@@ -271,7 +271,7 @@ public class EnlargePlotDistGraph extends Plot implements MouseListener {
 	/**
 	 * Custom file chooser class
 	 */
-	protected static class PlotImagesFileChooser extends JFileChooser {
+	public static class PlotImagesFileChooser extends JFileChooser {
 		/**
 		 * 
 		 */
@@ -322,7 +322,7 @@ public class EnlargePlotDistGraph extends Plot implements MouseListener {
 	/**
 	 * Inner class used to create simple file filters with only extension check
 	 */
-	protected static class PlotImagesFileFilter extends javax.swing.filechooser.FileFilter {
+	public static class PlotImagesFileFilter extends javax.swing.filechooser.FileFilter {
 		private String extension, description;
 
 		/**

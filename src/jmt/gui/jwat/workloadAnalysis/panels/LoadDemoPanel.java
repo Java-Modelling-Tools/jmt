@@ -58,14 +58,16 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 	private static final long serialVersionUID = 1L;
 	public static String absolutePath = "./";
 	private String demoDescription = "<HTML>" + "<b>Type of demo:</b> Workload analysis <p>"
-			+ "<b>Description:</b> This demo has been extracted from an Apache log file selecting only some variables<p>"
-			+ "<b># observations:</b> This demo has 37614 observations <p>"
-			+ "<b># variables:</b> Each observation is characterized by four variables<p>" + "<b>Variables description:</b><p>"
+			//+ "<b>Description:</b> This demo has been extracted from an Apache log file selecting only some variables<p>"
+			+ "<b># observations:</b> This demo has 4000 observations related to the visits to a website<p>"
+			+ "<b># variables:</b> Each observation is characterized by two numeric variables<p>" + "<b>Variables description:</b><p>"
 			+ "<TABLE align=center border=1>" + "<TR><TD><B>Name</B></TD><TD><B>Description</B></TD><TD><B>Type</B></TD></TR>"
-			+ "<TR><TD>IP</TD><TD>IP address</TD><TD>String</TD></TR>"
-			+ "<TR><TD>Timestamp</TD><TD>Timestamp of the visit as seen by the web server</TD><TD>Date</TD></TR>"
-			+ "<TR><TD>Access request</TD><TD>The request made</TD><TD>String</TD></TR>"
-			+ "<TR><TD>Bytes transferred</TD><TD>The number of bytes transferred</TD><TD>Numeric</TD></TR>" + "</TABLE></HTML>";
+			+ "<TR><TD>Execution time</TD><TD>Time required to execute the request</TD><TD>Numeric</TD></TR>"
+			+ "<TR><TD>KB transferred</TD><TD>Number of KB transferred during the request</TD><TD>Numeric</TD></TR>";
+			//+ "<TR><TD>IP</TD><TD>IP address</TD><TD>String</TD></TR>"
+			//+ "<TR><TD>Timestamp</TD><TD>Timestamp of the visit as seen by the web server</TD><TD>Date</TD></TR>"
+			//+ "<TR><TD>Access request</TD><TD>The request made</TD><TD>String</TD></TR>"
+			//+ "<TR><TD>Bytes transferred</TD><TD>The number of bytes transferred</TD><TD>Numeric</TD></TR>" + "</TABLE></HTML>";
 	private String useDescription = "<HTML>"
 			+ "<b>STEP 1:</b> Choose demo file from the list then click 'Load demo'.<p><p>"
 			+ "<b>STEP 2:</b> Analyze the statistics panels then click next.<p><p>"
@@ -139,8 +141,11 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 			public void actionPerformed(ActionEvent e) {
 				//Calls loader
 				try {
+					
 					Loader.readData(absolutePath + "examples/" + TEMP_DEMO_NAME_WA + "Data.jwat", Loader.loadParameter(TEMP_DEMO_NAME_WA),
 							new ProgressMonitorShow(LoadDemoPanel.this, "Loading Data...", 1000), new InputStatusListener());
+					//Loader.readData("D:/" + TEMP_DEMO_NAME_WA + "Data.jwat", Loader.loadParameter(TEMP_DEMO_NAME_WA),
+							//		new ProgressMonitorShow(LoadDemoPanel.this, "Loading Data...", 1000), new InputStatusListener());
 				} catch (FileNotFoundException ee) {
 					JOptionPane.showMessageDialog(LoadDemoPanel.this, "Loading aborted. File not found.", "ABORT!!", JOptionPane.WARNING_MESSAGE);
 				} catch (IOException ee) {

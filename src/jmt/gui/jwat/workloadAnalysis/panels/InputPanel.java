@@ -1103,7 +1103,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			optBtn[1].addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent ev) {
-					dialog.setVisible(false);
+					//dialog.setVisible(false);
 					final JDialog f = new JDialog();
 					f.setModal(true);
 					f.setTitle("Error log");
@@ -1111,11 +1111,13 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					f.setContentPane(new LogVisualizer(f));
 					f.addWindowListener(new WindowAdapter() {
 						public void windowClosing(WindowEvent e) {
-							dialog.setVisible(true);
+							//dialog.setVisible(true);
+							f.dispose();
 						}
 
 						public void windowClosed(WindowEvent e) {
-							dialog.setVisible(true);
+							f.dispose();
+							//dialog.setVisible(true);
 						}
 					});
 
