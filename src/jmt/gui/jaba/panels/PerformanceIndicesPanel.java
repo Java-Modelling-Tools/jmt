@@ -36,6 +36,7 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.jaba.JabaConstants;
 import jmt.gui.jaba.JabaModel;
 import jmt.gui.jaba.JabaWizard;
+import jmt.gui.jaba.graphs.JabaCanvas;
 import jmt.gui.jaba.graphs.PerformanceIndices2DGraph;
 
 /**
@@ -79,7 +80,7 @@ public class PerformanceIndicesPanel extends WizardPanel implements
 				this.removeAll();
 				this.setLayout(new BorderLayout());
 				graph = new PerformanceIndices2DGraph(data);
-				this.add(new JScrollPane(graph), BorderLayout.CENTER);
+				this.add(new JabaCanvas(graph), BorderLayout.CENTER);
 				this.add(new JLabel(JabaConstants.DESCRIPITION_GRAPH_PERFORMANCE_INDEX),
 						BorderLayout.PAGE_END);
 				JPanel flowPanel = new JPanel(
