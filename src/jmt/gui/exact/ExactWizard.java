@@ -331,7 +331,6 @@ public class ExactWizard extends Wizard {
 		addPanel(new DescriptionPanel(this));
 
 		setVisible(true);
-		showAbout(true);
 		/* END */
 	}
 
