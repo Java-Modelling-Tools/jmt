@@ -30,19 +30,19 @@ import java.util.Map;
  *
  */
 public enum SolverAlgorithm {
-	EXACT("MVA", true, true),
-	RECAL("RECAL", true, true),
-	MOM("MoM", true, true),
-	COMOM("CoMoM", true, true),
-	CHOW("Chow", true, false),
-	BARD_SCHWEITZER("Bard-Schweitzer", true, false),
-	AQL("AQL", true, false),
-	LINEARIZER("Linearizer", true, false),
-	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, false);
+	EXACT("MVA", true, true, true),
+	RECAL("RECAL", true, true, false),
+	MOM("MoM", true, true, false),
+	COMOM("CoMoM", true, true, false),
+	CHOW("Chow", true, false, false),
+	BARD_SCHWEITZER("Bard-Schweitzer", true, false, false),
+	AQL("AQL", true, false, false),
+	LINEARIZER("Linearizer", true, false, false),
+	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, false, false);
 	
 	// string representation of the algorithm
 	private String algorithmName;
-	private boolean closed, exact;
+	private boolean closed, exact, loadDependent;
 	
 	private static final String[] NAMES;
 	private static final String[] CLOSED_NAMES;
@@ -67,10 +67,11 @@ public enum SolverAlgorithm {
 		REVERSE_MAP = Collections.unmodifiableMap(revMap);
 	}
 	
-	private SolverAlgorithm(String algorithmName, boolean closed, boolean exact) {
+	private SolverAlgorithm(String algorithmName, boolean closed, boolean exact, boolean loadDependent) {
 		this.algorithmName = algorithmName;
 		this.closed = closed;
 		this.exact = exact;
+		this.loadDependent = loadDependent;
 	}
 	
 	@Override
@@ -90,6 +91,13 @@ public enum SolverAlgorithm {
 	 */
 	public boolean isExact() {
 		return exact;
+	}
+	
+	/**
+	 * @return true if the algorithm supports load dependent, false otherwise.
+	 */
+	public boolean supportLoadDependent() {
+		return loadDependent;
 	}
 	
 	/**

@@ -216,8 +216,9 @@ public final class AMVAPanel extends JPanel {
 	 * @param isClosed true if model is closed, false if not, null to read from data structure
 	 * @param isOpen true if model is open, false if not, null to read from data structure
 	 * @param isAlgowhatif true if whatif on algorithm was selected, false if not, null to read from data structure
+	 * @param isLoadDependent if model is load dependent or not. null to read from data structure
 	 */
-	public void update(Boolean isClosed, Boolean isOpen, Boolean isAlgowhatif) {
+	public void update(Boolean isClosed, Boolean isOpen, Boolean isAlgowhatif, Boolean isLoadDependent) {
 		ExactModel data = ew.getData();
 		SolverAlgorithm algorithm = data.getAlgorithmType();
 		tolerance.setText(numFormat.format(data.getTolerance()));
@@ -231,8 +232,13 @@ public final class AMVAPanel extends JPanel {
 		if (isAlgowhatif == null) {
 			isAlgowhatif = ew.getData().isWhatifAlgorithms();
 		}
+		if (isLoadDependent == null) {
+			isLoadDependent = ew.getData().isLd();
+		}
 		
-		if (isAlgowhatif) {
+		if (isLoadDependent) {
+			updateStatus(PanelStatus.DISABLED_MIXED);
+		} else if (isAlgowhatif) {
 			updateStatus(PanelStatus.DISABLED_WHATIF);
 		} else if (isOpen) {
 			updateStatus(PanelStatus.DISABLED_OPEN);

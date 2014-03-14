@@ -780,7 +780,7 @@ public class ExactWizard extends Wizard {
 				(panels.get(i)).gotFocus();
 			}
 		}
-		amvaPanel.update(null, null, null);
+		amvaPanel.update(null, null, null, null);
 	}
 
 	@Override
@@ -831,8 +831,9 @@ public class ExactWizard extends Wizard {
 	 * @param isClosed true if model is closed, false if not, null to read from data structure
 	 * @param isOpen true if model is open, false if not, null to read from data structure
 	 * @param isAlgowhatif true if whatif on algorithm was selected, false if not, null to read from data structure
+	 * @param isLoadDependent if model is load dependent or not. null to read from data structure
 	 */
-	public void updateAlgoPanel(Boolean isClosed, Boolean isOpen, Boolean isAlgowhatif) {
-		this.amvaPanel.update(isClosed, isOpen, isAlgowhatif);
+	public void updateAlgoPanel(Boolean isClosed, Boolean isOpen, Boolean isAlgowhatif, Boolean isLoadDependent) {
+		this.amvaPanel.update(isClosed, isOpen, isAlgowhatif, isLoadDependent);
 	}
 }

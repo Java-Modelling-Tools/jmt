@@ -50,6 +50,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import jmt.analytical.SolverAlgorithm;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
@@ -89,9 +90,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 	private int stations;
 	private int pop;
-
-	//if true, LD stations are allowed
-	private boolean LD_enabled_system;
 
 	private String[] stationNames;
 	private int[] stationTypes;
@@ -180,23 +178,21 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		synchronized (data) {
 			stations = data.getStations();
 			pop = data.getMaxpop();
-
-			//OLD
-			// closedSystem = data.isClosed();
-
-			//NEW
-			//@author Stefano Omini
-			//if true, load dependent stations are allowed
-			//(at the moment, only single class closed models allow LD stations)
-			LD_enabled_system = data.isClosed() && !data.isMultiClass();
-			//end NEW
-
-			//TODO: sostituire LD??
 			stationNames = ArrayUtils.copy(data.getStationNames());
 			stationTypes = ArrayUtils.copy(data.getStationTypes());
 		}
 
 		stationSpinner.setValue(new Integer(stations));
+	}
+	
+	/**
+	 * if true, load dependent stations are allowed
+	 * (at the moment, only single class closed models allow LD stations)
+	 * @return true if the model allows load dependent. False otherwise.
+	 */
+	private boolean isLdEnabled() {
+		ExactModel data = ew.getData();
+		return data.isClosed() && !data.isMultiClass() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
 	}
 
 	@Override
@@ -592,7 +588,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			if (column == 1) { //station type
 				/* select the right editor */
 
-				if (LD_enabled_system) {
+				if (isLdEnabled()) {
 					return LD_enabled_StationTypeEditor;
 				} else {
 					return LD_disabled_StationTypeEditor;
@@ -610,7 +606,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			//if this is type column, I must render it as a combo box instead of a jtextfield
 			if (column == 1) {
-				if (LD_enabled_system) {
+				if (isLdEnabled()) {
 					return LD_enabled_StationTypeCell;
 				} else {
 					return LD_disabled_StationTypeCell;
@@ -708,6 +704,11 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 							stationTypes[rowIndex] = i;
 							break;
 						}
+					}
+					boolean isLd = isLD();
+					ew.updateAlgoPanel(null, null, null, isLd);
+					if (isLd) {
+						ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
 					}
 					break;
 				default:

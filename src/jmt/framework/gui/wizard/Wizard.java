@@ -287,6 +287,13 @@ public class Wizard extends JMTFrame {
 		}
 		tabbedPane.setSelectedIndex(currentIndex - 1);
 	}
+	
+	/**
+	 * @return a reference to the selected wizard panel
+	 */
+	public WizardPanel getCurrentPanel() {
+		return (WizardPanel) tabbedPane.getSelectedComponent();
+	}
 
 	/**
 	 * enables/disables buttons according to current status

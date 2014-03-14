@@ -542,7 +542,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 			}
 		}
 		// Updates the algorithm panel
-		ew.updateAlgoPanel(isClosed, isOpen, null);
+		ew.updateAlgoPanel(isClosed, isOpen, null, null);
 	}
 
 	//END
