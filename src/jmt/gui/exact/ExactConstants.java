@@ -78,7 +78,8 @@ public interface ExactConstants {
 			+ "Add classes one by one or define total number at once.</font></body></html>";
 	public static final String DESCRIPTION_STATIONS = "<html><body align=\"left\"><font size=\"4\"><b>Stations characteristics</b>"
 			+ "</font><font size=\"3\"><br>Number, customized name and type of stations. "
-			+ "Add stations one by one or define total number at once.</font></body></html>";
+			+ "Add stations one by one or define the total number at once. "
+			+ "Load Dependent stations necessarily require the use of MVA.</font></body></html>";
 	public static final String DESCRIPTION_SERVICETIMES = "<html><body align=\"left\"><font size=\"4\"><b>Service Times</b>"
 			+ "</font><font size=\"3\"><br>Input service times of each station for each class.<br>"
 			+ "If the station is \"Load Dependent\" you can set the service times"
