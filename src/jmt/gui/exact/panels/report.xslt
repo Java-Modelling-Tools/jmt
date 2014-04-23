@@ -3,14 +3,17 @@
 	<xsl:output method="html" version="1.0" encoding="ISO-8859-1" indent="yes"/>
 	
 	<!-- EDITED by Abhimanyu Chugh -->
+	<!-- EDITED by Kourosh add ReferenceStation -->
+	
 	<xsl:variable name="alg-name-width">50%</xsl:variable>
 	<xsl:variable name="alg-tol-width">25%</xsl:variable>
 	<xsl:variable name="alg-iter-width">25%</xsl:variable>
 	<!-- END -->
 	<xsl:variable name="class-name-width">28%</xsl:variable>
 	<xsl:variable name="class-type-width">14%</xsl:variable>
-	<xsl:variable name="class-rate-width">28%</xsl:variable>
-	<xsl:variable name="class-pop-width">28%</xsl:variable>
+	<xsl:variable name="class-rate-width">18%</xsl:variable>
+	<xsl:variable name="class-pop-width">18%</xsl:variable>
+	<xsl:variable name="class-Station-width">20%</xsl:variable>
 	<xsl:variable name="station-name-width">50%</xsl:variable>
 	<xsl:variable name="station-type-width">50%</xsl:variable>
 	<xsl:variable name="param-width">80</xsl:variable>
@@ -90,6 +93,13 @@
 					</td></tr>
 					<tr><td align="center">
 						<xsl:call-template name="addServiceDemandsTable"/>
+					</td></tr>
+					
+					<tr><td align="center">
+						<xsl:call-template name="addServicesTable"/>
+					</td></tr>
+						<tr><td align="center">
+						<xsl:call-template name="addVisitsTable"/>
 					</td></tr>
 					<tr><td>
 						<xsl:apply-templates select="stations" mode="addLDSettingsTables"/>
@@ -200,6 +210,7 @@
 				<td>Type</td>
 				<td>Population</td>
 				<td>Arrival Rate</td>
+				
 			</tr>
 			<xsl:for-each select="*">
 				<tr>
@@ -214,11 +225,34 @@
 					</xsl:choose></td>
 					<td width="{$class-pop-width}"><xsl:value-of select="@population"/></td>
 					<td width="{$class-rate-width}"><xsl:value-of select="@rate"/></td>
+					
 				</tr>
 			</xsl:for-each>
 		</table>
 	</xsl:template>
 	
+			<!--creates table of Reference Station-->
+	<xsl:template match="parameters/ReferenceStation" mode="description">
+		<table class="param" cellspacing="0">
+			<tr><th class="paramtitle" colspan="2">
+				Reference Station
+			</th></tr>
+			<tr class="paramhead">
+				<td>Class Name</td>
+				<td>Station</td>		
+			</tr>
+			<xsl:for-each select="*">
+				<tr>
+				<xsl:attribute name="class">
+					<xsl:if test="position() mod 2=0">line2</xsl:if>
+					<xsl:if test="position() mod 2=1">line1</xsl:if>
+				</xsl:attribute>
+					<td width="{$class-name-width}"><xsl:value-of select="@name"/></td>			
+					<td width="{$class-pop-width}"><xsl:value-of select="@refStation"/></td>					
+				</tr>
+			</xsl:for-each>
+		</table>
+	</xsl:template>
 	<!--creates table of stations-->
 	<xsl:template match="parameters/stations" mode="description">
 		<table class="param" cellspacing="0">
@@ -246,8 +280,6 @@
 			</xsl:for-each>
 		</table>
 	</xsl:template>
-	
-	
 	<!--creates table of service demands-->
 	<xsl:template name="addServiceDemandsTable">
 		<table class="stationParam" cellspacing="0">
@@ -298,7 +330,75 @@
 			</xsl:for-each>
 		</table>
 	</xsl:template>
-		
+	<!--creates table of Services-->
+	<xsl:template name="addServicesTable">
+		<table class="stationParam" cellspacing="0">
+			<tr><th class="paramtitle" colspan="100">
+				Services
+			</th></tr>
+			<tr class="paramhead">
+				<td></td>
+				<xsl:for-each select="$model/parameters/classes/*">
+					<td width="{$param-width}"><xsl:value-of select="@name"/></td>
+				</xsl:for-each>
+			</tr>
+			<xsl:for-each select="$model/parameters/stations/*">
+			<xsl:variable name="rowNum"><xsl:value-of select="position()"/></xsl:variable>
+				<tr>
+					<td class="paramhead" width="{$param-width}">
+						<xsl:value-of select="@name"/>
+					</td>
+					
+							<xsl:for-each select="servicetimes/servicetime">
+								<xsl:variable name="classname" select="@customerclass"/>
+								<xsl:variable name="visit" select="../../visits/visit[@customerclass=$classname]"/>
+								<td>
+								<xsl:attribute name="class">
+									<xsl:if test="number($rowNum) mod 2=0">line2</xsl:if>
+									<xsl:if test="number($rowNum) mod 2=1">line1</xsl:if>
+								</xsl:attribute>
+									<xsl:value-of select="number(.)"/>
+								</td>
+							</xsl:for-each>
+				</tr>
+			</xsl:for-each>
+		</table>
+	</xsl:template>	
+	<!--creates table of visits-->
+	<xsl:template name="addVisitsTable">
+		<table class="stationParam" cellspacing="0">
+			<tr><th class="paramtitle" colspan="100">
+				Visits
+			</th></tr>
+			<tr class="paramhead">
+				<td></td>
+				<xsl:for-each select="$model/parameters/classes/*">
+					<td width="{$param-width}"><xsl:value-of select="@name"/></td>
+				</xsl:for-each>
+			</tr>
+			<xsl:for-each select="$model/parameters/stations/*">
+			<xsl:variable name="rowNum"><xsl:value-of select="position()"/></xsl:variable>
+				<tr>
+					<td class="paramhead" width="{$param-width}">
+						<xsl:value-of select="@name"/>
+					</td>
+					
+							<xsl:for-each select="servicetimes/servicetime">
+								<xsl:variable name="classname" select="@customerclass"/>
+								<xsl:variable name="visit" select="../../visits/visit[@customerclass=$classname]"/>
+								<td>
+								<xsl:attribute name="class">
+									<xsl:if test="number($rowNum) mod 2=0">line2</xsl:if>
+									<xsl:if test="number($rowNum) mod 2=1">line1</xsl:if>
+								</xsl:attribute>
+									<xsl:value-of select="number($visit)"/>
+								</td>
+							</xsl:for-each>
+				</tr>
+			</xsl:for-each>
+		</table>
+	</xsl:template>	
+	
 	<xsl:template name="substituteSemiColonInLD">
 	<xsl:param name="rightstring"/>
 		<xsl:if test="$rightstring!=''">

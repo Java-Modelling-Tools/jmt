@@ -18,6 +18,9 @@
 
 package jmt.gui.exact.panels;
 
+import java.io.Console;
+import java.sql.Ref;
+
 import jmt.analytical.SolverAlgorithm;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.gui.exact.ExactConstants;
@@ -46,6 +49,9 @@ public final class ResTimePanel extends SolutionPanel {
 	//NEW Dall'Orso
 	private double[][] classAggs, stationAggs;
 	private double[] globalAgg;
+	
+	private double[][][] throughput;
+	private double[][] classAggr,stationAggr;
 
 	//END
 
@@ -69,6 +75,10 @@ public final class ResTimePanel extends SolutionPanel {
 		classAggs = data.getPerClassR(algorithm);
 		stationAggs = data.getPerStationR(algorithm);
 		globalAgg = data.getGlobalR(algorithm);
+		
+		throughput = data.getThroughput(algorithm);
+		classAggr = data.getPerClassX(algorithm);
+		stationAggr = data.getPerStationX(algorithm);
 		//END
 		/* END */
 	}
@@ -80,7 +90,7 @@ public final class ResTimePanel extends SolutionPanel {
 
 	@Override
 	protected String getDescriptionMessage() {
-		return ExactConstants.DESCRIPTION_RESPONSETIMES;
+		return ExactConstants.DESCRIPTION_RESIDENCETIME;
 	}
 
 	/**
@@ -110,8 +120,12 @@ public final class ResTimePanel extends SolutionPanel {
 			*/
 			//NEW
 			//@author Dall'0rso
-			return stations + 1;
+			//return stations + 1;
 			//end NEW
+			
+			//NEW
+			return stations;
+			//End New
 
 		}
 
@@ -133,9 +147,11 @@ public final class ResTimePanel extends SolutionPanel {
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
-				return "<html><i>Aggregate</i></html>";
+				//return "<html><i>Aggregate</i></html>";
+				//return null;
 			}
-			return stationNames[rowIndex - 1];
+			//return stationNames[rowIndex - 1];
+			return stationNames[rowIndex];
 		}
 
 		@Override
@@ -148,6 +164,7 @@ public final class ResTimePanel extends SolutionPanel {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+		/*
 			double d;
 			//NEW Dall'Orso
 			if (rowIndex > 0 && columnIndex > 0) {
@@ -164,7 +181,39 @@ public final class ResTimePanel extends SolutionPanel {
 				return null; //causes the renderer to display a gray cell
 			}
 			return new Double(d);
+			*/
+			
+			double d = 0;
+			//NEW Dall'Orso
+			if (rowIndex >= 0 && columnIndex > 0) {
+				if(ReferenceStation[columnIndex-1] < stations)
+					d = resTimes[rowIndex][columnIndex - 1][iteration] / visits[ReferenceStation[columnIndex-1]][columnIndex-1]; //it is dividing the value of the each row with the visits
+				else
+					d = resTimes[rowIndex][columnIndex - 1][iteration];
+			} 
+			  else if (rowIndex >= 0 && columnIndex == 0) { //everything is here
+				double c = 0.0;
+				  for (int i=0; i< classes; i++)
+				{
+					  if(ReferenceStation[i] < stations)
+						  c += (throughput[rowIndex][i][iteration] / stationAggr[rowIndex][iteration]) * (resTimes[rowIndex][i][iteration] / visits[ReferenceStation[i]][i]) ;
+					  else
+						  c += (throughput[rowIndex][i][iteration] / stationAggr[rowIndex][iteration]) * (resTimes[rowIndex][i][iteration]) ;
+				  
+				}
+				d=c;
+			  }
+			  else {
+				d = globalAgg[iteration];
+			}
+			//END
+			if (d < 0) {
+				return null; //causes the renderer to display a gray cell
+			}
+			return new Double(d);
 		}
+		
 
 	}
+	
 }

@@ -28,8 +28,16 @@ public class SysPowerPanel extends SolutionPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	private double[][] classAggs;
+	//OLD
+	//private double[][] classAggs;
+	//private double[] globalAgg;
+	
+	//New
+	private double[][][] resTimes;
+	private double[][] classAggs, stationAggs;
 	private double[] globalAgg;
+	private double[][][] throughput;
+	private double[][] stationAggr,classAggr;
 
 	/* EDITED by Abhimanyu Chugh */
 	public SysPowerPanel(ExactWizard ew, SolverAlgorithm alg) {
@@ -43,10 +51,20 @@ public class SysPowerPanel extends SolutionPanel {
 	@Override
 	protected void sync() {
 		super.sync();
-		/* EDITED by Abhimanyu Chugh */
-		classAggs = data.getPerClassSP(algorithm);
-		globalAgg = data.getGlobalSP(algorithm);
+		/* EDITED by Abhimanyu Chugh */ //OLD
+		//classAggs = data.getPerClassSP(algorithm);
+		//globalAgg = data.getGlobalSP(algorithm);
 		/* END */
+		
+		//New
+		resTimes = data.getResTimes(algorithm);
+		classAggs = data.getPerClassR(algorithm);
+		stationAggs = data.getPerStationR(algorithm);
+		globalAgg = data.getGlobalR(algorithm);
+		
+		throughput = data.getThroughput(algorithm);		
+		stationAggr = data.getPerStationX(algorithm);
+		classAggr = data.getPerClassX(algorithm);
 	}
 
 	@Override
@@ -73,23 +91,29 @@ public class SysPowerPanel extends SolutionPanel {
 		}
 
 		public int getRowCount() {
-			//return stations+1;
-			return 1;
-			//end NEW
+			if (resTimes == null) {
+				return 0;
+			}
+			return 2;
 
 		}
 
 		public int getColumnCount() {
+			if (resTimes == null) {
+				return 0;
+			}
 			return classes + 1;
-			//end NEW
 		}
 
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
-				return "<html><i>Aggregate</i></html>";
+				return "<html><body><p><font size=\"0.5\">Inc R.St</font></p></body></html>";
 			}
-			return "-";
+			else if (rowIndex == 1)
+				return "<html><body><p><font size=\"0.5\">NotInc R.St</font></p></body></html>";
+			else
+				return null;
 		}
 
 		@Override
@@ -102,6 +126,7 @@ public class SysPowerPanel extends SolutionPanel {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+			/*
 			double d = 99999;//initialized with dummy
 			Object ret;
 			//NEW Dall'Orso
@@ -122,8 +147,106 @@ public class SysPowerPanel extends SolutionPanel {
 			}
 
 			return ret;
+			*/
+			
+			//in this panel everything is the same as SystemResponseTime but with a small change we need to divide throughput over response time.
+				
+			double d=0.0;
+				double c = 0.0; //in C we have the value of the SystemThrougput the code is the same as the one in the Throughput panel
+					for (int j=0;j<classes;j++)
+						for (int i=0; i<stations; i++)						
+							if (ReferenceStation[j] != stations)
+							{
+								c += throughput[ReferenceStation[j]][j][0];
+								break;
+							}						
+							else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
+								{c += classAggr[j][iteration];
+									break;
+								}
+				
+			if (rowIndex == 0 && columnIndex > 0){
+				
+				int i=0;
+				for (i=0; i<stations; i++)			
+					if (ReferenceStation[columnIndex - 1] == i)
+					{
+						c = throughput[rowIndex+i][columnIndex - 1][0];
+					}							
+					else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
+						c = classAggr[columnIndex - 1][iteration];
+				
+				for (i=0; i< stations; i++)
+					if(ReferenceStation[columnIndex-1] < stations)
+						d += resTimes[i][columnIndex - 1][iteration] / visits[ReferenceStation[columnIndex-1]][columnIndex-1];
+					else
+						d += resTimes[i][columnIndex - 1][iteration];
+				d = c/d;}
+			else if (rowIndex == 1 && columnIndex > 0)
+			{
+				int i=0;
+				for (i=0; i<stations; i++)			
+					if (ReferenceStation[columnIndex - 1] == i)
+					{
+						c = throughput[rowIndex-1+i][columnIndex - 1][0];
+					}							
+					else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
+						c = classAggr[columnIndex - 1][iteration];
+				
+				for (i=0; i< stations; i++)
+					if(ReferenceStation[columnIndex-1] < stations)
+						d += (resTimes[i][columnIndex - 1][iteration] / visits[ReferenceStation[columnIndex-1]][columnIndex-1]);
+					else
+						d += resTimes[i][columnIndex - 1][iteration];
+					if(ReferenceStation[columnIndex-1] < stations)
+						d -= serviceTimes[ReferenceStation[columnIndex-1]][columnIndex-1][0];
+				d = c/d;
+			}
+			else if (rowIndex == 0 && columnIndex == 0)
+			{
+				//now the values of the throughput of each class (throughput[i][j][0]/c it means the throughput of each class over the system throughput and the sum is always 1)
+				for(int j = 0; j< classes; j++){
+					double x=0.0;					
+					for (int i=0; i<stations; i++)			
+						if (ReferenceStation[j] != stations)
+							x += resTimes[i][j][iteration] / visits[ReferenceStation[j]][j];													
+						else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
+							x += resTimes[i][j][iteration];
+						if (ReferenceStation[j] != stations)
+						d += x*throughput[ReferenceStation[j]][j][0]/c;
+						else
+						d += x*classAggr[j][iteration]/c;				
+					}						
+				d = c/d; //To compute the SystemPower 
+				}
+			else if (rowIndex == 1 && columnIndex == 0)
+			{				
+					//now the values of the throughput of each class (throughput[i][j][0]/c it means the throughput of each class over the system throughput and the sum is always 1)
+					for(int j = 0; j< classes; j++){
+						double x=0.0;					
+						for (int i=0; i<stations; i++)			
+							if (ReferenceStation[j] != stations)
+								x += resTimes[i][j][iteration] / visits[ReferenceStation[j]][j];													
+							else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
+								x += resTimes[i][j][iteration];
+							if (ReferenceStation[j] != stations){
+								x -= serviceTimes[ReferenceStation[j]][j][0];
+								d += x*throughput[ReferenceStation[j]][j][0]/c;
+							}
+							else
+								d += x*classAggr[j][iteration]/c;
+						}
+					d = c/d; //To compute the SystemPower
+				
+			}
+			if (d < 0) {
+				return null; //causes the renderer to display a gray cell
+			}
+			return new Double(d);
+		}
+
 		}
 
 	}
 
-}
+

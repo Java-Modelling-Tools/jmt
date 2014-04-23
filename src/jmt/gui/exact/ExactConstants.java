@@ -39,7 +39,12 @@ import java.util.Set;
  * @author Ashanka 
  * Added modifications regarding the renaming of System Customer Number to System Number of Customers
  * @version Date: Sep-2009
+ * 
+ * @author Kourosh Sheykhvand
+ *  Added modifications regarding ReferenceStation and throughput
+ *  Nov 2013
  */
+
 public interface ExactConstants {
 
 	public static final int STATION_DELAY = 0;
@@ -87,6 +92,10 @@ public interface ExactConstants {
 			+ "Press \"Service Demands\" button to enter service demands instead of service times and visits.</font></body></html>";
 	public static final String DESCRIPTION_VISITS = "<html><body align=\"left\"><font size=\"4\"><b>Visits</b>"
 			+ "</font><font size=\"3\"><br>Average number of visits to each station per class.</font></body></html>";
+	public static final String DESCRIPTION_ReferenceStation = "<html><body align=\"left\"><font size=\"4\"><b>Reference Station</b>"
+			+ "</font><font size=\"3\"><br>The station is used to compute the system throughput and the system response time for each <b>closed class</b>" +
+			".<br>Performance metrics of <b>open classes</b> are always computed with respect to the <b>arrival process</b>. Visits at the Reference station can not be Zero</font></body></html>";
+	
 	public static final String DESCRIPTION_SERVICEDEMANDS = "<html><body align=\"left\"><font size=\"4\"><b>Service Demands</b>"
 			+ "</font><font size=\"3\"><br>Input service demands of each station and class.<br>"
 			+ "If the station is \"Load Dependent\" you can set the service demands"
@@ -97,11 +106,13 @@ public interface ExactConstants {
 	public static final String DESCRIPTION_QUEUELENGTHS = "<html><body align=\"left\"><font size=\"4\"><b>Number of Customers</b>"
 			+ "</font><font size=\"3\"><br>Average number of customers for each class at each station.</body></html>";
 	public static final String DESCRIPTION_THROUGHPUTS = "<html><body align=\"left\"><font size=\"4\"><b>Throughput</b>"
-			+ "</font><font size=\"3\"><br>Throughput for each class at each station.</body></html>";
-	public static final String DESCRIPTION_RESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>Residence Times</b>"
+			+ "</font><font size=\"3\"><br>Throughput of each class for each station. System Throughput is the completion rate of the <b>reference stations</b></body></html>";
+	public static final String DESCRIPTION_RESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>System ResponseTime</b>"					
+			+ "</font><font size=\"3\"><br> The global aggregate is the \"System Response Time\" and is obtained weighting the aggregated values by the relative per-class throughput."
+			+ "</body></html>";
+	public static final String DESCRIPTION_RESIDENCETIME = "<html><body align=\"left\"><font size=\"4\"><b>Residence Times</b>"
 			+ "</font><font size=\"3\"><br>Total time spent by each customer class summed across all visits to a station."
 			+ " The aggregate values of each class are the class Response Time (sum of the residence times of the class)."
-			+ " The global aggregate is the \"System Response Time\" and is obtained weighting the aggregated values by the relative per-class throughput."
 			+ "</body></html>";
 	public static final String DESCRIPTION_UTILIZATIONS = "<html><body align=\"left\"><font size=\"4\"><b>Utilization</b>"
 			+ "</font><font size=\"3\"><br>Utilization of a customer class at the selected station. "

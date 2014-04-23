@@ -18,6 +18,7 @@
 
 package jmt.framework.data;
 
+import java.awt.Color;
 import java.util.Arrays;
 
 /**
@@ -25,9 +26,10 @@ import java.util.Arrays;
  * @author alyf (Andrea Conti)
  * Date: 11-set-2003
  * Time: 16.46.05
+  
 
  Modified by Bertoli Marco 18-may-2006
-
+ Modified by Kourosh 18/11/2013 I added a new resize method for the color array.
  */
 
 /**
@@ -48,6 +50,7 @@ public class ArrayUtils {
 	/**
 	 * Resizes an array, preserving data and padding as needed
 	 */
+
 	public static int[] resize(int[] array, int newsize, int padding) {
 		if (newsize < 0) {
 			throw new RuntimeException("newsize must be >=0");
@@ -71,7 +74,29 @@ public class ArrayUtils {
 
 		return newArray;
 	}
+	/**
+	 * Resizes an array, preserving data and padding as needed
+	 */
+	public static Color[] resize(Color[] array, int newsize) {
+		if (newsize < 0) {
+			throw new RuntimeException("newsize must be >=0");
+		}
+		int oldsize = array.length;
+		if (newsize == oldsize) {
+			return array;
+		}
 
+		Color[] newArray = new Color[newsize];
+
+		int count = (oldsize < newsize ? oldsize : newsize);
+
+		System.arraycopy(array, 0, newArray, 0, count);
+
+
+
+		return newArray;
+	}
+	
 	/**
 	 * Resizes an array, preserving data and padding as needed
 	 */
@@ -671,5 +696,5 @@ public class ArrayUtils {
 			ret[i] = source[i] * num;
 		}
 		return ret;
-	}
+	}	
 }

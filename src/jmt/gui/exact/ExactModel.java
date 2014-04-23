@@ -32,6 +32,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import jmt.analytical.SolverAlgorithm;
 import jmt.analytical.SolverMultiClosedAMVA;
 import jmt.framework.data.ArrayUtils;
+import jmt.gui.common.definitions.CommonModel;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -59,9 +60,13 @@ import org.w3c.dom.NodeList;
  * If we are looking to open measures of Number of Customers from existing JMVA files then we should look for 
  * Queue length as this was the previous name of the label. 
  * @version Date: Sep-2009
+ * 
+ * @author Kourosh
+ *  Add a new property ReferenceStation which is used to declare the reference station for each closed class. and save and load the files
+ * @version Date: OCT-2013
  */
 
-public class ExactModel implements ExactConstants {
+public class ExactModel implements ExactConstants  {
 	
 	/* EDITED by Abhimanyu Chugh */
 	//Set by default to the Exact MVA algorithm
@@ -118,6 +123,10 @@ public class ExactModel implements ExactConstants {
 	//class types
 	//dim: classTypes[classes]
 	private int[] classTypes;
+	//class refstations
+	//private double[][] ReferenceStation;
+	private int[] ReferenceStation;
+	
 
 	/***********************SERVICE PARAMETERS**************************/
 
@@ -235,6 +244,9 @@ public class ExactModel implements ExactConstants {
 		visits = ArrayUtils.copy2(e.visits);
 
 		serviceTimes = ArrayUtils.copy3(e.serviceTimes);
+		
+		//ReferenceStation = ArrayUtils.copy2(e.ReferenceStation);
+		ReferenceStation = ArrayUtils.copy(e.ReferenceStation);
 
 		// What-if analysis
 		iterations = e.iterations;
@@ -555,6 +567,13 @@ public class ExactModel implements ExactConstants {
 		visits = new double[1][1];
 		visits[0][0] = 1.0;
 
+		//ReferenceStation = new double[1][2];
+		//ReferenceStation[0][0]= 0.0;
+		//ReferenceStation[0][1]= 0.0;
+		
+		ReferenceStation = new int[1];
+		ReferenceStation[0]= 0;		
+		
 		serviceTimes = new double[1][1][1];
 		//NEW
 		//@author Stefano Omini
@@ -638,7 +657,23 @@ public class ExactModel implements ExactConstants {
 	public int getClasses() {
 		return classes;
 	}
-
+	/**
+	 * @return get the matrix of ReferenceStations
+	 
+	public double[][] getReferenceStation() {
+		return ReferenceStation;
+	}
+	 */
+	
+	/**
+	 * @return get the matrix of ReferenceStations
+	 */
+	public int[] getReferenceStation() {
+		return ReferenceStation;
+	}
+	 
+	
+	
 	/**
 	 * @return total population
 	 */
@@ -900,7 +935,42 @@ public class ExactModel implements ExactConstants {
 		resultsOK = false;
 		return true;
 	}
-
+	
+	/**
+	 * sets the matrix of ReferenceStation
+	 * @param ReferenceStation the matrix of ReferenceStation
+	 * @throws IllegalArgumentException if the matrix is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 
+	public boolean setReferenceStation(double[][] ReferenceStation) {
+		if (ReferenceStation.length != classes ) {
+			throw new IllegalArgumentException("incorrect array dimension");
+		}
+		this.ReferenceStation = ReferenceStation;
+		changed = true;
+		resultsOK = false;
+		return true;
+	}
+	*/
+	
+	/**
+	 * sets the matrix of ReferenceStation
+	 * @param ReferenceStation the matrix of ReferenceStation
+	 * @throws IllegalArgumentException if the matrix is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setReferenceStation(int[] ReferenceStation) {
+		if (ReferenceStation.length != classes ) {
+			throw new IllegalArgumentException("incorrect array dimension");
+		}
+		this.ReferenceStation = ReferenceStation;
+		//changed = true;
+		resultsOK = false;
+		return true;
+	}
+	
+	
+	
 	/**
 	 * Resizes the data structures according to specified parameters. Data is preserved as far as possible
 	 * @return true if data was changed, false otherwise
@@ -934,6 +1004,10 @@ public class ExactModel implements ExactConstants {
 			serviceTimes = ArrayUtils.resize3var(serviceTimes, stations, classes, calcSizes(), 0.0);
 			// Checks if visits are all one
 			calcUnitaryVisits();
+			
+			//ReferenceStation = ArrayUtils.resize2(ReferenceStation, classes, 2, 0.0);			
+			ReferenceStation = ArrayUtils.resize(ReferenceStation, classes, 0);
+
 
 			return true;
 		} else {
@@ -1188,16 +1262,15 @@ public class ExactModel implements ExactConstants {
 		if (classes < 2) {
 			throw new RuntimeException("System must have at least one class");
 		}
-
 		classes--;
-
 		classNames = ArrayUtils.delete(classNames, i);
 		classTypes = ArrayUtils.delete(classTypes, i);
 		classData = ArrayUtils.delete(classData, i);
 
 		visits = ArrayUtils.delete2_2(visits, i);
-		serviceTimes = ArrayUtils.delete3_2(serviceTimes, i);
-
+		serviceTimes = ArrayUtils.delete3_2(serviceTimes, i);					
+		//ReferenceStation = ArrayUtils.delete2_1(ReferenceStation, i);
+		ReferenceStation = ArrayUtils.delete(ReferenceStation, i);		
 		resize(stations, classes);
 		//DEK (Federico Granata) 3-10-2003
 		//it was considering the results valid when a class is cancelled
@@ -1213,6 +1286,9 @@ public class ExactModel implements ExactConstants {
 		if (stations < 2) {
 			throw new RuntimeException("System must have at least one station");
 		}
+
+		String[] BstationNames = stationNames; //Backup of stations 
+				
 		stations--;
 		stationNames = ArrayUtils.delete(stationNames, i);
 		stationTypes = ArrayUtils.delete(stationTypes, i);
@@ -1220,12 +1296,40 @@ public class ExactModel implements ExactConstants {
 
 		visits = ArrayUtils.delete2_1(visits, i);
 		serviceTimes = ArrayUtils.delete3_1(serviceTimes, i);
+		
+
+		//ReferenceStation = ArrayUtils.delete2_2(ReferenceStation, i);
 
 		resize(stations, classes);
 		//DEK (Federico Granata) 3-10-2003
 		//it was considering the results valid when a class is cancelled
 		hasResults = false;
 		//END
+		
+		//Delete the selected station in ReferenceStation (Kourosh OCT 2013)		
+		/*	
+		for (int j= 0; j< classes ; j++)					
+					if (ReferenceStation[j][1] == i)
+						ReferenceStation[j][1] = 0.0;
+				String temp="";
+				for (int k= 0 ; k< classes; k++)
+				{					
+					if (ReferenceStation[k][1] == BstationNames.length)
+						ReferenceStation[k][1] = stationNames.length;
+					
+				}
+				for (int k= 0 ; k< classes; k++)
+				{						
+						temp = BstationNames[(int) ReferenceStation[k][1]];						
+						ReferenceStation[k][1] = stationNames.length;
+						for(int j=0;j<stationNames.length;j++)
+							if (temp.equals(stationNames[j]))
+								ReferenceStation[k][1] = j;					
+				}
+				*/
+		for(int j=0; j< classes; j++)
+			if(ReferenceStation[j] == i )
+				ReferenceStation[j] = 0;
 	}
 
 	/**
@@ -1354,6 +1458,14 @@ public class ExactModel implements ExactConstants {
 				whatIf.setAttribute("stationName", stationNames[whatIfStation]);
 			}
 		}
+		
+		/* classes */
+		Element ReferenceStation_element = root.createElement("ReferenceStation");
+		parametersElement.appendChild(ReferenceStation_element);
+		ReferenceStation_element.setAttribute("number", Integer.toString(classes));
+		for (int i = 0; i < classes; i++) {
+			ReferenceStation_element.appendChild(makeReferenceStationElement(root, i));
+		}
 
 		//OLD
 		//if (hasResults) modelElement.appendChild(appendSolutionElement(root));
@@ -1375,13 +1487,25 @@ public class ExactModel implements ExactConstants {
 			classElement = root.createElement("closedclass");
 			classElement.setAttribute("population", Integer.toString((int) classData[classNum]));
 			classElement.setAttribute("name", classNames[classNum]);
-
 		} else {
 			classElement = root.createElement("openclass");
 			classElement.setAttribute("rate", Double.toString(classData[classNum]));
 			classElement.setAttribute("name", classNames[classNum]);
-
 		}
+		return classElement;
+	}
+	
+	private Element makeReferenceStationElement(Document root, int classNum) {
+		Element classElement;
+			String[] MyStationNames;
+			MyStationNames = stationNames;
+			MyStationNames = ArrayUtils.resize(MyStationNames, MyStationNames.length+1, null);
+			MyStationNames[MyStationNames.length-1] = "Arrival Process";
+			classElement = root.createElement("Class");			
+			classElement.setAttribute("name", classNames[classNum]);					
+			//classElement.setAttribute("refStation", MyStationNames[(int) ReferenceStation[classNum][1]] );
+			classElement.setAttribute("refStation", MyStationNames[(int) ReferenceStation[classNum]] );
+		
 		return classElement;
 	}
 
@@ -1582,9 +1706,12 @@ public class ExactModel implements ExactConstants {
 
 		Node classNode = doc.getElementsByTagName("classes").item(0);
 		Node stationNode = doc.getElementsByTagName("stations").item(0);
-
+		Node ReferenceStationNode = doc.getElementsByTagName("ReferenceStation").item(0);
+		
 		NodeList descList = doc.getElementsByTagName("description");
 		NodeList solList = doc.getElementsByTagName("solutions");
+		
+		
 
 		//load description
 		if (descList.item(0) != null) {
@@ -1613,6 +1740,19 @@ public class ExactModel implements ExactConstants {
 				//stations loading failed!
 				return false;
 			}
+		}
+		
+		//load ReferenceStation
+		if (ReferenceStationNode != null) {
+			if (!loadReferenceStation(ReferenceStationNode)) {
+				//ReferenceStation loading failed!
+				return false;
+			}
+		}
+		else
+		{
+			loadReferenceStationDefault(classNode);
+			
 		}
 
 		//end NEW
@@ -1710,9 +1850,9 @@ public class ExactModel implements ExactConstants {
 		classNames = new String[classes];
 		classTypes = new int[classes];
 		classData = new double[classes];
-
-		NodeList classList = classNode.getChildNodes();
-
+		//ReferenceStation = new double[classes][];
+		ReferenceStation = new int[classes];
+		NodeList classList = classNode.getChildNodes();				
 		int classNum = 0;
 
 		maxpop = 0;
@@ -1732,11 +1872,19 @@ public class ExactModel implements ExactConstants {
 			if (current.getTagName().equals("closedclass")) {
 				classTypes[classNum] = CLASS_CLOSED;
 				classData[classNum] = Double.parseDouble(current.getAttribute("population"));
+				//ReferenceStation[classNum][2] = 0;
+				//for (int j=0; j<stations ; j++)
+				//	if(stationNames[j] == current.getAttribute("refStation"))
+				//ReferenceStation[classNum][2] = j;
 				maxpop += (int) classData[classNum];
 				open = false;
 			} else {
 				classTypes[classNum] = CLASS_OPEN;
 				classData[classNum] = Double.parseDouble(current.getAttribute("rate"));
+				//ReferenceStation[classNum][2] = 0;
+				//for (int j=0; j<stations ; j++)
+				//	if(stationNames[j] == current.getAttribute("refStation"))
+				//ReferenceStation[classNum][2] = j;
 				closed = false;
 			}
 			classNum++;
@@ -1790,7 +1938,7 @@ public class ExactModel implements ExactConstants {
 
 			visits[stationNum] = new double[classes];
 			serviceTimes[stationNum] = new double[classes][];
-
+			
 			/* station types and service times */
 
 			if (statType.equals("ldstation")) {
@@ -1857,12 +2005,47 @@ public class ExactModel implements ExactConstants {
 			}
 			stationNum++;
 		}
-
 		return true;
 	}
-
-	//end NEW
-
+	public boolean loadReferenceStation(Node ReferenceStationNode) {
+		classes = Integer.parseInt(((Element) ReferenceStationNode).getAttribute("number"));
+		ReferenceStation = new int[classes];
+		NodeList classList = ReferenceStationNode.getChildNodes();				
+		int classNum = 0;
+		Node n;
+		Element current;
+		for (int i = 0; i < classList.getLength(); i++) {
+			n = classList.item(i);
+			if (!(n instanceof Element)) {
+				continue;
+			}
+			current = (Element) n;			
+				for (int j=0; j<stations ; j++)			
+					if(stationNames[j].equals(current.getAttribute("refStation")))
+					{												
+					    ReferenceStation[classNum] = j;
+					    break;
+					}	
+					else if(current.getAttribute("refStation").equals("Arrival Process")){						
+					    ReferenceStation[classNum] = stationNames.length;
+					}					
+					else{						
+					    ReferenceStation[classNum] = 0;
+					}
+			classNum++;
+		}
+		return true;
+	}	
+	public boolean loadReferenceStationDefault(Node classNode) {
+		
+		classes  = Integer.parseInt(((Element) classNode).getAttribute("number"));		
+		for(int i=0;i<classes;i++)
+			{						
+			ReferenceStation[i] = 0;
+			}
+		return true;
+	}
+	
 	/**
 	 * Load solutions from xml file
 	 * @param sol NodeList of solution elements

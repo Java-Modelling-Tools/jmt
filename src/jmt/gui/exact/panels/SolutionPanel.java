@@ -46,6 +46,7 @@ import jmt.gui.exact.table.ResultsTable;
  * Time: 23.48.19
 
  * Modified by Bertoli Marco 6-jun-2006 --> What-if analysis
+ * Modified by kourosh Sheykhvand NOV 2013 --> Add class station
 
  */
 
@@ -69,9 +70,15 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 	protected int classes, stations;
 	protected String[] classNames;
 	protected String[] stationNames;
+	//protected double[][] ReferenceStation;
+	protected int[] ReferenceStation;
 	protected boolean hasResults;
 	protected boolean resultsOK;
 	protected boolean isSingle;
+	protected int[] classTypes;
+	protected double[][] visits;
+	protected double[][][] serviceTimes;
+
 
 	protected ResultsTable table;
 	protected JLabel statusLabel = new JLabel();
@@ -101,6 +108,12 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 		stationNames = data.getStationNames();
 		hasResults = data.hasResults();
 		resultsOK = data.areResultsOK();
+		ReferenceStation = data.getReferenceStation();
+		classTypes = data.getClassTypes();
+		visits = data.getVisits();
+		serviceTimes = data.getServiceTimes();
+		
+	
 
 		isSingle = (classes == 1);
 		statusLabel.setVisible(!resultsOK);

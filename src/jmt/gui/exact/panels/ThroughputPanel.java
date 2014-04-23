@@ -19,6 +19,7 @@
 package jmt.gui.exact.panels;
 
 import jmt.analytical.SolverAlgorithm;
+import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.gui.exact.ExactConstants;
 import jmt.gui.exact.ExactModel;
@@ -30,7 +31,10 @@ import jmt.gui.exact.table.ExactTableModel;
  * @author alyf (Andrea Conti)
  * Date: 11-set-2003
  * Time: 23.48.19
-
+ * Modified by Kourosh Sheykhvand Nov 2013
+ * the modification: for this panel since we do not need to have big calculation and the result to show can be easily driven by the result of the
+ * pervious algorithm, we decide not to touch the algorithm and by playing with the recieved information show the result. most of the changes are in GetValue
+ * fucntion.
  */
 
 /**
@@ -45,6 +49,7 @@ public final class ThroughputPanel extends SolutionPanel {
 	private double[][][] throughput;
 	private double[][] classAggr, stationAggr;
 	private double[] globalAggr;
+	
 
 	/* EDITED by Abhimanyu Chugh */
 	public ThroughputPanel(ExactWizard ew, SolverAlgorithm alg) {
@@ -123,7 +128,7 @@ public final class ThroughputPanel extends SolutionPanel {
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
-				return "<html><i>Aggregate</i></html>";
+				return "<html><i>System</i></html>";
 			} else {
 				return stationNames[rowIndex - 1];
 			}
@@ -138,18 +143,38 @@ public final class ThroughputPanel extends SolutionPanel {
 			}
 		}
 
-		@Override
+		@Override //Updated to show new means of Throughput
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			double d;
-			if (rowIndex == 0 && columnIndex == 0) {
-				d = globalAggr[iteration];
+			double d = 0.0;
+			if (rowIndex == 0 && columnIndex == 0) {				
+				double c = 0.0;
+				for (int j=0;j<classes;j++)
+					for (int i=0; i<stations; i++)						
+						if (ReferenceStation[columnIndex+j] == i)
+						{
+							c += throughput[rowIndex+i][columnIndex+j][0];
+							break;
+						}						
+						else if (ReferenceStation[columnIndex+j] == stations) //it means "Arrival Process Station"
+							{c += classAggr[columnIndex+j][iteration];
+								break;
+							}
+				d = c;
 			} else if (rowIndex == 0 && columnIndex > 0) {
-				d = classAggr[columnIndex - 1][iteration];
+						for (int i=0; i<stations; i++)			
+							if (ReferenceStation[columnIndex - 1] == i)
+							{
+								d = throughput[rowIndex+i][columnIndex - 1][0];
+							}							
+							else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
+								d = classAggr[columnIndex - 1][iteration];
+		
 			} else if (rowIndex > 0 && columnIndex == 0) {
 				d = stationAggr[rowIndex - 1][iteration];
 			} else {
 				d = throughput[rowIndex - 1][columnIndex - 1][iteration];
 			}
+			
 			if (d < 0) {
 				return null; //causes the renderer to display a gray cell
 			}

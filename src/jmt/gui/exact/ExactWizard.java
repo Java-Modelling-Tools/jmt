@@ -70,18 +70,21 @@ import jmt.gui.exact.panels.ForceUpdatablePanel;
 import jmt.gui.exact.panels.GraphPanel;
 import jmt.gui.exact.panels.IterationSelector;
 import jmt.gui.exact.panels.QueueLenPanel;
+import jmt.gui.exact.panels.ReferenceStationPanel;
 import jmt.gui.exact.panels.ResTimePanel;
 import jmt.gui.exact.panels.ServiceDemandsPanel;
 import jmt.gui.exact.panels.ServiceTimesPanel;
 import jmt.gui.exact.panels.StationsPanel;
 import jmt.gui.exact.panels.SynopsisPanel;
 import jmt.gui.exact.panels.SysPowerPanel;
+import jmt.gui.exact.panels.SystemRespTimePanel;
 import jmt.gui.exact.panels.ThroughputPanel;
 import jmt.gui.exact.panels.UtilizationPanel;
 import jmt.gui.exact.panels.VisitsPanel;
 import jmt.gui.exact.panels.WhatIfPanel;
 import jmt.gui.jsim.JSIMMain;
 import jmt.gui.jsim.definitions.JSIMModel;
+import jmt.gui.jsim.panels.RSPLPanel;
 import jmt.manual.ManualBookmarkers;
 import jmt.manual.PDFViewerBuffer;
 
@@ -93,6 +96,9 @@ import jmt.manual.PDFViewerBuffer;
  * Modified by Bertoli Marco 01-mar-2006 (added model conversion and solved bug
  * with stored visits)
  *
+ *Modified by Kourosh OCT2013 to add New panels such as ReferenceStation and SystemResponseTime
+ *Also there is a modification to show the initial page, now at the beginning we see visits and service times and if the user press on Service Demand we
+ *have a warning message which shows that by pressing this button visits are set to 1. 
  */
 public class ExactWizard extends Wizard {
 	private static final long serialVersionUID = 1L;
@@ -114,8 +120,9 @@ public class ExactWizard extends Wizard {
 	//END
 	
 	//keep a reference to these three components to enable switching
-	private WizardPanel serviceTimesPanel, serviceDemandsPanel, visitsPanel, whatIfPanel;
+	private WizardPanel serviceTimesPanel, serviceDemandsPanel, visitsPanel, whatIfPanel, ReferenceStationPanel;
 	private AMVAPanel amvaPanel;
+	
 
 	private AbstractJMTAction FILE_SAVE = new AbstractJMTAction("Save...") {
 		/**
@@ -318,18 +325,26 @@ public class ExactWizard extends Wizard {
 		addPanel(new StationsPanel(this));
 		serviceTimesPanel = new ServiceTimesPanel(this);
 		visitsPanel = new VisitsPanel(this);
+		
 		serviceDemandsPanel = new ServiceDemandsPanel(this);
 		if (data.areVisitsSet()) {
+			
+			addPanel(serviceDemandsPanel);
+		} else {
 			addPanel(serviceTimesPanel);
 			addPanel(visitsPanel);
-		} else {
-			addPanel(serviceDemandsPanel);
+			
 		}
+		
+		ReferenceStationPanel = new ReferenceStationPanel(this);
+		addPanel(ReferenceStationPanel);
+		
+		
 		/* EDITED by Abhimanyu Chugh */
 		whatIfPanel = new WhatIfPanel(this);
 		addPanel(whatIfPanel);
 		addPanel(new DescriptionPanel(this));
-
+	
 		setVisible(true);
 		/* END */
 	}
@@ -489,18 +504,18 @@ public class ExactWizard extends Wizard {
 			case ModelLoader.WARNING:
 				data = newdata;
 				currentPanel.gotFocus();
-				// Shows right panels
+				// Shows right panels  //Edited by Kourosh, because we need to show Visits and Service Demands as Defaults.
 				if (data.areVisitsSet()) {
-					removePanel(serviceDemandsPanel);
-					((ForceUpdatablePanel) serviceTimesPanel).retrieveData();
-					((ForceUpdatablePanel) visitsPanel).retrieveData();
-					addPanel(visitsPanel, 2);
-					addPanel(serviceTimesPanel, 2);
-				} else {
 					removePanel(visitsPanel);
 					removePanel(serviceTimesPanel);
 					((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
 					addPanel(serviceDemandsPanel, 2);
+				} else {
+					removePanel(serviceDemandsPanel);
+					((ForceUpdatablePanel) serviceTimesPanel).retrieveData();
+					((ForceUpdatablePanel) visitsPanel).retrieveData();
+					addPanel(visitsPanel, 2);
+					addPanel(serviceTimesPanel, 2);									
 				}
 				updateTile(modelLoader.getSelectedFile().getName());
 				tabbedPane.setSelectedIndex(0);
@@ -561,15 +576,26 @@ public class ExactWizard extends Wizard {
 	}
 
 	/**switches service times and visits panels to service demands panel in order to change
-	 * data representation.*/
+	 * data representation.*/ //Edited by Kourosh, because we need to show Visits and Service Demands as Defaults.
 	public void switchFromSTVtoSD() {
-		((ForceUpdatablePanel) serviceTimesPanel).commitData();
-		((ForceUpdatablePanel) visitsPanel).retrieveData();
-		((ForceUpdatablePanel) visitsPanel).commitData();
-		removePanel(serviceTimesPanel);
-		removePanel(visitsPanel);
-		((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
-		addPanel(serviceDemandsPanel, 2);
+		//kourosh123
+		int resultValue = JOptionPane.showConfirmDialog(this, "Visit values will be set to \"1\" Continue?", "JMVA - Warning", JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.WARNING_MESSAGE);
+		if (resultValue == JOptionPane.YES_OPTION) {			
+			((ForceUpdatablePanel) serviceTimesPanel).commitData();
+			((ForceUpdatablePanel) visitsPanel).retrieveData();
+			((ForceUpdatablePanel) visitsPanel).commitData();
+			removePanel(serviceTimesPanel);
+			removePanel(visitsPanel);
+			((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
+			addPanel(serviceDemandsPanel, 2);
+			
+		}
+		if (resultValue == JOptionPane.CANCEL_OPTION) {
+			
+		}
+		
+		
 	}
 
 	/**switches service times and visits panels to service demands panel in order to change
@@ -666,6 +692,7 @@ public class ExactWizard extends Wizard {
 				algPanel.addSolutionPanel(new ThroughputPanel(this, algorithm));
 				algPanel.addSolutionPanel(new QueueLenPanel(this, algorithm));
 				algPanel.addSolutionPanel(new ResTimePanel(this, algorithm));
+				algPanel.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 				algPanel.addSolutionPanel(new UtilizationPanel(this, algorithm));
 				//Added by ASHANKA START
 				// for System Power
@@ -678,8 +705,9 @@ public class ExactWizard extends Wizard {
 			SolverAlgorithm algorithm = data.getAlgorithmType();
 			AlgorithmPanel algPanel = new AlgorithmPanel(this, algorithm);
 			algPanel.addSolutionPanel(new ThroughputPanel(this, algorithm));
-			algPanel.addSolutionPanel(new QueueLenPanel(this, algorithm));
+			algPanel.addSolutionPanel(new QueueLenPanel(this, algorithm));			
 			algPanel.addSolutionPanel(new ResTimePanel(this, algorithm));
+			algPanel.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 			algPanel.addSolutionPanel(new UtilizationPanel(this, algorithm));
 			//Added by ASHANKA START
 			// for System Power
@@ -702,6 +730,7 @@ public class ExactWizard extends Wizard {
 			selector.addSolutionPanel(new ThroughputPanel(this, algorithm));
 			selector.addSolutionPanel(new QueueLenPanel(this, algorithm));
 			selector.addSolutionPanel(new ResTimePanel(this, algorithm));
+			selector.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 			selector.addSolutionPanel(new UtilizationPanel(this, algorithm));
 			//Added by ASHANKA START
 			// for System Power
@@ -713,6 +742,7 @@ public class ExactWizard extends Wizard {
 			ThroughputPanel throughput = new ThroughputPanel(this, alg);
 			QueueLenPanel queuelength = new QueueLenPanel(this, alg);
 			ResTimePanel restimes = new ResTimePanel(this, alg);
+			SystemRespTimePanel systemreptime = new SystemRespTimePanel(this,alg);
 			UtilizationPanel utilizations = new UtilizationPanel(this, alg);
 			//Added by ASHANKA START
 			//Introducing the new System Power Panel as a Tabbed Pane
@@ -722,6 +752,7 @@ public class ExactWizard extends Wizard {
 			jtp.add(throughput);
 			jtp.add(queuelength);
 			jtp.add(restimes);
+			jtp.add(systemreptime);
 			jtp.add(utilizations);
 			//Added by ASHANKA START
 			//for System Power
@@ -812,6 +843,7 @@ public class ExactWizard extends Wizard {
 		new ExactWizard();
 		//new ExactWizard(new ExactModel());
 		/* END */
+		
 	}
 
 	/**

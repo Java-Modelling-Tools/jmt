@@ -68,9 +68,16 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 	private String[] classNames;
 	private String[] stationNames;
 	private double[][] visits;
+	private int[] ReferenceStation;
+	
 
 	private VisitTable visitTable;
 
+	public static void infoBox(String infoMessage, String location)
+    {
+        JOptionPane.showMessageDialog(null, infoMessage, "InfoBox: " + location, JOptionPane.INFORMATION_MESSAGE);
+    }
+	
 	public VisitsPanel(ExactWizard ew) {
 		this.ew = ew;
 		help = ew.getHelp();
@@ -93,6 +100,8 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 			classNames = data.getClassNames();
 			stationNames = data.getStationNames();
 			visits = ArrayUtils.copy2(data.getVisits());
+			ReferenceStation = ArrayUtils.copy(data.getReferenceStation());
+			
 		}
 	}
 
@@ -244,9 +253,17 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			try {
 				double newVal = Double.parseDouble((String) value);
-				if (newVal >= 0) {
+				if (newVal > 0)
 					visits[rowIndex][columnIndex] = newVal;
-				}
+			else if (newVal == 0 && ReferenceStation[rowIndex] == rowIndex)
+					{
+						infoBox("you can not change the number of visits to Zero because you have chosen this station in the ReferenceStation" + ReferenceStation[columnIndex],"Warning!");
+						visits[rowIndex][columnIndex] = 1;					
+					}
+				else
+					visits[rowIndex][columnIndex] = 0;
+						
+				
 			} catch (NumberFormatException e) {
 			}
 		}
