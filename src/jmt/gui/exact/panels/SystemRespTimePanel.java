@@ -115,10 +115,12 @@ public final class SystemRespTimePanel extends SolutionPanel {
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
-				return "<html><body><p><font size=\"0.5\">Inc R.St</font></p></body></html>";
+				//return "<html><body><p><font size=\"0.5\">Inc R.St</font></p></body></html>";
+				return "<html><body><p><b>A</b></p></body></html>";
 			}
 			else if (rowIndex == 1)
-				return "<html><body><p><font size=\"0.5\">NotInc R.St</font></p></body></html>";
+				//return "<html><body><p><font size=\"0.5\">NotInc R.St</font></p></body></html>";
+				return "<html><body><p><b>B</b></p></body></html>";
 			else
 				return null;
 		}
@@ -140,7 +142,7 @@ public final class SystemRespTimePanel extends SolutionPanel {
 					else
 						d += resTimes[i][columnIndex - 1][iteration];
 			else if (rowIndex == 1 && columnIndex > 0)
-			{
+			{							
 				for (int i=0; i< stations; i++)
 					if(ReferenceStation[columnIndex-1] < stations)
 						d += (resTimes[i][columnIndex - 1][iteration] / visits[ReferenceStation[columnIndex-1]][columnIndex-1]);
@@ -148,6 +150,11 @@ public final class SystemRespTimePanel extends SolutionPanel {
 						d += resTimes[i][columnIndex - 1][iteration];
 					if(ReferenceStation[columnIndex-1] < stations)
 						d -= serviceTimes[ReferenceStation[columnIndex-1]][columnIndex-1][0];
+
+					// For the open classes there is no value for B
+					
+						if (classTypes[columnIndex-1] == 1)
+							d = 0.0;	
 			}
 			else if (rowIndex == 0 && columnIndex == 0)
 			{	double c = 0.0; //in C we have the value of the SystemThrougput the code is the same as the one in the Throughput panel
@@ -177,7 +184,7 @@ public final class SystemRespTimePanel extends SolutionPanel {
 					}						
 				}
 			else if (rowIndex == 1 && columnIndex == 0)
-			{
+			{				
 				double c = 0.0; //in C we have the value of the SystemThrougput the code is the same as the one in the Throughput panel
 				for (int j=0;j<classes;j++)
 					for (int i=0; i<stations; i++)						
@@ -199,18 +206,26 @@ public final class SystemRespTimePanel extends SolutionPanel {
 							else if (ReferenceStation[j] == stations) //it means "No Reference Station"
 								x += resTimes[i][j][iteration];
 							if (ReferenceStation[j] != stations){
-								x -= serviceTimes[ReferenceStation[j]][j][0];
+								//x -= serviceTimes[ReferenceStation[j]][j][0];
+								x -= resTimes[ReferenceStation[j]][j][0];
 								d += x*throughput[ReferenceStation[j]][j][0]/c;
 							}
 							else
 								d += x*classAggr[j][iteration]/c;
 						}
+					// For the open classes there is no value for B
+					for (int i = 0; i <classes; i++)
+					if (classTypes[i] == 1)
+						d = 0.0;
 				
 			}
 			if (d < 0) {
 				return null; //causes the renderer to display a gray cell
 			}
-			return new Double(d);
+			if (d == 0.0)
+				return new String("--");
+				else
+				return new Double(d);
 		}
 
 	}

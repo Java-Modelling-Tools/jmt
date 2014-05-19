@@ -108,10 +108,12 @@ public class SysPowerPanel extends SolutionPanel {
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
-				return "<html><body><p><font size=\"0.5\">Inc R.St</font></p></body></html>";
+				//return "<html><body><p><font size=\"0.5\">Inc R.St</font></p></body></html>";
+				return "<html><body><p><b>A</b></p></body></html>";
 			}
 			else if (rowIndex == 1)
-				return "<html><body><p><font size=\"0.5\">NotInc R.St</font></p></body></html>";
+				//return "<html><body><p><font size=\"0.5\">NotInc R.St</font></p></body></html>";
+				return "<html><body><p><b>B</b></p></body></html>";
 			else
 				return null;
 		}
@@ -201,6 +203,11 @@ public class SysPowerPanel extends SolutionPanel {
 					if(ReferenceStation[columnIndex-1] < stations)
 						d -= serviceTimes[ReferenceStation[columnIndex-1]][columnIndex-1][0];
 				d = c/d;
+				
+				// For the open classes there is no value for B
+				
+				if (classTypes[columnIndex-1] == 1)
+					d = 0.0;
 			}
 			else if (rowIndex == 0 && columnIndex == 0)
 			{
@@ -237,11 +244,17 @@ public class SysPowerPanel extends SolutionPanel {
 								d += x*classAggr[j][iteration]/c;
 						}
 					d = c/d; //To compute the SystemPower
-				
+					// For the open classes there is no value for B
+					for (int i = 0; i <classes; i++)
+					if (classTypes[i] == 1)
+						d = 0.0;
 			}
 			if (d < 0) {
 				return null; //causes the renderer to display a gray cell
 			}
+			if (d == 0.0)
+			return new String("--");
+			else
 			return new Double(d);
 		}
 

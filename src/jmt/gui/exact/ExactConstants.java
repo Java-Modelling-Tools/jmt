@@ -108,7 +108,7 @@ public interface ExactConstants {
 	public static final String DESCRIPTION_THROUGHPUTS = "<html><body align=\"left\"><font size=\"4\"><b>Throughput</b>"
 			+ "</font><font size=\"3\"><br>Throughput of each class for each station. System Throughput is the completion rate of the <b>reference stations</b></body></html>";
 	public static final String DESCRIPTION_RESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>System ResponseTime</b>"					
-			+ "</font><font size=\"3\"><br> The global aggregate is the \"System Response Time\" and is obtained weighting the aggregated values by the relative per-class throughput."
+			+ "</font><font size=\"3\"><br> The global aggregate is the \"System Response Time\" and is obtained weighting the aggregated values by the relative per-class throughput. <br> <b> A: </b> This value of System Response Time <b> include </b> the Residence Time of the Reference Station. <br>  <b> B: </b> This value of System Response Time <b> do NOT include </b> the Residence Time of the Reference Station. <br> Notice: For <b>open classes</b> the Reference Station always coincides with the arrival process. Thus the <b>B</b> values are not computed."
 			+ "</body></html>";
 	public static final String DESCRIPTION_RESIDENCETIME = "<html><body align=\"left\"><font size=\"4\"><b>Residence Times</b>"
 			+ "</font><font size=\"3\"><br>Total time spent by each customer class summed across all visits to a station."
@@ -147,11 +147,14 @@ public interface ExactConstants {
 			+ "<br>Since only integer Ni values are allowed, the number of models executed can be very small." + "</font></body></html>";
 	public static final String DESCRIPTION_GRAPH = "<html><body align=\"left\"><font size=\"4\"><b>Graphical Results</b>"
 			+ "</font><font size=\"3\"><br>Select performance indices to be plotted. Right-click and drag on the graph to zoom "
-			+ "it, right-click to save it in EPS or PNG format.</body></html>";
+			+ "it, right-click to save it in EPS or PNG format. <br>Notice: System Response Time of closed classes includes the Residence Time of the Reference Station.</body></html>";
 
 	public static final String DESCRIPTION_SYSPOWER = "<html><body align=\"left\"><font size=\"4\"><b>System Power</b>"
-			+ "</font><font size=\"3\"><br>Aggregate System Power: Aggregate System Throughput (sum of the per-class throughputs)/Aggregate System Response Time (sum of the Response Times per class weighted by the relative throughputs) "
-			+ "<br>Per-class System Power: Throughput/Response Time of each class</body></html>";
+			+ "</font><font size=\"3\"><br><b>Aggregate System Power:</b> Aggregate System Throughput (sum of the per-class throughputs) divided by the Aggregate System Response Time (sum of the Response Times per class weighted by the relative throughputs). "
+			+ "<br><b>Per-class System Power:</b> Throughput divided by the Response Time of each class."
+			+ "<br> <b> A: </b> This value of System Power is computed using the value of Residence Time that includes the Reference Station <br>  <b> B: </b> This value of System Power is computed using the value of Residence Time that NOT includes the Reference Station <br> Notice: For <b>open classes</b> the Reference Station always coincides with the arrival process. Thus the <b>B</b> values are not computed."
+			+ "</body></html>"
+			;
 
 	/** What-if Analysis type constants */
 	public static final String WHAT_IF_ARRIVAL = "Arrival Rates";
