@@ -22,6 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 import java.util.EventObject;
 
 import javax.swing.AbstractAction;
@@ -191,13 +192,7 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 		double[][] visits = new double[serviceDemands.length][];
 		for (int i = 0; i < serviceDemands.length; i++) {
 			visits[i] = new double[serviceDemands[i].length];
-			for (int j = 0; j < serviceDemands[i].length; j++) {
-				if (serviceDemands[i][j][0] != 0) {
-					visits[i][j] = 1;
-				} else {
-					visits[i][j] = 0;
-				}
-			}
+			Arrays.fill(visits[i], 1.0);
 		}
 		return visits;
 	}
