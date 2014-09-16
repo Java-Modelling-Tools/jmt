@@ -109,48 +109,53 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 * @param model data structure
 	 */
 	private static void setMeasures(Element root, PAResultsModel model) {
+		String logDecimalSeparator = root.getAttribute(XML_A_ROOT_LOG_DECIMAL_SEP);
+		model.setLogDecimalSeparator(logDecimalSeparator);
+		String logCsvDelimiter = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
+		model.setLogCsvDelimiter(logCsvDelimiter);
+		
 		NodeList measures = root.getElementsByTagName(XML_E_MEASURE);
 		for (int i = 0; i < measures.getLength(); i++) {
 			Element current = (Element) measures.item(i);
 			String measureName = current.getAttribute(XML_A_MEASURE_NAME);
 			// Adds its samples
-						NodeList samples = current.getElementsByTagName(XML_E_SAMPLE);
-						model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION), current.getAttribute(XML_A_MEASURE_CLASS), Double
-								.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)), Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
-								Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), current.getAttribute(XML_A_MEASURE_NODETYPE));
-						for (int j = 0; j < samples.getLength(); j++) {
-							Element sample = (Element) samples.item(j);
-							double mean = 0;
-							double upper = 0;
-							double lower = 0;
-							boolean valid;
-							
-							valid = Boolean.valueOf(sample.getAttribute(XML_A_SAMPLE_VALIDITY)).booleanValue();
-							mean = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_MEAN));
-							// If the sample was calculated with the requested precision simply parse
-							if (valid) {
-								upper = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_UPPERBOUND));
-								lower = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_LOWERBOUND));
-							}
-							//else check or fields equal to the String "Infinity"
-							else {
-								String u = sample.getAttribute(XML_A_SAMPLE_UPPERBOUND);
-								if (u.equals("Infinity")) {
-									upper = Double.POSITIVE_INFINITY;
-								} else {
-									upper = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_UPPERBOUND));
-								}
-								String l = sample.getAttribute(XML_A_SAMPLE_LOWERBOUND);
-								if (l.equals("Infinity")) {
-									lower = Double.POSITIVE_INFINITY;
-								} else {
-									lower = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_LOWERBOUND));
-								}
-							}
-							model.addSample(measureName, lower, mean, upper, valid);
-						}
+			NodeList samples = current.getElementsByTagName(XML_E_SAMPLE);
+			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION), current.getAttribute(XML_A_MEASURE_CLASS), Double
+					.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)), Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
+					Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), current.getAttribute(XML_A_MEASURE_NODETYPE));
+			for (int j = 0; j < samples.getLength(); j++) {
+				Element sample = (Element) samples.item(j);
+				double mean = 0;
+				double upper = 0;
+				double lower = 0;
+				boolean valid;
+
+				valid = Boolean.valueOf(sample.getAttribute(XML_A_SAMPLE_VALIDITY)).booleanValue();
+				mean = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_MEAN));
+				// If the sample was calculated with the requested precision simply parse
+				if (valid) {
+					upper = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_UPPERBOUND));
+					lower = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_LOWERBOUND));
+				}
+				//else check or fields equal to the String "Infinity"
+				else {
+					String u = sample.getAttribute(XML_A_SAMPLE_UPPERBOUND);
+					if (u.equals("Infinity")) {
+						upper = Double.POSITIVE_INFINITY;
+					} else {
+						upper = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_UPPERBOUND));
+					}
+					String l = sample.getAttribute(XML_A_SAMPLE_LOWERBOUND);
+					if (l.equals("Infinity")) {
+						lower = Double.POSITIVE_INFINITY;
+					} else {
+						lower = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_LOWERBOUND));
 					}
 				}
+				model.addSample(measureName, lower, mean, upper, valid);
+			}
+		}
+	}
 	/**
 	 * Loads measures data from saved XML document
 	 * @param root root element of xml document
@@ -158,16 +163,32 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 */
 	private static void setMeasures(Element root, StoredResultsModel model) {
 		double polling = Double.parseDouble(root.getAttribute(XML_A_ROOT_POLLING));
+		String logDecimalSeparator = root.getAttribute(XML_A_ROOT_LOG_DECIMAL_SEP);
+		model.setLogDecimalSeparator(logDecimalSeparator);
+		String logCsvDelimiter = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
+		model.setLogCsvDelimiter(logCsvDelimiter);
+		
 		model.setPollingInterval(polling);
 		NodeList measures = root.getElementsByTagName(XML_E_MEASURE);
 		for (int i = 0; i < measures.getLength(); i++) {
 			Element current = (Element) measures.item(i);
 			String measureName = current.getAttribute(XML_A_MEASURE_NAME);
+			String fileName = current.getAttribute(XML_A_MEASURE_LOG);
+			if (fileName != null && fileName.length() == 0) {
+				fileName = null;
+			}
 			// Add measure
-			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION), current.getAttribute(XML_A_MEASURE_CLASS), Double
-					.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)), Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
-					Integer.parseInt(current.getAttribute(XML_A_MEASURE_SAMPLES)), Integer.parseInt(current.getAttribute(XML_A_MEASURE_STATE)),
-					Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), current.getAttribute(XML_A_MEASURE_NODETYPE));
+			String discarded = current.getAttribute(XML_A_MEASURE_DISCARDEDSAMPLES);
+			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION), 
+					current.getAttribute(XML_A_MEASURE_CLASS), 
+					Double.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)), 
+					Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
+					Integer.parseInt(current.getAttribute(XML_A_MEASURE_SAMPLES)),
+					discarded == null || discarded.length() == 0 ? 0 : Integer.parseInt(discarded),
+					Integer.parseInt(current.getAttribute(XML_A_MEASURE_STATE)),
+					Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), 
+					current.getAttribute(XML_A_MEASURE_NODETYPE), fileName);
+				
 			// Adds its samples
 			NodeList samples = current.getElementsByTagName(XML_E_SAMPLE);
 			for (int j = 0; j < samples.getLength(); j++) {
@@ -205,10 +226,18 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 * @param model data structure
 	 */
 	private static void setEngineMeasures(Element root, StoredResultsModel model) {
+		String logDecimalSeparator = root.getAttribute(XML_A_ROOT_LOG_DECIMAL_SEP);
+		model.setLogDecimalSeparator(logDecimalSeparator);
+		String logCsvDelimiter = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
+		model.setLogCsvDelimiter(logCsvDelimiter);
+		
 		NodeList measures = root.getElementsByTagName(XML_EO_MEASURE);
 		for (int i = 0; i < measures.getLength(); i++) {
 			Element current = (Element) measures.item(i);
-			// Required elements
+			String fileName = current.getAttribute(XML_A_MEASURE_LOG);
+			if (fileName != null && fileName.length() == 0) {
+				fileName = null;
+			}
 			String stationName = current.getAttribute(XML_AO_MEASURE_STATION);
 			String className = current.getAttribute(XML_AO_MEASURE_CLASS);
 			String type = current.getAttribute(XML_AO_MEASURE_TYPE);
@@ -245,6 +274,11 @@ public class XMLResultsReader implements XMLResultsConstants {
 			int samples = 0;
 			if (attr != null && attr != "") {
 				samples = Integer.parseInt(attr);
+			}
+			attr = current.getAttribute(XML_AO_MEASURE_DISCARDEDSAMPLES);
+			int discarded = 0;
+			if (attr != null && attr != "") {
+				discarded = Integer.parseInt(attr);
 			}
 			attr = current.getAttribute(XML_AO_MEASURE_ALPHA);
 			double alpha = 0;
@@ -314,7 +348,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 				numType = SimConstants.RESPONSE_TIME_PER_SINK;
 			}
 			// Adds loaded informations into model data structure
-			model.addMeasure(Name, stationName, className, alpha, precision, samples, state, numType, nodeType);
+			model.addMeasure(Name, stationName, className, alpha, precision, samples, discarded, state, numType, nodeType,fileName);
 			model.addMeasureSample(Name, mean,lastIntervalAvgValue, simulationTime, upper, lower);
 		}
 	}

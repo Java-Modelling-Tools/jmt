@@ -73,6 +73,7 @@ public interface XMLConstantNames {
 	public static final String XML_A_MEASURE_CLASS = "referenceUserClass";
 	public static final String XML_A_MEASURE_STATION = "referenceNode";
 	public static final String XML_A_MEASURE_NODETYPE = "nodeType";
+	public static final String XML_A_MEASURE_LOG = "logFile";
 
 	public static final String XML_E_CONNECTION = "connection";
 	public static final String XML_A_CONNECTION_SOURCE = "source";

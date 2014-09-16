@@ -61,6 +61,7 @@ public class TempMeasure {
 	// alpha, precision
 	private double alpha, precision;
 	private double upperBound, lowerBound, lastIntervalAvgValue, simulationTime;
+	private String logFileName;
 
 	// --- end
 
@@ -99,6 +100,9 @@ public class TempMeasure {
 		finished = false;
 		success = false;
 		noSamplesTest = false;
+		if (measure.getOutput() != null && measure.getOutput().getOutputFile() != null) {
+			logFileName = measure.getOutput().getOutputFile().getAbsolutePath();
+		}
 	}
 
 	public void refreshMeasure() {
@@ -199,8 +203,10 @@ public class TempMeasure {
 		return nodeType;
 	}
 
-	
-
-	
-
+	/**
+	 * @return the file name used to log verbose measures.
+	 */
+	public String getLogFileName() {
+		return logFileName;
+	}
 }

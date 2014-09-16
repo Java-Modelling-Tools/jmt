@@ -134,6 +134,9 @@ public class XMLResultsWriter implements XMLResultsConstants {
 		elem.setAttribute("xsi:noNamespaceSchemaLocation", XML_DOCUMENT_XSD);
 		elem.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		elem.setAttribute(XML_A_ROOT_POLLING, Double.toString(measure.getPollingInterval()));
+		elem.setAttribute(XML_A_ROOT_LOG_DECIMAL_SEP, measure.getLogDecimalSeparator());
+		elem.setAttribute(XML_A_ROOT_LOG_DELIMITER, measure.getLogCsvDelimiter());
+
 		writeMeasures(resultsDoc, elem, measure);
 	}
 
@@ -156,6 +159,9 @@ public class XMLResultsWriter implements XMLResultsConstants {
 				elem.setAttribute(XML_A_MEASURE_ALPHA, Double.toString(measure.getAlpha(i)));
 				elem.setAttribute(XML_A_MEASURE_PRECISION, Double.toString(measure.getPrecision(i)));
 				elem.setAttribute(XML_A_MEASURE_NODETYPE, measure.getNodeType(i));
+				if (measure.getLogFileName(i) != null) {
+					elem.setAttribute(XML_A_MEASURE_LOG, measure.getLogFileName(i));
+				}
 				writeSamples(doc, elem, measure, i, true);
 				resultsNode.appendChild(elem);
 			}
@@ -173,6 +179,9 @@ public class XMLResultsWriter implements XMLResultsConstants {
 				elem.setAttribute(XML_A_MEASURE_ALPHA, Double.toString(measure.getAlpha(i)));
 				elem.setAttribute(XML_A_MEASURE_PRECISION, Double.toString(measure.getPrecision(i)));
 				elem.setAttribute(XML_A_MEASURE_NODETYPE, measure.getNodeType(i));
+				if (measure.getLogFileName(i) != null) {
+					elem.setAttribute(XML_A_MEASURE_LOG, measure.getLogFileName(i));
+				}
 				writeSamples(doc, elem, measure, i, false);
 				resultsNode.appendChild(elem);
 			}
@@ -191,7 +200,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 	 * @param parametric true if these are results from a parametric analysis simulation
 	 */
 	protected static void writeSamples(Document doc, Node measureNode, MeasureDefinition measure, int measureIndex, boolean parametric) {
-		Vector samples = measure.getValues(measureIndex);
+		Vector<MeasureValue> samples = measure.getValues(measureIndex);
 		if (parametric) {
 			PAResultsModel.MeasureValueImpl value;
 			// Writes all samples, ignoring upperBound and lowerBound if zeros or infinites
@@ -213,7 +222,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 			// (that means they are unset)
 			for (int i = 0; i < samples.size(); i++) {
 				Element sample = doc.createElement(XML_E_SAMPLE);
-				value = (MeasureValue) samples.get(i);
+				value = samples.get(i);
 				sample.setAttribute(XML_A_SAMPLE_MEAN, Double.toString(value.getMeanValue()));
 				sample.setAttribute(XML_A_LAST_INTERVAL_AVG_VALUE, Double.toString(value.getLastIntervalAvgValue()));
 				sample.setAttribute(XML_A_TIME, Double.toString(value.getSimTime()));

@@ -18,9 +18,6 @@
 
 package jmt.engine.dataAnalysis;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Iterator;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -37,7 +34,7 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.log.JSimLogger;
-import jmt.engine.math.SampleMean;
+import jmt.engine.math.SampleStatistics;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -91,9 +88,9 @@ public class Measure {
 	/** the array of samples: each element is the mean computed after pointSize original samples */
 	private double[] samples = new double[size_samples];
 
-	/** mean of all samples */
-	private SampleMean mean = new SampleMean();
-
+	/** statistics of all samples */
+	private SampleStatistics statistics = new SampleStatistics();
+	
 	/** max precision percentage reached */
 	private double maxPrecisionPercentage;
 
@@ -463,7 +460,7 @@ public class Measure {
 		lastSampleWeight= lastSampleWeight+(sample*weight);
 		lastWeight= lastWeight+weight;
 		simulationTime=NetSystem.getTime();
-		mean.putNewSample(sample * weight);
+		statistics.putNewSample(sample, weight);
 
 		//the sample is added, but the value of mean is updated only if counter
 		//is a multiple of pointSize (x % y is equal to the rest of the division x/y)
@@ -475,9 +472,7 @@ public class Measure {
 		//instead of waiting for every point size samples
 		//@author Stefano Omini
 		if (counter % pointSize == 0 && (counter % pointSize) < size_samples && counter >= 0) {
-			samples[counter / pointSize] = mean.getMean();
-		
-			
+			samples[counter / pointSize] = statistics.getMean();
 		}
 		counter++;
 
@@ -489,8 +484,10 @@ public class Measure {
 				finish = true;
 
 				if (output != null) {
+					//writes the new sample
+					output.write(sample, weight);
 					//writes the final measure
-					output.writeMeasure();
+					output.finalizeMeasure();
 				}
 			}
 			//simulation already finished
@@ -547,6 +544,14 @@ public class Measure {
 	 */
 	public double getSamplesAnalyzedPercentage() {
 		return (double) analyzer.getSamples() / analyzer.getMaxData();
+	}
+	
+	/**
+	 * Return statistics computed ad sample level
+	 * @return  statistics computed at samples level.
+	 */
+	public SampleStatistics getSampleStatistics() {
+		return statistics;
 	}
 
 	/** Returns max precision percentage reached.
@@ -740,10 +745,10 @@ public class Measure {
 		// Measure is class-independent --> Bertoli Marco
 		else {
 			try {
-				Iterator it = network.getJobClasses().listIterator();
+				Iterator<JobClass> it = network.getJobClasses().listIterator();
 				double ratioSum = 0.0, weight = 0.0;
 				while (it.hasNext()) {
-					JobClass jobC = (JobClass) it.next();
+					JobClass jobC = it.next();
 					//reference node for this job class
 					String referenceNodeName = jobC.getReferenceNodeName();
 					NetNode referenceNode = network.getNode(referenceNodeName);
@@ -878,18 +883,14 @@ public class Measure {
 		return aborted;
 	}
 
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
+	/**
+	 * Set simulation parameters for this measure
+	 * @param param the simulation parameters to consider
+	 */
 	public void setSimParameters(SimParameters param) {
 		analyzer.setParameters(param);
 		maxDeadState = param.getDeadMeasureMaxChecks();
 	}
-	//end NEW
-	
-	
-
 	
 	public double getSimTime() {
 		return simulationTime;

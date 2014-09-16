@@ -60,7 +60,6 @@ public class CSVLogger {
 	 * in values map, it is looked in defaultValues map.
 	 * @throws IOException if a problem is risen opening or writing to the log file
 	 */
-
 	public void log(Map<String, ?> values, Map<String, ?> defaultValues) throws IOException {
 		if (!isInitialized()) {
 			init();
@@ -85,8 +84,6 @@ public class CSVLogger {
 			writer.append(logLine);
 		}
 	}
-	
-	
 	
 	/**
 	 * Initialize this logger. This method has no effect if the logger is already initialized.

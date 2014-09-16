@@ -32,10 +32,15 @@
 						<xs:attribute name="precision" type="xs:double" use="required"/>
 						<xs:attribute name="alpha" type="xs:double" use="required"/>
 						<xs:attribute name="nodeType" type="xs:string" use="optional"/>
+						<xs:attribute name="logFile" type="xs:string" use="optional"/>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
 			<xs:attribute name="pollingInterval" type="xs:double" use="required"/>
+			<xs:attribute name="logDecimalSeparator" type="xs:string" use="optional"/>
+			<xs:attribute name="logDelimiter" type="xs:string" use="optional"/>
+			<xs:attribute name="logPath" type="xs:string" use="optional"/>
+			<xs:attribute name="lastRunTime" type="xs:string" use="optional"/>		
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

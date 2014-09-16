@@ -99,7 +99,7 @@ public interface MeasureDefinition {
 	 * @return number of analized samples
 	 */
 	public int getAnalizedSamples(int measureIndex);
-
+	
 	/**
 	 * Returns the name of a given measure
 	 * @param measureIndex index of the measure
@@ -129,11 +129,25 @@ public interface MeasureDefinition {
 	 * @return measure type
 	 */
 	public int getMeasureType(int measureIndex);
-
+	
+	/**
+	 * Returns log file name where a verbose measure was stored
+	 * @param measureIndex corresponding to a measure
+	 * @return the full path of the log file including the measure.
+	 */
+	public String getLogFileName(int measureIndex);
+	
+	/**
+	 * Returns the number of discarded samples for the measure
+	 * @param measureIndex the measure index
+	 * @return the number of discarded samples for the measure.
+	 */
+	public int getDiscardedSamples(int measureIndex);
+	
 	/**
 	 * Returns an array with the measureIndex of every queue length measure
 	 * @return an array with measures' index
-	 */
+	 */	
 	public int[] getQueueLengthMeasures();
 
 	/**
@@ -245,7 +259,17 @@ public interface MeasureDefinition {
 	 * @return current progress time
 	 */
 	public double getProgressTime();
+	
+	/**
+	 * @return return the decimal separator used in log files
+	 */
+	public String getLogDecimalSeparator();
 
+	/**
+	 * @return return the CSV delimiter used in log files
+	 */
+	public String getLogCsvDelimiter();
+	
 	// --- Listener Interfaces ------------------------------------------------------------------------
 	/**
 	 * Interface used to specify a listener on a measure. This is useful to
@@ -270,5 +294,6 @@ public interface MeasureDefinition {
 	public interface MalformedReplayerFileListener {
 		public void detectedError(String msg);
 	}	
+	
 	
 }

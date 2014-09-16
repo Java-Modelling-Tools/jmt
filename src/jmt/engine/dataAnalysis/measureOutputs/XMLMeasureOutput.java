@@ -147,7 +147,7 @@ public class XMLMeasureOutput extends MeasureOutput {
 	 * This method is called at the end of a measure.
 	 */
 	@Override
-	public void writeMeasure() {
+	public void finalizeMeasure() {
 		if (measure.hasFinished()) {
 			//general info
 			report.setAttribute("finished", "true");
@@ -216,5 +216,15 @@ public class XMLMeasureOutput extends MeasureOutput {
 		}
 
 	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.dataAnalysis.MeasureOutput#getOutputFile()
+	 */
+	@Override
+	public File getOutputFile() {
+		return file;
+	}
+	
+	
 
 }

@@ -127,16 +127,20 @@ public class XMLSimulationOutput extends SimulationOutput {
 			//only file name is passed, not the absolute path
 			//in fact definition and results will be put in the same directory
 
-			//TODO: forse va messo assoluto...
 			//root.setAttribute("modelDefinitionPath", simModelDefinition.getName());
 			if (name != null) {
 				root.setAttribute("modelDefinitionPath", name);
 			} else {
 				root.setAttribute("modelDefinitionPath", ".");
 			}
-
+			
+			// Write CSV definition for verbose measures load.
+			root.setAttribute("logDecimalSeparator", simulation.getSimParameters().getLogDecimalSeparator());
+			root.setAttribute("logDelimiter", simulation.getSimParameters().getLogDelimiter());
+			root.setAttribute("logPath", simulation.getSimParameters().getLogPath());
+			root.setAttribute("lastRunTime", simulation.getSimParameters().getTimestampValue());
 		} catch (Exception e) {
-			System.out.println(e);
+			logger.error("Error while writing simulator output XML", e);
 		}
 
 	}
@@ -144,7 +148,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 	/**
 	 * Writes the output of the specified measure.
 	 */
-	public void writeMeasure(Measure measure) {
+	private void writeMeasure(Measure measure) {
 
 		Element elem = doc.createElement("measure");
 		root.appendChild(elem);
@@ -253,12 +257,17 @@ public class XMLSimulationOutput extends SimulationOutput {
 		elem.setAttribute("meanValue", Double.toString(measure.getExtimatedMeanValue()));
 		elem.setAttribute("upperLimit", Double.toString(measure.getUpperLimit()));
 		elem.setAttribute("lowerLimit", Double.toString(measure.getLowerLimit()));
+		
+		//log file if verbose measure was selected
+		if (measure.getOutput() != null && measure.getOutput().getOutputFile() != null) {
+			elem.setAttribute("logFile", measure.getOutput().getOutputFile().getAbsolutePath());
+		}
 	}
 
 	/**
 	 * Writes the output of the drop measures, when blocking regions have been defined.
 	 */
-	public void writeMeasures_regionDroppedJobs() {
+	private void writeMeasures_regionDroppedJobs() {
 
 		BlockingRegion[] regions = sim.getAllRegions();
 		JobClass[] classes = sim.getClasses();
@@ -328,7 +337,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 	/**
 	 * Writes the output of the drop measures, when blocking regions have been defined.
 	 */
-	public void writeMeasures_regionUtilization() {
+	private void writeMeasures_regionUtilization() {
 
 		BlockingRegion[] regions = sim.getAllRegions();
 		JobClass[] classes = sim.getClasses();

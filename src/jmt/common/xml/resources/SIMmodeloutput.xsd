@@ -19,12 +19,17 @@
 						<xs:attribute name="alfa" type="xs:double" use="optional"/>
 						<xs:attribute name="maxSamples" type="xs:int" use="optional"/>
 						<xs:attribute name="nodeType" type="xs:string" use="optional"/>
+						<xs:attribute name="logFile" type="xs:string" use="optional"/>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
 			<xs:attribute name="modelName" type="xs:string" use="required"/>
 			<xs:attribute name="solutionMethod" type="xs:string" use="required"/>
 			<xs:attribute name="modelDefinitionPath" type="xs:string" use="required"/>
+			<xs:attribute name="logDecimalSeparator" type="xs:string" use="optional"/>
+			<xs:attribute name="logDelimiter" type="xs:string" use="optional"/>
+			<xs:attribute name="logPath" type="xs:string" use="optional"/>
+			<xs:attribute name="lastRunTime" type="xs:string" use="optional"/>		
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

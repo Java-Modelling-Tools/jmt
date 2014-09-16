@@ -98,9 +98,11 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 		chooser.setToolTipText("Choose the what-if analysis to be performed");
 		chooserPanel.add(chooser, BorderLayout.NORTH);
 		JLabel description = new JLabel(PARAMETRIC_ANALYSIS_DESCRIPTION);
+		JLabel Warning = new JLabel ("WARNING : Enabling What-If Analysis will disable all Statistical Outputs.");
 		JPanel northPanel = new JPanel(new BorderLayout());
 		northPanel.setBorder(new EmptyBorder(0, 0, 15, 0));
 		northPanel.add(description, "Center");
+		northPanel.add(Warning, "South");
 		northPanel.add(enablerPanel, "East");
 		upperPanel.add(northPanel, BorderLayout.NORTH);
 		upperPanel.add(chooserPanel, BorderLayout.SOUTH);
@@ -160,6 +162,10 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 			parameterOptionPanel.setEnabled(true);
 			tb.setTitleColor(DEFAULT_TITLE_COLOR);
 			parameterOptionPanel.repaint();
+			// Deactivate all log measures
+			for (Object measureKey : simd.getMeasureKeys()) {
+				simd.setMeasureLog(false, measureKey);
+			}
 		}
 	}
 

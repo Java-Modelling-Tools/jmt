@@ -66,6 +66,8 @@ public class PAResultsModel implements MeasureDefinition {
 	private Vector<Integer> throughputTimePerSink = new Vector<Integer>();
 	
 	private HashMap<String, Measure> names = new HashMap<String, Measure>();
+	
+	private String logDecimalSeparator, logCsvDelimiter;
 
 	//private boolean[] finished;
 	//private boolean simulationFinished = false;
@@ -73,6 +75,9 @@ public class PAResultsModel implements MeasureDefinition {
 	public PAResultsModel(CommonModel model) {
 		Vector<Object> measureKeys = model.getMeasureKeys();
 		measures = new Vector<Measure>(measureKeys.size());
+		this.logCsvDelimiter = model.getLoggingGlbParameter("delim");
+		this.logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
+		
 		for (int i = 0; i < measureKeys.size(); i++) {
 			Object thisMeasure = measureKeys.get(i);
 			String stationName = model.getStationName(model.getMeasureStation(thisMeasure));
@@ -555,7 +560,16 @@ public class PAResultsModel implements MeasureDefinition {
 		return 0; //To change body of implemented methods use File | Settings | File Templates.
 	}
 
+	
 	// ------------------------- end USELESS METHODS --------------------------------
+
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getFilename(int)
+	 */
+	@Override
+	public String getLogFileName(int measureIndex) {
+		return null;
+	}
 
 	/**
 	 * Inner class to store parameters of each measure
@@ -711,5 +725,46 @@ public class PAResultsModel implements MeasureDefinition {
 	public void detectedMalformedReplayerFile(String msg) {
 	}
 
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogDecimalSeparator()
+	 */
+	@Override
+	public String getLogDecimalSeparator() {
+		return logDecimalSeparator;
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogCsvDelimiter()
+	 */
+	@Override
+	public String getLogCsvDelimiter() {
+		return logCsvDelimiter;
+	}
+	
+	/**
+	 * @param logDecimalSeparator the logDecimalSeparator to set
+	 */
+	public void setLogDecimalSeparator(String logDecimalSeparator) {
+		this.logDecimalSeparator = logDecimalSeparator;
+	}
+
+
+
+	/**
+	 * @param logCsvDelimiter the logCsvDelimiter to set
+	 */
+	public void setLogCsvDelimiter(String logCsvDelimiter) {
+		this.logCsvDelimiter = logCsvDelimiter;
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getDiscardedSamples(int)
+	 */
+	@Override
+	public int getDiscardedSamples(int measureIndex) {
+		// No discarded samples stored here.
+		return 0;
+	}
+	
 	
 }

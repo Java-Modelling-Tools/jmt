@@ -69,10 +69,10 @@ public class JSimLoggerFactory {
 			synchronized (JSimLoggerFactory.class) {
 				if (csvLoggerCache.containsKey(file)) {
 					csvLoggerCache.remove(file);
-					logger.dispose();
 				}
 			}
 		}
+		logger.dispose();
 	}
 	
 	/**

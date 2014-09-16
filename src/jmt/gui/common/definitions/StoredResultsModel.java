@@ -23,7 +23,6 @@ import java.util.Vector;
 
 import jmt.engine.QueueNet.SimConstants;
 import jmt.framework.gui.graph.MeasureValue;
-import jmt.gui.common.definitions.MeasureDefinition.MalformedReplayerFileListener;
 
 /**
  * <p>Title: Result's Model data structure</p>
@@ -64,6 +63,8 @@ public class StoredResultsModel implements MeasureDefinition {
 	public Vector<Measure> getMeasures() {
 		return measures;
 	}
+	
+	private String logDecimalSeparator, logCsvDelimiter;
 
 	/**
 	 * Returns total number of measures
@@ -115,6 +116,16 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
+	 * Returns filename corresponding to a measure
+	 * @param measureIndex indiex of the measure
+	 * @return null
+	 */
+	
+	public String getLogFileName(int measureIndex){
+		return measures.get(measureIndex).fileName;
+	}
+	
+	/**
 	 * Returns number of analized samples for a given measure
 	 * 
 	 * @param measureIndex index of the measure
@@ -122,6 +133,16 @@ public class StoredResultsModel implements MeasureDefinition {
 	 */
 	public int getAnalizedSamples(int measureIndex) {
 		return measures.get(measureIndex).analyzedSamples;
+	}
+	
+	/**
+	 * Returns the number of discarded samples for a given measure
+	 * @param measureIndex index of the measure
+	 * @return number of discarded samples
+	 */
+	
+	public int getDiscardedSamples(int measureIndex){
+		return measures.get(measureIndex).discardedSamples;
 	}
 
 	/**
@@ -175,11 +196,31 @@ public class StoredResultsModel implements MeasureDefinition {
 	public int getMeasureType(int measureIndex) {
 		return measures.get(measureIndex).type;
 	}
-
+	
+	//ADDED by ANEISH START.
+	
+	/**
+	 * Returns true if the measure is a Time Or Number
+	 * @param measureIndex index of the measure
+	 * @return true if the measure is a rate or number quantity
+	 */
+	
+	public boolean isTimeOrNumber(int measureIndex){
+		int  type = getMeasureType(measureIndex) ;
+		if (type ==0 || type == 4 || type == 5 || type == 6 || type == 8 || type ==10 || type ==14){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	//ADDED by ANEISH STOP.
+		
 	/**
 	 * Returns an array with the measureIndex of every queue length measure
 	 * @return an array with measures' index
 	 */
+	
+	
 	public int[] getQueueLengthMeasures() {
 		int[] tmp = new int[queueLength.size()];
 		for (int i = 0; i < tmp.length; i++) {
@@ -380,12 +421,14 @@ public class StoredResultsModel implements MeasureDefinition {
 	 * @param alpha measure alpha
 	 * @param precision measure precision
 	 * @param analyzedSamples number of analyzed samples
+	 * @param discardedSamples number of discarded samples
 	 * @param state state of the measure
 	 * @param type type of the measure
+	 * @param fileName the output file name for the verbose measure
 	 */
-	public void addMeasure(String name, String stationName, String className, double alpha, double precision, int analyzedSamples, int state,
-			int type, String nodeType) {
-		Measure tmp = new Measure(name, stationName, className, alpha, precision, analyzedSamples, state, type, nodeType);
+	public void addMeasure(String name, String stationName, String className, double alpha, double precision, int analyzedSamples, int discardedSamples, int state,
+			int type, String nodeType,String fileName) {
+		Measure tmp = new Measure(name, stationName, className, alpha, precision, analyzedSamples, discardedSamples, state, type, nodeType, fileName);
 		measures.add(tmp);
 		names.put(name, tmp);
 		// Adds measure index to the right Vector
@@ -467,10 +510,10 @@ public class StoredResultsModel implements MeasureDefinition {
 	 * Inner class to store parameters of each measure
 	 */
 	protected class Measure {
-		public String name, stationName, className, nodeType;
+		public String name, stationName, className, nodeType, fileName;
 		public Vector<MeasureValue> values;
 		public double alpha, precision;
-		public int analyzedSamples, state, type;
+		public int analyzedSamples, state, type, discardedSamples;
 
 		/**
 		 * Construct a new Neasure object
@@ -480,21 +523,25 @@ public class StoredResultsModel implements MeasureDefinition {
 		 * @param alpha measure alpha
 		 * @param precision measure precision
 		 * @param analyzedSamples number of analyzed samples
+		 * @param discardedSamples number of discarded samples
 		 * @param state state of the measure
 		 * @param type type of the measure
+		 * @param fileName the output file name for the verbose measure
 		 */
-		public Measure(String name, String stationName, String className, double alpha, double precision, int analyzedSamples, int state, int type,
-				String nodeType) {
+		public Measure(String name, String stationName, String className, double alpha, double precision, int analyzedSamples, int discardedSamples, int state, int type,
+				String nodeType, String fileName) {
 			this.name = name;
 			this.stationName = stationName;
 			this.className = className;
 			this.alpha = alpha;
 			this.precision = precision;
 			this.analyzedSamples = analyzedSamples;
+			this.discardedSamples = discardedSamples;
 			this.state = state;
 			this.type = type;
 			values = new Vector<MeasureValue>();
 			this.nodeType = nodeType;
+			this.fileName=fileName ;
 		}
 
 		/**
@@ -554,6 +601,42 @@ public class StoredResultsModel implements MeasureDefinition {
 		public double getSimTime() {
 			return simulationT;
 		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogDecimalSeparator()
+	 */
+	@Override
+	public String getLogDecimalSeparator() {
+		return logDecimalSeparator;
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogCsvDelimiter()
+	 */
+	@Override
+	public String getLogCsvDelimiter() {
+		return logCsvDelimiter;
+	}
+
+	
+
+	/**
+	 * @param logDecimalSeparator the logDecimalSeparator to set
+	 */
+	public void setLogDecimalSeparator(String logDecimalSeparator) {
+		this.logDecimalSeparator = logDecimalSeparator;
+	}
+
+
+
+	/**
+	 * @param logCsvDelimiter the logCsvDelimiter to set
+	 */
+	public void setLogCsvDelimiter(String logCsvDelimiter) {
+		this.logCsvDelimiter = logCsvDelimiter;
 	}
 
 	// -------------------------------------------------------------------------------------------------------

@@ -34,6 +34,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -506,6 +507,18 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 			autoAppendPolicy = new Integer(LoggerParameters.LOGGER_AR_ASK);
 		}
 		tmp = null;
+		
+		//Checks if decimal separator and delimiter are same. If yes, changes decimal to default
+				String temp = new String(loggerOutputDecimalSeparatorDropdown[decimalSeparatorChooser.getSelectedIndex()]);
+				if (temp.equals(delim.toString()))
+				{
+					
+					JOptionPane.showMessageDialog(this,
+						    "Delimiter and Decimal separator cannot be the same. Please make sure that they are different.",
+						    "Error", JOptionPane.ERROR_MESSAGE);
+					decimalSeparatorChooser.setSelectedIndex(0);
+					
+				}
 
 		/* MF (Bertoli suggests): global append should be the only mode for 0.7.4 
 		if (isGlobal == false)

@@ -2303,7 +2303,9 @@ public class Mediator implements GuiInterface {
 						temp.deleteOnExit();
 						XMLWriter.writeXML(temp, model);
 						// Creates results data structure
-						model.setSimulationResults(new ResultsModel(model.getPollingInterval()));
+						String logCSVDelimiter = model.getLoggingGlbParameter("delim");
+						String logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
+						model.setSimulationResults(new ResultsModel(model.getPollingInterval(), logCSVDelimiter, logDecimalSeparator));
 						showResults.setEnabled(true);
 						dispatcher = new DispatcherThread(this, model, (ResultsModel) model.getSimulationResults());
 						dispatcher.startSimulation(temp);

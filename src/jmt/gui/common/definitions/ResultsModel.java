@@ -67,13 +67,35 @@ public class ResultsModel implements MeasureDefinition {
 	private double pollingInterval;
 	private double progressTime = 0.0;
 	private MalformedReplayerFileListener mrfListener;
+	
+	private String logDecimalSeparator, logCsvDelimiter;
+
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogDecimalSeparator()
+	 */
+	@Override
+	public String getLogDecimalSeparator() {
+		return logDecimalSeparator;
+	}
+
+
+
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogCsvDelimiter()
+	 */
+	@Override
+	public String getLogCsvDelimiter() {
+		return logCsvDelimiter;
+	}
 
 	/**
 	 * Constructs a new ResultsModel
 	 * @param pollingInterval measure polling interval
 	 */
-	public ResultsModel(double pollingInterval) {
+	public ResultsModel(double pollingInterval, String logCsvDelimiter, String logDecimalSeparator) {
 		this.pollingInterval = pollingInterval;
+		this.logCsvDelimiter = logCsvDelimiter;
+		this.logDecimalSeparator = logDecimalSeparator;
 	}
 
 	/**
@@ -276,6 +298,14 @@ public class ResultsModel implements MeasureDefinition {
 	public synchronized int getAnalizedSamples(int measureIndex) {
 		return measures[measureIndex].getNsamples();
 	}
+	
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.MeasureDefinition#getDiscardedSamples(int)
+	 */
+	@Override
+	public synchronized int getDiscardedSamples(int measureIndex) {
+		return measures[measureIndex].getDiscarded();
+	}
 
 	/**
 	 * Returns the vector of Temporary values of a given measure. Each element of the vector
@@ -313,7 +343,17 @@ public class ResultsModel implements MeasureDefinition {
 	public int getMeasureType(int measureIndex) {
 		return measures[measureIndex].getMeasureType();
 	}
-
+	
+	/**
+	 * Returns Filename corresponding to a Measure
+	 * @param measureIndex index of the measure
+	 * @return Filename of the measure
+	 */
+	
+	public String getLogFileName(int measureIndex){
+		return measures[measureIndex].getLogFileName();
+	}
+	
 	/**
 	 * Returns an array with the measureIndex of every queue length measure
 	 * @return an array with measures' index

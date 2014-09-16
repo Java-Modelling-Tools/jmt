@@ -1,0 +1,667 @@
+/**    
+ * Copyright (C) 2011, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
+
+package jmt.gui.common.editors;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.text.DecimalFormat;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.SpringLayout;
+import javax.swing.WindowConstants;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import jmt.engine.log.JSimLogger;
+import jmt.engine.math.DistributionDensity;
+import jmt.engine.math.SampleStatistics;
+import jmt.framework.gui.components.JMTFrame;
+import jmt.framework.gui.graph.DistributionDensityGraph;
+import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.gui.common.definitions.MeasureDefinition;
+import jmt.gui.common.definitions.StatisticalOutputsLoader;
+import jmt.gui.common.panels.MeasurePanel;
+import jmt.gui.common.resources.JMTImageLoader;
+
+/**
+ * <p>
+ * Title: StatisticalOutputsWindow Editor
+ * </p>
+ * <p>
+ * Description: The dialog that displays statistical outputs along with the requested type of graph. It also 
+ * contains a Redraw button that can be used to vary the number of samples to be taken into consideration while
+ * computing statistics, and changing the type of graph desired. Furthermore, there is an option to save the graph
+ * for future use.
+ * </p>
+ * 
+ * @author Aneish Goel: july-2013 
+ */
+
+public class StatisticalOutputsWindow extends JMTFrame {
+	private static final long serialVersionUID = 1L;
+	private static final String DEFAULT_INTERVALS = "10";
+
+	private static final String[] GRAPH_TYPES = {"-- Select a type --", "Density Line" , "Histogram", "Distribution"};
+
+	private JButton closeButton, reDrawButton ;
+	private JProgressBar progressBar ;
+	private StatisticalOutputsLoader sop;
+	public DistributionDensityGraph graph = null;
+	private JPanel graphHolder = new JPanel(new BorderLayout());
+	private JLabel icon = new JLabel() ;
+	private JPanel rightPanel;
+	private JToolBar toolbar;
+	public String windowName;
+	private JTextField firstSample, lastSample, fieldMean, fieldStanDev, fieldCoefVar, fieldVar, fieldSkew, fieldKur, fieldMoment2;
+	private JTextField fieldMoment1, fieldMoment3, fieldMoment4, fieldMin, fieldMax, discardedSamples;
+	private JTextField minValue, maxValue, numberOfIntervals;
+	private JComboBox graphType;
+	private DecimalFormat decimalFormat = new DecimalFormat("#0.0000");
+	private MeasureDefinition measureDefinition;
+	private int measureIndex;
+	private JSimLogger logger = JSimLogger.getLogger(StatisticalOutputsWindow.class);
+
+	public StatisticalOutputsWindow(MeasureDefinition measureDefinition, int measureIndex){
+		this.measureDefinition = measureDefinition;
+		this.measureIndex = measureIndex;
+		windowName = measureDefinition.getName(measureIndex);
+		try {
+			this.sop = new StatisticalOutputsLoader(measureDefinition, measureIndex);
+			initGUI();
+		} catch (FileNotFoundException ex) {
+			logger.error("Verbose CSV file not found for measure.", ex);
+		}
+	}
+
+	public void initGUI(){
+		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		this.setTitle(windowName);
+		int width = 1000, height = 650;
+		this.centerWindow(width, height);
+
+		//makes LeftSidePanel
+		JPanel pivotPanel = new JPanel() ;
+		pivotPanel.setLayout(new BoxLayout(pivotPanel, BoxLayout.PAGE_AXIS));
+
+		//makes BottomPanel
+		JPanel graphOptionsPanel = new JPanel(new BorderLayout());
+
+		graphOptionsPanel.setBorder(new TitledBorder(new EtchedBorder(), "Graph Drawing Options"));
+		graphOptionsPanel.setEnabled(false);
+
+		//adds ComboBox
+		JPanel centrePanel = new JPanel(new BorderLayout());
+		JLabel typeLabel = new JLabel("Select graph type");
+		graphType = new JComboBox(GRAPH_TYPES);
+		typeLabel.setLabelFor(graphType);
+		graphType.setSelectedIndex(0);
+		graphType.setToolTipText("Choose graph type amongst Density Line, Histogram and Distribution.");
+		graphType.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				updateGraph();
+			}
+		});
+		centrePanel.add(typeLabel);
+		centrePanel.add(graphType);
+		graphOptionsPanel.add(centrePanel, BorderLayout.NORTH);
+
+
+
+		//adds editableparameters panel
+		JPanel parametersPanel = new JPanel(new SpringLayout());
+		JLabel paralabel;
+
+
+		//adds minValue
+		paralabel = new JLabel("Min Value:");
+		minValue = new JTextField();
+		minValue.setEditable(true);
+		minValue.setMaximumSize(new Dimension(minValue.getMaximumSize().width, minValue.getMinimumSize().height));
+		paralabel.setLabelFor(minValue);
+		minValue.setToolTipText("Select minimum Value to be considered in the graph. Press Enter to confirm.");
+		minValue.setName("Min Value");
+
+		parametersPanel.add(paralabel);
+		parametersPanel.add(minValue);
+
+		//adds maxValue
+		paralabel = new JLabel("Max Value:");
+		maxValue = new JTextField();
+		maxValue.setEditable(true);
+		maxValue.setMaximumSize(new Dimension(maxValue.getMaximumSize().width, maxValue.getMinimumSize().height));
+		paralabel.setLabelFor(maxValue);
+		maxValue.setToolTipText("Select maximum value to be considered in the graph. Press Enter to confirm.");
+		maxValue.setName("Min Value");
+
+		parametersPanel.add(paralabel);
+		parametersPanel.add(maxValue);
+
+		//adds numberOfIntervals
+		paralabel = new JLabel("Number of Intervals:");
+		numberOfIntervals = new JTextField();
+		numberOfIntervals.setEditable(true);
+		numberOfIntervals.setMaximumSize(new Dimension(numberOfIntervals.getMaximumSize().width, numberOfIntervals.getMinimumSize().height));
+		paralabel.setLabelFor(numberOfIntervals);
+		numberOfIntervals.setText(DEFAULT_INTERVALS);
+		numberOfIntervals.setToolTipText("Select the number of intervals to divide the graph in between the minimum and maximum values. Press Enter to confirm.");
+		numberOfIntervals.setName("Number of Intervals");
+		
+		parametersPanel.add(paralabel);
+		parametersPanel.add(numberOfIntervals);
+
+		SpringUtilities.makeCompactGrid(parametersPanel, 3, 2, //rows, cols
+				2, 2, //initX, initY
+				2, 2);//xPad, yPad
+		graphOptionsPanel.add(parametersPanel, BorderLayout.CENTER);
+
+
+		reDrawButton = new JButton("Redraw");
+		reDrawButton.setEnabled(false);
+		reDrawButton.setToolTipText("Redraws the graph with the new minimum, maximum values, number of intervals" +
+				" and graphType. Also redraws on the basis of selected samples.");
+		reDrawButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent en){
+				refreshData();
+			}
+
+		});
+
+		closeButton = new JButton("EXIT");
+		closeButton.setToolTipText("Closes this window.");
+		closeButton.addActionListener(new ActionListener() {
+			// Fires a window closing event
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				StatisticalOutputsWindow.this.dispatchEvent(new WindowEvent(StatisticalOutputsWindow.this, WindowEvent.WINDOW_CLOSING));
+			}
+		});
+		JPanel ButtonsPanel = new JPanel();
+		ButtonsPanel.add(closeButton , BorderLayout.WEST);
+		ButtonsPanel.add(reDrawButton, BorderLayout.EAST);
+		graphOptionsPanel.add(ButtonsPanel, BorderLayout.SOUTH);
+
+
+		//makes ValuesPanel
+		//Adds  with all informations on this measure
+		JLabel label;
+		//creates MeasuresPanel to hold all Measure values (Mean, Variance, Standard Deviation, Coefficient of Variation,
+		//Skewness, and Kurtosis
+
+		JPanel measuresPanel= new JPanel(new SpringLayout());
+		measuresPanel.setBorder(new TitledBorder(new EtchedBorder(), "Measures"));
+		//  MEAN
+		label = new JLabel("Mean:");
+		fieldMean = new JTextField();
+		fieldMean.setEditable(false);
+		fieldMean.setToolTipText("Displays mean of the data.");
+		fieldMean.setMaximumSize(new Dimension(fieldMean.getMaximumSize().width, fieldMean.getMinimumSize().height));
+		label.setLabelFor(fieldMean);
+		measuresPanel.add(label);
+		measuresPanel.add(fieldMean);
+
+		//  VARIANCE
+		label = new JLabel("Variance:");
+		fieldVar = new JTextField();
+		fieldVar.setEditable(false);
+		fieldVar.setToolTipText("Displays variance of the data.");
+		fieldVar.setMaximumSize(new Dimension(fieldVar.getMaximumSize().width, fieldVar.getMinimumSize().height));
+		label.setLabelFor(fieldVar);
+		measuresPanel.add(label);
+		measuresPanel.add(fieldVar);
+
+		//STANDARD DEVIATION
+		label = new JLabel("Standard Deviation:");
+		fieldStanDev = new JTextField();
+		fieldStanDev.setEditable(false);
+		fieldStanDev.setToolTipText("Displays standard deviation of the data.");
+		fieldStanDev.setMaximumSize(new Dimension(fieldStanDev.getMaximumSize().width, fieldStanDev.getMinimumSize().height));
+		label.setLabelFor(fieldStanDev);
+		measuresPanel.add(label);
+		measuresPanel.add(fieldStanDev);
+
+		// COEFFICIENT OF VARIATION
+		label = new JLabel("Coefficient of Variation:");
+		fieldCoefVar = new JTextField() ;
+		fieldCoefVar.setEditable(false);
+		fieldCoefVar.setToolTipText("Displays coefficient of variation of the data.");
+		fieldCoefVar.setMaximumSize(new Dimension(fieldCoefVar.getMaximumSize().width, fieldCoefVar.getMinimumSize().height));
+		label.setLabelFor(fieldCoefVar);
+		measuresPanel.add(label);
+		measuresPanel.add(fieldCoefVar);
+
+
+		// SKEWNESS
+		label = new JLabel("Skewness:");
+		fieldSkew = new JTextField() ;
+		fieldSkew.setEditable(false);
+		fieldSkew.setToolTipText("Displays skewness of the data.");
+		fieldSkew.setMaximumSize(new Dimension(fieldSkew.getMaximumSize().width, fieldSkew.getMinimumSize().height));
+		label.setLabelFor(fieldSkew);
+		measuresPanel.add(label);
+		measuresPanel.add(fieldSkew);
+
+		// KURTOSIS
+		label = new JLabel("Kurtosis:");
+		fieldKur = new JTextField() ;
+		fieldKur.setEditable(false);
+		fieldKur.setToolTipText("Displays kurtosis of the data.");
+		fieldKur.setMaximumSize(new Dimension(fieldKur.getMaximumSize().width, fieldKur.getMinimumSize().height));
+		label.setLabelFor(fieldKur);
+		measuresPanel.add(label);
+		measuresPanel.add(fieldKur);
+
+		//Moments Panel : displays values of all Moments(Order 1,2,3,4)
+		JPanel momentsPanel = new JPanel(new SpringLayout());
+		momentsPanel.setBorder(new TitledBorder(new EtchedBorder(), "Moments"));
+
+		//FIRST MOMENT
+		label = new JLabel("First Moment:");
+		fieldMoment1 = new JTextField() ;
+		fieldMoment1.setEditable(false);
+		fieldMoment1.setToolTipText("Displays first moment(mean) of the data.");
+		fieldMoment1.setMaximumSize(new Dimension(fieldMoment1.getMaximumSize().width, fieldMoment1.getMinimumSize().height));
+		label.setLabelFor(fieldMoment2);
+		momentsPanel.add(label);
+		momentsPanel.add(fieldMoment1);
+
+		// SECOND MOMENT
+		label = new JLabel("Second Moment:");
+		fieldMoment2 = new JTextField() ;
+		fieldMoment2.setEditable(false);
+		fieldMoment2.setToolTipText("Displays second moment of the data.");
+		fieldMoment2.setMaximumSize(new Dimension(fieldMoment2.getMaximumSize().width, fieldMoment2.getMinimumSize().height));
+		label.setLabelFor(fieldMoment2);
+		momentsPanel.add(label);
+		momentsPanel.add(fieldMoment2);
+
+		// THIRD MOMENT
+		label = new JLabel("Third Moment :");
+		fieldMoment3 = new JTextField() ;
+		fieldMoment3.setEditable(false);
+		fieldMoment3.setToolTipText("Displays third moment of the data.");
+		fieldMoment3.setMaximumSize(new Dimension(fieldMoment3.getMaximumSize().width, fieldMoment3.getMinimumSize().height));
+		label.setLabelFor(fieldMoment3);
+		momentsPanel.add(label);
+		momentsPanel.add(fieldMoment3);
+
+		// FOURTH MOMENT
+		label = new JLabel("Fourth Moment:");
+		fieldMoment4 = new JTextField() ;
+		fieldMoment4.setEditable(false);
+		fieldMoment4.setToolTipText("Displays fourth moment of the data.");
+		fieldMoment4.setMaximumSize(new Dimension(fieldMoment4.getMaximumSize().width, fieldMoment4.getMinimumSize().height));
+		label.setLabelFor(fieldMoment4);
+		momentsPanel.add(label);
+		momentsPanel.add(fieldMoment4);
+
+		//BOUNDS PANEL : displays values of Bounds (min, max) of samples
+
+		JPanel boundsPanel = new JPanel(new SpringLayout());
+		boundsPanel.setBorder(new TitledBorder(new EtchedBorder(), "Bounds"));
+
+		//Displays Min Value amongst samples
+		label = new JLabel("Min Value:");
+		fieldMin = new JTextField() ;
+		fieldMin.setEditable(false);
+		fieldMin.setToolTipText("Displays minimun value amongst the samples.");
+		fieldMin.setMaximumSize(new Dimension(fieldMin.getMaximumSize().width, fieldMin.getMinimumSize().height));
+		label.setLabelFor(fieldMin);
+		boundsPanel.add(label);
+		boundsPanel.add(fieldMin);
+
+		//Displays Max Value amongst samples
+		label = new JLabel("Max Value:");
+		fieldMax = new JTextField() ;
+		fieldMax.setEditable(false);
+		fieldMax.setToolTipText("Displays maximum value amongst the samples.");
+		fieldMax.setMaximumSize(new Dimension(fieldMax.getMaximumSize().width, fieldMax.getMinimumSize().height));
+		label.setLabelFor(fieldMax);
+		boundsPanel.add(label);
+		boundsPanel.add(fieldMax);
+
+		label = new JLabel("No. of Discarded Samples:");
+		discardedSamples = new JTextField() ;
+		discardedSamples.setEditable(false);
+		discardedSamples.setToolTipText("Displays the number of discarded samples(transients).");
+		discardedSamples.setMaximumSize(new Dimension(discardedSamples.getMaximumSize().width, discardedSamples.getMinimumSize().height));
+		label.setLabelFor(discardedSamples);
+		discardedSamples.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)));				
+		boundsPanel.add(label);
+		boundsPanel.add(discardedSamples);
+
+		SpringUtilities.makeCompactGrid(measuresPanel, 3, 4, //rows, cols
+				2, 2, //initX, initY
+				2, 2);//xPad, yPad
+		//dataPanel.add(measuresPanel, BorderLayout.PAGE_START);
+
+		SpringUtilities.makeCompactGrid(momentsPanel, 2, 4, //rows, cols
+				2, 2, //initX, initY
+				2, 2);//xPad, yPad
+		//dataPanel.add(momentsPanel, BorderLayout.AFTER_LAST_LINE);
+
+		SpringUtilities.makeCompactGrid(boundsPanel, 3, 2, //rows, cols
+				2, 2, //initX, initY
+				2, 2);//xPad, yPad
+		//dataPanel.add(boundsPanel);
+
+		//BOUNDS ON CONSIDERED SAMPLES - selects the range of samples chosen for computation
+		JPanel sampleChooser = new JPanel(new SpringLayout());
+		sampleChooser.setBorder(new TitledBorder(new EtchedBorder(), "Bounds on Samples Considered"));
+
+
+		JLabel minRange = new JLabel("First sample:");
+		firstSample = new JTextField();
+		firstSample.setEditable(true);
+		firstSample.setToolTipText("Displays the first sample considered in computation of statistics.");
+		firstSample.setMaximumSize(new Dimension(firstSample.getMaximumSize().width, firstSample.getMinimumSize().height));
+		firstSample.setName("First sample");
+		minRange.setLabelFor(firstSample);
+
+		sampleChooser.add(minRange);
+		sampleChooser.add(firstSample);
+
+		JLabel maxRange = new JLabel("Last sample:");
+		lastSample = new JTextField(); 
+		lastSample.setEditable(true);
+		lastSample.setToolTipText("Displays the last sample considered in computation of statistics.");
+		lastSample.setMaximumSize(new Dimension(lastSample.getMaximumSize().width, lastSample.getMinimumSize().height));
+		lastSample.setName("Last sample");
+		maxRange.setLabelFor(lastSample);
+
+		sampleChooser.add(maxRange);
+		sampleChooser.add(lastSample);
+
+		SpringUtilities.makeCompactGrid(sampleChooser, 2, 2, //rows, cols
+				2, 2, //initX, initY
+				2, 2);//xPad, yPad
+
+
+
+
+		pivotPanel.add(measuresPanel);
+		pivotPanel.add(Box.createRigidArea(new Dimension(0,15)));
+		pivotPanel.add(momentsPanel);
+		pivotPanel.add(Box.createRigidArea(new Dimension(0,15)));
+		pivotPanel.add(boundsPanel);
+		pivotPanel.add(Box.createRigidArea(new Dimension(0,15)));
+		pivotPanel.add(sampleChooser);
+		pivotPanel.add(Box.createRigidArea(new Dimension(0,30)));
+		pivotPanel.add(graphOptionsPanel);
+		pivotPanel.add(Box.createRigidArea(new Dimension(0,30)));
+
+
+		// main RightPanel
+
+		rightPanel = new JPanel(new BorderLayout()) ;
+		//graph panel
+		rightPanel.add(graphHolder, BorderLayout.CENTER);
+
+
+
+
+
+		//Adds Toolbar with Loading/Successful Icon, and ProgressBar
+		toolbar = new JToolBar();
+		toolbar.setBorder(new TitledBorder(new EtchedBorder(), "Progress Status"));
+		toolbar.setFloatable(false);
+		toolbar.setRollover(true);
+
+		//Adds a Progress Bar
+		progressBar = new JProgressBar();
+		progressBar.setStringPainted(true);
+		progressBar.setToolTipText("Displays progress of graph loading.");
+		progressBar.setForeground(Color.BLUE);
+		setProgressBar(sop.getProgress());
+		toolbar.add(progressBar);
+
+
+		//Adds Loading/Loaded Icon
+		toolbar.add(icon, BorderLayout.WEST);
+		rightPanel.add(toolbar, BorderLayout.SOUTH);
+
+		JSplitPane graphPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+				pivotPanel, rightPanel);
+		graphPanel.setOneTouchExpandable(true);
+		graphPanel.setDividerLocation(500);
+
+		this.add(graphPanel, BorderLayout.CENTER);
+		setFieldsEnabled(false);
+		
+		// Update progress
+		setProgressBar(sop.getProgress());
+		sop.setProgressTimeListener(new StatisticalOutputsLoader.ProgressTimeListener() {
+			@Override
+			public void timeChanged(double time) {
+				setProgressBar(time);
+			}
+		});
+	}
+
+
+	private void setProgressBar(double percent) {
+		int progress = (int) Math.round(percent * 100);
+		progressBar.setValue(progress);
+		if (progress < 100) {
+			progressBar.setString("Loaded " + progress + "% of performance index samples...");
+			icon.setIcon(JMTImageLoader.loadImage(jmt.gui.common.definitions.ResultsConstants.IN_PROGRESS_IMAGE));
+			updateStatistics(false) ;
+		} else {
+			progressBar.setString("Load complete");
+			icon.setIcon(JMTImageLoader.loadImage(jmt.gui.common.definitions.ResultsConstants.SUCCESS_IMAGE));
+			updateStatistics(true) ;
+			setFieldsEnabled(true);
+			updateGraph();
+		}
+
+	}
+
+	private void updateGraph(){
+		//updates the Graph
+		DistributionDensity dist = sop.getDist();
+		graphHolder.removeAll();
+		int type = graphType.getSelectedIndex();
+		if (type != DistributionDensity.TYPE_NONE && dist != null) {
+			dist.setType(type);
+			graph = new DistributionDensityGraph(dist);
+			graph.setToolTipText("Displays desired graph. Right click to 'Save As' and double click to enlarge.");
+			graph.setMinimumSize(new Dimension(200, 150));
+			graph.setPreferredSize(new Dimension(300, 250));
+			graphHolder.add(graph);
+			graphHolder.validate();
+			graphHolder.repaint();
+			addGraphListener();
+		} else {
+			graph = null;
+		}
+		graphHolder.repaint();
+		
+		if (type != DistributionDensity.TYPE_NONE && dist == null) {
+			// Force a refresh if a chart was selected but no distribution was set.
+			refreshData();
+		}
+	}
+
+	private void updateStatistics(boolean complete){
+		SampleStatistics stat = sop.getStatistics();
+		if (stat == null) {
+			// statistics are not ready yet.
+			return;
+		}
+		fieldMean.setText(decimalFormat.format(stat.getMean()));
+		fieldStanDev.setText(decimalFormat.format(stat.getStandardDeviation()));
+		fieldMoment4.setText(decimalFormat.format(stat.getMoment4()));
+		fieldMoment3.setText(decimalFormat.format(stat.getMoment3()));
+		fieldMoment2.setText(decimalFormat.format(stat.getMoment2()));
+		fieldMoment1.setText(decimalFormat.format(stat.getMean()));
+		fieldSkew.setText(decimalFormat.format(stat.getSkew()));
+		fieldCoefVar.setText(decimalFormat.format(stat.getCoefficienfOfVariation()));
+		fieldVar.setText(decimalFormat.format(stat.getVariance()));
+		fieldKur.setText(decimalFormat.format(stat.getKurtosis()));
+		fieldMin.setText(decimalFormat.format(stat.getMin()));
+		fieldMax.setText(decimalFormat.format(stat.getMax()));
+		// Set meaningful initial values for option fields.
+		if (complete) {
+			if (isEmpty(minValue.getText())) {
+				minValue.setText(decimalFormat.format(stat.getMin()));
+			}
+			if (isEmpty(maxValue.getText())) {
+				maxValue.setText(decimalFormat.format(stat.getMax()));
+			}
+			if (isEmpty(firstSample.getText())) {
+				firstSample.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)+1));
+			}
+			if (isEmpty(lastSample.getText())) {
+				lastSample.setText(String.valueOf(sop.getTotalLines()));
+			}
+		}
+	}
+	
+	/**
+	 * Utility function to return if a string is empty
+	 * @param str the string
+	 * @return true if it is empty, false otherwise.
+	 */
+	private static boolean isEmpty(String str) {
+		return str == null || str.length() == 0;
+	}
+
+	public void addGraphListener(){
+		graph.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					JFrame popupFrame = new JFrame();
+					final DistributionDensityGraph popupGraph = new DistributionDensityGraph(sop.getDist());
+					popupGraph.setToolTipText("Right click to 'Save As'.");
+					popupFrame.getContentPane().add(popupGraph);
+					popupFrame.setTitle(windowName);
+					popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+					int width = 640, height = 480;
+					Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();
+					popupFrame.setBounds((scrDim.width - width) / 2, (scrDim.height - height) / 2, width, height);
+					popupGraph.addMouseListener(new MouseAdapter() {
+						@Override
+						public void mouseClicked(MouseEvent e) {
+							popupGraph.mouseClicked(e);
+
+						}
+					});
+
+					popupFrame.setVisible(true);
+				}
+				if (e.getButton() == MouseEvent.BUTTON3){
+					graph.addMouseListener(new MouseAdapter() {
+						@Override
+						public void mouseClicked(MouseEvent e) {
+							try{
+								graph.mouseClicked(e);
+							}catch(NullPointerException ek){
+							}
+						}
+					});
+				}
+			}
+		});
+	}
+
+	/**
+	 * Refresh data reading parameters from UI form.
+	 */
+	private void refreshData() {
+		try {
+			double min = parseNumber(minValue);
+			double max = parseNumber(maxValue);
+			int start = parseNumber(firstSample).intValue();
+			if (start < 1) {
+				start = 1;
+			}
+			int end = parseNumber(lastSample).intValue();
+			if (end > sop.getTotalLines()) {
+				end = sop.getTotalLines();
+			}
+			int intervals = parseNumber(numberOfIntervals).intValue();
+
+			// Replace integers (so remove decimal numbers)
+			firstSample.setText(String.valueOf(start));
+			lastSample.setText(String.valueOf(end));
+			numberOfIntervals.setText(String.valueOf(intervals));
+			
+			sop.setStart(start);
+			sop.setEnd(end);
+			sop.setDistribution(min, max, intervals, graphType.getSelectedIndex());
+
+			setFieldsEnabled(false);
+			sop.reloadData();
+		} catch (NumberFormatException ex) {
+			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
+	
+	/**
+	 * Enable/disable fields that should not be enabled while data is loaded.
+	 * @param enabled true to enable, false to disable
+	 */
+	private void setFieldsEnabled(boolean enabled) {
+		reDrawButton.setEnabled(enabled);
+		graphType.setEnabled(enabled);
+		minValue.setEnabled(enabled);
+		maxValue.setEnabled(enabled);
+		firstSample.setEnabled(enabled);
+		lastSample.setEnabled(enabled);
+		numberOfIntervals.setEnabled(enabled);
+	}
+	
+	private Double parseNumber(JTextField field) throws NumberFormatException {
+		if (field.getText() == null || field.getText().length() == 0) {
+			throw new NumberFormatException("No value selected for field '" + field.getName() + "'.");
+		} else {
+			try {
+				return Double.valueOf(field.getText());
+			} catch (Exception ex) {
+				throw new NumberFormatException("Value '" + field.getText() + "' for field '" + field.getName() + "' is not a valid number.");
+			}
+		}
+	}
+	
+}
+

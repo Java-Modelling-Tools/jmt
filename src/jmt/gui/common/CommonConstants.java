@@ -170,6 +170,9 @@ public interface CommonConstants {
                     HTML_FONT_NORM + "Customers of each class are routed depending on their number on the current station. " +
                     "The outgoing paths must have associated probabilities that should sum to 1 for each range."
                     + HTML_FONT_NOR_END + HTML_END;
+	
+    public final static String MEASURE_LOG_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Statistical Results CSV file" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Check the 'Stat.Res.' button to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size." + HTML_FONT_NOR_END + HTML_END;
 
 
 	// String tokens

@@ -19,6 +19,7 @@
 package jmt.engine.dataAnalysis.measureOutputs;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -41,28 +42,28 @@ import jmt.engine.dataAnalysis.MeasureOutput;
  */
 public class CSVMeasureOutput extends MeasureOutput {
 
-	private Writer File;
-	//private OutputStreamWriter File;
+	private Writer outputWriter;
+	private File file;
 
 	private boolean StdOutput;
 
 	/**
 	 * Constructor of a CSVMeasureOutput object.
-	 * @param Measure the measure to be sent in output
-	 * @param Append true to write at the end of the file (of course
+	 * @param measure the measure to be sent in output
+	 * @param append true to write at the end of the file (of course
 	 * it's useful only if a file is used)
-	 * @param FileName the name of the file; if null the output will be sent
+	 * @param fileName the name of the file; if null the output will be sent
 	 * on the standard output
 	 * @throws java.io.IOException
 	 */
-	public CSVMeasureOutput(jmt.engine.dataAnalysis.Measure Measure, boolean Append, String FileName) throws IOException {
-		super(Measure);
-		if (FileName == null) {
-			File = new OutputStreamWriter(System.out);
+	public CSVMeasureOutput(jmt.engine.dataAnalysis.Measure measure, boolean append, String fileName) throws IOException {
+		super(measure);
+		if (fileName == null) {
+			outputWriter = new OutputStreamWriter(System.out);
 			StdOutput = true;
 		} else {
-
-			File = new BufferedWriter(new FileWriter(FileName + ".csv", Append));
+			this.file = new File(fileName + ".csv");
+			outputWriter = new BufferedWriter(new FileWriter(this.file, append));
 			StdOutput = false;
 		}
 	}
@@ -76,37 +77,47 @@ public class CSVMeasureOutput extends MeasureOutput {
 	 */
 	public CSVMeasureOutput(jmt.engine.dataAnalysis.Measure Measure, boolean Append) throws IOException {
 		super(Measure);
-		File = new BufferedWriter(new FileWriter(Measure.getName() + ".csv", Append));
+		outputWriter = new BufferedWriter(new FileWriter(Measure.getName() + ".csv", Append));
 		StdOutput = false;
 	}
 
 	@Override
 	public void write(double Sample, double Weight) {
 		try {
-			File.write(Sample + "; " + Weight + ";\n");
+			outputWriter.write(Sample + "; " + Weight + ";\n");
 		} catch (IOException exc) {
 		}
 	}
 
 	@Override
-	public void writeMeasure() {
+	public void finalizeMeasure() {
 		try {
 
 			if (measure.getSuccess() == true) {
-				File.write("\nMeasure name; " + measure.getName() + ";\n" + "Measure value; " + measure.getMeanValue() + ";\n" + "Lower limit; "
+				outputWriter.write("\nMeasure name; " + measure.getName() + ";\n" + "Measure value; " + measure.getMeanValue() + ";\n" + "Lower limit; "
 						+ measure.getLowerLimit() + ";\n" + "Upper Limit; " + measure.getUpperLimit() + ";\n" + "Discarded samples; "
 						+ measure.getDiscardedSamples() + ";\n" + "Analyzed samples; " + measure.getAnalyzedSamples() + ";\n" + "Max samples; "
 						+ measure.getMaxSamples() + ";\n" + "Measure was successful; " + measure.getSuccess() + ";");
 			} else {
-				File.write("\nMeasure name; " + measure.getName() + ";\n" + "Extimated mean; " + measure.getExtimatedMeanValue() + ";\n"
+				outputWriter.write("\nMeasure name; " + measure.getName() + ";\n" + "Extimated mean; " + measure.getExtimatedMeanValue() + ";\n"
 						+ "Discarded samples; " + measure.getDiscardedSamples() + ";\n" + "Analyzed samples; " + measure.getAnalyzedSamples() + ";\n"
 						+ "Max samples; " + measure.getMaxSamples() + ";\n" + "Measure was successful; " + measure.getSuccess() + ";");
 			}
 
 			if (!StdOutput) {
-				File.close();
+				outputWriter.close();
 			}
 		} catch (IOException exc) {
 		}
 	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.dataAnalysis.MeasureOutput#getOutputFile()
+	 */
+	@Override
+	public File getOutputFile() {
+		return file;
+	}
+	
+	
 }

@@ -90,27 +90,27 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Hashmap for classes parameters
 	 */
-	protected HashMap<Object, Object> classDataHM = new CachedHashMap<Object, Object>(),
+	protected HashMap<Object, Object> classDataHM = new CachedHashMap<Object, Object>();
 
 	/**
 	 * Hashmap containing station parameters
 	 */
-	stationDataHM = new CachedHashMap<Object, Object>(),
+	protected HashMap<Object, Object>stationDataHM = new CachedHashMap<Object, Object>();
 
 	/**
 	 * Hashmap containing measure parameters
 	 */
-	measureDataHM = new CachedHashMap<Object, Object>(),
+	protected HashMap<Object, MeasureData> measureDataHM = new CachedHashMap<Object, MeasureData>();
 
 	/**
 	 * Hashmap containing blocking region parameters
 	 */
-	blockingDataHM = new CachedHashMap<Object, Object>(),
+	protected HashMap<Object, Object>blockingDataHM = new CachedHashMap<Object, Object>();
 
 	/**
 	 * Hashmap containing measure parameters
 	 */
-	blockingMeasureDataHM = new CachedHashMap<Object, Object>();
+	protected HashMap<Object, Object>blockingMeasureDataHM = new CachedHashMap<Object, Object>();
 
 	/**
 	 * BDMap containing station connections. On X coordinate will be put stationKeys for
@@ -172,6 +172,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * This method returns the entire set of class keys.
 	 */
+	@Override
 	public synchronized Vector<Object> getClassKeys() {
 		return classesKeyset;
 	}
@@ -181,6 +182,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * Author: Francesco D'Aquino
 	 */
+	@Override
 	public Vector<Object> getOpenClassKeys() {
 		Vector<Object> classes = this.getClassKeys();
 		Vector<Object> openClassKeys = new Vector<Object>(0, 1);
@@ -200,6 +202,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * Author: Francesco D'Aquino
 	 */
+	@Override
 	public int getTotalCloseClassPopulation() {
 		int sum = 0;
 		Vector<Object> closeClasses = getClosedClassKeys();
@@ -212,6 +215,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	* This method returns the set of closed class keys.
 	*/
+	@Override
 	public synchronized Vector<Object> getClosedClassKeys() {
 		Vector<Object> closedClasses = new Vector<Object>(0, 1);
 		for (int i = 0; i < classesKeyset.size(); i++) {
@@ -227,6 +231,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Returns name of the class linked to the specific key
 	 * */
+	@Override
 	public synchronized String getClassName(Object key) {
 		if (classesKeyset.contains(key)) {
 			return ((ClassData) classDataHM.get(key)).name;
@@ -238,6 +243,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Sets name of the class linked to the specific key
 	 * */
+	@Override
 	public synchronized void setClassName(String name, Object key) {
 		if (classDataHM.containsKey(key)) {
 			String oldName = ((ClassData) classDataHM.get(key)).name;
@@ -252,6 +258,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Returns type of the class linked to the specific key. Type of class is represented by
 	 * an int number whose value is contained in <code>JSIMConstants</code>.
 	 * */
+	@Override
 	public synchronized int getClassType(Object key) {
 		if (classesKeyset.contains(key)) {
 			return ((ClassData) classDataHM.get(key)).type;
@@ -264,6 +271,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Sets type of the class linked to the specific key. Type of class is represented by
 	 * an int number whose value is contained in <code>JSIMConstants</code>.
 	 * */
+	@Override
 	public synchronized void setClassType(int type, Object key) {
 		//Must check for class presence
 		ClassData cd;
@@ -291,6 +299,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Returns name of the class linked to the specific key
 	 * */
+	@Override
 	public synchronized int getClassPriority(Object key) {
 		if (classesKeyset.contains(key)) {
 			return ((ClassData) classDataHM.get(key)).priority;
@@ -302,6 +311,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Sets name of the class linked to the specific key
 	 * */
+	@Override
 	public synchronized void setClassPriority(int priority, Object key) {
 		if (classDataHM.containsKey(key)) {
 			int oldPriority = ((ClassData) classDataHM.get(key)).priority;
@@ -316,6 +326,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Returns population of the class linked to the specific key. Return value is an integer
 	 * if specified class is a closed class, null, otherwise.
 	 * */
+	@Override
 	public synchronized Integer getClassPopulation(Object key) {
 		if (classDataHM.containsKey(key)) {
 			return ((ClassData) classDataHM.get(key)).population;
@@ -327,6 +338,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Sets population of the class linked to the specific key
 	 * */
+	@Override
 	public synchronized void setClassPopulation(Integer population, Object key) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
@@ -349,6 +361,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Return value is an object representing distribution if specified class is an open
 	 *  class, null otherwise.
 	 * */
+	@Override
 	public synchronized Object getClassDistribution(Object key) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
@@ -362,6 +375,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Sets inter-arrival time distribution of the class linked to the specific key
 	 * */
+	@Override
 	public synchronized void setClassDistribution(Object distribution, Object key) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
@@ -381,6 +395,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**Returns a class parameter, given the class key of search, and the parameter name
 	 * specified by proper code.*/
+	@Override
 	public synchronized Object getClassParameter(Object key, int parameterName) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
@@ -415,6 +430,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * parameters, e.g. name must be a String, type, priority and population must be an
 	 * integer. Distribution must be an object. If type for a field is not correct, a
 	 * <code> ClassCastException</code> will be raised.*/
+	@Override
 	public synchronized void setClassParameter(Object key, int parameterName, Object value) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
@@ -449,6 +465,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**Sets all class parameters at once given the class' search key. If search key does
 	 * not exist, no class will be added.*/
+	@Override
 	public synchronized void setClassParameters(Object key, String name, int type, int priority, Integer population, Object distribution) {
 		if (!classesKeyset.contains(key)) {
 			return;
@@ -464,6 +481,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**Adds a class and sets all class parameters at once, return the new search key
 	 * identifying the new class.*/
+	@Override
 	public synchronized Object addClass(String name, int type, int priority, Integer population, Object distribution) {
 		//generating a new key
 		incrementalKey++;
@@ -486,6 +504,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**Deletes class given its search key. */
+	@Override
 	public synchronized void deleteClass(Object key) {
 		if (classesKeyset.contains(key)) {
 			classesKeyset.remove(key);
@@ -501,6 +520,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey search key for class
 	 * @param stationKey search key for referenced station
 	 */
+	@Override
 	public void setClassRefStation(Object classKey, Object stationKey) {
 		ClassData cd = (ClassData) classDataHM.get(classKey);
 		if (cd == null) {
@@ -518,6 +538,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey search key for class
 	 * @return search key for referenced station or null if it was not specified yet
 	 */
+	@Override
 	public Object getClassRefStation(Object classKey) {
 		ClassData cd = (ClassData) classDataHM.get(classKey);
 		if (cd == null) {
@@ -539,6 +560,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * Author: Francesco D'Aquino
 	 */
+	@Override
 	public Vector<Object> getStationKeysSource() {
 		Vector<Object> stations = this.getStationKeys();
 		Vector<Object> sources = new Vector<Object>(0, 1);
@@ -558,6 +580,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * Author: Francesco D'Aquino
 	 */
+	@Override
 	public Vector<Object> getStationKeysServer() {
 		Vector<Object> stations = this.getStationKeys();
 		Vector<Object> servers = new Vector<Object>(0, 1);
@@ -577,6 +600,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * Author: Francesco D'Aquino
 	 */
+	@Override
 	public Vector<Object> getStationKeysDelay() {
 		Vector<Object> stations = this.getStationKeys();
 		Vector<Object> delays = new Vector<Object>(0, 1);
@@ -610,6 +634,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**Returns entire key set for search of stations. Objects contained  in returned vector
 	 * can be directly passed to methods for parameters retrieval.*/
+	@Override
 	public Vector<Object> getStationKeys() {
 		return stationsKeyset;
 	}
@@ -617,6 +642,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * This method returns all station keys except source and sink ones.
 	 */
+	@Override
 	public Vector<Object> getStationKeysNoSourceSink() {
 		return noSourceSinkKeyset;
 	}
@@ -624,12 +650,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/* (non-Javadoc)
 	 * @see jmt.gui.common.definitions.StationDefinition#getStationRegionKeysNoSourceSink()
 	 */
+	@Override
 	public Vector<Object> getStationRegionKeysNoSourceSink() {
 		Vector<Object> vect = new Vector<Object>(noSourceSinkKeyset);
 		vect.addAll(blockingRegionsKeyset);
 		return vect;
 	}
 	
+	@Override
 	public Vector<Object> getStationKeysSink(){
 		Vector<Object> sink = new Vector<Object>();
 		Vector<Object> stations = this.getStationKeys();
@@ -646,6 +674,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * search key.
 	 * @param key: search key for station to be modified
 	 * @return : name of station.*/
+	@Override
 	public synchronized String getStationName(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -659,6 +688,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/** Sets type of the station, given the search key.
 	 * @param key: search key for station to be modified
 	 * @param name: name of station.*/
+	@Override
 	public synchronized void setStationName(String name, Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -673,6 +703,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/** Returns queue capacity of the station given the search key.*/
+	@Override
 	public synchronized Integer getStationQueueCapacity(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -684,6 +715,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/** Sets queue capacity of the station, given the search key.*/
+	@Override
 	public synchronized void setStationQueueCapacity(Integer queueCapacity, Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -698,6 +730,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/** Returns number of servers or number of forked job for the station given the search key.*/
+	@Override
 	public synchronized Integer getStationNumberOfServers(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -709,6 +742,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/** Sets number of servers or number of forked job for the station, given the search key.*/
+	@Override
 	public synchronized void setStationNumberOfServers(Integer numberOfServers, Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -723,6 +757,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/** Returns parameter for the station given the search key and parameter code.*/
+	@Override
 	public synchronized Object getStationParameter(Object key, int parameterCode) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -750,6 +785,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/** Sets parameter for the station, given the search key and parameter code.*/
+	@Override
 	public synchronized void setStationParameter(Object value, Object key, int parameterCode) {
 		switch (parameterCode) {
 			case STATION_NAME: {
@@ -776,6 +812,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * search key.
 	 * @param key: search key for station to be modified
 	 * @return : type of station.*/
+	@Override
 	public synchronized String getStationType(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -789,6 +826,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/** Sets name of the station, given the search key.
 	 * @param key: search key for station to be modified
 	 * @param type: type of station.*/
+	@Override
 	public synchronized void setStationType(String type, Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -861,6 +899,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param type: string representing station type. It's value is contained in
 	 * <code>JSIMConstants</code> interface.
 	 * @return : key of search for this class*/
+	@Override
 	public synchronized Object addStation(String name, String type) {
 		Object key = new Long(++incrementalKey);
 		//If this station has already been created, don't add search key to the list.
@@ -888,6 +927,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**Deletes station given a search key.*/
+	@Override
 	public synchronized void deleteStation(Object key) {
 		if (stationsKeyset.contains(key)) {
 			// Removes this station from owner blocking region (if needed)
@@ -927,6 +967,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @return maximum number of jobs allowed in a fork-join
 	 * region (-1 is infinity)
 	 */
+	@Override
 	public Integer getForkBlock(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -944,6 +985,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param value maximum number of jobs allowed in a fork-join
 	 * region (-1 is infinity)
 	 */
+	@Override
 	public void setForkBlock(Object key, Integer value) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
@@ -967,6 +1009,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey: search key for class.
 	 * @return FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
 	 */
+	@Override
 	public String getDropRule(Object stationKey, Object classKey) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -982,6 +1025,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey: search key for class.
 	 * @param rule FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
 	 */
+	@Override
 	public void setDropRule(Object stationKey, Object classKey, String rule) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null && rule != null) {
@@ -992,6 +1036,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public void setStationQueueStrategy(Object stationKey, String strategy) {
 		StationData station = (StationData) stationDataHM.get(stationKey);
 		if (station != null) {
@@ -1002,6 +1047,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public String getStationQueueStrategy(Object stationKey) {
 		StationData station = (StationData) stationDataHM.get(stationKey);
 		if (station != null) {
@@ -1011,6 +1057,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public void setQueueStrategy(Object stationKey, Object classKey, String queueStrategy) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -1021,6 +1068,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public String getQueueStrategy(Object stationKey, Object classKey) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -1030,6 +1078,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object distribution) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -1040,6 +1089,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public Object getServiceTimeDistribution(Object stationKey, Object classKey) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -1049,6 +1099,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public void setRoutingStrategy(Object stationKey, Object classKey, Object routingStrategy) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -1059,6 +1110,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public Object getRoutingStrategy(Object stationKey, Object classKey) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -1072,6 +1124,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Michael Fercu (Marco Bertoli) - 0.7.4
 	 * Access methods for "Logger"
 	 */
+	@Override
 	public void setLoggingParameters(Object stationKey, Object loggerParameters) {
 		StationData sd;
 		if (stationDataHM.containsKey(stationKey)) {
@@ -1089,6 +1142,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		sd.loggerParameters = loggerParameters;
 	}
 
+	@Override
 	public Object getLoggingParameters(Object stationKey) {
 		Object loggerParams = null;
 
@@ -1101,6 +1155,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return loggerParams;
 	}
 
+	@Override
 	public String getLoggingGlbParameter(String selector) {
 
 		// The global parameters must be instantiated for a new file
@@ -1122,6 +1177,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return null;
 	}
 
+	@Override
 	public void setLoggingGlbParameter(String selector, String value) {
 
 		// The global parameters must be instantiated for a new file
@@ -1185,6 +1241,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Francesco D'Aquino
 	 * Normalizes the routing probabilities for each station
 	 */
+	@Override
 	public void manageProbabilities() {
 		//get the vector of the stations
 		Vector<Object> stations = getStationKeys();
@@ -1214,7 +1271,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	// NB: cut from jmt.gui.common.xml.XMLWriter
-	public void normalizeProbabilities(Map values, Vector outputKeys, Object thisClassKey, Object thisStation){
+	public void normalizeProbabilities(Map<Object,Double> values, Vector<Object> outputKeys, Object thisClassKey, Object thisStation){
 		Vector<Object> sinkClosedprobabilities = new Vector<Object>();
 		Vector<Object> normalProbabilities = new Vector<Object>();
 		boolean allSink = true;
@@ -1267,7 +1324,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	    for(int i=0; i<probabilities.length; i++){
 	        if((probabilities[i]!=null || allNull) && normalProbabilities.contains(keys[i])){
 	            if(totalSum==0){
-	                probabilities[i] = new Double(1.0/(double)totalNonNull);
+	                probabilities[i] = new Double(1.0/totalNonNull);
 	            }else{
 	                probabilities[i] = new Double(probabilities[i].doubleValue()/totalSum);
 	            }
@@ -1366,6 +1423,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param areConnected: true if stations must be connected, false otherwise.
 	 * @return : true if connection was created, false otherwise.
 	 * */
+	@Override
 	public boolean setConnected(Object sourceKey, Object targetKey, boolean areConnected) {
 		Connection toSet = (Connection) connectionsBDM.get(targetKey, sourceKey);
 		//element does not exist, no further operation possible, return.
@@ -1395,6 +1453,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param targetKey: search key for target station
 	 * @return : true if stations are connected, false otherwise.
 	 */
+	@Override
 	public boolean areConnected(Object sourceKey, Object targetKey) {
 		Connection conn = (Connection) connectionsBDM.get(targetKey, sourceKey);
 		if (conn == null) {
@@ -1409,6 +1468,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param targetKey: search key for target station
 	 * @return : true if stations are connectable, false otherwise.
 	 */
+	@Override
 	public boolean areConnectable(Object sourceKey, Object targetKey) {
 		Connection conn = (Connection) connectionsBDM.get(targetKey, sourceKey);
 		if (conn == null) {
@@ -1423,6 +1483,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * returned.
 	 * @return Vector containing keys for connected stations.
 	 */
+	@Override
 	public Vector<Object> getForwardConnections(Object stationKey) {
 		//must find entry for row index (e.g. connection sources set)
 		Map conns = connectionsBDM.get(stationKey, BDMap.Y);
@@ -1434,6 +1495,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * returned.
 	 * @return Vector containing keys for connected stations.
 	 */
+	@Override
 	public Vector<Object> getBackwardConnections(Object stationKey) {
 		//must find entry for row index (e.g. connection targets set)
 		Map conns = connectionsBDM.get(stationKey, BDMap.X);
@@ -1531,20 +1593,28 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/*------------------------------------------------------------------------------
 	*---------------  methods for simulation parameters definition  ----------------
 	*-------------------------------------------------------------------------------*/
-
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.SimulationDefinition#addMeasure(java.lang.String, java.lang.Object, java.lang.Object)
+	 */
+	@Override
 	public Object addMeasure(String type, Object stationKey, Object classKey) {
-		return addMeasure(type, stationKey, classKey, Defaults.getAsDouble("measureAlpha"), Defaults.getAsDouble("measurePrecision"));
+		return addMeasure(type, stationKey, classKey, Defaults.getAsDouble("measureAlpha"), Defaults.getAsDouble("measurePrecision"), false);
 	}
 
-	public Object addMeasure(String type, Object stationKey, Object classKey, Double alpha, Double precision) {
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.SimulationDefinition#addMeasure(java.lang.String, java.lang.Object, java.lang.Object, java.lang.Double, java.lang.Double, jmt.gui.common.definitions.OutputParameters)
+	 */
+	@Override
+	public Object addMeasure(String type, Object stationKey, Object classKey, Double alpha, Double precision, boolean log) {
 		Object key = new Long(++incrementalKey);
-		MeasureData md = new MeasureData(stationKey, classKey, type, alpha, precision);
+		MeasureData md = new MeasureData(stationKey, classKey, type, alpha, precision, log);
 		measureDataHM.put(key, md);
 		measuresKeyset.add(key);
 		save = true;
 		return key;
 	}
 
+	@Override
 	public void removeMeasure(Object measureKey) {
 		if (measuresKeyset.contains(measureKey)) {
 			measuresKeyset.remove(measureKey);
@@ -1553,77 +1623,86 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public Vector<Object> getMeasureKeys() {
 		return measuresKeyset;
 	}
 
+	@Override
 	public String getMeasureType(Object measureKey) {
 		if (!measuresKeyset.contains(measureKey)) {
 			return null;
 		} else {
-			return ((MeasureData) measureDataHM.get(measureKey)).type;
+			return measureDataHM.get(measureKey).type;
 		}
 	}
 
+	@Override
 	public void setMeasureType(String newType, Object measureKey) {
 		if (measuresKeyset.contains(measureKey)) {
-			String oldType = ((MeasureData) measureDataHM.get(measureKey)).type;
-			((MeasureData) measureDataHM.get(measureKey)).type = newType;
+			String oldType = measureDataHM.get(measureKey).type;
+			measureDataHM.get(measureKey).type = newType;
 			if (!oldType.equals(newType)) {
 				save = true;
 			}
 		}
 	}
 
+	@Override
 	public Object getMeasureClass(Object measureKey) {
 		if (!measuresKeyset.contains(measureKey)) {
 			return null;
 		} else {
-			return ((MeasureData) measureDataHM.get(measureKey)).classKey;
+			return measureDataHM.get(measureKey).classKey;
 		}
 	}
 
+	@Override
 	public void setMeasureClass(Object classKey, Object measureKey) {
 		if (measuresKeyset.contains(measureKey)) {
-			Object oldKey = ((MeasureData) measureDataHM.get(measureKey)).classKey;
-			((MeasureData) measureDataHM.get(measureKey)).classKey = classKey;
+			Object oldKey = measureDataHM.get(measureKey).classKey;
+			measureDataHM.get(measureKey).classKey = classKey;
 			if (oldKey != classKey) {
 				save = true;
 			}
 		}
 	}
 
+	@Override
 	public Object getMeasureStation(Object measureKey) {
 		if (!measuresKeyset.contains(measureKey)) {
 			return null;
 		} else {
-			return ((MeasureData) measureDataHM.get(measureKey)).stationKey;
+			return measureDataHM.get(measureKey).stationKey;
 		}
 	}
 
+	@Override
 	public void setMeasureStation(Object stationKey, Object measureKey) {
 		if (measuresKeyset.contains(measureKey)) {
-			Object oldKey = ((MeasureData) measureDataHM.get(measureKey)).stationKey;
-			((MeasureData) measureDataHM.get(measureKey)).stationKey = stationKey;
+			Object oldKey = measureDataHM.get(measureKey).stationKey;
+			measureDataHM.get(measureKey).stationKey = stationKey;
 			if (oldKey != stationKey) {
 				save = true;
 			}
 		}
 	}
 
+	@Override
 	public Double getMeasureAlpha(Object measureKey) {
 		if (!measuresKeyset.contains(measureKey)) {
 			return null;
 		} else {
-			return ((MeasureData) measureDataHM.get(measureKey)).alpha;
+			return measureDataHM.get(measureKey).alpha;
 		}
 	}
 
+	@Override
 	public void setMeasureAlpha(Double alpha, Object measureKey) {
 		if (alpha.doubleValue() > 0 && alpha.doubleValue() < 1) {
 			if (measuresKeyset.contains(measureKey)) {
-				Double oldAlpha = ((MeasureData) measureDataHM.get(measureKey)).alpha;
-				((MeasureData) measureDataHM.get(measureKey)).alpha = alpha;
+				Double oldAlpha = measureDataHM.get(measureKey).alpha;
+				measureDataHM.get(measureKey).alpha = alpha;
 				if (!oldAlpha.equals(alpha)) {
 					save = true;
 				}
@@ -1631,23 +1710,51 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
 	public Double getMeasurePrecision(Object measureKey) {
 		if (!measuresKeyset.contains(measureKey)) {
 			return null;
 		} else {
-			return ((MeasureData) measureDataHM.get(measureKey)).precision;
+			return measureDataHM.get(measureKey).precision;
 		}
 	}
 
+	@Override
 	public void setMeasurePrecision(Double precision, Object measureKey) {
 		if (precision.doubleValue() > 0 && precision.doubleValue() < 1) {
 			if (measuresKeyset.contains(measureKey)) {
-				Double oldPrecision = ((MeasureData) measureDataHM.get(measureKey)).precision;
-				((MeasureData) measureDataHM.get(measureKey)).precision = precision;
+				Double oldPrecision = measureDataHM.get(measureKey).precision;
+				measureDataHM.get(measureKey).precision = precision;
 				if (!oldPrecision.equals(precision)) {
 					save = true;
 				}
 			}
+		}
+	}
+	
+	
+	
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.SimulationDefinition#setLogMeasure(boolean, java.lang.Object)
+	 */
+	@Override
+	public void setMeasureLog(boolean log, Object measureKey) {
+		MeasureData data = measureDataHM.get(measureKey);
+		if (data != null && data.log != log) {
+			data.log = log;
+			save = true;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.SimulationDefinition#getLogMeasure(java.lang.Object)
+	 */
+	@Override
+	public boolean getMeasureLog(Object measureKey) {
+		if (!measuresKeyset.contains(measureKey)) {
+			return false;
+		} else {
+			return measureDataHM.get(measureKey).log;
 		}
 	}
 
@@ -1658,6 +1765,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param key search's key for given measure
 	 * @return true if measure is global
 	 */
+	@Override
 	public boolean isGlobalMeasure(Object key) {
 		String type = getMeasureType(key);
 		return type.equals(SimulationDefinition.MEASURE_S_X) || type.equals(SimulationDefinition.MEASURE_S_RP)
@@ -1678,6 +1786,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param key
 	 * @return
 	 */
+	@Override
 	public boolean isSinkMeasure(Object key){
 		String type = getMeasureType(key);
 		boolean ret = false;
@@ -1692,6 +1801,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey search's key for class
 	 * Author: Bertoli Marco
 	 */
+	@Override
 	public void setPreloadedJobs(Integer jobs, Object stationKey, Object classKey) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -1709,6 +1819,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @return preloaded jobs
 	 * Author: Bertoli Marco
 	 */
+	@Override
 	public Integer getPreloadedJobs(Object stationKey, Object classKey) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
 		if (current != null) {
@@ -1723,6 +1834,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey class jobs to be preloaded belong to.
 	 * @return umber of jobs totally to be preloaded.
 	 */
+	@Override
 	public synchronized Integer getPreloadedJobsNumber(Object classKey) {
 		int foundJob = 0;
 		for (int i = 0; i < stationsKeyset.size(); i++) {
@@ -1731,10 +1843,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return new Integer(foundJob);
 	}
 
+	@Override
 	public boolean getUseRandomSeed() {
 		return useRandomSeed;
 	}
 
+	@Override
 	public void setUseRandomSeed(boolean value) {
 		if (useRandomSeed != value) {
 			save = true;
@@ -1742,6 +1856,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		this.useRandomSeed = value;
 	}
 
+	@Override
 	public void setSimulationSeed(Long seed) {
 		if (!this.seed.equals(seed)) {
 			save = true;
@@ -1749,10 +1864,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		this.seed = seed;
 	}
 
+	@Override
 	public Long getSimulationSeed() {
 		return seed;
 	}
 
+	@Override
 	public void setMaximumDuration(Double durationSeconds) {
 		if (!this.maxDuration.equals(durationSeconds)) {
 			save = true;
@@ -1760,6 +1877,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		this.maxDuration = durationSeconds;
 	}
 
+	@Override
 	public Double getMaximumDuration() {
 		return maxDuration;
 	}
@@ -1768,6 +1886,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Gets polling interval for temporary measures
 	 * @return polling interval for temporary measures
 	 */
+	@Override
 	public double getPollingInterval() {
 		return pollingInterval;
 	}
@@ -1776,6 +1895,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Sets polling interval for temporary measures
 	 * @param pollingInterval polling interval for temporary measures
 	 */
+	@Override
 	public void setPollingInterval(double pollingInterval) {
 		if (this.pollingInterval != pollingInterval) {
 			save = true;
@@ -1788,6 +1908,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * @param maxSamples maximum number of simulation samples
 	 */
+	@Override
 	public void setMaxSimulationSamples(Integer maxSamples) {
 		if (!this.maxSamples.equals(maxSamples)) {
 			save = true;
@@ -1800,6 +1921,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * @return maximum number of simulation samples
 	 */
+	@Override
 	public Integer getMaxSimulationSamples() {
 		return maxSamples;
 	}
@@ -1808,6 +1930,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Tells if statistic check was disabled as simulation stopping criteria
 	 * @return the disableStatistic
 	 */
+	@Override
 	public Boolean getDisableStatistic() {
 		return disableStatistic;
 	}
@@ -1816,6 +1939,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Sets if statistic check was disabled as simulation stopping criteria
 	 * @param disableStatistic the disableStatistic to set
 	 */
+	@Override
 	public void setDisableStatistic(Boolean disableStatistic) {
 		this.disableStatistic = disableStatistic;
 	}
@@ -1874,6 +1998,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * when strictly necessary as is can be slow if the model is big.
 	 * Author: Bertoli Marco
 	 */
+	@Override
 	public void manageJobs() {
 		for (int i = 0; i < classesKeyset.size(); i++) {
 			manageJobs(classesKeyset.get(i));
@@ -1885,6 +2010,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Returns last simulation results
 	 * @return simulation results or null if no simulation was performed
 	 */
+	@Override
 	public MeasureDefinition getSimulationResults() {
 		return results;
 	}
@@ -1893,6 +2019,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Sets simulation results
 	 * @param results simulation results data structure
 	 */
+	@Override
 	public void setSimulationResults(MeasureDefinition results) {
 		this.results = results;
 		save = true;
@@ -1902,6 +2029,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Tells if current model contains simulation results
 	 * @return true iff <code>getSimulationResults()</code> returns a non-null object
 	 */
+	@Override
 	public boolean containsSimulationResults() {
 		return (results != null);
 	}
@@ -1913,6 +2041,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * @return true if the animation is enabled
 	 */
+	@Override
 	public boolean isAnimationEnabled() {
 		return false;
 	}
@@ -1922,6 +2051,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * @param isEnabled - set it to true to enable queue animation
 	 */
+	@Override
 	public void setAnimationEnabled(boolean isEnabled) {
 
 	}
@@ -1931,6 +2061,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * @return true if the parametric analysis has been enabled
 	 */
+	@Override
 	public boolean isParametricAnalysisEnabled() {
 		return parametricAnalysisEnabled;
 	}
@@ -1939,6 +2070,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Enable / disable parametric analysis
 	 * @param enabled
 	 */
+	@Override
 	public void setParametricAnalysisEnabled(boolean enabled) {
 		if (parametricAnalysisEnabled != enabled) {
 			save = true;
@@ -1951,6 +2083,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * @param pad the parametric analysis definition to be set
 	 */
+	@Override
 	public void setParametricAnalysisModel(ParametricAnalysisDefinition pad) {
 		parametricAnalysisModel = pad;
 	}
@@ -1959,6 +2092,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Tells model that some data has been changed and need to be saved. This
 	 * is used by Parametric Analysis
 	 */
+	@Override
 	public void setSaveChanged() {
 		save = true;
 	}
@@ -1968,6 +2102,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	* the returned value may be not meaningful.
 	* @return the parametricAnalysisModel
 	*/
+	@Override
 	public ParametricAnalysisDefinition getParametricAnalysisModel() {
 		return parametricAnalysisModel;
 	}
@@ -1978,6 +2113,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param className the name of the class
 	 * @return  the key of the class whose name is <code>className</code>
 	 */
+	@Override
 	public Object getClassByName(String className) {
 		for (int i = 0; i < classesKeyset.size(); i++) {
 			Object thisClass = classesKeyset.get(i);
@@ -1994,6 +2130,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param stationName the name of the station
 	 * @return the key of the station
 	 */
+	@Override
 	public Object getStationByName(String stationName) {
 		for (int i = 0; i < stationsKeyset.size(); i++) {
 			Object thisStation = stationsKeyset.get(i);
@@ -2015,6 +2152,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param type type of new blocking region
 	 * @return search's key for new blocking region
 	 */
+	@Override
 	public Object addBlockingRegion(String name, String type) {
 		Object key = new Long(++incrementalKey);
 		//If this blocking region has already been created, don't add search key to the list.
@@ -2034,6 +2172,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * @param key Search's key for region to be deleted
 	 */
+	@Override
 	public void deleteBlockingRegion(Object key) {
 		if (blockingRegionsKeyset.contains(key)) {
 			BlockingRegionData bd = (BlockingRegionData) blockingDataHM.remove(key);
@@ -2061,6 +2200,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param stationKey Search's key for station
 	 * @return true if station can be put inside specified region
 	 */
+	@Override
 	public boolean addRegionStation(Object regionKey, Object stationKey) {
 		if (!this.canRegionStationBeAdded(regionKey, stationKey)) {
 			return false;
@@ -2079,6 +2219,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param regionKey Search's key for region
 	 * @param name      name of the blocking region
 	 */
+	@Override
 	public void setRegionName(Object regionKey, String name) {
 		if (blockingRegionsKeyset.contains(regionKey)) {
 			if (!((BlockingRegionData) blockingDataHM.get(regionKey)).name.equals(name)) {
@@ -2094,6 +2235,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param regionKey Search's key for region
 	 * @return name of the blocking region
 	 */
+	@Override
 	public String getRegionName(Object regionKey) {
 		if (blockingRegionsKeyset.contains(regionKey)) {
 			return ((BlockingRegionData) blockingDataHM.get(regionKey)).name;
@@ -2108,6 +2250,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param regionKey Search's key for region
 	 * @param type      type of the blocking region
 	 */
+	@Override
 	public void setRegionType(Object regionKey, String type) {
 		if (blockingRegionsKeyset.contains(regionKey)) {
 			if (!((BlockingRegionData) blockingDataHM.get(regionKey)).type.equals(type)) {
@@ -2123,6 +2266,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param regionKey Search's key for region
 	 * @return type of the blocking region
 	 */
+	@Override
 	public String getRegionType(Object regionKey) {
 		if (blockingRegionsKeyset.contains(regionKey)) {
 			return ((BlockingRegionData) blockingDataHM.get(regionKey)).type;
@@ -2138,6 +2282,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param stationKey Search's key for station
 	 * @return true if station can be put inside specified region
 	 */
+	@Override
 	public boolean canRegionStationBeAdded(Object regionKey, Object stationKey) {
 		if (!blockingRegionsKeyset.contains(regionKey) || !stationsKeyset.contains(stationKey)) {
 			return false;
@@ -2163,6 +2308,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param regionKey  Search's key for region
 	 * @param stationKey Search's key for station
 	 */
+	@Override
 	public void removeRegionStation(Object regionKey, Object stationKey) {
 		if (!blockingRegionsKeyset.contains(regionKey) || !stationsKeyset.contains(stationKey)) {
 			return;
@@ -2181,6 +2327,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *
 	 * @return the entire set of blocking region keys
 	 */
+	@Override
 	public Vector<Object> getRegionKeys() {
 		return blockingRegionsKeyset;
 	}
@@ -2192,6 +2339,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey        search's key for customer class
 	 * @param maxJobsPerClass maximum number of allowed customer. -1 means infinity.
 	 */
+	@Override
 	public void setRegionClassCustomerConstraint(Object regionKey, Object classKey, Integer maxJobsPerClass) {
 		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
 			return;
@@ -2209,6 +2357,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey  search's key for customer class
 	 * @param drop      true if jobs of specified class can be dropped, false otherwise
 	 */
+	@Override
 	public void setRegionClassDropRule(Object regionKey, Object classKey, Boolean drop) {
 		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
 			return;
@@ -2225,6 +2374,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param regionKey       search's key for blocking region
 	 * @param maxJobs maximum number of allowed customer. -1 means infinity.
 	 */
+	@Override
 	public void setRegionCustomerConstraint(Object regionKey, Integer maxJobs) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return;
@@ -2242,6 +2392,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey  search's key for customer class
 	 * @return maximum number of allowed customer. -1 means infinity.
 	 */
+	@Override
 	public Integer getRegionClassCustomerConstraint(Object regionKey, Object classKey) {
 		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
 			return null;
@@ -2256,6 +2407,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey  search's key for customer class
 	 * @return true if jobs of specified class can be dropped, false otherwise
 	 */
+	@Override
 	public Boolean getRegionClassDropRule(Object regionKey, Object classKey) {
 		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
 			return null;
@@ -2269,6 +2421,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param regionKey search's key for blocking region
 	 * @return maximum number of allowed customer. -1 means infinity.
 	 */
+	@Override
 	public Integer getRegionCustomerConstraint(Object regionKey) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return null;
@@ -2282,6 +2435,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param regionKey search's key for given blocking region
 	 * @return a set with every station inside given blocking region
 	 */
+	@Override
 	public Set<Object> getBlockingRegionStations(Object regionKey) {
 		if (blockingRegionsKeyset.contains(regionKey)) {
 			return ((BlockingRegionData) blockingDataHM.get(regionKey)).stations;
@@ -2296,6 +2450,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param stationKey search's key for given station
 	 * @return search's key for its blocking region or null if it's undefined
 	 */
+	@Override
 	public Object getStationBlockingRegion(Object stationKey) {
 		if (stationsKeyset.contains(stationKey)) {
 			return ((StationData) stationDataHM.get(stationKey)).blockingRegion;
@@ -2310,6 +2465,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @return a vector of search's keys of every station that can be added
 	 *         to a blocking region
 	 */
+	@Override
 	public Vector<Object> getBlockableStationKeys() {
 		return blockableStations;
 	}
@@ -2474,13 +2630,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String type;
 		public Double precision;
 		public Double alpha;
+		public boolean log; 
 
-		public MeasureData(Object station, Object userClass, String measureType, Double alpha, Double precision) {
+		public MeasureData(Object station, Object userClass, String measureType, Double alpha, Double precision, boolean log) {
 			stationKey = station;
 			classKey = userClass;
 			type = measureType;
 			this.precision = precision;
 			this.alpha = alpha;
+			this.log = log ; 
 		}
 	}
 
@@ -2500,25 +2658,31 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 	
+	@Override
 	public boolean isSinkProbabilityUpdated(){
 		return sinkProbabilityUpdate;
 	}
 	
+	@Override
 	public void setSinkProbabilityUpdatedVar(boolean param){
 		sinkProbabilityUpdate = param;
 	}
 
+	@Override
 	public Vector<String> getsinkProbabilityUpdateClasses(){		
 		return sinkProbabilityUpdateClasses;
 	}
 
+	@Override
 	public Vector<String> getsinkProbabilityUpdateStations(){		
 		return sinkProbabilityUpdateStations;
 	}
 	
+	@Override
 	public void resetSinkProbabilityUpdateStations(){
 		sinkProbabilityUpdateStations = new Vector<String>();
 	}
+	@Override
 	public void resetSinkProbabilityUpdateClasses(){
 		sinkProbabilityUpdateClasses = new Vector<String>();
 	}
@@ -2529,6 +2693,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *	It returns the cell (@callInKey, @classOutKey) of the class
 	 *  switch matrix of station @stationKey.
 	 */
+	@Override
 	public float getClassSwitchMatrix(Object stationKey, Object classInKey, Object classOutKey) {
 		StationClassData current = (StationClassData) stationDetailsBDM.get(classInKey, stationKey);
 		ClassSwitch row = (ClassSwitch) current.classSwitchProb;
@@ -2539,6 +2704,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *	It sets to @val the cell (@callInKey, @classOutKey) of the class
 	 *  switch matrix of station @stationKey.
 	 */
+	@Override
 	public void setClassSwitchMatrix(Object stationKey, Object classInKey, Object classOutKey, float val) {
 		if(val != getClassSwitchMatrix(stationKey, classInKey, classOutKey)) 
 			save = true;

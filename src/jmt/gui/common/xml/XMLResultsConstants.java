@@ -32,6 +32,10 @@ public interface XMLResultsConstants {
 	public static final String XML_DOCUMENT_XSD = "Results.xsd";
 	public static final String XML_DOCUMENT_ROOT = "results";
 	public static final String XML_A_ROOT_POLLING = "pollingInterval";
+	public static final String XML_A_ROOT_LOG_DECIMAL_SEP = "logDecimalSeparator";
+	public static final String XML_A_ROOT_LOG_DELIMITER = "logDelimiter";
+	public static final String XML_A_ROOT_LOG_PATH = "logPath";
+	public static final String XML_A_ROOT_LAST_RUN_TIME = "lastRunTime";
 
 	public static final String XML_E_MEASURE = "measure";
 	public static final String XML_A_MEASURE_NAME = "name";
@@ -40,11 +44,13 @@ public interface XMLResultsConstants {
 	public static final String XML_A_MEASURE_STATION = "referenceStation";
 	public static final String XML_A_MEASURE_FINALVALUE = "finalValue";
 	public static final String XML_A_MEASURE_SAMPLES = "analyzedSamples";
+	public static final String XML_A_MEASURE_DISCARDEDSAMPLES = "discardedSamples";
 	public static final String XML_A_MEASURE_STATE = "state";
 	public static final String XML_A_MEASURE_ALPHA = "alpha";
 	public static final String XML_A_MEASURE_PRECISION = "precision";
 	public static final String XML_A_MEASURE_NODETYPE = "nodeType";
-
+	public static final String XML_A_MEASURE_LOG = "logFile";
+	
 	public static final String XML_E_SAMPLE = "sample";
 	public static final String XML_A_SAMPLE_MEAN = "meanValue";
 	public static final String XML_A_SAMPLE_UPPERBOUND = "upperBound";

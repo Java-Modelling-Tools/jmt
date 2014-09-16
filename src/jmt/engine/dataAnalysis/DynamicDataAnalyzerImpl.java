@@ -20,7 +20,6 @@ package jmt.engine.dataAnalysis;
 
 import jmt.engine.math.DoubleArrayList;
 import jmt.engine.math.Printer;
-import jmt.engine.math.SampleMean;
 import jmt.engine.math.Spectrum;
 import jmt.engine.math.TStudent;
 import jmt.engine.math.WeightedMeanVar;
@@ -46,10 +45,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	private static final boolean DEBUG = false;
 	private static final boolean ZERODEBUG = false;
 
-	//NEW
-	//@author Stefano Omini
 	protected SimParameters parameters;
-	//end NEW
 
 	/**number of batches */
 	protected int numBatch = 128;
@@ -81,10 +77,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	protected double C1;
 	/**degrees of freeedom of the t-distribution */
 	protected int C2;
-
-	//TODO: serve oppure no?? Viene inizializzata ma poi non è aggiornata
-	/**sample mean*/
-	protected SampleMean sampleMean = new SampleMean();
 
 	/**the quantile required for the confidence interval*/
 	protected double alfa;
@@ -216,13 +208,10 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		initData = new DoubleArrayList();
 		initWeight = new DoubleArrayList();
 
-		//NEW
-		//@author Stefano Omini
 		if (nullTestEnabled) {
 			//initializes nullTestPeriod (the period of null test repetition)
 			nullTestPeriod = (int) (nullTestRate * maxData);
 		}
-		//end NEW
 	}
 
 	/**
@@ -456,9 +445,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			//initial transient detected all data to be discarded
 			eurDisc = initSamples;
 			heuristic = true;
-
-			//initializes SampleMean object
-			sampleMean.initialize();
 
 			// when rule R5 finishes the number of initial samples is used
 			// to extimate the initial transient length

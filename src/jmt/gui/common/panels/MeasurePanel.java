@@ -19,19 +19,26 @@
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.plaf.basic.ComboPopup;
@@ -39,6 +46,9 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import jmt.framework.data.LabelValue;
+import jmt.framework.data.MacroReplacer;
+import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
@@ -70,6 +80,8 @@ import jmt.gui.exact.table.ExactCellEditor;
  * 
  */
 public class MeasurePanel extends WizardPanel implements CommonConstants {
+	private static final LabelValue[] DELIMITERS = {new LabelValue(";"), new LabelValue(","), new LabelValue("Tab", "\t"), new LabelValue("Space"," ")};
+	private static final LabelValue[] DECIMAL = {new LabelValue("."), new LabelValue(",")};
 
 	/**
 	 * 
@@ -97,6 +109,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 	//label containing description of this panel's purpose
 	private JLabel descrLabel = new JLabel(MEASURES_DESCRIPTION);
+	private JLabel logPath;
 
 	//table containing measure data
 	protected MeasureTable measureTable;
@@ -106,12 +119,10 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			SimulationDefinition.MEASURE_RD, SimulationDefinition.MEASURE_RP, SimulationDefinition.MEASURE_U, SimulationDefinition.MEASURE_X,
 			SimulationDefinition.MEASURE_DR, SimulationDefinition.MEASURE_S_X, SimulationDefinition.MEASURE_S_RP, SimulationDefinition.MEASURE_S_DR,
 			SimulationDefinition.MEASURE_S_CN,
-			//Added by ASHANKA START
 			//Adds system power index to the performance index combo box in the JSIM panel
 			SimulationDefinition.MEASURE_S_SP,
 			SimulationDefinition.MEASURE_X_PER_SINK,
 			SimulationDefinition.MEASURE_R_PER_SINK
-	//Added by ASHANKA STOP
 	};
 
 	// Measure selection ComboBox
@@ -189,6 +200,78 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		warningPanel.addCheckVector(classData.getClassKeys());
 		warningPanel.addCheckVector(stationData.getStationRegionKeysNoSourceSink());
 		this.add(warningPanel, BorderLayout.CENTER);
+		
+		// Log definition panel
+		JPanel logPanel = new JPanel(new BorderLayout());
+		this.add(logPanel, BorderLayout.SOUTH);
+		logPanel.add(new JLabel(MEASURE_LOG_DESCRIPTION), BorderLayout.NORTH);
+		JPanel logSettings = new JPanel(new SpringLayout());
+		JLabel label = new JLabel("Delimiter:");
+		final JComboBox delimiters = new JComboBox(DELIMITERS);
+		delimiters.setSelectedItem(LabelValue.getElement(DELIMITERS, stationData.getLoggingGlbParameter("delim")));
+		delimiters.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				LabelValue element = (LabelValue) delimiters.getSelectedItem();
+				if (!element.getValue().equals(stationData.getLoggingGlbParameter("decimalSeparator"))) {
+					stationData.setLoggingGlbParameter("delim", element.getValue());
+				} else {
+					JOptionPane.showMessageDialog(MeasurePanel.this,
+						    "Delimiter and Decimal separator cannot be the same. Please make sure that they are different.",
+						    "Error", JOptionPane.ERROR_MESSAGE);
+					delimiters.setSelectedItem(LabelValue.getElement(DELIMITERS, stationData.getLoggingGlbParameter("delim")));
+				}
+			}
+		});
+		label.setLabelFor(delimiters);
+		logSettings.add(label);
+		logSettings.add(delimiters);
+		label = new JLabel("Decimal separator:");
+		final JComboBox decimals = new JComboBox(DECIMAL);
+		decimals.setSelectedItem(LabelValue.getElement(DECIMAL, stationData.getLoggingGlbParameter("decimalSeparator")));
+		label.setLabelFor(decimals);
+		decimals.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				LabelValue element = (LabelValue) decimals.getSelectedItem();
+				if (!element.getValue().equals(stationData.getLoggingGlbParameter("delim"))) {
+					stationData.setLoggingGlbParameter("decimalSeparator", element.getValue());
+				} else {
+					JOptionPane.showMessageDialog(MeasurePanel.this,
+						    "Delimiter and Decimal separator cannot be the same. Please make sure that they are different.",
+						    "Error", JOptionPane.ERROR_MESSAGE);
+					decimals.setSelectedItem(LabelValue.getElement(DECIMAL, stationData.getLoggingGlbParameter("decimalSeparator")));
+				}
+			}
+		});
+		logSettings.add(label);
+		logSettings.add(decimals);
+		SpringUtilities.makeCompactGrid(logSettings, 2, 2, 0, 0, 5, 2);
+		logPanel.add(logSettings, BorderLayout.EAST);
+		
+		final String filePath = new File(MacroReplacer.replace(stationData.getLoggingGlbParameter("path"))).getAbsolutePath();
+		JPanel logPathPanel = new JPanel(new FlowLayout(10));
+		logPanel.add(logPathPanel, BorderLayout.WEST);
+		logPath = new JLabel("CSV files path: " +  filePath);
+		logPathPanel.add(logPath);
+		final Button filepathButton = new Button("Browse");
+		logPathPanel.add(filepathButton);
+		filepathButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				JFileChooser fc = new JFileChooser();
+				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fc.setDialogTitle("Choose Save Path for all CSV log files...");
+				fc.setCurrentDirectory(new File(filePath));
+				int ret = fc.showSaveDialog(MeasurePanel.this);
+
+				if (ret == JFileChooser.APPROVE_OPTION) {
+					File directory = fc.getSelectedFile();
+					stationData.setLoggingGlbParameter("path", directory.getAbsolutePath());
+					logPath.setText("CSV files path: " +  directory.getAbsolutePath());
+				}
+			}
+		});
 	}
 
 	/**Updates data contained in this panel's components*/
@@ -281,7 +364,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
-			if (column == 5) {
+			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
 			} else if (column == 2 && simData.isSinkMeasure(simData.getMeasureKeys().get(row))) {
 				return stationsCombos.getEditor(stationData.getStationKeysSink());
@@ -301,7 +384,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
-			if (column == 5) {
+			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
 			} else if (column == 2 && !simData.isGlobalMeasure(simData.getMeasureKeys().get(row))) {
 				return stationsCombos.getRenderer();
@@ -320,10 +403,10 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Performance Index", "Class", "Station/Region", "Conf.Int.",
+		private String[] columnNames = new String[] { "Performance Index", "Class", "Station/Region", "Stat.Res.", "Conf.Int.",
 				"Max Rel.Err.", "" };
-		private Class[] columnClasses = new Class[] { String.class, String.class, String.class, Double.class, Double.class, Object.class };
-		public int[] columnWidths = new int[] { 120, 80, 120, 60, 60, 20 };
+		private Class[] columnClasses = new Class[] { String.class, String.class, String.class, Boolean.class, Double.class, Double.class, Object.class };
+		public int[] columnWidths = new int[] { 120, 80, 120, 30, 60, 60, 20 };
 
 		public int getRowCount() {
 			return simData.getMeasureKeys().size();
@@ -359,42 +442,40 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object key = simData.getMeasureKeys().get(rowIndex);
 			switch (columnIndex) {
-				case 0: {
-					return simData.getMeasureType(key);
-				}
-				case 1: {
-					return simData.getMeasureClass(key);
-				}
-				case 2: {
-					return simData.getMeasureStation(key);
-				}
-				case 3: {
-					return simData.getMeasureAlpha(key);
-				}
-				case 4: {
-					return simData.getMeasurePrecision(key);
-				}
+			case 0: 
+				return simData.getMeasureType(key);
+			case 1: 
+				return simData.getMeasureClass(key);
+			case 2: 
+				return simData.getMeasureStation(key);
+			case 3:
+				return simData.getMeasureLog(key);
+			case 4: 
+				return simData.getMeasureAlpha(key);
+			case 5: 
+				return simData.getMeasurePrecision(key);
 			}
 			return null;
 		}
+		
 
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object key = simData.getMeasureKeys().get(rowIndex);
 			switch (columnIndex) {
-				case 0: {
+				case 0: 
 					simData.setMeasureType((String) aValue, key);
 					break;
-				}
-				case 1: {
+				case 1: 
 					simData.setMeasureClass(aValue, key);
 					break;
-				}
-				case 2: {
+				case 2: 
 					simData.setMeasureStation(aValue, key);
 					break;
-				}
-				case 3: {
+				case 3: 
+					simData.setMeasureLog((Boolean)aValue, key);
+					break;
+				case 4: {
 					try {
 						String doubleVal = (String) aValue;
 						simData.setMeasureAlpha(Double.valueOf(doubleVal), key);
@@ -402,7 +483,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					} catch (NumberFormatException e) {
 					}
 				}
-				case 4: {
+				case 5: {
 					try {
 						String doubleVal = (String) aValue;
 						simData.setMeasurePrecision(Double.valueOf(doubleVal), key);

@@ -293,6 +293,8 @@ public class SimLoader {
 				simParam.setTimestampValue(temp_ltv);
 			}
 			//END MF08
+			
+			//FIXME read measure logging attributes here...
 
 			//Returns a NodeList of all the Elements with a given tag name in the order in which they
 			//are encountered in a preorder traversal of the Document tree.
@@ -416,10 +418,8 @@ public class SimLoader {
 				//throughput measure requires an InverseMeasure object!!
 				if (measureType == SimConstants.THROUGHPUT || measureType == SimConstants.SYSTEM_THROUGHPUT || measureType == SimConstants.DROP_RATE
 						|| measureType == SimConstants.SYSTEM_DROP_RATE
-						//Added by ASHANKA START
 						//Added System power as an Inverse Measure.
 						|| measureType == SimConstants.SYSTEM_POWER
-				//Added by ASHANKA STOP
 						|| measureType == SimConstants.THROUGHPUT_PER_SINK
 				) {
 					//throughput measure

@@ -99,15 +99,16 @@ public interface SimulationDefinition {
 	 * */
 	public Object addMeasure(String type, Object stationKey, Object classKey);
 
-	/**Adds a new measure for specified class and station
+	/**Adds a new measure for specified class and station (or region)
 	 * @param type: code for measure type.
 	 * @param stationKey: specified station for measure
 	 * @param classKey: specified class
 	 * @param alpha: alpha parameter for this measure
 	 * @param precision: precision parameter for this measure
+	 * @param log: true to log the measure to CSV. False to avoid it.
 	 * @return search key for new measure
 	 * */
-	public Object addMeasure(String type, Object stationKey, Object classKey, Double alpha, Double precision);
+	public Object addMeasure(String type, Object stationKey, Object classKey, Double alpha, Double precision, boolean log);
 
 	/**Removes a mesure from list, given its search key
 	 * @param measureKey: search Key for measure to be removed
@@ -123,7 +124,7 @@ public interface SimulationDefinition {
 	 * @param measureKey: search key
 	 * @return measure type
 	 */
-	public String getMeasureType(Object measureKey);
+	public String getMeasureType(Object measureKey);	
 
 	/**sets type of parameter to be measured
 	 * @param newType new type for this measure
@@ -178,6 +179,22 @@ public interface SimulationDefinition {
 	 * @param precision value of alpha parameter
 	 */
 	public void setMeasurePrecision(Double precision, Object measureKey);
+	
+	
+	/**
+	 * Sets if measure should be logged
+	 * @param log true to log measure, false to avoid (default)
+	 * @param measureKey the key of the measure
+	 */
+	public void setMeasureLog(boolean log, Object measureKey);
+	
+	/**
+	 * Tells if a measure should be logged
+	 * @param measureKey the key of the measure
+	 * @return true if measure should be logged, false otherwise.
+	 */
+	public boolean getMeasureLog(Object measureKey);
+	
 
 	/**
 	* Tells if a given measure is global or local (i.e. if it's station independent

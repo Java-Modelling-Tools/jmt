@@ -20,10 +20,10 @@ package jmt.gui.common.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -85,20 +85,17 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	/*defines the default logger (used to report errors and information for debugging purposes)*/
 	private static final jmt.engine.log.JSimLogger debugLog = jmt.engine.log.JSimLogger.getLogger(JSimLogger.STD_LOGGER);
 
-	/*defines matching between engine representation and gui names for drop
+	/**defines matching between engine representation and gui names for drop
 	rules.*/
-	protected static final HashMap dropRulesNamesMatchings = new HashMap() {
-		/**
-		 *
-		 */
-		private static final long serialVersionUID = 1L;
-
-		{
-			put("drop", FINITE_DROP);
-			put("waiting queue", FINITE_WAITING);
-			put("BAS blocking", FINITE_BLOCK);
-		}
-	};
+	protected static final Map<String,String> DROP_RULES_MAPPING;
+	
+	static {
+		HashMap<String, String> d = new HashMap<String, String>();
+		d.put("drop", FINITE_DROP);
+		d.put("waiting queue", FINITE_WAITING);
+		d.put("BAS blocking", FINITE_BLOCK);
+		DROP_RULES_MAPPING = Collections.unmodifiableMap(d);
+	}
 
 	// Variables used with caching purpose to improve reading speed
 	protected static Map<String, Distribution> engineToGuiDistr = null;
@@ -232,8 +229,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		for (Object key : keys) {
 			Object[] dualkey = (Object[]) key;
 			RoutingStrategy rs = (RoutingStrategy) model.getRoutingStrategy(dualkey[0], dualkey[1]);
-			Map routing = rs.getValues();
-			Map values = empiricalRouting.get(key);
+			Map<Object, Double> routing = rs.getValues();
+			Map<String, Double> values = empiricalRouting.get(key);
 			Object[] names = values.keySet().toArray();
 			// Creates correct hashmap with station key --> probability mapping
 			for (Object name : names) {
@@ -484,7 +481,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			String strategy;
 			for (Object className : classNames) {
 				strategy = findText(((Element) dropRules.get(className)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-				model.setDropRule(key, classes.get(className), (String) dropRulesNamesMatchings.get(strategy));
+				model.setDropRule(key, classes.get(className), DROP_RULES_MAPPING.get(strategy));
 			}
 		}
 	}
@@ -754,7 +751,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		Iterator<String> i = rows.keySet().iterator();
 
 	    while(i.hasNext()){
-	    	String classIn = (String) i.next();
+	    	String classIn = i.next();
 	    	Object classInKey = model.getClassByName(classIn);
 	    	Element row = (Element) rows.get(classIn);
 	    	NodeList rowChild = row.getChildNodes(); 
@@ -1017,8 +1014,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String type;
 		Double alpha, precision;
 		for (int i = 0; i < measures.getLength(); i++) {
-			String stationName = ((Element) measures.item(i)).getAttribute(XML_A_MEASURE_STATION);
-			String nodeType = ((Element) measures.item(i)).getAttribute(XML_A_MEASURE_NODETYPE);
+			Element measure = (Element) measures.item(i);
+			String stationName = measure.getAttribute(XML_A_MEASURE_STATION);
+			String nodeType = measure.getAttribute(XML_A_MEASURE_NODETYPE);
 			if (stationName != null && !stationName.equals("")) {
 				if (nodeType.equalsIgnoreCase(NODETYPE_REGION)) {
 					stationKey = regions.get(stationName);
@@ -1028,14 +1026,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else {
 				stationKey = null;
 			}
-			String className = ((Element) measures.item(i)).getAttribute(XML_A_MEASURE_CLASS);
+			String className = measure.getAttribute(XML_A_MEASURE_CLASS);
 			if (className != null && !className.equals("")) {
 				classKey = classes.get(className);
 			} else {
 				classKey = null;
 			}
-			type = ((Element) measures.item(i)).getAttribute(XML_A_MEASURE_TYPE);
-
+			type = measure.getAttribute(XML_A_MEASURE_TYPE);
 			//Begins all backward compatibility conditions for Changes of Labels of Perf Index.
 			// Supports old names
 			if ("Customer Number".equalsIgnoreCase(type) && "".equalsIgnoreCase(stationName)) {
@@ -1055,10 +1052,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			}
 			//Ends the backward compatibility conditions
 			// Inverts alpha
-			alpha = new Double(1 - Double.parseDouble(((Element) measures.item(i)).getAttribute(XML_A_MEASURE_ALPHA)));
-			precision = Double.valueOf(((Element) measures.item(i)).getAttribute(XML_A_MEASURE_PRECISION));
+			alpha = new Double(1 - Double.parseDouble(measure.getAttribute(XML_A_MEASURE_ALPHA)));
+			precision = Double.valueOf(measure.getAttribute(XML_A_MEASURE_PRECISION));
+			String verboseStr = measure.getAttribute(XML_A_MEASURE_VERBOSE);
+			boolean verbose = Boolean.parseBoolean(verboseStr);
+			
 			// Adds measure to the model
-			model.addMeasure(type, stationKey, classKey, alpha, precision);
+			model.addMeasure(type, stationKey, classKey, alpha, precision, verbose);
 		}
 	}
 

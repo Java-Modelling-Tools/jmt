@@ -1,4 +1,5 @@
 /**    
+
   * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
   * This program is free software; you can redistribute it and/or modify
@@ -28,6 +29,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Vector;
@@ -38,6 +40,7 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
@@ -49,6 +52,7 @@ import javax.swing.JToolBar;
 import javax.swing.SpringLayout;
 import javax.swing.WindowConstants;
 
+import jmt.engine.log.JSimLogger;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.FastGraph;
 import jmt.framework.gui.graph.MeasureValue;
@@ -57,6 +61,7 @@ import jmt.gui.common.definitions.AbortMeasure;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.ResultsConstants;
 import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.editors.StatisticalOutputsWindow;
 import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.common.xml.XMLConstantNames;
 
@@ -103,6 +108,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	// Used to format numbers
 	private static DecimalFormat decimalFormatExp = new DecimalFormat("0.00E0");
 	private static DecimalFormat decimalFormatNorm = new DecimalFormat("#0.000");
+	private JSimLogger logger = JSimLogger.getLogger(ResultsWindow.class);
 
 	/**
 	 * Creates a new ResultsWindow
@@ -333,6 +339,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		protected JFrame popupFrame;
 		protected JTextArea textState;
 		private JButton hideLastIntervalAvgValueButton;
+		private JButton statisticalOutputsButton ;
 		protected boolean lastIntervalAvgValueFlag;
 		private JTextArea textState2;
 
@@ -498,17 +505,38 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 				}
 			});
 
+			//Creates button to display Statistical Results Window.
+			statisticalOutputsButton = new JButton("Statistical Results");
+			statisticalOutputsButton.setToolTipText("Displays requested Statistical Outputs");
+			statisticalOutputsButton.setEnabled(false);
+			
+			if (md.getLogFileName(measureIndex) == null) {
+				statisticalOutputsButton.setVisible(false);
+			}
+			statisticalOutputsButton.addActionListener(new ActionListener(){
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					File logFile = new File(results.getLogFileName(measureIndex));
+					if (!logFile.isFile()) {
+						JOptionPane.showMessageDialog(ResultsWindow.this,
+							    "CSV file not found in path '" + logFile.getAbsolutePath() + "'.",
+							    "Error", JOptionPane.ERROR_MESSAGE);
+					} else {
+						StatisticalOutputsWindow statistics=new StatisticalOutputsWindow(results, measureIndex);
+						statistics.setVisible(true); 
+					}
+				}
+			});
 			dummyPanel.add(new JLabel("   "), BorderLayout.CENTER);
 			dummyPanel.add(hideLastIntervalAvgValueButton, BorderLayout.EAST);
 
+			//Adds the Statistical Results Button to the DummyPanel.
+			dummyPanel.add(statisticalOutputsButton, BorderLayout.WEST);
 			dummyPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 6, 6));
 
 			abortAndHidePanel.add(bottomPanel, BorderLayout.NORTH);
 			abortAndHidePanel.add(dummyPanel, BorderLayout.SOUTH);
-			pivotPanel.add(mainPanel, BorderLayout.CENTER);
-			pivotPanel.add(abortAndHidePanel, BorderLayout.SOUTH);
-			// Pack text area in the north of the panel
-		  
 			pivotPanel.add(mainPanel, BorderLayout.CENTER);
 			pivotPanel.add(abortAndHidePanel, BorderLayout.SOUTH);
 			// Pack text area in the north of the panel
@@ -639,7 +667,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 								}
 							});
 						}
-						popupFrame.show();
+						popupFrame.setVisible(true);
 					}
 				}
 			});
@@ -666,6 +694,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					icon.setToolTipText(FOR_GREEN_GRAPH);
 					textState.setText(FOR_GREEN_GRAPH);
 					abortButton.setEnabled(false);
+					//Activates the Statistical Results Button.
+					statisticalOutputsButton.setEnabled(true);
 					break;
 				case MeasureDefinition.MEASURE_FAILED:
 					icon.setIcon(JMTImageLoader.loadImage(FAILED_IMAGE));
@@ -674,6 +704,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					icon.setToolTipText(FOR_GREEN_GRAPH);
 					textState.setText(FOR_GREEN_GRAPH);
 					abortButton.setEnabled(false);
+					//Activates the Statistical Results Button.
+					statisticalOutputsButton.setEnabled(true);
 					break;
 				case MeasureDefinition.MEASURE_NO_SAMPLES:
 					icon.setIcon(JMTImageLoader.loadImage(NO_SAMPLES_IMAGE));
@@ -685,6 +717,15 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					mean.setText("-");
 					graph.setVisible(false); // Hides graph if no samples were received
 					break;
+			}
+			if (md.getLogFileName(measureIndex) != null) {
+				File file = new File(md.getLogFileName(measureIndex));
+				if (file.isFile()) {
+					statisticalOutputsButton.setVisible(true);
+				} else {
+					logger.warn(String.format("Detail CSV file '%s' not found for performance index '%s'. Disabling statistic window.",
+							file.getAbsolutePath(), md.getName(measureIndex)));
+				}
 			}
 		}
 	}

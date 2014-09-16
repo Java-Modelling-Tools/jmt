@@ -46,10 +46,9 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.dataAnalysis.Measure;
-import jmt.engine.dataAnalysis.MeasureOutput;
 import jmt.engine.dataAnalysis.SimParameters;
 import jmt.engine.dataAnalysis.XMLSimulationOutput;
-import jmt.engine.dataAnalysis.measureOutputs.CSVMeasureOutput;
+import jmt.engine.dataAnalysis.measureOutputs.VerboseCSVMeasureOutput;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.random.engine.RandomEngine;
 
@@ -472,9 +471,8 @@ public class Simulation {
 					//if true, for each Measure sets the corresponding MeasureOutput
 					//a measure output can be a file (xml, txt, ...) which contains
 					//samples and final report of that measure
-
-					//MeasureOutput output = new SimpleMeasureOutput(ms.getMeasure(), false, ms.getMeasure().getName() + ".log");
-					MeasureOutput output = new CSVMeasureOutput(ms.getMeasure(), false);
+					
+					new VerboseCSVMeasureOutput(ms.getMeasure(), simParameters);
 				}
 
 				network.addMeasure(ms.getMeasure());
@@ -794,18 +792,13 @@ public class Simulation {
 		return classes;
 	}
 
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
 	public void setSimParameters(SimParameters simParameters) {
 		this.simParameters = simParameters;
 	}
 
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
+	public SimParameters getSimParameters() {
+		return simParameters;
+	}
 
 	public void setPreloadEnabled(boolean preloadEnabled) {
 		this.preloadEnabled = preloadEnabled;
