@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>
-<installation version="1.0">
-	<variables>
-		<!-- This automatically checks the "Create Desktop Shortcuts" button. Default value is "False". -->
-		<variable name="DesktopShortcutCheckboxEnabled" value="true"/>
-	</variables>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<izpack:installation version="5.0"
+                     xmlns:izpack="http://izpack.org/schema/installation"
+                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                     xsi:schemaLocation="http://izpack.org/schema/installation http://izpack.org/schema/5.0/izpack-installation-5.0.xsd">
 	<!-- 
         The info section.
          -->
@@ -32,8 +31,13 @@
 		-->
 		<url>http://jmt.sourceforge.net/</url>
 		<javaversion>1.6</javaversion>
-		<run-privileged condition="izpack.windowsinstall.vista|izpack.windowsinstall.7"/>
+		<run-privileged condition="izpack.windowsinstall.vista|izpack.windowsinstall.7|izpack.windowsinstall.8"/>
 	</info>
+	<variables>
+		<!-- This automatically checks the "Create Desktop Shortcuts" button. Default value is "False". -->
+		<variable name="DesktopShortcutCheckboxEnabled" value="true"/>
+	</variables>
+	
 	<!-- 
         The gui preferences indication.
         Sets the installer window to 800x600. It will be able to change the size.
@@ -64,8 +68,6 @@
 		<res id="shortcutSpec.xml" src="shortcutSpec.xml"/>
 		<res id="Unix_shortcutSpec.xml" src="Unix_shortcutSpec.xml"/>
 	</resources>
-	<native type="izpack" name="ShellLink.dll"/>
-	<native type="izpack" name="ShellLink_x64.dll" />
 	<!-- 
         The panels section.
         We indicate here which panels we want to use. The order will be respected.
@@ -87,6 +89,8 @@
 	<packs>
 		<pack name="jmt" required="yes">
 			<description>The Java Modelling Tools core files.</description>
+			<onSelect name=""/>
+			<onDeselect name=""/>
 			<fileset dir="" targetdir="$INSTALL_PATH">
 				<include name="License.txt"/>
 				<include name="PolitecnicoLogo.jpg"/>
@@ -101,11 +105,17 @@
 		</pack>
 		<pack name="jmt-samples" required="yes" hidden="true">
 			<description>The Java Modelling Tools sample files</description>
+			<onSelect name=""/>
+			<onDeselect name=""/>
 			<fileset dir="" targetdir="$USER_HOME/JMT">
 				<include name="examples/**/*"/>
 				<include name="jwatFormats/**/*"/>
 			</fileset>
 		</pack>
 	</packs>
-</installation>
+	<natives>
+		<native type="izpack" name="ShellLink.dll"/>
+		<native type="izpack" name="ShellLink_x64.dll" />
+	</natives>	
+</izpack:installation>
 

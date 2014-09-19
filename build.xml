@@ -184,7 +184,12 @@
         description="Creates the jar with the installer, using IzPack">
 
         <!-- Allows us to use the IzPack Ant task -->
-        <taskdef name="iz_pack" classpath="${izpack}/lib/compiler.jar"
+		<path id="izpack.classpath">
+		    <fileset dir="${izpack}">
+		        <include name="lib/*.jar" />
+		    </fileset>
+		</path>
+        <taskdef name="iz_pack" classpathref="izpack.classpath"
              classname="com.izforge.izpack.ant.IzPackTask"/>
 
         <!-- copy resources used by installer. Filters shortcut specs  -->
