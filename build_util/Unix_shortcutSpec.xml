@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://izpack.org/schema/shortcuts http://izpack.org/schema/5.0/izpack-shortcuts-5.0.xsd">
 	<programGroup defaultName="Java Modelling Tools" location="applications"/>
 	<shortcut name="JMT @jmt.version@"
-	target="java" 
+	target="$JAVA_HOME/bin/java" 
 	commandLine="-jar &quot;$INSTALL_PATH/JMT.jar&quot;" 
 	programGroup="yes"
 	desktop="yes" 
@@ -21,7 +21,7 @@
 	</shortcut>
 	
 	<shortcut name="JMT @jmt.version@ 1.5Gb Heap"
-	target="java" 
+	target="$JAVA_HOME/bin/java" 
 	commandLine="-Xmx1500M -jar &quot;$INSTALL_PATH/JMT.jar&quot;" 
 	programGroup="yes"
 	desktop="no" 
@@ -37,7 +37,7 @@
 	</shortcut>
 	
 	<shortcut name="Uninstall JMT @jmt.version@" 
-	target="java" 
+	target="$JAVA_HOME/bin/java" 
 	programGroup="yes" 
 	desktop="no" 
 	applications="no" 
