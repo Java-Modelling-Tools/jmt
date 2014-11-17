@@ -159,7 +159,7 @@ public class SysPowerPanel extends SolutionPanel {
 						for (int i=0; i<stations; i++)						
 							if (ReferenceStation[j] != stations)
 							{
-								c += throughput[ReferenceStation[j]][j][0];
+								c += throughput[ReferenceStation[j]][j][iteration];
 								break;
 							}						
 							else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
@@ -173,7 +173,7 @@ public class SysPowerPanel extends SolutionPanel {
 				for (i=0; i<stations; i++)			
 					if (ReferenceStation[columnIndex - 1] == i)
 					{
-						c = throughput[rowIndex+i][columnIndex - 1][0];
+						c = throughput[rowIndex+i][columnIndex - 1][iteration];
 					}							
 					else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
 						c = classAggr[columnIndex - 1][iteration];
@@ -190,7 +190,7 @@ public class SysPowerPanel extends SolutionPanel {
 				for (i=0; i<stations; i++)			
 					if (ReferenceStation[columnIndex - 1] == i)
 					{
-						c = throughput[rowIndex-1+i][columnIndex - 1][0];
+						c = throughput[rowIndex-1+i][columnIndex - 1][iteration];
 					}							
 					else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
 						c = classAggr[columnIndex - 1][iteration];
@@ -201,7 +201,7 @@ public class SysPowerPanel extends SolutionPanel {
 					else
 						d += resTimes[i][columnIndex - 1][iteration];
 					if(ReferenceStation[columnIndex-1] < stations)
-						d -= serviceTimes[ReferenceStation[columnIndex-1]][columnIndex-1][0];
+						d -= resTimes[ReferenceStation[columnIndex-1]][columnIndex-1][iteration];
 				d = c/d;
 				
 				// For the open classes there is no value for B
@@ -220,7 +220,7 @@ public class SysPowerPanel extends SolutionPanel {
 						else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
 							x += resTimes[i][j][iteration];
 						if (ReferenceStation[j] != stations)
-						d += x*throughput[ReferenceStation[j]][j][0]/c;
+						d += x*throughput[ReferenceStation[j]][j][iteration]/c;
 						else
 						d += x*classAggr[j][iteration]/c;				
 					}						
@@ -237,8 +237,8 @@ public class SysPowerPanel extends SolutionPanel {
 							else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
 								x += resTimes[i][j][iteration];
 							if (ReferenceStation[j] != stations){
-								x -= serviceTimes[ReferenceStation[j]][j][0];
-								d += x*throughput[ReferenceStation[j]][j][0]/c;
+								x -= resTimes[ReferenceStation[j]][j][iteration];
+								d += x*throughput[ReferenceStation[j]][j][iteration]/c;
 							}
 							else
 								d += x*classAggr[j][iteration]/c;

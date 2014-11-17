@@ -152,7 +152,7 @@ public final class ThroughputPanel extends SolutionPanel {
 					for (int i=0; i<stations; i++)						
 						if (ReferenceStation[columnIndex+j] == i)
 						{
-							c += throughput[rowIndex+i][columnIndex+j][0];
+							c += throughput[rowIndex+i][columnIndex+j][iteration];
 							break;
 						}						
 						else if (ReferenceStation[columnIndex+j] == stations) //it means "Arrival Process Station"
@@ -164,7 +164,7 @@ public final class ThroughputPanel extends SolutionPanel {
 						for (int i=0; i<stations; i++)			
 							if (ReferenceStation[columnIndex - 1] == i)
 							{
-								d = throughput[rowIndex+i][columnIndex - 1][0];
+								d = throughput[rowIndex+i][columnIndex - 1][iteration];
 							}							
 							else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
 								d = classAggr[columnIndex - 1][iteration];

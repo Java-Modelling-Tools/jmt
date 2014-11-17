@@ -25,6 +25,8 @@ import jmt.gui.exact.ExactWizard;
 import jmt.gui.exact.table.ExactTableModel;
 import javax.swing.JTable;
 
+import com.sun.org.apache.xpath.internal.axes.IteratorPool;
+
 /**
  * @author Kourosh Sheykhvand
  * Date: Nov 2013
@@ -149,7 +151,7 @@ public final class SystemRespTimePanel extends SolutionPanel {
 					else
 						d += resTimes[i][columnIndex - 1][iteration];
 					if(ReferenceStation[columnIndex-1] < stations)
-						d -= serviceTimes[ReferenceStation[columnIndex-1]][columnIndex-1][0];
+						d -= resTimes[ReferenceStation[columnIndex-1]][columnIndex-1][iteration];
 
 					// For the open classes there is no value for B
 					
@@ -162,7 +164,7 @@ public final class SystemRespTimePanel extends SolutionPanel {
 				for (int i=0; i<stations; i++)						
 					if (ReferenceStation[j] != stations)
 					{
-						c += throughput[ReferenceStation[j]][j][0];
+						c += throughput[ReferenceStation[j]][j][iteration];
 						break;
 					}						
 					else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
@@ -178,7 +180,7 @@ public final class SystemRespTimePanel extends SolutionPanel {
 						else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
 							x += resTimes[i][j][iteration];
 						if (ReferenceStation[j] != stations)
-						d += x*throughput[ReferenceStation[j]][j][0]/c;
+						d += x*throughput[ReferenceStation[j]][j][iteration]/c;
 						else
 						d += x*classAggr[j][iteration]/c;
 					}						
@@ -190,7 +192,7 @@ public final class SystemRespTimePanel extends SolutionPanel {
 					for (int i=0; i<stations; i++)						
 						if (ReferenceStation[j] != stations)
 						{
-							c += throughput[ReferenceStation[j]][j][0];
+							c += throughput[ReferenceStation[j]][j][iteration];
 							break;
 						}						
 						else if (ReferenceStation[j] == stations) //it means "No Reference Station"
@@ -207,8 +209,8 @@ public final class SystemRespTimePanel extends SolutionPanel {
 								x += resTimes[i][j][iteration];
 							if (ReferenceStation[j] != stations){
 								//x -= serviceTimes[ReferenceStation[j]][j][0];
-								x -= resTimes[ReferenceStation[j]][j][0];
-								d += x*throughput[ReferenceStation[j]][j][0]/c;
+								x -= resTimes[ReferenceStation[j]][j][iteration];
+								d += x*throughput[ReferenceStation[j]][j][iteration]/c;
 							}
 							else
 								d += x*classAggr[j][iteration]/c;
