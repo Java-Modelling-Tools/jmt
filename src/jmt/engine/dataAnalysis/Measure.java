@@ -460,7 +460,7 @@ public class Measure {
 		lastSampleWeight= lastSampleWeight+(sample*weight);
 		lastWeight= lastWeight+weight;
 		simulationTime=NetSystem.getTime();
-		statistics.putNewSample(sample, weight);
+		statistics.putNewSample(sample, weight, simulationTime);
 
 		//the sample is added, but the value of mean is updated only if counter
 		//is a multiple of pointSize (x % y is equal to the rest of the division x/y)

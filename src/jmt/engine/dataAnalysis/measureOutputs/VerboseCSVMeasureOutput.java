@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import jmt.engine.NodeSections.LogTunnel;
+import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.dataAnalysis.MeasureOutput;
 import jmt.engine.dataAnalysis.SimParameters;
 import jmt.engine.log.CSVLogger;
@@ -34,24 +36,17 @@ import jmt.engine.log.JSimLoggerFactory;
  * This class implements a csv output for measure class. <br>
  * File output: <br>
  * <table border="1"> <tr>
- * <td>Mean Value</td>
- * <td>2nd Moment</td>
- * <td>3rd Moment</td>
- * <td>4th Moment</td> 
- * <td>Variance</td>
- * <td>Standard Deviation</td>
- * <td>Coefficient of Variation</td>
- * <td>Skewness</td>
- * <td>Max Value</td>
- * <td>Min Value</td>
- * <td>Total Samples</td>
+ * <td>Timestamp (simulation time)</td>
+ * <td>Sample</td>
+ * <td>Weight</td>
  * </tr></table>
  */
 public class VerboseCSVMeasureOutput extends MeasureOutput {
+	public static final String COLUMN_TS = LogTunnel.COLUMN_TIMESTAMP;
 	public static final String COLUMN_SAMPLEVALUE = "SAMPLE";
 	public static final String COLUMN_WEIGHTVALUE = "WEIGHT";
 	
-	public static final String[] COLUMNS = {COLUMN_SAMPLEVALUE, COLUMN_WEIGHTVALUE};
+	public static final String[] COLUMNS = {COLUMN_TS, COLUMN_SAMPLEVALUE, COLUMN_WEIGHTVALUE};
 	
 	private CSVLogger logger;
 	private File file;
@@ -85,6 +80,7 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 	public void write(double sample, double weight) {
 		try {
 			Map<String, Object> values = new HashMap<String, Object>();
+			values.put(COLUMN_TS, NetSystem.getTime());
 			values.put(COLUMN_SAMPLEVALUE, sample);
 			values.put(COLUMN_WEIGHTVALUE, weight);
 			logger.log(values, defaults);

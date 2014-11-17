@@ -37,6 +37,9 @@ public class SampleStatistics {
 	private double s2weight;//sum of (sample^2)*weight
 	private double s3weight;//sum of (sample^3)*weight
 	private double s4weight;//sum of (sample^4)*weight
+	
+	private double minSimTime;
+	private double maxSimTime;
 
 	/** Creates a new instance of SampleStatistics */
 	public SampleStatistics() {
@@ -62,14 +65,17 @@ public class SampleStatistics {
 		s2weight = 0;
 		s3weight = 0;
 		s4weight = 0;
+		minSimTime = Double.MAX_VALUE;
+		maxSimTime = 0;
 	}
 	
 	/** updates the max, min, sum of weights with the new value.
-	 *  @param  sample the value of the new element
-	 *  @param  weight the weight of the new element
+	 *  @param  sample the value of the new sample
+	 *  @param  weight the weight of the new sample
+	 *  @param  simulationTime the simulation time for the new sample
 	 */
 	
-	public void putNewSample(double sample, double weight) {
+	public void putNewSample(double sample, double weight, double simulationTime) {
 		if (weight == 0) {
 			return;
 		}
@@ -86,6 +92,9 @@ public class SampleStatistics {
 		s4weight = s4weight + weight*Math.pow(sample,4);
 		//updates the number of samples
 		n++;
+		//updates the simulation time
+		minSimTime = Math.min(minSimTime,simulationTime);
+		maxSimTime = Math.max(maxSimTime, simulationTime);
 		
 		//calculates the statistical parameters until that point
 		calcStatistics();
@@ -194,6 +203,20 @@ public class SampleStatistics {
 	 */
 	public double getSamples() {
 		return n;
+	}
+	
+	/**
+	 * @return the minimum simulation time
+	 */
+	public double getMinSimTime() {
+		return minSimTime;
+	}
+	
+	/**
+	 * @return the maximum simulation time
+	 */
+	public double getMaxSimTime() {
+		return maxSimTime;
 	}
 	
 	/** creates a string with the calculated parameters of the sequence monitored

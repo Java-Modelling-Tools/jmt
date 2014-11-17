@@ -95,7 +95,7 @@ public class StatisticalOutputsLoader {
 			long lastUpdateTime = System.currentTimeMillis();
 			while(reader.hasMoreLines()) {
 				reader.readLine();
-				statistics.putNewSample(reader.getParsedSample(), reader.getParsedWeight());
+				statistics.putNewSample(reader.getParsedSample(), reader.getParsedWeight(), reader.getParsedSimulationTime());
 				// Fills distribution if present
 				if (dist != null) {
 					dist.addSample(reader.getParsedSample(), reader.getParsedWeight());

@@ -42,6 +42,7 @@ public class VerboseCSVMeasureOutputReader {
 	private BufferedReader reader;
 	private int lineNumber;
 	private DecimalFormat numberParser;
+	private double parsedSimTime;
 	private double parsedSample;
 	private double parsedWeight;
 	private boolean hasMoreLines;
@@ -130,8 +131,10 @@ public class VerboseCSVMeasureOutputReader {
 	 */
 	private void parseLine(String str) throws ParseException {
 		int index = str.indexOf(logCsvDelimiter);
-		parsedSample = numberParser.parse(str).doubleValue();
-		parsedWeight = numberParser.parse(str, new ParsePosition(index + logCsvDelimiter.length())).doubleValue();
+		int index2 = str.indexOf(logCsvDelimiter, index+logCsvDelimiter.length());
+		parsedSimTime = numberParser.parse(str).doubleValue();
+		parsedSample = numberParser.parse(str, new ParsePosition(index + logCsvDelimiter.length())).doubleValue();
+		parsedWeight = numberParser.parse(str, new ParsePosition(index2 + logCsvDelimiter.length())).doubleValue();
 	}
 	
 	/**
@@ -153,6 +156,13 @@ public class VerboseCSVMeasureOutputReader {
 	 */
 	public double getParsedWeight() {
 		return parsedWeight;
+	}
+	
+	/**
+	 * @return the parsed simulation time
+	 */
+	public double getParsedSimulationTime() {
+		return parsedSimTime;
 	}
 	
 	/**
