@@ -177,7 +177,7 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double alpha = ((GammaDistrPar) p).getAlpha();
-			double lambda = ((GammaDistrPar) p).getLambda();
+			double lambda = 1/((GammaDistrPar) p).getLambda();
 			double a = alpha;
 			double aa = -1.0, aaa = -1.0,
 
@@ -203,6 +203,7 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 					}
 				}
 			} else { // CASE B: Acceptance complement algorithm gd (gaussian distribution, box muller transformation)
+				// D. Cerotti Source:Generating Gamma Variates by a Modified Rejection Technique J.H. Ahrens U. Dieter alg GD pag 53 ? 
 				if (a != aa) { // Step 1. Preparations
 					aa = a;
 					ss = a - 0.5;
