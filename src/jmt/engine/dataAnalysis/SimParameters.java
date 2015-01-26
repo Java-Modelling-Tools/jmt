@@ -57,6 +57,8 @@ public class SimParameters {
 	private int maxSamples = 500000;
 	//min samples collected for each measure
 	private int minSamples = 50000;
+	//max simulated time after which simulation will be stopped
+	private double maxSimulatedTime = -1;
 
 	private boolean disableStatisticStop = false;
 
@@ -147,6 +149,22 @@ public class SimParameters {
 		this.maxSamples = maxSamples;
 	}
 
+	/**
+	 * Gets the max simulated time after which simulation will be stopped
+	 * @return the max simulated time after which simulation will be stopped
+	 */
+	public double getMaxSimulatedTime() {
+		return  maxSimulatedTime;
+	}
+
+	/**
+	 * Sets the max simulated time after which simulation will be stopped
+	 * @param maxSimulatedTime max simulated time after which simulation will be stopped
+	 */
+	public void setMaxSimulatedTime(double maxSimulatedTime) {
+		this.maxSimulatedTime =  maxSimulatedTime;
+	}
+	
 	/**
 	 * Sets maximum number of checks before a measure is marked as dead
 	 * @param value integer value

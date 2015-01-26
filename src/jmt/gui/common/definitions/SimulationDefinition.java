@@ -52,6 +52,10 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class. 
+ *              
+ * Modified by Sturari Nicola (Nov 2014)
+ * Desc: Added a parameter representing the maximum simulated time (not real time) before the simulation is stopped
+ *  
  */
 public interface SimulationDefinition {
 
@@ -284,6 +288,16 @@ public interface SimulationDefinition {
 	 */
 	public Double getMaximumDuration();
 
+	/**Sets maximum duration for simulation in the time unit implicitly used in the model.
+	 * @param duration maximum length of the simulation in the time unit implicitly used in the model
+	 */
+	public void setMaxSimulatedTime(Double duration);
+
+	/**Returns maximum duration for simulation in the time unit implicitly used in the model.
+	 * @return maximum length of the simulation in the time unit implicitly used in the model
+	 */
+	public Double getMaxSimulatedTime();
+	
 	/**
 	 * Gets polling interval for temporary measures
 	 * @return polling interval for temporary measures

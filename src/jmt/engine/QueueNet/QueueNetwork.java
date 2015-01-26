@@ -25,6 +25,7 @@ import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.BlockingQueue;
 import jmt.engine.NodeSections.Queue;
 import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.dataAnalysis.TempMeasure;
 
 /**
  * This class implements a queue network.
@@ -387,4 +388,16 @@ public class QueueNetwork {
 	}
 	//end NEW
 
+	/**
+	 * Aborts all the measures linked to the queue network
+	 */
+	public void abortAllMeasures() {
+		LinkedList<Measure> measures = this.getMeasures();
+		TempMeasure tmp;
+		for (Measure m: measures) {
+			tmp = new TempMeasure(m);
+			tmp.refreshMeasure();
+			tmp.abort();
+		}
+	}
 }

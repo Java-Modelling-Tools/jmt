@@ -148,6 +148,8 @@
 			<xs:attribute name="seed" type="xs:long" use="optional" />
 			<xs:attribute name="maxTime" type="xs:double"
 				use="optional" />
+			<xs:attribute name="maxSimulated" type="xs:double"
+				use="optional" />
 			<xs:attribute name="polling" type="xs:double"
 				use="optional" />
 			<xs:attribute name="maxSamples" type="xs:int"

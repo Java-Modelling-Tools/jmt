@@ -249,6 +249,8 @@ public class SimLoader {
 			//gets the default value of maxsamples
 			//(max number of samples for each measure)
 			int maxSamples = simParam.getMaxSamples();
+			//gets the default value of maxSimulatedTime
+			double maxSimulatedTime = simParam.getMaxSimulatedTime();
 
 			// Gets the timestamp value
 			simParam.setTimestampValue(Long.toString(System.currentTimeMillis()));
@@ -261,6 +263,12 @@ public class SimLoader {
 				simParam.setMaxSamples(maxSamples);
 			}
 			// END
+			
+			// Read maxSimulatedTime if specified
+			if (root.getAttribute("maxSimulated") != "") {
+				maxSimulatedTime = Double.parseDouble(root.getAttribute("maxSimulated"));
+				simParam.setMaxSimulatedTime(maxSimulatedTime);
+			}
 
 			// NEW Bertoli Marco -- Disables condidence interval as stopping criteria
 			if (root.hasAttribute("disableStatisticStop")) {

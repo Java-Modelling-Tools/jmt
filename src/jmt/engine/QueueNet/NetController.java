@@ -18,7 +18,12 @@
 
 package jmt.engine.QueueNet;
 
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 import jmt.common.exception.NetException;
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.dataAnalysis.TempMeasure;
 import jmt.engine.simEngine.SimSystem;
 
 /**
@@ -42,7 +47,14 @@ class NetController {
 	private int reachabilityTest = refreshPeriod * 10;
 
 	private boolean blocked = false;
+	
+	//set to true when when the first abort measures is called due to max simulated time
+	//in order to prevent further calls while the system is still processing enqueued events
+	private boolean aborting = false;
 
+	//the maximum simulated time a simulation is allowed to reach before it is stopped, negative value means infinite
+	private double maxSimulatedTime = -1;
+	
 	NetController() {
 
 		running = false;
@@ -72,6 +84,17 @@ class NetController {
 					}
 					//refresh measures
 					NetSystem.checkMeasures();
+				}
+				//check if a positive max simulated time is set and has been reached for the first time
+				if(maxSimulatedTime > 0 && SimSystem.getClock() > maxSimulatedTime && !aborting) {
+					ListIterator<QueueNetwork> nets = NetSystem.getNetworkList().listIterator();
+					QueueNetwork network;
+					while (nets.hasNext()) {
+						network = nets.next();
+						network.abortAllMeasures();
+						aborting = true;
+					}
+					NetSystem.checkMeasures(); //refresh measures, this triggers a simulation stop because all measures have been aborted
 				}
 			}
 		}
@@ -113,5 +136,13 @@ class NetController {
 		blocked = false;
 		notifyAll();
 	}
-
+	
+	/**
+	 * Sets the value of the max simulated time, when this value is reached in a simulation the run is stopped
+	 * @param maxSimulatedTime the value to be set for the max simulated time
+	 */
+	public void setMaxSimulatedTime(double maxSimulatedTime) {
+		this.maxSimulatedTime = maxSimulatedTime;
+	}
+	
 }

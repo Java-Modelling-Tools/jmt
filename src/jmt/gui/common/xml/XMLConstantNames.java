@@ -31,6 +31,7 @@ public interface XMLConstantNames {
 	public static final String XML_A_ROOT_NAME = "name";
 	public static final String XML_A_ROOT_SEED = "seed";
 	public static final String XML_A_ROOT_DURATION = "maxTime";
+	public static final String XML_A_ROOT_SIMULATED = "maxSimulated";
 	public static final String XML_A_ROOT_LOGPATH = "logPath"; /* MF08 0.7.4 - path of logs */
 	public static final String XML_A_ROOT_LOGDELIM = "logDelimiter"; /* MF08 0.7.4 - delimiter character in log */
 	public static final String XML_A_ROOT_LOGDECIMALSEPARATOR = "logDecimalSeparator"; /* MF08 0.7.4 - delimiter character in log */

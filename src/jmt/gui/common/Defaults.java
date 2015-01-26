@@ -117,7 +117,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("isWithAnimation", "true");
 		def.setProperty("representableClasses", "10");
 		// end Francesco D'Aquino
-
+		def.setProperty("maxSimulatedTime", "-1");
 		//GUI default parameters.
 		def.setProperty("JSIMWindowWidth", "800");
 		def.setProperty("JSIMWindowHeight", "600");

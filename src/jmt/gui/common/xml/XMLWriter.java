@@ -196,6 +196,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			elem.setAttribute(XML_A_ROOT_DURATION, model.getMaximumDuration()
 					.toString());
 		}
+		// Max simulated time (not real time, but time in system of the simulated process)
+		if (model.getMaxSimulatedTime().longValue() > 0) {
+			elem.setAttribute(XML_A_ROOT_SIMULATED, model.getMaxSimulatedTime()
+					.toString());
+		}
 		// Polling interval - Bertoli Marco
 		elem.setAttribute(XML_A_ROOT_POLLING,
 				Double.toString(model.getPollingInterval()));

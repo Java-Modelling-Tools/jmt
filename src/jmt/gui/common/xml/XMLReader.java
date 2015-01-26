@@ -165,6 +165,14 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		} else {
 			model.setMaximumDuration(new Double(-1));
 		}
+		
+		// Gets optional parameter maximum simulated time
+		String maxSimulated = root.getAttribute(XML_A_ROOT_SIMULATED);
+		if (maxSimulated != null && maxSimulated != "") {
+			model.setMaxSimulatedTime(new Double(maxSimulated));
+		} else {
+			model.setMaxSimulatedTime(new Double(-1));
+		}
 
 		// Gets optional parameter polling interval
 		String polling = root.getAttribute(XML_A_ROOT_POLLING);

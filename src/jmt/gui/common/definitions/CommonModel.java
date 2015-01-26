@@ -72,6 +72,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	Integer maxSamples;
 	Double maxDuration;
 	boolean useRandomSeed = true;
+	Double maxSimulatedTime;
 	double pollingInterval;
 	protected MeasureDefinition results = null;
 	protected Boolean disableStatistic = Boolean.FALSE;
@@ -162,6 +163,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		seed = Defaults.getAsLong("simulationSeed");
 		useRandomSeed = Defaults.getAsBoolean("isSimulationSeedRandom").booleanValue();
 		maxDuration = Defaults.getAsDouble("simulationMaxDuration");
+		maxSimulatedTime = Defaults.getAsDouble("maxSimulatedTime");
 		maxSamples = Defaults.getAsInteger("maxSimulationSamples");
 		pollingInterval = Defaults.getAsDouble("simulationPolling").doubleValue();
 		//TODO: eventually load the parametricAnalysisEnabled state from default
@@ -1880,6 +1882,19 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	@Override
 	public Double getMaximumDuration() {
 		return maxDuration;
+	}
+	
+	@Override
+	public void setMaxSimulatedTime(Double duration)
+	{
+		if (!this.maxSimulatedTime.equals(duration)) {
+			save = true;
+		}
+		this.maxSimulatedTime = duration;
+	}
+	public Double getMaxSimulatedTime()
+	{
+		return maxSimulatedTime;
 	}
 
 	/**

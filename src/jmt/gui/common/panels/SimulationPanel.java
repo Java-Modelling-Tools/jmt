@@ -67,8 +67,8 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	protected HashMap<Object, Integer> unallocated;
 
 	// Simulation parameters
-	protected JCheckBox randomSeed, infDuration, noStatistic;
-	protected JSpinner seed, duration, polling, maxSamples;
+	protected JCheckBox randomSeed, infDuration, noStatistic, infSimulated;
+	protected JSpinner seed, duration, polling, maxSamples, simulated;
 	protected JTable preloadTable;
 
 	//Francesco D'Aquino
@@ -224,6 +224,22 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		}
 		simPanel.add(infDuration);
 
+		// Maximum Simulated Time
+		label = new JLabel("Maximum simulated time: ");
+		simPanel.add(label);
+		simulated = new JSpinner(new SpinnerNumberModel(1, .1, Integer.MAX_VALUE, 1));
+		simulated.setValue(simd.getMaxSimulatedTime());
+		label.setLabelFor(simulated);
+		simPanel.add(simulated);
+		infSimulated = new JCheckBox("infinite");
+		infSimulated.setToolTipText("Disables the bound on the simulated time");
+		if (simd.getMaxSimulatedTime().longValue() == -1) {
+			infSimulated.setSelected(true);
+			simulated.setValue(new Double(600));
+			simulated.setEnabled(false);
+		}
+		simPanel.add(infSimulated);
+		
 		// Maximum number of samples
 		label = new JLabel("Maximum number of samples: ");
 		label.setToolTipText("The term samples stands for observations");
@@ -263,7 +279,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 			simPanel.add(new JPanel());
 		}
 
-		SpringUtilities.makeCompactGrid(simPanel, 4, 3, //rows, cols
+		SpringUtilities.makeCompactGrid(simPanel, 5, 3, //rows, cols
 				16, 6, //initX, initY
 				6, 6);//xPad, yPad
 		upperPanel.add(simPanel, BorderLayout.CENTER);
@@ -323,6 +339,24 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 			}
 		});
 
+		// Infinite simulated time
+		infSimulated.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (infSimulated.isSelected()) {
+					simd.setMaxSimulatedTime(new Double(-1));
+					simulated.setEnabled(false);
+				} else {
+					Object value = simulated.getValue();
+					if (value instanceof Double) {
+						simd.setMaxSimulatedTime((Double) value);
+					} else if (value instanceof Integer) {
+						simd.setMaxSimulatedTime(new Double(((Integer) value).intValue()));
+					}
+					simulated.setEnabled(true);
+				}
+			}
+		});
+		
 		if (animationEnabler != null) {
 			animationEnabler.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
@@ -351,6 +385,25 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 					}
 				}
 				duration.setValue(simd.getMaximumDuration());
+			}
+		});
+
+		// Simulated Time
+		simulated.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Object value = simulated.getValue();
+				if (value instanceof Double) {
+					Double d = (Double) value;
+					if (d.doubleValue() >= MINIMUM_TIME) {
+						simd.setMaxSimulatedTime(d);
+					}
+				} else if (value instanceof Integer) {
+					Integer i = (Integer) value;
+					if (i.intValue() >= MINIMUM_TIME) {
+						simd.setMaxSimulatedTime(new Double(i.intValue()));
+					}
+				}
+				simulated.setValue(simd.getMaxSimulatedTime());
 			}
 		});
 

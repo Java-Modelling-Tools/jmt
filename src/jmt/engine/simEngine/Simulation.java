@@ -309,6 +309,9 @@ public class Simulation {
 	 *
 	 */
 	public void initialize() throws NetException {
+		// Sets the max simulated time for the system, when reached simulation is stopped
+		NetSystem.setMaxSimulatedTime(simParameters.getMaxSimulatedTime());
+
 		// Resets the job counter
 		Job.resetCounter();
 		

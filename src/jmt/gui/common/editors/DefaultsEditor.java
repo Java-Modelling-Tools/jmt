@@ -422,8 +422,12 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Maximum duration
 		addInputInfSpinner("Maximum duration (sec)", "simulationMaxDuration", sim_panel, MINIMUM_TIME, -1);
 		simpanelnum++;
+		
+		// Maximum simulated time
+		addInputInfSpinner("Maximum simulated time", "maxSimulatedTime", sim_panel, MINIMUM_TIME, -1);
+		simpanelnum++;
 
-		// Maximum duration
+		// Maximum number of samples
 		addInputSpinner("Maximum number of samples", "maxSimulationSamples", sim_panel, 100000, "The term samples stands for observations");
 		simpanelnum++;
 
