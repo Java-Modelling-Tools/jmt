@@ -64,7 +64,7 @@ public class Gamma extends Distribution {
 		});
 
 		// Sets parameter lambda
-		parameters[1] = new Distribution.Parameter("lambda", "\u03BB", Double.class, new Double(0.5));
+		parameters[1] = new Distribution.Parameter("beta", "\u03B8", Double.class, new Double(0.5));
 		// Checks value of k must be greater then 0
 		parameters[1].setValueChecker(new Distribution.ValueChecker() {
 			public boolean checkValue(Object value) {
@@ -126,13 +126,13 @@ public class Gamma extends Distribution {
 	protected void setCM(double mean, double c) {
 		// lambda = mean * c^2 && alpha = 1 / (c*c)
 		// Backups old parameters to restore them upon a false result
-		Object oldl = getParameter("lambda").getValue();
+		Object oldl = getParameter("beta").getValue();
 		Object olda = getParameter("alpha").getValue();
-		if (getParameter("lambda").setValue(new Double(mean * c * c)) && getParameter("alpha").setValue(new Double(1 / (c * c)))) {
+		if (getParameter("beta").setValue(new Double(mean * c * c)) && getParameter("alpha").setValue(new Double(1 / (c * c)))) {
 			this.mean = mean;
 			this.c = c;
 		} else {
-			getParameter("lambda").setValue(oldl);
+			getParameter("beta").setValue(oldl);
 			getParameter("alpha").setValue(olda);
 		}
 	}
@@ -143,7 +143,7 @@ public class Gamma extends Distribution {
 	 */
 	@Override
 	public void updateCM() {
-		mean = ((Double) getParameter("alpha").getValue()).doubleValue() * ((Double) getParameter("lambda").getValue()).doubleValue();
+		mean = ((Double) getParameter("alpha").getValue()).doubleValue() * ((Double) getParameter("beta").getValue()).doubleValue();
 		c = 1 / Math.sqrt(((Double) getParameter("alpha").getValue()).doubleValue());
 	}
 
