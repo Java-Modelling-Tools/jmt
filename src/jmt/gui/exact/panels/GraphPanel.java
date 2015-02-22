@@ -65,6 +65,10 @@ import jmt.gui.exact.ExactModel;
  * @author Bertoli Marco
  *         Date: 1-giu-2006
  *         Time: 11.01.29
+ *         
+ * @author Cerotti
+ *  		Fixed results retrieval according to reference station
+ * @version Date: JAN-2015
  */
 public class GraphPanel extends WizardPanel implements ExactConstants {
 	private static final long serialVersionUID = 1L;
@@ -301,7 +305,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				for (SolverAlgorithm algo : executedAlgorithms) {
 					// System response time
 					if (currentIndex.equals(AGGREGATE_TYPES[0])) {
-						graph.draw(i++, model.getGlobalR(algo));
+						graph.draw(i++, model.getGlobalR(algo, true));
 					}
 					// System throughput
 					else if (currentIndex.equals(AGGREGATE_TYPES[1])) {
@@ -313,7 +317,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 					}
 					//For single Class TableScroll Pane is removed. 
 					else if (currentIndex.equals(ExactConstants.INDICES_TYPES[4]) && !model.isMultiClass()) {
-						graph.draw(i++, model.getGlobalSP(algo));
+						graph.draw(i++, model.getGlobalSP(algo, true));
 					}
 				}
 				autosizeGraph();
@@ -422,9 +426,9 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			} else if (classNum < 0 && statNum >= 0) {
 				graph.draw(rowNum, model.getPerStationR(alg)[statNum]);
 			} else if (classNum >= 0 && statNum < 0) {
-				graph.draw(rowNum, model.getPerClassR(alg)[classNum]);
+				graph.draw(rowNum, model.getPerClassR(alg, true)[classNum]);
 			} else {
-				graph.draw(rowNum, model.getGlobalR(alg));
+				graph.draw(rowNum, model.getGlobalR(alg, true));
 			}
 		}
 		// Utilization
@@ -439,9 +443,9 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		//System Power
 		else if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
 			if (classNum >= 0) {
-				graph.draw(rowNum, model.getPerClassSP(alg)[classNum]);
+				graph.draw(rowNum, model.getPerClassSP(alg, true)[classNum]);
 			} else if (classNum == -1) {
-				graph.draw(rowNum, model.getGlobalSP(alg));
+				graph.draw(rowNum, model.getGlobalSP(alg, true));
 			}
 		}
 		/* END */

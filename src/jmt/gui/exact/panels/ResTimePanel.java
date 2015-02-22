@@ -18,13 +18,8 @@
 
 package jmt.gui.exact.panels;
 
-import java.io.Console;
-import java.sql.Ref;
-
 import jmt.analytical.SolverAlgorithm;
-import jmt.framework.gui.help.HoverHelp;
 import jmt.gui.exact.ExactConstants;
-import jmt.gui.exact.ExactModel;
 import jmt.gui.exact.ExactWizard;
 import jmt.gui.exact.table.ExactTableModel;
 
@@ -47,11 +42,8 @@ public final class ResTimePanel extends SolutionPanel {
 	private static final long serialVersionUID = 1L;
 	private double[][][] resTimes;
 	//NEW Dall'Orso
-	private double[][] classAggs, stationAggs;
-	private double[] globalAgg;
-	
-	private double[][][] throughput;
-	private double[][] classAggr,stationAggr;
+	private double[][] stationAggs;
+	private boolean mixedModel;
 
 	//END
 
@@ -71,14 +63,13 @@ public final class ResTimePanel extends SolutionPanel {
 		super.sync();
 		/* EDITED by Abhimanyu Chugh */
 		resTimes = data.getResTimes(algorithm);
-		//NEW Dall'Orso
-		classAggs = data.getPerClassR(algorithm);
-		stationAggs = data.getPerStationR(algorithm);
-		globalAgg = data.getGlobalR(algorithm);
-		
-		throughput = data.getThroughput(algorithm);
-		classAggr = data.getPerClassX(algorithm);
-		stationAggr = data.getPerStationX(algorithm);
+		//NEW Cerotti
+		mixedModel =!(data.isClosed() || data.isOpen());
+		if(!mixedModel){
+			stationAggs = data.getPerStationR(algorithm);
+		} else{
+			stationAggs = null;
+		}
 		//END
 		/* END */
 	}
@@ -109,6 +100,7 @@ public final class ResTimePanel extends SolutionPanel {
 			rowHeaderPrototype = "Station1000";
 		}
 
+		@Override
 		public int getRowCount() {
 			if (resTimes == null) {
 				return 0;
@@ -129,6 +121,7 @@ public final class ResTimePanel extends SolutionPanel {
 
 		}
 
+		@Override
 		public int getColumnCount() {
 			if (resTimes == null) {
 				return 0;
@@ -146,11 +139,6 @@ public final class ResTimePanel extends SolutionPanel {
 
 		@Override
 		protected Object getRowName(int rowIndex) {
-			if (rowIndex == 0) {
-				//return "<html><i>Aggregate</i></html>";
-				//return null;
-			}
-			//return stationNames[rowIndex - 1];
 			return stationNames[rowIndex];
 		}
 
@@ -164,53 +152,16 @@ public final class ResTimePanel extends SolutionPanel {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-		/*
-			double d;
-			//NEW Dall'Orso
-			if (rowIndex > 0 && columnIndex > 0) {
-				d = resTimes[rowIndex - 1][columnIndex - 1][iteration];
-			} else if (rowIndex == 0 && columnIndex > 0) {
-				d = classAggs[columnIndex - 1][iteration];
-			} else if (rowIndex > 0 && columnIndex == 0) {
-				d = stationAggs[rowIndex - 1][iteration];
+			double d=-1.0;
+			if (columnIndex > 0) {
+				d = resTimes[rowIndex][columnIndex - 1][iteration];
+			} else if(!mixedModel)
+				d = stationAggs[rowIndex][iteration];
+			if (d < 0.0) {
+				return new String("--");
 			} else {
-				d = globalAgg[iteration];
-			}
-			//END
-			if (d < 0) {
-				return null; //causes the renderer to display a gray cell
-			}
-			return new Double(d);
-			*/
-			
-			double d = 0;
-			//NEW Dall'Orso
-			if (rowIndex >= 0 && columnIndex > 0) {
-				if(ReferenceStation[columnIndex-1] < stations)
-					d = resTimes[rowIndex][columnIndex - 1][iteration] / visits[ReferenceStation[columnIndex-1]][columnIndex-1]; //it is dividing the value of the each row with the visits
-				else
-					d = resTimes[rowIndex][columnIndex - 1][iteration];
-			} 
-			  else if (rowIndex >= 0 && columnIndex == 0) { //everything is here
-				double c = 0.0;
-				  for (int i=0; i< classes; i++)
-				{
-					  if(ReferenceStation[i] < stations)
-						  c += (throughput[rowIndex][i][iteration] / stationAggr[rowIndex][iteration]) * (resTimes[rowIndex][i][iteration] / visits[ReferenceStation[i]][i]) ;
-					  else
-						  c += (throughput[rowIndex][i][iteration] / stationAggr[rowIndex][iteration]) * (resTimes[rowIndex][i][iteration]) ;
-				  
-				}
-				d=c;
-			  }
-			  else {
-				d = globalAgg[iteration];
-			}
-			//END
-			if (d < 0) {
-				return null; //causes the renderer to display a gray cell
-			}
-			return new Double(d);
+				return d;						
+			}	
 		}
 		
 

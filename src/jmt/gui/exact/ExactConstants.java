@@ -94,7 +94,7 @@ public interface ExactConstants {
 			+ "</font><font size=\"3\"><br>Average number of visits to each station per class.</font></body></html>";
 	public static final String DESCRIPTION_ReferenceStation = "<html><body align=\"left\"><font size=\"4\"><b>Reference Station</b>"
 			+ "</font><font size=\"3\"><br>The station is used to compute the system throughput and the system response time for each <b>closed class</b>" +
-			".<br>Performance metrics of <b>open classes</b> are always computed with respect to the <b>arrival process</b>. Visits at the Reference station can not be Zero</font></body></html>";
+			".<br>Performance metrics of <b>open classes</b> are always computed with respect to the <b>arrival process</b>. Visits at the Reference station can not be Zero. <br> <b>ATTENTION:</b> the reference station for all closed classes is forced to be the same station.</font></body></html>";
 	
 	public static final String DESCRIPTION_SERVICEDEMANDS = "<html><body align=\"left\"><font size=\"4\"><b>Service Demands</b>"
 			+ "</font><font size=\"3\"><br>Input service demands of each station and class.<br>"

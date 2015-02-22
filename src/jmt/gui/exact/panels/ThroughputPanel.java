@@ -19,10 +19,7 @@
 package jmt.gui.exact.panels;
 
 import jmt.analytical.SolverAlgorithm;
-import jmt.framework.data.ArrayUtils;
-import jmt.framework.gui.help.HoverHelp;
 import jmt.gui.exact.ExactConstants;
-import jmt.gui.exact.ExactModel;
 import jmt.gui.exact.ExactWizard;
 import jmt.gui.exact.table.ExactTableModel;
 
@@ -95,34 +92,20 @@ public final class ThroughputPanel extends SolutionPanel {
 			rowHeaderPrototype = "Station1000";
 		}
 
+		@Override
 		public int getRowCount() {
 			if (throughput == null) {
 				return 0;
 			}
-			//OLD
-			/*
-			if (stations == 1) return 1;
-			return stations;
-			*/
-			//NEW
-			//@author Dall'Orso
 			return stations + 1;
-			//end NEW
 		}
 
+		@Override
 		public int getColumnCount() {
 			if (throughput == null) {
 				return 0;
 			}
-			//OLD
-			/*
-			if (isSingle) return 1;
-			return classes;
-			*/
-			//NEW
-			//@author Dall'Orso
 			return classes + 1;
-			//end NEW
 		}
 
 		@Override
@@ -143,38 +126,18 @@ public final class ThroughputPanel extends SolutionPanel {
 			}
 		}
 
-		@Override //Updated to show new means of Throughput
+		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			double d = 0.0;
-			if (rowIndex == 0 && columnIndex == 0) {				
-				double c = 0.0;
-				for (int j=0;j<classes;j++)
-					for (int i=0; i<stations; i++)						
-						if (ReferenceStation[columnIndex+j] == i)
-						{
-							c += throughput[rowIndex+i][columnIndex+j][iteration];
-							break;
-						}						
-						else if (ReferenceStation[columnIndex+j] == stations) //it means "Arrival Process Station"
-							{c += classAggr[columnIndex+j][iteration];
-								break;
-							}
-				d = c;
+			double d;
+			if (rowIndex == 0 && columnIndex == 0) {
+				d = globalAggr[iteration];
 			} else if (rowIndex == 0 && columnIndex > 0) {
-						for (int i=0; i<stations; i++)			
-							if (ReferenceStation[columnIndex - 1] == i)
-							{
-								d = throughput[rowIndex+i][columnIndex - 1][iteration];
-							}							
-							else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
-								d = classAggr[columnIndex - 1][iteration];
-		
+				d = classAggr[columnIndex - 1][iteration];
 			} else if (rowIndex > 0 && columnIndex == 0) {
 				d = stationAggr[rowIndex - 1][iteration];
 			} else {
 				d = throughput[rowIndex - 1][columnIndex - 1][iteration];
 			}
-			
 			if (d < 0) {
 				return null; //causes the renderer to display a gray cell
 			}

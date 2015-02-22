@@ -24,6 +24,8 @@ import java.awt.Dimension;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.EventObject;
 import jmt.gui.exact.ExactConstants;
@@ -42,6 +44,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListCellRenderer;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
@@ -59,9 +62,6 @@ import jmt.gui.exact.ld.LDEditor;
 import jmt.gui.exact.table.ComboBoxCell;
 import jmt.gui.exact.table.ExactTable;
 
-import jmt.gui.exact.ExactModel;
-import jmt.gui.exact.ExactWizard;
-
 import jmt.gui.exact.table.ExactTableModel;
 
 /**
@@ -73,7 +73,7 @@ import jmt.gui.exact.table.ExactTableModel;
  * for the reference station is ReferenceStation has n rows which refers to the the all the classes. 
  * 
  */
-public final class ReferenceStationPanel extends WizardPanel implements ForceUpdatablePanel {
+public final class ReferenceStationPanel extends WizardPanel implements ForceUpdatablePanel, ExactConstants{
 
 	private static final long serialVersionUID = 1L;
 	private ExactWizard ew;
@@ -303,11 +303,21 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			stTable.tableChanged(new TableModelEvent(stTable.getModel()));				
 		}
 		}
-	protected class STTable extends ExactTable {
+	protected class STTable extends ExactTable implements PropertyChangeListener, Runnable{
 				
 		private static final long serialVersionUID = 1L;
+		private int row;
+		private int column;
+		private Object oldValue;
+		private Object newValue;
+		
 		public STTable() {
 			super(new STTableModel());			
+			this.row = -1;
+			this.column = -1;
+			this.oldValue = null;
+			this.newValue = null;
+			this.addPropertyChangeListener( this );
 			autoResizeMode = AUTO_RESIZE_SUBSEQUENT_COLUMNS;
 			setDisplaysScrollLabels(true);			
 			setRowSelectionAllowed(true);
@@ -349,7 +359,68 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			else {
 				return new DefaultTableCellRenderer();
 			}
-		}		
+		}	
+		
+		@Override
+		public void propertyChange(PropertyChangeEvent e)
+		{
+			//  A cell has started/stopped editing
+
+			if ("tableCellEditor".equals(e.getPropertyName()))
+			{
+				if(this.isEditing())
+					processEditingStarted();
+				else
+					processEditingStopped();
+			}
+		}
+
+		/*
+		 *  Save information of the cell about to be edited
+		 */
+		private void processEditingStarted()
+		{
+			//  The invokeLater is necessary because the editing row and editing
+			//  column of the table have not been set when the "tableCellEditor"
+			//  PropertyChangeEvent is fired.
+			//  This results in the "run" method being invoked
+
+			SwingUtilities.invokeLater( this );
+		}
+		/*
+		 *  See above.
+		 */
+		@Override
+		public void run()
+		{
+			row = this.convertRowIndexToModel( this.getEditingRow() );
+			column = this.convertColumnIndexToModel( this.getEditingColumn() );
+			oldValue = this.getModel().getValueAt(row, column);
+			newValue = null;
+		}
+
+		/*
+		 *	Update the Cell history when necessary
+		 */
+		private void processEditingStopped()
+		{
+			newValue = this.getModel().getValueAt(row, column);
+			
+			
+			if (! newValue.equals(oldValue))
+			{
+				//  Make a copy of the data in case another cell starts editing
+				//  while processing this change
+				for(int i=0; i< classes; i++)
+					if(classTypes[i] == 0)
+						setValueAt(newValue, i, 1);
+				this.update();
+
+			}
+			
+		}
+		
+		
 	/**
 	 * the model backing the service times table.
 	 * Rows represent stations, columns classes.
@@ -382,36 +453,34 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 
 		@Override
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {											
-					
-			for (int i=0 ; i< stationNames.length ; i++)
-			{
-				if (classTypes[rowIndex] == 0 && value.toString().equals("Arrival Process"))
-				{									
-					ReferenceStation[rowIndex] = 0;
-					break;															
-				}
-				else if (value.toString().equals(stationNames[i]))
-				{					
-					if (visits[i][rowIndex] != 0)
-						{
-							ReferenceStation[rowIndex] = i;
-							break;
-						}
-					else
-						{
-					 	infoBox("you can not choose a station which has Zero visits. please check the visit panel","Warning!");
-					 	for (int j=0 ; j < stationNames.length-1; j++)					 	
-					 		for (int k=0; k < classNames.length; k++)
-					 			if (visits[j][k] != 0)
-					 				ReferenceStation[rowIndex] = j;					 				
-					 	break;					 	
-						}
-				}				
-				else if (classTypes[rowIndex] == 1)					
-					ReferenceStation[rowIndex] = stationNames.length-1;
-				else 
-					ReferenceStation[rowIndex] = 0;
+
+			if (classTypes[rowIndex] == CLASS_OPEN && value.toString().equals("Arrival Process"))
+			{									
+				ReferenceStation[rowIndex] = stationNames.length-1;																			
 			}
+			else			
+				for (int i=0 ; i< stationNames.length ; i++)
+				{				
+					if (value.toString().equals(stationNames[i]))
+					{					
+						if (visits[i][rowIndex] != 0)
+							{
+								ReferenceStation[rowIndex] = i;
+								break;
+							}
+						else
+							{
+						 	infoBox("you can not choose a station which has Zero visits. please check the visit panel","Warning!");
+						 	for (int j=0 ; j < stationNames.length-1; j++)					 	
+						 		for (int k=0; k < classNames.length; k++)
+						 			if (visits[j][k] != 0)
+						 				ReferenceStation[rowIndex] = j;					 				
+						 	break;					 	
+							}
+					}				
+					else 
+						ReferenceStation[rowIndex] = 0;
+				}
 			
 		}		
 					

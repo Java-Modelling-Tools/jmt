@@ -18,9 +18,7 @@
 package jmt.gui.exact.panels;
 
 import jmt.analytical.SolverAlgorithm;
-import jmt.framework.gui.help.HoverHelp;
 import jmt.gui.exact.ExactConstants;
-import jmt.gui.exact.ExactModel;
 import jmt.gui.exact.ExactWizard;
 import jmt.gui.exact.table.ExactTableModel;
 
@@ -34,10 +32,11 @@ public class SysPowerPanel extends SolutionPanel {
 	
 	//New
 	private double[][][] resTimes;
-	private double[][] classAggs, stationAggs;
+	private double[][] classAggs;
+	private double[][] classAggsW;
 	private double[] globalAgg;
-	private double[][][] throughput;
-	private double[][] stationAggr,classAggr;
+	private double[] globalAggW;
+	private boolean mixedModel;
 
 	/* EDITED by Abhimanyu Chugh */
 	public SysPowerPanel(ExactWizard ew, SolverAlgorithm alg) {
@@ -51,20 +50,19 @@ public class SysPowerPanel extends SolutionPanel {
 	@Override
 	protected void sync() {
 		super.sync();
-		/* EDITED by Abhimanyu Chugh */ //OLD
-		//classAggs = data.getPerClassSP(algorithm);
-		//globalAgg = data.getGlobalSP(algorithm);
-		/* END */
-		
-		//New
 		resTimes = data.getResTimes(algorithm);
-		classAggs = data.getPerClassR(algorithm);
-		stationAggs = data.getPerStationR(algorithm);
-		globalAgg = data.getGlobalR(algorithm);
-		
-		throughput = data.getThroughput(algorithm);		
-		stationAggr = data.getPerStationX(algorithm);
-		classAggr = data.getPerClassX(algorithm);
+		classAggs = data.getPerClassSP(algorithm, true);
+		classAggsW = data.getPerClassSP(algorithm, false);
+		//NEW Cerotti
+		mixedModel =!(data.isClosed() || data.isOpen());
+		if(!mixedModel){
+			globalAgg = data.getGlobalSP(algorithm, true);
+			globalAggW = data.getGlobalSP(algorithm, false);			
+		}
+		else{
+			globalAgg = globalAggW = null;
+		}
+				
 	}
 
 	@Override
@@ -90,6 +88,7 @@ public class SysPowerPanel extends SolutionPanel {
 			rowHeaderPrototype = "Station1000";
 		}
 
+		@Override
 		public int getRowCount() {
 			if (resTimes == null) {
 				return 0;
@@ -98,6 +97,7 @@ public class SysPowerPanel extends SolutionPanel {
 
 		}
 
+		@Override
 		public int getColumnCount() {
 			if (resTimes == null) {
 				return 0;
@@ -128,131 +128,23 @@ public class SysPowerPanel extends SolutionPanel {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			/*
-			double d = 99999;//initialized with dummy
-			Object ret;
-			//NEW Dall'Orso
-			if (rowIndex > 0 && columnIndex > 0) {
-				ret = new String("-");
-			} else if (rowIndex == 0 && columnIndex > 0) {
-				d = classAggs[columnIndex - 1][iteration];
-				ret = new Double(d);
-			} else if (rowIndex > 0 && columnIndex == 0) {
-				ret = new String("-");
-			} else {
-				d = globalAgg[iteration];
-				ret = new Double(d);
-			}
-			//END
-			if (d < 0) {
-				return null; //causes the renderer to display a gray cell
-			}
-
-			return ret;
-			*/
-			
 			//in this panel everything is the same as SystemResponseTime but with a small change we need to divide throughput over response time.
 				
-			double d=0.0;
-				double c = 0.0; //in C we have the value of the SystemThrougput the code is the same as the one in the Throughput panel
-					for (int j=0;j<classes;j++)
-						for (int i=0; i<stations; i++)						
-							if (ReferenceStation[j] != stations)
-							{
-								c += throughput[ReferenceStation[j]][j][iteration];
-								break;
-							}						
-							else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
-								{c += classAggr[j][iteration];
-									break;
-								}
-				
-			if (rowIndex == 0 && columnIndex > 0){
-				
-				int i=0;
-				for (i=0; i<stations; i++)			
-					if (ReferenceStation[columnIndex - 1] == i)
-					{
-						c = throughput[rowIndex+i][columnIndex - 1][iteration];
-					}							
-					else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
-						c = classAggr[columnIndex - 1][iteration];
-				
-				for (i=0; i< stations; i++)
-					if(ReferenceStation[columnIndex-1] < stations)
-						d += resTimes[i][columnIndex - 1][iteration] / visits[ReferenceStation[columnIndex-1]][columnIndex-1];
-					else
-						d += resTimes[i][columnIndex - 1][iteration];
-				d = c/d;}
-			else if (rowIndex == 1 && columnIndex > 0)
-			{
-				int i=0;
-				for (i=0; i<stations; i++)			
-					if (ReferenceStation[columnIndex - 1] == i)
-					{
-						c = throughput[rowIndex-1+i][columnIndex - 1][iteration];
-					}							
-					else if (ReferenceStation[columnIndex - 1] == stations) //it means "Arrival Process Station"
-						c = classAggr[columnIndex - 1][iteration];
-				
-				for (i=0; i< stations; i++)
-					if(ReferenceStation[columnIndex-1] < stations)
-						d += (resTimes[i][columnIndex - 1][iteration] / visits[ReferenceStation[columnIndex-1]][columnIndex-1]);
-					else
-						d += resTimes[i][columnIndex - 1][iteration];
-					if(ReferenceStation[columnIndex-1] < stations)
-						d -= resTimes[ReferenceStation[columnIndex-1]][columnIndex-1][iteration];
-				d = c/d;
-				
-				// For the open classes there is no value for B
-				
-				if (classTypes[columnIndex-1] == 1)
-					d = 0.0;
-			}
-			else if (rowIndex == 0 && columnIndex == 0)
-			{
-				//now the values of the throughput of each class (throughput[i][j][0]/c it means the throughput of each class over the system throughput and the sum is always 1)
-				for(int j = 0; j< classes; j++){
-					double x=0.0;					
-					for (int i=0; i<stations; i++)			
-						if (ReferenceStation[j] != stations)
-							x += resTimes[i][j][iteration] / visits[ReferenceStation[j]][j];													
-						else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
-							x += resTimes[i][j][iteration];
-						if (ReferenceStation[j] != stations)
-						d += x*throughput[ReferenceStation[j]][j][iteration]/c;
-						else
-						d += x*classAggr[j][iteration]/c;				
-					}						
-				d = c/d; //To compute the SystemPower 
-				}
-			else if (rowIndex == 1 && columnIndex == 0)
-			{				
-					//now the values of the throughput of each class (throughput[i][j][0]/c it means the throughput of each class over the system throughput and the sum is always 1)
-					for(int j = 0; j< classes; j++){
-						double x=0.0;					
-						for (int i=0; i<stations; i++)			
-							if (ReferenceStation[j] != stations)
-								x += resTimes[i][j][iteration] / visits[ReferenceStation[j]][j];													
-							else if (ReferenceStation[j] == stations) //it means "Arrival Process Station"
-								x += resTimes[i][j][iteration];
-							if (ReferenceStation[j] != stations){
-								x -= resTimes[ReferenceStation[j]][j][iteration];
-								d += x*throughput[ReferenceStation[j]][j][iteration]/c;
-							}
-							else
-								d += x*classAggr[j][iteration]/c;
-						}
-					d = c/d; //To compute the SystemPower
-					// For the open classes there is no value for B
-					for (int i = 0; i <classes; i++)
-					if (classTypes[i] == 1)
-						d = 0.0;
-			}
-			if (d < 0) {
-				return null; //causes the renderer to display a gray cell
-			}
-			if (d == 0.0)
+			double d=-1.0;
+			
+			
+			if (rowIndex == 0 && columnIndex > 0)
+				d = classAggs[columnIndex - 1][iteration];
+			else if(rowIndex ==0 && columnIndex == 0 && !mixedModel)								
+			{								
+				d = globalAgg[iteration];
+			} else if(rowIndex == 1 && columnIndex > 0){
+				d = classAggsW[columnIndex - 1][iteration];
+			} else if(!mixedModel){
+				d = globalAggW[iteration];
+			}	
+			
+			if (d < 0.0)
 			return new String("--");
 			else
 			return new Double(d);

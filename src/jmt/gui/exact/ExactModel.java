@@ -32,7 +32,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import jmt.analytical.SolverAlgorithm;
 import jmt.analytical.SolverMultiClosedAMVA;
 import jmt.framework.data.ArrayUtils;
-import jmt.gui.common.definitions.CommonModel;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -64,6 +63,9 @@ import org.w3c.dom.NodeList;
  * @author Kourosh
  *  Add a new property ReferenceStation which is used to declare the reference station for each closed class. and save and load the files
  * @version Date: OCT-2013
+ * @author Cerotti
+ *  Fixed results retrieval according to reference station
+ * @version Date: JAN-2015
  */
 
 public class ExactModel implements ExactConstants  {
@@ -235,7 +237,7 @@ public class ExactModel implements ExactConstants  {
 		classNames = ArrayUtils.copy(e.classNames);
 		classTypes = ArrayUtils.copy(e.classTypes);
 		classData = ArrayUtils.copy(e.classData);
-		
+				
 		algorithmType = e.algorithmType;
 		tolerance = e.tolerance;
 		whatifAlgorithms = EnumSet.copyOf(e.whatifAlgorithms);
@@ -243,7 +245,7 @@ public class ExactModel implements ExactConstants  {
 
 		visits = ArrayUtils.copy2(e.visits);
 
-		serviceTimes = ArrayUtils.copy3(e.serviceTimes);
+		serviceTimes = ArrayUtils.copy3(e.serviceTimes);				
 		
 		//ReferenceStation = ArrayUtils.copy2(e.ReferenceStation);
 		ReferenceStation = ArrayUtils.copy(e.ReferenceStation);
@@ -272,7 +274,7 @@ public class ExactModel implements ExactConstants  {
 					algIterations.put(alg, ArrayUtils.copy(e.algIterations.get(alg)));
 				}
 			}
-			/* END */
+					/* END */
 		}
 	}
 	
@@ -456,7 +458,7 @@ public class ExactModel implements ExactConstants  {
 				this.algIterations.put(alg, new int[iterations]);
 			}
 		}
-		
+
 		ArrayUtils.copy2to3(queueLen, this.queueLen.get(alg), iteration);
 		ArrayUtils.copy2to3(throughput, this.throughput.get(alg), iteration);
 		ArrayUtils.copy2to3(resTimes, this.resTimes.get(alg), iteration);
@@ -483,7 +485,7 @@ public class ExactModel implements ExactConstants  {
 	public void resetAlgResults(SolverAlgorithm alg) {
 		if (queueLen.containsKey(alg)) {
 			queueLen.put(alg, new double[stations][classes][iterations]);
-			throughput.put(alg, new double[stations][classes][iterations]);
+			throughput.put(alg, new double[stations][classes][iterations]);			
 			resTimes.put(alg, new double[stations][classes][iterations]);
 			util.put(alg, new double[stations][classes][iterations]);
 			if (!alg.isExact()) {
@@ -1077,7 +1079,19 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public double[][][] getResTimes(SolverAlgorithm alg) {
 		if (alg != null) {
-			return resTimes.get(alg);
+			
+			// Added by Cerotti					
+			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));
+			
+			
+			for (int s=0; s < stations; s++)
+				for (int c=0; c< classes; c++)
+					for(int i=0; i < iterations; i++)
+						if(classTypes[c]==CLASS_CLOSED)
+							if(visits[ReferenceStation[c]][c]!=0)
+								res[s][c][i] /=  (visits[ReferenceStation[c]][c]);																	
+			// End here									
+			return res;
 		}
 		return null;
 	}
@@ -1262,7 +1276,9 @@ public class ExactModel implements ExactConstants  {
 		if (classes < 2) {
 			throw new RuntimeException("System must have at least one class");
 		}
+
 		classes--;
+
 		classNames = ArrayUtils.delete(classNames, i);
 		classTypes = ArrayUtils.delete(classTypes, i);
 		classData = ArrayUtils.delete(classData, i);
@@ -1286,9 +1302,6 @@ public class ExactModel implements ExactConstants  {
 		if (stations < 2) {
 			throw new RuntimeException("System must have at least one station");
 		}
-
-		String[] BstationNames = stationNames; //Backup of stations 
-				
 		stations--;
 		stationNames = ArrayUtils.delete(stationNames, i);
 		stationTypes = ArrayUtils.delete(stationTypes, i);
@@ -1296,40 +1309,17 @@ public class ExactModel implements ExactConstants  {
 
 		visits = ArrayUtils.delete2_1(visits, i);
 		serviceTimes = ArrayUtils.delete3_1(serviceTimes, i);
-		
-
-		//ReferenceStation = ArrayUtils.delete2_2(ReferenceStation, i);
 
 		resize(stations, classes);
-		//DEK (Federico Granata) 3-10-2003
+
 		//it was considering the results valid when a class is cancelled
 		hasResults = false;
-		//END
-		
-		//Delete the selected station in ReferenceStation (Kourosh OCT 2013)		
-		/*	
-		for (int j= 0; j< classes ; j++)					
-					if (ReferenceStation[j][1] == i)
-						ReferenceStation[j][1] = 0.0;
-				String temp="";
-				for (int k= 0 ; k< classes; k++)
-				{					
-					if (ReferenceStation[k][1] == BstationNames.length)
-						ReferenceStation[k][1] = stationNames.length;
-					
-				}
-				for (int k= 0 ; k< classes; k++)
-				{						
-						temp = BstationNames[(int) ReferenceStation[k][1]];						
-						ReferenceStation[k][1] = stationNames.length;
-						for(int j=0;j<stationNames.length;j++)
-							if (temp.equals(stationNames[j]))
-								ReferenceStation[k][1] = j;					
-				}
-				*/
-		for(int j=0; j< classes; j++)
-			if(ReferenceStation[j] == i )
+
+		for(int j=0; j< classes; j++) {
+			if(ReferenceStation[j] == i ) {
 				ReferenceStation[j] = 0;
+			}
+		}
 	}
 
 	/**
@@ -1706,6 +1696,7 @@ public class ExactModel implements ExactConstants  {
 
 		Node classNode = doc.getElementsByTagName("classes").item(0);
 		Node stationNode = doc.getElementsByTagName("stations").item(0);
+		
 		Node ReferenceStationNode = doc.getElementsByTagName("ReferenceStation").item(0);
 		
 		NodeList descList = doc.getElementsByTagName("description");
@@ -2181,9 +2172,9 @@ public class ExactModel implements ExactConstants  {
 					//scan cells of each column
 					for (int j = 0; j < throughput.length; j++) {
 						//throughput is ratio of specific throughput on specific num of visits
-						if (visits[j][i] != 0) {
-							retVal[i][k] = throughput[j][i][k] / visits[j][i];
-							break;
+						if (classTypes[i]==CLASS_CLOSED && visits[j][i] != 0) {
+							// Added by Cerotti
+							retVal[i][k] = throughput[ReferenceStation[i]][i][k];
 						} else {
 							//if all visits for a class (why is this included in model???)
 							//throughput for that class is 0
@@ -2301,42 +2292,52 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-	/**Returns per-class aggregate for residence times*/
-	public double[][] getPerClassR(SolverAlgorithm alg) {
+	// Added by Cerotti
+	/**Returns per-class aggregate for residence times according to reference station including its residence time or not (boolean with)*/
+	public double[][] getPerClassR(SolverAlgorithm alg, boolean with) {
+
 		if (resTimes == null) {
 			return null;
 		}
+		
 		double[][] retVal = new double[classes][iterations];
-		double[][][] resTimes = this.resTimes.get(alg);
+		double[][][] resTimes = this.getResTimes(alg);
+		
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < retVal.length; i++) {
 				retVal[i][k] = 0;
-				for (double[][] resTime : resTimes) {
-					retVal[i][k] += resTime[i][k];
-				}
+				for (int j = 0; j < stations; j++) 
+					if(with || j!=ReferenceStation[i]){
+						retVal[i][k] += resTimes[j][i][k];
+					}
 			}
 		}
 		return retVal;
 	}
-
+	
+	
 	/**Returns per-station aggregate for residence times*/
 	public double[][] getPerStationR(SolverAlgorithm alg) {
+
 		if (resTimes == null) {
 			return null;
 		}
+
 		double[][] retVal = new double[stations][iterations];
-		double[][] xClassAggs = getPerClassX(alg);
-		double[][][] resTimes = this.resTimes.get(alg);
+//		double[][] xClassAggs = getPerClassX(alg);
+		double[][][] throughput = this.throughput.get(alg);
+		double[][][] resTimes = this.getResTimes(alg);
+				
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
-			for (int i = 0; i < retVal.length; i++) {
+			for (int i = 0; i < stations; i++) {
 				retVal[i][k] = 0;
 				double dividend = 0;
-				for (int j = 0; j < resTimes[i].length; j++) {
-					if (xClassAggs != null) {
-						retVal[i][k] += xClassAggs[j][k] * resTimes[i][j][k];
-						dividend += xClassAggs[j][k];
+				for (int j = 0; j < classes; j++) {
+					if (throughput != null) {
+						retVal[i][k] += throughput[i][j][k] * resTimes[i][j][k];
+						dividend += throughput[i][j][k];
 					} else {
 						return null;
 					}
@@ -2351,14 +2352,16 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-	/**Returns system response time*/
-	public double[] getGlobalR(SolverAlgorithm alg) {
+	// Added by Cerotti
+	/**Returns system response time according to reference station including its residence time or not (boolean with)*/
+	public double[] getGlobalR(SolverAlgorithm alg, boolean with) {
 		if (resTimes == null) {
 			return null;
 		}
 		double[] retVal = new double[iterations];
-		double[][] xClassAggs = getPerClassX(alg);
-		double[][] aggs = getPerClassR(alg);
+		double[][] xClassAggs = getPerClassX(alg);		
+		double[][] aggs = getPerClassR(alg, with);
+
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			double dividend = 0;
@@ -2378,7 +2381,9 @@ public class ExactModel implements ExactConstants  {
 		}
 		return retVal;
 	}
-
+	
+	
+	
 	/**Returns per-class aggregate for utilization*/
 	public double[][] getPerClassU(SolverAlgorithm alg) {
 		if (util == null) {
@@ -2438,11 +2443,10 @@ public class ExactModel implements ExactConstants  {
 		}
 	}
 
-	//Added by ASHANKA START
-	//System Power
-	//Unlike other performance indices we don't have station level
-	//aggregate and individual 
-	public double[][] getPerClassSP(SolverAlgorithm alg) {
+	//Added by Davide Cerotti
+	//Per-class System Power
+	//according to reference station including its residence time or not (boolean with)*/  
+	public double[][] getPerClassSP(SolverAlgorithm alg, boolean with) {
 		if (resTimes == null) {
 			return null;
 		}
@@ -2451,7 +2455,7 @@ public class ExactModel implements ExactConstants  {
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < retVal.length; i++) {
 				try {
-					retVal[i][k] = getPerClassX(alg)[i][k] / getPerClassR(alg)[i][k];
+					retVal[i][k] = getPerClassX(alg)[i][k] / getPerClassR(alg, with)[i][k];
 				} catch (ArithmeticException ae) {
 					retVal[i][k] = 0;
 				}
@@ -2459,21 +2463,28 @@ public class ExactModel implements ExactConstants  {
 		}
 		return retVal;
 	}
-
-	public double[] getGlobalSP(SolverAlgorithm alg) {
+	
+	
+	
+	//Added by Davide Cerotti
+	//System Power
+	//according to reference station including its residence time or not (boolean with)*/  
+	public double[] getGlobalSP(SolverAlgorithm alg, boolean with) {
 		if (resTimes == null) {
 			return null;
 		}
 		double[] retVal = new double[iterations];
 		for (int k = 0; k < iterations; k++) {
 			try {
-				retVal[k] = getGlobalX(alg)[k] / getGlobalR(alg)[k];
+				retVal[k] = getGlobalX(alg)[k] / getGlobalR(alg, with)[k];
 			} catch (ArithmeticException e) {
 				retVal[k] = 0;
 			}
 		}
 		return retVal;
 	}
+	
+	
 	/* END */
 
 	//Added by ASHANKA STOP
