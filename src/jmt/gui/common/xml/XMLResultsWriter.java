@@ -179,6 +179,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 				elem.setAttribute(XML_A_MEASURE_ALPHA, Double.toString(measure.getAlpha(i)));
 				elem.setAttribute(XML_A_MEASURE_PRECISION, Double.toString(measure.getPrecision(i)));
 				elem.setAttribute(XML_A_MEASURE_NODETYPE, measure.getNodeType(i));
+				elem.setAttribute(XML_A_MEASURE_DISCARDEDSAMPLES, Integer.toString(measure.getDiscardedSamples(i)));
 				if (measure.getLogFileName(i) != null) {
 					elem.setAttribute(XML_A_MEASURE_LOG, measure.getLogFileName(i));
 				}
