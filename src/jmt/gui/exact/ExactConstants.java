@@ -89,7 +89,9 @@ public interface ExactConstants {
 			+ "</font><font size=\"3\"><br>Input service times of each station for each class.<br>"
 			+ "If the station is \"Load Dependent\" you can set the service times"
 			+ " for each number of customers by double-click on \"LD Settings...\" button.<br>"
-			+ "Press \"Service Demands\" button to enter service demands instead of service times and visits.</font></body></html>";
+			+ "Press \"Service Demands\" button to enter service demands instead of service times and visits.<br>" 
+			+ "MULTICLASS MODELS: when for a station the per-class service times are different, the results are correct ONLY IF its scheduling discipline is assumed Processor Sharing (PS) and not FCFS (See BCMP Theorem).<br>" +
+			"</font></body></html>";
 	public static final String DESCRIPTION_VISITS = "<html><body align=\"left\"><font size=\"4\"><b>Visits</b>"
 			+ "</font><font size=\"3\"><br>Average number of visits to each station per class.</font></body></html>";
 	public static final String DESCRIPTION_ReferenceStation = "<html><body align=\"left\"><font size=\"4\"><b>Reference Station</b>"

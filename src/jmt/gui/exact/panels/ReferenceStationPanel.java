@@ -164,7 +164,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 	}
 	@Override
 	public String getName() {
-		return "Reference Stations";
+		return "Reference Station";
 	}
 	private void commit() {
 

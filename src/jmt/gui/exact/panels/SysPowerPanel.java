@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 package jmt.gui.exact.panels;
 
 import jmt.analytical.SolverAlgorithm;
@@ -22,15 +22,9 @@ import jmt.gui.exact.ExactConstants;
 import jmt.gui.exact.ExactWizard;
 import jmt.gui.exact.table.ExactTableModel;
 
-public class SysPowerPanel extends SolutionPanel {
+public class SysPowerPanel extends SolutionPanel implements ExactConstants{
 
 	private static final long serialVersionUID = 1L;
-
-	//OLD
-	//private double[][] classAggs;
-	//private double[] globalAgg;
-	
-	//New
 	private double[][][] resTimes;
 	private double[][] classAggs;
 	private double[][] classAggsW;
@@ -38,14 +32,11 @@ public class SysPowerPanel extends SolutionPanel {
 	private double[] globalAggW;
 	private boolean mixedModel;
 
-	/* EDITED by Abhimanyu Chugh */
 	public SysPowerPanel(ExactWizard ew, SolverAlgorithm alg) {
 		super(ew, alg);
-		// TODO Auto-generated constructor stub
 		helpText = "<html>System Power</html>";
 		name = "System Power";
 	}
-	/* END */
 
 	@Override
 	protected void sync() {
@@ -57,12 +48,12 @@ public class SysPowerPanel extends SolutionPanel {
 		mixedModel =!(data.isClosed() || data.isOpen());
 		if(!mixedModel){
 			globalAgg = data.getGlobalSP(algorithm, true);
-			globalAggW = data.getGlobalSP(algorithm, false);			
+			globalAggW = data.getGlobalSP(algorithm, false);
 		}
 		else{
 			globalAgg = globalAggW = null;
 		}
-				
+
 	}
 
 	@Override
@@ -72,7 +63,6 @@ public class SysPowerPanel extends SolutionPanel {
 
 	@Override
 	protected ExactTableModel getTableModel() {
-		// TODO Auto-generated method stub
 		return new SPTableModel();
 	}
 
@@ -108,14 +98,13 @@ public class SysPowerPanel extends SolutionPanel {
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
-				//return "<html><body><p><font size=\"0.5\">Inc R.St</font></p></body></html>";
 				return "<html><body><p><b>A</b></p></body></html>";
 			}
-			else if (rowIndex == 1)
-				//return "<html><body><p><font size=\"0.5\">NotInc R.St</font></p></body></html>";
+			else if (rowIndex == 1) {
 				return "<html><body><p><b>B</b></p></body></html>";
-			else
+			} else {
 				return null;
+			}
 		}
 
 		@Override
@@ -129,29 +118,29 @@ public class SysPowerPanel extends SolutionPanel {
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			//in this panel everything is the same as SystemResponseTime but with a small change we need to divide throughput over response time.
-				
 			double d=-1.0;
-			
-			
-			if (rowIndex == 0 && columnIndex > 0)
+
+			if (rowIndex == 0 && columnIndex > 0) {
 				d = classAggs[columnIndex - 1][iteration];
-			else if(rowIndex ==0 && columnIndex == 0 && !mixedModel)								
-			{								
+			} else if(rowIndex ==0 && columnIndex == 0 && !mixedModel)
+			{
 				d = globalAgg[iteration];
 			} else if(rowIndex == 1 && columnIndex > 0){
 				d = classAggsW[columnIndex - 1][iteration];
 			} else if(!mixedModel){
 				d = globalAggW[iteration];
-			}	
-			
-			if (d < 0.0)
-			return new String("--");
-			else
-			return new Double(d);
-		}
+			}
 
+			// NOTE: for open classes do not compute row B
+			if ( (rowIndex == 1 && columnIndex > 0 && classTypes[columnIndex-1] == CLASS_OPEN) || d < 0.0) {
+				return new String("--");
+			} else {
+				return new Double(d);
+			}
 		}
 
 	}
+
+}
 
 

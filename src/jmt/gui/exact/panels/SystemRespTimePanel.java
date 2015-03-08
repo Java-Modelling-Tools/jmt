@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ */
 
 package jmt.gui.exact.panels;
 import jmt.analytical.SolverAlgorithm;
@@ -25,30 +25,25 @@ import jmt.gui.exact.table.ExactTableModel;
 /**
  * @author Kourosh Sheykhvand
  * Date: Nov 2013
- * in this panel we are going to show the new performance indexes which is SystemResponseTime the calculation has not finished yet. 
+ * in this panel we are going to show the new performance indexes which is SystemResponseTime the calculation has not finished yet.
  *  but the value are the same as the residence time panel but I just need to divide some of them. the formula has not be calculated but again
  *  we do not need to touch the algorithm we can have the information of the residence time and then use them here.
  */
 
-public final class SystemRespTimePanel extends SolutionPanel {
-
-	/**
-	 * 
-	 */
-	
+public final class SystemRespTimePanel extends SolutionPanel implements ExactConstants{
 	private static final long serialVersionUID = 1L;
 	private double[][][] resTimes;
-//	private double[][] classAggs, stationAggs;
+	//	private double[][] classAggs, stationAggs;
 	private double[] globalAgg;
 	private double[] globalAggW;
-//	private double[][][] throughput;
+	//	private double[][][] throughput;
 	private double[][] classAggr;
 	private double[][] classAggrW;
 	private boolean mixedModel;
 
 	public SystemRespTimePanel(ExactWizard ew, SolverAlgorithm alg) {
 		super(ew, alg);
-		
+
 		helpText = "<html>System Response Time</html>";
 		name = "System Response Time";
 	}
@@ -59,11 +54,11 @@ public final class SystemRespTimePanel extends SolutionPanel {
 	@Override
 	protected void sync() {
 		super.sync();
-		
+
 		resTimes = data.getResTimes(algorithm);
-				
+
 		classAggr = data.getPerClassR(algorithm, true);
-			
+
 		classAggrW = data.getPerClassR(algorithm, false);
 		mixedModel =!(data.isClosed() || data.isOpen());
 		if(!mixedModel){
@@ -72,16 +67,16 @@ public final class SystemRespTimePanel extends SolutionPanel {
 		} else{
 			globalAgg = globalAggW = null;
 		}
-		
+
 
 	}
 	@Override
 	protected ExactTableModel getTableModel() {
-		
-		
+
+
 		return new RTTableModel();
-		
-		
+
+
 	}
 
 	@Override
@@ -90,21 +85,21 @@ public final class SystemRespTimePanel extends SolutionPanel {
 	}
 
 	private class RTTableModel extends ExactTableModel {
-		
+
 		/**
 		 * 
-		 */		
-		
+		 */
+
 		private static final long serialVersionUID = 1L;
-		
+
 		public RTTableModel() {
-			
-			prototype = new Double(1000);			
+
+			prototype = new Double(1000);
 			rowHeaderPrototype = "Station1000";
-			
-			
+
+
 		}
-		
+
 		@Override
 		public int getRowCount() {
 			if (resTimes == null) {
@@ -122,14 +117,13 @@ public final class SystemRespTimePanel extends SolutionPanel {
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
-				//return "<html><body><p><font size=\"0.5\">Inc R.St</font></p></body></html>";
 				return "<html><body><p><b>A</b></p></body></html>";
 			}
-			else if (rowIndex == 1)
-				//return "<html><body><p><font size=\"0.5\">NotInc R.St</font></p></body></html>";
+			else if (rowIndex == 1) {
 				return "<html><body><p><b>B</b></p></body></html>";
-			else
+			} else {
 				return null;
+			}
 		}
 		@Override
 		public String getColumnName(int index) {
@@ -141,22 +135,24 @@ public final class SystemRespTimePanel extends SolutionPanel {
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			double d=-1.0;
-			
-			if (rowIndex == 0 && columnIndex > 0)
+
+			if (rowIndex == 0 && columnIndex > 0) {
 				d = classAggr[columnIndex - 1][iteration];
-			else if(rowIndex ==0 && columnIndex == 0 && !mixedModel)								
-			{								
+			} else if(rowIndex ==0 && columnIndex == 0 && !mixedModel)
+			{
 				d = globalAgg[iteration];
 			} else if(rowIndex == 1 && columnIndex > 0){
 				d = classAggrW[columnIndex - 1][iteration];
 			} else if(!mixedModel){
 				d = globalAggW[iteration];
-			}			
-			if (d < 0.0)
-				return new String("--");
-			else
-				return new Double(d);
-		}
+			}
 
+			// NOTE: for open classes do not compute row B
+			if ( (rowIndex == 1 && columnIndex > 0 && classTypes[columnIndex-1] == CLASS_OPEN) || d < 0.0) {
+				return new String("--");
+			} else {
+				return new Double(d);
+			}
+		}
 	}
 }

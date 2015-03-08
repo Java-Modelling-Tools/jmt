@@ -26,13 +26,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import jmt.analytical.SolverAlgorithm;
 import jmt.analytical.SolverMultiClosedAMVA;
 import jmt.framework.data.ArrayUtils;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -630,12 +630,11 @@ public class ExactModel implements ExactConstants  {
 	public boolean isOpen() {
 		return open;
 	}
-
+	
 	/**
 	 * @return true if this object describes a mixed system
 	 */
 	public boolean isMixed() {
-		//mixed = true only if closed = false and open = false
 		return !(closed || open);
 	}
 
@@ -1185,7 +1184,7 @@ public class ExactModel implements ExactConstants  {
 		}
 		return true;
 	}
-
+		
 	/**
 	 * @return true if the model contains only open stations
 	 */
@@ -1314,12 +1313,12 @@ public class ExactModel implements ExactConstants  {
 
 		//it was considering the results valid when a class is cancelled
 		hasResults = false;
-
-		for(int j=0; j< classes; j++) {
-			if(ReferenceStation[j] == i ) {
+		//END
+		
+		//Delete the selected station in ReferenceStation (Kourosh OCT 2013)		
+		for(int j=0; j< classes; j++)
+			if(ReferenceStation[j] == i )
 				ReferenceStation[j] = 0;
-			}
-		}
 	}
 
 	/**
@@ -1698,7 +1697,6 @@ public class ExactModel implements ExactConstants  {
 		Node stationNode = doc.getElementsByTagName("stations").item(0);
 		
 		Node ReferenceStationNode = doc.getElementsByTagName("ReferenceStation").item(0);
-		
 		NodeList descList = doc.getElementsByTagName("description");
 		NodeList solList = doc.getElementsByTagName("solutions");
 		
@@ -2172,18 +2170,17 @@ public class ExactModel implements ExactConstants  {
 					//scan cells of each column
 					for (int j = 0; j < throughput.length; j++) {
 						//throughput is ratio of specific throughput on specific num of visits
-						if (classTypes[i]==CLASS_CLOSED && visits[j][i] != 0) {
+						if (classTypes[i]==CLASS_OPEN){
+							retVal[i][k] = throughput[j][i][k];
+							break;
+						} else {
+//							retVal[i][k] = throughput[j][i][k] / visits[j][i];
+							
 							// Added by Cerotti
 							retVal[i][k] = throughput[ReferenceStation[i]][i][k];
-						} else {
-							//if all visits for a class (why is this included in model???)
-							//throughput for that class is 0
-							if (j == throughput.length - 1) {
-								retVal[i][k] = 0;
-							}
+							break;
 						}
 					}
-
 				}
 
 			}
@@ -2292,6 +2289,30 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
+/*	*//**Returns per-class aggregate for residence times*//*
+	public double[][] getPerClassR(SolverAlgorithm alg) {
+
+		if (resTimes == null) {
+			return null;
+		}
+		
+		double[][] retVal = new double[classes][iterations];
+		double[][][] resTimes = this.getResTimes(alg);
+//		double[][][] resTimes = this.resTimes.get(alg);
+		
+		// Scans for every iteration (what if analysis)
+		for (int k = 0; k < iterations; k++) {
+			for (int i = 0; i < retVal.length; i++) {
+				retVal[i][k] = 0;
+				for (double[][] resTime : resTimes) {
+					retVal[i][k] += resTime[i][k];
+				}
+			}
+		}
+		return retVal;
+	}
+*/
+	
 	// Added by Cerotti
 	/**Returns per-class aggregate for residence times according to reference station including its residence time or not (boolean with)*/
 	public double[][] getPerClassR(SolverAlgorithm alg, boolean with) {
@@ -2352,6 +2373,34 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
+/*	*//**Returns system response time*//*
+	public double[] getGlobalR(SolverAlgorithm alg) {
+		if (resTimes == null) {
+			return null;
+		}
+		double[] retVal = new double[iterations];
+		double[][] xClassAggs = getPerClassX(alg);
+		double[][] aggs = getPerClassR(alg);
+		// Scans for every iteration (what if analysis)
+		for (int k = 0; k < iterations; k++) {
+			double dividend = 0;
+			if (aggs != null) {
+				for (int i = 0; i < aggs.length; i++) {
+					retVal[k] += xClassAggs[i][k] * aggs[i][k];
+					dividend += xClassAggs[i][k];
+				}
+				if (dividend > 0) {
+					retVal[k] /= dividend;
+				} else {
+					retVal[k] = 0;
+				}
+			} else {
+				retVal[k] = Double.NaN;
+			}
+		}
+		return retVal;
+	}
+*/
 	// Added by Cerotti
 	/**Returns system response time according to reference station including its residence time or not (boolean with)*/
 	public double[] getGlobalR(SolverAlgorithm alg, boolean with) {
@@ -2443,6 +2492,28 @@ public class ExactModel implements ExactConstants  {
 		}
 	}
 
+	//Added by ASHANKA START
+	//System Power
+	//Unlike other performance indices we don't have station level
+	//aggregate and individual 
+/*	public double[][] getPerClassSP(SolverAlgorithm alg) {
+		if (resTimes == null) {
+			return null;
+		}
+		double[][] retVal = new double[classes][iterations];
+		// Scans for every iteration (what if analysis)
+		for (int k = 0; k < iterations; k++) {
+			for (int i = 0; i < retVal.length; i++) {
+				try {
+					retVal[i][k] = getPerClassX(alg)[i][k] / getPerClassR(alg)[i][k];
+				} catch (ArithmeticException ae) {
+					retVal[i][k] = 0;
+				}
+			}
+		}
+		return retVal;
+	}
+*/
 	//Added by Davide Cerotti
 	//Per-class System Power
 	//according to reference station including its residence time or not (boolean with)*/  
@@ -2454,17 +2525,28 @@ public class ExactModel implements ExactConstants  {
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < retVal.length; i++) {
-				try {
-					retVal[i][k] = getPerClassX(alg)[i][k] / getPerClassR(alg, with)[i][k];
-				} catch (ArithmeticException ae) {
-					retVal[i][k] = 0;
-				}
+				retVal[i][k] = getPerClassX(alg)[i][k] / getPerClassR(alg, with)[i][k];
 			}
 		}
 		return retVal;
 	}
 	
 	
+	
+/*	public double[] getGlobalSP(SolverAlgorithm alg) {
+		if (resTimes == null) {
+			return null;
+		}
+		double[] retVal = new double[iterations];
+		for (int k = 0; k < iterations; k++) {
+			try {
+				retVal[k] = getGlobalX(alg)[k] / getGlobalR(alg)[k];
+			} catch (ArithmeticException e) {
+				retVal[k] = 0;
+			}
+		}
+		return retVal;
+	}*/
 	
 	//Added by Davide Cerotti
 	//System Power
