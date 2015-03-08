@@ -29,6 +29,7 @@
 						<xs:attribute name="finalValue" type="xs:double" use="optional"/>
 						<xs:attribute name="state" type="xs:integer" use="optional"/>
 						<xs:attribute name="analyzedSamples" type="xs:integer" use="required"/>
+						<xs:attribute name="discardedSamples" type="xs:int" use="optional"/>
 						<xs:attribute name="precision" type="xs:double" use="required"/>
 						<xs:attribute name="alpha" type="xs:double" use="required"/>
 						<xs:attribute name="nodeType" type="xs:string" use="optional"/>

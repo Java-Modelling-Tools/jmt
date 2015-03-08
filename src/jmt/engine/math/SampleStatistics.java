@@ -209,7 +209,11 @@ public class SampleStatistics {
 	 * @return the minimum simulation time
 	 */
 	public double getMinSimTime() {
-		return minSimTime;
+		if (Double.MAX_VALUE == minSimTime) {
+			return 0.0;
+		} else {
+			return minSimTime;
+		}
 	}
 	
 	/**

@@ -50,6 +50,9 @@ public class StatisticalOutputsLoader {
 	private int start = -1;
 	private int end = -1;
 	private int totalLines = 0;
+	private double maxSimTime = Double.NaN;
+	private double initialSimTime = Double.NaN;
+	private double finalSimTime = Double.NaN;
 	private CSVLoader currentLoader;
 	
 	public StatisticalOutputsLoader(MeasureDefinition measureDefinition, int measureIndex) throws FileNotFoundException{
@@ -95,6 +98,16 @@ public class StatisticalOutputsLoader {
 			long lastUpdateTime = System.currentTimeMillis();
 			while(reader.hasMoreLines()) {
 				reader.readLine();
+				
+				// Check bounds on simulation time
+				if (!Double.isNaN(initialSimTime) && reader.getParsedSimulationTime() < initialSimTime) {
+					continue;
+				}
+				if ((!Double.isNaN(finalSimTime) && reader.getParsedSimulationTime() > finalSimTime)) {
+					break;
+				}
+				
+				// Process sample
 				statistics.putNewSample(reader.getParsedSample(), reader.getParsedWeight(), reader.getParsedSimulationTime());
 				// Fills distribution if present
 				if (dist != null) {
@@ -107,6 +120,7 @@ public class StatisticalOutputsLoader {
 				if (end > 0 && reader.getLineNumber() >= end) {
 					break;
 				}
+				
 			}
 			// If totalLines was not set, count them.
 			if (totalLines <= 0) {
@@ -114,6 +128,7 @@ public class StatisticalOutputsLoader {
 					reader.readLine();
 				}
 				totalLines = reader.getLineNumber();
+				maxSimTime = reader.getParsedSimulationTime();
 			}
 		} finally {
 			reader.closeFile();
@@ -150,8 +165,32 @@ public class StatisticalOutputsLoader {
 		end = en;
 	}
 	
+	/**
+	 * Set bounds on initial simulation time
+	 * @param initialSimTime initial simulation time or NaN to skip
+	 */
+	public void setInitialSimTime(double initialSimTime) {
+		this.initialSimTime = initialSimTime;
+	}
+
+	/**
+	 * Set bounds on final simulation time
+	 * @param finalSimTime final simulation time or NaN to skip
+	 */
+	public void setFinalSimTime(double finalSimTime) {
+		this.finalSimTime = finalSimTime;
+	}
+
 	public int getTotalLines() {
 		return totalLines;
+	}
+	
+	/**
+	 * Returns maximum simulation file in the entire file
+	 * @return the maximum simulation time
+	 */
+	public double getMaxSimulationTime() {
+		return maxSimTime;
 	}
 
 	/** listener for ProgressBar in StatisticalOutputsEditor. */

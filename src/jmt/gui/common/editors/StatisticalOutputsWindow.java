@@ -1,4 +1,4 @@
-/**    
+/**
  * Copyright (C) 2011, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
@@ -27,12 +27,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
+import java.util.Enumeration;
 
+import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -40,6 +42,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
@@ -47,6 +50,8 @@ import javax.swing.SpringLayout;
 import javax.swing.WindowConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import jmt.engine.log.JSimLogger;
 import jmt.engine.math.DistributionDensity;
@@ -56,7 +61,6 @@ import jmt.framework.gui.graph.DistributionDensityGraph;
 import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.StatisticalOutputsLoader;
-import jmt.gui.common.panels.MeasurePanel;
 import jmt.gui.common.resources.JMTImageLoader;
 
 /**
@@ -64,13 +68,13 @@ import jmt.gui.common.resources.JMTImageLoader;
  * Title: StatisticalOutputsWindow Editor
  * </p>
  * <p>
- * Description: The dialog that displays statistical outputs along with the requested type of graph. It also 
+ * Description: The dialog that displays statistical outputs along with the requested type of graph. It also
  * contains a Redraw button that can be used to vary the number of samples to be taken into consideration while
  * computing statistics, and changing the type of graph desired. Furthermore, there is an option to save the graph
  * for future use.
  * </p>
  * 
- * @author Aneish Goel: july-2013 
+ * @author Aneish Goel: july-2013
  */
 
 public class StatisticalOutputsWindow extends JMTFrame {
@@ -79,6 +83,9 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 	private static final String[] GRAPH_TYPES = {"-- Select a type --", "Density Line" , "Histogram", "Distribution"};
 
+	private static final String FILTER_TYPE_SAMPLE = "SAMPLE";
+	private static final String FILTER_TYPE_TIME = "TIME";
+	
 	private JButton closeButton, reDrawButton ;
 	private JProgressBar progressBar ;
 	private StatisticalOutputsLoader sop;
@@ -89,13 +96,16 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	private JToolBar toolbar;
 	public String windowName;
 	private JTextField firstSample, lastSample, fieldMean, fieldStanDev, fieldCoefVar, fieldVar, fieldSkew, fieldKur, fieldMoment2;
-	private JTextField fieldMoment1, fieldMoment3, fieldMoment4, fieldMin, fieldMax, discardedSamples;
+	private JTextField fieldMoment1, fieldMoment3, fieldMoment4, fieldMin, fieldMax, discardedSamples, fieldMinTime, fieldMaxTime;
 	private JTextField minValue, maxValue, numberOfIntervals;
+	private JLabel minRange, maxRange;
 	private JComboBox graphType;
+	private ButtonGroup filterTypeButtons;
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0000");
 	private MeasureDefinition measureDefinition;
 	private int measureIndex;
 	private JSimLogger logger = JSimLogger.getLogger(StatisticalOutputsWindow.class);
+	private String filterType = FILTER_TYPE_SAMPLE;
 
 	public StatisticalOutputsWindow(MeasureDefinition measureDefinition, int measureIndex){
 		this.measureDefinition = measureDefinition;
@@ -133,7 +143,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		graphType.setSelectedIndex(0);
 		graphType.setToolTipText("Choose graph type amongst Density Line, Histogram and Distribution.");
 		graphType.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				updateGraph();
@@ -183,7 +193,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		numberOfIntervals.setText(DEFAULT_INTERVALS);
 		numberOfIntervals.setToolTipText("Select the number of intervals to divide the graph in between the minimum and maximum values. Press Enter to confirm.");
 		numberOfIntervals.setName("Number of Intervals");
-		
+
 		parametersPanel.add(paralabel);
 		parametersPanel.add(numberOfIntervals);
 
@@ -359,15 +369,39 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		boundsPanel.add(label);
 		boundsPanel.add(fieldMax);
 
+		//Displays Min Simulation time amongst samples
+		label = new JLabel("Min Simulation Time:");
+		fieldMinTime = new JTextField() ;
+		fieldMinTime.setEditable(false);
+		fieldMinTime.setToolTipText("Displays the simulation time of the first collected sample");
+		fieldMinTime.setMaximumSize(new Dimension(fieldMinTime.getMaximumSize().width, fieldMinTime.getMinimumSize().height));
+		label.setLabelFor(fieldMinTime);
+		boundsPanel.add(label);
+		boundsPanel.add(fieldMinTime);
+		
+		//Displays Max Simulation time amongst samples
+		label = new JLabel("Max Simulation Time:");
+		fieldMaxTime = new JTextField() ;
+		fieldMaxTime.setEditable(false);
+		fieldMaxTime.setToolTipText("Displays the simulation time of the last collected sample");
+		fieldMaxTime.setMaximumSize(new Dimension(fieldMaxTime.getMaximumSize().width, fieldMaxTime.getMinimumSize().height));
+		label.setLabelFor(fieldMaxTime);
+		boundsPanel.add(label);
+		boundsPanel.add(fieldMaxTime);
+		
+
 		label = new JLabel("No. of Discarded Samples:");
 		discardedSamples = new JTextField() ;
 		discardedSamples.setEditable(false);
 		discardedSamples.setToolTipText("Displays the number of discarded samples(transients).");
 		discardedSamples.setMaximumSize(new Dimension(discardedSamples.getMaximumSize().width, discardedSamples.getMinimumSize().height));
 		label.setLabelFor(discardedSamples);
-		discardedSamples.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)));				
+		discardedSamples.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)));
 		boundsPanel.add(label);
 		boundsPanel.add(discardedSamples);
+		
+		boundsPanel.add(new JPanel());
+		boundsPanel.add(new JPanel());
 
 		SpringUtilities.makeCompactGrid(measuresPanel, 3, 4, //rows, cols
 				2, 2, //initX, initY
@@ -379,17 +413,41 @@ public class StatisticalOutputsWindow extends JMTFrame {
 				2, 2);//xPad, yPad
 		//dataPanel.add(momentsPanel, BorderLayout.AFTER_LAST_LINE);
 
-		SpringUtilities.makeCompactGrid(boundsPanel, 3, 2, //rows, cols
+		SpringUtilities.makeCompactGrid(boundsPanel, 3, 4, //rows, cols
 				2, 2, //initX, initY
 				2, 2);//xPad, yPad
 		//dataPanel.add(boundsPanel);
 
 		//BOUNDS ON CONSIDERED SAMPLES - selects the range of samples chosen for computation
 		JPanel sampleChooser = new JPanel(new SpringLayout());
-		sampleChooser.setBorder(new TitledBorder(new EtchedBorder(), "Bounds on Samples Considered"));
+		sampleChooser.setBorder(new TitledBorder(new EtchedBorder(), "Filter analyzed samples"));
+		
+		filterTypeButtons = new ButtonGroup();
+		JRadioButton sampleRadio = new JRadioButton("Based on number of samples");
+		sampleRadio.setActionCommand(FILTER_TYPE_SAMPLE);
+		sampleChooser.add(sampleRadio);
+		JRadioButton timeRadio = new JRadioButton("Based on simulation time");
+		timeRadio.setActionCommand(FILTER_TYPE_TIME);
+		sampleChooser.add(timeRadio);
+		filterTypeButtons.add(sampleRadio);
+		filterTypeButtons.add(timeRadio);
+		filterTypeButtons.setSelected(sampleRadio.getModel(), true);
+		sampleRadio.addChangeListener(new ChangeListener() {	
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				switchFilterType(filterTypeButtons.getSelection().getActionCommand());
+				
+			}
+		});
+		timeRadio.addChangeListener(new ChangeListener() {	
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				switchFilterType(filterTypeButtons.getSelection().getActionCommand());
+				
+			}
+		});
 
-
-		JLabel minRange = new JLabel("First sample:");
+		minRange = new JLabel("First sample:");
 		firstSample = new JTextField();
 		firstSample.setEditable(true);
 		firstSample.setToolTipText("Displays the first sample considered in computation of statistics.");
@@ -400,8 +458,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		sampleChooser.add(minRange);
 		sampleChooser.add(firstSample);
 
-		JLabel maxRange = new JLabel("Last sample:");
-		lastSample = new JTextField(); 
+		maxRange = new JLabel("Last sample:");
+		lastSample = new JTextField();
 		lastSample.setEditable(true);
 		lastSample.setToolTipText("Displays the last sample considered in computation of statistics.");
 		lastSample.setMaximumSize(new Dimension(lastSample.getMaximumSize().width, lastSample.getMinimumSize().height));
@@ -411,7 +469,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		sampleChooser.add(maxRange);
 		sampleChooser.add(lastSample);
 
-		SpringUtilities.makeCompactGrid(sampleChooser, 2, 2, //rows, cols
+		SpringUtilities.makeCompactGrid(sampleChooser, 3, 2, //rows, cols
 				2, 2, //initX, initY
 				2, 2);//xPad, yPad
 
@@ -466,7 +524,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		this.add(graphPanel, BorderLayout.CENTER);
 		setFieldsEnabled(false);
-		
+
 		// Update progress
 		setProgressBar(sop.getProgress());
 		sop.setProgressTimeListener(new StatisticalOutputsLoader.ProgressTimeListener() {
@@ -514,7 +572,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			graph = null;
 		}
 		graphHolder.repaint();
-		
+
 		if (type != DistributionDensity.TYPE_NONE && dist == null) {
 			// Force a refresh if a chart was selected but no distribution was set.
 			refreshData();
@@ -539,6 +597,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		fieldKur.setText(decimalFormat.format(stat.getKurtosis()));
 		fieldMin.setText(decimalFormat.format(stat.getMin()));
 		fieldMax.setText(decimalFormat.format(stat.getMax()));
+		fieldMinTime.setText(decimalFormat.format(stat.getMinSimTime()));
+		fieldMaxTime.setText(decimalFormat.format(stat.getMaxSimTime()));
 		// Set meaningful initial values for option fields.
 		if (complete) {
 			if (isEmpty(minValue.getText())) {
@@ -548,14 +608,22 @@ public class StatisticalOutputsWindow extends JMTFrame {
 				maxValue.setText(decimalFormat.format(stat.getMax()));
 			}
 			if (isEmpty(firstSample.getText())) {
-				firstSample.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)+1));
+				if (filterType.equals(FILTER_TYPE_SAMPLE)) {
+					firstSample.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)+1));
+				} else {
+					firstSample.setText(String.valueOf(stat.getMinSimTime()));
+				}
 			}
 			if (isEmpty(lastSample.getText())) {
-				lastSample.setText(String.valueOf(sop.getTotalLines()));
+				if (filterType.equals(FILTER_TYPE_SAMPLE)) {
+					lastSample.setText(String.valueOf(sop.getTotalLines()));
+				} else {
+					lastSample.setText(String.valueOf(stat.getMaxSimTime()));
+				}
 			}
 		}
 	}
-	
+
 	/**
 	 * Utility function to return if a string is empty
 	 * @param str the string
@@ -611,23 +679,45 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		try {
 			double min = parseNumber(minValue);
 			double max = parseNumber(maxValue);
-			int start = parseNumber(firstSample).intValue();
-			if (start < 1) {
-				start = 1;
-			}
-			int end = parseNumber(lastSample).intValue();
-			if (end > sop.getTotalLines()) {
-				end = sop.getTotalLines();
+			int start, end;
+			double simStart, simEnd;
+			if (filterType.equals(FILTER_TYPE_SAMPLE)) {
+				simStart = Double.NaN;
+				simEnd = Double.NaN;
+				start = parseNumber(firstSample).intValue();
+				if (start < 1) {
+					start = 1;
+				}
+				end = parseNumber(lastSample).intValue();
+				if (end > sop.getTotalLines()) {
+					end = sop.getTotalLines();
+				}
+				firstSample.setText(String.valueOf(start));
+				lastSample.setText(String.valueOf(end));
+			} else {
+				start = -1;
+				end = -1;
+				
+				simStart = parseNumber(firstSample);
+				if (simStart < 0.0) {
+					simStart = 0.0;
+				}
+				simEnd = parseNumber(lastSample);
+				if (simEnd > sop.getMaxSimulationTime()) {
+					simEnd = sop.getMaxSimulationTime();
+				}
+				firstSample.setText(decimalFormat.format(simStart));
+				lastSample.setText(decimalFormat.format(simEnd));
 			}
 			int intervals = parseNumber(numberOfIntervals).intValue();
 
 			// Replace integers (so remove decimal numbers)
-			firstSample.setText(String.valueOf(start));
-			lastSample.setText(String.valueOf(end));
 			numberOfIntervals.setText(String.valueOf(intervals));
-			
+
 			sop.setStart(start);
 			sop.setEnd(end);
+			sop.setInitialSimTime(simStart);
+			sop.setFinalSimTime(simEnd);
 			sop.setDistribution(min, max, intervals, graphType.getSelectedIndex());
 
 			setFieldsEnabled(false);
@@ -636,7 +726,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	
+
 	/**
 	 * Enable/disable fields that should not be enabled while data is loaded.
 	 * @param enabled true to enable, false to disable
@@ -649,8 +739,13 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		firstSample.setEnabled(enabled);
 		lastSample.setEnabled(enabled);
 		numberOfIntervals.setEnabled(enabled);
+		Enumeration<AbstractButton> filterButtonsE = filterTypeButtons.getElements();
+		while (filterButtonsE.hasMoreElements()) {
+			filterButtonsE.nextElement().setEnabled(enabled);
+		}
+		
 	}
-	
+
 	private Double parseNumber(JTextField field) throws NumberFormatException {
 		if (field.getText() == null || field.getText().length() == 0) {
 			throw new NumberFormatException("No value selected for field '" + field.getName() + "'.");
@@ -663,5 +758,23 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		}
 	}
 	
+	private void switchFilterType(String newFilterType) {
+		// Ignore irrelevant changes.
+		if (newFilterType.equals(filterType)) {
+			return;
+		}
+		this.filterType = newFilterType;
+		if (newFilterType.equals(FILTER_TYPE_SAMPLE)) {
+			minRange.setText("First sample:");
+			maxRange.setText("Last sample:");
+			firstSample.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)+1));
+			lastSample.setText(String.valueOf(sop.getTotalLines()));
+		} else {
+			minRange.setText("Initial simulation time:");
+			maxRange.setText("Final simulation time:");
+			firstSample.setText(String.valueOf(0.0));
+			lastSample.setText(String.valueOf(sop.getMaxSimulationTime()));
+		}
+	}
 }
 
