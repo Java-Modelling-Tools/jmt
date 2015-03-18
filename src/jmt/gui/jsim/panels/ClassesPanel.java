@@ -605,7 +605,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 				case (3): {
 					try {
 						Integer population = Integer.decode((String) aValue);
-						if (population.intValue() > 0) {
+						if (population.intValue() >= 0) {
 							data.setClassPopulation(population, key);
 						}
 					} catch (NumberFormatException nfe) {
