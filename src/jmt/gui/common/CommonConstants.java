@@ -179,9 +179,9 @@ public interface CommonConstants {
 	public static final String PAR1 = "%PAR1%";
 	public static final String PAR2 = "%PAR2%";
 
-	public static final int MAX_NUMBER_OF_CLASSES = 30;
-	public static final int MAX_NUMBER_OF_STATIONS = 50;
-	public static final int MAX_NUMBER_OF_REGIONS = 15;
+	public static final int MAX_NUMBER_OF_CLASSES = 1000;
+	public static final int MAX_NUMBER_OF_STATIONS = 1000;
+	public static final int MAX_NUMBER_OF_REGIONS = 1000;
 
 	public static final String ALL_CLASSES = "--- All Classes ---";
 	public static final String INFINITE_CAPACITY = "Infinite Capacity";
