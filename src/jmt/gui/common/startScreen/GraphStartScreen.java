@@ -121,6 +121,7 @@ public class GraphStartScreen extends JMTFrame {
 		super(true);
 		initGUI();
 		addListeners();
+		this.revalidate();
 	}
 
 	// --- Actions associated with buttons -----------------------------------------------------------------
