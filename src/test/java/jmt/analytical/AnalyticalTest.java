@@ -31,7 +31,7 @@ import jmt.analytical.SolverSingleClosedMVA;
  * @author Stefano
  * @version 7-giu-2004 10.01.14
  */
-public class TestAnalytical {
+public class AnalyticalTest {
 
 	/**
 	 * Test

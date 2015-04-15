@@ -14,7 +14,7 @@ import jmt.analytical.SolverMultiClosedLinearizer;
 import jmt.analytical.SolverMultiClosedMVA;
 import jmt.engine.math.Printer;
 
-public class TestAMVA {
+public class AMVATest {
 
 	public static void main(String[] args) {
 		//testMultiClosedLI();
@@ -29,10 +29,10 @@ public class TestAMVA {
 		//testMultiClosedLI_MoM_huge();
 //		testMultiClosedLI2();
 		
-		TestAMVA test = new TestAMVA();
+		//TestAMVA test = new TestAMVA();
 		//test.runTests2();
 		//test.runTests3();
-		test.runTests();
+		//test.runTests();
 	}
 	
 	public void runTests() {

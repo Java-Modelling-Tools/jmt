@@ -41,7 +41,10 @@
     <target name="copy_resources" description="copies resources into build dir" depends="compile">
 
         <!-- Copy application resources -->
+	<!-- Temporarily use both resource and source folder as resources are being move to main/resources -->
         <copy todir="${class}">
+            <fileset dir="${re_src}" 
+            	excludes="**/*.java,**/*.bak,**/*.log,**/*.dfPackage,**/.svn,**/package.htm*" />
             <fileset dir="${src}" 
             	excludes="**/*.java,**/*.bak,**/*.log,**/*.dfPackage,**/.svn,**/package.htm*" />
         </copy>
