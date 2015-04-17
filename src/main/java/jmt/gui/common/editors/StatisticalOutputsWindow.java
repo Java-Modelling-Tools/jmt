@@ -59,9 +59,9 @@ import jmt.engine.math.SampleStatistics;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.DistributionDensityGraph;
 import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.StatisticalOutputsLoader;
-import jmt.gui.common.resources.JMTImageLoader;
 
 /**
  * <p>

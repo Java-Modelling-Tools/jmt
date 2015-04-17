@@ -33,10 +33,10 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
-import jmt.gui.common.resources.JMTImageLoader;
 
 /**
  * <p>Title: Imaged ComboBox Table CellViewer/CellEditor Factory</p>

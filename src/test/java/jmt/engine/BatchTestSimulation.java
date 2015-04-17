@@ -16,7 +16,7 @@
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
-package jmt.test.engine;
+package jmt.engine;
 
 import jmt.engine.testSystem.BatchTest;
 import jmt.engine.testSystem.RandomMVAModelGenerator;

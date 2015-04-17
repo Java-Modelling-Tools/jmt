@@ -20,7 +20,7 @@ package jmt.gui.common.distributions;
 
 import javax.swing.ImageIcon;
 
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 
 /**
  * <p>Title: Normal Distribution</p>

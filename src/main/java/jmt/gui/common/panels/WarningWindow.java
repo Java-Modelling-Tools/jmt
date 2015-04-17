@@ -43,7 +43,7 @@ import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 
 import jmt.gui.common.CommonConstants;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 
 /**
  * <p>Title: Warning Window</p>

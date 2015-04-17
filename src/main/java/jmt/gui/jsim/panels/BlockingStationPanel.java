@@ -45,13 +45,13 @@ import javax.swing.table.TableCellRenderer;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.common.panels.BlockingRegionParameterPanel;
 import jmt.gui.common.panels.WarningScrollTable;
-import jmt.gui.common.resources.JMTImageLoader;
 
 /**
  * <p>Title: Blocking Region Station Definition Panel</p>

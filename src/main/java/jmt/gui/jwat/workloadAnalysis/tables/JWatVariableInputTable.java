@@ -25,7 +25,7 @@ import javax.swing.table.TableCellRenderer;
 
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.gui.common.CommonConstants;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.exact.table.ComboBoxCell;
 import jmt.gui.jwat.JWATConstants;
 import jmt.gui.jwat.workloadAnalysis.tables.listeners.RowDeleteListener;

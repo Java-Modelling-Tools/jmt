@@ -46,7 +46,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import jmt.framework.gui.controller.Manager;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 
 public class JWatStartScreen extends JFrame {
 	/**

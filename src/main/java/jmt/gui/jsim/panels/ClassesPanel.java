@@ -46,12 +46,12 @@ import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.common.resources.JMTImageLoader;
 
 /**
  * Created by IntelliJ IDEA.

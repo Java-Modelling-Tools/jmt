@@ -54,11 +54,11 @@ import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.GrayCellRenderer;
-import jmt.gui.common.resources.JMTImageLoader;
 
 /**
  * <p>Title: All Blocking Region Panel</p>

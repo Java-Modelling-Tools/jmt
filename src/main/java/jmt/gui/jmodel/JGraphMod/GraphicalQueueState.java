@@ -28,9 +28,9 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import jmt.gui.common.Defaults;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.distributions.Distribution;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.jmodel.controller.Mediator;
 import jmt.gui.jmodel.controller.ModelSnapshot;
 

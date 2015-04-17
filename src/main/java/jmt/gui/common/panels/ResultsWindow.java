@@ -57,12 +57,12 @@ import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.FastGraph;
 import jmt.framework.gui.graph.MeasureValue;
 import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.AbortMeasure;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.ResultsConstants;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.editors.StatisticalOutputsWindow;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.common.xml.XMLConstantNames;
 
 /**

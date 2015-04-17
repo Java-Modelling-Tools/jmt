@@ -21,7 +21,7 @@ package jmt.gui.jmodel.mainGui;
 import java.lang.reflect.Field;
 
 import jmt.framework.gui.components.JMTToolBar;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jmodel.controller.Mediator;
 import jmt.gui.jmodel.controller.actions.SetInsertState;
 

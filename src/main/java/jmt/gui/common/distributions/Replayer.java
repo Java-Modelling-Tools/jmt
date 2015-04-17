@@ -22,7 +22,7 @@ import java.io.File;
 
 import javax.swing.ImageIcon;
 
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 
 /**
  * <p>Title: Replayer virtual distribution</p>

@@ -27,7 +27,7 @@ import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.layouts.MultiBorderLayout;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jmodel.controller.GraphMouseListner;
 import jmt.gui.jmodel.controller.Mediator;
 

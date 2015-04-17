@@ -1,18 +1,23 @@
-package jmt.test.analytical;
+package jmt.analytical;
 
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 
-import jmt.analytical.Solver;
-import jmt.analytical.SolverMulti;
-import jmt.analytical.SolverMultiClosedAQL;
-import jmt.analytical.SolverMultiClosedBardSchweitzer;
-import jmt.analytical.SolverMultiClosedChow;
-import jmt.analytical.SolverMultiClosedLinearizer;
-import jmt.analytical.SolverMultiClosedMVA;
 import jmt.engine.math.Printer;
+import jmt.util.TempTextFile;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
 
 public class AMVATest {
 
@@ -29,12 +34,19 @@ public class AMVATest {
 		//testMultiClosedLI_MoM_huge();
 //		testMultiClosedLI2();
 		
-		//TestAMVA test = new TestAMVA();
+		AMVATest test = new AMVATest();
 		//test.runTests2();
 		//test.runTests3();
-		//test.runTests();
+		test.runTests();
 	}
 	
+	@Rule public TestName name = new TestName();
+	
+	@Ignore
+	@Test
+	/**
+	 * Requires a large amount of heap space
+	 */
 	public void runTests() {
 		int queues = 5;
 		int classes = 5;
@@ -346,7 +358,8 @@ public class AMVATest {
 		}
 		
 	}
-	
+	@Ignore
+	@Test
 	public void runTests3() {
 		int queues = 5;
 		int classes = 7;
@@ -427,6 +440,8 @@ public class AMVATest {
 		}
 	}
 
+	@Ignore
+	@Test
 	public void runTests2() {
 		int queues = 13;
 		int classes = 5;
@@ -1131,7 +1146,8 @@ public class AMVATest {
 		return buf.toString();
 	}
 	
-	public static void testMultiClosedLI() {
+	@Test
+	public void testMultiClosedLI_differentAlgorithms() throws IOException, URISyntaxException {
 
 		System.out.println("Closed system with 3 classes");
 		long start = System.currentTimeMillis();
@@ -1249,8 +1265,10 @@ public class AMVATest {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
 		
-		System.out.println(toString(stations, classes, models));
+		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
 		
+		tempFile.println(toString(stations, classes, models));
+		assertCorrectOutput(tempFile);
 /*		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(3, 2);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
 			mClosedMVA.solve();
@@ -1296,8 +1314,8 @@ public class AMVATest {
 		}
 */	}
 
-
-	public static void testMultiClosedLI_visits_not1() {
+	@Test
+	public void testMultiClosedLI_visits_not1_differentAlgorithms() throws IOException, URISyntaxException {
 
 		System.out.println("Closed system with 2 classes - visits > 1");
 		long start = System.currentTimeMillis();
@@ -1410,8 +1428,10 @@ public class AMVATest {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
 		
-		System.out.println(toString(stations, classes, models));
+		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
 		
+		tempFile.println(toString(stations, classes, models));
+		assertCorrectOutput(tempFile);
 		/*
 		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(2, 2);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
@@ -1459,7 +1479,8 @@ public class AMVATest {
 		*/
 	}
 
-	public static void testMultiClosedLI_big() {
+	@Test
+	public void testMultiClosedLI_big_differentAlgorithms() throws IOException, URISyntaxException {
 
 		System.out.println("Closed system with 4 classes");
 		long start = System.currentTimeMillis();
@@ -1582,8 +1603,10 @@ public class AMVATest {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
 		
-		System.out.println(toString(stations, classes, models));
-
+		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
+		
+		tempFile.println(toString(stations, classes, models));
+		assertCorrectOutput(tempFile);
 		/*
 		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(4, 2);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
@@ -1631,7 +1654,8 @@ public class AMVATest {
 		*/
 	}
 
-	public static void testLinearizerExample() {
+	@Test
+	public void testLinearizerExample() throws IOException, URISyntaxException {
 
 		System.out.println("Closed system with 2 classes - Linearizer example from research paper");
 		long start = System.currentTimeMillis();
@@ -1744,8 +1768,10 @@ public class AMVATest {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
 		
-		System.out.println(toString(stations, classes, models));
+		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
 		
+		tempFile.println(toString(stations, classes, models));
+		assertCorrectOutput(tempFile);
 		/*
 		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(2, 2);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
@@ -1793,7 +1819,8 @@ public class AMVATest {
 		*/
 	}
 
-	public static void testMultiClosedLI_huge() {
+	@Test
+	public void testMultiClosedLI_huge() throws IOException, URISyntaxException {
 
 		System.out.println("Closed system with 6 classes");
 		long start = System.currentTimeMillis();
@@ -1929,8 +1956,11 @@ public class AMVATest {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
 		
-		System.out.println(toString(stations, classes, models));
+		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
 		
+		tempFile.println(toString(stations, classes, models));
+		
+		assertCorrectOutput(tempFile);
 		/*
 		SolverMultiClosedAQL mClosedAQL = new SolverMultiClosedAQL(6, 25, pop);
 		if (mClosedAQL.input(name, type, servt, visits)) {
@@ -2075,6 +2105,16 @@ public class AMVATest {
 		}
 
 		return buf.toString();
+	}
+	
+	private void assertCorrectOutput(TempTextFile actual) throws IOException, URISyntaxException {
+		File actualFile = actual.getFile();		
+		File expectedFile = new File(getClass().getResource(this.name.getMethodName() + ".txt").toURI().getSchemeSpecificPart());
+
+		assertTrue(this.name.getMethodName() + ": Real output differs from expected!\n"
+				+ "Expected: \n" + FileUtils.readFileToString(expectedFile)
+				+ "\nActual: \n" + FileUtils.readFileToString(actualFile), 
+				FileUtils.contentEquals(actualFile, expectedFile));
 	}
 	
 }

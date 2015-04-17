@@ -33,7 +33,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.tree.TreeNode;
 
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 
 import org.jgraph.JGraph;
 import org.jgraph.graph.DefaultGraphCell;

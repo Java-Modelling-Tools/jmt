@@ -43,7 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import jmt.framework.gui.components.JMTDialog;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.startScreen.GraphStartScreen;
 
 /**

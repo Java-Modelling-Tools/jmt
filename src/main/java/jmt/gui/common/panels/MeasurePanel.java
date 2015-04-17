@@ -52,11 +52,11 @@ import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactCellEditor;
 

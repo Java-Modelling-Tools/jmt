@@ -29,8 +29,8 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
 import jmt.framework.gui.components.HtmlPanel;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory.Contributors;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.common.startScreen.GraphStartScreen;
 
 /**

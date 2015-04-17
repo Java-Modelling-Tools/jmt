@@ -34,7 +34,7 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 
 /**
  * <p>Title: Warning ScrollPanel for Tables</p>

@@ -19,7 +19,7 @@
 package jmt.gui.jmodel.controller.actions;
 
 import jmt.framework.gui.listeners.AbstractJMTAction;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jmodel.controller.Mediator;
 
 /** Defines the Abstract action of this application, it is connected to the

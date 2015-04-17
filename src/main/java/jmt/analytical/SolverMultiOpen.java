@@ -52,8 +52,8 @@ public class SolverMultiOpen extends SolverMulti {
 		this.servers = servers;
 		if (servers == null) {
 			// Assumes one server for each station (obviously ignore delays)
-			servers = new int[stations];
-			Arrays.fill(servers, 1);
+			this.servers = new int[stations];
+			Arrays.fill(this.servers, 1);
 		}
 	}
 

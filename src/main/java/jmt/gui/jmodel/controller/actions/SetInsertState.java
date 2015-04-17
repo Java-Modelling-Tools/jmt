@@ -22,7 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import jmt.gui.common.CommonConstants;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jmodel.controller.Mediator;
 
 /**

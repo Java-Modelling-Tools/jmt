@@ -35,8 +35,8 @@ import javax.swing.SwingConstants;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.listeners.AbstractJMTAction;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.manual.ManualBookmarkers;
 import jmt.manual.PDFViewerBuffer;
 

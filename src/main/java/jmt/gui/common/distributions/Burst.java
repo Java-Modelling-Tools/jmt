@@ -6,7 +6,7 @@ import java.util.Locale;
 
 import javax.swing.ImageIcon;
 
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 
 /**
  * <p>Title: Burst Distribution</p>

@@ -40,7 +40,7 @@ import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jwat.JWATConstants;
 import jmt.gui.jwat.MainJwatWizard;
 import jmt.gui.jwat.workloadAnalysis.chart.DispFuzzyMatrix;

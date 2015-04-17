@@ -27,7 +27,7 @@ import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.MainFuzzyKMean;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jwat.JWatWizard;
 import jmt.gui.jwat.MainJwatWizard;
 import jmt.gui.jwat.workloadAnalysis.panels.ClusterPanel;

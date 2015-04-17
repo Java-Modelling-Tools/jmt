@@ -43,7 +43,7 @@ import javax.swing.border.EtchedBorder;
 
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.QuickHTMLViewer;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
 import jmt.gui.jmodel.mainGui.MainWindow;
 

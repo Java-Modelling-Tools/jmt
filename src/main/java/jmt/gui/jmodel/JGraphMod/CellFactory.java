@@ -27,7 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.ImageIcon;
 
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jmodel.controller.Mediator;
 import jmt.gui.jmodel.definitions.JmodelStationDefinition;
 

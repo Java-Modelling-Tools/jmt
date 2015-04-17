@@ -35,7 +35,7 @@ import jmt.engine.jwat.workloadAnalysis.clustering.kMean.ClusteringInfosKMean;
 import jmt.engine.jwat.workloadAnalysis.utils.JavaWatColor;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import jmt.gui.common.CommonConstants;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jwat.JWATConstants;
 
 public class KMeansInfoClustering extends JPanel implements JWATConstants, CommonConstants {

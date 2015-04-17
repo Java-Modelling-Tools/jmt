@@ -36,8 +36,8 @@ import javax.swing.border.EmptyBorder;
 
 import jmt.framework.gui.components.JMTDialog;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
 
 /**

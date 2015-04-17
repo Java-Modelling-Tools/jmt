@@ -40,10 +40,10 @@ import javax.swing.event.ListSelectionListener;
 
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.panels.StationParameterPanel;
-import jmt.gui.common.resources.JMTImageLoader;
 
 /**
  * Created by IntelliJ IDEA.

@@ -52,9 +52,9 @@ import javax.swing.WindowConstants;
 import javax.swing.border.LineBorder;
 
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.definitions.GuiInterface;
-import jmt.gui.common.resources.JMTImageLoader;
 
 /**
  * <p>Title:</p>

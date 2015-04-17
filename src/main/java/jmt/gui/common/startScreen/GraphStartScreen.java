@@ -49,9 +49,9 @@ import jmt.common.GlobalSettings;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.QuickHTMLViewer;
 import jmt.framework.net.BrowserLauncher;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.AboutDialogFactory.Company;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
 import jmt.gui.exact.ExactWizard;
 import jmt.gui.jaba.JabaWizard;
@@ -104,7 +104,7 @@ public class GraphStartScreen extends JMTFrame {
 					"</body></html>",
 					FONT_TYPE, GlobalSettings.getSetting(GlobalSettings.VERSION), FONT_TYPE);
 	public static final String HTML_CONTENT_TITLE_HREF = 
-			String.format("<html><body><b><font face='%s' size='+2'>JMT - Java Modelling Tools v.%s</font></b><br>" +
+			String.format("<html><body><bIMG_SUITEICON><font face='%s' size='+2'>JMT - Java Modelling Tools v.%s</font></b><br>" +
 					"<font face='%s' size='-1'>Project Coordinator: G.Serazzi<br><br>" +
 					"<b>Home Page:</b> <a href=\"http://jmt.sourceforge.net\">http://jmt.sourceforge.net</a></font>" +
 					"</body></html>",
@@ -121,7 +121,7 @@ public class GraphStartScreen extends JMTFrame {
 		super(true);
 		initGUI();
 		addListeners();
-		this.revalidate();
+	//	this.revalidate();
 	}
 
 	// --- Actions associated with buttons -----------------------------------------------------------------

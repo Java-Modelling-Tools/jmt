@@ -53,8 +53,8 @@ import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.table.editors.ComboBoxCellEditor;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.distributions.Distribution;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 
 /**

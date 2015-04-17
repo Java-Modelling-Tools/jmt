@@ -304,7 +304,7 @@ public class MMQueues extends JMTFrame {
 
 			this.setTitle("jMCH - Markov Chain M/M/1 Station ");
 
-			this.setIconImage(jmt.gui.common.resources.JMTImageLoader.loadImage("JMCHIcon").getImage());
+			this.setIconImage(jmt.gui.common.JMTImageLoader.loadImage("JMCHIcon").getImage());
 
 			this.setSize(new java.awt.Dimension(initSize.width, initSize.height));
 			simulationP.setLayout(new GridBagLayout());

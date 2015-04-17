@@ -61,7 +61,7 @@ public class Manager {
 			}
 			windows.remove(application);
 			if (windows.isEmpty()) {
-				System.exit(0); // Closes current JVM with no error code.
+		//		System.exit(0); // Closes current JVM with no error code.
 			}
 		}
 	}

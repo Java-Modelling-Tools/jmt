@@ -29,7 +29,7 @@ package jmt.gui.common.distributions;
 //import jmt.gui.common.distributions.Distribution.ValueChecker;
 import javax.swing.ImageIcon;
 
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 
 /**
 * <p>Title: Constant Distribution</p>

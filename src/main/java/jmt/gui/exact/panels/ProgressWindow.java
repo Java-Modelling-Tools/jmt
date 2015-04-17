@@ -37,8 +37,8 @@ import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.parametric.PAProgressWindow;
-import jmt.gui.common.resources.JMTImageLoader;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
 import jmt.gui.exact.ExactModel;
 import jmt.gui.exact.link.SolverClient;

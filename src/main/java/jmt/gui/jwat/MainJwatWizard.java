@@ -38,7 +38,7 @@ import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.Defaults;
-import jmt.gui.common.resources.JMTImageLoader;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jwat.fitting.panels.FittingPanel;
 import jmt.gui.jwat.fitting.panels.LoadDemoFittingPanel;
 import jmt.gui.jwat.trafficAnalysis.panels.EpochPanel;
