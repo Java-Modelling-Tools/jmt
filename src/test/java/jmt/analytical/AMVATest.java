@@ -19,6 +19,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 
+/**
+ * Series of tests which have corresponding .txt files 
+ * with their expected output in the resources folder.
+ *
+ */
 public class AMVATest {
 
 	public static void main(String[] args) {

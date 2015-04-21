@@ -34,6 +34,9 @@ import org.junit.Test;
 import org.junit.rules.TestName;
 
 /**
+ * Series of tests which have corresponding .txt files 
+ * with their expected output in the resources folder.
+ * 
  * @author Stefano
  * @version 7-giu-2004 10.01.14
  */

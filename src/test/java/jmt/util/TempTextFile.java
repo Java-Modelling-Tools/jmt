@@ -5,6 +5,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 
+/**
+ * A class which creates and writes to a temporary text file.
+ * Used in tests to collect output and compare it to a model 
+ * file, with the expected output.
+ * 
+ * @author Piotr Tokaj
+ *
+ */
 public class TempTextFile {
 	
 	private File file;

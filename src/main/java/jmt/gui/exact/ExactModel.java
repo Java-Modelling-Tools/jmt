@@ -2606,6 +2606,7 @@ public class ExactModel implements ExactConstants  {
 				visits[i][j] = 1;
 			}
 		}
+		changed = true;
 	}
 
 	//calculates global arrival rate for open classes

@@ -1,15 +1,23 @@
 package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
+import jmt.gui.jaba.JabaWizard;
+import jmt.util.TextButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
+import org.fest.swing.finder.WindowFinder;
 import org.fest.swing.fixture.FrameFixture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class MainTest {
+/**
+ * 
+ * @author Piotr Tokaj
+ *
+ */
+public class JabaGuiTest {
 
 	private FrameFixture window;
 
@@ -21,13 +29,21 @@ public class MainTest {
 						return new GraphStartScreen();
 					}
 				}));
-	}
-
-	@Test
-	public void mainWindowDisplaysCorrectly() {
 		window.show();
 	}
 
+	/**
+	 * Checks that, on the main JMT window, the user can press the "JABA"
+	 * button, and that this will open a new window of type @JabaWizard
+	 * (which is the JABA frame).
+	 */
+	@Test
+	public void mainJABAWindowDisplaysCorrectly() {
+		window.button(new TextButtonMatcher("JABA")).click();
+		FrameFixture jaba = WindowFinder.findFrame(JabaWizard.class).using(window.robot);
+		jaba.show();
+	}
+	
 	@After
 	public void tearDown() {
 		window.cleanUp();
