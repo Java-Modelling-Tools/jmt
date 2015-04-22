@@ -41,8 +41,8 @@ import jmt.gui.common.definitions.ModelConverter;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.XMLWriter;
-import jmt.gui.exact.ExactConstants;
-import jmt.gui.exact.ExactModel;
+import jmt.jmva.gui.exact.ExactConstants;
+import jmt.jmva.gui.exact.ExactModel;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

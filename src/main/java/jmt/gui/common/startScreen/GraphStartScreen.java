@@ -53,12 +53,12 @@ import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.AboutDialogFactory.Company;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
-import jmt.gui.exact.ExactWizard;
 import jmt.gui.jaba.JabaWizard;
 import jmt.gui.jmodel.mainGui.MainWindow;
 import jmt.gui.jsim.JSIMMain;
 import jmt.gui.jwat.MainJwatWizard;
 import jmt.jmarkov.MMQueues;
+import jmt.jmva.gui.exact.ExactWizard;
 import jmt.manual.ManualBookmarkers;
 import jmt.manual.PDFViewerBuffer;
 

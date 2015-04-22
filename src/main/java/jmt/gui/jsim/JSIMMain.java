@@ -64,8 +64,6 @@ import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
 import jmt.gui.common.xml.ModelLoader;
 import jmt.gui.common.xml.XMLWriter;
-import jmt.gui.exact.ExactModel;
-import jmt.gui.exact.ExactWizard;
 import jmt.gui.jmodel.controller.SimulationStateChecker;
 import jmt.gui.jmodel.panels.jmodelClassesPanel;
 import jmt.gui.jsim.definitions.JSIMModel;
@@ -76,6 +74,8 @@ import jmt.gui.jsim.panels.ConnectionsPanel;
 import jmt.gui.jsim.panels.JSimProblemsWindow;
 import jmt.gui.jsim.panels.RSPLPanel;
 import jmt.gui.jsim.panels.StationsPanel;
+import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.gui.exact.ExactWizard;
 import jmt.manual.ManualBookmarkers;
 import jmt.manual.PDFViewerBuffer;
 

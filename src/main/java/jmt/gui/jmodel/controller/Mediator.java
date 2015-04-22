@@ -75,8 +75,6 @@ import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
 import jmt.gui.common.xml.ModelLoader;
 import jmt.gui.common.xml.XMLWriter;
-import jmt.gui.exact.ExactModel;
-import jmt.gui.exact.ExactWizard;
 import jmt.gui.jmodel.DialogFactory;
 import jmt.gui.jmodel.JGraphMod.BlockingRegion;
 import jmt.gui.jmodel.JGraphMod.CellComponent;
@@ -135,6 +133,8 @@ import jmt.gui.jmodel.mainGui.MainWindow;
 import jmt.gui.jmodel.panels.JModelProblemsWindow;
 import jmt.gui.jmodel.panels.StationNamePanel;
 import jmt.gui.jmodel.panels.jmodelClassesPanel;
+import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.gui.exact.ExactWizard;
 
 import org.jgraph.JGraph;
 import org.jgraph.graph.CellHandle;

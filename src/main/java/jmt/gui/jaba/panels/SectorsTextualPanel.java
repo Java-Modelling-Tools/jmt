@@ -41,8 +41,8 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.gui.exact.panels.SynopsisPanel;
 import jmt.gui.jaba.JabaWizard;
+import jmt.jmva.gui.exact.panels.SynopsisPanel;
 
 /**
  * <p>Title: Sectors Textual Panel</p>

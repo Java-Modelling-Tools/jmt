@@ -53,11 +53,11 @@ import jmt.common.exception.ExpressionParseException;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.help.HoverHelp;
-import jmt.gui.exact.ExactWizard;
 import jmt.gui.exact.ld.eval.Evaluator;
 import jmt.gui.exact.ld.eval.FastEvaluator;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
+import jmt.jmva.gui.exact.ExactWizard;
 
 /**
  * the editor window itself. Does not release the focus and follows the owner around the screen.

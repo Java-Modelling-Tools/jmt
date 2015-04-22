@@ -32,12 +32,12 @@ import javax.swing.ScrollPaneConstants;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.gui.exact.panels.ForceUpdatablePanel;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.gui.jaba.JabaConstants;
 import jmt.gui.jaba.JabaModel;
 import jmt.gui.jaba.JabaWizard;
+import jmt.jmva.gui.exact.panels.ForceUpdatablePanel;
 
 /**
 

@@ -21,11 +21,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import jmt.analytical.SolverDispatcher;
 import jmt.common.exception.LoadException;
 import jmt.common.exception.NetException;
 import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
 import jmt.gui.common.xml.XMLArchiver;
+import jmt.jmva.analytical.SolverDispatcher;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

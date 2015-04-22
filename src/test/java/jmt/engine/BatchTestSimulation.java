@@ -18,8 +18,8 @@
 
 package jmt.engine;
 
-import jmt.engine.testSystem.BatchTest;
-import jmt.engine.testSystem.RandomMVAModelGenerator;
+import jmt.jmva.BatchTest;
+import jmt.jmva.RandomMVAModelGenerator;
 
 /**
  * Created by IntelliJ IDEA.

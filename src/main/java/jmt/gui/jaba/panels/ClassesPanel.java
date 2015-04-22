@@ -55,7 +55,6 @@ import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.JMTImageLoader;
-import jmt.gui.exact.panels.ForceUpdatablePanel;
 import jmt.gui.exact.table.ComboBoxCell;
 import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactTable;
@@ -64,6 +63,7 @@ import jmt.gui.exact.table.ListOp;
 import jmt.gui.jaba.JabaConstants;
 import jmt.gui.jaba.JabaModel;
 import jmt.gui.jaba.JabaWizard;
+import jmt.jmva.gui.exact.panels.ForceUpdatablePanel;
 
 /**
 

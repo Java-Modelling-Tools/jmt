@@ -46,10 +46,10 @@ import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.QuickHTMLViewer;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
-import jmt.gui.exact.ExactWizard;
 import jmt.gui.jmodel.mainGui.MainWindow;
 import jmt.gui.jsim.JSIMMain;
 import jmt.jmarkov.MMQueues;
+import jmt.jmva.gui.exact.ExactWizard;
 
 /**
  * Created by IntelliJ IDEA.

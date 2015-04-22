@@ -21,7 +21,7 @@
 	<repositories>
 		<repository>
 			<id>local-repo</id>
-			<url>file:${project.basedir}/testMavenRepo</url>
+			<url>file:${project.basedir}/MavenAdditionalLibrariesRepository</url>
 		</repository>
 	</repositories>
 	<dependencies>

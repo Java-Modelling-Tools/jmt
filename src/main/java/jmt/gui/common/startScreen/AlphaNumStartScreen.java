@@ -41,8 +41,8 @@ import javax.swing.border.EtchedBorder;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
-import jmt.gui.exact.ExactModel;
-import jmt.gui.exact.ExactWizard;
+import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.gui.exact.ExactWizard;
 
 /**
  * Created by IntelliJ IDEA.

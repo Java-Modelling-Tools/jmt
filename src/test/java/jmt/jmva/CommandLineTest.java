@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import jmt.analytical.CommandLineSolver;
+import jmt.jmva.analytical.CommandLineSolver;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;

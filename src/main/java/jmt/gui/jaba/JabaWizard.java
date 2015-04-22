@@ -51,7 +51,6 @@ import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.WarningWindow;
 import jmt.gui.common.xml.ModelLoader;
-import jmt.gui.exact.panels.ForceUpdatablePanel;
 import jmt.gui.jaba.link.SolverDispatcher;
 import jmt.gui.jaba.panels.AllInOnePanel;
 import jmt.gui.jaba.panels.ClassesPanel;
@@ -64,6 +63,7 @@ import jmt.gui.jaba.panels.ServiceDemandsPanel;
 import jmt.gui.jaba.panels.ServiceTimesPanel;
 import jmt.gui.jaba.panels.StationsPanel;
 import jmt.gui.jaba.panels.VisitsPanel;
+import jmt.jmva.gui.exact.panels.ForceUpdatablePanel;
 import jmt.manual.ManualBookmarkers;
 import jmt.manual.PDFViewerBuffer;
 

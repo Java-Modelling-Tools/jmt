@@ -22,7 +22,7 @@ import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.simDispatcher.Dispatcher_jMVAschema;
-import jmt.engine.testSystem.BatchTest;
+import jmt.jmva.BatchTest;
 
 /**
  * @author Stefano Omini

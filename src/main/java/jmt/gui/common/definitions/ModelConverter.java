@@ -33,8 +33,8 @@ import jmt.gui.common.routingStrategies.RandomRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
-import jmt.gui.exact.ExactConstants;
-import jmt.gui.exact.ExactModel;
+import jmt.jmva.gui.exact.ExactConstants;
+import jmt.jmva.gui.exact.ExactModel;
 import Jama.Matrix;
 
 /**

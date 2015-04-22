@@ -11,6 +11,13 @@ import java.util.Map;
 import java.util.Random;
 
 import jmt.engine.math.Printer;
+import jmt.jmva.analytical.Solver;
+import jmt.jmva.analytical.SolverMulti;
+import jmt.jmva.analytical.SolverMultiClosedAQL;
+import jmt.jmva.analytical.SolverMultiClosedBardSchweitzer;
+import jmt.jmva.analytical.SolverMultiClosedChow;
+import jmt.jmva.analytical.SolverMultiClosedLinearizer;
+import jmt.jmva.analytical.SolverMultiClosedMVA;
 import jmt.util.TempTextFile;
 
 import org.apache.commons.io.FileUtils;
