@@ -173,6 +173,7 @@ public class PSServer extends ServiceSection {
 					// Estimate the job service time, puts it in the queue and sends a message to itself
 					// with the minimum service time of all the jobs to perform processing
 					double serviceTime = serviceStrategy[job.getJobClass().getId()].wait(this);
+					job.setServiceTime(serviceTime);
 					JobData data = new JobData(job, serviceTime);
 					handleJobInfoLists(data, PSEvent.JOB_IN);
 					jobs.add(data);

@@ -25,6 +25,7 @@ import java.util.Vector;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.PSServer;
+import jmt.engine.NodeSections.SRPT;
 import jmt.engine.NodeSections.Server;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobClassList;
@@ -163,7 +164,7 @@ public class SimulationStateChecker {
 				serviceSection = temp.getSection(NodeSection.SERVICE);
 			} catch (NetException ne) {
 			}
-			if (serviceSection instanceof Server || serviceSection instanceof PSServer) {
+			if (serviceSection instanceof Server || serviceSection instanceof PSServer || serviceSection instanceof SRPT) {
 				serverMap.put(tm.get(temp.getName()), temp);
 			}
 		}

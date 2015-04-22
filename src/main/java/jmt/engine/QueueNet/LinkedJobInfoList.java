@@ -303,6 +303,18 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
+	public boolean addRand(JobInfo jobInfo) {
+		if (list != null) {
+			updateAdd(jobInfo);
+			int pos = (int) (Math.random()*list.size());
+			listPerClass[jobInfo.getJob().getJobClass().getId()].addLast(jobInfo);
+			list.add(pos,jobInfo);
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	//----------------METHODS USED BY PRIORITY BASED STRATEGIES---------------//
 
 	//NEW
@@ -520,6 +532,45 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
+	public JobInfo removeSJF() throws jmt.common.exception.NetException  {
+		
+		//creates an iterator and finds the correct position
+		//according to the job service time
+		if (list != null) {
+			ListIterator<JobInfo> iterator = list.listIterator();
+			JobInfo current = null;
+			double currentJobTime = 0;
+			int index = -1;
+			int minIndex = 0;
+			double minTime = -1;
+			
+			while (iterator.hasNext()) {
+				index++;
+				current = iterator.next();
+				currentJobTime = current.getJob().getServiceTime();
+			
+				if (currentJobTime<minTime || minTime<0){
+					minTime = currentJobTime;
+					minIndex = index;
+				}			
+			}
+			
+			JobInfo jobInfo = list.get(minIndex);
+			
+			if ((jobInfo != null)) {
+				doRemove(jobInfo, 0, 0);
+				return jobInfo;
+			} else {
+				return null;
+			}
+		}
+		else {
+			return null;
+		}
+		
+				
+	}
+	
 	/**---------------------------------------------------------------------
 	 *---------------- "ANALYZE" AND "UPDATE" METHODS ----------------------
 	 *---------------------------------------------------------------------*/
@@ -846,4 +897,5 @@ public class LinkedJobInfoList implements JobInfoList {
 	public void setServerNumber(int serverNumber) {
 		this.serverNumber = serverNumber;
 	}
+       
 }

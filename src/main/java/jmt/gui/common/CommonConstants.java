@@ -78,7 +78,14 @@ public interface CommonConstants {
 	/**Constants for selection of queueing strategy*/
 	public final static String QUEUE_STRATEGY_LCFS = "LCFS";
 	public final static String QUEUE_STRATEGY_FCFS = "FCFS";
+	public final static String QUEUE_STRATEGY_RAND = "RAND" ;
+	public final static String QUEUE_STRATEGY_SJF = "SJF" ;
+	public final static String QUEUE_STRATEGY_LJF = "LJF" ;
+	public final static String QUEUE_STRATEGY_RP = "RAND (Priority)";
+	public final static String QUEUE_STRATEGY_SJFP = "SJF (Priority)";
+	public final static String QUEUE_STRATEGY_LJFP = "LJF (Priority)";
 	public final static String QUEUE_STRATEGY_STATION_PS = "Processor Sharing";
+	public final static String QUEUE_STRATEGY_STATION_SRPT = "Shortest Remaining Processing Time";
 	public final static String QUEUE_STRATEGY_STATION_QUEUE = "Non-preemptive Scheduling";
 	public final static String QUEUE_STRATEGY_STATION_QUEUE_PRIORITY = "Non-preemptive Scheduling (Priority)";
 

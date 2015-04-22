@@ -66,12 +66,13 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	/**
 	 * Used to define queuing policy
 	 */
-	protected Object[] queuePolicy = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS };
+	protected Object[] queuePolicy = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND, QUEUE_STRATEGY_SJF, QUEUE_STRATEGY_LJF}; //,  QUEUE_STRATEGY_RP, QUEUE_STRATEGY_SJFP, QUEUE_STRATEGY_LJFP };
 	/**
 	 * Used to define drop rules
 	 */
 	protected Object[] dropRules = { CommonConstants.FINITE_WAITING, CommonConstants.FINITE_BLOCK, CommonConstants.FINITE_DROP };
 
+//	protected Object[] serverQueuePolicy = { QUEUE_STRATEGY_STATION_PS,  QUEUE_STRATEGY_STATION_SRPT, QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
 	protected Object[] serverQueuePolicy = { QUEUE_STRATEGY_STATION_PS, QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
 
 	protected Object[] stationQueuePolicy = { QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
@@ -316,7 +317,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return (columnIndex == 1 && !data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS))
+			return (columnIndex == 1 && !data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS)
+					&& !data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_SRPT))
 					|| (columnIndex == 2 && data.getStationQueueCapacity(stationKey).intValue() >= 0);
 		}
 
@@ -377,6 +379,14 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			if (column == 1) {
 				if (data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS)) {
+					if (isSelected) {
+						label.setBackground(table.getSelectionBackground());
+					} else {
+						label.setBackground(table.getBackground());
+					}
+					return label;
+				}
+				else if (data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_SRPT)) {
 					if (isSelected) {
 						label.setBackground(table.getSelectionBackground());
 					} else {

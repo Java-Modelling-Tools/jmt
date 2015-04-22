@@ -104,6 +104,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static final String queueGetFCFS = "jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy";
 	protected static final String queueGetLCFS = "jmt.engine.NetStrategies.QueueGetStrategies.LCFSstrategy";
 	protected static final String queueGetPS = "jmt.engine.NetStrategies.QueueGetStrategies.PSSstrategy";
+	protected static final String queueGetSRPT = "jmt.engine.NetStrategies.QueueGetStrategies.SRPT";
 	protected static final String queuePut = "jmt.engine.NetStrategies.QueuePutStrategy";
 	protected static final String serviceStrategy = "jmt.engine.NetStrategies.ServiceStrategy";
 	protected static final String distributionContainer = "jmt.engine.random.DistributionContainer";
@@ -419,6 +420,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String name, classpath;
 		boolean fcfs = true;
 		boolean ps = false;
+		boolean srpt = false;
 		Map<String, Node> putStrategy = null;
 		Map<String, Node> dropRules = null;
 		for (int i = 0; i < parameters.getLength(); i++) {
@@ -432,7 +434,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (classpath.equals(queueGetPS)) {
 				fcfs = false;
 				ps = true;
-			} else if (classpath.equals(queuePut)) {
+			} else if (classpath.equals(queueGetSRPT)) {
+				fcfs = false;
+				srpt = true;
+			}
+			else if (classpath.equals(queuePut)) {
 				putStrategy = parseParameterRefclassArray(curr);
 			} else if (name.equals("size")) {
 				Integer size = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
@@ -452,6 +458,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				if (ps) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_PS);
 					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
+				} else if (srpt) {
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_SRPT);
+					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);				
 				} else if (strategy.equals("HeadStrategy")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
 					if (fcfs) {
@@ -459,6 +468,16 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					} else {
 						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
 					}
+				} else if (strategy.equals("RandStrategy")){
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setQueueStrategy(key,classes.get(className),QUEUE_STRATEGY_RAND);
+				} 
+                                else if (strategy.equals("SJFStrategy")){
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setQueueStrategy(key,classes.get(className),QUEUE_STRATEGY_SJF);				
+				} else if (strategy.equals("RandStrategyPriority")){
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setQueueStrategy(key,classes.get(className),QUEUE_STRATEGY_RP);				
 				} else if (strategy.equals("HeadStrategyPriority")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
 					if (fcfs) {
@@ -466,6 +485,17 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					} else {
 						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
 					}
+				} 
+                                else if (strategy.equals("SJFStrategyPriority")) {
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setQueueStrategy(key,classes.get(className),QUEUE_STRATEGY_SJFP);
+				} 
+                        else if (strategy.equals("LJFStrategy")) {
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setQueueStrategy(key,classes.get(className),QUEUE_STRATEGY_LJF);
+				} else if (strategy.equals("LJFStrategyPriority")){
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setQueueStrategy(key,classes.get(className),QUEUE_STRATEGY_LJFP);				
 				} else if (strategy.equals("TailStrategy")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
 					if (fcfs) {
@@ -521,6 +551,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String className = section.getAttribute(XML_A_STATION_SECTION_CLASSNAME);
 		if (CLASSNAME_PSSERVER.equals(className)) {
 			model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_PS);
+		}
+		if (CLASSNAME_SRPT.equals(className)) {
+			model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_SRPT);
 		}
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
 		Element curr;
@@ -1055,6 +1088,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			if ("Queue Length".equalsIgnoreCase(type)) {
 				type = SimulationDefinition.MEASURE_QL;
 			}
+//		if ("Fairness".equalsIgnoreCase(type)) {
+//				type = SimulationDefinition.MEASURE_FAIRNESS;
+//			}
 			if ("Customer Number".equalsIgnoreCase(type) && !"".equalsIgnoreCase(stationName)) {
 				type = SimulationDefinition.MEASURE_QL;
 			}

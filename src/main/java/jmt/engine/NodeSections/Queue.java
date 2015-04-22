@@ -24,6 +24,7 @@ import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategy;
 import jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy;
+import jmt.engine.NetStrategies.QueuePutStrategies.SJFStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.Job;
@@ -164,6 +165,13 @@ public class Queue extends InputSection {
 			this.getStrategy = new FCFSstrategy();
 		} else {
 			this.getStrategy = getStrategy;
+			// NEW author ANASTASIA
+			//if (putStrategy[0] == new WeightedPriority()){
+			//	this.getStrategy = new WPstrategy();
+			//}
+			//else if (putStrategy[0] == new SJFStrategy()){
+			//	this.getStrategy = new SJFGetStrategy();
+			//}
 		}
 		this.putStrategy = putStrategy;
 		// Uses putstrategy.length to estimate number of classes. It's a bit unclean but we are forced for compatibility.

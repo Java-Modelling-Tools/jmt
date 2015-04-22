@@ -54,6 +54,7 @@ public class Job implements Cloneable {
 
 	//end NEW
 
+	private double serviceTime = 0;
 	/** Creates a new instance of Job.
 	 *  @param JobClass Reference to the class of the job.
 	 */
@@ -165,4 +166,12 @@ public class Job implements Cloneable {
 		JobClass = newClass;
 	}
 	
+
+	public double getServiceTime(){
+		return serviceTime;
+	}
+	
+	public void setServiceTime(double time){
+		serviceTime = time;
+	}
 }

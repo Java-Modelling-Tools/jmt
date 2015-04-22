@@ -76,6 +76,10 @@ public class PSJobInfoList implements JobInfoList {
 	public boolean addLast(JobInfo jobInfo) throws NetException {
 		return list.addLast(jobInfo);
 	}
+        
+	public boolean addRand(JobInfo jobInfo){
+		return list.addRand(jobInfo);
+	}
 
 	/**--------------------------------------------------------
 	 *---------------- "ANALYZE" METHODS ----------------------

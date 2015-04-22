@@ -1972,6 +1972,9 @@ public class ModelChecker implements CommonConstants {
 			if (CommonConstants.QUEUE_STRATEGY_STATION_PS.equals(station_def.getStationQueueStrategy(thisServer))) {
 				continue;
 			}
+			if (CommonConstants.QUEUE_STRATEGY_STATION_SRPT.equals(station_def.getStationQueueStrategy(thisServer))) {
+				continue;
+			}
 			for (int j = 1; j < classes.size(); j++) {
 				//Object thisClass = classes.get(j);
 				String s0 = station_def.getQueueStrategy(thisServer, classes.get(j - 1));
@@ -2005,6 +2008,9 @@ public class ModelChecker implements CommonConstants {
 			Object thisServer = servers.get(i);
 			// Processor sharing stations are okay.
 			if (CommonConstants.QUEUE_STRATEGY_STATION_PS.equals(station_def.getStationQueueStrategy(thisServer))) {
+				continue;
+			}
+			if (CommonConstants.QUEUE_STRATEGY_STATION_SRPT.equals(station_def.getStationQueueStrategy(thisServer))) {
 				continue;
 			}
 			if ((this.isAllFCFSQueueingStrategy(thisServer)) && (this.isTypeUniformServiceStrategy(thisServer))) {

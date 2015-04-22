@@ -72,11 +72,17 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		HashMap<String, String> q = new HashMap<String, String>();
 		q.put(QUEUE_STRATEGY_FCFS, "TailStrategy");
 		q.put(QUEUE_STRATEGY_LCFS, "HeadStrategy");
+		q.put(QUEUE_STRATEGY_RAND, "RandStrategy");
+		q.put(QUEUE_STRATEGY_SJF, "SJFStrategy");
+		q.put(QUEUE_STRATEGY_LJF, "LJFStrategy");
 		QUEUE_PUT_MAPPING = Collections.unmodifiableMap(q);
 		
 		HashMap<String, String> p = new HashMap<String, String>();
 		p.put(QUEUE_STRATEGY_FCFS, "TailStrategyPriority");
 		p.put(QUEUE_STRATEGY_LCFS, "HeadStrategyPriority");
+//		p.put(QUEUE_STRATEGY_RP, "RandStrategyPriority");
+//		p.put(QUEUE_STRATEGY_SJFP, "SJFStrategyPriority");
+//		p.put(QUEUE_STRATEGY_LJFP, "LJFStrategyPriority");
 		PRIORITY_QUEUE_PUT_MAPPING = Collections.unmodifiableMap(p);
 		
 		HashMap<String, String> d = new HashMap<String, String>();
@@ -528,7 +534,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				.getStationQueueStrategy(stationKey))) {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME,
 					CLASSNAME_PSSERVER);
-		} else {
+		} else if (QUEUE_STRATEGY_STATION_SRPT.equals(model.getStationQueueStrategy(stationKey))) {
+				elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_SRPT);
+		} 
+		else {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_SERVER);
 		}
 

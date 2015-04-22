@@ -201,6 +201,15 @@ public interface JobInfoList {
 	 */
 	public abstract boolean addLast(JobInfo jobInfo) throws jmt.common.exception.NetException;
 
+        /** Adds a new job info in a random position.
+	 * @param jobInfo reference to job info to be added.
+	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
+	 * otherwise no list was created by the constructor)
+	 */
+	
+	public abstract boolean addRand(JobInfo jobInfo);
+
+        
 	/** Removes a job info from the list and updates the measures related to
 	 * throughput, utilization and response time.
 	 * @param jobInfo reference to job info to be removed.

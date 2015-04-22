@@ -166,6 +166,9 @@ public class Server extends ServiceSection {
 				return super.getObject(id);
 		}
 	}
+	public ServiceStrategy[] getServiceStrategy(){
+		return serviceStrategy;
+	}
 
 	@Override
 	protected void nodeLinked(NetNode node) {
@@ -226,6 +229,10 @@ public class Server extends ServiceSection {
 						// Gets the class of the job
 						c = job.getJobClass().getId();
 						// Auto-sends the job with delay equal to "serviceTime"
+						if (job.getServiceTime() != 0){
+							serviceTime = job.getServiceTime();
+						}
+						else 
 						serviceTime = serviceStrategy[c].wait(this);
 						// Calculates the service time of job
 						sendMe(job, serviceTime);
