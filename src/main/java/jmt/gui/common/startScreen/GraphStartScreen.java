@@ -90,7 +90,7 @@ public class GraphStartScreen extends JMTFrame {
 	public static final String IMG_JMODELICON = "JMODELIcon";
 	public static final String IMG_JMVAICON = "JMVAIcon";
 	public static final String IMG_JSIMICON = "JSIMIcon";
-	public static final String	IMG_JABAICON = "JABAIcon";
+	public static final String IMG_JABAICON = "JABAIcon";
 	public static final String IMG_JMCHICON = "JMCHIcon";
 	public static final String IMG_JWATICON = "JWATIcon";
 	public static final String IMG_SUITEICON = "JMTIcon";
@@ -106,7 +106,7 @@ public class GraphStartScreen extends JMTFrame {
 	public static final String HTML_CONTENT_TITLE_HREF = 
 			String.format("<html><body><bIMG_SUITEICON><font face='%s' size='+2'>JMT - Java Modelling Tools v.%s</font></b><br>" +
 					"<font face='%s' size='-1'>Project Coordinator: G.Serazzi<br><br>" +
-					"<b>Home Page:</b> <a href=\"http://jmt.sourceforge.net\">http://jmt.sourceforge.net</a></font>" +
+					"<b>Home Page:</b> <a href=\"http://jmt.sf.net\">http://jmt.sf.net</a></font>" +
 					"</body></html>",
 					FONT_TYPE, GlobalSettings.getSetting(GlobalSettings.VERSION), FONT_TYPE);
 	public static final String HTML_POLI = 
@@ -148,7 +148,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Markov Chain solver with graphical interface");
+			putValue(Action.SHORT_DESCRIPTION, "Markov Chain simulator with graphical interface");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 		}
 
@@ -181,7 +181,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Simulator solver with wizard interface");
+			putValue(Action.SHORT_DESCRIPTION, "Simulator with wizard interface");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JSIMICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 		}
 
@@ -197,7 +197,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Simulator and MVA solver with graphical interface");
+			putValue(Action.SHORT_DESCRIPTION, "Simulator with graphical interface");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 		}
 
@@ -213,7 +213,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Asyntotic bound analysis solver with wizard interface");
+			putValue(Action.SHORT_DESCRIPTION, "Asyntotic bound analysis with wizard interface");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 		}
 
