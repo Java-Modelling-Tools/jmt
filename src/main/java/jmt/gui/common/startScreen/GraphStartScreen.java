@@ -125,7 +125,7 @@ public class GraphStartScreen extends JMTFrame {
 	}
 
 	// --- Actions associated with buttons -----------------------------------------------------------------
-	private AbstractAction startJMVA = new AbstractAction("JMVA") {
+	private AbstractAction startJMVA = new AbstractAction() {
 		/**
 		 * 
 		 */
@@ -133,7 +133,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "MVA solver with wizard interface");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMVAICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMVAICON, new Dimension(40,40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -141,7 +141,7 @@ public class GraphStartScreen extends JMTFrame {
 		}
 	};
 
-	private AbstractAction startJMCH = new AbstractAction("JMCH") {
+	private AbstractAction startJMCH = new AbstractAction() {
 		/**
 		 * 
 		 */
@@ -149,7 +149,8 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Markov Chain simulator with graphical interface");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(40,40)));
+//			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -157,7 +158,7 @@ public class GraphStartScreen extends JMTFrame {
 		}
 	};
 
-	private AbstractAction startJWAT = new AbstractAction("JWAT") {
+	private AbstractAction startJWAT = new AbstractAction() {
 		/**
 		 * 
 		 */
@@ -165,7 +166,8 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Workload Analyzer Tool");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+//			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(40,40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -174,7 +176,7 @@ public class GraphStartScreen extends JMTFrame {
 		}
 	};
 
-	private AbstractAction startJSIM = new AbstractAction("<html>JSIM<em>wiz</em></html>") {
+	private AbstractAction startJSIM = new AbstractAction() {
 		/**
 		 * 
 		 */
@@ -182,7 +184,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Simulator with wizard interface");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JSIMICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JSIMICON, new Dimension(40,40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -190,7 +192,7 @@ public class GraphStartScreen extends JMTFrame {
 		}
 	};
 
-	private AbstractAction startJMODEL = new AbstractAction("<html>JSIM<em>graph</em></html>") {
+	private AbstractAction startJMODEL = new AbstractAction() {
 		/**
 		 * 
 		 */
@@ -198,7 +200,8 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Simulator with graphical interface");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+//			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(40,40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -206,7 +209,7 @@ public class GraphStartScreen extends JMTFrame {
 		}
 	};
 
-	private AbstractAction startJABA = new AbstractAction("JABA") {
+	private AbstractAction startJABA = new AbstractAction() {
 		/**
 		 * 
 		 */
@@ -214,7 +217,8 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Asyntotic bound analysis with wizard interface");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+//			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(40,40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
