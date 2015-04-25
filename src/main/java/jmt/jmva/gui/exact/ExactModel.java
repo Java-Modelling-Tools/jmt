@@ -542,7 +542,6 @@ public class ExactModel implements ExactConstants  {
 		stations = 1;
 		classes = 1;
 
-		// perchï¿½ ï¿½ 1 se non ci sono customers?? Lasciare cosï¿½
 		maxpop = 1;
 		changed = true;
 

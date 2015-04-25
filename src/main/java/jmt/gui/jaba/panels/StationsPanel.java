@@ -284,13 +284,13 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 
 		numberBox.add(new JButton(addStation));
 
-		numberBox.setMaximumSize(new Dimension(150, 50));
+		numberBox.setMaximumSize(new Dimension(300, 150));
 
 		stationSpinnerBox.add(numberBox);
 		//END
 
 		Box stationBox = Box.createVerticalBox();
-		stationBox.add(Box.createVerticalStrut(20));
+		stationBox.add(Box.createVerticalStrut(30));
 		stationBox.add(stationSpinnerBox);
 		stationBox.add(Box.createVerticalStrut(10));
 		JScrollPane stationTablePane = new JScrollPane(stationTable);
@@ -522,8 +522,8 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 			deleteButton = new JButton(deleteOneStation);
 			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);
 			enableDeletes();
-			rowHeader.setRowHeight(18);
-			setRowHeight(18);
+			rowHeader.setRowHeight(30);
+			setRowHeight(30);
 			//END Federico Dall'Orso
 
 			/* a station type cell editor for open/mixed systems */

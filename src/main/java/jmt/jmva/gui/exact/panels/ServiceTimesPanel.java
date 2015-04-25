@@ -154,9 +154,9 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		hBox.add(Box.createHorizontalStrut(20));
 
 		Box totalBox = Box.createVerticalBox();
-		totalBox.add(Box.createVerticalStrut(20));
+		totalBox.add(Box.createVerticalStrut(30));
 		totalBox.add(hBox);
-		totalBox.add(Box.createVerticalStrut(20));
+		totalBox.add(Box.createVerticalStrut(30));
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
@@ -244,9 +244,9 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		STTable() {
 			super(new STTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
-
+                        setRowHeight(30);
 			setDisplaysScrollLabels(true);
-
+                        
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
 			setClipboardTransferEnabled(true);
@@ -260,7 +260,6 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 			help.addHelp(tableHeader, "Click, SHIFT-click or drag to select columns");
 			rowHeader.setToolTipText(null);
 			help.addHelp(rowHeader, "Click, SHIFT-click or drag to select rows");
-
 		}
 
 		/**

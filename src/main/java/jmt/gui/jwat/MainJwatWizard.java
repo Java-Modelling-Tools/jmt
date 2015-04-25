@@ -118,7 +118,7 @@ public class MainJwatWizard extends JWatWizard {
 		this.setIconImage(JMTImageLoader.loadImage(IMG_JWATICON).getImage());
 		//this.setResizable(false);
 		this.setTitle(TITLE);
-		this.setSize(800, 600);
+		this.setSize(1024, 768);
 		centerWindow();
 		menus = new JPanel(new BorderLayout());
 		help = this.getHelp();

@@ -315,20 +315,20 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 
 		numberBox.add(new JButton(addClass));
 
-		numberBox.setMaximumSize(new Dimension(150, 50));
+		numberBox.setMaximumSize(new Dimension(300, 150));
 
 		classSpinnerBox.add(numberBox);
 		//END  Federico Dall'Orso 9/3/2005
 
 		Box classBox = Box.createVerticalBox();
-		classBox.add(Box.createVerticalStrut(20));
+		classBox.add(Box.createVerticalStrut(30));
 		classBox.add(classSpinnerBox);
 		classBox.add(Box.createVerticalStrut(10));
 		JScrollPane classTablePane = new JScrollPane(classTable);
 		classTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		classTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		classBox.add(classTablePane);
-		classBox.add(Box.createVerticalStrut(20));
+		classBox.add(Box.createVerticalStrut(30));
 
 		Box totalBox = Box.createHorizontalBox();
 		totalBox.add(Box.createHorizontalStrut(20));
@@ -568,8 +568,8 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 			deleteButton = new JButton(deleteOneClass);
 			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);
 			enableDeletes();
-			rowHeader.setRowHeight(18);
-			setRowHeight(18);
+			rowHeader.setRowHeight(30);
+			setRowHeight(30);
 			//END Federico Dall'Orso 8/3/2005
 
 			JComboBox classTypeBox = new JComboBox(CLASS_TYPENAMES);

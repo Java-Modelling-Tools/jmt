@@ -70,9 +70,9 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 		//create margins for this panel.
 		Box vBox = Box.createVerticalBox();
 		Box hBox = Box.createHorizontalBox();
-		vBox.add(Box.createVerticalStrut(20));
+		vBox.add(Box.createVerticalStrut(30));
 		vBox.add(hBox);
-		vBox.add(Box.createVerticalStrut(20));
+		vBox.add(Box.createVerticalStrut(30));
 		hBox.add(Box.createHorizontalStrut(20));
 
 		//build central panel

@@ -75,7 +75,7 @@ public class SysPowerPanel extends SolutionPanel implements ExactConstants{
 
 		SPTableModel() {
 			prototype = new Double(1000);
-			rowHeaderPrototype = "Station1000";
+			rowHeaderPrototype = "Station1000";                     
 		}
 
 		@Override

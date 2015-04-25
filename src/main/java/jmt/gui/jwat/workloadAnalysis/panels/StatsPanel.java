@@ -630,7 +630,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 	 */
 	private void createSampling() {
 		Box mainbox = Box.createVerticalBox();
-		mainbox.add(Box.createVerticalStrut(20));
+		mainbox.add(Box.createVerticalStrut(30));
 
 		Box paneldesclabel = Box.createHorizontalBox();
 		Box centralpanel = Box.createHorizontalBox();
@@ -733,7 +733,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 		warningpanl.add(jpwarning);
 
 		samplePanel.add(mainbox);
-		mainbox.add(Box.createVerticalStrut(20));
+		mainbox.add(Box.createVerticalStrut(30));
 	}
 
 	/**

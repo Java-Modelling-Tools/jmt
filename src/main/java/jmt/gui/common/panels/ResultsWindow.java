@@ -138,8 +138,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle("Simulation Results...");
 		this.setIconImage(JMTImageLoader.loadImage("Results").getImage());
-		int width = 800, height = 600;
-		this.centerWindow(width, height);
+		this.centerWindow(1024, 768);
 
 		// Creates all tabs
 		JTabbedPane mainPanel = new JTabbedPane();

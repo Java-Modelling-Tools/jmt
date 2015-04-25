@@ -225,7 +225,7 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 		table.getColumnModel().getColumn(0).setMaxWidth(50);
 		table.getColumnModel().getColumn(1).setPreferredWidth(65);
 		table.getColumnModel().getColumn(2).setPreferredWidth(65);
-		table.setRowHeight(18);
+		table.setRowHeight(30);
 		tableScrollPane = new JScrollPane(table);
 		tableScrollPane.setPreferredSize(new Dimension(160, tableScrollPane.getPreferredSize().height));
 		left.add(tableScrollPane, BorderLayout.CENTER);

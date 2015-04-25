@@ -156,9 +156,9 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 		hBox.add(Box.createHorizontalStrut(20));
 
 		Box totalBox = Box.createVerticalBox();
-		totalBox.add(Box.createVerticalStrut(20));
+		totalBox.add(Box.createVerticalStrut(30));
 		totalBox.add(hBox);
-		totalBox.add(Box.createVerticalStrut(20));
+		totalBox.add(Box.createVerticalStrut(30));
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
@@ -243,6 +243,7 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 		STTable() {
 			super(new STTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
+                        setRowHeight(30);
 
 			setDisplaysScrollLabels(true);
 

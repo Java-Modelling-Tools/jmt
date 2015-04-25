@@ -64,6 +64,7 @@ public class RowHeader extends JTable {
 	 */
 	public RowHeader() {
 		this(new DefaultRowHeaderModel());
+                setRowHeight(30);
 	}
 
 	/**
@@ -80,6 +81,7 @@ public class RowHeader extends JTable {
 			setModel(dm);
 		}
 
+                setRowHeight(30);
 		cellRenderer = tableHeader.getDefaultRenderer();
 		setFocusable(false);
 		setToolTipText("Click or drag to select rows");
@@ -135,7 +137,7 @@ public class RowHeader extends JTable {
 			 */
 			private static final long serialVersionUID = 1L;
 
-			/* keeps the #@£$*& thing from growing */
+			/* keeps the thing from growing */
 			@Override
 			public Dimension getPreferredSize() {
 				Dimension d = super.getPreferredSize();

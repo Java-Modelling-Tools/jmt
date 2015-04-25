@@ -106,7 +106,7 @@ public class MMQueues extends JMTFrame {
 	private int cpuNum; //number of server in the system
 	private boolean paused = false; //if the system is paused 
 
-	private Dimension initSize = new Dimension(800, 600);
+	private Dimension initSize = new Dimension(1024, 768);
 
 	private JPanel sPanel;
 	private JPanel lambdaPanel;

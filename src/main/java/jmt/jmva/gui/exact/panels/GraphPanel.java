@@ -516,7 +516,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			super(new LinesTableModel());
 			setDefaultRenderer(Color.class, new ColorCellEditor());
 			setDefaultRenderer(String.class, ComboBoxCellEditor.getRendererInstance());
-			setRowHeight(18);
+			setRowHeight(30);
 
 			// Creates class editors (one is for utilizations)
 			JComboBox classCombo = new JComboBox();

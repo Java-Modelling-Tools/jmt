@@ -43,7 +43,7 @@ public class EmptyPanel extends ParameterOptionPanel {
 
 	public void initialize() {
 		JPanel empty = new JPanel();
-		empty.setPreferredSize(new Dimension(800, 600));
+		empty.setPreferredSize(new Dimension(1024, 768));
 		this.setLayout(new BorderLayout());
 		this.add(empty, BorderLayout.CENTER);
 		title.setTitleColor(Color.LIGHT_GRAY);

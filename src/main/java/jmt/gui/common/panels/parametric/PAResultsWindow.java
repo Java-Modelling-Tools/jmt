@@ -156,7 +156,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setTitle("Simulation Results...");
 		this.setIconImage(JMTImageLoader.loadImage("Results").getImage());
-		this.centerWindow(800, 600);
+		this.centerWindow(1024, 768);
 
 		// Creates all tabs
 		JTabbedPane mainPanel = new JTabbedPane();
@@ -1008,7 +1008,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			this.getContentPane().add(pivotPanel2, BorderLayout.CENTER);
 
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			Dimension size = new Dimension(800, 600);
+			Dimension size = new Dimension(1024, 768);
 			this.setSize(size);
 			this.setLocation((screenSize.width - size.width) / 2, (screenSize.height - size.height) / 2);
 		}

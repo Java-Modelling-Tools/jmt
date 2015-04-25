@@ -87,7 +87,7 @@ public class MainWindow extends JMTFrame {
 
 		scroll = new JScrollPane();
 		mainPane.add(scroll, BorderLayout.CENTER);
-		centerWindow(800, 600);
+		centerWindow(1024, 768);
 		setVisible(true);
 	}
 

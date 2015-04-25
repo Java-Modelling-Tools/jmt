@@ -69,7 +69,7 @@ public class JWatWizard extends Wizard {
 		
 		JPanel labelbox = new JPanel();
 		labelbox.setLayout(new BorderLayout());
-		labelbox.add(Box.createVerticalStrut(20), BorderLayout.WEST);
+		labelbox.add(Box.createVerticalStrut(30), BorderLayout.WEST);
 		labelbox.add(helpLabel, BorderLayout.CENTER);
 
 		Box buttonBox = Box.createVerticalBox();

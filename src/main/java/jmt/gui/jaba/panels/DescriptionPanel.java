@@ -87,9 +87,9 @@ public final class DescriptionPanel extends WizardPanel implements JabaConstants
 		JScrollPane esp = new JScrollPane(textPane);
 		esp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		add(esp, BorderLayout.CENTER);
-		add(Box.createVerticalStrut(20), BorderLayout.NORTH);
+		add(Box.createVerticalStrut(30), BorderLayout.NORTH);
 		add(Box.createHorizontalStrut(20), BorderLayout.EAST);
-		add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
+		add(Box.createVerticalStrut(30), BorderLayout.SOUTH);
 		add(Box.createHorizontalStrut(20), BorderLayout.WEST);
 		*/
 		//NEW
@@ -105,8 +105,8 @@ public final class DescriptionPanel extends WizardPanel implements JabaConstants
 
 		setLayout(new BorderLayout());
 		add(intPanel, BorderLayout.CENTER);
-		add(Box.createVerticalStrut(20), BorderLayout.NORTH);
-		add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
+		add(Box.createVerticalStrut(30), BorderLayout.NORTH);
+		add(Box.createVerticalStrut(30), BorderLayout.SOUTH);
 		add(Box.createHorizontalStrut(20), BorderLayout.EAST);
 		add(Box.createHorizontalStrut(20), BorderLayout.WEST);
 

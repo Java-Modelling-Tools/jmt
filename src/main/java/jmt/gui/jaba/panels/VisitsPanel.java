@@ -125,8 +125,8 @@ public final class VisitsPanel extends WizardPanel implements JabaConstants, For
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
-		add(Box.createVerticalStrut(20), BorderLayout.NORTH);
-		add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
+		add(Box.createVerticalStrut(30), BorderLayout.NORTH);
+		add(Box.createVerticalStrut(30), BorderLayout.SOUTH);
 		add(Box.createHorizontalStrut(20), BorderLayout.EAST);
 		add(Box.createHorizontalStrut(20), BorderLayout.WEST);
 

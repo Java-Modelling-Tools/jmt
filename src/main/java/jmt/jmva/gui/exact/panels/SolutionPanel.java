@@ -124,7 +124,7 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 	 */
 	protected void initComponents() {
 		table = new ResultsTable(getTableModel(), help);
-
+                table.setRowHeight(30);
 		statusLabel.setForeground(Color.red);
 		statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
 		statusLabel.setText("WARNING: parameters have been changed since this solution was computed!");
@@ -135,7 +135,7 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 
 		JScrollPane jsp = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		JLabel descrLabel = new JLabel(getDescriptionMessage());
-
+                
 		intPanel.add(descrLabel, BorderLayout.NORTH);
 		intPanel.add(jsp, BorderLayout.CENTER);
 

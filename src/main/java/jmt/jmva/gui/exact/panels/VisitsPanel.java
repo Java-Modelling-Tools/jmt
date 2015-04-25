@@ -129,8 +129,8 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
-		add(Box.createVerticalStrut(20), BorderLayout.NORTH);
-		add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
+		add(Box.createVerticalStrut(30), BorderLayout.NORTH);
+		add(Box.createVerticalStrut(30), BorderLayout.SOUTH);
 		add(Box.createHorizontalStrut(20), BorderLayout.EAST);
 		add(Box.createHorizontalStrut(20), BorderLayout.WEST);
 
@@ -190,8 +190,9 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 		VisitTable() {
 			super(new VisitTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
+                        setRowHeight(30);
 
-			setDisplaysScrollLabels(true);
+                        setDisplaysScrollLabels(true);
 			help.addHelp(this,
 					"Click or drag to select cells; to edit data single-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreColumnsLabel, "There are more classes: scroll right to see them");

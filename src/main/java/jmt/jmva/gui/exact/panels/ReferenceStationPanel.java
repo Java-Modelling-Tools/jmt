@@ -156,8 +156,8 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
-		add(Box.createVerticalStrut(20), BorderLayout.NORTH);
-		add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
+		add(Box.createVerticalStrut(30), BorderLayout.NORTH);
+		add(Box.createVerticalStrut(30), BorderLayout.SOUTH);
 		add(Box.createHorizontalStrut(20), BorderLayout.EAST);
 		add(Box.createHorizontalStrut(20), BorderLayout.WEST);	
 	}
@@ -318,7 +318,8 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			this.newValue = null;
 			this.addPropertyChangeListener( this );
 			autoResizeMode = AUTO_RESIZE_SUBSEQUENT_COLUMNS;
-			setDisplaysScrollLabels(true);			
+                        setRowHeight(30);
+                        setDisplaysScrollLabels(true);			
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
 			setClipboardTransferEnabled(true);

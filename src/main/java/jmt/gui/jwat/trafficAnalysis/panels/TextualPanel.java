@@ -119,11 +119,11 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 		synScroll = new JScrollPane(synView);
 		synScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		synScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		vBox.add(Box.createVerticalStrut(20));
+		vBox.add(Box.createVerticalStrut(30));
 		vBox.add(h2Box);
-		vBox.add(Box.createVerticalStrut(20));
+		vBox.add(Box.createVerticalStrut(30));
 		vBox.add(synScroll);
-		vBox.add(Box.createVerticalStrut(20));
+		vBox.add(Box.createVerticalStrut(30));
 		//h2Box.add(Box.createHorizontalStrut(20));
 		h2Box.add(descrLabel);
 		h2Box.add(button_save);

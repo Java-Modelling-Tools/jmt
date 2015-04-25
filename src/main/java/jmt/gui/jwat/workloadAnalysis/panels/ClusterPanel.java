@@ -78,7 +78,7 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 		this.setLayout(new BorderLayout());
 		/*Creating Box*/
 		Box mainbox = Box.createVerticalBox();
-		mainbox.add(Box.createVerticalStrut(20));
+		mainbox.add(Box.createVerticalStrut(30));
 
 		Box paneldesclabel = Box.createHorizontalBox();
 		Box centralpanel = Box.createHorizontalBox();

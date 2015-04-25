@@ -314,7 +314,7 @@ public class ExactWizard extends Wizard {
 
 	public ExactWizard(ExactModel data) {
 		super(TITLE);
-		setSize(800, 600);
+		setSize(1024, 768);
 		this.centerWindow();
 		setIconImage(JMTImageLoader.loadImageAwt("JMVAIcon"));
 		this.data = data;
@@ -419,7 +419,7 @@ public class ExactWizard extends Wizard {
 
 		JPanel labelbox = new JPanel();
 		labelbox.setLayout(new BorderLayout());
-		labelbox.add(Box.createVerticalStrut(20), BorderLayout.WEST);
+		labelbox.add(Box.createVerticalStrut(30), BorderLayout.WEST);
 		labelbox.add(helpLabel, BorderLayout.CENTER);
 
 		Box buttonBox = Box.createVerticalBox();

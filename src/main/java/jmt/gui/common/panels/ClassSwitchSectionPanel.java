@@ -209,8 +209,8 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 			setRowSelectionAllowed(true);
 			tableHeader.setToolTipText(null);
 			rowHeader.setToolTipText(null);
-			rowHeader.setRowHeight(18);
-			setRowHeight(18);
+			rowHeader.setRowHeight(30);
+			setRowHeight(30);
 			this.setDefaultRenderer(Object.class, new ClassSwitchTableRenderer());
 			for(int i = 0; i < getColumnCount(); i++) {
 				getColumnModel().getColumn(i).setPreferredWidth(DEFAULT_COLUMN_WIDTH);

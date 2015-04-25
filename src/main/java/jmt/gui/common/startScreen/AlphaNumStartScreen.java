@@ -76,7 +76,7 @@ public class AlphaNumStartScreen extends JMTFrame {
 	SampleQNAnimation sampleQNAni = null;
 
 	//dimensions of the window
-	private static final int WIDTH = 800, HEIGHT = 270;
+	//private static final int WIDTH = 800, HEIGHT = 270;
 
 	JButton mvaAppl,//starts mva application
 			simAppl,//starts sim application
@@ -85,7 +85,7 @@ public class AlphaNumStartScreen extends JMTFrame {
 	//returns a reference to a new instance of StartScreen
 	public AlphaNumStartScreen() {
 		super(true, "JMT - Java Modelling Tools");
-		this.centerWindow(WIDTH, HEIGHT);
+		this.centerWindow(800, 270);
 		//close this window if proper button pressed
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setResizable(false);

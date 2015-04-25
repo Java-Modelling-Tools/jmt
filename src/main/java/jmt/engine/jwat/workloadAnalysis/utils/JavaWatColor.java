@@ -30,7 +30,7 @@ import javax.swing.JPanel;
 public class JavaWatColor {
 	public static void main(String[] v) {
 		JFrame f = new JFrame();
-		f.setSize(800, 600);
+		f.setSize(1024, 768);
 		JButton b = new JButton("Colora");
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

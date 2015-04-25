@@ -164,7 +164,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 			super();
 			setModel(new RoutingSelectionTableModel());
 			sizeColumns();
-			setRowHeight(18);
+			setRowHeight(30);
 		}
 
 		@Override

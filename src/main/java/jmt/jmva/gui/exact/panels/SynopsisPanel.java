@@ -93,9 +93,9 @@ public class SynopsisPanel extends WizardPanel {
 		synScroll = new JScrollPane(synView);
 		synScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		synScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-		vBox.add(Box.createVerticalStrut(20));
+		vBox.add(Box.createVerticalStrut(30));
 		vBox.add(hBox);
-		vBox.add(Box.createVerticalStrut(20));
+		vBox.add(Box.createVerticalStrut(30));
 		hBox.add(Box.createHorizontalStrut(20));
 		hBox.add(synScroll);
 		hBox.add(Box.createHorizontalStrut(20));
