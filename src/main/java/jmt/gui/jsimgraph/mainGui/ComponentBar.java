@@ -72,13 +72,13 @@ public class ComponentBar extends JMTToolBar {
 	}
 	
 	/**
-	 * Finds all possible station types using reflection on <code>JMODELConstants</code>
+	 * Finds all possible station types using reflection on <code>JSimGraphConstants</code>
 	 * In such way a future placement of new station types will be easy.
 	 * @return All station types element found
 	 */
 	private String[] getStationList() {
 		String path = "jmt.gui.jsimgraph.JGraphMod.";
-		Field[] fields = jmt.gui.jsimgraph.JMODELConstants.class.getFields();
+		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		String[] stationNames = new String[fields.length];
 		int index = 0;
 		try {

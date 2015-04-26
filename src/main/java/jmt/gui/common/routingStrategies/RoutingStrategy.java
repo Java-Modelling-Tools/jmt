@@ -80,7 +80,7 @@ public abstract class RoutingStrategy {
 			return all;
 		}
 		ArrayList<RoutingStrategy> strategies = new ArrayList<RoutingStrategy>();
-		Field[] fields = jmt.gui.jsimgraph.JMODELConstants.class.getFields();
+		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		try {
 			for (Field field : fields) {
 				if (field.getName().startsWith("ROUTING_")) {
@@ -104,7 +104,7 @@ public abstract class RoutingStrategy {
 			return allForSource;
 		}
 		ArrayList<RoutingStrategy> strategies = new ArrayList<RoutingStrategy>();
-		Field[] fields = jmt.gui.jsimgraph.JMODELConstants.class.getFields();
+		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		try {
 			for (Field field : fields) {
 				if (field.getName().startsWith("ROUTING_") && !field.getName().endsWith("LOADDEPENDANT") ) {

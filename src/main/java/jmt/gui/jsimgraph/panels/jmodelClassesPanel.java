@@ -30,7 +30,7 @@ import jmt.framework.gui.table.editors.ColorCellEditor;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.jsimgraph.JMODELConstants;
+import jmt.gui.jsimgraph.JSimGraphConstants;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
 import jmt.gui.jsimwiz.panels.ClassesPanel;
@@ -47,7 +47,7 @@ import jmt.gui.jsimwiz.panels.ClassesPanel;
  *         Date: 14-giu-2005
  *         Time: 9.42.15
  */
-public class jmodelClassesPanel extends ClassesPanel implements JMODELConstants {
+public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstants {
 	/**
 	 * 
 	 */

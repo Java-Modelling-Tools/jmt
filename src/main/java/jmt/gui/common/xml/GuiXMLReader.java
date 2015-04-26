@@ -30,7 +30,7 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
-import jmt.gui.jsimgraph.definitions.JMODELModel;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
 
 import org.w3c.dom.Document;
@@ -67,9 +67,9 @@ public class GuiXMLReader implements GuiXMLConstants {
 	 * @param model data model to be elaborated
 	 */
 	public static void parseXML(Element root, CommonModel model) {
-		if (model instanceof JMODELModel) {
-			setUserClasses(root, (JMODELModel) model);
-			setStations(root, (JMODELModel) model);
+		if (model instanceof JSimGraphModel) {
+			setUserClasses(root, (JSimGraphModel) model);
+			setStations(root, (JSimGraphModel) model);
 		}
 		setParametricAnalysis(root, model);
 	}
@@ -79,7 +79,7 @@ public class GuiXMLReader implements GuiXMLConstants {
 	 * @param root GuiXML document root
 	 * @param model data structure where properties have to be set
 	 */
-	protected static void setUserClasses(Element root, JMODELModel model) {
+	protected static void setUserClasses(Element root, JSimGraphModel model) {
 		NodeList classes = root.getElementsByTagName(XML_E_CLASS);
 		// Build a map of class name -> class key
 		HashMap names = new HashMap();
@@ -123,7 +123,7 @@ public class GuiXMLReader implements GuiXMLConstants {
 	 * @param root GuiXML document root
 	 * @param model data structure where properties have to be set
 	 */
-	protected static void setStations(Element root, JMODELModel model) {
+	protected static void setStations(Element root, JSimGraphModel model) {
 		NodeList stations = root.getElementsByTagName(XML_E_STATION);
 		// Build a map of station name -> station key
 		HashMap names = new HashMap();

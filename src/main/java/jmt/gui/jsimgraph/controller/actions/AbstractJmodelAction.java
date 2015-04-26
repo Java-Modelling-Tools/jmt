@@ -62,7 +62,7 @@ public abstract class AbstractJmodelAction extends AbstractJMTAction {
 	 */
 	public AbstractJmodelAction(String name, String iconName, Mediator mediator) {
 		this(name, mediator);
-		this.setIcon(iconName, JMTImageLoader.getImageLoader());
+ 		this.setIcon(iconName, JMTImageLoader.getImageLoader());
 	}
 
 }

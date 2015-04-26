@@ -63,7 +63,8 @@ public class SJFStrategy implements QueuePutStrategy{
 		while (iterator.hasNext()) {
 			index++;
 			current = iterator.next();
-			double currentServiceTime = current.getJob().getServiceTime();
+
+                        double currentServiceTime = current.getJob().getServiceTime();
 			
 			if (serviceTime< currentServiceTime) {
 				//the job to be added must be inserted before the current job

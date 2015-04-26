@@ -122,7 +122,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	public void initGUI(){
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle(windowName);
-		this.centerWindow(1024, 768);
+		this.centerWindow(1152, 864);
 
 		//makes LeftSidePanel
 		JPanel pivotPanel = new JPanel() ;
@@ -472,9 +472,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 				2, 2, //initX, initY
 				2, 2);//xPad, yPad
 
-
-
-
 		pivotPanel.add(measuresPanel);
 		pivotPanel.add(Box.createRigidArea(new Dimension(0,15)));
 		pivotPanel.add(momentsPanel);
@@ -492,10 +489,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		rightPanel = new JPanel(new BorderLayout()) ;
 		//graph panel
 		rightPanel.add(graphHolder, BorderLayout.CENTER);
-
-
-
-
 
 		//Adds Toolbar with Loading/Successful Icon, and ProgressBar
 		toolbar = new JToolBar();

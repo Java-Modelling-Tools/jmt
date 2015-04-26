@@ -27,7 +27,7 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.serviceStrategies.ServiceStrategy;
-import jmt.gui.jsimgraph.JMODELConstants;
+import jmt.gui.jsimgraph.JSimGraphConstants;
 
 /**
  * <p>Title: JMODEL-Model </p>
@@ -43,7 +43,7 @@ import jmt.gui.jsimgraph.JMODELConstants;
  * Modified by Francesco D'Aquino 11/11/2005
  */
 //todo MMM JMVA bridge, undo/redo
-public class JMODELModel extends CommonModel implements JmodelClassDefinition, JmodelStationDefinition, JMODELConstants {
+public class JSimGraphModel extends CommonModel implements JmodelClassDefinition, JmodelStationDefinition, JSimGraphConstants {
 
 	// ----- Variables -------------------------------------------------------------
 	protected HashMap<String, Long> objectNumber = new HashMap<String, Long>(); // Used to generate progressive unique default names
@@ -60,7 +60,7 @@ public class JMODELModel extends CommonModel implements JmodelClassDefinition, J
 	/**
 	 * Default constructor, creates a new instance of <code>JMODELModel</code>
 	 */
-	public JMODELModel() {
+	public JSimGraphModel() {
 		super();
 	}
 

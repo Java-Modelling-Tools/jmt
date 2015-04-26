@@ -29,6 +29,6 @@ import jmt.gui.common.CommonConstants;
  *         Date: 4-giu-2005
  *         Time: 18.10.43
  */
-public interface JMODELConstants extends CommonConstants {
+public interface JSimGraphConstants extends CommonConstants {
 	public static String COLOR_NAME = "Color"; // Name to save color into objectNumber data strucure
 }

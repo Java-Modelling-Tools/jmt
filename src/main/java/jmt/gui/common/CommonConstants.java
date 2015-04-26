@@ -117,7 +117,7 @@ public interface CommonConstants {
 	public final static RoutingStrategy ROUTING_SHORTESTRT = new ShortestResponseTimeRouting();
 	public final static RoutingStrategy ROUTING_LEASTUTILIZATION = new LeastUtilizationRouting();
 	public final static RoutingStrategy ROUTING_FASTESTSERVICE = new FastestServiceRouting();
-    public final static RoutingStrategy ROUTING_LOADDEPENDANT = new LoadDependentRouting();
+        public final static RoutingStrategy ROUTING_LOADDEPENDENT = new LoadDependentRouting();
 
 	/**HTML formats for panels descriptions*/
 	final static String HTML_START = "<html><body align=\"left\">";

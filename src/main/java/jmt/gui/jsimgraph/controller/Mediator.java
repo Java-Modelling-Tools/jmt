@@ -124,7 +124,7 @@ import jmt.gui.jsimgraph.controller.actions.SolveApprox;
 import jmt.gui.jsimgraph.controller.actions.StopSimulation;
 import jmt.gui.jsimgraph.controller.actions.SwitchToExactSolver;
 import jmt.gui.jsimgraph.controller.actions.TakeScreenShot;
-import jmt.gui.jsimgraph.definitions.JMODELModel;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
@@ -214,7 +214,7 @@ public class Mediator implements GuiInterface {
 	private Cursor oldCursor;
 
 	// Bertoli Marco
-	private JMODELModel model;
+	private JSimGraphModel model;
 	private JFrame resultsWindow;
 	private JmtClipboard clipboard;
 	private DispatcherThread dispatcher = null; // To control simulation
@@ -652,7 +652,7 @@ public class Mediator implements GuiInterface {
 		// Bertoli Marco
 		// Instantiates a new JMODELModel data structure to store the entire
 		// model
-		model = new JMODELModel();
+		model = new JSimGraphModel();
 		// end
 
 		mainWindow.setGraph(graph);
@@ -711,7 +711,7 @@ public class Mediator implements GuiInterface {
 		if(animationHolder != null ) {
 			animationHolder.stop();
 		}
-		JMODELModel tmpmodel = new JMODELModel();
+		JSimGraphModel tmpmodel = new JSimGraphModel();
 		int state = modelLoader.loadModel(tmpmodel, mainWindow);
 		if (state == ModelLoader.SUCCESS || state == ModelLoader.WARNING) {
 			resetMouseState();
@@ -801,7 +801,7 @@ public class Mediator implements GuiInterface {
 		}
 		resultsWindow = null;
 		openedArchive = null;
-		model = new JMODELModel();
+		model = new JSimGraphModel();
 		mainWindow.updateTitle(null);
 		// Free same resources by forcing a garbage collection
 		System.gc();
@@ -3412,7 +3412,7 @@ public class Mediator implements GuiInterface {
 		animationHolder = thread;
 	}
 
-	public JMODELModel getModel() {
+	public JSimGraphModel getModel() {
 		return model;
 	}	
 

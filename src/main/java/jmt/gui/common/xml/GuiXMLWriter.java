@@ -42,7 +42,7 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisModelFactory;
-import jmt.gui.jsimgraph.definitions.JMODELModel;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -140,9 +140,9 @@ public class GuiXMLWriter implements GuiXMLConstants {
 		guiDoc.appendChild(elem);
 		elem.setAttribute("xsi:noNamespaceSchemaLocation", XML_DOCUMENT_XSD);
 		elem.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		if (model instanceof JMODELModel) {
-			writeClasses(guiDoc, elem, (JMODELModel) model);
-			writeStations(guiDoc, elem, (JMODELModel) model);
+		if (model instanceof JSimGraphModel) {
+			writeClasses(guiDoc, elem, (JSimGraphModel) model);
+			writeStations(guiDoc, elem, (JSimGraphModel) model);
 		}
 		writeParametricAnalysisInfos(guiDoc, elem, model);
 	}
@@ -153,7 +153,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 	 * @param guiNode parent node where class informations should be added
 	 * @param model data structure
 	 */
-	static protected void writeClasses(Document doc, Node guiNode, JMODELModel model) {
+	static protected void writeClasses(Document doc, Node guiNode, JSimGraphModel model) {
 		Vector v = model.getClassKeys();
 		for (int i = 0; i < v.size(); i++) {
 			Object classKey = v.get(i);
@@ -172,7 +172,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 	 * @param guiNode parent node where station informations should be added
 	 * @param model data structure
 	 */
-	static protected void writeStations(Document doc, Node guiNode, JMODELModel model) {
+	static protected void writeStations(Document doc, Node guiNode, JSimGraphModel model) {
 		Vector stations = model.getStationKeys();
 		Element station, position;
 		for (int i = 0; i < stations.size(); i++) {

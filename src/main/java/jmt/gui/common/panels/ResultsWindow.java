@@ -573,7 +573,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			graphPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
 					pivotPanel2, graph);
 			graphPanel.setOneTouchExpandable(true);
-			graphPanel.setDividerLocation(360);
+			graphPanel.setDividerLocation(600);
 			graph.setMinimumSize(new Dimension(200, 150));
 			graph.setPreferredSize(new Dimension(300, 150));
 			
