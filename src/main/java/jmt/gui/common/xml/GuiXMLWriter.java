@@ -42,7 +42,7 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisModelFactory;
-import jmt.gui.jmodel.definitions.JMODELModel;
+import jmt.gui.jsimgraph.definitions.JMODELModel;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

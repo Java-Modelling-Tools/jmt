@@ -27,9 +27,9 @@ import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.ResultsModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.panels.ResultsWindow;
-import jmt.gui.jmodel.controller.Mediator;
-import jmt.gui.jmodel.controller.ModelSnapshot;
-import jmt.gui.jmodel.controller.SimulationStateChecker;
+import jmt.gui.jsimgraph.controller.Mediator;
+import jmt.gui.jsimgraph.controller.ModelSnapshot;
+import jmt.gui.jsimgraph.controller.SimulationStateChecker;
 
 /**
  * <p>Title: Dispatcher Thread</p>

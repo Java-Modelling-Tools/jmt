@@ -30,8 +30,8 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
-import jmt.gui.jmodel.definitions.JMODELModel;
-import jmt.gui.jmodel.definitions.JMTPoint;
+import jmt.gui.jsimgraph.definitions.JMODELModel;
+import jmt.gui.jsimgraph.definitions.JMTPoint;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

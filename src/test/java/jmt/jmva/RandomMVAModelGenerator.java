@@ -122,7 +122,7 @@ public class RandomMVAModelGenerator {
 	public static final int maxNumber_Station = 15;
 
 	//FOR OPEN MODELS, we want to set the Umax, that is the bottleneck resource utilization,
-	//so that it's contained in a fixed interval [min, max]
+	//so that it is contained in a fixed interval [min, max]
 	private double U_min_bottleneck = 0.3;
 	private double U_max_bottleneck = 0.85;
 
@@ -231,7 +231,7 @@ public class RandomMVAModelGenerator {
 				for (int i = 0; i < stations; i++) {
 					temp = Math.abs(randomGenerator.nextDouble());
 					serviceTimes[i][c][0] = temp;
-					//determines whether it's the maximum value for this class
+					//determines whether it is the maximum value for this class
 					if (temp > max) {
 						max = temp;
 					}

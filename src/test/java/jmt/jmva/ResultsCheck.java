@@ -452,7 +452,7 @@ public class ResultsCheck {
 			Element currentStat = (Element) statRes.item(i);
 
 			if (currentStat.getAttribute("station").equalsIgnoreCase(stat)) {
-				//it's the correct station
+				//it is the correct station
 
 				//retrieves class results of this station
 				NodeList classRes = currentStat.getElementsByTagName("classresults");
@@ -463,7 +463,7 @@ public class ResultsCheck {
 					Element currentCls = (Element) classRes.item(j);
 
 					if (currentCls.getAttribute("customerclass").equalsIgnoreCase(cls)) {
-						//it's the correct class
+						//it is the correct class
 
 						//retrieves the measures of this (station, class)
 						NodeList measures = currentCls.getElementsByTagName("measure");
@@ -474,7 +474,7 @@ public class ResultsCheck {
 							Element currentMeas = (Element) measures.item(k);
 
 							if (currentMeas.getAttribute("measureType").equalsIgnoreCase(type)) {
-								//it's the requested measure
+								//it is the requested measure
 
 								double exactValue = Double.parseDouble(currentMeas.getAttribute("meanValue"));
 								return exactValue;

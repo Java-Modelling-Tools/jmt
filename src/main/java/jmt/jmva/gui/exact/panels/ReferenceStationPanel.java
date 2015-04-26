@@ -47,7 +47,6 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.ld.LDEditor;
 import jmt.gui.exact.table.ComboBoxCell;
 import jmt.gui.exact.table.ExactTable;
-
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.jmva.gui.exact.ExactConstants;
 import jmt.jmva.gui.exact.ExactModel;

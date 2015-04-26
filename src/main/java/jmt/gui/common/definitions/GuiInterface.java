@@ -20,7 +20,7 @@ package jmt.gui.common.definitions;
 
 import javax.swing.JFrame;
 
-import jmt.gui.jmodel.controller.SimulationStateChecker;
+import jmt.gui.jsimgraph.controller.SimulationStateChecker;
 
 /**
  * <p>Title: Gui Interface</p>

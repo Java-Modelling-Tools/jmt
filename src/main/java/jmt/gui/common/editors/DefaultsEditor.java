@@ -683,7 +683,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Creates a Map with Queue Strategies Names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> distributions = new TreeMap<String, String>();
-		Field[] fields = jmt.gui.jmodel.JMODELConstants.class.getFields();
+		Field[] fields = jmt.gui.jsimgraph.JMODELConstants.class.getFields();
 		try {
 			for (Field field : fields) {
 				if (field.getName().startsWith("FINITE_")) {

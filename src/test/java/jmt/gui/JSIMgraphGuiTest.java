@@ -1,7 +1,7 @@
 package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
-import jmt.gui.jmodel.mainGui.MainWindow;
+import jmt.gui.jsimgraph.mainGui.MainWindow;
 import jmt.util.TextButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;

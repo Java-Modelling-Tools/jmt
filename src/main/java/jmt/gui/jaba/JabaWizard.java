@@ -571,7 +571,7 @@ public class JabaWizard extends Wizard {
 
 	protected void switchToSimulator() {
 		cancel();
-		new jmt.gui.jmodel.mainGui.MainWindow();
+		new jmt.gui.jsimgraph.mainGui.MainWindow();
 		dispose();
 	}
 

@@ -279,7 +279,7 @@ public abstract class Distribution implements ServiceStrategy {
 		}
 		String path = "jmt.gui.common.distributions.";
 
-		Field[] fields = jmt.gui.jmodel.JMODELConstants.class.getFields();
+		Field[] fields = jmt.gui.jsimgraph.JMODELConstants.class.getFields();
 		ArrayList<Distribution> tmp = new ArrayList<Distribution>();
 		try {
 			for (Field field : fields) {
