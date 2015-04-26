@@ -308,6 +308,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 			
 			if (scCustFracDiffs == null) {
 				System.out.println("service centre cust frac diffs are NULL");
+				scCustFracDiffs = new double[stations][classes];
 				for (int k = 0; k < stations; k++) {
 					for (int j = 0; j < classes; j++) {
 						scCustFracDiffs[k][j] = 0;

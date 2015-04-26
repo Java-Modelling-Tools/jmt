@@ -233,7 +233,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 			//Added by ASHANKA STOP
 			case SimConstants.THROUGHPUT_PER_SINK:
 				typeName = "Throughput per Sink";
-				
+				break;				
 			case SimConstants.RESPONSE_TIME_PER_SINK:
 				typeName = "Response Time per Sink";
 		}

@@ -158,7 +158,6 @@ public class SolverMultiClosedMoM extends SolverMulti {
 	@Override
 	public void solve() {
 		QueuingNet.QNSolver c = null;
-		boolean isPerturbed = false;
 		try{
 			c = new MoMSolver(qnm, nThreads);
 			c.computeNormalisingConstant();
@@ -178,7 +177,6 @@ public class SolverMultiClosedMoM extends SolverMulti {
 				}
 			}
 			scale = newscale;
-			isPerturbed = true;
 			QNModel qnm2 = null;
 			try {
 				qnm2 = new QNModel(qnm.R, qnm.M, N, Z, mi, D);

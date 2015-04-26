@@ -93,15 +93,15 @@ public class JobAnimation implements Animation {
 		currentPath = (int) (Math.random() * (jobPaths.length));
 	}
 
-	/**Adds a path to be followed by this job
-	 * @param jp: new path to be added.*/
-	public void addPath(JobPath jp) {
-		JobPath[] newJps = new JobPath[jobPaths.length + 1];
-		for (int i = 0; i < jobPaths.length; i++) {
-			newJps[i] = jobPaths[i];
-		}
-		newJps[jobPaths.length] = jp;
-	}
+//	/**Adds a path to be followed by this job
+//	 * @param jp: new path to be added.*/
+//	public void addPath(JobPath jp) {
+//		JobPath[] newJps = new JobPath[jobPaths.length + 1];
+//		for (int i = 0; i < jobPaths.length; i++) {
+//			newJps[i] = jobPaths[i];
+//		}
+//		newJps[jobPaths.length] = jp;
+//	}
 
 	public void refresh() {
 	}

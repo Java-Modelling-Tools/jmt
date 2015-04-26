@@ -108,7 +108,7 @@ public class FuzzyKSingleClusterScatter extends JPanel {
 		xVar = x;
 		yVar = y;
 		this.model = (ModelWorkloadAnalysis) model.getDataModel();
-		this.session = session;
+//		this.session = session;
 		this.model.addOnChangeVariableValue(new ChangeVariableListener() {
 			public void onChangeVariableValues() {
 				first = true;

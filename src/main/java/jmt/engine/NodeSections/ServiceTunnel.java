@@ -42,7 +42,7 @@ public class ServiceTunnel extends ServiceSection {
 		super(auto);
 	}
 
-	public void NodeLinked(NetNode node) {
+	public void tunnelNodeLinked(NetNode node) {
 	}
 
 	@Override

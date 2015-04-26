@@ -36,7 +36,7 @@ public abstract class RandomEngine {
 	//NEW
 	//@author Stefano Omini
 	//should be set by the class Simulation to initialize the default RandomEngine
-	private static long simulationSeed;
+	private long simulationSeed;
 
 	//end NEW
 

@@ -507,7 +507,6 @@ public class MMQueues extends JMTFrame {
 			c.weighty = 0;
 			c.gridy = 3;
 			simulationP.add(p, c);
-			c.gridx = 1;
 			c.gridx = 0;
 			c.weightx = 0;
 			c.gridy = 4;

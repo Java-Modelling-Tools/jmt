@@ -28,7 +28,7 @@ public class Observation implements Comparable {
 	/* List of values belong to a single observation */
 	private double[] observation = null;
 	/* Identify the element of the observation used to accomplish the compareTo method */
-	private static int sortIndex = 0;
+	private int sortIndex = 0;
 	/* Validity */
 	private boolean valid = true;
 	private int ID;

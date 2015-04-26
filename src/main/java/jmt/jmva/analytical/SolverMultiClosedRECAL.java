@@ -19,12 +19,10 @@ package jmt.jmva.analytical;
 import javax.naming.OperationNotSupportedException;
 
 import QueuingNet.RECALSolver;
-import DataStructures.BigRational;
 import DataStructures.QNModel;
 import Exceptions.BTFMatrixErrorException;
 import Exceptions.InconsistentLinearSystemException;
 import Exceptions.InternalErrorException;
-import QueuingNet.QNSolver;
 
 /**
  * This class implements the API to allow use by other applications. One can
@@ -176,13 +174,8 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 
 		try {
 			c.computeNormalisingConstant();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
 			c.computePerformanceMeasures();
-		} catch (InternalErrorException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

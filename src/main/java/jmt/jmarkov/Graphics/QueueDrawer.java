@@ -71,7 +71,8 @@ public class QueueDrawer extends JComponent implements Notifier {
 
 	// draw settings
 	private DrawConstrains dCst;
-	private static double START_GAP, END_GAP, ELEM_HEIGHT, ELEM_WIDTH, ELEMS_GAP, PROC_RAD, MORE_JOBS_MAX = 100, LOST_JOBS_MAX = 100;
+	private double START_GAP, END_GAP, ELEM_HEIGHT, ELEM_WIDTH, ELEMS_GAP, PROC_RAD; 
+	private static double MORE_JOBS_MAX = 100, LOST_JOBS_MAX = 100;
 	private Rectangle2D[] queue;
 	private RoundRectangle2D viewB;
 	private Ellipse2D processor, occupiedEll;
