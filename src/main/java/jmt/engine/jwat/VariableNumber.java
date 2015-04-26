@@ -232,7 +232,7 @@ public class VariableNumber implements JWATConstants {
 	 * @param index
 	 *            transformation to apply
 	 * @throws TrasformException
-	 *             throws if it isn't possible to apply transformation
+	 *             throws if it is not possible to apply transformation
 	 */
 	public void doTransformation(int index) throws TrasformException {
 		// Checks if this is a numeric variable otherwise no transformation

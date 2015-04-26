@@ -32,7 +32,7 @@ public class ConstantNode implements ExpressionNode {
 	public static final double[] VALUES = new double[] { Math.PI, Math.E };
 	/** Value of the constant */
 	protected double constant;
-	/** Name of the constant. Only if it's built-in */
+	/** Name of the constant. Only if it is built-in */
 	protected String name;
 	/** An empty array with children */
 	protected ExpressionNode[] children = new ExpressionNode[0];

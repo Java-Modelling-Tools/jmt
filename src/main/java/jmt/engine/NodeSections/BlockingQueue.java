@@ -180,7 +180,7 @@ public class BlockingQueue extends InputSection {
 			case NetEvent.EVENT_START:
 
 				//the input station receives the "start" event because it has no nodes in input
-				//then it's marked as reference node
+				//then it is marked as reference node
 
 				//NEW
 				//@author Stefano Omini

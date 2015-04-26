@@ -42,7 +42,7 @@ public class JobAnimation implements Animation {
 	protected double position;
 
 	/**timer that keeps trace of the millisecs passed by the time this job entered the
-	element (e.g. edge or station) it's going through*/
+	element (e.g. edge or station) it is going through*/
 	protected long timeOfEntrance;
 
 	//speed this job must move at through the queue net.

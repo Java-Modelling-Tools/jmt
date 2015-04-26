@@ -151,8 +151,8 @@ import org.jgraph.graph.PortView;
 import org.jgraph.plaf.basic.BasicGraphUI;
 
 /**
- * This class mantains a reference to all the main copmponents of the Gui,
- * in this way it's possible to divide the responsability of the actions &
+ * This class mantains a reference to all the main copmoonents of the Gui,
+ * in this way it is possible to divide the responsability of the actions &
  * every object know only about of himself & the mediator.
  * Other actions are made through the mediator without knowing who will actually
  * do it.
@@ -1481,7 +1481,7 @@ public class Mediator implements GuiInterface {
 		for (Object station : stations) {
 			forwardConnections = model.getForwardConnections(station);
 			for (int j = 0; j < forwardConnections.size(); j++) {
-				// Forces connection as it's already present into data structure
+				// Forces connection as it is already present into data structure
 				connect(cells.get(station), cells.get(forwardConnections.get(j)), true);
 			}
 
@@ -1589,7 +1589,7 @@ public class Mediator implements GuiInterface {
 	// Object[] overlapping = graph.getDescendants(graph.getRoots(bounds));
 	// Point2D zero = new Point(0,0);
 	// while (overlapping.length > 0) {
-	// // Moves bounds until it doesn't overlap with anything
+	// // Moves bounds until it does not overlap with anything
 	// Point2D last = (Point2D) zero.clone();
 	// for (int j=0; j<overlapping.length; j++) {
 	// // Puts last to last corner of overlapping cells
@@ -1730,7 +1730,7 @@ public class Mediator implements GuiInterface {
 			resetOverLapping = 0;
 			while (overlapping.length > 0) {
 
-				// Moves bounds until it doesn't overlap with anything
+				// Moves bounds until it does not overlap with anything
 				Point2D last = (Point2D) zero.clone();
 				for (int j = 0; j < overlapping.length; j++) {
 
@@ -2917,7 +2917,7 @@ public class Mediator implements GuiInterface {
 
 	/**
 	 * Adds a new Blocking region that contains selected cells,
-	 * if this doesn't overlap with existing one
+	 * if this does not overlap with existing one
 	 */
 	public void addSelectionToNewBlockingRegion() {
 		Object[] cells = graph.getSelectionCells();
@@ -2996,12 +2996,12 @@ public class Mediator implements GuiInterface {
 					newRegionKey = ((BlockingRegion) cell.getParent()).getKey();
 					if (!model.addRegionStation(newRegionKey, key)) {
 						// object cannot be added to blocking region (for
-						// example it's a source)
+						// example it is a source)
 						cell.removeFromParent();
 						graph.getModel().insert(new Object[] { cell }, null, null, null, null);
 						putBack.add(cell);
 					}
-					// Doesn't allow adding of selected objects to a new
+					// Does not allow adding of selected objects to a new
 					// blocking region
 					enableAddBlockingRegion(false);
 				}

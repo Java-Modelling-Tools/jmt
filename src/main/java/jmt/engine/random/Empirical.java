@@ -123,7 +123,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double[] pdf = ((EmpiricalPar) p).getPDF();
 			double mean = 0;
-			//it's a simple weighted mean: the weight of each value is the pdf of the value
+			//it is a simple weighted mean: the weight of each value is the pdf of the value
 			//itself
 			for (int ptn = 0; ptn < pdf.length; ptn++) {
 				mean += pdf[ptn] * ptn;

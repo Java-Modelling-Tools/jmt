@@ -529,7 +529,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		}
 
 		/**
-		 * This empty implementation is provided so users don't have to implement
+		 * This empty implementation is provided so users do not have to implement
 		 * this method if their data model is not editable.
 		 *
 		 * @param aValue      value to assign to cell

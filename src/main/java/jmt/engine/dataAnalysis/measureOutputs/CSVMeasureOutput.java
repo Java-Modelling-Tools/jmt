@@ -51,7 +51,7 @@ public class CSVMeasureOutput extends MeasureOutput {
 	 * Constructor of a CSVMeasureOutput object.
 	 * @param measure the measure to be sent in output
 	 * @param append true to write at the end of the file (of course
-	 * it's useful only if a file is used)
+	 * it is useful only if a file is used)
 	 * @param fileName the name of the file; if null the output will be sent
 	 * on the standard output
 	 * @throws java.io.IOException
@@ -72,7 +72,7 @@ public class CSVMeasureOutput extends MeasureOutput {
 	 * Constructor of a CSVMeasureOutput object, using a file.
 	 * @param Measure the measure to be sent in output
 	 * @param Append true to write at the end of the file (of course
-	 * it's useful only if a file is used)
+	 * it is useful only if a file is used)
 	 * @throws java.io.IOException
 	 */
 	public CSVMeasureOutput(jmt.engine.dataAnalysis.Measure Measure, boolean Append) throws IOException {

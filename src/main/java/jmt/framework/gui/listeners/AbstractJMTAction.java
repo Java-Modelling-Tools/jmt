@@ -120,7 +120,7 @@ public abstract class AbstractJMTAction extends AbstractAction {
 	}
 
 	/**
-	 * Sets the group associated to this action if it's selectable
+	 * Sets the group associated to this action if it is selectable
 	 * @param group identifier of group. Must be greater or equal to zero.
 	 */
 	protected void setGroup(int group) {

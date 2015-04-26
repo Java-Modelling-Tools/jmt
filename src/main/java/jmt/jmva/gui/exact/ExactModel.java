@@ -2131,7 +2131,7 @@ public class ExactModel implements ExactConstants  {
 						}
 					}
 					if (measure.getAttribute("measureType").equalsIgnoreCase(res)) {
-						//it's the measure we are searching for
+						//it is the measure we are searching for
 						value = measure.getAttribute("meanValue");
 						break;
 					}
@@ -2494,7 +2494,7 @@ public class ExactModel implements ExactConstants  {
 
 	//Added by ASHANKA START
 	//System Power
-	//Unlike other performance indices we don't have station level
+	//Unlike other performance indices we do not have station level
 	//aggregate and individual 
 /*	public double[][] getPerClassSP(SolverAlgorithm alg) {
 		if (resTimes == null) {
@@ -3084,7 +3084,7 @@ public class ExactModel implements ExactConstants  {
 	private boolean checkForSaturation(double[] classData, double[][] visits, double[][][] serviceTimes, int[] stationServers) {
 		for (int i = 0; i < stations; i++) {
 			if (stationTypes[i] == STATION_DELAY) {
-				//delay station: don't check saturation
+				//delay station: do not check saturation
 				continue;
 			}
 

@@ -220,7 +220,7 @@ public class JMTFrame extends JFrame {
 
 	public static void main(String[] args) {
 		JMTFrame frame = new JMTFrame(true, "test");
-		frame.centerWindow(640, 480);
+		frame.centerWindow(800, 600);
 		frame.setVisible(true);
 	}
 }

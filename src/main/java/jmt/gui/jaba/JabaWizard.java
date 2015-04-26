@@ -555,7 +555,7 @@ public class JabaWizard extends Wizard {
 	@Override
 	protected void finish() {
 		// OLD
-		// do not call this method!!! It's already called inside checkFinish()
+		// do not call this method!!! it is already called inside checkFinish()
 		// method.
 		// currentPanel.lostFocus();
 		solve();

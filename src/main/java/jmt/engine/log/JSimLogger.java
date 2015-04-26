@@ -52,7 +52,7 @@ public class JSimLogger implements Serializable {
 
 	private transient org.apache.log4j.Logger logger;
 	static {
-		// Initialize only if somebody didn't already initialize this.
+		// Initialize only if somebody did not already initialize this.
 		if (!LogManager.getCurrentLoggers().hasMoreElements()) {
 			URL propsUrl = JSimLogger.class.getResource(LOG4J_CONF);
 			boolean initialized = false;

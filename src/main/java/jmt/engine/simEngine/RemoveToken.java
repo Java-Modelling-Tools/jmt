@@ -20,7 +20,7 @@ package jmt.engine.simEngine;
 /**
  * <p><b>Name:</b> RemoveToken</p> 
  * <p><b>Description:</b> 
- * This class works as a token to remove future and deferred events. It's designed to disallow access to the internal
+ * This class works as a token to remove future and deferred events. it is designed to disallow access to the internal
  * data structure.
  * </p>
  * <p><b>Date:</b> 25/mag/2009

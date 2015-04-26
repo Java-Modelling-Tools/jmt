@@ -33,6 +33,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import jmt.gui.common.CommonConstants;
 
 /**
 
@@ -64,7 +65,7 @@ public class RowHeader extends JTable {
 	 */
 	public RowHeader() {
 		this(new DefaultRowHeaderModel());
-                setRowHeight(30);
+                setRowHeight(CommonConstants.ROW_HEIGHT);
 	}
 
 	/**
@@ -81,7 +82,7 @@ public class RowHeader extends JTable {
 			setModel(dm);
 		}
 
-                setRowHeight(30);
+                setRowHeight(CommonConstants.ROW_HEIGHT);
 		cellRenderer = tableHeader.getDefaultRenderer();
 		setFocusable(false);
 		setToolTipText("Click or drag to select rows");

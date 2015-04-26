@@ -47,7 +47,7 @@ public abstract class RoutingStrategy implements AutoCheck {
      * @param jobClass
      * @return
      *
-     * Made it normal func instead of Abstract as I don't want
+     * Made it normal func instead of Abstract as I do not want
      * other Strategies to forcefully overide this method.
      * Currently only LoadDependentRoutingStrategy overides it.
      */

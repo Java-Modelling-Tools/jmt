@@ -45,7 +45,7 @@ public class ComboBoxCellEditor extends AbstractCellEditor implements TableCellE
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	// Limit maximum cache... This is not really needed but it's good programming to avoid memory leakage
+	// Limit maximum cache... This is not really needed but it is good programming to avoid memory leakage
 	protected static final int MAX_CACHESIZE = 128;
 	// Uses to cache equivalent editors
 	protected static HashMap<Object[], ComboBoxCellEditor> editorCache;

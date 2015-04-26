@@ -117,7 +117,7 @@ public interface StationDefinition {
 
 	/**Adds a new station to the model. Name and type must be specified.
 	 * @param name: name of the new station
-	 * @param type: string representing station type. It's value is contained in
+	 * @param type: string representing station type. it is value is contained in
 	 * <code>JSIMConstants</code> interface.
 	 * @return : key of search for this class*/
 	public Object addStation(String name, String type);

@@ -37,7 +37,7 @@ import jmt.engine.QueueNet.NodeSection;
  * When a job leaves the blocking region, the region input station must receive
  * a message, in order to serve the blocked jobs.
  * <br>
- * However it's also possible to create a generic router and then to turn on/off the
+ * However it is also possible to create a generic router and then to turn on/off the
  * "border router" behaviour using the <tt>borderRouterTurnON(..)</tt> and
  * <tt>borderRouterTurnOFF()</tt> methods.
  *

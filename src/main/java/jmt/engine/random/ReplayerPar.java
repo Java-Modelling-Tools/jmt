@@ -95,7 +95,7 @@ public class ReplayerPar extends AbstractParameter implements Parameter {
 					}
 					// if the EOF is not reached it continues to read from the
 					// file else it restarts from the beginning of the file,
-					// it's cyclical
+					// it is cyclical
 					fr.close();
 					fr = new FileReader(fileName);
 					in = new BufferedReader(fr);

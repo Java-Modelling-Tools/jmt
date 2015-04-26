@@ -305,7 +305,7 @@ public class Dispatcher_jMVAschema {
 			if (modelDefinition.exists()) {
 				modelDefinition.delete();
 			}
-			//copy the model with results (rename doesn't work!)
+			//copy the model with results (rename does not work!)
 
 			//if (!temp.renameTo(modelDefinition)){
 			if (!copyFile(temp, modelDefinition)) {
@@ -406,7 +406,7 @@ public class Dispatcher_jMVAschema {
 		// Adds blocking region informations to model document
 		NodeList blockingList = inputDoc.getElementsByTagName(XMLConstantNames.XML_E_REGION);
 		// If model has one blocking region only, adds router to it (otherwise a job will exit from
-		// region when it's not requested
+		// region when it is not requested
 		if (blockingList.getLength() == 1) {
 			Element region = (Element) blockingList.item(0);
 			Element router = inputDoc.createElement(XMLConstantNames.XML_E_REGIONNODE);
@@ -775,7 +775,7 @@ public class Dispatcher_jMVAschema {
 	}
 
 	/**
-	 * Prints on System.out the temp values of measures that haven't finished yet
+	 * Prints on System.out the temp values of measures that have not finished yet
 	 */
 	public void printTempMeasures() {
 

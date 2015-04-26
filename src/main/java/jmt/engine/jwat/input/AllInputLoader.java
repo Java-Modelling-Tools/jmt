@@ -88,7 +88,7 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 								if (myMatch.contains(lineToken[i], myComp.compile(regExp[i]))) {
 									lineToken[i] = myMatch.getMatch().toString();
 								} else {
-									//Wrong row, token dosen't contains required data
+									//Wrong row, token dose not contains required data
 									countObs--;
 									try {
 										w.write("Error in row " + totalRaw + " : Element " + i + " is wrong\n");
@@ -103,7 +103,7 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 						//Wrong raw, element not found
 						countObs--;
 						try {
-							w.write("Error in row " + totalRaw + " : Line doesn't match format (element " + i + " not found)\n");
+							w.write("Error in row " + totalRaw + " : Line does not match format (element " + i + " not found)\n");
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -126,7 +126,7 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 						}
 						valori.add(new Observation(lineValue, countObs));
 					} else {
-						//Worong row, the line wasn't processed completely
+						//Worong row, the line was not processed completely
 						countObs--;
 						try {
 							w.write("Error in row " + totalRaw + " : Too many fields\n");

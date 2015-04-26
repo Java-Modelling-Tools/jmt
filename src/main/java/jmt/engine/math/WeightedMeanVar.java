@@ -110,7 +110,7 @@ public class WeightedMeanVar {
 
 		// coumputes the maximum and the minimum value of the sequence
 		if (sumWeights == 0) {
-			//it's the first value
+			//it is the first value
 			max = newValue;
 			min = newValue;
 		} else {
@@ -148,7 +148,7 @@ public class WeightedMeanVar {
 		if (oldSumWeights != 0) {
 			var = expectedValueX2 - Math.pow(mean, 2);
 		} else {
-			//it's the first sample, var = 0
+			//it is the first sample, var = 0
 			var = 0;
 		}
 	}

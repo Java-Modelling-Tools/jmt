@@ -104,7 +104,7 @@ public class QueueNetwork {
 		nodes.add(node);
 
 		if (node.getInputNodes().size() == 0) {
-			//if no input nodes are present, it's presumed that this node
+			//if no input nodes are present, it is presumed that this node
 			//must be a source of jobs
 			referenceNodes.add(node);
 		}
@@ -155,7 +155,7 @@ public class QueueNetwork {
 	 * Gets the JobClass with the specified name...
 	 *
 	 * @param name the name of the JobClass
-	 * @return the job class. Null if it doesn't exist.
+	 * @return the job class. Null if it does not exist.
 	 */
 	public JobClass getJobClass(String name) {
 		return jobClasses.get(name);

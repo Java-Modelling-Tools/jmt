@@ -84,7 +84,7 @@ public class XMLArchiver implements GuiXMLConstants {
 	 */
 	public static void loadModel(CommonModel model, File archiveName) {
 		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMT_ARCHIVE));
-		// If document is simulation file, loads it only, if it's an archive loads everything
+		// If document is simulation file, loads it only, if it is an archive loads everything
 		if (doc.getElementsByTagName(XML_ARCHIVE_DOCUMENT_ROOT).getLength() == 0) {
 			XMLReader.parseXML(doc, model);
 		} else {

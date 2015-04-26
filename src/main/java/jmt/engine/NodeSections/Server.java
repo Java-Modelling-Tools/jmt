@@ -190,7 +190,7 @@ public class Server extends ServiceSection {
 				//Otherwise an ack is sent backward to the input section and
 				//the counter of jobs in service is decreased.
 				if (busyCounter == 0) {
-					//it wasn't waiting for any job
+					//it was not waiting for any job
 					return NodeSection.MSG_NOT_PROCESSED;
 				} else if (busyCounter == numberOfServers) {
 					// Sends a request to the input section

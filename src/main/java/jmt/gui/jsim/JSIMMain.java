@@ -794,23 +794,23 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	 * Shows the panel to solve a problem
 	 */
 	public void showRelatedPanel(int problemType, int problemSubType, Object relatedStation, Object relatedClass) {
-		// if it's a no class error show the class panel
+		// if it is a no class error show the class panel
 		if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_CLASSES_ERROR)) {
 			tabbedPane.setSelectedIndex(0);
 		}
-		// if it's a no station error show the station panel
+		// if it is a no station error show the station panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_STATION_ERROR)) {
 			tabbedPane.setSelectedIndex(1);
 		}
-		// if it's a link error show the link panel
+		// if it is a link error show the link panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.STATION_LINK_ERROR)) {
 			tabbedPane.setSelectedIndex(2);
 		}
-		//if it's an allForwardSinkError show the link panel
+		//if it is an allForwardSinkError show the link panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ALL_FORWARD_STATION_ARE_SINK_ERROR)) {
 			tabbedPane.setSelectedIndex(2);
 		}
-		// if it's a routing error show the link panel
+		// if it is a routing error show the link panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ROUTING_ERROR)) {
 			AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
 			//set temp to show routing section panel

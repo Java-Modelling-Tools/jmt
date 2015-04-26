@@ -390,7 +390,7 @@ public class Dispatcher_jSIMschema {
 	}
 
 	/**
-	 * Prints on System.out the temp values of measures that haven't finished yet
+	 * Prints on System.out the temp values of measures that have not finished yet
 	 */
 	public void printTempMeasures() {
 

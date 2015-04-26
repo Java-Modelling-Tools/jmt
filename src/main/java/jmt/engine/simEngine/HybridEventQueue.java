@@ -95,7 +95,7 @@ public class HybridEventQueue implements EventQueue {
 	}
 
 	/**
-	 * This method will move events from future to current queue if it's empty.
+	 * This method will move events from future to current queue if it is empty.
 	 */
 	private void handleCurrent() {
 		if (current.size() == 0 && future.size() > 0) {

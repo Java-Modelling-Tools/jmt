@@ -112,7 +112,7 @@ public abstract class ImageLoader {
 			}
 		}
 
-		// Clears cache when it's bigger than maxCache. This is not needed but avoids memory leakages...
+		// Clears cache when it is bigger than maxCache. This is not needed but avoids memory leakages...
 		if (iconCache.size() > maxCache) {
 			iconCache.clear();
 		}

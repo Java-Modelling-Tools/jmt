@@ -93,7 +93,7 @@ public class AboutDialogFactory {
 	/** JSIMgraph main contributors */
 	private static final Contributors[] JMODEL = {
 		new Contributors(Company.POLIMI, "Bertoli Marco", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
-		new Contributors(Company.ICL, "Anastasia Eleftheriou", "*Casale Giuliano")
+		new Contributors(Company.ICL, "Eleftheriou Anastasia", "*Casale Giuliano")
 	};
 
 	/** JABA main contributors */
@@ -149,7 +149,7 @@ public class AboutDialogFactory {
 
 	/**
 	 * Creates a new modal JMTDialog with specified owner and with panel inside, displaying current text.
-	 * @param owner owner of the dialog. If it's null or invalid, created dialog will not
+	 * @param owner owner of the dialog. If it is null or invalid, created dialog will not
 	 * be modal
 	 * @param title title of dialog to be created
 	 * @param autoclose to automatically close the dialog after a timeout
@@ -186,7 +186,7 @@ public class AboutDialogFactory {
 		JPanel bottom = new JPanel();
 		bottom.add(exit);
 		dialog.getContentPane().add(bottom, BorderLayout.SOUTH);
-		dialog.centerWindow(640, 600);
+		dialog.centerWindow(800, 600);
 		
 		// Handles autoclose
 		if (autoclose) {

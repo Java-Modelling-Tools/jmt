@@ -201,7 +201,7 @@ public interface SimulationDefinition {
 	
 
 	/**
-	* Tells if a given measure is global or local (i.e. if it's station independent
+	* Tells if a given measure is global or local (i.e. if it is station independent
 	* or station dependent)
 	* <br>Author: Bertoli Marco
 	* @param key search's key for given measure

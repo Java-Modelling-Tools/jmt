@@ -57,6 +57,7 @@ import javax.swing.plaf.UIResource;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import jmt.gui.common.CommonConstants;
 
 import jmt.gui.common.JMTImageLoader;
 
@@ -338,7 +339,7 @@ public class ExactTable extends JTable {
 					scrollPane.setBorder(UIManager.getBorder("Table.scrollPaneBorder"));
 				}
 				//rowHeader=new RowHeader(dataModel);
-                                rowHeader.setRowHeight(30);
+                                rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);
 				rowHeader.install(this, scrollPane);
 				installLabels(scrollPane);
 				installSelectAllButton(scrollPane);

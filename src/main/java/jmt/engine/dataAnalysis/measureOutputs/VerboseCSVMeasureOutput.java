@@ -57,7 +57,7 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 	 * Constructor of a NewCSVMeasureOutput object, using a file.
 	 * @param Measure the measure to be sent in output
 	 * @param Append true to write at the end of the file (of course
-	 * it's useful only if a file is used)
+	 * it is useful only if a file is used)
 	 * @throws java.io.IOException
 	 */
 	public VerboseCSVMeasureOutput(jmt.engine.dataAnalysis.Measure Measure, SimParameters simParameters) throws IOException {

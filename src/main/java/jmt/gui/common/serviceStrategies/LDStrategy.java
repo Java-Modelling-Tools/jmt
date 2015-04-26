@@ -119,7 +119,7 @@ public class LDStrategy implements ServiceStrategy {
 	}
 
 	/**
-	 * Sets distribution for this range, don't preserver old values or C, nor of mean
+	 * Sets distribution for this range, do not preserver old values or C, nor of mean
 	 * @param key search's key for this range
 	 * @param distribution distribution to set in this range
 	 */

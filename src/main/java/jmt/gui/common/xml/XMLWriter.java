@@ -621,7 +621,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 									+ "LDParameter", null, new XMLParameter[] {
 									from, distribution[0], distribution[1],
 									function }, true);
-					// Sets array = false as it's not an array of equal elements
+					// Sets array = false as it is not an array of equal elements
 					ranges[j].parameterArray = "false";
 				}
 				// Creates LDParameter array

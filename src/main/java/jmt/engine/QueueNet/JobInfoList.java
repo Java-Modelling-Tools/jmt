@@ -271,7 +271,7 @@ public interface JobInfoList {
 	 *
 	 * Analyzes class throughput. <br>
 	 * WARNING: An InverseMeasure must be used.
-	 * The aim is to save computational time: in fact it's easier to analyze throughput
+	 * The aim is to save computational time: in fact it is easier to analyze throughput
 	 * by passing samples which are equals to 1/X,
 	 * instead of doing one division for each sample (this would make simulation much slower).
 	 * At the end the correct value is passed.

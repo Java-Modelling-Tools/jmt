@@ -173,7 +173,7 @@ public class RandomSource extends InputSection {
 					c = job.getJobClass().getId();
 
 					//no control is made on the number of jobs created
-					//it's an open class
+					//it is an open class
 					job.born();
 
 					//NEW

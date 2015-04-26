@@ -32,6 +32,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -95,17 +97,17 @@ public class GraphStartScreen extends JMTFrame {
 	public static final String IMG_JWATICON = "JWATIcon";
 	public static final String IMG_SUITEICON = "JMTIcon";
 	//names for URLS of documents to be shown as description of main applications
-	private static final String	URL_DOCUMENTATION_ONLINE = "http://jmt.sourceforge.net/Documentation.html";
+	private static final String	URL_DOCUMENTATION_ONLINE = "http://jmt.sf.net/Documentation.html";
 	// Content for logo panel
 	private static final String FONT_TYPE = "Arial";
 	public static final String HTML_CONTENT_TITLE = 
 			String.format("<html><body><b><font face='%s' size='+2'>JMT - Java Modelling Tools v.%s</font></b><br>" +
-					"<font face='%s' size='-1'>Project Coordinator: G.Serazzi</font>" +
+					"<font face='%s' size='-1'>Project Coordinators: G.Serazzi, G.Casale</font>" +
 					"</body></html>",
 					FONT_TYPE, GlobalSettings.getSetting(GlobalSettings.VERSION), FONT_TYPE);
 	public static final String HTML_CONTENT_TITLE_HREF = 
 			String.format("<html><body><bIMG_SUITEICON><font face='%s' size='+2'>JMT - Java Modelling Tools v.%s</font></b><br>" +
-					"<font face='%s' size='-1'>Project Coordinator: G.Serazzi<br><br>" +
+					"<font face='%s' size='-1'>Project Coordinators: G.Serazzi, G.Casale<br><br>" +
 					"<b>Home Page:</b> <a href=\"http://jmt.sf.net\">http://jmt.sf.net</a></font>" +
 					"</body></html>",
 					FONT_TYPE, GlobalSettings.getSetting(GlobalSettings.VERSION), FONT_TYPE);
@@ -121,7 +123,8 @@ public class GraphStartScreen extends JMTFrame {
 		super(true);
 		initGUI();
 		addListeners();
-	//	this.revalidate();
+ 		this.revalidate();
+                this.repaint();
 	}
 
 	// --- Actions associated with buttons -----------------------------------------------------------------
@@ -247,7 +250,7 @@ public class GraphStartScreen extends JMTFrame {
 		this.setTitle("JMT - Java Modelling Tools v." + GlobalSettings.getSetting(GlobalSettings.VERSION));
 		this.setIconImage(JMTImageLoader.loadImage(IMG_SUITEICON).getImage());
 		this.setResizable(false);
-		this.centerWindow(790, 550);
+		this.centerWindow(800, 600);
 
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		this.getContentPane().setLayout(new BorderLayout());
@@ -258,7 +261,7 @@ public class GraphStartScreen extends JMTFrame {
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE));
 		// Adjusts image
 		Image image = new ImageIcon(imageURL).getImage();
-		image = image.getScaledInstance(450, 370, Image.SCALE_SMOOTH);
+		image = image.getScaledInstance(440, 400, Image.SCALE_SMOOTH);
 		JLabel imageLabel = new JLabel();
 		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
 		imageLabel.setIcon(new ImageIcon(image));
@@ -296,12 +299,13 @@ public class GraphStartScreen extends JMTFrame {
 		}
 		this.getGlassPane().setVisible(true);
 		// Now Adds Sample Animation in the bottom
-		sampleQNAni = new SampleQNAnimation();
-		sampleQNAni.start();
-		JPanel pivotPanel = new JPanel(new GridBagLayout());
+ 		sampleQNAni = new SampleQNAnimation();
 		sampleQNAni.setPreferredSize(new Dimension(200, 120));
 		sampleQNAni.setBackground(new Color(151, 151, 151));
+        	sampleQNAni.start();
+		JPanel pivotPanel = new JPanel(new GridBagLayout());
 		pivotPanel.add(sampleQNAni);
+                this.repaint();
 		leftPanel.add(pivotPanel, BorderLayout.SOUTH);
 		// Adds intro buttons in the centre
 		JPanel introButtonArea = new JPanel(new GridLayout(-1, 1));
@@ -323,7 +327,7 @@ public class GraphStartScreen extends JMTFrame {
 		pivotPanel.setOpaque(false);
 		leftPanel.add(pivotPanel, BorderLayout.CENTER);
 
-	}
+        }
 
 	//assigns each component its own listener
 	private void addListeners() {
@@ -379,7 +383,7 @@ public class GraphStartScreen extends JMTFrame {
 	private void showDescrWin(URL url, String title) {
 		if (url != null) {
 			QuickHTMLViewer qhv = new QuickHTMLViewer(url, title);
-			qhv.centerWindow(730, 480);
+			qhv.centerWindow(800, 600);
 			qhv.setVisible(true);
 			qhv.setIconImage(getIconImage());
 		}

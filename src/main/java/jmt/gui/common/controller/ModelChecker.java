@@ -150,7 +150,7 @@ public class ModelChecker implements CommonConstants {
 	public static int OPEN_CLASS_BUT_NO_SOURCE_ERROR = 4;
 	//it occours when no open classes have been associated to a source
 	public static int SOURCE_WITH_NO_OPEN_CLASSES_ERROR = 5;
-	//it occours when a class hasn't a reference station
+	//it occours when a class has not a reference station
 	public static int REFERENCE_STATION_ERROR = 6;
 	//it occours when there is an open class but no sinks have been defined
 	public static int NO_SINK_WITH_OPEN_CLASSES_ERROR = 7;
@@ -851,7 +851,7 @@ public class ModelChecker implements CommonConstants {
 	* <br>- a Server not forward linked.
 	* <br>- a Delay not forward linked.
 	* <br>- a Sink not backward linked.
-	* <br><br>If there isn't any problem it returns null.
+	* <br><br>If there is not any problem it returns null.
 	* @return a Vector<Object> containing the keys of the stations with link problems.
 	*/
 	public Vector<Object> getKeysOfStationsWithLinkProblems() {
@@ -877,7 +877,7 @@ public class ModelChecker implements CommonConstants {
 	/**
 	 * Returns a HashMap where the key is the key of a close class. For each close class that may
 	 * be routed into a station whose forward stations are all sink it contains a Vector<Object> with the
-	 * keys of the stations where the problems occours. If there isn't any problem or no close
+	 * keys of the stations where the problems occours. If there is not any problem or no close
 	 * classes are defined it returns null.
 	 *  @return a HashMap where the key is the key of a close class.
 	 */
@@ -891,7 +891,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns a HashMap where the key is the key of a close class. For each close class with a routing
-	 * problem it contains a Vector<Object> with the keys of the stations where the routing problems occours. If there isn't any problem
+	 * problem it contains a Vector<Object> with the keys of the stations where the routing problems occours. If there is not any problem
 	 * or no close classes are defined it returns null.
 	 *  @return a HashMap where the key is the key of a close class.
 	 */
@@ -1660,7 +1660,7 @@ public class ModelChecker implements CommonConstants {
 						}
 					}
 				}
-				// ... else thisForwardStation isn't a Sink ...
+				// ... else thisForwardStation is not a Sink ...
 				else {
 					Vector<Object> temp;
 					// ... if the routing policy is ProbabilityRouting ...
@@ -1782,7 +1782,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Checks for DIFFERENT_SERVICE_TIME_ERROR. It checks the mean value for each
-	 * service time distribution inside a station, if it hasn't a mean value the error
+	 * service time distribution inside a station, if it has not a mean value the error
 	 * occours
 	 */
 	/*private void checkForDifferentServiceTimesWarnings() {
@@ -2173,7 +2173,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Changes all time distributions to exponential mainteining (when possible) the same mean
-	 * value. Since T-Student and Replayer don't have a mean value the mean value 1 is used.
+	 * value. Since T-Student and Replayer do not have a mean value the mean value 1 is used.
 	 */
 	/*public void changeDistributionsToExp() {
 	    Vector<Object> classes = class_def.getClassKeys();
@@ -2267,7 +2267,7 @@ public class ModelChecker implements CommonConstants {
 	                }
 	            }
 	        }
-	        //if all service time distributions doesn't have a mean value
+	        //if all service time distributions does not have a mean value
 	        if (!atLeastOneValidDistribution) {
 	            minMean = 1;
 	        }

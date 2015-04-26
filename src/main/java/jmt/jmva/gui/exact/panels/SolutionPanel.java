@@ -32,7 +32,7 @@ import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
 
 import jmt.framework.gui.help.HoverHelp;
-import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.gui.exact.table.ResultsTable;
 import jmt.jmva.analytical.SolverAlgorithm;
@@ -124,7 +124,7 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 	 */
 	protected void initComponents() {
 		table = new ResultsTable(getTableModel(), help);
-                table.setRowHeight(30);
+                table.setRowHeight(CommonConstants.ROW_HEIGHT);
 		statusLabel.setForeground(Color.red);
 		statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
 		statusLabel.setText("WARNING: parameters have been changed since this solution was computed!");

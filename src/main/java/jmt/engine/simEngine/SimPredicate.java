@@ -18,7 +18,7 @@ public abstract class SimPredicate {
 	 * @param event The event to test for a match.
 	 * @return The function should return <tt>true</tt> if the
 	 *         event matches and shoult be selected, of <tt>false</tt>
-	 *         if it doesn't
+	 *         if it does not
 	 */
 	public abstract boolean match(SimEvent event);
 }

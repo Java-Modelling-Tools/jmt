@@ -85,15 +85,15 @@ public class SeedPanel extends ParameterOptionPanel {
 
 	public void initialize() {
 		JPanel edit = new JPanel(new GridLayout(4, 1, 0, 5));
-		stepsLabel = new JLabel("Steps (n. of exec.): ");
+		stepsLabel = new JLabel("Steps:");
 		steps = new JSpinner(new SpinnerNumberModel(SPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));
 		steps.setToolTipText("Sets the number of performed simulations");
 		edit.add(stepsLabel);
 		edit.add(steps);
-		edit.setPreferredSize(new Dimension(130, 88));
+		edit.setPreferredSize(new Dimension(130, 108));
 		JPanel editLables = new JPanel(new GridLayout(4, 1, 0, 5));
 		editLables.add(stepsLabel);
-		editLables.setPreferredSize(new Dimension(100, 88));
+		editLables.setPreferredSize(new Dimension(100, 108));
 		JPanel editPanel = new JPanel();
 		editPanel.add(editLables);
 		editPanel.add(edit);

@@ -61,7 +61,7 @@ public abstract class NodeSection {
 
 	/*------------------------------------------------------------------------*/
 
-	/** Exception ID: Required measure doesn't exist. */
+	/** Exception ID: Required measure does not exist. */
 	public final int EXCEPTION_MEASURE_DOES_NOT_EXIST = 0x0001;
 	/** Exception ID: Required property is not available. */
 	public static final int EXCEPTION_PROPERTY_NOT_AVAILABLE = 0x0002;
@@ -407,7 +407,7 @@ public abstract class NodeSection {
 	protected RemoveToken send(int event, Object data, double delay, byte destinationSection, NetNode destination)
 			throws jmt.common.exception.NetException {
 		if ((event == NetEvent.EVENT_JOB) && ((destination != ownerNode) || ((destination == ownerNode) && (destinationSection != sectionID)))) {
-			//it's a JOB event and the destination is not the owner node or it's the owner
+			//it is a JOB event and the destination is not the owner node or it is the owner
 			//node but the dest section is not this section
 			updateJobsList((Job) data);
 		}
@@ -586,7 +586,7 @@ public abstract class NodeSection {
 	protected RemoveToken redirect(int event, Object data, double delay, byte destinationSection, NetNode destination)
 			throws jmt.common.exception.NetException {
 		if ((event == NetEvent.EVENT_JOB) && ((destination != ownerNode) || ((destination == ownerNode) && (destinationSection != sectionID)))) {
-			//it's a JOB event and the destination is not the owner node or it's the owner
+			//it is a JOB event and the destination is not the owner node or it is the owner
 			//node but the dest section is not this section
 			updateJobsListAfterRedirect((Job) data);
 		}
@@ -645,7 +645,7 @@ public abstract class NodeSection {
 			throws jmt.common.exception.NetException {
 
 		if (((destination != ownerNode) || ((destination == ownerNode) && (destinationSection != sectionID)))) {
-			//the destination is not the owner node or it's the owner
+			//the destination is not the owner node or it is the owner
 			//node but the dest section is not this section
 
 			/*
@@ -658,8 +658,8 @@ public abstract class NodeSection {
 			in queue or in blocking region
 			on the contrary, in the simulator, while analyzing the situation (queue/region full or
 			not) the job has been already inserted in the job info list
-			however, when it's stated that the job must be dropped, it must be removed from
-			the list and measures shouldn't be updated, otherwise they would consider
+			however, when it is stated that the job must be dropped, it must be removed from
+			the list and measures should not be updated, otherwise they would consider
 			this job in excess
 
 			*/

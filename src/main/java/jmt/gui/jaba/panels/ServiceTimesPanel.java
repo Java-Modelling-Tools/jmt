@@ -38,6 +38,7 @@ import javax.swing.table.TableCellEditor;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.gui.jaba.JabaConstants;
@@ -194,7 +195,7 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 
 
 	/**
-	 * Make sure we can't finish if we are editing LD data
+	 * Make sure we ca not finish if we are editing LD data
 	 */
 	@Override
 	public boolean canFinish() {
@@ -202,7 +203,7 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 	}
 
 	/**
-	 * Make sure we can't switch tabs if we are editing LD data
+	 * Make sure we ca not switch tabs if we are editing LD data
 	 */
 	@Override
 	public boolean canGoBack() {
@@ -210,7 +211,7 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 	}
 
 	/**
-	 * Make sure we can't switch tabs if we are editing LD data
+	 * Make sure we ca not switch tabs if we are editing LD data
 	 */
 	@Override
 	public boolean canGoForward() {
@@ -243,7 +244,7 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 		STTable() {
 			super(new STTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
-                        setRowHeight(30);
+                        setRowHeight(CommonConstants.ROW_HEIGHT);
 
 			setDisplaysScrollLabels(true);
 
@@ -264,7 +265,7 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 		}
 
 		/**
-		 * We don't want selectable columns
+		 * We do not want selectable columns
 		 */
 		/*public boolean getColumnSelectionAllowed() {return false;} */
 

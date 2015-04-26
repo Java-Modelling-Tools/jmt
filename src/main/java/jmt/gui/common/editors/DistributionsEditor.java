@@ -422,7 +422,7 @@ public class DistributionsEditor extends JMTDialog {
 				Double probability = new Double(Double.parseDouble(sourcefield
 						.getText()));
 				// Probability has to be smaller or equal than 1 (otherwise
-				// don't update value)
+				// do not update value)
 				if (probability.doubleValue() <= 1.0) {
 					// If the probability was entered into the probability field
 					// of interval B
@@ -522,13 +522,11 @@ public class DistributionsEditor extends JMTDialog {
 	protected void initComponents() {
 		// Sets default title, close operation and dimensions
 		this.setTitle("Editing Distribution...");
-		int width = 320, height = 600;
-
 		// Centers this dialog on the screen
 		if (recursive) {
-			this.centerWindowWithOffset(width, height, 50, 50);
+			this.centerWindowWithOffset(480, 600, 50, 50);
 		} else {
-			this.centerWindow(width, height);
+			this.centerWindow(480, 600);
 		}
 
 		// Creates a main panel and adds margins to it
@@ -1015,7 +1013,7 @@ public class DistributionsEditor extends JMTDialog {
 
 			c.insets = new Insets(0, 0, 0, 0); // No space between Name of
 												// distribution and Edit button
-			// don't finish row because also the label for the distribution has
+			// do not finish row because also the label for the distribution has
 			// to be added
 			c.gridwidth = GridBagConstraints.RELATIVE;
 			c.fill = GridBagConstraints.HORIZONTAL; // reset to default

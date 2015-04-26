@@ -289,9 +289,9 @@ public class SolverSingleClosedExact extends Solver {
 	}
 
 	/**
-	* Static scaling to control magnitude of G. It's not optimal, and in
+	* Static scaling to control magnitude of G. it is not optimal, and in
 	* some situations it does not overcome overflow problem, but generally
-	* it's enough */
+	* it is enough */
 	private void staticScale() {
 		int center = 0;
 		int cust = 0;

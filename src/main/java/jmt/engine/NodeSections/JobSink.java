@@ -87,7 +87,7 @@ public class JobSink extends InputSection {
 				//there's no need to remove them
 
 				//the owner node, on the contrary, adds them when the job message is received
-				//before the jobinfo objects weren't removed (often causing outOfMemory errors!!!)
+				//before the jobinfo objects were not removed (often causing outOfMemory errors!!!)
 
 				if (jobsList_node == null) {
 					jobsList_node = this.getOwnerNode().getJobInfoList();

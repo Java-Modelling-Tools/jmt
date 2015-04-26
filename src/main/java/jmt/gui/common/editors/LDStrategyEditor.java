@@ -248,7 +248,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	 */
 	protected void initGUI() {
 		// Sets default title, close operation and dimensions
-		this.centerWindow(640, 480);
+		this.centerWindow(800, 600);
 		this.setTitle("Editing Load Dependent Service Strategy...");
 
 		JTabbedPane mainPanel = new JTabbedPane();
@@ -401,6 +401,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 			super();
 			this.setModel(new LDStrategyTableModel());
 			this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+                        this.setRowHeight(CommonConstants.ROW_HEIGHT);
 		}
 
 		/*Set of column dimensions*/

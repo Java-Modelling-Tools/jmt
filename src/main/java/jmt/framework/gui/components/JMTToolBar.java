@@ -260,7 +260,7 @@ public class JMTToolBar extends JToolBar {
 	/**
 	 * Returns a button group
 	 * @param group identifier of button group
-	 * @return the button group or null if it doesn't exists
+	 * @return the button group or null if it does not exists
 	 */
 	public JMTButtonGroup getButtonGroup(int group) {
 		return buttonGroups.get(new Integer(group));

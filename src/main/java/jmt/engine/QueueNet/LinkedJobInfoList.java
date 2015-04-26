@@ -843,7 +843,7 @@ public class LinkedJobInfoList implements JobInfoList {
 			listPerClass[c].remove(JobInfo);
 			list.remove(JobInfo);
 
-			//the job has been redirected: it shouldn't be counted
+			//the job has been redirected: it should not be counted
 			jobsIn--;
 			jobsInPerClass[c]--;
 

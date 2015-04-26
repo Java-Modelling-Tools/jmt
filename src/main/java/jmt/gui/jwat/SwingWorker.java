@@ -42,7 +42,7 @@ public abstract class SwingWorker {
 
 	/** 
 	 * Get the value produced by the worker thread, or null if it 
-	 * hasn't been constructed yet.
+	 * has not been constructed yet.
 	 */
 	protected synchronized Object getValue() {
 		return value;
@@ -69,7 +69,7 @@ public abstract class SwingWorker {
 
 	/**
 	 * A new method that interrupts the worker thread.  Call this method
-	 * to force the worker to stop what it's doing.
+	 * to force the worker to stop what it is doing.
 	 */
 	public void interrupt() {
 		Thread t = threadVar.get();

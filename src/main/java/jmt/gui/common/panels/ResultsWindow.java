@@ -273,7 +273,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	 * @param indexes array with all measures indexes to be shown in this panel
 	 */
 	private void addTabPane(JTabbedPane parent, String name, String description, int[] indexes) {
-		// If no measure are present, don't add corresponding tab
+		// If no measure are present, do not add corresponding tab
 		if (indexes != null && indexes.length > 0) {
 			JPanel tabPanel = new JPanel(new BorderLayout());
 			// Adds margins

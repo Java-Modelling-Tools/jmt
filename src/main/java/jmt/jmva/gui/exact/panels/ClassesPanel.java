@@ -54,6 +54,7 @@ import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.exact.table.ComboBoxCell;
 import jmt.gui.exact.table.DisabledCellRenderer;
@@ -584,8 +585,8 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 			deleteButton = new JButton(deleteOneClass);
 			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);
 			enableDeletes();
-			rowHeader.setRowHeight(30);
-			setRowHeight(30);
+			rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowHeight(CommonConstants.ROW_HEIGHT);
 			//END Federico Dall'Orso 8/3/2005
 
 			JComboBox classTypeBox = new JComboBox(CLASS_TYPENAMES);

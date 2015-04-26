@@ -474,7 +474,7 @@ public abstract class Distribution implements ServiceStrategy {
 
 		/**
 		 * Sets a ValueChecker to check if a parameter's value is in the correct
-		 * range. If no checks are required don't call this method
+		 * range. If no checks are required do not call this method
 		 * 
 		 * @param checker
 		 *            Instance of ValueChecker Interface
@@ -519,7 +519,7 @@ public abstract class Distribution implements ServiceStrategy {
 				return true;
 			}
 
-			// Otherwise if it's a known number, try to decode it
+			// Otherwise if it is a known number, try to decode it
 			Object objval = null;
 			try {
 				if (valueClass.equals(Integer.class)) {

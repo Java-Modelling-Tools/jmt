@@ -30,7 +30,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- *  This class creates a file with a getLog of strings. Don't worry about
+ *  This class creates a file with a getLog of strings. Do not worry about
  *  performance, it uses a buffered writer. Remember to close the Log!
  *
  * @author  federico

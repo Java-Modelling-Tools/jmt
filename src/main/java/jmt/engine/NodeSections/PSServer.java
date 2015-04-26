@@ -188,7 +188,7 @@ public class PSServer extends ServiceSection {
 				//EVENT_ACK
 				//If there are no jobs in the service section, message is not processed.
 				if (waitingAcks == 0) {
-					//it wasn't waiting for any job
+					//it was not waiting for any job
 					return NodeSection.MSG_NOT_PROCESSED;
 				} else {
 					// Avoid ACK to the input section, as we already sent ack

@@ -124,7 +124,7 @@ public class IntervalInputLoader extends InputLoader implements JWATConstants {
 						//Riga sbagliata, decremento il num di oss
 						countObs--;
 						try {
-							w.write("Error in row " + (totalRaw + minInd) + " : Line doesn't match format (element " + i + " not found)\n");
+							w.write("Error in row " + (totalRaw + minInd) + " : Line does not match format (element " + i + " not found)\n");
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

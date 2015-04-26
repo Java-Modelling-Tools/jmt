@@ -307,7 +307,7 @@ public class NetSystem {
 	public static double checkProgress(QueueNetwork network) throws jmt.common.exception.NetException {
 
 		if (network == null) {
-			throw new NetException("Can't measure progress of a network which does not exist.");
+			throw new NetException("Ca not measure progress of a network which does not exist.");
 		}
 		// We extimate on the slowest not completed measure
 		ListIterator<Measure> measures;
@@ -329,7 +329,7 @@ public class NetSystem {
 	public static double getTempMeasures(QueueNetwork network) throws jmt.common.exception.NetException {
 
 		if (network == null) {
-			throw new NetException("Can't get measures of a network which does not exist.");
+			throw new NetException("Ca not get measures of a network which does not exist.");
 		}
 
 		ListIterator<Measure> measures;

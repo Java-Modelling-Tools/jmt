@@ -100,7 +100,7 @@ public class BlockingRegion extends DefaultGraphCell {
 
 	/**
 	 * Whenever name of this cell is asked, controls if displayed name is correct.
-	 * if it's not, changes it. This is a bit dirty but avoids to add a special listener
+	 * if it is not, changes it. This is a bit dirty but avoids to add a special listener
 	 * to this component that will be even more dirty.
 	 * @return an empty String
 	 */

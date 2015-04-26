@@ -21,7 +21,7 @@ package jmt.engine.log;
 import java.io.File;
 
 public class LoggerParameters {
-	public volatile boolean isEnabled; // the variable is left public for fast external read access - don't write to it.
+	public volatile boolean isEnabled; // the variable is left public for fast external read access - do not write to it.
 	public Boolean boolExecTimestamp;
 	public Boolean boolLoggername;
 	public Boolean boolTimeStamp;

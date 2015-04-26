@@ -54,6 +54,7 @@ import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.exact.table.ComboBoxCell;
 import jmt.gui.exact.table.ExactTable;
@@ -513,8 +514,8 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			deleteButton = new JButton(deleteOneStation);
 			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);
 			enableDeletes();
-			rowHeader.setRowHeight(30);
-			setRowHeight(30);
+			rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowHeight(CommonConstants.ROW_HEIGHT);
 			//END Federico Dall'Orso
 
 			/* a station type cell editor for open/mixed systems */

@@ -160,9 +160,9 @@ public class SolverSingleClosedMVA extends Solver {
 	 * <br>
 	 * WARNING: This method changes the order of the stations (LI and DELAY before, LD after):
 	 * the original order is restored only after calling the "solve" method
-	 * (so if you solve the model, you don't need to reorder results,
+	 * (so if you solve the model, you do not need to reorder results,
 	 * they are reordered by the "solve" method itself; otherwise, if you
-	 * don't solve the model after calling "input" method, you may have some problems).
+	 * do not solve the model after calling "input" method, you may have some problems).
 	 *  @param  n   array of names of service centers.
 	 *  @param  t   array of the types (LD or LI) of service centers.
 	 *  @param  s   matrix of service times of the service centers.
@@ -477,7 +477,7 @@ public class SolverSingleClosedMVA extends Solver {
 						residenceTime[k] = D[k];
 						break;
 					case Solver.LI:
-						//approximate technique doesn't use recursion!!
+						//approximate technique does not use recursion!!
 						residenceTime[k] = D[k] * customers * old_queueLen[k] / (customers - 1);
 						;
 						break;
@@ -531,7 +531,7 @@ public class SolverSingleClosedMVA extends Solver {
 	private void solveSingleLI(boolean intermediate) {
 
 		if (!intermediate) {
-			//intermediate results mustn't be saved, then use
+			//intermediate results must not be saved, then use
 			//the base method
 			solveSingleLI();
 			return;
@@ -659,7 +659,7 @@ public class SolverSingleClosedMVA extends Solver {
 		/*      OLD
 
 				//loop over all stations, transform all stations in load dependent
-				//it's not efficient must be changed
+				//it is not efficient must be changed
 				for (stat = 0; stat < stations; stat++) {
 					if (type[stat] != Solver.LD) {
 						wcomp = servTime[stat][0];
@@ -679,7 +679,7 @@ public class SolverSingleClosedMVA extends Solver {
 		//NEW
 		//@author Stefano Omini
 		//loop over all stations, transform all stations in load dependent
-		//it's not efficient must be changed
+		//it is not efficient must be changed
 		for (stat = 0; stat < stations; stat++) {
 			if (type[stat] != Solver.LD) {
 				wcomp = servTime[stat][0];
@@ -800,7 +800,7 @@ public class SolverSingleClosedMVA extends Solver {
 
 		//TODO: ancora da sistemare!!!
 		if (!intermediate) {
-			//intermediate results mustn't be saved, then use
+			//intermediate results must not be saved, then use
 			//the base method
 			solveSingleLD();
 			return;
@@ -842,7 +842,7 @@ public class SolverSingleClosedMVA extends Solver {
 		double wcomp;//composite waiting time
 
 		//loop over all stations, transform all stations in load dependent
-		//it's not efficient must be changed
+		//it is not efficient must be changed
 		for (stat = 0; stat < stations; stat++) {
 			if (type[stat] != Solver.LD) {
 				wcomp = servTime[stat][0];
@@ -2520,7 +2520,7 @@ public class SolverSingleClosedMVA extends Solver {
 	private void solveSingleLDErrCtrFaster(boolean intermediate) {
 		//TODO: ancora da sistemare!!! Non si hanno ancora i risultati intermedi...
 		if (!intermediate) {
-			//intermediate results mustn't be saved, then use
+			//intermediate results must not be saved, then use
 			//the base method
 			solveSingleLDErrCtrFaster();
 			return;
@@ -2905,7 +2905,7 @@ public class SolverSingleClosedMVA extends Solver {
 	@Override
 	public String toString() {
 		if (!intermediate_results) {
-			//if intermediate results haven't been saved, don't write them!
+			//if intermediate results have not been saved, do not write them!
 			return super.toString();
 		}
 		StringBuffer buf = new StringBuffer();

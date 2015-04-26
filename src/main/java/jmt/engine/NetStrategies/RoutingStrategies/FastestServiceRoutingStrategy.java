@@ -28,7 +28,7 @@ import jmt.engine.random.engine.RandomEngine;
 
 /**
  * This strategy sends jobs to the resource with the least Service time.
- * Reimplemented by Bertoli Marco 13-nov-2005 (original didn't work)
+ * Reimplemented by Bertoli Marco 13-nov-2005 (original did not work)
  * @author Bertoli Marco
  */
 public class FastestServiceRoutingStrategy extends RoutingStrategy {

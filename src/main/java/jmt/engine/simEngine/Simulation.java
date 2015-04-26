@@ -221,17 +221,17 @@ public class Simulation {
 	}
 
 	/**
-	 * Connects two nodes of the simulation: if a node hasn't been inserted in the model,
+	 * Connects two nodes of the simulation: if a node has not been inserted in the model,
 	 * then return a LoadException.
 	 * @param start the sourcce node
 	 * @param end the target node
-	 * @throws LoadException one of the nodes hasn't been inserted in te model
+	 * @throws LoadException one of the nodes has not been inserted in te model
 	 */
 	public void addConnection(String start, String end) throws LoadException {
 		if (isNode(start) && isNode(end)) {
 			connections.add(new Connection(start, end));
 		} else {
-			throw new LoadException("Trying to connect nodes that haven't been inserted yet.");
+			throw new LoadException("Trying to connect nodes that have not been inserted yet.");
 		}
 	}
 
@@ -597,7 +597,7 @@ public class Simulation {
 	}
 
 	/**
-	 * Runs this simulation. If it hasn't been initialized, then throws an Exception.
+	 * Runs this simulation. If it has not been initialized, then throws an Exception.
 	 * Controls the timer for max simulation time (if it has been defined).
 	 * @throws Exception Simulaton not initialized
 	 */

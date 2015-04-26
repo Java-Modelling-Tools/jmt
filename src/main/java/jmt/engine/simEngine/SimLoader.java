@@ -703,16 +703,16 @@ public class SimLoader {
 
 				} else {
 
-					//it's a group parameter! more complicated(the other was easy... :P )
+					//it is a group parameter! more complicated(the other was easy... :P )
 					if (DEBUG) {
-						System.out.println("        it's group class parameter");
+						System.out.println("        it is group class parameter");
 					}
 					//creates an array of Object that has enough element to store
 					//subParametes for each class.
 					arrayElements = new Object[jobClasses.length];
 					NodeList chiList = param.getChildNodes();
 					ArrayList<String> classVect = new ArrayList<String>();
-					//iterates over the childList, it's like this, it has a list (optional)of classRef
+					//iterates over the childList, it is like this, it has a list (optional)of classRef
 					//followed by a subParameter
 					for (int i = 0; i < chiList.getLength(); i++) {
 						Node n = chiList.item(i);
@@ -760,7 +760,7 @@ public class SimLoader {
 				return c.newInstance();
 			}
 
-			//check if it's a leaf node (it has a value & not subparameters)
+			//check if it is a leaf node (it has a value & not subparameters)
 			if (valueList != null) {
 
 				String value = valueList.item(0).getFirstChild().getNodeValue();
@@ -874,7 +874,7 @@ public class SimLoader {
 				}
 				return c.newInstance();
 			}
-			//check if it's a leaf node (it has a value & not subparameters)
+			//check if it is a leaf node (it has a value & not subparameters)
 			if (valueList.getLength() > 0) {
 				String value = valueList.item(0).getFirstChild().getNodeValue();
 				if (DEBUG) {
@@ -959,7 +959,7 @@ public class SimLoader {
 		try {
 			return c.getConstructor(paramClasses);
 		} catch (NoSuchMethodException e) {
-			//the right constructor isn't contained.. let search for another
+			//the right constructor is not contained.. let search for another
 			//one that fits
 		} catch (SecurityException e) {
 			e.printStackTrace();
@@ -1060,7 +1060,7 @@ public class SimLoader {
 		for (int c = 0; c < jobClasses.length; c++) {
 			jobClass = jobClasses[c];
 			if (jobClass.getName().equalsIgnoreCase(className)) {
-				//it's the class we are searching for
+				//it is the class we are searching for
 				return c;
 			}
 		}

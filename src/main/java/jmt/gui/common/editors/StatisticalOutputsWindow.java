@@ -122,7 +122,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	public void initGUI(){
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle(windowName);
-		this.centerWindow(1000, 650);
+		this.centerWindow(1024, 768);
 
 		//makes LeftSidePanel
 		JPanel pivotPanel = new JPanel() ;

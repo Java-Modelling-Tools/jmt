@@ -386,7 +386,7 @@ public class SolverMultiMixed extends SolverMulti {
 		for (int i = 0; i < stations; i++) {
 
 			if (type[i] == SolverMulti.DELAY) {
-				//delay station: don't check saturation
+				//delay station: do not check saturation
 				continue;
 			}
 

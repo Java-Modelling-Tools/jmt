@@ -71,7 +71,7 @@ public class NetworkList {
 	}
 
 	/** Gets the network in the list, if it exists, which has the specified Name.
-	 * @return The network called "Name". Returns Null if it doesn't exist.
+	 * @return The network called "Name". Returns Null if it does not exist.
 	 */
 	public QueueNetwork get(String name) {
 		ListIterator<QueueNetwork> iterator = networks.listIterator();

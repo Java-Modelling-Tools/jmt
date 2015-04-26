@@ -40,6 +40,7 @@ import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.ld.LDEditor;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
@@ -210,7 +211,7 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 	}
 
 	/**
-	 * Make sure we can't finish if we are editing LD data
+	 * Make sure we ca not finish if we are editing LD data
 	 */
 	@Override
 	public boolean canFinish() {
@@ -218,7 +219,7 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 	}
 
 	/**
-	 * Make sure we can't switch tabs if we are editing LD data
+	 * Make sure we ca not switch tabs if we are editing LD data
 	 */
 	@Override
 	public boolean canGoBack() {
@@ -226,7 +227,7 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 	}
 
 	/**
-	 * Make sure we can't switch tabs if we are editing LD data
+	 * Make sure we ca not switch tabs if we are editing LD data
 	 */
 	@Override
 	public boolean canGoForward() {
@@ -261,7 +262,7 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 		STTable() {
 			super(new STTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
-                        setRowHeight(30);
+                        setRowHeight(CommonConstants.ROW_HEIGHT);
 
 			setDisplaysScrollLabels(true);
 
@@ -282,7 +283,7 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 		}
 
 		/**
-		 * We don't want selectable columns
+		 * We do not want selectable columns
 		 */
 		/*public boolean getColumnSelectionAllowed() {return false;} */
 

@@ -55,7 +55,7 @@ public class EdgeAnimation implements Animation, JobContainer {
 
 	/**Creates a new instance of Edgeanimation. This must be initialized with a set of points
 	 * which are coords of starting point of this edge, points where this edge turns with a
-	 * straight angle (which may be omitted in case this edge doesn't turn), and finally
+	 * straight angle (which may be omitted in case this edge does not turn), and finally
 	 * ending point for this edge. All of the coords must be given in the real animation
 	 * resolution scale.
 	 * @param angles: coords of the angle points.
@@ -68,7 +68,7 @@ public class EdgeAnimation implements Animation, JobContainer {
 
 	/**Creates a new instance of Edgeanimation. This must be initialized with a set of points
 	 * which are coords of starting point of this edge, points where this edge turns with a
-	 * straight angle (which may be omitted in case this edge doesn't turn), and finally
+	 * straight angle (which may be omitted in case this edge does not turn), and finally
 	 * ending point for this edge. All of the coords must be given in the real animation
 	 * resolution scale.
 	 * @param angles: coords of the angle points.

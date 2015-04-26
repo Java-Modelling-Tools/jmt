@@ -204,7 +204,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 				getColumnModel().getColumn(0).setPreferredWidth(110);
 				getColumnModel().getColumn(1).setPreferredWidth(20);
 				getColumnModel().getColumn(2).setPreferredWidth(18);
-				setRowHeight(30);
+				setRowHeight(CommonConstants.ROW_HEIGHT);
 			}
 
 			@Override

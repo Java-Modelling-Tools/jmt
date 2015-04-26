@@ -158,7 +158,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			toLabel = new JLabel("To (s):");
 			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
 			to.setToolTipText("Sets the final service time mean value expressed in seconds");
-			stepsLabel = new JLabel("Steps (n. of exec.): ");
+			stepsLabel = new JLabel("Steps: ");
 			steps = new JSpinner(new SpinnerNumberModel(STPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));
 			steps.setToolTipText("Sets the number of steps to be performed");
 			//get the vector containing the keys of the class that can be used to do this type of parametric analysis
@@ -184,10 +184,11 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			from = new JTextField();
 			from.setEnabled(false);
 			from.setText(Double.toString(STPA.getInitialValue()));
+        		from.setPreferredSize(new Dimension(130, 30));
 			toLabel = new JLabel("To (%):");
 			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
 			to.setToolTipText("Sets the final proportion of service time with respect to the initial");
-			stepsLabel = new JLabel("Steps (n. of exec.): ");
+			stepsLabel = new JLabel("Steps: ");
 			steps = new JSpinner(new SpinnerNumberModel(STPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));
 			steps.setToolTipText("Sets the number of steps to be performed");
 			classChooser.setEnabled(false);
@@ -199,7 +200,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		from.setBackground(Color.WHITE);
 		stationChooserLabel = new JLabel("Station:");
 		edit.add(fromLabel);
-		edit.add(from);
+                edit.add(from);
 		edit.add(toLabel);
 		edit.add(to);
 		edit.add(stepsLabel);

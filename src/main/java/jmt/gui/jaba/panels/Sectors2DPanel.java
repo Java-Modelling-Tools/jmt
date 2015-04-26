@@ -35,7 +35,7 @@ import jmt.engine.jaba.FinalSect2D;
  * <p>Title: Sectors 2D Panel</p>
  * <p>Description: This panel is used to show saturation sectors on 2-class models.</p>
  * <p>This was reimlemented by Bertoli Marco as original one had strong redraw
- * problems, made strange things with rotations, didn't autoscale and overlapped labels
+ * problems, made strange things with rotations, did not autoscale and overlapped labels
  * too frequently.</p>
  *
  * @author Bertoli Marco, Zanzottera Andrea

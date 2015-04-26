@@ -212,7 +212,7 @@ public class QueueNetAnimation extends JPanel implements Animation {
 		Object lastElement = coveredPath.get(coveredPath.size() - 1);
 		//If destination is reached, start building path in reverse order...
 		if (lastElement.equals(pathEnd)) {
-			//Don't accept degenerate (e.g. one step-) paths
+			//Do not accept degenerate (e.g. one step-) paths
 			if (coveredPath.size() > 1) {
 				return coveredPath;
 			}

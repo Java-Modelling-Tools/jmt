@@ -662,7 +662,7 @@ public class NetNode extends SimEntity {
 		//
 		//SOURCE_SHIFT = 24;
 		//DESTINATION_SHIFT = 16;
-		//It's the opposite than receive(...): in this case we have event, source
+		//it is the opposite than receive(...): in this case we have event, source
 		//and destination sections and we have to summarize them into a single tag
 		//of a simEvent which will be scheduled by the simulator
 		int tag;
@@ -823,7 +823,7 @@ public class NetNode extends SimEntity {
 			JobInfo JobInfo = jobsList.lookFor(job);
 			if (JobInfo != null) {
 				//the job must be removed from the list but measures
-				//shouldn't be updated, otherwise they would consider
+				//should not be updated, otherwise they would consider
 				//this job in excess
 				jobsList.removeAfterDrop(JobInfo);
 			}
@@ -843,7 +843,7 @@ public class NetNode extends SimEntity {
 	 * service secion and output section, causing a lot of null pointer exception in routing
 	 * strategies if not threated correctly.
 	 * Author: Bertoli Marco
-	 * @return true if this node doesn't have service section and output section
+	 * @return true if this node does not have service section and output section
 	 */
 	public boolean isSink() {
 		// WARNING: to avoid circular dependancy and to speed up this method,

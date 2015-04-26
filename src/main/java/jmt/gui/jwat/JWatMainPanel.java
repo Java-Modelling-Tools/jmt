@@ -217,7 +217,7 @@ public class JWatMainPanel extends WizardPanel {
 		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 
-		//JLabel description = new JLabel("<html><body><h3>This is a simple<br>descirption added to this<br>page. Please don't mind it<br>will be replaced soon</h3></body></html>");
+		//JLabel description = new JLabel("<html><body><h3>This is a simple<br>descirption added to this<br>page. Please do not mind it<br>will be replaced soon</h3></body></html>");
 		//this.add(description,BorderLayout.WEST);
 		this.add(imageLabel, BorderLayout.CENTER);
 		this.add(eastPanel, BorderLayout.EAST);

@@ -581,7 +581,7 @@ public class SolverDispatcher {
 				break;
 			}
 
-			// Now solves current model - we cannot interrupt this as it's not designed to be done.
+			// Now solves current model - we cannot interrupt this as it is not designed to be done.
 			finalDispatch(model, i);
 		}
 		// Resets initial model
@@ -647,7 +647,7 @@ public class SolverDispatcher {
 				break;
 			}
 
-			// Now solves current model - we cannot interrupt this as it's not designed to be done.
+			// Now solves current model - we cannot interrupt this as it is not designed to be done.
 			finalDispatch(model, i);
 		}
 		// Resets initial model
@@ -672,7 +672,7 @@ public class SolverDispatcher {
 		// Values for what-if
 		double[] values = model.getWhatIfValues();
 
-		// Backup service times datas (note: we multiply only service times as it's the same of multiply service demands)
+		// Backup service times datas (note: we multiply only service times as it is the same of multiply service demands)
 		double[][][] initials = ArrayUtils.copy3(model.getServiceTimes());
 
 		// Saves what-if class and station indices
@@ -704,7 +704,7 @@ public class SolverDispatcher {
 				break;
 			}
 
-			// Now solves current model - we cannot interrupt this as it's not designed to be done.
+			// Now solves current model - we cannot interrupt this as it is not designed to be done.
 			finalDispatch(model, i);
 		}
 		// Resets initial model
@@ -772,7 +772,7 @@ public class SolverDispatcher {
 				break;
 			}
 
-			// Now solves current model - we cannot interrupt this as it's not designed to be done.
+			// Now solves current model - we cannot interrupt this as it is not designed to be done.
 			finalDispatch(model, i);
 		}
 		// Resets initial model

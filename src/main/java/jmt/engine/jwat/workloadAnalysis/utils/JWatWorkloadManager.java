@@ -23,7 +23,7 @@ public class JWatWorkloadManager {
 	 * this method will do 'dispose()' too.
 	 */
 	public static void exit(Window application) {
-		// Disposes application window if user didn't do it.
+		// Disposes application window if user did not do it.
 		if (application.isDisplayable()) {
 			application.dispose();
 		}

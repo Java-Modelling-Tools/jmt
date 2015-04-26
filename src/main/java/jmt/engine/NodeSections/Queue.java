@@ -58,7 +58,7 @@ import jmt.engine.random.engine.RandomEngine;
  *
  * The class has different constructors to create a generic queue or a redirecting queue.
  * <br>
- * However it's also possible to create a generic queue and then to turn on/off the
+ * However it is also possible to create a generic queue and then to turn on/off the
  * "redirecting queue" behaviour using the <tt>redirectionTurnON(..)</tt> and
  * <tt>redirectionTurnOFF()</tt> methods.
  *
@@ -139,7 +139,7 @@ public class Queue extends InputSection {
 	 * @param size Queue size (-1 = infinite queue).
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
-	 * @param drop True if the queue should rejects new jobs when it's full,
+	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
 	 */
 	public Queue(int size, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[]) {
@@ -174,14 +174,14 @@ public class Queue extends InputSection {
 			//}
 		}
 		this.putStrategy = putStrategy;
-		// Uses putstrategy.length to estimate number of classes. It's a bit unclean but we are forced for compatibility.
+		// Uses putstrategy.length to estimate number of classes. it is a bit unclean but we are forced for compatibility.
 		this.drop = new boolean[putStrategy.length];
 		this.block = new boolean[putStrategy.length];
 		Arrays.fill(this.drop, drop);
 		Arrays.fill(this.block, false);
 		coolStart = true;
 
-		//this node doesn't belong to any blocking region
+		//this node does not belong to any blocking region
 		redirectionON = false;
 		myRegion = null;
 		regionInputStation = null;
@@ -197,7 +197,7 @@ public class Queue extends InputSection {
 	 * @param size Queue size (-1 = infinite queue).
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
-	 * @param drop True if the queue should rejects new jobs when it's full,
+	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
 	 */
 	public Queue(Integer size, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[]) {
@@ -208,7 +208,7 @@ public class Queue extends InputSection {
 	 * @param size Queue size (-1 = infinite queue).
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
-	 * @param drop True if the queue should rejects new jobs when it's full,
+	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
 	 * @param myReg the blocking region to which the owner node of this queue belongs
 	 */
@@ -226,7 +226,7 @@ public class Queue extends InputSection {
 	 * @param size Queue size (-1 = infinite queue).
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
-	 * @param drop True if the queue should rejects new jobs when it's full,
+	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
 	 * @param myReg the blocking region to which the owner node of this queue belongs
 	 */
@@ -467,8 +467,8 @@ public class Queue extends InputSection {
 				//
 				//If the queue is not empty, it should be distinguished between finite/infinite queue.
 				//
-				//If the queue is finite, checks the size: if it's not full the job is put into the
-				//queue and an ack is sent. Else, if it's full, checks the owner node: if the
+				//If the queue is finite, checks the size: if it is not full the job is put into the
+				//queue and an ack is sent. Else, if it is full, checks the owner node: if the
 				//source node is the owner node of this section, an ack is sent and a waiting
 				//request is created. If the source is another node the waiting request is created
 				//only if drop is false, otherwise an ack is sent but the job is rejected.
@@ -483,7 +483,7 @@ public class Queue extends InputSection {
 					NetNode source = message.getSource();
 					boolean fromTheInside = myRegion.belongsToRegion(source);
 
-					//the first time input station isn't known yet
+					//the first time input station is not known yet
 					if (regionInputStation == null) {
 						regionInputStation = myRegion.getInputStation();
 					}
@@ -517,7 +517,7 @@ public class Queue extends InputSection {
 				//
 
 				// Check if there is still capacity.
-				// <= size because the arriving job hasn't been inserted in Queue
+				// <= size because the arriving job has not been inserted in Queue
 				// job list but has been inserted in NetNode job list !!
 				if (infinite || nodeJobsList.size() <= size) {
 					// Queue is not full. Okay.
@@ -526,7 +526,7 @@ public class Queue extends InputSection {
 					// queue was empty: this job is sent immediately to the next
 					// section and coolStart set to false.
 					if (coolStart) {
-						// No jobs in queue: Refresh jobsList and sends job (don't use put strategy, because queue is empty)
+						// No jobs in queue: Refresh jobsList and sends job (do not use put strategy, because queue is empty)
 						queueJobInfoList.add(new JobInfo(job));
 						//forward without any delay
 						forward(queueJobInfoList.removeFirst().getJob());
@@ -565,7 +565,7 @@ public class Queue extends InputSection {
 						//after arriving to this section, the job has been inserted in the job
 						//lists of both node section and node.
 						//If drop = true, the job must be removed if the queue is full.
-						//Using the "general" send method, however, the dropped job wasn't removed
+						//Using the "general" send method, however, the dropped job was not removed
 						//from the job info list of node section and of node, then it was
 						//sent later, after receiving one or more ack.
 
@@ -645,7 +645,7 @@ public class Queue extends InputSection {
 		//number of classes
 		int classNumber = preload_jobPerClass.length;
 
-		//jobs that haven't been inserted yet
+		//jobs that have not been inserted yet
 		int[] residualClassJobs = new int[classNumber];
 
 		//first of all computes the total number of jobs to be added

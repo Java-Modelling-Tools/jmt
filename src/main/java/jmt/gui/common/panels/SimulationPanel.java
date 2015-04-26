@@ -183,6 +183,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		// Adds preloading table
 		preloadTable = new PreloadingTable();
+                preloadTable.setRowHeight(CommonConstants.ROW_HEIGHT);
 		WarningScrollTable preloadPanel = new WarningScrollTable(preloadTable, WARNING_CLASS_STATION);
 		//tabbedPane.addTab("Initial state",preloadPanel);
 		//ParametricAnalysisPanel parametricAnalysisPanel = new ParametricAnalysisPanel();

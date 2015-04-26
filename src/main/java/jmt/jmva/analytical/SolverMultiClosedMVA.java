@@ -495,7 +495,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	private void solveLI(boolean intermediate) {
 
 		if (!intermediate) {
-			//intermediate results mustn't be saved, then use
+			//intermediate results must not be saved, then use
 			//the base method
 			solveLI();
 			return;
@@ -712,7 +712,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	@Override
 	public String toString() {
 		if (!intermediate_results) {
-			//if intermediate results haven't been saved, don't write them!
+			//if intermediate results have not been saved, do not write them!
 			return super.toString();
 		}
 		StringBuffer buf = new StringBuffer();
@@ -797,7 +797,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		popVect[1] = 15;
 		popVect[2] = 13;
 
-		//not a very general test but I don't want to write a lot of data..
+		//not a very general test but I do not want to write a lot of data..
 		for (int i = 0; i < nCent; i++) {
 			double local = (i + 1) * 0.5;
 			for (int j = 0; j < nCust; j++) {
@@ -862,7 +862,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		popVect[1] = 15;
 		popVect[2] = 13;
 
-		//not a very general test but I don't want to write a lot of data..
+		//not a very general test but I do not want to write a lot of data..
 		for (int i = 0; i < nCent; i++) {
 			double local = (i + 1) * 0.5;
 			for (int j = 0; j < nCust; j++) {

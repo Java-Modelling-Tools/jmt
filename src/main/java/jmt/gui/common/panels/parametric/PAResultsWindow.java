@@ -68,6 +68,7 @@ import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.MeasureValue;
 import jmt.framework.gui.graph.PAPlot;
 import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.MeasureDefinition;
@@ -235,7 +236,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	 * @param indexes array with all measures indexes to be shown in this panel
 	 */
 	private void addTabPane(JTabbedPane parent, String name, String description, int[] indexes) {
-		// If no measure are present, don't add corresponding tab
+		// If no measure are present, do not add corresponding tab
 		if (indexes != null && indexes.length > 0) {
 			JPanel tabPanel = new JPanel(new BorderLayout());
 			// Adds margins
@@ -1126,7 +1127,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 						xMin.setValue(new Double(xRange[0])); // -> set it
 						xMax.setValue(new Double(xRange[1]));
 					} else {
-						// ... else where it's not compatible restore the original value
+						// ... else where it is not compatible restore the original value
 						double min = xRange[0], max = xRange[1];
 						if (min < 0) {
 							min = 0;
@@ -1248,6 +1249,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			setClipboardTransferEnabled(true);
 			setFillCellsEnabled(false);
 			this.setRowHeaderWidth(100);
+                        this.setRowHeight(CommonConstants.ROW_HEIGHT);
 		}
 
 		/**

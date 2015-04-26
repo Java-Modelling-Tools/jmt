@@ -40,7 +40,7 @@ import jmt.gui.jsim.panels.ClassesPanel;
  * <p>Description: Panel used to edit user classes properties. Extends JSIM ClassesPanel.
  * In some points it is a bit tricky, as original ClassesPanel was not meant to be extended.
  * I preferred not to change ClassesPanel source code, nor copy and modificate it as
- * at the time of writing it was in early development stage and I didn't want to collide
+ * at the time of writing it was in early development stage and I did not want to collide
  * with the author.</p>
  * 
  * @author Bertoli Marco

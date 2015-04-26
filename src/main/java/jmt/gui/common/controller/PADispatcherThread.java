@@ -44,8 +44,8 @@ import org.w3c.dom.Document;
 /**
  * <p>Title: PADispatcherThread </p>
  * <p>Description: This thread is responsable for dispatching several simulations. If a simulation max
- * time has been specified, an inner thread will be used to stop simulation after that time. We don't rely
- * on engine method as it doesn't appear to work properly.</p>
+ * time has been specified, an inner thread will be used to stop simulation after that time. We do not rely
+ * on engine method as it does not appear to work properly.</p>
  *
  * @author Francesco D'Aquino
  *         Date: 29-dic-2005

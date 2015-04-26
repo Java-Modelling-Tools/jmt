@@ -59,7 +59,7 @@ public class JobClassList {
 	/**Gets, if it exists, the job class with the specified name.
 	 *
 	 * @param Name The name of the job class
-	 * @return the job class. Null if it doesn't exist.
+	 * @return the job class. Null if it does not exist.
 	 */
 	public JobClass get(String Name) {
 		ListIterator<JobClass> iterator = jobClasses.listIterator();

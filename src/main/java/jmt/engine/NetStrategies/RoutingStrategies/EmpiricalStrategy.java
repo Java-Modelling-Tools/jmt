@@ -160,7 +160,7 @@ public class EmpiricalStrategy extends RoutingStrategy {
 		try {
 
 			if (nodes == null) {
-				//it's the first execution of this method: find the NetNode objects
+				//it is the first execution of this method: find the NetNode objects
 				//corresponding to the nodeNames
 				findNodes();
 			}

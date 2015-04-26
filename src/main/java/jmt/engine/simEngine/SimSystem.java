@@ -420,7 +420,7 @@ public class SimSystem {
 									throw e1;
 								}
 							} else {
-								//the event doesn't match with the predicate, so it's put in the deferred queue
+								//the event does not match with the predicate, so it is put in the deferred queue
 								destEnt.simPutback(e);
 							}
 						}

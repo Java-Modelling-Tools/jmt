@@ -97,7 +97,7 @@ public class ColorCellEditor extends AbstractCellEditor implements TableCellEdit
 		}
 	}
 
-	//Implement the one CellEditor method that AbstractCellEditor doesn't.
+	//Implement the one CellEditor method that AbstractCellEditor does not.
 	public Object getCellEditorValue() {
 		return currentColor;
 	}

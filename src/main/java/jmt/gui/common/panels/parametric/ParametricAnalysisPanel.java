@@ -98,7 +98,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 		chooser.setToolTipText("Choose the what-if analysis to be performed");
 		chooserPanel.add(chooser, BorderLayout.NORTH);
 		JLabel description = new JLabel(PARAMETRIC_ANALYSIS_DESCRIPTION);
-		JLabel Warning = new JLabel ("WARNING : Enabling What-If Analysis will disable all Statistical Outputs.");
+                JLabel Warning = new JLabel (HTML_START + HTML_FONT_TITLE + "WARNING: "+ HTML_FONT_TIT_END + HTML_FONT_NORM + "Enabling What-If Analysis will disable all Statistical Outputs." + HTML_FONT_NOR_END + HTML_END);
 		JPanel northPanel = new JPanel(new BorderLayout());
 		northPanel.setBorder(new EmptyBorder(0, 0, 15, 0));
 		northPanel.add(description, "Center");

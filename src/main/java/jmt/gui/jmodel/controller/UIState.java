@@ -22,10 +22,10 @@ import java.awt.event.MouseEvent;
 
 /**
  * This interface defines the states of the user interface in particulare of the
- * mouse listener of the GraphMouseListner. It's used to abstract the behaviour
- * of the mouse listner from the state of the UI. In this way it's not necessary
- * to use a case for every situation, it's needed to change the state of the
- * mouse listner to change it's behaviour.
+ * mouse listener of the GraphMouseListner. it is used to abstract the behaviour
+ * of the mouse listner from the state of the UI. In this way it is not necessary
+ * to use a case for every situation, it is needed to change the state of the
+ * mouse listner to change it is behaviour.
  *
 
  * @author Federico Granata

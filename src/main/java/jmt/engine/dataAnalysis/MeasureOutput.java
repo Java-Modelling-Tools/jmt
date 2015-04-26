@@ -21,7 +21,7 @@ package jmt.engine.dataAnalysis;
 import java.io.File;
 
 /**
- * A measure output object is used to print a measure value(s). It's an abstract class,
+ * A measure output object is used to print a measure value(s). it is an abstract class,
  * whose methods should be overridden to implement the way in which each kind of measure
  * should be written on the output stream.
  * @author Francesco Radaelli, Marco Bertoli

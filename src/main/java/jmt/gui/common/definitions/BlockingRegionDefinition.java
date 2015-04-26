@@ -158,7 +158,7 @@ public interface BlockingRegionDefinition {
 	/**
 	 * Gets blocking region of a given station
 	 * @param stationKey search's key for given station
-	 * @return search's key for its blocking region or null if it's undefined
+	 * @return search's key for its blocking region or null if it is undefined
 	 */
 	public Object getStationBlockingRegion(Object stationKey);
 

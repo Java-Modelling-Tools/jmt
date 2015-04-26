@@ -31,6 +31,7 @@ import javax.swing.ScrollPaneConstants;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.jmva.gui.exact.ExactConstants;
@@ -190,7 +191,7 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 		VisitTable() {
 			super(new VisitTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
-                        setRowHeight(30);
+                        setRowHeight(CommonConstants.ROW_HEIGHT);
 
                         setDisplaysScrollLabels(true);
 			help.addHelp(this,

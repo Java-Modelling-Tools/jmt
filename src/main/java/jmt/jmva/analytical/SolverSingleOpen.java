@@ -64,7 +64,7 @@ public class SolverSingleOpen extends Solver {
 	//TODO: bisognerebbe far ritornare un boolean, per coprire il caso di soluzione non possibile (LD)
 
 	//NEW
-	//the old method "solve" has been renamed "solveLI", since LD stations weren't
+	//the old method "solve" has been renamed "solveLI", since LD stations were not
 	//allowed
 	//a new method "solve" has been introduced to check that no LD stations are contained
 	//in the system.

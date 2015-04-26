@@ -124,7 +124,7 @@ public class RndInputLoader extends InputLoader implements JWATConstants {
 						//Riga sbagliata, decremento il num di oss
 						countObs--;
 						try {
-							w.write("Error in row " + k + " : Line doesn't match format (element " + i + " not found)\n");
+							w.write("Error in row " + k + " : Line does not match format (element " + i + " not found)\n");
 						} catch (IOException e) {
 							e.printStackTrace();
 						}

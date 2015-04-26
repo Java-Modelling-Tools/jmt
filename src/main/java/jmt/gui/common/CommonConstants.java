@@ -43,7 +43,7 @@ public interface CommonConstants {
 	public final static int CLASS_TYPE_CLOSED = 1;
 
 	/** Table row height */
-	public final static int ROW_HEIGHT = 19;
+	public final static int ROW_HEIGHT = 30;
 
 	public final static String STATION_TYPE_SOURCE = "Source";
 	public final static String STATION_TYPE_SINK = "Sink";

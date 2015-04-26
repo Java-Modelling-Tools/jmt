@@ -1465,7 +1465,7 @@ public class JabaModel implements JabaConstants {
 					measure = (Element) measure_list.item(m);
 					if (measure.getAttribute("measureType").equalsIgnoreCase(
 							res)) {
-						// it's the measure we are searching for
+						// it is the measure we are searching for
 						value = measure.getAttribute("meanValue");
 						break;
 					}

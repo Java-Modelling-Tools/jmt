@@ -79,7 +79,7 @@ class NetController {
 				if (n % refreshPeriod == 0) {
 					//User may have defined measures that will not receive any sample
 					if (n % reachabilityTest == 0) {
-						//stop measures which haven't collected samples yet
+						//stop measures which have not collected samples yet
 						NetSystem.stopNoSamplesMeasures();
 					}
 					//refresh measures

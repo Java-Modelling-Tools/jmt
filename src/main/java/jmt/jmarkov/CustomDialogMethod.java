@@ -227,7 +227,7 @@ class CustomDialogMethod extends JDialog implements ActionListener, PropertyChan
 			}
 
 			//Reset the JOptionPane's value.
-			//If you don't do this, then if the user
+			//If you do not do this, then if the user
 			//presses the same button next time, no
 			//property change event will be fired.
 			optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
@@ -259,7 +259,7 @@ class CustomDialogMethod extends JDialog implements ActionListener, PropertyChan
 					if ((typedValue > maximumServer) || (typedValue < 1)) {
 						//text was invalid
 						textField.selectAll();
-						JOptionPane.showMessageDialog(CustomDialogMethod.this, "Sorry, '" + typedValue + "' " + "isn't a valid response.\n"
+						JOptionPane.showMessageDialog(CustomDialogMethod.this, "Sorry, '" + typedValue + "' " + "is not a valid response.\n"
 								+ "Please enter a number between 2 and " + maximumServer + ".", "Please try again", JOptionPane.ERROR_MESSAGE);
 						selectedMethod = null;
 						typedValue = 0;

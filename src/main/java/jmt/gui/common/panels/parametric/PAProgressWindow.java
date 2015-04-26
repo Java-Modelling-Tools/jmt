@@ -103,7 +103,7 @@ public class PAProgressWindow extends JMTDialog {
 		globalCumulativeTime = 0;
 		globalMeanSimulationTime = 0;
 
-		this.centerWindow(500, 390);
+		this.centerWindow(640, 480);
 
 		// Creates bottom toolbar
 		toolbar = new JToolBar();
@@ -296,8 +296,8 @@ public class PAProgressWindow extends JMTDialog {
 		}
 
 		int estimatedTime;
-		int[] hist; // it's a vector containing the number of simulation with a duration in a certain range.
-		// It's like a histogram; the algorithm uses the relative frequencies to estimate the most
+		int[] hist; // it is a vector containing the number of simulation with a duration in a certain range.
+		// it is like a histogram; the algorithm uses the relative frequencies to estimate the most
 		// probable residual time.
 
 		double dispersion = max - min;

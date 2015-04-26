@@ -143,7 +143,7 @@ public class Fork extends OutputSection {
 
 			case NetEvent.EVENT_ACK:
 				ackCount++;
-				// If this fork doesn't block, sends ACK back when all messages are delivered
+				// If this fork does not block, sends ACK back when all messages are delivered
 				// to unlock this fork
 				if ((jobNum < block || block <= 0) && ackCount == numOut) {
 					sendBackward(NetEvent.EVENT_ACK, job, 0.0);

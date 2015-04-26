@@ -51,7 +51,7 @@ public class ConnectState extends UIStateDefault {
 	//private boolean flag = false;
 	protected GraphMouseListner ml;
 
-	protected boolean pressed = false;//if the button isn't pressed
+	protected boolean pressed = false;//if the button is not pressed
 
 	public ConnectState(Mediator mediator, GraphMouseListner ml) {
 		super(mediator);

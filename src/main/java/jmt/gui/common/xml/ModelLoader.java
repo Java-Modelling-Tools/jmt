@@ -346,7 +346,7 @@ public class ModelLoader {
 
 	// --- Methods to open and parse files --------------------------------------------------------
 	protected int getXmlFileType(String fileName) {
-		// Opens without validating (as we don't know document type)
+		// Opens without validating (as we do not know document type)
 		try {
 			Document doc = XMLReader.loadXML(fileName);
 			String root = doc.getDocumentElement().getNodeName();

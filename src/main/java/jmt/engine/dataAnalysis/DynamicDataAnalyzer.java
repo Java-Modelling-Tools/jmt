@@ -43,7 +43,7 @@ public interface DynamicDataAnalyzer {
 
 	/**
 	 * Gets the extimated mean, even if the confidence requirements
-	 * haven't been reached
+	 * have not been reached
 	 * @return the extimated mean
 	 */
 	public double extimatedMean();

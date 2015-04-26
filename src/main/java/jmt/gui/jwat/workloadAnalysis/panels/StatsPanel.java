@@ -154,7 +154,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			+ "WARNING"
 			+ HTML_FONT_TIT_END
 			+ HTML_FONT_NORM
-			+ "At this time you can apply any number of sampling operations and transformations to data with the constraint that you can't apply any transformation after a sampling;"
+			+ "At this time you can apply any number of sampling operations and transformations to data with the constraint that you ca not apply any transformation after a sampling;"
 			+ "if you undo a transformation, applied before a sampling, this completely resets the sample; "
 			+ "if you undo a sampling it completely resets the sample." + HTML_FONT_NOR_END + HTML_END;
 
@@ -193,7 +193,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 							model.doTransformationOnVariable(variableTable.getSelectedRow(), VariableNumber.LOGARITHMIC);
 						} catch (TrasformException e) {
 							JOptionPane.showMessageDialog(null,
-									"It's impossible to apply logaritmic transformation due to the presence of 0 or negative values", "Erroe",
+									"it is impossible to apply logaritmic transformation due to the presence of 0 or negative values", "Erroe",
 									JOptionPane.INFORMATION_MESSAGE);
 						}
 					}

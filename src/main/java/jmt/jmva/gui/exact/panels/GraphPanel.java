@@ -52,6 +52,7 @@ import jmt.framework.gui.graph.WhatIfPlot;
 import jmt.framework.gui.table.editors.ColorCellEditor;
 import jmt.framework.gui.table.editors.ComboBoxCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.jmva.analytical.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactConstants;
 import jmt.jmva.gui.exact.ExactModel;
@@ -516,7 +517,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			super(new LinesTableModel());
 			setDefaultRenderer(Color.class, new ColorCellEditor());
 			setDefaultRenderer(String.class, ComboBoxCellEditor.getRendererInstance());
-			setRowHeight(30);
+			setRowHeight(CommonConstants.ROW_HEIGHT);
 
 			// Creates class editors (one is for utilizations)
 			JComboBox classCombo = new JComboBox();
@@ -894,7 +895,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		}
 		
 		/**
-		 * This empty implementation is provided so users don't have to implement
+		 * This empty implementation is provided so users do not have to implement
 		 * this method if their data model is not editable.
 		 *
 		 * @param aValue      value to assign to cell

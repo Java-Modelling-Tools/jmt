@@ -29,7 +29,7 @@ public class PerformanceEngine {
 		FinalSect2D sect;
 		for (int i = 0; i < saturationSects.size(); i++) {
 			sect = (FinalSect2D) saturationSects.get(i);
-			if (sect.getBeta1() > sect.getBeta2()) { // it's a very strage
+			if (sect.getBeta1() > sect.getBeta2()) { // it is a very strage
 														// behaviour,
 														// maybe there is a bug
 														// in the engine sector.

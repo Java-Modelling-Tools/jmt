@@ -109,7 +109,7 @@ public class CircularList<E> extends AbstractList<E> implements List<E>, RandomA
 	}
 
 	/**
-	 * Adds an object to the end of the list. It's a copy of add method.
+	 * Adds an object to the end of the list. it is a copy of add method.
 	 * @param o the object to add
 	 * @see #add(Object)
 	 */

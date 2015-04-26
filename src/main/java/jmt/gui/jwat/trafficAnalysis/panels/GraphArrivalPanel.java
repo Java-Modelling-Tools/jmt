@@ -51,6 +51,7 @@ import jmt.engine.jwat.trafficAnalysis.OnResetModel;
 import jmt.engine.jwat.trafficAnalysis.OnSetParamtersListener;
 import jmt.engine.jwat.trafficAnalysis.TrafficAnalysisSession;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.jwat.JWATConstants;
 import jmt.gui.jwat.MainJwatWizard;
 import jmt.gui.jwat.trafficAnalysis.utils.NewPlot;
@@ -365,7 +366,7 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		table.getColumnModel().getColumn(0).setMaxWidth(30);
 		table.getColumnModel().getColumn(1).setPreferredWidth(65);
 		table.getColumnModel().getColumn(2).setPreferredWidth(65);
-		table.setRowHeight(30);
+		table.setRowHeight(CommonConstants.ROW_HEIGHT);
 		tableScrollPane = new JScrollPane(table);
 		tableScrollPane.setPreferredSize(new Dimension(160, tableScrollPane.getPreferredSize().height));
 		left.add(tableScrollPane, BorderLayout.CENTER);

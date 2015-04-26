@@ -64,7 +64,7 @@ public class WarningWindow {
 	/**
 	 * Creates a new WarningWindow to show specified warnings
 	 * @param warnings warnings to be shown
-	 * @param owner owner of the shown dialog. If it's not a Dialog nor a Frame, created
+	 * @param owner owner of the shown dialog. If it is not a Dialog nor a Frame, created
 	 * window will not be modal.
 	 */
 	public WarningWindow(List<String> warnings, Window owner, String from, String to) {

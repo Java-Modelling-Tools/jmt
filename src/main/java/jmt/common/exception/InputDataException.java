@@ -22,7 +22,7 @@ package jmt.common.exception;
  * Exception thrown when the model definition is not correct.
  * Examples:
  * <br>
- * - a model hasn't enough processing capacity (saturation
+ * - a model has not enough processing capacity (saturation
  * may be due to the arrival rates of open classes).
  * <br>
  * - one or more popolations are equal to 0

@@ -28,7 +28,7 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
- * @author Bertoli Marco - Debugged as it didn't worked 8/9/2005
+ * @author Bertoli Marco - Debugged as it did not worked 8/9/2005
  *
  */
 

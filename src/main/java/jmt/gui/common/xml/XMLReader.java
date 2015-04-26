@@ -59,7 +59,7 @@ import org.xml.sax.SAXException;
 /**
  * <p>Title: XML Reader</p>
  * <p>Description: Reads model information from an XML file. This
- * class provide methods for model load. It's designed to be used by both JModel and JSim.</p>
+ * class provide methods for model load. it is designed to be used by both JModel and JSim.</p>
  *
  * @author Bertoli Marco
  *         Date: 27-lug-2005
@@ -589,7 +589,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		TreeMap<String, Node> res = new TreeMap<String, Node>();
 		Node child = parameterNode.getFirstChild();
 		String refClass;
-		// This manual parsing is a bit unclean but works well and it's really fast.
+		// This manual parsing is a bit unclean but works well and it is really fast.
 		// I was forced to do in this way for the problem said before.
 		while (child != null) {
 			while (child != null && (child.getNodeType() != Node.ELEMENT_NODE || !child.getNodeName().equals(XML_E_PARAMETER_REFCLASS))) {
@@ -702,7 +702,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					Double probability = Double.valueOf(findText(((Element) values.item(1)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 					// Now puts the tuple stationName -> probability into a Map, then adds it
 					// to empiricalRouting Map. This is needed as at this
-					// point we don't have all station's key so will be adjusted latelly
+					// point we do not have all station's key so will be adjusted latelly
 					Map<String, Double> tmp = new TreeMap<String, Double>();
 					tmp.put(stationName, probability);
 					// Put into empiricalRouting a pair of station key and class key and map with

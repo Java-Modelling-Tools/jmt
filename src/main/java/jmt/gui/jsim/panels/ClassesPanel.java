@@ -341,7 +341,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	/*Modify global number of classes for this model all at once.*/
 	protected void setNumberOfClasses(int newNumber) {
-		/*If new number is greater than a certain number, don't do anything and cancel
+		/*If new number is greater than a certain number, do not do anything and cancel
 		number modification inside spinner*/
 		if (newNumber > MAX_NUMBER_OF_CLASSES) {
 			setNumberOfClasses(MAX_NUMBER_OF_CLASSES);

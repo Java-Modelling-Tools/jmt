@@ -96,10 +96,10 @@ public class DirectCircularList<E> {
 	}
 
 	/**
-	 * Returns value for item in position index or null if it doesn't exist.
+	 * Returns value for item in position index or null if it does not exist.
 	 * This method is always O(1).
 	 * @param index index of element to be retrived
-	 * @return requested element or null if it doesn't exist
+	 * @return requested element or null if it does not exist
 	 * @see this.getSize()
 	 */
 	@SuppressWarnings("unchecked")

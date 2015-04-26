@@ -27,7 +27,7 @@ import jmt.framework.gui.graph.MeasureValue;
 /**
  * <p>Title: Result's Model data structure</p>
  * <p>Description: This class will store all values of measured loaded from a file.
- * It's used by <code>XMLResultsReader</code>.</p>
+ * it is used by <code>XMLResultsReader</code>.</p>
  * 
  * @author Bertoli Marco
  *         Date: 3-ott-2005

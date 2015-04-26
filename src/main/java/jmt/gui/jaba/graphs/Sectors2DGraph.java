@@ -49,7 +49,7 @@ import jmt.gui.jaba.label.Sectors2DPlacer;
  * </p>
  * <p>
  * This was reimlemented by Bertoli Marco as original one had strong redraw
- * problems, made strange things with rotations, didn't autoscale and overlapped
+ * problems, made strange things with rotations, did not autoscale and overlapped
  * labels too frequently.
  * </p>
  * 

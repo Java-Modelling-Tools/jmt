@@ -34,8 +34,8 @@ import jmt.gui.jmodel.controller.SimulationStateChecker;
 /**
  * <p>Title: Dispatcher Thread</p>
  * <p>Description: This thread is responsable for dispatching simulation. If simulation max time has
- * been specified, an inner thread will be used to stop simulation after that time. We don't rely
- * on engine method as it doesn't appear to work properly.</p>
+ * been specified, an inner thread will be used to stop simulation after that time. We do not rely
+ * on engine method as it does not appear to work properly.</p>
  * 
  * @author Bertoli Marco
  *         Date: 8-set-2005
@@ -205,7 +205,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 						System.err.println("Unexpected InterruptException in PollerThread");
 					}
 				}
-				// If it's first poll, initialize Results data structure
+				// If it is first poll, initialize Results data structure
 				if (!initialized) {
 					if (gui instanceof Mediator) {
 						((Mediator) gui).setGraphCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -223,7 +223,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 					// Shows it
 					gui.showResultsWindow();
 				}
-				// If it's next one, refresh stored tempMeasures (if simulation is started and not paused)
+				// If it is next one, refresh stored tempMeasures (if simulation is started and not paused)
 				else if (!dispatcher.simulator.isPaused()) {
 					dispatcher.simulator.refreshTempMeasures();
 					double progress = dispatcher.simulator.checkSimProgress();

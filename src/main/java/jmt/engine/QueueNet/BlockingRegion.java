@@ -123,9 +123,9 @@ public class BlockingRegion {
 
 		//sets owner simulation
 		sim = simul;
-		//before sim.initialize() method, network hasn't been set yet
+		//before sim.initialize() method, network has not been set yet
 		network = null;
-		//before sim.initialize() method, net nodes hasn't been set yet
+		//before sim.initialize() method, net nodes has not been set yet
 		this.regionNodeNames = regionNodeNames;
 		this.regionNodes = null;
 
@@ -234,9 +234,9 @@ public class BlockingRegion {
 
 		//sets owner simulation
 		sim = simul;
-		//before sim.initialize() method, network hasn't been set yet
+		//before sim.initialize() method, network has not been set yet
 		network = null;
-		//before sim.initialize() method, net nodes hasn't been set yet
+		//before sim.initialize() method, net nodes has not been set yet
 		this.regionNodeNames = regionNodeNames;
 		this.regionNodes = null;
 
@@ -454,7 +454,7 @@ public class BlockingRegion {
 	public boolean belongsToRegion(NetNode node) {
 
 		if (network == null) {
-			//if network hasn't been set
+			//if network has not been set
 			//nodes of ther region must be found, using their names
 			findRegionNodes();
 		}

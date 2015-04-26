@@ -898,13 +898,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**Adds a new station to the model. Name and type must be specified.
 	 * @param name: name of the new station
-	 * @param type: string representing station type. It's value is contained in
+	 * @param type: string representing station type. it is value is contained in
 	 * <code>JSIMConstants</code> interface.
 	 * @return : key of search for this class*/
 	@Override
 	public synchronized Object addStation(String name, String type) {
 		Object key = new Long(++incrementalKey);
-		//If this station has already been created, don't add search key to the list.
+		//If this station has already been created, do not add search key to the list.
 		if (!stationsKeyset.contains(key)) {
 			stationsKeyset.add(key);
 			if (!type.equals(STATION_TYPE_SOURCE) && !type.equals(STATION_TYPE_SINK)) {
@@ -1253,7 +1253,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		for (int i = 0; i < stations.size(); i++) {
 			//get the station at i from the station vector
 			Object thisStation = stations.get(i);
-			//if it isn't a sink...
+			//if it is not a sink...
 			if (!getStationType(thisStation).equals(CommonConstants.STATION_TYPE_SINK)) {
 				//Aboce :-^All stations have router except Sink
 				//for each class...
@@ -1436,7 +1436,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (!toSet.isConnectable) {
 			return false;
 		}
-		//is already been connected: can't be connected twice, but can be disconnected
+		//is already been connected: ca not be connected twice, but can be disconnected
 		if (toSet.isConnected) {
 			save = true;
 			//must disconnect
@@ -1761,7 +1761,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Tells if a given measure is global or local (i.e. if it's station independent
+	 * Tells if a given measure is global or local (i.e. if it is station independent
 	 * or station dependent)
 	 * <br>Author: Bertoli Marco
 	 * @param key search's key for given measure
@@ -1961,7 +1961,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * This method is used to manage number of jobs for a given class. If class is closed
-	 * all spare jobs will be allocated to its reference source (if it's not in a
+	 * all spare jobs will be allocated to its reference source (if it is not in a
 	 * blocking region, otherwise a different station is chosen), if for some reasons more
 	 * jobs are allocated than max population, they are reduced.
 	 * @param classKey search's key for class to be considered
@@ -2170,7 +2170,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	@Override
 	public Object addBlockingRegion(String name, String type) {
 		Object key = new Long(++incrementalKey);
-		//If this blocking region has already been created, don't add search key to the list.
+		//If this blocking region has already been created, do not add search key to the list.
 		if (!blockingRegionsKeyset.contains(key)) {
 			blockingRegionsKeyset.add(key);
 		}
@@ -2222,7 +2222,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		((BlockingRegionData) blockingDataHM.get(regionKey)).stations.add(stationKey);
 		((StationData) stationDataHM.get(stationKey)).blockingRegion = regionKey;
-		// Removes this station from blockable list as it's added to a blocking region
+		// Removes this station from blockable list as it is added to a blocking region
 		blockableStations.remove(stationKey);
 		save = true;
 		return true;
@@ -2463,7 +2463,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Gets blocking region of a given station
 	 *
 	 * @param stationKey search's key for given station
-	 * @return search's key for its blocking region or null if it's undefined
+	 * @return search's key for its blocking region or null if it is undefined
 	 */
 	@Override
 	public Object getStationBlockingRegion(Object stationKey) {
@@ -2529,7 +2529,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * inside an hash map or other data structures. Data contained inside this class are
 	 * defined once per each station. Data which are defined for a couple of one station
 	 * and one class (such as service times distribution) or for a couple of stations (
-	 * such as connections) need to be stored in other type of data structure and shouldn't
+	 * such as connections) need to be stored in other type of data structure and should not
 	 * be stored inside this class*/
 	protected class StationData {
 		public String queueStrategy;

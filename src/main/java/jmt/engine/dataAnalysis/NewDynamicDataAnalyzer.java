@@ -232,7 +232,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			return true;
 		}
 
-		// Controls if analysis wasn't already terminated
+		// Controls if analysis was not already terminated
 		if (end) {
 			return true;
 		}
@@ -445,7 +445,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 						// this is needed because otherwise we must cache every value of "newSample"
 						// and "weight" and this will be prone to OutOfMemoryException
 						// (that was tested, so this decision was taken). On the worst case it would be
-						// a lost of (checkSize - 1) samples which isn't too much...
+						// a lost of (checkSize - 1) samples which is not too much...
 						return true;
 					}
 				}
@@ -740,7 +740,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			batches.clean();
 			return delet;
 		} else {
-			//transient can't be deleted
+			//transient ca not be deleted
 			delet = false;
 			minSamples += batches.getDiscarded();
 			if (minSamples < maxData) {
@@ -833,7 +833,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 
 	/**
 	 * Gets the extimated mean, even if the confidence requirements
-	 * haven't been reached
+	 * have not been reached
 	 *
 	 * @return the extimated mean
 	 */

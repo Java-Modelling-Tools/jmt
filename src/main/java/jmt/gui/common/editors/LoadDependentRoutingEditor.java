@@ -92,7 +92,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
     }
 
     private void initGUI(String title) {
-        this.centerWindow(640, 480);
+        this.centerWindow(800, 600);
         this.setTitle(title);
         // Adds "Add Range" Button
         JPanel topPanel = new JPanel(new BorderLayout());

@@ -306,7 +306,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			}
 
 			if (!heuristic) {
-				//heuristic rule for transient detection hasn't finished yet
+				//heuristic rule for transient detection has not finished yet
 				heuristicR5(newSample, weight);
 			} else {
 				// heuristic = true  --> heuristic rule has finished,
@@ -376,7 +376,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 
 		return end;
 		//end = true if max number of data has been reached or if HWtest has been passed or if
-		//transient hasn't been deleted
+		//transient has not been deleted
 	}
 
 	/**
@@ -728,7 +728,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			miniW.clear();
 			return delet;
 		} else {
-			//transient can't be deleted (? ste)
+			//transient ca not be deleted (? ste)
 			//TODO: come si arriva a questo punto??
 			delet = false;
 			minSamples += discarded;
@@ -1155,7 +1155,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 
 	/**
 	 * Gets the extimated mean, even if the confidence requirements
-	 * haven't been reached
+	 * have not been reached
 	 * @return the extimated mean
 	 */
 	public double extimatedMean() {
@@ -1165,9 +1165,9 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			return getMean();
 		}
 		if (nullTestEnabled) {
-			//the measure wasn't successful
+			//the measure was not successful
 			//returns the mean extimated by the null test, even if the confidence requirements
-			//haven't been reached
+			//have not been reached
 			return nullTestData.getMean();
 		}
 		return 0.0;

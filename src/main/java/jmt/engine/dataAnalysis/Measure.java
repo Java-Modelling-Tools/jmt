@@ -131,7 +131,7 @@ public class Measure {
 
 	//true if no samples have been received
 	//in this case the measure should be forced to end, otherwise
-	//the simulation wouldn't stop
+	//the simulation would not stop
 	private boolean noSamplesTest = false;
 
 	//true if measure has been aborted
@@ -140,7 +140,7 @@ public class Measure {
 	//end NEW
 
 	/**
-	 * deadState is used to check if a measure is in a dead state (so doesn't receive
+	 * deadState is used to check if a measure is in a dead state (so does not receive
 	 * any more samples). A measure is marked as dead when it reaches maxDeadState.
 	 */
 	private int deadState = 0;
@@ -449,7 +449,7 @@ public class Measure {
 
 		if (finish) {
 			//confidence interval computation has been already finished
-			//it's not useful to continue updating this measure
+			//it is not useful to continue updating this measure
 			return true;
 		}
 
@@ -578,7 +578,7 @@ public class Measure {
 	/**
 	 * gets all requested quantiles
 	 *
-	 * @return vector of quatiles, null if quantiles computation wasn't requested
+	 * @return vector of quatiles, null if quantiles computation was not requested
 	 * while creating the Measure object. See constructor's parameters.
 	 */
 	public double[] getQuantileResults() {
@@ -610,7 +610,7 @@ public class Measure {
 	}
 
 	/**
-	 * gets the new data that have been generated; returns null if there aren't
+	 * gets the new data that have been generated; returns null if there are not
 	 * new data.
 	 */
 	public Document getNewData() {

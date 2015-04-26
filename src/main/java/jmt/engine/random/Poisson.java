@@ -53,7 +53,7 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	// cache for both;
 	protected int m;
 
-	protected static final double MEAN_MAX = Integer.MAX_VALUE; // for all means larger than that, we don't try to compute a poisson deviation, but return the mean.
+	protected static final double MEAN_MAX = Integer.MAX_VALUE; // for all means larger than that, we do not try to compute a poisson deviation, but return the mean.
 	protected static final double SWITCH_MEAN = 10.0; // switch from method A to method B
 
 	/**

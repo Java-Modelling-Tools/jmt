@@ -165,7 +165,7 @@ public class SolverMultiOpen extends SolverMulti {
 		for (int j = 0; j < stations; j++) {
 
 			if (type[j] == SolverMulti.DELAY) {
-				//delay station: don't check saturation
+				//delay station: do not check saturation
 				continue;
 			}
 

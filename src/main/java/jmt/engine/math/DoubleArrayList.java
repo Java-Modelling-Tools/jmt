@@ -18,7 +18,7 @@
 
 package jmt.engine.math;
 
-/** this class creates a dynamic list of double. It's useful to use when you want
+/** this class creates a dynamic list of double. it is useful to use when you want
  * to access the elements randomly, but you have often to cancel the first part of list
  *  or to add elements in the end but in general the size is approximately
  * constant.
@@ -231,7 +231,7 @@ public class DoubleArrayList {
 
 	/** test
 	 *
-	 * @return true if it's successfull
+	 * @return true if it is successfull
 	 */
 	public static boolean test() {
 		DoubleArrayList dal = new DoubleArrayList();

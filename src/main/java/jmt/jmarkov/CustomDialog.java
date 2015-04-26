@@ -295,7 +295,7 @@ class CustomDialog extends JDialog implements ActionListener, PropertyChangeList
 			}
 
 			//Reset the JOptionPane's value.
-			//If you don't do this, then if the user
+			//If you do not do this, then if the user
 			//presses the same button next time, no
 			//property change event will be fired.
 			optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);
@@ -315,7 +315,7 @@ class CustomDialog extends JDialog implements ActionListener, PropertyChangeList
 					if ((typedValue > 100000) || (typedValue < 1)) {
 						//text was invalid
 						textField.selectAll();
-						JOptionPane.showMessageDialog(CustomDialog.this, "Sorry, '" + typedValue + "' " + "isn't a valid response.\n"
+						JOptionPane.showMessageDialog(CustomDialog.this, "Sorry, '" + typedValue + "' " + "is not a valid response.\n"
 								+ "Please enter a number between 1 and 100'000.", "Please try again", JOptionPane.ERROR_MESSAGE);
 						typedText = null;
 						typedValue = 0;
