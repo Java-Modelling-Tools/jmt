@@ -380,6 +380,14 @@ public abstract class SolverMulti {
 	public double[] getClsThroughput() {
 		return clsThroughput;
 	}
+	
+	/**
+	 * Returns the queue lengths of the whole system for each customer class
+	 * @return the overall queue lengths for each customer class in the system
+	 */
+	public double[] getClsQueueLen() {
+		return clsNumJobs;
+	}
 
 	/** Returns the response time of the system
 	 *  @return the response time
@@ -393,6 +401,14 @@ public abstract class SolverMulti {
 	 */
 	public double getTotThroughput() {
 		return sysThroughput;
+	}
+	
+	/**
+	 * Returns the total number of jobs in the system.
+	 * @return the number of jobs.
+	 */
+	public double getTotQueueLength() {
+		return sysNumJobs;
 	}
 
 	/** Prints all the calculated indexes in the system.out.

@@ -157,7 +157,36 @@ public interface ExactConstants {
 			+ "<br> <b> A: </b> This value of System Power is computed using the value of Residence Time that includes the Reference Station <br>  <b> B: </b> This value of System Power is computed using the value of Residence Time that NOT includes the Reference Station <br> Notice: For <b>open classes</b> the Reference Station always coincides with the arrival process. Thus the <b>B</b> values are not computed."
 			+ "</body></html>"
 			;
-
+	
+	public static final String DESCRIPTION_RESPONSETIME_BOUNDS = "<html><body align=\"left\"><font size=\"4\"><b>Residence Time Bounds</b>"
+			+ "</font><font size=\"3\"><br>Bounds on the total time spent by each customer across all visits to a station."
+			+ " The global aggregate gives the bounds on \"System Response Time\"."
+			+ "</body></html>";
+	public static final String DESCRIPTION_QUEUELENGTH_BOUNDS = "<html><body align=\"left\"><font size=\"4\"><b>Number of Customer Bounds</b>"
+			+ "</font><font size=\"3\"><br>The bounds on the number of customers at each station in the single-class model.</body></html>";
+	public static final String DESCRIPTION_SYSPOWER_BOUNDS = "<html><body align=\"left\"><font size=\"4\"><b>System Power Bounds</b>"
+			+ "</font><font size=\"3\"><br>The bounds on System Power given by Throughput/Response Time for the single-class model.</body></html>";
+	public static final String DESCRIPTION_THROUGHPUT_BOUNDS = "<html><body align=\"left\"><font size=\"4\"><b>Throughput Bounds</b>"
+			+ "</font><font size=\"3\"><br>Throughput bounds at each station in the single-class model.</body></html>";
+	public static final String DESCRIPTION_UTILIZATION_BOUNDS = "<html><body align=\"left\"><font size=\"4\"><b>Utilization Bounds</b>"
+			+ "</font><font size=\"3\"><br>Bounds on utilization for each station in the single-class model. "
+			+ "The utilization of a delay station is the average number of customers in the station (it may be greater than 1)</body></html>";
+	
+	public static final String DESCRIPTION_TREEALG_OPTIONS = "<html><body align=\"left\"><font size=\"4\"><b>Tree Algorithm Options</b>"
+			+ "</font><font size=\"3\"><br>Configure the tree algorithm using the<br>options to the right.</font></body></html>";
+	public static final String DESCRIPTION_TREEALG_JVM_STATS = "<html><body align=\"left\"><font size=\"3\"><b>JVM Statistics</b></font></body></html>";
+	public static final String DESCRIPTION_TREEALG_MODEL_STATS = "<html><body align=\"left\"><font size=\"3\"><b>Model Statistics</b></font></body></html>";
+	public static final String DESCRIPTION_TREEALG_OPTIONS_TREE_PLANT_MODE = "<html><body align=\"left\"><font size=\"3\"><b>Tree Plant Mode</b>"
+			+ "</font><font size=\"3\"><br>Determines which tree planting mode is used.</font></body></html>";
+	public static final String DESCRIPTION_TREEALG_OPTIONS_COMPARISON_BASIS = "<html><body align=\"left\"><font size=\"3\"><b>Comparison Basis</b>"
+			+ "</font><font size=\"3\"><br>Determines the criteria used to select a tree.</font></body></html>";
+	public static final String DESCRIPTION_TREEALG_OPTIONS_TRAVERSAL_TYPE = "<html><body align=\"left\"><font size=\"3\"><b>Traversal Type</b>"
+			+ "</font><font size=\"3\"><br>Determines whether iterative or<br>recursive tree traversal is used.</font></body></html>";
+	public static final String DESCRIPTION_TREEALG_OPTIONS_TERMINATE_IF_HIGH_COMPLEXITY = "<html><body align=\"left\"><font size=\"3\"><b>Terminate if High Complexity</b>"
+			+ "</font><font size=\"3\"><br>Determines whether the algorithm will<br>terminate if deemed to have a very<br>high complexity.</font></body></html>";
+	public static final String DESCRIPTION_TREEALG_OPTIONS_NO_OF_THREADS= "<html><body align=\"left\"><font size=\"3\"><b>No. of Threads</b>"
+			+ "</font><font size=\"3\"><br>Determines the number of threads<br>to use when running the algorithm.</font></body></html>";
+	
 	/** What-if Analysis type constants */
 	public static final String WHAT_IF_ARRIVAL = "Arrival Rates";
 	public static final String WHAT_IF_CUSTOMERS = "Customer Numbers";

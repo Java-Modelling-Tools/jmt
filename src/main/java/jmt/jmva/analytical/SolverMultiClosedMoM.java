@@ -88,7 +88,7 @@ public class SolverMultiClosedMoM extends SolverMulti {
 
 		try {
 			int M = 0, R = this.classes;
-			Integer[] Z = new Integer[classes];
+			double[] Z = new double[classes];
 			for (int r = 0; r < R; r++) {
 				Z[r] = 0;
 			}
@@ -108,7 +108,7 @@ public class SolverMultiClosedMoM extends SolverMulti {
 			// Now Z contains the delay times
 
 			// Discover service demands
-			Integer[][] D = new Integer[M][R];
+			double[][] D = new double[M][R];
 			int mIndex = 0; // current queue
 			for (int i = 0; i < stations; i++) {
 				if (t[i] == LI) {
@@ -135,7 +135,7 @@ public class SolverMultiClosedMoM extends SolverMulti {
 			}
 
 			// Instantiate queuing network model
-			qnm = new QNModel(R, M, N, Z, multiplicities, D);
+			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
 			qnm.N.print();
 
 		} catch (Exception ex) {
@@ -158,12 +158,14 @@ public class SolverMultiClosedMoM extends SolverMulti {
 	@Override
 	public void solve() {
 		QueuingNet.QNSolver c = null;
+		boolean isPerturbed = false;
 		try{
 			c = new MoMSolver(qnm, nThreads);
 			c.computeNormalisingConstant();
 		} catch (Exception e) {
-			Integer D[][]=new Integer[qnm.M][qnm.R];
-			Integer Z[]=new Integer[qnm.R];
+			double D[][]=new double[qnm.M][qnm.R];
+			int T[]=new int[qnm.M];
+			double Z[]=new double[qnm.R];
 			Integer mi[]=new Integer[qnm.M];
 			Integer N[]=new Integer[qnm.R];
 			Integer pert = (Integer) 1;
@@ -172,14 +174,16 @@ public class SolverMultiClosedMoM extends SolverMulti {
 				Z[r] = (int) qnm.getDelay(r) * pert;
 				N[r] = qnm.getPopulationVector().get(r);
 				for (int i=0; i<qnm.M; i++) {
+					T[i] = qnm.getQueueType(i).ordinal();
 					mi[i] = qnm.getMultiplicitiesVector().get(i);
-					D[i][r] = (Integer) (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*Math.random())); // i is a perturbation of 10^-6 magnitude
+					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*Math.random())); // i is a perturbation of 10^-6 magnitude
 				}
 			}
 			scale = newscale;
+			isPerturbed = true;
 			QNModel qnm2 = null;
 			try {
-				qnm2 = new QNModel(qnm.R, qnm.M, N, Z, mi, D);
+				qnm2 = new QNModel(qnm.R, qnm.M, T, N, Z, mi, D);
 			} catch (Exception e3) {
 			}
 			qnm = qnm2;

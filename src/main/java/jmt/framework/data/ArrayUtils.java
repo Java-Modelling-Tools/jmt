@@ -288,6 +288,34 @@ public class ArrayUtils {
 		return newArray;
 	}
 
+		/**
+	 * @return a deep copy of <code>array</code>
+	 */
+	/* Added by Ben Homer */
+	public static double[][][][] copy4(double[][][][] array) {
+		int len1, len2, len3, len4;
+		len1 = array.length;
+		double[][][][] newArray = new double[len1][][][];
+		System.arraycopy(array, 0, newArray, 0, len1);
+		for (int i = 0; i < len1; i++) {
+			len2 = array[i].length;
+			newArray[i] = new double[len2][][];
+			System.arraycopy(array[i], 0, newArray[i], 0, len2);
+			for (int j = 0; j < len2; j++) {
+				len3 = array[i][j].length;
+				newArray[i][j] = new double[len3][];
+				System.arraycopy(array[i][j], 0, newArray[i][j], 0, len3);
+				for (int k = 0; k < len3; k++) {
+					len4 = array[i][j][k].length;
+					newArray[i][j][k] = new double[len4];
+					System.arraycopy(array[i][j][k], 0, newArray[i][j][k], 0, len4);
+				}
+			}
+		}
+
+		return newArray;
+	}
+
 	public static double[][][] copy3per2(double[][][] array3, double[][] factor) {
 		double[][][] newArray = new double[array3.length][][];
 		for (int i = 0; i < array3.length; i++) {
@@ -649,6 +677,22 @@ public class ArrayUtils {
 
 		return s.toString();
 	}
+	
+	
+	/**
+	 * Copies a 1D array in to a 2D one. Given source[i] elements are copied in
+	 * position dest[i][k] where k is a given index.
+	 * <br>
+	 * Author: Ben Homer
+	 * @param source source 1D array
+	 * @param dest destination 2D array
+	 * @param m second coordinate to be left unchanged
+	 */
+	public static void copy1to2(Object[] source, Object[][] dest, int k) {
+		for (int i = 0; i < source.length; i++) {
+			dest[i][k] = source[i];
+		}
+	}
 
 	/**
 	 * array[n]->result[n+1], where
@@ -666,6 +710,26 @@ public class ArrayUtils {
 	}
 
 	/**
+
+	/**
+	 * Copies a 3D array inr0 a 4D one. Given source[i][j][k] elements are copied in
+	 * position dest[i][j][k][m] where m is a given index.
+	 * <br>
+	 * Author: Ben Homer
+	 * @param source source 3D array
+	 * @param dest destination 4D array
+	 * @param m fourth coordinate to be left unchanged
+	 */
+	public static void copy3to4(double[][][] source, double[][][][] dest, int m) {
+		for (int i = 0; i < source.length; i++) {
+			for (int j = 0; j < source[i].length; j++) {
+				for (int k = 0; k < source[i][j].length; k++) {
+					dest[i][j][k][m] = source[i][j][k];
+				}
+			}
+		}
+	}
+        /*
 	 * Copies a 2D array in a 3D one. Given source[i][j] elements are copied in
 	 * position dest[i][j][k] where k is a given index.
 	 * <br>

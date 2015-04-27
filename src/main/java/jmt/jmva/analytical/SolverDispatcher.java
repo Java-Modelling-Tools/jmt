@@ -26,9 +26,11 @@ import jmt.framework.data.ArrayUtils;
 import jmt.framework.xml.XMLUtils;
 import jmt.jmva.gui.exact.ExactConstants;
 import jmt.jmva.gui.exact.ExactModel;
+import jmt.framework.data.Bound;
 
 import org.xml.sax.SAXException;
 
+import QueuingNet.TreeAlgorithms.Config;
 /**
  * Server side of the solver interface.<br>
  * This object takes a model, instantiates the correct solver, and solves it.<br>
@@ -193,6 +195,75 @@ public class SolverDispatcher {
 		throw new SolverException(s.toString(), t);
 	}
 
+	/** Added by Ben Homer 
+	 * @throws SolverException */
+                /*
+
+	private void solveSingleBounding(ExactModel model, int iteration) throws SolverException {
+		BoundsSolver boundsSolver = null;
+		SolverAlgorithm algorithmType = model.getAlgorithmType();
+		
+		// Init
+		int stations = model.getStations();
+		String[] names = model.getStationNames();
+		int[] types = mapStationTypes(model.getStationTypes());
+		double[][] servicetimes = (ArrayUtils.extract13(model.getServiceTimes(), 0));
+
+		//no supplemental copy here since extract13 already copies the first level of the array
+		adjustLD(servicetimes, types);
+		double[] visits = ArrayUtils.extract1(model.getVisits(), 0);
+
+		try {
+			if (model.isClosed()) { // Solving single-closed models
+				int pop = model.getMaxpop();
+				if (pop <= 0) {
+					throw new InputDataException("Population must be greater than zero");
+				}
+				
+				switch (algorithmType) {
+					case GEOMETRIC_BOUNDS:
+						boundsSolver = new SolverSingleClosedGB(pop, stations);
+					break;
+					case ASYMPTOTIC_BOUNDS:
+						boundsSolver = new SolverSingleClosedAB(pop, stations);
+					break;
+					case BALANCED_JOB_BOUNDS:
+						boundsSolver = new SolverSingleClosedBJB(pop, stations, true);
+					break;
+					default:
+						fail("Bounding analysis algorithm is not implemented.", null);
+					break;
+				}
+				
+				if (!boundsSolver.input(names, types, servicetimes, visits)) {
+					String algName = algorithmType.toString().replace(" ", "").replace("-", "");
+					fail("Error initializing " + algName + "SingleBoundsSolver", null);
+				}
+			} else { // Solving single-open models
+				throw new UnsupportedOperationException("Open model bounding solvers not yet implemented.");
+			}
+		} catch (Exception e) {
+			fail("Error initializing SingleClass bounds solver", e);
+		}
+
+
+		// solve 
+		boundsSolver.solve();
+		
+		Bound[][] Xb = new Bound[stations+1][2]; 
+		Bound[][] Rb = new Bound[stations+1][2]; 
+		Bound[][] Qb = new Bound[stations+1][2]; 
+		Bound[][] Ub = new Bound[stations+1][2];
+		for (int k = 0; k < 2; k++) {
+			ArrayUtils.copy1to2(boundsSolver.getThroughputBounds(), Xb, k);
+			ArrayUtils.copy1to2(boundsSolver.getResidenceTimeBounds(), Rb, k);
+			ArrayUtils.copy1to2(boundsSolver.getQueueLengthBounds(), Qb, k);
+			ArrayUtils.copy1to2(boundsSolver.getUtilisationBounds(), Ub, k);
+		}
+		// solution 
+		model.setBoundingResults(algorithmType, Xb, Rb, Qb, Ub, iteration);
+	}
+*/
 	private void solveSingle(ExactModel model, int iteration) throws Exception, InputDataException {
 
 		int stations = model.getStations();
@@ -201,6 +272,14 @@ public class SolverDispatcher {
 		SolverAlgorithm algorithmType = model.getAlgorithmType();
 		int algIterations = 0;
 		/** End **/
+		
+		/** Added by Ben Homer */
+		// For bounding models we use a bounding solver instead.
+		if (algorithmType.isBounding()) {
+//			solveSingleBounding(model, iteration);
+			return;
+		}
+		/** End */
 
 		//init
 		String[] names = model.getStationNames();
@@ -227,7 +306,9 @@ public class SolverDispatcher {
 					solver = new SolverSingleClosedMVA(pop, stations);
 				/*} else if (SolverAlgorithm.MoM.equals(algorithmType)) {
 					solver = new SolverSingleClosedMoM(pop, stations);
-				*/} else {
+				*/
+				} // TODO: Ben H - allow solution of single class models using TMVA and TC algorithms?? 
+				else {
 					SolverAlgorithm algType = model.getAlgorithmType();
 					solver = new SolverSingleClosedAMVA(pop, stations, algType, model.getTolerance());
 				}
@@ -336,6 +417,15 @@ public class SolverDispatcher {
 
 			}
 		}
+		
+		/** Added by Ben Homer */
+                /*
+		if (algorithmType.isBounding()) {
+			this.solveMultiBounding(model, iteration);
+			return;
+		}
+                */
+		/** End **/
 
 		/* init */
 		try {
@@ -377,7 +467,23 @@ public class SolverDispatcher {
 								fail("Error initializing CoMoMMultiSolver", null);
 						}
 						solver = closedSolver;
-					} else {
+					} /* Added by Ben Homer */
+					else if (SolverAlgorithm.TREE_CONVOLUTION.equals(algorithmType)) {
+						SolverMultiClosedTreeConvolution closedSolver = 
+								new SolverMultiClosedTreeConvolution(classes, stations, classPop);
+						if (!closedSolver.input(stationTypes, serviceTimes, visits, Config.NUM_THREADS)) {
+								fail("Error initializing TreeConvolutionMultiSolver. If model contains multiple delay stations combine them to a single delay station or use TMVA.", null);
+						}
+						solver = closedSolver;
+					} else if (SolverAlgorithm.TREE_MVA.equals(algorithmType)) {
+						 SolverMultiClosedTreeMVA closedSolver = 
+								new SolverMultiClosedTreeMVA(classes, stations, classPop);
+						if (!closedSolver.input(stationTypes, serviceTimes, visits, Config.NUM_THREADS)) {
+								fail("Error initializing TreeMVAMultiSolver", null);
+						}
+						solver = closedSolver;
+					} /* End */
+					else {
 						double tolerance = model.getTolerance();
 						SolverMultiClosedAMVA closerSolver = null;
 						if (SolverAlgorithm.CHOW.equals(algorithmType)) {
@@ -443,7 +549,75 @@ public class SolverDispatcher {
 		model.setResults(algorithmType, algIterations, ql, tp, rt, util, iteration);
 		/** End **/
 	}
+	
+	/*
+	 * @author Ben Homer
+	 */
+        /*
+	private void solveMultiBounding(ExactModel model, int iteration) throws SolverException, InputDataException {
+		BoundsSolverMulti boundsSolver = null;
+		SolverAlgorithm algorithmType = model.getAlgorithmType();
+		
+		// Init
+		int stations = model.getStations();
+		int classes = model.getClasses();
+		String[] names = model.getStationNames();
+		int[] types = mapStationTypes(model.getStationTypes());
+		double[][][] servicetimes = model.getServiceTimes();
 
+		//no supplemental copy here since extract13 already copies the first level of the array
+		adjustLD(servicetimes, types);
+		double[][] visits = model.getVisits();
+		int[] pops = new int[classes];
+		double[] pd = model.getClassData();
+		for (int c = 0; c < classes; c++) {
+			pops[c] = (int) pd[c];
+		}
+
+		try {
+			if (model.isClosed()) { // Solving single-closed models
+				int pop = model.getMaxpop();
+				if (pop <= 0) {
+					throw new InputDataException("Population must be greater than zero");
+				}
+				
+				switch(algorithmType) {
+					case GEOMETRIC_BOUNDS:
+						throw new UnsupportedOperationException("GBs cannot be obtained for multi-class models.");
+					case ASYMPTOTIC_BOUNDS:
+						boundsSolver = new SolverMultiClosedAB(stations, classes);
+					break;
+					case BALANCED_JOB_BOUNDS:
+						boundsSolver = new SolverMultiClosedBJB(stations, classes);
+					break;
+					default:
+						fail("Bounding analysis algorithm is not implemented.", null);
+					break;
+				}
+				
+				if (!boundsSolver.input(names, types, servicetimes, visits, pops)) {
+					String algName = algorithmType.toString().replace(" ", "").replace("-", "");
+					fail("Error initializing " + algName + "MultiBoundsSolver", null);
+				}
+			} else { // Solving single-open models
+				throw new UnsupportedOperationException("Open model bounding solvers not yet implemented.");
+			}
+		} catch (Exception e) {
+			fail("Error initializing SingleClass bounds solver", e);
+		}
+
+		// solve 
+		boundsSolver.solve();
+		
+		Bound[][] Xb = boundsSolver.getThroughputBounds();
+		Bound[][] Rb = boundsSolver.getResTimeBounds();
+		Bound[][] Qb = boundsSolver.getQueueLenBounds();
+		Bound[][] Ub = boundsSolver.getUtilizationBounds();
+		
+		// solution 
+		model.setBoundingResults(algorithmType, Xb, Rb, Qb, Ub, iteration);
+	}
+*/
 	/**
 	 * Map station types from model constants to solver constants
 	 */
@@ -506,9 +680,9 @@ public class SolverDispatcher {
 	}
 
 	/*
-		 * To conserve memory, service times arrays for LI stations are "compressed" to a single value. This
-		 * method expands them back to full length (multiclass version)
-		 */
+	 * To conserve memory, service times arrays for LI stations are "compressed" to a single value. This
+	 * method expands them back to full length (multiclass version)
+	 */
 	private void expand(double[][][] st, int pop) {
 		if (pop == 1) {
 			return;
