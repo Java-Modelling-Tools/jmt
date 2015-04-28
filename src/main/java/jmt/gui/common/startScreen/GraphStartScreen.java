@@ -96,6 +96,14 @@ public class GraphStartScreen extends JMTFrame {
 	public static final String IMG_JMCHICON = "JMCHIcon";
 	public static final String IMG_JWATICON = "JWATIcon";
 	public static final String IMG_SUITEICON = "JMTIcon";
+	
+	// Short Descriptions
+	public static final String JMVA_SHORT_DESCRIPTION = "MVA solver with wizard interface";
+	public static final String JMCH_SHORT_DESCRIPTION = "Markov Chain simulator with graphical interface";
+	public static final String JWAT_SHORT_DESCRIPTION = "Workload Analyzer Tool";
+	public static final String JSIM_SHORT_DESCRIPTION = "Simulator with wizard interface";
+	public static final String JMODEL_SHORT_DESCRIPTION = "Simulator with graphical interface";
+	public static final String JABA_SHORT_DESCRIPTION = "Asyntotic bound analysis with wizard interface";
 	//names for URLS of documents to be shown as description of main applications
 	private static final String	URL_DOCUMENTATION_ONLINE = "http://jmt.sf.net/Documentation.html";
 	// Content for logo panel
@@ -123,7 +131,9 @@ public class GraphStartScreen extends JMTFrame {
 		super(true);
 		initGUI();
 		addListeners();
- 		this.revalidate();
+ 		//this.revalidate(); WORKAROUND:
+		invalidate();
+		validate();
                 this.repaint();
 	}
 
@@ -135,7 +145,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "MVA solver with wizard interface");
+			putValue(Action.SHORT_DESCRIPTION, JMVA_SHORT_DESCRIPTION);
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMVAICON, new Dimension(40,40)));
 		}
 
@@ -151,7 +161,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Markov Chain simulator with graphical interface");
+			putValue(Action.SHORT_DESCRIPTION, JMCH_SHORT_DESCRIPTION);
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(40,40)));
 //			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 		}
@@ -168,7 +178,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Workload Analyzer Tool");
+			putValue(Action.SHORT_DESCRIPTION, JWAT_SHORT_DESCRIPTION);
 //			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(40,40)));
 		}
@@ -186,7 +196,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Simulator with wizard interface");
+			putValue(Action.SHORT_DESCRIPTION, JSIM_SHORT_DESCRIPTION);
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JSIMICON, new Dimension(40,40)));
 		}
 
@@ -202,7 +212,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Simulator with graphical interface");
+			putValue(Action.SHORT_DESCRIPTION, JMODEL_SHORT_DESCRIPTION);
 //			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(40,40)));
 		}
@@ -219,7 +229,7 @@ public class GraphStartScreen extends JMTFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Asyntotic bound analysis with wizard interface");
+			putValue(Action.SHORT_DESCRIPTION, JABA_SHORT_DESCRIPTION);
 //			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(40,40)));
 		}

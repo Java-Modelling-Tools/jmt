@@ -31,7 +31,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import jmt.common.xml.resources.XSDSchemaLoader;
+import jmt.common.xml.XSDSchemaLoader;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;

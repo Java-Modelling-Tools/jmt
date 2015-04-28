@@ -28,7 +28,7 @@ import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import jmt.common.exception.LoadException;
-import jmt.common.xml.resources.XSDSchemaLoader;
+import jmt.common.xml.XSDSchemaLoader;
 import jmt.engine.simDispatcher.Dispatcher_jMVAschema;
 import jmt.jmva.analytical.CommandLineSolver;
 

@@ -32,7 +32,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import jmt.common.xml.resources.XSDSchemaLoader;
+import jmt.common.xml.XSDSchemaLoader;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.PAResultsModel;
 import jmt.gui.common.definitions.StoredResultsModel;

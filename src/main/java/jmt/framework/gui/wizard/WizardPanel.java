@@ -21,6 +21,7 @@ package jmt.framework.gui.wizard;
 import javax.swing.JPanel;
 
 import jmt.gui.jaba.JabaModel;
+import jmt.gui.jaba.JabaResults;
 
 /**
 

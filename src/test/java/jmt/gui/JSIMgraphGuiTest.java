@@ -2,7 +2,7 @@ package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.gui.jsimgraph.mainGui.MainWindow;
-import jmt.util.TextButtonMatcher;
+import jmt.util.ShortDescriptionButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
@@ -37,7 +37,7 @@ public class JSIMgraphGuiTest {
 	 */
 	@Test
 	public void mainJSIMgraphWindowDisplaysCorrectly() {
-		window.button(new TextButtonMatcher("<html>JSIM<em>graph</em></html>")).click();
+		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JMODEL_SHORT_DESCRIPTION)).click();
 		FrameFixture jsimGraph = WindowFinder.findFrame(MainWindow.class).using(window.robot);
 		jsimGraph.show();
 	}

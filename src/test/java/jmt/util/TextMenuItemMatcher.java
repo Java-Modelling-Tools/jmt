@@ -4,6 +4,13 @@ import javax.swing.JMenuItem;
 
 import org.fest.swing.core.GenericTypeMatcher;
 
+/**
+ * A matcher for FEST to find menu items based on the text they contain.
+ * (By default FEST finds menu items by name)
+ * 
+ * @author Piotr Tokaj
+ *
+ */
 public class TextMenuItemMatcher extends GenericTypeMatcher<JMenuItem> {
 	
 	private String textToMatch;

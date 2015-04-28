@@ -2,7 +2,7 @@ package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.gui.jaba.JabaWizard;
-import jmt.util.TextButtonMatcher;
+import jmt.util.ShortDescriptionButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
@@ -39,7 +39,7 @@ public class JabaGuiTest {
 	 */
 	@Test
 	public void mainJABAWindowDisplaysCorrectly() {
-		window.button(new TextButtonMatcher("JABA")).click();
+		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JABA_SHORT_DESCRIPTION)).click();
 		FrameFixture jaba = WindowFinder.findFrame(JabaWizard.class).using(window.robot);
 		jaba.show();
 	}

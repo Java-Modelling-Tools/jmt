@@ -20,7 +20,7 @@ package jmt.gui.common.xml;
 
 import java.io.File;
 
-import jmt.common.xml.resources.XSDSchemaLoader;
+import jmt.common.xml.XSDSchemaLoader;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.PAResultsModel;

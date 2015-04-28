@@ -18,7 +18,6 @@ package jmt.jmva.analytical;
 
 import javax.naming.OperationNotSupportedException;
 
-import jmt.common.exception.SolverException;
 import QueuingNet.CoMoMBTFSolver;
 import DataStructures.QNModel;
 import Exceptions.BTFMatrixErrorException;
@@ -68,9 +67,8 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 	 *  @param  v   array of visits to the service centers
 	 *  @param  nThreads The number of threads the solver should use. If nThreads > 2 then the parallel algorithm is used.
 	 *  @return True if the operation is completed with success
-	 * @throws SolverException 
 	 */
-	public boolean input(int[] t, double[][][] s, double[][] v, int nThr) throws SolverException {
+	public boolean input(int[] t, double[][][] s, double[][] v, int nThr) {
 		if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
 			// wrong input.
 			return false;
@@ -88,11 +86,9 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 			}
 		}
 
-		boolean sparse = false;
-		
 		try {
 			int M = 0, R = this.classes;
-			double[] Z = new double[classes];
+			Integer[] Z = new Integer[classes];
 			for (int r = 0; r < R; r++) {
 				Z[r] = 0;
 			}
@@ -112,16 +108,12 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 			// Now Z contains the delay times
 
 			// Discover service demands
-			
-			double[][] D = new double[M][R];
+			Integer[][] D = new Integer[M][R];
 			int mIndex = 0; // current queue
 			for (int i = 0; i < stations; i++) {
 				if (t[i] == LI) {
 					for (int r = 0; r < classes; r++) {
 						D[mIndex][r] = (int) (servTime[i][r][0] * visits[i][r]);
-						if (D[mIndex][r] == 0) {
-							sparse = true;
-						}
 					}
 					mIndex++;
 				}
@@ -143,18 +135,13 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 			}
 
 			// Instantiate queuing network model
-			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
+			qnm = new QNModel(R, M, N, Z, multiplicities, D);
 			qnm.N.print();
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			// Return false if initialisation fails for any reason.
 			return false;
-		}
-		
-		if (sparse) {
-			System.out.print("Demands matrix contains 0s, CoMoM may not give accurate results.");
-			// throw new SolverException("CoMoM does not give accurate results for sparse networks.");
 		}
 		return true;
 	}
@@ -172,13 +159,12 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 	public void solve() {
 		QueuingNet.QNSolver c = null;
 		try{
-			// c = new CoMoMSimpleSolver(qnm, nThreads);
+			//			c = new CoMoMSimpleSolver(qnm, nThreads);
 			c = new CoMoMBTFSolver(qnm);
 			c.computeNormalisingConstant();
 		} catch (Exception e) {
-			double D[][]=new double[qnm.M][qnm.R];
-			int T[]=new int[qnm.M];
-			double Z[]=new double[qnm.R];
+			Integer D[][]=new Integer[qnm.M][qnm.R];
+			Integer Z[]=new Integer[qnm.R];
 			Integer mi[]=new Integer[qnm.M];
 			Integer N[]=new Integer[qnm.R];
 			Integer pert = 1;
@@ -187,16 +173,15 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 				Z[r] = qnm.getDelay(r) * pert;
 				N[r] = qnm.getPopulationVector().get(r);
 				for (int i=0; i<qnm.M; i++) {
-					T[i] = qnm.getQueueType(i).ordinal();
 					mi[i] = qnm.getMultiplicitiesVector().get(i);
-					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*Math.random())); // i is a perturbation of 10^-6 magnitude
+					D[i][r] = (Integer) (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*Math.random())); // i is a perturbation of 10^-6 magnitude
 				}
 			}
 			scale = newscale;
 
 			QNModel qnm2 = null;
 			try {
-				qnm2 = new QNModel(qnm.R, qnm.M, T, N, Z, mi, D);
+				qnm2 = new QNModel(qnm.R, qnm.M, N, Z, mi, D);
 			} catch (Exception e3) {
 			}
 			qnm = qnm2;

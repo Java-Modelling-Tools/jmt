@@ -29,7 +29,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import jmt.common.xml.resources.XSDSchemaLoader;
+import jmt.common.xml.XSDSchemaLoader;
 
 import org.apache.xerces.parsers.SAXParser;
 import org.w3c.dom.NamedNodeMap;

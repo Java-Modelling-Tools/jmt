@@ -34,7 +34,7 @@ import java.util.Date;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import jmt.common.exception.LoadException;
-import jmt.common.xml.resources.XSDSchemaLoader;
+import jmt.common.xml.XSDSchemaLoader;
 import jmt.engine.NodeSections.InputSection;
 import jmt.engine.NodeSections.OutputSection;
 import jmt.engine.NodeSections.ServiceSection;

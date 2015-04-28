@@ -25,33 +25,24 @@ import java.util.Map;
 
 /**
  * Enum class for all implemented algorithm solvers
- * @author Abhimanyu Chugh, bounding algorithms added by Ben Homer
+ * 
+ * @author Abhimanyu Chugh
+ *
  */
 public enum SolverAlgorithm {
-	// Exact
-	EXACT("MVA", true, Type.EXACT, true),
-	RECAL("RECAL", true, Type.EXACT, false),
-	MOM("MoM", true, Type.EXACT, false),
-	COMOM("CoMoM", true, Type.EXACT, false),
-	TREE_CONVOLUTION("Tree Convolution", true, Type.EXACT, false),
-	TREE_MVA("Tree MVA", true, Type.EXACT, true),
-	// Approximate
-	CHOW("Chow", true, Type.APPROXIMATE, false),
-	BARD_SCHWEITZER("Bard-Schweitzer", true, Type.APPROXIMATE, false),
-	AQL("AQL", true, Type.APPROXIMATE, false),
-	LINEARIZER("Linearizer", true, Type.APPROXIMATE, false),
-	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, Type.APPROXIMATE, false);
-	// Bounding
-	//ASYMPTOTIC_BOUNDS("Asymptotic Bounds", true, Type.BOUNDING, false),
-	//BALANCED_JOB_BOUNDS("Balanced Job Bounds", true, Type.BOUNDING, false),
-	//GEOMETRIC_BOUNDS("Geometric Bounds", true, Type.BOUNDING, false);
-	
-	private enum Type { EXACT, APPROXIMATE, BOUNDING };
+	EXACT("MVA", true, true, true),
+	RECAL("RECAL", true, true, false),
+	MOM("MoM", true, true, false),
+	COMOM("CoMoM", true, true, false),
+	CHOW("Chow", true, false, false),
+	BARD_SCHWEITZER("Bard-Schweitzer", true, false, false),
+	AQL("AQL", true, false, false),
+	LINEARIZER("Linearizer", true, false, false),
+	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, false, false);
 	
 	// string representation of the algorithm
 	private String algorithmName;
-	private boolean closed, loadDependent;
-  	private Type type;
+	private boolean closed, exact, loadDependent;
 	
 	private static final String[] NAMES;
 	private static final String[] CLOSED_NAMES;
@@ -76,11 +67,11 @@ public enum SolverAlgorithm {
 		REVERSE_MAP = Collections.unmodifiableMap(revMap);
 	}
 	
-	private SolverAlgorithm(String algorithmName, boolean closed, Type type, boolean loadDependent) {
+	private SolverAlgorithm(String algorithmName, boolean closed, boolean exact, boolean loadDependent) {
 		this.algorithmName = algorithmName;
 		this.closed = closed;
+		this.exact = exact;
 		this.loadDependent = loadDependent;
-    this.type = type;
 	}
 	
 	@Override
@@ -95,32 +86,11 @@ public enum SolverAlgorithm {
 		return closed;
 	}
 	
-  /**
+	/**
 	 * @return true if this algorithm is exact
 	 */
 	public boolean isExact() {
-		return type == Type.EXACT;
-	}
-	
-	/**
-	 * @return true if this algorithm is approximate
-	 */
-	public boolean isApproximate() {
-		return type == Type.APPROXIMATE;
-	}
-	
-	/**
-	 * @return true if this is a tree algorithm
-	 */
-	public boolean isTreeAlg() {
-		return this.equals(SolverAlgorithm.TREE_MVA) || this.equals(SolverAlgorithm.TREE_CONVOLUTION);
-	}
-	
-	/**
-	 * @return true if this algorithm is a bounding algorithm
-	 */
-	public boolean isBounding() {
-		return type == Type.BOUNDING;
+		return exact;
 	}
 	
 	/**
@@ -160,14 +130,6 @@ public enum SolverAlgorithm {
 	}
 	
 	public static int noOfExactAlgs() {
-		return 6;
-	}
-	
-	public static int noOfApproximateAlgs() {
-		return 5;
-	}
-	
-	public static int noOfBoundingAlgs() {
-		return 3;
+		return 4;
 	}
 }

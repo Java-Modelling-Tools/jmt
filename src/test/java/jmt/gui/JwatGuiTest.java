@@ -2,7 +2,7 @@ package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.gui.jwat.MainJwatWizard;
-import jmt.util.TextButtonMatcher;
+import jmt.util.ShortDescriptionButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
@@ -11,6 +11,8 @@ import org.fest.swing.fixture.FrameFixture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 
 /**
  * 
@@ -39,7 +41,7 @@ public class JwatGuiTest {
 	 */
 	@Test
 	public void mainJWATWindowDisplaysCorrectly() {
-		window.button(new TextButtonMatcher("JWAT")).click();
+		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JWAT_SHORT_DESCRIPTION)).click();
 		FrameFixture jwat = WindowFinder.findFrame(MainJwatWizard.class).using(window.robot);
 		jwat.show();
 	}

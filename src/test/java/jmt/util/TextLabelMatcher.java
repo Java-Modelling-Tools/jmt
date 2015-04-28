@@ -3,6 +3,13 @@ package jmt.util;
 import javax.swing.JLabel;
 
 import org.fest.swing.core.GenericTypeMatcher;
+/**
+ * A matcher for FEST to find labels based on the text they contain.
+ * (By default FEST finds labels by name)
+ * 
+ * @author Piotr Tokaj
+ *
+ */
 
 public class TextLabelMatcher extends GenericTypeMatcher<JLabel> {
 	

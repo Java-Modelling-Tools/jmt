@@ -24,5 +24,4 @@ public class TextButtonMatcher extends GenericTypeMatcher<JButton> {
 	protected boolean isMatching(JButton button) {
 		return textToMatch.equals(button.getText());
 	}
-
 }
