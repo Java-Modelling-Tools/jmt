@@ -29,8 +29,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import jmt.common.exception.LoadException;
 import jmt.common.xml.XSDSchemaLoader;
-import jmt.engine.simDispatcher.Dispatcher_jMVAschema;
 import jmt.jmva.analytical.CommandLineSolver;
+import jmt.jmva.engine.simDispatcher.Dispatcher_jMVAschema;
 
 import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;

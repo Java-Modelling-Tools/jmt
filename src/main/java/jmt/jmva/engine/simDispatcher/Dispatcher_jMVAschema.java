@@ -16,7 +16,7 @@
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
-package jmt.engine.simDispatcher;
+package jmt.jmva.engine.simDispatcher;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +33,7 @@ import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
 import jmt.engine.log.JSimLogger;
+import jmt.engine.simDispatcher.ModelTransformer;
 import jmt.engine.simEngine.SimLoader;
 import jmt.engine.simEngine.Simulation;
 import jmt.framework.xml.XMLUtils;
@@ -700,7 +701,7 @@ public class Dispatcher_jMVAschema {
 					return;
 				} else {
 					//gets the measures defined for this queue network
-					LinkedList measures = net.getMeasures();
+					LinkedList<Measure> measures = net.getMeasures();
 
 					//creates the array of temp measures
 					tempMeasures = new TempMeasure[measures.size()];
@@ -813,75 +814,11 @@ public class Dispatcher_jMVAschema {
 		return NetSystem.restartFromPause();
 	}
 
-	//------------------------TEST-----------------------------------//
-
-	public static void testSimulationTime() {
-
-		int N = 5;
-		long[] duration = new long[N];
-		long tot = 0;
-
-		for (int i = 0; i < N; i++) {
-
-			String path = "D:\\JMTtest\\prova" + i + ".xml";
-
-			Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema(path);
-			long start, stop, elapsed;
-
-			start = System.currentTimeMillis();
-
-			if (disp.solveModel()) {
-				stop = System.currentTimeMillis();
-				elapsed = stop - start;
-				//System.out.println("Duration execution "+i+": ");
-				System.out.println(Long.toString(elapsed));
-
-				duration[i] = elapsed;
-				tot += elapsed;
-
-			} else {
-				System.out.println("Error!!");
-			}
-		}
-
-		long mean = tot / N;
-		System.out.println("Mean: ");
-		System.out.println(Long.toString(mean));
-
-	}
-
-	public static void testSolution() {
-		//Dispatcher disp = new Dispatcher("D:\\test_2open.xml");
-		Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema("D:\\JMTtest\\solverstep0.xml");
-		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\solverstep10.xml");
-		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\prova.xml");
-		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\test_base.xml");
-
-		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\model_with_blocking.xml");
-		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\model_with_blocking_2.xml");
-		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\model_with_blocking_open_drop.xml");
-		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\preload.xml");
-		disp.setSimulationSeed(23000);
-
-		long start, stop, elapsed;
-		start = System.currentTimeMillis();
-
-		if (disp.solveModel()) {
-			stop = System.currentTimeMillis();
-			elapsed = stop - start;
-			//System.out.println("OK - Simulation time: ");
-			//System.out.println(Long.toString(elapsed));
-		} else {
-			System.out.println("Error!!");
-		}
-
-	}
-
 	private boolean copyFile(File input, File output_file) {
 
 		FileInputStream inputStream = null;
 		FileOutputStream outputStream_file1 = null;
-		int fileLenght = 0;
+		int fileLength = 0;
 
 		try {
 			inputStream = new FileInputStream(input.getAbsolutePath());
@@ -898,15 +835,26 @@ public class Dispatcher_jMVAschema {
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("Error while creating the copy of input file " + input.getAbsolutePath());
+			try {
+				inputStream.close();
+			} catch (IOException e1) {
+				logger.error("Error while closing stream");
+			}
 			return false;
 		}
 
 		try {
 			//number of available bytes
-			fileLenght = inputStream.available();
+			fileLength = inputStream.available();
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("Error while computing the length of input file " + input.getAbsolutePath());
+			try {
+				outputStream_file1.close();
+				inputStream.close();
+			} catch (IOException e1) {
+				logger.error("Error while closing stream");
+			}
 			return false;
 		}
 
@@ -915,7 +863,7 @@ public class Dispatcher_jMVAschema {
 
 		try {
 			int byte_read;
-			for (int i = 0; i < fileLenght; i++) {
+			for (int i = 0; i < fileLength; i++) {
 				//reads one byte
 				byte_read = inputStream.read();
 				//copies one byte
@@ -1000,7 +948,7 @@ public class Dispatcher_jMVAschema {
 				if (input.getVisits()[i][j] == 0
 						|| (input.getServiceTimes()[i][j][0] == 0 && input.getStationTypes()[i] != ExactConstants.STATION_LD)) {
 					// Removes all measures from station i for class j
-					Iterator it = output.getMeasureKeys().iterator();
+					Iterator<Object> it = output.getMeasureKeys().iterator();
 					while (it.hasNext()) {
 						Object key = it.next();
 						if (output.getMeasureClass(key) == classKeys[j] && output.getMeasureStation(key) == stationKeys[i]) {
@@ -1055,24 +1003,5 @@ public class Dispatcher_jMVAschema {
 				}
 			}
 		}
-	}
-
-	public static void main(String[] args) {
-		final Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema("c:\\test\\test.xml");
-		disp.setValidate(false);
-		//disp.getTransformedModel("c:\\test\\test.xml", "c:\\test\\test1.xml");
-		new Thread() {
-			@Override
-			public void run() {
-				try {
-					sleep(60 * 1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				disp.abortAllMeasures();
-			}
-		}.start();
-		disp.solveModelNewTransform();
 	}
 }

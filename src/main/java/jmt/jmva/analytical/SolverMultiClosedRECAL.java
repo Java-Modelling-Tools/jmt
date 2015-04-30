@@ -86,7 +86,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 
 		try {
 			int M = 0, R = this.classes;
-			Integer[] Z = new Integer[classes];
+			double[] Z = new double[classes];
 			for (int r = 0; r < R; r++) {
 				Z[r] = 0;
 			}
@@ -106,7 +106,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 			// Now Z contains the delay times
 
 			// Discover service demands
-			Integer[][] D = new Integer[M][R];
+			double[][] D = new double[M][R];
 			int mIndex = 0; // current queue
 			for (int i = 0; i < stations; i++) {
 				if (t[i] == LI) {
@@ -133,7 +133,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 			}
 
 			// Instantiate queuing network model
-			qnm = new QNModel(R, M, N, Z, multiplicities, D);
+			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
 			qnm.N.print();
 			for (int m = 0; m < qnm.M; m++) {
 				for (int r = 0; r < qnm.R; r++) {

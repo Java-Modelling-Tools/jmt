@@ -131,10 +131,8 @@ public class GraphStartScreen extends JMTFrame {
 		super(true);
 		initGUI();
 		addListeners();
- 		//this.revalidate(); WORKAROUND:
-		invalidate();
-		validate();
-                this.repaint();
+ 		this.revalidate();
+        this.repaint();
 	}
 
 	// --- Actions associated with buttons -----------------------------------------------------------------

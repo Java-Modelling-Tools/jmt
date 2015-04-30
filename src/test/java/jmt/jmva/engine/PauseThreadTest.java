@@ -16,18 +16,27 @@
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
-package jmt.engine;
+package jmt.jmva.engine;
+
+import static org.junit.Assert.fail;
+
+import java.io.File;
+import java.net.URISyntaxException;
 
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.QueueNetwork;
-import jmt.engine.simDispatcher.Dispatcher_jMVAschema;
 import jmt.jmva.BatchTest;
+import jmt.jmva.engine.simDispatcher.Dispatcher_jMVAschema;
+
+import org.junit.Test;
 
 /**
  * @author Stefano Omini
  */
 public class PauseThreadTest {
+	
+	private static final int MAX_WAIT_TIME = 15000;
 
 	private static void test1() {
 		int n = 5;
@@ -37,32 +46,40 @@ public class PauseThreadTest {
 		t2.start();
 	}
 
-	private static void test2() {
+	@Test
+	public void testPausing1SecondSleepAndCheckSimProgress() throws InterruptedException, URISyntaxException {
 
-		//Dispatcher disp = new Dispatcher("D://randomModel_open_1.xml");
-		Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema("D://JMTtest//randomModel_open_1.xml");
+		Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema(new File(getClass().getResource("randomModel_open_1.xml").toURI()));
 
 		Thread3 t3 = new Thread3(disp);
 		Thread4 t4 = new Thread4(disp);
 		t3.start();
 		t4.start();
+		t4.join(MAX_WAIT_TIME);
+		if(t4.isAlive()) {
+			t4.finished = true;
+			fail("Thread did not finish");
+		}
 	}
 
-	private static void test3() {
+	@Test
+	public void testPausing5SecondsSleepAndAbortAllMeasures() throws InterruptedException, URISyntaxException {
 
-		//Dispatcher disp = new Dispatcher("D://randomModel_open_1.xml");
-		Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema("D://JMTtest//randomModel_open_1.xml");
+		Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema(new File(getClass().getResource("randomModel_open_1.xml").toURI()));
 
 		Thread3 t3 = new Thread3(disp);
 		Thread5 t5 = new Thread5(disp);
 		t3.start();
 		t5.start();
+		t5.join(MAX_WAIT_TIME);
+		if(t5.isAlive()) {
+			t5.finished = true;
+			fail("Thread did not finish");
+		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		//test1();
-		//test2();
-		test3();
 	}
 
 }
@@ -176,6 +193,7 @@ class Thread4 extends Thread {
 
 			if (progress == 1.0) {
 				finished = true;
+				System.out.println("Finished");
 				break;
 			}
 
@@ -220,6 +238,7 @@ class Thread5 extends Thread {
 
 			if (disp.abortAllMeasures()) {
 				finished = true;
+				System.out.println("Finished");
 			}
 
 		}

@@ -18,11 +18,9 @@
 
 package jmt.jmva.gui.exact.panels;
 
-import jmt.framework.gui.help.HoverHelp;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.jmva.analytical.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**

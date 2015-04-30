@@ -18,8 +18,8 @@
 
 package jmt.engine;
 
-import jmt.engine.simDispatcher.Dispatcher_jMVAschema;
 import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.jmva.engine.simDispatcher.Dispatcher_jMVAschema;
 
 /**
  * Created by:

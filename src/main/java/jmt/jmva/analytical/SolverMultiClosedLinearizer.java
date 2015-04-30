@@ -204,9 +204,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 				}
 			}
 			
-			int iterations = 0;
 			while(true) {
-				iterations++;
 				
 				for (int k = 0; k < stations; k++) {
 					for (int c = 0; c < classes; c++) {

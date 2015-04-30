@@ -494,7 +494,6 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			JCheckBox checkBox = new JCheckBox (algo.toString());
 			checkBox.setName(algo.toString());
 
-			final int index = i;
 			checkBox.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					AbstractButton abstractButton = (AbstractButton) e.getSource();

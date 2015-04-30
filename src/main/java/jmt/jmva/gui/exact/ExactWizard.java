@@ -62,7 +62,6 @@ import jmt.gui.common.panels.WarningWindow;
 import jmt.gui.common.xml.ModelLoader;
 import jmt.gui.jsimwiz.JSIMMain;
 import jmt.gui.jsimwiz.definitions.JSIMModel;
-import jmt.gui.jsimwiz.panels.RSPLPanel;
 import jmt.jmva.analytical.SolverAlgorithm;
 import jmt.jmva.gui.exact.link.SolverClient;
 import jmt.jmva.gui.exact.panels.AMVAPanel;
@@ -439,8 +438,8 @@ public class ExactWizard extends Wizard {
 		ExactWizard ew = new ExactWizard();
 		updateTile(null);
 		ew.setBounds(bounds);
-		ew.show();
-		this.hide();
+		ew.setVisible(true);
+		this.setVisible(false);
 		this.dispose();
 	}
 
@@ -561,9 +560,9 @@ public class ExactWizard extends Wizard {
 	protected void switchToSimulator() {
 		JSIMModel output = new JSIMModel();
 		// New Converter by Bertoli Marco
-		List res = ModelConverter.convertJMVAtoJSIM(data, output);
+		List<String> res = ModelConverter.convertJMVAtoJSIM(data, output);
 		JSIMMain jsim = new JSIMMain(output);
-		jsim.show();
+		jsim.setVisible(true);
 		// If problems are found, shows warnings
 		if (res.size() > 0) {
 			new WarningWindow(res, jsim, CommonConstants.JMVA, CommonConstants.JSIM).show();
@@ -772,7 +771,7 @@ public class ExactWizard extends Wizard {
 		//BoundingBox of main window
 		Rectangle rect = this.getBounds();
 		solutionWindow.setBounds(rect.x + 20, rect.y + 20, rect.width, rect.height);
-		solutionWindow.show();
+		solutionWindow.setVisible(true);
 	}
 
 	//randomizes model data
