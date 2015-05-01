@@ -22,7 +22,7 @@
  * Created on 21 novembre 2002, 17.47
  */
 
-package jmt.jmva.analytical;
+package jmt.jmva.analytical.solvers;
 
 import java.io.PrintWriter;
 
@@ -32,7 +32,7 @@ import java.io.PrintWriter;
  * NOT USED
  * @author  Federico Granata
  */
-public class SolverSingleClosedExactDyn extends jmt.jmva.analytical.SolverSingleClosedExact {
+public class SolverSingleClosedExactDyn extends jmt.jmva.analytical.solvers.SolverSingleClosedExact {
 
 	private double[] scalPrec;
 	private double[] scalCorr;

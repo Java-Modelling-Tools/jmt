@@ -1,4 +1,4 @@
-package jmt.jmva.analytical;
+package jmt.jmva.analytical.solvers;
 
 import jmt.framework.data.ArrayUtils;
 

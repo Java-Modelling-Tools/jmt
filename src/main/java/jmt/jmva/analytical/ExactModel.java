@@ -16,22 +16,25 @@
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
-package jmt.jmva.gui.exact;
+package jmt.jmva.analytical;
 
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import jmt.common.Class_;
+import jmt.common.Station;
 import jmt.framework.data.ArrayUtils;
-import jmt.jmva.analytical.SolverAlgorithm;
-import jmt.jmva.analytical.SolverMultiClosedAMVA;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -99,6 +102,9 @@ public class ExactModel implements ExactConstants  {
 	private String description;
 
 	/***********************STATIONS AND CLASSES******************************/
+	
+	private List<Class_> classess;
+	private List<Station> stationss;
 
 	//number of service centers
 	private int stations;

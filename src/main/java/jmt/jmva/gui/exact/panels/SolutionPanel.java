@@ -35,8 +35,8 @@ import jmt.framework.gui.help.HoverHelp;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.gui.exact.table.ResultsTable;
-import jmt.jmva.analytical.SolverAlgorithm;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**

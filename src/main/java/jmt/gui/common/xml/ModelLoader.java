@@ -34,7 +34,7 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ModelConverter;
 import jmt.gui.common.definitions.StoredResultsModel;
 import jmt.gui.jaba.JabaModel;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactModel;
 
 import org.w3c.dom.Document;
 

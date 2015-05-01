@@ -40,7 +40,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.link.SolverClient;
 
 /**

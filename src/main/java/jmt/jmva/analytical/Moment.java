@@ -7,7 +7,12 @@ import org.xml.sax.SAXException;
 import jmt.common.exception.SolverException;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.xml.XMLUtils;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.solvers.Solver;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+import jmt.jmva.analytical.solvers.SolverMulti;
+import jmt.jmva.analytical.solvers.SolverMultiClosedLinearizer;
+import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
+import jmt.jmva.analytical.solvers.SolverSingleClosedMVA;
 
 public class Moment {
 	private static final boolean DEBUG = true;

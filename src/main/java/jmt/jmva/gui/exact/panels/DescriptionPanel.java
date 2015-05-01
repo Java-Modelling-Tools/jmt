@@ -30,7 +30,7 @@ import javax.swing.ScrollPaneConstants;
 
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.jmva.gui.exact.ExactConstants;
+import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**

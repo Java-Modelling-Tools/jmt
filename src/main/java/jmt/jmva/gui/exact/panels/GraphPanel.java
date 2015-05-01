@@ -53,9 +53,9 @@ import jmt.framework.gui.table.editors.ColorCellEditor;
 import jmt.framework.gui.table.editors.ComboBoxCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
-import jmt.jmva.analytical.SolverAlgorithm;
-import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
 
 /**
  * <p>Title: Graph Panel</p>

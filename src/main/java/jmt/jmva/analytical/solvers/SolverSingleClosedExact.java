@@ -22,7 +22,7 @@
  * Created on 27 aprile 2002, 10.31
  */
 
-package jmt.jmva.analytical;
+package jmt.jmva.analytical.solvers;
 
 import java.io.PrintWriter;
 

@@ -61,8 +61,8 @@ import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.gui.exact.table.ListOp;
-import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**
@@ -393,7 +393,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 		return true; // so that the user can correct errors
 	}
 
-	//checks wether population is greater than 0
+	//checks whether population is greater than 0
 	private boolean checkPop() {
 		classTable.stopEditing();
 		if (isLd && sumPop() < 1) {
@@ -575,7 +575,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 		ClassTable() {
 			super(new ClassTableModel());
-
+			setName("ClassTable");
 			disabledCellRenderer = new DisabledCellRenderer();
 
 			//BEGIN Federico Dall'Orso 8/3/2005

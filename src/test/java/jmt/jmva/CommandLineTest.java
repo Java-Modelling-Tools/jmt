@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import jmt.jmva.analytical.CommandLineSolver;
-import jmt.jmva.analytical.SolverMulti;
-import jmt.jmva.analytical.SolverMultiClosedMVA;
+import jmt.jmva.analytical.solvers.SolverMulti;
+import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;

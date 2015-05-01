@@ -60,9 +60,9 @@ import jmt.gui.exact.table.ComboBoxCell;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.gui.exact.table.ListOp;
-import jmt.jmva.analytical.SolverAlgorithm;
-import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**
@@ -504,7 +504,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 		StationTable() {
 			super(new StationTableModel());
-
+			setName("StationTable");
 			//BEGIN Federico Dall'Orso 8/3/2005
 			//station type cell renderers
 			//NEW
@@ -519,12 +519,12 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			//END Federico Dall'Orso
 
 			/* a station type cell editor for open/mixed systems */
-			JComboBox stationTypeBox = new JComboBox(STATION_TYPENAMES);
+			JComboBox<String> stationTypeBox = new JComboBox<String>(STATION_TYPENAMES);
 			stationTypeBox.setEditable(false);
 			LD_disabled_StationTypeEditor = new DefaultCellEditor(stationTypeBox);
 
 			/* a station type cell editor for closed systems */
-			JComboBox LD_enabled_StationTypeBox = new JComboBox(STATION_TYPENAMES_LD_ENABLED);
+			JComboBox<String> LD_enabled_StationTypeBox = new JComboBox<String>(STATION_TYPENAMES_LD_ENABLED);
 			LD_enabled_StationTypeBox.setEditable(false);
 			LD_enabled_StationTypeEditor = new DefaultCellEditor(LD_enabled_StationTypeBox);
 

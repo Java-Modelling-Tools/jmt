@@ -25,12 +25,12 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Random;
 
-import jmt.jmva.analytical.Solver;
-import jmt.jmva.analytical.SolverMulti;
-import jmt.jmva.analytical.SolverMultiClosedMVA;
-import jmt.jmva.analytical.SolverMultiMixed;
-import jmt.jmva.analytical.SolverMultiOpen;
-import jmt.jmva.analytical.SolverSingleClosedMVA;
+import jmt.jmva.analytical.solvers.Solver;
+import jmt.jmva.analytical.solvers.SolverMulti;
+import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
+import jmt.jmva.analytical.solvers.SolverMultiMixed;
+import jmt.jmva.analytical.solvers.SolverMultiOpen;
+import jmt.jmva.analytical.solvers.SolverSingleClosedMVA;
 import jmt.util.TempTextFile;
 
 import org.apache.commons.io.FileUtils;

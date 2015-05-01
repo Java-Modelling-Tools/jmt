@@ -41,9 +41,9 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import jmt.framework.gui.help.HoverHelp;
-import jmt.jmva.analytical.SolverAlgorithm;
-import jmt.jmva.analytical.SolverMultiClosedAMVA;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**

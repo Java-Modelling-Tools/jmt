@@ -7,7 +7,7 @@ import java.util.Iterator;
 import javax.swing.JTabbedPane;
 
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.jmva.analytical.SolverAlgorithm;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**

@@ -124,8 +124,8 @@ import jmt.gui.jsimgraph.controller.actions.SolveApprox;
 import jmt.gui.jsimgraph.controller.actions.StopSimulation;
 import jmt.gui.jsimgraph.controller.actions.SwitchToExactSolver;
 import jmt.gui.jsimgraph.controller.actions.TakeScreenShot;
-import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
 import jmt.gui.jsimgraph.mainGui.ComponentBar;
@@ -133,7 +133,7 @@ import jmt.gui.jsimgraph.mainGui.MainWindow;
 import jmt.gui.jsimgraph.panels.JModelProblemsWindow;
 import jmt.gui.jsimgraph.panels.StationNamePanel;
 import jmt.gui.jsimgraph.panels.jmodelClassesPanel;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
 import org.jgraph.JGraph;

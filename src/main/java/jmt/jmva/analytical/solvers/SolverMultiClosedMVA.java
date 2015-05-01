@@ -21,7 +21,7 @@
  * Created on 11 dicembre 2002, 9.37
  */
 
-package jmt.jmva.analytical;
+package jmt.jmva.analytical.solvers;
 
 /**
  * Solves a multiclass closed model, using MVA algorithm.

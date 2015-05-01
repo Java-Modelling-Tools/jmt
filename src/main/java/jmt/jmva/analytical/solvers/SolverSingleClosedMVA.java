@@ -21,7 +21,7 @@
  * Created on 13 novembre 2002, 10.48
  */
 
-package jmt.jmva.analytical;
+package jmt.jmva.analytical.solvers;
 
 import jmt.engine.math.Printer;
 

@@ -1,4 +1,4 @@
-package jmt.jmva.analytical;
+package jmt.jmva.analytical.solvers;
 
 /**
  * This class implements the Bard-Schweitzer algorithm for solving multi-closed models

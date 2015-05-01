@@ -48,8 +48,8 @@ import jmt.gui.exact.ld.LDEditor;
 import jmt.gui.exact.table.ComboBoxCell;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
-import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**
@@ -131,7 +131,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 	private void initComponents() {
 		stTable = new STTable();
 		JPanel totalBox = new JPanel(new BorderLayout(10, 10));
-		JLabel descrLabel = new JLabel(jmt.jmva.gui.exact.ExactConstants.DESCRIPTION_ReferenceStation);
+		JLabel descrLabel = new JLabel(jmt.jmva.analytical.ExactConstants.DESCRIPTION_ReferenceStation);
 		JPanel descrBox = new JPanel(new BorderLayout());
 		descrBox.setPreferredSize(new Dimension(200, 1000));
 		descrBox.add(descrLabel, BorderLayout.NORTH);

@@ -17,8 +17,8 @@
   */
 package jmt.jmva.analytical;
 
-import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+
 
 /**
  * <p><b>Name:</b> ModelApproximator</p> 

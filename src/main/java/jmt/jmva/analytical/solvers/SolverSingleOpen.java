@@ -16,7 +16,7 @@
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
-package jmt.jmva.analytical;
+package jmt.jmva.analytical.solvers;
 
 /**
  * Solves a single class open model. <br>

@@ -18,8 +18,8 @@
 package jmt.jmva.gui.exact.panels;
 
 import jmt.gui.exact.table.ExactTableModel;
-import jmt.jmva.analytical.SolverAlgorithm;
-import jmt.jmva.gui.exact.ExactConstants;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
 public class SysPowerPanel extends SolutionPanel implements ExactConstants{

@@ -59,10 +59,10 @@ import javax.swing.table.TableCellRenderer;
 
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.jmva.analytical.SolverAlgorithm;
-import jmt.jmva.analytical.SolverMultiClosedAMVA;
-import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**

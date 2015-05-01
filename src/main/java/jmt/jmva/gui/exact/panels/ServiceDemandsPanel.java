@@ -44,8 +44,8 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.ld.LDEditor;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
-import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**

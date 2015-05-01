@@ -24,8 +24,23 @@ import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.xml.XMLUtils;
-import jmt.jmva.gui.exact.ExactConstants;
-import jmt.jmva.gui.exact.ExactModel;
+import jmt.jmva.analytical.solvers.Solver;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+import jmt.jmva.analytical.solvers.SolverMulti;
+import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
+import jmt.jmva.analytical.solvers.SolverMultiClosedAQL;
+import jmt.jmva.analytical.solvers.SolverMultiClosedBardSchweitzer;
+import jmt.jmva.analytical.solvers.SolverMultiClosedChow;
+import jmt.jmva.analytical.solvers.SolverMultiClosedCoMoM;
+import jmt.jmva.analytical.solvers.SolverMultiClosedLinearizer;
+import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
+import jmt.jmva.analytical.solvers.SolverMultiClosedMoM;
+import jmt.jmva.analytical.solvers.SolverMultiClosedRECAL;
+import jmt.jmva.analytical.solvers.SolverMultiMixed;
+import jmt.jmva.analytical.solvers.SolverMultiOpen;
+import jmt.jmva.analytical.solvers.SolverSingleClosedAMVA;
+import jmt.jmva.analytical.solvers.SolverSingleClosedMVA;
+import jmt.jmva.analytical.solvers.SolverSingleOpen;
 
 import org.xml.sax.SAXException;
 

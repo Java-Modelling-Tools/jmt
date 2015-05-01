@@ -25,8 +25,8 @@ import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.engine.log.JSimLogger;
 import jmt.framework.xml.XMLUtils;
+import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.SolverDispatcher;
-import jmt.jmva.gui.exact.ExactModel;
 import jmt.jmva.gui.exact.panels.ProgressWindow;
 
 import org.xml.sax.SAXException;

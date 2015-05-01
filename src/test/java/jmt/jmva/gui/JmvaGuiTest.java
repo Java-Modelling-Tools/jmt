@@ -1,5 +1,7 @@
 package jmt.jmva.gui;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -14,6 +16,8 @@ import jmt.util.TextButtonMatcher;
 import jmt.util.TextLabelMatcher;
 import jmt.util.TextMenuItemMatcher;
 
+import org.fest.swing.core.KeyPressInfo;
+import org.fest.swing.data.TableCell;
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
 import org.fest.swing.finder.JFileChooserFinder;
@@ -23,6 +27,7 @@ import org.fest.swing.fixture.DialogFixture;
 import org.fest.swing.fixture.FrameFixture;
 import org.fest.swing.fixture.JFileChooserFixture;
 import org.fest.swing.fixture.JOptionPaneFixture;
+import org.fest.swing.fixture.JTableFixture;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -175,9 +180,42 @@ public class JmvaGuiTest {
 		jmva.button(new TextButtonMatcher("Service Times and Visits")).click();		
 		jmva.label(new TextLabelMatcher("Stations")).click();
 		jmva.button(new TextButtonMatcher("New Station")).click();
+		JTableFixture stationsTable = jmva.table("StationTable");
+		stationsTable.cell(TableCell.row(0).column(2)).click();
+		jmva.label(new TextLabelMatcher("Classes")).click();
+		jmva.button(new TextButtonMatcher("New Class")).click();
+		JTableFixture classesTable = jmva.table("ClassTable");
+		classesTable.enterValue(TableCell.row(1).column(2), "1");
 		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
 		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutions.close();
+		classesTable.cell(TableCell.row(0).column(4)).click();
+	}
+	
+	/**
+	 * Creates 3 additional classes (on top the existing 1) and deletes three
+	 * of them by highlighting them and pressing the 'delete' button.
+	 * Verifies the classes were deleted.
+	 * Then does a similar thing with stations
+	 */
+	@Test
+	public void JMVAdeletingManyStationsAndClasses() {
+		jmva.label(new TextLabelMatcher("Classes")).click();
+		jmva.button(new TextButtonMatcher("New Class")).click();
+		jmva.button(new TextButtonMatcher("New Class")).click();
+		jmva.button(new TextButtonMatcher("New Class")).click();
+		JTableFixture classesTable = jmva.table("ClassTable");
+		classesTable.selectRows(1, 2, 3);
+		classesTable.pressAndReleaseKey(KeyPressInfo.keyCode(127));
+		assertEquals(1, classesTable.component().getRowCount());
+		jmva.label(new TextLabelMatcher("Stations")).click();
+		jmva.button(new TextButtonMatcher("New Station")).click();
+		jmva.button(new TextButtonMatcher("New Station")).click();
+		jmva.button(new TextButtonMatcher("New Station")).click();
+		JTableFixture stationsTable = jmva.table("StationTable");
+		stationsTable.selectRows(0, 1, 2);
+		stationsTable.pressAndReleaseKey(KeyPressInfo.keyCode(127));
+		assertEquals(1, stationsTable.component().getRowCount());
 	}
 	
 	/**
