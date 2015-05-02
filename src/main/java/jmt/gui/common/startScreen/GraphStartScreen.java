@@ -98,12 +98,12 @@ public class GraphStartScreen extends JMTFrame {
 	public static final String IMG_SUITEICON = "JMTIcon";
 	
 	// Short Descriptions
-	public static final String JMVA_SHORT_DESCRIPTION = "MVA solver with wizard interface";
-	public static final String JMCH_SHORT_DESCRIPTION = "Markov Chain simulator with graphical interface";
-	public static final String JWAT_SHORT_DESCRIPTION = "Workload Analyzer Tool";
-	public static final String JSIM_SHORT_DESCRIPTION = "Simulator with wizard interface";
-	public static final String JMODEL_SHORT_DESCRIPTION = "Simulator with graphical interface";
-	public static final String JABA_SHORT_DESCRIPTION = "Asyntotic bound analysis with wizard interface";
+	public static final String JMVA_SHORT_DESCRIPTION = "JMVA: MVA solver with wizard interface";
+	public static final String JMCH_SHORT_DESCRIPTION = "JMCH: Markov Chain simulator with graphical interface";
+	public static final String JWAT_SHORT_DESCRIPTION = "JWAT: Workload Analyzer Tool";
+	public static final String JSIM_SHORT_DESCRIPTION = "JSIMwiz: Simulator with wizard interface";
+	public static final String JMODEL_SHORT_DESCRIPTION = "JSIMgraph: Simulator with graphical interface";
+	public static final String JABA_SHORT_DESCRIPTION = "JABA: Asyntotic bound analysis with wizard interface";
 	//names for URLS of documents to be shown as description of main applications
 	private static final String	URL_DOCUMENTATION_ONLINE = "http://jmt.sf.net/Documentation.html";
 	// Content for logo panel
