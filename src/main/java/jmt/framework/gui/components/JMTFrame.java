@@ -17,6 +17,8 @@
   */
 package jmt.framework.gui.components;
 
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -146,22 +148,19 @@ public class JMTFrame extends JFrame {
 	 * Centers this window on the screen
 	 */
 	public void centerWindow() {
-		Toolkit tk = Toolkit.getDefaultToolkit();
-		//gets dimensions of the screen to center window.
-		int xOffset = ((int) tk.getScreenSize().getWidth() - getWidth()) / 2, yOffset = ((int) tk.getScreenSize().getHeight() - getHeight()) / 2;
-
-		setBounds(xOffset, yOffset, this.getWidth(), this.getHeight());
+		centerWindow(getWidth(), getHeight());
 	}
 
 	/**
 	 * Puts this window in screen lower right corner
 	 */
 	public void moveToLowerRightCorner() {
-		Toolkit tk = Toolkit.getDefaultToolkit();
-		//gets dimensions of the screen to center window.
-		int xOffset = ((int) tk.getScreenSize().getWidth() - getWidth()), yOffset = ((int) tk.getScreenSize().getHeight() - getHeight());
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());
+		int xOffset = screenSize.width - insets.right - getWidth();
+		int yOffset = screenSize.height - insets.bottom - getHeight();
 
-		setBounds(xOffset, yOffset, this.getWidth(), this.getHeight());
+		setBounds(xOffset, yOffset, getWidth(), getHeight());
 	}
 
 	/**
@@ -170,9 +169,26 @@ public class JMTFrame extends JFrame {
 	 * @param height height of the window
 	 */
 	public void centerWindow(int width, int height) {
-		Toolkit tk = Toolkit.getDefaultToolkit();
+		//size of the screen
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+		//reads insets given by task bars
+		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());
+		int availableWidth = screenSize.width - insets.left - insets.right;
+		int availableHeight = screenSize.height - insets.top - insets.bottom;
+		
+		// Avoid to draw screens that are not visible and above taskbar
+		if (width > availableWidth) {
+			width = availableWidth;
+		}
+
+		if (height > availableHeight) {
+			height = availableHeight;
+		}
+
 		//gets dimensions of the screen to center window.
-		int xOffset = ((int) tk.getScreenSize().getWidth() - width) / 2, yOffset = ((int) tk.getScreenSize().getHeight() - height) / 2;
+		int xOffset = insets.left + (availableWidth - width) / 2;
+		int yOffset = insets.top + (availableHeight - height) / 2;
 
 		setBounds(xOffset, yOffset, width, height);
 	}

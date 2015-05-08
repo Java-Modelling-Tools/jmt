@@ -12,8 +12,8 @@ public class DistributionDensity {
 
 	/* Constants for type */
 	public final static int TYPE_NONE = 0;
-	public final static int TYPE_DENSITY_LINE = 1;
-	public final static int TYPE_DENSITY_BAR = 2;
+	public final static int TYPE_HISTOGRAM = 1;
+	public final static int TYPE_DENSITY_LINE = 2;
 	public final static int TYPE_DISTRIBUTION = 3;
 
 	/** Creates a new instance of Distribution_Density class.

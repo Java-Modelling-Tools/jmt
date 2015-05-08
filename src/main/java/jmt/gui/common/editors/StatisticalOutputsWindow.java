@@ -81,7 +81,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	private static final long serialVersionUID = 1L;
 	private static final String DEFAULT_INTERVALS = "10";
 
-	private static final String[] GRAPH_TYPES = {"-- Select a type --", "Density Line" , "Histogram", "Distribution"};
+	private static final String[] GRAPH_TYPES = {"-- Select a type --", "Histogram" , "Density Line", "Distribution"};
 
 	private static final String FILTER_TYPE_SAMPLE = "SAMPLE";
 	private static final String FILTER_TYPE_TIME = "TIME";
@@ -99,7 +99,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	private JTextField fieldMoment1, fieldMoment3, fieldMoment4, fieldMin, fieldMax, discardedSamples, fieldMinTime, fieldMaxTime;
 	private JTextField minValue, maxValue, numberOfIntervals;
 	private JLabel minRange, maxRange;
-	private JComboBox graphType;
+	private JComboBox<String> graphType;
 	private ButtonGroup filterTypeButtons;
 	private DecimalFormat decimalFormat = new DecimalFormat("#0.0000");
 	private MeasureDefinition measureDefinition;
@@ -137,7 +137,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		//adds ComboBox
 		JPanel centrePanel = new JPanel(new BorderLayout());
 		JLabel typeLabel = new JLabel("Select graph type");
-		graphType = new JComboBox(GRAPH_TYPES);
+		graphType = new JComboBox<String>(GRAPH_TYPES);
 		typeLabel.setLabelFor(graphType);
 		graphType.setSelectedIndex(0);
 		graphType.setToolTipText("Choose graph type amongst Density Line, Histogram and Distribution.");
