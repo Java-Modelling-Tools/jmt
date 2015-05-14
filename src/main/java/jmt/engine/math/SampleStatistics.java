@@ -17,9 +17,11 @@
   */
 package jmt.engine.math;
 
+/**
+ * Collect statistics related to given simulation samples
+ */
 public class SampleStatistics {
 	
-	private double sumweight;// sum of weights of all data
 	private double moment1;//1st moment(mean) of all data
 	private double moment2;//2nd moment of all data
 	private double moment3;//3rd moment of all data
@@ -29,26 +31,31 @@ public class SampleStatistics {
 	private double coefvar;//coefficient of variation of all data
 	private double skew;//skewness of all data
 	private double kurtosis;//kurtosis of all data
-	private double n;//number of data
-	private double max;//the greatest sample of all data inserted
-	private double min;//the smallest sample of all data inserted
+	protected double n;//number of data
+	protected double max;//the greatest sample of all data inserted
+	protected double min;//the smallest sample of all data inserted
 	
-	private double s1weight;//sum of (sample)*weight
-	private double s2weight;//sum of (sample^2)*weight
-	private double s3weight;//sum of (sample^3)*weight
-	private double s4weight;//sum of (sample^4)*weight
+	protected double totalWeight;// sum of weights of all data
+	protected double weigthedSum1;//sum of (sample)*weight
+	protected double weigthedSum2;//sum of (sample^2)*weight
+	protected double weigthedSum3;//sum of (sample^3)*weight
+	protected double weigthedSum4;//sum of (sample^4)*weight
 	
-	private double minSimTime;
-	private double maxSimTime;
+	protected double minSimTime;
+	protected double maxSimTime;
+	
 
 	/** Creates a new instance of SampleStatistics */
 	public SampleStatistics() {
 		initialize();
 	}
 	
-	/** initializes a new SampleStatistics 	 */
+	/** 
+	 * initializes a new SampleStatistics 	 
+	 * @param invertedIndex true if performance index is inverted i.e. throughput.
+	 */
 	private void initialize() {
-		sumweight = 0;
+		totalWeight = 0;
 		moment1 = 0;
 		moment2 = 0;
 		moment3 = 0;
@@ -61,10 +68,10 @@ public class SampleStatistics {
 		n = 0;
 		max = 0;
 		min = Double.MAX_VALUE;
-		s1weight = 0;
-		s2weight = 0;
-		s3weight = 0;
-		s4weight = 0;
+		weigthedSum1 = 0;
+		weigthedSum2 = 0;
+		weigthedSum3 = 0;
+		weigthedSum4 = 0;
 		minSimTime = Double.MAX_VALUE;
 		maxSimTime = 0;
 	}
@@ -74,22 +81,21 @@ public class SampleStatistics {
 	 *  @param  weight the weight of the new sample
 	 *  @param  simulationTime the simulation time for the new sample
 	 */
-	
 	public void putNewSample(double sample, double weight, double simulationTime) {
 		if (weight == 0) {
 			return;
 		}
 		
 		// updates the maximum and the minimum value of the sequence
-		max= Math.max(max, sample * weight);
-		min = Math.min(min, sample * weight);
+		max= Math.max(max, sample);
+		min = Math.min(min, sample);
 		// updates the sum of weights of the values of the sequence
-		sumweight = sumweight + weight;
+		totalWeight = totalWeight + weight;
 		// updates the sum of weights multiplied by appropriate power of samples of the sequence
-		s1weight = s1weight + weight*sample;
-		s2weight = s2weight + weight*Math.pow(sample,2);
-		s3weight = s3weight + weight*Math.pow(sample,3);
-		s4weight = s4weight + weight*Math.pow(sample,4);
+		weigthedSum1 = weigthedSum1 + weight*sample;
+		weigthedSum2 = weigthedSum2 + weight*Math.pow(sample,2);
+		weigthedSum3 = weigthedSum3 + weight*Math.pow(sample,3);
+		weigthedSum4 = weigthedSum4 + weight*Math.pow(sample,4);
 		//updates the number of samples
 		n++;
 		//updates the simulation time
@@ -103,12 +109,11 @@ public class SampleStatistics {
 	
 	/** computes all the statistical parameters, using their respective mathematical formulae
 	  */
-	private void calcStatistics()
-	{
-		moment1 = s1weight/sumweight;
-		moment2 = s2weight/sumweight;
-		moment3 = s3weight/sumweight;
-		moment4 = s4weight/sumweight;
+	protected void calcStatistics() {
+		moment1 = weigthedSum1/totalWeight;
+		moment2 = weigthedSum2/totalWeight;
+		moment3 = weigthedSum3/totalWeight;
+		moment4 = weigthedSum4/totalWeight;
 		
 		var = moment2 - Math.pow(moment1, 2);
 		sd = Math.sqrt(var);

@@ -27,7 +27,9 @@ import javax.swing.SwingWorker;
 
 import jmt.engine.dataAnalysis.measureOutputs.VerboseCSVMeasureOutputReader;
 import jmt.engine.math.DistributionDensity;
+import jmt.engine.math.InverseSampleStatistics;
 import jmt.engine.math.SampleStatistics;
+import jmt.engine.simEngine.EngineUtils;
 
 
 /**
@@ -54,12 +56,14 @@ public class StatisticalOutputsLoader {
 	private double initialSimTime = Double.NaN;
 	private double finalSimTime = Double.NaN;
 	private CSVLoader currentLoader;
+	private boolean inverseMeasure;
 	
 	public StatisticalOutputsLoader(MeasureDefinition measureDefinition, int measureIndex) throws FileNotFoundException{
 		this.measureDefinition = measureDefinition;
 		this.filename = measureDefinition.getLogFileName(measureIndex);
 		this.start = measureDefinition.getDiscardedSamples(measureIndex);
 		
+		inverseMeasure = EngineUtils.isInverseMeasure(measureDefinition.getMeasureType(measureIndex));
 		// Starts loading of CSV file in a separate thread.
 		reloadData();
 	}
@@ -89,7 +93,7 @@ public class StatisticalOutputsLoader {
 	private void loadCSV() throws IOException, ParseException {
 		File measureFile = new File(filename);
 		VerboseCSVMeasureOutputReader reader = new VerboseCSVMeasureOutputReader(measureFile, measureDefinition.getLogDecimalSeparator(),measureDefinition.getLogCsvDelimiter());
-		statistics = new SampleStatistics();
+		statistics = inverseMeasure ? new InverseSampleStatistics() : new SampleStatistics();
 		
 		// Skips header.
 		updateProgress(0.0);

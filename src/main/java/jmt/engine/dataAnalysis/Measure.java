@@ -34,7 +34,6 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.log.JSimLogger;
-import jmt.engine.math.SampleStatistics;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -60,36 +59,6 @@ public class Measure {
 
 	/** True, if each measure should be sent on output */
 	private boolean verbose;
-
-	/**true if new data is added*/
-	private boolean changed;
-
-	/**Number of original samples: remember that these samples are divided in batches
-	and each effective sample is the mean updated every pointSize (i.e. the size of the batch)
-	original samples */
-	private int counter = 0;
-
-	/**String into which new data are copied, in order to be inserted in a Document*/
-	private String newValues;
-
-	/**when the number of original samples (i.e. counter) is equal to fireEventSize,
-	counter is reset and "changed" is set to true*/
-	private static int fireEventSize = 1000;
-
-	/**size of the batch used to reduce the memory space
-	for example, mean value is updated every pointSize samples instead of
-	updating it for each new sample*/
-	private static int pointSize = 10;
-
-	private int size_samples = fireEventSize % pointSize;
-
-	//OLD
-	//private double[] samples = new double[fireEventSize / pointSize];
-	/** the array of samples: each element is the mean computed after pointSize original samples */
-	private double[] samples = new double[size_samples];
-
-	/** statistics of all samples */
-	private SampleStatistics statistics = new SampleStatistics();
 	
 	/** max precision percentage reached */
 	private double maxPrecisionPercentage;
@@ -97,18 +66,7 @@ public class Measure {
 	/** A measure output object is used to print a measure values */
 	private MeasureOutput output;
 
-	/**
-	 * DOM (Document Object Model) used to contain everything regards this measure
-	 * (name, mean, precision, ...) */
-	private Document data;
-
-	//NEW
-	//@author Stefano Omini
 	private JSimLogger logger = JSimLogger.getLogger(JSimLogger.STD_LOGGER);
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
 
 	//these informations were already contained in the SimMeasure class, but were no longer
 	//available in the Measure object, for this reason they have been replicated in the Measure
@@ -124,11 +82,6 @@ public class Measure {
 	//the queue network this measure belongs to
 	private QueueNetwork network;
 
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
-
 	//true if no samples have been received
 	//in this case the measure should be forced to end, otherwise
 	//the simulation would not stop
@@ -136,8 +89,6 @@ public class Measure {
 
 	//true if measure has been aborted
 	private boolean aborted = false;
-
-	//end NEW
 
 	/**
 	 * deadState is used to check if a measure is in a dead state (so does not receive
@@ -148,9 +99,6 @@ public class Measure {
 
 	//-------SCALE FACTOR FOR RESIDENCE TIME MEASURES------------//
 
-	//NEW
-	//@author Stefano Omini
-
 	// due to its architecture, jSIM correctly computes the
 	// residence time for a single visit,
 	// not the total residence time for all visits
@@ -160,15 +108,10 @@ public class Measure {
 	// the other types of measures do not need any scaling, so
 	// the scale factor remains equal to 1
 
-	//true if the measure has been scaled, false otherwise
-	private boolean scaled = false;
-
 	//the scale factor
 	double scaleFactor = 1.0;
 
 	protected double lastIntervalAvgValue, simulationTime, lastSampleWeight, lastWeight;
-	
-	//end NEW
 
 	//-------end SCALE FACTOR FOR RESIDENCE TIME MEASURES------------//
 
@@ -460,21 +403,6 @@ public class Measure {
 		lastSampleWeight= lastSampleWeight+(sample*weight);
 		lastWeight= lastWeight+weight;
 		simulationTime=NetSystem.getTime();
-		statistics.putNewSample(sample, weight, simulationTime);
-
-		//the sample is added, but the value of mean is updated only if counter
-		//is a multiple of pointSize (x % y is equal to the rest of the division x/y)
-
-		//OLD
-		//if (counter % pointSize == 0 || counter != 0)
-		//NEW
-		//In the old way, mean was updated for each new sample (because counter was >0 !!)
-		//instead of waiting for every point size samples
-		//@author Stefano Omini
-		if (counter % pointSize == 0 && (counter % pointSize) < size_samples && counter >= 0) {
-			samples[counter / pointSize] = statistics.getMean();
-		}
-		counter++;
 
 		if (analyzer.addSample(sample, weight)) {
 			//data analysis finished
@@ -509,18 +437,11 @@ public class Measure {
 			}
 
 		}
-		//NEW
-		//@author Stefano Omini
+
 		if (measureType == SimConstants.RESIDENCE_TIME) {
 			scaleMeasureWithVisitRatio();
 		}
-
-		//end NEW
-		if (counter == fireEventSize) {
-			counter = 0;
-			changed = true;
-
-		}
+		
 		return false;
 	}
 
@@ -544,14 +465,6 @@ public class Measure {
 	 */
 	public double getSamplesAnalyzedPercentage() {
 		return (double) analyzer.getSamples() / analyzer.getMaxData();
-	}
-	
-	/**
-	 * Return statistics computed ad sample level
-	 * @return  statistics computed at samples level.
-	 */
-	public SampleStatistics getSampleStatistics() {
-		return statistics;
 	}
 
 	/** Returns max precision percentage reached.
@@ -591,54 +504,6 @@ public class Measure {
 		return results;
 	}
 
-	//DEK (Federico Granata)
-	/**
-	 * Checks whether the data is changed
-	 * @return true iff data is changed
-	 */
-	public boolean isChanged() {
-		return changed;
-	}
-
-	/**
-	 * Gets the new analyzed data. Data are divided in batches. Every batch is
-	 * the sample mean of a group of data weighted.
-	 * @return data array
-	 */
-	public final double[] getData() {
-		return samples;
-	}
-
-	/**
-	 * gets the new data that have been generated; returns null if there are not
-	 * new data.
-	 */
-	public Document getNewData() {
-		if (!changed) {
-			Element root = data.getDocumentElement();
-			root.setAttribute("name", name);
-			return data;
-		}
-		changed = false;
-		Element root = data.getDocumentElement();
-		root.setAttribute("name", name);
-		root.setAttribute("meanValue", Double.toString(analyzer.getMean()));
-		root.setAttribute("upperBound", Double.toString(getUpperLimit()));
-		root.setAttribute("lowerBound", Double.toString(getLowerLimit()));
-		root.setAttribute("progress", Double.toString(getSamplesAnalyzedPercentage()));
-
-		root.setAttribute("finished", Boolean.toString(finish));
-		root.setAttribute("discarded", Integer.toString(getDiscardedSamples() / pointSize));
-
-		newValues = "";
-		for (double sample : samples) {
-			newValues += Double.toString(sample) + "/n";
-		}
-		root.setAttribute("data", newValues);
-		root.setAttribute("numData", Integer.toString(samples.length));
-		return data;
-	}
-
 	/**
 	 * Creates a DOM (Document Object Model) <code>Document<code>.
 	 */
@@ -648,7 +513,7 @@ public class Measure {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 
 			//data is a Document
-			data = builder.newDocument();
+			Document data = builder.newDocument();
 
 			Element root = data.createElement("measure");
 
@@ -784,13 +649,7 @@ public class Measure {
 				logger.error(ne);
 			}
 		}
-
-		//correggere mean upper lower ecc....
-
-		//sets scaled = true (to avoid other scaling operations)
-		scaled = true;
 		scaleFactor = visitRatio;
-
 	}
 
 	//******************ABORT**********************//

@@ -424,12 +424,7 @@ public class SimLoader {
 				int measureType = obtainMeasureType(type, referenceNode);
 				String nodeType = e.getAttribute("nodeType"); // Node is a station or a region
 				//throughput measure requires an InverseMeasure object!!
-				if (measureType == SimConstants.THROUGHPUT || measureType == SimConstants.SYSTEM_THROUGHPUT || measureType == SimConstants.DROP_RATE
-						|| measureType == SimConstants.SYSTEM_DROP_RATE
-						//Added System power as an Inverse Measure.
-						|| measureType == SimConstants.SYSTEM_POWER
-						|| measureType == SimConstants.THROUGHPUT_PER_SINK
-				) {
+				if (EngineUtils.isInverseMeasure(measureType)) {
 					//throughput measure
 					InverseMeasure invMeasure = new InverseMeasure(e.getAttribute("name"), Double.parseDouble(e.getAttribute("alpha")), Double
 							.parseDouble(e.getAttribute("precision")), maxSamples, e.getAttribute("verbose").equalsIgnoreCase("true"));

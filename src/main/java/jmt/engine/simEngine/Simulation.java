@@ -37,7 +37,6 @@ import jmt.engine.NodeSections.ServiceSection;
 import jmt.engine.NodeSections.ServiceTunnel;
 import jmt.engine.NodeSections.Terminal;
 import jmt.engine.QueueNet.BlockingRegion;
-import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
@@ -51,8 +50,6 @@ import jmt.engine.dataAnalysis.XMLSimulationOutput;
 import jmt.engine.dataAnalysis.measureOutputs.VerboseCSVMeasureOutput;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.random.engine.RandomEngine;
-
-import org.w3c.dom.Document;
 
 /**
  * This class creates a new Simulation. It provides an easy way to initialize
@@ -96,15 +93,8 @@ public class Simulation {
 	//used to run the simulation only if the queue network has been initialized
 	private boolean initialized = false;
 
-	//NEW
-	//@author Stefano Omini
 	//logger of the simulation
 	private JSimLogger logger = JSimLogger.getLogger(JSimLogger.STD_LOGGER);
-	//private JSimLogger logger = JSimLogger.getRootLogger();
-	//end NEW
-
-	// Global JobInfoList - Bertoli Marco
-	private GlobalJobInfoList globalInfoList;
 
 	//---------------------- end SIMULATION COMPONENTS --------------------------//
 
@@ -271,9 +261,6 @@ public class Simulation {
 		}
 	}
 
-	//NEW
-	//@author Stefano Omini
-
 	/**
 	 * Creates a blocking region.
 	 *
@@ -288,15 +275,9 @@ public class Simulation {
 	 */
 	public void addRegion(String name, double maxCapacity, double[] maxCapacityPerClass, double[] classWeights, boolean[] drop, String[] stations)
 			throws LoadException {
-		if (true) {
-			//TODO: andrebbero aggiunti controlli (nome non univoco, jobs<0, ecc...)
-			regions.add(new BlockingRegion(name, maxCapacity, maxCapacityPerClass, classWeights, drop, this, stations));
-		} else {
-			throw new LoadException("Exception while creating a blocking region.");
-		}
+		//TODO: andrebbero aggiunti controlli (nome non univoco, jobs<0, ecc...)
+		regions.add(new BlockingRegion(name, maxCapacity, maxCapacityPerClass, classWeights, drop, this, stations));
 	}
-
-	//end NEW
 
 	//--------------end METHODS TO ADD SIMULATION COMPONENTS---------------//
 
@@ -676,25 +657,6 @@ public class Simulation {
 		}
 		throw new LoadException("node not found");
 	}
-
-	/**
-	 * Gets all the measures inserted so far.
-	 *
-	 */
-	public Document[] getAllMeasures() {
-		Document[] tempMeasures = new Document[measures.size()];
-		for (int i = 0; i < measures.size(); i++) {
-			SimMeasure simMeasure = measures.get(i);
-			tempMeasures[i] = simMeasure.getMeasure().getNewData();
-		}
-		return tempMeasures;
-	}
-
-	/*
-	public NetLog getLog() {
-	return log;
-	}
-	*/
 
 	/**
 	 * Preload jobs in a queue
