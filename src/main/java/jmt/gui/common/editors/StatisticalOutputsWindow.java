@@ -21,6 +21,7 @@ package jmt.gui.common.editors;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -54,7 +55,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jmt.engine.log.JSimLogger;
-import jmt.engine.math.DistributionDensity;
 import jmt.engine.math.SampleStatistics;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.DistributionDensityGraph;
@@ -86,10 +86,17 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	private static final String FILTER_TYPE_SAMPLE = "SAMPLE";
 	private static final String FILTER_TYPE_TIME = "TIME";
 	
-	private JButton closeButton, reDrawButton ;
+	/* Constants for type */
+	public final static int TYPE_NONE = 0;
+	public final static int TYPE_HISTOGRAM = 1;
+	public final static int TYPE_DENSITY_LINE = 2;
+	public final static int TYPE_DISTRIBUTION = 3;
+	
+	private JButton closeButton, reDrawButton, saveButton ;
 	private JProgressBar progressBar ;
 	private StatisticalOutputsLoader sop;
 	public DistributionDensityGraph graph = null;
+	private SampleStatistics statGraph;
 	private JPanel graphHolder = new JPanel(new BorderLayout());
 	private JLabel icon = new JLabel() ;
 	private JPanel rightPanel;
@@ -132,7 +139,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		JPanel graphOptionsPanel = new JPanel(new BorderLayout());
 
 		graphOptionsPanel.setBorder(new TitledBorder(new EtchedBorder(), "Graph Drawing Options"));
-		graphOptionsPanel.setEnabled(false);
 
 		//adds ComboBox
 		JPanel centrePanel = new JPanel(new BorderLayout());
@@ -214,6 +220,17 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			}
 
 		});
+		
+		saveButton = new JButton("Save as CSV");
+		saveButton.setEnabled(false);
+		saveButton.setToolTipText("Save the data shown in the chart in a CSV file");
+		saveButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO save operation...
+				
+			}
+		});
 
 		closeButton = new JButton("EXIT");
 		closeButton.setToolTipText("Closes this window.");
@@ -224,10 +241,11 @@ public class StatisticalOutputsWindow extends JMTFrame {
 				StatisticalOutputsWindow.this.dispatchEvent(new WindowEvent(StatisticalOutputsWindow.this, WindowEvent.WINDOW_CLOSING));
 			}
 		});
-		JPanel ButtonsPanel = new JPanel();
-		ButtonsPanel.add(closeButton , BorderLayout.WEST);
-		ButtonsPanel.add(reDrawButton, BorderLayout.EAST);
-		graphOptionsPanel.add(ButtonsPanel, BorderLayout.SOUTH);
+		JPanel buttonsPanel = new JPanel(new FlowLayout());
+		buttonsPanel.add(closeButton);
+		buttonsPanel.add(reDrawButton);
+		buttonsPanel.add(saveButton);
+		graphOptionsPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
 
 		//makes ValuesPanel
@@ -540,6 +558,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			icon.setIcon(JMTImageLoader.loadImage(jmt.gui.common.definitions.ResultsConstants.SUCCESS_IMAGE));
 			updateStatistics(true) ;
 			setFieldsEnabled(true);
+			statGraph = sop.getStatistics();
 			updateGraph();
 		}
 
@@ -547,12 +566,10 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 	private void updateGraph(){
 		//updates the Graph
-		DistributionDensity dist = sop.getDist();
 		graphHolder.removeAll();
 		int type = graphType.getSelectedIndex();
-		if (type != DistributionDensity.TYPE_NONE && dist != null) {
-			dist.setType(type);
-			graph = new DistributionDensityGraph(dist);
+		if (type != TYPE_NONE && statGraph != null && statGraph.isDistributionAvailable()) {
+			graph = new DistributionDensityGraph(type, statGraph);
 			graph.setToolTipText("Displays desired graph. Right click to 'Save As' and double click to enlarge.");
 			graph.setMinimumSize(new Dimension(200, 150));
 			graph.setPreferredSize(new Dimension(300, 250));
@@ -565,7 +582,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		}
 		graphHolder.repaint();
 
-		if (type != DistributionDensity.TYPE_NONE && dist == null) {
+		if (type != TYPE_NONE && !statGraph.isDistributionAvailable()) {
 			// Force a refresh if a chart was selected but no distribution was set.
 			refreshData();
 		}
@@ -631,7 +648,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getClickCount() == 2) {
 					JFrame popupFrame = new JFrame();
-					final DistributionDensityGraph popupGraph = new DistributionDensityGraph(sop.getDist());
+					final DistributionDensityGraph popupGraph = new DistributionDensityGraph(graphType.getSelectedIndex(), statGraph);
 					popupGraph.setToolTipText("Right click to 'Save As'.");
 					popupFrame.getContentPane().add(popupGraph);
 					popupFrame.setTitle(windowName);
@@ -710,7 +727,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			sop.setEnd(end);
 			sop.setInitialSimTime(simStart);
 			sop.setFinalSimTime(simEnd);
-			sop.setDistribution(min, max, intervals, graphType.getSelectedIndex());
+			sop.setDistribution(min, max, intervals);
 
 			setFieldsEnabled(false);
 			sop.reloadData();
@@ -725,6 +742,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	 */
 	private void setFieldsEnabled(boolean enabled) {
 		reDrawButton.setEnabled(enabled);
+		saveButton.setEnabled(enabled);
 		graphType.setEnabled(enabled);
 		minValue.setEnabled(enabled);
 		maxValue.setEnabled(enabled);
@@ -734,8 +752,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		Enumeration<AbstractButton> filterButtonsE = filterTypeButtons.getElements();
 		while (filterButtonsE.hasMoreElements()) {
 			filterButtonsE.nextElement().setEnabled(enabled);
-		}
-		
+		}		
 	}
 
 	private Double parseNumber(JTextField field) throws NumberFormatException {

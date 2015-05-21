@@ -29,9 +29,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import org.freehep.util.export.ExportDialog;
+import jmt.engine.math.SampleStatistics;
+import jmt.engine.math.SampleStatistics.DistributionType;
+import jmt.gui.common.editors.StatisticalOutputsWindow;
 
-import jmt.engine.math.DistributionDensity;
+import org.freehep.util.export.ExportDialog;
 
 // Hacked cut+paste from FastGraph class...very bad...
 
@@ -67,13 +69,18 @@ public class DistributionDensityGraph extends JPanel {
 
 
 
-	public DistributionDensityGraph(DistributionDensity d)
-	{
-		values = d.getDistArray();
-		maxx = d.getMax();
-		minx = d.getMin();
-		intwidth = d.getIntWidth();
-		type = d.getType();
+	public DistributionDensityGraph(int type, SampleStatistics stat) {
+		DistributionType distrType;
+		if (type == StatisticalOutputsWindow.TYPE_DISTRIBUTION) {
+			distrType = DistributionType.CUMULATIVE;
+		} else {
+			distrType = DistributionType.FREQUENCY;
+		}
+		values = stat.getDistribution(distrType);
+		maxx = stat.getIntervalMax();
+		minx = stat.getIntervalMin();
+		intwidth = stat.getIntervalWidth();
+		this.type = type;
 	}
 
 	public void paint(Graphics g) {
@@ -160,7 +167,7 @@ public class DistributionDensityGraph extends JPanel {
 		// Draw chart series
 
 		switch(type) {
-		case DistributionDensity.TYPE_DENSITY_LINE:
+		case StatisticalOutputsWindow.TYPE_DENSITY_LINE:
 			for (int i = 0; i < values.length -1 ; i++) {
 				double yValue = values[i];
 				double nextYValue = values[i+1];
@@ -172,7 +179,7 @@ public class DistributionDensityGraph extends JPanel {
 			}
 			break;
 
-		case DistributionDensity.TYPE_HISTOGRAM:
+		case StatisticalOutputsWindow.TYPE_HISTOGRAM:
 			for (int i = 0; i < values.length ; i++) {
 				double yValue = values[i];
 				double xValue = getXValue(i);
@@ -183,7 +190,7 @@ public class DistributionDensityGraph extends JPanel {
 				g.drawLine(getX(xValue+ intwidth),getY(yValue),getX(xValue+ intwidth),y0);
 			}
 			break;
-		case DistributionDensity.TYPE_DISTRIBUTION:
+		case StatisticalOutputsWindow.TYPE_DISTRIBUTION:
 			for (int i = 0; i < values.length -1 ; i++) {
 				double yValue = values[i];
 				double nextYValue = values[i+1];
@@ -224,11 +231,11 @@ public class DistributionDensityGraph extends JPanel {
 	 */
 	private double getXValue(int index) {
 		switch(type) {
-		case DistributionDensity.TYPE_DENSITY_LINE:
+		case StatisticalOutputsWindow.TYPE_DENSITY_LINE:
 			return minx + intwidth*(index+0.5);
-		case DistributionDensity.TYPE_HISTOGRAM:
+		case StatisticalOutputsWindow.TYPE_HISTOGRAM:
 			return minx + intwidth*(index);
-		case DistributionDensity.TYPE_DISTRIBUTION:
+		case StatisticalOutputsWindow.TYPE_DISTRIBUTION:
 			return minx + intwidth*(index+0.5);
 		default :
 			return minx + intwidth*(index+0.5);

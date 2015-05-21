@@ -26,7 +26,6 @@ import java.text.ParseException;
 import javax.swing.SwingWorker;
 
 import jmt.engine.dataAnalysis.measureOutputs.VerboseCSVMeasureOutputReader;
-import jmt.engine.math.DistributionDensity;
 import jmt.engine.math.InverseSampleStatistics;
 import jmt.engine.math.SampleStatistics;
 import jmt.engine.simEngine.EngineUtils;
@@ -44,7 +43,6 @@ public class StatisticalOutputsLoader {
 	// Percentage upgrade time. Since it is a costly operation it is performed based on time.
 	private static final int UPDATE_PCT_MILLIS = 500;
 	private SampleStatistics statistics;
-	private DistributionDensity dist;
 	private MeasureDefinition measureDefinition;
 	private String filename;
 	private double progress = 0.0 ;
@@ -55,6 +53,10 @@ public class StatisticalOutputsLoader {
 	private double maxSimTime = Double.NaN;
 	private double initialSimTime = Double.NaN;
 	private double finalSimTime = Double.NaN;
+	private double distMin = Double.NaN;
+	private double distMax = Double.NaN;
+	private int distIntervals = -1;
+	
 	private CSVLoader currentLoader;
 	private boolean inverseMeasure;
 	
@@ -72,16 +74,10 @@ public class StatisticalOutputsLoader {
 		return statistics ;
 	}
 	
-	public DistributionDensity getDist(){
-		return dist;
-	}
-	
-	public void setDistribution(double min, double max, int intervals, int type) {
-		if (type == DistributionDensity.TYPE_NONE) {
-			dist = null;
-		} else {
-			dist = new DistributionDensity(min, max, intervals, type);
-		}
+	public void setDistribution(double min, double max, int intervals) {
+		this.distMin = min;
+		this.distMax = max;
+		this.distIntervals = intervals;
 	}
 	
 	public double getPercentage(double linesRead, double totalLines){
@@ -94,6 +90,11 @@ public class StatisticalOutputsLoader {
 		File measureFile = new File(filename);
 		VerboseCSVMeasureOutputReader reader = new VerboseCSVMeasureOutputReader(measureFile, measureDefinition.getLogDecimalSeparator(),measureDefinition.getLogCsvDelimiter());
 		statistics = inverseMeasure ? new InverseSampleStatistics() : new SampleStatistics();
+		
+		// Fill distribution if requested.
+		if (distIntervals > 0) {
+			statistics.initializeDistrubution(distMin, distMax, distIntervals);
+		}
 		
 		// Skips header.
 		updateProgress(0.0);
@@ -113,10 +114,7 @@ public class StatisticalOutputsLoader {
 				
 				// Process sample
 				statistics.putNewSample(reader.getParsedSample(), reader.getParsedWeight(), reader.getParsedSimulationTime());
-				// Fills distribution if present
-				if (dist != null) {
-					dist.addSample(reader.getParsedSample(), reader.getParsedWeight());
-				}
+
 				if (System.currentTimeMillis() - lastUpdateTime > UPDATE_PCT_MILLIS) {
 					updateProgress(reader.getParsedPercentage());
 					lastUpdateTime = System.currentTimeMillis();

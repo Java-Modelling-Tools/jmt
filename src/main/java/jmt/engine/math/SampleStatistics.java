@@ -20,7 +20,10 @@ package jmt.engine.math;
 /**
  * Collect statistics related to given simulation samples
  */
-public class SampleStatistics {
+public class SampleStatistics {	
+	public static enum DistributionType {
+		FREQUENCY, CUMULATIVE;
+	}
 	
 	private double moment1;//1st moment(mean) of all data
 	private double moment2;//2nd moment of all data
@@ -43,6 +46,14 @@ public class SampleStatistics {
 	
 	protected double minSimTime;
 	protected double maxSimTime;
+	
+	// Following variables are used to get intervals for density charts
+	protected boolean canInitializeIntervals;
+	protected double intervalWidth;
+	protected double intervalMin;
+	protected double intervalMax;
+	protected double totalIntervalWeights;
+	protected double[] intervalWeights;
 	
 
 	/** Creates a new instance of SampleStatistics */
@@ -74,6 +85,7 @@ public class SampleStatistics {
 		weigthedSum4 = 0;
 		minSimTime = Double.MAX_VALUE;
 		maxSimTime = 0;
+		canInitializeIntervals = true;
 	}
 	
 	/** updates the max, min, sum of weights with the new value.
@@ -85,6 +97,8 @@ public class SampleStatistics {
 		if (weight == 0) {
 			return;
 		}
+		// Avoid initialization of intervals after samples were already loaded
+		canInitializeIntervals = false;
 		
 		// updates the maximum and the minimum value of the sequence
 		max= Math.max(max, sample);
@@ -102,9 +116,59 @@ public class SampleStatistics {
 		minSimTime = Math.min(minSimTime,simulationTime);
 		maxSimTime = Math.max(maxSimTime, simulationTime);
 		
+		// Updates intervals if enabled
+		if (intervalWeights != null && sample >= intervalMin && sample <= intervalMax) {
+			int index = (int) Math.floor((sample - intervalMin)/intervalWidth);
+			
+			// The following avoids that due to numerical rounding, some samples exceed last bucket.
+			if (index >= intervalWeights.length) {
+				index = intervalWeights.length - 1;
+			}
+			intervalWeights[index] += weight;
+			totalIntervalWeights += weight;
+		}
+		
 		//calculates the statistical parameters until that point
 		calcStatistics();
-		
+	}
+	
+	/**
+	 * Tells that this sample statistic should also populate distributions. This method must
+	 * be called before samples are collected
+	 * @param intervalMin the minimum value of samples to collect in intervals
+	 * @param intervalMax the maximum value of samples to collect in intervals
+	 * @param intervals the number of intervals to build
+	 * @throws IllegalStateException if this method is called after addSample
+	 */
+	public void initializeDistrubution(double intervalMin, double intervalMax, int intervals) {
+		if (!canInitializeIntervals) {
+			throw new IllegalStateException("Cannot initialize distribution after samples were already added.");
+		}
+		this.intervalMin = intervalMin;
+		this.intervalMax = intervalMax;
+		totalIntervalWeights = 0;
+		//calculate the width of each interval
+		intervalWidth = (intervalMax-intervalMin)/intervals;
+		intervalWeights = new double[intervals];
+	}
+	
+	/**
+	 * Returns the distribution computed based on samples
+	 * @param type the type of distribution
+	 * @return the distribution if initialized, null otherwise.
+	 */
+	public double[] getDistribution(DistributionType type) {
+		if (intervalWeights == null) {
+			return null;
+		}
+		double[] ret = new double[intervalWeights.length];
+		for (int i=0; i<ret.length; i++) {
+			ret[i] = intervalWeights[i] / totalIntervalWeights;
+			if (type == DistributionType.CUMULATIVE && i > 0) {
+				ret[i] += ret[i-1];
+			}
+		}
+		return ret;
 	}
 	
 	/** computes all the statistical parameters, using their respective mathematical formulae
@@ -251,5 +315,34 @@ public class SampleStatistics {
 		buf.append("\nKurtosis of samples   : " + getKurtosis());
 		return buf.toString();
 	}
+
+	/**
+	 * @return the width of each interval used by the distribution
+	 */
+	public double getIntervalWidth() {
+		return intervalWidth;
+	}
+
+	/**
+	 * @return the minimum value of the intervals considered for distribution (inclusive)
+	 */
+	public double getIntervalMin() {
+		return intervalMin;
+	}
+
+	/**
+	 * @return the maximum value of the intervals considered for distribution (inclusive)
+	 */
+	public double getIntervalMax() {
+		return intervalMax;
+	}
+	
+	/**
+	 * @return true if distribution is available, false otherwise.
+	 */
+	public boolean isDistributionAvailable() {
+		return intervalWeights != null;
+	}
+	
 	
 }

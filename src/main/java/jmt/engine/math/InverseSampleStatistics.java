@@ -22,8 +22,9 @@ package jmt.engine.math;
  * @author Marco Bertoli
  */
 public class InverseSampleStatistics extends SampleStatistics {
-	private double prevWeight, prevSampleXWeight;
+	private double prevWeight, prevSampleXWeight, prevTotalIntervalWeights;
 	private double prevMax, prevMin, prevWeigthedSum2, prevWeigthedSum3, prevWeigthedSum4;
+	private double[] prevIntervalWeights;
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.math.SampleStatistics#putNewSample(double, double, double)
@@ -59,21 +60,52 @@ public class InverseSampleStatistics extends SampleStatistics {
 			weigthedSum2 = prevWeigthedSum2;
 			weigthedSum3 = prevWeigthedSum3;
 			weigthedSum4 = prevWeigthedSum4;
+			if (prevIntervalWeights != null) {
+				System.arraycopy(prevIntervalWeights, 0, intervalWeights, 0, prevIntervalWeights.length);
+				totalIntervalWeights = prevTotalIntervalWeights;
+			}
 		} 
+		double sample = sample_x_weight / weight;
 		
 		// Formulas are a bit "strange" because we are inverting measure sample by sample.
-		max= Math.max(max, sample_x_weight / weight);
-		min = Math.min(min, sample_x_weight / weight);
+		max= Math.max(max, sample);
+		min = Math.min(min, sample);
 		
 		// updates the sum of weights multiplied by appropriate power of samples of the sequence
 		weigthedSum2+= Math.pow(sample_x_weight,2) / weight;
 		weigthedSum3+= Math.pow(sample_x_weight,3) / Math.pow(weight,2);
 		weigthedSum4+= Math.pow(sample_x_weight,4) / Math.pow(weight,3);
+		
+		// Updates intervals if enabled
+		if (intervalWeights != null && sample >= intervalMin && sample <= intervalMax) {
+			int index = (int) Math.floor((sample - intervalMin)/intervalWidth);
+
+			// The following avoids that due to numerical rounding, some samples exceed last bucket.
+			if (index >= intervalWeights.length) {
+				index = intervalWeights.length - 1;
+			}
+			intervalWeights[index] += weight;
+			totalIntervalWeights += weight;
+		}
 				
 		//calculates the statistical parameters until that point
 		calcStatistics();
 	}
 	
+	
+	
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.SampleStatistics#initializeDistrubution(double, double, int)
+	 */
+	@Override
+	public void initializeDistrubution(double intervalMin, double intervalMax,
+			int intervals) {
+		super.initializeDistrubution(intervalMin, intervalMax, intervals);
+		prevIntervalWeights = new double[intervalWeights.length];
+	}
+
+
+
 	/**
 	 * Backup previous samples and non-linear indices
 	 * @param sample the sample to accumulate
@@ -87,5 +119,9 @@ public class InverseSampleStatistics extends SampleStatistics {
 		prevWeigthedSum2 = weigthedSum2;
 		prevWeigthedSum3 = weigthedSum3;
 		prevWeigthedSum4 = weigthedSum4;
+		if (intervalWeights != null) {
+			System.arraycopy(intervalWeights, 0, prevIntervalWeights, 0, intervalWeights.length);
+			prevTotalIntervalWeights = totalIntervalWeights;
+		}
 	}	
 }
