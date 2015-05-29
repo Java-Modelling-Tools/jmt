@@ -1,6 +1,7 @@
 package jmt.jmva.gui;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,6 +66,10 @@ public class JmvaGuiTest {
 		jmva.show();
 	}
 	
+	/**
+	 *  Checks that the help window for JMVA displays when the 
+	 *  appropriate button is pressed.
+	 */
 	@Test
 	public void JMVAhelpWindowDisplaysCorrectly() {
 		jmva.menuItem(new TextMenuItemMatcher("JMVA help")).click();
@@ -72,6 +77,10 @@ public class JmvaGuiTest {
 		helpWindow.close();
 	}
 	
+	/**
+	 *  Checks that the about window for JMVA displays when the
+	 *  appropriate button is pressed.
+	 */
 	@Test
 	public void JMVAaboutWindowDisplaysCorrectly() {
 		jmva.menuItem(new TextMenuItemMatcher("About JMVA...")).click();
@@ -79,6 +88,9 @@ public class JmvaGuiTest {
 		about.close();
 	}
 	
+	/**
+	 * Checks that pressing the "New" button opens a new JMVA window
+	 */
 	@Test
 	public void JMVAopenNewModel() {
 		jmva.menuItem(new TextMenuItemMatcher("New...")).click();
@@ -86,6 +98,35 @@ public class JmvaGuiTest {
 		newJmva.close();
 	}
 	
+	/**
+	 * Loads a previously saved file with a model but no solutions,
+	 * and solves it. Checks that the solution window displays.
+	 * Also checks that the input arrival rate and service time is as
+	 * specified in the file.
+	 * 
+	 * @throws URISyntaxException
+	 */
+	@Test
+	public void JMVAsolveSimpleExample() throws URISyntaxException {
+		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
+		JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(jmva.robot);
+		fileChooser.selectFile(new File(this.getClass().getResource("1cl_1stat_mm1_without_solutions.jmva").toURI()));
+		fileChooser.approve();
+		
+		JTableFixture classesTable = jmva.table("ClassTable");
+		assertTrue("Wrong arrival rate, actual: " + classesTable.cell(TableCell.row(0).column(3)).value(),
+				classesTable.cell(TableCell.row(0).column(3)).value().startsWith("9.000"));
+		
+		jmva.label(new TextLabelMatcher("Service Times")).click();
+		JTableFixture serviceTimesTable = jmva.table("ServiceTimesTable");
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(0)).value().startsWith("0.100"));
+		
+		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
+		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
+		solutions.close();
+	}
+
 	/**
 	 * Checks that opening a pre-existing file which already contains solutions
 	 * shows a window with these solutions, and that it is possible to close
@@ -114,37 +155,143 @@ public class JmvaGuiTest {
 	 * @throws URISyntaxException
 	 */
 	@Test
-	public void JMVAopenWhatIfExampleAndResolve() throws URISyntaxException {
+	public void JMVAopen1class2stationMM1KExampleAndResolve() throws URISyntaxException {
+		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
+		JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(jmva.robot);
+		fileChooser.selectFile(new File(this.getClass().getResource("1cl_2stat_mm1k.jmva").toURI()));
+		fileChooser.approve();
+		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
+		solutions.close();
+		
+		JTableFixture classesTable = jmva.table("ClassTable");
+		assertTrue("Wrong number of customers, actual: " + classesTable.cell(TableCell.row(0).column(2)).value(),
+				classesTable.cell(TableCell.row(0).column(2)).value().equals("11"));
+		
+		jmva.label(new TextLabelMatcher("Stations")).click();
+		JTableFixture stationTable = jmva.table("StationTable");
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(0).column(1)).value(),
+				stationTable.cell(TableCell.row(0).column(1)).value().equals("Load Independent"));
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(1).column(1)).value(),
+				stationTable.cell(TableCell.row(1).column(1)).value().equals("Load Independent"));
+		
+		jmva.label(new TextLabelMatcher("Service Times")).click();
+		JTableFixture serviceTimesTable = jmva.table("ServiceTimesTable");
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(0)).value().startsWith("0.1000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(1).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(1).column(0)).value().startsWith("0.1111"));
+		
+		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
+		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
+		solutionsAgain.close();		
+	}
+	
+	/**
+	 * Checks that opening a pre-existing file which already contains solutions
+	 * shows a window with these solutions, and that it is possible to close
+	 * this window, press "Solve" and have the window show up again.
+	 * 
+	 * @throws URISyntaxException
+	 */
+	@Test
+	public void JMVAopenWhatIfServtimeExampleAndResolve() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
 		JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(jmva.robot);
 		fileChooser.selectFile(new File(this.getClass().getResource("2cl_3stat_whatif_servtime.jmva").toURI()));
 		fileChooser.approve();
 		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutions.close();
+		
+		JTableFixture classesTable = jmva.table("ClassTable");
+		assertTrue("Wrong number of customers, actual: " + classesTable.cell(TableCell.row(0).column(2)).value(),
+				classesTable.cell(TableCell.row(0).column(2)).value().equals("20"));
+		assertTrue("Wrong number of customers, actual: " + classesTable.cell(TableCell.row(1).column(2)).value(),
+				classesTable.cell(TableCell.row(1).column(2)).value().equals("16"));
+		
+		jmva.label(new TextLabelMatcher("Stations")).click();
+		JTableFixture stationTable = jmva.table("StationTable");
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(0).column(1)).value(),
+				stationTable.cell(TableCell.row(0).column(1)).value().equals("Delay (Infinite Server)"));
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(1).column(1)).value(),
+				stationTable.cell(TableCell.row(1).column(1)).value().equals("Load Independent"));
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(2).column(1)).value(),
+				stationTable.cell(TableCell.row(2).column(1)).value().equals("Load Independent"));
+		
+		jmva.label(new TextLabelMatcher("Service Times")).click();
+		JTableFixture serviceTimesTable = jmva.table("ServiceTimesTable");
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(0)).value().startsWith("4.2500"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(1)).value().startsWith("2.7000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(1).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(1).column(0)).value().startsWith("1.4337"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(1).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(1).column(1)).value().startsWith("0.0286"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(2).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(2).column(0)).value().startsWith("0.8882"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(2).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(2).column(1)).value().startsWith("5.2500"));
+		
 		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
 		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutionsAgain.close();		
 	}
+	
 	/**
-	 * Loads a previously saved file with a model but no solutions,
-	 * and solves it.
+	 * Checks that opening a pre-existing file which already contains solutions
+	 * shows a window with these solutions, and that it is possible to close
+	 * this window, press "Solve" and have the window show up again.
 	 * 
 	 * @throws URISyntaxException
 	 */
 	@Test
-	public void JMVAsolveSimpleExample() throws URISyntaxException {
+	public void JMVAopenWhatIfPopmixExampleAndResolve() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
 		JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(jmva.robot);
-		fileChooser.selectFile(new File(this.getClass().getResource("1cl_1stat_mm1_without_solutions.jmva").toURI()));
+		fileChooser.selectFile(new File(this.getClass().getResource("2cl_3stat_whatif_popmix.jmva").toURI()));
 		fileChooser.approve();
-		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
 		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutions.close();
+		
+		JTableFixture classesTable = jmva.table("ClassTable");
+		assertTrue("Wrong number of customers, actual: " + classesTable.cell(TableCell.row(0).column(2)).value(),
+				classesTable.cell(TableCell.row(0).column(2)).value().equals("10"));
+		assertTrue("Wrong number of customers, actual: " + classesTable.cell(TableCell.row(1).column(2)).value(),
+				classesTable.cell(TableCell.row(1).column(2)).value().equals("10"));
+		
+		jmva.label(new TextLabelMatcher("Stations")).click();
+		JTableFixture stationTable = jmva.table("StationTable");
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(0).column(1)).value(),
+				stationTable.cell(TableCell.row(0).column(1)).value().equals("Load Independent"));
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(1).column(1)).value(),
+				stationTable.cell(TableCell.row(1).column(1)).value().equals("Load Independent"));
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(2).column(1)).value(),
+				stationTable.cell(TableCell.row(2).column(1)).value().equals("Load Independent"));
+		
+		jmva.label(new TextLabelMatcher("Service Times")).click();
+		JTableFixture serviceTimesTable = jmva.table("ServiceTimesTable");
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(0)).value().startsWith("1.0000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(1)).value().startsWith("4.0000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(1).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(1).column(0)).value().startsWith("6.0000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(1).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(1).column(1)).value().startsWith("1.0000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(2).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(2).column(0)).value().startsWith("1.0000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(2).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(2).column(1)).value().startsWith("5.0000"));
+		
+		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
+		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
+		solutionsAgain.close();		
 	}
 	
 	/**
 	 * Loads a previously saved file with a model but no solutions,
-	 * randomises the values, and solves it. 
+	 * randomises the values, changes the description slightly and solves it. 
+	 * Checks that solution window displays.
 	 * 
 	 * @throws URISyntaxException
 	 */
@@ -154,15 +301,115 @@ public class JmvaGuiTest {
 		JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(jmva.robot);
 		fileChooser.selectFile(new File(this.getClass().getResource("1cl_1stat_mm1_without_solutions.jmva").toURI()));
 		fileChooser.approve();
-		jmva.menuItem(new TextMenuItemMatcher("Randomize")).click();		
+		jmva.menuItem(new TextMenuItemMatcher("Randomize")).click();
+		jmva.label(new TextLabelMatcher("Comment")).click();
+		jmva.textBox().enterText(" Additonal description");
 		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
 		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutions.close();
 	}
 	
 	/**
-	 * Opens a previously saved file and changes some parameters
-	 * before solving it.
+	 * Checks that opening a pre-existing file which already contains solutions
+	 * shows a window with these solutions, and that it is possible to close
+	 * this window, press "Solve" and have the window show up again.
+	 * 
+	 * @throws URISyntaxException
+	 */
+	@Test
+	public void JMVAopenMixedExampleAndResolve() throws URISyntaxException {
+		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
+		JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(jmva.robot);
+		fileChooser.selectFile(new File(this.getClass().getResource("3c_3stat_mixed.jmva").toURI()));
+		fileChooser.approve();
+		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
+		solutions.close();
+		
+		JTableFixture classesTable = jmva.table("ClassTable");
+		assertTrue("Wrong number of customers, actual: " + classesTable.cell(TableCell.row(0).column(2)).value(),
+				classesTable.cell(TableCell.row(0).column(2)).value().equals("5"));
+		assertTrue("Wrong arrival rate, actual: " + classesTable.cell(TableCell.row(1).column(3)).value(),
+				classesTable.cell(TableCell.row(1).column(3)).value().startsWith("0.0500"));
+		assertTrue("Wrong arrival rate, actual: " + classesTable.cell(TableCell.row(2).column(3)).value(),
+				classesTable.cell(TableCell.row(2).column(3)).value().startsWith("0.0200"));
+		
+		jmva.label(new TextLabelMatcher("Stations")).click();
+		JTableFixture stationTable = jmva.table("StationTable");
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(0).column(1)).value(),
+				stationTable.cell(TableCell.row(0).column(1)).value().equals("Delay (Infinite Server)"));
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(1).column(1)).value(),
+				stationTable.cell(TableCell.row(1).column(1)).value().equals("Load Independent"));
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(2).column(1)).value(),
+				stationTable.cell(TableCell.row(2).column(1)).value().equals("Load Independent"));
+		
+		jmva.label(new TextLabelMatcher("Service Times")).click();
+		JTableFixture serviceTimesTable = jmva.table("ServiceTimesTable");
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(0)).value().startsWith("5.000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(1)).value().startsWith("0.000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(2)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(2)).value().startsWith("0.000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(1).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(1).column(0)).value().startsWith("1.000"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(1).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(1).column(1)).value().startsWith("1.100"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(1).column(2)).value(),
+				serviceTimesTable.cell(TableCell.row(1).column(2)).value().startsWith("1.100"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(2).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(2).column(0)).value().startsWith("1.600"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(2).column(1)).value(),
+				serviceTimesTable.cell(TableCell.row(2).column(1)).value().startsWith("2.100"));
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(2).column(2)).value(),
+				serviceTimesTable.cell(TableCell.row(2).column(2)).value().startsWith("0.500"));
+		
+		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
+		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
+		solutionsAgain.close();		
+	}
+	
+	/**
+	 * Checks that opening a pre-existing file which already contains solutions
+	 * shows a window with these solutions, and that it is possible to close
+	 * this window, press "Solve" and have the window show up again.
+	 * 
+	 * @throws URISyntaxException
+	 */
+	@Test
+	public void JMVAopenLoaddepExampleAndResolve() throws URISyntaxException {
+		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
+		JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(jmva.robot);
+		fileChooser.selectFile(new File(this.getClass().getResource("1cl_2stat_loaddep.jmva").toURI()));
+		fileChooser.approve();
+		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
+		solutions.close();
+		
+		JTableFixture classesTable = jmva.table("ClassTable");
+		assertTrue("Wrong arrival rate, actual: " + classesTable.cell(TableCell.row(0).column(2)).value(),
+				classesTable.cell(TableCell.row(0).column(2)).value().equals("5"));
+		
+		jmva.label(new TextLabelMatcher("Stations")).click();
+		JTableFixture stationTable = jmva.table("StationTable");
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(0).column(1)).value(),
+				stationTable.cell(TableCell.row(0).column(1)).value().equals("Load Independent"));
+		assertTrue("Wrong station type, actual: " + stationTable.cell(TableCell.row(1).column(1)).value(),
+				stationTable.cell(TableCell.row(1).column(1)).value().equals("Load Dependent"));
+		
+		jmva.label(new TextLabelMatcher("Service Times")).click();
+		JTableFixture serviceTimesTable = jmva.table("ServiceTimesTable");
+		assertTrue("Wrong service times, actual: " + serviceTimesTable.cell(TableCell.row(0).column(0)).value(),
+				serviceTimesTable.cell(TableCell.row(0).column(0)).value().startsWith("1.500"));
+		
+		jmva.menuItem(new TextMenuItemMatcher("Solve")).click();
+		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
+		solutionsAgain.close();		
+	}
+	
+	/**
+	 * Opens a previously saved file and changes some parameters before solving it.
+	 * This includes adding a station and a class, and changes the mode to
+	 * "Service Times" and then back to "Service Times and Visits".
+	 * 
 	 * 
 	 * @throws URISyntaxException
 	 * @throws InterruptedException
@@ -219,8 +466,9 @@ public class JmvaGuiTest {
 	}
 	
 	/**
-	 * Checks that a dialog confirming that you want to exit without saving
-	 * shows up correctly.
+	 * Checks that a dialog confirming that you want to 
+	 * exit without saving shows up correctly, 
+	 * and chooses to not save, when prompted by the dialog.
 	 * 
 	 * @throws URISyntaxException
 	 */
@@ -236,6 +484,13 @@ public class JmvaGuiTest {
 		confirmation.button(new TextButtonMatcher("No")).click();
 	}
 	
+	/**
+	 * Checks that a dialog confirming that you want to 
+	 * exit without saving shows up correctly, 
+	 * and chooses to cancel the exit, when prompted by the dialog.
+	 * 
+	 * @throws URISyntaxException
+	 */
 	@Test
 	public void JMVAcancelExit() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -249,6 +504,15 @@ public class JmvaGuiTest {
 		jmva.close();
 	}
 	
+	/**
+	 * Checks that a dialog confirming that you want to 
+	 * exit without saving shows up correctly,
+	 * and chooses to save, when prompted by the dialog.
+	 * 
+	 * @throws URISyntaxException
+	 * @throws IOException
+	 * @throws InterruptedException
+	 */
 	@Test
 	public void JMVAsaveOnExit() throws URISyntaxException, IOException, InterruptedException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -270,6 +534,13 @@ public class JmvaGuiTest {
 		window.cleanUp();
 	}
 	
+	/**
+	 * 
+	 * @param name - Name of the file
+	 * @param suffix - File type extension
+	 * @return Path to a temporary file with the given name and suffix
+	 * @throws IOException
+	 */
 	private static String getTempFile(String name, String suffix) throws IOException {
 		File file = File.createTempFile(name, suffix);
 		String path = file.getAbsolutePath();

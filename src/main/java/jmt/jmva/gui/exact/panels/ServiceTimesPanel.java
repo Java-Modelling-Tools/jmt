@@ -244,6 +244,7 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 
 		STTable() {
 			super(new STTableModel());
+			setName("ServiceTimesTable");
 			autoResizeMode = AUTO_RESIZE_OFF;
                         setRowHeight(CommonConstants.ROW_HEIGHT);
 			setDisplaysScrollLabels(true);

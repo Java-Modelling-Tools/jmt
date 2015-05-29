@@ -23,15 +23,12 @@ import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import jmt.common.Class_;
-import jmt.common.Station;
 import jmt.framework.data.ArrayUtils;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
@@ -102,9 +99,6 @@ public class ExactModel implements ExactConstants  {
 	private String description;
 
 	/***********************STATIONS AND CLASSES******************************/
-	
-	private List<Class_> classess;
-	private List<Station> stationss;
 
 	//number of service centers
 	private int stations;
