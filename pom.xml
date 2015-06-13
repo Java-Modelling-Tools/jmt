@@ -8,25 +8,6 @@
 		<izpack.staging>${project.build.directory}/staging</izpack.staging>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	<!-- Reading properties -->
-	<plugin>
-		<groupId>org.codehaus.mojo</groupId>
-		<artifactId>properties-maven-plugin</artifactId>
-		<version>1.0-alpha-2</version>
-		<executions>
-			<execution>
-				<phase>initialize</phase>
-				<goals>
-					<goal>read-project-properties</goal>
-				</goals>
-				<configuration>
-					<files>
-						<file>${basedir}/src/main/resources/jmt/common/globalsettings.conf</file>
-					</files>
-				</configuration>
-			</execution>
-		</executions>
-	</plugin>
 	<profiles>
 		<profile>
 			<id>full</id>
@@ -36,6 +17,25 @@
 			<build>
 				<finalName>JMT-installer-${jmt.version}</finalName>
 				<plugins>
+					<!-- Reading properties -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/src/main/resources/jmt/common/globalsettings.conf</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 					<!-- we want JDK 1.7 source and binary compatiblility -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -160,6 +160,25 @@
 			<build>
 				<finalName>JMVA-${jmt.version}</finalName>
 				<plugins>
+					<!-- Reading properties -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/src/main/resources/jmt/common/globalsettings.conf</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
 					<!-- we want JDK 1.7 source and binary compatiblility -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>

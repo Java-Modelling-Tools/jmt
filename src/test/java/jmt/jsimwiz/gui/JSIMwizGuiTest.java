@@ -1,7 +1,7 @@
-package jmt.gui;
+package jmt.jsimwiz.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
-import jmt.gui.jaba.JabaWizard;
+import jmt.gui.jsimwiz.JSIMMain;
 import jmt.util.ShortDescriptionButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
@@ -17,8 +17,8 @@ import org.junit.Test;
  * @author Piotr Tokaj
  *
  */
-public class JabaGuiTest {
-
+public class JSIMwizGuiTest {
+	
 	private FrameFixture window;
 
 	@Before
@@ -33,19 +33,20 @@ public class JabaGuiTest {
 	}
 
 	/**
-	 * Checks that, on the main JMT window, the user can press the "JABA"
-	 * button, and that this will open a new window of type @JabaWizard
-	 * (which is the JABA frame).
+	 * Checks that, on the main JMT window, the user can press the "JSIMwiz"
+	 * button, and that this will open a new window of type @JSIMMain
+	 * (which is the JSIMwiz frame).
 	 */
 	@Test
-	public void mainJABAWindowDisplaysCorrectly() {
-		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JABA_SHORT_DESCRIPTION)).click();
-		FrameFixture jaba = WindowFinder.findFrame(JabaWizard.class).using(window.robot);
-		jaba.show();
+	public void mainJSIMwizWindowDisplaysCorrectly() {
+		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JSIM_SHORT_DESCRIPTION)).click();
+		FrameFixture jsimWiz = WindowFinder.findFrame(JSIMMain.class).using(window.robot);
+		jsimWiz.show();
 	}
 	
 	@After
 	public void tearDown() {
 		window.cleanUp();
 	}
+
 }

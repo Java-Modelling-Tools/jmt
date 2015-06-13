@@ -1,4 +1,4 @@
-package jmt.gui;
+package jmt.jwat.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.gui.jwat.MainJwatWizard;

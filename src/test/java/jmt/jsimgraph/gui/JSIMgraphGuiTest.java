@@ -1,7 +1,7 @@
-package jmt.gui;
+package jmt.jsimgraph.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
-import jmt.gui.jsimwiz.JSIMMain;
+import jmt.gui.jsimgraph.mainGui.MainWindow;
 import jmt.util.ShortDescriptionButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
@@ -13,11 +13,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * 
  * @author Piotr Tokaj
- *
  */
-public class JSIMwizGuiTest {
+public class JSIMgraphGuiTest {
 	
 	private FrameFixture window;
 
@@ -33,15 +31,15 @@ public class JSIMwizGuiTest {
 	}
 
 	/**
-	 * Checks that, on the main JMT window, the user can press the "JSIMwiz"
-	 * button, and that this will open a new window of type @JSIMMain
-	 * (which is the JSIMwiz frame).
+	 * Checks that, on the main JMT window, the user can press the "JSIMgraph"
+	 * button, and that this will open a new window of type @MainWindow
+	 * (which is the JSIMgraph frame).
 	 */
 	@Test
-	public void mainJSIMwizWindowDisplaysCorrectly() {
-		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JSIM_SHORT_DESCRIPTION)).click();
-		FrameFixture jsimWiz = WindowFinder.findFrame(JSIMMain.class).using(window.robot);
-		jsimWiz.show();
+	public void mainJSIMgraphWindowDisplaysCorrectly() {
+		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JMODEL_SHORT_DESCRIPTION)).click();
+		FrameFixture jsimGraph = WindowFinder.findFrame(MainWindow.class).using(window.robot);
+		jsimGraph.show();
 	}
 	
 	@After

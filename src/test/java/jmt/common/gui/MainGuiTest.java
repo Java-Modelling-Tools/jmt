@@ -1,4 +1,4 @@
-package jmt.gui;
+package jmt.common.gui;
 
 import jmt.framework.gui.components.JMTDialog;
 import jmt.gui.common.startScreen.GraphStartScreen;
