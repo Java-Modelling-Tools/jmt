@@ -289,7 +289,8 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 * An inner thread used to stop simulation after timeout elapsed
 	 */
 	protected class TimerThread extends Thread {
-		protected long residualTime, totalTime;
+		protected long residualTime;
+		protected long totalTime;
 		protected DispatcherThread dispatcher;
 		protected long initialTime;
 		// End means normal end of measures, kill forced one

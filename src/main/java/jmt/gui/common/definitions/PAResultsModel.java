@@ -52,10 +52,17 @@ import jmt.gui.common.xml.XMLConstantNames;
 public class PAResultsModel implements MeasureDefinition {
 	private Vector<Measure> measures; // An array with all Measures
 	private Vector<Number> parameterValues;
-	private Vector<Integer> queueLength = new Vector<Integer>(), queueTime = new Vector<Integer>(), residenceTime = new Vector<Integer>(),
-			responseTime = new Vector<Integer>(), utilization = new Vector<Integer>(), throughput = new Vector<Integer>(),
-			dropRate = new Vector<Integer>(), systemResponseTime = new Vector<Integer>(), systemThroughput = new Vector<Integer>(),
-			customerNumber = new Vector<Integer>(), systemDropRate = new Vector<Integer>();
+	private Vector<Integer> queueLength = new Vector<Integer>();
+	private Vector<Integer> queueTime = new Vector<Integer>();
+	private Vector<Integer> residenceTime = new Vector<Integer>();
+	private Vector<Integer> responseTime = new Vector<Integer>();
+	private Vector<Integer> utilization = new Vector<Integer>();
+	private Vector<Integer> throughput = new Vector<Integer>();
+	private Vector<Integer> dropRate = new Vector<Integer>();
+	private Vector<Integer> systemResponseTime = new Vector<Integer>();
+	private Vector<Integer> systemThroughput = new Vector<Integer>();
+	private Vector<Integer> customerNumber = new Vector<Integer>();
+	private Vector<Integer> systemDropRate = new Vector<Integer>();
 	//Added by ASHANKA START
 	//Added for System power changes for JSIM simulation engine.
 	//This adds the index of the measure System Power.	
@@ -67,7 +74,8 @@ public class PAResultsModel implements MeasureDefinition {
 	
 	private HashMap<String, Measure> names = new HashMap<String, Measure>();
 	
-	private String logDecimalSeparator, logCsvDelimiter;
+	private String logDecimalSeparator;
+	private String logCsvDelimiter;
 
 	//private boolean[] finished;
 	//private boolean simulationFinished = false;
@@ -575,10 +583,16 @@ public class PAResultsModel implements MeasureDefinition {
 	 * Inner class to store parameters of each measure
 	 */
 	protected class Measure {
-		public String name, stationName, className, nodeType;
+		public String name;
+		public String stationName;
+		public String className;
+		public String nodeType;
 		public Vector<MeasureValue> values;
-		public double alpha, precision;
-		public int samples, state, type;
+		public double alpha;
+		public double precision;
+		public int samples;
+		public int state;
+		public int type;
 
 		/**
 		 * Construct a new Neasure object
@@ -645,7 +659,9 @@ public class PAResultsModel implements MeasureDefinition {
 	 * Inner class that implements Value interface
 	 */
 	public class MeasureValueImpl implements MeasureValue {
-		private double mean, upper, lower;
+		private double mean;
+		private double upper;
+		private double lower;
 		boolean valid;
 
 		/**

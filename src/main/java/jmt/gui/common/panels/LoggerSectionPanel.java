@@ -83,10 +83,22 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 	/* GUI Components */
 
 	/* Used to create a dropdown with filenames */
-	protected String[] loggerOutputFilenameDropdown, loggerOutputDelimiterDropdown, loggerOutputDecimalSeparatorDropdown, loggerAutoAppendDropdown;
+	protected String[] loggerOutputFilenameDropdown;
+
+	protected String[] loggerOutputDelimiterDropdown;
+
+	protected String[] loggerOutputDecimalSeparatorDropdown;
+
+	protected String[] loggerAutoAppendDropdown;
 
 	/* Useful for global log */
-	JComboBox autoAppendChooser, delimiterChooser, decimalSeparatorChooser, loggerChooser;
+	JComboBox autoAppendChooser;
+
+	JComboBox delimiterChooser;
+
+	JComboBox decimalSeparatorChooser;
+
+	JComboBox loggerChooser;
 	JLabel labelFileStatus;
 	JCheckBox checkExecutionTimestamp;
 

@@ -34,7 +34,8 @@ import jmt.gui.common.definitions.CommonModel;
 public class JSIMModel extends CommonModel {
 
 	private int openClasses = 0;
-	Object src, snk; // Pointer to source and sink reference
+	Object src; // Pointer to source and sink reference
+	Object snk;
 
 	//intercept each call for addition of a new class
 	@Override

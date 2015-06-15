@@ -12,7 +12,9 @@ package jmt.engine.simEngine;
  */
 
 public class SimTypeP extends SimPredicate {
-	private int tag1, tag2, tag3;
+	private int tag1;
+	private int tag2;
+	private int tag3;
 	private int ntags;
 
 	/** Constructor.

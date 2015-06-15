@@ -1060,11 +1060,19 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 		return IntervalPanelOption;
 	}
 
-	private JPanel filterS, filterD, filterN;
+	private JPanel filterS;
+
+	private JPanel filterD;
+
+	private JPanel filterN;
 	private JTextField subs;
-	private JSpinner minN, maxN;
+	private JSpinner minN;
+
+	private JSpinner maxN;
 	//private CalendarComboBox fromD,toD;
-	private JFormattedTextField fromD, toD;
+	private JFormattedTextField fromD;
+
+	private JFormattedTextField toD;
 
 	private JPanel getFilteringPanelOption() {
 		if (FilteringPanelOption == null) {

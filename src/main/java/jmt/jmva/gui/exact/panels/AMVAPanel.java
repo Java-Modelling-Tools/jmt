@@ -84,7 +84,8 @@ public final class AMVAPanel extends JPanel {
 
 	private ExactWizard ew;
 	
-	private JLabel tolLabel, algLabel;
+	private JLabel tolLabel;
+	private JLabel algLabel;
 	private JTextField tolerance;
 	private JComboBox algorithmList;
 	private String [] modelName;

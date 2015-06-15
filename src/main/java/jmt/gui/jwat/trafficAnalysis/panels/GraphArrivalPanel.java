@@ -81,7 +81,10 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	// Performance index selector
 	private JComboBox index;
 	// Bounds for graph
-	private JSpinner Xmin, Xmax, Ymin, Ymax;
+	private JSpinner Xmin;
+	private JSpinner Xmax;
+	private JSpinner Ymin;
+	private JSpinner Ymax;
 	// Tells if spinner update is forced. This is needed to avoid that updates made by
 	// code will be interpreted as updated made by user.
 	private boolean forcedUpdate = false;
@@ -96,13 +99,27 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	private MainJwatWizard ew;
 	private Vector columnHeads;
 	private Vector<Vector<Comparable>> rows;
-	private JPanel left, mainPanel;
+	private JPanel left;
+	private JPanel mainPanel;
 	private double[] res;
-	private boolean minute = false, month = false, day = false, hour = false, year = false;
-	private long nYear, nMonth, nDay, nHour, nMinute = 0;
+	private boolean minute = false;
+	private boolean month = false;
+	private boolean day = false;
+	private boolean hour = false;
+	private boolean year = false;
+	private long nYear;
+	private long nMonth;
+	private long nDay;
+	private long nHour;
+	private long nMinute = 0;
 	private VariableNumber v;
-	private SpinnerDateModel Sp1, Sp2;
-	Vector<double[]> ArrDay, ArrYear, ArrMonth, ArrHour, ArrMinute;
+	private SpinnerDateModel Sp1;
+	private SpinnerDateModel Sp2;
+	Vector<double[]> ArrDay;
+	Vector<double[]> ArrYear;
+	Vector<double[]> ArrMonth;
+	Vector<double[]> ArrHour;
+	Vector<double[]> ArrMinute;
 	private BurstEngine engine = null;
 
 	/**

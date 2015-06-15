@@ -93,8 +93,13 @@ public class JabaWizard extends Wizard {
 	private SolverDispatcher jsolver;
 
 	// keep a reference to these three components to enable switching
-	private WizardPanel serviceTimesPanel, serviceDemandsPanel, visitsPanel,
-			performancePanel;
+	private WizardPanel serviceTimesPanel;
+
+	private WizardPanel serviceDemandsPanel;
+
+	private WizardPanel visitsPanel;
+
+	private WizardPanel performancePanel;
 	private ConvexHullPanel hullPanel;
 
 	private AllInOnePanel allInOnePanel;

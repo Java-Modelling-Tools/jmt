@@ -337,7 +337,8 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 	private class pieChartIcon implements Icon {
 		private final int DIAMETRO = 100;
 		private int[] angle;
-		private double centreX, centreY;
+		private double centreX;
+		private double centreY;
 
 		public pieChartIcon(int numSpicchi) {
 			centreX = 0;

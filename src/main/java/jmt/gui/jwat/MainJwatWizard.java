@@ -72,7 +72,8 @@ public class MainJwatWizard extends JWatWizard {
 	private JwatSession session = null;
 
 	//Last panel visited, used to control correct next step
-	private int lastPanel = 0, currentPanel = 0;
+	private int lastPanel = 0;
+	private int currentPanel = 0;
 
 	private HoverHelp help = null;
 	// List of panels create for Workload Analysis tool

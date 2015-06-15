@@ -58,7 +58,9 @@ public class ProgressWindow extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private SolverClient solver;
 	private JProgressBar progressBar;
-	private JLabel mainLabel, elapsedTimeLabel, stepLabel;
+	private JLabel mainLabel;
+	private JLabel elapsedTimeLabel;
+	private JLabel stepLabel;
 	private SampleQNAnimation animation;
 	private int iterations;
 	private Timer timer;

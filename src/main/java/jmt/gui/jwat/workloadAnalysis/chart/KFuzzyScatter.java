@@ -83,7 +83,10 @@ public class KFuzzyScatter extends JPanel {
 	private BufferedImage graph; //Immagine grafico
 	private boolean first = true; //Indica che devono essere ridisegnati i punti nella buffered image
 	private boolean zoomming = false; //Indica che si sta operando una selezione di zoom In
-	private int xStart, yStart, xEnd, yEnd; //Posizione di inizio e fine della selezione di zoom
+	private int xStart; //Posizione di inizio e fine della selezione di zoom
+	private int yStart;
+	private int xEnd;
+	private int yEnd;
 	private ModelWorkloadAnalysis model; //Modello contenente i valori da plottare
 	private WorkloadAnalysisSession session; //Modello contenente i valori da plottare
 

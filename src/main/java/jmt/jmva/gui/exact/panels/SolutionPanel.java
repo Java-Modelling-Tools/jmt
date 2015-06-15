@@ -61,13 +61,17 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	protected String helpText, name;
+	protected String helpText;
+
+	protected String name;
 
 	protected HoverHelp help;
 
 	protected ExactModel data;
 
-	protected int classes, stations;
+	protected int classes;
+
+	protected int stations;
 	protected String[] classNames;
 	protected String[] stationNames;
 	//protected double[][] ReferenceStation;

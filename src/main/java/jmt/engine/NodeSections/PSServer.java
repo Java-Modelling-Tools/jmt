@@ -50,8 +50,8 @@ public class PSServer extends ServiceSection {
 	/** Property Identifier:  Service strategy. */
 	public static final int PROPERTY_ID_SERVICE_STRATEGY = 0x0104;
 
-	private int numberOfServers,
-	/** This variable is used to implement blocking.*/
+	private int numberOfServers;
+	private int /** This variable is used to implement blocking.*/
 	waitingAcks;
 
 	private ServiceStrategy serviceStrategy[];
@@ -64,7 +64,8 @@ public class PSServer extends ServiceSection {
 	/** The data structure holdings all the jobs */
 	private PriorityQueue<JobData> jobs;
 
-	private PSJobInfoList queueList, serviceList;
+	private PSJobInfoList queueList;
+	private PSJobInfoList serviceList;
 
 	// A token to preempt the last message sent when a new job arrives
 	private RemoveToken lastMessageSent;

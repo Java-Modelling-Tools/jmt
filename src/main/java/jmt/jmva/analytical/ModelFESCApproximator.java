@@ -35,7 +35,8 @@ import jmt.jmva.analytical.solvers.SolverAlgorithm;
  */
 public class ModelFESCApproximator {
 	private static final int SKIP = -1;
-	private ExactModel inputModel, outputModel;
+	private ExactModel inputModel;
+	private ExactModel outputModel;
 	private int iteration;
 	private int[] multipleServerList; // An array with mapping station -> added delay for multiple server handling
 	private boolean multipleServerApproximated;

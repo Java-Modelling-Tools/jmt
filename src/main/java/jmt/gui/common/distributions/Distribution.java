@@ -48,8 +48,10 @@ public abstract class Distribution implements ServiceStrategy {
 	protected String description;
 	protected ImageIcon image;
 	protected ValueChecker checker;
-	protected boolean hasMean, hasC; // Used to provide input parameters with the tuple (mean, C)
-	protected double c, mean;
+	protected boolean hasMean; // Used to provide input parameters with the tuple (mean, C)
+	protected boolean hasC;
+	protected double c;
+	protected double mean;
 	protected boolean isNestable;
 
 	/**

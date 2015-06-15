@@ -46,7 +46,9 @@ public class TANotifier extends JTable implements Notifier {
 	//	private int MAXIMUM_LOG = 1000000;
 
 	// for using avg jobs in Q + Server
-	private double totNumberOfJobsInSystem, lastUpdateTimeNumJobs;
+	private double totNumberOfJobsInSystem;
+
+	private double lastUpdateTimeNumJobs;
 	private int numberOfJobsInTheSystem;
 
 	//avg utilization

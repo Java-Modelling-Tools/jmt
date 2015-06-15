@@ -44,7 +44,8 @@ import jmt.gui.common.routingStrategies.LoadDependentRouting;
  */
 public class LoadDependentRoutingEditor extends JMTDialog implements CommonConstants {
 
-    private Object stationKey, classKey;
+    private Object stationKey;
+	private Object classKey;
     private StationDefinition stations;
     private ClassDefinition classes;
     private Vector<Object> validForwardStationKeys = new Vector<Object>();

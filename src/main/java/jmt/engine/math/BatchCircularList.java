@@ -38,7 +38,8 @@ public class BatchCircularList {
 	// Maximum number of samples
 	protected int maxSamples;
 	// Batches for samples and weights
-	protected double[] samples, weights;
+	protected double[] samples;
+	protected double[] weights;
 	// Number of stored samples (not batches)
 	protected int count;
 	// Starting point (batch)
@@ -46,7 +47,9 @@ public class BatchCircularList {
 	// Number of dicarded samples
 	protected int discarded;
 	// Used to compute mean value
-	protected double samplesSum, weightsSum, mean;
+	protected double samplesSum;
+	protected double weightsSum;
+	protected double mean;
 
 	/**
 	 * Construct a new BatchCircularList.

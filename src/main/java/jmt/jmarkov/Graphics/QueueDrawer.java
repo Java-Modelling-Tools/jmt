@@ -56,27 +56,64 @@ public class QueueDrawer extends JComponent implements Notifier {
 
 	private QueueLogic ql;
 
-	private long[] remainingTime, totTime;
+	private long[] remainingTime;
+
+	private long[] totTime;
 	private int nCpu = 1;
 
 	// queue data
-	private int jobs = 0, donejobs = 0, totjobs = 0, queueMax = 0,
-	// queueLen = 0,
-			queueMedia = 0, lostJobs = 0, view = 0;
+	private int jobs = 0;
+
+	private int donejobs = 0;
+
+	private int totjobs = 0;
+
+	private int queueMax = 0;
+
+	private int // queueLen = 0,
+	queueMedia = 0;
+
+	private int lostJobs = 0;
+
+	private int view = 0;
 
 	private static final int VIEWS = 2;
 
 	// panel settings
-	private double panelH = 250, panelW = 400, minH = 100, minW = 400;
+	private double panelH = 250;
+
+	private double panelW = 400;
+
+	private double minH = 100;
+
+	private double minW = 400;
 
 	// draw settings
 	private DrawConstrains dCst;
-	private double START_GAP, END_GAP, ELEM_HEIGHT, ELEM_WIDTH, ELEMS_GAP, PROC_RAD; 
-	private static double MORE_JOBS_MAX = 100, LOST_JOBS_MAX = 100;
+	private double START_GAP;
+
+	private double END_GAP;
+
+	private double ELEM_HEIGHT;
+
+	private double ELEM_WIDTH;
+
+	private double ELEMS_GAP;
+
+	private double PROC_RAD; 
+	private static double MORE_JOBS_MAX = 100;
+
+	private static double LOST_JOBS_MAX = 100;
 	private Rectangle2D[] queue;
 	private RoundRectangle2D viewB;
-	private Ellipse2D processor, occupiedEll;
-	private Rectangle2D occupiedRect, moreStatiRect, txtBounds;
+	private Ellipse2D processor;
+
+	private Ellipse2D occupiedEll;
+	private Rectangle2D occupiedRect;
+
+	private Rectangle2D moreStatiRect;
+
+	private Rectangle2D txtBounds;
 	private Area occupiedArea;
 
 	private Stroke stroke;
@@ -85,8 +122,16 @@ public class QueueDrawer extends JComponent implements Notifier {
 	private Color[] legendaC;
 
 	// color settings
-	private Color emptyC = Color.WHITE, queueC = Color.BLUE, busyC = queueC.brighter().brighter(), animC = Color.RED;
-	private boolean gradientF, viewButtonClicked = false;
+	private Color emptyC = Color.WHITE;
+
+	private Color queueC = Color.BLUE;
+
+	private Color busyC = queueC.brighter().brighter();
+
+	private Color animC = Color.RED;
+	private boolean gradientF;
+
+	private boolean viewButtonClicked = false;
 
 	private int executingJobId;
 

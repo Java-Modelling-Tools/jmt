@@ -30,7 +30,8 @@ import java.util.Arrays;
  */
 public class DirectCircularList<E> {
 	// Pointer to last inserted element and its index for direct access
-	protected int last, lastIndex;
+	protected int last;
+	protected int lastIndex;
 	// Array of datas
 	protected Object[] data;
 	// Size of the list

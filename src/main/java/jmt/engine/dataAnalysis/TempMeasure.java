@@ -59,8 +59,16 @@ public class TempMeasure {
 
 	// --- Bertoli Marco
 	// alpha, precision
-	private double alpha, precision;
-	private double upperBound, lowerBound, lastIntervalAvgValue, simulationTime;
+	private double alpha;
+
+	private double precision;
+	private double upperBound;
+
+	private double lowerBound;
+
+	private double lastIntervalAvgValue;
+
+	private double simulationTime;
 	private String logFileName;
 
 	// --- end

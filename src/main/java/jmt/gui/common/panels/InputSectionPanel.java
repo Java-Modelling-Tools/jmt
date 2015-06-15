@@ -78,7 +78,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected Object[] stationQueuePolicy = { QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
 
 	private ButtonGroup queueLengthGroup;
-	private JRadioButton infiniteQueueSelector, finiteQueueSelector;
+	private JRadioButton infiniteQueueSelector;
+	private JRadioButton finiteQueueSelector;
 	private JSpinner queueLengthSpinner;
 	private QueueTable queueTable;
 	/** Used to display classes with icon */

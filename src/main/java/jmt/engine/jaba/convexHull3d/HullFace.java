@@ -35,8 +35,12 @@ public class HullFace {
 
 	protected static final float COPLANAR_EPSILON = 0.001f;
 
-	private HullEdge e0, e1, e2;
-	private HullVertex v0, v1, v2;
+	private HullEdge e0;
+	private HullEdge e1;
+	private HullEdge e2;
+	private HullVertex v0;
+	private HullVertex v1;
+	private HullVertex v2;
 	private boolean visible;
 	private Vector4 normal;
 	private int numCoplanarVertices = 0;

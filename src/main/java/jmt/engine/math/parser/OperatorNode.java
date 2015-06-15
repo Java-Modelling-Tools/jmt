@@ -29,7 +29,9 @@ public class OperatorNode implements ExpressionNode {
 	/** List of supported operators */
 	public static final char[] OPERATIONS = new char[] { '+', '-', '*', '/', '%', '^' };
 	/** Children nodes */
-	protected ExpressionNode left, right; // Children nodes
+	protected ExpressionNode left; // Children nodes
+	/** Children nodes */
+	protected ExpressionNode right;
 	/** Operation of this node */
 	protected char operation;
 	/** An array with children */

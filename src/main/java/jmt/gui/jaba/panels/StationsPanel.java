@@ -497,10 +497,12 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private TableCellEditor LD_disabled_StationTypeEditor, LD_enabled_StationTypeEditor;
+		private TableCellEditor LD_disabled_StationTypeEditor;
+		private TableCellEditor LD_enabled_StationTypeEditor;
 		//BEGIN Federico Dall'Orso 8/3/2005
 		//NEW
-		private ComboBoxCell LD_disabled_StationTypeCell, LD_enabled_StationTypeCell;
+		private ComboBoxCell LD_disabled_StationTypeCell;
+		private ComboBoxCell LD_enabled_StationTypeCell;
 		//14/3/2005
 		private JButton deleteButton;
 		private ButtonCellEditor deleteButtonCellRenderer;

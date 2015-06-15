@@ -43,19 +43,66 @@ public class LinkedJobInfoList implements JobInfoList {
 	public final int PROPERTY_NOT_AVAILABLE = 0x0001;
 
 	//contain JobInfo objects
-	private LinkedList<JobInfo> list, listPerClass[];
+	private LinkedList<JobInfo> list;
+
+	private LinkedList<JobInfo> listPerClass[];
 
 	//arrivals and completions
-	private int jobsIn, jobsOut, jobsInPerClass[], jobsOutPerClass[];
+	private int jobsIn;
 
-	private double busyTime, busyTimePerClass[];
+	private int jobsOut;
 
-	private double lastJobOutTime, lastJobInTime, lastJobDropTime, lastJobOutTimePerClass[], lastJobInTimePerClass[], lastJobDropTimePerClass[];
+	private int jobsInPerClass[];
 
-	private Measure utilization, utilizationPerClass[], responseTime, responseTimePerClass[], residenceTime, residenceTimePerClass[], queueLength,
-			queueLengthPerClass[], dropRate, dropRatePerClass[], responseTimePerSink, responseTimePerSinkPerClass[] ;
+	private int jobsOutPerClass[];
 
-	private InverseMeasure throughput, throughputPerClass[], throughputPerSink, throughputPerSinkPerClass[];
+	private double busyTime;
+
+	private double busyTimePerClass[];
+
+	private double lastJobOutTime;
+
+	private double lastJobInTime;
+
+	private double lastJobDropTime;
+
+	private double lastJobOutTimePerClass[];
+
+	private double lastJobInTimePerClass[];
+
+	private double lastJobDropTimePerClass[];
+
+	private Measure utilization ;
+
+	private Measure utilizationPerClass[];
+
+	private Measure responseTime;
+
+	private Measure responseTimePerClass[];
+
+	private Measure residenceTime;
+
+	private Measure residenceTimePerClass[];
+
+	private Measure queueLength;
+
+	private Measure queueLengthPerClass[];
+
+	private Measure dropRate;
+
+	private Measure dropRatePerClass[];
+
+	private Measure responseTimePerSink;
+
+	private Measure responseTimePerSinkPerClass[];
+
+	private InverseMeasure throughput;
+
+	private InverseMeasure throughputPerClass[];
+
+	private InverseMeasure throughputPerSink;
+
+	private InverseMeasure throughputPerSinkPerClass[];
 
 	/** The number of servers to estimate Utilization measure on multiserver environments. */
 	private int serverNumber = 1;

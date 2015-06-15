@@ -42,10 +42,18 @@ public class GlobalJobInfoList {
 	private int numClass;
 
 	// Measures to be evalueated
-	private Measure[] responseTimePerClass, jobNumPerClass;
-	private Measure responseTime, jobNum;
-	private InverseMeasure[] throughputPerClass, dropRatePerClass;
-	private InverseMeasure throughput, dropRate;
+	private Measure[] responseTimePerClass;
+
+	private Measure[] jobNumPerClass;
+	private Measure responseTime;
+
+	private Measure jobNum;
+	private InverseMeasure[] throughputPerClass;
+
+	private InverseMeasure[] dropRatePerClass;
+	private InverseMeasure throughput;
+
+	private InverseMeasure dropRate;
 
 	//Added by ASHANKA START
 	//Analyzes the system power for jobs in the queue
@@ -56,14 +64,28 @@ public class GlobalJobInfoList {
 	//Added by ASHANKA STOP
 
 	// To calculate throughput and job number
-	private double lastJobOutTime, lastModifyNumber, lastJobDropTime;
-	private double[] lastJobOutTimePerClass, lastModifyNumberPerClass, lastJobDropTimePerClass;
+	private double lastJobOutTime;
+
+	private double lastModifyNumber;
+
+	private double lastJobDropTime;
+	private double[] lastJobOutTimePerClass;
+
+	private double[] lastModifyNumberPerClass;
+
+	private double[] lastJobDropTimePerClass;
 	private int[] jobsPerClass;
 	private int jobs;
 	
 	//Variables for the System Power calculation: New Modified version.
-	double systemPowerSamples, systemPowerSamplesClass[];
-	double sampling_SystemThroughputSum, sampling_SystemResponseSum, samplingClass_SystemThroughputSum[];
+	double systemPowerSamples;
+
+	double systemPowerSamplesClass[];
+	double sampling_SystemThroughputSum;
+
+	double sampling_SystemResponseSum;
+
+	double samplingClass_SystemThroughputSum[];
 
 	/**
 	 * Creates a new GlobalJobInfoList

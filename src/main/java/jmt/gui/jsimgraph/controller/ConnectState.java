@@ -43,9 +43,15 @@ public class ConnectState extends UIStateDefault {
 
 	protected JmtCell startPoint;
 
-	protected Point2D start, current;
+	protected Point2D start;
+
+	protected Point2D current;
 	//	public  boolean isReleased=false;
-	protected PortView port, firstPort, lastPort;
+	protected PortView port;
+
+	protected PortView firstPort;
+
+	protected PortView lastPort;
 	//private JmtCell aa;
 	//private JmtCell bb;
 	//private boolean flag = false;

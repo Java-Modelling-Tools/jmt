@@ -225,7 +225,8 @@ public class Loader {
 	 * Inner class used to create simple file filters with only extension check
 	 */
 	protected static class JmtFileFilter extends FileFilter {
-		private String extension, description;
+		private String extension;
+		private String description;
 
 		/**
 		 * Creates a new filefilter with specified extension and description

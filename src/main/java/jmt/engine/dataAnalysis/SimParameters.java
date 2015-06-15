@@ -63,7 +63,11 @@ public class SimParameters {
 	private boolean disableStatisticStop = false;
 
 	// logging attributes: path, replacement, delimiter, execution time
-	String logfilepath, logreplacemode, logdelimiterchar, logdeciamlseparatorchar, logtimestampvalue;
+	String logfilepath;
+	String logreplacemode;
+	String logdelimiterchar;
+	String logdeciamlseparatorchar;
+	String logtimestampvalue;
 
 	public SimParameters() {
 

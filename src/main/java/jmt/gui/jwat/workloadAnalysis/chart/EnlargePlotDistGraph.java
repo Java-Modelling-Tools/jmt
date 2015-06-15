@@ -324,7 +324,8 @@ public class EnlargePlotDistGraph extends Plot implements MouseListener {
 	 * Inner class used to create simple file filters with only extension check
 	 */
 	public static class PlotImagesFileFilter extends javax.swing.filechooser.FileFilter {
-		private String extension, description;
+		private String extension;
+		private String description;
 
 		/**
 		 * Creates a new filefilter with specified extension and description

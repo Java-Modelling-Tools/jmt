@@ -53,16 +53,16 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	//queue settings
 	private QueueLogic ql;
 	private double pb[];//status probability of the queue logic 
-	private int queueMax,//limited maximum queue
-			currentJob,//number of jobs in queue
-			lastJob;//for animate 
+	private int queueMax;//for animate 
 	//				jobTmp;
+	private int currentJob;
+	private int lastJob;
 
 	//panel settings
-	private double panelH = 250,//panel height
-			panelW = 400,//panel width
-			minH = 100,//minimum value for panelH
-			minW = 400; //minimum value for panelW
+	private double panelH = 250; //minimum value for panelW
+	private double panelW = 400;
+	private double minH = 100;
+	private double minW = 400;
 
 	//draw settings
 	private DrawConstrains dCst;
@@ -71,19 +71,29 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	private double STATUS_RAD;
 	private double START_GAP;
 	private double END_GAP;
-	private Stroke stroke, strokeB;
+	private Stroke stroke;
+	private Stroke strokeB;
 	private Font f;
 	private Arc2D[] statusP;
 	private Arc2D lastStatusP;
 	private Ellipse2D[] statusE;
-	private Ellipse2D lastStatusE, transitionE;
+	private Ellipse2D lastStatusE;
+	private Ellipse2D transitionE;
 	private QuadCurve2D[][] arc;
 	private GeneralPath arrow;
 	private float arroww = 5.0f;
-	private int frame, maxframe;
+	private int frame;
+	private int maxframe;
 
 	//colors
-	private Color probC, queueProbC, emptyC, queueC, animQueuesC, animProbC, animBorderC, borderC;
+	private Color probC;
+	private Color queueProbC;
+	private Color emptyC;
+	private Color queueC;
+	private Color animQueuesC;
+	private Color animProbC;
+	private Color animBorderC;
+	private Color borderC;
 
 	private int currentJobId;
 

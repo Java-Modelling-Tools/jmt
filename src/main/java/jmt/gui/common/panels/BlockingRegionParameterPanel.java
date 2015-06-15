@@ -74,7 +74,8 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 	protected JSpinner number;
 	protected JCheckBox inf;
 	// Panels for input data
-	protected JPanel globalPanel, classPanel;
+	protected JPanel globalPanel;
+	protected JPanel classPanel;
 	/** Used to display classes with icon */
 	protected ImagedComboBoxCellEditorFactory classEditor;
 

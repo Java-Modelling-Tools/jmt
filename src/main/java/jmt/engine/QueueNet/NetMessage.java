@@ -27,9 +27,13 @@ public class NetMessage implements Cloneable {
 
 	private int event;
 
-	private byte sourceSection, destinationSection;
+	private byte sourceSection;
 
-	private NetNode Source, Destination;
+	private byte destinationSection;
+
+	private NetNode Source;
+
+	private NetNode Destination;
 
 	private Object data;
 

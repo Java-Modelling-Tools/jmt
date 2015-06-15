@@ -35,7 +35,9 @@ import jmt.engine.simEngine.SimSystem;
 class NetController {
 	private boolean running;
 
-	private double startTime, stopTime;
+	private double startTime;
+
+	private double stopTime;
 
 	//number of system "ticks"
 	private int n;

@@ -64,7 +64,8 @@ public class LogTunnel extends ServiceTunnel {
 	public static final String[] COLUMNS = {COLUMN_LOGGERNAME, COLUMN_TIMESTAMP, COLUMN_JOBID, COLUMN_CLASSID, 
 		COLUMN_INTERARRIVAL_SAMECLASS, COLUMN_INTERARRIVAL_ANYCLASS, COLUMN_START_TIME};
 
-	private char chDelimiter, decimalSeparator;
+	private char chDelimiter;
+	private char decimalSeparator;
 	private int intReplacePolicy;
 	private String strTimestampValue;
 	private LoggerParameters lp;

@@ -26,7 +26,8 @@ import jmt.engine.jwat.Observation;
  * 
  */
 public class IntervalFilter implements FilterOnVariable {
-	private int min, max;
+	private int min;
+	private int max;
 
 	/**
 	 * Il valore di indice della prima osservazione e' 0

@@ -22,8 +22,14 @@ package jmt.engine.math;
  * @author Marco Bertoli
  */
 public class InverseSampleStatistics extends SampleStatistics {
-	private double prevWeight, prevSampleXWeight, prevTotalIntervalWeights;
-	private double prevMax, prevMin, prevWeigthedSum2, prevWeigthedSum3, prevWeigthedSum4;
+	private double prevWeight;
+	private double prevSampleXWeight;
+	private double prevTotalIntervalWeights;
+	private double prevMax;
+	private double prevMin;
+	private double prevWeigthedSum2;
+	private double prevWeigthedSum3;
+	private double prevWeigthedSum4;
 	private double[] prevIntervalWeights;
 
 	/* (non-Javadoc)

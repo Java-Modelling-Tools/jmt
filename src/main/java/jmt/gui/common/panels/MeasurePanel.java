@@ -129,7 +129,9 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	protected JComboBox measureSelection = new JComboBox(measureTypes);
 
 	/** Editors and renderers for table */
-	protected ImagedComboBoxCellEditorFactory stationsCombos, classesCombos;
+	protected ImagedComboBoxCellEditorFactory stationsCombos;
+	/** Editors and renderers for table */
+	protected ImagedComboBoxCellEditorFactory classesCombos;
 
 	//deletes a measure from list
 	protected AbstractAction deleteMeasure = new AbstractAction("") {

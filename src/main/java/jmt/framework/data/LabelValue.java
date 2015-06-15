@@ -27,7 +27,8 @@ package jmt.framework.data;
  * @version 1.0
  */
 public class LabelValue {
-	private String label, value;
+	private String label;
+	private String value;
 	
 	/**
 	 * Builds a label value with the given label and value

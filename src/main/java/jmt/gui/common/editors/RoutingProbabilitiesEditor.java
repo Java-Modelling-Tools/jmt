@@ -55,7 +55,8 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	private static final long serialVersionUID = 1L;
 	private Map<Object, Double> routingProbs;
 	private StationDefinition stations;
-	private Object stationKey, classKey;
+	private Object stationKey;
+	private Object classKey;
     private ClassDefinition classes;
 
 	private WarningScrollTable rtPane;

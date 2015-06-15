@@ -38,7 +38,9 @@ import javax.swing.event.TableColumnModelEvent;
  */
 public abstract class TableSelectionListener implements ListSelectionListener {
 
-	private ListSelectionModel rowSelectionModel, colSelectionModel;
+	private ListSelectionModel rowSelectionModel;
+
+	private ListSelectionModel colSelectionModel;
 
 	public static final int TYPE_ROW = 1;
 	public static final int TYPE_COLUMN = 2;

@@ -42,7 +42,9 @@ public enum SolverAlgorithm {
 	
 	// string representation of the algorithm
 	private String algorithmName;
-	private boolean closed, exact, loadDependent;
+	private boolean closed;
+	private boolean exact;
+	private boolean loadDependent;
 	
 	private static final String[] NAMES;
 	private static final String[] CLOSED_NAMES;

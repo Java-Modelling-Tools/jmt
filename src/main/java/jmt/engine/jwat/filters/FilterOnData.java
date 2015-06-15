@@ -8,7 +8,8 @@ import jmt.engine.jwat.Observation;
 
 public class FilterOnData implements FilterOnVariable {
 
-	Date from, to;
+	Date from;
+	Date to;
 	private int varIndex;
 
 	public FilterOnData(Date from, Date to, int index) {

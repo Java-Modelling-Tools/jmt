@@ -58,13 +58,16 @@ class CustomDialog extends JDialog implements ActionListener, PropertyChangeList
 	private JPanel selectionP;
 	private GridBagConstraints c;
 	private JTextField textField;
-	private JRadioButton nolimitRB, limitedRB;
+	private JRadioButton nolimitRB;
+	private JRadioButton limitedRB;
 	//in order to ask the log file will be generated or not
 	private JCheckBox logCheckBox;
 	private JTextField logTextField;
 	private JButton logButton;
 
-	private JRadioButton tabDelimited, commaDelimited, semiColonDelimited;
+	private JRadioButton tabDelimited;
+	private JRadioButton commaDelimited;
+	private JRadioButton semiColonDelimited;
 	private JPanel jp;
 
 	private File file;

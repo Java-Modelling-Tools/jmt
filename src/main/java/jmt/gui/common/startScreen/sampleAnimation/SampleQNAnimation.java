@@ -104,8 +104,12 @@ class ColoredStationAnimation extends StationAnimation {
 	private static Color[] colors = { new Color(255, 0, 0, 150), new Color(0, 255, 0, 150), new Color(0, 0, 0, 150), new Color(255, 255, 0, 150),
 			new Color(0, 0, 255, 150) };
 
-	private double cpuPhase = Math.random() * 360, queuePhase = Math.random() * 16;
-	private int colorPhase = (int) (Math.random() * colors.length), jobLength = 6;
+	private double cpuPhase = Math.random() * 360;
+
+	private double queuePhase = Math.random() * 16;
+	private int colorPhase = (int) (Math.random() * colors.length);
+
+	private int jobLength = 6;
 
 	private Image overlayedShading = null;
 

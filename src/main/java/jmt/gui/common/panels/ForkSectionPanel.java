@@ -57,7 +57,8 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 	protected StationDefinition sd;
 	protected ClassDefinition cd;
 	protected Object stationKey;
-	protected JSpinner numForkSpinner, blockSpinner;
+	protected JSpinner numForkSpinner;
+	protected JSpinner blockSpinner;
 
 	/**
 	 * Sets data for this panel

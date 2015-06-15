@@ -51,8 +51,12 @@ public class DistributionDensityGraph extends JPanel {
 	private double intwidth;
 	private int type;
 
-	private int x0, y0; 
-	private double xstep, ystep; 
+	private int x0;
+
+	private int y0; 
+	private double xstep;
+
+	private double ystep; 
 	private static final int MARGIN = 8;
 
 	private static final Color COLOR_DRAW = Color.BLUE;

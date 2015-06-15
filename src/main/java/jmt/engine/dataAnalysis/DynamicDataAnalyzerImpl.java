@@ -185,7 +185,8 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 
 	//constant (instead of computing the same expression at each time)
 	private final double sqrt_45 = Math.sqrt(45);
-	private double lastSampleWeight, lastWeight;
+	private double lastSampleWeight;
+	private double lastWeight;
 	
 	/** Creates a new DynamicDataAnalyzer
 	 *  @param alfa the quantile required for the confidence interval

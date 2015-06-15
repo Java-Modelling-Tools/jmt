@@ -51,7 +51,9 @@ public class Server extends ServiceSection {
 	//TODO: use this to correct residence times (R=r*v) or remove them!!
 	private int numberOfVisitsPerClass[];
 
-	private int busyCounter, numberOfServers;
+	private int busyCounter;
+
+	private int numberOfServers;
 
 	private ServiceStrategy serviceStrategy[];
 

@@ -44,10 +44,17 @@ import jmt.framework.gui.graph.MeasureValue;
  */
 public class ResultsModel implements MeasureDefinition {
 	private TempMeasure[] measures; // An array with all TempMeasures
-	private Vector<Integer> queueLength = new Vector<Integer>(), queueTime = new Vector<Integer>(), residenceTime = new Vector<Integer>(),
-			responseTime = new Vector<Integer>(), utilization = new Vector<Integer>(), throughput = new Vector<Integer>(),
-			dropRate = new Vector<Integer>(), systemResponseTime = new Vector<Integer>(), systemThroughput = new Vector<Integer>(),
-			customerNumber = new Vector<Integer>(), systemDropRate = new Vector<Integer>();
+	private Vector<Integer> queueLength = new Vector<Integer>();
+	private Vector<Integer> queueTime = new Vector<Integer>();
+	private Vector<Integer> residenceTime = new Vector<Integer>();
+	private Vector<Integer> responseTime = new Vector<Integer>();
+	private Vector<Integer> utilization = new Vector<Integer>();
+	private Vector<Integer> throughput = new Vector<Integer>();
+	private Vector<Integer> dropRate = new Vector<Integer>();
+	private Vector<Integer> systemResponseTime = new Vector<Integer>();
+	private Vector<Integer> systemThroughput = new Vector<Integer>();
+	private Vector<Integer> customerNumber = new Vector<Integer>();
+	private Vector<Integer> systemDropRate = new Vector<Integer>();
 
 	//Added by ASHANKA START
 	//Vector ro contain the Measure index of the System Power. 
@@ -68,7 +75,8 @@ public class ResultsModel implements MeasureDefinition {
 	private double progressTime = 0.0;
 	private MalformedReplayerFileListener mrfListener;
 	
-	private String logDecimalSeparator, logCsvDelimiter;
+	private String logDecimalSeparator;
+	private String logCsvDelimiter;
 
 	/* (non-Javadoc)
 	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogDecimalSeparator()
@@ -551,7 +559,11 @@ public class ResultsModel implements MeasureDefinition {
 	 * Implementation of Value interface
 	 */
 	public class MeasureValueImpl implements MeasureValue {
-		private double value, upper, lower, lastIntervalAvgValue, simulationTime;
+		private double value;
+		private double upper;
+		private double lower;
+		private double lastIntervalAvgValue;
+		private double simulationTime;
 		
 		public MeasureValueImpl(TempMeasure tm) {
 			value = tm.getTempMean();

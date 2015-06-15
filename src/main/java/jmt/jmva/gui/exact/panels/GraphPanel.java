@@ -80,7 +80,10 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 	// Performance index selector
 	private JComboBox index;
 	// Bounds for graph
-	private JSpinner Xmin, Xmax, Ymin, Ymax;
+	private JSpinner Xmin;
+	private JSpinner Xmax;
+	private JSpinner Ymin;
+	private JSpinner Ymax;
 	// Tells if spinner update is forced. This is needed to avoid that updates made by
 	// code will be interpreted as updated made by user.
 	private boolean forcedUpdate = false;
@@ -504,7 +507,11 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 	protected class LinesTable extends JTable {
 		private static final long serialVersionUID = 1L;
 		/** ComboBoxes used as cell editors */
-		private ComboEditor classEditor, stationsEditor, uStationsEditor;
+		private ComboEditor classEditor;
+		/** ComboBoxes used as cell editors */
+		private ComboEditor stationsEditor;
+		/** ComboBoxes used as cell editors */
+		private ComboEditor uStationsEditor;
 		
 		/** Edited by Georgios Poullaides **/
 		private ComboAlgoEditor algorithmEditor;

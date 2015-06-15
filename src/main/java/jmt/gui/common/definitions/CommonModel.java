@@ -84,9 +84,31 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * search keysets for classes, stations and measures
 	 */
-	protected Vector<Object> classesKeyset = new Vector<Object>(), noSourceSinkKeyset = new Vector<Object>(), stationsKeyset = new Vector<Object>(),
-			measuresKeyset = new Vector<Object>(), blockingRegionsKeyset = new Vector<Object>(), measuresBlockingKeyset = new Vector<Object>(),
-			blockableStations = new Vector<Object>();
+	protected Vector<Object> classesKeyset = new Vector<Object>();
+	/**
+	 * search keysets for classes, stations and measures
+	 */
+	protected Vector<Object> noSourceSinkKeyset = new Vector<Object>();
+	/**
+	 * search keysets for classes, stations and measures
+	 */
+	protected Vector<Object> stationsKeyset = new Vector<Object>();
+	/**
+	 * search keysets for classes, stations and measures
+	 */
+	protected Vector<Object> measuresKeyset = new Vector<Object>();
+	/**
+	 * search keysets for classes, stations and measures
+	 */
+	protected Vector<Object> blockingRegionsKeyset = new Vector<Object>();
+	/**
+	 * search keysets for classes, stations and measures
+	 */
+	protected Vector<Object> measuresBlockingKeyset = new Vector<Object>();
+	/**
+	 * search keysets for classes, stations and measures
+	 */
+	protected Vector<Object> blockableStations = new Vector<Object>();
 
 	/**
 	 * Hashmap for classes parameters
@@ -118,28 +140,32 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * connection targets, on Y for sources.
 	 */
 	//    protected BDMap connectionsBDM = new CachedBDMap(),
-	protected BDMap connectionsBDM = new BDMapImpl(),
-
+	protected BDMap connectionsBDM = new BDMapImpl();
 	/**
+	 * BDMap containing station connections. On X coordinate will be put stationKeys for
+	 * connection targets, on Y for sources.
+	 */
+	protected BDMap /**
 	 * BDMap containing a set of station details for each station and each class.
 	 * on X coordinate must be put class search keys, on Y station search keys.
 	 */
-	stationDetailsBDM = new BDMapImpl(),
-
-	//    stationDetailsBDM = new CachedBDMap(),
-
-			/**
-			 * BDMap containing a set of blocking region details for each blocking region and each class.
-			 * on X coordinate must be put class search keys, on Y blocking region search keys.
-			 */
-			blockingDetailsBDM = new BDMapImpl();
+	stationDetailsBDM = new BDMapImpl();
+	/**
+	 * BDMap containing station connections. On X coordinate will be put stationKeys for
+	 * connection targets, on Y for sources.
+	 */
+	protected BDMap /**
+	 * BDMap containing a set of blocking region details for each blocking region and each class.
+	 * on X coordinate must be put class search keys, on Y blocking region search keys.
+	 */
+	blockingDetailsBDM = new BDMapImpl();
 
 	// ------------------ Francesco D'Aquino ----------------------
 	private ParametricAnalysisDefinition parametricAnalysisModel;
 	private boolean parametricAnalysisEnabled;
 	private boolean sinkProbabilityUpdate;//Probability Routing Error.
-	private Vector<String> sinkProbabilityUpdateClasses = new Vector<String>()
-						, sinkProbabilityUpdateStations = new Vector<String>();
+	private Vector<String> sinkProbabilityUpdateClasses = new Vector<String>();
+	private Vector<String> sinkProbabilityUpdateStations = new Vector<String>();
 
 	// -------------- end Francesco D'Aquino ----------------------
 

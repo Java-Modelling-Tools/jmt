@@ -34,11 +34,19 @@ import java.awt.Stroke;
  * @author Ernesto
  */
 public class DrawBig implements DrawConstrains {
-	private static final double START_GAP = 10.0, ELEM_HEIGHT = 50.0, ELEM_WIDTH = 30.0, ELEMS_GAP = 7.0, PROC_RAD = 40.0, STAT_RAD = 25.0;
+	private static final double START_GAP = 10.0;
+	private static final double ELEM_HEIGHT = 50.0;
+	private static final double ELEM_WIDTH = 30.0;
+	private static final double ELEMS_GAP = 7.0;
+	private static final double PROC_RAD = 40.0;
+	private static final double STAT_RAD = 25.0;
 	private static final float STROKE_SIZE = 4.0f;
 
-	private static final Font F = new Font("Monospaced", Font.BOLD, 18), FN = new Font("Verdana", Font.BOLD, 18), FS = new Font("Verdana", Font.BOLD,
-			16), FB = new Font("Verdana", Font.BOLD, 20);
+	private static final Font F = new Font("Monospaced", Font.BOLD, 18);
+	private static final Font FN = new Font("Verdana", Font.BOLD, 18);
+	private static final Font FS = new Font("Verdana", Font.BOLD,
+			16);
+	private static final Font FB = new Font("Verdana", Font.BOLD, 20);
 
 	private static final Stroke S = new BasicStroke(STROKE_SIZE, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 	private static final Stroke BS = new BasicStroke(STROKE_SIZE + STROKE_SIZE / 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);

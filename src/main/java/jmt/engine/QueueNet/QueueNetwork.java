@@ -73,7 +73,9 @@ public class QueueNetwork {
 	/** Measure ID: residence time */
 	public final static int SERVICE_TIME = 0x003;
 
-	private NodeList referenceNodes, nodes;
+	private NodeList referenceNodes;
+
+	private NodeList nodes;
 
 	private LinkedList<Measure> measures;
 
@@ -81,7 +83,9 @@ public class QueueNetwork {
 
 	private String name;
 
-	private int behaviour, state;
+	private int behaviour;
+
+	private int state;
 
 	private GlobalJobInfoList jobInfoList;
 

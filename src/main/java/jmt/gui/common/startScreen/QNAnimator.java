@@ -103,7 +103,8 @@ public class QNAnimator extends JPanel {
 		//speed for the jobs on this path
 		private double jobSpeed;
 		//angles of this path
-		private int[] xPoints, yPoints;
+		private int[] xPoints;
+		private int[] yPoints;
 
 		public Path(int[] xCoords, int[] yCoords, double speed) {
 			xPoints = xCoords;

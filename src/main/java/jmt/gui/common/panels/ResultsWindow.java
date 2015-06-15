@@ -103,7 +103,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	private static final long serialVersionUID = 1L;
 	private MeasureDefinition results;
 	private AbortMeasure abort;
-	private JButton start, stop, pause;
+	private JButton start;
+	private JButton stop;
+	private JButton pause;
 	private JProgressBar progressBar;
 	// Used to format numbers
 	private static DecimalFormat decimalFormatExp = new DecimalFormat("0.00E0");
@@ -331,9 +333,13 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		protected JLabel icon;
 		protected JLabel msgLabel;
 		protected Vector<MeasureValue> values;
-		protected JTextField samples, mean, lower, upper;
+		protected JTextField samples;
+		protected JTextField mean;
+		protected JTextField lower;
+		protected JTextField upper;
 		protected JButton abortButton;
-		protected FastGraph graph, popupGraph;
+		protected FastGraph graph;
+		protected FastGraph popupGraph;
 		protected JSplitPane graphPanel;
 		protected JFrame popupFrame;
 		protected JTextArea textState;

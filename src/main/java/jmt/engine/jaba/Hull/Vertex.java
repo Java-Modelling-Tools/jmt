@@ -26,7 +26,15 @@ public class Vertex {
 	/**
 	 * The 3D coordinates (x, y, z) of the vertex.
 	 */
-	private int x, y, z;
+	private int x;
+	/**
+	 * The 3D coordinates (x, y, z) of the vertex.
+	 */
+	private int y;
+	/**
+	 * The 3D coordinates (x, y, z) of the vertex.
+	 */
+	private int z;
 
 	/**
 	 * Construct the vertex at (0, 0, 0).

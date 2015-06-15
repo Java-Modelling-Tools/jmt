@@ -81,7 +81,9 @@ public class GraphStartScreen extends JMTFrame {
 	private static URL imageURL = GraphStartScreen.class.getResource(IMAGE);
 	private static final int FONT_SIZE = 4;
 	private static String[] args;
-	private JButton onlineDoc, introEng, about;
+	private JButton onlineDoc;
+	private JButton introEng;
+	private JButton about;
 
 	// Queue Animation
 	private SampleQNAnimation sampleQNAni;

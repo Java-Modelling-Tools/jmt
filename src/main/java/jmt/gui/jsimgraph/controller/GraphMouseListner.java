@@ -40,7 +40,17 @@ public class GraphMouseListner implements MouseInputListener {
 
 	protected UIState currentState;
 
-	protected UIState connect, delete, insert, paste, select, nothing;
+	protected UIState connect;
+
+	protected UIState delete;
+
+	protected UIState insert;
+
+	protected UIState paste;
+
+	protected UIState select;
+
+	protected UIState nothing;
 
 	/** The focused cell under the mousepointer. */
 	protected CellView focus;

@@ -34,7 +34,8 @@ public class newGraham {
 	Vector<newPoint> newconvexHull = new Vector<newPoint>();
 	Vector<newPoint> newnewconvexHull = new Vector<newPoint>();
 
-	int height, width;
+	int height;
+	int width;
 
 	public void emptyPt() {
 		point.removeAllElements();
@@ -191,6 +192,7 @@ public class newGraham {
 }
 
 class PPoint {
-	int x, y;
+	int x;
+	int y;
 	float angle;
 }

@@ -120,7 +120,11 @@ public class ExactWizard extends Wizard {
 	//END
 	
 	//keep a reference to these three components to enable switching
-	private WizardPanel serviceTimesPanel, serviceDemandsPanel, visitsPanel, whatIfPanel, ReferenceStationPanel;
+	private WizardPanel serviceTimesPanel;
+	private WizardPanel serviceDemandsPanel;
+	private WizardPanel visitsPanel;
+	private WizardPanel whatIfPanel;
+	private WizardPanel ReferenceStationPanel;
 	private AMVAPanel amvaPanel;
 	
 

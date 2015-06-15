@@ -79,7 +79,9 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 
 	private boolean zeroLD;
 
-	private int classes, stations;
+	private int classes;
+
+	private int stations;
 	private String[] classNames;
 	private String[] stationNames;
 	private int[] stationTypes;

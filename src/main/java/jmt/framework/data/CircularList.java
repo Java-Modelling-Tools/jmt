@@ -46,7 +46,8 @@ public class CircularList<E> extends AbstractList<E> implements List<E>, RandomA
 	private static final int DEFAULT_SIZE = 10;
 
 	private transient E[] elements;
-	private transient int head, tail;
+	private transient int head;
+	private transient int tail;
 	private int size;
 
 	/**

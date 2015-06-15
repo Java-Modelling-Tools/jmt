@@ -67,8 +67,15 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	protected HashMap<Object, Integer> unallocated;
 
 	// Simulation parameters
-	protected JCheckBox randomSeed, infDuration, noStatistic, infSimulated;
-	protected JSpinner seed, duration, polling, maxSamples, simulated;
+	protected JCheckBox randomSeed;
+	protected JCheckBox infDuration;
+	protected JCheckBox noStatistic;
+	protected JCheckBox infSimulated;
+	protected JSpinner seed;
+	protected JSpinner duration;
+	protected JSpinner polling;
+	protected JSpinner maxSamples;
+	protected JSpinner simulated;
 	protected JTable preloadTable;
 
 	//Francesco D'Aquino

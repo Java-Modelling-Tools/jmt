@@ -30,12 +30,16 @@ import java.util.Map;
 public class CachedBDMap extends BDMapImpl {
 
 	//currently stored row and column
-	private Map mruXMap, mruYMap;
+	private Map mruXMap;
+
+	private Map mruYMap;
 
 	private Object mruXYMatch;
 
 	//currently stored keys
-	private Object mruXKey, mruYKey;
+	private Object mruXKey;
+
+	private Object mruYKey;
 
 	@Override
 	public Object get(Object xKey, Object yKey) {

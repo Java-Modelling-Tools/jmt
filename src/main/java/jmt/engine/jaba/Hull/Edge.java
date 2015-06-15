@@ -26,7 +26,11 @@ public class Edge {
 	/**
 	 * The end-points of the edge.
 	 */
-	private Vertex end1, end2;
+	private Vertex end1;
+	/**
+	 * The end-points of the edge.
+	 */
+	private Vertex end2;
 
 	/**
 	 * Construct an edge using two vertices.

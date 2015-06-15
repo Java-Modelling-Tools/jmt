@@ -41,7 +41,8 @@ public class DelayedShortestQLength extends RoutingStrategy {
 	private int property = NodeSection.PROPERTY_ID_RESIDENT_JOBS;
 	private RandomEngine random = RandomEngine.makeDefault();
 	private int num = 0;
-	private int[] qlen, newQlen;
+	private int[] qlen;
+	private int[] newQlen;
 
 	/**
 	 * This method should be overridden to implement a specific strategy.

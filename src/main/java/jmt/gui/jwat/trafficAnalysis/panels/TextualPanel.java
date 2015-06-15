@@ -276,7 +276,8 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 	 * Inner class used to create simple file filters with only extension check
 	 */
 	protected static class FileFilter extends javax.swing.filechooser.FileFilter {
-		private String extension, description;
+		private String extension;
+		private String description;
 
 		/**
 		 * Creates a new filefilter with specified extension and description

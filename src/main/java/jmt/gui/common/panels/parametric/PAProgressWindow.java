@@ -59,7 +59,9 @@ public class PAProgressWindow extends JMTDialog {
 	public static final String STOP_MESSAGE = "Parametric analysis stopped";
 	//private final double SIMULATION_DURATION_INITIALIZATION = 0;
 	private static final double HISTOGRAM_INTERVALS = 10;
-	private JButton start, stop, pause;
+	private JButton start;
+	private JButton stop;
+	private JButton pause;
 	private JToolBar toolbar;
 	private JProgressBar progressBar;
 	private SampleQNAnimation animation;
@@ -74,7 +76,8 @@ public class PAProgressWindow extends JMTDialog {
 	private int stepNumber;
 	private JPanel globalPanel;
 	private JPanel pivotPanel;
-	private boolean stopped, paused;
+	private boolean stopped;
+	private boolean paused;
 	private String elapsedTimeString;
 	private String remainingTimeString;
 

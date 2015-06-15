@@ -70,7 +70,9 @@ public class Sectors2DPanel extends JPanel {
 	private static final BasicStroke LINES = new BasicStroke(1);
 
 	// Initial x and y values and measure unit
-	private int x0, y0, unit;
+	private int x0;
+	private int y0;
+	private int unit;
 
 	// Used to format numbers
 	private static final DecimalFormat formatter = new DecimalFormat("0.000");

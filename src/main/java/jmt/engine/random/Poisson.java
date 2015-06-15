@@ -39,16 +39,39 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	// precomputed and cached values (for performance only)
 	// cache for < SWITCH_MEAN
 	protected double my_old = -1.0;
-	protected double par, q, p0, ppp;
+	protected double par;
+	protected double q;
+	protected double p0;
+	protected double ppp;
 	protected double[] pp = new double[36];
 	protected int llll;
 
 	// cache for >= SWITCH_MEAN
 	protected double my_last = -1.0;
 	protected double ll;
-	protected int k2, k4, k1, k5;
-	protected double dl, dr, r1, r2, r4, r5, lr, l_my, c_pm;
-	protected double f1, f2, f4, f5, p1, p2, p3, p4, p5, p6;
+	protected int k2;
+	protected int k4;
+	protected int k1;
+	protected int k5;
+	protected double dl;
+	protected double dr;
+	protected double r1;
+	protected double r2;
+	protected double r4;
+	protected double r5;
+	protected double lr;
+	protected double l_my;
+	protected double c_pm;
+	protected double f1;
+	protected double f2;
+	protected double f4;
+	protected double f5;
+	protected double p1;
+	protected double p2;
+	protected double p3;
+	protected double p4;
+	protected double p5;
+	protected double p6;
 
 	// cache for both;
 	protected int m;

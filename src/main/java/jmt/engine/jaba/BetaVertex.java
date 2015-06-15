@@ -24,7 +24,11 @@ package jmt.engine.jaba;
  */
 public class BetaVertex {
 
-	private double x, y, z;
+	private double x;
+
+	private double y;
+
+	private double z;
 
 	private double EPSYLON = 0.000001;
 

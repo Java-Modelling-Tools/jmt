@@ -190,18 +190,42 @@ public class Mediator implements GuiInterface {
 	// Cell factory
 	private CellFactory cellFactory;
 
-	private AbstractJmodelAction closeModel, newModel, openHelp, openModel, saveModel, setConnect, actionCopy, actionCut, setOptions, actionPaste,
-			setSelect, actionDelete, simulate, solveAnalitic, solveApp, editUserClasses, editMeasures, switchToExactSolver, exit,
-			// Bertoli Marco
-			editDefaults, saveModelAs, pauseSimulation, stopSimulation, editSimParams, showResults, about, addBlockingRegion, takeScreenShot,
-			// end
-
-			// Giuseppe De CIcco & Fabio Granara
-			actionRotate, actionSetRight,
-
-			// Conti Andrea
-			editUndo, editRedo;
+	private AbstractJmodelAction closeModel;
 	// end
+	private AbstractJmodelAction newModel;
+	private AbstractJmodelAction openHelp;
+	private AbstractJmodelAction openModel;
+	private AbstractJmodelAction saveModel;
+	private AbstractJmodelAction setConnect;
+	private AbstractJmodelAction actionCopy;
+	private AbstractJmodelAction actionCut;
+	private AbstractJmodelAction setOptions;
+	private AbstractJmodelAction actionPaste;
+	private AbstractJmodelAction setSelect;
+	private AbstractJmodelAction actionDelete;
+	private AbstractJmodelAction simulate;
+	private AbstractJmodelAction solveAnalitic;
+	private AbstractJmodelAction solveApp;
+	private AbstractJmodelAction editUserClasses;
+	private AbstractJmodelAction editMeasures;
+	private AbstractJmodelAction switchToExactSolver;
+	private AbstractJmodelAction exit;
+	private AbstractJmodelAction // Bertoli Marco
+	editDefaults;
+	private AbstractJmodelAction saveModelAs;
+	private AbstractJmodelAction pauseSimulation;
+	private AbstractJmodelAction stopSimulation;
+	private AbstractJmodelAction editSimParams;
+	private AbstractJmodelAction showResults;
+	private AbstractJmodelAction about;
+	private AbstractJmodelAction addBlockingRegion;
+	private AbstractJmodelAction takeScreenShot;
+	private AbstractJmodelAction // Giuseppe De CIcco & Fabio Granara
+	actionRotate;
+	private AbstractJmodelAction actionSetRight;
+	private AbstractJmodelAction // Conti Andrea
+	editUndo;
+	private AbstractJmodelAction editRedo;
 
 	private JmtJGraph graph;
 	private MainWindow mainWindow;

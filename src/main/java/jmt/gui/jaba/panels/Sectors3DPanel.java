@@ -82,7 +82,8 @@ public class Sectors3DPanel extends JPanel {
 	private String[] classNames;
 
 	// Used to immagazine traslation coordinates
-	private double traslationX, traslationY;
+	private double traslationX;
+	private double traslationY;
 
 	// Tells if graph is shown
 	private boolean isShown = false;
@@ -384,7 +385,8 @@ public class Sectors3DPanel extends JPanel {
 	 * <br> Author: Bertoli Marco
 	 */
 	protected class Caption implements Comparable {
-		private double x, y;
+		private double x;
+		private double y;
 		private String label;
 		private int statN;
 

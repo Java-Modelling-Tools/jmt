@@ -94,7 +94,11 @@ public class DistributionsEditor extends JMTDialog {
 	private static final long serialVersionUID = 1L;
 
 	// Internal data structure
-	protected Distribution initial, current, target;
+	protected Distribution initial;
+
+	protected Distribution current;
+
+	protected Distribution target;
 
 	protected boolean recursive;
 

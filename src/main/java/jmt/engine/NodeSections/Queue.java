@@ -100,9 +100,11 @@ public class Queue extends InputSection {
 	private int size;
 
 	//coolStart is true if there are no waiting jobs when the queue is started
-	private boolean coolStart, infinite;
+	private boolean coolStart;
+	private boolean infinite;
 
-	private boolean[] drop, block;
+	private boolean[] drop;
+	private boolean[] block;
 
 	//the JobInfoList of the owner NetNode (use to control the number of jobs in
 	//case of finite queue)

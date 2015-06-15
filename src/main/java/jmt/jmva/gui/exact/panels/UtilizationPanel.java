@@ -42,7 +42,8 @@ public final class UtilizationPanel extends SolutionPanel {
 	private static final long serialVersionUID = 1L;
 	private double[][][] util;
 	//NEW Federico Dall'Orso
-	private double[][] stationAggs, classAggs;
+	private double[][] stationAggs;
+	private double[][] classAggs;
 	private double[] globalAgg;
 
 	//END

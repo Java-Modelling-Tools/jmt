@@ -23,19 +23,50 @@ public class PSJobInfoList implements JobInfoList {
 	private JobInfoList list;
 
 	private int numberOfJobClasses;
-	private int size, sizePerClass[];
+	private int size;
+
+	private int sizePerClass[];
 
 	//arrivals and completions
-	private int jobsIn, jobsOut, jobsInPerClass[], jobsOutPerClass[];
+	private int jobsIn;
 
-	private double busyTime, busyTimePerClass[];
+	private int jobsOut;
 
-	private double lastJobOutTime, lastJobInTime, lastJobOutTimePerClass[], lastJobInTimePerClass[];
+	private int jobsInPerClass[];
 
-	private Measure utilization, utilizationPerClass[], responseTime, responseTimePerClass[], residenceTime, residenceTimePerClass[], queueLength,
-			queueLengthPerClass[];
+	private int jobsOutPerClass[];
 
-	private InverseMeasure throughput, throughputPerClass[];
+	private double busyTime;
+
+	private double busyTimePerClass[];
+
+	private double lastJobOutTime;
+
+	private double lastJobInTime;
+
+	private double lastJobOutTimePerClass[];
+
+	private double lastJobInTimePerClass[];
+
+	private Measure utilization;
+
+	private Measure utilizationPerClass[];
+
+	private Measure responseTime;
+
+	private Measure responseTimePerClass[];
+
+	private Measure residenceTime;
+
+	private Measure residenceTimePerClass[];
+
+	private Measure queueLength;
+
+	private Measure queueLengthPerClass[];
+
+	private InverseMeasure throughput;
+
+	private InverseMeasure throughputPerClass[];
 
 	/** The number of servers to estimate Utilization measure on multiserver environments. */
 	private int serverNumber = 1;

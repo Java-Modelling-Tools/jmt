@@ -52,7 +52,10 @@ class CustomDialogMethod extends JDialog implements ActionListener, PropertyChan
 	private JPanel selectionP;
 	private GridBagConstraints c;
 	private JTextField textField;
-	private JRadioButton mm1RB, mm1kRB, mmnRB, mmnkRB;
+	private JRadioButton mm1RB;
+	private JRadioButton mm1kRB;
+	private JRadioButton mmnRB;
+	private JRadioButton mmnkRB;
 	private JOptionPane optionPane;
 	private Label numberLabel;
 

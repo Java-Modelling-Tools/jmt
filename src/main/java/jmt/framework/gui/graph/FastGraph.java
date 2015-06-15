@@ -71,8 +71,12 @@ public class FastGraph extends JPanel {
 	
 	private List<MeasureValue> values;
 	private double xunit;
-	private int x0, y0; // Position of origin of cartesian axes
-	private double xstep, ystep; // Increment for each unit in pixels
+	private int x0; // Position of origin of cartesian axes
+
+	private int y0;
+	private double xstep; // Increment for each unit in pixels
+
+	private double ystep;
 	private boolean hideLastInterval;
 	private MeasureValue selectedValue = null;
 	protected PlotPopupMenu popup = new PlotPopupMenu();

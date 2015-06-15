@@ -51,10 +51,10 @@ public class JobsDrawer extends JPanel implements Notifier/*, Runnable */{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int donejobs = 0, //number of jobs arrived to the system
-			totjobs = 0, //when limited this is number of limited jobs o/w it is 0 
-			panelW = 100, //panel width
-			panelH = 100; //panel height
+	private int donejobs = 0; //panel height
+	private int totjobs = 0;
+	private int panelW = 100;
+	private int panelH = 100;
 	private DrawConstrains dCst;
 
 	/**

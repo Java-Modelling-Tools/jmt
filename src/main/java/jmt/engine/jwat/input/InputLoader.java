@@ -15,7 +15,8 @@ public abstract class InputLoader extends TimeConsumingWorker {
 	protected BufferedReader reader;
 	protected VariableMapping[] map;
 	protected ArrayList<Observation> valori;
-	protected int countObs, totalRaw;
+	protected int countObs;
+	protected int totalRaw;
 	protected String msg;
 
 	public InputLoader(Parameter param, String fileName, VariableMapping[] map, ProgressShow prg) throws FileNotFoundException {

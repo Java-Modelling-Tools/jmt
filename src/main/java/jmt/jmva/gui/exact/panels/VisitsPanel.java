@@ -65,7 +65,8 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 			+ " To copy one value to multiple cells click on the cell containing the value, select the"
 			+ " target cells by dragging and select <b>\"Fill\"</b>.<br><br></html>";
 
-	private int classes, stations;
+	private int classes;
+	private int stations;
 	private String[] classNames;
 	private String[] stationNames;
 	private double[][] visits;

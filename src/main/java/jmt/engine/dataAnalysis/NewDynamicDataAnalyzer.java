@@ -39,7 +39,8 @@ import Jama.Matrix;
  *         Time: 12.02.04
  */
 public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
-	private double alpha, precision;
+	private double alpha;
+	private double precision;
 	private int maxData;
 	// Minimum number of samples for an OK measure.
 	private int minData;

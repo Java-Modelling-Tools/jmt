@@ -111,7 +111,13 @@ public class Measure {
 	//the scale factor
 	double scaleFactor = 1.0;
 
-	protected double lastIntervalAvgValue, simulationTime, lastSampleWeight, lastWeight;
+	protected double lastIntervalAvgValue;
+
+	protected double simulationTime;
+
+	protected double lastSampleWeight;
+
+	protected double lastWeight;
 
 	//-------end SCALE FACTOR FOR RESIDENCE TIME MEASURES------------//
 

@@ -141,18 +141,65 @@ public class MMQueues extends JMTFrame {
 	private JSlider accelerationS;
 
 	// Label & Label strings
-	private JLabel sL, lambdaL, mediaJobsL, utilizationL, buffL, thrL, responseL, accelerationL;
+	private JLabel sL;
 
-	private String sStrS = "Avg. Service Time S = ", sStrE = " s", lambdaStrS = "Avg. Arrival Rate (lambda) = ", lambdaStrE = " cust./s",
-			nStrS = "Avg. Cust. in Station (Queue + Service) N = ", nStrE = " cust.", uStrS = "Avg. Utilization (Sum of All Servers) U = ",
-			uStrE = "", bufStrS = "Max Station Capacity k = ", bufStrE = " cust.", thrStrS = "Avg. Throughput X =", thrStrE = " cust./s",
-			respStrS = "Avg. Response Time R = ", respStrE = " s";
+	private JLabel lambdaL;
+
+	private JLabel mediaJobsL;
+
+	private JLabel utilizationL;
+
+	private JLabel buffL;
+
+	private JLabel thrL;
+
+	private JLabel responseL;
+
+	private JLabel accelerationL;
+
+	private String sStrS = "Avg. Service Time S = ";
+
+	private String sStrE = " s";
+
+	private String lambdaStrS = "Avg. Arrival Rate (lambda) = ";
+
+	private String lambdaStrE = " cust./s";
+
+	private String nStrS = "Avg. Cust. in Station (Queue + Service) N = ";
+
+	private String nStrE = " cust.";
+
+	private String uStrS = "Avg. Utilization (Sum of All Servers) U = ";
+
+	private String uStrE = "";
+
+	private String bufStrS = "Max Station Capacity k = ";
+
+	private String bufStrE = " cust.";
+
+	private String thrStrS = "Avg. Throughput X =";
+
+	private String thrStrE = " cust./s";
+
+	private String respStrS = "Avg. Response Time R = ";
+
+	private String respStrE = " s";
 
 	// Settings
-	private Color emptyC = Color.WHITE, probC = Color.GREEN, queueC = Color.BLUE, animC = Color.RED;
+	private Color emptyC = Color.WHITE;
+
+	private Color probC = Color.GREEN;
+
+	private Color queueC = Color.BLUE;
+
+	private Color animC = Color.RED;
 	private boolean gradientF = false;
 	private DrawConstrains dCst = new DrawNormal();
-	private int BUFF_I = 15, LAMBDA_I = 50, S_I = 95;
+	private int BUFF_I = 15;
+
+	private int LAMBDA_I = 50;
+
+	private int S_I = 95;
 
 	// menu
 	private JMenuBar menuB;

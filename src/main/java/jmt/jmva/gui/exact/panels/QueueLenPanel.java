@@ -53,7 +53,8 @@ public final class QueueLenPanel extends SolutionPanel {
 	private static final long serialVersionUID = 1L;
 	private double[][][] queueLen;
 	//NEW Dall'Orso
-	double[][] classAggs, stationAggs;
+	double[][] classAggs;
+	double[][] stationAggs;
 	double[] globalAgg;
 
 	//END

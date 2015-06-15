@@ -38,7 +38,8 @@ import jmt.jmva.gui.exact.ExactWizard;
 public final class ThroughputPanel extends SolutionPanel {
 	private static final long serialVersionUID = 1L;
 	private double[][][] throughput;
-	private double[][] classAggr, stationAggr;
+	private double[][] classAggr;
+	private double[][] stationAggr;
 	private double[] globalAggr;
 
 

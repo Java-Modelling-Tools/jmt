@@ -78,7 +78,9 @@ public final class ServiceDemandsPanel extends WizardPanel implements JabaConsta
 			+ " To edit service demands of an LD station double-click anywhere on its row.<br></html>";
 
 	private boolean zeroLD;
-	private int classes, stations;
+	private int classes;
+
+	private int stations;
 	private String[] classNames;
 	private String[] stationNames;
 	private int[] stationTypes;

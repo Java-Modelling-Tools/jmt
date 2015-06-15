@@ -25,8 +25,10 @@ package jmt.engine.jaba.convexHull3d;
  */
 public class HullEdge {
 	
-	private HullVertex	p0, p1;
-	private HullFace	f0, f1;
+	private HullVertex	p0;
+	private HullVertex p1;
+	private HullFace	f0;
+	private HullFace f1;
 	
 	private HullFace	newFace;
 	private boolean		delete;

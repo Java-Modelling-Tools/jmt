@@ -72,7 +72,10 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	// Performance index selector
 	private JComboBox index;
 	// Bounds for graph
-	private JSpinner Xmin, Xmax, Ymin, Ymax;
+	private JSpinner Xmin;
+	private JSpinner Xmax;
+	private JSpinner Ymin;
+	private JSpinner Ymax;
 	// Tells if spinner update is forced. This is needed to avoid that updates made by
 	// code will be interpreted as updated made by user.
 	private boolean forcedUpdate = false;
@@ -87,8 +90,10 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	private MainJwatWizard ew;
 	private Vector columnHeads;
 	private Vector<Vector<Comparable>> rows;
-	private JPanel left, mainPanel;
-	private double[] resA, resB;
+	private JPanel left;
+	private JPanel mainPanel;
+	private double[] resA;
+	private double[] resB;
 
 	private BurstEngine engine = null;
 

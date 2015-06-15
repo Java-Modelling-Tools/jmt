@@ -90,7 +90,9 @@ public class ExactTable extends JTable {
 	protected RowHeader rowHeader;
 	protected int rowHeaderWidth = 80;
 	protected JButton selectAllButton;
-	protected JLabel moreColumnsLabel, moreRowsLabel;
+	protected JLabel moreColumnsLabel;
+
+	protected JLabel moreRowsLabel;
 	protected boolean displaysScrollLabels = true;
 	protected boolean selectAllEnabled = true;
 	protected boolean clipboardTransferEnabled = false;

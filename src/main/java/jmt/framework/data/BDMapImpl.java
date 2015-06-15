@@ -35,7 +35,9 @@ public class BDMapImpl implements BDMap {
 	//contains all of the elements inserted into this BDMapImpl
 	private Object[][] contents = new Object[0][0];
 
-	private Object[] xKeys = new Object[0], yKeys = new Object[0];
+	private Object[] xKeys = new Object[0];
+
+	private Object[] yKeys = new Object[0];
 
 	/**returns keyset along a single dimension.
 	 * @param coordName name of dimension.

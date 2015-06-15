@@ -82,7 +82,17 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 	/** Edited by Abhimanyu Chugh **/
 	private NumberFormat numFormat = new DecimalFormat("#.###############");
 	/** End **/
-	private JLabel description, stationLabel, classLabel, fromLabel, toLabel, iterationLabel;
+	private JLabel description;
+	/** End **/
+	private JLabel stationLabel;
+	/** End **/
+	private JLabel classLabel;
+	/** End **/
+	private JLabel fromLabel;
+	/** End **/
+	private JLabel toLabel;
+	/** End **/
+	private JLabel iterationLabel;
 
 	public static final String helpText = "<html>In this panel you can select a <em>control parameter</em> "
 			+ "that will be used to performa a what-if analysis.<br>Model solution is iterated by changing selected "
@@ -102,8 +112,12 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 	private static final String TO_DEMANDS = "To (s) : ";
 	private static final String TO_MIX = "To (\u03b2i) : ";
 
-	private JComboBox type, stationName, className;
-	private JTextField from, to, iterations;
+	private JComboBox type;
+	private JComboBox stationName;
+	private JComboBox className;
+	private JTextField from;
+	private JTextField to;
+	private JTextField iterations;
 	private ClassTable classTable;
 	private JPanel tablePanel;
 	
@@ -123,11 +137,14 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 	// Data structures
 	private ExactModel data;
 	private TreeMap<String, Integer> classNames; // A map className --> index in source array
-	private TreeMap<String, Integer> closedClassNames, openClassNames;
+	private TreeMap<String, Integer> closedClassNames;
+	private TreeMap<String, Integer> openClassNames;
 	private TreeMap<String, Integer> stationNames; // A map stationName --> index in source array without LD stations
 	private double[] values;
-	private String currentType, currentClass;
-	private ArrayList<String> openClasses, closedClasses; // All open classes and closed classes names
+	private String currentType;
+	private String currentClass;
+	private ArrayList<String> openClasses; // All open classes and closed classes names
+	private ArrayList<String> closedClasses;
 	private HashMap<String,Integer> algorithmIndex;
 	// Current value ('from' field)
 	private double current;
@@ -1151,7 +1168,8 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 	
 	/** Defines a label for the whatif type */
 	private static class TypeLabel {
-		private String name, label;
+		private String name;
+		private String label;
 		private boolean valid;
 
 		public TypeLabel(String name, String label) {

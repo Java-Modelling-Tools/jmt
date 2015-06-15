@@ -791,7 +791,8 @@ public class Simulation {
 	 * This is a connection between two nodes of the simulation.
 	 */
 	class Connection {
-		private String start, end;
+		private String start;
+		private String end;
 
 		/**
 		 * Creates a node connection between two stations of the model

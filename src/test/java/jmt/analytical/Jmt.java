@@ -1,4 +1,4 @@
-package jmt.commandline;
+package jmt.analytical;
 
 import java.io.File;
 import java.io.FileInputStream;
