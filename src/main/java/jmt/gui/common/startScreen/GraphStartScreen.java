@@ -308,7 +308,6 @@ public class GraphStartScreen extends JMTFrame {
 		this.getGlassPane().setVisible(true);
 		// Now Adds Sample Animation in the bottom
  		sampleQNAni = new SampleQNAnimation();
-        	sampleQNAni.start();
 		JPanel pivotPanel = new JPanel(new GridBagLayout());
 		sampleQNAni.setPreferredSize(new Dimension(200, 120));
 //		sampleQNAni.setBackground(new Color(151, 151, 151));
@@ -334,6 +333,7 @@ public class GraphStartScreen extends JMTFrame {
 		pivotPanel.setOpaque(false);
 		leftPanel.add(pivotPanel, BorderLayout.CENTER);
 
+        	sampleQNAni.start();
         }
 
 	//assigns each component its own listener

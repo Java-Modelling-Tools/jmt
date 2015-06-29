@@ -33,6 +33,7 @@ import jmt.framework.data.ArrayUtils;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
 
+import jmt.jmva.analytical.solvers.SolverMultiClosedMonteCarlo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -75,6 +76,8 @@ public class ExactModel implements ExactConstants  {
 	public SolverAlgorithm algorithmType = SolverAlgorithm.EXACT;
 	//Set by default if user does not enter a tolerance value
 	public double tolerance = SolverMultiClosedAMVA.DEFAULT_TOLERANCE;
+	//Set by default if user does not enter a max sample value - used for Monte Carlo.
+    private int maxSamples = SolverMultiClosedMonteCarlo.MAX_SAMPLES;
 	//Names of the algorithms to be compared
 	private Set<SolverAlgorithm> whatifAlgorithms;
 	private Map<SolverAlgorithm, Double> whatifAlgorithmsTollerance;
@@ -240,6 +243,7 @@ public class ExactModel implements ExactConstants  {
 				
 		algorithmType = e.algorithmType;
 		tolerance = e.tolerance;
+        maxSamples = e.maxSamples;
 		whatifAlgorithms = EnumSet.copyOf(e.whatifAlgorithms);
 		whatifAlgorithmsTollerance = new EnumMap<SolverAlgorithm, Double>(e.whatifAlgorithmsTollerance);
 
@@ -293,6 +297,14 @@ public class ExactModel implements ExactConstants  {
 	public void setTolerance (double tol) {
 		tolerance = tol;
 	}
+
+    public int getMaxSamples() {
+        return maxSamples;
+    }
+
+    public void setMaxSamples(int maxSample) {
+        maxSamples = maxSample;
+    }
 
 	
 	/**
@@ -1416,7 +1428,8 @@ public class ExactModel implements ExactConstants  {
 		algParamsElement.appendChild(algType_element);
 		algType_element.setAttribute("name", algorithmType.toString());
 		algType_element.setAttribute("tolerance", Double.toString(tolerance));
-		
+        algType_element.setAttribute("maxSamples", Integer.toString(maxSamples));
+
 		/* compare algorithms box */
 		Element compareAlgs_element = root.createElement("compareAlgs");
 		compareAlgs_element.setAttribute("value", Boolean.toString(isWhatifAlgorithms()));
@@ -1754,8 +1767,11 @@ public class ExactModel implements ExactConstants  {
 			Element algType = (Element) algParam.getElementsByTagName("algType").item(0);
 			setAlgorithmType(SolverAlgorithm.fromString(algType.getAttribute("name")));
 			setTolerance(Double.parseDouble(algType.getAttribute("tolerance")));
-			
-			Element compareAlgs = (Element) algParam.getElementsByTagName("compareAlgs").item(0);
+            if (!algType.getAttribute("maxSamples").isEmpty()) {
+                setMaxSamples(Integer.parseInt(algType.getAttribute("maxSamples")));
+            }
+
+            Element compareAlgs = (Element) algParam.getElementsByTagName("compareAlgs").item(0);
 			NodeList whatIfAlgs = compareAlgs.getElementsByTagName("whatIfAlg");
 			for (int i = 0; i < whatIfAlgs.getLength(); i++) {
 				Element alg = (Element) whatIfAlgs.item(i);

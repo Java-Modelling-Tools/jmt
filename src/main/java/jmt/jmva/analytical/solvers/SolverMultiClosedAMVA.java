@@ -8,7 +8,7 @@ package jmt.jmva.analytical.solvers;
  */
 public abstract class SolverMultiClosedAMVA extends SolverMulti {
 	public final static double DEFAULT_TOLERANCE = Math.pow(10, -7);
-	protected double tolerance = DEFAULT_TOLERANCE;
+    protected double tolerance = DEFAULT_TOLERANCE;
 	protected int MAX_ITERATIONS = Integer.MAX_VALUE;
 	protected int[] clsPopulation;
 	protected int iterations = 0; // algorithm iterations
@@ -31,7 +31,7 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 			return null;
 		}
 	}
-	
+
 	public void setTolerance(double tolerance) {
 		this.tolerance = tolerance;
 	}

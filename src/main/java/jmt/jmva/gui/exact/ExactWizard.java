@@ -369,6 +369,7 @@ public class ExactWizard extends Wizard {
 		buttons.addAll(tb.populateToolbar(actions));
 		
 		//adds the algorithm selection box
+
 		amvaPanel = new AMVAPanel(this);
 		tb.add(amvaPanel);
 		
