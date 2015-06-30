@@ -31,16 +31,17 @@ import java.util.Map;
  */
 public enum SolverAlgorithm {
 	EXACT("MVA", true, true, true),
-	COMOM("CoMoM", true, true, false),
-	MOM("MoM", true, true, false),
 	RECAL("RECAL", true, true, false),
-        RGF("RGF", true, true, false),
+    RGF("RGF", true, true, false),
+	MOM("MoM", true, true, false),
+	COMOM("CoMoM", true, true, false),
+	MONTECARLO("Monte Carlo", true, false, false),
 	CHOW("Chow", true, false, false),
 	BARD_SCHWEITZER("Bard-Schweitzer", true, false, false),
 	AQL("AQL", true, false, false),
 	LINEARIZER("Linearizer", true, false, false),
-	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, false, false),
-	 MONTECARLO("Monte Carlo Sampling", true, false, false);
+	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, false, false);
+
 	
 	// string representation of the algorithm
 	private String algorithmName;

@@ -57,6 +57,10 @@ public class ModelFESCApproximator {
 	 */
 	public ExactModel getModelToBeSolved() {
 		initApproximation();
+		System.out.println("input " + inputModel.hashCode());
+		System.out.println("samples " + inputModel.getMaxSamples());
+		System.out.println("output " + outputModel.hashCode());
+		System.out.println("samples " + outputModel.getMaxSamples());
 		return outputModel;
 	}
 
