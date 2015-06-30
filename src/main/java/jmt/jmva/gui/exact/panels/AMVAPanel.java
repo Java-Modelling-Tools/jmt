@@ -118,9 +118,10 @@ public final class AMVAPanel extends JPanel {
 				if (algo.isExact()) {
                     updateStatus(PanelStatus.ENABLED);
 				} else {
-					updateStatus(PanelStatus.ENABLED_TOL);
                     if (algorithm.equals(MONTE_CARLO)) {
                         updateStatus(PanelStatus.ENABLED_MAX_SAMPLE);
+                    } else {
+                        updateStatus(PanelStatus.ENABLED_TOL);
                     }
 				}
 			}
@@ -128,14 +129,14 @@ public final class AMVAPanel extends JPanel {
 	};
 
     private MaxSampleInputListener ACTION_CHANGE_MAX_SAMPLE = new MaxSampleInputListener();
-	
+
 	private ToleranceInputListener ACTION_CHANGE_TOLERANCE = new ToleranceInputListener();
-	
+
 	public AMVAPanel(ExactWizard ew) {
 		super(new BorderLayout());
 		this.ew = ew;
 		help = ew.getHelp();
-		
+
 		int index = 0;
 		String[] names = SolverAlgorithm.closedNames();
 		modelName = new String[names.length+2];
@@ -151,10 +152,10 @@ public final class AMVAPanel extends JPanel {
 			modelName[index] = names[i];
 			index++;
 		}
-		
+
 		initialize();
 	}
-	
+
 	/**
 	 * Initialize this panel
 	 */
@@ -168,7 +169,7 @@ public final class AMVAPanel extends JPanel {
         mainPanel.add(maxSamples());
 		this.add(mainPanel, BorderLayout.WEST);
 	}
-	
+
 	private JComponent algorithmList() {
 		Dimension d = new Dimension(160,30);
 		algorithmList = new JComboBox(modelName);
@@ -204,7 +205,7 @@ public final class AMVAPanel extends JPanel {
 		help.addHelp(algorithmList, "Algorithm for solving model");
 		return algorithmList;
 	}
-	
+
 	private JComponent tolLabel() {
 		Dimension d = new Dimension(70,30);
 		tolLabel = new JLabel("  Tolerance:");
@@ -248,7 +249,7 @@ public final class AMVAPanel extends JPanel {
         maxSamples.setVisible(status.maxSamplesVisible);
         return maxSamples;
     }
-	
+
 	/**
 	 * Updates the algo panel
 	 * @param isClosed true if model is closed, false if not, null to read from data structure
@@ -260,6 +261,7 @@ public final class AMVAPanel extends JPanel {
 		ExactModel data = ew.getData();
 		SolverAlgorithm algorithm = data.getAlgorithmType();
 		tolerance.setText(numFormat.format(data.getTolerance()));
+        maxSamples.setText(numFormat.format(data.getMaxSamples()));
 		algorithmList.setSelectedItem(algorithm.toString());
 		if (isClosed == null) {
 			isClosed = ew.getData().isClosed();
@@ -273,7 +275,7 @@ public final class AMVAPanel extends JPanel {
 		if (isLoadDependent == null) {
 			isLoadDependent = ew.getData().isLd();
 		}
-		
+
 		if (isLoadDependent) {
 			updateStatus(PanelStatus.DISABLED_MIXED);
 		} else if (isAlgowhatif) {
@@ -283,15 +285,16 @@ public final class AMVAPanel extends JPanel {
 		} else if (!isClosed) {
 			updateStatus(PanelStatus.DISABLED_MIXED);
 		} else if (!algorithm.isExact()) {
-			updateStatus(PanelStatus.ENABLED_TOL);
-            if (algorithm.equals(MONTE_CARLO)) {
+            if (algorithm.toString().equals(MONTE_CARLO)) {
                 updateStatus(PanelStatus.ENABLED_MAX_SAMPLE);
+            } else {
+                updateStatus(PanelStatus.ENABLED_TOL);
             }
 		} else {
 			updateStatus(PanelStatus.ENABLED);
 		}
 	}
-	
+
 	/**
 	 * Updates the panel status
 	 * @param newStatus the new panel status
@@ -301,8 +304,8 @@ public final class AMVAPanel extends JPanel {
 			return;
 		}
 		algLabel.setText(newStatus.algorithmLabel);
-		algLabel.setEnabled(newStatus != PanelStatus.DISABLED_WHATIF);
-		algorithmList.setVisible(newStatus.selectorVisible);
+        algLabel.setEnabled(newStatus != PanelStatus.DISABLED_WHATIF);
+        algorithmList.setVisible(newStatus.selectorVisible);
 		tolLabel.setVisible(newStatus.tolleranceVisible);
 		tolerance.setVisible(newStatus.tolleranceVisible);
         maxSampleLabel.setVisible(newStatus.maxSamplesVisible);
@@ -318,7 +321,7 @@ public final class AMVAPanel extends JPanel {
 		help.addHelp(algLabel, "Algorithm used to solve the model");
 		return algLabel;
 	}
-	
+
 	private void updateTolerance() {
 		Double tol = SolverMultiClosedAMVA.validateTolerance(tolerance.getText());
 		if (tol != null) {
@@ -337,8 +340,6 @@ public final class AMVAPanel extends JPanel {
         } else {
             JOptionPane.showMessageDialog(ew, "Error: Invalid max samples value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
         }
-        System.out.println("model " + model.hashCode());
-        System.out.println("samples " + model.getMaxSamples());
     }
 
     private class MaxSampleInputListener implements KeyListener, FocusListener {
