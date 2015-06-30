@@ -82,7 +82,7 @@ public class AboutDialogFactory {
 	/** JMVA main contributors */
 	private static final Contributors[] JMVA = {
 		new Contributors(Company.POLIMI, "Bertoli Marco", "Conti Andrea", "Dall'Orso Federico", "Omini Stefano", "Granata Federico", "Gribaudo Marco", "Sheikhvand Kourosh"),
-		new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "*Casale Giuliano", "Tokaj Piotr", "Haixiao Su")
+		new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Tokaj Piotr", "Haixiao Su")
 	};
 
 	/** JSIMwiz main contributors */
@@ -93,7 +93,7 @@ public class AboutDialogFactory {
 	/** JSIMgraph main contributors */
 	private static final Contributors[] JMODEL = {
 		new Contributors(Company.POLIMI, "Bertoli Marco", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
-		new Contributors(Company.ICL, "Eleftheriou Anastasia", "*Casale Giuliano")
+		new Contributors(Company.ICL, "Eleftheriou Anastasia")
 	};
 
 	/** JABA main contributors */
