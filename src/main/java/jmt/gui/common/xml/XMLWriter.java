@@ -80,9 +80,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		HashMap<String, String> p = new HashMap<String, String>();
 		p.put(QUEUE_STRATEGY_FCFS, "TailStrategyPriority");
 		p.put(QUEUE_STRATEGY_LCFS, "HeadStrategyPriority");
-//		p.put(QUEUE_STRATEGY_RP, "RandStrategyPriority");
-//		p.put(QUEUE_STRATEGY_SJFP, "SJFStrategyPriority");
-//		p.put(QUEUE_STRATEGY_LJFP, "LJFStrategyPriority");
+		p.put(QUEUE_STRATEGY_RAND, "RandStrategyPriority");
+		p.put(QUEUE_STRATEGY_SJF, "SJFStrategyPriority");
+		p.put(QUEUE_STRATEGY_LJF, "LJFStrategyPriority");
 		PRIORITY_QUEUE_PUT_MAPPING = Collections.unmodifiableMap(p);
 		
 		HashMap<String, String> d = new HashMap<String, String>();

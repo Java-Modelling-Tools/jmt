@@ -33,8 +33,8 @@ public class RandStrategyPriority implements QueuePutStrategy{
 					
 		double serviceTime = strategy[job.getJobClass().getId()].wait(server);
 		
-		//double serviceTime = Math.random(); //for testing purposes
 		job.setServiceTime(serviceTime); 
+		
 		//priority of this job
 		int priority = job.getJobClass().getPriority();
 
@@ -87,6 +87,7 @@ public class RandStrategyPriority implements QueuePutStrategy{
 			//else if priority is not equal than current, continue iteration
 		}
 
+		/* This appears to be a leftover, I commented it (note by G. Casale, July 2015) 
 		switch (priority){
 			case 1: queue.addLast(new JobInfo(job), false); break;
 			case 2: if (lastLow == -1) {
@@ -96,7 +97,7 @@ public class RandStrategyPriority implements QueuePutStrategy{
 			case 3: queue.addFirst(new JobInfo(job), false); break;
 			
 		}
-		
+		*/
 		
 		return;
 	}
