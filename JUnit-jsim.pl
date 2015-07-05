@@ -3,7 +3,7 @@
 # (1) quit unless we have the correct number of command-line args
 $num_args = $#ARGV + 1;
 if ($num_args < 2) {
-    print "\nPass as an argument a path to a file and a name for the test\n";
+    print "\nPass as an argument a path to a file, a name for the test, and the path to the JMT jar\n";
     exit;
 }
  
@@ -11,8 +11,17 @@ if ($num_args < 2) {
 # filename and test name
 $filename=$ARGV[0];
 $testname=$ARGV[1];
+$jmt=$ARGV[2];
 
+system("java -cp $jmt jmt.commandline.Jmt sim ".$filename." -seed 1 -maxtime 60");
+
+$expectedOutputName = $filename."-result.jsim";
 $junitFile="JUnitTemplate-jsim.java";
+
+system("perl -pi -e \'\$_ = \"\" if ( \$. == 1 );\' $expectedOutputName");
+system("perl -pi -e \'\$_ = \"\" if ( \$. == 1 );\' $expectedOutputName");
+system("perl -pi -e 'chomp unless(/^:/);' $expectedOutputName");
+system("mv $expectedOutputName $testname-output.xml");
  
 open(my $fh, '<:encoding(UTF-8)', $filename) or die "Could not open file '$filename' $!";
 my $fullstring;
@@ -20,18 +29,12 @@ while (my $row = <$fh>) {
   $fullstring = $fullstring . $row;
   #print "ROW: $row\n";
 }
-my $inputText = substr($fullstring, 0, index($fullstring, "<solutions")) . substr($fullstring, rindex($fullstring, "/solutions>") + length("/solutions>"));
+my $inputText = substr($fullstring, 0, index($fullstring, "<results")) . substr($fullstring, rindex($fullstring, "/results>") + length("/results>"));
 
 $inputName = $testname . "-input.xml";
 open(my $inputFile, '>', $inputName) or die "Could not open file '$inputName' $!";
 print $inputFile $inputText;
 close $inputFile;
-
-
-$expectedOutputName = $testname . "-output.xml";
-open(my $expectedOutputFile, '>', $expectedOutputName) or die "Could not open file '$expectedOutputName' $!";
-print $expectedOutputFile $fullstring;
-close $expectedOutputFile;
 
 open(my $junitTemplate, '<:encoding(UTF-8)', $junitFile) or die "Could not open file '$junitFile' $!";
 my $fullTemplate;
@@ -40,7 +43,7 @@ while (my $row = <$junitTemplate>) {
   $fullTemplate = $fullTemplate . "$row\n";
 }
 $fullTemplate =~ s/testName/$testname/g;
-$junitName = $testname . " JUnit test.java";
+$junitName = $testname . "Test.java";
 open(my $inputJunit, '>', $junitName) or die "Could not open file '$junitName' $!";
 print $inputJunit $fullTemplate;
 close $inputJunit;

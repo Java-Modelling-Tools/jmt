@@ -93,7 +93,8 @@ distributed according to the licenses contained in the license folder:
 - JGoodies Looks, released under BSD open source License.
 - JGraph, released under GNU LGPL License.
 - Apache Log4j, released under Apache Software License.
+- Apache Commons, released under Apache Software License.
 - Ptolemy II Ptplot, released under BSD open source License.
 - Apache Xerces Java Parser, released under Apache Software License.
 - Pdf-renderer, released under GNU LGPL 2.1 License.
-
+- Spearlib, released under BSD open source License.

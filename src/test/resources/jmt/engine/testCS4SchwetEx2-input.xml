@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="testCS4SchwetEx2_3Queue2CS.jsimg" timestamp="Sat May 16 16:08:59 CEST 2015" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="," logDelimiter=";" logPath="C:\Users\serazzi/JMT/" logReplaceMode="0" maxSamples="10000000" name="testCS4SchwetEx2_3Queue2CS.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="testCS4SchwetEx2_3Queue2CS.jsimg" timestamp="Sun Jul 05 20:08:05 BST 2015" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="," logDelimiter=";" logPath="C:\Users\serazzi/JMT/" logReplaceMode="0" maxSamples="10000000" maxSimulated="60.0" name="testCS4SchwetEx2_3Queue2CS.jsimg" polling="1.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass customers="3" name="Class1" priority="0" referenceSource="CPU 1" type="closed"/>
 <userClass customers="0" name="Class2" priority="0" referenceSource="CPU 1" type="closed"/>
 <node name="CPU 1">
@@ -543,4 +543,5 @@
 <position rotate="false" x="365.0" y="460.0"/>
 </station>
 </jmodel>
+
 </archive>
