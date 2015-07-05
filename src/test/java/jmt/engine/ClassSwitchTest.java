@@ -10,7 +10,7 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import jmt.commandline.Jmt;
 
-public class TestClassSwitchTest {
+public class ClassSwitchTest {
 
 	@Test
 	public void testCS4SchwetEx2() throws Exception {
