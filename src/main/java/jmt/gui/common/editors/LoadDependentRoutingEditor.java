@@ -124,7 +124,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
         refreshComponents();
     }
 
-    protected AbstractAction okayAction = new AbstractAction("Okay") {
+    protected AbstractAction okayAction = new AbstractAction("OK") {
 		/**
 		 *
 		 */

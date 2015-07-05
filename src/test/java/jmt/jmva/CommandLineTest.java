@@ -107,6 +107,7 @@ public class CommandLineTest {
 				FileUtils.contentEquals(input, expected));			
 	}
 	
+	
 	@Test
 	public void fileNotXmlFailedJMVAtest() throws IOException, URISyntaxException {
 		CommandLineSolver solver = new CommandLineSolver();

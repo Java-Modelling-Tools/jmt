@@ -143,7 +143,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 
 	// --- Actions performed by buttons and EventListeners ---------------------------------------------
 	// When okay button is pressed
-	protected AbstractAction okayAction = new AbstractAction("Okay") {
+	protected AbstractAction okayAction = new AbstractAction("OK") {
 		/**
 		 * 
 		 */

@@ -107,8 +107,6 @@ public class SolverDispatcher {
 	public void solve(ExactModel model) throws SolverException, InputDataException {
 		stopped = false;
 		model.resetResults();
-        System.out.println("model " + model.hashCode());
-        System.out.println("samples " + model.getMaxSamples());
 		// Solves normal models
 		if (!model.isWhatIf()) {
 			finalDispatch(model, 0);
@@ -139,8 +137,7 @@ public class SolverDispatcher {
 		/* disable all change-checking */
 		model.discardChanges();
 		model.setChanged();
-        System.out.println("model " + model.hashCode());
-        System.out.println("samples " + model.getMaxSamples());
+
 		ModelFESCApproximator fesc = new ModelFESCApproximator(model, iteration);
 		try {
 			/** Edited by Abhimanyu Chugh **/

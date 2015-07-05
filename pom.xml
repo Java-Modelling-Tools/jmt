@@ -23,6 +23,17 @@
 						<artifactId>properties-maven-plugin</artifactId>
 						<version>1.0-alpha-2</version>
 						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>${basedir}/src/main/resources/jmt/common/globalsettings.conf</file>
+									</files>
+								</configuration>
+							</execution>
 						</executions>
 					</plugin>
 					<!-- we want JDK 1.7 source and binary compatiblility -->
@@ -350,6 +361,11 @@
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>1.3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
 		</dependency>
 	</dependencies>
 </project>

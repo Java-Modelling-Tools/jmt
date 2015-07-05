@@ -81,14 +81,5 @@ public class CommandLineSolver {
 		return solve(file);
 	}
 
-	/**
-	 * Used only for TESTING and DEBUGGING.
-	 */
-	public static void test1() {
-		CommandLineSolver solver = new CommandLineSolver();
-		String path = "D:\\prova.xml";
-		File file = new File(path);
-		solver.solve(file);
-	}
 
 }

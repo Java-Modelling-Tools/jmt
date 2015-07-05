@@ -1,0 +1,546 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="testCS4SchwetEx2_3Queue2CS.jsimg" timestamp="Sat May 16 16:08:59 CEST 2015" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="," logDelimiter=";" logPath="C:\Users\serazzi/JMT/" logReplaceMode="0" maxSamples="10000000" name="testCS4SchwetEx2_3Queue2CS.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<userClass customers="3" name="Class1" priority="0" referenceSource="CPU 1" type="closed"/>
+<userClass customers="0" name="Class2" priority="0" referenceSource="CPU 1" type="closed"/>
+<node name="CPU 1">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="PSStrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="PSServer">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>100.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>20.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>I/O 2</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>0.7000000000000001</value>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>I/O 3</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>0.19999999999999998</value>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>ClassSwitch 1-2</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>0.09999999999999999</value>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>ClassSwitch 2-1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>0.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>I/O 2</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>0.3</value>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>I/O 3</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>0.5</value>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>ClassSwitch 1-2</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>0.0</value>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>ClassSwitch 2-1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>0.2</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+</node>
+<node name="I/O 2">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="PSStrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="PSServer">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>14.285714285714285</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>14.285714285714285</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CPU 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CPU 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+</node>
+<node name="I/O 3">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="PSStrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="PSServer">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>10.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>10.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CPU 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CPU 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+</node>
+<node name="ClassSwitch 1-2">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="ClassSwitch">
+<parameter array="true" classPath="java.lang.Object" name="matrix">
+<refClass>Class1</refClass>
+<subParameter array="true" classPath="java.lang.Float" name="row">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Float" name="cell">
+<value>0.0</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.Float" name="cell">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter array="true" classPath="java.lang.Float" name="row">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Float" name="cell">
+<value>0.0</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.Float" name="cell">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CPU 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CPU 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+</node>
+<node name="ClassSwitch 2-1">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="ClassSwitch">
+<parameter array="true" classPath="java.lang.Object" name="matrix">
+<refClass>Class1</refClass>
+<subParameter array="true" classPath="java.lang.Float" name="row">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Float" name="cell">
+<value>1.0</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.Float" name="cell">
+<value>0.0</value>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter array="true" classPath="java.lang.Float" name="row">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Float" name="cell">
+<value>1.0</value>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="java.lang.Float" name="cell">
+<value>0.0</value>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CPU 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class2</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CPU 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+</node>
+<measure alpha="0.01" name="CPU 1_Class1_Number of Customers" nodeType="station" precision="0.01" referenceNode="CPU 1" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class2_Number of Customers" nodeType="station" precision="0.01" referenceNode="CPU 1" referenceUserClass="Class2" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="I/O 2_Class1_Number of Customers" nodeType="station" precision="0.01" referenceNode="I/O 2" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="I/O 2_Class2_Number of Customers" nodeType="station" precision="0.01" referenceNode="I/O 2" referenceUserClass="Class2" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class1_Utilization" nodeType="station" precision="0.03" referenceNode="CPU 1" referenceUserClass="Class1" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class2_Utilization" nodeType="station" precision="0.03" referenceNode="CPU 1" referenceUserClass="Class2" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="I/O 2_Class1_Utilization" nodeType="station" precision="0.03" referenceNode="I/O 2" referenceUserClass="Class1" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="I/O 2_Class2_Utilization" nodeType="station" precision="0.03" referenceNode="I/O 2" referenceUserClass="Class2" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="I/O 3_Class1_Utilization" nodeType="station" precision="0.03" referenceNode="I/O 3" referenceUserClass="Class1" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="I/O 3_Class2_Utilization" nodeType="station" precision="0.03" referenceNode="I/O 3" referenceUserClass="Class2" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="Class1_System Number of Customers" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Class2_System Number of Customers" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="Class2" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="System Number of Customers" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="I/O 3_Class1_Number of Customers" nodeType="station" precision="0.01" referenceNode="I/O 3" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="I/O 3_Class2_Number of Customers" nodeType="station" precision="0.01" referenceNode="I/O 3" referenceUserClass="Class2" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class1_Response Time" nodeType="station" precision="0.03" referenceNode="CPU 1" referenceUserClass="Class1" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class2_Response Time" nodeType="station" precision="0.03" referenceNode="CPU 1" referenceUserClass="Class2" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="I/O 2_Class1_Response Time" nodeType="station" precision="0.03" referenceNode="I/O 2" referenceUserClass="Class1" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="I/O 2_Class2_Response Time" nodeType="station" precision="0.03" referenceNode="I/O 2" referenceUserClass="Class2" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="I/O 3_Class1_Response Time" nodeType="station" precision="0.03" referenceNode="I/O 3" referenceUserClass="Class1" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="I/O 3_Class2_Response Time" nodeType="station" precision="0.03" referenceNode="I/O 3" referenceUserClass="Class2" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class1_Throughput" nodeType="station" precision="0.01" referenceNode="CPU 1" referenceUserClass="Class1" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class2_Throughput" nodeType="station" precision="0.03" referenceNode="CPU 1" referenceUserClass="Class2" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="I/O 2_Class1_Throughput" nodeType="station" precision="0.03" referenceNode="I/O 2" referenceUserClass="Class1" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="I/O 2_Class2_Throughput" nodeType="station" precision="0.03" referenceNode="I/O 2" referenceUserClass="Class2" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="I/O 3_Class1_Throughput" nodeType="station" precision="0.03" referenceNode="I/O 3" referenceUserClass="Class1" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="I/O 3_Class2_Throughput" nodeType="station" precision="0.03" referenceNode="I/O 3" referenceUserClass="Class2" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="System Response Time" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class1_Residence Time" nodeType="station" precision="0.03" referenceNode="CPU 1" referenceUserClass="Class1" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="CPU 1_Class2_Residence Time" nodeType="station" precision="0.03" referenceNode="CPU 1" referenceUserClass="Class2" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="Class2_System Response Time" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="Class2" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="System Throughput" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Throughput" verbose="false"/>
+<connection source="CPU 1" target="I/O 2"/>
+<connection source="CPU 1" target="I/O 3"/>
+<connection source="CPU 1" target="ClassSwitch 1-2"/>
+<connection source="CPU 1" target="ClassSwitch 2-1"/>
+<connection source="I/O 2" target="CPU 1"/>
+<connection source="I/O 3" target="CPU 1"/>
+<connection source="ClassSwitch 1-2" target="CPU 1"/>
+<connection source="ClassSwitch 2-1" target="CPU 1"/>
+<preload>
+<stationPopulations stationName="CPU 1">
+<classPopulation population="3" refClass="Class1"/>
+</stationPopulations>
+</preload>
+</sim>
+<jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+<userClass color="#FF0000FF" name="Class1"/>
+<userClass color="#FFFF0000" name="Class2"/>
+<station name="CPU 1">
+<position rotate="false" x="206.0" y="251.0"/>
+</station>
+<station name="I/O 2">
+<position rotate="false" x="507.0" y="191.0"/>
+</station>
+<station name="I/O 3">
+<position rotate="false" x="451.0" y="269.0"/>
+</station>
+<station name="ClassSwitch 1-2">
+<position rotate="false" x="335.0" y="54.0"/>
+</station>
+<station name="ClassSwitch 2-1">
+<position rotate="false" x="365.0" y="460.0"/>
+</station>
+</jmodel>
+</archive>
