@@ -16,6 +16,7 @@
 			</activation>
 			<build>
 				<finalName>JMT-installer-${jmt.version}</finalName>
+				<pluginManagement>
 				<plugins>
 					<!-- Reading properties -->
 					<plugin>
@@ -221,6 +222,7 @@
 						</configuration>
 					</plugin>
 				</plugins>
+					</pluginManagement>
 			</build>
 		</profile>
 	</profiles>
@@ -330,11 +332,6 @@
 			<groupId>ptolemy</groupId>
 			<artifactId>ptolemy</artifactId>
 			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>spearlib</groupId>
-			<artifactId>spearlib</artifactId>
-			<version>0.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>xerces</groupId>
