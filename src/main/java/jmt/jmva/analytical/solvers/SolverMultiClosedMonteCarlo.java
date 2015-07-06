@@ -6,7 +6,7 @@ import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.QueuingNet.CoMoMBTFSolver;
 import jmt.jmva.analytical.solvers.QueuingNet.MonteCarloSolver;
-
+import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
 import javax.naming.OperationNotSupportedException;
 
 /**
@@ -135,7 +135,7 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
      */
     @Override
     public void solve() {
-        QueuingNet.QNSolver c = null;
+        QNSolver c = null;
         try{
             c = new MonteCarloSolver(qnm, tolerance, maxSamples);
             c.computeNormalisingConstant();

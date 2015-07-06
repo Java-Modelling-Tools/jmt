@@ -18,6 +18,7 @@ package jmt.jmva.analytical.solvers;
 
 import javax.naming.OperationNotSupportedException;
 
+import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
 import jmt.jmva.analytical.solvers.QueuingNet.MoMSolver;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
@@ -157,7 +158,7 @@ public class SolverMultiClosedMoM extends SolverMulti {
 	 */
 	@Override
 	public void solve() {
-		QueuingNet.QNSolver c = null;
+		QNSolver c = null;
 		try{
 			c = new MoMSolver(qnm, nThreads);
 			c.computeNormalisingConstant();

@@ -17,7 +17,7 @@
 package jmt.jmva.analytical.solvers;
 
 import javax.naming.OperationNotSupportedException;
-
+import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
 import jmt.jmva.analytical.solvers.QueuingNet.RECALSolver;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
@@ -163,7 +163,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	 */
 	@Override
 	public void solve() {
-		QueuingNet.QNSolver c = null;
+		QNSolver c = null;
 
 		try{
 			c = new RECALSolver(qnm);

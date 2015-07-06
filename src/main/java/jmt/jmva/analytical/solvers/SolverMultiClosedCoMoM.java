@@ -17,10 +17,10 @@
 package jmt.jmva.analytical.solvers;
 
 import javax.naming.OperationNotSupportedException;
-
+import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
 import jmt.jmva.analytical.solvers.QueuingNet.CoMoMBTFSolver;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
-import jmt.jmva.analytical.Exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
 
@@ -157,7 +157,7 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 	 */
 	@Override
 	public void solve() {
-		QueuingNet.QNSolver c = null;
+		QNSolver c = null;
 		try{
 			//			c = new CoMoMSimpleSolver(qnm, nThreads);
 			c = new CoMoMBTFSolver(qnm);
