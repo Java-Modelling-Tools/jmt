@@ -1,11 +1,11 @@
 package jmt.jmva.analytical.solvers;
 
-import DataStructures.QNModel;
-import Exceptions.BTFMatrixErrorException;
-import Exceptions.InconsistentLinearSystemException;
-import Exceptions.InternalErrorException;
-import QueuingNet.CoMoMBTFSolver;
-import QueuingNet.MonteCarloSolver;
+import jmt.jmva.analytical.solvers.DataStructures.QNModel;
+import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.QueuingNet.CoMoMBTFSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.MonteCarloSolver;
 
 import javax.naming.OperationNotSupportedException;
 

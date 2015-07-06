@@ -18,11 +18,11 @@ package jmt.jmva.analytical.solvers;
 
 import javax.naming.OperationNotSupportedException;
 
-import QueuingNet.MoMSolver;
-import DataStructures.QNModel;
-import Exceptions.BTFMatrixErrorException;
-import Exceptions.InconsistentLinearSystemException;
-import Exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.QueuingNet.MoMSolver;
+import jmt.jmva.analytical.solvers.DataStructures.QNModel;
+import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
 
 /**
  * This class implements the API to allow use by other applications. One can
