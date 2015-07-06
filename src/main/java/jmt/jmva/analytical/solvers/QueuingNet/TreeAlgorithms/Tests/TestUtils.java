@@ -1,6 +1,6 @@
 package jmt.jmva.analytical.solvers.QueuingNet.TreeAlgorithms.Tests;
 
-import static org.junit.Assert.*;
+import org.junit.Assert.*;
 
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.InputFileParserException;

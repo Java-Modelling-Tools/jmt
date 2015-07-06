@@ -1,6 +1,6 @@
 package jmt.jmva.analytical.solvers.LinearSystem.BTF;
 
-import static org.junit.Assert.*;
+import org.junit.Assert.*;
 
 import javax.naming.OperationNotSupportedException;
 

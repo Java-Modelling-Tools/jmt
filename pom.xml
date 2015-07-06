@@ -16,7 +16,6 @@
 			</activation>
 			<build>
 				<finalName>JMT-installer-${jmt.version}</finalName>
-				<pluginManagement>
 				<plugins>
 					<!-- Reading properties -->
 					<plugin>
@@ -222,7 +221,6 @@
 						</configuration>
 					</plugin>
 				</plugins>
-					</pluginManagement>
 			</build>
 		</profile>
 	</profiles>

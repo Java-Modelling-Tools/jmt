@@ -39,7 +39,7 @@ import jmt.engine.QueueNet.NetMessage;
  *         Time: 16.19.58
  */
 public class Join extends InputSection {
-	/** Data structure used to store received fragments for each job */
+	/** Data structure used to store received tasks for each job */
 	private HashMap<Job, Integer> jobs;
 
 	// --- Constructors -----------------------------------------------------------------------------
@@ -55,7 +55,7 @@ public class Join extends InputSection {
 	// ----------------------------------------------------------------------------------------------
 
 	/**
-	 * Assemples splitted jobs and sends an EVENT_JOIN to reference fork when done
+	 * Assembles splitted tasks and sends an EVENT_JOIN to reference fork when done
 	 *
 	 * @param message message to be processed.
 	 * @throws NetException if something goes wrong
@@ -83,13 +83,13 @@ public class Join extends InputSection {
 					GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
 					global.removeForkedJob(fJob);
 
-					// Needed pieces
+					// Needed tasks
 					int needed;
 					if (jobs.containsKey(fJob.getForkedJob())) {
 						needed = jobs.get(fJob.getForkedJob()).intValue();
 					} else {
 						needed = fJob.getForkedNumber();
-						// As we are waiting for other fragments, adds merged job to global and local info list
+						// As we are waiting for other tasks, adds merged job to global and local info list
 						JobInfo merged = new JobInfo(fJob.getForkedJob());
 						info.add(merged);
 						jobsList.add(merged);
@@ -97,8 +97,8 @@ public class Join extends InputSection {
 					// Decrement needed as we received this job
 					needed--;
 
-					// If needed is zero, all pieces has been retrived and job can be
-					// fowarded
+					// If needed is zero, all tasks has been retrieved and the job can be
+					// forwarded
 					if (needed == 0) {
 						jobs.remove(fJob.getForkedJob());
 						// Adds original job, otherwise we will have one less job in the network
@@ -109,7 +109,7 @@ public class Join extends InputSection {
 						send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0, fJob.getReferenceFork().getSectionID(), fJob.getReferenceFork()
 								.getOwnerNode());
 					} else {
-						// We must wait for more fragments before sending this to
+						// We must wait for more tasks before sending this to
 						// next section
 						jobs.put(fJob.getForkedJob(), new Integer(needed));
 					}
