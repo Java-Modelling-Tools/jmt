@@ -377,7 +377,9 @@ public class SolverDispatcher {
 								fail("Error initializing CoMoMMultiSolver", null);
 						}
 						solver = closedSolver;
-					} else if (SolverAlgorithm.RGF.equals(algorithmType)) {
+					}
+					/*
+					else if (SolverAlgorithm.RGF.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedRGF closedSolver = new SolverMultiClosedRGF(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
@@ -392,7 +394,7 @@ public class SolverDispatcher {
 						closedSolver.setTolerance(model.getTolerance());
 						closedSolver.setMaxSamples(model.getMaxSamples());
 						solver = closedSolver;
-					} else {
+					}*/ else {
 						double tolerance = model.getTolerance();
 						SolverMultiClosedAMVA closerSolver = null;
 						if (SolverAlgorithm.CHOW.equals(algorithmType)) {
