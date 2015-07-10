@@ -35,24 +35,34 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 public class ErlangPar extends AbstractParameter implements Parameter {
 
 	private double alpha;
-	private double r;
+	private long r;
 
 	/**
 	 * creates a new erlang parameter.
 	 * It creates a new erlang parameter with the information provided by the user.
 	 * @param alpha double containing the "scale" parameter (must be greater than zero).
-	 * @param r double containing the "shape" parameter (must be greater than zero).
+	 * @param r long containing the "shape" parameter (must be greater than zero).
 	 *
 	 * @throws IncorrectDistributionParameterException if any of the double provided is less or equal to zero.
 	 *
 	 */
 
-	public ErlangPar(double alpha, double r) throws IncorrectDistributionParameterException {
+	public ErlangPar(double alpha, long r) throws IncorrectDistributionParameterException {
 		this.alpha = alpha;
 		this.r = r;
 		testParameters();
 	}
 
+	public ErlangPar(Double walpha, Long wr) throws IncorrectDistributionParameterException {
+		this(walpha.doubleValue(), wr.longValue());
+	}
+	
+	//ARIF: left this function to make the program compatible with the older version XML files that is saved before these changes
+	public ErlangPar(double alpha, double r) throws IncorrectDistributionParameterException {
+		this(alpha, (long)r);
+	}
+	
+	//arif: left this function to make the program compatible with the older version XML files that is saved before these changes
 	public ErlangPar(Double walpha, Double wr) throws IncorrectDistributionParameterException {
 		this(walpha.doubleValue(), wr.doubleValue());
 	}
@@ -108,11 +118,11 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	 * it returns the value of r.
 	 * It returns the parameter r of the erlang distribution, also called the "shape" parameter.
 	 *
-	 * @return double with r which is the "shape" parameter.
+	 * @return long with r which is the "shape" parameter.
 	 *
 	 */
 
-	public double getR() {
+	public long getR() {
 		return r;
 	}
 
@@ -145,7 +155,7 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	 *
 	 */
 
-	public void setR(double r) throws IncorrectDistributionParameterException {
+	public void setR(long r) throws IncorrectDistributionParameterException {
 		this.r = r;
 		try {
 			testParameters();

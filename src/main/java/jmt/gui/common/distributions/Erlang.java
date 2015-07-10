@@ -49,9 +49,10 @@ public class Erlang extends Distribution {
 	protected Parameter[] setParameters() {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[2];
-		// Sets parameter alpha
-		parameters[0] = new Parameter("alpha", "\u03B1", Double.class, new Double(0.8));
-		// Checks value of alpha must greater then 0
+		// Sets parameter lambda
+		//ARIF: Left parameters name as alpha and r in order to have back-compatibility of the XML files.
+		parameters[0] = new Parameter("alpha", "\u03BB", Double.class, new Double(0.8));
+		// Checks value of lambda must greater then 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
@@ -63,13 +64,14 @@ public class Erlang extends Distribution {
 			}
 		});
 
-		// Sets parameter r
-		parameters[1] = new Parameter("r", "r", Double.class, new Double(4));
+		// Sets parameter k
+		//ARIF: Left parameters name as alpha and r in order to have back-compatibility of the XML files.
+		parameters[1] = new Parameter("r", "k", Long.class, new Long(4));
 		// Checks value of k must be greater then 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
-				Double d = (Double) value;
-				if (d.doubleValue() > 0) {
+				Long d = (Long) value;
+				if (d.longValue() > 0) {
 					return true;
 				} else {
 					return false;
@@ -96,7 +98,7 @@ public class Erlang extends Distribution {
 	@Override
 	public String toString() {
 		return "erl(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
-				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
+				+ FormatNumber(((Long) parameters[1].getValue()).longValue()) + ")";
 	}
 
 	/**
@@ -123,11 +125,17 @@ public class Erlang extends Distribution {
 	 * @param c c value
 	 */
 	protected void setCM(double mean, double c) {
-		// alpha = 1 / (c*c*mean) && r = 1 / (c*c)
+		// lambda = 1 / (c*c*mean) && k = 1 / (c*c)
 		// Backups old parameters to restore them upon a false result
 		Object oldr = getParameter("r").getValue();
 		Object olda = getParameter("alpha").getValue();
-		if (getParameter("r").setValue(new Double(1 / (c * c))) && getParameter("alpha").setValue(new Double(1 / (c * c * mean)))) {
+		
+		Long k = new Long(Math.round(new Double(1 / (c * c))));
+		c = 1 / Math.sqrt((k).doubleValue());
+		Double lambda = new Double(k/mean);
+		
+		
+		if (getParameter("r").setValue(k) && getParameter("alpha").setValue(lambda)) {
 			this.mean = mean;
 			this.c = c;
 		} else {
@@ -142,7 +150,7 @@ public class Erlang extends Distribution {
 	 */
 	@Override
 	public void updateCM() {
-		mean = ((Double) getParameter("r").getValue()).doubleValue() / ((Double) getParameter("alpha").getValue()).doubleValue();
-		c = 1 / Math.sqrt(((Double) getParameter("r").getValue()).doubleValue());
+		mean = ((Long) getParameter("r").getValue()).longValue() / ((Double) getParameter("alpha").getValue()).doubleValue();
+		c = 1 / Math.sqrt(((Long) getParameter("r").getValue()).doubleValue());
 	}
 }

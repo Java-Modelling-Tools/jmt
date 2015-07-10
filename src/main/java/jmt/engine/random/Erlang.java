@@ -170,7 +170,7 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double alpha = ((ErlangPar) p).getAlpha();
-			double r = ((ErlangPar) p).getR();
+			long r = ((ErlangPar) p).getR(); 
 			double par = 1.0;
 			for (int i = 0; i < r; i++) {
 				par = par * engine.raw();
