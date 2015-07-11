@@ -39,6 +39,7 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -84,7 +85,7 @@ public class GraphStartScreen extends JMTFrame {
 	private JButton about;
 
 	// Queue Animation
-	private SampleQNAnimation sampleQNAni;
+	public static SampleQNAnimation sampleQNAni;
 
 	// Images
 	public static final String IMG_LOGOPOLI = "logo";
@@ -333,7 +334,6 @@ public class GraphStartScreen extends JMTFrame {
 		pivotPanel.setOpaque(false);
 		leftPanel.add(pivotPanel, BorderLayout.CENTER);
 
-        	sampleQNAni.start();
         }
 
 	//assigns each component its own listener
@@ -440,6 +440,15 @@ public class GraphStartScreen extends JMTFrame {
 
 	// -----------------------------------------------------------------------------------------------------
 
+	public static void sleep(int amt) // In milliseconds
+	{
+	    long a = System.currentTimeMillis();
+	    long b = System.currentTimeMillis();
+	    while ((b - a) <= amt)
+	    {
+	        b = System.currentTimeMillis();
+	    }
+	}
 	/**
 	 * Main method
 	 * @param args not used
@@ -448,5 +457,8 @@ public class GraphStartScreen extends JMTFrame {
 		GraphStartScreen.args = args;
 		GraphStartScreen gss = new GraphStartScreen();
 		gss.setVisible(true);
+		gss.setState(JFrame.NORMAL);
+		gss.sleep(100);
+      	sampleQNAni.start();
 	}
 }
