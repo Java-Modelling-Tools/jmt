@@ -12,8 +12,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sun.corba.se.impl.orbutil.graph.Graph;
-
 /**
  * 
  * @author Piotr Tokaj

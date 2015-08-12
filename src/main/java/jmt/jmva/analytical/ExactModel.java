@@ -3119,4 +3119,34 @@ public class ExactModel implements ExactConstants  {
 		return false;
 	}
 	//-----------------------------------------------------------------------------------
+	/**
+	 * Checks current model for reference station consistency: all the visits of closed class in the reference station must be different from zero
+	 * @return true if model is consistent, false otherwise
+	 */
+	public boolean checkVisitReferenceStation() {
+		for (int j = 0; j < classes; j++) {
+			if (classTypes[j] == CLASS_CLOSED){ // for all closed classes
+				if(visits[ReferenceStation[j]][j]==0) // check that visits in reference station must be different from zero
+					return false;
+			}			
+		}
+		return true;
+	}
+	
+	/**
+	 * Checks current model for reference station consistency: the reference station must be the same for all closed classes
+	 * @return true if model is consistent, false otherwise
+	 */
+	public boolean checkClassesReferenceStation() {
+		int classindex=-1;		
+		for (int j = 0; j < classes; j++) {
+			if (classTypes[j] == CLASS_CLOSED){ // for all closed classes
+				if(classindex==-1)
+					classindex=ReferenceStation[j]; // store the first closed class index  
+				else if(classindex!=ReferenceStation[j]) // all other closed classes must coincide with the first one
+					return false;									
+			}			
+		}
+		return true;
+	}
 }

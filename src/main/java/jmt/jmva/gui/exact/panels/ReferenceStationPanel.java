@@ -19,11 +19,12 @@
 package jmt.jmva.gui.exact.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+
 import javax.swing.Box;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
@@ -333,8 +334,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) { //stations type, select the right editor
-				return stationEditor;
-				
+				return stationEditor;				
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -342,9 +342,9 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			//if this is type column, I must render it as a combo box instead of a jtextfield
-			if (column == 1) {				
-					return StationCombo;
-				}			
+			if (column == 1 && classTypes[row] == CLASS_CLOSED) {				
+				return StationCombo;
+			}			
 			else {
 				return new DefaultTableCellRenderer();
 			}
@@ -442,35 +442,35 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 
 		@Override
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {											
-
-			if (classTypes[rowIndex] == CLASS_OPEN && value.toString().equals("Arrival Process"))
-			{									
-				ReferenceStation[rowIndex] = stationNames.length-1;																			
-			}
-			else			
-				for (int i=0 ; i< stationNames.length ; i++)
-				{				
-					if (value.toString().equals(stationNames[i]))
-					{					
-						if (visits[i][rowIndex] != 0)
-							{
-								ReferenceStation[rowIndex] = i;
-								break;
-							}
-						else
-							{
-						 	infoBox("you can not choose a station which has Zero visits. please check the visit panel","Warning!");
-						 	for (int j=0 ; j < stationNames.length-1; j++)					 	
-						 		for (int k=0; k < classNames.length; k++)
-						 			if (visits[j][k] != 0)
-						 				ReferenceStation[rowIndex] = j;					 				
-						 	break;					 	
-							}
-					}				
-					else 
-						ReferenceStation[rowIndex] = 0;
+			for (int i=0 ; i< stationNames.length ; i++)
+			{
+				if (classTypes[rowIndex] == 0 && value.toString().equals("Arrival Process"))
+				{									
+					ReferenceStation[rowIndex] = 0;
+					break;															
 				}
-			
+				else if (value.toString().equals(stationNames[i]))
+				{					
+					if (visits[i][rowIndex] != 0)
+					{
+						ReferenceStation[rowIndex] = i;
+						break;
+					}
+					else
+					{
+						infoBox("you can not choose a station which has Zero visits. please check the visit panel","Warning!");
+						for (int j=0 ; j < stationNames.length-1; j++)					 	
+							for (int k=0; k < classNames.length; k++)
+								if (visits[j][k] != 0)
+									ReferenceStation[rowIndex] = j;					 				
+						break;					 	
+					}
+				}				
+				else if (classTypes[rowIndex] == 1)					
+					ReferenceStation[rowIndex] = stationNames.length-1;
+				else 
+					ReferenceStation[rowIndex] = 0;
+			}
 		}		
 					
 		@Override
@@ -479,7 +479,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			case 0:
 				return false;
 			case 1:
-				if(classTypes[rowIndex] == 0)
+				if(classTypes[rowIndex] == CLASS_CLOSED)
 					return true;
 				else
 					return false;

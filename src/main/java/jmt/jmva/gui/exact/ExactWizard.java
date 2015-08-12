@@ -635,6 +635,22 @@ public class ExactWizard extends Wizard {
 						"Input data error", JOptionPane.ERROR_MESSAGE);
 				return;
 		}
+		
+		// Checks reference station consistency
+		boolean bool = data.checkVisitReferenceStation();
+		if(bool==false){
+			JOptionPane.showMessageDialog(this, "Error: for all classes the visit of the reference station must be different from zero. Please adjust visit values or change the reference station.",
+					"Input data error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+
+		bool = data.checkClassesReferenceStation();
+		if(bool==false){
+			JOptionPane.showMessageDialog(this, "Error: the reference station must be the same for all closed classes. Please adjust the reference station classes.",
+					"Input data error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
 		newdata.resetResults();
 		/* END */
 		

@@ -258,15 +258,13 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 				double newVal = Double.parseDouble((String) value);
 				if (newVal > 0)
 					visits[rowIndex][columnIndex] = newVal;
-			else if (newVal == 0 && ReferenceStation[rowIndex] == rowIndex)
+			else if (newVal == 0 && ReferenceStation[columnIndex] == rowIndex)
 					{
-						infoBox("you can not change the number of visits to Zero because you have chosen this station in the ReferenceStation" + ReferenceStation[columnIndex],"Warning!");
+						infoBox("you can not change the number of visits to Zero because you have chosen this station as the ReferenceStation","Warning!");
 						visits[rowIndex][columnIndex] = 1;					
 					}
 				else
-					visits[rowIndex][columnIndex] = 0;
-						
-				
+					visits[rowIndex][columnIndex] = 0;										
 			} catch (NumberFormatException e) {
 			}
 		}
