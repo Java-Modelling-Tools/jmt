@@ -13,7 +13,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -21,11 +20,9 @@ import java.util.Date;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
@@ -38,11 +35,10 @@ import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.FuzzyKMean;
 import jmt.engine.jwat.workloadAnalysis.utils.ChangeVariableListener;
 import jmt.engine.jwat.workloadAnalysis.utils.JavaWatColor;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
-import jmt.gui.common.Defaults;
 import jmt.gui.jwat.JWATConstants;
 
 import org.freehep.graphics2d.VectorGraphics;
-import org.freehep.util.export.ExportDialog;
+import org.freehep.graphicsbase.util.export.ExportDialog;
 
 public class FuzzyKSingleClusterScatter extends JPanel {
 	/**

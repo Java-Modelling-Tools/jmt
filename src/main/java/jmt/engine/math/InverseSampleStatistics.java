@@ -22,6 +22,9 @@ package jmt.engine.math;
  * @author Marco Bertoli
  */
 public class InverseSampleStatistics extends SampleStatistics {
+	// Batching is used to group together multiple samples. In the future this could be made dynamic.
+	private static final int BATCH_SIZE = 50;
+	
 	private double prevWeight;
 	private double prevSampleXWeight;
 	private double prevTotalIntervalWeights;
@@ -31,12 +34,38 @@ public class InverseSampleStatistics extends SampleStatistics {
 	private double prevWeigthedSum3;
 	private double prevWeigthedSum4;
 	private double[] prevIntervalWeights;
+	
+	// The following variables handles batches
+	private int batchSamples = 0;
+	private double currentWeight = 0.0;
+	private double currentSampleXWeight = 0.0;
+	private double currentSimulationTime = 0.0;
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.math.SampleStatistics#putNewSample(double, double, double)
 	 */
 	@Override
 	public void putNewSample(double weight, double sample_x_weight, double simulationTime) {
+		// Increment the current batch
+		currentWeight += weight;
+		currentSampleXWeight += sample_x_weight;
+		currentSimulationTime = simulationTime;
+		batchSamples++;
+		
+		// Process the current batch when it's full
+		if (batchSamples >= BATCH_SIZE) {
+			processSamples(currentWeight, currentSampleXWeight, currentSimulationTime);
+			
+			// Reset for the next batch
+			batchSamples = 0;
+			currentWeight = 0.0;
+			currentSampleXWeight = 0.0;
+			currentSimulationTime = 0.0;
+		}	
+	}
+
+	
+	public void processSamples(double weight, double sample_x_weight, double simulationTime) {
 		if (weight == 0 && prevWeight == 0) {
 			return;
 		}
@@ -129,5 +158,20 @@ public class InverseSampleStatistics extends SampleStatistics {
 			System.arraycopy(intervalWeights, 0, prevIntervalWeights, 0, intervalWeights.length);
 			prevTotalIntervalWeights = totalIntervalWeights;
 		}
+	}
+
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.SampleStatistics#finalizeLoading()
+	 */
+	@Override
+	public void finalizeLoading() {
+		// Process the last batch
+		if (batchSamples > 0) {
+			processSamples(currentWeight, currentSampleXWeight, currentSimulationTime);
+		}	
+		super.finalizeLoading();
 	}	
+	
+	
 }

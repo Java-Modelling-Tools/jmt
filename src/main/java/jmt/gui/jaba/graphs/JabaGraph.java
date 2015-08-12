@@ -31,7 +31,7 @@ import javax.swing.JPopupMenu;
 
 import jmt.engine.jaba.DPoint;
 
-import org.freehep.util.export.ExportDialog;
+import org.freehep.graphicsbase.util.export.ExportDialog;
 
 /**
  * @author Sebastiano Spicuglia

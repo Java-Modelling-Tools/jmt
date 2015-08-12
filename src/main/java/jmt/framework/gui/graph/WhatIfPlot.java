@@ -17,7 +17,6 @@
  */
 package jmt.framework.gui.graph;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -36,14 +35,11 @@ import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import jmt.gui.jaba.graphs.JabaGraph;
-
-import org.freehep.util.export.ExportDialog;
-
 import jmt.gui.common.Defaults;
+
+import org.freehep.graphicsbase.util.export.ExportDialog;
 
 import ptolemy.plot.Plot;
 

@@ -135,6 +135,7 @@ public class StatisticalOutputsLoader {
 		} finally {
 			reader.closeFile();
 			updateProgress(100.0);
+			statistics.finalizeLoading();
 		}
 	}
 		

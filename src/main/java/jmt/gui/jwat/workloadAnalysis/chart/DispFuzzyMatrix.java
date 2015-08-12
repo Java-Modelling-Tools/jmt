@@ -47,7 +47,7 @@ import jmt.engine.jwat.workloadAnalysis.utils.JavaWatColor;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 
 import org.freehep.graphics2d.VectorGraphics;
-import org.freehep.util.export.ExportDialog;
+import org.freehep.graphicsbase.util.export.ExportDialog;
 
 public class DispFuzzyMatrix extends JScrollPane {
 	/**

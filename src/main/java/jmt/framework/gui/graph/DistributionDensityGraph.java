@@ -33,7 +33,7 @@ import jmt.engine.math.SampleStatistics;
 import jmt.engine.math.SampleStatistics.DistributionType;
 import jmt.gui.common.editors.StatisticalOutputsWindow;
 
-import org.freehep.util.export.ExportDialog;
+import org.freehep.graphicsbase.util.export.ExportDialog;
 
 // Hacked cut+paste from FastGraph class...very bad...
 

@@ -25,7 +25,7 @@ import jmt.gui.common.Defaults;
 import jmt.gui.jsimgraph.controller.Mediator;
 
 import org.freehep.graphics2d.VectorGraphics;
-import org.freehep.util.export.ExportDialog;
+import org.freehep.graphicsbase.util.export.ExportDialog;
 import org.jgraph.JGraph;
 import org.jgraph.graph.BasicMarqueeHandler;
 import org.jgraph.graph.CellView;

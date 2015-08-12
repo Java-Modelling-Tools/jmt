@@ -597,8 +597,10 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			graphHolder.validate();
 			graphHolder.repaint();
 			addGraphListener();
+			saveButton.setEnabled(true);
 		} else {
 			graph = null;
+			saveButton.setEnabled(false);
 		}
 		graphHolder.repaint();
 
@@ -762,7 +764,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	 */
 	private void setFieldsEnabled(boolean enabled) {
 		reDrawButton.setEnabled(enabled);
-		saveButton.setEnabled(enabled);
 		graphType.setEnabled(enabled);
 		minValue.setEnabled(enabled);
 		maxValue.setEnabled(enabled);

@@ -344,5 +344,12 @@ public class SampleStatistics {
 		return intervalWeights != null;
 	}
 	
+	/**
+	 * This method is called at the end of the loading phase.
+	 */
+	public void finalizeLoading() {
+		// Subclasses will do something here.
+	}
+	
 	
 }

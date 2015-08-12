@@ -37,7 +37,7 @@ import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import jmt.gui.jwat.JWATConstants;
 
 import org.freehep.graphics2d.VectorGraphics;
-import org.freehep.util.export.ExportDialog;
+import org.freehep.graphicsbase.util.export.ExportDialog;
 
 public class KMeanSingleClusterScatter extends JPanel {
 	/**

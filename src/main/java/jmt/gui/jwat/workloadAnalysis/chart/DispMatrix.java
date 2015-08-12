@@ -28,7 +28,7 @@ import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 
 import org.freehep.graphics2d.VectorGraphics;
-import org.freehep.util.export.ExportDialog;
+import org.freehep.graphicsbase.util.export.ExportDialog;
 
 //TODO: Aggiungere listener a model per cambiamento della matrice delle osservazioni
 public class DispMatrix extends JScrollPane {
