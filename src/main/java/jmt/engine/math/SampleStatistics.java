@@ -171,6 +171,29 @@ public class SampleStatistics {
 		return ret;
 	}
 	
+	/**
+	 * @return the start point for intervals of the distribution
+	 */
+	public double[] getDistributionIntervalsStart() {
+		double[] ret = new double[intervalWeights.length];
+		for (int i=0; i<ret.length; i++) {
+			ret[i] = intervalMin + i * intervalWidth;
+		}
+		return ret;
+	}
+	
+	/**
+	 * @return the end point for intervals of the distribution
+	 */
+	public double[] getDistriburionIntervalsEnd() {
+		double[] ret = new double[intervalWeights.length];
+		for (int i=0; i<ret.length; i++) {
+			ret[i] = intervalMax - (ret.length - i - 1) * intervalWidth;
+		}
+		return ret;
+		
+	}
+	
 	/** computes all the statistical parameters, using their respective mathematical formulae
 	  */
 	protected void calcStatistics() {

@@ -28,9 +28,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.AbstractButton;
 import javax.swing.Box;
@@ -38,6 +43,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -53,12 +59,16 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
 
+import jmt.engine.log.CSVLogger;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.math.SampleStatistics;
+import jmt.engine.math.SampleStatistics.DistributionType;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.DistributionDensityGraph;
 import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.StatisticalOutputsLoader;
@@ -91,6 +101,12 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	public final static int TYPE_HISTOGRAM = 1;
 	public final static int TYPE_DENSITY_LINE = 2;
 	public final static int TYPE_DISTRIBUTION = 3;
+	
+	public static final String CSV_COLUMN_INDEX = "INTERVAL";
+	public static final String CSV_COLUMN_START = "INTERVAL_START";
+	public static final String CSV_COLUMN_END = "INTERVAL_END";
+	public static final String CSV_COLUMN_VALUE = "VALUE";
+	
 	
 	private JButton closeButton ;
 	private JButton reDrawButton;
@@ -247,8 +263,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		saveButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				// TODO save operation...
-				
+				showSaveChartWindow();
 			}
 		});
 
@@ -804,6 +819,92 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			maxRange.setText("Final simulation time:");
 			firstSample.setText(String.valueOf(0.0));
 			lastSample.setText(String.valueOf(sop.getMaxSimulationTime()));
+		}
+	}
+	
+	/**
+	 * Show a window to save chart data
+	 */
+	private void showSaveChartWindow() {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setAcceptAllFileFilterUsed(true);
+		FileFilter csvFilter = new FileFilter() {
+			
+			@Override
+			public String getDescription() {
+				return "CSV file (*.csv)";
+			}
+			
+			@Override
+			public boolean accept(File f) {
+				return f.getName().toLowerCase().endsWith(".csv");
+			}
+		};
+		chooser.addChoosableFileFilter(csvFilter);
+		chooser.setFileFilter(csvFilter);
+		chooser.setMultiSelectionEnabled(false);
+		chooser.setCurrentDirectory(Defaults.getWorkingPath());
+		chooser.setDialogTitle("Save graph data as CSV...");
+		int returnCode = chooser.showSaveDialog(this);
+		boolean save = false;
+		File selectedFile = null;
+		if (returnCode == JFileChooser.APPROVE_OPTION && chooser.getSelectedFile() != null) {
+			selectedFile = chooser.getSelectedFile();
+			// Add extension if missing
+			if (!selectedFile.getName().toLowerCase().endsWith(".csv")) {
+				selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".csv");
+			}
+			
+			// Check for overwrite.
+			if (selectedFile.exists()) {
+				int response = JOptionPane.showConfirmDialog(null, "Overwrite file '" + selectedFile.getName() + "'?", "Confirm overwrite", JOptionPane.YES_NO_OPTION,
+						JOptionPane.QUESTION_MESSAGE);
+				save = response == JOptionPane.YES_OPTION;
+			} else {
+				save = true;
+			}
+		}
+		
+		if (save) {
+			DistributionType distrType;
+			if (graphType.getSelectedIndex() == StatisticalOutputsWindow.TYPE_DISTRIBUTION) {
+				distrType = DistributionType.CUMULATIVE;
+			} else {
+				distrType = DistributionType.FREQUENCY;
+			}
+			try {
+				saveChartData(selectedFile, distrType);
+			} catch (IOException ex) {
+				JOptionPane.showMessageDialog(this, "Error while writing CSV file: " + ex.getMessage());
+			}
+		}
+	}
+	
+	/**
+	 * Save chart data in target file
+	 * @param targetFile the target file for save operation
+	 * @param type the distribution type to save
+	 * @throws IOException when save operation failed
+	 */
+	private void saveChartData(File targetFile, DistributionType type) throws IOException {
+		CSVLogger logger = new CSVLogger(targetFile, new String[] {CSV_COLUMN_INDEX, CSV_COLUMN_START, CSV_COLUMN_END, CSV_COLUMN_VALUE}, false, 
+				Defaults.get("loggerDelimiter"), Defaults.get("loggerDecimalSeparator").charAt(0));
+		try {
+			HashMap<String, Number> value = new HashMap<>();
+			Map<String,Number> defaults = Collections.emptyMap();
+			double[] values = statGraph.getDistribution(type);
+			double[] start = statGraph.getDistributionIntervalsStart();
+			double[] end = statGraph.getDistriburionIntervalsEnd();
+			
+			for (int i=0; i<values.length; i++) {
+				value.put(CSV_COLUMN_INDEX, i+1);
+				value.put(CSV_COLUMN_START, start[i]);
+				value.put(CSV_COLUMN_END, end[i]);
+				value.put(CSV_COLUMN_VALUE, values[i]);
+				logger.log(value, defaults);
+			}
+		} finally {
+			logger.close();
 		}
 	}
 }
