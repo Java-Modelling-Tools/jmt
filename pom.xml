@@ -68,6 +68,7 @@
 											<mainClass>jmt.gui.common.startScreen.GraphStartScreen</mainClass>
 										</transformer>
 									</transformers>
+                  <dependencyReducedPomLocation>${basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
 								</configuration>
 							</execution>
 						</executions>
