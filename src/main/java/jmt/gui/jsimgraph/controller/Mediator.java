@@ -2720,6 +2720,24 @@ public class Mediator implements GuiInterface {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 			model.manageJobs(); // a close class may be added
 		}
+		// if it has at least one classswitch and multiple reference station is selected for closed classes
+		else if ((problemSubType == ModelChecker.CS_REFERENCE_STATION) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
+			model.manageJobs(); // a close class may be added
+		}
+		// 
+		else if ((problemSubType == ModelChecker.CLOSED_ZERO_POPULATION) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
+			model.manageJobs(); // a close class may be added
+		}
+		// 
+		else if ((problemSubType == ModelChecker.CS_ALL_CLOSED_ZERO_POPULATION) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
+			model.manageJobs(); // a close class may be added
+		}
+		else if ((problemSubType == ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+			dialogFactory.getDialog(new MeasurePanel(model, model, model), "Edit Performance Indices");
+		}
 		// if a source has been inserted in the model but no open classes
 		// defined show the class panel
 		else if ((problemSubType == ModelChecker.SOURCE_WITH_NO_OPEN_CLASSES_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {

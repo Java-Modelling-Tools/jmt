@@ -20,7 +20,7 @@ package jmt.engine.dataAnalysis;
 
 /**
  * It may be convenient to use an inverse measure to save computational time:
- * Inn fact, in some cases, it is easier to analyze a measure by passing samples which are
+ * In fact, in some cases, it is easier to analyze a measure by passing samples which are
  * equals to 1/measure, instead of doing one division for each sample
  * (this would make simulation much slower).
  * At the end the correct value is passed, since the "get" methods are overridden.

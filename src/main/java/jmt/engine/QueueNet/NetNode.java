@@ -652,6 +652,7 @@ public class NetNode extends SimEntity {
 			JobInfo jobInfo = jobsList.lookFor(job);
 			if (jobInfo != null) {
 				jobsList.remove(jobInfo);
+				getQueueNet().getJobInfoList().updateResponseSum(jobInfo);
 			}
 		}
 

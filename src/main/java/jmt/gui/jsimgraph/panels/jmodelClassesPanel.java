@@ -103,7 +103,7 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 
 		public jmodelClassTable() {
 			super();
-			columnSizes = new int[] { 8, 100, 60, 28, 38, 140, 39, 90, 18 };
+			columnSizes = new int[] { 8, 100, 100, 28, 38, 140, 39, 200, 18 };
 		}
 
 		@Override
@@ -172,6 +172,8 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				return classdefinition.getClassColor(classdefinition.getClassKeys().get(rowIndex));
 			} else if (columnIndex == 7) {
 				return classdefinition.getClassRefStation(classdefinition.getClassKeys().get(rowIndex));
+			} else if(STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7)) && columnIndex == 5){
+				return null;
 			} else {
 				return super.getValueAt(rowIndex, columnIndex - 1);
 			}
@@ -183,6 +185,7 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				classdefinition.setClassColor(classdefinition.getClassKeys().get(rowIndex), (Color) aValue);
 			} else if (columnIndex == 7) {
 				classdefinition.setClassRefStation(classdefinition.getClassKeys().get(rowIndex), aValue);
+				refreshComponents();
 			} else {
 				super.setValueAt(aValue, rowIndex, columnIndex - 1);
 			}
@@ -194,6 +197,9 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				return false;
 			}
 			if (columnIndex == 6 && (getValueAt(rowIndex, 2).equals("Closed"))) {
+				return false;
+			}
+			if (columnIndex == 6 && (STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7)))) {
 				return false;
 			}
 			if (columnIndex == 5) {

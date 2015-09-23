@@ -23,6 +23,7 @@ import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.BlockingQueue;
+import jmt.engine.NodeSections.ClassSwitch;
 import jmt.engine.NodeSections.Queue;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
@@ -227,14 +228,35 @@ public class QueueNetwork {
 	public void addMeasure(Measure measure) {
 		// If GlobalJobInfoList is not set, creates it
 		// (at this point all classes should be declared)
+		csExists(); 
 		if (jobInfoList == null) {
-			jobInfoList = new GlobalJobInfoList(jobClasses.size());
+			jobInfoList = new GlobalJobInfoList(jobClasses.size(), csExists());
 		}
 
 		//sets the reference to network
 		measure.setNetwork(this);
 
 		measures.add(measure);
+	}
+	
+	private boolean csExists() {
+		boolean csExists = false;
+		ListIterator<NetNode> it = nodes.listIterator();
+		while (it.hasNext()){
+			NetNode node = it.next();
+			NodeSection serviceSection = null;
+			try {
+				serviceSection = node.getSection(NodeSection.SERVICE);
+			} catch (NetException e) {
+				// NEVER ENTERS
+				e.printStackTrace();
+			}
+			if(serviceSection != null && serviceSection instanceof ClassSwitch){
+				csExists = true;
+				break;
+			}
+		}
+		return csExists;
 	}
 
 	/**
@@ -391,6 +413,30 @@ public class QueueNetwork {
 
 	}
 	//end NEW
+
+	/**
+	 * Gets the total number of switched jobs in the whole network for the specified class
+	 * @param jobClass the job class
+	 * @return the total number of switched jobs in the whole network for the specified class
+	 */
+	public int getSwitchedJobs(JobClass jobClass) {
+		//switched jobs
+		int switched = 0;
+		for (int s = 0; s < nodes.size(); s++) {
+			NetNode node = nodes.get(s);
+			NodeSection inputSection;
+			try {
+				inputSection = node.getSection(NodeSection.SERVICE);
+				if (inputSection instanceof ClassSwitch) {
+					switched += ((ClassSwitch) inputSection).getSwitchedJobCount(jobClass.getId());
+				} 
+			} catch (NetException ne) {
+				continue;
+			}
+		}
+		return switched;
+
+	}
 
 	/**
 	 * Aborts all the measures linked to the queue network

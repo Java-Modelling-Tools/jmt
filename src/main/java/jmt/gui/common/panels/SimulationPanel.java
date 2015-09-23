@@ -197,7 +197,10 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		//tabbedPane.addTab("Parametric analysis options",parametricAnalysisPanel);
 		//mainpanel.add(tabbedPane, BorderLayout.CENTER);
 		mainpanel.add(preloadPanel, BorderLayout.CENTER);
-		upperPanel.add(new JLabel("Initial customer locations:"), BorderLayout.SOUTH);
+		upperPanel.add(new JLabel("<HTML>" + 
+				"Initial customer locations:" + "<br/>" +
+				"Jobs located in <b>ClassSwitch</b>, <b>Router</b> and <b>Fork</b> are entering these stations." 
+				+"</HTML>"), BorderLayout.SOUTH);
 
 		// Adds simulation parameters
 		JPanel simPanel = new JPanel(new SpringLayout());

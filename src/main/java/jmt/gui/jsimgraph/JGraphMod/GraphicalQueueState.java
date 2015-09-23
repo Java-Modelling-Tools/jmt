@@ -110,6 +110,10 @@ public class GraphicalQueueState {
 			Vector<Object> refClasses = new Vector<Object>(0, 1);
 			Object thisSource = sources.get(i);
 			JmtCell cell = tm.get(thisSource);
+			// Skips special sources - ClassSwitch for the openClass - Arif Canakoglu 
+			if (cell == null) {
+				continue;
+			}
 			int classCount = 0;
 			for (int k = 0; k < openClasses.size(); k++) {
 				Object thisClass = openClasses.get(k);
@@ -214,9 +218,16 @@ public class GraphicalQueueState {
 			Point2D p = mediator.getCellCoordinates(cell);
 			double offset;
 			double xStart;
-			double yStart = p.getY() + V_FREE_SPACE;
+			double yStart;
 			offset = (int) ((mediator.getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT) / 2);
-			g.fill(new Rectangle2D.Double(p.getX() + offset, p.getY(), (int) width + 1, (int) height + 2));
+			if(cell.isLeftInputCell()){
+				g.fill(new Rectangle2D.Double(p.getX()  + offset, p.getY(), (int) width , (int) height ));
+				yStart = p.getY() + V_FREE_SPACE;
+			}
+			else{
+				g.fill(new Rectangle2D.Double(p.getX() + QUEUE_HEIGHT + offset, p.getY(), (int) width, (int) height ));
+				yStart = p.getY() + V_FREE_SPACE;
+			}
 
 			//First draw the queues ....
 			//if the number of classes is less then MAX_NUMBER_OF_CLASSES_QUEUE
@@ -229,8 +240,14 @@ public class GraphicalQueueState {
 
 					Color color = mediator.getClassDefinition().getClassColor(classes.get(j));
 					g.setColor(color);
+					if(cell.isLeftInputCell()){
 					xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
 					g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
+					}
+					else{
+						xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE + QUEUE_HEIGHT;
+						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
+					}
 					yStart += thisHeight;
 				}
 			}
@@ -271,8 +288,14 @@ public class GraphicalQueueState {
 
 						Color color = mediator.getClassDefinition().getClassColor(thisStation);
 						g.setColor(color);
+						if(cell.isLeftInputCell()){
 						xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
 						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
+						}
+						else{
+							xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE + QUEUE_HEIGHT;
+							g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
+						}
 						yStart += thisHeight;
 					}
 				}
@@ -283,7 +306,12 @@ public class GraphicalQueueState {
 			//offset =  (int) ( (getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT)/2 + QUEUE_HEIGHT );
 			int startAngle = 0;
 			int arcDiameter = (int) (QUEUE_HEIGHT) - 2;
+			if(cell.isLeftInputCell()){
 			xStart = p.getX() + offset + (int) QUEUE_WIDTH + 1;
+			}
+			else{
+				xStart = p.getX() + offset + 1;
+			}
 			yStart = p.getY() + 1;
 			g.setColor(Color.LIGHT_GRAY);
 			g.fill(new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, 0, 360, Arc2D.PIE));

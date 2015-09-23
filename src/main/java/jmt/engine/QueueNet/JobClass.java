@@ -27,7 +27,7 @@ public class JobClass {
 	//job class name
 	private String name;
 	//job class id
-	private int Id;
+	private int id;
 
 	/* Closed class type */
 	public static final int CLOSED_CLASS = 0;
@@ -75,17 +75,31 @@ public class JobClass {
 	//----------------------SETTER AND GETTER---------------------------///
 
 	/**Sets the Id of this class
-	 * @param Id
+	 * @param id
 	 */
-	void setId(int Id) {
-		this.Id = Id;
+	void setId(int id) {
+		this.id = id;
 	}
 
 	/** Gets the id of this class.
 	 * @return Value of property Id.
 	 */
 	public int getId() {
-		return Id;
+		return id;
+	}
+	
+	/** Gets the id of this class as bitwise long.
+	 * @return Value of property Id.
+	 */
+	public long getIdBitwise() {
+		return getIdBitwise(id);
+	}
+	
+	/** Gets the id of this class as bitwise long.
+	 * @return Value of property Id.
+	 */
+	public static long getIdBitwise(int id) {
+		return 1 << id;
 	}
 
 	/** Gets the name of this class.

@@ -52,7 +52,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -83,10 +82,11 @@ import jmt.jmarkov.utils.Formatter;
 import jmt.manual.ManualBookmarkers;
 import jmt.manual.PDFViewerBuffer;
 
-import com.jgoodies.looks.Options;
-
-public class MMQueues extends JMTFrame {
-
+/**
+ * @author Arif Canakoglu
+ *
+ */
+public class MMQueues extends JMTFrame { 
 	/**
 	 * 
 	 */
@@ -1110,13 +1110,12 @@ public class MMQueues extends JMTFrame {
 	public void stopProcessing(boolean isSaveFileOption) {
 		sim.stop();
 		while (sim.isRunning()) {
-			;//waiting to stop
+			//waiting to stop
+			try {Thread.sleep(100);} 
+			catch (InterruptedException e) {}
 		}
-		try {
-			Thread.sleep(100);//in order to sure every panel is updated
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		try {Thread.sleep(100);} 
+		catch (InterruptedException e) {}
 		jq.clearQueue();
 		outputTA.reset();
 		logFile.reset();

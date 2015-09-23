@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -373,7 +374,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	public void setStationName(String name, Object key) {
 		// Changes station name only if needed
 		if (!name.equals(getStationName(key))) {
-			super.setStationName(getUniqueStationName(name), key);
+			super.setStationName(getUniqueStationName(getCheckStationName(name)), key);
 		}
 	}
 
@@ -519,6 +520,19 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			return ss;
 		}
 	}
+	
+	/**
+	 * Returns given name if a station with the same name does not exists or makes it unique
+	 * @param name station name
+	 * @return unique name
+	 */
+	private String getCheckStationName(String name) {
+		String result = name;
+		if(name.equals(CommonConstants.STATION_TYPE_CLASSSWITCH))
+			result = result + "_" + "1";
+		return result;
+	}
+	
 
 	/**
 	 * Returns given name if a station with the same name does not exists or makes it unique

@@ -90,6 +90,7 @@ public class Join extends InputSection {
 					} else {
 						needed = fJob.getForkedNumber();
 						// As we are waiting for other tasks, adds merged job to global and local info list
+						//JobInfo merged = new JobInfo(fJob.getForkedJob(), fJob.getBornTime());
 						JobInfo merged = new JobInfo(fJob.getForkedJob());
 						info.add(merged);
 						jobsList.add(merged);

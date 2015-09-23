@@ -22,8 +22,10 @@ import java.awt.*;
 import java.util.HashMap;
 import java.util.Vector;
 
+import javax.swing.JLabel;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -38,12 +40,15 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.common.editors.LoadDependentRoutingEditor;
 import jmt.gui.common.editors.RoutingProbabilitiesEditor;
+import jmt.gui.common.panels.ClassSwitchSectionPanel.ClassSwitchTableRenderer;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.exact.table.DisabledCellRenderer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -163,6 +168,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		public RoutingSelectionTable() {
 			super();
 			setModel(new RoutingSelectionTableModel());
+			this.setDefaultRenderer(Object.class, new RoutingSelectionTableRenderer());
 			sizeColumns();
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 		}
@@ -187,7 +193,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			if (column == 0) {
-				return classEditor.getRenderer();
+				return classEditor.getRenderer(true, 1);
 			} else if (column == 1) {
 				return ComboBoxCellEditor.getRendererInstance();
 			} else {
@@ -216,6 +222,28 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 			}
 		}
 
+	}
+	
+	protected class RoutingSelectionTableRenderer extends GrayCellRenderer {
+		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 8097765063638320793L;
+		
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+			Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+			super.setHorizontalAlignment(SwingConstants.LEFT);
+ 
+			if (!table.isCellEditable(row, 1)) {
+				renderer.setEnabled(false);
+			} else {
+				renderer.setEnabled(true);
+			}
+			return renderer;
+		
+		}
 	}
 
 	protected class RoutingSelectionTableModel extends AbstractTableModel {
@@ -248,8 +276,22 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return columnIndex == 1;
+             if(columnIndex == 1){
+	             if(stationData.getStationKeysSource().contains(stationKey)){//if it is a source station
+	            	 Object classKey = indexToKey(rowIndex);
+	            	 Object refStation = classData.getClassRefStation(classKey);
+	            	 if(!stationKey.equals(refStation))
+	            		 return false;
+	            	 else 
+	            		 return true;//should be reference station
+	             }
+	             else 
+	            	 return true;
+             }
+             else //column 0 is not editable
+            	 return false;
 		}
+		
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object key = indexToKey(rowIndex);

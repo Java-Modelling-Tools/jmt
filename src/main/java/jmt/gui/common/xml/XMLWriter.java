@@ -269,6 +269,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	 */
 	static protected String getSourceNameForClass(Object classKey,
 			Document doc, CommonModel model) {
+		if(CommonConstants.STATION_TYPE_CLASSSWITCH.equals(model.getClassRefStation(classKey)))
+			return CommonConstants.STATION_TYPE_CLASSSWITCH;
 		if (model.getClassRefStation(classKey) != null) {
 			return model.getStationName(model.getClassRefStation(classKey));
 		} else {

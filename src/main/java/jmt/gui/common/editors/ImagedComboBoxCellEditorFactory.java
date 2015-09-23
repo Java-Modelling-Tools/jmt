@@ -266,6 +266,11 @@ public class ImagedComboBoxCellEditorFactory {
 					// Null component
 					setText("");
 				}
+				else if(key.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)){
+					setText(CommonConstants.STATION_TYPE_CLASSSWITCH);
+					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_CLASSSWITCH+ "Combo"));
+				}
+
 			} else {
 				// This is a class
 				if (cd.getClassName(key) != null && !cd.getClassName(key).equals("")) {
@@ -300,8 +305,24 @@ public class ImagedComboBoxCellEditorFactory {
 	 * @return an instance of Imaged combobox renderer
 	 */
 	public TableCellRenderer getRenderer() {
+		return getRenderer(false, 0);
+	}
+	
+	/** TO CORRECT
+	 * Returns an instance of Imaged combobox renderer
+	 * @return an instance of Imaged combobox renderer
+	 */
+	/**
+	 * @param isGrayRenderer if it is enabled or disable renderer
+	 * @param referenceColumn if it is disable renderer then the column that is use to the cell's editable status
+	 * @return an instance of Imaged combobox renderer 
+	 */
+	public TableCellRenderer getRenderer(boolean isGrayRenderer, int referenceColumn) {
 		if (renderer == null) {
-			renderer = new ImagedComboRenderer();
+			if(isGrayRenderer)
+				renderer = new ImagedComboGrayRenderer(referenceColumn);
+			else 
+				renderer = new ImagedComboRenderer();
 		}
 		return renderer;
 	}
@@ -330,7 +351,25 @@ public class ImagedComboBoxCellEditorFactory {
 			return component;
 		}
 	}
+	
+	protected class ImagedComboGrayRenderer extends ImagedComboRenderer {
+		private int referenceColumn;
+		
+		public ImagedComboGrayRenderer(int referenceColumn) {
+			super();
+			this.referenceColumn = referenceColumn;
+		}
 
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+			if(!table.isCellEditable(row, referenceColumn))
+				renderer.setEnabled(false);
+			return renderer;
+				
+		}
+	}
+	
 	protected class ImagedComboRenderer implements TableCellRenderer {
 		protected JComboBox combo = new JComboBox();
 

@@ -585,6 +585,8 @@ public class DistributionsEditor extends JMTDialog {
 		Arrays.sort(distributionNames); // Sorts alphabetically distribution
 										// names
 		choser = new JComboBox(distributionNames);
+		//ARIF: show all elements in ComboBox
+		choser.setMaximumRowCount(distributionNames.length);
 		choser.setToolTipText("Choose distribution type");
 		// Select correct distribution
 		if (current != null) {

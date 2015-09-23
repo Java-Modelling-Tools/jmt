@@ -341,7 +341,7 @@ public class ExactTable extends JTable {
 					scrollPane.setBorder(UIManager.getBorder("Table.scrollPaneBorder"));
 				}
 				//rowHeader=new RowHeader(dataModel);
-                                rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);
+				rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);
 				rowHeader.install(this, scrollPane);
 				installLabels(scrollPane);
 				installSelectAllButton(scrollPane);

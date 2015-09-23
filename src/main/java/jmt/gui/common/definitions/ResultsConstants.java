@@ -86,7 +86,10 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_QUEUETIMES = HTML_START + HTML_FONT_TITLE + "Queue Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average queue time for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
 	public static final String DESCRIPTION_SYSTEMRESPONSETIMES = HTML_START + HTML_FONT_TITLE + "System Response Time" + HTML_FONT_TIT_END
-			+ HTML_FONT_NORM + "Average response time of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
+			+ HTML_FONT_NORM + "Average response time of the entire system for each chosen class."
+					+ "<br><b>ATTENTION:</b> With <b>CLASS SWITCHING</b> the SYSTEM RESPONSE TIME per CLASS refers to the mean time spent in the system when the job is in that class. "
+					+ "So it is the <b>SYSTEM RESIDENCE TIME</b> of the class." + HTML_FONT_NOR_END + HTML_END;
+//ADD HERE
 	public static final String DESCRIPTION_SYSTEMTHROUGHPUTS = HTML_START + HTML_FONT_TITLE + "System Throughput" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Average throughput of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
 	public static final String DESCRIPTION_CUSTOMERNUMBERS = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END

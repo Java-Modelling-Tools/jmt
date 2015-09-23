@@ -45,7 +45,7 @@ import jmt.framework.gui.wizard.WizardPanel;
 public class DialogFactory {
 	// Dimensions
 	
-	private static final int width = 720;
+	private static final int width = 780;
 	private static final int height = 520;
 	private static final float RESIZE_RATIO = 0.8f;
 

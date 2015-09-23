@@ -121,6 +121,9 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
+				if (classData.getClassType(classData.getClassKeys().get(row)) == CLASS_TYPE_OPEN)
+					return combos.getEditor(stationData.getStationKeysSource());
+				else  
 				return combos.getEditor(stationData.getStationKeysNoSourceSink());
 			} else {
 				return super.getCellEditor(row, column);
@@ -173,7 +176,7 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 				return false;
 			}
 			if (classData.getClassType(classData.getClassKeys().get(rowIndex)) == CLASS_TYPE_OPEN) {
-				return false;
+				return true;
 			}
 			return true;
 		}

@@ -321,13 +321,12 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 		int count = 0;
 		for (int i = 0; i < names.size(); i++) {
 			if (((Boolean) selected.get(i)).booleanValue()) {
-				if (!types.get(i).equals(JWatVariableInputTable.VarTypes[2]) || count > 0) {
-					return false;
+				if (types.get(i).equals(JWatVariableInputTable.VarTypes[2])) {
+					count++;
 				}
-				count++;
 			}
 		}
-		if (count == 0) {
+		if (count != 1) {
 			return false;
 		}
 		return true;

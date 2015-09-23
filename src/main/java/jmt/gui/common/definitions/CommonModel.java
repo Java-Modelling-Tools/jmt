@@ -387,12 +387,16 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Returns inter-arrival time distribution of the class linked to the specific key.
 	 * Return value is an object representing distribution if specified class is an open
-	 *  class, null otherwise.
+	 *  class and reference station is not class switch, null otherwise.
 	 * */
 	@Override
 	public synchronized Object getClassDistribution(Object key) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
+			ClassData classData = ((ClassData) classDataHM.get(key));
+			if(classData.refSource!=null && classData.refSource.equals(STATION_TYPE_CLASSSWITCH)) {
+				return null;
+			}
 			cd = (ClassData) classDataHM.get(key);
 		} else {
 			return null;
@@ -555,7 +559,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			return;
 		}
 		Object oldRef = cd.refSource;
-		cd.refSource = stationsKeyset.contains(stationKey) ? stationKey : null;
+		if(CommonConstants.STATION_TYPE_CLASSSWITCH.equals(stationKey))
+			cd.refSource = CommonConstants.STATION_TYPE_CLASSSWITCH;
+		else
+			cd.refSource = stationsKeyset.contains(stationKey) ? stationKey : null;
 		if (oldRef != stationKey) {
 			save = true;
 		}
@@ -573,7 +580,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			return null;
 		}
 		//if previously saved refSource has been deleted, delete it to mantain coherence
-		if (!stationsKeyset.contains(cd.refSource)) {
+		if (!stationsKeyset.contains(cd.refSource) && !CommonConstants.STATION_TYPE_CLASSSWITCH.equals(cd.refSource)) { 
 			cd.refSource = null;
 		}
 		return cd.refSource;
@@ -596,6 +603,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			Object thisStation = stations.get(i);
 			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_SOURCE)) {
 				sources.add(thisStation);
+			}
+		}
+		for (int i = 0; i < stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_CLASSSWITCH)) {
+				sources.add(CommonConstants.STATION_TYPE_CLASSSWITCH);
+				break;
 			}
 		}
 		return sources;

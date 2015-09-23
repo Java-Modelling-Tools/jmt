@@ -20,6 +20,7 @@ package jmt.engine.NodeSections;
 
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
@@ -27,9 +28,12 @@ import jmt.engine.QueueNet.NetMessage;
 /**
  * This class implements a class switch.
  * 
- * @author Sebatiano Spicuglia
+ * @author Sebatiano Spicuglia, Arif Canakoglu
  */
 public class ClassSwitch extends ServiceSection {
+
+	private int[] switchedClasses; 
+	private int totalSwitchedClasses = 0;
 
 	private Float[][] matrix;
 
@@ -42,6 +46,7 @@ public class ClassSwitch extends ServiceSection {
 				this.matrix[i][j] = row[j];
 			}
 		}
+		switchedClasses = new int[matrix.length];
 	}
 
 	@Override
@@ -58,18 +63,26 @@ public class ClassSwitch extends ServiceSection {
 			case NetEvent.EVENT_JOB:
 				int jobClassIn = message.getJob().getJobClass().getId();
 				int jobClassOut = chooseOutClass(matrix[jobClassIn]);
+				//Find out class by using the matrix
+				JobClass outClass = getJobClasses().get(jobClassOut);
+	
+				//Update counters
+				if (!job.hasBeenClass(outClass)) {
+					switchedClasses[jobClassOut]++;
+					totalSwitchedClasses++;
+				}
 				
 			
 				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
 				
 				//remove job from node list
 				JobInfoList local = getOwnerNode().getJobInfoList();
-				local.remove(local.lookFor(job));
-				//remove job from station list
-				jobsList.remove(jobsList.lookFor(job));
+
 				GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
-				global.performJobClassSwitch(job, getJobClasses().get(jobClassOut));
+				global.performJobClassSwitch(job, outClass);
 				sendForward(message.getEvent(), job, 0.0);
+			
+				local.remove(local.lookFor(job));
 			
 				break;
 			case NetEvent.EVENT_STOP:
@@ -106,4 +119,23 @@ public class ClassSwitch extends ServiceSection {
 		return i-1;
 	}
 	
+	/**
+	 * Gets the count of the switched jobs of the specified class
+	 * 
+	 * @param jobClass the job class 
+	 * @return the count of the switched jobs of the specified class
+	 */
+	public int getSwitchedJobCount(int jobClass){
+		return switchedClasses[jobClass];
+	}
+	
+	/**
+	 * Gets total count of the switched jobs 
+	 * 
+	 * @return total count of the switched jobs 
+	 */
+	public int getTotalSwitchedJobs() {
+		return totalSwitchedClasses;
+	}
+
 }

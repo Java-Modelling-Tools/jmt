@@ -36,7 +36,7 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
-import jmt.gui.exact.table.ExactCellRenderer;
+import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 
@@ -220,12 +220,14 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 		
 	}
 
-	protected class ClassSwitchTableRenderer extends ExactCellRenderer {
+	protected class ClassSwitchTableRenderer extends DisabledCellRenderer {
 
 		private static final long serialVersionUID = 8097765063638320793L;
 		
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+			if(value == null)
+				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 			if (value instanceof Number) {
 				super.setHorizontalAlignment(SwingConstants.RIGHT);
 			} else if (value instanceof Boolean) {
@@ -308,12 +310,19 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return true;
+			Vector<Object> classes = classData.getClassKeys();
+			Object rowClassKey = classes.get(rowIndex);
+			Object columnClassKey = classes.get(columnIndex);
+			int rowClassType = classData.getClassType(rowClassKey);
+			int columnClassType = classData.getClassType(columnClassKey);
+			return rowClassType == columnClassType;
 		}
 
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+			if(!isCellEditable(rowIndex, columnIndex))
+				return null;
 			Vector<Object> classes = classData.getClassKeys();
 			//if(columnIndex == -1) {
 			//	return classData.getClassName(classes.get(rowIndex));

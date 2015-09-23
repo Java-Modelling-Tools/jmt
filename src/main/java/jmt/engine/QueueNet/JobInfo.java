@@ -36,6 +36,16 @@ public class JobInfo {
 		this.job = Job;
 		time = NetSystem.getTime();
 	}
+	
+//	/** Creates a new instance of JobInfo object.
+//	 * Set time for the forked job, set the forked time.
+//	 * @param Job Reference to the job to be described.
+//	 * @param time time of the forked job.
+//	 */
+//	public JobInfo(Job Job, double time) {
+//		this.job = Job;
+//		this.time = time;
+//	}
 
 	/** Gets the job referenced by this JobInfo
 	 * @return Referenced job.

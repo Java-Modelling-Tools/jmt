@@ -23,6 +23,8 @@ package jmt.engine.QueueNet;
  * 	@author Francesco Radaelli, Marco Bertoli
  */
 public class Job implements Cloneable {
+	// bitwise data, if the job have ever been as job class
+	private long classesBitwise;
 
 	//counter used to generate id
 	private static int counter;
@@ -30,7 +32,7 @@ public class Job implements Cloneable {
 	private int Id;
 
 	//Class of this job
-	private JobClass JobClass;
+	private JobClass jobClass;
 	//used to compute residence time: born time is reset when a job enters a station
 	private double BornTime;
 	//used to compute system response time
@@ -56,10 +58,11 @@ public class Job implements Cloneable {
 
 	private double serviceTime = 0;
 	/** Creates a new instance of Job.
-	 *  @param JobClass Reference to the class of the job.
+	 *  @param jobClass Reference to the class of the job.
 	 */
-	public Job(JobClass JobClass) {
-		this.JobClass = JobClass;
+	public Job(JobClass jobClass) {
+		//setClass(jobClass);
+		this.jobClass = jobClass;
 		// Job Id is used only for logging
 		this.Id = counter++;
 
@@ -73,7 +76,7 @@ public class Job implements Cloneable {
 	 * @return Value of property Class.
 	 */
 	public JobClass getJobClass() {
-		return JobClass;
+		return jobClass;
 	}
 
 	/** Sets born time.*/
@@ -104,6 +107,7 @@ public class Job implements Cloneable {
 	//@author Stefano Omini
 	public void resetSystemEnteringTime() {
 		systemEnteringTime = NetSystem.getTime();
+		resetClass();
 	}
 
 	public double getSystemEnteringTime() {
@@ -163,7 +167,44 @@ public class Job implements Cloneable {
 	 * @param newClass the new value of JobClass
 	 */
 	public void setClass(JobClass newClass) {
-		JobClass = newClass;
+		jobClass = newClass;
+		classesBitwise |= newClass.getIdBitwise();
+		//Long.toBinaryString(classesBitwise);
+	}
+	
+	/**
+	 * Reset bitwise 
+	 */
+	private void resetClass() {
+		classesBitwise = jobClass.getIdBitwise();
+	}
+	
+	/** 
+	 * If the job have ever been as jobClass
+	 * @param jobClass the class of the job if the job has ever been the class
+	 * @return true if the job currently of given class or previously in this class
+	 */
+	public boolean hasBeenClass(JobClass jobClass) {
+		return hasBeenClass(jobClass.getIdBitwise());
+	}
+	
+	/** 
+	 * If the job have ever been as jobClass id
+	 * @param jobClassId the class of the job if the job has ever been the class
+	 * @return true if the job currently of given class or previously in this class
+	 */
+	public boolean hasBeenClass(int jobClassId) {
+		long idBitwise = JobClass.getIdBitwise(jobClassId);
+		return  hasBeenClass(idBitwise);
+	}
+	
+	/** 
+	 * If the job have ever been as jobClass as idBitwise
+	 * @param jobClassId the class of the job if the job has ever been the class
+	 * @return true if the job currently of given class or previously in this class
+	 */
+	private boolean hasBeenClass(long idBitwise){
+		return  (classesBitwise & idBitwise) > 0 ;
 	}
 	
 

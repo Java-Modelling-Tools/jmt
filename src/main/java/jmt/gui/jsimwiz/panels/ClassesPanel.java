@@ -275,7 +275,8 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		JPanel upRightPanel = new JPanel(new BorderLayout());
 		addClass = new JButton(addNewClass);
 		addClass.setMinimumSize(DIM_BUTTON_S);
-		upRightPanel.add(addClass, BorderLayout.CENTER);
+		addClass.setMaximumSize(DIM_BUTTON_S);
+		upRightPanel.add(addClass, BorderLayout.NORTH);
 
 		//build spinner panel
 		JPanel spinnerPanel = new JPanel();
@@ -286,7 +287,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		spinnerPanel.add(classNumSpinner);
 
 		//add all panels to the mail panel
-		upRightPanel.add(spinnerPanel, BorderLayout.SOUTH);
+		upRightPanel.add(spinnerPanel, BorderLayout.CENTER);
 		upperPanel.add(upRightPanel, BorderLayout.EAST);
 		componentsPanel.add(upperPanel, BorderLayout.NORTH);
 		componentsPanel.add(new JScrollPane(classTable), BorderLayout.CENTER);

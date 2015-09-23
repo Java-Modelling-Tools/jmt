@@ -34,6 +34,7 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.log.JSimLogger;
+import jmt.gui.common.CommonConstants;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -567,12 +568,19 @@ public class Measure {
 		if (jobClass != null) {
 			//reference node for this job class
 			String referenceNodeName = jobClass.getReferenceNodeName();
-			NetNode referenceNode = network.getNode(referenceNodeName);
 			int visitsReferenceNode, visitsThisNode;
 			try {
-				//visits to the reference node
-				NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
-				visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobClass);
+				if(referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)){
+					visitsReferenceNode = 0;
+				}
+				else{
+					NetNode referenceNode = network.getNode(referenceNodeName);
+					//visits to the reference node
+					NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
+					visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobClass);
+					//network.getNode("Queue 2").getSection(NodeSection.OUTPUT).getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, network.getJobClass("Class2"))
+				}
+				visitsReferenceNode += network.getSwitchedJobs(jobClass);
 
 				//visits to this node node
 				NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
@@ -617,16 +625,22 @@ public class Measure {
 		else {
 			try {
 				Iterator<JobClass> it = network.getJobClasses().listIterator();
-				double ratioSum = 0.0, weight = 0.0;
+				int visitsThisNodeSum = 0, visitsReferenceNodeSum = 0, droppedJobsSum = 0;
 				while (it.hasNext()) {
 					JobClass jobC = it.next();
 					//reference node for this job class
 					String referenceNodeName = jobC.getReferenceNodeName();
-					NetNode referenceNode = network.getNode(referenceNodeName);
 					int visitsReferenceNode, visitsThisNode;
-					//visits to the reference node
-					NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
-					visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobC);
+					if(referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)){
+						visitsReferenceNode = 0;
+					}
+					else{
+						NetNode referenceNode = network.getNode(referenceNodeName);
+						//visits to the reference node
+						NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
+						visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobC);
+					}
+					//visitsReferenceNode += network.getSwitchedJobs(jobC);
 
 					//visits to this node node
 					NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
@@ -639,16 +653,13 @@ public class Measure {
 						visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobPerClass(jobC.getId());
 
 					}
-					double currVisitRatio = (double) (visitsThisNode) / (visitsReferenceNode - droppedJobs);
-
-					// Uses new calculated visit ratio to compute a weighted visit ratio
-					// This is done only if currVisitRatio value is valid
-					if (!Double.isNaN(currVisitRatio) && !Double.isInfinite(currVisitRatio)) {
-						ratioSum += currVisitRatio * visitsThisNode;
-						weight += visitsThisNode;
-						visitRatio = ratioSum / weight;
-					}
+					visitsThisNodeSum += visitsThisNode;
+					visitsReferenceNodeSum += visitsReferenceNode;
+					droppedJobsSum += droppedJobs;
+					
 				}
+				visitRatio = (double) (visitsThisNodeSum) / (visitsReferenceNodeSum - droppedJobsSum);
+
 			} catch (NetException ne) {
 				visitRatio = 1;
 				logger.error("Error in computing visit ratio.");

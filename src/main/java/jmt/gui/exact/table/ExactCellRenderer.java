@@ -18,6 +18,7 @@
 
 package jmt.gui.exact.table;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;

@@ -300,7 +300,8 @@ public class LinkedJobInfoList implements JobInfoList {
 			throw new jmt.common.exception.NetException(this, PROPERTY_NOT_AVAILABLE, "property not available");
 		}
 		//creates an iterator for the job class list of the job class of the specified job
-		ListIterator<JobInfo> it = listPerClass[Job.getJobClass().getId()].listIterator();
+		//ARIF: changed because possibly class switch has already changed the job class
+		ListIterator<JobInfo> it = list.listIterator();//PerClass[Job.getJobClass().getId()].listIterator();
 		JobInfo jobInfo;
 		while (it.hasNext()) {
 			jobInfo = it.next();

@@ -127,7 +127,7 @@ public class JModelProblemsWindow extends JDialog {
 		} else {
 			this.setTitle("Simulation diagnostic");
 		}
-		setBounds(20, 20, 20, 20);
+		setBounds(200, 200, 200, 200);
 
 		title = new JLabel(CommonConstants.HTML_START + CommonConstants.HTML_FONT_TITLE + "Problems found" + CommonConstants.HTML_FONT_TIT_END
 				+ CommonConstants.HTML_FONT_NORM + "Click on an element to solve the problem" + CommonConstants.HTML_FONT_NOR_END
@@ -171,13 +171,19 @@ public class JModelProblemsWindow extends JDialog {
 					if (mc.isErrorFreeNormal()) {
 						continueButton.setEnabled(true);
 					}
-					if ((pType == ModelChecker.ERROR_PROBLEM)
+					if (((pType == ModelChecker.ERROR_PROBLEM)
 							&& ((pSubType == ModelChecker.NO_CLASSES_ERROR) 
 									|| (pSubType == ModelChecker.SIMULATION_ERROR)
 									|| (pSubType == ModelChecker.REFERENCE_STATION_ERROR)
 									|| (pSubType == ModelChecker.SOURCE_WITH_NO_OPEN_CLASSES_ERROR) 
 									|| (pSubType == ModelChecker.ROUTING_ERROR) 
-									|| (pSubType == ModelChecker.SINK_BUT_NO_OPEN_CLASSES_ERROR))) {
+									|| (pSubType == ModelChecker.SINK_BUT_NO_OPEN_CLASSES_ERROR)
+									|| (pSubType == ModelChecker.CS_REFERENCE_STATION)
+									|| (pSubType == ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS)
+									|| (pSubType == ModelChecker.CS_ALL_CLOSED_ZERO_POPULATION)))
+						|| ((pType == ModelChecker.WARNING_PROBLEM)
+								&& ((pSubType == ModelChecker.CLOSED_ZERO_POPULATION)))
+						) {
 						if (!mc.isEverythingOkNormal()) {
 							show();
 						}
@@ -206,10 +212,10 @@ public class JModelProblemsWindow extends JDialog {
 		gbconstants.insets.top = 20;
 		gbconstants.insets.left = -38;
 		typeButton = new JButton("Type");
-		typeButton.setPreferredSize(new Dimension(100, 15));
+		typeButton.setPreferredSize(new Dimension(100, 20));
 		this.addComponent(typeButton, gblayout, gbconstants, 1, 0, 1, 1);
 		descriptionButton = new JButton("Description");
-		descriptionButton.setPreferredSize(new Dimension(333, 15));
+		descriptionButton.setPreferredSize(new Dimension(333, 20));
 		gbconstants.insets.left = -68;
 		this.addComponent(descriptionButton, gblayout, gbconstants, 1, 1, 1, 1);
 		gbconstants.fill = GridBagConstraints.BOTH;
@@ -550,6 +556,10 @@ public class JModelProblemsWindow extends JDialog {
 									+ " is not backward linked", stationKey, null));
 				}
 			}
+//			problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.NO_BACKWARD_LINK_WARNING,
+//					"<html><font color=\"white\">--</font><i>Warning</i>" +
+//					"<font color=\"white\">--------</font>" + "TEST"
+//							+ " is not backward linked", "TEST", null));
 			if (mc.isThereParametricAnalysisModelModifiedWarning()) {
 				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING,
 						"<html><font color=\"white\">--</font><i>Warning</i>" +
@@ -636,6 +646,44 @@ public class JModelProblemsWindow extends JDialog {
 							"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>" +
                             "station: " + sourceName + " for class: " + className	+ " with invalid LoadDependentRouting", stationKey, classKey));
 				}
+			}
+            if (mc.isThereCsReferenceStation()) {
+				problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_REFERENCE_STATION,
+						"<html><font color=\"white\">----</font><b>Error</b>" +
+						"<font color=\"white\">---------</font>Since a ClassSwitch is in the model, then <b>all</b> classes must have the <b>same</b> Reference Station.", null, null));
+			}
+            if (mc.isThereCsSystemThroughputClass()) {
+				problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS,
+						"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>With <b>ClassSwitch</b>, the <b>per-class</b> system throughput cannot be computed.", null, null));
+//				Vector temp = mc.getCsSystemThroughputClass();
+//				for (int i = 0; i < temp.size(); i++) {
+//					Object classKey = temp.get(i);
+//					String className = mc.getClassModel().getClassName(classKey);
+//					problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS,
+//							"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>With class switching, the system throghput per class cannot be computed.", null, classKey));
+//				}
+			}
+
+            if (mc.isThereClosedClassZeroPopulation()) {
+//				problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLOSED_ZERO_POPULATION,
+//						"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>At least one closed class has zero population.", null, null));
+				for (Object classKey:mc.getClosedZeroPopulation()) {
+					String className = mc.getClassModel().getClassName(classKey);
+					problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CLOSED_ZERO_POPULATION,
+							"<html><font color=\"white\">--</font><i>Warning</i>" +
+							"<font color=\"white\">---------</font>Population set to zero: " + className, null, classKey));
+				}
+				
+			}
+            if (mc.isThereCsAllClosedZeroPopulation()) {
+				problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_ALL_CLOSED_ZERO_POPULATION,
+						"<html><font color=\"white\">--</font><i>Warning</i>" +
+						"<font color=\"white\">---------</font>All the closed classes have zero population.", null, null));
+			}
+            if (mc.isThereCsWithForkJoinOrFcr()) {
+				problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_WITH_FORK_JOIN_OR_FCR,
+						"<html><font color=\"white\">--</font><i>Warning</i>" +
+						"<font color=\"white\">---------</font>In this version, ClassSwitch with FCRegion or Fork-Join is not supported.", null, null));
 			}
 		}
 	}

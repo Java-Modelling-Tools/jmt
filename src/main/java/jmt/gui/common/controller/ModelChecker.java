@@ -126,6 +126,12 @@ public class ModelChecker implements CommonConstants {
 	private Vector<Object> csFollowedByBas;
 	//Vector containing the keys of cs between fork/join
 	private Vector<Object> csBetweenForkJoin;
+//	//Vector containing the keys of classes which is different then the first closed type class if class_switch exists
+//	private Vector<Object> csReferenceStation;
+	//Vector containing the classes of the system throughput
+	private Vector<Object> csSystemThroughputClass;
+	//Vector containing the closed classes of zero population 
+	private Vector<Object> closedZeroPopulation;
 
     private Map<Object, HashMap<Object, Object>> invalidLoadDependentRouting;
 
@@ -189,6 +195,15 @@ public class ModelChecker implements CommonConstants {
 	public static final int CS_BETWEEN_FORK_JOIN = 21;
 
     public static final int LOAD_DEPENDENT_ROUTING_INVALID = 22;
+    //Checks the different reference station of closed class if there exists class_switch.
+    public static final int CS_REFERENCE_STATION = 23;
+    //Checks existance of the global throughput per class with class switch 
+    public static final int CS_SYSTEM_THROUGHPUT_CLASS = 24;
+    //Checks if all the closed classes population is zero with class switch 
+    public static final int CS_ALL_CLOSED_ZERO_POPULATION = 25;
+    
+    //Checks if CS with FCR OR FORK-JOIN
+    public static final int CS_WITH_FORK_JOIN_OR_FCR = 26;
 
 	//it occours when more than one sink have been defined
 	public static int MORE_THAN_ONE_SINK_WARNING = 0;
@@ -240,6 +255,11 @@ public class ModelChecker implements CommonConstants {
 
 	public static int SINK_PROBABILITY_UPDATE_WARNING = 13;
 	
+    //Checks if the closed classes population is zero. 
+    public static final int CLOSED_ZERO_POPULATION = 14;
+    
+
+	
 	/*
 	//It occours only when trying to switch from JSim or JModel to JMVA, if there is at least
 	//one non exponential distribution
@@ -253,9 +273,9 @@ public class ModelChecker implements CommonConstants {
 	*/
 
 
-	private int NUMBER_OF_ERROR_TYPES = 23;
-	private int NUMBER_OF_NORMAL_ERROR_TYPES = 23;
-	private int NUMBER_OF_WARNING_TYPES = 14;
+	private int NUMBER_OF_ERROR_TYPES = 27;
+	private int NUMBER_OF_NORMAL_ERROR_TYPES = 27;
+	private int NUMBER_OF_WARNING_TYPES = 15;
 	private int NUMBER_OF_NORMAL_WARNING_TYPES = 5;
 
 	/**
@@ -292,6 +312,9 @@ public class ModelChecker implements CommonConstants {
 		csWithWrongMatrix = new Vector<Object>(0, 1);
 		csFollowedByBas = new Vector<Object>(0, 1);
 		csBetweenForkJoin = new Vector<Object>(0, 1);
+//		csReferenceStation = new Vector<Object>(0, 1);
+		csSystemThroughputClass = new Vector<Object>(0, 1);
+		closedZeroPopulation = new Vector<Object>(0, 1);
 		//nonFCFSStations = new Vector(0,1);
 		BCMPnonStateIndependentRoutingStations = new Vector<Object>(0, 1);
 		emptyBlockingRegions = new Vector<Object>(0, 1);
@@ -320,6 +343,9 @@ public class ModelChecker implements CommonConstants {
 		csWithWrongMatrix.removeAllElements();
 		csFollowedByBas.removeAllElements();
 		csBetweenForkJoin.removeAllElements();
+//		csReferenceStation.removeAllElements();
+		csSystemThroughputClass.removeAllElements();
+		closedZeroPopulation.removeAllElements();
 		emptyBlockingRegions.removeAllElements();
         invalidLoadDependentRouting.clear();
 		for (int i = 0; i < NUMBER_OF_ERROR_TYPES; i++) {
@@ -381,6 +407,10 @@ public class ModelChecker implements CommonConstants {
 			checkForCsMatrixProbabilities();
 			checkForCsFollowedByBAS();
 			checkForCsBetweenForkJoin();
+			checkCsReferenceStation();
+			checkCsSystemThroughputClass();
+			checkZeroPopulation();
+			checkForkOrFcr();
 		}
 
 	}
@@ -637,6 +667,69 @@ public class ModelChecker implements CommonConstants {
 		return errors[CS_BETWEEN_FORK_JOIN];
 	}
 
+
+	/**
+	 * Returns true if exist at least class_switch and 
+	 * different reference station for the closed classses
+	 * , false otherwise.
+	 * @return true if exist at least class_switch and 
+	 * different reference station for the closed classses
+	 * , false otherwise.
+	 */
+	public boolean isThereCsReferenceStation() {
+		return errors[CS_REFERENCE_STATION];
+	}
+	
+	/**
+	 * Returns true if exist at least system throughput for a class
+	 * performance index when there exists at least one class switch
+	 * in the model
+	 * , false otherwise.
+	 * @return true if exist at least system throughput for a class
+	 * performance index when there exists at least one class switch
+	 * in the model
+	 * , false otherwise.
+	 */
+	public boolean isThereCsSystemThroughputClass() {
+		return errors[CS_SYSTEM_THROUGHPUT_CLASS];
+	}
+	
+	/**
+	 * Returns true if there exists at least one closed class with
+	 * zero population
+	 * , false otherwise.
+	 * @return true if there exists at least one closed class with
+	 * zero population
+	 * , false otherwise.
+	 */
+	public boolean isThereClosedClassZeroPopulation() {
+		return warnings[CLOSED_ZERO_POPULATION];
+	}
+	
+	/**
+	 * Returns true if all the closed classes has zero population
+	 * with class switch
+	 * , false otherwise.
+	 * @return true if all the closed classes has zero population
+	 * with class switch
+	 * , false otherwise.
+	 */
+	public boolean isThereCsAllClosedZeroPopulation() {
+		return errors[CS_ALL_CLOSED_ZERO_POPULATION];
+	}
+	
+	
+	/**
+	 * Returns true if all the closed classes has zero population
+	 * with class switch
+	 * , false otherwise.
+	 * @return true if all the closed classes has zero population
+	 * with class switch
+	 * , false otherwise.
+	 */
+	public boolean isThereCsWithForkJoinOrFcr() {
+		return errors[CS_WITH_FORK_JOIN_OR_FCR];
+	}
 
 	/**
 	 * Checks the presence in the model of a non exponential time distribution. This is an
@@ -965,6 +1058,37 @@ public class ModelChecker implements CommonConstants {
 	public Vector<Object> getCsBetweenForkJoin() {
 		return csBetweenForkJoin;
 	}	
+	
+//	/**
+//	 * Use it to get a Vector<Object> containing closed classes with different
+//	 * reference station other than the first closed class
+//	 * @return a Vector<Object> containing closed classes with different
+//	 * reference station other than the first closed class
+//	 */
+//	public Vector<Object> getCsReferenceStation() {
+//		return csReferenceStation;
+//	}	
+	
+	
+	/**
+	 * Use it to get a Vector<Object> containing classes that are
+	 * defined global throughtput when class switch exists in model
+	 * @return a Vector<Object> class names that are
+	 * defined global throughtput when class switch exists in model
+	 */
+	public Vector<Object> getCsSystemThroughputClass(){
+		return csSystemThroughputClass;
+	}
+	
+	/**
+	 * Use it to get a Vector<Object> containing closed classes that has
+	 * zero populations
+	 * @return a Vector<Object> closed class keys that has
+	 * zero populations
+	 */
+	public Vector<Object> getClosedZeroPopulation(){
+		return closedZeroPopulation;
+	}
 	
 	/**
 	 * Use it to get a Vector<Object> containing the keys of servers with FCFS
@@ -2435,6 +2559,97 @@ public class ModelChecker implements CommonConstants {
 				csBetweenForkJoin.add(tmp);
 			}
 		}
+	}
+	
+	/**
+	 * It checks the different reference station of closed class if there exists class_switch.
+	 */
+	public void checkCsReferenceStation() {
+		if(csExists()){
+			Vector<Object> classKeys = class_def.getClassKeys();
+			Long closedReferenceStation = null;
+
+			for (int i = 0; i < classKeys.size(); i++) {
+				//get the key at i
+				Object thisKey = classKeys.get(i);
+				//get the Reference Station of the class
+				Object thisRefStation = class_def.getClassRefStation(thisKey);
+				if(thisRefStation == null)
+					continue;
+				if(class_def.getClassType(thisKey) == CommonConstants.CLASS_TYPE_CLOSED)
+					if(closedReferenceStation == null)
+						closedReferenceStation = (Long)thisRefStation;
+					else if (!thisRefStation.equals(closedReferenceStation) ){
+//						csReferenceStation.add(closedReferenceStation);
+						errors[CS_REFERENCE_STATION] = true;
+					}
+			}
+		}
+	}
+	
+	
+	public void checkCsSystemThroughputClass() {
+		if (csExists()) {
+			for (Object measure : simulation_def.getMeasureKeys()) {
+				Object measureClassKey = simulation_def.getMeasureClass(measure);
+				String thisMeasureType = simulation_def.getMeasureType(measure);
+				if (thisMeasureType.equalsIgnoreCase(SimulationDefinition.MEASURE_S_X) && measureClassKey != null) {
+					csSystemThroughputClass.add(measureClassKey);
+					errors[CS_SYSTEM_THROUGHPUT_CLASS] = true;
+				}
+			}
+		}
+	}
+	
+	public void checkZeroPopulation() {
+		if (csExists()) {
+			if (class_def.getClosedClassKeys().size() > 0 && class_def.getTotalCloseClassPopulation() == 0)
+				errors[CS_ALL_CLOSED_ZERO_POPULATION] = true;
+		} else {
+			for (Object closedClassKey : class_def.getClosedClassKeys())
+				if (class_def.getClassPopulation(closedClassKey) == 0) {
+					closedZeroPopulation.add(closedClassKey);
+					warnings[CLOSED_ZERO_POPULATION] = true;
+				}
+		}
+	}
+	
+	public void checkForkOrFcr() {
+		if ((csExists() && forkExists()) || (csExists() && fcrExists()) ) {
+			errors[CS_WITH_FORK_JOIN_OR_FCR] = true;
+		} 
+	}
+	
+	private boolean csExists() {
+		boolean csExists = false;
+		for (int i = 0; i < station_def.getStationKeys().size(); i++) {
+			Object stationKey = station_def.getStationKeys().get(i);
+			if (station_def.getStationType(stationKey).equals(STATION_TYPE_CLASSSWITCH)) {
+				csExists = true;
+				break;
+			}
+		}
+		return csExists;
+	}
+	
+	private boolean forkExists() {
+		boolean forkExists = false;
+		for (int i = 0; i < station_def.getStationKeys().size(); i++) {
+			Object stationKey = station_def.getStationKeys().get(i);
+			if (station_def.getStationType(stationKey).equals(STATION_TYPE_FORK)) {
+				forkExists = true;
+				break;
+			}
+		}
+		return forkExists;
+	}
+	
+	private boolean fcrExists() {
+		boolean fcrExists = false;
+		if (blocking_def.getRegionKeys().size() > 0) {
+			fcrExists = true;
+		}
+		return fcrExists;
 	}
 	
 	/**

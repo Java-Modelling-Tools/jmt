@@ -230,6 +230,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		// Set reference station for each class
 		Object[] keys = refStations.keySet().toArray();
 		for (Object key : keys) {
+			if(CommonConstants.STATION_TYPE_CLASSSWITCH.equals(refStations.get(key)))
+				model.setClassRefStation(key, CommonConstants.STATION_TYPE_CLASSSWITCH);
+			else
 			model.setClassRefStation(key, stations.get(refStations.get(key)));
 		}
 		// Sets correct station key into every empiricalRouting element

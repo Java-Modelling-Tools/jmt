@@ -40,12 +40,13 @@ import jmt.engine.dataAnalysis.Measure;
 public class GlobalJobInfoList {
 
 	private int numClass;
+	private boolean hasClassSwitch;
 
 	// Measures to be evalueated
-	private Measure[] responseTimePerClass;
+	private Measure[] responseTimePerClassWOCS, responseTimePerClassWithCS;
 
 	private Measure[] jobNumPerClass;
-	private Measure responseTime;
+	private Measure responseTimeWOCS, responseTimeWithCS;
 
 	private Measure jobNum;
 	private InverseMeasure[] throughputPerClass;
@@ -86,31 +87,36 @@ public class GlobalJobInfoList {
 	double sampling_SystemResponseSum;
 
 	double samplingClass_SystemThroughputSum[];
+	
+	private double responseSumWithCS;
+	private double[] responseSumPerClassWithCS;
 
 	/**
 	 * Creates a new GlobalJobInfoList
 	 * @param classNum number of classes in current network model
 	 */
-	public GlobalJobInfoList(int classNum) {
-		initialize(classNum);
+	public GlobalJobInfoList(int classNum, boolean hasClassSwitch) {
+		initialize(classNum, hasClassSwitch);
 	}
 
 	/**
 	 * Resets this info list
 	 * @param classNum number of classes in current network model
 	 */
-	private void initialize(int classNum) {
+	private void initialize(int classNum, boolean hasClassSwitch) {
 		numClass = classNum;
-		lastJobOutTime = lastJobDropTime = lastModifyNumber = 0.0;
+		this.hasClassSwitch = hasClassSwitch;
+		lastJobOutTime = lastJobDropTime = lastModifyNumber = responseSumWithCS = 0.0;
 		lastJobOutTimePerClass = new double[classNum];
 		lastJobDropTimePerClass = new double[classNum];
 		lastModifyNumberPerClass = new double[classNum];
+		responseSumPerClassWithCS = new double[classNum];
 		jobs = 0;
 		jobsPerClass = new int[classNum];
 
 		// Resets measures
-		responseTimePerClass = jobNumPerClass = dropRatePerClass = throughputPerClass = null;
-		responseTime = jobNum = dropRate = throughput = null;
+		responseTimePerClassWOCS = responseTimePerClassWithCS = jobNumPerClass = dropRatePerClass = throughputPerClass = null;
+		responseTimeWOCS = responseTimeWithCS = jobNum = dropRate = throughput = null;
 
 		//Added by ASHANKA START
 		//resets 
@@ -155,7 +161,10 @@ public class GlobalJobInfoList {
 		jobsPerClass[job.getJobClass().getId()]--;
 
 		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = NetSystem.getTime();
+		for(int index = 0; index < numClass; index++)
+			if(job.hasBeenClass(index))
+				lastJobOutTimePerClass[job.getJobClass().getId()] = NetSystem.getTime();
+		lastJobOutTime = NetSystem.getTime();
 	}
 	
 	/**
@@ -175,7 +184,10 @@ public class GlobalJobInfoList {
 
 		// Updates jobs number and throughput data structures
 		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = NetSystem.getTime();
+		for(int index = 0; index < numClass; index++)
+			if(job.hasBeenClass(index))
+				lastJobOutTimePerClass[index] = NetSystem.getTime();
+		lastJobOutTime = NetSystem.getTime();
 
 		job.resetSystemEnteringTime();
 	}
@@ -231,19 +243,31 @@ public class GlobalJobInfoList {
 	/**
 	 * Analyzes System Response Time for a specific job class or for every class
 	 * @param jobClass specified job class. If null measure will be job independent
-	 * @param Measure reference to a Measure object
+	 * @param measure reference to a Measure object
 	 */
-	public void analyzeResponseTime(JobClass jobClass, Measure Measure) {
-		if (jobClass != null) {
-			// If array is not initialized, initialize it
-			if (responseTimePerClass == null) {
-				responseTimePerClass = new Measure[numClass];
+	public void analyzeResponseTime(JobClass jobClass, Measure measure) {
+		if(hasClassSwitch){
+			if (jobClass != null) {
+				if (responseTimePerClassWithCS == null) {
+					responseTimePerClassWithCS = new Measure[numClass];
+				}
+	
+				// Sets measure
+				responseTimePerClassWithCS[jobClass.getId()] = measure;
+			} else {
+				responseTimeWithCS = measure;
 			}
-
-			// Sets measure
-			responseTimePerClass[jobClass.getId()] = Measure;
 		} else {
-			responseTime = Measure;
+			if (jobClass != null) {
+				if (responseTimePerClassWOCS == null) {
+					responseTimePerClassWOCS = new Measure[numClass];
+				}
+	
+				// Sets measure
+				responseTimePerClassWOCS[jobClass.getId()] = measure;
+			} else {
+				responseTimeWOCS = measure;
+			}
 		}
 	}
 
@@ -312,15 +336,52 @@ public class GlobalJobInfoList {
 	 * @param job current job
 	 */
 	private void updateResponseTime(Job job) {
-		if (responseTimePerClass != null) {
+		// with class switch
+		if (responseTimePerClassWithCS != null) {
 			// Retrives measure (if not null)
-			Measure m = responseTimePerClass[job.getJobClass().getId()];
+			for(int index = 0; index < numClass; index++){
+				if(job.hasBeenClass(index)){
+					Measure m = responseTimePerClassWithCS[index];
+					if (m != null) {
+						m.update(responseSumPerClassWithCS[index], 1.0);
+						responseSumPerClassWithCS[index] = 0;
+					}
+				}
+			}
+		}
+		if (responseTimeWithCS != null) {
+			responseTimeWithCS.update(responseSumWithCS, 1.0);
+			responseSumWithCS = 0;
+		}
+		
+		// without class switch
+		if (responseTimePerClassWOCS != null) {
+			// Retrives measure (if not null)
+			Measure m = responseTimePerClassWOCS[job.getJobClass().getId()];
 			if (m != null) {
 				m.update(NetSystem.getTime() - job.getSystemEnteringTime(), 1.0);
 			}
 		}
-		if (responseTime != null) {
-			responseTime.update(NetSystem.getTime() - job.getSystemEnteringTime(), 1.0);
+		if (responseTimeWOCS != null) {
+			responseTimeWOCS.update(NetSystem.getTime() - job.getSystemEnteringTime(), 1.0);
+		}
+		
+	}
+	
+	/**
+	 * update the times in response time with class switch
+	 * 
+	 * @param jobInfo info of the job
+	 */
+	public void updateResponseSum(JobInfo jobInfo) {
+		if (hasClassSwitch) {
+			// skip forked job
+			if (jobInfo.getJob() instanceof ForkJob)
+				return;
+			int jobClassId = jobInfo.getJob().getJobClass().getId();
+			double time = NetSystem.getTime() - jobInfo.getTime();
+			responseSumWithCS += time;
+			responseSumPerClassWithCS[jobClassId] += time;
 		}
 	}
 
@@ -350,11 +411,13 @@ public class GlobalJobInfoList {
 		if (throughputPerClass != null) {
 			// Retrives measure (if not null)
 			// new sample is the inter-departures time (1/throughput)
-			int index = job.getJobClass().getId();
-			InverseMeasure m = throughputPerClass[index];
-			if (m != null) {
-				m.update(NetSystem.getTime() - lastJobOutTimePerClass[index], 1.0);
-			}
+			for(int index = 0; index < numClass; index++)
+				if(job.hasBeenClass(index)){
+					InverseMeasure m = throughputPerClass[index];
+					if (m != null) {
+						m.update(NetSystem.getTime() - lastJobOutTimePerClass[index], 1.0);
+					}
+				}
 		}
 		if (throughput != null) {
 			throughput.update(NetSystem.getTime() - lastJobOutTime, 1.0);

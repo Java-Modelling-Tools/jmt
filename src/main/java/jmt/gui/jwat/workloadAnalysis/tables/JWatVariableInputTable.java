@@ -80,7 +80,8 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 		super.setModel(tabMod);
 		sizeColumnsAndRows();
 		setRowHeight(ROW_HEIGHT);
-		this.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(combobox));
+		// Arif Canakoglu: name column is not a combobox 
+		//this.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(combobox));
 		/*this.getColumnModel().getColumn(5).setCellEditor(
 				new DefaultCellEditor(combobox));*/
 		this.getColumnModel().getColumn(columnSizes.length - 1).setCellEditor(new ButtonCellEditor(new JButton(deleteVar)));

@@ -57,6 +57,7 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.exact.table.BooleanCellRenderer;
 import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactCellEditor;
 
@@ -186,6 +187,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		rightPanel.add(measureSelection, BorderLayout.CENTER);
 		rightPanel.add(new JLabel(" "), BorderLayout.NORTH);
 		measureSelection.addActionListener(addMeasure);
+		//ARIF: show all elements in ComboBox
+		measureSelection.setMaximumRowCount(measureTypes.length);
 		Object popup = measureSelection.getUI().getAccessibleChild(measureSelection, 0);  
 	    if (popup instanceof ComboPopup) {  
 		      JList jlist = ((ComboPopup)popup).getList();  
@@ -374,6 +377,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				Vector<Object> l1 = stationData.getStationRegionKeysNoSourceSink();
 				Vector<Object> l2 = stationData.getStationKeysSource();
 				l1.addAll(l2);
+				//ARIF: remove generic class switch element if exists
+				l1.removeElement(STATION_TYPE_CLASSSWITCH);
 				return stationsCombos.getEditor(l1);
 			} else if (column == 2) {
 				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
@@ -392,6 +397,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				return stationsCombos.getRenderer();
 			} else if (column == 1) {
 				return classesCombos.getRenderer();
+			} else if (column == 3){
+				return new BooleanCellRenderer();
 			} else {
 				return super.getCellRenderer(row, column);
 			}
