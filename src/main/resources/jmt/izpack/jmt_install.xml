@@ -31,7 +31,7 @@
 		-->
 		<url>http://jmt.sourceforge.net/</url>
 		<javaversion>1.7</javaversion>
-		<run-privileged condition="izpack.windowsinstall.vista|izpack.windowsinstall.7"/>
+		<run-privileged condition="izpack.windowsinstall"/>
 	</info>
 	<variables>
 		<!-- This automatically checks the "Create Desktop Shortcuts" button. Default value is "False". -->
