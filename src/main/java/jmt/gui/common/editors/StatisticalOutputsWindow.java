@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -65,6 +66,7 @@ import jmt.engine.log.CSVLogger;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.math.SampleStatistics;
 import jmt.engine.math.SampleStatistics.DistributionType;
+import jmt.engine.simEngine.EngineUtils;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.DistributionDensityGraph;
 import jmt.framework.gui.layouts.SpringUtilities;
@@ -149,11 +151,13 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	private int measureIndex;
 	private JSimLogger logger = JSimLogger.getLogger(StatisticalOutputsWindow.class);
 	private String filterType = FILTER_TYPE_SAMPLE;
+	private boolean inverseMeasure;
 
 	public StatisticalOutputsWindow(MeasureDefinition measureDefinition, int measureIndex){
 		this.measureDefinition = measureDefinition;
 		this.measureIndex = measureIndex;
 		windowName = measureDefinition.getName(measureIndex);
+		inverseMeasure = EngineUtils.isInverseMeasure(measureDefinition.getMeasureType(measureIndex));
 		try {
 			this.sop = new StatisticalOutputsLoader(measureDefinition, measureIndex);
 			initGUI();
@@ -170,7 +174,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		//makes LeftSidePanel
 		JPanel pivotPanel = new JPanel() ;
 		pivotPanel.setLayout(new BoxLayout(pivotPanel, BoxLayout.PAGE_AXIS));
-
+		
 		//makes BottomPanel
 		JPanel graphOptionsPanel = new JPanel(new BorderLayout());
 
@@ -536,6 +540,18 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		pivotPanel.add(graphOptionsPanel);
 		pivotPanel.add(Box.createRigidArea(new Dimension(0,30)));
 
+		// Add warning that measure is inverse
+		JPanel leftPanel = new JPanel(new BorderLayout());
+		leftPanel.add(pivotPanel, BorderLayout.CENTER);
+		if (inverseMeasure) {
+			JLabel warningLabel = new JLabel("<html>Please note that inter-departure times are displayed for Throughput, Drop rate and System power indices</html>");
+			warningLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+			warningLabel.setIcon(JMTImageLoader.loadImage("lightbulb"));
+			warningLabel.setIconTextGap(5);
+			
+			leftPanel.add(warningLabel, BorderLayout.NORTH);
+		}
+
 
 		// main RightPanel
 
@@ -563,7 +579,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		rightPanel.add(toolbar, BorderLayout.SOUTH);
 
 		JSplitPane graphPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				pivotPanel, rightPanel);
+				leftPanel, rightPanel);
 		graphPanel.setOneTouchExpandable(true);
 		graphPanel.setDividerLocation(500);
 
