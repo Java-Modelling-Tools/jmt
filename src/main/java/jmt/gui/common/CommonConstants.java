@@ -108,7 +108,7 @@ public interface CommonConstants {
 	public final static String DISTRIBUTION_UNIFORM = "Uniform";
 	//public final static String DISTRIBUTION_STUDENTT = "StudentT";
 	//public final static String DISTRIBUTION_POISSON = "Poisson";
-	public final static String DISTRIBUTION_REPLAYER = "Replayer";
+	public final static String DISTRIBUTION_REPLAYER = "Replayer (Trace)";
 
 	public final static RoutingStrategy ROUTING_RANDOM = new RandomRouting();
 	public final static RoutingStrategy ROUTING_ROUNDROBIN = new RoundRobinRouting();
