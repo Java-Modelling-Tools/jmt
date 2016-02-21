@@ -106,8 +106,8 @@ public interface CommonConstants {
 	public final static String DISTRIBUTION_MMPP2 = "MMPP2";
 	public final static String DISTRIBUTION_GAMMA = "Gamma";
 	public final static String DISTRIBUTION_UNIFORM = "Uniform";
-	public final static String DISTRIBUTION_STUDENTT = "StudentT";
-	public final static String DISTRIBUTION_POISSON = "Poisson";
+	//public final static String DISTRIBUTION_STUDENTT = "StudentT";
+	//public final static String DISTRIBUTION_POISSON = "Poisson";
 	public final static String DISTRIBUTION_REPLAYER = "Replayer";
 
 	public final static RoutingStrategy ROUTING_RANDOM = new RandomRouting();
