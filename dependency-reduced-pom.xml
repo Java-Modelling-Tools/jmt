@@ -22,7 +22,7 @@
                 </goals>
                 <configuration>
                   <files>
-                    <file>/home/gcasale/jmt-code/src/main/resources/jmt/common/globalsettings.conf</file>
+                    <file>/home/gcasale/Dropbox/code/jmt-code/src/main/resources/jmt/common/globalsettings.conf</file>
                   </files>
                 </configuration>
               </execution>
@@ -128,12 +128,12 @@
                   <goal>izpack</goal>
                 </goals>
                 <configuration>
-                  <installFile>/home/gcasale/jmt-code/target/staging/jmt_install.xml</installFile>
+                  <installFile>/home/gcasale/Dropbox/code/jmt-code/target/staging/jmt_install.xml</installFile>
                   <attach>false</attach>
                   <kind>standard</kind>
                   <descriptorEncoding>UTF-8</descriptorEncoding>
-                  <izpackBasedir>/home/gcasale/jmt-code/target/staging</izpackBasedir>
-                  <customPanelDirectory>/home/gcasale/jmt-code/target/staging</customPanelDirectory>
+                  <izpackBasedir>/home/gcasale/Dropbox/code/jmt-code/target/staging</izpackBasedir>
+                  <customPanelDirectory>/home/gcasale/Dropbox/code/jmt-code/target/staging</customPanelDirectory>
                 </configuration>
               </execution>
             </executions>
@@ -146,12 +146,12 @@
               </dependency>
             </dependencies>
             <configuration>
-              <installFile>/home/gcasale/jmt-code/target/staging/jmt_install.xml</installFile>
+              <installFile>/home/gcasale/Dropbox/code/jmt-code/target/staging/jmt_install.xml</installFile>
               <attach>false</attach>
               <kind>standard</kind>
               <descriptorEncoding>UTF-8</descriptorEncoding>
-              <izpackBasedir>/home/gcasale/jmt-code/target/staging</izpackBasedir>
-              <customPanelDirectory>/home/gcasale/jmt-code/target/staging</customPanelDirectory>
+              <izpackBasedir>/home/gcasale/Dropbox/code/jmt-code/target/staging</izpackBasedir>
+              <customPanelDirectory>/home/gcasale/Dropbox/code/jmt-code/target/staging</customPanelDirectory>
             </configuration>
           </plugin>
           <plugin>
