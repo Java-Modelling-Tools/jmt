@@ -46,7 +46,7 @@ public class Simulate extends AbstractJmodelAction {
 	 */
 	public Simulate(Mediator mediator) {
 		super("Simulate", "Sim", mediator);
-		putValue(SHORT_DESCRIPTION, "solve simulating model");
+		putValue(SHORT_DESCRIPTION, "Start simulation");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_MASK));
 		setEnabled(false);

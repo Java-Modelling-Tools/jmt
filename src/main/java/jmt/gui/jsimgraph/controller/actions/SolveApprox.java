@@ -42,7 +42,7 @@ public class SolveApprox extends AbstractJmodelAction {
 	 */
 	public SolveApprox(Mediator mediator) {
 		super("Approximate Solver", mediator);
-		putValue(SHORT_DESCRIPTION, "solve the model with approximate tecnique");
+		putValue(SHORT_DESCRIPTION, "Solve model with an approximate solver");
 		//		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
 		setEnabled(false);
 	}

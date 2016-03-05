@@ -44,7 +44,7 @@ public class SaveModelAs extends AbstractJmodelAction {
 	 */
 	public SaveModelAs(Mediator mediator) {
 		super("Save As...", "Save", mediator);
-		putValue(SHORT_DESCRIPTION, "save the current model giving a new name to it");
+		putValue(SHORT_DESCRIPTION, "Save model with a new file name");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_A));
 		setEnabled(false);
 	}

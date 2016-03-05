@@ -42,7 +42,7 @@ public class SolveAnalytic extends AbstractJmodelAction {
 	 */
 	public SolveAnalytic(Mediator mediator) {
 		super("Approx", mediator);
-		putValue(SHORT_DESCRIPTION, "solve the model with analytic tecnique");
+		putValue(SHORT_DESCRIPTION, "Solve model with analytic tecniques");
 		//		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
 		setEnabled(false);
 	}

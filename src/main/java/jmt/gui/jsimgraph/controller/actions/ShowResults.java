@@ -45,7 +45,7 @@ public class ShowResults extends AbstractJmodelAction {
 	 */
 	public ShowResults(Mediator mediator) {
 		super("Show Results", "Results", mediator);
-		this.setTooltipText("show simulation results window");
+		this.setTooltipText("Show simulation results");
 		this.setMnemonicKey(KeyEvent.VK_R);
 		this.setAcceleratorKey(KeyEvent.VK_R, InputEvent.ALT_MASK);
 		this.setSelectable(true);

@@ -46,7 +46,7 @@ public class SaveModel extends AbstractJmodelAction {
 	 */
 	public SaveModel(Mediator mediator) {
 		super("Save", "Save", mediator);
-		putValue(SHORT_DESCRIPTION, "save the current model");
+		putValue(SHORT_DESCRIPTION, "Save model");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
 		// 25/09/03 - Massimo Cattai //////////////////////////////////////////
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK));

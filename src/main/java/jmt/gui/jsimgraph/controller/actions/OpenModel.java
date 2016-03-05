@@ -46,7 +46,7 @@ public class OpenModel extends AbstractJmodelAction {
 	 */
 	public OpenModel(Mediator mediator) {
 		super("Open", "Open", mediator);
-		putValue(SHORT_DESCRIPTION, "open a previosly saved model");
+		putValue(SHORT_DESCRIPTION, "Open a previously saved model");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_O));
 		// 25/09/03 - Massimo Cattai //////////////////////////////////////////
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));

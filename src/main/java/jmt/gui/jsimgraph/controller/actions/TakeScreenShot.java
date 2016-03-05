@@ -42,7 +42,7 @@ public class TakeScreenShot extends AbstractJmodelAction {
 	 */
 	public TakeScreenShot(Mediator mediator) {
 		super("Export as image...", "sshot", mediator);
-		putValue(SHORT_DESCRIPTION, "Exports a ScreenShot of current graph in vectorial or raster format");
+		putValue(SHORT_DESCRIPTION, "Exports a screenshot in vectorial or raster format");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_E));
 		setEnabled(false);
 	}

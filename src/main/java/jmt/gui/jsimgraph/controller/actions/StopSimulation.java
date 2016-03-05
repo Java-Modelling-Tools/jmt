@@ -44,7 +44,7 @@ public class StopSimulation extends AbstractJmodelAction {
 	 */
 	public StopSimulation(Mediator mediator) {
 		super("Stop Simulation", "Stop", mediator);
-		putValue(SHORT_DESCRIPTION, "stops simulation");
+		putValue(SHORT_DESCRIPTION, "Stop simulation");
 		//		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
 		setEnabled(false);
 	}

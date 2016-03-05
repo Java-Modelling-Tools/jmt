@@ -39,7 +39,7 @@ public class SetOptions extends AbstractJmodelAction {
 
 	public SetOptions(Mediator mediator) {
 		super("Options", mediator);
-		putValue(SHORT_DESCRIPTION, "Set JMT options");
+		putValue(SHORT_DESCRIPTION, "Set options");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_O));
 	}
 
