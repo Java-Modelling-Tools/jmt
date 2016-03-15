@@ -12,6 +12,8 @@ import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
+
 
 public class RandStrategyPriority implements QueuePutStrategy{
 
@@ -23,6 +25,7 @@ public class RandStrategyPriority implements QueuePutStrategy{
 	 * @param sourceNode Job source node.
 	 * @param callingSection The section which calls this strategy.
 	 */
+        private RandomEngine engine = RandomEngine.makeDefault();
 	
 	public void put(Job job, JobInfoList queue, byte sourceSection,
 			NetNode sourceNode, NodeSection callingSection) throws NetException {
@@ -78,7 +81,7 @@ public class RandStrategyPriority implements QueuePutStrategy{
 				
 				// It will add the job randomly in the particular priority it belongs
 				
-				int pos = (int) (firstElement + (int)(Math.random() * (lastElement - firstElement)));
+				int pos = (int) (firstElement + (int)(engine.raw() * (lastElement - firstElement)));
 				
 				queue.add(pos, new JobInfo(job), false);
 				

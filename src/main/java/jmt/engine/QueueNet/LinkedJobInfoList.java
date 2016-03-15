@@ -24,6 +24,7 @@ import java.util.ListIterator;
 
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.random.engine.RandomEngine;
 
 /** This class implements a job info list based on a linked list.
  * @author Francesco Radaelli, Stefano Omini.
@@ -106,6 +107,8 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	/** The number of servers to estimate Utilization measure on multiserver environments. */
 	private int serverNumber = 1;
+
+        private RandomEngine engine = RandomEngine.makeDefault();
 
 	/** Creates a new JobInfoList instance.
 	* @param numberOfJobClasses number of job classes.
@@ -354,7 +357,7 @@ public class LinkedJobInfoList implements JobInfoList {
 	public boolean addRand(JobInfo jobInfo) {
 		if (list != null) {
 			updateAdd(jobInfo);
-			int pos = (int) (Math.random()*list.size());
+			int pos = (int) (engine.raw()*list.size());
 			listPerClass[jobInfo.getJob().getJobClass().getId()].addLast(jobInfo);
 			list.add(pos,jobInfo);
 			return true;

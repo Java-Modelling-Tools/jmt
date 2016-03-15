@@ -24,6 +24,7 @@ import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * This class implements a class switch.
@@ -34,6 +35,7 @@ public class ClassSwitch extends ServiceSection {
 
 	private int[] switchedClasses; 
 	private int totalSwitchedClasses = 0;
+	private RandomEngine engine = RandomEngine.makeDefault();
 
 	private Float[][] matrix;
 
@@ -110,7 +112,8 @@ public class ClassSwitch extends ServiceSection {
 		for (i = 0; i < row.length; i++) {
 			sum += row[i];
 		}
-		random = (float) (Math.random() * sum);
+
+                random = (float) (engine.raw() * sum);
 		for (i = 0; i < row.length; i++) {
 			random -= row[i];
 			if(random <= 0)
