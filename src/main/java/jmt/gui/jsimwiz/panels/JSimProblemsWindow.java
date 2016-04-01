@@ -55,6 +55,7 @@ import javax.swing.border.LineBorder;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.ModelChecker;
+import static jmt.gui.common.controller.ModelChecker.BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.jsimwiz.JSIMMain;
 
@@ -288,6 +289,16 @@ public class JSimProblemsWindow extends JFrame {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
 					problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING,
 							"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>Different per class queueing strategy found at "
+									+ thisStation, temp.get(i), null));
+				}
+			}
+			if (mc.isThereBCMPNonSymmetricSchedulingPolicies()) {
+				Vector temp = mc.getBCMPserversWithNonSymmetricScheduling();
+                                System.out.println("Eccolo");
+				for (int i = 0; i < temp.size(); i++) {
+					String thisStation = mc.getStationModel().getStationName(temp.get(i));
+					problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_NON_SYMMETRIC_SCHEDULING,
+							"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>Class with unsupported scheduling policy found at "
 									+ thisStation, temp.get(i), null));
 				}
 			}

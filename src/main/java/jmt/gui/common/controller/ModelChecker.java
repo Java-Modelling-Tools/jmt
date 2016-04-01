@@ -114,6 +114,9 @@ public class ModelChecker implements CommonConstants {
 	private Vector<Object> BCMPdelaysWithNonRationalServiceDistribution;
 	//Vector containing the keys of the stations where a non random routing is used.
 	//Used only in JMVA conversion
+	private Vector<Object> BCMPserverWithNonSymmetricSchedulingPolicy;
+	//Vector containing the keys of the stations where a non BCMP scheduling policy is used.
+	//Used only in JMVA conversion
 	private Vector<Object> BCMPnonStateIndependentRoutingStations;
 	//Vector containing the stations (not Sinks or Sources) not backward connected. Used for
 	// warnings
@@ -170,7 +173,7 @@ public class ModelChecker implements CommonConstants {
 	public static final int DUPLICATE_MEASURE_ERROR = 11;
 	//it occours if one or performance index has one or more null field
 	public static final int INCONSISTENT_MEASURE_ERROR = 12;
-	//It occours only when trying to switch from JSim or JModel to JMVA, if there is at least
+	//Thrown only when trying to switch from JSim or JModel to JMVA, if there is at least
 	//one open class without a reference station
 	//public static final int OPEN_CLASS_REFERENCE_STATION_ERROR = 13;
 	//it occours when there is at least one join but not a fork;
@@ -211,57 +214,60 @@ public class ModelChecker implements CommonConstants {
 	public static int NO_BACKWARD_LINK_WARNING = 1;
 	//it occours if there is a fork but not a join
 	public static int FORK_WITHOUT_JOIN_WARNING = 2;
-	//It occours if the parametric analysis model has become inconsistent
+	//Thrown if the parametric analysis model has become inconsistent
 	//with the model definition. This warning advices user to recheck the
 	//parametric model definition, since it had been modified to make it
 	//consistent back again.
 	public static int PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING = 3;
-	//It occours if a no PA are avaible, but a PA model was previously defined
+	//Thrown if a no PA are avaible, but a PA model was previously defined
 	public static int PARAMETRIC_ANALYSIS_NO_MORE_AVAIBLE_WARNING = 4;
-	//It occours if the station has diffrent per class queueing
+	//Thrown if the station has diffrent per class queueing
 	// strategy. (only when trying to convert to JMVA)
 	public static int BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING = 5;
-	//It occours if the service policy inside a station with FCFS
+	//Thrown if the service policy inside a station with FCFS
 	//queueing strategy, differs from class to class. In fact,
 	//according to the BCMP theorem hypothesis, the service times
 	//in an FCFS station must be all load independent or independent,
 	//mixtures are not allowed
 	public static int BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING = 6;
-	//It occours if the station has a FCFS queueing strategy, but
+	//Thrown if the station has a FCFS queueing strategy, but
 	//the service time distribution is not exponential
 	public static int BCMP_FCFS_EXPONENTIAL_WARNING = 7;
-	//It occours if the station has a FCFS queueing strategy, but
+	//Thrown if the station has a FCFS queueing strategy, but
 	//the per class mean values of service time differ
 	// (only when trying to convert to JMVA)
 	public static int BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING = 8;
-	//It occours if the station has a Processor Sharing service strategy
+	//Thrown if the station has a Processor Sharing service strategy
 	//but it is not possible to define a Laplace rational transform
 	//for the service time distribution
 	// (only when trying to convert to JMVA)
 	public static int BCMP_PROCESSOR_SHARING_WARNING = 9;
-	//It occours if the station has a delay behavior but it is not
+	//Thrown if the station has a delay behavior but it is not
 	//possible to define a Laplace rational transform for a
 	//service time distribution
 	// (only when trying to convert to JMVA)
 	public static int BCMP_DELAY_WARNING = 10;
-	//It occours if the station has a LCFS - Preemptive Resume
+	//Thrown if the station has a LCFS - Preemptive Resume
 	//queueing strategy but it is not possible to define a
 	//Laplace rational transform for the service time distribution
 	// (only when trying to convert to JMVA)
 	public static int BCMP_LCFS_PR_WARNING = 11;
-	//It occours if the routing strategy is state dependent
+	//Thrown if the routing strategy is state dependent
 	// (only when trying to convert to JMVA)
 	public static int BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING = 12;
 
 	public static int SINK_PROBABILITY_UPDATE_WARNING = 13;
 	
-    //Checks if the closed classes population is zero. 
-    public static final int CLOSED_ZERO_POPULATION = 14;
+        //Checks if the closed classes population is zero. 
+        public static final int CLOSED_ZERO_POPULATION = 14;
     
+	public static int BCMP_NON_SYMMETRIC_SCHEDULING = 15;
+	//Thrown if the scheduling policies other than PS, FCFS, DELAY, or RAND are used
+	// (only when trying to convert to JMVA)
 
 	
 	/*
-	//It occours only when trying to switch from JSim or JModel to JMVA, if there is at least
+	//Thrown only when trying to switch from JSim or JModel to JMVA, if there is at least
 	//one non exponential distribution
 	public static int NO_EXP_FOUND_WARNING = 2;
 	//it occours only when trying to convert to JMVA
@@ -275,7 +281,7 @@ public class ModelChecker implements CommonConstants {
 
 	private int NUMBER_OF_ERROR_TYPES = 27;
 	private int NUMBER_OF_NORMAL_ERROR_TYPES = 27;
-	private int NUMBER_OF_WARNING_TYPES = 15;
+	private int NUMBER_OF_WARNING_TYPES = 16;
 	private int NUMBER_OF_NORMAL_WARNING_TYPES = 5;
 
 	/**
@@ -308,6 +314,7 @@ public class ModelChecker implements CommonConstants {
 		BCMPserversFCFSWithoutExponential = new Vector<Object>(0, 1);
 		BCMPFcfsServersWithDifferentServiceTimes = new Vector<Object>(0, 1);
 		BCMPdelaysWithNonRationalServiceDistribution = new Vector<Object>(0, 1);
+                BCMPserverWithNonSymmetricSchedulingPolicy = new Vector<Object>(0, 1);
         invalidLoadDependentRouting = new HashMap<Object, HashMap<Object, Object>>(0);
 		csWithWrongMatrix = new Vector<Object>(0, 1);
 		csFollowedByBas = new Vector<Object>(0, 1);
@@ -340,6 +347,7 @@ public class ModelChecker implements CommonConstants {
 		BCMPFcfsServersWithDifferentServiceTimes.removeAllElements();
 		BCMPdelaysWithNonRationalServiceDistribution.removeAllElements();
 		BCMPnonStateIndependentRoutingStations.removeAllElements();
+                BCMPserverWithNonSymmetricSchedulingPolicy.removeAllElements();
 		csWithWrongMatrix.removeAllElements();
 		csFollowedByBas.removeAllElements();
 		csBetweenForkJoin.removeAllElements();
@@ -377,6 +385,7 @@ public class ModelChecker implements CommonConstants {
 			checkForBCMPDelayWarning();
 			checkForBCMPLcfsPrWarning();
 			checkForBCMPNonStateIndependentRoutingWarning();
+                        checkForBCMPNonSymmetricSchedulingPolicies();
 		} else {
 			station_def.manageProbabilities();
 			checkForNoClassError();
@@ -474,7 +483,7 @@ public class ModelChecker implements CommonConstants {
 	public boolean isWarningFreeToJMVA() {
 		boolean ok = true;
 		if ((warnings[BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING]) || (warnings[BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING])
-				|| (warnings[BCMP_FCFS_EXPONENTIAL_WARNING]) || (warnings[BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING])
+				|| (warnings[BCMP_FCFS_EXPONENTIAL_WARNING]) || (warnings[BCMP_NON_SYMMETRIC_SCHEDULING]) || (warnings[BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING])
 				|| (warnings[BCMP_PROCESSOR_SHARING_WARNING]) || (warnings[BCMP_DELAY_WARNING]) || (warnings[BCMP_LCFS_PR_WARNING])
 				|| (warnings[BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING])) {
 			ok = false;
@@ -495,6 +504,7 @@ public class ModelChecker implements CommonConstants {
 		return ok;
 	}
 
+                
 	/**
 	 * Returns true if no classes have been defined.
 	 * @return false, if there is at least one class
@@ -856,6 +866,18 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
+	* Checks if there are stations that are neither PS, FCFS, or RAND 
+        * Note that LCFS-PR is currently not supported by JMT.
+	*
+	* @return true if delays with a service time distribution whith
+	*         a non rational Laplace transform are found
+	*/
+        public boolean isThereBCMPNonSymmetricSchedulingPolicies() {
+		return warnings[BCMP_NON_SYMMETRIC_SCHEDULING];
+            
+        }
+
+	/**
 	* Checks if there are delays with a service time distribution whose
 	* Laplace transform is not rational
 	*
@@ -1017,6 +1039,16 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public Vector<Object> getBCMPserversWithDifferentQueueStrategy() {
 		return BCMPserversWithDifferentQueueStrategy;
+	}
+
+        	/**
+	 * Use it to get a Vector<Object> containing the keys of servers with per
+	 * class different queue startegies
+	 * @return a Vector<Object> containing the keys of servers with per class
+	 *         different queue startegies
+	 */
+	public Vector<Object> getBCMPserversWithNonSymmetricScheduling() {
+		return BCMPserverWithNonSymmetricSchedulingPolicy;
 	}
 
 	/**
@@ -2249,6 +2281,30 @@ public class ModelChecker implements CommonConstants {
 
 	private void checkForBCMPLcfsPrWarning() {
 		//TODO:implementation
+	}
+
+        private void checkForBCMPNonSymmetricSchedulingPolicies() {
+		Vector<Object> servers = station_def.getStationKeysServer();
+		if (!servers.isEmpty()) {
+			for (int i = 0; i < servers.size(); i++) {
+				Object thisServer = servers.get(i);
+                       		Vector<Object> classes = class_def.getClassKeys();
+                    		for (int j = 0; j < classes.size(); j++) {
+				if (CommonConstants.QUEUE_STRATEGY_STATION_PS.equals(station_def.getStationQueueStrategy(thisServer))) {
+                                    continue;
+				} else if (CommonConstants.QUEUE_STRATEGY_FCFS.equals(station_def.getQueueStrategy(thisServer,classes.get(j)))) {
+                                    continue;                                    
+				} else if (CommonConstants.QUEUE_STRATEGY_RAND.equals(station_def.getQueueStrategy(thisServer,classes.get(j)))) {
+                                    continue;                                    
+                                } else {
+                                    warnings[BCMP_NON_SYMMETRIC_SCHEDULING] = true;
+                                    if (!BCMPserverWithNonSymmetricSchedulingPolicy.contains(thisServer)) {
+                                        BCMPserverWithNonSymmetricSchedulingPolicy.add(thisServer);
+                                    }
+                                }
+                    		}
+		}			
+		}
 	}
 
 	private boolean isTypeUniformServiceStrategy(Object stationKey) {

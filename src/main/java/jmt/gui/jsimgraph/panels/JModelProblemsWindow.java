@@ -55,6 +55,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.definitions.GuiInterface;
+import jmt.gui.jsimwiz.panels.JSimProblemsWindow;
 
 /**
  * <p>Title:</p>
@@ -319,6 +320,15 @@ public class JModelProblemsWindow extends JDialog {
 									+ thisStation, temp.get(i), null));
 				}
 			}
+       			if (mc.isThereBCMPNonSymmetricSchedulingPolicies()) {
+				Vector temp = mc.getBCMPserversWithNonSymmetricScheduling();
+				for (int i = 0; i < temp.size(); i++) {
+					String thisStation = mc.getStationModel().getStationName(temp.get(i));
+					problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_NON_SYMMETRIC_SCHEDULING,
+							"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>Unsupported scheduling policy found at "
+									+ thisStation, temp.get(i), null));
+				}
+			}
 			if (mc.isThereBCMPDifferentServiceTypeWarning()) {
 				Vector temp = mc.getBCMPserversWithDifferentServiceTypes();
 				for (int i = 0; i < temp.size(); i++) {
@@ -528,8 +538,7 @@ public class JModelProblemsWindow extends JDialog {
 				}
 			}
 			if (mc.isTherePreloadingInBlockingRegionError()) {
-				problems
-						.add(new ProblemElement(
+				problems.add(new ProblemElement(
 								ModelChecker.ERROR_PROBLEM,
 								ModelChecker.PRELOADING_WITH_BLOCKING,
 								"<html><font color=\"white\">----</font><b>Error</b>" +
@@ -537,8 +546,7 @@ public class JModelProblemsWindow extends JDialog {
 								null, null));
 			}
 			if (mc.isThereMoreThanOneSinkWarning()) {
-				problems
-						.add(new ProblemElement(
+				problems.add(new ProblemElement(
 								ModelChecker.WARNING_PROBLEM,
 								ModelChecker.MORE_THAN_ONE_SINK_WARNING,
 								"<html><font color=\"white\">--</font><i>Warning</i>" +
@@ -573,8 +581,7 @@ public class JModelProblemsWindow extends JDialog {
 						null));
 			}
 			if (mc.isThereForkWithoutJoinWarnings()) {
-				problems
-						.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.FORK_WITHOUT_JOIN_WARNING,
+				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.FORK_WITHOUT_JOIN_WARNING,
 								"<html><font color=\"white\">--</font><i>Warning</i>" +
 								"<font color=\"white\">--------</font>Fork found but no join",
 								null, null));
@@ -587,8 +594,7 @@ public class JModelProblemsWindow extends JDialog {
 						null, null));
 			}
 			if (mc.isThereSinkProbabilityUpdateWarning()) {
-				problems
-						.add(new ProblemElement(
+				problems.add(new ProblemElement(
 								ModelChecker.WARNING_PROBLEM,
 								ModelChecker.SINK_PROBABILITY_UPDATE_WARNING,
 								"<html><font color=\"white\">--</font><i>Warning</i>" +
