@@ -233,27 +233,6 @@ public class JabaWizard extends Wizard {
 		}
 	};
 
-	private AbstractJMTAction SWITCH_TO_SIMULATOR = new AbstractJMTAction(
-			"Import in JSIM...") {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		{
-			putValue(Action.SHORT_DESCRIPTION,
-					"Import current model into JSIMwiz...");
-			setIcon("toJSIM", JMTImageLoader.getImageLoader());
-			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
-					KeyEvent.VK_G, ActionEvent.CTRL_MASK));
-			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_G));
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			switchToSimulator();
-		}
-	};
-
 	private AbstractJMTAction ACTION_RANDOMIZE_MODEL = new AbstractJMTAction(
 			"Randomize") {
 		/**
@@ -362,7 +341,7 @@ public class JabaWizard extends Wizard {
 
 		// null values add a gap between toolbar icons
 		AbstractJMTAction[] actions = { FILE_NEW, FILE_OPEN, FILE_SAVE, null,
-				ACTION_SOLVE, SWITCH_TO_SIMULATOR, ACTION_RANDOMIZE_MODEL
+				ACTION_SOLVE, ACTION_RANDOMIZE_MODEL
 				, null, HELP };
 		String[] htext = {
 				"Creates a new model",
@@ -387,7 +366,7 @@ public class JabaWizard extends Wizard {
 						FILE_OPEN, FILE_SAVE, null, FILE_EXIT }),
 				new MenuAction("Action", new AbstractJMTAction[] {
 						ACTION_SOLVE, ACTION_RANDOMIZE_MODEL, null,
-						SWITCH_TO_SIMULATOR, null, ACTION_NEXT, ACTION_PREV }),
+						null, ACTION_NEXT, ACTION_PREV }),
 				new MenuAction("Help", new AbstractJMTAction[] { HELP, null,
 						ABOUT }), };
 
