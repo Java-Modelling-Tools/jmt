@@ -196,6 +196,8 @@ public class SolverMultiClosedMoM extends SolverMulti {
 		try {
 			c.computePerformanceMeasures();
 		} catch (InternalErrorException e) {
+                  e.printStackTrace();
+                  System.out.println(e.getMessage());
 		}
 
 		clsThroughput = qnm.getMeanThroughputsAsDoubles();

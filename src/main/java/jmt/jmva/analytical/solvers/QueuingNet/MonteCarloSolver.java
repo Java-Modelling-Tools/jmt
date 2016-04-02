@@ -209,7 +209,7 @@ public class MonteCarloSolver extends QNSolver {
             m.restore();
         }
         qnm.setPerformanceMeasures(Q, X);
-        qnm.printPerformaceMeasrues();
+        qnm.printPerformanceMeasures();
     }
 
     private class MonteCarloSamplingTask implements Callable<Tuple<Double, Double>> {

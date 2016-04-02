@@ -363,14 +363,14 @@ public class SolverDispatcher {
 								fail("Error initializing RECALMultiSolver", null);
 						}
 						solver = closedSolver;
-					} else if (SolverAlgorithm.MOM.equals(algorithmType)) {
+					}/* else if (SolverAlgorithm.MOM.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedMoM closedSolver = new SolverMultiClosedMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 								fail("Error initializing MoMMultiSolver", null);
 						}
 						solver = closedSolver;
-					} else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
+					}*/ else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedCoMoM closedSolver = new SolverMultiClosedCoMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {

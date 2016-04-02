@@ -33,7 +33,7 @@ public enum SolverAlgorithm {
 	EXACT("MVA", true, true, true),
 	RECAL("RECAL", true, true, false),
     	//RGF("RGF", true, true, false),
-	MOM("MoM", true, true, false),
+	//MOM("MoM", true, true, false),
 	COMOM("CoMoM", true, true, false),
 	CHOW("Chow", true, false, false),
 	BARD_SCHWEITZER("Bard-Schweitzer", true, false, false),

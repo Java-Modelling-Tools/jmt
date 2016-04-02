@@ -37,7 +37,8 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	 * Array containing population for each class
 	 */
 	protected int[] population;
-	/**
+
+        /**
 	 * Contains the queuing network model
 	 */
 	protected QNModel qnm;
