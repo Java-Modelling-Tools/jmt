@@ -90,7 +90,7 @@ public class FittingPanel extends WizardPanel {
 									"Mean: " + myFormatter.format(model.getMean()) + "\n" +
 									"Variance: " + myFormatter.format(model.getVariance()) + "\n" +
 									"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()) + "\n\n"+
-									"Attention! Since the number of observations is too small the test may not be reliable!");
+									"Warning! Since the number of observations is too small the test may not be reliable!");
 					}
 					else {
 						resultfittingTextArea.setText("According to the test your data do not follow the exponential distribution" + "\n\n" +
@@ -122,7 +122,7 @@ public class FittingPanel extends WizardPanel {
 									"The following statistical indexes are obtained from the analyzed data" + "\n" +
 									"Variance: " + myFormatter.format(model.getVariance()) + "\n" +
 									"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()) + "\n\n"+
-									"Attention! Since the number of observations is too small the test may not be reliable!");
+									"Warning! Since the number of observations is too small the test may not be reliable!");
 					}
 					else {
 						resultfittingTextArea.setText("According to the test your data do not follow the Pareto distribution" + "\n\n" +
