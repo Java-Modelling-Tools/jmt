@@ -171,6 +171,14 @@ public class Job implements Cloneable {
 		classesBitwise |= newClass.getIdBitwise();
 		//Long.toBinaryString(classesBitwise);
 	}
+        
+         /** Adds a class to job history
+	 * @param newClass the JobClass to add
+	 */
+	public void addClass(JobClass newClass) {
+		classesBitwise |= newClass.getIdBitwise();
+		//Long.toBinaryString(classesBitwise);
+	}
 	
 	/**
 	 * Reset bitwise 

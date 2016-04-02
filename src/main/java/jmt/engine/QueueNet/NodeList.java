@@ -18,8 +18,10 @@
 
 package jmt.engine.QueueNet;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import jmt.engine.random.engine.RandomEngine;
 
 /** This class implements a node list. Note that only classes of QueueNet
  * package can add or remove objects to/from the list.
@@ -28,6 +30,7 @@ import java.util.ListIterator;
 public class NodeList {
 
 	private LinkedList<NetNode> nodes;
+        private RandomEngine engine = RandomEngine.makeDefault();
 
 	/** Creates a new instance of NodeList class.
 	 */
@@ -115,4 +118,22 @@ public class NodeList {
 	public boolean contains(NetNode node) {
 		return nodes.contains(node);
 	}
+	
+	//bpmn
+	public LinkedList<NetNode> randomNodes() {
+		HashSet<Integer> hs = new HashSet<Integer>();
+		LinkedList<NetNode> temp = new LinkedList<NetNode>();
+		int size = nodes.size();
+		while(hs.size() < size){
+                        //replaced Math.random() code
+			int index = (int)(engine.raw() * size);
+			int s = hs.size();
+			hs.add(index);
+			if(s < hs.size()){
+				temp.add(nodes.get(index));
+			}
+		}
+		return temp;
+	}
+	//end
 }

@@ -123,7 +123,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION), current.getAttribute(XML_A_MEASURE_CLASS), Double
 					.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)), Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
 					Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), current.getAttribute(XML_A_MEASURE_NODETYPE));
-			for (int j = 0; j < samples.getLength(); j++) {
+                        for (int j = 0; j < samples.getLength(); j++) {
 				Element sample = (Element) samples.item(j);
 				double mean = 0;
 				double upper = 0;
@@ -341,11 +341,17 @@ public class XMLResultsReader implements XMLResultsConstants {
 				numType = SimConstants.SYSTEM_POWER;
 			}
 			//Added by ASHANKA STOP
-			else if (tmp.startsWith("Throughput") && tmp.endsWith("Sink")) {
+			else if (tmp.startsWith("throughput") && tmp.endsWith("sink")) {
 				numType = SimConstants.THROUGHPUT_PER_SINK;
 			}
-			else if (tmp.startsWith("Response") && tmp.endsWith("Sink")) {
+			else if (tmp.startsWith("response") && tmp.endsWith("sink")) {
 				numType = SimConstants.RESPONSE_TIME_PER_SINK;
+			} else if (type.equals("FCR - Mean Job Weight")){
+				numType = SimConstants.MEAN_WEIGHT;
+			} else if (type.equals("FCR - Mean Memory Occupation")){
+				numType = SimConstants.MEAN_MEMORY_OCCUPATION;
+			} else if(type.equals("Fork Join Response Time")){
+				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
 			}
 			// Adds loaded informations into model data structure
 			model.addMeasure(Name, stationName, className, alpha, precision, samples, discarded, state, numType, nodeType,fileName);

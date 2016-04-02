@@ -31,6 +31,7 @@ import jmt.engine.QueueNet.LinkedJobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.dataAnalysis.Measure;
 
 /**
  * This class implements the queue of a region input station, that is
@@ -227,7 +228,7 @@ public class BlockingQueue extends InputSection {
 				if (jobInfo != null) {
 					jobsList_node.remove(jobInfo);
 				}
-
+                                
 				//checks whether there are jobs in queue
 				if (jobsList.size() == 0) {
 					//no jobs in queue
@@ -416,5 +417,19 @@ public class BlockingQueue extends InputSection {
 	 */
 	public int getDroppedJobs() {
 		return droppedJobs;
+	}
+
+	// for blocking region
+	@Override
+	public void analyze(int name, Measure measurement)
+			throws jmt.common.exception.NetException {
+		switch (name) {
+		case 0:
+			this.blockingRegion.setWeightMeasure(measurement);
+			break;
+		case 1:
+			this.blockingRegion.setSizeMeasure(measurement);
+			break;
+		}
 	}
 }

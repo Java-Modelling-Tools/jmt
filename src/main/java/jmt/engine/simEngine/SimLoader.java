@@ -112,6 +112,9 @@ public class SimLoader {
 		//@author Stefano Omini
 
 		simModelPath = xmlPath;
+//		xmlPath = "/home/js/Documents/~JModelSimulation3852173409779516183.xml";
+//		xmlPath = "/home/js/Documents/~JModelSimulation5554792256213153684.xml";
+//		System.out.println(xmlPath);
 		InputStream is = new BufferedInputStream(new FileInputStream(xmlPath));
 		//loads the model and creates a Simulation object
 		load(is);
@@ -1035,6 +1038,15 @@ public class SimLoader {
 		else if (measure.equalsIgnoreCase("Throughput per Sink")) {
 			return SimConstants.THROUGHPUT_PER_SINK;
 		}
+		else if(measure.equalsIgnoreCase("FCR - Mean Job Weight")){
+			return SimConstants.MEAN_WEIGHT;
+		}
+		else if(measure.equalsIgnoreCase("FCR - Mean Memory Occupation")){
+			return SimConstants.MEAN_MEMORY_OCCUPATION;
+		}
+		else if(measure.equalsIgnoreCase("Fork Join Response Time")){
+			return SimConstants.FORK_JOIN_RESPONSE_TIME;
+		}
 		//default value
 		return SimConstants.UTILIZATION;
 	}
@@ -1120,6 +1132,22 @@ public class SimLoader {
 				}
 			} else {
 				throw new LoadException("Element \"globalConstraint\" missing...");
+			}
+			
+			//--------------GLOBAL MEMORY CONSTRAINT-------------//
+			
+			double maxMemory = -1;
+			
+			NodeList globalMemoryConstraints = region.getElementsByTagName("globalMemoryConstraint");
+			
+			if (globalMemoryConstraints.item(0) != null) {
+				Element globalMemoryConst = (Element) globalMemoryConstraints.item(0);
+				maxMemory = Double.parseDouble(globalMemoryConst.getAttribute("maxMemory"));
+				if (DEBUG) {
+					System.out.println("   global memory constraint = " + Double.toString(maxMemory));
+				}
+			} else {
+				throw new LoadException("Element \"globalMemoryConstraint\" missing...");
 			}
 
 			//--------------DROP RULES---------------//
@@ -1272,10 +1300,52 @@ public class SimLoader {
 				}
 
 			}
+			//------------------Memory Size Each Class--------------//
+			NodeList classSizes = root.getElementsByTagName("classMemorySize");
+
+			double[] regionClassSizes = new double[classNumber];
+			//init
+			Arrays.fill(regionClassSizes, 1.0);
+
+			if (classSizes.getLength() > 0) {
+
+				//the number of class weights must be exactly equal
+				//to the number of classes
+				/*
+				if (classWeights.getLength() != classNumber) {
+				    throw new LoadException("One class weight is required for each class.");
+				}
+				*/
+
+				Element clsSize = null;
+				int classPosition;
+				String className;
+
+				for (int c = 0; c < classSizes.getLength(); c++) {
+					clsSize = (Element) classSizes.item(c);
+
+					className = clsSize.getAttribute("jobClass");
+
+					//entries may be in a wrong order: find the right position
+					classPosition = getJobClassPosition(className);
+
+					if (classPosition == -1) {
+						//class not exists
+						throw new LoadException("The job class associated to this memory size does not exist in model");
+					} else {
+						regionClassSizes[classPosition] = Double.parseDouble(clsSize.getAttribute("size"));
+					}
+
+					if (DEBUG) {
+						System.out.println("   size for class " + className + " = " + Double.toString(regionClassSizes[classPosition]));
+					}
+				}
+
+			}
 
 			//------------------ADD BLOCKING REGION TO SIM ---------//
-			sim.addRegion(regionName, maxCapacity, maxCapacityPerClass, regionClassWeights, dropThisClass, stationNames);
-
+//			sim.addRegion(regionName, maxCapacity, maxCapacityPerClass, regionClassWeights, dropThisClass, stationNames);
+			sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, regionClassSizes, regionClassWeights, dropThisClass, stationNames);
 			if (DEBUG) {
 				System.out.println("added region " + regionName);
 			}

@@ -106,8 +106,22 @@ public interface XMLConstantNames {
 	public static final String XML_A_CLASSCONSTRAINT_CLASS = "jobClass";
 	public static final String XML_A_CLASSCONSTRAINT_MAXJOBS = "maxJobsPerClass";
 	public static final String XML_E_GLOBALCONSTRAINT = "globalConstraint";
+	public static final String XML_E_GLOBALMEMORYCONSTRAINT = "globalMemoryConstraint";
+	public static final String XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY = "maxMemory";
+	
 	public static final String XML_A_GLOBALCONSTRAINT_MAXJOBS = "maxJobs";
 	public static final String XML_E_DROPRULES = "dropRules";
+	
+	public static final String XML_E_WEIGHT = "classWeight";
+	
+	public static final String XML_A_WEIGHT_CLASS = "jobClass";
+	public static final String XML_A_WEIGHT_MULTI = "weight";
+	
+	public static final String XML_E_MEMORYSIZE = "classMemorySize";
+	
+	public static final String XML_A_MEMORY_CLASS = "jobClass";
+	public static final String XML_A_MEMORY_SIZE = "size";
+	
 	public static final String XML_A_DROPRULES_CLASS = "jobClass";
 	public static final String XML_A_DROPRULES_DROP = "dropThisClass";
 

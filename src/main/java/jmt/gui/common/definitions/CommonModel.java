@@ -35,6 +35,12 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.classSwitch.ClassSwitch;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
+import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
+import jmt.gui.common.forkStrategies.OutPath;
+import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -93,6 +99,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * search keysets for classes, stations and measures
 	 */
 	protected Vector<Object> stationsKeyset = new Vector<Object>();
+        	
+	protected Vector<Object> FJKeyset = new Vector<Object>();
+        
 	/**
 	 * search keysets for classes, stations and measures
 	 */
@@ -159,6 +168,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * on X coordinate must be put class search keys, on Y blocking region search keys.
 	 */
 	blockingDetailsBDM = new BDMapImpl();
+        
+        //S Jiang
+	protected HashMap<Object, Vector<Object>> fakeForwardConnection = new CachedHashMap<Object, Vector<Object>>();
+	//end
 
 	// ------------------ Francesco D'Aquino ----------------------
 	private ParametricAnalysisDefinition parametricAnalysisModel;
@@ -322,6 +335,27 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				cd.refSource = null;
 			}
 		}
+                for(Object station: this.getStationKeys()) {
+                        for(Object classK: this.getClassKeys()) {
+                                Object strategy = this.getForkingStrategy(station, classK);
+                                if(strategy instanceof MultiBranchClassSwitchFork) {
+                                        Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
+                                        for(OutPath o: m.values()) {
+                                                o.getOutParameters().put(key, 0);
+                                        }
+                                }
+                                if(strategy instanceof ClassSwitchFork) {
+                                        Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
+                                        for(OutPath o: m.values()) {
+                                                o.getOutParameters().put(key, 0);
+                                        }
+                                }
+                                strategy = this.getJoinStrategy(station, classK);
+                                if(strategy instanceof GuardJoin) {
+                                        ((GuardJoin) strategy).getGuard().put(key, 0);
+                                }
+                        }
+                }
 	}
 
 	/**
@@ -394,7 +428,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
 			ClassData classData = ((ClassData) classDataHM.get(key));
-			if(classData.refSource!=null && classData.refSource.equals(STATION_TYPE_CLASSSWITCH)) {
+			if(classData.refSource != null && (classData.refSource.equals(STATION_TYPE_CLASSSWITCH) || classData.refSource.equals(STATION_TYPE_FORK))) {
 				return null;
 			}
 			cd = (ClassData) classDataHM.get(key);
@@ -531,6 +565,27 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		addStationDetailsForClass(key);
 		//add per-class blocking region details
 		addBlockingDetailsForClass(key);
+                for(Object station: this.getStationKeys()) {
+                        for(Object classK: this.getClassKeys()) {
+                                Object strategy = this.getForkingStrategy(station, classK);
+                                if(strategy instanceof MultiBranchClassSwitchFork) {
+                                        Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
+                                        for(OutPath o: m.values()) {
+                                                o.getOutParameters().put(key, 0);
+                                        }
+                                }
+                                if(strategy instanceof ClassSwitchFork) {
+                                        Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
+                                        for(OutPath o: m.values()) {
+                                                o.getOutParameters().put(key, 0);
+                                        }
+                                }
+                                strategy = this.getJoinStrategy(station, classK);
+                                if(strategy instanceof GuardJoin) {
+                                        ((GuardJoin) strategy).getGuard().put(key, 0);
+                                }
+                        }
+                }
 		save = true;
 		return key;
 	}
@@ -561,7 +616,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		Object oldRef = cd.refSource;
 		if(CommonConstants.STATION_TYPE_CLASSSWITCH.equals(stationKey))
 			cd.refSource = CommonConstants.STATION_TYPE_CLASSSWITCH;
-		else
+                else if(CommonConstants.STATION_TYPE_FORK.equals(stationKey))
+                        cd.refSource = CommonConstants.STATION_TYPE_FORK;
+                else
 			cd.refSource = stationsKeyset.contains(stationKey) ? stationKey : null;
 		if (oldRef != stationKey) {
 			save = true;
@@ -580,7 +637,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			return null;
 		}
 		//if previously saved refSource has been deleted, delete it to mantain coherence
-		if (!stationsKeyset.contains(cd.refSource) && !CommonConstants.STATION_TYPE_CLASSSWITCH.equals(cd.refSource)) { 
+		if (!stationsKeyset.contains(cd.refSource) && !CommonConstants.STATION_TYPE_CLASSSWITCH.equals(cd.refSource) && !CommonConstants.STATION_TYPE_FORK.equals(cd.refSource)) { 
 			cd.refSource = null;
 		}
 		return cd.refSource;
@@ -609,6 +666,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			Object thisStation = stations.get(i);
 			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_CLASSSWITCH)) {
 				sources.add(CommonConstants.STATION_TYPE_CLASSSWITCH);
+				break;
+			}
+		}
+                for (int i = 0; i < stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_FORK)) {
+				sources.add(CommonConstants.STATION_TYPE_FORK);
 				break;
 			}
 		}
@@ -688,6 +752,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	public Vector<Object> getStationKeysNoSourceSink() {
 		return noSourceSinkKeyset;
 	}
+        
+        public Vector<Object> getFJKeys(){
+		return this.FJKeyset;
+	}
 
 	/* (non-Javadoc)
 	 * @see jmt.gui.common.definitions.StationDefinition#getStationRegionKeysNoSourceSink()
@@ -697,6 +765,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		Vector<Object> vect = new Vector<Object>(noSourceSinkKeyset);
 		vect.addAll(blockingRegionsKeyset);
 		return vect;
+	}
+        
+        @Override
+	public Vector<Object> getFCRegionKeys() {
+		return blockingRegionsKeyset;
 	}
 	
 	@Override
@@ -891,6 +964,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			} else {
 				noSourceSinkKeyset.remove(key);
 			}
+			if (!type.equals(STATION_TYPE_FORK)) {
+				if (!FJKeyset.contains(key)) {
+					FJKeyset.add(key);
+				}
+			} else {
+				FJKeyset.remove(key);
+			}
 
 			// If station is in a blocking region removes it if its type is not valid
 			if (sd.blockingRegion != null) {
@@ -950,6 +1030,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			if (!type.equals(STATION_TYPE_SOURCE) && !type.equals(STATION_TYPE_SINK)) {
 				noSourceSinkKeyset.add(key);
 			}
+                        if (type.equals(STATION_TYPE_FORK)) {
+				FJKeyset.add(key);
+			}
 			// If this station can be blocked, adds it to blockable stations vector
 			if (canStationTypeBeBlocked(type)) {
 				blockableStations.add(key);
@@ -976,17 +1059,21 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			StationData sd = (StationData) stationDataHM.get(key);
 			//Part where LoadDependant Routing must be refreshed:
 			Vector<Object> bacwardStationKeys = this.getBackwardConnections(key);
-            for(Iterator<Object> it = bacwardStationKeys.iterator(); it.hasNext();){
-                Object stationKey = it.next();
-                Vector<Object> classKeys = this.getClassKeys();
-                for(Object classKey : classKeys){
-                    RoutingStrategy rs = (RoutingStrategy)this.getRoutingStrategy(stationKey, classKey);
-                    if(rs instanceof LoadDependentRouting){
-                        LoadDependentRouting ld = (LoadDependentRouting) rs;
-                        ld.refreshRoutingOnStationDeletion(this.getStationName(key));
-                    }
-                }
-            }
+                        for(Iterator<Object> it = bacwardStationKeys.iterator(); it.hasNext();){
+                                Object stationKey = it.next();
+                                Vector<Object> classKeys = this.getClassKeys();
+                                for(Object classKey : classKeys){
+                                        RoutingStrategy rs = (RoutingStrategy)this.getRoutingStrategy(stationKey, classKey);
+                                        ForkStrategy fs = (ForkStrategy) this.getForkingStrategy(stationKey, classKey);
+                                        if(rs instanceof LoadDependentRouting){
+                                                LoadDependentRouting ld = (LoadDependentRouting) rs;
+                                                ld.refreshRoutingOnStationDeletion(this.getStationName(key));
+                                        }
+                                        if(fs != null) {
+                                                fs.removeStation(key);
+                                        }
+                                }
+                        }
 			//
 			if (sd.blockingRegion != null) {
 				removeRegionStation(sd.blockingRegion, key);
@@ -996,10 +1083,37 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			deleteStationConnections(key);
 			deleteStationDetails(key);
 			noSourceSinkKeyset.remove(key);
+                        FJKeyset.remove(key);
 			blockableStations.remove(key);
 			save = true;
 		}
 
+	}
+        
+	// check if use simplified fork strategy
+	@Override
+	public Boolean getIsSimplifiedFork(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.isSimplifiedFork;
+	}
+
+	@Override
+	public void setIsSimplifiedFork(Object key, Boolean value) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (!sd.isSimplifiedFork.equals(value)) {
+			save = true;
+		}
+		sd.isSimplifiedFork = value;
 	}
 
 	/**
@@ -1140,6 +1254,32 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			return null;
 		}
 	}
+        
+        @Override
+	public void setForkingStrategy(Object stationKey, Object classKey,
+			Object forkingStrategy) {
+		StationClassData current = (StationClassData) stationDetailsBDM.get(
+				classKey, stationKey);
+		if (current != null) {
+			if (!forkingStrategy.equals(current.forkingStrategy)) {
+				save = true;
+			}
+			current.forkingStrategy = forkingStrategy;
+		}
+	}
+
+	@Override
+	public void setJoinStrategy(Object stationKey, Object classKey,
+			Object joinStrategy) {
+		StationClassData current = (StationClassData) stationDetailsBDM.get(
+				classKey, stationKey);
+		if (current != null) {
+			// if (!joinStrategy.equals(current.joinStrategy)) {
+			save = true;
+			// }
+			current.joinStrategy = joinStrategy;
+		}
+	}
 
 	@Override
 	public void setRoutingStrategy(Object stationKey, Object classKey, Object routingStrategy) {
@@ -1149,6 +1289,28 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				save = true;
 			}
 			current.routingStrategy = routingStrategy;
+		}
+	}
+        
+        @Override
+	public Object getForkingStrategy(Object stationKey, Object classKey) {
+		StationClassData current = (StationClassData) stationDetailsBDM.get(
+				classKey, stationKey);
+		if (current != null) {
+			return current.forkingStrategy;
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public Object getJoinStrategy(Object stationKey, Object classKey) {
+		StationClassData current = (StationClassData) stationDetailsBDM.get(
+				classKey, stationKey);
+		if (current != null) {
+			return current.joinStrategy;
+		} else {
+			return null;
 		}
 	}
 
@@ -1376,6 +1538,47 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	        values.put(keys[i], probabilities[i]);
 	    }
 	}
+        
+        // M Cazzoli
+        public void normalizeProbabilitiesFork(Map<Object, Double> values) {
+                
+                Set<Object> keys = values.keySet();
+                
+		Double[] probabilities = new Double[keys.size()];
+		Object[] keyList = keys.toArray();
+		// extract all values from map in array form
+		for (int i = 0; i < keyList.length; i++) {
+			probabilities[i] = (Double) values.get(keyList[i]);
+		}
+
+		values.clear();
+		// scan for null values and for total sum
+		double totalSum = 0.0;
+		int totalNonNull = 0;
+		boolean allNull = true;
+		for (int i = 0; i < probabilities.length; i++) {
+			if (probabilities[i] != null) {
+				totalSum += probabilities[i].doubleValue();
+				totalNonNull++;
+				allNull = false;
+			}
+		}
+		// modify non null values for their sum to match 1 and put null values
+		// to 1
+		for (int i = 0; i < probabilities.length; i++) {
+			if ((probabilities[i] != null || allNull)) {
+				if (totalSum == 0) {
+					probabilities[i] = new Double(1.0 / totalNonNull);
+				} else {
+					probabilities[i] = new Double(
+							probabilities[i].doubleValue() / totalSum);
+				}
+			} else {
+				probabilities[i] = new Double(0.0);
+			}
+			values.put(keyList[i], probabilities[i]);
+		}
+	}
 	
 	private boolean isClosedClassSinkProbability(Object stationKey, Object classKey){
 		boolean ret = false;
@@ -1399,26 +1602,39 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			return null;
 		}
 		if (STATION_TYPE_DELAY.equals(sd.type)) {
-			defaultDetails = new StationClassData(Defaults.get("stationQueueStrategy"), Defaults.getAsNewInstance("stationDelayServiceStrategy"),
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null);
+			defaultDetails = new StationClassData(
+					Defaults.get("stationQueueStrategy"),
+					Defaults.getAsNewInstance("stationDelayServiceStrategy"),
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
 		} else if (STATION_TYPE_SERVER.equals(sd.type)) {
-			defaultDetails = new StationClassData(Defaults.get("stationQueueStrategy"), Defaults.getAsNewInstance("stationServiceStrategy"), Defaults
-					.getAsNewInstance("stationRoutingStrategy"), null);
+			defaultDetails = new StationClassData(
+					Defaults.get("stationQueueStrategy"),
+					Defaults.getAsNewInstance("stationServiceStrategy"),
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
 		} else if (STATION_TYPE_SOURCE.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null, Defaults.getAsNewInstance("stationRoutingStrategy"), null);
+			defaultDetails = new StationClassData(null, null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
 		} else if (STATION_TYPE_SINK.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null, null, null);
+			defaultDetails = new StationClassData(null, null, null, null, null, null);
 		} else if (STATION_TYPE_TERMINAL.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null, Defaults.getAsNewInstance("stationRoutingStrategy"), null);
-		} else if ((STATION_TYPE_ROUTER.equals(sd.type)) || (STATION_TYPE_LOGGER.equals(sd.type))) {
-			defaultDetails = new StationClassData(Defaults.get("stationQueueStrategy"), null, Defaults.getAsNewInstance("stationRoutingStrategy"), null);
+			defaultDetails = new StationClassData(null, null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
+		} else if ((STATION_TYPE_ROUTER.equals(sd.type))
+				|| (STATION_TYPE_LOGGER.equals(sd.type))) {
+			defaultDetails = new StationClassData(
+					Defaults.get("stationQueueStrategy"), null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
 		} else if (STATION_TYPE_FORK.equals(sd.type)) {
-			defaultDetails = new StationClassData(Defaults.get("stationQueueStrategy"), null, null, null);
+			defaultDetails = new StationClassData(
+					Defaults.get("stationQueueStrategy"), null, null, null,Defaults.getAsNewInstance("stationForkingStrategy"), null);
 		} else if (STATION_TYPE_JOIN.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null, Defaults.getAsNewInstance("stationRoutingStrategy"), null);
-		} else if(STATION_TYPE_CLASSSWITCH.equals(sd.type)) {
-			defaultDetails = new StationClassData(Defaults.get("stationQueueStrategy"), null, Defaults
-					.getAsNewInstance("stationRoutingStrategy"), Defaults.getAsNewInstance("stationCsRowMatrix"));
+			defaultDetails = new StationClassData(null, null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, Defaults.getAsNewInstance("stationJoinStrategy"));
+		} else if (STATION_TYPE_CLASSSWITCH.equals(sd.type)) {
+			defaultDetails = new StationClassData(
+					Defaults.get("stationQueueStrategy"), null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"),
+					Defaults.getAsNewInstance("stationCsRowMatrix"), null, null);
 		}
 		return defaultDetails;
 	}
@@ -1452,6 +1668,27 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**Deletes station details about a certain class, given its search key*/
 	protected void deleteStationDetailsForClass(Object classKey) {
 		stationDetailsBDM.remove(classKey, BDMap.X);
+                for(Object station: this.getStationKeys()) {
+                        for(Object classK: this.getClassKeys()) {
+                                Object strategy = this.getForkingStrategy(station, classK);
+                                if(strategy instanceof MultiBranchClassSwitchFork) {
+                                        Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
+                                        for(OutPath o: m.values()) {
+                                                o.getOutParameters().remove(classKey);
+                                        }
+                                }
+                                if(strategy instanceof ClassSwitchFork) {
+                                        Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
+                                        for(OutPath o: m.values()) {
+                                                o.getOutParameters().remove(classKey);
+                                        }
+                                }
+                                strategy = this.getJoinStrategy(station, classK);
+                                if(strategy instanceof GuardJoin) {
+                                        ((GuardJoin) strategy).getGuard().remove(classKey);
+                                }
+                        }
+                }
 	}
 
 	/*------------------------------------------------------------------------------
@@ -1836,6 +2073,24 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				|| type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) ? true : false;
 		return ret;
 	}
+        	
+	@Override
+	public boolean isFCRMeasure(Object key){
+		String type = getMeasureType(key);
+		boolean ret = false;
+		ret = (type.equals(SimulationDefinition.MEASURE_MEAN_WEIGHT)
+				|| type.equals(SimulationDefinition.MEASURE_MEAN_MEMORY_OCCUPATION))? true : false;
+		return ret;
+	}
+	
+	@Override
+	public boolean isFJMeasure(Object key){
+		String type = getMeasureType(key);
+		boolean ret = false;
+		ret = (type.equals(SimulationDefinition.MEASURE_FJ_RESPONSE_TIME))? true : false;
+		return ret;
+	}
+
 	/**
 	 * Sets preloaded jobs on a given station for a given class
 	 * @param jobs number of jobs to be put in queue
@@ -2214,7 +2469,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (!blockingRegionsKeyset.contains(key)) {
 			blockingRegionsKeyset.add(key);
 		}
-		BlockingRegionData newBlocking = new BlockingRegionData(name, type, Defaults.getAsInteger("blockingMaxJobs"));
+		BlockingRegionData newBlocking = new BlockingRegionData(name, type, Defaults.getAsInteger("blockingMaxJobs"), Defaults.getAsInteger("blockingMaxMemory"));
 		blockingDataHM.put(key, newBlocking);
 		// Adds region-class specific data
 		addBlockingDetails(key);
@@ -2422,6 +2677,27 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).drop = drop;
 	}
+        	@Override
+	public void setRegionClassWeight(Object regionKey, Object classKey, Integer weight){
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return;
+		}
+		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight.equals(weight)) {
+			save = true;
+		}
+		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight = weight;
+	}
+	
+	@Override
+	public void setRegionClassSize(Object regionKey, Object classKey, Integer size){
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return;
+		}
+		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size.equals(size)) {
+			save = true;
+		}
+		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size = size;
+	}
 
 	/**
 	 * Sets a global customer number constraint for a given region
@@ -2438,6 +2714,32 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			save = true;
 		}
 		((BlockingRegionData) blockingDataHM.get(regionKey)).maxJobs = maxJobs;
+	}
+        
+	@Override
+	public void setRegionMemoryCapacity(Object regionKey, Integer memorySize){
+		if (!blockingRegionsKeyset.contains(regionKey)) {
+			return;
+		}
+		if (!((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory.equals(memorySize)) {
+			save = true;
+		}
+		((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory = memorySize;
+	}
+	@Override 
+	public Integer getRegionClassWeight(Object regionKey, Object classKey){
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return null;
+		}
+		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight;
+	}
+	
+	@Override 
+	public Integer getRegionClassSize(Object regionKey, Object classKey){
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return null;
+		}
+		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size;
 	}
 
 	/**
@@ -2482,6 +2784,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			return null;
 		}
 		return ((BlockingRegionData) blockingDataHM.get(regionKey)).maxJobs;
+	}
+        
+	@Override
+	public Integer getRegionMemorySize(Object regionKey){
+		if (!blockingRegionsKeyset.contains(regionKey)) {
+			return null;
+		}
+		return ((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory;
 	}
 
 	/**
@@ -2533,7 +2843,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		Vector<Object> blockingKeys = getRegionKeys();
 		for (int i = 0; i < blockingKeys.size(); i++) {
 			blockingDetailsBDM.put(classKey, blockingKeys.get(i), new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"), Defaults
-					.getAsBoolean("blockingDropPerClass")));
+					.getAsBoolean("blockingDropPerClass"), Defaults.getAsInteger("weight"),Defaults.getAsInteger("size")));
 		}
 	}
 
@@ -2545,7 +2855,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		Vector<Object> classKeys = getClassKeys();
 		for (int i = 0; i < classKeys.size(); i++) {
 			blockingDetailsBDM.put(classKeys.get(i), blockingRegionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
-					Defaults.getAsBoolean("blockingDropPerClass")));
+					Defaults.getAsBoolean("blockingDropPerClass"), Defaults.getAsInteger("weight"), Defaults.getAsInteger("size")));
 		}
 	}
 
@@ -2581,6 +2891,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Object loggerParameters;
 		/** Reference to owner blocking station or null */
 		public Object blockingRegion;
+                
+		public Boolean isSimplifiedFork;
 
 		public StationData(String name, String type, Integer numOfServers, Integer queueCapacity) {
 			this.name = name;
@@ -2588,6 +2900,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			this.numOfServers = numOfServers;
 			this.queueCapacity = queueCapacity;
 			this.loggerParameters = null;
+                        this.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
 		}
 	}
 
@@ -2617,13 +2930,16 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String name;
 		public String type;
 		public Integer maxJobs;
+                public Integer maxMemory;
+                
 		/** Reference to owned stations */
 		public HashSet<Object> stations;
 
-		public BlockingRegionData(String name, String type, Integer maxJobs) {
+		public BlockingRegionData(String name, String type, Integer maxJobs, Integer maxMemory) {
 			this.name = name;
 			this.type = type;
 			this.maxJobs = maxJobs;
+                        this.maxMemory = maxMemory;
 			stations = new HashSet<Object>();
 		}
 	}
@@ -2634,10 +2950,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected class BlockingClassData {
 		public Integer maxJobs;
 		public Boolean drop;
+                public Integer weight;
+		public Integer size;
 
-		public BlockingClassData(Integer maxJobs, Boolean drop) {
+		public BlockingClassData(Integer maxJobs, Boolean drop, Integer weight, Integer size) {
 			this.maxJobs = maxJobs;
 			this.drop = drop;
+                        this.weight = weight;
+			this.size = size;
 		}
 	}
 
@@ -2665,14 +2985,19 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Object classSwitchProb; //this is a row of the cs matrix
 		public Integer preload;
 		public String dropRule;
+                //bpmn
+		public Object forkingStrategy;
+		public Object joinStrategy;
 
-		public StationClassData(String queueStrategy, Object serviceDistribution, Object routingStrategy, Object classSwitchProb) {
+		public StationClassData(String queueStrategy, Object serviceDistribution, Object routingStrategy, Object classSwitchProb, Object forkingStrategy, Object joinStrategy) {
 			this.queueStrategy = queueStrategy;
 			this.serviceDistribution = serviceDistribution;
 			this.routingStrategy = routingStrategy;
 			this.classSwitchProb = classSwitchProb;
 			this.preload = new Integer(0);
 			this.dropRule = Defaults.get("dropRule");
+                        this.forkingStrategy = forkingStrategy;
+			this.joinStrategy = joinStrategy;
 		}
 	}
 

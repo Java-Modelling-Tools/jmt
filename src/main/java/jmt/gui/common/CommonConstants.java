@@ -21,6 +21,15 @@ package jmt.gui.common;
 import java.awt.Dimension;
 
 import jmt.framework.data.ConstMap;
+import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
+import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.CombFork;
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.forkStrategies.ProbabilitiesFork;
+import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.joinStrategies.NormalJoin;
+import jmt.gui.common.joinStrategies.PartialJoin;
 import jmt.gui.common.routingStrategies.*;
 
 /**
@@ -55,6 +64,10 @@ public interface CommonConstants {
 	public final static String STATION_TYPE_JOIN = "Join";
 	public final static String STATION_TYPE_LOGGER = "Logger";
 	public final static String STATION_TYPE_CLASSSWITCH = "ClassSwitch";
+	
+	//For BPMN
+//	public final static String STATION_TYPE_INGATEWAY = "InGateWay";
+//	public final static String STATION_TYPE_OUTGATEWAY = "OutGateWay";
 
 	/** A map that decodes from station type to station name for the GUI */
 
@@ -72,6 +85,9 @@ public interface CommonConstants {
 			putConst(STATION_TYPE_JOIN, STATION_TYPE_JOIN);
 			putConst(STATION_TYPE_LOGGER, STATION_TYPE_LOGGER);
 			putConst(STATION_TYPE_CLASSSWITCH, STATION_TYPE_CLASSSWITCH);
+			//For BPMN
+//			putConst(STATION_TYPE_INGATEWAY, STATION_TYPE_INGATEWAY);
+//			putConst(STATION_TYPE_OUTGATEWAY, STATION_TYPE_OUTGATEWAY);
 		}
 	};
 
@@ -117,8 +133,17 @@ public interface CommonConstants {
 	public final static RoutingStrategy ROUTING_SHORTESTRT = new ShortestResponseTimeRouting();
 	public final static RoutingStrategy ROUTING_LEASTUTILIZATION = new LeastUtilizationRouting();
 	public final static RoutingStrategy ROUTING_FASTESTSERVICE = new FastestServiceRouting();
-	public final static RoutingStrategy ROUTING_LOADDEPENDENT = new LoadDependentRouting();
+        public final static RoutingStrategy ROUTING_LOADDEPENDENT = new LoadDependentRouting();
+    
+        public final static ForkStrategy FORKING_PROBABILITIES = new ProbabilitiesFork();
+        public final static ForkStrategy FORKING_COMBINATION = new CombFork();
+        public final static ForkStrategy FORKING_CLASS_SWITCH = new ClassSwitchFork();
+        public final static ForkStrategy FORKING_MULTI_BRANCH_CLASS_SWITCH = new MultiBranchClassSwitchFork();
 
+        public final static JoinStrategy JOINING_NORMAL = new NormalJoin();
+        public final static JoinStrategy JOINING_PARTIAL = new PartialJoin();
+        public final static JoinStrategy JOINING_MIX = new GuardJoin();
+    
 	/**HTML formats for panels descriptions*/
 	final static String HTML_START = "<html><body align=\"left\">";
 	final static String HTML_END = "</body></html>";

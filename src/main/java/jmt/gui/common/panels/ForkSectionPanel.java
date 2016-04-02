@@ -26,6 +26,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -57,8 +58,7 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 	protected StationDefinition sd;
 	protected ClassDefinition cd;
 	protected Object stationKey;
-	protected JSpinner numForkSpinner;
-	protected JSpinner blockSpinner;
+	protected JSpinner numForkSpinner, blockSpinner;
 
 	/**
 	 * Sets data for this panel
@@ -93,16 +93,7 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 		//building mainPanel
 		this.setLayout(new GridLayout(2, 1));
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
-
-		//layout of fragNum panel
-		JPanel fragnum = new JPanel();
-		fragnum.setBorder(new TitledBorder(new EtchedBorder(), "Fork degree"));
-		this.add(fragnum);
-		JLabel text = new JLabel("Number of Forked-Jobs to be generated on each output link for each input job (customer) to the Fork:");
-		text.setLabelFor(numForkSpinner);
-		fragnum.add(text);
-		fragnum.add(numForkSpinner);
-
+		
 		//layout of block panel
 		JPanel block = new JPanel(new BorderLayout(10, 10));
 		block.setBorder(new TitledBorder(new EtchedBorder(), "Fork-Join Section Capacity"));
@@ -110,11 +101,11 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 
 		// Adds a checkbox to block panel to select block function
 		final JCheckBox check = new JCheckBox();
-		check.setText("Enable Finite Capacity: limit maximum number of jobs (customers) inside a fork-join section. ");
+		check.setText("<html>Enable Finite Capacity: limit maximum number of jobs (customers) inside a fork-join section.</html>");
 		check.setToolTipText("Limit the maximum allowed number of jobs inside a fork-join section. Following jobs will be queued.");
 
 		// Adds a spinner to block panel to select block number
-		JLabel label = new JLabel("Capacity (max number of jobs, NOT Forked-Jobs): ");
+		JLabel label = new JLabel("Capacity (max number of jobs, NOT tasks): ");
 		label.setLabelFor(blockSpinner);
 
 		// Initial values
@@ -205,6 +196,6 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 	 */
 	@Override
 	public String getName() {
-		return "Fork Section";
+		return "Capacity Section";
 	}
 }

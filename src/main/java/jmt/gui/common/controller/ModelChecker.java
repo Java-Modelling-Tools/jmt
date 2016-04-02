@@ -29,6 +29,7 @@ import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RandomRouting;
@@ -135,6 +136,8 @@ public class ModelChecker implements CommonConstants {
 	private Vector<Object> csSystemThroughputClass;
 	//Vector containing the closed classes of zero population 
 	private Vector<Object> closedZeroPopulation;
+        //List of all FiringMixJoin station and keys with zero tasks
+        private HashMap<Object, List<Object>> GuardStrategyZeroTasks;
 
     private Map<Object, HashMap<Object, Object>> invalidLoadDependentRouting;
 
@@ -205,8 +208,10 @@ public class ModelChecker implements CommonConstants {
     //Checks if all the closed classes population is zero with class switch 
     public static final int CS_ALL_CLOSED_ZERO_POPULATION = 25;
     
-    //Checks if CS with FCR OR FORK-JOIN
-    public static final int CS_WITH_FORK_JOIN_OR_FCR = 26;
+    //Check if FiringForkStrategy has 0 tasks
+    public static final int GUARD_STRATEGY_ZERO_TASKS = 26; 
+    //Check if FiringForkStrategy has 0 tasks
+    public static final int GUARD_STRATEGY_CLOSED_ZERO_POPULATION = 27;
 
 	//it occours when more than one sink have been defined
 	public static int MORE_THAN_ONE_SINK_WARNING = 0;
@@ -264,6 +269,9 @@ public class ModelChecker implements CommonConstants {
 	public static int BCMP_NON_SYMMETRIC_SCHEDULING = 15;
 	//Thrown if the scheduling policies other than PS, FCFS, DELAY, or RAND are used
 	// (only when trying to convert to JMVA)
+        
+        //Checks if CS with FCR OR FORK-JOIN
+        public static final int CS_WITH_FORK_JOIN = 16;
 
 	
 	/*
@@ -279,9 +287,9 @@ public class ModelChecker implements CommonConstants {
 	*/
 
 
-	private int NUMBER_OF_ERROR_TYPES = 27;
-	private int NUMBER_OF_NORMAL_ERROR_TYPES = 27;
-	private int NUMBER_OF_WARNING_TYPES = 16;
+	private int NUMBER_OF_ERROR_TYPES = 28;
+	private int NUMBER_OF_NORMAL_ERROR_TYPES = 28;
+	private int NUMBER_OF_WARNING_TYPES = 17;
 	private int NUMBER_OF_NORMAL_WARNING_TYPES = 5;
 
 	/**
@@ -322,6 +330,7 @@ public class ModelChecker implements CommonConstants {
 //		csReferenceStation = new Vector<Object>(0, 1);
 		csSystemThroughputClass = new Vector<Object>(0, 1);
 		closedZeroPopulation = new Vector<Object>(0, 1);
+                GuardStrategyZeroTasks = new HashMap<Object, List<Object>>(0, 1);
 		//nonFCFSStations = new Vector(0,1);
 		BCMPnonStateIndependentRoutingStations = new Vector<Object>(0, 1);
 		emptyBlockingRegions = new Vector<Object>(0, 1);
@@ -354,6 +363,7 @@ public class ModelChecker implements CommonConstants {
 //		csReferenceStation.removeAllElements();
 		csSystemThroughputClass.removeAllElements();
 		closedZeroPopulation.removeAllElements();
+                GuardStrategyZeroTasks.clear();
 		emptyBlockingRegions.removeAllElements();
         invalidLoadDependentRouting.clear();
 		for (int i = 0; i < NUMBER_OF_ERROR_TYPES; i++) {
@@ -420,6 +430,7 @@ public class ModelChecker implements CommonConstants {
 			checkCsSystemThroughputClass();
 			checkZeroPopulation();
 			checkForkOrFcr();
+                        checkGuardStrategyZeroTasks();
 		}
 
 	}
@@ -501,6 +512,9 @@ public class ModelChecker implements CommonConstants {
 		if(warnings[SINK_PROBABILITY_UPDATE_WARNING]){//Added this seperatly other wise I had to redo the numbering,
 			ok = false;
 		}
+                if(warnings[CS_WITH_FORK_JOIN]) {
+                        ok = false;
+                }
 		return ok;
 	}
 
@@ -737,8 +751,28 @@ public class ModelChecker implements CommonConstants {
 	 * with class switch
 	 * , false otherwise.
 	 */
-	public boolean isThereCsWithForkJoinOrFcr() {
-		return errors[CS_WITH_FORK_JOIN_OR_FCR];
+	public boolean isThereCsWithForkJoin() {
+		return warnings[CS_WITH_FORK_JOIN];
+	}
+        
+        /**
+	 * Returns true if exist a FiringForkStrategy with a mix of 0 tasks for each class
+         * , false otherwise.
+	 * @return f exist a FiringForkStrategy with a mix of 0 tasks for each class
+	 * , false otherwise.
+	 */
+	public boolean isThereGuardStrategyZeroTasks() {
+		return errors[GUARD_STRATEGY_ZERO_TASKS];
+	}
+        
+        /**
+	 * Returns true if exist a FiringForkStrategy and at least a closed class has zero population
+         * , false otherwise.
+	 * @return f exist a FiringForkStrategy with a mix of 0 tasks for each class
+	 * , false otherwise.
+	 */
+	public boolean isThereGuardStrategyClosedZeroPopulation() {
+		return errors[GUARD_STRATEGY_CLOSED_ZERO_POPULATION];
 	}
 
 	/**
@@ -1158,6 +1192,20 @@ public class ModelChecker implements CommonConstants {
 
     public Map<Object, HashMap<Object, Object>> getInvalidLoadDependentRoutingStations() {
 		return invalidLoadDependentRouting;
+	}
+    
+        /**
+	 * Returns a HashMap where the key is the key of a join station. For each fork station that contains
+	 * a FiringMixStrategy with zero tasks it contains a List<Object> with the
+	 * keys of the classes where the problems occours. If there is not any problem it returns null.
+	 *  @return a HashMap where the key is the key of a fork station.
+	 */
+	public HashMap<Object, List<Object>> getKeysOfAllGuardStrategyZeroTask() {
+		if (errors[GUARD_STRATEGY_ZERO_TASKS]) {
+			return GuardStrategyZeroTasks;
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -2661,7 +2709,13 @@ public class ModelChecker implements CommonConstants {
 		if (csExists()) {
 			if (class_def.getClosedClassKeys().size() > 0 && class_def.getTotalCloseClassPopulation() == 0)
 				errors[CS_ALL_CLOSED_ZERO_POPULATION] = true;
-		} else {
+		} else if(isTereFiringMixStrategy()) {
+                        for (Object closedClassKey : class_def.getClosedClassKeys())
+				if (class_def.getClassPopulation(closedClassKey) == 0) {
+					closedZeroPopulation.add(closedClassKey);
+					errors[GUARD_STRATEGY_CLOSED_ZERO_POPULATION] = true;
+				}
+                } else {
 			for (Object closedClassKey : class_def.getClosedClassKeys())
 				if (class_def.getClassPopulation(closedClassKey) == 0) {
 					closedZeroPopulation.add(closedClassKey);
@@ -2671,8 +2725,8 @@ public class ModelChecker implements CommonConstants {
 	}
 	
 	public void checkForkOrFcr() {
-		if ((csExists() && forkExists()) || (csExists() && fcrExists()) ) {
-			errors[CS_WITH_FORK_JOIN_OR_FCR] = true;
+		if (csExists() && forkExists()) {
+			warnings[CS_WITH_FORK_JOIN] = true;
 		} 
 	}
 	
@@ -2707,6 +2761,43 @@ public class ModelChecker implements CommonConstants {
 		}
 		return fcrExists;
 	}
+        
+        public void checkGuardStrategyZeroTasks() {
+                for(Object station: station_def.getStationKeys()) {
+                        List<Object> classes = new ArrayList();
+                        for(Object c: class_def.getClassKeys()) {
+                                Object strategy = station_def.getJoinStrategy(station, c);
+                                if(strategy instanceof GuardJoin) {
+                                        int sum = 0;
+                                        for(Integer i: ((GuardJoin) strategy).getGuard().values()) {
+                                                sum += i;
+                                        }
+                                        if (sum <= 0) {
+                                                errors[GUARD_STRATEGY_ZERO_TASKS] = true;
+                                                classes.add(c);
+                                        }
+                                }
+                        }
+                        if(classes.size() > 0) {
+                                GuardStrategyZeroTasks.put(station, classes);
+                        }
+                }
+	}
+        
+        private boolean isTereFiringMixStrategy() {
+                for(Object station: station_def.getStationKeys()) {
+                        List<Object> classes = new ArrayList();
+                        for(Object c: class_def.getClassKeys()) {
+                                Object strategy = station_def.getJoinStrategy(station, c);
+                                if(strategy instanceof GuardJoin) {
+                                        return true;
+                                }
+                        }
+                }
+                return false;
+        }
+        
+        
 	
 	/**
 	 * Helper of checkForCsBetweenForkJoin.

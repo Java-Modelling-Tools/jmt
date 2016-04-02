@@ -20,6 +20,7 @@ package jmt.gui.common.xml;
 
 import java.io.File;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +28,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.forkStrategies.OutPath;
+import jmt.gui.common.forkStrategies.ProbabilitiesFork;
+import jmt.gui.common.forkStrategies.CombFork;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.joinStrategies.NormalJoin;
+import jmt.gui.common.joinStrategies.PartialJoin;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -45,6 +53,9 @@ import jmt.framework.data.MacroReplacer;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
+import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -271,6 +282,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			Document doc, CommonModel model) {
 		if(CommonConstants.STATION_TYPE_CLASSSWITCH.equals(model.getClassRefStation(classKey)))
 			return CommonConstants.STATION_TYPE_CLASSSWITCH;
+                if(CommonConstants.STATION_TYPE_FORK.equals(model.getClassRefStation(classKey)))
+			return CommonConstants.STATION_TYPE_FORK;
 		if (model.getClassRefStation(classKey) != null) {
 			return model.getStationName(model.getClassRefStation(classKey));
 		} else {
@@ -352,7 +365,23 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			CommonModel model, Object stationKey) {
 		Element join = doc.createElement(XML_E_STATION_SECTION);
 		join.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_JOIN);
+		join.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_JOIN);
+		join.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_JOIN);
 		node.appendChild(join);
+
+		Vector<?> classes = model.getClassKeys();
+		XMLParameter[] joinStrats = new XMLParameter[classes.size()];
+		Object currentClass;
+		for (int i = 0; i < joinStrats.length; i++) {
+			currentClass = classes.get(i);
+			joinStrats[i] = JoinStrategyWriter.getJoinStrategyParameter(
+					(JoinStrategy) model.getJoinStrategy(stationKey,
+							currentClass), model, currentClass, stationKey);
+		}
+		XMLParameter globalJoin = new XMLParameter("JoinStrategy",
+				strategiesClasspathBase + "JoinStrategy", null, joinStrats,
+				false);
+		globalJoin.appendParameterElement(doc, join);
 	}
 
 	/**
@@ -383,8 +412,28 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				.getForkBlock(stationKey).getClass().getName(), null, model
 				.getForkBlock(stationKey).toString(), false);
 		// ...and adds them as fork's children
+		XMLParameter isSim = new XMLParameter("isSimplifiedFork", model
+				.getIsSimplifiedFork(stationKey).getClass().getName(), null,
+				model.getIsSimplifiedFork(stationKey).toString(), false);
 		jobsPerLink.appendParameterElement(doc, fork);
 		block.appendParameterElement(doc, fork);
+		isSim.appendParameterElement(doc, fork);
+		
+
+		Vector<?> classes = model.getClassKeys();
+		XMLParameter[] forkingStrats = new XMLParameter[classes.size()];
+		Object currentClass;
+		for (int i = 0; i < forkingStrats.length; i++) {
+			currentClass = classes.get(i);
+			forkingStrats[i] = ForkingStrategyWriter
+					.getForkingStrategyParameter((ForkStrategy) model
+							.getForkingStrategy(stationKey, currentClass),
+							model, currentClass, stationKey);
+		}
+		XMLParameter globalForking = new XMLParameter("ForkStrategy",
+				strategiesClasspathBase + "ForkStrategy", null, forkingStrats,
+				false);
+		globalForking.appendParameterElement(doc, fork);
 
 	}
 
@@ -970,6 +1019,12 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			globalConstraint.setAttribute(XML_A_GLOBALCONSTRAINT_MAXJOBS, model
 					.getRegionCustomerConstraint(key).toString());
 			region.appendChild(globalConstraint);
+			
+			Element memoryConstraint = doc.createElement(XML_E_GLOBALMEMORYCONSTRAINT);
+			memoryConstraint.setAttribute(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY, model
+					.getRegionMemorySize(key).toString());
+			region.appendChild(memoryConstraint);
+
 			while (classes.hasNext()) {
 				Object classKey = classes.next();
 				Element classConstraint = doc
@@ -992,6 +1047,29 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 						.getRegionClassDropRule(key, classKey).toString());
 				region.appendChild(drop);
 			}
+                        
+			classes = model.getClassKeys().iterator();
+			while (classes.hasNext()) {
+				Object classKey = classes.next();
+				Element size = doc.createElement(XML_E_MEMORYSIZE);
+				size.setAttribute(XML_A_MEMORY_CLASS,
+						model.getClassName(classKey));
+				size.setAttribute(XML_A_MEMORY_SIZE, model
+						.getRegionClassSize(key, classKey).toString());
+				region.appendChild(size);
+			}
+			
+			classes = model.getClassKeys().iterator();
+			while (classes.hasNext()) {
+				Object classKey = classes.next();
+				Element weight = doc.createElement(XML_E_WEIGHT);
+				weight.setAttribute(XML_A_WEIGHT_CLASS,
+						model.getClassName(classKey));
+				weight.setAttribute(XML_A_WEIGHT_MULTI, model
+						.getRegionClassWeight(key, classKey).toString());
+				region.appendChild(weight);
+			}
+
 			simNode.appendChild(region);
 		}
 	}
@@ -1314,4 +1392,288 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 */
 	}
 
+	protected static class ForkingStrategyWriter {
+
+		static XMLParameter getForkingStrategyParameter(
+				ForkStrategy forkingStrat, CommonModel model, Object classKey,
+				Object stationKey) {
+			if (forkingStrat instanceof ProbabilitiesFork) {
+				// parameter containing array of empirical entries
+				ArrayList<XMLParameter> outPathEntries = new ArrayList<XMLParameter>();
+				XMLParameter[] innerForkingPar = null;
+				if (forkingStrat.getOutDetails() != null
+						&& forkingStrat instanceof ProbabilitiesFork) {
+					XMLParameter outPathPar = null;
+					Vector<Object> outputs = model
+							.getForwardConnections(stationKey);
+					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) forkingStrat.getOutDetails();
+					// model.normalizeProbabilities(values, outputs, classKey,
+					// stationKey);
+					ArrayList<XMLParameter> outPathArray = new ArrayList<XMLParameter>();
+					// XMLParameter[] empiricalEntries = new
+					// XMLParameter[outputs
+					// .size()];
+					// for (int i = 0; i < outPathArray.length; i++) {
+					for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
+						Map<Object, Double> map = (Map) entry.getValue().getOutParameters();
+                                                //M Cazzoli
+                                                model.normalizeProbabilitiesFork(map);
+                                                //end
+                                                
+						// XMLParameter[] empiricalEntries = new
+						// XMLParameter[map.size()];
+						ArrayList<XMLParameter> empiricalEntries = new ArrayList<XMLParameter>();
+
+						XMLParameter stationDest = new XMLParameter(
+								"stationName", String.class.getName(), null,
+								(String) entry.getValue().getOutName(), true);
+						String outProb = entry.getValue().getProb().toString();
+						XMLParameter routProb = new XMLParameter("probability",
+								Double.class.getName(), null, outProb, true);
+						XMLParameter outUnitProb = new XMLParameter(
+								"outUnitProbability",
+								EmpiricalEntry.class.getName(), null,
+								new XMLParameter[] { stationDest, routProb },
+								true);
+						outUnitProb.parameterArray = "false";
+						for (Map.Entry<Object, Double> subEntry : map
+								.entrySet()) {
+							
+							
+							if(subEntry.getKey() != null){
+							
+							XMLParameter numOfJobs = new XMLParameter(
+									"numbers", String.class.getName(), null,
+									subEntry.getKey().toString(), true);
+							String numProb = subEntry.getValue().toString();
+							XMLParameter forkNumProb = new XMLParameter(
+									"probability", Double.class.getName(),
+									null, numProb, true);
+							XMLParameter numEntry = new XMLParameter(
+									"EmpiricalEntry",
+									EmpiricalEntry.class.getName(),
+									null,
+									new XMLParameter[] { numOfJobs, forkNumProb },
+									true);
+							numEntry.parameterArray = "false";
+							empiricalEntries.add(numEntry);
+							
+							}
+						}
+						XMLParameter JobsPerLinkDis = new XMLParameter(
+								"JobsPerLinkDis",
+								EmpiricalEntry.class.getName(),
+								null,
+								empiricalEntries
+										.toArray(new XMLParameter[empiricalEntries
+												.size()]), true);
+						XMLParameter outPathEntry = new XMLParameter(
+								"OutPathEntry",
+								jmt.engine.NetStrategies.ForkStrategies.OutPath.class
+										.getName(), null, new XMLParameter[] {
+										outUnitProb, JobsPerLinkDis }, true);
+						outPathEntry.parameterArray = "false";
+						outPathEntries.add(outPathEntry);
+					}
+
+					XMLParameter probForkingPar = new XMLParameter(
+							"EmpiricalEntryArray",
+							jmt.engine.NetStrategies.ForkStrategies.OutPath.class
+									.getName(), null, outPathEntries
+									.toArray(new XMLParameter[outPathEntries
+											.size()]), true);
+					innerForkingPar = new XMLParameter[] { probForkingPar };
+
+				}
+				// creating parameter for empirical strategy: must be null if
+				// routing is empirical
+				XMLParameter forkingStrategy = new XMLParameter(
+						forkingStrat.getName(), forkingStrat.getClassPath(),
+						model.getClassName(classKey), innerForkingPar, true);
+				forkingStrategy.parameterArray = "false";
+				return forkingStrategy;
+			} else if (forkingStrat instanceof CombFork) {
+				Map<Object, Double> probs = (Map<Object, Double>) forkingStrat.getOutDetails();
+                                // M Cazzoli
+                                // check sum of probabilities equals 1
+                                int n = 0;
+                                for(Object o: model.getForwardConnections(stationKey)) {
+                                        if (model.getStationType(o).equals(
+				                               CommonConstants.STATION_TYPE_SINK)
+                                                                && model.getClassType(classKey) == CommonConstants.CLASS_TYPE_CLOSED) {
+                                                n++;
+                                        }
+                                }
+                                n = probs.size() - n;
+                                model.normalizeProbabilitiesFork(probs);
+                                //end
+				XMLParameter[] combParam = new XMLParameter[probs.size()];
+				for (int i = 0; i < probs.size(); i++) {
+					XMLParameter stationDest = new XMLParameter(
+							"Number of Branches", String.class.getName(), null,
+							new Integer(i + 1).toString(), true);
+					String outProb = probs.get(Integer.toString(i + 1)).toString();
+					XMLParameter routProb = new XMLParameter("probability",
+							Double.class.getName(), null, outProb, true);
+					XMLParameter outUnitProb = new XMLParameter(
+							"outUnitProbability",
+							EmpiricalEntry.class.getName(), null,
+							new XMLParameter[] { stationDest, routProb }, true);
+					outUnitProb.parameterArray = "false";
+					combParam[i] = outUnitProb;
+				}
+				XMLParameter entryArray = new XMLParameter("EmpiricalEntry",
+						EmpiricalEntry.class.getName(), null, combParam, true);
+				XMLParameter forkingStrategy = new XMLParameter(
+						forkingStrat.getName(), forkingStrat.getClassPath(),
+						model.getClassName(classKey),
+						new XMLParameter[] { entryArray }, true);
+				forkingStrategy.parameterArray = "false";
+				return forkingStrategy;
+			} else if (forkingStrat instanceof MultiBranchClassSwitchFork || forkingStrat instanceof ClassSwitchFork) {
+				// parameter containing array of empirical entries
+				XMLParameter[] innerForkingPar = null;
+				if (forkingStrat.getOutDetails() != null) {
+					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) forkingStrat.getOutDetails();
+					// model.normalizeProbabilities(values, outputs, classKey,
+					// stationKey);
+					ArrayList<XMLParameter> classNumArray = new ArrayList<XMLParameter>();
+					// XMLParameter[] empiricalEntries = new
+					// XMLParameter[outputs
+					// .size()];
+					// for (int i = 0; i < outPathArray.length; i++) {
+					for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
+						Map<Object, Integer> map = (Map) entry.getValue().getOutParameters();
+						// XMLParameter[] empiricalEntries = new
+						// XMLParameter[map.size()];
+						ArrayList<XMLParameter> classes = new ArrayList<XMLParameter>();
+                                                ArrayList<XMLParameter> numbers = new ArrayList<XMLParameter>();
+                                                
+                                                
+                                                
+                                                
+						XMLParameter stationDest = new XMLParameter(
+								"stationName", String.class.getName(), null,
+								(String) entry.getValue().getOutName(), true);
+						for (Object c: model.getClassKeys()) {
+							
+							if(map.get(c) != null){
+							
+							XMLParameter jobClass = new XMLParameter(
+									"class", String.class.getName(), null,
+									model.getClassName(c), true);
+							classes.add(jobClass);
+                                                        XMLParameter jobNum = new XMLParameter(
+									"numberOfJobs", String.class.getName(), null,
+									map.get(c).toString(), true);
+							numbers.add(jobNum);
+							
+							}
+						}
+						XMLParameter classesPar = new XMLParameter(
+								"Classes",
+								String.class.getName(),
+								null,
+								classes
+										.toArray(new XMLParameter[classes
+												.size()]), true);
+                                                XMLParameter NumbersPar = new XMLParameter(
+								"Numbers",
+								String.class.getName(),
+								null,
+								numbers
+										.toArray(new XMLParameter[numbers
+												.size()]), true);
+						XMLParameter classJobNumEntry = new XMLParameter(
+								"OutPathEntry",
+								jmt.engine.NetStrategies.ForkStrategies.ClassJobNum.class
+										.getName(), null, new XMLParameter[] {
+										stationDest, classesPar, NumbersPar }, true);
+						classJobNumEntry.parameterArray = "false";
+						classNumArray.add(classJobNumEntry);
+					}
+
+					XMLParameter classSwitchForkPar = new XMLParameter(
+							"ClassJobNumArray",
+							jmt.engine.NetStrategies.ForkStrategies.ClassJobNum.class
+									.getName(), null, classNumArray
+									.toArray(new XMLParameter[classNumArray
+											.size()]), true);
+					innerForkingPar = new XMLParameter[] { classSwitchForkPar };
+
+				}
+				// creating parameter for empirical strategy: must be null if
+				// routing is empirical
+				XMLParameter forkingStrategy = new XMLParameter(
+						forkingStrat.getName(), forkingStrat.getClassPath(),
+						model.getClassName(classKey), innerForkingPar, true);
+				forkingStrategy.parameterArray = "false";
+				return forkingStrategy;
+			} else {
+				return null;
+			}
+
+		}
+
+	}
+
+	protected static class JoinStrategyWriter {
+
+		static XMLParameter getJoinStrategyParameter(JoinStrategy joinStrat,
+				CommonModel model, Object classKey, Object stationKey) {
+			if (joinStrat instanceof PartialJoin || joinStrat instanceof NormalJoin) {
+				XMLParameter numRequired = new XMLParameter("numRequired",
+						Integer.class.getName(), null,
+						((Integer) joinStrat.getRequiredNum()).toString(), true);
+				String name = joinStrat.getName();
+				String classPath = joinStrat.getClassPath();
+				XMLParameter joinStrategy = new XMLParameter(
+						name, classPath, model.getClassName(classKey),
+						new XMLParameter[] { numRequired }, true);
+				joinStrategy.parameterArray = "false";
+				return joinStrategy;
+			} else if(joinStrat instanceof GuardJoin) {
+                                String name = joinStrat.getName();
+                                String classPath = joinStrat.getClassPath();
+                                Map<Object, Integer> map = ((GuardJoin) joinStrat).getGuard();
+                                ArrayList<XMLParameter> classes = new ArrayList<XMLParameter>();
+                                ArrayList<XMLParameter> numbers = new ArrayList<XMLParameter>();
+                                for (Object c: model.getClassKeys()) {
+							
+                                        if(map.get(c) != null){
+                                                XMLParameter jobClass = new XMLParameter(
+                                                                "class", String.class.getName(), null,
+                                                                model.getClassName(c), true);
+                                                classes.add(jobClass);
+                                                XMLParameter jobNum = new XMLParameter(
+                                                                "required", String.class.getName(), null,
+                                                                map.get(c).toString(), true);
+                                                numbers.add(jobNum);
+                                        }
+                                }
+                                
+                                XMLParameter classesPar = new XMLParameter(
+                                                "Classes",
+                                                String.class.getName(),
+                                                null,
+                                                classes.toArray(new XMLParameter[classes.size()]),
+                                                true);
+                                XMLParameter numbersPar = new XMLParameter(
+                                                "Numbers",
+                                                String.class.getName(),
+                                                null,
+                                                numbers.toArray(new XMLParameter[numbers.size()]),
+                                                true);
+                                
+                                XMLParameter joinStrategy = new XMLParameter(
+						name, classPath, model.getClassName(classKey),
+						new XMLParameter[] { classesPar, numbersPar }, true);
+                                joinStrategy.parameterArray = "false";
+				return joinStrategy;
+                        
+                        } else {
+				return null;
+			}
+		}
+	}
 }

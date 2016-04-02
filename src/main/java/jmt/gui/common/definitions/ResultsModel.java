@@ -55,6 +55,11 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
 	private Vector<Integer> customerNumber = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
+	
+	private Vector<Integer> meanWeight = new Vector<Integer>();
+	private Vector<Integer> meanMemoryOccupation = new Vector<Integer>();
+	
+	private Vector<Integer> FJResponseTime = new Vector<Integer>();
 
 	//Added by ASHANKA START
 	//Vector ro contain the Measure index of the System Power. 
@@ -167,6 +172,17 @@ public class ResultsModel implements MeasureDefinition {
 				case SimConstants.THROUGHPUT_PER_SINK:
 					throughputTimePerSink.add(new Integer(i));
 					break;
+					
+				case SimConstants.MEAN_WEIGHT:
+					meanWeight.add(new Integer(i));
+					break;
+				case SimConstants.MEAN_MEMORY_OCCUPATION:
+					meanMemoryOccupation.add(new Integer(i));
+					break;
+				case SimConstants.FORK_JOIN_RESPONSE_TIME:
+					FJResponseTime.add(new Integer(i));
+					break;
+					
 			}
 			// Adds to allMeasures HashMap a vector to collect all values of this measure
 			Vector<MeasureValueImpl> temp_mean = new Vector<MeasureValueImpl>();
@@ -610,6 +626,30 @@ public class ResultsModel implements MeasureDefinition {
 		int[] tmp = new int[throughputTimePerSink.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = throughputTimePerSink.get(i).intValue();
+		}
+		return tmp;
+	}
+	
+	public int[] getMeanWeightMeasures(){
+		int[] tmp = new int[meanWeight.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = meanWeight.get(i).intValue();
+		}
+		return tmp;
+	}
+	
+	public int[] getMeanMemoryOccupationMeasures(){
+		int[] tmp = new int[meanMemoryOccupation.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = meanMemoryOccupation.get(i).intValue();
+		}
+		return tmp;
+	}
+	
+	public int[] getFJResponseTimeMeasures(){
+		int[] tmp = new int[FJResponseTime.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = FJResponseTime.get(i).intValue();
 		}
 		return tmp;
 	}

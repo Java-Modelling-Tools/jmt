@@ -163,6 +163,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		//Added by ASHANKA STOP
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_R_PER_SINK, DESCRIPTION_RESPONSETIME_SINK, results.getResponsetimePerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_SINK, results.getThroughputPerSinkMeasures());
+                addTabPane(mainPanel, SimulationDefinition.MEASURE_MEAN_WEIGHT, DESCRIPTION_MEAN_WEIGHT, results.getMeanWeightMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_MEAN_MEMORY_OCCUPATION, DESCRIPTION_MEAN_MEMORY_OCCUPATION, results.getMeanMemoryOccupationMeasures());	
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
 		// Creates bottom toolbar
 		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable(false);

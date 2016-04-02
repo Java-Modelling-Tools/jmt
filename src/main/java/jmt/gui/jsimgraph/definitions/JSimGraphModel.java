@@ -492,8 +492,18 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			for (int i = 0; i < classes.size(); i++) {
 				currclass = classes.get(i);
 				queueStrategy.put(currclass, getQueueStrategy(key, currclass));
-				serviceStrategy.put(currclass, ((ServiceStrategy) getServiceTimeDistribution(key, currclass)).clone());
-				routingStrategy.put(currclass, ((RoutingStrategy) getRoutingStrategy(key, currclass)).clone());
+				//bugs fixed:
+				//check if null
+				if( getServiceTimeDistribution(key, currclass) != null){
+					serviceStrategy.put(currclass, ((ServiceStrategy) getServiceTimeDistribution(key, currclass)).clone());
+				}else{
+					serviceStrategy.put(currclass,null);
+				}
+				if(getRoutingStrategy(key, currclass) != null){
+					routingStrategy.put(currclass, ((RoutingStrategy) getRoutingStrategy(key, currclass)).clone());
+				}else{
+					routingStrategy.put(currclass, null);
+				}
 			}
 		}
 
@@ -520,13 +530,13 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			return ss;
 		}
 	}
-	
+
 	/**
 	 * Returns given name if a station with the same name does not exists or makes it unique
 	 * @param name station name
 	 * @return unique name
 	 */
-	private String getCheckStationName(String name) {
+        private String getCheckStationName(String name) {
 		String result = name;
 		if(name.equals(CommonConstants.STATION_TYPE_CLASSSWITCH))
 			result = result + "_" + "1";

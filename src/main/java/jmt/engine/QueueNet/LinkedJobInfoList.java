@@ -76,6 +76,10 @@ public class LinkedJobInfoList implements JobInfoList {
 	private Measure utilization ;
 
 	private Measure utilizationPerClass[];
+        
+        private Measure utilizationJoin ;
+
+	private Measure utilizationPerClassJoin[];
 
 	private Measure responseTime;
 
@@ -174,7 +178,7 @@ public class LinkedJobInfoList implements JobInfoList {
 	public int getJobsInPerClass(JobClass JobClass) {
 		return jobsInPerClass[JobClass.getId()];
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getJobsInPerClass()
 	 */
@@ -468,6 +472,7 @@ public class LinkedJobInfoList implements JobInfoList {
 
 			updateThroughput(job);
 			updateUtilization(jobClass);
+                        updateUtilizationJoin(jobClass);
 
 			//NEW
 			//@author Stefano Omini
@@ -639,6 +644,18 @@ public class LinkedJobInfoList implements JobInfoList {
 			utilization = Measurement;
 		}
 	}
+        
+        // M. Cazzoli
+        public void analyzeUtilizationJoin(JobClass jobClass, Measure Measurement) {
+		if (jobClass != null) {
+			if (utilizationPerClassJoin == null) {
+				utilizationPerClassJoin = new Measure[listPerClass.length];
+			}
+			utilizationPerClassJoin[jobClass.getId()] = Measurement;
+		} else {
+			utilizationJoin = Measurement;
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeResponseTime(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
@@ -752,6 +769,29 @@ public class LinkedJobInfoList implements JobInfoList {
 			utilization.update(list.size() / divisor, NetSystem.getTime() - getLastModifyTime());
 		}
 	}
+        
+        // M. Cazzoli
+        private void updateUtilizationJoin(JobClass JobClass) {
+
+		if (utilizationPerClassJoin != null) {
+			int c = JobClass.getId();
+			Measure m = utilizationPerClassJoin[c];
+			if (m != null) {
+                                if (listPerClass[c].size() > 0) {
+                                        m.update(1, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
+                                } else {
+                                        m.update(0, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
+                                }
+			}
+		}
+		if (utilizationJoin != null) {
+			if (list.size() > 0) {
+                                utilizationJoin.update(1, NetSystem.getTime() - getLastModifyTime());
+                        } else {
+                                utilizationJoin.update(0, NetSystem.getTime() - getLastModifyTime());
+                        }
+		}
+	}
 
 	private void updateResidenceTime(JobInfo JobInfo) {
 		int c = JobInfo.getJob().getJobClass().getId();
@@ -805,6 +845,7 @@ public class LinkedJobInfoList implements JobInfoList {
 		int c = jobClass.getId();
 
 		updateUtilization(jobClass);
+                updateUtilizationJoin(jobClass);
 		updateQueueLength(jobClass);
 
 		jobsIn++;
@@ -948,5 +989,13 @@ public class LinkedJobInfoList implements JobInfoList {
 	public void setServerNumber(int serverNumber) {
 		this.serverNumber = serverNumber;
 	}
-       
+	//fork in region
+	public int getJobsInPerClass(int Id){
+		return jobsInPerClass[Id];
+	}
+        
+	public int getJobsOutPerClass(int Id){
+		return jobsOutPerClass[Id];
+	}
+    //end
 }

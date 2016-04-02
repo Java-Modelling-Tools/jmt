@@ -18,6 +18,7 @@
 
 package jmt.engine.QueueNet;
 
+import jmt.common.exception.NetException;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.log.JSimLogger;
@@ -678,5 +679,14 @@ public abstract class NodeSection {
 	 */
 	boolean automaticUpdateNodeJobinfolist() {
 		return nodeAuto;
+	}
+	
+	//for blocking region measurement
+	public void analyze(int name, Measure measurement) throws NetException {
+		
+	}
+	
+	public void analyze(int name, JobClass jc, Measure measurement, JobClass[] classes){
+		
 	}
 }

@@ -180,6 +180,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		//Added by ASHANKA STOP
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_R_PER_SINK, DESCRIPTION_RESPONSETIME_SINK, results.getResponsetimePerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_SINK, results.getThroughputPerSinkMeasures());
+                addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
 	}
 
 	public String getXLabel() {
@@ -406,13 +407,13 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(label);
 			mainPanel.add(field);
 			//Samples
-			label = new JLabel("Samples: ");
+			label = new JLabel("Models ");
 			samples = new JTextField();
 			samples.setEditable(false);
 			samples.setMaximumSize(new Dimension(samples.getMaximumSize().width, samples.getMinimumSize().height));
 			label.setLabelFor(samples);
 			samples.setText("" + values.size());
-			samples.setToolTipText("Number of samples: " + samples.getText());
+			samples.setToolTipText("Number of models: " + samples.getText());
 			mainPanel.add(label);
 			mainPanel.add(samples);
 			//xMin
@@ -868,7 +869,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			samples.setMaximumSize(new Dimension(samples.getMaximumSize().width, samples.getMinimumSize().height));
 			label.setLabelFor(samples);
 			samples.setText("" + values.size());
-			samples.setToolTipText("Number of samples");
+			samples.setToolTipText("Number of models");
 			mainPanel.add(label);
 			mainPanel.add(samples);
 

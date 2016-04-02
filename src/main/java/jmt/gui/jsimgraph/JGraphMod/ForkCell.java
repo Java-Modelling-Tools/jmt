@@ -77,7 +77,8 @@ public class ForkCell extends JmtCell {
 	 */
 	@Override
 	public boolean generateOrDestroyJobs() {
-		return true;
+		//fork in br
+		return false;
 	}
 
 	/**

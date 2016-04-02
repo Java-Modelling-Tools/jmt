@@ -270,6 +270,10 @@ public class ImagedComboBoxCellEditorFactory {
 					setText(CommonConstants.STATION_TYPE_CLASSSWITCH);
 					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_CLASSSWITCH+ "Combo"));
 				}
+                                else if(key.equals(CommonConstants.STATION_TYPE_FORK)){
+					setText(CommonConstants.STATION_TYPE_FORK);
+					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_FORK+ "Combo"));
+				}
 
 			} else {
 				// This is a class

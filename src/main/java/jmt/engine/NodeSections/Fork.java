@@ -20,15 +20,22 @@ package jmt.engine.NodeSections;
 import java.util.Iterator;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.ForkStrategies.ClassSwitchFork;
+import jmt.engine.NetStrategies.ForkStrategy;
+import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeList;
+import jmt.engine.QueueNet.NodeListWithJobNum;
+import jmt.engine.QueueNet.NodeSection;
+import static jmt.gui.common.CommonConstants.STATION_TYPE_FORK;
 
 /**
  * <p>Title: Fork</p>
@@ -40,6 +47,8 @@ import jmt.engine.QueueNet.NodeList;
  * @author Bertoli Marco
  *         Date: 13-mar-2006
  *         Time: 15.23.22
+ * 
+ * Modified by J. Shuai & M. Cazzoli, implemented fork strategies
  */
 public class Fork extends OutputSection {
 	/** Maximum number of jobs allowed in a fork-join region (-1 or 0 is infinity) */
@@ -56,6 +65,13 @@ public class Fork extends OutputSection {
 
 	/** Current number of jobs inside a fork-join region */
 	private int jobNum;
+        
+        private Boolean isSimplifiedFork;
+
+	private ForkStrategy[] forkStrategies;
+        
+        private int[] switchedClasses; 
+	private int totalSwitchedClasses = 0;
 
 	// --- Constructors -----------------------------------------------------------------------------
 	/**
@@ -88,6 +104,15 @@ public class Fork extends OutputSection {
 		this.block = block;
 		this.jobsPerLink = jobsPerLink;
 	}
+        
+	//extend the fork section with fork strategies
+	public Fork(Integer jobsPerLink, Integer block, Boolean isSimplifiedFork,
+			ForkStrategy[] forkStrategies) {
+		this(jobsPerLink, block);
+		//if use the original simple fork
+		this.isSimplifiedFork = isSimplifiedFork;
+		this.forkStrategies = forkStrategies;
+	}
 
 	// ----------------------------------------------------------------------------------------------
 
@@ -106,9 +131,27 @@ public class Fork extends OutputSection {
 		// Finds event type
 		switch (message.getEvent()) {
 			case NetEvent.EVENT_JOB:
-				NodeList output = getOwnerNode().getOutputNodes();
+				// OLD
+                                // NodeList output = getOwnerNode().getOutputNodes();
+                                // BPMN
+                                NodeList output = null;
+                                JobClass jobClass = job.getJobClass();
+                                NodeListWithJobNum outputInfo = forkStrategies[jobClass.getId()]
+                                                .getOutNodes(this, jobClass);
+                                if (this.isSimplifiedFork) {
+                                        output = getOwnerNode().getOutputNodes();
+                                        numOut = this.jobsPerLink * output.size();
+                                } else {
+                                        output = outputInfo.getNodeList();
+                                        numOut = outputInfo.getTotalNum();
+                                }
+
+                                //soften
+//              		JobInfo jii = myRegion.getInputStation().getJobInfoList().lookFor(job);
+                                //end
+
 				// Finds number of output jobs
-				numOut = output.size() * jobsPerLink;
+//				numOut = output.size() * jobsPerLink;
 				// Resets ack count
 				ackCount = 0;
 
@@ -123,23 +166,99 @@ public class Fork extends OutputSection {
 				GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
 
 				// Sends "jobsPerLink" jobs on each output link
-				Iterator<NetNode> i = output.listIterator();
+				Iterator<NetNode> i = output.randomNodes().iterator();
+			
+                                boolean flag = false;
 				while (i.hasNext()) {
-					NetNode outNode = i.next();
-					for (int n = 0; n < jobsPerLink; n++) {
-						ForkJob newJob = new ForkJob(numOut, job, this);
-						// Sends new job to all following stations
-						send(newJob, 0.0, outNode);
-						// Adds job to system jobinfolist
-						global.addForkedJob(newJob);
-					}
-				}
-				// Increment job counter
-				jobNum++;
+                                        NetNode outNode = i.next();
+                                        if (!this.isSimplifiedFork) {
+                                                for(JobClass c: outputInfo.getClassesWithNum(outNode).keySet()) {
+                                                        for (int n = 0; n < outputInfo.getClassesWithNum(outNode).get(c); n++) {
+                                                                // ForkJob newJob = new ForkJob(numOut, job, this);
+                                                                ForkJob newJob;
+                                                                if (forkStrategies[jobClass.getId()] instanceof ClassSwitchFork) {
+                                                                        newJob = new ForkJob(numOut, job, this, c, outputInfo.getClassesWithNum(outNode).get(c));
+                                                                } else {
+                                                                        newJob = new ForkJob(numOut, job, this);
+                                                                }
+                                                                //soften
+                                                                if(myRegion != null){
+                                                                        myRegion.getInputStation().getJobInfoList().add(new JobInfo(newJob));
+                                                                        if(flag){
+                                                                                myRegion.increaseOccupation(job.getJobClass());
+                                                                        }
+                                                                        flag = true;
+                                                                }
+                                                                //end
 
-				// Removes original job, otherwise we will have one extra job in the network
-				global.removeForkedJob(job);
-				break;
+                                                                // Sends new job to all following stations
+                                                                send(newJob, 0.0, outNode);
+                                                                // Adds job to system jobinfolist
+                //						global.addForkedJob(newJob);
+                                                        }
+                                                        NetNode refNode = getOwnerNode().getQueueNet().getNode(c.getReferenceNodeName());
+                                                        Boolean isRefStationFork = (refNode != null) ? (refNode.getSection(NodeSection.OUTPUT) instanceof Fork) : false;
+                                                        if (((c.getReferenceNodeName().equals(STATION_TYPE_FORK)) || isRefStationFork) && !hasBeenClass(c, job)) {
+                                                                if (switchedClasses != null) {
+                                                                        switchedClasses[c.getId()]++;
+                                                                } else {
+                                                                        switchedClasses = new int[getJobClasses().size()];
+                                                                }
+                                                                totalSwitchedClasses++;
+                                                                job.addClass(c);
+                                                        }
+                                                }
+                                        } else {
+                                                for(int n = 0; n < jobsPerLink; n++){
+                                                        ForkJob newJob = new ForkJob(numOut, job, this);
+                                                        //soften
+
+                                                        if(myRegion != null){
+                                                                myRegion.getInputStation().getJobInfoList().add(new JobInfo(newJob));
+                                                                if(flag){
+                                                                        myRegion.increaseOccupation(job.getJobClass());
+                                                                }
+                                                                flag = true;
+                                                        }
+                                                        //end
+                                                        // Sends new job to all following stations
+                                                        send(newJob, 0.0, outNode);
+                                                        // Adds job to system jobinfolist
+        //						global.addForkedJob(newJob);
+                                                }
+                                        }
+
+                                }
+                                //soften
+        //			if(myRegion != null){
+        //				myRegion.decreaseOccupation(job.getJobClass());
+        //			}
+                                //end
+                                // Increment job counter
+                                jobNum++;
+                                //if the jobs are blocked in the fork section,
+                                //send the fake msgs to the former nodes
+                                if(numOut == 0){
+                                        sendBackward(NetEvent.EVENT_ACK, job, 0.0);
+                                        global.dropJob(job);
+                                        jobNum--;
+        //				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
+                                }
+
+                                // Removes original job, otherwise we will have one extra job in the
+                                // network
+        //			global.removeForkedJob(job);
+
+                                //soften
+                                //remove from the blocking region input node
+                                if(myRegion != null){
+                                JobInfo ji = myRegion.getInputStation().getJobInfoList().lookFor(job);
+                                myRegion.getInputStation().getJobInfoList().remove(ji);
+                                }
+                                //end
+
+
+                                break;
 
 			case NetEvent.EVENT_ACK:
 				ackCount++;
@@ -151,6 +270,10 @@ public class Fork extends OutputSection {
 				break;
 			case NetEvent.EVENT_JOIN:
 				// If this fork blocks, finally sends ACK back and unlocks this
+                                Job j = (Job)message.getData();
+			
+                                send(NetEvent.EVENT_JOIN, j, 0.0, getOwnerNode().getSection(NodeSection.INPUT).getSectionID(), getOwnerNode());
+
 				if (jobNum == block) {
 					sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 				}
@@ -161,5 +284,47 @@ public class Fork extends OutputSection {
 		}
 		// Everything was okay
 		return MSG_PROCESSED;
+	}
+        
+        private boolean hasBeenClass(JobClass c, Job j){
+                if(j instanceof ForkJob)
+                        return hasBeenClass(c, ((ForkJob) j).getForkedJob());
+                return j.hasBeenClass(c);
+        } 
+	
+	//soften	
+	private boolean redirectionON;
+	private BlockingRegion myRegion;
+	private NetNode regionInputStation;
+		
+	//soften
+	public void addRegion(BlockingRegion region){
+		redirectionON = true;
+		myRegion = region;
+		regionInputStation = myRegion.getInputStation();
+	}
+	//end
+        
+        /**
+	 * Gets the count of the switched jobs of the specified class
+	 * 
+	 * @param jobClass the job class 
+	 * @return the count of the switched jobs of the specified class
+	 */
+	public int getSwitchedJobCount(int jobClass){
+		if (switchedClasses != null) {
+                        return switchedClasses[jobClass];
+                } else {
+                        return 0;
+                }
+	}
+        
+        /**
+	 * Gets total count of the switched jobs 
+	 * 
+	 * @return total count of the switched jobs 
+	 */
+	public int getTotalSwitchedJobs() {
+		return totalSwitchedClasses;
 	}
 }

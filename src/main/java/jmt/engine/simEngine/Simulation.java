@@ -28,7 +28,9 @@ import jmt.common.exception.LoadException;
 import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.BlockingQueue;
 import jmt.engine.NodeSections.BlockingRouter;
+import jmt.engine.NodeSections.Fork;
 import jmt.engine.NodeSections.InputSection;
+import jmt.engine.NodeSections.Join;
 import jmt.engine.NodeSections.OutputSection;
 import jmt.engine.NodeSections.Queue;
 import jmt.engine.NodeSections.RandomSource;
@@ -273,10 +275,19 @@ public class Simulation {
 	 *
 	 * @throws LoadException if some errors occur during the region creation
 	 */
-	public void addRegion(String name, double maxCapacity, double[] maxCapacityPerClass, double[] classWeights, boolean[] drop, String[] stations)
+	//	public void addRegion(String name, double maxCapacity, double[] maxCapacityPerClass, double[] classWeights, boolean[] drop, String[] stations)
+//			throws LoadException {
+//		//TODO: andrebbero aggiunti controlli (nome non univoco, jobs<0, ecc...)
+//		regions.add(new BlockingRegion(name, maxCapacity, maxCapacityPerClass, classWeights, drop, this, stations));
+//	}
+	
+	public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] classSizes, double[] classWeights, boolean[] drop, String[] stations)
 			throws LoadException {
-		//TODO: andrebbero aggiunti controlli (nome non univoco, jobs<0, ecc...)
-		regions.add(new BlockingRegion(name, maxCapacity, maxCapacityPerClass, classWeights, drop, this, stations));
+//		if (true) {
+			regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, classSizes ,classWeights, drop, this, stations));
+//		} else {
+//			throw new LoadException("Exception while creating a blocking region.");
+//		}
 	}
 
 	//--------------end METHODS TO ADD SIMULATION COMPONENTS---------------//
@@ -408,6 +419,10 @@ public class Simulation {
 					NodeSection input = innerNode.getSection(NodeSection.INPUT);
 					if (input instanceof Queue) {
 						((Queue) input).redirectionTurnON(br);
+					//soften
+					}else if(input instanceof Join){
+						((Join) input).addRegion(br);
+					//end	
 					} else {
 						throw new NetException("Error in creating blocking region: " + "inner station " + innerNode.getName()
 								+ " has a not compliant input section.");
@@ -417,6 +432,8 @@ public class Simulation {
 					NodeSection output = innerNode.getSection(NodeSection.OUTPUT);
 					if (output instanceof Router) {
 						((Router) output).borderRouterTurnON(br);
+                                        }else if(output instanceof Fork){
+						((Fork)output).addRegion(br);
 					} else {
 						throw new NetException("Error in creating blocking region: " + "inner station " + innerNode.getName()
 								+ " has a not compliant output section.");
@@ -492,8 +509,14 @@ public class Simulation {
 							break;
 						case SimConstants.UTILIZATION:
 							//measures the utilization of the service section (=mean number of jobs present in service section joblist)
-							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
-							break;
+                                                        //Mattia Cazzoli
+                                                        if(netNodes[nodePosition].getSection(NodeSection.INPUT) instanceof Join) {
+                                                                ((Join) netNodes[nodePosition].getSection(NodeSection.INPUT)).analyzeUtilization(jClass, ms.getMeasure(), classes);
+                                                        } else {
+                                                                netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
+                                                        }
+                                                        //end
+                                                        break;
 						case SimConstants.THROUGHPUT:
 							//measures the throughput of the service section (= throughput of service section joblist)
 							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
@@ -523,7 +546,19 @@ public class Simulation {
 						case SimConstants.THROUGHPUT_PER_SINK:
 							// measures the drop rate of an input section
 							netNodes[nodePosition].analyze(SimConstants.THROUGHPUT_PER_SINK, jClass, ms.getMeasure());
+							break;       
+							
+						case SimConstants.MEAN_WEIGHT:
+							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, ms.getMeasure());
 							break;
+							
+						case SimConstants.MEAN_MEMORY_OCCUPATION:
+							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, ms.getMeasure());
+							break;
+						
+						case SimConstants.FORK_JOIN_RESPONSE_TIME:
+							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, jClass, ms.getMeasure(), classes);
+							
 					}
 				}
 				// Global measures (new by Bertoli Marco)

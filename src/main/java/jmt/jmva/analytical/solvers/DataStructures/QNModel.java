@@ -662,7 +662,7 @@ public class QNModel {
      * Added by Jack Bradshaw
      * Prints the preformance measures computed for the model.
      */
-    public void printPerformaceMeasrues() {
+    public void printPerformanceMeasures() {
     	System.out.println("\nMean Throughputs:");
     	MiscFunctions.printMatrix(X);
     	

@@ -100,6 +100,9 @@
 										<copy todir="${izpack.staging}/license">
 											<fileset dir="${basedir}/license" />
 										</copy>
+                                                                                <!--<copy todir="${izpack.staging}/templates">
+											<fileset dir="${basedir}/templates" />
+										</copy>-->
 										<copy
 											file="${project.build.directory}/JMT-installer-${jmt.version}.jar"
 											tofile="${izpack.staging}/JMT.jar" />
@@ -356,5 +359,10 @@
 			<artifactId>commons-lang</artifactId>
 			<version>2.6</version>
 		</dependency>
+                <dependency>
+                        <groupId>org.swinglabs</groupId>
+                        <artifactId>swingx</artifactId>
+                        <version>1.6.1</version>
+                </dependency>
 	</dependencies>
 </project>

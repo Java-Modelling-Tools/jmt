@@ -131,6 +131,13 @@ public interface BlockingRegionDefinition {
 	 * @param classKey search's key for customer class
 	 * @return maximum number of allowed customer. -1 means infinity.
 	 */
+	
+	public void setRegionClassWeight(Object regionKey, Object classKey, Integer weight);
+	
+	public void setRegionClassSize(Object regionKey, Object classKey, Integer weight);
+	
+	public void setRegionMemoryCapacity(Object regionKey, Integer memorySize);
+	
 	public Integer getRegionClassCustomerConstraint(Object regionKey, Object classKey);
 
 	/**
@@ -174,5 +181,11 @@ public interface BlockingRegionDefinition {
 	 * given the search key.
 	 */
 	public String getStationName(Object key);
+	
+	public Integer getRegionClassWeight(Object regionKey, Object classKey);
+	
+	public Integer getRegionMemorySize(Object regionKey);
+	
+	public Integer getRegionClassSize(Object regionKey, Object classKey);
 
 }

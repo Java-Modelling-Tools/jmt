@@ -32,6 +32,8 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.prefs.Preferences;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -52,6 +55,7 @@ import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.image.ImageLoader;
 import jmt.framework.gui.listeners.MenuAction;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.DispatcherThread;
 import jmt.gui.common.controller.ModelChecker;
@@ -65,6 +69,7 @@ import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.editors.DefaultsEditor;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.BlockingRegionParameterPanel;
+import jmt.gui.common.panels.CustomizableDialogFactory;
 import jmt.gui.common.panels.MeasurePanel;
 import jmt.gui.common.panels.ResultsWindow;
 import jmt.gui.common.panels.SimulationPanel;
@@ -74,6 +79,7 @@ import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
 import jmt.gui.common.xml.ModelLoader;
+import jmt.gui.common.xml.TemplateFileOperation;
 import jmt.gui.common.xml.XMLWriter;
 import jmt.gui.jsimgraph.DialogFactory;
 import jmt.gui.jsimgraph.JGraphMod.BlockingRegion;
@@ -102,6 +108,7 @@ import jmt.gui.jsimgraph.controller.actions.ActionSetRight;
 import jmt.gui.jsimgraph.controller.actions.ActionUndo;
 import jmt.gui.jsimgraph.controller.actions.AddBlockingRegion;
 import jmt.gui.jsimgraph.controller.actions.CloseModel;
+import jmt.gui.jsimgraph.controller.actions.DownloadDefaultTemplates;
 import jmt.gui.jsimgraph.controller.actions.EditDefaults;
 import jmt.gui.jsimgraph.controller.actions.EditMeasures;
 import jmt.gui.jsimgraph.controller.actions.EditPAParams;
@@ -124,15 +131,20 @@ import jmt.gui.jsimgraph.controller.actions.SolveApprox;
 import jmt.gui.jsimgraph.controller.actions.StopSimulation;
 import jmt.gui.jsimgraph.controller.actions.SwitchToExactSolver;
 import jmt.gui.jsimgraph.controller.actions.TakeScreenShot;
+import jmt.gui.jsimgraph.controller.actions.UseTemplate;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
 import jmt.gui.jsimgraph.mainGui.ComponentBar;
 import jmt.gui.jsimgraph.mainGui.MainWindow;
+import jmt.gui.jsimgraph.panels.AutoDownloadPanel;
 import jmt.gui.jsimgraph.panels.JModelProblemsWindow;
 import jmt.gui.jsimgraph.panels.StationNamePanel;
+import jmt.gui.jsimgraph.panels.TemplatePanel;
 import jmt.gui.jsimgraph.panels.jmodelClassesPanel;
+import jmt.gui.jsimgraph.template.TemplateConstants;
+import jmt.gui.jsimgraph.template.TemplateData;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
@@ -189,6 +201,11 @@ public class Mediator implements GuiInterface {
 	private DialogFactory dialogFactory;
 	// Cell factory
 	private CellFactory cellFactory;
+        
+        // S Jiang
+	// Dialog Factory to display template input panels.
+	private CustomizableDialogFactory customizableDialogFactory;
+	// end
 
 	private AbstractJmodelAction closeModel;
 	// end
@@ -217,6 +234,11 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction stopSimulation;
 	private AbstractJmodelAction editSimParams;
 	private AbstractJmodelAction showResults;
+        
+	// S Jiang
+	private AbstractJmodelAction useTemplate;
+	// end
+
 	private AbstractJmodelAction about;
 	private AbstractJmodelAction addBlockingRegion;
 	private AbstractJmodelAction takeScreenShot;
@@ -226,6 +248,8 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction // Conti Andrea
 	editUndo;
 	private AbstractJmodelAction editRedo;
+        //S Jiang
+	private AbstractJmodelAction downloadDefaultTemplates;
 
 	private JmtJGraph graph;
 	private MainWindow mainWindow;
@@ -266,6 +290,27 @@ public class Mediator implements GuiInterface {
 		this.mainWindow = mainWindow;
 		dialogFactory = new DialogFactory(mainWindow);
 		cellFactory = new CellFactory(this);
+
+		// S Jiang
+		customizableDialogFactory = new CustomizableDialogFactory(mainWindow);
+
+		if (Defaults.getAsBoolean("showDefaultTemplates")) {
+			int result = JOptionPane
+					.showConfirmDialog(mainWindow,
+							"Would you like to download some recommended templates for JSIMGraph?");
+			
+			if (result == JOptionPane.YES_OPTION) {
+				downloadDefaultTemplates();
+			}
+			
+                        if (result == JOptionPane.NO_OPTION) {
+                                Defaults.set("showDefaultTemplates", "false");
+                                Defaults.save();
+                        }
+		}
+		
+		// end
+
 		this.graph = graph;
 		closeModel = new CloseModel(this);
 		newModel = new NewModel(this);
@@ -299,6 +344,12 @@ public class Mediator implements GuiInterface {
 		editSimParams = new EditSimParams(this);
 		editPAParams = new EditPAParams(this);
 		showResults = new ShowResults(this);
+
+		// S Jiang
+		useTemplate = new UseTemplate(this);
+		downloadDefaultTemplates = new DownloadDefaultTemplates(this);
+		// end
+
 		about = new About(this);
 		addBlockingRegion = new AddBlockingRegion(this);
 		// fg
@@ -329,7 +380,7 @@ public class Mediator implements GuiInterface {
 		AbstractJmodelAction[] actions = new AbstractJmodelAction[] { newModel, openModel, saveModel, null,
 				// editUndo, editRedo, null,
 				actionCut, actionCopy, actionPaste, null, editUserClasses, editMeasures, editSimParams, editPAParams, null, switchToExactSolver,
-				null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp };
+				null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp, null, useTemplate };
 		toolbar.populateToolbar(actions);
 		return toolbar;
 	}
@@ -684,6 +735,11 @@ public class Mediator implements GuiInterface {
 		saveModel.setEnabled(true);
 		saveModelAs.setEnabled(true);
 		editMeasures.setEnabled(true);
+
+		// S Jiang
+		useTemplate.setEnabled(true);
+		// end
+
 		// Bertoli Marco
 		// Show only insert options on ComponentBar
 		componentBar.clearButtonGroupSelection(0);
@@ -815,6 +871,11 @@ public class Mediator implements GuiInterface {
 		// Disables the botton to start simualtion
 		simulate.setEnabled(false);
 		editSimParams.setEnabled(false);
+                
+		// S Jiang
+		useTemplate.setEnabled(false);
+		// end
+
 		editPAParams.setEnabled(false);
 		takeScreenShot.setEnabled(false);
 		// Disables show results button and measure definition
@@ -1224,6 +1285,33 @@ public class Mediator implements GuiInterface {
 					+ " Properties...");
 		}
 	}
+        
+	//S Jiang	
+	public void startEditingAtAbstractCell(Object cell) {
+		graph.startEditingAtCell(cell);
+		if ((cell != null) && (cell instanceof JmtCell)) {
+			JmtCell jcell = (JmtCell) cell;
+			StationParameterPanel stationPanel = new jmt.gui.common.panels.StationParameterPanel(
+					model, model,
+					((CellComponent) jcell.getUserObject()).getKey());
+			// Adds on the top a panel to change station name
+			stationPanel.add(
+					new StationNamePanel(model, ((CellComponent) jcell
+							.getUserObject()).getKey()), BorderLayout.NORTH);
+			dialogFactory.getDialog(stationPanel, "Editing "
+					+ jcell.getUserObject().toString() + " Properties...");
+
+		}
+		// Blocking region editing
+		else if ((cell != null) && (cell instanceof BlockingRegion)) {
+			Object regionKey = ((BlockingRegion) cell).getKey();
+			dialogFactory.getDialog(new BlockingRegionParameterPanel(model,
+					model, regionKey),
+					"Editing " + model.getRegionName(regionKey)
+							+ " Properties...");
+		}
+	}
+	//end
 
 	/**
 	 * Cuts the selection of the graph.
@@ -2580,6 +2668,17 @@ public class Mediator implements GuiInterface {
 	public void editSimulationParameters() {
 		dialogFactory.getDialog(new SimulationPanel(model, model, model, this), "Define Simulation Parameters");
 	}
+        
+        // S Jiang
+	/**
+	 * Called when UseTemplate action is triggered
+	 */
+	public void editTemplate() {
+		customizableDialogFactory.getDialog(700, 300, new TemplatePanel(this),
+				"Add/use templates");
+	}
+
+	// end
 
 	/**
 	 * Called when EditPAParams action is triggered
@@ -2892,7 +2991,7 @@ public class Mediator implements GuiInterface {
 			}
 		} else if ((problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
 			JOptionPane.showMessageDialog(null, "A fork was found but no join. Please check the topology");
-		} else if ((problemSubType == ModelChecker.EMPTY_BLOCKING_REGION)) {
+		} else if ((problemSubType == ModelChecker.EMPTY_BLOCKING_REGION) && (problemType == ModelChecker.ERROR_PROBLEM)) {
 			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n", "Empty finite capacity regions found",
 					JOptionPane.ERROR_MESSAGE);
 			if (k == 0) {
@@ -2917,6 +3016,13 @@ public class Mediator implements GuiInterface {
 		} else if ((problemSubType == ModelChecker.CS_BETWEEN_FORK_JOIN) && (problemType == ModelChecker.ERROR_PROBLEM)) {
 			String name = this.getStationDefinition().getStationName(relatedStation);
 			JOptionPane.showMessageDialog(null, name + " switch between fork/join. This topology is not allowed.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+                else if ((problemSubType == ModelChecker.GUARD_STRATEGY_ZERO_TASKS) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
+			String stationName = model.getStationName(relatedStation);
+			// set the station parameter panel to show the routing section
+			tempPanel.showJoinSectionPanel(relatedClass);
+			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
 		}
 
 	}
@@ -3456,6 +3562,157 @@ public class Mediator implements GuiInterface {
 
 	public JSimGraphModel getModel() {
 		return model;
-	}	
+	}
+        
+	// S Jiang
+	public MainWindow getMainWindow() {
+		return this.mainWindow;
+	}
+	
+	public void downloadDefaultTemplates(){
+		customizableDialogFactory.getDialog(520, 200, new AutoDownloadPanel(), "Downloading...");
+	}
+	
+	// used to find the bottom bound of canvas
+	public double getBound() {
+                
+                graph.getGraphLayoutCache().reload();
+
+		int nCells = graph.getModel().getRootCount();
+
+		double Y = 10.0;
+
+		for (int i = 0; i < nCells; i++) {
+			double temp = graph.getCellBounds(graph.getModel().getRootAt(i))
+					.getMaxY();
+			if (Y < temp) {
+				Y = temp;
+			}
+		}
+
+		return Y;
+	}
+	// end
+	
+	//S Jiang
+	public void deleteCells(Object[] cells) {
+		GraphModel graphmodel = graph.getModel();
+
+		// If a cell is a blocking region avoid removing its edges and
+		// select its element at the end of the removal process
+		Set edges = new HashSet();
+		Set<Object> select = new HashSet<Object>();
+
+		// Set with all regions that can be deleted as its child were removed
+		Set<Object> regions = new HashSet<Object>();
+		// Set with all JmtCells that we are removing
+		Set<Object> jmtCells = new HashSet<Object>();
+
+		// Giuseppe De Cicco & Fabio Granara
+		// for(int k=0; k<cells.length; k++){
+		// if(cells[k] instanceof JmtEdge){
+		// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)cells[k])))).SubOut();
+		// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)cells[k])))).SubIn();
+		// }
+		//
+		// }
+		for (int i = 0; i < cells.length; i++) {
+			if (!(cells[i] instanceof BlockingRegion)) {
+				// Adds edge for removal
+				edges.addAll(DefaultGraphModel.getEdges(graphmodel,
+						new Object[] { cells[i] }));
+				// Giuseppe De Cicco & Fabio Granara
+				// quando vado a eliminare un nodo, a cui è collegato un arco,
+				// vado ad incrementare o diminuire il contatore per il
+				// pulsanteAGGIUSTATUTTO
+				// Iterator iter = edges.iterator();
+				// while (iter.hasNext()) {
+				// Object next = iter.next();
+				// if (next instanceof JmtEdge){
+				// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)next)))).SubOut();
+				// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)next)))).SubIn();
+				// }
+				//
+				// }
+				// Stores parents information and cell
+				if (cells[i] instanceof JmtCell) {
+					if (((JmtCell) cells[i]).getParent() instanceof BlockingRegion) {
+						regions.add(((JmtCell) cells[i]).getParent());
+					}
+					jmtCells.add(cells[i]);
+				}
+			} else {
+				// Adds node for selection
+				Object[] nodes = graph
+						.getDescendants(new Object[] { cells[i] });
+				for (Object node : nodes) {
+					if (node instanceof JmtCell || node instanceof JmtEdge) {
+						select.add(node);
+					}
+				}
+				// Removes blocking region from data structure
+				model.deleteBlockingRegion(((BlockingRegion) cells[i]).getKey());
+			}
+		}
+
+		if (!edges.isEmpty()) {
+			graphmodel.remove(edges.toArray());
+		}
+		// removes cells from graph
+		graphmodel.remove(cells);
+
+		// Checks if all children of a blocking region have been removed
+		Iterator<Object> it = regions.iterator();
+		while (it.hasNext()) {
+			jmtCells.add(null);
+			BlockingRegion region = (BlockingRegion) it.next();
+			List child = region.getChildren();
+			boolean empty = true;
+			for (int i = 0; i < child.size(); i++) {
+				if (child.get(i) instanceof JmtCell
+						&& !jmtCells.contains(child.get(i))) {
+					empty = false;
+					break;
+				}
+			}
+			if (empty) {
+				model.deleteBlockingRegion(region.getKey());
+				graphmodel.remove(new Object[] { region });
+			}
+		}
+
+		// Removes cells from data structure
+		for (Object cell : cells) {
+			if (cell instanceof JmtCell) {
+				model.deleteStation(((CellComponent) ((JmtCell) cell)
+						.getUserObject()).getKey());
+			} else if (cell instanceof JmtEdge) {
+				JmtEdge link = (JmtEdge) cell;
+				model.setConnected(link.getSourceKey(), link.getTargetKey(),
+						false);
+			}
+		}
+
+		// If no stations remains gray select and link buttons
+		if (graph.getModel().getRootCount() == 0) {
+			componentBar.clearButtonGroupSelection(0);
+			setConnect.setEnabled(false);
+			setSelect.setEnabled(false);
+		}
+
+		// Selects components from removed blocking regions
+		if (select.size() > 0) {
+			graph.setSelectionCells(select.toArray());
+			// Resets parent information of cells that changed parent
+			it = select.iterator();
+			while (it.hasNext()) {
+				Object next = it.next();
+				if (next instanceof JmtCell) {
+					((JmtCell) next).resetParent();
+				}
+			}
+		}
+	}
+	//end
 
 }

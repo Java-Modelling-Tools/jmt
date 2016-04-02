@@ -18,6 +18,7 @@
 
 package jmt.engine.QueueNet;
 
+import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.simEngine.Simulation;
 
 /**
@@ -61,6 +62,8 @@ public class BlockingRegion {
 
 	/** the maximum number of jobs that can be at the same time inside the region */
 	protected double maxCapacity;
+	
+	protected double maxMemory;
 	/** the maximum number of jobs of each class that can be at the same time inside the region
 	 *  (-1 if the class has not a class constraint)
 	 */
@@ -70,6 +73,8 @@ public class BlockingRegion {
 	protected double actualOccupation;
 	/** the number of jobs of each class that are currently inside the region */
 	protected double[] actualOccupationPerClass;
+	
+	protected double actualMemoryOccupation;
 
 	/** True if there are already maxJobs inside the region */
 	protected boolean globallyBlocked;
@@ -81,6 +86,9 @@ public class BlockingRegion {
 
 	/** true if there is a global constraint */
 	protected boolean globalConstraintDefined;
+	
+	/** true if there is a global memory constraint */
+	protected boolean globalMemoryConstraintDefined;
 	/** true if the specified class has a class constraint */
 	protected boolean classConstraintDefined[];
 
@@ -94,8 +102,23 @@ public class BlockingRegion {
 
 	//class c weight: number of token required by each class c job
 	protected double[] classWeights;
+	
+	protected double[] classSizes;
 
 	//---------------------------end CLASS WEIGHTS---------------------//
+	
+	private boolean sizeConstraintDefined = false;
+	
+	//size constraint
+//	private boolean isThreadType = false;
+//	private double maxSize = 10;
+//	private double usedSize = 0;
+//	private double[] sizePerClass = {5,2,1};
+//	private double[] capacityPerClass = {10,10,5};
+	
+	private Measure weightMeasure, sizeMeasure;
+	private double lastTimeModified;
+	private double lastWeightOccupation, lastSizeOccupation;
 
 	/**
 	 * Creates a blocking region with both global constraint and class constraints
@@ -143,6 +166,7 @@ public class BlockingRegion {
 
 		//init actual occupation
 		this.actualOccupation = 0;
+		this.actualMemoryOccupation = 0;
 		//init region status
 		this.globallyBlocked = false;
 
@@ -206,7 +230,7 @@ public class BlockingRegion {
 		}
 
 	}
-
+	
 	// WEIGHTED CONSTRAINTS
 	/**
 	 * Creates a blocking region with both global constraint and class constraints
@@ -220,9 +244,9 @@ public class BlockingRegion {
 	 * @param simul the simulation to which the blocking region belongs
 	 * @param regionNodeNames the names of the nodes contained in the blocking region.
 	 */
-	public BlockingRegion(String regionName, double maxCapacity, double[] maxCapacityPerClass, double[] classWeights, boolean[] drop,
+	public BlockingRegion(String regionName, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] classSizes, double[] classWeights, boolean[] drop,
 			Simulation simul, String[] regionNodeNames) {
-
+		
 		//No control on input dimensions.
 
 		//-----------------REGION PROPERTIES----------------------//
@@ -251,9 +275,19 @@ public class BlockingRegion {
 			this.globalConstraintDefined = true;
 			this.maxCapacity = maxCapacity;
 		}
-
+		
+		if(maxMemory == -1){
+			this.globalMemoryConstraintDefined = false;
+			this.maxMemory = -1;
+		}else{
+			this.globalMemoryConstraintDefined = true;
+			this.maxMemory = maxMemory;
+		}
+		
 		//init actual occupation
 		this.actualOccupation = 0;
+		
+		this.actualMemoryOccupation = 0;
 		//init region status
 		this.globallyBlocked = false;
 
@@ -302,6 +336,10 @@ public class BlockingRegion {
 		weightedConstraintDefined = true;
 		//copy class weights
 		this.classWeights = classWeights;
+		
+		//------------------MEMORY CONSTRAINT---------------------//
+		sizeConstraintDefined = true;
+		this.classSizes = classSizes;
 
 		//------------------DROP PROPERTIES-----------------------//
 
@@ -329,6 +367,10 @@ public class BlockingRegion {
 	public boolean hasWeightedConstraint() {
 		return weightedConstraintDefined;
 	}
+	
+	public boolean hasSizeConstraint(){
+		return sizeConstraintDefined;
+	}
 
 	/** Gets the number of jobs currently inside the blocking region */
 	public double getActualOccupation() {
@@ -352,18 +394,55 @@ public class BlockingRegion {
 	 */
 	public void increaseOccupation(JobClass jobClass) {
 		int c = jobClass.getId();
-
+		
+		
+		
 		actualOccupation += classWeights[c];
+		actualMemoryOccupation += classSizes[c];
 		actualOccupationPerClass[c] += classWeights[c];
+		
+		double currentTime = NetSystem.getTime();
+		
+		if(weightMeasure != null){
+			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
+			lastWeightOccupation = actualOccupation;
+		}
+		if(sizeMeasure != null){
+			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
+			lastSizeOccupation = actualMemoryOccupation;
+		}
+		
+		lastTimeModified = currentTime;
+		//soften
+//		System.out.println(actualOccupation);
+		//end
 		return;
 	}
 
 	/** Decreases the number of jobs currently inside the region */
 	public void decreaseOccupation(JobClass jobClass) {
 		int c = jobClass.getId();
-
+		
 		actualOccupation -= classWeights[c];
+		actualMemoryOccupation -= classSizes[c];
 		actualOccupationPerClass[c] -= classWeights[c];
+		
+		double currentTime = NetSystem.getTime();
+		
+		if(weightMeasure != null){
+			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
+			lastWeightOccupation = actualOccupation;
+		}
+		double lmv = 0.0;
+		if(sizeMeasure != null){
+			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
+			lastSizeOccupation = actualMemoryOccupation;
+		}
+		
+		lastTimeModified = currentTime;
+		//soften
+//		System.out.println(actualOccupation);
+		//end
 		return;
 	}
 
@@ -385,19 +464,53 @@ public class BlockingRegion {
 	 * @return true if blocked, false if other capacity is available
 	 */
 	public boolean isBlocked(JobClass jobClass) {
+		
+//		double currentOccupation = 0.0;
+//		double currentMemory = 0.0;
+//		double[] currentOccupationPerClass = new double[classWeights.length];
+//		for(int i = 0; i < regionNodes.length; i++){
+//			for(int j= 0; j < maxCapacityPerClass.length; j++){
+//				try {
+//					JobInfoList tempList = regionNodes[i].getJobInfoList();
+//					currentOccupation += (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classWeights[j];
+//					currentMemory += (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classSizes[j];
+//					currentOccupationPerClass[j] = (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classWeights[j];
+//					if(currentOccupation != actualOccupation){
+//						System.out.println(currentOccupation);
+//						System.out.println(actualOccupation);
+//						System.out.println("--------");
+//					}
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//		}
+		
 		int id = jobClass.getId();
 
 		if (globalConstraintDefined) {
 			if ((actualOccupation + classWeights[id]) > maxCapacity) {
+//				if((currentOccupation + classWeights[id]) > maxCapacity){
 				//globally blocked
 				return true;
+//				}
+			}
+		}
+		
+		if(globalMemoryConstraintDefined){
+			if((actualMemoryOccupation + classSizes[id]) > maxMemory){
+//				if((currentMemory + classSizes[id]) > maxMemory){
+				return true;
+//				}
 			}
 		}
 
 		if (classConstraintDefined[jobClass.getId()]) {
 			if ((actualOccupationPerClass[id] + classWeights[id]) > maxCapacityPerClass[id]) {
 				//class blocked
+//				if((currentOccupationPerClass[id] + classWeights[id]) > maxCapacityPerClass[id]){
 				return true;
+//				}
 			}
 		}
 
@@ -522,5 +635,105 @@ public class BlockingRegion {
 	 */
 	public double getMaxCapacity() {
 		return maxCapacity;
+	}
+
+//	public boolean isThreadType() {
+//		return isThreadType;
+//	}
+//
+//	public void setThreadType(boolean isThreadType) {
+//		this.isThreadType = isThreadType;
+//	}
+//
+//	public double getMaxSize() {
+//		return maxSize;
+//	}
+//
+//	public void setMaxSize(double maxSize) {
+//		this.maxSize = maxSize;
+//	}
+//
+//	public double getUsedSize() {
+//		return usedSize;
+//	}
+//
+//	public void setUsedSize(double usedSize) {
+//		this.usedSize = usedSize;
+//	}
+//
+//	public double[] getSizePerClass() {
+//		return sizePerClass;
+//	}
+//
+//	public void setSizePerClass(double[] sizePerClass) {
+//		this.sizePerClass = sizePerClass;
+//	}
+//
+//	public double[] getCapacityPerClass() {
+//		return capacityPerClass;
+//	}
+//
+//	public void setCapacityPerClass(double[] capacityPerClass) {
+//		this.capacityPerClass = capacityPerClass;
+//	}
+	
+	public void setWeightMeasure(Measure wm){
+		this.weightMeasure = wm;
+	}
+	public void setSizeMeasure(Measure sm){
+		this.sizeMeasure = sm;
+	}
+	
+	public void increaseOccupation(JobClass jobClass, int i) {
+		int c = jobClass.getId();
+		
+		
+		
+		actualOccupation += classWeights[c] * i;
+		actualMemoryOccupation += classSizes[c] * i;
+		actualOccupationPerClass[c] += classWeights[c] * i;
+		
+		double currentTime = NetSystem.getTime();
+		
+		if(weightMeasure != null){
+			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
+			lastWeightOccupation = actualOccupation;
+		}
+		if(sizeMeasure != null){
+			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
+			lastSizeOccupation = actualMemoryOccupation;
+		}
+		
+		lastTimeModified = currentTime;
+		//soften
+//		System.out.println(actualOccupation);
+		//end
+		return;
+	}
+	
+	public void decreaseOccupation(JobClass jobClass, int i) {
+		int c = jobClass.getId();
+		
+		actualOccupation -= classWeights[c] * i;
+		actualMemoryOccupation -= classSizes[c] * i;
+		actualOccupationPerClass[c] -= classWeights[c] * i;
+		
+		double currentTime = NetSystem.getTime();
+		
+		if(weightMeasure != null){
+			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
+			lastWeightOccupation = actualOccupation;
+		}
+		double lmv = 0.0;
+		if(sizeMeasure != null){
+			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
+			lastSizeOccupation = actualMemoryOccupation;
+		}
+		
+		lastTimeModified = currentTime;
+		//soften
+//		System.out.println(actualOccupation);
+		//end
+		return;
 	}
 }

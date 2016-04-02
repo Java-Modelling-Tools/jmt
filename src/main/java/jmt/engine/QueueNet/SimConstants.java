@@ -99,5 +99,14 @@ public class SimConstants {
 	public static final String NODE_TYPE_REGION = "region";
 	/** To be used for a station measure. This is default */
 	public static final String NODE_TYPE_STATION = "station";
+	
+	/** Measure identifier: mean weight of a FCRegion.   */
+	public static final int MEAN_WEIGHT = 27;
+	
+	/** Measure identifier: mean memory occupation of a FCRegion.   */
+	public static final int MEAN_MEMORY_OCCUPATION = 28;
+	
+	/** Measure identifier: Response Time of a F/J area */
+	public static final int FORK_JOIN_RESPONSE_TIME = 29;
 
 }

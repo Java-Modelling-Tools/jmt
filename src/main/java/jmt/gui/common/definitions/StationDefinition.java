@@ -83,6 +83,10 @@ public interface StationDefinition {
 	public Vector<Object> getStationRegionKeysNoSourceSink();
 	
 	public Vector<Object> getStationKeysSink();
+	
+	public Vector<Object> getFCRegionKeys();
+	
+	public Vector<Object> getFJKeys();
 
 	/** Returns name of the station in <code>String</code> representation, given the search key.*/
 	public String getStationName(Object key);
@@ -133,6 +137,8 @@ public interface StationDefinition {
 	 * region (-1 is infinity)
 	 */
 	public Integer getForkBlock(Object key);
+	
+	public Boolean getIsSimplifiedFork(Object key);
 
 	/**
 	 * Sets if a fork is blocking
@@ -142,6 +148,8 @@ public interface StationDefinition {
 	 * region (-1 is infinity)
 	 */
 	public void setForkBlock(Object key, Integer value);
+	
+	public void setIsSimplifiedFork(Object key, Boolean value);
 
 	/*------------------------------------------------------------------------------
 	 *---------------- Methods for setup of class-station parameters ---------------
@@ -189,7 +197,10 @@ public interface StationDefinition {
 	 * @param routingStrategy: distribution to be set for specified class and station.
 	 */
 	public void setRoutingStrategy(Object stationKey, Object classKey, Object routingStrategy);
-
+	
+	public void setForkingStrategy(Object stationKey, Object classKey, Object routingStrategy);
+	
+	public void setJoinStrategy(Object stationKey, Object classKey, Object joinStrategy);
 	/**Returns routing strategy for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, null value is
 	 * returned.
@@ -198,6 +209,10 @@ public interface StationDefinition {
 	 * @return routing strategy for specified class and station.
 	 */
 	public Object getRoutingStrategy(Object stationKey, Object classKey);
+	
+	public Object getForkingStrategy(Object stationKey, Object classKey);
+	
+	public Object getJoinStrategy(Object stationKey, Object classKey);
 
 	/** Sets (Returns) logging parameters for the logger.
 	 * @param stationKey: search key for station.

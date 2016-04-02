@@ -20,9 +20,11 @@ package jmt.gui.common.xml;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -43,11 +45,22 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.CombFork;
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
+import jmt.gui.common.forkStrategies.OutPath;
+import jmt.gui.common.forkStrategies.ProbabilitiesFork;
+import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.joinStrategies.PartialJoin;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import static jmt.gui.common.xml.XMLConstantNames.XML_E_PARAMETER_VALUE;
+import static jmt.gui.common.xml.XMLConstantNames.XML_E_SUBPARAMETER;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -81,6 +94,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static TreeMap<String, Object> regions; // Data structure used to map between region name and its key
 	protected static HashMap<Object, String> refStations; // Data structure used to hold classes' reference stations
 	protected static HashMap<Object[], Map<String, Double>> empiricalRouting; // Data structure to save malformed empirical routing tuples
+        protected static HashMap<Object[], Map<String, OutPath>> empiricalForking;
+	protected static HashMap<Object[], Map<String,Double>> combForking;
 
 	/*defines the default logger (used to report errors and information for debugging purposes)*/
 	private static final jmt.engine.log.JSimLogger debugLog = jmt.engine.log.JSimLogger.getLogger(JSimLogger.STD_LOGGER);
@@ -100,6 +115,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	// Variables used with caching purpose to improve reading speed
 	protected static Map<String, Distribution> engineToGuiDistr = null;
 	protected static Map<String, RoutingStrategy> engineToGuiRouting = null;
+	
+        protected static Map<String, ForkStrategy> engineToGuiForking = null;
+	protected static Map<String, JoinStrategy> engineToGuiJoin = null;
 
 	protected static final String queueGetFCFS = "jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy";
 	protected static final String queueGetLCFS = "jmt.engine.NetStrategies.QueueGetStrategies.LCFSstrategy";
@@ -222,6 +240,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
 		parseClasses(root, model);
 		empiricalRouting = new HashMap<Object[], Map<String, Double>>();
+                empiricalForking = new HashMap<Object[], Map<String, OutPath>>();
+		combForking = new HashMap<Object[], Map<String, Double>>();
 		parseStations(root, model);
 		parseConnections(root, model);
 		parseBlockingRegions(root, model);
@@ -232,8 +252,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		for (Object key : keys) {
 			if(CommonConstants.STATION_TYPE_CLASSSWITCH.equals(refStations.get(key)))
 				model.setClassRefStation(key, CommonConstants.STATION_TYPE_CLASSSWITCH);
+                        else if(CommonConstants.STATION_TYPE_FORK.equals(refStations.get(key)))
+				model.setClassRefStation(key, CommonConstants.STATION_TYPE_FORK);
 			else
-			model.setClassRefStation(key, stations.get(refStations.get(key)));
+                                model.setClassRefStation(key, stations.get(refStations.get(key)));
 		}
 		// Sets correct station key into every empiricalRouting element
 		// Now each key is an Object[] where (0) is station key and (1) class key
@@ -249,6 +271,33 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				routing.put(stations.get(name), values.get(name));
 			}
 		}
+		keys = empiricalForking.keySet().toArray();
+		for (Object key : keys) {
+			Object[] dualkey = (Object[]) key;
+			ForkStrategy fs = (ForkStrategy) model.getForkingStrategy(
+					dualkey[0], dualkey[1]);
+                        Map<Object, OutPath> outPaths = (Map<Object, OutPath>) fs.getOutDetails();
+			Map<String, OutPath> values = empiricalForking.get(key);
+			Object[] names = values.keySet().toArray();
+			// Creates correct hashmap with station key --> probability mapping
+			for (Object name : names) {
+				outPaths.put(stations.get(name), values.get(name));
+			}
+		}
+		keys = combForking.keySet().toArray();
+		for (Object key : keys) {
+			Object[] dualkey = (Object[]) key;
+			ForkStrategy fs = (ForkStrategy) model.getForkingStrategy(
+					dualkey[0], dualkey[1]);
+			Map<Object, Double> forking = (Map<Object, Double>) fs.getOutDetails();
+			Map<String, Double> values = combForking.get(key);
+			Object[] names = values.keySet().toArray();
+			// Creates correct hashmap with station key --> probability mapping
+			for (Object name : names) {
+				forking.put(name, values.get(name));
+			}
+		}
+
 	}
 
 	/**
@@ -356,7 +405,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			if (type.equals(STATION_TYPE_SOURCE)) {
 				parseSource((Element) sections.item(0), model, key, name);
 				parseRouter((Element) sections.item(2), model, key);
-			} else if (type.equals(STATION_TYPE_TERMINAL) || type.equals(STATION_TYPE_ROUTER) || type.equals(STATION_TYPE_JOIN)) {
+			} else if (type.equals(STATION_TYPE_TERMINAL) || type.equals(STATION_TYPE_ROUTER)) {
 				parseRouter((Element) sections.item(2), model, key);
 			} else if (type.equals(STATION_TYPE_DELAY)) {
 				parseDelay((Element) sections.item(1), model, key);
@@ -375,6 +424,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				parseQueue((Element) sections.item(0), model, key);
 				parseClassSwitch((Element) sections.item(1), model, key);
 				parseRouter((Element) sections.item(2), model, key);
+			} else if (type.equals(STATION_TYPE_JOIN)) {
+				parseRouter((Element) sections.item(2), model, key);
+				parseJoin((Element) sections.item(0), model, key);
 			}
 
 		}
@@ -896,10 +948,375 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			if (parameterName.equals("jobsPerLink")) {
 				model.setStationNumberOfServers(Integer.decode(findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))), key);
 			} else if (parameterName.equals("block")) {
-				model.setForkBlock(key, Integer.valueOf(findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
+				model.setForkBlock(key, Integer.valueOf(findText(parameter
+						.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
+			} else if (parameterName.equals("isSimplifiedFork")) {
+				model.setIsSimplifiedFork(key, Boolean
+						.parseBoolean(findText(parameter.getElementsByTagName(
+								XML_E_PARAMETER_VALUE).item(0))));
+			} else if (parameterName.equals("ForkStrategy")) {
+				Map<String, Node> forking = parseParameterRefclassArray(parameter);
+				Object[] classNames = forking.keySet().toArray();
+				String className;
+
+				if (engineToGuiForking == null) {
+					engineToGuiForking = new TreeMap<String, ForkStrategy>();
+					ForkStrategy[] allFS = ForkStrategy.findAll();
+					for (ForkStrategy element : allFS) {
+						engineToGuiForking.put(element.getClass().getName(),
+								element);
+					}
+				}
+
+				Object[] forkStratKeys = engineToGuiForking.keySet().toArray();
+				for (Object className2 : classNames) {
+					Map<String, OutPath> map = new HashMap<String, OutPath>();
+					className = ((Element) forking.get(className2))
+							.getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+					for (Object forkStratKey : forkStratKeys) {
+						if (className.equals(engineToGuiForking.get(
+								forkStratKey).getClassPath())) {
+							model.setForkingStrategy(key, classes
+									.get(className2),
+									engineToGuiForking.get(forkStratKey)
+											.clone());
+						}
+					}
+
+					ForkStrategy fs = (ForkStrategy) model.getForkingStrategy(
+							key, classes.get(className2));
+					if (fs instanceof ProbabilitiesFork) {
+						ArrayList<Node> entries = new ArrayList<Node>();
+						// Finds EntryArray node
+						Node entryArray = forking.get(className2)
+								.getFirstChild();
+						while (entryArray.getNodeType() != Node.ELEMENT_NODE
+								|| !entryArray.getNodeName().equals(
+										XML_E_SUBPARAMETER)) {
+							entryArray = entryArray.getNextSibling();
+						}
+						// Now finds every outPaths
+						Node child = entryArray.getFirstChild();
+						while (child != null) {
+							// Find first subParameter element
+							while (child != null
+									&& (child.getNodeType() != Node.ELEMENT_NODE || !child
+											.getNodeName().equals(
+													XML_E_SUBPARAMETER))) {
+								child = child.getNextSibling();
+							}
+							if (child != null) {
+								entries.add(child);
+								child = child.getNextSibling();
+							}
+						}
+						// For each empirical entry get station name and
+						// probability
+						for (int j = 0; j < entries.size(); j++) {
+
+							OutPath op = new OutPath();
+                                                        op.putEntry(1, 1.0);
+
+							Node temp = entries.get(j).getFirstChild();
+							while (temp.getNodeType() != Node.ELEMENT_NODE
+									|| !temp.getNodeName().equals(
+											XML_E_SUBPARAMETER)) {
+								temp = temp.getNextSibling();
+							}
+							NodeList values = ((Element) temp)
+									.getElementsByTagName(XML_E_SUBPARAMETER);
+							String stationName = findText(((Element) values
+									.item(0)).getElementsByTagName(
+									XML_E_PARAMETER_VALUE).item(0));
+							Double probability = Double
+									.valueOf(findText(((Element) values.item(1))
+											.getElementsByTagName(
+													XML_E_PARAMETER_VALUE)
+											.item(0)));
+							op.setOutName(stationName);
+							op.setProb(probability);
+							temp = temp.getNextSibling();
+							while (temp.getNodeType() != Node.ELEMENT_NODE
+									|| !temp.getNodeName().equals(
+											XML_E_SUBPARAMETER)) {
+								temp = temp.getNextSibling();
+							}
+							ArrayList<Node> probs = new ArrayList<Node>();
+							Node temp2 = temp.getFirstChild();
+							while (temp2 != null) {
+								// Find first subParameter element
+								while (temp2 != null
+										&& (temp2.getNodeType() != Node.ELEMENT_NODE || !temp2
+												.getNodeName().equals(
+														XML_E_SUBPARAMETER))) {
+									temp2 = temp2.getNextSibling();
+								}
+								if (temp2 != null) {
+									probs.add(temp2);
+									temp2 = temp2.getNextSibling();
+								}
+							}
+							HashMap<Object, Object> tempMap = new HashMap<Object, Object>();
+							for (int k = 0; k < probs.size(); k++) {
+								Node temp3 = probs.get(k);
+								NodeList results = ((Element) temp3)
+										.getElementsByTagName(XML_E_SUBPARAMETER);
+								String num = findText(((Element) results
+										.item(0)).getElementsByTagName(
+										XML_E_PARAMETER_VALUE).item(0));
+								Double prob = Double
+										.valueOf(findText(((Element) results
+												.item(1)).getElementsByTagName(
+												XML_E_PARAMETER_VALUE).item(0)));
+								tempMap.put(num, prob);
+							}
+							op.setOutParameters(tempMap);
+							map.put(stationName, op);
+						}
+						empiricalForking.put(
+								new Object[] { key, classes.get(className2) },
+								map);
+					} else if (fs instanceof CombFork) {
+						ArrayList<Node> entries = new ArrayList<Node>();
+						// Finds EntryArray node
+						Node entryArray = forking.get(className2)
+								.getFirstChild();
+						while (entryArray.getNodeType() != Node.ELEMENT_NODE
+								|| !entryArray.getNodeName().equals(
+										XML_E_SUBPARAMETER)) {
+							entryArray = entryArray.getNextSibling();
+						}
+						Node child = entryArray.getFirstChild();
+						while (child != null) {
+							// Find first subParameter element
+							while (child != null
+									&& (child.getNodeType() != Node.ELEMENT_NODE || !child
+											.getNodeName().equals(
+													XML_E_SUBPARAMETER))) {
+								child = child.getNextSibling();
+							}
+							if (child != null) {
+								entries.add(child);
+								child = child.getNextSibling();
+							}
+						}
+						Map<String, Double> tmp = new TreeMap<String, Double>();
+						for (int j = 0; j < entries.size(); j++) {
+							NodeList values = ((Element) entries.get(j))
+									.getElementsByTagName(XML_E_SUBPARAMETER);
+							String num = findText(((Element) values.item(0))
+									.getElementsByTagName(XML_E_PARAMETER_VALUE)
+									.item(0));
+							Double probability = Double
+									.valueOf(findText(((Element) values.item(1))
+											.getElementsByTagName(XML_E_PARAMETER_VALUE)
+											.item(0)));
+							tmp.put(num, probability);	
+						}
+						combForking.put(
+								new Object[] { key, classes.get(className2) }, tmp);
+                                        } else if (fs instanceof MultiBranchClassSwitchFork || fs instanceof ClassSwitchFork) {
+						ArrayList<Node> entries = new ArrayList<Node>();
+						// Finds EntryArray node
+						Node entryArray = forking.get(className2)
+								.getFirstChild();
+						while (entryArray.getNodeType() != Node.ELEMENT_NODE
+								|| !entryArray.getNodeName().equals(
+										XML_E_SUBPARAMETER)) {
+							entryArray = entryArray.getNextSibling();
+						}
+						// Now finds every outPaths
+						Node child = entryArray.getFirstChild();
+						while (child != null) {
+							// Find first subParameter element
+							while (child != null
+									&& (child.getNodeType() != Node.ELEMENT_NODE || !child
+											.getNodeName().equals(
+													XML_E_SUBPARAMETER))) {
+								child = child.getNextSibling();
+							}
+							if (child != null) {
+								entries.add(child);
+								child = child.getNextSibling();
+							}
+						}
+						// For each empirical entry get station name and
+						// probability
+						for (int j = 0; j < entries.size(); j++) {
+
+							OutPath op = new OutPath();
+                                                        op.putEntry(1, 1.0);
+
+							Node temp = entries.get(j).getFirstChild();
+							while (temp.getNodeType() != Node.ELEMENT_NODE
+									|| !temp.getNodeName().equals(
+											XML_E_SUBPARAMETER)) {
+								temp = temp.getNextSibling();
+							}
+//							NodeList values = ((Element) entries.get(j))
+//									.getElementsByTagName(XML_E_SUBPARAMETER);
+							String stationName = findText(((Element) temp)
+									.getElementsByTagName(
+									XML_E_PARAMETER_VALUE).item(0));
+							op.setOutName(stationName);
+							temp = temp.getNextSibling();
+							while (temp.getNodeType() != Node.ELEMENT_NODE
+									|| !temp.getNodeName().equals(
+											XML_E_SUBPARAMETER)) {
+								temp = temp.getNextSibling();
+							}
+							ArrayList<Node> probs = new ArrayList<Node>();
+							Node temp2 = temp.getFirstChild();
+							while (temp2 != null) {
+								// Find first subParameter element
+								while (temp2 != null
+										&& (temp2.getNodeType() != Node.ELEMENT_NODE || !temp2
+												.getNodeName().equals(
+														XML_E_SUBPARAMETER))) {
+									temp2 = temp2.getNextSibling();
+								}
+								if (temp2 != null) {
+									probs.add(temp2);
+									temp2 = temp2.getNextSibling();
+								}
+							}
+                                                        List<String> classes = new ArrayList();
+							for (int k = 0; k < probs.size(); k++) {
+								String jobClass = findText(((Element) probs.get(k))
+									.getElementsByTagName(
+									XML_E_PARAMETER_VALUE).item(0));
+//                                                                        findText(((Element) results
+//										.item(0)).getElementsByTagName(
+//										XML_E_PARAMETER_VALUE).item(0));
+								classes.add(jobClass);
+							}
+                                                        temp = temp.getNextSibling();
+							while (temp.getNodeType() != Node.ELEMENT_NODE
+									|| !temp.getNodeName().equals(
+											XML_E_SUBPARAMETER)) {
+								temp = temp.getNextSibling();
+							}
+                                                        probs = new ArrayList<Node>();
+                                                        temp2 = temp.getFirstChild();
+							while (temp2 != null) {
+								// Find first subParameter element
+								while (temp2 != null
+										&& (temp2.getNodeType() != Node.ELEMENT_NODE || !temp2
+												.getNodeName().equals(
+														XML_E_SUBPARAMETER))) {
+									temp2 = temp2.getNextSibling();
+								}
+								if (temp2 != null) {
+									probs.add(temp2);
+									temp2 = temp2.getNextSibling();
+								}
+							}
+                                                        List<Object> numbers = new ArrayList();
+							for (int k = 0; k < probs.size(); k++) {
+								Integer number = Integer.parseInt(findText(((Element) probs.get(k))
+									.getElementsByTagName(
+									XML_E_PARAMETER_VALUE).item(0)));
+								numbers.add(number);
+							}
+                                                        HashMap<Object, Object> tempMap = new HashMap<Object, Object>();
+                                                        for(int k = 0; k < classes.size(); k++) {
+                                                                tempMap.put(model.getClassByName(classes.get(k)), numbers.get(k));
+                                                        }
+							op.setOutParameters(tempMap);
+							map.put(stationName, op);
+						}
+						empiricalForking.put(
+								new Object[] { key, classes.get(className2) },
+								map);
+					}
+
+				}
 			}
 		}
 	}
+
+	protected static void parseJoin(Element section, CommonModel model,
+			Object key) {
+		Element parameter = (Element) section.getElementsByTagName(
+				XML_E_PARAMETER).item(0);
+		              Map<String, Node> join = null;
+                if (parameter != null) {
+                        join = parseParameterRefclassArray(parameter);
+                        Object[] classNames = join.keySet().toArray();
+                        String className;
+
+                        if (engineToGuiJoin == null) {
+                                engineToGuiJoin = new TreeMap<String, JoinStrategy>();
+                                JoinStrategy[] allJS = JoinStrategy.findAll();
+                                for (JoinStrategy element : allJS) {
+                                        engineToGuiJoin.put(element.getClass().getName(), element);
+                                }
+                        }
+
+                        Object[] joinStratKeys = engineToGuiJoin.keySet().toArray();
+                        for (Object className2 : classNames) {
+                                className = ((Element) join.get(className2))
+                                                .getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+
+                                for (Object joinStratKey : joinStratKeys) {
+                                        if (className.equals(engineToGuiJoin.get(joinStratKey)
+                                                        .getClassPath())) {
+                                                model.setJoinStrategy(key, classes.get(className2),
+                                                                engineToGuiJoin.get(joinStratKey).clone());
+                                        }
+                                }
+
+                                JoinStrategy js = (JoinStrategy) model.getJoinStrategy(key,
+                                                classes.get(className2));
+                                if (js instanceof PartialJoin) {
+                                        Element temp = (Element) join.get(className2);
+                                        NodeList temp2 = temp.getElementsByTagName(XML_E_SUBPARAMETER);
+                                        for (int i = 0; i < temp2.getLength(); i++) {
+                                                Element temp3 = (Element) temp2.item(i);
+                                                if (temp3.getAttribute(XML_A_CLASS_NAME).equals(
+                                                                "numRequired")) {
+                                                        js.setRequiredNum(Integer.parseInt(temp3
+                                                                        .getElementsByTagName("value").item(0)
+                                                                        .getFirstChild().getTextContent()));
+                                                }
+                                        }
+                                } else if (js instanceof GuardJoin) {
+                                        Element temp = (Element) join.get(className2);
+                                        NodeList parList = temp.getElementsByTagName(XML_E_SUBPARAMETER);
+                                        Map<Object, Integer> mix = new HashMap<>();
+                                        List<String> classes = new ArrayList<>();
+                                        List<Integer> numbers = new ArrayList<>();
+                                        for (int i = 0; i < parList.getLength(); i++) {
+                                                Element par = (Element) parList.item(i);
+                                                if (par.getAttribute(XML_A_CLASS_NAME).equals(
+                                                                "Classes")) {
+                                                        NodeList classList = par.getElementsByTagName(XML_E_SUBPARAMETER);
+                                                        for (int j = 0; j < classList.getLength(); j++) {
+                                                                Element classPar = (Element) classList.item(j);
+                                                                classes.add(classPar.getElementsByTagName("value").item(0).getFirstChild().getTextContent());
+                                                        }
+                                                } else if (par.getAttribute(XML_A_CLASS_NAME).equals(
+                                                                "Numbers")) {
+                                                        NodeList numList = par.getElementsByTagName(XML_E_SUBPARAMETER);
+                                                        for (int j = 0; j < numList.getLength(); j++) {
+                                                                Element numPar = (Element) numList.item(j);
+                                                                numbers.add(Integer.parseInt(numPar.getElementsByTagName("value").item(0).getFirstChild().getTextContent()));
+                                                        }
+                                                }
+                                        }
+                                       for (int i = 0; i < classes.size(); i++) {
+                                               mix.put(model.getClassByName(classes.get(i)), numbers.get(i));
+                                       }
+                                       ((GuardJoin) js).setGuard(mix);
+                                }
+                        }
+                } else {
+                        for(Object o: classes.values()) {
+                                model.setJoinStrategy(key, o, CommonConstants.JOINING_NORMAL.clone());
+                        }
+                }
+	}
+
 
 	/**
 	 * Parses service section informations contained in serviceTimeStrategy element to create a
@@ -1198,12 +1615,35 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			//TODO Add support for Double global constraints
 			int num = new Double(globalConstraint.getAttribute(XML_A_GLOBALCONSTRAINT_MAXJOBS)).intValue();
 			model.setRegionCustomerConstraint(key, new Integer(num));
+
+			Element globalMemoryConstraint = (Element) region.getElementsByTagName(
+					XML_E_GLOBALMEMORYCONSTRAINT).item(0);
+                        int memorySize = -1;
+                        if (globalMemoryConstraint != null) {
+                                memorySize = new Double(globalMemoryConstraint
+                                        .getAttribute(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY)).intValue();
+                        }
+			model.setRegionMemoryCapacity(key, new Integer(memorySize));
 			// Now parses drop rules
 			NodeList drop = region.getElementsByTagName(XML_E_DROPRULES);
 			for (int j = 0; j < drop.getLength(); j++) {
 				Element rule = (Element) drop.item(j);
 				model.setRegionClassDropRule(key, classes.get(rule.getAttribute(XML_A_DROPRULES_CLASS)), Boolean.valueOf(rule
 						.getAttribute(XML_A_DROPRULES_DROP)));
+			}
+			NodeList weights = region.getElementsByTagName(XML_E_WEIGHT);
+			for(int j = 0; j< weights.getLength(); j++){
+				Element weight = (Element) weights.item(j);
+				model.setRegionClassWeight(key, classes.get(weight
+						.getAttribute(XML_A_WEIGHT_CLASS)), Integer
+						.valueOf(weight.getAttribute(XML_A_WEIGHT_MULTI)));
+			}
+			NodeList sizes = region.getElementsByTagName(XML_E_MEMORYSIZE);
+			for(int j = 0; j< sizes.getLength(); j++){
+				Element size = (Element) sizes.item(j);
+				model.setRegionClassSize(key, classes.get(size
+						.getAttribute(XML_A_MEMORY_CLASS)), Integer
+						.valueOf(size.getAttribute(XML_A_MEMORY_SIZE)));
 			}
 		}
 	}

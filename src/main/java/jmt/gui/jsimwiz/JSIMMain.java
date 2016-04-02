@@ -931,7 +931,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			}
 		} else if ((problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
 			JOptionPane.showMessageDialog(this, "A fork was found but no join. Please check the topology");
-		} else if ((problemSubType == ModelChecker.EMPTY_BLOCKING_REGION)) {
+		} else if ((problemSubType == ModelChecker.EMPTY_BLOCKING_REGION) && (problemType == ModelChecker.ERROR_PROBLEM)) {
 			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n", "Empty finite capacity regions found",
 					JOptionPane.ERROR_MESSAGE);
 			if (k == 0) {

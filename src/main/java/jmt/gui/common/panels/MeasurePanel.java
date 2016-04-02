@@ -25,6 +25,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -116,14 +117,25 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	protected MeasureTable measureTable;
 
 	//types of measures selectable
-	protected static final String[] measureTypes = new String[] { "---Select an index---", SimulationDefinition.MEASURE_QL, SimulationDefinition.MEASURE_QT,
-			SimulationDefinition.MEASURE_RD, SimulationDefinition.MEASURE_RP, SimulationDefinition.MEASURE_U, SimulationDefinition.MEASURE_X,
-			SimulationDefinition.MEASURE_DR, SimulationDefinition.MEASURE_S_X, SimulationDefinition.MEASURE_S_RP, SimulationDefinition.MEASURE_S_DR,
-			SimulationDefinition.MEASURE_S_CN,
-			//Adds system power index to the performance index combo box in the JSIM panel
-			SimulationDefinition.MEASURE_S_SP,
+	protected static final String[] measureTypes = new String[] {
+                        "---Select an index---",          
+                        SimulationDefinition.MEASURE_DR,
+                        SimulationDefinition.MEASURE_MEAN_WEIGHT,
+                        SimulationDefinition.MEASURE_MEAN_MEMORY_OCCUPATION,
+                        SimulationDefinition.MEASURE_FJ_RESPONSE_TIME,
+                        SimulationDefinition.MEASURE_QL,
+                        SimulationDefinition.MEASURE_QT,
+                        SimulationDefinition.MEASURE_RD,
+                        SimulationDefinition.MEASURE_RP,
+                        SimulationDefinition.MEASURE_R_PER_SINK,
+                        SimulationDefinition.MEASURE_S_DR,
+                        SimulationDefinition.MEASURE_S_CN,
+                        SimulationDefinition.MEASURE_S_SP,
+                        SimulationDefinition.MEASURE_S_RP,
+                        SimulationDefinition.MEASURE_S_X,
+                        SimulationDefinition.MEASURE_X,
 			SimulationDefinition.MEASURE_X_PER_SINK,
-			SimulationDefinition.MEASURE_R_PER_SINK
+                        SimulationDefinition.MEASURE_U	
 	};
 
 	// Measure selection ComboBox
@@ -187,7 +199,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		rightPanel.add(measureSelection, BorderLayout.CENTER);
 		rightPanel.add(new JLabel(" "), BorderLayout.NORTH);
 		measureSelection.addActionListener(addMeasure);
-		//ARIF: show all elements in ComboBox
+                //ARIF: show all elements in ComboBox
 		measureSelection.setMaximumRowCount(measureTypes.length);
 		Object popup = measureSelection.getUI().getAccessibleChild(measureSelection, 0);  
 	    if (popup instanceof ComboPopup) {  
@@ -377,11 +389,19 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				Vector<Object> l1 = stationData.getStationRegionKeysNoSourceSink();
 				Vector<Object> l2 = stationData.getStationKeysSource();
 				l1.addAll(l2);
-				//ARIF: remove generic class switch element if exists
+                                //ARIF: remove generic class switch element if exists
 				l1.removeElement(STATION_TYPE_CLASSSWITCH);
+				return stationsCombos.getEditor(l1);
+			} else if(column == 2 && simData.isFCRMeasure(simData.getMeasureKeys().get(row))){
+				Vector<Object> l1 = stationData.getFCRegionKeys();
+				return stationsCombos.getEditor(l1);
+			} else if(column == 2 && simData.isFJMeasure(simData.getMeasureKeys().get(row))){
+				Vector<Object> l1 = stationData.getFJKeys();
 				return stationsCombos.getEditor(l1);
 			} else if (column == 2) {
 				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
+			} else if(column == 1 && simData.isFCRMeasure(simData.getMeasureKeys().get(row))){
+				return classesCombos.getEditor(new ArrayList<Object>());
 			} else if (column == 1) {
 				return classesCombos.getEditor(classData.getClassKeys());
 			} else {
@@ -397,7 +417,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				return stationsCombos.getRenderer();
 			} else if (column == 1) {
 				return classesCombos.getRenderer();
-			} else if (column == 3){
+                        } else if (column == 3){
 				return new BooleanCellRenderer();
 			} else {
 				return super.getCellRenderer(row, column);

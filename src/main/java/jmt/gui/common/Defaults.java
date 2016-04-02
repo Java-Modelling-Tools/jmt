@@ -77,10 +77,15 @@ public class Defaults implements CommonConstants {
 		def.setProperty("stationServiceStrategy", "jmt.gui.common.distributions.Exponential");
 		def.setProperty("stationDelayServiceStrategy", "jmt.gui.common.distributions.Exponential");
 		def.setProperty("stationRoutingStrategy", "jmt.gui.common.routingStrategies.RandomRouting");
+		//bpmn
+		def.setProperty("stationForkingStrategy", "jmt.gui.common.forkStrategies.ProbabilitiesFork");
+		def.setProperty("stationJoinStrategy","jmt.gui.common.joinStrategies.NormalJoin");
+		//
 		def.setProperty("stationCsRowMatrix", "jmt.gui.common.classSwitch.ClassSwitch");
 		def.setProperty("forkBlock", "-1");
 		def.setProperty("forkJobsPerLink", "1");
 		def.setProperty("dropRule", "Drop");
+		def.setProperty("isSimplifiedFork", "true");
 
 		// Classes parameters defaults
 		def.setProperty("className", "Class");
@@ -94,6 +99,9 @@ public class Defaults implements CommonConstants {
 		def.setProperty("blockingDropPerClass", "true");
 		def.setProperty("blockingMaxJobs", "-1");
 		def.setProperty("blockingRegionName", "FCRegion");
+		def.setProperty("blockingMaxMemory", "-1");
+		def.setProperty("weight","1");
+		def.setProperty("size","1");
 		// Not used parameter...
 		def.setProperty("blockingRegionType", "default");
 
@@ -121,6 +129,9 @@ public class Defaults implements CommonConstants {
 		//GUI default parameters.
 		def.setProperty("JSIMWindowWidth", "800");
 		def.setProperty("JSIMWindowHeight", "600");
+                // templates dialogs default parameters
+                def.setProperty("showDefaultTemplates", "true");
+                def.setProperty("showTemplateDialog", "true");
 		
 		return def;
 	}

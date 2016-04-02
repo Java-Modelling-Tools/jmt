@@ -39,6 +39,7 @@ import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.PSJobInfoList;
 import jmt.engine.QueueNet.WaitingRequest;
+import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.random.engine.RandomEngine;
 
 /**
@@ -109,6 +110,8 @@ public class Queue extends InputSection {
 	//the JobInfoList of the owner NetNode (use to control the number of jobs in
 	//case of finite queue)
 	private JobInfoList nodeJobsList;
+        //the JobInfoList used for Fork nodes
+        private JobInfoList FJList;
 
 	/** This jobinfolist should be used instead of jobsList to support Processor Sharing */
 	private JobInfoList queueJobInfoList;
@@ -268,6 +271,9 @@ public class Queue extends InputSection {
 	 */
 	public void redirectionTurnON(BlockingRegion region) {
 		//sets blocking region properties
+		//soften
+//		System.out.println("In QUEUE:" + this.getOwnerNode().getName());
+		//end
 		redirectionON = true;
 		myRegion = region;
 		regionInputStation = myRegion.getInputStation();
@@ -523,6 +529,14 @@ public class Queue extends InputSection {
 				// job list but has been inserted in NetNode job list !!
 				if (infinite || nodeJobsList.size() <= size) {
 					// Queue is not full. Okay.
+                                        
+                                        // If parent node is a fork node adds job to FJ info list
+                                        if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+                                                // Removes job from global node list
+                                                if (FJList != null) {
+                                                        FJList.add(new JobInfo(job));
+                                                }
+                                        }
 
 					// If coolStart is true, this is the first job received or the
 					// queue was empty: this job is sent immediately to the next
@@ -587,6 +601,18 @@ public class Queue extends InputSection {
 				}
 
 				break;
+                            
+                        case NetEvent.EVENT_JOIN:
+                                Job j = (Job)message.getData();
+
+                                JobInfo jData = null;
+                                if(FJList != null){
+                                        jData = FJList.lookFor(j);
+                                }
+                                if(jData != null && FJList != null){
+                                        FJList.remove(jData);
+                                }
+                                break;
 
 			default:
 				return MSG_NOT_PROCESSED;
@@ -675,6 +701,15 @@ public class Queue extends InputSection {
 				this.getOwnerNode().getJobInfoList().add(newJobInfo);
 				// Adds this job to the queue jobinfolist
 				queueJobInfoList.add(newJobInfo);
+                                try {
+                                        // If parent node is a fork node adds job to FJ info list
+                                        if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+                                                // Removes job from global node list
+                                                FJList.add(newJobInfo);
+                                        }
+                                } catch (NetException ex) {
+                                        
+                                }
 
 				//job has been added: decrease class e total counters
 				residualClassJobs[randomClassIndex]--;
@@ -692,5 +727,17 @@ public class Queue extends InputSection {
 
 		}
 
+	}  
+        
+        @Override
+        public void analyze(int name, JobClass jc, Measure measurement, JobClass[] classes){
+		if(FJList == null){
+			FJList = new LinkedJobInfoList(classes.length, true);
+		}
+		switch(name){
+			case 0:
+				FJList.analyzeResponseTime(jc, measurement);
+				break;
+		}
 	}
 }

@@ -570,7 +570,7 @@ public class Measure {
 			String referenceNodeName = jobClass.getReferenceNodeName();
 			int visitsReferenceNode, visitsThisNode;
 			try {
-				if(referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)){
+				if(referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH) || referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)){
 					visitsReferenceNode = 0;
 				}
 				else{
@@ -631,7 +631,7 @@ public class Measure {
 					//reference node for this job class
 					String referenceNodeName = jobC.getReferenceNodeName();
 					int visitsReferenceNode, visitsThisNode;
-					if(referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)){
+					if(referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH) || referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)){
 						visitsReferenceNode = 0;
 					}
 					else{

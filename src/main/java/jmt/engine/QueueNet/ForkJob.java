@@ -27,12 +27,16 @@ import jmt.engine.NodeSections.Fork;
  * @author Bertoli Marco
  *         Date: 13-mar-2006
  *         Time: 15.48.33
+ * 
+ * Modified by J. Shuai & M. Cazzoli, implemented fork and join strategies
  */
 public class ForkJob extends Job {
 	/** Reference to original job */
 	protected Job forkedJob;
 	/** Number of child jobs */
 	protected int jobNum;
+        /** Number of child jobs of same class */
+	protected int jobNumClass;
 	/** Reference to Fork node */
 	protected Fork forkNode;
 
@@ -48,8 +52,26 @@ public class ForkJob extends Job {
 		this.jobNum = jobNum;
 		this.forkNode = forkNode;
 		this.systemEnteringTime = forkedJob.systemEnteringTime;
+                this.jobNumClass = jobNum;
 		this.born();
 	}
+        
+	// bpmn
+        /**
+	 * Creates a new ForkJob, given number of jobs, original job and reference fork
+	 * @param jobNum number of jobs in which this one must be splitted
+	 * @param forkedJob original job to split
+	 * @param forkNode reference to splitting node (used for blocking)
+         * @param jobClass the class of the ForkJob
+         * @param jobNum number of jobs of class {@code jobClass} in which this one must be splitted
+	 */
+        public ForkJob(int jobNum, Job forkedJob, Fork forkNode, JobClass jobClass, int jobNumClass) {
+		this(jobNum, forkedJob, forkNode);
+                this.jobNumClass = jobNumClass;
+		super.setClass(jobClass);
+	}
+
+	// end
 
 	/**
 	 * Gets original job that was splitted in this piece
@@ -73,5 +95,9 @@ public class ForkJob extends Job {
 	 */
 	public Fork getReferenceFork() {
 		return forkNode;
-	}
+	}       
+        
+        public int getjobNumClas() {
+                return jobNumClass;
+        }
 }

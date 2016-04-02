@@ -63,6 +63,12 @@ public class PAResultsModel implements MeasureDefinition {
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
 	private Vector<Integer> customerNumber = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
+	
+	private Vector<Integer> meanWeight = new Vector<Integer>(); 
+	private Vector<Integer> meanMemoryOccupation = new Vector<Integer>();
+	
+	private Vector<Integer> FJResponseTime = new Vector<Integer>();
+	
 	//Added by ASHANKA START
 	//Added for System power changes for JSIM simulation engine.
 	//This adds the index of the measure System Power.	
@@ -130,23 +136,22 @@ public class PAResultsModel implements MeasureDefinition {
 			} else if (type.startsWith("queue") && type.endsWith("time")) {
 				numType = SimConstants.QUEUE_TIME;
 				queueTime.add(new Integer(i));
-			} else if (type.startsWith("system")) {
-				if (type.endsWith("throughput")) {
+			} else if (type.startsWith("system") && type.endsWith("throughput")) {
 					numType = SimConstants.SYSTEM_THROUGHPUT;
 					systemThroughput.add(new Integer(i));
-				} else if (type.endsWith("time")) {
+			} else if (type.startsWith("system") && type.endsWith("time")) {
 					numType = SimConstants.SYSTEM_RESPONSE_TIME;
 					systemResponseTime.add(new Integer(i));
-				}
-				//Added by ASHANKA START
-				//Added the following to Include the new
-				//performance index called System Power
-				else if (type.endsWith("power")) {
+			}
+                        //Added by ASHANKA START
+                        //Added the following to Include the new
+                        //performance index called System Power
+                        else if (type.startsWith("system") && type.endsWith("power")) {
 					numType = SimConstants.SYSTEM_POWER;
 					systemPower.add(new Integer(i));
-				}
-				//Added by ASHANKA STOP
-			} else if ((type.startsWith("customer") && type.endsWith("number") && "".equalsIgnoreCase(stationName))//Backward compatibility condition
+			}
+                        //Added by ASHANKA STOP
+                        else if ((type.startsWith("customer") && type.endsWith("number") && "".equalsIgnoreCase(stationName))//Backward compatibility condition
 					|| (type.startsWith("system") && type.endsWith("number")) //Backward compatibility condition
 					|| (type.startsWith("system") && type.endsWith("customers"))) {//Present name of the perf index which is System Number of Customers
 				numType = SimConstants.SYSTEM_JOB_NUMBER;
@@ -163,8 +168,16 @@ public class PAResultsModel implements MeasureDefinition {
 			} else if (type.startsWith("throughput") && type.endsWith("sink")) {
 				numType = SimConstants.THROUGHPUT_PER_SINK;
 				throughputTimePerSink.add(new Integer(i));
+			} else if (type.endsWith("mean job weight")){
+				numType = SimConstants.MEAN_WEIGHT;
+				meanWeight.add(new Integer(i));
+			} else if (type.endsWith("mean memory occupation")){
+				numType = SimConstants.MEAN_MEMORY_OCCUPATION;
+				meanMemoryOccupation.add(new Integer(i));
+			} else if(type.equals("fork join response time")){
+				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
+				FJResponseTime.add(new Integer(i));
 			}
-			
 			measures.add(new Measure(measureName, stationName, className, thisAlpha, thisPrecision, numType, nodeType));
 		}
 		parameterValues = model.getParametricAnalysisModel().getParameterValues();
@@ -234,6 +247,15 @@ public class PAResultsModel implements MeasureDefinition {
 				break;
 			case SimConstants.THROUGHPUT_PER_SINK:
 				throughputTimePerSink.add(new Integer(measures.size() - 1));
+				break;
+                        case SimConstants.MEAN_WEIGHT:
+				meanWeight.add(new Integer(measures.size() - 1));
+				break;
+                        case SimConstants.MEAN_MEMORY_OCCUPATION:
+				meanMemoryOccupation.add(new Integer(measures.size() - 1));
+				break;
+                        case SimConstants.FORK_JOIN_RESPONSE_TIME:
+				FJResponseTime.add(new Integer(measures.size() - 1));
 				break;
 			
 		}
@@ -780,6 +802,33 @@ public class PAResultsModel implements MeasureDefinition {
 	public int getDiscardedSamples(int measureIndex) {
 		// No discarded samples stored here.
 		return 0;
+	}
+	
+	@Override
+	public int[] getMeanWeightMeasures(){
+		int[] tmp = new int[meanWeight.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = meanWeight.get(i).intValue();
+		}
+		return tmp;
+	}
+	
+	@Override
+	public int[] getMeanMemoryOccupationMeasures(){
+		int[] tmp = new int[meanMemoryOccupation.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = meanMemoryOccupation.get(i).intValue();
+		}
+		return tmp;
+	}
+	
+	@Override
+	public int[] getFJResponseTimeMeasures(){
+		int[] tmp = new int[FJResponseTime.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = FJResponseTime.get(i).intValue();
+		}
+		return tmp;
 	}
 	
 	

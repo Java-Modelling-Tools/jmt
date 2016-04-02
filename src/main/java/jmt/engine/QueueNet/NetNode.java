@@ -344,7 +344,7 @@ public class NetNode extends SimEntity {
 	public void analyze(int measureName, JobClass jobClass, Measure measurement) throws jmt.common.exception.NetException {
 		switch (measureName) {
 			case SimConstants.LIST_NUMBER_OF_JOBS:
-				jobsList.analyzeQueueLength(jobClass, measurement);
+                                        jobsList.analyzeQueueLength(jobClass, measurement);
 				break;
 
 			case SimConstants.LIST_RESIDENCE_TIME:
@@ -353,7 +353,7 @@ public class NetNode extends SimEntity {
 				break;
 			//NEW Bertoli Marco
 			case SimConstants.LIST_RESPONSE_TIME:
-				jobsList.analyzeResponseTime(jobClass, measurement);
+                                        jobsList.analyzeResponseTime(jobClass, measurement);
 				break;
 			//end NEW
 

@@ -224,6 +224,11 @@ public interface MeasureDefinition {
 	public int[] getResponsetimePerSinkMeasures();
 	public int[] getThroughputPerSinkMeasures();
 
+        public int[] getMeanWeightMeasures();
+	public int[] getMeanMemoryOccupationMeasures();
+	
+	public int[] getFJResponseTimeMeasures();
+
 	/**
 	 * Returns the node type of a given measure
 	 * @param measureIndex index of the measure

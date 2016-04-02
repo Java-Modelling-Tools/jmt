@@ -22,6 +22,7 @@ import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
@@ -177,16 +178,42 @@ public class Router extends OutputSection {
 						if (regionInputStation == null) {
 							regionInputStation = myBlockingRegion.getInputStation();
 						}
+                                                // soften
+                                                // System.out.println("In Router:" +
+                                                // this.getOwnerNode().getSection(INPUT));
+                                                if (this.getOwnerNode().getSection(INPUT) instanceof Join) {
+                                                        if (((Join) this.getOwnerNode().getSection(INPUT))
+                                                                        .getMyRegion() != null) {
 
-						myBlockingRegion.decreaseOccupation(jobClass);
+                                                                int i = ((Join) this.getOwnerNode().getSection(
+                                                                                INPUT)).getDeTimes(job) - 1;
+                                                                for (int j = 0; j < i; j++) {
+                                                                        myBlockingRegion.decreaseOccupation(jobClass);
 
-						//send(NetEvent.EVENT_JOB_OUT_OF_REGION, null, 0.0, NodeSection.INPUT, regionInputStation);
-						send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);
-						//Since now for blocking regions the job dropping is handles manually at node level 
-						//hence need to create events with Jobs ..Modified for FCR Bug Fix
-					}
-				}
-				return MSG_PROCESSED;
+        //								JobInfo ji = myBlockingRegion.getInputStation()
+        //										.getJobInfoList().lookFor(job);
+        //								if (ji != null) {
+        //									System.out.println(ji);
+                                                                                // myBlockingRegion.getInputStation().getJobInfoList().remove(ji);
+        //								}
+
+                                                                }
+                                                        }
+                                                }
+                                                //end
+                                                myBlockingRegion.decreaseOccupation(jobClass);
+
+                                                // send(NetEvent.EVENT_JOB_OUT_OF_REGION, null, 0.0,
+                                                // NodeSection.INPUT, regionInputStation);
+                                                send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0,
+                                                                NodeSection.INPUT, regionInputStation);
+                                                // Since now for blocking regions the job dropping is
+                                                // handles manually at node level
+                                                // hence need to create events with Jobs ..Modified for FCR
+                                                // Bug Fix
+                                        }
+                                }
+                                return MSG_PROCESSED;
 
 			case NetEvent.EVENT_ACK:
 				//EVENT_ACK

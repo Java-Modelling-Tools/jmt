@@ -17,16 +17,26 @@
  */
 package jmt.engine.NodeSections;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.JoinStrategies.GuardJoin;
+import jmt.engine.NetStrategies.JoinStrategies.NormalJoin;
+import jmt.engine.NetStrategies.JoinStrategy;
+import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.ForkJob;
-import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
+import jmt.engine.QueueNet.LinkedJobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.dataAnalysis.Measure;
 
 /**
  * <p>Title: Join</p>
@@ -37,10 +47,19 @@ import jmt.engine.QueueNet.NetMessage;
  * @author Bertoli Marco
  *         Date: 13-mar-2006
  *         Time: 16.19.58
+ * 
+ * Modified by J. Shuai & M. Cazzoli, implemented join strategies
  */
 public class Join extends InputSection {
 	/** Data structure used to store received tasks for each job */
 	private HashMap<Job, Integer> jobs;
+        private HashMap<Job, Integer[]> required;
+        private HashMap<Job, Integer> allJobs;
+	private HashMap<Job, Boolean> hasFired;
+	private HashMap<Job, Integer> counter;
+        private HashMap<Job, List<ForkJob>> forkJobs;
+        
+        private JoinStrategy[] joinStrategies;
 
 	// --- Constructors -----------------------------------------------------------------------------
 	/**
@@ -50,6 +69,16 @@ public class Join extends InputSection {
 		// Disables automatic handling of jobinfolists
 		super(false);
 		jobs = new HashMap<Job, Integer>();
+                required = new HashMap<>();
+                allJobs = new HashMap<Job, Integer>();
+		hasFired = new HashMap<Job, Boolean>();
+		counter = new HashMap<Job, Integer>();
+                forkJobs = new HashMap<Job, List<ForkJob>>();
+	}
+        
+	public Join(JoinStrategy[] joinStrategies){
+		this();
+		this.joinStrategies = joinStrategies;
 	}
 
 	// ----------------------------------------------------------------------------------------------
@@ -68,64 +97,191 @@ public class Join extends InputSection {
 				Job job = message.getJob();
 				// Sends ACK back
 				send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+                        
+                                JobInfoList info = getOwnerNode().getJobInfoList();
+                                JobInfoList section = (JobInfoList) this.getObject(NodeSection.PROPERTY_ID_JOBINFOLIST);
 
 				if (job instanceof ForkJob) {
 					ForkJob fJob = (ForkJob) job;
-
-					// Removes job from global node list
-					JobInfoList info = getOwnerNode().getJobInfoList();
-					JobInfo jobData = info.lookFor(job);
-					if (jobData != null) {
-						info.remove(jobData);
-					}
+                                        List fJobs = forkJobs.get(fJob.getForkedJob());
+                                        if(fJobs == null) {
+                                                fJobs = new ArrayList();
+                                                forkJobs.put(fJob.getForkedJob(), fJobs);
+                                                JobInfo temp = new JobInfo(job);
+                                                section.add(temp);
+                                                section.remove(temp);
+                                        }
+                                        fJobs.add(fJob);
 
 					// Removes job from system list
-					GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
-					global.removeForkedJob(fJob);
+//					GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
+//					global.removeForkedJob(fJob);
 
 					// Needed tasks
 					int needed;
-					if (jobs.containsKey(fJob.getForkedJob())) {
-						needed = jobs.get(fJob.getForkedJob()).intValue();
-					} else {
-						needed = fJob.getForkedNumber();
-						// As we are waiting for other tasks, adds merged job to global and local info list
-						//JobInfo merged = new JobInfo(fJob.getForkedJob(), fJob.getBornTime());
-						JobInfo merged = new JobInfo(fJob.getForkedJob());
-						info.add(merged);
-						jobsList.add(merged);
-					}
-					// Decrement needed as we received this job
-					needed--;
+					int totalForked;
+                                        Integer[] neededPerClass = null;
+                                        boolean isFired;
+                                        if (allJobs.containsKey(fJob.getForkedJob())) {
+                                                totalForked = allJobs.get(fJob.getForkedJob());
+                                                needed = jobs.get(fJob.getForkedJob());
+                                                neededPerClass = required.get(fJob.getForkedJob());
+                                                isFired = hasFired.get(fJob.getForkedJob());
+                                        } else {
+                                                // old
+                                                // needed = fJob.getForkedNumber();
+                                                // end
+                                                // bpmn
+                                                totalForked = fJob.getForkedNumber();
+                                                needed = joinStrategies[fJob.getForkedJob().getJobClass().getId()].getRequiredNum();
+                                                if (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof GuardJoin) {
+                                                        neededPerClass = ((GuardJoin) joinStrategies[fJob.getForkedJob().getJobClass().getId()]).getRequiredPerClass();
+                                                        needed = -1;
+                                                }
+                                                required.put(fJob.getForkedJob(), neededPerClass);
+                                                isFired = false;
 
-					// If needed is zero, all tasks has been retrieved and the job can be
-					// forwarded
-					if (needed == 0) {
-						jobs.remove(fJob.getForkedJob());
-						// Adds original job, otherwise we will have one less job in the network
-						global.addForkedJob(fJob.getForkedJob());
-						// Sends job forward
-						sendForward(fJob.getForkedJob(), 0.0);
-						// Notify fork node (to support blocking)
-						send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0, fJob.getReferenceFork().getSectionID(), fJob.getReferenceFork()
-								.getOwnerNode());
-					} else {
-						// We must wait for more tasks before sending this to
-						// next section
-						jobs.put(fJob.getForkedJob(), new Integer(needed));
-					}
-				} else {
-					// If this is not a fork job, sends it forward
-					sendForward(job, 0.0);
-				}
+                                                //soften
+                                                if (myRegion != null) {
+                                                        if (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof NormalJoin) {
+                                                                counter.put(fJob.getForkedJob(), fJob.getForkedNumber());
+                                                        } else {
+                                                                counter.put(fJob.getForkedJob(), joinStrategies[fJob.getForkedJob().getJobClass().getId()].getRequiredNum());
+                                                        }
+                                                }
+                                                //end
 
-				break;
+                                                // end
+                                                // As we are waiting for other fragments, adds merged job to
+                                                // global and local info list
+        //					JobInfo merged = new JobInfo(fJob.getForkedJob());
+        //					info.add(merged);
+        //					jobsList.add(merged);
+                                        }
+                                        // Decrement needed as we received this job
+                                        totalForked--;
+                                        // If needed is zero, all pieces has been retrived and job can
+                                        // be
+                                        // forwarded
+                                        //soften
+                                        if(isFired){
+                                                JobInfo i = info.lookFor(fJob);
+                                                if (i != null) {
+                                                        info.remove(i);
+                                                }
+                                                if(myRegion != null){
+                                                        myRegion.decreaseOccupation(fJob.getJobClass());
+                                                }
+                                        }
+                                        //end
+                                        if (!isFired) {
+                                                needed--;
+                                                boolean allZeros = false;
+                                                if (neededPerClass != null) {
+                                                        neededPerClass[fJob.getJobClass().getId()]--;
+                                                        allZeros = true;
+                                                        for(Integer i: neededPerClass) {
+                                                                allZeros = allZeros && (i == 0);
+                                                        }
+                                                }
+                                                jobs.put(fJob.getForkedJob(), needed);
+                                                hasFired.put(fJob.getForkedJob(), false);
+                                                boolean allArrived = (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof NormalJoin) && (totalForked == 0);
+                                                if (needed == 0 || allArrived || allZeros) {
+                                                        // Adds original job, otherwise we will have one less
+                                                        // job in the network
+        //						global.addForkedJob(fJob.getForkedJob());
+                                                        for(ForkJob j: forkJobs.get(fJob.getForkedJob())) {
+                                                                JobInfo i = info.lookFor(j);
+                                                                if (i != null) {
+                                                                        info.remove(i);
+                                                                }
+                                                                if(myRegion != null){
+                                                                        JobInfo ji = myRegion.getInputStation().getJobInfoList().lookFor(j);
+                                                                        if(ji != null){
+                                                                                myRegion.getInputStation().getJobInfoList().remove(ji);
+                                                                        }
+                                                                }
+                                                                //soften
+                //							myRegion.getInputStation().getJobInfoList().add(new JobInfo(fJob.getForkedJob()));
+                                                                //end
+                                                        }
+                                                        if(myRegion != null){
+                                                                myRegion.getInputStation().getJobInfoList().remove(new JobInfo(fJob.getForkedJob()));
+                                                        }
+        //                                                if(serviceList != null) {
+        //                                                       JobInfo i = serviceList.lookFor(firstJob.get(fJob.getForkedJob())); 
+        //                                                       if(i != null) {
+        //                                                             serviceList.remove(i);
+        //                                                       }
+        //                                                }
+                                                        // Sends job forward
+                                                        sendForward(fJob.getForkedJob(), 0.0);
+                                                        hasFired.put(fJob.getForkedJob(), true);
+                                                        // Notify fork node (to support blocking)
+                                                        send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0,
+                                                                        fJob.getReferenceFork().getSectionID(), fJob
+                                                                                        .getReferenceFork().getOwnerNode());
+                                                } else {
+                                                        if(myRegion != null){
+        //							myRegion.decreaseOccupation(fJob.getJobClass());
+                                                        }
+                                                        // We must wait for more fragments before sending this
+                                                        // to
+                                                        // next section
+                                                        // jobs.put(fJob.getForkedJob(), new Integer(needed));
+                                                }
+                                        }
+                                        if (totalForked == 0){
+                                                allJobs.remove(fJob.getForkedJob());
+                                                jobs.remove(fJob.getForkedJob());
+                                                hasFired.remove(fJob.getForkedJob());
+                                                forkJobs.remove(fJob.getForkedJob());
+                                                required.remove(fJob.getForkedJob());
+                                        } else {
+                                                allJobs.put(fJob.getForkedJob(), totalForked);
+                                        }
+                                } else {
+                                        // If this is not a fork job, sends it forward
+                                        sendForward(job, 0.0);
+                                }
+
+                                break;
 			case NetEvent.EVENT_ACK:
 				break;
 		}
 
 		// Everything was okay
 		return MSG_PROCESSED;
+	}
+
+	//soften	
+	private boolean redirectionON;
+	private BlockingRegion myRegion;
+	private NetNode regionInputStation;
+	
+	//soften
+	public void addRegion(BlockingRegion region){
+		redirectionON = true;
+		myRegion = region;
+		regionInputStation = myRegion.getInputStation();
+	}
+	
+	public int getDeTimes(Job job){
+		return this.counter.remove(job);
+	}
+	
+	public BlockingRegion getMyRegion(){
+		return this.myRegion;
+	}
+//	end
+        
+        public void analyzeUtilization(JobClass jc, Measure measurement, JobClass[] classes){
+                JobInfoList info = getOwnerNode().getJobInfoList();
+		if(info == null){
+			info = new LinkedJobInfoList(classes.length, true);
+		}
+                ((LinkedJobInfoList) info).analyzeUtilizationJoin(jc, measurement);
 	}
 
 }

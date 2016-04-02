@@ -24,6 +24,7 @@ import java.util.ListIterator;
 import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.BlockingQueue;
 import jmt.engine.NodeSections.ClassSwitch;
+import jmt.engine.NodeSections.Fork;
 import jmt.engine.NodeSections.Queue;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
@@ -89,6 +90,8 @@ public class QueueNetwork {
 	private int state;
 
 	private GlobalJobInfoList jobInfoList;
+        
+        private boolean taskWarningNotShown = true;
 
 	/** Creates a new instance of QueueNetwork. */
 	public QueueNetwork(String name) {
@@ -424,11 +427,15 @@ public class QueueNetwork {
 		int switched = 0;
 		for (int s = 0; s < nodes.size(); s++) {
 			NetNode node = nodes.get(s);
-			NodeSection inputSection;
+			NodeSection section;
 			try {
-				inputSection = node.getSection(NodeSection.SERVICE);
-				if (inputSection instanceof ClassSwitch) {
-					switched += ((ClassSwitch) inputSection).getSwitchedJobCount(jobClass.getId());
+				section = node.getSection(NodeSection.SERVICE);
+				if (section instanceof ClassSwitch) {
+					switched += ((ClassSwitch) section).getSwitchedJobCount(jobClass.getId());
+				} 
+                                section = node.getSection(NodeSection.OUTPUT);
+                                if (section instanceof Fork) {
+					switched += ((Fork) section).getSwitchedJobCount(jobClass.getId());
 				} 
 			} catch (NetException ne) {
 				continue;
@@ -450,4 +457,18 @@ public class QueueNetwork {
 			tmp.abort();
 		}
 	}
+
+        /**
+         * @return the taskWarningNotShown
+         */
+        public boolean isTaskWarningNotShown() {
+                return taskWarningNotShown;
+        }
+
+        /**
+         * @param taskWarningNotShown the taskWarningNotShown to set
+         */
+        public void setTaskWarningNotShown(boolean taskWarningNotShown) {
+                this.taskWarningNotShown = taskWarningNotShown;
+        }
 }

@@ -1,4 +1,4 @@
-/**    
+/** 
   * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
   * This program is free software; you can redistribute it and/or modify
@@ -55,6 +55,8 @@ public class StoredResultsModel implements MeasureDefinition {
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
 	private Vector<Integer> customerNumber = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
+	private Vector<Integer> meanWeight = new Vector<Integer>(); 
+	private Vector<Integer> meanMemoryOccupation = new Vector<Integer>();
 
 	//Added by ASHANKA START
 	//Added as a part of addition of the performance index system power to the 
@@ -65,6 +67,8 @@ public class StoredResultsModel implements MeasureDefinition {
 	
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputTimePerSink = new Vector<Integer>();
+	
+	private Vector<Integer> FJResponseTime = new Vector<Integer>();
 
 
 	public Vector<Measure> getMeasures() {
@@ -393,6 +397,30 @@ public class StoredResultsModel implements MeasureDefinition {
 		}
 		return tmp;
 	}
+	
+	public int[] getMeanWeightMeasures(){
+		int[] tmp = new int[meanWeight.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = meanWeight.get(i).intValue();
+		}
+		return tmp;
+	}
+	
+	public int[] getMeanMemoryOccupationMeasures(){
+		int[] tmp = new int[meanMemoryOccupation.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = meanMemoryOccupation.get(i).intValue();
+		}
+		return tmp;
+	}
+	
+	public int[] getFJResponseTimeMeasures(){
+		int[] tmp = new int[FJResponseTime.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = FJResponseTime.get(i).intValue();
+		}
+		return tmp;
+	}
 
 	/**
 	 * Returns if simulation has finished, so results are fixed
@@ -487,6 +515,16 @@ public class StoredResultsModel implements MeasureDefinition {
 				break;
 			case SimConstants.THROUGHPUT_PER_SINK:
 				throughputTimePerSink.add(new Integer(measures.size() - 1));
+				break;
+			
+			case SimConstants.MEAN_WEIGHT:
+				meanWeight.add(new Integer(measures.size() - 1));
+				break;
+			case SimConstants.MEAN_MEMORY_OCCUPATION:
+				meanMemoryOccupation.add(new Integer(measures.size() - 1));
+				break;
+                        case SimConstants.FORK_JOIN_RESPONSE_TIME:
+				FJResponseTime.add(new Integer(measures.size() - 1));
 				break;
 		}
 	}

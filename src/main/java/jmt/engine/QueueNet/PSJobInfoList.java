@@ -402,5 +402,14 @@ public class PSJobInfoList implements JobInfoList {
 			InverseMeasure Measurement) {
 		list.analyzeThroughputPerSink(jobClass, Measurement);
 	}
+	//fork in region
+	public int getJobsInPerClass(int Id){
+		return jobsInPerClass[Id];
+	}
+	
+	public int getJobsOutPerClass(int Id){
+		return jobsOutPerClass[Id];
+	}
+	//end
 
 }

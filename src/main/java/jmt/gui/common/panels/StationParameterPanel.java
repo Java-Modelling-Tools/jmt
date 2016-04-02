@@ -56,6 +56,9 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	protected ForkSectionPanel fsPane;
 	protected LoggerSectionPanel lsPane;
 	protected ClassSwitchSectionPanel csPane;
+	// For BPMN
+	protected InGateWaySectionPanel gsPane;
+	protected JoinSectionPanel jsPane;
 	// Current wizard panel
 	protected WizardPanel current;
 
@@ -197,6 +200,35 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			}
 
 		}
+		// For BPMN
+		if(hasInGateWaySection(type)){
+			if (gsPane == null) {
+				gsPane = new InGateWaySectionPanel(stationData, classData, stationKey);
+			} else {
+				gsPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(gsPane, gsPane.getName());
+//                        mainPanel.setEnabledAt(2, !stationData.getIsSimplifiedFork(stationKey));
+                        
+			// If this was previously selected, selects this
+			if (oldComponent == gsPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+		}
+		
+		if(hasJoinSection(type)){
+			if (jsPane == null) {
+				jsPane = new JoinSectionPanel(stationData, classData, stationKey);
+			} else {
+				jsPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(jsPane, jsPane.getName());
+
+			// If this was previously selected, selects this
+			if (oldComponent == jsPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+		}
 
 		// Sets current panel
 		current = (WizardPanel) mainPanel.getSelectedComponent();
@@ -206,7 +238,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		if (checkNullValues()) {
 			return false;
 		} else {
-			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_FORK.equals(type);
+			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_FORK.equals(type); //|| STATION_TYPE_INGATEWAY.equals(type);
 		}
 	}
 
@@ -224,7 +256,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		} else {
 			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_DELAY.equals(type) || STATION_TYPE_SOURCE.equals(type)
 					|| STATION_TYPE_ROUTER.equals(type) || STATION_TYPE_LOGGER.equals(type) || STATION_TYPE_TERMINAL.equals(type)
-					|| STATION_TYPE_JOIN.equals(type) || STATION_TYPE_CLASSSWITCH.equals(type);
+					|| STATION_TYPE_JOIN.equals(type) || STATION_TYPE_CLASSSWITCH.equals(type); //|| STATION_TYPE_OUTGATEWAY.equals(type);
 		}
 	}
 
@@ -240,7 +272,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		if (checkNullValues()) {
 			return false;
 		} else {
-			return STATION_TYPE_FORK.equals(type);
+			return STATION_TYPE_FORK.equals(type); //|| STATION_TYPE_INGATEWAY.equals(type);
 		}
 	}
 	
@@ -255,6 +287,22 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			return false;
 		} else {
 			return STATION_TYPE_CLASSSWITCH.equals(type);
+		}
+	}
+	// For BPMN
+	private boolean hasInGateWaySection(String type){
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_FORK.equals(type);
+		}
+	}
+	
+	private boolean hasJoinSection(String type){
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_JOIN.equals(type);
 		}
 	}
 	
@@ -289,6 +337,12 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	 */
 	public void showCsSectionPanel() {
 		mainPanel.setSelectedComponent(csPane);
+	}
+        
+        public void showJoinSectionPanel(Object classKey) {
+                jsPane.setData(stationData, classData, stationKey);
+                jsPane.setSelectedClass(classKey);
+		mainPanel.setSelectedComponent(jsPane);
 	}
 
 	/**
