@@ -217,7 +217,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		
 		
 		// Abort simulation when maxData is reached
-		if (nsamples > maxData && !confIntervalOk) {
+		if (nsamples >= maxData && !confIntervalOk) {
 			success = false;
 			end = true;
 			// Free allocated memory
@@ -225,7 +225,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			return true;
 		}
 		// Max samples are reached and confidence interval too, but statistic stop was disabled
-		else if (nsamples > maxData && confIntervalOk) {
+		else if (nsamples >= maxData && confIntervalOk) {
 			success = true;
 			end = true;
 			// Free allocated memory
