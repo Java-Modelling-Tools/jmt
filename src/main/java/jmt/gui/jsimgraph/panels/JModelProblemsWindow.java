@@ -528,7 +528,8 @@ public class JModelProblemsWindow extends JDialog {
 				problems.add(new ProblemElement(
 								ModelChecker.ERROR_PROBLEM,
 								ModelChecker.PRELOADING_WITH_BLOCKING,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations inside a blocking region is not supported.</div></html>",
+//								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations inside a blocking region is not supported.</div></html>",
+								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations exceeds global or class constraints (weights have not been considered).</div></html>",
 								null, null));
 			}
 			if (mc.isThereMoreThanOneSinkWarning()) {
