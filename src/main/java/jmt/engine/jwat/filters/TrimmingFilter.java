@@ -21,7 +21,7 @@ import jmt.engine.jwat.Observation;
 
 public class TrimmingFilter implements FilterOnVariable {
 	private int index;
-	private boolean up; //true elimina da index in poi altrimenti al contrario
+	private boolean up; //true eliminate from index otherwise the opposite way
 
 	public TrimmingFilter(int index, boolean b) {
 		this.index = index;

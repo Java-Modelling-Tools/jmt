@@ -30,7 +30,7 @@ import jmt.gui.jwat.JWATConstants;
  * @author Brambilla Davide, Fumagalli Claudio
  * @version 1.1
  */
-public class MatrixOsservazioni {
+public class MatrixObservations {
 	/* Array of observations */
 	private Observation[] VectOss;
 	/* Array of variables */
@@ -44,7 +44,7 @@ public class MatrixOsservazioni {
 	 * @param TipoVar Variable's types
 	 * @param map array of mapping class for each variable
 	 */
-	public MatrixOsservazioni(Observation[] Matrix, String[] Vname, int[] TipoVar, VariableMapping[] map) throws OutOfMemoryError {
+	public MatrixObservations(Observation[] Matrix, String[] Vname, int[] TipoVar, VariableMapping[] map) throws OutOfMemoryError {
 		/* Number of variables and observationss*/
 		int VarDim = Vname.length;
 		int OssDim = Matrix.length;

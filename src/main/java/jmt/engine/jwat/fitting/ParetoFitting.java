@@ -51,9 +51,6 @@ public class ParetoFitting implements FittingAlgorithm {
 
 		alphaML = (n - 2) / summation;
 		
-		//System.out.println("n is: " + n);
-		//System.out.println("------->Stimatore di k: " + sigmaML);
-		//System.out.println("------->Stimatore di alpha " + alphaML);
 	}
 	
 	/**

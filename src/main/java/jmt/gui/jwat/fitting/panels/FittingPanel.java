@@ -155,7 +155,7 @@ public class FittingPanel extends WizardPanel {
 		mainBox.add(Box.createVerticalStrut(10));
 		add(mainBox);
 
-		// Pannello dei componenti univariate statistics panel
+		// components univariate statistics panel
 		if(distribution == EXPO)
 			componentsPanel.add(new JLabel("Results of fitting of exponential distribution"), BorderLayout.NORTH);
 		else if(distribution == PARETO)

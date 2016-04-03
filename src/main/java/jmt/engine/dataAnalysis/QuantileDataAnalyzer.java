@@ -32,7 +32,7 @@ import jmt.engine.math.SampleMeanVar;
 
  */
 public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
-	//TODO: questa classe funziona anche nel caso di InverseMeasure????
+	//TODO: does this class work also in the case of InverseMeasure????
 	DoubleArrayList data;
 
 	boolean ordered = false;
@@ -48,7 +48,7 @@ public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
 	 *                      (precision = maxamplitude / mean)
 	 * @param maxData  maximum number of data to be analyzed
 	 *
-	 * @param quantile Requested quantiles //TODO: giusto??
+	 * @param quantile Requested quantiles //TODO: correct??
 	 * @param sorter Sorting algorithm used to manage data
 	 */
 	public QuantileDataAnalyzer(double alfa, double precision, int maxData, double[] quantile, SortAlgorithm sorter) {
@@ -156,7 +156,7 @@ public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
 		double[] d = data.toArray(0, data.getSize() - 1);
 		//		long start = System.currentTimeMillis();
 		sorter.sort(d);
-		//		System.out.println("tempo = "+ (System.currentTimeMillis() - start));
+		//		System.out.println("time = "+ (System.currentTimeMillis() - start));
 		data = new DoubleArrayList(d);
 
 	}

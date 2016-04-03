@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-//TODO: testare mettere a posto...classe di prova!
+//TODO: test and fix, this is a test class!
 /**
  * This class implements an event queue used internally by the Sim_system to
  * manage the list of Sim_events.

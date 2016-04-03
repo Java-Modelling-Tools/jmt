@@ -2,7 +2,7 @@ package jmt.gui.jwat.workloadAnalysis.tables;
 
 import javax.swing.table.AbstractTableModel;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.gui.jwat.JWATConstants;
 
 public class JWatUnivariateStatsTableModel extends AbstractTableModel implements JWATConstants {
@@ -16,11 +16,11 @@ public class JWatUnivariateStatsTableModel extends AbstractTableModel implements
 	protected String[] columnNames = new String[] { "Variable", "Mean", "Variance", "Std. Dev.", "Coeff. of var.", "Minimum", "Maximum", "Range",
 			"Median", "Kurtosis", "Skewness", "Num. Obs." };
 
-	private MatrixOsservazioni data = null;
+	private MatrixObservations data = null;
 
 	//private DecimalFormat format = new DecimalFormat("####.####E0");
 
-	public JWatUnivariateStatsTableModel(MatrixOsservazioni model) {
+	public JWatUnivariateStatsTableModel(MatrixObservations model) {
 		data = model;
 	}
 
@@ -106,7 +106,7 @@ public class JWatUnivariateStatsTableModel extends AbstractTableModel implements
 		return String.class;
 	}
 
-	public void setMatrixObs(MatrixOsservazioni m) {
+	public void setMatrixObs(MatrixObservations m) {
 		data = m;
 	}
 }

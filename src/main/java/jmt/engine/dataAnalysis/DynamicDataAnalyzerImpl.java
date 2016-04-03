@@ -400,7 +400,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		// actual number of crosses
 		int counter = 0;
 
-		//TODO: si potrebbe modificare (vedi tesi granata)
+		//TODO: this may be changed (see Granata's master thesis)
 		// number of times that the time series initData should cross the initMean
 		// to determine the end of transient
 		int overTimes = 40; //OLD=40
@@ -730,10 +730,10 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			return delet;
 		} else {
 			//transient ca not be deleted (? ste)
-			//TODO: come si arriva a questo punto??
+			//TODO: how did we arrive here?
 			delet = false;
 			minSamples += discarded;
-			//TODO: forse è minSamples > maxData????
+			//TODO: should it be minSamples > maxData????
 			if (minSamples < maxData) {
 				end = true;
 				if (DEBUG) {

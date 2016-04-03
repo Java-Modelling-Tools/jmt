@@ -12,16 +12,16 @@ public class ClusterInfoFuzzy {
 
 	public class SFCluStat {
 
-		public int iNotZr; //Numero delle Osservazioni diverse da Zero
+		public int iNotZr; //Non-zero observations
 		public double dMedia; //Media
 		public double dStdEr; //Standard Error
 		public double dStdDv; //Standard Deviation
-		public double dVarnz; //Varianza
+		public double dVarnz; //Variance
 		public double dKurto; //Kurtosis
 		public double dSkewn; //Skewness
 		public double dRange; //Range   (Max-Min)
-		public double dMinOs; //Valore Minimo
-		public double dMaxOs; //Valore Massimo
+		public double dMinOs; //Minimum value
+		public double dMaxOs; //Maximum value
 
 		public double dSomma; //Somma dei valori per ogni variabile	v[1]
 		public double dSQuad; //Somma dei quadrati					v[2]

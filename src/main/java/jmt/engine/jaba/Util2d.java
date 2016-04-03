@@ -29,7 +29,7 @@ import java.util.Vector;
  */
 public class Util2d {
 
-	private double EPSYLON = 0.000001; // Costante di errore per i moduli    
+	private double EPSYLON = 0.000001; // Error costante used for modulo    
 
 	/**
 	 * Il metodo controlla se p è collineare ai punti a e b

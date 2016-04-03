@@ -22,8 +22,8 @@ public class FormatFileReader {
 
 	public FormatFileReader(String fileN) {
 		fileName = new File(fileN);
-		// Caricamento dati da file formato
-		try {
+		// Load data from file format
+                try {
 			BufferedReader file = new BufferedReader(new FileReader(fileName));
 			// Retrive number of variables
 			numeroVariabili = Integer.parseInt(file.readLine());

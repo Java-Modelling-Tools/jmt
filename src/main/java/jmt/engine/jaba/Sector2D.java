@@ -74,7 +74,7 @@ public class Sector2D {
 		beta22 = b22;
 		this.p1 = p1;
 		this.p2 = p2;
-		// vs è un vettore di newPoint
+		// vs is a vector of newPoint
 		vp = vs;
 		//stations[0]=-1;
 
@@ -150,7 +150,7 @@ public class Sector2D {
 		Util2d uti = new Util2d();
 		newPoint p2 = new newPoint((int) ss.getP1().getX(), 0);
 		//if (uti.Collinear(ss.getP1(),p2,p3) && (double)ss.getP1().getY()!=0 && p3.y!=0)
-		// Riga alternativa usata come prova
+		// Alternative row used as test
 		if (ss.getP1().getX() == p3.getX() && ss.getP1().getY() != p3.getY()) {
 			vp.addElement(p3);
 		}
@@ -161,7 +161,7 @@ public class Sector2D {
 		Util2d uti = new Util2d();
 		newPoint p2 = new newPoint(0, (int) ss.getP1().getY());
 		//if (uti.Collinear(p2,ss.getP1(),p3) && (double)ss.getP1().getX()!=0)
-		// Riga alternativa usata come prova
+		// Alternative row used as test
 		if (ss.getP1().getY() == p3.getY() && ss.getP1().getX() != p3.getX()) {
 			vp.addElement(p3);
 		}

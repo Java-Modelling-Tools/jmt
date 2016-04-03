@@ -3,7 +3,7 @@ package jmt.engine.jwat.fitting.utils;
 import java.util.Arrays;
 import java.util.Vector;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.engine.jwat.workloadAnalysis.utils.ChangeVariableListener;
 import jmt.engine.jwat.workloadAnalysis.utils.SetMatrixListener;
@@ -11,8 +11,8 @@ import jmt.gui.jwat.JWatModel;
 
 public class ModelFitting implements JWatModel {
 
-	// Matrice delle osservazioni
-	private MatrixOsservazioni matrix = null;
+	// Matrix of observations
+	private MatrixObservations matrix = null;
 	//array of observations (only numerical for fitting)
 	private double[] obslist;
 	//statistiscal values: mean, variance, coefficient of variation
@@ -26,7 +26,7 @@ public class ModelFitting implements JWatModel {
 		listenerOnChangeVariable = new Vector<ChangeVariableListener>();
 	}
 
-	public MatrixOsservazioni getMatrix() {
+	public MatrixObservations getMatrix() {
 		// TODO Auto-generated method stub
 		return matrix;
 	}
@@ -36,7 +36,7 @@ public class ModelFitting implements JWatModel {
 		fireNotifyOnResetMatrixObservation();
 	}
 
-	public void setMatrix(MatrixOsservazioni matrix) {
+	public void setMatrix(MatrixObservations matrix) {
 		Observation[] obs;
 		int i;
 		this.matrix = matrix;
@@ -127,7 +127,6 @@ public class ModelFitting implements JWatModel {
 		}
 
 		result[0] = sum / data.length;
-		//System.out.println("Media:" + result[0]);
 		result[1] = 0;
 
 		for (double element : data) {
@@ -135,10 +134,7 @@ public class ModelFitting implements JWatModel {
 		}
 
 		result[1] /= (data.length - 1);
-		//System.out.println("Varianza: " + result[1]);
 		result[2] = Math.sqrt(result[1]) / result[0];
-
-		//System.out.println("Coefficient of variation: "+result[2]);
 
 		return result;
 

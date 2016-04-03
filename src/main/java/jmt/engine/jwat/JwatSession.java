@@ -52,7 +52,7 @@ public abstract class JwatSession {
 	}
 
 	public void saveSession(String filepath, String filename, String type) {
-		MatrixOsservazioni matrix = model.getMatrix();
+		MatrixObservations matrix = model.getMatrix();
 		this.filepath = filepath;
 		this.filename = filename;
 		//System.out.println("PATH " + filepath);

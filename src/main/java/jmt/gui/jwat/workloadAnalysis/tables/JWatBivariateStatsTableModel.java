@@ -2,7 +2,7 @@ package jmt.gui.jwat.workloadAnalysis.tables;
 
 import javax.swing.table.AbstractTableModel;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.StatBivariate;
 import jmt.gui.jwat.JWATConstants;
 
@@ -13,11 +13,11 @@ public class JWatBivariateStatsTableModel extends AbstractTableModel implements 
 	 */
 	private static final long serialVersionUID = 1L;
 	private String[] names = new String[0];
-	private MatrixOsservazioni matrix = null;
+	private MatrixObservations matrix = null;
 
 	//private DecimalFormat format = new DecimalFormat("####.####E0");
 
-	public JWatBivariateStatsTableModel(MatrixOsservazioni m) {
+	public JWatBivariateStatsTableModel(MatrixObservations m) {
 		matrix = m;
 	}
 
@@ -72,7 +72,7 @@ public class JWatBivariateStatsTableModel extends AbstractTableModel implements 
 		return names;
 	}
 
-	public void setMatrixObs(MatrixOsservazioni m) {
+	public void setMatrixObs(MatrixObservations m) {
 		matrix = m;
 		if (matrix == null) {
 			names = new String[0];

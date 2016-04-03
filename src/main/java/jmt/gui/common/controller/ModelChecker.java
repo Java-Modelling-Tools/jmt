@@ -150,36 +150,36 @@ public class ModelChecker implements CommonConstants {
 	//constant used to define a warning
 	public static int WARNING_PROBLEM = 1;
 
-	//it occours when no classes have been defined
+	//it occurs when no classes have been defined
 	public static int NO_CLASSES_ERROR = 0;
-	//it occours when no station have been defined
+	//it occurs when no station have been defined
 	public static int NO_STATION_ERROR = 1;
-	//it occours when no measure have been defined
+	//it occurs when no measure have been defined
 	public static int SIMULATION_ERROR = 2;
-	//it occours when there is a sink but no open classes have been defined
+	//it occurs when there is a sink but no open classes have been defined
 	public static int SINK_BUT_NO_OPEN_CLASSES_ERROR = 3;
-	//it occours when there is an open class but no sources have been defined
+	//it occurs when there is an open class but no sources have been defined
 	public static int OPEN_CLASS_BUT_NO_SOURCE_ERROR = 4;
-	//it occours when no open classes have been associated to a source
+	//it occurs when no open classes have been associated to a source
 	public static int SOURCE_WITH_NO_OPEN_CLASSES_ERROR = 5;
-	//it occours when a class has not a reference station
+	//it occurs when a class has not a reference station
 	public static int REFERENCE_STATION_ERROR = 6;
-	//it occours when there is an open class but no sinks have been defined
+	//it occurs when there is an open class but no sinks have been defined
 	public static int NO_SINK_WITH_OPEN_CLASSES_ERROR = 7;
-	//it occours when a station is not properly linked
+	//it occurs when a station is not properly linked
 	public static int STATION_LINK_ERROR = 8;
-	//it occours when a close class is routed with probability 1 into a sink
+	//it occurs when a close class is routed with probability 1 into a sink
 	public static int ROUTING_ERROR = 9;
-	//it occours when a close class is routed into a station whose forward stations are all sinks
+	//it occurs when a close class is routed into a station whose forward stations are all sinks
 	public static int ALL_FORWARD_STATION_ARE_SINK_ERROR = 10;
-	//it occours if the same measure is defined more than once
+	//it occurs if the same measure is defined more than once
 	public static final int DUPLICATE_MEASURE_ERROR = 11;
-	//it occours if one or performance index has one or more null field
+	//it occurs if one or performance index has one or more null field
 	public static final int INCONSISTENT_MEASURE_ERROR = 12;
 	//Thrown only when trying to switch from JSim or JModel to JMVA, if there is at least
 	//one open class without a reference station
 	//public static final int OPEN_CLASS_REFERENCE_STATION_ERROR = 13;
-	//it occours when there is at least one join but not a fork;
+	//it occurs when there is at least one join but not a fork;
 	public static final int JOIN_WITHOUT_FORK_ERROR = 13;
 	//All jobs splitted by a fork must be routed to the same sink, or
 	//to the same join
@@ -213,11 +213,11 @@ public class ModelChecker implements CommonConstants {
     //Check if FiringForkStrategy has 0 tasks
     public static final int GUARD_STRATEGY_CLOSED_ZERO_POPULATION = 27;
 
-	//it occours when more than one sink have been defined
+	//it occurs when more than one sink have been defined
 	public static int MORE_THAN_ONE_SINK_WARNING = 0;
-	//it occours when a station (not sink or source) is not backward linked
+	//it occurs when a station (not sink or source) is not backward linked
 	public static int NO_BACKWARD_LINK_WARNING = 1;
-	//it occours if there is a fork but not a join
+	//it occurs if there is a fork but not a join
 	public static int FORK_WITHOUT_JOIN_WARNING = 2;
 	//Thrown if the parametric analysis model has become inconsistent
 	//with the model definition. This warning advices user to recheck the
@@ -278,11 +278,11 @@ public class ModelChecker implements CommonConstants {
 	//Thrown only when trying to switch from JSim or JModel to JMVA, if there is at least
 	//one non exponential distribution
 	public static int NO_EXP_FOUND_WARNING = 2;
-	//it occours only when trying to convert to JMVA
+	//it occurs only when trying to convert to JMVA
 	public static int DIFFERENT_SERVICE_TIME_WARNING = 3;
-	//it occours only when trying to convert to JMVA
+	//it occurs only when trying to convert to JMVA
 	public static int NON_FCFS_WARNING = 4;
-	//it it occours only when trying to convert to JMVA
+	//it it occurs only when trying to convert to JMVA
 	public static int NON_STATE_INDEPENDENT_ROUTING_WARNING = 5;
 	*/
 
@@ -554,7 +554,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns true if there is at least one open class but no sinks have been defined
-	 * @return true if the problem occours.
+	 * @return true if the problem occurs.
 	 */
 	public boolean isThereNoSinkWithOpenClassesError() {
 		return errors[NO_SINK_WITH_OPEN_CLASSES_ERROR];
@@ -562,7 +562,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns true if there is at least a sink but no open classes have been defined
-	 * @return true if the problem occours
+	 * @return true if the problem occurs
 	 */
 	public boolean isThereSinkButNoOpenClassError() {
 		return errors[SINK_BUT_NO_OPEN_CLASSES_ERROR];
@@ -570,7 +570,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns true if there is at least one open class but no source has been defined
-	 * @return true if the problem occours
+	 * @return true if the problem occurs
 	 */
 	public boolean isThereOpenClassButNoSourceError() {
 		return errors[OPEN_CLASS_BUT_NO_SOURCE_ERROR];
@@ -578,7 +578,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns true if there is at least one station link error
-	 * @return true if the problem occours.
+	 * @return true if the problem occurs.
 	 */
 	public boolean isThereStationLinkError() {
 		return errors[STATION_LINK_ERROR];
@@ -603,7 +603,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns true if no measures have been defined
-	 * @return true if the problem occours
+	 * @return true if the problem occurs
 	 */
 	public boolean isThereSimulationError() {
 		return errors[SIMULATION_ERROR];
@@ -826,7 +826,7 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns true if the PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING occours
+	 * Returns true if the PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING occurs
 	 * @return true if the parametric analysis model had become inconsistent
 	 *         consequently it was modified
 	 */
@@ -835,7 +835,7 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns true if PARAMETRIC_ANALYSIS_NO_MORE_AVAIBLE_WARNING occours
+	 * Returns true if PARAMETRIC_ANALYSIS_NO_MORE_AVAIBLE_WARNING occurs
 	 * @return true if no PA are avaible but a PA model was previously defined
 	 */
 	public boolean isThereParametricAnalysisNoMoreAvaibleWarning() {
@@ -844,7 +844,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Checks if the service times for different classes are different inside the same station
-	 * @return true if the problem occours
+	 * @return true if the problem occurs
 	 */
 	/*public boolean isThereDifferentServiceTimeWarning() {
 	    return warnings[DIFFERENT_SERVICE_TIME_WARNING];
@@ -1026,7 +1026,7 @@ public class ModelChecker implements CommonConstants {
 	/**
 	 * Returns a HashMap where the key is the key of a close class. For each close class that may
 	 * be routed into a station whose forward stations are all sink it contains a Vector<Object> with the
-	 * keys of the stations where the problems occours. If there is not any problem or no close
+	 * keys of the stations where the problems occurs. If there is not any problem or no close
 	 * classes are defined it returns null.
 	 *  @return a HashMap where the key is the key of a close class.
 	 */
@@ -1040,7 +1040,7 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns a HashMap where the key is the key of a close class. For each close class with a routing
-	 * problem it contains a Vector<Object> with the keys of the stations where the routing problems occours. If there is not any problem
+	 * problem it contains a Vector<Object> with the keys of the stations where the routing problems occurs. If there is not any problem
 	 * or no close classes are defined it returns null.
 	 *  @return a HashMap where the key is the key of a close class.
 	 */
@@ -1197,7 +1197,7 @@ public class ModelChecker implements CommonConstants {
         /**
 	 * Returns a HashMap where the key is the key of a join station. For each fork station that contains
 	 * a FiringMixStrategy with zero tasks it contains a List<Object> with the
-	 * keys of the classes where the problems occours. If there is not any problem it returns null.
+	 * keys of the classes where the problems occurs. If there is not any problem it returns null.
 	 *  @return a HashMap where the key is the key of a fork station.
 	 */
 	public HashMap<Object, List<Object>> getKeysOfAllGuardStrategyZeroTask() {
@@ -1809,7 +1809,7 @@ public class ModelChecker implements CommonConstants {
 	 * @param classKey the key of the class to be analyzed
 	 * @param startingStationKey the key of the station where we start analyzing the routing
 	 * @param alreadyVisited vector containing the keys of the already visited stations
-	 * @return the Vector<Object> containing the keys of the stations where the routing problem occours
+	 * @return the Vector<Object> containing the keys of the stations where the routing problem occurs
 	 */
 	private Vector<Object> exploreForRoutingProblems(Object classKey, Object startingStationKey, Vector<Object> alreadyVisited) {
 		//Vector<Object> containing the keys to be returned
@@ -1902,7 +1902,7 @@ public class ModelChecker implements CommonConstants {
 	 * @param classKey the key of the class to be analyzed
 	 * @param startingStationKey the key of the station where we start analyzing the routing
 	 * @param alreadyVisited vector containing the keys of the already visited stations
-	 * @return the Vector<Object> containing the keys of the stations where the error occours
+	 * @return the Vector<Object> containing the keys of the stations where the error occurs
 	 */
 	private Vector<Object> exploreForAllForwardStationAreSink(Object classKey, Object startingStationKey, Vector<Object> alreadyVisited) {
 		boolean allSink = true;
@@ -1987,7 +1987,7 @@ public class ModelChecker implements CommonConstants {
 	/**
 	 * Checks for DIFFERENT_SERVICE_TIME_ERROR. It checks the mean value for each
 	 * service time distribution inside a station, if it has not a mean value the error
-	 * occours
+	 * occurs
 	 */
 	/*private void checkForDifferentServiceTimesWarnings() {
 	    Vector<Object> stations = station_def.getStationKeysNoSourceSink();
@@ -2021,7 +2021,7 @@ public class ModelChecker implements CommonConstants {
 	                        d = (Distribution) temp;
 	                        //if d does not have a mean value...
 	                        if (!d.hasMean()) {
-	                            //the problem occours -> exit
+	                            //the problem occurs -> exit
 	                            warnings[DIFFERENT_SERVICE_TIME_WARNING] = true;
 	                            return;
 	                        }
@@ -2029,7 +2029,7 @@ public class ModelChecker implements CommonConstants {
 	                            double thisMean = d.getMean();
 	                            //if a mean differs from the others
 	                            if (thisMean != thisStationMean) {
-	                                //the problem occours -> exit
+	                                //the problem occurs -> exit
 	                                warnings[DIFFERENT_SERVICE_TIME_WARNING] = true;
 	                                return;
 	                            }

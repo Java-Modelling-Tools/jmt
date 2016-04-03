@@ -93,7 +93,7 @@ public class Erlang extends AbstractDistribution implements Distribution {
 			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
 			double sum = 0;
-			double a; // var di servizio per calcolare la somma
+			double a; // service variable to calculate sum
 			for (int i = 0; i < r - 1; i++) {
 				a = Math.pow((alpha * x), i) / Arithmetic.factorial(i);
 				sum = sum + a;

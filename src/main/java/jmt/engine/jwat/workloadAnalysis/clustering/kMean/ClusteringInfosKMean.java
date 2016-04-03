@@ -1,6 +1,6 @@
 package jmt.engine.jwat.workloadAnalysis.clustering.kMean;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.engine.jwat.workloadAnalysis.clustering.ClusteringInfos;
 import jmt.engine.jwat.workloadAnalysis.clustering.kMean.KMeanClusteringEngine.TempClusterStatistics;
@@ -32,7 +32,7 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 		this.numCluster = numCluster;
 	}
 
-	public void Output(int[] varSel, TempClusterStatistics[][] sum, short[] clusAssign, MatrixOsservazioni m, double oldPassw) //Deve valere assw precedentemente calcolato 
+	public void Output(int[] varSel, TempClusterStatistics[][] sum, short[] clusAssign, MatrixObservations m, double oldPassw) //Deve valere assw precedentemente calcolato 
 	{
 
 		passw = oldPassw;
@@ -108,7 +108,7 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 
 	}
 
-	public void DOStat(int[] varSel, short[] clusAssign, MatrixOsservazioni m) {
+	public void DOStat(int[] varSel, short[] clusAssign, MatrixObservations m) {
 		boolean[] bValidVar = new boolean[m.getNumVariables()];
 
 		int df = 0;
@@ -126,7 +126,7 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 		DoStat(m, varSel.length, clusAssign, bValidVar);
 	}
 
-	private void DoStat(MatrixOsservazioni m, int nNumUsed, short[] arrNClus, boolean[] bValidVar) {
+	private void DoStat(MatrixObservations m, int nNumUsed, short[] arrNClus, boolean[] bValidVar) {
 
 		double absoluteVal[][] = new double[arrNClus.length][m.getNumVariables()];
 

@@ -202,7 +202,6 @@ public class Sectors3DGraph extends JabaGraph implements MouseListener {
 			// per ogni settore
 			for (int i = 0; i < s3d.size(); i++) {
 				Sector3D sector = (Sector3D) s3d.get(i);
-				//System.out.println("Totale: "+s3d.size()+", Parziale: "+i);
 				// Sono le coordinate dei punti che saranno passati al metodo fillPolygon
 				int[] xxp = new int[sector.CountPoint()];
 				int[] yyp = new int[sector.CountPoint()];

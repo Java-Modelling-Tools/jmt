@@ -8,7 +8,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import jmt.engine.jwat.JwatSession;
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.input.ResultLoader;
 import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
 import jmt.engine.jwat.workloadAnalysis.clustering.Clustering;
@@ -92,7 +92,7 @@ public class WorkloadResultLoader implements ResultLoader {
 		ClusteringInfosKMean curInfo[];
 		int i, j, k;
 		int curNumCluster;
-		MatrixOsservazioni m = waSession.getDataModel().getMatrix();
+		MatrixObservations m = waSession.getDataModel().getMatrix();
 		int numvars = m.getNumVariables();
 		int numoss = m.getNumOfObs();
 		DataInputStream dis = new DataInputStream(zf.getInputStream(new ZipEntry(fileName)));
@@ -136,7 +136,7 @@ public class WorkloadResultLoader implements ResultLoader {
 		ClusteringInfosFuzzy curInfo[];
 		int i, j, k;
 		int curNumCluster;
-		MatrixOsservazioni m = waSession.getDataModel().getMatrix();
+		MatrixObservations m = waSession.getDataModel().getMatrix();
 		int numvars = m.getNumVariables();
 		int numoss = m.getNumOfObs();
 		DataInputStream dis = new DataInputStream(zf.getInputStream(new ZipEntry(fileName)));

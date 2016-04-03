@@ -54,7 +54,7 @@ public class SmallQQPlot extends JPanel {
 		this.model = model;
 		this.engfitting = engfitting;
 		setSize(202, 202);
-		//Su panel grafico
+		//On graphical panel
 		addMouseListener(new MouseAdapter() {
 			// Creates new windows with enlarged graph
 			@Override

@@ -682,7 +682,7 @@ public class NetNode extends SimEntity {
 		return simUnschedule(token);
 	}
 
-	//TODO: non usato
+	//TODO: not used
 	/** Sends a message to a section of all the NetNodes of the QueueNetwork.
 	 * @param Event Event tag.
 	 * @param Data  Data to be attached to the message.
@@ -742,7 +742,7 @@ public class NetNode extends SimEntity {
 	 */
 	@Override
 	public void restart() {
-		//TODO: ï¿½ giusto che non faccia niente?
+		//TODO: os it correct that this method does nothing?
 	}
 
 	@Override

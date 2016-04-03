@@ -2,7 +2,7 @@ package jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean;
 
 import java.lang.reflect.InvocationTargetException;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.TimeConsumingWorker;
 import jmt.engine.jwat.VariableNumber;
 import jmt.engine.jwat.input.EventFinishAbort;
@@ -11,7 +11,7 @@ import jmt.engine.jwat.workloadAnalysis.clustering.EventClusteringDone;
 
 public class MainFuzzyKMean extends TimeConsumingWorker {
 
-	private MatrixOsservazioni matrix;
+	private MatrixObservations matrix;
 	private int maxClust;
 	private int maxIter;
 	private int fuzzyLevel;
@@ -21,7 +21,7 @@ public class MainFuzzyKMean extends TimeConsumingWorker {
 	private FuzzyKMeanClusteringEngine cluster = null;
 	private String msg = null;
 
-	public MainFuzzyKMean(ProgressShow prg, MatrixOsservazioni m, int[] varSel, int numClust, int iteration, int fuzzyL, short trasf) {
+	public MainFuzzyKMean(ProgressShow prg, MatrixObservations m, int[] varSel, int numClust, int iteration, int fuzzyL, short trasf) {
 		super(prg);
 		this.varSel = varSel;
 		this.matrix = m;

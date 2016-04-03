@@ -1,6 +1,6 @@
 package jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.engine.jwat.workloadAnalysis.clustering.ClusteringInfos;
 
@@ -42,7 +42,7 @@ public class ClusteringInfosFuzzy implements ClusteringInfos {
 		return assignedToClust;
 	}
 
-	public void setError(MatrixOsservazioni m, double err) {
+	public void setError(MatrixObservations m, double err) {
 		if (this.err == err) {
 			return;
 		}
@@ -86,7 +86,7 @@ public class ClusteringInfosFuzzy implements ClusteringInfos {
 		}
 	}
 
-	private void DoStat(MatrixOsservazioni m) {
+	private void DoStat(MatrixObservations m) {
 		int nclus;
 
 		Observation[] currOss = m.getListOss(); //Valore corrente di ogni variabile

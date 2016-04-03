@@ -4,7 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.framework.data.MacroReplacer;
 import jmt.gui.jwat.JWATConstants;
@@ -33,7 +33,7 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 		double[] lineValue = new double[param.getNumVarSelected()];
 		String[] lineToken = new String[param.getNumVar()];
 		String parseToken = null;
-		MatrixOsservazioni m;
+		MatrixObservations m;
 
 		//Initialize the input log file.
 		try {
@@ -68,10 +68,10 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 				if (totalRaw % getStep() == 0) {
 					updateInfos(totalRaw, "<HTML># observations read: " + totalRaw + "<p># errors: " + (totalRaw - countObs) + "</HTML>", false);
 				}
-				//Legge le stringhe e ne controlla il formato
-				for (i = 0; i < param.getNumVar(); i++) {
-					//Leggo il token con i separatori (se definiti) qualunque cosa ci sia dentro
-					if (separator[i] != null) {
+				//Read strings and check format
+                                for (i = 0; i < param.getNumVar(); i++) {
+					//Read tokens with separators (if defined) regardless of what's inside
+                                    	if (separator[i] != null) {
 						parseToken = separator[i];
 					} else {
 						parseToken = regExp[i];
@@ -79,13 +79,13 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 
 					if (myMatch.contains(input, myComp.compile(parseToken))) {
 						if (sel[i]) {
-							//Prendo il token
+							//Get the token
 							lineToken[i] = myMatch.getMatch().toString();
 							if (separator[i] != null) {
-								//	Se il token aveva dei separatori li tolgo
-								lineToken[i] = lineToken[i].substring(1, lineToken[i].length() - 1);
-								//E prendo quello che mi interessa di cio che rimane
-								if (myMatch.contains(lineToken[i], myComp.compile(regExp[i]))) {
+								// If the token has separatores remove them
+                                                            	lineToken[i] = lineToken[i].substring(1, lineToken[i].length() - 1);
+								//Take what I need from what's left
+                                                                if (myMatch.contains(lineToken[i], myComp.compile(regExp[i]))) {
 									lineToken[i] = myMatch.getMatch().toString();
 								} else {
 									//Wrong row, token dose not contains required data
@@ -152,7 +152,7 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 				return null;
 			}
 			updateInfos(totalRaw, "Calculating Statistics...", false);
-			m = new MatrixOsservazioni(valori.toArray(new Observation[valori.size()]), param.getSelName(), param.getSelType(), map);
+			m = new MatrixObservations(valori.toArray(new Observation[valori.size()]), param.getSelName(), param.getSelType(), map);
 			updateInfos(totalRaw + 1, "Done", true);
 			return m;
 

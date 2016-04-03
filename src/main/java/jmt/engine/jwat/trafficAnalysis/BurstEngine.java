@@ -90,7 +90,7 @@ public class BurstEngine {
 	 * Called by the constructor to start the engine and calculate the values for all the epochs n
 	 */
 	private void calculate() {
-		// <--- Inserire finestra di uodate ?
+		// <--- Insert update window ?
 		epochDuration(T, n);
 		for (int i = 1; i <= n; i++) {
 			startEng(i);

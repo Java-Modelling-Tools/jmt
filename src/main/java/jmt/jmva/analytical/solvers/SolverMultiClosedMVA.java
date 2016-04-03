@@ -160,7 +160,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 
 	}
 
-	//TODO: attenzione, non è in grado di gestire classi con popolazioni nulle
+	//TODO: warning, it cannot handle classes with zero jobs
 	/** initializes the Multi class solver with the system parameters.
 	 * @param  n   array of names of the service centers.
 	 * @param  t   array of types (LD or LI) of the service centers.
@@ -225,7 +225,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		}
 
 		//moves in the last position the class with maximum population
-		//todo: perchè? (per ottimizzare consumo di memoria muovendosi intelligentemente nello spazio degli stati)
+                //TODO: why? (to optimize the memory consumption moving intelligently on the state space)
 		population[lastClass] = pop[maxIndex];
 		population[maxIndex] = pop[lastClass];
 
@@ -245,11 +245,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 				System.arraycopy(s[i][j], 0, servTime[i][j], 0, s[i][j].length);
 			}
 			System.arraycopy(s[i][maxIndex], 0, servTime[i][lastClass], 0, s[i][maxIndex].length);
-			//todo: perchè copia s[i][0].length e non s[i][lastClass].length ?
-			//OLD
-			//System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 0, s[i][0].length);
-			//NEW
-			//@author Stefano Omini
 			System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 0, s[i][lastClass].length);
 
 		}
@@ -338,7 +333,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 			solveLI(intermediate);
 			//System.out.println(this);
 		} else {
-			//TODO: ancora da implementare
+			//TODO: still to implement
 			//solveLD(intermediate);
 		}
 	}
@@ -368,8 +363,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		}
 
 		do {
-			//TODO: tolta per controllare se serve, probabilmente è solo per debug
-			//printStatus();
 			//compute residence time
 			for (m = 0; m < stations; m++) {
 				for (c = 0; c < lastClass; c++) {
@@ -504,8 +497,8 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		//intermediate results must be saved
 		intermediate_results = true;
 
-		//TODO: ci interessano i risultati intermedi anche per i multiclass??
-
+		//TODO: do we need intermediate results also for multiclass??
+                
 		int m = 0;//index of service center
 		int c = 0;//index of class
 		int lastClass = classes - 1;
@@ -527,8 +520,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		}
 
 		do {
-			//TODO: tolta per controllare se serve, probabilmente è solo per debug
-			//printStatus();
 			//compute residence time
 			for (m = 0; m < stations; m++) {
 				for (c = 0; c < lastClass; c++) {

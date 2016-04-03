@@ -190,7 +190,7 @@ public class SolverSingleClosedMVA extends Solver {
 		//@author Stefano Omini
 		if (!(countLI > 0 && countLI < t.length)) {
 			//end NEW
-			//TODO: controllare la nuova condizione
+			//TODO: check the new condition
 			//stations are either only LI or only LD
 			for (int i = 0; i < stations; i++) {
 				position[i] = i;
@@ -290,7 +290,7 @@ public class SolverSingleClosedMVA extends Solver {
 
 	/*
 		public void indexes() {
-	        //TODO: non implementato!!!!
+	        //TODO: not implemented!!!!
 		}
 	    //overrides indexes() of SolverSingleClosedExact
 	*/
@@ -365,7 +365,7 @@ public class SolverSingleClosedMVA extends Solver {
 		if (loadIndep) {
 			solveSingleLI(intermediate);
 		} else {
-			//TODO: aggiungere caso intermediate=true per LD (dopo averlo implementato!!)
+			//TODO: add case intermediate=true for LD 
 
 			//TODO: debug
 			solveSingleLD(intermediate);
@@ -431,82 +431,6 @@ public class SolverSingleClosedMVA extends Solver {
 			}
 
 		}//end loop through customers
-
-		//the other indexes dependent on totThroughput
-		for (k = 0; k < stations; k++) {
-			throughput[k] = totThroughput * visits[k];
-			totRespTime = customers / totThroughput;
-			utilization[k] = totThroughput * D[k];
-		}//end loop through stations
-
-	}//end of solveSingleLI
-
-	/** Solves a single class closed model with only LI stations, using
-	 * an approximated technique (which avoids recursion)
-	 *
-	 * @author Stefano Omini */
-	//TODO: non funziona ancora tanto bene, in particolare alcuni valori di residence e queue sembrano poco precisi
-	private void solveSingleLI_approx() {
-		int k;//index of station
-		int n;//index of customer
-		double sum;
-
-		double[] old_queueLen = new double[stations];
-
-		//service demands: D = visits * servTime
-		double[] D = new double[stations];
-
-		//put all queue length to 0 for n = 0 customers in the network
-		for (k = 0; k < stations; k++) {
-			old_queueLen[k] = customers / stations;
-			queueLen[k] = 0.0;
-			D[k] = servTime[k][0] * visits[k];//uses D = S * V to speed up
-		}
-
-		//calculation of throughput for the whole network and of queue length for each station
-		//recursively starting from 0 customer in network to max customers
-
-		boolean finished = false; //true, when the specified precision has been reached
-
-		do {
-			sum = 0.0;
-
-			for (k = 0; k < stations; k++) {
-				switch (type[k]) {
-					case Solver.DELAY:
-						residenceTime[k] = D[k];
-						break;
-					case Solver.LI:
-						//approximate technique does not use recursion!!
-						residenceTime[k] = D[k] * customers * old_queueLen[k] / (customers - 1);
-						;
-						break;
-				}//end case
-
-				sum += residenceTime[k];
-			}//end loop through stations
-
-			totThroughput = customers / sum;
-			int counter = 0;
-
-			for (k = 0; k < stations; k++) {
-				queueLen[k] = totThroughput * residenceTime[k];
-
-				if ((Math.abs(queueLen[k] - old_queueLen[k])) < 0.0000001) {
-					counter++;
-				}
-			}
-			//end loop through stations
-
-			if (counter == stations) {
-				finished = true;
-			}
-
-			for (k = 0; k < stations; k++) {
-				old_queueLen[k] = queueLen[k];
-			}
-
-		} while (!finished);
 
 		//the other indexes dependent on totThroughput
 		for (k = 0; k < stations; k++) {
@@ -798,7 +722,7 @@ public class SolverSingleClosedMVA extends Solver {
 	 */
 	private void solveSingleLD(boolean intermediate) {
 
-		//TODO: ancora da sistemare!!!
+		//TODO: still to fix!!!
 		if (!intermediate) {
 			//intermediate results must not be saved, then use
 			//the base method

@@ -1,6 +1,6 @@
 package jmt.engine.jwat.workloadAnalysis.clustering.kMean;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.workloadAnalysis.clustering.Clustering;
 import jmt.engine.jwat.workloadAnalysis.clustering.ClusteringInfos;
 import jmt.engine.jwat.workloadAnalysis.clustering.kMean.KMeanClusteringEngine.TempClusterStatistics;
@@ -37,7 +37,7 @@ public class KMean implements Clustering, JWATConstants {
 		return results[numCluster];
 	}
 
-	public void calcClusteringInfo(int numCluster, TempClusterStatistics[][] sum, short[] cAss, MatrixOsservazioni m) {
+	public void calcClusteringInfo(int numCluster, TempClusterStatistics[][] sum, short[] cAss, MatrixObservations m) {
 		//clusterAssignemnt.add(clusAssign);
 		clustAssign[numCluster] = cAss;
 		results[numCluster] = new ClusteringInfosKMean(numCluster, m.getNumVariables());

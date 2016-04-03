@@ -9,7 +9,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import jmt.engine.jwat.JwatSession;
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.engine.jwat.TimeConsumingWorker;
 import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
@@ -55,7 +55,7 @@ public class SessionLoader extends TimeConsumingWorker {
 		int[] selType;
 		double[] valLst;
 		int numObs, numVar, i, j, id;
-		MatrixOsservazioni m = null;
+		MatrixObservations m = null;
 		VariableMapping[] map;
 		DOMParser domP;
 		NodeList tmpNodeLst, resNodeList = null;
@@ -150,7 +150,7 @@ public class SessionLoader extends TimeConsumingWorker {
 		}
 		//System.out.println("Create matrix");
 		updateInfos(5, "Create matrix", false);
-		m = new MatrixOsservazioni(valori, selName, selType, map);
+		m = new MatrixObservations(valori, selName, selType, map);
 		session.getDataModel().setMatrix(m);
 
 		return resNodeList;

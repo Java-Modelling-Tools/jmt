@@ -38,7 +38,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.table.AbstractTableModel;
 
 import jmt.engine.jwat.DinamicFormat;
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.ClusteringInfosFuzzy;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.jwat.JWATConstants;
@@ -58,7 +58,7 @@ public class FuzzyInfoClustering extends JPanel implements CommonConstants, JWAT
 	private JLabel descrSetError = null;
 	private int numClust = 0;
 	private double entropy = 0.0;
-	private MatrixOsservazioni m;
+	private MatrixObservations m;
 	private FuzzyInfoCluster fPanel = null;
 
 	private String INFO_CLUSTERING = HTML_START + HTML_FONT_TITLE + "CLUSTERING INFORMATION " + HTML_FONT_TIT_END + HTML_FONT_NORM
@@ -67,7 +67,7 @@ public class FuzzyInfoClustering extends JPanel implements CommonConstants, JWAT
 			+ "You can select which error to use to create each<p>single cluster according to Fuzzy K-Means<p>clustering results" + HTML_FONT_NOR_END
 			+ HTML_END;
 
-	public FuzzyInfoClustering(MatrixOsservazioni m, DispFuzzyMatrix f, int numC, double ent, ClusteringInfosFuzzy c) {
+	public FuzzyInfoClustering(MatrixObservations m, DispFuzzyMatrix f, int numC, double ent, ClusteringInfosFuzzy c) {
 		matrix = f;
 		numClust = numC;
 		entropy = ent;

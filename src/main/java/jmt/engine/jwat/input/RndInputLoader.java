@@ -7,7 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.engine.random.engine.MersenneTwister;
 import jmt.framework.data.MacroReplacer;
@@ -51,7 +51,7 @@ public class RndInputLoader extends InputLoader implements JWATConstants {
 		double[] lineValue = new double[param.getNumVarSelected()];
 		String[] lineToken = new String[param.getNumVar()];
 		String parseToken = null;
-		MatrixOsservazioni m = null;
+		MatrixObservations m = null;
 
 		try {
 			w = new FileWriter(MacroReplacer.replace(LOG_FILE_NAME));
@@ -173,7 +173,7 @@ public class RndInputLoader extends InputLoader implements JWATConstants {
 			}
 
 			updateInfos(totalRaw, "Calculating Statistics...", false);
-			m = new MatrixOsservazioni(valori.toArray(new Observation[valori.size()]), param.getSelName(), param.getSelType(), map);
+			m = new MatrixObservations(valori.toArray(new Observation[valori.size()]), param.getSelName(), param.getSelType(), map);
 			updateInfos(totalRaw + 1, "Done", true);
 			return m;
 

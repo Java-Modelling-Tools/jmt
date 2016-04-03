@@ -50,7 +50,7 @@ public class Loader implements JWATConstants {
 
 		int[] varType = param.getVarType();
 
-		//Creo i Mapping
+		//Creo mappings
 		for (int i = 0; i < map.length; i++) {
 			switch (varType[i]) {
 				case Parameter.NUMBER:

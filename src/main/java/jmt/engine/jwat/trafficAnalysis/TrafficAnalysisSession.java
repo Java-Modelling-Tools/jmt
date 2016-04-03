@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.zip.ZipOutputStream;
 
 import jmt.engine.jwat.JwatSession;
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,7 +57,7 @@ public class TrafficAnalysisSession extends JwatSession {
 		model.resetModel();
 	}
 
-	public void setMatrix(MatrixOsservazioni m) {
+	public void setMatrix(MatrixObservations m) {
 		model.setMatrix(m);
 		if (epochs != -1) {
 			engine = new BurstEngine(m.getVariables()[0], epochs, null);

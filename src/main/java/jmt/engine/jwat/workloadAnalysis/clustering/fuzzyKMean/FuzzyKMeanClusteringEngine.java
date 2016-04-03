@@ -18,7 +18,7 @@
 
 package jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.engine.jwat.TimeConsumingWorker;
 import jmt.engine.jwat.VariableNumber;
@@ -60,7 +60,7 @@ public class FuzzyKMeanClusteringEngine {
 		fuzzy = f;
 	}
 
-	public void PrepFClustering(MatrixOsservazioni m, int indVarSel[], int nMaxClust, int nFLev, int nIter) {
+	public void PrepFClustering(MatrixObservations m, int indVarSel[], int nMaxClust, int nFLev, int nIter) {
 		m_nNumNorm = indVarSel.length;
 		m_nMaxClust = nMaxClust; // Num.massimo di clusters da considerare
 		m_nFLev = nFLev; // Livello di fuzzyness

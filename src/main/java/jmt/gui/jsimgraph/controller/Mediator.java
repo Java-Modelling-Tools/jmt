@@ -1672,8 +1672,8 @@ public class Mediator implements GuiInterface {
 	// * <br>
 	// * Author: Bertoli Marco
 	// */
-	// // VECCHIO ALGORITMO
-	// public void putSelectedCellsInGoodPlace() {
+	// // OLD ALGORITHM
+        // public void putSelectedCellsInGoodPlace() {
 	// Object[] cells = graph.getDescendants(graph.getSelectionCells());
 	// for (int i=0; i<cells.length;i++)
 	// if(cells[i] instanceof JmtCell)
@@ -1688,7 +1688,7 @@ public class Mediator implements GuiInterface {
 	// * Author: Bertoli Marco
 	// * @param cell Identifier of the cell to be moved
 	// */
-	// // VECCHIO ALGORITMO
+	// // OLD ALGORITHM
 	// public void putCellInGoodPlace(JmtCell cell) {
 	// Rectangle bounds =
 	// GraphConstants.getBounds(cell.getAttributes()).getBounds();

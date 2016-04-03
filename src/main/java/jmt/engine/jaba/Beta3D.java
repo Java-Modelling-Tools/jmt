@@ -74,8 +74,7 @@ public class Beta3D {
 		Sector3D s3d = new Sector3D();
 		for (int i = 0; i < faces.size(); i++) {
 			s3d = BetaTriangle(faces.get(i));
-			// Controllo: se una classe è sempre nulla non la inserisco xè non
-			// è un triangolo ma sta sul lato.
+			// Check: if a class is always null then I don't insert it because it's not a triangle, it stays on a side
 			if ((Math.abs(s3d.getBeta(0, 1) - 0) > EPSYLON && Math.abs(s3d.getBeta(0, 2) - 0) > EPSYLON && Math.abs(s3d.getBeta(0, 3) - 0) > EPSYLON)
 					&& (Math.abs(s3d.getBeta(1, 1) - 0) > EPSYLON && Math.abs(s3d.getBeta(1, 2) - 0) > EPSYLON && Math.abs(s3d.getBeta(1, 3) - 0) > EPSYLON)
 					&& (Math.abs(s3d.getBeta(2, 1) - 0) > EPSYLON && Math.abs(s3d.getBeta(2, 2) - 0) > EPSYLON && Math.abs(s3d.getBeta(2, 3) - 0) > EPSYLON)) {

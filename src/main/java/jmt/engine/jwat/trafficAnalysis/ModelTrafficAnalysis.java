@@ -2,14 +2,14 @@ package jmt.engine.jwat.trafficAnalysis;
 
 import java.util.ArrayList;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.gui.jwat.JWatModel;
 
 public class ModelTrafficAnalysis implements JWatModel {
-	private MatrixOsservazioni matrix = null;
+	private MatrixObservations matrix = null;
 	private ArrayList<OnResetModel> resetModel = new ArrayList<OnResetModel>();
 
-	public MatrixOsservazioni getMatrix() {
+	public MatrixObservations getMatrix() {
 		return matrix;
 	}
 
@@ -34,7 +34,7 @@ public class ModelTrafficAnalysis implements JWatModel {
 		}
 	}
 
-	public void setMatrix(MatrixOsservazioni matrix) {
+	public void setMatrix(MatrixObservations matrix) {
 		this.matrix = matrix;
 	}
 

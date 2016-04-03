@@ -38,7 +38,6 @@ public class JmtEdgeView extends EdgeView {
 		 * 
 		 */
 	private static final long serialVersionUID = 1L;
-	// Questa variabile e' gia statica dai sorgenti della libreria.
 	private static JmtEdgeRenderer renderer = new JmtEdgeRenderer();
 	private Mediator mediator;
 

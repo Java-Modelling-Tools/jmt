@@ -21,8 +21,8 @@ import jmt.engine.jwat.input.StringMapping;
 import jmt.engine.jwat.input.VariableMapping;
 
 public class VariableString extends VariableNumber {
-	// Utilizzata per mantenere l'associazione ra numero e stringa
-
+	// used to keep the association ra number with string
+    
 	public VariableString(Observation[] valObs, String vName, int pos, short type, VariableMapping varMapping) {
 		super(valObs, vName, pos, type, varMapping);
 	}
@@ -57,8 +57,8 @@ public class VariableString extends VariableNumber {
 		}
 	}
 
-	//UPDATE 28/10/2006: + funzione per ottenere liste dai valori matchabili
-	public int[] getListOfMatching(String s) {
+	//UPDATE 28/10/2006: + funzione to obtain lists with matchable values
+        public int[] getListOfMatching(String s) {
 		return ((StringMapping) mapping).getMatchingStringList(s);
 	}
 }

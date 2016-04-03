@@ -20,7 +20,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.ProgressStatusListener;
 import jmt.engine.jwat.input.EventFinishAbort;
 import jmt.engine.jwat.input.EventStatus;
@@ -150,7 +150,7 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 		model.addOnSetMatrixObservationListener(new SetMatrixListener() {
 
 			public void onSetMatrixObservation() {
-				MatrixOsservazioni m = model.getMatrix();
+				MatrixObservations m = model.getMatrix();
 				String[] varLst = m.getVariableNames();
 				varList.setListData(varLst);
 				varList.setSelectionModel(new myListSelectionModel(model.getMatrix().getNumVariables()));

@@ -21,7 +21,7 @@ package jmt.engine.jwat.workloadAnalysis.clustering.kMean;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.engine.jwat.TimeConsumingWorker;
 import jmt.engine.jwat.VariableNumber;
@@ -29,7 +29,7 @@ import jmt.engine.jwat.VariableNumber;
 public class KMeanClusteringEngine {
 	private TimeConsumingWorker worker;
 	private KMean clustering;
-	private MatrixOsservazioni m;
+	private MatrixObservations m;
 	private Observation[] obsVal;
 	private VariableNumber[] listAllVar; //Puntatori a tutte le variabili
 	private VariableNumber[] listSelVar; //Puntatori a tutte le variabili
@@ -80,7 +80,7 @@ public class KMeanClusteringEngine {
 		this.clustering = clustering;
 	}
 
-	public boolean PrepClustering(MatrixOsservazioni m, int numeroMassimoCluster, int numeroMassimoIterazioni, int variabiliSelezionate[]) {
+	public boolean PrepClustering(MatrixObservations m, int numeroMassimoCluster, int numeroMassimoIterazioni, int variabiliSelezionate[]) {
 		int j = 0, i = 0;
 		this.m = m;
 		/* Inserite per TEST */

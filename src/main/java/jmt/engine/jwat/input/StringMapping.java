@@ -26,8 +26,9 @@ public class StringMapping extends VariableMapping {
 		return valMap.size();
 	}
 
-	//Update 28/10/2006: + funzione utilizzata per sampling che data una stringa restituisce tutti indice stringhe che la 
-	//					   contengono come sottostringa
+	//Update 28/10/2006: + function utilized for sampling that given a string return
+        // all indices of strings that contain it as substring
+        
 	public int[] getMatchingStringList(String s) {
 		ArrayList<Integer> v = new ArrayList<Integer>(); //<Integer>
 		for (int i = 0; i < valMap.size(); i++) {

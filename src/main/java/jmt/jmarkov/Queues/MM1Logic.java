@@ -90,7 +90,6 @@ public class MM1Logic implements QueueLogic {
 	 * Calculate the interarrival time of poisson distribution with given medium 
 	 */
 	private double getTime(double media) {
-		//forma esplicita della legge di distribuzione Poisson
 		return ((-media * Math.log(rnd.nextDouble())));
 
 	}

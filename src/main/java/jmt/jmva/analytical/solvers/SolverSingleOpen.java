@@ -61,7 +61,7 @@ public class SolverSingleOpen extends Solver {
 		residenceTime = new double[stations];
 	}
 
-	//TODO: bisognerebbe far ritornare un boolean, per coprire il caso di soluzione non possibile (LD)
+        //TODO: we should return a boolean in the case where a solution is not possible (LD)
 
 	//NEW
 	//the old method "solve" has been renamed "solveLI", since LD stations were not

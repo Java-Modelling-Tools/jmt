@@ -67,7 +67,8 @@ public abstract class NodeSection {
 	/** Exception ID: Required property is not available. */
 	public static final int EXCEPTION_PROPERTY_NOT_AVAILABLE = 0x0002;
 
-	//TODO: attenzione, non tutte queste proprietà hanno senso per ogni tipo di sezione
+	//TODO: warning, not all properties make sense for all section types
+    
 	/** Property ID: number of jobs inside */
 	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0001;
 	/** Property ID: number of jobs which arrived to this NodeSection  */
@@ -83,7 +84,7 @@ public abstract class NodeSection {
 	/** Property Identifier: JobInfoList.*/
 	public static final int PROPERTY_ID_JOBINFOLIST = 0x0007;
 
-	//TODO: rendere più efficiente il meccanismo di rilevamneto dell'owner node? (per evitare troppi getNode)
+        //TODO: make more efficient the mechanism to determine the ownerNode (to avoid too many getNode)
 	/** Owner of this NodeSection. */
 	private NetNode ownerNode;
 
@@ -155,7 +156,7 @@ public abstract class NodeSection {
 		return sectionID;
 	}
 
-	//TODO: eventualmente si può fare un overriding per componenti particolari (terminal, ..)
+        //TODO: alternatively one can override particular components (terminal,..)
 	/** Analyzes a measure in the node section. Ovveride this method to
 	 * analyze a measure depending on the node section implementation. Note that
 	 * the first 256 identifiers are reserved by NodeSection class.

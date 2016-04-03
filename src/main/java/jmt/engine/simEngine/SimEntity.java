@@ -96,7 +96,7 @@ public abstract class SimEntity {
 		SimSystem.hold(me, delay);
 	}
 
-	//TODO: METTERE A POSTO
+	//TODO: to fix
 	/** An interruptable hold.
 	 * Causes the entity to hold for <tt>delay</tt> units of simulation time.
 	 * @param delay The amount of time to hold

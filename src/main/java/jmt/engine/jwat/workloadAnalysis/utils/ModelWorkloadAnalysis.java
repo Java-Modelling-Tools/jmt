@@ -19,14 +19,14 @@ package jmt.engine.jwat.workloadAnalysis.utils;
 
 import java.util.Vector;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.filters.FilterOnVariable;
 import jmt.engine.jwat.workloadAnalysis.exceptions.TrasformException;
 import jmt.gui.jwat.JWatModel;
 
 public class ModelWorkloadAnalysis implements JWatModel {
-	// Matrice delle osservazioni
-	private MatrixOsservazioni matrix = null;
+	// Observation matrix
+	private MatrixObservations matrix = null;
 	// vector of the listener on set matrix
 	private Vector<SetMatrixListener> listenerOnMatrixChange = null; //<SetMatrixListener> 
 	// vector of the listener on change variable ( transformations )
@@ -43,14 +43,14 @@ public class ModelWorkloadAnalysis implements JWatModel {
 	/**
 	 * @return
 	 */
-	public MatrixOsservazioni getMatrix() {
+	public MatrixObservations getMatrix() {
 		return matrix;
 	}
 
 	/**
 	 * @param matrix
 	 */
-	public void setMatrix(MatrixOsservazioni matrix) {
+	public void setMatrix(MatrixObservations matrix) {
 		this.matrix = matrix;
 		fireNotifyOnSetMatrixObservation();
 	}
@@ -119,7 +119,7 @@ public class ModelWorkloadAnalysis implements JWatModel {
 		setTransformation();
 	}
 
-	//UPDATE 28/10/2006: +spostamento operazioni di trasformazione e sampling in matrixOsservazioni
+        //UPDATE 28/10/2006: move operations of transform and sampling in MatrixObservations 
 	public void resetModel() {
 		matrix = null;
 		fireNotifyOnResetMatrixObservation();

@@ -153,13 +153,13 @@ public class newGraham {
 		// add the first element again to close polygon
 		//convexHull.addElement(convexHull.firstElement());
 
-		//todo conversione da PPoint a newPoint
+		//todo conversation from PPoint to newPoint
 		for (int i = 0; i < convexHull.size(); i++) {
 			PtTonewPoint(convexHull.get(i));
 		}
 
-		//todo bisogna invertire l'ordine di uscita dei punti
-		for (int i = newconvexHull.size(); i > 0; i--) {
+		//todo invert the order of exit of points
+               for (int i = newconvexHull.size(); i > 0; i--) {
 			newnewconvexHull.addElement(newconvexHull.get(i));
 			newconvexHull.removeElementAt(i);
 		}

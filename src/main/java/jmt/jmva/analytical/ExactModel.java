@@ -402,7 +402,7 @@ public class ExactModel implements ExactConstants  {
 		if (util == null || util.length != stations || util[0].length != classes) {
 			throw new IllegalArgumentException("util must be non null and of size [stations][classes][iterations]");
 		}
-		// non controlla il numero di classi per tutte le stazioni, ma solo per la prima!!
+                // it does not check the number of classes for all station, just for the first one!!
 		this.queueLen.put(alg, ArrayUtils.copy3(queueLen));
 		this.throughput.put(alg, ArrayUtils.copy3(throughput));
 		this.resTimes.put(alg, ArrayUtils.copy3(resTimes));

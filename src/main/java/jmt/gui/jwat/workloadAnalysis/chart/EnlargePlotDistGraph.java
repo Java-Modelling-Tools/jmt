@@ -1,6 +1,6 @@
 package jmt.gui.jwat.workloadAnalysis.chart;
 
-//TODO: aggiungere popupmenu, salvataggio grafico
+//TODO: add popupmenu, save graphics
 
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;

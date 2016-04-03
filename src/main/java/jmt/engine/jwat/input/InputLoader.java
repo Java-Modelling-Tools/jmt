@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.Observation;
 import jmt.engine.jwat.TimeConsumingWorker;
 
@@ -30,7 +30,7 @@ public abstract class InputLoader extends TimeConsumingWorker {
 	@Override
 	public void finished() {
 		if (this.get() != null) {
-			fireEventStatus(new EventFinishLoad((MatrixOsservazioni) this.get(), totalRaw, countObs));
+			fireEventStatus(new EventFinishLoad((MatrixObservations) this.get(), totalRaw, countObs));
 		} else {
 			fireEventStatus(new EventFinishAbort(msg));
 		}

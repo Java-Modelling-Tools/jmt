@@ -66,10 +66,10 @@ public class ConvolutionSolver extends RecursiveSolver {
 
                 int k = m.findFirstNonZeroElement();
 
-                //Create ÃŽâ€�m-1
+                //Create
                 m.minusOne(k + 1);
                 toRet = compute(m, p);
-                // restore ÃŽâ€�m
+                // restore 
                 m.restore();
 
                 for (int r = 0; r < qnm.R; r++) {

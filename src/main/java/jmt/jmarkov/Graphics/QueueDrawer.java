@@ -361,10 +361,10 @@ public class QueueDrawer extends JComponent implements Notifier {
 		g2d.setPaint(border);
 		g2d.draw(queue[i]);
 
-		// Controllo se questo stato corrisponde alla media dei jobs
+                // Check if the state corresponds to the mean number of jobs
 		if (i == queueLenght() - queueMedia) {
-			// disegno un triangolo sopra lo stato che rappresenta la media
-			GeneralPath gp = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
+			// draw a trinagle above that represents the average
+                    	GeneralPath gp = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 			gp.moveTo((float) x, (float) (y - ELEM_HEIGHT / 2));
 			gp.lineTo((float) (x + ELEM_WIDTH), (float) (y - ELEM_HEIGHT / 2));
 			gp.lineTo((float) (x + ELEM_WIDTH / 2.0), (float) (y - ELEMS_GAP));

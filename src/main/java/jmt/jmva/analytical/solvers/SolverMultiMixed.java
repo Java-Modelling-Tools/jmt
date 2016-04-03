@@ -23,9 +23,9 @@ package jmt.jmva.analytical.solvers;
  * @author Federico Granata, Stefano Omini
  */
 public class SolverMultiMixed extends SolverMulti {
-	//TODO aggiungere controllo su processing capacity (guardare solo le classi aperte)
-
-	//TODO: aggiungere calcolo del response time di ogni stazione
+	//TODO add check on saturation
+    
+	//TODO: add calculation of response time at each station
 
 	/** array with class types */
 	int[] classType;
@@ -98,7 +98,7 @@ public class SolverMultiMixed extends SolverMulti {
 	 * </em>
 	 */
 	public void solveLI() {
-		//TODO: ci sono problemi nel caso di stazioni delay???!!!
+		//TODO: are the problems with delay stations???!!!
 		//class parameters: population (for closed classes), arrival rate (for open classes)
 		int[] closedClasses;
 		double[] openClasses;
@@ -147,7 +147,7 @@ public class SolverMultiMixed extends SolverMulti {
 		oCounter = 0;
 		cCounter = 0;
 
-		//TODO: non crea strutture analoghe anche per open,perchè le D delle classi open non cambiano
+                //demands for open classes do not change
 		double[][][] closedServTime = new double[stations][closedClasses.length][1];
 		double[][] closedVisits = new double[stations][closedClasses.length];
 
@@ -315,7 +315,7 @@ public class SolverMultiMixed extends SolverMulti {
 						//throughput[i][j] = queueLen[i][j] * closedVisits[i][cCounter] / residenceTime[i][j];
 						//NEW
 						//@author Stefano Omini
-						//TODO: verificare correttezza modifiche
+						//TODO: verify correctness
 						throughput[i][j] = clSolver.getThroughput(i);
 						//utilization must be computed (using the utilization law) with the original
 						//service demand

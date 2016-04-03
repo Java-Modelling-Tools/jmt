@@ -274,7 +274,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 				loadOnRun = true;
 				JWatVariableInputTableModel tableModel = ((JWatVariableInputTableModel) inputTable.getModel());
 				Parameter fileParameter = tableModel.getParameter();
-				//Controllo se necessario creare il filtering
+				//Check needed to create the filtering
 				if (((String) filterchooser.getModel().getSelectedItem()).equals(FILTER_TEXT_COMPLETE)) {
 					try {
 						fileParameter.setOption(new int[] { Loader.calcNumOfObs((nameFile.getAbsolutePath())),
@@ -284,7 +284,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					}
 				}
 				if (((String) filterchooser.getModel().getSelectedItem()).equals(FILTER_TEXT_RANDOM)) {
-					// OPTION PER RANDOM
+					// OPTION FOR RANDOM
 					fileParameter.setSampleMethod(Parameter.RANDOM_INPUT);
 					try {
 						fileParameter.setOption(new int[] { Loader.calcNumOfObs(nameFile.getAbsolutePath()),
@@ -294,12 +294,12 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					}
 				}
 				if (((String) filterchooser.getModel().getSelectedItem()).equals(FILTER_TEXT_INTERVAL)) {
-					// OPTION PER INTERVAL
+					// OPTION FOR INTERVAL
 					fileParameter.setSampleMethod(Parameter.INTERVAL_INPUT);
 					fileParameter.setOption(new int[] { ((SpinnerNumberModel) intervalFromObs.getModel()).getNumber().intValue(),
 							((SpinnerNumberModel) intervalToObs.getModel()).getNumber().intValue() });
 				}
-				//Chiamata a loader
+				//Call to loader
 				try {
 					Loader.readData(nameFile.getAbsolutePath(), fileParameter, new ProgressMonitorShow(InputPanel.this, "Loading Data...", 1000),
 							new InputStatusListener());

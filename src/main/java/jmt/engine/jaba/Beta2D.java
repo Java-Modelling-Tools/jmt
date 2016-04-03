@@ -31,32 +31,31 @@ import Jama.Matrix;
  */
 public class Beta2D {
 
-	double EPSYLON = 0.0001; //costante per le approssimazioni
-
+	double EPSYLON = 0.0001; //costant for the approximations
+        
 	/**
-	 * Dati due punti p1 e p2 il metodo ritorna le beta del settore di saturazione
-	 * attraverso la soluzione di un sistema lineare.
+	 * Given two points p1 and p2 the method return the betas of the saturation
+         * sector by means of solving a system of linear equations
 	 * @param p1
 	 * @param p2
-	 * @return un settore Sector2D con le coordinate nello spazio delle Beta e i Service
-	 * Demands associati.
-	 */
+	 * @return a sector Sector2D with the coordinates in the space of the betas and the associated service demands
+         */
 	public Sector2D BetaCalc2D(newPoint p1, newPoint p2) {
 		double[][] arraya = { { 1, 1, 0, 0 }, { 0, 0, 1, 1 }, { -p2.getX(), 0, p1.getX(), 0 }, { 0, p2.getY(), 0, -p1.getY() } };
 		double[][] arrayb = { { 1 }, { 1 }, { 0 }, { 0 } };
 		Matrix A = new Matrix(arraya);
 		Matrix b = new Matrix(arrayb);
 		Matrix x = A.solve(b);
-		// Creo un nuovo settore con le soluzioni e i punti associati
-		Sector2D out = new Sector2D(x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get(3, 0), p1, p2);
+		// Creates a new sector with the associates solutions and points
+                Sector2D out = new Sector2D(x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get(3, 0), p1, p2);
 		return out;
 	}
 
 	/**
-	 * Dato un vettore di vertici ritorna un vettore di double[] che rappresentano
-	 * le beta e i punti del settore a cui è associato.
-	 * @param verticesnp    il vettore di vertici passato
-	 * @return              un vettore con le beta con la struttura dati di BetaCalc2D
+         * Given a vector of vertices returns a vector double[] representing
+         * the betas and the points in the associated sector
+	 * @param verticesnp    the vector of vertices
+         * @return              a vector with the beta with the data structures in BetaCal2D
 	 */
 	public Vector<Sector2D> BetaVector(Vector<newPoint> verticesnp) {
 		Vector<Sector2D> sector = new Vector<Sector2D>();
@@ -69,43 +68,42 @@ public class Beta2D {
 	}
 
 	/**
-	 * Il metodo associa ad un vettore passato da BetaVector ad ogni settore la sua
-	 * stazione, "esplodendolo" in modo da avere anche i settori dove satura una singola
-	 * stazione.
-	 *
-	 * @param sector        un vettore passato da BetaVector
+         * The method associates a vector passed from BetaVector to each sector 
+         * a station, exploding in such a way to obtain also the sectors where
+         * a single station saturates
+	 * @param sector        a vettore passed by BetaVector
 	 * @return              {b1,1-b1,b2,1-b2,xa,ya,xb,yb}
-	 *                      se nel settore sat 1sola staz=>xb,yb=-1
+	 *                      if in the sector saturates a single station=>xb,yb=-1
 	 */
 	public Vector<Sector2D> StatAss(Vector<Sector2D> sector) {
 		//Util2d uti = new Util2d();
 		Vector<Sector2D> out = new Vector<Sector2D>();
-		// supponiamo di avere 2 intervalli [b1,1-b1]->[b2,1-b2] e [b3,1-b3]->[b4,1-b4]
+		// Suppose to have 2 intervals [b1,1-b1]->[b2,1-b2] and [b3,1-b3]->[b4,1-b4]
 
-		// se b1!=0 associo alla stazione A l'intervallo [0,1]->[b1,1-b1]
+		// if b1!=0 associate to station A the interval [0,1]->[b1,1-b1]
 		if (sector.get(0).getBeta1() > EPSYLON) {
 			Sector2D sss = new Sector2D(0, 1, sector.get(0).getBeta1(), sector.get(0).getBeta11(), sector.get(0).getP1());
 			out.addElement(sss);
 		}
 
-		// Adesso procedo alla scansione di tutti gli intervalli
-		for (int i = 0; i < (sector.size()); i++) {
+		// Now proceed to scanning all intervals
+                for (int i = 0; i < (sector.size()); i++) {
 
-			// Settore normale
+			// Normal sectors
 
 			Sector2D sss = new Sector2D(sector.get(i).getBeta1(), sector.get(i).getBeta11(), sector.get(i).getBeta2(), sector.get(i).getBeta22(),
 					sector.get(i).getP1(), sector.get(i).getP2());
 			out.addElement(sss);
 
-			// se gli estremi b2 e b3 non coincidono (a meno di EPSYLON) associo b2-->b3 alla stazione di b2
-			if (i != (sector.size() - 1) //todo controllare l'estensione
+			// if the extremes b2 and b3 do not coincide (except EPSYLON) associate b2-->b3 to the station b2
+			if (i != (sector.size() - 1) //TODO: check extension
 					&& (sector.get(i + 1).getBeta1() - sector.get(i).getBeta2()) > EPSYLON) {
 				Sector2D ss1 = new Sector2D(sector.get(i).getBeta2(), sector.get(i).getBeta22(), sector.get(i + 1).getBeta1(), sector.get(i + 1)
 						.getBeta11(), sector.get(i).getP2());
 				out.addElement(ss1);
 			}
 
-			//Associo all'ultima stazione l'intervallo b4->1 se b4!=0
+			//Associate the last station to the interval b4->1 if b4!=0
 			else if (i == (sector.size() - 1) && sector.get(i).getBeta2() != 1) {
 				Sector2D ssf = new Sector2D(sector.get(i).getBeta2(), sector.get(i).getBeta22(), 1, 0, sector.get(i).getP2()); //aggiungere ,end
 				out.addElement(ssf);

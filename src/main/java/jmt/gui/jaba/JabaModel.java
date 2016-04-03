@@ -243,14 +243,14 @@ public class JabaModel implements JabaConstants {
 		classTypes[1] = CLASS_CLOSED;
 
 		visits = new double[1][2];
-		// Settato a 1 i Service Demands di default
+		// default
 		visits[0][0] = 1.0;
 		visits[0][1] = 1.0;
 
 		serviceTimes = new double[1][2][1];
 		// NEW
 		// @author Andrea Zanzottera
-		// Settato a 1 i Service Demands di default
+		// default
 		serviceTimes[0][0][0] = 1.0;
 		serviceTimes[0][1][0] = 1.0;
 		// end NEW
@@ -584,7 +584,7 @@ public class JabaModel implements JabaConstants {
 		// validate sizes
 		for (int s = 0; s < stations; s++) {
 			currSize = (stationTypes[s] == STATION_LD ? maxpop : 1);
-			// TODO: se stazione è LD ma non ci sono customers, max pop = 0
+			// TODO: if the station is LD but there are no jobs, max pop = 0
 			if (currSize == 0) {
 				currSize = 1;
 			}
@@ -695,9 +695,8 @@ public class JabaModel implements JabaConstants {
 			if (classTypes[i] != CLASS_CLOSED) {
 				// make sure we stay in a consistent state
 				removeLD();
-				// TODO: rimuove le LD perchè il caso LD multiclasse non è
-				// gestibile
-				return false;
+				// TODO: remove LD because LD multiclass is not handled
+                                return false;
 			}
 		}
 		return true;
@@ -932,7 +931,7 @@ public class JabaModel implements JabaConstants {
 
 			// NEW
 			// @author Stefano Omini
-			// TODO: controllare se va
+			// TODO: check if this works
 			classes_element.appendChild(makeClassElement(root, i));
 			// end NEW
 		}

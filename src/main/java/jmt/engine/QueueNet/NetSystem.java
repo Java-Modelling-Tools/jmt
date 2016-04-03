@@ -248,7 +248,7 @@ public class NetSystem {
 	 * @return
 	 * @throws jmt.common.exception.NetException
 	 */
-	//TODO: NON USATA
+	//TODO: not used
 	public static double getMeasure(String name, int measureID) throws jmt.common.exception.NetException {
 		QueueNetwork net = getNode(name).getQueueNet();
 		return net.getMeasure(name, measureID);

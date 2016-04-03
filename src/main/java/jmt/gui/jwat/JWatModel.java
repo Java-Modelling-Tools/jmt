@@ -1,11 +1,11 @@
 package jmt.gui.jwat;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 
 public interface JWatModel {
 	public void resetModel();
 
-	public MatrixOsservazioni getMatrix();
+	public MatrixObservations getMatrix();
 
-	public void setMatrix(MatrixOsservazioni matrix);
+	public void setMatrix(MatrixObservations matrix);
 }

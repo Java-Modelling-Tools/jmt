@@ -2,7 +2,7 @@ package jmt.engine.jwat.workloadAnalysis.clustering.kMean;
 
 import java.lang.reflect.InvocationTargetException;
 
-import jmt.engine.jwat.MatrixOsservazioni;
+import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.TimeConsumingWorker;
 import jmt.engine.jwat.VariableNumber;
 import jmt.engine.jwat.input.EventFinishAbort;
@@ -19,12 +19,12 @@ public class MainKMean extends TimeConsumingWorker {
 	private int[] varSel;
 	private int numClust;
 	private int iteration;
-	private MatrixOsservazioni m;
+	private MatrixObservations m;
 	private KMean clustering;
 	private String msg = null;
 	private KMeanClusteringEngine Cluster;
 
-	public MainKMean(ProgressShow prg, MatrixOsservazioni m, int[] varSel, int numClust, int iteration, short trasf) {
+	public MainKMean(ProgressShow prg, MatrixObservations m, int[] varSel, int numClust, int iteration, short trasf) {
 		super(prg);
 		this.m = m;
 		this.iteration = iteration;

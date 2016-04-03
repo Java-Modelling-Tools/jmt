@@ -100,7 +100,7 @@ public class UnivariateStatistics {
 		return variance;
 	}
 
-	//TODO Verificare con Fuma non sono sicuro
+	//TODO Verify this method
 	/**
 	 * Returns Median Value
 	 * @return Median Value
@@ -161,7 +161,7 @@ public class UnivariateStatistics {
 		for (i = 0; i < list.length; i++) {
 			mean += list[i].getIndex(nVar);
 			variance += Math.pow(list[i].getIndex(nVar), 2);
-			//Quantili index
+			//Quantile index
 			if (i == (qIndex * list.length / 100)) {
 				quantili[qIndex - 1] = i;
 				qIndex++;
