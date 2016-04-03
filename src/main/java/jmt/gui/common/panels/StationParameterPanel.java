@@ -160,11 +160,12 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 
 		}
 		if (hasLoggerSection(type)) {
-			if (lsPane == null) {
+// GC: this if was misbehaving in the presence of two or more loggers: https://sourceforge.net/p/jmt/bugs/42/
+//			if (lsPane == null) {
 				lsPane = new LoggerSectionPanel(stationData, classData, stationKey);
-			} else {
-				lsPane.setData(stationData, classData, stationKey);
-			}
+//			} else {
+//				lsPane.setData(stationData, classData, stationKey);
+//			}
 			mainPanel.add(lsPane, lsPane.getName());
 
 			// If this was previously selected, selects this
