@@ -50,6 +50,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.SpringLayout;
+import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
 import jmt.engine.log.JSimLogger;
@@ -111,6 +112,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	private static DecimalFormat decimalFormatExp = new DecimalFormat("0.00E0");
 	private static DecimalFormat decimalFormatNorm = new DecimalFormat("#0.000");
 	private JSimLogger logger = JSimLogger.getLogger(ResultsWindow.class);
+        private double startTime = System.currentTimeMillis();
 
 	/**
 	 * Creates a new ResultsWindow
@@ -183,6 +185,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
 		progressBar.setForeground(Color.BLUE);
+                UIManager.put( "ProgressBar.selectionForeground", Color.white );
 		setProgressBar(results.getProgressTime());
 		toolbar.add(progressBar);
 		// Add close window button
@@ -227,10 +230,11 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		if (progress < 100) {
 			progressBar.setString(progress + "% of simulation performed...");
 		} else {
-			progressBar.setString("Simulation Complete");
+			progressBar.setString("Simulation Complete (Time Elapsed: " + Math.ceil((System.currentTimeMillis() - startTime)/100)/10 + "s)");
 		}
 	}
 
+        
 	/**
 	 * Sets action for toolbar buttons and displays them
 	 * @param startAction action associated with start simulation button
@@ -476,7 +480,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			mean.setText(doubleToString((values.lastElement()).getMeanValue()));
 			bottomPanel.add(label, BorderLayout.WEST);
 			bottomPanel.add(mean, BorderLayout.CENTER);
-			bottomPanel.add(new JLabel("Warniiiin"), BorderLayout.SOUTH);
+			bottomPanel.add(new JLabel("Warning"), BorderLayout.SOUTH);
 			// AbortButton
 			abortButton = new JButton();
 			abortButton.setText("Abort Measure");
@@ -574,8 +578,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			pivotPanel2.add(textStatePanel2);
 			
 			// Sets a minimal size for text area panel
-			pivotPanel2.setMinimumSize(new Dimension(320, 150));
-			pivotPanel2.setPreferredSize(new Dimension(360, 150));
+			pivotPanel2.setMinimumSize(new Dimension(320, 190));
+			pivotPanel2.setPreferredSize(new Dimension(360, 190));
 
 			// Adds graph
 			graph = new FastGraph(values, md.getPollingInterval());
@@ -583,8 +587,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					pivotPanel2, graph);
 			graphPanel.setOneTouchExpandable(true);
 			graphPanel.setDividerLocation(600);
-			graph.setMinimumSize(new Dimension(200, 150));
-			graph.setPreferredSize(new Dimension(300, 150));
+			graphPanel.setMinimumSize(new Dimension(320, 190));
+			graph.setMinimumSize(new Dimension(200, 190));
+			graph.setPreferredSize(new Dimension(300, 190));
 			
 			add(graphPanel, BorderLayout.CENTER);
 			// Sets icon image and abort button state
