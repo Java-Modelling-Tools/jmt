@@ -37,6 +37,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	 * Array containing population for each class
 	 */
 	protected int[] population;
+	private Integer scale = 100000;
 
         /**
 	 * Contains the queuing network model
@@ -81,7 +82,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		servTime = new double[stations][classes][1];
 		for (int i = 0; i < stations; i++) {
 			for (int r = 0; r < classes; r++) {
-				servTime[i][r][0]=s[i][r][0] * 1000000;
+				servTime[i][r][0]=s[i][r][0] * scale;
 			}
 		}
 
@@ -192,9 +193,9 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		scQueueLen = new double[stations];
 		for (int m = 0; m < qnm.M; m++) {
 			for (int r = 0; r < qnm.R; r++) {
-				throughput[m][r] = clsThroughput[r] * visits[m][r] * 1000000;
-				utilization[m][r] = throughput[m][r] * servTime[m][r][0] / 1000000; // Umc=Xmc*Smc
-				residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] / 1000000;
+				throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
+				utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
+				residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] / scale;
 				scThroughput[m] += throughput[m][r];
 				scUtilization[m] += utilization[m][r];
 				scResidTime[m] += residenceTime[m][r];
