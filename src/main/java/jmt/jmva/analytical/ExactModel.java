@@ -2612,6 +2612,7 @@ public class ExactModel implements ExactConstants  {
 								serviceTimes[i][j][k] = Math.random();
 							}
 						}
+                                                serviceTimes[i][j][k]=Math.ceil(serviceTimes[i][j][k]*1000)/1000; // keep 3 decimal digits
 					}
 				}
 			}

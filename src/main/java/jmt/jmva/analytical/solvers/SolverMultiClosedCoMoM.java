@@ -37,7 +37,7 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 	 * Array containing population for each class
 	 */
 	protected int[] population;
-	private Integer scale = 1000000;
+	private Integer scale = 100000;
 
 	/**
 	 * Contains the queuing network model
