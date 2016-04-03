@@ -115,7 +115,7 @@ public class SolverSingleClosedMVA extends Solver {
 		//@author Stefano Omini
 
 		//OLD
-		//Unuseful: no longer extends SolverSingleClosedExact
+	        //Not useful anymore: no longer extends SolverSingleClosedExact
 		//super(cust, stat);
 
 		stations = stat;
@@ -579,26 +579,6 @@ public class SolverSingleClosedMVA extends Solver {
 		double ws;//waiting time
 		double wcomp;//composite waiting time
 		//		double prod;//internal variable
-
-		/*      OLD
-
-				//loop over all stations, transform all stations in load dependent
-				//it is not efficient must be changed
-				for (stat = 0; stat < stations; stat++) {
-					if (type[stat] != Solver.LD) {
-						wcomp = servTime[stat][0];
-						if (type[stat] == Solver.DELAY) {
-							for (cust = 1; cust <= customers; cust++)
-								//TODO: attenzione, qui va in out of bound, non c'è un elemento x ogni popolazione!
-		                        servTime[stat][cust] = wcomp / cust;
-						} else {
-							for (cust = 1; cust <= customers; cust++)
-								servTime[stat][cust] = servTime[stat][0];
-						}
-					}
-				}//end loop over all stations
-
-		*/
 
 		//NEW
 		//@author Stefano Omini
@@ -1624,45 +1604,16 @@ public class SolverSingleClosedMVA extends Solver {
 	/**
 	 * Solves a model with LI and LD stations
 	 */
-	//TODO: by DEK (Federico Granata) ti sei impestato nel metodo meno testato, e piu' incasinato! complimenti
-	//e' il meno testato perche' Serazzi non mi e' mai stato convito ad usare un metodo la cui stabilita'
-	//non era nota e nemmeno un bound sull'errore..
-	//inoltre non e' vero che sia piu' veloce lo e' solo se le probabilita' significative sono poche.
-	//e' poco testato perche' non ho avuto granche tempo di lavorarci sopra visto che non ero autorizzato.
-	//e' inoltre poco ottimizzato (rispetto a quello che si puo' fare in quanto c'era poco tempo)
-	// saprei spiegarti molto meglio il metoto Fast, sicuramente stabile.
-	//comunque l'idea che sta dietro a questo deriva da quello sopra, in questo caso dico approx perche'
-	// non tutti gli elemnti vengono sommati ad ogni passo. il motivo e' semplice non servono,
-	//sommare elemnti molto molto piccoli ad uno grande e' inutile. questo metodo fa esattamente questo.
 	private void solveSingleLDErrCtrFaster() {
 		int m;//index of station
 		int n;//index of customer
 		int k;//index of customers, in marginal probability
 		double sum = 0.0;
 
-		//TODO: questo dovrebbero essere il throughput: quale differenza c'è tra X e Y??
-		//R: non hai guardato la bibliografia? l'articolo di balbo bruell????
-		//si X e Y sono il throughput ma calcolato in maniera diversa, mi spiego X e' quello
-		//classico da Lazowska, Y invece vience calcolato mano a mano ponendo 1 alla volta il tempo di
-		//servizio del nodo pari a 0
 		double[] X = new double[customers + 1];
 		double MIN = 1.0E-290;
 		double MAX = 1.0E290;
 
-		//TODO: che cosa sono puntProb e expMult?
-		//R1: expMult e' il esponente che serve come nei metodi che vedi sopra per tenere
-		//conto delle grandi oscillazioni delle probabilita' in pratica devo avere un array grande
-		//N+1 customers che contine il vaolre dell-esponente del moltiplicatore di ogni probabilita'
-		//anche questo problema e' nella mia tesi... quello che succede e' che nei sistemi LD le probabilita'
-		//mentre si risolve il sistema oscillano tra valori molto piccoli (dipende dai parametri dei sistema
-		//ma possono arrivare a 10^-1000 )e vaolri significativi (10^/2) ovvimanete un semplice double non farebbe
-		//altro che trasformare il numero in 0 e quindi perdere l'informazione connessa a quella probabilita'.
-		//il risultato e' un errore anche molto consistente nella soluzione.
-		//
-		//R2:puntProb, e' un "puntatore" cioe' punta al valore
-		//puntProb[0] contiene il numero di elemnti usati di puntProb, per evitare di farsi tutto il giro inutile dell'array
-		//ad ogni passo. tiene traccia degli elemnti significativi nel sistema. se uan probabilita' e'
-		//troppo piccola non verra' contata.
 		int min = 0;
 		byte[] expMultPrec = new byte[customers + 1];
 		byte[] expMultCorr = new byte[customers + 1];
@@ -1941,7 +1892,7 @@ public class SolverSingleClosedMVA extends Solver {
 	 *
 	 */
 	private void solveSingleLDErrCtrFaster(boolean intermediate) {
-		//TODO: ancora da sistemare!!! Non si hanno ancora i risultati intermedi...
+            //TODO: still to fix, it does not yet give intermediate results
 		if (!intermediate) {
 			//intermediate results must not be saved, then use
 			//the base method

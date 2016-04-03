@@ -74,10 +74,10 @@ public class ConvolutionSolver extends RecursiveSolver {
 
                 for (int r = 0; r < qnm.R; r++) {
                     if (p.get(r) > 0) { // This is the point that differs when a MoM instantiation is performed.
-                        // Create ÃŽï¿½-1r
+                        // Create
                         p.minusOne(r + 1);
                         BigRational toAdd = compute(m, p);
-                        // restore ÃŽï¿½-1r
+                        // restore
                         p.restore();
                         toAdd = toAdd.multiply(qnm.getDemandAsBigRational(k, r));
                         toRet = toRet.add(toAdd);

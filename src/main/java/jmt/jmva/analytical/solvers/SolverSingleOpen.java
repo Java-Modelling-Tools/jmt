@@ -130,7 +130,7 @@ public class SolverSingleOpen extends Solver {
 
 	//NEW
 	//@author Stefano Omini
-	//TODO aggiungere controllo su processing capacity
+	//TODO add check on saturation
 	/**
 	 * A system is said to have sufficient capacity to process a given load
 	 * <tt>lambda</tt> if no service center is saturated as a result of such a load.

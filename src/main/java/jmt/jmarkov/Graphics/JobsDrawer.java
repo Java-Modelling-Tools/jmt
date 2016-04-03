@@ -166,7 +166,7 @@ public class JobsDrawer extends JPanel implements Notifier/*, Runnable */{
 		g2d.setStroke(dCst.getDrawStroke());
 		changeDrawSettings(dCst);
 
-		//disegna jobs
+		//draw jobs
 		drawJobsRemaining(donejobs, totjobs, panelW * 0.15f, 10.0f, panelW * 0.7f, panelH / 2.0f, g2d);
 	}
 
