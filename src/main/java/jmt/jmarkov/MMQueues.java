@@ -101,6 +101,7 @@ public class MMQueues extends JMTFrame {
 	private double lambdaMultiplier = 1; //lambda slide bar multiplier
 	private int lambdaMultiplierChange = 0; // for the lambda slide bar
 	private int sMultiplierChange = 1; // for the service slide bar
+        private int type = -1;
 
 	private int buffer; //number of place for the waiting queue
 	private int cpuNum; //number of server in the system
@@ -1067,6 +1068,7 @@ public class MMQueues extends JMTFrame {
 
 	private void updateFields() {
 		try {
+             
 			Q = ql.mediaJobs();
 			U = ql.utilization();
 			utilizationL.setForeground(Color.BLACK);
@@ -1092,7 +1094,9 @@ public class MMQueues extends JMTFrame {
 			responseL.setText(respStrS + "Saturation");
 			nonErgodic = true;
 		}
-		queueDrawer.setMediaJobs(Q - U);
+		queueDrawer.setMaxJobs(buffer + 1);
+		statiDrawer.setMaxJobs(buffer + cpuNum);
+                queueDrawer.setMediaJobs(Q - U);
 		statiDrawer.repaint();
 
 		if (sim == null || !sim.isStarted()) {
@@ -1127,7 +1131,8 @@ public class MMQueues extends JMTFrame {
 		stopB.setEnabled(false);
 		pauseB.setEnabled(false);
 		selectQueueRB.setEnabled(true);
-		updateFields();
+
+ 		updateFields();
 	}
 
 	public void setSSlider() {
