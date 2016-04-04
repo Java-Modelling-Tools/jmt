@@ -397,7 +397,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		 */
 		private static final long serialVersionUID = 1L;
 		private Class[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class ,String.class, String.class};
-		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Drop", "Memory Size", "Weight" };
+		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Drop", "Memory Size"};//, "Weight" };
 
 		public int getRowCount() {
 			return cd.getClassKeys().size();
