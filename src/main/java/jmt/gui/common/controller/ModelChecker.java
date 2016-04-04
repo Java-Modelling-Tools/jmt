@@ -270,8 +270,12 @@ public class ModelChecker implements CommonConstants {
 	//Thrown if the scheduling policies other than PS, FCFS, DELAY, or RAND are used
     // (only when trying to convert to JMVA)
 
+
     //Checks if CS with FCR OR FORK-JOIN
     public static final int CS_WITH_FORK_JOIN = 16;
+
+    //Throws a warning if FCFS Priorities is used but all classes have the same priorities
+    public static final int SLOW_FCFS_SAME_PRIORITIES = 17;
 
     /*
      //Thrown only when trying to switch from JSim or JModel to JMVA, if there is at least
@@ -286,7 +290,7 @@ public class ModelChecker implements CommonConstants {
      */
     private int NUMBER_OF_ERROR_TYPES = 28;
     private int NUMBER_OF_NORMAL_ERROR_TYPES = 28;
-    private int NUMBER_OF_WARNING_TYPES = 17;
+    private int NUMBER_OF_WARNING_TYPES = 18;
     private int NUMBER_OF_NORMAL_WARNING_TYPES = 5;
 
     /**
@@ -429,6 +433,7 @@ public class ModelChecker implements CommonConstants {
             checkZeroPopulation();
             checkForkOrFcr();
             checkGuardStrategyZeroTasks();
+            checkSlowFCFSPriorities();
         }
 
     }
@@ -511,6 +516,9 @@ public class ModelChecker implements CommonConstants {
             ok = false;
         }
         if (warnings[CS_WITH_FORK_JOIN]) {
+            ok = false;
+        }
+        if (warnings[SLOW_FCFS_SAME_PRIORITIES]) {
             ok = false;
         }
         return ok;
@@ -953,6 +961,10 @@ public class ModelChecker implements CommonConstants {
     public boolean isThereForkWithoutJoinWarnings() {
         return warnings[FORK_WITHOUT_JOIN_WARNING];
     }
+    
+    public boolean isThereSlowFCFSSamePriorities() {
+        return warnings[SLOW_FCFS_SAME_PRIORITIES];
+    }    
 
     /**
      * Checks if there are stations with Processor Sharing service strategy with
@@ -2232,6 +2244,37 @@ public class ModelChecker implements CommonConstants {
      */
     private void checkForForkJoinRoutingError() {
 
+    }
+
+    public void checkSlowFCFSPriorities() {
+        Vector<Object> classKeys = class_def.getClassKeys();
+
+        boolean isSamePrios = true;
+        if (classKeys.size() > 0) {
+            for (int i = 1; i < classKeys.size(); i++) {
+                //get the key at i
+                Object lastKey = classKeys.get(i - 1);
+                Object thisKey = classKeys.get(i);
+                //get the Reference Station of the class
+                int lastPriority = class_def.getClassPriority(lastKey);
+                int thisPriority = class_def.getClassPriority(thisKey);
+                if (thisPriority != lastPriority) {
+                    isSamePrios = false;
+                }
+            }
+            boolean isThereFCFSPrio = false;
+            Vector<Object> servers = station_def.getStationKeysServer();
+            for (int i = 0; i < servers.size(); i++) {
+                Object thisServer = servers.get(i);
+            if (CommonConstants.QUEUE_STRATEGY_STATION_QUEUE_PRIORITY.equals(station_def.getStationQueueStrategy(thisServer))) {
+                isThereFCFSPrio = true;
+                if (isSamePrios) {
+                    warnings[SLOW_FCFS_SAME_PRIORITIES] = true;
+                    System.out.println("SLOW_FCFS_SAME_PRIORITIES");
+                }
+            }                
+            }
+        }
     }
 
     private void checkForBCMPDifferentQueueingStrategyWarning() {

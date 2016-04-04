@@ -568,6 +568,12 @@ public class JModelProblemsWindow extends JDialog {
 								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Fork found but no join.</div></html>",
 								null, null));
 			}
+                        if (mc.isThereSlowFCFSSamePriorities()) {
+				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.SLOW_FCFS_SAME_PRIORITIES,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Priority scheduling is used, but all classes have the same priorities."
+                                                + " The simulation may run slower than usual.",
+                                                null, null));
+			}
 			if (mc.isSinkPerfIndicesWithClosedClassError()){
 				problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_PERF_WITH_CLOSED_CLASS_ERROR,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per sink should not be used for closed class.</div></html>",
