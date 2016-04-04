@@ -1036,16 +1036,16 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 								.toString());
 				region.appendChild(classConstraint);
 			}
-			// Add drop rules
-			classes = model.getClassKeys().iterator();
+                        
+                        classes = model.getClassKeys().iterator();
 			while (classes.hasNext()) {
 				Object classKey = classes.next();
-				Element drop = doc.createElement(XML_E_DROPRULES);
-				drop.setAttribute(XML_A_DROPRULES_CLASS,
+				Element weight = doc.createElement(XML_E_WEIGHT);
+				weight.setAttribute(XML_A_WEIGHT_CLASS,
 						model.getClassName(classKey));
-				drop.setAttribute(XML_A_DROPRULES_DROP, model
-						.getRegionClassDropRule(key, classKey).toString());
-				region.appendChild(drop);
+				weight.setAttribute(XML_A_WEIGHT_MULTI, model
+						.getRegionClassWeight(key, classKey).toString());
+				region.appendChild(weight);
 			}
                         
 			classes = model.getClassKeys().iterator();
@@ -1058,16 +1058,17 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 						.getRegionClassSize(key, classKey).toString());
 				region.appendChild(size);
 			}
-			
+                        
+                        // Add drop rules
 			classes = model.getClassKeys().iterator();
 			while (classes.hasNext()) {
 				Object classKey = classes.next();
-				Element weight = doc.createElement(XML_E_WEIGHT);
-				weight.setAttribute(XML_A_WEIGHT_CLASS,
+				Element drop = doc.createElement(XML_E_DROPRULES);
+				drop.setAttribute(XML_A_DROPRULES_CLASS,
 						model.getClassName(classKey));
-				weight.setAttribute(XML_A_WEIGHT_MULTI, model
-						.getRegionClassWeight(key, classKey).toString());
-				region.appendChild(weight);
+				drop.setAttribute(XML_A_DROPRULES_DROP, model
+						.getRegionClassDropRule(key, classKey).toString());
+				region.appendChild(drop);
 			}
 
 			simNode.appendChild(region);

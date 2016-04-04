@@ -84,6 +84,12 @@
 										type="xs:double" use="required" />
 								</xs:complexType>
 							</xs:element>
+							<xs:element name="globalMemoryConstraint" minOccurs="0" maxOccurs="1">
+								<xs:complexType>
+									<xs:attribute name="maxMemory"
+										type="xs:double" use="required"/>
+								</xs:complexType>
+							</xs:element>
 							<xs:element name="classConstraint"
 								minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
@@ -100,6 +106,15 @@
 										type="xs:string" use="required" />
 									<xs:attribute name="weight"
 										type="xs:double" use="required" />
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="classMemorySize" minOccurs="0"
+								maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="jobClass"
+										type="xs:string" use="required"/>
+									<xs:attribute name="size"
+										type="xs:integer" use="required"/>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="dropRules" minOccurs="0"
