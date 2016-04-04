@@ -64,7 +64,7 @@ public class ForkEditor extends JSplitPane implements
 	private CombTable combTable = new CombTable();
         private ClassNumTable classNumTable;
 	private JTextArea noOptLabel = new JTextArea(
-			"No options available for this forking strategy");
+			"No options available for this fork strategy");
 	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);
 	private JSplitPane jsp = new JSplitPane();
 	private JSplitPane jsp2 = new JSplitPane();
