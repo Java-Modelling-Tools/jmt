@@ -157,7 +157,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
                 //layout of fragNum panel
 		JPanel fragnum = new JPanel();
 		fragnum.setLayout(new BorderLayout());
-		fragnum.setBorder(new TitledBorder(new EtchedBorder(), "Standard forking strategy"));
+		fragnum.setBorder(new TitledBorder(new EtchedBorder(), "Standard fork strategy"));
 		final JCheckBox useSim = new JCheckBox();
 		useSim.setText("Enable the advanced forking strategies.");
 //		fragnum.add(useSim, BorderLayout.CENTER);
@@ -225,7 +225,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 	
 	@Override
 	public String getName() {
-		return "Fork Policies";
+		return "Fork Strategies";
 	}
 	
 	protected class ForkingSelectionTable extends JTable {
@@ -298,7 +298,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Class", "Forking Strategy" };
+		private String[] columnNames = new String[] { "Class", "Fork Strategy" };
 		public int[] columnSizes = new int[] { 70, 100 };
 		private Class[] columnClasses = new Class[] { String.class, Object.class };
 

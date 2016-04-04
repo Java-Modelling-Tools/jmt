@@ -122,7 +122,7 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 	 */
 	@Override
 	public String getName() {
-		return "Join Policies";
+		return "Join Strategies";
 	}
 
 	protected class JoinSelectionTable extends JTable {
