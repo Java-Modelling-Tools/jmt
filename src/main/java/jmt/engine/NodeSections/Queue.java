@@ -611,6 +611,7 @@ public class Queue extends InputSection {
                                 }
                                 if(jData != null && FJList != null){
                                         FJList.remove(jData);
+                                        this.getOwnerNode().getQueueNet().getJobInfoList().updateResponseSum(jData);
                                 }
                                 break;
 
