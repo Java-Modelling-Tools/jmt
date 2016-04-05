@@ -18,13 +18,13 @@
 											<xs:element name="closedclass">
 												<xs:complexType>
 													<xs:attribute name="name" type="xs:string" use="required"/>
-													<xs:attribute name="population" type="xs:double" use="required"/>
+													<xs:attribute name="population" type="jdouble" use="required"/>
 												</xs:complexType>
 											</xs:element>
 											<xs:element name="openclass">
 												<xs:complexType>
 													<xs:attribute name="name" type="xs:string" use="required"/>
-													<xs:attribute name="rate" type="xs:double" use="required"/>
+													<xs:attribute name="rate" type="jdouble" use="required"/>
 												</xs:complexType>
 											</xs:element>
 										</xs:choice>
@@ -45,7 +45,7 @@
 																	<xs:element name="servicetime" maxOccurs="unbounded">
 																		<xs:complexType>
 																			<xs:simpleContent>
-																				<xs:extension base="xs:double">
+																				<xs:extension base="jdouble">
 																					<xs:attribute name="customerclass" type="xs:string" use="required"/>
 																				</xs:extension>
 																			</xs:simpleContent>
@@ -60,7 +60,7 @@
 																	<xs:element name="visit" maxOccurs="unbounded">
 																		<xs:complexType>
 																			<xs:simpleContent>
-																				<xs:extension base="xs:double">
+																				<xs:extension base="jdouble">
 																					<xs:attribute name="customerclass" type="xs:string" use="required"/>
 																				</xs:extension>
 																			</xs:simpleContent>
@@ -82,7 +82,7 @@
 																	<xs:element name="servicetime" maxOccurs="unbounded">
 																		<xs:complexType>
 																			<xs:simpleContent>
-																				<xs:extension base="xs:double">
+																				<xs:extension base="jdouble">
 																					<xs:attribute name="customerclass" type="xs:string" use="required"/>
 																				</xs:extension>
 																			</xs:simpleContent>
@@ -97,7 +97,7 @@
 																	<xs:element name="visit" maxOccurs="unbounded">
 																		<xs:complexType>
 																			<xs:simpleContent>
-																				<xs:extension base="xs:double">
+																				<xs:extension base="jdouble">
 																					<xs:attribute name="customerclass" type="xs:string" use="required"/>
 																				</xs:extension>
 																			</xs:simpleContent>
@@ -135,7 +135,7 @@
 																	<xs:element name="visit" maxOccurs="unbounded">
 																		<xs:complexType>
 																			<xs:simpleContent>
-																				<xs:extension base="xs:double">
+																				<xs:extension base="jdouble">
 																					<xs:attribute name="customerclass" type="xs:string" use="required"/>
 																				</xs:extension>
 																			</xs:simpleContent>
@@ -171,7 +171,7 @@
 							</xs:element>
 							<xs:element name="globalConstraint">
 								<xs:complexType>
-									<xs:attribute name="maxJobs" type="xs:double" use="required"/>
+									<xs:attribute name="maxJobs" type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="globalMemoryConstraint" minOccurs="0" maxOccurs="1">
@@ -182,13 +182,13 @@
 							<xs:element name="classConstraint" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="jobClass" type="xs:string" use="required"/>
-									<xs:attribute name="maxJobsPerClass" type="xs:double" use="required"/>
+									<xs:attribute name="maxJobsPerClass" type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="classWeight" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="jobClass" type="xs:string" use="required"/>
-									<xs:attribute name="weight" type="xs:double" use="required"/>
+									<xs:attribute name="weight" type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="classMemorySize" minOccurs="0" maxOccurs="unbounded">
@@ -228,14 +228,14 @@
 													<xs:element name="measure" minOccurs="0" maxOccurs="unbounded">
 														<xs:complexType>
 															<xs:attribute name="measureType" type="xs:string" use="required"/>
-															<xs:attribute name="meanValue" type="xs:double" use="optional"/>
-															<xs:attribute name="lowerLimit" type="xs:double" use="optional"/>
-															<xs:attribute name="upperLimit" type="xs:double" use="optional"/>
+															<xs:attribute name="meanValue" type="jdouble" use="optional"/>
+															<xs:attribute name="lowerLimit" type="jdouble" use="optional"/>
+															<xs:attribute name="upperLimit" type="jdouble" use="optional"/>
 															<xs:attribute name="successful" type="xs:boolean" use="required"/>
 															<xs:attribute name="analyzedSamples" type="xs:int" use="optional"/>
 															<xs:attribute name="discardedSamples" type="xs:int" use="optional"/>
-															<xs:attribute name="precision" type="xs:double" use="optional"/>
-															<xs:attribute name="alfa" type="xs:double" use="optional"/>
+															<xs:attribute name="precision" type="jdouble" use="optional"/>
+															<xs:attribute name="alfa" type="jdouble" use="optional"/>
 															<xs:attribute name="maxSamples" type="xs:int" use="optional"/>
 															<xs:attribute name="nodeType" type="xs:string" use="optional"/>
 														</xs:complexType>
@@ -257,14 +257,14 @@
 													<xs:element name="measure" minOccurs="0" maxOccurs="unbounded">
 														<xs:complexType>
 															<xs:attribute name="measureType" type="xs:string" use="required"/>
-															<xs:attribute name="meanValue" type="xs:double" use="optional"/>
-															<xs:attribute name="lowerLimit" type="xs:double" use="optional"/>
-															<xs:attribute name="upperLimit" type="xs:double" use="optional"/>
+															<xs:attribute name="meanValue" type="jdouble" use="optional"/>
+															<xs:attribute name="lowerLimit" type="jdouble" use="optional"/>
+															<xs:attribute name="upperLimit" type="jdouble" use="optional"/>
 															<xs:attribute name="successful" type="xs:boolean" use="required"/>
 															<xs:attribute name="analyzedSamples" type="xs:int" use="optional"/>
 															<xs:attribute name="discardedSamples" type="xs:int" use="optional"/>
-															<xs:attribute name="precision" type="xs:double" use="optional"/>
-															<xs:attribute name="alfa" type="xs:double" use="optional"/>
+															<xs:attribute name="precision" type="jdouble" use="optional"/>
+															<xs:attribute name="alfa" type="jdouble" use="optional"/>
 															<xs:attribute name="maxSamples" type="xs:int" use="optional"/>
 															<xs:attribute name="nodeType" type="xs:string" use="optional"/>
 														</xs:complexType>
@@ -281,7 +281,7 @@
 						<xs:attribute name="ok" type="xs:boolean" use="optional"/>
 						<xs:attribute name="solutionMethod" type="xs:string" use="optional"/>
 						<xs:attribute name="iteration" type="xs:integer" use="optional"/>
-						<xs:attribute name="iterationValue" type="xs:double" use="optional"/>
+						<xs:attribute name="iterationValue" type="jdouble" use="optional"/>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>

@@ -12,12 +12,12 @@
 						<xs:sequence>
 							<xs:element name="sample" maxOccurs="unbounded">
 								<xs:complexType>
-									<xs:attribute name="meanValue" type="xs:double" use="required"/>
+									<xs:attribute name="meanValue" type="jdouble" use="required"/>
 									<!--lastIntervalAvgValue shoud be required, it is optional just for backward compatibility -->
-									<xs:attribute name="lastIntervalAvgValue" type="xs:double" use="optional"/>
-									<xs:attribute name="simulationTime" type="xs:double" use="optional"/>
-									<xs:attribute name="upperBound" type="xs:double" use="optional"/>
-									<xs:attribute name="lowerBound" type="xs:double" use="optional"/>
+									<xs:attribute name="lastIntervalAvgValue" type="jdouble" use="optional"/>
+									<xs:attribute name="simulationTime" type="jdouble" use="optional"/>
+									<xs:attribute name="upperBound" type="jdouble" use="optional"/>
+									<xs:attribute name="lowerBound" type="jdouble" use="optional"/>
 									<xs:attribute name="validity" type="xs:boolean" use="optional"/>
 								</xs:complexType>
 							</xs:element>
@@ -26,18 +26,18 @@
 						<xs:attribute name="referenceClass" type="xs:string" use="required"/>
 						<xs:attribute name="type" type="xs:integer" use="required"/>
 						<xs:attribute name="referenceStation" type="xs:string" use="required"/>
-						<xs:attribute name="finalValue" type="xs:double" use="optional"/>
+						<xs:attribute name="finalValue" type="jdouble" use="optional"/>
 						<xs:attribute name="state" type="xs:integer" use="optional"/>
 						<xs:attribute name="analyzedSamples" type="xs:integer" use="required"/>
 						<xs:attribute name="discardedSamples" type="xs:int" use="optional"/>
-						<xs:attribute name="precision" type="xs:double" use="required"/>
-						<xs:attribute name="alpha" type="xs:double" use="required"/>
+						<xs:attribute name="precision" type="jdouble" use="required"/>
+						<xs:attribute name="alpha" type="jdouble" use="required"/>
 						<xs:attribute name="nodeType" type="xs:string" use="optional"/>
 						<xs:attribute name="logFile" type="xs:string" use="optional"/>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
-			<xs:attribute name="pollingInterval" type="xs:double" use="required"/>
+			<xs:attribute name="pollingInterval" type="jdouble" use="required"/>
 			<xs:attribute name="logDecimalSeparator" type="xs:string" use="optional"/>
 			<xs:attribute name="logDelimiter" type="xs:string" use="optional"/>
 			<xs:attribute name="logPath" type="xs:string" use="optional"/>

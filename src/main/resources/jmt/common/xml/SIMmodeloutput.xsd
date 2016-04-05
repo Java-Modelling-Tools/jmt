@@ -9,14 +9,14 @@
 						<xs:attribute name="station" type="xs:string" use="required"/>
 						<xs:attribute name="class" type="xs:string" use="required"/>
 						<xs:attribute name="measureType" type="xs:string" use="required"/>
-						<xs:attribute name="meanValue" type="xs:double" use="optional"/>
-						<xs:attribute name="lowerLimit" type="xs:double" use="optional"/>
-						<xs:attribute name="upperLimit" type="xs:double" use="optional"/>
+						<xs:attribute name="meanValue" type="jdouble" use="optional"/>
+						<xs:attribute name="lowerLimit" type="jdouble" use="optional"/>
+						<xs:attribute name="upperLimit" type="jdouble" use="optional"/>
 						<xs:attribute name="successful" type="xs:boolean" use="required"/>
 						<xs:attribute name="analyzedSamples" type="xs:int" use="optional"/>
 						<xs:attribute name="discardedSamples" type="xs:int" use="optional"/>
-						<xs:attribute name="precision" type="xs:double" use="optional"/>
-						<xs:attribute name="alfa" type="xs:double" use="optional"/>
+						<xs:attribute name="precision" type="jdouble" use="optional"/>
+						<xs:attribute name="alfa" type="jdouble" use="optional"/>
 						<xs:attribute name="maxSamples" type="xs:int" use="optional"/>
 						<xs:attribute name="nodeType" type="xs:string" use="optional"/>
 						<xs:attribute name="logFile" type="xs:string" use="optional"/>

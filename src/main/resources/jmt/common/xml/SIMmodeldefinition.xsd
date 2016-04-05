@@ -25,16 +25,36 @@
 							use="required" />
 						<xs:attribute name="alpha" use="required">
 							<xs:simpleType>
-								<xs:restriction base="xs:double">
-									<xs:whiteSpace value="collapse" />
-								</xs:restriction>
+								<xs:union>
+									<xs:simpleType>
+										<xs:restriction base="xs:double">
+											<xs:whiteSpace value="collapse" />
+										</xs:restriction>
+									</xs:simpleType>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:enumeration value="Infinity"/>
+											<xs:enumeration value="-Infinity"/>
+										</xs:restriction>
+									</xs:simpleType>	
+								</xs:union>
 							</xs:simpleType>
 						</xs:attribute>
 						<xs:attribute name="precision" use="required">
 							<xs:simpleType>
-								<xs:restriction base="xs:double">
-									<xs:whiteSpace value="collapse" />
-								</xs:restriction>
+								<xs:union>
+									<xs:simpleType>
+										<xs:restriction base="xs:double">
+											<xs:whiteSpace value="collapse" />
+										</xs:restriction>
+									</xs:simpleType>
+									<xs:simpleType>
+										<xs:restriction base="xs:string">
+											<xs:enumeration value="Infinity"/>
+											<xs:enumeration value="-Infinity"/>
+										</xs:restriction>
+									</xs:simpleType>	
+								</xs:union>
 							</xs:simpleType>
 						</xs:attribute>
 						<xs:attribute name="verbose" use="optional">
@@ -81,13 +101,13 @@
 							<xs:element name="globalConstraint">
 								<xs:complexType>
 									<xs:attribute name="maxJobs"
-										type="xs:double" use="required" />
+										type="jdouble" use="required" />
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="globalMemoryConstraint" minOccurs="0" maxOccurs="1">
 								<xs:complexType>
 									<xs:attribute name="maxMemory"
-										type="xs:double" use="required"/>
+										type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="classConstraint"
@@ -96,7 +116,7 @@
 									<xs:attribute name="jobClass"
 										type="xs:string" use="required" />
 									<xs:attribute name="maxJobsPerClass"
-										type="xs:double" use="required" />
+										type="jdouble" use="required" />
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="classWeight" minOccurs="0"
@@ -105,7 +125,7 @@
 									<xs:attribute name="jobClass"
 										type="xs:string" use="required" />
 									<xs:attribute name="weight"
-										type="xs:double" use="required" />
+										type="jdouble" use="required" />
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="classMemorySize" minOccurs="0"
@@ -161,11 +181,11 @@
 			<xs:attribute name="name" type="xs:string" use="required" />
 			<xs:attribute name="debug" type="xs:boolean" use="optional" />
 			<xs:attribute name="seed" type="xs:long" use="optional" />
-			<xs:attribute name="maxTime" type="xs:double"
+			<xs:attribute name="maxTime" type="jdouble"
 				use="optional" />
-			<xs:attribute name="maxSimulated" type="xs:double"
+			<xs:attribute name="maxSimulated" type="jdouble"
 				use="optional" />
-			<xs:attribute name="polling" type="xs:double"
+			<xs:attribute name="polling" type="jdouble"
 				use="optional" />
 			<xs:attribute name="maxSamples" type="xs:int"
 				use="optional" />
