@@ -214,7 +214,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 					dispatcher.results.setTempMeasures(dispatcher.simulator.getTempMeasures(), dispatcher.simulator.checkSimProgress());
 					initialized = true;
 					// Sets ResultsWindow
-					ResultsWindow rw = new ResultsWindow(results, dispatcher);
+					ResultsWindow rw = new ResultsWindow(results, dispatcher, gui.getFileName());
 					gui.setResultsWindow(rw);
 					// Moves it to lower right corner if animation is enabled
 					if (sd.isAnimationEnabled()) {

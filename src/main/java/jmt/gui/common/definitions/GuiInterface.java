@@ -91,4 +91,6 @@ public interface GuiInterface {
 	 * @param avaible true if they are avaible
 	 */
 	//public void setPAResultsAvaible(boolean avaible);
+        
+        public String getFileName();
 }

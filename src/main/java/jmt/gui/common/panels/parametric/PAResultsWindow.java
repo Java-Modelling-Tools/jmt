@@ -131,6 +131,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+        private static final String TITLE = "Simulation Results";
 	public static final int SPINNER_WIDTH = 65;
 	public static final double PLOT_ZOOM_FACTOR = 0.5;
 	public static final double SPINNER_PRECISION = 0.001;
@@ -143,9 +144,10 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	 * @param pad parametric analysis definition model
 	 * @param resModel parametric analysis results data structure
 	 */
-	public PAResultsWindow(ParametricAnalysisDefinition pad, PAResultsModel resModel) {
+	public PAResultsWindow(ParametricAnalysisDefinition pad, PAResultsModel resModel, String fileName) {
 		this.results = resModel;
 		this.pad = pad;
+                this.updateTitle(fileName);
 		initGUI();
 	}
 
@@ -155,7 +157,6 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	private void initGUI() {
 		// Sets default title, close operation and dimensions
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		this.setTitle("Simulation Results...");
 		this.setIconImage(JMTImageLoader.loadImage("Results").getImage());
 		this.centerWindow(1024, 768);
 
@@ -1651,6 +1652,18 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 */
 		public String getExtension() {
 			return extension;
+		}
+	}
+        
+        /**
+	 * Updates this window title adding the file name
+	 * @param filename the file name or null to remove it.
+	 */
+	public void updateTitle(String filename) {
+		if (filename != null) {
+			setTitle(TITLE + " - " + filename);
+		} else {
+			setTitle(TITLE);
 		}
 	}
 }

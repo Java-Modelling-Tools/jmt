@@ -178,7 +178,9 @@ public class PAResultsModel implements MeasureDefinition {
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
 				FJResponseTime.add(new Integer(i));
 			}
-			measures.add(new Measure(measureName, stationName, className, thisAlpha, thisPrecision, numType, nodeType));
+                        Measure tmp = new Measure(measureName, stationName, className, thisAlpha, thisPrecision, numType, nodeType);
+			measures.add(tmp);
+                        names.put(measureName, tmp);
 		}
 		parameterValues = model.getParametricAnalysisModel().getParameterValues();
 	}

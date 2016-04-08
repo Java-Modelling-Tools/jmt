@@ -813,10 +813,10 @@ public class Mediator implements GuiInterface {
 			// If model contains results, enable Results Window
 			if (model.containsSimulationResults()) {
 				if (model.isParametricAnalysisEnabled()) {
-					this.setResultsWindow(new PAResultsWindow(model.getParametricAnalysisModel(), (PAResultsModel) model.getSimulationResults()));
+					this.setResultsWindow(new PAResultsWindow(model.getParametricAnalysisModel(), (PAResultsModel) model.getSimulationResults(), openedArchive.getName()));
 					showResults.setEnabled(true);
 				} else {
-					this.setResultsWindow(new ResultsWindow(model.getSimulationResults()));
+					this.setResultsWindow(new ResultsWindow(model.getSimulationResults(), openedArchive.getName()));
 					showResults.setEnabled(true);
 				}
 			}
@@ -1504,6 +1504,12 @@ public class Mediator implements GuiInterface {
 			case ModelLoader.SUCCESS:
 				model.resetSaveState();
 				mainWindow.updateTitle(openedArchive.getName());
+                                if (resultsWindow instanceof ResultsWindow) {
+                                        ((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+                                }
+                                if (resultsWindow instanceof PAResultsWindow) {
+                                        ((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+                                }
 				break;
 			case ModelLoader.FAILURE:
 				showErrorMessage(modelLoader.getFailureMotivation());
@@ -1524,6 +1530,12 @@ public class Mediator implements GuiInterface {
 				model.resetSaveState();
 				openedArchive = modelLoader.getSelectedFile();
 				mainWindow.updateTitle(openedArchive.getName());
+                                if (resultsWindow instanceof ResultsWindow) {
+                                        ((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+                                }
+                                if (resultsWindow instanceof PAResultsWindow) {
+                                        ((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+                                }
 				break;
 			case ModelLoader.FAILURE:
 				showErrorMessage(modelLoader.getFailureMotivation());
@@ -2400,6 +2412,7 @@ public class Mediator implements GuiInterface {
 			model.manageJobs();
 			mc = new ModelChecker(model, model, model, model, false);
 			pw = new JModelProblemsWindow(mainWindow, mc, this);
+                        pw.setModal(true);
 			if (!mc.isEverythingOkNormal()) {
 				pw.show();
 			}
@@ -2623,6 +2636,7 @@ public class Mediator implements GuiInterface {
 	public void toJMVA() {
 		mc = new ModelChecker(model, model, model, model, true);
 		pw = new JModelProblemsWindow(mainWindow, mc, this);
+                pw.setModal(true);
 		if (!mc.isEverythingOkToJMVA()) {
 			pw.show();
 		}
@@ -3714,5 +3728,14 @@ public class Mediator implements GuiInterface {
 		}
 	}
 	//end
+
+        @Override
+        public String getFileName() {
+                if(openedArchive != null) {
+                        return openedArchive.getName();
+                } else {
+                        return null;
+                }
+        }
 
 }

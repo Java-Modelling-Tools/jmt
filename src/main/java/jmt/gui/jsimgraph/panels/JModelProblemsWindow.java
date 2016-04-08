@@ -228,9 +228,11 @@ public class JModelProblemsWindow extends JDialog {
 		gbconstants.insets.left = -38;
 		typeButton = new JButton("Type");
 		typeButton.setPreferredSize(new Dimension(100, 20));
+                typeButton.setFocusable(false);
 		this.addComponent(typeButton, gblayout, gbconstants, 1, 0, 1, 1);
 		descriptionButton = new JButton("Description");
 		descriptionButton.setPreferredSize(new Dimension(882, 20));
+                descriptionButton.setFocusable(false);
 		gbconstants.insets.left = -68;
 		this.addComponent(descriptionButton, gblayout, gbconstants, 1, 1, 1, 1);
 		gbconstants.fill = GridBagConstraints.BOTH;
@@ -239,6 +241,7 @@ public class JModelProblemsWindow extends JDialog {
 		gbconstants.weighty = 1;
 		gbconstants.insets.right = 10;
 		gbconstants.insets.left = 10;
+                jsp.setFocusable(false);
 		this.addComponent(jsp, gblayout, gbconstants, 2, 0, 2, 1);
 		ButtonEventHandler beh = new ButtonEventHandler();
 		continueButton = new JButton("Continue");
@@ -266,7 +269,6 @@ public class JModelProblemsWindow extends JDialog {
 		this.setLocation(300, 190);
 		this.setModal(true);
 		this.setResizable(false);
-		this.setFocusableWindowState(false);
 	}
 
 	/**

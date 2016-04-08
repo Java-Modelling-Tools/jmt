@@ -44,7 +44,7 @@ public class TestLDService {
 		String resfilename = path + "res_sim_" + filename + ".xml";
 		StoredResultsModel srm = new StoredResultsModel();
 		XMLResultsReader.parseXML(XMLReader.loadXML(resfilename), srm);
-		ResultsWindow res = new ResultsWindow(srm);
+		ResultsWindow res = new ResultsWindow(srm, filename);
 		res.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		res.show();
 	}

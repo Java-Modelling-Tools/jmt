@@ -238,10 +238,11 @@ public class XMLResultsReader implements XMLResultsConstants {
 			if (fileName != null && fileName.length() == 0) {
 				fileName = null;
 			}
-			String stationName = current.getAttribute(XML_AO_MEASURE_STATION);
-			String className = current.getAttribute(XML_AO_MEASURE_CLASS);
+			String stationName = current.getAttribute(XML_AO_MEASURE_STATION).isEmpty() ? "Network" : current.getAttribute(XML_AO_MEASURE_STATION);
+			String className = current.getAttribute(XML_AO_MEASURE_CLASS).isEmpty() ? "All classes" : current.getAttribute(XML_AO_MEASURE_CLASS);
 			String type = current.getAttribute(XML_AO_MEASURE_TYPE);
 			String success = current.getAttribute(XML_AO_MEASURE_SUCCESFUL);
+                        
 			boolean successful = success.toLowerCase().equals("true");
 			// Optional Elements
 			String attr;

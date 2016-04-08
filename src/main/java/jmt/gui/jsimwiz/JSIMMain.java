@@ -415,10 +415,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			// If simulation results are present, adds a Result Window
 			if (model.containsSimulationResults()) {
 				if (model.isParametricAnalysisEnabled()) {
-					this.setResultsWindow(new PAResultsWindow(model.getParametricAnalysisModel(), (PAResultsModel) model.getSimulationResults()));
+					this.setResultsWindow(new PAResultsWindow(model.getParametricAnalysisModel(), (PAResultsModel) model.getSimulationResults(), currentFile.getName()));
 					SHOW_RESULTS.setEnabled(true);
 				} else {
-					this.setResultsWindow(new ResultsWindow(model.getSimulationResults()));
+					this.setResultsWindow(new ResultsWindow(model.getSimulationResults(), currentFile.getName()));
 					SHOW_RESULTS.setEnabled(true);
 				}
 			}
@@ -1043,5 +1043,14 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	public void setAnimationHolder(Thread thread) {
 		//Ignore		
 	}
+
+        @Override
+        public String getFileName() {
+                if(currentFile != null) {
+                        return currentFile.getName();
+                } else {
+                        return null;
+                }
+        }
 
 }

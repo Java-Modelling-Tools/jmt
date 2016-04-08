@@ -102,6 +102,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+        
+        private final String TITLE = "Simulation Results";
+        
 	private MeasureDefinition results;
 	private AbortMeasure abort;
 	private JButton start;
@@ -117,9 +120,11 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	/**
 	 * Creates a new ResultsWindow
 	 * @param results results data structure
+         * @param fileName name of simulation file
 	 */
-	public ResultsWindow(MeasureDefinition results) {
+	public ResultsWindow(MeasureDefinition results, String fileName) {
 		this.results = results;
+                this.updateTitle(fileName);
 		initGUI();
 	}
 
@@ -128,9 +133,10 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	 * @param results results data structure
 	 * @param abort object used to implement abort button action
 	 */
-	public ResultsWindow(MeasureDefinition results, AbortMeasure abort) {
+	public ResultsWindow(MeasureDefinition results, AbortMeasure abort, String fileName) {
 		this.results = results;
 		this.abort = abort;
+                this.updateTitle(fileName);
 		initGUI();
 	}
 
@@ -140,7 +146,6 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	private void initGUI() {
 		// Sets default title, close operation and dimensions
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
-		this.setTitle("Simulation Results...");
 		this.setIconImage(JMTImageLoader.loadImage("Results").getImage());
 		this.centerWindow(1024, 768);
 
@@ -740,6 +745,18 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 							file.getAbsolutePath(), md.getName(measureIndex)));
 				}
 			}
+		}
+	}
+        
+        /**
+	 * Updates this window title adding the file name
+	 * @param filename the file name or null to remove it.
+	 */
+	public void updateTitle(String filename) {
+		if (filename != null) {
+			setTitle(TITLE + " - " + filename);
+		} else {
+			setTitle(TITLE);
 		}
 	}
 }
