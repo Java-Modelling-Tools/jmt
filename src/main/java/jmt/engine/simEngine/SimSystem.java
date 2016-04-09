@@ -5,6 +5,7 @@
 
 package jmt.engine.simEngine;
 
+import java.util.Hashtable;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,7 +20,7 @@ public class SimSystem {
 
 	private static boolean DEBUG = false;
 
-	// Private data members
+        // Private data members
 	static private List<SimEntity> entities; // The current entity list
 
 	static private EventQueue future; // The future event queue
@@ -29,6 +30,10 @@ public class SimSystem {
 	static private double clock; // Holds the current global simulation time
 	static private boolean running; // Tells whether the run() member been called yet
 	static private NumberFormat nf;
+
+        // cache for the entity IDs
+        static private Hashtable<Integer,SimEntity> entityHash = new Hashtable<Integer,SimEntity>();
+
 
 	//
 	// Public library interface
@@ -105,13 +110,9 @@ public class SimSystem {
 	 * @return A reference to the entity, or null if it could not be found
 	 */
 	static final public SimEntity getEntity(int id) {
-        SimEntity ent, found = null;
-        for (Iterator<SimEntity> it = entities.iterator(); it.hasNext();) {
-            ent = it.next();
-            if(ent.getId() == id){
-                 found = ent;
-            }
-        }
+            
+        SimEntity found = entityHash.get(id);    
+        
         if (found == null) {
 			System.out.println("SimSystem: could not find entity " + id);
 		}
@@ -156,6 +157,8 @@ public class SimSystem {
 			/* Post an event to make this entity */
 			evt = new SimEvent(SimEvent.CREATE, clock, e.getId(), 0, 0, e);
 			future.add(evt);
+                        /* add entity id to the entity cache to accelerate getEntity(int id) */
+                        entityHash.put(e.getId(), e);
 		} else {
 			if (e.getId() == -1) {
 
@@ -165,6 +168,7 @@ public class SimSystem {
 				// Only add once!
 				e.setId(entities.size());
 				entities.add(e);
+                                entityHash.put(e.getId(), e);
 			}
 		}
 	}
