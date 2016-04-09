@@ -71,11 +71,10 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 	// Name of blocking region
 	protected JTextField name;
 	// Global number of jobs
-	protected JSpinner number, memory;
-	protected JCheckBox inf, mInf;
+	protected JSpinner number;
+	protected JCheckBox inf;
 	// Panels for input data
-	protected JPanel globalPanel;
-	protected JPanel classPanel;
+	protected JPanel globalPanel, classPanel;
 	/** Used to display classes with icon */
 	protected ImagedComboBoxCellEditorFactory classEditor;
 
@@ -128,24 +127,15 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		// Enter global number of customers
 		label = new JLabel("Region capacity: ");
 		JPanel tmpPanel = new JPanel(new BorderLayout(6, 6));
-		JPanel tmp = new JPanel(new BorderLayout(6,6));
 		number = new JSpinner();
-		memory = new JSpinner();
 		inf = new JCheckBox("Infinite");
-		mInf = new JCheckBox("Infinite");
-		JLabel mLabel = new JLabel("Region memory capacity: ");
 		tmpPanel.add(number, BorderLayout.CENTER);
 		tmpPanel.add(inf, BorderLayout.EAST);
-		tmp.add(memory, BorderLayout.CENTER);
-		tmp.add(mInf, BorderLayout.EAST);
 		label.setLabelFor(tmpPanel);
-		mLabel.setLabelFor(memory);
 		globalPanel.add(label);
 		globalPanel.add(tmpPanel);
-		globalPanel.add(mLabel);
-		globalPanel.add(tmp);
 
-		SpringUtilities.makeCompactGrid(globalPanel, 3, 2, 20, 4, 20, 10);
+		SpringUtilities.makeCompactGrid(globalPanel, 2, 2, 20, 4, 20, 10);
 		add(globalPanel, BorderLayout.NORTH);
 		// Panel with class dependent parameters
 		classPanel = new JPanel(new BorderLayout());
@@ -178,20 +168,6 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 				}
 			}
 		});
-		memory.addChangeListener(new ChangeListener(){
-			public void stateChanged(ChangeEvent e) {
-				Object value = memory.getValue();
-				if (value instanceof Integer) {
-					int num = ((Integer) value).intValue();
-					if (num > 0) {
-						brd.setRegionMemoryCapacity(key, (Integer) value);
-					}
-					// Shows stored value
-					memory.setValue(brd.getRegionMemorySize(key));
-				}
-			}
-		});
-		
 		inf.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (inf.isSelected()) {
@@ -207,23 +183,6 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 					number.setValue(num);
 					number.setEnabled(true);
 					brd.setRegionCustomerConstraint(key, num);
-				}
-			}
-		});
-		mInf.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				if(mInf.isSelected()){
-					memory.setValue(new Float(Float.POSITIVE_INFINITY));
-					memory.setEnabled(false);
-					brd.setRegionMemoryCapacity(key, new Integer(-1));
-				}else{
-					Integer memorySize = Defaults.getAsInteger("blockingMaxMemory");
-					if(memorySize.intValue() <= 0){
-						memorySize = new Integer(1);
-					}
-					memory.setValue(memorySize);
-					memory.setEnabled(true);
-					brd.setRegionMemoryCapacity(key, memorySize);
 				}
 			}
 		});
@@ -275,16 +234,6 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 			number.setValue(new Float(Float.POSITIVE_INFINITY));
 			inf.setSelected(true);
 			number.setEnabled(false);
-		}
-		Integer memoSize = brd.getRegionMemorySize(key);
-		if(memoSize.intValue() > 0){
-			memory.setValue(memoSize);
-			mInf.setSelected(false);
-			memory.setEnabled(true);
-		} else {
-			memory.setValue(new Float(Float.POSITIVE_INFINITY));
-			mInf.setSelected(true);
-			memory.setEnabled(false);
 		}
 	}
 
@@ -349,7 +298,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		protected String[] dropRules = new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() };
 		protected TableCellRenderer gray = new GrayCellRenderer();
 
-		int[] columnSizes = new int[] { 150, 60, 30, 50, 40, 40 };
+		int[] columnSizes = new int[] { 200, 60, 20, 50 };
 
 		public BlockingTable() {
 			super();
@@ -396,15 +345,15 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private Class[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class ,String.class, String.class};
-		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Drop", "Memory Size"};//, "Weight" };
+		private Class[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class };
+		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Drop" };
 
 		public int getRowCount() {
 			return cd.getClassKeys().size();
 		}
 
 		public int getColumnCount() {
-			return columnNames.length;
+			return 4;
 		}
 
 		@Override
@@ -420,7 +369,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			// Drop rule, infinity constraint are editables. Number value is editable if infinity is uncecked
-			return columnIndex == 5 || columnIndex == 4 || columnIndex == 3 || columnIndex == 2 || (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, columnIndex + 1)).booleanValue());
+			return columnIndex == 3 || columnIndex == 2 || (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, columnIndex + 1)).booleanValue());
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
@@ -441,10 +390,6 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 					return (num.intValue() <= 0) ? Boolean.TRUE : Boolean.FALSE;
 				case (3):
 					return brd.getRegionClassDropRule(key, classKey).toString();
-				case (4):
-					return brd.getRegionClassSize(key, classKey).toString();
-				case (5):
-					return brd.getRegionClassWeight(key, classKey).toString();
 			}
 			return null;
 		}
@@ -479,26 +424,6 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 					break;
 				case (3):
 					brd.setRegionClassDropRule(key, classKey, Boolean.valueOf((String) aValue));
-					break;
-				case (4):
-					try {
-						value = Integer.decode((String) aValue);
-						if (value.intValue() > 0) {
-							brd.setRegionClassSize(key, classKey, Integer.valueOf((String) aValue));
-						}
-					} catch (NumberFormatException e) {
-						// Do nothing
-					}
-					break;
-				case (5):
-					try {
-						value = Integer.decode((String) aValue);
-						if (value.intValue() > 0) {
-							brd.setRegionClassWeight(key, classKey, Integer.valueOf((String) aValue));
-						}
-					} catch (NumberFormatException e) {
-						// Do nothing
-					}
 					break;
 			}
 			repaint();
