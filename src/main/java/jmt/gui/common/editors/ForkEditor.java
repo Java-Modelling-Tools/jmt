@@ -752,7 +752,7 @@ public class ForkEditor extends JSplitPane implements
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Forking Number",
+		private String[] columnNames = new String[] { "No. of branches",
 				"Probability" };
 		private Class[] columnClasses = new Class[] { String.class,
 				Object.class };
