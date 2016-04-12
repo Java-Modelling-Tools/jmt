@@ -132,10 +132,4 @@ public class ProbabilitiesFork extends ForkStrategy {
 		return true;
 	}
 
-	@Override
-	public HashMap<Object, Integer> generateJobs() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

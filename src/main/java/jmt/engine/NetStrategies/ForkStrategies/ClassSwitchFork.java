@@ -53,11 +53,6 @@ public class ClassSwitchFork extends ForkStrategy {
                 return nl;
                 
         }
-
-        @Override
-        public HashMap<Object, Integer> generateJobs() {
-                return null;
-        }
         
         private boolean findNodes() {
 		nodes = new NetNode[nodeNames.length];

@@ -17,8 +17,6 @@ public abstract class ForkStrategy implements AutoCheck {
 				jobClass);
 	}
 	
-	public abstract HashMap<Object,Integer> generateJobs();
-	
 	public boolean check() {
 		return true;
 	}
