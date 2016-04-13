@@ -11,26 +11,24 @@
 It is recommended to UNINSTALL any previous version of Java Modelling
 Tools present on your PC before installing this new release.
 
-<h2>What's new in version 0.9.2</h2>
+<h2>What's new in version 0.9.3</h2>
 <h3>JMT</h3>
 <ul>
-<li>Project upgraded to Java 1.7</li>
-<li>Upgraded installation to izPack 5.0 to support Windows 8.x</li>
-<li>Default resolution upgraded to 1024x768</li>
-<li>Code improvements: deep refactoring, added maven support, added unit tests</li>
+<li>Templates: new “T” button allows to download external templates in JSIMgraph. A template provides a wizard to automatically generate a JSIMgraph model. Any external party can expose a JMT template server, contributions welcome! Please check the manual for details.</li>
+<li>Multiple bug fixes in JSIM and JABA</li>
+<li>1.5 Gb heap version no longer available.</li>
 </ul>
 <h3>JMVA</h3>
 <ul>  
-<li>Users can now select any station in the model as Reference station (the station used for the computation of the system throughput and the system response time).</li>
-<li>Code of MoM, CoMoM, and AMVA solution algorithms now part of the stable code branch</li>
+<li>MonteCarlo and RGF methods integrated in source code (not exposed in GUI yet).</li>
 </ul>
 <h3>JSIM</h3>
 <ul>
-<li>New scheduling algorithms (shortest job first SJF, longest job first LJF, random RAND)</li>
-<li>Class switch, new more powerful implementation, not available in this release for models with fork/join and finite capacity region</li>
-<li>Support for using a large number of classes, queues, and finite capacity regions in a single model</li>
-<li>Several statistics (mean, moments, ...) are generated for the performance indices (response time, number of customers, ...) with the possibility of generating graphics (histogram, density, distribution) on all or a part of the simulated events (results can be saved in CSV files)</li>
-<li>New simulation control parameter, the simulation can be stopped at a user specified simulation time</li>
+<li>Advanced fork strategies: Branch probabilities, Random subset, Class Switch, Multi-Branch Class Switch</li>
+<li>Advanced join strategies: Quorum, Guard</li>
+<li>Improved checks in conversion to JMVA</li>
+<li>Preloading enabled in FCR</li>
+<li>Improved performance of simulation engine for models with several stations.</li>
 </ul>
 
 <h2>Working folder</h2>
