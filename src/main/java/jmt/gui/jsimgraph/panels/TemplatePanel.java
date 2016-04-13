@@ -99,7 +99,7 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 
 		this.setLayout(new BorderLayout());
 
-		JButton add = new JButton("Add/see all Templates");
+		JButton add = new JButton("Add/See all");
 		JButton remove = new JButton("Remove");
 		JButton refresh = new JButton("Refresh");
 
