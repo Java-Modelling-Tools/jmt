@@ -1722,6 +1722,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			}
 		} else {
 			toSet.isConnected = areConnected;
+                        if(areConnected) {
+                                for(Object c: this.getClassKeys()) {
+                                        ForkStrategy fs = (ForkStrategy) this.getForkingStrategy(sourceKey, c);
+                                        if (fs != null) {
+                                                fs.addStation(this.getStationName(targetKey), targetKey, c, this.getClassKeys());
+                                        }
+                                }                    
+                        }
 			return toSet.isConnected;
 		}
 		return false;

@@ -2,6 +2,7 @@ package jmt.gui.common.forkStrategies;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 public class CombFork extends ForkStrategy {
 	private Map<Object, Double> outProbabilities = new HashMap<Object, Double>();
@@ -38,6 +39,11 @@ public class CombFork extends ForkStrategy {
         @Override
         public void removeStation(Object stationKey) {
                 outProbabilities.remove(Integer.toString(outProbabilities.size()));
+        }
+
+        @Override
+        public void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys) {
+                outProbabilities.put(Integer.toString(outProbabilities.size() + 1), new Double(0.0));
         }
 
 }

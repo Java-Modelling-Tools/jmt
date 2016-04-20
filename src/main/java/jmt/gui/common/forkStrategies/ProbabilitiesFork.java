@@ -3,6 +3,7 @@ package jmt.gui.common.forkStrategies;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Vector;
 
 import javax.swing.text.html.HTMLDocument.Iterator;
 
@@ -46,6 +47,15 @@ public class ProbabilitiesFork extends ForkStrategy {
         @Override
         public void removeStation(Object stationKey) {
                 outPaths.remove(stationKey);
+        }
+
+        @Override
+        public void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys) {
+                OutPath tempPath = new OutPath();
+                tempPath.putEntry(1, 1.0);
+                tempPath.setOutName(stationName);
+                tempPath.setProb(1.0);
+                outPaths.put(stationKey, tempPath);
         }
 
 }

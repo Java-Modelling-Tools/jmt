@@ -87,6 +87,10 @@ public class AutoDownloadPanel extends WizardPanel {
 		
 		download.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+                                File folder = new File(TemplateConstants.TEMPLATE_FOLDER);
+                                if(!folder.exists()) {
+                                        folder.mkdir();
+                                }
 				progress.setValue(0);
 				progress.setString("0%");
 				download.setEnabled(false);

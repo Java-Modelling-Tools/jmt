@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 public abstract class ForkStrategy {
 	protected static ForkStrategy[] all = null;
@@ -87,6 +88,8 @@ public abstract class ForkStrategy {
 	}
         
         public abstract void removeStation(Object stationKey);
+        
+        public abstract void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys);
 	
 	public abstract boolean isModelStateDependent();
 	

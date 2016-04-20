@@ -294,7 +294,7 @@ public class Mediator implements GuiInterface {
 		// S Jiang
 		customizableDialogFactory = new CustomizableDialogFactory(mainWindow);
 
-                /*
+                
 		if (Defaults.getAsBoolean("showDefaultTemplates")) {
 			int result = JOptionPane
 					.showConfirmDialog(mainWindow,
@@ -309,7 +309,7 @@ public class Mediator implements GuiInterface {
                                 Defaults.save();
                         }
 		}
-                */
+                
 		
 		// end
 
