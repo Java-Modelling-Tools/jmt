@@ -313,6 +313,15 @@ public class MersenneTwister extends RandomEngine {
 	public double raw() {
 		return genrand_real3();
 	}
+        
+        /**
+	 * Returns a 32 bit uniformly distributed random number in the open unit
+	 * interval [0.0,1.0)  (including 0.0, excluding 1.0).
+	 */
+	@Override
+	public double raw2() {
+		return genrand_real3();
+	}
 
 	/**
 	 * test

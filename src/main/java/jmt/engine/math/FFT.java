@@ -1,5 +1,7 @@
 package jmt.engine.math;
 
+import jmt.engine.random.engine.RandomEngine;
+
 /** Computes FFT's of complex, double precision data where n is an integer power of 2.
  * This appears to be slower than the Radix2 method,
  * but the code is smaller and simpler, and it requires no extra storage.
@@ -14,6 +16,8 @@ package jmt.engine.math;
  */
 
 public class FFT {
+        
+        private static RandomEngine engine = RandomEngine.makeDefault();
 
 	public static final double num_flops(int N) {
 		double Nd = N;
@@ -63,7 +67,8 @@ public class FFT {
 		int nd = 2 * n;
 		double data[] = new double[nd];
 		for (int i = 0; i < nd; i++) {
-			data[i] = Math.random();
+                        // relpaced Math.random
+			data[i] = engine.raw2();
 		}
 		return data;
 	}

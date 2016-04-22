@@ -95,5 +95,11 @@ public abstract class RandomEngine {
 	 * interval (0.0,1.0)  (excluding 0.0 and 1.0).
 	 */
 	public abstract double raw();
+        
+        /**
+	 * Returns a 32 bit uniformly distributed random number in the open unit
+	 * interval [0.0,1.0)  (including 0.0, excluding 1.0).
+	 */
+	public abstract double raw2();
 
 } //end RandomStrategy Engine

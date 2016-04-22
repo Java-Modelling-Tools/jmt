@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeSet;
+import jmt.engine.random.engine.RandomEngine;
 
 import jmt.jmva.analytical.solvers.DataStructures.PopulationVector;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
@@ -43,6 +44,8 @@ public class TreePlanter {
 	
 	/** The complexity evaluator. */
 	private ComplexityEvaluator ce;
+        
+        private RandomEngine engine = RandomEngine.makeDefault();
 
 	/** Constructor.
 	 * @param qnm The queueing network model to solve.
@@ -227,7 +230,8 @@ public class TreePlanter {
 								candidate2 = s;
 							}
 							else if (candidate2.weight == s.weight) {
-								candidate2 = (Math.random() < 0.5) ? candidate2 : s;
+                                                                // relpaced Math.random
+								candidate2 = (engine.raw2() < 0.5) ? candidate2 : s;
 							}
 						}
 					}

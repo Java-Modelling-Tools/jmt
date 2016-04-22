@@ -8,6 +8,7 @@ import jmt.jmva.analytical.solvers.QueuingNet.CoMoMBTFSolver;
 import jmt.jmva.analytical.solvers.QueuingNet.MonteCarloSolver;
 import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
 import javax.naming.OperationNotSupportedException;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * Created by ellasu on 25/06/2015.
@@ -25,6 +26,8 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
      * Contains the queuing network model
      */
     protected QNModel qnm;
+    
+    private RandomEngine engine = RandomEngine.makeDefault();
 
 
     /** Creates new SolverMultiClosedMonteCarlo
@@ -153,7 +156,8 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
                 for (int i=0; i<qnm.M; i++) {
                     T[i] = qnm.getQueueType(i).ordinal();
                     mi[i] = qnm.getMultiplicitiesVector().get(i);
-                    D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*Math.random())); // i is a perturbation of 10^-6 magnitude
+                    // relpaced Math.random
+                    D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*engine.raw2())); // i is a perturbation of 10^-6 magnitude
                 }
             }
             scale = newscale;

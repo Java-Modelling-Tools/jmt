@@ -26,6 +26,7 @@ package jmt.engine.dataAnalysis;
 
 import Jama.Matrix;
 import Jama.SingularValueDecomposition;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  *  This class performs polynomial fitting on given data: there are two
@@ -34,6 +35,8 @@ import Jama.SingularValueDecomposition;
  * @author  Federico Granata
  */
 public class PolyFit {
+        
+        private static RandomEngine engine = RandomEngine.makeDefault();
 
 	/**
 	 * fit:
@@ -176,7 +179,8 @@ public class PolyFit {
 
 		for (int i = 0; i < 200; i++) {
 			x[i] = i + 1;
-			y[i] = Math.random();
+                        // relpaced Math.random
+			y[i] = engine.raw2();
 			//System.out.println(y[i]+" ");
 			//l.write(pippo);
 		}

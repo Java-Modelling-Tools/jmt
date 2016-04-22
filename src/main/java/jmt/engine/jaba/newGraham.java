@@ -19,6 +19,7 @@
 package jmt.engine.jaba;
 
 import java.util.Vector;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * Created by IntelliJ IDEA.
@@ -28,6 +29,8 @@ import java.util.Vector;
  * To change this template use File | Settings | File Templates.
  */
 public class newGraham {
+        
+        private RandomEngine engine = RandomEngine.makeDefault();
 
 	Vector<PPoint> point = new Vector<PPoint>(2);
 	Vector<PPoint> convexHull = new Vector<PPoint>(2);
@@ -44,8 +47,9 @@ public class newGraham {
 	void addPt() {
 		boolean ptin = false;
 		PPoint pt = new PPoint();
-		pt.x = (int) (Math.random() * (width - 2) + 1);
-		pt.y = (int) (Math.random() * (height - 2) + 1);
+                // relpaced Math.random
+		pt.x = (int) (engine.raw2() * (width - 2) + 1);
+		pt.y = (int) (engine.raw2() * (height - 2) + 1);
 
 		pt.angle = 0;
 		point.addElement(pt);

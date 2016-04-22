@@ -9,6 +9,7 @@ import jmt.jmva.analytical.solvers.QueuingNet.ConvolutionSolver;
 import jmt.jmva.analytical.solvers.QueuingNet.RGFSolver;
 import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
 import javax.naming.OperationNotSupportedException;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * Solves a multiclass closed model, using RGF algorithm
@@ -27,6 +28,8 @@ public class SolverMultiClosedRGF extends SolverMulti {
 	 * Number of threads that the MoMSolver should use
 	 */
 	protected int nThreads;
+        
+        private RandomEngine engine = RandomEngine.makeDefault();
 
 	/** Creates new SolverMultiClosedRGF
 	 *  @param  stations    number of service centers
@@ -156,7 +159,8 @@ public class SolverMultiClosedRGF extends SolverMulti {
 				for (int i=0; i<qnm.M; i++) {
 					T[i] = qnm.getQueueType(i).ordinal();
 					mi[i] = qnm.getMultiplicitiesVector().get(i);
-					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*Math.random())); // i is a perturbation of 10^-6 magnitude
+                                        // relpaced Math.random
+					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*engine.raw2())); // i is a perturbation of 10^-6 magnitude
 				}
 			}
 			scale = newscale;

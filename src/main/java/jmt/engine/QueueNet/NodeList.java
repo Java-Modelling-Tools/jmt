@@ -126,7 +126,7 @@ public class NodeList {
 		int size = nodes.size();
 		while(hs.size() < size){
                         //replaced Math.random() code
-			int index = (int)(engine.raw() * size);
+			int index = (int)(engine.raw2() * size);
 			int s = hs.size();
 			hs.add(index);
 			if(s < hs.size()){

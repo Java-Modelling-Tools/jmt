@@ -63,7 +63,7 @@ public class CombFork extends ForkStrategy{
 			while(pickedIndex.size() < num){
 				//generate random number 1 ~ size of branches
                                 //replaced Math.Random() code
-				int index = (int)(engine.raw() * nodes.size());
+				int index = (int)(engine.raw2() * nodes.size());
 				//add to the NodeListWithJobNum
 				//OLD
 				//nl.add(nodes.get(index), 1);
