@@ -1,4 +1,4 @@
-package jmt.analytical;
+package jmt.jmva;
 
 import static org.junit.Assert.assertTrue;
 

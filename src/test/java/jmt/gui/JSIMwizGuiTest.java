@@ -1,4 +1,4 @@
-package jmt.jsimwiz.gui;
+package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.gui.jsimwiz.JSIMMain;

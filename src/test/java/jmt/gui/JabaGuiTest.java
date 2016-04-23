@@ -1,7 +1,7 @@
-package jmt.jwat.gui;
+package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
-import jmt.gui.jwat.MainJwatWizard;
+import jmt.gui.jaba.JabaWizard;
 import jmt.util.ShortDescriptionButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
@@ -17,7 +17,7 @@ import org.junit.Test;
  * @author Piotr Tokaj
  *
  */
-public class JwatGuiTest {
+public class JabaGuiTest {
 
 	private FrameFixture window;
 
@@ -33,15 +33,15 @@ public class JwatGuiTest {
 	}
 
 	/**
-	 * Checks that, on the main JMT window, the user can press the "JWAT"
-	 * button, and that this will open a new window of type @MainJwatWizard
-	 * (which is the JWAT frame).
+	 * Checks that, on the main JMT window, the user can press the "JABA"
+	 * button, and that this will open a new window of type @JabaWizard
+	 * (which is the JABA frame).
 	 */
 	@Test
-	public void mainJWATWindowDisplaysCorrectly() {
-		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JWAT_SHORT_DESCRIPTION)).click();
-		FrameFixture jwat = WindowFinder.findFrame(MainJwatWizard.class).using(window.robot);
-		jwat.show();
+	public void mainJABAWindowDisplaysCorrectly() {
+		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JABA_SHORT_DESCRIPTION)).click();
+		FrameFixture jaba = WindowFinder.findFrame(JabaWizard.class).using(window.robot);
+		jaba.show();
 	}
 	
 	@After

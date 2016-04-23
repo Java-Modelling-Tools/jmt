@@ -1,4 +1,4 @@
-package jmt.jmva.mixed;
+package jmt.jmva;
 
 import static org.junit.Assert.assertTrue;
 

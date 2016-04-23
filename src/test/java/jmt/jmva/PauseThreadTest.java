@@ -16,7 +16,7 @@
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
-package jmt.jmva.engine;
+package jmt.jmva;
 
 import static org.junit.Assert.fail;
 

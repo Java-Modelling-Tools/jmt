@@ -1,4 +1,4 @@
-package jmt.jmch.gui;
+package jmt.gui;
 
 import javax.swing.JDialog;
 

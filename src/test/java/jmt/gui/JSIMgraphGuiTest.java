@@ -1,4 +1,4 @@
-package jmt.jsimgraph.gui;
+package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.gui.jsimgraph.mainGui.MainWindow;

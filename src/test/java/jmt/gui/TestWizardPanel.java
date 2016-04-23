@@ -16,7 +16,7 @@
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
 
-package jmt.framework.gui.wizard;
+package jmt.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -25,6 +25,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingConstants;
+import jmt.framework.gui.wizard.WizardPanel;
 
 /**
 
