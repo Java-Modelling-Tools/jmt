@@ -390,7 +390,6 @@ public class EngineRegressionTest {
 		scanner.nextLine();
 		while (scanner.hasNextLine()) {
 		    String line = scanner.nextLine();
-                    System.out.println(line);
 		    coll.add(line);
 		}
 
