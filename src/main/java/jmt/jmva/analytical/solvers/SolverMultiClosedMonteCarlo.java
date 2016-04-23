@@ -156,7 +156,7 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
                 for (int i=0; i<qnm.M; i++) {
                     T[i] = qnm.getQueueType(i).ordinal();
                     mi[i] = qnm.getMultiplicitiesVector().get(i);
-                    // relpaced Math.random
+                    // Replaced Math.random
                     D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*engine.raw2())); // i is a perturbation of 10^-6 magnitude
                 }
             }

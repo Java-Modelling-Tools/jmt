@@ -67,7 +67,7 @@ public class FFT {
 		int nd = 2 * n;
 		double data[] = new double[nd];
 		for (int i = 0; i < nd; i++) {
-                        // relpaced Math.random
+                        // Replaced Math.random
 			data[i] = engine.raw2();
 		}
 		return data;

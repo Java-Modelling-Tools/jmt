@@ -230,7 +230,7 @@ public class TreePlanter {
 								candidate2 = s;
 							}
 							else if (candidate2.weight == s.weight) {
-                                                                // relpaced Math.random
+                                                                // Replaced Math.random
 								candidate2 = (engine.raw2() < 0.5) ? candidate2 : s;
 							}
 						}

@@ -179,7 +179,7 @@ public class PolyFit {
 
 		for (int i = 0; i < 200; i++) {
 			x[i] = i + 1;
-                        // relpaced Math.random
+                        // Replaced Math.random
 			y[i] = engine.raw2();
 			//System.out.println(y[i]+" ");
 			//l.write(pippo);
