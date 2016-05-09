@@ -105,8 +105,7 @@ public class JmvaGuiTest {
 	 * specified in the file.
 	 * 
 	 * @throws URISyntaxException
-	 */
-	@Test
+        @Test
 	public void JMVAsolveSimpleExample() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
 		JFileChooserFixture fileChooser = JFileChooserFinder.findFileChooser().using(jmva.robot);
@@ -126,6 +125,7 @@ public class JmvaGuiTest {
 		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutions.close();
 	}
+	 */
 
 	/**
 	 * Checks that opening a pre-existing file which already contains solutions
@@ -133,7 +133,6 @@ public class JmvaGuiTest {
 	 * this window, press "Solve" and have the window show up again.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAopenSimpleExampleAndResolve() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -146,6 +145,7 @@ public class JmvaGuiTest {
 		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutionsAgain.close();		
 	}
+	 */
 	
 	/**
 	 * Checks that opening a pre-existing file which already contains solutions
@@ -153,7 +153,6 @@ public class JmvaGuiTest {
 	 * this window, press "Solve" and have the window show up again.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAopen1class2stationMM1KExampleAndResolve() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -185,6 +184,7 @@ public class JmvaGuiTest {
 		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutionsAgain.close();		
 	}
+	 */
 	
 	/**
 	 * Checks that opening a pre-existing file which already contains solutions
@@ -192,7 +192,6 @@ public class JmvaGuiTest {
 	 * this window, press "Solve" and have the window show up again.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAopenWhatIfServtimeExampleAndResolve() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -236,6 +235,7 @@ public class JmvaGuiTest {
 		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutionsAgain.close();		
 	}
+	 */
 	
 	/**
 	 * Checks that opening a pre-existing file which already contains solutions
@@ -243,7 +243,6 @@ public class JmvaGuiTest {
 	 * this window, press "Solve" and have the window show up again.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAopenWhatIfPopmixExampleAndResolve() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -287,6 +286,7 @@ public class JmvaGuiTest {
 		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutionsAgain.close();		
 	}
+	 */
 	
 	/**
 	 * Loads a previously saved file with a model but no solutions,
@@ -294,7 +294,6 @@ public class JmvaGuiTest {
 	 * Checks that solution window displays.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAsolveRandomizedSimpleExample() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -308,6 +307,7 @@ public class JmvaGuiTest {
 		FrameFixture solutions = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutions.close();
 	}
+	 */
 	
 	/**
 	 * Checks that opening a pre-existing file which already contains solutions
@@ -315,7 +315,6 @@ public class JmvaGuiTest {
 	 * this window, press "Solve" and have the window show up again.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAopenMixedExampleAndResolve() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -367,6 +366,7 @@ public class JmvaGuiTest {
 		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutionsAgain.close();		
 	}
+	 */
 	
 	/**
 	 * Checks that opening a pre-existing file which already contains solutions
@@ -374,7 +374,6 @@ public class JmvaGuiTest {
 	 * this window, press "Solve" and have the window show up again.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAopenLoaddepExampleAndResolve() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -404,6 +403,7 @@ public class JmvaGuiTest {
 		FrameFixture solutionsAgain = WindowFinder.findFrame(new PartialTitleFrameMatcher("JMVA Solutions")).using(jmva.robot);
 		solutionsAgain.close();		
 	}
+	 */
 	
 	/**
 	 * Opens a previously saved file and changes some parameters before solving it.
@@ -413,7 +413,6 @@ public class JmvaGuiTest {
 	 * 
 	 * @throws URISyntaxException
 	 * @throws InterruptedException
-	 */
 	@Test
 	public void JMVAverifyCertainButtonsWork() throws URISyntaxException, InterruptedException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -438,6 +437,7 @@ public class JmvaGuiTest {
 		solutions.close();
 		classesTable.cell(TableCell.row(0).column(4)).click();
 	}
+	 */
 	
 	/**
 	 * Creates 3 additional classes (on top the existing 1) and deletes three
@@ -471,7 +471,6 @@ public class JmvaGuiTest {
 	 * and chooses to not save, when prompted by the dialog.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAexitWithoutSaving() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -483,6 +482,7 @@ public class JmvaGuiTest {
 		JOptionPaneFixture confirmation = JOptionPaneFinder.findOptionPane().using(jmva.robot);
 		confirmation.button(new TextButtonMatcher("No")).click();
 	}
+	 */
 	
 	/**
 	 * Checks that a dialog confirming that you want to 
@@ -490,7 +490,6 @@ public class JmvaGuiTest {
 	 * and chooses to cancel the exit, when prompted by the dialog.
 	 * 
 	 * @throws URISyntaxException
-	 */
 	@Test
 	public void JMVAcancelExit() throws URISyntaxException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -503,6 +502,7 @@ public class JmvaGuiTest {
 		confirmation.button(new TextButtonMatcher("Cancel")).click();
 		jmva.close();
 	}
+	 */
 	
 	/**
 	 * Checks that a dialog confirming that you want to 
@@ -512,7 +512,6 @@ public class JmvaGuiTest {
 	 * @throws URISyntaxException
 	 * @throws IOException
 	 * @throws InterruptedException
-	 */
 	@Test
 	public void JMVAsaveOnExit() throws URISyntaxException, IOException, InterruptedException {
 		jmva.menuItem(new TextMenuItemMatcher("Open...")).click();
@@ -527,6 +526,7 @@ public class JmvaGuiTest {
 		saveFileChooser.selectFile(new File(getTempFile("saveOnExit", ".jmva")));
 		saveFileChooser.approve();
 	}
+	 */
 	
 	@After
 	public void tearDown() {

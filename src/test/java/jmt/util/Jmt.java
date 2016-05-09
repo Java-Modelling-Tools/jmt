@@ -1,4 +1,4 @@
-package jmt.jmva;
+package jmt.util;
 
 import java.io.File;
 import java.io.FileInputStream;
