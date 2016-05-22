@@ -120,6 +120,8 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_MEAN_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR - Mean Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM 
 			+ "Mean Memory Occupation for each chosen FCRegion" + HTML_FONT_NOR_END + HTML_END;
 	
-	public static final String DESCRIPTION_FJ_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Response Time for each chosen F/J area" + HTML_FONT_NOR_END + HTML_END;
+	public static final String DESCRIPTION_FJ_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Fork Join Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+			+ "Response Time for each chosen F/J section" + HTML_FONT_NOR_END + HTML_END;
+        public static final String DESCRIPTION_FJ_CN = HTML_START + HTML_FONT_TITLE + "Fork Join Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+			+ "Average number of customers for each chosen F/J section" + HTML_FONT_NOR_END + HTML_END;
 }

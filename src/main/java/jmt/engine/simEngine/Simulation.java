@@ -558,6 +558,10 @@ public class Simulation {
 						
 						case SimConstants.FORK_JOIN_RESPONSE_TIME:
 							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, jClass, ms.getMeasure(), classes);
+                                                        break;
+                                                case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, jClass, ms.getMeasure(), classes);
+                                                        break;
 							
 					}
 				}

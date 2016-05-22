@@ -228,6 +228,7 @@ public interface MeasureDefinition {
 	public int[] getMeanMemoryOccupationMeasures();
 	
 	public int[] getFJResponseTimeMeasures();
+        public int[] getFJCustomerNumberMeasures();
 
 	/**
 	 * Returns the node type of a given measure

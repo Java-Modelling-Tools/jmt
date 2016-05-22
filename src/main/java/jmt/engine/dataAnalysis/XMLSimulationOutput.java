@@ -246,6 +246,9 @@ public class XMLSimulationOutput extends SimulationOutput {
                         case SimConstants.FORK_JOIN_RESPONSE_TIME:
 				typeName = "Fork Join Response Time";
                                 break;
+                        case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+				typeName = "Fork Join Number of Customers";
+                                break;
 		}
 
 		elem.setAttribute("measureType", typeName);

@@ -108,5 +108,12 @@ public class SimConstants {
 	
 	/** Measure identifier: Response Time of a F/J area */
 	public static final int FORK_JOIN_RESPONSE_TIME = 29;
+        
+        /** Measure identifier: Response Time of a F/J area */
+	public static final int FORK_JOIN_NUMBER_OF_JOBS = 30;
+        
+        public static boolean isFJMeasure(int measure) {
+                return measure == FORK_JOIN_RESPONSE_TIME || measure == FORK_JOIN_NUMBER_OF_JOBS;
+        }
 
 }

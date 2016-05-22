@@ -739,6 +739,10 @@ public class Queue extends InputSection {
 			case 0:
 				FJList.analyzeResponseTime(jc, measurement);
 				break;
+                        case 1:
+                                System.out.println("ANALYZE NC");
+                                FJList.analyzeQueueLength(jc, measurement);
+				break;
 		}
 	}
 }

@@ -122,6 +122,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
                         SimulationDefinition.MEASURE_DR,
                         SimulationDefinition.MEASURE_MEAN_WEIGHT,
                         SimulationDefinition.MEASURE_MEAN_MEMORY_OCCUPATION,
+                        SimulationDefinition.MEASURE_FJ_CN,
                         SimulationDefinition.MEASURE_FJ_RESPONSE_TIME,
                         SimulationDefinition.MEASURE_QL,
                         SimulationDefinition.MEASURE_QT,
@@ -386,7 +387,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			} else if (column == 2 && simData.isSinkMeasure(simData.getMeasureKeys().get(row))) {
 				return stationsCombos.getEditor(stationData.getStationKeysSink());
 			} else if (column == 2 && simData.getMeasureType(simData.getMeasureKeys().get(row)).equals(SimulationDefinition.MEASURE_X)) {
-				Vector<Object> l1 = stationData.getStationRegionKeysNoSourceSink();
+                                Vector<Object> l1 = stationData.getStationRegionKeysNoSourceSink();
 				Vector<Object> l2 = stationData.getStationKeysSource();
 				l1.addAll(l2);
                                 //ARIF: remove generic class switch element if exists
@@ -397,7 +398,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				return stationsCombos.getEditor(l1);
 			} else if(column == 2 && simData.isFJMeasure(simData.getMeasureKeys().get(row))){
 				Vector<Object> l1 = stationData.getFJKeys();
-				return stationsCombos.getEditor(l1);
+				return stationsCombos.getEditorFJ(l1);
 			} else if (column == 2) {
 				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
 			} else if(column == 1 && simData.isFCRMeasure(simData.getMeasureKeys().get(row))){
@@ -414,7 +415,11 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
 			} else if (column == 2 && !simData.isGlobalMeasure(simData.getMeasureKeys().get(row))) {
-				return stationsCombos.getRenderer();
+				if (simData.isFJMeasure(simData.getMeasureKeys().get(row))) {
+                                        return stationsCombos.getRendererFJ();
+                                } else {
+                                        return stationsCombos.getRenderer();
+                                }
 			} else if (column == 1) {
 				return classesCombos.getRenderer();
                         } else if (column == 3){
@@ -476,7 +481,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			case 1: 
 				return simData.getMeasureClass(key);
 			case 2: 
-				return simData.getMeasureStation(key);
+                                return simData.getMeasureStation(key);
 			case 3:
 				return simData.getMeasureLog(key);
 			case 4: 

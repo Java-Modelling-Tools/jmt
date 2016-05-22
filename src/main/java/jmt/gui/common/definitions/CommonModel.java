@@ -2095,7 +2095,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	public boolean isFJMeasure(Object key){
 		String type = getMeasureType(key);
 		boolean ret = false;
-		ret = (type.equals(SimulationDefinition.MEASURE_FJ_RESPONSE_TIME))? true : false;
+		ret = (type.equals(SimulationDefinition.MEASURE_FJ_RESPONSE_TIME) || type.equals(SimulationDefinition.MEASURE_FJ_CN))? true : false;
 		return ret;
 	}
 

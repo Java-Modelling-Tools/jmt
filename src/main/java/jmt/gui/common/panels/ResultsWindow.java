@@ -52,6 +52,7 @@ import javax.swing.JToolBar;
 import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
+import jmt.engine.QueueNet.SimConstants;
 
 import jmt.engine.log.JSimLogger;
 import jmt.framework.gui.components.JMTFrame;
@@ -172,7 +173,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_SINK, results.getThroughputPerSinkMeasures());
                 addTabPane(mainPanel, SimulationDefinition.MEASURE_MEAN_WEIGHT, DESCRIPTION_MEAN_WEIGHT, results.getMeanWeightMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_MEAN_MEMORY_OCCUPATION, DESCRIPTION_MEAN_MEMORY_OCCUPATION, results.getMeanMemoryOccupationMeasures());	
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJCustomerNumberMeasures());
+                addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
 		// Creates bottom toolbar
 		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable(false);
@@ -396,8 +398,13 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			// If station name is undefined, disables its fields
 			String stationName = md.getStationName(measureIndex);
 			if (stationName != null && !stationName.equals("")) {
-				field.setText(stationName);
-				field.setToolTipText("Name of the station: " + field.getText());
+                                if (SimConstants.isFJMeasure(md.getMeasureType(measureIndex))) {
+                                        field.setText(stationName + " (Fork Join)");
+                                        field.setToolTipText("Name of the F/J section: " + field.getText());
+                                } else {
+                                        field.setText(stationName);
+                                        field.setToolTipText("Name of the station: " + field.getText());
+                                }
 			} else {
 				field.setText(ALL_STATIONS);
 				field.setToolTipText("This measure is referred to the entire network");

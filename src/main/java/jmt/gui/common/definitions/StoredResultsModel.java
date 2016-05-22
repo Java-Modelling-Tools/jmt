@@ -69,7 +69,7 @@ public class StoredResultsModel implements MeasureDefinition {
 	private Vector<Integer> throughputTimePerSink = new Vector<Integer>();
 	
 	private Vector<Integer> FJResponseTime = new Vector<Integer>();
-
+        private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
 
 	public Vector<Measure> getMeasures() {
 		return measures;
@@ -421,6 +421,14 @@ public class StoredResultsModel implements MeasureDefinition {
 		}
 		return tmp;
 	}
+        
+        public int[] getFJCustomerNumberMeasures(){
+		int[] tmp = new int[FJCustomerNumber.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = FJCustomerNumber.get(i).intValue();
+		}
+		return tmp;
+	}
 
 	/**
 	 * Returns if simulation has finished, so results are fixed
@@ -525,6 +533,9 @@ public class StoredResultsModel implements MeasureDefinition {
 				break;
                         case SimConstants.FORK_JOIN_RESPONSE_TIME:
 				FJResponseTime.add(new Integer(measures.size() - 1));
+				break;
+                        case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+				FJCustomerNumber.add(new Integer(measures.size() - 1));
 				break;
 		}
 	}

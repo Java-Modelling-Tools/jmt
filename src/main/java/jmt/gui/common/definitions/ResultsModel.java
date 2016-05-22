@@ -60,6 +60,7 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector<Integer> meanMemoryOccupation = new Vector<Integer>();
 	
 	private Vector<Integer> FJResponseTime = new Vector<Integer>();
+        private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
 
 	//Added by ASHANKA START
 	//Vector ro contain the Measure index of the System Power. 
@@ -181,6 +182,9 @@ public class ResultsModel implements MeasureDefinition {
 					break;
 				case SimConstants.FORK_JOIN_RESPONSE_TIME:
 					FJResponseTime.add(new Integer(i));
+					break;
+                                case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+					FJCustomerNumber.add(new Integer(i));
 					break;
 					
 			}
@@ -650,6 +654,13 @@ public class ResultsModel implements MeasureDefinition {
 		int[] tmp = new int[FJResponseTime.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = FJResponseTime.get(i).intValue();
+		}
+		return tmp;
+	}
+        public int[] getFJCustomerNumberMeasures(){
+		int[] tmp = new int[FJCustomerNumber.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = FJCustomerNumber.get(i).intValue();
 		}
 		return tmp;
 	}

@@ -1047,6 +1047,9 @@ public class SimLoader {
 		else if(measure.equalsIgnoreCase("Fork Join Response Time")){
 			return SimConstants.FORK_JOIN_RESPONSE_TIME;
 		}
+                else if(measure.equalsIgnoreCase("Fork Join Number of Customers")){
+			return SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
+		}
 		//default value
 		return SimConstants.UTILIZATION;
 	}

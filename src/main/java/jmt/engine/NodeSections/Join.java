@@ -176,18 +176,18 @@ public class Join extends InputSection {
                                         //end
                                         if (!isFired) {
                                                 needed--;
-                                                boolean allZeros = false;
+                                                boolean isGuardTrue = false;
                                                 if (neededPerClass != null) {
                                                         neededPerClass[fJob.getJobClass().getId()]--;
-                                                        allZeros = true;
+                                                        isGuardTrue = true;
                                                         for(Integer i: neededPerClass) {
-                                                                allZeros = allZeros && (i == 0);
+                                                                isGuardTrue = isGuardTrue && (i <= 0);
                                                         }
                                                 }
                                                 jobs.put(fJob.getForkedJob(), needed);
                                                 hasFired.put(fJob.getForkedJob(), false);
                                                 boolean allArrived = (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof NormalJoin) && (totalForked == 0);
-                                                if (needed == 0 || allArrived || allZeros) {
+                                                if (needed == 0 || allArrived || isGuardTrue) {
                                                         // Adds original job, otherwise we will have one less
                                                         // job in the network
         //						global.addForkedJob(fJob.getForkedJob());

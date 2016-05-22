@@ -68,6 +68,7 @@ public class PAResultsModel implements MeasureDefinition {
 	private Vector<Integer> meanMemoryOccupation = new Vector<Integer>();
 	
 	private Vector<Integer> FJResponseTime = new Vector<Integer>();
+        private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
 	
 	//Added by ASHANKA START
 	//Added for System power changes for JSIM simulation engine.
@@ -178,6 +179,10 @@ public class PAResultsModel implements MeasureDefinition {
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
 				FJResponseTime.add(new Integer(i));
 			}
+                        else if(type.equals("fork join number of customers")){
+				numType = SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
+				FJCustomerNumber.add(new Integer(i));
+			}
                         Measure tmp = new Measure(measureName, stationName, className, thisAlpha, thisPrecision, numType, nodeType);
 			measures.add(tmp);
                         names.put(measureName, tmp);
@@ -258,6 +263,9 @@ public class PAResultsModel implements MeasureDefinition {
 				break;
                         case SimConstants.FORK_JOIN_RESPONSE_TIME:
 				FJResponseTime.add(new Integer(measures.size() - 1));
+				break;
+                        case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+				FJCustomerNumber.add(new Integer(measures.size() - 1));
 				break;
 			
 		}
@@ -829,6 +837,15 @@ public class PAResultsModel implements MeasureDefinition {
 		int[] tmp = new int[FJResponseTime.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = FJResponseTime.get(i).intValue();
+		}
+		return tmp;
+	}
+        
+        @Override
+	public int[] getFJCustomerNumberMeasures(){
+		int[] tmp = new int[FJCustomerNumber.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = FJCustomerNumber.get(i).intValue();
 		}
 		return tmp;
 	}

@@ -354,6 +354,9 @@ public class XMLResultsReader implements XMLResultsConstants {
 			} else if(type.equals("Fork Join Response Time")){
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
 			}
+                        else if(type.equals("Fork Join Number of Customers")){
+				numType = SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
+			}
 			// Adds loaded informations into model data structure
 			model.addMeasure(Name, stationName, className, alpha, precision, samples, discarded, state, numType, nodeType,fileName);
 			model.addMeasureSample(Name, mean,lastIntervalAvgValue, simulationTime, upper, lower);
