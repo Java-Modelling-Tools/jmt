@@ -752,6 +752,9 @@ public class Measure {
 			boolean log_success = analyzer.getSuccess();
 
 			logger.debug("Measure " + name + " finished. Mean value: " + log_mean + " Success = " + log_success);
+                        if (output != null) {
+                                output.finalizeMeasure();
+                        }
 		}
 	}
 

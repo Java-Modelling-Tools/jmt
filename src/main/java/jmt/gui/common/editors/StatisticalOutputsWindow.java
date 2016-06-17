@@ -93,7 +93,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	private static final long serialVersionUID = 1L;
 	private static final String DEFAULT_INTERVALS = "10";
 
-	private static final String[] GRAPH_TYPES = {"-- Select a type --", "Histogram" , "Density Line", "Distribution"};
+	private static final String[] GRAPH_TYPES = {"-- Select a type of graph --", "Histogram" , "Density Line", "Distribution"};
 
 	private static final String FILTER_TYPE_SAMPLE = "SAMPLE";
 	private static final String FILTER_TYPE_TIME = "TIME";
@@ -358,7 +358,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		//Moments Panel : displays values of all Moments(Order 1,2,3,4)
 		JPanel momentsPanel = new JPanel(new SpringLayout());
-		momentsPanel.setBorder(new TitledBorder(new EtchedBorder(), "Moments"));
+		momentsPanel.setBorder(new TitledBorder(new EtchedBorder(), "Power Moments"));
 
 		//FIRST MOMENT
 		label = new JLabel("First Moment:");
