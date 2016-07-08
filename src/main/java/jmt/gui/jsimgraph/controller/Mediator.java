@@ -3013,7 +3013,7 @@ public class Mediator implements GuiInterface {
 			if (k == 0) {
 				mc.deleteEmptyBlockingRegions();
 			}
-		} else if (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING) {
+		} else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING)) {
 			editSimulationParameters();
 		} else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID)) {
             StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);

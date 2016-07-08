@@ -84,6 +84,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
         JoinStrategy js = (JoinStrategy) sd.getJoinStrategy(stationKey, classKey);
 		if (js == null) {
+                        descrTextPane.setText("");
 			emptyPane();
 		} else {
 			descrTextPane.setText(js.getDescription());

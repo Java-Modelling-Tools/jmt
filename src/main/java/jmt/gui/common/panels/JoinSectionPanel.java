@@ -54,9 +54,6 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		classData = cd;
 		this.stationKey = stationKey;
 		classEditor.setData(cd);
-		if (joinStrategies != null) {
-			joinStrategies.tableChanged(new TableModelEvent(joinStrategies.getModel()));
-		}
 	}
 
 	//Francesco D'Aquino
@@ -99,9 +96,6 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		if (editor != null) {
 			editor.stopCellEditing();
 		}
-                if (joinStrategies != null && joinStrategies.getRowCount() > 0) {
-			joinStrategies.setRowSelectionInterval(0, 0);
-		}
 	}
 
 	/**
@@ -110,11 +104,13 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 	@Override
 	public void gotFocus() {
 		classEditor.clearCache();
-		// Select first routing strategy
-		if (joinStrategies != null && joinStrategies.getRowCount() > 0) {
-                        int sel = joinStrategies.getSelectedRow() < 0 ? 0 : joinStrategies.getSelectedRow();
-			joinStrategies.setRowSelectionInterval(sel, sel);
-		}
+                if (joinStrategies != null && joinStrategies.getRowCount() > 0) {
+                        if(joinStrategies.getSelectedRow() == -1)
+                                joinStrategies.setRowSelectionInterval(0, 0);
+                        joinEditor.setData(stationData, classData,  stationKey, classData.getClassKeys().get(joinStrategies.getSelectedRow()));
+		} else {
+                        joinEditor.setData(stationData, classData,  stationKey, 0);
+                }
 	}
 
 	/**

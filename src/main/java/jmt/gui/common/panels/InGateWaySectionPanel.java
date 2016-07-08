@@ -100,21 +100,33 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
         
         private JRootPane gPaneAdvanced;
         private JRootPane gPaneStandard;
+        final JCheckBox useSim;
 	
 	public InGateWaySectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey){
 		classEditor = new ImagedComboBoxCellEditorFactory(cd);
-		setData(sd, cd, stationKey);
+		setDataInternal(sd, cd, stationKey);
 		forkingStrategies = new ForkingSelectionTable();
 		forkingProbEditor = new ForkEditor(sd, cd, stationKey, null);
+                useSim = new JCheckBox();
                 updateSpinner();
 		initComponents();
 	}
 	
-	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey) {
+	private void setDataInternal(StationDefinition sd, ClassDefinition cd, Object stationKey) {
 		this.cd = cd;
 		this.sd = sd;
 		this.stationKey = stationKey;
 		classEditor.setData(cd);
+	}
+        
+        public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey) {
+		this.setDataInternal(sd, cd, stationKey);
+                useSim.setSelected(!sd.getIsSimplifiedFork(stationKey));
+                boolean isSim = !useSim.isSelected();
+                numForkSpinner.setEnabled(isSim);
+                gPaneAdvanced.getGlassPane().setVisible(isSim);
+                gPaneStandard.getGlassPane().setVisible(!isSim);
+                updateSpinner();
 	}
 	
 	protected void initComponents(){
@@ -158,7 +170,6 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		JPanel fragnum = new JPanel();
 		fragnum.setLayout(new BorderLayout());
 		fragnum.setBorder(new TitledBorder(new EtchedBorder(), "Standard fork strategy"));
-		final JCheckBox useSim = new JCheckBox();
 		useSim.setText("Enable the advanced forking strategies.");
 //		fragnum.add(useSim, BorderLayout.CENTER);
 		JLabel text = new JLabel("Number of tasks to be generated on each output link for each input job (customer) to the Fork:");
@@ -172,9 +183,9 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
                 gPaneStandard.setGlassPane(new GlassPane());
                 gPaneStandard.getGlassPane().setVisible(!sd.getIsSimplifiedFork(stationKey));
 		
-		boolean isSim = sd.getIsSimplifiedFork(stationKey);
-		useSim.setSelected(!isSim);
-		numForkSpinner.setEnabled(isSim);
+		sd.getIsSimplifiedFork(stationKey);
+		useSim.setSelected(!sd.getIsSimplifiedFork(stationKey));
+		numForkSpinner.setEnabled(sd.getIsSimplifiedFork(stationKey));
 		
 		useSim.addActionListener(new ActionListener(){
 
@@ -219,8 +230,14 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 	public void gotFocus() {
 		classEditor.clearCache();
 		if (forkingStrategies != null && forkingStrategies.getRowCount() > 0) {
-			forkingStrategies.setRowSelectionInterval(0, 0);
-		}
+                        if(forkingStrategies.getSelectedRow() == -1)
+                                forkingStrategies.setRowSelectionInterval(0, 0);
+                        forkingProbEditor.setData(sd, cd,  stationKey, cd.getClassKeys().get(forkingStrategies.getSelectedRow()));
+                        descrTextPane.setText(((ForkStrategy)sd.getForkingStrategy( stationKey, cd.getClassKeys().get(forkingStrategies.getSelectedRow()))).getDescription());
+		} else {
+                        forkingProbEditor.setData(sd, cd,  stationKey, 0);
+                        descrTextPane.setText("");
+                }
 	}
 	
 	@Override
@@ -359,22 +376,26 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 	}
         
         private void updateSpinner() {
-		numForkSpinner = new JSpinner();
-		numForkSpinner.setPreferredSize(DIM_BUTTON_XS);
+                if(numForkSpinner == null) {
+                        numForkSpinner = new JSpinner();
+                        numForkSpinner.setPreferredSize(DIM_BUTTON_XS);
+                        numForkSpinner.setToolTipText("Number of tasks created for each input job on each output link");
+                        numForkSpinner.addChangeListener(new ChangeListener() {
+                                public void stateChanged(ChangeEvent e) {
+                                        if (numForkSpinner.getValue() instanceof Integer) {
+                                                Integer serverNum = (Integer) numForkSpinner.getValue();
+                                                if (serverNum.intValue() < 1) {
+                                                        serverNum = new Integer(1);
+                                                        numForkSpinner.setValue(serverNum);
+                                                }
+                                                sd.setStationNumberOfServers(serverNum, stationKey);
+                                        }
+                                }
+                        });
+                }
 		numForkSpinner.setValue(sd.getStationNumberOfServers(stationKey));
-		numForkSpinner.setToolTipText("Number of tasks created for each input job on each output link");
-		numForkSpinner.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				if (numForkSpinner.getValue() instanceof Integer) {
-					Integer serverNum = (Integer) numForkSpinner.getValue();
-					if (serverNum.intValue() < 1) {
-						serverNum = new Integer(1);
-						numForkSpinner.setValue(serverNum);
-					}
-					sd.setStationNumberOfServers(serverNum, stationKey);
-				}
-			}
-		});
+                numForkSpinner.invalidate();
+                numForkSpinner.repaint();
 	}
         
 //        public void enableComponents(Container container, boolean enable) {

@@ -937,7 +937,8 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			if (k == 0) {
 				mc.deleteEmptyBlockingRegions();
 			}
-		} else if (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING) {
+		} else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING)) {
+                        System.out.println("HERE");
 			tabbedPane.setSelectedIndex(7);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_PERF_IND_WITH_NO_SINK_ERROR)) {

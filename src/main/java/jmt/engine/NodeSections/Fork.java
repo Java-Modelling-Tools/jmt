@@ -272,7 +272,7 @@ public class Fork extends OutputSection {
 				// If this fork blocks, finally sends ACK back and unlocks this
                                 Job j = (Job)message.getData();
 			
-                                send(NetEvent.EVENT_JOIN, j, 0.0, getOwnerNode().getSection(NodeSection.INPUT).getSectionID(), getOwnerNode());
+                                send(NetEvent.EVENT_JOIN, j, 0.0, getOwnerNode().getSection(NodeSection.INPUT).getSectionID());
 
 				if (jobNum == block) {
 					sendBackward(NetEvent.EVENT_ACK, job, 0.0);
