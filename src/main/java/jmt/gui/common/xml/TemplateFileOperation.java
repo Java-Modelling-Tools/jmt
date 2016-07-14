@@ -43,6 +43,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class TemplateFileOperation {
@@ -101,7 +102,9 @@ public class TemplateFileOperation {
 			throws SAXException, IOException {
 
 		DOMParser parser = new DOMParser();
-		parser.parse(filename);
+                InputSource in_source = new InputSource(filename);
+                //TODO: il parser va prima creato!!
+                parser.parse(in_source);
 		Document doc = parser.getDocument();
 		NodeList sites = doc.getElementsByTagName("site");
 
@@ -219,7 +222,9 @@ public class TemplateFileOperation {
 		List<TemplateData> defaultList = new ArrayList<TemplateData>();
 
 		DOMParser parser = new DOMParser();
-		parser.parse(filename);
+                InputSource in_source = new InputSource(filename);
+                //TODO: il parser va prima creato!!
+                parser.parse(in_source);
 		Document doc = parser.getDocument();
 
 		NodeList temps = doc.getElementsByTagName("template");
@@ -289,7 +294,9 @@ public class TemplateFileOperation {
 		List<TemplateData> defaultList = new ArrayList<TemplateData>();
 
 		DOMParser parser = new DOMParser();
-		parser.parse(filename);
+		InputSource in_source = new InputSource(filename);
+                //TODO: il parser va prima creato!!
+                parser.parse(in_source);
 		Document doc = parser.getDocument();
 
 		NodeList temps = doc.getElementsByTagName("template");
@@ -353,7 +360,9 @@ public class TemplateFileOperation {
                 File XMLFile = new File(SITE_FILE);
                 if (XMLFile.exists()) {
                         DOMParser parser = new DOMParser();
-                        parser.parse(SITE_FILE);
+                        InputSource in_source = new InputSource(SITE_FILE);
+                        //TODO: il parser va prima creato!!
+                        parser.parse(in_source);
                         Document doc = parser.getDocument();
                         NodeList sites = doc.getElementsByTagName("site");
                         List<String> siteNames = data.getSiteNames();
@@ -388,7 +397,7 @@ public class TemplateFileOperation {
                 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 		FileInputStream fis = new FileInputStream(XMLFile);
-		Document doc = db.parse(fis);
+		Document doc = db.parse(new InputSource(fis));
 		fis.close();
 		Element element = doc.getDocumentElement();
 		Node node = doc.createElement("site");

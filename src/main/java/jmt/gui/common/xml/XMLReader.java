@@ -19,6 +19,8 @@
 package jmt.gui.common.xml;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,6 +69,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
@@ -1672,8 +1675,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				parser.setProperty(EXTERNAL_SCHEMA_LOCATION_PROPERTY_ID, schemaSource);
 			}
 
-			// Creates a DOM document from the xml file
-			parser.parse(filename);
+                        FileReader fr = new FileReader(filename);
+			InputSource in_source = new InputSource(fr);
+			//TODO: il parser va prima creato!!
+			parser.parse(in_source);
+                                               
 			return parser.getDocument();
 		} catch (SAXException e) {
 			System.err.println("XMLLoader Error - An error occurs while attempting to parse the document \"" + e.getMessage() + "\".");
