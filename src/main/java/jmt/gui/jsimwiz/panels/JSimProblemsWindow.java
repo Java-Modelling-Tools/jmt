@@ -609,8 +609,15 @@ public class JSimProblemsWindow extends JFrame {
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" +
 							stationName + " switch between fork/join. This topology is not allowed.</div></html>", stationKey, null));
 				}				
-			}
-            if (mc.isThereLoadDependentRoutingError()) {
+			} if(mc.isThereSemaphoreNotBetweenForkJoin()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN,
+						"<html><font color=\"white\">----</font><b>Error</b>" +
+						"<font color=\"white\">---------</font>" +
+						"Exist some Semaphore components not between a fork and a join.", null, null));
+			} if (mc.isThereSemaphoreWithoutJoinError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SEMAPHORE_WITHOUT_JOIN_ERROR,
+						"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>Semaphore without join", null, null));
+			} if (mc.isThereLoadDependentRoutingError()) {
 				Map<Object, HashMap<Object, Object>> temp = mc.getInvalidLoadDependentRoutingStations();
 				for (Iterator<Object> it = temp.keySet().iterator(); it.hasNext();) {
                     Object key = it.next();

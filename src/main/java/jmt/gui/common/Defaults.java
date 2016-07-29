@@ -80,6 +80,7 @@ public class Defaults implements CommonConstants {
 		//bpmn
 		def.setProperty("stationForkingStrategy", "jmt.gui.common.forkStrategies.ProbabilitiesFork");
 		def.setProperty("stationJoinStrategy","jmt.gui.common.joinStrategies.NormalJoin");
+		def.setProperty("stationSemaphoreStrategy","jmt.gui.common.semaphoreStrategies.NormalSemaphore");
 		//
 		def.setProperty("stationCsRowMatrix", "jmt.gui.common.classSwitch.ClassSwitch");
 		def.setProperty("forkBlock", "-1");

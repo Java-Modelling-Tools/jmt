@@ -103,7 +103,7 @@ public class TemplateFileOperation {
 
 		DOMParser parser = new DOMParser();
                 InputSource in_source = new InputSource(filename);
-                //TODO: il parser va prima creato!!
+                //TODO: the parser must be created first
                 parser.parse(in_source);
 		Document doc = parser.getDocument();
 		NodeList sites = doc.getElementsByTagName("site");
@@ -223,8 +223,8 @@ public class TemplateFileOperation {
 
 		DOMParser parser = new DOMParser();
                 InputSource in_source = new InputSource(filename);
-                //TODO: il parser va prima creato!!
-                parser.parse(in_source);
+                  //TODO: the parser must be created first
+              parser.parse(in_source);
 		Document doc = parser.getDocument();
 
 		NodeList temps = doc.getElementsByTagName("template");
@@ -295,8 +295,8 @@ public class TemplateFileOperation {
 
 		DOMParser parser = new DOMParser();
 		InputSource in_source = new InputSource(filename);
-                //TODO: il parser va prima creato!!
-                parser.parse(in_source);
+                     //TODO: the parser must be created first
+           parser.parse(in_source);
 		Document doc = parser.getDocument();
 
 		NodeList temps = doc.getElementsByTagName("template");
@@ -361,7 +361,7 @@ public class TemplateFileOperation {
                 if (XMLFile.exists()) {
                         DOMParser parser = new DOMParser();
                         InputSource in_source = new InputSource(SITE_FILE);
-                        //TODO: il parser va prima creato!!
+                    //TODO: the parser must be created first
                         parser.parse(in_source);
                         Document doc = parser.getDocument();
                         NodeList sites = doc.getElementsByTagName("site");

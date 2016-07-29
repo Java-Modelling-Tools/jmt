@@ -59,6 +59,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	// For BPMN
 	protected InGateWaySectionPanel gsPane;
 	protected JoinSectionPanel jsPane;
+	protected SemaphoreSectionPanel smsPane;
 	// Current wizard panel
 	protected WizardPanel current;
 
@@ -230,6 +231,20 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 				mainPanel.setSelectedComponent(oldComponent);
 			}
 		}
+		
+		if(hasSemaphoreSection(type)){
+			if (smsPane == null) {
+				smsPane = new SemaphoreSectionPanel(stationData, classData, stationKey);
+			} else {
+				smsPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(smsPane, smsPane.getName());
+
+			// If this was previously selected, selects this
+			if (oldComponent == smsPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+		}
 
 		// Sets current panel
 		current = (WizardPanel) mainPanel.getSelectedComponent();
@@ -257,7 +272,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		} else {
 			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_DELAY.equals(type) || STATION_TYPE_SOURCE.equals(type)
 					|| STATION_TYPE_ROUTER.equals(type) || STATION_TYPE_LOGGER.equals(type) || STATION_TYPE_TERMINAL.equals(type)
-					|| STATION_TYPE_JOIN.equals(type) || STATION_TYPE_CLASSSWITCH.equals(type); //|| STATION_TYPE_OUTGATEWAY.equals(type);
+					|| STATION_TYPE_JOIN.equals(type) || STATION_TYPE_CLASSSWITCH.equals(type) || STATION_TYPE_TASKSEMAPHORE.equals(type); //|| STATION_TYPE_OUTGATEWAY.equals(type);
 		}
 	}
 
@@ -307,6 +322,14 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		}
 	}
 	
+	private boolean hasSemaphoreSection(String type){
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_TASKSEMAPHORE.equals(type);
+		}
+	}
+	
 	private boolean checkNullValues() {
 		return stationKey == null || stationData == null || classData == null;
 	}
@@ -345,6 +368,12 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
                 jsPane.setSelectedClass(classKey);
 		mainPanel.setSelectedComponent(jsPane);
 	}
+        
+        public void showSemaphoreSectionPanel(Object classKey) {
+            smsPane.setData(stationData, classData, stationKey);
+            smsPane.setSelectedClass(classKey);
+            mainPanel.setSelectedComponent(smsPane);
+        }
 
 	/**
 	 * @return the panel's name

@@ -619,8 +619,19 @@ public class JModelProblemsWindow extends JDialog {
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" +
 							stationName + " switch between fork/join. This topology is not allowed.</div></html>", stationKey, null));
 				}				
-			}
-            if (mc.isThereLoadDependentRoutingError()) {
+			} if(mc.isThereSemaphoreNotBetweenForkJoin()) {
+				Vector<Object> temp = mc.getSemaphoreNotBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" +
+							stationName + " semaphore is not between fork/join. This topology is not allowed.</div></html>", stationKey, null));
+				}				
+			} if (mc.isThereSemaphoreWithoutJoinError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SEMAPHORE_WITHOUT_JOIN_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Semaphore without join.</div></html>", null, null));
+			} if (mc.isThereLoadDependentRoutingError()) {
 				Map<Object, HashMap<Object, Object>> temp = mc.getInvalidLoadDependentRoutingStations();
 				for (Iterator<Object> it = temp.keySet().iterator(); it.hasNext();) {
                     Object key = it.next();

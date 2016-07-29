@@ -56,6 +56,8 @@ import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -337,6 +339,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				writeJoinSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
+			} else if (STATION_TYPE_TASKSEMAPHORE.equals(stationType)) {
+				writeSemaphoreSection(doc, elem, model, stationKey);
+				writeTunnelSection(doc, elem, model, stationKey);
+				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_SINK.equals(stationType)) {
 				writeSinkSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_CLASSSWITCH.equals(stationType)) {
@@ -382,6 +388,42 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				strategiesClasspathBase + "JoinStrategy", null, joinStrats,
 				false);
 		globalJoin.appendParameterElement(doc, join);
+	}
+	
+	/**
+	 * Writes a Semaphore input section <br>
+	 * Author: Vitor S. Lopes
+	 * 
+	 * @param doc
+	 *            document root
+	 * @param node
+	 *            node where created section should be appended
+	 * @param model
+	 *            data structure
+	 * @param stationKey
+	 *            search's key for semaphore
+	 */
+	private static void writeSemaphoreSection(Document doc, Node node,
+			CommonModel model, Object stationKey) {
+		Element semaphore = doc.createElement(XML_E_STATION_SECTION);
+		semaphore.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_TASKSEMAPHORE);
+		semaphore.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_TASKSEMAPHORE);
+		semaphore.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_TASKSEMAPHORE);
+		node.appendChild(semaphore);
+
+		Vector<?> classes = model.getClassKeys();
+		XMLParameter[] semaphoreStrats = new XMLParameter[classes.size()];
+		Object currentClass;
+		for (int i = 0; i < semaphoreStrats.length; i++) {
+			currentClass = classes.get(i);
+			semaphoreStrats[i] = SemaphoreStrategyWriter.getSemaphoreStrategyParameter(
+					(SemaphoreStrategy) model.getSemaphoreStrategy(stationKey,
+							currentClass), model, currentClass, stationKey);
+		}
+		XMLParameter globalSemaphore = new XMLParameter("SemaphoreStrategy",
+				strategiesClasspathBase + "SemaphoreStrategy", null, semaphoreStrats,
+				false);
+		globalSemaphore.appendParameterElement(doc, semaphore);
 	}
 
 	/**
@@ -1636,6 +1678,13 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			} else if(joinStrat instanceof GuardJoin) {
                                 String name = joinStrat.getName();
                                 String classPath = joinStrat.getClassPath();
+                                /*
+                                if (joinStrat instanceof GuardJoin){
+                                	Map<Object, Integer> map = ((GuardJoin) joinStrat).getGuard();
+                                }
+                                //else if (joinStrat instanceof TaskAggregateJoin){
+                                //	Map<Object, Integer> map = ((TaskAggregateJoin) joinStrat).getTaskAggregate();
+                                //}*/
                                 Map<Object, Integer> map = ((GuardJoin) joinStrat).getGuard();
                                 ArrayList<XMLParameter> classes = new ArrayList<XMLParameter>();
                                 ArrayList<XMLParameter> numbers = new ArrayList<XMLParameter>();
@@ -1672,9 +1721,79 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
                                 joinStrategy.parameterArray = "false";
 				return joinStrategy;
                         
-                        } else {
+                        }else {
 				return null;
 			}
+		}
+	}
+	
+	
+	protected static class SemaphoreStrategyWriter {
+
+		static XMLParameter getSemaphoreStrategyParameter(SemaphoreStrategy semaphoreStrat,
+				CommonModel model, Object classKey, Object stationKey) {
+			//if(semaphoreStrat instanceof NormalSemaphore) {
+				XMLParameter SemThres = new XMLParameter("SemThres",
+						Integer.class.getName(), null,
+						((Integer) semaphoreStrat.getSemaphoreThres()).toString(), true);
+				String name = semaphoreStrat.getName();
+				String classPath = semaphoreStrat.getClassPath();
+				XMLParameter semaphoreStrategy = new XMLParameter(
+						name, classPath, model.getClassName(classKey),
+						new XMLParameter[] { SemThres }, true);
+				semaphoreStrategy.parameterArray = "false";
+				return semaphoreStrategy;
+			//} else {
+			//	return null;
+			//}
+			
+			/*
+			//if(semaphoreStrat instanceof NormalSemaphore) {
+                            String name = semaphoreStrat.getName();
+                            String classPath = semaphoreStrat.getClassPath();
+                            
+                            Map<Object, Integer> map = ((NormalSemaphore) semaphoreStrat).getSemaphore();
+                            ArrayList<XMLParameter> classes = new ArrayList<XMLParameter>();
+                            ArrayList<XMLParameter> numbers = new ArrayList<XMLParameter>();
+                            for (Object c: model.getClassKeys()) {						
+                                   /// if(map.get(c) != null){
+                                            XMLParameter jobClass = new XMLParameter(
+                                                            "class", String.class.getName(), null,
+                                                            model.getClassName(c), true);
+                                            classes.add(jobClass);
+                                            if (map.get(c) == null) {
+                                            	map.put(c, 0);
+                                            }
+                                            XMLParameter jobNum = new XMLParameter(
+                                                            "required", String.class.getName(), null,
+                                                            map.get(c).toString(), true);
+                                            numbers.add(jobNum);
+                                    ///}
+                            }
+                            
+                            XMLParameter classesPar = new XMLParameter(
+                                            "Classes",
+                                            String.class.getName(),
+                                            null,
+                                            classes.toArray(new XMLParameter[classes.size()]),
+                                            true);
+                            XMLParameter numbersPar = new XMLParameter(
+                                            "Numbers",
+                                            String.class.getName(),
+                                            null,
+                                            numbers.toArray(new XMLParameter[numbers.size()]),
+                                            true);
+                            
+                            XMLParameter semaphoreStrategy = new XMLParameter(
+					name, classPath, model.getClassName(classKey),
+					new XMLParameter[] { classesPar, numbersPar }, true);
+                            semaphoreStrategy.parameterArray = "false";
+			return semaphoreStrategy;
+                    
+                   // }else {
+				//return null;
+			//}
+			*/
 		}
 	}
 }

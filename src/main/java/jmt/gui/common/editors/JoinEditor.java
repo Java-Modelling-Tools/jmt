@@ -37,6 +37,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	private StationDefinition stations;
 	private Object stationKey, classKey;
         private ClassDefinition classes;
+       
 
 	private JPanel joinPane = new JPanel();
 	private JSpinner jNumField = new JSpinner();
@@ -82,16 +83,19 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	}
 
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-        JoinStrategy js = (JoinStrategy) sd.getJoinStrategy(stationKey, classKey);
+		JoinStrategy js = (JoinStrategy) sd.getJoinStrategy(stationKey, classKey);
+		
+        
 		if (js == null) {
+			emptyPane(); 
                         descrTextPane.setText("");
 			emptyPane();
 		} else {
 			descrTextPane.setText(js.getDescription());
                         if (js instanceof PartialJoin){
-                                createDetails(js, sd, stationKey, classKey);
+                                createDetails(js, sd, stationKey, classKey);                        		
                         } else if(js instanceof GuardJoin) {
-                                createFiringMixDetails(js, sd, cs, stationKey, classKey);
+                                createFiringMixDetails(js, sd, cs, stationKey, classKey);                                
                         } else {
                                 emptyPane();
                         }
@@ -105,6 +109,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	}
 
 	private void createDetails(JoinStrategy js, StationDefinition sd, Object stationKey, Object classKey) {
+	
 		requiredNum = js.getRequiredNum();
 		stations = sd;
 		this.stationKey = stationKey;
@@ -115,10 +120,14 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	}
         
         private void createFiringMixDetails(JoinStrategy js, StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-		requiredNum = js.getRequiredNum();
+        
+        requiredNum = js.getRequiredNum();
 		stations = sd;
                 classes = cs;
-                firingMix = ((GuardJoin) js).getGuard();
+                if (js instanceof GuardJoin){
+                	firingMix = ((GuardJoin) js).getGuard();
+                }
+                                
 		this.stationKey = stationKey;
 		this.classKey = classKey;
                 if (firingMix.isEmpty()) {
@@ -148,7 +157,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 					i = new Integer(1);
 					jNumField.setValue(i);
 				}
-				JoinStrategy js = (JoinStrategy)stations.getJoinStrategy(stationKey, classKey);
+				JoinStrategy js = (JoinStrategy)stations.getJoinStrategy(stationKey, classKey);				
 				js.setRequiredNum(i);
 			}
 			
@@ -181,16 +190,20 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	protected class MixTableModel extends AbstractTableModel {
 
                 private ClassDefinition cs;
+                
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Class",
-				"Tasks required" };
+		
+			
+		private String[] columnNames = new String[] { "Class","Tasks Required" };
 		private Class[] columnClasses = new Class[] { String.class,
 				Object.class };
-		public int[] columnSizes = new int[] { 80, 60 };
+		public int[] columnSizes = new int[] { 40, 100 };
                 
-                public MixTableModel(ClassDefinition cs) {
-                        this.cs = cs;
-                }
+                public MixTableModel( ClassDefinition cs) {
+                        this.cs = cs;                                        
+                        
+                }        
+                
 
 		public int getRowCount() {
 			if (classes.getClassKeys() != null) {
@@ -202,15 +215,17 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 
 		public int getColumnCount() {
 			return columnNames.length;
-		}
+		} 
 
 		@Override
 		public String getColumnName(int columnIndex) {
+			
 			return columnNames[columnIndex];
+						
 		}
 
 		@Override
-		public Class<Object> getColumnClass(int columnIndex) {
+		public Class<Object> getColumnClass(int columnIndex) {			
 			return columnClasses[columnIndex];
 		}
 
@@ -240,7 +255,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 				try {
 					Integer value = Integer.valueOf((String) aValue);
 					if (value >= 0) {
-                                                firingMix.put(indexToKey(rowIndex), value);
+						firingMix.put(indexToKey(rowIndex), value);
 					}
 				} catch (NumberFormatException e) {
                                         

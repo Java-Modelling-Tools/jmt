@@ -145,7 +145,7 @@ public class XMLArchiver implements GuiXMLConstants {
 		// Adds sim and jmodel root elements to Archive root
 		root.appendChild(archiveDoc.importNode(sim.getElementsByTagName(XMLConstantNames.XML_DOCUMENT_ROOT).item(0), true));
 		if (jmodel != null) {
-			root.appendChild(archiveDoc.importNode(jmodel.getElementsByTagName(XML_DOCUMENT_ROOT).item(0), true));
+			root.appendChild(archiveDoc.importNode(jmodel.getElementsByTagName(XML_DOCUMENT_ROOT).item(0), true)); 
 		}
 		// Adds simulation results idf present
 		if (results != null) {

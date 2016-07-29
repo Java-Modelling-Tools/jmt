@@ -127,6 +127,8 @@ public class ModelChecker implements CommonConstants {
     private Vector<Object> csFollowedByBas;
     //Vector containing the keys of cs between fork/join
     private Vector<Object> csBetweenForkJoin;
+    //Vector containing the keys of semaphore not between fork/join
+    private Vector<Object> semaphoreNotBetweenForkJoin;
 //	//Vector containing the keys of classes which is different then the first closed type class if class_switch exists
 //	private Vector<Object> csReferenceStation;
     //Vector containing the classes of the system throughput
@@ -212,6 +214,12 @@ public class ModelChecker implements CommonConstants {
     public static final int GUARD_STRATEGY_ZERO_TASKS = 26;
     //Check if FiringForkStrategy has 0 tasks
     public static final int GUARD_STRATEGY_CLOSED_ZERO_POPULATION = 27;
+    
+    //Check if exists some semaphore not between a fork and a join
+    public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN = 28;
+    
+    //it occurs when there is at least one semaphore but not a join;
+    public static final int SEMAPHORE_WITHOUT_JOIN_ERROR = 29;
 
     //it occurs when more than one sink have been defined
     public static int MORE_THAN_ONE_SINK_WARNING = 0;
@@ -288,8 +296,8 @@ public class ModelChecker implements CommonConstants {
      //it it occurs only when trying to convert to JMVA
      public static int NON_STATE_INDEPENDENT_ROUTING_WARNING = 5;
      */
-    private int NUMBER_OF_ERROR_TYPES = 28;
-    private int NUMBER_OF_NORMAL_ERROR_TYPES = 28;
+    private int NUMBER_OF_ERROR_TYPES = 30;
+    private int NUMBER_OF_NORMAL_ERROR_TYPES = 30;
     private int NUMBER_OF_WARNING_TYPES = 18;
     private int NUMBER_OF_NORMAL_WARNING_TYPES = 5;
 
@@ -329,6 +337,7 @@ public class ModelChecker implements CommonConstants {
         csWithWrongMatrix = new Vector<Object>(0, 1);
         csFollowedByBas = new Vector<Object>(0, 1);
         csBetweenForkJoin = new Vector<Object>(0, 1);
+        semaphoreNotBetweenForkJoin = new Vector<Object>(0, 1);
 //		csReferenceStation = new Vector<Object>(0, 1);
         csSystemThroughputClass = new Vector<Object>(0, 1);
         closedZeroPopulation = new Vector<Object>(0, 1);
@@ -362,6 +371,7 @@ public class ModelChecker implements CommonConstants {
         csWithWrongMatrix.removeAllElements();
         csFollowedByBas.removeAllElements();
         csBetweenForkJoin.removeAllElements();
+        semaphoreNotBetweenForkJoin.removeAllElements();
 //		csReferenceStation.removeAllElements();
         csSystemThroughputClass.removeAllElements();
         closedZeroPopulation.removeAllElements();
@@ -428,6 +438,8 @@ public class ModelChecker implements CommonConstants {
             checkForCsMatrixProbabilities();
             checkForCsFollowedByBAS();
             checkForCsBetweenForkJoin();
+            checkForSemaphoreBetweenForkJoin();  
+            checkForSemaphoreWithoutJoinErrors();
             checkCsReferenceStation();
             checkCsSystemThroughputClass();
             checkZeroPopulation();
@@ -714,6 +726,21 @@ public class ModelChecker implements CommonConstants {
     public boolean isThereCsBetweenForkJoin() {
         return errors[CS_BETWEEN_FORK_JOIN];
     }
+    
+    /**
+     * Returns true if exist some semaphore components not between a fork and a
+     * join, returns false otherwise.
+     *
+     * @return
+     */
+    public boolean isThereSemaphoreNotBetweenForkJoin() {
+        return errors[SEMAPHORE_NOT_BETWEEN_FORK_JOIN];
+    }
+    
+    public boolean isThereSemaphoreWithoutJoinError() {
+        return errors[SEMAPHORE_WITHOUT_JOIN_ERROR];
+    }
+
 
     /**
      * Returns true if exist at least class_switch and different reference
@@ -1174,6 +1201,16 @@ public class ModelChecker implements CommonConstants {
      */
     public Vector<Object> getCsBetweenForkJoin() {
         return csBetweenForkJoin;
+    }
+    
+    /**
+     * Use it to get a Vector<Object> containing the keys of semaphores not between
+     * fork/join.
+     *
+     * @return a Vector<Object> containing the keys of semaphores between fork/join.
+     */
+    public Vector<Object> getSemaphoreNotBetweenForkJoin() {
+        return semaphoreNotBetweenForkJoin;
     }
 
 //	/**
@@ -2776,7 +2813,43 @@ public class ModelChecker implements CommonConstants {
             }
         }
     }
+    
+    /**
+     * It checks if exist some semaphore components between a fork and a
+     * join.
+     */
+    public void checkForSemaphoreBetweenForkJoin() {
+        for (int i = 0; i < station_def.getStationKeys().size(); i++) {
+            Object stationKey = station_def.getStationKeys().get(i);
+            if (!station_def.getStationType(stationKey).equals(STATION_TYPE_FORK)) {
+                continue;
+            }
+            Object tmp = checkForSemaphoreBetweenForkJoinHelper(stationKey, stationKey, false, true, null);
+            if (tmp != null) {
+                errors[SEMAPHORE_NOT_BETWEEN_FORK_JOIN] = true;
+                semaphoreNotBetweenForkJoin.add(tmp);
+            }
+        }
+    }
 
+    private void checkForSemaphoreWithoutJoinErrors() {
+        boolean semaphore = false;
+        boolean join = false;
+        Vector<Object> stations = station_def.getStationKeys();
+        for (int i = 0; i < stations.size(); i++) {
+            Object thisKey = stations.get(i);
+            if (station_def.getStationType(thisKey).equals(STATION_TYPE_TASKSEMAPHORE)) {
+                semaphore = true;
+            }
+            if (station_def.getStationType(thisKey).equals(STATION_TYPE_JOIN)) {
+                join = true;
+            }
+        }
+        if ((!join) && (semaphore)) {
+            errors[SEMAPHORE_WITHOUT_JOIN_ERROR] = true;
+        }
+    }
+    
     /**
      * It checks the different reference station of closed class if there exists
      * class_switch.
@@ -2957,6 +3030,58 @@ public class ModelChecker implements CommonConstants {
         for (int i = 0; i < forward.size(); i++) {
             Object forwardStation = forward.get(i);
             Object tmp = checkForCsBetweenForkJoinHelper(start, forwardStation, foundedCSCopy, false, wrongCsCopy);
+            if (tmp != null) {
+                return tmp;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Helper of checkForSemaphoreBetweenForkJoin. It uses recursion
+     *
+     * @param start the station from which the check begins. It is used to
+     * prevent infinite loop.
+     * @param curr	the current station we are analyzing
+     * @param foundedJoin True if in the path between start and current exist some
+     * join components.
+     * @param firstInvokation True if it is the first time you invoke this
+     * method.
+     * @param wrongSm If foundedJoin is equals to true, this parameter contains
+     * the pointer to the semaphore components found.
+     * @return It returns the pointer to the semaphore components founded
+     * between start and a join, it returns null if such components does not
+     * exist.
+     *
+     */
+    private Object checkForSemaphoreBetweenForkJoinHelper(Object start, Object curr, boolean foundedJoin, boolean firstInvokation, Object wrongSm) {
+        boolean foundedJoinCopy = foundedJoin;
+        Object wrongSmCopy = wrongSm;        
+        //Exit conditions
+        if (curr != null) {
+            if (station_def.getStationType(curr).equals(STATION_TYPE_JOIN)) {
+                foundedJoinCopy = true;                
+            }
+            if (station_def.getStationType(curr).equals(STATION_TYPE_FORK)) { //Restart appearance of a Join provided a Fork
+            	foundedJoinCopy = false;
+            }
+            if (station_def.getStationType(curr).equals(STATION_TYPE_TASKSEMAPHORE) && foundedJoin)//Error
+            {
+            	return wrongSmCopy = curr;
+            }
+            if (station_def.getStationType(curr).equals(STATION_TYPE_TASKSEMAPHORE) && !foundedJoin)//Everything ok
+            {
+            	return null;
+            }
+            if (curr.equals(start) && !firstInvokation) {
+                return null;
+            }
+        }
+        //Recursion
+        Vector<Object> forward = station_def.getForwardConnections(curr);
+        for (int i = 0; i < forward.size(); i++) {
+            Object forwardStation = forward.get(i);
+            Object tmp = checkForSemaphoreBetweenForkJoinHelper(start, forwardStation, foundedJoinCopy, false, wrongSmCopy);
             if (tmp != null) {
                 return tmp;
             }

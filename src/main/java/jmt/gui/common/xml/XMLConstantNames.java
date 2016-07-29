@@ -139,6 +139,9 @@ public interface XMLConstantNames {
 	public static final String CLASSNAME_FORK = "Fork";
 	public static final String CLASSNAME_JOIN = "Join";
 	public static final String CLASSNAME_CLASSSWITCH = "ClassSwitch";
+	public static final String CLASSNAME_TASKSEMAPHORE = "TaskSemaphore";
+	
+	public static final String XML_E_MAPREDUCE = "template_mapreduce";
 
 	public static final String NODETYPE_REGION = "region";
 	public static final String NODETYPE_STATION = "station";

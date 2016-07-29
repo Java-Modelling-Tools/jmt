@@ -70,7 +70,8 @@ public abstract class JmtCell extends DefaultGraphCell {
 	public static final int FORK = 5;
 	public static final int JOIN = 6;
 	public static final int LDSERVER = 7;
-	public static final int CLASSSWITCH = 8;
+	public static final int CLASSSWITCH = 8; 
+	public static final int SEMAPHORE = 9;
 
 	private Port[] ports;
 

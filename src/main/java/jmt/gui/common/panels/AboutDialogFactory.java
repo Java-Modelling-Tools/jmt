@@ -93,7 +93,7 @@ public class AboutDialogFactory {
 	/** JSIMgraph main contributors */
 	private static final Contributors[] JMODEL = {
 		new Contributors(Company.POLIMI, "Bertoli Marco", "Cazzoli Mattia", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
-		new Contributors(Company.ICL, "Eleftheriou Anastasia", "Jiang Shuai")
+		new Contributors(Company.ICL, "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor")
 	};
 
 	/** JABA main contributors */

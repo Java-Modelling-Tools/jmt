@@ -356,6 +356,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 			tmpMap.put(STATION_TYPE_ROUTER, STATION_NAMES.get(STATION_TYPE_ROUTER));
 			tmpMap.put(STATION_TYPE_FORK, STATION_NAMES.get(STATION_TYPE_FORK));
 			tmpMap.put(STATION_TYPE_JOIN, STATION_NAMES.get(STATION_TYPE_JOIN));
+			tmpMap.put(STATION_TYPE_TASKSEMAPHORE, STATION_NAMES.get(STATION_TYPE_TASKSEMAPHORE));
 			addInputCombo("Type", "stationType", station_panel, tmpMap);
 			stationpanelnum++;
 		}

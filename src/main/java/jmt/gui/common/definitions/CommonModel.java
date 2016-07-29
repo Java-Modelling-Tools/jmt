@@ -41,6 +41,8 @@ import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
 import jmt.gui.common.forkStrategies.OutPath;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -354,6 +356,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
                                 if(strategy instanceof GuardJoin) {
                                         ((GuardJoin) strategy).getGuard().put(key, 0);
                                 }
+                                /*strategy = this.getSemaphoreStrategy(station, classK);
+                                if(strategy instanceof NormalSemaphore) {
+                                    ((NormalSemaphore) strategy).getSemaphore().put(key, 0);
+                                }*/
                         }
                 }
 	}
@@ -584,6 +590,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
                                 if(strategy instanceof GuardJoin) {
                                         ((GuardJoin) strategy).getGuard().put(key, 0);
                                 }
+                                /*strategy = this.getSemaphoreStrategy(station, classK);
+                                if(strategy instanceof NormalSemaphore) {
+                                    ((NormalSemaphore) strategy).getSemaphore().put(key, 0);
+                                }*/
                         }
                 }
 		save = true;
@@ -870,6 +880,32 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		sd.numOfServers = numberOfServers;
 	}
+	
+	/** Sets number of servers or number of forked job for the station, given the search key.*/
+	@Override
+	public synchronized void setSemaphoreThreshold(Object classKey, Integer PercentageThres, Object stationKey) {
+		StationClassData current = (StationClassData) stationDetailsBDM.get(
+				classKey, stationKey);
+		if (current != null) {
+			NormalSemaphore semaphore =  (NormalSemaphore) current.semaphoreStrategy;
+			semaphore.setSemaphoreThres(PercentageThres);
+		} 	
+		
+		// sd;		
+		//if (stationDetailsBDM.containsKey(stationKey)) {
+			//StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		//} else {
+		//	return;
+		//}
+		
+		((NormalSemaphore) current.semaphoreStrategy).setSemaphoreThres(PercentageThres);
+		//map.put(classKey, PercentageThres);
+		/*
+		if (!sd.PercentageThres.equals(PercentageThres)) {
+			save = true;
+		}
+		sd.PercentageThres = PercentageThres;*/
+	}
 
 	/** Returns parameter for the station given the search key and parameter code.*/
 	@Override
@@ -892,7 +928,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			}
 			case STATION_NUMBER_OF_SERVERS: {
 				return sd.numOfServers;
-			}
+			}			
 			default: {
 				return null;
 			}
@@ -1006,7 +1042,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			/*Delay stations have infinite number of servers and no queue*/
 			numberOfServers = new Integer(-1);
 		} else if (sd.type.equals(STATION_TYPE_TERMINAL) || sd.type.equals(STATION_TYPE_ROUTER) || sd.type.equals(STATION_TYPE_SOURCE)
-				|| sd.type.equals(STATION_TYPE_SINK) || sd.type.equals(STATION_TYPE_JOIN) || sd.type.equals(STATION_TYPE_LOGGER)) {
+				|| sd.type.equals(STATION_TYPE_SINK) || sd.type.equals(STATION_TYPE_JOIN) || sd.type.equals(STATION_TYPE_LOGGER) || sd.type.equals(STATION_TYPE_TASKSEMAPHORE)) {
 			/*If this station has no queue and no service section, there's no need to
 			* set any parameter value for these sections.*/
 			numberOfServers = null;
@@ -1153,7 +1189,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			save = true;
 		}
 		sd.forkBlock = value;
-	}
+	}	
+	
 
 	/*------------------------------------------------------------------------------
 	 *---------------- Methods for setup of class-station parameters ---------------
@@ -1291,6 +1328,17 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			current.routingStrategy = routingStrategy;
 		}
 	}
+	
+	@Override
+	public void setSemaphoreStrategy(Object stationKey, Object classKey, Object semaphoreStrategy) {
+		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (current != null) {
+			//if (!routingStrategy.equals(current.routingStrategy)) {
+				save = true;
+			//}
+			current.semaphoreStrategy = semaphoreStrategy;
+		}
+	}
         
         @Override
 	public Object getForkingStrategy(Object stationKey, Object classKey) {
@@ -1309,6 +1357,17 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				classKey, stationKey);
 		if (current != null) {
 			return current.joinStrategy;
+		} else {
+			return null;
+		}
+	}
+	
+	@Override
+	public Object getSemaphoreStrategy(Object stationKey, Object classKey) {
+		StationClassData current = (StationClassData) stationDetailsBDM.get(
+				classKey, stationKey);
+		if (current != null) {
+			return current.semaphoreStrategy;
 		} else {
 			return null;
 		}
@@ -1605,36 +1664,39 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			defaultDetails = new StationClassData(
 					Defaults.get("stationQueueStrategy"),
 					Defaults.getAsNewInstance("stationDelayServiceStrategy"),
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null);
 		} else if (STATION_TYPE_SERVER.equals(sd.type)) {
 			defaultDetails = new StationClassData(
 					Defaults.get("stationQueueStrategy"),
 					Defaults.getAsNewInstance("stationServiceStrategy"),
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null);
 		} else if (STATION_TYPE_SOURCE.equals(sd.type)) {
 			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null);
 		} else if (STATION_TYPE_SINK.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null, null, null, null, null);
+			defaultDetails = new StationClassData(null, null, null, null, null, null, null);
 		} else if (STATION_TYPE_TERMINAL.equals(sd.type)) {
 			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null);
 		} else if ((STATION_TYPE_ROUTER.equals(sd.type))
 				|| (STATION_TYPE_LOGGER.equals(sd.type))) {
 			defaultDetails = new StationClassData(
 					Defaults.get("stationQueueStrategy"), null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null);
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null);
 		} else if (STATION_TYPE_FORK.equals(sd.type)) {
 			defaultDetails = new StationClassData(
-					Defaults.get("stationQueueStrategy"), null, null, null,Defaults.getAsNewInstance("stationForkingStrategy"), null);
+					Defaults.get("stationQueueStrategy"), null, null, null,Defaults.getAsNewInstance("stationForkingStrategy"), null, null);
 		} else if (STATION_TYPE_JOIN.equals(sd.type)) {
 			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, Defaults.getAsNewInstance("stationJoinStrategy"));
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, Defaults.getAsNewInstance("stationJoinStrategy"), null);
+		} else if (STATION_TYPE_TASKSEMAPHORE.equals(sd.type)) {
+			defaultDetails = new StationClassData(null, null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, Defaults.getAsNewInstance("stationSemaphoreStrategy"));
 		} else if (STATION_TYPE_CLASSSWITCH.equals(sd.type)) {
 			defaultDetails = new StationClassData(
 					Defaults.get("stationQueueStrategy"), null,
 					Defaults.getAsNewInstance("stationRoutingStrategy"),
-					Defaults.getAsNewInstance("stationCsRowMatrix"), null, null);
+					Defaults.getAsNewInstance("stationCsRowMatrix"), null, null, null);
 		}
 		return defaultDetails;
 	}
@@ -1687,6 +1749,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
                                 if(strategy instanceof GuardJoin) {
                                         ((GuardJoin) strategy).getGuard().remove(classKey);
                                 }
+                                /*strategy = this.getSemaphoreStrategy(station, classK);                                
+                                if(strategy instanceof NormalSemaphore) {
+                                    	((NormalSemaphore) strategy).getSemaphore().remove(classKey);
+                                }*/
                         }
                 }
 	}
@@ -1830,7 +1896,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		// No connection between a router or a fork or join and itself
 		if (sourceKey == targetKey
 				&& (source.type.equals(STATION_TYPE_ROUTER) || source.type.equals(STATION_TYPE_FORK) || source.type.equals(STATION_TYPE_JOIN) || source.type
-						.equals(STATION_TYPE_LOGGER))) {
+						.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_TASKSEMAPHORE))) {
 			return false;
 		}
 		//no direct connections from source to sink
@@ -2617,7 +2683,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected boolean canStationTypeBeBlocked(String stationType) {
 		return !stationType.equals(CommonConstants.STATION_TYPE_SOURCE) && !stationType.equals(CommonConstants.STATION_TYPE_SINK)
 				&& !stationType.equals(CommonConstants.STATION_TYPE_FORK) && !stationType.equals(CommonConstants.STATION_TYPE_JOIN)
-				&& !stationType.equals(CommonConstants.STATION_TYPE_TERMINAL);
+				&& !stationType.equals(CommonConstants.STATION_TYPE_TERMINAL) && !stationType.equals(CommonConstants.STATION_TYPE_TASKSEMAPHORE);
 	}
 
 	/**
@@ -2996,16 +3062,18 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
                 //bpmn
 		public Object forkingStrategy;
 		public Object joinStrategy;
+		public Object semaphoreStrategy;
 
-		public StationClassData(String queueStrategy, Object serviceDistribution, Object routingStrategy, Object classSwitchProb, Object forkingStrategy, Object joinStrategy) {
+		public StationClassData(String queueStrategy, Object serviceDistribution, Object routingStrategy, Object classSwitchProb, Object forkingStrategy, Object joinStrategy, Object semaphoreStrategy) {
 			this.queueStrategy = queueStrategy;
 			this.serviceDistribution = serviceDistribution;
 			this.routingStrategy = routingStrategy;
 			this.classSwitchProb = classSwitchProb;
 			this.preload = new Integer(0);
 			this.dropRule = Defaults.get("dropRule");
-                        this.forkingStrategy = forkingStrategy;
+            this.forkingStrategy = forkingStrategy;
 			this.joinStrategy = joinStrategy;
+			this.semaphoreStrategy = semaphoreStrategy;
 		}
 	}
 

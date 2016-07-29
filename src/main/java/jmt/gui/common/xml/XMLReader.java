@@ -56,6 +56,8 @@ import jmt.gui.common.forkStrategies.ProbabilitiesFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.PartialJoin;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -121,6 +123,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	
         protected static Map<String, ForkStrategy> engineToGuiForking = null;
 	protected static Map<String, JoinStrategy> engineToGuiJoin = null;
+	protected static Map<String, SemaphoreStrategy> engineToGuiSemaphore = null;
 
 	protected static final String queueGetFCFS = "jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy";
 	protected static final String queueGetLCFS = "jmt.engine.NetStrategies.QueueGetStrategies.LCFSstrategy";
@@ -139,8 +142,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * is the best choice)
 	 * @return true iff model was recognized and loaded, false otherwise
 	 */
-	public static boolean loadModel(String fileName, CommonModel model) {
-		Document doc = loadXML(fileName, XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION));
+	public static boolean loadModel(String fileName, CommonModel model) {		
+		Document doc = loadXML(fileName, XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION));		
 		if (doc.getElementsByTagName(XML_DOCUMENT_ROOT).getLength() != 0) {
 			// Document is a simulation model
 			parseXML(doc, model);
@@ -162,7 +165,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * is the best choice)
 	 * @return true iff model was recognized and loaded, false otherwise
 	 */
-	public static boolean loadModel(File xmlFile, CommonModel model) {
+	public static boolean loadModel(File xmlFile, CommonModel model) {		
 		return loadModel(xmlFile.getAbsolutePath(), model);
 	}
 
@@ -171,7 +174,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * @param root root of document to be parsed
 	 * @param model data model to be elaborated
 	 */
-	public static void parseXML(Element root, CommonModel model) {
+	public static void parseXML(Element root, CommonModel model) {		
 		// Gets optional parameter simulation seed
 		String seed = root.getAttribute(XML_A_ROOT_SEED);
 		if (seed != null && seed != "") {
@@ -350,8 +353,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		Integer customers;
 		String name;
 		Distribution defaultDistr = (Distribution) Defaults.getAsNewInstance("classDistribution");
-		Object key;
-		for (int i = 0; i < nodeclasses.getLength(); i++) {
+		Object key;		
+		for (int i = 0; i < nodeclasses.getLength(); i++) {			
 			currclass = (Element) nodeclasses.item(i);
 			name = currclass.getAttribute(XML_A_CLASS_NAME);
 			type = currclass.getAttribute(XML_A_CLASS_TYPE).equals("closed") ? CLASS_TYPE_CLOSED : CLASS_TYPE_OPEN;
@@ -430,6 +433,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (type.equals(STATION_TYPE_JOIN)) {
 				parseRouter((Element) sections.item(2), model, key);
 				parseJoin((Element) sections.item(0), model, key);
+			} else if (type.equals(STATION_TYPE_TASKSEMAPHORE)) {
+				parseRouter((Element) sections.item(2), model, key);
+				parseSemaphore((Element) sections.item(0), model, key);
 			}
 
 		}
@@ -1310,12 +1316,102 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
                                        for (int i = 0; i < classes.size(); i++) {
                                                mix.put(model.getClassByName(classes.get(i)), numbers.get(i));
                                        }
+                                       
                                        ((GuardJoin) js).setGuard(mix);
                                 }
                         }
                 } else {
                         for(Object o: classes.values()) {
                                 model.setJoinStrategy(key, o, CommonConstants.JOINING_NORMAL.clone());
+                        }
+                }
+	}
+	
+	protected static void parseSemaphore(Element section, CommonModel model,
+			Object key) {
+		Element parameter = (Element) section.getElementsByTagName(
+				XML_E_PARAMETER).item(0);
+		              Map<String, Node> semaphore = null;
+                if (parameter != null) {
+                        semaphore = parseParameterRefclassArray(parameter);
+                        Object[] classNames = semaphore.keySet().toArray();
+                        String className;
+
+                        if (engineToGuiSemaphore == null) {
+                                engineToGuiSemaphore = new TreeMap<String, SemaphoreStrategy>();
+                                SemaphoreStrategy[] allSS = SemaphoreStrategy.findAll();
+                                for (SemaphoreStrategy element : allSS) {
+                                        engineToGuiSemaphore.put(element.getClass().getName(), element);
+                                }
+                        } 
+
+                        Object[] semaphoreStratKeys = engineToGuiSemaphore.keySet().toArray();
+                        for (Object className2 : classNames) {
+                                className = ((Element) semaphore.get(className2))
+                                                .getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+
+                                for (Object semaphoreStratKey : semaphoreStratKeys) {
+                                        if (className.equals(engineToGuiSemaphore.get(semaphoreStratKey)
+                                                        .getClassPath())) {
+                                                model.setSemaphoreStrategy(key, classes.get(className2),
+                                                                engineToGuiSemaphore.get(semaphoreStratKey).clone());
+                                        }
+                                }
+
+                                SemaphoreStrategy ss = (SemaphoreStrategy) model.getSemaphoreStrategy(key,
+                                                classes.get(className2));
+                                
+                                if (ss instanceof NormalSemaphore) {
+                                    Element temp = (Element) semaphore.get(className2);
+                                    NodeList temp2 = temp.getElementsByTagName(XML_E_SUBPARAMETER);
+                                    for (int i = 0; i < temp2.getLength(); i++) {
+                                            Element temp3 = (Element) temp2.item(i);
+                                            if (temp3.getAttribute(XML_A_CLASS_NAME).equals(
+                                                            "SemThres")) {
+                                                    ss.setSemaphoreThres(Integer.parseInt(temp3
+                                                                    .getElementsByTagName("value").item(0)
+                                                                    .getFirstChild().getTextContent()));
+                                            }
+                                    }
+                                }
+                                /*
+                                if (ss instanceof NormalSemaphore) {
+                                        Element temp = (Element) semaphore.get(className2);
+                                        NodeList parList = temp.getElementsByTagName(XML_E_SUBPARAMETER);
+                                        Map<Object, Integer> mix = new HashMap<>();
+                                        List<String> classes = new ArrayList<>();
+                                        List<Integer> numbers = new ArrayList<>();
+                                        for (int i = 0; i < parList.getLength(); i++) {
+                                                Element par = (Element) parList.item(i);
+                                                if (par.getAttribute(XML_A_CLASS_NAME).equals(
+                                                                "Classes")) {
+                                                        NodeList classList = par.getElementsByTagName(XML_E_SUBPARAMETER);
+                                                        for (int j = 0; j < classList.getLength(); j++) {
+                                                                Element classPar = (Element) classList.item(j);
+                                                                classes.add(classPar.getElementsByTagName("value").item(0).getFirstChild().getTextContent());
+                                                        }
+                                                } else if (par.getAttribute(XML_A_CLASS_NAME).equals(
+                                                                "Numbers")) {
+                                                        NodeList numList = par.getElementsByTagName(XML_E_SUBPARAMETER);
+                                                        for (int j = 0; j < numList.getLength(); j++) {
+                                                                Element numPar = (Element) numList.item(j);
+                                                                numbers.add(Integer.parseInt(numPar.getElementsByTagName("value").item(0).getFirstChild().getTextContent()));
+                                                        }
+                                                }
+                                        }
+                                        
+                                       for (int i = 0; i < classes.size(); i++) {
+                                               mix.put(model.getClassByName(classes.get(i)), numbers.get(i));
+                                       }
+                                       //mix.put(className2, numbers.get(model.getClassKeys().indexOf(className2)));                                       
+                                       if (ss instanceof NormalSemaphore){
+                                    	   ((NormalSemaphore) ss).setSemaphore(mix);
+                                       }                                       
+                                }*/
+                        }
+                } else {
+                        for(Object o: classes.values()) {
+                                model.setSemaphoreStrategy(key, o, CommonConstants.SEMAPHORE_NORMAL.clone());
                         }
                 }
 	}
@@ -1456,11 +1552,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			return STATION_TYPE_FORK;
 		} else if (sectionNames[0].equals(CLASSNAME_JOIN)) {
 			return STATION_TYPE_JOIN;
+		} else if (sectionNames[0].equals(CLASSNAME_TASKSEMAPHORE)) {
+			return STATION_TYPE_TASKSEMAPHORE;
 		} else if (sectionNames[1].equals(CLASSNAME_TUNNEL)) {
 			return STATION_TYPE_ROUTER;
 		} else if (sectionNames[1].equals(CLASSNAME_LOGGER)) {
 			return STATION_TYPE_LOGGER;
-		}
+		} 
 		return null;
 	}
 
@@ -1666,18 +1764,17 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		DOMParser parser = new DOMParser();
 		try {
 			// Sets validation only if needed
-			if (schemaSource != null) {
-				parser.setFeature(NAMESPACES_FEATURE_ID, true);
-				parser.setFeature(VALIDATION_FEATURE_ID, true);
-				parser.setFeature(SCHEMA_VALIDATION_FEATURE_ID, true);
+			if (schemaSource != null) {				
+				parser.setFeature(NAMESPACES_FEATURE_ID, true);				
+				parser.setFeature(VALIDATION_FEATURE_ID, true);				
+				parser.setFeature(SCHEMA_VALIDATION_FEATURE_ID, true);				
 				parser.setFeature(VALIDATION_DYNAMIC_FEATURE_ID, true);
-
 				parser.setProperty(EXTERNAL_SCHEMA_LOCATION_PROPERTY_ID, schemaSource);
 			}
 
                         FileReader fr = new FileReader(filename);
 			InputSource in_source = new InputSource(fr);
-			//TODO: il parser va prima creato!!
+			//TODO: the parser must first be created
 			parser.parse(in_source);
                                                
 			return parser.getDocument();

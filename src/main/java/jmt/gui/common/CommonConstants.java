@@ -30,6 +30,8 @@ import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.NormalJoin;
 import jmt.gui.common.joinStrategies.PartialJoin;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.routingStrategies.*;
 
 /**
@@ -45,6 +47,9 @@ import jmt.gui.common.routingStrategies.*;
  *
  * Modified by Ashanka (Nov 2012)
  * Desc: Added new LoadDependent Routing
+ * 
+ * Modified by Vitor S. Lopes (Jul 2016)
+ * Desc: Added Task Semaphore
  */
 public interface CommonConstants {
 
@@ -64,6 +69,8 @@ public interface CommonConstants {
 	public final static String STATION_TYPE_JOIN = "Join";
 	public final static String STATION_TYPE_LOGGER = "Logger";
 	public final static String STATION_TYPE_CLASSSWITCH = "ClassSwitch";
+	public final static String STATION_TYPE_TASKSEMAPHORE = "TaskSemaphore";
+	
 	
 	//For BPMN
 //	public final static String STATION_TYPE_INGATEWAY = "InGateWay";
@@ -85,6 +92,7 @@ public interface CommonConstants {
 			putConst(STATION_TYPE_JOIN, STATION_TYPE_JOIN);
 			putConst(STATION_TYPE_LOGGER, STATION_TYPE_LOGGER);
 			putConst(STATION_TYPE_CLASSSWITCH, STATION_TYPE_CLASSSWITCH);
+			putConst(STATION_TYPE_TASKSEMAPHORE, STATION_TYPE_TASKSEMAPHORE);
 			//For BPMN
 //			putConst(STATION_TYPE_INGATEWAY, STATION_TYPE_INGATEWAY);
 //			putConst(STATION_TYPE_OUTGATEWAY, STATION_TYPE_OUTGATEWAY);
@@ -143,6 +151,9 @@ public interface CommonConstants {
         public final static JoinStrategy JOINING_NORMAL = new NormalJoin();
         public final static JoinStrategy JOINING_PARTIAL = new PartialJoin();
         public final static JoinStrategy JOINING_MIX = new GuardJoin();
+       
+        
+        public final static SemaphoreStrategy SEMAPHORE_NORMAL = new NormalSemaphore();
     
 	/**HTML formats for panels descriptions*/
 	final static String HTML_START = "<html><body align=\"left\">";

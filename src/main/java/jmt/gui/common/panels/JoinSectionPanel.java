@@ -25,6 +25,7 @@ import jmt.gui.common.editors.JoinEditor;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.PartialJoin;
 
+
 public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 	
 	private static final long serialVersionUID = 1L;
@@ -77,7 +78,7 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		//layout of main panel
 		WarningScrollTable jsp = new WarningScrollTable(joinStrategies, WARNING_CLASS);
 		//routing strategy selector on the left, routing probabilities editor on the right
-		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Routing Strategies"));
+		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Join Strategies"));
 		mainPanel.setResizeWeight(.80); // Gives more space to left component
 		jsp.setMinimumSize(new Dimension(180, 100));
 		mainPanel.setLeftComponent(jsp);

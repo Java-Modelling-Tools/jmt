@@ -1,0 +1,28 @@
+<archive name="Queue.jsimg" timestamp="Mon Jul 11 16:35:53 BST 2016" xsi:noNamespaceSchemaLocation="Archive.xsd"><sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="/homes/vsoaresl/JMT/" logReplaceMode="0" maxSamples="1000000" name="Queue.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd"><node name="Queue 1"><section className="Queue"><parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter><parameter array="true" classPath="java.lang.String" name="dropStrategies"/><parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/><parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy"/></section><section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter><parameter array="true" classPath="java.lang.Integer" name="numberOfVisits"/><parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy"/></section><section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section></node></sim><jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd"><station name="Queue 1"><position rotate="false" x="444.0" y="259.0"/></station></jmodel>
+<template_mapreduce name="MapReduce1">
+	<input name="Queue 1"></input>
+	<fork>
+		<map>1</map>
+		<red>1</red>
+	</fork>	
+	<mapper>2</mapper>
+	<semaphore>
+		<class1>100</class1>
+	</semaphore>
+	<reducer>3</reducer>
+	<output name=""></output>				
+</template_mapreduce><template_mapreduce name="MapReduce2">
+	<input name=""></input>
+	<fork>
+		<map>1</map>
+		<red>1</red>
+	</fork>	
+	<mapper>2</mapper>
+	<semaphore>
+		<class1>100</class1>
+	</semaphore>
+	<reducer>2</reducer>
+	<output name=""></output>				
+</template_mapreduce>
+</archive>
+

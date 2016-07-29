@@ -112,6 +112,9 @@ public interface StationDefinition {
 
 	/** Sets number of servers or number of forked job for the station, given the search key.*/
 	public void setStationNumberOfServers(Integer numberOfServers, Object key);
+	
+	/** Sets number of servers or number of forked job for the station, given the search key.*/
+	public void setSemaphoreThreshold(Object classKey, Integer PercentageThres, Object stationKey);
 
 	/** Returns parameter for the station given the search key and parameter code.*/
 	public Object getStationParameter(Object key, int parameterCode);
@@ -148,6 +151,7 @@ public interface StationDefinition {
 	 * region (-1 is infinity)
 	 */
 	public void setForkBlock(Object key, Integer value);
+		
 	
 	public void setIsSimplifiedFork(Object key, Boolean value);
 
@@ -201,6 +205,8 @@ public interface StationDefinition {
 	public void setForkingStrategy(Object stationKey, Object classKey, Object routingStrategy);
 	
 	public void setJoinStrategy(Object stationKey, Object classKey, Object joinStrategy);
+	
+	public void setSemaphoreStrategy(Object stationKey, Object classKey, Object semaphoreStrategy);
 	/**Returns routing strategy for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, null value is
 	 * returned.
@@ -213,6 +219,8 @@ public interface StationDefinition {
 	public Object getForkingStrategy(Object stationKey, Object classKey);
 	
 	public Object getJoinStrategy(Object stationKey, Object classKey);
+	
+	public Object getSemaphoreStrategy(Object stationKey, Object classKey);
 
 	/** Sets (Returns) logging parameters for the logger.
 	 * @param stationKey: search key for station.
