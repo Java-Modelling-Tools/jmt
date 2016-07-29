@@ -207,6 +207,9 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		      JList jlist = ((ComboPopup)popup).getList();  
 		      jlist.setVisibleRowCount(measureTypes.length);
 	    }  
+            
+                // GC: Ensures that keyboard arrows can be used to select metric
+                measureSelection.putClientProperty("JComboBox.isTableCellEditor", Boolean.TRUE);
 		
 		measureTable = new MeasureTable();
 

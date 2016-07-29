@@ -120,13 +120,13 @@
 										type="jdouble" use="required" />
 								</xs:complexType>
 							</xs:element>
-							<xs:element name="classWeight" minOccurs="0"
+							<xs:element name="dropRules" minOccurs="0"
 								maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="jobClass"
 										type="xs:string" use="required" />
-									<xs:attribute name="weight"
-										type="jdouble" use="required" />
+									<xs:attribute name="dropThisClass"
+										type="xs:boolean" use="required" />
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="classMemorySize" minOccurs="0"
@@ -138,13 +138,13 @@
 										type="xs:integer" use="required"/>
 								</xs:complexType>
 							</xs:element>
-							<xs:element name="dropRules" minOccurs="0"
+							<xs:element name="classWeight" minOccurs="0"
 								maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="jobClass"
 										type="xs:string" use="required" />
-									<xs:attribute name="dropThisClass"
-										type="xs:boolean" use="required" />
+									<xs:attribute name="weight"
+										type="jdouble" use="required" />
 								</xs:complexType>
 							</xs:element>
 						</xs:sequence>
