@@ -24,6 +24,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -81,8 +82,10 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			num = new Long(num.longValue() + 1);
 		}
 		objectNumber.put(Defaults.get("className"), num);
+                Distribution defaultClassDistrib = (Distribution) Defaults.getAsNewInstance("classDistribution");
+                defaultClassDistrib.setMean(2.0); // set default arrival rate to 0.5
 		return addClass(getUniqueClassName(Defaults.get("className") + num.toString()), Defaults.getAsInteger("classType").intValue(), Defaults
-				.getAsInteger("classPriority").intValue(), Defaults.getAsInteger("classPopulation"), Defaults.getAsNewInstance("classDistribution"));
+				.getAsInteger("classPriority").intValue(), Defaults.getAsInteger("classPopulation"), defaultClassDistrib);
 	}
 
 	/**

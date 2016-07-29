@@ -30,7 +30,7 @@ import jmt.engine.random.Parameter;
 
 /**
  * This class implements a job source (generator): a job is created every
- * <i>t</i> simulation time units using a statisitcal distribution according
+ * <i>t</i> simulation time units using a statistical distribution according
  * to its class.
  * @author Francesco Radaelli, Federico Granata
  *

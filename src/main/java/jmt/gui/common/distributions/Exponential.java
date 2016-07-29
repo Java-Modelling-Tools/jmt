@@ -49,7 +49,7 @@ public class Exponential extends Distribution {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[1];
 		// Sets parameter lambda
-		parameters[0] = new Parameter("lambda", "\u03BB", Double.class, new Double(1));
+		parameters[0] = new Parameter("lambda", "\u03BB", Double.class, new Double(1.0));
 		// Checks value of lambda must be greater than 0 and not infinity
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {

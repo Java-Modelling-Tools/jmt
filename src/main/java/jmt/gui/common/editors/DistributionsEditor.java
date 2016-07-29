@@ -505,8 +505,7 @@ public class DistributionsEditor extends JMTDialog {
 		if (initial != null) {
 			this.current = initial.clone();
 		} else {
-			this.current = new Exponential(); // Default distribution if nothing
-												// is selected
+			this.current = new Exponential(); // Default distribution if nothing												// is selected
 		}
 
 		// If distributions is not already set, sets it!
