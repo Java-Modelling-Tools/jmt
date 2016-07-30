@@ -76,6 +76,11 @@ public interface StationDefinition {
 	 * This method returns all station keys except source and sink ones.
 	 */
 	public Vector<Object> getStationKeysNoSourceSink();
+        
+        /**
+	 * This method returns all station keys for components that can be pre-loaded
+	 */
+	public Vector<Object> getStationKeysPreloadable();
 
 	/**
 	 * This method returns all station (without sources and sinks) and blocking region keys.

@@ -100,6 +100,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * search keysets for classes, stations and measures
 	 */
+	protected Vector<Object> preloadableKeyset = new Vector<Object>();
+	/**
+	 * search keysets for classes, stations and measures
+	 */
 	protected Vector<Object> stationsKeyset = new Vector<Object>();
         	
 	protected Vector<Object> FJKeyset = new Vector<Object>();
@@ -762,6 +766,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	public Vector<Object> getStationKeysNoSourceSink() {
 		return noSourceSinkKeyset;
 	}
+	/**
+	 * This method returns all station keys except source and sink ones.
+	 */
+	@Override
+	public Vector<Object> getStationKeysPreloadable() {
+		return preloadableKeyset;
+	}
         
         public Vector<Object> getFJKeys(){
 		return this.FJKeyset;
@@ -1000,6 +1011,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			} else {
 				noSourceSinkKeyset.remove(key);
 			}
+			// If new type is not source or sink add to noSourceSink
+			if (!type.equals(STATION_TYPE_SOURCE) && !type.equals(STATION_TYPE_SINK) && !type.equals(STATION_TYPE_JOIN) && !type.equals(STATION_TYPE_TASKSEMAPHORE) && !type.equals(STATION_TYPE_LOGGER)) {
+				if (!preloadableKeyset.contains(key)) {
+					preloadableKeyset.add(key);
+				}
+			} else {
+				preloadableKeyset.remove(key);
+			}
 			if (!type.equals(STATION_TYPE_FORK)) {
 				if (!FJKeyset.contains(key)) {
 					FJKeyset.add(key);
@@ -1066,6 +1085,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			if (!type.equals(STATION_TYPE_SOURCE) && !type.equals(STATION_TYPE_SINK)) {
 				noSourceSinkKeyset.add(key);
 			}
+			if (!type.equals(STATION_TYPE_SOURCE) && !type.equals(STATION_TYPE_SINK) && !type.equals(STATION_TYPE_JOIN) && !type.equals(STATION_TYPE_TASKSEMAPHORE) && !type.equals(STATION_TYPE_LOGGER)) {
+				preloadableKeyset.add(key);
+			}
                         if (type.equals(STATION_TYPE_FORK)) {
 				FJKeyset.add(key);
 			}
@@ -1119,6 +1141,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			deleteStationConnections(key);
 			deleteStationDetails(key);
 			noSourceSinkKeyset.remove(key);
+			preloadableKeyset.remove(key);
                         FJKeyset.remove(key);
 			blockableStations.remove(key);
 			save = true;

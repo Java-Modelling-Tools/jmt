@@ -199,7 +199,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		mainpanel.add(preloadPanel, BorderLayout.CENTER);
 		upperPanel.add(new JLabel("<HTML>" + 
 				"Initial customer locations:" + "<br/>" +
-				"Jobs located in <b>ClassSwitch</b>, <b>Router</b> and <b>Fork</b> are entering these stations." 
+				"Jobs located in <b>ClassSwitch</b>, <b>Router</b> and <b>Fork</b> are treated as arriving into these stations." 
 				+"</HTML>"), BorderLayout.SOUTH);
 
 		// Adds simulation parameters
@@ -500,7 +500,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		}
 
 		public int getColumnCount() {
-			return sd.getStationKeysNoSourceSink().size();
+			return sd.getStationKeysPreloadable().size();
 		}
 
 		@Override
@@ -514,7 +514,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public String getColumnName(int index) {
-			if (index >= 0 && sd.getStationKeysNoSourceSink().size() > 0) {
+			if (index >= 0 && sd.getStationKeysPreloadable().size() > 0) {
 				return sd.getStationName(getStationKey(index));
 			} else {
 				return "";
@@ -549,7 +549,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		//returns search key of a station given its index in table
 		private Object getStationKey(int index) {
-			return sd.getStationKeysNoSourceSink().get(index);
+			return sd.getStationKeysPreloadable().get(index);
 		}
 
 		//returns search key of a class given its index in table
