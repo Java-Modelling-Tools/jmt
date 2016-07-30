@@ -70,7 +70,7 @@ TreeSelectionListener {
 
 	// use to create bar in the panel
 	private Scrollbar bar;
-	private static int SCROLLBAR_ACCURANCY = 1;
+	private static int SCROLLBAR_ACCURACY = 1;
 
 	// Panel where upload manual
 	private JPanel canvas;
@@ -124,7 +124,7 @@ TreeSelectionListener {
 		 */	
 
 		bar = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, (pageEnd - pageStart)
-				* SCROLLBAR_ACCURANCY);
+				* SCROLLBAR_ACCURACY);
 		bar.addAdjustmentListener(this);
 		JScrollPane scroller = new JScrollPane(canvas);
 		scroller.getVerticalScrollBar().setPreferredSize(new Dimension(0, 0));

@@ -64,7 +64,7 @@
 	<resources>
 		<res id="LicencePanel.licence" src="License.txt"/>
 		<res id="HTMLInfoPanel.info" src="ReadMe.html"/>
-		<res id="Installer.image" src="PolitecnicoLogo.jpg"/>
+		<res id="Installer.image" src="WebsiteLogo.png"/>
 		<res id="shortcutSpec.xml" src="shortcutSpec.xml"/>
 		<res id="Unix_shortcutSpec.xml" src="Unix_shortcutSpec.xml"/>
 	</resources>
@@ -93,7 +93,7 @@
 			<onDeselect name=""/>
 			<fileset dir="" targetdir="$INSTALL_PATH">
 				<include name="License.txt"/>
-				<include name="PolitecnicoLogo.jpg"/>
+				<include name="WebsiteLogo.png"/>
 				<include name="ReadMe.html"/>
 				<include name="*.ico"/>
 				<include name="*.png"/>
@@ -110,6 +110,7 @@
 			<fileset dir="" targetdir="$USER_HOME/JMT">
 				<include name="examples/**/*"/>
 				<include name="jwatFormats/**/*"/>
+				<include name="templates/**/*"/>
 			</fileset>
 		</pack>
 	</packs>
