@@ -29,6 +29,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import jmt.gui.common.Defaults;
 import jmt.gui.common.CommonConstants;
 import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.wizard.WizardPanel;
@@ -45,8 +46,6 @@ import jmt.framework.gui.wizard.WizardPanel;
 public class DialogFactory {
 	// Dimensions
 	
-	private static final int width = CommonConstants.MAX_GUI_WIDTH_DIALOG_DEFAULT;
-	private static final int height = CommonConstants.MAX_GUI_HEIGHT_DIALOG_DEFAULT;
 	private static final float RESIZE_RATIO = CommonConstants.MIN_GUI_DIALOG_RESIZE_RATIO;
 
 	// Private variables
@@ -60,8 +59,8 @@ public class DialogFactory {
 	public DialogFactory(Frame mainWindow) {
 		this.mainWindow = mainWindow;
 	}
-
-	private void createDialog() {
+        
+	private void createDialog(int width, int height) {
 		// Creates modal dialog
 		dialogFrame = new JMTDialog(mainWindow, true);
 		dialogFrame.centerWindow(width, height);
@@ -98,7 +97,16 @@ public class DialogFactory {
 	 * @param title title of this dialog
 	 */
 	public void getDialog(final JComponent panel, String title) {
-		createDialog();
+             getDialog(panel, title, CommonConstants.MAX_GUI_WIDTH_DIALOG_DEFAULT, CommonConstants.MAX_GUI_HEIGHT_DIALOG_DEFAULT, false, "", "");
+	}
+
+	/**
+	 * Returns modal dialog box showing given panel and with given title
+	 * @param  panel to be shown on the center area of this dialog
+	 * @param title title of this dialog
+	 */
+	public void getDialog(final JComponent panel, String title, int width, int height, boolean saveSize, String defaultWidthProp, String defaultHeightProp) {
+		createDialog(width, height);
 		// Adds input panel
 		dialogFrame.getContentPane().add(panel, BorderLayout.CENTER);
 		// Sets title
@@ -112,5 +120,11 @@ public class DialogFactory {
 
 		// Shows dialog
 		dialogFrame.show();
+                if (saveSize) {
+           		Dimension d = dialogFrame.getSize();
+        		Defaults.set(defaultWidthProp, String.valueOf(d.width));
+                	Defaults.set(defaultHeightProp, String.valueOf(d.height));
+                        Defaults.save();                        
+                }
 	}
 }

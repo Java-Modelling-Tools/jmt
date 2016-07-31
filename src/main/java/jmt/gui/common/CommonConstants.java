@@ -103,6 +103,8 @@ public interface CommonConstants {
         public final static float MIN_GUI_DIALOG_RESIZE_RATIO = 1.0f;
         public final static int MAX_GUI_WIDTH_DIALOG_DEFAULT =  780;
         public final static int MAX_GUI_HEIGHT_DIALOG_DEFAULT = 520;
+        public final static int MAX_GUI_WIDTH_JSIMG_CLASSDEF = 1024;
+        public final static int MAX_GUI_HEIGHT_JSIMG_CLASSDEF = 520;
         public final static int MAX_GUI_WIDTH_JWAT_COLOR =  1024;
         public final static int MAX_GUI_HEIGHT_JWAT_COLOR = 768;
         public final static int MAX_GUI_WIDTH_QUICKHTML =  800;

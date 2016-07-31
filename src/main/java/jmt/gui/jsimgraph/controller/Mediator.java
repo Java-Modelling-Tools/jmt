@@ -1648,7 +1648,7 @@ public class Mediator implements GuiInterface {
 	 * Launches the <code>UserClass</code> editor.
 	 */
 	public void editUserClasses() {
-		dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Define customer classes");
+		dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Define customer classes", Defaults.getAsInteger("JSIMClassDefWindowWidth").intValue(), Defaults.getAsInteger("JSIMClassDefWindowHeight").intValue(),true,"JSIMClassDefWindowWidth","JSIMClassDefWindowHeight");
 	}
 
 	/**
@@ -2516,11 +2516,11 @@ public class Mediator implements GuiInterface {
 	 * Author: Bertoli Marco
 	 */
 	public void editMeasures() {
-		dialogFactory.getDialog(new MeasurePanel(model, model, model), "Define performance indices");
-	}
+		dialogFactory.getDialog(new MeasurePanel(model, model, model), "Define performance indices", Defaults.getAsInteger("JSIMMeasuresDefWindowWidth").intValue(), Defaults.getAsInteger("JSIMMeasuresDefWindowHeight").intValue(),true,"JSIMMeasuresDefWindowWidth","JSIMMeasuresDefWindowHeight");
+        }
 
 	/**
-	 * @return A refernce to the action <code>EditMeasures</code>.
+	 * @return A reference to the action <code>EditMeasures</code>.
 	 */
 	public AbstractJmodelAction getEditMeasures() {
 		return editMeasures;
