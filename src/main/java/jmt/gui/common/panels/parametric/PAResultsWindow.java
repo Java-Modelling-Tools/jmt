@@ -512,7 +512,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			tempJspPanel.add(jsp, BorderLayout.CENTER);
 
 			textState = new JLabel();
-			textState.setText("<html>The values in <font color=\"red\"> red </font> could not be computed with the requested precision</html>");
+			textState.setText("<html>The values in <font color=\"red\"> red </font> were not be computed with the requested precision</html>");
 			JPanel textStatePanel = new JPanel(new BorderLayout());
 			JPanel tempTextStatePanel = new JPanel(new FlowLayout());
 			tempTextStatePanel.add(textState);
@@ -976,7 +976,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			tempJspPanel.add(tempTitlePanel, BorderLayout.NORTH);
 			tempJspPanel.add(jsp, BorderLayout.CENTER);
 			textState = new JLabel();
-			textState.setText("<html>The values in <font color=\"red\"> red </font> could not be computed with the requested precision</html>");
+			textState.setText("<html>The values in <font color=\"red\"> red </font> were not be computed with the requested precision</html>");
 			JPanel textStatePanel = new JPanel(new BorderLayout());
 			JPanel tempTextStatePanel = new JPanel(new FlowLayout());
 			tempTextStatePanel.add(textState);

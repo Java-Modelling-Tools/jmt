@@ -196,23 +196,22 @@ public class Beta3D {
 	}
 
 	/**
-	 * Il metodo controlla se due triangoli sono unibili con un settore in
-	 * cui saturano 2 stazioni.
-	 *
+         * The method checks if two triangles can be merged with a sector in which two stations saturate
+         * 
 	 * @param s1
 	 * @param s2
 	 * @return
 	 */
 	public boolean Joinable(Sector3D s1, Sector3D s2) {
-		int controllo = 0;
+		int check = 0;
 		for (int i = 0; i < s1.CountStations(); i++) {
 			for (int j = 0; j < s2.CountStations(); j++) {
 				if (s1.getS(i) == s2.getS(j)) {
-					controllo++;
+					check++;
 				}
 			}
 		}
-		if (controllo == 2) {
+		if (check == 2) {
 			return true;
 		} else {
 			return false;
@@ -220,8 +219,8 @@ public class Beta3D {
 	}
 
 	/**
-	 * Dati due settori triangolari con stazioni in comune restituisce la faccia che li unisce
-	 *
+         * Given two triangular sectors with stations in common, returns the facet that connects them
+         * 
 	 * @param s1
 	 * @param s2
 	 * @return
@@ -248,8 +247,7 @@ public class Beta3D {
 	}
 
 	/**
-	 * Dato un vettore contenente i settori triangolari restituisce un vettore contenente
-	 * i settori dove saturano 2 stazioni che li uniscono
+         * Given a vector including the triangular sectors, returns a vector including the sectors that unite them and where two stations saturate
 	 *
 	 * @param triangles
 	 * @return
@@ -752,9 +750,9 @@ public class Beta3D {
 	}
 
 	/**
-	 * Crea il settore di saturazione globale nel caso in cui saturi soltanto una stazione
-	 * @param v la stazione
-	 * @return il settore
+         * Creates the global saturation sector in the case where a single station saturates
+	 * @param v station
+	 * @return sector
 	 */
 	public Vector<Object> OneDominator(Vertex v) {
 		Vector<Object> out = new Vector<Object>();
