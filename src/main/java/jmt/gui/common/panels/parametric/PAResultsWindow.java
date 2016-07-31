@@ -158,7 +158,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		// Sets default title, close operation and dimensions
 		this.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		this.setIconImage(JMTImageLoader.loadImage("Results").getImage());
-		this.centerWindow(1024, 768);
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_WHATIF_RESULTS, CommonConstants.MAX_GUI_HEIGHT_WHATIF_RESULTS);
 
 		// Creates all tabs
 		JTabbedPane mainPanel = new JTabbedPane();
@@ -1012,7 +1012,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			this.getContentPane().add(pivotPanel2, BorderLayout.CENTER);
 
 			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			Dimension size = new Dimension(1024, 768);
+			Dimension size = new Dimension(CommonConstants.MAX_GUI_WIDTH_WHATIF_RESULTS, CommonConstants.MAX_GUI_HEIGHT_WHATIF_RESULTS);
 			this.setSize(size);
 			this.setLocation((screenSize.width - size.width) / 2, (screenSize.height - size.height) / 2);
 		}

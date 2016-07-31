@@ -17,6 +17,7 @@
  */
 package jmt.gui.common.panels.parametric;
 
+import jmt.gui.common.CommonConstants;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -43,7 +44,7 @@ public class EmptyPanel extends ParameterOptionPanel {
 
 	public void initialize() {
 		JPanel empty = new JPanel();
-		empty.setPreferredSize(new Dimension(1024, 768));
+		empty.setPreferredSize(new Dimension(CommonConstants.MAX_GUI_WIDTH_COMMON, CommonConstants.MAX_GUI_HEIGHT_COMMON));
 		this.setLayout(new BorderLayout());
 		this.add(empty, BorderLayout.CENTER);
 		title.setTitleColor(Color.LIGHT_GRAY);

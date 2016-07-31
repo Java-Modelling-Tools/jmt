@@ -264,7 +264,7 @@ public class JModelProblemsWindow extends JDialog {
 		this.addComponent(continueButton, gblayout, gbconstants, 3, 0, 1, 1);
 		gbconstants.insets.right = -45;
 		this.addComponent(cancelButton, gblayout, gbconstants, 3, 1, 1, 1);
-		this.setSize(450, 435);
+		this.setSize(CommonConstants.MAX_GUI_WIDTH_JSIM_PROBLEMS, CommonConstants.MAX_GUI_HEIGHT_JSIM_PROBLEMS);
 		this.setLocation(300, 190);
 		this.setModal(true);
 		this.setResizable(false);

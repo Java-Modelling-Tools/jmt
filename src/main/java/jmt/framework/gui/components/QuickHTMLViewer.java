@@ -19,7 +19,7 @@
 package jmt.framework.gui.components;
 
 import java.net.URL;
-
+import jmt.gui.common.CommonConstants;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
@@ -46,7 +46,7 @@ public class QuickHTMLViewer extends JMTFrame {
 	 * @param url: url of document that must be displayed.
 	 */
 	public QuickHTMLViewer(URL url) {
-		this.centerWindow(800, 600);
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_QUICKHTML, CommonConstants.MAX_GUI_HEIGHT_QUICKHTML);
 		HtmlPanel html = new HtmlPanel(url);
 		html.setAntiAliasing(true);
 		JScrollPane jsp = new JScrollPane(html, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);

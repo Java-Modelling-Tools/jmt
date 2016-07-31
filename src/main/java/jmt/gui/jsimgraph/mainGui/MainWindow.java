@@ -19,14 +19,16 @@
 package jmt.gui.jsimgraph.mainGui;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-
+import jmt.gui.common.CommonConstants;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.layouts.MultiBorderLayout;
+import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jsimgraph.controller.GraphMouseListner;
 import jmt.gui.jsimgraph.controller.Mediator;
@@ -87,7 +89,8 @@ public class MainWindow extends JMTFrame {
 
 		scroll = new JScrollPane();
 		mainPane.add(scroll, BorderLayout.CENTER);
-		centerWindow(1024, 768);
+//		centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIMG, CommonConstants.MAX_GUI_HEIGHT_JSIMG);
+		centerWindow(Defaults.getAsInteger("JSIMWindowWidth").intValue(), Defaults.getAsInteger("JSIMWindowHeight").intValue());
 		setVisible(true);
 	}
 
@@ -132,6 +135,10 @@ public class MainWindow extends JMTFrame {
 			mediator.getPAProgressWindow().stopAnimation();
 			mediator.getPAProgressWindow().dispose();
 		}
+		Dimension d = getSize();
+		Defaults.set("JSIMWindowWidth", String.valueOf(d.width));
+		Defaults.set("JSIMWindowHeight", String.valueOf(d.height));
+		Defaults.save();
 	}
 
 	/** Removes the current graph from the main window.

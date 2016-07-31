@@ -71,6 +71,7 @@ import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.DistributionDensityGraph;
 import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.gui.common.Defaults;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.StatisticalOutputsLoader;
@@ -169,7 +170,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	public void initGUI(){
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle(windowName);
-		this.centerWindow(1152, 864);
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_STAT_OUTPUT, CommonConstants.MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT);
 
 		//makes LeftSidePanel
 		JPanel pivotPanel = new JPanel() ;

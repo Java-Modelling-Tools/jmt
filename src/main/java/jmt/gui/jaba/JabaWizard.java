@@ -18,6 +18,7 @@
 
 package jmt.gui.jaba;
 
+import jmt.gui.common.CommonConstants;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
@@ -112,7 +113,7 @@ public class JabaWizard extends Wizard {
 		super("JABA");
 
 		System.out.flush();
-		setSize(1024, 768);
+		setSize(CommonConstants.MAX_GUI_WIDTH_JABA, CommonConstants.MAX_GUI_HEIGHT_JABA);
 		this.centerWindow();
 		setIconImage(JMTImageLoader.loadImageAwt("JABAIcon"));
 		this.data = data;

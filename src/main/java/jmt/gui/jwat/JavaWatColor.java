@@ -26,11 +26,12 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import jmt.gui.common.CommonConstants;
 
 public class JavaWatColor {
 	public static void main(String[] v) {
 		JFrame f = new JFrame();
-		f.setSize(800, 600);
+		f.setSize(CommonConstants.MAX_GUI_WIDTH_JWAT_COLOR, CommonConstants.MAX_GUI_HEIGHT_JWAT_COLOR);
 		JButton b = new JButton("Colora");
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

@@ -100,7 +100,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private static final String WINDOW_TITLE = "JSIMwiz - Queue Network Models Simulator";
+	private static final String WINDOW_TITLE = "JSIMwiz - Textual Queueing Network Simulator";
 
 	private CommonModel model = new JSIMModel();
 	private File currentFile = null;

@@ -160,7 +160,7 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 
 		public jmodelClassTableModel() {
 			super();
-			columnNames = new String[] { "Color", "Name", "Type", "Priority", "Population", "Interarrival Time Distribution", "",
+			columnNames = new String[] { "Color", "Name", "Type", "Prio", "Population", "Interarrival Time", "",
 					"Reference Station", "" };
 			colClasses = new Class[] { Color.class, String.class, JComboBox.class, String.class, String.class, String.class, Object.class,
 					JComboBox.class, JButton.class };

@@ -34,6 +34,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
+import jmt.gui.common.CommonConstants;
 import jmt.framework.gui.components.HtmlPanel;
 import jmt.framework.gui.components.JMTDialog;
 import jmt.gui.exact.ld.eval.Evaluator;
@@ -89,7 +90,7 @@ public class LDHelpDialog extends JMTDialog {
 		evalHelp = eval.getHelpURL();
 
 		setResizable(false);
-		this.centerWindow(600, 400);
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_LDHELP, CommonConstants.MAX_GUI_HEIGHT_LDHELP);
 		initComponents();
 		setDefaultCloseOperation(HIDE_ON_CLOSE);
 	}

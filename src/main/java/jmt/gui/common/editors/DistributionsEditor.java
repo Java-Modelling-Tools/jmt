@@ -68,6 +68,7 @@ import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.image.ImagePanel;
 import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.framework.gui.listeners.KeyFocusAdapter;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.distributions.Burst;
 import jmt.gui.common.distributions.Distribution;
@@ -527,9 +528,9 @@ public class DistributionsEditor extends JMTDialog {
 		this.setTitle("Editing Distribution...");
 		// Centers this dialog on the screen
 		if (recursive) {
-			this.centerWindowWithOffset(480, 600, 50, 50);
+			this.centerWindowWithOffset(CommonConstants.MAX_GUI_WIDTH_JSIM_DISTRIB, CommonConstants.MAX_GUI_HEIGHT_JSIM_DISTRIB, 50, 50);
 		} else {
-			this.centerWindow(480, 600);
+			this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_DISTRIB, CommonConstants.MAX_GUI_HEIGHT_JSIM_DISTRIB);
 		}
 
 		// Creates a main panel and adds margins to it

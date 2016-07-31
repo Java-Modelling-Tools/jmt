@@ -47,6 +47,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import jmt.framework.gui.controller.Manager;
 import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.CommonConstants;
 
 public class JWatStartScreen extends JFrame {
 	/**
@@ -153,7 +154,7 @@ public class JWatStartScreen extends JFrame {
 		this.setIconImage(JMTImageLoader.loadImage(IMG_JWATICON).getImage());
 		this.setResizable(false);
 		this.setTitle("jWAT");
-		this.setSize(520, 400);
+		this.setSize(CommonConstants.MAX_GUI_WIDTH_JWAT_STARTSCREEN, CommonConstants.MAX_GUI_HEIGHT_JWAT_STARTSCREEN);
 		//Image image = new ImageIcon(imageURL).getImage();
 		//image = image.getScaledInstance(400, 315, Image.SCALE_SMOOTH);
 		JPanel eastPanel = new JPanel(new BorderLayout());

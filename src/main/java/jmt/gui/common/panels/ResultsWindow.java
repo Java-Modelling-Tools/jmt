@@ -18,7 +18,7 @@
   */
 
 package jmt.gui.common.panels;
-
+import jmt.gui.common.CommonConstants;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -148,7 +148,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		// Sets default title, close operation and dimensions
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setIconImage(JMTImageLoader.loadImage("Results").getImage());
-		this.centerWindow(1024, 768);
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_RESULTS, CommonConstants.MAX_GUI_HEIGHT_JSIM_RESULTS);
 
 		// Creates all tabs
 		JTabbedPane mainPanel = new JTabbedPane();

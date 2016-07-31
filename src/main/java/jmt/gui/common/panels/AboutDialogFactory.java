@@ -43,6 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
 import jmt.framework.gui.components.JMTDialog;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.startScreen.GraphStartScreen;
 
@@ -186,7 +187,7 @@ public class AboutDialogFactory {
 		JPanel bottom = new JPanel();
 		bottom.add(exit);
 		dialog.getContentPane().add(bottom, BorderLayout.SOUTH);
-		dialog.centerWindow(800, 600);
+		dialog.centerWindow(CommonConstants.MAX_GUI_WIDTH_ABOUT, CommonConstants.MAX_GUI_HEIGHT_ABOUT);
 		
 		// Handles autoclose
 		if (autoclose) {

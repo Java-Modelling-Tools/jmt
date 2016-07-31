@@ -318,7 +318,7 @@ public class ExactWizard extends Wizard {
 
 	public ExactWizard(ExactModel data) {
 		super(TITLE);
-		setSize(1024, 768);
+		setSize(CommonConstants.MAX_GUI_WIDTH_JMVA, CommonConstants.MAX_GUI_HEIGHT_JMVA);
 		this.centerWindow();
 		setIconImage(JMTImageLoader.loadImageAwt("JMVAIcon"));
 		this.data = data;

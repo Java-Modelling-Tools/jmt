@@ -38,6 +38,7 @@ import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.Defaults;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jwat.fitting.panels.FittingPanel;
 import jmt.gui.jwat.fitting.panels.LoadDemoFittingPanel;
@@ -119,7 +120,7 @@ public class MainJwatWizard extends JWatWizard {
 		this.setIconImage(JMTImageLoader.loadImage(IMG_JWATICON).getImage());
 		//this.setResizable(false);
 		this.setTitle(TITLE);
-		this.setSize(1024, 768);
+		this.setSize(CommonConstants.MAX_GUI_WIDTH_JWAT, CommonConstants.MAX_GUI_HEIGHT_JWAT);
 		centerWindow();
 		menus = new JPanel(new BorderLayout());
 		help = this.getHelp();

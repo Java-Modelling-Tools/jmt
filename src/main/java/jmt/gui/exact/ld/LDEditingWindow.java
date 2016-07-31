@@ -48,7 +48,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-
+import jmt.gui.common.CommonConstants;
 import jmt.common.exception.ExpressionParseException;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.components.JMTDialog;
@@ -201,7 +201,7 @@ public class LDEditingWindow extends JMTDialog {
 		if (owner == null) {
 			throw new IllegalArgumentException("owner must not be null!");
 		}
-		setSize(400, 400); // only height is fixed
+		setSize(CommonConstants.MAX_GUI_WIDTH_LDEDITING, CommonConstants.MAX_GUI_HEIGHT_LDEDITING); // only height is fixed
 		//setUndecorated(true);
 		//setResizable(false);
 		this.owner = owner;

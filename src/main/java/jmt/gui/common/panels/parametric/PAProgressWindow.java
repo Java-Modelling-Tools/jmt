@@ -106,7 +106,7 @@ public class PAProgressWindow extends JMTDialog {
 		globalCumulativeTime = 0;
 		globalMeanSimulationTime = 0;
 
-		this.centerWindow(640, 480);
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_WHATIF_PROGRESS, CommonConstants.MAX_GUI_HEIGHT_WHATIF_PROGRESS);
 
 		// Creates bottom toolbar
 		toolbar = new JToolBar();

@@ -50,6 +50,7 @@ import jmt.common.GlobalSettings;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.QuickHTMLViewer;
 import jmt.framework.net.BrowserLauncher;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.AboutDialogFactory.Company;
@@ -259,7 +260,7 @@ public class GraphStartScreen extends JMTFrame {
 		this.setTitle("JMT - Java Modelling Tools v." + GlobalSettings.getSetting(GlobalSettings.VERSION));
 		this.setIconImage(JMTImageLoader.loadImage(IMG_SUITEICON).getImage());
 		this.setResizable(false);
-		this.centerWindow(800, 600);
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_STARTSCREEN, CommonConstants.MAX_GUI_HEIGHT_STARTSCREEN);
 
 		JPanel mainPanel = new JPanel(new BorderLayout());
 		this.getContentPane().setLayout(new BorderLayout());
@@ -390,7 +391,7 @@ public class GraphStartScreen extends JMTFrame {
 	private void showDescrWin(URL url, String title) {
 		if (url != null) {
 			QuickHTMLViewer qhv = new QuickHTMLViewer(url, title);
-			qhv.centerWindow(800, 600);
+			qhv.centerWindow(CommonConstants.MAX_GUI_WIDTH_STARTSCREEN, CommonConstants.MAX_GUI_HEIGHT_STARTSCREEN);
 			qhv.setVisible(true);
 			qhv.setIconImage(getIconImage());
 		}

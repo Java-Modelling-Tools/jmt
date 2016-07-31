@@ -22,7 +22,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import jmt.gui.common.CommonConstants;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -30,7 +30,7 @@ import javax.swing.JPanel;
 public class JavaWatColor {
 	public static void main(String[] v) {
 		JFrame f = new JFrame();
-		f.setSize(1024, 768);
+		f.setSize(CommonConstants.MAX_GUI_WIDTH_JWAT_COLOR, CommonConstants.MAX_GUI_HEIGHT_JWAT_COLOR);
 		JButton b = new JButton("Colora");
 		b.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

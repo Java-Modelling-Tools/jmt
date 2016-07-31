@@ -248,7 +248,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	 */
 	protected void initGUI() {
 		// Sets default title, close operation and dimensions
-		this.centerWindow(800, 600);
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_LDSTRATEGY, CommonConstants.MAX_GUI_HEIGHT_LDSTRATEGY);
 		this.setTitle("Editing Load Dependent Service Strategy...");
 
 		JTabbedPane mainPanel = new JTabbedPane();

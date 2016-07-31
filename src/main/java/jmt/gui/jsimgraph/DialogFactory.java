@@ -29,7 +29,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
-
+import jmt.gui.common.CommonConstants;
 import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.wizard.WizardPanel;
 
@@ -45,9 +45,9 @@ import jmt.framework.gui.wizard.WizardPanel;
 public class DialogFactory {
 	// Dimensions
 	
-	private static final int width = 780;
-	private static final int height = 520;
-	private static final float RESIZE_RATIO = 0.8f;
+	private static final int width = CommonConstants.MAX_GUI_WIDTH_DIALOG_DEFAULT;
+	private static final int height = CommonConstants.MAX_GUI_HEIGHT_DIALOG_DEFAULT;
+	private static final float RESIZE_RATIO = CommonConstants.MIN_GUI_DIALOG_RESIZE_RATIO;
 
 	// Private variables
 	private JMTDialog dialogFrame;
