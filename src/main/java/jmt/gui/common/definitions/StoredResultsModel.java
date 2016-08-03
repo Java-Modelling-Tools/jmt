@@ -525,10 +525,10 @@ public class StoredResultsModel implements MeasureDefinition {
 				throughputTimePerSink.add(new Integer(measures.size() - 1));
 				break;
 			
-			case SimConstants.MEAN_WEIGHT:
+			case SimConstants.FCR_TOTAL_WEIGHT:
 				meanWeight.add(new Integer(measures.size() - 1));
 				break;
-			case SimConstants.MEAN_MEMORY_OCCUPATION:
+			case SimConstants.FCR_MEMORY_OCCUPATION:
 				meanMemoryOccupation.add(new Integer(measures.size() - 1));
 				break;
                         case SimConstants.FORK_JOIN_RESPONSE_TIME:

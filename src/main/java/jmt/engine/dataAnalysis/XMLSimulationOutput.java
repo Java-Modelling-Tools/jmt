@@ -237,11 +237,11 @@ public class XMLSimulationOutput extends SimulationOutput {
 			case SimConstants.RESPONSE_TIME_PER_SINK:
 				typeName = "Response Time per Sink";
                                 break;
-                        case SimConstants.MEAN_WEIGHT:
-				typeName = "FCR - Mean Job Weight";
+                        case SimConstants.FCR_TOTAL_WEIGHT:
+				typeName = "FCR Job Weight";
                                 break;
-                        case SimConstants.MEAN_MEMORY_OCCUPATION:
-				typeName = "FCR - Mean Memory Occupation";
+                        case SimConstants.FCR_MEMORY_OCCUPATION:
+				typeName = "FCR Memory Occupation";
                                 break;
                         case SimConstants.FORK_JOIN_RESPONSE_TIME:
 				typeName = "Fork Join Response Time";

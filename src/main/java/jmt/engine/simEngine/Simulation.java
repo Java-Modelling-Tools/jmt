@@ -548,11 +548,11 @@ public class Simulation {
 							netNodes[nodePosition].analyze(SimConstants.THROUGHPUT_PER_SINK, jClass, ms.getMeasure());
 							break;       
 							
-						case SimConstants.MEAN_WEIGHT:
+						case SimConstants.FCR_TOTAL_WEIGHT:
 							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, ms.getMeasure());
 							break;
 							
-						case SimConstants.MEAN_MEMORY_OCCUPATION:
+						case SimConstants.FCR_MEMORY_OCCUPATION:
 							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, ms.getMeasure());
 							break;
 						

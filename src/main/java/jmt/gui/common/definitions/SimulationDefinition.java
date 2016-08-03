@@ -89,8 +89,8 @@ public interface SimulationDefinition {
 	public static final String MEASURE_X_PER_SINK = "Throughput per Sink";
 	public static final String MEASURE_R_PER_SINK = "Response Time per Sink";
 	
-	public static final String MEASURE_MEAN_WEIGHT = "FCR - Mean Job Weight";
-	public static final String MEASURE_MEAN_MEMORY_OCCUPATION = "FCR - Mean Memory Occupation";
+	public static final String MEASURE_MEAN_WEIGHT = "FCR Total Weight";
+	public static final String MEASURE_MEAN_MEMORY_OCCUPATION = "FCR Memory Occupation";
 	
 	public static final String MEASURE_FJ_RESPONSE_TIME = "Fork Join Response Time";
         public static final String MEASURE_FJ_CN = "Fork Join Number of Customers";

@@ -347,10 +347,10 @@ public class XMLResultsReader implements XMLResultsConstants {
 			}
 			else if (tmp.startsWith("response") && tmp.endsWith("sink")) {
 				numType = SimConstants.RESPONSE_TIME_PER_SINK;
-			} else if (type.equals("FCR - Mean Job Weight")){
-				numType = SimConstants.MEAN_WEIGHT;
-			} else if (type.equals("FCR - Mean Memory Occupation")){
-				numType = SimConstants.MEAN_MEMORY_OCCUPATION;
+			} else if (type.equals("FCR Total Weight")){
+				numType = SimConstants.FCR_TOTAL_WEIGHT;
+			} else if (type.equals("FCR Memory Occupation")){
+				numType = SimConstants.FCR_MEMORY_OCCUPATION;
 			} else if(type.equals("Fork Join Response Time")){
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
 			}

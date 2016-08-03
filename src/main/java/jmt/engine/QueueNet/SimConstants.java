@@ -101,10 +101,10 @@ public class SimConstants {
 	public static final String NODE_TYPE_STATION = "station";
 	
 	/** Measure identifier: mean weight of a FCRegion.   */
-	public static final int MEAN_WEIGHT = 27;
+	public static final int FCR_TOTAL_WEIGHT = 27;
 	
 	/** Measure identifier: mean memory occupation of a FCRegion.   */
-	public static final int MEAN_MEMORY_OCCUPATION = 28;
+	public static final int FCR_MEMORY_OCCUPATION = 28;
 	
 	/** Measure identifier: Response Time of a F/J area */
 	public static final int FORK_JOIN_RESPONSE_TIME = 29;

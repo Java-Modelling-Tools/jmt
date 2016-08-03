@@ -169,11 +169,11 @@ public class PAResultsModel implements MeasureDefinition {
 			} else if (type.startsWith("throughput") && type.endsWith("sink")) {
 				numType = SimConstants.THROUGHPUT_PER_SINK;
 				throughputTimePerSink.add(new Integer(i));
-			} else if (type.endsWith("mean job weight")){
-				numType = SimConstants.MEAN_WEIGHT;
+			} else if (type.endsWith("job weight")){
+				numType = SimConstants.FCR_TOTAL_WEIGHT;
 				meanWeight.add(new Integer(i));
-			} else if (type.endsWith("mean memory occupation")){
-				numType = SimConstants.MEAN_MEMORY_OCCUPATION;
+			} else if (type.endsWith("memory occupation")){
+				numType = SimConstants.FCR_MEMORY_OCCUPATION;
 				meanMemoryOccupation.add(new Integer(i));
 			} else if(type.equals("fork join response time")){
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
@@ -255,10 +255,10 @@ public class PAResultsModel implements MeasureDefinition {
 			case SimConstants.THROUGHPUT_PER_SINK:
 				throughputTimePerSink.add(new Integer(measures.size() - 1));
 				break;
-                        case SimConstants.MEAN_WEIGHT:
+                        case SimConstants.FCR_TOTAL_WEIGHT:
 				meanWeight.add(new Integer(measures.size() - 1));
 				break;
-                        case SimConstants.MEAN_MEMORY_OCCUPATION:
+                        case SimConstants.FCR_MEMORY_OCCUPATION:
 				meanMemoryOccupation.add(new Integer(measures.size() - 1));
 				break;
                         case SimConstants.FORK_JOIN_RESPONSE_TIME:

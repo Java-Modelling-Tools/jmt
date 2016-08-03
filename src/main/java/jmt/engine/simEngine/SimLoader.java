@@ -1038,11 +1038,11 @@ public class SimLoader {
 		else if (measure.equalsIgnoreCase("Throughput per Sink")) {
 			return SimConstants.THROUGHPUT_PER_SINK;
 		}
-		else if(measure.equalsIgnoreCase("FCR - Mean Job Weight")){
-			return SimConstants.MEAN_WEIGHT;
+		else if(measure.equalsIgnoreCase("FCR Total Weight")){
+			return SimConstants.FCR_TOTAL_WEIGHT;
 		}
-		else if(measure.equalsIgnoreCase("FCR - Mean Memory Occupation")){
-			return SimConstants.MEAN_MEMORY_OCCUPATION;
+		else if(measure.equalsIgnoreCase("FCR Memory Occupation")){
+			return SimConstants.FCR_MEMORY_OCCUPATION;
 		}
 		else if(measure.equalsIgnoreCase("Fork Join Response Time")){
 			return SimConstants.FORK_JOIN_RESPONSE_TIME;

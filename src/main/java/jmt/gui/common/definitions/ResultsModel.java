@@ -172,12 +172,11 @@ public class ResultsModel implements MeasureDefinition {
 					break;
 				case SimConstants.THROUGHPUT_PER_SINK:
 					throughputTimePerSink.add(new Integer(i));
-					break;
-					
-				case SimConstants.MEAN_WEIGHT:
+					break;					
+				case SimConstants.FCR_TOTAL_WEIGHT:
 					meanWeight.add(new Integer(i));
 					break;
-				case SimConstants.MEAN_MEMORY_OCCUPATION:
+				case SimConstants.FCR_MEMORY_OCCUPATION:
 					meanMemoryOccupation.add(new Integer(i));
 					break;
 				case SimConstants.FORK_JOIN_RESPONSE_TIME:

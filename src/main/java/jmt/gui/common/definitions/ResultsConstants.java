@@ -114,10 +114,10 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_THROUGHPUT_SINK = HTML_START + HTML_FONT_TITLE + "Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
 	+ "Throughput for each chosen Sink." + HTML_FONT_NOR_END + HTML_END;
 	
-	public static final String DESCRIPTION_MEAN_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR - Mean Job Weight" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+	public static final String DESCRIPTION_MEAN_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR Total Weight" + HTML_FONT_TIT_END + HTML_FONT_NORM 
 			+ "Mean Job Weight for each chosen FCRegion" + HTML_FONT_NOR_END + HTML_END;
 			
-	public static final String DESCRIPTION_MEAN_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR - Mean Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+	public static final String DESCRIPTION_MEAN_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM 
 			+ "Mean Memory Occupation for each chosen FCRegion" + HTML_FONT_NOR_END + HTML_END;
 	
 	public static final String DESCRIPTION_FJ_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Fork Join Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM 
