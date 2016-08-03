@@ -46,7 +46,7 @@ import jmt.framework.gui.wizard.WizardPanel;
 public class DialogFactory {
 	// Dimensions
 	
-	private static final float RESIZE_RATIO = CommonConstants.MIN_GUI_DIALOG_RESIZE_RATIO;
+//	private static final float RESIZE_RATIO = CommonConstants.MIN_GUI_DIALOG_RESIZE_RATIO;
 
 	// Private variables
 	private JMTDialog dialogFrame;
@@ -65,7 +65,7 @@ public class DialogFactory {
 		dialogFrame = new JMTDialog(mainWindow, true);
 		dialogFrame.centerWindow(width, height);
 		dialogFrame.setResizable(true);
-		dialogFrame.setMinimumSize(new Dimension((int)(width * RESIZE_RATIO), (int) (height* RESIZE_RATIO)));
+		//dialogFrame.setMinimumSize(new Dimension((int)(width * RESIZE_RATIO), (int) (height* RESIZE_RATIO)));
 		dialogFrame.getContentPane().setLayout(new BorderLayout());
 
 		//Adds button bar
