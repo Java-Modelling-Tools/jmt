@@ -150,9 +150,9 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 			}
 		}
 
-		if (Math.abs(sumProb - 1.0) > 1E-14) {
-			//total probability must be near 1 (10exp(-14) error allowed)
-			throw new IncorrectDistributionParameterException("The sum of all the given probability must be 1.0");
+		if (Math.abs(sumProb - 1.0) > 1E-3) {
+			//total probability must be near 1 (10exp(-3) error allowed)
+			throw new IncorrectDistributionParameterException("The sum of the probability mass must be 1.0, input mass is " + sumProb);
 		}
 
 		//sets the cdf with the new probabilities

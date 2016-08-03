@@ -1692,7 +1692,6 @@ public class ExactModel implements ExactConstants  {
 		base.appendChild(elems);
 		for (int i = 0; i < n; i++) {
 			elem = root.createElement(inner);
-			// separa i diversi elementi dell'array con ";"
 	        elem.appendChild(root.createTextNode(ArrayUtils.toCSV(arr[i])));
 			elems.appendChild(elem);
 		}
