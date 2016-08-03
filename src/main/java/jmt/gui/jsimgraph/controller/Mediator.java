@@ -2536,7 +2536,7 @@ public class Mediator implements GuiInterface {
 	public boolean checkForSave(String msg) {
 		// Checks if there's an old graph to save
 		if (model != null && model.toBeSaved()) {
-			int resultValue = JOptionPane.showConfirmDialog(mainWindow, msg, "JMODEL - Warning", JOptionPane.YES_NO_CANCEL_OPTION,
+			int resultValue = JOptionPane.showConfirmDialog(mainWindow, msg, "JSIMgraph - Warning", JOptionPane.YES_NO_CANCEL_OPTION,
 					JOptionPane.WARNING_MESSAGE);
 			if (resultValue == JOptionPane.YES_OPTION) {
 				saveModel();
