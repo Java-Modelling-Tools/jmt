@@ -132,6 +132,8 @@ public class Simulation {
 	private int[][] preload_initialPopulations;
 
 	//---------------------- end PRELOAD -------------------------------//
+        
+        private boolean isTerminalSimulation;
 
 	//-------------------------CONSTRUCTORS-------------------------------//
 
@@ -821,6 +823,20 @@ public class Simulation {
 	public void addDistrNetNode(NetNode netNode) {
 		distrNetNodes.add(netNode);
 	}
+
+        /**
+         * @return the isTerminalSimulation
+         */
+        public boolean isIsTerminalSimulation() {
+                return isTerminalSimulation;
+        }
+
+        /**
+         * @param isTerminalSimulation the isTerminalSimulation to set
+         */
+        public void setIsTerminalSimulation(boolean isTerminalSimulation) {
+                this.isTerminalSimulation = isTerminalSimulation;
+        }
 
 	//------------------- end GETTER AND SETTER ----------------------------------//
 

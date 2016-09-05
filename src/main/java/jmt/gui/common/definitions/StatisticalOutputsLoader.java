@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import javax.swing.SwingWorker;
+import jmt.engine.dataAnalysis.Measure;
 
 import jmt.engine.dataAnalysis.measureOutputs.VerboseCSVMeasureOutputReader;
 import jmt.engine.math.SampleStatistics;
@@ -41,7 +42,7 @@ public class StatisticalOutputsLoader {
 	// Percentage upgrade time. Since it is a costly operation it is performed based on time.
 	private static final int UPDATE_PCT_MILLIS = 500;
 	private SampleStatistics statistics;
-	private MeasureDefinition measureDefinition;
+//	private MeasureDefinition measureDefinition;
 	private String filename;
 	private double progress = 0.0 ;
 	private ProgressTimeListener ptlistener = null ;
@@ -54,16 +55,29 @@ public class StatisticalOutputsLoader {
 	private double distMin = Double.NaN;
 	private double distMax = Double.NaN;
 	private int distIntervals = -1;
+        private String decimalSeparator;
+        private String logCsvDelimiter;
 	
 	private CSVLoader currentLoader;
 	
 	public StatisticalOutputsLoader(MeasureDefinition measureDefinition, int measureIndex) throws FileNotFoundException{
-		this.measureDefinition = measureDefinition;
+                decimalSeparator = measureDefinition.getLogDecimalSeparator();
+                logCsvDelimiter = measureDefinition.getLogCsvDelimiter();
 		this.filename = measureDefinition.getLogFileName(measureIndex);
 		this.start = measureDefinition.getDiscardedSamples(measureIndex);
 		
 		// Starts loading of CSV file in a separate thread.
 		reloadData();
+	}
+    
+        public StatisticalOutputsLoader(Measure measure, String decimalSeparator, String logCsvDelimiter) throws FileNotFoundException, IOException, ParseException {
+		this.filename = measure.getOutput().getOutputFile().getAbsolutePath();
+		this.start = measure.getDiscardedSamples();
+                this.decimalSeparator = decimalSeparator;
+                this.logCsvDelimiter = logCsvDelimiter;
+		
+		// Starts loading of CSV file in a separate thread.
+		loadCSV();
 	}
 	
 	public SampleStatistics getStatistics(){
@@ -83,8 +97,9 @@ public class StatisticalOutputsLoader {
 	
 	//reads file and generates graph. Code linked with code of CSVOutputReader.
 	private void loadCSV() throws IOException, ParseException {
+                System.out.println((filename == null) ? "null" : filename);
 		File measureFile = new File(filename);
-		VerboseCSVMeasureOutputReader reader = new VerboseCSVMeasureOutputReader(measureFile, measureDefinition.getLogDecimalSeparator(),measureDefinition.getLogCsvDelimiter());
+		VerboseCSVMeasureOutputReader reader = new VerboseCSVMeasureOutputReader(measureFile, decimalSeparator,logCsvDelimiter);
 		statistics = new SampleStatistics();
 		
 		// Fill distribution if requested.

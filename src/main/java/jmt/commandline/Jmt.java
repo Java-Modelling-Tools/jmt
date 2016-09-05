@@ -209,6 +209,7 @@ public class Jmt {
 		aTransformer.transform(src, dest);  
 		
 		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(temp);
+                dispatcher.setIsTerminalSimulation(true);
 		// Sets simulation seed if required
 		if (options.containsKey(OPTION_SEED)) {
 			try {
@@ -238,7 +239,7 @@ public class Jmt {
 		output.delete();
 		
 		return success;
-	}
+	}  
 	/**
 	 * Returns a map with option name as key and list of parameters as value. Parameter without options are saved with "" as key
 	 * @param args command line args

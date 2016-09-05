@@ -1140,6 +1140,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			stationDataHM.remove(key);
 			deleteStationConnections(key);
 			deleteStationDetails(key);
+                        deleteStationMeasures(key);
 			noSourceSinkKeyset.remove(key);
 			preloadableKeyset.remove(key);
                         FJKeyset.remove(key);
@@ -2969,6 +2970,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected void deleteBlockingDetails(Object blockingRegionKey) {
 		blockingDetailsBDM.remove(blockingRegionKey, BDMap.Y);
 	}
+
+        private void deleteStationMeasures(Object key) {
+                for(Object measureKey: measuresKeyset.toArray()){
+                        if (getMeasureStation(measureKey) == key) {
+                                removeMeasure(measureKey);
+                        }
+                }
+        }
 
 	// --- end Blocking Region Definition ------------------------------------------------------------
 

@@ -19,6 +19,10 @@
 package jmt.engine.dataAnalysis;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -37,7 +41,9 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.QueueNet.SimulationOutput;
 import jmt.engine.log.JSimLogger;
+import jmt.engine.math.SampleStatistics;
 import jmt.engine.simEngine.Simulation;
+import jmt.gui.common.definitions.StatisticalOutputsLoader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -85,9 +91,15 @@ public class XMLSimulationOutput extends SimulationOutput {
 
 	//the File containing the original model definition
 	File simModelDefinition;
+        
+        private String decimalSeparator;
+        private String logDelimiter;
+        private boolean isTerminalSimulation;
 
 	public XMLSimulationOutput(Simulation simulation) {
 		super(simulation);
+                
+                this.isTerminalSimulation = simulation.isIsTerminalSimulation();
 
 		try {
 			/////////////////////////////
@@ -135,6 +147,8 @@ public class XMLSimulationOutput extends SimulationOutput {
 			}
 			
 			// Write CSV definition for verbose measures load.
+                        decimalSeparator = simulation.getSimParameters().getLogDecimalSeparator();
+                        logDelimiter = simulation.getSimParameters().getLogDelimiter();
 			root.setAttribute("logDecimalSeparator", simulation.getSimParameters().getLogDecimalSeparator());
 			root.setAttribute("logDelimiter", simulation.getSimParameters().getLogDelimiter());
 			root.setAttribute("logPath", simulation.getSimParameters().getLogPath());
@@ -142,7 +156,6 @@ public class XMLSimulationOutput extends SimulationOutput {
 		} catch (Exception e) {
 			logger.error("Error while writing simulator output XML", e);
 		}
-
 	}
 
 	/**
@@ -273,7 +286,27 @@ public class XMLSimulationOutput extends SimulationOutput {
 		
 		//log file if verbose measure was selected
 		if (measure.getOutput() != null && measure.getOutput().getOutputFile() != null) {
-			elem.setAttribute("logFile", measure.getOutput().getOutputFile().getAbsolutePath());
+                        elem.setAttribute("logFile", measure.getOutput().getOutputFile().getAbsolutePath());
+                        if (isTerminalSimulation) try {
+                                StatisticalOutputsLoader loader = new StatisticalOutputsLoader(measure, decimalSeparator, logDelimiter);
+                                SampleStatistics stat = loader.getStatistics();
+                                elem.setAttribute("mean", Double.toString(stat.getMean()));
+                                elem.setAttribute("variance", Double.toString(stat.getVariance()));
+                                elem.setAttribute("standardDeviation", Double.toString(stat.getStandardDeviation()));
+                                elem.setAttribute("coefficientOfVariation", Double.toString(stat.getCoefficienfOfVariation()));
+                                elem.setAttribute("skeweness", Double.toString(stat.getSkew()));
+                                elem.setAttribute("kurtosis", Double.toString(stat.getKurtosis()));
+                                elem.setAttribute("firstPowerMoment", Double.toString(stat.getMean()));
+                                elem.setAttribute("secondPowerMoment", Double.toString(stat.getMoment2()));
+                                elem.setAttribute("thirdPowerMoment", Double.toString(stat.getMoment3()));
+                                elem.setAttribute("fourthPowerMoment", Double.toString(stat.getMoment4()));
+                                elem.setAttribute("minValue", Double.toString(stat.getMin()));
+                                elem.setAttribute("maxValue", Double.toString(stat.getMax()));
+                                elem.setAttribute("minSimulationTime", Double.toString(stat.getMinSimTime()));
+                                elem.setAttribute("maxSimulationTime", Double.toString(stat.getMaxSimTime()));
+                        } catch (IOException | ParseException ex) {
+                                Logger.getLogger(XMLSimulationOutput.class.getName()).log(Level.SEVERE, null, ex);
+                        }
 		}
 	}
 

@@ -107,10 +107,14 @@ public class Defaults implements CommonConstants {
 		def.setProperty("blockingRegionType", "default");
 
 		// Logger Parameters (for global log)
-		def.setProperty("loggerDelimiter", ";");
 		Locale locale = JMTFrame.getPlatformDefaultLocale();
 		DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);
 		def.setProperty("loggerDecimalSeparator", String.valueOf(symbols.getDecimalSeparator()));
+                if (String.valueOf(symbols.getDecimalSeparator()).equals(",")) {
+                        def.setProperty("loggerDelimiter", ";");
+                } else {
+                        def.setProperty("loggerDelimiter", ",");
+                }
 		def.setProperty("loggerAutoAppend", "" + jmt.engine.log.LoggerParameters.LOGGER_AR_ASK);
 		def.setProperty("loggerFilePath", "");
 

@@ -83,6 +83,7 @@ public class Dispatcher_jSIMschema {
 	private long maxDuration = -1;
 
 	private Simulation sim;
+        boolean isTerminalSimulation;
 
 	/**
 	 * This constructor receives the absolute path of the xml file containing
@@ -153,6 +154,7 @@ public class Dispatcher_jSIMschema {
 		//try {
 		SimLoader simLoader = new SimLoader(simModelDefinitionPath);
 		sim = simLoader.getSim();
+                sim.setIsTerminalSimulation(isTerminalSimulation);
 
 		//sets in the Simulation object the path of the
 		//xml model definition
@@ -503,5 +505,9 @@ public class Dispatcher_jSIMschema {
 		}
 
 	}
+        
+        public void setIsTerminalSimulation(boolean isTerminalSimulation) {
+                this.isTerminalSimulation = isTerminalSimulation;
+        }
 
 }

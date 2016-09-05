@@ -21,6 +21,20 @@
 						<xs:attribute name="maxSamples" type="xs:int" use="optional"/>
 						<xs:attribute name="nodeType" type="xs:string" use="optional"/>
 						<xs:attribute name="logFile" type="xs:string" use="optional"/>
+						<xs:attribute name="mean" type="xs:string" use="optional"/>
+						<xs:attribute name="variance" type="xs:string" use="optional"/>
+						<xs:attribute name="standardDeviation" type="xs:string" use="optional"/>
+						<xs:attribute name="coefficientOfVariation" type="xs:string" use="optional"/>
+						<xs:attribute name="skeweness" type="xs:string" use="optional"/>
+						<xs:attribute name="kurtosis" type="xs:string" use="optional"/>
+						<xs:attribute name="firstPowerMoment" type="xs:string" use="optional"/>
+						<xs:attribute name="secondPowerMoment" type="xs:string" use="optional"/>
+						<xs:attribute name="thirdPowerMoment" type="xs:string" use="optional"/>
+						<xs:attribute name="fourthPowerMoment" type="xs:string" use="optional"/>
+						<xs:attribute name="minValue" type="xs:string" use="optional"/>
+						<xs:attribute name="maxValue" type="xs:string" use="optional"/>
+						<xs:attribute name="minSimulationTime" type="xs:string" use="optional"/>
+						<xs:attribute name="maxSimulationTime" type="xs:string" use="optional"/>
 					</xs:complexType>
 				</xs:element>
 			</xs:sequence>
