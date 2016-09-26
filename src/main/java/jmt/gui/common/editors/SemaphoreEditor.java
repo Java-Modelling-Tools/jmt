@@ -1,10 +1,25 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.editors;
 
 import java.awt.FlowLayout;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -13,8 +28,6 @@ import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.SpinnerModel;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -23,26 +36,26 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
 import jmt.gui.common.CommonConstants;
-import static jmt.gui.common.CommonConstants.WARNING_ROUTING;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
-//import jmt.gui.common.joinStrategies.GuardJoin;
-//import jmt.gui.common.joinStrategies.JoinStrategy;
-//import jmt.gui.common.joinStrategies.PartialJoin;
-//import jmt.gui.common.joinStrategies.TaskAggregateJoin;
-import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
-import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.panels.WarningScrollTable;
+import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.exact.table.DisabledCellRenderer;
+import jmt.gui.exact.table.ExactCellEditor;
 
+/**
+ *
+ * @author Vitor S. Lopes
+ */
 public class SemaphoreEditor extends JSplitPane implements CommonConstants {
+
 	private static final long serialVersionUID = 1L;
 	private int semaphoreThres;
-        private Map<Object, Integer> firingMix;
+	private Map<Object, Integer> firingMix;
 	private StationDefinition stations;
 	private Object stationKey, classKey;
-        private ClassDefinition classes;
-        private SemaphoreStrategy semaphorestrategy;
+	private ClassDefinition classes;
 
 	private JPanel semaphorePane = new JPanel();
 	private JSpinner jNumField = new JSpinner();
@@ -50,9 +63,8 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 	private JScrollPane descrPane = new JScrollPane();
 	private JTextArea noOptLabel = new JTextArea("No options available for this semaphore strategy");
 	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);
-    private MixTable mixTable;
-    private WarningScrollTable mixPane;
-    private SpinnerModel spinnermodel = new SpinnerNumberModel(1, 1, null, 1);
+	private MixTable mixTable;
+	private WarningScrollTable mixPane;
 
 	public SemaphoreEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		super();
@@ -60,14 +72,14 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		super.setDividerSize(3);
 		super.setBorder(new EmptyBorder(0, 0, 0, 0));
 		this.setResizeWeight(.5);
-                mixTable = new MixTable(cs);
+		mixTable = new MixTable(cs);
 		setData(sd, cs, stationKey, classKey);
 		initComponents();
 	}
 
 	private void initComponents() {
-                mixPane = new WarningScrollTable(mixTable, WARNING_CLASS);
-                mixPane.setBorder(new TitledBorder(new EtchedBorder(), "Semaphore Options"));
+		mixPane = new WarningScrollTable(mixTable, WARNING_CLASS);
+		mixPane.setBorder(new TitledBorder(new EtchedBorder(), "Semaphore Options"));
 		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Semaphore Options"));
 		noOptLabel.setOpaque(false);
 		noOptLabel.setEditable(false);
@@ -81,9 +93,8 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		descrPane.setViewportView(descrTextPane);
 		semaphorePane.setLayout(new FlowLayout());
 		JLabel text = new JLabel("Number of Required Tasks:");
-		semaphorePane.add(text);
 		jNumField.setPreferredSize(DIM_BUTTON_XS);
-		jNumField.setModel(spinnermodel);
+		semaphorePane.add(text);
 		semaphorePane.add(jNumField);
 		semaphorePane.setBorder(new TitledBorder(new EtchedBorder(), "Semaphore Options"));
 		setLeftComponent(descrPane);
@@ -91,70 +102,64 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		SemaphoreStrategy ss = (SemaphoreStrategy) sd.getSemaphoreStrategy(stationKey, classKey);
-		semaphorestrategy = ss;
-		this.classKey = classKey;
-		
 		if (ss == null) {
-			emptyPane();				
+			emptyPane();
 		} else {
-			descrTextPane.setText(ss.getDescription());                        
-						if(ss instanceof NormalSemaphore) {
-                            	//createFiringMixDetails(ss, sd, cs, stationKey, classKey);
-							createDetails(ss, sd, stationKey, classKey);
-                        } else {
-                                emptyPane();                                 
-                        }
+			descrTextPane.setText(ss.getDescription());
+			if (ss instanceof NormalSemaphore) {
+				createDetails(ss, sd, stationKey, classKey);
+			} else {
+				emptyPane();
+			}
 		}
 		doLayout();
 	}
 
 	private void emptyPane() {
-                firingMix = null;
+		firingMix = null;
 		setRightComponent(noOptLabelPanel);
 	}
-	
-	private void createDetails(SemaphoreStrategy ss, StationDefinition sd, Object stationKey, Object classKey){
-	
+
+	private void createDetails(SemaphoreStrategy ss, StationDefinition sd, Object stationKey, Object classKey) {
 		semaphoreThres = ss.getSemaphoreThres();
 		stations = sd;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
-                firingMix = null;
+		firingMix = null;
 		setRightComponent(semaphorePane);
 		this.updateSpinner();
 	}
-   
-	
-	private void updateSpinner(){
+
+	private void updateSpinner() {
 		jNumField.setValue(semaphoreThres);
-		jNumField.addChangeListener(new ChangeListener(){
+		jNumField.addChangeListener(new ChangeListener() {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				Integer i = (Integer) jNumField.getValue();
 				if (i.intValue() < 1) {
-					i = new Integer(0);
-					jNumField.setValue(0);
+					i = new Integer(1);
+					jNumField.setValue(i);
 				}
-				SemaphoreStrategy ss = (SemaphoreStrategy)stations.getSemaphoreStrategy(stationKey, classKey);				
+				SemaphoreStrategy ss = (SemaphoreStrategy) stations.getSemaphoreStrategy(stationKey, classKey);				
 				ss.setSemaphoreThres(i);
 			}
-			
+
 		});
 	}
-        
-        protected class MixTable extends JTable {
+
+	protected class MixTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
-                ClassDefinition cs;
+		ClassDefinition cs;
 
 		public MixTable(ClassDefinition cs) {
 			super();
 			setModel(new MixTableModel(cs));
-			setDefaultEditor(Object.class,
-					new jmt.gui.exact.table.ExactCellEditor());
-                        this.setDefaultRenderer(Object.class, new DisabledCellRenderer());
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			this.setDefaultRenderer(Object.class, new DisabledCellRenderer());
 			sizeColumns();
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		private void sizeColumns() {
@@ -168,25 +173,21 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 
 	protected class MixTableModel extends AbstractTableModel {
 
-                private ClassDefinition cs;
-                
 		private static final long serialVersionUID = 1L;
-		
-			
-		private String[] columnNames = new String[] { "Class","Tasks Required(%)" };
-		private Class[] columnClasses = new Class[] { String.class,
+		private ClassDefinition cs;
+		private String[] columnNames = new String[] { "Class",
+				"Tasks Required (%)" };
+		private Class<?>[] columnClasses = new Class[] { String.class,
 				Object.class };
 		public int[] columnSizes = new int[] { 40, 100 };
-                
-                public MixTableModel( ClassDefinition cs) {
-                        this.cs = cs;                                    
-                }        
-                
+
+		public MixTableModel(ClassDefinition cs) {
+			this.cs = cs;                                    
+		}
 
 		public int getRowCount() {
 			if (classes.getClassKeys() != null) {
 				return classes.getClassKeys().size();
-				//return 1;
 			} else {
 				return 0;
 			}
@@ -202,7 +203,7 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		}
 
 		@Override
-		public Class<Object> getColumnClass(int columnIndex) {		
+		public Class<?> getColumnClass(int columnIndex) {		
 			return columnClasses[columnIndex];
 		}
 
@@ -219,7 +220,6 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 			}
 			if (columnIndex == 0) {
 				return classes.getClassName(indexToKey(rowIndex));
-				//return classes.getClassName(classKey);
 			} else if (columnIndex == 1 && isCellEditable(rowIndex, columnIndex)) {
 				return firingMix.get(indexToKey(rowIndex));
 			} else {
@@ -232,21 +232,14 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 			if (columnIndex == 1) {
 				try {
 					Integer value = Integer.valueOf((String) aValue);
-					if (value >= 0) {
-						if (semaphorestrategy instanceof NormalSemaphore){
-							if (value <= 100){
-								firingMix.put(indexToKey(rowIndex), value);
-							}							
-						} else {
-                                firingMix.put(indexToKey(rowIndex), value);
-						}
+					if (value >= 0 && value <= 100) {
+						firingMix.put(indexToKey(rowIndex), value);
 					}
 				} catch (NumberFormatException e) {
-                                        
 				}
 			}
 		}
-		
+
 		private Object indexToKey(int index) {
 			return classes.getClassKeys().get(index);
 		}

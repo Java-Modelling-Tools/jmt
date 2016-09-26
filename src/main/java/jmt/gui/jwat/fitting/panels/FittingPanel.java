@@ -70,11 +70,11 @@ public class FittingPanel extends WizardPanel {
 				
 				obslist = model.getListObservations();
 				
-				if(distribution == EXPO) {
+				if (distribution == EXPO) {
 					engfitting = new ExponentialFitting(obslist, 0.05d);
 					initComponents();
-					if(engfitting.isFitted()) {
-						if(obslist.length > 20)
+					if (engfitting.isFitted()) {
+						if (obslist.length > 20)
 							resultfittingTextArea.setText("The analyzed data fits the exponential distribution with significativity 0.05" + "\n" +
 									"(the significativity is the probability of rejecting the Exponential hypothesis when it is true)" + "\n" + 
 										"Lambda: " + myFormatter.format(engfitting.getEstimatedParameters()[0]) + "\n\n" +
@@ -100,11 +100,11 @@ public class FittingPanel extends WizardPanel {
 								"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()));
 					}
 				}
-				else if(distribution == PARETO) {
+				else if (distribution == PARETO) {
 					engfitting = new ParetoFitting(obslist, 0.05d);
 					initComponents();
-					if(engfitting.isFitted()) {
-						if(obslist.length > 20)
+					if (engfitting.isFitted()) {
+						if (obslist.length > 20)
 							resultfittingTextArea.setText("The analyzed data fits the Pareto distribution with significativity 0.05" + "\n" +
 											"(the significativity is the probability of rejecting the Pareto hypothesis when it is true)" + "\n" +   
 											"Alpha (Shape parameter): " + myFormatter.format(engfitting.getEstimatedParameters()[1]) + "\n" +
@@ -156,9 +156,9 @@ public class FittingPanel extends WizardPanel {
 		add(mainBox);
 
 		// components univariate statistics panel
-		if(distribution == EXPO)
+		if (distribution == EXPO)
 			componentsPanel.add(new JLabel("Results of fitting of exponential distribution"), BorderLayout.NORTH);
-		else if(distribution == PARETO)
+		else if (distribution == PARETO)
 			componentsPanel.add(new JLabel("Results of fitting of Pareto distribution"), BorderLayout.NORTH);
 
         resultfittingScrollPane = new JScrollPane();
@@ -202,7 +202,7 @@ public class FittingPanel extends WizardPanel {
 	@Override
 	public String getName() {
 		// TODO Auto-generated method stub
-		if(distribution == EXPO)
+		if (distribution == EXPO)
 			return "Exponential";
 		else
 			return "Pareto";

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NetStrategies.RoutingStrategies;
 
@@ -36,6 +36,7 @@ import jmt.engine.random.engine.RandomEngine;
  * TODO provvisoria per testing
  */
 public class DelayedShortestQLength extends RoutingStrategy {
+
 	private byte inputSection = NodeSection.INPUT;
 	private byte serviceSection = NodeSection.SERVICE;
 	private int property = NodeSection.PROPERTY_ID_RESIDENT_JOBS;
@@ -47,31 +48,31 @@ public class DelayedShortestQLength extends RoutingStrategy {
 	/**
 	 * This method should be overridden to implement a specific strategy.
 	 *
-	 * @param Nodes    List of nodes.
-	 * @param jobClass class ofcurrent job to be routed
-	 * @return Selected node .
+	 * @param nodes    List of nodes.
+	 * @param jobClass class of current job to be routed
+	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList Nodes, JobClass jobClass) {
+	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
 		if (qlen == null) {
-			qlen = new int[Nodes.size()];
-			newQlen = new int[Nodes.size()];
+			qlen = new int[nodes.size()];
+			newQlen = new int[nodes.size()];
 		}
 		int[] next = new int[qlen.length];
 		try {
-			// Simulate delay (need to be reimplemented if used)
+			// Simulate delay (need to be re-implemented if used)
 			num++;
 			if (num == 1) {
-				for (int i = 0; i < Nodes.size(); i++) {
-					newQlen[i] = Nodes.get(i).getSection(inputSection).getIntSectionProperty(property)
-							+ Nodes.get(i).getSection(serviceSection).getIntSectionProperty(property);
+				for (int i = 0; i < nodes.size(); i++) {
+					newQlen[i] = nodes.get(i).getSection(inputSection).getIntSectionProperty(property)
+							+ nodes.get(i).getSection(serviceSection).getIntSectionProperty(property);
 				}
 			}
 			if (num > 8) {
 				num = 0;
 			} else if (num > 4) { // approx 1 sec passed TODO occorre implementare un giusto test con il calendario
 				qlen = newQlen;
-				newQlen = new int[Nodes.size()];
+				newQlen = new int[nodes.size()];
 			}
 
 			// Finds shortest queue in stored array
@@ -86,9 +87,9 @@ public class DelayedShortestQLength extends RoutingStrategy {
 				}
 			}
 			if (cur == 1) {
-				return Nodes.get(next[0]);
+				return nodes.get(next[0]);
 			} else {
-				return Nodes.get(next[(int) Math.floor(random.raw() * cur)]);
+				return nodes.get(next[(int) Math.floor(random.raw() * cur)]);
 			}
 		} catch (NetException e) {
 			System.out.println("Error: ");
@@ -96,4 +97,5 @@ public class DelayedShortestQLength extends RoutingStrategy {
 		}
 		return null;
 	}
+
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.engine.NodeSections;
@@ -38,7 +38,7 @@ import jmt.engine.log.LoggerParameters;
  * by adding logging (information about forward messages only).
  * Every message sent from the input section is forwarded to the
  * output section and every message sent the from output section
- * is backwarded to the input section.</p>
+ * is backward to the input section.</p>
  *
  * @author Michael Fercu
  *         Date: 12-lug-2008
@@ -53,6 +53,7 @@ import jmt.engine.log.LoggerParameters;
  *
  */
 public class LogTunnel extends ServiceTunnel {
+
 	public static final String COLUMN_LOGGERNAME = "LOGGERNAME";
 	public static final String COLUMN_TIMESTAMP = "TIMESTAMP";
 	public static final String COLUMN_JOBID = "JOB_ID";
@@ -60,9 +61,9 @@ public class LogTunnel extends ServiceTunnel {
 	public static final String COLUMN_INTERARRIVAL_SAMECLASS = "INTERARRIVAL_SAMECLASS";
 	public static final String COLUMN_INTERARRIVAL_ANYCLASS = "INTERARRIVAL_ANYCLASS";
 	public static final String COLUMN_START_TIME = "SIMUL_START_TIME";
-	
+
 	public static final String[] COLUMNS = {COLUMN_LOGGERNAME, COLUMN_TIMESTAMP, COLUMN_JOBID, COLUMN_CLASSID, 
-		COLUMN_INTERARRIVAL_SAMECLASS, COLUMN_INTERARRIVAL_ANYCLASS, COLUMN_START_TIME};
+			COLUMN_INTERARRIVAL_SAMECLASS, COLUMN_INTERARRIVAL_ANYCLASS, COLUMN_START_TIME};
 
 	private char chDelimiter;
 	private char decimalSeparator;
@@ -111,70 +112,79 @@ public class LogTunnel extends ServiceTunnel {
 	}
 
 	@Override
-	protected int process(NetMessage message) throws jmt.common.exception.NetException {
+	protected int process(NetMessage message) throws NetException {
 		try {
-			switch(message.getEvent()) {
-				case NetEvent.EVENT_STOP:
-					if (logger != null) {
-						logger.close();
-					}
-					break;
-				case NetEvent.EVENT_JOB:
-					Job job = message.getJob();
-					// Build logger and default values if needed
-					if (logger == null) {
-						initLoggerParameters();
-						logger = JSimLoggerFactory.getCSVLogger(
-								new File(lp.path, lp.name), 
-								COLUMNS, 
-								intReplacePolicy == LoggerParameters.LOGGER_AR_APPEND, 
-								String.valueOf(chDelimiter), 
-								decimalSeparator
-						);
-						defaultValues = new HashMap<String, String>();
-						if (lp.boolLoggername) {
-							defaultValues.put(COLUMN_LOGGERNAME, message.getSource().getName());
-						}
-						if (lp.boolExecTimestamp) {
-							defaultValues.put(COLUMN_START_TIME, strTimestampValue);
-						}
-					}
-					// Fills the values for the log column
-					Map<String, Object> values = new HashMap<String, Object>();
-					if (lp.boolTimeStamp) {
-						values.put(COLUMN_TIMESTAMP, message.getTime());
-					}
+			switch (message.getEvent()) {
 
-					if (lp.boolJobID) {
-						values.put(COLUMN_JOBID, job.getId());
-					}
+			case NetEvent.EVENT_START:
+				break;
 
-					if (lp.boolJobClass) {
-						values.put(COLUMN_CLASSID, job.getJobClass().getName());
+			case NetEvent.EVENT_JOB:
+				Job job = message.getJob();
+				// Build logger and default values if needed
+				if (logger == null) {
+					initLoggerParameters();
+					logger = JSimLoggerFactory.getCSVLogger(
+							new File(lp.path, lp.name), 
+							COLUMNS, 
+							intReplacePolicy == LoggerParameters.LOGGER_AR_APPEND, 
+							String.valueOf(chDelimiter), 
+							decimalSeparator
+							);
+					defaultValues = new HashMap<String, String>();
+					if (lp.boolLoggername) {
+						defaultValues.put(COLUMN_LOGGERNAME, message.getSource().getName());
 					}
+					if (lp.boolExecTimestamp) {
+						defaultValues.put(COLUMN_START_TIME, strTimestampValue);
+					}
+				}
+				// Fills the values for the log column
+				Map<String, Object> values = new HashMap<String, Object>();
+				if (lp.boolTimeStamp) {
+					values.put(COLUMN_TIMESTAMP, message.getTime());
+				}
 
-					if (lp.boolTimeSameClass.booleanValue() == true) {
-						double interarrivalSame = message.getTime() - jobsList.getLastJobOutTimePerClass(job.getJobClass());
-						values.put(COLUMN_INTERARRIVAL_SAMECLASS, interarrivalSame);
-					}
+				if (lp.boolJobID) {
+					values.put(COLUMN_JOBID, job.getId());
+				}
 
-					if (lp.boolTimeAnyClass.booleanValue() == true) {
-						double interarrivalAny = message.getTime() - jobsList.getLastJobOutTime();
-						values.put(COLUMN_INTERARRIVAL_ANYCLASS, interarrivalAny);
-					}
-					// Finally logs the line
-					logger.log(values, defaultValues);
-					// Send forwards the JOB
-					sendForward(message.getEvent(), message.getData(), 0.0);
-					break;
-				case NetEvent.EVENT_ACK:
-					// Send backward the ACK
-					sendBackward(message.getEvent(), message.getData(), 0.0);
-					break;
-				default:
-					return MSG_NOT_PROCESSED;
+				if (lp.boolJobClass) {
+					values.put(COLUMN_CLASSID, job.getJobClass().getName());
+				}
+
+				if (lp.boolTimeSameClass.booleanValue() == true) {
+					double interarrivalSame = message.getTime() - jobsList.getLastJobOutTimePerClass(job.getJobClass());
+					values.put(COLUMN_INTERARRIVAL_SAMECLASS, interarrivalSame);
+				}
+
+				if (lp.boolTimeAnyClass.booleanValue() == true) {
+					double interarrivalAny = message.getTime() - jobsList.getLastJobOutTime();
+					values.put(COLUMN_INTERARRIVAL_ANYCLASS, interarrivalAny);
+				}
+				// Finally logs the line
+				logger.log(values, defaultValues);
+				// Send forwards the JOB
+				sendForward(message.getEvent(), message.getData(), 0.0);
+				break;
+
+			case NetEvent.EVENT_ACK:
+				// Send backward the ACK
+				sendBackward(message.getEvent(), message.getData(), 0.0);
+				break;
+
+			case NetEvent.EVENT_STOP:
+				if (logger != null) {
+					logger.close();
+				}
+				break;
+
+			default:
+				return MSG_NOT_PROCESSED;
 			}
+
 			return MSG_PROCESSED;
+
 		} catch (IOException ex) {
 			throw new NetException("Error while writing to the log file: " + ex.getMessage());
 		}
@@ -187,4 +197,5 @@ public class LogTunnel extends ServiceTunnel {
 			logger = null;
 		}
 	}
+
 }

@@ -1,99 +1,70 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.engine.NetStrategies.QueuePutStrategies;
 
+import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.QueuePutStrategy;
+import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.NodeSections.Server;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
-import jmt.engine.QueueNet.NetEvent;
-import jmt.engine.QueueNet.NetMessage;
-import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
-import jmt.engine.random.Parameter;
-import jmt.engine.NetStrategies.ServiceStrategy;
-import jmt.engine.NetStrategies.ServiceStrategies.LDParameter;
-import jmt.engine.NetStrategies.ServiceStrategies.LoadDependentStrategy;
-import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
-import jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy;
 
-public class SJFStrategy implements QueuePutStrategy{
-	
-	/**
-	 * arriving jobs are put in the Queue in a Shortest-Job-First manner.
-	 * @param job Job to be added to the queue.
-	 * @param queue Queue.
-	 * @param sourceSection Job source section.
-	 * @param sourceNode Job source node.
-	 * @param callingSection The section which calls this strategy.
-	 */
+/**
+ * This class implements a specific queue put strategy: all arriving jobs
+ * are put to the queue in a Shortest-Job-First manner.
+ * @author Lulai Zhu
+ */
+public class SJFStrategy implements QueuePutStrategy {
 
-	public void put(Job job, JobInfoList queue, byte sourceSection,
-			NetNode sourceNode, NodeSection callingSection) throws NetException {
-		
+	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
 		Server server = (Server) callingSection.getOwnerNode().getSection(NodeSection.SERVICE);
-		
 		ServiceStrategy[] strategy = server.getServiceStrategy();
-					
 		double serviceTime = strategy[job.getJobClass().getId()].wait(server);
-		
-		//double serviceTime = Math.random(); //for testing purposes
 		job.setServiceTime(serviceTime);
-			
-		//list of jobs in queue
-		List<JobInfo> list = queue.getJobList();
 
+		List<JobInfo> list = queue.getJobList();
 		if (list.size() == 0) {
-			//empty list: add first in general and class lists
-			queue.addFirst(new JobInfo(job), false);
+			queue.addFirst(new JobInfo(job));
 			return;
 		}
 
-		//else creates an iterator and find the correct position
-		//according to the job size
-
-		ListIterator<JobInfo> iterator = list.listIterator();
-		JobInfo current = null;
+		double currentServiceTime = 0.0;
+		Iterator<JobInfo> it = list.iterator();
 		int index = -1;
-
-		//iterator starts from the first (i.e. the job with highest priority)
-		while (iterator.hasNext()) {
+		while (it.hasNext()) {
+			currentServiceTime = it.next().getJob().getServiceTime();
 			index++;
-			current = iterator.next();
-
-                        double currentServiceTime = current.getJob().getServiceTime();
-			
-			if (serviceTime< currentServiceTime) {
-				//the job to be added must be inserted before the current job
-				//index is the position of the current element, which will be shifted together
-				//with the following ones
-
-				queue.add(index, new JobInfo(job), false);
+			if (currentServiceTime > serviceTime) {
+				queue.add(index, new JobInfo(job));
 				return;
 			}
-			
-			//else if Service Time is longer than current, continue iteration
 		}
-
-		//exiting from the "while" means that the job to be inserted is the job with
-		//longest size
-		//add last
-		queue.addLast(new JobInfo(job), false);
-		return;
-		
-		
+		queue.addLast(new JobInfo(job));
 	}
 
-	
-	/* (non-Javadoc)
-	 * @see jmt.common.AutoCheck#check()
-	 */	
 	public boolean check() {
 		return true;
 	}
-
 
 }

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.exact.ld;
 
@@ -43,16 +43,18 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
-import jmt.gui.common.CommonConstants;
+
 import jmt.common.exception.ExpressionParseException;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.help.HoverHelp;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.ld.eval.Evaluator;
 import jmt.gui.exact.ld.eval.FastEvaluator;
 import jmt.gui.exact.table.ExactTable;
@@ -64,10 +66,8 @@ import jmt.jmva.gui.exact.ExactWizard;
  */
 public class LDEditingWindow extends JMTDialog {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
 	/* dummy arrays to keep the tablemodel happy during initialization */
 	private double[][] serviceTimes = new double[1][1];
 	private String[] classNames = new String[1];
@@ -87,21 +87,18 @@ public class LDEditingWindow extends JMTDialog {
 	/* the Actions behind the various components */
 
 	public AbstractAction LD_CANCEL = new AbstractAction("Cancel") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent ae) {
 			hide();
 			ldEditor.editingCanceled();
 		}
+
 	};
 
 	public AbstractAction LD_COMMIT = new AbstractAction("OK") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent ae) {
@@ -109,12 +106,11 @@ public class LDEditingWindow extends JMTDialog {
 			commit();
 			ldEditor.editingStopped();
 		}
+
 	};
 
 	public AbstractAction COPYDOWN_ACTION = new AbstractAction("Copy down") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -126,23 +122,21 @@ public class LDEditingWindow extends JMTDialog {
 			ldTable.copyCellDown();
 			ldTable.requestFocus();
 		}
+
 	};
 
 	public AbstractAction LD_HELP = new AbstractAction("Help") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
 			showHelp();
 		}
+
 	};
 
 	public AbstractAction EVALUATE = new AbstractAction("Evaluate") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -169,6 +163,7 @@ public class LDEditingWindow extends JMTDialog {
 				ldTable.requestFocus();
 			}
 		}
+
 	};
 
 	/**
@@ -201,7 +196,8 @@ public class LDEditingWindow extends JMTDialog {
 		if (owner == null) {
 			throw new IllegalArgumentException("owner must not be null!");
 		}
-		setSize(CommonConstants.MAX_GUI_WIDTH_LDEDITING, CommonConstants.MAX_GUI_HEIGHT_LDEDITING); // only height is fixed
+		// only height is fixed
+		setSize(CommonConstants.MAX_GUI_WIDTH_LDEDITING, CommonConstants.MAX_GUI_HEIGHT_LDEDITING);
 		//setUndecorated(true);
 		//setResizable(false);
 		this.owner = owner;
@@ -225,7 +221,6 @@ public class LDEditingWindow extends JMTDialog {
 	 * create components and lay them out
 	 */
 	private void initComponents() {
-
 		ldTable = new LDTable();
 
 		//ldTitle=new JLabel("LD editor");
@@ -235,10 +230,10 @@ public class LDEditingWindow extends JMTDialog {
 
 		ldExpression = new JTextField();
 		ldExpression.addActionListener(new ActionListener() { // evaluate as the use presses enter
-					public void actionPerformed(ActionEvent e) {
-						EVALUATE.actionPerformed(e);
-					}
-				});
+			public void actionPerformed(ActionEvent e) {
+				EVALUATE.actionPerformed(e);
+			}
+		});
 
 		/*JPanel cp=new JPanel();
 		cp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(),
@@ -267,7 +262,6 @@ public class LDEditingWindow extends JMTDialog {
 
 		cp.add(totalBox, BorderLayout.CENTER);
 		//cp.add(ldTitle,BorderLayout.NORTH);
-
 	}
 
 	/**
@@ -291,10 +285,9 @@ public class LDEditingWindow extends JMTDialog {
 	 * @return the editing tools bar
 	 */
 	JComponent makeTools() {
-
 		Box vbox = Box.createVerticalBox();
-
 		Box box = Box.createHorizontalBox();
+
 		/*JButton copyanchor=new JButton(ldTable.FILL_ACTION);
 		help.addHelp(copyanchor,"Copies the value in the focused cell to all selected cells");
 		box.add(copyanchor);*/
@@ -312,7 +305,8 @@ public class LDEditingWindow extends JMTDialog {
 		JPanel lPanel = new JPanel();
 		lPanel.setLayout(new BorderLayout());
 		JLabel helpLabel = new JLabel(
-				"<html>Enter the expression to be evaluated, using <b><i>n</i></b> for the number of customers. For syntax details and a list of supported functions click on \"Help\"</html>");
+				"<html>Enter the expression to be evaluated, using <b><i>n</i></b> for the number of customers. "
+				+ "For syntax details and a list of supported functions click on \"Help\"</html>");
 		helpLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		lPanel.add(helpLabel);
 
@@ -320,7 +314,6 @@ public class LDEditingWindow extends JMTDialog {
 		vbox.add(box);
 
 		return vbox;
-
 	}
 
 	/**
@@ -388,14 +381,12 @@ public class LDEditingWindow extends JMTDialog {
 
 	private class LDTable extends ExactTable {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		LDTable() {
 			super(new LDTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
+			setRowHeight(CommonConstants.ROW_HEIGHT);
 
 			setDisplaysScrollLabels(true);
 			setMoreColumnsTooltip("Scroll right to see more classes");
@@ -465,9 +456,6 @@ public class LDEditingWindow extends JMTDialog {
 	 */
 	private class LDTableModel extends ExactTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		LDTableModel() {
@@ -568,8 +556,8 @@ public class LDEditingWindow extends JMTDialog {
 			}
 
 			fireTableRowsUpdated(rowFrom, rowTo);
-
 		}
 
 	}
+
 }

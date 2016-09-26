@@ -8,7 +8,7 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
@@ -39,7 +39,7 @@ public class MultiplicitiesVector extends EnhancedVector {
      *
      * @param M The matrix containing the vector elements
      */
-    public MultiplicitiesVector(Integer[] M){
+    public MultiplicitiesVector(Integer[] M) {
         super(M);
     }
 
@@ -81,9 +81,9 @@ public class MultiplicitiesVector extends EnhancedVector {
      */
     public int whichSingleQueueAdded() throws InternalErrorException {
     	int queue_added = 0;
-    	for(int i = 0; i < size(); i++) {
-    		if(get(i)  != 0 ) {
-    			if(queue_added > 0 || get(i) != 1) {
+    	for (int i = 0; i < size(); i++) {
+    		if (get(i)  != 0 ) {
+    			if (queue_added > 0 || get(i) != 1) {
     				throw new InternalErrorException("Internal Error: Called whichSingleQueueAdded() on a vector with more than one non-zero element");
     			} else {
     				queue_added = i + 1;

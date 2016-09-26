@@ -433,7 +433,7 @@ public class ConvexHull3D {
 		
 		v3 = v2.next;
 		vol = f0.volumeSign( v3 );
-		while ( vol == 0 ) {// C: if(-1) = true
+		while ( vol == 0 ) {// C: if (-1) = true
 			v3 = v3.next;
 			if ( v3 == v0 ) {
 				throw new AllPointsCoplanarExceptions( "All points are coplanar." );

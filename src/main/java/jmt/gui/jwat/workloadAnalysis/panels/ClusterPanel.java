@@ -247,14 +247,14 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 		//dati caricati
 		private void finishedEvent(EventClusteringDone e) {
 			//	int confirm=JOptionPane.showConfirmDialog(ClusterPanel.this,"Clustering completed, continue?","CLUSTERING COMPLETED!!",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
-			//	if (confirm==JOptionPane.YES_OPTION){
+			//	if (confirm==JOptionPane.YES_OPTION) {
 			session.addClustering(e.getClustering());
 			((JWatWizard) getParentWizard()).setEnableButton("Next >", true);
 			((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
 			canGoOn = true;
 			((JWatWizard) getParentWizard()).showNextPanel();
 			//	}
-			/*	else{
+			/*	else {
 					canGoOn=false;
 					System.gc();
 					((JWatWizard)getParentWizard()).setEnableButton("Next >",false);

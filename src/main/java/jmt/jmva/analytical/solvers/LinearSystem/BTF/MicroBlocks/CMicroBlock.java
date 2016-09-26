@@ -55,11 +55,11 @@ public class CMicroBlock extends MicroBlock {
 		
 		
 		//Loop over all n's contained in this microblock
-		for(int i = 0; i < number_of_ns ; i++) {
+		for (int i = 0; i < number_of_ns ; i++) {
 			n = basis.getPopulationChangeVector(vector_index++); 
 			
 			//Loop over all queues (including no queue)
-			for(int k = 0; k <= qnm.M; k++) {
+			for (int k = 0; k <= qnm.M; k++) {
 				array[row][0] = basis.indexOf(n, k);
 				n.minusOne(_class);
 				array[row][1] = basis.indexOf(n, k);
@@ -103,14 +103,14 @@ public class CMicroBlock extends MicroBlock {
 	public void multiply(BigRational[] result)
 			throws BTFMatrixErrorException {
 		//negative population, constant is zero
-		if(_class > current_class) {
+		if (_class > current_class) {
 			System.out.println("inserting zero");
-			for(int i = 0; i < size.row; i++) {
+			for (int i = 0; i < size.row; i++) {
 				result[array[i][0]] = BigRational.ZERO;
 			}
 		//carry forward
 		} else {
-			for(int i = 0; i < size.row; i++) {				
+			for (int i = 0; i < size.row; i++) {				
 				result[array[i][0]] = carryForwardValue(i);
 			}
 		}
@@ -119,13 +119,13 @@ public class CMicroBlock extends MicroBlock {
 	@Override
 	public void solve(BigRational[] rhs) {
 		//negative population, constant is zero
-		if(_class > current_class) {
-			for(int i = 0; i < size.row; i++) {
+		if (_class > current_class) {
+			for (int i = 0; i < size.row; i++) {
 				basis.setValue(BigRational.ZERO, array[i][0]);
 			}
 		//carry forward
 		} else {
-			for(int i = 0; i < size.row; i++) {	
+			for (int i = 0; i < size.row; i++) {	
 				basis.setValue(  carryForwardValue(i), array[i][0]);			
 			}
 		}

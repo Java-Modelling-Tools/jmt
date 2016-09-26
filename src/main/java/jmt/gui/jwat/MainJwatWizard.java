@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat;
 
 import java.awt.BorderLayout;
@@ -37,8 +55,8 @@ import jmt.engine.jwat.trafficAnalysis.TrafficAnalysisSession;
 import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.gui.common.Defaults;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jwat.fitting.panels.FittingPanel;
 import jmt.gui.jwat.fitting.panels.LoadDemoFittingPanel;
@@ -55,14 +73,12 @@ import jmt.manual.ManualBookmarkers;
 import jmt.manual.PDFViewerBuffer;
 
 public class MainJwatWizard extends JWatWizard {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-	//jWAT tool icons
+	//JWAT tool icons
 	private String IMG_JWATICON = "JWATIcon";
 	//private JToolBar toolBar = null;
-	private static final String TITLE = "jWAT";
+	private static final String TITLE = "JWAT";
 	private static final String WORK_LOAD_TITLE = "Workload Analysis";
 	private static final String BURSTINESS_TITLE = "Traffic Analysis  - Burstiness";
 	private static final String FITTING_TITLE = "Fitting Workload Data";
@@ -90,31 +106,29 @@ public class MainJwatWizard extends JWatWizard {
 	}
 
 	private JFileChooser fileSaveF = new JFileChooser(Defaults.getWorkingPath()) {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
 			setApproveButtonText("Save");
 			setFileSelectionMode(JFileChooser.FILES_ONLY);
 		}
+
 	};
 
 	private JFileChooser fileOpenF = new JFileChooser(Defaults.getWorkingPath()) {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
 			setApproveButtonText("Open");
 			setFileSelectionMode(JFileChooser.FILES_ONLY);
 		}
+
 	};
 
-	/*
-	 * Initializes jWAT start screen GUI
+	/**
+	 * Initializes JWAT start screen GUI
 	 */
 	private void initGUI() {
 		this.setIconImage(JMTImageLoader.loadImage(IMG_JWATICON).getImage());
@@ -129,45 +143,45 @@ public class MainJwatWizard extends JWatWizard {
 		mainPanel = new JWatMainPanel(this);
 		this.addPanel(mainPanel);
 	}
-	
+
 	public void setFittingEnv(String mode) {
 		this.setTitle(TITLE + " - " + FITTING_TITLE);
 		session = new FittingSession();
-		
-		//Creates and adds all necessary panels to jWAT main screen
+
+		//Creates and adds all necessary panels to JWAT main screen
 		WizardPanel p;
-		
+
 		if (mode.equals("load")) {
 			p = new jmt.gui.jwat.fitting.panels.InputPanel(this);
 		} else {
 			p = new LoadDemoFittingPanel(this);
 		}
-		
+
 		JWatPanels.add(p);
 		this.addPanel(p);
-		
+
 		p = new FittingPanel(this,FittingPanel.PARETO);
 		JWatPanels.add(p);
 		this.addPanel(p);
-		
+
 		p = new FittingPanel(this,FittingPanel.EXPO);
 		JWatPanels.add(p);
 		this.addPanel(p);
-		
+
 		getFittingToolbar();
 		getFittingMenubar();
-		
+
 		this.setEnableButton("Solve", false);
 		//Shows next panel, the first of traffic analysis wizard
 		showNextPanel();
 	}
 
-	// Set correct enviornement for traffic analysis
+	// Set correct environment for traffic analysis
 	public void setTrafficEnv() {
 		this.setTitle(TITLE + " - " + BURSTINESS_TITLE);
 		session = new TrafficAnalysisSession();
 
-		//Creates and adds all necessary panels to jWAT main screen
+		//Creates and adds all necessary panels to JWAT main screen
 		WizardPanel p = new jmt.gui.jwat.trafficAnalysis.panels.InputPanel(this);
 		JWatPanels.add(p);
 		this.addPanel(p);
@@ -190,13 +204,13 @@ public class MainJwatWizard extends JWatWizard {
 		//Sets menu and tool bars
 		getTrafficToolbar();
 		getTrafficMenubar();
-		//Disables Saolve button
+		//Disables Solve button
 		this.setEnableButton("Solve", false);
 		//Shows next panel, the first of traffic analysis wizard
 		showNextPanel();
 	}
 
-	//Adds all necessary panes concernig with Workload analysis
+	//Adds all necessary panes concerning with Workload analysis
 	public void setWorkloadEnv(String mode) {
 		this.setTitle(TITLE + " - " + WORK_LOAD_TITLE);
 		session = new WorkloadAnalysisSession();
@@ -277,14 +291,10 @@ public class MainJwatWizard extends JWatWizard {
 		return session;
 	}
 
-	/*
-	 * 
-	 */
 	protected AbstractAction WL_EXIT_ACTION = new AbstractAction("Exit") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Exits Application");
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
@@ -294,12 +304,13 @@ public class MainJwatWizard extends JWatWizard {
 		public void actionPerformed(ActionEvent e) {
 			cancel();
 		}
+
 	};
+
 	private AbstractAction WL_HELP_SHOWHELP = new AbstractAction("JWAT Help") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Show JWAT help");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Help"));
@@ -318,14 +329,14 @@ public class MainJwatWizard extends JWatWizard {
 				}
 			};
 			EventQueue.invokeLater(r);
-
 		}
+
 	};
+
 	private AbstractAction WL_HELP_CREDITS = new AbstractAction("About JWAT") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Credits");
 		}
@@ -341,16 +352,14 @@ public class MainJwatWizard extends JWatWizard {
 				}
 			};
 			EventQueue.invokeLater(r);
-
 		}
+
 	};
 
-	
 	private AbstractAction WL_FILE_NEW = new AbstractAction("New") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "New input file");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("New"));
@@ -370,12 +379,13 @@ public class MainJwatWizard extends JWatWizard {
 				}
 			}
 		}
+
 	};
+
 	private AbstractAction WL_FILE_SAVE = new AbstractAction("Save") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Save session");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Save"));
@@ -384,7 +394,6 @@ public class MainJwatWizard extends JWatWizard {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			JwatSession session;
 			if (fileSaveF.showOpenDialog(MainJwatWizard.this) == JFileChooser.APPROVE_OPTION) {
 				File fFile = fileSaveF.getSelectedFile();
 				String fileName = fFile.getAbsolutePath();
@@ -393,12 +402,13 @@ public class MainJwatWizard extends JWatWizard {
 						.lastIndexOf("\\") + 1), JwatSession.WORKLOAD_SAVE);
 			}
 		}
+
 	};
+
 	private AbstractAction WL_FILE_OPEN = new AbstractAction("Open...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Open session");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Open"));
@@ -418,17 +428,19 @@ public class MainJwatWizard extends JWatWizard {
 			}
 
 		}
+
 	};
 
 	private class SessionStatusListener implements ProgressStatusListener {
+
 		public void statusEvent(EventStatus e) {
 			switch (e.getType()) {
-				case EventStatus.ABORT_EVENT:
-					abortEvent((EventFinishAbort) e);
-					break;
-				case EventStatus.DONE_EVENT:
-					finishedEvent((EventSessionLoaded) e);
-					break;
+			case EventStatus.ABORT_EVENT:
+				abortEvent((EventFinishAbort) e);
+				break;
+			case EventStatus.DONE_EVENT:
+				finishedEvent((EventSessionLoaded) e);
+				break;
 			}
 		}
 
@@ -485,13 +497,13 @@ public class MainJwatWizard extends JWatWizard {
 
 			dialog.show();
 		}
+
 	}
 
 	private AbstractAction WL_ACTION_SOLVE = new AbstractAction("Clusterize") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Clusterize");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Sim"));
@@ -501,8 +513,9 @@ public class MainJwatWizard extends JWatWizard {
 
 		public void actionPerformed(ActionEvent e) {
 		}
+
 	};
-	
+
 	/**
 	 * @return the toolbar for the jaba wizard. Shamelessly uses icon from the main jmt frame
 	 */
@@ -517,7 +530,7 @@ public class MainJwatWizard extends JWatWizard {
 		//String[] icons = {"New","Sim", "Help"};
 		//String[] htext = {"Creates a new model","Solves the current model", "Show help"};
 		String[] icons = { "New", "Help" };
-		String[] htext = { "Creates a new model", "Show help" };
+		//String[] htext = { "Creates a new model", "Show help" };
 
 		JButton button;
 		tb.setBorderPainted(true);
@@ -536,21 +549,18 @@ public class MainJwatWizard extends JWatWizard {
 				button.setContentAreaFilled(false);
 				button.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 				tb.add(button);
-			
+
 			}
 		}
 		setToolBar(tb);
-		
 	}
 
 	private void getFittingMenubar() {
-
 		JMenuBar jmb = new JMenuBar();
 
-		/*JMenuItem[][] menuItems = {{new JMenuItem(FILE_NEW),null, new JMenuItem(FILE_EXIT)},
-		                           {new JMenuItem(ACTION_SOLVE),
-		                            null, new JMenuItem(ACTION_NEXT), new JMenuItem(ACTION_PREV)},
-		                           {new JMenuItem(HELP), null, new JMenuItem(ABOUT)} };*/
+		/*JMenuItem[][] menuItems = { {new JMenuItem(FILE_NEW),null, new JMenuItem(FILE_EXIT)},
+				{new JMenuItem(ACTION_SOLVE), null, new JMenuItem(ACTION_NEXT), new JMenuItem(ACTION_PREV)},
+				{new JMenuItem(HELP), null, new JMenuItem(ABOUT)} };*/
 		JMenuItem[][] menuItems = { { new JMenuItem(FI_FILE_NEW), null, new JMenuItem(FI_FILE_EXIT) },
 				{ new JMenuItem(FI_HELP), null, new JMenuItem(FI_ABOUT) } };
 
@@ -615,15 +625,16 @@ public class MainJwatWizard extends JWatWizard {
 	 * @return menu
 	 */
 	private void getWorkloadMenuBar() {
-
 		JMenuBar workloadMenubar = new JMenuBar();
 		JMenuItem[][] menuItems = {
 				{ new JMenuItem(WL_FILE_NEW), new JMenuItem(WL_FILE_SAVE), new JMenuItem(WL_FILE_OPEN), null, new JMenuItem(WL_EXIT_ACTION) },
 				{ new JMenuItem(WL_ACTION_SOLVE) {
+					private static final long serialVersionUID = 1L;
 					{
 						setEnabled(false);
 					}
 				} }, { new JMenuItem(WL_HELP_SHOWHELP) {
+					private static final long serialVersionUID = 1L;
 					{
 						setEnabled(true);
 					}
@@ -659,7 +670,6 @@ public class MainJwatWizard extends JWatWizard {
 	 * @return the toolbar for the jaba wizard. Shamelessly uses icon from the main jmt frame
 	 */
 	protected void getTrafficToolbar() {
-
 		JToolBar tb = new JToolBar();
 		tb.setRollover(true);
 		tb.setOrientation(SwingConstants.HORIZONTAL);
@@ -670,7 +680,7 @@ public class MainJwatWizard extends JWatWizard {
 		//String[] icons = {"New","Sim", "Help"};
 		//String[] htext = {"Creates a new model","Solves the current model", "Show help"};
 		String[] icons = { "New", "Help" };
-		String[] htext = { "Creates a new model", "Show help" };
+		//String[] htext = { "Creates a new model", "Show help" };
 
 		JButton button;
 		tb.setBorderPainted(true);
@@ -689,19 +699,17 @@ public class MainJwatWizard extends JWatWizard {
 				button.setContentAreaFilled(false);
 				button.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 				tb.add(button);
-				}
+			}
 		}
 		setToolBar(tb);
 	}
 
 	private void getTrafficMenubar() {
-
 		JMenuBar jmb = new JMenuBar();
 
-		/*JMenuItem[][] menuItems = {{new JMenuItem(FILE_NEW),null, new JMenuItem(FILE_EXIT)},
-		                           {new JMenuItem(ACTION_SOLVE),
-		                            null, new JMenuItem(ACTION_NEXT), new JMenuItem(ACTION_PREV)},
-		                           {new JMenuItem(HELP), null, new JMenuItem(ABOUT)} };*/
+		/*JMenuItem[][] menuItems = { {new JMenuItem(FILE_NEW),null, new JMenuItem(FILE_EXIT)},
+				{new JMenuItem(ACTION_SOLVE), null, new JMenuItem(ACTION_NEXT), new JMenuItem(ACTION_PREV)},
+				{new JMenuItem(HELP), null, new JMenuItem(ABOUT)} };*/
 		JMenuItem[][] menuItems = { { new JMenuItem(TR_FILE_NEW), null, new JMenuItem(TR_FILE_EXIT) },
 				{ new JMenuItem(ACTION_NEXT), new JMenuItem(ACTION_PREV) }, { new JMenuItem(TR_HELP), null, new JMenuItem(TR_ABOUT) } };
 
@@ -723,10 +731,9 @@ public class MainJwatWizard extends JWatWizard {
 	}
 
 	private AbstractAction TR_FILE_NEW = new AbstractAction("New...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Create New Model");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("New"));
@@ -737,13 +744,13 @@ public class MainJwatWizard extends JWatWizard {
 		public void actionPerformed(ActionEvent e) {
 			trafficNewModel();
 		}
+
 	};
-	
+
 	private AbstractAction FI_FILE_NEW = new AbstractAction("New...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Create New Model");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("New"));
@@ -754,13 +761,13 @@ public class MainJwatWizard extends JWatWizard {
 		public void actionPerformed(ActionEvent e) {
 			fittingNewModel();
 		}
+
 	};
 
 	private AbstractAction TR_FILE_EXIT = new AbstractAction("Exit") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Exits Application");
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
@@ -770,13 +777,13 @@ public class MainJwatWizard extends JWatWizard {
 		public void actionPerformed(ActionEvent e) {
 			cancel();
 		}
+
 	};
-	
+
 	private AbstractAction FI_FILE_EXIT = new AbstractAction("Exit") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Exits Application");
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
@@ -786,13 +793,13 @@ public class MainJwatWizard extends JWatWizard {
 		public void actionPerformed(ActionEvent e) {
 			cancel();
 		}
+
 	};
 
 	private AbstractAction TR_HELP = new AbstractAction("Burstiness help") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Show Burstiness help");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Help"));
@@ -811,15 +818,14 @@ public class MainJwatWizard extends JWatWizard {
 				}
 			};
 			EventQueue.invokeLater(r);
-
 		}
+
 	};
-	
+
 	private AbstractAction FI_HELP = new AbstractAction("Fitting help") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Show Fitting help");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Help"));
@@ -838,14 +844,12 @@ public class MainJwatWizard extends JWatWizard {
 				}
 			};
 			EventQueue.invokeLater(r);
-
 		}
+
 	};
 
 	private AbstractAction TR_ABOUT = new AbstractAction("About Burstiness...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -858,12 +862,11 @@ public class MainJwatWizard extends JWatWizard {
 		public void actionPerformed(ActionEvent e) {
 			trafficShowAbout();
 		}
+
 	};
-	
+
 	private AbstractAction FI_ABOUT = new AbstractAction("About Fitting...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -876,12 +879,11 @@ public class MainJwatWizard extends JWatWizard {
 		public void actionPerformed(ActionEvent e) {
 			trafficShowAbout();
 		}
+
 	};
-	
+
 	private AbstractAction TR_ACTION_SOLVE = new AbstractAction("Solve") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -896,6 +898,7 @@ public class MainJwatWizard extends JWatWizard {
 				finish();
 			}
 		}
+
 	};
 
 	private void trafficNewModel() {
@@ -910,7 +913,7 @@ public class MainJwatWizard extends JWatWizard {
 			}
 		}
 	}
-	
+
 	private void fittingNewModel() {
 		if (JOptionPane.showConfirmDialog(MainJwatWizard.this, "This operation will reset data. Continue?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 			//Reset model and set first panel
@@ -927,4 +930,5 @@ public class MainJwatWizard extends JWatWizard {
 	private void trafficShowAbout() {
 		JOptionPane.showMessageDialog(this, "Sorry, is not available", "About Burstiness not found", JOptionPane.ERROR_MESSAGE);
 	}
+
 }

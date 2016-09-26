@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.jmva.gui.exact.panels;
@@ -61,10 +61,10 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 
 		classAggrW = data.getPerClassR(algorithm, false);
 		mixedModel =!(data.isClosed() || data.isOpen());
-		if(!mixedModel){
+		if (!mixedModel) {
 			globalAgg = data.getGlobalR(algorithm, true);
 			globalAggW = data.getGlobalR(algorithm, false);
-		} else{
+		} else {
 			globalAgg = globalAggW = null;
 		}
 
@@ -138,12 +138,12 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 
 			if (rowIndex == 0 && columnIndex > 0) {
 				d = classAggr[columnIndex - 1][iteration];
-			} else if(rowIndex ==0 && columnIndex == 0 && !mixedModel)
+			} else if (rowIndex ==0 && columnIndex == 0 && !mixedModel)
 			{
 				d = globalAgg[iteration];
-			} else if(rowIndex == 1 && columnIndex > 0){
+			} else if (rowIndex == 1 && columnIndex > 0) {
 				d = classAggrW[columnIndex - 1][iteration];
-			} else if(!mixedModel){
+			} else if (!mixedModel) {
 				d = globalAggW[iteration];
 			}
 

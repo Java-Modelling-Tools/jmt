@@ -1,20 +1,21 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat;
 
 import java.awt.BorderLayout;
@@ -29,7 +30,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URL;
-import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -42,21 +42,18 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import jmt.framework.gui.controller.Manager;
-import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
 
 public class JWatStartScreen extends JFrame {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	//Start screen image
 	private static URL imageURL = JWatStartScreen.class.getResource("StartScreenJWat.png");
-	//jWAT tool icons
+	//JWAT tool icons
 	private String IMG_JWATICON = "JWATIcon";
 	private String IMG_TRAFFIC_ICON = "TrafficIcon";
 	private String IMG_SAVE_ICON = "Open";
@@ -68,10 +65,9 @@ public class JWatStartScreen extends JFrame {
 	private Rollover rollover = new Rollover();
 
 	protected AbstractAction startPath = new AbstractAction("") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Path analyzer");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_PATH_ICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
@@ -79,27 +75,29 @@ public class JWatStartScreen extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 		}
+
 	};
+
 	protected AbstractAction startWLA = new AbstractAction("") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Worload analyzer");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_WL_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			//			WorkloadAnalysisWizard.main(new String[]{"load"});
+			//WorkloadAnalysisWizard.main(new String[]{"load"});
 			JWatStartScreen.this.dispose();
 		}
+
 	};
+
 	protected AbstractAction startTraffic = new AbstractAction("") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Traffic Analysis  - Burstiness");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_TRAFFIC_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
@@ -109,38 +107,42 @@ public class JWatStartScreen extends JFrame {
 			//BurstWizard.main(null);
 			JWatStartScreen.this.dispose();
 		}
+
 	};
+
 	protected AbstractAction startLoad = new AbstractAction("") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Open a demo file");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_SAVE_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			//			WorkloadAnalysisWizard.main(new String[]{"demo"});
+			//WorkloadAnalysisWizard.main(new String[]{"demo"});
 			JWatStartScreen.this.dispose();
 		}
+
 	};
+
 	protected AbstractAction empty = new AbstractAction() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 		}
 
 		public void actionPerformed(ActionEvent e) {
 		}
+
 	};
+
 	//Arrays of abstract actions for tool buttons
 	private AbstractAction[] buttonAction = { startPath, startWLA, startTraffic, empty, startLoad };
 
 	/**
-	 * jWAT Constructor.
+	 * JWAT Constructor.
 	 */
 	public JWatStartScreen() {
 		initGUI();
@@ -148,12 +150,12 @@ public class JWatStartScreen extends JFrame {
 	}
 
 	/*
-	 * Initializes jWAT start screen GUI
+	 * Initializes JWAT start screen GUI
 	 */
 	private void initGUI() {
 		this.setIconImage(JMTImageLoader.loadImage(IMG_JWATICON).getImage());
 		this.setResizable(false);
-		this.setTitle("jWAT");
+		this.setTitle("JWAT");
 		this.setSize(CommonConstants.MAX_GUI_WIDTH_JWAT_STARTSCREEN, CommonConstants.MAX_GUI_HEIGHT_JWAT_STARTSCREEN);
 		//Image image = new ImageIcon(imageURL).getImage();
 		//image = image.getScaledInstance(400, 315, Image.SCALE_SMOOTH);
@@ -215,8 +217,8 @@ public class JWatStartScreen extends JFrame {
 		if (action == buttonAction[0]) {
 			button.setEnabled(false);
 		}
-		//if(action == buttonAction[2]) button.setEnabled(false);
-		//if(action == buttonAction[4]) button.setEnabled(false);
+		//if (action == buttonAction[2]) button.setEnabled(false);
+		//if (action == buttonAction[4]) button.setEnabled(false);
 		panel.add(button);
 		return panel;
 	}
@@ -225,6 +227,7 @@ public class JWatStartScreen extends JFrame {
 	 * This class is used to perform rollover on the buttons by changing background
 	 */
 	public class Rollover extends MouseAdapter {
+
 		private Color normal;
 		private Color rollover;
 
@@ -248,6 +251,7 @@ public class JWatStartScreen extends JFrame {
 		public void mouseExited(MouseEvent e) {
 			((Component) e.getSource()).setBackground(normal);
 		}
+
 	}
 
 	/**
@@ -257,4 +261,5 @@ public class JWatStartScreen extends JFrame {
 	public static void main(String[] args) {
 		new JWatStartScreen().setVisible(true);
 	}
+
 }

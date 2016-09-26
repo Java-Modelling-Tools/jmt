@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 package jmt.engine.QueueNet;
 
 import java.util.List;
@@ -154,62 +154,35 @@ public interface JobInfoList {
 	 */
 	public abstract boolean addFirst(JobInfo jobInfo);
 
-	/** Adds a new job info in the specified position.
-	 * The jobs must be inserted in both general and class jobs lists. The
-	 * specified position is relative to general list. In its own class job list, a job
-	 * can be put at the beginning (head) or at the end (tail).
-	 *
-	 * @param index the specified position
-	 * @param jobInfo reference to job info to be added.
-	 * @param isClassTail if true, job will be put in the last position of its own class job list (tail
-	 * strategy); if false, it will be put in first position (head strategy)
-	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
-	 */
-	public abstract boolean add(int index, JobInfo jobInfo, boolean isClassTail);
-
-	/** Adds a new job info in the specified position.
-	 * The jobs must be inserted in both general and class jobs lists. The
-	 * specified position is relative to general list. In its own class job list, a job
-	 * can be put at the beginning (head) or at the end (tail).
-	 *
-	 * @param jobInfo reference to job info to be added.
-	 * @param isClassTail if true, job will be put in the last position of its own class job list (tail
-	 * strategy); if false, it will be put in first position (head strategy)
-	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
-	 */
-	public abstract boolean addFirst(JobInfo jobInfo, boolean isClassTail);
-
-	/** Adds a new job info in the specified position.
-	 * The jobs must be inserted in both general and class jobs lists. The
-	 * specified position is relative to general list. In its own class job list, a job
-	 * can be put at the beginning (head) or at the end (tail).
-	 *
-	 * @param jobInfo reference to job info to be added.
-	 * @param isClassTail if true, job will be put in the last position of its own class job list (tail
-	 * strategy); if false, it will be put in first position (head strategy)
-	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
-	 */
-	public abstract boolean addLast(JobInfo jobInfo, boolean isClassTail);
-
 	/** Adds a new job info to the bottom of the list.
 	 * @param jobInfo reference to job info to be added.
 	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
 	 * otherwise no list was created by the constructor)
 	 */
-	public abstract boolean addLast(JobInfo jobInfo) throws jmt.common.exception.NetException;
+	public abstract boolean addLast(JobInfo jobInfo);
 
-        /** Adds a new job info in a random position.
+	/** Adds a new job info at a specified position.
+	 * @param index the specified position
 	 * @param jobInfo reference to job info to be added.
 	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
 	 * otherwise no list was created by the constructor)
 	 */
-	
-	public abstract boolean addRand(JobInfo jobInfo);
+	public abstract boolean add(int index, JobInfo jobInfo);
 
-        
+	/** Adds a new job info at a specified position.
+	 * The jobs must be inserted in both general and class job lists. The
+	 * position is relative to general list. In its own class job list, a job
+	 * can be put at the start (head) or at the end (tail).
+	 *
+	 * @param index the specified position
+	 * @param jobInfo reference to job info to be added.
+	 * @param isClassHead if true, job will be put at the start of its own class job list (head
+	 * strategy); if false, it will be put at the end (tail strategy)
+	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
+	 * otherwise no list was created by the constructor)
+	 */
+	public abstract boolean add(int index, JobInfo jobInfo, boolean isClassHead);
+
 	/** Removes a job info from the list and updates the measures related to
 	 * throughput, utilization and response time.
 	 * @param jobInfo reference to job info to be removed.
@@ -268,7 +241,6 @@ public interface JobInfoList {
 	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure Measurement);
 
 	/**
-	 *
 	 * Analyzes class throughput. <br>
 	 * WARNING: An InverseMeasure must be used.
 	 * The aim is to save computational time: in fact it is easier to analyze throughput
@@ -278,10 +250,7 @@ public interface JobInfoList {
 	 * @param JobClass Job class to be analyzed. If null, measure will be
 	 * job class independent.
 	 * @param Measurement Reference to a InverseMeasure object.
-	 *
-	 *
 	 */
-
 	public abstract void analyzeThroughput(JobClass JobClass, InverseMeasure Measurement);
 
 	/** Analyzes class residence time.
@@ -304,7 +273,7 @@ public interface JobInfoList {
 	 * @param Measurement : Reference to the measure object.
 	 */
 	public abstract void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure Measurement);
-	
+
 	/**
 	 * Analyzes : Calculates the Response Time from the source to 
 	 * each sink of the job for each sink in the Queueing Network. 
@@ -312,30 +281,51 @@ public interface JobInfoList {
 	 * @param Measurement : Reference to the measure object.
 	 */
 	public abstract void analyzeResponseTimePerSink(JobClass jobClass, Measure Measurement);
-	
-	/** Removes a job info from the list without updating measures.
+
+	/**
+	 * Removes a job info from the list when a job is removed.
 	 *
-	 * @param JobInfo reference to job info to be removed.
+	 * @param jobInfo reference to the job info to be removed.
 	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
 	 * otherwise no list was created by the constructor)
 	 */
-	public abstract boolean removeAfterRedirect(JobInfo JobInfo) throws jmt.common.exception.NetException;
+	public abstract boolean removeJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
 
-	/** Removes a job info from the list after drop.
+	/**
+	 * Removes a job info from the list when a job is redirected.
 	 *
-	 * @param JobInfo reference to job info to be removed.
+	 * @param jobInfo reference to the job info to be removed.
 	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
 	 * otherwise no list was created by the constructor)
 	 */
-	public abstract boolean removeAfterDrop(JobInfo JobInfo) throws jmt.common.exception.NetException;
+	public abstract boolean redirectJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
 
-	/** drops a Job. This method must be called when a job is dropped but it was not in the info list.
-	*
-	 * @param JobInfo reference to job info to be removed.
+	/**
+	 * Removes a job info from the list when a job is dropped.
+	 *
+	 * @param jobInfo reference to the job info to be removed.
 	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
-	* otherwise no list was created by the constructor)
+	 * otherwise no list was created by the constructor)
 	 */
-	public abstract boolean dropJob(Job job) throws jmt.common.exception.NetException;
+	public abstract boolean dropJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
+
+	/**
+	 * Adds a new job info to the list when a job is produced.
+	 *
+	 * @param jobInfo reference to the job info to be added.
+	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
+	 * otherwise no list was created by the constructor)
+	 */
+	public abstract boolean produceJob(JobInfo JobInfo) throws jmt.common.exception.NetException;
+
+	/**
+	 * Removes a job info from the list when a job is consumed.
+	 *
+	 * @param jobInfo reference to the job info to be removed.
+	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
+	 * otherwise no list was created by the constructor)
+	 */
+	public abstract boolean consumeJob(JobInfo JobInfo) throws jmt.common.exception.NetException;
 
 	/**
 	 * Sets the number of servers. This parameter is used to scale utilization

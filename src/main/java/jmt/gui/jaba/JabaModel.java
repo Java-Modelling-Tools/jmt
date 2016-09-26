@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.gui.jaba;
@@ -1552,7 +1552,7 @@ public class JabaModel implements JabaConstants {
 		}
 	}
 
-	/** Returns per-class aggregate for queue lenghts */
+	/** Returns per-class aggregate for queue lengths */
 	public double[] getPerClassQ() {
 		if (queueLen == null) {
 			return null;
@@ -1570,7 +1570,7 @@ public class JabaModel implements JabaConstants {
 		}
 	}
 
-	/** Returns per-station aggregate for queue lenghts */
+	/** Returns per-station aggregate for queue lengths */
 	public double[] getPerStationQ() {
 		if (queueLen == null) {
 			return null;
@@ -1586,7 +1586,7 @@ public class JabaModel implements JabaConstants {
 		}
 	}
 
-	/** Returns global aggregate for queue lenghts */
+	/** Returns global aggregate for queue lengths */
 	public double getGlobalQ() {
 		if (queueLen == null) {
 			return Double.NaN;

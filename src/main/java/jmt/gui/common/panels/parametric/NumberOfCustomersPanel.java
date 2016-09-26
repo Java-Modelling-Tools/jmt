@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.common.panels.parametric;
 
@@ -179,7 +179,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		to = new JSpinner(toModel);
 		to.setToolTipText("Set the final number of jobs");
 		stepsLabel = new JLabel("Steps (n. of exec.): ");
-		int maximumSteps = NCPA.searchForAvaibleSteps();
+		int maximumSteps = NCPA.searchForAvailableSteps();
 		if (maximumSteps > ParametricAnalysis.MAX_STEP_NUMBER) {
 			maximumSteps = ParametricAnalysis.MAX_STEP_NUMBER;
 		}
@@ -339,7 +339,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 					toModel.setMinimum(new Integer(minTo));
 					to.addChangeListener(cl);
 					int oldStep = ((Integer) steps.getValue()).intValue();
-					int newMaximumStep = NCPA.searchForAvaibleSteps();
+					int newMaximumStep = NCPA.searchForAvailableSteps();
 					if (newMaximumStep > ParametricAnalysis.MAX_STEP_NUMBER) {
 						newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;
 					}
@@ -375,7 +375,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 					classChooser.removeAllItems();
 					classChooser.addItem("All closed classes");
 					classChooser.setEnabled(false);
-					int newMaximumStep = NCPA.searchForAvaibleSteps();
+					int newMaximumStep = NCPA.searchForAvailableSteps();
 					if (newMaximumStep > ParametricAnalysis.MAX_STEP_NUMBER) {
 						newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;
 					}
@@ -400,7 +400,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 					SpinnerNumberModel snm = (SpinnerNumberModel) steps.getModel();
 					int oldValue = (int) NCPA.getFinalValue();
 					NCPA.setFinalValue(tValue.intValue());
-					int newSteps = NCPA.searchForAvaibleSteps();
+					int newSteps = NCPA.searchForAvailableSteps();
 					if (newSteps > ParametricAnalysis.MAX_STEP_NUMBER) {
 						newSteps = ParametricAnalysis.MAX_STEP_NUMBER;
 					}
@@ -445,7 +445,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 					}
 				}
 				NCPA.setReferenceClass(classKey);
-				int newMaximumStep = NCPA.searchForAvaibleSteps();
+				int newMaximumStep = NCPA.searchForAvailableSteps();
 				if (newMaximumStep > ParametricAnalysis.MAX_STEP_NUMBER) {
 					newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;
 				}
@@ -584,9 +584,9 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 				int index = 0;
 				for (int k = 0; k < classes.size(); k++) {
 					String name = cd.getClassName(classes.get(k));
-					int lenght = name.length();
-					if (lenght > max) {
-						max = lenght;
+					int length = name.length();
+					if (length > max) {
+						max = length;
 						index = k;
 					}
 				}

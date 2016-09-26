@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.jmva.analytical.solvers;
 
@@ -87,7 +87,7 @@ public abstract class SolverMulti {
 	 * [station] [class] */
 	protected double[][] utilization;
 
-	/** queue lenght for each service station, class<br>
+	/** queue length for each service station, class<br>
 	 * [station] [class] */
 	protected double[][] queueLen;
 
@@ -103,7 +103,7 @@ public abstract class SolverMulti {
 	 *  [station] */
 	protected double[] scUtilization;
 
-	/** queue lenght of the service centers<br>
+	/** queue length of the service centers<br>
 	 *  [station] */
 	protected double[] scQueueLen;
 
@@ -261,7 +261,7 @@ public abstract class SolverMulti {
 	}
 
 	/**
-	 *  Returns the queue lenght of each class for each station
+	 *  Returns the queue length of each class for each station
 	 *  @return the queue length [center][class] matrix for the system
 	 */
 	public double[][] getQueueLen() {

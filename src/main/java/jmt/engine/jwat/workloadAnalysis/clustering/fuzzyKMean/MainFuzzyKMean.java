@@ -89,7 +89,7 @@ public class MainFuzzyKMean extends TimeConsumingWorker {
 			}
 			updateInfos((maxIter * maxClust) + 2, "Saving Results", true);
 			//Calcolo delle statistiche clustering eseguito
-			//for(int i = 0; i < clustering.getNumCluster();i++)
+			//for (int i = 0; i < clustering.getNumCluster();i++)
 			//clustering.getClusteringInfos(i).DOStat(varSel,clustering.getAsseg()[i],matrix);
 			updateInfos((maxIter * maxClust) + 3, "END", true);
 

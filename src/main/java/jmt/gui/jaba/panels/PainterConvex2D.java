@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jaba.panels;
 
@@ -383,7 +383,7 @@ public class PainterConvex2D {
 	}
 
 	/**
-	* This function draw te area among the axis and the point of the convex hull
+	* This function draw the area among the axis and the point of the convex hull
 	 * @param g The graphic object
 	 * @param allConvex The vector with the points of the convex hull
 	 * @param allDominants The vector with the dominant points
@@ -391,7 +391,7 @@ public class PainterConvex2D {
 	 * @param maskedoff The vector with the masked-off points
 	 */
 	public void drawArea(Graphics g, Vector<Point2D> allConvex, Vector<Point2D> allDominants, Color area, Color maskedoff) {
-		//The first color in the maskedoff color beacause after will be draw
+		//The first color in the maskedoff color because after will be draw
 		//the non-maskedoff areas
 		g.setColor(maskedoff);
 		Polygon poly = new Polygon();

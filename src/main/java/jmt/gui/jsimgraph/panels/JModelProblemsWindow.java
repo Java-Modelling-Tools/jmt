@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.panels;
 
@@ -24,7 +24,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
@@ -54,14 +53,12 @@ import javax.swing.ListSelectionModel;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
-import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
 
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.definitions.GuiInterface;
-import jmt.gui.jsimwiz.panels.JSimProblemsWindow;
 
 /**
  * <p>Title:</p>
@@ -83,7 +80,7 @@ import jmt.gui.jsimwiz.panels.JSimProblemsWindow;
  * the model : added new function : isThereSinkPerfIndicesError
  * 2. Response Time per Sink and Throughput per Sink should not be selected
  * with a closed class because for a closed model as of now in JMT no jobs 
- * are routed to the it. So sink should be choosen only when a open class 
+ * are routed to the it. So sink should be chosen only when a open class 
  * is present : isSinkPerfIndicesWithClosedClassError.
  * 
  * Modified by Ashanka (June 2010):
@@ -94,12 +91,10 @@ import jmt.gui.jsimwiz.panels.JSimProblemsWindow;
  * 
  */
 public class JModelProblemsWindow extends JDialog {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-        
-        private final static int DESCRIPTION_HTML_WIDTH = 662;
+
+	private final static int DESCRIPTION_HTML_WIDTH = 662;
 
 	GuiInterface gi;
 
@@ -168,10 +163,9 @@ public class JModelProblemsWindow extends JDialog {
 						continueButton.setEnabled(true);
 					}
 					//else continueButton.setEnabled(false);
-					if (((pType == ModelChecker.ERROR_PROBLEM) 
-							&& ((pSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR)))
-							|| ((pType == ModelChecker.ERROR_PROBLEM) 
-									&& ((pSubType == ModelChecker.NO_STATION_ERROR)))) {
+					if ((pType == ModelChecker.ERROR_PROBLEM)
+							&& ((pSubType == ModelChecker.NO_STATION_ERROR)
+									|| (pSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR))) {
 						setVisible(false);
 					} else {
 						if (!mc.isEverythingOkToJMVA()) {
@@ -183,28 +177,29 @@ public class JModelProblemsWindow extends JDialog {
 						continueButton.setEnabled(true);
 					}
 					if (((pType == ModelChecker.ERROR_PROBLEM)
-							&& ((pSubType == ModelChecker.NO_CLASSES_ERROR) 
-									|| (pSubType == ModelChecker.SIMULATION_ERROR)
-									|| (pSubType == ModelChecker.REFERENCE_STATION_ERROR)
-									|| (pSubType == ModelChecker.SOURCE_WITH_NO_OPEN_CLASSES_ERROR) 
-									|| (pSubType == ModelChecker.ROUTING_ERROR) 
-									|| (pSubType == ModelChecker.SINK_BUT_NO_OPEN_CLASSES_ERROR)
-									|| (pSubType == ModelChecker.CS_REFERENCE_STATION)
-									|| (pSubType == ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS)
-									|| (pSubType == ModelChecker.CS_ALL_CLOSED_ZERO_POPULATION)))
-						|| ((pType == ModelChecker.WARNING_PROBLEM)
-								&& ((pSubType == ModelChecker.CLOSED_ZERO_POPULATION)))
-						) {
+							&& ((pSubType == ModelChecker.NO_STATION_ERROR)
+									|| (pSubType == ModelChecker.ALL_FORWARD_STATION_ARE_SINK_ERROR)
+									|| (pSubType == ModelChecker.NO_SINK_WITH_OPEN_CLASSES_ERROR)
+									|| (pSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR)
+									|| (pSubType == ModelChecker.STATION_LINK_ERROR)
+									|| (pSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)
+									|| (pSubType == ModelChecker.CS_FOLLOWED_BY_A_BAS)
+									|| (pSubType == ModelChecker.CS_BETWEEN_FORK_JOIN)
+									|| (pSubType == ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN)
+									|| (pSubType == ModelChecker.PLACE_BETWEEN_FORK_JOIN)
+									|| (pSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN)))
+							|| ((pType == ModelChecker.WARNING_PROBLEM)
+									&& ((pSubType == ModelChecker.MORE_THAN_ONE_SINK_WARNING)
+											|| (pSubType == ModelChecker.NO_BACKWARD_LINK_WARNING)
+											|| (pSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)))) {
+						setVisible(false);
+					} else {
 						if (!mc.isEverythingOkNormal()) {
 							setVisible(true);
 						}
-					} else {
-						setVisible(false);
 					}
 				}
-
 			}
-
 		});
 
 		JPanel containerPanel = new JPanel();
@@ -227,11 +222,11 @@ public class JModelProblemsWindow extends JDialog {
 		gbconstants.insets.left = -38;
 		typeButton = new JButton("Type");
 		typeButton.setPreferredSize(new Dimension(100, 20));
-                typeButton.setFocusable(false);
+		typeButton.setFocusable(false);
 		this.addComponent(typeButton, gblayout, gbconstants, 1, 0, 1, 1);
 		descriptionButton = new JButton("Description");
 		descriptionButton.setPreferredSize(new Dimension(882, 20));
-                descriptionButton.setFocusable(false);
+		descriptionButton.setFocusable(false);
 		gbconstants.insets.left = -68;
 		this.addComponent(descriptionButton, gblayout, gbconstants, 1, 1, 1, 1);
 		gbconstants.fill = GridBagConstraints.BOTH;
@@ -240,7 +235,7 @@ public class JModelProblemsWindow extends JDialog {
 		gbconstants.weighty = 1;
 		gbconstants.insets.right = 10;
 		gbconstants.insets.left = 10;
-                jsp.setFocusable(false);
+		jsp.setFocusable(false);
 		this.addComponent(jsp, gblayout, gbconstants, 2, 0, 2, 1);
 		ButtonEventHandler beh = new ButtonEventHandler();
 		continueButton = new JButton("Continue");
@@ -284,15 +279,11 @@ public class JModelProblemsWindow extends JDialog {
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No station defined.</div></html>", null, null));
 			}
 			if (mc.isThereOpenClassButNoSourceError()) {
-				problems
-						.addElement(new ProblemElement(
-								ModelChecker.ERROR_PROBLEM,
-								ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Open class found but no source defined.</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Open class found but no source defined.</div></html>", null, null));
 			}
 			if (mc.isThereClassesWithoutRefStationError()) {
-				Vector temp = mc.getKeysOfClassesWithoutRefStation();
+				Vector<Object> temp = mc.getKeysOfClassesWithoutRefStation();
 				for (int i = 0; i < temp.size(); i++) {
 					Object classKey = temp.get(i);
 					String className = mc.getClassModel().getClassName(classKey);
@@ -302,27 +293,36 @@ public class JModelProblemsWindow extends JDialog {
 				}
 			}
 			/*if (mc.isThereOpenClassReferenceStationError()) {
-			    Vector openClasses = mc.getKeysOfOpenClassesWithoutRefStation();
-			    for (int i=0; i<openClasses.size(); i++) {
-			        String className = mc.getClassModel().getClassName(openClasses.get(i));
-			        problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM,ModelChecker.OPEN_CLASS_REFERENCE_STATION_ERROR,"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>Open class " + className + " has not a reference station",null,null));
-			    }
+				Vector<Object> openClasses = mc.getKeysOfOpenClassesWithoutRefStation();
+				for (int i = 0; i < openClasses.size(); i++) {
+					String className = mc.getClassModel().getClassName(openClasses.get(i));
+					problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.OPEN_CLASS_REFERENCE_STATION_ERROR,
+							"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>"
+									+ "Open class " + className + " has not a reference station.", null, null));
+				}
 			}*/
-
 			/*if (mc.isThereNoExpFoundWarning()) {
-			    problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM,ModelChecker.NO_EXP_FOUND_WARNING,"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>A non-exponential time distribution was found",null,null));
-			}
+				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.NO_EXP_FOUND_WARNING,
+						"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>"
+								+ "A non-exponential time distribution was found.", null, null));
+			}*/
 			/*if (mc.isThereDelaysFoundError()) {
-			    problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM,ModelChecker.DELAYS_FOUND_ERROR,"      Error             Delays not supported in JModel to JMVA conversion",null,null));
+				problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.DELAYS_FOUND_ERROR,
+						"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>"
+								+ "Delays not supported in JModel to JMVA conversion.", null, null));
 			}*/
 			/*if (mc.isThereDifferentServiceTimeWarning()) {
-			    problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM,ModelChecker.DIFFERENT_SERVICE_TIME_WARNING,"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>A station with different mean service time per class was found",null,null));
-			}
-			if (mc.isThereNonFCFSWarning()) {
-			    problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM,ModelChecker.NON_FCFS_WARNING,"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>A non FCFS queue strategy was found",null,null));
+				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.DIFFERENT_SERVICE_TIME_WARNING,
+						"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>"
+								+ "A station with different mean service time per class was found.", null, null));
+			}*/
+			/*if (mc.isThereNonFCFSWarning()) {
+				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.NON_FCFS_WARNING,
+						"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>"
+								+ "A non FCFS queue strategy was found.", null, null));
 			}*/
 			if (mc.isThereBCMPDifferentQueueingStrategyWarning()) {
-				Vector temp = mc.getBCMPserversWithDifferentQueueStrategy();
+				Vector<Object> temp = mc.getBCMPserversWithDifferentQueueStrategy();
 				for (int i = 0; i < temp.size(); i++) {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING,
@@ -330,8 +330,8 @@ public class JModelProblemsWindow extends JDialog {
 									+ thisStation + ".</div></html>", temp.get(i), null));
 				}
 			}
-       			if (mc.isThereBCMPNonSymmetricSchedulingPolicies()) {
-				Vector temp = mc.getBCMPserversWithNonSymmetricScheduling();
+			if (mc.isThereBCMPNonSymmetricSchedulingPolicies()) {
+				Vector<Object> temp = mc.getBCMPserversWithNonSymmetricScheduling();
 				for (int i = 0; i < temp.size(); i++) {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_NON_SYMMETRIC_SCHEDULING,
@@ -340,7 +340,7 @@ public class JModelProblemsWindow extends JDialog {
 				}
 			}
 			if (mc.isThereBCMPDifferentServiceTypeWarning()) {
-				Vector temp = mc.getBCMPserversWithDifferentServiceTypes();
+				Vector<Object> temp = mc.getBCMPserversWithDifferentServiceTypes();
 				for (int i = 0; i < temp.size(); i++) {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING,
@@ -349,7 +349,7 @@ public class JModelProblemsWindow extends JDialog {
 				}
 			}
 			if (mc.isThereBCMPFcfsNonExponentialWarning()) {
-				Vector temp = mc.getBCMPserversFCFSWithoutExponential();
+				Vector<Object> temp = mc.getBCMPserversFCFSWithoutExponential();
 				for (int i = 0; i < temp.size(); i++) {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_FCFS_EXPONENTIAL_WARNING,
@@ -358,7 +358,7 @@ public class JModelProblemsWindow extends JDialog {
 				}
 			}
 			if (mc.isThereBCMPFcfsDifferentServiceTimesWarning()) {
-				Vector temp = mc.getBCMPFcfsServersWithDifferentServiceTimes();
+				Vector<Object> temp = mc.getBCMPFcfsServersWithDifferentServiceTimes();
 				for (int i = 0; i < temp.size(); i++) {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING,
@@ -367,21 +367,17 @@ public class JModelProblemsWindow extends JDialog {
 				}
 			}
 			if (mc.isThereBCMPDelayWarning()) {
-				Vector temp = mc.getBCMPdelaysWithNonRationalServiceDistribution();
+				Vector<Object> temp = mc.getBCMPdelaysWithNonRationalServiceDistribution();
 				for (int i = 0; i < temp.size(); i++) {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_FCFS_EXPONENTIAL_WARNING,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + thisStation
-									+ " with non valid service time distribution.</div></html>", temp.get(i), null));
+							+ " with non valid service time distribution.</div></html>", temp.get(i), null));
 				}
 			}
 			if (mc.isThereBCMPNonStateIndependentRoutingWarning()) {
-				problems
-						.addElement(new ProblemElement(
-								ModelChecker.WARNING_PROBLEM,
-								ModelChecker.BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">A non state independent routing strategy was found.</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">A non state independent routing strategy was found.</div></html>", null, null));
 			}
 			//TODO: Lcfs case handling
 			//TODO: Processor Sharing handling
@@ -395,62 +391,64 @@ public class JModelProblemsWindow extends JDialog {
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No station defined.</div></html>", null, null));
 			}
 			if (mc.isThereStationLinkError()) {
-				Vector temp = mc.getKeysOfStationsWithLinkProblems();
+				Vector<Object> temp = mc.getKeysOfStationsWithLinkProblems();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					String description;
 					if (mc.getStationModel().getStationType(stationKey).equals(CommonConstants.STATION_TYPE_SINK)) {
-						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName + " has no ingoing links! No routing is possible.</div></html>");
+						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+								+ " has no ingoing links! No routing is possible.</div></html>");
 					} else {
-						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName + "  has no outgoing links! No routing is possible.</div></html>");
+						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+								+ " has no outgoing links! No routing is possible.</div></html>");
 					}
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.STATION_LINK_ERROR, description, stationKey, null));
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.STATION_LINK_ERROR,
+							description, stationKey, null));
 				}
 			}
 			if (mc.isThereAllForwardStationsAreSinkErrors()) {
-				HashMap temp = mc.getKeysOfAllForwardStationsAreSinkErrors();
-				Vector classKeys = mc.getClassModel().getClassKeys();
+				HashMap<Object, Vector<Object>> temp = mc.getKeysOfAllForwardStationsAreSinkErrors();
+				Vector<Object> classKeys = mc.getClassModel().getClassKeys();
 				for (int i = 0; i < classKeys.size(); i++) {
 					Object classKey = classKeys.get(i);
 					String className = mc.getClassModel().getClassName(classKey);
-					Vector stationWithAllForwardStationsAreSinkErrors = (Vector) temp.get(classKey);
+					Vector<Object> stationWithAllForwardStationsAreSinkErrors = temp.get(classKey);
 					if (stationWithAllForwardStationsAreSinkErrors != null) {
 						for (int j = 0; j < stationWithAllForwardStationsAreSinkErrors.size(); j++) {
 							Object stationKey = stationWithAllForwardStationsAreSinkErrors.get(j);
 							String stationName = mc.getStationModel().getStationName(stationKey);
 							problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.ALL_FORWARD_STATION_ARE_SINK_ERROR,
-									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Close class "
-											+ className + " routed to station " + stationName + " linked only to sink.</div></html>", stationKey, classKey));
+									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Close class " + className + " routed to station "
+											+ stationName + " linked only to sink.</div></html>", stationKey, classKey));
 						}
 					}
 				}
 			}
 			if (mc.isThereRoutingError()) {
-				HashMap temp = mc.getKeysOfRoutingProblems();
-				Vector classKeys = mc.getClassModel().getClassKeys();
+				HashMap<Object, Vector<Object>> temp = mc.getKeysOfRoutingProblems();
+				Vector<Object> classKeys = mc.getClassModel().getClassKeys();
 				for (int i = 0; i < classKeys.size(); i++) {
 					Object classKey = classKeys.get(i);
 					String className = mc.getClassModel().getClassName(classKey);
-					Vector stationWithRoutingProblems = (Vector) temp.get(classKey);
+					Vector<Object> stationWithRoutingProblems = temp.get(classKey);
 					if (stationWithRoutingProblems != null) {
 						for (int j = 0; j < stationWithRoutingProblems.size(); j++) {
 							Object stationKey = stationWithRoutingProblems.get(j);
 							String stationName = mc.getStationModel().getStationName(stationKey);
 							problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.ROUTING_ERROR,
-									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Close class "
-											+ className + " at station " + stationName + " is routed to sink with p=1.</div></html>", stationKey, classKey));
+									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Close class " + className
+									+ " at station " + stationName + " is routed to sink with p=1.</div></html>", stationKey, classKey));
 						}
 					}
 				}
 			}
 			if (mc.isThereSimulationError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SIMULATION_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No performance indices defined.</div></html>",
-						null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No performance indices defined.</div></html>", null, null));
 			}
 			if (mc.isThereClassesWithoutRefStationError()) {
-				Vector temp = mc.getKeysOfClassesWithoutRefStation();
+				Vector<Object> temp = mc.getKeysOfClassesWithoutRefStation();
 				for (int i = 0; i < temp.size(); i++) {
 					Object classKey = temp.get(i);
 					String className = mc.getClassModel().getClassName(classKey);
@@ -460,255 +458,274 @@ public class JModelProblemsWindow extends JDialog {
 				}
 			}
 			if (mc.isThereNoSinkWithOpenClassesError()) {
-				problems
-						.addElement(new ProblemElement(
-								ModelChecker.ERROR_PROBLEM,
-								ModelChecker.NO_SINK_WITH_OPEN_CLASSES_ERROR,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Open classes were found but no sink have been defined.</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_SINK_WITH_OPEN_CLASSES_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Open classes were found but no sink have been defined.</div></html>", null, null));
 			}
 			if (mc.isThereSinkButNoOpenClassError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_BUT_NO_OPEN_CLASSES_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sink without open classes", null,
-						null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sink without open classes", null, null));
 			}
 			if (mc.isThereOpenClassButNoSourceError()) {
-				problems
-						.addElement(new ProblemElement(
-								ModelChecker.ERROR_PROBLEM,
-								ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">An open class was found but no source has been defined.</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">An open class was found but no source has been defined.</div></html>", null, null));
 			}
 			if (mc.isThereSourceWithNoClassesError()) {
-				Vector temp = mc.getKeysOfSourceWithoutClasses();
+				Vector<Object> temp = mc.getKeysOfSourceWithoutClasses();
 				for (int i = 0; i < temp.size(); i++) {
 					Object sourceKey = temp.get(i);
 					String sourceName = mc.getStationModel().getStationName(sourceKey);
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SOURCE_WITH_NO_OPEN_CLASSES_ERROR,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + sourceName
-									+ " without open classes associated.</div></html>", sourceKey, null));
+							+ " without open classes associated.</div></html>", sourceKey, null));
 				}
 			}
-			if (mc.isThereSinkPerfIndicesWithNoSinkError()){
+			if (mc.isThereSinkPerfIndicesWithNoSinkError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_PERF_IND_WITH_NO_SINK_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per sink should not be used " +
-						"if there is no Sink defined in the model.</div></html>",
-						null, null));
-			}			
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per sink should not be used "
+								+ "if there is no Sink defined in the model.</div></html>", null, null));
+			}
 			if (mc.isThereInconsistentMeasureError()) {
-				problems
-						.addElement(new ProblemElement(
-								ModelChecker.ERROR_PROBLEM,
-								ModelChecker.INCONSISTENT_MEASURE_ERROR,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Undefined station in performance index.</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.INCONSISTENT_MEASURE_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Undefined station in performance index.</div></html>", null, null));
 			}
 			if (mc.isThereMeasureError()) {
-				problems
-						.addElement(new ProblemElement(
-								ModelChecker.ERROR_PROBLEM,
-								ModelChecker.DUPLICATE_MEASURE_ERROR,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">A performance index is defined more than once.</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.DUPLICATE_MEASURE_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">A performance index is defined more than once.</div></html>", null, null));
 			}
 			if (mc.isTherejoinWithoutForkError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.JOIN_WITHOUT_FORK_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Join without fork.</div></html>", null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Join found but no fork.</div></html>", null, null));
 			}
 			if (mc.isThereEmptyBlockingRegionError()) {
-				Vector regionKeys = mc.getKeysOfEmptyBlockingRegions();
+				Vector<Object> regionKeys = mc.getKeysOfEmptyBlockingRegions();
 				for (int i = 0; i < regionKeys.size(); i++) {
 					String name = mc.getBlockingModel().getRegionName(regionKeys.get(i));
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.EMPTY_BLOCKING_REGION,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Finite Capacity Region " + name
-									+ " is empty.</div></html>", regionKeys.get(i), null));
+							+ " is empty.</div></html>", regionKeys.get(i), null));
 				}
 			}
 			if (mc.isTherePreloadingInBlockingRegionError()) {
-				problems.addElement(new ProblemElement(
-								ModelChecker.ERROR_PROBLEM,
-								ModelChecker.PRELOADING_WITH_BLOCKING,
-//								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations inside a blocking region is not supported.</div></html>",
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations exceeds global or class constraints (weights have not been considered).</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.PRELOADING_WITH_BLOCKING,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations exceeds global or class constraints "
+								+ "(weights have not been considered).</div></html>", null, null));
 			}
 			if (mc.isThereMoreThanOneSinkWarning()) {
-				problems.addElement(new ProblemElement(
-								ModelChecker.WARNING_PROBLEM,
-								ModelChecker.MORE_THAN_ONE_SINK_WARNING,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">More than one sink defined, measures may not be accurate.</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM,ModelChecker.MORE_THAN_ONE_SINK_WARNING,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">More than one sink defined, "
+								+ "measures may not be accurate.</div></html>", null, null));
 			}
 			if (mc.isThereNoBackwardLinkWarning()) {
-				Vector temp = mc.getKeysOfStationWithoutBackwardLinks();
+				Vector<Object> temp = mc.getKeysOfStationWithoutBackwardLinks();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.NO_BACKWARD_LINK_WARNING,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-									+ " is not backward linked.</div></html>", stationKey, null));
+							+ " is not backward linked.</div></html>", stationKey, null));
 				}
 			}
-//			problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.NO_BACKWARD_LINK_WARNING,
-//					"<html><font color=\"white\">--</font><i>Warning</i>" +
-//					"<font color=\"white\">--------</font>" + "TEST"
-//							+ " is not backward linked", "TEST", null));
 			if (mc.isThereParametricAnalysisModelModifiedWarning()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">What-if analysis model modified.</div></html>",
-						null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">What-if analysis model modified.</div></html>", null, null));
 			}
-			if (mc.isThereParametricAnalysisNoMoreAvaibleWarning()) {
-				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.PARAMETRIC_ANALYSIS_NO_MORE_AVAIBLE_WARNING,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">What-if analysis not avaible.</div></html>", null,
-						null));
+			if (mc.isThereParametricAnalysisNoMoreAvailableWarning()) {
+				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">What-if analysis not available.</div></html>", null, null));
 			}
 			if (mc.isThereForkWithoutJoinWarnings()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.FORK_WITHOUT_JOIN_WARNING,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Fork found but no join.</div></html>",
-								null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Fork found but no join.</div></html>", null, null));
 			}
-                        if (mc.isThereSlowFCFSSamePriorities()) {
+			if (mc.isThereSlowFCFSSamePriorities()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.SLOW_FCFS_SAME_PRIORITIES,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Priority scheduling is used, but all classes have the same priorities."
-                                                + " The simulation may run slower than usual.",
-                                                null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Priority scheduling is used, but all classes have the same priorities. "
+								+ "The simulation may run slower than usual.</div></html>", null, null));
 			}
-			if (mc.isSinkPerfIndicesWithClosedClassError()){
+			if (mc.isSinkPerfIndicesWithClosedClassError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_PERF_WITH_CLOSED_CLASS_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per sink should not be used for closed class.</div></html>",
-						null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per sink "
+								+ "should not be used for closed class.</div></html>", null, null));
 			}
 			if (mc.isThereSinkProbabilityUpdateWarning()) {
-				problems.addElement(new ProblemElement(
-								ModelChecker.WARNING_PROBLEM,
-								ModelChecker.SINK_PROBABILITY_UPDATE_WARNING,
-								"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sink Probability of the Closed Class(s) " +
-								" "+ mc.getClassModel().getsinkProbabilityUpdateClasses() + " " +
-								"of Station(s)" +
-								" " + mc.getStationModel().getsinkProbabilityUpdateStations() + " " +
-								"has been updated to 0.0.</div></html>",
-								null, null));
+				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.SINK_PROBABILITY_UPDATE_WARNING,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sink Probability of the Closed Class(s) "
+								+ mc.getClassModel().getsinkProbabilityUpdateClasses() + " of Station(s) "
+								+ mc.getStationModel().getsinkProbabilityUpdateStations() + " has been updated to 0.0.</div></html>", null, null));
 				//Reset after displaying the offending Station and Class names.
 				mc.getClassModel().resetSinkProbabilityUpdateClasses();
 				mc.getStationModel().resetSinkProbabilityUpdateStations();
-			} if(mc.isThereCsMatrixRowSumError()) {
+			}
+			if (mc.isThereCsMatrixRowSumError()) {
 				Vector<Object> temp = mc.getCsWithWrongMatrix();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_MATRIX_HAS_ROWS_LESS_THAN_ONE,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">In " + stationName	+ " switch, rows must sum to a value equal or greater than one.</div></html>", stationKey, null));
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">In " + stationName
+							+ " switch, rows must sum to a value equal or greater than one.</div></html>", stationKey, null));
 				}				
-			} if(mc.isThereCsFollowedByBasError()) {
+			}
+			if (mc.isThereCsFollowedByBasError()) {
 				Vector<Object> temp = mc.getCsFolloweByBas();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_FOLLOWED_BY_A_BAS,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" +
-							stationName	+ " is followed by a queue with BAS strategy scheduling.</div></html>", stationKey, null));
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " is followed by a queue with BAS strategy scheduling.</div></html>", stationKey, null));
 				}				
-			} if(mc.isThereCsBetweenForkJoin()) {
+			}
+			if (mc.isThereCsBetweenForkJoin()) {
 				Vector<Object> temp = mc.getCsBetweenForkJoin();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_BETWEEN_FORK_JOIN,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" +
-							stationName + " switch between fork/join. This topology is not allowed.</div></html>", stationKey, null));
-				}				
-			} if(mc.isThereSemaphoreNotBetweenForkJoin()) {
-				Vector<Object> temp = mc.getSemaphoreNotBetweenForkJoin();
-				for (int i = 0; i < temp.size(); i++) {
-					Object stationKey = temp.get(i);
-					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" +
-							stationName + " semaphore is not between fork/join. This topology is not allowed.</div></html>", stationKey, null));
-				}				
-			} if (mc.isThereSemaphoreWithoutJoinError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SEMAPHORE_WITHOUT_JOIN_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Semaphore without join.</div></html>", null, null));
-			} if (mc.isThereLoadDependentRoutingError()) {
-				Map<Object, HashMap<Object, Object>> temp = mc.getInvalidLoadDependentRoutingStations();
-				for (Iterator<Object> it = temp.keySet().iterator(); it.hasNext();) {
-                    Object key = it.next();
-                    HashMap<Object, Object> val = (HashMap<Object, Object>)temp.get(key);
-                    Map.Entry m = val.entrySet().iterator().next();
-					Object stationKey = m.getKey();
-                    Object classKey = m.getValue();
-                    String className = mc.getClassModel().getClassName(classKey);
-					String sourceName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Station: " + sourceName + " for class: " + className	+ " with invalid LoadDependentRouting.</div></html>", stationKey, classKey));
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " is located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
 				}
 			}
-            if (mc.isThereCsReferenceStation()) {
+			if (mc.isThereLoadDependentRoutingError()) {
+				Map<Object, HashMap<Object, Object>> temp = mc.getInvalidLoadDependentRoutingStations();
+				for (Iterator<Object> it = temp.keySet().iterator(); it.hasNext();) {
+					Object key = it.next();
+					HashMap<Object, Object> val = (HashMap<Object, Object>)temp.get(key);
+					Map.Entry<Object, Object> m = val.entrySet().iterator().next();
+					Object stationKey = m.getKey();
+					Object classKey = m.getValue();
+					String className = mc.getClassModel().getClassName(classKey);
+					String sourceName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Station: " + sourceName + " for class: "
+									+ className	+ " with invalid LoadDependentRouting.</div></html>", stationKey, classKey));
+				}
+			}
+			if (mc.isThereCsReferenceStation()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_REFERENCE_STATION,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a ClassSwitch is in the model, then <b>all</b> classes must have the <b>same</b> Reference Station.</div></html>", null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a ClassSwitch is in the model, "
+								+ "then <b>all</b> classes must have the <b>same</b> Reference Station.</div></html>", null, null));
 			}
-            if (mc.isThereCsSystemThroughputClass()) {
+			if (mc.isThereCsSystemThroughputClass()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">With <b>ClassSwitch</b>, the <b>per-class</b> system throughput cannot be computed.</div></html>", null, null));
-//				Vector temp = mc.getCsSystemThroughputClass();
-//				for (int i = 0; i < temp.size(); i++) {
-//					Object classKey = temp.get(i);
-//					String className = mc.getClassModel().getClassName(classKey);
-//					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS,
-//							"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>With class switching, the system throghput per class cannot be computed.", null, classKey));
-//				}
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">With <b>ClassSwitch</b>, "
+								+ "the <b>per-class</b> system throughput cannot be computed.</div></html>", null, null));
 			}
-
-            if (mc.isThereClosedClassZeroPopulation()) {
-//				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLOSED_ZERO_POPULATION,
-//						"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>At least one closed class has zero population.", null, null));
+			if (mc.isThereClosedClassZeroPopulation()) {
 				for (Object classKey:mc.getClosedZeroPopulation()) {
 					String className = mc.getClassModel().getClassName(classKey);
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CLOSED_ZERO_POPULATION,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Population set to zero: " + className + "</div></html>", null, classKey));
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Population set to zero: "
+									+ className + "</div></html>", null, classKey));
 				}
-				
 			}
-            if (mc.isThereCsAllClosedZeroPopulation()) {
+			if (mc.isThereCsAllClosedZeroPopulation()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_ALL_CLOSED_ZERO_POPULATION,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">All the closed classes have zero population.</div></html>", null, null));
 			}
-            
-            // M: Cazzoli: Substituted error for cs with fj or fcr with warning for cs with fj
-            if (mc.isThereCsWithForkJoin()) {
+			// M: Cazzoli: Substituted error for cs with fj or fcr with warning for cs with fj
+			if (mc.isThereCsWithForkJoin()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CS_WITH_FORK_JOIN,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">If you use a ClassSwitch station and a Fork/Join region in the same model"
-                                                        + ", depending on the layout of the model,  some indices may not be computed exactly (e.g., the System Response Time)."
-                                                        + "  You may consider also to use the new Fork Strategy \"class switch\" that allows the generation of new classes of tasks within a Fork/Join region.</div></html>",
-                                                null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">If you use a ClassSwitch station and a Fork/Join region in the same model, "
+								+ "depending on the layout of the model,  some indices may not be computed exactly (e.g., the System Response Time). "
+								+ "You may consider also to use the new Fork Strategy \"class switch\" that allows the generation of new classes of tasks within a Fork/Join region.</div></html>", null, null));
 			}
-            if (mc.isThereGuardStrategyZeroTasks()) {
-				HashMap temp = mc.getKeysOfAllGuardStrategyZeroTask();
-				List stationKeys = mc.getStationModel().getStationKeys();
+			if (mc.isThereGuardStrategyZeroTasks()) {
+				HashMap<Object, List<Object>> temp = mc.getKeysOfAllGuardStrategyZeroTask();
+				List<Object> stationKeys = mc.getStationModel().getStationKeys();
 				for (int i = 0; i < stationKeys.size(); i++) {
 					Object stationKey = stationKeys.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					List classes = (List) temp.get(stationKey);
+					List<Object> classes = temp.get(stationKey);
 					if (classes != null) {
 						for (int j = 0; j < classes.size(); j++) {
 							Object classKey = classes.get(j);
 							String className = mc.getClassModel().getClassName(classKey);
 							problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.GUARD_STRATEGY_ZERO_TASKS,
-									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Station "
-											+ stationName + " has Guard Strategy at class " + className + " with zero tasks.</div></html>", stationKey, classKey));
+									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Station " + stationName
+									+ " has Guard Strategy at class " + className + " with zero tasks.</div></html>", stationKey, classKey));
 						}
 					}
 				}
 			}
-//            if (mc.isThereGuardStrategyClosedZeroPopulation()) {
-//				for (Object classKey:mc.getClosedZeroPopulation()) {
-//					String className = mc.getClassModel().getClassName(classKey);
-//					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.GUARD_STRATEGY_CLOSED_ZERO_POPULATION,
-//							"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>Exixts a Guard Strategy and " + className + " pulation is set to zero", null, classKey));
-//				}
-//			}
+			//if (mc.isThereGuardStrategyClosedZeroPopulation()) {
+			//	for (Object classKey:mc.getClosedZeroPopulation()) {
+			//		String className = mc.getClassModel().getClassName(classKey);
+			//		problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.GUARD_STRATEGY_CLOSED_ZERO_POPULATION,
+			//				"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>"
+			//						+ "Exixts a Guard Strategy and " + className + " population is set to zero.", null, classKey));
+			//	}
+			//}
+			if (mc.isThereSemaphoreNotBetweenForkJoin()) {
+				Vector<Object> temp = mc.getSemaphoreNotBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " is not located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isTherePlaceBetweenForkJoin()) {
+				Vector<Object> temp = mc.getPlaceBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.PLACE_BETWEEN_FORK_JOIN,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " is located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereTransitionBetweenForkJoin()) {
+				Vector<Object> temp = mc.getTransitionBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_BETWEEN_FORK_JOIN,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " is located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereTransitionWithoutValidEnablingOrInhibitingCondition()) {
+				Vector<Object> temp = mc.getTransitionWithoutValidEnablingOrInhibitingCondition();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_WITHOUT_VALID_ENABLING_OR_INHIBITING_CONDITION,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " has no valid enabling or inhibiting conditions for all classes.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereTransitionWithoutValidFiringOutcome()) {
+				Vector<Object> temp = mc.getTransitionWithoutValidFiringOutcome();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_WITHOUT_VALID_FIRING_OUTCOME,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " has no valid firing outcomes for all classes.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereTransitionWithInvalidEnablingOrInhibitingCondition()) {
+				Vector<Object> temp = mc.getTransitionWithInvalidEnablingOrInhibitingCondition();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_WITH_INVALID_ENABLING_OR_INHIBITING_CONDITION,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " has invalid enabling or inhibiting conditions for some classes.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereTransitionWithInvalidFiringOutcome()) {
+				Vector<Object> temp = mc.getTransitionWithInvalidFiringOutcome();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_WITH_INVALID_FIRING_OUTCOME,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " has invalid firing outcomes for some classes.</div></html>", stationKey, null));
+				}
+			}
 		}
 	}
 
@@ -747,6 +764,7 @@ public class JModelProblemsWindow extends JDialog {
 	}
 
 	private class ProblemElementRenderer implements ListCellRenderer {
+
 		private String[] iconNames = new String[] { "Error", "Warning" };
 		private Icon[] icons = new Icon[iconNames.length];
 		private int[] problemTypes = { ModelChecker.ERROR_PROBLEM, ModelChecker.WARNING_PROBLEM };
@@ -759,50 +777,52 @@ public class JModelProblemsWindow extends JDialog {
 
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			JLabel label = null;
-                        JPanel pane = new JPanel();
-                        pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
+			JPanel pane = new JPanel();
+			pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
 			for (int i = 0; i < problemTypes.length; i++) {
 				if (problemTypes[i] == ((ProblemElement) value).getProblemType()) {
 					String errorDescription = ((ProblemElement) value).getDescription();
 					label = new JLabel(errorDescription, icons[i], SwingConstants.LEFT);
 				}
 			}
-                        String labelName = iconNames[((ProblemElement) value).getProblemType()];
-                        if (((ProblemElement) value).getProblemType() == ModelChecker.ERROR_PROBLEM) {
-                                labelName = "<html><b>" + labelName + "</b></html>";
-                        } else {
-                                labelName = "<html><i>" + labelName + "</i></html>";
-                        }
-                        label = new JLabel(labelName, icons[((ProblemElement) value).getProblemType()], SwingConstants.CENTER);
-                        label.setMinimumSize(new Dimension(111, 20));
-                        label.setMaximumSize(new Dimension(111, 1000));
-                        label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			String labelName = iconNames[((ProblemElement) value).getProblemType()];
+			if (((ProblemElement) value).getProblemType() == ModelChecker.ERROR_PROBLEM) {
+				labelName = "<html><b>" + labelName + "</b></html>";
+			} else {
+				labelName = "<html><i>" + labelName + "</i></html>";
+			}
+			label = new JLabel(labelName, icons[((ProblemElement) value).getProblemType()], SwingConstants.CENTER);
+			label.setMinimumSize(new Dimension(111, 20));
+			label.setMaximumSize(new Dimension(111, 1000));
+			label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 			label.setOpaque(true);
 			label.setBackground(isSelected ? list.getSelectionBackground() : Color.WHITE);
 			label.setForeground(isSelected ? list.getSelectionForeground() : Color.BLACK);
 			label.setFont(isSelected ? label.getFont().deriveFont(Font.BOLD) : label.getFont().deriveFont(Font.ROMAN_BASELINE));
-                        
-                        JLabel description = null;
-                        String errorDescription = ((ProblemElement) value).getDescription();
+
+			JLabel description = null;
+			String errorDescription = ((ProblemElement) value).getDescription();
 			description = new JLabel(errorDescription, SwingConstants.LEFT);
-                        description.setMinimumSize(new Dimension(871, 20));
-                        description.setMaximumSize(new Dimension(871, 1000));
-                        description.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-                        description.setOpaque(true);
+			description.setMinimumSize(new Dimension(871, 20));
+			description.setMaximumSize(new Dimension(871, 1000));
+			description.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+			description.setOpaque(true);
 			description.setBackground(isSelected ? list.getSelectionBackground() : Color.WHITE);
 			description.setForeground(isSelected ? list.getSelectionForeground() : Color.BLACK);
 			description.setFont(isSelected ? description.getFont().deriveFont(Font.BOLD) : description.getFont().deriveFont(Font.ROMAN_BASELINE));
 
-                        pane.add(label);
-                        pane.add(description);
-                        
-                        pane.setBorder(new MatteBorder(0, 0, 1, 0, Color.GRAY));
-                        
+			pane.add(label);
+			pane.add(description);
+
+			pane.setBorder(new MatteBorder(0, 0, 1, 0, Color.GRAY));
+
 			return pane;
 		}
+
 	}
 
 	private class ProblemElement {
+
 		int type;
 		int subType;
 		String description;
@@ -836,16 +856,16 @@ public class JModelProblemsWindow extends JDialog {
 		public Object getRelatedClassKey() {
 			return relatedClassKey;
 		}
+
 	}
 
 	private class ButtonEventHandler implements ActionListener {
+
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == cancelButton) {
 				operationCanceled = true;
 				dispose();
-			}
-
-			else if (e.getSource() == continueButton) {
+			} else if (e.getSource() == continueButton) {
 				operationCanceled = false;
 				dispose();
 			}

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.engine.QueueNet;
 
 import java.util.List;
@@ -19,6 +37,7 @@ import jmt.engine.dataAnalysis.Measure;
  * @version 3.0
  */
 public class PSJobInfoList implements JobInfoList {
+
 	/** Wrapped JobInfoList */
 	private JobInfoList list;
 
@@ -88,28 +107,20 @@ public class PSJobInfoList implements JobInfoList {
 		return list.add(jobInfo);
 	}
 
-	public boolean add(int index, JobInfo jobInfo, boolean isClassTail) {
-		return list.add(index, jobInfo, isClassTail);
-	}
-
 	public boolean addFirst(JobInfo jobInfo) {
 		return list.addFirst(jobInfo);
 	}
 
-	public boolean addFirst(JobInfo jobInfo, boolean isClassTail) {
-		return list.addFirst(jobInfo, isClassTail);
-	}
-
-	public boolean addLast(JobInfo jobInfo, boolean isClassTail) {
-		return list.addLast(jobInfo, isClassTail);
-	}
-
-	public boolean addLast(JobInfo jobInfo) throws NetException {
+	public boolean addLast(JobInfo jobInfo) {
 		return list.addLast(jobInfo);
 	}
-        
-	public boolean addRand(JobInfo jobInfo){
-		return list.addRand(jobInfo);
+
+	public boolean add(int index, JobInfo jobInfo) {
+		return list.add(index, jobInfo);
+	}
+
+	public boolean add(int index, JobInfo jobInfo, boolean isClassTail) {
+		return list.add(index, jobInfo, isClassTail);
 	}
 
 	/**--------------------------------------------------------
@@ -191,10 +202,6 @@ public class PSJobInfoList implements JobInfoList {
 		} else {
 			queueLength = measurement;
 		}
-	}
-
-	public boolean dropJob(Job job) throws NetException {
-		return list.dropJob(job);
 	}
 
 	public double getBusyTime() throws NetException {
@@ -279,12 +286,24 @@ public class PSJobInfoList implements JobInfoList {
 		return list.remove(jobInfo);
 	}
 
-	public boolean removeAfterDrop(JobInfo jobInfo) throws NetException {
-		return list.removeAfterDrop(jobInfo);
+	public boolean removeJob(JobInfo jobInfo) throws NetException {
+		return list.removeJob(jobInfo);
 	}
 
-	public boolean removeAfterRedirect(JobInfo jobInfo) throws NetException {
-		return list.removeAfterRedirect(jobInfo);
+	public boolean redirectJob(JobInfo jobInfo) throws NetException {
+		return list.redirectJob(jobInfo);
+	}
+
+	public boolean dropJob(JobInfo jobInfo) throws NetException {
+		return list.dropJob(jobInfo);
+	}
+
+	public boolean produceJob(JobInfo jobInfo) throws NetException {
+		return list.produceJob(jobInfo);
+	}
+
+	public boolean consumeJob(JobInfo jobInfo) throws NetException {
+		return list.consumeJob(jobInfo);
 	}
 
 	public JobInfo removeFirst() throws NetException {
@@ -364,7 +383,7 @@ public class PSJobInfoList implements JobInfoList {
 
 	/**
 	 * Updates a measure if it is not null
-	 * @param m the mesure, may be null
+	 * @param m the measure, may be null
 	 * @param value the value
 	 * @param weight the weight
 	 */
@@ -376,7 +395,7 @@ public class PSJobInfoList implements JobInfoList {
 
 	/**
 	 * Updates a perclass measure if it is not null
-	 * @param m the mesure, may be null
+	 * @param m the measure, may be null
 	 * @param value the value
 	 * @param weight the weight
 	 */
@@ -392,7 +411,7 @@ public class PSJobInfoList implements JobInfoList {
 	public JobInfoList getInternalList() {
 		return list;
 	}
-	
+
 	public void analyzeResponseTimePerSink(JobClass jobClass,
 			Measure Measurement) {
 		list.analyzeResponseTimePerSink(jobClass, Measurement);
@@ -403,11 +422,11 @@ public class PSJobInfoList implements JobInfoList {
 		list.analyzeThroughputPerSink(jobClass, Measurement);
 	}
 	//fork in region
-	public int getJobsInPerClass(int Id){
+	public int getJobsInPerClass(int Id) {
 		return jobsInPerClass[Id];
 	}
-	
-	public int getJobsOutPerClass(int Id){
+
+	public int getJobsOutPerClass(int Id) {
 		return jobsOutPerClass[Id];
 	}
 	//end

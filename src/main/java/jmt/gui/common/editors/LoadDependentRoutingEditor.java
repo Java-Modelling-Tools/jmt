@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.editors;
 
 import java.awt.BorderLayout;
@@ -44,117 +62,118 @@ import jmt.gui.common.routingStrategies.LoadDependentRouting;
  */
 public class LoadDependentRoutingEditor extends JMTDialog implements CommonConstants {
 
-    private Object stationKey;
+	private static final long serialVersionUID = 1L;
+
+	private Object stationKey;
 	private Object classKey;
-    private StationDefinition stations;
-    private ClassDefinition classes;
-    private Vector<Object> validForwardStationKeys = new Vector<Object>();
+	private StationDefinition stations;
+	private ClassDefinition classes;
+	private Vector<Object> validForwardStationKeys = new Vector<Object>();
 
-    private LoadDependentRouting routingStrategy;
+	private LoadDependentRouting routingStrategy;
 
-    private HashMap<Integer, Integer> mapRowIndexAndFrom;
-    protected JTable rangesTable;
+	private HashMap<Integer, Integer> mapRowIndexAndFrom;
+	protected JTable rangesTable;
 
-    public LoadDependentRoutingEditor(Frame parent, HashMap<String, Object> params){
-        super(parent, true);
-        init(params);
-    }
+	public LoadDependentRoutingEditor(Frame parent, HashMap<String, Object> params) {
+		super(parent, true);
+		init(params);
+	}
 
-    public LoadDependentRoutingEditor(Dialog parent, HashMap<String, Object> params){
-        super(parent, true);
-        init(params);
-    }
+	public LoadDependentRoutingEditor(Dialog parent, HashMap<String, Object> params) {
+		super(parent, true);
+		init(params);
+	}
 
-    private void init(HashMap<String, Object> params){
-        stations =  (StationDefinition)params.get("StationDefinition");
-        classes = (ClassDefinition)params.get("ClassDefinition");
-        stationKey = params.get("stationKey");
-        classKey   = params.get("classKey");
-        routingStrategy = (LoadDependentRouting)stations.getRoutingStrategy(stationKey, classKey);
-        setValidForwardStationKeys();
-        if(routingStrategy != null){
-            if(routingStrategy.getEmpiricalEntries()!= null){
-                Set<String> validForwardStationNames = new LinkedHashSet<String>(0);
-                for(Object fStationKey : validForwardStationKeys){
-                    validForwardStationNames.add(stations.getStationName(fStationKey));
-                }
-                routingStrategy.refreshRouting(validForwardStationNames);
-                if(mapRowIndexAndFrom == null){
-                    mapRowIndexAndFrom = new HashMap<Integer, Integer>();
-                }
-                int range = 0;
-                for(Integer from : routingStrategy.getEmpiricalEntries().keySet()){
-                    mapRowIndexAndFrom.put(range, from);
-                    range = range +1;
-                }
-            }
-        }
-        initGUI((String)params.get("title"));
-    }
+	private void init(HashMap<String, Object> params) {
+		stations =  (StationDefinition)params.get("StationDefinition");
+		classes = (ClassDefinition)params.get("ClassDefinition");
+		stationKey = params.get("stationKey");
+		classKey   = params.get("classKey");
+		routingStrategy = (LoadDependentRouting)stations.getRoutingStrategy(stationKey, classKey);
+		setValidForwardStationKeys();
+		if (routingStrategy != null) {
+			if (routingStrategy.getEmpiricalEntries()!= null) {
+				Set<String> validForwardStationNames = new LinkedHashSet<String>(0);
+				for (Object fStationKey : validForwardStationKeys) {
+					validForwardStationNames.add(stations.getStationName(fStationKey));
+				}
+				routingStrategy.refreshRouting(validForwardStationNames);
+				if (mapRowIndexAndFrom == null) {
+					mapRowIndexAndFrom = new HashMap<Integer, Integer>();
+				}
+				int range = 0;
+				for (Integer from : routingStrategy.getEmpiricalEntries().keySet()) {
+					mapRowIndexAndFrom.put(range, from);
+					range = range +1;
+				}
+			}
+		}
+		initGUI((String)params.get("title"));
+	}
 
-    private void initGUI(String title) {
-        this.centerWindow(CommonConstants.MAX_GUI_WIDTH_LDROUTING, CommonConstants.MAX_GUI_HEIGHT_LDROUTING);
-        this.setTitle(title);
-        // Adds "Add Range" Button
-        JPanel topPanel = new JPanel(new BorderLayout());
+	private void initGUI(String title) {
+		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_LDROUTING, CommonConstants.MAX_GUI_HEIGHT_LDROUTING);
+		this.setTitle(title);
+		// Adds "Add Range" Button
+		JPanel topPanel = new JPanel(new BorderLayout());
 		JPanel rightTopPanel = new JPanel(new BorderLayout());
 		JButton addRange = new JButton(addRangeAction);
 		addRange.setMinimumSize(DIM_BUTTON_S);
 		rightTopPanel.add(addRange, BorderLayout.EAST);
-        topPanel.add(rightTopPanel, BorderLayout.NORTH);
+		topPanel.add(rightTopPanel, BorderLayout.NORTH);
 
-        JPanel LDPanel = new JPanel(new BorderLayout());
-        LDPanel.add(topPanel, BorderLayout.NORTH);
+		JPanel LDPanel = new JPanel(new BorderLayout());
+		LDPanel.add(topPanel, BorderLayout.NORTH);
 		// Adds StrategyTable
 		rangesTable = new LoadDependentRoutingStrategyTable();
-        JScrollPane scrollPane = new JScrollPane(rangesTable);
+		JScrollPane scrollPane = new JScrollPane(rangesTable);
 		LDPanel.add(scrollPane, BorderLayout.CENTER);
 
-        JTabbedPane mainPanel = new JTabbedPane();
-        JPanel bottomPanel = new JPanel(new FlowLayout());
+		JTabbedPane mainPanel = new JTabbedPane();
+		JPanel bottomPanel = new JPanel(new FlowLayout());
 		// Adds Okay button to bottom_panel
 		JButton okayButton = new JButton(okayAction);
 		bottomPanel.add(okayButton);
 
-        mainPanel.addTab("Edit", LDPanel);
+		mainPanel.addTab("Edit", LDPanel);
 
-        this.getContentPane().setLayout(new BorderLayout());
+		this.getContentPane().setLayout(new BorderLayout());
 		this.getContentPane().add(mainPanel, BorderLayout.CENTER);
-        this.getContentPane().add((bottomPanel), BorderLayout.SOUTH);
-        refreshComponents();
-    }
+		this.getContentPane().add((bottomPanel), BorderLayout.SOUTH);
+		refreshComponents();
+	}
 
-    protected AbstractAction okayAction = new AbstractAction("OK") {
-		/**
-		 *
-		 */
+	protected AbstractAction okayAction = new AbstractAction("OK") {
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Accepts changes and closes this window");
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			java.util.List<String> errors = routingStrategy.validate();
-            StringBuilder msg = new StringBuilder();
-            if(errors.size() >0 ){
-                for(String error : errors){
-                    msg.append(error).append("\n");
-                }
-                showErrorMessageToUser(msg.toString());
-                refreshComponents();
-            }else{
-                //LoadDependentRoutingEditor.this.close();
-                LoadDependentRoutingEditor.this.setVisible(false);
-            }
+			StringBuilder msg = new StringBuilder();
+			if (errors.size() >0 ) {
+				for (String error : errors) {
+					msg.append(error).append("\n");
+				}
+				showErrorMessageToUser(msg.toString());
+				refreshComponents();
+			} else {
+				//LoadDependentRoutingEditor.this.close();
+				LoadDependentRoutingEditor.this.setVisible(false);
+			}
 		}
+
 	};
 
 	// When Add Range button is pressed
 	protected AbstractAction addRangeAction = new AbstractAction("Add Range") {
-		/**
-		 *
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Adds a new range into this service time strategy");
 		}
@@ -162,45 +181,42 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 		public void actionPerformed(ActionEvent e) {
 			addRange();
 		}
+
 	};
 
-    protected void addRange() {
+	protected void addRange() {
 		if (routingStrategy.getEmpiricalEntries() != null && routingStrategy.getEmpiricalEntries().size() >= 100) {
 			return;
 		}
-		if(mapRowIndexAndFrom == null){
-            mapRowIndexAndFrom = new HashMap<Integer, Integer>();
-        }
-        Integer newRowIndex = mapRowIndexAndFrom.size();
-        int newFrom = 1;
-        if(newRowIndex != 0){
-            int lastRowIndex = newRowIndex - 1;
-            int lastFrom = mapRowIndexAndFrom.get(lastRowIndex);
-            newFrom = lastFrom + 1;
-        }
+		if (mapRowIndexAndFrom == null) {
+			mapRowIndexAndFrom = new HashMap<Integer, Integer>();
+		}
+		Integer newRowIndex = mapRowIndexAndFrom.size();
+		int newFrom = 1;
+		if (newRowIndex != 0) {
+			int lastRowIndex = newRowIndex - 1;
+			int lastFrom = mapRowIndexAndFrom.get(lastRowIndex);
+			newFrom = lastFrom + 1;
+		}
 
-        for(Object stationObjKey : stations.getForwardConnections(stationKey))  {
-            boolean isClassClosed = CommonConstants.CLASS_TYPE_CLOSED == classes.getClassType(classKey);
-            boolean stationIsSink = CommonConstants.STATION_TYPE_SINK.equalsIgnoreCase(stations.getStationType(stationObjKey));
-            if(isClassClosed){
-                if(!stationIsSink){
-                    routingStrategy.addEmricalEntryForFrom(newFrom, stations.getStationName(stationObjKey), 0.0);
-                }
-            }else{
-                routingStrategy.addEmricalEntryForFrom(newFrom, stations.getStationName(stationObjKey), 0.0);
-            }
-        }
-        mapRowIndexAndFrom.put(newRowIndex, newFrom);
+		for (Object stationObjKey : stations.getForwardConnections(stationKey))  {
+			boolean isClassClosed = CommonConstants.CLASS_TYPE_CLOSED == classes.getClassType(classKey);
+			boolean stationIsSink = CommonConstants.STATION_TYPE_SINK.equalsIgnoreCase(stations.getStationType(stationObjKey));
+			if (isClassClosed) {
+				if (!stationIsSink) {
+					routingStrategy.addEmricalEntryForFrom(newFrom, stations.getStationName(stationObjKey), 0.0);
+				}
+			} else {
+				routingStrategy.addEmricalEntryForFrom(newFrom, stations.getStationName(stationObjKey), 0.0);
+			}
+		}
+		mapRowIndexAndFrom.put(newRowIndex, newFrom);
 		refreshComponents();
 	}
 
-
-
 	// deletion of one range
 	protected AbstractAction deleteRange = new AbstractAction("") {
-		/**
-		*
-		*/
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -214,86 +230,83 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 				deleteRange(index);
 			}
 		}
+
 	};
 
-    protected void refreshComponents() {
+	protected void refreshComponents() {
 		rangesTable.tableChanged(new TableModelEvent(rangesTable.getModel()));
 	}
 
 	/**
 	 * delete a range from strategy given the index the range to be deleted is displayed at
 	 * inside the table.
-     * @param index
-     * corresponding row index where delete will be performed
-     */
+	 * @param index
+	 * corresponding row index where delete will be performed
+	 */
 	protected void deleteRange(int index) {
-        Integer from = mapRowIndexAndFrom.get(index);
+		Integer from = mapRowIndexAndFrom.get(index);
 
-        int nextRowIndex = index + 1;
-        while(mapRowIndexAndFrom.get(nextRowIndex) != null){
-            mapRowIndexAndFrom.put(index, mapRowIndexAndFrom.get(nextRowIndex));
-            nextRowIndex++;
-            index++;
-        }
-        mapRowIndexAndFrom.remove(index);
-        routingStrategy.deleteEmpricalEntryForFrom(from);
+		int nextRowIndex = index + 1;
+		while (mapRowIndexAndFrom.get(nextRowIndex) != null) {
+			mapRowIndexAndFrom.put(index, mapRowIndexAndFrom.get(nextRowIndex));
+			nextRowIndex++;
+			index++;
+		}
+		mapRowIndexAndFrom.remove(index);
+		routingStrategy.deleteEmpricalEntryForFrom(from);
 
 		refreshComponents();
 	}
 
+	protected class LoadDependentRoutingStrategyTable extends JTable {
 
-
-    protected class LoadDependentRoutingStrategyTable extends JTable {
-		/**
-		 *
-		 */
 		private static final long serialVersionUID = 1L;
+
 		/*This button allow a single range to be deleted directly from the table.
 		Corresponding value contained into cell must be zero.*/
 		public JButton deleteButton = new JButton() {
-			/**
-			 *
-			 */
+
 			private static final long serialVersionUID = 1L;
 
 			{
 				setAction(deleteRange);
 				setFocusable(false);
 			}
+
 		};
 
-        protected int[] columnSizes = null;
+		protected int[] columnSizes = null;
 
 		public LoadDependentRoutingStrategyTable() {
 			super();
 			super.setModel(new LoadDependentRoutingStrategyTableModel());
 			this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-            columnSizes = new int[super.getModel().getColumnCount()];
-            columnSizes[0] = 20;
-            columnSizes[1] = 20;
-            for(int index=2; index < columnSizes.length ; index++){
+			columnSizes = new int[super.getModel().getColumnCount()];
+			columnSizes[0] = 20;
+			columnSizes[1] = 20;
+			for (int index=2; index < columnSizes.length ; index++) {
 
-                columnSizes[index] = 50;
+				columnSizes[index] = 50;
 				if (index == columnSizes.length - 1) {
 					columnSizes[index] = 20;
-                }
-            }
+				}
+			}
 
 			sizeColumnsAndRows();
 			setDefaultRenderer(String.class, new GrayCellRenderer());
 			setDefaultEditor(Object.class, new jmt.gui.exact.table.ExactCellEditor());
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 
 		//returns a component to be contained inside a table column(or cell)
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
-
-            Integer from = mapRowIndexAndFrom.get(row);
-            LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
-            int deleteButtonPosition = 2 + (columnEntries.length - 1) + 1;
-            if (column == deleteButtonPosition && row > 0) {
+			Integer from = mapRowIndexAndFrom.get(row);
+			LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
+			int deleteButtonPosition = 2 + (columnEntries.length - 1) + 1;
+			if (column == deleteButtonPosition && row > 0) {
 				return new ButtonCellEditor(deleteButton);
 			} else if (column == deleteButtonPosition && row == 0) {
 				return getDefaultRenderer(String.class);
@@ -305,11 +318,11 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 		/*returns customized editor for table cells.*/
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
-            Integer from = mapRowIndexAndFrom.get(row);
-            LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
-            int deleteButtonPosition = 2 + (columnEntries.length - 1) + 1;
-            if (column == deleteButtonPosition && row > 0) {
-			   	return new ButtonCellEditor(new JButton(deleteRange));
+			Integer from = mapRowIndexAndFrom.get(row);
+			LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
+			int deleteButtonPosition = 2 + (columnEntries.length - 1) + 1;
+			if (column == deleteButtonPosition && row > 0) {
+				return new ButtonCellEditor(new JButton(deleteRange));
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -321,64 +334,63 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 				this.getColumnModel().getColumn(i).setMinWidth(columnSizes[i]);
 				if (i == columnSizes.length - 1) {
 					this.getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);
-//					this.setRowHeight(20);
+					//this.setRowHeight(20);
 				}
 			}
 		}
+
 	}
 
+	protected class LoadDependentRoutingStrategyTableModel extends AbstractTableModel {
 
-    protected class LoadDependentRoutingStrategyTableModel extends AbstractTableModel {
+		private static final long serialVersionUID = 1L;
 
-        protected String[] columnNames = null;
+		protected String[] columnNames = null;
+		protected Class<?>[] colClasses = null;
 
-        protected Class[] colClasses = null;
+		public LoadDependentRoutingStrategyTableModel() {
+			columnNames = new String[validForwardStationKeys.size() + 3];
+			colClasses  = new Class[validForwardStationKeys.size() + 3];
+			columnNames[0] = "From";
+			colClasses[0] = String.class;
+			columnNames[1] = "To";
+			colClasses[1] = String.class;
+			int columnIndex = 2;
+			for (Object stationKey : validForwardStationKeys) {
+				columnNames[columnIndex] = stations.getStationName(stationKey);
+				colClasses[columnIndex] = String.class;
+				columnIndex++;
+			}
+			columnNames[columnIndex] = "";
+			colClasses[columnIndex] = JButton.class;
+		}
 
-        LoadDependentRoutingStrategyTableModel(){
+		/**
+		 * Returns the number of rows in the model. A
+		 * <code>JTable</code> uses this method to determine how many rows it
+		 * should display.  This method should be quick, as it
+		 * is called frequently during rendering.
+		 *
+		 * @return the number of rows in the model
+		 * @see #getColumnCount
+		 */
+		public int getRowCount() {
+			return (routingStrategy != null && routingStrategy.getEmpiricalEntries() != null) ? routingStrategy.getEmpiricalEntries().size() : 0;  //To change body of implemented methods use File | Settings | File Templates.
+		}
 
-            columnNames = new String[validForwardStationKeys.size() + 3];
-            colClasses  = new Class[validForwardStationKeys.size() + 3];
-            columnNames[0] = "From";
-            colClasses[0] = String.class;
-            columnNames[1] = "To";
-            colClasses[1] = String.class;
-            int columnIndex = 2;
-            for(Object stationKey : validForwardStationKeys){
-                columnNames[columnIndex] = stations.getStationName(stationKey);
-                colClasses[columnIndex] = String.class;
-                columnIndex++;
-            }
+		/**
+		 * Returns the number of columns in the model. A
+		 * <code>JTable</code> uses this method to determine how many columns it
+		 * should create and display by default.
+		 *
+		 * @return the number of columns in the model
+		 * @see #getRowCount
+		 */
+		public int getColumnCount() {
+			return columnNames.length; //To change body of implemented methods use File | Settings | File Templates.
+		}
 
-            columnNames[columnIndex] = "";
-            colClasses[columnIndex] = JButton.class;
-        }
-
-        /**
-         * Returns the number of rows in the model. A
-         * <code>JTable</code> uses this method to determine how many rows it
-         * should display.  This method should be quick, as it
-         * is called frequently during rendering.
-         *
-         * @return the number of rows in the model
-         * @see #getColumnCount
-         */
-        public int getRowCount() {
-            return (routingStrategy != null && routingStrategy.getEmpiricalEntries() != null) ? routingStrategy.getEmpiricalEntries().size() : 0;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        /**
-         * Returns the number of columns in the model. A
-         * <code>JTable</code> uses this method to determine how many columns it
-         * should create and display by default.
-         *
-         * @return the number of columns in the model
-         * @see #getRowCount
-         */
-        public int getColumnCount() {
-            return columnNames.length;  //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        @Override
+		@Override
 		public String getColumnName(int columnIndex) {
 			if (columnIndex < columnNames.length) {
 				return columnNames[columnIndex];
@@ -389,7 +401,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 
 		/**Returns class describing data contained in specific column.*/
 		@Override
-		public Class<Object> getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			if (columnIndex < colClasses.length) {
 				return colClasses[columnIndex];
 			} else {
@@ -397,109 +409,112 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 			}
 		}
 
-        /**
-         * Returns the value for the cell at <code>columnIndex</code> and
-         * <code>rowIndex</code>.
-         *
-         * @param    rowIndex    the row whose value is to be queried
-         * @param    columnIndex the column whose value is to be queried
-         * @return the value Object at the specified cell
-         */
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            Integer from = mapRowIndexAndFrom.get(rowIndex);
-            Object to = "\u221E";
-            int nextRowIndex = rowIndex + 1;
-            if(mapRowIndexAndFrom.get(nextRowIndex) != null){
-                Integer nextRowFrom = mapRowIndexAndFrom.get(nextRowIndex);
-                to = nextRowFrom -1;
-            }
-            switch (columnIndex) {
-				case (0): {
-					return from;
-				}
-				case (1): {
+		/**
+		 * Returns the value for the cell at <code>columnIndex</code> and
+		 * <code>rowIndex</code>.
+		 *
+		 * @param    rowIndex    the row whose value is to be queried
+		 * @param    columnIndex the column whose value is to be queried
+		 * @return the value Object at the specified cell
+		 */
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			Integer from = mapRowIndexAndFrom.get(rowIndex);
+			Object to = "\u221E";
+			int nextRowIndex = rowIndex + 1;
+			if (mapRowIndexAndFrom.get(nextRowIndex) != null) {
+				Integer nextRowFrom = mapRowIndexAndFrom.get(nextRowIndex);
+				to = nextRowFrom -1;
+			}
+			switch (columnIndex) {
+			case (0): {
+				return from;
+			}
+			case (1): {
 
-					return to;
-				}
-				default: {
-                    LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
-                    if(columnEntries != null && columnIndex < columnEntries.length + 2){
-                        return columnEntries[columnIndex -2].getProbability();
-                    }else{
-                        return null;
-                    }
+				return to;
+			}
+			default: {
+				LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
+				if (columnEntries != null && columnIndex < columnEntries.length + 2) {
+					return columnEntries[columnIndex -2].getProbability();
+				} else {
+					return null;
 				}
 			}
-        }
+			}
+		}
 
-        /**Tells whether data contained in a specific cell(given row and column index)
+		/**Tells whether data contained in a specific cell(given row and column index)
 		 * is editable or not. In this case distribution column is not editable, as
 		 * editing functionality is implemented via edit button*/
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            Integer from = mapRowIndexAndFrom.get(rowIndex);
-            LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
-            return !(rowIndex == 0 && (columnIndex == 0 || columnIndex == columnEntries.length + 2)) && columnIndex != 1;
-        }
-        /**Puts edited values to the underlying data structure for model implementation*/
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			Integer from = mapRowIndexAndFrom.get(rowIndex);
+			LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
+			return !(rowIndex == 0 && (columnIndex == 0 || columnIndex == columnEntries.length + 2)) && columnIndex != 1;
+		}
+
+		/**Puts edited values to the underlying data structure for model implementation*/
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Integer from = mapRowIndexAndFrom.get(rowIndex);
 			switch (columnIndex) {
-				case (0):
-					try {
-                        if(mapRowIndexAndFrom.values().contains(Integer.parseInt((String) aValue))){
-                            return;
-                        }
-                        LoadDependentRouting.EmpiricalEntry[] listToCopy = routingStrategy.getEmpiricalEntryForFrom(from);
-                        for(LoadDependentRouting.EmpiricalEntry o : listToCopy){
-                            routingStrategy.addEmricalEntryForFrom(Integer.parseInt((String) aValue), o.getStationName(), o.getProbability());
-                        }
-                        routingStrategy.deleteEmpricalEntryForFrom(from);
-                        mapRowIndexAndFrom.put(rowIndex, Integer.parseInt((String) aValue));
-					} catch (NumberFormatException ignored) {
-
+			case (0):
+				try {
+					if (mapRowIndexAndFrom.values().contains(Integer.parseInt((String) aValue))) {
+						return;
 					}
-					break;
-                case (1):
-                    break;
+					LoadDependentRouting.EmpiricalEntry[] listToCopy = routingStrategy.getEmpiricalEntryForFrom(from);
+					for (LoadDependentRouting.EmpiricalEntry o : listToCopy) {
+						routingStrategy.addEmricalEntryForFrom(Integer.parseInt((String) aValue), o.getStationName(), o.getProbability());
+					}
+					routingStrategy.deleteEmpricalEntryForFrom(from);
+					mapRowIndexAndFrom.put(rowIndex, Integer.parseInt((String) aValue));
+				} catch (NumberFormatException ignored) {
 
-				default: {
-                    LoadDependentRouting.EmpiricalEntry[] coulmEntries = routingStrategy.getEmpiricalEntryForFrom(from);
-                    if(coulmEntries != null && columnIndex < coulmEntries.length + 2){
-                        coulmEntries[columnIndex -2].setProbability(Double.parseDouble((String)aValue));
-                    }
-                }
+				}
+			break;
+			case (1):
+				break;
+
+			default: {
+				LoadDependentRouting.EmpiricalEntry[] coulmEntries = routingStrategy.getEmpiricalEntryForFrom(from);
+				if (coulmEntries != null && columnIndex < coulmEntries.length + 2) {
+					coulmEntries[columnIndex -2].setProbability(Double.parseDouble((String)aValue));
+				}
+			}
 			}
 
 			// If from has changed, need to repaint the table
 			if (columnIndex == 0) {
 				//repaint();
-                List<Integer> fromAsList = new ArrayList<Integer>();
-                fromAsList.addAll(mapRowIndexAndFrom.values());
-                Collections.sort(fromAsList);
-                mapRowIndexAndFrom.clear();
-                for(int row=0; row < fromAsList.size(); row++){
-                    mapRowIndexAndFrom.put(row, fromAsList.get(row));
-                }
-                refreshComponents();
+				List<Integer> fromAsList = new ArrayList<Integer>();
+				fromAsList.addAll(mapRowIndexAndFrom.values());
+				Collections.sort(fromAsList);
+				mapRowIndexAndFrom.clear();
+				for (int row=0; row < fromAsList.size(); row++) {
+					mapRowIndexAndFrom.put(row, fromAsList.get(row));
+				}
+				refreshComponents();
 			}
 		}
-    }
 
-    private void showErrorMessageToUser(String arg){
-        JOptionPane.showMessageDialog(LoadDependentRoutingEditor.this, arg, "Stop! Verify", JOptionPane.WARNING_MESSAGE);
-    }
+	}
 
-    private void setValidForwardStationKeys(){
-        Vector<Object> forwardConnectionKeys = stations.getForwardConnections(stationKey);
-        for(Object fStationKey : forwardConnectionKeys){
-            if(CommonConstants.CLASS_TYPE_CLOSED == classes.getClassType(classKey)){
-                if(!CommonConstants.STATION_TYPE_SINK.equalsIgnoreCase(stations.getStationType(fStationKey))){
-                    validForwardStationKeys.add(fStationKey);
-                }
-            }else{
-                validForwardStationKeys.add(fStationKey);
-            }
-        }
-    }
+	private void showErrorMessageToUser(String arg) {
+		JOptionPane.showMessageDialog(LoadDependentRoutingEditor.this, arg, "Stop! Verify", JOptionPane.WARNING_MESSAGE);
+	}
+
+	private void setValidForwardStationKeys() {
+		Vector<Object> forwardConnectionKeys = stations.getForwardConnections(stationKey);
+		for (Object fStationKey : forwardConnectionKeys) {
+			if (CommonConstants.CLASS_TYPE_CLOSED == classes.getClassType(classKey)) {
+				if (!CommonConstants.STATION_TYPE_SINK.equalsIgnoreCase(stations.getStationType(fStationKey))) {
+					validForwardStationKeys.add(fStationKey);
+				}
+			} else {
+				validForwardStationKeys.add(fStationKey);
+			}
+		}
+	}
+
 }

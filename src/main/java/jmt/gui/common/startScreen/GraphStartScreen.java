@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.startScreen;
 
@@ -74,6 +74,7 @@ import jmt.manual.PDFViewerBuffer;
  *         Time: 12.34.22
  */
 public class GraphStartScreen extends JMTFrame {
+
 	private static final long serialVersionUID = 1L;
 	private static final String IMAGE = "StartScreen.png";
 	private static final int BORDERSIZE = 20;
@@ -98,7 +99,7 @@ public class GraphStartScreen extends JMTFrame {
 	public static final String IMG_JMCHICON = "JMCHIcon";
 	public static final String IMG_JWATICON = "JWATIcon";
 	public static final String IMG_SUITEICON = "JMTIcon";
-	
+
 	// Short Descriptions
 	public static final String JMVA_SHORT_DESCRIPTION = "JMVA: MVA solver with wizard interface";
 	public static final String JMCH_SHORT_DESCRIPTION = "JMCH: Markov Chain simulator with graphical interface";
@@ -133,15 +134,13 @@ public class GraphStartScreen extends JMTFrame {
 		super(true);
 		initGUI();
 		addListeners();
- 		this.revalidate();
-        this.repaint();
+		this.revalidate();
+		this.repaint();
 	}
 
 	// --- Actions associated with buttons -----------------------------------------------------------------
 	private AbstractAction startJMVA = new AbstractAction() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -152,34 +151,32 @@ public class GraphStartScreen extends JMTFrame {
 		public void actionPerformed(ActionEvent e) {
 			new ExactWizard();
 		}
+
 	};
 
 	private AbstractAction startJMCH = new AbstractAction() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMCH_SHORT_DESCRIPTION);
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(40,40)));
-//			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			//putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			MMQueues.main(args);
 		}
+
 	};
 
 	private AbstractAction startJWAT = new AbstractAction() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JWAT_SHORT_DESCRIPTION);
-//			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			//putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(40,40)));
 		}
 
@@ -187,12 +184,11 @@ public class GraphStartScreen extends JMTFrame {
 			//JWatStartScreen.main(args);
 			MainJwatWizard.main(args);
 		}
+
 	};
 
 	private AbstractAction startJSIM = new AbstractAction() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -203,40 +199,39 @@ public class GraphStartScreen extends JMTFrame {
 		public void actionPerformed(ActionEvent e) {
 			JSIMMain.main(args);
 		}
+
 	};
 
 	private AbstractAction startJMODEL = new AbstractAction() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMODEL_SHORT_DESCRIPTION);
-//			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			//putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(40,40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			MainWindow.main(args);
 		}
+
 	};
 
 	private AbstractAction startJABA = new AbstractAction() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JABA_SHORT_DESCRIPTION);
-//			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			//putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(40,40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			JabaWizard.main(args);
 		}
+
 	};
 	// -----------------------------------------------------------------------------------------------------
 
@@ -250,10 +245,10 @@ public class GraphStartScreen extends JMTFrame {
 
 	// --- Methods to paint GUI ----------------------------------------------------------------------------
 	/**
-	 * Creates all gui related stuff
+	 * Initialize all gui related stuff
 	 */
 	private void initGUI() {
-		//set tooltip delay for whole project
+		// Sets tooltip delay for whole project
 		ToolTipManager.sharedInstance().setInitialDelay(300);
 		ToolTipManager.sharedInstance().setDismissDelay(100000);
 		// Sets default title, close operation and dimensions
@@ -279,7 +274,7 @@ public class GraphStartScreen extends JMTFrame {
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 		mainPanel.add(imageLabel, BorderLayout.CENTER);
 
-		// Add buttons taking them from buttonActions[]
+		// Adds buttons taking them from buttonActions[]
 		JPanel buttonPanel = new JPanel(new GridLayout(buttonActions.length, 1, 2, 2));
 		for (AbstractAction buttonAction : buttonActions) {
 			buttonPanel.add(createButton(buttonAction));
@@ -297,7 +292,6 @@ public class GraphStartScreen extends JMTFrame {
 		topPanel.add(leftPanel, BorderLayout.WEST);
 		// Adds logo and title to leftPanel
 		{
-			
 			JPanel logoPanel = new JPanel();
 			BoxLayout layout = new BoxLayout(logoPanel, BoxLayout.Y_AXIS);
 			logoPanel.setLayout(layout);
@@ -309,10 +303,10 @@ public class GraphStartScreen extends JMTFrame {
 		}
 		this.getGlassPane().setVisible(true);
 		// Now Adds Sample Animation in the bottom
- 		sampleQNAni = new SampleQNAnimation();
+		sampleQNAni = new SampleQNAnimation();
 		JPanel pivotPanel = new JPanel(new GridBagLayout());
 		sampleQNAni.setPreferredSize(new Dimension(200, 120));
-//		sampleQNAni.setBackground(new Color(151, 151, 151));
+		//sampleQNAni.setBackground(new Color(151, 151, 151));
 		pivotPanel.add(sampleQNAni);
 		leftPanel.add(pivotPanel, BorderLayout.SOUTH);
 		// Adds intro buttons in the centre
@@ -323,7 +317,7 @@ public class GraphStartScreen extends JMTFrame {
 		introEng.addMouseListener(rollover);
 		about = new JButton("Credits");
 		about.addMouseListener(rollover);
-		
+
 		introButtonArea.add(introEng);
 		introButtonArea.add(new JPanel());
 		introButtonArea.add(onlineDoc);
@@ -334,8 +328,7 @@ public class GraphStartScreen extends JMTFrame {
 		pivotPanel.add(introButtonArea);
 		pivotPanel.setOpaque(false);
 		leftPanel.add(pivotPanel, BorderLayout.CENTER);
-
-        }
+	}
 
 	//assigns each component its own listener
 	private void addListeners() {
@@ -344,6 +337,7 @@ public class GraphStartScreen extends JMTFrame {
 				BrowserLauncher.openURL(URL_DOCUMENTATION_ONLINE);
 			}
 		});
+
 		introEng.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Runnable r = new Runnable() {
@@ -358,8 +352,8 @@ public class GraphStartScreen extends JMTFrame {
 				EventQueue.invokeLater(r);
 			}
 		});
+
 		about.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				AboutDialogFactory.showJMT(GraphStartScreen.this);	
@@ -411,6 +405,7 @@ public class GraphStartScreen extends JMTFrame {
 	 * This class is used to perform rollover on the buttons by changing background
 	 */
 	public class Rollover extends MouseAdapter {
+
 		private Color normal;
 		private Color rollover;
 
@@ -435,6 +430,7 @@ public class GraphStartScreen extends JMTFrame {
 		public void mouseExited(MouseEvent e) {
 			((Component) e.getSource()).setBackground(normal);
 		}
+
 	}
 
 	private Rollover rollover = new Rollover();
@@ -443,13 +439,14 @@ public class GraphStartScreen extends JMTFrame {
 
 	public static void sleep(int amt) // In milliseconds
 	{
-	    long a = System.currentTimeMillis();
-	    long b = System.currentTimeMillis();
-	    while ((b - a) <= amt)
-	    {
-	        b = System.currentTimeMillis();
-	    }
+		long a = System.currentTimeMillis();
+		long b = System.currentTimeMillis();
+		while ((b - a) <= amt)
+		{
+			b = System.currentTimeMillis();
+		}
 	}
+
 	/**
 	 * Main method
 	 * @param args not used
@@ -460,6 +457,7 @@ public class GraphStartScreen extends JMTFrame {
 		gss.setVisible(true);
 		gss.setState(JFrame.NORMAL);
 		gss.sleep(100);
-      	sampleQNAni.start();
+		sampleQNAni.start();
 	}
+
 }

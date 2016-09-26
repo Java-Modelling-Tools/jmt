@@ -1,22 +1,25 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.QueueNet;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.simEngine.Simulation;
@@ -41,6 +44,12 @@ import jmt.engine.simEngine.Simulation;
  *
  */
 public class BlockingRegion {
+
+	public static final String REGION_GROUP_FCFS_STRATEGY = "FCFS";
+	public static final String REGION_GROUP_HPS_STRATEGY = "HPS";
+	public static final String REGION_GROUP_HPS_LCFS_STRATEGY = "HPS_LCFS";
+	public static final String REGION_GROUP_HPS_FCFS_STRATEGY = "HPS_FCFS";
+
 	/** The name of the blocking region */
 	protected String name;
 
@@ -62,7 +71,7 @@ public class BlockingRegion {
 
 	/** the maximum number of jobs that can be at the same time inside the region */
 	protected double maxCapacity;
-	
+
 	protected double maxMemory;
 	/** the maximum number of jobs of each class that can be at the same time inside the region
 	 *  (-1 if the class has not a class constraint)
@@ -73,7 +82,7 @@ public class BlockingRegion {
 	protected double actualOccupation;
 	/** the number of jobs of each class that are currently inside the region */
 	protected double[] actualOccupationPerClass;
-	
+
 	protected double actualMemoryOccupation;
 
 	/** True if there are already maxJobs inside the region */
@@ -86,7 +95,7 @@ public class BlockingRegion {
 
 	/** true if there is a global constraint */
 	protected boolean globalConstraintDefined;
-	
+
 	/** true if there is a global memory constraint */
 	protected boolean globalMemoryConstraintDefined;
 	/** true if the specified class has a class constraint */
@@ -102,23 +111,29 @@ public class BlockingRegion {
 
 	//class c weight: number of token required by each class c job
 	protected double[] classWeights;
-	
+
 	protected double[] classSizes;
 
 	//---------------------------end CLASS WEIGHTS---------------------//
-	
+
 	private boolean sizeConstraintDefined = false;
-	
+
 	//size constraint
-//	private boolean isThreadType = false;
-//	private double maxSize = 10;
-//	private double usedSize = 0;
-//	private double[] sizePerClass = {5,2,1};
-//	private double[] capacityPerClass = {10,10,5};
-	
+	//private boolean isThreadType = false;
+	//private double maxSize = 10;
+	//private double usedSize = 0;
+	//private double[] sizePerClass = {5,2,1};
+	//private double[] capacityPerClass = {10,10,5};
+
 	private Measure weightMeasure, sizeMeasure;
 	private double lastTimeModified;
 	private double lastWeightOccupation, lastSizeOccupation;
+
+	protected boolean groupConstraintDefined;
+	protected List<GroupInfo> groupInfo_FCFS;
+	protected List<GroupInfo> groupInfo_HPS;
+	protected boolean groupHPSActive;
+	protected String groupHPSStrategy;
 
 	/**
 	 * Creates a blocking region with both global constraint and class constraints
@@ -132,13 +147,10 @@ public class BlockingRegion {
 	 * @param simul the simulation to which the blocking region belongs
 	 * @param regionNodeNames the names of the nodes contained in the blocking region.
 	 */
-	public BlockingRegion(String regionName, double maxCapacity, double[] maxCapacityPerClass, boolean[] drop, Simulation simul,
-			String[] regionNodeNames) {
-
+	public BlockingRegion(String regionName, double maxCapacity, double[] maxCapacityPerClass, boolean[] drop, Simulation simul, String[] regionNodeNames) {
 		//No control on input dimensions.
 
 		//-----------------REGION PROPERTIES----------------------//
-
 		//region name
 		this.name = regionName;
 		//class number
@@ -153,7 +165,6 @@ public class BlockingRegion {
 		this.regionNodes = null;
 
 		//------------------GLOBAL CONSTRAINT--------------------//
-
 		if (maxCapacity == -1) {
 			//no global constraint
 			this.globalConstraintDefined = false;
@@ -171,7 +182,6 @@ public class BlockingRegion {
 		this.globallyBlocked = false;
 
 		//------------------CLASS CONSTRAINT--------------------//
-
 		classConstraintDefined = new boolean[classNumber];
 
 		if (maxCapacityPerClass == null) {
@@ -185,8 +195,6 @@ public class BlockingRegion {
 
 		} else {
 			//class constraint defined
-
-			//copy constraints values
 			this.maxCapacityPerClass = maxCapacityPerClass;
 
 			for (int c = 0; c < classNumber; c++) {
@@ -211,7 +219,6 @@ public class BlockingRegion {
 		}
 
 		//------------------WEIGHTED CONSTRAINT--------------------//
-
 		weightedConstraintDefined = false;
 		classWeights = new double[classNumber];
 
@@ -222,15 +229,13 @@ public class BlockingRegion {
 		}
 
 		//------------------DROP PROPERTIES-----------------------//
-
 		dropClass = new boolean[classNumber];
 
 		for (int c = 0; c < classNumber; c++) {
 			dropClass[c] = drop[c];
 		}
-
 	}
-	
+
 	// WEIGHTED CONSTRAINTS
 	/**
 	 * Creates a blocking region with both global constraint and class constraints
@@ -245,12 +250,10 @@ public class BlockingRegion {
 	 * @param regionNodeNames the names of the nodes contained in the blocking region.
 	 */
 	public BlockingRegion(String regionName, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] classSizes, double[] classWeights, boolean[] drop,
-			Simulation simul, String[] regionNodeNames) {
-		
+			String[] groupNames, double[] maxCapacityPerGroup, String[] groupStrategies, List<List<Integer>> groupClassIndexLists, Simulation simul, String[] regionNodeNames) {
 		//No control on input dimensions.
 
 		//-----------------REGION PROPERTIES----------------------//
-
 		//region name
 		this.name = regionName;
 		//class number
@@ -265,7 +268,6 @@ public class BlockingRegion {
 		this.regionNodes = null;
 
 		//------------------GLOBAL CONSTRAINT--------------------//
-
 		if (maxCapacity == -1) {
 			//no global constraint
 			this.globalConstraintDefined = false;
@@ -275,24 +277,23 @@ public class BlockingRegion {
 			this.globalConstraintDefined = true;
 			this.maxCapacity = maxCapacity;
 		}
-		
-		if(maxMemory == -1){
+
+		if (maxMemory == -1) {
 			this.globalMemoryConstraintDefined = false;
 			this.maxMemory = -1;
-		}else{
+		} else {
 			this.globalMemoryConstraintDefined = true;
 			this.maxMemory = maxMemory;
 		}
-		
+
 		//init actual occupation
 		this.actualOccupation = 0;
-		
+
 		this.actualMemoryOccupation = 0;
 		//init region status
 		this.globallyBlocked = false;
 
 		//------------------CLASS CONSTRAINT--------------------//
-
 		classConstraintDefined = new boolean[classNumber];
 
 		if (maxCapacityPerClass == null) {
@@ -306,8 +307,6 @@ public class BlockingRegion {
 
 		} else {
 			//class constraint defined
-
-			//copy constraints values
 			this.maxCapacityPerClass = maxCapacityPerClass;
 
 			for (int c = 0; c < classNumber; c++) {
@@ -332,20 +331,40 @@ public class BlockingRegion {
 		}
 
 		//------------------WEIGHTED CONSTRAINT--------------------//
-
 		weightedConstraintDefined = true;
 		//copy class weights
 		this.classWeights = classWeights;
-		
+
 		//------------------MEMORY CONSTRAINT---------------------//
 		sizeConstraintDefined = true;
 		this.classSizes = classSizes;
 
 		//------------------DROP PROPERTIES-----------------------//
-
 		dropClass = new boolean[classNumber];
 		dropClass = drop;
 
+		//------------------GROUP CONSTRAINT----------------------//
+		if (groupNames.length == 0) {
+			groupConstraintDefined = false;
+		} else {
+			groupConstraintDefined = true;
+		}
+
+		groupInfo_FCFS = new ArrayList<GroupInfo>();
+		groupInfo_HPS = new ArrayList<GroupInfo>();
+		for (int i = 0; i < groupNames.length; i++) {
+			if (groupStrategies[i].equals(REGION_GROUP_FCFS_STRATEGY)) {
+				groupInfo_FCFS.add(new GroupInfo(groupNames[i], maxCapacityPerGroup[i], groupStrategies[i], groupClassIndexLists.get(i)));
+			}
+			if (groupStrategies[i].contains(REGION_GROUP_HPS_STRATEGY)) {
+				groupInfo_HPS.add(new GroupInfo(groupNames[i], maxCapacityPerGroup[i], groupStrategies[i], groupClassIndexLists.get(i)));
+			}
+		}
+		if (groupInfo_HPS.size() > 0) {
+			groupHPSStrategy = groupInfo_HPS.get(0).strategy;
+		}
+		groupHPSActive = false;
+		calcHPSGroupActive();
 	}
 
 	//-----------------------CONSTRAINTS METHODS---------------------------\\
@@ -355,7 +374,7 @@ public class BlockingRegion {
 		return globalConstraintDefined;
 	}
 
-	/** True if the class is subjectedto a class constraint */
+	/** True if the class is subjected to a class constraint */
 	public boolean hasClassConstraint(JobClass jobClass) {
 		return classConstraintDefined[jobClass.getId()];
 	}
@@ -367,9 +386,13 @@ public class BlockingRegion {
 	public boolean hasWeightedConstraint() {
 		return weightedConstraintDefined;
 	}
-	
-	public boolean hasSizeConstraint(){
+
+	public boolean hasSizeConstraint() {
 		return sizeConstraintDefined;
+	}
+
+	public boolean hasGroupConstraint() {
+		return groupConstraintDefined;
 	}
 
 	/** Gets the number of jobs currently inside the blocking region */
@@ -388,61 +411,80 @@ public class BlockingRegion {
 		}
 	}
 
+	private void calcHPSGroupActive() {
+		if (!groupConstraintDefined) {
+			groupHPSActive = false;
+			return;
+		} else if (groupInfo_HPS.size() == 0) {
+			groupHPSActive = false;
+			return;
+		} else if (groupInfo_FCFS.size() == 0) {
+			groupHPSActive = true;
+			return;
+		}
+
+		groupHPSActive = true;
+		for (int i = 0; i < groupInfo_FCFS.size(); i++) {
+			if (groupInfo_FCFS.get(i).actualOccupation.size() < groupInfo_FCFS.get(i).maxCapacity) {
+				groupHPSActive = false;
+				break;
+			}
+		}
+	}
+
+	public boolean isHPSGroupActive() {
+		calcHPSGroupActive();
+		return groupHPSActive;
+	}
+
+	public String getHPSStrategy() {
+		if (groupHPSStrategy.contains(REGION_GROUP_HPS_STRATEGY)) {
+			return groupHPSStrategy;
+		} else {
+			return REGION_GROUP_HPS_LCFS_STRATEGY;
+		}
+	}
+
 	/** Increases both the number of total jobs currently inside the region
 	 * and also the number of jobs of the specified class currently inside
 	 * the region.
 	 */
 	public void increaseOccupation(JobClass jobClass) {
 		int c = jobClass.getId();
-		
-		
-		
 		actualOccupation += classWeights[c];
 		actualMemoryOccupation += classSizes[c];
 		actualOccupationPerClass[c] += classWeights[c];
-		
+
 		double currentTime = NetSystem.getTime();
-		
-		if(weightMeasure != null){
+		if (weightMeasure != null) {
 			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
 			lastWeightOccupation = actualOccupation;
 		}
-		if(sizeMeasure != null){
+		if (sizeMeasure != null) {
 			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
 			lastSizeOccupation = actualMemoryOccupation;
 		}
-		
 		lastTimeModified = currentTime;
-		//soften
-//		System.out.println(actualOccupation);
-		//end
 		return;
 	}
 
-	/** Decreases the number of jobs currently inside the region */
+	/** Decreases the number of jobs currently inside the region. */
 	public void decreaseOccupation(JobClass jobClass) {
 		int c = jobClass.getId();
-		
 		actualOccupation -= classWeights[c];
 		actualMemoryOccupation -= classSizes[c];
 		actualOccupationPerClass[c] -= classWeights[c];
-		
+
 		double currentTime = NetSystem.getTime();
-		
-		if(weightMeasure != null){
+		if (weightMeasure != null) {
 			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
 			lastWeightOccupation = actualOccupation;
 		}
-		double lmv = 0.0;
-		if(sizeMeasure != null){
+		if (sizeMeasure != null) {
 			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
 			lastSizeOccupation = actualMemoryOccupation;
 		}
-		
 		lastTimeModified = currentTime;
-		//soften
-//		System.out.println(actualOccupation);
-		//end
 		return;
 	}
 
@@ -464,58 +506,78 @@ public class BlockingRegion {
 	 * @return true if blocked, false if other capacity is available
 	 */
 	public boolean isBlocked(JobClass jobClass) {
-		
-//		double currentOccupation = 0.0;
-//		double currentMemory = 0.0;
-//		double[] currentOccupationPerClass = new double[classWeights.length];
-//		for(int i = 0; i < regionNodes.length; i++){
-//			for(int j= 0; j < maxCapacityPerClass.length; j++){
-//				try {
-//					JobInfoList tempList = regionNodes[i].getJobInfoList();
-//					currentOccupation += (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classWeights[j];
-//					currentMemory += (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classSizes[j];
-//					currentOccupationPerClass[j] = (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classWeights[j];
-//					if(currentOccupation != actualOccupation){
-//						System.out.println(currentOccupation);
-//						System.out.println(actualOccupation);
-//						System.out.println("--------");
-//					}
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
-		
+		//double currentOccupation = 0.0;
+		//double currentMemory = 0.0;
+		//double[] currentOccupationPerClass = new double[classWeights.length];
+		//for (int i = 0; i < regionNodes.length; i++) {
+		//	for (int j= 0; j < maxCapacityPerClass.length; j++) {
+		//		try {
+		//			JobInfoList tempList = regionNodes[i].getJobInfoList();
+		//			currentOccupation += (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classWeights[j];
+		//			currentMemory += (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classSizes[j];
+		//			currentOccupationPerClass[j] = (tempList.getJobsInPerClass(j) - tempList.getJobsOutPerClass(j))* classWeights[j];
+		//			if (currentOccupation != actualOccupation) {
+		//				System.out.println(currentOccupation);
+		//				System.out.println(actualOccupation);
+		//				System.out.println("--------");
+		//			}
+		//		} catch (Exception e) {
+		//			e.printStackTrace();
+		//		}
+		//	}
+		//}
+
 		int id = jobClass.getId();
 
 		if (globalConstraintDefined) {
 			if ((actualOccupation + classWeights[id]) > maxCapacity) {
-//				if((currentOccupation + classWeights[id]) > maxCapacity){
+				//if ((currentOccupation + classWeights[id]) > maxCapacity) {
 				//globally blocked
 				return true;
-//				}
+				//}
 			}
 		}
-		
-		if(globalMemoryConstraintDefined){
-			if((actualMemoryOccupation + classSizes[id]) > maxMemory){
-//				if((currentMemory + classSizes[id]) > maxMemory){
+
+		if (globalMemoryConstraintDefined) {
+			if ((actualMemoryOccupation + classSizes[id]) > maxMemory) {
+				//if ((currentMemory + classSizes[id]) > maxMemory) {
 				return true;
-//				}
+				//}
 			}
 		}
 
 		if (classConstraintDefined[jobClass.getId()]) {
 			if ((actualOccupationPerClass[id] + classWeights[id]) > maxCapacityPerClass[id]) {
 				//class blocked
-//				if((currentOccupationPerClass[id] + classWeights[id]) > maxCapacityPerClass[id]){
+				//if ((currentOccupationPerClass[id] + classWeights[id]) > maxCapacityPerClass[id]) {
 				return true;
-//				}
+				//}
 			}
 		}
 
-		return false;
+		if (groupConstraintDefined) {
+			boolean isBlocked = true;
+			if (!groupHPSActive) {
+				for (int i = 0; i < groupInfo_FCFS.size(); i++) {
+					if (groupInfo_FCFS.get(i).classIndexList.contains(id)) {
+						if (groupInfo_FCFS.get(i).actualOccupation.size() < groupInfo_FCFS.get(i).maxCapacity) {
+							isBlocked = false;
+						}
+					}
+				}
+			} else {
+				for (int i = 0; i < groupInfo_HPS.size(); i++) {
+					if (groupInfo_HPS.get(i).classIndexList.contains(id)) {
+						if (groupInfo_HPS.get(i).actualOccupation.size() < groupInfo_HPS.get(i).maxCapacity) {
+							isBlocked = false;
+						}
+					}
+				}
+			}
+			return isBlocked;
+		}
 
+		return false;
 	}
 
 	//-------------------- end  CONSTRAINTS METHODS---------------------------\\
@@ -534,7 +596,7 @@ public class BlockingRegion {
 	 * Finds and sets the netNode objects using the node names
 	 */
 	private void findRegionNodes() {
-		//nodes of ther region must be found, using their names
+		//nodes of the region must be found, using their names
 		network = sim.getNetwork();
 		regionNodes = new NetNode[regionNodeNames.length];
 		for (int i = 0; i < regionNodeNames.length; i++) {
@@ -565,10 +627,9 @@ public class BlockingRegion {
 	 * @return true if the specified node is contained in the region
 	 */
 	public boolean belongsToRegion(NetNode node) {
-
 		if (network == null) {
 			//if network has not been set
-			//nodes of ther region must be found, using their names
+			//nodes of the region must be found, using their names
 			findRegionNodes();
 		}
 		for (NetNode regionNode : regionNodes) {
@@ -588,10 +649,9 @@ public class BlockingRegion {
 	 * null otherwise
 	 */
 	public NetNode getRegionNode(String nodeName) {
-
 		if (network == null) {
 			//before searching a particular node for the first time,
-			//nodes of ther region must be found, using their names
+			//nodes of the region must be found, using their names
 			findRegionNodes();
 		}
 
@@ -637,103 +697,193 @@ public class BlockingRegion {
 		return maxCapacity;
 	}
 
-//	public boolean isThreadType() {
-//		return isThreadType;
-//	}
-//
-//	public void setThreadType(boolean isThreadType) {
-//		this.isThreadType = isThreadType;
-//	}
-//
-//	public double getMaxSize() {
-//		return maxSize;
-//	}
-//
-//	public void setMaxSize(double maxSize) {
-//		this.maxSize = maxSize;
-//	}
-//
-//	public double getUsedSize() {
-//		return usedSize;
-//	}
-//
-//	public void setUsedSize(double usedSize) {
-//		this.usedSize = usedSize;
-//	}
-//
-//	public double[] getSizePerClass() {
-//		return sizePerClass;
-//	}
-//
-//	public void setSizePerClass(double[] sizePerClass) {
-//		this.sizePerClass = sizePerClass;
-//	}
-//
-//	public double[] getCapacityPerClass() {
-//		return capacityPerClass;
-//	}
-//
-//	public void setCapacityPerClass(double[] capacityPerClass) {
-//		this.capacityPerClass = capacityPerClass;
-//	}
-	
-	public void setWeightMeasure(Measure wm){
+	//public boolean isThreadType() {
+	//	return isThreadType;
+	//}
+	//
+	//public void setThreadType(boolean isThreadType) {
+	//	this.isThreadType = isThreadType;
+	//}
+	//
+	//public double getMaxSize() {
+	//	return maxSize;
+	//}
+	//
+	//public void setMaxSize(double maxSize) {
+	//	this.maxSize = maxSize;
+	//}
+	//
+	//public double getUsedSize() {
+	//	return usedSize;
+	//}
+	//
+	//public void setUsedSize(double usedSize) {
+	//	this.usedSize = usedSize;
+	//}
+	//
+	//public double[] getSizePerClass() {
+	//	return sizePerClass;
+	//}
+	//
+	//public void setSizePerClass(double[] sizePerClass) {
+	//	this.sizePerClass = sizePerClass;
+	//}
+	//
+	//public double[] getCapacityPerClass() {
+	//	return capacityPerClass;
+	//}
+	//
+	//public void setCapacityPerClass(double[] capacityPerClass) {
+	//	this.capacityPerClass = capacityPerClass;
+	//}
+
+	public void setWeightMeasure(Measure wm) {
 		this.weightMeasure = wm;
 	}
-	public void setSizeMeasure(Measure sm){
+	public void setSizeMeasure(Measure sm) {
 		this.sizeMeasure = sm;
 	}
-	
+
 	public void increaseOccupation(JobClass jobClass, int i) {
 		int c = jobClass.getId();
-		
-		
-		
 		actualOccupation += classWeights[c] * i;
 		actualMemoryOccupation += classSizes[c] * i;
 		actualOccupationPerClass[c] += classWeights[c] * i;
-		
+
 		double currentTime = NetSystem.getTime();
-		
-		if(weightMeasure != null){
+		if (weightMeasure != null) {
 			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
 			lastWeightOccupation = actualOccupation;
 		}
-		if(sizeMeasure != null){
+		if (sizeMeasure != null) {
 			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
 			lastSizeOccupation = actualMemoryOccupation;
 		}
-		
 		lastTimeModified = currentTime;
-		//soften
-//		System.out.println(actualOccupation);
-		//end
 		return;
 	}
-	
+
 	public void decreaseOccupation(JobClass jobClass, int i) {
 		int c = jobClass.getId();
-		
 		actualOccupation -= classWeights[c] * i;
 		actualMemoryOccupation -= classSizes[c] * i;
 		actualOccupationPerClass[c] -= classWeights[c] * i;
-		
+
 		double currentTime = NetSystem.getTime();
-		
-		if(weightMeasure != null){
+		if (weightMeasure != null) {
 			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
 			lastWeightOccupation = actualOccupation;
 		}
-		double lmv = 0.0;
-		if(sizeMeasure != null){
+		if (sizeMeasure != null) {
 			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
 			lastSizeOccupation = actualMemoryOccupation;
 		}
-		
 		lastTimeModified = currentTime;
-		//soften
-//		System.out.println(actualOccupation);
-		//end
 		return;
 	}
+
+	/** Increases both the number of total jobs currently inside the region
+	 * and also the number of jobs of the specified class and group currently
+	 * inside the region without groupIndex.
+	 */
+	public void increaseOccupation(Job job) {
+		int c = job.getJobClass().getId();
+		actualOccupation += classWeights[c];
+		actualMemoryOccupation += classSizes[c];
+		actualOccupationPerClass[c] += classWeights[c];
+
+		if (groupConstraintDefined) {
+			if (!groupHPSActive) {
+				for (int i = 0; i < groupInfo_FCFS.size(); i++) {
+					if (groupInfo_FCFS.get(i).classIndexList.contains(job.getJobClass().getId())) {
+						if (groupInfo_FCFS.get(i).actualOccupation.size() < groupInfo_FCFS.get(i).maxCapacity) {
+							groupInfo_FCFS.get(i).actualOccupation.add(job);
+						}
+					}
+				}
+			} else {
+				for (int i = 0; i < groupInfo_HPS.size(); i++) {
+					if (groupInfo_HPS.get(i).classIndexList.contains(job.getJobClass().getId())) {
+						if (groupInfo_HPS.get(i).actualOccupation.size() < groupInfo_HPS.get(i).maxCapacity) {
+							groupInfo_HPS.get(i).actualOccupation.add(job);
+						}
+					}
+				}
+			}
+			groupHPSActive = false;
+		}
+
+		double currentTime = NetSystem.getTime();
+		if (weightMeasure != null) {
+			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
+			lastWeightOccupation = actualOccupation;
+		}
+		if (sizeMeasure != null) {
+			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
+			lastSizeOccupation = actualMemoryOccupation;
+		}	
+		lastTimeModified = currentTime;
+		return;
+	}
+
+	/** Decreases the number of jobs currently inside the region. */
+	public void decreaseOccupation(Job job) {
+		int c = job.getJobClass().getId();
+		actualOccupation -= classWeights[c];
+		actualMemoryOccupation -= classSizes[c];
+		actualOccupationPerClass[c] -= classWeights[c];
+
+		if (groupConstraintDefined) {
+			boolean groupInfo_FCFS_blocked = true;
+			for (int i = 0; i < groupInfo_FCFS.size(); i++) {
+				if (groupInfo_FCFS.get(i).actualOccupation.contains(job)) {
+					groupInfo_FCFS.get(i).actualOccupation.remove(job);
+					groupInfo_FCFS_blocked = false;
+					break;
+				}
+			}
+			if (groupInfo_FCFS_blocked) {
+				for (int i = 0; i < groupInfo_HPS.size(); i++) {
+					if (groupInfo_HPS.get(i).actualOccupation.contains(job)) {
+						groupInfo_HPS.get(i).actualOccupation.remove(job);
+						break;
+					}
+				}
+			}
+		}
+
+		double currentTime = NetSystem.getTime();
+		if (weightMeasure != null) {
+			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
+			lastWeightOccupation = actualOccupation;
+		}
+		if (sizeMeasure != null) {
+			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);
+			lastSizeOccupation = actualMemoryOccupation;
+		}
+		lastTimeModified = currentTime;
+		return;
+	}
+
+	protected class GroupInfo {
+
+		public String name;
+		public double maxCapacity;
+		public String strategy;
+		protected List<Integer> classIndexList;
+		protected List<Job> actualOccupation;
+
+		public GroupInfo(String name, double maxCapacity, String strategy, List<Integer> classIndexList) {
+			this.name = name;
+			this.maxCapacity = maxCapacity;
+			this.strategy = strategy;
+			this.classIndexList = new ArrayList<Integer>();
+			this.actualOccupation = new ArrayList<Job>();
+			for (int i = 0; i < classIndexList.size(); i++) {
+				this.classIndexList.add(classIndexList.get(i));
+			}
+		}
+
+	}
+
 }

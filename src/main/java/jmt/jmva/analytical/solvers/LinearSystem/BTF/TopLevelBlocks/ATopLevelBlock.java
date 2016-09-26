@@ -65,7 +65,7 @@ public abstract class ATopLevelBlock extends TopLevelBlock {
 		
 		//Take required secondary macro blocks
 		sub_block.sec_macro_blocks = new SecondaryMacroBlock[sub_block.macro_blocks.length - 1];
-		for(int i = 0; i < sub_block.sec_macro_blocks.length; i++) {
+		for (int i = 0; i < sub_block.sec_macro_blocks.length; i++) {
 			sub_block.sec_macro_blocks[i] = sec_macro_blocks[i].subBlock(current_class, sub_block.macro_blocks[i], sub_block.macro_blocks[i + 1]);
 		}
 		
@@ -92,7 +92,7 @@ public abstract class ATopLevelBlock extends TopLevelBlock {
 	private void initialiseSecondaryMacroBlocks() throws BTFMatrixErrorException {
 		sec_macro_blocks = new SecondaryMacroBlock[macro_blocks.length - 1];
 		//Instantiate secondary macro blocks		
-		for(int h = 0; h < macro_blocks.length - 1; h++) {				
+		for (int h = 0; h < macro_blocks.length - 1; h++) {				
 			newSecondaryMacroBlock(h, macro_blocks[h], macro_blocks[h+1]);			
 		}
 	}
@@ -104,7 +104,7 @@ public abstract class ATopLevelBlock extends TopLevelBlock {
 		
 		int row_inserted_at =  macro_blocks[block].addCE(position, n, queue);
 		
-		if(block < sec_macro_blocks.length) {
+		if (block < sec_macro_blocks.length) {
 			sec_macro_blocks[block].addCE(row_inserted_at, n, queue);
 		}	
 		return row_inserted_at;
@@ -137,7 +137,7 @@ public abstract class ATopLevelBlock extends TopLevelBlock {
 		int row_inserted_at =  macro_blocks[block].addPC(position, n, _class);	
 		
 		//add equation to secondary macro block
-		if(block > 0) {
+		if (block > 0) {
 			sec_macro_blocks[block - 1].addPC(row_inserted_at, n, _class);
 		}
 		
@@ -151,7 +151,7 @@ public abstract class ATopLevelBlock extends TopLevelBlock {
 		super.multiply(result);
 		
 		//Also multiply sec_macro_blocks
-		for(int i = 0; i < sec_macro_blocks.length; i++) {
+		for (int i = 0; i < sec_macro_blocks.length; i++) {
 			sec_macro_blocks[i].multiply(result);
 		}
 	}
@@ -165,7 +165,7 @@ public abstract class ATopLevelBlock extends TopLevelBlock {
 		macro_blocks[macro_blocks.length - 1].solve(rhs);
 		
 		//Now, solve secondary macro block, marco block pairs in reverse order:
-		for(int i =  sec_macro_blocks.length - 1; i >= 0; i--) {
+		for (int i =  sec_macro_blocks.length - 1; i >= 0; i--) {
 			sec_macro_blocks[i].solve(rhs);
 			macro_blocks[i].solve(rhs);
 		}

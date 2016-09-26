@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions.parametric;
 
@@ -28,7 +28,7 @@ import jmt.gui.common.distributions.Distribution;
 /**
  * <p>Title: ParametricAnalysisChecker </p>
  * <p>Description: the main task of this class is to check which parametric analysis simulation
- *           are avaible. It offers also some other methods used to get avaible stations and
+ *           are available. It offers also some other methods used to get available stations and
  *           classes for some types of parametric analysis.</p>
  *
  * @author Francesco D'Aquino
@@ -53,8 +53,8 @@ public class ParametricAnalysisChecker {
 	}
 
 	/**
-	 * Checks if at least one parametric simulation is avaible.
-	 * @return true if at least one parametric simulation is avaible.
+	 * Checks if at least one parametric simulation is available.
+	 * @return true if at least one parametric simulation is available.
 	 */
 	public boolean canBeEnabled() {
 		boolean canBeEnabled = true;
@@ -67,7 +67,7 @@ public class ParametricAnalysisChecker {
 	}
 
 	/**
-	 * Gets an array of String containing the description of avaible parametric simulations
+	 * Gets an array of String containing the description of available parametric simulations
 	 * @return the array
 	 */
 	public String[] getRunnableParametricAnalysis() {
@@ -84,16 +84,16 @@ public class ParametricAnalysisChecker {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_POPULATION_MIX);
 		}
 		//check if "Service time" parametric analysis is runnable
-		temp = checkForServiceTimesParametricAnalysisAvaibleStations();
+		temp = checkForServiceTimesParametricAnalysisAvailableStations();
 		if (!temp.isEmpty()) {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_SERVICE_TIMES);
 		}
 		//check if "Arrival rate" parametric analysis is runnable
-		temp = checkForArrivalRatesParametricSimulationAvaibleClasses();
+		temp = checkForArrivalRatesParametricSimulationAvailableClasses();
 		if (!temp.isEmpty()) {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_ARRIVAL_RATE);
 		}
-		//check if "Seed" parametric analysis is avaible
+		//check if "Seed" parametric analysis is available
 		if ((!cd.getClassKeys().isEmpty()) && (!sd.getStationKeys().isEmpty())) {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_SEED);
 		}
@@ -107,12 +107,12 @@ public class ParametricAnalysisChecker {
 
 	/**
 	 *  This method has a meaning only if used inside a service times parametric analysis. It
-	 *  can be used to get the keys of stations avaible to perform that kind of parametric
+	 *  can be used to get the keys of stations available to perform that kind of parametric
 	 *  analysis.
-	 * @return the Vector containing the keys of avaible stations
+	 * @return the Vector containing the keys of available stations
 	 */
-	public Vector<Object> checkForServiceTimesParametricAnalysisAvaibleStations() {
-		Vector<Object> avaibleStations = new Vector<Object>(0, 1);
+	public Vector<Object> checkForServiceTimesParametricAnalysisAvailableStations() {
+		Vector<Object> availableStations = new Vector<Object>(0, 1);
 		Vector stations = sd.getStationKeysNoSourceSink();
 		Vector classes = cd.getClassKeys();
 		for (int i = 0; i < stations.size(); i++) {
@@ -130,20 +130,20 @@ public class ParametricAnalysisChecker {
 				}
 			}
 			if (stationOk) {
-				avaibleStations.add(thisStation);
+				availableStations.add(thisStation);
 			}
 		}
-		return avaibleStations;
+		return availableStations;
 	}
 
 	/**
 	 * This method has a meaning only if used inside a service times parametric analysis.
-	 * It can be used to get the keys of classes avaible to perform that kind of parametric
+	 * It can be used to get the keys of classes available to perform that kind of parametric
 	 * analysis.
 	 * @param stationKey the key of the station whose service times will be varied.
-	 * @return a Vector containing the keys of avaible classes
+	 * @return a Vector containing the keys of available classes
 	 */
-	public Vector<Object> checkForServiceTimesParametricSimulationAvaibleClasses(Object stationKey) {
+	public Vector<Object> checkForServiceTimesParametricSimulationAvailableClasses(Object stationKey) {
 		Vector<Object> valid = new Vector<Object>(0, 1);
 		Vector classes = cd.getClassKeys();
 		for (int j = 0; j < classes.size(); j++) {
@@ -161,11 +161,11 @@ public class ParametricAnalysisChecker {
 
 	/**
 	 * This method has a meaning only if used inside an arrival rate parametric analysis.
-	 * It can be used to get the keys of classes avaible to perform that kind of parametric
+	 * It can be used to get the keys of classes available to perform that kind of parametric
 	 * analysis.
-	 * @return a Vector containing the keys of avaible classes
+	 * @return a Vector containing the keys of available classes
 	 */
-	public Vector<Object> checkForArrivalRatesParametricSimulationAvaibleClasses() {
+	public Vector<Object> checkForArrivalRatesParametricSimulationAvailableClasses() {
 		Vector<Object> valid = new Vector<Object>(0, 1);
 		Vector classes = cd.getOpenClassKeys();
 		for (int j = 0; j < classes.size(); j++) {

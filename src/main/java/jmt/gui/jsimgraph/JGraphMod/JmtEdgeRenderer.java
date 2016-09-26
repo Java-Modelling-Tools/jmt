@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.JGraphMod;
 
@@ -299,7 +299,7 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 												&& ((int) p[0].getX() < (int) ((Point2D) (pointOnFirstPoints.get(j))).getX())
 												&& (int) ((Point2D) (pointOnFirstPoints.get(j))).getX() < (int) p[1].getX()) {
 											//	  		            					c'era 20 e non 10  
-											//	  		            				  	if((p[1].getX()-p[0].getX())>0){
+											//	  		            				  	if ((p[1].getX()-p[0].getX())>0) {
 
 											if (((j + 1) < pointOnFirstPoints.size())
 													&& (((Point2D) (pointOnFirstPoints.get(j + 1))).getX() > ((Point2D) (pointOnFirstPoints.get(j)))
@@ -340,9 +340,9 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 														(float) ((Point2D) (pointOnFirstPoints.get(j))).getY());
 												fatto = true;
 											}
-											//	  		            				  }else {
+											//	  		            				  } else {
 											//	  		            					  System.out.println("Entrata speciale 1 in jmtedgerenderer");
-											//	  		            					  //if((p[0].getX()-p[1].getX()<20)&&((p[0].getX()-p[1].getX())>0)) per quando ci sarà left
+											//	  		            					  //if ((p[0].getX()-p[1].getX()<20)&&((p[0].getX()-p[1].getX())>0)) per quando ci sarà left
 											//	  		            				 view.sharedPath.curveTo((float) (p[0].getX()),(float) (p[0].getY()) ,(float) (p[0].getX()+4),(float) p[0].getY() - 10,(float) (p[1].getX()),(float) (p[1].getY()));
 											//	  		            				 
 											//	  		            				  }
@@ -409,13 +409,13 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 										temp2.add(pointOnFirstPoints.get(pointOnFirstPoints.size() - z - 1));
 									}
 									pointOnFirstPoints = temp2;
-									//		  	  	        				for(int z=0; z<pointOnFirstPoints.size(); z++){
+									//		  	  	        				for (int z=0; z<pointOnFirstPoints.size(); z++) {
 									//		  		  	  	        			System.out.println("x="+((Point2D)pointOnFirstPoints.get(z)).getX()+", y="+((Point2D)pointOnFirstPoints.get(z)).getY());
 									//		  		  	  	        			}
 
 								}
 							}
-							//	  	  	        		 if(!fatto &&i==0){
+							//	  	  	        		 if (!fatto &&i==0) {
 							view.sharedPath.lineTo((float) (p[1].getX()), (float) (p[1].getY()));
 							view.sharedPath.moveTo((float) (p[1].getX()), (float) (p[1].getY()));
 							fatto = true;

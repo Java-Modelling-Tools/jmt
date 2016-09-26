@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.common.definitions;
 
@@ -50,6 +50,7 @@ import jmt.gui.common.xml.XMLConstantNames;
  * Description: Implemented the throughputTimePerSink and responseTimePerSink for the what if/parameteric simulation.
  */
 public class PAResultsModel implements MeasureDefinition {
+
 	private Vector<Measure> measures; // An array with all Measures
 	private Vector<Number> parameterValues;
 	private Vector<Integer> queueLength = new Vector<Integer>();
@@ -63,13 +64,13 @@ public class PAResultsModel implements MeasureDefinition {
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
 	private Vector<Integer> customerNumber = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
-	
+
 	private Vector<Integer> meanWeight = new Vector<Integer>(); 
 	private Vector<Integer> meanMemoryOccupation = new Vector<Integer>();
-	
+
 	private Vector<Integer> FJResponseTime = new Vector<Integer>();
-        private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
-	
+	private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
+
 	//Added by ASHANKA START
 	//Added for System power changes for JSIM simulation engine.
 	//This adds the index of the measure System Power.	
@@ -78,9 +79,9 @@ public class PAResultsModel implements MeasureDefinition {
 
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputTimePerSink = new Vector<Integer>();
-	
+
 	private HashMap<String, Measure> names = new HashMap<String, Measure>();
-	
+
 	private String logDecimalSeparator;
 	private String logCsvDelimiter;
 
@@ -92,7 +93,7 @@ public class PAResultsModel implements MeasureDefinition {
 		measures = new Vector<Measure>(measureKeys.size());
 		this.logCsvDelimiter = model.getLoggingGlbParameter("delim");
 		this.logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
-		
+
 		for (int i = 0; i < measureKeys.size(); i++) {
 			Object thisMeasure = measureKeys.get(i);
 			String stationName = model.getStationName(model.getMeasureStation(thisMeasure));
@@ -138,21 +139,15 @@ public class PAResultsModel implements MeasureDefinition {
 				numType = SimConstants.QUEUE_TIME;
 				queueTime.add(new Integer(i));
 			} else if (type.startsWith("system") && type.endsWith("throughput")) {
-					numType = SimConstants.SYSTEM_THROUGHPUT;
-					systemThroughput.add(new Integer(i));
+				numType = SimConstants.SYSTEM_THROUGHPUT;
+				systemThroughput.add(new Integer(i));
 			} else if (type.startsWith("system") && type.endsWith("time")) {
-					numType = SimConstants.SYSTEM_RESPONSE_TIME;
-					systemResponseTime.add(new Integer(i));
-			}
-                        //Added by ASHANKA START
-                        //Added the following to Include the new
-                        //performance index called System Power
-                        else if (type.startsWith("system") && type.endsWith("power")) {
-					numType = SimConstants.SYSTEM_POWER;
-					systemPower.add(new Integer(i));
-			}
-                        //Added by ASHANKA STOP
-                        else if ((type.startsWith("customer") && type.endsWith("number") && "".equalsIgnoreCase(stationName))//Backward compatibility condition
+				numType = SimConstants.SYSTEM_RESPONSE_TIME;
+				systemResponseTime.add(new Integer(i));
+			} else if (type.startsWith("system") && type.endsWith("power")) {
+				numType = SimConstants.SYSTEM_POWER;
+				systemPower.add(new Integer(i));
+			} else if ((type.startsWith("customer") && type.endsWith("number") && "".equalsIgnoreCase(stationName))//Backward compatibility condition
 					|| (type.startsWith("system") && type.endsWith("number")) //Backward compatibility condition
 					|| (type.startsWith("system") && type.endsWith("customers"))) {//Present name of the perf index which is System Number of Customers
 				numType = SimConstants.SYSTEM_JOB_NUMBER;
@@ -169,23 +164,22 @@ public class PAResultsModel implements MeasureDefinition {
 			} else if (type.startsWith("throughput") && type.endsWith("sink")) {
 				numType = SimConstants.THROUGHPUT_PER_SINK;
 				throughputTimePerSink.add(new Integer(i));
-			} else if (type.endsWith("job weight")){
+			} else if (type.endsWith("total weight")) {
 				numType = SimConstants.FCR_TOTAL_WEIGHT;
 				meanWeight.add(new Integer(i));
-			} else if (type.endsWith("memory occupation")){
+			} else if (type.endsWith("memory occupation")) {
 				numType = SimConstants.FCR_MEMORY_OCCUPATION;
 				meanMemoryOccupation.add(new Integer(i));
-			} else if(type.equals("fork join response time")){
+			} else if (type.equals("fork join response time")) {
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
 				FJResponseTime.add(new Integer(i));
-			}
-                        else if(type.equals("fork join number of customers")){
+			} else if (type.equals("fork join number of customers")) {
 				numType = SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
 				FJCustomerNumber.add(new Integer(i));
 			}
-                        Measure tmp = new Measure(measureName, stationName, className, thisAlpha, thisPrecision, numType, nodeType);
+			Measure tmp = new Measure(measureName, stationName, className, thisAlpha, thisPrecision, numType, nodeType);
 			measures.add(tmp);
-                        names.put(measureName, tmp);
+			names.put(measureName, tmp);
 		}
 		parameterValues = model.getParametricAnalysisModel().getParameterValues();
 	}
@@ -210,64 +204,60 @@ public class PAResultsModel implements MeasureDefinition {
 		names.put(name, tmp);
 		// Adds measure index to the right Vector
 		switch (type) {
-			case SimConstants.QUEUE_TIME:
-				queueTime.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.RESIDENCE_TIME:
-				residenceTime.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.RESPONSE_TIME:
-				responseTime.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.UTILIZATION:
-				utilization.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.THROUGHPUT:
-				throughput.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.QUEUE_LENGTH:
-				queueLength.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.SYSTEM_RESPONSE_TIME:
-				systemResponseTime.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.SYSTEM_JOB_NUMBER:
-				customerNumber.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.SYSTEM_THROUGHPUT:
-				systemThroughput.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.DROP_RATE:
-				dropRate.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.SYSTEM_DROP_RATE:
-				systemDropRate.add(new Integer(measures.size() - 1));
-				break;
-			//Added by ASHANKA START
-			//Added for System Power performance Index inclusion in JSIM
-			case SimConstants.SYSTEM_POWER:
-				systemPower.add(new Integer(measures.size() - 1));
-				break;
-			//Added by ASHANKA STOP
-			case SimConstants.RESPONSE_TIME_PER_SINK:
-				responseTimePerSink.add(new Integer(measures.size() - 1));
-				break;
-			case SimConstants.THROUGHPUT_PER_SINK:
-				throughputTimePerSink.add(new Integer(measures.size() - 1));
-				break;
-                        case SimConstants.FCR_TOTAL_WEIGHT:
-				meanWeight.add(new Integer(measures.size() - 1));
-				break;
-                        case SimConstants.FCR_MEMORY_OCCUPATION:
-				meanMemoryOccupation.add(new Integer(measures.size() - 1));
-				break;
-                        case SimConstants.FORK_JOIN_RESPONSE_TIME:
-				FJResponseTime.add(new Integer(measures.size() - 1));
-				break;
-                        case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-				FJCustomerNumber.add(new Integer(measures.size() - 1));
-				break;
-			
+		case SimConstants.QUEUE_TIME:
+			queueTime.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.RESIDENCE_TIME:
+			residenceTime.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.RESPONSE_TIME:
+			responseTime.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.UTILIZATION:
+			utilization.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.THROUGHPUT:
+			throughput.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.QUEUE_LENGTH:
+			queueLength.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.SYSTEM_RESPONSE_TIME:
+			systemResponseTime.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.SYSTEM_JOB_NUMBER:
+			customerNumber.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.SYSTEM_THROUGHPUT:
+			systemThroughput.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.DROP_RATE:
+			dropRate.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.SYSTEM_DROP_RATE:
+			systemDropRate.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.SYSTEM_POWER:
+			systemPower.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.RESPONSE_TIME_PER_SINK:
+			responseTimePerSink.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.THROUGHPUT_PER_SINK:
+			throughputTimePerSink.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.FCR_TOTAL_WEIGHT:
+			meanWeight.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.FCR_MEMORY_OCCUPATION:
+			meanMemoryOccupation.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.FORK_JOIN_RESPONSE_TIME:
+			FJResponseTime.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+			FJCustomerNumber.add(new Integer(measures.size() - 1));
+			break;
 		}
 	}
 
@@ -339,13 +329,13 @@ public class PAResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns number of analized samples for a given measure. For parametric
+	 * Returns number of analyzed samples for a given measure. For parametric
 	 * analysis this number is equal to the number of performed steps
 	 *
 	 * @param measureIndex index of the measure
-	 * @return number of analized samples
+	 * @return number of analyzed samples
 	 */
-	public int getAnalizedSamples(int measureIndex) {
+	public int getAnalyzedSamples(int measureIndex) {
 		return (measures.get(measureIndex)).getNumberOfSamples();
 	}
 
@@ -550,13 +540,13 @@ public class PAResultsModel implements MeasureDefinition {
 	 * @param listener     listener to add or null to remove old one.
 	 */
 	public void addMeasureListener(int measureIndex, MeasureListener listener) {
-		//not implemented
+		//Not implemented
 	}
 
 	/**
 	 * Not implemented
 	 *
-	 * @param listener listener to be set or null to unset previous one
+	 * @param listener listener to be set or null to reset previous one
 	 */
 	public void setProgressTimeListener(ProgressTimeListener listener) {
 		//Not implemented
@@ -600,7 +590,7 @@ public class PAResultsModel implements MeasureDefinition {
 		return 0; //To change body of implemented methods use File | Settings | File Templates.
 	}
 
-	
+
 	// ------------------------- end USELESS METHODS --------------------------------
 
 	/* (non-Javadoc)
@@ -615,6 +605,7 @@ public class PAResultsModel implements MeasureDefinition {
 	 * Inner class to store parameters of each measure
 	 */
 	protected class Measure {
+
 		public String name;
 		public String stationName;
 		public String className;
@@ -627,7 +618,7 @@ public class PAResultsModel implements MeasureDefinition {
 		public int type;
 
 		/**
-		 * Construct a new Neasure object
+		 * Construct a new Measure object
 		 * @param name measure name
 		 * @param stationName reference station name
 		 * @param className reference class name
@@ -661,7 +652,7 @@ public class PAResultsModel implements MeasureDefinition {
 		}
 
 		/**
-		 * Gets the number of sampples for this measure
+		 * Gets the number of samples for this measure
 		 * @return the number of samples
 		 */
 		public int getNumberOfSamples() {
@@ -685,12 +676,14 @@ public class PAResultsModel implements MeasureDefinition {
 		public int getType() {
 			return type;
 		}
+
 	}
 
 	/**
 	 * Inner class that implements Value interface
 	 */
 	public class MeasureValueImpl implements MeasureValue {
+
 		private double mean;
 		private double upper;
 		private double lower;
@@ -725,18 +718,19 @@ public class PAResultsModel implements MeasureDefinition {
 		public boolean isValid() {
 			return valid;
 		}
-		
+
 		@Override
 		public double getLastIntervalAvgValue() {
 			// TODO Auto-generated method stub
 			return 0;
 		}
-		
+
 		@Override
 		public double getSimTime() {
 			// TODO Auto-generated method stub
 			return 0;
 		}
+
 	}
 
 	//Added by ASHANKA START
@@ -767,7 +761,7 @@ public class PAResultsModel implements MeasureDefinition {
 
 	public void setMalformedReplayerFileListener(
 			MalformedReplayerFileListener listener) {
-	
+
 	}
 
 	public void detectedMalformedReplayerFile(String msg) {
@@ -788,15 +782,13 @@ public class PAResultsModel implements MeasureDefinition {
 	public String getLogCsvDelimiter() {
 		return logCsvDelimiter;
 	}
-	
+
 	/**
 	 * @param logDecimalSeparator the logDecimalSeparator to set
 	 */
 	public void setLogDecimalSeparator(String logDecimalSeparator) {
 		this.logDecimalSeparator = logDecimalSeparator;
 	}
-
-
 
 	/**
 	 * @param logCsvDelimiter the logCsvDelimiter to set
@@ -813,42 +805,41 @@ public class PAResultsModel implements MeasureDefinition {
 		// No discarded samples stored here.
 		return 0;
 	}
-	
+
 	@Override
-	public int[] getMeanWeightMeasures(){
+	public int[] getMeanWeightMeasures() {
 		int[] tmp = new int[meanWeight.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = meanWeight.get(i).intValue();
 		}
 		return tmp;
 	}
-	
+
 	@Override
-	public int[] getMeanMemoryOccupationMeasures(){
+	public int[] getMeanMemoryOccupationMeasures() {
 		int[] tmp = new int[meanMemoryOccupation.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = meanMemoryOccupation.get(i).intValue();
 		}
 		return tmp;
 	}
-	
+
 	@Override
-	public int[] getFJResponseTimeMeasures(){
+	public int[] getFJResponseTimeMeasures() {
 		int[] tmp = new int[FJResponseTime.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = FJResponseTime.get(i).intValue();
 		}
 		return tmp;
 	}
-        
-        @Override
-	public int[] getFJCustomerNumberMeasures(){
+
+	@Override
+	public int[] getFJCustomerNumberMeasures() {
 		int[] tmp = new int[FJCustomerNumber.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = FJCustomerNumber.get(i).intValue();
 		}
 		return tmp;
 	}
-	
-	
+
 }

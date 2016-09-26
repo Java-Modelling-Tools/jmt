@@ -468,7 +468,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		}
 
 		/**
-		 * Tells wether data contained in a specific cell(given row and column
+		 * Tells whether data contained in a specific cell(given row and column
 		 * index) is editable or not. In this case distribution column is not
 		 * editable, as editing functionality is implemented via edit button
 		 */
@@ -560,7 +560,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		}
 
 		/**
-		 * Tells wether data contained in a specific cell(given row and column
+		 * Tells whether data contained in a specific cell(given row and column
 		 * index) is editable or not. In this case distribution column is not
 		 * editable, as editing functionality is implemented via edit button
 		 */
@@ -653,7 +653,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		}
 
 		/**
-		 * Tells wether data contained in a specific cell(given row and column
+		 * Tells whether data contained in a specific cell(given row and column
 		 * index) is editable or not. In this case distribution column is not
 		 * editable, as editing functionality is implemented via edit button
 		 */

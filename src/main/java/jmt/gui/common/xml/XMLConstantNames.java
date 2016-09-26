@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.xml;
 
@@ -108,22 +108,33 @@ public interface XMLConstantNames {
 	public static final String XML_E_GLOBALCONSTRAINT = "globalConstraint";
 	public static final String XML_E_GLOBALMEMORYCONSTRAINT = "globalMemoryConstraint";
 	public static final String XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY = "maxMemory";
-	
+
+	public static final String XML_E_GROUPCONSTRAINT = "groupConstraint";
+	public static final String XML_A_GROUPCONSTRAINT_GROUP = "jobGroup";
+	public static final String XML_A_GROUPCONSTRAINT_MAXJOBS = "maxJobsPerGroup";
+	public static final String XML_E_GROUPSTRATEGY = "groupStrategy";
+	public static final String XML_A_GROUPSTRATEGY_GROUP = "jobGroup";
+	public static final String XML_A_GROUPSTRATEGY_STRATEGY = "strategy";
+	public static final String XML_E_GROUPCLASSLIST = "groupClassList";
+	public static final String XML_E_GROUPCLASS = "groupClass";
+	public static final String XML_A_GROUPCLASS_GROUP = "jobGroup";
+	public static final String XML_A_GROUPCLASS_CLASS = "jobClass";
+
 	public static final String XML_A_GLOBALCONSTRAINT_MAXJOBS = "maxJobs";
 	public static final String XML_E_DROPRULES = "dropRules";
-	
-	public static final String XML_E_WEIGHT = "classWeight";
-	
-	public static final String XML_A_WEIGHT_CLASS = "jobClass";
-	public static final String XML_A_WEIGHT_MULTI = "weight";
-	
-	public static final String XML_E_MEMORYSIZE = "classMemorySize";
-	
-	public static final String XML_A_MEMORY_CLASS = "jobClass";
-	public static final String XML_A_MEMORY_SIZE = "size";
-	
-	public static final String XML_A_DROPRULES_CLASS = "jobClass";
-	public static final String XML_A_DROPRULES_DROP = "dropThisClass";
+
+	public static final String XML_E_CLASSWEIGHT = "classWeight";
+
+	public static final String XML_A_CLASSWEIGHT_CLASS = "jobClass";
+	public static final String XML_A_CLASSWEIGHT_WEIGHT = "weight";
+
+	public static final String XML_E_CLASSMEMORYSIZE = "classMemorySize";
+
+	public static final String XML_A_CLASSMEMORY_CLASS = "jobClass";
+	public static final String XML_A_CLASSMEMORY_SIZE = "size";
+
+	public static final String XML_A_DROPRULE_CLASS = "jobClass";
+	public static final String XML_A_DROPRULE_DROP = "dropThisClass";
 
 	public static final String CLASSNAME_SOURCE = "RandomSource";
 	public static final String CLASSNAME_TERMINAL = "Terminal";
@@ -140,7 +151,12 @@ public interface XMLConstantNames {
 	public static final String CLASSNAME_JOIN = "Join";
 	public static final String CLASSNAME_CLASSSWITCH = "ClassSwitch";
 	public static final String CLASSNAME_TASKSEMAPHORE = "TaskSemaphore";
-	
+	public static final String CLASSNAME_STORE = "Store";
+	public static final String CLASSNAME_LINK = "Link";
+	public static final String CLASSNAME_ENABLING = "Enabling";
+	public static final String CLASSNAME_TIMING = "Timing";
+	public static final String CLASSNAME_FIRING = "Firing";
+
 	public static final String XML_E_MAPREDUCE = "template_mapreduce";
 
 	public static final String NODETYPE_REGION = "region";

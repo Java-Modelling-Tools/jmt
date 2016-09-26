@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.mainGui;
 
@@ -23,14 +23,14 @@ import java.awt.Dimension;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import jmt.gui.common.CommonConstants;
+
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.layouts.MultiBorderLayout;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
-import jmt.gui.jsimgraph.controller.GraphMouseListner;
+import jmt.gui.jsimgraph.controller.GraphMouseListener;
 import jmt.gui.jsimgraph.controller.Mediator;
 
 import org.jgraph.JGraph;
@@ -46,17 +46,15 @@ import org.jgraph.JGraph;
 
  */
 public class MainWindow extends JMTFrame {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
-	private static final String TITLE = "JSIMgraph - Advanced queueing network simulation tool";
+	private static final String TITLE = "JSIMgraph - Graphical Queueing Network Simulator";
 
 	protected Mediator mediator;// mediator between components of the application
 	protected JMTToolBar toolbar;//main toolbar
 	protected JMTMenuBar menu;//main menu
-	protected GraphMouseListner ml;//mouse listener of the JGraph
+	protected GraphMouseListener ml;//mouse listener of the JGraph
 	protected JScrollPane scroll;//panel that contains the JGraph component
 
 	protected JPanel mainPane;//panel that contains the "scroll"
@@ -84,12 +82,11 @@ public class MainWindow extends JMTFrame {
 		mainPane = new JPanel(new BorderLayout());
 		getContentPane().add(mainPane, BorderLayout.CENTER);
 
-		ml = new GraphMouseListner(mediator);
-		mediator.setMouseListner(ml);
+		ml = new GraphMouseListener(mediator);
+		mediator.setMouseListener(ml);
 
 		scroll = new JScrollPane();
 		mainPane.add(scroll, BorderLayout.CENTER);
-//		centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIMG, CommonConstants.MAX_GUI_HEIGHT_JSIMG);
 		centerWindow(Defaults.getAsInteger("JSIMWindowWidth").intValue(), Defaults.getAsInteger("JSIMWindowHeight").intValue());
 		setVisible(true);
 	}
@@ -175,4 +172,5 @@ public class MainWindow extends JMTFrame {
 			setTitle(TITLE);
 		}
 	}
+
 }

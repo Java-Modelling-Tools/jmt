@@ -1,5 +1,5 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jwat.workloadAnalysis.panels;
 
@@ -154,7 +154,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			+ "WARNING"
 			+ HTML_FONT_TIT_END
 			+ HTML_FONT_NORM
-			+ "At this time you can apply any number of sampling operations and transformations to data with the constraint that you ca not apply any transformation after a sampling;"
+			+ "At this time you can apply any number of sampling operations and transformations to data with the constraint that you cannot apply any transformation after a sampling;"
 			+ "if you undo a transformation, applied before a sampling, this completely resets the sample; "
 			+ "if you undo a sampling it completely resets the sample." + HTML_FONT_NOR_END + HTML_END;
 
@@ -517,7 +517,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 							}
 							//Abilitazione pulsanti di sampling e undo
 							executeSam.setEnabled(true);
-							//if(model.getMatrix().getVariables()[select].isSampled())
+							//if (model.getMatrix().getVariables()[select].isSampled())
 							if (isSampled) {
 								undoSam.setEnabled(true);
 							} else {
@@ -539,7 +539,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 							executeSam.setEnabled(false);
 							undoSam.setEnabled(false);
 							//Controllo su sampling selezionato
-							if(samplingList.getSelectedIndex() == 3){
+							if (samplingList.getSelectedIndex() == 3) {
 								samplingList.clearSelection();
 								samplingList.setSelectedIndex(3);
 							}*/

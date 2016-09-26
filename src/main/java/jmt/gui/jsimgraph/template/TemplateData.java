@@ -19,11 +19,11 @@ public class TemplateData {
 	//use md5 checksum function
 	private String md5; 
 	
-	public TemplateData(){
+	public TemplateData() {
 		
 	}
 	
-	public TemplateData(String fileName, String shortDescription, String updateAddress){
+	public TemplateData(String fileName, String shortDescription, String updateAddress) {
 		this.fileName = fileName;
 		this.shortDescription = shortDescription;
 		this.updateAddress = updateAddress;

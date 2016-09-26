@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2011, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.gui.jaba.cartesian;
@@ -47,8 +47,8 @@ public class CartesianPositivePlane {
 
 	private Graphics2D g;
 	private DPoint origin;
-	private int xAxisLenght;
-	private int yAxisLenght;
+	private int xAxisLength;
+	private int yAxisLength;
 	private double xMaxValue;
 	private double yMaxValue;
 
@@ -59,7 +59,7 @@ public class CartesianPositivePlane {
 	 *            the specified Graphics context
 	 * @param origin
 	 *            the point on g where to place the origin of the plane
-	 * @param xAxisLenght
+	 * @param xAxisLength
 	 *            the x-axis length
 	 * @param yAxisLength
 	 *            the y-axis length
@@ -69,15 +69,15 @@ public class CartesianPositivePlane {
 	 *            the max value of ordinate you want to place on the graph
 	 * @throws Exception
 	 */
-	public CartesianPositivePlane(Graphics2D g, DPoint origin, int xAxisLenght,
+	public CartesianPositivePlane(Graphics2D g, DPoint origin, int xAxisLength,
 			int yAxisLength, double xMaxValue, double yMaxValue)
 			throws Exception {
 		if (g == null || origin == null)
 			throw new Exception();
 		this.g = g;
 		this.origin = origin;
-		this.xAxisLenght = xAxisLenght;
-		this.yAxisLenght = yAxisLength;
+		this.xAxisLength = xAxisLength;
+		this.yAxisLength = yAxisLength;
 		this.xMaxValue = xMaxValue;
 		this.yMaxValue = yMaxValue;
 	}
@@ -170,38 +170,38 @@ public class CartesianPositivePlane {
 	 */
 	public void draw(String xAxisLabel, String yAxisLabel) {
 		Polygon xArrow, yArrow;
-		int xLenght, yLenght;
+		int xLength, yLength;
 
-		xLenght = xAxisLenght + SPACE_BETWEEN_MAX_VALUE_AND_ARROW;
-		yLenght = yAxisLenght + SPACE_BETWEEN_MAX_VALUE_AND_ARROW;
+		xLength = xAxisLength + SPACE_BETWEEN_MAX_VALUE_AND_ARROW;
+		yLength = yAxisLength + SPACE_BETWEEN_MAX_VALUE_AND_ARROW;
 		// X Axis
 		g.drawLine((int) origin.getX(), (int) origin.getY(),
-				(int) origin.getX() + xLenght, (int) origin.getY());
+				(int) origin.getX() + xLength, (int) origin.getY());
 		xArrow = new Polygon();
-		xArrow.addPoint((int) origin.getX() + xLenght - ARROW_WIDTH,
+		xArrow.addPoint((int) origin.getX() + xLength - ARROW_WIDTH,
 				(int) origin.getY() - ARROW_HEIGHT);
-		xArrow.addPoint((int) origin.getX() + xLenght - ARROW_WIDTH,
+		xArrow.addPoint((int) origin.getX() + xLength - ARROW_WIDTH,
 				(int) origin.getY() + ARROW_HEIGHT);
-		xArrow.addPoint((int) origin.getX() + xLenght, (int) origin.getY());
+		xArrow.addPoint((int) origin.getX() + xLength, (int) origin.getY());
 		g.fillPolygon(xArrow);
 		g.draw(xArrow);
-		g.drawString(xAxisLabel, (int) origin.getX() + xLenght
+		g.drawString(xAxisLabel, (int) origin.getX() + xLength
 				+ SPACE_BETWEEN_LABEL_AND_ARROW, (int) origin.getY()
 				+ SPACE_BETWEEN_LABEL_AND_ARROW);
 
 		// Y Axis
 		g.drawLine((int) origin.getX(), (int) origin.getY(),
-				(int) origin.getX(), (int) origin.getY() - yLenght);
+				(int) origin.getX(), (int) origin.getY() - yLength);
 		yArrow = new Polygon();
 		yArrow.addPoint((int) origin.getX() - ARROW_HEIGHT, (int) origin.getY()
-				- yLenght + ARROW_WIDTH);
+				- yLength + ARROW_WIDTH);
 		yArrow.addPoint((int) origin.getX() + ARROW_HEIGHT, (int) origin.getY()
-				- yLenght + ARROW_WIDTH);
-		yArrow.addPoint((int) origin.getX(), (int) origin.getY() - yLenght);
+				- yLength + ARROW_WIDTH);
+		yArrow.addPoint((int) origin.getX(), (int) origin.getY() - yLength);
 		g.fillPolygon(yArrow);
 		g.draw(yArrow);
 		g.drawString(yAxisLabel, (int) origin.getX()
-				- SPACE_BETWEEN_LABEL_AND_ARROW, (int) origin.getY() - yLenght
+				- SPACE_BETWEEN_LABEL_AND_ARROW, (int) origin.getY() - yLength
 				- SPACE_BETWEEN_LABEL_AND_ARROW);
 	}
 
@@ -221,60 +221,60 @@ public class CartesianPositivePlane {
 	}
 
 	/**
-	 * Returns the x-coodinate of the @x point into the graphics context
+	 * Returns the x-coordinate of the @x point into the graphics context
 	 * 
 	 * @param x
 	 *            a point
-	 * @return the x-coodinate of the @x point into the graphics context
+	 * @return the x-coordinate of the @x point into the graphics context
 	 */
 	public int getTrueX(double x) {
-		return (int) (origin.getX() + x / xMaxValue * xAxisLenght);
+		return (int) (origin.getX() + x / xMaxValue * xAxisLength);
 	}
 
 	/**
-	 * Returns the y-coodinate of the @y point into the graphics context
+	 * Returns the y-coordinate of the @y point into the graphics context
 	 * 
 	 * @param y
 	 *            a point
-	 * @return the y-coodinate of the @y point into the graphics context
+	 * @return the y-coordinate of the @y point into the graphics context
 	 */
 	public int getTrueY(double y) {
-		return (int) (origin.getY() - y / yMaxValue * yAxisLenght);
+		return (int) (origin.getY() - y / yMaxValue * yAxisLength);
 	}
 
 	/**
-	 * Returns the coodinates of the @p point into the graphics context
+	 * Returns the coordinates of the @p point into the graphics context
 	 * 
 	 * @param p
 	 *            a point
-	 * @return the coodinates of the @p point into the graphics context
+	 * @return the coordinates of the @p point into the graphics context
 	 */
 	public DPoint getTruePoint(DPoint p) {
 		return new DPoint(getTrueX(p.getX()), getTrueY(p.getY()));
 	}
 
 	/**
-	 * Returns the coodinates of the @p point into the graphics context
+	 * Returns the coordinates of the @p point into the graphics context
 	 * 
 	 * @param p
 	 *            a point
-	 * @return the coodinates of the @p point into the graphics context
+	 * @return the coordinates of the @p point into the graphics context
 	 */
 	public DPoint getTruePoint(Point2D p) {
 		return new DPoint(getTrueX(p.getX()), getTrueY(p.getY()));
 	}
 
 	/**
-	 * Returns the coodinates of the @p point (on the graphics context) into the
+	 * Returns the coordinates of the @p point (on the graphics context) into the
 	 * plane
 	 * 
 	 * @param p
 	 *            a point
-	 * @return the coodinates of the @p point into the plane
+	 * @return the coordinates of the @p point into the plane
 	 */
 	public DPoint getGraphPointFromTruePoint(DPoint p) {
-		return new DPoint(xMaxValue * (p.getX() - origin.getX()) / xAxisLenght,
-				(origin.getY() - p.getY()) * yMaxValue / yAxisLenght);
+		return new DPoint(xMaxValue * (p.getX() - origin.getX()) / xAxisLength,
+				(origin.getY() - p.getY()) * yMaxValue / yAxisLength);
 	}
 
 }

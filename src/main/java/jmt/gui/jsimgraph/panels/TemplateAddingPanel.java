@@ -230,7 +230,7 @@ public class TemplateAddingPanel extends WizardPanel implements
                 
                 siteList.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
                         public void keyPressed(KeyEvent evt) {
-                                if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
+                                if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
                                         doUpdate();
                                 }
                         }
@@ -433,7 +433,7 @@ public class TemplateAddingPanel extends WizardPanel implements
                         String find = "http.*";
                         Pattern pattern = Pattern.compile(find);
                         Matcher matcher = pattern.matcher(raw);
-                        if(matcher.find()){
+                        if (matcher.find()) {
                                 indexURL = matcher.group()  + "/"
                                                 + F_NAME_INDEX;
                         }
@@ -998,7 +998,7 @@ public class TemplateAddingPanel extends WizardPanel implements
 			try {
 				// pagePane.setPage(new URL(TemplateConstants.BLANK_PAGE));
 
-				// SwingUtilities.invokeAndWait(new Runnable(){
+				// SwingUtilities.invokeAndWait(new Runnable() {
 				//
 				// @Override
 				// public void run() {
@@ -1032,7 +1032,7 @@ public class TemplateAddingPanel extends WizardPanel implements
 			for (final String string : chunks) {
 				// try{
 				//
-				// }catch(Exception e){
+				// }catch(Exception e) {
 				// e.printStackTrace();
 				// }
 

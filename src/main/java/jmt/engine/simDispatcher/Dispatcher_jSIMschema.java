@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.simDispatcher;
 
@@ -83,7 +83,7 @@ public class Dispatcher_jSIMschema {
 	private long maxDuration = -1;
 
 	private Simulation sim;
-        boolean isTerminalSimulation;
+	boolean isTerminalSimulation;
 
 	/**
 	 * This constructor receives the absolute path of the xml file containing
@@ -136,9 +136,7 @@ public class Dispatcher_jSIMschema {
 	}
 
 	public boolean solveModel() throws IOException, LoadException, NetException, Exception {
-
 		/*********************SIM DEFINITION MODEL*********************/
-
 		// does model file exist??
 		if (!simModelDefinition.exists()) {
 			//the passed file does not exist
@@ -149,12 +147,11 @@ public class Dispatcher_jSIMschema {
 		}
 
 		/*********************SIMULATION LOADING AND RUNNING*********************/
-
 		//now prepare simulation
 		//try {
 		SimLoader simLoader = new SimLoader(simModelDefinitionPath);
 		sim = simLoader.getSim();
-                sim.setIsTerminalSimulation(isTerminalSimulation);
+		sim.setIsTerminalSimulation(isTerminalSimulation);
 
 		//sets in the Simulation object the path of the
 		//xml model definition
@@ -206,7 +203,7 @@ public class Dispatcher_jSIMschema {
 
 		simPaused = false;
 		simFinished = true;
-		
+
 		// Shutdown the simulation timer, if any.
 		es.shutdownNow();
 
@@ -271,7 +268,6 @@ public class Dispatcher_jSIMschema {
 	 * Pauses the simulation, refreshes temp measures and then restarts simulation
 	 */
 	public synchronized void refreshTempMeasures() {
-
 		//simulation not started yet
 		if (!simStarted) {
 			return;
@@ -291,13 +287,13 @@ public class Dispatcher_jSIMschema {
 					return;
 				} else {
 					//gets the measures defined for this queue network
-					LinkedList measures = net.getMeasures();
+					LinkedList<Measure> measures = net.getMeasures();
 
 					//creates the array of temp measures
 					tempMeasures = new TempMeasure[measures.size()];
 
 					for (int m = 0; m < measures.size(); m++) {
-						tempMeasures[m] = new TempMeasure((Measure) measures.get(m));
+						tempMeasures[m] = new TempMeasure(measures.get(m));
 						tempMeasures[m].refreshMeasure();
 					}
 				}
@@ -345,9 +341,7 @@ public class Dispatcher_jSIMschema {
 			for (int m = 0; m < tempMeasures.length; m++) {
 				abortMeasure(m);
 			}
-
 			return true;
-
 		} else {
 			return false;
 		}
@@ -368,7 +362,6 @@ public class Dispatcher_jSIMschema {
 
 	public synchronized boolean abortMeasure(int index) {
 		boolean success = false;
-
 		if (pauseSim()) {
 			refreshTempMeasures();
 
@@ -379,7 +372,6 @@ public class Dispatcher_jSIMschema {
 			}
 			restartSim();
 		}
-
 		return success;
 	}
 
@@ -395,7 +387,6 @@ public class Dispatcher_jSIMschema {
 	 * Prints on System.out the temp values of measures that have not finished yet
 	 */
 	public void printTempMeasures() {
-
 		if (pauseSim()) {
 			if (tempMeasures != null) {
 				for (TempMeasure tempMeasure : tempMeasures) {
@@ -407,7 +398,6 @@ public class Dispatcher_jSIMschema {
 			}
 			restartSim();
 		}
-
 	}
 
 	/**
@@ -438,13 +428,11 @@ public class Dispatcher_jSIMschema {
 	//------------------------TEST-----------------------------------//
 
 	public static void testSimulationTime() {
-
 		int N = 5;
 		long[] duration = new long[N];
 		long tot = 0;
 
 		for (int i = 0; i < N; i++) {
-
 			String path = "D:\\JMTtest\\prova" + i + ".xml";
 
 			Dispatcher_jSIMschema disp = new Dispatcher_jSIMschema(path);
@@ -469,7 +457,6 @@ public class Dispatcher_jSIMschema {
 		long mean = tot / N;
 		System.out.println("Mean: ");
 		System.out.println(Long.toString(mean));
-
 	}
 
 	/**
@@ -503,11 +490,10 @@ public class Dispatcher_jSIMschema {
 		} else {
 			System.out.println("Error!!");
 		}
-
 	}
-        
-        public void setIsTerminalSimulation(boolean isTerminalSimulation) {
-                this.isTerminalSimulation = isTerminalSimulation;
-        }
+
+	public void setIsTerminalSimulation(boolean isTerminalSimulation) {
+		this.isTerminalSimulation = isTerminalSimulation;
+	}
 
 }

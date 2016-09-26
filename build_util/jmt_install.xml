@@ -76,7 +76,7 @@
 		<panel classname="HTMLInfoPanel"/>
 		<panel classname="LicencePanel"/>
 		<panel classname="TargetPanel"/>
-<!--		<panel classname="PacksPanel"/>	-->
+	<!--	<panel classname="PacksPanel"/>	-->
 		<panel classname="ShortcutPanel"/>
 		<panel classname="InstallPanel"/>
 		<panel classname="SimpleFinishPanel"/>

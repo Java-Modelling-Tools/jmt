@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.dataAnalysis;
 
@@ -253,17 +253,17 @@ public class Measure {
 	//@author Stefano Omini
 
 	/** Gets measure value: if the confidence requirements have not been
-	 * reached, it is returned the value extimated up to that moment.
+	 * reached, it is returned the value estimated up to that moment.
 	 * @return measure value.
 	 */
-	public double getExtimatedMeanValue() {
+	public double getEstimatedMeanValue() {
 		// OLD
-		// return analyzer.extimatedMean();
+		// return analyzer.estimatedMean();
 
 		//NEW
 		//@author Stefano Omini
 		if (!noSamplesTest) {
-			return analyzer.extimatedMean() * scaleFactor;
+			return analyzer.estimatedMean() * scaleFactor;
 		} else {
 			return 0.0;
 			//end NEW
@@ -307,18 +307,18 @@ public class Measure {
 	}
 	
 	public double getLastIntervalAvgValue() {
-		if(lastWeight==0){
+		if (lastWeight==0) {
 			lastWeight=0;
 			lastSampleWeight=0;
 			return lastIntervalAvgValue;
-			}
-		else{
+		}
+		else {
 			lastIntervalAvgValue=(lastSampleWeight/lastWeight);
 			lastWeight=0;
 			lastSampleWeight=0;
 			return lastIntervalAvgValue;
-			}
-			
+		}
+
 	}
 
 	/** Gets upper limit.
@@ -429,7 +429,7 @@ public class Measure {
 
 			if (logger.isDebugEnabled()) {
 				boolean log_success = analyzer.getSuccess();
-				double log_mean = getExtimatedMeanValue();
+				double log_mean = getEstimatedMeanValue();
 				logger.debug("Measure " + name + " finished. Mean value: " + log_mean + " Success = " + log_success);
 			}
 
@@ -556,7 +556,6 @@ public class Measure {
 	 * the visit ratio = number of accesses to this station / number of
 	 * accesses to the reference station)
 	 */
-
 	private void scaleMeasureWithVisitRatio() {
 		//retrieves JobClass object using its name
 		JobClass jobClass = network.getJobClass(jobClassName);
@@ -570,10 +569,11 @@ public class Measure {
 			String referenceNodeName = jobClass.getReferenceNodeName();
 			int visitsReferenceNode, visitsThisNode;
 			try {
-				if(referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH) || referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)){
+				if (referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
+					|| referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
+					|| referenceNodeName.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
 					visitsReferenceNode = 0;
-				}
-				else{
+				} else {
 					NetNode referenceNode = network.getNode(referenceNodeName);
 					//visits to the reference node
 					NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
@@ -631,16 +631,18 @@ public class Measure {
 					//reference node for this job class
 					String referenceNodeName = jobC.getReferenceNodeName();
 					int visitsReferenceNode, visitsThisNode;
-					if(referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH) || referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)){
+					if (referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
+							|| referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
+							|| referenceNodeName.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
 						visitsReferenceNode = 0;
 					}
-					else{
+					else {
 						NetNode referenceNode = network.getNode(referenceNodeName);
 						//visits to the reference node
 						NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
 						visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobC);
 					}
-					//visitsReferenceNode += network.getSwitchedJobs(jobC);
+					visitsReferenceNode += network.getSwitchedJobs(jobC);
 
 					//visits to this node node
 					NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
@@ -732,7 +734,7 @@ public class Measure {
 		//writes measure output on log
 		if (logger.isDebugEnabled()) {
 
-			double log_mean = getExtimatedMeanValue();
+			double log_mean = getEstimatedMeanValue();
 			boolean log_success = analyzer.getSuccess();
 
 			logger.debug("Measure " + name + " finished. Mean value: " + log_mean + " Success = " + log_success);
@@ -748,13 +750,13 @@ public class Measure {
 		//writes measure output on log
 		if (logger.isDebugEnabled()) {
 
-			double log_mean = getExtimatedMeanValue();
+			double log_mean = getEstimatedMeanValue();
 			boolean log_success = analyzer.getSuccess();
 
 			logger.debug("Measure " + name + " finished. Mean value: " + log_mean + " Success = " + log_success);
-                        if (output != null) {
-                                output.finalizeMeasure();
-                        }
+			if (output != null) {
+				output.finalizeMeasure();
+			}
 		}
 	}
 

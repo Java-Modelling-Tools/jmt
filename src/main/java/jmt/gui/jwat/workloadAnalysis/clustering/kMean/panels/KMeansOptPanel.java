@@ -202,7 +202,7 @@ public class KMeansOptPanel extends JPanel implements CommonConstants {
 	}
 
 	private void setSolveAction() {
-		//if(model.getListOfClustering().size() > 0) ((JWatWizard)parent.getParentWizard()).setEnableButton("Next >",true);
+		//if (model.getListOfClustering().size() > 0) ((JWatWizard)parent.getParentWizard()).setEnableButton("Next >",true);
 		//else ((JWatWizard)parent.getParentWizard()).setEnableButton("Next >",false);
 		((MainJwatWizard) parent.getParentWizard()).setEnableButton("Solve", true);
 		((MainJwatWizard) parent.getParentWizard()).setActionButton("Solve", new AbstractAction() {

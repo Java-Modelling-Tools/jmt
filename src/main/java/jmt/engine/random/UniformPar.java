@@ -1,38 +1,38 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
- *
+ * 
  * This is the parameter that should be passed to the Uniform
  * distribution.
- *
+ * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
  * @author Bertoli Marco 10-oct-2005
- *
+ * 
  * Edited by Bertoli Marco 2005: Inverted max and min to have classical position
+ * 
  */
-
 public class UniformPar extends AbstractParameter implements Parameter {
 
 	private double max;
@@ -64,7 +64,7 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	 * It verify if the parameter is correct. For the uniform distribution the parameter
 	 * is right if the bound are right which means that max must be greater or equal to min.
 	 *
-	 * @return boolean, indicating wether the parameter is correct or not.
+	 * @return boolean, indicating whether the parameter is correct or not.
 	 *
 	 */
 
@@ -82,7 +82,7 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	 * is right if the bound are right which means that max must be greater or equal to min.
 	 * It is the same of the method check() but it is a service method used only by the constructor.
 	 *
-	 * @return boolean, indicating wether the parameter is correct or not.
+	 * @return boolean, indicating whether the parameter is correct or not.
 	 *
 	 */
 

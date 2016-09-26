@@ -8,12 +8,13 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package jmt.jmva.analytical.solvers.LinearSystemSolver;
 
 import jmt.jmva.analytical.solvers.DataStructures.BigRational;
@@ -46,7 +47,7 @@ public interface SolverInterface {
      * A that may need to be updated when requested. This is needed by the MoM
      * algorithm.
      * @param A The matrix A of the linear system Ax = b
-     * @param UList The list containg these positions as Tuple objects
+     * @param UList The list containing these positions as Tuple objects
      * @param uncomputables Set of the indexes of possible zero-columns of A
      * @throws OperationNotSupportedException Thrown when the matrix A is not square
      */

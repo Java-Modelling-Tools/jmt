@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.panels.parametric;
 
@@ -49,10 +49,9 @@ import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
  *         Time: 13.53.23
  */
 public class PAProgressWindow extends JMTDialog {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	public static final String RUNNING_MESSAGE = "What-if analysis running, please wait...";
 	public static final String ENUMERATION_MESSAGE = "Running simulation";
 	public static final String PAUSE_MESSAGE = "Parametric analysis paused...";
@@ -268,7 +267,7 @@ public class PAProgressWindow extends JMTDialog {
 		//set the precision of residual time estimation
 		double histogramIntervals = HISTOGRAM_INTERVALS;
 		double currentTime = (((double) System.currentTimeMillis()) / 1000 - //get time elapsed from start in seconds
-		this.globalStartTime);
+				this.globalStartTime);
 
 		double simulationDuration;
 		if (!wasPaused) {
@@ -288,7 +287,7 @@ public class PAProgressWindow extends JMTDialog {
 
 		simulationTimes[lastSimulationCompletedIndex - 1] = simulationDuration; //insert last simulation duration into the Vector
 
-		//for cycle used to get minimum and maximum simulaion duration
+		//for cycle used to get minimum and maximum simulation duration
 		for (int i = 0; i < lastSimulationCompletedIndex; i++) {
 			if (simulationTimes[i] < min) {
 				min = simulationTimes[i];
@@ -465,7 +464,7 @@ public class PAProgressWindow extends JMTDialog {
 	}
 
 	/**
-	 * Called when the parametric analyis is finished, not when it is stopped
+	 * Called when the parametric analysis is finished, not when it is stopped
 	 */
 	public void finished() {
 		stopped = true;
@@ -483,6 +482,7 @@ public class PAProgressWindow extends JMTDialog {
 	}
 
 	protected class Timer extends Thread {
+
 		double lastTime;
 
 		public Timer() {
@@ -511,5 +511,7 @@ public class PAProgressWindow extends JMTDialog {
 				}
 			}
 		}
+
 	}
+
 }

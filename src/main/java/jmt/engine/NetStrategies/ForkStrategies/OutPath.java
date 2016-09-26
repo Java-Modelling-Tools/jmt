@@ -31,8 +31,8 @@ public class OutPath {
 
 	public void setProbabilityOfChosen(EmpiricalEntry probabilityOfChosen) 
 			throws IncorrectDistributionParameterException {
-		if(probabilityOfChosen.getProbability() <= 1 
-				&& probabilityOfChosen.getProbability() >=0){
+		if (probabilityOfChosen.getProbability() <= 1 
+				&& probabilityOfChosen.getProbability() >=0) {
 			this.probabilityOfChosen = probabilityOfChosen;
 		} else {
 			throw new IncorrectDistributionParameterException(
@@ -46,21 +46,21 @@ public class OutPath {
 
 	public void setJobsPerLinkDis(EmpiricalEntry[] jobsPerLinkDis) 
 			throws IncorrectDistributionParameterException {
-		if(checkProb(jobsPerLinkDis)){
+		if (checkProb(jobsPerLinkDis)) {
 			JobsPerLinkDis = jobsPerLinkDis;
-		}else {
+		} else {
 			throw new IncorrectDistributionParameterException(
 					"the sum of probabilities should be 1");
 		}
 	}
 	
-	public boolean checkProb(EmpiricalEntry[] ee){
+	public boolean checkProb(EmpiricalEntry[] ee) {
 		boolean flag = false;
 		double sum = 0;
-		for(int i = 0; i < ee.length; i++){
+		for (int i = 0; i < ee.length; i++) {
 			sum += ee[i].getProbability();
 		}
-		if(sum == 1){
+		if (sum == 1) {
 			flag = true;
 		}
 		return flag;

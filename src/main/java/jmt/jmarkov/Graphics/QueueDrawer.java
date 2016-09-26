@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -211,7 +211,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 		PROC_RAD = dCst.getProcessorRadius();
 
 		// initilazing the queue
-		queue = new Rectangle2D.Double[queueLenght()];
+		queue = new Rectangle2D.Double[queueLength()];
 		processor = new Ellipse2D.Double();
 		// repaint();
 	}
@@ -256,16 +256,16 @@ public class QueueDrawer extends JComponent implements Notifier {
 		viewB = drawViewButton(panelW - viewB.getWidth() - END_GAP, panelH - viewB.getHeight() - 1, g2d, true, viewButtonClicked);
 		START_GAP = START_GAP * 2 + drawLegend(legendaC, legendaS, dCst.getFont(), START_GAP, START_GAP, g2d, false);
 
-		for (int i = 0; i < queueLenght(); i++) {
+		for (int i = 0; i < queueLength(); i++) {
 			if (i < jobs) {
-				drawQueueStatus(queueLenght() - i - 1, queueC, Color.black, gradientF, g2d);
+				drawQueueStatus(queueLength() - i - 1, queueC, Color.black, gradientF, g2d);
 			} else {
-				drawQueueStatus(queueLenght() - i - 1, emptyC, Color.black, gradientF, g2d);
+				drawQueueStatus(queueLength() - i - 1, emptyC, Color.black, gradientF, g2d);
 			}
 		}
 
 		drawProcessorView(view, g2d);
-		if ((jobs > queueLenght()) && ((queueLenght() < queueMax) || (queueMax == -1))) {
+		if ((jobs > queueLength()) && ((queueLength() < queueMax) || (queueMax == -1))) {
 			drawMoreStatus(queueC, emptyC, Color.black, gradientF, g2d);
 		}
 		drawJobs(g2d);
@@ -362,8 +362,8 @@ public class QueueDrawer extends JComponent implements Notifier {
 		g2d.draw(queue[i]);
 
                 // Check if the state corresponds to the mean number of jobs
-		if (i == queueLenght() - queueMedia) {
-			// draw a trinagle above that represents the average
+		if (i == queueLength() - queueMedia) {
+			// draw a triangle above that represents the average
                     	GeneralPath gp = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 			gp.moveTo((float) x, (float) (y - ELEM_HEIGHT / 2));
 			gp.lineTo((float) (x + ELEM_WIDTH), (float) (y - ELEM_HEIGHT / 2));
@@ -376,7 +376,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 
 		x += ELEM_WIDTH / 2.0;
 		y += ELEM_HEIGHT / 2.0;
-		drawCenteredText("" + (queueLenght() - i), readColor(startC), null, x, y, g2d, false, true);
+		drawCenteredText("" + (queueLength() - i), readColor(startC), null, x, y, g2d, false, true);
 	}
 
 	// private void drawLostJobs2(Color txtColor, boolean gradientFill,
@@ -409,7 +409,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 			drawCenteredText("executing cust.:" + donejobs + ", residual time:" + remainingTime[0] + "ms", Color.BLACK, Color.WHITE, x
 					- txtBounds.getWidth() / 2.0, y, g2d, true, true);
 		}
-		//		else if(nCpu==2){
+		//		else if (nCpu==2) {
 		//			txtBounds = drawCenteredText("executing cust.:" + 
 		//					donejobs + ", residual time(1):" + remainingTime[0] + "ms"+ ", residual time(2):" + remainingTime[1] + "ms", Color.BLACK, Color.WHITE, x, y, g2d, true, false);
 		//			drawCenteredText("executing cust.:" + 
@@ -794,7 +794,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 		return rc;
 	}
 
-	private int queueLenght() {
+	private int queueLength() {
 		int a = (int) ((panelW - (PROC_RAD * 2 + ELEMS_GAP) - 4 * ELEM_WIDTH - 4 * ELEMS_GAP - START_GAP - END_GAP) / (ELEM_WIDTH + ELEMS_GAP));
 		if ((queueMax > 0) && (queueMax < a)) {
 			return queueMax;
@@ -810,7 +810,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 	}
 
 	private Point2D.Double getProcessorXY() {
-		return new Point2D.Double(getElementXY(queueLenght()).x, panelH * 0.4 - PROC_RAD);
+		return new Point2D.Double(getElementXY(queueLength()).x, panelH * 0.4 - PROC_RAD);
 	}
 
 	private void resize() {
@@ -864,7 +864,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 	 * @param y
 	 *            initial ordinate
 	 * @param g2d
-	 * @return panel lenght 
+	 * @return panel length
 	 */
 	private double drawLegend(Color[] ca, String[] sa, Font f, double x, double y, Graphics2D g2d, boolean draw) {
 		Rectangle2D[] ra = new Rectangle2D[ca.length];

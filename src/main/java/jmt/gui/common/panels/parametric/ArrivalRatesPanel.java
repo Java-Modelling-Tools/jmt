@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.common.panels.parametric;
 
@@ -132,12 +132,12 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 			steps = new JSpinner(new SpinnerNumberModel(ARPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));
 			steps.setToolTipText("Sets the number of steps to be performed");
 			//get the vector containing the keys of the class that can be used to do this type of parametric analysis
-			Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvaibleClasses();
+			Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvailableClasses();
 			String[] classNames = new String[validC.size()];
 			for (int i = 0; i < validC.size(); i++) {
 				classNames[i] = cd.getClassName(validC.get(i));
 			}
-			//if there is only one class avaible or if the "all class" simulation is not avaible
+			//if there is only one class available or if the "all class" simulation is not available
 			//disable the allClass radio button
 			if ((validC.size() < cd.getOpenClassKeys().size()) || (cd.getOpenClassKeys().size() == 1)) {
 				allClass.setEnabled(false);
@@ -218,7 +218,7 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 		if (enabled) {
 			//if the panel is enabled the allClass radioButton can be enabled only if all of the class have a service
 			//time distribution with a mean value, in the reference station contained in STPA.
-			Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvaibleClasses();
+			Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvailableClasses();
 			if ((validC.size() < cd.getOpenClassKeys().size() || (cd.getOpenClassKeys().size() == 1))) {
 				allClass.setEnabled(false);
 			} else {
@@ -304,7 +304,7 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 					classChooser.setEnabled(true);
 					//get the vector containing the keys of the valid classes. A class is valid if its service
 					//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
-					Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvaibleClasses();
+					Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvailableClasses();
 					String[] classNames = new String[validC.size()];
 					for (int i = 0; i < validC.size(); i++) {
 						classNames[i] = cd.getClassName(validC.get(i));

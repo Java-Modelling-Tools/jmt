@@ -45,7 +45,7 @@ public class XSecondaryMacroBlock extends SecondaryMacroBlock {
 			
 		int col;
 		
-		for(int s = 1; s <= qnm.R - 1; s++) {
+		for (int s = 1; s <= qnm.R - 1; s++) {
 			
 			n.plusOne(s);				
 			
@@ -55,7 +55,7 @@ public class XSecondaryMacroBlock extends SecondaryMacroBlock {
 			col -= position.col;			
 			
 			//Column is in this block
-			if(col >= 0 && col < size.col) {							
+			if (col >= 0 && col < size.col) {							
 				matrix.write( row_of_block , col, qnm.getDemandAsBigRational(queue - 1, s - 1).negate());
 			}					
 		}

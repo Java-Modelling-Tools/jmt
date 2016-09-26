@@ -575,7 +575,7 @@ public class Gamma extends Constants {
 		}
 
 		q = (x - 0.5) * Math.log(x) - x + 0.91893853320467274178;
-		//if( x > 1.0e8 ) return( q );
+		//if ( x > 1.0e8 ) return( q );
 		if (x > 1.0e8) {
 			return (q);
 		}

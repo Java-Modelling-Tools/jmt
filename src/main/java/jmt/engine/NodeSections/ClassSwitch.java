@@ -1,4 +1,4 @@
-/**    
+/**
  * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
@@ -8,16 +8,17 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.engine.NodeSections;
 
+import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
@@ -33,7 +34,7 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class ClassSwitch extends ServiceSection {
 
-	private int[] switchedClasses; 
+	private int[] switchedClasses;
 	private int totalSwitchedClasses = 0;
 	private RandomEngine engine = RandomEngine.makeDefault();
 
@@ -52,46 +53,50 @@ public class ClassSwitch extends ServiceSection {
 	}
 
 	@Override
-	protected int process(NetMessage message)
-			throws jmt.common.exception.NetException {
+	protected int process(NetMessage message) throws NetException {
 		Job job;
 		job = message.getJob();
-		switch (message.getEvent()) {
-			case NetEvent.EVENT_START:
-				break;
-			case NetEvent.EVENT_ACK:
-				sendBackward(message.getEvent(), message.getData(), 0.0);
-				break;
-			case NetEvent.EVENT_JOB:
-				int jobClassIn = message.getJob().getJobClass().getId();
-				int jobClassOut = chooseOutClass(matrix[jobClassIn]);
-				//Find out class by using the matrix
-				JobClass outClass = getJobClasses().get(jobClassOut);
-	
-				//Update counters
-				if (!job.hasBeenClass(outClass)) {
-					switchedClasses[jobClassOut]++;
-					totalSwitchedClasses++;
-				}
-				
-			
-				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
-				
-				//remove job from node list
-				JobInfoList local = getOwnerNode().getJobInfoList();
 
-				GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
-				global.performJobClassSwitch(job, outClass);
-				sendForward(message.getEvent(), job, 0.0);
-			
-				local.remove(local.lookFor(job));
-			
-				break;
-			case NetEvent.EVENT_STOP:
-				break;
-			default:
-				return MSG_NOT_PROCESSED;
+		switch (message.getEvent()) {
+
+		case NetEvent.EVENT_START:
+			break;
+
+		case NetEvent.EVENT_ACK:
+			sendBackward(message.getEvent(), message.getData(), 0.0);
+			break;
+
+		case NetEvent.EVENT_JOB:
+			int jobClassIn = message.getJob().getJobClass().getId();
+			int jobClassOut = chooseOutClass(matrix[jobClassIn]);
+			//Find out class by using the matrix
+			JobClass outClass = getJobClasses().get(jobClassOut);
+
+			//Update counters
+			if (!job.hasBeenClass(outClass)) {
+				switchedClasses[jobClassOut]++;
+				totalSwitchedClasses++;
+			}
+
+			sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
+
+			//remove job from node list
+			JobInfoList local = getOwnerNode().getJobInfoList();
+
+			GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
+			global.performJobClassSwitch(job, outClass);
+			sendForward(message.getEvent(), job, 0.0);
+
+			local.remove(local.lookFor(job));
+			break;
+
+		case NetEvent.EVENT_STOP:
+			break;
+
+		default:
+			return MSG_NOT_PROCESSED;
 		}
+
 		return MSG_PROCESSED;
 	}
 
@@ -107,31 +112,31 @@ public class ClassSwitch extends ServiceSection {
 		float sum;
 		float random;
 		int i;
-		
+
 		sum = 0;
 		for (i = 0; i < row.length; i++) {
 			sum += row[i];
 		}
 
-                random = (float) (engine.raw() * sum);
+		random = (float) (engine.raw() * sum);
 		for (i = 0; i < row.length; i++) {
 			random -= row[i];
-			if(random <= 0)
+			if (random <= 0)
 				return i;
 		}
 		return i-1;
 	}
-	
+
 	/**
 	 * Gets the count of the switched jobs of the specified class
 	 * 
 	 * @param jobClass the job class 
 	 * @return the count of the switched jobs of the specified class
 	 */
-	public int getSwitchedJobCount(int jobClass){
+	public int getSwitchedJobCount(int jobClass) {
 		return switchedClasses[jobClass];
 	}
-	
+
 	/**
 	 * Gets total count of the switched jobs 
 	 * 

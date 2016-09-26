@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.exact.table;
 
@@ -35,28 +35,25 @@ import javax.swing.table.AbstractTableModel;
  */
 public abstract class ExactTableModel extends AbstractTableModel implements ModelHandlesRowHeader, PrototypedTableModel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	protected Object prototype;
 	protected Object rowHeaderPrototype;
 
 	public final Object getValueAt(int rowIndex, int columnIndex) {
 		switch (columnIndex) {
-			case -1:
-				return getRowName(rowIndex);
-			default:
-				return getValueAtImpl(rowIndex, columnIndex);
+		case -1:
+			return getRowName(rowIndex);
+		default:
+			return getValueAtImpl(rowIndex, columnIndex);
 		}
 	}
 
 	public Object getPrototype(int columnIndex) {
 		switch (columnIndex) {
-			case -1:
-				return rowHeaderPrototype;
-			default:
-				return prototype;
+		case -1:
+			return rowHeaderPrototype;
+		default:
+			return prototype;
 		}
 	}
 
@@ -75,7 +72,7 @@ public abstract class ExactTableModel extends AbstractTableModel implements Mode
 	}
 
 	/**
-	 * Copies the valu cell to all selected cells. Default implementation does absolutely nothing.
+	 * Copies the value cell to all selected cells. Default implementation does absolutely nothing.
 	 */
 	public void copyCellToArea(int sourceRow, int sourceCol, int rowFrom, int rowTo, int colFrom, int colTo) {
 	}

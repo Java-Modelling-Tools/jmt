@@ -1,28 +1,28 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NodeSections;
 
+import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
@@ -63,12 +63,12 @@ public class Router extends OutputSection {
 	in fact, if the router sends a job outside the region, a message
 	must be sent to the input station of that region, to decrease the
 	number of jobs inside the region
-	*/
+	 */
 
 	/**true if this router is the border router of a blocking region*/
-	private boolean borderRouter;
+	private boolean borderRouterON;
 	/** the blocking region this router belongs to */
-	private BlockingRegion myBlockingRegion;
+	private BlockingRegion myRegion;
 	/** the region input station of the blocking region */
 	private NetNode regionInputStation;
 
@@ -81,8 +81,8 @@ public class Router extends OutputSection {
 		super();
 		this.routingStrategies = routingStrategies;
 
-		borderRouter = false;
-		myBlockingRegion = null;
+		borderRouterON = false;
+		myRegion = null;
 		regionInputStation = null;
 	}
 
@@ -93,17 +93,17 @@ public class Router extends OutputSection {
 		super();
 		this.routingStrategies = routingStrategies;
 
-		borderRouter = true;
-		myBlockingRegion = blockReg;
-		regionInputStation = myBlockingRegion.getInputStation();
+		borderRouterON = true;
+		myRegion = blockReg;
+		regionInputStation = myRegion.getInputStation();
 	}
 
 	/**
 	 * Tells whether this router is a border router of a blocking region.
 	 * @return true if this router is a border router of a blocking region.
 	 */
-	public boolean isBorderRouter() {
-		return borderRouter;
+	public boolean isBorderRouterON() {
+		return borderRouterON;
 	}
 
 	/**
@@ -113,9 +113,9 @@ public class Router extends OutputSection {
 	 */
 	public void borderRouterTurnON(BlockingRegion region) {
 		//sets blocking region properties
-		borderRouter = true;
-		myBlockingRegion = region;
-		regionInputStation = myBlockingRegion.getInputStation();
+		borderRouterON = true;
+		myRegion = region;
+		regionInputStation = myRegion.getInputStation();
 		return;
 	}
 
@@ -124,109 +124,107 @@ public class Router extends OutputSection {
 	 */
 	public void borderRouterTurnOFF() {
 		//sets blocking region properties
-		borderRouter = false;
-		myBlockingRegion = null;
+		borderRouterON = false;
+		myRegion = null;
 		regionInputStation = null;
 		return;
 	}
 
 	@Override
-	public Object getObject(int id, JobClass jobClass) throws jmt.common.exception.NetException {
+	public Object getObject(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_ROUTING_STRATEGY:
-				return routingStrategies[jobClass.getId()];
-			default:
-				return super.getObject(id);
+		case PROPERTY_ID_ROUTING_STRATEGY:
+			return routingStrategies[jobClass.getId()];
+		default:
+			return super.getObject(id);
 		}
 	}
 
 	@Override
-	protected int process(NetMessage message) throws jmt.common.exception.NetException {
-
+	protected int process(NetMessage message) throws NetException {
 		switch (message.getEvent()) {
 
-			case NetEvent.EVENT_JOB:
+		case NetEvent.EVENT_START:
+			break;
 
-				Job job = message.getJob();
+		case NetEvent.EVENT_JOB:
 
-				//EVENT_JOB
-				//if the router is not busy, an output node is chosen using
-				//the routing strategy and a message containing the job is sent to it.
+			Job job = message.getJob();
 
-				JobClass jobClass = job.getJobClass();
+			//EVENT_JOB
+			//if the router is not busy, an output node is chosen using
+			//the routing strategy and a message containing the job is sent to it.
 
-				//choose the outNode using the corresponding routing strategy
-				NetNode outNode = routingStrategies[jobClass.getId()].getOutNode(this, jobClass);
-				// Bertoli Marco: sanity checks with closed classes and sinks were moved inside
-				// routing strategies
+			JobClass jobClass = job.getJobClass();
 
-				if (outNode == null) {
-					return MSG_NOT_PROCESSED;
-				}
+			//choose the outNode using the corresponding routing strategy
+			NetNode outNode = routingStrategies[jobClass.getId()].getOutNode(this, jobClass);
+			// Bertoli Marco: sanity checks with closed classes and sinks were moved inside
+			// routing strategies
 
-				//send the job to all nodes identified by the strategy
-				send(job, 0.0, outNode);
-
-				//Border router behaviour (used in case of blocking region)
-				if (isBorderRouter()) {
-					//the owner node of this router is inside the region: if the outNode is outside
-					//the region, it means that one job has left the blocking region so the region
-					//input station (its blocking router) must receive a particular message
-					if (!myBlockingRegion.belongsToRegion(outNode)) {
-
-						//the first time finds the input station
-						if (regionInputStation == null) {
-							regionInputStation = myBlockingRegion.getInputStation();
-						}
-                                                // soften
-                                                // System.out.println("In Router:" +
-                                                // this.getOwnerNode().getSection(INPUT));
-                                                if (this.getOwnerNode().getSection(INPUT) instanceof Join) {
-                                                        if (((Join) this.getOwnerNode().getSection(INPUT))
-                                                                        .getMyRegion() != null) {
-
-                                                                int i = ((Join) this.getOwnerNode().getSection(
-                                                                                INPUT)).getDeTimes(job) - 1;
-                                                                for (int j = 0; j < i; j++) {
-                                                                        myBlockingRegion.decreaseOccupation(jobClass);
-
-        //								JobInfo ji = myBlockingRegion.getInputStation()
-        //										.getJobInfoList().lookFor(job);
-        //								if (ji != null) {
-        //									System.out.println(ji);
-                                                                                // myBlockingRegion.getInputStation().getJobInfoList().remove(ji);
-        //								}
-
-                                                                }
-                                                        }
-                                                }
-                                                //end
-                                                myBlockingRegion.decreaseOccupation(jobClass);
-
-                                                // send(NetEvent.EVENT_JOB_OUT_OF_REGION, null, 0.0,
-                                                // NodeSection.INPUT, regionInputStation);
-                                                send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0,
-                                                                NodeSection.INPUT, regionInputStation);
-                                                // Since now for blocking regions the job dropping is
-                                                // handles manually at node level
-                                                // hence need to create events with Jobs ..Modified for FCR
-                                                // Bug Fix
-                                        }
-                                }
-                                return MSG_PROCESSED;
-
-			case NetEvent.EVENT_ACK:
-				//EVENT_ACK
-				//
-				//An ack is sent back to the service section.
-				//
-
-				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
-				break;
-
-			default:
+			if (outNode == null) {
 				return MSG_NOT_PROCESSED;
+			}
+
+			//send the job to all nodes identified by the strategy
+			send(job, 0.0, outNode);
+
+			//Border router behaviour (used in case of blocking region)
+			if (isBorderRouterON()) {
+				//the owner node of this router is inside the region: if the outNode is outside
+				//the region, it means that one job has left the blocking region so the region
+				//input station (its blocking router) must receive a particular message
+				if (!myRegion.belongsToRegion(outNode)) {
+					// soften
+					if (this.getOwnerNode().getSection(INPUT) instanceof Join) {
+						if (((Join) this.getOwnerNode().getSection(INPUT))
+								.getMyRegion() != null) {
+							int i = ((Join) this.getOwnerNode().getSection(
+									INPUT)).getDeTimes(job) - 1;
+							for (int j = 0; j < i; j++) {
+								//myRegion.decreaseOccupation(jobClass);
+								myRegion.decreaseOccupation(job);
+
+								//JobInfo ji = myRegion.getInputStation()
+								//		.getJobInfoList().lookFor(job);
+								//if (ji != null) {
+								//	myRegion.getInputStation().getJobInfoList().remove(ji);
+								//}
+							}
+						}
+					}
+					//end
+					//myRegion.decreaseOccupation(jobClass);
+					myRegion.decreaseOccupation(job);
+
+					//send(NetEvent.EVENT_JOB_OUT_OF_REGION, null, 0.0,
+					//		NodeSection.INPUT, regionInputStation);
+					send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0,
+							NodeSection.INPUT, regionInputStation);
+					// Since now for blocking regions the job dropping is
+					// handles manually at node level
+					// hence need to create events with Jobs ..Modified for FCR
+					// Bug Fix
+				}
+			}
+			break;
+
+		case NetEvent.EVENT_ACK:
+
+			//EVENT_ACK
+			//An ack is sent back to the service section.
+
+			sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
+			break;
+
+		case NetEvent.EVENT_STOP:
+			break;
+
+		default:
+			return MSG_NOT_PROCESSED;
 		}
+
 		return MSG_PROCESSED;
 	}
+
 }

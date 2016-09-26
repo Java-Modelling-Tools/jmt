@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.xml;
 
@@ -111,7 +111,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 	}
 
 	/**
-	 * Returns the entire Document rapresenting GUI data structure.
+	 * Returns the entire Document representing GUI data structure.
 	 * @param model data structure
 	 * @return complete GUI data structure in Document format
 	 */
@@ -157,7 +157,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 		Vector v = model.getClassKeys();
 		for (int i = 0; i < v.size(); i++) {
 			Object classKey = v.get(i);
-			// Now transforms Class color in Exadecimal (Web like) rappresentation
+			// Now transforms Class color in hexadecimal (Web like) representation
 			String classColor = "#" + Integer.toHexString(model.getClassColor(classKey).getRGB()).toUpperCase();
 			Element userClass = doc.createElement(XML_E_CLASS);
 			userClass.setAttribute(XML_A_CLASS_NAME, model.getClassName(classKey));
@@ -211,17 +211,17 @@ public class GuiXMLWriter implements GuiXMLConstants {
 					//if the old PAModel could not be corrected..
 					if (result == 2) {
 						ParametricAnalysisChecker checker = new ParametricAnalysisChecker(model, model, model);
-						//if there are no PA simulation avaible, disable parametric analysis
+						//if there are no PA simulation available, disable parametric analysis
 						//and return
 						if (!checker.canBeEnabled()) {
 							parametric = doc.createElement(XML_E_PARAMETRIC);
 							parametric.setAttribute(XML_A_PARAMETRIC_ENABLED, "false");
 							return;
 						}
-						//else set the first avaible
+						//else set the first available
 						else {
-							String avaibleModel = checker.getRunnableParametricAnalysis()[0];
-							pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(avaibleModel, model, model, model);
+							String availableModel = checker.getRunnableParametricAnalysis()[0];
+							pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(availableModel, model, model, model);
 						}
 					}
 					//else the PAModel can be corrected, so correct it
@@ -246,7 +246,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 			}
 			guiNode.appendChild(parametric);
 		}
-		//parametric analysis is not avaible, set it
+		//parametric analysis is not available, set it
 		else {
 			parametric = doc.createElement(XML_E_PARAMETRIC);
 			parametric.setAttribute(XML_A_PARAMETRIC_ENABLED, "false");

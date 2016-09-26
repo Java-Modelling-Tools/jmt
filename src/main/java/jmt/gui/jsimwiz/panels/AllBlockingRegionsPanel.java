@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jsimwiz.panels;
 
@@ -252,7 +252,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 			 * @param e the event that characterizes the change.
 			 */
 			public void valueChanged(ListSelectionEvent e) {
-				// Retrives blocking region key
+				// Retrieves blocking region key
 				Object key = regions.getValueAt(regions.getSelectedRow(), 0);
 				// If no elements are selected, removes old blocking panel
 
@@ -294,7 +294,8 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 	 */
 	private void addRegion() {
 		if (bd.getRegionKeys().size() < MAX_NUMBER_OF_REGIONS) {
-			bd.addBlockingRegion(Defaults.get("blockingRegionName") + counter++, Defaults.get("blockingRegionType"));
+			bd.addBlockingRegion(Defaults.get("blockingRegionName") + counter, Defaults.get("blockingRegionType"));
+			counter++;
 		}
 	}
 
@@ -370,6 +371,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 			delete.setFocusable(false);
 			deleteRenderer = new ButtonCellEditor(delete);
 			setRowHeight(ROW_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 
 			// Sets column size
 			getColumnModel().getColumn(0).setPreferredWidth(120);

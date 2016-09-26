@@ -1,4 +1,4 @@
-/**    
+/**
  * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.gui.common.panels;
@@ -26,7 +26,6 @@ import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
@@ -42,12 +41,10 @@ import jmt.gui.exact.table.ExactTableModel;
 
 
 public class ClassSwitchSectionPanel extends WizardPanel implements
-		CommonConstants {
+CommonConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
 	private static final String DESCRIPTION = HTML_START
 			+ "The value (i, j) is the probability that a job of class i "
 			+ "switches to class j. The values may be either probabilities or number of visits. "
@@ -60,7 +57,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 	private static final String NORMALIZATION_WARNING = HTML_START
 			+ "<font color=\"blue\"> Warning: some rows sum to a value greater than one, values will be normalized.</font>"
 			+ HTML_END;
-	
+
 	/** Used to display classes with icon */
 	private JTable csTable;
 	private StationDefinition stationData;
@@ -71,7 +68,6 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 	private JLabel normalizzationWarningLabel;
 	private boolean errorRows[];
 	private boolean warningRows[];
-	
 
 	public ClassSwitchSectionPanel(StationDefinition sd, ClassDefinition cd,
 			Object stationKey) {
@@ -86,7 +82,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 		if (descriptionLabel != null) {
 			descriptionLabel.setVisible(classData.getClassKeys().size() != 0);
 		}
-		if(classData.getClassKeys().size()>0) {
+		if (classData.getClassKeys().size()>0) {
 			csTable = new ClassSwitchTable();
 			this.errorRows = new boolean[classData.getClassKeys().size()];
 			this.warningRows = new boolean[classData.getClassKeys().size()];
@@ -100,7 +96,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 	protected void initComponents() {
 		removeAll();
 		setLayout(new BorderLayout());
-		
+
 		WarningScrollTable wST = new WarningScrollTable(csTable, WARNING_CLASS);
 		setBorder(new TitledBorder(new EtchedBorder(), "CS Strategies"));
 		setMinimumSize(new Dimension(180, 100));
@@ -124,8 +120,8 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 	 */
 	@Override
 	public void lostFocus() {
-		if(csTable!=null) {
-			if(csTable.getCellEditor()!=null) {
+		if (csTable!=null) {
+			if (csTable.getCellEditor()!=null) {
 				csTable.getCellEditor().stopCellEditing();
 			}
 		}
@@ -152,18 +148,18 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 	private void checkRowLessThanOne() {
 		boolean allIsOk = true;
 		boolean noWarning = true;
-		for(int i = 0; i < classData.getClassKeys().size(); i++) {
+		for (int i = 0; i < classData.getClassKeys().size(); i++) {
 			float row = 0;
-			for(int j = 0; j < classData.getClassKeys().size(); j++) {
+			for (int j = 0; j < classData.getClassKeys().size(); j++) {
 				row += stationData.getClassSwitchMatrix(stationKey,
 						classData.getClassKeys().get(i), classData.getClassKeys().get(j));
 			}
-			if(row < 1) {
+			if (row < 1) {
 				allIsOk = false;
 				errorRows[i] = true;
 				warningRows[i] = false;
 				normalizzationErrorLabel.setVisible(true);				
-			} else if(row > 1) {
+			} else if (row > 1) {
 				noWarning  = false;
 				warningRows[i] = true;
 				errorRows[i] = false;
@@ -173,60 +169,58 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 				errorRows[i] = false;
 			}
 		}
-		if(allIsOk) {
+		if (allIsOk) {
 			normalizzationErrorLabel.setVisible(false);				
 		}
-		if(noWarning) {
+		if (noWarning) {
 			normalizzationWarningLabel.setVisible(false);				
 		}
 	}
 
 	private String getPercValueCell(int row, int col) {
-			float sum = 0;
-			for(int j = 0; j < classData.getClassKeys().size(); j++) {
-				sum += stationData.getClassSwitchMatrix(stationKey,
-						classData.getClassKeys().get(row), classData.getClassKeys().get(j));
-			}
-			if(sum <= 0.0000001) {
-				return "0%";
-			}
-			Float res= stationData.getClassSwitchMatrix(stationKey,
-					classData.getClassKeys().get(row), classData.getClassKeys().get(col)) / sum * 100;
-			return Math.round(res)+"%";
+		float sum = 0;
+		for (int j = 0; j < classData.getClassKeys().size(); j++) {
+			sum += stationData.getClassSwitchMatrix(stationKey,
+					classData.getClassKeys().get(row), classData.getClassKeys().get(j));
+		}
+		if (sum <= 0.0000001) {
+			return "0%";
+		}
+		Float res= stationData.getClassSwitchMatrix(stationKey,
+				classData.getClassKeys().get(row), classData.getClassKeys().get(col)) / sum * 100;
+		return Math.round(res)+"%";
 	}
-	
+
 	protected class ClassSwitchTable extends ExactTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		private static final int DEFAULT_COLUMN_WIDTH = 110;
 
 		public ClassSwitchTable() {
 			super(new ClassSwitchTableModel());
-			
- 			setColumnSelectionAllowed(false);
+
+			setColumnSelectionAllowed(false);
 			setRowSelectionAllowed(true);
 			tableHeader.setToolTipText(null);
 			rowHeader.setToolTipText(null);
 			rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 			this.setDefaultRenderer(Object.class, new ClassSwitchTableRenderer());
-			for(int i = 0; i < getColumnCount(); i++) {
+			for (int i = 0; i < getColumnCount(); i++) {
 				getColumnModel().getColumn(i).setPreferredWidth(DEFAULT_COLUMN_WIDTH);
 			}
-			
 		}
-		
+
 	}
 
 	protected class ClassSwitchTableRenderer extends DisabledCellRenderer {
 
-		private static final long serialVersionUID = 8097765063638320793L;
-		
+		private static final long serialVersionUID = 1L;
+
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-			if(value == null)
+			if (value == null)
 				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 			if (value instanceof Number) {
 				super.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -235,33 +229,30 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 			} else {
 				super.setHorizontalAlignment(SwingConstants.CENTER);
 			}
-			if(isSelected) {
-				if(!hasFocus) {
+			if (isSelected) {
+				if (!hasFocus) {
 					isSelected = false;
 				}
 				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 				return c;
 			}
 			JLabel res = new JLabel((String)value,  SwingConstants.CENTER);
-			if(errorRows[row]) {
+			if (errorRows[row]) {
 				res.setForeground(Color.RED);
-			} else if(warningRows[row]) {
+			} else if (warningRows[row]) {
 				res.setForeground(Color.BLUE);
 			}
 			return res;
 		}
 
-		
 	}
-	
+
 	protected class ClassSwitchTableModel extends ExactTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
+
 		public int[] columnSizes = new int[] { 70, 100 };
-		
+
 		public ClassSwitchTableModel() {
 			prototype = "Class10000";
 			rowHeaderPrototype = "Class10000";
@@ -281,24 +272,23 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 			Vector<Object> classes = classData.getClassKeys();
 			return classData.getClassName(classes.get(columnIndex));
 		}
-		
+
 		@Override
 		protected Object getRowName(int rowIndex) {
 			Vector<Object> classes = classData.getClassKeys();
 			return classData.getClassName(classes.get(rowIndex));
 		}
 
-
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		@Override
 		public Class getColumnClass(int columnIndex) {
-			if(columnIndex == -1) {
+			if (columnIndex == -1) {
 				return String.class;
 			} else {
 				return String.class;
 			}
 		}
-		
+
 		@Override
 		public Object getPrototype(int i) {
 			if (i == -1) {
@@ -318,16 +308,15 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 			return rowClassType == columnClassType;
 		}
 
-
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			if(!isCellEditable(rowIndex, columnIndex))
+			if (!isCellEditable(rowIndex, columnIndex))
 				return null;
 			Vector<Object> classes = classData.getClassKeys();
-			//if(columnIndex == -1) {
+			//if (columnIndex == -1) {
 			//	return classData.getClassName(classes.get(rowIndex));
 			//}
-			if(csTable.isCellSelected(rowIndex, columnIndex)) {
+			if (csTable.isCellSelected(rowIndex, columnIndex)) {
 				return stationData.getClassSwitchMatrix(stationKey,
 						classes.get(rowIndex), classes.get(columnIndex));
 			} else {
@@ -350,7 +339,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements
 					val);
 			checkRowLessThanOne();
 		}
-				
+
 	}
 
 }

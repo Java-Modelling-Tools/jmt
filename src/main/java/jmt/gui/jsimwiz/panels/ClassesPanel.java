@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimwiz.panels;
 
@@ -68,13 +68,13 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 	/*TODO: to enable this functionality, just put a constructor accepting a customized
 	*JSIMDefault class as parameter, and then put a form to allow user to generate instances
 	*of this class.*/
-	//protected Defaults defaults = new Defaults(){};
+	//protected Defaults defaults = new Defaults() {};
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	//Table containg class-set data
+	//Table containing class-set data
 	protected ClassTable classTable;
 
 	//ComboBox editor for station type
@@ -305,8 +305,12 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	//adds a new class to the table and, simultaneously to the underlying model data structure
 	protected void addClass() {
+		Distribution defaultClassDistrib = (Distribution) Defaults.getAsNewInstance("classDistribution");
+		if (defaultClassDistrib.hasMean()) {
+			defaultClassDistrib.setMean(defaultClassDistrib.getMean() * 2);
+		}
 		data.addClass(Defaults.get("className") + (++classNameIndex), Defaults.getAsInteger("classType").intValue(), Defaults.getAsInteger(
-				"classPriority").intValue(), Defaults.getAsInteger("classPopulation"), Defaults.getAsNewInstance("classDistribution"));
+				"classPriority").intValue(), Defaults.getAsInteger("classPopulation"), defaultClassDistrib);
 		refreshComponents();
 	}
 
@@ -370,7 +374,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	//---------------------------- Table containing classes parameters --------------------------
 	/*Table that must display all of data about user classes. Customization of table settings is
-	obtained via inheritation of <code>JTable</code> Class.*/
+	obtained via inheritance of <code>JTable</code> Class.*/
 
 	protected class ClassTable extends JTable {
 
@@ -419,6 +423,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 			setDefaultRenderer(String.class, new jmt.gui.exact.table.DisabledCellRenderer());
 			setDefaultEditor(Object.class, new jmt.gui.exact.table.ExactCellEditor());
 			setRowHeight(ROW_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		//returns a component to be contained inside a table column(or cell)
@@ -528,7 +533,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 			}
 		}
 
-		/**Tells wether data contained in a specific cell(given row and column index)
+		/**Tells whether data contained in a specific cell(given row and column index)
 		 * is editable or not. In this case distribution column is not editable, as
 		 * editing functionality is implemented via edit button*/
 		@Override
@@ -613,9 +618,9 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 					}
 					break;
 				}/*case(5):{
-					                   data.setClassDistribution(aValue, key);
-					                   break;
-					               }*/
+					data.setClassDistribution(aValue, key);
+					break;
+				}*/
 			}
 			/*if editing cell belongs to class type column, i must update population and
 			distribution cells*/

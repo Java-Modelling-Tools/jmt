@@ -1,29 +1,31 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NodeSections;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.random.Parameter;
@@ -37,7 +39,7 @@ import jmt.engine.random.Parameter;
  */
 public class RandomSource extends InputSection {
 
-	public static int PARAMETERS_EXCEPTION = 0x0001;
+	public static final int PARAMETERS_EXCEPTION = 0x0001;
 
 	/** Service distribution: one for each job class. */
 	//	protected Distribution distributions[];
@@ -67,154 +69,160 @@ public class RandomSource extends InputSection {
 	}
 
 	@Override
-	protected int process(NetMessage message) throws jmt.common.exception.NetException {
+	protected int process(NetMessage message) throws NetException {
 		Job job;
 		double delay;
 		int c;
+
 		switch (message.getEvent()) {
 
-			case NetEvent.EVENT_START:
+		case NetEvent.EVENT_START:
 
-				//case EVENT_START:
-				//the random source creates all the jobs requested by each class.
-				//for each job created, it sends to itself a message whose delay is the time of
-				//departure of the job, calculated using the strategy of the corresponding class
+			//case EVENT_START:
+			//the random source creates all the jobs requested by each class.
+			//for each job created, it sends to itself a message whose delay is the time of
+			//departure of the job, calculated using the strategy of the corresponding class
 
-				//log.write(NetLog.LEVEL_RELEASE, null, this, NetLog.EVENT_START);
+			//log.write(NetLog.LEVEL_RELEASE, null, this, NetLog.EVENT_START);
 
-				ListIterator<JobClass> jobClasses = getJobClasses().listIterator();
-				JobClass jobClass;
+			ListIterator<JobClass> jobClasses = getJobClasses().listIterator();
+			JobClass jobClass;
 
-				while (jobClasses.hasNext()) {
-					jobClass = jobClasses.next();
+			while (jobClasses.hasNext()) {
+				jobClass = jobClasses.next();
 
-					//NEW
-					//@author Stefano Omini
-					if (jobClass.getType() == JobClass.CLOSED_CLASS) {
-						//closed class: no arrivals
-						continue;
-					}
-					//end NEW
-
-					c = jobClass.getId();
-
-					// Calculates the delay of departure (1/lambda)
-					if (strategy[c] != null) {
-						job = new Job(jobClass);
-						delay = strategy[c].wait(this);
-						sendMe(job, delay);
-						//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
-					}
-
+				//NEW
+				//@author Stefano Omini
+				if (jobClass.getType() == JobClass.CLOSED_CLASS) {
+					//closed class: no arrivals
+					continue;
 				}
-				break;
+				//end NEW
 
-			case NetEvent.EVENT_ACK:
+				c = jobClass.getId();
 
-				//case EVENT_ACK:
-				//if there are waiting jobs, takes the first, set its bornTime and
-				//forwards it to the service section.
-				//then it creates a new job and sends to itself a message whose delay is the time of
-				//departure of that job.
-				//otherwise, if there are no waiting jobs, sets coolstart=true
-
-				if (waitingJobs.size() != 0) {
-					job = waitingJobs.removeFirst();
-					c = job.getJobClass().getId();
-					job.born();
-
-					//NEW
-					//@author Stefano Omini, Bertoli Marco
-
-					// in RandomSource the job is created (--> SystemEnteringTime is initialized)
-					// but then is delayed as long as the random interarrival time ("delay")
-					//
-					// to compute system response time, the job starting time must be
-					// reset (otherwise it will correspond to the creation time and not to the
-					// leaving time, which is "delay" seconds after)
-
-					// Signals to global jobInfoList new added job
-					this.getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
-
-					//end NEW
-
-					sendForward(job, 0.0);
-
-					//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_OUT);
-
-					// Create a new job and send it to me delayed
-					job = new Job(getJobClasses().get(c));
+				// Calculates the delay of departure (1/lambda)
+				if (strategy[c] != null) {
+					job = new Job(jobClass);
 					delay = strategy[c].wait(this);
 					sendMe(job, delay);
-
 					//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
-
-				} else {
-					coolStart = true;
 				}
-				break;
 
-			case NetEvent.EVENT_JOB:
+			}
+			break;
 
-				//case EVENT_JOB
-				//if coolStart=false adds the job to the list of waiting jobs.
+		case NetEvent.EVENT_JOB:
+
+			//case EVENT_JOB
+			//if coolStart=false adds the job to the list of waiting jobs.
+			//
+			//if coolStart=true (no waiting jobs)  the job is forwarded, an ack message
+			//is sent to the source of the message and a new job is created (the random source
+			//sends to itself a message, whose delay is the time of departure of the new job).
+
+			//log.write(NetLog.LEVEL_DEBUG, message.getJob(), this, NetLog.JOB_IN);
+
+			// Gets the job from the message
+			job = message.getJob();
+
+			if (coolStart) {
+				// Gets the class of the job
+				c = job.getJobClass().getId();
+
+				//no control is made on the number of jobs created
+				//it is an open class
+				job.born();
+
+				//NEW
+				//@author Stefano Omini, Bertoli Marco
+
+				// in RandomSource the job is created (--> SystemEnteringTime is initialized)
+				// but then is delayed as long as the random interarrival time ("delay")
 				//
-				//if coolStart=true (no waiting jobs)  the job is forwarded, an ack message
-				//is sent to the source of the message and a new job is created (the random source
-				//sends to itself a message, whose delay is the time of departure of the new job).
+				// to compute system response time, the job starting time must be
+				// reset (otherwise it will correspond to the creation time and not to the
+				// leaving time, which is "delay" seconds after)
 
-				//log.write(NetLog.LEVEL_DEBUG, message.getJob(), this, NetLog.JOB_IN);
+				// Signals to node jobInfoList new added job
+				this.getOwnerNode().getJobInfoList().add(new JobInfo(job));
+				// Signals to global jobInfoList new added job
+				this.getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
 
-				// Gets the job from the message
-				job = message.getJob();
+				//end NEW
 
-				if (coolStart) {
-					// Gets the class of the job
-					c = job.getJobClass().getId();
+				sendForward(job, 0.0);
 
-					//no control is made on the number of jobs created
-					//it is an open class
-					job.born();
+				//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_OUT);
 
-					//NEW
-					//@author Stefano Omini, Bertoli Marco
+				job = new Job(job.getJobClass());
+				delay = strategy[c].wait(this);
+				sendMe(job, delay);
 
-					// in RandomSource the job is created (--> SystemEnteringTime is initialized)
-					// but then is delayed as long as the random interarrival time ("delay")
-					//
-					// to compute system response time, the job starting time must be
-					// reset (otherwise it will correspond to the creation time and not to the
-					// leaving time, which is "delay" seconds after)
+				// Sets coolStart to false, next job should wait ack
+				coolStart = false;
 
-					// Signals to global jobInfoList new added job
-					this.getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
+				//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
+			} else {
+				//coolStart is false: there are waiting jobs. Add the received job.
+				waitingJobs.add(job);
+			}
+			break;
 
-					//end NEW
+		case NetEvent.EVENT_ACK:
 
-					sendForward(job, 0.0);
-					send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+			//case EVENT_ACK:
+			//if there are waiting jobs, takes the first, set its bornTime and
+			//forwards it to the service section.
+			//then it creates a new job and sends to itself a message whose delay is the time of
+			//departure of that job.
+			//otherwise, if there are no waiting jobs, sets coolstart=true
 
-					//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_OUT);
+			if (waitingJobs.size() != 0) {
+				job = waitingJobs.removeFirst();
+				c = job.getJobClass().getId();
+				job.born();
 
-					job = new Job(job.getJobClass());
-					delay = strategy[c].wait(this);
-					sendMe(job, delay);
+				//NEW
+				//@author Stefano Omini, Bertoli Marco
 
-					// Sets coolStart to false, next job should wait ack
-					coolStart = false;
+				// in RandomSource the job is created (--> SystemEnteringTime is initialized)
+				// but then is delayed as long as the random interarrival time ("delay")
+				//
+				// to compute system response time, the job starting time must be
+				// reset (otherwise it will correspond to the creation time and not to the
+				// leaving time, which is "delay" seconds after)
 
-					//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
-					return MSG_PROCESSED;
+				// Signals to node jobInfoList new added job
+				this.getOwnerNode().getJobInfoList().add(new JobInfo(job));
+				// Signals to global jobInfoList new added job
+				this.getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
 
-				} else {
-					//coolStart is false: there are waiting jobs. Add the received job.
-					waitingJobs.add(job);
-				}
-				break;
+				//end NEW
 
-			default:
-				return MSG_NOT_PROCESSED;
+				sendForward(job, 0.0);
+
+				//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_OUT);
+
+				// Create a new job and send it to me delayed
+				job = new Job(getJobClasses().get(c));
+				delay = strategy[c].wait(this);
+				sendMe(job, delay);
+
+				//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
+			} else {
+				coolStart = true;
+			}
+			break;
+
+		case NetEvent.EVENT_STOP:
+			break;
+
+		default:
+			return MSG_NOT_PROCESSED;
 		}
+
 		return MSG_PROCESSED;
 	}
+
 }

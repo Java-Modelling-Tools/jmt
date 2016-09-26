@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.QueueNet;
 
@@ -22,6 +22,7 @@ import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.Queue;
+import jmt.engine.NodeSections.Store;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.SimParameters;
@@ -136,30 +137,30 @@ public class NetNode extends SimEntity {
 	 */
 	public void addSection(NodeSection section) throws jmt.common.exception.NetException {
 		switch (section.getSectionID()) {
-			case NodeSection.INPUT:
-				if (inputSection == null) {
-					this.inputSection = section;
-				} else {
-					throw new jmt.common.exception.NetException(this, EXCEPTION_INPUT_SECTION_ALREADY_DEFINED,
-							"input section has been already defined");
-				}
-				break;
-			case NodeSection.SERVICE:
-				if (serviceSection == null) {
-					this.serviceSection = section;
-				} else {
-					throw new jmt.common.exception.NetException(this, EXCEPTION_SERVICE_SECTION_ALREADY_DEFINED,
-							"service section has been already defined");
-				}
-				break;
-			case NodeSection.OUTPUT:
-				if (outputSection == null) {
-					this.outputSection = section;
-				} else {
-					throw new jmt.common.exception.NetException(this, EXCEPTION_OUTPUT_SECTION_ALREADY_DEFINED,
-							"output section has been already defined");
-				}
-				break;
+		case NodeSection.INPUT:
+			if (inputSection == null) {
+				this.inputSection = section;
+			} else {
+				throw new jmt.common.exception.NetException(this, EXCEPTION_INPUT_SECTION_ALREADY_DEFINED,
+						"input section has been already defined");
+			}
+			break;
+		case NodeSection.SERVICE:
+			if (serviceSection == null) {
+				this.serviceSection = section;
+			} else {
+				throw new jmt.common.exception.NetException(this, EXCEPTION_SERVICE_SECTION_ALREADY_DEFINED,
+						"service section has been already defined");
+			}
+			break;
+		case NodeSection.OUTPUT:
+			if (outputSection == null) {
+				this.outputSection = section;
+			} else {
+				throw new jmt.common.exception.NetException(this, EXCEPTION_OUTPUT_SECTION_ALREADY_DEFINED,
+						"output section has been already defined");
+			}
+			break;
 		}
 	}
 
@@ -206,14 +207,14 @@ public class NetNode extends SimEntity {
 	public int getIntNodeProperty(int Id) throws jmt.common.exception.NetException {
 		try {
 			switch (Id) {
-				case PROPERTY_ID_ARRIVED_JOBS:
-					return jobsList.getJobsIn();
-				case PROPERTY_ID_LEFT_JOBS:
-					return jobsList.getJobsOut();
-				case PROPERTY_ID_EVENTS:
-					return eventsCounter;
-				case PROPERTY_ID_RESIDENT_JOBS:
-					return jobsList.size();
+			case PROPERTY_ID_ARRIVED_JOBS:
+				return jobsList.getJobsIn();
+			case PROPERTY_ID_LEFT_JOBS:
+				return jobsList.getJobsOut();
+			case PROPERTY_ID_EVENTS:
+				return eventsCounter;
+			case PROPERTY_ID_RESIDENT_JOBS:
+				return jobsList.size();
 			}
 		} catch (jmt.common.exception.NetException exc) {
 			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
@@ -231,12 +232,12 @@ public class NetNode extends SimEntity {
 	public int getIntNodeProperty(int Id, JobClass JobClass) throws jmt.common.exception.NetException {
 		try {
 			switch (Id) {
-				case PROPERTY_ID_ARRIVED_JOBS:
-					return jobsList.getJobsInPerClass(JobClass);
-				case PROPERTY_ID_LEFT_JOBS:
-					return jobsList.getJobsOutPerClass(JobClass);
-				case PROPERTY_ID_RESIDENT_JOBS:
-					return jobsList.size(JobClass);
+			case PROPERTY_ID_ARRIVED_JOBS:
+				return jobsList.getJobsInPerClass(JobClass);
+			case PROPERTY_ID_LEFT_JOBS:
+				return jobsList.getJobsOutPerClass(JobClass);
+			case PROPERTY_ID_RESIDENT_JOBS:
+				return jobsList.size(JobClass);
 			}
 		} catch (jmt.common.exception.NetException exc) {
 			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
@@ -252,10 +253,10 @@ public class NetNode extends SimEntity {
 	public double getDoubleNodeProperty(int Id) throws jmt.common.exception.NetException {
 		try {
 			switch (Id) {
-				case PROPERTY_ID_RESIDENCE_TIME:
-					return jobsList.getBusyTime() / jobsList.getJobsOut();
-				case PROPERTY_ID_THROUGHPUT:
-					return jobsList.getJobsOut() / NetSystem.getTime();
+			case PROPERTY_ID_RESIDENCE_TIME:
+				return jobsList.getBusyTime() / jobsList.getJobsOut();
+			case PROPERTY_ID_THROUGHPUT:
+				return jobsList.getJobsOut() / NetSystem.getTime();
 			}
 		} catch (jmt.common.exception.NetException exc) {
 			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
@@ -273,10 +274,10 @@ public class NetNode extends SimEntity {
 	public double getDoubleNodeProperty(int Id, JobClass JobClass) throws jmt.common.exception.NetException {
 		try {
 			switch (Id) {
-				case PROPERTY_ID_RESIDENCE_TIME:
-					return jobsList.getBusyTimePerClass(JobClass) / jobsList.getJobsOutPerClass(JobClass);
-				case PROPERTY_ID_THROUGHPUT:
-					return jobsList.getJobsOutPerClass(JobClass) / NetSystem.getTime();
+			case PROPERTY_ID_RESIDENCE_TIME:
+				return jobsList.getBusyTimePerClass(JobClass) / jobsList.getJobsOutPerClass(JobClass);
+			case PROPERTY_ID_THROUGHPUT:
+				return jobsList.getJobsOutPerClass(JobClass) / NetSystem.getTime();
 			}
 		} catch (jmt.common.exception.NetException exc) {
 			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
@@ -291,8 +292,8 @@ public class NetNode extends SimEntity {
 	 */
 	public Object getObjectNodeProperty(int Id) throws jmt.common.exception.NetException {
 		switch (Id) {
-			default:
-				throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+		default:
+			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -305,8 +306,8 @@ public class NetNode extends SimEntity {
 	 */
 	public Object getObjectNodeProperty(int Id, JobClass JobClass) throws jmt.common.exception.NetException {
 		switch (Id) {
-			default:
-				throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+		default:
+			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -317,14 +318,14 @@ public class NetNode extends SimEntity {
 	 */
 	public NodeSection getSection(int Id) throws jmt.common.exception.NetException {
 		switch (Id) {
-			case NodeSection.INPUT:
-				return inputSection;
-			case NodeSection.SERVICE:
-				return serviceSection;
-			case NodeSection.OUTPUT:
-				return outputSection;
-			default:
-				throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required section is not available.");
+		case NodeSection.INPUT:
+			return inputSection;
+		case NodeSection.SERVICE:
+			return serviceSection;
+		case NodeSection.OUTPUT:
+			return outputSection;
+		default:
+			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required section is not available.");
 		}
 	}
 
@@ -343,34 +344,34 @@ public class NetNode extends SimEntity {
 	 */
 	public void analyze(int measureName, JobClass jobClass, Measure measurement) throws jmt.common.exception.NetException {
 		switch (measureName) {
-			case SimConstants.LIST_NUMBER_OF_JOBS:
-                                        jobsList.analyzeQueueLength(jobClass, measurement);
-				break;
+		case SimConstants.LIST_NUMBER_OF_JOBS:
+			jobsList.analyzeQueueLength(jobClass, measurement);
+			break;
 
-			case SimConstants.LIST_RESIDENCE_TIME:
-				//jobsList.analyzeResponseTime(jobClass, measurement);
-				jobsList.analyzeResidenceTime(jobClass, measurement);
-				break;
+		case SimConstants.LIST_RESIDENCE_TIME:
+			//jobsList.analyzeResponseTime(jobClass, measurement);
+			jobsList.analyzeResidenceTime(jobClass, measurement);
+			break;
 			//NEW Bertoli Marco
-			case SimConstants.LIST_RESPONSE_TIME:
-                                        jobsList.analyzeResponseTime(jobClass, measurement);
-				break;
+		case SimConstants.LIST_RESPONSE_TIME:
+			jobsList.analyzeResponseTime(jobClass, measurement);
+			break;
 			//end NEW
 
-			case SimConstants.LIST_DROP_RATE:
-				jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
-				break;
-				
-			case SimConstants.RESPONSE_TIME_PER_SINK:
-				jobsList.analyzeResponseTimePerSink(jobClass, measurement);
-				break;
-				
-			case SimConstants.THROUGHPUT_PER_SINK:
-				jobsList.analyzeThroughputPerSink(jobClass, (InverseMeasure)measurement);
-				break;
+		case SimConstants.LIST_DROP_RATE:
+			jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
+			break;
 
-			default:
-				throw new jmt.common.exception.NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+		case SimConstants.RESPONSE_TIME_PER_SINK:
+			jobsList.analyzeResponseTimePerSink(jobClass, measurement);
+			break;
+
+		case SimConstants.THROUGHPUT_PER_SINK:
+			jobsList.analyzeThroughputPerSink(jobClass, (InverseMeasure) measurement);
+			break;
+
+		default:
+			throw new jmt.common.exception.NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
 	}
 
@@ -481,7 +482,7 @@ public class NetNode extends SimEntity {
 
 			eventType = message.getEvent();
 
-			//if the deferred queue(where we put messages when the node is busy)
+			//if the deferred queue (where we put messages when the node is busy)
 			//contains an abort event then poison the node.
 			//TODO: da togliere e' meglio mettere qualcosa che faccia lo stesso sul sistema quando viene lanciato un evento di questo genere
 			if (simWaiting(new SimTypeP(NetEvent.EVENT_ABORT)) > 0) {
@@ -514,7 +515,7 @@ public class NetNode extends SimEntity {
 		}
 
 	}
-	
+
 	private void handleStopMessages() throws NetException {
 		if (!stopped) {
 			stopped = true;
@@ -549,76 +550,77 @@ public class NetNode extends SimEntity {
 
 		//message goes through this switch depending on the destination section
 		//if the message is correctly processed by the appropriate node section
-		//then the pocessed variable contains a value different from the initial
+		//then the processed variable contains a value different from the initial
 		//MSG_NOT_PROCESSED.
 		switch (destinationSection) {
 
-			case NodeSection.INPUT:
-				// checks jobs routing
-				if (message.getEvent() == NetEvent.EVENT_JOB) {
-					if (source != this) {
-						if (sourceSection != NodeSection.OUTPUT) {
-							//the exterior source section can be the input
-							// section only in case of redirecting queue
-							NodeSection sourceSect = source.getSection(sourceSection);
+		case NodeSection.INPUT:
+			// checks jobs routing
+			if (message.getEvent() == NetEvent.EVENT_JOB) {
+				if (source != this) {
+					if (sourceSection != NodeSection.OUTPUT) {
+						//the exterior source section can be the input
+						//section only in case of redirecting queue
+						NodeSection sourceSect = source.getSection(sourceSection);
 
-							//check if this job has been redirected, otherwise the message
-							//cannot be dispatched
-							boolean redirected = (sourceSect instanceof Queue) && (((Queue) sourceSect).isRedirectionON());
-							if (!redirected) {
-								break;
-							}
+						//check if this job has been redirected, otherwise the message
+						//cannot be dispatched
+						boolean redirectedByQueue = (sourceSect instanceof Queue) && (((Queue) sourceSect).isRedirectionON());
+						boolean redirectedByStore = (sourceSect instanceof Store) && (((Store) sourceSect).isRedirectionON());
+						if (!redirectedByQueue && !redirectedByStore) {
+							break;
 						}
 					}
 				}
-				
-				// If this message is JOB and we are reference node for that job, signals it
-				// This is needed for global measures - Bertoli Marco
-				if (sourceSection == NodeSection.OUTPUT && message.getEvent() == NetEvent.EVENT_JOB) {
-					if (message.getJob().getJobClass().getReferenceNodeName().equals(this.getName())) {
-						this.getQueueNet().getJobInfoList().recycleJob(message.getJob());
-					} else {
-						// Update job number since the job still exists
-						this.getQueueNet().getJobInfoList().existJob(message.getJob());
-					}			
-				}
-				
-				if (inputSection != null) {
-					processed = inputSection.receive(message);
-				}
-				break;
+			}
 
-			case NodeSection.SERVICE:
-				// checks jobs routing
-				if (message.getEvent() == NetEvent.EVENT_JOB) {
-					if (source != this) {
-						break;
-					}
-				}
-				if (serviceSection != null) {
-					processed = serviceSection.receive(message);
-				}
-				break;
+			// If this message is JOB and we are reference node for that job, signals it
+			// This is needed for global measures - Bertoli Marco
+			if (sourceSection == NodeSection.OUTPUT && message.getEvent() == NetEvent.EVENT_JOB) {
+				if (message.getJob().getJobClass().getReferenceNodeName().equals(this.getName())) {
+					this.getQueueNet().getJobInfoList().recycleJob(message.getJob());
+				} else {
+					// Update job number since the job still exists
+					this.getQueueNet().getJobInfoList().existJob(message.getJob());
+				}			
+			}
 
-			case NodeSection.OUTPUT:
-				// checks jobs routing
-				if (message.getEvent() == NetEvent.EVENT_JOB) {
-					if (source != this) {
-						break;
-					} else if (sourceSection == NodeSection.INPUT) {
-						break;
-					}
-				}
-				if (outputSection != null) {
-					processed = outputSection.receive(message);
-				}
-				break;
+			if (inputSection != null) {
+				processed = inputSection.receive(message);
+			}
+			break;
 
-			default:
-				;
+		case NodeSection.SERVICE:
+			// checks jobs routing
+			if (message.getEvent() == NetEvent.EVENT_JOB) {
+				if (source != this) {
+					break;
+				}
+			}
+			if (serviceSection != null) {
+				processed = serviceSection.receive(message);
+			}
+			break;
+
+		case NodeSection.OUTPUT:
+			// checks jobs routing
+			if (message.getEvent() == NetEvent.EVENT_JOB) {
+				if (source != this) {
+					break;
+				} else if (sourceSection == NodeSection.INPUT) {
+					break;
+				}
+			}
+			if (outputSection != null) {
+				processed = outputSection.receive(message);
+			}
+			break;
+
+		default:
+			;
 		}
 		// This situation should be avoided as it is probably an error.
-		if (processed == NodeSection.MSG_NOT_PROCESSED && message.getEvent() != NetEvent.EVENT_STOP) {
+		if (processed == NodeSection.MSG_NOT_PROCESSED) {
 			String src = message.getSource().getName() + ":" + message.getSourceSection();
 			String dst = message.getDestination().getName() + ":" + message.getDestinationSection();
 			String job = "";
@@ -642,10 +644,9 @@ public class NetNode extends SimEntity {
 	 */
 	RemoveToken send(int event, Object data, double delay, byte sourceSection, byte destinationSection, NetNode destination)
 			throws jmt.common.exception.NetException {
-		
+
 		//Look if message is a job message and if job is leaving this node
-		if (outputSection != null
-				&& outputSection.automaticUpdateNodeJobinfolist()
+		if (outputSection != null && outputSection.automaticUpdateNodeJobinfolist()
 				&& (event == NetEvent.EVENT_JOB)
 				&& ((destination != this) || ((destination == this) && (sourceSection == NodeSection.OUTPUT) && (destinationSection == NodeSection.INPUT)))) {
 			Job job = (Job) data;
@@ -704,21 +705,21 @@ public class NetNode extends SimEntity {
 		Tag += DestinationSection << NodeSection.DESTINATION_SHIFT;
 
 		switch (NodeType) {
-			case QueueNetwork.REFERENCE_NODE:
-				iterator = Network.getReferenceNodes().listIterator();
-				while (iterator.hasNext()) {
-					//					Entity.sim_schedule(((NetNode) Iterator.next()).Entity.get_id(), Delay, Tag, Data);
-					simSchedule(iterator.next().getId(), Delay, Tag, Data);
-				}
-				break;
-			case QueueNetwork.NODE:
-				//@3G           Iterator=Network.getReferenceNodes().listIterator();
-				iterator = Network.getNodes().listIterator();
-				while (iterator.hasNext()) {
-					//					Entity.sim_schedule(((NetNode) Iterator.next()).Entity.get_id(), Delay, Tag, Data);
-					simSchedule(iterator.next().getId(), Delay, Tag, Data);
-				}
-				break;
+		case QueueNetwork.REFERENCE_NODE:
+			iterator = Network.getReferenceNodes().listIterator();
+			while (iterator.hasNext()) {
+				//Entity.sim_schedule(((NetNode) Iterator.next()).Entity.get_id(), Delay, Tag, Data);
+				simSchedule(iterator.next().getId(), Delay, Tag, Data);
+			}
+			break;
+		case QueueNetwork.NODE:
+			//Iterator = Network.getReferenceNodes().listIterator();
+			iterator = Network.getNodes().listIterator();
+			while (iterator.hasNext()) {
+				//Entity.sim_schedule(((NetNode) Iterator.next()).Entity.get_id(), Delay, Tag, Data);
+				simSchedule(iterator.next().getId(), Delay, Tag, Data);
+			}
+			break;
 		}
 	}
 
@@ -760,9 +761,9 @@ public class NetNode extends SimEntity {
 	//@author Stefano Omini
 
 	/**
-	 * Redirects a message to a NetNode, without updating jobInfoList measures.
-	 * @param Event Event tag.
-	 * @param Data  Data to be attached to the message.
+	 * Redirects a job to a NetNode without updating measures.
+	 *
+	 * @param job job to be attached to the message.
 	 * @param Delay Scheduling delay.
 	 * @param SourceSection The source section.
 	 * @param DestinationSection The destination section.
@@ -770,40 +771,29 @@ public class NetNode extends SimEntity {
 	 * @return a token to remove sent event
 	 * @throws jmt.common.exception.NetException Exception
 	 */
-	RemoveToken redirect(int Event, Object Data, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
+	RemoveToken redirect(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
 			throws jmt.common.exception.NetException {
-		int Tag;
 
-		//Look if message is a job message and if job is leaving this node
-		if (outputSection != null
-				&& outputSection.automaticUpdateNodeJobinfolist()
-				&& (Event == NetEvent.EVENT_JOB)
-				&& ((Destination != this) || ((Destination == this) && (SourceSection == NodeSection.OUTPUT) && (DestinationSection == NodeSection.INPUT)))) {
-			Job job = (Job) Data;
+		NodeSection section = getSection(SourceSection);
+		if (section != null && section.automaticUpdateNodeJobinfolist()
+				&& (Destination != this) || ((Destination == this) && (SourceSection == NodeSection.OUTPUT) && (DestinationSection == NodeSection.INPUT))) {
 			JobInfo JobInfo = jobsList.lookFor(job);
 			if (JobInfo != null) {
-				//removes the job without updating measures
-				jobsList.removeAfterRedirect(JobInfo);
+				jobsList.redirectJob(JobInfo);
 			}
 		}
 
-		Tag = Event & NetEvent.EVENT_MASK;
+		int Tag = NetEvent.EVENT_JOB & NetEvent.EVENT_MASK;
 		Tag += SourceSection << NodeSection.SOURCE_SHIFT;
 		Tag += DestinationSection << NodeSection.DESTINATION_SHIFT;
-
-		return simSchedule(Destination.getId(), Delay, Tag, Data);
+		return simSchedule(Destination.getId(), Delay, Tag, job);
 	}
 
-	/** Sends an "ack" message to a NetNode, to inform it that
+	/**
+	 * Sends an "ack" message to a NetNode to inform it that
 	 * the job previously sent has been dropped.
-	 * The dropped job is removed from the job info list.
-	 * <br>
-	 * The general "send" method cannot be used, because it updates
-	 * the job info list (by removing the job) only if the message contains
-	 * a job event (on the contrary, after dropping a job an ack event is sent!)
 	 *
-	 * @param Event Event tag.
-	 * @param Data  Data to be attached to the message.
+	 * @param job job to be attached to the message.
 	 * @param Delay Scheduling delay.
 	 * @param SourceSection The source section.
 	 * @param DestinationSection The destination section.
@@ -811,30 +801,50 @@ public class NetNode extends SimEntity {
 	 * @return a token to remove sent event
 	 * @throws jmt.common.exception.NetException Exception
 	 */
-	RemoveToken sendAckAfterDrop(int Event, Object Data, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
+	RemoveToken sendAckAfterDrop(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
 			throws jmt.common.exception.NetException {
 
-		int Tag;
-
-		//Look if message is an ack message
-
-		if ((Event == NetEvent.EVENT_ACK) && ((Destination != this) || ((Destination == this) && (DestinationSection != SourceSection)))) {
-
-			Job job = (Job) Data;
+		NodeSection section = getSection(SourceSection);
+		if (section != null && section.automaticUpdateNodeJobinfolist()) {
 			JobInfo JobInfo = jobsList.lookFor(job);
 			if (JobInfo != null) {
-				//the job must be removed from the list but measures
-				//should not be updated, otherwise they would consider
-				//this job in excess
-				jobsList.removeAfterDrop(JobInfo);
+				jobsList.dropJob(JobInfo);
 			}
-
 		}
 
-		Tag = Event & NetEvent.EVENT_MASK;
+		int Tag = NetEvent.EVENT_ACK & NetEvent.EVENT_MASK;
 		Tag += SourceSection << NodeSection.SOURCE_SHIFT;
 		Tag += DestinationSection << NodeSection.DESTINATION_SHIFT;
-		return simSchedule(Destination.getId(), Delay, Tag, Data);
+		return simSchedule(Destination.getId(), Delay, Tag, job);
+	}
+
+	/**
+	 * Sends an "ack" message to a NetNode to inform it that
+	 * the job previously sent has been consumed.
+	 *
+	 * @param job job to be attached to the message.
+	 * @param Delay Scheduling delay.
+	 * @param SourceSection The source section.
+	 * @param DestinationSection The destination section.
+	 * @param Destination The destination node.
+	 * @return a token to remove sent event
+	 * @throws jmt.common.exception.NetException Exception
+	 */
+	RemoveToken sendAckAfterConsume(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
+			throws jmt.common.exception.NetException {
+
+		NodeSection section = getSection(SourceSection);
+		if (section != null && section.automaticUpdateNodeJobinfolist()) {
+			JobInfo JobInfo = jobsList.lookFor(job);
+			if (JobInfo != null) {
+				jobsList.consumeJob(JobInfo);
+			}
+		}
+
+		int Tag = NetEvent.EVENT_ACK & NetEvent.EVENT_MASK;
+		Tag += SourceSection << NodeSection.SOURCE_SHIFT;
+		Tag += DestinationSection << NodeSection.DESTINATION_SHIFT;
+		return simSchedule(Destination.getId(), Delay, Tag, job);
 	}
 
 	//end NEW

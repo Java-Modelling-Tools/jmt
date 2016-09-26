@@ -8,7 +8,7 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
@@ -105,7 +105,7 @@ public class EnhancedVector extends ArrayList<Integer> implements Comparable<Enh
      * Checks whether a value of -1 is contained in the EnhancedVector.
      * @return True if -1 is contained, else false.
      */
-    public boolean containsMinusOne(){
+    public boolean containsMinusOne() {
         return this.contains(-1);
     }
 
@@ -121,7 +121,7 @@ public class EnhancedVector extends ArrayList<Integer> implements Comparable<Enh
         for (Integer k : this) {
             if (k > 0) {
                 return i;
-            } else if (k < 0){
+            } else if (k < 0) {
                 return i;
             }
             i++;
@@ -134,7 +134,7 @@ public class EnhancedVector extends ArrayList<Integer> implements Comparable<Enh
      * @param index The position's index
      * @return The number in that position as a BigRational
      */
-    public BigRational getAsBigRational(int index){
+    public BigRational getAsBigRational(int index) {
         return new BigRational(this.get(index));
     }
 
@@ -318,17 +318,17 @@ public class EnhancedVector extends ArrayList<Integer> implements Comparable<Enh
         } else {
             // Vectors have the same length
             // Check 1: Lower sum ==> Greater vector
-            if (v1.sum() < v2.sum()){
+            if (v1.sum() < v2.sum()) {
                 return -1;
-            } else if (v1.sum() > v2.sum()){
+            } else if (v1.sum() > v2.sum()) {
                 return 1;
             } else {
                 // Vectors have same length and same sum
                 // Check 2: Greater leftmost element ==> Greater vector
-                for (int i = 0; i < v1.size(); i++){
-                    if (v1.get(i) > v2.get(i)){
+                for (int i = 0; i < v1.size(); i++) {
+                    if (v1.get(i) > v2.get(i)) {
                         return -1;
-                    } else if  (v1.get(i)< v2.get(i)){
+                    } else if  (v1.get(i)< v2.get(i)) {
                         return 1;
                     }
                 }
@@ -391,7 +391,7 @@ public class EnhancedVector extends ArrayList<Integer> implements Comparable<Enh
     public void print() {
     	String newLine = System.getProperty("line.separator");
     	System.out.print("[");
-    	for(int i = 0; i < this.size(); i++) {
+    	for (int i = 0; i < this.size(); i++) {
     		System.out.print(this.get(i) + " ");    	 	
     	}
     	System.out.print("]" + newLine);

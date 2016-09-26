@@ -1,36 +1,35 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
- *
+ * 
  * This is the parameter that should be passed to the empirical
  * distribution.
- *
+ * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
- *
+ * 
  */
-
 public class EmpiricalPar extends AbstractParameter implements Parameter {
 
 	/** cumulative distribution function*/
@@ -105,7 +104,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 *
 	 * @return  array of double with the probability distribution function tabulated.
 	 */
-
 	public double[] getPDF() {
 		return pdf;
 	}
@@ -113,11 +111,10 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	/**
 	 * It returns the cdf of the distribution.
 	 * It returns the value of the parameters for the empirical distribution, that is
-	 * the vector of double reppresenting the cumulative distribution function tabulated.
+	 * the vector of double representing the cumulative distribution function tabulated.
 	 *
 	 * @return  array of double with the cumulative distribution function tabulated.
 	 */
-
 	public double[] getCDF() {
 		return cdf;
 	}
@@ -189,13 +186,12 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	public boolean check() {
 		/*
 		The gtz condition and the sum to 1 condition are actually controlled
-		* by the setPDF, therefore it is sufficient to control that the CDF is not empty.
-		*/
+		 * by the setPDF, therefore it is sufficient to control that the CDF is not empty.
+		 */
 		return (!(cdf == null));
 	}
 
 	// 11/09/03 - Massimo Cattai //
-
 	//TODO: è permesso il valore 0 delle probabilità??
 
 	/**
@@ -223,12 +219,12 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * Returns the value in the corrisponding position: generally only the
+	 * Returns the value in the corresponding position: generally only the
 	 * empirical distribution needs to access this method (generates the random
 	 * number then ask for the corresponding value).
 	 *
 	 * @param position
-	 * @return the vaue
+	 * @return the value
 	 */
 	Object getValue(int position) {
 		return values[position];
@@ -237,7 +233,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	/**
 	 * Returns all the values.
 	 */
-
 	public Object[] getValues() {
 		return values;
 	}

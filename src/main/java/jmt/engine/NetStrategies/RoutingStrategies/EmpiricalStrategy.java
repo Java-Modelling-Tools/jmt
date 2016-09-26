@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NetStrategies.RoutingStrategies;
 
@@ -36,8 +36,8 @@ import jmt.engine.random.EmpiricalPar;
  *
  * @author Federico Granata, Stefano Omini, Bertoli Marco
  */
-
 public class EmpiricalStrategy extends RoutingStrategy {
+
 	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
 	// Used to terminate the loop to avoid to send a job of closed class into a sink
 	// By the way a check is implemented at gui level, so this condition will never apply.
@@ -152,13 +152,12 @@ public class EmpiricalStrategy extends RoutingStrategy {
 	 * Gets the output node, into which the job must be routed, using an
 	 * empirical strategy.
 	 * @param nodeList the list of output nodes
-	 * @param jobClass class ofcurrent job to be routed
+	 * @param jobClass class of current job to be routed
 	 * @return The selected node.
 	 */
 	@Override
 	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
 		try {
-
 			if (nodes == null) {
 				//it is the first execution of this method: find the NetNode objects
 				//corresponding to the nodeNames
@@ -212,4 +211,5 @@ public class EmpiricalStrategy extends RoutingStrategy {
 		return true;
 	}
 	//end NEW
+
 }

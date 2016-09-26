@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jwat.trafficAnalysis.panels;
 
@@ -48,7 +48,7 @@ import jmt.engine.jwat.VariableNumber;
 import jmt.engine.jwat.trafficAnalysis.BurstEngine;
 import jmt.engine.jwat.trafficAnalysis.ModelTrafficAnalysis;
 import jmt.engine.jwat.trafficAnalysis.OnResetModel;
-import jmt.engine.jwat.trafficAnalysis.OnSetParamtersListener;
+import jmt.engine.jwat.trafficAnalysis.OnSetParametersListener;
 import jmt.engine.jwat.trafficAnalysis.TrafficAnalysisSession;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
@@ -58,7 +58,7 @@ import jmt.gui.jwat.trafficAnalysis.utils.NewPlot;
 
 /**
  * <p>Title: Graph Panel</p>
- * <p>Description: This panelis used to display JMVA what-if analysis
+ * <p>Description: This panel is used to display JMVA what-if analysis
  * results in a graph. Number of allowed lines in graph is determined
  * by <code>graph.getColors().length</code>. Modify it to allow more lines.</p>
  *
@@ -128,8 +128,8 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	 */
 	public GraphArrivalPanel(MainJwatWizard ew) {
 		this.ew = ew;
-		((TrafficAnalysisSession) ew.getSession()).addSetParamsListener(new OnSetParamtersListener() {
-			public void ParamsSetted() {
+		((TrafficAnalysisSession) ew.getSession()).addSetParamsListener(new OnSetParametersListener() {
+			public void ParamsSet() {
 				System.err.println("GraphArrival Panel reset");
 				GraphArrivalPanel.this.removeAll();
 				engine = ((TrafficAnalysisSession) GraphArrivalPanel.this.ew.getSession()).getEngine();
@@ -139,7 +139,7 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 			}
 		});
 		((ModelTrafficAnalysis) ew.getModel()).addResetModelListener(new OnResetModel() {
-			public void modelResetted() {
+			public void modelReset() {
 				GraphArrivalPanel.this.removeAll();
 			}
 		});

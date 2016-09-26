@@ -21,7 +21,7 @@ public class PopulationChangeVector extends EnhancedVector   {
      *
      * @param P The matrix containing the vector elements
      */
-    public PopulationChangeVector(Integer[] P){
+    public PopulationChangeVector(Integer[] P) {
         super(P);
     }
 
@@ -51,7 +51,7 @@ public class PopulationChangeVector extends EnhancedVector   {
        
     public int sum(int from, int to) {
     	int total = 0;
-    	for(;from <to; from++) {
+    	for (;from <to; from++) {
     		total += get(from);
     	}
     	return total;
@@ -72,8 +72,8 @@ public class PopulationChangeVector extends EnhancedVector   {
      * indexes start from 0
      */
     public int RightMostNonZero() {
-    	for(int i = size() - 1; i >= 0; i-- ) {
-    		if(get(i) != 0) return i;
+    	for (int i = size() - 1; i >= 0; i-- ) {
+    		if (get(i) != 0) return i;
     	}
     	return -1;
     }

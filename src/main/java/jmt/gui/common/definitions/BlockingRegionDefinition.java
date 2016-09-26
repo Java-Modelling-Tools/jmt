@@ -1,25 +1,28 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions;
 
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import jmt.gui.common.definitions.CommonModel.BlockingGroupData;
 
 /**
  * <p>Title: Blocking Region Definition Interface</p>
@@ -31,6 +34,7 @@ import java.util.Vector;
  *         Time: 16.21.26
  */
 public interface BlockingRegionDefinition {
+
 	/**
 	 * Adds a new blocking region to the model
 	 * @param name name of new blocking region
@@ -131,13 +135,6 @@ public interface BlockingRegionDefinition {
 	 * @param classKey search's key for customer class
 	 * @return maximum number of allowed customer. -1 means infinity.
 	 */
-	
-	public void setRegionClassWeight(Object regionKey, Object classKey, Integer weight);
-	
-	public void setRegionClassSize(Object regionKey, Object classKey, Integer weight);
-	
-	public void setRegionMemoryCapacity(Object regionKey, Integer memorySize);
-	
 	public Integer getRegionClassCustomerConstraint(Object regionKey, Object classKey);
 
 	/**
@@ -181,11 +178,45 @@ public interface BlockingRegionDefinition {
 	 * given the search key.
 	 */
 	public String getStationName(Object key);
-	
-	public Integer getRegionClassWeight(Object regionKey, Object classKey);
-	
+
 	public Integer getRegionMemorySize(Object regionKey);
-	
+
+	public void setRegionMemorySize(Object regionKey, Integer memorySize);
+
+	public Integer getRegionClassWeight(Object regionKey, Object classKey);
+
+	public void setRegionClassWeight(Object regionKey, Object classKey, Integer weight);
+
 	public Integer getRegionClassSize(Object regionKey, Object classKey);
+
+	public void setRegionClassSize(Object regionKey, Object classKey, Integer size);
+
+	public List<BlockingGroupData> getRegionGroupList(Object regionKey);
+
+	public void addRegionGroup(Object regionKey, String name, Integer capacity, String strategy);
+
+	public void deleteRegionGroup(Object regionKey,int index);
+
+	public void deleteAllRegionGroups(Object regionKey);
+
+	public String getRegionGroupName(Object regionKey, int index);
+
+	public void setRegionGroupName(Object regionKey, int index, String name);
+
+	public Integer getRegionGroupCapacity(Object regionKey, int index);
+
+	public void setRegionGroupCapacity(Object regionKey, int index, Integer maxJobs);
+
+	public String getRegionGroupStrategy(Object regionKey, int index);
+
+	public void setRegionGroupStrategy(Object regionKey, int index, String strategy);
+
+	public List<Object> getRegionGroupClassList(Object regionKey, int index);
+
+	public void addClassIntoRegionGroup(Object regionKey, int index, Object classKey);
+
+	public void deleteClassFromRegionGroup(Object regionKey, int index, Object classKey);
+
+	public void deleteAllClassesFromRegionGroup(Object regionKey, int index);
 
 }

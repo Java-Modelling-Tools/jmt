@@ -1023,7 +1023,7 @@ public class ExponentialFitting implements FittingAlgorithm {
 	
 	private void calculateParameters() {
 		mean = 0.0d;
-		for(double el:data) {
+		for (double el:data) {
 			mean += el;
 		}
 		mean /= data.length;
@@ -1050,13 +1050,13 @@ public class ExponentialFitting implements FittingAlgorithm {
 		numw = Math.pow(mean - data[0], 2);
 		
 		denw = 0.0d;
-		for(double el:data) {
+		for (double el:data) {
 			denw += Math.pow(el - mean,2);
 		}
 		
 		wn = ((double) n/(n-1))*((double)numw/denw);
 	
-		if(data.length >= 1000) {
+		if (data.length >= 1000) {
 			double sx_limit, dx_limit;
 			
 			mu = ((double)n*(n-1))/(n+1);
@@ -1077,7 +1077,7 @@ public class ExponentialFitting implements FittingAlgorithm {
 			
 			return isExponential;
 		}
-		else if(data.length >= 3) {
+		else if (data.length >= 3) {
 			isExponential = wn > crit_values[data.length-3][0] && wn < crit_values[data.length-3][1];
 			
 			return isExponential;
@@ -1096,7 +1096,7 @@ public class ExponentialFitting implements FittingAlgorithm {
 		
 		y = new double[n];
 		
-		for(i=0;i<n;i++) {
+		for (i=0;i<n;i++) {
 			y[i] = -mean*Math.log(1d-((double) i+1)/((double) n+1));
 			
 			//System.out.println("Exponential Original value: " + data[i] + "  Inverted value: " + y[i]);

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.jmva;
 
@@ -96,7 +96,7 @@ public class ResultsCheck {
 	 * Creates a ResultCheck object.
 	 * @param filePath the model to be tested
 	 * @param extendedInfo if true, more test simulation info will be logged
-	 * @param simSeed the simulationon seed to be used (use this feature only for test)
+	 * @param simSeed the simulation seed to be used (use this feature only for test)
 	 */
 	public ResultsCheck(String filePath, boolean extendedInfo, long simSeed) {
 
@@ -194,7 +194,7 @@ public class ResultsCheck {
 		FileInputStream inputStream = null;
 		FileOutputStream outputStream_file1 = null;
 		FileOutputStream outputStream_file2 = null;
-		int fileLenght = 0;
+		int fileLength = 0;
 
 		try {
 			inputStream = new FileInputStream(input.getAbsolutePath());
@@ -217,7 +217,7 @@ public class ResultsCheck {
 
 		try {
 			//number of available bytes
-			fileLenght = inputStream.available(); // Mi informo sul num. bytes.
+			fileLength = inputStream.available(); // Mi informo sul num. bytes.
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("Error while computing the length of input file " + input.getAbsolutePath());
@@ -229,7 +229,7 @@ public class ResultsCheck {
 
 		try {
 			int byte_read;
-			for (int i = 0; i < fileLenght; i++) {
+			for (int i = 0; i < fileLength; i++) {
 				//reads one byte
 				byte_read = inputStream.read();
 				//copies one byte

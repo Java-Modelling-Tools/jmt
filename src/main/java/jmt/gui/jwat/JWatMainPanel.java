@@ -47,7 +47,7 @@ public class JWatMainPanel extends WizardPanel {
 	private static final long serialVersionUID = 1L;
 	//Start screen image
 	private static URL imageURL = JWatMainPanel.class.getResource("StartScreenJWat.png");
-	//jWAT tool icons
+	//JWAT tool icons
 	private String IMG_TRAFFIC_ICON = "TrafficIcon";
 	private String IMG_SAVE_ICON = "Open";
 	private String IMG_PATH_ICON = "PathIcon";
@@ -151,8 +151,8 @@ public class JWatMainPanel extends WizardPanel {
 		//if (action == buttonAction[0]) {
 		//	button.setEnabled(false);
 		//}
-		//if(action == buttonAction[2]) button.setEnabled(false);
-		//if(action == buttonAction[4]) button.setEnabled(false);
+		//if (action == buttonAction[2]) button.setEnabled(false);
+		//if (action == buttonAction[4]) button.setEnabled(false);
 		panel.add(button);
 		return panel;
 	}

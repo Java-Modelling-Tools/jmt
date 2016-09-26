@@ -13,7 +13,7 @@ public class AddingSitePanel extends JPanel {
 	private JTextField name;
 	private JTextField address;
 	
-	public AddingSitePanel(){
+	public AddingSitePanel() {
 		this.setLayout(new GridLayout(0,1));
 		
 		JLabel siteName = new JLabel("Site Name: ");
@@ -31,15 +31,15 @@ public class AddingSitePanel extends JPanel {
 		this.add(address);
 	}
 	
-	public String getName(){
+	public String getName() {
 		return name.getText();
 	}
 	
-	public String getAddress(){
+	public String getAddress() {
 		return address.getText();
 	}
 	
-	public String getPanelName(){
+	public String getPanelName() {
 		return "New Site";
 	}
 }

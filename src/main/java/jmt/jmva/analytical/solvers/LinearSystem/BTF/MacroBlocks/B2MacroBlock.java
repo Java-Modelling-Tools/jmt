@@ -40,7 +40,7 @@ public class B2MacroBlock extends MacroBlock {
 	}
 
 	public void update(int current_class_population) {
-		for(int i = 0; i < micro_blocks.length; i++) {
+		for (int i = 0; i < micro_blocks.length; i++) {
 			((B2MicroBlock) micro_blocks[i]).update(current_class_population);
 		}		
 	}

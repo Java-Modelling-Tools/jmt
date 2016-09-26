@@ -1,7 +1,6 @@
 package jmt.gui;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,23 +10,17 @@ import jmt.framework.gui.components.JMTDialog;
 import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.jmva.gui.exact.ExactWizard;
 import jmt.manual.PDFViewerBuffer;
-import jmt.util.PartialTitleFrameMatcher;
 import jmt.util.ShortDescriptionButtonMatcher;
 import jmt.util.TextButtonMatcher;
 import jmt.util.TextLabelMatcher;
 import jmt.util.TextMenuItemMatcher;
 
 import org.fest.swing.core.KeyPressInfo;
-import org.fest.swing.data.TableCell;
 import org.fest.swing.edt.GuiActionRunner;
 import org.fest.swing.edt.GuiQuery;
-import org.fest.swing.finder.JFileChooserFinder;
-import org.fest.swing.finder.JOptionPaneFinder;
 import org.fest.swing.finder.WindowFinder;
 import org.fest.swing.fixture.DialogFixture;
 import org.fest.swing.fixture.FrameFixture;
-import org.fest.swing.fixture.JFileChooserFixture;
-import org.fest.swing.fixture.JOptionPaneFixture;
 import org.fest.swing.fixture.JTableFixture;
 import org.junit.After;
 import org.junit.Before;

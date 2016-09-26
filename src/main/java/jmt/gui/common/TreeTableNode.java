@@ -24,10 +24,10 @@ public class TreeTableNode extends AbstractMutableTreeTableNode {
 		return (Object[]) getUserObject();
 	}
 	
-	public void setType(String type){
+	public void setType(String type) {
 		this.type = type;
 	}
-	public String getType(){
+	public String getType() {
 		return type;
 	}
 

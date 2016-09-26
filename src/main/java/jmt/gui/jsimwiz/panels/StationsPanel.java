@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimwiz.panels;
 
@@ -23,7 +23,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.text.ParseException;
-import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -69,7 +68,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	//Table containg class-set data
+	//Table containing class-set data
 	private StationTable stationTable;
 
 	//Button that allows to add classes one by one
@@ -80,7 +79,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	//Enabled types of station for station editing
 	Object[] stationTypes = new Object[] { STATION_TYPE_DELAY, STATION_TYPE_SERVER, STATION_TYPE_FORK, STATION_TYPE_JOIN, STATION_TYPE_ROUTER,
-			STATION_TYPE_LOGGER, STATION_TYPE_CLASSSWITCH };
+			STATION_TYPE_LOGGER, STATION_TYPE_CLASSSWITCH, STATION_TYPE_TASKSEMAPHORE }; //, STATION_TYPE_PLACE, STATION_TYPE_TRANSITION };
 
 	//Component responsible of setting global number of classes at once
 	private JSpinner stationNumSpinner = new JSpinner() {
@@ -132,8 +131,8 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 	//deletion of one class
 	private AbstractAction deleteStation = new AbstractAction("") {
 		/**
-		* 
-		*/
+		 * 
+		 */
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -332,21 +331,16 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	//---------------------------- Table containing classes parameters --------------------------
 	/*Table that must display all of data about user classes. Customization of table settings is
-	obtained via inheritation of <code>JTable</code> Class.*/
+	obtained via inheritance of <code>JTable</code> Class.*/
 
 	private class StationTable extends JTable {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		/*This button allow a single userclass to be deleted directly from the table.
 		Corresponding value contained into cell must be zero.*/
 		JButton deleteButton = new JButton() {
-			/**
-			 * 
-			 */
+
 			private static final long serialVersionUID = 1L;
 
 			{
@@ -364,6 +358,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 			sizeColumnsAndRows();
 			setRowHeight(ROW_HEIGHT);
 			setDefaultRenderer(String.class, new jmt.gui.exact.table.DisabledCellRenderer());
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		//returns a component to be contained inside a table column(or cell)
@@ -420,16 +415,13 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	private class StationTableModel extends AbstractTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		//Names of columns contained in table. Columns containing buttons have empty names
 		String[] columnNames = new String[] { "Name", "Type", "" };
 
 		//Class declarations for this table's columns.
-		Class[] colClasses = new Class[] { String.class, JComboBox.class, JButton.class };
+		Class<?>[] colClasses = new Class[] { String.class, JComboBox.class, JButton.class };
 
 		/**Creates a new instance of class table model*/
 		public StationTableModel() {
@@ -464,7 +456,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 		/**Returns class describing data contained in specific column.*/
 		@Override
-		public Class getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			if (columnIndex < colClasses.length) {
 				return colClasses[columnIndex];
 			} else {
@@ -472,7 +464,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 			}
 		}
 
-		/**Tells wether data contained in a specific cell(given row and column index)
+		/**Tells whether data contained in a specific cell(given row and column index)
 		 * is editable or not. In this case distribution column is not editable, as
 		 * editing functionality is implemented via edit button*/
 		@Override
@@ -495,15 +487,15 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object key = data.getStationKeys().get(rowIndex);
 			switch (columnIndex) {
-				case (0): {
-					return data.getStationName(key);
-				}
-				case (1): {
-					return data.getStationType(key);
-				}
-				default: {
-					return null;
-				}
+			case (0): {
+				return data.getStationName(key);
+			}
+			case (1): {
+				return data.getStationType(key);
+			}
+			default: {
+				return null;
+			}
 			}
 		}
 
@@ -512,14 +504,14 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object key = data.getStationKeys().get(rowIndex);
 			switch (columnIndex) {
-				case (0): {
-					data.setStationName((String) aValue, key);
-					break;
-				}
-				case (1): {
-					data.setStationType((String) aValue, key);
-					break;
-				}
+			case (0): {
+				data.setStationName((String) aValue, key);
+				break;
+			}
+			case (1): {
+				data.setStationType((String) aValue, key);
+				break;
+			}
 			}
 		}
 

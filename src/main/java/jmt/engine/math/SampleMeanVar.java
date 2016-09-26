@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 /*
  * SampleMeanVar.java
@@ -33,7 +33,7 @@ public class SampleMeanVar {
 	protected double svar;//sample variance of data
 	protected double n;//number of data
 	protected double max;//the greatest sample of all data inserted
-	protected double min;//the smallestest sample of all data inserted
+	protected double min;//the smallest sample of all data inserted
 	protected double S;// sum of (sample - mean)^2
 	protected double confInt;
 
@@ -67,7 +67,7 @@ public class SampleMeanVar {
 		}
 	}
 
-	/** initalize a new SampleMeanVar with parameters all zero
+	/** initialize a new SampleMeanVar with parameters all zero
 	 */
 	public void initialize() {
 		sum = 0;
@@ -86,12 +86,12 @@ public class SampleMeanVar {
 	 */
 	public void putNewSample(double newValue) {
 		calcVar(newValue);
-		// coumputes the maximum and the minimum value of the sequence
+		// computes the maximum and the minimum value of the sequence
 		max = Math.max(max, newValue);
 		min = Math.min(min, newValue);
 	}
 
-	/** coumputes the new mean using a more stable algorithm
+	/** computes the new mean using a more stable algorithm
 	 *  @param newValue the new element to be added to the sequence
 	 */
 	protected void calcMean(double newValue) {
@@ -99,7 +99,7 @@ public class SampleMeanVar {
 		smean += (newValue - smean) / n;
 	}
 
-	/** coumputes the new sample variance using a stable algorithm
+	/** computes the new sample variance using a stable algorithm
 	 *  it also computes the mean with the stable algorithm.
 	 *  @param newValue the new element to be added to the sequence
 	 */
@@ -134,7 +134,7 @@ public class SampleMeanVar {
 		return svar;
 	}
 
-	/** get the gratest value
+	/** get the greatest value
 	 *  @return the actual max value
 	 */
 	public double getMax() {
@@ -164,7 +164,7 @@ public class SampleMeanVar {
 		return confInt;
 	}
 
-	/** creats a string with the calculated parametrs of the sequence monitored
+	/** creates a string with the calculated parameters of the sequence monitored
 	 *  by SampleMeanVar
 	 *  @return a string
 	 */

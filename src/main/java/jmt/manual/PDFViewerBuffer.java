@@ -45,18 +45,16 @@ import com.sun.pdfview.action.GoToAction;
  */
 public class PDFViewerBuffer extends JFrame implements AdjustmentListener,
 TreeSelectionListener {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private static final int PAGE_NUM_RESERVED = -1;
 	private static final String MANUAL_RESOURCE = "manuals/manual.pdf";
 	private static final String EMPTY_RESOURCE = "emptyFile.txt";
 
 	//size of buffer
-	private static int BUFFER_SIZE = 3;// MUST BE ODD
+	private static final int BUFFER_SIZE = 3;// MUST BE ODD
 	//size of page display
-	private static int PAGE_DIMENSION_RATIO = 65;
+	private static final int PAGE_DIMENSION_RATIO = 65;
 
 	//buffer to memory use for load manual
 	private Image buffer[];
@@ -70,7 +68,7 @@ TreeSelectionListener {
 
 	// use to create bar in the panel
 	private Scrollbar bar;
-	private static int SCROLLBAR_ACCURACY = 1;
+	private static final int SCROLLBAR_ACCURACY = 1;
 
 	// Panel where upload manual
 	private JPanel canvas;

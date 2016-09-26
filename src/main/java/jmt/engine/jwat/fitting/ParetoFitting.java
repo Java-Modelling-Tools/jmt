@@ -43,7 +43,7 @@ public class ParetoFitting implements FittingAlgorithm {
 		sigmaML = data[0];
 		trasf_data = (double[]) data.clone();
 		summation = 0.0d;
-		for(i=0;i<n;i++) {
+		for (i=0;i<n;i++) {
 			trasf_data[i] /= sigmaML;
 			trasf_data[i] = Math.log(trasf_data[i]);
 			summation += trasf_data[i];
@@ -71,9 +71,9 @@ public class ParetoFitting implements FittingAlgorithm {
 		usegn = 0.0d;
 		iui = 0.0d;
 		
-		for(i = 1;i <= n-1;i++) {
+		for (i = 1;i <= n-1;i++) {
 			
-			if(i==1)
+			if (i==1)
 				y = (n - i + 1) * trasf_data[i-1];
 			else
 				y = (n - i + 1) * (trasf_data[i-1] - trasf_data[i-2]);
@@ -124,7 +124,7 @@ public class ParetoFitting implements FittingAlgorithm {
 		
 		y = new double[n];
 		
-		for(i=0;i<n;i++) {
+		for (i=0;i<n;i++) {
 			y[i] = sigmaML/Math.pow(1d-((double) i+1)/((double) n+1),1d/alphaML);
 			
 			//System.out.println("Original value: " + data[i] + "  Inverted value: " + y[i]);

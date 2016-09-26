@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.common.panels.parametric;
 
@@ -131,7 +131,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 				int code = pad.checkCorrectness(true); //check correctness of the PAD and if it is possible corrects it
 				if (code != 2) {
 					chooser.setSelectedItem(pad.getType());
-				} else { //the old type of parametric analysis is no more avaible
+				} else { //the old type of parametric analysis is no more available
 					pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(temp, cd, sd, simd);
 					simd.setParametricAnalysisModel(pad);
 				}
@@ -202,7 +202,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 	}
 
 	/**
-	 * Creates the choosen parameter option panel
+	 * Creates the chosen parameter option panel
 	 * @param pad the instance of <code>ParameterAnalysisDefinition</code> model.
 	 * @return  the <code>ParameterOptionPanel</code> corresponding to the <code>ParameterAnalysisDefinition</code>
 	 * passed as parameter
@@ -276,7 +276,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 	        /*else {
 	            int code = pad.checkCorrectness(true);  //check correctness of the PAD and if it is possible corrects it
 	            if (code != 2) chooser.setSelectedItem(pad.getType());
-	            else {    //the old type of parametric analysis is no more avaible
+	            else { //the old type of parametric analysis is no more available
 	                pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(temp,cd,sd,simd);
 	                simd.setParametricAnalysisModel(pad);
 	            }

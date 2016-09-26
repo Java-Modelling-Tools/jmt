@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions;
 
@@ -43,6 +43,7 @@ import jmt.framework.gui.graph.MeasureValue;
  *              each sink per class.
  */
 public class ResultsModel implements MeasureDefinition {
+
 	private TempMeasure[] measures; // An array with all TempMeasures
 	private Vector<Integer> queueLength = new Vector<Integer>();
 	private Vector<Integer> queueTime = new Vector<Integer>();
@@ -55,12 +56,12 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
 	private Vector<Integer> customerNumber = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
-	
+
 	private Vector<Integer> meanWeight = new Vector<Integer>();
 	private Vector<Integer> meanMemoryOccupation = new Vector<Integer>();
-	
+
 	private Vector<Integer> FJResponseTime = new Vector<Integer>();
-        private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
+	private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
 
 	//Added by ASHANKA START
 	//Vector ro contain the Measure index of the System Power. 
@@ -68,7 +69,7 @@ public class ResultsModel implements MeasureDefinition {
 	//inclusion in the JSIM as a performance Index.
 	private Vector<Integer> systemPower = new Vector<Integer>();
 	//Added by ASHANKA STOP
-	
+
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputTimePerSink = new Vector<Integer>();
 
@@ -80,7 +81,7 @@ public class ResultsModel implements MeasureDefinition {
 	private double pollingInterval;
 	private double progressTime = 0.0;
 	private MalformedReplayerFileListener mrfListener;
-	
+
 	private String logDecimalSeparator;
 	private String logCsvDelimiter;
 
@@ -91,8 +92,6 @@ public class ResultsModel implements MeasureDefinition {
 	public String getLogDecimalSeparator() {
 		return logDecimalSeparator;
 	}
-
-
 
 	/* (non-Javadoc)
 	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogCsvDelimiter()
@@ -126,66 +125,60 @@ public class ResultsModel implements MeasureDefinition {
 		// Now parses measure type and puts each TempMeasure in right vector
 		for (int i = 0; i < measures.length; i++) {
 			switch (measures[i].getMeasureType()) {
-				case SimConstants.QUEUE_TIME:
-					queueTime.add(new Integer(i));
-					break;
-				case SimConstants.RESIDENCE_TIME:
-					residenceTime.add(new Integer(i));
-					break;
-				case SimConstants.RESPONSE_TIME:
-					responseTime.add(new Integer(i));
-					break;
-				case SimConstants.UTILIZATION:
-					utilization.add(new Integer(i));
-					break;
-				case SimConstants.THROUGHPUT:
-					throughput.add(new Integer(i));
-					break;
-				case SimConstants.QUEUE_LENGTH:
-					queueLength.add(new Integer(i));
-					break;
-				case SimConstants.SYSTEM_RESPONSE_TIME:
-					systemResponseTime.add(new Integer(i));
-					break;
-				case SimConstants.SYSTEM_JOB_NUMBER:
-					customerNumber.add(new Integer(i));
-					break;
-				case SimConstants.SYSTEM_THROUGHPUT:
-					systemThroughput.add(new Integer(i));
-					break;
-				case SimConstants.DROP_RATE:
-					dropRate.add(new Integer(i));
-					break;
-				case SimConstants.SYSTEM_DROP_RATE:
-					systemDropRate.add(new Integer(i));
-					break;
-				//Added by ASHANKA START
-				//Added as a part of addition of System Power to
-				//JSIM as a new Performance Index.
-				case SimConstants.SYSTEM_POWER:
-					systemPower.add(new Integer(i));
-					break;
-				//Added by ASHANKA STOP
-					
-				case SimConstants.RESPONSE_TIME_PER_SINK:
-					responseTimePerSink.add(new Integer(i));
-					break;
-				case SimConstants.THROUGHPUT_PER_SINK:
-					throughputTimePerSink.add(new Integer(i));
-					break;					
-				case SimConstants.FCR_TOTAL_WEIGHT:
-					meanWeight.add(new Integer(i));
-					break;
-				case SimConstants.FCR_MEMORY_OCCUPATION:
-					meanMemoryOccupation.add(new Integer(i));
-					break;
-				case SimConstants.FORK_JOIN_RESPONSE_TIME:
-					FJResponseTime.add(new Integer(i));
-					break;
-                                case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-					FJCustomerNumber.add(new Integer(i));
-					break;
-					
+			case SimConstants.QUEUE_TIME:
+				queueTime.add(new Integer(i));
+				break;
+			case SimConstants.RESIDENCE_TIME:
+				residenceTime.add(new Integer(i));
+				break;
+			case SimConstants.RESPONSE_TIME:
+				responseTime.add(new Integer(i));
+				break;
+			case SimConstants.UTILIZATION:
+				utilization.add(new Integer(i));
+				break;
+			case SimConstants.THROUGHPUT:
+				throughput.add(new Integer(i));
+				break;
+			case SimConstants.QUEUE_LENGTH:
+				queueLength.add(new Integer(i));
+				break;
+			case SimConstants.SYSTEM_RESPONSE_TIME:
+				systemResponseTime.add(new Integer(i));
+				break;
+			case SimConstants.SYSTEM_JOB_NUMBER:
+				customerNumber.add(new Integer(i));
+				break;
+			case SimConstants.SYSTEM_THROUGHPUT:
+				systemThroughput.add(new Integer(i));
+				break;
+			case SimConstants.DROP_RATE:
+				dropRate.add(new Integer(i));
+				break;
+			case SimConstants.SYSTEM_DROP_RATE:
+				systemDropRate.add(new Integer(i));
+				break;
+			case SimConstants.SYSTEM_POWER:
+				systemPower.add(new Integer(i));
+				break;
+			case SimConstants.RESPONSE_TIME_PER_SINK:
+				responseTimePerSink.add(new Integer(i));
+				break;
+			case SimConstants.THROUGHPUT_PER_SINK:
+				throughputTimePerSink.add(new Integer(i));
+				break;
+			case SimConstants.FCR_TOTAL_WEIGHT:
+				meanWeight.add(new Integer(i));
+				break;
+			case SimConstants.FCR_MEMORY_OCCUPATION:
+				meanMemoryOccupation.add(new Integer(i));
+				break;
+			case SimConstants.FORK_JOIN_RESPONSE_TIME:
+				FJResponseTime.add(new Integer(i));
+				break;
+			case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+				FJCustomerNumber.add(new Integer(i));
+				break;
 			}
 			// Adds to allMeasures HashMap a vector to collect all values of this measure
 			Vector<MeasureValueImpl> temp_mean = new Vector<MeasureValueImpl>();
@@ -318,14 +311,14 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns number of analized samples for a given measure
+	 * Returns number of analyzed samples for a given measure
 	 * @param measureIndex index of the measure
-	 * @return number of analized samples
+	 * @return number of analyzed samples
 	 */
-	public synchronized int getAnalizedSamples(int measureIndex) {
+	public synchronized int getAnalyzedSamples(int measureIndex) {
 		return measures[measureIndex].getNsamples();
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see jmt.gui.common.definitions.MeasureDefinition#getDiscardedSamples(int)
 	 */
@@ -338,7 +331,7 @@ public class ResultsModel implements MeasureDefinition {
 	 * Returns the vector of Temporary values of a given measure. Each element of the vector
 	 * is an instance of <code>Value</code> interface.
 	 * @param measureIndex index of the measure
-	 * @return vector of termporary values until now
+	 * @return vector of temporary values until now
 	 */
 	public synchronized Vector<MeasureValue> getValues(int measureIndex) {
 		return measuresVector[measureIndex];
@@ -370,17 +363,16 @@ public class ResultsModel implements MeasureDefinition {
 	public int getMeasureType(int measureIndex) {
 		return measures[measureIndex].getMeasureType();
 	}
-	
+
 	/**
 	 * Returns Filename corresponding to a Measure
 	 * @param measureIndex index of the measure
 	 * @return Filename of the measure
 	 */
-	
-	public String getLogFileName(int measureIndex){
+	public String getLogFileName(int measureIndex) {
 		return measures[measureIndex].getLogFileName();
 	}
-	
+
 	/**
 	 * Returns an array with the measureIndex of every queue length measure
 	 * @return an array with measures' index
@@ -538,22 +530,22 @@ public class ResultsModel implements MeasureDefinition {
 
 	/**
 	 * Sets a ProgressTimeListener to listen to progress time change events. This is unique.
-	 * @param listener listener to be set or null to unset previous one
+	 * @param listener listener to be set or null to reset previous one
 	 */
 	public synchronized void setProgressTimeListener(ProgressTimeListener listener) {
 		ptlistener = listener;
 	}
-	
+
 	/**
 	 * Sets a ProgressTimeListener to listen to detected malformed replayer file. This is unique.
-	 * @param listener listener to be set or null to unset previous one
+	 * @param listener listener to be set or null to reset previous one
 	 */
 	public synchronized void setMalformedReplayerFileListener(MalformedReplayerFileListener listener) {
 		mrfListener = listener;
 	}
-	
+
 	public synchronized void detectedMalformedReplayerFile(String msg) {
-		if(mrfListener != null) {
+		if (mrfListener != null) {
 			mrfListener.detectedError(msg);
 		}
 	}
@@ -578,28 +570,26 @@ public class ResultsModel implements MeasureDefinition {
 	 * Implementation of Value interface
 	 */
 	public class MeasureValueImpl implements MeasureValue {
+
 		private double value;
 		private double upper;
 		private double lower;
 		private double lastIntervalAvgValue;
 		private double simulationTime;
-		
+
 		public MeasureValueImpl(TempMeasure tm) {
 			value = tm.getTempMean();
 			upper = tm.getUpperBound();
 			lower = tm.getLowerBound();
-			
+
 			lastIntervalAvgValue = tm.getLastIntervalAvgValue();
 			simulationTime= tm.getSimTime();
-			
 		}
-		
+
 		public double getLastIntervalAvgValue() {
 			return lastIntervalAvgValue;
 		}
-		
-		
-		
+
 		public double getSimTime() {
 			return simulationTime;
 		}
@@ -615,6 +605,7 @@ public class ResultsModel implements MeasureDefinition {
 		public double getMeanValue() {
 			return value;
 		}
+
 	}
 
 	public int[] getResponsetimePerSinkMeasures() {
@@ -632,31 +623,32 @@ public class ResultsModel implements MeasureDefinition {
 		}
 		return tmp;
 	}
-	
-	public int[] getMeanWeightMeasures(){
+
+	public int[] getMeanWeightMeasures() {
 		int[] tmp = new int[meanWeight.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = meanWeight.get(i).intValue();
 		}
 		return tmp;
 	}
-	
-	public int[] getMeanMemoryOccupationMeasures(){
+
+	public int[] getMeanMemoryOccupationMeasures() {
 		int[] tmp = new int[meanMemoryOccupation.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = meanMemoryOccupation.get(i).intValue();
 		}
 		return tmp;
 	}
-	
-	public int[] getFJResponseTimeMeasures(){
+
+	public int[] getFJResponseTimeMeasures() {
 		int[] tmp = new int[FJResponseTime.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = FJResponseTime.get(i).intValue();
 		}
 		return tmp;
 	}
-        public int[] getFJCustomerNumberMeasures(){
+
+	public int[] getFJCustomerNumberMeasures() {
 		int[] tmp = new int[FJCustomerNumber.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = FJCustomerNumber.get(i).intValue();

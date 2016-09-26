@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.QueueNet;
 
@@ -65,11 +65,10 @@ public class SimConstants {
 	/** Measure identifier: drop rate of the system (Bertoli Marco)  */
 	public static final int SYSTEM_DROP_RATE = 11;
 
-	//Added by ASHANKA START
-	//Id of the system power
 	public static final int SYSTEM_POWER = 12;
-	//Added by ASHANKA STOP
+
 	public static final int THROUGHPUT_PER_SINK = 13;
+
 	public static final int RESPONSE_TIME_PER_SINK = 14;
 
 	//-------------------- end SIMULATION MEASURE IDENTIFIERS -------------------------//
@@ -95,25 +94,27 @@ public class SimConstants {
 	public static final int LIST_DROP_RATE = 26;
 
 	//-------------------- end JOB LIST MEASURE IDENTIFIERS -------------------------//
+
 	/** To be used for a blocking region measure */
 	public static final String NODE_TYPE_REGION = "region";
+
 	/** To be used for a station measure. This is default */
 	public static final String NODE_TYPE_STATION = "station";
-	
-	/** Measure identifier: mean weight of a FCRegion.   */
+
+	/** Measure identifier: total weight of a FCRegion.   */
 	public static final int FCR_TOTAL_WEIGHT = 27;
-	
-	/** Measure identifier: mean memory occupation of a FCRegion.   */
+
+	/** Measure identifier: memory occupation of a FCRegion.   */
 	public static final int FCR_MEMORY_OCCUPATION = 28;
-	
-	/** Measure identifier: Response Time of a F/J area */
+
+	/** Measure identifier: response time of a F/J area */
 	public static final int FORK_JOIN_RESPONSE_TIME = 29;
-        
-        /** Measure identifier: Response Time of a F/J area */
+
+	/** Measure identifier: number of jobs in a F/J area */
 	public static final int FORK_JOIN_NUMBER_OF_JOBS = 30;
-        
-        public static boolean isFJMeasure(int measure) {
-                return measure == FORK_JOIN_RESPONSE_TIME || measure == FORK_JOIN_NUMBER_OF_JOBS;
-        }
+
+	public static boolean isFJMeasure(int measure) {
+		return measure == FORK_JOIN_RESPONSE_TIME || measure == FORK_JOIN_NUMBER_OF_JOBS;
+	}
 
 }

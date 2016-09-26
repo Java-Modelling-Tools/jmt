@@ -43,7 +43,7 @@ public class SparseBlock {
 	}
 
 	public BigRational get(int row, int col) {
-		if(columns[row] == col) {
+		if (columns[row] == col) {
 			return values[row];
 		} else {
 			return BigRational.ZERO;
@@ -51,13 +51,13 @@ public class SparseBlock {
 	}
 	
 	public void multiply(BigRational[] result) {
-		 for(int i = 0; i < rows; i++) {
+		 for (int i = 0; i < rows; i++) {
 			 result[position.row + i] = result[position.row + i].add(basis.getNewValue(position.col + columns[i]).multiply(values[i]));
 		 }
 	} 
 
 	public void solve(BigRational[] rhs) {
-		for(int i = 0; i < rows; i++) {
+		for (int i = 0; i < rows; i++) {
 			 rhs[position.row + i] = rhs[position.row + i].add((basis.getNewValue(position.col + columns[i]).multiply(values[i])).negate());
 		} 		
 	}

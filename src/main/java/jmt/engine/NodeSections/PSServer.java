@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NodeSections;
 
@@ -43,6 +43,7 @@ import jmt.engine.simEngine.RemoveToken;
  * @version 1.0
  */
 public class PSServer extends ServiceSection {
+
 	/** Property Identifier:  Busy counter. */
 	public static final int PROPERTY_ID_BUSY_COUNTER = 0x0101;
 	/** Property Identifier:  Max jobs (number of servers). */
@@ -51,8 +52,8 @@ public class PSServer extends ServiceSection {
 	public static final int PROPERTY_ID_SERVICE_STRATEGY = 0x0104;
 
 	private int numberOfServers;
-	private int /** This variable is used to implement blocking.*/
-	waitingAcks;
+	/** This variable is used to implement blocking.*/
+	private int waitingAcks;
 
 	private ServiceStrategy serviceStrategy[];
 
@@ -74,9 +75,9 @@ public class PSServer extends ServiceSection {
 	/** Creates a new instance of Server.
 	 * @param serverNumber Number of jobs which can be served simultaneously.
 	 * @param serviceStrategy Array of service strategies, one per class.
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
-	public PSServer(Integer serverNumber, ServiceStrategy serviceStrategy[]) throws jmt.common.exception.NetException {
+	public PSServer(Integer serverNumber, ServiceStrategy serviceStrategy[]) throws NetException {
 		// Disable automatic section jobinfolist usage. We will update it manually.
 		super(false, true);
 		this.serviceStrategy = serviceStrategy;
@@ -84,40 +85,39 @@ public class PSServer extends ServiceSection {
 		jobs = new PriorityQueue<JobData>();
 	}
 
-	public PSServer(Integer serverNumber, Integer numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[])
-			throws jmt.common.exception.NetException {
+	public PSServer(Integer serverNumber, Integer numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[]) throws NetException {
 		this(serverNumber, serviceStrategy);
 	}
 
 	@Override
-	public int getIntSectionProperty(int id) throws jmt.common.exception.NetException {
+	public int getIntSectionProperty(int id) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_BUSY_COUNTER:
-				return jobs.size();
-			case PROPERTY_ID_MAX_JOBS:
-				return numberOfServers;
-			default:
-				return super.getIntSectionProperty(id);
+		case PROPERTY_ID_BUSY_COUNTER:
+			return jobs.size();
+		case PROPERTY_ID_MAX_JOBS:
+			return numberOfServers;
+		default:
+			return super.getIntSectionProperty(id);
 		}
 	}
 
 	@Override
-	public Object getObject(int id, JobClass jobClass) throws jmt.common.exception.NetException {
+	public Object getObject(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_SERVICE_STRATEGY:
-				return serviceStrategy[jobClass.getId()];
-			default:
-				return super.getObject(id);
+		case PROPERTY_ID_SERVICE_STRATEGY:
+			return serviceStrategy[jobClass.getId()];
+		default:
+			return super.getObject(id);
 		}
 	}
 
 	@Override
-	public Object getObject(int id) throws jmt.common.exception.NetException {
+	public Object getObject(int id) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_SERVICE_STRATEGY:
-				return serviceStrategy;
-			default:
-				return super.getObject(id);
+		case PROPERTY_ID_SERVICE_STRATEGY:
+			return serviceStrategy;
+		default:
+			return super.getObject(id);
 		}
 	}
 
@@ -148,61 +148,71 @@ public class PSServer extends ServiceSection {
 	}
 
 	@Override
-	protected int process(NetMessage message) throws jmt.common.exception.NetException {
+	protected int process(NetMessage message) throws NetException {
 		switch (message.getEvent()) {
-			case NetEvent.EVENT_JOB:
-				Job job = message.getJob();
 
-				if (isMine(message)) {
-					// I sent the message, so it ended servicing
+		case NetEvent.EVENT_START:
+			break;
+
+		case NetEvent.EVENT_JOB:
+			Job job = message.getJob();
+			if (isMine(message)) {
+				// I sent the message, so it ended servicing
+				updateServiceTimes(lastMessageSentTime);
+				lastMessageSent = null;
+				// forwards the completed jobs to the output section
+				JobData data = jobs.peek();
+				handleJobInfoLists(data, PSEvent.JOB_OUT);
+				jobs.poll();
+				sendForward(data.getJob(), 0.0);
+				waitingAcks++;
+			} else {
+				// Check if a job is running
+				if (lastMessageSent != null) {
+					// We need to preempt the last message
+					removeMessage(lastMessageSent);
 					updateServiceTimes(lastMessageSentTime);
 					lastMessageSent = null;
-					// forwards the completed jobs to the output section
-					JobData data = jobs.peek();
-					handleJobInfoLists(data, PSEvent.JOB_OUT);
-					jobs.poll();
-					sendForward(data.getJob(), 0.0);
-					waitingAcks++;
-				} else {
-					// Check if a job is running
-					if (lastMessageSent != null) {
-						// We need to preempt the last message
-						removeMessage(lastMessageSent);
-						updateServiceTimes(lastMessageSentTime);
-						lastMessageSent = null;
-					}
-					// Estimate the job service time, puts it in the queue and sends a message to itself
-					// with the minimum service time of all the jobs to perform processing
-					double serviceTime = serviceStrategy[job.getJobClass().getId()].wait(this);
-//					job.setServiceTime(serviceTime);
-					JobData data = new JobData(job, serviceTime);
-					handleJobInfoLists(data, PSEvent.JOB_IN);
-					jobs.add(data);
-
-					// Sends an ACK to the input section as we will always accept new jobs.
-					sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
 				}
-				serviceJobs();
-				break;
-
-			case NetEvent.EVENT_ACK:
-				//EVENT_ACK
-				//If there are no jobs in the service section, message is not processed.
-				if (waitingAcks == 0) {
-					//it was not waiting for any job
-					return NodeSection.MSG_NOT_PROCESSED;
+				// Estimate the job service time, puts it in the queue and sends a message to itself
+				// with the minimum service time of all the jobs to perform processing
+				double serviceTime = 0.0;
+				if (job.getServiceTime() != 0.0) {
+					serviceTime = job.getServiceTime();
 				} else {
-					// Avoid ACK to the input section, as we already sent ack
-					waitingAcks--;
+					serviceTime = serviceStrategy[job.getJobClass().getId()].wait(this);
 				}
+				//job.setServiceTime(serviceTime);
+				JobData data = new JobData(job, serviceTime);
+				handleJobInfoLists(data, PSEvent.JOB_IN);
+				jobs.add(data);
 
-				serviceJobs();
+				// Sends an ACK to the input section as we will always accept new jobs.
+				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
+			}
+			serviceJobs();
+			break;
 
-				break;
+		case NetEvent.EVENT_ACK:
+			//EVENT_ACK
+			//If there are no jobs in the service section, message is not processed.
+			if (waitingAcks == 0) {
+				//it was not waiting for any job
+				return NodeSection.MSG_NOT_PROCESSED;
+			} else {
+				// Avoid ACK to the input section, as we already sent ack
+				waitingAcks--;
+			}
+			serviceJobs();
+			break;
 
-			default:
-				return MSG_NOT_PROCESSED;
+		case NetEvent.EVENT_STOP:
+			break;
+
+		default:
+			return MSG_NOT_PROCESSED;
 		}
+
 		return MSG_PROCESSED;
 	}
 
@@ -235,7 +245,7 @@ public class PSServer extends ServiceSection {
 	 * @throws NetException
 	 */
 	private void handleJobInfoLists(JobData jobData, PSEvent event) throws NetException {
-		// Retrive queue PSJobInfoList
+		// Retrieve queue PSJobInfoList
 		if (queueList == null) {
 			queueList = (PSJobInfoList) getOwnerNode().getSection(NodeSection.INPUT).getObject(PROPERTY_ID_JOBINFOLIST);
 		}

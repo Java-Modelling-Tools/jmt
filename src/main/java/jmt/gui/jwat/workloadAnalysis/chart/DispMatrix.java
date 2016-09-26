@@ -159,7 +159,7 @@ public class DispMatrix extends JScrollPane {
 						showScreenShotDialog();
 						/* inserimento del nome per il salvataggio nel file */
 						/*String inputValue = JOptionPane.showInputDialog("Please insert name: ");
-						if(inputValue != null)
+						if (inputValue != null)
 						{
 							File file = new File(inputValue + ".png");
 							try{

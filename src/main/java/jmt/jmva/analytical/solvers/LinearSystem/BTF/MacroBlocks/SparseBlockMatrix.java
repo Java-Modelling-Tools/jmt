@@ -51,8 +51,8 @@ public class SparseBlockMatrix {
 		
 		matrix = new SparseBlock[block_rows][block_cols];
 		
-		for(int x = 0; x < block_rows; x++) {
-			for(int y = 0; y < block_cols; y++) {
+		for (int x = 0; x < block_rows; x++) {
+			for (int y = 0; y < block_cols; y++) {
 				this.matrix[x][y] = block_matrix.matrix[x][y];
 			}
 		}
@@ -62,7 +62,7 @@ public class SparseBlockMatrix {
 
 	private void initialise() throws BTFMatrixErrorException {
 		
-		if(rows % block_rows != 0 || cols %  block_cols != 0) {			
+		if (rows % block_rows != 0 || cols %  block_cols != 0) {			
 			throw new BTFMatrixErrorException("Block matrix of size " + rows + " x " + cols + " cannot be divided into " +  block_rows + "rows and " + block_cols + "columns");
 		}
 		
@@ -74,17 +74,17 @@ public class SparseBlockMatrix {
 		
 		matrix = new SparseBlock[block_rows][block_cols];
 		
-		for(int i = 0; i <  block_rows; i++) {
+		for (int i = 0; i <  block_rows; i++) {
 			block_starting_row = i * rows_in_blocks;
-			for(int j = 0; j <  block_cols; j++) {
+			for (int j = 0; j <  block_cols; j++) {
 				block_starting_col = j * cols_in_blocks;
 				matrix[i][j] = new SparseBlock(basis, new Position(position.row + block_starting_row, position.col + block_starting_col), rows_in_blocks, cols_in_blocks);
 			}
 		}
 		
 		//Fill with zeros
-		for(int x = 0; x < rows; x++) {
-			for(int y = 0; y < cols; y++) {
+		for (int x = 0; x < rows; x++) {
+			for (int y = 0; y < cols; y++) {
 				 write(x, y, BigRational.ZERO);
 			}
 		}
@@ -118,8 +118,8 @@ public class SparseBlockMatrix {
 	
 	public void printRow(int row) {
 		int row_to_write = row - position.row;
-		if(row_to_write >= 0 && row_to_write < rows) {
-			for(int y = 0; y < cols; y++) {
+		if (row_to_write >= 0 && row_to_write < rows) {
+			for (int y = 0; y < cols; y++) {
 				 System.out.format("%2s ", get(row_to_write, y).toString());
 			}			
 		}
@@ -131,7 +131,7 @@ public class SparseBlockMatrix {
 	
 	public void multiply(BigRational[] result) throws BTFMatrixErrorException {
 		
-		if(cols + position.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when multiplying");;		
+		if (cols + position.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when multiplying");;		
 		
 		for (int i = 0; i < block_rows; i++) {  		
             for (int j = 0; j < block_cols; j++) {
@@ -141,7 +141,7 @@ public class SparseBlockMatrix {
 	}		
 	
 	public void solve(BigRational[] rhs) throws BTFMatrixErrorException {
-		if(cols + position.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when solving");		
+		if (cols + position.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when solving");		
 		
 		for (int i = 0; i < block_rows; i++) {  		
             for (int j = 0; j < block_cols; j++) {

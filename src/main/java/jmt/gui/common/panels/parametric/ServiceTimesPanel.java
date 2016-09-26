@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.common.panels.parametric;
 
@@ -122,10 +122,10 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		radioButtonsPanel.setBorder(new EmptyBorder(5, 20, 0, 20));
 		JPanel edit = new JPanel(new GridLayout(5, 1, 0, 5));
 		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);
-		Vector<Object> avaibleS = checker.checkForServiceTimesParametricAnalysisAvaibleStations();
-		String[] stationNames = new String[avaibleS.size()];
-		for (int i = 0; i < avaibleS.size(); i++) {
-			stationNames[i] = sd.getStationName(avaibleS.get(i));
+		Vector<Object> availableS = checker.checkForServiceTimesParametricAnalysisAvailableStations();
+		String[] stationNames = new String[availableS.size()];
+		for (int i = 0; i < availableS.size(); i++) {
+			stationNames[i] = sd.getStationName(availableS.get(i));
 		}
 		classChooserLabel = new JLabel("Class:");
 		classChooser = new JComboBox();
@@ -141,13 +141,13 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		descriptionTitle = new TitledBorder(new EtchedBorder(), "Description");
 		descrPane.setBorder(descriptionTitle);
 		descrPane.setMinimumSize(new Dimension(80, 0));
-		//if the reference station of the STPA is still avaible
-		if (avaibleS.contains(STPA.getReferenceStation())) {
+		//if the reference station of the STPA is still available
+		if (availableS.contains(STPA.getReferenceStation())) {
 			stationChooser.setSelectedItem(sd.getStationName(STPA.getReferenceStation()));
 		}
 		//else select another one
 		else {
-			STPA.setReferenceStation(avaibleS.get(0));
+			STPA.setReferenceStation(availableS.get(0));
 			stationChooser.setSelectedIndex(0);
 		}
 		if (STPA.isSingleClass()) {
@@ -162,7 +162,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			steps = new JSpinner(new SpinnerNumberModel(STPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));
 			steps.setToolTipText("Sets the number of steps to be performed");
 			//get the vector containing the keys of the class that can be used to do this type of parametric analysis
-			Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvaibleClasses(STPA.getReferenceStation());
+			Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());
 			String[] classeNames = new String[validC.size()];
 			for (int i = 0; i < validC.size(); i++) {
 				classeNames[i] = cd.getClassName(validC.get(i));
@@ -239,7 +239,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		if (enabled) {
 			//if the panel is enabled the allClass radioButton can be enabled only if all of the class have a service
 			//time distribution with a mean value, in the reference station contained in STPA.
-			Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvaibleClasses(STPA.getReferenceStation());
+			Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());
 			if ((validC.size() < cd.getClassKeys().size()) || (cd.getClassKeys().size() == 1)) {
 				allClass.setEnabled(false);
 			} else {
@@ -326,7 +326,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 					STPA.setSingleClass(true);
 					//get the vector containing the keys of the valid classes. A class is valid if its service
 					//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
-					Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvaibleClasses(STPA.getReferenceStation());
+					Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());
 					String[] classNames = new String[validC.size()];
 					for (int i = 0; i < validC.size(); i++) {
 						classNames[i] = cd.getClassName(validC.get(i));
@@ -382,13 +382,13 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 				STPA.setReferenceStation(getStationKey(stationName));
 				//get the vector containing the keys of the valid classes. A class is valid if its service
 				//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
-				Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvaibleClasses(STPA.getReferenceStation());
+				Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());
 				if (STPA.isSingleClass()) {
 					String[] classes = new String[validC.size()];
 					for (int i = 0; i < validC.size(); i++) {
 						classes[i] = cd.getClassName(validC.get(i));
 					}
-					//if the reference station of the STPA is no more valid get the first avaible
+					//if the reference station of the STPA is no more valid get the first available
 					if (!validC.contains(STPA.getReferenceClass())) {
 						STPA.setReferenceClass(validC.get(0));
 					}
@@ -407,16 +407,16 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 					classChooser.addItemListener(listener);
 					singleClass.setSelected(true);
 					allClass.setSelected(false);
-					//if the number of avaible classes is less than the total number of classes the all class service
-					//time parametric analysis is no more avaible.
+					//if the number of available classes is less than the total number of classes the all class service
+					//time parametric analysis is no more available.
 					if (validC.size() < cd.getClassKeys().size()) {
 						allClass.setEnabled(false);
 					} else {
 						allClass.setEnabled(true);
 					}
 				} else {
-					//if the number of avaible classes is less than the total number of classes the all class service
-					//time parametric analysis is no more avaible...
+					//if the number of available classes is less than the total number of classes the all class service
+					//time parametric analysis is no more available...
 					if (validC.size() < cd.getClassKeys().size()) {
 						STPA.setSingleClass(true);
 						String[] classes = new String[validC.size()];

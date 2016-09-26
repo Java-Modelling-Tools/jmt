@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import jmt.engine.QueueNet.NetEvent;
+
 /**
  * This is the system class which manages the simulation. All
  * the members of this class are static, so there is no need to
@@ -18,22 +20,23 @@ import java.util.List;
  */
 public class SimSystem {
 
-	private static boolean DEBUG = false;
+	private static final boolean DEBUG = false;
 
-        // Private data members
+	// Private data members
 	static private List<SimEntity> entities; // The current entity list
 
 	static private EventQueue future; // The future event queue
 
 	static private EventQueue deferred; // The deferred event queue
 
+	static private EventQueue timing; // The timing event queue
+
 	static private double clock; // Holds the current global simulation time
 	static private boolean running; // Tells whether the run() member been called yet
 	static private NumberFormat nf;
 
-        // cache for the entity IDs
-        static private Hashtable<Integer,SimEntity> entityHash = new Hashtable<Integer,SimEntity>();
-
+	// cache for the entity IDs
+	static private Hashtable<Integer,SimEntity> entityHash = new Hashtable<Integer,SimEntity>();
 
 	//
 	// Public library interface
@@ -58,6 +61,8 @@ public class SimSystem {
 		future = new HybridEventQueue();
 
 		deferred = new ListEventQueue();
+
+		timing = new TimingEventQueue();
 
 		clock = 0.0;
 		running = false;
@@ -110,10 +115,10 @@ public class SimSystem {
 	 * @return A reference to the entity, or null if it could not be found
 	 */
 	static final public SimEntity getEntity(int id) {
-            
-        SimEntity found = entityHash.get(id);    
-        
-        if (found == null) {
+
+		SimEntity found = entityHash.get(id);    
+
+		if (found == null) {
 			System.out.println("SimSystem: could not find entity " + id);
 		}
 		return found;
@@ -157,8 +162,8 @@ public class SimSystem {
 			/* Post an event to make this entity */
 			evt = new SimEvent(SimEvent.CREATE, clock, e.getId(), 0, 0, e);
 			future.add(evt);
-                        /* add entity id to the entity cache to accelerate getEntity(int id) */
-                        entityHash.put(e.getId(), e);
+			/* add entity id to the entity cache to accelerate getEntity(int id) */
+			entityHash.put(e.getId(), e);
 		} else {
 			if (e.getId() == -1) {
 
@@ -168,7 +173,7 @@ public class SimSystem {
 				// Only add once!
 				e.setId(entities.size());
 				entities.add(e);
-                                entityHash.put(e.getId(), e);
+				entityHash.put(e.getId(), e);
 			}
 		}
 	}
@@ -208,29 +213,31 @@ public class SimSystem {
 	 * @return <tt>false</tt> if there are no more future events to be processed
 	 */
 	static public boolean runTick() throws jmt.common.exception.NetException {
-		// If there are more future events then deals with them
-		SimEvent event;
-
-		if (future.size() > 0) {
-			event = future.pop();
-
-			processEvent(event);
-			double now = event.eventTime();
-			// Checks if next events are at same time...
-			boolean trymore = (future.size() > 0);
-			while (trymore) {
-				event = future.peek();
-				if (event.eventTime() == now) {
-					processEvent(future.pop());
-					trymore = (future.size() > 0);
-				} else {
-					trymore = false;
-				}
-			}
+		double now = 0.0;
+		if (future.size() > 0 && timing.size() > 0) {
+			now = Math.min(future.peek().eventTime(), timing.peek().eventTime());
+		} else if (future.size() > 0) {
+			now = future.peek().eventTime();
+		} else if (timing.size() > 0) {
+			now = timing.peek().eventTime();
 		} else {
 			running = false;
+			return false;
 		}
-		return running;
+
+		SimEvent event = null;
+		while (future.size() > 0 && future.peek().eventTime() == now) {
+			event = future.pop();
+			processEvent(event);
+		}
+		while (timing.size() > 0 && timing.peek().eventTime() == now) {
+			future.add(timing.pop());
+			while (future.size() > 0 && future.peek().eventTime() == now) {
+				event = future.pop();
+				processEvent(event);
+			}
+		}
+		return true;
 	}
 
 	/** Stops the simulation, by calling the poison() method of each SimEntity.
@@ -270,7 +277,11 @@ public class SimSystem {
 
 	static synchronized RemoveToken send(int src, int dest, double delay, int tag, Object data) {
 		SimEvent e = new SimEvent(SimEvent.SEND, clock + delay, src, dest, tag, data);
-		future.add(e);
+		if ((tag & NetEvent.EVENT_MASK) == NetEvent.EVENT_TIMING) {
+			timing.add(e);
+		} else {
+			future.add(e);
+		}
 		return new RemoveToken(e);
 	}
 
@@ -280,10 +291,15 @@ public class SimSystem {
 	 * @return true if the event was found and removed, false otherwise.
 	 */
 	static synchronized boolean remove(RemoveToken token) {
+		SimEvent e = token.getEvent();
 		if (token.isDeferred()) {
-			return deferred.remove(token.getEvent());
+			return deferred.remove(e);
 		} else {
-			return future.remove(token.getEvent());
+			if ((e.getTag() & NetEvent.EVENT_MASK) == NetEvent.EVENT_TIMING) {
+				return timing.remove(e);
+			} else {
+				return future.remove(e);
+			}
 		}
 	}
 
@@ -325,8 +341,8 @@ public class SimSystem {
 		boolean found = false;
 
 		// retrieve + remove event with dest == src
-		for (Iterator it = deferred.iterator(); it.hasNext() && !found;) {
-			ev = (SimEvent) it.next();
+		for (Iterator<SimEvent> it = deferred.iterator(); it.hasNext() && !found;) {
+			ev = it.next();
 			if (ev.getDest() == src) {
 				if (p.match(ev)) {
 					deferred.remove(ev);
@@ -336,10 +352,8 @@ public class SimSystem {
 		}
 		if (found) {
 			entities.get(src).setEvbuf((SimEvent) ev.clone());
-
 		} else {
 			entities.get(src).setEvbuf(null);
-
 		}
 	}
 
@@ -348,8 +362,8 @@ public class SimSystem {
 		boolean found = false;
 
 		// retrieves + remove event with dest == src
-		for (Iterator it = future.iterator(); it.hasNext() && !found;) {
-			ev = (SimEvent) it.next();
+		for (Iterator<SimEvent> it = future.iterator(); it.hasNext() && !found;) {
+			ev = it.next();
 			if (ev.getSrc() == src) {
 				if (p.match(ev)) {
 					it.remove();
@@ -357,12 +371,11 @@ public class SimSystem {
 				}
 			}
 		}
+
 		if (found) {
 			entities.get(src).setEvbuf((SimEvent) ev.clone());
-
 		} else {
 			entities.get(src).setEvbuf(null);
-
 		}
 	}
 
@@ -379,7 +392,6 @@ public class SimSystem {
 		int dest, src;
 		SimEntity destEnt;
 
-		//System.out.println("SimSystem: Processing event");
 		// Update the system's clock
 		if (e.eventTime() < clock) {
 			throw new jmt.common.exception.NetException("SimSystem: Error - past event detected! \n" + "Time: " + clock + ", event time: "
@@ -390,68 +402,68 @@ public class SimSystem {
 		// Ok now process it
 		switch (e.getType()) {
 
-			case (SimEvent.SEND):
-				// Checks for matching wait
-				dest = e.getDest();
-				if (dest < 0) {
-					throw new jmt.common.exception.NetException("SimSystem: Error - attempt to send to a null entity");
-				} else {
-					destEnt = entities.get(dest);
-					if (destEnt.getState() == SimEntity.WAITING) {
-						SimPredicate p = destEnt.getWaitingPred();
+		case (SimEvent.SEND):
+			// Checks for matching wait
+			dest = e.getDest();
+		if (dest < 0) {
+			throw new jmt.common.exception.NetException("SimSystem: Error - attempt to send to a null entity");
+		} else {
+			destEnt = entities.get(dest);
+			if (destEnt.getState() == SimEntity.WAITING) {
+				SimPredicate p = destEnt.getWaitingPred();
 
-						if (p == null) {
-							//the entity was waiting for a generic predicate
-							destEnt.setEvbuf((SimEvent) e.clone());
-							destEnt.setState(SimEntity.RUNNABLE);
-							try {
-								destEnt.execute();
-							} catch (jmt.common.exception.NetException e1) {
-								abort();
-								throw e1;
-							}
-						} else {
-							//the entity was waiting for events with a specified predicate
-							//this event matches with such predicate??
-							if (destEnt.getWaitingPred().match(e)) {
-								p = null;
-								destEnt.setEvbuf((SimEvent) e.clone());
-								destEnt.setState(SimEntity.RUNNABLE);
-								try {
-									destEnt.execute();
-								} catch (jmt.common.exception.NetException e1) {
-									abort();
-									throw e1;
-								}
-							} else {
-								//the event does not match with the predicate, so it is put in the deferred queue
-								destEnt.simPutback(e);
-							}
+				if (p == null) {
+					//the entity was waiting for a generic predicate
+					destEnt.setEvbuf((SimEvent) e.clone());
+					destEnt.setState(SimEntity.RUNNABLE);
+					try {
+						destEnt.execute();
+					} catch (jmt.common.exception.NetException e1) {
+						abort();
+						throw e1;
+					}
+				} else {
+					//the entity was waiting for events with a specified predicate
+					//this event matches with such predicate??
+					if (destEnt.getWaitingPred().match(e)) {
+						p = null;
+						destEnt.setEvbuf((SimEvent) e.clone());
+						destEnt.setState(SimEntity.RUNNABLE);
+						try {
+							destEnt.execute();
+						} catch (jmt.common.exception.NetException e1) {
+							abort();
+							throw e1;
 						}
 					} else {
-						//if the entity is not WAITING the event is put in the deferred queue
-						deferred.add(e);
+						//the event does not match with the predicate, so it is put in the deferred queue
+						destEnt.simPutback(e);
 					}
 				}
-				break;
+			} else {
+				//if the entity is not WAITING the event is put in the deferred queue
+				deferred.add(e);
+			}
+		}
+		break;
 
-			case (SimEvent.ENULL):
-				throw new jmt.common.exception.NetException("SimSystem: Error - event has a null type");
+		case (SimEvent.ENULL):
+			throw new jmt.common.exception.NetException("SimSystem: Error - event has a null type");
 
-			case (SimEvent.CREATE):
-				SimEntity newe = (SimEntity) e.getData();
-				addEntityDynamically(newe);
-				break;
+		case (SimEvent.CREATE):
+			SimEntity newe = (SimEntity) e.getData();
+		addEntityDynamically(newe);
+		break;
 
-			case (SimEvent.HOLD_DONE):
-				src = e.getSrc();
-				if (src < 0) {
-					throw new jmt.common.exception.NetException("SimSystem: Error - NULL entity holding");
-				} else {
-					entities.get(src).setState(SimEntity.RUNNABLE);
-					entities.get(src).restart();
-				}
-				break;
+		case (SimEvent.HOLD_DONE):
+			src = e.getSrc();
+		if (src < 0) {
+			throw new jmt.common.exception.NetException("SimSystem: Error - NULL entity holding");
+		} else {
+			entities.get(src).setState(SimEntity.RUNNABLE);
+			entities.get(src).restart();
+		}
+		break;
 		}
 	}
 
@@ -465,4 +477,5 @@ public class SimSystem {
 			System.out.println("Simulation Aborted");
 		}
 	}
+
 }

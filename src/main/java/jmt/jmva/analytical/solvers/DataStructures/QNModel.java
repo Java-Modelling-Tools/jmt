@@ -1,5 +1,5 @@
 /**
- * * Copyright (C) 2010, Michail Makaronidis
+ * Copyright (C) 2010, Michail Makaronidis
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,13 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package jmt.jmva.analytical.solvers.DataStructures;
 
 import java.io.BufferedReader;
@@ -626,7 +627,7 @@ public class QNModel {
      */
     public PopulationVector getPopulationVector() {
     	PopulationVector to_return = new PopulationVector();
-    	for(int i = 0; i < R; i++) {
+    	for (int i = 0; i < R; i++) {
     		to_return.add(this.N.get(i));
     	}
         return to_return;

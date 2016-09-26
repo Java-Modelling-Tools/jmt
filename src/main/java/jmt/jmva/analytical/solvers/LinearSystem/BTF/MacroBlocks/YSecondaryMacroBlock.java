@@ -43,13 +43,13 @@ public class YSecondaryMacroBlock extends SecondaryMacroBlock {
 			throws BTFMatrixErrorException, InternalErrorException {
 				
 		int row_of_block = row - position.row;		
-		if(row_of_block < 0 || row_of_block >= size.row) throw new BTFMatrixErrorException("Row: " + row + " not in micro block, when considering n:" + n +" class: " + _class);
+		if (row_of_block < 0 || row_of_block >= size.row) throw new BTFMatrixErrorException("Row: " + row + " not in micro block, when considering n:" + n +" class: " + _class);
 		
 		n.minusOne(_class);
 		int col =  basis.indexOf(n, 0);
 		int col_of_block = col - position.col;	
 		
-		if(col_of_block >= 0 && col_of_block < size.col) { //column is in this block				
+		if (col_of_block >= 0 && col_of_block < size.col) { //column is in this block				
 			matrix.write(row_of_block, col_of_block, qnm.N.getAsBigRational(_class - 1).subtract(n.getAsBigRational(_class - 1)));		
 		}
 		n.restore();

@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common;
 
@@ -49,9 +49,10 @@ import jmt.framework.gui.components.JMTFrame;
  * 
  */
 public class Defaults implements CommonConstants {
+
 	protected static final String FILENAME = "defaults.conf";
 	protected static Properties prop;
-	
+
 	private static JSimLogger logger = JSimLogger.getLogger(Defaults.class);
 	// Initialize properties
 	static {
@@ -81,12 +82,21 @@ public class Defaults implements CommonConstants {
 		def.setProperty("stationForkingStrategy", "jmt.gui.common.forkStrategies.ProbabilitiesFork");
 		def.setProperty("stationJoinStrategy","jmt.gui.common.joinStrategies.NormalJoin");
 		def.setProperty("stationSemaphoreStrategy","jmt.gui.common.semaphoreStrategies.NormalSemaphore");
-		//
+
 		def.setProperty("stationCsRowMatrix", "jmt.gui.common.classSwitch.ClassSwitch");
 		def.setProperty("forkBlock", "-1");
 		def.setProperty("forkJobsPerLink", "1");
-		def.setProperty("dropRule", "Drop");
+		def.setProperty("dropRule", FINITE_DROP);
 		def.setProperty("isSimplifiedFork", "true");
+
+		def.setProperty("storeCapacity", "-1");
+		def.setProperty("storeQueueStrategy", QUEUE_STRATEGY_RAND);
+		def.setProperty("storeDropRule", FINITE_DROP);
+		def.setProperty("transitionVector", "jmt.gui.common.transitionStrategies.TransitionVector");
+		def.setProperty("transitionServerNumber", "-1");
+		def.setProperty("transitionTimingStrategy", "jmt.gui.common.distributions.Exponential");
+		def.setProperty("transitionFiringPriority", "-1");
+		def.setProperty("transitionFiringWeight", "1");
 
 		// Classes parameters defaults
 		def.setProperty("className", "Class");
@@ -101,8 +111,11 @@ public class Defaults implements CommonConstants {
 		def.setProperty("blockingMaxJobs", "-1");
 		def.setProperty("blockingRegionName", "FCRegion");
 		def.setProperty("blockingMaxMemory", "-1");
-		def.setProperty("weight","1");
-		def.setProperty("size","1");
+		def.setProperty("weight", "1");
+		def.setProperty("size", "1");
+		def.setProperty("blockingGroupName", "Group");
+		def.setProperty("blockingGroupCapacity", "1");
+		def.setProperty("blockingGroupStratagy", REGION_GROUP_STRATEGY_FCFS);
 		// Not used parameter...
 		def.setProperty("blockingRegionType", "default");
 
@@ -110,15 +123,15 @@ public class Defaults implements CommonConstants {
 		Locale locale = JMTFrame.getPlatformDefaultLocale();
 		DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);
 		def.setProperty("loggerDecimalSeparator", String.valueOf(symbols.getDecimalSeparator()));
-                if (String.valueOf(symbols.getDecimalSeparator()).equals(",")) {
-                        def.setProperty("loggerDelimiter", ";");
-                } else {
-                        def.setProperty("loggerDelimiter", ",");
-                }
+		if (String.valueOf(symbols.getDecimalSeparator()).equals(",")) {
+			def.setProperty("loggerDelimiter", ";");
+		} else {
+			def.setProperty("loggerDelimiter", ",");
+		}
 		def.setProperty("loggerAutoAppend", "" + jmt.engine.log.LoggerParameters.LOGGER_AR_ASK);
 		def.setProperty("loggerFilePath", "");
 
-		//Simulation Defaults parameters
+		// Simulation Defaults parameters
 		def.setProperty("measureAlpha", "0.99");
 		def.setProperty("measurePrecision", "0.03");
 		def.setProperty("simulationSeed", "23000");
@@ -131,19 +144,17 @@ public class Defaults implements CommonConstants {
 		def.setProperty("representableClasses", "10");
 		// end Francesco D'Aquino
 		def.setProperty("maxSimulatedTime", "-1");
-		//GUI default parameters.
+		// GUI default parameters.
 		def.setProperty("JSIMWindowWidth", "1024");
 		def.setProperty("JSIMWindowHeight", "768");
-		//GUI default parameters.
 		def.setProperty("JSIMClassDefWindowWidth", "1024");
 		def.setProperty("JSIMClassDefWindowHeight", "520");
-		//GUI default parameters.
 		def.setProperty("JSIMMeasuresDefWindowWidth", "1024");
 		def.setProperty("JSIMMeasuresDefWindowHeight", "520");
-                // templates dialogs default parameters
-                def.setProperty("showDefaultTemplates", "true");
-                def.setProperty("showTemplateDialog", "true");
-		
+		// Templates dialogs default parameters
+		def.setProperty("showDefaultTemplates", "true");
+		def.setProperty("showTemplateDialog", "true");
+
 		return def;
 	}
 
@@ -257,18 +268,18 @@ public class Defaults implements CommonConstants {
 	public static void reload() {
 		prop = new Properties(getDefaults());
 		// Try to load properties from default config file, otherwise uses defaults one
-			File file = new File(getWorkingPath(), FILENAME);
-			if (file.isFile()) {
-				try {
-					InputStream input = new FileInputStream(new File(getWorkingPath(), FILENAME));
-					prop.load(input);
-					input.close();
-				} catch (IOException e) {
-					logger.error("Error while reading default values", e);
-				}
-			} else {
-				logger.debug("Configuration file not found in location " + file.getAbsolutePath());
+		File file = new File(getWorkingPath(), FILENAME);
+		if (file.isFile()) {
+			try {
+				InputStream input = new FileInputStream(new File(getWorkingPath(), FILENAME));
+				prop.load(input);
+				input.close();
+			} catch (IOException e) {
+				logger.error("Error while reading default values", e);
 			}
+		} else {
+			logger.debug("Configuration file not found in location " + file.getAbsolutePath());
+		}
 	}
 
 	/**
@@ -277,7 +288,7 @@ public class Defaults implements CommonConstants {
 	public static void revertToDefaults() {
 		prop = new Properties(getDefaults());
 	}
-	
+
 	/**
 	 * Returns the working directory. Creates it if it does not exist.
 	 * @return the working directory for JMT files
@@ -290,4 +301,5 @@ public class Defaults implements CommonConstants {
 		}
 		return dir;
 	}
+
 }

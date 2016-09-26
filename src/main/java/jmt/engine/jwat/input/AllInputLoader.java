@@ -82,7 +82,7 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 							//Get the token
 							lineToken[i] = myMatch.getMatch().toString();
 							if (separator[i] != null) {
-								// If the token has separatores remove them
+								// If the token has separators remove them
                                                             	lineToken[i] = lineToken[i].substring(1, lineToken[i].length() - 1);
 								//Take what I need from what's left
                                                                 if (myMatch.contains(lineToken[i], myComp.compile(regExp[i]))) {

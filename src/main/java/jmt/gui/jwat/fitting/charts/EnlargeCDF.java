@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
  
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jwat.fitting.charts;
 
@@ -63,7 +63,7 @@ public class EnlargeCDF extends Plot implements MouseListener {
 		this.setConnected(false, 1);
 		this.setMarksStyle("various", 1);
 		
-		if(this.engfitting.isLastRunFitted()) {
+		if (this.engfitting.isLastRunFitted()) {
 			this.setConnected(true, 2);
 			this.setMarksStyle("point", 2);
 			this.setColors(new Color[] {Color.BLUE,Color.RED});
@@ -91,7 +91,7 @@ public class EnlargeCDF extends Plot implements MouseListener {
 		this.setConnected(false, 1);
 		this.setMarksStyle("various", 1);
 		
-		if(this.engfitting.isLastRunFitted()) {
+		if (this.engfitting.isLastRunFitted()) {
 			this.setConnected(true, 2);
 			this.setMarksStyle("point", 2);
 			this.setColors(new Color[] {Color.BLUE,Color.RED});
@@ -103,30 +103,30 @@ public class EnlargeCDF extends Plot implements MouseListener {
 		setXRange(0, x[x.length-1]+1);
 		setYRange(0, 1);
 		
-		//draw the reference line fot the points
+		//draw the reference line for the points
 		for (int i = 0; i < x.length; i++) {
 			//System.out.println("x[i] = "+x[i]+" (1d/x.length)*i: "+(1d/x.length)*i);
 			addPoint(1, x[i], (1d/x.length)*i, true); 
 		}
 		
-		if(engfitting.isLastRunFitted()) {
+		if (engfitting.isLastRunFitted()) {
 			step = x[x.length-1] / Math.min((x.length*100),5000);
 			//System.out.println("Step: "+step);
-			if(distribution == SmallCDF.PARETO) {
+			if (distribution == SmallCDF.PARETO) {
 				double K = engfitting.getEstimatedParameters()[0];
 				double alpha = engfitting.getEstimatedParameters()[1];
 				
-				for(count_an_cdf = K;count_an_cdf < x[x.length-1]; count_an_cdf += step) {
+				for (count_an_cdf = K;count_an_cdf < x[x.length-1]; count_an_cdf += step) {
 					//System.out.println("count_an_cdf = "+count_an_cdf+" CDF: "+(1d-Math.pow((K/count_an_cdf),alpha)));
 					addPoint(2, count_an_cdf, 1d-Math.pow((K/count_an_cdf),alpha), true);
 				}
 				//add last point at the end
 				addPoint(2, x[x.length-1], 1d-Math.pow((K/x[x.length-1]),alpha), true);
 			}
-			else if(distribution == SmallCDF.EXPO) {
+			else if (distribution == SmallCDF.EXPO) {
 				double lambda = engfitting.getEstimatedParameters()[0];
 				
-				for(count_an_cdf = 0.0d;count_an_cdf < x[x.length-1]; count_an_cdf += step) {
+				for (count_an_cdf = 0.0d;count_an_cdf < x[x.length-1]; count_an_cdf += step) {
 					addPoint(2, count_an_cdf, 1d-Math.exp(-lambda*count_an_cdf), true);
 				}
 				//add last point at the end

@@ -8,12 +8,13 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 package jmt.jmva.analytical.solvers.LinearSystemSolver;
 
 import jmt.jmva.analytical.solvers.DataStructures.BigRational;
@@ -105,7 +106,7 @@ public class Solver implements SolverInterface {
      * A that may need to be updated when requested. This is needed by the MoM 
      * algorithm. 
      * @param A The matrix A of the linear system Ax = b
-     * @param UList The list containg these positions as Tuple objects
+     * @param UList The list containing these positions as Tuple objects
      * @throws OperationNotSupportedException Thrown when the matrix A is not square
      */
     @Override
@@ -131,7 +132,7 @@ public class Solver implements SolverInterface {
      * algorithm. Furthermore, some bounds of the maximum elements contained
      * in the linear systems (max A, max B, max Solution = max G) are given.
      * @param A The matrix A of the linear system Ax = b
-     * @param UList The list containg these positions as Tuple objects
+     * @param UList The list containing these positions as Tuple objects
      * @param uncomputables The set of indexes of possible zero-columns of A
      * @param maxA The maximum possible element in matrix A
      * @param maxb The maximum possible element of vector b

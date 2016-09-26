@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 package jmt.gui.jwat.trafficAnalysis.panels;
 
 import java.awt.BorderLayout;
@@ -78,7 +78,7 @@ import jmt.gui.jwat.workloadAnalysis.tables.JWatVariableInputTableModel;
 import jmt.gui.jwat.workloadAnalysis.tables.listeners.RowDeleteListener;
 
 /**
- * Description: This class rapresents workload analysis tool input panel
+ * Description: This class represents workload analysis tool input panel
  *
  * @author Brambilla Davide Matr 667986, Fumagalli Claudio 667971
  * Created: 30-lug-2006 10.54.14 Darksch
@@ -140,11 +140,11 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 	private static String obsNumbString = "Number of observations: ";
 	private static String obsFileName = "File name: ";
 	private int obsNumb = -1;
-	// Combobox http log files retrived from default directory
+	// Combobox http log files retrieved from default directory
 	private SteppedComboBox filechooser = new SteppedComboBox(new String[] { browseInputPanelText });
 	// List of log files in save directory and opened by user
 	private File nameFile;
-	// ComboBox file format retrived from default format directory
+	// ComboBox file format retrieved from default format directory
 	private SteppedComboBox formatchooser = new SteppedComboBox(new String[] { browseInputPanelText });
 	private JButton saveNewFormat = null;
 	// ComboBox filtering possibilities
@@ -267,7 +267,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			}
 			if (!((JWatVariableInputTableModel) inputTable.getModel()).checkInfos()) {
 				JOptionPane.showMessageDialog(InputPanel.this,
-						"Format file not choose or some fileds of variable table are not correctly setted or are left blank");
+						"Format file not choose or some fileds of variable table are not correctly set or are left blank");
 				return;
 			}
 			//Controllo che sia selezionata la sola variabile data, una e una sola

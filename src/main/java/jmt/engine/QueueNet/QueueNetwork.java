@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.QueueNet;
 
@@ -24,8 +24,11 @@ import java.util.ListIterator;
 import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.BlockingQueue;
 import jmt.engine.NodeSections.ClassSwitch;
+import jmt.engine.NodeSections.Enabling;
+import jmt.engine.NodeSections.Firing;
 import jmt.engine.NodeSections.Fork;
 import jmt.engine.NodeSections.Queue;
+import jmt.engine.NodeSections.Store;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
 
@@ -36,13 +39,13 @@ import jmt.engine.dataAnalysis.TempMeasure;
 public class QueueNetwork {
 
 	/* Symbolic name for reference node in the network: it should be used
-	* within broadcast communication.
-	*/
+	 * within broadcast communication.
+	 */
 	public static final int REFERENCE_NODE = 0x0001;
 
 	/* Symbolic name for normal node in the network: it should be used
-	* within broadcast communication.
-	*/
+	 * within broadcast communication.
+	 */
 	public static final int NODE = 0x0002;
 
 	/** Behaviour ID: Aborts the simulation when a measure has been obtained.*/
@@ -90,8 +93,8 @@ public class QueueNetwork {
 	private int state;
 
 	private GlobalJobInfoList jobInfoList;
-        
-        private boolean taskWarningNotShown = true;
+
+	private boolean taskWarningNotShown = true;
 
 	/** Creates a new instance of QueueNetwork. */
 	public QueueNetwork(String name) {
@@ -184,18 +187,18 @@ public class QueueNetwork {
 		boolean found = false;
 
 		switch (measureID) {
-			case QUEUE_LENGTH:
-				measure = nodes.get(nodeName).getDoubleNodeProperty(NetNode.PROPERTY_ID_RESIDENT_JOBS);
-				found = true;
-				break;
-			case RESIDENCE_TIME:
-				measure = nodes.get(nodeName).getDoubleNodeProperty(NetNode.PROPERTY_ID_RESIDENCE_TIME);
-				found = true;
-				break;
-			case SERVICE_TIME:
-				measure = nodes.get(nodeName).getSection(NodeSection.SERVICE).getDoubleSectionProperty(NodeSection.PROPERTY_ID_RESIDENCE_TIME);
-				found = true;
-				break;
+		case QUEUE_LENGTH:
+			measure = nodes.get(nodeName).getDoubleNodeProperty(NetNode.PROPERTY_ID_RESIDENT_JOBS);
+			found = true;
+			break;
+		case RESIDENCE_TIME:
+			measure = nodes.get(nodeName).getDoubleNodeProperty(NetNode.PROPERTY_ID_RESIDENCE_TIME);
+			found = true;
+			break;
+		case SERVICE_TIME:
+			measure = nodes.get(nodeName).getSection(NodeSection.SERVICE).getDoubleSectionProperty(NodeSection.PROPERTY_ID_RESIDENCE_TIME);
+			found = true;
+			break;
 		}
 		if (found) {
 			return measure;
@@ -231,7 +234,7 @@ public class QueueNetwork {
 	public void addMeasure(Measure measure) {
 		// If GlobalJobInfoList is not set, creates it
 		// (at this point all classes should be declared)
-		csExists(); 
+		csExists();
 		if (jobInfoList == null) {
 			jobInfoList = new GlobalJobInfoList(jobClasses.size(), csExists());
 		}
@@ -241,11 +244,11 @@ public class QueueNetwork {
 
 		measures.add(measure);
 	}
-	
+
 	private boolean csExists() {
 		boolean csExists = false;
 		ListIterator<NetNode> it = nodes.listIterator();
-		while (it.hasNext()){
+		while (it.hasNext()) {
 			NetNode node = it.next();
 			NodeSection serviceSection = null;
 			try {
@@ -254,7 +257,7 @@ public class QueueNetwork {
 				// NEVER ENTERS
 				e.printStackTrace();
 			}
-			if(serviceSection != null && serviceSection instanceof ClassSwitch){
+			if (serviceSection != null && serviceSection instanceof ClassSwitch) {
 				csExists = true;
 				break;
 			}
@@ -334,7 +337,6 @@ public class QueueNetwork {
 	 * class
 	 */
 	public int getDroppedJobs(JobClass jobClass) {
-
 		//dropped jobs
 		int dropped = 0;
 		int classIndex = jobClass.getId();
@@ -344,23 +346,13 @@ public class QueueNetwork {
 			NodeSection inputSection;
 			try {
 				inputSection = node.getSection(NodeSection.INPUT);
-
-				//jobs can be dropped by a finite queue or by a blocking region
-
-				if (inputSection instanceof BlockingQueue) {
-
-					//input section of a blocking region
+				//jobs can be dropped by a finite queue, a finite store or a blocking region
+				if (inputSection instanceof Queue) {
+					dropped += ((Queue) inputSection).getDroppedJobPerClass(classIndex);
+				} else if (inputSection instanceof Store) {
+					dropped += ((Store) inputSection).getDroppedJobPerClass(classIndex);
+				} else if (inputSection instanceof BlockingQueue) {
 					dropped += ((BlockingQueue) inputSection).getDroppedJobPerClass(classIndex);
-
-				} else if (inputSection instanceof Queue) {
-
-					//check
-					boolean infinite = ((Queue) inputSection).hasInfiniteQueue();
-					if (!infinite) {
-						//finite queue
-						dropped += ((Queue) inputSection).getDroppedJobPerClass(classIndex);
-					}
-
 				}
 			} catch (NetException ne) {
 				continue;
@@ -368,9 +360,7 @@ public class QueueNetwork {
 		}
 
 		return dropped;
-
 	}
-
 	//end NEW
 
 	//NEW
@@ -380,7 +370,6 @@ public class QueueNetwork {
 	 * @return the total number of dropped jobs in the whole network
 	 */
 	public int getDroppedJobs() {
-
 		//dropped jobs
 		int dropped = 0;
 
@@ -389,23 +378,13 @@ public class QueueNetwork {
 			NodeSection inputSection;
 			try {
 				inputSection = node.getSection(NodeSection.INPUT);
-
-				//jobs can be dropped by a finite queue or by a blocking region
-
-				if (inputSection instanceof BlockingQueue) {
-
-					//input section of a blocking region
+				//jobs can be dropped by a finite queue, a finite store or a blocking region
+				if (inputSection instanceof Queue) {
+					dropped += ((Queue) inputSection).getDroppedJobs();
+				} else if (inputSection instanceof Store) {
+					dropped += ((Store) inputSection).getDroppedJobs();
+				} else if (inputSection instanceof BlockingQueue) {
 					dropped += ((BlockingQueue) inputSection).getDroppedJobs();
-
-				} else if (inputSection instanceof Queue) {
-
-					//check
-					boolean infinite = ((Queue) inputSection).hasInfiniteQueue();
-					if (!infinite) {
-						//finite queue
-						dropped += ((Queue) inputSection).getDroppedJobs();
-					}
-
 				}
 			} catch (NetException ne) {
 				continue;
@@ -413,7 +392,6 @@ public class QueueNetwork {
 		}
 
 		return dropped;
-
 	}
 	//end NEW
 
@@ -425,6 +403,7 @@ public class QueueNetwork {
 	public int getSwitchedJobs(JobClass jobClass) {
 		//switched jobs
 		int switched = 0;
+
 		for (int s = 0; s < nodes.size(); s++) {
 			NetNode node = nodes.get(s);
 			NodeSection section;
@@ -432,17 +411,25 @@ public class QueueNetwork {
 				section = node.getSection(NodeSection.SERVICE);
 				if (section instanceof ClassSwitch) {
 					switched += ((ClassSwitch) section).getSwitchedJobCount(jobClass.getId());
-				} 
-                                section = node.getSection(NodeSection.OUTPUT);
-                                if (section instanceof Fork) {
+				}
+				section = node.getSection(NodeSection.OUTPUT);
+				if (section instanceof Fork) {
 					switched += ((Fork) section).getSwitchedJobCount(jobClass.getId());
-				} 
+				}
+				section = node.getSection(NodeSection.INPUT);
+				if (section instanceof Enabling) {
+					switched -= ((Enabling) section).getConsumedJobsPerClass(jobClass.getId());
+				}
+				section = node.getSection(NodeSection.OUTPUT);
+				if (section instanceof Firing) {
+					switched += ((Firing) section).getProducedJobsPerClass(jobClass.getId());
+				}
 			} catch (NetException ne) {
 				continue;
 			}
 		}
-		return switched;
 
+		return switched;
 	}
 
 	/**
@@ -458,17 +445,18 @@ public class QueueNetwork {
 		}
 	}
 
-        /**
-         * @return the taskWarningNotShown
-         */
-        public boolean isTaskWarningNotShown() {
-                return taskWarningNotShown;
-        }
+	/**
+	 * @return the taskWarningNotShown
+	 */
+	public boolean isTaskWarningNotShown() {
+		return taskWarningNotShown;
+	}
 
-        /**
-         * @param taskWarningNotShown the taskWarningNotShown to set
-         */
-        public void setTaskWarningNotShown(boolean taskWarningNotShown) {
-                this.taskWarningNotShown = taskWarningNotShown;
-        }
+	/**
+	 * @param taskWarningNotShown the taskWarningNotShown to set
+	 */
+	public void setTaskWarningNotShown(boolean taskWarningNotShown) {
+		this.taskWarningNotShown = taskWarningNotShown;
+	}
+
 }

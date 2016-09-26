@@ -26,7 +26,7 @@ public class ClassJobNum {
         public ClassJobNum(String name, String[] classes, String[] numbers) {
                 this.name = name;
                 this.numbers = new Integer[numbers.length];
-                for(int i = 0; i < numbers.length; i++)
+                for (int i = 0; i < numbers.length; i++)
                         this.numbers[i] = Integer.parseInt(numbers[i]);
                 this.classes = classes;
         }

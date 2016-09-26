@@ -25,7 +25,7 @@ public class FormatFileReader {
 		// Load data from file format
                 try {
 			BufferedReader file = new BufferedReader(new FileReader(fileName));
-			// Retrive number of variables
+			// Retrieve number of variables
 			numeroVariabili = Integer.parseInt(file.readLine());
 			types = new int[numeroVariabili];
 			selected = new boolean[numeroVariabili];
@@ -35,7 +35,7 @@ public class FormatFileReader {
 			regExpr = new ArrayList<String>();
 			defaults = new ArrayList<String>();
 			replaces = new ArrayList<String>();
-			// Retrive single variable information
+			// Retrieve single variable information
 			for (int i = 0; i < numeroVariabili; i++) {
 				names.add(file.readLine());
 				types[i] = Integer.parseInt(file.readLine());

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NodeSections;
 
@@ -26,7 +26,6 @@ import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.NodeSection;
 
 /**
  * This class implements a multi-class, single/multi server service.
@@ -62,9 +61,9 @@ public class Server extends ServiceSection {
 	 * the server will be single visit.
 	 * @param serverNumber Number of jobs which can be served simultaneously.
 	 * @param serviceStrategy Array of service strategies, one per class.
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
-	public Server(Integer serverNumber, Integer numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[]) throws jmt.common.exception.NetException {
+	public Server(Integer serverNumber, Integer numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[]) throws NetException {
 		//numberOfVisitsPerClass is null
 		if (numberOfVisitsPerClass == null) {
 			this.serviceStrategy = serviceStrategy;
@@ -72,18 +71,16 @@ public class Server extends ServiceSection {
 			busyCounter = 0;
 			this.numberOfServers = serverNumber.intValue();
 		} else {
-			//else creates an array of int & then use the same cosntructor
+			//else creates an array of int & then use the same constructor
 			int[] nVisits = new int[numberOfVisitsPerClass.length];
 			for (int i = 0; i < numberOfVisitsPerClass.length; i++) {
 				nVisits[i] = numberOfVisitsPerClass[i].intValue();
-
 			}
 			this.serviceStrategy = serviceStrategy;
 			this.numberOfVisitsPerClass = nVisits;
 			busyCounter = 0;
 			this.numberOfServers = serverNumber.intValue();
 		}
-
 	}
 
 	/** Creates a new instance of Server.
@@ -91,35 +88,34 @@ public class Server extends ServiceSection {
 	 * @param numberOfVisitsPerClass Number of job visits per class: if null
 	 * the server will be single visit.
 	 * @param serviceStrategy Array of service strategies, one per class.
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
-	public Server(int serverNumber, int numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[]) throws jmt.common.exception.NetException {
+	public Server(int serverNumber, int numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[]) throws NetException {
 		this.serviceStrategy = serviceStrategy;
 		this.numberOfVisitsPerClass = numberOfVisitsPerClass;
 		busyCounter = 0;
 		this.numberOfServers = serverNumber;
-
 	}
 
 	@Override
-	public int getIntSectionProperty(int id) throws jmt.common.exception.NetException {
+	public int getIntSectionProperty(int id) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_BUSY_COUNTER:
-				return busyCounter;
-			case PROPERTY_ID_MAX_JOBS:
-				return numberOfServers;
-			default:
-				return super.getIntSectionProperty(id);
+		case PROPERTY_ID_BUSY_COUNTER:
+			return busyCounter;
+		case PROPERTY_ID_MAX_JOBS:
+			return numberOfServers;
+		default:
+			return super.getIntSectionProperty(id);
 		}
 	}
 
 	@Override
-	public int getIntSectionProperty(int id, JobClass jobClass) throws jmt.common.exception.NetException {
+	public int getIntSectionProperty(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_VISITS_PER_CLASS:
-				return numberOfVisitsPerClass[jobClass.getId()];
-			default:
-				return super.getIntSectionProperty(id, jobClass);
+		case PROPERTY_ID_VISITS_PER_CLASS:
+			return numberOfVisitsPerClass[jobClass.getId()];
+		default:
+			return super.getIntSectionProperty(id, jobClass);
 		}
 	}
 
@@ -150,25 +146,25 @@ public class Server extends ServiceSection {
 	}
 
 	@Override
-	public Object getObject(int id, JobClass jobClass) throws jmt.common.exception.NetException {
+	public Object getObject(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_SERVICE_STRATEGY:
-				return serviceStrategy[jobClass.getId()];
-			default:
-				return super.getObject(id);
+		case PROPERTY_ID_SERVICE_STRATEGY:
+			return serviceStrategy[jobClass.getId()];
+		default:
+			return super.getObject(id);
 		}
 	}
 
 	@Override
-	public Object getObject(int id) throws jmt.common.exception.NetException {
+	public Object getObject(int id) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_SERVICE_STRATEGY:
-				return serviceStrategy;
-			default:
-				return super.getObject(id);
+		case PROPERTY_ID_SERVICE_STRATEGY:
+			return serviceStrategy;
+		default:
+			return super.getObject(id);
 		}
 	}
-	public ServiceStrategy[] getServiceStrategy(){
+	public ServiceStrategy[] getServiceStrategy() {
 		return serviceStrategy;
 	}
 
@@ -180,81 +176,91 @@ public class Server extends ServiceSection {
 	}
 
 	@Override
-	protected int process(NetMessage message) throws jmt.common.exception.NetException {
+	protected int process(NetMessage message) throws NetException {
 		int c;
 		Job job;
-		double serviceTime;
+
 		switch (message.getEvent()) {
 
-			case NetEvent.EVENT_ACK:
-				//EVENT_ACK
-				//If there are no jobs in the service section, message is not processed.
-				//Otherwise an ack is sent backward to the input section and
-				//the counter of jobs in service is decreased.
-				if (busyCounter == 0) {
-					//it was not waiting for any job
-					return NodeSection.MSG_NOT_PROCESSED;
-				} else if (busyCounter == numberOfServers) {
-					// Sends a request to the input section
-					sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
-					busyCounter--;
-				} else {
-					// Avoid ACK as we already sent ack
-					busyCounter--;
-				}
-				break;
+		case NetEvent.EVENT_START:
+			break;
 
-			case NetEvent.EVENT_JOB:
+		case NetEvent.EVENT_JOB:
 
-				//EVENT_JOB
-				//If the message has been sent by the server itself,
-				// then the job is forwarded.
-				//
-				//If the message has been sent by another section, the server, if
-				//is not completely busy, sends to itself a message containing the
-				//job and with delay equal to the service time calculated using
-				//the service strategy.
-				//The counter of jobs in service is increased and, if further service
-				//capacity is left, an ack is sent to the input section.
+			//EVENT_JOB
+			//If the message has been sent by the server itself,
+			// then the job is forwarded.
+			//
+			//If the message has been sent by another section, the server, if
+			//is not completely busy, sends to itself a message containing the
+			//job and with delay equal to the service time calculated using
+			//the service strategy.
+			//The counter of jobs in service is increased and, if further service
+			//capacity is left, an ack is sent to the input section.
 
-				// Gets the job from the message
-				job = message.getJob();
+			// Gets the job from the message
+			job = message.getJob();
 
-				if (isMine(message)) {
-					// this job has been just served (the message has been sent by the server itself)
-					// forwards the job to the output section
-					sendForward(job, 0.0);
-				} else {
-					//message received from another node section: if the server is not completely busy,
-					//it sends itself a message with this job
-					if (busyCounter < numberOfServers) {
-						// Gets the class of the job
-						c = job.getJobClass().getId();
-						// Auto-sends the job with delay equal to "serviceTime"
-						if (job.getServiceTime() != 0){
-							serviceTime = job.getServiceTime();
-						}
-						else 
-						serviceTime = serviceStrategy[c].wait(this);
-						// Calculates the service time of job
-						sendMe(job, serviceTime);
-
-						busyCounter++;
-						if (busyCounter < numberOfServers) {
-							// Sends an ACK to the input section (remember not to propagate
-							// this ack again when computation is finished)
-							sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
-						}
+			if (isMine(message)) {
+				// this job has been just served (the message has been sent by the server itself)
+				// forwards the job to the output section
+				sendForward(job, 0.0);
+			} else {
+				//message received from another node section: if the server is not completely busy,
+				//it sends itself a message with this job
+				if (busyCounter < numberOfServers) {
+					// Gets the class of the job
+					c = job.getJobClass().getId();
+					// Auto-sends the job with delay equal to "serviceTime"
+					double serviceTime = 0.0;
+					if (job.getServiceTime() != 0.0) {
+						serviceTime = job.getServiceTime();
 					} else {
-						//server is busy
-						return NodeSection.MSG_NOT_PROCESSED;
+						serviceTime = serviceStrategy[c].wait(this);
 					}
-				}
-				break;
+					// Calculates the service time of job
+					sendMe(job, serviceTime);
 
-			default:
+					busyCounter++;
+					if (busyCounter < numberOfServers) {
+						// Sends an ACK to the input section (remember not to propagate
+						// this ack again when computation is finished)
+						sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
+					}
+				} else {
+					//server is busy
+					return MSG_NOT_PROCESSED;
+				}
+			}
+			break;
+
+		case NetEvent.EVENT_ACK:
+
+			//EVENT_ACK
+			//If there are no jobs in the service section, message is not processed.
+			//Otherwise an ack is sent backward to the input section and
+			//the counter of jobs in service is decreased.
+
+			if (busyCounter == 0) {
+				//it was not waiting for any job
 				return MSG_NOT_PROCESSED;
+			} else if (busyCounter == numberOfServers) {
+				// Sends a request to the input section
+				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
+				busyCounter--;
+			} else {
+				// Avoid ACK as we already sent ack
+				busyCounter--;
+			}
+			break;
+
+		case NetEvent.EVENT_STOP:
+			break;
+
+		default:
+			return MSG_NOT_PROCESSED;
 		}
+
 		return MSG_PROCESSED;
 	}
 

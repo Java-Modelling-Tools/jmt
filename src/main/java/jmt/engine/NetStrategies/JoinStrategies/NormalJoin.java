@@ -6,7 +6,7 @@ public class NormalJoin extends JoinStrategy {
 	
 	private int requiredNum;
 	
-	public NormalJoin(Integer requiredNums){
+	public NormalJoin(Integer requiredNums) {
 		this.requiredNum = requiredNums;
 	}
 	

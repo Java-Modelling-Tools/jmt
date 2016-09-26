@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.dataAnalysis;
 
@@ -64,7 +64,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	private static final int checkSize = 500;
 	// Multiplier to space to be added when arrays are full
 	private static final int hArrayMult = 4;
-	// An epsilon added to the mean value to avoid problems with monothonic
+	// An epsilon added to the mean value to avoid problems with monotonic
 	// measures tending to an asympthotic value
 	private static final double hEpsilon = 1e-8;
 
@@ -82,7 +82,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	// ---------------------------------------------------------------------------------------------
 
 	// ---- Variables for MSER-m Rule --------------------------------------------------------------
-	// Number of samples in a batch. 5 is raccomanded as will perform a MSER-5 rule that seems
+	// Number of samples in a batch. 5 is recommended as will perform a MSER-5 rule that seems
 	// the most stable
 	private static final int batchSize = 5;
 
@@ -90,7 +90,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	// Big values are better but will REALLY slow simulation down
 	private static final int maxRuleSamples = 5000;
 
-	// Used to store transient datas to perform MSER-m rule and initialize spectral analisys
+	// Used to store transient data to perform MSER-m rule and initialize spectral analysis
 	private BatchCircularList batches = new BatchCircularList(batchSize, maxRuleSamples);
 
 	/**minimum length (number of samples) of transient period */
@@ -111,28 +111,28 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	/**index of the batch*/
 	int batch;
 
-	/**the extimated mean */
+	/**the estimated mean */
 	protected double extMean = 0;
-	/**the extimated variance */
+	/**the estimated variance */
 	protected double extVar = 0;
-	/**the exitmated confidence intervals */
+	/**the estimated confidence intervals */
 	protected double confInt = 0;
-	/** the extimated instantaneous value*/
+	/**the estimated instantaneous value */
 	private double lastIntervalAvg=0;
 
 
-	/**constant chosen to reduce bias of variance extimator */
+	/**constant chosen to reduce bias of variance estimator */
 	protected double C1;
-	/**degrees of freeedom of the t-distribution */
+	/**degrees of freedom of the t-distribution */
 	protected int C2;
 
-	/**number of points of the polyfit*/
+	/**number of points of the polyfit */
 	protected int K = numBatch / 4;
 
 	// why numbatch/4 ? --> the signal spectral is computed using as the mean of two samples
 	// therefore:
 	// divide for 2, because having numbatch batches, we consider numbatch / 2
-	// divide again for 2, because we want to use only the first half of the spectr
+	// divide again for 2, because we want to use only the first half of the spectral
 	// (the second half is sigmetric)
 
 	/**the order of the polynomial*/
@@ -295,7 +295,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			}
 		}
 		// At this point Fisherman Rule was passed and biased data truncated. New samples will
-		// be analyzed with spectral analisys method to find confidence interval
+		// be analyzed with spectral analysis method to find confidence interval
 
 		if (!delet) {
 			//transient detected but not deleted yet
@@ -351,12 +351,12 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	}
 	public double getLastIntervalAvg() {
 		
-		if(lastWeight==0){
+		if (lastWeight==0) {
 			lastWeight=0;
 			lastSampleWeight=0;
 			return lastIntervalAvg;
 			}
-		else{
+		else {
 			lastIntervalAvg=(lastSampleWeight/lastWeight);
 			lastWeight=0;
 			lastSampleWeight=0;
@@ -384,7 +384,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 * <br>
 	 *
 	 * An epsilon value was added to the rule to avoid problems when a measure has
-	 * a monothonic behaviour to an asymptotic value
+	 * a monotonic behaviour to an asymptotic value
 	 *
 	 * @return true iff heuristic is verified
 	 */
@@ -419,7 +419,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		double mean = batches.getMeanValue();
 
 		// Stores new mean value into array. Try to compress sequence avoiding
-		// store of monothonic values
+		// store of monotonic values
 		if ((prevprev < prev * (1 - hEpsilon) && prev < mean * (1 - hEpsilon)) || (prevprev > prev * (1 + hEpsilon) && prev > mean * (1 + hEpsilon))) {
 			// Sequence can be compressed, so overwrite prev value
 			hMeans[hSamplesNum - 1] = mean;
@@ -437,7 +437,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			int crosses = 0; // Number of crosses of mean value
 			for (int i = 0; i < hSamplesNum - 2; i++) {
 				// Note that hMeans values are to be tested with this rule and NOT Samples
-				// as we are studing the distribution of mean values and not of single samples
+				// as we are studying the distribution of mean values and not of single samples
 				if (hMeans[i] >= lower && hMeans[i + 1] <= upper || (hMeans[i] <= upper && hMeans[i + 1] >= lower)) {
 					crosses++;
 					if (crosses >= crossesNum) {
@@ -567,17 +567,17 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	}
 
 	/** calculates the variance through Heidelberger & Welch method, if the data
-	     *  are the means of batches of size batchLen, the variance must be multipied
+	     *  are the means of batches of size batchLen, the variance must be multiplied
 	     *  by batchLen.
 	     *
-	     *  @param  data        array contaning the sequence of data
+	     *  @param  data        array containing the sequence of data
 	     *  @param  start       the starting sample
 	     *  @param  n           number of data of the sequence to be estimated
 	     *  @param  K           number of points used in the polynomial fitting
-	     *                      must be <= n/4, tipically is 25, 50
+	     *                      must be <= n/4, typically is 25, 50
 	     *  @param  polyOrder   the order of the polynomial to be fitted to the getLog
-	     *                      of the spectrum of data tipically is 2 or 3.
-	     *  @return the extimated variance
+	     *                      of the spectrum of data typically is 2 or 3.
+	     *  @return the estimated variance
 	     */
 	public double calcVar(double[] data, int start, int n, int K, int polyOrder) {
 
@@ -600,8 +600,8 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		//polynomial fitting
 		polyCoeff = PolyFit.fit(K, fn, J, polyOrder);
 		/*this function could be eliminated if the fit it is calculated through
-		  * the normal eqaution algorithm, because the (AA')^-1 it is created and
-		  * calulated to fit. But if the calculation is done trough other
+		  * the normal equation algorithm, because the (AA')^-1 it is created and
+		  * calculated to fit. But if the calculation is done through other
 		  * algorithms then you have to do with this function.
 		  */
 		C = calcConstants(K, polyOrder);
@@ -609,8 +609,8 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	}
 
 	/** computes the degrees of freedom of the tStudent distribution used in the
-	 * extimation of variance and confidence intervals C2,
-	 * and a constant used to depolarize the variance extinmator
+	 * estimation of variance and confidence intervals C2,
+	 * and a constant used to depolarize the variance estimator
 	 * @param K number of points of the polyfit
 	 * @param polyOrder the order of the polynomial
 	 * @return the double array of dimension 2, at first position it is C1
@@ -618,8 +618,8 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 */
 	public double[] calcConstants(int K, int polyOrder) {
 		double constants[] = new double[2];
-		double sigmaQ = calcExtimatorVar(K, polyOrder);//computes the variance
-		//of the extimator of the variance
+		double sigmaQ = calcEstimatorVar(K, polyOrder);//computes the variance
+		//of the estimator of the variance
 		constants[0] = Math.exp(-sigmaQ / 2);//C1
 		constants[1] = Math.round((float) Math.rint(2 / (Math.exp(sigmaQ) - 1)));
 		//C2
@@ -627,9 +627,9 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	}
 
 	/**
-	     * computes the variance of the extimator of the variance
-	     */
-	protected double calcExtimatorVar(int K, int polyOrder) {
+	 * computes the variance of the estimator of the variance
+	*/
+	protected double calcEstimatorVar(int K, int polyOrder) {
 		Matrix X = new Matrix(K, polyOrder + 1);
 		Matrix Xt;
 		Matrix square;
@@ -741,7 +741,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			batches.clean();
 			return delet;
 		} else {
-			//transient ca not be deleted
+			//transient cannot be deleted
 			delet = false;
 			minSamples += batches.getDiscarded();
 			if (minSamples < maxData) {
@@ -815,7 +815,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	// ---------------------------------------------------------------------------------------------
 
 	/**
-	 * Returns if the analysis was succesful
+	 * Returns if the analysis was successful
 	 *
 	 * @return true if the analysis respect all'users requests
 	 */
@@ -833,12 +833,12 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	}
 
 	/**
-	 * Gets the extimated mean, even if the confidence requirements
+	 * Gets the estimated mean, even if the confidence requirements
 	 * have not been reached
 	 *
-	 * @return the extimated mean
+	 * @return the estimated mean
 	 */
-	public double extimatedMean() {
+	public double estimatedMean() {
 		if (!heuristicPassed || !delet) {
 			return batches.getMeanValue();
 		} else if (extMean < hEpsilon && batches.getMeanValue() >= hEpsilon) {
@@ -858,7 +858,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	}
 
 	/**
-	 * Gets the half width confidence interval extimated of the monitored data
+	 * Gets the half width confidence interval estimated of the monitored data
 	 * stream.
 	 *
 	 * @return the confidence interval requested

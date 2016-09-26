@@ -8,7 +8,7 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
@@ -132,7 +132,7 @@ public class RecursiveSolver extends QNSolver {
             map.put(p.copy(), step2);
         } else {
             //TODO: Remove this when adequately tested
-            /*if (step1.containsKey(m)){
+            /*if (step1.containsKey(m)) {
                 throw new InternalErrorException("Attempt to re-enter data into Gmap");
             }*/
             // step2 must be null, or else we would have found the value of G.

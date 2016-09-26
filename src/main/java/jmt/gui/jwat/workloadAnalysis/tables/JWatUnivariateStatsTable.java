@@ -32,7 +32,7 @@ public class JWatUnivariateStatsTable extends JTable implements CommonConstants 
 	private JPanel labelPanel = null;
 	private JLabel label = null;
 
-	// Contructor
+	// Constructor
 	public JWatUnivariateStatsTable(ModelWorkloadAnalysis model) {
 		setSelectionBackground(new Color(83, 126, 126));
 		setSelectionForeground(Color.BLACK);

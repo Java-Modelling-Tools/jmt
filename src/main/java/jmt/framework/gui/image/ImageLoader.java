@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 package jmt.framework.gui.image;
 
 import java.awt.Dimension;
@@ -31,7 +31,7 @@ import javax.swing.ImageIcon;
  * <p><b>Name:</b> ImageLoader</p> 
  * <p><b>Description:</b> 
  * A class used to load images. Each subclass must implement the <code>getImageURL</code>
- * method to retrive URL of resource to be loaded. This class holds a cache of loaded images.
+ * method to retrieve URL of resource to be loaded. This class holds a cache of loaded images.
  * Cache size can be adjusted using the <code>maxCache</code> field.
  * </p>
  * <p><b>Date:</b> 23/gen/07
@@ -60,7 +60,7 @@ public abstract class ImageLoader {
 
 	/**
 	 * Returns the url of a given resource
-	 * @param resourceName name of the resource to be retrived
+	 * @param resourceName name of the resource to be retrieved
 	 * @return url of the resource or null if it was not found
 	 */
 	protected abstract URL getImageURL(String resourceName);
@@ -124,7 +124,7 @@ public abstract class ImageLoader {
 	/**
 	 * Loads an icon with specified name and caches it, then resizes it.
 	 * @param iconName name of the icon to be loaded. Extensions are automatically added, if needed.
-	 * @param size target dimension of image. a negative number means to mantain aspect ratio on that dimension
+	 * @param size target dimension of image. a negative number means to maintain aspect ratio on that dimension
 	 * @return icon if found, null otherwise
 	 */
 	public ImageIcon loadIcon(String iconName, Dimension size) {

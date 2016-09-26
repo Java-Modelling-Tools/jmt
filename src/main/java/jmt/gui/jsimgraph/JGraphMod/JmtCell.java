@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.JGraphMod;
 
@@ -41,19 +41,17 @@ import org.jgraph.graph.DefaultPort;
 import org.jgraph.graph.GraphConstants;
 import org.jgraph.graph.Port;
 
-/** vertex cell for jmt
-
+/**
+ * vertex cell for jmt
+ *
  * @author Federico Granata
  * Date: 11-lug-2003
  * Time: 13.48.34
  *
  * @author Bertoli Marco
-
  */
 public abstract class JmtCell extends DefaultGraphCell {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private Dimension imageDimension;
 	// Used to determine if parent of this cell has changed (to detect enter and exit from
@@ -70,8 +68,10 @@ public abstract class JmtCell extends DefaultGraphCell {
 	public static final int FORK = 5;
 	public static final int JOIN = 6;
 	public static final int LDSERVER = 7;
-	public static final int CLASSSWITCH = 8; 
+	public static final int CLASSSWITCH = 8;
 	public static final int SEMAPHORE = 9;
+	public static final int PLACE = 10;
+	public static final int TRANSITION = 11;
 
 	private Port[] ports;
 
@@ -94,7 +94,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.
 	 *
-	  * @param userObject an Object provided by the user that constitutes
+	 * @param userObject an Object provided by the user that constitutes
 	 *                   the cell's data
 	 *
 	 * Conti Andrea  01-09-2003
@@ -109,17 +109,17 @@ public abstract class JmtCell extends DefaultGraphCell {
 		GraphConstants.setSize(attributes, imageDimension);
 	}
 
-	//	 Giuseppe De Cicco & Fabio Granara
+	// Giuseppe De Cicco & Fabio Granara
 	public void AddIn() {
 		in += 1;
 	}
 
-	//	 Giuseppe De Cicco & Fabio Granara
+	// Giuseppe De Cicco & Fabio Granara
 	public void SubIn() {
 		in -= 1;
 	}
 
-	//	 Giuseppe De Cicco & Fabio Granara
+	// Giuseppe De Cicco & Fabio Granara
 	public void AddOut() {
 		out += 1;
 	}
@@ -130,8 +130,9 @@ public abstract class JmtCell extends DefaultGraphCell {
 	}
 
 	/**
-	 * Return Cell's real size (this method considers Icon and name size)
-	 * @param graph <code>JGraph</code> object to retrive font dimension informations
+	 * Returns Cell's real size (this method considers Icon and name size)
+	 *
+	 * @param graph <code>JGraph</code> object to retrieve font dimension informations
 	 * @return cell's real size
 	 *
 	 * Bertoli Marco  4-giu-2005
@@ -151,7 +152,8 @@ public abstract class JmtCell extends DefaultGraphCell {
 		return cellDimension;
 	}
 
-	/**creats the ports for this vertex
+	/**
+	 * Creates the ports for this vertex
 	 *
 	 * @return array of ports
 	 */
@@ -160,6 +162,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 	/**
 	 * Sets all the attribults like background colour, dimensions, port number
 	 * & position
+	 *
 	 * @param pt
 	 * @return created map
 	 */
@@ -214,15 +217,15 @@ public abstract class JmtCell extends DefaultGraphCell {
 	}
 
 	/**
-	 * is true if the InputPort of this cell is on the left side
+	 * Tells if the InputPort of this cell is on the left side
 	 * @return true if the InputPort of this cell is on the left side
 	 */
-	//	 Giuseppe De Cicco & Fabio Granara
+	// Giuseppe De Cicco & Fabio Granara
 	public boolean isLeftInputCell() {
 		return leftInputCell;
 	}
 
-	//	 Giuseppe De Cicco & Fabio Granara
+	// Giuseppe De Cicco & Fabio Granara
 	public void setLeftInputCell(boolean state) {
 		leftInputCell = state;
 	}
@@ -236,6 +239,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 
 	/**
 	 * Tells if this cell parent was changed since last call to resetParent() method
+	 *
 	 * @return true if parent changed, false otherwise
 	 * @see #resetParent()
 	 */
@@ -252,6 +256,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 	/**
 	 * Tells if this station generates or destroys jobs (useful for blocking region
 	 * management)
+	 *
 	 * @return true if this station generates or destroy jobs, false otherwise
 	 */
 	public boolean generateOrDestroyJobs() {
@@ -261,6 +266,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 	/**
 	 * Returns previous parent of this cell (the one present when resetParent()
 	 * method was called)
+	 *
 	 * @return previous parent of this cell
 	 * @see #resetParent()
 	 */
@@ -270,7 +276,9 @@ public abstract class JmtCell extends DefaultGraphCell {
 
 	/**
 	 * Returns the name of the icon of this cell
+	 *
 	 * @return the name of the icon of this cell
 	 */
 	public abstract String getIcon();
+
 }

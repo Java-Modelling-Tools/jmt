@@ -1,30 +1,30 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -63,9 +63,6 @@ import jmt.gui.common.serviceStrategies.ZeroStrategy;
  */
 public class ServiceSectionPanel extends WizardPanel implements CommonConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	protected Object stationKey;
 	protected StationDefinition data;
@@ -79,13 +76,11 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 
 	//editing of arrival time distribution
 	protected AbstractAction editDistribution = new AbstractAction("Edit") {
-		/**
-		* 
-		*/
+
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Edits service section parameters");
+			putValue(Action.SHORT_DESCRIPTION, "Edits Service Time Distribution");
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -98,7 +93,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				if (service instanceof Distribution) {
 					DistributionsEditor editor = DistributionsEditor.getInstance(ServiceSectionPanel.this.getParent(), (Distribution) service);
 					// Sets editor window title
-					editor.setTitle("Editing " + classData.getClassName(key) + " distribution...");
+					editor.setTitle("Editing " + classData.getClassName(key) + " Service Time Distribution...");
 					// Shows editor window
 					editor.show();
 					// Sets new Distribution to selected class
@@ -112,7 +107,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				else {
 					LDStrategyEditor editor = LDStrategyEditor.getInstance(ServiceSectionPanel.this.getParent(), (LDStrategy) service);
 					// Sets editor window title
-					editor.setTitle("Editing " + classData.getClassName(key) + " Load Dependent service strategy...");
+					editor.setTitle("Editing " + classData.getClassName(key) + " Load Dependent Service Strategy...");
 					// Shows editor window
 					editor.show();
 					serviceTable.repaint();
@@ -160,7 +155,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 	private void updateSpinner() {
 		serversNumSpinner.setValue(data.getStationNumberOfServers(stationKey));
 		if (STATION_TYPE_DELAY.equals(data.getStationType(stationKey))) {
-			serversNumSpinner.setValue(new Float(Float.POSITIVE_INFINITY));
+			serversNumSpinner.setValue(Float.POSITIVE_INFINITY);
 			serversNumSpinner.setEnabled(false);
 		} else {
 			serversNumSpinner.setEnabled(true);
@@ -219,9 +214,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 	}
 
 	protected class ServiceTable extends JTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		/**
@@ -230,9 +223,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		protected Object[] serviceType = new Object[] { SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT, SERVICE_ZERO };
 
 		JButton editButton = new JButton() {
-			/**
-			 * 
-			 */
+
 			private static final long serialVersionUID = 1L;
 
 			{
@@ -247,16 +238,17 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			setModel(new ServiceTableModel());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
-			if (column == columnSizes.length - 1 && getValueAt(row, 1) != SERVICE_ZERO) {
-				return new ButtonCellEditor(editButton);
+			if (column == 0) {
+				return classEditor.getRenderer();
 			} else if (column == 1) {
 				return ComboBoxCellEditor.getRendererInstance();
-			} else if (column == 0) {
-				return classEditor.getRenderer();
+			} else if (column == 3) {
+				return new DisabledButtonCellRenderer(editButton);
 			} else {
 				return super.getCellRenderer(row, column);
 			}
@@ -266,7 +258,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
 				return ComboBoxCellEditor.getEditorInstance(serviceType);
-			} else if (column == columnSizes.length - 1) {
+			} else if (column == 3) {
 				return new ButtonCellEditor(new JButton(editDistribution));
 			} else {
 				return super.getCellEditor(row, column);
@@ -282,19 +274,16 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 
 	protected class ServiceTableModel extends AbstractTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
-		private Class[] columnClasses = new Class[] { String.class, JComboBox.class, String.class, Object.class };
 		private String[] columnNames = new String[] { "Class", "Strategy", "Service Time Distribution", "" };
+		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Object.class };
 
 		public int getRowCount() {
 			return classData.getClassKeys().size();
 		}
 
 		public int getColumnCount() {
-			return 4;
+			return columnNames.length;
 		}
 
 		@Override
@@ -303,31 +292,31 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		}
 
 		@Override
-		public Class<Integer> getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			return columnClasses[columnIndex];
 		}
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return ((columnIndex == columnNames.length - 1 && getValueAt(rowIndex, 1) != SERVICE_ZERO) || columnIndex == 1);
+			return (columnIndex == 1 || (columnIndex == 3 && !SERVICE_ZERO.equals((String) getValueAt(rowIndex, 1))));
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object classKey = classData.getClassKeys().get(rowIndex);
 			switch (columnIndex) {
-				case (0):
-					return classKey;
-				case (1):
-					// Checks if current service section is load dependent or indipendent
-					if (data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy) {
-						return SERVICE_LOAD_DEPENDENT;
-					} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
-						return SERVICE_ZERO;
-					} else {
-						return SERVICE_LOAD_INDEPENDENT;
-					}
-				case (2):
-					return data.getServiceTimeDistribution(stationKey, classKey);
+			case (0):
+				return classKey;
+			case (1):
+				// Checks if current service section is load dependent or independent
+				if (data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy) {
+					return SERVICE_LOAD_DEPENDENT;
+				} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
+					return SERVICE_ZERO;
+				} else {
+					return SERVICE_LOAD_INDEPENDENT;
+				}
+			case (2):
+				return data.getServiceTimeDistribution(stationKey, classKey);
 			}
 			return null;
 		}
@@ -337,23 +326,49 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object classKey = classData.getClassKeys().get(rowIndex);
 			switch (columnIndex) {
-				// Load dependency
-				case (1):
-					if (SERVICE_LOAD_DEPENDENT.equals(aValue)) {
-						// Puts a LDService strategy only if previously it was different
-						if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy)) {
-							data.setServiceTimeDistribution(stationKey, classKey, new LDStrategy());
-						}
-					} else if (SERVICE_ZERO.equals(aValue)) {
-						data.setServiceTimeDistribution(stationKey, classKey, new ZeroStrategy());
-					} else {
-						// Puts default service strategy, only if previously a load dependent was chosen
-						if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof Distribution)) {
-							data.setServiceTimeDistribution(stationKey, classKey, Defaults.getAsNewInstance("stationServiceStrategy"));
-						}
+			// Load dependency
+			case (1):
+				if (SERVICE_LOAD_DEPENDENT.equals(aValue)) {
+					// Puts a Load Dependent Service Strategy only if previously it was different
+					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy)) {
+						data.setServiceTimeDistribution(stationKey, classKey, new LDStrategy());
 					}
-					repaint();
+				} else if (SERVICE_ZERO.equals(aValue)) {
+					// Puts a Zero Service Time Strategy only if previously it was different
+					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy)) {
+						data.setServiceTimeDistribution(stationKey, classKey, new ZeroStrategy());
+					}
+				} else {
+					// Puts the default service strategy only if previously it was different
+					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof Distribution)) {
+						data.setServiceTimeDistribution(stationKey, classKey, Defaults.getAsNewInstance("stationServiceStrategy"));
+					}
+				}
+			repaint();
 			}
+		}
+
+	}
+
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+		public DisabledButtonCellRenderer(JButton jbutt) {
+			super(jbutt);
+			button = jbutt;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			if (table.isCellEditable(row, column)) {
+				button.setEnabled(true);
+			} else {
+				button.setEnabled(false);
+			}
+			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
 
 	}

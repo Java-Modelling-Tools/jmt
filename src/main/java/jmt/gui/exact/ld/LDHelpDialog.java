@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.exact.ld;
 
@@ -34,9 +34,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
-import jmt.gui.common.CommonConstants;
 import jmt.framework.gui.components.HtmlPanel;
 import jmt.framework.gui.components.JMTDialog;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.ld.eval.Evaluator;
 
 /**
@@ -52,9 +52,6 @@ import jmt.gui.exact.ld.eval.Evaluator;
  */
 public class LDHelpDialog extends JMTDialog {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private static final String generalHelp = "<html>To enter values, single-click on the desired cell"
@@ -67,20 +64,19 @@ public class LDHelpDialog extends JMTDialog {
 			+ "<br><br>The expression evaluator allows you to automatically set service times as a function of the number of"
 			+ " customers. Just select the cells you want to fill, enter an expression and press Enter or click <b>Evaluate</b>.<br>"
 			+ " For detailed information on expression syntax and supported functions select the <b>Evaluator</b> tab above.</html>";
-	/*" Cells can be filled by evaluating a mathematical expression:<br> enter it in the text field,"+
-	" make sure the desired cells are selected and click on <b>\"Evaluate\"</b>.<br><br>";*/
+			//+ " Cells can be filled by evaluating a mathematical expression:<br> enter it in the text field,"
+			//+ " make sure the desired cells are selected and click on <b>\"Evaluate\"</b>.<br><br>";
 
 	private URL evalHelp;
 
 	private AbstractAction close = new AbstractAction("OK") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
 			hide();
 		}
+
 	};
 
 	public LDHelpDialog(Dialog owner, Evaluator eval) {

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.QueueNet;
 
@@ -104,6 +104,8 @@ public class NetSystem {
 				while (nodes.hasNext()) {
 					Node = nodes.next();
 					Node.send(NetEvent.EVENT_START, null, 0.0, NodeSection.NO_ADDRESS, NodeSection.INPUT, Node);
+					Node.send(NetEvent.EVENT_START, null, 0.0, NodeSection.NO_ADDRESS, NodeSection.SERVICE, Node);
+					Node.send(NetEvent.EVENT_START, null, 0.0, NodeSection.NO_ADDRESS, NodeSection.OUTPUT, Node);
 				}
 				Network.setState(QueueNetwork.STATE_RUNNING);
 
@@ -152,7 +154,7 @@ public class NetSystem {
 	}
 
 	/** Stops the NetSystem Engine and terminates the simulation.
-	 * @param Network Reference to the netowrk to be stopped.
+	 * @param Network Reference to the network to be stopped.
 	 * @throws jmt.common.exception.NetException
 	 */
 	public static void stop(QueueNetwork Network) throws jmt.common.exception.NetException {
@@ -185,7 +187,7 @@ public class NetSystem {
 	}
 
 	/** Aborts the NetSystem Engine and terminates the simulation.
-	 * @param network Reference to the netowrk to be stopped.
+	 * @param network Reference to the network to be stopped.
 	 * @throws jmt.common.exception.NetException
 	 */
 	public static void abort(QueueNetwork network) throws jmt.common.exception.NetException {
@@ -302,14 +304,14 @@ public class NetSystem {
 	 * <br>Author: Bertoli Marco
 	 * @param network network to be checked for progress
 	 * @return estimated simulation progress
-	 * @throws jmt.common.exception.NetException if network il null
+	 * @throws jmt.common.exception.NetException if network is null
 	 */
 	public static double checkProgress(QueueNetwork network) throws jmt.common.exception.NetException {
 
 		if (network == null) {
-			throw new NetException("Ca not measure progress of a network which does not exist.");
+			throw new NetException("Cannot measure progress of a network which does not exist.");
 		}
-		// We extimate on the slowest not completed measure
+		// We estimate on the slowest not completed measure
 		ListIterator<Measure> measures;
 		double slowest = 1;
 		Measure measure;
@@ -329,7 +331,7 @@ public class NetSystem {
 	public static double getTempMeasures(QueueNetwork network) throws jmt.common.exception.NetException {
 
 		if (network == null) {
-			throw new NetException("Ca not get measures of a network which does not exist.");
+			throw new NetException("Cannot get measures of a network which does not exist.");
 		}
 
 		ListIterator<Measure> measures;

@@ -124,7 +124,7 @@ public class TreePlanter {
 		treePlantTimer.start();
 		boolean suitableTreeFound = false;
 		int i = 0;
-		while(!suitableTreeFound) {
+		while (!suitableTreeFound) {
 			if (i >= Config.MAX_TREE_PLANT_ATTEMPTS) {
 				treePlantTimer.pause();
 				return false;
@@ -297,7 +297,7 @@ public class TreePlanter {
 			
 			Covered coverS1unionS2 = ccu.getClassCoverage(c, S1unionS2);
 			if (coverS1 == Covered.PARTIALLY && coverS1unionS2 != Covered.FULLY) cost--;
-			else if(coverS1 == Covered.PARTIALLY && coverS1unionS2 == Covered.FULLY) cost -= 2;
+			else if (coverS1 == Covered.PARTIALLY && coverS1unionS2 == Covered.FULLY) cost -= 2;
 		}
 
 		return cost;

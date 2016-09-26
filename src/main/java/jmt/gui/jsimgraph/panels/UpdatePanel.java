@@ -36,22 +36,22 @@ public class UpdatePanel extends WizardPanel {
 	private JButton download;
 	private JButton cancel;
 
-	private List<TemplateData> datas;
+	private List<TemplateData> data;
 	private DefaultPackageTable defaultPackageTable;
 
 	private JPanel parent;
         
         private TemplatePanel panel;
 	
-	public UpdatePanel(List<TemplateData> datas){
-		this.datas = datas;
+	public UpdatePanel(List<TemplateData> data) {
+		this.data = data;
 		parent = this;
                 this.panel = null;
 		initComponents();
 	}
 
-        UpdatePanel(TemplatePanel panel, List<TemplateData> datas) {
-                this.datas = datas;
+        UpdatePanel(TemplatePanel panel, List<TemplateData> data) {
+                this.data = data;
 		parent = this;
                 this.panel = panel;
 		initComponents();
@@ -75,9 +75,9 @@ public class UpdatePanel extends WizardPanel {
 				progress.setString("0%");
 				download.setEnabled(false);
 				cancel.setEnabled(false);
-				if(ConnectionCheck.netCheck(TemplateConstants.CONN_TEST_ADDRESSES)){
+				if (ConnectionCheck.netCheck(TemplateConstants.CONN_TEST_ADDRESSES)) {
 					new Downloader(progress).execute();
-				}else{
+				} else {
 					download.setEnabled(true);
 					cancel.setEnabled(true);
 					JOptionPane.showMessageDialog(parent, "Connection error");
@@ -128,6 +128,7 @@ public class UpdatePanel extends WizardPanel {
 			setModel(new DefaultPackageTableModel());
 			sizeColumns();
 			setRowHeight(TemplateConstants.CELL_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 		}
 		
 		private void sizeColumns() {
@@ -143,7 +144,7 @@ public class UpdatePanel extends WizardPanel {
             int rowIndex = rowAtPoint(p);
 
             try {
-                tip = datas.get(rowIndex).getToolTip();
+                tip = data.get(rowIndex).getToolTip();
             } catch (Exception e1) {
             	e1.printStackTrace();
             }
@@ -162,7 +163,7 @@ public class UpdatePanel extends WizardPanel {
 		
 		public int[] columnSizes = new int[] { 520 };
 
-		boolean[] flags = new boolean[datas.size()];
+		boolean[] flags = new boolean[data.size()];
 
 		public DefaultPackageTableModel() {
 			Arrays.fill(flags, true);
@@ -190,12 +191,12 @@ public class UpdatePanel extends WizardPanel {
 
 		@Override
 		public int getRowCount() {
-			return datas.size();
+			return data.size();
 		}
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
-			return datas.get(rowIndex).getName();
+			return data.get(rowIndex).getName();
 		}
 
 		@Override
@@ -215,10 +216,10 @@ public class UpdatePanel extends WizardPanel {
 
 		@Override
 		protected Boolean doInBackground() throws Exception {
-			for (int i = 0; i < datas.size(); i++) {
+			for (int i = 0; i < data.size(); i++) {
 					
-                                String file = datas.get(i).getUpdateAddress();
-                                String fileName = datas.get(i).getFileName();
+                                String file = data.get(i).getUpdateAddress();
+                                String fileName = data.get(i).getFileName();
 
                                 try {
                                         if (fileName != null) {
@@ -248,7 +249,7 @@ public class UpdatePanel extends WizardPanel {
 		protected void process(final List<Integer> chunks) {
 			for (final Integer task : chunks) {
 				if (task > -1) {
-					int value = task * 100 / datas.size();
+					int value = task * 100 / data.size();
 					progress.setValue(value);
 					progress.setString(value + "%");
 				}
@@ -257,7 +258,7 @@ public class UpdatePanel extends WizardPanel {
 					download.setEnabled(true);
 					cancel.setEnabled(true);
 					SwingUtilities.getWindowAncestor(parent).setVisible(false);
-                                        if(panel != null) {
+                                        if (panel != null) {
                                                 panel.updateTemplates();
                                         }
 				}

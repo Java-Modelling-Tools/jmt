@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions;
 
@@ -81,21 +81,20 @@ public interface SimulationDefinition {
 	public static final String MEASURE_DR = "Drop Rate";
 	/**Code for average system drop rate*/
 	public static final String MEASURE_S_DR = "System Drop Rate";
-	//Added by ASHANKA START
-	//Added as a part of process 
-	//of including the system power performance index to JSIM
-	public static final String MEASURE_S_SP = "System Power";
-	
-	public static final String MEASURE_X_PER_SINK = "Throughput per Sink";
-	public static final String MEASURE_R_PER_SINK = "Response Time per Sink";
-	
-	public static final String MEASURE_MEAN_WEIGHT = "FCR Total Weight";
-	public static final String MEASURE_MEAN_MEMORY_OCCUPATION = "FCR Memory Occupation";
-	
-	public static final String MEASURE_FJ_RESPONSE_TIME = "Fork Join Response Time";
-        public static final String MEASURE_FJ_CN = "Fork Join Number of Customers";
 
-	//Added by ASHANKA STOP
+	public static final String MEASURE_S_SP = "System Power";
+
+	public static final String MEASURE_X_PER_SINK = "Throughput per Sink";
+
+	public static final String MEASURE_R_PER_SINK = "Response Time per Sink";
+
+	public static final String MEASURE_FCR_TOTAL_WEIGHT = "FCR Total Weight";
+
+	public static final String MEASURE_FCR_MEMORY_OCCUPATION = "FCR Memory Occupation";
+
+	public static final String MEASURE_FJ_RESPONSE_TIME = "Fork Join Response Time";
+
+	public static final String MEASURE_FJ_CN = "Fork Join Number of Customers";
 
 	/*------------------------------------------------------------------------------------------
 	------------------------------Parameters for measures definition----------------------------
@@ -120,7 +119,7 @@ public interface SimulationDefinition {
 	 * */
 	public Object addMeasure(String type, Object stationKey, Object classKey, Double alpha, Double precision, boolean log);
 
-	/**Removes a mesure from list, given its search key
+	/**Removes a measure from list, given its search key
 	 * @param measureKey: search Key for measure to be removed
 	 */
 	public void removeMeasure(Object measureKey);
@@ -130,13 +129,13 @@ public interface SimulationDefinition {
 	 */
 	public Vector<Object> getMeasureKeys();
 
-	/** Returns type of measure, given measure searchkey.
+	/**Returns type of measure, given measure search key
 	 * @param measureKey: search key
 	 * @return measure type
 	 */
 	public String getMeasureType(Object measureKey);	
 
-	/**sets type of parameter to be measured
+	/**Sets type of parameter to be measured
 	 * @param newType new type for this measure
 	 * @param measureKey search key for this measure
 	 */
@@ -161,60 +160,58 @@ public interface SimulationDefinition {
 	public Object getMeasureStation(Object measureKey);
 
 	/**Changes reference station for specified measure, given its search key
-	 * @param stationKey: search key for station this mesure must be referred to.
+	 * @param stationKey: search key for station this measure must be referred to.
 	 * @param measureKey: search key for measure.
 	 */
 	public void setMeasureStation(Object stationKey, Object measureKey);
 
 	/**returns value for alpha parameter of a specific measure, given its search key.
-	 * @param measureKey search keyt for station
+	 * @param measureKey search key for station
 	 * @return value of alpha parameter
 	 */
 	public Double getMeasureAlpha(Object measureKey);
 
 	/**Sets value for alpha parameter of a specific measure, given its search key.
-	 * @param measureKey search keyt for station
+	 * @param measureKey search key for station
 	 * @param alpha value of alpha parameter
 	 */
 	public void setMeasureAlpha(Double alpha, Object measureKey);
 
 	/**returns value for precision parameter of a specific measure, given its search key.
-	 * @param measureKey search keyt for station
+	 * @param measureKey search key for station
 	 * @return value of precision parameter
 	 */
 	public Double getMeasurePrecision(Object measureKey);
 
 	/**Sets value for alpha parameter of a specific measure, given its search key.
-	 * @param measureKey search keyt for station
+	 * @param measureKey search key for station
 	 * @param precision value of alpha parameter
 	 */
 	public void setMeasurePrecision(Double precision, Object measureKey);
-	
-	
+
 	/**
 	 * Sets if measure should be logged
 	 * @param log true to log measure, false to avoid (default)
 	 * @param measureKey the key of the measure
 	 */
 	public void setMeasureLog(boolean log, Object measureKey);
-	
+
 	/**
 	 * Tells if a measure should be logged
 	 * @param measureKey the key of the measure
 	 * @return true if measure should be logged, false otherwise.
 	 */
 	public boolean getMeasureLog(Object measureKey);
-	
 
 	/**
-	* Tells if a given measure is global or local (i.e. if it is station independent
-	* or station dependent)
-	* <br>Author: Bertoli Marco
-	* @param key search's key for given measure
-	* @return true if measure is global
-	*/
+	 * Tells if a given measure is global or local (i.e. if it is station independent
+	 * or station dependent)
+	 * <br>Author: Bertoli Marco
+	 * @param key search's key for given measure
+	 * @return true if measure is global
+	 */
 	public boolean isGlobalMeasure(Object key);
-	
+
 	/**
 	 * Tells if the Measure is being calculated keeping the Sink as reference,
 	 * Is used for the performance indices of
@@ -223,9 +220,9 @@ public interface SimulationDefinition {
 	 * @return
 	 */
 	public boolean isSinkMeasure(Object key);
-	
+
 	public boolean isFCRMeasure(Object key);
-	
+
 	public boolean isFJMeasure(Object key);
 
 	/*------------------------------------------------------------------------------------------
@@ -251,7 +248,7 @@ public interface SimulationDefinition {
 	/**
 	 * Returns number of jobs totally allocated for specified class.
 	 * @param classKey class jobs to be preloaded belong to.
-	 * @return umber of jobs totally to be preloaded.
+	 * @return number of jobs totally to be preloaded.
 	 */
 	public Integer getPreloadedJobsNumber(Object classKey);
 
@@ -307,7 +304,7 @@ public interface SimulationDefinition {
 	 * @return maximum length of the simulation in the time unit implicitly used in the model
 	 */
 	public Double getMaxSimulatedTime();
-	
+
 	/**
 	 * Gets polling interval for temporary measures
 	 * @return polling interval for temporary measures
@@ -362,7 +359,6 @@ public interface SimulationDefinition {
 	 * @return true iff <code>getSimulationResults()</code> returns a non-null object
 	 */
 	public boolean containsSimulationResults();
-
 	// ------------------------------------------------------------------------------------------------------
 
 	// -------------------- Francesco D'Aquino -----------------------------------

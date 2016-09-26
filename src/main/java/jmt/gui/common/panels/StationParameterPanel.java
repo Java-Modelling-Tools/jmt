@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.panels;
 
@@ -40,9 +40,7 @@ import jmt.gui.common.definitions.StationDefinition;
  * To change this template use Options | File Templates.
  */
 public class StationParameterPanel extends WizardPanel implements CommonConstants {
-	/**
-	 *
-	 */
+
 	private static final long serialVersionUID = 1L;
 	protected StationDefinition stationData;
 	protected ClassDefinition classData;
@@ -60,6 +58,10 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	protected InGateWaySectionPanel gsPane;
 	protected JoinSectionPanel jsPane;
 	protected SemaphoreSectionPanel smsPane;
+	protected StoreSectionPanel stPane;
+	protected EnablingSectionPanel enPane;
+	protected TimingSectionPanel tiPane;
+	protected FiringSectionPanel fiPane;
 	// Current wizard panel
 	protected WizardPanel current;
 
@@ -161,12 +163,12 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 
 		}
 		if (hasLoggerSection(type)) {
-// GC: this if was misbehaving in the presence of two or more loggers: https://sourceforge.net/p/jmt/bugs/42/
-//			if (lsPane == null) {
-				lsPane = new LoggerSectionPanel(stationData, classData, stationKey);
-//			} else {
-//				lsPane.setData(stationData, classData, stationKey);
-//			}
+			// GC: this if was misbehaving in the presence of two or more loggers: https://sourceforge.net/p/jmt/bugs/42/
+			//if (lsPane == null) {
+			lsPane = new LoggerSectionPanel(stationData, classData, stationKey);
+			//} else {
+			//lsPane.setData(stationData, classData, stationKey);
+			//}
 			mainPanel.add(lsPane, lsPane.getName());
 
 			// If this was previously selected, selects this
@@ -187,6 +189,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == csPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
+
 		}
 		if (hasRoutingSection(type)) {
 			if (rsPane == null) {
@@ -203,22 +206,22 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 
 		}
 		// For BPMN
-		if(hasInGateWaySection(type)){
+		if (hasInGateWaySection(type)) {
 			if (gsPane == null) {
 				gsPane = new InGateWaySectionPanel(stationData, classData, stationKey);
 			} else {
 				gsPane.setData(stationData, classData, stationKey);
 			}
 			mainPanel.add(gsPane, gsPane.getName());
-//                        mainPanel.setEnabledAt(2, !stationData.getIsSimplifiedFork(stationKey));
-                        
+			//mainPanel.setEnabledAt(2, !stationData.getIsSimplifiedFork(stationKey));
+
 			// If this was previously selected, selects this
 			if (oldComponent == gsPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
+
 		}
-		
-		if(hasJoinSection(type)){
+		if (hasJoinSection(type)) {
 			if (jsPane == null) {
 				jsPane = new JoinSectionPanel(stationData, classData, stationKey);
 			} else {
@@ -230,9 +233,9 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == jsPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
+
 		}
-		
-		if(hasSemaphoreSection(type)){
+		if (hasSemaphoreSection(type)) {
 			if (smsPane == null) {
 				smsPane = new SemaphoreSectionPanel(stationData, classData, stationKey);
 			} else {
@@ -244,6 +247,63 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == smsPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
+
+		}
+		if (hasStoreSection(type)) {
+			if (stPane == null) {
+				stPane = new StoreSectionPanel(stationData, classData, stationKey);
+			} else {
+				stPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(stPane, stPane.getName());
+
+			// If this was previously selected, selects this
+			if (oldComponent == stPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+
+		}
+		if (hasEnablingSection(type)) {
+			if (enPane == null) {
+				enPane = new EnablingSectionPanel(stationData, classData, stationKey);
+			} else {
+				enPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(enPane, enPane.getName());
+
+			// If this was previously selected, selects this
+			if (oldComponent == enPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+
+		}
+		if (hasTimingSection(type)) {
+			if (tiPane == null) {
+				tiPane = new TimingSectionPanel(stationData, classData, stationKey);
+			} else {
+				tiPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(tiPane, tiPane.getName());
+
+			// If this was previously selected, selects this
+			if (oldComponent == tiPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+
+		}
+		if (hasFiringSection(type)) {
+			if (fiPane == null) {
+				fiPane = new FiringSectionPanel(stationData, classData, stationKey);
+			} else {
+				fiPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(fiPane, fiPane.getName());
+
+			// If this was previously selected, selects this
+			if (oldComponent == fiPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+
 		}
 
 		// Sets current panel
@@ -272,7 +332,8 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		} else {
 			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_DELAY.equals(type) || STATION_TYPE_SOURCE.equals(type)
 					|| STATION_TYPE_ROUTER.equals(type) || STATION_TYPE_LOGGER.equals(type) || STATION_TYPE_TERMINAL.equals(type)
-					|| STATION_TYPE_JOIN.equals(type) || STATION_TYPE_CLASSSWITCH.equals(type) || STATION_TYPE_TASKSEMAPHORE.equals(type); //|| STATION_TYPE_OUTGATEWAY.equals(type);
+					|| STATION_TYPE_JOIN.equals(type) || STATION_TYPE_CLASSSWITCH.equals(type) || STATION_TYPE_TASKSEMAPHORE.equals(type);
+					//|| STATION_TYPE_OUTGATEWAY.equals(type);
 		}
 	}
 
@@ -291,7 +352,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			return STATION_TYPE_FORK.equals(type); //|| STATION_TYPE_INGATEWAY.equals(type);
 		}
 	}
-	
+
 	/**
 	 * True the stations of type @type
 	 * have a class_switch panel, false otherwise.
@@ -305,31 +366,64 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			return STATION_TYPE_CLASSSWITCH.equals(type);
 		}
 	}
+
 	// For BPMN
-	private boolean hasInGateWaySection(String type){
+	private boolean hasInGateWaySection(String type) {
 		if (checkNullValues()) {
 			return false;
 		} else {
 			return STATION_TYPE_FORK.equals(type);
 		}
 	}
-	
-	private boolean hasJoinSection(String type){
+
+	private boolean hasJoinSection(String type) {
 		if (checkNullValues()) {
 			return false;
 		} else {
 			return STATION_TYPE_JOIN.equals(type);
 		}
 	}
-	
-	private boolean hasSemaphoreSection(String type){
+
+	private boolean hasSemaphoreSection(String type) {
 		if (checkNullValues()) {
 			return false;
 		} else {
 			return STATION_TYPE_TASKSEMAPHORE.equals(type);
 		}
 	}
-	
+
+	private boolean hasStoreSection(String type) {
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_PLACE.equals(type);
+		}
+	}
+
+	private boolean hasEnablingSection(String type) {
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_TRANSITION.equals(type);
+		}
+	}
+
+	private boolean hasTimingSection(String type) {
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_TRANSITION.equals(type);
+		}
+	}
+
+	private boolean hasFiringSection(String type) {
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_TRANSITION.equals(type);
+		}
+	}
+
 	private boolean checkNullValues() {
 		return stationKey == null || stationData == null || classData == null;
 	}
@@ -354,7 +448,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	public void showServiceSectionPanel() {
 		mainPanel.setSelectedComponent(ssPane);
 	}
-	
+
 	/**
 	 * It shows the class_switch panel
 	 * of the related station.
@@ -362,18 +456,26 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	public void showCsSectionPanel() {
 		mainPanel.setSelectedComponent(csPane);
 	}
-        
-        public void showJoinSectionPanel(Object classKey) {
-                jsPane.setData(stationData, classData, stationKey);
-                jsPane.setSelectedClass(classKey);
+
+	public void showJoinSectionPanel(Object classKey) {
+		jsPane.setData(stationData, classData, stationKey);
+		jsPane.setSelectedClass(classKey);
 		mainPanel.setSelectedComponent(jsPane);
 	}
-        
-        public void showSemaphoreSectionPanel(Object classKey) {
-            smsPane.setData(stationData, classData, stationKey);
-            smsPane.setSelectedClass(classKey);
-            mainPanel.setSelectedComponent(smsPane);
-        }
+
+	public void showSemaphoreSectionPanel(Object classKey) {
+		smsPane.setData(stationData, classData, stationKey);
+		smsPane.setSelectedClass(classKey);
+		mainPanel.setSelectedComponent(smsPane);
+	}
+
+	public void showEnablingSectionPanel(Object classKey) {
+		mainPanel.setSelectedComponent(enPane);
+	}
+
+	public void showFiringSectionPanel(Object classKey) {
+		mainPanel.setSelectedComponent(fiPane);
+	}
 
 	/**
 	 * @return the panel's name
@@ -392,4 +494,5 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			current.lostFocus();
 		}
 	}
+
 }

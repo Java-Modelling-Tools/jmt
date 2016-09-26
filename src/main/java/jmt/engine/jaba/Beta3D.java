@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.jaba;
 
@@ -65,7 +65,6 @@ public class Beta3D {
 
 		Sector3D out = new Sector3D(x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get(3, 0), x.get(4, 0), x.get(5, 0), x.get(6, 0), x.get(7, 0), x.get(8,
 				0), 3, v1, v2, v3);
-
 		return out;
 	}
 
@@ -85,7 +84,6 @@ public class Beta3D {
 	}
 
 	public Sector3D TriNoB3(BetaVertex v1, BetaVertex v2, Vertex st1, Vertex st2) {
-
 		int[] v1c = st1.getCoords();
 		int v1x = v1c[0];
 		int v1y = v1c[1];
@@ -100,7 +98,7 @@ public class Beta3D {
 		int v3x=v3c[0];
 		int v3y=v3c[1];
 		int v3z=v3c[2];
-		*/
+		 */
 		double[][] arraya = { { 1, 1, 1, 0, 0, 0 }, { 0, 0, 0, 1, 1, 1 }, { v2x, 0, 0, -v1x, 0, 0 }, { 0, v2y, 0, 0, -v1y, 0 },
 				{ 0, 0, v2z, 0, 0, -v1z }, { 0, 0, 0, 0, 0, 1 } };
 
@@ -122,7 +120,6 @@ public class Beta3D {
 	}
 
 	public Sector3D TriNoB1(BetaVertex v1, BetaVertex v2, Vertex st1, Vertex st2) {
-
 		int[] v1c = st1.getCoords();
 		int v1x = v1c[0];
 		int v1y = v1c[1];
@@ -137,7 +134,7 @@ public class Beta3D {
 		int v3x=v3c[0];
 		int v3y=v3c[1];
 		int v3z=v3c[2];
-		*/
+		 */
 		double[][] arraya = { { 1, 1, 1, 0, 0, 0 }, { 0, 0, 0, 1, 1, 1 }, { v2x, 0, 0, -v1x, 0, 0 }, { 0, v2y, 0, 0, -v1y, 0 },
 				{ 0, 0, v2z, 0, 0, -v1z }, { 0, 0, 0, 1, 0, 0 } };
 
@@ -159,7 +156,6 @@ public class Beta3D {
 	}
 
 	public Sector3D TriNoB2(BetaVertex v1, BetaVertex v2, Vertex st1, Vertex st2) {
-
 		int[] v1c = st1.getCoords();
 		int v1x = v1c[0];
 		int v1y = v1c[1];
@@ -174,7 +170,7 @@ public class Beta3D {
 		int v3x=v3c[0];
 		int v3y=v3c[1];
 		int v3z=v3c[2];
-		*/
+		 */
 		double[][] arraya = { { 1, 1, 1, 0, 0, 0 }, { 0, 0, 0, 1, 1, 1 }, { v2x, 0, 0, -v1x, 0, 0 }, { 0, v2y, 0, 0, -v1y, 0 },
 				{ 0, 0, v2z, 0, 0, -v1z }, { 0, 0, 0, 0, 1, 0 } };
 
@@ -196,8 +192,9 @@ public class Beta3D {
 	}
 
 	/**
-         * The method checks if two triangles can be merged with a sector in which two stations saturate
-         * 
+	 * The method checks if two triangles can be merged with a sector in which two
+	 * stations saturate
+	 * 
 	 * @param s1
 	 * @param s2
 	 * @return
@@ -219,8 +216,9 @@ public class Beta3D {
 	}
 
 	/**
-         * Given two triangular sectors with stations in common, returns the facet that connects them
-         * 
+	 * Given two triangular sectors with stations in common, returns the facet that
+	 * connects them
+	 * 
 	 * @param s1
 	 * @param s2
 	 * @return
@@ -247,8 +245,9 @@ public class Beta3D {
 	}
 
 	/**
-         * Given a vector including the triangular sectors, returns a vector including the sectors that unite them and where two stations saturate
-	 *
+	 * Given a vector including the triangular sectors, returns a vector including
+	 * the sectors that unite them and where two stations saturate
+	 * 
 	 * @param triangles
 	 * @return
 	 */
@@ -443,7 +442,6 @@ public class Beta3D {
 
 	public Vector<Object> Join1Staz(Vector<Object> latixy, Vector<Object> latixz, Vector<Object> latiyz, Vector<Object> lati, Vector<Object> sett1staz) {
 		//Vector out = new Vector();
-
 		for (int i = 0; i < lati.size(); i++) {
 			//Vector stemp = new Vector();    // Conterrà i segmenti selezionati
 			Vector<BetaVertex> ptemp = new Vector<BetaVertex>(); // Conterrà i punti dei segmenti
@@ -455,7 +453,6 @@ public class Beta3D {
 			// Controllo necessario per i casi particolari in cui vengono collegati come sett2staz
 			// due lati del triangolo
 			if (((((Segment3D) lati.get(i)).getS1())) == ((((Segment3D) lati.get(i)).getS2()))) {
-
 				// Cerco tra i segmenti sul lato con beta3=0
 				for (int j = 0; j < latixy.size(); j++) {
 					int[] cxy = ((((Segment3D) latixy.get(j)).getS1()).getCoords());
@@ -469,6 +466,7 @@ public class Beta3D {
 						j--;
 					}
 				}
+
 				// Cerco tra i segmenti sul lato con beta2=0
 				for (int k = 0; k < latixz.size(); k++) {
 					int[] cxz = ((((Segment3D) latixz.get(k)).getS1()).getCoords());
@@ -482,6 +480,7 @@ public class Beta3D {
 						k--;
 					}
 				}
+
 				// Cerco tra i segmenti sul lato con beta1=0
 				for (int h = 0; h < latiyz.size(); h++) {
 					int[] cyz = ((((Segment3D) latiyz.get(h)).getS1()).getCoords());
@@ -498,7 +497,6 @@ public class Beta3D {
 
 				// Cerco tra i segmenti del gruppo lati
 				for (int l = 0; l < lati.size(); l++) {
-
 					int[] clat = ((((Segment3D) lati.get(l)).getS1()).getCoords());
 					if (clato[0] == clat[0] && clato[1] == clat[1] && clato[2] == clat[2]) {
 						ptemp.addElement(((Segment3D) lati.get(l)).getBeta(0));
@@ -510,7 +508,6 @@ public class Beta3D {
 						lati.removeElementAt(l);
 						l--;
 					}
-
 				}
 
 				// Elimino i punti doppi
@@ -621,7 +618,6 @@ public class Beta3D {
 		}
 
 		// confronto yz-xz
-
 		if (latiyz.size() > 1 && latixz.size() > 1) {
 			for (int i = 0; i < latiyz.size(); i++) {
 				int[] p1yz = (((Segment3D) latiyz.get(i)).getS1()).getCoords();
@@ -696,10 +692,10 @@ public class Beta3D {
 						}
 					}
 
-					/* ATTIVARE SOLO PER CONTROLLI
-					System.out.println(c);
-					System.out.println(k);
-					*/
+					//ATTIVARE SOLO PER CONTROLLI
+					//System.out.println(c);
+					//System.out.println(k);
+
 					if (c > 1) {
 						// toglie un triangolo e crea un settore con 4 stazioni
 						((Sector3D) triangles.get(i)).setType(((Sector3D) triangles.get(i)).getType() + 1);
@@ -715,7 +711,6 @@ public class Beta3D {
 						((Sector3D) triangles.get(i)).AddVertex(betas, ((Sector3D) triangles.get(j)).getS(z));
 						triangles.removeElementAt(j);
 						j--;
-
 					}
 				}
 			}
@@ -735,7 +730,6 @@ public class Beta3D {
 	 */
 	public Vector<Object> DeleteFake(Vector<Object> s3d) {
 		for (int i = 0; i < s3d.size(); i++) {
-
 			if (Math.abs(((Sector3D) s3d.get(i)).getBeta(0, 0) - ((Sector3D) s3d.get(i)).getBeta(1, 0)) < EPSYLON
 					&& Math.abs(((Sector3D) s3d.get(i)).getBeta(0, 1) - ((Sector3D) s3d.get(i)).getBeta(1, 1)) < EPSYLON
 					&& Math.abs(((Sector3D) s3d.get(i)).getBeta(0, 2) - ((Sector3D) s3d.get(i)).getBeta(1, 2)) < EPSYLON
@@ -750,7 +744,9 @@ public class Beta3D {
 	}
 
 	/**
-         * Creates the global saturation sector in the case where a single station saturates
+	 * Creates the global saturation sector in the case where a single station
+	 * saturates
+	 * 
 	 * @param v station
 	 * @return sector
 	 */

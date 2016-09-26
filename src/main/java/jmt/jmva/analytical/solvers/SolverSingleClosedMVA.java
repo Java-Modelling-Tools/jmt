@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 /*
  * SolverSingleClosedMVA.java
@@ -954,7 +954,7 @@ public class SolverSingleClosedMVA extends Solver {
 		}//end initialization
 
 		//loop over all LD stations
-		//for(m = LICount; m < stations; m++) {
+		//for (m = LICount; m < stations; m++) {
 		for (m = noLI ? 1 : LICount; m < stations; m++) {
 			//p[0][0] = 1;
 			pPrec[0] = 1;
@@ -1015,7 +1015,7 @@ public class SolverSingleClosedMVA extends Solver {
 					usPrec[m][n] += pCorr[k];
 				}
 
-				//for(int i=LICount; i < m; i++) {
+				//for (int i=LICount; i < m; i++) {
 				for (int i = noLI ? 0 : LICount; i < m; i++) {
 					//ns[m+1][i][n] = 0;
 					nsCorr[i][n] = 0;
@@ -1044,7 +1044,7 @@ public class SolverSingleClosedMVA extends Solver {
 		//calculation of other parameters
 		totThroughput = X[customers] / visits[stations - 1];
 
-		//for(m = LICount; m < stations; m++) {
+		//for (m = LICount; m < stations; m++) {
 		for (m = noLI ? 0 : LICount; m < stations; m++) {
 			throughput[m] = totThroughput * visits[m];
 			if (type[m] == Solver.DELAY) {
@@ -1253,14 +1253,14 @@ public class SolverSingleClosedMVA extends Solver {
 			//			System.out.println();
 			//			System.out.println();
 			//			for (int i = 0; i < nsPrec.length; i++) {
-			//				for(int j = 0; j < nsPrec[i].length; j++) {
+			//				for (int j = 0; j < nsPrec[i].length; j++) {
 			//				System.out.print(nsPrec[i][j]+" ");
 			//				}
 			//				System.out.println();
 			//			}
 			//			System.out.println();
 			//			for (int i = 0; i < usPrec.length; i++) {
-			//				for(int j = 0; j < usPrec[i].length; j++) {
+			//				for (int j = 0; j < usPrec[i].length; j++) {
 			//				System.out.print(usPrec[i][j]+" ");
 			//				}
 			//				System.out.println();
@@ -1272,7 +1272,7 @@ public class SolverSingleClosedMVA extends Solver {
 		//loop over all LD stations
 		//i have to use 2 counters to make it work correctly
 		//1 to loop over all stations, 1 to loop over the arrays that
-		//are avaliable only fot load dependent stations.
+		//are available only for load dependent stations.
 
 		//		for (m = noLI ? 1 : LICount; m < stations; m++) {
 		counter = 1;
@@ -1397,7 +1397,7 @@ public class SolverSingleClosedMVA extends Solver {
 						}
 					}
 
-					//if(Math.abs(usPrec[m][n]+(pCorr[0]*Math.pow(MIN,
+					//if (Math.abs(usPrec[m][n]+(pCorr[0]*Math.pow(MIN,
 					//- expMultCorr[0]) )- 1) > 0.0000000000001)
 					//    System.out.println(n+" ERROR   Sum of prob : "
 					//    +(usPrec[m][n]+(pCorr[0]*Math.pow(MIN,- expMultCorr[0]) ))
@@ -1456,14 +1456,14 @@ public class SolverSingleClosedMVA extends Solver {
 					System.out.println();
 					System.out.println();
 					for (int i = 0; i < nsCorr.length; i++) {
-					for(int j = 0; j < nsCorr[i].length; j++) {
+					for (int j = 0; j < nsCorr[i].length; j++) {
 					System.out.print(nsCorr[i][j]+" ");
 					}
 					System.out.println();
 					}
 					System.out.println();
 					for (int i = 0; i < usCorr.length; i++) {
-					for(int j = 0; j < usCorr[i].length; j++) {
+					for (int j = 0; j < usCorr[i].length; j++) {
 					System.out.print(usCorr[i][j]+" ");
 					}
 					System.out.println();
@@ -1489,14 +1489,14 @@ public class SolverSingleClosedMVA extends Solver {
 				//			System.out.println();
 				//			System.out.println();
 				//			for (int i = 0; i < nsCorr.length; i++) {
-				//				for(int j = 0; j < nsCorr[i].length; j++) {
+				//				for (int j = 0; j < nsCorr[i].length; j++) {
 				//				System.out.print(nsCorr[i][j]+" ");
 				//				}
 				//				System.out.println();
 				//			}
 				//			System.out.println();
 				//			for (int i = 0; i < usCorr.length; i++) {
-				//				for(int j = 0; j < usCorr[i].length; j++) {
+				//				for (int j = 0; j < usCorr[i].length; j++) {
 				//				System.out.print(usCorr[i][j]+" ");
 				//				}
 				//				System.out.println();
@@ -1537,14 +1537,14 @@ public class SolverSingleClosedMVA extends Solver {
 			System.out.println();
 			System.out.println();
 			for (int i = 0; i < nsPrec.length; i++) {
-				for(int j = 0; j < nsPrec[i].length; j++) {
+				for (int j = 0; j < nsPrec[i].length; j++) {
 				System.out.print(nsPrec[i][j]+" ");
 				}
 				System.out.println();
 			}
 			System.out.println();
 			for (int i = 0; i < usPrec.length; i++) {
-				for(int j = 0; j < usPrec[i].length; j++) {
+				for (int j = 0; j < usPrec[i].length; j++) {
 				System.out.print(usPrec[i][j]+" ");
 				}
 				System.out.println();
@@ -1801,12 +1801,12 @@ public class SolverSingleClosedMVA extends Solver {
 				}
 
 				//test of correctness sum(p(k,n)) = 1. only for debug
-				//if(Math.abs(usPrec[m][n]+(pCorr[0]
+				//if (Math.abs(usPrec[m][n]+(pCorr[0]
 				//*Math.pow(MIN, expMultCorr[0]))- 1) > 0.0000000000001)
 				//    System.out.println(n+" ERROR   Sum of prob : "
 				//    +(usPrec[m][n]+(pCorr[0]*Math.pow(MIN, expMultCorr[0]))));
 
-				//calculation of utilization & queue lenght of al m subsystem
+				//calculation of utilization & queue length of al m subsystem
 				//from n
 				for (int i = noLI ? 0 : LICount; i < m; i++) {
 					nsCorr[i][n] = 0.0;
@@ -2111,12 +2111,12 @@ public class SolverSingleClosedMVA extends Solver {
 				}
 
 				//test of correctness sum(p(k,n)) = 1. only for debug
-				//if(Math.abs(usPrec[m][n]+(pCorr[0]
+				//if (Math.abs(usPrec[m][n]+(pCorr[0]
 				//*Math.pow(MIN, expMultCorr[0]))- 1) > 0.0000000000001)
 				//    System.out.println(n+" ERROR   Sum of prob : "
 				//    +(usPrec[m][n]+(pCorr[0]*Math.pow(MIN, expMultCorr[0]))));
 
-				//calculation of utilization & queue lenght of al m subsystem
+				//calculation of utilization & queue length of al m subsystem
 				//from n
 				for (int i = noLI ? 0 : LICount; i < m; i++) {
 					nsCorr[i][n] = interm_queueLen[n][i] = 0.0;

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.jmva.gui.exact;
 
@@ -101,8 +101,10 @@ import jmt.manual.PDFViewerBuffer;
  *have a warning message which shows that by pressing this button visits are set to 1. 
  */
 public class ExactWizard extends Wizard {
+
 	private static final long serialVersionUID = 1L;
-	private static final String TITLE = "JMVA - Product form queueing network solver";
+
+	private static final String TITLE = "JMVA - Product Form Queueing Network Solver";
 	private final static boolean DEBUG = false;
 
 	private ExactModel data;
@@ -118,7 +120,7 @@ public class ExactWizard extends Wizard {
 	//A link to the last modified model's temporary file - used to display synopsis
 	private File tempFile = null;
 	//END
-	
+
 	//keep a reference to these three components to enable switching
 	private WizardPanel serviceTimesPanel;
 	private WizardPanel serviceDemandsPanel;
@@ -126,12 +128,9 @@ public class ExactWizard extends Wizard {
 	private WizardPanel whatIfPanel;
 	private WizardPanel ReferenceStationPanel;
 	private AMVAPanel amvaPanel;
-	
 
 	private AbstractJMTAction FILE_SAVE = new AbstractJMTAction("Save...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -144,12 +143,11 @@ public class ExactWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			save();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_OPEN = new AbstractJMTAction("Open...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -162,12 +160,11 @@ public class ExactWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			open();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_NEW = new AbstractJMTAction("New...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -180,12 +177,11 @@ public class ExactWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			newModel();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_EXIT = new AbstractJMTAction("Exit") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -197,12 +193,11 @@ public class ExactWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			close();
 		}
+
 	};
 
 	private AbstractJMTAction SWITCH_TO_SIMULATOR = new AbstractJMTAction("Import in JSIM...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -215,12 +210,11 @@ public class ExactWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			switchToSimulator();
 		}
+
 	};
 
 	private AbstractJMTAction ACTION_RANDOMIZE_MODEL = new AbstractJMTAction("Randomize") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -233,12 +227,11 @@ public class ExactWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			randomizeModel();
 		}
+
 	};
 
 	private AbstractJMTAction HELP = new AbstractJMTAction("JMVA help") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -250,7 +243,6 @@ public class ExactWizard extends Wizard {
 
 		public void actionPerformed(ActionEvent e) {
 			//showHelp(e);
-
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
@@ -261,14 +253,12 @@ public class ExactWizard extends Wizard {
 				}
 			};
 			EventQueue.invokeLater(r);
-
 		}
+
 	};
 
 	private AbstractJMTAction ABOUT = new AbstractJMTAction("About JMVA...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -279,18 +269,17 @@ public class ExactWizard extends Wizard {
 			        KeyStroke.getKeyStroke(KeyEvent.VK_H,
 			                ActionEvent.ALT_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
-			*/
+			 */
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			showAbout(false);
 		}
+
 	};
 
 	private AbstractJMTAction ACTION_SOLVE = new AbstractJMTAction("Solve") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -303,14 +292,12 @@ public class ExactWizard extends Wizard {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-
 			if (checkFinish()) {
 				finish();
 			}
-
 		}
+
 	};
-	
 
 	public ExactWizard() {
 		this(new ExactModel());
@@ -329,26 +316,25 @@ public class ExactWizard extends Wizard {
 		addPanel(new StationsPanel(this));
 		serviceTimesPanel = new ServiceTimesPanel(this);
 		visitsPanel = new VisitsPanel(this);
-		
+
 		serviceDemandsPanel = new ServiceDemandsPanel(this);
 		if (data.areVisitsSet()) {
-			
+
 			addPanel(serviceDemandsPanel);
 		} else {
 			addPanel(serviceTimesPanel);
 			addPanel(visitsPanel);
-			
+
 		}
-		
+
 		ReferenceStationPanel = new ReferenceStationPanel(this);
 		addPanel(ReferenceStationPanel);
-		
-		
+
 		/* EDITED by Abhimanyu Chugh */
 		whatIfPanel = new WhatIfPanel(this);
 		addPanel(whatIfPanel);
 		addPanel(new DescriptionPanel(this));
-	
+
 		setVisible(true);
 		/* END */
 	}
@@ -357,7 +343,6 @@ public class ExactWizard extends Wizard {
 	 * @return the toolbar for the exact wizard. Shamelessly uses icon from the main jmt frame
 	 */
 	protected JMTToolBar makeToolbar() {
-
 		JMTToolBar tb = new JMTToolBar(JMTImageLoader.getImageLoader());
 		tb.setFloatable(false);
 
@@ -367,12 +352,12 @@ public class ExactWizard extends Wizard {
 				"Import current model to JSIMwiz to solve it with the simulator", "Randomize model data", "Show help"};
 		ArrayList<AbstractButton> buttons = new ArrayList<AbstractButton>();
 		buttons.addAll(tb.populateToolbar(actions));
-		
+
 		//adds the algorithm selection box
 
 		amvaPanel = new AMVAPanel(this);
 		tb.add(amvaPanel);
-		
+
 		// Adds help
 		for (int i = 0; i < buttons.size(); i++) {
 			AbstractButton button = buttons.get(i);
@@ -380,7 +365,6 @@ public class ExactWizard extends Wizard {
 		}
 		return tb;
 	}
-
 
 	private JMTMenuBar makeMenubar() {
 		JMTMenuBar jmb = new JMTMenuBar(JMTImageLoader.getImageLoader());
@@ -448,7 +432,6 @@ public class ExactWizard extends Wizard {
 		this.setVisible(false);
 		this.dispose();
 	}
-
 	//END Federico Dall'Orso 8/3/2005
 
 	/**
@@ -483,13 +466,13 @@ public class ExactWizard extends Wizard {
 		}
 		int retval = modelLoader.saveModel(data, this, null);
 		switch (retval) {
-			case ModelLoader.SUCCESS:
-				data.resetChanged();
-				updateTile(modelLoader.getSelectedFile().getName());
-				break;
-			case ModelLoader.FAILURE:
-				JOptionPane.showMessageDialog(this, modelLoader.getFailureMotivation(), "Error", JOptionPane.ERROR_MESSAGE);
-				break;
+		case ModelLoader.SUCCESS:
+			data.resetChanged();
+			updateTile(modelLoader.getSelectedFile().getName());
+			break;
+		case ModelLoader.FAILURE:
+			JOptionPane.showMessageDialog(this, modelLoader.getFailureMotivation(), "Error", JOptionPane.ERROR_MESSAGE);
+			break;
 		}
 	}
 
@@ -505,30 +488,29 @@ public class ExactWizard extends Wizard {
 		ExactModel newdata = new ExactModel();
 		int retval = modelLoader.loadModel(newdata, this);
 		switch (retval) {
-			case ModelLoader.SUCCESS:
-			case ModelLoader.WARNING:
-				data = newdata;
-				currentPanel.gotFocus();
-				// Shows right panels  //Edited by Kourosh, because we need to show Visits and Service Demands as Defaults.
-				if (data.areVisitsSet()) {
-					removePanel(visitsPanel);
-					removePanel(serviceTimesPanel);
-					((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
-					addPanel(serviceDemandsPanel, 2);
-				} else {
-					removePanel(serviceDemandsPanel);
-					((ForceUpdatablePanel) serviceTimesPanel).retrieveData();
-					((ForceUpdatablePanel) visitsPanel).retrieveData();
-					addPanel(visitsPanel, 2);
-					addPanel(serviceTimesPanel, 2);									
-				}
-				updateTile(modelLoader.getSelectedFile().getName());
-				tabbedPane.setSelectedIndex(0);
-				break;
-			case ModelLoader.FAILURE:
-				JOptionPane.showMessageDialog(this, modelLoader.getFailureMotivation(), "Error", JOptionPane.ERROR_MESSAGE);
-				break;
-
+		case ModelLoader.SUCCESS:
+		case ModelLoader.WARNING:
+			data = newdata;
+			currentPanel.gotFocus();
+			// Shows right panels  //Edited by Kourosh, because we need to show Visits and Service Demands as Defaults.
+			if (data.areVisitsSet()) {
+				removePanel(visitsPanel);
+				removePanel(serviceTimesPanel);
+				((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
+				addPanel(serviceDemandsPanel, 2);
+			} else {
+				removePanel(serviceDemandsPanel);
+				((ForceUpdatablePanel) serviceTimesPanel).retrieveData();
+				((ForceUpdatablePanel) visitsPanel).retrieveData();
+				addPanel(visitsPanel, 2);
+				addPanel(serviceTimesPanel, 2);									
+			}
+			updateTile(modelLoader.getSelectedFile().getName());
+			tabbedPane.setSelectedIndex(0);
+			break;
+		case ModelLoader.FAILURE:
+			JOptionPane.showMessageDialog(this, modelLoader.getFailureMotivation(), "Error", JOptionPane.ERROR_MESSAGE);
+			break;
 		}
 		tempFile = modelLoader.getSelectedFile();
 		if (data.hasResults()) {
@@ -551,7 +533,6 @@ public class ExactWizard extends Wizard {
 		//OLD
 		//do not call this method!!! it is already called inside checkFinish() method.
 		//currentPanel.lostFocus();
-
 		solve();
 	}
 
@@ -594,13 +575,10 @@ public class ExactWizard extends Wizard {
 			removePanel(visitsPanel);
 			((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
 			addPanel(serviceDemandsPanel, 2);
-			
+
 		}
 		if (resultValue == JOptionPane.CANCEL_OPTION) {
-			
 		}
-		
-		
 	}
 
 	/**switches service times and visits panels to service demands panel in order to change
@@ -615,50 +593,47 @@ public class ExactWizard extends Wizard {
 	}
 
 	private void solve() {
-
 		if (solver == null) {
 			solver = new SolverClient(this);
 		}
 
 		ExactModel newdata = new ExactModel(data); // Yields the mean performance indices
-		
+
 		// Checks saturation
 		int state = data.checkSaturation();
 		switch (state) {
-			case ExactModel.SATURATION:
-				JOptionPane.showMessageDialog(this, "Error: input data will cause model saturation. Please adjust arrival rates or service demands.",
-						"Input data error", JOptionPane.ERROR_MESSAGE);
-				return;
-			case ExactModel.SATURATION_WHATIF:
-				JOptionPane.showMessageDialog(this,
-						"Error: input data will cause model saturation during what-if analysis. Please adjust what-if analysis parameters.",
-						"Input data error", JOptionPane.ERROR_MESSAGE);
-				return;
+		case ExactModel.SATURATION:
+			JOptionPane.showMessageDialog(this, "Error: input data will cause model saturation. Please adjust arrival rates or service demands.",
+					"Input data error", JOptionPane.ERROR_MESSAGE);
+			return;
+		case ExactModel.SATURATION_WHATIF:
+			JOptionPane.showMessageDialog(this,
+					"Error: input data will cause model saturation during what-if analysis. Please adjust what-if analysis parameters.",
+					"Input data error", JOptionPane.ERROR_MESSAGE);
+			return;
 		}
-		
+
 		// Checks reference station consistency
 		boolean bool = data.checkVisitReferenceStation();
-		if(bool==false){
+		if (bool==false) {
 			JOptionPane.showMessageDialog(this, "Error: for all classes the visit of the reference station must be different from zero. Please adjust visit values or change the reference station.",
 					"Input data error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
 		bool = data.checkClassesReferenceStation();
-		if(bool==false){
+		if (bool==false) {
 			JOptionPane.showMessageDialog(this, "Error: the reference station must be the same for all closed classes. Please adjust the reference station classes.",
 					"Input data error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		
+
 		newdata.resetResults();
 		/* END */
-		
+
 		try {
 			//OLD
-			/*
-			solver.solve(newdata);
-			*/
+			//solver.solve(newdata);
 			//NEW Dall'Orso
 			tempFile = solver.solve(newdata);
 			//OLD
@@ -683,7 +658,7 @@ public class ExactWizard extends Wizard {
 		updatePanels();
 		currentPanel.gotFocus();
 	}
-	
+
 	//@author Bertoli Marco
 	private void showAbout(boolean autoclose) {
 		AboutDialogFactory.showJMVA(this, autoclose);
@@ -743,7 +718,7 @@ public class ExactWizard extends Wizard {
 			//Added by ASHANKA START
 			// for System Power
 			selector.addSolutionPanel(systemPower);
-			*/
+			 */
 			//Added by ASHANKA STOP
 			jtp.add(selector);
 		} else if (selector != null) {
@@ -769,7 +744,7 @@ public class ExactWizard extends Wizard {
 			//Introducing the new System Power Panel as a Tabbed Pane
 			SysPowerPanel systemPower = new SysPowerPanel(this, alg);
 			//Added by ASHANKA STOP
-			
+
 			jtp.add(throughput);
 			jtp.add(queuelength);
 			jtp.add(restimes);
@@ -819,7 +794,6 @@ public class ExactWizard extends Wizard {
 		}
 		repaint();
 	}
-
 	//END
 
 	private void updatePanels() {
@@ -864,7 +838,6 @@ public class ExactWizard extends Wizard {
 		new ExactWizard();
 		//new ExactWizard(new ExactModel());
 		/* END */
-		
 	}
 
 	/**
@@ -878,7 +851,7 @@ public class ExactWizard extends Wizard {
 			setTitle(TITLE);
 		}
 	}	
-	
+
 	/**
 	 * Updates the algo panel
 	 * @param isClosed true if model is closed, false if not, null to read from data structure
@@ -889,4 +862,5 @@ public class ExactWizard extends Wizard {
 	public void updateAlgoPanel(Boolean isClosed, Boolean isOpen, Boolean isAlgowhatif, Boolean isLoadDependent) {
 		this.amvaPanel.update(isClosed, isOpen, isAlgowhatif, isLoadDependent);
 	}
+
 }

@@ -54,7 +54,7 @@ public class XBlock extends ATopLevelBlock {
 	}
 	
 	public void LUPDecompose(boolean in_place) throws InconsistentLinearSystemException {
-		for(int i = 0; i < macro_blocks.length; i++) {
+		for (int i = 0; i < macro_blocks.length; i++) {
 			((XMacroBlock) macro_blocks[i]).LUPDecompose(in_place);
 		}
 	}
@@ -62,7 +62,7 @@ public class XBlock extends ATopLevelBlock {
 	@Override
 	public void printRow2(int row) {
 		super.printRow2(row);		
-		for(int i = 0; i < sec_macro_blocks.length; i++) {
+		for (int i = 0; i < sec_macro_blocks.length; i++) {
 			sec_macro_blocks[i].printRow2(row);
 		}
 	}

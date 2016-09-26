@@ -50,13 +50,13 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 	
 	private JPanel parent;
 	
-	public Template(Mediator m){
+	public Template(Mediator m) {
 		mediator = m;
 		parent = this;
 		this.initComponents();
 	}
 	
-	public void initComponents(){
+	public void initComponents() {
 		
 		//------------------build the GUI components of your template here------------------//
 		
@@ -71,7 +71,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 			
 			JLabel pLabel = new JLabel(icon);
 			picPane.add(pLabel);
-		}catch(Exception e){
+		}catch(Exception e) {
 			
 		}
 		JLabel label = new JLabel("Number of service center: ");
@@ -140,7 +140,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 		//------------------------------------END------------------------------------------//
 	}
 	
-	public void initCells(){
+	public void initCells() {
 		CellFactory cf = new CellFactory(mediator);
 		fork = cf.createCell("ForkCell");
 		server = cf.createCell("ServerCell");
@@ -168,7 +168,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 		
 		JmtClipboard clipboard = new JmtClipboard(mediator);
 		
-		for(int i = 1; i < num; i++){
+		for (int i = 1; i < num; i++) {
 			
 			clipboard.copyCell(server);
 			JmtCell sub = clipboard.pasteCell(new JMTPoint(150, YBound + 50 + 100 * i, false));
@@ -250,7 +250,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 	}
 	
 	@Override
-	public void showDialog(MainWindow mainWindow){
+	public void showDialog(MainWindow mainWindow) {
 		CustomizableDialogFactory templateDialogFactory = new CustomizableDialogFactory(mainWindow);
 		//change size/name of your template dialog here
 		//width, height, ..., title
@@ -259,11 +259,11 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 	
 	//change the name of your template
 	@Override
-	public String getName(){
+	public String getName() {
 		return "Parallel Model Template";
 	}
 	
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		
 	}
 	

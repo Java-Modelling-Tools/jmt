@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.framework.gui.graph;
 
@@ -120,7 +120,7 @@ public class WhatIfPlot extends Plot {
 	}
 
 	/**
-	 * Called each time a rescale event occurrs
+	 * Called each time a rescale event occurs
 	 */
 	protected void fireRescaleEvent() {
 		Iterator<RescaleListener> i = listeners.iterator();
@@ -339,7 +339,7 @@ public class WhatIfPlot extends Plot {
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent e) {
-					if(legendPanel != null) {
+					if (legendPanel != null) {
 						ExportDialog export = new ExportDialog();
 						export.showExportDialog((Component) legendPanel,
 									"Export view as ...", (Component) legendPanel,
@@ -373,7 +373,7 @@ public class WhatIfPlot extends Plot {
 		protected PlotImagesFileFilter defaultFilter;
 
 		/**
-		 * Creates a File chooser in the appropriate directory user deafault.
+		 * Creates a File chooser in the appropriate directory user default.
 		 * @param defaultFilter default file filter
 		 */
 		public PlotImagesFileChooser(PlotImagesFileFilter defaultFilter) {
@@ -386,7 +386,7 @@ public class WhatIfPlot extends Plot {
 		 */
 		@Override
 		public void approveSelection() {
-			// Gets the choosed file name
+			// Gets the chosen file name
 			String name = getSelectedFile().getName();
 			String parent = getSelectedFile().getParent();
 			if (getDialogType() == OPEN_DIALOG) {

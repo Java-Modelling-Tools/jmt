@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
@@ -21,23 +39,21 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-//import jmt.gui.common.editors.JoinEditor;
 import jmt.gui.common.editors.SemaphoreEditor;
-//import jmt.gui.common.joinStrategies.JoinStrategy;
-//import jmt.gui.common.joinStrategies.PartialJoin;
-//import jmt.gui.common.joinStrategies.TaskAggregateJoin;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
-import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 
+/**
+ *
+ * @author Vitor S. Lopes
+ */
 public class SemaphoreSectionPanel extends WizardPanel implements CommonConstants{
-	
+
 	private static final long serialVersionUID = 1L;
 	private StationDefinition stationData;
 	private ClassDefinition classData;
 	private Object stationKey;
 	private JSplitPane mainPanel;
 
-    private static String className;
 	private SemaphoreSelectionTable semaphoreStrategies;
 	private SemaphoreEditor semaphoreEditor;
 
@@ -62,9 +78,8 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		}
 	}
 
-	
 	public void setSelectedClass(Object classKey) {
-		Vector temp = classData.getClassKeys();
+		Vector<Object> temp = classData.getClassKeys();
 		int i;
 		for (i = 0; i < temp.size(); i++) {
 			if (temp.get(i) == classKey) {
@@ -102,8 +117,8 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		if (editor != null) {
 			editor.stopCellEditing();
 		}
-                if (semaphoreStrategies != null && semaphoreStrategies.getRowCount() > 0) {
-                	semaphoreStrategies.setRowSelectionInterval(0, 0);
+		if (semaphoreStrategies != null && semaphoreStrategies.getRowCount() > 0) {
+			semaphoreStrategies.setRowSelectionInterval(0, 0);
 		}
 	}
 
@@ -115,8 +130,8 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		classEditor.clearCache();
 		// Select first routing strategy
 		if (semaphoreStrategies != null && semaphoreStrategies.getRowCount() > 0) {
-                        int sel = semaphoreStrategies.getSelectedRow() < 0 ? 0 : semaphoreStrategies.getSelectedRow();
-                        semaphoreStrategies.setRowSelectionInterval(sel, sel);
+			int sel = semaphoreStrategies.getSelectedRow() < 0 ? 0 : semaphoreStrategies.getSelectedRow();
+			semaphoreStrategies.setRowSelectionInterval(sel, sel);
 		}
 	}
 
@@ -129,29 +144,28 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 	}
 
 	protected class SemaphoreSelectionTable extends JTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public SemaphoreSelectionTable() {
 			super();
 			setModel(new SemaphoreSelectionTableModel());
 			sizeColumns();
-			setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowHeight(ROW_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
 				SemaphoreStrategy[] semaphoreStrategies = null;
-                                Vector<Object> sources = stationData.getStationKeysSource();
-                                if(sources.contains(stationKey)){
-                                	semaphoreStrategies = SemaphoreStrategy.findAllForSource();
-                                }else{
-                                	semaphoreStrategies = SemaphoreStrategy.findAll();
-                                }
-                                return ComboBoxCellEditor.getEditorInstance(semaphoreStrategies);
+				Vector<Object> sources = stationData.getStationKeysSource();
+				if (sources.contains(stationKey)) {
+					semaphoreStrategies = SemaphoreStrategy.findAllForSource();
+				} else {
+					semaphoreStrategies = SemaphoreStrategy.findAll();
+				}
+				return ComboBoxCellEditor.getEditorInstance(semaphoreStrategies);
 
 			} else {
 				return super.getCellEditor(row, column);
@@ -182,7 +196,7 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 			int row = getSelectedRow();
 			if (row != -1) {
 				if (semaphoreEditor != null) {
-//					semaphoreEditor.stopEditing();
+					//semaphoreEditor.stopEditing();
 					semaphoreEditor.setData(stationData, classData,  stationKey, classData.getClassKeys().get(row));
 					SemaphoreSectionPanel.this.doLayout();
 					SemaphoreSectionPanel.this.repaint();
@@ -194,13 +208,10 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 
 	protected class SemaphoreSelectionTableModel extends AbstractTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 		private String[] columnNames = new String[] { "Class", "Semaphore Strategy" };
 		public int[] columnSizes = new int[] { 70, 100 };
-		private Class[] columnClasses = new Class[] { String.class, Object.class };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 
 		public int getRowCount() {
 			return classData.getClassKeys().size();
@@ -216,7 +227,7 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		}
 
 		@Override
-		public Class<Integer> getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			return columnClasses[columnIndex];
 		}
 
@@ -240,11 +251,10 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			if (columnIndex == 1) {
 				Object classKey = indexToKey(rowIndex);
-                                className = classData.getClassName(classKey);
 				if (!value.equals(stationData.getSemaphoreStrategy(stationKey, classKey))) {
 					stationData.setSemaphoreStrategy(stationKey, classKey, ((SemaphoreStrategy) value).clone());
 				}
-				
+
 				semaphoreEditor.setData(stationData, classData, stationKey, classKey);
 				doLayout();
 				repaint();

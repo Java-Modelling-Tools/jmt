@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions.parametric;
 
@@ -50,7 +50,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 	private boolean singleClass;
 	private Object classKey;
 	private Object stationKey;
-	private Vector<Object> avaibleClasses;
+	private Vector<Object> availableClasses;
 
 	private Object values;
 
@@ -61,11 +61,11 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 		simDef = simd;
 		numberOfSteps = STEPS;
 		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);
-		stationKey = checker.checkForServiceTimesParametricAnalysisAvaibleStations().get(0);
-		Vector<Object> avaible = checker.checkForServiceTimesParametricSimulationAvaibleClasses(stationKey);
-		if ((cd.getClassKeys().size() == 1) || (avaible.size() < cd.getClassKeys().size())) {
+		stationKey = checker.checkForServiceTimesParametricAnalysisAvailableStations().get(0);
+		Vector<Object> available = checker.checkForServiceTimesParametricSimulationAvailableClasses(stationKey);
+		if ((cd.getClassKeys().size() == 1) || (available.size() < cd.getClassKeys().size())) {
 			singleClass = true;
-			classKey = avaible.get(0);
+			classKey = available.get(0);
 			double mean = ((Distribution) (stationDef.getServiceTimeDistribution(stationKey, classKey))).getMean();
 			initialValue = mean;
 			finalValue = mean * INCREMENT_SINGLE;
@@ -264,8 +264,8 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 				distr.setMean(refST.doubleValue());
 			} else {
 				//Vector classSet = classDef.getClassKeys();
-				for (int i = 0; i < avaibleClasses.size(); i++) {
-					Object thisClass = avaibleClasses.get(i);
+				for (int i = 0; i < availableClasses.size(); i++) {
+					Object thisClass = availableClasses.get(i);
 					double refST = ((ValuesTable) values).getValue(thisClass, step);
 					Distribution distr = (Distribution) stationDef.getServiceTimeDistribution(stationKey, thisClass);
 					distr.setMean(refST);
@@ -280,7 +280,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 	 * @return the maximum number of steps
 	 */
 	@Override
-	public int searchForAvaibleSteps() {
+	public int searchForAvailableSteps() {
 		return Integer.MAX_VALUE;
 	}
 
@@ -305,23 +305,23 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 		} else {
 			double sum = 1;
 			double increment = (finalValue - initialValue) / (100 * (double) (numberOfSteps - 1));
-			//find the set of avaible classes
+			//find the set of available classes
 			Vector allClasses = classDef.getClassKeys();
-			avaibleClasses = new Vector<Object>(0, 1);
+			availableClasses = new Vector<Object>(0, 1);
 			for (int i = 0; i < allClasses.size(); i++) {
 				Object thisClass = allClasses.get(i);
 				Object temp = stationDef.getServiceTimeDistribution(stationKey, thisClass);
 				if (temp instanceof Distribution) {
 					Distribution distr = (Distribution) temp;
 					if (distr.hasMean()) {
-						avaibleClasses.add(thisClass);
+						availableClasses.add(thisClass);
 					}
 				}
 			}
-			values = new ValuesTable(classDef, avaibleClasses, numberOfSteps);
+			values = new ValuesTable(classDef, availableClasses, numberOfSteps);
 			for (int i = 0; i < numberOfSteps; i++) {
-				for (int k = 0; k < avaibleClasses.size(); k++) {
-					Object thisClass = avaibleClasses.get(k);
+				for (int k = 0; k < availableClasses.size(); k++) {
+					Object thisClass = availableClasses.get(k);
 					double thisInitialServiceTime = ((Distribution) stationDef.getServiceTimeDistribution(stationKey, thisClass)).getMean();
 					double value = thisInitialServiceTime * (sum);
 					((ValuesTable) values).setValue(thisClass, value);
@@ -329,9 +329,9 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 				sum += increment; //note that the increment may be < 0
 			}
 			//used to save the initial values of service time
-			originalValues = new Vector(avaibleClasses.size());
-			for (int i = 0; i < avaibleClasses.size(); i++) {
-				Object thisClass = avaibleClasses.get(i);
+			originalValues = new Vector(availableClasses.size());
+			for (int i = 0; i < availableClasses.size(); i++) {
+				Object thisClass = availableClasses.get(i);
 				double thisServiceTime = ((Distribution) stationDef.getServiceTimeDistribution(stationKey, thisClass)).getMean();
 				((Vector<Double>) originalValues).add(new Double(thisServiceTime));
 			}
@@ -350,8 +350,8 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 				distr.setMean(mean.doubleValue());
 			} else {
 				Vector values = (Vector) originalValues;
-				for (int i = 0; i < avaibleClasses.size(); i++) {
-					Object thisClass = avaibleClasses.get(i);
+				for (int i = 0; i < availableClasses.size(); i++) {
+					Object thisClass = availableClasses.get(i);
 					Distribution distr = (Distribution) stationDef.getServiceTimeDistribution(stationKey, thisClass);
 					Double thisValue = (Double) values.get(i);
 					distr.setMean(thisValue.doubleValue());
@@ -377,29 +377,29 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 		int code = 0;
 		Vector classes = classDef.getClassKeys();
 		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(classDef, stationDef, simDef);
-		//Find the avaible stations
-		Vector<Object> avaibleStations = checker.checkForServiceTimesParametricAnalysisAvaibleStations();
-		if (avaibleStations.isEmpty()) {
-			code = 2; // -> This type of PA is not avaible
+		//Find the available stations
+		Vector<Object> availableStations = checker.checkForServiceTimesParametricAnalysisAvailableStations();
+		if (availableStations.isEmpty()) {
+			code = 2; // -> This type of PA is not available
 		} else {
-			//if the reference station is no more avaible change reference station
-			if (!avaibleStations.contains(stationKey)) {
+			//if the reference station is no more available change reference station
+			if (!availableStations.contains(stationKey)) {
 				code = 1;
 				if (autocorrect) {
-					stationKey = avaibleStations.get(0);
+					stationKey = availableStations.get(0);
 					setDefaultInitialValue();
 					setDefaultFinalValue();
 				}
 			}
-			//Find avaible classes for stationKey
-			Vector<Object> avaibleClasses = checker.checkForServiceTimesParametricSimulationAvaibleClasses(stationKey);
+			//Find available classes for stationKey
+			Vector<Object> availableClasses = checker.checkForServiceTimesParametricSimulationAvailableClasses(stationKey);
 			//if is single class...
 			if (isSingleClass()) {
-				// ... and the selected close class is no more avaible
-				if (!avaibleClasses.contains(classKey)) {
+				// ... and the selected close class is no more available
+				if (!availableClasses.contains(classKey)) {
 					code = 1;
 					if (autocorrect) {
-						classKey = avaibleClasses.get(0); //change the reference class
+						classKey = availableClasses.get(0); //change the reference class
 						setDefaultInitialValue();
 						setDefaultFinalValue();
 					}
@@ -417,11 +417,11 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 			}
 			//all class case...
 			else {
-				if ((avaibleClasses.size() < classes.size()) || (classes.size() == 1)) { //all class parametric analysis is no more avaible
+				if ((availableClasses.size() < classes.size()) || (classes.size() == 1)) { //all class parametric analysis is no more available
 					code = 1;
 					if (autocorrect) {
 						singleClass = true;
-						classKey = avaibleClasses.get(0);
+						classKey = availableClasses.get(0);
 						setDefaultInitialValue();
 						setDefaultFinalValue();
 					}
@@ -445,7 +445,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 			ValuesTable temp = (ValuesTable) values;
 			double originalValue = ((Double) ((Vector) originalValues).get(0)).doubleValue();
 			for (int i = 0; i < numberOfSteps; i++) {
-				double thisValue = temp.getValue(avaibleClasses.get(0), i);
+				double thisValue = temp.getValue(availableClasses.get(0), i);
 				double ratio = thisValue / originalValue * 100;
 				assumedValues.add(new Double(ratio));
 			}

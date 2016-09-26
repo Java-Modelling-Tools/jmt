@@ -56,13 +56,13 @@ public class LUP_Decomposition {
 		//store size of matrix A
 		size = A.length;
 		
-		if(in_place && !Main.verbose) {
+		if (in_place && !Main.verbose) {
 			A_prime = A;
 		} else {
 			//A_prime is a copy of A, where decomposition will be performed in place
 			A_prime = new BigRational[size][size];
-			for(int i = 0; i < size; i++) {
-				for(int j = 0; j < size; j ++) {
+			for (int i = 0; i < size; i++) {
+				for (int j = 0; j < size; j ++) {
 					A_prime[i][j] = A[i][j].copy(); //TODO copy()?
 				}
 			}
@@ -70,7 +70,7 @@ public class LUP_Decomposition {
 		
 		//The permutation P is initially the identity
 		P = new int[size];
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			P[i] = i;
 		}
 			
@@ -92,25 +92,25 @@ public class LUP_Decomposition {
 		BigRational abs_A;
 		int k_prime = -1;
 		
-		for(int k = 0; k < size; k++) {
+		for (int k = 0; k < size; k++) {
 			p = BigRational.ZERO;
-			for(int i = k; i < size; i++) {
+			for (int i = k; i < size; i++) {
 				abs_A = A_prime[i][k].abs();
-				if(abs_A.greaterThan(p)) {
+				if (abs_A.greaterThan(p)) {
 					p = abs_A;
 					k_prime = i;
 				}
 			}
-			if( p.isZero()) {
+			if ( p.isZero()) {
 				throw new InconsistentLinearSystemException("LUP Decomposition failed: Singular Matrix");
 			}
 			P_exchange(k, k_prime);
-			for(int i = 0; i < size; i++) {
+			for (int i = 0; i < size; i++) {
 				A_prime_exchange(k, k_prime, i);
 			}
-			for(int i = k + 1; i < size; i++) {
+			for (int i = k + 1; i < size; i++) {
 				A_prime[i][k] = A_prime[i][k].divide(A_prime[k][k]);
-				for(int j = k + 1; j < size; j++) {
+				for (int j = k + 1; j < size; j++) {
 					A_prime[i][j] = A_prime[i][j].subtract(A_prime[i][k].multiply(A_prime[k][j]));
 				}
 			}
@@ -149,18 +149,18 @@ public class LUP_Decomposition {
 		BigRational[] y = new BigRational[size];
 		
 		//Forward substitution
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			BigRational sum = BigRational.ZERO;
-			for(int j = 0; j <= i - 1; j++) {
+			for (int j = 0; j <= i - 1; j++) {
 				sum = sum.add(A_prime[i][j].multiply(y[j]));
 			}
 			y[i] = rhs[position.row + P[i]].subtract(sum);
 		}
 		
 		//Backward substitution
-		for(int i = size - 1; i >= 0; i--) {
+		for (int i = size - 1; i >= 0; i--) {
 			BigRational sum = BigRational.ZERO;
-			for(int j = i + 1; j < size; j++) {
+			for (int j = i + 1; j < size; j++) {
 				sum = sum.add(A_prime[i][j].multiply(basis.getNewValue(position.row + j)));
 			}
 			basis.setValue(y[i].subtract(sum), position.row + i);
@@ -179,18 +179,18 @@ public class LUP_Decomposition {
 		BigRational[] y = new BigRational[size];
 		
 		//Forward substitution
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			BigRational sum = BigRational.ZERO;
-			for(int j = 0; j <= i - 1; j++) {
+			for (int j = 0; j <= i - 1; j++) {
 				sum = sum.add(A_prime[i][j].multiply(y[j]));
 			}
 			y[i] = b[P[i]].subtract(sum);
 		}
 		
 		//Backward substitution
-		for(int i = size - 1; i >= 0; i--) {
+		for (int i = size - 1; i >= 0; i--) {
 			BigRational sum = BigRational.ZERO;
-			for(int j = i + 1; j < size; j++) {
+			for (int j = i + 1; j < size; j++) {
 				sum = sum.add(A_prime[i][j].multiply(x[j]));
 			}
 			x[i] = y[i].subtract(sum);

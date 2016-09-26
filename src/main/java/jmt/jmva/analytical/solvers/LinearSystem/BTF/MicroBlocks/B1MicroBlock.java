@@ -73,21 +73,21 @@ public class B1MicroBlock extends MicroBlock {
 	@Override
 	public void printRow2(int row) {
 		int row_to_print = row - position.row;		
-		if(row_to_print >= 0 && row_to_print < size.row) {
+		if (row_to_print >= 0 && row_to_print < size.row) {
 			//print whitespace offset
-			for(int i = 0; i < array[row_to_print][1]; i++) {
+			for (int i = 0; i < array[row_to_print][1]; i++) {
 				System.out.format("%2s ", " ");
 			}
 			BigRational value = getValue(row_to_print);
-			if(!value.equals(BigRational.ZERO)) {
+			if (!value.equals(BigRational.ZERO)) {
 				System.out.format("%2s ", getValue(row_to_print));
 			}
 		}
 
 	}
 			
-	private BigRational multiplyRow(int index){
-		if(array[index][0] != 0) {
+	private BigRational multiplyRow(int index) {
+		if (array[index][0] != 0) {
 			return basis.getOldValue(getCol(index)).multiply(getValue(index));  //TODO copy()?
 		} else {
 			return BigRational.ZERO;
@@ -98,24 +98,24 @@ public class B1MicroBlock extends MicroBlock {
 	public void multiply(BigRational[] result)
 			throws BTFMatrixErrorException {
 		
-		for(int i = 0; i < size.row; i++) {
+		for (int i = 0; i < size.row; i++) {
 			result[position.row + i] = multiplyRow(i);
 		}
 	}
 	
 	private  BigRational getValue(int row) {
-		if(array[row][0] == 0) return BigRational.ZERO;
+		if (array[row][0] == 0) return BigRational.ZERO;
 		return qnm.getDemandAsBigRational(array[row][0] - 1, current_class - 1);
 	}
 	
 	private int getCol(int row) {
-		if(array[row][0] == 0) return 0;
+		if (array[row][0] == 0) return 0;
 		return array[row][1];
 	}
 
 	@Override
 	public void solve(BigRational[] rhs) {
-		for(int i = 0; i < size.row; i++) {
+		for (int i = 0; i < size.row; i++) {
 			rhs[position.row + i] = multiplyRow(i);			
 		}		
 	}

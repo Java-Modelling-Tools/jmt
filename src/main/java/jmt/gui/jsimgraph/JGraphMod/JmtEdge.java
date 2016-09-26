@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.JGraphMod;
 
@@ -216,18 +216,18 @@ public class JmtEdge extends DefaultEdge {
 
 		}
 
-		//    	if(intersectionVertexPoint2.size()>0){
+		//    	if (intersectionVertexPoint2.size()>0) {
 		//    		System.out.println("Subito dopo il for: primo punto: x= "+((Point2D)(intersectionVertexPoint2.get(0))).getX()+", y="+((Point2D)(intersectionVertexPoint2.get(0))).getY());
 		//    		System.out.println("Subito dopo il for: secondo punto: x= "+((Point2D)(intersectionVertexPoint2.get(1))).getX()+", y="+((Point2D)(intersectionVertexPoint2.get(1))).getY());
 		//        	
 		//    	}
 
 		//		Questa parte si occupa di ordinare l'arraylist dei punti di intersezione
-		//    	if((rightSide && leftSide) || (lowerSide && rightSide)){
+		//    	if ((rightSide && leftSide) || (lowerSide && rightSide)) {
 		//    		Point2D tmpPoint=(Point2D) intersectionVertexPoint.get(0);
 		//    		Point2D tmpPoint2=(Point2D) intersectionVertexPoint.get(1);
 		////    		intersectionVertexPoint2=null;
-		//    		if(tmpPoint.getX()<tmpPoint2.getX()){
+		//    		if (tmpPoint.getX()<tmpPoint2.getX()) {
 		//    			intersectionVertexPoint.set(0, intersectionVertexPoint.get(1));
 		//    			intersectionVertexPoint.set(1, tmpPoint);
 		//    			}
@@ -254,14 +254,14 @@ public class JmtEdge extends DefaultEdge {
 			intersectionVertexPoint.set(1, lowPoint);
 
 		}
-		//    	if(intersectionVertexPoint2.size()>0){
+		//    	if (intersectionVertexPoint2.size()>0) {
 		//    		System.out.println("Subito dopo il tutto: primo punto: x= "+((Point2D)(intersectionVertexPoint2.get(0))).getX()+", y="+((Point2D)(intersectionVertexPoint2.get(0))).getY());
 		//    		System.out.println("Subito dopo il tutto: secondo punto: x= "+((Point2D)(intersectionVertexPoint2.get(1))).getX()+", y="+((Point2D)(intersectionVertexPoint2.get(1))).getY());
 		//        	
 		//    	}
 		//    	
 		//    	return intersecato;
-		//    	if(intersectionVertexPoint2.size()>0){
+		//    	if (intersectionVertexPoint2.size()>0) {
 		//    		Point2D tmp=(Point2D) intersectionVertexPoint2.get(0);
 		//    		intersectionVertexPoint2.set(0, intersectionVertexPoint2.get(1));
 		//    		intersectionVertexPoint2.set(1,tmp);
@@ -274,15 +274,15 @@ public class JmtEdge extends DefaultEdge {
 		/*
 		
 		//    	scandisce da sx a dx il lato superiore
-		for(int i=(int)minX; i<maxX;i++){
-			if(((int)(controlPoints[1].getX())== i) && ((controlPoints[1].getY()<minY && controlPoints[2].getY()>minY)||((controlPoints[1].getY()>minY && controlPoints[2].getY()<minY)))){
+		for (int i=(int)minX; i<maxX;i++) {
+			if (((int)(controlPoints[1].getX())== i) && ((controlPoints[1].getY()<minY && controlPoints[2].getY()>minY)||((controlPoints[1].getY()>minY && controlPoints[2].getY()<minY)))) {
 				intersecato=true;
 				upperSide=true;
 				intersectionVertexPoint.add(new Point2D.Double(i,(int)minY));
 			}
 			
-			if(controlPoint>4){
-			if(((int)(controlPoints[3].getX())== i) && ((controlPoints[3].getY()<minY && controlPoints[4].getY()>minY)||((controlPoints[3].getY()>minY && controlPoints[4].getY()<minY)))){
+			if (controlPoint>4) {
+			if (((int)(controlPoints[3].getX())== i) && ((controlPoints[3].getY()<minY && controlPoints[4].getY()>minY)||((controlPoints[3].getY()>minY && controlPoints[4].getY()<minY)))) {
 				intersecato=true;
 				upperSide=true;
 				intersectionVertexPoint.add(new Point2D.Double(i,(int)minY));
@@ -290,20 +290,20 @@ public class JmtEdge extends DefaultEdge {
 			}
 		}
 		//    	scandisce da sopra a sotto il lato destro del vertice
-		for(int i=(int)minY+1;i<maxY;i++){
+		for (int i=(int)minY+1;i<maxY;i++) {
 		
-			if(((int)controlPoints[0].getY())==i &&(((int)controlPoints[0].getX()<(int)maxX && (int)controlPoints[1].getX()>(int)maxX)||((int)controlPoints[0].getX()>(int)maxX && (int)controlPoints[1].getX()<(int)maxX))){
+			if (((int)controlPoints[0].getY())==i &&(((int)controlPoints[0].getX()<(int)maxX && (int)controlPoints[1].getX()>(int)maxX)||((int)controlPoints[0].getX()>(int)maxX && (int)controlPoints[1].getX()<(int)maxX))) {
 				rightSide=true;
 				intersecato=true;
 				intersectionVertexPoint.add(new Point2D.Double((int)maxX,i));
 			}
-			if(((int)controlPoints[2].getY())==i &&(((int)controlPoints[2].getX()<(int)maxX && (int)controlPoints[3].getX()>(int)maxX)||((int)controlPoints[2].getX()>(int)maxX && (int)controlPoints[3].getX()<(int)maxX))){
+			if (((int)controlPoints[2].getY())==i &&(((int)controlPoints[2].getX()<(int)maxX && (int)controlPoints[3].getX()>(int)maxX)||((int)controlPoints[2].getX()>(int)maxX && (int)controlPoints[3].getX()<(int)maxX))) {
 				rightSide=true;
 				intersecato=true;
 				intersectionVertexPoint.add(new Point2D.Double((int)maxX,i));
 			}
-			if(controlPoint>4){
-				if(((int)controlPoints[4].getY())==i &&(((int)controlPoints[4].getX()<(int)maxX && (int)controlPoints[5].getX()>(int)maxX)||((int)controlPoints[4].getX()>(int)maxX && (int)controlPoints[5].getX()<(int)maxX))){
+			if (controlPoint>4) {
+				if (((int)controlPoints[4].getY())==i &&(((int)controlPoints[4].getX()<(int)maxX && (int)controlPoints[5].getX()>(int)maxX)||((int)controlPoints[4].getX()>(int)maxX && (int)controlPoints[5].getX()<(int)maxX))) {
 					rightSide=true;
 					intersecato=true;
 					intersectionVertexPoint.add(new Point2D.Double((int)maxX,i));
@@ -313,15 +313,15 @@ public class JmtEdge extends DefaultEdge {
 		}
 		//    	scandisce da sx a dx il lato inferiore del vertice
 		
-		for(int i=(int)maxX-1; i>minX;i--){
-			if(((int)(controlPoints[1].getX())== i) && ((controlPoints[1].getY()<maxY && controlPoints[2].getY()>maxY)||((controlPoints[1].getY()>maxY && controlPoints[2].getY()<maxY)))){
+		for (int i=(int)maxX-1; i>minX;i--) {
+			if (((int)(controlPoints[1].getX())== i) && ((controlPoints[1].getY()<maxY && controlPoints[2].getY()>maxY)||((controlPoints[1].getY()>maxY && controlPoints[2].getY()<maxY)))) {
 				intersecato=true;
 				lowerSide=true;
 				intersectionVertexPoint.add(new Point2D.Double(i,(int)maxY));
 			}
 				
-			if(controlPoint>4){
-				if(((int)(controlPoints[3].getX())== i) && ((controlPoints[3].getY()<maxY && controlPoints[4].getY()>maxY)||((controlPoints[3].getY()>maxY && controlPoints[4].getY()<maxY)))){
+			if (controlPoint>4) {
+				if (((int)(controlPoints[3].getX())== i) && ((controlPoints[3].getY()<maxY && controlPoints[4].getY()>maxY)||((controlPoints[3].getY()>maxY && controlPoints[4].getY()<maxY)))) {
 					intersecato=true;
 					lowerSide=true;
 					intersectionVertexPoint.add(new Point2D.Double(i,(int)maxY));
@@ -331,19 +331,19 @@ public class JmtEdge extends DefaultEdge {
 				
 		}
 		//    	scandisce da sotto a sopra il lato sinistro del vertice
-		for(int i=(int)maxY-1;i>(minY-1);i--){
-			if(((int)controlPoints[0].getY())==i &&(((int)controlPoints[0].getX()<(int)minX && (int)controlPoints[1].getX()>(int)minX)||((int)controlPoints[0].getX()>(int)minX && (int)controlPoints[1].getX()<(int)minX))){
+		for (int i=(int)maxY-1;i>(minY-1);i--) {
+			if (((int)controlPoints[0].getY())==i &&(((int)controlPoints[0].getX()<(int)minX && (int)controlPoints[1].getX()>(int)minX)||((int)controlPoints[0].getX()>(int)minX && (int)controlPoints[1].getX()<(int)minX))) {
 				intersecato=true;
 				leftSide=true;
 				intersectionVertexPoint.add((new Point2D.Double((int)minX,i)));
 			}
-			if(((int)controlPoints[2].getY())==i &&(((int)controlPoints[2].getX()<(int)minX && (int)controlPoints[3].getX()>(int)minX)||((int)controlPoints[2].getX()>(int)minX && (int)controlPoints[3].getX()<(int)minX))){
+			if (((int)controlPoints[2].getY())==i &&(((int)controlPoints[2].getX()<(int)minX && (int)controlPoints[3].getX()>(int)minX)||((int)controlPoints[2].getX()>(int)minX && (int)controlPoints[3].getX()<(int)minX))) {
 				intersecato=true;
 				leftSide=true;
 				intersectionVertexPoint.add((new Point2D.Double((int)minX,i)));
 			}
-			if(controlPoint>4){
-				if(((int)controlPoints[4].getY())==i &&(((int)controlPoints[4].getX()<(int)minX && (int)controlPoints[5].getX()>(int)minX)||((int)controlPoints[4].getX()>(int)minX && (int)controlPoints[5].getX()<(int)minX))){
+			if (controlPoint>4) {
+				if (((int)controlPoints[4].getY())==i &&(((int)controlPoints[4].getX()<(int)minX && (int)controlPoints[5].getX()>(int)minX)||((int)controlPoints[4].getX()>(int)minX && (int)controlPoints[5].getX()<(int)minX))) {
 					intersecato=true;
 					leftSide=true;
 					intersectionVertexPoint.add((new Point2D.Double((int)minX,i)));
@@ -351,7 +351,7 @@ public class JmtEdge extends DefaultEdge {
 			}
 				
 		}
-		if(intersecato){
+		if (intersecato) {
 			System.out.println("Numero di intersezioni2: "+intersectionVertexPoint2.size());
 			System.out.println("2primo punto: x= "+((Point2D)(intersectionVertexPoint2.get(0))).getX()+", y="+((Point2D)(intersectionVertexPoint2.get(0))).getY());
 			System.out.println("2secondo punto: x= "+((Point2D)(intersectionVertexPoint2.get(1))).getX()+", y="+((Point2D)(intersectionVertexPoint2.get(1))).getY());
@@ -409,9 +409,9 @@ public class JmtEdge extends DefaultEdge {
 			}
 		}
 
-		//		if(intersecato){
+		//		if (intersecato) {
 		//			System.out.println("Grandezza di intersezioni:"+intersectionEdgePoint.size());
-		//			for(int i=0;i<intersectionEdgePoint.size();i++){
+		//			for (int i=0;i<intersectionEdgePoint.size();i++) {
 		//				System.out.println("Punto x= "+((Point2D)(intersectionEdgePoint.get(i))).getX()+", y= "+((Point2D)(intersectionEdgePoint.get(i))).getY());
 		//			}
 		//		}
@@ -572,13 +572,13 @@ public class JmtEdge extends DefaultEdge {
 									intersecato = true;
 								}
 							}
-							//        			}else if(((controlPoints[0].getX()>controlPoints3[1].getX())&&(controlPoints[1].getX()<controlPoints3[1].getX())&&controlPoints3[1].getY()==controlPoints[1].getY())){
+							//        			} else if (((controlPoints[0].getX()>controlPoints3[1].getX())&&(controlPoints[1].getX()<controlPoints3[1].getX())&&controlPoints3[1].getY()==controlPoints[1].getY())) {
 							//        				System.out.println("Ciaooooooooooo");
 							//        				boolean contiene=false;
-							//        				if(intersectionEdgePoint.contains(controlPoints3[1])){
+							//        				if (intersectionEdgePoint.contains(controlPoints3[1])) {
 							//        					contiene=true;
 							//        				}
-							//        				if(intersectionEdgePoint==null || !contiene){
+							//        				if (intersectionEdgePoint==null || !contiene) {
 							//
 							//        				intersectionEdgePoint.add(controlPoints3[1]);
 							//        				intersecato=true;

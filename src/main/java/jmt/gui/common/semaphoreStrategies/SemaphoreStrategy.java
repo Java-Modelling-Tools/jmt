@@ -1,16 +1,35 @@
+/**
+ * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.semaphoreStrategies;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Map;
 
-import jmt.gui.common.forkStrategies.ForkStrategy;
-import jmt.gui.common.forkStrategies.OutPath;
-
+/**
+ *
+ * @author Vitor S. Lopes
+ */
 public abstract class SemaphoreStrategy {
+
 	protected static SemaphoreStrategy[] all = null;
 	protected static SemaphoreStrategy[] allForSource = null;
-	
+
 	protected String description;
 
 	public abstract String getName();
@@ -23,10 +42,11 @@ public abstract class SemaphoreStrategy {
 	public String toString() {
 		return getName();
 	}
-	
+
 	public abstract int getSemaphoreThres();
+
 	public abstract void setSemaphoreThres(int i);
-	
+
 	@Override
 	public abstract SemaphoreStrategy clone();
 
@@ -40,7 +60,7 @@ public abstract class SemaphoreStrategy {
 	}
 
 	public abstract String getClassPath();
-	
+
 	public static SemaphoreStrategy[] findAll() {
 		if (all != null) {
 			return all;
@@ -64,6 +84,7 @@ public abstract class SemaphoreStrategy {
 		all = ret;
 		return ret;
 	}
+
 	//TODO:modify this piece of code
 	public static SemaphoreStrategy[] findAllForSource() {
 		if (allForSource != null) {
@@ -88,6 +109,7 @@ public abstract class SemaphoreStrategy {
 		allForSource = ret;
 		return ret;
 	}
-	
+
 	public abstract boolean isModelStateDependent();
+
 }

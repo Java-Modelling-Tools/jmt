@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.engine.math;
 
@@ -32,7 +32,7 @@ public class DirectCircularList<E> {
 	// Pointer to last inserted element and its index for direct access
 	protected int last;
 	protected int lastIndex;
-	// Array of datas
+	// Array of data
 	protected Object[] data;
 	// Size of the list
 	protected int size;
@@ -99,7 +99,7 @@ public class DirectCircularList<E> {
 	/**
 	 * Returns value for item in position index or null if it does not exist.
 	 * This method is always O(1).
-	 * @param index index of element to be retrived
+	 * @param index index of element to be retrieved
 	 * @return requested element or null if it does not exist
 	 * @see this.getSize()
 	 */
@@ -131,8 +131,8 @@ public class DirectCircularList<E> {
 	}
 
 	/**
-	 * Used for debugging purposes: provides a string rappresentation of every object in the data structure
-	 * @return a string rappresentation of every object in the data structure
+	 * Used for debugging purposes: provides a string representation of every object in the data structure
+	 * @return a string representation of every object in the data structure
 	 */
 	@Override
 	public String toString() {

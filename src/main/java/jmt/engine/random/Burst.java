@@ -12,11 +12,8 @@ import jmt.engine.simEngine.SimSystem;
  * 
  * This is the Burst distribution.
  * 
- * <br>
- * <br>
- * Copyright (c) 2003 <br>
- * Politecnico di Milano - dipartimento di Elettronica e Informazione
- * 
+ * <br><br>Copyright (c) 2003
+ * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Federico Dal Castello
  * 
  */
@@ -33,9 +30,9 @@ public class Burst extends NetNode implements Distribution {
 	 */
 	private Double probability;
 	/** length distribution A */
-	private Distribution lenghtDistrA;
+	private Distribution lengthDistrA;
 	/** length distribution B */
-	private Distribution lenghtDistrB;
+	private Distribution lengthDistrB;
 	/** parameter of length distribution A */
 	private Parameter lengthParamA;
 	/** parameter of length distribution B */
@@ -88,9 +85,9 @@ public class Burst extends NetNode implements Distribution {
 
 		engine = RandomEngine.makeDefault();
 		this.probability = probability;
-		this.lenghtDistrA = distrContA.getDistribution();
+		this.lengthDistrA = distrContA.getDistribution();
 		this.lengthParamA = distrContA.getParameter();
-		this.lenghtDistrB = distrContB.getDistribution();
+		this.lengthDistrB = distrContB.getDistribution();
 		this.lengthParamB = distrContB.getParameter();
 		this.isRoundRobin = isRoundRobin;
 
@@ -148,22 +145,22 @@ public class Burst extends NetNode implements Distribution {
 		if (isRoundRobin.booleanValue()) {
 			// alternates the interval distributions, starting with distribution A
 			if ((currentLengthDistr == null) || // the length distribution has not been initialized yet
-					currentLengthDistr.equals(lenghtDistrB)) {
+					currentLengthDistr.equals(lengthDistrB)) {
 				// sets it to length distribution A
-				currentLengthDistr = lenghtDistrA;
+				currentLengthDistr = lengthDistrA;
 				currentLengthPar = lengthParamA;
 			} else {
 				// sets it to length distribution B
-				currentLengthDistr = lenghtDistrB;
+				currentLengthDistr = lengthDistrB;
 				currentLengthPar = lengthParamB;
 			}
 		} else {
 			// changes the interval distributions according to the probability parameter
 			if (engine.raw() < probability.doubleValue()) {
-				currentLengthDistr = lenghtDistrA;
+				currentLengthDistr = lengthDistrA;
 				currentLengthPar = lengthParamA;
 			} else {
-				currentLengthDistr = lenghtDistrB;
+				currentLengthDistr = lengthDistrB;
 				currentLengthPar = lengthParamB;
 			}
 		}
@@ -276,7 +273,7 @@ public class Burst extends NetNode implements Distribution {
 		Distribution currentValueDistr;
 		Parameter currentValPar;
 
-		if (currentLengthDistr.equals(lenghtDistrA)) {
+		if (currentLengthDistr.equals(lengthDistrA)) {
 			// the current distribution is distribution A
 			currentValueDistr = par.getValueDistributionA();
 			currentValPar = par.getValueParameterA();

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.simEngine;
 
@@ -29,7 +29,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -58,7 +60,7 @@ import org.xml.sax.SAXNotSupportedException;
 
 /**
  * This class contains the methods to load the DOM description of a
- * queueing netwok model from a XML file and then to create a Simulation object
+ * queueing network model from a XML file and then to create a Simulation object
  * from that description.
  *
  * For each node, all parameters and sub-parameters are loaded using the suitable constructors.
@@ -85,7 +87,7 @@ import org.xml.sax.SAXNotSupportedException;
  */
 public class SimLoader {
 
-	//used for debug pourposes
+	//used for debug purposes
 	private static final boolean DEBUG = false;
 
 	//represents the entire XML document. it is the root
@@ -107,24 +109,20 @@ public class SimLoader {
 	 * @param xmlPath the <em>absolute</em> path of the xml model definition
 	 */
 	public SimLoader(String xmlPath) throws IOException, LoadException {
-
 		//NEW
 		//@author Stefano Omini
 
 		simModelPath = xmlPath;
-//		xmlPath = "/home/js/Documents/~JModelSimulation3852173409779516183.xml";
-//		xmlPath = "/home/js/Documents/~JModelSimulation5554792256213153684.xml";
-//		System.out.println(xmlPath);
+		//xmlPath = "/home/js/Documents/~JModelSimulation3852173409779516183.xml";
+		//xmlPath = "/home/js/Documents/~JModelSimulation5554792256213153684.xml";
+		//System.out.println(xmlPath);
 		InputStream is = new BufferedInputStream(new FileInputStream(xmlPath));
 		//loads the model and creates a Simulation object
 		load(is);
-
 		//end NEW
-
 	}
 
 	private void load(InputStream is) throws LoadException {
-
 		if (is == null) {
 			throw new LoadException("File not Found");
 		}
@@ -153,7 +151,6 @@ public class SimLoader {
 				parser.parse(inputSource);
 			} catch (FileNotFoundException e) {
 				throw new LoadException("Problems while parsing", e);
-
 			}
 
 			//get the w3c document
@@ -166,6 +163,7 @@ public class SimLoader {
 			if (DEBUG) {
 				System.out.println("root = " + root.getAttribute("name"));
 			}
+
 			//recovers the name of the simulation & creates a getLog with the same
 			//name
 			if (root.getNodeName() == null) {
@@ -179,9 +177,7 @@ public class SimLoader {
 
 			//NEW
 			//@author Stefano Omini
-
 			//default values
-
 			long seed = -1;
 			String simName = "";
 
@@ -189,17 +185,15 @@ public class SimLoader {
 				simName = root.getAttribute("name");
 			}
 
-			//vraiable debug is no longer USED
+			//variable debug is no longer USED
 
 			if (root.getAttribute("seed") != "") {
 				seed = Long.parseLong(root.getAttribute("seed"));
 			}
 
 			if (simName.equalsIgnoreCase("")) {
-
 				//NEW
 				//@author Stefano Omini
-
 				//no name specified: uses current time as name
 				String datePattern = "yyyyMMdd_HHmmss";
 				SimpleDateFormat formatter = new SimpleDateFormat(datePattern);
@@ -212,18 +206,14 @@ public class SimLoader {
 				//OLD
 				//sim = new Simulation(seed, null, debug);
 				sim = new Simulation(seed, simName);
-
 				//end NEW
-
 			} else {
-
 				//OLD
 				//sim = new Simulation(seed, simName, debug);
 				sim = new Simulation(seed, simName);
 			}
 
 			sim.setXmlSimModelDefPath(simModelPath);
-
 			//end NEW
 
 			//-------------- SIM PARAMETERS -------------------//
@@ -266,14 +256,14 @@ public class SimLoader {
 				simParam.setMaxSamples(maxSamples);
 			}
 			// END
-			
+
 			// Read maxSimulatedTime if specified
 			if (root.getAttribute("maxSimulated") != "") {
 				maxSimulatedTime = Double.parseDouble(root.getAttribute("maxSimulated"));
 				simParam.setMaxSimulatedTime(maxSimulatedTime);
 			}
 
-			// NEW Bertoli Marco -- Disables condidence interval as stopping criteria
+			// NEW Bertoli Marco -- Disables confidence interval as stopping criteria
 			if (root.hasAttribute("disableStatisticStop")) {
 				simParam.setDisableStatisticStop(root.getAttribute("disableStatisticStop").equalsIgnoreCase(Boolean.TRUE.toString()));
 			}
@@ -304,11 +294,11 @@ public class SimLoader {
 				simParam.setTimestampValue(temp_ltv);
 			}
 			//END MF08
-			
+
 			//FIXME read measure logging attributes here...
 
 			//Returns a NodeList of all the Elements with a given tag name in the order in which they
-			//are encountered in a preorder traversal of the Document tree.
+			//are encountered in a preordering traversal of the Document tree.
 			NodeList nodeList = root.getElementsByTagName("node");
 			NodeList classList = root.getElementsByTagName("userClass");
 			NodeList measureList = root.getElementsByTagName("measure");
@@ -322,11 +312,9 @@ public class SimLoader {
 
 				//NEW
 				//@author Stefano Omini
-
 				Element currentJobClass = (Element) classList.item(i);
 
 				//parse class attributes: name, type and priority
-
 				String currentClassName = currentJobClass.getAttribute("name");
 				String currentClassType = currentJobClass.getAttribute("type");
 				String currentClassPriority = currentJobClass.getAttribute("priority");
@@ -336,7 +324,6 @@ public class SimLoader {
 
 				if (currentClassType.equalsIgnoreCase("closed")) {
 					type = JobClass.CLOSED_CLASS;
-
 					//TODO: al momento non viene letto l'attributo opzionale "customers"
 					//(che comunque non ï¿½ necessario: i job vengono creati dal terminal o precaricati
 					//nelle code)
@@ -352,7 +339,6 @@ public class SimLoader {
 
 				//add job class
 				jobClasses[i] = new JobClass(currentClassName, priority, type, referenceNode);
-
 				//end NEW
 
 				if (DEBUG) {
@@ -439,7 +425,6 @@ public class SimLoader {
 							.getAttribute("precision")), maxSamples, e.getAttribute("verbose").equalsIgnoreCase("true"), null);
 
 					sim.addMeasure(measureType, e.getAttribute("referenceNode"), measure, e.getAttribute("referenceUserClass"), nodeType);
-
 				}
 
 				if (DEBUG) {
@@ -452,7 +437,6 @@ public class SimLoader {
 
 			//NEW
 			//@author Stefano Omini
-
 			NodeList regionList = root.getElementsByTagName("blockingRegion");
 
 			// Use external method
@@ -460,7 +444,6 @@ public class SimLoader {
 			if (DEBUG) {
 				System.out.println("");
 			}
-
 			//end NEW
 
 			//Preloading
@@ -475,7 +458,6 @@ public class SimLoader {
 
 			if (preload != null) {
 				//preload has been defined by user
-
 				NodeList stations;
 				NodeList initialPops;
 				Element station;
@@ -528,15 +510,11 @@ public class SimLoader {
 				}
 
 				//copies the preload info into simulation object
-
 				sim.setPreloadEnabled(true);
 				sim.setPreload_stationNames(stationNames);
 				sim.setPreload_initialPopulations(initialP);
-
 			}
-
 			//end NEW
-
 		} catch (SAXNotRecognizedException e) {
 			e.printStackTrace();
 		} catch (SAXNotSupportedException e) {
@@ -698,9 +676,7 @@ public class SimLoader {
 						System.out.println("        created parameter");
 					}
 					return parameter;
-
 				} else {
-
 					//it is a group parameter! more complicated(the other was easy... :P )
 					if (DEBUG) {
 						System.out.println("        it is group class parameter");
@@ -759,16 +735,15 @@ public class SimLoader {
 			}
 
 			//check if it is a leaf node (it has a value & not subparameters)
-			if (valueList != null) {
-
+			if (valueList.getLength() > 0) {
 				String value = valueList.item(0).getFirstChild().getNodeValue();
 				if (DEBUG) {
 					System.out.println("        parameter is a leaf node, value = " + value);
 				}
 				//needs to get the String constructor
 				Object[] initargs = { value };
-				Class<?>[] paramterTypes = { initargs[0].getClass() };
-				Constructor<?> constr = getConstructor(c, paramterTypes);
+				Class<?>[] parameterTypes = { initargs[0].getClass() };
+				Constructor<?> constr = getConstructor(c, parameterTypes);
 				if (DEBUG) {
 					System.out.println("        created parameter");
 				}
@@ -781,7 +756,7 @@ public class SimLoader {
 					System.out.println("        parameter is a leaf node with subparameter ");
 				}
 				Class<?>[] paramClasses = new Class[childList.getLength()];
-				//creates iteratevely all the subparamters
+				//creates iteratively all the subparameters
 				for (int i = 0; i < childList.getLength(); i++) {
 					Element e = (Element) childList.item(i);
 					if (DEBUG) {
@@ -793,7 +768,6 @@ public class SimLoader {
 				Constructor<?> constr = getConstructor(c, paramClasses);
 				return constr.newInstance(initargs);
 			}
-
 		} catch (ClassNotFoundException e) {
 			throw new LoadException("Class of Parameter not found", e);
 		} catch (NoSuchMethodException e) {
@@ -828,13 +802,13 @@ public class SimLoader {
 			if (DEBUG) {
 				System.out.println("            found subparameter class = " + c.getName());
 			}
-			//check is subp is an array
+			//check if the subparameter is an array
 			if (subp.getAttribute("array").equals("true")) {
 				//array subparameter
 				if (DEBUG) {
 					System.out.println("            the subParameter is an array");
 				}
-				//check if there r childs in the array
+				//check if there are child nodes in the array
 				if (!subp.hasChildNodes()) {
 					if (DEBUG) {
 						System.out.println("            creates 0 size array");
@@ -856,7 +830,7 @@ public class SimLoader {
 					}
 					arrayElements[i] = createSubParameter((Element) childList.item(i));
 				}
-				//reates a fake array object
+				//creates a fake array object
 				Object parameter = Array.newInstance(c, childList.getLength());
 				//copy inside all the elements
 				System.arraycopy(arrayElements, 0, parameter, 0, arrayElements.length);
@@ -865,13 +839,14 @@ public class SimLoader {
 				}
 				return parameter;
 			}
-			//check for defaul cosntructor
+			//check for default constructor
 			if (!subp.hasChildNodes()) {
 				if (DEBUG) {
-					System.out.println("            created with default cosntructor");
+					System.out.println("            created with default constructor");
 				}
 				return c.newInstance();
 			}
+
 			//check if it is a leaf node (it has a value & not subparameters)
 			if (valueList.getLength() > 0) {
 				String value = valueList.item(0).getFirstChild().getNodeValue();
@@ -880,22 +855,21 @@ public class SimLoader {
 				}
 				//needs to get the String constructor
 				Object[] initargs = { value };
-				Class<?>[] paramterTypes = { initargs[0].getClass() };
-				Constructor<?> constr = getConstructor(c, paramterTypes);
+				Class<?>[] parameterTypes = { initargs[0].getClass() };
+				Constructor<?> constr = getConstructor(c, parameterTypes);
 				if (DEBUG) {
 					System.out.println("            created subParameter");
 				}
-
 				return constr.newInstance(initargs);
 			} else {
 				//leaf node but has subparameters
 				NodeList childList = XMLParser.getElementsByTagName(subp, "subParameter");
 				Object[] initargs = new Object[childList.getLength()];
 				if (DEBUG) {
-					System.out.println("            subParameter is a leaf node with subparamter ");
+					System.out.println("            subParameter is a leaf node with subparameter ");
 				}
 				Class<?>[] paramClasses = new Class[childList.getLength()];
-				//creates iteratevely all the subparamters
+				//creates iteratively all the subparameters
 				for (int i = 0; i < childList.getLength(); i++) {
 					Element e = (Element) childList.item(i);
 					if (DEBUG) {
@@ -910,7 +884,6 @@ public class SimLoader {
 				if (o instanceof NetNode && o instanceof Distribution) {
 					sim.addDistrNetNode((NetNode) o);
 				}
-
 				return o;
 			}
 		} catch (ClassNotFoundException e) {
@@ -1025,29 +998,19 @@ public class SimLoader {
 			return SimConstants.SYSTEM_JOB_NUMBER;
 		} else if (measure.equalsIgnoreCase("System Drop Rate")) {
 			return SimConstants.SYSTEM_DROP_RATE;
-		}
-		//Added by ASHANKA START
-		//This loads the System Power into the JSIM
-		else if (measure.equalsIgnoreCase("System Power")) {
+		} else if (measure.equalsIgnoreCase("System Power")) {
 			return SimConstants.SYSTEM_POWER;
-		}
-		//Added by ASHANKA STOP
-		else if (measure.equalsIgnoreCase("Response Time per Sink")) {
+		} else if (measure.equalsIgnoreCase("Response Time per Sink")) {
 			return SimConstants.RESPONSE_TIME_PER_SINK;
-		}
-		else if (measure.equalsIgnoreCase("Throughput per Sink")) {
+		} else if (measure.equalsIgnoreCase("Throughput per Sink")) {
 			return SimConstants.THROUGHPUT_PER_SINK;
-		}
-		else if(measure.equalsIgnoreCase("FCR Total Weight")){
+		} else if (measure.equalsIgnoreCase("FCR Total Weight")) {
 			return SimConstants.FCR_TOTAL_WEIGHT;
-		}
-		else if(measure.equalsIgnoreCase("FCR Memory Occupation")){
+		} else if (measure.equalsIgnoreCase("FCR Memory Occupation")) {
 			return SimConstants.FCR_MEMORY_OCCUPATION;
-		}
-		else if(measure.equalsIgnoreCase("Fork Join Response Time")){
+		} else if (measure.equalsIgnoreCase("Fork Join Response Time")) {
 			return SimConstants.FORK_JOIN_RESPONSE_TIME;
-		}
-                else if(measure.equalsIgnoreCase("Fork Join Number of Customers")){
+		} else if (measure.equalsIgnoreCase("Fork Join Number of Customers")) {
 			return SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
 		}
 		//default value
@@ -1074,20 +1037,17 @@ public class SimLoader {
 				return c;
 			}
 		}
-
 		//no class with the specified name
 		return -1;
-
 	}
 
 	/**
 	 * Load blocking region from input XML file
 	 * @param root root element of XML file
 	 * @param regionList a NodeList data structure with all blocking regions
-	 * @throws LoadException if some problems occurrs during loading
+	 * @throws LoadException if some problems occurs during loading
 	 */
 	private void loadBlockingRegions(Element root, NodeList regionList) throws LoadException {
-
 		int classNumber = root.getElementsByTagName("userClass").getLength();
 
 		//adds all regions
@@ -1107,7 +1067,6 @@ public class SimLoader {
 			//String regionType = region.getAttribute("type");
 
 			//--------------REGION NODES----------------//
-
 			//gets the names of the stations contained in the region
 			NodeList regionNodesList = region.getElementsByTagName("regionNode");
 
@@ -1122,7 +1081,6 @@ public class SimLoader {
 			}
 
 			//---------GLOBAL CONSTRAINT-----------//
-
 			double maxCapacity = -1;
 
 			NodeList globalConstraints = region.getElementsByTagName("globalConstraint");
@@ -1136,13 +1094,12 @@ public class SimLoader {
 			} else {
 				throw new LoadException("Element \"globalConstraint\" missing...");
 			}
-			
+
 			//--------------GLOBAL MEMORY CONSTRAINT-------------//
-			
 			double maxMemory = -1;
-			
+
 			NodeList globalMemoryConstraints = region.getElementsByTagName("globalMemoryConstraint");
-			
+
 			if (globalMemoryConstraints.item(0) != null) {
 				Element globalMemoryConst = (Element) globalMemoryConstraints.item(0);
 				maxMemory = Double.parseDouble(globalMemoryConst.getAttribute("maxMemory"));
@@ -1154,7 +1111,6 @@ public class SimLoader {
 			}
 
 			//--------------DROP RULES---------------//
-
 			NodeList dropRules = region.getElementsByTagName("dropRules");
 
 			//drop rules (one for each class)
@@ -1177,18 +1133,15 @@ public class SimLoader {
 				}
 			} else {
 				//drop rules specified by user
-
 				if (DEBUG) {
 					System.out.println("Loading specified drop rules...");
 				}
 
 				//the number of drop rules must be exactly equal
 				//to the number of classes
-				/*
-				if (dropRules.getLength() != classNumber) {
-				throw new LoadException("One drop rule is required for each class.");
-				}
-				*/
+				/*if (dropRules.getLength() != classNumber) {
+					throw new LoadException("One drop rule is required for each class.");
+				}*/
 
 				Element dropRule = null;
 				int classPosition;
@@ -1213,7 +1166,6 @@ public class SimLoader {
 						System.out.println("   drop class " + className + " = " + dropThisClass[classPosition]);
 					}
 				}
-
 			}
 
 			//-----------------CLASS CONSTRAINTS-----------------//
@@ -1227,11 +1179,9 @@ public class SimLoader {
 			if (classConstraints.getLength() > 0) {
 				//the number of class constraints must be exactly equal
 				//to the number of classes
-				/*
-				if (classConstraints.getLength() != classNumber) {
-				    throw new LoadException("One class constraint is required for each class.");
-				}
-				*/
+				/*if (classConstraints.getLength() != classNumber) {
+					throw new LoadException("One class constraint is required for each class.");
+				}*/
 
 				Element clsConst = null;
 				int classPosition;
@@ -1257,11 +1207,9 @@ public class SimLoader {
 						System.out.println("   constraint for class " + className + " = " + Double.toString(maxCapacityPerClass[classPosition]));
 					}
 				}
-
 			}
 
 			//----------------CLASS WEIGHTS----------------//
-
 			NodeList classWeights = root.getElementsByTagName("classWeight");
 
 			double[] regionClassWeights = new double[classNumber];
@@ -1269,14 +1217,11 @@ public class SimLoader {
 			Arrays.fill(regionClassWeights, 1.0);
 
 			if (classWeights.getLength() > 0) {
-
 				//the number of class weights must be exactly equal
 				//to the number of classes
-				/*
-				if (classWeights.getLength() != classNumber) {
-				    throw new LoadException("One class weight is required for each class.");
-				}
-				*/
+				/*if (classWeights.getLength() != classNumber) {
+					throw new LoadException("One class weight is required for each class.");
+				}*/
 
 				Element clsWeight = null;
 				int classPosition;
@@ -1301,8 +1246,8 @@ public class SimLoader {
 						System.out.println("   weight for class " + className + " = " + Double.toString(regionClassWeights[classPosition]));
 					}
 				}
-
 			}
+
 			//------------------Memory Size Each Class--------------//
 			NodeList classSizes = root.getElementsByTagName("classMemorySize");
 
@@ -1311,14 +1256,11 @@ public class SimLoader {
 			Arrays.fill(regionClassSizes, 1.0);
 
 			if (classSizes.getLength() > 0) {
-
 				//the number of class weights must be exactly equal
 				//to the number of classes
-				/*
-				if (classWeights.getLength() != classNumber) {
-				    throw new LoadException("One class weight is required for each class.");
-				}
-				*/
+				/*if (classWeights.getLength() != classNumber) {
+					throw new LoadException("One class weight is required for each class.");
+				}*/
 
 				Element clsSize = null;
 				int classPosition;
@@ -1343,32 +1285,65 @@ public class SimLoader {
 						System.out.println("   size for class " + className + " = " + Double.toString(regionClassSizes[classPosition]));
 					}
 				}
+			}
 
+			//------------------Group Constraints---------------------//
+			NodeList groupConstraints = region.getElementsByTagName("groupConstraint");
+			int groupNumber = groupConstraints.getLength();
+			String[] groupNames = new String[groupNumber];
+			double[] maxCapacityPerGroup = new double[groupNumber];
+			for (int j = 0; j < groupNumber; j++) {
+				Element groupConstraint = (Element) groupConstraints.item(j);
+				groupNames[j] = groupConstraint.getAttribute("jobGroup");
+				maxCapacityPerGroup[j] = Double.parseDouble(groupConstraint.getAttribute("maxJobsPerGroup"));
+			}
+
+			//------------------Group Strategies----------------------//
+			NodeList groupStrategies = region.getElementsByTagName("groupStrategy");
+			String[] groupStrategy = new String[groupNumber];
+			for (int j = 0; j < groupNumber; j++) {
+				Element groupStrategyElement = (Element) groupStrategies.item(j);
+				groupStrategy[j] = groupStrategyElement.getAttribute("strategy");
+			}
+
+			//------------------Group ClassesList---------------------//
+			NodeList groupClassLists  = region.getElementsByTagName("groupClassList");
+			List<List<Integer>> groupClassIndexLists = new ArrayList<List<Integer>>();
+			for (int j = 0; j < groupNumber; j++) {
+				Element groupClassList = (Element) groupClassLists.item(j);
+				NodeList groupClasses = groupClassList.getElementsByTagName("groupClass");
+				groupClassIndexLists.add(new ArrayList<Integer>());
+				for (int k = 0; k < groupClasses.getLength(); k++) {
+					Element groupClass = (Element) groupClasses.item(k);
+					int classIndex = getJobClassPosition(groupClass.getAttribute("jobClass"));
+					groupClassIndexLists.get(j).add(classIndex);
+				}
 			}
 
 			//------------------ADD BLOCKING REGION TO SIM ---------//
-//			sim.addRegion(regionName, maxCapacity, maxCapacityPerClass, regionClassWeights, dropThisClass, stationNames);
-			sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, regionClassSizes, regionClassWeights, dropThisClass, stationNames);
+			//sim.addRegion(regionName, maxCapacity, maxCapacityPerClass, regionClassWeights, dropThisClass, stationNames);
+			//sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, regionClassSizes, regionClassWeights, dropThisClass, stationNames);
+			sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, regionClassSizes, regionClassWeights, dropThisClass,
+					groupNames, maxCapacityPerGroup, groupStrategy, groupClassIndexLists, stationNames);
 			if (DEBUG) {
 				System.out.println("added region " + regionName);
 			}
 		}
-
 	}
 
 	// Cut and paste of old GUI code used by SimLoader (to clear up things) - Bertoli Marco
 	public static class XMLParser {
+
 		/**
-		 *  Returns a NodeList of all descendant Elements with a given tag name, in
-		 * the order in which they are encountered in a preorder traversal of this
-		 * Element (ony at first level).
-		 * @param e  The lement that is being analyzed.
+		 * Returns a NodeList of all descendant Elements with a given tag name, in
+		 * the order in which they are encountered in a preordering traversal of
+		 * this Element (only at first level).
+		 * @param e  The element that is being analyzed.
 		 * @param name  The name of the tag to match on.
 		 * @return A list of matching Element nodes.
 		 */
 		public static NodeList getElementsByTagName(Element e, String name) {
 			JmtNodeList reqChild = new JmtNodeList();
-
 			NodeList childList = e.getChildNodes();
 			if (childList != null && childList.getLength() != 0) {
 				for (int i = 0; i < childList.getLength(); i++) {
@@ -1380,10 +1355,9 @@ public class SimLoader {
 				}
 			}
 			return reqChild;
-
 		}
 
-		/** Implements a NodeList that lets also add Noes, feel free to
+		/** Implements a NodeList that lets also add Nodes, feel free to
 		 * add methods if u need.
 
 		 * @author Federico Granata
@@ -1392,6 +1366,7 @@ public class SimLoader {
 
 		 */
 		public static class JmtNodeList implements NodeList {
+
 			ArrayList<Node> data;
 
 			public JmtNodeList() {
@@ -1409,6 +1384,7 @@ public class SimLoader {
 			public int getLength() {
 				return data.size();
 			}
+
 		}
 
 	}

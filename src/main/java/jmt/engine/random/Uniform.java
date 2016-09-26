@@ -1,40 +1,40 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
- *
+ * 
  * This is the Uniform distribution.This object offers many
- * methods to obtain random value distribuited like a uniform. This is because
+ * methods to obtain random value distributed like a uniform. This is because
  * the Uniform distribution must be also used by external classes as an
  * interface with the real pseudo-random number generator (which return many
- * type of value distribuited like a uniform too). (see the constructor
+ * type of value distributed like a uniform too). (see the constructor
  * description for his pdf definition).
- *
+ * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
  * @author Modified by Stefano Omini, 7/5/2004
+ * 
  */
-
 public class Uniform extends AbstractDistribution implements Distribution {
 
 	/**
@@ -43,7 +43,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	 * pdf(x) = -----------
 	 *            max-min</pre>
 	 * where max and min are two double boundaries for the distribution.
-	 * max must be greater than min. If x is not betwen min and max, pdf(x)=0.
+	 * max must be greater than min. If x is not between min and max, pdf(x)=0.
 	 *
 	 */
 
@@ -73,7 +73,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 			return 1.0 / (max - min);
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: the *max* parameter must be > of the *min* one because min and max reppresent the boud of the distribution");
+					"Remember: the *max* parameter must be > of the *min* one because min and max represent the boud of the distribution");
 		}
 	}
 
@@ -106,7 +106,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 			return (x - min) / (max - min);
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: the *max* parameter must be > of the *min* one because min and max reppresent the boud of the distribution");
+					"Remember: the *max* parameter must be > of the *min* one because min and max represent the boud of the distribution");
 		}
 	}
 
@@ -133,7 +133,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 			return (max + min) / 2;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: the *max* parameter must be > of the *min* one because min and max reppresent the boud of the distribution");
+					"Remember: the *max* parameter must be > of the *min* one because min and max represent the boud of the distribution");
 		}
 	}
 
@@ -161,7 +161,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 			return Math.pow((max - min), 2) / 12;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: the *max* parameter must be > of the *min* one because min and max reppresent the boud of the distribution");
+					"Remember: the *max* parameter must be > of the *min* one because min and max represent the boud of the distribution");
 		}
 	}
 
@@ -233,7 +233,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 			return random;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: the *max* parameter must be > of the *min* one because min and max reppresent the boud of the distribution");
+					"Remember: the *max* parameter must be > of the *min* one because min and max represent the boud of the distribution");
 		}
 	}
 
@@ -266,7 +266,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 			return (int) ((long) min + (long) ((1L + (long) max - (long) min) * engine.raw()));
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: the *max* parameter must be > of the *min* one because min and max reppresent the boud of the distribution");
+					"Remember: the *max* parameter must be > of the *min* one because min and max represent the boud of the distribution");
 		}
 	}
 
@@ -287,7 +287,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 			return min + (max - min) * engine.raw();
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: the *max* parameter must be > of the *min* one because min and max reppresent the boud of the distribution");
+					"Remember: the *max* parameter must be > of the *min* one because min and max represent the boud of the distribution");
 		}
 	}
 

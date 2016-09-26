@@ -55,9 +55,9 @@ public abstract class SecondaryMacroBlock extends ComponentBlock {
 	@Override
 	public void printRow2(int row) {
 		int row_to_print = row - position.row;
-		if(row_to_print >= 0 && row_to_print < size.row) {
+		if (row_to_print >= 0 && row_to_print < size.row) {
 			//print white space offset
-			for(int i = cols_printed; i < position.col; i++) {
+			for (int i = cols_printed; i < position.col; i++) {
 				System.out.format("%2s ", " ");	
 				cols_printed++;
 			}

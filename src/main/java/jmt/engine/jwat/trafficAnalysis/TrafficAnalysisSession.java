@@ -14,7 +14,7 @@ public class TrafficAnalysisSession extends JwatSession {
 
 	private BurstEngine engine = null;
 	private int epochs = -1;
-	private ArrayList<OnSetParamtersListener> setParameters = new ArrayList<OnSetParamtersListener>();
+	private ArrayList<OnSetParametersListener> setParameters = new ArrayList<OnSetParametersListener>();
 
 	public TrafficAnalysisSession() {
 		super(new ModelTrafficAnalysis());
@@ -32,19 +32,19 @@ public class TrafficAnalysisSession extends JwatSession {
 		this.epochs = epochs;
 	}
 
-	public void addSetParamsListener(OnSetParamtersListener lst) {
+	public void addSetParamsListener(OnSetParametersListener lst) {
 		if (!setParameters.contains(lst)) {
 			setParameters.add(lst);
 		}
 	}
 
-	public void removeSetParamsListener(OnSetParamtersListener lst) {
+	public void removeSetParamsListener(OnSetParametersListener lst) {
 		setParameters.remove(lst);
 	}
 
 	private void notifySetParams() {
 		for (int i = 0; i < setParameters.size(); i++) {
-			setParameters.get(i).ParamsSetted();
+			setParameters.get(i).ParamsSet();
 		}
 	}
 

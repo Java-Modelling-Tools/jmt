@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.controller;
 
@@ -34,12 +34,10 @@ import org.jgraph.graph.GraphConstants;
 
 /**
  * Handles all the events when the user is in the select mode
- *
 
  * @author dekkar (Federico Granata)
  * Date: Jun 20, 2003
  * Time: 10:42:28 AM
-
 
  * Modified by Bertoli Marco 28-giu-2005
 
@@ -47,31 +45,31 @@ import org.jgraph.graph.GraphConstants;
 public class SelectState extends UIStateDefault {
 
 	private Object[] cells = null;
-	//		rappresentano l angolo altro-sinistro di ogni cella selezionata
+	//rappresentano l angolo altro-sinistro di ogni cella selezionata
 	private Integer[] Xmin = null;
 	private Integer[] Ymin = null;
-	//		rappresentano l angolo basso-destro di ogni cella selezionata
+	//rappresentano l angolo basso-destro di ogni cella selezionata
 	private Integer[] Xmax = null;
 	private Integer[] Ymax = null;
 
 	private boolean moved = false;
 	private JmtJGraph graphtmp = null;
 
-	protected GraphMouseListner ml;//refernce to mouse listner
+	protected GraphMouseListener ml;//reference to mouse listener
 
 	/** Creates the select state
 	 *
 	 * @param mediator
 	 * @param ml
 	 */
-	public SelectState(Mediator mediator, GraphMouseListner ml) {
+	public SelectState(Mediator mediator, GraphMouseListener ml) {
 		super(mediator);
 		this.ml = ml;
 	}
 
 	/**
 	 * Handles press event, it selects the cell that is under the pointer
-	 * if there is no cell deselects. There is also the possibility of
+	 * If there is no cell deselects. There is also the possibility of
 	 * activating the marquee handler
 	 *
 	 * @param e press mouse event
@@ -101,9 +99,9 @@ public class SelectState extends UIStateDefault {
 
 			if (!mediator.isForceMarqueeEvent(e)) {
 				if (e.getClickCount() == mediator.getEditClickCount() && ml.getFocus() != null
-				//&& ml.getFocus().isLeaf()
-				//&& ml.getFocus().getParentView() == null
-				) {
+						//&& ml.getFocus().isLeaf()
+						//&& ml.getFocus().getParentView() == null
+						) {
 					// Start Editing Only if cell is editable - BERTOLI MARCO
 					if (mediator.isCellEditable(ml.getFocus().getCell())) {
 						ml.handleEditTrigger(ml.getFocus().getCell());
@@ -202,7 +200,7 @@ public class SelectState extends UIStateDefault {
 					for (int i = 0; i < cells.length; i++) {
 						if (cells[i] instanceof JmtCell) {
 							Rectangle2D rett = GraphConstants.getBounds(((JmtCell) cells[i]).getAttributes());
-							//                		rappresentano l angolo altro-sinistro di ogni cella selezionata
+							//rappresentano l angolo altro-sinistro di ogni cella selezionata
 							Xmin[i] = new Integer((int) rett.getMinX());
 							Ymin[i] = new Integer((int) rett.getMinY());
 							Xmax[i] = new Integer((int) rett.getMaxX());
@@ -217,15 +215,15 @@ public class SelectState extends UIStateDefault {
 							celgru[0] = cells[i];
 							//celle presenti nel blocking region incluse port e regione
 
-							//                			Object[] celless=graphtmp.getDescendants(celgru);
+							//Object[] celless=graphtmp.getDescendants(celgru);
 							//System.out.println("Numero di celle in gruppo: "+ celless.length);
 
 							if (rett2 != null) {
 								//System.out.println("Dentro DRAG mi restituisce un rettangolo se è di tipoBLockingRegion");
 								Xmin[i] = new Integer((int) rett2.getMinX());
 								Ymin[i] = new Integer((int) rett2.getMinY());
-								//                        		Xmax[i]=new Integer((int) rett2.getMaxX());
-								//                        		Ymax[i]=new Integer((int) rett2.getMaxY());
+								//Xmax[i]=new Integer((int) rett2.getMaxX());
+								//Ymax[i]=new Integer((int) rett2.getMaxY());
 								//System.out.println("Valori: "+ X[i]+", "+Y[i]);
 								moved = true;
 							}
@@ -238,7 +236,7 @@ public class SelectState extends UIStateDefault {
 
 	}
 
-	//	Heavely modified by Giuseppe De Cicco & Fabio Granara
+	//Heavely modified by Giuseppe De Cicco & Fabio Granara
 	@Override
 	public void handleRelease(MouseEvent e) {
 		mediator.setIsReleased(true);
@@ -258,7 +256,7 @@ public class SelectState extends UIStateDefault {
 
 				// Puts selected cells in good place to avoid overlapping
 				if (moved && Xmin.length > 0 && Ymin.length > 0) {
-					//                	System.out.println("chiamata in select state");
+					//System.out.println("chiamata in select state");
 					mediator.putSelectedCellsInGoodPlace(cells, Xmin, Ymin);
 
 					mediator.avoidOverlappingCell(cells);
@@ -277,7 +275,7 @@ public class SelectState extends UIStateDefault {
 					ml.postProcessSelection(e, tmp, wasSelected);
 				}
 				// Notify mediator that object can have been placed inside or
-				// ouside a blocking region
+				// outside a blocking region
 				mediator.handlesBlockingRegionDrag();
 
 			}

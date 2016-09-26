@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.jmva.analytical;
 
@@ -52,7 +52,7 @@ import org.w3c.dom.NodeList;
  * @version Date: Aug-2009
  * 
  * @author Ashanka
- * Cleaned code by removing unnecesary comments of old code.
+ * Cleaned code by removing unnecessary comments of old code.
  * @version Date: Sep-2009
  * 
  * @author Ashanka
@@ -70,19 +70,19 @@ import org.w3c.dom.NodeList;
  */
 
 public class ExactModel implements ExactConstants  {
-	
+
 	/* EDITED by Abhimanyu Chugh */
 	//Set by default to the Exact MVA algorithm
 	public SolverAlgorithm algorithmType = SolverAlgorithm.EXACT;
 	//Set by default if user does not enter a tolerance value
 	public double tolerance = SolverMultiClosedAMVA.DEFAULT_TOLERANCE;
 	//Set by default if user does not enter a max sample value - used for Monte Carlo.
-    private int maxSamples = SolverMultiClosedMonteCarlo.MAX_SAMPLES;
+	private int maxSamples = SolverMultiClosedMonteCarlo.MAX_SAMPLES;
 	//Names of the algorithms to be compared
 	private Set<SolverAlgorithm> whatifAlgorithms;
 	private Map<SolverAlgorithm, Double> whatifAlgorithmsTollerance;
 	/* END */
-	
+
 	//true if the model is closed
 	private boolean closed;
 	//true if the model is open
@@ -131,7 +131,6 @@ public class ExactModel implements ExactConstants  {
 	//class refstations
 	//private double[][] ReferenceStation;
 	private int[] ReferenceStation;
-	
 
 	/***********************SERVICE PARAMETERS**************************/
 
@@ -205,13 +204,13 @@ public class ExactModel implements ExactConstants  {
 	private double[] whatIfValues;
 
 	/*****************************************************************/
-	
+
 	/**
 	 * make an object with default values
 	 */
 	public ExactModel() {
 		setDefaults();
-		
+
 		/* EDITED by Abhimanyu Chugh */
 		/* END */
 	}
@@ -240,17 +239,17 @@ public class ExactModel implements ExactConstants  {
 		classNames = ArrayUtils.copy(e.classNames);
 		classTypes = ArrayUtils.copy(e.classTypes);
 		classData = ArrayUtils.copy(e.classData);
-				
+
 		algorithmType = e.algorithmType;
 		tolerance = e.tolerance;
-        maxSamples = e.maxSamples;
+		maxSamples = e.maxSamples;
 		whatifAlgorithms = EnumSet.copyOf(e.whatifAlgorithms);
 		whatifAlgorithmsTollerance = new EnumMap<SolverAlgorithm, Double>(e.whatifAlgorithmsTollerance);
 
 		visits = ArrayUtils.copy2(e.visits);
 
 		serviceTimes = ArrayUtils.copy3(e.serviceTimes);				
-		
+
 		//ReferenceStation = ArrayUtils.copy2(e.ReferenceStation);
 		ReferenceStation = ArrayUtils.copy(e.ReferenceStation);
 
@@ -268,7 +267,7 @@ public class ExactModel implements ExactConstants  {
 			resTimes = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 			util = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 			algIterations = new LinkedHashMap<SolverAlgorithm, int[]>();
-			
+
 			for (SolverAlgorithm alg : e.queueLen.keySet()) {
 				queueLen.put(alg, ArrayUtils.copy3(e.queueLen.get(alg)));
 				throughput.put(alg, ArrayUtils.copy3(e.throughput.get(alg)));
@@ -278,42 +277,41 @@ public class ExactModel implements ExactConstants  {
 					algIterations.put(alg, ArrayUtils.copy(e.algIterations.get(alg)));
 				}
 			}
-					/* END */
+			/* END */
 		}
 	}
-	
+
 	public void setAlgorithmType(SolverAlgorithm algorithm) {
 		algorithmType = algorithm;
 	}
-	
+
 	public SolverAlgorithm getAlgorithmType() {
 		return algorithmType;
 	}
-	
+
 	public double getTolerance() {
 		return tolerance;
 	}
-	
+
 	public void setTolerance (double tol) {
 		tolerance = tol;
 	}
 
-    public int getMaxSamples() {
-        return maxSamples;
-    }
+	public int getMaxSamples() {
+		return maxSamples;
+	}
 
-    public void setMaxSamples(int maxSample) {
-        maxSamples = maxSample;
-    }
+	public void setMaxSamples(int maxSample) {
+		maxSamples = maxSample;
+	}
 
-	
 	/**
 	 * @return the set of algorithm to perform whatif on
 	 */
 	public Set<SolverAlgorithm> getWhatifAlgorithms() {
 		return whatifAlgorithms;
 	}
-	
+
 	/**
 	 * Set algorithm to perform whatif on
 	 * @param algorithm the algorithm
@@ -326,7 +324,7 @@ public class ExactModel implements ExactConstants  {
 			this.whatifAlgorithms.remove(algorithm);
 		}
 	}
-	
+
 	/**
 	 * Returns the tolerance for a whatif algorithm
 	 * @param algorithm the algorithm
@@ -340,7 +338,7 @@ public class ExactModel implements ExactConstants  {
 			return SolverMultiClosedAMVA.DEFAULT_TOLERANCE;
 		}
 	}
-	
+
 	/**
 	 * Sets the tolerance for a whatif algorithm
 	 * @param algorithm the algorithm
@@ -349,21 +347,21 @@ public class ExactModel implements ExactConstants  {
 	public void setWhatifAlgorithmTolerance(SolverAlgorithm algorithm, double value) {
 		whatifAlgorithmsTollerance.put(algorithm, value);
 	}
-	
+
 	/**
 	 * @return true if AMVA algorithm comparison was requested. false otherwise.
 	 */
 	public boolean isWhatifAlgorithms() {
 		return whatifAlgorithms.size() > 0;
 	}
-	
+
 	/**
 	 * Clears whatif algorithms selection
 	 */
 	public void clearWhatifAlgorithms() {
 		whatifAlgorithms.clear();
 	}
-	
+
 	/**
 	 * Clears all the results
 	 */
@@ -402,7 +400,7 @@ public class ExactModel implements ExactConstants  {
 		if (util == null || util.length != stations || util[0].length != classes) {
 			throw new IllegalArgumentException("util must be non null and of size [stations][classes][iterations]");
 		}
-                // it does not check the number of classes for all station, just for the first one!!
+		// it does not check the number of classes for all station, just for the first one!!
 		this.queueLen.put(alg, ArrayUtils.copy3(queueLen));
 		this.throughput.put(alg, ArrayUtils.copy3(throughput));
 		this.resTimes.put(alg, ArrayUtils.copy3(resTimes));
@@ -410,13 +408,13 @@ public class ExactModel implements ExactConstants  {
 		if (!alg.isExact()) {
 			this.algIterations.put(alg, ArrayUtils.copy(algIterations));
 		}
-		
+
 		iterations = queueLen[0][0].length;
+
 		/*TODO: achugh
 		hasResults = true;
 		resultsOK = true;
-		changed = true;
-		*/
+		changed = true;*/
 	}
 	/* END */
 
@@ -478,13 +476,13 @@ public class ExactModel implements ExactConstants  {
 		if (isApprox) {
 			this.algIterations.get(alg)[iteration] = algIterations;
 		}
-		/* TODO: achugh
+
+		/*TODO: achugh
 		hasResults = true;
 		resultsOK = true;
-		changed = true;
-		*/
+		changed = true;*/
 	}
-	
+
 	public void setResultsBooleans(boolean value) {
 		hasResults = value;
 		resultsOK = value;
@@ -536,7 +534,7 @@ public class ExactModel implements ExactConstants  {
 		resTimes = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 		util = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 		algIterations = new LinkedHashMap<SolverAlgorithm, int[]>();
-		
+
 		hasResults = false;
 		changed = true;
 	}
@@ -583,10 +581,10 @@ public class ExactModel implements ExactConstants  {
 		//ReferenceStation = new double[1][2];
 		//ReferenceStation[0][0]= 0.0;
 		//ReferenceStation[0][1]= 0.0;
-		
+
 		ReferenceStation = new int[1];
 		ReferenceStation[0]= 0;		
-		
+
 		serviceTimes = new double[1][1][1];
 		//NEW
 		//@author Stefano Omini
@@ -594,7 +592,7 @@ public class ExactModel implements ExactConstants  {
 		//end NEW
 
 		description = "";
-	
+
 		whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);
 		whatifAlgorithmsTollerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
 	}
@@ -641,7 +639,7 @@ public class ExactModel implements ExactConstants  {
 	public boolean isOpen() {
 		return open;
 	}
-	
+
 	/**
 	 * @return true if this object describes a mixed system
 	 */
@@ -669,23 +667,23 @@ public class ExactModel implements ExactConstants  {
 	public int getClasses() {
 		return classes;
 	}
+
 	/**
 	 * @return get the matrix of ReferenceStations
-	 
-	public double[][] getReferenceStation() {
-		return ReferenceStation;
-	}
 	 */
-	
+	/*public double[][] getReferenceStation() {
+		return ReferenceStation;
+	}*/
+
 	/**
 	 * @return get the matrix of ReferenceStations
 	 */
 	public int[] getReferenceStation() {
 		return ReferenceStation;
 	}
-	 
-	
-	
+
+
+
 	/**
 	 * @return total population
 	 */
@@ -900,7 +898,6 @@ public class ExactModel implements ExactConstants  {
 		// Checks if visits are all one
 		calcUnitaryVisits();
 		return true;
-
 	}
 
 	/**
@@ -947,14 +944,14 @@ public class ExactModel implements ExactConstants  {
 		resultsOK = false;
 		return true;
 	}
-	
+
 	/**
 	 * sets the matrix of ReferenceStation
 	 * @param ReferenceStation the matrix of ReferenceStation
 	 * @throws IllegalArgumentException if the matrix is not of the correct size
 	 * @return true if data was changed, false otherwise
-	 
-	public boolean setReferenceStation(double[][] ReferenceStation) {
+	 */
+	/*public boolean setReferenceStation(double[][] ReferenceStation) {
 		if (ReferenceStation.length != classes ) {
 			throw new IllegalArgumentException("incorrect array dimension");
 		}
@@ -962,9 +959,8 @@ public class ExactModel implements ExactConstants  {
 		changed = true;
 		resultsOK = false;
 		return true;
-	}
-	*/
-	
+	}*/
+
 	/**
 	 * sets the matrix of ReferenceStation
 	 * @param ReferenceStation the matrix of ReferenceStation
@@ -980,9 +976,7 @@ public class ExactModel implements ExactConstants  {
 		resultsOK = false;
 		return true;
 	}
-	
-	
-	
+
 	/**
 	 * Resizes the data structures according to specified parameters. Data is preserved as far as possible
 	 * @return true if data was changed, false otherwise
@@ -1016,10 +1010,9 @@ public class ExactModel implements ExactConstants  {
 			serviceTimes = ArrayUtils.resize3var(serviceTimes, stations, classes, calcSizes(), 0.0);
 			// Checks if visits are all one
 			calcUnitaryVisits();
-			
+
 			//ReferenceStation = ArrayUtils.resize2(ReferenceStation, classes, 2, 0.0);			
 			ReferenceStation = ArrayUtils.resize(ReferenceStation, classes, 0);
-
 
 			return true;
 		} else {
@@ -1089,16 +1082,14 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public double[][][] getResTimes(SolverAlgorithm alg) {
 		if (alg != null) {
-			
 			// Added by Cerotti					
 			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));
-			
-			
+
 			for (int s=0; s < stations; s++)
 				for (int c=0; c< classes; c++)
-					for(int i=0; i < iterations; i++)
-						if(classTypes[c]==CLASS_CLOSED)
-							if(visits[ReferenceStation[c]][c]!=0)
+					for (int i=0; i < iterations; i++)
+						if (classTypes[c]==CLASS_CLOSED)
+							if (visits[ReferenceStation[c]][c]!=0)
 								res[s][c][i] /=  (visits[ReferenceStation[c]][c]);																	
 			// End here									
 			return res;
@@ -1107,8 +1098,8 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
-	* @return throughputs
-	*/
+	 * @return throughputs
+	 */
 	public Map<SolverAlgorithm, double[][][]> getThroughput() {
 		return throughput;
 	}
@@ -1195,7 +1186,7 @@ public class ExactModel implements ExactConstants  {
 		}
 		return true;
 	}
-		
+
 	/**
 	 * @return true if the model contains only open stations
 	 */
@@ -1253,23 +1244,23 @@ public class ExactModel implements ExactConstants  {
 	public String toString() {
 		StringBuffer s = new StringBuffer();
 		s.append("stations=").append(stations).append(" classes=").append(classes).append(" pop=").append(maxpop).append(" changed=").append(changed)
-				.append(" ld=").append(ld).append(" open=").append(open).append(" closed=").append(closed).append(" hasResults=").append(hasResults)
-				.append(" resultsOK=").append(resultsOK).append("\n").append("stationNames=").append(ArrayUtils.toString(stationNames)).append("\n")
-				.append("stationTypes=").append(ArrayUtils.toString(stationTypes)).append("\n").append("classNames=").append(
-						ArrayUtils.toString(classNames)).append("\n").append("classTypes=").append(ArrayUtils.toString(classTypes)).append("\n")
-				.append("classData=").append(ArrayUtils.toString(classData)).append("\n").append("visits=").append(ArrayUtils.toString2(visits))
-				.append("\n").append("serviceTimes=").append(ArrayUtils.toString3(serviceTimes)).append("\n");
+		.append(" ld=").append(ld).append(" open=").append(open).append(" closed=").append(closed).append(" hasResults=").append(hasResults)
+		.append(" resultsOK=").append(resultsOK).append("\n").append("stationNames=").append(ArrayUtils.toString(stationNames)).append("\n")
+		.append("stationTypes=").append(ArrayUtils.toString(stationTypes)).append("\n").append("classNames=").append(
+				ArrayUtils.toString(classNames)).append("\n").append("classTypes=").append(ArrayUtils.toString(classTypes)).append("\n")
+		.append("classData=").append(ArrayUtils.toString(classData)).append("\n").append("visits=").append(ArrayUtils.toString2(visits))
+		.append("\n").append("serviceTimes=").append(ArrayUtils.toString3(serviceTimes)).append("\n");
 		if (hasResults) {
 			/* EDITED by Abhimanyu Chugh */
-			for(SolverAlgorithm alg : queueLen.keySet()) {
+			for (SolverAlgorithm alg : queueLen.keySet()) {
 				double[][][] queueLens = queueLen.get(alg);
 				double[][][] throughputs = throughput.get(alg);
 				double[][][] resTime = resTimes.get(alg);
 				double[][][] utils = util.get(alg);
-				
+
 				s.append("algorithm=").append(alg).append("\n").append("number of customers=").append(ArrayUtils.toString3(queueLens))
-					.append("\n").append("throughput=").append(ArrayUtils.toString3(throughputs)).append("\n").append("resTimes=")
-					.append(ArrayUtils.toString3(resTime)).append("\n").append("utilization=").append(ArrayUtils.toString3(utils)).append("\n");
+				.append("\n").append("throughput=").append(ArrayUtils.toString3(throughputs)).append("\n").append("resTimes=")
+				.append(ArrayUtils.toString3(resTime)).append("\n").append("utilization=").append(ArrayUtils.toString3(utils)).append("\n");
 			}
 			/* END */
 		}
@@ -1282,7 +1273,6 @@ public class ExactModel implements ExactConstants  {
 	 * @param i the index of the class
 	 */
 	public void deleteClass(int i) {
-
 		if (classes < 2) {
 			throw new RuntimeException("System must have at least one class");
 		}
@@ -1325,10 +1315,10 @@ public class ExactModel implements ExactConstants  {
 		//it was considering the results valid when a class is cancelled
 		hasResults = false;
 		//END
-		
+
 		//Delete the selected station in ReferenceStation (Kourosh OCT 2013)		
-		for(int j=0; j< classes; j++)
-			if(ReferenceStation[j] == i )
+		for (int j=0; j< classes; j++)
+			if (ReferenceStation[j] == i )
 				ReferenceStation[j] = 0;
 	}
 
@@ -1422,13 +1412,13 @@ public class ExactModel implements ExactConstants  {
 		/* algorithm parameters */
 		Element algParamsElement = root.createElement("algParams");
 		modelElement.appendChild(algParamsElement);
-		
+
 		/* algorithm combo box */
 		Element algType_element = root.createElement("algType");
 		algParamsElement.appendChild(algType_element);
 		algType_element.setAttribute("name", algorithmType.toString());
 		algType_element.setAttribute("tolerance", Double.toString(tolerance));
-        algType_element.setAttribute("maxSamples", Integer.toString(maxSamples));
+		algType_element.setAttribute("maxSamples", Integer.toString(maxSamples));
 
 		/* compare algorithms box */
 		Element compareAlgs_element = root.createElement("compareAlgs");
@@ -1443,7 +1433,7 @@ public class ExactModel implements ExactConstants  {
 			}
 		}
 		/* END */
-		
+
 		/* What-if Analysis - Bertoli Marco */
 		if (isWhatIf()) {
 			Element whatIf = root.createElement("whatIf");
@@ -1459,7 +1449,7 @@ public class ExactModel implements ExactConstants  {
 				whatIf.setAttribute("stationName", stationNames[whatIfStation]);
 			}
 		}
-		
+
 		/* classes */
 		Element ReferenceStation_element = root.createElement("ReferenceStation");
 		parametersElement.appendChild(ReferenceStation_element);
@@ -1479,7 +1469,6 @@ public class ExactModel implements ExactConstants  {
 		}
 
 		return root;
-
 	}
 
 	private Element makeClassElement(Document root, int classNum) {
@@ -1495,127 +1484,125 @@ public class ExactModel implements ExactConstants  {
 		}
 		return classElement;
 	}
-	
+
 	private Element makeReferenceStationElement(Document root, int classNum) {
 		Element classElement;
-			String[] MyStationNames;
-			MyStationNames = stationNames;
-			MyStationNames = ArrayUtils.resize(MyStationNames, MyStationNames.length+1, null);
-			MyStationNames[MyStationNames.length-1] = "Arrival Process";
-			classElement = root.createElement("Class");			
-			classElement.setAttribute("name", classNames[classNum]);					
-			//classElement.setAttribute("refStation", MyStationNames[(int) ReferenceStation[classNum][1]] );
-			classElement.setAttribute("refStation", MyStationNames[(int) ReferenceStation[classNum]] );
-		
+		String[] MyStationNames;
+		MyStationNames = stationNames;
+		MyStationNames = ArrayUtils.resize(MyStationNames, MyStationNames.length+1, null);
+		MyStationNames[MyStationNames.length-1] = "Arrival Process";
+		classElement = root.createElement("Class");			
+		classElement.setAttribute("name", classNames[classNum]);					
+		//classElement.setAttribute("refStation", MyStationNames[(int) ReferenceStation[classNum][1]]);
+		classElement.setAttribute("refStation", MyStationNames[(int) ReferenceStation[classNum]]);
 		return classElement;
 	}
 
 	private Element makeStationElement(Document root, int stationNum) {
-
 		Element station_element;
 		Node servicetimes_element;
 		Node visits_element;
 
 		switch (this.stationTypes[stationNum]) {
 
-			case STATION_LI:
+		case STATION_LI:
 
-				station_element = root.createElement("listation");
-				station_element.setAttribute("name", this.stationNames[stationNum]);
-				station_element.setAttribute("servers", String.valueOf(this.stationServers[stationNum]));
+			station_element = root.createElement("listation");
+			station_element.setAttribute("name", this.stationNames[stationNum]);
+			station_element.setAttribute("servers", String.valueOf(this.stationServers[stationNum]));
 
-				/* create the section for service times */
-				servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
-				station_element.appendChild(servicetimes_element);
+			/* create the section for service times */
+			servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
+			station_element.appendChild(servicetimes_element);
 
-				/* create the section for visits */
-				visits_element = station_element.appendChild(root.createElement("visits"));
-				station_element.appendChild(visits_element);
+			/* create the section for visits */
+			visits_element = station_element.appendChild(root.createElement("visits"));
+			station_element.appendChild(visits_element);
 
-				/* for each customer class */
-				for (int j = 0; j < classes; j++) {
-					String class_name = this.classNames[j];
-					/* set service time */
-					Element st_element = root.createElement("servicetime");
-					st_element.setAttribute("customerclass", class_name);
-					st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
-					servicetimes_element.appendChild(st_element);
-					/* set visit */
-					Element visit_element = root.createElement("visit");
-					visit_element.setAttribute("customerclass", class_name);
-					visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
-					visits_element.appendChild(visit_element);
-				}
+			/* for each customer class */
+			for (int j = 0; j < classes; j++) {
+				String class_name = this.classNames[j];
+				/* set service time */
+				Element st_element = root.createElement("servicetime");
+				st_element.setAttribute("customerclass", class_name);
+				st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
+				servicetimes_element.appendChild(st_element);
+				/* set visit */
+				Element visit_element = root.createElement("visit");
+				visit_element.setAttribute("customerclass", class_name);
+				visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
+				visits_element.appendChild(visit_element);
+			}
 
-				break;
+			break;
 
-			case STATION_DELAY:
+		case STATION_DELAY:
 
-				station_element = root.createElement("delaystation");
-				station_element.setAttribute("name", this.stationNames[stationNum]);
+			station_element = root.createElement("delaystation");
+			station_element.setAttribute("name", this.stationNames[stationNum]);
 
-				/* create the section for service times */
-				servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
-				station_element.appendChild(servicetimes_element);
+			/* create the section for service times */
+			servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
+			station_element.appendChild(servicetimes_element);
 
-				/* create the section for visits */
-				visits_element = station_element.appendChild(root.createElement("visits"));
-				station_element.appendChild(visits_element);
+			/* create the section for visits */
+			visits_element = station_element.appendChild(root.createElement("visits"));
+			station_element.appendChild(visits_element);
 
-				/* for each customer class */
-				for (int j = 0; j < classes; j++) {
-					String class_name = this.classNames[j];
-					/* set service time */
-					Element st_element = root.createElement("servicetime");
-					st_element.setAttribute("customerclass", class_name);
-					st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
-					servicetimes_element.appendChild(st_element);
-					/* set visit */
-					Element visit_element = root.createElement("visit");
-					visit_element.setAttribute("customerclass", class_name);
-					visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
-					visits_element.appendChild(visit_element);
-				}
+			/* for each customer class */
+			for (int j = 0; j < classes; j++) {
+				String class_name = this.classNames[j];
+				/* set service time */
+				Element st_element = root.createElement("servicetime");
+				st_element.setAttribute("customerclass", class_name);
+				st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
+				servicetimes_element.appendChild(st_element);
+				/* set visit */
+				Element visit_element = root.createElement("visit");
+				visit_element.setAttribute("customerclass", class_name);
+				visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
+				visits_element.appendChild(visit_element);
+			}
 
-				break;
+			break;
 
-			case STATION_LD:
+		case STATION_LD:
 
-				station_element = root.createElement("ldstation");
-				station_element.setAttribute("name", this.stationNames[stationNum]);
-				station_element.setAttribute("servers", String.valueOf(this.stationServers[stationNum]));
+			station_element = root.createElement("ldstation");
+			station_element.setAttribute("name", this.stationNames[stationNum]);
+			station_element.setAttribute("servers", String.valueOf(this.stationServers[stationNum]));
 
-				/* create the section for service times */
-				servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
-				station_element.appendChild(servicetimes_element);
+			/* create the section for service times */
+			servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
+			station_element.appendChild(servicetimes_element);
 
-				/* create the section for visits */
-				visits_element = station_element.appendChild(root.createElement("visits"));
-				station_element.appendChild(visits_element);
+			/* create the section for visits */
+			visits_element = station_element.appendChild(root.createElement("visits"));
+			station_element.appendChild(visits_element);
 
-				/* for each customer class */
-				for (int j = 0; j < classes; j++) {
-					String class_name = this.classNames[j];
-					/* set service times, one for each population (values are CSV formatted) */
-					Element st_element = root.createElement("servicetimes");
-					st_element.setAttribute("customerclass", class_name);
+			/* for each customer class */
+			for (int j = 0; j < classes; j++) {
+				String class_name = this.classNames[j];
+				/* set service times, one for each population (values are CSV formatted) */
+				Element st_element = root.createElement("servicetimes");
+				st_element.setAttribute("customerclass", class_name);
 
-					String serv_t = ArrayUtils.toCSV(serviceTimes[stationNum][j]);
+				String serv_t = ArrayUtils.toCSV(serviceTimes[stationNum][j]);
 
-					st_element.appendChild(root.createTextNode(serv_t));
+				st_element.appendChild(root.createTextNode(serv_t));
 
-					servicetimes_element.appendChild(st_element);
-					/* set visit */
-					Element visit_element = root.createElement("visit");
-					visit_element.setAttribute("customerclass", class_name);
-					visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
-					visits_element.appendChild(visit_element);
-				}
+				servicetimes_element.appendChild(st_element);
+				/* set visit */
+				Element visit_element = root.createElement("visit");
+				visit_element.setAttribute("customerclass", class_name);
+				visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
+				visits_element.appendChild(visit_element);
+			}
 
-				break;
+			break;
 
-			default:
-				station_element = null;
+		default:
+			station_element = null;
 		}//end switch
 		return station_element;
 	}
@@ -1640,36 +1627,36 @@ public class ExactModel implements ExactConstants  {
 			}
 			/* EDITED by Abhimanyu Chugh */
 			result_element.setAttribute("algCount", Integer.toString(queueLen.size()));
-			
+
 			for (SolverAlgorithm alg : queueLen.keySet()) {
 				Element algorithm_element = (Element) result_element.appendChild(root.createElement("algorithm"));
 				algorithm_element.setAttribute("name", alg.toString());
 				if (!alg.isExact()) {
 					algorithm_element.setAttribute("iterations", Integer.toString(algIterations.get(alg)[k]));
 				}
-				
+
 				for (int i = 0; i < stations; i++) {
 					Element stationresults_element = (Element) algorithm_element.appendChild(root.createElement("stationresults"));
 					stationresults_element.setAttribute("station", this.stationNames[i]);
 					for (int j = 0; j < classes; j++) {
 						Element classesresults_element = (Element) stationresults_element.appendChild(root.createElement("classresults"));
 						classesresults_element.setAttribute("customerclass", classNames[j]);
-							
+
 						Element Q_element = (Element) classesresults_element.appendChild(root.createElement("measure"));
 						Q_element.setAttribute("measureType", "Number of Customers");
 						Q_element.setAttribute("successful", "true");
 						Q_element.setAttribute("meanValue", Double.toString(this.queueLen.get(alg)[i][j][k]));
-	
+
 						Element X_element = (Element) classesresults_element.appendChild(root.createElement("measure"));
 						X_element.setAttribute("measureType", "Throughput");
 						X_element.setAttribute("successful", "true");
 						X_element.setAttribute("meanValue", Double.toString(this.throughput.get(alg)[i][j][k]));
-	
+
 						Element R_element = (Element) classesresults_element.appendChild(root.createElement("measure"));
 						R_element.setAttribute("measureType", "Residence time");
 						R_element.setAttribute("successful", "true");
 						R_element.setAttribute("meanValue", Double.toString(this.resTimes.get(alg)[i][j][k]));
-	
+
 						Element U_element = (Element) classesresults_element.appendChild(root.createElement("measure"));
 						U_element.setAttribute("measureType", "Utilization");
 						U_element.setAttribute("successful", "true");
@@ -1678,24 +1665,25 @@ public class ExactModel implements ExactConstants  {
 				}
 			}
 			/* END */
-			
+
 			parentElement.appendChild(result_element);
 		}
 	}
 
-	/* Not used
-	private void appendMatrixCSV(Document root, Element base, double[][] arr, String outer, String inner) {
+	//Not used
+	/*private void appendMatrixCSV(Document root, Element base, double[][] arr, String outer, String inner) {
 		// forse devo usare questo per trattare anche il caso LD
-	    Element elems, elem;
+		Element elems, elem;
 		int n = arr.length;
 		elems = root.createElement(outer);
 		base.appendChild(elems);
 		for (int i = 0; i < n; i++) {
 			elem = root.createElement(inner);
-	        elem.appendChild(root.createTextNode(ArrayUtils.toCSV(arr[i])));
+			// separa i diversi elementi dell'array con ";"
+			elem.appendChild(root.createTextNode(ArrayUtils.toCSV(arr[i])));
 			elems.appendChild(elem);
 		}
-	}  */
+	}*/
 
 	/**
 	 * load the state of this object from the Document.
@@ -1703,15 +1691,12 @@ public class ExactModel implements ExactConstants  {
 	 * WARNING: If the operation fails the object is left in an incorrect state and should be discarded.
 	 */
 	public boolean loadDocument(Document doc) {
-
 		Node classNode = doc.getElementsByTagName("classes").item(0);
 		Node stationNode = doc.getElementsByTagName("stations").item(0);
-		
+
 		Node ReferenceStationNode = doc.getElementsByTagName("ReferenceStation").item(0);
 		NodeList descList = doc.getElementsByTagName("description");
 		NodeList solList = doc.getElementsByTagName("solutions");
-		
-		
 
 		//load description
 		if (descList.item(0) != null) {
@@ -1741,7 +1726,7 @@ public class ExactModel implements ExactConstants  {
 				return false;
 			}
 		}
-		
+
 		//load ReferenceStation
 		if (ReferenceStationNode != null) {
 			if (!loadReferenceStation(ReferenceStationNode)) {
@@ -1752,25 +1737,24 @@ public class ExactModel implements ExactConstants  {
 		else
 		{
 			loadReferenceStationDefault(classNode);
-			
 		}
 
 		//end NEW
-		
+
 		/* EDITED by Abhimanyu Chugh */
 		/* Algorithm parameters */
 		NodeList algParams = doc.getElementsByTagName("algParams");
 		if (algParams.getLength() > 0) {
 			Element algParam = (Element) algParams.item(0);
-			
+
 			Element algType = (Element) algParam.getElementsByTagName("algType").item(0);
 			setAlgorithmType(SolverAlgorithm.fromString(algType.getAttribute("name")));
 			setTolerance(Double.parseDouble(algType.getAttribute("tolerance")));
-            if (!algType.getAttribute("maxSamples").isEmpty()) {
-                setMaxSamples(Integer.parseInt(algType.getAttribute("maxSamples")));
-            }
+			if (!algType.getAttribute("maxSamples").isEmpty()) {
+				setMaxSamples(Integer.parseInt(algType.getAttribute("maxSamples")));
+			}
 
-            Element compareAlgs = (Element) algParam.getElementsByTagName("compareAlgs").item(0);
+			Element compareAlgs = (Element) algParam.getElementsByTagName("compareAlgs").item(0);
 			NodeList whatIfAlgs = compareAlgs.getElementsByTagName("whatIfAlg");
 			for (int i = 0; i < whatIfAlgs.getLength(); i++) {
 				Element alg = (Element) whatIfAlgs.item(i);
@@ -1792,7 +1776,7 @@ public class ExactModel implements ExactConstants  {
 			Element whatIf = (Element) whatIfs.item(0);
 			setWhatIfType(whatIf.getAttribute("type"));
 			setWhatIfValues(ArrayUtils.fromCSV(whatIf.getAttribute("values")));
-			// Try to retrive what-if class informations
+			// Try to retrieve what-if class informations
 			setWhatIfClass(-1);
 			String className = whatIf.getAttribute("className");
 			if (className != null && !className.equals("")) {
@@ -1803,7 +1787,7 @@ public class ExactModel implements ExactConstants  {
 					}
 				}
 			}
-			// Try to retrive what-if station informations
+			// Try to retrieve what-if station informations
 			setWhatIfStation(-1);
 			String stationName = whatIf.getAttribute("stationName");
 			if (stationName != null && !stationName.equals("")) {
@@ -1823,17 +1807,15 @@ public class ExactModel implements ExactConstants  {
 
 		//load solution
 		if (solList.getLength() > 0) {
-
 			if (!loadSolution(solList)) {
 				return false;
 			}
 			hasResults = true;
-
 		} else {
 			this.resetResults(); 
 		}
 
-		// compute flags
+		//compute flags
 		resize(stations, classes);
 		changed = false;
 		return true;
@@ -1847,7 +1829,6 @@ public class ExactModel implements ExactConstants  {
 	//NEW
 	//@author Stefano Omini
 	public boolean loadClasses(Node classNode) {
-
 		classes = Integer.parseInt(((Element) classNode).getAttribute("number"));
 
 		classNames = new String[classes];
@@ -1877,7 +1858,7 @@ public class ExactModel implements ExactConstants  {
 				classData[classNum] = Double.parseDouble(current.getAttribute("population"));
 				//ReferenceStation[classNum][2] = 0;
 				//for (int j=0; j<stations ; j++)
-				//	if(stationNames[j] == current.getAttribute("refStation"))
+				//	if (stationNames[j] == current.getAttribute("refStation"))
 				//ReferenceStation[classNum][2] = j;
 				maxpop += (int) classData[classNum];
 				open = false;
@@ -1886,7 +1867,7 @@ public class ExactModel implements ExactConstants  {
 				classData[classNum] = Double.parseDouble(current.getAttribute("rate"));
 				//ReferenceStation[classNum][2] = 0;
 				//for (int j=0; j<stations ; j++)
-				//	if(stationNames[j] == current.getAttribute("refStation"))
+				//	if (stationNames[j] == current.getAttribute("refStation"))
 				//ReferenceStation[classNum][2] = j;
 				closed = false;
 			}
@@ -1901,7 +1882,6 @@ public class ExactModel implements ExactConstants  {
 	//NEW
 	//@author Stefano Omini
 	public boolean loadStations(Node stationNode) {
-
 		stations = Integer.parseInt(((Element) stationNode).getAttribute("number"));
 
 		stationNames = new String[stations];
@@ -1941,7 +1921,7 @@ public class ExactModel implements ExactConstants  {
 
 			visits[stationNum] = new double[classes];
 			serviceTimes[stationNum] = new double[classes][];
-			
+
 			/* station types and service times */
 
 			if (statType.equals("ldstation")) {
@@ -2010,6 +1990,7 @@ public class ExactModel implements ExactConstants  {
 		}
 		return true;
 	}
+
 	public boolean loadReferenceStation(Node ReferenceStationNode) {
 		classes = Integer.parseInt(((Element) ReferenceStationNode).getAttribute("number"));
 		ReferenceStation = new int[classes];
@@ -2023,36 +2004,36 @@ public class ExactModel implements ExactConstants  {
 				continue;
 			}
 			current = (Element) n;			
-				for (int j=0; j<stations ; j++)			
-					if(stationNames[j].equals(current.getAttribute("refStation")))
-					{												
-					    ReferenceStation[classNum] = j;
-					    break;
-					}	
-					else if(current.getAttribute("refStation").equals("Arrival Process")){						
-					    ReferenceStation[classNum] = stationNames.length;
-					}					
-					else{						
-					    ReferenceStation[classNum] = 0;
-					}
+			for (int j=0; j<stations ; j++)			
+				if (stationNames[j].equals(current.getAttribute("refStation")))
+				{												
+					ReferenceStation[classNum] = j;
+					break;
+				}	
+				else if (current.getAttribute("refStation").equals("Arrival Process")) {						
+					ReferenceStation[classNum] = stationNames.length;
+				}					
+				else {						
+					ReferenceStation[classNum] = 0;
+				}
 			classNum++;
 		}
 		return true;
-	}	
+	}
+
 	public boolean loadReferenceStationDefault(Node classNode) {
-		
 		classes  = Integer.parseInt(((Element) classNode).getAttribute("number"));		
-		for(int i=0;i<classes;i++)
-			{						
+		for (int i=0;i<classes;i++)
+		{						
 			ReferenceStation[i] = 0;
-			}
+		}
 		return true;
 	}
-	
+
 	/**
 	 * Load solutions from xml file
 	 * @param sol NodeList of solution elements
-	 * @return true if load was succesful, false otherwise
+	 * @return true if load was successful, false otherwise
 	 */
 	public boolean loadSolution(NodeList sol) {
 		resultsOK = true;
@@ -2071,7 +2052,7 @@ public class ExactModel implements ExactConstants  {
 				for (int a = 0; a < algCount; a++) {
 					Element a_alg = (Element) solution.getElementsByTagName("algorithm").item(a);
 					SolverAlgorithm alg = SolverAlgorithm.fromString(a_alg.getAttribute("name"));
-					
+
 					if (alg == null) {
 						continue;
 					}
@@ -2085,7 +2066,7 @@ public class ExactModel implements ExactConstants  {
 							algIterations.put(alg, new int[iterations]);
 						}
 					}
-					
+
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Number of Customers"), queueLen.get(alg), i);
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Throughput"), throughput.get(alg), i);
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Residence time"), resTimes.get(alg), i);
@@ -2118,7 +2099,6 @@ public class ExactModel implements ExactConstants  {
 	//NEW
 	//@author Stefano Omini
 	public double[][] loadResultsMatrix(Element base, int len1, int len2, String res) {
-
 		//matrix of results
 		double[][] arr = new double[len1][len2];
 
@@ -2184,12 +2164,12 @@ public class ExactModel implements ExactConstants  {
 					//scan cells of each column
 					for (int j = 0; j < throughput.length; j++) {
 						//throughput is ratio of specific throughput on specific num of visits
-						if (classTypes[i]==CLASS_OPEN){
+						if (classTypes[i]==CLASS_OPEN) {
 							retVal[i][k] = throughput[j][i][k];
 							break;
 						} else {
-//							retVal[i][k] = throughput[j][i][k] / visits[j][i];
-							
+							//retVal[i][k] = throughput[j][i][k] / visits[j][i];
+
 							// Added by Cerotti
 							retVal[i][k] = throughput[ReferenceStation[i]][i][k];
 							break;
@@ -2243,7 +2223,7 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-	/**Returns per-class aggregate for queue lenghts*/
+	/**Returns per-class aggregate for queue lengths*/
 	public double[][] getPerClassQ(SolverAlgorithm alg) {
 		if (queueLen == null) {
 			return null;
@@ -2264,7 +2244,7 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-	/**Returns per-station aggregate for queue lenghts*/
+	/**Returns per-station aggregate for queue lengths*/
 	public double[][] getPerStationQ(SolverAlgorithm alg) {
 		if (queueLen == null) {
 			return null;
@@ -2283,7 +2263,7 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-	/**Returns global aggregate for queue lenghts*/
+	/**Returns global aggregate for queue lengths*/
 	public double[] getGlobalQ(SolverAlgorithm alg) {
 		if (queueLen == null) {
 			return null;
@@ -2303,17 +2283,16 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-/*	*//**Returns per-class aggregate for residence times*//*
-	public double[][] getPerClassR(SolverAlgorithm alg) {
-
+	/**Returns per-class aggregate for residence times*/
+	/*public double[][] getPerClassR(SolverAlgorithm alg) {
 		if (resTimes == null) {
 			return null;
 		}
-		
+
 		double[][] retVal = new double[classes][iterations];
 		double[][][] resTimes = this.getResTimes(alg);
-//		double[][][] resTimes = this.resTimes.get(alg);
-		
+		//double[][][] resTimes = this.resTimes.get(alg);
+
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < retVal.length; i++) {
@@ -2324,46 +2303,42 @@ public class ExactModel implements ExactConstants  {
 			}
 		}
 		return retVal;
-	}
-*/
-	
+	}*/
+
 	// Added by Cerotti
 	/**Returns per-class aggregate for residence times according to reference station including its residence time or not (boolean with)*/
 	public double[][] getPerClassR(SolverAlgorithm alg, boolean with) {
-
 		if (resTimes == null) {
 			return null;
 		}
-		
+
 		double[][] retVal = new double[classes][iterations];
 		double[][][] resTimes = this.getResTimes(alg);
-		
+
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < retVal.length; i++) {
 				retVal[i][k] = 0;
 				for (int j = 0; j < stations; j++) 
-					if(with || j!=ReferenceStation[i]){
+					if (with || j!=ReferenceStation[i]) {
 						retVal[i][k] += resTimes[j][i][k];
 					}
 			}
 		}
 		return retVal;
 	}
-	
-	
+
 	/**Returns per-station aggregate for residence times*/
 	public double[][] getPerStationR(SolverAlgorithm alg) {
-
 		if (resTimes == null) {
 			return null;
 		}
 
 		double[][] retVal = new double[stations][iterations];
-//		double[][] xClassAggs = getPerClassX(alg);
+		//double[][] xClassAggs = getPerClassX(alg);
 		double[][][] throughput = this.throughput.get(alg);
 		double[][][] resTimes = this.getResTimes(alg);
-				
+
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < stations; i++) {
@@ -2387,8 +2362,8 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-/*	*//**Returns system response time*//*
-	public double[] getGlobalR(SolverAlgorithm alg) {
+	/**Returns system response time*/
+	/*public double[] getGlobalR(SolverAlgorithm alg) {
 		if (resTimes == null) {
 			return null;
 		}
@@ -2413,8 +2388,8 @@ public class ExactModel implements ExactConstants  {
 			}
 		}
 		return retVal;
-	}
-*/
+	}*/
+
 	// Added by Cerotti
 	/**Returns system response time according to reference station including its residence time or not (boolean with)*/
 	public double[] getGlobalR(SolverAlgorithm alg, boolean with) {
@@ -2444,24 +2419,22 @@ public class ExactModel implements ExactConstants  {
 		}
 		return retVal;
 	}
-	
-	
-	
+
 	/**Returns per-class aggregate for utilization*/
 	public double[][] getPerClassU(SolverAlgorithm alg) {
 		if (util == null) {
 			return null;
 		} else {
-			/* Disabled as this measure is unsensed... Returns an array with negatives instead
+			/*Disabled as this measure is unsensed... Returns an array with negatives instead
 			double[] retVal = new double[classes];
-			for(int i=0; i<retVal.length; i++){
+			for (int i=0; i<retVal.length; i++) {
 			    retVal[i] = 0;
-			    for(int j=0; j<util.length; j++){
+			    for (int j=0; j<util.length; j++) {
 			        retVal[i] += util[j][i];
 			    }
 			}
-			return retVal;
-			*/
+			return retVal;*/
+
 			double[][] neg = new double[classes][iterations];
 			for (int k = 0; k < classes; k++) {
 				Arrays.fill(neg[k], -1.0);
@@ -2495,11 +2468,11 @@ public class ExactModel implements ExactConstants  {
 			/* Disabled as this measure is unsensed... Returns an array with negatives instead
 			double retVal = 0;
 			double[] aggs = getPerStationU();
-			if(aggs!=null){
-			    for(int i=0; i<aggs.length; i++) retVal += aggs[i];
+			if (aggs!=null) {
+			    for (int i=0; i<aggs.length; i++) retVal += aggs[i];
 			    return retVal;
-			}else return Double.NaN;
-			*/
+			} else return Double.NaN;
+			 */
 			double[] neg = new double[iterations];
 			Arrays.fill(neg, -1.0);
 			return neg;
@@ -2510,7 +2483,7 @@ public class ExactModel implements ExactConstants  {
 	//System Power
 	//Unlike other performance indices we do not have station level
 	//aggregate and individual 
-/*	public double[][] getPerClassSP(SolverAlgorithm alg) {
+	/*public double[][] getPerClassSP(SolverAlgorithm alg) {
 		if (resTimes == null) {
 			return null;
 		}
@@ -2526,8 +2499,8 @@ public class ExactModel implements ExactConstants  {
 			}
 		}
 		return retVal;
-	}
-*/
+	}*/
+
 	//Added by Davide Cerotti
 	//Per-class System Power
 	//according to reference station including its residence time or not (boolean with)*/  
@@ -2544,10 +2517,8 @@ public class ExactModel implements ExactConstants  {
 		}
 		return retVal;
 	}
-	
-	
-	
-/*	public double[] getGlobalSP(SolverAlgorithm alg) {
+
+	/*public double[] getGlobalSP(SolverAlgorithm alg) {
 		if (resTimes == null) {
 			return null;
 		}
@@ -2561,7 +2532,7 @@ public class ExactModel implements ExactConstants  {
 		}
 		return retVal;
 	}*/
-	
+
 	//Added by Davide Cerotti
 	//System Power
 	//according to reference station including its residence time or not (boolean with)*/  
@@ -2579,8 +2550,6 @@ public class ExactModel implements ExactConstants  {
 		}
 		return retVal;
 	}
-	
-	
 	/* END */
 
 	//Added by ASHANKA STOP
@@ -2611,7 +2580,7 @@ public class ExactModel implements ExactConstants  {
 								serviceTimes[i][j][k] = Math.random();
 							}
 						}
-                                                serviceTimes[i][j][k]=Math.ceil(serviceTimes[i][j][k]*1000)/1000; // keep 3 decimal digits
+						serviceTimes[i][j][k]=Math.ceil(serviceTimes[i][j][k]*1000)/1000; // keep 3 decimal digits
 					}
 				}
 			}
@@ -3119,20 +3088,21 @@ public class ExactModel implements ExactConstants  {
 		return false;
 	}
 	//-----------------------------------------------------------------------------------
+
 	/**
 	 * Checks current model for reference station consistency: all the visits of closed class in the reference station must be different from zero
 	 * @return true if model is consistent, false otherwise
 	 */
 	public boolean checkVisitReferenceStation() {
 		for (int j = 0; j < classes; j++) {
-			if (classTypes[j] == CLASS_CLOSED){ // for all closed classes
-				if(visits[ReferenceStation[j]][j]==0) // check that visits in reference station must be different from zero
+			if (classTypes[j] == CLASS_CLOSED) { // for all closed classes
+				if (visits[ReferenceStation[j]][j]==0) // check that visits in reference station must be different from zero
 					return false;
 			}			
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Checks current model for reference station consistency: the reference station must be the same for all closed classes
 	 * @return true if model is consistent, false otherwise
@@ -3140,13 +3110,14 @@ public class ExactModel implements ExactConstants  {
 	public boolean checkClassesReferenceStation() {
 		int classindex=-1;		
 		for (int j = 0; j < classes; j++) {
-			if (classTypes[j] == CLASS_CLOSED){ // for all closed classes
-				if(classindex==-1)
+			if (classTypes[j] == CLASS_CLOSED) { // for all closed classes
+				if (classindex==-1)
 					classindex=ReferenceStation[j]; // store the first closed class index  
-				else if(classindex!=ReferenceStation[j]) // all other closed classes must coincide with the first one
+				else if (classindex!=ReferenceStation[j]) // all other closed classes must coincide with the first one
 					return false;									
 			}			
 		}
 		return true;
 	}
+
 }

@@ -84,7 +84,7 @@ public abstract class MacroBlock extends ComponentBlock{
 		Position block_position = position.copy();
 	
 		//Instantiate micro blocks
-		for(int i = 0; i < number_of_micro_blocks; i++) {
+		for (int i = 0; i < number_of_micro_blocks; i++) {
 			
 			//insert new micro block
 			micro_blocks[i] = newMicroBlock(block_position.copy(), h);
@@ -168,18 +168,18 @@ public abstract class MacroBlock extends ComponentBlock{
 	private int findMicroBlock(int position) throws BTFMatrixErrorException {
 		
 		//Invalid position passed:
-		if(position < 0) throw new  BTFMatrixErrorException("Trying to find macro block containing index: " + position);
+		if (position < 0) throw new  BTFMatrixErrorException("Trying to find macro block containing index: " + position);
 		
 		int block = 0;
 		
 		//Linear Search to locate containing MacroBlock //TODO binary search
-		for(int i = 1; i < micro_blocks.length; i++) {
-			if(position >= (micro_blocks[i].getStartingRow())) {
+		for (int i = 1; i < micro_blocks.length; i++) {
+			if (position >= (micro_blocks[i].getStartingRow())) {
 				block++;
 			}
 		}
 		//Invalid position passed, size of block overshot!
-		if(block >=  micro_blocks.length) throw new  BTFMatrixErrorException("Ran out of micro blocks! position = " + position);
+		if (block >=  micro_blocks.length) throw new  BTFMatrixErrorException("Ran out of micro blocks! position = " + position);
 		
 		return block;
 	}
@@ -222,7 +222,7 @@ public abstract class MacroBlock extends ComponentBlock{
 	@Override
 	public void multiply(BigRational[] result) throws BTFMatrixErrorException {
 		//multiply all micro blocks
-		for(int i = 0; i < micro_blocks.length; i++) {
+		for (int i = 0; i < micro_blocks.length; i++) {
 			micro_blocks[i].multiply(result);
 		}		
 	}
@@ -230,7 +230,7 @@ public abstract class MacroBlock extends ComponentBlock{
 	@Override
 	public void solve(BigRational[] rhs) throws BTFMatrixErrorException, OperationNotSupportedException, InconsistentLinearSystemException, InternalErrorException {		
 		//solve all micro blocks
-		for(int i = 0; i <  micro_blocks.length ; i++) {
+		for (int i = 0; i <  micro_blocks.length ; i++) {
 			micro_blocks[i].solve(rhs);
 		}
 	}
@@ -238,7 +238,7 @@ public abstract class MacroBlock extends ComponentBlock{
 	@Override
 	public void printRow2(int row) {
 		//print all micro blocks
-		for(int i = 0; i < micro_blocks.length; i++) {
+		for (int i = 0; i < micro_blocks.length; i++) {
 			micro_blocks[i].printRow2(row);
 		}
 	}

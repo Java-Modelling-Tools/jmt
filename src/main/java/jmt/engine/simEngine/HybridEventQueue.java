@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.engine.simEngine;
 
 import java.util.Comparator;
@@ -20,11 +38,13 @@ import jmt.framework.data.CircularList;
  * @version 1.1
  */
 public class HybridEventQueue implements EventQueue {
-	private int DEFAULT_INITIAL_CAPACITY = 111;
+
+	private final static int DEFAULT_INITIAL_CAPACITY = 111;
+
 	/** Current events */
 	private CircularList<SimEvent> current;
 	/** Future events*/
-	private Queue<SimEvent> future;
+	private PriorityQueue<SimEvent> future;
 	/** Current time. All events in current event queue will have this time. */
 	private double currentTime;
 	/** A counter used to order future events basing on event time and insertion order */
@@ -44,11 +64,11 @@ public class HybridEventQueue implements EventQueue {
 		} else if (eventTime > currentTime) {
 			addToFuture(event);
 		} else {
-			// Probably this condition will never happen but we are robust to it. We leaqve to the simulation
+			// Probably this condition will never happen but we are robust to it. We leave to the simulation
 			// engine the choice to deal with past events.
 			moveCurrentToFuture();
-			currentTime = eventTime;
 			current.add(event);
+			currentTime = eventTime;
 		}
 		return true;
 	}
@@ -100,10 +120,10 @@ public class HybridEventQueue implements EventQueue {
 	private void handleCurrent() {
 		if (current.size() == 0 && future.size() > 0) {
 			SimEvent first = future.remove();
-			currentTime = first.eventTime();
 			current.add(first);
+			currentTime = first.eventTime();
 			while (future.size() > 0 && future.peek().eventTime() == currentTime) {
-				current.add(future.poll());
+				current.add(future.remove());
 			}
 		}
 	}
@@ -138,7 +158,7 @@ public class HybridEventQueue implements EventQueue {
 	 */
 	private void addToFuture(SimEvent event) {
 		if (order == Integer.MAX_VALUE) {
-			// Need to rebuild future events queue becauseorder indices were finished. Probably this case will never happen
+			// Need to rebuild future events queue because order indices were finished. Probably this case will never happen
 			// but we are robust to it.
 			rebuildOrderIndices();
 		}
@@ -149,11 +169,11 @@ public class HybridEventQueue implements EventQueue {
 	/* (non-Javadoc)
 	 * @see jmt.engine.simEngine.EventQueue#remove(jmt.engine.simEngine.SimEvent)
 	 */
-	public boolean remove(SimEvent ev) {
-		if (ev.eventTime() == currentTime) {
-			return current.remove(ev);
+	public boolean remove(SimEvent event) {
+		if (event.eventTime() == currentTime) {
+			return current.remove(event);
 		} else {
-			return future.remove(ev);
+			return future.remove(event);
 		}
 	}
 

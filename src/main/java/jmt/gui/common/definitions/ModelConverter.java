@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.gui.common.definitions;
@@ -52,13 +52,13 @@ public class ModelConverter {
 	 * Converts a JMVA model to JSIM. Conversion is performed by equalling service times in every
 	 * LI station (adjusting visits) and creating FCFS queues with exponential service time distribution.
 	 * <br>
-	 * Visits are converted with routing probability, to mantain correctness of computated response time values
+	 * Visits are converted with routing probability, to maintain correctness of computed response time values
 	 * a "virtual" node called  RefStation is added as a reference station for closed classes and
 	 * routed when (in terms of mean values) a single visit is performed in the system. (as visits values are scaled to
 	 * compute probability distribution).
 	 * <br>
 	 * Note that a single router node, called "Router" is used to route jobs through the
-	 * entire network, simplyfing its thopology. Stations (LI, LD and Delays) are connected in a parallel form with
+	 * entire network, simplifying its topology. Stations (LI, LD and Delays) are connected in a parallel form with
 	 * the Router.
 	 * @param input JMVA model (read only access)
 	 * @param output target JSIM or JMODEL model. This is expected to be empty
@@ -115,9 +115,8 @@ public class ModelConverter {
 			output.setConnected(refRouterKey, routerKey, true);
 			output.setConnected(routerKey, refRouterKey, true);
 			// Gives warning on refStation
-			res
-					.add("A special node, called \"RefStation\" was added in order to compute correctly the System Response Time and System Throughput of closed classes."
-							+ " Its presence is fundamental to compute correctly number of visits at each station for closed classes.");
+			res.add("A special node, called \"RefStation\" was added in order to compute correctly the System Response Time and System Throughput of closed classes."
+					+ " Its presence is fundamental to compute correctly number of visits at each station for closed classes.");
 		}
 
 		if (input.isOpen() || input.isMixed()) {
@@ -244,7 +243,7 @@ public class ModelConverter {
 
 	// --- Methods for conversion JSIM --> JMVA -----------------------------------------------
 	/**
-	 * Converts a JSIM model to JMVA. Visits are computed from thopology. To work well this
+	 * Converts a JSIM model to JMVA. Visits are computed from topology. To work well this
 	 * method requires:
 	 * <ul>
 	 * <li> Reference station to be set for each class
@@ -420,7 +419,7 @@ public class ModelConverter {
 					vis = V.getColumnPackedCopy();
 				} catch (Exception e) {
 					// Matrix is singular
-					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as" + " network thopology was badly specified");
+					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as" + " network topology was badly specified");
 				}
 
 			} else {
@@ -451,7 +450,7 @@ public class ModelConverter {
 					vis = V.getColumnPackedCopy();
 				} catch (Exception e) {
 					// Matrix is singular
-					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as" + " network thopology was badly specified");
+					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as" + " network topology was badly specified");
 				}
 			}
 
@@ -526,7 +525,7 @@ public class ModelConverter {
 	 * @param model data structure
 	 * @param classKey search's key for target class
 	 * @param warnings Vector where computation warnings must be put
-	 * @return computated routing probability matrix
+	 * @return computed routing probability matrix
 	 */
 	private static double[][] buildProbabilityMatrix(List<Object> stations, CommonModel model, Object classKey, List<String> warnings) {
 		double[][] matrix = new double[stations.size()][stations.size()];

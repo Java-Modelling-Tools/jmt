@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.panels;
 
@@ -45,7 +45,7 @@ import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 
 /**
- * <p>Title: Simulation & Preloading panel</p>
+ * <p>Title: Simulation & Preloading Panel</p>
  * <p>Description: A panel in which simulation parameters and queue preloading can be specified</p>
  * 
  * @author Bertoli Marco
@@ -55,9 +55,7 @@ import jmt.gui.exact.table.ExactTableModel;
  * Modified by Francesco D'Aquino 11/11/2005
  */
 public class SimulationPanel extends WizardPanel implements CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	protected static final int BORDERSIZE = 20;
 	protected static final long MINIMUM_TIME = 5; // Minimum simulation duration
@@ -190,7 +188,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		// Adds preloading table
 		preloadTable = new PreloadingTable();
-                preloadTable.setRowHeight(CommonConstants.ROW_HEIGHT);
+		preloadTable.setRowHeight(CommonConstants.ROW_HEIGHT);
 		WarningScrollTable preloadPanel = new WarningScrollTable(preloadTable, WARNING_CLASS_STATION);
 		//tabbedPane.addTab("Initial state",preloadPanel);
 		//ParametricAnalysisPanel parametricAnalysisPanel = new ParametricAnalysisPanel();
@@ -199,7 +197,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		mainpanel.add(preloadPanel, BorderLayout.CENTER);
 		upperPanel.add(new JLabel("<HTML>" + 
 				"Initial customer locations:" + "<br/>" +
-				"Jobs located in <b>ClassSwitch</b>, <b>Router</b> and <b>Fork</b> are treated as arriving into these stations." 
+				"Jobs located in <b>ClassSwitch</b>, <b>Router</b> and <b>Fork</b> are treated as arriving into these stations."
 				+"</HTML>"), BorderLayout.SOUTH);
 
 		// Adds simulation parameters
@@ -250,7 +248,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 			simulated.setEnabled(false);
 		}
 		simPanel.add(infSimulated);
-		
+
 		// Maximum number of samples
 		label = new JLabel("Maximum number of samples: ");
 		label.setToolTipText("The term samples stands for observations");
@@ -367,7 +365,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 				}
 			}
 		});
-		
+
 		if (animationEnabler != null) {
 			animationEnabler.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
@@ -463,9 +461,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	 * Inner class to specify preloading table
 	 */
 	protected class PreloadingTable extends ExactTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public PreloadingTable() {
@@ -485,9 +481,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	 * Rows represent classes, columns stations.
 	 */
 	protected class PreloadTableModel extends ExactTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public PreloadTableModel() {

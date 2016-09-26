@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,17 +8,16 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.gui.jaba;
 
-import jmt.gui.common.CommonConstants;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.Rectangle;
@@ -78,9 +77,6 @@ import jmt.manual.PDFViewerBuffer;
  */
 public class JabaWizard extends Wizard {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private final static boolean DEBUG = false;
@@ -134,7 +130,6 @@ public class JabaWizard extends Wizard {
 		drawPanel.setData(this.data);
 		addPanel(drawPanel);
 		// Pannello con i risultati in numeri
-
 		// END Andrea Zanzottera 25/11/2005
 
 		// New Carlo Gimondi
@@ -160,9 +155,7 @@ public class JabaWizard extends Wizard {
 	}
 
 	private AbstractJMTAction FILE_SAVE = new AbstractJMTAction("Save...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -176,12 +169,11 @@ public class JabaWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			save();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_OPEN = new AbstractJMTAction("Open...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -195,12 +187,11 @@ public class JabaWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			open();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_NEW = new AbstractJMTAction("New...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -214,12 +205,11 @@ public class JabaWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			newModel();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_EXIT = new AbstractJMTAction("Exit") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -232,13 +222,12 @@ public class JabaWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			close();
 		}
+
 	};
 
 	private AbstractJMTAction ACTION_RANDOMIZE_MODEL = new AbstractJMTAction(
 			"Randomize") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -253,13 +242,12 @@ public class JabaWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			randomizeModel();
 		}
+
 	};
 
 
 	private AbstractJMTAction HELP = new AbstractJMTAction("JABA help") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -281,14 +269,12 @@ public class JabaWizard extends Wizard {
 				}
 			};
 			EventQueue.invokeLater(r);
-
 		}
+
 	};
 
 	private AbstractJMTAction ABOUT = new AbstractJMTAction("About JABA") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -304,12 +290,11 @@ public class JabaWizard extends Wizard {
 		public void actionPerformed(ActionEvent e) {
 			showAbout();
 		}
+
 	};
 
 	private AbstractJMTAction ACTION_SOLVE = new AbstractJMTAction("Solve") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -323,12 +308,11 @@ public class JabaWizard extends Wizard {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-
 			if (checkFinish()) {
 				finish();
 			}
-
 		}
+
 	};
 
 	/**
@@ -336,7 +320,6 @@ public class JabaWizard extends Wizard {
 	 *         main jmt frame
 	 */
 	protected JMTToolBar makeToolbar() {
-
 		JMTToolBar tb = new JMTToolBar(JMTImageLoader.getImageLoader());
 		tb.setFloatable(false);
 
@@ -370,7 +353,6 @@ public class JabaWizard extends Wizard {
 						null, ACTION_NEXT, ACTION_PREV }),
 				new MenuAction("Help", new AbstractJMTAction[] { HELP, null,
 						ABOUT }), };
-
 		jmb.populateMenu(menuItems);
 		return jmb;
 	}
@@ -404,7 +386,6 @@ public class JabaWizard extends Wizard {
 		buttons.add(button_next);
 		buttons.add(button_finish);
 		buttons.add(button_cancel);
-	
 
 		JPanel labelbox = new JPanel();
 		labelbox.setLayout(new BorderLayout());
@@ -486,7 +467,6 @@ public class JabaWizard extends Wizard {
 	 * Opens a new model <br>
 	 * Author: Bertoli Marco
 	 */
-	@SuppressWarnings("unchecked")
 	private void open() {
 		currentPanel.lostFocus();
 		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
@@ -520,7 +500,6 @@ public class JabaWizard extends Wizard {
 					modelLoader.getFailureMotivation(), "Error",
 					JOptionPane.ERROR_MESSAGE);
 			break;
-
 		}
 		updatePanels();
 
@@ -528,7 +507,7 @@ public class JabaWizard extends Wizard {
 		if (retval == ModelLoader.WARNING) {
 			new WarningWindow(modelLoader.getLastWarnings(), this,
 					modelLoader.getInputFileFormat(), CommonConstants.JABA)
-					.show();
+			.show();
 		}
 		updatePanels();
 	}
@@ -592,7 +571,6 @@ public class JabaWizard extends Wizard {
 	}
 
 	public void solve() {
-
 		// New Carlo Gimondi
 		int selectTab = 4;
 		if (tabbedPane.getSelectedIndex() > 4) {
@@ -605,7 +583,7 @@ public class JabaWizard extends Wizard {
 			jsolver = new SolverDispatcher();
 		}
 		JabaModel newdata = new JabaModel(data); // Yields the mean performance
-													// indices
+												 // indices
 
 		try {
 			// controllo che ci siano 2 o 3 classi
@@ -628,9 +606,7 @@ public class JabaWizard extends Wizard {
 
 		// Zanzottera: i risultati vengono visualizzati all'interno della
 		// schermata principale
-		/*
-		 * //Dall'Orso createSolutionWindow(newdata.getResults()); //END
-		 */
+		// Dall'Orso createSolutionWindow(newdata.getResults()); //END
 
 		updatePanels();
 		currentPanel.gotFocus();
@@ -638,7 +614,6 @@ public class JabaWizard extends Wizard {
 		// graphical glitch)
 
 		// Modify Carlo Gimondi
-
 		// Remove when 3 class Utilization Panel will create
 		if (data.getClasses() == 3) {
 			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 2, false);
@@ -658,7 +633,6 @@ public class JabaWizard extends Wizard {
 	private void showAbout() {
 		AboutDialogFactory.showJABA(this);
 	}
-
 	// end NEW
 
 	// randomizes model data
@@ -686,8 +660,6 @@ public class JabaWizard extends Wizard {
 		}
 		repaint();
 	}
-
-	// END
 
 	private void updatePanels() {
 		if (data == null) {

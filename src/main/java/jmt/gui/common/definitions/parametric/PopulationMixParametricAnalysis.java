@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions.parametric;
 
@@ -32,7 +32,7 @@ import jmt.gui.common.definitions.StationDefinition;
  * the varied parameter is the population mix between two close classes.It
  * adds the <code >classKey</code> field used to keep the key of
  * the Job-Class whose service time will be varied. This type of parametric
- * simulation is avaible only when there are exactly two close classes.</p>
+ * simulation is available only when there are exactly two close classes.</p>
  *
  * @author Francesco D'Aquino
  *         Date: 14-dic-2005
@@ -59,7 +59,7 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 		classSet.remove(classKey);
 		otherClassKey = classSet.get(0);
 		popValue = cd.getTotalCloseClassPopulation();
-		numberOfSteps = this.searchForAvaibleSteps();
+		numberOfSteps = this.searchForAvailableSteps();
 		if (numberOfSteps > MAX_STEP_NUMBER) {
 			numberOfSteps = MAX_STEP_NUMBER;
 		}
@@ -145,7 +145,7 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 	 * @return the maximum number of steps
 	 */
 	@Override
-	public int searchForAvaibleSteps() {
+	public int searchForAvailableSteps() {
 		float diff = Math.abs((float) initialValue - (float) finalValue);
 		//diff = diff/100;
 		int totalPop = classDef.getTotalCloseClassPopulation();
@@ -223,7 +223,7 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 					otherClassKey = closeClasses.get(1);
 					setDefaultInitialValue();
 					setDefaultFinalValue();
-					numberOfSteps = searchForAvaibleSteps();
+					numberOfSteps = searchForAvailableSteps();
 					if (numberOfSteps > MAX_STEP_NUMBER) {
 						numberOfSteps = MAX_STEP_NUMBER;
 					}
@@ -236,7 +236,7 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 					if (autocorrect) {
 						setDefaultInitialValue();
 						setDefaultFinalValue();
-						numberOfSteps = searchForAvaibleSteps();
+						numberOfSteps = searchForAvailableSteps();
 						if (numberOfSteps > MAX_STEP_NUMBER) {
 							numberOfSteps = MAX_STEP_NUMBER;
 						}

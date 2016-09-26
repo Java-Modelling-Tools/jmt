@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.xml;
 
@@ -113,7 +113,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 		model.setLogDecimalSeparator(logDecimalSeparator);
 		String logCsvDelimiter = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
 		model.setLogCsvDelimiter(logCsvDelimiter);
-		
+
 		NodeList measures = root.getElementsByTagName(XML_E_MEASURE);
 		for (int i = 0; i < measures.getLength(); i++) {
 			Element current = (Element) measures.item(i);
@@ -123,7 +123,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION), current.getAttribute(XML_A_MEASURE_CLASS), Double
 					.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)), Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
 					Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), current.getAttribute(XML_A_MEASURE_NODETYPE));
-                        for (int j = 0; j < samples.getLength(); j++) {
+			for (int j = 0; j < samples.getLength(); j++) {
 				Element sample = (Element) samples.item(j);
 				double mean = 0;
 				double upper = 0;
@@ -156,6 +156,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 			}
 		}
 	}
+
 	/**
 	 * Loads measures data from saved XML document
 	 * @param root root element of xml document
@@ -167,7 +168,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 		model.setLogDecimalSeparator(logDecimalSeparator);
 		String logCsvDelimiter = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
 		model.setLogCsvDelimiter(logCsvDelimiter);
-		
+
 		model.setPollingInterval(polling);
 		NodeList measures = root.getElementsByTagName(XML_E_MEASURE);
 		for (int i = 0; i < measures.getLength(); i++) {
@@ -185,10 +186,10 @@ public class XMLResultsReader implements XMLResultsConstants {
 					Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
 					Integer.parseInt(current.getAttribute(XML_A_MEASURE_SAMPLES)),
 					discarded == null || discarded.length() == 0 ? 0 : Integer.parseInt(discarded),
-					Integer.parseInt(current.getAttribute(XML_A_MEASURE_STATE)),
-					Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), 
-					current.getAttribute(XML_A_MEASURE_NODETYPE), fileName);
-				
+							Integer.parseInt(current.getAttribute(XML_A_MEASURE_STATE)),
+							Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), 
+							current.getAttribute(XML_A_MEASURE_NODETYPE), fileName);
+
 			// Adds its samples
 			NodeList samples = current.getElementsByTagName(XML_E_SAMPLE);
 			for (int j = 0; j < samples.getLength(); j++) {
@@ -198,12 +199,12 @@ public class XMLResultsReader implements XMLResultsConstants {
 				double lower = 0;
 				double lastIntervalAvgValue = 0;
 				double simulationTime = 0;
-				
+
 				mean = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_MEAN));
-				if (sample.getAttribute(XML_A_LAST_INTERVAL_AVG_VALUE) != null && sample.getAttribute(XML_A_LAST_INTERVAL_AVG_VALUE)!=""){
+				if (sample.getAttribute(XML_A_LAST_INTERVAL_AVG_VALUE) != null && sample.getAttribute(XML_A_LAST_INTERVAL_AVG_VALUE)!="") {
 					lastIntervalAvgValue= Double.parseDouble(sample.getAttribute(XML_A_LAST_INTERVAL_AVG_VALUE));
 				}
-				if (sample.getAttribute(XML_A_TIME) != null && sample.getAttribute(XML_A_TIME)!=""){
+				if (sample.getAttribute(XML_A_TIME) != null && sample.getAttribute(XML_A_TIME)!="") {
 					simulationTime= Double.parseDouble(sample.getAttribute(XML_A_TIME));
 				}
 				// Gets upperBound if specified
@@ -230,7 +231,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 		model.setLogDecimalSeparator(logDecimalSeparator);
 		String logCsvDelimiter = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
 		model.setLogCsvDelimiter(logCsvDelimiter);
-		
+
 		NodeList measures = root.getElementsByTagName(XML_EO_MEASURE);
 		for (int i = 0; i < measures.getLength(); i++) {
 			Element current = (Element) measures.item(i);
@@ -241,8 +242,8 @@ public class XMLResultsReader implements XMLResultsConstants {
 			String stationName = current.getAttribute(XML_AO_MEASURE_STATION).isEmpty() ? "Network" : current.getAttribute(XML_AO_MEASURE_STATION);
 			String className = current.getAttribute(XML_AO_MEASURE_CLASS).isEmpty() ? "All classes" : current.getAttribute(XML_AO_MEASURE_CLASS);
 			String type = current.getAttribute(XML_AO_MEASURE_TYPE);
-			String success = current.getAttribute(XML_AO_MEASURE_SUCCESFUL);
-                        
+			String success = current.getAttribute(XML_AO_MEASURE_SUCCESSFUL);
+
 			boolean successful = success.toLowerCase().equals("true");
 			// Optional Elements
 			String attr;
@@ -255,7 +256,6 @@ public class XMLResultsReader implements XMLResultsConstants {
 			if (attr != null && attr != "") {
 				lastIntervalAvgValue = Double.parseDouble(attr);
 			}
-			
 			double simulationTime = 0;
 			if (attr != null && attr != "") {
 				simulationTime = Double.parseDouble(attr);
@@ -344,17 +344,15 @@ public class XMLResultsReader implements XMLResultsConstants {
 			//Added by ASHANKA STOP
 			else if (tmp.startsWith("throughput") && tmp.endsWith("sink")) {
 				numType = SimConstants.THROUGHPUT_PER_SINK;
-			}
-			else if (tmp.startsWith("response") && tmp.endsWith("sink")) {
+			} else if (tmp.startsWith("response") && tmp.endsWith("sink")) {
 				numType = SimConstants.RESPONSE_TIME_PER_SINK;
-			} else if (type.equals("FCR Total Weight")){
+			} else if (type.equals("FCR Total Weight")) {
 				numType = SimConstants.FCR_TOTAL_WEIGHT;
-			} else if (type.equals("FCR Memory Occupation")){
+			} else if (type.equals("FCR Memory Occupation")) {
 				numType = SimConstants.FCR_MEMORY_OCCUPATION;
-			} else if(type.equals("Fork Join Response Time")){
+			} else if (type.equals("Fork Join Response Time")) {
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
-			}
-                        else if(type.equals("Fork Join Number of Customers")){
+			} else if (type.equals("Fork Join Number of Customers")) {
 				numType = SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
 			}
 			// Adds loaded informations into model data structure
@@ -362,4 +360,5 @@ public class XMLResultsReader implements XMLResultsConstants {
 			model.addMeasureSample(Name, mean,lastIntervalAvgValue, simulationTime, upper, lower);
 		}
 	}
+
 }

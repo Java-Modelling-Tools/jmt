@@ -8,7 +8,7 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
@@ -179,7 +179,7 @@ public class BigRational implements Comparable<BigRational> {
      */
     public BigRational copy() {
     	BigRational b = new BigRational(num, den);
-    	if(undefined) {
+    	if (undefined) {
     		b.makeUndefined();
     	}
     	return b;
@@ -661,7 +661,7 @@ public class BigRational implements Comparable<BigRational> {
     public BigRational modNormal(BigInteger m) {
         if (undefined) {
             return this; // We cannot compute the mod of an "uncomputable" number.
-        }else {
+        } else {
             BigRational toReturn;
             BigInteger a = this.num;
             BigInteger b = this.den.multiply(m);

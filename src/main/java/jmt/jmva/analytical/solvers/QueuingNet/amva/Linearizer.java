@@ -52,7 +52,7 @@ public class Linearizer extends AMVA {
 				coreResults[c] = new LinearizerCoreAlgorithm();
 			}
 		}
-		while(true) {
+		while (true) {
 			if (useDeSouzaMuntz) {
 				for (int k = 0; k < stations; k++) {
 					for (int j = 0; j < classes; j++) {
@@ -205,7 +205,7 @@ public class Linearizer extends AMVA {
 			}
 			
 //			int iterations = 0;
-			while(true) {
+			while (true) {
 //				iterations++;
 				
 				for (int k = 0; k < stations; k++) {

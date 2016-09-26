@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NodeSections;
 
@@ -32,10 +32,11 @@ import jmt.engine.QueueNet.NetNode;
  * @author  Stefano Omini, Bertoli Marco
  */
 public class BlockingRouter extends OutputSection {
+
 	/** The number of ACKs we are waiting */
 	private int waitingAcks = 0;
 
-	/** Creates a new instance of Router which limitates the number of
+	/** Creates a new instance of Router which limits the number of
 	 * jobs entering in the region with constraints.
 	 * No routing strategy is required: the destination node is already known
 	 * when the job arrives to the input station.
@@ -49,29 +50,40 @@ public class BlockingRouter extends OutputSection {
 	@Override
 	protected int process(NetMessage message) throws NetException {
 		switch (message.getEvent()) {
-			case NetEvent.EVENT_JOB:
-				// Sends the message to the real destination and wait for the ack
-				Job job = message.getJob();
-				//this is the real destination, i.e. the internal node that at first
-				//had redirected the job to the input station
-				NetNode realDestinationNode = job.getOriginalDestinationNode();
-				send(job, 0.0, realDestinationNode);
 
-				waitingAcks++;
-				return MSG_PROCESSED;
-			case NetEvent.EVENT_ACK:
-				//this ack has been received from one of the output nodes (router was waiting for this ack)
-				//sends an ack back to the service section to request another job to be routed
-				if (waitingAcks > 0) {
-					sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
-					waitingAcks--;
-				} else {
-					// Nobody was waiting this ACK.
-					return MSG_NOT_PROCESSED;
-				}
-				return MSG_PROCESSED;
-			default:
+		case NetEvent.EVENT_START:
+			break;
+
+		case NetEvent.EVENT_JOB:
+			// Sends the message to the real destination and wait for the ack
+			Job job = message.getJob();
+			//this is the real destination, i.e. the internal node that at first
+			//had redirected the job to the input station
+			NetNode realDestinationNode = job.getOriginalDestinationNode();
+			send(job, 0.0, realDestinationNode);
+			waitingAcks++;
+			break;
+
+		case NetEvent.EVENT_ACK:
+			//this ack has been received from one of the output nodes (router was waiting for this ack)
+			//sends an ack back to the service section to request another job to be routed
+			if (waitingAcks > 0) {
+				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
+				waitingAcks--;
+			} else {
+				// Nobody was waiting this ACK.
 				return MSG_NOT_PROCESSED;
+			}
+			break;
+
+		case NetEvent.EVENT_STOP:
+			break;
+
+		default:
+			return MSG_NOT_PROCESSED;
 		}
+
+		return MSG_PROCESSED;
 	}
+
 }

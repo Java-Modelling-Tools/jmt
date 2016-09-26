@@ -116,7 +116,7 @@ public abstract class Basis {
 	 * Sorts the PopulationChangeVectors according to the 'vector_comparator'
 	 */
 	protected final void sort() {
-		if(vector_comparator == null) {
+		if (vector_comparator == null) {
 			//No comparator specified, do nothing.
 			return;
 		} else { //sort the ordering
@@ -172,7 +172,7 @@ public abstract class Basis {
 	public abstract BigRational getNormalisingConstant() throws InternalErrorException;
 	
 	public void reset_uncomputables() {
-		for(int i = 0; i < size; i++) {
+		for (int i = 0; i < size; i++) {
 			uncomputables.add(i);
 		}
 	}

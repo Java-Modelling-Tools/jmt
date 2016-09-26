@@ -280,7 +280,7 @@ public class EnlargePlotDistGraph extends Plot implements MouseListener {
 		protected PlotImagesFileFilter defaultFilter;
 
 		/**
-		 * Creates a File chooser in the appropriate directory user deafault.
+		 * Creates a File chooser in the appropriate directory user default.
 		 * @param defaultFilter default file filter
 		 */
 		public PlotImagesFileChooser(PlotImagesFileFilter defaultFilter) {
@@ -293,7 +293,7 @@ public class EnlargePlotDistGraph extends Plot implements MouseListener {
 		 */
 		@Override
 		public void approveSelection() {
-			// Gets the choosed file name
+			// Gets the chosen file name
 			String name = getSelectedFile().getName();
 			String parent = getSelectedFile().getParent();
 			if (getDialogType() == OPEN_DIALOG) {

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.xml;
 
@@ -96,7 +96,7 @@ public class GuiXMLReader implements GuiXMLConstants {
 			userclass = (Element) classes.item(i);
 			name = userclass.getAttribute(XML_A_CLASS_NAME);
 			str_color = userclass.getAttribute(XML_A_CLASS_COLOR);
-			// Parses color string (# + RGB rappresentation in HEX format)
+			// Parses color string (# + RGB representation in HEX format)
 			if (str_color.startsWith("#")) {
 				str_color = str_color.substring(1, str_color.length());
 			} else {
@@ -174,7 +174,7 @@ public class GuiXMLReader implements GuiXMLConstants {
 						String fieldValue = field.getAttribute(XML_A_FIELD_VALUE);
 						pad.setProperty(fieldName, fieldValue);
 					}
-					pad.searchForAvaibleSteps();
+					pad.searchForAvailableSteps();
 					pad.createValuesSet();
 					model.setParametricAnalysisModel(pad);
 				} catch (InvocationTargetException ite) {

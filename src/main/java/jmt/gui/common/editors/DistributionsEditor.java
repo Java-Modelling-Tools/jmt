@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2011, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.gui.common.editors;
@@ -89,9 +89,7 @@ import jmt.gui.common.distributions.Replayer;
  * @author Bertoli Marco Date: 29-giu-2005 Time: 11.31.07
  */
 public class DistributionsEditor extends JMTDialog {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	// Internal data structure
@@ -115,7 +113,7 @@ public class DistributionsEditor extends JMTDialog {
 	protected static final int BORDERSIZE = 20;
 
 	// Components
-	protected JComboBox choser = new JComboBox();
+	protected JComboBox chooser = new JComboBox();
 	protected ImagePanel iconpanel = new ImagePanel();
 	protected JPanel param_panel = new JPanel(new SpringLayout());
 	protected JPanel mean_c_panel = new JPanel(new SpringLayout());
@@ -134,8 +132,7 @@ public class DistributionsEditor extends JMTDialog {
 
 	protected JPanel[] intervalPanels;
 
-	// --- Static methods
-	// ------------------------------------------------------------------------------
+	// --- Static methods ------------------------------------------------------------------------------
 	/**
 	 * Returns a new instance of DistributionsEditor, given parent container
 	 * (used to find top level Dialog or Frame to create this dialog as modal).
@@ -212,8 +209,7 @@ public class DistributionsEditor extends JMTDialog {
 
 	// -------------------------------------------------------------------------------------------------
 
-	// --- Method to collect results
-	// -------------------------------------------------------------------
+	// --- Method to collect results -------------------------------------------------------------------
 	/**
 	 * Returns Distribution selected in this dialog or initial one if cancel
 	 * button was pressed
@@ -228,8 +224,7 @@ public class DistributionsEditor extends JMTDialog {
 
 	// -------------------------------------------------------------------------------------------------
 
-	// --- Constructors to create modal dialog
-	// ---------------------------------------------------------
+	// --- Constructors to create modal dialog ---------------------------------------------------------
 	/**
 	 * Builds a new Distribution Editor Dialog. This dialog is designed to be
 	 * modal.
@@ -266,14 +261,12 @@ public class DistributionsEditor extends JMTDialog {
 
 	// -------------------------------------------------------------------------------------------------
 
-	// --- Actions performed by buttons and EventListeners
-	// ---------------------------------------------
+	// --- Actions performed by buttons and EventListeners ---------------------------------------------
 	// When okay button is pressed
 	protected AbstractAction okayAction = new AbstractAction("OK") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION,
 					"Closes this window and apply changes");
@@ -289,17 +282,17 @@ public class DistributionsEditor extends JMTDialog {
 						DistributionsEditor.this,
 						"Error in distribution parameters: "
 								+ current.getPrecondition(),
-						"Wrong parameters error", JOptionPane.ERROR_MESSAGE);
+								"Wrong parameters error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
+
 	};
 
 	// When cancel button is pressed
 	protected AbstractAction cancelAction = new AbstractAction("Cancel") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION,
 					"Closes this window discarding all changes");
@@ -309,6 +302,7 @@ public class DistributionsEditor extends JMTDialog {
 			target = initial;
 			DistributionsEditor.this.dispose();
 		}
+
 	};
 
 	/**
@@ -363,7 +357,7 @@ public class DistributionsEditor extends JMTDialog {
 	};
 
 	/**
-	 * Listener for choser ComboBox to instantiate a new distributions data
+	 * Listener for chooser ComboBox to instantiate a new distributions data
 	 * object when current distribution type is changed.
 	 */
 	protected ItemListener change_listener = new ItemListener() {
@@ -378,11 +372,11 @@ public class DistributionsEditor extends JMTDialog {
 				refreshView();
 			} catch (InstantiationException ex) {
 				System.out
-						.println("Error: Error instantiating selected Distribution");
+				.println("Error: Error instantiating selected Distribution");
 				ex.printStackTrace();
 			} catch (IllegalAccessException ex) {
 				System.out
-						.println("Error: Error accessing to selected Distribution");
+				.println("Error: Error accessing to selected Distribution");
 				ex.printStackTrace();
 			}
 		}
@@ -391,9 +385,8 @@ public class DistributionsEditor extends JMTDialog {
 	private JTextField replayerTextField;
 
 	private JButton chooseReplayerFileButton;
-	
-	private JFileChooser replayerFileDialog = new JFileChooser(Defaults.getWorkingPath());
 
+	private JFileChooser replayerFileDialog = new JFileChooser(Defaults.getWorkingPath());
 
 	/**
 	 * Listener used for Burst-Distribution only. Updates the Round-Robin
@@ -446,9 +439,7 @@ public class DistributionsEditor extends JMTDialog {
 			}
 
 			refreshValues();
-
 		}
-
 	}
 
 	/**
@@ -462,10 +453,9 @@ public class DistributionsEditor extends JMTDialog {
 	 * 
 	 */
 	protected class EditButtonAction extends AbstractAction {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		private int key;
 
 		public EditButtonAction(int key) {
@@ -476,7 +466,7 @@ public class DistributionsEditor extends JMTDialog {
 		public void actionPerformed(ActionEvent e) {
 			DistributionsEditor editor = DistributionsEditor.getInstance(
 					getParent(), (Distribution) current.getParameter(key)
-							.getValue(), true);
+					.getValue(), true);
 			// Sets editor window title
 			editor.setTitle("Editing "
 					+ current.getParameter(key).getDescription());
@@ -488,12 +478,12 @@ public class DistributionsEditor extends JMTDialog {
 
 			refreshValues();
 		}
+
 	};
 
 	// -------------------------------------------------------------------------------------------------
 
-	// --- Initialize data structure and layout
-	// --------------------------------------------------------
+	// --- Initialize data structure and layout --------------------------------------------------------
 	/**
 	 * Initialize this dialog data structures
 	 * 
@@ -506,7 +496,8 @@ public class DistributionsEditor extends JMTDialog {
 		if (initial != null) {
 			this.current = initial.clone();
 		} else {
-			this.current = new Exponential(); // Default distribution if nothing												// is selected
+			// Default distribution if nothing is selected
+			this.current = new Exponential();
 		}
 
 		// If distributions is not already set, sets it!
@@ -517,7 +508,6 @@ public class DistributionsEditor extends JMTDialog {
 		if (allowedNestedDistributions == null && recursive) {
 			allowedNestedDistributions = findNestedDistributions();
 		}
-
 	}
 
 	/**
@@ -528,9 +518,11 @@ public class DistributionsEditor extends JMTDialog {
 		this.setTitle("Editing Distribution...");
 		// Centers this dialog on the screen
 		if (recursive) {
-			this.centerWindowWithOffset(CommonConstants.MAX_GUI_WIDTH_JSIM_DISTRIB, CommonConstants.MAX_GUI_HEIGHT_JSIM_DISTRIB, 50, 50);
+			this.centerWindowWithOffset(CommonConstants.MAX_GUI_WIDTH_JSIM_DISTRIB,
+					CommonConstants.MAX_GUI_HEIGHT_JSIM_DISTRIB, 50, 50);
 		} else {
-			this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_DISTRIB, CommonConstants.MAX_GUI_HEIGHT_JSIM_DISTRIB);
+			this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_DISTRIB,
+					CommonConstants.MAX_GUI_HEIGHT_JSIM_DISTRIB);
 		}
 
 		// Creates a main panel and adds margins to it
@@ -583,18 +575,18 @@ public class DistributionsEditor extends JMTDialog {
 
 		Object[] distributionNames = distributionNameSet.toArray();
 		Arrays.sort(distributionNames); // Sorts alphabetically distribution
-										// names
-		choser = new JComboBox(distributionNames);
+		// names
+		chooser = new JComboBox(distributionNames);
 		//ARIF: show all elements in ComboBox
-		choser.setMaximumRowCount(distributionNames.length);
-		choser.setToolTipText("Choose distribution type");
+		chooser.setMaximumRowCount(distributionNames.length);
+		chooser.setToolTipText("Choose distribution type");
 		// Select correct distribution
 		if (current != null) {
-			choser.setSelectedItem(current.getName());
+			chooser.setSelectedItem(current.getName());
 			refreshView();
 		}
-		choser.addItemListener(change_listener);
-		distr_panel.add(choser, BorderLayout.CENTER);
+		chooser.addItemListener(change_listener);
+		distr_panel.add(chooser, BorderLayout.CENTER);
 
 		// Adds image viewer with a couple of borders
 		JPanel image_panel = new JPanel(new BorderLayout());
@@ -606,8 +598,7 @@ public class DistributionsEditor extends JMTDialog {
 		image_panel.add(iconpanel, BorderLayout.CENTER);
 	}
 
-	// -------------------------------------------------------------------------------------------------
-
+	// ------------------------------------------------------------------
 	// --- Shows current distribution
 	// ------------------------------------------------------------------
 	protected void refreshView() {
@@ -623,7 +614,6 @@ public class DistributionsEditor extends JMTDialog {
 			iconpanel.setImage(current.getImage());
 
 			if (current instanceof Burst) {
-
 				// Sets the layout of only one row instead of two: the Burst
 				// distribution
 				// will be shown into a panel with a different layout, to avoid
@@ -696,7 +686,7 @@ public class DistributionsEditor extends JMTDialog {
 					// makes this patch as less as possible error prone.
 					if (current instanceof Replayer
 							&& current.getParameter(i).getName()
-									.equals(Replayer.FILE_NAME_PARAMETER)) {
+							.equals(Replayer.FILE_NAME_PARAMETER)) {
 						replayerTextField = textfield;
 						chooseReplayerFileButton = new JButton("Choose the file");
 						chooseReplayerFileButton.addActionListener(new ActionListener() {
@@ -746,14 +736,14 @@ public class DistributionsEditor extends JMTDialog {
 						// Creates the label
 						label = new JLabel("mean:", SwingConstants.TRAILING);
 						mean_c_panel
-								.add(label,
-										new SpringLayout.Constraints(
-												Spring.constant(0),
-												Spring.constant(0),
-												Spring.constant(maxwidth),
-												Spring.constant(label
-														.getMinimumSize().height)));
-						// Creates the fextfield used to input mean values
+						.add(label,
+								new SpringLayout.Constraints(
+										Spring.constant(0),
+										Spring.constant(0),
+										Spring.constant(maxwidth),
+										Spring.constant(label
+												.getMinimumSize().height)));
+						// Creates the textfield used to input mean values
 						textfield = new JTextField(5);
 						textfield.setMaximumSize(new Dimension(textfield
 								.getMaximumSize().width, textfield
@@ -771,14 +761,14 @@ public class DistributionsEditor extends JMTDialog {
 						// Creates the label
 						label = new JLabel("c:", SwingConstants.TRAILING);
 						mean_c_panel
-								.add(label,
-										new SpringLayout.Constraints(
-												Spring.constant(0),
-												Spring.constant(0),
-												Spring.constant(maxwidth),
-												Spring.constant(label
-														.getMinimumSize().height)));
-						// Creates the fextfield used to input mean values
+						.add(label,
+								new SpringLayout.Constraints(
+										Spring.constant(0),
+										Spring.constant(0),
+										Spring.constant(maxwidth),
+										Spring.constant(label
+												.getMinimumSize().height)));
+						// Creates the textfield used to input mean values
 						textfield = new JTextField(5);
 						textfield.setMaximumSize(new Dimension(textfield
 								.getMaximumSize().width, textfield
@@ -789,20 +779,16 @@ public class DistributionsEditor extends JMTDialog {
 						textfield.addKeyListener(cmListener);
 						mean_c_panel.add(textfield);
 					}
-					SpringUtilities.makeCompactGrid(mean_c_panel, rows, 2, // rows,
-																			// cols
+					SpringUtilities.makeCompactGrid(mean_c_panel, rows, 2, // rows, cols
 							6, 6, // initX, initY
 							6, 6); // xPad, yPad
 				} else {
 					mean_c_panel.setVisible(false);
 				}
-
 			}
 
 			refreshValues();
-
 			scrolledPanel.repaint();
-
 		}
 	}
 
@@ -843,7 +829,6 @@ public class DistributionsEditor extends JMTDialog {
 	}
 
 	protected void refreshValues() {
-
 		DecimalFormat df = new DecimalFormat("#.############");
 		df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
 
@@ -911,7 +896,7 @@ public class DistributionsEditor extends JMTDialog {
 							}
 							// fully disables the probability text field
 							((JTextField) probComp)
-									.setEditable(enableComponent);
+							.setEditable(enableComponent);
 						}
 					}
 				}
@@ -932,7 +917,6 @@ public class DistributionsEditor extends JMTDialog {
 		}
 
 		scrolledPanel.repaint();
-
 	}
 
 	/**
@@ -1000,7 +984,7 @@ public class DistributionsEditor extends JMTDialog {
 			GridBagConstraints c = new GridBagConstraints();
 			c.insets = new Insets(10, 0, 0, 0); // top padding
 			c.gridwidth = GridBagConstraints.REMAINDER; // end row after this
-														// entry
+			// entry
 			c.fill = GridBagConstraints.HORIZONTAL;
 			// how to fill space when enlarging window vertically
 			c.weightx = 1.0;
@@ -1018,7 +1002,7 @@ public class DistributionsEditor extends JMTDialog {
 			but.setPreferredSize(new Dimension(65, 24));
 
 			c.insets = new Insets(0, 0, 0, 0); // No space between Name of
-												// distribution and Edit button
+			// distribution and Edit button
 			// do not finish row because also the label for the distribution has
 			// to be added
 			c.gridwidth = GridBagConstraints.RELATIVE;
@@ -1043,7 +1027,6 @@ public class DistributionsEditor extends JMTDialog {
 			c.weightx = 1.0;
 			c.weighty = 1.0;
 			intervalPanel.add(distributionValueTextField, c);
-
 		}
 
 		/**
@@ -1056,7 +1039,6 @@ public class DistributionsEditor extends JMTDialog {
 		 *            if the probability is for interval A or B
 		 */
 		protected void addProbability(Container intervalPanel, boolean intervalA) {
-
 			JLabel probLabel = new JLabel(PROBABILITY);
 			JTextField probValue = new JTextField();
 			Double probability = (Double) current.getParameter(0).getValue();
@@ -1087,7 +1069,6 @@ public class DistributionsEditor extends JMTDialog {
 			c.weightx = 1.0;
 			c.weighty = 1.0;
 			intervalPanel.add(probValue, c);
-
 		}
 
 		/**
@@ -1098,14 +1079,12 @@ public class DistributionsEditor extends JMTDialog {
 		 * @author Federico Dal Castello
 		 */
 		protected void addRoundRobin(Container intervalPanel) {
-
 			JCheckBox roundRobinCheckBox = new JCheckBox();
 			roundRobinCheckBox.setText(ROUND_ROBIN + " (A-B-A-B-A-B-A-B...)");
 			roundRobinCheckBox.setName(ROUND_ROBIN);
 
 			Boolean isChecked = (Boolean) current.getParameter(5).getValue();
 			roundRobinCheckBox.setSelected(isChecked.booleanValue());
-
 			roundRobinCheckBox.addActionListener(new RoundRobinAdapter());
 
 			// the checkbox will be aligned to the left
@@ -1117,7 +1096,8 @@ public class DistributionsEditor extends JMTDialog {
 			// Add the distribution
 			intervalPanel.add(roundRobinCheckBox, c);
 		}
-	}
 
+	}
 	// -------------------------------------------------------------------------------------------------
+
 }

@@ -18,13 +18,13 @@ public class TypeTwoABlocks extends MacroBlockSelectionPolicy{
 	protected MacroBlock[] selectMacroBlocks(int current_class) {
 		
 		int number_of_macro_blocks = 0;		
-		if(current_class < qnm.R) {
+		if (current_class < qnm.R) {
 			number_of_macro_blocks = (current_class < qnm.M ? current_class: qnm.M);
 		}
 		
 		//Take required macro blocks
 		MacroBlock[] macro_blocks = new MacroBlock[number_of_macro_blocks];
-		for(int i = 0; i < macro_blocks.length; i++) {
+		for (int i = 0; i < macro_blocks.length; i++) {
 			macro_blocks[i] = full_block.macro_blocks[i + 1].subBlock(current_class);
 		}
 		return macro_blocks;

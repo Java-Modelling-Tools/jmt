@@ -37,7 +37,7 @@ public class MD5Checksum {
    
    public static List<String> getMD5List(File[] files) throws Exception {
 	   List<String> list = new ArrayList<String>();
-	   for(int i = 0; i < files.length; i ++){
+	   for (int i = 0; i < files.length; i ++) {
 		   String MD5 = getMD5Checksum(files[i].getAbsolutePath());
 		   list.add(MD5);
 	   }

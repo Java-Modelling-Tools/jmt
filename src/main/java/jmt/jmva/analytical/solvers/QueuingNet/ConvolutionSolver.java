@@ -8,7 +8,7 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
@@ -126,7 +126,7 @@ public class ConvolutionSolver extends RecursiveSolver {
     	PopulationVector N = qnm.getPopulationVector();
     	
     	//set populations to zero for all further classes
-    	for(int i = 0; i < N.size(); i++ ) {
+    	for (int i = 0; i < N.size(); i++ ) {
     		N.set(i, 0);
     	}    	
     	
@@ -140,9 +140,9 @@ public class ConvolutionSolver extends RecursiveSolver {
     	
     	BigRational[] basis_values = new BigRational[basis.getSize()];
     	
-    	for(int i = 0; i < basis.getOrder().size(); i++) {
+    	for (int i = 0; i < basis.getOrder().size(); i++) {
     		PopulationChangeVector n = basis.getPopulationChangeVector(i);
-    		for(int k = 0; k <= qnm.M; k++) {
+    		for (int k = 0; k <= qnm.M; k++) {
     			
     			m.plusOne(k);
     			G = recallG(m, N.changePopulation(n));

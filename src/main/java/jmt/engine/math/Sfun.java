@@ -126,7 +126,7 @@ public class Sfun {
 			.164761214141064673895301522827e-17, -.562681717632940809299928521323e-18, .194744338223207851429197867821e-18 };
 
 	/**
-	 *	Private contructor, so nobody can make an instance of this class.
+	 *	Private constructor, so nobody can make an instance of this class.
 	 */
 	private Sfun() {
 	}

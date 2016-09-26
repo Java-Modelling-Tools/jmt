@@ -1,10 +1,7 @@
 package jmt.gui.common.editors;
 
 import java.awt.FlowLayout;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,7 +18,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
 import jmt.gui.common.CommonConstants;
-import static jmt.gui.common.CommonConstants.WARNING_ROUTING;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.joinStrategies.GuardJoin;
@@ -29,15 +25,16 @@ import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.PartialJoin;
 import jmt.gui.common.panels.WarningScrollTable;
 import jmt.gui.exact.table.DisabledCellRenderer;
+import jmt.gui.exact.table.ExactCellEditor;
 
 public class JoinEditor extends JSplitPane implements CommonConstants {
+
 	private static final long serialVersionUID = 1L;
 	private int requiredNum;
-        private Map<Object, Integer> firingMix;
+	private Map<Object, Integer> firingMix;
 	private StationDefinition stations;
 	private Object stationKey, classKey;
-        private ClassDefinition classes;
-       
+	private ClassDefinition classes;
 
 	private JPanel joinPane = new JPanel();
 	private JSpinner jNumField = new JSpinner();
@@ -45,8 +42,8 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	private JScrollPane descrPane = new JScrollPane();
 	private JTextArea noOptLabel = new JTextArea("No options available for this join strategy");
 	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);
-        private MixTable mixTable;
-        private WarningScrollTable mixPane;
+	private MixTable mixTable;
+	private WarningScrollTable mixPane;
 
 	public JoinEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		super();
@@ -54,14 +51,14 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 		super.setDividerSize(3);
 		super.setBorder(new EmptyBorder(0, 0, 0, 0));
 		this.setResizeWeight(.5);
-                mixTable = new MixTable(cs);
+		mixTable = new MixTable(cs);
 		setData(sd, cs, stationKey, classKey);
 		initComponents();
 	}
 
 	private void initComponents() {
-                mixPane = new WarningScrollTable(mixTable, WARNING_CLASS);
-                mixPane.setBorder(new TitledBorder(new EtchedBorder(), "Join Options"));
+		mixPane = new WarningScrollTable(mixTable, WARNING_CLASS);
+		mixPane.setBorder(new TitledBorder(new EtchedBorder(), "Join Options"));
 		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Join Options"));
 		noOptLabel.setOpaque(false);
 		noOptLabel.setEditable(false);
@@ -73,8 +70,8 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 		descrTextPane.setWrapStyleWord(true);
 		descrPane.setBorder(new TitledBorder(new EtchedBorder(), "Description"));
 		descrPane.setViewportView(descrTextPane);
-                joinPane.setLayout(new FlowLayout());
-		JLabel text = new JLabel("Number of tasks required:");
+		joinPane.setLayout(new FlowLayout());
+		JLabel text = new JLabel("Number of Tasks Required:");
 		jNumField.setPreferredSize(DIM_BUTTON_XS);
 		joinPane.add(text);
 		joinPane.add(jNumField);
@@ -84,71 +81,61 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		JoinStrategy js = (JoinStrategy) sd.getJoinStrategy(stationKey, classKey);
-		
-        
 		if (js == null) {
-			emptyPane(); 
-                        descrTextPane.setText("");
 			emptyPane();
 		} else {
 			descrTextPane.setText(js.getDescription());
-                        if (js instanceof PartialJoin){
-                                createDetails(js, sd, stationKey, classKey);                        		
-                        } else if(js instanceof GuardJoin) {
-                                createFiringMixDetails(js, sd, cs, stationKey, classKey);                                
-                        } else {
-                                emptyPane();
-                        }
+			if (js instanceof PartialJoin) {
+				createDetails(js, sd, stationKey, classKey);
+			} else if (js instanceof GuardJoin) {
+				createFiringMixDetails(js, sd, cs, stationKey, classKey);
+			} else {
+				emptyPane();
+			}
 		}
 		doLayout();
 	}
 
 	private void emptyPane() {
-                firingMix = null;
+		firingMix = null;
 		setRightComponent(noOptLabelPanel);
 	}
 
 	private void createDetails(JoinStrategy js, StationDefinition sd, Object stationKey, Object classKey) {
-	
 		requiredNum = js.getRequiredNum();
 		stations = sd;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
-                firingMix = null;
+		firingMix = null;
 		setRightComponent(joinPane);
 		this.updateSpinner();
 	}
-        
-        private void createFiringMixDetails(JoinStrategy js, StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-        
-        requiredNum = js.getRequiredNum();
+
+	private void createFiringMixDetails(JoinStrategy js, StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
+		requiredNum = js.getRequiredNum();
 		stations = sd;
-                classes = cs;
-                if (js instanceof GuardJoin){
-                	firingMix = ((GuardJoin) js).getGuard();
-                }
-                                
+		classes = cs;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
-                if (firingMix.isEmpty()) {
-                        setupFiringMixJoin();
-                }
+		firingMix = ((GuardJoin) js).getGuard();
+		if (firingMix.isEmpty()) {
+			setupFiringMixJoin();
+		}
 		setRightComponent(mixPane);
 		this.updateSpinner();
 	}
-        
-        private void setupFiringMixJoin() {
-                HashMap<Object, Integer> temp = new HashMap<>(firingMix);
-                firingMix.clear();
-                for (int i = 0; i < classes.getClassKeys().size(); i++) {
+
+	private void setupFiringMixJoin() {
+		firingMix.clear();
+		for (int i = 0; i < classes.getClassKeys().size(); i++) {
 			Object currentKey = classes.getClassKeys().get(i);
-                        firingMix.put(currentKey, 0);
+			firingMix.put(currentKey, 0);
 		}
-        }
-	
-	private void updateSpinner(){
+	}
+
+	private void updateSpinner() {
 		jNumField.setValue(requiredNum);
-		jNumField.addChangeListener(new ChangeListener(){
+		jNumField.addChangeListener(new ChangeListener() {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -157,25 +144,25 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 					i = new Integer(1);
 					jNumField.setValue(i);
 				}
-				JoinStrategy js = (JoinStrategy)stations.getJoinStrategy(stationKey, classKey);				
+				JoinStrategy js = (JoinStrategy)stations.getJoinStrategy(stationKey, classKey);
 				js.setRequiredNum(i);
 			}
-			
+
 		});
 	}
-        
-        protected class MixTable extends JTable {
+
+	protected class MixTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
-                ClassDefinition cs;
+		ClassDefinition cs;
 
 		public MixTable(ClassDefinition cs) {
 			super();
 			setModel(new MixTableModel(cs));
-			setDefaultEditor(Object.class,
-					new jmt.gui.exact.table.ExactCellEditor());
-                        this.setDefaultRenderer(Object.class, new DisabledCellRenderer());
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			this.setDefaultRenderer(Object.class, new DisabledCellRenderer());
 			sizeColumns();
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		private void sizeColumns() {
@@ -189,21 +176,17 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 
 	protected class MixTableModel extends AbstractTableModel {
 
-                private ClassDefinition cs;
-                
 		private static final long serialVersionUID = 1L;
-		
-			
-		private String[] columnNames = new String[] { "Class","Tasks Required" };
-		private Class[] columnClasses = new Class[] { String.class,
+		private ClassDefinition cs;
+		private String[] columnNames = new String[] { "Class",
+				"Tasks Required" };
+		private Class<?>[] columnClasses = new Class[] { String.class,
 				Object.class };
 		public int[] columnSizes = new int[] { 40, 100 };
-                
-                public MixTableModel( ClassDefinition cs) {
-                        this.cs = cs;                                        
-                        
-                }        
-                
+
+		public MixTableModel(ClassDefinition cs) {
+			this.cs = cs;
+		}
 
 		public int getRowCount() {
 			if (classes.getClassKeys() != null) {
@@ -215,17 +198,15 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 
 		public int getColumnCount() {
 			return columnNames.length;
-		} 
-
-		@Override
-		public String getColumnName(int columnIndex) {
-			
-			return columnNames[columnIndex];
-						
 		}
 
 		@Override
-		public Class<Object> getColumnClass(int columnIndex) {			
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
 			return columnClasses[columnIndex];
 		}
 
@@ -258,11 +239,11 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 						firingMix.put(indexToKey(rowIndex), value);
 					}
 				} catch (NumberFormatException e) {
-                                        
+
 				}
 			}
 		}
-		
+
 		private Object indexToKey(int index) {
 			return classes.getClassKeys().get(index);
 		}

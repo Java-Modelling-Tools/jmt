@@ -52,7 +52,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 				coreResults[c] = new LinearizerCoreAlgorithm();
 			}
 		}
-		while(true) {
+		while (true) {
 			if (useDeSouzaMuntz) {
 				for (int k = 0; k < stations; k++) {
 					for (int j = 0; j < classes; j++) {
@@ -204,7 +204,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 				}
 			}
 			
-			while(true) {
+			while (true) {
 				
 				for (int k = 0; k < stations; k++) {
 					for (int c = 0; c < classes; c++) {

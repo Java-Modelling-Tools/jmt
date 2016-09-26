@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NodeSections;
 
@@ -49,7 +49,7 @@ import jmt.engine.dataAnalysis.Measure;
  *       FCR should also contain the time spent in the FCR and not only the time spent queuing.
  *       
  *       Approach taken presently to rectify is to delay the capture of the performance indices 
- *       untill the job is out of the FCR. So the job dropping are manually handled for Blocking region
+ *       until the job is out of the FCR. So the job dropping are manually handled for Blocking region
  *       at Node level.
  */
 public class BlockingQueue extends InputSection {
@@ -131,10 +131,10 @@ public class BlockingQueue extends InputSection {
 	@Override
 	public int getIntSectionProperty(int id) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_SIZE:
-				return size;
-			default:
-				return super.getIntSectionProperty(id);
+		case PROPERTY_ID_SIZE:
+			return size;
+		default:
+			return super.getIntSectionProperty(id);
 		}
 	}
 
@@ -143,24 +143,36 @@ public class BlockingQueue extends InputSection {
 	 * @return the first job in queue that is not class blocked; null otherwise.
 	 */
 	private Job getNextNotBlockedJob() {
-
 		if (jobsList == null) {
 			return null;
 		}
 
 		List<JobInfo> jobList = jobsList.getJobList();
-
 		ListIterator<JobInfo> iterator = jobList.listIterator();
-
+		boolean hasGroupConstraint = blockingRegion.hasGroupConstraint();
+		boolean isHPSGroupActive = blockingRegion.isHPSGroupActive();
 		Job nextJob = null;
 		int nextJobPriority = 0;
 		while (iterator.hasNext()) {
 			JobInfo info = iterator.next();
 			JobClass jobClass = info.getJob().getJobClass();
-			if (nextJob == null || nextJobPriority < jobClass.getPriority()) {
-				if (!blockingRegion.isBlocked(jobClass)) {
-					nextJob = info.getJob();
-					nextJobPriority = jobClass.getPriority();
+			if (hasGroupConstraint) {
+				if (nextJob == null || nextJobPriority < jobClass.getPriority() || (nextJobPriority == jobClass.getPriority()
+						&& blockingRegion.getHPSStrategy().equals(BlockingRegion.REGION_GROUP_HPS_LCFS_STRATEGY))) {
+					if (!blockingRegion.isBlocked(jobClass)) {
+						nextJob = info.getJob();
+						nextJobPriority = jobClass.getPriority();
+						if (!isHPSGroupActive) {
+							break;
+						}
+					}
+				}
+			} else {
+				if (nextJob == null || nextJobPriority < jobClass.getPriority()) {
+					if (!blockingRegion.isBlocked(jobClass)) {
+						nextJob = info.getJob();
+						nextJobPriority = jobClass.getPriority();
+					}
 				}
 			}
 		}
@@ -175,185 +187,176 @@ public class BlockingQueue extends InputSection {
 	protected int process(NetMessage message) throws NetException {
 		Job job;
 		Job notBlockedJob;
+		JobClass jobClass;
 
 		switch (message.getEvent()) {
 
-			case NetEvent.EVENT_START:
+		case NetEvent.EVENT_START:
 
-				//the input station receives the "start" event because it has no nodes in input
-				//then it is marked as reference node
+			//the input station receives the "start" event because it has no nodes in input
+			//then it is marked as reference node
 
-				//NEW
-				//@author Stefano Omini
+			//NEW
+			//@author Stefano Omini
 
-				//checks whether there are jobs in queue
-				if (jobsList.size() == 0) {
-					//no jobs in queue
-					coolStart = true;
-					break;
+			//checks whether there are jobs in queue
+			if (jobsList.size() == 0) {
+				//no jobs in queue
+				coolStart = true;
+				break;
+			}
+
+			//get the first job which is not blocked (if exists)
+			notBlockedJob = getNextNotBlockedJob();
+
+			if (notBlockedJob == null) {
+				//all jobs in queue are class blocked
+				//nothing else to do
+			} else {
+				//get class
+				//jobClass = notBlockedJob.getJobClass();
+				//forward job and increase occupation
+				forward(notBlockedJob);
+				blockingRegion.increaseOccupation(notBlockedJob);
+			}
+			break;
+
+		case NetEvent.EVENT_JOB:
+
+			//EVENT_JOB
+			job = message.getJob();
+
+			//no ack must be sent to the source of message (the redirecting queue of a node
+			//inside the region)
+			jobClass = job.getJobClass();
+
+			//this job has been received by an internal node
+			//the region input station will have to send it back
+			NetNode realDestination = message.getSource();
+
+			//adds a JobInfo object after modifying the job with redirection informations
+			job.setOriginalDestinationNode(realDestination);
+			jobsList.add(new JobInfo(job));
+
+			//checks whether the region is blocked for this class
+			if (blockingRegion.isBlocked(jobClass)) {
+				//the region is already blocked
+				//the job must be dropped?
+				if (classDrop[jobClass.getId()] == true) {
+					//drop job
+					drop(job);
 				}
+				//otherwise the job remains blocked in queue
+				break;
+			}
 
-				//get the first job which is not blocked (if exists)
+			//the region is not blocked for this class
+			//checks whether the queue is empty (coolstart = true) or not
 
-				notBlockedJob = getNextNotBlockedJob();
+			if (coolStart) {
+				// If coolStart is true, this job is sent immediately to the next
+				// section and coolStart set to false.
+				forward(job);
+				blockingRegion.increaseOccupation(job);
 
-				if (notBlockedJob == null) {
-					//all jobs in queue are class blocked
-					//nothing else to do
-					break;
-				} else {
-					//get class
-					JobClass jobClass = notBlockedJob.getJobClass();
-					//forward job and increase occupation
-					forward(notBlockedJob);
-					blockingRegion.increaseOccupation(jobClass);
-					break;
-				}
+				coolStart = false;
+			} else {
+				//coolStart is false: this means that the jobs in queue are class blocked,
+				//otherwise they would have been already sent to the region till it would
+				//become globally or class blocked
 
-				//the BlockingQueue has almost the same behaviour with the events
-				//EVENT_JOB_OUT_OF_REGION and EVENT_ACK
+				//the job is sent to service section
 
-			case NetEvent.EVENT_JOB_OUT_OF_REGION:
-
-				//FCR Bug fix:
-				//The dropping of the job was post poned as the time 
-				//spent in the Queuing station was not taken in consideration.
-				//Secondly point to be noted is that I am 
-				//only dropping Jobs at Node level as the node section jobs 
-				//are automatically dropped but the node level jobs are
-				//dropped manually.
-				Job localJob = (Job) message.getData();
-				JobInfo jobInfo = jobsList_node.lookFor(localJob);
-				//remove only when you find a job in the list.
-				if (jobInfo != null) {
-					jobsList_node.remove(jobInfo);
-				}
-                                
-				//checks whether there are jobs in queue
-				if (jobsList.size() == 0) {
-					//no jobs in queue
-					coolStart = true;
-					break;
-				}
-
-				//search for the first job which is not blocked (if exists)
-				// and forward it
-
-				notBlockedJob = getNextNotBlockedJob();
-
-				if (notBlockedJob != null) {
-					JobClass jobClass = notBlockedJob.getJobClass();
-					forward(notBlockedJob);
-					blockingRegion.increaseOccupation(jobClass);
-					break;
-				} else {
-					//all jobs in queue are blocked
-					//nothing else to do
-					break;
-				}
-
-			case NetEvent.EVENT_ACK:
-
-				//checks whether there are jobs in queue
-				if (jobsList.size() == 0) {
-					//no jobs in queue
-					coolStart = true;
-					break;
-				}
-
-				//search for the first job which is not blocked (if exists)
-				// and forward it
-
-				notBlockedJob = getNextNotBlockedJob();
-
-				if (notBlockedJob != null) {
-					JobClass jobClass = notBlockedJob.getJobClass();
-					forward(notBlockedJob);
-					blockingRegion.increaseOccupation(jobClass);
-					break;
-				} else {
-					//all jobs in queue are blocked
-					//nothing else to do
-					break;
-				}
-
-			case NetEvent.EVENT_JOB:
-
-				//EVENT_JOB
-
-				job = message.getJob();
-
-				//no ack must be sent to the source of message (the redirecting queue of a node
-				//inside the region)
-
-				JobClass jobClass = job.getJobClass();
-
-				//this job has been received by an internal node
-				//the region input station will have to send it back
-				NetNode realDestination = message.getSource();
-
-				//adds a JobInfo object after modifying the job with redirection informations
-				job.setOriginalDestinationNode(realDestination);
-				jobsList.add(new JobInfo(job));
-
-				//checks whether the region is blocked for this class
-				if (blockingRegion.isBlocked(jobClass)) {
-					//the region is already blocked
-
-					//the job must be dropped?
-					if (classDrop[jobClass.getId()] == true) {
-						//drop job
-						drop(job);
-						break;
-					}
-					//otherwise the job remains blocked in queue
-					break;
-				}
-
-				//the region is not blocked for this class
-				//checks whether the queue is empty (coolstart = true) or not
-
-				if (coolStart) {
-					// If coolStart is true, this job is sent immediately to the next
-					// section and coolStart set to false.
-
-					forward(job);
-					blockingRegion.increaseOccupation(jobClass);
-
-					coolStart = false;
-
-				} else {
-					//coolStart is false: this means that the jobs in queue are class blocked,
-					//otherwise they would have been already sent to the region till it would
-					//become globally or class blocked
-
-					//the job is sent to service section
-
-					//OLD
-					/* Job firstNotBlocked = getFirstNotBlockedJob();
-					if (firstNotBlocked != null) {
-					    forward(firstNotBlocked);
-					    if (DEBUG) {
-					        System.out.println("SendJobIn");
-					    }
-
-					    blockingRegion.increaseOccupation(jobClass);
-
-					}
-					*/
-					forward(job);
+				//OLD
+				/*Job firstNotBlocked = getFirstNotBlockedJob();
+				if (firstNotBlocked != null) {
+					forward(firstNotBlocked);
 					if (DEBUG) {
 						System.out.println("SendJobIn");
 					}
 
 					blockingRegion.increaseOccupation(jobClass);
-
+				}*/
+				forward(job);
+				if (DEBUG) {
+					System.out.println("SendJobIn");
 				}
-				break;
 
-			default:
-				return MSG_NOT_PROCESSED;
+				blockingRegion.increaseOccupation(job);
+			}
+			break;
+
+			//the BlockingQueue has almost the same behaviour with the events
+			//EVENT_ACK and EVENT_JOB_OUT_OF_REGION
+
+		case NetEvent.EVENT_ACK:
+
+			//checks whether there are jobs in queue
+			if (jobsList.size() == 0) {
+				//no jobs in queue
+				coolStart = true;
+				break;
+			}
+
+			//search for the first job which is not blocked (if exists)
+			//and forward it
+			notBlockedJob = getNextNotBlockedJob();
+
+			if (notBlockedJob != null) {
+				//jobClass = notBlockedJob.getJobClass();
+				forward(notBlockedJob);
+				blockingRegion.increaseOccupation(notBlockedJob);
+			} else {
+				//all jobs in queue are blocked
+				//nothing else to do
+			}
+			break;
+
+		case NetEvent.EVENT_JOB_OUT_OF_REGION:
+
+			//FCR Bug fix:
+			//The dropping of the job was postponed as the time 
+			//spent in the Queuing station was not taken in consideration.
+			//Secondly point to be noted is that I am 
+			//only dropping Jobs at Node level as the node section jobs 
+			//are automatically dropped but the node level jobs are
+			//dropped manually.
+			Job localJob = (Job) message.getData();
+			JobInfo jobInfo = jobsList_node.lookFor(localJob);
+
+			//remove only when you find a job in the list.
+			if (jobInfo != null) {
+				jobsList_node.remove(jobInfo);
+			}
+
+			//checks whether there are jobs in queue
+			if (jobsList.size() == 0) {
+				//no jobs in queue
+				coolStart = true;
+				break;
+			}
+
+			//search for the first job which is not blocked (if exists)
+			//and forward it
+			notBlockedJob = getNextNotBlockedJob();
+
+			if (notBlockedJob != null) {
+				//jobClass = notBlockedJob.getJobClass();
+				forward(notBlockedJob);
+				blockingRegion.increaseOccupation(notBlockedJob);
+			} else {
+				//all jobs in queue are blocked
+				//nothing else to do
+			}
+			break;
+
+		case NetEvent.EVENT_STOP:
+			break;
+
+		default:
+			return MSG_NOT_PROCESSED;
 		}
+
 		return MSG_PROCESSED;
 	}
 
@@ -368,7 +371,6 @@ public class BlockingQueue extends InputSection {
 	 * @throws NetException
 	 */
 	private void drop(Job job) throws NetException {
-
 		int c = job.getJobClass().getId();
 		droppedJobs++;
 		droppedJobsPerClass[c]++;
@@ -376,10 +378,7 @@ public class BlockingQueue extends InputSection {
 		JobInfo jobInfo = jobsList.lookFor(job);
 		if (jobInfo != null) {
 			//removes job from the jobInfoList of the node section
-			jobsList.removeAfterDrop(jobInfo);
-
-			//removes job from the jobInfoList of the node
-			this.getOwnerNode().getJobInfoList().removeAfterDrop(jobInfo);
+			jobsList.dropJob(jobInfo);
 		}
 
 		if (jobsList_node == null) {
@@ -388,10 +387,18 @@ public class BlockingQueue extends InputSection {
 		JobInfo jobInfo_node = jobsList_node.lookFor(job);
 		if (jobInfo_node != null) {
 			//removes job from the jobInfoList of the node
-			jobsList_node.removeAfterDrop(jobInfo_node);
+			jobsList_node.dropJob(jobInfo_node);
 		}
 		// Removes job from global jobInfoList - Bertoli Marco
 		getOwnerNode().getQueueNet().getJobInfoList().dropJob(job);
+	}
+
+	/**
+	 * Gets the number of dropped jobs
+	 * @return the number of dropped jobs
+	 */
+	public int getDroppedJobs() {
+		return droppedJobs;
 	}
 
 	/**
@@ -404,25 +411,16 @@ public class BlockingQueue extends InputSection {
 
 	/**
 	 * Gets the number of dropped jobs for the specified class
-	 * @param jobClassIndex the index of the job class
+	 * @param classIndex the index of the job class
 	 * @return the number of dropped jobs for the specified class, -1 otherwise
 	 */
-	public int getDroppedJobPerClass(int jobClassIndex) {
-		return droppedJobsPerClass[jobClassIndex];
-	}
-
-	/**
-	 * Gets the number of dropped jobs
-	 * @return the number of dropped jobs
-	 */
-	public int getDroppedJobs() {
-		return droppedJobs;
+	public int getDroppedJobPerClass(int classIndex) {
+		return droppedJobsPerClass[classIndex];
 	}
 
 	// for blocking region
 	@Override
-	public void analyze(int name, Measure measurement)
-			throws jmt.common.exception.NetException {
+	public void analyze(int name, Measure measurement) throws NetException {
 		switch (name) {
 		case 0:
 			this.blockingRegion.setWeightMeasure(measurement);
@@ -432,4 +430,5 @@ public class BlockingQueue extends InputSection {
 			break;
 		}
 	}
+
 }

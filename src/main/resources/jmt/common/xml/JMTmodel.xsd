@@ -204,6 +204,30 @@
 									<xs:attribute name="dropThisClass" type="xs:boolean" use="required"/>
 								</xs:complexType>
 							</xs:element>
+							<xs:element name="groupConstraint" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="jobGroup" type="xs:string" use="required"/>
+									<xs:attribute name="maxJobsPerGroup" type="xs:integer" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="groupStrategy" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="jobGroup" type="xs:string" use="required"/>
+									<xs:attribute name="strategy" type="xs:string" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="groupClassList" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="groupClass" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:attribute name="jobGroup" type="xs:string" use="required"/>
+												<xs:attribute name="jobClass" type="xs:string" use="required"/>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
 						</xs:sequence>
 						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="type" type="xs:string" use="optional"/>

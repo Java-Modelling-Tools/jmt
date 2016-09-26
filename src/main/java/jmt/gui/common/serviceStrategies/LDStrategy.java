@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.serviceStrategies;
 
@@ -40,7 +40,7 @@ import jmt.gui.common.distributions.Distribution;
  *         Time: 12.25.52
  */
 public class LDStrategy implements ServiceStrategy {
-	protected static final String VAR = "n"; // Dipendent variable
+	protected static final String VAR = "n"; // Dependent variable
 	protected static DecimalFormat formatter = new DecimalFormat("#.####");
 	protected TreeMap<Object, Range> ranges;
 
@@ -98,14 +98,14 @@ public class LDStrategy implements ServiceStrategy {
 	}
 
 	/**
-	 * Sets distribution for this range, preserving old value of c, if applayable.
+	 * Sets distribution for this range, preserving old value of c, if applicable.
 	 * @param key search's key for this range
 	 * @param distribution distribution to set in this range
 	 */
 	public synchronized void setRangeDistribution(Object key, Distribution distribution) {
 		Range tmp = ranges.get(key);
 		Distribution tmpdist = distribution.clone();
-		// Preserve stored value of c, if applayable
+		// Preserve stored value of c, if applicable
 		if (tmp.distribution.hasC() && distribution.hasC()) {
 			double c = tmp.distribution.getC();
 			tmpdist.setC(c);
@@ -280,8 +280,8 @@ public class LDStrategy implements ServiceStrategy {
 
 	/**
 	 * Returns mean value of service time distribution for given number of jobs.
-	 * @param jobs queue lenght of the station
-	 * @return  mean value of service time distribution. On insuccess returns -1
+	 * @param jobs queue length of the station
+	 * @return  mean value of service time distribution. On unsuccess returns -1
 	 */
 	public double getMeanValue(int jobs) {
 		// Finds key of right range

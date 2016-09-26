@@ -1,32 +1,32 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions;
 
 /**
  * <p>Title: Results Constants</p>
- * <p>Description: All sort of constanttext displayed into results window. This is provied here
- * for easy mantainability.</p>
- * 
+ * <p>Description: All sort of constant text displayed into results window. This is provided here
+ * for easy maintainability.</p>
+ *
  * @author Bertoli Marco
  *         Date: 26-set-2005
  *         Time: 11.06.50
- *         
+ *
  * Modified by Ashanka (Aug 09):
  * Desc: The code to include the changes for label changes from 
  *       1. Queue Length to Customer Number 
@@ -36,8 +36,7 @@ package jmt.gui.common.definitions;
  * Desc: The code to include the changes for label changes from 
  *       1. Customer Number to Number of Customers
  *       2. System Customer Number to System Number of Customers.
- *       
- * 
+ *
  * Modified by Ashanka (Nov 09):
  * Desc: Added the description of the Drop Rate
  * 
@@ -49,6 +48,7 @@ package jmt.gui.common.definitions;
  *              each sink per class. 
  */
 public interface ResultsConstants {
+
 	public static final int BORDERSIZE = 5;
 	public static final String IN_PROGRESS_IMAGE = "Measure_running";
 	public static final String IN_PROGRESS_TEXT = "Simulator is still computing this measure";
@@ -60,7 +60,8 @@ public interface ResultsConstants {
 	public static final String NO_SAMPLES_TEXT = "Simulator cannot compute this measure as no samples were received";
 	public static final String ALL_CLASSES = "-- All --";
 	public static final String ALL_STATIONS = "-- Network --";
-	public static final String FOR_GREEN_GRAPH = "Double click on this graph to open it in a new windows.\nRight-click to save it.\nClick on green bars to see the simulation time, the sample average (blue), and the sample values (green).\n";
+	public static final String FOR_GREEN_GRAPH = "Double click on this graph to open it in a new windows.\nRight-click to save it.\nClick on green bars to see the simulation time, "
+			+ "the sample average (blue), and the sample values (green).\n";
 	/**HTML formats for panels descriptions*/
 	final static String HTML_START = "<html><body align=\"left\">";
 	final static String HTML_END = "</body></html>";
@@ -72,34 +73,42 @@ public interface ResultsConstants {
 	// Tabbed panels description
 	public static final String DESCRIPTION_QUEUELENGTHS = HTML_START + HTML_FONT_TITLE + "Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average number of customers for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_THROUGHPUTS = HTML_START + HTML_FONT_TITLE + "Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average throughput for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_RESPONSETIMES = HTML_START + HTML_FONT_TITLE + "Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average response time for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_UTILIZATIONS = HTML_START + HTML_FONT_TITLE + "Utilization" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Utilization of a customer class at the selected station. The utilization of a queueing station with more than one server is the "
 			+ "average utilization of each server.  The utilization of a delay station is the average number of customers in the station. "
 			+ "(it may be greater than 1)" + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_RESIDENCETIMES = HTML_START + HTML_FONT_TITLE + "Residence Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average residence time for each chosen class at each chosen station. (Residence Time = Number of Visits * Response Time)"
 			+ HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_QUEUETIMES = HTML_START + HTML_FONT_TITLE + "Queue Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average queue time for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_SYSTEMRESPONSETIMES = HTML_START + HTML_FONT_TITLE + "System Response Time" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Average response time of the entire system for each chosen class."
-					+ "<br><b>WARNING:</b> With <b>CLASS SWITCHING</b> the SYSTEM RESPONSE TIME per CLASS refers to the mean time spent in the system when the job is in that class. "
-					+ "So it is the <b>SYSTEM RESIDENCE TIME</b> of the class." + HTML_FONT_NOR_END + HTML_END;
-//ADD HERE
+			+ "<br><b>WARNING:</b> With <b>CLASS SWITCHING</b> the SYSTEM RESPONSE TIME per CLASS refers to the mean time spent in the system when the job is in that class. "
+			+ "So it is the <b>SYSTEM RESIDENCE TIME</b> of the class." + HTML_FONT_NOR_END + HTML_END;
+
+	//ADD HERE
 	public static final String DESCRIPTION_SYSTEMTHROUGHPUTS = HTML_START + HTML_FONT_TITLE + "System Throughput" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Average throughput of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_CUSTOMERNUMBERS = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Average customer number for each chosen class." + HTML_FONT_NOR_END + HTML_END;
+
 	//Added by ASHANKA START
 	//Added for System Power changes in the JSIM
 	//Its a new performance index.
 	public static final String DESCRIPTION_SYSTEMPOWER = HTML_START + HTML_FONT_TITLE + "System Power" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "System Power for each chosen class." + HTML_FONT_NOR_END + HTML_END;
-
 	//Added by ASHANKA STOP
 
 	public static final String DESCRIPTION_DROPRATE = HTML_START + HTML_FONT_TITLE + "Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
@@ -107,21 +116,23 @@ public interface ResultsConstants {
 
 	// Temp measure mean label
 	public static final String TEMP_MEAN = HTML_START + HTML_FONT_NORM + "<b>Average value: </b>" + HTML_FONT_NOR_END + HTML_END;
-	
+
 	public static final String DESCRIPTION_RESPONSETIME_SINK = HTML_START + HTML_FONT_TITLE + "Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-		+ "Response Time for each chosen Sink." + HTML_FONT_NOR_END + HTML_END;
-	
+			+ "Response Time for each chosen Sink." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_THROUGHPUT_SINK = HTML_START + HTML_FONT_TITLE + "Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
-	+ "Throughput for each chosen Sink." + HTML_FONT_NOR_END + HTML_END;
-	
-	public static final String DESCRIPTION_MEAN_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR Total Weight" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Mean Job Weight for each chosen FCRegion" + HTML_FONT_NOR_END + HTML_END;
-			
-	public static final String DESCRIPTION_MEAN_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Mean Memory Occupation for each chosen FCRegion" + HTML_FONT_NOR_END + HTML_END;
-	
+			+ "Throughput for each chosen Sink." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_FCR_TOTAL_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR Total Weight" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+			+ "Total Weight for each chosen FCRegion" + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_FCR_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+			+ "Memory Occupation for each chosen FCRegion" + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_FJ_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Fork Join Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM 
 			+ "Response Time for each chosen F/J section" + HTML_FONT_NOR_END + HTML_END;
-        public static final String DESCRIPTION_FJ_CN = HTML_START + HTML_FONT_TITLE + "Fork Join Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+
+	public static final String DESCRIPTION_FJ_CN = HTML_START + HTML_FONT_TITLE + "Fork Join Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM 
 			+ "Average number of customers for each chosen F/J section" + HTML_FONT_NOR_END + HTML_END;
+
 }

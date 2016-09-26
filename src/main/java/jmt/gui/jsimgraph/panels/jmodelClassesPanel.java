@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.panels;
 
@@ -28,7 +28,6 @@ import javax.swing.table.TableCellRenderer;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.table.editors.ColorCellEditor;
 import jmt.gui.common.definitions.ClassDefinition;
-import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.jsimgraph.JSimGraphConstants;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
@@ -39,7 +38,7 @@ import jmt.gui.jsimwiz.panels.ClassesPanel;
  * <p>Title: JModel User Classes Panel</p>
  * <p>Description: Panel used to edit user classes properties. Extends JSIM ClassesPanel.
  * In some points it is a bit tricky, as original ClassesPanel was not meant to be extended.
- * I preferred not to change ClassesPanel source code, nor copy and modificate it as
+ * I preferred not to change ClassesPanel source code, nor copy and modify it as
  * at the time of writing it was in early development stage and I did not want to collide
  * with the author.</p>
  * 
@@ -48,18 +47,16 @@ import jmt.gui.jsimwiz.panels.ClassesPanel;
  *         Time: 9.42.15
  */
 public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	protected JmodelClassDefinition classdefinition;
 	protected JmodelStationDefinition stationdefinition;
-
 	protected ImagedComboBoxCellEditorFactory stations;
 
 	/**
 	 * Construct a new jmodelClassesPanel
-	 * @param cd a reference to the underlayng data structure
+	 * @param cd a reference to the underlying data structure
 	 */
 	public jmodelClassesPanel(JmodelClassDefinition cd, JmodelStationDefinition sd) {
 		super();
@@ -93,12 +90,10 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 
 	/**
 	 * Overrides ClassTable. It is a table containing class parameters.
-	 * Added suppport for "Color" column and rererence station combobox
+	 * Added support for "Color" column and reference station combobox
 	 */
 	protected class jmodelClassTable extends ClassTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public jmodelClassTable() {
@@ -121,7 +116,7 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 					return getDefaultRenderer(String.class);
 				}
 			}
-			// Column for refercence source
+			// Column for reference source
 			else if (column == 7) {
 				return stations.getRenderer();
 			} else if (column == 8) {
@@ -153,14 +148,12 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 	 * Define a custom table model. Overrides ClassTableModel to add support for "Color" column
 	 */
 	protected class jmodelClassTableModel extends ClassTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public jmodelClassTableModel() {
 			super();
-			columnNames = new String[] { "Color", "Name", "Type", "Priority", "Population", "Interarrival Time Distrib.", "",
+			columnNames = new String[] { "Color", "Name", "Type", "Priority", "Population", "Interarrival Time Distribution", "",
 					"Reference Station", "" };
 			colClasses = new Class[] { Color.class, String.class, JComboBox.class, String.class, String.class, String.class, Object.class,
 					JComboBox.class, JButton.class };
@@ -172,7 +165,9 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				return classdefinition.getClassColor(classdefinition.getClassKeys().get(rowIndex));
 			} else if (columnIndex == 7) {
 				return classdefinition.getClassRefStation(classdefinition.getClassKeys().get(rowIndex));
-			} else if((STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7)) || STATION_TYPE_FORK.equals(getValueAt(rowIndex, 7))) && columnIndex == 5){
+			} else if (columnIndex == 5 && (STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7)) 
+					|| STATION_TYPE_FORK.equals(getValueAt(rowIndex, 7))
+					|| STATION_TYPE_TRANSITION.equals(getValueAt(rowIndex, 7)))) {
 				return null;
 			} else {
 				return super.getValueAt(rowIndex, columnIndex - 1);
@@ -199,7 +194,9 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 			if (columnIndex == 6 && (getValueAt(rowIndex, 2).equals("Closed"))) {
 				return false;
 			}
-			if (columnIndex == 6 && ((STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7)) || STATION_TYPE_FORK.equals(getValueAt(rowIndex, 7))))) {
+			if (columnIndex == 6 && (STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7))
+					|| STATION_TYPE_FORK.equals(getValueAt(rowIndex, 7))
+					|| STATION_TYPE_TRANSITION.equals(getValueAt(rowIndex, 7)))) {
 				return false;
 			}
 			if (columnIndex == 5) {
@@ -208,4 +205,5 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 			return true;
 		}
 	}
+
 }

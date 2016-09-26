@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.xml;
 
@@ -104,7 +104,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 	}
 
 	/**
-	 * Returns the entire Document rapresenting results data structure.
+	 * Returns the entire Document representing results data structure.
 	 * @param measure data structure
 	 * @return complete measures data structure in Document format
 	 */
@@ -155,7 +155,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 				elem.setAttribute(XML_A_MEASURE_TYPE, Integer.toString(measure.getMeasureType(i)));
 				elem.setAttribute(XML_A_MEASURE_CLASS, measure.getClassName(i));
 				elem.setAttribute(XML_A_MEASURE_STATION, measure.getStationName(i));
-				elem.setAttribute(XML_A_MEASURE_SAMPLES, Integer.toString(measure.getAnalizedSamples(i)));
+				elem.setAttribute(XML_A_MEASURE_SAMPLES, Integer.toString(measure.getAnalyzedSamples(i)));
 				elem.setAttribute(XML_A_MEASURE_ALPHA, Double.toString(measure.getAlpha(i)));
 				elem.setAttribute(XML_A_MEASURE_PRECISION, Double.toString(measure.getPrecision(i)));
 				elem.setAttribute(XML_A_MEASURE_NODETYPE, measure.getNodeType(i));
@@ -174,7 +174,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 				elem.setAttribute(XML_A_MEASURE_CLASS, measure.getClassName(i));
 				elem.setAttribute(XML_A_MEASURE_STATION, measure.getStationName(i));
 				elem.setAttribute(XML_A_MEASURE_FINALVALUE, Double.toString((measure.getValues(i).lastElement()).getMeanValue()));
-				elem.setAttribute(XML_A_MEASURE_SAMPLES, Integer.toString(measure.getAnalizedSamples(i)));
+				elem.setAttribute(XML_A_MEASURE_SAMPLES, Integer.toString(measure.getAnalyzedSamples(i)));
 				elem.setAttribute(XML_A_MEASURE_STATE, Integer.toString(measure.getMeasureState(i)));
 				elem.setAttribute(XML_A_MEASURE_ALPHA, Double.toString(measure.getAlpha(i)));
 				elem.setAttribute(XML_A_MEASURE_PRECISION, Double.toString(measure.getPrecision(i)));
@@ -204,8 +204,8 @@ public class XMLResultsWriter implements XMLResultsConstants {
 		Vector<MeasureValue> samples = measure.getValues(measureIndex);
 		if (parametric) {
 			PAResultsModel.MeasureValueImpl value;
-			// Writes all samples, ignoring upperBound and lowerBound if zeros or infinites
-			// (that means they are unset)
+			// Writes all samples, ignoring upperBound and lowerBound if zeros or infinities
+			// (that means they are reset)
 			for (int i = 0; i < samples.size(); i++) {
 				Element sample = doc.createElement(XML_E_SAMPLE);
 				value = (PAResultsModel.MeasureValueImpl) samples.get(i);
@@ -219,8 +219,8 @@ public class XMLResultsWriter implements XMLResultsConstants {
 			}
 		} else {
 			MeasureValue value;
-			// Writes all samples, ignoring upperBound and lowerBound if zeros or infinites
-			// (that means they are unset)
+			// Writes all samples, ignoring upperBound and lowerBound if zeros or infinities
+			// (that means they are reset)
 			for (int i = 0; i < samples.size(); i++) {
 				Element sample = doc.createElement(XML_E_SAMPLE);
 				value = samples.get(i);

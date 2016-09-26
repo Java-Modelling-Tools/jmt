@@ -1,16 +1,31 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.joinStrategies;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Map;
-
-import jmt.gui.common.forkStrategies.ForkStrategy;
-import jmt.gui.common.forkStrategies.OutPath;
 
 public abstract class JoinStrategy {
+
 	protected static JoinStrategy[] all = null;
 	protected static JoinStrategy[] allForSource = null;
-	
+
 	protected String description;
 
 	public abstract String getName();
@@ -23,10 +38,11 @@ public abstract class JoinStrategy {
 	public String toString() {
 		return getName();
 	}
-	
+
 	public abstract int getRequiredNum();
+
 	public abstract void setRequiredNum(int i);
-	
+
 	@Override
 	public abstract JoinStrategy clone();
 
@@ -40,7 +56,7 @@ public abstract class JoinStrategy {
 	}
 
 	public abstract String getClassPath();
-	
+
 	public static JoinStrategy[] findAll() {
 		if (all != null) {
 			return all;
@@ -64,6 +80,7 @@ public abstract class JoinStrategy {
 		all = ret;
 		return ret;
 	}
+
 	//TODO:modify this piece of code
 	public static JoinStrategy[] findAllForSource() {
 		if (allForSource != null) {
@@ -88,6 +105,7 @@ public abstract class JoinStrategy {
 		allForSource = ret;
 		return ret;
 	}
-	
+
 	public abstract boolean isModelStateDependent();
+
 }

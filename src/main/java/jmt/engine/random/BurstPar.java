@@ -4,11 +4,8 @@ package jmt.engine.random;
  * 
  * This is the parameter that should be passed to the Burst distribution.
  * 
- * <br>
- * <br>
- * Copyright (c) 2003 <br>
- * Politecnico di Milano - dipartimento di Elettronica e Informazione
- * 
+ * <br><br>Copyright (c) 2003
+ * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Federico Dal Castello
  * 
  */

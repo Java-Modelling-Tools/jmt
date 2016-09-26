@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions.parametric;
 
@@ -61,7 +61,7 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 		}
 		initialValue = cd.getTotalCloseClassPopulation();
 		finalValue = cd.getTotalCloseClassPopulation() * 2 + 1;
-		numberOfSteps = this.searchForAvaibleSteps();
+		numberOfSteps = this.searchForAvailableSteps();
 		if (numberOfSteps > MAX_STEP_NUMBER) {
 			numberOfSteps = MAX_STEP_NUMBER;
 		}
@@ -149,7 +149,6 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 			if (singleClass) {
 				Integer refPop = (Integer) ((Vector) values).get(step);
 				classDef.setClassPopulation(refPop, classKey);
-
 			} else {
 				Vector classSet = classDef.getClosedClassKeys();
 				for (int i = 0; i < classSet.size(); i++) {
@@ -171,7 +170,7 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 	 * @return the maximum number of steps
 	 */
 	@Override
-	public int searchForAvaibleSteps() {
+	public int searchForAvailableSteps() {
 		int max = (int) (finalValue - initialValue) + 1;
 		validParameterValues = new Vector<Integer>(max, 1);
 		if (singleClass) {
@@ -182,7 +181,7 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 			}
 			return max;
 		} else {
-			int avaibleSteps = 0;
+			int availableSteps = 0;
 			Vector classSet = classDef.getClosedClassKeys();
 			//calculate the proportion between classes populations
 			double[] betas = new double[classSet.size()];
@@ -206,11 +205,11 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 				//check if the cycle was exited before checking all classes
 				if (!(j < classSet.size())) {
 					validParameterValues.add(new Integer(totalPop));
-					avaibleSteps++;
+					availableSteps++;
 				}
 				totalPop++;
 			}
-			return avaibleSteps;
+			return availableSteps;
 		}
 	}
 
@@ -307,7 +306,7 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 		} else {
 			//if is single class...
 			if (isSingleClass()) {
-				// ... and the selected close class is no more avaible
+				// ... and the selected close class is no more available
 				if (!closeClasses.contains(classKey)) {
 					code = 1;
 					if (autocorrect) {
@@ -318,7 +317,7 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 						if (finalValue < minFinal) {
 							finalValue = minFinal;
 						}
-						numberOfSteps = searchForAvaibleSteps();
+						numberOfSteps = searchForAvailableSteps();
 						if (numberOfSteps > MAX_STEP_NUMBER) {
 							numberOfSteps = MAX_STEP_NUMBER;
 						}
@@ -333,9 +332,9 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 						if (autocorrect) {
 							initialValue = totalPop;
 							if (finalValue < minFinal) { //the initial value was changed,
-								finalValue = minFinal; //so change the final value and
+								finalValue = minFinal;   //so change the final value and
 							}
-							numberOfSteps = searchForAvaibleSteps(); //number of steps
+							numberOfSteps = searchForAvailableSteps(); //number of steps
 							if (numberOfSteps > MAX_STEP_NUMBER) {
 								numberOfSteps = MAX_STEP_NUMBER;
 							}
@@ -358,14 +357,14 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 						if (finalValue < minFinal) { //the initial value was changed,
 							finalValue = minFinal; //so change the final value and
 						}
-						numberOfSteps = searchForAvaibleSteps(); //number of steps
+						numberOfSteps = searchForAvailableSteps(); //number of steps
 						if (numberOfSteps > MAX_STEP_NUMBER) {
 							numberOfSteps = MAX_STEP_NUMBER;
 						}
 					}
 				} else {
 					Vector<Integer> temp = validParameterValues;
-					int temp2 = searchForAvaibleSteps();
+					int temp2 = searchForAvailableSteps();
 					//if the total nmber job equals initialValue, but the
 					//validParameterValues is different from the old one
 					//it means that something was changed

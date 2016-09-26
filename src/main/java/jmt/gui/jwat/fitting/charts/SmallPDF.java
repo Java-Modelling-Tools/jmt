@@ -96,14 +96,14 @@ public class SmallPDF extends JPanel {
 		//build the count of frequencies
 		int j=0;
 		double bucket_dim = x[x.length-1] / Math.round(x.length/10);
-		for(int i=0;i<freq_y.length;i++) {
+		for (int i=0;i<freq_y.length;i++) {
 			
-			while((x[j] < (i+1)*bucket_dim) && (x[j] >= i*bucket_dim)) {
+			while ((x[j] < (i+1)*bucket_dim) && (x[j] >= i*bucket_dim)) {
 				freq_y[i]++;
 				j++;
 			}
 			
-			if(i<(freq_y.length-1))
+			if (i<(freq_y.length-1))
 				freq_y[i] /= x.length;
 			
 			//System.out.println("Bucket from "+ i*bucket_dim + " to " + (i+1)*bucket_dim + " Percentage: " + freq_y[i]);

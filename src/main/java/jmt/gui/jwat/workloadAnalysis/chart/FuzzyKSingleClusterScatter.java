@@ -280,15 +280,15 @@ public class FuzzyKSingleClusterScatter extends JPanel {
 
 	}
 
-	/*private int getColor(int obs){
+	/*private int getColor(int obs) {
 		int pos = -1;
-	    for(int i=0;i<c1.length;i++){
-	        if(c1[i][obs] >= err){
-	            if(pos != -1) return 1;
+	    for (int i=0;i<c1.length;i++) {
+	        if (c1[i][obs] >= err) {
+	            if (pos != -1) return 1;
 	            else pos = i;
 	        }
 	    }
-	    if(pos == -1) return 0;
+	    if (pos == -1) return 0;
 	    return pos+2;
 	}*/
 

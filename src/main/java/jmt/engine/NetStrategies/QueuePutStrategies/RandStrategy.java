@@ -1,42 +1,47 @@
-package jmt.engine.NetStrategies.QueuePutStrategies;
-import jmt.common.exception.NetException;
-import jmt.engine.NetStrategies.QueuePutStrategy;
-import jmt.engine.NetStrategies.ServiceStrategy;
-import jmt.engine.NodeSections.Server;
-import jmt.engine.QueueNet.*;
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-/** @author Anastasia Eleftheriou
- * 
- * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-public class RandStrategy implements QueuePutStrategy{
-	/**
-	 * arriving jobs are randomly put in the Queue.
-	 * @param job Job to be added to the queue.
-	 * @param queue Queue.
-	 * @param sourceSection Job source section.
-	 * @param sourceNode Job source node.
-	 * @param callingSection The section which calls this strategy.
-	 * @throws NetException 
-	 */
-	public void put(Job job, JobInfoList queue, byte sourceSection, NetNode sourceNode, NodeSection callingSection) throws NetException {
-		
-	Server server = (Server) callingSection.getOwnerNode().getSection(NodeSection.SERVICE);
-		
-		ServiceStrategy[] strategy = server.getServiceStrategy();
-					
-		double serviceTime = strategy[job.getJobClass().getId()].wait(server);
-		
-		//double serviceTime = Math.random(); //for testing purposes
-		job.setServiceTime(serviceTime); 
-		queue.addRand(new JobInfo(job));
+package jmt.engine.NetStrategies.QueuePutStrategies;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.QueuePutStrategy;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.JobInfoList;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * This class implements a specific queue put strategy: all arriving jobs
+ * are put at random positions of the queue.
+ * @author Lulai Zhu
+ */
+public class RandStrategy implements QueuePutStrategy {
+
+	private RandomEngine engine = RandomEngine.makeDefault();
+
+	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+		job.setServiceTime(0.0);
+		queue.add((int) (engine.raw() * (queue.size() + 1)), new JobInfo(job));
 	}
-	
-	/* (non-Javadoc)
-	 * @see jmt.common.AutoCheck#check()
-	 */	
+
 	public boolean check() {
 		return true;
 	}
+
 }

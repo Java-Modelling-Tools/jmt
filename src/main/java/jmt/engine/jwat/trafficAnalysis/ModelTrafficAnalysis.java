@@ -30,7 +30,7 @@ public class ModelTrafficAnalysis implements JWatModel {
 
 	private void notifyResetModel() {
 		for (int i = 0; i < resetModel.size(); i++) {
-			resetModel.get(i).modelResetted();
+			resetModel.get(i).modelReset();
 		}
 	}
 

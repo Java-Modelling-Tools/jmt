@@ -93,7 +93,7 @@ public class SingleThreadTCSolver extends TreeTraverser implements IThreadedTCSo
 		throughputTimer.start();
 		for (int s = 0; s < qnm.R; s++) {
 			double totD = 0;
-			for(int k = 0; k < qnm.M; k++) {
+			for (int k = 0; k < qnm.M; k++) {
 				totD += qnm.getDemand(k, s);
 			}
 			if (totD == 0) {
@@ -127,7 +127,7 @@ public class SingleThreadTCSolver extends TreeTraverser implements IThreadedTCSo
 		
 		for (int m = 0; m < qnm.M; m++) {
 			
-			switch(qnm.getQueueType(m)) {
+			switch (qnm.getQueueType(m)) {
 			
 			// Case: Queue-dependent station, DELAY/infinite server.
 			case DELAY:

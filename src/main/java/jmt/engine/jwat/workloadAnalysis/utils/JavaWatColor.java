@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.jwat.workloadAnalysis.utils;
 
@@ -22,12 +22,15 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import jmt.gui.common.CommonConstants;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import jmt.gui.common.CommonConstants;
+
 public class JavaWatColor {
+
 	public static void main(String[] v) {
 		JFrame f = new JFrame();
 		f.setSize(CommonConstants.MAX_GUI_WIDTH_JWAT_COLOR, CommonConstants.MAX_GUI_HEIGHT_JWAT_COLOR);
@@ -38,9 +41,6 @@ public class JavaWatColor {
 			}
 		});
 		p = new JPanel() {
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -151,11 +151,11 @@ public class JavaWatColor {
 		name[36] = "ROSSO N°4";
 		list[37] = new Color(99, 55, 137).brighter().brighter();
 		name[37] = "VIOLA SCURO N°3";
-
 	}
 
 	private static JPanel p;
 	private static Color[] list;
 	private static String[] name;
 	private static int tot = 38;
+
 }

@@ -25,7 +25,7 @@ public class AddingPanelData {
 	
 	private TreeTableNode root;
 	
-	public AddingPanelData(){
+	public AddingPanelData() {
 		MD5s = new ArrayList<String>();
 		templateDatas = new ArrayList<TemplateData>();
 		siteNames = new ArrayList<String>();
@@ -85,32 +85,32 @@ public class AddingPanelData {
 		this.root = root;
 	}
 	
-	public void clearRoot(){
+	public void clearRoot() {
 		root = new RootNode("root");
 	}
 	
-	public void clearTemplateDatas(){
+	public void clearTemplateDatas() {
 		templateDatas = new ArrayList<TemplateData>(); 
 	}
 	
-	public void clearSitesData(){
+	public void clearSitesData() {
 		siteNames = new ArrayList<String>();
 		siteURLs = new ArrayList<String>();
 		siteInfos = new ArrayList<String>();
 	}
 	
 	//add
-	public void addTemplateData(TemplateData data){
+	public void addTemplateData(TemplateData data) {
 		this.templateDatas.add(data);
 	}
 	
-	public void addSite(String name, String URL){
+	public void addSite(String name, String URL) {
 		this.siteURLs.add(URL);
 		this.siteNames.add(name);
 		this.siteInfos.add(name +"-"+ URL);
 	}
 	
-	public void addNode(TreeTableNode node){
+	public void addNode(TreeTableNode node) {
 		this.root.add(node);
 	}
 

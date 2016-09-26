@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NetStrategies.RoutingStrategies;
 
@@ -41,19 +41,19 @@ public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 	/**
 	 * This strategy selects the resource with the least Queue Time for this jobClass
 	 * among the output nodes.
-	 * @param Nodes List of the output nodes.
-	 * @param jobClass class ofcurrent job to be routed
+	 * @param nodes List of the output nodes.
+	 * @param jobClass class of current job to be routed
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList Nodes, JobClass jobClass) {
-		if (Nodes.size() == 0) {
+	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
+		if (nodes.size() == 0) {
 			return null;
 		}
-		// next nodes candidates... Holds an array of them as on equality of response time they
+		// next node candidates... Holds an array of them as on equality of response time they
 		// will be chosen randomly
-		NetNode[] next = new NetNode[Nodes.size()];
-		next[0] = Nodes.get(0);
+		NetNode[] next = new NetNode[nodes.size()];
+		next[0] = nodes.get(0);
 		int nextLength = 1;
 		double leastRTime;
 
@@ -75,9 +75,9 @@ public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 			}
 
 			double tmp;
-			for (int i = 1; i < Nodes.size(); i++) {
+			for (int i = 1; i < nodes.size(); i++) {
 				// Stores new node in last free space
-				next[nextLength] = Nodes.get(i);
+				next[nextLength] = nodes.get(i);
 				// Checks if output is a sink... If class is open, sinks are preferred as have 0 response time.
 				// if class il closed, avoid it
 				if (next[nextLength].isSink()) {
@@ -116,4 +116,5 @@ public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 			return next[0];
 		}
 	}
+
 }

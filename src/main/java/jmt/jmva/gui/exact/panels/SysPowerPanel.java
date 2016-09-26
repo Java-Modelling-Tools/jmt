@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.jmva.gui.exact.panels;
 
@@ -46,11 +46,11 @@ public class SysPowerPanel extends SolutionPanel implements ExactConstants{
 		classAggsW = data.getPerClassSP(algorithm, false);
 		//NEW Cerotti
 		mixedModel =!(data.isClosed() || data.isOpen());
-		if(!mixedModel){
+		if (!mixedModel) {
 			globalAgg = data.getGlobalSP(algorithm, true);
 			globalAggW = data.getGlobalSP(algorithm, false);
 		}
-		else{
+		else {
 			globalAgg = globalAggW = null;
 		}
 
@@ -122,12 +122,12 @@ public class SysPowerPanel extends SolutionPanel implements ExactConstants{
 
 			if (rowIndex == 0 && columnIndex > 0) {
 				d = classAggs[columnIndex - 1][iteration];
-			} else if(rowIndex ==0 && columnIndex == 0 && !mixedModel)
+			} else if (rowIndex ==0 && columnIndex == 0 && !mixedModel)
 			{
 				d = globalAgg[iteration];
-			} else if(rowIndex == 1 && columnIndex > 0){
+			} else if (rowIndex == 1 && columnIndex > 0) {
 				d = classAggsW[columnIndex - 1][iteration];
-			} else if(!mixedModel){
+			} else if (!mixedModel) {
 				d = globalAggW[iteration];
 			}
 

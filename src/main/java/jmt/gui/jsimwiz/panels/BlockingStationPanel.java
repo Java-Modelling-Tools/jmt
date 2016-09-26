@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jsimwiz.panels;
 
@@ -196,7 +196,7 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 		stationPanel.add(tmpPanel, BorderLayout.EAST);
 		// Creates table to display stations
 		stationTable = new StationTable();
-		WarningScrollTable warning = new WarningScrollTable(stationTable, WARNING_STATIONS);
+		WarningScrollTable warning = new WarningScrollTable(stationTable, WARNING_STATION);
 		warning.addCheckVector(sd.getStationKeysNoSourceSink());
 		stationPanel.add(warning);
 		add(stationPanel);
@@ -300,6 +300,7 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 			getColumnModel().getColumn(1).setMaxWidth(ROW_HEIGHT);
 			getColumnModel().setColumnSelectionAllowed(false);
 			setRowHeight(ROW_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		/**

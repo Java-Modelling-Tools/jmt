@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,13 +8,14 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
@@ -30,25 +31,23 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.JTable;
+import javax.swing.JSpinner.DefaultEditor;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.SpinnerListModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SpringLayout;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 
 import jmt.framework.gui.layouts.SpringUtilities;
-import jmt.framework.gui.table.editors.ComboBoxCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
-import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 
 /**
@@ -60,24 +59,30 @@ import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
  *         Time: 16.15.46
  */
 public class BlockingRegionParameterPanel extends WizardPanel implements CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	protected ClassDefinition cd;
 	protected BlockingRegionDefinition brd;
 	protected Object key;
-	protected BlockingTable table;
 	// Name of blocking region
 	protected JTextField name;
 	// Global number of jobs
-	protected JSpinner number, memory;
-	protected JCheckBox inf, mInf;
+	protected JSpinner number, memory, gNumber;
+	protected JCheckBox inf, mInf, gEnable;
 	// Panels for input data
 	protected JPanel globalPanel;
-	protected JPanel classPanel;
+
+	protected BlockingRegionClassPanel classTablePanel;
+	protected BlockingRegionGroupPanel groupTablePanel;
 	/** Used to display classes with icon */
 	protected ImagedComboBoxCellEditorFactory classEditor;
+
+	protected JTabbedPane mainPanel;
+	protected WizardPanel current;
+
+	// Index for temporary class name assignment
+	protected int groupNameIndex;
 
 	/**
 	 * Builds a new Blocking Region Parameter Panel
@@ -105,9 +110,23 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		this.cd = cd;
 		this.brd = brd;
 		this.key = key;
-		classPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Class specific " + brd.getRegionName(key) + " Properties"));
-		globalPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Global " + brd.getRegionName(key) + " Properties"));
 		classEditor.setData(cd);
+
+		mainPanel.removeAll();
+		if (classTablePanel == null) {
+			classTablePanel = new BlockingRegionClassPanel(cd, brd, key);
+		} else {
+			classTablePanel.setData(cd, brd, key);
+		}
+		if (groupTablePanel == null) {
+			groupTablePanel = new BlockingRegionGroupPanel(cd, brd, key, gEnable);
+		} else {
+			groupTablePanel.setData(cd, brd, key);
+		}
+		mainPanel.add(classTablePanel, "Class Specific");
+		mainPanel.add(groupTablePanel, "Group Specific");
+
+		current = (WizardPanel) mainPanel.getSelectedComponent();
 		updateData();
 	}
 
@@ -116,43 +135,55 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 	 */
 	protected void initComponents() {
 		setLayout(new BorderLayout(5, 5));
+
 		// Panel with global region parameters
 		globalPanel = new JPanel(new SpringLayout());
-		globalPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Global " + brd.getRegionName(key) + " Properties"));
+		globalPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), brd.getRegionName(key) + " Global Properties"));
+		mainPanel = new JTabbedPane();
+		mainPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), brd.getRegionName(key) + " Specific Properties"));
+
 		// Enter region name
-		JLabel label = new JLabel("Region name: ");
+		JLabel label = new JLabel("Region Name: ");
 		name = new JTextField();
 		label.setLabelFor(name);
 		globalPanel.add(label);
 		globalPanel.add(name);
 		// Enter global number of customers
-		label = new JLabel("Region capacity: ");
+		label = new JLabel("Region Capacity: ");
 		JPanel tmpPanel = new JPanel(new BorderLayout(6, 6));
-		JPanel tmp = new JPanel(new BorderLayout(6,6));
+		JPanel tmp = new JPanel(new BorderLayout(6, 6));
+		JPanel tmpG = new JPanel(new BorderLayout(6, 6));
+		tmpG.setBorder(new EmptyBorder(0, 0, 0, 2));
 		number = new JSpinner();
 		memory = new JSpinner();
+		gNumber = new JSpinner();
 		inf = new JCheckBox("Infinite");
 		mInf = new JCheckBox("Infinite");
-		JLabel mLabel = new JLabel("Region memory capacity: ");
+		gEnable = new JCheckBox("Enable");
+		// Disable grouping feature
+		gEnable.setEnabled(false);
+		JLabel mLabel = new JLabel("Region Memory Size: ");
+		JLabel gLabel = new JLabel("Region Groups: ");
 		tmpPanel.add(number, BorderLayout.CENTER);
 		tmpPanel.add(inf, BorderLayout.EAST);
 		tmp.add(memory, BorderLayout.CENTER);
 		tmp.add(mInf, BorderLayout.EAST);
+		tmpG.add(gNumber, BorderLayout.CENTER);
+		tmpG.add(gEnable,BorderLayout.EAST);
 		label.setLabelFor(tmpPanel);
-		mLabel.setLabelFor(memory);
+		mLabel.setLabelFor(tmp);
+		gLabel.setLabelFor(tmpG);
 		globalPanel.add(label);
 		globalPanel.add(tmpPanel);
 		globalPanel.add(mLabel);
 		globalPanel.add(tmp);
+		globalPanel.add(gLabel);
+		globalPanel.add(tmpG);
 
-		SpringUtilities.makeCompactGrid(globalPanel, 3, 2, 20, 4, 20, 10);
-		add(globalPanel, BorderLayout.NORTH);
-		// Panel with class dependent parameters
-		classPanel = new JPanel(new BorderLayout());
-		classPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Class specific " + brd.getRegionName(key) + " Properties"));
-		table = new BlockingTable();
-		classPanel.add(new WarningScrollTable(table, WARNING_CLASS));
-		add(classPanel, BorderLayout.CENTER);
+		SpringUtilities.makeCompactGrid(globalPanel, 4, 2, 20, 4, 20, 10);
+		add(globalPanel, BorderLayout.NORTH);		
+		add(mainPanel, BorderLayout.CENTER);
+		groupNameIndex = brd.getRegionGroupList(key).size();
 	}
 
 	/**
@@ -173,36 +204,47 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 					if (num > 0) {
 						brd.setRegionCustomerConstraint(key, (Integer) value);
 					}
-					// Shows stored value
 					number.setValue(brd.getRegionCustomerConstraint(key));
 				}
 			}
 		});
-		memory.addChangeListener(new ChangeListener(){
+
+		memory.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				Object value = memory.getValue();
 				if (value instanceof Integer) {
 					int num = ((Integer) value).intValue();
 					if (num > 0) {
-						brd.setRegionMemoryCapacity(key, (Integer) value);
+						brd.setRegionMemorySize(key, (Integer) value);
 					}
-					// Shows stored value
 					memory.setValue(brd.getRegionMemorySize(key));
 				}
 			}
 		});
-		
+
+		gNumber.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Object value = gNumber.getValue();
+				if (value instanceof Integer) {
+					int num = ((Integer) value).intValue();
+					if (num > 0) {
+						setNumberOfGroups(num);
+					}
+					gNumber.setValue(brd.getRegionGroupList(key).size());
+				}
+			}
+		});
+
 		inf.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (inf.isSelected()) {
-					number.setValue(new Float(Float.POSITIVE_INFINITY));
+					number.setValue(Float.POSITIVE_INFINITY);
 					number.setEnabled(false);
-					brd.setRegionCustomerConstraint(key, new Integer(-1));
+					brd.setRegionCustomerConstraint(key, Integer.valueOf(-1));
 				} else {
-					// Uses default value if finite, otherwise initialize with one.
 					Integer num = Defaults.getAsInteger("blockingMaxJobs");
 					if (num.intValue() <= 0) {
-						num = new Integer(1);
+						num = Integer.valueOf(1);
 					}
 					number.setValue(num);
 					number.setEnabled(true);
@@ -210,24 +252,59 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 				}
 			}
 		});
-		mInf.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e){
-				if(mInf.isSelected()){
-					memory.setValue(new Float(Float.POSITIVE_INFINITY));
+
+		mInf.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (mInf.isSelected()) {
+					memory.setValue(Float.POSITIVE_INFINITY);
 					memory.setEnabled(false);
-					brd.setRegionMemoryCapacity(key, new Integer(-1));
-				}else{
+					brd.setRegionMemorySize(key, Integer.valueOf(-1));
+				} else {
 					Integer memorySize = Defaults.getAsInteger("blockingMaxMemory");
-					if(memorySize.intValue() <= 0){
-						memorySize = new Integer(1);
+					if (memorySize.intValue() <= 0) {
+						memorySize = Integer.valueOf(1);
 					}
 					memory.setValue(memorySize);
 					memory.setEnabled(true);
-					brd.setRegionMemoryCapacity(key, memorySize);
+					brd.setRegionMemorySize(key, memorySize);
 				}
 			}
 		});
 
+		gEnable.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (gEnable.isSelected()) {
+					addGroup();
+					gNumber.setModel(new SpinnerNumberModel());
+					Integer numOfGroup = Integer.valueOf(1);
+					gNumber.setValue(numOfGroup);
+					gNumber.setEnabled(true);
+					mainPanel.setEnabledAt(1, true);
+				} else {
+					deleteAllGroup();
+					gNumber.setModel(new SpinnerListModel(new String[]{"--"}));
+					((DefaultEditor) gNumber.getEditor()).getTextField().setHorizontalAlignment(JTextField.RIGHT);
+					gNumber.setValue("--");
+					gNumber.setEnabled(false);
+					mainPanel.setSelectedIndex(0);
+					mainPanel.setEnabledAt(1, false);
+				}	
+			}
+		});
+
+		mainPanel.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				// Loses focus on old panel
+				if (current != null) {
+					current.lostFocus();
+				}
+				// Gets focus on new panel
+				if (mainPanel.getSelectedComponent() != null) {
+					current = (WizardPanel) mainPanel.getSelectedComponent();
+					current.gotFocus();
+				}
+			}
+		});
 	}
 
 	/**
@@ -235,29 +312,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 	 */
 	@Override
 	public String getName() {
-		return "Finite Capacity Region Parameters";
-	}
-
-	/**
-	 * called by the Wizard before when switching to another panel
-	 */
-	@Override
-	public void lostFocus() {
-		// Aborts editing of table
-		TableCellEditor editor = table.getCellEditor();
-		if (editor != null) {
-			editor.stopCellEditing();
-		}
-	}
-
-	/**
-	 * called by the Wizard when the panel becomes active
-	 */
-	@Override
-	public void gotFocus() {
-		// Fires a table change event
-		table.tableChanged(new TableModelEvent(table.getModel()));
-		classEditor.clearCache();
+		return "Blocking Region Parameter Panel";
 	}
 
 	/**
@@ -269,22 +324,39 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		Integer customer = brd.getRegionCustomerConstraint(key);
 		if (customer.intValue() > 0) {
 			number.setValue(customer);
-			inf.setSelected(false);
 			number.setEnabled(true);
+			inf.setSelected(false);
 		} else {
-			number.setValue(new Float(Float.POSITIVE_INFINITY));
-			inf.setSelected(true);
+			number.setValue(Float.POSITIVE_INFINITY);
 			number.setEnabled(false);
+			inf.setSelected(true);
 		}
-		Integer memoSize = brd.getRegionMemorySize(key);
-		if(memoSize.intValue() > 0){
-			memory.setValue(memoSize);
-			mInf.setSelected(false);
+
+		Integer MemorySize = brd.getRegionMemorySize(key);
+		if (MemorySize.intValue() > 0) {
+			memory.setValue(MemorySize);
 			memory.setEnabled(true);
+			mInf.setSelected(false);
 		} else {
-			memory.setValue(new Float(Float.POSITIVE_INFINITY));
-			mInf.setSelected(true);
+			memory.setValue(Float.POSITIVE_INFINITY);
 			memory.setEnabled(false);
+			mInf.setSelected(true);
+		}
+
+		Integer numOfGroup = brd.getRegionGroupList(key).size();
+		if (numOfGroup.intValue() > 0) {
+			gNumber.setModel(new SpinnerNumberModel());
+			gNumber.setValue(numOfGroup);
+			gNumber.setEnabled(true);
+			gEnable.setSelected(true);
+			mainPanel.setEnabledAt(1, true);
+		} else {
+			gNumber.setModel(new SpinnerListModel(new String[]{"--"}));
+			((DefaultEditor) gNumber.getEditor()).getTextField().setHorizontalAlignment(JTextField.RIGHT);
+			gNumber.setValue("--");
+			gNumber.setEnabled(false);
+			gEnable.setSelected(false);
+			mainPanel.setEnabledAt(1, false);
 		}
 	}
 
@@ -297,18 +369,11 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 	}
 
 	/**
-	 * Sets if class panel is visible (default true)
-	 * @param value true if panel is visible
-	 */
-	public void setClassVisible(boolean value) {
-		classPanel.setVisible(value);
-	}
-
-	/**
 	 * Listener used to change region name (associated to name JTextFields).
 	 * Parameters are set when JTextField loses focus or ENTER key is pressed.
 	 */
 	protected class inputListener implements KeyListener, FocusListener {
+
 		/**
 		 * Update station's name
 		 */
@@ -336,174 +401,61 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 
 		public void keyTyped(KeyEvent e) {
 		}
+
 	}
 
 	/**
-	 * Inner class used to parametrize blocking region class constraints
+	 * Modifies global number of classes for this model all at once.
 	 */
-	protected class BlockingTable extends JTable {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		protected String[] dropRules = new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() };
-		protected TableCellRenderer gray = new GrayCellRenderer();
-
-		int[] columnSizes = new int[] { 150, 60, 30, 50, 40, 40 };
-
-		public BlockingTable() {
-			super();
-			setModel(new BlockingTableModel());
-			sizeColumns();
-			setRowHeight(ROW_HEIGHT);
+	protected void setNumberOfGroups(int newNumber) {
+		// If new number is greater than a certain number, do nothing
+		if (newNumber > MAX_NUMBER_OF_GROUPS) {
+			setNumberOfGroups(MAX_NUMBER_OF_GROUPS);
+			return;
 		}
 
-		@Override
-		public TableCellRenderer getCellRenderer(int row, int column) {
-			if (column == 0) {
-				return classEditor.getRenderer();
-			} else if (column == 1) {
-				return gray;
-			} else if (column == 3) {
-				return ComboBoxCellEditor.getRendererInstance();
-			} else {
-				return super.getCellRenderer(row, column);
+		// If new number is not valid, reset to 0
+		if (newNumber < 0) {
+			setNumberOfGroups(0);
+			return;
+		}
+
+		int oldNumber = brd.getRegionGroupList(key).size();
+		// If new number is greater than former one, just add
+		if (newNumber > oldNumber) {
+			for (int i = oldNumber; i < newNumber; i++) {
+				addGroup();
+			}
+		} else if (newNumber < oldNumber) {
+			// Otherwise, just delete
+			for (int i = oldNumber - 1; i >= newNumber; i--) {
+				deleteGroup(i);
 			}
 		}
-
-		@Override
-		public TableCellEditor getCellEditor(int row, int column) {
-			if (column == 3) {
-				return ComboBoxCellEditor.getEditorInstance(dropRules);
-			} else {
-				return super.getCellEditor(row, column);
-			}
-		}
-
-		private void sizeColumns() {
-			for (int i = 0; i < columnSizes.length && i < getColumnCount(); i++) {
-				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
-			}
-		}
+		refreshComponents();
 	}
 
-	/**
-	 * Table model for blocking table
-	 */
-	protected class BlockingTableModel extends AbstractTableModel {
+	protected void addGroup() {
+		groupNameIndex++;
+		brd.addRegionGroup(key,Defaults.get("blockingGroupName") + groupNameIndex,
+				Defaults.getAsInteger("blockingGroupCapacity").intValue(),
+				Defaults.get("blockingGroupStratagy"));
+		refreshComponents();
+	}
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		private Class[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class ,String.class, String.class};
-		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Drop", "Memory Size", "Weight" };
+	protected void deleteGroup(int index) {
+		brd.deleteRegionGroup(key, index);
+		refreshComponents();
+	}
 
-		public int getRowCount() {
-			return cd.getClassKeys().size();
-		}
+	protected void deleteAllGroup() {
+		brd.deleteAllRegionGroups(key);
+		groupNameIndex = 0;
+		refreshComponents();
+	}
 
-		public int getColumnCount() {
-			return columnNames.length;
-		}
-
-		@Override
-		public String getColumnName(int columnIndex) {
-			return columnNames[columnIndex];
-		}
-
-		@Override
-		public Class<Integer> getColumnClass(int columnIndex) {
-			return columnClasses[columnIndex];
-		}
-
-		@Override
-		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			// Drop rule, infinity constraint are editables. Number value is editable if infinity is uncecked
-			return columnIndex == 5 || columnIndex == 4 || columnIndex == 3 || columnIndex == 2 || (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, columnIndex + 1)).booleanValue());
-		}
-
-		public Object getValueAt(int rowIndex, int columnIndex) {
-			Object classKey = cd.getClassKeys().get(rowIndex);
-			Integer num;
-			switch (columnIndex) {
-				case (0):
-					return classKey;
-				case (1):
-					num = brd.getRegionClassCustomerConstraint(key, classKey);
-					if (num.intValue() > 0) {
-						return num;
-					} else {
-						return "\u221e"; // Infinity symbol
-					}
-				case (2):
-					num = brd.getRegionClassCustomerConstraint(key, classKey);
-					return (num.intValue() <= 0) ? Boolean.TRUE : Boolean.FALSE;
-				case (3):
-					return brd.getRegionClassDropRule(key, classKey).toString();
-				case (4):
-					return brd.getRegionClassSize(key, classKey).toString();
-				case (5):
-					return brd.getRegionClassWeight(key, classKey).toString();
-			}
-			return null;
-		}
-
-		/**Puts edited values to the underlying data structure for model implementation*/
-		@Override
-		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			Object classKey = cd.getClassKeys().get(rowIndex);
-			Integer value;
-			switch (columnIndex) {
-				case (1):
-					try {
-						value = Integer.decode((String) aValue);
-						if (value.intValue() > 0) {
-							brd.setRegionClassCustomerConstraint(key, classKey, value);
-						}
-					} catch (NumberFormatException e) {
-						// Do nothing
-					}
-					break;
-				case (2):
-					boolean val = ((Boolean) aValue).booleanValue();
-					if (val) {
-						brd.setRegionClassCustomerConstraint(key, classKey, new Integer(-1));
-					} else {
-						value = Defaults.getAsInteger("blockingMaxJobsPerClass");
-						if (value.intValue() <= 0) {
-							value = new Integer(1);
-						}
-						brd.setRegionClassCustomerConstraint(key, classKey, value);
-					}
-					break;
-				case (3):
-					brd.setRegionClassDropRule(key, classKey, Boolean.valueOf((String) aValue));
-					break;
-				case (4):
-					try {
-						value = Integer.decode((String) aValue);
-						if (value.intValue() > 0) {
-							brd.setRegionClassSize(key, classKey, Integer.valueOf((String) aValue));
-						}
-					} catch (NumberFormatException e) {
-						// Do nothing
-					}
-					break;
-				case (5):
-					try {
-						value = Integer.decode((String) aValue);
-						if (value.intValue() > 0) {
-							brd.setRegionClassWeight(key, classKey, Integer.valueOf((String) aValue));
-						}
-					} catch (NumberFormatException e) {
-						// Do nothing
-					}
-					break;
-			}
-			repaint();
-		}
-
+	protected void refreshComponents() {
+		groupTablePanel.Refresh();
 	}
 
 }

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.QueueNet;
 
@@ -47,16 +47,16 @@ public class Job implements Cloneable {
 	redirected to the region input station (which check the capability of the
 	blocking region) and then returned to the destination node, using the
 	informations contained in this object.
-	*/
+	 */
 
 	//true if this job has been redirected
 	private boolean redirected = false;
 	// the original destination of the job message
 	private NetNode originalDestinationNode = null;
-
 	//end NEW
 
-	private double serviceTime = 0;
+	private double serviceTime = 0.0;
+
 	/** Creates a new instance of Job.
 	 *  @param jobClass Reference to the class of the job.
 	 */
@@ -114,6 +114,10 @@ public class Job implements Cloneable {
 		return systemEnteringTime;
 	}
 
+	public void setSystemEnteringTime(double time) {
+		systemEnteringTime = time;
+	}
+
 	//end NEW
 
 	//NEW
@@ -157,7 +161,7 @@ public class Job implements Cloneable {
 	}
 
 	//end NEW
-	
+
 	public static void resetCounter() {
 		counter = 0;
 	}
@@ -171,22 +175,22 @@ public class Job implements Cloneable {
 		classesBitwise |= newClass.getIdBitwise();
 		//Long.toBinaryString(classesBitwise);
 	}
-        
-         /** Adds a class to job history
+
+	/** Adds a class to job history
 	 * @param newClass the JobClass to add
 	 */
 	public void addClass(JobClass newClass) {
 		classesBitwise |= newClass.getIdBitwise();
 		//Long.toBinaryString(classesBitwise);
 	}
-	
+
 	/**
 	 * Reset bitwise 
 	 */
 	private void resetClass() {
 		classesBitwise = jobClass.getIdBitwise();
 	}
-	
+
 	/** 
 	 * If the job have ever been as jobClass
 	 * @param jobClass the class of the job if the job has ever been the class
@@ -195,7 +199,7 @@ public class Job implements Cloneable {
 	public boolean hasBeenClass(JobClass jobClass) {
 		return hasBeenClass(jobClass.getIdBitwise());
 	}
-	
+
 	/** 
 	 * If the job have ever been as jobClass id
 	 * @param jobClassId the class of the job if the job has ever been the class
@@ -205,22 +209,21 @@ public class Job implements Cloneable {
 		long idBitwise = JobClass.getIdBitwise(jobClassId);
 		return  hasBeenClass(idBitwise);
 	}
-	
+
 	/** 
 	 * If the job have ever been as jobClass as idBitwise
 	 * @param jobClassId the class of the job if the job has ever been the class
 	 * @return true if the job currently of given class or previously in this class
 	 */
-	private boolean hasBeenClass(long idBitwise){
+	private boolean hasBeenClass(long idBitwise) {
 		return  (classesBitwise & idBitwise) > 0 ;
 	}
-	
 
-	public double getServiceTime(){
+	public double getServiceTime() {
 		return serviceTime;
 	}
-	
-	public void setServiceTime(double time){
+
+	public void setServiceTime(double time) {
 		serviceTime = time;
 	}
 }

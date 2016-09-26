@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.editors;
 
@@ -77,7 +77,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	}
 
 	private void initComponents() {
-		rtPane = new WarningScrollTable(routingTable, WARNING_ROUTING);
+		rtPane = new WarningScrollTable(routingTable, WARNING_OUTGOING_ROUTING);
 		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Routing Options"));
 		noOptLabel.setOpaque(false);
 		noOptLabel.setEditable(false);
@@ -94,7 +94,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	}
 
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-		/*        if(stationKey==null||classKey==null||sd==null){
+		/*        if (stationKey==null||classKey==null||sd==null) {
 		            emptyPane();
 		            return;
 		        }
@@ -109,12 +109,12 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			} else {
 				createDetails(rs, sd, stationKey, classKey);
 			}*/
-            if(rs instanceof ProbabilityRouting){
+            if (rs instanceof ProbabilityRouting) {
                 createDetails(rs, sd, stationKey, classKey);
-            }else if(rs instanceof LoadDependentRouting){
+            } else if (rs instanceof LoadDependentRouting) {
                 JComponent LDRoutingPanel = new JPanel();
                 LDRoutingPanel.setBorder(new TitledBorder(new EtchedBorder(), "LD Routing Options"));
-                if(sd.getForwardConnections(stationKey) != null && sd.getForwardConnections(stationKey).size() != 0){
+                if (sd.getForwardConnections(stationKey) != null && sd.getForwardConnections(stationKey).size() != 0) {
                     JButton editLoadDependentRoutingButton = new JButton("Edit LD Routing..");
                     HashMap<String, Object> ldParameters = new HashMap<String, Object>();
                     ldParameters.put("ClassDefinition",cs);
@@ -126,11 +126,11 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
                     ldParameters.put("title","Editing for [Class] "+className + " for [Station] " + stationName + " Load Dependent Routing ...");
                     editLoadDependentRoutingButton.addActionListener(new EditLoadDependentRoutingListener(ldParameters));
                     LDRoutingPanel.add(editLoadDependentRoutingButton);
-                }else{
+                } else {
                     LDRoutingPanel = rtPane;
                 }
                 setRightComponent(LDRoutingPanel);
-            }else{
+            } else {
                emptyPane();
             }
 		}
@@ -193,6 +193,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			setModel(new RoutingTableModel());
 			setDefaultEditor(Object.class, new jmt.gui.exact.table.ExactCellEditor());
 			sizeColumns();
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		private void sizeColumns() {
@@ -277,11 +278,11 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
     private class EditLoadDependentRoutingListener implements ActionListener{
         HashMap<String, Object> properties = null;
-        public EditLoadDependentRoutingListener (HashMap<String, Object> properties){
+        public EditLoadDependentRoutingListener (HashMap<String, Object> properties) {
 
             this.properties = properties;
         }
-        public void actionPerformed(ActionEvent e){
+        public void actionPerformed(ActionEvent e) {
             Container parent = (Container)RoutingProbabilitiesEditor.this;
             RoutingSectionPanel.openLoadDependentRoutingEditor(parent,properties);
         }

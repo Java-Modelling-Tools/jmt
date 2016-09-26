@@ -1,5 +1,5 @@
-/*   
- * Copyright (C) 2011, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jaba.graphs;
 
@@ -57,32 +57,32 @@ public class JabaCanvas extends JPanel implements AdjustmentListener{
 	private void updateBars() {
 		int deltaWidth = (graphWidth - this.getWidth());
 		int deltaHeight = (graphHeight-this.getHeight());
-		if( deltaWidth > 0) {
+		if ( deltaWidth > 0) {
 			hBar.setMinimum(0);
 			hBar.setMaximum(deltaWidth);
-			if(!hBar.isVisible())
+			if (!hBar.isVisible())
 				hBar.setValue(0);
 			hBar.setVisible(true);
-		}else {
+		} else {
 			hBar.setVisible(false);
 			graph.translateX(0);
 		}
-		if(deltaHeight>0) {
+		if (deltaHeight>0) {
 			vBar.setMinimum(0);
 			vBar.setMaximum(deltaHeight);
-			if(!vBar.isVisible())
+			if (!vBar.isVisible())
 				vBar.setValue(0);
 			vBar.setVisible(true);
-		}else {
+		} else {
 			vBar.setVisible(false);
 			graph.translateY(0);
 		}
 	}
 
 	public void adjustmentValueChanged(AdjustmentEvent ev) {
-		if(ev.getSource() == hBar) {
+		if (ev.getSource() == hBar) {
 			graph.translateX(ev.getValue());
-		} else if(ev.getSource() == vBar) {
+		} else if (ev.getSource() == vBar) {
 			graph.translateY(ev.getValue());
 		}		
 	}

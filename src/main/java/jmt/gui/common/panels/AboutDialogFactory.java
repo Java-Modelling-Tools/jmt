@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2013, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.panels;
 
@@ -57,64 +57,67 @@ import jmt.gui.common.startScreen.GraphStartScreen;
  *         Time: 16.42.10
  */
 public class AboutDialogFactory {
+
 	public enum Company {
+
 		POLIMI, ICL;
-		
+
 		/**
 		 * @return the logo of the contributor company
 		 */
 		public JComponent getLogo() {
 			switch (this) {
-				case POLIMI:
-					JLabel logo = new JLabel(GraphStartScreen.HTML_POLI);
-					logo.setHorizontalTextPosition(SwingConstants.TRAILING);
-					logo.setVerticalTextPosition(SwingConstants.CENTER);
-					logo.setIconTextGap(10);
-					logo.setIcon(JMTImageLoader.loadImage("logo", new Dimension(70, 70)));
-					return logo;
-				case ICL:
-					return new JLabel(JMTImageLoader.loadImage("logo_icl", new Dimension(-1,40)));
-				default:
-					return null;
+			case POLIMI:
+				JLabel logo = new JLabel(GraphStartScreen.HTML_POLI);
+				logo.setHorizontalTextPosition(SwingConstants.TRAILING);
+				logo.setVerticalTextPosition(SwingConstants.CENTER);
+				logo.setIconTextGap(10);
+				logo.setIcon(JMTImageLoader.loadImage("logo", new Dimension(70, 70)));
+				return logo;
+			case ICL:
+				return new JLabel(JMTImageLoader.loadImage("logo_icl", new Dimension(-1,40)));
+			default:
+				return null;
 			}
 		}
+
 	}
-	
+
 	/** JMVA main contributors */
 	private static final Contributors[] JMVA = {
-		new Contributors(Company.POLIMI, "Bertoli Marco", "Conti Andrea", "Dall'Orso Federico", "Omini Stefano", "Granata Federico", "Gribaudo Marco", "Sheikhvand Kourosh"),
-		new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Tokaj Piotr", "Haixiao Su")
+			new Contributors(Company.POLIMI, "Bertoli Marco", "Conti Andrea", "Dall'Orso Federico", "Omini Stefano", "Granata Federico", "Gribaudo Marco", "Sheikhvand Kourosh"),
+			new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Tokaj Piotr", "Su Haixiao")
 	};
 
 	/** JSIMwiz main contributors */
 	private static final Contributors[] JSIM = {
-		new Contributors(Company.POLIMI, "Bertoli Marco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Dall'Orso Federico")
+			new Contributors(Company.POLIMI, "Bertoli Marco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Dall'Orso Federico")
 	};
 
 	/** JSIMgraph main contributors */
 	private static final Contributors[] JMODEL = {
-		new Contributors(Company.POLIMI, "Bertoli Marco", "Cazzoli Mattia", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
-		new Contributors(Company.ICL, "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor")
+			new Contributors(Company.POLIMI, "Bertoli Marco", "Cazzoli Mattia", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
+			new Contributors(Company.ICL, "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phumin Phuangjaisri")
 	};
 
 	/** JABA main contributors */
 	private static final Contributors[] JABA = {
-		new Contributors(Company.POLIMI, "Bertoli Marco", "Zanzottera Andrea", "Gimondi Carlo", "Spicuglia Sebastiano")
+			new Contributors(Company.POLIMI, "Bertoli Marco", "Zanzottera Andrea", "Gimondi Carlo", "Spicuglia Sebastiano")
 	};
 
 	/** JMCH main contributors */
 	private static final Contributors[] JMCH = {
-		new Contributors(Company.POLIMI, "Canakoglu Arif", "Di Mauro Ernesto")
+			new Contributors(Company.POLIMI, "Canakoglu Arif", "Di Mauro Ernesto")
 	};
 
 	/** JWAT main contributors */
 	private static final Contributors[] JWAT = {
-		new Contributors(Company.POLIMI, "Brambilla Davide", "Fumagalli Claudio")
+			new Contributors(Company.POLIMI, "Brambilla Davide", "Fumagalli Claudio")
 	};
-	
+
 	/** Overall contributors is merged by the others */
 	private static final Contributors[] JMT;
-	
+
 	static {
 		List<Contributors> allContributors = new ArrayList<AboutDialogFactory.Contributors>();
 		allContributors.addAll(Arrays.asList(JMVA));
@@ -145,7 +148,7 @@ public class AboutDialogFactory {
 	 * Variables
 	 */
 	private static final long AUTOCLOSE_TIMEOUT = 2500;
-	
+
 	private static boolean autoJMVAshown = false;
 
 	/**
@@ -188,7 +191,7 @@ public class AboutDialogFactory {
 		bottom.add(exit);
 		dialog.getContentPane().add(bottom, BorderLayout.SOUTH);
 		dialog.centerWindow(CommonConstants.MAX_GUI_WIDTH_ABOUT, CommonConstants.MAX_GUI_HEIGHT_ABOUT);
-		
+
 		// Handles autoclose
 		if (autoclose) {
 			ExecutorService es = Executors.newSingleThreadExecutor();
@@ -205,11 +208,9 @@ public class AboutDialogFactory {
 			});
 			es.shutdown();
 		}
-		
+
 		return dialog;
 	}
-
-
 
 	/**
 	 * Shows JMVA about window
@@ -300,10 +301,11 @@ public class AboutDialogFactory {
 	 * Defines the major contributors of a tool, grouped by company
 	 */
 	public static class Contributors {
+
 		private Company company;
 		private List<String> names;
 		private List<String> processedNames;
-		
+
 		/**
 		 * Builds a contributors list
 		 * @param company the company
@@ -350,13 +352,14 @@ public class AboutDialogFactory {
 		public List<String> getNames() {
 			return names;
 		}
-		
+
 		/**
 		 * @return the contributor names showing first name and surname
 		 */
 		public List<String> getProcessedNames() {
 			return processedNames;
 		}
-		
+
 	}
+
 }

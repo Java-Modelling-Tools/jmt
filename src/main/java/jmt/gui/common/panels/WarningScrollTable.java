@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.panels;
 
@@ -46,14 +46,13 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 14.30.24
  */
 public class WarningScrollTable extends JRootPane {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	protected static final int BORDERSIZE = 5;
-	protected static final Dimension warningBoxSize = new Dimension(170, 90);
+	protected static final Dimension warningBoxSize = new Dimension(210, 95);
 	protected JTable table;
-	protected Vector<Vector> vectors;
+	protected Vector<Vector<Object>> vectors;
 
 	/**
 	 * Constructs a new WarningScrollTable, given a table and a warning message to display if the
@@ -82,13 +81,13 @@ public class WarningScrollTable extends JRootPane {
 	}
 
 	/**
-	 * Adds a new Vector tobe check. If this methodis used behaviour of WarningScrollTable will
+	 * Adds a new Vector to be checked. If this method is used behaviour of WarningScrollTable will
 	 * change and warning message will be shown only if any of input vectors is empty
 	 * @param v input vector to be checked
 	 */
-	public void addCheckVector(Vector v) {
+	public void addCheckVector(Vector<Object> v) {
 		if (vectors == null) {
-			vectors = new Vector<Vector>();
+			vectors = new Vector<Vector<Object>>();
 		}
 		vectors.add(v);
 	}
@@ -107,7 +106,9 @@ public class WarningScrollTable extends JRootPane {
 	@Override
 	public void paint(Graphics g) {
 		if (vectors == null) {
-			if (table != null) {
+			if (table == null) {
+				getGlassPane().setVisible(true);
+			} else {
 				getGlassPane().setVisible(table.getRowCount() == 0 || table.getColumnCount() == 0);
 			}
 		} else {
@@ -161,4 +162,5 @@ public class WarningScrollTable extends JRootPane {
 		warning.add(innerPanel);
 		return warning;
 	}
+
 }

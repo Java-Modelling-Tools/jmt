@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.engine.NetStrategies.RoutingStrategies;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
@@ -14,7 +32,8 @@ import jmt.engine.random.EmpiricalPar;
  * Time: 10:25 PM
  * To change this template use File | Settings | File Templates.
  */
-public class LoadDependentRoutingParameter implements Comparable<Object>{
+public class LoadDependentRoutingParameter implements Comparable<Object> {
+
     private int from;
     private Empirical distribution;
 	private EmpiricalPar param;
@@ -29,7 +48,7 @@ public class LoadDependentRoutingParameter implements Comparable<Object>{
         probabilities = new double[empiricals.length];
         stationName = new String[empiricals.length];
 
-        for(int e=0; e<empiricals.length; e++){
+        for (int e=0; e<empiricals.length; e++) {
             probabilities[e] = empiricals[e].getProbability();
             stationName[e] = (String)empiricals[e].getValue();
         }
@@ -37,18 +56,18 @@ public class LoadDependentRoutingParameter implements Comparable<Object>{
         param = new EmpiricalPar(probabilities);
     }
 
-    public NetNode getOutNode(){
+    public NetNode getOutNode() {
         NetNode node = null;
-        if(nodes == null || nodes.length ==0){
+        if (nodes == null || nodes.length ==0) {
             nodes = new NetNode[stationName.length];
-            for(int n=0; (stationName != null && n<stationName.length); n++){
+            for (int n=0; (stationName != null && n<stationName.length); n++) {
                 nodes[n] = NetSystem.getNode(stationName[n]);
             }
         }
         try{
             int nodePos = (int) distribution.nextRand(param);
             node = this.nodes[nodePos];
-        }catch(IncorrectDistributionParameterException id){
+        }catch(IncorrectDistributionParameterException id) {
 
         }
         return node;
@@ -92,11 +111,11 @@ public class LoadDependentRoutingParameter implements Comparable<Object>{
      *                            from being compared to this object.
      */
     public int compareTo(Object o) {
-        if(o instanceof LoadDependentRoutingParameter){
+        if (o instanceof LoadDependentRoutingParameter) {
             return this.from - ((LoadDependentRoutingParameter)o).from;
-        }else if(o instanceof Integer){
+        } else if (o instanceof Integer) {
             return this.from - ((Integer)o).intValue();
-        }else{
+        } else {
             throw new ClassCastException("Incorrect Class to compare");
         }
     }

@@ -43,8 +43,8 @@ public abstract class MatrixMicroBlock extends MicroBlock {
 		array = new BigRational[size.row][size.col];
 		
 		//fill with zeros
-		for(int x = 0; x < size.row; x++) {
-			for(int y = 0; y < size.col; y++) {
+		for (int x = 0; x < size.row; x++) {
+			for (int y = 0; y < size.col; y++) {
 				array[x][y] = BigRational.ZERO;
 			}
 		}
@@ -69,7 +69,7 @@ public abstract class MatrixMicroBlock extends MicroBlock {
 	@Override
 	public void multiply(BigRational[] result) throws BTFMatrixErrorException {		
 		
-		if(position.col + size.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when multiplying");
+		if (position.col + size.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when multiplying");
 		
 		for (int i = 0; i < size.row; i++) {           
             try {
@@ -84,13 +84,13 @@ public abstract class MatrixMicroBlock extends MicroBlock {
 	@Override
 	public void printRow2(int row) {
 		int row_to_print = row - position.row;		
-		if(row_to_print >= 0 && row_to_print < size.row) {
+		if (row_to_print >= 0 && row_to_print < size.row) {
 			//print white space offset
-			for(int i = cols_printed; i < position.col; i++) {
+			for (int i = cols_printed; i < position.col; i++) {
 				System.out.format("%2s ", " ");	
 				cols_printed++;
 			}
-			for(int col = 0; col < size.col; col++) {				
+			for (int col = 0; col < size.col; col++) {				
 				System.out.format("%2s ", array[row_to_print][col].toString());
 				cols_printed++;
 			}

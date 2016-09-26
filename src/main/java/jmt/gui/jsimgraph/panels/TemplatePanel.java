@@ -157,7 +157,7 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				List<TemplateData> updateList = new ArrayList<TemplateData>();
-                                for(int i: templateTable.getSelectedRows()) {
+                                for (int i: templateTable.getSelectedRows()) {
                                         TemplateData template = templates[i];
                                         updateList.add(template);
                                 }
@@ -307,6 +307,7 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 			setModel(new TemplateTableModel());
 			sizeColumns();
 			setRowHeight(CELL_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		private void sizeColumns() {

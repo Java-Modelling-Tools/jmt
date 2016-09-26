@@ -20,7 +20,7 @@ public class CustomizableDialogFactory {
 	private JMTDialog dialogFrame;
 	private Frame mainWindow;
 	
-	public CustomizableDialogFactory(Frame mainWindow){
+	public CustomizableDialogFactory(Frame mainWindow) {
 		this.mainWindow = mainWindow;
 	}
 	
@@ -33,7 +33,7 @@ public class CustomizableDialogFactory {
 		dialogFrame.getContentPane().setLayout(new BorderLayout());
 	}
 	
-	public void getDialog(int width, int height, final JComponent panel, String title){
+	public void getDialog(int width, int height, final JComponent panel, String title) {
 		createDialog(width, height);
 		// Adds panel
 		dialogFrame.getContentPane().add(panel, BorderLayout.CENTER);

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.editors;
 
@@ -67,10 +67,9 @@ import jmt.gui.common.serviceStrategies.LDStrategy;
  *         Time: 11.49.53
  */
 public class LDStrategyEditor extends JMTDialog implements CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	protected static final int BORDERSIZE = 20;
 	protected static final int MAXRANGES = 1000;
 	public static final String HELPFILE = "ParserHelp.html";
@@ -144,10 +143,9 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	// --- Actions performed by buttons and EventListeners ---------------------------------------------
 	// When okay button is pressed
 	protected AbstractAction okayAction = new AbstractAction("OK") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Accepts changes and closes this window");
 		}
@@ -155,14 +153,14 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 		public void actionPerformed(ActionEvent e) {
 			LDStrategyEditor.this.close();
 		}
+
 	};
 
 	// When Add Range button is pressed
 	protected AbstractAction addRangeAction = new AbstractAction("Add Range") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Adds a new range into this service time strategy");
 		}
@@ -170,13 +168,12 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 		public void actionPerformed(ActionEvent e) {
 			addRange();
 		}
+
 	};
 
 	// deletion of one range
 	protected AbstractAction deleteRange = new AbstractAction("") {
-		/**
-		* 
-		*/
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -190,13 +187,12 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 				deleteRange(index);
 			}
 		}
+
 	};
 
 	//Component responsible of setting global number of ranges at once
 	protected JSpinner rangesNumSpinner = new JSpinner() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -226,6 +222,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 				}
 			});
 		}
+
 	};
 
 	// -------------------------------------------------------------------------------------------------
@@ -244,7 +241,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	}
 
 	/**
-	 * Inits all gui related stuff
+	 * Initialize all gui related stuff
 	 */
 	protected void initGUI() {
 		// Sets default title, close operation and dimensions
@@ -368,31 +365,29 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 		}
 	}
 
-	// -------------------------------------------------------------------------------------------------
+	//--------------------------------------------------------------------------------------------------
 
 	//---------------------------- Table containing strategy parameters --------------------------------
 
 	/**
 	 * Table that must display all of data about user classes. Customization of table
-	 * settings is obtained via inheritation of <code>JTable</code> Class.
+	 * settings is obtained via inheritance of <code>JTable</code> Class.
 	 */
 	protected class LDStrategyTable extends JTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		/*This button allow a single range to be deleted directly from the table.
 		Corresponding value contained into cell must be zero.*/
 		public JButton deleteButton = new JButton() {
-			/**
-			 * 
-			 */
+
 			private static final long serialVersionUID = 1L;
 
 			{
 				setAction(deleteRange);
 				setFocusable(false);
 			}
+
 		};
 		/** Editor to select distribution type */
 		protected ComboBoxCellEditor distributionEditor = ComboBoxCellEditor.getEditorInstance(distributions.keySet().toArray());
@@ -401,7 +396,8 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 			super();
 			this.setModel(new LDStrategyTableModel());
 			this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-                        this.setRowHeight(CommonConstants.ROW_HEIGHT);
+			this.setRowHeight(CommonConstants.ROW_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 		}
 
 		/*Set of column dimensions*/
@@ -453,22 +449,21 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 				}
 			}
 		}
+
 	}
 
 	/**
 	 * Table data model to implement customized data editing
 	 */
 	protected class LDStrategyTableModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		//Names of columns contained in table. Columns containing buttons have empty names
 		protected String[] columnNames = new String[] { "From", "To", "Distribution", "Mean", "C", "" };
 
 		//Class declarations for this table's columns.
-		protected Class[] colClasses = new Class[] { String.class, String.class, JComboBox.class, String.class, String.class, JButton.class };
+		protected Class<?>[] colClasses = new Class[] { String.class, String.class, JComboBox.class, String.class, String.class, JButton.class };
 
 		/**Creates a new instance of class table model*/
 		public LDStrategyTableModel() {
@@ -499,7 +494,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 
 		/**Returns class describing data contained in specific column.*/
 		@Override
-		public Class<Object> getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			if (columnIndex < colClasses.length) {
 				return colClasses[columnIndex];
 			} else {
@@ -507,7 +502,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 			}
 		}
 
-		/**Tells wether data contained in a specific cell(given row and column index)
+		/**Tells whether data contained in a specific cell(given row and column index)
 		 * is editable or not. In this case distribution column is not editable, as
 		 * editing functionality is implemented via edit button*/
 		@Override
@@ -528,33 +523,33 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object key = strategy.getAllRanges()[rowIndex];
 			switch (columnIndex) {
-				case (0): {
-					return new Integer(strategy.getRangeFrom(key));
+			case (0): {
+				return new Integer(strategy.getRangeFrom(key));
+			}
+			case (1): {
+				int value = strategy.getRangeTo(key);
+				if (value > 0) {
+					return new Integer(value);
+				} else {
+					return "\u221E"; // Infinity character
 				}
-				case (1): {
-					int value = strategy.getRangeTo(key);
-					if (value > 0) {
-						return new Integer(value);
-					} else {
-						return "\u221E"; // Infinity character
-					}
-				}
-				case (2): {
-					return strategy.getRangeDistribution(key).getName();
-				}
-				case (3): {
-					return strategy.getRangeDistributionMean(key);
-				}
-				case (4): {
-					if (strategy.getRangeDistribution(key).hasC()) {
-						return FormatNumber(strategy.getRangeDistribution(key).getC());
-					} else {
-						return null;
-					}
-				}
-				default: {
+			}
+			case (2): {
+				return strategy.getRangeDistribution(key).getName();
+			}
+			case (3): {
+				return strategy.getRangeDistributionMean(key);
+			}
+			case (4): {
+				if (strategy.getRangeDistribution(key).hasC()) {
+					return FormatNumber(strategy.getRangeDistribution(key).getC());
+				} else {
 					return null;
 				}
+			}
+			default: {
+				return null;
+			}
 			}
 		}
 
@@ -563,24 +558,24 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object key = strategy.getAllRanges()[rowIndex];
 			switch (columnIndex) {
-				case (0):
-					try {
-						strategy.setRangeFrom(key, Integer.parseInt((String) aValue));
-					} catch (NumberFormatException e) {
-					}
-					break;
-				case (2):
-					strategy.setRangeDistribution(key, distributions.get(aValue));
-					break;
-				case (3):
-					strategy.setRangeDistributionMean(key, (String) aValue);
-					break;
-				case (4):
-					try {
-						strategy.setRangeDistributionC(key, Double.parseDouble((String) aValue));
-					} catch (NumberFormatException nfe) {
-					}
-					break;
+			case (0):
+				try {
+					strategy.setRangeFrom(key, Integer.parseInt((String) aValue));
+				} catch (NumberFormatException e) {
+				}
+			break;
+			case (2):
+				strategy.setRangeDistribution(key, distributions.get(aValue));
+			break;
+			case (3):
+				strategy.setRangeDistributionMean(key, (String) aValue);
+			break;
+			case (4):
+				try {
+					strategy.setRangeDistributionC(key, Double.parseDouble((String) aValue));
+				} catch (NumberFormatException nfe) {
+				}
+			break;
 			}
 
 			// If from or distribution has changed, need to repaint the table
@@ -591,7 +586,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 
 		/**
 		 * Helper method used to formats given number into string according to default rules.
-		 * @param d bouble to be converted
+		 * @param d double to be converted
 		 * @return string representation of given number
 		 */
 		protected String FormatNumber(double d) {

@@ -32,7 +32,7 @@ public class CombFork extends ForkStrategy{
 		distribution = new Empirical();
 		for (int i = 0; i < entries.length; i++) {
 			EmpiricalEntry entry = entries[i];
-			if(entry.getValue() instanceof String){
+			if (entry.getValue() instanceof String) {
 				String nodeNum = (String) entry.getValue();
 				nodeNums[i] = nodeNum;
 				probabilities[i] = entry.getProbability();
@@ -60,7 +60,7 @@ public class CombFork extends ForkStrategy{
 			//using set to avoid duplication
 			HashSet<Integer> pickedIndex = new HashSet<Integer>();
 			//if the nodes picked are less the required number, continue the picking
-			while(pickedIndex.size() < num){
+			while (pickedIndex.size() < num) {
 				//generate random number 1 ~ size of branches
                                 //replaced Math.Random() code
 				int index = (int)(engine.raw2() * nodes.size());
@@ -71,7 +71,7 @@ public class CombFork extends ForkStrategy{
 				pickedIndex.add(index);
 			}
 			//add to the NodeListWithJobNum
-			for(Integer i : pickedIndex){
+			for (Integer i : pickedIndex) {
 				Map<JobClass, Integer> map = new HashMap<JobClass, Integer>();
                                 map.put(jobClass, 1);
                                 nl.add(nodes.get(i), map);

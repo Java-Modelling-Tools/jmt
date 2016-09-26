@@ -52,7 +52,7 @@ public class BooleanCellRenderer extends JCheckBox implements TableCellRenderer 
 
 	class MyCheckIcon extends MetalCheckBoxIcon {
 		private Boolean isSelected ;
-		MyCheckIcon(Boolean isSelected){
+		MyCheckIcon(Boolean isSelected) {
 			this.isSelected = isSelected;
 		}
 		protected void drawCheck(Component c, Graphics g, int x, int y) {
@@ -71,7 +71,7 @@ public class BooleanCellRenderer extends JCheckBox implements TableCellRenderer 
 
 		@Override
 		public void paintIcon(Component c, Graphics g, int x, int y) {
-			if(!isSelected){
+			if (!isSelected) {
 			Color old = g.getColor();
 			g.setColor(new Color(250, 250, 250)); // modify this colour to get
 													// diff. coloured ticks

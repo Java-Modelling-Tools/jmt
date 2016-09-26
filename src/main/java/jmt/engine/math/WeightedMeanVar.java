@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.math;
 
@@ -28,7 +28,7 @@ public class WeightedMeanVar {
 	protected double var;//variance of data
 
 	protected double max;//the greatest sample of all data inserted
-	protected double min;//the smallestest sample of all data inserted
+	protected double min;//the smallest sample of all data inserted
 
 	protected double expectedValueX2; // E[x^2]
 	protected double sumWeights;//sum of all weights
@@ -108,7 +108,7 @@ public class WeightedMeanVar {
 	 */
 	public void putNewSample(double newValue, double newWeight) {
 
-		// coumputes the maximum and the minimum value of the sequence
+		// computes the maximum and the minimum value of the sequence
 		if (sumWeights == 0) {
 			//it is the first value
 			max = newValue;
@@ -123,7 +123,7 @@ public class WeightedMeanVar {
 
 	}
 
-	/** coumputes the new sample variance using a stable algorithm
+	/** computes the new sample variance using a stable algorithm
 	 *  it also computes the mean with the stable algorithm.
 	 *  @param newValue the new element to be added to the sequence
 	 */
@@ -167,7 +167,7 @@ public class WeightedMeanVar {
 		return var;
 	}
 
-	/** get the gratest value
+	/** get the greatest value
 	 *  @return the actual max value
 	 */
 	public double getMax() {

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.exact.table;
 
@@ -80,9 +80,6 @@ import jmt.gui.common.JMTImageLoader;
  */
 public class ExactTable extends JTable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private static final boolean DEBUG = false;
@@ -110,9 +107,7 @@ public class ExactTable extends JTable {
 	protected String moreRowsTooltip;//"Scroll down to see more rows...";
 
 	protected AbstractAction selectAction = new AbstractAction() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -130,6 +125,7 @@ public class ExactTable extends JTable {
 			selectAll();
 			requestFocus();
 		}
+
 	};
 
 	/**
@@ -182,7 +178,6 @@ public class ExactTable extends JTable {
 		selectionListener.install(this);
 
 		clip = Toolkit.getDefaultToolkit().getSystemClipboard();
-
 	}
 
 	protected void installKeyboard() {
@@ -222,7 +217,7 @@ public class ExactTable extends JTable {
 	}
 
 	/**
-	 * Overridden to make sure column sizes are mantained
+	 * Overridden to make sure column sizes are maintained
 	 */
 	@Override
 	public void tableChanged(TableModelEvent e) {
@@ -233,7 +228,6 @@ public class ExactTable extends JTable {
 	}
 
 	private void sizeColumns() {
-
 		/* try and resize columns according to their header and (if available) prototype width*/
 		/* taken from Sun's JTable tutorial, with some added features */
 		int colnum = dataModel.getColumnCount();
@@ -259,13 +253,10 @@ public class ExactTable extends JTable {
 			autoWidth = comp.getPreferredSize().width;
 
 			if (hasPrototypes) {
-				/*                comp = getDefaultRenderer(dataModel.getColumnClass(i)).
-								        getTableCellRendererComponent(
-								                this, ptm.getPrototype(i),
-								                false, false, 0, i);
-				*/comp = getDefaultRenderer(Object.class).getTableCellRendererComponent(this, ptm.getPrototype(i), false, false, 0, i);
+				//comp = getDefaultRenderer(dataModel.getColumnClass(i)).getTableCellRendererComponent(this, ptm.getPrototype(i), false, false, 0, i);
+				comp = getDefaultRenderer(Object.class).getTableCellRendererComponent(this, ptm.getPrototype(i), false, false, 0, i);
 
-				autoWidth = Math.max(autoWidth, comp.getPreferredSize().width);
+				 autoWidth = Math.max(autoWidth, comp.getPreferredSize().width);
 			}
 
 			col.setPreferredWidth(autoWidth);
@@ -371,7 +362,6 @@ public class ExactTable extends JTable {
 				rowHeader.uninstall();
 			}
 		}
-
 	}
 
 	private void installSelectAllButton(JScrollPane scrollPane) {
@@ -397,7 +387,6 @@ public class ExactTable extends JTable {
 		if (displaysScrollLabels) {
 			updateScrollLabels();
 		}
-
 	}
 
 	/**
@@ -536,7 +525,6 @@ public class ExactTable extends JTable {
 	 */
 	@Override
 	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-
 		if (orientation == SwingConstants.HORIZONTAL) {
 			return 80;
 		}
@@ -661,7 +649,6 @@ public class ExactTable extends JTable {
 			}
 		}
 		updateRows(rowsselected[0], rowsselected[rowsselected.length - 1]);
-
 	}
 
 	public void pasteCells() {
@@ -714,9 +701,7 @@ public class ExactTable extends JTable {
 	}
 
 	public AbstractAction COPY_ACTION = new AbstractAction("Copy") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -727,12 +712,11 @@ public class ExactTable extends JTable {
 		public void actionPerformed(ActionEvent e) {
 			copyCells();
 		}
+
 	};
 
 	public AbstractAction CUT_ACTION = new AbstractAction("Cut") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -744,12 +728,11 @@ public class ExactTable extends JTable {
 			copyCells();
 			clearCells();
 		}
+
 	};
 
 	public AbstractAction PASTE_ACTION = new AbstractAction("Paste") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -760,12 +743,11 @@ public class ExactTable extends JTable {
 		public void actionPerformed(ActionEvent e) {
 			pasteCells();
 		}
+
 	};
 
 	public AbstractAction CLEAR_ACTION = new AbstractAction("Clear") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -776,12 +758,11 @@ public class ExactTable extends JTable {
 		public void actionPerformed(ActionEvent e) {
 			clearCells();
 		}
+
 	};
 
 	public AbstractAction FILL_ACTION = new AbstractAction("Fill") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -792,6 +773,7 @@ public class ExactTable extends JTable {
 		public void actionPerformed(ActionEvent e) {
 			copyAnchorToSelection();
 		}
+
 	};
 
 	protected class MouseHandler extends MouseAdapter {

@@ -116,7 +116,7 @@ public class BTFLinearSystem extends LinearSystem {
 		//Create rhs vector
 		rhs = new BigRational[basis.getSize()];
 		
-		if(Main.verbose) {
+		if (Main.verbose) {
 			printFullMatrices();
 		}
 	}
@@ -130,16 +130,16 @@ public class BTFLinearSystem extends LinearSystem {
 	private void generate() throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException {
 		PopulationChangeVector n;
 		int row_added;
-	   	for(int i = 0; i < MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M); i++)  { //loop over all possible population changes n
+	   	for (int i = 0; i < MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M); i++)  { //loop over all possible population changes n
 	   		n  = basis.getPopulationChangeVector(i).copy(); // To improve bug safety
 	   		
-	   		if(n.sumHead(qnm.R - 1) < qnm.M) {
-	   			for(int k = 1; k <= qnm.M; k++) {
+	   		if (n.sumHead(qnm.R - 1) < qnm.M) {
+	   			for (int k = 1; k <= qnm.M; k++) {
 	   				row_added = x_block.addCE(basis.indexOf(n,k), n, k);   				
 	   				y_block.addCE(row_added, n, k);
 	   				b1_block.addCE(row_added, n, k);	   				
 	  			}
-	   			for(int s = 1; s < qnm.R; s++) {
+	   			for (int s = 1; s < qnm.R; s++) {
 	   				n.plusOne(s);
 	   				row_added = x_block.addPC(basis.indexOf(n, 1), n, s);	   				
 	   				y_block.addPC(row_added, n, s);
@@ -163,7 +163,7 @@ public class BTFLinearSystem extends LinearSystem {
 		
 		System.out.print("Matrices for class " + current_class + "\n\n\n");
 		
-		if(Main.verbose) {
+		if (Main.verbose) {
 			printWorkingMatrices();
 		}		
 	}
@@ -211,7 +211,7 @@ public class BTFLinearSystem extends LinearSystem {
 		c.multiply(lhs_result);			
 		
 		//achieves identity rows in A
-		for(int i = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M; i < basis.getSize(); i++) {
+		for (int i = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M; i < basis.getSize(); i++) {
 			lhs_result[i] = basis.getNewValue(i).copy();
 		}
 	}
@@ -244,7 +244,7 @@ public class BTFLinearSystem extends LinearSystem {
 		//calculate the number of rows in the top blocks of the matrices
 		int top_half_rows = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M;
 		
-		for(int row = 0; row < top_half_rows; row++) {
+		for (int row = 0; row < top_half_rows; row++) {
 			x_block.printRow2(row);			
 			y_block.printRow2(row);		
 			ComponentBlock.newLine();
@@ -252,14 +252,14 @@ public class BTFLinearSystem extends LinearSystem {
 					
 		//print B1
 		System.out.print("B1: \n\n");
-		for(int row = 0; row < top_half_rows; row++) {
+		for (int row = 0; row < top_half_rows; row++) {
 			b1_block.printRow2(row);
 			ComponentBlock.newLine();
 		}
 				
 		//print B2
 		System.out.print("B2: \n\n");
-		for(int row = top_half_rows; row < basis.getSize(); row++) {
+		for (int row = top_half_rows; row < basis.getSize(); row++) {
 			b2_block.printRow2(row);					
 			ComponentBlock.newLine();
 		}

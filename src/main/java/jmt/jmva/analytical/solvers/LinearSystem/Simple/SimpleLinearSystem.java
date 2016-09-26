@@ -76,7 +76,7 @@ private static StandardMatrix A, B;
 		
 		BigRational[] result = solver.solve(sysB);
 		
-		for(int i = 0; i < basis.getSize(); i++) {
+		for (int i = 0; i < basis.getSize(); i++) {
 			basis.setValue(result[i], i);
 		}
 	}
@@ -88,7 +88,7 @@ private static StandardMatrix A, B;
 		generateAB(current_N, current_class);
 		
 		System.out.println("Intialising A and B:");
-		if(Main.verbose){ 
+		if (Main.verbose) { 
 			System.out.println("A:");
 			A.print();
 			System.out.println("B:");
@@ -109,17 +109,17 @@ private static StandardMatrix A, B;
 		   	int row = -1;
 		   	int col = 0;
 		   	PopulationChangeVector n;
-		   	for(int i = 0; i < MiscFunctions.binomialCoefficient(M + R - 1 , M); i++)  { //loop over all possible population changes n
+		   	for (int i = 0; i < MiscFunctions.binomialCoefficient(M + R - 1 , M); i++)  { //loop over all possible population changes n
 		   		n  = basis.getPopulationChangeVector(i).copy(); // To improve bug safety
-		   		if(n.sumTail(current_class-1) > 0) {  //potential negative population
-		   			for(int k = 0; k <= M; k++) {
+		   		if (n.sumTail(current_class-1) > 0) {  //potential negative population
+		   			for (int k = 0; k <= M; k++) {
 		   				row++;
 		   				col = basis.indexOf(n,k);
 		   				A.write(row, col, BigRational.ONE);
 		   				basis.computatble(col);
 		   				//System.out.println("Fisrt n: " + n);
 		   				//System.out.println("row: " + row);
-		   				if(n.sumTail(current_class) > 0) {  //negative population
+		   				if (n.sumTail(current_class) > 0) {  //negative population
 		   					A.write(row, col, BigRational.ONE);
 		   					//System.out.println("1");
 		   					col = basis.indexOf(n, k);
@@ -136,8 +136,8 @@ private static StandardMatrix A, B;
 		   				}    				
 		   			}
 		   		} else {
-		   			if(n.sumHead(current_class - 1) < M) {
-		   				for(int k = 1; k <= M; k++) {
+		   			if (n.sumHead(current_class - 1) < M) {
+		   				for (int k = 1; k <= M; k++) {
 		   					//add CE corresponding to G(0, N - n) for each queue k
 		   					row++;
 		   					col = basis.indexOf(n, k);
@@ -146,7 +146,7 @@ private static StandardMatrix A, B;
 		   					col = basis.indexOf(n, 0);
 		   					A.write(row, col, BigRational.ONE.negate());
 		   					basis.computatble(col);
-		   					for(int s = 1; s <= current_class - 1; s++) {
+		   					for (int s = 1; s <= current_class - 1; s++) {
 		   						n.plusOne(s);	
 		   						//System.out.println("n: " + n);
 		   						col = basis.indexOf(n, k);
@@ -158,7 +158,7 @@ private static StandardMatrix A, B;
 		   					col = basis.indexOf(n, k);
 		  					B.write(row, col, qnm.getDemandAsBigRational(k-1, current_class-1));
 		  				}
-		   				for(int s = 1; s < current_class; s++) {
+		   				for (int s = 1; s < current_class; s++) {
 		   					//add PC  corresponding to G(0, N - n) for each class s less than the current class
 		   					row++;
 		    				col = basis.indexOf(n, 0);
@@ -168,7 +168,7 @@ private static StandardMatrix A, B;
 		   					col = basis.indexOf(n, 0);
 		   					A.write(row, col, qnm.getDelayAsBigRational(s-1).negate());
 		   					basis.computatble(col);
-		   					for(int k = 1; k <= M; k++) { //loop over all queues k (= sum)
+		   					for (int k = 1; k <= M; k++) { //loop over all queues k (= sum)
 		   						col = basis.indexOf(n, k);
 		   						A.write(row, col, qnm.getDemandAsBigRational(k-1, s-1).negate());
 		   						basis.computatble(col);
@@ -178,17 +178,17 @@ private static StandardMatrix A, B;
 		   			}    			    			
 		   		}
 		   	}
-		   	for(int i = 0; i < MiscFunctions.binomialCoefficient(M + R - 1 , M); i++)  { //loop over all possible population changes n
+		   	for (int i = 0; i < MiscFunctions.binomialCoefficient(M + R - 1 , M); i++)  { //loop over all possible population changes n
 		   		//add PC of class 'current_class'
 		   		n  = basis.getPopulationChangeVector(i).copy(); // To improve bug safety
-		   		if(n.sumTail(current_class-1) <= 0) {  // TODO remove <
+		   		if (n.sumTail(current_class-1) <= 0) {  // TODO remove <
 		   			row++;
 		   			col = basis.indexOf(n, 0);
 					A.write(row, col, N.getAsBigRational(current_class-1));
 					basis.computatble(col);
 					A.toBeUpdated(row, col);					
 					B.write(row, col, qnm.getDelayAsBigRational(current_class -1 ));
-					for( int k = 1; k <= M; k++) {
+					for ( int k = 1; k <= M; k++) {
 						col = basis.indexOf(n, k);
 						B.write(row, col, qnm.getDemandAsBigRational( k - 1, current_class -1 ));					
 					}

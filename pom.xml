@@ -68,7 +68,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- we want JDK 1.7 source and binary compatiblility -->
+                    <!-- we want JDK 1.7 source and binary compatibility -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
@@ -215,7 +215,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <!-- we want JDK 1.7 source and binary compatiblility -->
+                    <!-- we want JDK 1.7 source and binary compatibility -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>

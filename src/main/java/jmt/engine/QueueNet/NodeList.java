@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.QueueNet;
 
@@ -30,7 +30,7 @@ import jmt.engine.random.engine.RandomEngine;
 public class NodeList {
 
 	private LinkedList<NetNode> nodes;
-        private RandomEngine engine = RandomEngine.makeDefault();
+	private RandomEngine engine = RandomEngine.makeDefault();
 
 	/** Creates a new instance of NodeList class.
 	 */
@@ -118,18 +118,18 @@ public class NodeList {
 	public boolean contains(NetNode node) {
 		return nodes.contains(node);
 	}
-	
+
 	//bpmn
 	public LinkedList<NetNode> randomNodes() {
 		HashSet<Integer> hs = new HashSet<Integer>();
 		LinkedList<NetNode> temp = new LinkedList<NetNode>();
 		int size = nodes.size();
-		while(hs.size() < size){
-                        //replaced Math.random() code
+		while (hs.size() < size) {
+			//replaced Math.random() code
 			int index = (int)(engine.raw2() * size);
 			int s = hs.size();
 			hs.add(index);
-			if(s < hs.size()){
+			if (s < hs.size()) {
 				temp.add(nodes.get(index));
 			}
 		}

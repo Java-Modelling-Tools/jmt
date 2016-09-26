@@ -334,13 +334,13 @@ public class MersenneTwister extends RandomEngine {
 
 		System.out.println("\nINT:  ");
 		/*
-		for(int i =0; i< 1000; i++) {
+		for (int i =0; i< 1000; i++) {
 		    integer = p.genrand_int32();
 		    if (integer > 0)
 		        System.out.print(integer+" ");
 		    else
 		        System.out.print(((long) (integer & 0x7fffffff) + 0x80000000L) + " ");
-		    if(i%5 == 4)
+		    if (i%5 == 4)
 		        System.out.println();
 		}*/
 

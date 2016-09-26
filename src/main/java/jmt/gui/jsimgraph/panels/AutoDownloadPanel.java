@@ -43,84 +43,84 @@ public class AutoDownloadPanel extends WizardPanel {
 
 	private static final long serialVersionUID = 1L;
 
-        private String indexFile;
-        
+	private String indexFile;
+
 	private JProgressBar progress;
 
 	private JButton download;
 	private JButton cancel;
-        private JButton retry;
-        
-        private JLabel errorLabel = new JLabel("Connection error");
-        private JLabel progLabel = new JLabel("PROGRESS:");
-        private JPanel bottomPane;
+	private JButton retry;
 
-	private List<TemplateData> datas;
+	private JLabel errorLabel = new JLabel("Connection error");
+	private JLabel progLabel = new JLabel("PROGRESS:");
+	private JPanel bottomPane;
+
+	private List<TemplateData> data;
 	private DefaultPackageTable defaultPackageTable;
 
 	private JPanel parent;
-        
-        private TemplatePanel panel;
-        private boolean error;
-	
-	public AutoDownloadPanel(){
+
+	private TemplatePanel panel;
+	private boolean error;
+
+	public AutoDownloadPanel() {
 		parent = this;
-                this.panel = null;
+		this.panel = null;
 		initComponents();
 	}
 
 	public void initComponents() {
-                
-                downloadIndex();
-                
+
+		downloadIndex();
+
 		progress = new JProgressBar();
 		progress.setStringPainted(true);
 		progress.setString("0%");
 		download = new JButton("Download");
 		cancel = new JButton("Cancel");
-                retry = new JButton("Retry");
+		retry = new JButton("Retry");
 
 		progress.setPreferredSize(new Dimension(200, 25));
 		download.setPreferredSize(new Dimension(110, 25));
 		cancel.setPreferredSize(new Dimension(110, 25));
-                retry.setPreferredSize(new Dimension(110, 25));
-		
+		retry.setPreferredSize(new Dimension(110, 25));
+
 		download.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-                                File folder = new File(TemplateConstants.TEMPLATE_FOLDER);
-                                if(!folder.exists()) {
-                                        folder.mkdir();
-                                }
+				File folder = new File(TemplateConstants.TEMPLATE_FOLDER);
+				if (!folder.exists()) {
+					folder.mkdir();
+				}
 				progress.setValue(0);
 				progress.setString("0%");
 				download.setEnabled(false);
 				cancel.setEnabled(false);
-				if(ConnectionCheck.netCheck(TemplateConstants.CONN_TEST_ADDRESSES)){
+				if (ConnectionCheck.netCheck(TemplateConstants.CONN_TEST_ADDRESSES)) {
 					new Downloader().execute();
-				}else{
+				} else {
 					download.setEnabled(true);
 					cancel.setEnabled(true);
 					JOptionPane.showMessageDialog(parent, "Connection error");
 				}
 			}
 		});
-		
+
 		cancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				SwingUtilities.getWindowAncestor(parent).setVisible(false);
 			}
 		});
-                
-                retry.addActionListener(new ActionListener() {
+
+		retry.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				downloadIndex();
-                                for(TemplateData t : datas)
-                                        System.out.println(t.getName());
-                                ((DefaultPackageTableModel) defaultPackageTable.getModel()).fireDataChanged();
-                                ((DefaultPackageTableModel) defaultPackageTable.getModel()).setFlags(datas.size());
-                                createBottom();
-                                AutoDownloadPanel.this.revalidate();
-                                AutoDownloadPanel.this.repaint();
+				for (TemplateData t : data)
+					System.out.println(t.getName());
+				((DefaultPackageTableModel) defaultPackageTable.getModel()).fireDataChanged();
+				((DefaultPackageTableModel) defaultPackageTable.getModel()).setFlags(data.size());
+				createBottom();
+				AutoDownloadPanel.this.revalidate();
+				AutoDownloadPanel.this.repaint();
 			}
 		});
 
@@ -141,49 +141,49 @@ public class AutoDownloadPanel extends WizardPanel {
 
 		JPanel bottomPane = new JPanel();
 		bottomPane.setLayout(new FlowLayout(FlowLayout.LEADING));
-                createBottom();
+		createBottom();
 		upperPane.add(label);
 		this.add(upperPane, BorderLayout.NORTH);
 		this.add(fileListPane, BorderLayout.CENTER);
 	}
-        
-        private void downloadIndex() {
-                try {
-                        File index = File.createTempFile(F_NAME_INDEX, "");
-                        index.deleteOnExit();
-                        indexFile = index.getAbsolutePath();
+
+	private void downloadIndex() {
+		try {
+			File index = File.createTempFile(F_NAME_INDEX, "");
+			index.deleteOnExit();
+			indexFile = index.getAbsolutePath();
 			TemplateFileOperation.download(DEFAULT_SITE + "/" + F_NAME_INDEX , indexFile,
-						CONN_TIMEOUT, READ_TIMEOUT);
-			datas = TemplateFileOperation.getDefaultTemplatesFromIndex(indexFile);
-                        error = false;
+					CONN_TIMEOUT, READ_TIMEOUT);
+			data = TemplateFileOperation.getDefaultTemplatesFromIndex(indexFile);
+			error = false;
 		} catch (Exception e) {
-                        datas = new ArrayList<>();
-                        error = true;
+			data = new ArrayList<>();
+			error = true;
 		}
-        }
-        
-        private void createBottom() {
-                if (bottomPane != null) {
-                        this.remove(bottomPane);
-                }
-                bottomPane = new JPanel();
+	}
+
+	private void createBottom() {
+		if (bottomPane != null) {
+			this.remove(bottomPane);
+		}
+		bottomPane = new JPanel();
 		bottomPane.setLayout(new FlowLayout(FlowLayout.LEADING));
-                if (error) {
-                        bottomPane.setLayout(new BorderLayout());
-                        bottomPane.add(errorLabel, BorderLayout.WEST);
-                        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEADING));
-                        buttons.add(retry);
-                        buttons.add(cancel);
-                        bottomPane.add(buttons, BorderLayout.EAST);
-                } else {
-                        bottomPane.setLayout(new FlowLayout(FlowLayout.LEADING));
-                        bottomPane.add(progLabel);
-                        bottomPane.add(progress);
-                        bottomPane.add(download);
-                        bottomPane.add(cancel);
-                }
-                this.add(bottomPane, BorderLayout.SOUTH);
-        }
+		if (error) {
+			bottomPane.setLayout(new BorderLayout());
+			bottomPane.add(errorLabel, BorderLayout.WEST);
+			JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEADING));
+			buttons.add(retry);
+			buttons.add(cancel);
+			bottomPane.add(buttons, BorderLayout.EAST);
+		} else {
+			bottomPane.setLayout(new FlowLayout(FlowLayout.LEADING));
+			bottomPane.add(progLabel);
+			bottomPane.add(progress);
+			bottomPane.add(download);
+			bottomPane.add(cancel);
+		}
+		this.add(bottomPane, BorderLayout.SOUTH);
+	}
 
 	public class DefaultPackageTable extends JTable {
 
@@ -194,27 +194,28 @@ public class AutoDownloadPanel extends WizardPanel {
 			setModel(new DefaultPackageTableModel());
 			sizeColumns();
 			setRowHeight(TemplateConstants.CELL_HEIGHT);
+			getTableHeader().setReorderingAllowed(false);
 		}
-		
+
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
 				getColumnModel().getColumn(i).setPreferredWidth(((DefaultPackageTableModel) getModel()).columnSizes[i]);
 			}
 		}
-		
+
 		@Override
 		public String getToolTipText(MouseEvent e) {
 			String tip = null;
-            Point p = e.getPoint();
-            int rowIndex = rowAtPoint(p);
+			Point p = e.getPoint();
+			int rowIndex = rowAtPoint(p);
 
-            try {
-                tip = datas.get(rowIndex).getToolTip();
-            } catch (Exception e1) {
-            	e1.printStackTrace();
-            }
+			try {
+				tip = data.get(rowIndex).getToolTip();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
 
-            return tip;
+			return tip;
 		}
 
 	}
@@ -225,19 +226,19 @@ public class AutoDownloadPanel extends WizardPanel {
 
 		String[] columnNames = { "Template", "Download" };
 		Class<?>[] columnClass = { String.class, Boolean.class };
-		
+
 		public int[] columnSizes = new int[] { 420,100 };
 
-		boolean[] flags = new boolean[datas.size()];
-                
-                public void setFlags(int size) {
-                        flags = new boolean[datas.size()];
-                        Arrays.fill(flags, true);
-                }
-                
-                public void fireDataChanged() {
-                        super.fireTableDataChanged();
-                }
+		boolean[] flags = new boolean[data.size()];
+
+		public void setFlags(int size) {
+			flags = new boolean[data.size()];
+			Arrays.fill(flags, true);
+		}
+
+		public void fireDataChanged() {
+			super.fireTableDataChanged();
+		}
 
 		public DefaultPackageTableModel() {
 			Arrays.fill(flags, true);
@@ -269,13 +270,13 @@ public class AutoDownloadPanel extends WizardPanel {
 
 		@Override
 		public int getRowCount() {
-			return datas.size();
+			return data.size();
 		}
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (columnIndex == 0) {
-				return datas.get(rowIndex).getName();
+				return data.get(rowIndex).getName();
 			} else {
 				return flags[rowIndex];
 			}
@@ -297,30 +298,30 @@ public class AutoDownloadPanel extends WizardPanel {
 
 		@Override
 		protected Boolean doInBackground() throws Exception {
-                        toDownload = new ArrayList<>();
-                        for(int i = 0; i < datas.size(); i++) {
-                                if((Boolean) defaultPackageTable.getValueAt(i, 1)) {
-                                        toDownload.add(datas.get(i));
-                                }
-                        }
+			toDownload = new ArrayList<>();
+			for (int i = 0; i < data.size(); i++) {
+				if ((Boolean) defaultPackageTable.getValueAt(i, 1)) {
+					toDownload.add(data.get(i));
+				}
+			}
 			for (int i = 0; i < toDownload.size(); i++) {
-                                String file = toDownload.get(i).getUpdateAddress();
-                                String fileName = toDownload.get(i).getFileName();
-                                try {
-                                        if (fileName != null) {
-                                                fileName = TemplateConstants.TEMPLATE_FOLDER
-                                                                + fileName;
-                                                TemplateFileOperation.download(file, fileName,
-                                                                TemplateConstants.CONN_TIMEOUT,
-                                                                TemplateConstants.READ_TIMEOUT);
-                                        } else {
-                                                throw new Exception();
-                                        }
-                                } catch (Exception e) {
-                                        JOptionPane.showMessageDialog(parent,
-                                                        "<html> Error: Unable to download <br>\n"
-                                                                        + file);
-                                }
+				String file = toDownload.get(i).getUpdateAddress();
+				String fileName = toDownload.get(i).getFileName();
+				try {
+					if (fileName != null) {
+						fileName = TemplateConstants.TEMPLATE_FOLDER
+								+ fileName;
+						TemplateFileOperation.download(file, fileName,
+								TemplateConstants.CONN_TIMEOUT,
+								TemplateConstants.READ_TIMEOUT);
+					} else {
+						throw new Exception();
+					}
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(parent,
+							"<html> Error: Unable to download <br>\n"
+									+ file);
+				}
 				publish(i + 1);
 			}
 			Thread.sleep(300);
@@ -339,12 +340,12 @@ public class AutoDownloadPanel extends WizardPanel {
 				if (task == -1) {
 					download.setEnabled(true);
 					cancel.setEnabled(true);
-                                        Defaults.set("showDefaultTemplates", "false");
-                                        Defaults.save();
+					Defaults.set("showDefaultTemplates", "false");
+					Defaults.save();
 					SwingUtilities.getWindowAncestor(parent).setVisible(false);
-                                        if(panel != null) {
-                                                panel.updateTemplates();
-                                        }
+					if (panel != null) {
+						panel.updateTemplates();
+					}
 				}
 			}
 		}

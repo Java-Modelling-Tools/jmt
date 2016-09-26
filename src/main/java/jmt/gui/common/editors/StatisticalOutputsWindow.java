@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2011, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.gui.common.editors;
@@ -70,8 +70,8 @@ import jmt.engine.simEngine.EngineUtils;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.DistributionDensityGraph;
 import jmt.framework.gui.layouts.SpringUtilities;
-import jmt.gui.common.Defaults;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.StatisticalOutputsLoader;
@@ -89,28 +89,28 @@ import jmt.gui.common.definitions.StatisticalOutputsLoader;
  * 
  * @author Aneish Goel: july-2013
  */
-
 public class StatisticalOutputsWindow extends JMTFrame {
+
 	private static final long serialVersionUID = 1L;
+
 	private static final String DEFAULT_INTERVALS = "10";
 
 	private static final String[] GRAPH_TYPES = {"-- Select a type of graph --", "Histogram" , "Density Line", "Distribution"};
 
 	private static final String FILTER_TYPE_SAMPLE = "SAMPLE";
 	private static final String FILTER_TYPE_TIME = "TIME";
-	
+
 	/* Constants for type */
 	public final static int TYPE_NONE = 0;
 	public final static int TYPE_HISTOGRAM = 1;
 	public final static int TYPE_DENSITY_LINE = 2;
 	public final static int TYPE_DISTRIBUTION = 3;
-	
+
 	public static final String CSV_COLUMN_INDEX = "INTERVAL";
 	public static final String CSV_COLUMN_START = "INTERVAL_START";
 	public static final String CSV_COLUMN_END = "INTERVAL_END";
 	public static final String CSV_COLUMN_VALUE = "VALUE";
-	
-	
+
 	private JButton closeButton ;
 	private JButton reDrawButton;
 	private JButton saveButton;
@@ -154,7 +154,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	private String filterType = FILTER_TYPE_SAMPLE;
 	private boolean inverseMeasure;
 
-	public StatisticalOutputsWindow(MeasureDefinition measureDefinition, int measureIndex){
+	public StatisticalOutputsWindow(MeasureDefinition measureDefinition, int measureIndex) {
 		this.measureDefinition = measureDefinition;
 		this.measureIndex = measureIndex;
 		windowName = measureDefinition.getName(measureIndex);
@@ -167,7 +167,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		}
 	}
 
-	public void initGUI(){
+	public void initGUI() {
 		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 		this.setTitle(windowName);
 		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_STAT_OUTPUT, CommonConstants.MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT);
@@ -175,7 +175,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		//makes LeftSidePanel
 		JPanel pivotPanel = new JPanel() ;
 		pivotPanel.setLayout(new BoxLayout(pivotPanel, BoxLayout.PAGE_AXIS));
-		
+
 		//makes BottomPanel
 		JPanel graphOptionsPanel = new JPanel(new BorderLayout());
 
@@ -189,7 +189,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		graphType.setSelectedIndex(0);
 		graphType.setToolTipText("Choose graph type amongst Density Line, Histogram and Distribution.");
 		graphType.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				updateGraph();
@@ -199,12 +198,9 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		centrePanel.add(graphType);
 		graphOptionsPanel.add(centrePanel, BorderLayout.NORTH);
 
-
-
-		//adds editableparameters panel
+		//adds editable parameters panel
 		JPanel parametersPanel = new JPanel(new SpringLayout());
 		JLabel paralabel;
-
 
 		//adds minValue
 		paralabel = new JLabel("Min Value:");
@@ -248,20 +244,17 @@ public class StatisticalOutputsWindow extends JMTFrame {
 				2, 2);//xPad, yPad
 		graphOptionsPanel.add(parametersPanel, BorderLayout.CENTER);
 
-
 		reDrawButton = new JButton("Redraw");
 		reDrawButton.setEnabled(false);
 		reDrawButton.setToolTipText("Redraws the graph with the new minimum, maximum values, number of intervals" +
 				" and graphType. Also redraws on the basis of selected samples.");
 		reDrawButton.addActionListener(new ActionListener() {
-
 			@Override
-			public void actionPerformed(ActionEvent en){
+			public void actionPerformed(ActionEvent en) {
 				refreshData();
 			}
-
 		});
-		
+
 		saveButton = new JButton("Save as CSV");
 		saveButton.setEnabled(false);
 		saveButton.setToolTipText("Save the data shown in the chart in a CSV file");
@@ -287,16 +280,15 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		buttonsPanel.add(saveButton);
 		graphOptionsPanel.add(buttonsPanel, BorderLayout.SOUTH);
 
-
 		//makes ValuesPanel
-		//Adds  with all informations on this measure
+		//Adds with all informations on this measure
 		JLabel label;
 		//creates MeasuresPanel to hold all Measure values (Mean, Variance, Standard Deviation, Coefficient of Variation,
 		//Skewness, and Kurtosis
 
 		JPanel measuresPanel= new JPanel(new SpringLayout());
 		measuresPanel.setBorder(new TitledBorder(new EtchedBorder(), "Measures"));
-		//  MEAN
+		// MEAN
 		label = new JLabel("Mean:");
 		fieldMean = new JTextField();
 		fieldMean.setEditable(false);
@@ -306,7 +298,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		measuresPanel.add(label);
 		measuresPanel.add(fieldMean);
 
-		//  VARIANCE
+		// VARIANCE
 		label = new JLabel("Variance:");
 		fieldVar = new JTextField();
 		fieldVar.setEditable(false);
@@ -316,7 +308,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		measuresPanel.add(label);
 		measuresPanel.add(fieldVar);
 
-		//STANDARD DEVIATION
+		// STANDARD DEVIATION
 		label = new JLabel("Standard Deviation:");
 		fieldStanDev = new JTextField();
 		fieldStanDev.setEditable(false);
@@ -335,7 +327,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		label.setLabelFor(fieldCoefVar);
 		measuresPanel.add(label);
 		measuresPanel.add(fieldCoefVar);
-
 
 		// SKEWNESS
 		label = new JLabel("Skewness:");
@@ -361,7 +352,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		JPanel momentsPanel = new JPanel(new SpringLayout());
 		momentsPanel.setBorder(new TitledBorder(new EtchedBorder(), "Power Moments"));
 
-		//FIRST MOMENT
+		// FIRST MOMENT
 		label = new JLabel("First Moment:");
 		fieldMoment1 = new JTextField() ;
 		fieldMoment1.setEditable(false);
@@ -402,7 +393,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		momentsPanel.add(fieldMoment4);
 
 		//BOUNDS PANEL : displays values of Bounds (min, max) of samples
-
 		JPanel boundsPanel = new JPanel(new SpringLayout());
 		boundsPanel.setBorder(new TitledBorder(new EtchedBorder(), "Bounds"));
 
@@ -435,7 +425,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		label.setLabelFor(fieldMinTime);
 		boundsPanel.add(label);
 		boundsPanel.add(fieldMinTime);
-		
+
 		//Displays Max Simulation time amongst samples
 		label = new JLabel("Max Simulation Time:");
 		fieldMaxTime = new JTextField() ;
@@ -445,7 +435,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		label.setLabelFor(fieldMaxTime);
 		boundsPanel.add(label);
 		boundsPanel.add(fieldMaxTime);
-		
 
 		label = new JLabel("No. of Discarded Samples:");
 		discardedSamples = new JTextField() ;
@@ -456,7 +445,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		discardedSamples.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)));
 		boundsPanel.add(label);
 		boundsPanel.add(discardedSamples);
-		
+
 		boundsPanel.add(new JPanel());
 		boundsPanel.add(new JPanel());
 
@@ -478,7 +467,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		//BOUNDS ON CONSIDERED SAMPLES - selects the range of samples chosen for computation
 		JPanel sampleChooser = new JPanel(new SpringLayout());
 		sampleChooser.setBorder(new TitledBorder(new EtchedBorder(), "Filter analyzed samples"));
-		
+
 		filterTypeButtons = new ButtonGroup();
 		JRadioButton sampleRadio = new JRadioButton("Based on number of samples");
 		sampleRadio.setActionCommand(FILTER_TYPE_SAMPLE);
@@ -493,14 +482,14 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				switchFilterType(filterTypeButtons.getSelection().getActionCommand());
-				
+
 			}
 		});
 		timeRadio.addChangeListener(new ChangeListener() {	
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				switchFilterType(filterTypeButtons.getSelection().getActionCommand());
-				
+
 			}
 		});
 
@@ -549,13 +538,11 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			warningLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
 			warningLabel.setIcon(JMTImageLoader.loadImage("lightbulb"));
 			warningLabel.setIconTextGap(5);
-			
+
 			leftPanel.add(warningLabel, BorderLayout.NORTH);
 		}
 
-
 		// main RightPanel
-
 		rightPanel = new JPanel(new BorderLayout()) ;
 		//graph panel
 		rightPanel.add(graphHolder, BorderLayout.CENTER);
@@ -573,7 +560,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		progressBar.setForeground(Color.BLUE);
 		setProgressBar(sop.getProgress());
 		toolbar.add(progressBar);
-
 
 		//Adds Loading/Loaded Icon
 		toolbar.add(icon, BorderLayout.WEST);
@@ -597,7 +583,6 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		});
 	}
 
-
 	private void setProgressBar(double percent) {
 		int progress = (int) Math.round(percent * 100);
 		progressBar.setValue(progress);
@@ -613,10 +598,9 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			statGraph = sop.getStatistics();
 			updateGraph();
 		}
-
 	}
 
-	private void updateGraph(){
+	private void updateGraph() {
 		//updates the Graph
 		graphHolder.removeAll();
 		int type = graphType.getSelectedIndex();
@@ -642,7 +626,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		}
 	}
 
-	private void updateStatistics(boolean complete){
+	private void updateStatistics(boolean complete) {
 		SampleStatistics stat = sop.getStatistics();
 		if (stat == null) {
 			// statistics are not ready yet.
@@ -696,7 +680,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		return str == null || str.length() == 0;
 	}
 
-	public void addGraphListener(){
+	public void addGraphListener() {
 		graph.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -717,16 +701,15 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 						}
 					});
-
 					popupFrame.setVisible(true);
 				}
-				if (e.getButton() == MouseEvent.BUTTON3){
+				if (e.getButton() == MouseEvent.BUTTON3) {
 					graph.addMouseListener(new MouseAdapter() {
 						@Override
 						public void mouseClicked(MouseEvent e) {
 							try{
 								graph.mouseClicked(e);
-							}catch(NullPointerException ek){
+							}catch(NullPointerException ek) {
 							}
 						}
 					});
@@ -760,7 +743,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			} else {
 				start = -1;
 				end = -1;
-				
+
 				simStart = parseNumber(firstSample);
 				if (simStart < 0.0) {
 					simStart = 0.0;
@@ -772,9 +755,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 				firstSample.setText(decimalFormat.format(simStart));
 				lastSample.setText(decimalFormat.format(simEnd));
 			}
-			int intervals = parseNumber(numberOfIntervals).intValue();
 
-			// Replace integers (so remove decimal numbers)
+			int intervals = parseNumber(numberOfIntervals).intValue();
 			numberOfIntervals.setText(String.valueOf(intervals));
 
 			sop.setStart(start);
@@ -819,7 +801,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			}
 		}
 	}
-	
+
 	private void switchFilterType(String newFilterType) {
 		// Ignore irrelevant changes.
 		if (newFilterType.equals(filterType)) {
@@ -838,7 +820,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			lastSample.setText(String.valueOf(sop.getMaxSimulationTime()));
 		}
 	}
-	
+
 	/**
 	 * Show a window to save chart data
 	 */
@@ -846,12 +828,11 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		JFileChooser chooser = new JFileChooser();
 		chooser.setAcceptAllFileFilterUsed(true);
 		FileFilter csvFilter = new FileFilter() {
-			
 			@Override
 			public String getDescription() {
 				return "CSV file (*.csv)";
 			}
-			
+
 			@Override
 			public boolean accept(File f) {
 				return f.getName().toLowerCase().endsWith(".csv");
@@ -871,7 +852,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			if (!selectedFile.getName().toLowerCase().endsWith(".csv")) {
 				selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".csv");
 			}
-			
+
 			// Check for overwrite.
 			if (selectedFile.exists()) {
 				int response = JOptionPane.showConfirmDialog(null, "Overwrite file '" + selectedFile.getName() + "'?", "Confirm overwrite", JOptionPane.YES_NO_OPTION,
@@ -881,7 +862,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 				save = true;
 			}
 		}
-		
+
 		if (save) {
 			DistributionType distrType;
 			if (graphType.getSelectedIndex() == StatisticalOutputsWindow.TYPE_DISTRIBUTION) {
@@ -896,7 +877,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			}
 		}
 	}
-	
+
 	/**
 	 * Save chart data in target file
 	 * @param targetFile the target file for save operation
@@ -912,7 +893,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			double[] values = statGraph.getDistribution(type);
 			double[] start = statGraph.getDistributionIntervalsStart();
 			double[] end = statGraph.getDistriburionIntervalsEnd();
-			
+
 			for (int i=0; i<values.length; i++) {
 				value.put(CSV_COLUMN_INDEX, i+1);
 				value.put(CSV_COLUMN_START, start[i]);
@@ -924,5 +905,5 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			logger.close();
 		}
 	}
-}
 
+}

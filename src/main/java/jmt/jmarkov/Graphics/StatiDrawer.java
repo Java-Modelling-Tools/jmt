@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 /*
@@ -171,9 +171,9 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 
 	private void updateQueueSettings() {
 		//queue is initializing
-		statusE = new Ellipse2D.Double[queueLenght() + 1];
-		statusP = new Arc2D.Double[queueLenght() + 1];
-		arc = new QuadCurve2D.Double[queueLenght() + 3][queueLenght() + 3];
+		statusE = new Ellipse2D.Double[queueLength() + 1];
+		statusP = new Arc2D.Double[queueLength() + 1];
+		arc = new QuadCurve2D.Double[queueLength() + 3][queueLength() + 3];
 	}
 
 	private void resize() {
@@ -203,16 +203,16 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 				+ drawLegend(new Color[] { probC, queueC, animQueuesC }, new String[] { "probability", "queue", "current state" }, dCst.getFont(),
 						START_GAP, START_GAP, g2d);
 		updateQueueSettings();
-		pb = new double[queueLenght() + 1];
-		for (int i = 0; i < queueLenght() + 1; i++) {
+		pb = new double[queueLength() + 1];
+		for (int i = 0; i < queueLength() + 1; i++) {
 			try {
 				pb[i] = ql.getStatusProbability(i);
 			} catch (NonErgodicException e) {
 				pb[i] = 0.0;
 			}
-			if ((queueLenght() < queueMax) || (queueMax == 0)) { //queue is infinite or bigger than the visible area 
+			if ((queueLength() < queueMax) || (queueMax == 0)) { //queue is infinite or bigger than the visible area 
 				//drawing the previous of last status 
-				if (i == queueLenght() - 2) {
+				if (i == queueLength() - 2) {
 					drawMoreStatus(g2d);
 					drawArc(i, (i + 1), false, "", g2d, borderC);
 					drawArc((i + 1), i, false, "", g2d, borderC);
@@ -248,7 +248,7 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 				}
 
 			}
-			if (i < queueLenght()) {
+			if (i < queueLength()) {
 				drawArc(i, (i + 1), false, "", g2d, borderC);
 				drawArc((i + 1), i, false, "", g2d, borderC);
 			}
@@ -266,7 +266,7 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 			}
 		}
 		//animation
-		if ((lastJob != currentJob) && (currentJob < queueLenght() - 2) && animate) {
+		if ((lastJob != currentJob) && (currentJob < queueLength() - 2) && animate) {
 			animateTransition3(lastJob, currentJob, false, g2d, animBorderC, animQueuesC);
 		}
 
@@ -295,13 +295,13 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	}
 
 	public void drawLastStatus(String jobStr, double probability, Graphics2D g2d, Color sc, Color pc) {
-		double x = 2.0 * (2.0 * STATUS_RAD + ELEMS_GAP) * (queueLenght() - 1) + START_GAP;
+		double x = 2.0 * (2.0 * STATUS_RAD + ELEMS_GAP) * (queueLength() - 1) + START_GAP;
 		double y = panelH / 2.0 - STATUS_RAD;
 		Color ctmp = g2d.getColor();
 		lastStatusE = new Ellipse2D.Double(x, y, STATUS_RAD * 2.0, STATUS_RAD * 2.0);
 		g2d.setPaint(sc);
 		g2d.fill(lastStatusE);
-		//if(queueMax != 0){
+		//if (queueMax != 0) {
 		double pie = probability * 360;
 		lastStatusP = new Arc2D.Double(x, y, STATUS_RAD * 2.0, STATUS_RAD * 2.0, 0.0, pie, Arc2D.PIE);
 		g2d.setPaint(pc);
@@ -317,7 +317,7 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	}
 
 	public void drawMoreStatus(Graphics2D g2d) {
-		double x = 2.0 * (2.0 * STATUS_RAD + ELEMS_GAP) * (queueLenght() - 2) + START_GAP;
+		double x = 2.0 * (2.0 * STATUS_RAD + ELEMS_GAP) * (queueLength() - 2) + START_GAP;
 		Color ctmp = g2d.getColor();
 		g2d.setPaint(Color.BLACK);
 		drawCenteredText(" . . . ", Color.BLACK, x + STATUS_RAD, panelH / 2.0, g2d, false);
@@ -369,14 +369,14 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 		g2d.setStroke(stroke);
 	}
 
-	//	private void animateTransition2(int from, int to, boolean bold, Graphics2D g2d, Color c){
+	//	private void animateTransition2(int from, int to, boolean bold, Graphics2D g2d, Color c) {
 	//			Color oldc = g2d.getColor();
 	//			g2d.setColor(c);
 	//			//arrow = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 	//			double gap, x1, x2, y, ctrlx, ctrly;
 	//			if (bold)
 	//				g2d.setStroke(strokeB);
-	//			if(from > to){
+	//			if (from > to) {
 	//				x2 = to * (4 * STATUS_RAD + 2* ELEMS_GAP) + START_GAP + STATUS_RAD * 2 ;//+ ELEMS_GAP;
 	//				x1 = from * (4 * STATUS_RAD + 2 * ELEMS_GAP) + START_GAP;// - ELEMS_GAP;				
 	//			
@@ -463,11 +463,11 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	}
 
 	public void drawLastArc(boolean bold, String txt, Graphics2D g2d, Color c) {
-		drawArc(queueLenght() + 2, queueLenght() + 1, false, "", g2d, c);
-		drawArc(queueLenght() + 1, queueLenght() + 2, false, "", g2d, c);
+		drawArc(queueLength() + 2, queueLength() + 1, false, "", g2d, c);
+		drawArc(queueLength() + 1, queueLength() + 2, false, "", g2d, c);
 	}
 
-	//	private void animateTransition(int from, int to, Color c, int frame, int maxframe, Graphics2D g2d){
+	//	private void animateTransition(int from, int to, Color c, int frame, int maxframe, Graphics2D g2d) {
 	//			Color oldc = g2d.getColor();
 	//			g2d.setColor(c);
 	//			double x, y, diameter;
@@ -508,10 +508,8 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 
 	}
 
-	private int queueLenght() {
-
-		//		int a = (int)((panelW - 2 * START_GAP  - 4 * (2 * STATUS_RAD + ELEMS_GAP) 
-		//			- ELEMS_GAP )/(2 * (2 * STATUS_RAD + ELEMS_GAP)));
+	private int queueLength() {
+		//int a = (int)((panelW - 2 * START_GAP  - 4 * (2 * STATUS_RAD + ELEMS_GAP) - ELEMS_GAP )/(2 * (2 * STATUS_RAD + ELEMS_GAP)));
 		int tmp = (int) ((panelW - START_GAP - END_GAP + (2 * STATUS_RAD + 2 * ELEMS_GAP)) / (2 * (2 * STATUS_RAD + ELEMS_GAP)));
 		if ((queueMax > 0) && (queueMax < tmp)) {
 			return queueMax;

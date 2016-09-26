@@ -35,7 +35,7 @@ public class XMacroBlock extends MacroBlock {
 	}
 	
 	public void LUPDecompose(boolean in_place) throws InconsistentLinearSystemException {
-		for(int i = 0; i < micro_blocks.length; i++) {
+		for (int i = 0; i < micro_blocks.length; i++) {
 			((XMicroBlock) micro_blocks[i]).LUPDecompose(in_place);
 		}
 	}

@@ -71,26 +71,26 @@ public class B2MicroBlock extends MicroBlock {
 		int number_of_queue_constants = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M;
 		
 		int row_to_print = row - position.row;		
-		if(row_to_print >= 0 && row_to_print < size.row) {
+		if (row_to_print >= 0 && row_to_print < size.row) {
 			
 			//cols_printed = 0;
 			//print white offset
 			int first_column = (position.row + row_to_print - number_of_queue_constants) * qnm.M;
-			for(int i = 0; i < first_column; i++) {
+			for (int i = 0; i < first_column; i++) {
 				System.out.format("%2s ", " ");
 				cols_printed++;
 			}
 			//print Demand for each queue
-			for(int k = 1; k <= qnm.M; k++) {
+			for (int k = 1; k <= qnm.M; k++) {
 				System.out.format("%2s ", qnm.getDemandAsBigInteger(k - 1, current_class - 1)).toString();
 				cols_printed++;
 			}			
 			//print white space to next block
-			for(int i = cols_printed; i < number_of_queue_constants; i++) {
+			for (int i = cols_printed; i < number_of_queue_constants; i++) {
 				System.out.format("%2s ", " ");
 			}			
 			//print whitespace to delays
-			for(int i = 0; i <= (row - number_of_queue_constants); i++) {
+			for (int i = 0; i <= (row - number_of_queue_constants); i++) {
 				System.out.format("%2s ", " ");
 			}
 			//print Delay
@@ -105,7 +105,7 @@ public class B2MicroBlock extends MicroBlock {
 		
 		BigRational result = BigRational.ZERO;
 		
-		for(int k = 1; k <= qnm.M; k++) {
+		for (int k = 1; k <= qnm.M; k++) {
 			result = result.
 					add((basis.getOldValue(((position.row + index - number_of_queue_constants) * qnm.M) + k - 1).
 							multiply(qnm.getDemandAsBigInteger(k - 1, current_class - 1))));
@@ -121,7 +121,7 @@ public class B2MicroBlock extends MicroBlock {
 	public void multiply(BigRational[] result)
 			throws BTFMatrixErrorException {
 		
-		for(int i = 0; i < size.row; i++) {
+		for (int i = 0; i < size.row; i++) {
 			result[position.row + i] = multiplyRow(i);
 		}
 	}
@@ -131,7 +131,7 @@ public class B2MicroBlock extends MicroBlock {
 		
 		BigRational value;
 		
-		for(int i = 0; i < size.row; i++) {
+		for (int i = 0; i < size.row; i++) {
 			
 			value = multiplyRow(i);
 			

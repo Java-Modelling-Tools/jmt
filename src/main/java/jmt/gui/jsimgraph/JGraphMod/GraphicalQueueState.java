@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.JGraphMod;
 
@@ -43,8 +43,8 @@ import jmt.gui.jsimgraph.controller.ModelSnapshot;
  *         Date: 22-feb-2006
  *         Time: 09.09.21
 
- * Modyfied by Bertoli Marco to support JGraph 5.8 - 21/mar/2006
- * Modyfied by Bertoli Marco to greatly speed up everything - 18/may/2006
+ * Modified by Bertoli Marco to support JGraph 5.8 - 21/mar/2006
+ * Modified by Bertoli Marco to greatly speed up everything - 18/may/2006
 
  */
 public class GraphicalQueueState {
@@ -80,7 +80,7 @@ public class GraphicalQueueState {
 		double nClasses = mediator.getClassDefinition().getClassKeys().size();
 		double maxNJobs = queueState.getMaxValue();
 
-		//used to avoid extreme queue lenght variation when the number of jobs inside the system is very small
+		//used to avoid extreme queue length variation when the number of jobs inside the system is very small
 		if (maxNJobs < 10) {
 			maxNJobs = 10;
 		}
@@ -220,11 +220,11 @@ public class GraphicalQueueState {
 			double xStart;
 			double yStart;
 			offset = (int) ((mediator.getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT) / 2);
-			if(cell.isLeftInputCell()){
+			if (cell.isLeftInputCell()) {
 				g.fill(new Rectangle2D.Double(p.getX()  + offset, p.getY(), (int) width , (int) height ));
 				yStart = p.getY() + V_FREE_SPACE;
 			}
-			else{
+			else {
 				g.fill(new Rectangle2D.Double(p.getX() + QUEUE_HEIGHT + offset, p.getY(), (int) width, (int) height ));
 				yStart = p.getY() + V_FREE_SPACE;
 			}
@@ -240,11 +240,11 @@ public class GraphicalQueueState {
 
 					Color color = mediator.getClassDefinition().getClassColor(classes.get(j));
 					g.setColor(color);
-					if(cell.isLeftInputCell()){
+					if (cell.isLeftInputCell()) {
 					xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
 					g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 					}
-					else{
+					else {
 						xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE + QUEUE_HEIGHT;
 						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 					}
@@ -288,11 +288,11 @@ public class GraphicalQueueState {
 
 						Color color = mediator.getClassDefinition().getClassColor(thisStation);
 						g.setColor(color);
-						if(cell.isLeftInputCell()){
+						if (cell.isLeftInputCell()) {
 						xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
 						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 						}
-						else{
+						else {
 							xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE + QUEUE_HEIGHT;
 							g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 						}
@@ -306,10 +306,10 @@ public class GraphicalQueueState {
 			//offset =  (int) ( (getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT)/2 + QUEUE_HEIGHT );
 			int startAngle = 0;
 			int arcDiameter = (int) (QUEUE_HEIGHT) - 2;
-			if(cell.isLeftInputCell()){
+			if (cell.isLeftInputCell()) {
 			xStart = p.getX() + offset + (int) QUEUE_WIDTH + 1;
 			}
-			else{
+			else {
 				xStart = p.getX() + offset + 1;
 			}
 			yStart = p.getY() + 1;

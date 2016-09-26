@@ -27,7 +27,7 @@ public class ClassSwitchFork extends ForkStrategy {
         public ClassSwitchFork(ClassJobNum jobsPerClass[]) {
                 this.jobsPerClass = jobsPerClass;
                 nodeNames = new String[jobsPerClass.length];
-                for(int i = 0; i < jobsPerClass.length; i++) {
+                for (int i = 0; i < jobsPerClass.length; i++) {
                         ClassJobNum c = jobsPerClass[i];
                         nodeNames[i] = c.getName();
                 }
@@ -41,10 +41,10 @@ public class ClassSwitchFork extends ForkStrategy {
                         //corresponding to the nodeNames
                         findNodes();
                 }
-                for(int i = 0; i < jobsPerClass.length; i++) {
+                for (int i = 0; i < jobsPerClass.length; i++) {
                         ClassJobNum c = jobsPerClass[i];
                         Map<JobClass, Integer> map = new HashMap<JobClass, Integer>();
-                        for(int j = 0; j < c.getClasses().length; j++) {
+                        for (int j = 0; j < c.getClasses().length; j++) {
                                 map.put(findClass(c.getClasses()[j]), c.getNumbers()[j]);
                         }
                         nl.add(this.nodes[i], map);

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jwat.trafficAnalysis.utils;
 
@@ -193,7 +193,7 @@ public class Loader {
 		protected JmtFileFilter defaultFilter;
 
 		/**
-		 * Creates a File chooser in the appropriate directory user deafault.
+		 * Creates a File chooser in the appropriate directory user default.
 		 * @param defaultFilter default file filter
 		 */
 		public JmtFileChooser(JmtFileFilter defaultFilter) {
@@ -206,7 +206,7 @@ public class Loader {
 		 */
 		@Override
 		public void approveSelection() {
-			// Gets the choosed file name
+			// Gets the chosen file name
 			String name = getSelectedFile().getName();
 			String parent = getSelectedFile().getParent();
 			if (getDialogType() == OPEN_DIALOG) {

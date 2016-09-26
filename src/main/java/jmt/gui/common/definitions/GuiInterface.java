@@ -1,26 +1,24 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions;
 
 import javax.swing.JFrame;
-
-import jmt.gui.jsimgraph.controller.SimulationStateChecker;
 
 /**
  * <p>Title: Gui Interface</p>
@@ -39,7 +37,7 @@ public interface GuiInterface {
 	public void showErrorMessage(String message);
 
 	/**
-	 * Shows a panel with catched exception
+	 * Shows a panel with caught exception
 	 * @param e exception to be shown
 	 */
 	public void handleException(Exception e);
@@ -86,11 +84,13 @@ public interface GuiInterface {
 	 * @param parw the Parametric Analysis Results Window to be set
 	 */
 	//public void setPAResultsWindow(PAResultsWindow parw);
+
 	/**
 	 * Sets the availability of results in case of parametric analysis
-	 * @param avaible true if they are avaible
+	 * @param available true if they are available
 	 */
-	//public void setPAResultsAvaible(boolean avaible);
-        
-        public String getFileName();
+	//public void setPAResultsAvailable(boolean available);
+
+	public String getFileName();
+
 }

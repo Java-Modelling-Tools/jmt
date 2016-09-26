@@ -8,27 +8,27 @@ public class NodeListWithJobNum {
 	private NodeList nodes;
 	private int total = 0;
 	
-	public NodeListWithJobNum(){
+	public NodeListWithJobNum() {
 		nodesWithJobs= new HashMap<NetNode, Map<JobClass, Integer>>();
 		nodes = new NodeList();
 	}
 	
-	public void add(NetNode netNode, Map<JobClass, Integer> num){
+	public void add(NetNode netNode, Map<JobClass, Integer> num) {
 		nodesWithJobs.put(netNode, num);
 		nodes.add(netNode);
-                for(Integer i: num.values())
+                for (Integer i: num.values())
                     total = total + i;
 	}
 	
-	public NodeList getNodeList(){
+	public NodeList getNodeList() {
 		return this.nodes;
 	}
 	
-	public Map<JobClass, Integer> getClassesWithNum(NetNode netNode){
+	public Map<JobClass, Integer> getClassesWithNum(NetNode netNode) {
 		return nodesWithJobs.get(netNode);
 	}
 	
-	public int getTotalNum(){
+	public int getTotalNum() {
 		return total;
 	}
 }

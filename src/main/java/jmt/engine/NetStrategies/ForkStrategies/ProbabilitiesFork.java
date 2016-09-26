@@ -44,7 +44,7 @@ public class ProbabilitiesFork extends ForkStrategy {
 		
 		for (int i = 0; i < entries.length; i++) {
 			EmpiricalEntry entry = entries[i];
-			if(entry.getValue() instanceof String){
+			if (entry.getValue() instanceof String) {
 				String nodeName = (String) entry.getValue();
 				nodeNames[i] = nodeName;
 				probabilities[i] = entry.getProbability();
@@ -61,7 +61,7 @@ public class ProbabilitiesFork extends ForkStrategy {
 		this.outPaths = outPaths;
 		
 		EmpiricalEntry[] entries = new EmpiricalEntry[outPaths.length];
-		for (int i = 0; i < entries.length; i ++){
+		for (int i = 0; i < entries.length; i ++) {
 			entries[i] = outPaths[i].getProbabilityOfChosen();
 		}
 		
@@ -73,7 +73,7 @@ public class ProbabilitiesFork extends ForkStrategy {
 		
 		for (int i = 0; i < entries.length; i++) {
 			EmpiricalEntry entry = entries[i];
-			if(entry.getValue() instanceof String){
+			if (entry.getValue() instanceof String) {
 				String nodeName = (String) entry.getValue();
 				nodeNames[i] = nodeName;
 				probabilities[i] = entry.getProbability();
@@ -98,10 +98,10 @@ public class ProbabilitiesFork extends ForkStrategy {
 				findNodes();
 			}
 			
-			for(int i = 0; i < params.length; i ++){
+			for (int i = 0; i < params.length; i ++) {
 				//the empirical distribution returns the position of the chosen output node
 				int nodePos = (int) distribution.nextRand(params[i]);
-				if(nodePos == 0 && nodeList.contains(this.nodes[i])){
+				if (nodePos == 0 && nodeList.contains(this.nodes[i])) {
 					EmpiricalEntry[] JobsPerLinkDis = outPaths[i].getJobsPerLinkDis();
 					EmpiricalPar numParam = new EmpiricalPar(JobsPerLinkDis);
 					

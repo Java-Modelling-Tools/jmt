@@ -91,28 +91,28 @@ public class StandardMatrix extends Matrix {
 	 * @param matrix
 	 * @return the determinant of the matrix
 	 */
-	private BigRational determinant(BigRational[][] matrix){ //method sig. takes a matrix (two dimensional array), returns determinant.
+	private BigRational determinant(BigRational[][] matrix) { //method sig. takes a matrix (two dimensional array), returns determinant.
 	    BigRational sum = BigRational.ZERO; 
 	    BigRational s;
-	    if(matrix.length==1){  //bottom case of recursion. size 1 matrix determinant is itself.
+	    if (matrix.length==1) {  //bottom case of recursion. size 1 matrix determinant is itself.
 	        return(matrix[0][0]);
 	    }
-	    for(int i=0;i<matrix.length;i++){ //finds determinant using row-by-row expansion
+	    for (int i=0;i<matrix.length;i++) { //finds determinant using row-by-row expansion
 	    BigRational[][]smaller= new BigRational[matrix.length-1][matrix.length-1]; //creates smaller matrix- values not in same row, column
-	    	for(int a=1;a<matrix.length;a++){
-	    		for(int b=0;b<matrix.length;b++){
-	    			if(b<i){
+	    	for (int a=1;a<matrix.length;a++) {
+	    		for (int b=0;b<matrix.length;b++) {
+	    			if (b<i) {
 	    				smaller[a-1][b]=matrix[a][b];
 	    			}
-	    			else if(b>i){
+	    			else if (b>i) {
 	    				smaller[a-1][b-1]=matrix[a][b];
 	    			}
 	    		}
 	    	}
-	    	if(i%2==0){ //sign changes based on i
+	    	if (i%2==0) { //sign changes based on i
 	    		s = BigRational.ONE;
 	    	}
-	    	else{
+	    	else {
 	    		s= BigRational.ONE.negate();
 	    	}
 	    	sum = sum.add( s.multiply(matrix[0][i].multiply((determinant(smaller))))); // recursive step: determinant of larger determined by smaller.

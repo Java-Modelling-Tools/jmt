@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2007, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.dataAnalysis;
 
@@ -44,6 +44,7 @@ import jmt.engine.log.JSimLogger;
 import jmt.engine.math.SampleStatistics;
 import jmt.engine.simEngine.Simulation;
 import jmt.gui.common.definitions.StatisticalOutputsLoader;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -74,6 +75,7 @@ import org.w3c.dom.Element;
  * 
  */
 public class XMLSimulationOutput extends SimulationOutput {
+
 	private static final String SEPARATOR = System.getProperty("file.separator");
 	final static boolean DEBUG = false;
 
@@ -91,15 +93,15 @@ public class XMLSimulationOutput extends SimulationOutput {
 
 	//the File containing the original model definition
 	File simModelDefinition;
-        
-        private String decimalSeparator;
-        private String logDelimiter;
-        private boolean isTerminalSimulation;
+
+	private String decimalSeparator;
+	private String logDelimiter;
+	private boolean isTerminalSimulation;
 
 	public XMLSimulationOutput(Simulation simulation) {
 		super(simulation);
-                
-                this.isTerminalSimulation = simulation.isIsTerminalSimulation();
+
+		this.isTerminalSimulation = simulation.isIsTerminalSimulation();
 
 		try {
 			/////////////////////////////
@@ -145,10 +147,10 @@ public class XMLSimulationOutput extends SimulationOutput {
 			} else {
 				root.setAttribute("modelDefinitionPath", ".");
 			}
-			
+
 			// Write CSV definition for verbose measures load.
-                        decimalSeparator = simulation.getSimParameters().getLogDecimalSeparator();
-                        logDelimiter = simulation.getSimParameters().getLogDelimiter();
+			decimalSeparator = simulation.getSimParameters().getLogDecimalSeparator();
+			logDelimiter = simulation.getSimParameters().getLogDelimiter();
 			root.setAttribute("logDecimalSeparator", simulation.getSimParameters().getLogDecimalSeparator());
 			root.setAttribute("logDelimiter", simulation.getSimParameters().getLogDelimiter());
 			root.setAttribute("logPath", simulation.getSimParameters().getLogPath());
@@ -162,7 +164,6 @@ public class XMLSimulationOutput extends SimulationOutput {
 	 * Writes the output of the specified measure.
 	 */
 	private void writeMeasure(Measure measure) {
-
 		Element elem = doc.createElement("measure");
 		root.appendChild(elem);
 
@@ -197,71 +198,60 @@ public class XMLSimulationOutput extends SimulationOutput {
 		String typeName = "";
 
 		switch (type) {
-			case SimConstants.QUEUE_LENGTH:
-				typeName = "Number of Customers";
-				break;
-
-			case SimConstants.QUEUE_TIME:
-				typeName = "Queue Time";
-				break;
-
-			case SimConstants.UTILIZATION:
-				typeName = "Utilization";
-				break;
-
-			case SimConstants.THROUGHPUT:
-				typeName = "Throughput";
-				break;
-
-			case SimConstants.RESIDENCE_TIME:
-				typeName = "Residence Time";
-				break;
-
-			case SimConstants.RESPONSE_TIME:
-				typeName = "Response Time";
-				break;
-
-			case SimConstants.SYSTEM_RESPONSE_TIME:
-				typeName = "System Response Time";
-				break;
-
-			case SimConstants.SYSTEM_THROUGHPUT:
-				typeName = "System Throughput";
-				break;
-
-			case SimConstants.SYSTEM_JOB_NUMBER:
-				typeName = "System Number of Customers";
-				break;
-			case SimConstants.DROP_RATE:
-				typeName = "Drop Rate";
-				break;
-			case SimConstants.SYSTEM_DROP_RATE:
-				typeName = "System Drop Rate";
-				break;
-			//Added by ASHANKA START
-			//Adds the performance index system power for jsim
-			case SimConstants.SYSTEM_POWER:
-				typeName = "System Power";
-				break;
-			//Added by ASHANKA STOP
-			case SimConstants.THROUGHPUT_PER_SINK:
-				typeName = "Throughput per Sink";
-				break;				
-			case SimConstants.RESPONSE_TIME_PER_SINK:
-				typeName = "Response Time per Sink";
-                                break;
-                        case SimConstants.FCR_TOTAL_WEIGHT:
-				typeName = "FCR Job Weight";
-                                break;
-                        case SimConstants.FCR_MEMORY_OCCUPATION:
-				typeName = "FCR Memory Occupation";
-                                break;
-                        case SimConstants.FORK_JOIN_RESPONSE_TIME:
-				typeName = "Fork Join Response Time";
-                                break;
-                        case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-				typeName = "Fork Join Number of Customers";
-                                break;
+		case SimConstants.QUEUE_LENGTH:
+			typeName = "Number of Customers";
+			break;
+		case SimConstants.QUEUE_TIME:
+			typeName = "Queue Time";
+			break;
+		case SimConstants.UTILIZATION:
+			typeName = "Utilization";
+			break;
+		case SimConstants.THROUGHPUT:
+			typeName = "Throughput";
+			break;
+		case SimConstants.RESIDENCE_TIME:
+			typeName = "Residence Time";
+			break;
+		case SimConstants.RESPONSE_TIME:
+			typeName = "Response Time";
+			break;
+		case SimConstants.SYSTEM_RESPONSE_TIME:
+			typeName = "System Response Time";
+			break;
+		case SimConstants.SYSTEM_THROUGHPUT:
+			typeName = "System Throughput";
+			break;
+		case SimConstants.SYSTEM_JOB_NUMBER:
+			typeName = "System Number of Customers";
+			break;
+		case SimConstants.DROP_RATE:
+			typeName = "Drop Rate";
+			break;
+		case SimConstants.SYSTEM_DROP_RATE:
+			typeName = "System Drop Rate";
+			break;
+		case SimConstants.SYSTEM_POWER:
+			typeName = "System Power";
+			break;
+		case SimConstants.THROUGHPUT_PER_SINK:
+			typeName = "Throughput per Sink";
+			break;				
+		case SimConstants.RESPONSE_TIME_PER_SINK:
+			typeName = "Response Time per Sink";
+			break;
+		case SimConstants.FCR_TOTAL_WEIGHT:
+			typeName = "FCR Total Weight";
+			break;
+		case SimConstants.FCR_MEMORY_OCCUPATION:
+			typeName = "FCR Memory Occupation";
+			break;
+		case SimConstants.FORK_JOIN_RESPONSE_TIME:
+			typeName = "Fork Join Response Time";
+			break;
+		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+			typeName = "Fork Join Number of Customers";
+			break;
 		}
 
 		elem.setAttribute("measureType", typeName);
@@ -271,7 +261,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 		elem.setAttribute("precision", Double.toString(analyzer.getPrecision()));
 		elem.setAttribute("alfa", Double.toString(analyzer.getAlfa()));
 
-		//analyzer has been succesful?
+		//analyzer has been successful?
 		boolean success = analyzer.getSuccess();
 		elem.setAttribute("successful", Boolean.toString(success));
 
@@ -279,34 +269,34 @@ public class XMLSimulationOutput extends SimulationOutput {
 		elem.setAttribute("analyzedSamples", Integer.toString(measure.getAnalyzedSamples()));
 		elem.setAttribute("discardedSamples", Integer.toString(measure.getDiscardedSamples()));
 
-		//this is the extimated mean, but it may be wrong
-		elem.setAttribute("meanValue", Double.toString(measure.getExtimatedMeanValue()));
+		//this is the estimated mean, but it may be wrong
+		elem.setAttribute("meanValue", Double.toString(measure.getEstimatedMeanValue()));
 		elem.setAttribute("upperLimit", Double.toString(measure.getUpperLimit()));
 		elem.setAttribute("lowerLimit", Double.toString(measure.getLowerLimit()));
-		
+
 		//log file if verbose measure was selected
 		if (measure.getOutput() != null && measure.getOutput().getOutputFile() != null) {
-                        elem.setAttribute("logFile", measure.getOutput().getOutputFile().getAbsolutePath());
-                        if (isTerminalSimulation) try {
-                                StatisticalOutputsLoader loader = new StatisticalOutputsLoader(measure, decimalSeparator, logDelimiter);
-                                SampleStatistics stat = loader.getStatistics();
-                                elem.setAttribute("mean", Double.toString(stat.getMean()));
-                                elem.setAttribute("variance", Double.toString(stat.getVariance()));
-                                elem.setAttribute("standardDeviation", Double.toString(stat.getStandardDeviation()));
-                                elem.setAttribute("coefficientOfVariation", Double.toString(stat.getCoefficienfOfVariation()));
-                                elem.setAttribute("skeweness", Double.toString(stat.getSkew()));
-                                elem.setAttribute("kurtosis", Double.toString(stat.getKurtosis()));
-                                elem.setAttribute("firstPowerMoment", Double.toString(stat.getMean()));
-                                elem.setAttribute("secondPowerMoment", Double.toString(stat.getMoment2()));
-                                elem.setAttribute("thirdPowerMoment", Double.toString(stat.getMoment3()));
-                                elem.setAttribute("fourthPowerMoment", Double.toString(stat.getMoment4()));
-                                elem.setAttribute("minValue", Double.toString(stat.getMin()));
-                                elem.setAttribute("maxValue", Double.toString(stat.getMax()));
-                                elem.setAttribute("minSimulationTime", Double.toString(stat.getMinSimTime()));
-                                elem.setAttribute("maxSimulationTime", Double.toString(stat.getMaxSimTime()));
-                        } catch (IOException | ParseException ex) {
-                                Logger.getLogger(XMLSimulationOutput.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+			elem.setAttribute("logFile", measure.getOutput().getOutputFile().getAbsolutePath());
+			if (isTerminalSimulation) try {
+				StatisticalOutputsLoader loader = new StatisticalOutputsLoader(measure, decimalSeparator, logDelimiter);
+				SampleStatistics stat = loader.getStatistics();
+				elem.setAttribute("mean", Double.toString(stat.getMean()));
+				elem.setAttribute("variance", Double.toString(stat.getVariance()));
+				elem.setAttribute("standardDeviation", Double.toString(stat.getStandardDeviation()));
+				elem.setAttribute("coefficientOfVariation", Double.toString(stat.getCoefficienfOfVariation()));
+				elem.setAttribute("skeweness", Double.toString(stat.getSkew()));
+				elem.setAttribute("kurtosis", Double.toString(stat.getKurtosis()));
+				elem.setAttribute("firstPowerMoment", Double.toString(stat.getMean()));
+				elem.setAttribute("secondPowerMoment", Double.toString(stat.getMoment2()));
+				elem.setAttribute("thirdPowerMoment", Double.toString(stat.getMoment3()));
+				elem.setAttribute("fourthPowerMoment", Double.toString(stat.getMoment4()));
+				elem.setAttribute("minValue", Double.toString(stat.getMin()));
+				elem.setAttribute("maxValue", Double.toString(stat.getMax()));
+				elem.setAttribute("minSimulationTime", Double.toString(stat.getMinSimTime()));
+				elem.setAttribute("maxSimulationTime", Double.toString(stat.getMaxSimTime()));
+			} catch (IOException | ParseException ex) {
+				Logger.getLogger(XMLSimulationOutput.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		}
 	}
 
@@ -314,24 +304,20 @@ public class XMLSimulationOutput extends SimulationOutput {
 	 * Writes the output of the drop measures, when blocking regions have been defined.
 	 */
 	private void writeMeasures_regionDroppedJobs() {
-
 		BlockingRegion[] regions = sim.getAllRegions();
 		JobClass[] classes = sim.getClasses();
 		int classNumber = classes.length;
 
 		if (regions != null) {
 			//at least one region has been defined
-
 			for (BlockingRegion region : regions) {
 				try {
 					//retrieves the blocking queue of the input station
 					NodeSection ns = region.getInputStation().getSection(NodeSection.INPUT);
 
 					if (ns instanceof BlockingQueue) {
-
 						//For each class count dropped jobs
 						for (int c = 0; c < classNumber; c++) {
-
 							Element el = doc.createElement("measure");
 							root.appendChild(el);
 
@@ -360,40 +346,33 @@ public class XMLSimulationOutput extends SimulationOutput {
 							el.setAttribute("analyzedSamples", Integer.toString(arrivedJobs));
 							el.setAttribute("discardedSamples", Integer.toString(droppedJobs));
 
-							/*
 							//analyzer confidence requirements
-							el.setAttribute("maxSamples", Integer.toString(0));
-							el.setAttribute("precision", Double.toString(0));
-							el.setAttribute("alfa", Double.toString(0));
-							*/
+							//el.setAttribute("maxSamples", Integer.toString(0));
+							//el.setAttribute("precision", Double.toString(0));
+							//el.setAttribute("alfa", Double.toString(0));
+
 							logger.debug("Dropped jobs percentage region " + region.getName() + "-" + className + ": " + drop_percentage);
 						}
 					}
-
 				} catch (NetException ne) {
 					ne.printStackTrace();
 					return;
 				}
 			}
-
 		}
-
 	}
 
 	/**
 	 * Writes the output of the drop measures, when blocking regions have been defined.
 	 */
 	private void writeMeasures_regionUtilization() {
-
 		BlockingRegion[] regions = sim.getAllRegions();
 		JobClass[] classes = sim.getClasses();
 		int classNumber = classes.length;
 
 		if (regions != null) {
 			//at least one region has been defined
-
 			for (BlockingRegion region : regions) {
-
 				BlockingRegion reg = region;
 
 				if (!reg.hasGlobalConstraint()) {
@@ -408,7 +387,6 @@ public class XMLSimulationOutput extends SimulationOutput {
 				String className;
 
 				for (int c = 0; c < classNumber; c++) {
-
 					className = classes[c].getName();
 					//logger.debug("Computing region U for class " + className);
 
@@ -451,11 +429,8 @@ public class XMLSimulationOutput extends SimulationOutput {
 					el.setAttribute("successful", Boolean.toString(success));
 					el.setAttribute("measureType", "Region Utilization");
 				}
-
 			}
-
 		}
-
 	}
 
 	public File writeAllMeasures() {
@@ -492,14 +467,12 @@ public class XMLSimulationOutput extends SimulationOutput {
 					} else {
 						xmlResultsName = parent + SEPARATOR + "res_sim_" + mvaModelDefinition.getName();
 					}
-
 				} else {
 					//the passed filename is not absolute
 					xmlResultsName = SEPARATOR + "res_sim_" + mvaModelDefinition.getName();
 				}
 			} else {
 				//mvaModelDefinition not defined
-
 				//use sim model path
 				String simModelPath = sim.getXmlSimModelDefPath();
 				File simModelFile;
@@ -508,7 +481,6 @@ public class XMLSimulationOutput extends SimulationOutput {
 					//sim model file exist
 					simModelFile = new File(simModelPath);
 					xmlResultsName = simModelFile.getParent() + SEPARATOR + "res_sim_" + sim.getName() + ".xml";
-
 				} else {
 					//get the user dir
 					String curDir = System.getProperty("user.dir");
@@ -520,7 +492,6 @@ public class XMLSimulationOutput extends SimulationOutput {
 					}
 					xmlResultsName = curDir + SEPARATOR + "res_sim_JMT" + name + ".xml";
 				}
-
 			}
 
 			//creates the results file
@@ -545,13 +516,12 @@ public class XMLSimulationOutput extends SimulationOutput {
 
 			temp.renameTo(resultsFile);
 
-			// Check because somethime rename fails...
+			// Check because sometimes rename fails...
 			if (resultsFile.exists()) {
 				return resultsFile;
 			} else {
 				return temp;
 			}
-
 		} catch (javax.xml.transform.TransformerConfigurationException exc) {
 			exc.printStackTrace();
 		} catch (javax.xml.transform.TransformerException exc) {
@@ -565,9 +535,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 	}
 
 	private double findQueueMeasure(String className, String stationName) {
-
 		try {
-
 			org.w3c.dom.NodeList measureList = root.getElementsByTagName("measure");
 			int measureNumber = measureList.getLength();
 			Element currentMeasure;
@@ -599,13 +567,11 @@ public class XMLSimulationOutput extends SimulationOutput {
 					logger.debug("Q measure found for " + stationName + "-" + className + ": NOT SUCCESSFUL");
 					return -1;
 				}
-
 			}
 
 			//else measure not found
 			logger.debug("Q measure not found for " + stationName + "-" + className);
 			return -1;
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.debug("Q measure not found for " + stationName + "-" + className);

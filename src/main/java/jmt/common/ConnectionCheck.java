@@ -6,8 +6,8 @@ import java.net.URLConnection;
 import jmt.gui.jsimgraph.template.TemplateConstants;
 
 public class ConnectionCheck {
-	public static boolean netCheck(String[] testURLs){
-		for (String testURL : testURLs){
+	public static boolean netCheck(String[] testURLs) {
+		for (String testURL : testURLs) {
 			try {
         	   URL url = new URL(testURL);
         	   URLConnection conn = (URLConnection)url.openConnection();

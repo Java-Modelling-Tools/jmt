@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.common.editors;
 
@@ -59,10 +59,10 @@ public class ImagedComboBoxCellEditorFactory {
 	protected boolean isString;
 	/** Cache for components */
 	protected HashMap<Object, LabelRenderer> cache = new HashMap<Object, LabelRenderer>();
-        protected HashMap<Object, LabelRenderer> cacheFJ = new HashMap<Object, LabelRenderer>();
+	protected HashMap<Object, LabelRenderer> cacheFJ = new HashMap<Object, LabelRenderer>();
 	/** Renderer instance */
 	protected TableCellRenderer renderer;
-        /** Renderer instance for FJ */
+	/** Renderer instance for FJ */
 	protected TableCellRenderer rendererFJ;
 	/** Editor instance */
 	protected ImagedComboEditor editor;
@@ -138,7 +138,7 @@ public class ImagedComboBoxCellEditorFactory {
 	 */
 	public void clearCache() {
 		cache.clear();
-                cacheFJ.clear();
+		cacheFJ.clear();
 		nullRenderer = null;
 	}
 
@@ -191,8 +191,8 @@ public class ImagedComboBoxCellEditorFactory {
 		editor.setData(rend);
 		return editor;
 	}
-        
-        public TableCellEditor getEditorFJ(List data) {
+
+	public TableCellEditor getEditorFJ(List data) {
 		if (editor == null) {
 			editor = new ImagedComboEditor();
 		}
@@ -243,8 +243,8 @@ public class ImagedComboBoxCellEditorFactory {
 		}
 		return label;
 	}
-        
-        protected LabelRenderer getDrawComponentFJ(Object key) {
+
+	protected LabelRenderer getDrawComponentFJ(Object key) {
 		LabelRenderer label;
 		if (key == null) {
 			if (nullRenderer == null) {
@@ -270,15 +270,15 @@ public class ImagedComboBoxCellEditorFactory {
 		 */
 		private static final long serialVersionUID = 1L;
 		protected Object key;
-                protected boolean isFJ;
+		protected boolean isFJ;
 
 		/**
-		 * Construst a new labelrenderer with given object
+		 * Construct a new label renderer with given object
 		 * @param key search's key for class or station
 		 */
 		public LabelRenderer(Object key, boolean isFJ) {
 			super();
-                        this.isFJ = isFJ;
+			this.isFJ = isFJ;
 			setHorizontalTextPosition(SwingConstants.RIGHT);
 			setOpaque(true);
 			setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
@@ -295,11 +295,11 @@ public class ImagedComboBoxCellEditorFactory {
 			} else if (isStation) {
 				// This is a station
 				if (sd.getStationName(key) != null && !sd.getStationName(key).equals("")) {
-                                        if(isFJ) {
-                                                setText(sd.getStationName(key) + " (Fork Join)");
-                                        } else {
-                                                setText(sd.getStationName(key));
-                                        }
+					if (isFJ) {
+						setText(sd.getStationName(key) + " (Fork Join)");
+					} else {
+						setText(sd.getStationName(key));
+					}
 					setIcon(JMTImageLoader.loadImage(sd.getStationType(key) + "Combo"));
 				}
 				// This is a region
@@ -313,14 +313,15 @@ public class ImagedComboBoxCellEditorFactory {
 				if (key == null) {
 					// Null component
 					setText("");
-				}
-				else if(key.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)){
+				} else if (key.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)) {
 					setText(CommonConstants.STATION_TYPE_CLASSSWITCH);
 					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_CLASSSWITCH+ "Combo"));
-				}
-                                else if(key.equals(CommonConstants.STATION_TYPE_FORK)){
+				} else if (key.equals(CommonConstants.STATION_TYPE_FORK)) {
 					setText(CommonConstants.STATION_TYPE_FORK);
 					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_FORK+ "Combo"));
+				} else if (key.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+					setText(CommonConstants.STATION_TYPE_TRANSITION);
+					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_TRANSITION+ "Combo"));
 				}
 
 			} else {
@@ -328,12 +329,12 @@ public class ImagedComboBoxCellEditorFactory {
 				if (cd.getClassName(key) != null && !cd.getClassName(key).equals("")) {
 					setText(cd.getClassName(key));
 					switch (cd.getClassType(key)) {
-						case CommonConstants.CLASS_TYPE_CLOSED:
-							setIcon(JMTImageLoader.loadImage("ClosedCombo"));
-							break;
-						case CommonConstants.CLASS_TYPE_OPEN:
-							setIcon(JMTImageLoader.loadImage("OpenCombo"));
-							break;
+					case CommonConstants.CLASS_TYPE_CLOSED:
+						setIcon(JMTImageLoader.loadImage("ClosedCombo"));
+						break;
+					case CommonConstants.CLASS_TYPE_OPEN:
+						setIcon(JMTImageLoader.loadImage("OpenCombo"));
+						break;
 					}
 				} else if (key == null) {
 					// Null component
@@ -359,14 +360,14 @@ public class ImagedComboBoxCellEditorFactory {
 	public TableCellRenderer getRenderer() {
 		return getRenderer(false, 0);
 	}
-        
-        public TableCellRenderer getRendererFJ() {
+
+	public TableCellRenderer getRendererFJ() {
 		if (rendererFJ == null) {
-				rendererFJ = new ImagedComboRenderer(true);
+			rendererFJ = new ImagedComboRenderer(true);
 		}
 		return rendererFJ;
 	}
-	
+
 	/** TO CORRECT
 	 * Returns an instance of Imaged combobox renderer
 	 * @return an instance of Imaged combobox renderer
@@ -378,14 +379,14 @@ public class ImagedComboBoxCellEditorFactory {
 	 */
 	public TableCellRenderer getRenderer(boolean isGrayRenderer, int referenceColumn) {
 		if (renderer == null) {
-			if(isGrayRenderer)
+			if (isGrayRenderer)
 				renderer = new ImagedComboGrayRenderer(referenceColumn, false);
 			else 
 				renderer = new ImagedComboRenderer(false);
 		}
 		return renderer;
 	}
-        
+
 	/**
 	 * This class is used to display a custom renderer into the comboBox with
 	 * Jlabels generated by getDrawComponent method.
@@ -410,10 +411,10 @@ public class ImagedComboBoxCellEditorFactory {
 			return component;
 		}
 	}
-	
+
 	protected class ImagedComboGrayRenderer extends ImagedComboRenderer {
 		private int referenceColumn;
-		
+
 		public ImagedComboGrayRenderer(int referenceColumn, boolean isFJ) {
 			super(isFJ);
 			this.referenceColumn = referenceColumn;
@@ -422,22 +423,22 @@ public class ImagedComboBoxCellEditorFactory {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			if(!table.isCellEditable(row, referenceColumn))
+			if (!table.isCellEditable(row, referenceColumn))
 				renderer.setEnabled(false);
 			return renderer;
-				
+
 		}
 	}
-	
+
 	protected class ImagedComboRenderer implements TableCellRenderer {
 		protected JComboBox combo = new JComboBox();
-                protected boolean isFJ;
+		protected boolean isFJ;
 
 		/**
 		 * Creates a new ImagedComboRenderer and sets renderer for comboBox.
 		 */
 		public ImagedComboRenderer(boolean isFJ) {
-                        this.isFJ = isFJ;
+			this.isFJ = isFJ;
 			combo.setRenderer(new ComboImageRenderer());
 		}
 
@@ -467,12 +468,12 @@ public class ImagedComboBoxCellEditorFactory {
 		 * @param    column     the column index of the cell being drawn
 		 */
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                        Component renderer;
-                        if (isFJ) { 
-                                renderer = getDrawComponentFJ(value);
-                        } else {
-                                renderer = getDrawComponent(value);
-                        }
+			Component renderer;
+			if (isFJ) { 
+				renderer = getDrawComponentFJ(value);
+			} else {
+				renderer = getDrawComponent(value);
+			}
 			if (table.isCellEditable(row, column)) {
 				// If the cell is editable, returns a comboBox
 				combo.removeAllItems();

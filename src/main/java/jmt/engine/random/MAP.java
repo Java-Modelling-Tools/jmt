@@ -73,7 +73,7 @@ public class MAP extends AbstractDistribution implements Distribution {
 			}
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter mean, variance, lambda1 and lambda 2 must be gtz; p must be a number betwen 0 and 1");
+					"Remember: parameter mean, variance, lambda1 and lambda 2 must be gtz; p must be a number between 0 and 1");
 		}
 	}
 

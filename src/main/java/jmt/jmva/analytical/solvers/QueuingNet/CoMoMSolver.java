@@ -48,7 +48,7 @@ public class CoMoMSolver extends QNSolver {
 		
 		current_N = new PopulationVector(0,R);		
 				
-		for(int _class = 1; _class <= R; _class++) {
+		for (int _class = 1; _class <= R; _class++) {
 			System.out.println("Working on class " + _class);
 			System.out.println("Current Population: " + current_N);
 			
@@ -67,11 +67,11 @@ public class CoMoMSolver extends QNSolver {
     private  void solveForClass(int _class) throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
 		/*
 		//If no jobs of current_class in target population, move onto next class
-		if(target_N.get(current_class - 1) == 0) {
+		if (target_N.get(current_class - 1) == 0) {
 			return;
 		}				
 		*/
-		for(int class_population = current_N.get(_class - 1); 
+		for (int class_population = current_N.get(_class - 1); 
 				class_population <= target_N.get(_class - 1); 
 				class_population++ ) {
 			
@@ -83,7 +83,7 @@ public class CoMoMSolver extends QNSolver {
 			
 			system.solve();
 						
-			if(class_population < target_N.get(_class - 1)) {
+			if (class_population < target_N.get(_class - 1)) {
 				
 				current_N.plusOne(_class);
 			}

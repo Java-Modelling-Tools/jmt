@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.definitions;
 
@@ -82,10 +82,12 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			num = new Long(num.longValue() + 1);
 		}
 		objectNumber.put(Defaults.get("className"), num);
-                Distribution defaultClassDistrib = (Distribution) Defaults.getAsNewInstance("classDistribution");
-                defaultClassDistrib.setMean(2.0); // set default arrival rate to 0.5
-		return addClass(getUniqueClassName(Defaults.get("className") + num.toString()), Defaults.getAsInteger("classType").intValue(), Defaults
-				.getAsInteger("classPriority").intValue(), Defaults.getAsInteger("classPopulation"), defaultClassDistrib);
+		Distribution defaultClassDistrib = (Distribution) Defaults.getAsNewInstance("classDistribution");
+		if (defaultClassDistrib.hasMean()) {
+			defaultClassDistrib.setMean(defaultClassDistrib.getMean() * 2);
+		}
+		return addClass(getUniqueClassName(Defaults.get("className") + num.toString()), Defaults.getAsInteger("classType").intValue(),
+				Defaults.getAsInteger("classPriority").intValue(), Defaults.getAsInteger("classPopulation"), defaultClassDistrib);
 	}
 
 	/**
@@ -150,7 +152,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 * specified by proper code.
 	 * @param key key of search for class
 	 * @param parameterName name of parameter to be changed
-	 * @param value selected parameter should be setted to this value
+	 * @param value selected parameter should be set to this value
 	 * Overrides default one to add "Color"
 	 */
 	@Override
@@ -177,7 +179,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		if (old != type) {
 			setClassRefStation(key, null);
 			if (type == CLASS_TYPE_OPEN) {
-				Vector stations = this.getStationKeys();
+				Vector<Object> stations = this.getStationKeys();
 				for (int i = 0; i < stations.size(); i++) {
 					if (this.getStationType(stations.get(i)).equals(STATION_TYPE_SOURCE)) {
 						setClassRefStation(key, stations.get(i));
@@ -313,7 +315,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 */
 	private String getUniqueClassName(String name) {
 		TreeSet<String> names = new TreeSet<String>(); // Map of all unique names with their first users
-		Vector keys = getClassKeys();
+		Vector<Object> keys = getClassKeys();
 		// Finds all used names
 		for (int i = 0; i < keys.size(); i++) {
 			names.add(this.getClassName(keys.get(i)));
@@ -453,7 +455,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		// Now sets class-dependant parameters ONLY if stored class exists (so has not been deleted
 		// in the meantime)
 		Object[] classkeyset = ss.serviceStrategy.keySet().toArray();
-		Vector currentclasses = getClassKeys();
+		Vector<Object> currentclasses = getClassKeys();
 		for (Object element : classkeyset) {
 			if (currentclasses.contains(element)) {
 				setQueueStrategy(key, element, ss.queueStrategy.get(element));
@@ -490,21 +492,21 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			queueCapacity = getStationQueueCapacity(key);
 			numOfServers = getStationNumberOfServers(key);
 			// Now sets all attributes of the (station/class) touple
-			Vector classes = getClassKeys();
+			Vector<Object> classes = getClassKeys();
 			Object currclass;
 			for (int i = 0; i < classes.size(); i++) {
 				currclass = classes.get(i);
 				queueStrategy.put(currclass, getQueueStrategy(key, currclass));
 				//bugs fixed:
 				//check if null
-				if( getServiceTimeDistribution(key, currclass) != null){
+				if ( getServiceTimeDistribution(key, currclass) != null) {
 					serviceStrategy.put(currclass, ((ServiceStrategy) getServiceTimeDistribution(key, currclass)).clone());
-				}else{
-					serviceStrategy.put(currclass,null);
+				} else {
+					serviceStrategy.put(currclass, null);
 				}
-				if(getRoutingStrategy(key, currclass) != null){
+				if (getRoutingStrategy(key, currclass) != null) {
 					routingStrategy.put(currclass, ((RoutingStrategy) getRoutingStrategy(key, currclass)).clone());
-				}else{
+				} else {
 					routingStrategy.put(currclass, null);
 				}
 			}
@@ -539,13 +541,12 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 * @param name station name
 	 * @return unique name
 	 */
-        private String getCheckStationName(String name) {
+	private String getCheckStationName(String name) {
 		String result = name;
-		if(name.equals(CommonConstants.STATION_TYPE_CLASSSWITCH))
+		if (name.equals(CommonConstants.STATION_TYPE_CLASSSWITCH))
 			result = result + "_" + "1";
 		return result;
 	}
-	
 
 	/**
 	 * Returns given name if a station with the same name does not exists or makes it unique
@@ -554,7 +555,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 */
 	private String getUniqueStationName(String name) {
 		TreeSet<String> names = new TreeSet<String>(); // Map of all unique names with their first users
-		Vector keys = getStationKeys();
+		Vector<Object> keys = getStationKeys();
 		// Finds all used names
 		for (int i = 0; i < keys.size(); i++) {
 			names.add(this.getStationName(keys.get(i)));
@@ -595,12 +596,12 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 * @return search's key for created blocking region
 	 */
 	public Object addBlockingRegion() {
-		long num = 0L;
+		long num = 1L;
 		String baseName = Defaults.get("blockingRegionName");
 
 		// Gets all blocking region names to find an unique name
 		TreeSet<String> names = new TreeSet<String>();
-		Vector keys = getRegionKeys();
+		Vector<Object> keys = getRegionKeys();
 		for (int i = 0; i < keys.size(); i++) {
 			names.add(getRegionName(keys.get(i)));
 		}
@@ -613,4 +614,5 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		return addBlockingRegion(name, Defaults.get("blockingRegionType"));
 	}
 	// ----------------------------------------------------------------------------------------------------
+
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jwat.trafficAnalysis.panels;
 
@@ -39,7 +39,7 @@ import javax.swing.ScrollPaneConstants;
 import jmt.engine.jwat.trafficAnalysis.BurstEngine;
 import jmt.engine.jwat.trafficAnalysis.ModelTrafficAnalysis;
 import jmt.engine.jwat.trafficAnalysis.OnResetModel;
-import jmt.engine.jwat.trafficAnalysis.OnSetParamtersListener;
+import jmt.engine.jwat.trafficAnalysis.OnSetParametersListener;
 import jmt.engine.jwat.trafficAnalysis.TrafficAnalysisSession;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.Defaults;
@@ -90,15 +90,15 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 	public TextualPanel(MainJwatWizard burstwizard) {
 		super();
 		this.burstwizard = burstwizard;
-		((TrafficAnalysisSession) this.burstwizard.getSession()).addSetParamsListener(new OnSetParamtersListener() {
-			public void ParamsSetted() {
+		((TrafficAnalysisSession) this.burstwizard.getSession()).addSetParamsListener(new OnSetParametersListener() {
+			public void ParamsSet() {
 				burstengine = ((TrafficAnalysisSession) TextualPanel.this.burstwizard.getSession()).getEngine();
 				TextualPanel.this.removeAll();
 				initComponents();
 			}
 		});
 		((ModelTrafficAnalysis) this.burstwizard.getModel()).addResetModelListener(new OnResetModel() {
-			public void modelResetted() {
+			public void modelReset() {
 				TextualPanel.this.removeAll();
 			}
 		});
@@ -226,7 +226,7 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 		protected FileFilter defaultFilter;
 
 		/**
-		 * Creates a File chooser in the appropriate directory user deafault.
+		 * Creates a File chooser in the appropriate directory user default.
 		 * @param defaultFilter default file filter
 		 */
 		public FileChooser(FileFilter defaultFilter) {
@@ -239,7 +239,7 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 		 */
 		@Override
 		public void approveSelection() {
-			// Gets the choosed file name
+			// Gets the chosen file name
 			String name = getSelectedFile().getName();
 			String parent = getSelectedFile().getParent();
 			if (getDialogType() == OPEN_DIALOG) {

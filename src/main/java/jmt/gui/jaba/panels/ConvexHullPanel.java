@@ -164,7 +164,7 @@ public class ConvexHullPanel extends WizardPanel implements ActionListener,
 		//FOURTH ROW
 		String stations[] = new String[data.getStations()+1];
 		stations[0] = null;
-		for(int i = 0; i < data.getStations(); i++)
+		for (int i = 0; i < data.getStations(); i++)
 			stations[i+1] = data.getStationNames()[i];
 		stationList = new JComboBox(stations);
 		stationList.addActionListener(this);
@@ -194,13 +194,13 @@ public class ConvexHullPanel extends WizardPanel implements ActionListener,
 				painter2D.showAllLabels(true);
 			else
 				painter2D.showAllLabels(false);
-		} else if(ev.getSource() == showLabels3DBox ) {
+		} else if (ev.getSource() == showLabels3DBox ) {
 			if (showLabels3DBox.getModel().isSelected())
 				painter3D.setEnableHullVerticesLabels(true);
 			else
 				painter3D.setEnableHullVerticesLabels(false);
 			painter3D.repaint();
-		} else if(ev.getSource() == showOnlyBottleneckBox ) {
+		} else if (ev.getSource() == showOnlyBottleneckBox ) {
 			if (showOnlyBottleneckBox.getModel().isSelected())
 				painter3D.setEnableInternalVertices(false);
 			else
@@ -215,26 +215,26 @@ public class ConvexHullPanel extends WizardPanel implements ActionListener,
 				painter2D.showAllLabels(true);
 			else
 				painter2D.showAllLabels(false);
-		} else if(ev.getSource() == renderModeComboBox) {
+		} else if (ev.getSource() == renderModeComboBox) {
 			String s = (String) renderModeComboBox.getSelectedItem();
-			if(s.equals(SOLID)){
+			if (s.equals(SOLID)) {
 				painter3D.setEnableVisibleEdges(true);
 				painter3D.setEnableHiddenEdges(false);
 				painter3D.setEnableVisibleFaces(true);
 				painter3D.setEnableHiddenFaces(true);
-			} else if(s.equals(WIREFRAME)) {
+			} else if (s.equals(WIREFRAME)) {
 				painter3D.setEnableVisibleEdges(true);
 				painter3D.setEnableHiddenEdges(true);
 				painter3D.setEnableVisibleFaces(false);
 				painter3D.setEnableHiddenFaces(false);
-			} else if(s.equals(POINTS)) {
+			} else if (s.equals(POINTS)) {
 				painter3D.setEnableVisibleEdges(false);
 				painter3D.setEnableHiddenEdges(false);
 				painter3D.setEnableVisibleFaces(false);
 				painter3D.setEnableHiddenFaces(false);
 			}
 			painter3D.repaint();
-		} else if(ev.getSource() == stationList) {
+		} else if (ev.getSource() == stationList) {
 			painter3D.selectStation((String) stationList.getSelectedItem());
 		}
 	}

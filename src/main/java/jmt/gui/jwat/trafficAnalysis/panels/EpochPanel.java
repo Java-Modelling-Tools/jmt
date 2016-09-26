@@ -42,7 +42,7 @@ public class EpochPanel extends WizardPanel implements JWATConstants {
 
 		initComponents();
 		((ModelTrafficAnalysis) this.burstwizard.getModel()).addResetModelListener(new OnResetModel() {
-			public void modelResetted() {
+			public void modelReset() {
 				EpochPanel.this.removeAll();
 				initComponents();
 			}

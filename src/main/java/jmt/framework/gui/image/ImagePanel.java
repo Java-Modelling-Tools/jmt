@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.framework.gui.image;
 
@@ -30,10 +30,10 @@ import javax.swing.SwingConstants;
 
 /**
  * <p>Title: ImagePanel</p>
- * <p>Description: A graphical component used to swow a given IconImage. This panel is designed to
- * auto-resize the image basing on width assigned by layout managers, mantaining aspect ratio.
+ * <p>Description: A graphical component used to show a given IconImage. This panel is designed to
+ * auto-resize the image basing on width assigned by layout managers, maintaining aspect ratio.
  * A maximum height can be specified too. Internal caching is used as long as width is not changed
- * to avoid to recalculate images scaling continously.</p>
+ * to avoid to recalculate images scaling continuously.</p>
  * 
  * @author Bertoli Marco
  *         Date: 1-lug-2005

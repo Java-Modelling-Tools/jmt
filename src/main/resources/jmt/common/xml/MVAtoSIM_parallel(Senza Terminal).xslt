@@ -39,8 +39,8 @@
 	</xsl:template>
 	
 	<!--Creates connections for this model. As all of the connections must be parallelized, if there are closed classes all of the stations must be 
-	      connected to the terminal as precessor and successor nodes. If there are openclasses all of the stations must have a source as a 
-	      precessor node and a sink as a successor node.-->
+	      connected to the terminal as predecessor and successor nodes. If there are open classes all of the stations must have a source as a 
+	      predecessor node and a sink as a successor node.-->
 	<xsl:template name="createConnections">
 		<xsl:for-each select="parameters/stations/*">
 			<xsl:if test="count(../../classes/openclass)!=0">
@@ -277,15 +277,15 @@
 					</parameter>
 				</xsl:when>
 				<!--If neither all of the classes are open, nor are all closed, routing strategy must route all of the
-				openclasses to the sink that will be created, and all of the closed ones to the terminal station. This must be specified with an 
-				empirical strategy. Otherwise also a random routingstrategy can be used, as this station is link only to one other.-->
+				open classes to the sink that will be created, and all of the closed ones to the terminal station. This must be specified with an 
+				empirical strategy. Otherwise also a random routing strategy can be used, as this station is link only to one other.-->
 				<xsl:when test="count(../../classes/openclass)=0 or count(../../classes/closedclass)=0">
 					<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
 						<xsl:apply-templates select="../../classes/*" mode="ignoreValueRouting"/>
 					</parameter>
 				</xsl:when>
 				<!--If this station is a li or a ld ora a delay station and there are both open and closed classes, the routing section must route 
-				     openclasses to the sink, closedclasses to the terminal-->
+				     open classes to the sink, closed classes to the terminal-->
 				<xsl:when test="name(.)='ldstation' or name(.)='listation' or name(.)='delaystation' ">
 					<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
 						<xsl:apply-templates select="../../classes/*" mode="EmpiricalRouting"/>
@@ -376,9 +376,9 @@
 			</subParameter>
 	</xsl:template>
 	
-	<!--initialization of station parameters - number of visits. All of the visits must be setted to 1 because the mva model's system of visist is 
-	     managed out with a proper combination of node topology and routing probabilities. In particular the topologic configuration of the model
-	     is described by a set of parallel connections, while routing probabilities are setted for each class and each station as the ratio between
+	<!--initialization of station parameters - number of visits. All of the visits must be set to 1 because the mva model's system of visit is 
+	     managed out with a proper combination of node topology and routing probabilities. In particular the topological configuration of the model
+	     is described by a set of parallel connections, while routing probabilities are set for each class and each station as the ratio between
 	     the number of visits of the successor node's station and the sum of number of visits above the whole set of successor stations 
 	     separately for each class-->
 	<xsl:template match="visit">
@@ -390,9 +390,9 @@
 			</subParameter>
 	</xsl:template>
 	
-	<!--theese three templates create routing strategy parameters for each class. The first creates random routing strategy in case there is only
+	<!--these three templates create routing strategy parameters for each class. The first creates random routing strategy in case there is only
 	     one successor node or probability for each successor node may be not specified. The second sets routing strategy when successor nodes 
-	     are terminal and sink: openclasses must be routed to the sink, the closed ones to the terminal. The third finally routes jobs to each server 
+	     are terminal and sink: open classes must be routed to the sink, the closed ones to the terminal. The third finally routes jobs to each server 
 	     assigning different probabilities according with the number of visits defined for each server in the mva model.-->
 	<xsl:template match="classes/*" mode="ignoreValueRouting">
 			<refClass>

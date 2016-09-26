@@ -1,24 +1,24 @@
-/**    
+/**
 
-  * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.panels;
-import jmt.gui.common.CommonConstants;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -59,6 +59,7 @@ import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.FastGraph;
 import jmt.framework.gui.graph.MeasureValue;
 import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.AbortMeasure;
 import jmt.gui.common.definitions.MeasureDefinition;
@@ -99,13 +100,11 @@ import jmt.gui.common.xml.XMLConstantNames;
  *              each sink per class.
  */
 public class ResultsWindow extends JMTFrame implements ResultsConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-        
-        private final String TITLE = "Simulation Results";
-        
+
+	private final String TITLE = "Simulation Results";
+
 	private MeasureDefinition results;
 	private AbortMeasure abort;
 	private JButton start;
@@ -116,16 +115,16 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	private static DecimalFormat decimalFormatExp = new DecimalFormat("0.00E0");
 	private static DecimalFormat decimalFormatNorm = new DecimalFormat("#0.000");
 	private JSimLogger logger = JSimLogger.getLogger(ResultsWindow.class);
-        private double startTime = System.currentTimeMillis();
+	private double startTime = System.currentTimeMillis();
 
 	/**
 	 * Creates a new ResultsWindow
 	 * @param results results data structure
-         * @param fileName name of simulation file
+	 * @param fileName name of simulation file
 	 */
 	public ResultsWindow(MeasureDefinition results, String fileName) {
 		this.results = results;
-                this.updateTitle(fileName);
+		this.updateTitle(fileName);
 		initGUI();
 	}
 
@@ -137,12 +136,12 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	public ResultsWindow(MeasureDefinition results, AbortMeasure abort, String fileName) {
 		this.results = results;
 		this.abort = abort;
-                this.updateTitle(fileName);
+		this.updateTitle(fileName);
 		initGUI();
 	}
 
 	/**
-	 * Initialize allgui related stuff
+	 * Initialize all gui related stuff
 	 */
 	private void initGUI() {
 		// Sets default title, close operation and dimensions
@@ -171,10 +170,10 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		//Added by ASHANKA STOP
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_R_PER_SINK, DESCRIPTION_RESPONSETIME_SINK, results.getResponsetimePerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_SINK, results.getThroughputPerSinkMeasures());
-                addTabPane(mainPanel, SimulationDefinition.MEASURE_MEAN_WEIGHT, DESCRIPTION_MEAN_WEIGHT, results.getMeanWeightMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_MEAN_MEMORY_OCCUPATION, DESCRIPTION_MEAN_MEMORY_OCCUPATION, results.getMeanMemoryOccupationMeasures());	
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_TOTAL_WEIGHT, DESCRIPTION_FCR_TOTAL_WEIGHT, results.getMeanWeightMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_MEMORY_OCCUPATION, DESCRIPTION_FCR_MEMORY_OCCUPATION, results.getMeanMemoryOccupationMeasures());	
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJCustomerNumberMeasures());
-                addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
 		// Creates bottom toolbar
 		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable(false);
@@ -192,7 +191,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
 		progressBar.setForeground(Color.BLUE);
-                UIManager.put( "ProgressBar.selectionForeground", Color.white );
+		UIManager.put( "ProgressBar.selectionForeground", Color.white );
 		setProgressBar(results.getProgressTime());
 		toolbar.add(progressBar);
 		// Add close window button
@@ -216,15 +215,12 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		// Adds toolbar
 		this.getContentPane().add(toolbar, BorderLayout.SOUTH);
 
-		
 		// Adds listener for progressBar
 		results.setProgressTimeListener(new MeasureDefinition.ProgressTimeListener() {
 			public void timeChanged(double time) {
 				setProgressBar(time);
 			}
 		});
-		
-
 	}
 
 	/**
@@ -241,7 +237,6 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		}
 	}
 
-        
 	/**
 	 * Sets action for toolbar buttons and displays them
 	 * @param startAction action associated with start simulation button
@@ -321,7 +316,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	/**
 	 * Helper method used to convert a double into a String avoiding too many decimals
 	 * @param d number to be converted
-	 * @return string rappresentation of input number
+	 * @return string representation of input number
 	 */
 	protected static String doubleToString(double d) {
 		double abs = (d >= 0) ? d : -d;
@@ -338,10 +333,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	 * Inner class to create a panel that holds a specified measure
 	 */
 	protected class MeasurePanel extends JPanel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		protected MeasureDefinition md;
 		protected int measureIndex;
 		protected JLabel icon;
@@ -398,13 +392,13 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			// If station name is undefined, disables its fields
 			String stationName = md.getStationName(measureIndex);
 			if (stationName != null && !stationName.equals("")) {
-                                if (SimConstants.isFJMeasure(md.getMeasureType(measureIndex))) {
-                                        field.setText(stationName + " (Fork Join)");
-                                        field.setToolTipText("Name of the F/J section: " + field.getText());
-                                } else {
-                                        field.setText(stationName);
-                                        field.setToolTipText("Name of the station: " + field.getText());
-                                }
+				if (SimConstants.isFJMeasure(md.getMeasureType(measureIndex))) {
+					field.setText(stationName + " (Fork Join)");
+					field.setToolTipText("Name of the F/J section: " + field.getText());
+				} else {
+					field.setText(stationName);
+					field.setToolTipText("Name of the station: " + field.getText());
+				}
 			} else {
 				field.setText(ALL_STATIONS);
 				field.setToolTipText("This measure is referred to the entire network");
@@ -444,8 +438,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			samples.setEditable(false);
 			samples.setMaximumSize(new Dimension(samples.getMaximumSize().width, samples.getMinimumSize().height));
 			label.setLabelFor(samples);
-			samples.setText("" + md.getAnalizedSamples(measureIndex));
-			samples.setToolTipText("Number of samples (observations) currently analized: " + samples.getText());
+			samples.setText("" + md.getAnalyzedSamples(measureIndex));
+			samples.setToolTipText("Number of samples (observations) currently analyzed: " + samples.getText());
 			dataPanel.add(label);
 			dataPanel.add(samples);
 
@@ -481,8 +475,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					2, 2, //initX, initY
 					2, 2);//xPad, yPad
 			mainPanel.add(dataPanel, BorderLayout.CENTER);
-			
-			// Temp mean and abort button are threated in a separate panel
+
+			// Temp mean and abort button are in a separate panel
 			JPanel bottomPanel = new JPanel(new BorderLayout(7, 7));
 			label = new JLabel(TEMP_MEAN);
 			mean = new JTextField();
@@ -501,23 +495,22 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			msgLabel.setForeground(Color.RED);
 			bottomPanel.add(msgLabel, BorderLayout.SOUTH);
 			bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 6, 6));
-	
+
 			JPanel pivotPanel = new JPanel(new BorderLayout());
 			JPanel abortAndHidePanel = new JPanel(new BorderLayout());
 			JPanel dummyPanel = new JPanel(new BorderLayout());
 			hideLastIntervalAvgValueButton = new JButton("Hide instantaneous values");
 
 			hideLastIntervalAvgValueButton.addActionListener(new ActionListener() {
-
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
 					if (hideLastIntervalAvgValueButton.getText().equals(
 							"Hide instantaneous values")) {
 						hideLastIntervalAvgValueButton
-								.setText("Show instantaneous values");
+						.setText("Show instantaneous values");
 					} else {
 						hideLastIntervalAvgValueButton
-								.setText("Hide instantaneous values");
+						.setText("Hide instantaneous values");
 					}
 
 					lastIntervalAvgValueFlag = !lastIntervalAvgValueFlag;
@@ -525,7 +518,6 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					if (popupGraph != null) {
 						popupGraph.setHideLastInterval(lastIntervalAvgValueFlag);
 					}
-
 				}
 			});
 
@@ -533,19 +525,18 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			statisticalOutputsButton = new JButton("Statistical Results");
 			statisticalOutputsButton.setToolTipText("Displays requested Statistical Outputs");
 			statisticalOutputsButton.setEnabled(false);
-			
+
 			if (md.getLogFileName(measureIndex) == null) {
 				statisticalOutputsButton.setVisible(false);
 			}
-			statisticalOutputsButton.addActionListener(new ActionListener(){
-				
+			statisticalOutputsButton.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					File logFile = new File(results.getLogFileName(measureIndex));
 					if (!logFile.isFile()) {
 						JOptionPane.showMessageDialog(ResultsWindow.this,
-							    "CSV file not found in path '" + logFile.getAbsolutePath() + "'.",
-							    "Error", JOptionPane.ERROR_MESSAGE);
+								"CSV file not found in path '" + logFile.getAbsolutePath() + "'.",
+								"Error", JOptionPane.ERROR_MESSAGE);
 					} else {
 						StatisticalOutputsWindow statistics=new StatisticalOutputsWindow(results, measureIndex);
 						statistics.setVisible(true); 
@@ -564,7 +555,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			pivotPanel.add(mainPanel, BorderLayout.CENTER);
 			pivotPanel.add(abortAndHidePanel, BorderLayout.SOUTH);
 			// Pack text area in the north of the panel
-		    JPanel pivotPanel2 = new JPanel(new BorderLayout());
+			JPanel pivotPanel2 = new JPanel(new BorderLayout());
 			pivotPanel2.add(pivotPanel, BorderLayout.NORTH);
 			// Adds a textPanel to show state
 			textState = new JTextArea();
@@ -576,7 +567,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			textStatePanel.setBorder(BorderFactory.createEmptyBorder(
 					BORDERSIZE / 2, BORDERSIZE / 2, BORDERSIZE / 2,
 					BORDERSIZE / 2));
-		    pivotPanel2.add(textStatePanel, BorderLayout.SOUTH);
+			pivotPanel2.add(textStatePanel, BorderLayout.SOUTH);
 
 			textState2 = new JTextArea();
 			textState2.setEditable(false);
@@ -588,7 +579,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					BORDERSIZE / 2, BORDERSIZE / 2, BORDERSIZE / 2,
 					BORDERSIZE / 2));
 			pivotPanel2.add(textStatePanel2);
-			
+
 			// Sets a minimal size for text area panel
 			pivotPanel2.setMinimumSize(new Dimension(320, 190));
 			pivotPanel2.setPreferredSize(new Dimension(360, 190));
@@ -602,7 +593,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			graphPanel.setMinimumSize(new Dimension(320, 190));
 			graph.setMinimumSize(new Dimension(200, 190));
 			graph.setPreferredSize(new Dimension(300, 190));
-			
+
 			add(graphPanel, BorderLayout.CENTER);
 			// Sets icon image and abort button state
 			setCorrectState();
@@ -621,12 +612,12 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			if (md.getMeasureState(measureIndex) == MeasureDefinition.MEASURE_IN_PROGRESS) {
 				md.setMalformedReplayerFileListener(new MeasureDefinition.MalformedReplayerFileListener() {
 					public void detectedError(String msg) {
-						if(msgLabel != null) {
+						if (msgLabel != null) {
 							msgLabel.setText(msg);
 						}
 					}
 				});
-		
+
 				// If simulation is not finished, adds a measure listener
 				md.addMeasureListener(measureIndex, new MeasureDefinition.MeasureListener() {
 					public void measureChanged(List<MeasureValue> measureValues, boolean finished) {
@@ -651,8 +642,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 
 						mean.setText(doubleToString(lastValue.getMeanValue()));
 						mean.setToolTipText("Current mean value of this measure: " + mean.getText());
-						samples.setText("" + md.getAnalizedSamples(measureIndex));
-						samples.setToolTipText("Number of samples (observations) currently analized: " + samples.getText());
+						samples.setText("" + md.getAnalyzedSamples(measureIndex));
+						samples.setToolTipText("Number of samples (observations) currently analyzed: " + samples.getText());
 						// If finished is true, state was changed
 						if (finished) {
 							setCorrectState();
@@ -660,6 +651,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 						repaint();
 					}
 				});
+
 				// Sets AbortButton action, only if abort is available
 				if (abort != null) {
 					abortButton.addActionListener(new ActionListener() {
@@ -670,6 +662,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					});
 				}
 			}
+
 			// Popups graph if graph window is double clicked
 			graph.addMouseListener(new MouseAdapter() {
 				@Override
@@ -688,7 +681,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 								@Override
 								public void mouseClicked(MouseEvent e) {
 									popupGraph.mouseClicked(e);
-									
+
 								}
 							});
 						}
@@ -696,7 +689,6 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					}
 				}
 			});
-
 		}
 
 		/**
@@ -704,44 +696,44 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		 */
 		protected void setCorrectState() {
 			switch (md.getMeasureState(measureIndex)) {
-				case MeasureDefinition.MEASURE_IN_PROGRESS:
-					icon.setIcon(JMTImageLoader.loadImage(IN_PROGRESS_IMAGE));
-					icon.setToolTipText(IN_PROGRESS_TEXT);
-					textState.setText(IN_PROGRESS_TEXT);
-					icon.setToolTipText(FOR_GREEN_GRAPH);
-					textState.setText(FOR_GREEN_GRAPH);
-					abortButton.setEnabled(true);
-					break;
-				case MeasureDefinition.MEASURE_SUCCESS:
-					icon.setIcon(JMTImageLoader.loadImage(SUCCESS_IMAGE));
-					icon.setToolTipText(SUCCESS_TEXT);
-					textState.setText(SUCCESS_TEXT);
-					icon.setToolTipText(FOR_GREEN_GRAPH);
-					textState.setText(FOR_GREEN_GRAPH);
-					abortButton.setEnabled(false);
-					//Activates the Statistical Results Button.
-					statisticalOutputsButton.setEnabled(true);
-					break;
-				case MeasureDefinition.MEASURE_FAILED:
-					icon.setIcon(JMTImageLoader.loadImage(FAILED_IMAGE));
-					icon.setToolTipText(FAILED_TEXT);
-					textState.setText(FAILED_TEXT);
-					icon.setToolTipText(FOR_GREEN_GRAPH);
-					textState.setText(FOR_GREEN_GRAPH);
-					abortButton.setEnabled(false);
-					//Activates the Statistical Results Button.
-					statisticalOutputsButton.setEnabled(true);
-					break;
-				case MeasureDefinition.MEASURE_NO_SAMPLES:
-					icon.setIcon(JMTImageLoader.loadImage(NO_SAMPLES_IMAGE));
-					icon.setToolTipText(NO_SAMPLES_TEXT);
-					textState.setText(NO_SAMPLES_TEXT);
-					icon.setToolTipText(FOR_GREEN_GRAPH);
-					textState.setText(FOR_GREEN_GRAPH);
-					abortButton.setEnabled(false);
-					mean.setText("-");
-					graph.setVisible(false); // Hides graph if no samples were received
-					break;
+			case MeasureDefinition.MEASURE_IN_PROGRESS:
+				icon.setIcon(JMTImageLoader.loadImage(IN_PROGRESS_IMAGE));
+				icon.setToolTipText(IN_PROGRESS_TEXT);
+				textState.setText(IN_PROGRESS_TEXT);
+				icon.setToolTipText(FOR_GREEN_GRAPH);
+				textState.setText(FOR_GREEN_GRAPH);
+				abortButton.setEnabled(true);
+				break;
+			case MeasureDefinition.MEASURE_SUCCESS:
+				icon.setIcon(JMTImageLoader.loadImage(SUCCESS_IMAGE));
+				icon.setToolTipText(SUCCESS_TEXT);
+				textState.setText(SUCCESS_TEXT);
+				icon.setToolTipText(FOR_GREEN_GRAPH);
+				textState.setText(FOR_GREEN_GRAPH);
+				abortButton.setEnabled(false);
+				//Activates the Statistical Results Button.
+				statisticalOutputsButton.setEnabled(true);
+				break;
+			case MeasureDefinition.MEASURE_FAILED:
+				icon.setIcon(JMTImageLoader.loadImage(FAILED_IMAGE));
+				icon.setToolTipText(FAILED_TEXT);
+				textState.setText(FAILED_TEXT);
+				icon.setToolTipText(FOR_GREEN_GRAPH);
+				textState.setText(FOR_GREEN_GRAPH);
+				abortButton.setEnabled(false);
+				//Activates the Statistical Results Button.
+				statisticalOutputsButton.setEnabled(true);
+				break;
+			case MeasureDefinition.MEASURE_NO_SAMPLES:
+				icon.setIcon(JMTImageLoader.loadImage(NO_SAMPLES_IMAGE));
+				icon.setToolTipText(NO_SAMPLES_TEXT);
+				textState.setText(NO_SAMPLES_TEXT);
+				icon.setToolTipText(FOR_GREEN_GRAPH);
+				textState.setText(FOR_GREEN_GRAPH);
+				abortButton.setEnabled(false);
+				mean.setText("-");
+				graph.setVisible(false); // Hides graph if no samples were received
+				break;
 			}
 			if (md.getLogFileName(measureIndex) != null) {
 				File file = new File(md.getLogFileName(measureIndex));
@@ -753,9 +745,10 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 				}
 			}
 		}
+
 	}
-        
-        /**
+
+	/**
 	 * Updates this window title adding the file name
 	 * @param filename the file name or null to remove it.
 	 */
@@ -766,4 +759,5 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			setTitle(TITLE);
 		}
 	}
+
 }

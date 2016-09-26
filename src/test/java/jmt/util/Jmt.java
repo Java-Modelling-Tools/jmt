@@ -49,7 +49,7 @@ public class Jmt {
 	         new StreamResult(new OutputStreamWriter(out, "UTF-8")));
 	}
 	
-	public static void help(){
+	public static void help() {
 		System.err.println("Usage: jmt.commandline.Jmt [sim|mva] [modelfilename] [options]");
 		System.err.println("mva options:");
 		System.err.println("  <none>");
@@ -60,7 +60,7 @@ public class Jmt {
 	}
 	
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
-		 if(!destFile.exists()) {
+		 if (!destFile.exists()) {
 		  destFile.createNewFile();
 		 }
 
@@ -75,23 +75,23 @@ public class Jmt {
 
 		  long count =0;
 		  long size = source.size();                
-		  while((count += destination.transferFrom(source, 0, size-count))<size);
+		  while ((count += destination.transferFrom(source, 0, size-count))<size);
 		 }
 		 finally {
-		  if(source != null) {
+		  if (source != null) {
 		   source.close();
 		  }
-		  if(destination != null) {
+		  if (destination != null) {
 		   destination.close();
 		  }
 		}
 	}
 	
 	public static void main(String[] args) throws LoadException, NetException, Exception {
-		if(args.length < 2){
+		if (args.length < 2) {
 			help();
 		}
-		if(args[0].equals("mva")){
+		if (args[0].equals("mva")) {
 			File model = new File(args[1]);
 			File result = new File(args[1]+"-result.jmva");
 			
@@ -106,7 +106,7 @@ public class Jmt {
 			dispatcher.solve(model);
 			copyFile(model, result);			
 
-		} else if(args[0].equals("sim")){
+		} else if (args[0].equals("sim")) {
 			Map<String,String> options = parseParameters(args, 2);
 			
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

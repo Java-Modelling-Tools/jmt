@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.commandline;
 
 import java.io.File;
@@ -39,23 +57,24 @@ import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
 public class Jmt {
+
 	private static final String OPTION_SEED = "-seed";
 	private static final String OPTION_MAXTIME = "-maxtime";
-	
-	public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
-	    TransformerFactory tf = TransformerFactory.newInstance();
-	    Transformer transformer = tf.newTransformer();
-	    transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-	    transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-	    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-	    transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-	    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
-	    transformer.transform(new DOMSource(doc), 
-	         new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+	public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
+		TransformerFactory tf = TransformerFactory.newInstance();
+		Transformer transformer = tf.newTransformer();
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+		transformer.transform(new DOMSource(doc), 
+				new StreamResult(new OutputStreamWriter(out, "UTF-8")));
 	}
-	
-	public static void help(){
+
+	public static void help() {
 		System.err.println("Usage: jmt.commandline.Jmt [sim|mva] [modelfilename] [options]");
 		System.err.println("mva options:");
 		System.err.println("  <none>");
@@ -64,45 +83,45 @@ public class Jmt {
 		System.err.println("  -maxtime 60 : sets the maximum simulation time to 60 seconds");
 		System.exit(2);
 	}
-	
+
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
-		 if(!destFile.exists()) {
-		  destFile.createNewFile();
-		 }
+		if (!destFile.exists()) {
+			destFile.createNewFile();
+		}
 
-		 FileChannel source = null;
-		 FileChannel destination = null;
-		 try {
-		  source = new FileInputStream(sourceFile).getChannel();
-		  destination = new FileOutputStream(destFile).getChannel();
+		FileChannel source = null;
+		FileChannel destination = null;
+		try {
+			source = new FileInputStream(sourceFile).getChannel();
+			destination = new FileOutputStream(destFile).getChannel();
 
-		   // previous code: destination.transferFrom(source, 0, source.size());
-		   //should be to avoid infinite loops.
+			//previous code: destination.transferFrom(source, 0, source.size());
+			//should be to avoid infinite loops.
 
-		  long count =0;
-		  long size = source.size();                
-		  while((count += destination.transferFrom(source, 0, size-count))<size);
-		 }
-		 finally {
-		  if(source != null) {
-		   source.close();
-		  }
-		  if(destination != null) {
-		   destination.close();
-		  }
+			long count =0;
+			long size = source.size();                
+			while ((count += destination.transferFrom(source, 0, size-count))<size);
+		}
+		finally {
+			if (source != null) {
+				source.close();
+			}
+			if (destination != null) {
+				destination.close();
+			}
 		}
 	}
-	
+
 	public static void main(String[] args) throws LoadException, NetException, Exception {
-		if(args.length < 2){
+		if (args.length < 2) {
 			help();
 		}
-		if(args[0].equals("mva")){
+		if (args[0].equals("mva")) {
 			File model = new File(args[1]);
 			File result = new File(args[1]+"-result.jmva");
 			mva(model, result);			
 
-		} else if(args[0].equals("sim")){
+		} else if (args[0].equals("sim")) {
 			File model = new File(args[1]);
 			File result = new File(args[1]+"-result.jsim");
 			if (!model.isFile()) {
@@ -119,15 +138,13 @@ public class Jmt {
 	}
 
 	public static void mva(File model, File result) throws SolverException, InputDataException, IOException {
-
-		
 		if (!model.isFile()) {
 			System.err.print("Invalid model file: " + model.getAbsolutePath());
 			System.exit(1);
 		}
 
 		SolverDispatcher dispatcher = new SolverDispatcher();
-		
+
 		// Starts the solution
 		dispatcher.solve(model);
 		copyFile(model, result);
@@ -136,24 +153,21 @@ public class Jmt {
 	public static boolean sim(File model, File result)
 			throws ParserConfigurationException, IOException, SAXException, TransformerFactoryConfigurationError,
 			TransformerConfigurationException, TransformerException, LoadException, NetException, Exception {
-		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
-		
-		
+
 		File temp = File.createTempFile("tempfileSim",".jsim");
 		temp.deleteOnExit();
-		
-		
+
 		Document doc = db.parse(model);
 		Element sim = XMLArchiver.getSimFromArchiveDocument(doc);
-		
+
 		Document doc2 = db.newDocument();
 		Node dup = doc2.importNode(sim, true);
 		NamedNodeMap attributes = dup.getAttributes();
 		attributes.removeNamedItem("xsi:noNamespaceSchemaLocation");
 		doc2.appendChild(dup);
-		
+
 		/*
 		 * save to a temp file
 		 */
@@ -162,43 +176,37 @@ public class Jmt {
 		Source src = new DOMSource(doc2);  
 		Result dest = new StreamResult(temp);  
 		aTransformer.transform(src, dest);  
-		
+
 		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(temp);
 
-		
 		// Starts the simulation
 		boolean success = dispatcher.solveModel();
-		
+
 		File output = dispatcher.getOutputFile();
-		
-		
 		copyFile(output, result);
 		output.delete();
+
 		return success;
 	}
-	
 
 	public static boolean sim(File model, File result, Map<String,String> options)
 			throws ParserConfigurationException, IOException, SAXException, TransformerFactoryConfigurationError,
 			TransformerConfigurationException, TransformerException, LoadException, NetException, Exception {
-		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
-		
-		
+
 		File temp = File.createTempFile("tempfileSim",".jsim");
 		temp.deleteOnExit();
-		
-		
+
 		Document doc = db.parse(model);
 		Element sim = XMLArchiver.getSimFromArchiveDocument(doc);
-		
+
 		Document doc2 = db.newDocument();
 		Node dup = doc2.importNode(sim, true);
 		NamedNodeMap attributes = dup.getAttributes();
 		attributes.removeNamedItem("xsi:noNamespaceSchemaLocation");
 		doc2.appendChild(dup);
-		
+
 		/*
 		 * save to a temp file
 		 */
@@ -207,9 +215,9 @@ public class Jmt {
 		Source src = new DOMSource(doc2);  
 		Result dest = new StreamResult(temp);  
 		aTransformer.transform(src, dest);  
-		
+
 		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(temp);
-                dispatcher.setIsTerminalSimulation(true);
+		dispatcher.setIsTerminalSimulation(true);
 		// Sets simulation seed if required
 		if (options.containsKey(OPTION_SEED)) {
 			try {
@@ -219,7 +227,7 @@ public class Jmt {
 				System.exit(1);
 			}
 		}
-		
+
 		if (options.containsKey(OPTION_MAXTIME)) {
 			try {
 				dispatcher.setSimulationMaxDuration(Long.parseLong(options.get(OPTION_MAXTIME)) * 1000);
@@ -228,18 +236,17 @@ public class Jmt {
 				System.exit(1);
 			}	
 		}
-		
+
 		// Starts the simulation
 		boolean success = dispatcher.solveModel();
-		
+
 		File output = dispatcher.getOutputFile();
-		
-		
 		copyFile(output, result);
 		output.delete();
-		
+
 		return success;
-	}  
+	}
+
 	/**
 	 * Returns a map with option name as key and list of parameters as value. Parameter without options are saved with "" as key
 	 * @param args command line args
@@ -263,4 +270,5 @@ public class Jmt {
 		}
 		return options;
 	}
+
 }

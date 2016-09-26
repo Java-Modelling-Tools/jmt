@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.dataAnalysis;
 
@@ -57,25 +57,25 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	/**mean of batches weighted */
 	protected double[] weightBatchMean;
 
-	/**the extimated mean */
+	/**the estimated mean */
 	protected double extMean = 0;
-	/**the extimated variance */
+	/**the estimated variance */
 	protected double extVar = 0;
-	/**the exitmated confidence intervals */
+	/**the estimated confidence intervals */
 	protected double confInt = 0;
-	/** the extimated instantaneous value*/
+	/**the estimated instantaneous value */
 	private double lastIntervalAvg=0;
 
 	/**the sum of samples of the last batch */
 	protected double sumLastBatch;
-	/** actual number of samples */
+	/**actual number of samples */
 	protected int nSamples = 0;
 	/**maximum number of data to be collected */
 	protected int maxData;
 
-	/**constant chosen to reduce bias of variance extimator */
+	/**constant chosen to reduce bias of variance estimator */
 	protected double C1;
-	/**degrees of freeedom of the t-distribution */
+	/**degrees of freedom of the t-distribution */
 	protected int C2;
 
 	/**the quantile required for the confidence interval*/
@@ -95,7 +95,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	protected boolean delet = false;
 	/** initialized = true if the system is in steady state*/
 	protected boolean initialized;
-	/** end = true if the analysis has been completed (succesfully or not)*/
+	/** end = true if the analysis has been completed (successfully or not)*/
 	protected boolean end;
 	/** success = true if the analysis is successful, the required precision has
 	been met*/
@@ -115,20 +115,20 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	//be replaced by new ones
 	protected int delta;
 
-	/**number of points of the polyfit*/
+	/**number of points of the polyfit */
 	protected int K = numBatch / 4;
 
 	// why numbatch/4 ? --> the signal spectral is computed using as the mean of two samples
 	// therefore:
 	// divide for 2, because having numbatch batches, we consider numbatch / 2
-	// divide again for 2, because we want to use only the first half of the spectr
+	// divide again for 2, because we want to use only the first half of the spectral
 	// (the second half is sigmetric)
 
 	/**the order of the polynomial*/
 	protected int polyOrder = 2;
 
 	/**
-	 * First extimate of transient length: this
+	 * First estimate of transient length: this
 	 * number of samples is identified by the heuristic test
 	 */
 	public int eurDisc = 0;
@@ -448,7 +448,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			heuristic = true;
 
 			// when rule R5 finishes the number of initial samples is used
-			// to extimate the initial transient length
+			// to estimate the initial transient length
 			// (we need a part already steady of the sequence, because we need to
 			// compute its variance)
 
@@ -576,8 +576,8 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			var = batchLen * calcVar(batchMean, 0, numBatch, batchMean.length / 4, 2);
 
 			// computes the degrees of freedom of the tStudent distribution (used in the
-			// extimation of variance and confidence intervals)
-			// and a constant used to depolarize the variance extinmator
+			// estimation of variance and confidence intervals)
+			// and a constant used to depolarize the variance estimator
 			C = calcConstants(batchMean.length / 4, 2);
 
 			//prepares the test for stationarity
@@ -729,7 +729,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			miniW.clear();
 			return delet;
 		} else {
-			//transient ca not be deleted (? ste)
+			//transient cannot be deleted
 			//TODO: how did we arrive here?
 			delet = false;
 			minSamples += discarded;
@@ -847,9 +847,9 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		buf.append("\n-------------------------");
 		buf.append("\nAnalysis ");
 		if (success) {
-			buf.append("\nSuccesfully completed.\n");
+			buf.append("\nSuccessfully completed.\n");
 		} else {
-			buf.append("\nUnsuccesfully completed.\n");
+			buf.append("\nUnsuccessfully completed.\n");
 		}
 		buf.append("\nSamples analyzed : " + (nSamples + discarded));
 		buf.append("\nSamples used : " + nSamples);
@@ -861,7 +861,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		buf.append("\n");
 		buf.append("\nWith probablity : " + ((1 - alfa) * 100) + "%");
 		buf.append("\nDiscarded samples :  " + discarded);
-		buf.append("\nExtimated variance : " + Printer.print(getVar(), 6));
+		buf.append("\nEstimated variance : " + Printer.print(getVar(), 6));
 		buf.append("\nLast batch size : " + batchLen);
 		buf.append("\nNumber of Batches : " + numBatch);
 		return buf.toString();
@@ -874,7 +874,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		return nSamples + discarded;
 	}
 
-	/** gets the mean extimated of the monitored data stream
+	/** gets the mean estimated of the monitored data stream
 	 * @return the mean
 	 */
 	public double getMean() {
@@ -891,7 +891,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		//end NEW
 	}
 
-	/** gets the variance extimated of the monitored data stream
+	/** gets the variance estimated of the monitored data stream
 	 * @return the variance
 	 */
 	public double getVar() {
@@ -902,7 +902,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		}
 	}
 
-	/** gets the half width confidence interval extimated of the monitored data
+	/** gets the half width confidence interval estimated of the monitored data
 	 *  stream.
 	 * @return the confidence interval requested
 	 */
@@ -922,17 +922,17 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	}
 
 	/** calculates the variance through Heidelberger & Welch method, if the data
-	 *  are the means of batches of size batchLen, the variance must be multipied
+	 *  are the means of batches of size batchLen, the variance must be multiplied
 	 *  by batchLen.
 	 *
-	 *  @param  data        array contaning the sequence of data
+	 *  @param  data        array containing the sequence of data
 	 *  @param  start       the starting sample
 	 *  @param  n           number of data of the sequence to be estimated
 	 *  @param  K           number of points used in the polynomial fitting
-	 *                      must be <= n/4, tipically is 25, 50
+	 *                      must be <= n/4, typically is 25, 50
 	 *  @param  polyOrder   the order of the polynomial to be fitted to the getLog
-	 *                      of the spectrum of data tipically is 2 or 3.
-	 *  @return the extimated variance
+	 *                      of the spectrum of data typically is 2 or 3.
+	 *  @return the estimated variance
 	 */
 	public double calcVar(double[] data, int start, int n, int K, int polyOrder) {
 
@@ -955,8 +955,8 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		//polynomial fitting
 		polyCoeff = PolyFit.fit(K, fn, J, polyOrder);
 		/*this function could be eliminated if the fit it is calculated through
-		* the normal eqaution algorithm, because the (AA')^-1 it is created and
-		* calulated to fit. But if the calculation is done trough other
+		* the normal equation algorithm, because the (AA')^-1 it is created and
+		* calculated to fit. But if the calculation is done through other
 		* algorithms then you have to do with this function.
 		*/
 		C = calcConstants(K, polyOrder);
@@ -964,8 +964,8 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	}
 
 	/** computes the degrees of freedom of the tStudent distribution used in the
-	 * extimation of variance and confidence intervals C2,
-	 * and a constant used to depolarize the variance extinmator
+	 * estimation of variance and confidence intervals C2,
+	 * and a constant used to depolarize the variance estimator
 	 * @param K number of points of the polyfit
 	 * @param polyOrder the order of the polynomial
 	 * @return the double array of dimension 2, at first position it is C1
@@ -973,8 +973,8 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	 */
 	public double[] calcConstants(int K, int polyOrder) {
 		double constants[] = new double[2];
-		double sigmaQ = calcExtimatorVar(K, polyOrder);//computes the variance
-		//of the extimator of the variance
+		double sigmaQ = calcEstimatorVar(K, polyOrder);//computes the variance
+		//of the estimator of the variance
 		constants[0] = Math.exp(-sigmaQ / 2);//C1
 		constants[1] = Math.round((float) Math.rint(2 / (Math.exp(sigmaQ) - 1)));
 		//C2
@@ -982,9 +982,9 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	}
 
 	/**
-	 * computes the variance of the extimator of the variance
+	 * computes the variance of the estimator of the variance
 	 */
-	protected double calcExtimatorVar(int K, int polyOrder) {
+	protected double calcEstimatorVar(int K, int polyOrder) {
 		Matrix X = new Matrix(K, polyOrder + 1);
 		Matrix Xt = new Matrix(polyOrder + 1, K);
 		Matrix square = new Matrix(K, K);
@@ -1155,19 +1155,19 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	}
 
 	/**
-	 * Gets the extimated mean, even if the confidence requirements
+	 * Gets the estimated mean, even if the confidence requirements
 	 * have not been reached
-	 * @return the extimated mean
+	 * @return the estimated mean
 	 */
-	public double extimatedMean() {
+	public double estimatedMean() {
 		if (success) {
 			//the measure computation was successful
-			//returns the mean computed by the main stimator
+			//returns the mean computed by the main estimator
 			return getMean();
 		}
 		if (nullTestEnabled) {
 			//the measure was not successful
-			//returns the mean extimated by the null test, even if the confidence requirements
+			//returns the mean estimated by the null test, even if the confidence requirements
 			//have not been reached
 			return nullTestData.getMean();
 		}
@@ -1210,12 +1210,12 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 
 	@Override
 	public double getLastIntervalAvg() {
-		if(lastWeight==0){
+		if (lastWeight==0) {
 			lastWeight=0;
 			lastSampleWeight=0;
 			return lastIntervalAvg;
 			}
-		else{
+		else {
 			lastIntervalAvg=(lastSampleWeight/lastWeight);
 			lastWeight=0;
 			lastSampleWeight=0;

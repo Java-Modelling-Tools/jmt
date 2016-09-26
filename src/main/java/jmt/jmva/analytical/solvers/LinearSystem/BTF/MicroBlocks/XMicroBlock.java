@@ -52,9 +52,9 @@ public class XMicroBlock extends MatrixMicroBlock {
 	}
 	
 	public void LUPDecompose(boolean in_place) throws InconsistentLinearSystemException {
-		if(in_place) {
+		if (in_place) {
 			LUP = new LUP_Decomposition(basis, position, array, true);
-		}else{
+		} else {
 			LUP = new LUP_Decomposition(basis, position, array, false);
 		}
 	}
@@ -73,11 +73,11 @@ public class XMicroBlock extends MatrixMicroBlock {
 		
 		col -= position.col;		
 			
-		if(col < 0 || col >= array.length) throw new BTFMatrixErrorException("Column not in micro block, when considering n:" + n +" queue: " + queue);
+		if (col < 0 || col >= array.length) throw new BTFMatrixErrorException("Column not in micro block, when considering n:" + n +" queue: " + queue);
 			
 		array[row][col] = BigRational.ONE;			
 			
-		for(int s = 1; s <= qnm.R - 1; s++) {
+		for (int s = 1; s <= qnm.R - 1; s++) {
 			
 			n.plusOne(s);				
 			
@@ -87,7 +87,7 @@ public class XMicroBlock extends MatrixMicroBlock {
 			col -= position.col;			
 			
 			//Column is in this block
-			if(col >= 0 && col < array.length) {							
+			if (col >= 0 && col < array.length) {							
 				array[row][col] =  qnm.getDemandAsBigRational(queue - 1, s - 1).negate();
 			}		
 			
@@ -107,10 +107,10 @@ public class XMicroBlock extends MatrixMicroBlock {
 		
 		col -= position.col;		
 		
-		if(col < 0 || col >= array.length) throw new BTFMatrixErrorException("Column not in micro block, when considering n:" + n +" class: " + _class);
-		if( col + qnm.M - 1 >= array.length) throw new BTFMatrixErrorException("PC will not fit, when considering:" + n +" class: " + _class);
+		if (col < 0 || col >= array.length) throw new BTFMatrixErrorException("Column not in micro block, when considering n:" + n +" class: " + _class);
+		if ( col + qnm.M - 1 >= array.length) throw new BTFMatrixErrorException("PC will not fit, when considering:" + n +" class: " + _class);
 		
-		for(int k = 1; k <= qnm.M; k++) {			
+		for (int k = 1; k <= qnm.M; k++) {			
 			
 			array[row][col] = qnm.getDemandAsBigRational( k - 1, _class -1).negate();  
 			col++;  //NOTE: Specific to this order
@@ -137,7 +137,7 @@ public class XMicroBlock extends MatrixMicroBlock {
 		BigRational[] result = new BigRational[size.row];
 		
 		//copy portion of rhs to sysB
-		for(int i = 0; i < size.row; i++) {
+		for (int i = 0; i < size.row; i++) {
 			sysB[i] = rhs[position.row + i];
 		}
 		
@@ -153,7 +153,7 @@ public class XMicroBlock extends MatrixMicroBlock {
 		System.out.println("result");
 		MiscFunctions.printMatrix(result);
 		//copy result to basis
-		for(int i = 0; i < size.row; i++) {
+		for (int i = 0; i < size.row; i++) {
 			basis.setValue(result[i], position.row + i);
 		}
 		

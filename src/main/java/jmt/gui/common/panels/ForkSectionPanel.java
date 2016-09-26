@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.common.panels;
 
@@ -26,7 +26,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -41,7 +40,7 @@ import jmt.gui.common.definitions.StationDefinition;
 
 /**
  * <p>Title: ForkSection Panel</p>
- * <p>Description: This panelis used to parametrize fork special behaviour</p>
+ * <p>Description: This panel is used to parametrize fork special behaviour</p>
  *
  * @author Bertoli Marco
  *         Date: 15-mar-2006
@@ -111,7 +110,7 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 		// Initial values
 		if (sd.getForkBlock(stationKey).intValue() < 0) {
 			check.setSelected(false);
-			blockSpinner.setValue(new Float(Float.POSITIVE_INFINITY));
+			blockSpinner.setValue(Float.POSITIVE_INFINITY);
 			blockSpinner.setEnabled(false);
 		} else {
 			check.setSelected(true);
@@ -136,7 +135,7 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 					blockSpinner.setEnabled(true);
 				} else {
 					sd.setForkBlock(stationKey, new Integer(-1));
-					blockSpinner.setValue(new Float(Float.POSITIVE_INFINITY));
+					blockSpinner.setValue(Float.POSITIVE_INFINITY);
 					blockSpinner.setEnabled(false);
 				}
 			}

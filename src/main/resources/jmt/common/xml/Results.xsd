@@ -14,7 +14,7 @@
 							<xs:element name="sample" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="meanValue" type="jdouble" use="required"/>
-									<!--lastIntervalAvgValue shoud be required, it is optional just for backward compatibility -->
+									<!--lastIntervalAvgValue should be required, it is optional just for backward compatibility -->
 									<xs:attribute name="lastIntervalAvgValue" type="jdouble" use="optional"/>
 									<xs:attribute name="simulationTime" type="jdouble" use="optional"/>
 									<xs:attribute name="upperBound" type="jdouble" use="optional"/>

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.common.panels.parametric;
 
@@ -103,7 +103,7 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 		to = new JSpinner(new SpinnerNumberModel(PMPA.getFinalValue(), 0.000, 1.000, 0.001));
 		to.setToolTipText("Sets the final proportion of jobs");
 		stepsLabel = new JLabel("Steps (n. of exec.): ");
-		int maxSteps = PMPA.searchForAvaibleSteps();
+		int maxSteps = PMPA.searchForAvailableSteps();
 		if (maxSteps > ParametricAnalysis.MAX_STEP_NUMBER) {
 			maxSteps = ParametricAnalysis.MAX_STEP_NUMBER;
 		}
@@ -194,7 +194,7 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 					SpinnerNumberModel snm = (SpinnerNumberModel) steps.getModel();
 					double oldValue = PMPA.getInitialValue();
 					PMPA.setInitialValue(fValue.doubleValue());
-					int newMaxSteps = PMPA.searchForAvaibleSteps();
+					int newMaxSteps = PMPA.searchForAvailableSteps();
 					if (newMaxSteps > ParametricAnalysis.MAX_STEP_NUMBER) {
 						newMaxSteps = ParametricAnalysis.MAX_STEP_NUMBER;
 					}
@@ -220,7 +220,7 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 					SpinnerNumberModel snm = (SpinnerNumberModel) steps.getModel();
 					double oldValue = PMPA.getFinalValue();
 					PMPA.setFinalValue(tValue.doubleValue());
-					int newMaxSteps = PMPA.searchForAvaibleSteps();
+					int newMaxSteps = PMPA.searchForAvailableSteps();
 					if (newMaxSteps > ParametricAnalysis.MAX_STEP_NUMBER) {
 						newMaxSteps = ParametricAnalysis.MAX_STEP_NUMBER;
 					}
@@ -269,7 +269,7 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 				//SpinnerNumberModel snm = (SpinnerNumberModel) steps.getModel();
 				//int oldMax = ((Integer)snm.getMaximum()).intValue();
 				//int currentSteps = ((Integer)snm.getValue()).intValue();
-				//int newMaximumSteps = PMPA.searchForAvaibleSteps();
+				//int newMaximumSteps = PMPA.searchForAvailableSteps();
 				//if (newMaximumSteps > ParametricAnalysis.MAX_STEP_NUMBER) newMaximumSteps = ParametricAnalysis.MAX_STEP_NUMBER;
 				//if (newMaximumSteps < oldMax) steps.setModel(new SpinnerNumberModel(newMaximumSteps,2,newMaximumSteps,0.001));
 				//else steps.setModel(new SpinnerNumberModel(currentSteps,2,newMaximumSteps,0.001));

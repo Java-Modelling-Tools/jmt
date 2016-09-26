@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2007, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimgraph.controller;
 
@@ -32,8 +32,6 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,7 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
-import java.util.prefs.Preferences;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -79,7 +76,6 @@ import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
 import jmt.gui.common.xml.ModelLoader;
-import jmt.gui.common.xml.TemplateFileOperation;
 import jmt.gui.common.xml.XMLWriter;
 import jmt.gui.jsimgraph.DialogFactory;
 import jmt.gui.jsimgraph.JGraphMod.BlockingRegion;
@@ -143,8 +139,6 @@ import jmt.gui.jsimgraph.panels.JModelProblemsWindow;
 import jmt.gui.jsimgraph.panels.StationNamePanel;
 import jmt.gui.jsimgraph.panels.TemplatePanel;
 import jmt.gui.jsimgraph.panels.jmodelClassesPanel;
-import jmt.gui.jsimgraph.template.TemplateConstants;
-import jmt.gui.jsimgraph.template.TemplateData;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
@@ -163,8 +157,8 @@ import org.jgraph.graph.PortView;
 import org.jgraph.plaf.basic.BasicGraphUI;
 
 /**
- * This class mantains a reference to all the main copmoonents of the Gui,
- * in this way it is possible to divide the responsability of the actions &
+ * This class maintains a reference to all the main components of the Gui,
+ * in this way it is possible to divide the responsibility of the actions &
  * every object know only about of himself & the mediator.
  * Other actions are made through the mediator without knowing who will actually
  * do it.
@@ -178,7 +172,7 @@ import org.jgraph.plaf.basic.BasicGraphUI;
 
  * Modified by Francesco D'Aquino
 
- * Modyfied by Bertoli Marco to support JGraph 5.8 - 21/mar/2006
+ * Modified by Bertoli Marco to support JGraph 5.8 - 21/mar/2006
 
  * Modified by Giuseppe De Cicco & Fabio Granara
  * 
@@ -194,21 +188,21 @@ import org.jgraph.plaf.basic.BasicGraphUI;
  * Model validation of the perf indices.
  */
 public class Mediator implements GuiInterface {
+
 	private boolean isReleased = false;
 	// making it final allows the compiler to skip code generation when false
-	private GraphMouseListner mouseListner;
+	private GraphMouseListener mouseListener;
 	// Dialog factory
 	private DialogFactory dialogFactory;
 	// Cell factory
 	private CellFactory cellFactory;
-        
-        // S Jiang
+
+	// S Jiang
 	// Dialog Factory to display template input panels.
 	private CustomizableDialogFactory customizableDialogFactory;
 	// end
 
 	private AbstractJmodelAction closeModel;
-	// end
 	private AbstractJmodelAction newModel;
 	private AbstractJmodelAction openHelp;
 	private AbstractJmodelAction openModel;
@@ -227,14 +221,13 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction editMeasures;
 	private AbstractJmodelAction switchToExactSolver;
 	private AbstractJmodelAction exit;
-	private AbstractJmodelAction // Bertoli Marco
-	editDefaults;
+	private AbstractJmodelAction editDefaults;
 	private AbstractJmodelAction saveModelAs;
 	private AbstractJmodelAction pauseSimulation;
 	private AbstractJmodelAction stopSimulation;
 	private AbstractJmodelAction editSimParams;
 	private AbstractJmodelAction showResults;
-        
+
 	// S Jiang
 	private AbstractJmodelAction useTemplate;
 	// end
@@ -248,7 +241,7 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction // Conti Andrea
 	editUndo;
 	private AbstractJmodelAction editRedo;
-        //S Jiang
+	//S Jiang
 	private AbstractJmodelAction downloadDefaultTemplates;
 
 	private JmtJGraph graph;
@@ -283,7 +276,6 @@ public class Mediator implements GuiInterface {
 
 	// Giuseppe De Cicco
 	private JmtOverlapping overlapping;
-
 	// end
 
 	public Mediator(final JmtJGraph graph, MainWindow mainWindow) {
@@ -294,23 +286,20 @@ public class Mediator implements GuiInterface {
 		// S Jiang
 		customizableDialogFactory = new CustomizableDialogFactory(mainWindow);
 
-                
 		if (Defaults.getAsBoolean("showDefaultTemplates")) {
 			int result = JOptionPane
 					.showConfirmDialog(mainWindow,
 							"Would you like to download some recommended templates for JSIMGraph?");
-			
+
 			if (result == JOptionPane.YES_OPTION) {
 				downloadDefaultTemplates();
 			}
-			
-                        if (result == JOptionPane.NO_OPTION) {
-                                Defaults.set("showDefaultTemplates", "false");
-                                Defaults.save();
-                        }
+
+			if (result == JOptionPane.NO_OPTION) {
+				Defaults.set("showDefaultTemplates", "false");
+				Defaults.save();
+			}
 		}
-                
-		
 		// end
 
 		this.graph = graph;
@@ -393,13 +382,14 @@ public class Mediator implements GuiInterface {
 	 */
 	public JMTMenuBar createMenu() {
 		JMTMenuBar menu = new JMTMenuBar(JMTImageLoader.getImageLoader());
+
 		// File menu
 		MenuAction action = new MenuAction("File", new AbstractJmodelAction[] { newModel, openModel, saveModel, saveModelAs, closeModel, null, exit });
 		menu.addMenu(action);
 
 		// Edit menu
 		action = new MenuAction("Edit", new AbstractJmodelAction[] {
-		// editUndo, editRedo, null
+				// editUndo, editRedo, null
 				actionCut, actionCopy, actionPaste, actionDelete, null, takeScreenShot });
 		menu.addMenu(action);
 
@@ -424,8 +414,8 @@ public class Mediator implements GuiInterface {
 		return componentBar;
 	}
 
-	public void setMouseListner(GraphMouseListner mouseListner) {
-		this.mouseListner = mouseListner;
+	public void setMouseListener(GraphMouseListener mouseListener) {
+		this.mouseListener = mouseListener;
 	}
 
 	private File openedArchive;
@@ -504,7 +494,6 @@ public class Mediator implements GuiInterface {
 	public AbstractJmodelAction getAbout() {
 		return about;
 	}
-
 	// end
 
 	// Conti Andrea - undo
@@ -542,7 +531,6 @@ public class Mediator implements GuiInterface {
 	public void setUndoManager(GraphUndoManager um) {
 		undoManager = um;
 	}
-
 	// end
 
 	public void setConnectState() {
@@ -551,29 +539,28 @@ public class Mediator implements GuiInterface {
 		oldCursor = cursor;
 		cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 		setGraphCursor(cursor);
-
 		// end 14-11-2003
-		mouseListner.setConnectState();
+		mouseListener.setConnectState();
 	}
 
 	public void setCopyState() {
 		setSelect.setEnabled(true);
-		// mouseListner.setCopyState();
+		// mouseListener.setCopyState();
 	}
 
 	public void setCutState() {
 		setSelect.setEnabled(true);
-		// mouseListner.setCutState();
+		// mouseListener.setCutState();
 	}
 
 	public void setInsertState(String className) {
 		setSelect.setEnabled(true);
-		mouseListner.setInsertState(className);
+		mouseListener.setInsertState(className);
 	}
 
 	public void setSelectState() {
 		setSelect.setEnabled(true);
-		mouseListner.setSelectState();
+		mouseListener.setSelectState();
 		// DEK (Federico Granata)
 		// mainWindow.getAlbero().setSelectedButton(true);
 	}
@@ -613,7 +600,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	public void setHandle(CellHandle handle) {
-		this.mouseListner.setHandle(handle);
+		this.mouseListener.setHandle(handle);
 	}
 
 	public AbstractJmodelAction getCloseModel() {
@@ -689,12 +676,8 @@ public class Mediator implements GuiInterface {
 		graph.setModel(new DefaultGraphModel());
 
 		// Giuseppe De Cicco
-
 		graph.getGraphLayoutCache().setFactory(new JmtDefaultCellViewFactory(this) {
 
-			/**
-			 * 
-			 */
 			private static final long serialVersionUID = -8352272370225918131L;
 
 			// Override per creare il RENDERER - Giuseppe De Cicco
@@ -718,8 +701,8 @@ public class Mediator implements GuiInterface {
 			graph.setBackground(new Color(120, 120, 120));
 		}
 
-		graph.addMouseListener(mouseListner);
-		graph.addMouseMotionListener(mouseListner);
+		graph.addMouseListener(mouseListener);
+		graph.addMouseMotionListener(mouseListener);
 
 		// Conti Andrea
 		undoProxy.discardAllEdits();
@@ -770,7 +753,7 @@ public class Mediator implements GuiInterface {
 		// Enable the action to perform editing user classes
 		editUserClasses.setEnabled(true);
 		switchToExactSolver.setEnabled(true);
-		// Enables the botton to start simualtion
+		// Enables the button to start simulation
 		simulate.setEnabled(true);
 		editSimParams.setEnabled(true);
 		editPAParams.setEnabled(true);
@@ -790,7 +773,7 @@ public class Mediator implements GuiInterface {
 		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
 			return;
 		}
-		if(animationHolder != null ) {
+		if (animationHolder != null ) {
 			animationHolder.stop();
 		}
 		JSimGraphModel tmpmodel = new JSimGraphModel();
@@ -870,10 +853,10 @@ public class Mediator implements GuiInterface {
 		editUserClasses.setEnabled(false);
 		editMeasures.setEnabled(false);
 		switchToExactSolver.setEnabled(false);
-		// Disables the botton to start simualtion
+		// Disables the button to start simulation
 		simulate.setEnabled(false);
 		editSimParams.setEnabled(false);
-                
+
 		// S Jiang
 		useTemplate.setEnabled(false);
 		// end
@@ -909,14 +892,14 @@ public class Mediator implements GuiInterface {
 		setConnect.setEnabled(true);
 	}
 
-	/** Set the state of mouse listner to select & passes the event to the
-	 * listner as if press event is generated.
+	/** Set the state of mouse listener to select & passes the event to the
+	 * listener as if press event is generated.
 	 *
 	 * @param e
 	 */
 	public void selectAt(MouseEvent e) {
 		activateSelect();
-		mouseListner.mousePressed(e);
+		mouseListener.mousePressed(e);
 	}
 
 	/**
@@ -1026,7 +1009,7 @@ public class Mediator implements GuiInterface {
 
 	/**
 	 * Sets graph cursor
-	 * @param cursor to be setted
+	 * @param cursor to be set
 	 */
 	public void setGraphCursor(Cursor cursor) {
 		graph.setCursor(cursor);
@@ -1050,7 +1033,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Upscale the given point in place, ie.
+	 * Upscale the given point in place, i.e.
 	 * using the given instance.
 	 * @param p the point to be upscaled
 	 * @return the upscaled point instance
@@ -1089,16 +1072,11 @@ public class Mediator implements GuiInterface {
 			GraphConstants.setPoints(map, list);
 			GraphConstants.setRouting(map, GraphConstants.ROUTING_SIMPLE);
 			GraphConstants.setRouting(map, JmtGraphConstants.ROUTING_JMT);
-			GraphConstants.setEndFill(map, true);
-
-			// 24/09/03 - Massimo Cattai
-			// //////////////////////////////////////////
-			// Add a Line End Attribute
 			GraphConstants.setLineEnd(map, GraphConstants.ARROW_CLASSIC);
-			// 24/09/03 - end
-			// /////////////////////////////////////////////////////
+			GraphConstants.setEndFill(map, true);
+			GraphConstants.setDisconnectable(map, false);
 			Map<Object, Map> viewMap = new Hashtable<Object, Map>();
-			// ---- Adds connection into underlayng data structure -- BERTOLI
+			// ---- Adds connection into underlying data structure -- BERTOLI
 			// MARCO
 			Object sourceKey = ((CellComponent) ((JmtCell) ((OutputPort) (outPort.getCell())).getUserObject()).getUserObject()).getKey();
 			Object targetKey = ((CellComponent) ((JmtCell) ((InputPort) (inPort.getCell())).getUserObject()).getUserObject()).getKey();
@@ -1117,7 +1095,6 @@ public class Mediator implements GuiInterface {
 			}
 			// ---- End -- BERTOLI MARCO
 		}
-
 	}
 
 	/**
@@ -1146,7 +1123,7 @@ public class Mediator implements GuiInterface {
 		if (source == null || target == null) {
 			return null;
 		}
-		// Retrives source and target keys to create connection
+		// Retrieves source and target keys to create connection
 		Object sourceKey = ((CellComponent) source.getUserObject()).getKey();
 		Object targetKey = ((CellComponent) target.getUserObject()).getKey();
 		// Initializes correct layout for routing edges
@@ -1155,6 +1132,7 @@ public class Mediator implements GuiInterface {
 		GraphConstants.setRouting(map, JmtGraphConstants.ROUTING_JMT);
 		GraphConstants.setLineEnd(map, GraphConstants.ARROW_CLASSIC);
 		GraphConstants.setEndFill(map, true);
+		GraphConstants.setDisconnectable(map, false);
 		Map<Object, Map> viewMap = new Hashtable<Object, Map>();
 		JmtEdge connection = new JmtEdge(sourceKey, targetKey, this);
 		viewMap.put(connection, map);
@@ -1192,7 +1170,7 @@ public class Mediator implements GuiInterface {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * repaints the graph component
 	 */
@@ -1284,10 +1262,10 @@ public class Mediator implements GuiInterface {
 		else if ((cell != null) && (cell instanceof BlockingRegion)) {
 			Object regionKey = ((BlockingRegion) cell).getKey();
 			dialogFactory.getDialog(new BlockingRegionParameterPanel(model, model, regionKey), "Editing " + model.getRegionName(regionKey)
-					+ " Properties...");
+			+ " Properties...");
 		}
 	}
-        
+
 	//S Jiang	
 	public void startEditingAtAbstractCell(Object cell) {
 		graph.startEditingAtCell(cell);
@@ -1310,7 +1288,7 @@ public class Mediator implements GuiInterface {
 			dialogFactory.getDialog(new BlockingRegionParameterPanel(model,
 					model, regionKey),
 					"Editing " + model.getRegionName(regionKey)
-							+ " Properties...");
+					+ " Properties...");
 		}
 	}
 	//end
@@ -1349,7 +1327,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Displays an error message in the panel that is responable to make the
+	 * Displays an error message in the panel that is responsible to make the
 	 * user understand why a certain operation is not valid.
 	 *
 	 * @param message error to be displayed.
@@ -1360,7 +1338,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Deletes all the vertex & edgees that are selected. it deletes also the
+	 * Deletes all the vertices & edges that are selected. it deletes also the
 	 * edges that are connected to the eliminated vertexes.
 
 	 * Bertoli Marco 03-06-2005
@@ -1380,8 +1358,8 @@ public class Mediator implements GuiInterface {
 		Set<Object> jmtCells = new HashSet<Object>();
 
 		// Giuseppe De Cicco & Fabio Granara
-		// for(int k=0; k<cells.length; k++){
-		// if(cells[k] instanceof JmtEdge){
+		// for (int k=0; k<cells.length; k++) {
+		// if (cells[k] instanceof JmtEdge) {
 		// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)cells[k])))).SubOut();
 		// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)cells[k])))).SubIn();
 		// }
@@ -1398,7 +1376,7 @@ public class Mediator implements GuiInterface {
 				// Iterator iter = edges.iterator();
 				// while (iter.hasNext()) {
 				// Object next = iter.next();
-				// if (next instanceof JmtEdge){
+				// if (next instanceof JmtEdge) {
 				// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)next)))).SubOut();
 				// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)next)))).SubIn();
 				// }
@@ -1481,12 +1459,11 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Shows the panel that opens when the rigth button is clicked.
+	 * Shows the panel that opens when the right button is clicked.
 	 *
-	 * @param p point where the right button is cliecked on the graph
+	 * @param p point where the right button is clicked on the graph
 	 */
 	public void showOPanel(Point p) {
-
 	}
 
 	/**
@@ -1503,19 +1480,19 @@ public class Mediator implements GuiInterface {
 		updateStationPositions();
 		int status = modelLoader.saveModel(model, mainWindow, openedArchive);
 		switch (status) {
-			case ModelLoader.SUCCESS:
-				model.resetSaveState();
-				mainWindow.updateTitle(openedArchive.getName());
-                                if (resultsWindow instanceof ResultsWindow) {
-                                        ((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
-                                }
-                                if (resultsWindow instanceof PAResultsWindow) {
-                                        ((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
-                                }
-				break;
-			case ModelLoader.FAILURE:
-				showErrorMessage(modelLoader.getFailureMotivation());
-				break;
+		case ModelLoader.SUCCESS:
+			model.resetSaveState();
+			mainWindow.updateTitle(openedArchive.getName());
+			if (resultsWindow instanceof ResultsWindow) {
+				((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+			}
+			if (resultsWindow instanceof PAResultsWindow) {
+				((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+			}
+			break;
+		case ModelLoader.FAILURE:
+			showErrorMessage(modelLoader.getFailureMotivation());
+			break;
 		}
 	}
 
@@ -1528,20 +1505,20 @@ public class Mediator implements GuiInterface {
 		updateStationPositions();
 		int status = modelLoader.saveModel(model, mainWindow, null);
 		switch (status) {
-			case ModelLoader.SUCCESS:
-				model.resetSaveState();
-				openedArchive = modelLoader.getSelectedFile();
-				mainWindow.updateTitle(openedArchive.getName());
-                                if (resultsWindow instanceof ResultsWindow) {
-                                        ((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
-                                }
-                                if (resultsWindow instanceof PAResultsWindow) {
-                                        ((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
-                                }
-				break;
-			case ModelLoader.FAILURE:
-				showErrorMessage(modelLoader.getFailureMotivation());
-				break;
+		case ModelLoader.SUCCESS:
+			model.resetSaveState();
+			openedArchive = modelLoader.getSelectedFile();
+			mainWindow.updateTitle(openedArchive.getName());
+			if (resultsWindow instanceof ResultsWindow) {
+				((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+			}
+			if (resultsWindow instanceof PAResultsWindow) {
+				((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+			}
+			break;
+		case ModelLoader.FAILURE:
+			showErrorMessage(modelLoader.getFailureMotivation());
+			break;
 		}
 	}
 
@@ -1564,7 +1541,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Uses information retrived from data structure to recreate graph structure.
+	 * Uses information retrieved from data structure to recreate graph structure.
 	 * This method has to be called after loading a model.
 	 * <br>Author: Bertoli Marco
 	 */
@@ -1602,7 +1579,7 @@ public class Mediator implements GuiInterface {
 			}
 			cells.put(station, cell);
 		}
-		Vector forwardConnections;
+		Vector<Object> forwardConnections;
 		// Shows connections
 		for (Object station : stations) {
 			forwardConnections = model.getForwardConnections(station);
@@ -1610,14 +1587,13 @@ public class Mediator implements GuiInterface {
 				// Forces connection as it is already present into data structure
 				connect(cells.get(station), cells.get(forwardConnections.get(j)), true);
 			}
-
 		}
 		// Now adds blocking regions
-		Vector regions = model.getRegionKeys();
+		Vector<Object> regions = model.getRegionKeys();
 		for (int i = 0; i < regions.size(); i++) {
 			Object key = regions.get(i);
 			Set<JmtCell> regionStation = new HashSet<JmtCell>();
-			Iterator stationKeys = model.getBlockingRegionStations(key).iterator();
+			Iterator<Object> stationKeys = model.getBlockingRegionStations(key).iterator();
 			while (stationKeys.hasNext()) {
 				regionStation.add(cells.get(stationKeys.next()));
 			}
@@ -1648,7 +1624,10 @@ public class Mediator implements GuiInterface {
 	 * Launches the <code>UserClass</code> editor.
 	 */
 	public void editUserClasses() {
-		dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Define customer classes", Defaults.getAsInteger("JSIMClassDefWindowWidth").intValue(), Defaults.getAsInteger("JSIMClassDefWindowHeight").intValue(),true,"JSIMClassDefWindowWidth","JSIMClassDefWindowHeight");
+		dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Define customer classes",
+				Defaults.getAsInteger("JSIMClassDefWindowWidth").intValue(),
+				Defaults.getAsInteger("JSIMClassDefWindowHeight").intValue(), true,
+				"JSIMClassDefWindowWidth", "JSIMClassDefWindowHeight");
 	}
 
 	/**
@@ -1680,23 +1659,21 @@ public class Mediator implements GuiInterface {
 	}
 
 	// /**
-	// * This function will put selected cells in place avoiding overlapping
-	// with other cells
+	// * This function will put selected cells in place avoiding overlapping with other cells
 	// * in graph window
 	// * <br>
 	// * Author: Bertoli Marco
 	// */
 	// // OLD ALGORITHM
-        // public void putSelectedCellsInGoodPlace() {
+	// public void putSelectedCellsInGoodPlace() {
 	// Object[] cells = graph.getDescendants(graph.getSelectionCells());
 	// for (int i=0; i<cells.length;i++)
-	// if(cells[i] instanceof JmtCell)
+	// if (cells[i] instanceof JmtCell)
 	// putCellInGoodPlace((JmtCell) cells[i]);
 	// }
 
 	// /**
-	// * This function will put given cell in place avoiding overlapping with
-	// other cells
+	// * This function will put given cell in place avoiding overlapping with other cells
 	// * in graph window
 	// * <br>
 	// * Author: Bertoli Marco
@@ -1732,7 +1709,7 @@ public class Mediator implements GuiInterface {
 	// }
 	// }
 	// // if last is still zero, only Blocking section were found overlapping
-	// // so leave everyting as before
+	// // so leave everything as before
 	// if (last.equals(zero))
 	// break;
 	// // Rounds last and moves bounds to found point
@@ -1754,13 +1731,9 @@ public class Mediator implements GuiInterface {
 	 *
 	 */
 	public void putSelectedCellsInGoodPlace(Object[] cells, Integer[] X, Integer[] Y) {
-
 		for (int i = 0; i < cells.length; i++) {
-
 			if (cells[i] instanceof JmtCell) {
-
 				putCellInGoodPlace((JmtCell) cells[i], X[i].intValue(), Y[i].intValue(), true);
-
 			}
 			if (cells[i] instanceof BlockingRegion) {
 				Object[] tmp = new Object[1];
@@ -1768,15 +1741,11 @@ public class Mediator implements GuiInterface {
 				Object[] children = graph.getDescendants(tmp);
 				for (Object element : children) {
 					if (element instanceof JmtCell) {
-
 						putCellInGoodPlace((JmtCell) element, -1, -1, false);
-
 					}
 				}
-
 				// putBlockingRegionInGoodPlace((BlockingRegion) cells[i]);
 			}
-
 		}
 		graph.getGraphLayoutCache().reload();
 		sp = 0;
@@ -1822,11 +1791,11 @@ public class Mediator implements GuiInterface {
 			oldPointY = y;
 			// ---------inzio
 			// Object[] cells=(graph).getDescendants(graph.getRoots());
-			// for(int j=0;j<cells.length;j++){
-			// if((cells[j] instanceof JmtCell) &&(cells[j]!=cell)){
+			// for (int j=0;j<cells.length;j++) {
+			// if ((cells[j] instanceof JmtCell) &&(cells[j]!=cell)) {
 			// Rectangle
 			// boundcell=GraphConstants.getBounds(((JmtCell)cells[j]).getAttributes()).getBounds();
-			// if(boundcell.intersects(bounds2)){
+			// if (boundcell.intersects(bounds2)) {
 			// System.out.println("true");
 			// }
 			// }
@@ -1835,7 +1804,6 @@ public class Mediator implements GuiInterface {
 			// ---------------fine
 			// check if a cell isInGroup
 			if (isInGroup(cell)) {
-
 				inGroup = true;
 			}
 
@@ -1873,7 +1841,7 @@ public class Mediator implements GuiInterface {
 						return;
 					}
 					// System.out.println("---flag in for---");
-					// if(overlapping[j] instanceof JmtEdge
+					// if (overlapping[j] instanceof JmtEdge
 					// &&((JmtEdge)overlapping[j]).intersects((EdgeView)(graph.getGraphLayoutCache()).getMapping(overlapping[j],
 					// false),
 					// GraphConstants.getBounds(((JmtCell)cell).getAttributes())))
@@ -2166,7 +2134,6 @@ public class Mediator implements GuiInterface {
 				}
 
 				bounds.setLocation(new Point((int) (last.getX()), (int) (last.getY())));
-
 				overlapping = graph.getDescendants(graph.getRoots(bounds));
 			}
 
@@ -2190,7 +2157,6 @@ public class Mediator implements GuiInterface {
 			Object[] overlapping = graph.getDescendants(graph.getRoots(bounds));
 
 			if (overlapping == null) {
-
 				return;
 			}
 
@@ -2240,14 +2206,13 @@ public class Mediator implements GuiInterface {
 				bounds.setLocation(new Point((int) (last.getX()), (int) (last.getY())));
 				overlapping = graph.getDescendants(graph.getRoots(bounds));
 			}
+
 			GraphConstants.setBounds(cell.getAttributes(), bounds);
-
 		}
-
 	}
 
 	/**
-	 * Retrives the location of the given cell.
+	 * Retrieves the location of the given cell.
 	 * @param cell The given cell
 	 * @return The cell location
 	 */
@@ -2276,7 +2241,7 @@ public class Mediator implements GuiInterface {
 			Object c = cell2;
 			if (c instanceof JmtCell) {
 				if (!c.equals(cell)) {
-					// Retrives the i-th cell attributes
+					// Retrieves the i-th cell attributes
 					attributes = ((JmtCell) c).getAttributes();
 					// Is there an intersection ?
 					if (GraphConstants.getBounds(attributes).intersects(r)) {
@@ -2303,7 +2268,6 @@ public class Mediator implements GuiInterface {
 	 */
 	public boolean overlapCells(Point p, Dimension d) {
 		Rectangle r = new Rectangle(p, d);
-
 		boolean overlapCells = false;
 		Object[] cells = graph.getRoots(r);
 		for (Object cell : cells) {
@@ -2318,7 +2282,6 @@ public class Mediator implements GuiInterface {
 
 		}
 		return overlapCells;
-
 	}
 
 	/**
@@ -2330,7 +2293,7 @@ public class Mediator implements GuiInterface {
 	 * Modified by Michael Fercu (Logger,2008,0.7.4)
 	 */
 	public void startSimulation() {
-		if(animationHolder != null ) {
+		if (animationHolder != null ) {
 			animationHolder.stop();
 		}
 		// if simulation is not in pause state
@@ -2369,8 +2332,8 @@ public class Mediator implements GuiInterface {
 							//Code to remove duplicate file names from the list to obtain a unique list of File names.
 							Arrays.sort(ln);
 							int k = 0;
-							for (int i = 0; i < ln.length; i++){
-								if (i > 0 && ln[i].equals(ln[i -1])){
+							for (int i = 0; i < ln.length; i++) {
+								if (i > 0 && ln[i].equals(ln[i -1])) {
 									continue;
 								}
 								ln[k++] = ln[i];
@@ -2381,7 +2344,7 @@ public class Mediator implements GuiInterface {
 							for (String element : unique) {
 								// if the files have data, print what will be overwritten
 								if (new File(logabspath + element).length() > 0) {
-										ln2 = ln2 + element + ", ";
+									ln2 = ln2 + element + ", ";
 								}
 							}
 							// remove the trailing comma
@@ -2414,7 +2377,7 @@ public class Mediator implements GuiInterface {
 			model.manageJobs();
 			mc = new ModelChecker(model, model, model, model, false);
 			pw = new JModelProblemsWindow(mainWindow, mc, this);
-                        pw.setModal(true);
+			pw.setModal(true);
 			if (!mc.isEverythingOkNormal()) {
 				pw.show();
 			}
@@ -2446,8 +2409,7 @@ public class Mediator implements GuiInterface {
 						resultsWindow.dispose();
 					}
 					if (progressWindow == null) {
-						progressWindow = new PAProgressWindow(mainWindow, simulate, pauseSimulation, stopSimulation, model
-								.getParametricAnalysisModel());
+						progressWindow = new PAProgressWindow(mainWindow, simulate, pauseSimulation, stopSimulation, model.getParametricAnalysisModel());
 					}
 					batchThread = new PADispatcherThread(this, model, progressWindow);
 					changeSimActionsState(false, true, true);
@@ -2516,8 +2478,11 @@ public class Mediator implements GuiInterface {
 	 * Author: Bertoli Marco
 	 */
 	public void editMeasures() {
-		dialogFactory.getDialog(new MeasurePanel(model, model, model), "Define performance indices", Defaults.getAsInteger("JSIMMeasuresDefWindowWidth").intValue(), Defaults.getAsInteger("JSIMMeasuresDefWindowHeight").intValue(),true,"JSIMMeasuresDefWindowWidth","JSIMMeasuresDefWindowHeight");
-        }
+		dialogFactory.getDialog(new MeasurePanel(model, model, model), "Define performance indices",
+				Defaults.getAsInteger("JSIMMeasuresDefWindowWidth").intValue(),
+				Defaults.getAsInteger("JSIMMeasuresDefWindowHeight").intValue(), true,
+				"JSIMMeasuresDefWindowWidth","JSIMMeasuresDefWindowHeight");
+	}
 
 	/**
 	 * @return A reference to the action <code>EditMeasures</code>.
@@ -2550,7 +2515,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * @return A refernce to the action <code>SwitchToExactSolver</code>.
+	 * @return A reference to the action <code>SwitchToExactSolver</code>.
 	 */
 	public AbstractJmodelAction getSwitchToWizard() {
 		return switchToExactSolver;
@@ -2577,7 +2542,7 @@ public class Mediator implements GuiInterface {
 	 * Sends an exit signal to main window
 	 */
 	public void exit() {
-		// Send a closing signat to main window.
+		// Send a closing signal to main window.
 		mainWindow.dispatchEvent(new WindowEvent(mainWindow, WindowEvent.WINDOW_CLOSING));
 	}
 
@@ -2593,7 +2558,7 @@ public class Mediator implements GuiInterface {
 	 * operations while in inserting mode)
 	 */
 	public void resetMouseState() {
-		mouseListner.setDefaultState();
+		mouseListener.setDefaultState();
 		componentBar.clearButtonGroupSelection(0);
 		if (graph != null) {
 			graph.clearSelection();
@@ -2612,7 +2577,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Shows a panel with catched exception
+	 * Shows a panel with caught exception
 	 * @param e exception to be shown
 	 */
 	public void handleException(Exception e) {
@@ -2638,7 +2603,7 @@ public class Mediator implements GuiInterface {
 	public void toJMVA() {
 		mc = new ModelChecker(model, model, model, model, true);
 		pw = new JModelProblemsWindow(mainWindow, mc, this);
-                pw.setModal(true);
+		pw.setModal(true);
 		if (!mc.isEverythingOkToJMVA()) {
 			pw.show();
 		}
@@ -2649,7 +2614,7 @@ public class Mediator implements GuiInterface {
 			// try {
 			// New Converter by Bertoli Marco
 			ExactModel output = new ExactModel();
-			List res = ModelConverter.convertJSIMtoJMVA(model, output);
+			List<String> res = ModelConverter.convertJSIMtoJMVA(model, output);
 			ExactWizard jmva = new ExactWizard(output);
 			// If problems are found, shows warnings
 			if (res.size() > 0) {
@@ -2664,7 +2629,7 @@ public class Mediator implements GuiInterface {
 			 * File.createTempFile("~MVA", ".xml"); destFile.deleteOnExit();
 			 * InputStream stream =
 			 * XSDSchemaLoader.loadSchemaAsStream(XSDSchemaLoader.JSIM_TO_JMVA);
-			 * if(stream==null){ System.out.println("stream is null"); return; }
+			 * if (stream==null) { System.out.println("stream is null"); return; }
 			 * XMLWriter.writeXML(xmlTempFile, model); InputStream is = new
 			 * BufferedInputStream(stream); Transformer transformer =
 			 * TransformerFactory.newInstance().newTransformer(new
@@ -2684,16 +2649,14 @@ public class Mediator implements GuiInterface {
 	public void editSimulationParameters() {
 		dialogFactory.getDialog(new SimulationPanel(model, model, model, this), "Define Simulation Parameters");
 	}
-        
-        // S Jiang
+
+	// S Jiang
 	/**
 	 * Called when UseTemplate action is triggered
 	 */
 	public void editTemplate() {
-		customizableDialogFactory.getDialog(700, 300, new TemplatePanel(this),
-				"Add/use templates");
+		customizableDialogFactory.getDialog(700, 300, new TemplatePanel(this), "Add/use templates");
 	}
-
 	// end
 
 	/**
@@ -2798,122 +2761,110 @@ public class Mediator implements GuiInterface {
 	 */
 	public void showRelatedPanel(int problemType, int problemSubType, Object relatedStation, Object relatedClass) {
 		// if it is a no class error show the class panel
-		if ((problemSubType == ModelChecker.NO_CLASSES_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_CLASSES_ERROR)) {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 			model.manageJobs(); // a close class may be added
 		}
 		// if it is a no station error show an error message dialog
-		else if ((problemSubType == ModelChecker.NO_STATION_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			JOptionPane.showMessageDialog(null, "Please insert at least one server or delay before starting simulation.", "Error",
-					JOptionPane.ERROR_MESSAGE);
-		} else if ((problemSubType == ModelChecker.SIMULATION_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_STATION_ERROR)) {
+			JOptionPane.showMessageDialog(null, "Please insert at least one server or delay before starting simulation.",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SIMULATION_ERROR)) {
 			dialogFactory.getDialog(new MeasurePanel(model, model, model), "Edit Performance Indices");
 		}
-		// if a measure is inconsistent (i.e have one or more 'null' field) show
-		// performance indices panel
-		else if ((problemSubType == ModelChecker.INCONSISTENT_MEASURE_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		// if a measure is inconsistent (i.e have one or more 'null' field) show performance indices panel
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INCONSISTENT_MEASURE_ERROR)) {
 			dialogFactory.getDialog(new MeasurePanel(model, model, model), "Edit Performance Indices");
 		}
-		
-		else if ((problemSubType == ModelChecker.SINK_PERF_IND_WITH_NO_SINK_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_PERF_IND_WITH_NO_SINK_ERROR)) {
 			dialogFactory.getDialog(new MeasurePanel(model, model, model), "Edit Performance Indices");
 		}
-		else if ((problemSubType == ModelChecker.SINK_PERF_WITH_CLOSED_CLASS_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_PERF_WITH_CLOSED_CLASS_ERROR)) {
 			dialogFactory.getDialog(new MeasurePanel(model, model, model), "Edit Performance Indices");
 		}
-		// if a measure was defined more than once ask to erase all redundant
-		// measure
-		else if ((problemSubType == ModelChecker.DUPLICATE_MEASURE_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			int k = JOptionPane.showConfirmDialog(null, "Delete all redundant performance indices?\n", "Redundant performance indices found",
-					JOptionPane.ERROR_MESSAGE);
+		// if a measure was defined more than once ask to remove all redundant measures
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.DUPLICATE_MEASURE_ERROR)) {
+			int k = JOptionPane.showConfirmDialog(null, "Delete all redundant performance indices?\n",
+					"Redundant performance indices found", JOptionPane.ERROR_MESSAGE);
 			if (k == 0) {
 				mc.deleteRedundantMeasure();
 			}
 		}
 		// if it is a reference station error show the class panel
-		else if ((problemSubType == ModelChecker.REFERENCE_STATION_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.REFERENCE_STATION_ERROR)) {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 			model.manageJobs(); // a close class may be added
 		}
-		// if it has at least one classswitch and multiple reference station is selected for closed classes
-		else if ((problemSubType == ModelChecker.CS_REFERENCE_STATION) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		// if it has at least one class switch and multiple reference station is selected for closed classes
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CS_REFERENCE_STATION)) {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 			model.manageJobs(); // a close class may be added
 		}
-		// 
-		else if ((problemSubType == ModelChecker.CLOSED_ZERO_POPULATION) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.CLOSED_ZERO_POPULATION)) {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 			model.manageJobs(); // a close class may be added
 		}
-		// 
-		else if ((problemSubType == ModelChecker.CS_ALL_CLOSED_ZERO_POPULATION) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CS_ALL_CLOSED_ZERO_POPULATION)) {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 			model.manageJobs(); // a close class may be added
 		}
-		else if ((problemSubType == ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		// if a source has been inserted in the model but no open classes defined show the class panel
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS)) {
 			dialogFactory.getDialog(new MeasurePanel(model, model, model), "Edit Performance Indices");
 		}
-		// if a source has been inserted in the model but no open classes
-		// defined show the class panel
-		else if ((problemSubType == ModelChecker.SOURCE_WITH_NO_OPEN_CLASSES_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SOURCE_WITH_NO_OPEN_CLASSES_ERROR)) {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
-		} else if ((problemSubType == ModelChecker.ROUTING_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ROUTING_ERROR)) {
 			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 			String stationName = model.getStationName(relatedStation);
 			// set the station parameter panel to show the routing section
 			tempPanel.showRoutingSectionPanel(relatedClass);
 			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
 		}
-		// if a class may be routed into a station whose forward stations are
-		// all sink show an error message
-		else if ((problemSubType == ModelChecker.ALL_FORWARD_STATION_ARE_SINK_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		// if a class may be routed into a station whose forward stations are all sinks show an error message
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ALL_FORWARD_STATION_ARE_SINK_ERROR)) {
 			String stationName = model.getStationName(relatedStation);
 			String className = model.getClassName(relatedClass);
 			JOptionPane.showMessageDialog(null, "Close class " + className + " may be routed into " + stationName
-					+ " whose forward station are all sink.", "Error", JOptionPane.ERROR_MESSAGE);
+					+ " whose forward stations are all sinks.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-		// if no open classes defined but at least a sink has been defined show
-		// the class panel
-		else if ((problemSubType == ModelChecker.SINK_BUT_NO_OPEN_CLASSES_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		// if no open classes defined but at least a sink has been defined show the class panel
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_BUT_NO_OPEN_CLASSES_ERROR)) {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
-			// JOptionPane.showConfirmDialog(null,"Add an open class to the
-			// model?",
-			// "Error",JOptionPane.OK_CANCEL_OPTION,JOptionPane.ERROR_MESSAGE);
 		}
-		// if an open class defined but no sink have been defined show an error
-		// message
-		else if ((problemSubType == ModelChecker.NO_SINK_WITH_OPEN_CLASSES_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			JOptionPane.showMessageDialog(null, "Open classes defined but no sink, add a sink to the model.", "Error", JOptionPane.ERROR_MESSAGE);
+		// if an open class defined but no sink have been defined show an error message
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_SINK_WITH_OPEN_CLASSES_ERROR)) {
+			JOptionPane.showMessageDialog(null, "Open classes defined but no sink, add a sink to the model.", "Error",
+					JOptionPane.ERROR_MESSAGE);
 		}
 		// if an open class defined but no source show an error message
-		else if ((problemSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			JOptionPane.showMessageDialog(null, "Open classes defined but no source, add a source to the model.", "Error", JOptionPane.ERROR_MESSAGE);
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR)) {
+			JOptionPane.showMessageDialog(null, "Open classes defined but no source, add a source to the model.", "Error",
+					JOptionPane.ERROR_MESSAGE);
 		}
 		// if there is a station link error show an error message
-		else if ((problemSubType == ModelChecker.STATION_LINK_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.STATION_LINK_ERROR)) {
 			String stationName = model.getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, "The station " + stationName + " is not forward linked, add a forward link", "Error",
-					JOptionPane.ERROR_MESSAGE);
-		} else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
-			JOptionPane.showMessageDialog(null, "One or more join found but no fork. Please, remove all join or add a fork");
+			JOptionPane.showMessageDialog(null, "The station " + stationName + " is not forward linked, add a forward link",
+					"Error", JOptionPane.ERROR_MESSAGE);
 		}
-		// if it is a reference station error show the class panel
-		/*
-		 * else if ((problemSubType ==
-		 * ModelChecker.OPEN_CLASS_REFERENCE_STATION_ERROR) && (problemType ==
-		 * ModelChecker.ERROR_PROBLEM)) { DialogFactory.getDialog(new
-		 * jmodelClassesPanel(model,model),"Manage User Classes");
-		 * model.manageJobs(); //a close class may be added }
-		 */
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
+			JOptionPane.showMessageDialog(null, "A join was found but no fork. Please remove all joins or add a fork",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		//else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.OPEN_CLASS_REFERENCE_STATION_ERROR)) {
+		//	// if it is a reference station error show the class panel
+		//	dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
+		//	model.manageJobs(); //a close class may be added
+		//}
 		// used only in JMVA conversion
-		else if ((problemSubType == ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING)) {
 			String name = this.getStationDefinition().getStationName(relatedStation);
-			int k = JOptionPane
-					.showConfirmDialog(
-							null,
-							"According to BCMP theorem hypothesis each station must have the same queue\nstrategy for each class, but different per class queue strategy were found at "
-									+ name + ".\nDo you want to edit " + name + " queue strategy?\n\n", "Mixed queue strategy found",
-							JOptionPane.WARNING_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis each station must have the same queue\nstrategy "
+					+ "for each class, but different per class queue strategy were found at " + name + ".\nDo you want to edit " + name
+					+ " queue strategy?\n\n", "Mixed queue strategy found", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 				// set the station parameter panel to show the queue section
@@ -2922,12 +2873,11 @@ public class Mediator implements GuiInterface {
 			}
 		}
 		// used only in JMVA conversion
-		else if ((problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING)) {
 			String name = this.getStationDefinition().getStationName(relatedStation);
-			int k = JOptionPane.showConfirmDialog(null,
-					"According to BCMP theorem hypothesis, a FCFS server must have the same service times for each class,\nbut at " + name
-							+ " the service strategy is mixed, i.e. both load dependent and independent were found.\nDo you want to edit " + name
-							+ " service parameters?\n\n", "Mixed service strategies found", JOptionPane.WARNING_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, a FCFS server must have the same service times "
+					+ "for each class,\nbut at " + name + " the service strategy is mixed, i.e. both load dependent and independent were found.\n"
+					+ "Do you want to edit " + name + " service parameters?\n\n", "Mixed service strategies found", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 				// set the station parameter panel to show the queue section
@@ -2936,12 +2886,11 @@ public class Mediator implements GuiInterface {
 			}
 		}
 		// used only in JMVA conversion
-		else if ((problemSubType == ModelChecker.BCMP_FCFS_EXPONENTIAL_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_EXPONENTIAL_WARNING)) {
 			String name = this.getStationDefinition().getStationName(relatedStation);
-			int k = JOptionPane.showConfirmDialog(null,
-					"According to BCMP theorem hypothesis, in a FCFS server all the service time distribution\nmust be exponential, but at " + name
-							+ " at least one non exponential distribution was found.\nDo you want to edit " + name + " service parameters?\n\n",
-					"Non exponential distribution in FCFS server", JOptionPane.WARNING_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, in a FCFS server all the service time distribution\n"
+					+ "must be exponential, but at " + name + " at least one non exponential distribution was found.\nDo you want to edit " + name
+					+ " service parameters?\n\n", "Non exponential distribution in FCFS server", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 				// set the station parameter panel to show the queue section
@@ -2950,13 +2899,12 @@ public class Mediator implements GuiInterface {
 			}
 		}
 		// used only in JMVA conversion
-		else if ((problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING)) {
 			String name = this.getStationDefinition().getStationName(relatedStation);
-			int k = JOptionPane
-					.showConfirmDialog(
-							null,
-							"According to BCMP theorem hypothesis, in a FCFS server all the per class service time mean values\nmust be the same. If the service strategies are load dependent the mean value in each range\nhas to be the same for each class.\nDo you want to edit "
-									+ name + " service parameters?\n\n", "Non exponential distribution in FCFS server", JOptionPane.WARNING_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, in a FCFS server all the per class service time mean "
+					+ "values\nmust be the same. If the service strategies are load dependent the mean value in each range\nhas to be the same for "
+					+ "each class.\nDo you want to edit " + name + " service parameters?\n\n", "Non exponential distribution in FCFS server",
+					JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 				// set the station parameter panel to show the queue section
@@ -2964,83 +2912,122 @@ public class Mediator implements GuiInterface {
 				dialogFactory.getDialog(tempPanel, "Editing " + name + " Properties...");
 			}
 		}
-		// used only for to JMVA conversion, for non Random Routing routing
-		// strategy errors
+		// used only for to JMVA conversion
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING)) {
-			int k = JOptionPane
-					.showConfirmDialog(
-							null,
-							"Convert all non state independent routing strategies to Random Routing?\n\nAccording to the BCMP theorem the routing probabilities must be independent from the state of the model.\nChoosing ok all non state independent routing strategies inside a station will be converted to Random Routing.\nDo you want to convert all non state independent routing strategies to Random Routing?\n\n",
-							"BCMP hypothesis not verified", JOptionPane.ERROR_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "Convert all non state independent routing strategies to Random Routing?\n\nAccording to the "
+					+ "BCMP theorem the routing probabilities must be independent from the state of the model.\nChoosing ok all non state independent "
+					+ "routing strategies inside a station will be converted to Random Routing.\nDo you want to convert all non state independent "
+					+ "routing strategies to Random Routing?\n\n", "BCMP hypothesis not verified", JOptionPane.ERROR_MESSAGE);
 			if (k == 0) {
 				mc.setAllStateDependentRoutingStrategyToRandomRouting();
 			}
 		}
 		// if there are more than one sink show a warning message
-		else if ((problemSubType == ModelChecker.MORE_THAN_ONE_SINK_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
-			JOptionPane
-					.showMessageDialog(
-							null,
-							"If more than one sink is reacheable by the same open class the computed throughput may not be accurate.\nPlease check the model before starting simulation.",
-							"Warning", JOptionPane.WARNING_MESSAGE);
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.MORE_THAN_ONE_SINK_WARNING)) {
+			JOptionPane.showMessageDialog(null, "If more than one sink is reachable by the same open class the computed throughput "
+					+ "may not be accurate.\nPlease check the model before starting simulation.", "Warning", JOptionPane.WARNING_MESSAGE);
 		}
-		// if a station (server or delay) is not backward connected show a
-		// warning message
-		else if ((problemSubType == ModelChecker.NO_BACKWARD_LINK_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		// if a station (server or delay) is not backward connected show a warning message
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.NO_BACKWARD_LINK_WARNING)) {
 			String stationName = model.getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, "The station " + stationName
-					+ " is not backward linked. Please check the model before starting simulation.", "Warning", JOptionPane.WARNING_MESSAGE);
-		} else if ((problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
-			String message = "Check parametric analysis model?\n\nThe parametric analysis model previously defined had become inconsistent with the \nsimulation model. It will be automatically modified when simulation will be started.\nDo you want to autocorrect and check parametric analysis panel?\n\n";
+			JOptionPane.showMessageDialog(null, "The station " + stationName + " is not backward linked. Please check the model "
+					+ "before starting simulation.", "Warning", JOptionPane.WARNING_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING)) {
+			String message = "Check parametric analysis model?\n\nThe parametric analysis model previously defined had become inconsistent with the\n"
+					+ "simulation model. It will be automatically modified when simulation will be started.\nDo you want to autocorrect and check "
+					+ "parametric analysis panel?\n\n";
 			int k = JOptionPane.showConfirmDialog(null, message, "Inconsistent parametric analysis model", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				model.getParametricAnalysisModel().checkCorrectness(true);
 				ParametricAnalysisPanel paPanel = new ParametricAnalysisPanel(model, model, model, this);
 				dialogFactory.getDialog(paPanel, "Edit what-if analysis parameters");
 			}
-		} else if ((problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_NO_MORE_AVAIBLE_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
-			String message = "Parametric analysis was set, but no parametric analysis is now avaible,\nsince the simulation model was changed. It is only possible to execute normal simulation.\nDo you wish to continue anyway?\n\n";
-			int k = JOptionPane.showConfirmDialog(null, message, "Parametric analysis not avaible", JOptionPane.WARNING_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING)) {
+			String message = "Parametric analysis was set, but no parametric analysis is now available,\nsince the simulation model was changed. "
+					+ "It is only possible to execute normal simulation.\nDo you wish to continue anyway?\n\n";
+			int k = JOptionPane.showConfirmDialog(null, message, "Parametric analysis not available", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				model.setParametricAnalysisEnabled(false);
 				model.setParametricAnalysisModel(null);
 			}
-		} else if ((problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
-			JOptionPane.showMessageDialog(null, "A fork was found but no join. Please check the topology");
-		} else if ((problemSubType == ModelChecker.EMPTY_BLOCKING_REGION) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n", "Empty finite capacity regions found",
-					JOptionPane.ERROR_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)) {
+			JOptionPane.showMessageDialog(null, "A fork was found but no join. Please check the topology.", "Warning",
+					JOptionPane.WARNING_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.EMPTY_BLOCKING_REGION)) {
+			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n",
+					"Empty finite capacity regions found", JOptionPane.ERROR_MESSAGE);
 			if (k == 0) {
 				mc.deleteEmptyBlockingRegions();
 			}
-		} else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING)) {
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING)) {
 			editSimulationParameters();
-		} else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID)) {
-            StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID)) {
+			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 			String stationName = model.getStationName(relatedStation);
 			// set the station parameter panel to show the routing section
 			tempPanel.showRoutingSectionPanel(relatedClass);
 			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
-		} else if ((problemSubType == ModelChecker.CS_MATRIX_HAS_ROWS_LESS_THAN_ONE) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-				StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
-				String name = this.getStationDefinition().getStationName(relatedStation);
-				tempPanel.showCsSectionPanel();
-				dialogFactory.getDialog(tempPanel, "Editing " + name + " Properties...");
-		} else if ((problemSubType == ModelChecker.CS_FOLLOWED_BY_A_BAS) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			String name = this.getStationDefinition().getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, name + " is followed by a queue implementing a BAS stratregy. This topology is not allowed.", "Error", JOptionPane.ERROR_MESSAGE);
-		} else if ((problemSubType == ModelChecker.CS_BETWEEN_FORK_JOIN) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			String name = this.getStationDefinition().getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, name + " switch between fork/join. This topology is not allowed.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-                else if ((problemSubType == ModelChecker.GUARD_STRATEGY_ZERO_TASKS) && (problemType == ModelChecker.ERROR_PROBLEM)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CS_MATRIX_HAS_ROWS_LESS_THAN_ONE)) {
+			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
+			String name = this.getStationDefinition().getStationName(relatedStation);
+			tempPanel.showCsSectionPanel();
+			dialogFactory.getDialog(tempPanel, "Editing " + name + " Properties...");
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CS_FOLLOWED_BY_A_BAS)) {
+			String name = this.getStationDefinition().getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, name + " is followed by a queue implementing a BAS strategy. "
+					+ "This topology is not allowed.", "Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CS_BETWEEN_FORK_JOIN)) {
+			String name = this.getStationDefinition().getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, name + " is located between fork/join. This topology is not allowed.",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.GUARD_STRATEGY_ZERO_TASKS)) {
 			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 			String stationName = model.getStationName(relatedStation);
 			// set the station parameter panel to show the routing section
 			tempPanel.showJoinSectionPanel(relatedClass);
 			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
 		}
-
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN)) {
+			String name = this.getStationDefinition().getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, name + " is not located between fork/join. This topology is not allowed.",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PLACE_BETWEEN_FORK_JOIN)) {
+			String name = this.getStationDefinition().getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, name + " is located between fork/join. This topology is not allowed.",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN)) {
+			String name = this.getStationDefinition().getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, name + " is located between fork/join. This topology is not allowed.",
+					"Error", JOptionPane.ERROR_MESSAGE);
+		}
+		else if (((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITHOUT_VALID_ENABLING_OR_INHIBITING_CONDITION))
+				|| ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITH_INVALID_ENABLING_OR_INHIBITING_CONDITION))) {
+			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
+			String stationName = model.getStationName(relatedStation);
+			// set the station parameter panel to show the enabling section
+			tempPanel.showEnablingSectionPanel(relatedClass);
+			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
+		}
+		else if (((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITHOUT_VALID_FIRING_OUTCOME))
+				|| ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITH_INVALID_FIRING_OUTCOME))) {
+			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
+			String stationName = model.getStationName(relatedStation);
+			// set the station parameter panel to show the firing section
+			tempPanel.showFiringSectionPanel(relatedClass);
+			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
+		}
 	}
 
 	/**
@@ -3181,7 +3168,7 @@ public class Mediator implements GuiInterface {
 				}
 			}
 		}
-		// Puts cells removed from blocking regiont on background
+		// Puts cells removed from blocking region on background
 		graph.getModel().toBack(putBack.toArray());
 	}
 
@@ -3229,7 +3216,6 @@ public class Mediator implements GuiInterface {
 
 	// Giuseppe De Cicco and Fabio Granara
 	public AbstractJmodelAction getRotate() {
-
 		return actionRotate;
 	}
 
@@ -3244,8 +3230,8 @@ public class Mediator implements GuiInterface {
 				if (cell2 instanceof BlockingRegion) {
 					celgru = new Object[1];
 					celgru[0] = cell2;
-					// celle presenti nel blocking region incluse port e regione
 
+					// celle presenti nel blocking region incluse port e regione
 					celless = graph.getDescendants(celgru);
 					for (Object celles : celless) {
 						if (celles.equals(cell)) {
@@ -3260,7 +3246,6 @@ public class Mediator implements GuiInterface {
 
 	// Giuseppe De Cicco & Fabio Granara
 	public void avoidOverlappingCell(Object[] cells2) {
-
 		overlapping.avoidOverlappingCell(cells2);
 		graphRepaint();
 		graph.getGraphLayoutCache().reload();
@@ -3279,7 +3264,6 @@ public class Mediator implements GuiInterface {
 	private Thread animationHolder = null;
 
 	public void adjustGraph() {
-
 		Object[] cells;
 
 		// queste variabili mi servono per capire quali sono le celle che hanno
@@ -3313,21 +3297,19 @@ public class Mediator implements GuiInterface {
 		for (int i = 0; i < cells.length; i++) {
 			if (cells[i] instanceof JmtCell) {
 				((JmtCell) cells[i]).in = (DefaultGraphModel.getIncomingEdges(graph.getModel(), cells[i])).length;
-
 			}
 
 			if (cells[i] instanceof JmtCell) {
-
 				if (((JmtCell) cells[i]).in < inMin) {
 					inMin = ((JmtCell) cells[i]).in;
 				}
 				if (((JmtCell) cells[i]).in > inMax) {
 					inMax = ((JmtCell) cells[i]).in;
 				}
-
 			}
 
 		}
+
 		boolean projectClose = true;
 		for (Object cell : cells) {
 			if (cell instanceof JmtCell && !sourceIn) {
@@ -3352,9 +3334,9 @@ public class Mediator implements GuiInterface {
 				}
 			}
 		}
+
 		// Questa parte gestisce quando abbiamo un progetto close
 		if (!sourceIn && projectClose && !serverWithZeroIn) {
-
 			int tmpMax = 0;
 			JmtCell tmpCell = null;
 			for (Object cell : cells) {
@@ -3368,7 +3350,6 @@ public class Mediator implements GuiInterface {
 			}
 			min = new ArrayList<Object>();
 			min.add(tmpCell);
-
 		}
 
 		int widthMaxMin = 0;
@@ -3397,18 +3378,15 @@ public class Mediator implements GuiInterface {
 		for (int w2 = 0; w2 < cells.length; w2++) {
 			if (cells[w2] instanceof JmtCell) {
 				if (!((JmtCell) cells[w2]).seen) {
-
 					min.add(cells[w2]);
 				}
 			}
-
 		}
 		flag1 = false;
 
 		for (int q = 0; q < min.size(); q++) {
 			searchNext((JmtCell) min.get(q));
 			flag1 = false;
-
 		}
 
 		flag1 = false;
@@ -3428,7 +3406,6 @@ public class Mediator implements GuiInterface {
 		graphRepaint();
 		graph.getGraphLayoutCache().reload();
 		avoidOverlappingCell(cells);
-
 	}
 
 	// Giuseppe De Cicco & Fabio Granara
@@ -3439,7 +3416,6 @@ public class Mediator implements GuiInterface {
 		List<Object> next = new ArrayList<Object>();
 
 		if (flag1 == false && prev.seen == false) {
-
 			// Rectangle bounds =
 			// GraphConstants.getBounds(((JmtCell)prev).getAttributes()).getBounds();
 			if (!flag2) {
@@ -3480,7 +3456,6 @@ public class Mediator implements GuiInterface {
 		if (inRepositionSons == false && ((JmtCell) next.get(0)).seen == false) {
 			j = searchNext((JmtCell) next.get(0));
 		} else if (inRepositionSons == true && ((JmtCell) next.get(0)).seen == false) {
-
 			Rectangle bounds = GraphConstants.getBounds(((JmtCell) next.get(0)).getAttributes()).getBounds();
 			bounds.setLocation((int) (boundspadre.getCenterX()) + widthMax + 50 - (int) (bounds.getWidth() / 2), (int) boundspadre.getCenterY()
 					- (int) (bounds.getHeight() / 2));
@@ -3520,9 +3495,7 @@ public class Mediator implements GuiInterface {
 		int w = boundspadre.y + ((heightMax + 35) * (numero + 1)) - 38;
 
 		for (int i = cont; i < sons.size(); i++) {
-
 			if (((JmtCell) sons.get(i)).seen == false) {
-
 				Rectangle bounds = GraphConstants.getBounds(((JmtCell) sons.get(i)).getAttributes()).getBounds();
 				bounds.setLocation((int) (boundspadre.getCenterX()) + widthMax + 50 - (int) (bounds.getWidth() / 2), w
 						- (int) (bounds.getHeight() / 2) + 80);
@@ -3534,7 +3507,6 @@ public class Mediator implements GuiInterface {
 
 				if (listEdges.length > 0) {
 					flag = true;
-
 					j = searchNext((JmtCell) sons.get(i));
 					inRepositionSons = true;
 				}
@@ -3579,25 +3551,21 @@ public class Mediator implements GuiInterface {
 	public JSimGraphModel getModel() {
 		return model;
 	}
-        
+
 	// S Jiang
 	public MainWindow getMainWindow() {
 		return this.mainWindow;
 	}
-	
-	public void downloadDefaultTemplates(){
+
+	public void downloadDefaultTemplates() {
 		customizableDialogFactory.getDialog(520, 200, new AutoDownloadPanel(), "Downloading...");
 	}
-	
+
 	// used to find the bottom bound of canvas
 	public double getBound() {
-                
-                graph.getGraphLayoutCache().reload();
-
+		graph.getGraphLayoutCache().reload();
 		int nCells = graph.getModel().getRootCount();
-
 		double Y = 10.0;
-
 		for (int i = 0; i < nCells; i++) {
 			double temp = graph.getCellBounds(graph.getModel().getRootAt(i))
 					.getMaxY();
@@ -3605,11 +3573,10 @@ public class Mediator implements GuiInterface {
 				Y = temp;
 			}
 		}
-
 		return Y;
 	}
 	// end
-	
+
 	//S Jiang
 	public void deleteCells(Object[] cells) {
 		GraphModel graphmodel = graph.getModel();
@@ -3625,12 +3592,11 @@ public class Mediator implements GuiInterface {
 		Set<Object> jmtCells = new HashSet<Object>();
 
 		// Giuseppe De Cicco & Fabio Granara
-		// for(int k=0; k<cells.length; k++){
-		// if(cells[k] instanceof JmtEdge){
+		// for (int k=0; k<cells.length; k++) {
+		// if (cells[k] instanceof JmtEdge) {
 		// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)cells[k])))).SubOut();
 		// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)cells[k])))).SubIn();
 		// }
-		//
 		// }
 		for (int i = 0; i < cells.length; i++) {
 			if (!(cells[i] instanceof BlockingRegion)) {
@@ -3644,11 +3610,10 @@ public class Mediator implements GuiInterface {
 				// Iterator iter = edges.iterator();
 				// while (iter.hasNext()) {
 				// Object next = iter.next();
-				// if (next instanceof JmtEdge){
+				// if (next instanceof JmtEdge) {
 				// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)next)))).SubOut();
 				// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)next)))).SubIn();
 				// }
-				//
 				// }
 				// Stores parents information and cell
 				if (cells[i] instanceof JmtCell) {
@@ -3674,7 +3639,7 @@ public class Mediator implements GuiInterface {
 		if (!edges.isEmpty()) {
 			graphmodel.remove(edges.toArray());
 		}
-		// removes cells from graph
+		// Removes cells from graph
 		graphmodel.remove(cells);
 
 		// Checks if all children of a blocking region have been removed
@@ -3731,13 +3696,13 @@ public class Mediator implements GuiInterface {
 	}
 	//end
 
-        @Override
-        public String getFileName() {
-                if(openedArchive != null) {
-                        return openedArchive.getName();
-                } else {
-                        return null;
-                }
-        }
+	@Override
+	public String getFileName() {
+		if (openedArchive != null) {
+			return openedArchive.getName();
+		} else {
+			return null;
+		}
+	}
 
 }

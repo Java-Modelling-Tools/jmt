@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jsimgraph.JGraphMod;
 
@@ -31,12 +31,13 @@ import org.jgraph.graph.Port;
  *         Time: 17.53.21
  */
 public class RoutingStationCell extends JmtCell {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
-	// Disables this component
+	/**
+	 * Tells if this component can be placed on JGraph or has been disabled. This is
+	 * useful to load old models with disabled components (like terminals)
+	 */
 	public static final boolean canBePlaced = true;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
@@ -54,7 +55,8 @@ public class RoutingStationCell extends JmtCell {
 	}
 
 	/**
-	 * creats the ports for this vertex
+	 * Creates the ports for this vertex
+	 *
 	 * @return array of ports
 	 */
 	@Override

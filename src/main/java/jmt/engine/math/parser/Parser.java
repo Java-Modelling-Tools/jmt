@@ -1,4 +1,4 @@
-/**    
+/**
   * Copyright 2006 Bertoli Marco
 
   *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -128,7 +128,7 @@ public class Parser {
 	}
 
 	/**
-	 * Returns if imput character character is an operator
+	 * Returns if input character character is an operator
 	 * @param c input character
 	 * @return truth value
 	 */
@@ -160,7 +160,7 @@ public class Parser {
 	}
 
 	/**
-	 * Returns if imput character is the last one (TERM)
+	 * Returns if input character is the last one (TERM)
 	 * @param c input character
 	 * @return truth value
 	 */
@@ -454,8 +454,8 @@ public class Parser {
 	}
 
 	/**
-	 * Returns a string rappresentation of parsed expression with the right parentesis
-	 * @return a string rappresentation of parsed expression with the right parentesis
+	 * Returns a string representation of parsed expression with the right parenthesis
+	 * @return a string representation of parsed expression with the right parenthesis
 	 * @throws ParseError if parsed input string was malformed
 	 */
 	public String getExpression() throws ParseError {

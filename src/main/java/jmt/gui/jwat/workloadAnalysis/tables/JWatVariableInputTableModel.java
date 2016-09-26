@@ -65,7 +65,7 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 	}
 
 	/**
-	 * Tells wether data contained in a specific cell(given row and column
+	 * Tells whether data contained in a specific cell(given row and column
 	 * index) is editable or not. In this case distribution column is not
 	 * editable, as editing functionality is implemented via edit button
 	 */
@@ -219,8 +219,8 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 			if (regExpr.get(i).equals("")) {
 				return false;
 			}
-			// if(comments.get(i).equals("")) return false;
-			// if(delimiters.get(i).equals("")) return false;
+			// if (comments.get(i).equals("")) return false;
+			// if (delimiters.get(i).equals("")) return false;
 			if (((Boolean) selected.get(i)).booleanValue()) {
 				check = true;
 			}

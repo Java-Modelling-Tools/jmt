@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.definitions.parametric;
 
@@ -50,7 +50,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	private boolean singleClass;
 	private Object classKey;
 
-	private Vector<Object> avaibleClasses;
+	private Vector<Object> availableClasses;
 	private Object values;
 
 	public ArrivalRateParametricAnalysis(ClassDefinition cd, StationDefinition sd, SimulationDefinition simd) {
@@ -59,10 +59,10 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 		classDef = cd;
 		stationDef = sd;
 		simDef = simd;
-		Vector<Object> avaible = new ParametricAnalysisChecker(cd, sd, simd).checkForArrivalRatesParametricSimulationAvaibleClasses();
-		if ((cd.getOpenClassKeys().size() == 1) || (avaible.size() < cd.getOpenClassKeys().size())) {
+		Vector<Object> available = new ParametricAnalysisChecker(cd, sd, simd).checkForArrivalRatesParametricSimulationAvailableClasses();
+		if ((cd.getOpenClassKeys().size() == 1) || (available.size() < cd.getOpenClassKeys().size())) {
 			singleClass = true;
-			classKey = avaible.get(0);
+			classKey = available.get(0);
 			double arrivalRate = 1 / (((Distribution) cd.getClassDistribution(classKey)).getMean());
 			initialValue = arrivalRate;
 			finalValue = arrivalRate * INCREMENT_SINGLE;
@@ -180,8 +180,8 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 				Distribution distr = (Distribution) classDef.getClassDistribution(classKey);
 				distr.setMean(1 / (refAR.doubleValue()));
 			} else {
-				for (int i = 0; i < avaibleClasses.size(); i++) {
-					Object thisClass = avaibleClasses.get(i);
+				for (int i = 0; i < availableClasses.size(); i++) {
+					Object thisClass = availableClasses.get(i);
 					double refAR = ((ValuesTable) values).getValue(thisClass, step);
 					Distribution distr = (Distribution) classDef.getClassDistribution(thisClass);
 					distr.setMean(1 / refAR);
@@ -196,7 +196,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	 * @return the maximum number of steps
 	 */
 	@Override
-	public int searchForAvaibleSteps() {
+	public int searchForAvailableSteps() {
 		return Integer.MAX_VALUE;
 	}
 
@@ -220,23 +220,23 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 		} else {
 			double sum = 1;
 			double increment = (finalValue - initialValue) / (100 * (double) (numberOfSteps - 1));
-			//find the set of avaible classes
+			//find the set of available classes
 			Vector allClasses = classDef.getOpenClassKeys();
-			avaibleClasses = new Vector<Object>(0, 1);
+			availableClasses = new Vector<Object>(0, 1);
 			for (int i = 0; i < allClasses.size(); i++) {
 				Object thisClass = allClasses.get(i);
 				Object temp = classDef.getClassDistribution(thisClass);
 				if (temp instanceof Distribution) {
 					Distribution distr = (Distribution) temp;
 					if (distr.hasMean()) {
-						avaibleClasses.add(thisClass);
+						availableClasses.add(thisClass);
 					}
 				}
 			}
-			values = new ValuesTable(classDef, avaibleClasses, numberOfSteps);
+			values = new ValuesTable(classDef, availableClasses, numberOfSteps);
 			for (int i = 0; i < numberOfSteps; i++) {
-				for (int k = 0; k < avaibleClasses.size(); k++) {
-					Object thisClass = avaibleClasses.get(k);
+				for (int k = 0; k < availableClasses.size(); k++) {
+					Object thisClass = availableClasses.get(k);
 					double thisInitialArrivalRate = 1 / (((Distribution) classDef.getClassDistribution(thisClass)).getMean());
 					double value = thisInitialArrivalRate * (sum);
 					((ValuesTable) values).setValue(thisClass, value);
@@ -244,9 +244,9 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 				sum += increment; //note that the increment may be < 0
 			}
 			//used to save the initial values of service time
-			originalValues = new Vector(avaibleClasses.size());
-			for (int i = 0; i < avaibleClasses.size(); i++) {
-				Object thisClass = avaibleClasses.get(i);
+			originalValues = new Vector(availableClasses.size());
+			for (int i = 0; i < availableClasses.size(); i++) {
+				Object thisClass = availableClasses.get(i);
 				double thisRate = 1 / (((Distribution) classDef.getClassDistribution(thisClass)).getMean());
 				((Vector<Double>) originalValues).add(new Double(thisRate));
 			}
@@ -265,9 +265,9 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 				distr.setMean(1 / (rate.doubleValue()));
 			} else {
 				Vector values = (Vector) originalValues;
-				Vector avaibleClasses = classDef.getOpenClassKeys();
-				for (int i = 0; i < avaibleClasses.size(); i++) {
-					Object thisClass = avaibleClasses.get(i);
+				Vector availableClasses = classDef.getOpenClassKeys();
+				for (int i = 0; i < availableClasses.size(); i++) {
+					Object thisClass = availableClasses.get(i);
 					Distribution distr = (Distribution) classDef.getClassDistribution(thisClass);
 					Double thisRate = (Double) values.get(i);
 					distr.setMean(1 / (thisRate.doubleValue()));
@@ -292,14 +292,14 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 		int code = 0;
 		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(classDef, stationDef, simDef);
 		Vector openClasses = classDef.getOpenClassKeys();
-		Vector<Object> avaibleClasses = checker.checkForArrivalRatesParametricSimulationAvaibleClasses();
-		if (avaibleClasses.isEmpty()) {
+		Vector<Object> availableClasses = checker.checkForArrivalRatesParametricSimulationAvailableClasses();
+		if (availableClasses.isEmpty()) {
 			code = 2;
 		} else {
 			//if is single class...
 			if (isSingleClass()) {
-				// ... and the selected close class is no more avaible
-				if (!avaibleClasses.contains(classKey)) {
+				// ... and the selected close class is no more available
+				if (!availableClasses.contains(classKey)) {
 					code = 1;
 					if (autocorrect) {
 						classKey = openClasses.get(0); //change the reference class
@@ -318,10 +318,10 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 					}
 				}
 			} else {
-				if ((avaibleClasses.size() < openClasses.size()) || (openClasses.size() == 1)) {
+				if ((availableClasses.size() < openClasses.size()) || (openClasses.size() == 1)) {
 					code = 1;
 					if (autocorrect) {
-						classKey = avaibleClasses.get(0);
+						classKey = availableClasses.get(0);
 						singleClass = true;
 						setDefaultInitialValue();
 						setDefaultFinalValue();
@@ -346,7 +346,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 			ValuesTable temp = (ValuesTable) values;
 			double originalValue = ((Double) ((Vector) originalValues).get(0)).doubleValue();
 			for (int i = 0; i < numberOfSteps; i++) {
-				double thisValue = temp.getValue(avaibleClasses.get(0), i);
+				double thisValue = temp.getValue(availableClasses.get(0), i);
 				double ratio = thisValue / originalValue * 100;
 				assumedValues.add(new Double(ratio));
 			}

@@ -1,30 +1,30 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.QueueNet;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
-import jmt.engine.random.engine.RandomEngine;
 
 /** This class implements a job info list based on a linked list.
  * @author Francesco Radaelli, Stefano Omini.
@@ -38,15 +38,13 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class LinkedJobInfoList implements JobInfoList {
 
-	private static final boolean DEBUG = false;
-
 	/** Required property is not available*/
-	public final int PROPERTY_NOT_AVAILABLE = 0x0001;
+	public static final int PROPERTY_NOT_AVAILABLE = 0x0001;
 
 	//contain JobInfo objects
 	private LinkedList<JobInfo> list;
 
-	private LinkedList<JobInfo> listPerClass[];
+	public LinkedList<JobInfo> listPerClass[];
 
 	//arrivals and completions
 	private int jobsIn;
@@ -76,8 +74,8 @@ public class LinkedJobInfoList implements JobInfoList {
 	private Measure utilization ;
 
 	private Measure utilizationPerClass[];
-        
-        private Measure utilizationJoin ;
+
+	private Measure utilizationJoin ;
 
 	private Measure utilizationPerClassJoin[];
 
@@ -93,9 +91,9 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	private Measure queueLengthPerClass[];
 
-	private Measure dropRate;
+	private InverseMeasure dropRate;
 
-	private Measure dropRatePerClass[];
+	private InverseMeasure dropRatePerClass[];
 
 	private Measure responseTimePerSink;
 
@@ -112,13 +110,11 @@ public class LinkedJobInfoList implements JobInfoList {
 	/** The number of servers to estimate Utilization measure on multiserver environments. */
 	private int serverNumber = 1;
 
-        private RandomEngine engine = RandomEngine.makeDefault();
-
 	/** Creates a new JobInfoList instance.
-	* @param numberOfJobClasses number of job classes.
-	* @param save True to create and use a list to add/remove
-	* each job which arrives/departes, false otherwise.
-	*/
+	 * @param numberOfJobClasses number of job classes.
+	 * @param save True to create and use a list to add/remove
+	 * each job which arrives/departs, false otherwise.
+	 */
 	@SuppressWarnings("unchecked")
 	public LinkedJobInfoList(int numberOfJobClasses, boolean save) {
 		int i;
@@ -135,7 +131,6 @@ public class LinkedJobInfoList implements JobInfoList {
 		busyTimePerClass = new double[numberOfJobClasses];
 		lastJobInTimePerClass = new double[numberOfJobClasses];
 		lastJobOutTimePerClass = new double[numberOfJobClasses];
-		throughputPerClass = new InverseMeasure[numberOfJobClasses];
 		lastJobDropTimePerClass = new double[numberOfJobClasses];
 	}
 
@@ -178,7 +173,7 @@ public class LinkedJobInfoList implements JobInfoList {
 	public int getJobsInPerClass(JobClass JobClass) {
 		return jobsInPerClass[JobClass.getId()];
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getJobsInPerClass()
 	 */
@@ -358,98 +353,54 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	public boolean addRand(JobInfo jobInfo) {
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#addLast(jmt.engine.QueueNet.JobInfo)
+	 */
+	public boolean addLast(JobInfo jobInfo) {
 		if (list != null) {
 			updateAdd(jobInfo);
-			int pos = (int) (engine.raw()*list.size());
 			listPerClass[jobInfo.getJob().getJobClass().getId()].addLast(jobInfo);
-			list.add(pos,jobInfo);
+			list.addLast(jobInfo);
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
-	//----------------METHODS USED BY PRIORITY BASED STRATEGIES---------------//
 
-	//NEW
-	//@author Stefano Omini
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#addRand(jmt.engine.QueueNet.JobInfo)
+	 */
+	public boolean add(int index, JobInfo jobInfo) {
+		if (list != null) {
+			updateAdd(jobInfo);
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			Iterator<JobInfo> it = list.iterator();
+			int indexPerClass = 0;
+			for (int i = 0; i < index; i++) {
+				if (it.next().getJob().getJobClass() == jobClass) {
+					indexPerClass++;
+				}
+			}
+			listPerClass[jobClass.getId()].add(indexPerClass, jobInfo);
+			list.add(index, jobInfo);
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#add(int, jmt.engine.QueueNet.JobInfo, boolean)
 	 */
-	public boolean add(int index, JobInfo jobInfo, boolean isClassTail) {
-
+	public boolean add(int index, JobInfo jobInfo, boolean isClassHead) {
 		if (list != null) {
 			updateAdd(jobInfo);
-
-			if (isClassTail) {
-				listPerClass[jobInfo.getJob().getJobClass().getId()].addLast(jobInfo);
-			} else {
+			if (isClassHead) {
 				listPerClass[jobInfo.getJob().getJobClass().getId()].addFirst(jobInfo);
+			} else {
+				listPerClass[jobInfo.getJob().getJobClass().getId()].addLast(jobInfo);
 			}
 			list.add(index, jobInfo);
-
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#addFirst(jmt.engine.QueueNet.JobInfo, boolean)
-	 */
-	public boolean addFirst(JobInfo jobInfo, boolean isClassTail) {
-
-		if (list != null) {
-			updateAdd(jobInfo);
-
-			if (isClassTail) {
-				listPerClass[jobInfo.getJob().getJobClass().getId()].addLast(jobInfo);
-			} else {
-				listPerClass[jobInfo.getJob().getJobClass().getId()].addFirst(jobInfo);
-			}
-			list.addFirst(jobInfo);
-
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#addLast(jmt.engine.QueueNet.JobInfo, boolean)
-	 */
-	public boolean addLast(JobInfo jobInfo, boolean isClassTail) {
-
-		if (list != null) {
-			updateAdd(jobInfo);
-
-			if (isClassTail) {
-				listPerClass[jobInfo.getJob().getJobClass().getId()].addLast(jobInfo);
-			} else {
-				listPerClass[jobInfo.getJob().getJobClass().getId()].addFirst(jobInfo);
-			}
-			list.addLast(jobInfo);
-
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	//end NEW
-
-	//----------------end METHODS USED BY PRIORITY BASED STRATEGIES---------------//
-
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#addLast(jmt.engine.QueueNet.JobInfo)
-	 */
-	public boolean addLast(JobInfo jobInfo) throws jmt.common.exception.NetException {
-		if (list != null) {
-			updateAdd(jobInfo);
-			listPerClass[jobInfo.getJob().getJobClass().getId()].addLast(jobInfo);
-			list.addLast(jobInfo);
 			return true;
 		} else {
 			return false;
@@ -472,7 +423,7 @@ public class LinkedJobInfoList implements JobInfoList {
 
 			updateThroughput(job);
 			updateUtilization(jobClass);
-                        updateUtilizationJoin(jobClass);
+			updateUtilizationJoin(jobClass);
 
 			//NEW
 			//@author Stefano Omini
@@ -499,15 +450,15 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	private void finalRemove(JobInfo what, LinkedList<JobInfo> list, int position) {
 		switch (position) {
-			case 1:
-				list.removeFirst();
-				break;
-			case 2:
-				list.removeLast();
-				break;
-			default:
-				list.remove(what);
-				break;
+		case 1:
+			list.removeFirst();
+			break;
+		case 2:
+			list.removeLast();
+			break;
+		default:
+			list.remove(what);
+			break;
 		}
 	}
 
@@ -588,45 +539,6 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	public JobInfo removeSJF() throws jmt.common.exception.NetException  {
-		
-		//creates an iterator and finds the correct position
-		//according to the job service time
-		if (list != null) {
-			ListIterator<JobInfo> iterator = list.listIterator();
-			JobInfo current = null;
-			double currentJobTime = 0;
-			int index = -1;
-			int minIndex = 0;
-			double minTime = -1;
-			
-			while (iterator.hasNext()) {
-				index++;
-				current = iterator.next();
-				currentJobTime = current.getJob().getServiceTime();
-			
-				if (currentJobTime<minTime || minTime<0){
-					minTime = currentJobTime;
-					minIndex = index;
-				}			
-			}
-			
-			JobInfo jobInfo = list.get(minIndex);
-			
-			if ((jobInfo != null)) {
-				doRemove(jobInfo, 0, 0);
-				return jobInfo;
-			} else {
-				return null;
-			}
-		}
-		else {
-			return null;
-		}
-		
-				
-	}
-	
 	/**---------------------------------------------------------------------
 	 *---------------- "ANALYZE" AND "UPDATE" METHODS ----------------------
 	 *---------------------------------------------------------------------*/
@@ -644,9 +556,9 @@ public class LinkedJobInfoList implements JobInfoList {
 			utilization = Measurement;
 		}
 	}
-        
-        // M. Cazzoli
-        public void analyzeUtilizationJoin(JobClass jobClass, Measure Measurement) {
+
+	// M. Cazzoli
+	public void analyzeUtilizationJoin(JobClass jobClass, Measure Measurement) {
 		if (jobClass != null) {
 			if (utilizationPerClassJoin == null) {
 				utilizationPerClassJoin = new Measure[listPerClass.length];
@@ -712,7 +624,7 @@ public class LinkedJobInfoList implements JobInfoList {
 			residenceTime = Measurement;
 		}
 	}
-	
+
 	public void analyzeResponseTimePerSink(JobClass jobClass,
 			Measure Measurement) {
 		if (jobClass != null) {
@@ -769,27 +681,27 @@ public class LinkedJobInfoList implements JobInfoList {
 			utilization.update(list.size() / divisor, NetSystem.getTime() - getLastModifyTime());
 		}
 	}
-        
-        // M. Cazzoli
-        private void updateUtilizationJoin(JobClass JobClass) {
+
+	// M. Cazzoli
+	private void updateUtilizationJoin(JobClass JobClass) {
 
 		if (utilizationPerClassJoin != null) {
 			int c = JobClass.getId();
 			Measure m = utilizationPerClassJoin[c];
 			if (m != null) {
-                                if (listPerClass[c].size() > 0) {
-                                        m.update(1, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
-                                } else {
-                                        m.update(0, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
-                                }
+				if (listPerClass[c].size() > 0) {
+					m.update(1, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
+				} else {
+					m.update(0, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
+				}
 			}
 		}
 		if (utilizationJoin != null) {
 			if (list.size() > 0) {
-                                utilizationJoin.update(1, NetSystem.getTime() - getLastModifyTime());
-                        } else {
-                                utilizationJoin.update(0, NetSystem.getTime() - getLastModifyTime());
-                        }
+				utilizationJoin.update(1, NetSystem.getTime() - getLastModifyTime());
+			} else {
+				utilizationJoin.update(0, NetSystem.getTime() - getLastModifyTime());
+			}
 		}
 	}
 
@@ -830,9 +742,6 @@ public class LinkedJobInfoList implements JobInfoList {
 				// Inverse measure must be used to compute throughput
 				m.update(NetSystem.getTime() - getLastJobOutTimePerClass(Job.getJobClass()), 1.0);
 			}
-			if (DEBUG) {
-				System.out.println(NetSystem.getTime() - getLastJobOutTimePerClass(Job.getJobClass()));
-			}
 		}
 		if (throughput != null) {
 			throughput.update(NetSystem.getTime() - getLastJobOutTime(), 1.0);
@@ -845,15 +754,15 @@ public class LinkedJobInfoList implements JobInfoList {
 		int c = jobClass.getId();
 
 		updateUtilization(jobClass);
-                updateUtilizationJoin(jobClass);
+		updateUtilizationJoin(jobClass);
 		updateQueueLength(jobClass);
 
+		lastJobInTimePerClass[c] = lastJobInTime = NetSystem.getTime();
 		jobsIn++;
 		jobsInPerClass[c]++;
-		lastJobInTimePerClass[c] = lastJobInTime = NetSystem.getTime();
 
 	}
-	
+
 	public void updateResponseTimePerSink(JobInfo jobInfo) {
 		int c = jobInfo.getJob().getJobClass().getId();
 		if (responseTimePerSinkPerClass != null) {
@@ -866,18 +775,20 @@ public class LinkedJobInfoList implements JobInfoList {
 			responseTimePerSink.update(NetSystem.getTime() - jobInfo.getJob().getSystemEnteringTime(), 1.0);
 		}
 	}
+
 	public void updateThroughputPerSink(JobInfo jobInfo) {
 		int c = jobInfo.getJob().getJobClass().getId();
 		if (throughputPerSinkPerClass != null) {
 			InverseMeasure m = throughputPerSinkPerClass[c];
 			if (m != null) {
-				m.update(NetSystem.getTime() - getLastJobDropTimePerClass(jobInfo.getJob().getJobClass()), 1.0);
+				m.update(NetSystem.getTime() - getLastJobOutTimePerClass(jobInfo.getJob().getJobClass()), 1.0);
 			}
 		}
 		if (throughputPerSink != null) {
-			throughputPerSink.update(NetSystem.getTime() - getLastJobDropTime(), 1.0);
+			throughputPerSink.update(NetSystem.getTime() - getLastJobOutTime(), 1.0);
 		}
 	}
+
 	//NEW
 	//@author Stefano Omini
 	//modified 21/5/2004
@@ -924,17 +835,38 @@ public class LinkedJobInfoList implements JobInfoList {
 	//@author Stefano Omini
 
 	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#removeAfterRedirect(jmt.engine.QueueNet.JobInfo)
+	 * @see jmt.engine.QueueNet.JobInfoList#removeJob(jmt.engine.QueueNet.JobInfo)
 	 */
-	public boolean removeAfterRedirect(JobInfo JobInfo) throws jmt.common.exception.NetException {
+	public boolean removeJob(JobInfo jobInfo) throws jmt.common.exception.NetException {
 		if (list != null) {
-			Job job = JobInfo.getJob();
+			Job job = jobInfo.getJob();
 			JobClass jobClass = job.getJobClass();
 			int c = jobClass.getId();
 
-			listPerClass[c].remove(JobInfo);
-			list.remove(JobInfo);
+			updateResponseTimePerSink(jobInfo);
+			updateThroughputPerSink(jobInfo);
 
+			listPerClass[c].remove(jobInfo);
+			list.remove(jobInfo);
+			lastJobOutTimePerClass[c] = lastJobOutTime = NetSystem.getTime();
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#redirectJob(jmt.engine.QueueNet.JobInfo)
+	 */
+	public boolean redirectJob(JobInfo jobInfo) throws jmt.common.exception.NetException {
+		if (list != null) {
+			Job job = jobInfo.getJob();
+			JobClass jobClass = job.getJobClass();
+			int c = jobClass.getId();
+
+			listPerClass[c].remove(jobInfo);
+			list.remove(jobInfo);
 			//the job has been redirected: it should not be counted
 			jobsIn--;
 			jobsInPerClass[c]--;
@@ -946,9 +878,48 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#removeAfterDrop(jmt.engine.QueueNet.JobInfo)
+	 * @see jmt.engine.QueueNet.JobInfoList#dropJob(jmt.engine.QueueNet.JobInfo)
 	 */
-	public boolean removeAfterDrop(JobInfo JobInfo) throws jmt.common.exception.NetException {
+	public boolean dropJob(JobInfo jobInfo) throws jmt.common.exception.NetException {
+		if (list != null) {
+			Job job = jobInfo.getJob();
+			JobClass jobClass = job.getJobClass();
+			int c = jobClass.getId();
+
+			updateDropRate(jobClass);
+
+			listPerClass[c].remove(jobInfo);
+			list.remove(jobInfo);
+			lastJobDropTimePerClass[c] = lastJobDropTime = NetSystem.getTime();
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#produceJob(jmt.engine.QueueNet.JobInfo)
+	 */
+	public boolean produceJob(JobInfo JobInfo) throws jmt.common.exception.NetException {
+		if (list != null) {
+			Job job = JobInfo.getJob();
+			JobClass jobClass = job.getJobClass();
+			int c = jobClass.getId();
+
+			listPerClass[c].add(JobInfo);
+			list.add(JobInfo);
+
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#consumeJob(jmt.engine.QueueNet.JobInfo)
+	 */
+	public boolean consumeJob(JobInfo JobInfo) throws jmt.common.exception.NetException {
 		if (list != null) {
 			Job job = JobInfo.getJob();
 			JobClass jobClass = job.getJobClass();
@@ -956,27 +927,7 @@ public class LinkedJobInfoList implements JobInfoList {
 
 			listPerClass[c].remove(JobInfo);
 			list.remove(JobInfo);
-			updateResponseTimePerSink(JobInfo);
-			updateThroughputPerSink(JobInfo);
-			return dropJob(job);
-		} else {
-			return false;
-		}
-	}
 
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#dropJob(jmt.engine.QueueNet.Job)
-	 */
-	public boolean dropJob(Job job) throws jmt.common.exception.NetException {
-		if (list != null) {
-			JobClass jobClass = job.getJobClass();
-			int c = jobClass.getId();
-
-			updateQueueLength(jobClass);
-			updateDropRate(jobClass);
-
-			//Update last drop time 
-			lastJobDropTimePerClass[c] = lastJobDropTime = NetSystem.getTime();
 			return true;
 		} else {
 			return false;
@@ -990,12 +941,12 @@ public class LinkedJobInfoList implements JobInfoList {
 		this.serverNumber = serverNumber;
 	}
 	//fork in region
-	public int getJobsInPerClass(int Id){
+	public int getJobsInPerClass(int Id) {
 		return jobsInPerClass[Id];
 	}
-        
-	public int getJobsOutPerClass(int Id){
+
+	public int getJobsOutPerClass(int Id) {
 		return jobsOutPerClass[Id];
 	}
-    //end
+	//end
 }

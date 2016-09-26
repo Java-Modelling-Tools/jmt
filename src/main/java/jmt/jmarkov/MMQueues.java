@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2007, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 package jmt.jmarkov;
@@ -59,6 +59,7 @@ import javax.swing.event.ChangeListener;
 
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.controller.Manager;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.jmarkov.Graphics.JobsDrawer;
 import jmt.jmarkov.Graphics.LogFile;
@@ -86,28 +87,25 @@ import jmt.manual.PDFViewerBuffer;
  * @author Arif Canakoglu
  *
  */
-
 public class MMQueues extends JMTFrame { 
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	private static final boolean DEBUG = false;
 
-	private boolean nonErgodic;// if the utilization is less than 1
+	private boolean nonErgodic;//if the utilization is less than 1
 	private double U; // Utilization [%]
 	private double Q; // Average customer in station
 	private double sMultiplier = 1; //service time slide bar multiplier
 	private double lambdaMultiplier = 1; //lambda slide bar multiplier
-	private int lambdaMultiplierChange = 0; // for the lambda slide bar
-	private int sMultiplierChange = 1; // for the service slide bar
+	private int lambdaMultiplierChange = 0; //for the lambda slide bar
+	private int sMultiplierChange = 1; //for the service slide bar
 
 	private int buffer; //number of place for the waiting queue
 	private int cpuNum; //number of server in the system
 	private boolean paused = false; //if the system is paused 
 
-	private Dimension initSize = new Dimension(800, 600);
+	private Dimension initSize = new Dimension(CommonConstants.MAX_GUI_WIDTH_JMCH, CommonConstants.MAX_GUI_HEIGHT_JMCH);
 
 	private JPanel sPanel;
 	private JPanel lambdaPanel;
@@ -246,7 +244,6 @@ public class MMQueues extends JMTFrame {
 		this.setLocation((screenSize.width - initSize.width) / 2, (screenSize.height - initSize.height) / 2);
 		// for setting the place of the screen
 		try {
-
 			// Simulation data panel
 			simulationP = new JPanel();
 			parametersP = new JPanel();
@@ -350,7 +347,7 @@ public class MMQueues extends JMTFrame {
 				}
 			});
 
-			this.setTitle("jMCH - Markov Chain M/M/1 Station ");
+			this.setTitle("JMCH - Markov Chain M/M/1 Station ");
 
 			this.setIconImage(jmt.gui.common.JMTImageLoader.loadImage("JMCHIcon").getImage());
 
@@ -400,6 +397,7 @@ public class MMQueues extends JMTFrame {
 				}
 			});
 			lambdaS.addMouseListener(new MouseListener() {
+
 				public void mouseClicked(MouseEvent e) {
 				}
 
@@ -457,6 +455,7 @@ public class MMQueues extends JMTFrame {
 				}
 			});
 			sS.addMouseListener(new MouseListener() {
+
 				public void mouseClicked(MouseEvent e) {
 				}
 
@@ -591,15 +590,14 @@ public class MMQueues extends JMTFrame {
 			queueMenu = new JMenu("Queue");
 
 			selectQueueRB = new AbstractAction("Select Station Type") {
-				/**
-				 * 
-				 */
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
 					// action code goes here
 					selectMethod();
 				}
+
 			};
 
 			queueMenu.add(selectQueueRB);
@@ -607,9 +605,7 @@ public class MMQueues extends JMTFrame {
 			queueMenu.addSeparator();
 			// exitMenuItem = new JMenuItem();
 			Action exitAction = new AbstractAction("Exit") {
-				/**
-				 * 
-				 */
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
@@ -617,6 +613,7 @@ public class MMQueues extends JMTFrame {
 					dispose();
 					Manager.exit(MMQueues.this);
 				}
+
 			};
 			queueMenu.add(exitAction);
 			menuB.add(queueMenu);
@@ -625,9 +622,7 @@ public class MMQueues extends JMTFrame {
 			settingsMenu = new JMenu("Settings");
 			colorsMenu = new JMenu("Colors");
 			Action queueCAction = new AbstractAction("Probability...") {
-				/**
-				 * 
-				 */
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
@@ -642,12 +637,11 @@ public class MMQueues extends JMTFrame {
 						changeColors();
 					}
 				}
+
 			};
 			colorsMenu.add(queueCAction);
 			Action queueFCAction = new AbstractAction("Queue...") {
-				/**
-				 * 
-				 */
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
@@ -662,10 +656,12 @@ public class MMQueues extends JMTFrame {
 						changeColors();
 					}
 				}
+
 			};
 			colorsMenu.add(queueFCAction);
 			colorsMenu.addSeparator();
 			Action statusCAction = new AbstractAction("Empty state...") {
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
@@ -680,12 +676,11 @@ public class MMQueues extends JMTFrame {
 						changeColors();
 					}
 				}
+
 			};
 			colorsMenu.add(statusCAction);
 			Action animCAction = new AbstractAction("Animation...") {
-				/**
-				 * 
-				 */
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
@@ -700,6 +695,7 @@ public class MMQueues extends JMTFrame {
 						changeColors();
 					}
 				}
+
 			};
 			colorsMenu.add(animCAction);
 			colorsMenu.addSeparator();
@@ -718,8 +714,9 @@ public class MMQueues extends JMTFrame {
 			// sizeMenu = new JMenu("Dimensioni");
 			sizeMenu = new JMenu("Icon size");
 
-			// Action drawSmallAction = new AbstractAction("Piccole"){
+			// Action drawSmallAction = new AbstractAction("Piccole") {
 			Action drawSmallAction = new AbstractAction("Small") {
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
@@ -731,8 +728,9 @@ public class MMQueues extends JMTFrame {
 			};
 			sizeMenu.add(drawSmallAction);
 
-			// Action drawNormalAction = new AbstractAction("Normali"){
+			// Action drawNormalAction = new AbstractAction("Normali") {
 			Action drawNormalAction = new AbstractAction("Normal") {
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
@@ -740,13 +738,12 @@ public class MMQueues extends JMTFrame {
 					dCst = new DrawNormal();
 					changeSize();
 				}
+
 			};
 			sizeMenu.add(drawNormalAction);
-			// Action drawBigAction = new AbstractAction("Grandi"){
+			// Action drawBigAction = new AbstractAction("Grandi") {
 			Action drawBigAction = new AbstractAction("Large") {
-				/**
-				 * 
-				 */
+
 				private static final long serialVersionUID = 1L;
 
 				public void actionPerformed(ActionEvent event) {
@@ -754,27 +751,25 @@ public class MMQueues extends JMTFrame {
 					dCst = new DrawBig();
 					changeSize();
 				}
+
 			};
 			sizeMenu.add(drawBigAction);
 			settingsMenu.add(sizeMenu);
 
 			menuB.add(settingsMenu);
 
-			
 			// help
 			helpMenu = new JMenu("Help");
-	
+
 			JMenuItem help = new JMenuItem();
 			help.setText("JMCH help");
 			help.setToolTipText("Show help JMCH");
-						
-			
+
 			// OLD
 			// helpMenuItem = helpMenu.add("Help");
 			// NEW
 			// @author Stefano Omini
 			help.addActionListener(new ActionListener() {
-			
 				/**
 				 * Invoked when an action occurs.
 				 */
@@ -789,12 +784,11 @@ public class MMQueues extends JMTFrame {
 						}
 					};
 					EventQueue.invokeLater(r);
-
 				}
 			});
-		
+
 			helpMenu.add(help);
-	
+
 			// end NEW
 
 			// NEW Bertoli Marco
@@ -804,7 +798,6 @@ public class MMQueues extends JMTFrame {
 			about.setText("About JMCH");
 			about.setToolTipText("About JMCH");
 			about.addActionListener(new ActionListener() {
-
 				/**
 				 * Invoked when an action occurs.
 				 */
@@ -837,9 +830,6 @@ public class MMQueues extends JMTFrame {
 
 	}
 
-	/**
-	 * 
-	 */
 	protected void changeColors() {
 		queueDrawer.setColors(emptyC, queueC, animC, gradientF);
 		queueDrawer.repaint();
@@ -847,9 +837,6 @@ public class MMQueues extends JMTFrame {
 		statiDrawer.repaint();
 	}
 
-	/**
-	 * @param evt
-	 */
 	protected void buffSStateChanged(ChangeEvent evt) {
 		buffer = buffS.getValue() - cpuNum;
 		if (buffer < 1) {
@@ -870,70 +857,69 @@ public class MMQueues extends JMTFrame {
 		buffS.setMinimum(cpuNumber + 1);
 		buffS.setValue(buffer + cpuNumber);
 		switch (queueType) {
-			case 0:
-				buffer = 0;
-				ql = new MM1Logic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier);
-				buffPanel.setVisible(false);
-				sS.setValue(S_I);
-				lambdaS.setValue(LAMBDA_I);
-				statiDrawer.updateLogic(ql);
-				queueDrawer.updateLogic(ql);
-				queueDrawer.setMaxJobs(0);
-				statiDrawer.setMaxJobs(0);
-				queueDrawer.setCpuNumber(1);
-				updateFields();
-				this.setTitle("jMCH - Markov Chain M/M/1  Station");
-				break;
+		case 0:
+			buffer = 0;
+			ql = new MM1Logic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier);
+			buffPanel.setVisible(false);
+			sS.setValue(S_I);
+			lambdaS.setValue(LAMBDA_I);
+			statiDrawer.updateLogic(ql);
+			queueDrawer.updateLogic(ql);
+			queueDrawer.setMaxJobs(0);
+			statiDrawer.setMaxJobs(0);
+			queueDrawer.setCpuNumber(1);
+			updateFields();
+			this.setTitle("JMCH - Markov Chain M/M/1  Station");
+			break;
 
-			case 1:
-				//buffer = BUFF_I;
-				ql = new MM1dLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, buffer);
-				buffPanel.setVisible(true);
-				sS.setValue(S_I);
-				lambdaS.setValue(LAMBDA_I);
-				statiDrawer.updateLogic(ql);
-				queueDrawer.updateLogic(ql);
-				queueDrawer.setMaxJobs(buffer + 1);
-				statiDrawer.setMaxJobs(buffer + 1);
-				queueDrawer.setCpuNumber(1);
-				updateFields();
-				this.setTitle("jMCH - Markov Chain M/M/1/k Finite Capacity Station");
-				break;
+		case 1:
+			//buffer = BUFF_I;
+			ql = new MM1dLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, buffer);
+			buffPanel.setVisible(true);
+			sS.setValue(S_I);
+			lambdaS.setValue(LAMBDA_I);
+			statiDrawer.updateLogic(ql);
+			queueDrawer.updateLogic(ql);
+			queueDrawer.setMaxJobs(buffer + 1);
+			statiDrawer.setMaxJobs(buffer + 1);
+			queueDrawer.setCpuNumber(1);
+			updateFields();
+			this.setTitle("JMCH - Markov Chain M/M/1/k Finite Capacity Station");
+			break;
 
-			case 2:
-				buffer = 0;
-				ql = new MMNLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, cpuNumber);
-				buffPanel.setVisible(false);
-				sS.setValue(S_I);
-				lambdaS.setValue(LAMBDA_I);
-				statiDrawer.updateLogic(ql);
-				queueDrawer.updateLogic(ql);
-				queueDrawer.setMaxJobs(0);
-				statiDrawer.setMaxJobs(0);
-				queueDrawer.setCpuNumber(cpuNumber);
-				updateFields();
-				this.setTitle("jMCH - Markov Chain M/M/" + cpuNumber + " Station");
-				break;
-			case 3:
+		case 2:
+			buffer = 0;
+			ql = new MMNLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, cpuNumber);
+			buffPanel.setVisible(false);
+			sS.setValue(S_I);
+			lambdaS.setValue(LAMBDA_I);
+			statiDrawer.updateLogic(ql);
+			queueDrawer.updateLogic(ql);
+			queueDrawer.setMaxJobs(0);
+			statiDrawer.setMaxJobs(0);
+			queueDrawer.setCpuNumber(cpuNumber);
+			updateFields();
+			this.setTitle("JMCH - Markov Chain M/M/" + cpuNumber + " Station");
+			break;
 
-				//buffer = BUFF_I;
-				ql = new MMNdLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, cpuNumber, buffer);
-				buffPanel.setVisible(true);
-				sS.setValue(S_I);
-				lambdaS.setValue(LAMBDA_I);
-				statiDrawer.updateLogic(ql);
-				queueDrawer.updateLogic(ql);
-				queueDrawer.setMaxJobs(buffer + 1);
-				statiDrawer.setMaxJobs(buffer + cpuNumber);
-				queueDrawer.setCpuNumber(cpuNumber);
-				updateFields();
-				this.setTitle("jMCH - Markov Chain M/M/" + cpuNumber + "/k Finite Capacity Station");
-				break;
+		case 3:
+			//buffer = BUFF_I;
+			ql = new MMNdLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, cpuNumber, buffer);
+			buffPanel.setVisible(true);
+			sS.setValue(S_I);
+			lambdaS.setValue(LAMBDA_I);
+			statiDrawer.updateLogic(ql);
+			queueDrawer.updateLogic(ql);
+			queueDrawer.setMaxJobs(buffer + 1);
+			statiDrawer.setMaxJobs(buffer + cpuNumber);
+			queueDrawer.setCpuNumber(cpuNumber);
+			updateFields();
+			this.setTitle("JMCH - Markov Chain M/M/" + cpuNumber + "/k Finite Capacity Station");
+			break;
 
-			default:
-				break;
+		default:
+			break;
 		}
-
 	}
 
 	public static void main(String[] args) {
@@ -951,7 +937,6 @@ public class MMQueues extends JMTFrame {
 	}
 
 	private void setLogAnalyticalResults() {
-
 		try {
 			if (ql.getMaxStates() == 0) {
 				outputTA.setAnalyticalResult(ql.mediaJobs(), ql.utilization(), ql.throughput(), ql.responseTime(), ql.getLambda(), ql.getS(), 0);
@@ -1023,7 +1008,6 @@ public class MMQueues extends JMTFrame {
 			selectQueueRB.setEnabled(false);
 
 			setLogAnalyticalResults();
-
 		}
 	}
 
@@ -1034,11 +1018,9 @@ public class MMQueues extends JMTFrame {
 	/** Auto-generated event handler method */
 	protected void pauseBActionPerformed(ActionEvent evt) {
 		if (paused) {
-
 			paused = false;
 			sim.pause();
 		} else {
-
 			paused = true;
 			sim.pause();
 			outputTA.refresh();
@@ -1057,13 +1039,11 @@ public class MMQueues extends JMTFrame {
 		lambdaL.setText(lambdaStrS + Formatter.formatNumber(lambdaS.getValue() * lambdaMultiplier, 2) + lambdaStrE);
 		setSSlider();
 		updateFields();
-
 	}
 
 	protected void sSStateChanged(ChangeEvent evt) {
 		setSSlider();
 		updateFields();
-
 	}
 
 	private void updateFields() {
@@ -1081,7 +1061,6 @@ public class MMQueues extends JMTFrame {
 			if (sim != null && ql.getLambda() > 0) {
 				sim.setLambdaZero(false);
 			}
-
 		} catch (NonErgodicException e) {
 			Q = 0.0;
 			U = 0.0;
@@ -1101,7 +1080,6 @@ public class MMQueues extends JMTFrame {
 		} else {
 			outputTA.setAnalyticalResult();
 		}
-
 	}
 
 	private TitledBorder addTitle(String title, Font f) {
@@ -1128,15 +1106,16 @@ public class MMQueues extends JMTFrame {
 		stopB.setEnabled(false);
 		pauseB.setEnabled(false);
 		selectQueueRB.setEnabled(true);
+
 		updateFields();
 	}
 
 	public void setSSlider() {
 		//sMultiplier = ql.getMaxErgodicS();
 		Dictionary<Integer, JLabel> d = sS.getLabelTable();
-		//		for (int i = 0; i < 6; i++) {
-		//			d.put(new Integer(i * 25), new JLabel("" + Formatter.formatNumber(i * sMultiplier ), 2));
-		//		}
+		//for (int i = 0; i < 6; i++) {
+		//	d.put(new Integer(i * 25), new JLabel("" + Formatter.formatNumber(i * sMultiplier ), 2));
+		//}
 		for (int i = sS.getMinimum(); i <= sS.getMaximum(); i += sS.getMajorTickSpacing()) {
 			d.put(new Integer(i), new JLabel("" + Formatter.formatNumber(i * sMultiplier, 2)));
 		}
@@ -1153,10 +1132,9 @@ public class MMQueues extends JMTFrame {
 			ld.put(new Integer(i), new JLabel("" + Formatter.formatNumber(i * lambdaMultiplier, 2)));
 		}
 
-		// for(int i = 0; i <= 4; i++){
-		// ld.put(new Integer(i * 25), new JLabel("" + Formatter.formatNumber(i
-		// * 0.25, 2) ));
-		// }
+		//for (int i = 0; i <= 4; i++) {
+		//	ld.put(new Integer(i * 25), new JLabel("" + Formatter.formatNumber(i * 0.25, 2)));
+		//}
 		lambdaS.setLabelTable(ld);
 		ql.setLambda(lambdaMultiplier * lambdaS.getValue());
 		lambdaL.setText(lambdaStrS + Formatter.formatNumber(lambdaS.getValue() * lambdaMultiplier, 2) + lambdaStrE);
@@ -1175,9 +1153,8 @@ public class MMQueues extends JMTFrame {
 						setLambdaSlider();
 						lambdaS.setValue((lambdaS.getValue() + 1) / 5);
 					}
-
 					lambdaMultiplierChange++;
-					//					System.out.println("LambdaMultiplier:" + lambdaMultiplier);
+					//System.out.println("LambdaMultiplier:" + lambdaMultiplier);
 				} else {
 					break;
 				}
@@ -1193,7 +1170,7 @@ public class MMQueues extends JMTFrame {
 						lambdaS.setValue(lambdaS.getValue() * 5);
 					}
 					lambdaMultiplierChange--;
-					//					System.out.println("LambdaMultiplier:" + lambdaMultiplier);
+					//System.out.println("LambdaMultiplier:" + lambdaMultiplier);
 				} else {
 					break;
 				}
@@ -1216,9 +1193,8 @@ public class MMQueues extends JMTFrame {
 						setSSlider();
 						sS.setValue((sS.getValue() + 1) / 5);
 					}
-
 					sMultiplierChange++;
-					//					System.out.println("SMultiplier:" + sMultiplier);
+					//System.out.println("SMultiplier:" + sMultiplier);
 				} else {
 					break;
 				}
@@ -1234,7 +1210,7 @@ public class MMQueues extends JMTFrame {
 						sS.setValue(sS.getValue() * 5);
 					}
 					sMultiplierChange--;
-					//					System.out.println("SMultiplier:" + sMultiplier);
+					//System.out.println("SMultiplier:" + sMultiplier);
 				} else {
 					break;
 				}
@@ -1271,6 +1247,6 @@ public class MMQueues extends JMTFrame {
 		} else if (selectedMethod == "mmnk") {
 			showQueue(3, methodDialog.getValidatedValue());
 		}
-
 	}
+
 }

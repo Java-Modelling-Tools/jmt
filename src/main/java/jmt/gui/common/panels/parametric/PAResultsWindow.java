@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.panels.parametric;
 
@@ -127,11 +127,10 @@ import jmt.gui.exact.table.ExactTableModel;
  *              each sink per class.
  */
 public class PAResultsWindow extends JMTFrame implements ResultsConstants, ParametricAnalysis {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-        private static final String TITLE = "Simulation Results";
+
+	private static final String TITLE = "Simulation Results";
 	public static final int SPINNER_WIDTH = 65;
 	public static final double PLOT_ZOOM_FACTOR = 0.5;
 	public static final double SPINNER_PRECISION = 0.001;
@@ -147,12 +146,12 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	public PAResultsWindow(ParametricAnalysisDefinition pad, PAResultsModel resModel, String fileName) {
 		this.results = resModel;
 		this.pad = pad;
-                this.updateTitle(fileName);
+		this.updateTitle(fileName);
 		initGUI();
 	}
 
 	/**
-	 * Initialize all gui-related stuff
+	 * Initialize all gui related stuff
 	 */
 	private void initGUI() {
 		// Sets default title, close operation and dimensions
@@ -181,8 +180,8 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		//Added by ASHANKA STOP
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_R_PER_SINK, DESCRIPTION_RESPONSETIME_SINK, results.getResponsetimePerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_SINK, results.getThroughputPerSinkMeasures());
-                addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CN, results.getFJCustomerNumberMeasures());
-                addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CN, results.getFJCustomerNumberMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
 	}
 
 	public String getXLabel() {
@@ -273,45 +272,43 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	 * @return a <code>String</code> containing the title
 	 */
 	/*private String getTableTitle() {
-	        if (pad.getType().equals(PA_TYPE_NUMBER_OF_CUSTOMERS)) {
-	            return "<html><b>Total number of jobs</b></html>";
-	        }
-	        else if (pad.getType().equals(PA_TYPE_POPULATION_MIX)) {
-	            String className = pad.getReferenceClassName();
-	            return "<html><b>Proportion of jobs from " + className + " with respect to total number of jobs</b></html>";
-	        }
-	        else if (pad.getType().equals(PA_TYPE_SERVICE_TIMES)) {
-	            ServiceTimesParametricAnalysis stpa = (ServiceTimesParametricAnalysis)pad;
-	            String className = stpa.getReferenceClassName();
-	            String stationName = stpa.getReferenceStationName();
-	            if (stpa.isSingleClass()) {
-	                return "<html><b>Proportion of service time mean value of " + className + " at " + stationName + " with respect to the initial value</b></html>";
-	            }
-	            else return "<html><b>Proportion of service time mean value at " + stationName + " with respect to the initial value</b></html>";
-	        }
-	        else if (pad.getType().equals(PA_TYPE_ARRIVAL_RATE)){
-	            ArrivalRateParametricAnalysis arpa = (ArrivalRateParametricAnalysis)pad;
-	            String className = arpa.getReferenceClassName();
-	            if (arpa.isSingleClass()) {
-	                return "<html><b>Proportion of arrival rate mean value of " + className + " with respect to the initial value</b></html>";
-	            }
-	            else return "<html><b>Proportion of arrival rate mean value with respect to the initial value</b></html>";
-	        }
-	        else if (pad.getType().equals(PA_TYPE_SEED)) {
-	            return "<html><b>Simulation number</b></html>";
-	        }
-	        else return "Not defined";
-	    }
-	    */
+		if (pad.getType().equals(PA_TYPE_NUMBER_OF_CUSTOMERS)) {
+			return "<html><b>Total number of jobs</b></html>";
+		}
+		else if (pad.getType().equals(PA_TYPE_POPULATION_MIX)) {
+			String className = pad.getReferenceClassName();
+			return "<html><b>Proportion of jobs from " + className + " with respect to total number of jobs</b></html>";
+		}
+		else if (pad.getType().equals(PA_TYPE_SERVICE_TIMES)) {
+			ServiceTimesParametricAnalysis stpa = (ServiceTimesParametricAnalysis)pad;
+			String className = stpa.getReferenceClassName();
+			String stationName = stpa.getReferenceStationName();
+			if (stpa.isSingleClass()) {
+				return "<html><b>Proportion of service time mean value of " + className + " at " + stationName + " with respect to the initial value</b></html>";
+			}
+			else return "<html><b>Proportion of service time mean value at " + stationName + " with respect to the initial value</b></html>";
+		}
+		else if (pad.getType().equals(PA_TYPE_ARRIVAL_RATE)) {
+			ArrivalRateParametricAnalysis arpa = (ArrivalRateParametricAnalysis)pad;
+			String className = arpa.getReferenceClassName();
+			if (arpa.isSingleClass()) {
+				return "<html><b>Proportion of arrival rate mean value of " + className + " with respect to the initial value</b></html>";
+			}
+			else return "<html><b>Proportion of arrival rate mean value with respect to the initial value</b></html>";
+		}
+		else if (pad.getType().equals(PA_TYPE_SEED)) {
+			return "<html><b>Simulation number</b></html>";
+		}
+		else return "Not defined";
+	}*/
 
 	/**
 	 * Inner class to create a panel that holds all the computed performance indices
 	 */
 	protected class PAMeasurePanel extends JPanel implements PlotContainer {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		protected PAResultsModel rm;
 		protected int measureIndex;
 		protected Vector values;
@@ -327,7 +324,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		protected double YMIN;
 		protected double YMAX;
 
-		public PAMeasurePanel(PAResultsModel rm, int measureIndex) {//, Vector values){ //, Vector validities) {
+		public PAMeasurePanel(PAResultsModel rm, int measureIndex) {//, Vector values) { //, Vector validities) {
 			this.rm = rm;
 			this.measureIndex = measureIndex;
 			this.values = rm.getValues(measureIndex);
@@ -355,7 +352,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			graph.drawPlot(true);
 			XMIN = graph.getPlotXMin();
 			XMAX = graph.getPlotXMax();
-			//If simulation was stopped andanly one result was calculated the XMIN andX YMAX
+			//If simulation was stopped and only one result was calculated the XMIN andX YMAX
 			//may equal, the same for YMIN and YMAX. In this case adjust the XMIN, XMAX, YMIN,
 			//and YMAX values
 			if (XMAX == XMIN) {
@@ -707,6 +704,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					}
 				}
 			});
+
 			xMin.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (xMin.getValue() instanceof Double) {
@@ -719,6 +717,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					}
 				}
 			});
+
 			xMax.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (xMax.getValue() instanceof Double) {
@@ -731,6 +730,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					}
 				}
 			});
+
 			yMin.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (yMin.getValue() instanceof Double) {
@@ -743,6 +743,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					}
 				}
 			});
+
 			yMax.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (yMax.getValue() instanceof Double) {
@@ -764,6 +765,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	 * a Plot object
 	 */
 	public interface PlotContainer {
+
 		/**
 		 * Gets the PAPlot object
 		 * @return  the plot
@@ -791,10 +793,9 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	 * A class representing a frame containing information about a single measure
 	 */
 	protected class ZoomedFrame extends JFrame implements PlotContainer {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		MeasureDefinition md;
 		int measureIndex;
 		Vector values;
@@ -823,7 +824,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		}
 
 		/**
-		 * Initializes all gui-related stuff
+		 * Initialize all gui related stuff
 		 */
 		public void initialize() {
 			JTextField samples;
@@ -882,7 +883,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			XMAX = graph.getPlotXMax();
 			YMIN = graph.getPlotYMin();
 			YMAX = graph.getPlotYMax();
-			//If simulation was stopped andanly one result was calculated the XMIN andX YMAX
+			//If simulation was stopped and only one result was calculated the XMIN andX YMAX
 			//may equal, the same for YMIN and YMAX. In this case adjust the XMIN, XMAX, YMIN,
 			//and YMAX values
 			if (XMAX == XMIN) {
@@ -1162,7 +1163,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				}
 
 				public void mouseClicked(MouseEvent e) {
-					//show a popup menù where you can zomm in and out and save
+					//show a popup menu where you can zoom in and out and save
 					//the plot to an image
 					if (SwingUtilities.isRightMouseButton(e)) {
 						PlotPopupMenu plotPopup = new PlotPopupMenu(getReference());
@@ -1170,6 +1171,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					}
 				}
 			});
+
 			xMin.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (xMin.getValue() instanceof Double) {
@@ -1184,6 +1186,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					}
 				}
 			});
+
 			xMax.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (xMax.getValue() instanceof Double) {
@@ -1198,6 +1201,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					}
 				}
 			});
+
 			yMin.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (yMin.getValue() instanceof Double) {
@@ -1212,6 +1216,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					}
 				}
 			});
+
 			yMax.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
 					if (yMax.getValue() instanceof Double) {
@@ -1227,16 +1232,16 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				}
 			});
 		}
+
 	}
 
 	/**
 	 * Inner class to show parametric analysis results
 	 */
 	protected class ValuesTable extends ExactTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		Vector values;
 		//Vector validities;
 		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
@@ -1252,7 +1257,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			setClipboardTransferEnabled(true);
 			setFillCellsEnabled(false);
 			this.setRowHeaderWidth(100);
-                        this.setRowHeight(CommonConstants.ROW_HEIGHT);
+			this.setRowHeight(CommonConstants.ROW_HEIGHT);
 		}
 
 		/**
@@ -1283,6 +1288,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 
 			return dtcr;
 		}
+
 	}
 
 	/**
@@ -1290,10 +1296,9 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	 * Columns represent the values assumed by the varying parameter.
 	 */
 	protected class ValuesTableModel extends ExactTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		private DecimalFormat hexFormat = new DecimalFormat("0.000E0");
 		private DecimalFormat threeDecFormat = new DecimalFormat("0.000");
 		private DecimalFormat twoDecFormat = new DecimalFormat("0.00");
@@ -1335,7 +1340,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 */
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			String toReturn;
-			//if the value that should be contained in the requested cell is avaible
+			//if the value that should be contained in the requested cell is available
 			if (columnIndex < values.size()) {
 				//upper bound cells
 				if (rowIndex == 1) {
@@ -1462,13 +1467,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				double value = ((Double) assumedValues.get(index)).doubleValue();
 				columnName = "ß = " + threeDec.format(value);
 			}
-			// if it is a seed parametric analysis just enumerate columns
+			//if it is a seed parametric analysis just enumerate columns
 			else if (pad.getType().equals(PA_TYPE_SEED)) {
 				columnName = Integer.toString(index);
 				return columnName;
 			}
 			return columnName;
 		}
+
 	}
 
 	/**
@@ -1477,6 +1483,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	 * images (in EPS or PNG format)
 	 */
 	protected class PlotPopupMenu extends JPopupMenu {
+
 		public JMenuItem restore;
 		public JMenuItem zoomIn;
 		public JMenuItem zoomOut;
@@ -1551,7 +1558,6 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 						}
 					}
 				}
-
 			});
 		}
 
@@ -1565,17 +1571,20 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			g.dispose();
 			return tgt;
 		}
+
 	}
 
 	/**
 	 * Custom file chooser class
 	 */
 	protected static class PlotImagesFileChooser extends JFileChooser {
+
 		private static final long serialVersionUID = 1L;
+
 		protected PlotImagesFileFilter defaultFilter;
 
 		/**
-		 * Creates a File chooser in the appropriate directory user deafault.
+		 * Creates a File chooser in the appropriate directory user default.
 		 * @param defaultFilter default file filter
 		 */
 		public PlotImagesFileChooser(PlotImagesFileFilter defaultFilter) {
@@ -1587,7 +1596,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 * Overrides default method to provide a warning if saving over an existing file
 		 */
 		public void approveSelection() {
-			// Gets the choosed file name
+			// Gets the chosen file name
 			String name = getSelectedFile().getName();
 			String parent = getSelectedFile().getParent();
 			if (getDialogType() == OPEN_DIALOG) {
@@ -1612,12 +1621,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				}
 			}
 		}
+
 	}
 
 	/**
 	 * Inner class used to create simple file filters with only extension check
 	 */
 	protected static class PlotImagesFileFilter extends javax.swing.filechooser.FileFilter {
+
 		private String extension;
 		private String description;
 
@@ -1654,9 +1665,10 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		public String getExtension() {
 			return extension;
 		}
+
 	}
-        
-        /**
+
+	/**
 	 * Updates this window title adding the file name
 	 * @param filename the file name or null to remove it.
 	 */
@@ -1667,4 +1679,5 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			setTitle(TITLE);
 		}
 	}
+
 }

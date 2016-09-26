@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.engine.QueueNet;
 
@@ -77,7 +77,7 @@ public class GlobalJobInfoList {
 	private double[] lastJobDropTimePerClass;
 	private int[] jobsPerClass;
 	private int jobs;
-	
+
 	//Variables for the System Power calculation: New Modified version.
 	double systemPowerSamples;
 
@@ -87,7 +87,7 @@ public class GlobalJobInfoList {
 	double sampling_SystemResponseSum;
 
 	double samplingClass_SystemThroughputSum[];
-	
+
 	private double responseSumWithCS;
 	private double[] responseSumPerClassWithCS;
 
@@ -131,7 +131,7 @@ public class GlobalJobInfoList {
 	// --- Methods to be called on job events ---------------------------------------------
 	/**
 	 * This method MUST be called each time a new job is added to the network
-	 * @param job identifier of created job
+	 * @param job identifier of added job
 	 */
 	public void addJob(Job job) {
 		job.resetSystemEnteringTime();
@@ -152,21 +152,20 @@ public class GlobalJobInfoList {
 		updateJobNumber(job);
 
 		//Added by ASHANKA START
-		//Moment is Jobis removed analyse and capture
 		updateSystemPower(job);
 		//Added by ASHANKA STOP
 
 		// Updates jobs number and throughput data structures
 		jobs--;
 		jobsPerClass[job.getJobClass().getId()]--;
-
 		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-		for(int index = 0; index < numClass; index++)
-			if(job.hasBeenClass(index))
+
+		for (int index = 0; index < numClass; index++)
+			if (job.hasBeenClass(index))
 				lastJobOutTimePerClass[job.getJobClass().getId()] = NetSystem.getTime();
 		lastJobOutTime = NetSystem.getTime();
 	}
-	
+
 	/**
 	 * This method MUST be called each time a job cycles in its reference station
 	 * @param job identifier of cycling job
@@ -174,27 +173,26 @@ public class GlobalJobInfoList {
 	public void recycleJob(Job job) {
 		updateResponseTime(job);
 		updateThroughput(job);
-		
 		updateJobNumber(job);
 
 		//Added by ASHANKA START
-		//Analyse the sample
 		updateSystemPower(job);
 		//Added by ASHANKA STOP
 
 		// Updates jobs number and throughput data structures
 		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-		for(int index = 0; index < numClass; index++)
-			if(job.hasBeenClass(index))
+
+		for (int index = 0; index < numClass; index++)
+			if (job.hasBeenClass(index))
 				lastJobOutTimePerClass[index] = NetSystem.getTime();
 		lastJobOutTime = NetSystem.getTime();
 
 		job.resetSystemEnteringTime();
 	}
-	
+
 	/**
 	 * This method COULD be called to notify that a JOB exists
-	 * @param job identifier
+	 * @param job identifier of existing job
 	 */
 	public void existJob(Job job) {
 		updateJobNumber(job);
@@ -202,10 +200,28 @@ public class GlobalJobInfoList {
 	}
 
 	/**
-	 * This method MUST be called each time a job is forked into a fork node
-	 * @param job identifier of new created job
+	 * This method must be called each time a job is dropped by a queue, a store or
+	 * a blocking region
+	 * @param job identifier of dropped job
 	 */
-	public void addForkedJob(Job job) {
+	public void dropJob(Job job) {
+		updateJobNumber(job);
+		// Updates dropped jobs and drop percentage measure
+		updateDropRate(job);
+
+		// Updates jobs number and drop rate data structures
+		jobs--;
+		jobsPerClass[job.getJobClass().getId()]--;
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
+
+		lastJobDropTimePerClass[job.getJobClass().getId()] = lastJobDropTime = NetSystem.getTime();
+	}
+
+	/**
+	 * This method MUST be called each time a job is produced by a transition
+	 * @param job identifier of produced job
+	 */
+	public void produceJob(Job job) {
 		updateJobNumber(job);
 		// Updates job number data structure only
 		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
@@ -214,27 +230,15 @@ public class GlobalJobInfoList {
 	}
 
 	/**
-	 * This method MUST be called each time a job is joined in a join node
-	 * @param job identifier of merged job
+	 * This method MUST be called each time a job is consumed by a transition
+	 * @param job identifier of consumed job
 	 */
-	public void removeForkedJob(Job job) {
+	public void consumeJob(Job job) {
 		updateJobNumber(job);
 		// Updates job number data structure only
 		jobs--;
 		jobsPerClass[job.getJobClass().getId()]--;
 		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-	}
-
-	/**
-	 * This method must be called each time a job is dropped by a queue or by a blocking region
-	 * @param job dropped job identifier
-	 */
-	public void dropJob(Job job) {
-		removeForkedJob(job);
-		// Updates dropped jobs and drop percentage measure
-		updateDropRate(job);
-		lastJobDropTimePerClass[job.getJobClass().getId()] = lastJobDropTime = NetSystem.getTime();
-
 	}
 
 	// ------------------------------------------------------------------------------------
@@ -246,12 +250,12 @@ public class GlobalJobInfoList {
 	 * @param measure reference to a Measure object
 	 */
 	public void analyzeResponseTime(JobClass jobClass, Measure measure) {
-		if(hasClassSwitch){
+		if (hasClassSwitch) {
 			if (jobClass != null) {
 				if (responseTimePerClassWithCS == null) {
 					responseTimePerClassWithCS = new Measure[numClass];
 				}
-	
+
 				// Sets measure
 				responseTimePerClassWithCS[jobClass.getId()] = measure;
 			} else {
@@ -262,7 +266,7 @@ public class GlobalJobInfoList {
 				if (responseTimePerClassWOCS == null) {
 					responseTimePerClassWOCS = new Measure[numClass];
 				}
-	
+
 				// Sets measure
 				responseTimePerClassWOCS[jobClass.getId()] = measure;
 			} else {
@@ -338,9 +342,9 @@ public class GlobalJobInfoList {
 	private void updateResponseTime(Job job) {
 		// with class switch
 		if (responseTimePerClassWithCS != null) {
-			// Retrives measure (if not null)
-			for(int index = 0; index < numClass; index++){
-				if(job.hasBeenClass(index)){
+			// Retrieves measure (if not null)
+			for (int index = 0; index < numClass; index++) {
+				if (job.hasBeenClass(index)) {
 					Measure m = responseTimePerClassWithCS[index];
 					if (m != null) {
 						m.update(responseSumPerClassWithCS[index], 1.0);
@@ -353,10 +357,10 @@ public class GlobalJobInfoList {
 			responseTimeWithCS.update(responseSumWithCS, 1.0);
 			responseSumWithCS = 0;
 		}
-		
+
 		// without class switch
 		if (responseTimePerClassWOCS != null) {
-			// Retrives measure (if not null)
+			// Retrieves measure (if not null)
 			Measure m = responseTimePerClassWOCS[job.getJobClass().getId()];
 			if (m != null) {
 				m.update(NetSystem.getTime() - job.getSystemEnteringTime(), 1.0);
@@ -365,9 +369,9 @@ public class GlobalJobInfoList {
 		if (responseTimeWOCS != null) {
 			responseTimeWOCS.update(NetSystem.getTime() - job.getSystemEnteringTime(), 1.0);
 		}
-		
+
 	}
-	
+
 	/**
 	 * update the times in response time with class switch
 	 * 
@@ -391,7 +395,7 @@ public class GlobalJobInfoList {
 	 */
 	private void updateJobNumber(Job job) {
 		if (jobNumPerClass != null) {
-			// Retrives measure (if not null)
+			// Retrieves measure (if not null)
 			int index = job.getJobClass().getId();
 			Measure m = jobNumPerClass[index];
 			if (m != null) {
@@ -409,10 +413,10 @@ public class GlobalJobInfoList {
 	 */
 	private void updateThroughput(Job job) {
 		if (throughputPerClass != null) {
-			// Retrives measure (if not null)
+			// Retrieves measure (if not null)
 			// new sample is the inter-departures time (1/throughput)
-			for(int index = 0; index < numClass; index++)
-				if(job.hasBeenClass(index)){
+			for (int index = 0; index < numClass; index++)
+				if (job.hasBeenClass(index)) {
 					InverseMeasure m = throughputPerClass[index];
 					if (m != null) {
 						m.update(NetSystem.getTime() - lastJobOutTimePerClass[index], 1.0);
@@ -430,7 +434,7 @@ public class GlobalJobInfoList {
 	 */
 	private void updateDropRate(Job job) {
 		if (dropRatePerClass != null) {
-			// Retrives measure (if not null)
+			// Retrieves measure (if not null)
 			int index = job.getJobClass().getId();
 			Measure m = dropRatePerClass[index];
 			if (m != null) {
@@ -476,7 +480,7 @@ public class GlobalJobInfoList {
 		sampling_SystemResponseSum   = sampling_SystemResponseSum + (NetSystem.getTime() - job.getSystemEnteringTime());
 		systemPowerSamples = systemPowerSamples +1;
 		if (systemPowerPerClass != null) {
-			// Retrives measure (if not null)
+			// Retrieves measure (if not null)
 			// new sample is the inter-departures time (1/throughput)
 			int index = job.getJobClass().getId();
 			InverseMeasure m = systemPowerPerClass[index];
@@ -508,19 +512,19 @@ public class GlobalJobInfoList {
 		// Get the identifiers of old and new classes
 		int oldClassId = job.getJobClass().getId();
 		int newClassId = newClass.getId();
-		
+
 		// Updates old class measure (if not null)
 		if (jobNumPerClass != null && jobNumPerClass[oldClassId] != null) {
 			jobNumPerClass[oldClassId].update(jobsPerClass[oldClassId], NetSystem.getTime() - lastModifyNumberPerClass[oldClassId]);
 		}
 		lastModifyNumberPerClass[oldClassId] = NetSystem.getTime();
-		
+
 		// Updates new class measure (if not null)
 		if (jobNumPerClass != null && jobNumPerClass[newClassId] != null) {
 			jobNumPerClass[newClassId].update(jobsPerClass[newClassId], NetSystem.getTime() - lastModifyNumberPerClass[newClassId]);
 		}
 		lastModifyNumberPerClass[newClassId] = NetSystem.getTime();
-		
+
 		// Switch job class
 		job.setClass(newClass);
 		jobsPerClass[oldClassId]--;

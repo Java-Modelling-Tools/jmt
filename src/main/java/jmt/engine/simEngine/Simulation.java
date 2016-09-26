@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2009, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.simEngine;
 
@@ -31,12 +31,14 @@ import jmt.engine.NodeSections.BlockingRouter;
 import jmt.engine.NodeSections.Fork;
 import jmt.engine.NodeSections.InputSection;
 import jmt.engine.NodeSections.Join;
+import jmt.engine.NodeSections.Link;
 import jmt.engine.NodeSections.OutputSection;
 import jmt.engine.NodeSections.Queue;
 import jmt.engine.NodeSections.RandomSource;
 import jmt.engine.NodeSections.Router;
 import jmt.engine.NodeSections.ServiceSection;
 import jmt.engine.NodeSections.ServiceTunnel;
+import jmt.engine.NodeSections.Store;
 import jmt.engine.NodeSections.Terminal;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.Job;
@@ -74,7 +76,7 @@ public class Simulation {
 
 	//name of the simulation
 	private String name;
-	// queueing network associated to this simulation
+	//queueing network associated to this simulation
 	private QueueNetwork network;
 
 	//classes of the system
@@ -87,7 +89,7 @@ public class Simulation {
 	private List<Connection> connections = new ArrayList<Connection>();
 	//measures requested by the simulation
 	private List<SimMeasure> measures = new ArrayList<SimMeasure>();
-	// blocking region measures requested by the simulator
+	//blocking region measures requested by the simulator
 	private List<SimMeasure> regionMeasures = new ArrayList<SimMeasure>();
 	//blocking regions
 	private List<BlockingRegion> regions = new ArrayList<BlockingRegion>();
@@ -112,12 +114,12 @@ public class Simulation {
 
 	//---------------------- XML FILES PATH --------------------------//
 	//path of the xml file containing the mva model description
-	//this attribute has been setted only if a SimLoader has been used to
+	//this attribute has been set only if a SimLoader has been used to
 	//create this Simulation object
 	String xmlModelDefPath;
 
 	//path of the xml file containing the simulation model description
-	//this attribute has been setted only if a SimLoader has been used to
+	//this attribute has been set only if a SimLoader has been used to
 	//create this Simulation object
 	String xmlSimModelDefPath;
 	//---------------------- end XML FILES PATH --------------------------//
@@ -132,14 +134,13 @@ public class Simulation {
 	private int[][] preload_initialPopulations;
 
 	//---------------------- end PRELOAD -------------------------------//
-        
-        private boolean isTerminalSimulation;
+
+	private boolean isTerminalSimulation;
 
 	//-------------------------CONSTRUCTORS-------------------------------//
 
 	//NEW
 	//@author Stefano Omini
-
 	/**
 	 * Creates a new Simulation object.
 	 * @param seed simulation seed (if -1, an automatic seed will be generated)
@@ -149,7 +150,6 @@ public class Simulation {
 	 *
 	 */
 	public Simulation(long seed, String simName, long maxSimulationTime) throws IOException {
-
 		//name of the simulation
 		name = simName;
 
@@ -163,8 +163,6 @@ public class Simulation {
 		}
 	}
 
-	//NEW
-	//@author Stefano Omini
 	/**
 	 * Creates a new Simulation object.
 	 * @param seed simulation seed (if -1, an automatic seed will be generated)
@@ -184,7 +182,6 @@ public class Simulation {
 			setRandomEngineSeed(seed);
 		}
 	}
-
 	//end NEW
 
 	//-------------------------end CONSTRUCTORS-------------------------------//
@@ -217,9 +214,9 @@ public class Simulation {
 	/**
 	 * Connects two nodes of the simulation: if a node has not been inserted in the model,
 	 * then return a LoadException.
-	 * @param start the sourcce node
+	 * @param start the source node
 	 * @param end the target node
-	 * @throws LoadException one of the nodes has not been inserted in te model
+	 * @throws LoadException one of the nodes has not been inserted in the model
 	 */
 	public void addConnection(String start, String end) throws LoadException {
 		if (isNode(start) && isNode(end)) {
@@ -277,19 +274,30 @@ public class Simulation {
 	 *
 	 * @throws LoadException if some errors occur during the region creation
 	 */
-	//	public void addRegion(String name, double maxCapacity, double[] maxCapacityPerClass, double[] classWeights, boolean[] drop, String[] stations)
-//			throws LoadException {
-//		//TODO: andrebbero aggiunti controlli (nome non univoco, jobs<0, ecc...)
-//		regions.add(new BlockingRegion(name, maxCapacity, maxCapacityPerClass, classWeights, drop, this, stations));
-//	}
-	
-	public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] classSizes, double[] classWeights, boolean[] drop, String[] stations)
+	//public void addRegion(String name, double maxCapacity, double[] maxCapacityPerClass, double[] classWeights, boolean[] drop, String[] stations)
+	//		throws LoadException {
+	//	//TODO: andrebbero aggiunti controlli (nome non univoco, jobs<0, ecc...)
+	//	regions.add(new BlockingRegion(name, maxCapacity, maxCapacityPerClass, classWeights, drop, this, stations));
+	//}
+
+	//public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] classSizes, double[] classWeights, boolean[] drop, String[] stations)
+	//		throws LoadException {
+	//	//if (true) {
+	//		regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, classSizes ,classWeights, drop, this, stations));
+	//	//} else {
+	//	//	throw new LoadException("Exception while creating a blocking region.");
+	//	//}
+	//}
+
+	public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] classSizes, double[] classWeights, boolean[] drop,
+			String[] groupNames, double[] maxCapacityPerGroup, String[] groupStrategies, List<List<Integer>> groupClassIndexLists, String[] stations)
 			throws LoadException {
-//		if (true) {
-			regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, classSizes ,classWeights, drop, this, stations));
-//		} else {
-//			throw new LoadException("Exception while creating a blocking region.");
-//		}
+		//if (true) {
+		regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, classSizes ,classWeights, drop, 
+				groupNames, maxCapacityPerGroup, groupStrategies, groupClassIndexLists, this, stations));
+		//} else {
+		//	throw new LoadException("Exception while creating a blocking region.");
+		//}
 	}
 
 	//--------------end METHODS TO ADD SIMULATION COMPONENTS---------------//
@@ -297,7 +305,7 @@ public class Simulation {
 	//------------------INITIALIZATION AND RUN------------------------------//
 
 	/**
-	 * Intilalizes all the components of this Simulation.
+	 * Initializes all the components of this Simulation.
 	 * This method assures that all the operations are
 	 * executed in the correct order.
 	 *
@@ -308,7 +316,7 @@ public class Simulation {
 
 		// Resets the job counter
 		Job.resetCounter();
-		
+
 		// creates network
 		network = new QueueNetwork("jSIM simulation: " + name);
 		// adds network to NetSystem
@@ -367,7 +375,6 @@ public class Simulation {
 
 			//NEW
 			//@author Stefano Omini
-
 			//add blocking regions
 			BlockingRegion br;
 			for (int i = 0; i < regions.size(); i++) {
@@ -416,29 +423,32 @@ public class Simulation {
 					//and a Router-type output section
 					//other not compliant sections will cause a NetException
 
-					//nodes which receive jobs from the outside must
-					//have redirecting queue behaviour turned on
+					//nodes which receive jobs from the outside must have the redirection
+					//behaviour turned on
 					NodeSection input = innerNode.getSection(NodeSection.INPUT);
 					if (input instanceof Queue) {
 						((Queue) input).redirectionTurnON(br);
-					//soften
-					}else if(input instanceof Join){
+					} else if (input instanceof Join) {
 						((Join) input).addRegion(br);
-					//end	
+					} else if (input instanceof Store) {
+						((Store) input).redirectionTurnON(br);
 					} else {
 						throw new NetException("Error in creating blocking region: " + "inner station " + innerNode.getName()
-								+ " has a not compliant input section.");
+						+ " has a not compliant input section.");
 					}
 
-					//nodes which sends jobs outside the region must have border router behaviour
+					//nodes which send jobs outside the region must have the border router
+					//behaviour turned on
 					NodeSection output = innerNode.getSection(NodeSection.OUTPUT);
 					if (output instanceof Router) {
 						((Router) output).borderRouterTurnON(br);
-                                        }else if(output instanceof Fork){
+					} else if (output instanceof Fork) {
 						((Fork)output).addRegion(br);
+					} else if (output instanceof Link) {
+						((Link) output).borderRouterTurnON(br);
 					} else {
 						throw new NetException("Error in creating blocking region: " + "inner station " + innerNode.getName()
-								+ " has a not compliant output section.");
+						+ " has a not compliant output section.");
 					}
 				}
 				if (regionMeasures.size() > 0) {
@@ -474,14 +484,14 @@ public class Simulation {
 					//if true, for each Measure sets the corresponding MeasureOutput
 					//a measure output can be a file (xml, txt, ...) which contains
 					//samples and final report of that measure
-					
+
 					new VerboseCSVMeasureOutput(ms.getMeasure(), simParameters);
 				}
 
 				network.addMeasure(ms.getMeasure());
 			}
 
-			//intialize measures
+			//initialize measures
 			for (int i = 0; i < measures.size(); i++) {
 				ms = measures.get(i);
 
@@ -505,89 +515,78 @@ public class Simulation {
 					int nodePosition = findNodePosition(ms.getNodeName());
 
 					switch (ms.getMeasureType()) {
-						case SimConstants.QUEUE_LENGTH:
-							//measures the number of jobs in the global node (=mean number of jobs present in node joblist)
-							netNodes[nodePosition].analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
-							break;
-						case SimConstants.UTILIZATION:
-							//measures the utilization of the service section (=mean number of jobs present in service section joblist)
-                                                        //Mattia Cazzoli
-                                                        if(netNodes[nodePosition].getSection(NodeSection.INPUT) instanceof Join) {
-                                                                ((Join) netNodes[nodePosition].getSection(NodeSection.INPUT)).analyzeUtilization(jClass, ms.getMeasure(), classes);
-                                                        } else {
-                                                                netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
-                                                        }
-                                                        //end
-                                                        break;
-						case SimConstants.THROUGHPUT:
-							//measures the throughput of the service section (= throughput of service section joblist)
-							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
-							break;
-						case SimConstants.RESPONSE_TIME:
-							//measures the resp time for all visits
-							netNodes[nodePosition].analyze(SimConstants.LIST_RESPONSE_TIME, jClass, ms.getMeasure());
-							break;
-						case SimConstants.RESIDENCE_TIME:
-							//measures the response time on the global node (= mean residence time in node joblist)
-							netNodes[nodePosition].analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
-							break;
-						case SimConstants.QUEUE_TIME:
-							//measures the queue time spent in the input setion (= mean residence time in input section joblist)
-							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
-							break;
-						case SimConstants.DROP_RATE:
-							// measures the drop rate of an input section
-							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(SimConstants.LIST_DROP_RATE, jClass, ms.getMeasure());
-							break;
-							
-						case SimConstants.RESPONSE_TIME_PER_SINK:
-							// measures the drop rate of an input section
-							netNodes[nodePosition].analyze(SimConstants.RESPONSE_TIME_PER_SINK, jClass, ms.getMeasure());
-							break;
-							
-						case SimConstants.THROUGHPUT_PER_SINK:
-							// measures the drop rate of an input section
-							netNodes[nodePosition].analyze(SimConstants.THROUGHPUT_PER_SINK, jClass, ms.getMeasure());
-							break;       
-							
-						case SimConstants.FCR_TOTAL_WEIGHT:
-							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, ms.getMeasure());
-							break;
-							
-						case SimConstants.FCR_MEMORY_OCCUPATION:
-							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, ms.getMeasure());
-							break;
-						
-						case SimConstants.FORK_JOIN_RESPONSE_TIME:
-							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, jClass, ms.getMeasure(), classes);
-                                                        break;
-                                                case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, jClass, ms.getMeasure(), classes);
-                                                        break;
-							
+					case SimConstants.QUEUE_LENGTH:
+						//measures the number of jobs in the global node (=mean number of jobs present in node joblist)
+						netNodes[nodePosition].analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
+						break;
+					case SimConstants.UTILIZATION:
+						//measures the utilization of the service section (=mean number of jobs present in service section joblist)
+						//Mattia Cazzoli
+						if (netNodes[nodePosition].getSection(NodeSection.INPUT) instanceof Join) {
+							((Join) netNodes[nodePosition].getSection(NodeSection.INPUT)).analyzeUtilization(jClass, ms.getMeasure(), classes);
+						} else {
+							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
+						}
+						//end
+						break;
+					case SimConstants.THROUGHPUT:
+						//measures the throughput of the output section (= throughput of output section joblist)
+						netNodes[nodePosition].getSection(NodeSection.OUTPUT).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RESPONSE_TIME:
+						//measures the response time for all visits
+						netNodes[nodePosition].analyze(SimConstants.LIST_RESPONSE_TIME, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RESIDENCE_TIME:
+						//measures the response time on the global node (= mean residence time in node joblist)
+						netNodes[nodePosition].analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
+						break;
+					case SimConstants.QUEUE_TIME:
+						//measures the queue time spent in the input section (= mean residence time in input section joblist)
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
+						break;
+					case SimConstants.DROP_RATE:
+						// measures the drop rate of the global node
+						netNodes[nodePosition].analyze(SimConstants.LIST_DROP_RATE, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RESPONSE_TIME_PER_SINK:
+						netNodes[nodePosition].analyze(SimConstants.RESPONSE_TIME_PER_SINK, jClass, ms.getMeasure());
+						break;
+					case SimConstants.THROUGHPUT_PER_SINK:
+						netNodes[nodePosition].analyze(SimConstants.THROUGHPUT_PER_SINK, jClass, ms.getMeasure());
+						break;       
+					case SimConstants.FCR_TOTAL_WEIGHT:
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, ms.getMeasure());
+						break;
+					case SimConstants.FCR_MEMORY_OCCUPATION:
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, ms.getMeasure());
+						break;
+					case SimConstants.FORK_JOIN_RESPONSE_TIME:
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, jClass, ms.getMeasure(), classes);
+						break;
+					case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, jClass, ms.getMeasure(), classes);
+						break;
 					}
 				}
 				// Global measures (new by Bertoli Marco)
 				else {
 					switch (ms.getMeasureType()) {
-						case SimConstants.SYSTEM_RESPONSE_TIME:
-							network.getJobInfoList().analyzeResponseTime(jClass, ms.getMeasure());
-							break;
-						case SimConstants.SYSTEM_THROUGHPUT:
-							network.getJobInfoList().analyzeThroughput(jClass, ms.getMeasure());
-							break;
-						case SimConstants.SYSTEM_JOB_NUMBER:
-							network.getJobInfoList().analyzeJobNumber(jClass, ms.getMeasure());
-							break;
-						case SimConstants.SYSTEM_DROP_RATE:
-							network.getJobInfoList().analyzeDropRate(jClass, ms.getMeasure());
-							break;
-						//Added by ASHANKA START
-						//Added System Power performance index as a part of the global indeces.
-						case SimConstants.SYSTEM_POWER:
-							network.getJobInfoList().analyzeSystemPower(jClass, ms.getMeasure());
-							break;
-						//Added by ASHANKA STOP
+					case SimConstants.SYSTEM_RESPONSE_TIME:
+						network.getJobInfoList().analyzeResponseTime(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_THROUGHPUT:
+						network.getJobInfoList().analyzeThroughput(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_JOB_NUMBER:
+						network.getJobInfoList().analyzeJobNumber(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_DROP_RATE:
+						network.getJobInfoList().analyzeDropRate(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_POWER:
+						network.getJobInfoList().analyzeSystemPower(jClass, ms.getMeasure());
+						break;
 					}
 				}
 			}
@@ -621,7 +620,7 @@ public class Simulation {
 	/**
 	 * Runs this simulation. If it has not been initialized, then throws an Exception.
 	 * Controls the timer for max simulation time (if it has been defined).
-	 * @throws Exception Simulaton not initialized
+	 * @throws Exception Simulation not initialized
 	 */
 	public void run() throws Exception {
 		if (initialized) {
@@ -633,8 +632,6 @@ public class Simulation {
 			//results are put into a xml file
 			XMLSimulationOutput output = new XMLSimulationOutput(this);
 			outputFile = output.writeAllMeasures();
-
-			//end NEW
 
 			NetSystem.terminate();
 		} else {
@@ -703,7 +700,6 @@ public class Simulation {
 	 * Preload jobs in a queue
 	 */
 	public void preload_station(String stationName, int[] jobs) {
-
 		//find the node
 		NetNode node = NetSystem.getNode(stationName);
 
@@ -714,12 +710,14 @@ public class Simulation {
 				if (section instanceof Queue) {
 					//preload jobs for each class
 					((Queue) section).preloadJobs(jobs);
+				} else if (section instanceof Store) {
+					//preload jobs for each class
+					((Store) section).preloadJobs(jobs);
 				}
 			} catch (NetException e) {
 				return;
 			}
 		}
-
 	}
 
 	//-------------------------end SUPPORT METHODS---------------------------------//
@@ -736,7 +734,6 @@ public class Simulation {
 
 	//NEW
 	//@author Stefano Omini
-
 	public String getXmlModelDefPath() {
 		return xmlModelDefPath;
 	}
@@ -764,7 +761,6 @@ public class Simulation {
 	public boolean hasFinished() {
 		return finished;
 	}
-
 	//end NEW
 
 	//TODO: servono per blocking
@@ -817,26 +813,25 @@ public class Simulation {
 	public void setPreload_initialPopulations(int[][] preload_initialPopulations) {
 		this.preload_initialPopulations = preload_initialPopulations;
 	}
-
 	//end NEW
 
 	public void addDistrNetNode(NetNode netNode) {
 		distrNetNodes.add(netNode);
 	}
 
-        /**
-         * @return the isTerminalSimulation
-         */
-        public boolean isIsTerminalSimulation() {
-                return isTerminalSimulation;
-        }
+	/**
+	 * @return the isTerminalSimulation
+	 */
+	public boolean isIsTerminalSimulation() {
+		return isTerminalSimulation;
+	}
 
-        /**
-         * @param isTerminalSimulation the isTerminalSimulation to set
-         */
-        public void setIsTerminalSimulation(boolean isTerminalSimulation) {
-                this.isTerminalSimulation = isTerminalSimulation;
-        }
+	/**
+	 * @param isTerminalSimulation the isTerminalSimulation to set
+	 */
+	public void setIsTerminalSimulation(boolean isTerminalSimulation) {
+		this.isTerminalSimulation = isTerminalSimulation;
+	}
 
 	//------------------- end GETTER AND SETTER ----------------------------------//
 
@@ -846,6 +841,7 @@ public class Simulation {
 	 * This is a connection between two nodes of the simulation.
 	 */
 	class Connection {
+
 		private String start;
 		private String end;
 
@@ -866,12 +862,14 @@ public class Simulation {
 		public String getStart() {
 			return start;
 		}
+
 	}
 
 	/**
-	 * Creates a measure to be estimated on the simulaton model.
+	 * Creates a measure to be estimated on the simulation model.
 	 */
 	class SimMeasure {
+
 		private String jClass;
 		private Measure measure;
 		private String nodeName;
@@ -914,12 +912,14 @@ public class Simulation {
 		public String getjClass() {
 			return jClass;
 		}
+
 	}
 
 	/**
 	 * Represents a service center in the simulation
 	 */
 	class SimNode {
+
 		private NetNode node;
 		//node sections
 		private InputSection input;
@@ -945,7 +945,7 @@ public class Simulation {
 			this.input = inSec;
 			this.service = serSec;
 			this.output = outSec;
-			//
+
 			nodeInit = true;
 
 			if (simParameters != null) {

@@ -8,7 +8,7 @@
 
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
 
  * You should have received a copy of the GNU General Public License
@@ -145,7 +145,7 @@ public class Main {
     	/*
     	System.setOut(new java.io.PrintStream(
     		    new java.io.OutputStream() {
-    		       public void write(int b){}
+    		       public void write(int b) {}
     		    }
     		 ));
     	*/
@@ -166,7 +166,7 @@ public class Main {
                     return;
                 }
                 int performanceMeasures = Integer.parseInt(args[1]);
-                if(performanceMeasures == 2) {
+                if (performanceMeasures == 2) {
                 	verbose = true;
                 }
                 if (performanceMeasures != 0 && performanceMeasures != 1 &&  performanceMeasures != 2) {
@@ -187,11 +187,11 @@ public class Main {
                 	int M = 4;
                 	int R = 4;
                 	double sparcity = 0.5;
-		        	if(args.length >= 5) {
+		        	if (args.length >= 5) {
 		              	//Manual setting M and R
 		              	M = Integer.parseInt(args[4]);
 		              	R = Integer.parseInt(args[5]);
-		              	if(args.length >= 7) {  
+		              	if (args.length >= 7) {  
 		              		sparcity = Double.parseDouble(args[6]);
 		              	}
 		        	}
@@ -201,13 +201,13 @@ public class Main {
                 }
                 /* End */
                 
-                if(args.length >= 5) {
+                if (args.length >= 5) {
                 	//Manual setting M and R
                 	int M = Integer.parseInt(args[4]);
                 	int R = Integer.parseInt(args[5]);
                 	qnm.setM(M);
                 	qnm.setR(R);
-                	if(args.length >= 7) {   
+                	if (args.length >= 7) {   
                 		int N = Integer.parseInt(args[6]);
                 		qnm.setN(N);
                 	}
@@ -294,7 +294,7 @@ public class Main {
             	total_time.pause();
             	ps.print(total_time.getInterval());
             	
-            	if(failed) {
+            	if (failed) {
             		System.exit(1);
             	}
             	//System.err.println("exited");

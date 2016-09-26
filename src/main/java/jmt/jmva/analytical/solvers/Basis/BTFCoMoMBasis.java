@@ -24,10 +24,10 @@ public class BTFCoMoMBasis extends CoMoMBasis {
 		int population_position = order.indexOf(n);		
 		int queue_added = m;	
 		
-		if(population_position == -1) throw new InternalErrorException("Invalid PopulationChangeVector:" + n);
+		if (population_position == -1) throw new InternalErrorException("Invalid PopulationChangeVector:" + n);
 		
 		//No queues added, constant is in Lambda_Y
-		if(queue_added == 0) {
+		if (queue_added == 0) {
 			return MiscFunctions.binomialCoefficient(M + R - 1 , M)*M + population_position;
 		} 
 		

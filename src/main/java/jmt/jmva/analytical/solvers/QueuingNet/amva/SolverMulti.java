@@ -67,7 +67,7 @@ public abstract class SolverMulti {
 	 * [station] [class] */
 	protected double[][] utilization;
 
-	/** queue lenght for each service station, class<br>
+	/** queue length for each service station, class<br>
 	 * [station] [class] */
 	protected double[][] queueLen;
 
@@ -83,7 +83,7 @@ public abstract class SolverMulti {
 	 *  [station] */
 	protected double[] scUtilization;
 
-	/** queue lenght of the service centers<br>
+	/** queue length of the service centers<br>
 	 *  [station] */
 	protected double[] scQueueLen;
 
@@ -241,7 +241,7 @@ public abstract class SolverMulti {
 	}
 
 	/**
-	 *  Returns the queue lenght of each class for each station
+	 *  Returns the queue length of each class for each station
 	 *  @return the queue length [center][class] matrix for the system
 	 */
 	public double[][] getQueueLen() {

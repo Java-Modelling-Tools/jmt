@@ -1,5 +1,5 @@
-/**    
- * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
  
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,12 +8,12 @@
  
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 package jmt.gui.jwat.fitting.charts;
 
@@ -83,14 +83,14 @@ public class EnlargePDF extends Plot implements MouseListener {
 		//build the count of frequencies
 		int j=0;
 		double bucket_dim = data[data.length-1] / Math.round(data.length/10);
-		for(int i=0;i<freq_y.length;i++) {
+		for (int i=0;i<freq_y.length;i++) {
 			
-			while((data[j] < (i+1)*bucket_dim) && (data[j] >= i*bucket_dim)) {
+			while ((data[j] < (i+1)*bucket_dim) && (data[j] >= i*bucket_dim)) {
 				freq_y[i]++;
 				j++;
 			}
 			
-			if(i<(freq_y.length-1))
+			if (i<(freq_y.length-1))
 				freq_y[i] /= data.length;
 			
 			//System.out.println("Bucket from "+ i*bucket_dim + " to " + (i+1)*bucket_dim + " Percentage: " + freq_y[i]);

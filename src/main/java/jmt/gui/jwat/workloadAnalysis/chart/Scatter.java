@@ -110,7 +110,7 @@ public class Scatter extends JPanel {
 		addMouseMotionListener(p);
 	}
 
-	//protected void paintComponent(Graphics g){
+	//protected void paintComponent(Graphics g) {
 	//System.err.println("paintComponent");
 	//if (g == null) return;
 	//VectorGraphics vg = VectorGraphics.create(g);

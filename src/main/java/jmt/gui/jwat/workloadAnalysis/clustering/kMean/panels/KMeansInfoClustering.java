@@ -198,12 +198,12 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 	private JPanel getListVars() {
 		/* Versione con combo box
 		comboVars = new JComboBox(model.getMatrix().getVariableNames());
-		comboVars.addActionListener(new ActionListener(){
+		comboVars.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(tableVars != null && comboVars != null){
+				if (tableVars != null && comboVars != null) {
 					System.err.println("Selezione cluster");	
 					double[] p = new double[numClust];
-					for(int i = 0; i < numClust;i++)
+					for (int i = 0; i < numClust;i++)
 						p[i] = info.infoCluster[i].percVar[comboVars.getSelectedIndex()];
 					
 					((varsDetModel)tableVars.getModel()).setNewPerc(p);
@@ -212,8 +212,8 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 					int[] angle=new int[numClust];
 			        int i;
 			        angle[0]=0;
-			        for(i=1;i<numClust;i++) angle[i]=angle[i-1]+(int)((360) * p[i-1]);
-			        for(;i<angle.length;i++) angle[i]=360;
+			        for (i=1;i<numClust;i++) angle[i]=angle[i-1]+(int)((360) * p[i-1]);
+			        for (;i<angle.length;i++) angle[i]=360;
 			        
 					pieChartVars.setAngle(angle); 
 					chartVars.repaint();
@@ -383,7 +383,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 			if (Math.sqrt(Math.pow((x - centreX), 2) + Math.pow((y - centreY), 2)) > DIAMETRO / 2) {
 				return -1;
 			}
-			//if(x-centreX==0) return 0;
+			//if (x-centreX==0) return 0;
 			angl = Math.toDegrees(Math.atan((centreY - y) / (x - centreX)));
 			if (x < centreX) {
 				angl = 180 + angl;
@@ -458,7 +458,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 		}
 
 		/**
-		 * Tells wether data contained in a specific cell(given row and column
+		 * Tells whether data contained in a specific cell(given row and column
 		 * index) is editable or not. In this case distribution column is not
 		 * editable, as editing functionality is implemented via edit button
 		 */
@@ -523,7 +523,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 		}
 
 		/**
-		 * Tells wether data contained in a specific cell(given row and column
+		 * Tells whether data contained in a specific cell(given row and column
 		 * index) is editable or not. In this case distribution column is not
 		 * editable, as editing functionality is implemented via edit button
 		 */

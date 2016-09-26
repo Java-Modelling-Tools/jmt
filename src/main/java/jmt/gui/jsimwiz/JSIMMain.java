@@ -1,20 +1,20 @@
 /**
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.jsimwiz;
 
@@ -26,7 +26,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -95,9 +94,6 @@ import jmt.manual.PDFViewerBuffer;
  */
 public class JSIMMain extends Wizard implements GuiInterface {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private static final String WINDOW_TITLE = "JSIMwiz - Textual Queueing Network Simulator";
@@ -127,9 +123,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	// end
 
 	private AbstractJMTAction FILE_NEW = new AbstractJMTAction("New") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 		{
 			setIcon("New", JMTImageLoader.getImageLoader());
@@ -141,13 +135,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			newFile();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_OPEN = new AbstractJMTAction("Open") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			setIcon("Open", JMTImageLoader.getImageLoader());
 			putValue(Action.SHORT_DESCRIPTION, "Open Saved Model");
@@ -158,13 +152,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			openFile();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_SAVE = new AbstractJMTAction("Save") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Save this model");
 			setIcon("Save", JMTImageLoader.getImageLoader());
@@ -175,13 +169,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			saveFile();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_SAVEAS = new AbstractJMTAction("Save as") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			setMnemonicKey(KeyEvent.VK_A);
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
@@ -192,13 +186,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			saveFileAs();
 		}
+
 	};
 
 	private AbstractJMTAction FILE_EXIT = new AbstractJMTAction("Exit") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Exit JSIM");
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
@@ -208,13 +202,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			close();
 		}
+
 	};
 
 	private AbstractJMTAction ACTION_SWITCH_JMVA = new AbstractJMTAction("Export to JMVA...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Export current model to JMVA...");
 			setIcon("toJMVA", JMTImageLoader.getImageLoader());
@@ -225,13 +219,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			toJMVA();
 		}
+
 	};
 
-	private AbstractJMTAction ACTION_RAND = new AbstractJMTAction("Randomize") {
-		/**
-		 * 
-		 */
+	/*private AbstractJMTAction ACTION_RAND = new AbstractJMTAction("Randomize") {
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Generate Randomized Model");
 			setIcon("Dice", JMTImageLoader.getImageLoader());
@@ -241,13 +235,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			randomizeModel();
 		}
-	};
+
+	};*/
 
 	private AbstractJMTAction SIM_START = new AbstractJMTAction("Start Simulation") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Start Simulation");
 			setIcon("Sim", JMTImageLoader.getImageLoader());
@@ -258,13 +252,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			startSimulation();
 		}
+
 	};
 
 	private AbstractJMTAction SIM_PAUSE = new AbstractJMTAction("Pause") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Pause Simulation");
 			setIcon("Pause", JMTImageLoader.getImageLoader());
@@ -277,13 +271,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			pauseSimulation();
 		}
+
 	};
 
 	private AbstractJMTAction SIM_STOP = new AbstractJMTAction("Stop") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Stop Simulation");
 			setIcon("Stop", JMTImageLoader.getImageLoader());
@@ -296,13 +290,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			stopSimulation();
 		}
+
 	};
 
 	private AbstractJMTAction OPTIONS_DEFAULTS = new AbstractJMTAction("Default parameters...") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Define default value of model's parameters");
 			setIcon("Options", JMTImageLoader.getImageLoader());
@@ -313,13 +307,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			showOptions();
 		}
+
 	};
 
 	private AbstractJMTAction HELP_SHOWHELP = new AbstractJMTAction("JSIMwiz help") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Show JSIMwiz help");
 			setIcon("Help", JMTImageLoader.getImageLoader());
@@ -329,7 +323,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 		public void actionPerformed(ActionEvent e) {
 			//showHelp(e);
-
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
@@ -340,15 +333,14 @@ public class JSIMMain extends Wizard implements GuiInterface {
 				}
 			};
 			EventQueue.invokeLater(r);
-
 		}
+
 	};
 
 	private AbstractJMTAction HELP_CREDITS = new AbstractJMTAction("About JSIMwiz") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "About JSIMwiz");
 		}
@@ -356,13 +348,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		public void actionPerformed(ActionEvent e) {
 			showCredits();
 		}
+
 	};
 
 	public AbstractJMTAction SHOW_RESULTS = new AbstractJMTAction("Results") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Show simulation results");
 			setIcon("Results", JMTImageLoader.getImageLoader());
@@ -494,7 +486,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	 */
 	private void saveFileAs() {
 		int status = modelLoader.saveModel(model, this, null);
-
 		if (status == ModelLoader.FAILURE) {
 			showErrorMessage(modelLoader.getFailureMotivation());
 		} else if (status == ModelLoader.SUCCESS) {
@@ -520,7 +511,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		if (SIM_STOP.isEnabled()) {
 			stopSimulation();
 		}
-		// Disposes resultswindow and this
+		// Disposes results window and this
 		if (resultsWindow != null) {
 			resultsWindow.dispose();
 		}
@@ -547,7 +538,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	public void launchToJMVA() {
 		// New Converter by Bertoli Marco
 		ExactModel output = new ExactModel();
-		List res = ModelConverter.convertJSIMtoJMVA(model, output);
+		List<String> res = ModelConverter.convertJSIMtoJMVA(model, output);
 		ExactWizard jmva = new ExactWizard(output);
 		// If problems are found, shows warnings
 		if (res.size() > 0) {
@@ -555,8 +546,8 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 	}
 
-	private void randomizeModel() {
-	}
+	/*private void randomizeModel() {
+	}*/
 
 	private void startSimulation() {
 		//if simulation is not in pause state
@@ -588,7 +579,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			//pw.setToJMVAConversion(false);
 			pw.updateProblemsShown(false);
 			if (!mc.isEverythingOkNormal()) {
-				WindowListener wl = pw.getWindowListeners()[0];
 				pw.show();
 			} else {
 				pw.setVisible(false);
@@ -624,7 +614,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			SHOW_RESULTS.setEnabled(false);
 			// Removes previous ResultsWindow
 			//if (parametricResultsWindow != null) {
-			//    parametricResultsWindow.dispose();
+			//	parametricResultsWindow.dispose();
 			//}
 			if (progressWindow == null) {
 				progressWindow = new PAProgressWindow(this, SIM_START, SIM_PAUSE, SIM_STOP, model.getParametricAnalysisModel());
@@ -659,7 +649,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		SIM_STOP.setEnabled(stop);
 		SIM_PAUSE.setEnabled(pause);
 	}
-
 
 	/**
 	 * Shows JSIM Credits
@@ -723,7 +712,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	private JMTMenuBar createMenuBar() {
 		JMTMenuBar menuBar = new JMTMenuBar(JMTImageLoader.getImageLoader());
 		AbstractJMTAction[] menus = new AbstractJMTAction[] {
-		//File menu
+				//File menu
 				new MenuAction("File", new AbstractJMTAction[] { FILE_NEW, FILE_OPEN, FILE_SAVE, FILE_SAVEAS, null, FILE_EXIT }),
 				//ActionMenu
 				new MenuAction("Action", new AbstractJMTAction[] { ACTION_NEXT, ACTION_PREV, null, ACTION_SWITCH_JMVA }),
@@ -792,15 +781,15 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	 * Shows the panel to solve a problem
 	 */
 	public void showRelatedPanel(int problemType, int problemSubType, Object relatedStation, Object relatedClass) {
-		// if it is a no class error show the class panel
+		//if it is a no class error show the class panel
 		if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_CLASSES_ERROR)) {
 			tabbedPane.setSelectedIndex(0);
 		}
-		// if it is a no station error show the station panel
+		//if it is a no station error show the station panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_STATION_ERROR)) {
 			tabbedPane.setSelectedIndex(1);
 		}
-		// if it is a link error show the link panel
+		//if it is a link error show the link panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.STATION_LINK_ERROR)) {
 			tabbedPane.setSelectedIndex(2);
 		}
@@ -808,7 +797,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ALL_FORWARD_STATION_ARE_SINK_ERROR)) {
 			tabbedPane.setSelectedIndex(2);
 		}
-		// if it is a routing error show the link panel
+		//if it is a routing error show the link panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ROUTING_ERROR)) {
 			AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
 			//set temp to show routing section panel
@@ -823,10 +812,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INCONSISTENT_MEASURE_ERROR)) {
 			tabbedPane.setSelectedIndex(4);
 		}
-		//if a measure was defined more than once ask to delete the redundant measure
-		else if ((problemSubType == ModelChecker.DUPLICATE_MEASURE_ERROR) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			int k = JOptionPane.showConfirmDialog(null, "Delete all redundant performance indices?\n", "Redundant performance indices found",
-					JOptionPane.ERROR_MESSAGE);
+		//if a measure was defined more than once ask to remove all redundant measures
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.DUPLICATE_MEASURE_ERROR)) {
+			int k = JOptionPane.showConfirmDialog(null, "Delete all redundant performance indices?\n",
+					"Redundant performance indices found", JOptionPane.ERROR_MESSAGE);
 			if (k == 0) {
 				mc.deleteRedundantMeasure();
 			}
@@ -834,20 +823,18 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		//if it is a reference station error show the reference station panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.REFERENCE_STATION_ERROR)) {
 			tabbedPane.setSelectedIndex(5);
-		} else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
-			JOptionPane.showMessageDialog(this, "One or more join found but no fork. Please, remove al join or add a fork");
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
+			JOptionPane.showMessageDialog(this, "A join was found but no fork. Please remove all joins or add a fork.",
+					"Error", JOptionPane.ERROR_MESSAGE);
 			tabbedPane.setSelectedIndex(1);
 		}
-
 		//used only in JMVA conversion
-		else if ((problemSubType == ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING)) {
 			String name = getModel().getStationName(relatedStation);
-			int k = JOptionPane
-					.showConfirmDialog(
-							null,
-							"According to BCMP theorem hypothesis each station must have the same queue\nstrategy for each class, but different per class queue strategy were found at "
-									+ name + ".\nDo you want to edit " + name + " queue strategy?\n\n", "Mixed queue strategy found",
-							JOptionPane.WARNING_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis each station must have the same queue\nstrategy "
+					+ "for each class, but different per class queue strategy were found at " + name + ".\nDo you want to edit " + name
+					+ " queue strategy?\n\n", "Mixed queue strategy found", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
 				//set the station parameter panel to show the queue section
@@ -856,12 +843,11 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			}
 		}
 		//used only in JMVA conversion
-		else if ((problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING)) {
 			String name = getModel().getStationName(relatedStation);
-			int k = JOptionPane.showConfirmDialog(null,
-					"According to BCMP theorem hypothesis, a FCFS server must have the same service times for each class,\nbut at " + name
-							+ " the service strategy is mixed, i.e. both load dependent and independent were found.\nDo you want to edit " + name
-							+ " service parameters?\n\n", "Mixed service strategies found", JOptionPane.WARNING_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, a FCFS server must have the same service times "
+					+ "for each class,\nbut at " + name + " the service strategy is mixed, i.e. both load dependent and independent were found.\n"
+					+ "Do you want to edit " + name + " service parameters?\n\n", "Mixed service strategies found", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
 				//set the station parameter panel to show the service section
@@ -870,12 +856,11 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			}
 		}
 		//used only in JMVA conversion
-		else if ((problemSubType == ModelChecker.BCMP_FCFS_EXPONENTIAL_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_EXPONENTIAL_WARNING)) {
 			String name = getModel().getStationName(relatedStation);
-			int k = JOptionPane.showConfirmDialog(null,
-					"According to BCMP theorem hypothesis, in a FCFS server all the service time distribution\nmust be exponential, but at " + name
-							+ " at least one non exponential distribution was found.\nDo you want to edit " + name + " service parameters?\n\n",
-					"Non exponential distribution in FCFS server", JOptionPane.WARNING_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, in a FCFS server all the service time distribution\n"
+					+ "must be exponential, but at " + name + " at least one non exponential distribution was found.\nDo you want to edit " + name
+					+ " service parameters?\n\n", "Non exponential distribution in FCFS server", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
 				//set the station parameter panel to show the service section
@@ -884,13 +869,12 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			}
 		}
 		//used only in JMVA conversion
-		else if ((problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING)) {
 			String name = getModel().getStationName(relatedStation);
-			int k = JOptionPane
-					.showConfirmDialog(
-							null,
-							"According to BCMP theorem hypothesis, in a FCFS server all the per class service time mean values\nmust be the same. If the service strategies are load dependent the mean value in each range\nhas to be the same for each class.\nDo you want to edit "
-									+ name + " service parameters?\n\n", "Non exponential distribution in FCFS server", JOptionPane.WARNING_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, in a FCFS server all the per class service time mean "
+					+ "values\nmust be the same. If the service strategies are load dependent the mean value in each range\nhas to be the same for "
+					+ "each class.\nDo you want to edit " + name + " service parameters?\n\n", "Non exponential distribution in FCFS server",
+					JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
 				//set the station parameter panel to show the queue section
@@ -900,45 +884,49 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 		//used only in JMVA conversion
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING)) {
-			int k = JOptionPane
-					.showConfirmDialog(
-							null,
-							"Convert all non state independent routing strategies to Random Routing?\n\nAccording to the BCMP theorem the routing probabilities must be independent from the state of the model.\nChoosing ok all non state independent routing strategies inside a station will be converted to Random Routing.\nDo you want to convert all non state independent routing strategies to Random Routing?\n\n",
-							"BCMP hypothesis not verified", JOptionPane.ERROR_MESSAGE);
+			int k = JOptionPane.showConfirmDialog(null, "Convert all non state independent routing strategies to Random Routing?\n\nAccording to the "
+					+ "BCMP theorem the routing probabilities must be independent from the state of the model.\nChoosing ok all non state independent "
+					+ "routing strategies inside a station will be converted to Random Routing.\nDo you want to convert all non state independent "
+					+ "routing strategies to Random Routing?\n\n", "BCMP hypothesis not verified", JOptionPane.ERROR_MESSAGE);
 			if (k == 0) {
 				mc.setAllStateDependentRoutingStrategyToRandomRouting();
 			}
 		}
-
 		//if it is a no backward link warning show the link panel
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.NO_BACKWARD_LINK_WARNING)) {
 			tabbedPane.setSelectedIndex(2);
-		} else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING)) {
-			String message = "Check parametric analysis model?\n\nThe parametric analysis model previously defined had become inconsistent with the \nsimulation model. It will be automatically modified when simulation will be started.\nDo you want to autocorrect and check parametric analysis panel?\n\n";
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING)) {
+			String message = "Check parametric analysis model?\n\nThe parametric analysis model previously defined had become inconsistent with the\n"
+					+ "simulation model. It will be automatically modified when simulation will be started.\nDo you want to autocorrect and check "
+					+ "parametric analysis panel?\n\n";
 			int k = JOptionPane.showConfirmDialog(null, message, "Inconsistent parametric analysis model", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				model.getParametricAnalysisModel().checkCorrectness(true);
 				tabbedPane.setSelectedIndex(8);
-				SimulationPanel simPanel = (SimulationPanel) tabbedPane.getComponentAt(6);
-				//model.getParametricAnalysisModel().setModified(true);
 			}
-		} else if ((problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_NO_MORE_AVAIBLE_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
-			String message = "Parametric analysis was set, but no parametric analysis is now avaible,\nsince the simulation model was changed. It is only possible to execute normal simulation.\nDo you wish to continue anyway?\n\n";
-			int k = JOptionPane.showConfirmDialog(null, message, "Parametric analysis not avaible", JOptionPane.WARNING_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING)) {
+			String message = "Parametric analysis was set, but no parametric analysis is now available,\nsince the simulation model was changed. "
+					+ "It is only possible to execute normal simulation.\nDo you wish to continue anyway?\n\n";
+			int k = JOptionPane.showConfirmDialog(null, message, "Parametric analysis not available", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
 				model.setParametricAnalysisEnabled(false);
 				model.setParametricAnalysisModel(null);
 			}
-		} else if ((problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING) && (problemType == ModelChecker.WARNING_PROBLEM)) {
-			JOptionPane.showMessageDialog(this, "A fork was found but no join. Please check the topology");
-		} else if ((problemSubType == ModelChecker.EMPTY_BLOCKING_REGION) && (problemType == ModelChecker.ERROR_PROBLEM)) {
-			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n", "Empty finite capacity regions found",
-					JOptionPane.ERROR_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)) {
+			JOptionPane.showMessageDialog(this, "A fork was found but no join. Please check the topology.", "Warning",
+					JOptionPane.WARNING_MESSAGE);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.EMPTY_BLOCKING_REGION)) {
+			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n",
+					"Empty finite capacity regions found", JOptionPane.ERROR_MESSAGE);
 			if (k == 0) {
 				mc.deleteEmptyBlockingRegions();
 			}
-		} else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING)) {
-                        System.out.println("HERE");
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING)) {
 			tabbedPane.setSelectedIndex(7);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_PERF_IND_WITH_NO_SINK_ERROR)) {
@@ -962,21 +950,21 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	 * @param parw the Parametric Analysis Results Window to be set
 	 */
 	/*public void setPAResultsWindow(PAResultsWindow parw) {
-	    parametricResultsWindow = parw;
-	    parw.addWindowListener(new WindowAdapter() {
-	        public void windowClosing(WindowEvent e) {
-	            resultsButton.setSelected(false);
-	        }
-	    });
+		parametricResultsWindow = parw;
+		parw.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				resultsButton.setSelected(false);
+			}
+		});
 	}*/
 
 	/**
 	 * Sets the availability of results in case of parametric analysis
 	 *
-	 * @param avaible true if they are avaible
+	 * @param available true if they are available
 	 */
-	/*public void setPAResultsAvaible(boolean avaible) {
-	    resultsButton.setEnabled(avaible);
+	/*public void setPAResultsAvailable(boolean available) {
+		resultsButton.setEnabled(available);
 	}*/
 
 	/**
@@ -991,7 +979,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	//-------------------------------------- end Francesco D'Aquino --------------------------------
 
 	/**
-	 * Shows a panel with catched exception
+	 * Shows a panel with caught exception
 	 * @param e exception to be shown
 	 */
 	public void handleException(Exception e) {
@@ -1014,8 +1002,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	public boolean checkForSave(String msg) {
 		// Checks if there's an old graph to save
 		if (model != null && model.toBeSaved()) {
-			int resultValue = JOptionPane.showConfirmDialog(this, msg, "JSIM - Warning", JOptionPane.YES_NO_CANCEL_OPTION,
-					JOptionPane.WARNING_MESSAGE);
+			int resultValue = JOptionPane.showConfirmDialog(this, msg, "JSIM - Warning", JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (resultValue == JOptionPane.YES_OPTION) {
 				saveFile();
 				return true;
@@ -1032,7 +1019,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	}
 
 	/**
-	 * Overrides default Solve button pression...
+	 * Overrides default Solve button press...
 	 * @see Wizard
 	 */
 	@Override
@@ -1045,13 +1032,13 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		//Ignore		
 	}
 
-        @Override
-        public String getFileName() {
-                if(currentFile != null) {
-                        return currentFile.getName();
-                } else {
-                        return null;
-                }
-        }
+	@Override
+	public String getFileName() {
+		if (currentFile != null) {
+			return currentFile.getName();
+		} else {
+			return null;
+		}
+	}
 
 }

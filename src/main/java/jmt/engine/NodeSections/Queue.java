@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.NodeSections;
 
@@ -24,9 +24,9 @@ import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategy;
 import jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy;
-import jmt.engine.NetStrategies.QueuePutStrategies.SJFStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
+import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobClassList;
@@ -79,7 +79,7 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class Queue extends InputSection {
 
-	/** Property Identifier: infinite. */
+	/** Property Identifier: infinite.*/
 	public static final int PROPERTY_ID_INFINITE = 0x0101;
 	/** Property Identifier: drop.*/
 	public static final int PROPERTY_ID_DROP = 0x0102;
@@ -107,13 +107,16 @@ public class Queue extends InputSection {
 	private boolean[] drop;
 	private boolean[] block;
 
-	//the JobInfoList of the owner NetNode (use to control the number of jobs in
-	//case of finite queue)
-	private JobInfoList nodeJobsList;
-        //the JobInfoList used for Fork nodes
-        private JobInfoList FJList;
+	private JobClassList jobClasses;
 
-	/** This jobinfolist should be used instead of jobsList to support Processor Sharing */
+	//the JobInfoList of the owner NetNode
+	private JobInfoList nodeJobsList;
+	//the JobInfoList of the global Network
+	private GlobalJobInfoList netJobsList;
+	//the JobInfoList used for Fork nodes
+	private JobInfoList FJList;
+
+	/** This JobInfoList should be used instead of jobsList to support Processor Sharing */
 	private JobInfoList queueJobInfoList;
 
 	//number of dropped jobs
@@ -148,7 +151,6 @@ public class Queue extends InputSection {
 	 * false otherwise.
 	 */
 	public Queue(int size, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[]) {
-
 		//OLD
 		//super();
 
@@ -156,11 +158,11 @@ public class Queue extends InputSection {
 		//auto = false, otherwise when a JOB message is received,
 		//the corresponding Job object is automatically added to
 		//JobInfoList
-
 		super(false);
 		//end NEW
 
 		if (size == -1) {
+			this.size = -1;
 			infinite = true;
 		} else {
 			this.size = size;
@@ -170,13 +172,6 @@ public class Queue extends InputSection {
 			this.getStrategy = new FCFSstrategy();
 		} else {
 			this.getStrategy = getStrategy;
-			// NEW author ANASTASIA
-			//if (putStrategy[0] == new WeightedPriority()){
-			//	this.getStrategy = new WPstrategy();
-			//}
-			//else if (putStrategy[0] == new SJFStrategy()){
-			//	this.getStrategy = new SJFGetStrategy();
-			//}
 		}
 		this.putStrategy = putStrategy;
 		// Uses putstrategy.length to estimate number of classes. it is a bit unclean but we are forced for compatibility.
@@ -271,9 +266,6 @@ public class Queue extends InputSection {
 	 */
 	public void redirectionTurnON(BlockingRegion region) {
 		//sets blocking region properties
-		//soften
-//		System.out.println("In QUEUE:" + this.getOwnerNode().getName());
-		//end
 		redirectionON = true;
 		myRegion = region;
 		regionInputStation = myRegion.getInputStation();
@@ -297,451 +289,404 @@ public class Queue extends InputSection {
 		return redirectionON;
 	}
 
-	//end NEW
-
 	@Override
-	public boolean isEnabled(int id) throws jmt.common.exception.NetException {
+	public boolean isEnabled(int id) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_INFINITE:
-				return infinite;
-			default:
-				return super.isEnabled(id);
+		case PROPERTY_ID_INFINITE:
+			return infinite;
+		default:
+			return super.isEnabled(id);
 		}
 	}
 
 	@Override
-	public int getIntSectionProperty(int id) throws jmt.common.exception.NetException {
+	public int getIntSectionProperty(int id) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_SIZE:
-				return size;
-			case PROPERTY_ID_WAITING_REQUESTS:
-				return waitingRequests.size();
-				//NEW
-				//@author Stefano Omini
-			case PROPERTY_ID_DROPPED_JOBS:
-				return droppedJobs;
-				//end NEW
-			default:
-				return super.getIntSectionProperty(id);
+		case PROPERTY_ID_SIZE:
+			return size;
+		case PROPERTY_ID_WAITING_REQUESTS:
+			return waitingRequests.size();
+			//NEW
+			//@author Stefano Omini
+		case PROPERTY_ID_DROPPED_JOBS:
+			return droppedJobs;
+			//end NEW
+		default:
+			return super.getIntSectionProperty(id);
 		}
 	}
 
 	@Override
-	public int getIntSectionProperty(int id, JobClass jobClass) throws jmt.common.exception.NetException {
+	public int getIntSectionProperty(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_WAITING_REQUESTS:
-				return waitingRequests.size(jobClass);
-				//NEW
-				//@author Stefano Omini
-			case PROPERTY_ID_DROPPED_JOBS:
-				return droppedJobsPerClass[jobClass.getId()];
-				//end NEW
-			default:
-				return super.getIntSectionProperty(id, jobClass);
+		case PROPERTY_ID_WAITING_REQUESTS:
+			return waitingRequests.size(jobClass);
+		case PROPERTY_ID_DROPPED_JOBS:
+			return droppedJobsPerClass[jobClass.getId()];
+		default:
+			return super.getIntSectionProperty(id, jobClass);
 		}
 	}
 
 	@Override
-	public Object getObject(int id) throws jmt.common.exception.NetException {
+	public Object getObject(int id) throws NetException {
 		switch (id) {
-			case PROPERTY_ID_GET_STRATEGY:
-				return getStrategy;
-			case PROPERTY_ID_PUT_STRATEGY:
-				return putStrategy;
-			default:
-				return super.getObject(id);
+		case PROPERTY_ID_GET_STRATEGY:
+			return getStrategy;
+		case PROPERTY_ID_PUT_STRATEGY:
+			return putStrategy;
+		default:
+			return super.getObject(id);
 		}
-	}
-
-	public boolean hasInfiniteQueue() {
-		return infinite;
 	}
 
 	@Override
 	protected void nodeLinked(NetNode node) {
 		// Sets netnode dependent properties
-		waitingRequests = new LinkedJobInfoList(getJobClasses().size(), true);
+		jobClasses = getJobClasses();
+		waitingRequests = new LinkedJobInfoList(jobClasses.size(), true);
 		if (putStrategy == null) {
-			putStrategy = new QueuePutStrategy[getJobClasses().size()];
-			for (int i = 0; i < getJobClasses().size(); i++) {
+			putStrategy = new QueuePutStrategy[jobClasses.size()];
+			for (int i = 0; i < putStrategy.length; i++) {
 				putStrategy[i] = new TailStrategy();
 			}
 		}
 
-		// TODO the following line its not clean. The correct behavior should be implemented without this hack.
+		// TODO the following line is not clean. The correct behaviour should be implemented without this hack.
 		try {
 			if (getOwnerNode().getSection(SERVICE) instanceof PSServer) {
-				jobsList = new PSJobInfoList(getJobClasses().size(), true);
+				jobsList = new PSJobInfoList(jobClasses.size(), true);
 				queueJobInfoList = ((PSJobInfoList) jobsList).getInternalList();
 			}
 		} catch (NetException ex) {
 			logger.error(ex);
 		}
 		if (jobsList == null) {
-			jobsList = new LinkedJobInfoList(getJobClasses().size(), true);
+			jobsList = new LinkedJobInfoList(jobClasses.size(), true);
 		}
 		if (queueJobInfoList == null) {
 			queueJobInfoList = jobsList;
 		}
 
-		if (!infinite) {
-			droppedJobs = 0;
-			droppedJobsPerClass = new int[getJobClasses().size()];
-			for (int i = 0; i < droppedJobsPerClass.length; i++) {
-				droppedJobsPerClass[i] = 0;
-			}
+		droppedJobs = 0;
+		droppedJobsPerClass = new int[jobClasses.size()];
+		for (int i = 0; i < droppedJobsPerClass.length; i++) {
+			droppedJobsPerClass[i] = 0;
 		}
 
 		//retrieves the job info list of the owner node
 		nodeJobsList = getOwnerNode().getJobInfoList();
-
 	}
 
 	/** This method implements a generic finite/infinite queue
 	 * @param message message to be processed.
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
 	@Override
-	protected int process(NetMessage message) throws jmt.common.exception.NetException {
+	protected int process(NetMessage message) throws NetException {
 		Job job;
+
 		switch (message.getEvent()) {
 
-			case NetEvent.EVENT_START:
+		case NetEvent.EVENT_START:
 
-				//EVENT_START
-				//If there are jobs in queue, the first (chosen using the specified
-				//get strategy) is forwarded and coolStart becomes false.
+			//EVENT_START
+			//If there are jobs in queue, the first (chosen using the specified
+			//get strategy) is forwarded and coolStart becomes false.
 
-				if (queueJobInfoList.size() > 0) {
-					//the first job is forwarded to service section
-					forward(getStrategy.get(queueJobInfoList));
-					coolStart = false;
-				}
+			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
+			if (queueJobInfoList.size() > 0) {
+				//the first job is forwarded to service section
+				forward(getStrategy.get(queueJobInfoList));
+				coolStart = false;
+			}
+			break;
 
-				break;
+		case NetEvent.EVENT_JOB:
 
-			case NetEvent.EVENT_ACK:
+			//EVENT_JOB
+			//If the queue is a redirecting queue, jobs arriving from the outside of
+			//the blocking region must be redirected to the region input station
+			//
+			//Otherwise the job is processed as usual.
+			//
+			//If coolStart is true, the queue is empty, so the job is added to the job list
+			//and immediately forwarded to the next section. An ack is sent and coolStart is
+			//set to false.
+			//
+			//If the queue is not empty, it should be distinguished between finite/infinite queue.
+			//
+			//If the queue is finite, checks the size: if it is not full the job is put into the
+			//queue and an ack is sent. Else, if it is full, checks the owner node: if the
+			//source node is the owner node of this section, an ack is sent and a waiting
+			//request is created. If the source is another node the waiting request is created
+			//only if drop is false, otherwise an ack is sent but the job is rejected.
+			//
+			//If the queue is infinite, the job is put into the queue and an ack is sent
 
-				//EVENT_ACK
-				//If there are waiting requests, the first is taken (if the source node of this request
-				//is the owner node of this section, an ack message is sent).
-				//The job contained is put into the queue using the specified put strategy.
-				//
-				//At this point, if there are jobs in queue, the first is taken (using the
-				//specified get strategy) and forwarded. Otherwise, if there are no jobs, coolStart
-				//is set true.
+			job = message.getJob();
 
-				// if there is a waiting request send ack to the first node
-				//(note that with infinite queue there are no waitinq requests)
-				if (waitingRequests.size() != 0) {
-					WaitingRequest wr;
-					wr = (WaitingRequest) waitingRequests.removeFirst();
+			//----REDIRECTION BEHAVIOUR----------//
+			if (isRedirectionON()) {
 
-					// If the source is not the owner node sends ack if blocking is enabled. Otherwise 
-					// ack was already sent.
-					if (!isMyOwnerNode(wr.getNode()) && block[wr.getJob().getJobClass().getId()]) {
-						send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSection(), wr.getNode());
-					}
+				NetNode source = message.getSource();
+				boolean fromTheInside = myRegion.belongsToRegion(source);
 
-					//the class ID of this job
-					int c = wr.getJob().getJobClass().getId();
-					//the job is put into the queue according to its own class put strategy
-					putStrategy[c].put(wr.getJob(), queueJobInfoList, message.getSourceSection(), message.getSource(), this);
-				}
+				if (!fromTheInside) {
+					//this message has arrived from the outside of the blocking region
+					if ((source != regionInputStation)) {
+						//the external source is not the input station
+						//the message must be redirected to the input station,
+						//without processing it
 
-				// if there is at least one job, sends it
-				if (queueJobInfoList.size() > 0) {
-					// Gets job using a specific strategy and sends job
-					Job jobSent = getStrategy.get(queueJobInfoList);
-					forward(jobSent);
-				} else {
-					// else set coolStart to true
-					coolStart = true;
-
-				}
-				break;
-
-			case NetEvent.EVENT_JOB:
-
-				//EVENT_JOB
-				//If the queue is a redirecting queue, jobs arriving from the outside of
-				//the blocking region must be redirected to the region input station
-				//
-				//Otherwise the job is processed as usual.
-				//
-				//If coolStart is true, the queue is empty, so the job is added to the job list
-				//and immediately forwarded to the next section. An ack is sent and coolStart is
-				//set to false.
-				//
-				//If the queue is not empty, it should be distinguished between finite/infinite queue.
-				//
-				//If the queue is finite, checks the size: if it is not full the job is put into the
-				//queue and an ack is sent. Else, if it is full, checks the owner node: if the
-				//source node is the owner node of this section, an ack is sent and a waiting
-				//request is created. If the source is another node the waiting request is created
-				//only if drop is false, otherwise an ack is sent but the job is rejected.
-				//
-				//If the queue is infinite, the job is put into the queue and an ack is sent
-
-				job = message.getJob();
-
-				//----REDIRECTION BEHAVIOUR----------//
-				if (isRedirectionON()) {
-
-					NetNode source = message.getSource();
-					boolean fromTheInside = myRegion.belongsToRegion(source);
-
-					//the first time input station is not known yet
-					if (regionInputStation == null) {
-						regionInputStation = myRegion.getInputStation();
-					}
-
-					if (!fromTheInside) {
-						//this message has arrived from the outside of the blocking region
-						if ((source != regionInputStation)) {
-							//the external source is not the input station
-							//the message must be redirected to the input station,
-							//without processing it
-
-							//redirects the message to the inputStation
-							redirect(NetEvent.EVENT_JOB, job, 0.0, NodeSection.INPUT, regionInputStation);
-							//send a ack to the source
-							send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-
-							return MSG_PROCESSED;
-						}
-					}
-				}
-				//----END REDIRECTION BEHAVIOUR-------//
-
-				//
-				//two possible cases:
-				//1 - the queue is a generic queue (redirectionOn == false)
-				//2 - the queue is a redirecting queue, but the message has arrived
-				//from the inside of the region or from the inputStation:
-				//in this case the redirecting queue acts as a normal queue
-				//
-				//therefore in both cases the behaviour is the same
-				//
-
-				// Check if there is still capacity.
-				// <= size because the arriving job has not been inserted in Queue
-				// job list but has been inserted in NetNode job list !!
-				if (infinite || nodeJobsList.size() <= size) {
-					// Queue is not full. Okay.
-                                        
-                                        // If parent node is a fork node adds job to FJ info list
-                                        if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-                                                // Removes job from global node list
-                                                if (FJList != null) {
-                                                        FJList.add(new JobInfo(job));
-                                                }
-                                        }
-
-					// If coolStart is true, this is the first job received or the
-					// queue was empty: this job is sent immediately to the next
-					// section and coolStart set to false.
-					if (coolStart) {
-						// No jobs in queue: Refresh jobsList and sends job (do not use put strategy, because queue is empty)
-						queueJobInfoList.add(new JobInfo(job));
-						//forward without any delay
-						forward(queueJobInfoList.removeFirst().getJob());
-
-						coolStart = false;
-					} else {
-						putStrategy[job.getJobClass().getId()].put(job, queueJobInfoList, message.getSourceSection(), message.getSource(), this);
-					}
-					//sends an ACK backward
-					send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-				} else {
-					// Queue is full. Now we use an additional queue or drop.
-
-					// if the job has been sent by the owner node of this queue section
-					if (isMyOwnerNode(message.getSource())) {
+						//redirects the message to the inputStation
+						redirect(job, 0.0, NodeSection.INPUT, regionInputStation);
+						//send a ack to the source
 						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-
-						waitingRequests.add(new WaitingRequest(message.getSource(), message.getSourceSection(), job));
+						break;
 					}
-					// otherwise if job has been sent by another node
-					else if (!drop[job.getJobClass().getId()]) {
-						// if drop is true reject the job, else add the job to waitingRequests
-						waitingRequests.add(new WaitingRequest(message.getSource(), message.getSourceSection(), job));
-						//if blocking is disabled, sends ack otherwise router of the previous node remains busy
-						if (!block[job.getJobClass().getId()]) {
-							send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-						}
-					} else {
-						// if drop, send ack event to source
-						droppedJobs++;
-						droppedJobsPerClass[job.getJobClass().getId()]++;
+				}
+			}
+			//----END REDIRECTION BEHAVIOUR-------//
 
-						// Removes job from global jobInfoList - Bertoli Marco
-						getOwnerNode().getQueueNet().getJobInfoList().dropJob(job);
+			//
+			//two possible cases:
+			//1 - the queue is a generic queue (redirectionOn == false)
+			//2 - the queue is a redirecting queue, but the message has arrived
+			//from the inside of the region or from the inputStation:
+			//in this case the redirecting queue acts as a normal queue
+			//
+			//therefore in both cases the behaviour is the same
+			//
 
-						//after arriving to this section, the job has been inserted in the job
-						//lists of both node section and node.
-						//If drop = true, the job must be removed if the queue is full.
-						//Using the "general" send method, however, the dropped job was not removed
-						//from the job info list of node section and of node, then it was
-						//sent later, after receiving one or more ack.
+			// Check if there is still capacity.
+			// <= size because the arriving job has not been inserted in Queue
+			// job list but has been inserted in NetNode job list !!
+			if (infinite || nodeJobsList.size() <= size) {
+				// Queue is not full. Okay.
 
-						sendAckAfterDrop(job, 0.0, message.getSourceSection(), message.getSource());
-
-						//if the queue is inside a blocking region, the jobs
-						//counter must be decreased
-						if (isRedirectionON()) {
-							//decrease the number of jobs
-							myRegion.decreaseOccupation(job.getJobClass());
-							//sends an event to the input station (which may be blocked)
-							send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);
-							//Since now for blocking regions the job dropping is handles manually at node 
-							//level hence need to create events with Jobs ..Modified for FCR Bug Fix
-						}
+				// If parent node is a fork node adds job to FJ info list
+				if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+					// Removes job from global node list
+					if (FJList != null) {
+						FJList.add(new JobInfo(job));
 					}
 				}
 
-				break;
-                            
-                        case NetEvent.EVENT_JOIN:
-                                Job j = (Job)message.getData();
+				// If coolStart is true, this is the first job received or the
+				// queue was empty: this job is sent immediately to the next
+				// section and coolStart set to false.
+				if (coolStart) {
+					// No jobs in queue: Refresh jobsList and sends job (do not use put strategy, because queue is empty)
+					queueJobInfoList.add(new JobInfo(job));
+					// forward without any delay
+					forward(queueJobInfoList.removeFirst().getJob());
 
-                                JobInfo jData = null;
-                                if(FJList != null){
-                                        jData = FJList.lookFor(j);
-                                }
-                                if(jData != null && FJList != null){
-                                        FJList.remove(jData);
-                                        this.getOwnerNode().getQueueNet().getJobInfoList().updateResponseSum(jData);
-                                }
-                                break;
+					coolStart = false;
+				} else {
+					putStrategy[job.getJobClass().getId()].put(job, queueJobInfoList, this);
+				}
+				// sends an ACK backward
+				send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+			} else {
+				// Queue is full. Now we use an additional queue or drop.
 
-			default:
-				return MSG_NOT_PROCESSED;
+				// if the job has been sent by the owner node of this queue section
+				if (isMyOwnerNode(message.getSource())) {
+					send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+
+					waitingRequests.add(new WaitingRequest(message.getSource(), message.getSourceSection(), job));
+				}
+				// otherwise if job has been sent by another node
+				else if (!drop[job.getJobClass().getId()]) {
+					// if drop is true reject the job, else add the job to waitingRequests
+					waitingRequests.add(new WaitingRequest(message.getSource(), message.getSourceSection(), job));
+					// if blocking is disabled, sends ack otherwise router of the previous node remains busy
+					if (!block[job.getJobClass().getId()]) {
+						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+					}
+				} else {
+					// if drop, send ack event to source
+					droppedJobs++;
+					droppedJobsPerClass[job.getJobClass().getId()]++;
+
+					// Removes job from global jobInfoList - Bertoli Marco
+					netJobsList.dropJob(job);
+
+					//after arriving to this section, the job has been inserted in the job
+					//lists of both node section and node.
+					//If drop = true, the job must be removed if the queue is full.
+					//Using the "general" send method, however, the dropped job was not removed
+					//from the job info list of node section and of node, then it was
+					//sent later, after receiving one or more ack.
+
+					sendAckAfterDrop(job, 0.0, message.getSourceSection(), message.getSource());
+
+					//if the queue is inside a blocking region, the jobs
+					//counter must be decreased
+					if (isRedirectionON()) {
+						//decrease the number of jobs
+						//myRegion.decreaseOccupation(job.getJobClass());
+						myRegion.decreaseOccupation(job);
+						//sends an event to the input station (which may be blocked)
+						send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);
+						//Since now for blocking regions the job dropping is handles manually at node 
+						//level hence need to create events with Jobs ..Modified for FCR Bug Fix
+					}
+				}
+			}
+			break;
+
+		case NetEvent.EVENT_ACK:
+
+			//EVENT_ACK
+			//If there are waiting requests, the first is taken (if the source node of this request
+			//is the owner node of this section, an ack message is sent).
+			//The job contained is put into the queue using the specified put strategy.
+			//
+			//At this point, if there are jobs in queue, the first is taken (using the
+			//specified get strategy) and forwarded. Otherwise, if there are no jobs, coolStart
+			//is set true.
+
+			// if there is a waiting request send ack to the first node
+			//(note that with infinite queue there are no waiting requests)
+			if (waitingRequests.size() != 0) {
+				WaitingRequest wr;
+				wr = (WaitingRequest) waitingRequests.removeFirst();
+
+				// If the source is not the owner node sends ack if blocking is enabled. Otherwise 
+				// ack was already sent.
+				if (!isMyOwnerNode(wr.getNode()) && block[wr.getJob().getJobClass().getId()]) {
+					send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSection(), wr.getNode());
+				}
+
+				//the class ID of this job
+				int c = wr.getJob().getJobClass().getId();
+				//the job is put into the queue according to its own class put strategy
+				putStrategy[c].put(wr.getJob(), queueJobInfoList, this);
+			}
+
+			// if there is at least one job, sends it
+			if (queueJobInfoList.size() > 0) {
+				// Gets job using a specific strategy and sends job
+				Job jobSent = getStrategy.get(queueJobInfoList);
+				forward(jobSent);
+			} else {
+				// else set coolStart to true
+				coolStart = true;
+			}
+			break;
+
+		case NetEvent.EVENT_JOIN:
+			Job j = (Job)message.getData();
+
+			JobInfo jData = null;
+			if (FJList != null) {
+				jData = FJList.lookFor(j);
+			}
+			if (jData != null && FJList != null) {
+				FJList.remove(jData);
+				netJobsList.updateResponseSum(jData);
+			}
+			break;
+
+		case NetEvent.EVENT_JOB_RELEASE:
+			break;
+
+		case NetEvent.EVENT_JOB_FINISH:
+			break;
+
+		case NetEvent.EVENT_STOP:
+			break;
+
+		default:
+			return MSG_NOT_PROCESSED;
 		}
+
 		return MSG_PROCESSED;
 	}
 
-	private void forward(Job job) throws jmt.common.exception.NetException {
+	private void forward(Job job) throws NetException {
 		sendForward(job, 0.0);
 	}
 
 	/**
 	 * Gets the total number of dropped jobs
-	 * @return the total number of dropped jobs, -1 otherwise
+	 * @return the total number of dropped jobs
 	 */
 	public int getDroppedJobs() {
-		if (!infinite) {
-			return droppedJobs;
-		} else {
-			return -1;
-		}
+		return droppedJobs;
 	}
 
 	/**
 	 * Gets the numbers of dropped jobs for each class
-	 * @return the numbers of dropped jobs for each class, null otherwise
+	 * @return the numbers of dropped jobs for each class
 	 */
 	public int[] getDroppedJobsPerClass() {
-		if (!infinite) {
-			return droppedJobsPerClass;
-		} else {
-			return null;
-		}
-
-	}
-
-	/**	 * Gets the number of dropped jobs for the specified class
-	 * @return the number of dropped jobs for the specified class, -1 otherwise
-	 */
-	public int getDroppedJobPerClass(int jobClass) {
-		if (!infinite) {
-			return droppedJobsPerClass[jobClass];
-		} else {
-			return -1;
-		}
-
+		return droppedJobsPerClass;
 	}
 
 	/**
-	 * Adds the specified numbers of jobs for each class
-	 * @param preload_jobPerClass the numbers of jobs for each class
+	 * Gets the number of dropped jobs for the specified class
+	 * @return the number of dropped jobs for the specified class
 	 */
-	public void preloadJobs(int[] preload_jobPerClass) {
+	public int getDroppedJobPerClass(int classIndex) {
+		return droppedJobsPerClass[classIndex];
+	}
 
-		//total jobs
-		int totJobs = 0;
-
-		//number of classes
-		int classNumber = preload_jobPerClass.length;
-
-		//jobs that have not been inserted yet
-		int[] residualClassJobs = new int[classNumber];
-
-		//first of all computes the total number of jobs to be added
-		for (int c = 0; c < classNumber; c++) {
-			totJobs += preload_jobPerClass[c];
-			residualClassJobs[c] = preload_jobPerClass[c];
+	/**
+	 * Preloads the specified numbers of jobs for each class
+	 * @param jobsPerClass the specified numbers of jobs for each class
+	 * @throws NetException
+	 */
+	public void preloadJobs(int[] jobsPerClass) throws NetException {
+		int totalJobs = 0;
+		for (int i = 0; i < jobsPerClass.length; i++) {
+			totalJobs += jobsPerClass[i];
 		}
-
-		RandomEngine randomEng = RandomEngine.makeDefault();
-		int randomClassIndex;
-
-		JobClassList jobClasses = getJobClasses();
-
-		while (totJobs > 0) {
-			//jobs of different classes must be mixed.. use random numbers
-
-			randomClassIndex = (int) Math.floor((randomEng.raw()) * classNumber);
-
-			if (residualClassJobs[randomClassIndex] > 0) {
-				//other jobs to be added
-				Job newJob = new Job(jobClasses.get(randomClassIndex));
-				JobInfo newJobInfo = new JobInfo(newJob);
-				
-				// Signals to node jobInfoList otherwise measures and Load dependent code are wrong
-				this.getOwnerNode().getJobInfoList().add(newJobInfo);
-				// Adds this job to the queue jobinfolist
-				queueJobInfoList.add(newJobInfo);
-                                try {
-                                        // If parent node is a fork node adds job to FJ info list
-                                        if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-                                                // Removes job from global node list
-                                                FJList.add(newJobInfo);
-                                        }
-                                } catch (NetException ex) {
-                                        
-                                }
-
-				//job has been added: decrease class e total counters
-				residualClassJobs[randomClassIndex]--;
-				totJobs--;
-				
-				// Signals to global jobInfoList new added job - Bertoli Marco
-				this.getOwnerNode().getQueueNet().getJobInfoList().addJob(newJob);
-				
-				
+		Job[] jobPermutation = new Job[totalJobs];
+		int index = 0;
+		for (int i = 0; i < jobsPerClass.length; i++) {
+			for (int j = 0; j < jobsPerClass[i]; j++) {
+				jobPermutation[index] = new Job(jobClasses.get(i));
+				index++;
 			}
-
-			//else no other jobs of this class must be added
-
-			//continue
-
 		}
 
-	}  
-        
-        @Override
-        public void analyze(int name, JobClass jc, Measure measurement, JobClass[] classes){
-		if(FJList == null){
-			FJList = new LinkedJobInfoList(classes.length, true);
+		RandomEngine randomEngine = RandomEngine.makeDefault();
+		for (int i = jobPermutation.length - 1; i > 0; i--) {
+			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+			Job job = jobPermutation[i];
+			jobPermutation[i] = jobPermutation[j];
+			jobPermutation[j] = job;
 		}
-		switch(name){
-			case 0:
-				FJList.analyzeResponseTime(jc, measurement);
-				break;
-                        case 1:
-                                FJList.analyzeQueueLength(jc, measurement);
-				break;
+
+		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
+		for (int i = 0; i < jobPermutation.length; i++) {
+			Job job = jobPermutation[i];
+			JobInfo jobInfo = new JobInfo(job);
+			putStrategy[job.getJobClass().getId()].put(job, jobsList, this);
+			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+				FJList.add(jobInfo);
+			}
+			nodeJobsList.add(jobInfo);
+			netJobsList.addJob(job);
 		}
 	}
+
+	@Override
+	public void analyze(int name, JobClass jc, Measure measurement, JobClass[] classes) {
+		if (FJList == null) {
+			FJList = new LinkedJobInfoList(classes.length, true);
+		}
+		switch (name) {
+		case 0:
+			FJList.analyzeResponseTime(jc, measurement);
+			break;
+		case 1:
+			FJList.analyzeQueueLength(jc, measurement);
+			break;
+		}
+	}
+
 }

@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.xml;
 
@@ -50,6 +50,7 @@ import org.w3c.dom.Element;
  *         Time: 13.47.51
  */
 public class XMLArchiver implements GuiXMLConstants {
+
 	/**
 	 * Saves JMT Archive storing informations for simulator and for the gui
 	 * @param archiveName Handler to the archive to be created
@@ -109,7 +110,7 @@ public class XMLArchiver implements GuiXMLConstants {
 	/**
 	 * Returns a new Archive XML Document used to store simulation and GUI data
 	 * @param model data structure
-	 * @param documentName name of created document (to be setted into root element)
+	 * @param documentName name of created document (to be set into root element)
 	 * @return created Document
 	 */
 	public static Document getDocument(CommonModel model, String documentName) {
@@ -122,7 +123,7 @@ public class XMLArchiver implements GuiXMLConstants {
 			return null;
 		}
 		Document archiveDoc = docBuilder.newDocument();
-		// Retrives documents from XMLWriter and GuiXMLWriter
+		// Retrieves documents from XMLWriter and GuiXMLWriter
 		Document sim = XMLWriter.getDocument(model, documentName);
 		Document jmodel;
 		Document results = null;
@@ -145,7 +146,7 @@ public class XMLArchiver implements GuiXMLConstants {
 		// Adds sim and jmodel root elements to Archive root
 		root.appendChild(archiveDoc.importNode(sim.getElementsByTagName(XMLConstantNames.XML_DOCUMENT_ROOT).item(0), true));
 		if (jmodel != null) {
-			root.appendChild(archiveDoc.importNode(jmodel.getElementsByTagName(XML_DOCUMENT_ROOT).item(0), true)); 
+			root.appendChild(archiveDoc.importNode(jmodel.getElementsByTagName(XML_DOCUMENT_ROOT).item(0), true));
 		}
 		// Adds simulation results idf present
 		if (results != null) {
@@ -185,7 +186,7 @@ public class XMLArchiver implements GuiXMLConstants {
 	 * @return Element of corresponding results informations
 	 */
 	public static Element getResultsFromArchiveDocument(Document archive) {
-		// Retrives "results" node and returns it
+		// Retrieves "results" node and returns it
 		if (archive.getElementsByTagName(XMLResultsConstants.XML_DOCUMENT_ROOT).getLength() > 0) {
 			return (Element) archive.getElementsByTagName(XMLResultsConstants.XML_DOCUMENT_ROOT).item(0);
 		} else {

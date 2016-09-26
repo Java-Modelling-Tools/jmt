@@ -1,20 +1,20 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.gui.common.editors;
 
@@ -80,10 +80,9 @@ import jmt.gui.common.routingStrategies.RoutingStrategy;
  * Desc: Added new defaults control of a Random CheckBox.
  */
 public class DefaultsEditor extends JDialog implements CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Constants used to select which parameters should be shown
 	 */
@@ -150,10 +149,9 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	// --- Actions performed by buttons and EventListeners ---------------------------------------------
 	// When okay button is pressed
 	protected AbstractAction okayAction = new AbstractAction("OK") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Closes this window and saves all changes");
 		}
@@ -166,10 +164,9 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 
 	// When cancel button is pressed
 	protected AbstractAction cancelAction = new AbstractAction("Cancel") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Closes this window discarding all changes");
 		}
@@ -182,10 +179,9 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 
 	// When reset button is pressed
 	protected AbstractAction resetAction = new AbstractAction("Reset") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Reverts all values to original ones");
 		}
@@ -210,6 +206,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	 * Parameters are set when JTextField loses focus or ENTER key is pressed.
 	 */
 	protected class inputListener implements KeyListener, FocusListener {
+
 		/**
 		 * Update values of Defaults fields
 		 */
@@ -240,7 +237,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	}
 
 	protected inputListener stringListener = new inputListener();
-	// Vector that contains every compoent in which a StringListener has been registered
+	// Vector that contains every component in which a StringListener has been registered
 	// It is used as the focus listener can do "random" things while reverting values
 	// to original ones
 	protected Vector<JTextField> registeredStringListener = new Vector<JTextField>();
@@ -356,7 +353,11 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 			tmpMap.put(STATION_TYPE_ROUTER, STATION_NAMES.get(STATION_TYPE_ROUTER));
 			tmpMap.put(STATION_TYPE_FORK, STATION_NAMES.get(STATION_TYPE_FORK));
 			tmpMap.put(STATION_TYPE_JOIN, STATION_NAMES.get(STATION_TYPE_JOIN));
+			tmpMap.put(STATION_TYPE_LOGGER, STATION_NAMES.get(STATION_TYPE_LOGGER));
+			tmpMap.put(STATION_TYPE_CLASSSWITCH, STATION_NAMES.get(STATION_TYPE_CLASSSWITCH));
 			tmpMap.put(STATION_TYPE_TASKSEMAPHORE, STATION_NAMES.get(STATION_TYPE_TASKSEMAPHORE));
+			//tmpMap.put(STATION_TYPE_PLACE, STATION_NAMES.get(STATION_TYPE_PLACE));
+			//tmpMap.put(STATION_TYPE_TRANSITION, STATION_NAMES.get(STATION_TYPE_TRANSITION));
 			addInputCombo("Type", "stationType", station_panel, tmpMap);
 			stationpanelnum++;
 		}
@@ -394,7 +395,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		stationpanelnum++;
 
 		// Number of jobs created for each fork link
-		addInputSpinner("Fork degree", "forkJobsPerLink", station_panel, 1, null);
+		addInputSpinner("Fork Degree", "forkJobsPerLink", station_panel, 1, null);
 		stationpanelnum++;
 
 		SpringUtilities.makeCompactGrid(station_panel, stationpanelnum, 2, //rows, cols
@@ -423,7 +424,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Maximum duration
 		addInputInfSpinner("Maximum duration (sec)", "simulationMaxDuration", sim_panel, MINIMUM_TIME, -1);
 		simpanelnum++;
-		
+
 		// Maximum simulated time
 		addInputInfSpinner("Maximum simulated time", "maxSimulatedTime", sim_panel, MINIMUM_TIME, -1);
 		simpanelnum++;
@@ -541,7 +542,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		final JSpinner spinner = new JSpinner();
 		label.setLabelFor(spinner);
 		spinner.setValue(Defaults.getAsInteger(property));
-		if(tooltip != null) {
+		if (tooltip != null) {
 			spinner.setToolTipText(tooltip);
 		}
 		// Sets maximum size to minimal one, otherwise springLayout will stretch this
@@ -670,6 +671,9 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		Map<String, String> distributions = new TreeMap<String, String>();
 		distributions.put(CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.QUEUE_STRATEGY_FCFS);
 		distributions.put(CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.QUEUE_STRATEGY_LCFS);
+		distributions.put(CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.QUEUE_STRATEGY_RAND);
+		distributions.put(CommonConstants.QUEUE_STRATEGY_SJF, CommonConstants.QUEUE_STRATEGY_SJF);
+		distributions.put(CommonConstants.QUEUE_STRATEGY_LJF, CommonConstants.QUEUE_STRATEGY_LJF);
 		addInputCombo(text, property, cont, distributions);
 	}
 
@@ -861,7 +865,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		cont.add(label);
 		cont.add(internal);
 	}
-	
+
 	//Added the Random Checkbox and a spinner.
 	protected void addInputRandomSpinner(String text, final String booleanProperty, final String valueProperty, Container cont,
 			final int minvalue) {
@@ -929,4 +933,5 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		cont.add(label);
 		cont.add(internal);
 	}
+
 }

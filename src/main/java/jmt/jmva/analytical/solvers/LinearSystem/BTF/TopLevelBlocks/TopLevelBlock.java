@@ -85,7 +85,7 @@ public abstract class TopLevelBlock extends ComponentBlock {
 		//The starting position of the next macro block to be added
 		Position block_position = position.copy();
 		
-		for(int h = 0; h < number_of_macro_blocks; h++) {	
+		for (int h = 0; h < number_of_macro_blocks; h++) {	
 			
 			//add new macro block
 			macro_blocks[h] = newMacroBlock(block_position.copy(), h);
@@ -164,19 +164,19 @@ public abstract class TopLevelBlock extends ComponentBlock {
 	protected int findMacroBlock(int position) throws BTFMatrixErrorException {
 
 		//Invalid position passed:
-		if(position < 0) throw new  BTFMatrixErrorException("Trying to find macro block containing index: " + position);
+		if (position < 0) throw new  BTFMatrixErrorException("Trying to find macro block containing index: " + position);
 		
 		int block = 0;
 		
 		//Linear Search to locate containing MacroBlock //TODO binary search
-		for(int i = 1; i < macro_blocks.length; i++) {
-			if(position >= (macro_blocks[i].getStartingRow())) {
+		for (int i = 1; i < macro_blocks.length; i++) {
+			if (position >= (macro_blocks[i].getStartingRow())) {
 				block++;
 			}
 		}
 		
 		//Invalid positon passed, size of block overshot!
-		if(block >=  macro_blocks.length) throw new  BTFMatrixErrorException("Ran out of macro blocks! position = " + position);
+		if (block >=  macro_blocks.length) throw new  BTFMatrixErrorException("Ran out of macro blocks! position = " + position);
 		
 		return block;
 	}
@@ -202,21 +202,21 @@ public abstract class TopLevelBlock extends ComponentBlock {
 	@Override
 	public void multiply(BigRational[] result) throws BTFMatrixErrorException {
 		
-		for(int i = 0; i < macro_blocks.length; i++) {
+		for (int i = 0; i < macro_blocks.length; i++) {
 			macro_blocks[i].multiply(result);
 		}
 	}
 	
 	@Override
 	public void solve(BigRational[] rhs) throws BTFMatrixErrorException, OperationNotSupportedException, InconsistentLinearSystemException, InternalErrorException {
-		for(int i = 0; i < macro_blocks.length; i++) {
+		for (int i = 0; i < macro_blocks.length; i++) {
 			macro_blocks[i].solve(rhs);
 		}
 	}
 	
 	@Override
 	public void printRow2(int row) {
-		for(int i = 0; i < macro_blocks.length; i++) {
+		for (int i = 0; i < macro_blocks.length; i++) {
 			macro_blocks[i].printRow2(row);
 		}
 	}	

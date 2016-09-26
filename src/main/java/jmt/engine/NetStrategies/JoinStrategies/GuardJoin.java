@@ -19,7 +19,7 @@ public class GuardJoin extends JoinStrategy{
         public GuardJoin(String[] classes, String[] numbers) {
                 required = new Integer[numbers.length];
                 req = 0;
-                for(int i = 0; i < numbers.length; i++) {
+                for (int i = 0; i < numbers.length; i++) {
                         required[i] = Integer.parseInt(numbers[i]);
                         req += Integer.parseInt(numbers[i]);
                 }

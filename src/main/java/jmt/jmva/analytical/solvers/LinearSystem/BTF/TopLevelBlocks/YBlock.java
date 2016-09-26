@@ -55,7 +55,7 @@ public class YBlock extends ATopLevelBlock {
 	
 	@Override
 	public void printRow2(int row) {
-		for(int i = 0; i < sec_macro_blocks.length; i++) {
+		for (int i = 0; i < sec_macro_blocks.length; i++) {
 			sec_macro_blocks[i].printRow2(row);
 		}
 		super.printRow2(row);		

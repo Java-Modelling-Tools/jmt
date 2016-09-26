@@ -1,37 +1,36 @@
-/**    
-  * Copyright (C) 2006, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-  * This program is free software; you can redistribute it and/or modify
-  * it under the terms of the GNU General Public License as published by
-  * the Free Software Foundation; either version 2 of the License, or
-  * (at your option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
 
-  * This program is distributed in the hope that it will be useful,
-  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
 
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
- *
+ * 
  * This is the parameter that should be passed to the Hyper Exponential
  * distribution.
- *
+ * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
  * @author Bertoli Marco - Debugged as it did not worked 8/9/2005
- *
+ * 
  */
-
 public class HyperExpPar extends AbstractParameter implements Parameter {
 
 	private double mean;
@@ -81,7 +80,7 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	 * @param lambda1 double containing the value of lambda for the first exponential.
 	 * @param lambda2 double containing the value of lambda for the second exponential.
 	 *
-	 * @throws IncorrectDistributionParameterException if p is not betwen zero and one and if lambda1 and lambda2 are not both greater than zero.
+	 * @throws IncorrectDistributionParameterException if p is not between zero and one and if lambda1 and lambda2 are not both greater than zero.
 	 *
 	 */
 	public HyperExpPar(double p, double lambda1, double lambda2) throws IncorrectDistributionParameterException {
@@ -117,7 +116,7 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	/**
 	 * Tests the parameters for the constructor requiring p, lambda1 and lambda2.
 	 *
-	 * @throws IncorrectDistributionParameterException if p is not betwen zero and one or if lambda1 and labda2 are not both greater than zero.
+	 * @throws IncorrectDistributionParameterException if p is not between zero and one or if lambda1 and labda2 are not both greater than zero.
 	 *
 	 */
 	private void testParameters1() throws IncorrectDistributionParameterException {
@@ -135,9 +134,9 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	/**
 	 * It verify if the parameter is correct. For the hyper exponential
 	 * distribution, the parameter is right if the mean calculated is gtz,
-	 * the variance is gtz, p probability is betwen 0 and 1 and both the lambda value are gtz.
+	 * the variance is gtz, p probability is between 0 and 1 and both the lambda value are gtz.
 	 *
-	 * @return boolean, indicating wether the parameter is correct or not.
+	 * @return boolean, indicating whether the parameter is correct or not.
 	 *
 	 */
 

@@ -31,11 +31,11 @@ public class SimEvent implements Cloneable {
 	static final int SEND = 1;
 	//used to let an entity know that its waiting time has finished
 	static final int HOLD_DONE = 2;
-	//this event creates dinamically a new entity
+	//this event creates dynamically a new entity
 	static final int CREATE = 3;
 
 	// Constructors
-	/** Contructor, create a blank event. Useful for fetching events
+	/** Constructor, create a blank event. Useful for fetching events
 	 * using methods such as <tt>SimEntity.simWait(ev)</tt>.
 	 */
 	public SimEvent() {
