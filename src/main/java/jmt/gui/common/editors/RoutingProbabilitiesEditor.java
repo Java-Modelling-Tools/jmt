@@ -49,15 +49,11 @@ import jmt.gui.common.routingStrategies.RoutingStrategy;
  */
 public class RoutingProbabilitiesEditor extends JSplitPane implements CommonConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Map<Object, Double> routingProbs;
 	private StationDefinition stations;
 	private Object stationKey;
 	private Object classKey;
-    private ClassDefinition classes;
 
 	private WarningScrollTable rtPane;
 	private JTextArea descrTextPane = new JTextArea("");
@@ -94,45 +90,35 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	}
 
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-		/*        if (stationKey==null||classKey==null||sd==null) {
-		            emptyPane();
-		            return;
-		        }
-		*/
-        RoutingStrategy rs = (RoutingStrategy) sd.getRoutingStrategy(stationKey, classKey);
+		RoutingStrategy rs = (RoutingStrategy) sd.getRoutingStrategy(stationKey, classKey);
 		if (rs == null) {
 			emptyPane();
 		} else {
 			descrTextPane.setText(rs.getDescription());
-			/*if (rs.getValues() == null) {
-				emptyPane();
-			} else {
+			if (rs instanceof ProbabilityRouting) {
 				createDetails(rs, sd, stationKey, classKey);
-			}*/
-            if (rs instanceof ProbabilityRouting) {
-                createDetails(rs, sd, stationKey, classKey);
-            } else if (rs instanceof LoadDependentRouting) {
-                JComponent LDRoutingPanel = new JPanel();
-                LDRoutingPanel.setBorder(new TitledBorder(new EtchedBorder(), "LD Routing Options"));
-                if (sd.getForwardConnections(stationKey) != null && sd.getForwardConnections(stationKey).size() != 0) {
-                    JButton editLoadDependentRoutingButton = new JButton("Edit LD Routing..");
-                    HashMap<String, Object> ldParameters = new HashMap<String, Object>();
-                    ldParameters.put("ClassDefinition",cs);
-                    ldParameters.put("StationDefinition",sd);
-                    ldParameters.put("stationKey",stationKey);
-                    ldParameters.put("classKey",classKey);
-                    String stationName = sd.getStationName(stationKey);
-                    String className = cs.getClassName(classKey);
-                    ldParameters.put("title","Editing for [Class] "+className + " for [Station] " + stationName + " Load Dependent Routing ...");
-                    editLoadDependentRoutingButton.addActionListener(new EditLoadDependentRoutingListener(ldParameters));
-                    LDRoutingPanel.add(editLoadDependentRoutingButton);
-                } else {
-                    LDRoutingPanel = rtPane;
-                }
-                setRightComponent(LDRoutingPanel);
-            } else {
-               emptyPane();
-            }
+			} else if (rs instanceof LoadDependentRouting) {
+				JComponent LDRoutingPanel = new JPanel();
+				LDRoutingPanel.setBorder(new TitledBorder(new EtchedBorder(), "LD Routing Options"));
+				if (sd.getForwardConnections(stationKey) != null && sd.getForwardConnections(stationKey).size() != 0) {
+					JButton editLoadDependentRoutingButton = new JButton("Edit LD Routing..");
+					HashMap<String, Object> ldParameters = new HashMap<String, Object>();
+					ldParameters.put("ClassDefinition",cs);
+					ldParameters.put("StationDefinition",sd);
+					ldParameters.put("stationKey",stationKey);
+					ldParameters.put("classKey",classKey);
+					String stationName = sd.getStationName(stationKey);
+					String className = cs.getClassName(classKey);
+					ldParameters.put("title","Editing for [Class] "+className + " for [Station] " + stationName + " Load Dependent Routing ...");
+					editLoadDependentRoutingButton.addActionListener(new EditLoadDependentRoutingListener(ldParameters));
+					LDRoutingPanel.add(editLoadDependentRoutingButton);
+				} else {
+					LDRoutingPanel = rtPane;
+				}
+				setRightComponent(LDRoutingPanel);
+			} else {
+				emptyPane();
+			}
 		}
 		doLayout();
 	}
@@ -158,7 +144,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			return;
 		}
 		//fetching output-connected stations list
-		Vector output = stations.getForwardConnections(stationKey);
+		Vector<Object> output = stations.getForwardConnections(stationKey);
 		//saving all entries of routing strategy in a temporary data structure
 		HashMap<Object, Double> temp = new HashMap<Object, Double>(routingProbs);
 		routingProbs.clear();
@@ -172,7 +158,6 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 				routingProbs.put(currentKey, new Double(0.0));
 			}
 		}
-
 	}
 
 	public void stopEditing() {
@@ -183,9 +168,6 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	protected class RoutingTable extends JTable {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		public RoutingTable() {
@@ -206,12 +188,9 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	protected class RoutingTableModel extends AbstractTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 		private String[] columnNames = new String[] { "Destination", "Probability" };
-		private Class[] columnClasses = new Class[] { String.class, Object.class };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 		public int[] columnSizes = new int[] { 80, 60 };
 
 		public int getRowCount() {
@@ -232,7 +211,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		}
 
 		@Override
-		public Class<Object> getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			return columnClasses[columnIndex];
 		}
 
@@ -274,17 +253,22 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			}
 			return stations.getForwardConnections(stationKey).get(index);
 		}
+
 	}
 
-    private class EditLoadDependentRoutingListener implements ActionListener{
-        HashMap<String, Object> properties = null;
-        public EditLoadDependentRoutingListener (HashMap<String, Object> properties) {
+	private class EditLoadDependentRoutingListener implements ActionListener {
 
-            this.properties = properties;
-        }
-        public void actionPerformed(ActionEvent e) {
-            Container parent = (Container)RoutingProbabilitiesEditor.this;
-            RoutingSectionPanel.openLoadDependentRoutingEditor(parent,properties);
-        }
-    }
+		HashMap<String, Object> properties = null;
+
+		public EditLoadDependentRoutingListener (HashMap<String, Object> properties) {
+			this.properties = properties;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			Container parent = (Container)RoutingProbabilitiesEditor.this;
+			RoutingSectionPanel.openLoadDependentRoutingEditor(parent,properties);
+		}
+
+	}
+
 }

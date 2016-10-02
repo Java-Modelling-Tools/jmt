@@ -335,7 +335,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		refreshComponents();
 	}
 
-	/*Multiple deletion of classes. Indexes to ship call to precedent method, are retrieved
+	/*Multiple deletion of classes. Indices to ship call to precedent method, are retrieved
 	through classtable methods (get selected rows)*/
 	protected void deleteSelectedClasses() {
 		int[] rows = classTable.getSelectedRows();

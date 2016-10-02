@@ -145,7 +145,7 @@ public class Firing extends OutputSection {
 	}
 
 	/**
-	 * Gets the number of produced jobs for specified class
+	 * Gets the number of produced jobs for the specified class
 	 */
 	public int getProducedJobsPerClass(int jobClass) {
 		return producedJobsPerClass[jobClass];

@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
@@ -71,7 +72,6 @@ import jmt.gui.common.forkStrategies.ForkStrategy;
 public class InGateWaySectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
-
 	protected StationDefinition sd;
 	protected ClassDefinition cd;
 	protected Object stationKey;
@@ -175,7 +175,6 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		numForkSpinner.setEnabled(sd.getIsSimplifiedFork(stationKey));
 
 		useSim.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				boolean isSim = !useSim.isSelected();
@@ -184,7 +183,6 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 				gPaneAdvanced.getGlassPane().setVisible(isSim);
 				gPaneStandard.getGlassPane().setVisible(!isSim);
 			}
-
 		});
 
 		JPanel mainPanel = new JPanel();
@@ -221,8 +219,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 				forkingStrategies.setRowSelectionInterval(0, 0);
 			}
 			forkingProbEditor.setData(sd, cd, stationKey, cd.getClassKeys().get(forkingStrategies.getSelectedRow()));
-			descrTextPane.setText(((ForkStrategy)sd.getForkingStrategy(stationKey,
-					cd.getClassKeys().get(forkingStrategies.getSelectedRow()))).getDescription());
+			descrTextPane.setText(((ForkStrategy)sd.getForkingStrategy(stationKey, cd.getClassKeys().get(forkingStrategies.getSelectedRow()))).getDescription());
 		} else {
 			forkingProbEditor.setData(sd, cd,  stationKey, 0);
 			descrTextPane.setText("");
@@ -300,7 +297,6 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 	protected class ForkingSelectionTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
-
 		private String[] columnNames = new String[] { "Class", "Fork Strategy" };
 		public int[] columnSizes = new int[] { 60, 100 };
 		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
@@ -347,7 +343,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 					sd.setForkingStrategy(stationKey, classKey, ((ForkStrategy) value).clone());
 				}			
 				forkingProbEditor.setData(sd, cd, stationKey, classKey);
-				descrTextPane.setText(((ForkStrategy)sd.getForkingStrategy( stationKey, classKey)).getDescription());
+				descrTextPane.setText(((ForkStrategy) sd.getForkingStrategy(stationKey, classKey)).getDescription());
 				//doLayout();
 				//repaint();
 				InGateWaySectionPanel.this.doLayout();
@@ -358,6 +354,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		private Object indexToKey(int index) {
 			return cd.getClassKeys().get(index);
 		}
+
 	}
 
 	private void updateSpinner() {
@@ -366,6 +363,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 			numForkSpinner.setPreferredSize(DIM_BUTTON_XS);
 			numForkSpinner.setToolTipText("Number of tasks created for each input job on each output link");
 			numForkSpinner.addChangeListener(new ChangeListener() {
+				@Override
 				public void stateChanged(ChangeEvent e) {
 					if (numForkSpinner.getValue() instanceof Integer) {
 						Integer serverNum = (Integer) numForkSpinner.getValue();
@@ -383,45 +381,35 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		numForkSpinner.repaint();
 	}
 
-	//public void enableComponents(Container container, boolean enable) {
-	//	Component[] components = container.getComponents();
-	//	for (Component component : components) {
-	//		component.setEnabled(enable);
-	//		if (component instanceof Container) {
-	//			enableComponents((Container)component, enable);
-	//		}
-	//	}
-	//}
-
 	class GlassPane extends JComponent {
 
 		private static final long serialVersionUID = 1L;
 
 		public GlassPane()
 		{
-			setOpaque( false );
-			setVisible( false );
+			setOpaque(false);
+			setVisible(false);
 			Color base = UIManager.getColor("inactiveCaptionBorder");
 			base = (base == null) ? Color.LIGHT_GRAY : base;
 			Color background = new Color(base.getRed(), base.getGreen(), base.getBlue(), 128);
-			setBackground( background );
+			setBackground(background);
 
 			// Disable Mouse events for the panel
-
-			addMouseListener( new MouseAdapter() {} );
-			addMouseMotionListener( new MouseMotionAdapter() {} );
+			addMouseListener(new MouseAdapter() {});
+			addMouseMotionListener(new MouseMotionAdapter() {});
 		}
 
-		/*
-		 *  The component is transparent but we want to paint the background
-		 *  to give it the disabled look.
+		/**
+		 * The component is transparent but we want to paint the background
+		 * to give it the disabled look.
 		 */
 		@Override
 		protected void paintComponent(Graphics g)
 		{
-			g.setColor( getBackground() );
+			g.setColor(getBackground());
 			g.fillRect(0, 0, getSize().width, getSize().height);
 		}
+
 	}
 
 }

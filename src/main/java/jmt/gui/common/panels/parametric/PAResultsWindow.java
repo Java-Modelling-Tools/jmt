@@ -89,7 +89,7 @@ import jmt.gui.exact.table.ExactTableModel;
 /**
  * <p>Title: PAResultsWindow </p>
  * <p>Description: this is a JFrame used to show results from a parametric analysis simulation.
- * Performance indexes are grouped by type inside a JTabbedPane. Performance indexes of the
+ * Performance indices are grouped by type inside a JTabbedPane. Performance indices of the
  * same type are showed one below the other. <br>
  * It contains some subclasses used for several purpose: <br>
  *   - <code>PAMeasurePanel</code>: it is a JPanel that contains the table with results and the
@@ -231,15 +231,15 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 
 	/**
 	 * Creates a new tabbed pane that shows specified measures and adds it to
-	 * specified JTabPane. If measures indexes vector is null or empty no panel is added.
+	 * specified JTabPane. If measures indices vector is null or empty no panel is added.
 	 * @param parent panel where newly created tab should be added
 	 * @param name name of the panel to be added
 	 * @param description description to be shown into the panel
-	 * @param indexes array with all measures indexes to be shown in this panel
+	 * @param indices array with all measures indices to be shown in this panel
 	 */
-	private void addTabPane(JTabbedPane parent, String name, String description, int[] indexes) {
+	private void addTabPane(JTabbedPane parent, String name, String description, int[] indices) {
 		// If no measure are present, do not add corresponding tab
-		if (indexes != null && indexes.length > 0) {
+		if (indices != null && indices.length > 0) {
 			JPanel tabPanel = new JPanel(new BorderLayout());
 			// Adds margins
 			tabPanel.add(Box.createVerticalStrut(BORDERSIZE), BorderLayout.NORTH);
@@ -255,9 +255,9 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			upperPanel.add(Box.createVerticalStrut(BORDERSIZE / 2), BorderLayout.SOUTH);
 			mainpanel.add(upperPanel, BorderLayout.NORTH);
 			// Adds panel with measures
-			JPanel scroll = new JPanel(new GridLayout(indexes.length, 1, 1, 1));
+			JPanel scroll = new JPanel(new GridLayout(indices.length, 1, 1, 1));
 			// Adds all measures to this panel
-			for (int indexe : indexes) {
+			for (int indexe : indices) {
 				scroll.add(new PAMeasurePanel(results, indexe));//,thisMeasureValues));
 			}
 			mainpanel.add(new JScrollPane(scroll), BorderLayout.CENTER);

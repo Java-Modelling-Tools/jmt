@@ -150,7 +150,7 @@ public interface XMLConstantNames {
 	public static final String CLASSNAME_FORK = "Fork";
 	public static final String CLASSNAME_JOIN = "Join";
 	public static final String CLASSNAME_CLASSSWITCH = "ClassSwitch";
-	public static final String CLASSNAME_TASKSEMAPHORE = "TaskSemaphore";
+	public static final String CLASSNAME_SEMAPHORE = "Semaphore";
 	public static final String CLASSNAME_STORE = "Store";
 	public static final String CLASSNAME_LINK = "Link";
 	public static final String CLASSNAME_ENABLING = "Enabling";

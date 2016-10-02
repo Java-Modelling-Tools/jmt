@@ -19,10 +19,7 @@
 package jmt.engine.NodeSections;
 
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.PriorityQueue;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
@@ -32,6 +29,7 @@ import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.random.engine.RandomEngine;
 import jmt.engine.simEngine.RemoveToken;
 
 /**
@@ -49,7 +47,8 @@ public class Timing extends ServiceSection {
 	private Integer[] firingPriorities;
 	private Integer[] firingWeights;
 	private int idleServers;
-	private PriorityQueue[] timingTokenQueues;
+	private RandomEngine randomEngine;
+	private LinkedList[] timingTokenQueues;
 	private int[] extraEnablingSets;
 	private LinkedList<JobClass> extraEnablingSetQueue;
 
@@ -67,10 +66,11 @@ public class Timing extends ServiceSection {
 	@Override
 	protected void nodeLinked(NetNode node) {
 		idleServers = numberOfServers;
+		randomEngine = RandomEngine.makeDefault();
 		JobClassList jobClasses = getJobClasses();
-		timingTokenQueues = new PriorityQueue[jobClasses.size()];
+		timingTokenQueues = new LinkedList[jobClasses.size()];
 		for (int i = 0; i < timingTokenQueues.length; i++) {
-			timingTokenQueues[i] = new PriorityQueue<RemoveToken>(11, new TimingTokenComparator());
+			timingTokenQueues[i] = new LinkedList<RemoveToken>();
 		}
 		extraEnablingSets = new int[jobClasses.size()];
 		Arrays.fill(extraEnablingSets, 0);
@@ -129,27 +129,26 @@ public class Timing extends ServiceSection {
 					packet.setData(DataPacket.FIELD_FIRING_WEIGHT, Integer.valueOf(firingWeights[classIndex]));
 					RemoveToken token = sendMe(NetEvent.EVENT_TIMING, packet, delay);
 					packet.setData(DataPacket.FIELD_TIMING_TOKEN, token);
-					timingTokenQueues[classIndex].add(token);
+					int index = (int) (randomEngine.raw() * (timingTokenQueues[classIndex].size() + 1));
+					timingTokenQueues[classIndex].add(index, token);
+					//timingTokenQueues[classIndex].add(token);
 				}
 			} else {
 				for (int i = 0; i > deltaTimingEvents; i--) {
-					RemoveToken token = (RemoveToken) timingTokenQueues[classIndex].remove();
+					RemoveToken token = (RemoveToken) timingTokenQueues[classIndex].removeLast();
 					removeMessage(token);
 				}
 			}
 
 			if (deltaExtraEnablingSets >= 0) {
 				for (int i = 0; i < deltaExtraEnablingSets; i++) {
-					extraEnablingSetQueue.add(jobClass);
+					int index = (int) (randomEngine.raw() * (extraEnablingSetQueue.size() + 1));
+					extraEnablingSetQueue.add(index, jobClass);
+					//extraEnablingSetQueue.add(jobClass);
 				}
 			} else {
-				Iterator<JobClass> it = extraEnablingSetQueue.descendingIterator();
-				int i = 0;
-				while (i > deltaExtraEnablingSets) {
-					if (it.next() == jobClass) {
-						it.remove();
-						i--;
-					}
+				for (int i = 0; i > deltaExtraEnablingSets; i--) {
+					extraEnablingSetQueue.removeLast();
 				}
 			}
 			break;
@@ -168,8 +167,9 @@ public class Timing extends ServiceSection {
 
 			if (numberOfServers >= 0) {
 				if (extraEnablingSetQueue.size() > 0) {
-					jobClass = extraEnablingSetQueue.remove();
+					jobClass = extraEnablingSetQueue.removeFirst();
 					classIndex = jobClass.getId();
+					extraEnablingSets[classIndex]--;
 					double delay = timingStrategies[classIndex].wait(this);
 					packet = new DataPacket();
 					packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
@@ -178,8 +178,9 @@ public class Timing extends ServiceSection {
 					packet.setData(DataPacket.FIELD_FIRING_WEIGHT, Integer.valueOf(firingWeights[classIndex]));
 					token = sendMe(NetEvent.EVENT_TIMING, packet, delay);
 					packet.setData(DataPacket.FIELD_TIMING_TOKEN, token);
-					timingTokenQueues[classIndex].add(token);
-					extraEnablingSets[classIndex]--;
+					int index = (int) (randomEngine.raw() * (timingTokenQueues[classIndex].size() + 1));
+					timingTokenQueues[classIndex].add(index, token);
+					//timingTokenQueues[classIndex].add(token);
 				} else {
 					idleServers++;
 				}
@@ -203,22 +204,6 @@ public class Timing extends ServiceSection {
 		}
 
 		return MSG_PROCESSED;
-	}
-
-	private static class TimingTokenComparator implements Comparator<RemoveToken> {
-
-		public int compare(RemoveToken t1, RemoveToken t2) {
-			double time1 = t1.getSimEvent().eventTime();
-			double time2 = t2.getSimEvent().eventTime();
-			if (time1 > time2) {
-				return -1;
-			} else if (time1 < time2) {
-				return 1;
-			} else {
-				return 0;
-			}
-		}
-
 	}
 
 }

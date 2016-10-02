@@ -78,7 +78,7 @@ public class FittingPanel extends WizardPanel {
 							resultfittingTextArea.setText("The analyzed data fits the exponential distribution with significativity 0.05" + "\n" +
 									"(the significativity is the probability of rejecting the Exponential hypothesis when it is true)" + "\n" + 
 										"Lambda: " + myFormatter.format(engfitting.getEstimatedParameters()[0]) + "\n\n" +
-										"The following statistical indexes are obtained from the analyzed data" + "\n" +
+										"The following statistical indices are obtained from the analyzed data" + "\n" +
 										"Mean: " + myFormatter.format(model.getMean()) + "\n" +
 										"Variance: " + myFormatter.format(model.getVariance()) + "\n" +
 										"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()));
@@ -86,7 +86,7 @@ public class FittingPanel extends WizardPanel {
 							resultfittingTextArea.setText("The analyzed data fits the exponential distribution with significativity 0.05" + "\n" +
 									"(the significativity is the probability of rejecting the Exponential hypothesis when it is true)" + "\n" +   
 									"Lambda: " + myFormatter.format(engfitting.getEstimatedParameters()[0]) + "\n\n" +
-									"The following statistical indexes are obtained from the analyzed data" + "\n" +
+									"The following statistical indices are obtained from the analyzed data" + "\n" +
 									"Mean: " + myFormatter.format(model.getMean()) + "\n" +
 									"Variance: " + myFormatter.format(model.getVariance()) + "\n" +
 									"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()) + "\n\n"+
@@ -94,7 +94,7 @@ public class FittingPanel extends WizardPanel {
 					}
 					else {
 						resultfittingTextArea.setText("According to the test your data do not follow the exponential distribution" + "\n\n" +
-								"The following statistical indexes are obtained from the analyzed data" + "\n" +
+								"The following statistical indices are obtained from the analyzed data" + "\n" +
 								"Mean: " + myFormatter.format(model.getMean()) + "\n" +
 								"Variance: " + myFormatter.format(model.getVariance()) + "\n" +
 								"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()));
@@ -109,7 +109,7 @@ public class FittingPanel extends WizardPanel {
 											"(the significativity is the probability of rejecting the Pareto hypothesis when it is true)" + "\n" +   
 											"Alpha (Shape parameter): " + myFormatter.format(engfitting.getEstimatedParameters()[1]) + "\n" +
 											"k (Scale parameter): " + myFormatter.format(engfitting.getEstimatedParameters()[0]) + "\n\n" +
-											"The following statistical indexes are obtained from the analyzed data" + "\n" +
+											"The following statistical indices are obtained from the analyzed data" + "\n" +
 											"Mean: " + myFormatter.format(model.getMean()) + "\n" +
 											"Variance: " + myFormatter.format(model.getVariance()) + "\n" +
 											"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()));
@@ -119,14 +119,14 @@ public class FittingPanel extends WizardPanel {
 									"Alpha (Shape parameter): " + myFormatter.format(engfitting.getEstimatedParameters()[1]) + "\n" +
 									"k (Scale parameter): " + myFormatter.format(engfitting.getEstimatedParameters()[0]) + "\n" +
 									"Mean: " + myFormatter.format(model.getMean()) + "\n\n" +
-									"The following statistical indexes are obtained from the analyzed data" + "\n" +
+									"The following statistical indices are obtained from the analyzed data" + "\n" +
 									"Variance: " + myFormatter.format(model.getVariance()) + "\n" +
 									"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()) + "\n\n"+
 									"Warning! Since the number of observations is too small the test may not be reliable!");
 					}
 					else {
 						resultfittingTextArea.setText("According to the test your data do not follow the Pareto distribution" + "\n\n" +
-								"The following statistical indexes are obtained from the analyzed data" + "\n" +
+								"The following statistical indices are obtained from the analyzed data" + "\n" +
 								"Mean: " + myFormatter.format(model.getMean()) + "\n" +
 								"Variance: " + myFormatter.format(model.getVariance()) + "\n" +
 								"Coefficient of variation: " + myFormatter.format(model.getCoeffVariation()));

@@ -391,7 +391,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				//ARIF: remove generic elements if exists
 				l1.removeElement(STATION_TYPE_CLASSSWITCH);
 				l1.removeElement(STATION_TYPE_FORK);
-				l1.removeElement(STATION_TYPE_TRANSITION);
+				l1.removeElement(STATION_TYPE_SCALER);
 				return stationsCombos.getEditor(l1);
 			} else if (column == 2 && simData.isFCRMeasure(simData.getMeasureKeys().get(row))) {
 				Vector<Object> l1 = stationData.getFCRegionKeys();

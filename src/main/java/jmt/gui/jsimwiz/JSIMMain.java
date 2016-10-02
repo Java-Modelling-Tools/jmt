@@ -584,7 +584,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 				pw.setVisible(false);
 				launchSimulation();
 			}
-
 		} else {
 			if (!model.isParametricAnalysisEnabled()) {
 				dispatcher.restartSimulation();
@@ -629,10 +628,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	}
 
 	private void pauseSimulation() {
-		if (model.isParametricAnalysisEnabled()) {
-			batchThread.pauseSimulation();
-		} else {
+		if (!model.isParametricAnalysisEnabled()) {
 			dispatcher.pauseSimulation();
+		} else {
+			batchThread.pauseSimulation();
 		}
 	}
 

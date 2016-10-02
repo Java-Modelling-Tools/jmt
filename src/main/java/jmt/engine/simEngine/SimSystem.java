@@ -52,7 +52,6 @@ public class SimSystem {
 	 * `tracefile'
 	 */
 	static public void initialize() {
-
 		entities = new ArrayList<SimEntity>();
 
 		// future = new ListEventQueue();
@@ -71,7 +70,6 @@ public class SimSystem {
 		nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(4);
 		nf.setMinimumFractionDigits(2);
-
 	}
 
 	/** Returns the number format used for generating
@@ -83,9 +81,9 @@ public class SimSystem {
 
 	// The two standard predicates
 	/** A standard predicate that matches any event. */
-	static public SimAnyP SIM_ANY = new SimAnyP();
+	static final public SimAnyP SIM_ANY = new SimAnyP();
 	/** A standard predicate that does not match any events. */
-	static public SimNoneP SIM_NONE = new SimNoneP();
+	static final public SimNoneP SIM_NONE = new SimNoneP();
 
 	// Public access methods
 
@@ -115,9 +113,7 @@ public class SimSystem {
 	 * @return A reference to the entity, or null if it could not be found
 	 */
 	static final public SimEntity getEntity(int id) {
-
-		SimEntity found = entityHash.get(id);    
-
+		SimEntity found = entityHash.get(id);
 		if (found == null) {
 			System.out.println("SimSystem: could not find entity " + id);
 		}
@@ -130,7 +126,6 @@ public class SimSystem {
 	 */
 	static public SimEntity getEntity(String name) {
 		SimEntity ent, found = null;
-
 		for (Iterator<SimEntity> it = entities.iterator(); it.hasNext();) {
 			ent = it.next();
 			if (name.compareTo(ent.getName()) == 0) {
@@ -166,7 +161,6 @@ public class SimSystem {
 			entityHash.put(e.getId(), e);
 		} else {
 			if (e.getId() == -1) {
-
 				//-1 is the default value written by the constructor.
 				// Now a new ID is set
 
@@ -350,6 +344,7 @@ public class SimSystem {
 				}
 			}
 		}
+
 		if (found) {
 			entities.get(src).setEvbuf((SimEvent) ev.clone());
 		} else {

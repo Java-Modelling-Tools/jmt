@@ -286,8 +286,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			return CommonConstants.STATION_TYPE_CLASSSWITCH;
 		if (CommonConstants.STATION_TYPE_FORK.equals(model.getClassRefStation(classKey)))
 			return CommonConstants.STATION_TYPE_FORK;
-		if (CommonConstants.STATION_TYPE_TRANSITION.equals(model.getClassRefStation(classKey)))
-			return CommonConstants.STATION_TYPE_TRANSITION;
+		if (CommonConstants.STATION_TYPE_SCALER.equals(model.getClassRefStation(classKey)))
+			return CommonConstants.STATION_TYPE_SCALER;
 		if (model.getClassRefStation(classKey) != null) {
 			return model.getStationName(model.getClassRefStation(classKey));
 		} else {
@@ -309,18 +309,12 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					model.getStationName(stations.get(i)));
 			Object stationKey = stations.get(i);
 			String stationType = model.getStationType(stationKey);
-			if (STATION_TYPE_DELAY.equals(stationType)) {
-				writeQueueSection(doc, elem, model, stationKey);
-				writeDelaySection(doc, elem, model, stationKey);
-				writeRouterSection(doc, elem, model, stationKey);
-			} else if (STATION_TYPE_SERVER.equals(stationType)) {
-				writeQueueSection(doc, elem, model, stationKey);
-				writeServerSection(doc, elem, model, stationKey);
-				writeRouterSection(doc, elem, model, stationKey);
-			} else if (STATION_TYPE_SOURCE.equals(stationType)) {
+			if (STATION_TYPE_SOURCE.equals(stationType)) {
 				writeSourceSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
+			} else if (STATION_TYPE_SINK.equals(stationType)) {
+				writeSinkSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_TERMINAL.equals(stationType)) {
 				writeTerminalSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
@@ -329,9 +323,13 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				writeQueueSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
-			} else if (STATION_TYPE_LOGGER.equals(stationType)) {
+			} else if (STATION_TYPE_DELAY.equals(stationType)) {
 				writeQueueSection(doc, elem, model, stationKey);
-				writeLoggerSection(doc, elem, model, stationKey);
+				writeDelaySection(doc, elem, model, stationKey);
+				writeRouterSection(doc, elem, model, stationKey);
+			} else if (STATION_TYPE_SERVER.equals(stationType)) {
+				writeQueueSection(doc, elem, model, stationKey);
+				writeServerSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_FORK.equals(stationType)) {
 				writeQueueSection(doc, elem, model, stationKey);
@@ -341,16 +339,22 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				writeJoinSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
-			} else if (STATION_TYPE_SINK.equals(stationType)) {
-				writeSinkSection(doc, elem, model, stationKey);
+			} else if (STATION_TYPE_LOGGER.equals(stationType)) {
+				writeQueueSection(doc, elem, model, stationKey);
+				writeLoggerSection(doc, elem, model, stationKey);
+				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_CLASSSWITCH.equals(stationType)) {
 				writeQueueSection(doc, elem, model, stationKey);
 				writeClassSwitchSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
-			} else if (STATION_TYPE_TASKSEMAPHORE.equals(stationType)) {
+			} else if (STATION_TYPE_SEMAPHORE.equals(stationType)) {
 				writeSemaphoreSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
+			} else if (STATION_TYPE_SCALER.equals(stationType)) {
+				writeJoinSection(doc, elem, model, stationKey);
+				writeTunnelSection(doc, elem, model, stationKey);
+				writeForkSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_PLACE.equals(stationType)) {
 				writeStoreSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
@@ -465,7 +469,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	private static void writeSemaphoreSection(Document doc, Node node,
 			CommonModel model, Object stationKey) {
 		Element semaphore = doc.createElement(XML_E_STATION_SECTION);
-		semaphore.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_TASKSEMAPHORE);
+		semaphore.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_SEMAPHORE);
 		node.appendChild(semaphore);
 
 		Vector<?> classes = model.getClassKeys();

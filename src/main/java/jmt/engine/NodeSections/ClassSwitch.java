@@ -18,6 +18,8 @@
 
 package jmt.engine.NodeSections;
 
+import java.util.Arrays;
+
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
@@ -34,9 +36,9 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class ClassSwitch extends ServiceSection {
 
-	private int[] switchedClasses;
-	private int totalSwitchedClasses = 0;
-	private RandomEngine engine = RandomEngine.makeDefault();
+	private int switchedJobs;
+	private int[] switchedJobsPerClass;
+	private RandomEngine engine;
 
 	private Float[][] matrix;
 
@@ -49,7 +51,10 @@ public class ClassSwitch extends ServiceSection {
 				this.matrix[i][j] = row[j];
 			}
 		}
-		switchedClasses = new int[matrix.length];
+		switchedJobs = 0;
+		switchedJobsPerClass = new int[matrix.length];
+		Arrays.fill(switchedJobsPerClass, 0);
+		engine = RandomEngine.makeDefault();
 	}
 
 	@Override
@@ -74,8 +79,8 @@ public class ClassSwitch extends ServiceSection {
 
 			//Update counters
 			if (!job.hasBeenClass(outClass)) {
-				switchedClasses[jobClassOut]++;
-				totalSwitchedClasses++;
+				switchedJobs++;
+				switchedJobsPerClass[jobClassOut]++;
 			}
 
 			sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
@@ -128,22 +133,20 @@ public class ClassSwitch extends ServiceSection {
 	}
 
 	/**
-	 * Gets the count of the switched jobs of the specified class
-	 * 
-	 * @param jobClass the job class 
-	 * @return the count of the switched jobs of the specified class
+	 * Gets the total number of switched jobs
+	 * @return the total number of switched jobs
 	 */
-	public int getSwitchedJobCount(int jobClass) {
-		return switchedClasses[jobClass];
+	public int getSwitchedJobs() {
+		return switchedJobs;
 	}
 
 	/**
-	 * Gets total count of the switched jobs 
-	 * 
-	 * @return total count of the switched jobs 
+	 * Gets the number of switched jobs for the specified class
+	 * @param classIndex the index of the job class
+	 * @return the number of switched jobs for the specified class
 	 */
-	public int getTotalSwitchedJobs() {
-		return totalSwitchedClasses;
+	public int getSwitchedJobsPerClass(int classIndex) {
+		return switchedJobsPerClass[classIndex];
 	}
 
 }

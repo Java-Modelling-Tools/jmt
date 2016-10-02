@@ -86,7 +86,6 @@ public class XMLMeasureOutput extends MeasureOutput {
 		file = new File("D://" + fileName + ".xml");
 
 		createDOM();
-
 	}
 
 	/**
@@ -120,13 +119,11 @@ public class XMLMeasureOutput extends MeasureOutput {
 			root.appendChild(report);
 
 			samples = document.createElement("samples");
-
 		} catch (FactoryConfigurationError factoryConfigurationError) {
 			factoryConfigurationError.printStackTrace();
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
@@ -134,13 +131,11 @@ public class XMLMeasureOutput extends MeasureOutput {
 	 */
 	@Override
 	public void write(double Sample, double Weight) {
-
 		Element sample = document.createElement("sample");
 		sample.setAttribute("sample", Double.toString(Sample));
 		sample.setAttribute("weight", Double.toString(Weight));
 
 		samples.appendChild(sample);
-
 	}
 
 	/**
@@ -172,7 +167,6 @@ public class XMLMeasureOutput extends MeasureOutput {
 					report.setAttribute("upperBound", Double.toString(measure.getUpperLimit()));
 					report.setAttribute("lowerBound", Double.toString(measure.getLowerLimit()));
 				}
-
 			} else {
 				//measure was not successful
 				report.setAttribute("meanValue", Double.toString(measure.getEstimatedMeanValue()));
@@ -185,7 +179,6 @@ public class XMLMeasureOutput extends MeasureOutput {
 	}
 
 	public void saveXML() {
-
 		//close file
 		try {
 			Source source = new DOMSource(document);
@@ -209,12 +202,10 @@ public class XMLMeasureOutput extends MeasureOutput {
 				file.delete();
 			}
 			temp.renameTo(file);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.out.println("error in closing file..");
 		}
-
 	}
 
 	/* (non-Javadoc)
@@ -224,7 +215,5 @@ public class XMLMeasureOutput extends MeasureOutput {
 	public File getOutputFile() {
 		return file;
 	}
-	
-	
 
 }

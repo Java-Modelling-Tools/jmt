@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
@@ -50,9 +51,7 @@ import jmt.gui.common.definitions.StationDefinition;
  *  Desc: Minor Cosmetic changes in the label. Changed some Label regarding the Definitions for better understanding of Users.
  */
 public class ForkSectionPanel extends WizardPanel implements CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	protected StationDefinition sd;
 	protected ClassDefinition cd;
@@ -120,7 +119,6 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 
 		// Adds action listeners
 		check.addActionListener(new ActionListener() {
-
 			/**
 			 * Toggles block property
 			 */
@@ -187,7 +185,6 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 				}
 			}
 		});
-
 	}
 
 	/**
@@ -197,4 +194,5 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 	public String getName() {
 		return "Capacity Section";
 	}
+
 }

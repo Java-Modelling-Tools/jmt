@@ -627,7 +627,7 @@ public class JModelProblemsWindow extends JDialog {
 			if (mc.isThereCsWithForkJoin()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CS_WITH_FORK_JOIN,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">If you use a ClassSwitch station and a Fork/Join region in the same model, "
-								+ "depending on the layout of the model,  some indices may not be computed exactly (e.g., the System Response Time). "
+								+ "depending on the layout of the model, some indices may not be computed exactly (e.g., the System Response Time). "
 								+ "You may consider also to use the new Fork Strategy \"class switch\" that allows the generation of new classes of tasks within a Fork/Join region.</div></html>", null, null));
 			}
 			if (mc.isThereGuardStrategyZeroTasks()) {

@@ -31,6 +31,7 @@ import jmt.engine.NodeSections.Fork;
  * Modified by J. Shuai & M. Cazzoli, implemented fork and join strategies
  */
 public class ForkJob extends Job {
+
 	/** Reference to original job */
 	protected Job forkedJob;
 	/** Number of child jobs */
@@ -56,7 +57,6 @@ public class ForkJob extends Job {
 		this.born();
 	}
 
-	// bpmn
 	/**
 	 * Creates a new ForkJob, given number of jobs, original job and reference fork
 	 * @param jobNum number of jobs in which this one must be split
@@ -70,8 +70,6 @@ public class ForkJob extends Job {
 		this.jobNumClass = jobNumClass;
 		super.setClass(jobClass);
 	}
-
-	// end
 
 	/**
 	 * Gets original job that was split in this piece
@@ -97,7 +95,7 @@ public class ForkJob extends Job {
 		return forkNode;
 	}       
 
-	public int getjobNumClas() {
+	public int getjobNumClass() {
 		return jobNumClass;
 	}
 

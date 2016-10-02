@@ -270,8 +270,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				model.setClassRefStation(key, CommonConstants.STATION_TYPE_CLASSSWITCH);
 			else if (CommonConstants.STATION_TYPE_FORK.equals(refStations.get(key)))
 				model.setClassRefStation(key, CommonConstants.STATION_TYPE_FORK);
-			else if (CommonConstants.STATION_TYPE_TRANSITION.equals(refStations.get(key)))
-				model.setClassRefStation(key, CommonConstants.STATION_TYPE_TRANSITION);
+			else if (CommonConstants.STATION_TYPE_SCALER.equals(refStations.get(key)))
+				model.setClassRefStation(key, CommonConstants.STATION_TYPE_SCALER);
 			else
 				model.setClassRefStation(key, stations.get(refStations.get(key)));
 		}
@@ -443,8 +443,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			if (type.equals(STATION_TYPE_SOURCE)) {
 				parseSourceSection((Element) sections.item(0), model, key, name);
 				parseRouterSection((Element) sections.item(2), model, key);
-			} else if (type.equals(STATION_TYPE_TERMINAL)
-					|| type.equals(STATION_TYPE_ROUTER)) {
+			} else if (type.equals(STATION_TYPE_TERMINAL)) {
+				parseRouterSection((Element) sections.item(2), model, key);
+			} else if (type.equals(STATION_TYPE_ROUTER)) {
 				parseRouterSection((Element) sections.item(2), model, key);
 			} else if (type.equals(STATION_TYPE_DELAY)) {
 				parseDelaySection((Element) sections.item(1), model, key);
@@ -456,6 +457,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (type.equals(STATION_TYPE_FORK)) {
 				parseQueueSection((Element) sections.item(0), model, key);
 				parseForkSection((Element) sections.item(2), model, key);
+			} else if (type.equals(STATION_TYPE_JOIN)) {
+				parseJoinSection((Element) sections.item(0), model, key);
+				parseRouterSection((Element) sections.item(2), model, key);
 			} else if (type.equals(STATION_TYPE_LOGGER)) {
 				parseLoggerSection((Element) sections.item(1), model, key);
 				parseRouterSection((Element) sections.item(2), model, key);
@@ -463,12 +467,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				parseQueueSection((Element) sections.item(0), model, key);
 				parseClassSwitchSection((Element) sections.item(1), model, key);
 				parseRouterSection((Element) sections.item(2), model, key);
-			} else if (type.equals(STATION_TYPE_JOIN)) {
-				parseJoinSection((Element) sections.item(0), model, key);
-				parseRouterSection((Element) sections.item(2), model, key);
-			} else if (type.equals(STATION_TYPE_TASKSEMAPHORE)) {
+			} else if (type.equals(STATION_TYPE_SEMAPHORE)) {
 				parseSemaphoreSection((Element) sections.item(0), model, key);
 				parseRouterSection((Element) sections.item(2), model, key);
+			} else if (type.equals(STATION_TYPE_SCALER)) {
+				parseJoinSection((Element) sections.item(0), model, key);
+				parseForkSection((Element) sections.item(2), model, key);
 			} else if (type.equals(STATION_TYPE_PLACE)) {
 				parseStoreSection((Element) sections.item(0), model, key);
 			} else if (type.equals(STATION_TYPE_TRANSITION)) {
@@ -1403,40 +1407,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						}
 					}
 				}
-
-				/*if (ss instanceof NormalSemaphore) {
-					Element temp = (Element) semaphore.get(className2);
-					NodeList parList = temp.getElementsByTagName(XML_E_SUBPARAMETER);
-					Map<Object, Integer> mix = new HashMap<>();
-					List<String> classes = new ArrayList<>();
-					List<Integer> numbers = new ArrayList<>();
-					for (int i = 0; i < parList.getLength(); i++) {
-						Element par = (Element) parList.item(i);
-						if (par.getAttribute(XML_A_CLASS_NAME).equals(
-								"Classes")) {
-							NodeList classList = par.getElementsByTagName(XML_E_SUBPARAMETER);
-							for (int j = 0; j < classList.getLength(); j++) {
-								Element classPar = (Element) classList.item(j);
-								classes.add(classPar.getElementsByTagName("value").item(0).getFirstChild().getTextContent());
-							}
-						} else if (par.getAttribute(XML_A_CLASS_NAME).equals(
-								"Numbers")) {
-							NodeList numList = par.getElementsByTagName(XML_E_SUBPARAMETER);
-							for (int j = 0; j < numList.getLength(); j++) {
-								Element numPar = (Element) numList.item(j);
-								numbers.add(Integer.parseInt(numPar.getElementsByTagName("value").item(0).getFirstChild().getTextContent()));
-							}
-						}
-					}
-
-					for (int i = 0; i < classes.size(); i++) {
-						mix.put(model.getClassByName(classes.get(i)), numbers.get(i));
-					}
-					//mix.put(className2, numbers.get(model.getClassKeys().indexOf(className2)));                                       
-					if (ss instanceof NormalSemaphore) {
-						((NormalSemaphore) ss).setSemaphore(mix);
-					}
-				}*/
 			}
 		} else {
 			for (Object o: classes.values()) {
@@ -1745,20 +1715,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		}
 
 		// Finds station type, basing on section names
-		if (sectionNames[0].equals(CLASSNAME_QUEUE)
-				&& sectionNames[1].equals(CLASSNAME_DELAY)
-				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
-			return STATION_TYPE_DELAY;
-		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
-				&& (sectionNames[1].equals(CLASSNAME_SERVER)
-						|| sectionNames[1].equals(CLASSNAME_PSSERVER)
-						|| sectionNames[1].equals(CLASSNAME_SRPT))
-				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
-			return STATION_TYPE_SERVER;
-		} else if (sectionNames[0].equals(CLASSNAME_SOURCE)
+		if (sectionNames[0].equals(CLASSNAME_SOURCE)
 				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
 			return STATION_TYPE_SOURCE;
+		} else if (sectionNames[0].equals(CLASSNAME_SINK)) {
+			return STATION_TYPE_SINK;
 		} else if (sectionNames[0].equals(CLASSNAME_TERMINAL)
 				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
@@ -1768,9 +1730,15 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
 			return STATION_TYPE_ROUTER;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
-				&& sectionNames[1].equals(CLASSNAME_LOGGER)
+				&& sectionNames[1].equals(CLASSNAME_DELAY)
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
-			return STATION_TYPE_LOGGER;
+			return STATION_TYPE_DELAY;
+		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
+				&& (sectionNames[1].equals(CLASSNAME_SERVER)
+				|| sectionNames[1].equals(CLASSNAME_PSSERVER)
+				|| sectionNames[1].equals(CLASSNAME_SRPT))
+				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
+			return STATION_TYPE_SERVER;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
 				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
 				&& sectionNames[2].equals(CLASSNAME_FORK)) {
@@ -1779,16 +1747,22 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
 			return STATION_TYPE_JOIN;
-		} else if (sectionNames[0].equals(CLASSNAME_SINK)) {
-			return STATION_TYPE_SINK;
+		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
+				&& sectionNames[1].equals(CLASSNAME_LOGGER)
+				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
+			return STATION_TYPE_LOGGER;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
 				&& sectionNames[1].equals(CLASSNAME_CLASSSWITCH)
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
 			return STATION_TYPE_CLASSSWITCH;
-		} else if (sectionNames[0].equals(CLASSNAME_TASKSEMAPHORE)
+		} else if (sectionNames[0].equals(CLASSNAME_SEMAPHORE)
 				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
-			return STATION_TYPE_TASKSEMAPHORE;
+			return STATION_TYPE_SEMAPHORE;
+		} else if (sectionNames[0].equals(CLASSNAME_JOIN)
+				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
+				&& sectionNames[2].equals(CLASSNAME_FORK)) {
+			return STATION_TYPE_SCALER;
 		} else if (sectionNames[0].equals(CLASSNAME_STORE)
 				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
 				&& sectionNames[2].equals(CLASSNAME_LINK)) {
@@ -2034,7 +2008,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				parser.setFeature(VALIDATION_FEATURE_ID, true);
 				parser.setFeature(SCHEMA_VALIDATION_FEATURE_ID, true);
 				parser.setFeature(VALIDATION_DYNAMIC_FEATURE_ID, true);
-
 				parser.setProperty(EXTERNAL_SCHEMA_LOCATION_PROPERTY_ID, schemaSource);
 			}
 

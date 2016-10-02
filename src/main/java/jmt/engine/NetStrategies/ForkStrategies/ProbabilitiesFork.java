@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.engine.NetStrategies.ForkStrategies;
 
 import java.util.HashMap;
@@ -16,32 +34,21 @@ import jmt.engine.random.EmpiricalEntry;
 import jmt.engine.random.EmpiricalPar;
 
 public class ProbabilitiesFork extends ForkStrategy {
-	
-	//store the probabilites of selecting branches
+
 	private double probabilities[];
-	
-	//the names of branches
 	private String[] nodeNames;
-	
 	private Empirical distribution;
-	
 	private EmpiricalPar[] params;
-	
 	private NetNode[] nodes;
-	
-	//the data structure storing the details of each branch
-	//name
-	//probability of chosen
-	//the probabilities p(n) that n jobs are forked to this branch
 	private OutPath[] outPaths;
 
-	public ProbabilitiesFork(EmpiricalEntry[] entries) throws LoadException, IncorrectDistributionParameterException{
+	public ProbabilitiesFork(EmpiricalEntry[] entries) throws LoadException, IncorrectDistributionParameterException {
 		probabilities = new double[entries.length];
 		nodeNames = new String[entries.length];
-		
+
 		distribution = new Empirical();
 		params = new EmpiricalPar[entries.length];
-		
+
 		for (int i = 0; i < entries.length; i++) {
 			EmpiricalEntry entry = entries[i];
 			if (entry.getValue() instanceof String) {
@@ -53,31 +60,28 @@ public class ProbabilitiesFork extends ForkStrategy {
 			} else {
 				throw new LoadException("Name of the node is not a String");
 			}
-		}		
-
+		}
 	}
-	
-	public ProbabilitiesFork(OutPath[] outPaths) throws LoadException, IncorrectDistributionParameterException{
+
+	public ProbabilitiesFork(OutPath[] outPaths) throws LoadException, IncorrectDistributionParameterException {
 		this.outPaths = outPaths;
-		
 		EmpiricalEntry[] entries = new EmpiricalEntry[outPaths.length];
 		for (int i = 0; i < entries.length; i ++) {
 			entries[i] = outPaths[i].getProbabilityOfChosen();
 		}
-		
+
 		probabilities = new double[entries.length];
 		nodeNames = new String[entries.length];
-		
+
 		distribution = new Empirical();
 		params = new EmpiricalPar[entries.length];
-		
+
 		for (int i = 0; i < entries.length; i++) {
 			EmpiricalEntry entry = entries[i];
 			if (entry.getValue() instanceof String) {
 				String nodeName = (String) entry.getValue();
 				nodeNames[i] = nodeName;
 				probabilities[i] = entry.getProbability();
-				//temp = {P(Chosen), p(Not Chosen)}
 				double[] temp = {probabilities[i], 1.0 - probabilities[i]};
 				//parameters of each branch
 				params[i] = new EmpiricalPar(temp);
@@ -91,37 +95,33 @@ public class ProbabilitiesFork extends ForkStrategy {
 	public NodeListWithJobNum getOutNodes(NodeList nodeList, JobClass jobClass) {
 		NodeListWithJobNum nl = new NodeListWithJobNum();
 		try {
-
 			if (nodes == null) {
 				//it is the first execution of this method: find the NetNode objects
 				//corresponding to the nodeNames
 				findNodes();
 			}
-			
+
 			for (int i = 0; i < params.length; i ++) {
 				//the empirical distribution returns the position of the chosen output node
 				int nodePos = (int) distribution.nextRand(params[i]);
-				if (nodePos == 0 && nodeList.contains(this.nodes[i])) {
+				if (nodePos == 0 && nodeList.contains(nodes[i])) {
 					EmpiricalEntry[] JobsPerLinkDis = outPaths[i].getJobsPerLinkDis();
 					EmpiricalPar numParam = new EmpiricalPar(JobsPerLinkDis);
-					
-					Integer num = Integer.parseInt((String)JobsPerLinkDis[(int)distribution.nextRand(numParam)].getValue());
+					Integer num = Integer.parseInt((String) JobsPerLinkDis[(int) distribution.nextRand(numParam)].getValue());
 					Map<JobClass, Integer> map = new HashMap<JobClass, Integer>();
-                                        map.put(jobClass, num);
-                                        nl.add(this.nodes[i], map);
+					map.put(jobClass, num);
+					nl.add(nodes[i], map);
 				}
 			}
 			return nl;
-			
 		} catch (IncorrectDistributionParameterException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
-	
+
 	private boolean findNodes() {
 		nodes = new NetNode[nodeNames.length];
-
 		for (int i = 0; i < nodeNames.length; i++) {
 			nodes[i] = NetSystem.getNode(nodeNames[i]);
 			if (nodes[i] == null) {

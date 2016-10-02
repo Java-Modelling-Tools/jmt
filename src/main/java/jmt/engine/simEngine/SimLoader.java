@@ -29,7 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -916,7 +915,7 @@ public class SimLoader {
 	}
 
 	// An array of names for DOM node-types
-	// (Array indexes = nodeType() values.)
+	// (Array indices = nodeType() values.)
 	static final String[] typeName = { "none", "Element", "Attr", "Text", "CDATA", "EntityRef", "Entity", "ProcInstr", "Comment", "Document",
 			"DocType", "DocFragment", "Notation", };
 

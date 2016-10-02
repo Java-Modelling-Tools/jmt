@@ -80,7 +80,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 
 		// Adds a change listener to perform gotFocus() and lostFocus() calls on wizardPanels
 		mainPanel.addChangeListener(new ChangeListener() {
-
 			/**
 			 * Invoked when the target of the listener has changed its state.
 			 *
@@ -120,20 +119,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		} else {
 			title.setTitle("Parameters Definition");
 		}
-		if (hasForkSection(type)) {
-			if (fsPane == null) {
-				fsPane = new ForkSectionPanel(stationData, classData, stationKey);
-			} else {
-				fsPane.setData(stationData, classData, stationKey);
-			}
-			mainPanel.add(fsPane, fsPane.getName());
 
-			// If this was previously selected, selects this
-			if (oldComponent == fsPane) {
-				mainPanel.setSelectedComponent(oldComponent);
-			}
-
-		}
 		if (hasInputSection(type)) {
 			if (isPane == null) {
 				isPane = new InputSectionPanel(stationData, classData, stationKey);
@@ -146,7 +132,32 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == isPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
+		}
+		if (hasJoinSection(type)) {
+			if (jsPane == null) {
+				jsPane = new JoinSectionPanel(stationData, classData, stationKey);
+			} else {
+				jsPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(jsPane, jsPane.getName());
 
+			// If this was previously selected, selects this
+			if (oldComponent == jsPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+		}
+		if (hasSemaphoreSection(type)) {
+			if (smsPane == null) {
+				smsPane = new SemaphoreSectionPanel(stationData, classData, stationKey);
+			} else {
+				smsPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(smsPane, smsPane.getName());
+
+			// If this was previously selected, selects this
+			if (oldComponent == smsPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
 		}
 		if (hasServiceSection(type)) {
 			if (ssPane == null) {
@@ -160,7 +171,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == ssPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-
 		}
 		if (hasLoggerSection(type)) {
 			// GC: this if was misbehaving in the presence of two or more loggers: https://sourceforge.net/p/jmt/bugs/42/
@@ -175,7 +185,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == lsPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-
 		}
 		if (hasClassSwitchSection(type)) {
 			if (csPane == null) {
@@ -189,7 +198,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == csPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-
 		}
 		if (hasRoutingSection(type)) {
 			if (rsPane == null) {
@@ -203,7 +211,19 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == rsPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
+		}
+		if (hasForkSection(type)) {
+			if (fsPane == null) {
+				fsPane = new ForkSectionPanel(stationData, classData, stationKey);
+			} else {
+				fsPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(fsPane, fsPane.getName());
 
+			// If this was previously selected, selects this
+			if (oldComponent == fsPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
 		}
 		// For BPMN
 		if (hasInGateWaySection(type)) {
@@ -219,35 +239,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == gsPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-
-		}
-		if (hasJoinSection(type)) {
-			if (jsPane == null) {
-				jsPane = new JoinSectionPanel(stationData, classData, stationKey);
-			} else {
-				jsPane.setData(stationData, classData, stationKey);
-			}
-			mainPanel.add(jsPane, jsPane.getName());
-
-			// If this was previously selected, selects this
-			if (oldComponent == jsPane) {
-				mainPanel.setSelectedComponent(oldComponent);
-			}
-
-		}
-		if (hasSemaphoreSection(type)) {
-			if (smsPane == null) {
-				smsPane = new SemaphoreSectionPanel(stationData, classData, stationKey);
-			} else {
-				smsPane.setData(stationData, classData, stationKey);
-			}
-			mainPanel.add(smsPane, smsPane.getName());
-
-			// If this was previously selected, selects this
-			if (oldComponent == smsPane) {
-				mainPanel.setSelectedComponent(oldComponent);
-			}
-
 		}
 		if (hasStoreSection(type)) {
 			if (stPane == null) {
@@ -261,7 +252,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == stPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-
 		}
 		if (hasEnablingSection(type)) {
 			if (enPane == null) {
@@ -275,7 +265,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == enPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-
 		}
 		if (hasTimingSection(type)) {
 			if (tiPane == null) {
@@ -289,7 +278,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == tiPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-
 		}
 		if (hasFiringSection(type)) {
 			if (fiPane == null) {
@@ -303,7 +291,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == fiPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-
 		}
 
 		// Sets current panel
@@ -314,7 +301,23 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		if (checkNullValues()) {
 			return false;
 		} else {
-			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_FORK.equals(type); //|| STATION_TYPE_INGATEWAY.equals(type);
+			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_FORK.equals(type);
+		}
+	}
+
+	private boolean hasJoinSection(String type) {
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_JOIN.equals(type) || STATION_TYPE_SCALER.equals(type);
+		}
+	}
+
+	private boolean hasSemaphoreSection(String type) {
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_SEMAPHORE.equals(type);
 		}
 	}
 
@@ -322,18 +325,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		if (checkNullValues()) {
 			return false;
 		} else {
-			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_DELAY.equals(type);
-		}
-	}
-
-	private boolean hasRoutingSection(String type) {
-		if (checkNullValues()) {
-			return false;
-		} else {
-			return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_DELAY.equals(type) || STATION_TYPE_SOURCE.equals(type)
-					|| STATION_TYPE_ROUTER.equals(type) || STATION_TYPE_LOGGER.equals(type) || STATION_TYPE_TERMINAL.equals(type)
-					|| STATION_TYPE_JOIN.equals(type) || STATION_TYPE_CLASSSWITCH.equals(type) || STATION_TYPE_TASKSEMAPHORE.equals(type);
-					//|| STATION_TYPE_OUTGATEWAY.equals(type);
+			return STATION_TYPE_DELAY.equals(type) || STATION_TYPE_SERVER.equals(type);
 		}
 	}
 
@@ -345,20 +337,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		}
 	}
 
-	private boolean hasForkSection(String type) {
-		if (checkNullValues()) {
-			return false;
-		} else {
-			return STATION_TYPE_FORK.equals(type); //|| STATION_TYPE_INGATEWAY.equals(type);
-		}
-	}
-
-	/**
-	 * True the stations of type @type
-	 * have a class_switch panel, false otherwise.
-	 * @param type the type of the station
-	 * @return
-	 */
 	private boolean hasClassSwitchSection(String type) {
 		if (checkNullValues()) {
 			return false;
@@ -367,28 +345,30 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		}
 	}
 
+	private boolean hasRoutingSection(String type) {
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_SOURCE.equals(type) ||  STATION_TYPE_TERMINAL.equals(type) || STATION_TYPE_ROUTER.equals(type)
+					|| STATION_TYPE_DELAY.equals(type) || STATION_TYPE_SERVER.equals(type) || STATION_TYPE_JOIN.equals(type)
+					|| STATION_TYPE_LOGGER.equals(type) || STATION_TYPE_CLASSSWITCH.equals(type) || STATION_TYPE_SEMAPHORE.equals(type);
+		}
+	}
+
+	private boolean hasForkSection(String type) {
+		if (checkNullValues()) {
+			return false;
+		} else {
+			return STATION_TYPE_FORK.equals(type) || STATION_TYPE_SCALER.equals(type);
+		}
+	}
+
 	// For BPMN
 	private boolean hasInGateWaySection(String type) {
 		if (checkNullValues()) {
 			return false;
 		} else {
-			return STATION_TYPE_FORK.equals(type);
-		}
-	}
-
-	private boolean hasJoinSection(String type) {
-		if (checkNullValues()) {
-			return false;
-		} else {
-			return STATION_TYPE_JOIN.equals(type);
-		}
-	}
-
-	private boolean hasSemaphoreSection(String type) {
-		if (checkNullValues()) {
-			return false;
-		} else {
-			return STATION_TYPE_TASKSEMAPHORE.equals(type);
+			return STATION_TYPE_FORK.equals(type) || STATION_TYPE_SCALER.equals(type);
 		}
 	}
 
@@ -431,30 +411,9 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	// -------------------------------------------------------------------------
 	// ----------------------  Francesco D'Aquino ------------------------------
 	// -------------------------------------------------------------------------
-	public void showRoutingSectionPanel() {
-		mainPanel.setSelectedComponent(rsPane);
-	}
-
-	public void showRoutingSectionPanel(Object classKey) {
-		rsPane.setData(stationData, classData, stationKey);
-		rsPane.setSelectedClass(classKey);
-		mainPanel.setSelectedComponent(rsPane);
-	}
 
 	public void showQueueSectionPanel() {
 		mainPanel.setSelectedComponent(isPane);
-	}
-
-	public void showServiceSectionPanel() {
-		mainPanel.setSelectedComponent(ssPane);
-	}
-
-	/**
-	 * It shows the class_switch panel
-	 * of the related station.
-	 */
-	public void showCsSectionPanel() {
-		mainPanel.setSelectedComponent(csPane);
 	}
 
 	public void showJoinSectionPanel(Object classKey) {
@@ -467,6 +426,24 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		smsPane.setData(stationData, classData, stationKey);
 		smsPane.setSelectedClass(classKey);
 		mainPanel.setSelectedComponent(smsPane);
+	}
+
+	public void showServiceSectionPanel() {
+		mainPanel.setSelectedComponent(ssPane);
+	}
+
+	public void showCsSectionPanel() {
+		mainPanel.setSelectedComponent(csPane);
+	}
+
+	public void showRoutingSectionPanel() {
+		mainPanel.setSelectedComponent(rsPane);
+	}
+
+	public void showRoutingSectionPanel(Object classKey) {
+		rsPane.setData(stationData, classData, stationKey);
+		rsPane.setSelectedClass(classKey);
+		mainPanel.setSelectedComponent(rsPane);
 	}
 
 	public void showEnablingSectionPanel(Object classKey) {

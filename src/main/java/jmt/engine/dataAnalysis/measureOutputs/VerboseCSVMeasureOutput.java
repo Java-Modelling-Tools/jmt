@@ -41,17 +41,18 @@ import jmt.engine.log.JSimLoggerFactory;
  * </tr></table>
  */
 public class VerboseCSVMeasureOutput extends MeasureOutput {
+
 	public static final String COLUMN_TS = LogTunnel.COLUMN_TIMESTAMP;
 	public static final String COLUMN_SAMPLEVALUE = "SAMPLE";
 	public static final String COLUMN_WEIGHTVALUE = "WEIGHT";
-	
+
 	public static final String[] COLUMNS = {COLUMN_TS, COLUMN_SAMPLEVALUE, COLUMN_WEIGHTVALUE};
-	
+
 	private CSVLogger logger;
 	private File file;
-	
+
 	private Map<String, Object> defaults = Collections.emptyMap();
-	
+
 	/**
 	 * Constructor of a NewCSVMeasureOutput object, using a file.
 	 * @param Measure the measure to be sent in output
@@ -62,16 +63,16 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 	public VerboseCSVMeasureOutput(jmt.engine.dataAnalysis.Measure Measure, SimParameters simParameters) throws IOException {
 		super(Measure);
 		file = new File(simParameters.getLogPath(), measure.getName() + ".csv");
-		
+
 		char decimalSeparator;
-		
+
 		String ds = simParameters.getLogDecimalSeparator();
 		if (ds != null && ds.length() > 0) {
 			decimalSeparator = ds.charAt(0);
 		} else {
 			decimalSeparator = '.';
 		}
-		
+
 		logger = JSimLoggerFactory.getCSVLogger(file, COLUMNS, false, simParameters.getLogDelimiter(), decimalSeparator);
 	}
 
@@ -98,11 +99,11 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 			logger = null;
 		}
 	}
-	
+
 	@Override
 	public void finalizeMeasure() {
 		close();
-	//FIXME fix this...
+//FIXME fix this...
 //		try {
 //			if (measure.getSuccess() == true) {
 //				writer.write("\nMeasure name; " + measure.getName() + ";\n" + "Mean; " + statistics.getMean() + ";\n" + "2nd Moment; "
@@ -127,7 +128,5 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 	public File getOutputFile() {
 		return file;
 	}
-	
-	
-	
+
 }

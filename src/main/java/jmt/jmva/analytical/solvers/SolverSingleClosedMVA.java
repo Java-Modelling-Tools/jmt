@@ -289,10 +289,10 @@ public class SolverSingleClosedMVA extends Solver {
 	//end NEW
 
 	/*
-		public void indexes() {
+		public void indices() {
 	        //TODO: not implemented!!!!
 		}
-	    //overrides indexes() of SolverSingleClosedExact
+	    //overrides indices() of SolverSingleClosedExact
 	*/
 
 	/**
@@ -432,7 +432,7 @@ public class SolverSingleClosedMVA extends Solver {
 
 		}//end loop through customers
 
-		//the other indexes dependent on totThroughput
+		//the other indices dependent on totThroughput
 		for (k = 0; k < stations; k++) {
 			throughput[k] = totThroughput * visits[k];
 			totRespTime = customers / totThroughput;
@@ -2272,7 +2272,7 @@ public class SolverSingleClosedMVA extends Solver {
 	//NEW
 	//@author Stefano Omini
 
-	/** generates a string with all the calculated indexes.
+	/** generates a string with all the calculated indices.
 	 * @return the string
 	 */
 

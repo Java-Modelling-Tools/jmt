@@ -48,7 +48,7 @@ public interface SolverInterface {
      * algorithm.
      * @param A The matrix A of the linear system Ax = b
      * @param UList The list containing these positions as Tuple objects
-     * @param uncomputables Set of the indexes of possible zero-columns of A
+     * @param uncomputables Set of the indices of possible zero-columns of A
      * @throws OperationNotSupportedException Thrown when the matrix A is not square
      */
     public abstract void initialise(BigRational[][] A, List<Tuple<Integer, Integer>> UList, Set<Integer> uncomputables) throws OperationNotSupportedException;

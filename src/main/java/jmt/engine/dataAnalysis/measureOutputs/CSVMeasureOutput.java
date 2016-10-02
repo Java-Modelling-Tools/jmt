@@ -38,7 +38,7 @@ import jmt.engine.dataAnalysis.MeasureOutput;
  * <td>Analyzed Samples</td>
  * <td>Max Samples</td>
  * </tr></table>
- @author Francesco Radaelli
+ * @author Francesco Radaelli
  */
 public class CSVMeasureOutput extends MeasureOutput {
 
@@ -92,7 +92,6 @@ public class CSVMeasureOutput extends MeasureOutput {
 	@Override
 	public void finalizeMeasure() {
 		try {
-
 			if (measure.getSuccess() == true) {
 				outputWriter.write("\nMeasure name; " + measure.getName() + ";\n" + "Measure value; " + measure.getMeanValue() + ";\n" + "Lower limit; "
 						+ measure.getLowerLimit() + ";\n" + "Upper Limit; " + measure.getUpperLimit() + ";\n" + "Discarded samples; "
@@ -118,6 +117,5 @@ public class CSVMeasureOutput extends MeasureOutput {
 	public File getOutputFile() {
 		return file;
 	}
-	
-	
+
 }

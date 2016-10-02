@@ -40,14 +40,14 @@ public class Link extends OutputSection {
 	private NodeList OutputNodes;
 	private NetNode requestSource;
 
-	//-------------------BLOCKING REGION PROPERTIES----------------------------//
+	//--------------------BLOCKING REGION PROPERTIES--------------------//
 	//true if the border router behaviour is turned on
 	private boolean borderRouterON;
 	//the blocking region that the owner node of this section belongs to
 	private BlockingRegion myRegion;
 	//the input station of the blocking region
 	private NetNode regionInputStation;
-	//-------------------BLOCKING REGION PROPERTIES----------------------------//
+	//------------------------------------------------------------------//
 
 	/**
 	 * Creates a new instance of the link section.

@@ -99,10 +99,10 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		WarningScrollTable jsp = new WarningScrollTable(semaphoreStrategies, WARNING_CLASS);
 		//routing strategy selector on the left, routing probabilities editor on the right
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Semaphore Strategies"));
-		mainPanel.setResizeWeight(.80); // Gives more space to left component
-		jsp.setMinimumSize(new Dimension(180, 100));
+		mainPanel.setResizeWeight(1.0); // Gives more space to left component
+		jsp.setMinimumSize(new Dimension(200, 100));
 		mainPanel.setLeftComponent(jsp);
-		semaphoreEditor.setMinimumSize(new Dimension(160, 100));
+		semaphoreEditor.setMinimumSize(new Dimension(200, 100));
 		mainPanel.setRightComponent(semaphoreEditor);
 		add(mainPanel, BorderLayout.CENTER);
 	}
@@ -166,7 +166,6 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 					semaphoreStrategies = SemaphoreStrategy.findAll();
 				}
 				return ComboBoxCellEditor.getEditorInstance(semaphoreStrategies);
-
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -197,7 +196,7 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 			if (row != -1) {
 				if (semaphoreEditor != null) {
 					//semaphoreEditor.stopEditing();
-					semaphoreEditor.setData(stationData, classData,  stationKey, classData.getClassKeys().get(row));
+					semaphoreEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(row));
 					SemaphoreSectionPanel.this.doLayout();
 					SemaphoreSectionPanel.this.repaint();
 				}
@@ -265,6 +264,7 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		private Object indexToKey(int index) {
 			return classData.getClassKeys().get(index);
 		}
+
 	}
 
 }

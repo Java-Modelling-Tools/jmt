@@ -2451,10 +2451,10 @@ public class Mediator implements GuiInterface {
 	 * Modified by Francesco D'Aquino
 	 */
 	public void pauseSimulation() {
-		if (model.isParametricAnalysisEnabled()) {
-			batchThread.pauseSimulation();
-		} else {
+		if (!model.isParametricAnalysisEnabled()) {
 			dispatcher.pauseSimulation();
+		} else {
+			batchThread.pauseSimulation();
 		}
 	}
 
@@ -2481,7 +2481,7 @@ public class Mediator implements GuiInterface {
 		dialogFactory.getDialog(new MeasurePanel(model, model, model), "Define performance indices",
 				Defaults.getAsInteger("JSIMMeasuresDefWindowWidth").intValue(),
 				Defaults.getAsInteger("JSIMMeasuresDefWindowHeight").intValue(), true,
-				"JSIMMeasuresDefWindowWidth","JSIMMeasuresDefWindowHeight");
+				"JSIMMeasuresDefWindowWidth", "JSIMMeasuresDefWindowHeight");
 	}
 
 	/**

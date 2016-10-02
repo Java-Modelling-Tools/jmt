@@ -26,15 +26,13 @@ import org.jgraph.graph.Port;
  * <p>Description: </p>
  */
 public class LoggerCell extends JmtCell {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	// Disables this component
 	public static final boolean canBePlaced = true;
 
-	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco;mod MF)
+	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
 	public static final String ICON = Mediator.advanced ? "bc" : "Logger";
 
 	/**
@@ -58,6 +56,17 @@ public class LoggerCell extends JmtCell {
 		ports[0] = new InputPort(this);
 		ports[1] = new OutputPort(this);
 		return ports;
+	}
+
+	/**
+	 * Tells if this station generates or destroys jobs (useful for blocking region
+	 * management)
+	 *
+	 * @return true if this station generates or destroy jobs, false otherwise
+	 */
+	@Override
+	public boolean generateOrDestroyJobs() {
+		return false;
 	}
 
 	/**

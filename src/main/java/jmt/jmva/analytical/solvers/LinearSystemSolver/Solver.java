@@ -68,7 +68,7 @@ public class Solver implements SolverInterface {
      */
     protected List<Tuple<Integer, Integer>> UList;
     /**
-     * The set of indexes of possible zero-columns of A.
+     * The set of indices of possible zero-columns of A.
      */
     protected Set<Integer> uncomputables;
     /**
@@ -133,7 +133,7 @@ public class Solver implements SolverInterface {
      * in the linear systems (max A, max B, max Solution = max G) are given.
      * @param A The matrix A of the linear system Ax = b
      * @param UList The list containing these positions as Tuple objects
-     * @param uncomputables The set of indexes of possible zero-columns of A
+     * @param uncomputables The set of indices of possible zero-columns of A
      * @param maxA The maximum possible element in matrix A
      * @param maxb The maximum possible element of vector b
      * @param maxG The maximum possible legal solution value

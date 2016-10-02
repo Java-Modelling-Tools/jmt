@@ -187,7 +187,7 @@ public class SolverSingleClosedExactDyn extends jmt.jmva.analytical.solvers.Solv
 		return;
 	}
 
-	/** Calculates the indexes of interest for the system.<br>
+	/** Calculates the indices of interest for the system.<br>
 	 *  For a description of the algorithm see:<br>
 	 * <em>
 	 *  S.C. Bruell, G. Balbo,<br>
@@ -195,7 +195,7 @@ public class SolverSingleClosedExactDyn extends jmt.jmva.analytical.solvers.Solv
 	 * 1980, Elsevier North Holland
 	 */
 	@Override
-	public void indexes() {
+	public void indices() {
 		//TODO: da implementare??
 	}
 

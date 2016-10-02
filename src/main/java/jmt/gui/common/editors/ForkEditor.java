@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.editors;
 
 import java.awt.GridLayout;
@@ -64,8 +82,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	private OutNumTable numTable;
 	private CombTable combTable = new CombTable();
 	private ClassNumTable classNumTable;
-	private JTextArea noOptLabel = new JTextArea(
-			"No options available for this fork strategy");
+	private JTextArea noOptLabel = new JTextArea("No options available for this fork strategy");
 	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);
 	private JSplitPane jsp = new JSplitPane();
 	private JSplitPane jsp2 = new JSplitPane();
@@ -73,8 +90,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 	private Object item;
 
-	public ForkEditor(StationDefinition sd, ClassDefinition cs,
-			Object stationKey, Object classKey) {
+	public ForkEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		super();
 		super.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		super.setDividerSize(3);
@@ -93,12 +109,12 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		csPane = new WarningScrollTable(switchTable, WARNING_OUTGOING_ROUTING);
 		onPane = new WarningScrollTable(numTable, "Select a branch");
 		cnPane = new WarningScrollTable(classNumTable, WARNING_OUTGOING_ROUTING);
+
 		switchTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
 				if (switchTable.getSelectedRow() > -1) {
-					out = outPaths.get(indexToKey(switchTable.getSelectedRow()))
-							.getOutParameters();
+					out = outPaths.get(indexToKey(switchTable.getSelectedRow())).getOutParameters();
 					numTable.updateUI();
 					onPane.updateUI();
 				}
@@ -111,8 +127,8 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 				return stations.getForwardConnections(stationKey).get(index);
 			}
 		});
-		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(),
-				"Forking Options"));
+
+		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Forking Options"));
 		noOptLabel.setOpaque(false);
 		noOptLabel.setEditable(false);
 		noOptLabel.setLineWrap(true);
@@ -133,7 +149,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		JButton delete = new JButton("Delete");
 
 		add.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (out != null && keys != null) {
@@ -141,13 +156,10 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 					keys.add(null);
 					outTable.updateUI();
 				}
-
 			}
-
 		});
 
 		delete.addActionListener(new ActionListener() {
-
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (outTable.getSelectedRow() != -1) {
@@ -158,7 +170,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 					}
 				}
 			}
-
 		});
 
 		buttons = new JPanel();
@@ -183,13 +194,8 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		jsp.setRightComponent(jsp2);
 	}
 
-	public void setData(StationDefinition sd, ClassDefinition cs,
-			Object stationKey, Object classKey) {
-		/*
-		 * if (stationKey==null||classKey==null||sd==null) { emptyPane(); return; }
-		 */
-		ForkStrategy fs = (ForkStrategy) sd.getForkingStrategy(stationKey,
-				classKey);
+	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
+		ForkStrategy fs = (ForkStrategy) sd.getForkingStrategy(stationKey, classKey);
 		numTable.clearSelection();
 		outTable.clearSelection();
 		jsp2.getRightComponent().setVisible(false);
@@ -201,10 +207,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			emptyPane();
 		} else {
 			descrTextPane.setText(fs.getDescription());
-			/*
-			 * if (rs.getValues() == null) { emptyPane(); }
-			 * else { createDetails(rs, sd, stationKey, classKey); }
-			 */
 			if (fs instanceof ProbabilitiesFork) {
 				createDetails(fs, sd, stationKey, classKey);
 			} else if (fs instanceof CombFork) {
@@ -226,8 +228,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		out = null;
 	}
 
-	private void createDetails(ForkStrategy fs, StationDefinition sd,
-			Object stationKey, Object classKey) {
+	private void createDetails(ForkStrategy fs, StationDefinition sd, Object stationKey, Object classKey) {
 		outPaths = (Map<Object, OutPath>) fs.getOutDetails();
 		stations = sd;
 		out = null;
@@ -250,8 +251,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		}
 	}
 
-	private void createCombDetails(ForkStrategy fs, StationDefinition sd,
-			Object stationKey, Object classKey) {
+	private void createCombDetails(ForkStrategy fs, StationDefinition sd, Object stationKey, Object classKey) {
 		combProbs = (Map<Object, Double>) fs.getOutDetails();
 		stations = sd;
 		this.stationKey = stationKey;
@@ -265,8 +265,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		setRightComponent(new JPanel());
 	}
 
-	private void createClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cs,
-			Object stationKey, Object classKey) {
+	private void createClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		outPaths = (Map<Object, OutPath>) fs.getOutDetails();
 		stations = sd;
 		this.stationKey = stationKey;
@@ -285,8 +284,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		setRightComponent(new JPanel());
 	}
 
-	private void createMultiBranchClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cs,
-			Object stationKey, Object classKey) {
+	private void createMultiBranchClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		outPaths = (Map<Object, OutPath>) fs.getOutDetails();
 		stations = sd;
 		this.stationKey = stationKey;
@@ -338,14 +336,11 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			if (stations.getForwardConnections(stationKey).size() == 1) {
 				jl.setSelectedIndex(0);
 			}
-
 		}
-
 	}
 
 	protected void setupCombForking() {
-		if (stationKey == null || classKey == null || stations == null
-				|| combProbs == null) {
+		if (stationKey == null || classKey == null || stations == null || combProbs == null) {
 			return;
 		}
 		Vector<Object> output = stations.getForwardConnections(stationKey);
@@ -362,13 +357,11 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 				// default
 				combProbs.put(key, new Double(0.0));
 			}
-
 		}
 	}
 
 	protected void setupClassSwitchForking() {
-		if (stationKey == null || classKey == null || stations == null
-				|| outPaths == null) {
+		if (stationKey == null || classKey == null || stations == null || outPaths == null) {
 			return;
 		}
 		// fetching output-connected stations list
@@ -456,8 +449,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(
-						((ForkingTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((ForkingTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
@@ -466,10 +458,8 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	protected class ForkingTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Destination",
-		"Probability" };
-		private Class<?>[] columnClasses = new Class[] { String.class,
-				Object.class };
+		private String[] columnNames = new String[] { "Destination", "Probability" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 		public int[] columnSizes = new int[] { 80, 60 };
 
 		public int getRowCount() {
@@ -533,6 +523,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			}
 			return stations.getForwardConnections(stationKey).get(index);
 		}
+
 	}
 
 	protected class OutPathTable extends JTable {
@@ -549,8 +540,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(
-						((OutPathTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((OutPathTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
@@ -559,10 +549,8 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	protected class OutPathTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Number of tasks",
-		"Probability" };
-		private Class<?>[] columnClasses = new Class[] { String.class,
-				Object.class };
+		private String[] columnNames = new String[] { "Number of tasks", "Probability" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 		public int[] columnSizes = new int[] { 80, 60 };
 
 		public int getRowCount() {
@@ -621,7 +609,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 					}
 				} catch (NumberFormatException e) {
 				}
-
 			}
 			if (columnIndex == 1) {
 				try {
@@ -641,6 +628,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			}
 			return keys.get(index);
 		}
+
 	}
 
 	protected class OutComboBox extends JComboBox implements ActionListener {
@@ -656,21 +644,17 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == this && this.getSelectedIndex() >= 0) {
-				out = outPaths.get(
-						stations.getStationByName((String) item))
-						.getOutParameters();
+				out = outPaths.get(stations.getStationByName((String) item)).getOutParameters();
 				keys = new ArrayList<Object>(out.keySet());
 				jsp2.getRightComponent().setVisible(true);
 				jsp2.setDividerLocation(-1);
 				outTable.updateUI();
 			}
 		}
+
 	}
 
-	protected class OutComboModel extends AbstractListModel implements
-	ComboBoxModel {
-
-		// Object item = null;
+	protected class OutComboModel extends AbstractListModel implements ComboBoxModel {
 
 		@Override
 		public Object getElementAt(int index) {
@@ -723,8 +707,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(
-						((CombTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((CombTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
@@ -733,10 +716,8 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	protected class CombTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "No. of branches",
-		"Probability" };
-		private Class<?>[] columnClasses = new Class[] { String.class,
-				Object.class };
+		private String[] columnNames = new String[] { "No. of branches", "Probability" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 		public int[] columnSizes = new int[] { 80, 60 };
 
 		public int getRowCount() {
@@ -796,6 +777,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		private Object indexToKey(int index) {
 			return Integer.toString(index + 1);
 		}
+
 	}
 
 	protected class ClassNumTable extends JTable {
@@ -814,8 +796,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(
-						((ClassNumTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((ClassNumTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
@@ -825,10 +806,8 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 		private ClassDefinition cs;
-		private String[] columnNames = new String[] { "Class",
-		"Number of tasks" };
-		private Class<?>[] columnClasses = new Class[] { String.class,
-				Object.class };
+		private String[] columnNames = new String[] { "Class", "Number of tasks" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 		public int[] columnSizes = new int[] { 80, 60 };
 
 		public ClassNumTableModel(ClassDefinition cs) {
@@ -896,6 +875,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		private Object indexToKey(int index) {
 			return classes.getClassKeys().get(index);
 		}
+
 	}
 
 	protected class ForkingSwitchTable extends JTable {
@@ -912,8 +892,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(
-						((ForkingSwitchTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((ForkingSwitchTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
@@ -973,6 +952,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			}
 			return stations.getForwardConnections(stationKey).get(index);
 		}
+
 	}
 
 	protected class OutNumTable extends JTable {
@@ -990,8 +970,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(
-						((OutNumTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((OutNumTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
@@ -1026,6 +1005,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 				}
 			}
 		}
+
 	}
 
 }

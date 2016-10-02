@@ -68,6 +68,17 @@ public class RoutingStationCell extends JmtCell {
 	}
 
 	/**
+	 * Tells if this station generates or destroys jobs (useful for blocking region
+	 * management)
+	 *
+	 * @return true if this station generates or destroy jobs, false otherwise
+	 */
+	@Override
+	public boolean generateOrDestroyJobs() {
+		return false;
+	}
+
+	/**
 	 * Returns the name of the icon of this cell
 	 *
 	 * @return the name of the icon of this cell

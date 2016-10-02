@@ -90,7 +90,7 @@ public class PAPlot extends Plot {
 			lowerBounds[i] = thisValue.getLowerBound();
 			upperBounds[i] = thisValue.getUpperBound();
 		}
-		//find the indexes of not valid bounds
+		//find the indices of not valid bounds
 		for (int i = 0; i < valuesNumber; i++) {
 			if (!((upperBounds[i] == 0) && (this.values[i] != 0))) {
 				if (Double.isInfinite(upperBounds[i])) {

@@ -177,7 +177,6 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 					routingStrategies = RoutingStrategy.findAll();
 				}
 				return ComboBoxCellEditor.getEditorInstance(routingStrategies);
-
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -219,20 +218,18 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 
 	protected class RoutingSelectionTableRenderer extends GrayCellRenderer {
 
-		private static final long serialVersionUID = 8097765063638320793L;
+		private static final long serialVersionUID = 1L;
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 			Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 			super.setHorizontalAlignment(SwingConstants.LEFT);
-
 			if (!table.isCellEditable(row, 1)) {
 				renderer.setEnabled(false);
 			} else {
 				renderer.setEnabled(true);
 			}
 			return renderer;
-
 		}
 
 	}
@@ -265,19 +262,23 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			if (columnIndex == 1) {
-				if (stationData.getStationKeysSource().contains(stationKey)) {//if it is a source station
+				if (stationData.getStationKeysSource().contains(stationKey)) {
+					//if it is a source station
 					Object classKey = indexToKey(rowIndex);
 					Object refStation = classData.getClassRefStation(classKey);
-					if (!stationKey.equals(refStation))
+					if (!stationKey.equals(refStation)) {
 						return false;
-					else 
-						return true;//should be reference station
-				}
-				else 
+					} else {
+						//should be reference station
+						return true;
+					}
+				} else {
 					return true;
-			}
-			else //column 0 is not editable
+				}
+			} else {
+				//column 0 is not editable
 				return false;
+			}
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
@@ -335,7 +336,6 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 	}
 
 	public static void openLoadDependentRoutingEditor(Container parent, HashMap<String, Object> params) {
-
 		while (!(parent instanceof Frame || parent instanceof Dialog)) {
 			parent = parent.getParent();
 		}

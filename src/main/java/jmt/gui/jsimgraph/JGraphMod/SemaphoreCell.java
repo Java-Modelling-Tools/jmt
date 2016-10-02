@@ -27,7 +27,7 @@ import org.jgraph.graph.Port;
  * Date: 25-jul-2016
  * Time: 11.59.51
  */
-public class TaskSemaphoreCell extends JmtCell {
+public class SemaphoreCell extends JmtCell {
 
 	private static final long serialVersionUID = 1L;
 
@@ -38,7 +38,7 @@ public class TaskSemaphoreCell extends JmtCell {
 	public static final boolean canBePlaced = true;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
-	public static final String ICON = Mediator.advanced ? "bc" : "tasksemaphore";
+	public static final String ICON = Mediator.advanced ? "bc" : "semaphore";
 
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.
@@ -46,7 +46,7 @@ public class TaskSemaphoreCell extends JmtCell {
 	 * @param userObject an Object provided by the user that constitutes
 	 *                   the cell's data
 	 */
-	public TaskSemaphoreCell(Object userObject) {
+	public SemaphoreCell(Object userObject) {
 		super(ICON, userObject);
 		type = SEMAPHORE;
 	}

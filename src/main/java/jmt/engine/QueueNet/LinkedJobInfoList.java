@@ -18,7 +18,6 @@
 
 package jmt.engine.QueueNet;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
@@ -44,7 +43,7 @@ public class LinkedJobInfoList implements JobInfoList {
 	//contain JobInfo objects
 	private LinkedList<JobInfo> list;
 
-	public LinkedList<JobInfo> listPerClass[];
+	private LinkedList<JobInfo> listPerClass[];
 
 	//arrivals and completions
 	private int jobsIn;
@@ -117,11 +116,10 @@ public class LinkedJobInfoList implements JobInfoList {
 	 */
 	@SuppressWarnings("unchecked")
 	public LinkedJobInfoList(int numberOfJobClasses, boolean save) {
-		int i;
 		if (save) {
 			list = new LinkedList<JobInfo>();
 			listPerClass = new LinkedList[numberOfJobClasses];
-			for (i = 0; i < numberOfJobClasses; i++) {
+			for (int i = 0; i < numberOfJobClasses; i++) {
 				listPerClass[i] = new LinkedList<JobInfo>();
 			}
 		}
@@ -152,9 +150,9 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#size(jmt.engine.QueueNet.JobClass)
 	 */
-	public int size(JobClass JobClass) throws jmt.common.exception.NetException {
+	public int size(JobClass jobClass) throws jmt.common.exception.NetException {
 		if (listPerClass != null) {
-			return listPerClass[JobClass.getId()].size();
+			return listPerClass[jobClass.getId()].size();
 		} else {
 			throw new jmt.common.exception.NetException(this, PROPERTY_NOT_AVAILABLE, "property not available");
 		}
@@ -170,8 +168,8 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getJobsInPerClass(jmt.engine.QueueNet.JobClass)
 	 */
-	public int getJobsInPerClass(JobClass JobClass) {
-		return jobsInPerClass[JobClass.getId()];
+	public int getJobsInPerClass(JobClass jobClass) {
+		return jobsInPerClass[jobClass.getId()];
 	}
 
 	/* (non-Javadoc)
@@ -191,8 +189,8 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getJobsOutPerClass(jmt.engine.QueueNet.JobClass)
 	 */
-	public int getJobsOutPerClass(JobClass JobClass) {
-		return jobsOutPerClass[JobClass.getId()];
+	public int getJobsOutPerClass(JobClass jobClass) {
+		return jobsOutPerClass[jobClass.getId()];
 	}
 
 	/* (non-Javadoc)
@@ -216,9 +214,9 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getBusyTimePerClass(jmt.engine.QueueNet.JobClass)
 	 */
-	public double getBusyTimePerClass(JobClass JobClass) throws jmt.common.exception.NetException {
+	public double getBusyTimePerClass(JobClass jobClass) throws jmt.common.exception.NetException {
 		if (listPerClass != null) {
-			return busyTimePerClass[JobClass.getId()];
+			return busyTimePerClass[jobClass.getId()];
 		} else {
 			throw new jmt.common.exception.NetException(this, PROPERTY_NOT_AVAILABLE, "property not available");
 		}
@@ -234,8 +232,8 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobInTimePerClass(jmt.engine.QueueNet.JobClass)
 	 */
-	public double getLastJobInTimePerClass(JobClass JobClass) {
-		return lastJobInTimePerClass[JobClass.getId()];
+	public double getLastJobInTimePerClass(JobClass jobClass) {
+		return lastJobInTimePerClass[jobClass.getId()];
 	}
 
 	/* (non-Javadoc)
@@ -255,15 +253,15 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobOutTimePerClass(jmt.engine.QueueNet.JobClass)
 	 */
-	public double getLastJobOutTimePerClass(JobClass JobClass) {
-		return lastJobOutTimePerClass[JobClass.getId()];
+	public double getLastJobOutTimePerClass(JobClass jobClass) {
+		return lastJobOutTimePerClass[jobClass.getId()];
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobDropTimePerClass(jmt.engine.QueueNet.JobClass)
 	 */
-	public double getLastJobDropTimePerClass(JobClass JobClass) {
-		return lastJobDropTimePerClass[JobClass.getId()];
+	public double getLastJobDropTimePerClass(JobClass jobClass) {
+		return lastJobDropTimePerClass[jobClass.getId()];
 	}
 
 	/* (non-Javadoc)
@@ -282,32 +280,32 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getLastModifyTimePerClass(jmt.engine.QueueNet.JobClass)
 	 */
-	public double getLastModifyTimePerClass(JobClass JobClass) {
-		if (lastJobOutTimePerClass[JobClass.getId()] >= lastJobInTimePerClass[JobClass.getId()]
-				&& lastJobOutTimePerClass[JobClass.getId()] >= lastJobDropTimePerClass[JobClass.getId()]) {
-			return lastJobOutTimePerClass[JobClass.getId()];
-		} else if (lastJobInTimePerClass[JobClass.getId()] >= lastJobOutTimePerClass[JobClass.getId()]
-				&& lastJobInTimePerClass[JobClass.getId()] >= lastJobDropTimePerClass[JobClass.getId()]) {
-			return lastJobInTimePerClass[JobClass.getId()];
+	public double getLastModifyTimePerClass(JobClass jobClass) {
+		if (lastJobOutTimePerClass[jobClass.getId()] >= lastJobInTimePerClass[jobClass.getId()]
+				&& lastJobOutTimePerClass[jobClass.getId()] >= lastJobDropTimePerClass[jobClass.getId()]) {
+			return lastJobOutTimePerClass[jobClass.getId()];
+		} else if (lastJobInTimePerClass[jobClass.getId()] >= lastJobOutTimePerClass[jobClass.getId()]
+				&& lastJobInTimePerClass[jobClass.getId()] >= lastJobDropTimePerClass[jobClass.getId()]) {
+			return lastJobInTimePerClass[jobClass.getId()];
 		} else {
-			return lastJobDropTimePerClass[JobClass.getId()];
+			return lastJobDropTimePerClass[jobClass.getId()];
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#lookFor(jmt.engine.QueueNet.Job)
 	 */
-	public JobInfo lookFor(Job Job) throws jmt.common.exception.NetException {
+	public JobInfo lookFor(Job job) throws jmt.common.exception.NetException {
 		if (listPerClass == null) {
 			throw new jmt.common.exception.NetException(this, PROPERTY_NOT_AVAILABLE, "property not available");
 		}
 		//creates an iterator for the job class list of the job class of the specified job
 		//ARIF: changed because possibly class switch has already changed the job class
-		ListIterator<JobInfo> it = list.listIterator();//PerClass[Job.getJobClass().getId()].listIterator();
+		ListIterator<JobInfo> it = list.listIterator();//PerClass[job.getJobClass().getId()].listIterator();
 		JobInfo jobInfo;
 		while (it.hasNext()) {
 			jobInfo = it.next();
-			if (jobInfo.getJob() == Job) {
+			if (jobInfo.getJob() == job) {
 				return jobInfo;
 			}
 		}
@@ -368,13 +366,13 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#addRand(jmt.engine.QueueNet.JobInfo)
+	 * @see jmt.engine.QueueNet.JobInfoList#add(int, jmt.engine.QueueNet.JobInfo)
 	 */
 	public boolean add(int index, JobInfo jobInfo) {
 		if (list != null) {
 			updateAdd(jobInfo);
 			JobClass jobClass = jobInfo.getJob().getJobClass();
-			Iterator<JobInfo> it = list.iterator();
+			ListIterator<JobInfo> it = list.listIterator();
 			int indexPerClass = 0;
 			for (int i = 0; i < index; i++) {
 				if (it.next().getJob().getJobClass() == jobClass) {
@@ -382,7 +380,7 @@ public class LinkedJobInfoList implements JobInfoList {
 				}
 			}
 			listPerClass[jobClass.getId()].add(indexPerClass, jobInfo);
-			list.add(index, jobInfo);
+			it.add(jobInfo);
 			return true;
 		} else {
 			return false;
@@ -546,105 +544,106 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeUtilization(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeUtilization(JobClass jobClass, Measure Measurement) {
+	public void analyzeUtilization(JobClass jobClass, Measure measurement) {
 		if (jobClass != null) {
 			if (utilizationPerClass == null) {
 				utilizationPerClass = new Measure[listPerClass.length];
 			}
-			utilizationPerClass[jobClass.getId()] = Measurement;
+			utilizationPerClass[jobClass.getId()] = measurement;
 		} else {
-			utilization = Measurement;
+			utilization = measurement;
 		}
 	}
 
-	// M. Cazzoli
-	public void analyzeUtilizationJoin(JobClass jobClass, Measure Measurement) {
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#analyzeUtilizationJoin(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
+	 */
+	public void analyzeUtilizationJoin(JobClass jobClass, Measure measurement) {
 		if (jobClass != null) {
 			if (utilizationPerClassJoin == null) {
 				utilizationPerClassJoin = new Measure[listPerClass.length];
 			}
-			utilizationPerClassJoin[jobClass.getId()] = Measurement;
+			utilizationPerClassJoin[jobClass.getId()] = measurement;
 		} else {
-			utilizationJoin = Measurement;
+			utilizationJoin = measurement;
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeResponseTime(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeResponseTime(JobClass jobClass, Measure Measurement) {
+	public void analyzeResponseTime(JobClass jobClass, Measure measurement) {
 		if (jobClass != null) {
 			if (responseTimePerClass == null) {
 				responseTimePerClass = new Measure[listPerClass.length];
 			}
-			responseTimePerClass[jobClass.getId()] = Measurement;
+			responseTimePerClass[jobClass.getId()] = measurement;
 		} else {
-			responseTime = Measurement;
+			responseTime = measurement;
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeDropRate(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
-	public void analyzeDropRate(JobClass jobClass, InverseMeasure Measurement) {
+	public void analyzeDropRate(JobClass jobClass, InverseMeasure measurement) {
 		if (jobClass != null) {
 			if (dropRatePerClass == null) {
 				dropRatePerClass = new InverseMeasure[listPerClass.length];
 			}
-			dropRatePerClass[jobClass.getId()] = Measurement;
+			dropRatePerClass[jobClass.getId()] = measurement;
 		} else {
-			dropRate = Measurement;
+			dropRate = measurement;
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeThroughput(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
-	public void analyzeThroughput(JobClass JobClass, InverseMeasure Measurement) {
-		if (JobClass != null) {
+	public void analyzeThroughput(JobClass jobClass, InverseMeasure measurement) {
+		if (jobClass != null) {
 			if (throughputPerClass == null) {
 				throughputPerClass = new InverseMeasure[listPerClass.length];
 			}
-			throughputPerClass[JobClass.getId()] = Measurement;
+			throughputPerClass[jobClass.getId()] = measurement;
 		} else {
-			throughput = Measurement;
+			throughput = measurement;
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeResidenceTime(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeResidenceTime(JobClass JobClass, Measure Measurement) {
-		if (JobClass != null) {
+	public void analyzeResidenceTime(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
 			if (residenceTimePerClass == null) {
 				residenceTimePerClass = new Measure[listPerClass.length];
 			}
-			residenceTimePerClass[JobClass.getId()] = Measurement;
+			residenceTimePerClass[jobClass.getId()] = measurement;
 		} else {
-			residenceTime = Measurement;
+			residenceTime = measurement;
 		}
 	}
 
-	public void analyzeResponseTimePerSink(JobClass jobClass,
-			Measure Measurement) {
+	public void analyzeResponseTimePerSink(JobClass jobClass, Measure measurement) {
 		if (jobClass != null) {
 			if (responseTimePerSinkPerClass == null) {
 				responseTimePerSinkPerClass = new Measure[listPerClass.length];
 			}
-			responseTimePerSinkPerClass[jobClass.getId()] = Measurement;
+			responseTimePerSinkPerClass[jobClass.getId()] = measurement;
 		} else {
-			responseTimePerSink = Measurement;
+			responseTimePerSink = measurement;
 		}		
 	}
 
-	public void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure Measurement) {
+	public void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure measurement) {
 		if (jobClass != null) {
 			if (throughputPerSinkPerClass == null) {
 				throughputPerSinkPerClass = new InverseMeasure[listPerClass.length];
 			}
-			throughputPerSinkPerClass[jobClass.getId()] = Measurement;
+			throughputPerSinkPerClass[jobClass.getId()] = measurement;
 		} else {
-			throughputPerSink = Measurement;
+			throughputPerSink = measurement;
 		}		
 	}
 
@@ -653,28 +652,27 @@ public class LinkedJobInfoList implements JobInfoList {
 	 * <br>Author: Bertoli Marco
 	 * @param JobInfo current JobInfo
 	 */
-	private void updateResponseTime(JobInfo JobInfo) {
-		int c = JobInfo.getJob().getJobClass().getId();
-		double ArriveTime = JobInfo.getTime();
+	private void updateResponseTime(JobInfo jobInfo) {
+		int c = jobInfo.getJob().getJobClass().getId();
+		double arriveTime = jobInfo.getTime();
 		if (responseTimePerClass != null) {
 			Measure m = responseTimePerClass[c];
 			if (m != null) {
-				m.update(NetSystem.getTime() - ArriveTime, 1.0);
+				m.update(NetSystem.getTime() - arriveTime, 1.0);
 			}
 		}
 		if (responseTime != null) {
-			responseTime.update(NetSystem.getTime() - ArriveTime, 1.0);
+			responseTime.update(NetSystem.getTime() - arriveTime, 1.0);
 		}
 	}
 
-	private void updateUtilization(JobClass JobClass) {
+	private void updateUtilization(JobClass jobClass) {
 		double divisor = serverNumber;
-
 		if (utilizationPerClass != null) {
-			int c = JobClass.getId();
+			int c = jobClass.getId();
 			Measure m = utilizationPerClass[c];
 			if (m != null) {
-				m.update(listPerClass[c].size() / divisor, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
+				m.update(listPerClass[c].size() / divisor, NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
 			}
 		}
 		if (utilization != null) {
@@ -682,17 +680,15 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	// M. Cazzoli
-	private void updateUtilizationJoin(JobClass JobClass) {
-
+	private void updateUtilizationJoin(JobClass jobClass) {
 		if (utilizationPerClassJoin != null) {
-			int c = JobClass.getId();
+			int c = jobClass.getId();
 			Measure m = utilizationPerClassJoin[c];
 			if (m != null) {
 				if (listPerClass[c].size() > 0) {
-					m.update(1, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
+					m.update(1, NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
 				} else {
-					m.update(0, NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
+					m.update(0, NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
 				}
 			}
 		}
@@ -705,17 +701,17 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	private void updateResidenceTime(JobInfo JobInfo) {
-		int c = JobInfo.getJob().getJobClass().getId();
-		double ArriveTime = JobInfo.getTime();
+	private void updateResidenceTime(JobInfo jobInfo) {
+		int c = jobInfo.getJob().getJobClass().getId();
+		double arriveTime = jobInfo.getTime();
 		if (residenceTimePerClass != null) {
 			Measure m = residenceTimePerClass[c];
 			if (m != null) {
-				m.update(NetSystem.getTime() - ArriveTime, 1.0);
+				m.update(NetSystem.getTime() - arriveTime, 1.0);
 			}
 		}
 		if (residenceTime != null) {
-			residenceTime.update(NetSystem.getTime() - ArriveTime, 1.0);
+			residenceTime.update(NetSystem.getTime() - arriveTime, 1.0);
 		}
 	}
 
@@ -733,14 +729,14 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	private void updateThroughput(Job Job) {
-		int c = Job.getJobClass().getId();
+	private void updateThroughput(Job job) {
+		int c = job.getJobClass().getId();
 		if (throughputPerClass != null) {
 			Measure m = throughputPerClass[c];
 			if (m != null) {
 				// new sample is the inter-departures time (1/throughput)
 				// Inverse measure must be used to compute throughput
-				m.update(NetSystem.getTime() - getLastJobOutTimePerClass(Job.getJobClass()), 1.0);
+				m.update(NetSystem.getTime() - getLastJobOutTimePerClass(job.getJobClass()), 1.0);
 			}
 		}
 		if (throughput != null) {
@@ -748,8 +744,8 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	private void updateAdd(JobInfo JobInfo) {
-		Job job = JobInfo.getJob();
+	private void updateAdd(JobInfo jobInfo) {
+		Job job = jobInfo.getJob();
 		JobClass jobClass = job.getJobClass();
 		int c = jobClass.getId();
 
@@ -796,14 +792,14 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeQueueLength(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeQueueLength(JobClass JobClass, Measure Measurement) {
-		if (JobClass != null) {
+	public void analyzeQueueLength(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
 			if (queueLengthPerClass == null) {
 				queueLengthPerClass = new Measure[listPerClass.length];
 			}
-			queueLengthPerClass[JobClass.getId()] = Measurement;
+			queueLengthPerClass[jobClass.getId()] = measurement;
 		} else {
-			queueLength = Measurement;
+			queueLength = measurement;
 		}
 	}
 
@@ -814,14 +810,13 @@ public class LinkedJobInfoList implements JobInfoList {
 	 * are only the jobs in the service sections.
 	 * This difference must be guaranteed at upper level (in Simulation class) where
 	 * "analyze" methods are called
-	 * @param JobClass
 	 */
-	private void updateQueueLength(JobClass JobClass) {
+	private void updateQueueLength(JobClass jobClass) {
 		if (queueLengthPerClass != null) {
-			int c = JobClass.getId();
+			int c = jobClass.getId();
 			Measure m = queueLengthPerClass[c];
 			if (m != null) {
-				m.update(listPerClass[c].size(), NetSystem.getTime() - getLastModifyTimePerClass(JobClass));
+				m.update(listPerClass[c].size(), NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
 			}
 		}
 		if (queueLength != null) {
@@ -901,14 +896,14 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#produceJob(jmt.engine.QueueNet.JobInfo)
 	 */
-	public boolean produceJob(JobInfo JobInfo) throws jmt.common.exception.NetException {
+	public boolean produceJob(JobInfo jobInfo) throws jmt.common.exception.NetException {
 		if (list != null) {
-			Job job = JobInfo.getJob();
+			Job job = jobInfo.getJob();
 			JobClass jobClass = job.getJobClass();
 			int c = jobClass.getId();
 
-			listPerClass[c].add(JobInfo);
-			list.add(JobInfo);
+			listPerClass[c].add(jobInfo);
+			list.add(jobInfo);
 
 			return true;
 		} else {
@@ -919,14 +914,14 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#consumeJob(jmt.engine.QueueNet.JobInfo)
 	 */
-	public boolean consumeJob(JobInfo JobInfo) throws jmt.common.exception.NetException {
+	public boolean consumeJob(JobInfo jobInfo) throws jmt.common.exception.NetException {
 		if (list != null) {
-			Job job = JobInfo.getJob();
+			Job job = jobInfo.getJob();
 			JobClass jobClass = job.getJobClass();
 			int c = jobClass.getId();
 
-			listPerClass[c].remove(JobInfo);
-			list.remove(JobInfo);
+			listPerClass[c].remove(jobInfo);
+			list.remove(jobInfo);
 
 			return true;
 		} else {
@@ -940,13 +935,13 @@ public class LinkedJobInfoList implements JobInfoList {
 	public void setServerNumber(int serverNumber) {
 		this.serverNumber = serverNumber;
 	}
-	//fork in region
-	public int getJobsInPerClass(int Id) {
-		return jobsInPerClass[Id];
+
+	public int getJobsInPerClass(int id) {
+		return jobsInPerClass[id];
 	}
 
-	public int getJobsOutPerClass(int Id) {
-		return jobsOutPerClass[Id];
+	public int getJobsOutPerClass(int id) {
+		return jobsOutPerClass[id];
 	}
-	//end
+
 }

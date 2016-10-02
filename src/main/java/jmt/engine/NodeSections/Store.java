@@ -18,6 +18,7 @@
 
 package jmt.engine.NodeSections;
 
+import java.util.Arrays;
 import java.util.List;
 
 import jmt.common.exception.NetException;
@@ -65,14 +66,14 @@ public class Store extends InputSection {
 	private int droppedJobs;
 	private int[] droppedJobsPerClass;
 
-	//-------------------BLOCKING REGION PROPERTIES----------------------------//
+	//--------------------BLOCKING REGION PROPERTIES--------------------//
 	//true if the redirection behaviour is turned on
 	private boolean redirectionON;
 	//the blocking region that the owner node of this section belongs to
 	private BlockingRegion myRegion;
 	//the input station of the blocking region
 	private NetNode regionInputStation;
-	//-------------------BLOCKING REGION PROPERTIES----------------------------//
+	//------------------------------------------------------------------//
 
 	/**
 	 * Creates a new instance of the store section.
@@ -135,9 +136,7 @@ public class Store extends InputSection {
 		acceptedRelease = false;
 		droppedJobs = 0;
 		droppedJobsPerClass = new int[jobClasses.size()];
-		for (int i = 0; i < droppedJobsPerClass.length; i++) {
-			droppedJobsPerClass[i] = 0;
-		}
+		Arrays.fill(droppedJobsPerClass, 0);
 	}
 
 	/**
@@ -298,14 +297,7 @@ public class Store extends InputSection {
 	}
 
 	/**
-	 * Gets the numbers of dropped jobs for each class
-	 */
-	public int[] getDroppedJobsPerClass() {
-		return droppedJobsPerClass;
-	}
-
-	/**
-	 * Gets the number of dropped jobs for specified class
+	 * Gets the number of dropped jobs for the specified class
 	 */
 	public int getDroppedJobPerClass(int classIndex) {
 		return droppedJobsPerClass[classIndex];

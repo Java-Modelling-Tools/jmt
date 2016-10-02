@@ -29,8 +29,7 @@ public abstract class ForkStrategy implements AutoCheck {
 	public abstract NodeListWithJobNum getOutNodes(NodeList nodes, JobClass jobClass);
 
 	public NodeListWithJobNum getOutNodes(NodeSection callingSection, JobClass jobClass) {
-		return getOutNodes(callingSection.getOwnerNode().getOutputNodes(),
-				jobClass);
+		return getOutNodes(callingSection.getOwnerNode().getOutputNodes(), jobClass);
 	}
 
 	public boolean check() {

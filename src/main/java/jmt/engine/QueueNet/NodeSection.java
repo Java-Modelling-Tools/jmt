@@ -167,7 +167,6 @@ public abstract class NodeSection {
 	 */
 	public void analyze(int name, JobClass jobClass, Measure measurement) throws jmt.common.exception.NetException {
 		switch (name) {
-
 		case SimConstants.LIST_RESIDENCE_TIME:
 			jobsList.analyzeResidenceTime(jobClass, measurement);
 			break;
@@ -559,9 +558,6 @@ public abstract class NodeSection {
 		}
 	}
 
-	//NEW
-	//@author Stefano Omini
-
 	/**
 	 * Redirects a job to a section of a node without updating measures.
 	 *
@@ -657,8 +653,6 @@ public abstract class NodeSection {
 		}
 	}
 
-	//end NEW
-
 	/**
 	 * Tells if jobinfolist at node section should be updated automatically
 	 * @return true if it should be handled automatically, false otherwise
@@ -667,12 +661,16 @@ public abstract class NodeSection {
 		return nodeAuto;
 	}
 
-	//for blocking region measurement
-	public void analyze(int name, Measure measurement) throws NetException {
-
+	public void analyzeJoin(int name, JobClass jobClass, Measure measurement) throws NetException {
+		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 	}
 
-	public void analyze(int name, JobClass jc, Measure measurement, JobClass[] classes) {
-
+	public void analyzeFCR(int name, Measure measurement) throws NetException {
+		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 	}
+
+	public void analyzeFJ(int name, JobClass jc, Measure measurement) throws NetException {
+		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+	}
+
 }

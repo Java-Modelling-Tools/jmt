@@ -60,7 +60,7 @@ public class Measure {
 
 	/** True, if each measure should be sent on output */
 	private boolean verbose;
-	
+
 	/** max precision percentage reached */
 	private double maxPrecisionPercentage;
 
@@ -96,7 +96,7 @@ public class Measure {
 	 * any more samples). A measure is marked as dead when it reaches maxDeadState.
 	 */
 	private int deadState = 0;
-	private int maxDeadState = 2;
+	private int maxDeadState = 4;
 
 	//-------SCALE FACTOR FOR RESIDENCE TIME MEASURES------------//
 
@@ -134,7 +134,6 @@ public class Measure {
 
 	public Measure(String Name, double alfa, double precision, int maxSamples, boolean Verbose, double[] quantiles) {
 		this.name = Name;
-		//DEK (Federico Granata)
 		if (quantiles != null && quantiles.length > 0) {
 			//quantile calculation is requested too
 			analyzer = new QuantileDataAnalyzer(alfa, precision, maxSamples, quantiles);
@@ -147,11 +146,7 @@ public class Measure {
 		maxPrecisionPercentage = 0.0;
 		this.verbose = Verbose;
 		createDOM();
-	
 	}
-
-	//NEW
-	//@author Stefano Omini
 
 	/**
 	 * Sets the station, the class, the type of this Measure
@@ -202,8 +197,6 @@ public class Measure {
 		this.network = network;
 	}
 
-	//end NEW
-
 	public boolean getVerbose() {
 		return verbose;
 	}
@@ -236,116 +229,73 @@ public class Measure {
 	 * @return measure value.
 	 */
 	public double getMeanValue() {
-		// OLD
-		// return analyzer.getMean();
-
-		//NEW
-		//@author Stefano Omini
 		if (!noSamplesTest) {
 			return analyzer.getMean() * scaleFactor;
 		} else {
 			return 0.0;
-			//end NEW
 		}
 	}
-
-	//NEW
-	//@author Stefano Omini
 
 	/** Gets measure value: if the confidence requirements have not been
 	 * reached, it is returned the value estimated up to that moment.
 	 * @return measure value.
 	 */
 	public double getEstimatedMeanValue() {
-		// OLD
-		// return analyzer.estimatedMean();
-
-		//NEW
-		//@author Stefano Omini
 		if (!noSamplesTest) {
 			return analyzer.estimatedMean() * scaleFactor;
 		} else {
 			return 0.0;
-			//end NEW
 		}
 	}
-
-	//end NEW
 
 	/** Gets lower limit.
 	 * @return Lower limit.
 	 */
 	public double getLowerLimit() {
-
-		//NEW
-		//@author Stefano Omini
 		if (analyzer.isZero()) {
 			return 0.0;
 		}
-		//end NEW
 
 		double lower = analyzer.getMean() - analyzer.getConfInt();
-
-		// NEW Bertoli
-		if (analyzer.getConfInt() == 0) {
-			return 0;
-			//end NEW
+		if (analyzer.getConfInt() == 0.0) {
+			return 0.0;
 		}
 
-		if (lower > 0) {
-			// OLD
-			// return lower;
-
-			//NEW
-			//@author Stefano Omini
+		if (lower > 0.0) {
 			return lower * scaleFactor;
-			//end NEW
-
 		} else {
-			return 0;
+			return 0.0;
 		}
 	}
-	
+
 	public double getLastIntervalAvgValue() {
-		if (lastWeight==0) {
-			lastWeight=0;
-			lastSampleWeight=0;
+		if (lastWeight == 0.0) {
+			lastWeight = 0.0;
+			lastSampleWeight = 0.0;
 			return lastIntervalAvgValue;
 		}
 		else {
-			lastIntervalAvgValue=(lastSampleWeight/lastWeight);
-			lastWeight=0;
-			lastSampleWeight=0;
+			lastIntervalAvgValue = lastSampleWeight / lastWeight;
+			lastWeight = 0.0;
+			lastSampleWeight = 0.0;
 			return lastIntervalAvgValue;
 		}
-
 	}
 
 	/** Gets upper limit.
-	 * @return Lower limit.
+	 * @return Upper limit.
 	 */
 	public double getUpperLimit() {
-		//NEW
-		//@author Stefano Omini
 		if (analyzer.isZero()) {
 			return analyzer.getNullMeasure_upperLimit();
 		}
-		//end NEW
-		double upper = analyzer.getMean() + analyzer.getConfInt();
 
-		// NEW Bertoli
-		if (analyzer.getConfInt() == 0) {
-			return 0;
-			//end NEW
+		double upper = analyzer.getMean() + analyzer.getConfInt();
+		if (analyzer.getConfInt() == 0.0) {
+			return 0.0;
 		}
 
-		// OLD
-		// return upper;
-
-		//NEW
-		//@author Stefano Omini
 		return upper * scaleFactor;
-		//end NEW
 	}
 
 	/** Returns number of analyzed samples.
@@ -377,9 +327,6 @@ public class Measure {
 	 */
 
 	public synchronized boolean update(double sample, double weight) {
-		//NEW
-		//@author Stefano Omini
-
 		/*
 		The old version has this problem:
 		Even if the confidence requirements have been reached, measure is updated until ALL
@@ -395,7 +342,7 @@ public class Measure {
 
 		The following if-block is used to skip measure updating phase when the computation
 		has already reached the confidence interval.
-		*/
+		 */
 
 		if (finish) {
 			//confidence interval computation has been already finished
@@ -403,21 +350,17 @@ public class Measure {
 			return true;
 		}
 
-		//end NEW
-
 		// Resets measure dead state
 		deadState = 0;
-		lastSampleWeight= lastSampleWeight+(sample*weight);
-		lastWeight= lastWeight+weight;
-		simulationTime=NetSystem.getTime();
+		lastSampleWeight = lastSampleWeight + (sample * weight);
+		lastWeight = lastWeight + weight;
+		simulationTime = NetSystem.getTime();
 
 		if (analyzer.addSample(sample, weight)) {
 			//data analysis finished
-
 			if (!finish) {
 				//simulation not finished yet
 				finish = true;
-
 				if (output != null) {
 					//writes the new sample
 					output.write(sample, weight);
@@ -434,21 +377,18 @@ public class Measure {
 			}
 
 			return true;
-
 		} else if (verbose) {
 			//data analysis not finished yet
-
 			if (output != null) {
 				//writes the new sample
 				output.write(sample, weight);
 			}
-
 		}
 
 		if (measureType == SimConstants.RESIDENCE_TIME) {
 			scaleMeasureWithVisitRatio();
 		}
-		
+
 		return false;
 	}
 
@@ -459,13 +399,9 @@ public class Measure {
 		return name;
 	}
 
-	//NEW
-	//@author Stefano Omini
 	public DynamicDataAnalyzer getAnalyzer() {
 		return analyzer;
 	}
-
-	//end NEW
 
 	/** Returns analyzed samples percentage.
 	 * @return analyzed samples percentage.
@@ -494,7 +430,6 @@ public class Measure {
 		return finish;
 	}
 
-	//DEK (Federico Granata)
 	/**
 	 * gets all requested quantiles
 	 *
@@ -521,9 +456,7 @@ public class Measure {
 
 			//data is a Document
 			Document data = builder.newDocument();
-
 			Element root = data.createElement("measure");
-
 			root.setAttribute("name", name);
 			root.setAttribute("meanValue", "null");
 			root.setAttribute("upperBound", "null");
@@ -534,19 +467,13 @@ public class Measure {
 			root.setAttribute("discarded", "0");
 			root.setAttribute("precision", Double.toString(analyzer.getPrecision()));
 			root.setAttribute("maxSamples", Double.toString(getMaxSamples()));
-
 			data.appendChild(root);
-
 		} catch (FactoryConfigurationError factoryConfigurationError) {
 			factoryConfigurationError.printStackTrace();
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		}
-
 	}
-
-	//NEW
-	//@author Stefano Omini
 
 	/**
 	 * jSIM architecture does not allow to correctly compute residence time for
@@ -557,9 +484,9 @@ public class Measure {
 	 * accesses to the reference station)
 	 */
 	private void scaleMeasureWithVisitRatio() {
+		double visitRatio = 1.0;
 		//retrieves JobClass object using its name
 		JobClass jobClass = network.getJobClass(jobClassName);
-		double visitRatio = 1.0;
 		//current measure node
 		NetNode thisNode = network.getNode(nodeName);
 
@@ -570,51 +497,38 @@ public class Measure {
 			int visitsReferenceNode, visitsThisNode;
 			try {
 				if (referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
-					|| referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
-					|| referenceNodeName.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
+						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_SCALER)) {
 					visitsReferenceNode = 0;
 				} else {
 					NetNode referenceNode = network.getNode(referenceNodeName);
 					//visits to the reference node
 					NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
 					visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobClass);
-					//network.getNode("Queue 2").getSection(NodeSection.OUTPUT).getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, network.getJobClass("Class2"))
 				}
 				visitsReferenceNode += network.getSwitchedJobs(jobClass);
+				visitsReferenceNode += network.getProducedJobs(jobClass);
 
-				//visits to this node node
+				//visits to this node
 				NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
-
 				visitsThisNode = thisNodeInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobClass);
 
 				// the reference source generates a certain number of jobs
 				// - some of them have reached this station
-				// - other have been dropped before enetering this station or
+				// - other have been dropped before entering this station or
 				// elsewhere in the network
 				int droppedJobs = network.getDroppedJobs(jobClass);
 
 				if (thisNodeInputSection instanceof BlockingQueue) {
-
 					// if the input section is a BlockingQueue,
 					// remove (from the total number of visits)
 					// the jobs dropped by the BlockingQueue itself,
 					// because they have been counted
 					// in arrived jobs
 					visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobPerClass(jobClass.getId());
-
 				}
 
-				//visit ratio
-				//
-				// we must consider only not dropped jobs:
-				// --> visit ratio = visits to this node / (visits to ref node - dropped jobs)
 				visitRatio = (double) (visitsThisNode) / (visitsReferenceNode - droppedJobs);
-
-				//System.out.println("refNode: " + Integer.toString(visitsReferenceNode));
-				//System.out.println("thisNode: " + Integer.toString(visitsThisNode));
-				//System.out.println("dropped: " + droppedJobs);
-				//System.out.println("visit ratio: " + Double.toString(visitRatio));
-
 			} catch (NetException ne) {
 				visitRatio = 1;
 				logger.error("Error in computing visit ratio.");
@@ -633,35 +547,42 @@ public class Measure {
 					int visitsReferenceNode, visitsThisNode;
 					if (referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
 							|| referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
-							|| referenceNodeName.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+							|| referenceNodeName.equals(CommonConstants.STATION_TYPE_SCALER)) {
 						visitsReferenceNode = 0;
-					}
-					else {
+					} else {
 						NetNode referenceNode = network.getNode(referenceNodeName);
 						//visits to the reference node
 						NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
 						visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobC);
 					}
-					visitsReferenceNode += network.getSwitchedJobs(jobC);
+					//visitsReferenceNode += network.getSwitchedJobs(jobC);
+					visitsReferenceNode += network.getProducedJobs(jobC);
 
-					//visits to this node node
+					//visits to this node
 					NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
-
 					visitsThisNode = thisNodeInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobC);
 
+					// the reference source generates a certain number of jobs
+					// - some of them have reached this station
+					// - other have been dropped before entering this station or
+					// elsewhere in the network
 					int droppedJobs = network.getDroppedJobs(jobC);
 
 					if (thisNodeInputSection instanceof BlockingQueue) {
+						// if the input section is a BlockingQueue,
+						// remove (from the total number of visits)
+						// the jobs dropped by the BlockingQueue itself,
+						// because they have been counted
+						// in arrived jobs
 						visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobPerClass(jobC.getId());
-
 					}
-					visitsThisNodeSum += visitsThisNode;
-					visitsReferenceNodeSum += visitsReferenceNode;
-					droppedJobsSum += droppedJobs;
-					
-				}
-				visitRatio = (double) (visitsThisNodeSum) / (visitsReferenceNodeSum - droppedJobsSum);
 
+					visitsReferenceNodeSum += visitsReferenceNode;
+					visitsThisNodeSum += visitsThisNode;
+					droppedJobsSum += droppedJobs;
+				}
+
+				visitRatio = (double) (visitsThisNodeSum) / (visitsReferenceNodeSum - droppedJobsSum);
 			} catch (NetException ne) {
 				visitRatio = 1;
 				logger.error("Error in computing visit ratio.");
@@ -674,7 +595,6 @@ public class Measure {
 	//******************ABORT**********************//
 
 	public synchronized boolean abortMeasure() {
-
 		if (finish) {
 			//measure already finished
 			//nothing to do
@@ -685,11 +605,8 @@ public class Measure {
 			finish = true;
 			//stops analyzer
 			stopMeasure();
-
 		}
-
 		return true;
-
 	}
 
 	// --- Dead Measures Test - Bertoli Marco --------------------------------------------
@@ -700,20 +617,17 @@ public class Measure {
 	 * @return true iff measure has been marked as dead and was stopped
 	 */
 	public boolean testDeadMeasure() {
+		deadState++;
 		if (deadState > maxDeadState) {
 			stop_NoSamples();
 			return true;
 		}
-		deadState++;
 		return false;
 	}
 
 	// -----------------------------------------------------------------------------------
 
 	//*****************NO SAMPLES TEST*******************//
-
-	//NEW
-	//@author Stefano Omini
 
 	public boolean receivedNoSamples() {
 		return noSamplesTest;
@@ -722,7 +636,6 @@ public class Measure {
 	public void stop_NoSamples() {
 		finish = true;
 		noSamplesTest = true;
-
 		//stop measure with success
 		stopMeasure(true);
 	}
@@ -733,13 +646,10 @@ public class Measure {
 
 		//writes measure output on log
 		if (logger.isDebugEnabled()) {
-
 			double log_mean = getEstimatedMeanValue();
 			boolean log_success = analyzer.getSuccess();
-
 			logger.debug("Measure " + name + " finished. Mean value: " + log_mean + " Success = " + log_success);
 		}
-
 	}
 
 	protected void stopMeasure() {
@@ -749,10 +659,8 @@ public class Measure {
 
 		//writes measure output on log
 		if (logger.isDebugEnabled()) {
-
 			double log_mean = getEstimatedMeanValue();
 			boolean log_success = analyzer.getSuccess();
-
 			logger.debug("Measure " + name + " finished. Mean value: " + log_mean + " Success = " + log_success);
 			if (output != null) {
 				output.finalizeMeasure();
@@ -772,11 +680,9 @@ public class Measure {
 		analyzer.setParameters(param);
 		maxDeadState = param.getDeadMeasureMaxChecks();
 	}
-	
+
 	public double getSimTime() {
 		return simulationTime;
 	}
-
-
 
 }

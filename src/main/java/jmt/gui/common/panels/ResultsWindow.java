@@ -172,7 +172,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_SINK, results.getThroughputPerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_TOTAL_WEIGHT, DESCRIPTION_FCR_TOTAL_WEIGHT, results.getMeanWeightMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_MEMORY_OCCUPATION, DESCRIPTION_FCR_MEMORY_OCCUPATION, results.getMeanMemoryOccupationMeasures());	
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJCustomerNumberMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CN, results.getFJCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
 		// Creates bottom toolbar
 		JToolBar toolbar = new JToolBar();
@@ -277,15 +277,15 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 
 	/**
 	 * Creates a new tabbed pane that shows specified measures and adds it to
-	 * specified JTabPane. If measures indexes vector is null or empty no panel is added.
+	 * specified JTabPane. If measures indices vector is null or empty no panel is added.
 	 * @param parent panel where newly created tab should be added
 	 * @param name name of the panel to be added
 	 * @param description description to be shown into the panel
-	 * @param indexes array with all measures indexes to be shown in this panel
+	 * @param indices array with all measures indices to be shown in this panel
 	 */
-	private void addTabPane(JTabbedPane parent, String name, String description, int[] indexes) {
+	private void addTabPane(JTabbedPane parent, String name, String description, int[] indices) {
 		// If no measure are present, do not add corresponding tab
-		if (indexes != null && indexes.length > 0) {
+		if (indices != null && indices.length > 0) {
 			JPanel tabPanel = new JPanel(new BorderLayout());
 			// Adds margins
 			tabPanel.add(Box.createVerticalStrut(BORDERSIZE), BorderLayout.NORTH);
@@ -301,9 +301,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			upperPanel.add(Box.createVerticalStrut(BORDERSIZE / 2), BorderLayout.SOUTH);
 			mainpanel.add(upperPanel, BorderLayout.NORTH);
 			// Adds panel with measures
-			JPanel scroll = new JPanel(new GridLayout(indexes.length, 1, 1, 1));
+			JPanel scroll = new JPanel(new GridLayout(indices.length, 1, 1, 1));
 			// Adds all measures to this panel
-			for (int indexe : indexes) {
+			for (int indexe : indices) {
 				scroll.add(new MeasurePanel(results, indexe));
 			}
 			mainpanel.add(new JScrollPane(scroll), BorderLayout.CENTER);

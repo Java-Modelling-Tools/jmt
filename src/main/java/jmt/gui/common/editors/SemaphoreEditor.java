@@ -133,7 +133,6 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 	private void updateSpinner() {
 		jNumField.setValue(semaphoreThres);
 		jNumField.addChangeListener(new ChangeListener() {
-
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				Integer i = (Integer) jNumField.getValue();
@@ -144,7 +143,6 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 				SemaphoreStrategy ss = (SemaphoreStrategy) stations.getSemaphoreStrategy(stationKey, classKey);				
 				ss.setSemaphoreThres(i);
 			}
-
 		});
 	}
 
@@ -164,8 +162,7 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(
-						((MixTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((MixTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
@@ -175,10 +172,8 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 		private ClassDefinition cs;
-		private String[] columnNames = new String[] { "Class",
-				"Tasks Required (%)" };
-		private Class<?>[] columnClasses = new Class[] { String.class,
-				Object.class };
+		private String[] columnNames = new String[] { "Class", "Tasks Required (%)" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 		public int[] columnSizes = new int[] { 40, 100 };
 
 		public MixTableModel(ClassDefinition cs) {
@@ -243,6 +238,7 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		private Object indexToKey(int index) {
 			return classes.getClassKeys().get(index);
 		}
+
 	}
 
 }

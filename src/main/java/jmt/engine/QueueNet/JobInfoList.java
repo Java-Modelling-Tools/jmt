@@ -50,10 +50,10 @@ public interface JobInfoList {
 
 	/**
 	 * Returns the number of jobs of a specific job class in the list.
-	 * @param JobClass Job class to look for.
+	 * @param jobClass Job class to look for.
 	 * @return Number of jobs of a specified job class.
 	 */
-	public abstract int size(JobClass JobClass) throws jmt.common.exception.NetException;
+	public abstract int size(JobClass jobClass) throws jmt.common.exception.NetException;
 
 	/** Gets the number of jobs added to the list.
 	 * @return Arrived Jobs.
@@ -61,10 +61,10 @@ public interface JobInfoList {
 	public abstract int getJobsIn();
 
 	/** Gets the number of jobs of a specific job class added to the list.
-	 * @param JobClass Job class to look for.
+	 * @param jobClass Job class to look for.
 	 * @return Arrived jobs of a specific job class.
 	 */
-	public abstract int getJobsInPerClass(JobClass JobClass);
+	public abstract int getJobsInPerClass(JobClass jobClass);
 
 	/** Gets the number of jobs removed from the list.
 	 * @return Departed Jobs.
@@ -72,10 +72,10 @@ public interface JobInfoList {
 	public abstract int getJobsOut();
 
 	/** Gets the number of jobs of a specific job class removed from the list.
-	 * @param JobClass Job class to look for.
+	 * @param jobClass Job class to look for.
 	 * @return Departed jobs of a specific job class.
 	 */
-	public abstract int getJobsOutPerClass(JobClass JobClass);
+	public abstract int getJobsOutPerClass(JobClass jobClass);
 
 	/** Gets busy time.
 	 * @return Busy time.
@@ -87,7 +87,7 @@ public interface JobInfoList {
 	 * @return Busy time for job class.
 	 * @throws jmt.common.exception.NetException
 	 */
-	public abstract double getBusyTimePerClass(JobClass JobClass) throws jmt.common.exception.NetException;
+	public abstract double getBusyTimePerClass(JobClass jobClass) throws jmt.common.exception.NetException;
 
 	/** Gets time of the last job arrived.
 	 * @return Time of last job arrived.
@@ -97,7 +97,7 @@ public interface JobInfoList {
 	/** Gets time of the last job arrived of a specified job class.
 	 * @return Time of last job arrived of a specified job class.
 	 */
-	public abstract double getLastJobInTimePerClass(JobClass JobClass);
+	public abstract double getLastJobInTimePerClass(JobClass jobClass);
 
 	/** Gets time of the last job was dropped.
 	 * @return Time of last job departed.
@@ -112,12 +112,12 @@ public interface JobInfoList {
 	/** Gets time of the last job departed of a specified job class.
 	 * @return Time of last job departed of a specified job class.
 	 */
-	public abstract double getLastJobOutTimePerClass(JobClass JobClass);
+	public abstract double getLastJobOutTimePerClass(JobClass jobClass);
 
 	/** Gets time of the last job dropped of a specified job class.
 	 * @return Time of last job dropped of a specified job class.
 	 */
-	public abstract double getLastJobDropTimePerClass(JobClass JobClass);
+	public abstract double getLastJobDropTimePerClass(JobClass jobClass);
 
 	/** Gets time of the last modify of the list.
 	 * @return Time of last modify of the list.
@@ -127,13 +127,13 @@ public interface JobInfoList {
 	/** Gets time of the last modify of the list for a specified job class.
 	 * @return Time of the last modify of the list for a specified job class.
 	 */
-	public abstract double getLastModifyTimePerClass(JobClass JobClass);
+	public abstract double getLastModifyTimePerClass(JobClass jobClass);
 
 	/** Looks for an information job object which references to a specific job.
-	 * @param Job The specified job.
+	 * @param job The specified job.
 	 * @return JobInfo object which references to the specified job, null otherwise.
 	 */
-	public abstract JobInfo lookFor(Job Job) throws jmt.common.exception.NetException;
+	public abstract JobInfo lookFor(Job job) throws jmt.common.exception.NetException;
 
 	/**
 	 * Gets the job info list
@@ -222,23 +222,30 @@ public interface JobInfoList {
 	/** Analyzes class utilization.
 	 * @param jobClass Job class to be analyzed. If null, measure will be
 	 * job class independent.
-	 * @param Measurement Reference to a measure object.
+	 * @param measurement Reference to a measure object.
 	 */
-	public abstract void analyzeUtilization(JobClass jobClass, Measure Measurement);
+	public abstract void analyzeUtilization(JobClass jobClass, Measure measurement);
+
+	/** Analyzes class utilization of a join
+	 * @param jobClass Job class to be analyzed. If null, measure will be
+	 * job class independent.
+	 * @param measurement Reference to a measure object.
+	 */
+	public void analyzeUtilizationJoin(JobClass jobClass, Measure measurement);
 
 	/** Analyzes class response time.
 	 * @param jobClass Job class to be analyzed. If null, measure will be
 	 * job class independent.
-	 * @param Measurement Reference to a measure object.
+	 * @param measurement Reference to a measure object.
 	 */
-	public abstract void analyzeResponseTime(JobClass jobClass, Measure Measurement);
+	public abstract void analyzeResponseTime(JobClass jobClass, Measure measurement);
 
 	/** Analyzes class drop rate. Bertoli Marco
 	 * @param jobClass Job class to be analyzed. If null, measure will be
 	 * job class independent.
-	 * @param Measurement Reference to a measure object.
+	 * @param measurement Reference to a measure object.
 	 */
-	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure Measurement);
+	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure measurement);
 
 	/**
 	 * Analyzes class throughput. <br>
@@ -247,40 +254,40 @@ public interface JobInfoList {
 	 * by passing samples which are equals to 1/X,
 	 * instead of doing one division for each sample (this would make simulation much slower).
 	 * At the end the correct value is passed.
-	 * @param JobClass Job class to be analyzed. If null, measure will be
+	 * @param jobClass Job class to be analyzed. If null, measure will be
 	 * job class independent.
-	 * @param Measurement Reference to a InverseMeasure object.
+	 * @param measurement Reference to a InverseMeasure object.
 	 */
-	public abstract void analyzeThroughput(JobClass JobClass, InverseMeasure Measurement);
+	public abstract void analyzeThroughput(JobClass jobClass, InverseMeasure measurement);
 
 	/** Analyzes class residence time.
-	 * @param JobClass Job class to be analyzed. If null, measure will be
+	 * @param jobClass Job class to be analyzed. If null, measure will be
 	 * job class independent.
-	 * @param Measurement Reference to a measure object.
+	 * @param measurement Reference to a measure object.
 	 */
-	public abstract void analyzeResidenceTime(JobClass JobClass, Measure Measurement);
+	public abstract void analyzeResidenceTime(JobClass jobClass, Measure measurement);
 
 	/** Analyzes list residence time.
-	 * @param JobClass Job class to be analyzed. If null, measure will be
+	 * @param jobClass Job class to be analyzed. If null, measure will be
 	 * job class independent.
-	 * @param Measurement Reference to a measure object.
+	 * @param measurement Reference to a measure object.
 	 */
-	public abstract void analyzeQueueLength(JobClass JobClass, Measure Measurement);
+	public abstract void analyzeQueueLength(JobClass jobClass, Measure measurement);
 
 	/**
 	 * Analyzes : Calculates the Throughput at each sink of the Network. 
 	 * @param jobClass : Job class to be analyzed.
-	 * @param Measurement : Reference to the measure object.
+	 * @param measurement : Reference to the measure object.
 	 */
-	public abstract void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure Measurement);
+	public abstract void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure measurement);
 
 	/**
 	 * Analyzes : Calculates the Response Time from the source to 
 	 * each sink of the job for each sink in the Queueing Network. 
 	 * @param jobClass : Job class to be analyzed.
-	 * @param Measurement : Reference to the measure object.
+	 * @param measurement : Reference to the measure object.
 	 */
-	public abstract void analyzeResponseTimePerSink(JobClass jobClass, Measure Measurement);
+	public abstract void analyzeResponseTimePerSink(JobClass jobClass, Measure measurement);
 
 	/**
 	 * Removes a job info from the list when a job is removed.
@@ -316,7 +323,7 @@ public interface JobInfoList {
 	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
 	 * otherwise no list was created by the constructor)
 	 */
-	public abstract boolean produceJob(JobInfo JobInfo) throws jmt.common.exception.NetException;
+	public abstract boolean produceJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
 
 	/**
 	 * Removes a job info from the list when a job is consumed.
@@ -325,7 +332,7 @@ public interface JobInfoList {
 	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
 	 * otherwise no list was created by the constructor)
 	 */
-	public abstract boolean consumeJob(JobInfo JobInfo) throws jmt.common.exception.NetException;
+	public abstract boolean consumeJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
 
 	/**
 	 * Sets the number of servers. This parameter is used to scale utilization

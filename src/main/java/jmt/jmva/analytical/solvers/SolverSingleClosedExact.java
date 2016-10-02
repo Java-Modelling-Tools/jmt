@@ -78,7 +78,7 @@ public class SolverSingleClosedExact extends Solver {
 	}
 
 	/**
-	 * Calculates the indexes of interest for the system.<br>
+	 * Calculates the indices of interest for the system.<br>
 	 *  For a description of the algorithm see:<br>
 	 *  <em>
 	 *  S.C. Bruell, G. Balbo,<br>
@@ -86,7 +86,7 @@ public class SolverSingleClosedExact extends Solver {
 	 * 1980, Elsevier North Holland
 	 * </em>
 	 */
-	public void indexes() {
+	public void indices() {
 		long start; // initial time.
 		long end; // termination time.
 		double FM = 1;

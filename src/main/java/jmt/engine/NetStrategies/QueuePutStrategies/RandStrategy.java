@@ -33,11 +33,11 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class RandStrategy implements QueuePutStrategy {
 
-	private RandomEngine engine = RandomEngine.makeDefault();
+	private RandomEngine randomEngine = RandomEngine.makeDefault();
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
 		job.setServiceTime(0.0);
-		queue.add((int) (engine.raw() * (queue.size() + 1)), new JobInfo(job));
+		queue.add((int) (randomEngine.raw() * (queue.size() + 1)), new JobInfo(job));
 	}
 
 	public boolean check() {

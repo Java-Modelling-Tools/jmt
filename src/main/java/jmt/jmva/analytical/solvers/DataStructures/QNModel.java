@@ -159,7 +159,7 @@ public class QNModel {
     }
 
     /**
-     * Returns the service demand of a class at a queue. Indexes start from 0.
+     * Returns the service demand of a class at a queue. Indices start from 0.
      * @param k Queue index
      * @param r Class index
      * @return The corresponding service demand
@@ -170,7 +170,7 @@ public class QNModel {
 
     /**
      * Returns the service demand of a class at a queue as a BigDecimal object.
-     * Indexes start from 0.
+     * Indices start from 0.
      *
      * @param k Queue index
      * @param r Class index
@@ -182,7 +182,7 @@ public class QNModel {
 
     /**
      * Returns the service demand of a class at a queue as a BigInteger object.
-     * Indexes start from 0.
+     * Indices start from 0.
      *
      * @param k Queue index
      * @param r Class index
@@ -194,7 +194,7 @@ public class QNModel {
 
     /**
      * Returns the service demand of a class at a queue as a BigRational object.
-     * Indexes start from 0.
+     * Indices start from 0.
      *
      * @param k Queue index
      * @param r Class index
@@ -205,7 +205,7 @@ public class QNModel {
     }
 
     /**
-     * Returns the delay (think time) of a class. Indexes start from 0.
+     * Returns the delay (think time) of a class. Indices start from 0.
      *
      * @param r Class index
      * @return The corresponding delay (think time)
@@ -216,7 +216,7 @@ public class QNModel {
 
     /**
      * Returns the delay (think time) of a class as a BigDecimal object .
-     * Indexes start from 0.
+     * Indices start from 0.
      *
      * @param r Class index
      * @return The corresponding delay (think time)
@@ -227,7 +227,7 @@ public class QNModel {
 
     /**
      * Returns the delay (think time) of a class as a BigInteger object .
-     * Indexes start from 0.
+     * Indices start from 0.
      *
      * @param r Class index
      * @return The corresponding delay (think time)
@@ -238,7 +238,7 @@ public class QNModel {
 
     /**
      * Returns the delay (think time) of a class as a BigRational object .
-     * Indexes start from 0.
+     * Indices start from 0.
      *
      * @param r Class index
      * @return The corresponding delay (think time)

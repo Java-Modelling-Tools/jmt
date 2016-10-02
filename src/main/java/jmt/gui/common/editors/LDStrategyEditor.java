@@ -355,7 +355,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	}
 
 	/**
-	 * Multiple deletion of ranges. Indexes to ship call to precedent method, are retrieved
+	 * Multiple deletion of ranges. Indices to ship call to precedent method, are retrieved
 	 * through classtable methods (get selected rows)
 	 */
 	protected void deleteSelectedClasses() {

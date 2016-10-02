@@ -42,11 +42,11 @@ public class RandomSource extends InputSection {
 	public static final int PARAMETERS_EXCEPTION = 0x0001;
 
 	/** Service distribution: one for each job class. */
-	//	protected Distribution distributions[];
+	//protected Distribution distributions[];
 	/** Distribution parameters: one for each job class. */
 	protected Parameter parameters[];
 
-	private boolean coolStart;//when is true the waitingjobs queue is void
+	private boolean coolStart; //when is true the waitingjobs queue is void
 
 	private LinkedList<Job> waitingJobs; //TODO: se riusciamo a convertire in job info list è meglio
 
@@ -61,11 +61,6 @@ public class RandomSource extends InputSection {
 		this.strategy = strategy;
 		waitingJobs = new LinkedList<Job>();
 		coolStart = true;
-
-		//NEW
-		//@author Stefano Omini
-		//log = NetSystem.getLog();
-		//end NEW
 	}
 
 	@Override
@@ -83,32 +78,22 @@ public class RandomSource extends InputSection {
 			//for each job created, it sends to itself a message whose delay is the time of
 			//departure of the job, calculated using the strategy of the corresponding class
 
-			//log.write(NetLog.LEVEL_RELEASE, null, this, NetLog.EVENT_START);
-
 			ListIterator<JobClass> jobClasses = getJobClasses().listIterator();
 			JobClass jobClass;
-
 			while (jobClasses.hasNext()) {
 				jobClass = jobClasses.next();
-
-				//NEW
-				//@author Stefano Omini
 				if (jobClass.getType() == JobClass.CLOSED_CLASS) {
 					//closed class: no arrivals
 					continue;
 				}
-				//end NEW
 
 				c = jobClass.getId();
-
 				// Calculates the delay of departure (1/lambda)
 				if (strategy[c] != null) {
 					job = new Job(jobClass);
 					delay = strategy[c].wait(this);
 					sendMe(job, delay);
-					//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
 				}
-
 			}
 			break;
 
@@ -121,11 +106,8 @@ public class RandomSource extends InputSection {
 			//is sent to the source of the message and a new job is created (the random source
 			//sends to itself a message, whose delay is the time of departure of the new job).
 
-			//log.write(NetLog.LEVEL_DEBUG, message.getJob(), this, NetLog.JOB_IN);
-
 			// Gets the job from the message
 			job = message.getJob();
-
 			if (coolStart) {
 				// Gets the class of the job
 				c = job.getJobClass().getId();
@@ -133,9 +115,6 @@ public class RandomSource extends InputSection {
 				//no control is made on the number of jobs created
 				//it is an open class
 				job.born();
-
-				//NEW
-				//@author Stefano Omini, Bertoli Marco
 
 				// in RandomSource the job is created (--> SystemEnteringTime is initialized)
 				// but then is delayed as long as the random interarrival time ("delay")
@@ -145,24 +124,19 @@ public class RandomSource extends InputSection {
 				// leaving time, which is "delay" seconds after)
 
 				// Signals to node jobInfoList new added job
-				this.getOwnerNode().getJobInfoList().add(new JobInfo(job));
+				getOwnerNode().getJobInfoList().add(new JobInfo(job));
 				// Signals to global jobInfoList new added job
-				this.getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
-
-				//end NEW
+				getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
 
 				sendForward(job, 0.0);
 
-				//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_OUT);
-
+				// Create a new job and send it to me delayed
 				job = new Job(job.getJobClass());
 				delay = strategy[c].wait(this);
 				sendMe(job, delay);
 
 				// Sets coolStart to false, next job should wait ack
 				coolStart = false;
-
-				//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
 			} else {
 				//coolStart is false: there are waiting jobs. Add the received job.
 				waitingJobs.add(job);
@@ -183,9 +157,6 @@ public class RandomSource extends InputSection {
 				c = job.getJobClass().getId();
 				job.born();
 
-				//NEW
-				//@author Stefano Omini, Bertoli Marco
-
 				// in RandomSource the job is created (--> SystemEnteringTime is initialized)
 				// but then is delayed as long as the random interarrival time ("delay")
 				//
@@ -194,22 +165,16 @@ public class RandomSource extends InputSection {
 				// leaving time, which is "delay" seconds after)
 
 				// Signals to node jobInfoList new added job
-				this.getOwnerNode().getJobInfoList().add(new JobInfo(job));
+				getOwnerNode().getJobInfoList().add(new JobInfo(job));
 				// Signals to global jobInfoList new added job
-				this.getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
-
-				//end NEW
+				getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
 
 				sendForward(job, 0.0);
-
-				//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_OUT);
 
 				// Create a new job and send it to me delayed
 				job = new Job(getJobClasses().get(c));
 				delay = strategy[c].wait(this);
 				sendMe(job, delay);
-
-				//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
 			} else {
 				coolStart = true;
 			}

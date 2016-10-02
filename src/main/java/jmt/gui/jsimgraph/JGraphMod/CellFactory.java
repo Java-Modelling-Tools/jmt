@@ -92,7 +92,7 @@ public class CellFactory {
 		// Recalls the cell constructor passing the component as user object
 		JmtCell cell = null;
 		try {
-			Class[] parameterTypes = { Object.class };
+			Class<?>[] parameterTypes = { Object.class };
 			Object[] initargs = new Object[1];
 			initargs[0] = userObject;
 			cell = (JmtCell) Class.forName(path + className).getConstructor(parameterTypes).newInstance(initargs);
@@ -167,7 +167,7 @@ public class CellFactory {
 
 	/**
 	 * Calculate exact size of a <code>JmtCell</code> component before creating it.
-	 * Will be used to avoid sovrapposition of nodes on the graph before placement.
+	 * Will be used to avoid overlapping of nodes on the graph before placement.
 	 * @param className name of the *Cell that will be instantiated
 	 * @return predicted dimensions of Node
 	 */

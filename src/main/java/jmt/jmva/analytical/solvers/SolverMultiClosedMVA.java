@@ -696,7 +696,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	//NEW
 	//@author Stefano Omini
 
-	/** generates a string with all the calculated indexes.
+	/** generates a string with all the calculated indices.
 	 * @return the string
 	 */
 

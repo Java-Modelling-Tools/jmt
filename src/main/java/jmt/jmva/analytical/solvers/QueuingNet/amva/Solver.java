@@ -100,12 +100,12 @@ public abstract class Solver {
 		return true;
 	}
 
-	/** prints all the calculated indexes in the system.out
+	/** prints all the calculated indices in the system.out
 	 *  it is used to debug or test the class.
 	 */
-	public void printIndexes() {
+	public void printIndices() {
 		for (int i = 0; i < stations; i++) {
-			System.out.println("Indexes " + name[i]);
+			System.out.println("Indices " + name[i]);
 			System.out.println("throughput        : " + throughput[i]);
 			System.out.println("utilization       : " + utilization[i]);
 			System.out.println("mean queue length : " + queueLen[i]);
@@ -121,7 +121,7 @@ public abstract class Solver {
 		buf.append(getClass().getName());
 		buf.append("\n-------------------------");
 		for (int i = 0; i < stations; i++) {
-			buf.append("\nIndexes " + name[i]);
+			buf.append("\nIndices " + name[i]);
 			buf.append("\nthroughput          : " + throughput[i]);
 			buf.append("\nutilization         : " + utilization[i]);
 			buf.append("\nmean queue length   : " + queueLen[i]);
@@ -133,7 +133,7 @@ public abstract class Solver {
 		return buf.toString();
 	}
 	*/
-	/** generates a string with all the calculated indexes.
+	/** generates a string with all the calculated indices.
 	 * @return the string
 	 */
 

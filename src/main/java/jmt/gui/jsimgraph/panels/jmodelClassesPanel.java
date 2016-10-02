@@ -165,9 +165,10 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				return classdefinition.getClassColor(classdefinition.getClassKeys().get(rowIndex));
 			} else if (columnIndex == 7) {
 				return classdefinition.getClassRefStation(classdefinition.getClassKeys().get(rowIndex));
-			} else if (columnIndex == 5 && (STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7)) 
+			} else if (columnIndex == 5
+					&& (STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7)) 
 					|| STATION_TYPE_FORK.equals(getValueAt(rowIndex, 7))
-					|| STATION_TYPE_TRANSITION.equals(getValueAt(rowIndex, 7)))) {
+					|| STATION_TYPE_SCALER.equals(getValueAt(rowIndex, 7)))) {
 				return null;
 			} else {
 				return super.getValueAt(rowIndex, columnIndex - 1);
@@ -194,9 +195,10 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 			if (columnIndex == 6 && (getValueAt(rowIndex, 2).equals("Closed"))) {
 				return false;
 			}
-			if (columnIndex == 6 && (STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7))
+			if (columnIndex == 6
+					&& (STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7))
 					|| STATION_TYPE_FORK.equals(getValueAt(rowIndex, 7))
-					|| STATION_TYPE_TRANSITION.equals(getValueAt(rowIndex, 7)))) {
+					|| STATION_TYPE_SCALER.equals(getValueAt(rowIndex, 7)))) {
 				return false;
 			}
 			if (columnIndex == 5) {

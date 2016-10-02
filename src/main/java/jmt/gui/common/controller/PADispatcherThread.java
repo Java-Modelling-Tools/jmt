@@ -43,7 +43,7 @@ import org.w3c.dom.Document;
 
 /**
  * <p>Title: PADispatcherThread </p>
- * <p>Description: This thread is responsable for dispatching several simulations. If a simulation max
+ * <p>Description: This thread is responsible for dispatching several simulations. If a simulation max
  * time has been specified, an inner thread will be used to stop simulation after that time. We do not rely
  * on engine method as it does not appear to work properly.</p>
  *
@@ -101,7 +101,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 			if (timer != null) {
 				timer.kill();
 			}
-			gui.changeSimActionsState(true, false, false);
+			//gui.changeSimActionsState(true, false, false);
 			simulator.abortAllMeasures();
 			//simulator.killSimulation();
 		}
@@ -133,12 +133,12 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 	}
 
 	/*public void startParametricAnalysis() {
-	    // If a time maximum time is specified, initialize all stuff related
-	    if (simd.getMaximumDuration().longValue() > 0) {
-	        timer = new TimerThread(this, simd.getMaximumDuration().doubleValue());
-	    }
-	    gui.changeSimActionsState(false, true, true);
-	    start();
+		// If a time maximum time is specified, initialize all stuff related
+		if (simd.getMaximumDuration().longValue() > 0) {
+			timer = new TimerThread(this, simd.getMaximumDuration().doubleValue());
+		}
+		gui.changeSimActionsState(false, true, true);
+		start();
 	}*/
 
 	@Override

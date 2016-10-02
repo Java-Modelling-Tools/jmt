@@ -79,7 +79,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	//Enabled types of station for station editing
 	Object[] stationTypes = new Object[] { STATION_TYPE_DELAY, STATION_TYPE_SERVER, STATION_TYPE_FORK, STATION_TYPE_JOIN, STATION_TYPE_ROUTER,
-			STATION_TYPE_LOGGER, STATION_TYPE_CLASSSWITCH, STATION_TYPE_TASKSEMAPHORE }; //, STATION_TYPE_PLACE, STATION_TYPE_TRANSITION };
+			STATION_TYPE_LOGGER, STATION_TYPE_CLASSSWITCH, STATION_TYPE_SEMAPHORE, STATION_TYPE_SCALER }; //, STATION_TYPE_PLACE, STATION_TYPE_TRANSITION };
 
 	//Component responsible of setting global number of classes at once
 	private JSpinner stationNumSpinner = new JSpinner() {
@@ -405,8 +405,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public boolean isCellEditable(int row, int column) {
 			// Avoid deletion of sources and sinks
 			String stationType = data.getStationType(data.getStationKeys().get(row));
-			return !((column == getColumnCount() - 1 || column == 1) && (stationType.equals(STATION_TYPE_SOURCE) || stationType
-					.equals(STATION_TYPE_SINK)));
+			return !((column == getColumnCount() - 1 || column == 1) && (stationType.equals(STATION_TYPE_SOURCE) || stationType.equals(STATION_TYPE_SINK)));
 		}
 	}
 

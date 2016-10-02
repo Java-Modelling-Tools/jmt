@@ -70,7 +70,6 @@ public class QueueNetwork {
 	/** State ID: The network is in final state.*/
 	public final static int STATE_FINAL = 0x0005;
 
-	//dekkar (Federico Granata)
 	/** Measure ID: queue length */
 	public final static int QUEUE_LENGTH = 0x001;
 	/** Measure ID: residence time */
@@ -94,7 +93,7 @@ public class QueueNetwork {
 
 	private GlobalJobInfoList jobInfoList;
 
-	private boolean taskWarningNotShown = true;
+	private boolean taskWarningShown;
 
 	/** Creates a new instance of QueueNetwork. */
 	public QueueNetwork(String name) {
@@ -105,25 +104,24 @@ public class QueueNetwork {
 		measures = new LinkedList<Measure>();
 		behaviour = BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP;
 		state = STATE_READY;
+		taskWarningShown = false;
 	}
 
-	/** Adds a generic node to the newtork. If the node has no inputs the node
+	/** Adds a generic node to the network. If the node has no inputs the node
 	 * is set as reference node.
 	 * @param node node to be added.
 	 */
 	public void addNode(NetNode node) throws jmt.common.exception.NetException {
 		nodes.add(node);
-
 		if (node.getInputNodes().size() == 0) {
 			//if no input nodes are present, it is presumed that this node
 			//must be a source of jobs
 			referenceNodes.add(node);
 		}
-
 		node.setNetwork(this);
 	}
 
-	/** Adds a node to the newtork and forces it to be a reference node.
+	/** Adds a node to the network and forces it to be a reference node.
 	 * @param node node to be added.
 	 */
 	public void addReferenceNode(NetNode node) throws jmt.common.exception.NetException {
@@ -148,9 +146,8 @@ public class QueueNetwork {
 		return nodes;
 	}
 
-	//dekkar (Federico Granata)
 	/**
-	 * Gets the NetNode with the specified name...
+	 * Gets the NetNode with the specified name.
 	 *
 	 * @param name the name of the node
 	 * @return the specified node
@@ -159,11 +156,8 @@ public class QueueNetwork {
 		return nodes.get(name);
 	}
 
-	//NEW
-	//@author Stefano Omini
-
 	/**
-	 * Gets the JobClass with the specified name...
+	 * Gets the JobClass with the specified name.
 	 *
 	 * @param name the name of the JobClass
 	 * @return the job class. Null if it does not exist.
@@ -172,9 +166,6 @@ public class QueueNetwork {
 		return jobClasses.get(name);
 	}
 
-	//end NEW
-
-	//dekkar (Federico Granata)
 	/**Gets the specified measure from the node with the specified name.
 	 *
 	 * @param nodeName name of the node
@@ -185,7 +176,6 @@ public class QueueNetwork {
 	public double getMeasure(String nodeName, int measureID) throws jmt.common.exception.NetException {
 		double measure = 0;
 		boolean found = false;
-
 		switch (measureID) {
 		case QUEUE_LENGTH:
 			measure = nodes.get(nodeName).getDoubleNodeProperty(NetNode.PROPERTY_ID_RESIDENT_JOBS);
@@ -241,7 +231,6 @@ public class QueueNetwork {
 
 		//sets the reference to network
 		measure.setNetwork(this);
-
 		measures.add(measure);
 	}
 
@@ -327,44 +316,6 @@ public class QueueNetwork {
 		}
 	}
 
-	//NEW
-	//@author Stefano Omini
-	/**
-	 * Get the total number of dropped jobs in the whole network for the specified
-	 * class
-	 * @param jobClass the job class
-	 * @return the total number of dropped jobs in the whole network for the specified
-	 * class
-	 */
-	public int getDroppedJobs(JobClass jobClass) {
-		//dropped jobs
-		int dropped = 0;
-		int classIndex = jobClass.getId();
-
-		for (int s = 0; s < nodes.size(); s++) {
-			NetNode node = nodes.get(s);
-			NodeSection inputSection;
-			try {
-				inputSection = node.getSection(NodeSection.INPUT);
-				//jobs can be dropped by a finite queue, a finite store or a blocking region
-				if (inputSection instanceof Queue) {
-					dropped += ((Queue) inputSection).getDroppedJobPerClass(classIndex);
-				} else if (inputSection instanceof Store) {
-					dropped += ((Store) inputSection).getDroppedJobPerClass(classIndex);
-				} else if (inputSection instanceof BlockingQueue) {
-					dropped += ((BlockingQueue) inputSection).getDroppedJobPerClass(classIndex);
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-
-		return dropped;
-	}
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
 	/**
 	 * Get the total number of dropped jobs in the whole network
 	 * @return the total number of dropped jobs in the whole network
@@ -372,13 +323,11 @@ public class QueueNetwork {
 	public int getDroppedJobs() {
 		//dropped jobs
 		int dropped = 0;
-
-		for (int s = 0; s < nodes.size(); s++) {
-			NetNode node = nodes.get(s);
+		for (int i = 0; i < nodes.size(); i++) {
+			NetNode node = nodes.get(i);
 			NodeSection inputSection;
 			try {
 				inputSection = node.getSection(NodeSection.INPUT);
-				//jobs can be dropped by a finite queue, a finite store or a blocking region
 				if (inputSection instanceof Queue) {
 					dropped += ((Queue) inputSection).getDroppedJobs();
 				} else if (inputSection instanceof Store) {
@@ -390,10 +339,63 @@ public class QueueNetwork {
 				continue;
 			}
 		}
-
 		return dropped;
 	}
-	//end NEW
+
+	/**
+	 * Get the total number of dropped jobs in the whole network for the specified class
+	 * @param jobClass the job class
+	 * @return the total number of dropped jobs in the whole network for the specified class
+	 */
+	public int getDroppedJobs(JobClass jobClass) {
+		//dropped jobs
+		int dropped = 0;
+		int classIndex = jobClass.getId();
+		for (int i = 0; i < nodes.size(); i++) {
+			NetNode node = nodes.get(i);
+			NodeSection inputSection;
+			try {
+				inputSection = node.getSection(NodeSection.INPUT);
+				if (inputSection instanceof Queue) {
+					dropped += ((Queue) inputSection).getDroppedJobPerClass(classIndex);
+				} else if (inputSection instanceof Store) {
+					dropped += ((Store) inputSection).getDroppedJobPerClass(classIndex);
+				} else if (inputSection instanceof BlockingQueue) {
+					dropped += ((BlockingQueue) inputSection).getDroppedJobPerClass(classIndex);
+				}
+			} catch (NetException ne) {
+				continue;
+			}
+		}
+		return dropped;
+	}
+
+	/**
+	 * Gets the total number of switched jobs in the whole network
+	 * @param jobClass the job class
+	 * @return the total number of switched jobs in the whole network
+	 */
+	public int getSwitchedJobs() {
+		//switched jobs
+		int switched = 0;
+		for (int i = 0; i < nodes.size(); i++) {
+			NetNode node = nodes.get(i);
+			NodeSection section;
+			try {
+				section = node.getSection(NodeSection.SERVICE);
+				if (section instanceof ClassSwitch) {
+					switched += ((ClassSwitch) section).getSwitchedJobs();
+				}
+				section = node.getSection(NodeSection.OUTPUT);
+				if (section instanceof Fork) {
+					switched += ((Fork) section).getSwitchedJobs();
+				}
+			} catch (NetException ne) {
+				continue;
+			}
+		}
+		return switched;
+	}
 
 	/**
 	 * Gets the total number of switched jobs in the whole network for the specified class
@@ -403,33 +405,77 @@ public class QueueNetwork {
 	public int getSwitchedJobs(JobClass jobClass) {
 		//switched jobs
 		int switched = 0;
-
-		for (int s = 0; s < nodes.size(); s++) {
-			NetNode node = nodes.get(s);
+		for (int i = 0; i < nodes.size(); i++) {
+			NetNode node = nodes.get(i);
 			NodeSection section;
 			try {
 				section = node.getSection(NodeSection.SERVICE);
 				if (section instanceof ClassSwitch) {
-					switched += ((ClassSwitch) section).getSwitchedJobCount(jobClass.getId());
+					switched += ((ClassSwitch) section).getSwitchedJobsPerClass(jobClass.getId());
 				}
 				section = node.getSection(NodeSection.OUTPUT);
 				if (section instanceof Fork) {
-					switched += ((Fork) section).getSwitchedJobCount(jobClass.getId());
-				}
-				section = node.getSection(NodeSection.INPUT);
-				if (section instanceof Enabling) {
-					switched -= ((Enabling) section).getConsumedJobsPerClass(jobClass.getId());
-				}
-				section = node.getSection(NodeSection.OUTPUT);
-				if (section instanceof Firing) {
-					switched += ((Firing) section).getProducedJobsPerClass(jobClass.getId());
+					switched += ((Fork) section).getSwitchedJobsPerClass(jobClass.getId());
 				}
 			} catch (NetException ne) {
 				continue;
 			}
 		}
-
 		return switched;
+	}
+
+	/**
+	 * Gets the total number of produced jobs in the whole network
+	 * @param jobClass the job class
+	 * @return the total number of produced jobs in the whole network
+	 */
+	public int getProducedJobs() {
+		//produced jobs
+		int produced = 0;
+		for (int i = 0; i < nodes.size(); i++) {
+			NetNode node = nodes.get(i);
+			NodeSection section;
+			try {
+				section = node.getSection(NodeSection.INPUT);
+				if (section instanceof Enabling) {
+					produced -= ((Enabling) section).getConsumedJobs();
+				}
+				section = node.getSection(NodeSection.OUTPUT);
+				if (section instanceof Firing) {
+					produced += ((Firing) section).getProducedJobs();
+				}
+			} catch (NetException ne) {
+				continue;
+			}
+		}
+		return produced;
+	}
+
+	/**
+	 * Gets the total number of produced jobs in the whole network for the specified class
+	 * @param jobClass the job class
+	 * @return the total number of produced jobs in the whole network for the specified class
+	 */
+	public int getProducedJobs(JobClass jobClass) {
+		//produced jobs
+		int produced = 0;
+		for (int i = 0; i < nodes.size(); i++) {
+			NetNode node = nodes.get(i);
+			NodeSection section;
+			try {
+				section = node.getSection(NodeSection.INPUT);
+				if (section instanceof Enabling) {
+					produced -= ((Enabling) section).getConsumedJobsPerClass(jobClass.getId());
+				}
+				section = node.getSection(NodeSection.OUTPUT);
+				if (section instanceof Firing) {
+					produced += ((Firing) section).getProducedJobsPerClass(jobClass.getId());
+				}
+			} catch (NetException ne) {
+				continue;
+			}
+		}
+		return produced;
 	}
 
 	/**
@@ -445,18 +491,12 @@ public class QueueNetwork {
 		}
 	}
 
-	/**
-	 * @return the taskWarningNotShown
-	 */
-	public boolean isTaskWarningNotShown() {
-		return taskWarningNotShown;
+	public boolean isTaskWarningShown() {
+		return taskWarningShown;
 	}
 
-	/**
-	 * @param taskWarningNotShown the taskWarningNotShown to set
-	 */
-	public void setTaskWarningNotShown(boolean taskWarningNotShown) {
-		this.taskWarningNotShown = taskWarningNotShown;
+	public void setTaskWarningShown(boolean taskWarningShown) {
+		this.taskWarningShown = taskWarningShown;
 	}
 
 }

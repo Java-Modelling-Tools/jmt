@@ -1,38 +1,46 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.engine.NetStrategies.JoinStrategies;
 
 import jmt.engine.NetStrategies.JoinStrategy;
 
-/**
- *
- * @author mattia
- */
-public class GuardJoin extends JoinStrategy{
-        
-        private Integer[] required;
-        private int req;
-        
-        public GuardJoin(String[] classes, String[] numbers) {
-                required = new Integer[numbers.length];
-                req = 0;
-                for (int i = 0; i < numbers.length; i++) {
-                        required[i] = Integer.parseInt(numbers[i]);
-                        req += Integer.parseInt(numbers[i]);
-                }
-                
-        }
+public class GuardJoin extends JoinStrategy {
 
-        @Override
-        public int getRequiredNum() {
-                return req;
-        }
-        
-        public Integer[] getRequiredPerClass() {
-                return required.clone();
-        }
-        
+	private Integer[] required;
+	private int requiredNum;
+
+	public GuardJoin(String[] classes, String[] numbers) {
+		required = new Integer[numbers.length];
+		requiredNum = 0;
+		for (int i = 0; i < numbers.length; i++) {
+			required[i] = Integer.parseInt(numbers[i]);
+			requiredNum += Integer.parseInt(numbers[i]);
+		}
+	}
+
+	@Override
+	public int getRequiredNum() {
+		return requiredNum;
+	}
+
+	public Integer[] getRequiredPerClass() {
+		return required.clone();
+	}
+
 }

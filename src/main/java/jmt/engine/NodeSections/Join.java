@@ -27,8 +27,10 @@ import jmt.engine.NetStrategies.JoinStrategies.NormalJoin;
 import jmt.engine.NetStrategies.JoinStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.LinkedJobInfoList;
@@ -36,6 +38,7 @@ import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.dataAnalysis.Measure;
 
 /**
@@ -62,6 +65,11 @@ public class Join extends InputSection {
 
 	private JoinStrategy[] joinStrategies;
 
+	private JobClassList jobClasses;
+	private JobInfoList nodeJobsList;
+	private GlobalJobInfoList netJobsList;
+	private JobInfoList FJList;
+
 	// --- Constructors -----------------------------------------------------------------------------
 	/**
 	 * Constructs a new Join
@@ -70,11 +78,11 @@ public class Join extends InputSection {
 		// Disables automatic handling of jobinfolists
 		super(false);
 		jobs = new HashMap<Job, Integer>();
-		required = new HashMap<>();
+		required = new HashMap<Job, Integer[]>();
 		allJobs = new HashMap<Job, Integer>();
 		hasFired = new HashMap<Job, Boolean>();
-		counter = new HashMap<Job, Integer>();
 		forkJobs = new HashMap<Job, List<ForkJob>>();
+		counter = new HashMap<Job, Integer>();
 	}
 
 	public Join(JoinStrategy[] joinStrategies) {
@@ -83,6 +91,12 @@ public class Join extends InputSection {
 	}
 
 	// ----------------------------------------------------------------------------------------------
+
+	@Override
+	protected void nodeLinked(NetNode node) {
+		jobClasses = getJobClasses();
+		nodeJobsList = node.getJobInfoList();
+	};
 
 	/**
 	 * Assembles split tasks and sends an EVENT_JOIN to reference fork when done
@@ -96,15 +110,12 @@ public class Join extends InputSection {
 		switch (message.getEvent()) {
 
 		case NetEvent.EVENT_START:
+			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 			break;
 
 		case NetEvent.EVENT_JOB:
 			Job job = message.getJob();
-			// Sends ACK back
 			send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-
-			JobInfoList info = getOwnerNode().getJobInfoList();
-			JobInfoList section = (JobInfoList) this.getObject(NodeSection.PROPERTY_ID_JOBINFOLIST);
 
 			if (job instanceof ForkJob) {
 				ForkJob fJob = (ForkJob) job;
@@ -113,18 +124,13 @@ public class Join extends InputSection {
 					fJobs = new ArrayList<ForkJob>();
 					forkJobs.put(fJob.getForkedJob(), fJobs);
 					JobInfo temp = new JobInfo(job);
-					section.add(temp);
-					section.remove(temp);
+					jobsList.add(temp);
+					jobsList.remove(temp);
 				}
 				fJobs.add(fJob);
 
-				// Removes job from system list
-				//GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
-				//global.removeForkedJob(fJob);
-
-				// Needed tasks
-				int needed;
 				int totalForked;
+				int needed;
 				Integer[] neededPerClass = null;
 				boolean isFired;
 				if (allJobs.containsKey(fJob.getForkedJob())) {
@@ -133,10 +139,6 @@ public class Join extends InputSection {
 					neededPerClass = required.get(fJob.getForkedJob());
 					isFired = hasFired.get(fJob.getForkedJob());
 				} else {
-					// old
-					//needed = fJob.getForkedNumber();
-					// end
-					// bpmn
 					totalForked = fJob.getForkedNumber();
 					needed = joinStrategies[fJob.getForkedJob().getJobClass().getId()].getRequiredNum();
 					if (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof GuardJoin) {
@@ -146,7 +148,6 @@ public class Join extends InputSection {
 					required.put(fJob.getForkedJob(), neededPerClass);
 					isFired = false;
 
-					//soften
 					if (myRegion != null) {
 						if (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof NormalJoin) {
 							counter.put(fJob.getForkedJob(), fJob.getForkedNumber());
@@ -154,30 +155,20 @@ public class Join extends InputSection {
 							counter.put(fJob.getForkedJob(), joinStrategies[fJob.getForkedJob().getJobClass().getId()].getRequiredNum());
 						}
 					}
-					//end
-
-					// end
-					// As we are waiting for other fragments, adds merged job to global and local info list
-					//JobInfo merged = new JobInfo(fJob.getForkedJob());
-					//info.add(merged);
-					//jobsList.add(merged);
 				}
-				// Decrement needed as we received this job
 				totalForked--;
+
 				// If needed is zero, all pieces has been retrieved and job can be forwarded
-				//soften
 				if (isFired) {
-					JobInfo i = info.lookFor(fJob);
+					JobInfo i = nodeJobsList.lookFor(fJob);
 					if (i != null) {
-						info.remove(i);
+						nodeJobsList.remove(i);
 					}
 					if (myRegion != null) {
 						//myRegion.decreaseOccupation(fJob.getJobClass());
 						myRegion.decreaseOccupation(fJob);
 					}
-				}
-				//end
-				if (!isFired) {
+				} else {
 					needed--;
 					boolean isGuardTrue = false;
 					if (neededPerClass != null) {
@@ -189,14 +180,13 @@ public class Join extends InputSection {
 					}
 					jobs.put(fJob.getForkedJob(), needed);
 					hasFired.put(fJob.getForkedJob(), false);
+
 					boolean allArrived = (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof NormalJoin) && (totalForked == 0);
 					if (needed == 0 || allArrived || isGuardTrue) {
-						// Adds original job, otherwise we will have one less job in the network
-						//global.addForkedJob(fJob.getForkedJob());
-						for (ForkJob j: forkJobs.get(fJob.getForkedJob())) {
-							JobInfo i = info.lookFor(j);
+						for (ForkJob j : forkJobs.get(fJob.getForkedJob())) {
+							JobInfo i = nodeJobsList.lookFor(j);
 							if (i != null) {
-								info.remove(i);
+								nodeJobsList.remove(i);
 							}
 							if (myRegion != null) {
 								JobInfo ji = myRegion.getInputStation().getJobInfoList().lookFor(j);
@@ -204,53 +194,58 @@ public class Join extends InputSection {
 									myRegion.getInputStation().getJobInfoList().remove(ji);
 								}
 							}
-							//soften
-							//myRegion.getInputStation().getJobInfoList().add(new JobInfo(fJob.getForkedJob()));
-							//end
 						}
 						if (myRegion != null) {
 							myRegion.getInputStation().getJobInfoList().remove(new JobInfo(fJob.getForkedJob()));
 						}
-						//if (serviceList != null) {
-						//	JobInfo i = serviceList.lookFor(firstJob.get(fJob.getForkedJob())); 
-						//	if (i != null) {
-						//		serviceList.remove(i);
-						//	}
-						//}
+
 						// Sends job forward
 						sendForward(fJob.getForkedJob(), 0.0);
 						hasFired.put(fJob.getForkedJob(), true);
 						// Notify fork node (to support blocking)
-						send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0,
-								fJob.getReferenceFork().getSectionID(), fJob
-								.getReferenceFork().getOwnerNode());
-					} else {
-						if (myRegion != null) {
-							//myRegion.decreaseOccupation(fJob.getJobClass());
-							//myRegion.decreaseOccupation(fJob);
+						send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0, NodeSection.OUTPUT, fJob.getReferenceFork().getOwnerNode());
+
+						if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+							if (FJList != null) {
+								FJList.add(new JobInfo(fJob.getForkedJob()));
+							}
 						}
-						// We must wait for more fragments before sending this
-						// to
-						// next section
-						// jobs.put(fJob.getForkedJob(), new Integer(needed));
 					}
 				}
+
 				if (totalForked == 0) {
-					allJobs.remove(fJob.getForkedJob());
 					jobs.remove(fJob.getForkedJob());
+					required.remove(fJob.getForkedJob());
+					allJobs.remove(fJob.getForkedJob());
 					hasFired.remove(fJob.getForkedJob());
 					forkJobs.remove(fJob.getForkedJob());
-					required.remove(fJob.getForkedJob());
 				} else {
 					allJobs.put(fJob.getForkedJob(), totalForked);
 				}
 			} else {
 				// If this is not a fork job, sends it forward
 				sendForward(job, 0.0);
+				if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+					if (FJList != null) {
+						FJList.add(new JobInfo(job));
+					}
+				}
 			}
 			break;
 
 		case NetEvent.EVENT_ACK:
+			break;
+
+		case NetEvent.EVENT_JOIN:
+			Job j = (Job) message.getData();
+			JobInfo jData = null;
+			if (FJList != null) {
+				jData = FJList.lookFor(j);
+			}
+			if (jData != null && FJList != null) {
+				FJList.remove(jData);
+				netJobsList.updateResponseSum(jData);
+			}
 			break;
 
 		case NetEvent.EVENT_JOB_RELEASE:
@@ -270,12 +265,10 @@ public class Join extends InputSection {
 		return MSG_PROCESSED;
 	}
 
-	//soften	
 	private boolean redirectionON;
 	private BlockingRegion myRegion;
 	private NetNode regionInputStation;
 
-	//soften
 	public void addRegion(BlockingRegion region) {
 		redirectionON = true;
 		myRegion = region;
@@ -283,20 +276,38 @@ public class Join extends InputSection {
 	}
 
 	public int getDeTimes(Job job) {
-		return this.counter.remove(job);
+		return counter.remove(job);
 	}
 
 	public BlockingRegion getMyRegion() {
-		return this.myRegion;
+		return myRegion;
 	}
-	//end
 
-	public void analyzeUtilization(JobClass jc, Measure measurement, JobClass[] classes) {
-		JobInfoList info = getOwnerNode().getJobInfoList();
-		if (info == null) {
-			info = new LinkedJobInfoList(classes.length, true);
+	@Override
+	public void analyzeJoin(int name, JobClass jobClass, Measure measurement) throws NetException {
+		switch (name) {
+			case SimConstants.UTILIZATION:
+				nodeJobsList.analyzeUtilizationJoin(jobClass, measurement);
+			default:
+				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
-		((LinkedJobInfoList) info).analyzeUtilizationJoin(jc, measurement);
+	}
+
+	@Override
+	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
+		if (FJList == null) {
+			FJList = new LinkedJobInfoList(jobClasses.size(), true);
+		}
+		switch (name) {
+		case SimConstants.FORK_JOIN_RESPONSE_TIME:
+			FJList.analyzeResponseTime(jobClass, measurement);
+			break;
+		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+			FJList.analyzeQueueLength(jobClass, measurement);
+			break;
+		default:
+			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+		}
 	}
 
 }

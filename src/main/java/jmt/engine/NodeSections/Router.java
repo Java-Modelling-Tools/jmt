@@ -54,8 +54,8 @@ public class Router extends OutputSection {
 	public static final int PROPERTY_ID_ROUTING_STRATEGY = 0x0101;
 	private RoutingStrategy routingStrategies[];
 
-	/*----------------BLOCKING REGION PROPERTIES---------------------*/
-	//@author Stefano Omini
+	/*------------------BLOCKING REGION PROPERTIES------------------*/
+
 	/*
 	these properties are used if this router is the border router of
 	a blocking region (i.e. it is connected also to nodes outside the
@@ -72,7 +72,7 @@ public class Router extends OutputSection {
 	/** the region input station of the blocking region */
 	private NetNode regionInputStation;
 
-	/*---------------------------------------------------------------*/
+	/*--------------------------------------------------------------*/
 
 	/** Creates a new instance of Router.
 	 * @param routingStrategies Routing strategies, one for each class.
@@ -88,13 +88,15 @@ public class Router extends OutputSection {
 
 	/** Creates a new instance of blocking region border Router.
 	 * @param routingStrategies Routing strategies, one for each class.
+	 * @param myReg the blocking region to which the owner node of this router
+	 * belongs.
 	 */
-	public Router(RoutingStrategy routingStrategies[], BlockingRegion blockReg) {
+	public Router(RoutingStrategy routingStrategies[], BlockingRegion myReg) {
 		super();
 		this.routingStrategies = routingStrategies;
 
 		borderRouterON = true;
-		myRegion = blockReg;
+		myRegion = myReg;
 		regionInputStation = myRegion.getInputStation();
 	}
 
@@ -108,15 +110,14 @@ public class Router extends OutputSection {
 
 	/**
 	 * Turns on the "borderRouter" behaviour.
-	 * @param region the blocking region to which the owner node
-	 * of this router belongs
+	 * @param region the blocking region to which the owner node of this router
+	 * belongs.
 	 */
 	public void borderRouterTurnON(BlockingRegion region) {
 		//sets blocking region properties
 		borderRouterON = true;
 		myRegion = region;
 		regionInputStation = myRegion.getInputStation();
-		return;
 	}
 
 	/**
@@ -127,7 +128,6 @@ public class Router extends OutputSection {
 		borderRouterON = false;
 		myRegion = null;
 		regionInputStation = null;
-		return;
 	}
 
 	@Override

@@ -36,6 +36,7 @@ import java.util.Locale;
  * @author Bertoli Marco 2014-09-14
  */
 public class VerboseCSVMeasureOutputReader {
+
 	private String logCsvDelimiter;
 	private File measureCsvFile;
 	private RandomAccessFile file;
@@ -47,7 +48,7 @@ public class VerboseCSVMeasureOutputReader {
 	private double parsedWeight;
 	private boolean hasMoreLines;
 	private long fileSize;
-	
+
 	/**
 	 * Builds a new CSV measure reader
 	 * @param measureCsvFile the measure csv file. Muse be a valid file
@@ -62,7 +63,7 @@ public class VerboseCSVMeasureOutputReader {
 		numberParser = new DecimalFormat("#.#", dfs);
 		fileSize = measureCsvFile.length();
 	}
-	
+
 	/**
 	 * Opens the measure file
 	 * @param initialLine the initial line to read.
@@ -75,7 +76,7 @@ public class VerboseCSVMeasureOutputReader {
 		file = new RandomAccessFile(measureCsvFile, "r");
 		lineNumber = 0;
 		reader = new BufferedReader(new InputStreamReader(new FileInputStream(file.getFD())));	
-		
+
 		// Skips initial lines.
 		for (int j=0; j<initialLine; j++) {
 			reader.readLine();
@@ -83,7 +84,7 @@ public class VerboseCSVMeasureOutputReader {
 		}
 		hasMoreLines = file.getFilePointer() < fileSize;
 	}
-	
+
 	/**
 	 * Closes the reader if it is open
 	 * @throws IOException if there is an error closing the file.
@@ -97,7 +98,7 @@ public class VerboseCSVMeasureOutputReader {
 			hasMoreLines = false;
 		}
 	}
-	
+
 	/**
 	 * Tells if there are more lines in this file.
 	 * @return true if there are more lines, false otherwise
@@ -106,7 +107,7 @@ public class VerboseCSVMeasureOutputReader {
 	public boolean hasMoreLines() throws IOException {
 		return hasMoreLines;
 	}
-	
+
 	/**
 	 * Reads a line from the verbose CSV
 	 * @return true if more lines are available, false otherwise
@@ -124,7 +125,7 @@ public class VerboseCSVMeasureOutputReader {
 		parseLine(str);
 		return true;
 	}
-	
+
 	/**
 	 * Parses a CSV file line
 	 * @param line the output data structure
@@ -136,7 +137,7 @@ public class VerboseCSVMeasureOutputReader {
 		parsedSample = numberParser.parse(str, new ParsePosition(index + logCsvDelimiter.length())).doubleValue();
 		parsedWeight = numberParser.parse(str, new ParsePosition(index2 + logCsvDelimiter.length())).doubleValue();
 	}
-	
+
 	/**
 	 * @return the last line number read
 	 */
@@ -157,14 +158,14 @@ public class VerboseCSVMeasureOutputReader {
 	public double getParsedWeight() {
 		return parsedWeight;
 	}
-	
+
 	/**
 	 * @return the parsed simulation time
 	 */
 	public double getParsedSimulationTime() {
 		return parsedSimTime;
 	}
-	
+
 	/**
 	 * Returns the percentage of file parsed
 	 * @return the percentage of file parsed
@@ -186,6 +187,5 @@ public class VerboseCSVMeasureOutputReader {
 		super.finalize();
 		closeFile();
 	}
-	
-	
+
 }

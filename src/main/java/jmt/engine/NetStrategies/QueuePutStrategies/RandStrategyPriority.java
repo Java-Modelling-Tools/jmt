@@ -37,7 +37,7 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class RandStrategyPriority implements QueuePutStrategy {
 
-	private RandomEngine engine = RandomEngine.makeDefault();
+	private RandomEngine randomEngine = RandomEngine.makeDefault();
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
@@ -75,7 +75,7 @@ public class RandStrategyPriority implements QueuePutStrategy {
 			}
 			size++;
 		}
-		queue.add(index + (int) (engine.raw() * (size + 1)), new JobInfo(job));
+		queue.add(index + (int) (randomEngine.raw() * (size + 1)), new JobInfo(job));
 	}
 
 	public boolean check() {

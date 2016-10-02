@@ -395,12 +395,12 @@ public abstract class SolverMulti {
 		return sysThroughput;
 	}
 
-	/** Prints all the calculated indexes in the system.out.
+	/** Prints all the calculated indices in the system.out.
 	 *  It is used to debug or test the class.
 	 */
-	public void printIndexes() {
+	public void printIndices() {
 		for (int i = 0; i < stations; i++) {
-			pw.println("Indexes of " + name[i]);
+			pw.println("Indices of " + name[i]);
 			for (int j = 0; j < classes; j++) {
 				pw.println("of class " + j);
 				pw.println("throughput        : " + throughput[i][j]);
@@ -421,7 +421,7 @@ public abstract class SolverMulti {
 		buf.append("\nAnalysis with SolverMulti");
 		buf.append("\n");
 		for (int i = 0; i < stations; i++) {
-			buf.append("\n\n\nIndexes of " + name[i]);
+			buf.append("\n\n\nIndices of " + name[i]);
 			for (int j = 0; j < classes; j++) {
 				buf.append("\n\nClass " + j);
 				buf.append("\n- queue length      : " + queueLen[i][j]);
@@ -437,7 +437,7 @@ public abstract class SolverMulti {
 			buf.append("\n- utilization        : " + scUtilization[i]);
 		}
 		for (int j = 0; j < classes; j++) {
-			buf.append("\n\nIndexes of class " + j);
+			buf.append("\n\nIndices of class " + j);
 			buf.append("\n- response time       : " + clsRespTime[j]);
 			buf.append("\n- throughput          : " + clsRespTime[j]);
 		}

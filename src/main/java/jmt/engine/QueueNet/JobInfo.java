@@ -37,15 +37,15 @@ public class JobInfo {
 		time = NetSystem.getTime();
 	}
 
-//	/** Creates a new instance of JobInfo object.
-//	 * Set time for the forked job, set the forked time.
-//	 * @param Job Reference to the job to be described.
-//	 * @param time time of the forked job.
-//	 */
-//	public JobInfo(Job Job, double time) {
-//		this.job = Job;
-//		this.time = time;
-//	}
+	/** Creates a new instance of JobInfo object.
+	 * Set time for the forked job, set the forked time.
+	 * @param Job Reference to the job to be described.
+	 * @param time time of the forked job.
+	 */
+	/*public JobInfo(Job Job, double time) {
+		this.job = Job;
+		this.time = time;
+	}*/
 
 	/** Gets the job referenced by this JobInfo
 	 * @return Referenced job.
@@ -54,14 +54,14 @@ public class JobInfo {
 		return job;
 	}
 
-	/** Gets Time property value .
+	/** Gets Time property value.
 	 * @return Time property value.
 	 */
 	public double getTime() {
 		return time;
 	}
 
-	/** Sets Time property value .
+	/** Sets Time property value.
 	 * @param time Time property value.
 	 */
 	protected void setTime(double time) {

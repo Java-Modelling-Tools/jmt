@@ -66,7 +66,6 @@ public class NetSystem {
 	 */
 	public static void terminate() throws jmt.common.exception.NetException {
 		abort();
-
 	}
 
 	/** Gets the current simulation time.
@@ -98,9 +97,7 @@ public class NetSystem {
 		while (nets.hasNext()) {
 			Network = nets.next();
 			if (Network.getState() == QueueNetwork.STATE_READY) {
-
 				nodes = Network.getNodes().listIterator();
-
 				while (nodes.hasNext()) {
 					Node = nodes.next();
 					Node.send(NetEvent.EVENT_START, null, 0.0, NodeSection.NO_ADDRESS, NodeSection.INPUT, Node);
@@ -108,17 +105,12 @@ public class NetSystem {
 					Node.send(NetEvent.EVENT_START, null, 0.0, NodeSection.NO_ADDRESS, NodeSection.OUTPUT, Node);
 				}
 				Network.setState(QueueNetwork.STATE_RUNNING);
-
 			}
 		}
 
 		netController.start();
-
 		netController.run();
 	}
-
-	//NEW
-	//@author Stefano Omini
 
 	public static boolean pause() {
 		//if (netController != null && netController.isRunning()) {
@@ -137,8 +129,6 @@ public class NetSystem {
 		}
 		return false;
 	}
-
-	//end NEW
 
 	/** Stops the NetSystem Engine and terminates the simulation (stops all the
 	 * controlled QueueNetworks).
@@ -162,13 +152,11 @@ public class NetSystem {
 		if (Network.getState() == QueueNetwork.STATE_RUNNING) {
 			/* Informs ALL nodes of stop event and not only Reference nodes */
 			ListIterator<NetNode> nodes = Network.getNodes().listIterator();
-
 			while (nodes.hasNext()) {
 				node = nodes.next();
 				node.send(NetEvent.EVENT_STOP, null, 0.0, NodeSection.NO_ADDRESS, NodeSection.NO_ADDRESS, node);
 			}
 			Network.setState(QueueNetwork.STATE_STOPPED);
-
 		}
 	}
 
@@ -200,7 +188,6 @@ public class NetSystem {
 				node.send(NetEvent.EVENT_ABORT, null, 0.0, NodeSection.NO_ADDRESS, NodeSection.NO_ADDRESS, node);
 			}
 			network.setState(QueueNetwork.STATE_ABORTED);
-
 		}
 	}
 
@@ -268,7 +255,6 @@ public class NetSystem {
 			if (num > 0) {
 				measures = network.getMeasures().listIterator();
 				count = 0;
-
 				while (measures.hasNext()) {
 					measure = measures.next();
 					if (measure.hasFinished()) {
@@ -277,23 +263,22 @@ public class NetSystem {
 				}
 
 				switch (network.getBehaviour()) {
-					case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP:
-						if (count == num) {
-							stop(network);
-						}
-						break;
-					case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_ABORT:
-						if (count == num) {
-							abort(network);
-						}
-						break;
-					case QueueNetwork.BEHAVIOUR_ABORT:
-						abort();
-						break;
-					case QueueNetwork.BEHAVIOUR_STOP:
-						stop();
-						break;
-
+				case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP:
+					if (count == num) {
+						stop(network);
+					}
+					break;
+				case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_ABORT:
+					if (count == num) {
+						abort(network);
+					}
+					break;
+				case QueueNetwork.BEHAVIOUR_ABORT:
+					abort();
+					break;
+				case QueueNetwork.BEHAVIOUR_STOP:
+					stop();
+					break;
 				}
 			}
 		}
@@ -307,10 +292,10 @@ public class NetSystem {
 	 * @throws jmt.common.exception.NetException if network is null
 	 */
 	public static double checkProgress(QueueNetwork network) throws jmt.common.exception.NetException {
-
 		if (network == null) {
 			throw new NetException("Cannot measure progress of a network which does not exist.");
 		}
+
 		// We estimate on the slowest not completed measure
 		ListIterator<Measure> measures;
 		double slowest = 1;
@@ -329,7 +314,6 @@ public class NetSystem {
 	}
 
 	public static double getTempMeasures(QueueNetwork network) throws jmt.common.exception.NetException {
-
 		if (network == null) {
 			throw new NetException("Cannot get measures of a network which does not exist.");
 		}
@@ -338,7 +322,6 @@ public class NetSystem {
 		int count = 0;
 		Measure measure;
 		int num = network.getMeasures().size();
-
 		if (num > 0) {
 			measures = network.getMeasures().listIterator();
 			while (measures.hasNext()) {
@@ -375,7 +358,7 @@ public class NetSystem {
 			}
 		}
 	}
-	
+
 	/**
 	 * Sets the maximum simulated time for the simulation in the netController
 	 * @param network network to be checked for progress
@@ -385,4 +368,5 @@ public class NetSystem {
 			netController.setMaxSimulatedTime(maxSimulatedTime);
 		}
 	}
+
 }

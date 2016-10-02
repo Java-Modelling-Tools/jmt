@@ -69,7 +69,7 @@ public class PopulationChangeVector extends EnhancedVector   {
        
     /**
      * returns index of the right-most non-zero element
-     * indexes start from 0
+     * indices start from 0
      */
     public int RightMostNonZero() {
     	for (int i = size() - 1; i >= 0; i-- ) {

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
@@ -75,10 +93,10 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		WarningScrollTable jsp = new WarningScrollTable(joinStrategies, WARNING_CLASS);
 		//routing strategy selector on the left, routing probabilities editor on the right
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Join Strategies"));
-		mainPanel.setResizeWeight(.80); // Gives more space to left component
-		jsp.setMinimumSize(new Dimension(180, 100));
+		mainPanel.setResizeWeight(1.0); // Gives more space to left component
+		jsp.setMinimumSize(new Dimension(200, 100));
 		mainPanel.setLeftComponent(jsp);
-		joinEditor.setMinimumSize(new Dimension(160, 100));
+		joinEditor.setMinimumSize(new Dimension(200, 100));
 		mainPanel.setRightComponent(joinEditor);
 		add(mainPanel, BorderLayout.CENTER);
 	}
@@ -105,9 +123,9 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 			if (joinStrategies.getSelectedRow() == -1) {
 				joinStrategies.setRowSelectionInterval(0, 0);
 			}
-			joinEditor.setData(stationData, classData,  stationKey, classData.getClassKeys().get(joinStrategies.getSelectedRow()));
+			joinEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(joinStrategies.getSelectedRow()));
 		} else {
-			joinEditor.setData(stationData, classData,  stationKey, 0);
+			joinEditor.setData(stationData, classData, stationKey, 0);
 		}
 
 	}
@@ -143,7 +161,6 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 					joinStrategies = JoinStrategy.findAll();
 				}
 				return ComboBoxCellEditor.getEditorInstance(joinStrategies);
-
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -174,7 +191,7 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 			if (row != -1) {
 				if (joinEditor != null) {
 					//joinEditor.stopEditing();
-					joinEditor.setData(stationData, classData,  stationKey, classData.getClassKeys().get(row));
+					joinEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(row));
 					JoinSectionPanel.this.doLayout();
 					JoinSectionPanel.this.repaint();
 				}
@@ -242,6 +259,7 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		private Object indexToKey(int index) {
 			return classData.getClassKeys().get(index);
 		}
+
 	}
 
 }

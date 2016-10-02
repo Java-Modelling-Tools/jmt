@@ -315,15 +315,14 @@ public class ImagedComboBoxCellEditorFactory {
 					setText("");
 				} else if (key.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)) {
 					setText(CommonConstants.STATION_TYPE_CLASSSWITCH);
-					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_CLASSSWITCH+ "Combo"));
+					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_CLASSSWITCH + "Combo"));
 				} else if (key.equals(CommonConstants.STATION_TYPE_FORK)) {
 					setText(CommonConstants.STATION_TYPE_FORK);
-					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_FORK+ "Combo"));
-				} else if (key.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
-					setText(CommonConstants.STATION_TYPE_TRANSITION);
-					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_TRANSITION+ "Combo"));
+					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_FORK + "Combo"));
+				} else if (key.equals(CommonConstants.STATION_TYPE_SCALER)) {
+					setText(CommonConstants.STATION_TYPE_SCALER);
+					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_SCALER + "Combo"));
 				}
-
 			} else {
 				// This is a class
 				if (cd.getClassName(key) != null && !cd.getClassName(key).equals("")) {
@@ -340,7 +339,6 @@ public class ImagedComboBoxCellEditorFactory {
 					// Null component
 					setText(CommonConstants.ALL_CLASSES);
 				}
-
 			}
 		}
 

@@ -38,6 +38,7 @@ import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.PSJobInfoList;
+import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.QueueNet.WaitingRequest;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.random.engine.RandomEngine;
@@ -129,18 +130,14 @@ public class Queue extends InputSection {
 
 	private QueuePutStrategy putStrategy[];
 
-	//-------------------BLOCKING REGION PROPERTIES----------------------------//
-	//@author Stefano Omini
-
-	//true if the queue belongs to a blocking region and has to redirect the jobs
-	//arriving from the outside of the region
+	//--------------------BLOCKING REGION PROPERTIES--------------------//
+	//true if the redirection behaviour is turned on
 	private boolean redirectionON;
-	//the blocking region the node belongs to
+	//the blocking region that the owner node of this section belongs to
 	private BlockingRegion myRegion;
 	//the input station of the blocking region
 	private NetNode regionInputStation;
-
-	//-------------------end BLOCKING REGION PROPERTIES----------------------------//
+	//------------------------------------------------------------------//
 
 	/**
 	 * Creates a new instance of finite Queue.
@@ -151,15 +148,10 @@ public class Queue extends InputSection {
 	 * false otherwise.
 	 */
 	public Queue(int size, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[]) {
-		//OLD
-		//super();
-
-		//NEW
 		//auto = false, otherwise when a JOB message is received,
 		//the corresponding Job object is automatically added to
 		//JobInfoList
 		super(false);
-		//end NEW
 
 		if (size == -1) {
 			this.size = -1;
@@ -174,7 +166,8 @@ public class Queue extends InputSection {
 			this.getStrategy = getStrategy;
 		}
 		this.putStrategy = putStrategy;
-		// Uses putstrategy.length to estimate number of classes. it is a bit unclean but we are forced for compatibility.
+		// Uses putstrategy.length to estimate number of classes. It is a bit
+		// unclean but we are forced for compatibility.
 		this.drop = new boolean[putStrategy.length];
 		this.block = new boolean[putStrategy.length];
 		Arrays.fill(this.drop, drop);
@@ -185,11 +178,6 @@ public class Queue extends InputSection {
 		redirectionON = false;
 		myRegion = null;
 		regionInputStation = null;
-
-		//NEW
-		//@author Stefano Omini
-		//log = NetSystem.getLog();
-		//end NEW
 	}
 
 	/**
@@ -210,7 +198,8 @@ public class Queue extends InputSection {
 	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
 	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
-	 * @param myReg the blocking region to which the owner node of this queue belongs
+	 * @param myReg the blocking region to which the owner node of this queue
+	 * belongs.
 	 */
 	public Queue(int size, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[], BlockingRegion myReg) {
 		//uses constructor for generic queue
@@ -228,7 +217,8 @@ public class Queue extends InputSection {
 	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
 	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
-	 * @param myReg the blocking region to which the owner node of this queue belongs
+	 * @param myReg the blocking region to which the owner node of this queue
+	 * belongs.
 	 */
 	public Queue(Integer size, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[], BlockingRegion myReg) {
 		this(size.intValue(), drop.booleanValue(), getStrategy, putStrategy, myReg);
@@ -240,7 +230,7 @@ public class Queue extends InputSection {
 	 * @param size Queue size (-1 = infinite queue).
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
-	 * @param dropStrategies  
+	 * @param dropStrategies Drop strategy: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
 	 */
 	public Queue(Integer size, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[]) {
 		this(size.intValue(), false, getStrategy, putStrategy);
@@ -261,8 +251,8 @@ public class Queue extends InputSection {
 
 	/**
 	 * Turns on the "redirecting queue" behaviour.
-	 * @param region the blocking region to which the owner node
-	 * of this queue belongs
+	 * @param region the blocking region to which the owner node of this queue
+	 * belongs.
 	 */
 	public void redirectionTurnON(BlockingRegion region) {
 		//sets blocking region properties
@@ -306,11 +296,8 @@ public class Queue extends InputSection {
 			return size;
 		case PROPERTY_ID_WAITING_REQUESTS:
 			return waitingRequests.size();
-			//NEW
-			//@author Stefano Omini
 		case PROPERTY_ID_DROPPED_JOBS:
 			return droppedJobs;
-			//end NEW
 		default:
 			return super.getIntSectionProperty(id);
 		}
@@ -354,7 +341,7 @@ public class Queue extends InputSection {
 
 		// TODO the following line is not clean. The correct behaviour should be implemented without this hack.
 		try {
-			if (getOwnerNode().getSection(SERVICE) instanceof PSServer) {
+			if (node.getSection(NodeSection.SERVICE) instanceof PSServer) {
 				jobsList = new PSJobInfoList(jobClasses.size(), true);
 				queueJobInfoList = ((PSJobInfoList) jobsList).getInternalList();
 			}
@@ -370,12 +357,10 @@ public class Queue extends InputSection {
 
 		droppedJobs = 0;
 		droppedJobsPerClass = new int[jobClasses.size()];
-		for (int i = 0; i < droppedJobsPerClass.length; i++) {
-			droppedJobsPerClass[i] = 0;
-		}
+		Arrays.fill(droppedJobsPerClass, 0);
 
 		//retrieves the job info list of the owner node
-		nodeJobsList = getOwnerNode().getJobInfoList();
+		nodeJobsList = node.getJobInfoList();
 	}
 
 	/** This method implements a generic finite/infinite queue
@@ -467,7 +452,6 @@ public class Queue extends InputSection {
 
 				// If parent node is a fork node adds job to FJ info list
 				if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-					// Removes job from global node list
 					if (FJList != null) {
 						FJList.add(new JobInfo(job));
 					}
@@ -578,8 +562,7 @@ public class Queue extends InputSection {
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			Job j = (Job)message.getData();
-
+			Job j = (Job) message.getData();
 			JobInfo jData = null;
 			if (FJList != null) {
 				jData = FJList.lookFor(j);
@@ -619,15 +602,8 @@ public class Queue extends InputSection {
 	}
 
 	/**
-	 * Gets the numbers of dropped jobs for each class
-	 * @return the numbers of dropped jobs for each class
-	 */
-	public int[] getDroppedJobsPerClass() {
-		return droppedJobsPerClass;
-	}
-
-	/**
 	 * Gets the number of dropped jobs for the specified class
+	 * @param classIndex the index of the job class
 	 * @return the number of dropped jobs for the specified class
 	 */
 	public int getDroppedJobPerClass(int classIndex) {
@@ -667,7 +643,9 @@ public class Queue extends InputSection {
 			JobInfo jobInfo = new JobInfo(job);
 			putStrategy[job.getJobClass().getId()].put(job, jobsList, this);
 			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-				FJList.add(jobInfo);
+				if (FJList != null) {
+					FJList.add(jobInfo);
+				}
 			}
 			nodeJobsList.add(jobInfo);
 			netJobsList.addJob(job);
@@ -675,17 +653,19 @@ public class Queue extends InputSection {
 	}
 
 	@Override
-	public void analyze(int name, JobClass jc, Measure measurement, JobClass[] classes) {
+	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
 		if (FJList == null) {
-			FJList = new LinkedJobInfoList(classes.length, true);
+			FJList = new LinkedJobInfoList(jobClasses.size(), true);
 		}
 		switch (name) {
-		case 0:
-			FJList.analyzeResponseTime(jc, measurement);
+		case SimConstants.FORK_JOIN_RESPONSE_TIME:
+			FJList.analyzeResponseTime(jobClass, measurement);
 			break;
-		case 1:
-			FJList.analyzeQueueLength(jc, measurement);
+		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+			FJList.analyzeQueueLength(jobClass, measurement);
 			break;
+		default:
+			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
 	}
 

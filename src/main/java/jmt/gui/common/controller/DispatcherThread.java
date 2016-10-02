@@ -33,7 +33,7 @@ import jmt.gui.jsimgraph.controller.SimulationStateChecker;
 
 /**
  * <p>Title: Dispatcher Thread</p>
- * <p>Description: This thread is responsable for dispatching simulation. If simulation max time has
+ * <p>Description: This thread is responsible for dispatching simulation. If simulation max time has
  * been specified, an inner thread will be used to stop simulation after that time. We do not rely
  * on engine method as it does not appear to work properly.</p>
  * 
@@ -112,7 +112,6 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		if (sd.isAnimationEnabled()) {
 			//if it is the first time create a new simStateChecker
 			simStateChecker = new SimulationStateChecker((Mediator) gui, simulator);
-
 		}
 		// ----------- end Francesco D'Aquino -----------
 		// If needed sets simulation seed
@@ -149,7 +148,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 			if (timer != null) {
 				timer.kill();
 			}
-			gui.changeSimActionsState(true, false, false);
+			//gui.changeSimActionsState(true, false, false);
 			simulator.abortAllMeasures();
 		}
 	}

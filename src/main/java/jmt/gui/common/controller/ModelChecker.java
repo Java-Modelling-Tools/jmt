@@ -89,7 +89,7 @@ public class ModelChecker implements CommonConstants {
 	private HashMap<Object, Vector<Object>> allForwardStationsAreSinkErrors;
 	//Vector containing the keys of measures defined more than once
 	private Vector<Object> redundantMeasure;
-	//Vector containing the inconsistent performance indexes
+	//Vector containing the inconsistent performance indices
 	private Vector<Object> inconsistentMeasures;
 	//Vector containing the keys of servers with per class different
 	//queue strategies
@@ -2726,7 +2726,7 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Changes all time distributions to exponential mainteining (when possible)
+	 * Changes all time distributions to exponential maintaining (when possible)
 	 * the same mean value. Since T-Student and Replayer do not have a mean
 	 * value the mean value 1 is used.
 	 */
@@ -3231,7 +3231,7 @@ public class ModelChecker implements CommonConstants {
 	public void checkForSemaphoreNotBetweenForkJoin() {
 		for (int i = 0; i < station_def.getStationKeys().size(); i++) {
 			Object stationKey = station_def.getStationKeys().get(i);
-			if (station_def.getStationType(stationKey).equals(STATION_TYPE_TASKSEMAPHORE)) {
+			if (station_def.getStationType(stationKey).equals(STATION_TYPE_SEMAPHORE)) {
 				semaphoreNotBetweenForkJoin.add(stationKey);
 			}
 		}
@@ -3241,7 +3241,7 @@ public class ModelChecker implements CommonConstants {
 			if (!station_def.getStationType(stationKey).equals(STATION_TYPE_FORK)) {
 				continue;
 			}
-			Vector<Object> result = searchForStationBetweenForkJoin(STATION_TYPE_TASKSEMAPHORE, stationKey);
+			Vector<Object> result = searchForStationBetweenForkJoin(STATION_TYPE_SEMAPHORE, stationKey);
 			if (result != null && !result.isEmpty()) {
 				semaphoreBetweenForkJoin.addAll(result);
 			}

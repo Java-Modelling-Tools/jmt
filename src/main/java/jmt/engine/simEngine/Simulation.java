@@ -69,6 +69,7 @@ import jmt.engine.random.engine.RandomEngine;
  *              each sink per class. 
  */
 public class Simulation {
+
 	/** Output file handler */
 	File outputFile;
 
@@ -139,8 +140,6 @@ public class Simulation {
 
 	//-------------------------CONSTRUCTORS-------------------------------//
 
-	//NEW
-	//@author Stefano Omini
 	/**
 	 * Creates a new Simulation object.
 	 * @param seed simulation seed (if -1, an automatic seed will be generated)
@@ -182,7 +181,6 @@ public class Simulation {
 			setRandomEngineSeed(seed);
 		}
 	}
-	//end NEW
 
 	//-------------------------end CONSTRUCTORS-------------------------------//
 
@@ -443,7 +441,7 @@ public class Simulation {
 					if (output instanceof Router) {
 						((Router) output).borderRouterTurnON(br);
 					} else if (output instanceof Fork) {
-						((Fork)output).addRegion(br);
+						((Fork) output).addRegion(br);
 					} else if (output instanceof Link) {
 						((Link) output).borderRouterTurnON(br);
 					} else {
@@ -521,17 +519,19 @@ public class Simulation {
 						break;
 					case SimConstants.UTILIZATION:
 						//measures the utilization of the service section (=mean number of jobs present in service section joblist)
-						//Mattia Cazzoli
 						if (netNodes[nodePosition].getSection(NodeSection.INPUT) instanceof Join) {
-							((Join) netNodes[nodePosition].getSection(NodeSection.INPUT)).analyzeUtilization(jClass, ms.getMeasure(), classes);
+							netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeJoin(SimConstants.UTILIZATION, jClass, ms.getMeasure());
 						} else {
 							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
 						}
-						//end
 						break;
 					case SimConstants.THROUGHPUT:
 						//measures the throughput of the output section (= throughput of output section joblist)
-						netNodes[nodePosition].getSection(NodeSection.OUTPUT).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
+						if (netNodes[nodePosition].getSection(NodeSection.OUTPUT) instanceof Fork) {
+							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
+						} else {
+							netNodes[nodePosition].getSection(NodeSection.OUTPUT).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
+						}
 						break;
 					case SimConstants.RESPONSE_TIME:
 						//measures the response time for all visits
@@ -554,18 +554,18 @@ public class Simulation {
 						break;
 					case SimConstants.THROUGHPUT_PER_SINK:
 						netNodes[nodePosition].analyze(SimConstants.THROUGHPUT_PER_SINK, jClass, ms.getMeasure());
-						break;       
+						break;
 					case SimConstants.FCR_TOTAL_WEIGHT:
-						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, ms.getMeasure());
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeFCR(SimConstants.FCR_TOTAL_WEIGHT, ms.getMeasure());
 						break;
 					case SimConstants.FCR_MEMORY_OCCUPATION:
-						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, ms.getMeasure());
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeFCR(SimConstants.FCR_MEMORY_OCCUPATION, ms.getMeasure());
 						break;
 					case SimConstants.FORK_JOIN_RESPONSE_TIME:
-						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(0, jClass, ms.getMeasure(), classes);
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeFJ(SimConstants.FORK_JOIN_RESPONSE_TIME, jClass, ms.getMeasure());
 						break;
 					case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(1, jClass, ms.getMeasure(), classes);
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeFJ(SimConstants.FORK_JOIN_NUMBER_OF_JOBS, jClass, ms.getMeasure());
 						break;
 					}
 				}

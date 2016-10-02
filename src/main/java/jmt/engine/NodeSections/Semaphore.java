@@ -28,19 +28,15 @@ import jmt.engine.NetStrategies.SemaphoreStrategies.NormalSemaphore;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.Job;
-import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
-import jmt.engine.QueueNet.LinkedJobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NodeSection;
-import jmt.engine.dataAnalysis.Measure;
 
 /**
- * <p>Title: Task Semaphore</p>
- * <p>Description: This class is a Task Semaphore input section, used to stop a
+ * <p>Title: Semaphore</p>
+ * <p>Description: This class is a Semaphore input section, used to stop a
  * percentage of forked tasks. Tasks are kept until they reach the threshold. If
  * a non-fragmented job is received, it is simply routed to service section.</p>
  *
@@ -48,7 +44,7 @@ import jmt.engine.dataAnalysis.Measure;
  *         Date: 25-jul-2016
  *         Time: 11.37.58
  */
-public class TaskSemaphore extends InputSection {
+public class Semaphore extends InputSection {
 
 	/** Data structure used to store received tasks for each job */	
 	private HashMap<Job, Integer> required;
@@ -60,28 +56,35 @@ public class TaskSemaphore extends InputSection {
 
 	private SemaphoreStrategy[] semaphoreStrategies;
 
+	private JobInfoList nodeJobsList;
+
 	// --- Constructors -----------------------------------------------------------------------------
 
 	/**
-	 * Constructs a new Task Semaphore
+	 * Constructs a new Semaphore
 	 */
-	public TaskSemaphore() {
+	public Semaphore() {
 		// Disables automatic handling of jobinfolist
-		super(false);		
-		required = new HashMap<>();
-		aggregated = new HashMap<>();
+		super(false);
+		required = new HashMap<Job, Integer>();
+		aggregated = new HashMap<Job, Integer>();
 		allJobs = new HashMap<Job, Integer>();
 		hasFired = new HashMap<Job, Boolean>();
-		counter = new HashMap<Job, Integer>();
 		forkJobs = new HashMap<Job, List<ForkJob>>();
-	} 
+		counter = new HashMap<Job, Integer>();
+	}
 
-	public TaskSemaphore(SemaphoreStrategy[] semaphoreStrategies) {
+	public Semaphore(SemaphoreStrategy[] semaphoreStrategies) {
 		this();
 		this.semaphoreStrategies = semaphoreStrategies;
 	}
 
 	// ----------------------------------------------------------------------------------------------
+
+	@Override
+	protected void nodeLinked(NetNode node) {
+		nodeJobsList = node.getJobInfoList();
+	};
 
 	/**
 	 * @param message message to be processed.
@@ -97,11 +100,7 @@ public class TaskSemaphore extends InputSection {
 
 		case NetEvent.EVENT_JOB:
 			Job job = message.getJob();
-			// Sends ACK back
 			send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-
-			JobInfoList info = getOwnerNode().getJobInfoList();
-			JobInfoList section = (JobInfoList) this.getObject(NodeSection.PROPERTY_ID_JOBINFOLIST);
 
 			if (job instanceof ForkJob) {
 				ForkJob fJob = (ForkJob) job;
@@ -110,8 +109,8 @@ public class TaskSemaphore extends InputSection {
 					fJobs = new ArrayList<ForkJob>();
 					forkJobs.put(fJob.getForkedJob(), fJobs);
 					JobInfo temp = new JobInfo(job);
-					section.add(temp);
-					section.remove(temp);
+					jobsList.add(temp);
+					jobsList.remove(temp);
 				}
 				fJobs.add(fJob);
 
@@ -125,8 +124,7 @@ public class TaskSemaphore extends InputSection {
 					totalAggregated = aggregated.get(fJob.getForkedJob());
 					isFired = hasFired.get(fJob.getForkedJob());
 				} else {
-					totalForked = fJob.getForkedNumber();                                             
-
+					totalForked = fJob.getForkedNumber();
 					neededPerClass = ((NormalSemaphore) semaphoreStrategies[fJob.getForkedJob().getJobClass().getId()]).getSemaphoreThres();
 					if (neededPerClass == 0) {
 						neededPerClass = 1;
@@ -140,44 +138,39 @@ public class TaskSemaphore extends InputSection {
 					aggregated.put(fJob.getForkedJob(), totalAggregated);
 					isFired = false;
 
-					if (myRegion != null) {                                                       
-						counter.put(fJob.getForkedJob(), fJob.getForkedNumber());                                                      
+					if (myRegion != null) {
+						counter.put(fJob.getForkedJob(), fJob.getForkedNumber());
 						counter.put(fJob.getForkedJob(), semaphoreStrategies[fJob.getForkedJob().getJobClass().getId()].getSemaphoreThres());
 					}
 				}
-				// Decrement needed as we received this job
 				totalForked--;
 
 				if (isFired) {
-					JobInfo i = info.lookFor(fJob);
+					JobInfo i = nodeJobsList.lookFor(fJob);
 					if (i != null) {
-						info.remove(i);
+						nodeJobsList.remove(i);
 					}
 					if (myRegion != null) {
 						//myRegion.decreaseOccupation(fJob.getJobClass());
 						myRegion.decreaseOccupation(fJob);
 					}
 					sendForward(job, 0.0);
-				}
-
-				if (!isFired) {
-
+				} else {
 					boolean isGuardTrue = false;
-					if (neededPerClass != null) {                                                		
-						neededPerClass--;                                                       
+					if (neededPerClass != null) {
+						neededPerClass--;
 						if (neededPerClass <= 0) {
 							isGuardTrue = true;
-						}                                                        
+						}
 					}
-
 					hasFired.put(fJob.getForkedJob(), false);
-					required.put(fJob.getForkedJob(), neededPerClass);                                                
-					if (isGuardTrue) {                                                       
+					required.put(fJob.getForkedJob(), neededPerClass);
 
-						for (ForkJob j: forkJobs.get(fJob.getForkedJob())) {
-							JobInfo i = info.lookFor(j);
+					if (isGuardTrue) {
+						for (ForkJob j : forkJobs.get(fJob.getForkedJob())) {
+							JobInfo i = nodeJobsList.lookFor(j);
 							if (i != null) {
-								info.remove(i);
+								nodeJobsList.remove(i);
 							}
 							if (myRegion != null) {
 								JobInfo ji = myRegion.getInputStation().getJobInfoList().lookFor(j);
@@ -190,27 +183,23 @@ public class TaskSemaphore extends InputSection {
 							myRegion.getInputStation().getJobInfoList().remove(new JobInfo(fJob.getForkedJob()));
 						}
 
-						// Sends job forward
 						for (int n = 0; n < totalAggregated; n++) {
 							sendForward(job, 0.0);
 							hasFired.put(fJob.getForkedJob(), true);
-						}                                                 
-					} 
+						}
+					}
 				}
 
 				if (totalForked == 0) {
-
-					allJobs.remove(fJob.getForkedJob());                                                
-					hasFired.remove(fJob.getForkedJob());
-					forkJobs.remove(fJob.getForkedJob());
 					required.remove(fJob.getForkedJob());
 					aggregated.remove(fJob.getForkedJob());
-
+					allJobs.remove(fJob.getForkedJob());
+					hasFired.remove(fJob.getForkedJob());
+					forkJobs.remove(fJob.getForkedJob());
 				} else {
 					allJobs.put(fJob.getForkedJob(), totalForked);
 				}
 			} else {
-				// If this is not a fork job, sends it forward
 				sendForward(job, 0.0);
 			}
 			break;
@@ -234,7 +223,7 @@ public class TaskSemaphore extends InputSection {
 		// Everything was okay
 		return MSG_PROCESSED;
 	}
-	
+
 	private boolean redirectionON;
 	private BlockingRegion myRegion;
 	private NetNode regionInputStation;
@@ -246,19 +235,11 @@ public class TaskSemaphore extends InputSection {
 	}
 
 	public BlockingRegion getMyRegion() {
-		return this.myRegion;
+		return myRegion;
 	}
 
 	public int getDeTimes(Job job) {
-		return this.counter.remove(job);
-	}
-
-	public void analyzeUtilization(JobClass jc, Measure measurement, JobClass[] classes) {
-		JobInfoList info = getOwnerNode().getJobInfoList();
-		if (info == null) {
-			info = new LinkedJobInfoList(classes.length, true);
-		}
-		((LinkedJobInfoList) info).analyzeUtilizationJoin(jc, measurement);
+		return counter.remove(job);
 	}
 
 }

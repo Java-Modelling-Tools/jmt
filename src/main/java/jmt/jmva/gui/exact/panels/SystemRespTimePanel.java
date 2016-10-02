@@ -25,7 +25,7 @@ import jmt.jmva.gui.exact.ExactWizard;
 /**
  * @author Kourosh Sheykhvand
  * Date: Nov 2013
- * in this panel we are going to show the new performance indexes which is SystemResponseTime the calculation has not finished yet.
+ * in this panel we are going to show the new performance indices which is SystemResponseTime the calculation has not finished yet.
  *  but the value are the same as the residence time panel but I just need to divide some of them. the formula has not be calculated but again
  *  we do not need to touch the algorithm we can have the information of the residence time and then use them here.
  */

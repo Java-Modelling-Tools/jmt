@@ -18,6 +18,7 @@
 
 package jmt.engine.NodeSections;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -31,6 +32,7 @@ import jmt.engine.QueueNet.LinkedJobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.dataAnalysis.Measure;
 
 /**
@@ -80,7 +82,7 @@ public class BlockingQueue extends InputSection {
 	protected boolean[] classDrop;
 
 	/** For each class, true if jobs in excess must be dropped */
-	protected double[] classWeights = null;
+	protected double[] classWeights;
 
 	private int droppedJobs;
 	private int[] droppedJobsPerClass;
@@ -92,40 +94,29 @@ public class BlockingQueue extends InputSection {
 	 * Creates a new instance of infinite BlockingQueue.
 	 */
 	public BlockingQueue(BlockingRegion myRegion) {
-
 		super(true);
-
 		coolStart = true;
 		//infinite queue
 		this.size = -1;
 		//sets the blocking region owner of this blocking queue
 		this.blockingRegion = myRegion;
-
 	}
 
 	@Override
 	protected void nodeLinked(NetNode node) {
 		// Sets netnode dependent properties
-
-		//if (jobsList == null)
 		jobsList = new LinkedJobInfoList(getJobClasses().size(), true);
-
-		jobsList_node = this.getOwnerNode().getJobInfoList();
+		jobsList_node = node.getJobInfoList();
 
 		//copies drop properties from blocking region
 		//and initializes dropped jobs
-		droppedJobs = 0;
-		droppedJobsPerClass = new int[node.getJobClasses().size()];
-		this.classDrop = new boolean[node.getJobClasses().size()];
-
-		for (int i = 0; i < droppedJobsPerClass.length; i++) {
-			//copies drop properties from blocking region
-			this.classDrop[i] = blockingRegion.getClassDrop(i);
-			//initializes dropped jobs
-			droppedJobsPerClass[i] = 0;
+		classDrop = new boolean[getJobClasses().size()];
+		for (int i = 0; i < classDrop.length; i++) {
+			classDrop[i] = blockingRegion.getClassDrop(i);
 		}
-
-		return;
+		droppedJobs = 0;
+		droppedJobsPerClass = new int[getJobClasses().size()];
+		Arrays.fill(droppedJobsPerClass, 0);
 	}
 
 	@Override
@@ -382,7 +373,7 @@ public class BlockingQueue extends InputSection {
 		}
 
 		if (jobsList_node == null) {
-			jobsList_node = this.getOwnerNode().getJobInfoList();
+			jobsList_node = getOwnerNode().getJobInfoList();
 		}
 		JobInfo jobInfo_node = jobsList_node.lookFor(job);
 		if (jobInfo_node != null) {
@@ -394,40 +385,33 @@ public class BlockingQueue extends InputSection {
 	}
 
 	/**
-	 * Gets the number of dropped jobs
-	 * @return the number of dropped jobs
+	 * Gets the total number of dropped jobs
+	 * @return the total number of dropped jobs
 	 */
 	public int getDroppedJobs() {
 		return droppedJobs;
 	}
 
 	/**
-	 * Gets the number of dropped jobs of each class
-	 * @return the number of dropped jobs of each class
-	 */
-	public int[] getDroppedJobsPerClass() {
-		return droppedJobsPerClass;
-	}
-
-	/**
 	 * Gets the number of dropped jobs for the specified class
 	 * @param classIndex the index of the job class
-	 * @return the number of dropped jobs for the specified class, -1 otherwise
+	 * @return the number of dropped jobs for the specified class
 	 */
 	public int getDroppedJobPerClass(int classIndex) {
 		return droppedJobsPerClass[classIndex];
 	}
 
-	// for blocking region
 	@Override
-	public void analyze(int name, Measure measurement) throws NetException {
+	public void analyzeFCR(int name, Measure measurement) throws NetException {
 		switch (name) {
-		case 0:
-			this.blockingRegion.setWeightMeasure(measurement);
+		case SimConstants.FCR_TOTAL_WEIGHT:
+			blockingRegion.setWeightMeasure(measurement);
 			break;
-		case 1:
-			this.blockingRegion.setSizeMeasure(measurement);
+		case SimConstants.FCR_MEMORY_OCCUPATION:
+			blockingRegion.setSizeMeasure(measurement);
 			break;
+		default:
+			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
 	}
 

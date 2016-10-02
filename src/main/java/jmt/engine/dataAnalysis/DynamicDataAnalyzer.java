@@ -128,5 +128,4 @@ public interface DynamicDataAnalyzer {
 	 */
 	public void setParameters(SimParameters parameters);
 
-
 }

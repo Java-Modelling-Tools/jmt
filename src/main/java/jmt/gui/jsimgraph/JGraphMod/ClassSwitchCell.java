@@ -26,9 +26,7 @@ import org.jgraph.graph.Port;
  *
  */
 public class ClassSwitchCell extends JmtCell {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -37,7 +35,7 @@ public class ClassSwitchCell extends JmtCell {
 	 */
 	public static final boolean canBePlaced = true;
 
-	// Do not change this as it is accessed by reflection to forecast new cell dimensions
+	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
 	public static final String ICON = "cs";
 
 	/**
@@ -64,16 +62,6 @@ public class ClassSwitchCell extends JmtCell {
 	}
 
 	/**
-	 * Returns the name of the icon of this cell
-	 *
-	 * @return the name of the icon of this cell
-	 */
-	@Override
-	public String getIcon() {
-		return ICON;
-	}
-	
-	/**
 	 * Tells if this station generates or destroys jobs (useful for blocking region
 	 * management)
 	 * @return true if this station generates or destroy jobs, false otherwise
@@ -81,6 +69,16 @@ public class ClassSwitchCell extends JmtCell {
 	@Override
 	public boolean generateOrDestroyJobs() {
 		return true;
+	}
+
+	/**
+	 * Returns the name of the icon of this cell
+	 *
+	 * @return the name of the icon of this cell
+	 */
+	@Override
+	public String getIcon() {
+		return ICON;
 	}
 
 }

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.editors;
 
 import java.awt.FlowLayout;
@@ -136,7 +154,6 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	private void updateSpinner() {
 		jNumField.setValue(requiredNum);
 		jNumField.addChangeListener(new ChangeListener() {
-
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				Integer i = (Integer) jNumField.getValue();
@@ -147,7 +164,6 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 				JoinStrategy js = (JoinStrategy)stations.getJoinStrategy(stationKey, classKey);
 				js.setRequiredNum(i);
 			}
-
 		});
 	}
 
@@ -167,8 +183,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(
-						((MixTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((MixTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
@@ -178,10 +193,8 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 		private ClassDefinition cs;
-		private String[] columnNames = new String[] { "Class",
-				"Tasks Required" };
-		private Class<?>[] columnClasses = new Class[] { String.class,
-				Object.class };
+		private String[] columnNames = new String[] { "Class", "Tasks Required" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 		public int[] columnSizes = new int[] { 40, 100 };
 
 		public MixTableModel(ClassDefinition cs) {
@@ -247,6 +260,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 		private Object indexToKey(int index) {
 			return classes.getClassKeys().get(index);
 		}
+
 	}
 
 }

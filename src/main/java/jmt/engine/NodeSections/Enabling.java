@@ -47,6 +47,7 @@ public class Enabling extends InputSection {
 	private TransitionVector[] inhibitingConditions;
 	private TransitionVector[] inputSituations;
 	private GlobalJobInfoList netJobsList;
+	private int[] enablingDegrees;
 	private int unfinishedRequests;
 	private double totalLifetime;
 	private int consumedJobs;
@@ -71,6 +72,8 @@ public class Enabling extends InputSection {
 				inputSituations[i].setValue(nodeName, Integer.valueOf(0));
 			}
 		}
+		enablingDegrees = new int[jobClasses.size()];
+		Arrays.fill(enablingDegrees, 0);
 		unfinishedRequests = 0;
 		totalLifetime = 0.0;
 		consumedJobs = 0;
@@ -128,11 +131,12 @@ public class Enabling extends InputSection {
 				}
 			}
 
-			if (enablingDegree >= 0) {
+			if (enablingDegree >= 0 && enablingDegree != enablingDegrees[classIndex]) {
 				DataPacket packet = new DataPacket();
 				packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
 				packet.setData(DataPacket.FIELD_ENABLING_DEGREE, enablingDegree);
 				sendForward(NetEvent.EVENT_ENABLING, packet, 0.0);
+				enablingDegrees[classIndex] = enablingDegree;
 			}
 			break;
 		}
@@ -141,6 +145,11 @@ public class Enabling extends InputSection {
 		{
 			JobClass jobClass = (JobClass) ((DataPacket) data).getData(DataPacket.FIELD_REFERENCE_CLASS);
 			int classIndex = jobClass.getId();
+			if (enablingDegrees[classIndex] <= 0) {
+				return MSG_NOT_PROCESSED;
+			}
+			enablingDegrees[classIndex]--;
+
 			for (String nodeName : enablingConditions[classIndex].keySet()) {
 				int requiredJobs = enablingConditions[classIndex].getValue(nodeName).intValue();
 				if (requiredJobs > 0) {
@@ -194,7 +203,7 @@ public class Enabling extends InputSection {
 	}
 
 	/**
-	 * Gets the number of consumed jobs for specified class
+	 * Gets the number of consumed jobs for the specified class
 	 */
 	public int getConsumedJobsPerClass(int jobClass) {
 		return consumedJobsPerClass[jobClass];

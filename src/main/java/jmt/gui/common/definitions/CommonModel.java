@@ -431,9 +431,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
 			ClassData classData = ((ClassData) classDataHM.get(key));
-			if (classData.refSource != null && (classData.refSource.equals(STATION_TYPE_CLASSSWITCH)
-					|| classData.refSource.equals(STATION_TYPE_FORK)
-					|| classData.refSource.equals(STATION_TYPE_TRANSITION))) {
+			if (classData.refSource != null
+					&& (classData.refSource.equals(STATION_TYPE_CLASSSWITCH)
+							|| classData.refSource.equals(STATION_TYPE_FORK)
+							|| classData.refSource.equals(STATION_TYPE_SCALER))) {
 				return null;
 			}
 			cd = (ClassData) classDataHM.get(key);
@@ -627,8 +628,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			cd.refSource = CommonConstants.STATION_TYPE_CLASSSWITCH;
 		else if (CommonConstants.STATION_TYPE_FORK.equals(stationKey))
 			cd.refSource = CommonConstants.STATION_TYPE_FORK;
-		else if (CommonConstants.STATION_TYPE_TRANSITION.equals(stationKey))
-			cd.refSource = CommonConstants.STATION_TYPE_TRANSITION;
+		else if (CommonConstants.STATION_TYPE_SCALER.equals(stationKey))
+			cd.refSource = CommonConstants.STATION_TYPE_SCALER;
 		else
 			cd.refSource = stationsKeyset.contains(stationKey) ? stationKey : null;
 		if (oldRef != stationKey) {
@@ -648,8 +649,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			return null;
 		}
 		//if previously saved refSource has been deleted, delete it to maintain coherence
-		if (!stationsKeyset.contains(cd.refSource) && !CommonConstants.STATION_TYPE_CLASSSWITCH.equals(cd.refSource)
-				&& !CommonConstants.STATION_TYPE_FORK.equals(cd.refSource) && !CommonConstants.STATION_TYPE_TRANSITION.equals(cd.refSource)) { 
+		if (!stationsKeyset.contains(cd.refSource)
+				&& !CommonConstants.STATION_TYPE_CLASSSWITCH.equals(cd.refSource)
+				&& !CommonConstants.STATION_TYPE_FORK.equals(cd.refSource)
+				&& !CommonConstants.STATION_TYPE_SCALER.equals(cd.refSource)) { 
 			cd.refSource = null;
 		}
 		return cd.refSource;
@@ -692,8 +695,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		for (int i = 0; i < stations.size(); i++) {
 			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_TRANSITION)) {
-				sources.add(CommonConstants.STATION_TYPE_TRANSITION);
+			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_SCALER)) {
+				sources.add(CommonConstants.STATION_TYPE_SCALER);
 				break;
 			}
 		}
@@ -1050,7 +1053,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			} else {
 				noSourceSinkKeyset.remove(key);
 			}
-			if (type.equals(STATION_TYPE_FORK)) {
+			if (type.equals(STATION_TYPE_FORK) || type.equals(STATION_TYPE_SCALER)) {
 				if (!FJKeyset.contains(key)) {
 					FJKeyset.add(key);
 				}
@@ -1098,13 +1101,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (sd.type.equals(STATION_TYPE_DELAY)) {
 			/*Delay stations have infinite number of servers and no queue*/
 			sd.numOfServers = new Integer(-1);
-		} else if (sd.type.equals(STATION_TYPE_TERMINAL) || sd.type.equals(STATION_TYPE_ROUTER) || sd.type.equals(STATION_TYPE_SOURCE)
-				|| sd.type.equals(STATION_TYPE_SINK) || sd.type.equals(STATION_TYPE_JOIN) || sd.type.equals(STATION_TYPE_LOGGER)
-				|| sd.type.equals(STATION_TYPE_TASKSEMAPHORE) || sd.type.equals(STATION_TYPE_PLACE)) {
+		} else if (sd.type.equals(STATION_TYPE_SOURCE) || sd.type.equals(STATION_TYPE_SINK) || sd.type.equals(STATION_TYPE_TERMINAL)
+				|| sd.type.equals(STATION_TYPE_ROUTER) || sd.type.equals(STATION_TYPE_JOIN) || sd.type.equals(STATION_TYPE_LOGGER)
+				|| sd.type.equals(STATION_TYPE_SEMAPHORE) || sd.type.equals(STATION_TYPE_PLACE)) {
 			/*If this station has no queue and no service section, there's no need to
 			 * set any parameter value for these sections.*/
 			sd.numOfServers = null;
-		} else if (sd.type.equals(STATION_TYPE_FORK)) {
+		} else if (sd.type.equals(STATION_TYPE_FORK) || sd.type.equals(STATION_TYPE_SCALER)) {
 			sd.forkBlock = Defaults.getAsInteger("forkBlock");
 			sd.numOfServers = Defaults.getAsInteger("forkJobsPerLink");
 		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
@@ -1130,7 +1133,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			if (!type.equals(STATION_TYPE_SOURCE) && !type.equals(STATION_TYPE_SINK)) {
 				noSourceSinkKeyset.add(key);
 			}
-			if (type.equals(STATION_TYPE_FORK)) {
+			if (type.equals(STATION_TYPE_FORK) || type.equals(STATION_TYPE_SCALER)) {
 				FJKeyset.add(key);
 			}
 			if (isStationTypePreloadable(type)) {
@@ -1737,7 +1740,20 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			}
 		}
 
-		if (STATION_TYPE_DELAY.equals(sd.type)) {
+		if (STATION_TYPE_SOURCE.equals(sd.type)) {
+			defaultDetails = new StationClassData(null, null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null, null, null, null, null, null, null);
+		} else if (STATION_TYPE_SINK.equals(sd.type)) {
+			defaultDetails = new StationClassData(null, null, null, null, null, null, null, null, null, null, null, null, null);
+		} else if (STATION_TYPE_TERMINAL.equals(sd.type)) {
+			defaultDetails = new StationClassData(null, null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null, null, null, null, null, null, null);
+		} else if (STATION_TYPE_ROUTER.equals(sd.type)) {
+			defaultDetails = new StationClassData(
+					queueStrategy, null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null,
+					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
+		} else if (STATION_TYPE_DELAY.equals(sd.type)) {
 			defaultDetails = new StationClassData(
 					queueStrategy,
 					Defaults.getAsNewInstance("stationDelayServiceStrategy"),
@@ -1749,20 +1765,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 					Defaults.getAsNewInstance("stationServiceStrategy"),
 					Defaults.getAsNewInstance("stationRoutingStrategy"), null,
 					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_SOURCE.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_SINK.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null, null, null, null, null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_TERMINAL.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null, null, null, null, null, null, null);
-		} else if ((STATION_TYPE_ROUTER.equals(sd.type))
-				|| (STATION_TYPE_LOGGER.equals(sd.type))) {
-			defaultDetails = new StationClassData(
-					queueStrategy, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null,
-					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
 		} else if (STATION_TYPE_FORK.equals(sd.type)) {
 			defaultDetails = new StationClassData(
 					queueStrategy, null, null, null,
@@ -1772,16 +1774,25 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			defaultDetails = new StationClassData(null, null,
 					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null,
 					Defaults.getAsNewInstance("stationJoinStrategy"), null, null, null, null, null, null);
+		} else if (STATION_TYPE_LOGGER.equals(sd.type)) {
+			defaultDetails = new StationClassData(
+					queueStrategy, null,
+					Defaults.getAsNewInstance("stationRoutingStrategy"), null,
+					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
 		} else if (STATION_TYPE_CLASSSWITCH.equals(sd.type)) {
 			defaultDetails = new StationClassData(
 					queueStrategy, null,
 					Defaults.getAsNewInstance("stationRoutingStrategy"),
 					Defaults.getAsNewInstance("stationCsRowMatrix"),
 					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_TASKSEMAPHORE.equals(sd.type)) {
+		} else if (STATION_TYPE_SEMAPHORE.equals(sd.type)) {
 			defaultDetails = new StationClassData(null, null,
 					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null,
 					Defaults.getAsNewInstance("stationSemaphoreStrategy"), null, null, null, null, null);
+		} else if (STATION_TYPE_SCALER.equals(sd.type)) {
+			defaultDetails = new StationClassData(null, null, null, null, null,
+					Defaults.getAsNewInstance("stationForkingStrategy"),
+					Defaults.getAsNewInstance("stationJoinStrategy"), null, null, null, null, null, null);
 		} else if (STATION_TYPE_PLACE.equals(sd.type)) {
 			defaultDetails = new StationClassData(
 					Defaults.get("storeQueueStrategy"), null, null, null,
@@ -1983,24 +1994,24 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				&& (target.type.equals(STATION_TYPE_SERVER) || target.type.equals(STATION_TYPE_DELAY))) {
 			return true;
 		}
-		//no outgoing connections from sink
-		if (source.type.equals(STATION_TYPE_SINK)) {
-			return false;
-		}
 		//no incoming connection to source
 		if (target.type.equals(STATION_TYPE_SOURCE)) {
 			return false;
 		}
-		// No connection between a router or a fork or join and itself
+		//no outgoing connections from sink
+		if (source.type.equals(STATION_TYPE_SINK)) {
+			return false;
+		}
+		// No connection between a router, fork, join, logger, semaphore or scaler and itself
 		if (sourceKey == targetKey
 				&& (source.type.equals(STATION_TYPE_ROUTER) || source.type.equals(STATION_TYPE_FORK) || source.type.equals(STATION_TYPE_JOIN)
-						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_TASKSEMAPHORE))) {
+						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_SEMAPHORE) || source.type.equals(STATION_TYPE_SCALER))) {
 			return false;
 		}
 		//no direct connections from source to sink
 		//no loops on terminal
 		//no direct connections between terminal and source or sink
-		if ((source.type.equals(STATION_TYPE_SOURCE) || source.type.equals(STATION_TYPE_TERMINAL) || source.type.equals(STATION_TYPE_SINK))
+		if ((source.type.equals(STATION_TYPE_SOURCE) || source.type.equals(STATION_TYPE_SINK) || source.type.equals(STATION_TYPE_TERMINAL))
 				&& (target.type.equals(STATION_TYPE_SOURCE) || target.type.equals(STATION_TYPE_SINK) || target.type.equals(STATION_TYPE_TERMINAL))) {
 			return false;
 		}
@@ -2271,8 +2282,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	public boolean isFJMeasure(Object key) {
 		String type = getMeasureType(key);
 		boolean ret = false;
-		ret = (type.equals(SimulationDefinition.MEASURE_FJ_RESPONSE_TIME)
-				|| type.equals(SimulationDefinition.MEASURE_FJ_CN)) ? true : false;
+		ret = (type.equals(SimulationDefinition.MEASURE_FJ_CN)
+				|| type.equals(SimulationDefinition.MEASURE_FJ_RESPONSE_TIME)) ? true : false;
 		return ret;
 	}
 
@@ -2796,8 +2807,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	protected boolean canStationTypeBeBlocked(String stationType) {
 		return !stationType.equals(CommonConstants.STATION_TYPE_SOURCE) && !stationType.equals(CommonConstants.STATION_TYPE_SINK)
-				&& !stationType.equals(CommonConstants.STATION_TYPE_FORK) && !stationType.equals(CommonConstants.STATION_TYPE_JOIN)
-				&& !stationType.equals(CommonConstants.STATION_TYPE_TERMINAL) && !stationType.equals(CommonConstants.STATION_TYPE_TASKSEMAPHORE)
+				&& !stationType.equals(CommonConstants.STATION_TYPE_TERMINAL) && !stationType.equals(CommonConstants.STATION_TYPE_FORK)
+				&& !stationType.equals(CommonConstants.STATION_TYPE_JOIN) && !stationType.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
+				&& !stationType.equals(CommonConstants.STATION_TYPE_SEMAPHORE) && !stationType.equals(CommonConstants.STATION_TYPE_SCALER)
 				&& !stationType.equals(CommonConstants.STATION_TYPE_TRANSITION);
 	}
 
@@ -3480,8 +3492,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	protected boolean isStationTypePreloadable(String stationType) {
 		return !stationType.equals(STATION_TYPE_SOURCE) && !stationType.equals(STATION_TYPE_SINK)
-				&& !stationType.equals(STATION_TYPE_JOIN) && !stationType.equals(STATION_TYPE_TERMINAL)
-				&& !stationType.equals(STATION_TYPE_TASKSEMAPHORE) && !stationType.equals(STATION_TYPE_TRANSITION);
+				&& !stationType.equals(STATION_TYPE_TERMINAL) && !stationType.equals(STATION_TYPE_JOIN)
+				&& !stationType.equals(STATION_TYPE_SEMAPHORE) && !stationType.equals(STATION_TYPE_SCALER)
+				&& !stationType.equals(STATION_TYPE_TRANSITION);
 	}
 
 	/**

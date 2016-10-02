@@ -57,7 +57,7 @@ import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
  * Desc: Added new LoadDependent Routing
  *
  * Modified by Vitor S. Lopes (Jul 2016)
- * Desc: Added Task Semaphore
+ * Desc: Added Semaphore
  *
  * Modified by Lulai Zhu (Jul 2016)
  * Desc: Added Place and Transition
@@ -80,7 +80,8 @@ public interface CommonConstants {
 	public final static String STATION_TYPE_JOIN = "Join";
 	public final static String STATION_TYPE_LOGGER = "Logger";
 	public final static String STATION_TYPE_CLASSSWITCH = "ClassSwitch";
-	public final static String STATION_TYPE_TASKSEMAPHORE = "TaskSemaphore";
+	public final static String STATION_TYPE_SEMAPHORE = "Semaphore";
+	public final static String STATION_TYPE_SCALER = "Scaler";
 	public final static String STATION_TYPE_PLACE = "Place";
 	public final static String STATION_TYPE_TRANSITION = "Transition";
 
@@ -98,13 +99,13 @@ public interface CommonConstants {
 			putConst(STATION_TYPE_TERMINAL, STATION_TYPE_TERMINAL);
 			putConst(STATION_TYPE_ROUTER, "Router");
 			putConst(STATION_TYPE_DELAY, STATION_TYPE_DELAY);
-			//putConst(STATION_TYPE_SERVER, "Queueing Station");
 			putConst(STATION_TYPE_SERVER, "Queue");
 			putConst(STATION_TYPE_FORK, STATION_TYPE_FORK);
 			putConst(STATION_TYPE_JOIN, STATION_TYPE_JOIN);
 			putConst(STATION_TYPE_LOGGER, STATION_TYPE_LOGGER);
 			putConst(STATION_TYPE_CLASSSWITCH, STATION_TYPE_CLASSSWITCH);
-			putConst(STATION_TYPE_TASKSEMAPHORE, STATION_TYPE_TASKSEMAPHORE);
+			putConst(STATION_TYPE_SEMAPHORE, STATION_TYPE_SEMAPHORE);
+			putConst(STATION_TYPE_SCALER, STATION_TYPE_SCALER);
 			putConst(STATION_TYPE_PLACE, STATION_TYPE_PLACE);
 			putConst(STATION_TYPE_TRANSITION, STATION_TYPE_TRANSITION);
 

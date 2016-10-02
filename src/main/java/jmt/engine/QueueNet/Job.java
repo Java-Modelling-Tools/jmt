@@ -23,6 +23,7 @@ package jmt.engine.QueueNet;
  * 	@author Francesco Radaelli, Marco Bertoli
  */
 public class Job implements Cloneable {
+
 	// bitwise data, if the job have ever been as job class
 	private long classesBitwise;
 
@@ -38,8 +39,6 @@ public class Job implements Cloneable {
 	//used to compute system response time
 	protected double systemEnteringTime;
 
-	//NEW
-	//@author Stefano Omini
 	/*
 	This fields are used with blocking region.
 	The presence of an input station, in fact, modifies the route of some jobs:
@@ -53,7 +52,6 @@ public class Job implements Cloneable {
 	private boolean redirected = false;
 	// the original destination of the job message
 	private NetNode originalDestinationNode = null;
-	//end NEW
 
 	private double serviceTime = 0.0;
 
@@ -66,10 +64,7 @@ public class Job implements Cloneable {
 		// Job Id is used only for logging
 		this.Id = counter++;
 
-		//NEW
-		//@author Stefano Omini
 		resetSystemEnteringTime();
-		//end NEW
 	}
 
 	/** Gets the class of this job.
@@ -103,8 +98,6 @@ public class Job implements Cloneable {
 		return Id;
 	}
 
-	//NEW
-	//@author Stefano Omini
 	public void resetSystemEnteringTime() {
 		systemEnteringTime = NetSystem.getTime();
 		resetClass();
@@ -117,11 +110,6 @@ public class Job implements Cloneable {
 	public void setSystemEnteringTime(double time) {
 		systemEnteringTime = time;
 	}
-
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
 
 	/**
 	 * Tells whether this job has been redirected (used for blocking regions)
@@ -159,8 +147,6 @@ public class Job implements Cloneable {
 		this.originalDestinationNode = originalDestinationNode;
 		redirected = true;
 	}
-
-	//end NEW
 
 	public static void resetCounter() {
 		counter = 0;

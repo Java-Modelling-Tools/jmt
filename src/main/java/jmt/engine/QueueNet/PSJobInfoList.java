@@ -91,7 +91,6 @@ public class PSJobInfoList implements JobInfoList {
 	private int serverNumber = 1;
 
 	public PSJobInfoList(int numberOfJobClasses, boolean save) {
-		this.numberOfJobClasses = numberOfJobClasses;
 		list = new LinkedJobInfoList(numberOfJobClasses, save);
 
 		// Initialize all the arrays
@@ -130,61 +129,68 @@ public class PSJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeUtilization(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeUtilization(JobClass jobClass, Measure Measurement) {
+	public void analyzeUtilization(JobClass jobClass, Measure measurement) {
 		if (jobClass != null) {
 			if (utilizationPerClass == null) {
 				utilizationPerClass = new Measure[numberOfJobClasses];
 			}
-			utilizationPerClass[jobClass.getId()] = Measurement;
+			utilizationPerClass[jobClass.getId()] = measurement;
 		} else {
-			utilization = Measurement;
+			utilization = measurement;
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#analyzeUtilizationJoin(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
+	 */
+	public void analyzeUtilizationJoin(JobClass jobClass, Measure measurement) {
+		list.analyzeUtilizationJoin(jobClass, measurement);
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeResponseTime(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeResponseTime(JobClass jobClass, Measure Measurement) {
+	public void analyzeResponseTime(JobClass jobClass, Measure measurement) {
 		if (jobClass != null) {
 			if (responseTimePerClass == null) {
 				responseTimePerClass = new Measure[numberOfJobClasses];
 			}
-			responseTimePerClass[jobClass.getId()] = Measurement;
+			responseTimePerClass[jobClass.getId()] = measurement;
 		} else {
-			responseTime = Measurement;
+			responseTime = measurement;
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeDropRate(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
-	public void analyzeDropRate(JobClass jobClass, InverseMeasure Measurement) {
-		list.analyzeDropRate(jobClass, Measurement);
+	public void analyzeDropRate(JobClass jobClass, InverseMeasure measurement) {
+		list.analyzeDropRate(jobClass, measurement);
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeThroughput(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
-	public void analyzeThroughput(JobClass JobClass, InverseMeasure Measurement) {
-		if (JobClass != null) {
+	public void analyzeThroughput(JobClass jobClass, InverseMeasure measurement) {
+		if (jobClass != null) {
 			if (throughputPerClass == null) {
 				throughputPerClass = new InverseMeasure[numberOfJobClasses];
 			}
-			throughputPerClass[JobClass.getId()] = Measurement;
+			throughputPerClass[jobClass.getId()] = measurement;
 		} else {
-			throughput = Measurement;
+			throughput = measurement;
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeResidenceTime(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeResidenceTime(JobClass JobClass, Measure measurement) {
-		if (JobClass != null) {
+	public void analyzeResidenceTime(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
 			if (residenceTimePerClass == null) {
 				residenceTimePerClass = new Measure[numberOfJobClasses];
 			}
-			residenceTimePerClass[JobClass.getId()] = measurement;
+			residenceTimePerClass[jobClass.getId()] = measurement;
 		} else {
 			residenceTime = measurement;
 		}
@@ -193,12 +199,12 @@ public class PSJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeQueueLength(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeQueueLength(JobClass JobClass, Measure measurement) {
-		if (JobClass != null) {
+	public void analyzeQueueLength(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
 			if (queueLengthPerClass == null) {
 				queueLengthPerClass = new Measure[numberOfJobClasses];
 			}
-			queueLengthPerClass[JobClass.getId()] = measurement;
+			queueLengthPerClass[jobClass.getId()] = measurement;
 		} else {
 			queueLength = measurement;
 		}
@@ -412,23 +418,20 @@ public class PSJobInfoList implements JobInfoList {
 		return list;
 	}
 
-	public void analyzeResponseTimePerSink(JobClass jobClass,
-			Measure Measurement) {
-		list.analyzeResponseTimePerSink(jobClass, Measurement);
+	public void analyzeResponseTimePerSink(JobClass jobClass, Measure measurement) {
+		list.analyzeResponseTimePerSink(jobClass, measurement);
 	}
 
-	public void analyzeThroughputPerSink(JobClass jobClass,
-			InverseMeasure Measurement) {
-		list.analyzeThroughputPerSink(jobClass, Measurement);
-	}
-	//fork in region
-	public int getJobsInPerClass(int Id) {
-		return jobsInPerClass[Id];
+	public void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure measurement) {
+		list.analyzeThroughputPerSink(jobClass, measurement);
 	}
 
-	public int getJobsOutPerClass(int Id) {
-		return jobsOutPerClass[Id];
+	public int getJobsInPerClass(int id) {
+		return jobsInPerClass[id];
 	}
-	//end
+
+	public int getJobsOutPerClass(int id) {
+		return jobsOutPerClass[id];
+	}
 
 }

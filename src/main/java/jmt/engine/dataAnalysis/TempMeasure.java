@@ -131,7 +131,6 @@ public class TempMeasure {
 				success = measure.getSuccess();
 				noSamplesTest = measure.receivedNoSamples();
 			}
-
 		}
 	}
 
@@ -196,13 +195,11 @@ public class TempMeasure {
 	public double getLowerBound() {
 		return lowerBound;
 	}
-	
+
 	public double getLastIntervalAvgValue() {
 		return lastIntervalAvgValue;
 	}
-	
-	
-	
+
 	public double getSimTime() {
 		return simulationTime;
 	}
@@ -217,4 +214,5 @@ public class TempMeasure {
 	public String getLogFileName() {
 		return logFileName;
 	}
+
 }

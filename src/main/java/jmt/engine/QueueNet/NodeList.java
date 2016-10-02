@@ -119,7 +119,6 @@ public class NodeList {
 		return nodes.contains(node);
 	}
 
-	//bpmn
 	public LinkedList<NetNode> randomNodes() {
 		HashSet<Integer> hs = new HashSet<Integer>();
 		LinkedList<NetNode> temp = new LinkedList<NetNode>();
@@ -135,5 +134,5 @@ public class NodeList {
 		}
 		return temp;
 	}
-	//end
+
 }
