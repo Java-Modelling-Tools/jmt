@@ -157,7 +157,9 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return  columnIndex == 5 || columnIndex == 4 || columnIndex == 3 || columnIndex == 2
+			// Disable the Weight setting
+			return  //columnIndex == 5 ||
+					columnIndex == 4 || columnIndex == 3 || columnIndex == 2
 					|| (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, columnIndex + 1)).booleanValue());
 		}
 

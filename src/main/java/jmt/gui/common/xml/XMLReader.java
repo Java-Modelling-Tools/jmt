@@ -1735,8 +1735,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			return STATION_TYPE_DELAY;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
 				&& (sectionNames[1].equals(CLASSNAME_SERVER)
-				|| sectionNames[1].equals(CLASSNAME_PSSERVER)
-				|| sectionNames[1].equals(CLASSNAME_SRPT))
+						|| sectionNames[1].equals(CLASSNAME_PSSERVER)
+						|| sectionNames[1].equals(CLASSNAME_SRPT))
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
 			return STATION_TYPE_SERVER;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)

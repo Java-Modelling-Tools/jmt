@@ -119,8 +119,7 @@ TreeSelectionListener {
 
 		/**	
 		 * creation and management scrollbars	
-		 */	
-
+		 */
 		bar = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, (pageEnd - pageStart)
 				* SCROLLBAR_ACCURACY);
 		bar.addAdjustmentListener(this);
@@ -140,7 +139,6 @@ TreeSelectionListener {
 				(int) Math.min(imageHeight * 1.9, tk.getScreenSize().getHeight())));
 		pack();
 		setVisible(true);
-
 	}
 
 

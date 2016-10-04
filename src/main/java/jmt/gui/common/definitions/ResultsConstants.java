@@ -94,22 +94,17 @@ public interface ResultsConstants {
 
 	public static final String DESCRIPTION_SYSTEMRESPONSETIMES = HTML_START + HTML_FONT_TITLE + "System Response Time" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Average response time of the entire system for each chosen class."
-			+ "<br><b>WARNING:</b> With <b>CLASS SWITCHING</b> the SYSTEM RESPONSE TIME per CLASS refers to the mean time spent in the system when the job is in that class. "
-			+ "So it is the <b>SYSTEM RESIDENCE TIME</b> of the class." + HTML_FONT_NOR_END + HTML_END;
+			+ "<br><b>WARNING:</b> With class switching, the System Response Time per class refers to the mean time that a job spends being of that class in the system."
+			+ HTML_FONT_NOR_END + HTML_END;
 
-	//ADD HERE
 	public static final String DESCRIPTION_SYSTEMTHROUGHPUTS = HTML_START + HTML_FONT_TITLE + "System Throughput" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Average throughput of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_CUSTOMERNUMBERS = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Average customer number for each chosen class." + HTML_FONT_NOR_END + HTML_END;
 
-	//Added by ASHANKA START
-	//Added for System Power changes in the JSIM
-	//Its a new performance index.
 	public static final String DESCRIPTION_SYSTEMPOWER = HTML_START + HTML_FONT_TITLE + "System Power" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "System Power for each chosen class." + HTML_FONT_NOR_END + HTML_END;
-	//Added by ASHANKA STOP
 
 	public static final String DESCRIPTION_DROPRATE = HTML_START + HTML_FONT_TITLE + "Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Rate of the customers dropped before entering the station" + HTML_FONT_NOR_END + HTML_END;
