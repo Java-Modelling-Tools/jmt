@@ -18,6 +18,7 @@
 
 package jmt.gui.common.definitions;
 
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -43,90 +44,102 @@ public interface StationDefinition {
 	public static final int STATION_NUMBER_OF_SERVERS = 3;
 
 	/**
-	 * This method returns the key set of sources
-	 *
-	 * @return an array containing the entire set of source keys
-	 *
-	 * Author: Francesco D'Aquino
-	 */
-	public Vector<Object> getStationKeysSource();
-
-	/**
-	 * This method returns the key set of servers
-	 *
-	 * @return an array containing the entire set of server keys
-	 *
-	 * Author: Francesco D'Aquino
-	 */
-	public Vector<Object> getStationKeysServer();
-
-	/**
-	 * This method returns the key set of delays
-	 *
-	 * @return an array containing the entire set of delay keys
-	 *
-	 * Author: Francesco D'Aquino
-	 */
-	public Vector<Object> getStationKeysDelay();
-
-	/**
-	 * This method returns the key set of sinks
-	 *
-	 * @return an array containing the entire set of sink keys
-	 *
-	 * Author: Francesco D'Aquino
-	 */
-	public Vector<Object> getStationKeysSink();
-
-	/**
-	 * This method returns the key set of loggers
-	 *
-	 * @return an array containing the entire set of logger keys
-	 *
-	 * Author: Michael Fercu (Marco Bertoli) 0.7.4
-	 */
-	public Vector<Object> getStationKeysLogger();
-
-	/**
-	 * This method returns the key set of places
-	 *
-	 * @return an array containing the entire set of place keys
-	 *
-	 * Author: Lulai Zhu
-	 */
-	public Vector<Object> getStationKeysPlace();
-
-	/**
-	 * This method returns the key set of transitions
-	 *
-	 * @return an array containing the entire set of transition keys
-	 *
-	 * Author: Lulai Zhu
-	 */
-	public Vector<Object> getStationKeysTransition();
-
-	/**
-	 * This method returns the entire set of station keys.
+	 * This method returns the key set of all stations.
 	 */
 	public Vector<Object> getStationKeys();
 
 	/**
-	 * This method returns all station keys without source and sink ones.
+	 * This method returns the key set of sources.
 	 */
-	public Vector<Object> getStationKeysNoSourceSink();
+	public Vector<Object> getStationKeysSource();
 
 	/**
-	 * This method returns all fork/join keys.
+	 * This method returns the key set of sinks.
 	 */
-	public Vector<Object> getFJKeys();
+	public Vector<Object> getStationKeysSink();
 
 	/**
-	 * This method returns all preloadable station keys.
+	 * This method returns the key set of terminals.
+	 */
+	public Vector<Object> getStationKeysTerminal();
+
+	/**
+	 * This method returns the key set of routers.
+	 */
+	public Vector<Object> getStationKeysRouter();
+
+	/**
+	 * This method returns the key set of delays.
+	 */
+	public Vector<Object> getStationKeysDelay();
+
+	/**
+	 * This method returns the key set of servers.
+	 */
+	public Vector<Object> getStationKeysServer();
+
+	/**
+	 * This method returns the key set of forks.
+	 */
+	public Vector<Object> getStationKeysFork();
+
+	/**
+	 * This method returns the key set of joins.
+	 */
+	public Vector<Object> getStationKeysJoin();
+
+	/**
+	 * This method returns the key set of loggers.
+	 */
+	public Vector<Object> getStationKeysLogger();
+
+	/**
+	 * This method returns the key set of class switches.
+	 */
+	public Vector<Object> getStationKeysClassSwitch();
+
+	/**
+	 * This method returns the key set of semaphores.
+	 */
+	public Vector<Object> getStationKeysSemaphore();
+
+	/**
+	 * This method returns the key set of scalers.
+	 */
+	public Vector<Object> getStationKeysScaler();
+
+	/**
+	 * This method returns the key set of places.
+	 */
+	public Vector<Object> getStationKeysPlace();
+
+	/**
+	 * This method returns the key set of transitions.
+	 */
+	public Vector<Object> getStationKeysTransition();
+
+	/**
+	 * This method returns the key set of preloadable stations.
 	 */
 	public Vector<Object> getStationKeysPreloadable();
 
 	/**
-	 * This method returns all blocking region keys.
+	 * This method returns all station (except sources and sinks) keys.
+	 */
+	public Vector<Object> getStationKeysNoSourceSink();
+
+	/**
+	 * This method returns reference source keys.
+	 */
+	public Vector<Object> getStationKeysRefSource();
+
+	/**
+	 * This method returns fork/join section keys.
+	 */
+	public Vector<Object> getFJKeys();
+
+	/**
+	 * This method returns the key set of blocking regions.
 	 */
 	public Vector<Object> getFCRegionKeys();
 
@@ -135,99 +148,165 @@ public interface StationDefinition {
 	 */
 	public Vector<Object> getStationRegionKeysNoSourceSink();
 
-	/** Returns name of the station in <code>String</code> representation, given the search key.*/
+	/**
+	 * Returns name of the station, given the search key.
+	 */
 	public String getStationName(Object key);
 
-	/** Sets name of the station, given the search key.*/
-	public void setStationName(String name, Object key);
+	/**
+	 * Sets name of the station, given the search key.
+	 */
+	public void setStationName(Object key, String name);
 
-	/** Returns type of the station in <code>String</code> representation,
-	 * given the search key.*/
+	/**
+	 * Returns type of the station, given the search key.
+	 */
 	public String getStationType(Object key);
 
-	/** Sets type of the station, given the search key.*/
-	public void setStationType(String type, Object key);
+	/**
+	 * Sets type of the station, given the search key.
+	 */
+	public void setStationType(Object key, String type);
 
-	/** Returns queue capacity given the search key.*/
+	/**
+	 * Returns queue capacity of the station, given the search key.
+	 */
 	public Integer getStationQueueCapacity(Object key);
 
-	/** Sets queue capacity of the station, given the search key.*/
-	public void setStationQueueCapacity(Integer queueCapacity, Object key);
+	/**
+	 * Sets queue capacity of the station, given the search key.
+	 */
+	public void setStationQueueCapacity(Object key, Integer queueCapacity);
 
-	/** Returns number of servers or number of forked job for the station given the search key.*/
+	/**
+	 * Returns queue strategy of the station, given the search key.
+	 */
+	public String getStationQueueStrategy(Object key);
+
+	/**
+	 * Sets queue strategy of the station, given the search key.
+	 */
+	public void setStationQueueStrategy(Object key, String queueStrategy);
+
+	/**
+	 * Returns number of servers of the station, given the search key.
+	 */
 	public Integer getStationNumberOfServers(Object key);
 
-	/** Sets number of servers or number of forked job for the station, given the search key.*/
-	public void setStationNumberOfServers(Integer numberOfServers, Object key);
-
-	/** Returns parameter for the station given the search key and parameter code.*/
-	public Object getStationParameter(Object key, int parameterCode);
-
-	/** Sets parameter for the station, given the search key and parameter code.*/
-	public void setStationParameter(Object value, Object key, int parameterCode);
-
-	/**Adds a new station to the model. Name and type must be specified.
-	 * @param name: name of the new station
-	 * @param type: string representing station type. it is value is contained in
-	 * <code>JSIMConstants</code> interface.
-	 * @return : key of search for this class*/
-	public Object addStation(String name, String type);
-
-	/**Deletes station given a search key.*/
-	public void deleteStation(Object key);
+	/**
+	 * Sets number of servers of the station, given the search key.
+	 */
+	public void setStationNumberOfServers(Object key, Integer numberOfServers);
 
 	/**
 	 * Tells if a fork is blocking
 	 * <br>Author: Bertoli Marco
-	 * @param key search's key for fork
-	 * @return maximum number of jobs allowed in a fork-join
+	 * @param key: search's key for fork
+	 * @return maximum number of jobs allowed in the fork-join
 	 * region (-1 is infinity)
 	 */
 	public Integer getForkBlock(Object key);
 
-	public Boolean getIsSimplifiedFork(Object key);
-
 	/**
 	 * Sets if a fork is blocking
 	 * <br>Author: Bertoli Marco
-	 * @param key search's key for fork
-	 * @param value maximum number of jobs allowed in a fork-join
+	 * @param key: search's key for fork
+	 * @param value: maximum number of jobs allowed in the fork-join
 	 * region (-1 is infinity)
 	 */
 	public void setForkBlock(Object key, Integer value);
 
+	/**
+	 * Tells if a fork is simplified
+	 * <br>Author: Bertoli Marco
+	 * @param key: search's key for fork
+	 * @return true if the fork is simplified, false otherwise
+	 */
+	public Boolean getIsSimplifiedFork(Object key);
+
+	/**
+	 * Sets if a fork is simplified
+	 * <br>Author: Bertoli Marco
+	 * @param key: search's key for fork
+	 * @param value: true if the fork is simplified, false otherwise
+	 */
 	public void setIsSimplifiedFork(Object key, Boolean value);
+
+	/**
+	 * Adds a new station to the model, given the station name and type.
+	 * @param name name of the station.
+	 * @param type type of the station.
+	 * @return search key for the new station.
+	 */
+	public Object addStation(String name, String type);
+
+	/**
+	 * Deletes a station from the model, given the search key.
+	 */
+	public void deleteStation(Object key);
 
 	/*------------------------------------------------------------------------------
 	 *---------------- Methods for setup of class-station parameters ---------------
 	 *------------------------------------------------------------------------------*/
 
-	/**Sets queue strategy for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
-	 * @param stationKey: search key for station.
-	 * @param classKey: search key for class.
-	 * @param queueStrategy: string name for queue strategy*/
-	public void setQueueStrategy(Object stationKey, Object classKey, String queueStrategy);
-
-	/**Returns queue strategy for a station and a class, given their search keys.
+	/**
+	 * Returns queue capacity for a station and a class, given their search keys.
 	 * If specified station cannot accept this kind of parameter, null value is
 	 * returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @return string name for queue strategy*/
-	public String getQueueStrategy(Object stationKey, Object classKey);
+	 * @return integer for queue capacity.
+	 */
+	public Integer getQueueCapacity(Object stationKey, Object classKey);
 
-	/**Sets Service Time distribution for class and station, given their search keys.
+	/**
+	 * Sets queue capacity for a station and a class, given their search keys.
 	 * If specified station cannot accept this kind of parameter, no value will
 	 * be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param distribution: distribution to be set for specified class and station.
+	 * @return queueCapacity: integer for queue capacity.
 	 */
-	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object distribution);
+	public void setQueueCapacity(Object stationKey, Object classKey, Integer queueCapacity);
 
-	/**Returns Service Time distribution for class and station, given their search keys.
+	/**
+	 * Returns queue strategy for a station and a class, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return string name for queue strategy.
+	 */
+	public String getQueueStrategy(Object stationKey, Object classKey);
+
+	/**
+	 * Sets queue strategy for a station and a class, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param queueStrategy: string name for queue strategy.
+	 */
+	public void setQueueStrategy(Object stationKey, Object classKey, String queueStrategy);
+
+	/**
+	 * Returns drop rule associated with given station queue section if capacity is finite.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
+	 */
+	public String getDropRule(Object stationKey, Object classKey);
+
+	/**
+	 * Sets drop rule associated with given station queue section if capacity is finite.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param dropRule: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
+	 */
+	public void setDropRule(Object stationKey, Object classKey, String dropRule);
+
+	/**
+	 * Returns service time distribution for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, null value is
 	 * returned.
 	 * @param stationKey: search key for station.
@@ -236,22 +315,18 @@ public interface StationDefinition {
 	 */
 	public Object getServiceTimeDistribution(Object stationKey, Object classKey);
 
-	/**Sets routing strategy for class and station, given their search keys.
+	/**
+	 * Sets service time distribution for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, no value will
 	 * be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param routingStrategy: distribution to be set for specified class and station.
+	 * @param distribution: distribution to be set for specified class and station.
 	 */
-	public void setRoutingStrategy(Object stationKey, Object classKey, Object routingStrategy);
+	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object distribution);
 
-	public void setForkingStrategy(Object stationKey, Object classKey, Object forkingStrategy);
-
-	public void setJoinStrategy(Object stationKey, Object classKey, Object joinStrategy);
-
-	public void setSemaphoreStrategy(Object stationKey, Object classKey, Object semaphoreStrategy);
-
-	/**Returns routing strategy for class and station, given their search keys.
+	/**
+	 * Returns routing strategy for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, null value is
 	 * returned.
 	 * @param stationKey: search key for station.
@@ -260,31 +335,99 @@ public interface StationDefinition {
 	 */
 	public Object getRoutingStrategy(Object stationKey, Object classKey);
 
-	public Object getForkingStrategy(Object stationKey, Object classKey);
+	/**
+	 * Sets routing strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param routingStrategy: routing strategy to be set for specified class and station.
+	 */
+	public void setRoutingStrategy(Object stationKey, Object classKey, Object routingStrategy);
 
+	/**
+	 * Returns fork strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return fork strategy for specified class and station.
+	 */
+	public Object getForkStrategy(Object stationKey, Object classKey);
+
+	/**
+	 * Sets fork strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param forkStrategy: fork strategy to be set for specified class and station.
+	 */
+	public void setForkStrategy(Object stationKey, Object classKey, Object forkStrategy);
+
+	/**
+	 * Returns join strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return join strategy for specified class and station.
+	 */
 	public Object getJoinStrategy(Object stationKey, Object classKey);
 
+	/**
+	 * Sets join strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param joinStrategy: join strategy to be set for specified class and station.
+	 */
+	public void setJoinStrategy(Object stationKey, Object classKey, Object joinStrategy);
+
+	/**
+	 * Returns semaphore strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return semaphore strategy for specified class and station.
+	 */
 	public Object getSemaphoreStrategy(Object stationKey, Object classKey);
 
-	/** Sets (Returns) logging parameters for the logger.
+	/**
+	 * Sets semaphore strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param semaphoreStrategy: semaphore strategy to be set for specified class and station.
+	 */
+	public void setSemaphoreStrategy(Object stationKey, Object classKey, Object semaphoreStrategy);
+
+	/**
+	 * Returns logging parameters for the logger. <I>MF'08 0.7.4</I>
+	 * @param stationKey: search key for station.
+	 */
+	public Object getLoggingParameters(Object stationKey);
+
+	/**
+	 * Sets logging parameters for the logger. <I>MF'08 0.7.4</I>
 	 * @param stationKey: search key for station.
 	 * @param loggerParameters: local LoggerParameters.
 	 */
 	public void setLoggingParameters(Object stationKey, Object loggerParameters);
 
-	/** Returns logging parameters for the logger. <I>MF'08 0.7.4</I>
-	 * @param stationKey: search key for station.
-	 */
-	public Object getLoggingParameters(Object stationKey);
-
-	/** Returns logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
+	/**
+	 * Returns logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
 	 * @param selector: either "path", "delim", or "autoAppend" 
 	 */
 	public String getLoggingGlbParameter(String selector);
 
-	/** Sets a global logging parameter as a CommonModel variable. <I>MF'08 0.7.4</I>
+	/**
+	 * Sets logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
 	 * @param selector: either "path", "delim", "decimalSeparator", or "autoAppend" 
-	 * @param value: String to assign to variable named by Selector.
+	 * @param value: String to assign to variable named by selector.
 	 */
 	public void setLoggingGlbParameter(String selector, String value);
 
@@ -292,22 +435,6 @@ public interface StationDefinition {
 	 * Normalizes the routing probabilities
 	 */
 	public void manageProbabilities();
-
-	/**
-	 * Returns drop rule associated with given station queue section if capacity is finite
-	 * @param stationKey: search key for station.
-	 * @param classKey: search key for class.
-	 * @return FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
-	 */
-	public String getDropRule(Object stationKey, Object classKey);
-
-	/**
-	 * Sets drop rule associated with given station queue section if capacity is finite
-	 * @param stationKey: search key for station.
-	 * @param classKey: search key for class.
-	 * @param rule: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
-	 */
-	public void setDropRule(Object stationKey, Object classKey, String rule);
 
 	/*------------------------------------------------------------------------------
 	 *-------------  methods for inter-station connections definition  --------------
@@ -351,95 +478,152 @@ public interface StationDefinition {
 	public Vector<Object> getBackwardConnections(Object stationKey);
 
 	/**
-	 * Returns the key of the station whose name is <code>stationName</code>. It
-	 * returns <code>null</code> if no such station is found.
-	 * @param stationName the name of the station
-	 * @return the key of the station
+	 * Returns the search key for the station, given the station name.
 	 */
 	public Object getStationByName(String stationName);
-
-	public void setStationQueueStrategy(Object stationKey, String strategy);
-
-	public String getStationQueueStrategy(Object stationKey);
 
 	public boolean isSinkProbabilityUpdated();
 
 	public void setSinkProbabilityUpdatedVar(boolean param);
 
-	public Vector<String> getsinkProbabilityUpdateStations();
+	public Vector<String> getSinkProbabilityUpdateStations();
 
 	public void resetSinkProbabilityUpdateStations();
 
 	/**
-	 *	Returns the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class
-	 *  switch matrix of station <code>stationKey</code>.
+	 * Returns the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class
+	 * switch matrix for station <code>stationKey</code>.
 	 */
 	public float getClassSwitchMatrix(Object stationKey, Object classInKey, Object classOutKey);
 
 	/**
-	 *  Sets the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class
-	 *  switch matrix of station <code>stationKey</code>.
+	 * Sets the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class
+	 * switch matrix for station <code>stationKey</code>.
 	 */
-	public void setClassSwitchMatrix(Object stationKey, Object classInKey, Object classOutKey, float val);
+	public void setClassSwitchMatrix(Object stationKey, Object classInKey, Object classOutKey, float value);
 
 	/**
-	 *  Returns the entry <code>stationInKey</code> of the enabling condition for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
+	 * Returns the threshold for semaphore <code>stationKey</code> and class <code>classKey</code>.
 	 */
-	public Integer getEnablingCondition(Object stationKey, Object classKey, Object stationInKey);
+	public Integer getSemaphoreThreshold(Object stationKey, Object classKey);
 
 	/**
-	 *  Sets the entry <code>stationInKey</code> of the enabling condition for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
+	 * Sets the threshold for semaphore <code>stationKey</code> and class <code>classKey</code>.
 	 */
-	public void setEnablingCondition(Object stationKey, Object classKey, Object stationInKey, Integer value);
+	public void setSemaphoreThreshold(Object stationKey, Object classKey, Integer threshold);
 
 	/**
-	 *  Returns the entry <code>stationInKey</code> of the inhibiting condition for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
+	 * Returns the size of the mode list for transition <code>stationKey</code>.
 	 */
-	public Integer getInhibitingCondition(Object stationKey, Object classKey, Object stationInKey);
+	public int getTransitionModeListSize(Object stationKey);
 
 	/**
-	 *  Sets the entry <code>stationInKey</code> of the inhibiting condition for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
+	 * Adds a new mode for transition <code>stationKey</code>.
 	 */
-	public void setInhibitingCondition(Object stationKey, Object classKey, Object stationInKey, Integer value);
+	public void addTransitionMode(Object stationKey, String name);
 
 	/**
-	 *  Returns the entry <code>stationOutKey</code> of the firing outcome for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
+	 * Deletes a mode for transition <code>stationKey</code>.
 	 */
-	public Integer getFiringOutcome(Object stationKey, Object classKey, Object stationOutKey);
+	public void deleteTransitionMode(Object stationKey, int modeIndex);
 
 	/**
-	 *  Sets the entry <code>stationOutKey</code> of the firing outcome for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
+	 * Returns the name of mode <code>modeIndex</code> for transition <code>stationKey</code>.
 	 */
-	public void setFiringOutcome(Object stationKey, Object classKey, Object stationOutKey, Integer value);
+	public String getTransitionModeName(Object stationKey, int modeIndex);
 
 	/**
-	 * Returns the firing priority for station <code>stationKey</code> and class
-	 * <code>classKey</code>.
+	 * Returns the names of all the modes for transition <code>stationKey</code>.
 	 */
-	public Integer getFiringPriority(Object stationKey, Object classKey);
+	public List<String> getAllTransitionModeNames(Object stationKey);
 
 	/**
-	 * Sets the firing priority for station <code>stationKey</code> and class
-	 * <code>classKey</code>.
+	 * Sets the name of transition mode <code>modeIndex</code> for station <code>stationKey</code>.
 	 */
-	public void setFiringPriority(Object stationKey, Object classKey, Integer value);
+	public void setTransitionModeName(Object stationKey, int modeIndex, String name);
 
 	/**
-	 * Returns the firing weight for station <code>stationKey</code> and class
-	 * <code>classKey</code>.
+	 * Returns the entry (<code>stationInKey</code>, <code>classKey</code>) of the enabling
+	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
 	 */
-	public Integer getFiringWeight(Object stationKey, Object classKey);
+	public Integer getEnablingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey);
 
 	/**
-	 * Sets the firing weight for station <code>stationKey</code> and class
-	 * <code>classKey</code>.
+	 * Sets the entry (<code>stationInKey</code>, <code>classKey</code>) of the enabling
+	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
 	 */
-	public void setFiringWeight(Object stationKey, Object classKey, Integer value);
+	public void setEnablingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey, Integer value);
+
+	/**
+	 * Returns the entry (<code>stationInKey</code>, <code>classKey</code>) of the inhibiting
+	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	public Integer getInhibitingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey);
+
+	/**
+	 * Sets the entry (<code>stationInKey</code>, <code>classKey</code>) of the inhibiting
+	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	public void setInhibitingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey, Integer value);
+
+	/**
+	 * Returns the number of servers for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	public Integer getNumberOfServers(Object stationKey, int modeIndex);
+
+	/**
+	 * Sets the number of servers for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	public void setNumberOfServers(Object stationKey, int modeIndex, Integer number);
+
+	/**
+	 * Returns the firing time distribution for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	public Object getFiringTimeDistribution(Object stationKey, int modeIndex);
+
+	/**
+	 * Sets the firing time distribution for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	public void setFiringTimeDistribution(Object stationKey, int modeIndex, Object distribution);
+
+	/**
+	 * Returns the firing priority for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	public Integer getFiringPriority(Object stationKey, int modeIndex);
+
+	/**
+	 * Sets the firing priority for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	public void setFiringPriority(Object stationKey, int modeIndex, Integer priority);
+
+	/**
+	 * Returns the firing weight for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	public Double getFiringWeight(Object stationKey, int modeIndex);
+
+	/**
+	 * Sets the firing weight for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	public void setFiringWeight(Object stationKey, int modeIndex, Double weight);
+
+	/**
+	 * Returns the entry (<code>stationOutKey</code>, <code>classKey</code>) of the firing
+	 * outcome for transition <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	public Integer getFiringOutcome(Object stationKey, int modeIndex, Object stationOutKey, Object classKey);
+
+	/**
+	 * Sets the entry (<code>stationOutKey</code>, <code>classKey</code>) of the firing
+	 * outcome for transition <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	public void setFiringOutcome(Object stationKey, int modeIndex, Object stationOutKey, Object classKey, Integer value);
 
 }

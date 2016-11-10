@@ -101,10 +101,10 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	private static final String FILTER_TYPE_TIME = "TIME";
 
 	/* Constants for type */
-	public final static int TYPE_NONE = 0;
-	public final static int TYPE_HISTOGRAM = 1;
-	public final static int TYPE_DENSITY_LINE = 2;
-	public final static int TYPE_DISTRIBUTION = 3;
+	public static final int TYPE_NONE = 0;
+	public static final int TYPE_HISTOGRAM = 1;
+	public static final int TYPE_DENSITY_LINE = 2;
+	public static final int TYPE_DISTRIBUTION = 3;
 
 	public static final String CSV_COLUMN_INDEX = "INTERVAL";
 	public static final String CSV_COLUMN_START = "INTERVAL_START";
@@ -246,8 +246,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		reDrawButton = new JButton("Redraw");
 		reDrawButton.setEnabled(false);
-		reDrawButton.setToolTipText("Redraws the graph with the new minimum, maximum values, number of intervals" +
-				" and graphType. Also redraws on the basis of selected samples.");
+		reDrawButton.setToolTipText("Redraw the graph with the new minimum, maximum values, number of intervals" +
+				" and graphType on the basis of selected samples.");
 		reDrawButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent en) {
@@ -257,7 +257,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		saveButton = new JButton("Save as CSV");
 		saveButton.setEnabled(false);
-		saveButton.setToolTipText("Save the data shown in the chart in a CSV file");
+		saveButton.setToolTipText("Save the data shown in the chart in a CSV file.");
 		saveButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -266,7 +266,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		});
 
 		closeButton = new JButton("EXIT");
-		closeButton.setToolTipText("Closes this window.");
+		closeButton.setToolTipText("Close this window.");
 		closeButton.addActionListener(new ActionListener() {
 			// Fires a window closing event
 			@Override
@@ -373,7 +373,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		momentsPanel.add(fieldMoment2);
 
 		// THIRD MOMENT
-		label = new JLabel("Third Moment :");
+		label = new JLabel("Third Moment:");
 		fieldMoment3 = new JTextField() ;
 		fieldMoment3.setEditable(false);
 		fieldMoment3.setToolTipText("Displays third moment of the data.");
@@ -420,7 +420,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		label = new JLabel("Min Simulation Time:");
 		fieldMinTime = new JTextField() ;
 		fieldMinTime.setEditable(false);
-		fieldMinTime.setToolTipText("Displays the simulation time of the first collected sample");
+		fieldMinTime.setToolTipText("Displays the simulation time of the first collected sample.");
 		fieldMinTime.setMaximumSize(new Dimension(fieldMinTime.getMaximumSize().width, fieldMinTime.getMinimumSize().height));
 		label.setLabelFor(fieldMinTime);
 		boundsPanel.add(label);
@@ -430,7 +430,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		label = new JLabel("Max Simulation Time:");
 		fieldMaxTime = new JTextField() ;
 		fieldMaxTime.setEditable(false);
-		fieldMaxTime.setToolTipText("Displays the simulation time of the last collected sample");
+		fieldMaxTime.setToolTipText("Displays the simulation time of the last collected sample.");
 		fieldMaxTime.setMaximumSize(new Dimension(fieldMaxTime.getMaximumSize().width, fieldMaxTime.getMinimumSize().height));
 		label.setLabelFor(fieldMaxTime);
 		boundsPanel.add(label);
@@ -439,7 +439,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		label = new JLabel("No. of Discarded Samples:");
 		discardedSamples = new JTextField() ;
 		discardedSamples.setEditable(false);
-		discardedSamples.setToolTipText("Displays the number of discarded samples(transients).");
+		discardedSamples.setToolTipText("Displays the number of discarded samples (transients).");
 		discardedSamples.setMaximumSize(new Dimension(discardedSamples.getMaximumSize().width, discardedSamples.getMinimumSize().height));
 		label.setLabelFor(discardedSamples);
 		discardedSamples.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)));
@@ -534,7 +534,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		JPanel leftPanel = new JPanel(new BorderLayout());
 		leftPanel.add(pivotPanel, BorderLayout.CENTER);
 		if (inverseMeasure) {
-			JLabel warningLabel = new JLabel("<html>Please note that inter-departure times are displayed for Throughput, Drop rate and System power indices</html>");
+			JLabel warningLabel = new JLabel("<html>Please note that inter-departure times are displayed for Throughput, Drop Rate and System Power indices.</html>");
 			warningLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
 			warningLabel.setIcon(JMTImageLoader.loadImage("lightbulb"));
 			warningLabel.setIconTextGap(5);
@@ -656,7 +656,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			}
 			if (isEmpty(firstSample.getText())) {
 				if (filterType.equals(FILTER_TYPE_SAMPLE)) {
-					firstSample.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)+1));
+					firstSample.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex) + 1));
 				} else {
 					firstSample.setText(String.valueOf(stat.getMinSimTime()));
 				}
@@ -811,7 +811,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		if (newFilterType.equals(FILTER_TYPE_SAMPLE)) {
 			minRange.setText("First sample:");
 			maxRange.setText("Last sample:");
-			firstSample.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex)+1));
+			firstSample.setText(String.valueOf(measureDefinition.getDiscardedSamples(measureIndex) + 1));
 			lastSample.setText(String.valueOf(sop.getTotalLines()));
 		} else {
 			minRange.setText("Initial simulation time:");
@@ -895,7 +895,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			double[] end = statGraph.getDistriburionIntervalsEnd();
 
 			for (int i=0; i<values.length; i++) {
-				value.put(CSV_COLUMN_INDEX, i+1);
+				value.put(CSV_COLUMN_INDEX, i + 1);
 				value.put(CSV_COLUMN_START, start[i]);
 				value.put(CSV_COLUMN_END, end[i]);
 				value.put(CSV_COLUMN_VALUE, values[i]);

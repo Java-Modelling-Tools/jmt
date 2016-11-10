@@ -85,6 +85,9 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 	/** Table used to display stations */
 	protected JTable stationTable;
 
+	/** Panel used to display warning */
+	protected WarningScrollTable warningPanel;
+
 	/** Spinner used to select number of stations */
 	protected JSpinner stationNumSpinner;
 
@@ -129,6 +132,10 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 	public void gotFocus() {
 		if (blockingPanel != null) {
 			blockingPanel.gotFocus();
+		}
+		if (warningPanel != null) {
+			warningPanel.clearCheckVectors();
+			warningPanel.addCheckVector(sd.getStationKeysNoSourceSink());
 		}
 		stations.clear();
 		stations.addAll(bd.getBlockingRegionStations(regionKey));
@@ -196,9 +203,9 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 		stationPanel.add(tmpPanel, BorderLayout.EAST);
 		// Creates table to display stations
 		stationTable = new StationTable();
-		WarningScrollTable warning = new WarningScrollTable(stationTable, WARNING_STATION);
-		warning.addCheckVector(sd.getStationKeysNoSourceSink());
-		stationPanel.add(warning);
+		warningPanel = new WarningScrollTable(stationTable, WARNING_STATION);
+		warningPanel.addCheckVector(sd.getStationKeysNoSourceSink());
+		stationPanel.add(warningPanel);
 		add(stationPanel);
 
 		// Creates blocking region panel

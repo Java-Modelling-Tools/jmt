@@ -63,7 +63,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);
 		stationKey = checker.checkForServiceTimesParametricAnalysisAvailableStations().get(0);
 		Vector<Object> available = checker.checkForServiceTimesParametricSimulationAvailableClasses(stationKey);
-		if ((cd.getClassKeys().size() == 1) || (available.size() < cd.getClassKeys().size())) {
+		if (cd.getClassKeys().size() == 1 || available.size() < cd.getClassKeys().size()) {
 			singleClass = true;
 			classKey = available.get(0);
 			double mean = ((Distribution) (stationDef.getServiceTimeDistribution(stationKey, classKey))).getMean();
@@ -291,7 +291,6 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 	 */
 	@Override
 	public void createValuesSet() {
-		double initialServiceTime;
 		if (singleClass) {
 			double sum = 0;
 			double increment = (finalValue - initialValue) / ((numberOfSteps - 1));
@@ -306,7 +305,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 			double sum = 1;
 			double increment = (finalValue - initialValue) / (100 * (double) (numberOfSteps - 1));
 			//find the set of available classes
-			Vector allClasses = classDef.getClassKeys();
+			Vector<Object> allClasses = classDef.getClassKeys();
 			availableClasses = new Vector<Object>(0, 1);
 			for (int i = 0; i < allClasses.size(); i++) {
 				Object thisClass = allClasses.get(i);
@@ -375,7 +374,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 	@Override
 	public int checkCorrectness(boolean autocorrect) {
 		int code = 0;
-		Vector classes = classDef.getClassKeys();
+		Vector<Object> classes = classDef.getClassKeys();
 		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(classDef, stationDef, simDef);
 		//Find the available stations
 		Vector<Object> availableStations = checker.checkForServiceTimesParametricAnalysisAvailableStations();
@@ -417,7 +416,8 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 			}
 			//all class case...
 			else {
-				if ((availableClasses.size() < classes.size()) || (classes.size() == 1)) { //all class parametric analysis is no more available
+				//all class parametric analysis is no more available
+				if (classes.size() == 1 || availableClasses.size() < classes.size()) {
 					code = 1;
 					if (autocorrect) {
 						singleClass = true;

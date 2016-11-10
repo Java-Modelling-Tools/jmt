@@ -36,9 +36,6 @@ import jmt.manual.PDFViewerBuffer;
  */
 public class OpenHelp extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -46,7 +43,7 @@ public class OpenHelp extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public OpenHelp(Mediator mediator) {
-		super("JSIMgraph help", "JSIMgraph help", mediator);
+		super("JSIMgraph Help", "Help", mediator);
 		putValue(SHORT_DESCRIPTION, "Show JSIMgraph help");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
 	}
@@ -55,8 +52,6 @@ public class OpenHelp extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		//showHelp(e);
-
 		Runnable r = new Runnable() {
 			public void run() {
 				try {
@@ -67,6 +62,6 @@ public class OpenHelp extends AbstractJmodelAction {
 			}
 		};
 		EventQueue.invokeLater(r);
-
 	}
+
 }

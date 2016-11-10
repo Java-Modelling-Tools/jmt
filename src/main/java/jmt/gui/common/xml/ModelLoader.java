@@ -86,7 +86,7 @@ public class ModelLoader {
 	protected static final String FAIL_CONVERSION = "Input file is recognized but cannot be converted "
 			+ "to work within this application. Please open it with ";
 
-	// Better to move this element elsewere...
+	// Better to move this element elsewhere...
 	protected static final String XML_MVA_ROOT = "model";
 
 	protected JmtFileChooser dialog;

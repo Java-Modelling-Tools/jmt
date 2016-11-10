@@ -49,86 +49,107 @@ import jmt.gui.common.definitions.StationDefinition;
  *         Time: 17.03.54
  */
 public class ImagedComboBoxCellEditorFactory {
+
+	public static final int OPTION_DEFAULT = 0;
+	public static final int OPTION_CLASS_TYPES = 1;
+	public static final int OPTION_STATION_TYPES = 2;
+	public static final int OPTION_CLASS_NAMES = 3;
+	public static final int OPTION_STATION_NAMES = 4;
+	public static final int OPTION_FJ_STATION_NAMES = 5;
+	public static final int OPTION_TRANSITION_MODES = 6;
+
 	/** Station Definition data structure */
 	protected StationDefinition sd;
 	/** Class Definition data structure */
 	protected ClassDefinition cd;
-	/** Tells if modify classes or stations */
-	protected boolean isStation;
-	/** Tells if modify strings with images */
-	protected boolean isString;
+	/** Instance Option **/
+	protected int option;
 	/** Cache for components */
 	protected HashMap<Object, LabelRenderer> cache = new HashMap<Object, LabelRenderer>();
-	protected HashMap<Object, LabelRenderer> cacheFJ = new HashMap<Object, LabelRenderer>();
 	/** Renderer instance */
 	protected TableCellRenderer renderer;
-	/** Renderer instance for FJ */
-	protected TableCellRenderer rendererFJ;
 	/** Editor instance */
 	protected ImagedComboEditor editor;
 	/** Null element renderer */
 	protected LabelRenderer nullRenderer;
 	/** Allows null as a valid component */
-	protected boolean allowsNull = false;
+	protected boolean allowsNull;
 
 	/**
 	 * Creates a new ImagedComboBoxCellEditorFactory used to display
-	 * station comboboxes
-	 * @param sd reference to station definition datastructure
+	 * texts without images.
 	 */
-	public ImagedComboBoxCellEditorFactory(StationDefinition sd) {
-		setData(sd);
+	public ImagedComboBoxCellEditorFactory() {
+		option = OPTION_DEFAULT;
+		allowsNull = false;
 	}
 
 	/**
 	 * Creates a new ImagedComboBoxCellEditorFactory used to display
-	 * station comboboxes
-	 * @param cd reference to class definition datastructure
+	 * class name comboboxes
+	 * @param cd reference to class definition data structure
 	 */
 	public ImagedComboBoxCellEditorFactory(ClassDefinition cd) {
+		option = OPTION_CLASS_NAMES;
+		allowsNull = true;
 		setData(cd);
 	}
 
 	/**
 	 * Creates a new ImagedComboBoxCellEditorFactory used to display
-	 * strings with images. Every image must be called <code>[String] + "Combo"</code>
-	 * where <code>[String]</code> is the content of the string.
+	 * station name comboboxes
+	 * @param sd reference to station definition data structure
 	 */
-	public ImagedComboBoxCellEditorFactory() {
-		isString = true;
-		isStation = false;
+	public ImagedComboBoxCellEditorFactory(StationDefinition sd) {
+		option = OPTION_STATION_NAMES;
+		allowsNull = false;
+		setData(sd);
 	}
 
 	/**
 	 * Creates a new ImagedComboBoxCellEditorFactory used to display
-	 * station types with images. Every image must be called <code>[String] + "Combo"</code>
-	 * where <code>[String]</code> is the content of the string.
-	 * @param isStation tells to resolve station names
+	 * texts with images according to the specified option.
 	 */
-	public ImagedComboBoxCellEditorFactory(boolean isStation) {
-		isString = true;
-		this.isStation = isStation;
+	public ImagedComboBoxCellEditorFactory(ClassDefinition cd, StationDefinition sd, int option) {
+		this.option = option;
+		switch (option) {
+		case OPTION_CLASS_TYPES:
+		case OPTION_STATION_TYPES:
+			allowsNull = false;
+			break;
+		case OPTION_CLASS_NAMES:
+			allowsNull = true;
+			setData(cd);
+			break;
+		case OPTION_STATION_NAMES:
+		case OPTION_FJ_STATION_NAMES:
+			allowsNull = false;
+			setData(sd);
+			break;
+		case OPTION_TRANSITION_MODES:
+			allowsNull = true;
+			break;
+		default:
+			allowsNull = false;
+			break;
+		}
 	}
 
 	/**
-	 * Changes stored reference to station data structure
-	 * @param sd reference to station definition datastructure
+	 * Changes stored reference to class data structure
+	 * @param cd reference to class definition data structure
 	 */
-	public void setData(StationDefinition sd) {
-		isStation = true;
-		isString = false;
-		this.sd = sd;
+	public void setData(ClassDefinition cd) {
+		this.cd = cd;
 		clearCache();
 	}
 
 	/**
 	 * Changes stored reference to station data structure
-	 * @param cd reference to class definition datastructure
+	 * @param sd reference to station definition data structure
 	 */
-	public void setData(ClassDefinition cd) {
-		isStation = false;
-		isString = false;
-		this.cd = cd;
+	public void setData(StationDefinition sd) {
+		this.sd = sd;
 		clearCache();
 	}
 
@@ -138,7 +159,6 @@ public class ImagedComboBoxCellEditorFactory {
 	 */
 	public void clearCache() {
 		cache.clear();
-		cacheFJ.clear();
 		nullRenderer = null;
 	}
 
@@ -192,35 +212,6 @@ public class ImagedComboBoxCellEditorFactory {
 		return editor;
 	}
 
-	public TableCellEditor getEditorFJ(List data) {
-		if (editor == null) {
-			editor = new ImagedComboEditor();
-		}
-		LabelRenderer[] rend;
-		if (allowsNull) {
-			rend = new LabelRenderer[data.size() + 1];
-			rend[0] = getDrawComponentFJ(null);
-			for (int i = 1; i < rend.length; i++) {
-				rend[i] = getDrawComponentFJ(data.get(i - 1));
-			}
-		} else {
-			rend = new LabelRenderer[data.size()];
-			for (int i = 0; i < data.size(); i++) {
-				rend[i] = getDrawComponentFJ(data.get(i));
-			}
-		}
-		editor.setData(rend);
-		return editor;
-	}
-
-	/**
-	 * Tells if comboBoxes should allow null values selection
-	 * @param value true if selection is allowed, false otherwise
-	 */
-	public void setAllowsNull(boolean value) {
-		allowsNull = value;
-	}
-
 	/**
 	 * Returns component to draw a station or a class in a comboBox.
 	 * Provides caching functionalities.
@@ -231,32 +222,15 @@ public class ImagedComboBoxCellEditorFactory {
 		LabelRenderer label;
 		if (key == null) {
 			if (nullRenderer == null) {
-				nullRenderer = new LabelRenderer(null, false);
+				nullRenderer = new LabelRenderer(null);
 			}
 			return nullRenderer;
 		}
 		if (cache.containsKey(key)) {
 			label = cache.get(key);
 		} else {
-			label = new LabelRenderer(key, false);
+			label = new LabelRenderer(key);
 			cache.put(key, label);
-		}
-		return label;
-	}
-
-	protected LabelRenderer getDrawComponentFJ(Object key) {
-		LabelRenderer label;
-		if (key == null) {
-			if (nullRenderer == null) {
-				nullRenderer = new LabelRenderer(null, true);
-			}
-			return nullRenderer;
-		}
-		if (cacheFJ.containsKey(key)) {
-			label = cacheFJ.get(key);
-		} else {
-			label = new LabelRenderer(key, true);
-			cacheFJ.put(key, label);
 		}
 		return label;
 	}
@@ -270,39 +244,45 @@ public class ImagedComboBoxCellEditorFactory {
 		 */
 		private static final long serialVersionUID = 1L;
 		protected Object key;
-		protected boolean isFJ;
 
 		/**
 		 * Construct a new label renderer with given object
 		 * @param key search's key for class or station
 		 */
-		public LabelRenderer(Object key, boolean isFJ) {
+		public LabelRenderer(Object key) {
 			super();
-			this.isFJ = isFJ;
 			setHorizontalTextPosition(SwingConstants.RIGHT);
 			setOpaque(true);
 			setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
 			this.key = key;
-			if (isString) {
-				// This is only a string
-				if (isStation) {
-					// If this is a station type string, resolves label names
-					setText(CommonConstants.STATION_NAMES.get(key));
-				} else {
-					setText((String) key);
-				}
+			switch (option) {
+			case OPTION_CLASS_TYPES:
+				setText((String) key);
 				setIcon(JMTImageLoader.loadImage(key + "Combo"));
-			} else if (isStation) {
-				// This is a station
-				if (sd.getStationName(key) != null && !sd.getStationName(key).equals("")) {
-					if (isFJ) {
-						setText(sd.getStationName(key) + " (Fork Join)");
+				break;
+			case OPTION_STATION_TYPES:
+				setText(CommonConstants.STATION_NAMES.get(key));
+				setIcon(JMTImageLoader.loadImage(key + "Combo"));
+				break;
+			case OPTION_CLASS_NAMES:
+				if (key == null) {
+					setText(CommonConstants.ALL_CLASSES);
+					break;
+				}
+				if (cd.getClassName(key) != null && !cd.getClassName(key).equals("")) {
+					setText(cd.getClassName(key));
+					if (cd.getClassType(key) == CommonConstants.CLASS_TYPE_OPEN) {
+						setIcon(JMTImageLoader.loadImage("OpenCombo"));
 					} else {
-						setText(sd.getStationName(key));
+						setIcon(JMTImageLoader.loadImage("ClosedCombo"));
 					}
+				}
+				break;
+			case OPTION_STATION_NAMES:
+				if (sd.getStationName(key) != null && !sd.getStationName(key).equals("")) {
+					setText(sd.getStationName(key));
 					setIcon(JMTImageLoader.loadImage(sd.getStationType(key) + "Combo"));
 				}
-				// This is a region
 				if (sd instanceof BlockingRegionDefinition) {
 					BlockingRegionDefinition bd = (BlockingRegionDefinition) sd;
 					if (bd.getRegionName(key) != null && !bd.getRegionName(key).equals("")) {
@@ -310,35 +290,30 @@ public class ImagedComboBoxCellEditorFactory {
 						setIcon(JMTImageLoader.loadImage("BlockingCombo"));
 					}
 				}
+				if (CommonConstants.STATION_TYPE_FORK.equals(key)
+						|| CommonConstants.STATION_TYPE_CLASSSWITCH.equals(key)
+						|| CommonConstants.STATION_TYPE_SCALER.equals(key)
+						|| CommonConstants.STATION_TYPE_TRANSITION.equals(key)) {
+					setText((String) key);
+					setIcon(JMTImageLoader.loadImage((String) key + "Combo"));
+				}
+				break;
+			case OPTION_FJ_STATION_NAMES:
+				if (sd.getStationName(key) != null && !sd.getStationName(key).equals("")) {
+					setText(sd.getStationName(key) + " (Fork Join)");
+					setIcon(JMTImageLoader.loadImage(sd.getStationType(key) + "Combo"));
+				}
+				break;
+			case OPTION_TRANSITION_MODES:
 				if (key == null) {
-					// Null component
-					setText("");
-				} else if (key.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)) {
-					setText(CommonConstants.STATION_TYPE_CLASSSWITCH);
-					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_CLASSSWITCH + "Combo"));
-				} else if (key.equals(CommonConstants.STATION_TYPE_FORK)) {
-					setText(CommonConstants.STATION_TYPE_FORK);
-					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_FORK + "Combo"));
-				} else if (key.equals(CommonConstants.STATION_TYPE_SCALER)) {
-					setText(CommonConstants.STATION_TYPE_SCALER);
-					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_SCALER + "Combo"));
+					setText(CommonConstants.ALL_MODES);
+					break;
 				}
-			} else {
-				// This is a class
-				if (cd.getClassName(key) != null && !cd.getClassName(key).equals("")) {
-					setText(cd.getClassName(key));
-					switch (cd.getClassType(key)) {
-					case CommonConstants.CLASS_TYPE_CLOSED:
-						setIcon(JMTImageLoader.loadImage("ClosedCombo"));
-						break;
-					case CommonConstants.CLASS_TYPE_OPEN:
-						setIcon(JMTImageLoader.loadImage("OpenCombo"));
-						break;
-					}
-				} else if (key == null) {
-					// Null component
-					setText(CommonConstants.ALL_CLASSES);
-				}
+				setText((String) key);
+				break;
+			default:
+				setText((String) key);
+				break;
 			}
 		}
 
@@ -359,13 +334,6 @@ public class ImagedComboBoxCellEditorFactory {
 		return getRenderer(false, 0);
 	}
 
-	public TableCellRenderer getRendererFJ() {
-		if (rendererFJ == null) {
-			rendererFJ = new ImagedComboRenderer(true);
-		}
-		return rendererFJ;
-	}
-
 	/** TO CORRECT
 	 * Returns an instance of Imaged combobox renderer
 	 * @return an instance of Imaged combobox renderer
@@ -378,9 +346,9 @@ public class ImagedComboBoxCellEditorFactory {
 	public TableCellRenderer getRenderer(boolean isGrayRenderer, int referenceColumn) {
 		if (renderer == null) {
 			if (isGrayRenderer)
-				renderer = new ImagedComboGrayRenderer(referenceColumn, false);
+				renderer = new ImagedComboGrayRenderer(referenceColumn);
 			else 
-				renderer = new ImagedComboRenderer(false);
+				renderer = new ImagedComboRenderer();
 		}
 		return renderer;
 	}
@@ -413,8 +381,7 @@ public class ImagedComboBoxCellEditorFactory {
 	protected class ImagedComboGrayRenderer extends ImagedComboRenderer {
 		private int referenceColumn;
 
-		public ImagedComboGrayRenderer(int referenceColumn, boolean isFJ) {
-			super(isFJ);
+		public ImagedComboGrayRenderer(int referenceColumn) {
 			this.referenceColumn = referenceColumn;
 		}
 
@@ -430,13 +397,11 @@ public class ImagedComboBoxCellEditorFactory {
 
 	protected class ImagedComboRenderer implements TableCellRenderer {
 		protected JComboBox combo = new JComboBox();
-		protected boolean isFJ;
 
 		/**
 		 * Creates a new ImagedComboRenderer and sets renderer for comboBox.
 		 */
-		public ImagedComboRenderer(boolean isFJ) {
-			this.isFJ = isFJ;
+		public ImagedComboRenderer() {
 			combo.setRenderer(new ComboImageRenderer());
 		}
 
@@ -455,7 +420,7 @@ public class ImagedComboBoxCellEditorFactory {
 		 * box that is checked.  <code>null</code> is a
 		 * valid value
 		 * @param    isSelected    true if the cell is to be rendered with the
-		 * selection highlighted; otherwise false
+		 * selection highlighted; false otherwise
 		 * @param    hasFocus    if true, render cell appropriately.  For
 		 * example, put a special border on the cell, if
 		 * the cell can be edited, render in the color used
@@ -467,11 +432,7 @@ public class ImagedComboBoxCellEditorFactory {
 		 */
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			Component renderer;
-			if (isFJ) { 
-				renderer = getDrawComponentFJ(value);
-			} else {
-				renderer = getDrawComponent(value);
-			}
+			renderer = getDrawComponent(value);
 			if (table.isCellEditable(row, column)) {
 				// If the cell is editable, returns a comboBox
 				combo.removeAllItems();

@@ -26,6 +26,7 @@ package jmt.gui.common.xml;
  * Modified by Bertoli Marco
  */
 public interface XMLConstantNames {
+
 	public static final String XML_DOCUMENT_XSD = "SIMmodeldefinition.xsd";
 	public static final String XML_DOCUMENT_ROOT = "sim";
 	public static final String XML_A_ROOT_NAME = "name";
@@ -106,6 +107,7 @@ public interface XMLConstantNames {
 	public static final String XML_A_CLASSCONSTRAINT_CLASS = "jobClass";
 	public static final String XML_A_CLASSCONSTRAINT_MAXJOBS = "maxJobsPerClass";
 	public static final String XML_E_GLOBALCONSTRAINT = "globalConstraint";
+	public static final String XML_A_GLOBALCONSTRAINT_MAXJOBS = "maxJobs";
 	public static final String XML_E_GLOBALMEMORYCONSTRAINT = "globalMemoryConstraint";
 	public static final String XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY = "maxMemory";
 
@@ -120,21 +122,15 @@ public interface XMLConstantNames {
 	public static final String XML_A_GROUPCLASS_GROUP = "jobGroup";
 	public static final String XML_A_GROUPCLASS_CLASS = "jobClass";
 
-	public static final String XML_A_GLOBALCONSTRAINT_MAXJOBS = "maxJobs";
 	public static final String XML_E_DROPRULES = "dropRules";
-
-	public static final String XML_E_CLASSWEIGHT = "classWeight";
-
-	public static final String XML_A_CLASSWEIGHT_CLASS = "jobClass";
-	public static final String XML_A_CLASSWEIGHT_WEIGHT = "weight";
-
-	public static final String XML_E_CLASSMEMORYSIZE = "classMemorySize";
-
-	public static final String XML_A_CLASSMEMORY_CLASS = "jobClass";
-	public static final String XML_A_CLASSMEMORY_SIZE = "size";
-
 	public static final String XML_A_DROPRULE_CLASS = "jobClass";
 	public static final String XML_A_DROPRULE_DROP = "dropThisClass";
+	public static final String XML_E_CLASSWEIGHT = "classWeight";
+	public static final String XML_A_CLASSWEIGHT_CLASS = "jobClass";
+	public static final String XML_A_CLASSWEIGHT_WEIGHT = "weight";
+	public static final String XML_E_CLASSMEMORYSIZE = "classMemorySize";
+	public static final String XML_A_CLASSMEMORY_CLASS = "jobClass";
+	public static final String XML_A_CLASSMEMORY_SIZE = "size";
 
 	public static final String CLASSNAME_SOURCE = "RandomSource";
 	public static final String CLASSNAME_TERMINAL = "Terminal";
@@ -151,8 +147,8 @@ public interface XMLConstantNames {
 	public static final String CLASSNAME_JOIN = "Join";
 	public static final String CLASSNAME_CLASSSWITCH = "ClassSwitch";
 	public static final String CLASSNAME_SEMAPHORE = "Semaphore";
-	public static final String CLASSNAME_STORE = "Store";
-	public static final String CLASSNAME_LINK = "Link";
+	public static final String CLASSNAME_STORAGE = "Storage";
+	public static final String CLASSNAME_LINKAGE = "Linkage";
 	public static final String CLASSNAME_ENABLING = "Enabling";
 	public static final String CLASSNAME_TIMING = "Timing";
 	public static final String CLASSNAME_FIRING = "Firing";

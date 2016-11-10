@@ -118,7 +118,6 @@ public class DispFuzzyMatrix extends JScrollPane {
 		private int curClust;
 		private int clustering = 0;
 		private double fuzzyN = -1;
-		private double[][] c1 = null;
 
 		public DispersionPanel() {
 			setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -268,39 +267,28 @@ public class DispFuzzyMatrix extends JScrollPane {
 														if (!done[(int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot)]) {
 															updateInfos(((row * Elenco.length) + (col)) * 10000 + i + (k++), "Plotting scatter "
 																	+ ((row * Elenco.length) + (col + 1)), false);
-															//g.setColor(JavaWatColor.getColor(((Integer)(c.get(Elenco[col].getObsID(j)-1))).intValue()));
-
 															g.setColor(JavaWatColor.getColor(c1[Elenco[col].getObsID(j) - 1]));
-															g
-																	.fillOval(
-																			col
-																					* WIDTH_TOT
-																					+ 5
-																					+ /* i - 1,*/
-																					(int) (((Elenco[col].getValue(j) - Elenco[col].getUniStats()
-																							.getMinValue())) * xFoot) - 1,
-																			(((row + 1) * HEIGHT_TOT) - 5 - (int) (((Elenco[col].getValue(j, row) - Elenco[row]
-																					.getUniStats().getMinValue())) * yFoot)), 1, 1);
+															g.fillOval(col * WIDTH_TOT + 5 +
+																	(int) (((Elenco[col].getValue(j) - Elenco[col].getUniStats().getMinValue())) * xFoot) - 1,
+																	(((row + 1) * HEIGHT_TOT) - 5 - (int) (((Elenco[col].getValue(j, row) - Elenco[row]
+																			.getUniStats().getMinValue())) * yFoot)), 1, 1);
 															done[(int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot)] = true;
 														}
 													}
 												}
-
 											}
 										}
 									}
 								}
 							} else {
 								g.setColor(Color.WHITE);
-								g.fillRect(0, 0, 300, 100);
-								g.setColor(Color.BLACK);
-								g.drawString("With this data the graphic cannot be create", 50, 50);
+								g.fillRect(0, 0, WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1);
+								DispersionPanel.this.repaint();
 							}
 						} catch (Exception e) {
 							g.setColor(Color.WHITE);
-							g.fillRect(0, 0, 300, 100);
-							g.setColor(Color.BLACK);
-							g.drawString("With this data the graphic cannot be create", 50, 50);
+							g.fillRect(0, 0, WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1);
+							DispersionPanel.this.repaint();
 						}
 						updateInfos(10000 * (Elenco.length * Elenco.length) + 1, "End", false);
 						return null;
@@ -315,23 +303,6 @@ public class DispFuzzyMatrix extends JScrollPane {
 			} else {
 				g.drawImage(chart, 0, 0, null);
 			}
-		}
-
-		private int getColor(int obs, double err) {
-			int pos = -1;
-			for (int i = 0; i < c1.length; i++) {
-				if (c1[i][obs] >= err) {
-					if (pos != -1) {
-						return 1;
-					} else {
-						pos = i;
-					}
-				}
-			}
-			if (pos == -1) {
-				return 0;
-			}
-			return pos + 2;
 		}
 
 		/* Lista delle variabili da visualizzare */

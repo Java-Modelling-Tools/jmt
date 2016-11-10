@@ -1,6 +1,6 @@
 /**
 
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,27 +153,25 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		JTabbedPane mainPanel = new JTabbedPane();
 		this.getContentPane().setLayout(new BorderLayout());
 		this.getContentPane().add(mainPanel, BorderLayout.CENTER);
-		addTabPane(mainPanel, "Number of Customers", DESCRIPTION_QUEUELENGTHS, results.getQueueLengthMeasures());
-		addTabPane(mainPanel, "Queue Time", DESCRIPTION_QUEUETIMES, results.getQueueTimeMeasures());
-		addTabPane(mainPanel, "Residence Time", DESCRIPTION_RESIDENCETIMES, results.getResidenceTimeMeasures());
-		addTabPane(mainPanel, "Response Time", DESCRIPTION_RESPONSETIMES, results.getResponseTimeMeasures());
-		addTabPane(mainPanel, "Utilization", DESCRIPTION_UTILIZATIONS, results.getUtilizationMeasures());
-		addTabPane(mainPanel, "Throughput", DESCRIPTION_THROUGHPUTS, results.getThroughputMeasures());
-		addTabPane(mainPanel, "Drop Rate", DESCRIPTION_DROPRATE, results.getDropRateMeasures());
-		addTabPane(mainPanel, "System Response Time", DESCRIPTION_SYSTEMRESPONSETIMES, results.getSystemResponseTimeMeasures());
-		addTabPane(mainPanel, "System Throughput", DESCRIPTION_SYSTEMTHROUGHPUTS, results.getSystemThroughputMeasures());
-		addTabPane(mainPanel, "System Drop Rate", DESCRIPTION_DROPRATE, results.getSystemDropRateMeasures());
-		addTabPane(mainPanel, "System Number of Customers", DESCRIPTION_CUSTOMERNUMBERS, results.getCustomerNumberMeasures());
-		//Added by ASHANKA START
-		//Adds the System Power panel in the results window
-		addTabPane(mainPanel, "System Power", DESCRIPTION_SYSTEMPOWER, results.getSystemPowerMeasures());
-		//Added by ASHANKA STOP
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_R_PER_SINK, DESCRIPTION_RESPONSETIME_SINK, results.getResponsetimePerSinkMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_SINK, results.getThroughputPerSinkMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_TOTAL_WEIGHT, DESCRIPTION_FCR_TOTAL_WEIGHT, results.getMeanWeightMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_MEMORY_OCCUPATION, DESCRIPTION_FCR_MEMORY_OCCUPATION, results.getMeanMemoryOccupationMeasures());	
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CN, results.getFJCustomerNumberMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_QL, DESCRIPTION_QUEUE_LENGTH, results.getQueueLengthMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_QT, DESCRIPTION_QUEUE_TIME, results.getQueueTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP, DESCRIPTION_RESPONSE_TIME, results.getResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_RD, DESCRIPTION_RESIDENCE_TIME, results.getResidenceTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_U, DESCRIPTION_UTILIZATION, results.getUtilizationMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_X, DESCRIPTION_THROUGHPUT, results.getThroughputMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_DR, DESCRIPTION_DROP_RATE, results.getDropRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RP, DESCRIPTION_SYSTEM_RESPONSE_TIME, results.getSystemResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_X, DESCRIPTION_SYSTEM_THROUGHPUT, results.getSystemThroughputMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_DR, DESCRIPTION_SYSTEM_DROP_RATE, results.getSystemDropRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_P, DESCRIPTION_SYSTEM_POWER, results.getSystemPowerMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP_PER_SINK, DESCRIPTION_RESPONSE_TIME_PER_SINK, results.getResponsetimePerSinkMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_PER_SINK, results.getThroughputPerSinkMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_TW, DESCRIPTION_FCR_TOTAL_WEIGHT, results.getFCRTotalWeightMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_MO, DESCRIPTION_FCR_MEMORY_OCCUPATION, results.getFCRMemoryOccupationMeasures());	
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CUSTOMER_NUMBER, results.getFJCustomerNumberMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RP, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FX, DESCRIPTION_FIRING_THROUGHPUT, results.getFiringThroughputMeasures());
 		// Creates bottom toolbar
 		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable(false);
@@ -303,8 +301,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			// Adds panel with measures
 			JPanel scroll = new JPanel(new GridLayout(indices.length, 1, 1, 1));
 			// Adds all measures to this panel
-			for (int indexe : indices) {
-				scroll.add(new MeasurePanel(results, indexe));
+			for (int index : indices) {
+				scroll.add(new MeasurePanel(results, index));
 			}
 			mainpanel.add(new JScrollPane(scroll), BorderLayout.CENTER);
 
@@ -394,11 +392,10 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			if (stationName != null && !stationName.equals("")) {
 				if (SimConstants.isFJMeasure(md.getMeasureType(measureIndex))) {
 					field.setText(stationName + " (Fork Join)");
-					field.setToolTipText("Name of the F/J section: " + field.getText());
 				} else {
 					field.setText(stationName);
-					field.setToolTipText("Name of the station: " + field.getText());
 				}
+				field.setToolTipText("Name of the station: " + field.getText());
 			} else {
 				field.setText(ALL_STATIONS);
 				field.setToolTipText("This measure is referred to the entire network");
@@ -407,6 +404,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			dataPanel.add(field);
 			// Class name
 			label = new JLabel("Class Name: ");
+			if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+				label.setText("Mode Name: ");
+			}
 			field = new JTextField();
 			field.setEditable(false);
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
@@ -415,10 +415,19 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			String className = md.getClassName(measureIndex);
 			if (className != null && !className.equals("")) {
 				field.setText(className);
-				field.setToolTipText("Name of the class: " + field.getText());
+				if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+					field.setToolTipText("Name of the mode: " + field.getText());
+				} else {
+					field.setToolTipText("Name of the class: " + field.getText());
+				}
 			} else {
-				field.setText(ResultsConstants.ALL_CLASSES);
-				field.setToolTipText("This measure is an aggregate of every class");
+				if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+					field.setText(ResultsConstants.ALL_MODES);
+					field.setToolTipText("This measure is an aggregate of every mode");
+				} else {
+					field.setText(ResultsConstants.ALL_CLASSES);
+					field.setToolTipText("This measure is an aggregate of every class");
+				}
 			}
 			dataPanel.add(label);
 			dataPanel.add(field);
@@ -538,7 +547,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 								"CSV file not found in path '" + logFile.getAbsolutePath() + "'.",
 								"Error", JOptionPane.ERROR_MESSAGE);
 					} else {
-						StatisticalOutputsWindow statistics=new StatisticalOutputsWindow(results, measureIndex);
+						StatisticalOutputsWindow statistics = new StatisticalOutputsWindow(results, measureIndex);
 						statistics.setVisible(true); 
 					}
 				}

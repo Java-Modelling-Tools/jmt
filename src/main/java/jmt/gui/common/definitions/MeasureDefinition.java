@@ -152,28 +152,10 @@ public interface MeasureDefinition {
 	public int[] getQueueLengthMeasures();
 
 	/**
-	 * Returns an array with the measureIndex of every throughput measure
-	 * @return an array with measures' index
-	 */
-	public int[] getThroughputMeasures();
-
-	/**
-	 * Returns an array with the measureIndex of every drop rate measure
-	 * @return an array with measures' index
-	 */
-	public int[] getDropRateMeasures();
-
-	/**
 	 * Returns an array with the measureIndex of every queue time measure
 	 * @return an array with measures' index
 	 */
 	public int[] getQueueTimeMeasures();
-
-	/**
-	 * Returns an array with the measureIndex of every residence time measure
-	 * @return an array with measures' index
-	 */
-	public int[] getResidenceTimeMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every response time measure
@@ -182,10 +164,28 @@ public interface MeasureDefinition {
 	public int[] getResponseTimeMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every residence time measure
+	 * @return an array with measures' index
+	 */
+	public int[] getResidenceTimeMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every throughput measure
+	 * @return an array with measures' index
+	 */
+	public int[] getThroughputMeasures();
+
+	/**
 	 * Returns an array with the measureIndex of every utilization measure
 	 * @return an array with measures' index
 	 */
 	public int[] getUtilizationMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every drop rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getDropRateMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every system response time measure
@@ -200,16 +200,16 @@ public interface MeasureDefinition {
 	public int[] getSystemThroughputMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every system customer number measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemCustomerNumberMeasures();
+
+	/**
 	 * Returns an array with the measureIndex of every system drop rate measure
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemDropRateMeasures();
-
-	/**
-	 * Returns an array with the measureIndex of every customer number measure
-	 * @return an array with measures' index
-	 */
-	public int[] getCustomerNumberMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every system power measure
@@ -217,17 +217,47 @@ public interface MeasureDefinition {
 	 */
 	public int[] getSystemPowerMeasures();
 
+	/**
+	 * Returns an array with the measureIndex of every response time per sink measure
+	 * @return an array with measures' index
+	 */
 	public int[] getResponsetimePerSinkMeasures();
 
+	/**
+	 * Returns an array with the measureIndex of every throughput per sink measure
+	 * @return an array with measures' index
+	 */
 	public int[] getThroughputPerSinkMeasures();
 
-	public int[] getMeanWeightMeasures();
+	/**
+	 * Returns an array with the measureIndex of every FCR total weight measure
+	 * @return an array with measures' index
+	 */
+	public int[] getFCRTotalWeightMeasures();
 
-	public int[] getMeanMemoryOccupationMeasures();
+	/**
+	 * Returns an array with the measureIndex of every FCR memory occupation measure
+	 * @return an array with measures' index
+	 */
+	public int[] getFCRMemoryOccupationMeasures();
 
+	/**
+	 * Returns an array with the measureIndex of every FJ customer number measure
+	 * @return an array with measures' index
+	 */
+	public int[] getFJCustomerNumberMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every FJ response time measure
+	 * @return an array with measures' index
+	 */
 	public int[] getFJResponseTimeMeasures();
 
-	public int[] getFJCustomerNumberMeasures(); 
+	/**
+	 * Returns an array with the measureIndex of every firing throughput measure
+	 * @return an array with measures' index
+	 */
+	public int[] getFiringThroughputMeasures();
 
 	/**
 	 * Returns the node type of a given measure

@@ -69,7 +69,6 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 	private static final long serialVersionUID = 1L;
 
-	protected ImagedComboBoxCellEditorFactory groupEditor;
 	protected BlockingGroupTable groupTable;
 	protected BlockingRegionDefinition brd;
 	protected ClassDefinition cd;
@@ -125,7 +124,6 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 		this.key = key;
 		this.gEnable = gEnable;
 
-		groupEditor = new ImagedComboBoxCellEditorFactory();
 		setData(cd,brd, key);
 		initComponents();
 		addDataManagers(); 
@@ -135,7 +133,6 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 		this.brd = brd;
 		this.cd = cd;
 		this.key = key;
-		groupEditor.setData(cd);
 	}
 
 	private void initComponents() {
@@ -153,8 +150,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 				if (brd.getRegionGroupStrategy(key, j).contains(REGION_GROUP_STRATEGY_HPS)) {
 					continue;
 				}
-				Object classKey = cd.getClassKeys().get(i);
-				if (brd.getRegionGroupClassList(key, j).contains(classKey)) {
+				if (brd.getRegionGroupClassList(key, j).contains(cd.getClassKeys().get(i))) {
 					classAssignTogroup[i] = true;
 					break;
 				}
@@ -264,7 +260,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 		protected String[][] strategies = new String[][]{
 			new String[]{ REGION_GROUP_STRATEGY_FCFS, REGION_GROUP_STRATEGY_HPS_LCFS },
 			new String[]{ REGION_GROUP_STRATEGY_FCFS, REGION_GROUP_STRATEGY_HPS_FCFS } };
-		protected TableCellRenderer gray = new GrayCellRenderer();
+		protected TableCellRenderer grayRenderer = new GrayCellRenderer();
 		int[] columnSizes = new int[] { 150, 50, 50, 50, 20 };
 
 		protected JButton editButton = new JButton() {
@@ -295,7 +291,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			if (column == 1) {
-				return gray;
+				return grayRenderer;
 			} else if (column == 2) {
 				return ComboBoxCellEditor.getRendererInstance();
 			} else if (column == 3) {
@@ -398,7 +394,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			case (1):
 				try {
 					ivalue = Integer.valueOf((String) aValue);
-					if (ivalue.intValue() >= 0) {
+					if (ivalue.intValue() > 0) {
 						brd.setRegionGroupCapacity(key, rowIndex, ivalue);
 					}
 				} catch (NumberFormatException e) {
@@ -473,11 +469,16 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			return "Blocking Region Group Panel";
 		}
 
+		@Override
+		public void gotFocus() {
+			classEditor.clearCache();
+		}
+
 		protected class GroupEditTable extends JTable {
 
 			private static final long serialVersionUID = 1L;
 
-			protected TableCellRenderer gray = new BooleanRenderer();
+			protected TableCellRenderer grayRenderer = new BooleanRenderer();
 			int[] columnSizes = new int[] { 320, 50 };
 
 			public GroupEditTable() {
@@ -493,7 +494,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 				if (column == 0) {
 					return classEditor.getRenderer();
 				} else if (column == 1) {
-					return gray;
+					return grayRenderer;
 				} else {
 					return super.getCellRenderer(row, column);
 				}

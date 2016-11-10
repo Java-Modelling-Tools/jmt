@@ -13,7 +13,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import jmt.engine.jwat.fitting.FittingAlgorithm;
-import jmt.engine.jwat.fitting.ParetoFitting;
 import jmt.engine.jwat.fitting.utils.ModelFitting;
 import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
 

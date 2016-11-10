@@ -25,6 +25,7 @@ import jmt.engine.jwat.input.ProgressMonitorShow;
 import jmt.engine.jwat.workloadAnalysis.utils.ChangeVariableListener;
 import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
+import jmt.gui.jwat.workloadAnalysis.chart.DispKMeanMatrix.DispersionPanel;
 
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
@@ -233,9 +234,8 @@ public class DispQQPlotMatrix extends JScrollPane {
 								}
 							} catch (Exception e) {
 								g.setColor(Color.WHITE);
-								g.fillRect(0, 0, 300, 100);
-								g.setColor(Color.BLACK);
-								g.drawString("With this data the graphic cannot be create", 50, 50);
+								g.fillRect(0, 0, WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1);
+								DispersionPanel.this.repaint();
 							}
 							updateInfos((Elenco.length * Elenco.length) + 1, "End", false);
 						}

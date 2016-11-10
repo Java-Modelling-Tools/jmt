@@ -52,14 +52,12 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 		classDef = cd;
 		stationDef = sd;
 		simDef = simd;
-		classKey = classDef.getClosedClassKeys().get(0);
-		initialValue = classDef.getClassPopulation(classKey).doubleValue() / classDef.getTotalCloseClassPopulation();
-		finalValue = TO;
-		Vector classSet = classDef.getClosedClassKeys();
-		classSet.remove(classKey);
-		otherClassKey = classSet.get(0);
-		popValue = cd.getTotalCloseClassPopulation();
-		numberOfSteps = this.searchForAvailableSteps();
+		classKey = cd.getClosedClassKeys().get(0);
+		otherClassKey = cd.getClosedClassKeys().get(1);
+		setDefaultInitialValue();
+		setDefaultFinalValue();
+		popValue = cd.getTotalClosedClassPopulation();
+		numberOfSteps = searchForAvailableSteps();
 		if (numberOfSteps > MAX_STEP_NUMBER) {
 			numberOfSteps = MAX_STEP_NUMBER;
 		}
@@ -92,8 +90,11 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 	 */
 	public void setDefaultInitialValue() {
 		double pop = classDef.getClassPopulation(classKey).doubleValue();
-		double totalPop = classDef.getTotalCloseClassPopulation();
-		initialValue = pop / totalPop;
+		double totalPop = classDef.getTotalClosedClassPopulation();
+		initialValue = 0;
+		if (totalPop > 0) {
+			initialValue = pop / totalPop;
+		}
 	}
 
 	/**
@@ -132,9 +133,9 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 		}
 		if (values != null) {
 			int refPop = (int) values.getValue(classKey, step);
-			int otherClassPop = classDef.getTotalCloseClassPopulation() - refPop;
-			classDef.setClassPopulation(new Integer(refPop), classKey);
-			classDef.setClassPopulation(new Integer(otherClassPop), otherClassKey);
+			int otherClassPop = classDef.getTotalClosedClassPopulation() - refPop;
+			classDef.setClassPopulation(classKey, new Integer(refPop));
+			classDef.setClassPopulation(otherClassKey, new Integer(otherClassPop));
 			simDef.manageJobs();
 		}
 	}
@@ -147,9 +148,8 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 	@Override
 	public int searchForAvailableSteps() {
 		float diff = Math.abs((float) initialValue - (float) finalValue);
-		//diff = diff/100;
-		int totalPop = classDef.getTotalCloseClassPopulation();
-		return ((int) (totalPop * diff)) + 1;
+		int steps = ((int) (classDef.getTotalClosedClassPopulation() * diff)) + 1;
+		return (steps < 2) ? 2 : steps;
 	}
 
 	/**
@@ -159,14 +159,16 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 	 */
 	@Override
 	public void createValuesSet() {
-		Vector classSet = classDef.getClosedClassKeys();
-		classSet.remove(classKey);
-		otherClassKey = classSet.get(0);
-		int totalPop = classDef.getTotalCloseClassPopulation();
-		int initialClassPop = (int) Math.round(classDef.getTotalCloseClassPopulation() * initialValue);
+		Vector<Object> closeClasses = classDef.getClosedClassKeys();
+		otherClassKey = (closeClasses.get(0) != classKey) ? closeClasses.get(0) : closeClasses.get(1);
+		int totalPop = classDef.getTotalClosedClassPopulation();
+		int initialClassPop = (int) Math.round(totalPop * initialValue);
 		int initialOtherClassPop = totalPop - initialClassPop;
-		values = new ValuesTable(classDef, classDef.getClosedClassKeys(), numberOfSteps);
-		double p = (finalValue - initialValue) / ((numberOfSteps - 1)) * totalPop;
+		values = new ValuesTable(classDef, closeClasses, numberOfSteps);
+		double p = 0;
+		if (totalPop > 0) {
+			p = (finalValue - initialValue) / (numberOfSteps - 1) * totalPop;
+		}
 		double sum = 0;
 		for (int i = 0; i < numberOfSteps; i++) {
 			double increment = (int) Math.round(sum);
@@ -191,8 +193,8 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 		Vector vals = (Vector) originalValues;
 		int thisClassPop = ((Integer) vals.get(0)).intValue();
 		int otherClassPop = ((Integer) vals.get(1)).intValue();
-		classDef.setClassPopulation(new Integer(thisClassPop), classKey);
-		classDef.setClassPopulation(new Integer(otherClassPop), otherClassKey);
+		classDef.setClassPopulation(classKey, new Integer(thisClassPop));
+		classDef.setClassPopulation(otherClassKey, new Integer(otherClassPop));
 		simDef.manageJobs();
 	}
 
@@ -210,13 +212,13 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 	@Override
 	public int checkCorrectness(boolean autocorrect) {
 		int code = 0;
-		Vector closeClasses = classDef.getClosedClassKeys();
-		int totalPop = classDef.getTotalCloseClassPopulation();
-		if ((closeClasses.size() != 2) || (totalPop < 1)) {
+		Vector<Object> closeClasses = classDef.getClosedClassKeys();
+		int totalPop = classDef.getTotalClosedClassPopulation();
+		if (closeClasses.size() != 2 || totalPop < 1) {
 			code = 2; //This PA model can be no more used
 		} else {
 			//if one of the two classes was changed..
-			if ((!closeClasses.contains(classKey)) || (!closeClasses.contains(otherClassKey))) {
+			if (!closeClasses.contains(classKey) || !closeClasses.contains(otherClassKey)) {
 				code = 1;
 				if (autocorrect) {
 					classKey = closeClasses.get(0);
@@ -230,8 +232,7 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 				}
 			} else {
 				//else, if the total number of jobs has changed re - calculate the number of steps
-				int actualPopValue = classDef.getTotalCloseClassPopulation();
-				if (popValue != actualPopValue) {
+				if (popValue != totalPop) {
 					code = 1;
 					if (autocorrect) {
 						setDefaultInitialValue();
@@ -240,7 +241,7 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 						if (numberOfSteps > MAX_STEP_NUMBER) {
 							numberOfSteps = MAX_STEP_NUMBER;
 						}
-						popValue = actualPopValue;
+						popValue = totalPop;
 					}
 				}
 			}
@@ -260,7 +261,10 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 			double tempThisClassPop = values.getValue(classKey, i);
 			double tempOtherClassPop = values.getValue(otherClassKey, i);
 			double sum = tempThisClassPop + tempOtherClassPop;
-			double val = tempThisClassPop / sum;
+			double val = 0;
+			if (sum > 0) {
+				val = tempThisClassPop / sum;
+			}
 			assumedValues.add(new Double(val));
 		}
 		return assumedValues;
@@ -315,9 +319,8 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 			}
 		} else if (propertyName.equals(REFERENCE_CLASS_PROPERTY)) {
 			classKey = classDef.getClassByName(value);
-			Vector temp = classDef.getClosedClassKeys();
-			temp.remove(classKey);
-			otherClassKey = temp.get(0);
+			Vector<Object> closedClasses = classDef.getClosedClassKeys();
+			otherClassKey = (closedClasses.get(0) != classKey) ? closedClasses.get(0) : closedClasses.get(1);
 		}
 	}
 }

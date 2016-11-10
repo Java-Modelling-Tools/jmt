@@ -167,22 +167,18 @@ public abstract class NodeSection {
 	 */
 	public void analyze(int name, JobClass jobClass, Measure measurement) throws jmt.common.exception.NetException {
 		switch (name) {
-		case SimConstants.LIST_RESIDENCE_TIME:
-			jobsList.analyzeResidenceTime(jobClass, measurement);
-			break;
-
-		case SimConstants.LIST_THROUGHPUT:
-			jobsList.analyzeThroughput(jobClass, (InverseMeasure) measurement);
-			break;
-
 		case SimConstants.LIST_NUMBER_OF_JOBS:
 			jobsList.analyzeUtilization(jobClass, measurement);
 			break;
-
+		case SimConstants.LIST_RESIDENCE_TIME:
+			jobsList.analyzeResidenceTime(jobClass, measurement);
+			break;
+		case SimConstants.LIST_THROUGHPUT:
+			jobsList.analyzeThroughput(jobClass, (InverseMeasure) measurement);
+			break;
 		case SimConstants.LIST_DROP_RATE:
 			jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
 			break;
-
 		default:
 			throw new jmt.common.exception.NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
@@ -669,7 +665,11 @@ public abstract class NodeSection {
 		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 	}
 
-	public void analyzeFJ(int name, JobClass jc, Measure measurement) throws NetException {
+	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
+		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+	}
+
+	public void analyzeTransition(int name, String modeName, Measure measurement) throws NetException {
 		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 	}
 

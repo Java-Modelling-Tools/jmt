@@ -184,10 +184,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 */
 	@Override
 	public boolean check() {
-		/*
-		The gtz condition and the sum to 1 condition are actually controlled
-		 * by the setPDF, therefore it is sufficient to control that the CDF is not empty.
-		 */
 		return (!(cdf == null));
 	}
 

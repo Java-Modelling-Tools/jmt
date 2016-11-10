@@ -121,14 +121,14 @@ public class SectorsTextualPanel extends WizardPanel {
 			fileTransf.transform(sSource, sResult);
 			synView.setPage(new URL("file", "localhost", tempFile.getPath()));
 			synScroll.setViewportView(synView);
-		} catch (TransformerConfigurationException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Transform Exception", JOptionPane.ERROR_MESSAGE);
+		} catch (TransformerConfigurationException tce) {
+			JOptionPane.showMessageDialog(null, tce.getMessage(), "Transform Exception", JOptionPane.ERROR_MESSAGE);
 		} catch (TransformerFactoryConfigurationError tfce) {
 			JOptionPane.showMessageDialog(null, tfce.getMessage(), "Transform Error", JOptionPane.ERROR_MESSAGE);
 		} catch (IOException ioe) {
 			JOptionPane.showMessageDialog(null, ioe.getMessage(), "File Exception", JOptionPane.ERROR_MESSAGE);
-		} catch (TransformerException e) {
-			JOptionPane.showMessageDialog(null, e.getMessage(), "Transform Exception", JOptionPane.ERROR_MESSAGE);
+		} catch (TransformerException te) {
+			JOptionPane.showMessageDialog(null, te.getMessage(), "Transform Exception", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 

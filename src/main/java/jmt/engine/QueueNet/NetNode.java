@@ -22,7 +22,7 @@ import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.Queue;
-import jmt.engine.NodeSections.Store;
+import jmt.engine.NodeSections.Storage;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.SimParameters;
@@ -339,11 +339,11 @@ public class NetNode extends SimEntity {
 		case SimConstants.LIST_NUMBER_OF_JOBS:
 			jobsList.analyzeQueueLength(jobClass, measurement);
 			break;
-		case SimConstants.LIST_RESIDENCE_TIME:
-			jobsList.analyzeResidenceTime(jobClass, measurement);
-			break;
 		case SimConstants.LIST_RESPONSE_TIME:
 			jobsList.analyzeResponseTime(jobClass, measurement);
+			break;
+		case SimConstants.LIST_RESIDENCE_TIME:
+			jobsList.analyzeResidenceTime(jobClass, measurement);
 			break;
 		case SimConstants.LIST_DROP_RATE:
 			jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
@@ -530,15 +530,15 @@ public class NetNode extends SimEntity {
 			if (message.getEvent() == NetEvent.EVENT_JOB) {
 				if (source != this) {
 					if (sourceSection != NodeSection.OUTPUT) {
-						//the exterior source section can be the input
-						//section only in case of redirecting queue
+						//the exterior source section can be the input section only
+						//in case of redirecting queue
 						NodeSection sourceSect = source.getSection(sourceSection);
 
 						//check if this job has been redirected, otherwise the message
 						//cannot be dispatched
 						boolean redirectedByQueue = (sourceSect instanceof Queue) && (((Queue) sourceSect).isRedirectionON());
-						boolean redirectedByStore = (sourceSect instanceof Store) && (((Store) sourceSect).isRedirectionON());
-						if (!redirectedByQueue && !redirectedByStore) {
+						boolean redirectedByStorage = (sourceSect instanceof Storage) && (((Storage) sourceSect).isRedirectionON());
+						if (!redirectedByQueue && !redirectedByStorage) {
 							break;
 						}
 					}

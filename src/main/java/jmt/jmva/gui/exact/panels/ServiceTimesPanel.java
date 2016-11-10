@@ -247,9 +247,9 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 			super(new STTableModel());
 			setName("ServiceTimesTable");
 			autoResizeMode = AUTO_RESIZE_OFF;
-                        setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowHeight(CommonConstants.ROW_HEIGHT);
+
 			setDisplaysScrollLabels(true);
-                        
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
 			setClipboardTransferEnabled(true);
@@ -297,7 +297,7 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 
 		/**
 		 * Overridden to obtain a different editor for LD stations.
-		 * Cannot choose editor via standard JTable mechanism because cell type is not column-dependant
+		 * Cannot choose editor via standard JTable mechanism because cell type is not column-dependent
 		 */
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {

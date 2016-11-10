@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 	// Table used to select performance indices to be plotted
 	private LinesTable table;
 	// Dimension of bounds spinners
-	final static Dimension DIM_SPINNER = new Dimension(60, 20);
+	static final Dimension DIM_SPINNER = new Dimension(60, 20);
 	// Current performance index
 	private String currentIndex = "none";
 	// Selected performance indices

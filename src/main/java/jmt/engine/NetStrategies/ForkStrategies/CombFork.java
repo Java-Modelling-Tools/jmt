@@ -87,7 +87,7 @@ public class CombFork extends ForkStrategy {
 			//add to the NodeListWithJobNum
 			for (Integer i : pickedIndex) {
 				Map<JobClass, Integer> map = new HashMap<JobClass, Integer>();
-				map.put(jobClass, 1);
+				map.put(jobClass, Integer.valueOf(1));
 				nl.add(nodes.get(i), map);
 			}
 			return nl;

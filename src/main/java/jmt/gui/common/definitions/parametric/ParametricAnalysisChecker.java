@@ -57,13 +57,8 @@ public class ParametricAnalysisChecker {
 	 * @return true if at least one parametric simulation is available.
 	 */
 	public boolean canBeEnabled() {
-		boolean canBeEnabled = true;
-		Vector classes = cd.getClassKeys();
-		Vector stations = sd.getStationKeys();
-		if ((classes.size() == 0) || (stations.size() == 0) || (getRunnableParametricAnalysis().length == 0)) {
-			canBeEnabled = false;
-		}
-		return canBeEnabled;
+		return !cd.getClassKeys().isEmpty() && !sd.getStationKeys().isEmpty()
+				&& getRunnableParametricAnalysis().length > 0;
 	}
 
 	/**
@@ -79,7 +74,6 @@ public class ParametricAnalysisChecker {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_NUMBER_OF_CUSTOMERS);
 		}
 		//check if "Population mix" parametric analysis is runnable
-		temp = cd.getClosedClassKeys();
 		if (temp.size() == 2) {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_POPULATION_MIX);
 		}
@@ -94,10 +88,10 @@ public class ParametricAnalysisChecker {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_ARRIVAL_RATE);
 		}
 		//check if "Seed" parametric analysis is available
-		if ((!cd.getClassKeys().isEmpty()) && (!sd.getStationKeys().isEmpty())) {
+		if (!cd.getClassKeys().isEmpty() && !sd.getStationKeys().isEmpty()) {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_SEED);
 		}
-		//initilalize runnable array
+		//initialize runnable array
 		runnable = new String[runnableVector.size()];
 		for (int i = 0; i < runnable.length; i++) {
 			runnable[i] = runnableVector.get(i);
@@ -113,23 +107,23 @@ public class ParametricAnalysisChecker {
 	 */
 	public Vector<Object> checkForServiceTimesParametricAnalysisAvailableStations() {
 		Vector<Object> availableStations = new Vector<Object>(0, 1);
-		Vector stations = sd.getStationKeysNoSourceSink();
-		Vector classes = cd.getClassKeys();
+		Vector<Object> stations = sd.getStationKeysNoSourceSink();
+		Vector<Object> classes = cd.getClassKeys();
 		for (int i = 0; i < stations.size(); i++) {
 			Object thisStation = stations.get(i);
-			boolean stationOk = false;
+			boolean stationOK = false;
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
 				Object temp = sd.getServiceTimeDistribution(thisStation, thisClass);
 				if (temp instanceof Distribution) {
 					Distribution distr = (Distribution) temp;
 					if (distr.hasMean()) {
-						stationOk = true;
+						stationOK = true;
 						break;
 					}
 				}
 			}
-			if (stationOk) {
+			if (stationOK) {
 				availableStations.add(thisStation);
 			}
 		}
@@ -145,7 +139,7 @@ public class ParametricAnalysisChecker {
 	 */
 	public Vector<Object> checkForServiceTimesParametricSimulationAvailableClasses(Object stationKey) {
 		Vector<Object> valid = new Vector<Object>(0, 1);
-		Vector classes = cd.getClassKeys();
+		Vector<Object> classes = cd.getClassKeys();
 		for (int j = 0; j < classes.size(); j++) {
 			Object thisClass = classes.get(j);
 			Object temp = sd.getServiceTimeDistribution(stationKey, thisClass);
@@ -167,7 +161,7 @@ public class ParametricAnalysisChecker {
 	 */
 	public Vector<Object> checkForArrivalRatesParametricSimulationAvailableClasses() {
 		Vector<Object> valid = new Vector<Object>(0, 1);
-		Vector classes = cd.getOpenClassKeys();
+		Vector<Object> classes = cd.getOpenClassKeys();
 		for (int j = 0; j < classes.size(); j++) {
 			Object thisClass = classes.get(j);
 			Object temp = cd.getClassDistribution(thisClass);

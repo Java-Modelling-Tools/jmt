@@ -248,7 +248,7 @@ public class QueueNetAnimation extends JPanel implements Animation {
 			} else {
 				for (int i = 0; i < v.size(); i++) {
 					Object newNode = v.get(i);
-					//clone only when neccessary!
+					//clone only when necessary!
 					if (i != 0) {
 						coveredPath = new Vector<Object>(coveredPath);
 					}

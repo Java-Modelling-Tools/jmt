@@ -65,7 +65,7 @@ public abstract class JoinStrategy {
 		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		try {
 			for (Field field : fields) {
-				if (field.getName().startsWith("JOINING_")) {
+				if (field.getName().startsWith("JOIN_")) {
 					strategies.add((JoinStrategy) field.get(null));
 				}
 			}
@@ -90,7 +90,7 @@ public abstract class JoinStrategy {
 		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		try {
 			for (Field field : fields) {
-				if (field.getName().startsWith("Join_") && !field.getName().endsWith("LOADDEPENDANT") ) {
+				if (field.getName().startsWith("Join_") && !field.getName().endsWith("LOADDEPENDENT") ) {
 					strategies.add((JoinStrategy) field.get(null));
 				}
 			}

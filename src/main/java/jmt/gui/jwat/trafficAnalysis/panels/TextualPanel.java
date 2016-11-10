@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jwat.trafficAnalysis.panels;
 
 import java.awt.GridLayout;
@@ -56,9 +57,6 @@ import jmt.gui.jwat.MainJwatWizard;
  */
 public class TextualPanel extends WizardPanel implements JWATConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public static final String DESCRIPTION_PANEL = "<html><body align=\"left\"><font size=\"4\"><b>Burstiness results</b>"
@@ -74,10 +72,9 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 	private MainJwatWizard burstwizard;
 
 	protected AbstractAction ACTION_SAVE = new AbstractAction("  Save  ") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(SHORT_DESCRIPTION, "Save the results");
 		}
@@ -85,23 +82,28 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 		public void actionPerformed(ActionEvent e) {
 			save();
 		}
+
 	};
 
 	public TextualPanel(MainJwatWizard burstwizard) {
 		super();
 		this.burstwizard = burstwizard;
 		((TrafficAnalysisSession) this.burstwizard.getSession()).addSetParamsListener(new OnSetParametersListener() {
+
 			public void ParamsSet() {
 				burstengine = ((TrafficAnalysisSession) TextualPanel.this.burstwizard.getSession()).getEngine();
 				TextualPanel.this.removeAll();
 				initComponents();
 			}
+
 		});
 		((ModelTrafficAnalysis) this.burstwizard.getModel()).addResetModelListener(new OnResetModel() {
+
 			public void modelReset() {
 				TextualPanel.this.removeAll();
 			}
 		});
+
 	}
 
 	private void initComponents() {
@@ -124,17 +126,14 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 		vBox.add(Box.createVerticalStrut(30));
 		vBox.add(synScroll);
 		vBox.add(Box.createVerticalStrut(30));
-		//h2Box.add(Box.createHorizontalStrut(20));
 		h2Box.add(descrLabel);
 		h2Box.add(button_save);
 		hBox.add(Box.createHorizontalStrut(20));
 		hBox.add(vBox);
 		hBox.add(Box.createHorizontalStrut(20));
-		// h2Box.setMaximumSize(new Dimension(580,50));
 		this.setLayout(new GridLayout(1, 1));
 		this.add(hBox);
-		synView
-				.setText("<html><body><center><font face=\"bold\" size=\"3\">Burstiness values will be here displayed once you solve the problem.</font></center></body></html>");
+		synView.setText("<html><body><center><font face=\"bold\" size=\"3\">Burstiness values will be here displayed once you solve the problem.</font></center></body></html>");
 	}
 
 	@Override
@@ -146,14 +145,13 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 	public void gotFocus() {
 		redraw();
 		repaint();
+		burstwizard.setCurrentPanel(TRAFFIC_TEXTUAL_PANEL);
 	}
 
 	/**
 	 * Print the textual values of the burstiness factors
 	 */
 	public void redraw() {
-
-		//            if (burstwizard.getResultOk()) {
 		double[] resultB = burstengine.getData("b");
 		double[] resultA = burstengine.getData("a");
 		double[] ArrPlusCount = burstengine.getData("ArrPlusCount");
@@ -177,24 +175,17 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 		res = res.concat("</body>" + "</html>");
 		button_save.setEnabled(true);
 		synView.setText(res);
-
-		//                   }
-		//            else {
-		//               synView.setText("<html><body><center><font face=\"bold\" size=\"3\">Burstiness values will be here displayed once you solve the problem.</font></center></body></html>");
-		//            }
 	}
 
 	private void save() {
 		FileFilter HTMLfilter = new FileFilter(".html", "Html");
 		FileChooser fileChooser = new FileChooser(HTMLfilter);
 		fileChooser.setFileFilter(HTMLfilter);
-		//fileChooser.addChoosableFileFilter(XMLfilter);
 		int r = fileChooser.showSaveDialog(TextualPanel.this);
 		if (r == JFileChooser.APPROVE_OPTION) {
 			File file = fileChooser.getSelectedFile();
 			if (fileChooser.getFileFilter().equals(HTMLfilter)) {
 				try {
-
 					String Title = new String("<font size=\"4\"><b>Burstiness Results</b><br><br>");
 					String temp = new String(synView.getText());
 					OutputStreamWriter fileStream = new OutputStreamWriter(new FileOutputStream(file));
@@ -208,9 +199,7 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 					JOptionPane.showMessageDialog(fileChooser, "I/O exception", "JMT - Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
-
 		}
-
 	}
 
 	//  --- Methods to choose a file -------------------------------------------------------------
@@ -219,10 +208,9 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 	 * Custom file chooser class
 	 */
 	protected static class FileChooser extends JFileChooser {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		protected FileFilter defaultFilter;
 
 		/**
@@ -248,7 +236,6 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 			if (getDialogType() == SAVE_DIALOG) {
 				try {
 					FileFilter used = ((FileFilter) this.getFileFilter());
-
 					if (!name.toLowerCase().endsWith(used.getExtension())) {
 						name = name + used.getExtension();
 						setSelectedFile(new File(parent, name));
@@ -270,12 +257,14 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 				}
 			}
 		}
+
 	}
 
 	/**
 	 * Inner class used to create simple file filters with only extension check
 	 */
 	protected static class FileFilter extends javax.swing.filechooser.FileFilter {
+
 		private String extension;
 		private String description;
 
@@ -317,7 +306,6 @@ public class TextualPanel extends WizardPanel implements JWATConstants {
 
 	}
 
-	// --------------------------------------------------------------------
 	@Override
 	public void lostFocus() {
 		burstwizard.setLastPanel(TRAFFIC_TEXTUAL_PANEL);

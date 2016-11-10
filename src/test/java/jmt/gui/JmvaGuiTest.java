@@ -65,7 +65,7 @@ public class JmvaGuiTest {
 	 */
 	@Test
 	public void JMVAhelpWindowDisplaysCorrectly() {
-		jmva.menuItem(new TextMenuItemMatcher("JMVA help")).click();
+		jmva.menuItem(new TextMenuItemMatcher("JMVA Help")).click();
 		FrameFixture helpWindow = WindowFinder.findFrame(PDFViewerBuffer.class).using(jmva.robot);
 		helpWindow.close();
 	}
@@ -76,7 +76,7 @@ public class JmvaGuiTest {
 	 */
 	@Test
 	public void JMVAaboutWindowDisplaysCorrectly() {
-		jmva.menuItem(new TextMenuItemMatcher("About JMVA...")).click();
+		jmva.menuItem(new TextMenuItemMatcher("About JMVA")).click();
 		DialogFixture about = WindowFinder.findDialog(JMTDialog.class).using(jmva.robot);
 		about.close();
 	}

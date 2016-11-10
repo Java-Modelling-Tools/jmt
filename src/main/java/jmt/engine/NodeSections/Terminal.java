@@ -57,11 +57,6 @@ public class Terminal extends InputSection {
 		for (int c = 0; c < this.jobsPerClass.length; c++) {
 			this.jobsPerClass[c] = jobsPerClass[c];
 		}
-
-		//NEW
-		//@author Stefano Omini
-		//log = NetSystem.getLog();
-		//end NEW
 	}
 
 	/**
@@ -75,20 +70,12 @@ public class Terminal extends InputSection {
 		for (int c = 0; c < this.jobsPerClass.length; c++) {
 			this.jobsPerClass[c] = jobsPerClass[c].intValue();
 		}
-
-		//NEW
-		//@author Stefano Omini
-		//log = NetSystem.getLog();
-		//end NEW
 	}
 
 	@Override
 	protected void nodeLinked(NetNode node) {
 		// Sets netnode dependent properties
 		waitingRequests = new LinkedJobInfoList(getJobClasses().size(), true);
-		//TODO: togliere??
-		//if (jobsList == null)
-		//	jobsList = new JobInfoList(getJobClasses().size(), true);
 	}
 
 	@Override
@@ -104,7 +91,6 @@ public class Terminal extends InputSection {
 			//the terminal creates all the jobs requested by each class.
 			//for each job created, it sends to itself a message with delay 0
 
-			//log.write(NetLog.LEVEL_RELEASE, null, this, NetLog.EVENT_START);
 			ListIterator<JobClass> jobClasses = getJobClasses().listIterator();
 			JobClass jobClass;
 
@@ -120,13 +106,10 @@ public class Terminal extends InputSection {
 			while (jobClasses.hasNext()) {
 				jobClass = jobClasses.next();
 
-				//NEW
-				//@author Stefano Omini
 				if (jobClass.getType() == JobClass.OPEN_CLASS) {
 					//open class: no jobs to be generated
 					continue;
 				}
-				//end NEW
 
 				c = jobClass.getId();
 
@@ -140,22 +123,10 @@ public class Terminal extends InputSection {
 						//each job is created and sent to the terminal itself
 						job = new Job(jobClass);
 
-						//OLD
-						// the delay of departure is set to 0
-						//sendMe(job, 0);
-
-						//NEW
-						//@author Stefano Omini
 						//sets a random (very small) delay to mix the jobs
-						//of different classes
-
-						//mixRandomDelay = (randomEng.nextDouble()) * 0.00001;
 						mixRandomDelay = (randomEng.raw()) * 0.00001;
 
 						sendMe(job, mixRandomDelay);
-						//end NEW
-
-						//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_CREATED);
 					}
 				}
 			}
@@ -173,22 +144,15 @@ public class Terminal extends InputSection {
 			//message, the job's bornTime is set, then the job is forwarded.
 			//
 
-			//log.write(NetLog.LEVEL_DEBUG, message.getJob(), this, NetLog.JOB_IN);
-
 			// Gets the job from the message
 			job = message.getJob();
 
-			//TODO: serve questa coolStart????
 			if (coolStart) {
 				//the queue of waiting jobs is empty
 
 				if (message.getSource() == this.getOwnerNode() && message.getSourceSection() == this.getSectionID()) {
-
 					//message sent by the terminal itself
-					job.born();
 					sendForward(job, 0.0);
-
-					//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_OUT);
 
 					coolStart = false;
 				} else {
@@ -198,10 +162,7 @@ public class Terminal extends InputSection {
 					send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 
 					//job goes on
-					job.born();
 					sendForward(job, 0.0);
-
-					//log.write(NetLog.LEVEL_DEBUG, job, this, NetLog.JOB_OUT);
 
 					coolStart = false;
 				}
@@ -226,14 +187,10 @@ public class Terminal extends InputSection {
 
 				if (!isMyOwnerNode(wr.getNode())) {
 					send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSection(), wr.getNode());
-
-					//log.write(NetLog.LEVEL_ALL, message.getJob(), this, NetLog.ACK_JOB);
 				}
 
 				Job jobSent = wr.getJob();
 				sendForward(jobSent, 0.0);
-
-				//log.write(NetLog.LEVEL_DEBUG, jobSent, this, NetLog.JOB_OUT);
 			} else {
 				coolStart = true;
 			}

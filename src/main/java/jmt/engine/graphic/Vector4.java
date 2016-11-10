@@ -41,9 +41,9 @@ public class Vector4 {
 	public static final Vector4	Z_AXIS_REV	= createAxis3D( 0.0f, 0.0f, -1.0f );
 	
 	// Axes indices.
-	public final static int		X_INDEX		= 0;
-	public final static int		Y_INDEX		= 1;
-	public final static int		Z_INDEX		= 2;
+	public static final int		X_INDEX		= 0;
+	public static final int		Y_INDEX		= 1;
+	public static final int		Z_INDEX		= 2;
 	
 	
 	public Vector4() {

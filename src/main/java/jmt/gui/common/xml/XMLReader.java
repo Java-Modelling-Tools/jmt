@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -93,16 +94,18 @@ import org.xml.sax.SAXException;
  *       2. System Customer Number to System Number of Customers.
  */
 public class XMLReader implements XMLConstantNames, CommonConstants {
+
 	protected static TreeMap<String, Object> classes; // Data structure used to map between class name and its key
 	protected static TreeMap<String, Object> stations; // Data structure used to map between station name and its key
 	protected static TreeMap<String, Object> regions; // Data structure used to map between region name and its key
 	protected static HashMap<Object, String> refStations; // Data structure used to hold classes' reference stations
-	protected static HashMap<Object[], Map<String, Double>> empiricalRouting; // Data structure to save malformed empirical routing tuples
-	protected static HashMap<Object[], Map<String, OutPath>> empiricalForking;
-	protected static HashMap<Object[], Map<String, Double>> combForking;
-	protected static HashMap<Object[], Map<String, Integer>> enablingConditionMap;
-	protected static HashMap<Object[], Map<String, Integer>> inhibitingConditionMap;
-	protected static HashMap<Object[], Map<String, Integer>> firingOutcomeMap;
+	protected static HashMap<Object, List<String>> modeNameLists; // Data structure used to hold transitions' mode name lists
+	protected static HashMap<Object[], Map<String, Double>> empiricalRouting;
+	protected static HashMap<Object[], Map<String, OutPath>> empiricalFork;
+	protected static HashMap<Object[], Map<String, Double>> combFork;
+	protected static HashMap<Object[], Integer> enablingConditionMap;
+	protected static HashMap<Object[], Integer> inhibitingConditionMap;
+	protected static HashMap<Object[], Integer> firingOutcomeMap;
 
 	/*defines the default logger (used to report errors and information for debugging purposes)*/
 	private static final jmt.engine.log.JSimLogger debugLog = jmt.engine.log.JSimLogger.getLogger(JSimLogger.STD_LOGGER);
@@ -123,7 +126,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static Map<String, Distribution> engineToGuiDistr = null;
 	protected static Map<String, RoutingStrategy> engineToGuiRouting = null;
 
-	protected static Map<String, ForkStrategy> engineToGuiForking = null;
+	protected static Map<String, ForkStrategy> engineToGuiFork = null;
 	protected static Map<String, JoinStrategy> engineToGuiJoin = null;
 	protected static Map<String, SemaphoreStrategy> engineToGuiSemaphore = null;
 
@@ -180,37 +183,38 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		// Gets optional parameter simulation seed
 		String seed = root.getAttribute(XML_A_ROOT_SEED);
 		if (seed != null && seed != "") {
-			model.setUseRandomSeed(false);
-			model.setSimulationSeed(new Long(seed));
+			model.setUseRandomSeed(Boolean.valueOf(false));
+			model.setSimulationSeed(Long.valueOf(seed));
 		} else {
-			model.setUseRandomSeed(true);
+			model.setUseRandomSeed(Boolean.valueOf(true));
 		}
+
 		// Gets optional parameter maximum time
 		String maxTime = root.getAttribute(XML_A_ROOT_DURATION);
 		if (maxTime != null && maxTime != "") {
-			model.setMaximumDuration(new Double(maxTime));
+			model.setMaximumDuration(Double.valueOf(maxTime));
 		} else {
-			model.setMaximumDuration(new Double(-1));
+			model.setMaximumDuration(Double.valueOf(-1));
 		}
 
 		// Gets optional parameter maximum simulated time
 		String maxSimulated = root.getAttribute(XML_A_ROOT_SIMULATED);
 		if (maxSimulated != null && maxSimulated != "") {
-			model.setMaxSimulatedTime(new Double(maxSimulated));
+			model.setMaxSimulatedTime(Double.valueOf(maxSimulated));
 		} else {
-			model.setMaxSimulatedTime(new Double(-1));
+			model.setMaxSimulatedTime(Double.valueOf(-1));
 		}
 
 		// Gets optional parameter polling interval
 		String polling = root.getAttribute(XML_A_ROOT_POLLING);
 		if (polling != null && polling != "") {
-			model.setPollingInterval(Double.parseDouble(polling));
+			model.setPollingInterval(Double.valueOf(polling));
 		}
 
 		// Gets optional parameter maximum samples
 		String maxSamples = root.getAttribute(XML_A_ROOT_MAXSAMPLES);
 		if (maxSamples != null && maxSamples != "") {
-			model.setMaxSimulationSamples(Integer.decode(maxSamples));
+			model.setMaxSimulationSamples(Integer.valueOf(maxSamples));
 		}
 
 		// Gets optional parameter disable statistic
@@ -253,11 +257,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
 		parseClasses(root, model);
 		empiricalRouting = new HashMap<Object[], Map<String, Double>>();
-		empiricalForking = new HashMap<Object[], Map<String, OutPath>>();
-		combForking = new HashMap<Object[], Map<String, Double>>();
-		enablingConditionMap = new HashMap<Object[], Map<String, Integer>>();
-		inhibitingConditionMap = new HashMap<Object[], Map<String, Integer>>();
-		firingOutcomeMap = new HashMap<Object[], Map<String, Integer>>();
+		empiricalFork = new HashMap<Object[], Map<String, OutPath>>();
+		combFork = new HashMap<Object[], Map<String, Double>>();
+		enablingConditionMap = new HashMap<Object[], Integer>();
+		inhibitingConditionMap = new HashMap<Object[], Integer>();
+		firingOutcomeMap = new HashMap<Object[], Integer>();
 		parseStations(root, model);
 		parseConnections(root, model);
 		parseBlockingRegions(root, model);
@@ -266,14 +270,15 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		// Set reference station for each class
 		Object[] keys = refStations.keySet().toArray();
 		for (Object key : keys) {
-			if (CommonConstants.STATION_TYPE_CLASSSWITCH.equals(refStations.get(key)))
-				model.setClassRefStation(key, CommonConstants.STATION_TYPE_CLASSSWITCH);
-			else if (CommonConstants.STATION_TYPE_FORK.equals(refStations.get(key)))
-				model.setClassRefStation(key, CommonConstants.STATION_TYPE_FORK);
-			else if (CommonConstants.STATION_TYPE_SCALER.equals(refStations.get(key)))
-				model.setClassRefStation(key, CommonConstants.STATION_TYPE_SCALER);
-			else
-				model.setClassRefStation(key, stations.get(refStations.get(key)));
+			String name = refStations.get(key);
+			if (STATION_TYPE_FORK.equals(name)
+					|| STATION_TYPE_CLASSSWITCH.equals(name)
+					|| STATION_TYPE_SCALER.equals(name)
+					|| STATION_TYPE_TRANSITION.equals(name)) {
+				model.setClassRefStation(key, name);
+			} else {
+				model.setClassRefStation(key, stations.get(name));
+			}
 		}
 		// Sets correct station key into every empiricalRouting element
 		// Now each key is an Object[] where (0) is station key and (1) class key
@@ -288,54 +293,48 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				routing.put(stations.get(name), values.get(name));
 			}
 		}
-		keys = empiricalForking.keySet().toArray();
+		keys = empiricalFork.keySet().toArray();
 		for (Object key : keys) {
 			Object[] dualkey = (Object[]) key;
-			ForkStrategy fs = (ForkStrategy) model.getForkingStrategy(dualkey[0], dualkey[1]);
+			ForkStrategy fs = (ForkStrategy) model.getForkStrategy(dualkey[0], dualkey[1]);
 			Map<Object, OutPath> outPaths = (Map<Object, OutPath>) fs.getOutDetails();
-			Map<String, OutPath> values = empiricalForking.get(key);
+			Map<String, OutPath> values = empiricalFork.get(key);
 			Object[] names = values.keySet().toArray();
 			for (Object name : names) {
 				outPaths.put(stations.get(name), values.get(name));
 			}
 		}
-		keys = combForking.keySet().toArray();
+		keys = combFork.keySet().toArray();
 		for (Object key : keys) {
 			Object[] dualkey = (Object[]) key;
-			ForkStrategy fs = (ForkStrategy) model.getForkingStrategy(dualkey[0], dualkey[1]);
-			Map<Object, Double> forking = (Map<Object, Double>) fs.getOutDetails();
-			Map<String, Double> values = combForking.get(key);
+			ForkStrategy fs = (ForkStrategy) model.getForkStrategy(dualkey[0], dualkey[1]);
+			Map<Object, Double> fork = (Map<Object, Double>) fs.getOutDetails();
+			Map<String, Double> values = combFork.get(key);
 			Object[] names = values.keySet().toArray();
 			for (Object name : names) {
-				forking.put(name, values.get(name));
+				fork.put(name, values.get(name));
 			}
 		}
 		keys = enablingConditionMap.keySet().toArray();
 		for (Object key : keys) {
-			Object[] dualkey = (Object[]) key;
-			Map<String, Integer> values = enablingConditionMap.get(key);
-			Object[] names = values.keySet().toArray();
-			for (Object name : names) {
-				model.setEnablingCondition(dualkey[0], dualkey[1], stations.get(name), values.get(name));
-			}
+			Object[] quadkey = (Object[]) key;
+			Integer value = enablingConditionMap.get(key);
+			model.setEnablingCondition(quadkey[0], ((Integer) quadkey[1]).intValue(),
+					stations.get((String) quadkey[2]), quadkey[3], value);
 		}
 		keys = inhibitingConditionMap.keySet().toArray();
 		for (Object key : keys) {
-			Object[] dualkey = (Object[]) key;
-			Map<String, Integer> values = inhibitingConditionMap.get(key);
-			Object[] names = values.keySet().toArray();
-			for (Object name : names) {
-				model.setInhibitingCondition(dualkey[0], dualkey[1], stations.get(name), values.get(name));
-			}
+			Object[] quadkey = (Object[]) key;
+			Integer value = inhibitingConditionMap.get(key);
+			model.setInhibitingCondition(quadkey[0], ((Integer) quadkey[1]).intValue(),
+					stations.get((String) quadkey[2]), quadkey[3], value);
 		}
 		keys = firingOutcomeMap.keySet().toArray();
 		for (Object key : keys) {
-			Object[] dualkey = (Object[]) key;
-			Map<String, Integer> values = firingOutcomeMap.get(key);
-			Object[] names = values.keySet().toArray();
-			for (Object name : names) {
-				model.setFiringOutcome(dualkey[0], dualkey[1], stations.get(name), values.get(name));
-			}
+			Object[] quadkey = (Object[]) key;
+			Integer value = firingOutcomeMap.get(key);
+			model.setFiringOutcome(quadkey[0], ((Integer) quadkey[1]).intValue(),
+					stations.get((String) quadkey[2]), quadkey[3], value);
 		}
 	}
 
@@ -382,18 +381,19 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		NodeList nodeclasses = root.getElementsByTagName(XML_E_CLASS);
 		// Now scans all elements
 		Element currclass;
-		int type, priority;
+		int type;
+		Integer priority;
 		Integer customers;
 		String name;
-		Distribution defaultDistr = (Distribution) Defaults.getAsNewInstance("classDistribution");
 		Object key;
 		for (int i = 0; i < nodeclasses.getLength(); i++) {
 			currclass = (Element) nodeclasses.item(i);
 			name = currclass.getAttribute(XML_A_CLASS_NAME);
-			type = currclass.getAttribute(XML_A_CLASS_TYPE).equals("closed") ? CLASS_TYPE_CLOSED : CLASS_TYPE_OPEN;
-			customers = new Integer(0);
-			priority = 0;
-			// As these elements are not mandatory, sets them to 0, then tries to parses them
+			type = currclass.getAttribute(XML_A_CLASS_TYPE).equals("open") ? CLASS_TYPE_OPEN : CLASS_TYPE_CLOSED;
+			priority = Defaults.getAsInteger("classPriority");
+			customers = Defaults.getAsInteger("classPopulation");
+
+			// As these elements are not mandatory, sets them by default, then tries to parses them
 			String tmp = currclass.getAttribute(XML_A_CLASS_CUSTOMERS);
 			if (tmp != null && tmp != "") {
 				customers = Integer.valueOf(tmp);
@@ -401,11 +401,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
 			tmp = currclass.getAttribute(XML_A_CLASS_PRIORITY);
 			if (tmp != null && tmp != "") {
-				priority = Integer.parseInt(tmp);
+				priority = Integer.valueOf(tmp);
 			}
 
 			// Now adds user class. Note that distribution will be set lately.
-			key = model.addClass(name, type, priority, customers, defaultDistr);
+			key = model.addClass(name, type, priority, customers, Defaults.getAsNewInstance("classDistribution"));
 			// Stores reference station as will be set lately (when we will have stations key)
 			refStations.put(key, currclass.getAttribute(XML_A_CLASS_REFSOURCE));
 			// Creates mapping class-name -> key into stations data structure
@@ -422,8 +422,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * @param model data structure where all properties have to be set
 	 */
 	protected static void parseStations(Element root, CommonModel model) {
-		// Initialize stations data structure
+		// Initialize stations and modeNameLists data structure
 		stations = new TreeMap<String, Object>();
+		modeNameLists = new HashMap<Object, List<String>>();
 		NodeList nodestations = root.getElementsByTagName(XML_E_STATION);
 		Object key;
 		Element station;
@@ -474,7 +475,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				parseJoinSection((Element) sections.item(0), model, key);
 				parseForkSection((Element) sections.item(2), model, key);
 			} else if (type.equals(STATION_TYPE_PLACE)) {
-				parseStoreSection((Element) sections.item(0), model, key);
+				parseStorageSection((Element) sections.item(0), model, key);
 			} else if (type.equals(STATION_TYPE_TRANSITION)) {
 				parseEnablingSection((Element) sections.item(0), model, key);
 				parseTimingSection((Element) sections.item(1), model, key);
@@ -499,14 +500,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		// Now parses Service Distribution
 		Map<String, Node> distributions = parseParameterRefclassArray(parameter);
 		// Assign distribution for a class only if current source is its reference station
-		Object[] classNames = distributions.keySet().toArray();
-		Object classkey;
-		for (Object className : classNames) {
+		Set<String> classNames = distributions.keySet();
+		for (String className : classNames) {
 			// If current class has this station as reference source and is open...
 			if (refStations.get(classes.get(className)) != null && refStations.get(classes.get(className)).equals(stationName)
 					&& model.getClassType(classes.get(className)) == CLASS_TYPE_OPEN) {
-				classkey = classes.get(className);
-				model.setClassDistribution(parseServiceStrategy((Element) distributions.get(className)), classkey);
+				Object classkey = classes.get(className);
+				model.setClassDistribution(classkey, parseServiceStrategy((Element) distributions.get(className)));
 				model.setClassRefStation(classkey, key);
 				// Removes this class from refStations as it was already handled
 				refStations.remove(classkey);
@@ -547,7 +547,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				putStrategy = parseParameterRefclassArray(curr);
 			} else if (name.equals("size")) {
 				Integer size = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
-				model.setStationQueueCapacity(size, key);
+				model.setStationQueueCapacity(key, size);
 			} else if (name.equals("dropStrategies")) {
 				dropRules = parseParameterRefclassArray(curr);
 			}
@@ -675,7 +675,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (name.equals("maxJobs")) {
 				// Sets number of servers
 				Integer jobs = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
-				model.setStationNumberOfServers(jobs, key);
+				model.setStationNumberOfServers(key, jobs);
 			}
 		}
 	}
@@ -857,7 +857,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					int fromVal = new Integer(fromValue);
 					values = ((Element) values.item(1)).getElementsByTagName(XML_E_SUBPARAMETER);
 
-					for (int n=0; n<values.getLength(); n++) {
+					for (int n = 0; n < values.getLength(); n++) {
 						try{//Empirical Entry..Station Name..probability Keeps repeating..
 							String atrName = ((Element) values.item(n)).getAttribute("name");//Empirical Entry..Station Name..probability..for a from.
 							if ("EmpiricalEntry".equalsIgnoreCase(atrName)) {
@@ -868,7 +868,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 								String probabilityValue = findText(((Element)probability).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 								Double prob = Double.parseDouble(probabilityValue);
 								//ld.getRange(fromVal).setProbabilities(stationName, probVal);
-								ld.addEmricalEntryForFrom(new Integer(fromVal),stationName, prob);
+								ld.addEmricalEntryForFrom(new Integer(fromVal), stationName, prob);
 							}
 						}catch(Exception e) {
 						}
@@ -990,7 +990,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			String parameterName = parameter.getAttribute(XML_A_PARAMETER_NAME);
 			// Fork number of server is used as number of jobs per link
 			if (parameterName.equals("jobsPerLink")) {
-				model.setStationNumberOfServers(Integer.decode(findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))), key);
+				model.setStationNumberOfServers(key, Integer.valueOf(findText(
+						parameter.getElementsByTagName(XML_E_PARAMETER_VALUE)
+						.item(0))));
 			} else if (parameterName.equals("block")) {
 				model.setForkBlock(key, Integer.valueOf(findText(parameter
 						.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
@@ -999,40 +1001,40 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						.parseBoolean(findText(parameter.getElementsByTagName(
 								XML_E_PARAMETER_VALUE).item(0))));
 			} else if (parameterName.equals("ForkStrategy")) {
-				Map<String, Node> forking = parseParameterRefclassArray(parameter);
-				Object[] classNames = forking.keySet().toArray();
+				Map<String, Node> fork = parseParameterRefclassArray(parameter);
+				Object[] classNames = fork.keySet().toArray();
 				String className;
 
-				if (engineToGuiForking == null) {
-					engineToGuiForking = new TreeMap<String, ForkStrategy>();
+				if (engineToGuiFork == null) {
+					engineToGuiFork = new TreeMap<String, ForkStrategy>();
 					ForkStrategy[] allFS = ForkStrategy.findAll();
 					for (ForkStrategy element : allFS) {
-						engineToGuiForking.put(element.getClass().getName(),
+						engineToGuiFork.put(element.getClass().getName(),
 								element);
 					}
 				}
 
-				Object[] forkStratKeys = engineToGuiForking.keySet().toArray();
+				Object[] forkStratKeys = engineToGuiFork.keySet().toArray();
 				for (Object className2 : classNames) {
 					Map<String, OutPath> map = new HashMap<String, OutPath>();
-					className = ((Element) forking.get(className2))
+					className = ((Element) fork.get(className2))
 							.getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
 					for (Object forkStratKey : forkStratKeys) {
-						if (className.equals(engineToGuiForking.get(
+						if (className.equals(engineToGuiFork.get(
 								forkStratKey).getClassPath())) {
-							model.setForkingStrategy(key, classes
+							model.setForkStrategy(key, classes
 									.get(className2),
-									engineToGuiForking.get(forkStratKey)
+									engineToGuiFork.get(forkStratKey)
 									.clone());
 						}
 					}
 
-					ForkStrategy fs = (ForkStrategy) model.getForkingStrategy(
+					ForkStrategy fs = (ForkStrategy) model.getForkStrategy(
 							key, classes.get(className2));
 					if (fs instanceof ProbabilitiesFork) {
 						ArrayList<Node> entries = new ArrayList<Node>();
 						// Finds EntryArray node
-						Node entryArray = forking.get(className2)
+						Node entryArray = fork.get(className2)
 								.getFirstChild();
 						while (entryArray.getNodeType() != Node.ELEMENT_NODE
 								|| !entryArray.getNodeName().equals(
@@ -1117,13 +1119,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 							op.setOutParameters(tempMap);
 							map.put(stationName, op);
 						}
-						empiricalForking.put(
+						empiricalFork.put(
 								new Object[] { key, classes.get(className2) },
 								map);
 					} else if (fs instanceof CombFork) {
 						ArrayList<Node> entries = new ArrayList<Node>();
 						// Finds EntryArray node
-						Node entryArray = forking.get(className2)
+						Node entryArray = fork.get(className2)
 								.getFirstChild();
 						while (entryArray.getNodeType() != Node.ELEMENT_NODE
 								|| !entryArray.getNodeName().equals(
@@ -1157,12 +1159,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 											.item(0)));
 							tmp.put(num, probability);	
 						}
-						combForking.put(
+						combFork.put(
 								new Object[] { key, classes.get(className2) }, tmp);
 					} else if (fs instanceof MultiBranchClassSwitchFork || fs instanceof ClassSwitchFork) {
 						ArrayList<Node> entries = new ArrayList<Node>();
 						// Finds EntryArray node
-						Node entryArray = forking.get(className2)
+						Node entryArray = fork.get(className2)
 								.getFirstChild();
 						while (entryArray.getNodeType() != Node.ELEMENT_NODE
 								|| !entryArray.getNodeName().equals(
@@ -1269,7 +1271,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 							op.setOutParameters(tempMap);
 							map.put(stationName, op);
 						}
-						empiricalForking.put(
+						empiricalFork.put(
 								new Object[] { key, classes.get(className2) },
 								map);
 					}
@@ -1356,7 +1358,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			}
 		} else {
 			for (Object o: classes.values()) {
-				model.setJoinStrategy(key, o, CommonConstants.JOINING_NORMAL.clone());
+				model.setJoinStrategy(key, o, JOIN_NORMAL.clone());
 			}
 		}
 	}
@@ -1377,7 +1379,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				for (SemaphoreStrategy element : allSS) {
 					engineToGuiSemaphore.put(element.getClass().getName(), element);
 				}
-			} 
+			}
 
 			Object[] semaphoreStratKeys = engineToGuiSemaphore.keySet().toArray();
 			for (Object className2 : classNames) {
@@ -1400,8 +1402,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					for (int i = 0; i < temp2.getLength(); i++) {
 						Element temp3 = (Element) temp2.item(i);
 						if (temp3.getAttribute(XML_A_CLASS_NAME).equals(
-								"SemThres")) {
-							ss.setSemaphoreThres(Integer.parseInt(temp3
+								"threshold")) {
+							ss.setThreshold(Integer.parseInt(temp3
 									.getElementsByTagName("value").item(0)
 									.getFirstChild().getTextContent()));
 						}
@@ -1410,32 +1412,42 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			}
 		} else {
 			for (Object o: classes.values()) {
-				model.setSemaphoreStrategy(key, o, CommonConstants.SEMAPHORE_NORMAL.clone());
+				model.setSemaphoreStrategy(key, o, SEMAPHORE_NORMAL.clone());
 			}
 		}
 	}
 
 	/**
-	 * Extract all informations regarding Store section.
+	 * Extract all informations regarding Storage section.
 	 * @param section input section of source station
 	 * @param model link to data structure
 	 * @param key key of search for this source station into data structure
 	 */
-	protected static void parseStoreSection(Element section, CommonModel model, Object key) {
+	protected static void parseStorageSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
+		Map<String, Node> capacities = null;
 		Map<String, Node> dropRules = null;
 		Map<String, Node> putStrategies = null;
 
 		for (int i = 0; i < parameters.getLength(); i++) {
 			Element parameter = (Element) parameters.item(i);
 			String name = parameter.getAttribute(XML_A_PARAMETER_NAME);
-			if (name.equals("capacity")) {
-				String capacity = findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-				model.setStationQueueCapacity(Integer.valueOf(capacity), key);
+			if (name.equals("totalCapacity")) {
+				String totalCap = findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.setStationQueueCapacity(key, Integer.valueOf(totalCap));
+			} else if (name.equals("capacities")) {
+				capacities = parseParameterRefclassArray(parameter);
 			} else if (name.equals("dropRules")) {
 				dropRules = parseParameterRefclassArray(parameter);
 			} else if (name.equals("putStrategies")) {
 				putStrategies = parseParameterRefclassArray(parameter);
+			}
+		}
+
+		if (capacities != null) {
+			for (Entry<String, Node> capacity : capacities.entrySet()) {
+				String cap = findText(((Element) capacity.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.setQueueCapacity(key, classes.get(capacity.getKey()), Integer.valueOf(cap));
 			}
 		}
 
@@ -1469,46 +1481,52 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 */
 	protected static void parseEnablingSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
-		Map<String, Node> enablingConditions = null;
-		Map<String, Node> inhibitingConditions = null;
+		Vector<Node> enablingConditions = null;
+		Vector<Node> inhibitingConditions = null;
 
 		for (int i = 0; i < parameters.getLength(); i++) {
 			Element parameter = (Element) parameters.item(i);
 			String name = parameter.getAttribute(XML_A_PARAMETER_NAME);
 			if (name.equals("enablingConditions")) {
-				enablingConditions = parseParameterRefclassArray(parameter);
+				enablingConditions = parseParameterArray(parameter);
 			} else if (name.equals("inhibitingConditions")) {
-				inhibitingConditions = parseParameterRefclassArray(parameter);
+				inhibitingConditions = parseParameterArray(parameter);
 			}
 		}
 
 		if (enablingConditions != null) {
-			for (Entry<String, Node> condition : enablingConditions.entrySet()) {
-				Vector<Node> childNodes = parseParameterArray((Element) condition.getValue());
-				Vector<Node> enablingEntries = parseParameterArray((Element) childNodes.get(0));
-				Map<String, Integer> enablingEntryMap = new HashMap<String, Integer>();
-				for (Node entry : enablingEntries) {
-					NodeList values = ((Element) entry).getElementsByTagName(XML_E_SUBPARAMETER);
-					String stationName = findText(((Element) values.item(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-					String numberOfJobs = findText(((Element) values.item(1)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-					enablingEntryMap.put(stationName, Integer.valueOf(numberOfJobs));
+			for (int i = 0; i < enablingConditions.size(); i++) {
+				Node enablingCondition = enablingConditions.get(i);
+				Vector<Node> conditionElements = parseParameterArray((Element) enablingCondition);
+				Vector<Node> enablingVectors = parseParameterArray((Element) conditionElements.get(0));
+				for (Node enablingVector : enablingVectors) {
+					Vector<Node> vectorElements = parseParameterArray((Element) enablingVector);
+					String stationName = findText(((Element) vectorElements.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+					Map<String, Node> enablingEntries = parseParameterRefclassArray((Element) vectorElements.get(1));
+					for (Entry<String, Node> enablingEntry : enablingEntries.entrySet()) {
+						Object[] quadkey = new Object[] { key, Integer.valueOf(i), stationName, classes.get(enablingEntry.getKey()) };
+						String value = findText(((Element) enablingEntry.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+						enablingConditionMap.put(quadkey, Integer.valueOf(value));
+					}
 				}
-				enablingConditionMap.put(new Object[] {key, classes.get(condition.getKey())}, enablingEntryMap);
 			}
 		}
 
 		if (inhibitingConditions != null) {
-			for (Entry<String, Node> condition : inhibitingConditions.entrySet()) {
-				Vector<Node> childNodes = parseParameterArray((Element) condition.getValue());
-				Vector<Node> inhibitingEntries = parseParameterArray((Element) childNodes.get(0));
-				Map<String, Integer> inhibitingEntryMap = new HashMap<String, Integer>();
-				for (Node entry : inhibitingEntries) {
-					NodeList values = ((Element) entry).getElementsByTagName(XML_E_SUBPARAMETER);
-					String stationName = findText(((Element) values.item(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-					String numberOfJobs = findText(((Element) values.item(1)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-					inhibitingEntryMap.put(stationName, Integer.valueOf(numberOfJobs));
+			for (int i = 0; i < inhibitingConditions.size(); i++) {
+				Node inhibitingCondition = inhibitingConditions.get(i);
+				Vector<Node> conditionElements = parseParameterArray((Element) inhibitingCondition);
+				Vector<Node> inhibitingVectors = parseParameterArray((Element) conditionElements.get(0));
+				for (Node inhibitingVector : inhibitingVectors) {
+					Vector<Node> vectorElements = parseParameterArray((Element) inhibitingVector);
+					String stationName = findText(((Element) vectorElements.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+					Map<String, Node> inhibitingEntries = parseParameterRefclassArray((Element) vectorElements.get(1));
+					for (Entry<String, Node> inhibitingEntry : inhibitingEntries.entrySet()) {
+						Object[] quadkey = new Object[] { key, Integer.valueOf(i), stationName, classes.get(inhibitingEntry.getKey()) };
+						String value = findText(((Element) inhibitingEntry.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+						inhibitingConditionMap.put(quadkey, Integer.valueOf(value));
+					}
 				}
-				inhibitingConditionMap.put(new Object[] {key, classes.get(condition.getKey())}, inhibitingEntryMap);
 			}
 		}
 	}
@@ -1521,43 +1539,69 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 */
 	protected static void parseTimingSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
-		Map<String, Node> timingStrategies = null;
-		Map<String, Node> firingPriorities = null;
-		Map<String, Node> firingWeights = null;
+		Vector<Node> modeNames = null;
+		Vector<Node> numbersOfServers = null;
+		Vector<Node> timingStrategies = null;
+		Vector<Node> firingPriorities = null;
+		Vector<Node> firingWeights = null;
 
 		for (int i = 0; i < parameters.getLength(); i++) {
 			Element parameter = (Element) parameters.item(i);
 			String name = parameter.getAttribute(XML_A_PARAMETER_NAME);
-			if (name.equals("numberOfServers")) {
-				String numberOfServers = findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-				model.setStationNumberOfServers(Integer.valueOf(numberOfServers), key);
+			if (name.equals("modeNames")) {
+				modeNames = parseParameterArray(parameter);
+			} else if (name.equals("numbersOfServers")) {
+				numbersOfServers = parseParameterArray(parameter);
 			} else if (name.equals("timingStrategies")) {
-				timingStrategies = parseParameterRefclassArray(parameter);
+				timingStrategies = parseParameterArray(parameter);
 			} else if (name.equals("firingPriorities")) {
-				firingPriorities = parseParameterRefclassArray(parameter);
+				firingPriorities = parseParameterArray(parameter);
 			} else if (name.equals("firingWeights")) {
-				firingWeights = parseParameterRefclassArray(parameter);
+				firingWeights = parseParameterArray(parameter);
+			}
+		}
+
+		if (modeNames != null) {
+			model.deleteTransitionMode(key, 0);
+			List<String> nameList = new ArrayList<String>();
+			for (int i = 0; i < modeNames.size(); i++) {
+				Node modeName = modeNames.get(i);
+				String name = findText(((Element) modeName).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.addTransitionMode(key, name);
+				nameList.add(name);
+			}
+			modeNameLists.put(key, nameList);
+		}
+
+		if (numbersOfServers != null) {
+			for (int i = 0; i < numbersOfServers.size(); i++) {
+				Node numberOfServers = numbersOfServers.get(i);
+				String number = findText(((Element) numberOfServers).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.setNumberOfServers(key, i,  Integer.valueOf(number));
 			}
 		}
 
 		if (timingStrategies != null) {
-			for (Entry<String, Node> strategy : timingStrategies.entrySet()) {
-				Object timingStrategy = parseServiceStrategy((Element) strategy.getValue());
-				model.setServiceTimeDistribution(key, classes.get(strategy.getKey()), timingStrategy);
+			for (int i = 0; i < timingStrategies.size(); i++) {
+				Node timingStrategy = timingStrategies.get(i);
+				Object strategy = parseServiceStrategy((Element) timingStrategy);
+				model.setFiringTimeDistribution(key, i, strategy);
 			}
 		}
 
 		if (firingPriorities != null) {
-			for (Entry<String, Node> priority : firingPriorities.entrySet()) {
-				String firingPriority = findText(((Element) priority.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-				model.setFiringPriority(key, classes.get(priority.getKey()), Integer.valueOf(firingPriority));
+			for (int i = 0; i < firingPriorities.size(); i++) {
+				Node firingPriority = firingPriorities.get(i);
+				String priority = findText(((Element) firingPriority).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.setFiringPriority(key, i,  Integer.valueOf(priority));
 			}
 		}
 
 		if (firingWeights != null) {
-			for (Entry<String, Node> weight : firingWeights.entrySet()) {
-				String firingWeight = findText(((Element) weight.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-				model.setFiringWeight(key, classes.get(weight.getKey()), Integer.valueOf(firingWeight));
+			for (int i = 0; i < firingWeights.size(); i++) {
+				Node firingWeight = firingWeights.get(i);
+				String weight = findText(((Element) firingWeight).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.setFiringWeight(key, i,  Double.valueOf(weight));
 			}
 		}
 	}
@@ -1570,28 +1614,31 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 */
 	protected static void parseFiringSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
-		Map<String, Node> firingOutcomes = null;
+		Vector<Node> firingOutcomes = null;
 
 		for (int i = 0; i < parameters.getLength(); i++) {
 			Element parameter = (Element) parameters.item(i);
 			String name = parameter.getAttribute(XML_A_PARAMETER_NAME);
 			if (name.equals("firingOutcomes")) {
-				firingOutcomes = parseParameterRefclassArray(parameter);
+				firingOutcomes = parseParameterArray(parameter);
 			}
 		}
 
 		if (firingOutcomes != null) {
-			for (Entry<String, Node> outcome : firingOutcomes.entrySet()) {
-				Vector<Node> childNodes = parseParameterArray((Element) outcome.getValue());
-				Vector<Node> firingEntries = parseParameterArray((Element) childNodes.get(0));
-				Map<String, Integer> firingEntryMap = new HashMap<String, Integer>();
-				for (Node entry : firingEntries) {
-					NodeList values = ((Element) entry).getElementsByTagName(XML_E_SUBPARAMETER);
-					String stationName = findText(((Element) values.item(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-					String numberOfJobs = findText(((Element) values.item(1)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-					firingEntryMap.put(stationName, Integer.valueOf(numberOfJobs));
+			for (int i = 0; i < firingOutcomes.size(); i++) {
+				Node firingOutcome = firingOutcomes.get(i);
+				Vector<Node> outcomeElements = parseParameterArray((Element) firingOutcome);
+				Vector<Node> firingVectors = parseParameterArray((Element) outcomeElements.get(0));
+				for (Node firingVector : firingVectors) {
+					Vector<Node> vectorElements = parseParameterArray((Element) firingVector);
+					String stationName = findText(((Element) vectorElements.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+					Map<String, Node> firingEntries = parseParameterRefclassArray((Element) vectorElements.get(1));
+					for (Entry<String, Node> firingEntry : firingEntries.entrySet()) {
+						Object[] quadkey = new Object[] { key, Integer.valueOf(i), stationName, classes.get(firingEntry.getKey()) };
+						String value = findText(((Element) firingEntry.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+						firingOutcomeMap.put(quadkey, Integer.valueOf(value));
+					}
 				}
-				firingOutcomeMap.put(new Object[] {key, classes.get(outcome.getKey())}, firingEntryMap);
 			}
 		}
 	}
@@ -1763,9 +1810,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
 				&& sectionNames[2].equals(CLASSNAME_FORK)) {
 			return STATION_TYPE_SCALER;
-		} else if (sectionNames[0].equals(CLASSNAME_STORE)
+		} else if (sectionNames[0].equals(CLASSNAME_STORAGE)
 				&& sectionNames[1].equals(CLASSNAME_TUNNEL)
-				&& sectionNames[2].equals(CLASSNAME_LINK)) {
+				&& sectionNames[2].equals(CLASSNAME_LINKAGE)) {
 			return STATION_TYPE_PLACE;
 		} else if (sectionNames[0].equals(CLASSNAME_ENABLING)
 				&& sectionNames[1].equals(CLASSNAME_TIMING)
@@ -1801,15 +1848,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else {
 				stationKey = null;
 			}
-			String className = measure.getAttribute(XML_A_MEASURE_CLASS);
-			if (className != null && !className.equals("")) {
-				classKey = classes.get(className);
-			} else {
-				classKey = null;
-			}
 			type = measure.getAttribute(XML_A_MEASURE_TYPE);
-			//Begins all backward compatibility conditions for Changes of Labels of Perf Index.
-			//Supports old names
+			//Begins all backward compatibility conditions
 			if ("Customer Number".equalsIgnoreCase(type) && "".equalsIgnoreCase(stationName)) {
 				type = SimulationDefinition.MEASURE_S_CN;
 			}
@@ -1822,13 +1862,27 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			if ("Queue Length".equalsIgnoreCase(type)) {
 				type = SimulationDefinition.MEASURE_QL;
 			}
-			//if ("Fairness".equalsIgnoreCase(type)) {
-			//	type = SimulationDefinition.MEASURE_FAIRNESS;
-			//}
 			if ("Customer Number".equalsIgnoreCase(type) && !"".equalsIgnoreCase(stationName)) {
 				type = SimulationDefinition.MEASURE_QL;
 			}
 			//Ends the backward compatibility conditions
+			classKey = null;
+			String className = measure.getAttribute(XML_A_MEASURE_CLASS);
+			if (className != null && !className.equals("")) {
+				if (type.equals(SimulationDefinition.MEASURE_FX)) {
+					List<String> modeNameList = modeNameLists.get(stationKey);
+					if (modeNameList != null) {
+						for (String modeName : modeNameList) {
+							if (modeName.equals(className)) {
+								classKey = modeName;
+								break;
+							}
+						}
+					}
+				} else {
+					classKey = classes.get(className);
+				}
+			}
 			//Inverts alpha
 			alpha = new Double(1 - Double.parseDouble(measure.getAttribute(XML_A_MEASURE_ALPHA)));
 			precision = Double.valueOf(measure.getAttribute(XML_A_MEASURE_PRECISION));
@@ -1879,7 +1933,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					Object classKey = classes.get(((Element) class_pop.item(j)).getAttribute(XML_A_CLASSPOPULATION_NAME));
 					Integer jobs = new Integer(((Element) class_pop.item(j)).getAttribute(XML_A_CLASSPOPULATION_POPULATION));
 					// Sets preloading informations
-					model.setPreloadedJobs(jobs, stationKey, classKey);
+					model.setPreloadedJobs(stationKey, classKey, jobs);
 				}
 			}
 		}
@@ -2018,11 +2072,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			return parser.getDocument();
 		} catch (SAXException e) {
 			System.err.println("XMLLoader Error - An error occurs while attempting to parse the document \"" + e.getMessage() + "\".");
-
-			/*JOptionPane.showMessageDialog(null,
-					"An error occurs while attempting to parse the document \"" + e.getMessage() + "\".",
-					"JMT - File error",
-					JOptionPane.ERROR_MESSAGE);*/
 			return null;
 		} catch (IOException e) {
 			System.err.println("XMLLoader Error - An error occurs while attempting to parse the document.");
@@ -2056,11 +2105,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			transformer.setOutputProperty("encoding", ENCODING);
 			transformer.transform(new DOMSource(node), new StreamResult(System.out));
 		} catch (TransformerConfigurationException e) {
-			e.printStackTrace(); //To change body of catch statement use Options | File Templates.
-		} catch (TransformerFactoryConfigurationError transformerFactoryConfigurationError) {
-			transformerFactoryConfigurationError.printStackTrace(); //To change body of catch statement use Options | File Templates.
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
 		} catch (TransformerException e) {
-			e.printStackTrace(); //To change body of catch statement use Options | File Templates.
+			e.printStackTrace();
 		}
 
 	}

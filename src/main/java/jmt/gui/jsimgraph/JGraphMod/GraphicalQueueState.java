@@ -29,14 +29,13 @@ import java.util.Vector;
 
 import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
-import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.controller.ModelSnapshot;
 
 /**
  * <p>Title: GraphicalQueueState</p>
- * <p>Description: this class is used to graphically update thestate of queues
+ * <p>Description: this class is used to graphically update the state of queues
  * and utilizations</p>
  *
  * @author Francesco D'Aquino
@@ -50,7 +49,6 @@ import jmt.gui.jsimgraph.controller.ModelSnapshot;
 public class GraphicalQueueState {
 	private Mediator mediator;
 	private HashMap<Object, JmtCell> tm; // Used to map station keys to their cells
-	private int oldModel;
 
 	public GraphicalQueueState(Mediator m) {
 		mediator = m;
@@ -104,13 +102,13 @@ public class GraphicalQueueState {
 
 		Graphics2D g = mediator.getGraphGraphics();
 
-		Vector openClasses = mediator.getClassDefinition().getOpenClassKeys();
-		Vector sources = mediator.getStationDefinition().getStationKeysSource();
+		Vector<Object> sources = mediator.getStationDefinition().getStationKeysSource();
+		Vector<Object> openClasses = mediator.getClassDefinition().getOpenClassKeys();
 		for (int i = 0; i < sources.size(); i++) {
 			Vector<Object> refClasses = new Vector<Object>(0, 1);
 			Object thisSource = sources.get(i);
 			JmtCell cell = tm.get(thisSource);
-			// Skips special sources - ClassSwitch for the openClass - Arif Canakoglu 
+			// Skips special or additional sources
 			if (cell == null) {
 				continue;
 			}
@@ -124,7 +122,7 @@ public class GraphicalQueueState {
 			}
 			Point2D p = mediator.getCellCoordinates(cell);
 
-			//int xStart = (int)(p.x + SOURCE_MARGIN) + 8;
+			//int xStart = (int) (p.x + SOURCE_MARGIN) + 8;
 			double xStart = p.getX() + ((mediator.getCellDimension(cell).getWidth() - SOURCE_SIZE + 2 * SOURCE_MARGIN) / 2);
 			double yStart = (int) (p.getY() + SOURCE_MARGIN) + 1;
 			//if the number of class is less than the maximum representable
@@ -144,7 +142,7 @@ public class GraphicalQueueState {
 			//else..
 			else {
 				int classSpace;
-				Vector<Object> classesReplication = (Vector<Object>) refClasses.clone();
+				Vector<Object> classesReplication = new Vector<Object>(refClasses);
 				Vector<Object> classesToBeDrawn = new Vector<Object>(0, 1);
 				double min;
 				double mean;
@@ -155,13 +153,14 @@ public class GraphicalQueueState {
 
 					for (int j = 0; j < classesReplication.size(); j++) {
 						Object thisClass = classesReplication.get(j);
-						Distribution temp = (Distribution) mediator.getClassDefinition().getClassParameter(thisClass,
-								ClassDefinition.CLASS_DISTRIBUTION);
-						if (temp.hasMean()) {
-							mean = temp.getMean();
-							if (mean < min) {
-								index = j;
-								min = mean;
+						Object temp = mediator.getClassDefinition().getClassDistribution(thisClass);
+						if (temp instanceof Distribution) {
+							if (((Distribution) temp).hasMean()) {
+								mean = ((Distribution) temp).getMean();
+								if (mean < min) {
+									index = j;
+									min = mean;
+								}
 							}
 						}
 					}
@@ -179,7 +178,7 @@ public class GraphicalQueueState {
 						int index = 0;
 						for (int k = 0; k < classesReplication.size(); k++) {
 							Object thisClass = classesReplication.get(k);
-							priority = mediator.getClassDefinition().getClassPriority(thisClass);
+							priority = mediator.getClassDefinition().getClassPriority(thisClass).intValue();
 							if (priority > max) {
 								max = priority;
 								index = k;
@@ -204,13 +203,13 @@ public class GraphicalQueueState {
 		}
 
 		//Now draw station's queue
-		Vector servers = queueState.getServers();
-		Vector classes = mediator.getClassDefinition().getClassKeys();
+		Vector<Object> servers = mediator.getStationDefinition().getStationKeysServer();
+		Vector<Object> classes = mediator.getClassDefinition().getClassKeys();
 
 		//for each server ...
 		for (int i = 0; i < servers.size(); i++) {
 			JmtCell cell = tm.get(servers.get(i));
-			// Skips blocking region special nodes - Bertoli Marco
+			// Skips special or additional servers
 			if (cell == null) {
 				continue;
 			}
@@ -252,14 +251,14 @@ public class GraphicalQueueState {
 				}
 			}
 
-			// else draw only the first MAX_NUMBER_OF_CLASSES_QUEUE with the greates
+			// else draw only the first MAX_NUMBER_OF_CLASSES_QUEUE with the greatest
 			// number of job inside thisStation
 			else {
 				V_FREE_SPACE = (int) ((QUEUE_HEIGHT - (((int) (height / MAX_NUMBER_OF_CLASSES_QUEUE)) * (double) MAX_NUMBER_OF_CLASSES_QUEUE)) / 2);
 				yStart = p.getY() + V_FREE_SPACE;
 
-				Vector classesReplication = (Vector) classes.clone();
-				Vector classesToBeDrawn = new Vector(0, 1);
+				Vector<Object> classesReplication = new Vector<Object>(classes);
+				Vector<Object> classesToBeDrawn = new Vector<Object>(0, 1);
 				double max;
 				double nJobs;
 				for (int k = 0; k < MAX_NUMBER_OF_CLASSES_QUEUE; k++) {
@@ -303,7 +302,7 @@ public class GraphicalQueueState {
 
 			//then draw the utilization
 			//if the number of classes is less then MAX_NUMBER_OF_CLASSES_QUEUE
-			//offset =  (int) ( (getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT)/2 + QUEUE_HEIGHT );
+			//offset = (int) ((getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT)/2 + QUEUE_HEIGHT);
 			int startAngle = 0;
 			int arcDiameter = (int) (QUEUE_HEIGHT) - 2;
 			if (cell.isLeftInputCell()) {

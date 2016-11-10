@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.engine.jwat.input;
 
 import java.io.BufferedReader;
@@ -32,12 +33,11 @@ public class Loader implements JWATConstants {
 
 	public static int calcNumOfObs(String filePath) throws FileNotFoundException, IOException {
 		int numObs = 0;
-		BufferedReader reader;
-		reader = new BufferedReader(new FileReader(filePath));
-
+		BufferedReader reader = new BufferedReader(new FileReader(filePath));
 		while (reader.readLine() != null) {
 			numObs++;
 		}
+		reader.close();
 		return numObs;
 	}
 
@@ -45,7 +45,7 @@ public class Loader implements JWATConstants {
 		InputLoader loads = null;
 		VariableMapping[] map;
 
-		//Initializating the object necessary to load data.
+		//Initializing the object necessary to load data.
 		map = new VariableMapping[param.getNumVar()];
 
 		int[] varType = param.getVarType();
@@ -53,29 +53,28 @@ public class Loader implements JWATConstants {
 		//Creo mappings
 		for (int i = 0; i < map.length; i++) {
 			switch (varType[i]) {
-				case Parameter.NUMBER:
-					map[i] = null;
-					break;
-				case Parameter.DATE:
-					map[i] = new DataMapping();
-					break;
-				case Parameter.STRING:
-					map[i] = new StringMapping();
-					//map[i]=new positionalMapping();
-					break;
+			case Parameter.NUMBER:
+				map[i] = null;
+				break;
+			case Parameter.DATE:
+				map[i] = new DataMapping();
+				break;
+			case Parameter.STRING:
+				map[i] = new StringMapping();
+				break;
 			}
 		}
 		try {
 			switch (param.getSampleMethod()) {
-				case Parameter.ALL_INPUT:
-					loads = new AllInputLoader(param, filePath, map, prShow);
-					break;
-				case Parameter.INTERVAL_INPUT:
-					loads = new IntervalInputLoader(param, filePath, map, prShow);
-					break;
-				case Parameter.RANDOM_INPUT:
-					loads = new RndInputLoader(param, filePath, map, prShow);
-					break;
+			case Parameter.ALL_INPUT:
+				loads = new AllInputLoader(param, filePath, map, prShow);
+				break;
+			case Parameter.INTERVAL_INPUT:
+				loads = new IntervalInputLoader(param, filePath, map, prShow);
+				break;
+			case Parameter.RANDOM_INPUT:
+				loads = new RndInputLoader(param, filePath, map, prShow);
+				break;
 			}
 		} catch (FileNotFoundException e) {
 			pStatusList.statusEvent(new EventFinishAbort("Loading aborted. File not found."));
@@ -86,17 +85,14 @@ public class Loader implements JWATConstants {
 
 	public static Parameter loadParameter(File demoPath, String demoName) throws FileNotFoundException, IOException {
 		FormatFileReader form = new FormatFileReader(new File(demoPath, demoName + "Format.jwatformat").getAbsolutePath());
-	
-		//FormatFileReader form = new FormatFileReader("D:/" + demoName + "Format.jwatformat");
-		//System.out.println(absolutePath + "examples/" + demoName + "Format.jwatformat");
+
 		boolean[] varSelected = new boolean[form.getNumVars()];
 		String[] varName = new String[form.getNumVars()];
 		String[] regularExp = new String[form.getNumVars()];
 		String[] tokenExp = new String[form.getNumVars()];
 		int[] varType = new int[form.getNumVars()];
-		
+
 		int options[] = new int[] { Loader.calcNumOfObs(new File(demoPath, demoName + "Data.jwat").getAbsolutePath()) };
-		//int options[] = new int[] { Loader.calcNumOfObs("D:/" + demoName + "Data.jwat") };
 
 		for (int i = 0; i < form.getNumVars(); i++) {
 			varSelected[i] = true;
@@ -123,10 +119,8 @@ public class Loader implements JWATConstants {
 			SessionLoader sLoader = new SessionLoader(fileName, prShow);
 			sLoader.addStatusListener(pStatusList);
 			sLoader.start();
-		} catch (FileNotFoundException e) {
-			pStatusList.statusEvent(new EventFinishAbort("Loading aborted. File not found."));
 		} catch (IOException e) {
-			pStatusList.statusEvent(new EventFinishAbort("Loading aborted. File not found."));
+			pStatusList.statusEvent(new EventFinishAbort("Loading session failed."));
 		}
 	}
 

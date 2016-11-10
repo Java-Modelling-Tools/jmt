@@ -24,8 +24,8 @@ import jmt.engine.math.parser.Parser;
 import jmt.gui.common.editors.LDStrategyEditor;
 
 /**
- * <p><b>Name:</b> FastEvaluator</p> 
- * <p><b>Description:</b> 
+ * <p><b>Name:</b> FastEvaluator</p>
+ * <p><b>Description:</b>
  * Evaluates given expression using my java fast expression evaluator.
  * </p>
  * <p><b>Date:</b> 09/dic/06

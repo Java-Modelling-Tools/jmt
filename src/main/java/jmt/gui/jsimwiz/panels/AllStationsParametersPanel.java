@@ -25,7 +25,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.util.Vector;
 
-import javax.swing.AbstractListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -121,7 +120,6 @@ public class AllStationsParametersPanel extends WizardPanel implements CommonCon
 	public void showStationParameterPanel(Object stationKey, Object classKey, int index) {
 		if (stationParsPane != null) {
 			stationParsPane.setData(stationKey);
-
 		} else {
 			stationParsPane = new StationParameterPanel(stationData, classData, stationKey);
 			add(stationParsPane, BorderLayout.CENTER);
@@ -155,7 +153,7 @@ public class AllStationsParametersPanel extends WizardPanel implements CommonCon
 		if (stationsList != null) {
 			Vector stations = stationData.getStationKeys();
 			stationsList.setListData(stations);
-			// If old selected key exists selects it, oterwise select first station
+			// If old selected key exists selects it, otherwise select first station
 			if (stations.contains(selectedKey)) {
 				stationsList.setSelectedValue(selectedKey, true);
 			} else if (stations.size() > 0) {
@@ -185,23 +183,6 @@ public class AllStationsParametersPanel extends WizardPanel implements CommonCon
 			label.setFont(isSelected ? label.getFont().deriveFont(Font.BOLD) : label.getFont().deriveFont(Font.ROMAN_BASELINE));
 			return label;
 		}
-	}
-
-	private class StationsListModel extends AbstractListModel {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public int getSize() {
-			return stationData.getStationKeys().size();
-		}
-
-		public Object getElementAt(int index) {
-			return stationData.getStationKeys().get(index);
-			//return stationData.getStationName(stationData.getStationKeys().get(index));
-		}
-
 	}
 
 }

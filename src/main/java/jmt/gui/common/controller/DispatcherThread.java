@@ -62,7 +62,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		this.sd = sd;
 		this.gui = gui;
 		this.results = results;
-		poller = new PollerThread(sd.getPollingInterval(), this);
+		poller = new PollerThread(sd.getPollingInterval().doubleValue(), this);
 		// Avoid hanging the system during execution
 		this.setPriority(Thread.MIN_PRIORITY);
 	}
@@ -115,11 +115,11 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		}
 		// ----------- end Francesco D'Aquino -----------
 		// If needed sets simulation seed
-		if (!sd.getUseRandomSeed()) {
+		if (!sd.getUseRandomSeed().booleanValue()) {
 			simulator.setSimulationSeed(sd.getSimulationSeed().longValue());
 		}
 		// If a time maximum time is specified, initialize all stuff related
-		if (sd.getMaximumDuration().longValue() > 0) {
+		if (sd.getMaximumDuration().doubleValue() > 0) {
 			timer = new TimerThread(this, sd.getMaximumDuration().doubleValue());
 		}
 		gui.changeSimActionsState(false, true, true);
@@ -179,7 +179,6 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 * Inner thread used to poll
 	 */
 	protected class PollerThread extends Thread {
-		private static final long REFREH_INTERVAL_ANIMATION_HOLDING = 1000;
 		protected long interval;
 		protected DispatcherThread dispatcher;
 		protected boolean initialized = false;
@@ -263,24 +262,6 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 				}
 			}
 			// Simulation is finished
-//REMOVED, NOT STABLE ENOUGH
-//			gui.setAnimationHolder((Thread)this);
-//			while (true) {
-//				try {
-//					simStateChecker.forceDraw();
-//				} catch(Exception e) {
-//					//The graph has been modified, we stop to hold animation
-//					simStateChecker.getServersContent().clear();
-//					simStateChecker.getServersUtilization().clear();
-//					simStateChecker.forceRepaint();
-//					break;
-//				}
-//				try {
-//					sleep(REFREH_INTERVAL_ANIMATION_HOLDING);
-//				} catch (InterruptedException ex) {
-//					System.err.println("Unexpected InterruptException in PollerThread");
-//				}
-//			}
 		}
 	}
 
@@ -393,7 +374,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 			} else {
 				elapsed = 1 - (double) (residualTime - (System.currentTimeMillis() - initialTime)) / (double) totalTime;
 			}
-			// Fix possible problem when this funcion is called after simulation ends
+			// Fix possible problem when this function is called after simulation ends
 			if (elapsed > 1) {
 				elapsed = 1;
 			}

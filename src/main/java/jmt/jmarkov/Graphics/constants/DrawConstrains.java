@@ -93,4 +93,5 @@ public interface DrawConstrains {
 	 * * Returns the radius of the status
 	 */
 	double getStatusRadius();
+
 }

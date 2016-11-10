@@ -73,9 +73,7 @@ public class WorkloadAnalysisSession extends JwatSession {
 		if (pos < clusterOperation.size()) {
 			clusterOperation.remove(pos);
 			fireNotifyOnModifiedClustering();
-			System.err.println(Runtime.getRuntime().freeMemory());
 			System.gc();
-			System.err.println(Runtime.getRuntime().freeMemory());
 		}
 	}
 
@@ -160,11 +158,10 @@ public class WorkloadAnalysisSession extends JwatSession {
 	}
 
 	private void saveFuzzyData(ZipOutputStream zos, FuzzyKMean clustering) throws IOException {
-		int i, j, k, s;
+		int i, j, k;
 		ClusteringInfosFuzzy curInfo;
 		ClusterInfoFuzzy curClustInfo[];
 		double clustAssign[][];
-		double entropy[];
 		DataOutputStream dos = new DataOutputStream(zos);
 
 		for (i = 0; i < clustering.getNumCluster(); i++) {
@@ -232,11 +229,9 @@ public class WorkloadAnalysisSession extends JwatSession {
 	public void copySession(JwatSession newSession) {
 		model.setMatrix(newSession.getDataModel().getMatrix());
 		Vector<Clustering> listClust = ((WorkloadAnalysisSession) newSession).getListOfClustering();
-
 		for (int nn = 0; nn < listClust.size(); nn++) {
 			addClustering(listClust.get(nn));
 		}
-
 	}
 
 }

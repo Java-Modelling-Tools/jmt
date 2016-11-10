@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,9 @@ public abstract class SemaphoreStrategy {
 		return getName();
 	}
 
-	public abstract int getSemaphoreThres();
+	public abstract int getThreshold();
 
-	public abstract void setSemaphoreThres(int i);
+	public abstract void setThreshold(int i);
 
 	@Override
 	public abstract SemaphoreStrategy clone();
@@ -94,7 +94,7 @@ public abstract class SemaphoreStrategy {
 		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		try {
 			for (Field field : fields) {
-				if (field.getName().startsWith("Semaphore_") && !field.getName().endsWith("LOADDEPENDANT") ) {
+				if (field.getName().startsWith("Semaphore_") && !field.getName().endsWith("LOADDEPENDENT") ) {
 					strategies.add((SemaphoreStrategy) field.get(null));
 				} 
 			}

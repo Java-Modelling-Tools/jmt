@@ -118,7 +118,6 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 	};
 
 	public ServiceSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
-		super();
 		classEditor = new ImagedComboBoxCellEditorFactory(cd);
 		setData(sd, cd, stationKey);
 	}
@@ -171,7 +170,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 						serverNum = new Integer(1);
 						serversNumSpinner.setValue(serverNum);
 					}
-					data.setStationNumberOfServers(serverNum, stationKey);
+					data.setStationNumberOfServers(stationKey, serverNum);
 				}
 			}
 		});
@@ -234,7 +233,6 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		int[] columnSizes = new int[] { 90, 60, 150, 30 };
 
 		public ServiceTable() {
-			super();
 			setModel(new ServiceTableModel());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
@@ -298,7 +296,16 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return (columnIndex == 1 || (columnIndex == 3 && !SERVICE_ZERO.equals((String) getValueAt(rowIndex, 1))));
+			Object classKey = classData.getClassKeys().get(rowIndex);
+			if (columnIndex == 0) {
+				return false;
+			} else if (columnIndex == 2) {
+				return false;
+			} else if (columnIndex == 3 && data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
+				return false;
+			} else {
+				return true;
+			}
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
@@ -328,12 +335,12 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			switch (columnIndex) {
 			// Load dependency
 			case (1):
-				if (SERVICE_LOAD_DEPENDENT.equals(aValue)) {
+				if (((String) aValue).equals(SERVICE_LOAD_DEPENDENT)) {
 					// Puts a Load Dependent Service Strategy only if previously it was different
 					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy)) {
 						data.setServiceTimeDistribution(stationKey, classKey, new LDStrategy());
 					}
-				} else if (SERVICE_ZERO.equals(aValue)) {
+				} else if (((String) aValue).equals(SERVICE_ZERO)) {
 					// Puts a Zero Service Time Strategy only if previously it was different
 					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy)) {
 						data.setServiceTimeDistribution(stationKey, classKey, new ZeroStrategy());
@@ -341,7 +348,8 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				} else {
 					// Puts the default service strategy only if previously it was different
 					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof Distribution)) {
-						data.setServiceTimeDistribution(stationKey, classKey, Defaults.getAsNewInstance("stationServiceStrategy"));
+						Object distribution = Defaults.getAsNewInstance("stationServiceStrategy");
+						data.setServiceTimeDistribution(stationKey, classKey, distribution);
 					}
 				}
 			repaint();

@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jwat.trafficAnalysis.panels;
 
 import java.awt.BorderLayout;
@@ -58,10 +59,9 @@ import jmt.gui.jwat.trafficAnalysis.utils.NewPlot;
  *         Time: 11.01.29
  */
 public class GraphPanel extends WizardPanel implements JWATConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	public static final String[] INDICES_TYPES = { " b ", " a " };
 	public static final String DESCRIPTION_GRAPH = "<html><body align=\"left\"><font size=\"4\"><b>Burst values</b>"
 			+ "</font><font size=\"3\"><br>Computed burstiness factors for all the epochs. Left-click and drag on the graph to zoom "
@@ -84,7 +84,7 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	// Scrollpane used for table
 	private JScrollPane tableScrollPane;
 	// Dimension of bounds spinners
-	final static Dimension DIM_SPINNER = new Dimension(60, 20);
+	static final Dimension DIM_SPINNER = new Dimension(60, 20);
 	// Current performance index
 	private String currentIndex = " b ";
 	private MainJwatWizard ew;
@@ -104,19 +104,22 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	public GraphPanel(MainJwatWizard ew) {
 		this.ew = ew;
 		((TrafficAnalysisSession) ew.getSession()).addSetParamsListener(new OnSetParametersListener() {
+
 			public void ParamsSet() {
-				System.err.println("Graph Panel reset");
 				engine = ((TrafficAnalysisSession) GraphPanel.this.ew.getSession()).getEngine();
 				GraphPanel.this.removeAll();
 				initGraphics();
 				setTable();
 			}
+
 		});
 		((ModelTrafficAnalysis) ew.getModel()).addResetModelListener(new OnResetModel() {
+
 			public void modelReset() {
 				GraphPanel.this.removeAll();
 			}
 		});
+
 	}
 
 	/**
@@ -153,7 +156,6 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 		totPanel.add(formulaPanel, BorderLayout.CENTER);
 		totPanel.add(formula2Panel, BorderLayout.SOUTH);
 		left.add(totPanel, BorderLayout.NORTH);
-		// left.add(formulaPanel, BorderLayout.NORTH);
 		// Adds panel for bounds selection
 		JPanel boundsPanel = new JPanel(new GridLayout(2, 4, 1, 1));
 		boundsPanel.add(new JLabel("Xmin: ", SwingConstants.RIGHT));
@@ -196,7 +198,6 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 		left.add(tableScrollPane, BorderLayout.CENTER);
 		updateSpinners();
 		addActions();
-
 	}
 
 	/**
@@ -237,7 +238,6 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 		left.add(tableScrollPane, BorderLayout.CENTER);
 		mainPanel.updateUI();
 		paintIndex(1);
-
 	}
 
 	/**
@@ -299,11 +299,9 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	 */
 	private void updateIndex() {
 		String current = (String) index.getSelectedItem();
-
 		currentIndex = current;
 		if (((ModelTrafficAnalysis) ew.getModel()).getMatrix() != null) {
 			paintIndex(1);
-			// Updates graph
 		}
 		graph.setYLabel("Burstiness factor " + current);
 		graph.repaint();
@@ -315,12 +313,14 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	private void addActions() {
 		// Listener used for bounds spinners
 		ChangeListener boundsListener = new ChangeListener() {
+
 			public void stateChanged(ChangeEvent e) {
 				if (!forcedUpdate) {
 					setBounds();
 					updateSpinners();
 				}
 			}
+
 		};
 		Xmin.addChangeListener(boundsListener);
 		Xmax.addChangeListener(boundsListener);
@@ -328,19 +328,22 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 		Ymax.addChangeListener(boundsListener);
 		// Listener for index selection comboBox
 		index.addItemListener(new ItemListener() {
+
 			public void itemStateChanged(ItemEvent e) {
 				updateIndex();
 			}
-		});
 
+		});
 		// Adds a listener to the graph to detect zoom events
 		graph.addRescaleListener(new NewPlot.RescaleListener() {
+
 			public void Rescaled() {
 				forcedUpdate = true;
 				updateSpinners();
 				forcedUpdate = false;
 			}
 		});
+
 	}
 
 	/**
@@ -357,7 +360,6 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 		graph.setXAxis(xAxis);
 
 		// Clears previous graph
-
 		if (resB.length < -1 || resA.length < -1) {
 			// Resets view
 			autosizeGraph();
@@ -392,6 +394,11 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	@Override
 	public String getName() {
 		return "Burst Values - Graphics";
+	}
+
+	@Override
+	public void gotFocus() {
+		ew.setCurrentPanel(TRAFFIC_GRAPH_PANEL);
 	}
 
 	@Override

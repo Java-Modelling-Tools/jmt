@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,15 +26,15 @@ import jmt.engine.NetStrategies.SemaphoreStrategy;
  */
 public class NormalSemaphore extends SemaphoreStrategy {
 
-	private int semaphoreThres;
+	private int threshold;
 
-	public NormalSemaphore(Integer semaphoreThreshold) {
-		this.semaphoreThres = semaphoreThreshold;
+	public NormalSemaphore(Integer threshold) {
+		this.threshold = threshold;
 	}
 
 	@Override
-	public int getSemaphoreThres() {
-		return semaphoreThres; 
+	public int getThreshold() {
+		return threshold; 
 	}
 
 }

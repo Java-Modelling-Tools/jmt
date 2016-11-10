@@ -89,7 +89,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 		descrPane.setBorder(new TitledBorder(new EtchedBorder(), "Description"));
 		descrPane.setViewportView(descrTextPane);
 		joinPane.setLayout(new FlowLayout());
-		JLabel text = new JLabel("Number of Tasks Required:");
+		JLabel text = new JLabel("Number of Required Tasks:");
 		jNumField.setPreferredSize(DIM_BUTTON_XS);
 		joinPane.add(text);
 		joinPane.add(jNumField);
@@ -146,8 +146,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	private void setupFiringMixJoin() {
 		firingMix.clear();
 		for (int i = 0; i < classes.getClassKeys().size(); i++) {
-			Object currentKey = classes.getClassKeys().get(i);
-			firingMix.put(currentKey, 0);
+			firingMix.put(classes.getClassKeys().get(i), 0);
 		}
 	}
 
@@ -193,7 +192,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 		private ClassDefinition cs;
-		private String[] columnNames = new String[] { "Class", "Tasks Required" };
+		private String[] columnNames = new String[] { "Class", "Required Tasks" };
 		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
 		public int[] columnSizes = new int[] { 40, 100 };
 

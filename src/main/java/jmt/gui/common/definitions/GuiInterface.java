@@ -72,24 +72,7 @@ public interface GuiInterface {
 	 */
 	public void showRelatedPanel(int problemType, int problemSubType, Object relatedStation, Object relatedCLass);
 
-	/**
-	 * Shows the class panel
-	 */
-	public void showClassPanel();
-
 	public void setAnimationHolder(Thread thread);
-
-	/**
-	 * Sets the Parametric Analysis Results Window
-	 * @param parw the Parametric Analysis Results Window to be set
-	 */
-	//public void setPAResultsWindow(PAResultsWindow parw);
-
-	/**
-	 * Sets the availability of results in case of parametric analysis
-	 * @param available true if they are available
-	 */
-	//public void setPAResultsAvailable(boolean available);
 
 	public String getFileName();
 

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat.workloadAnalysis.tables;
 
 import java.util.Vector;
@@ -10,24 +28,16 @@ import jmt.engine.jwat.filters.FilterOnVariable;
 import jmt.engine.jwat.input.Parameter;
 
 public class JWatVariableInputTableModel extends AbstractTableModel {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
-	// Names of columns contained in table. Columns containing buttons have
-	// empty names
+	// Names of columns contained in table.
 	protected String[] columnNames = new String[] { "Select", "Name", "Type", "Comment", "Sep.", "Perl5 Reg. Exp.", "Def.", "Rep.", "" };
 
 	// Class declarations for this table's columns.
-	protected Class[] colClasses = new Class[] { Boolean.class, String.class, JComboBox.class, String.class, String.class, String.class,
+	protected Class<?>[] colClasses = new Class[] { Boolean.class, String.class, JComboBox.class, String.class, String.class, String.class,
 			String.class, String.class, JButton.class };
 
-	/*protected Class[] colClasses = new Class[] { String.class, JComboBox.class,
-			Boolean.class, String.class, String.class, JComboBox.class,
-			 String.class, String.class,JButton.class };*/
-
-	// Vettori dei valori
 	private Vector<Object> names = new Vector<Object>();
 
 	private Vector types = new Vector();
@@ -60,7 +70,7 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 	}
 
 	@Override
-	public Class getColumnClass(int index) {
+	public Class<?> getColumnClass(int index) {
 		return colClasses[index];
 	}
 
@@ -91,24 +101,24 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 	public Object getValueAt(int row, int col) {
 		if (row < names.size()) {
 			switch (col) {
-				case 1:
-					return names.get(row);
-				case 2:
-					return types.get(row);
-				case 0:
-					return selected.get(row);
-				case 3:
-					return comments.get(row);
-				case 4:
-					return delimiters.get(row);
-				case 5:
-					return regExpr.get(row);
-				case 6:
-					return defaults.get(row);
-				case 7:
-					return replaces.get(row);
-				case 8:
-					return null;
+			case 1:
+				return names.get(row);
+			case 2:
+				return types.get(row);
+			case 0:
+				return selected.get(row);
+			case 3:
+				return comments.get(row);
+			case 4:
+				return delimiters.get(row);
+			case 5:
+				return regExpr.get(row);
+			case 6:
+				return defaults.get(row);
+			case 7:
+				return replaces.get(row);
+			case 8:
+				return null;
 			}
 		}
 		return null;
@@ -118,30 +128,30 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 	public void setValueAt(Object value, int r, int c) {
 		if (r < names.size()) {
 			switch (c) {
-				case 1:
-					names.set(r, value);
-					break;
-				case 2:
-					types.set(r, value);
-					break;
-				case 0:
-					selected.set(r, value);
-					break;
-				case 3:
-					comments.set(r, value);
-					break;
-				case 4:
-					delimiters.set(r, value);
-					break;
-				case 5:
-					regExpr.set(r, value);
-					break;
-				case 6:
-					defaults.set(r, value);
-					break;
-				case 7:
-					replaces.set(r, value);
-					break;
+			case 1:
+				names.set(r, value);
+				break;
+			case 2:
+				types.set(r, value);
+				break;
+			case 0:
+				selected.set(r, value);
+				break;
+			case 3:
+				comments.set(r, value);
+				break;
+			case 4:
+				delimiters.set(r, value);
+				break;
+			case 5:
+				regExpr.set(r, value);
+				break;
+			case 6:
+				defaults.set(r, value);
+				break;
+			case 7:
+				replaces.set(r, value);
+				break;
 			}
 		}
 		fireTableCellUpdated(r, c);
@@ -198,12 +208,10 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 		return null;
 	}
 
-	// Numero di righe nella tabella
 	public int getSize() {
 		return names.size();
 	}
 
-	// Controlla se per tutte le righe sono specificati i valori richiesti
 	public boolean checkInfos() {
 		boolean check = false;
 		if (names.size() == 0) {
@@ -219,8 +227,6 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 			if (regExpr.get(i).equals("")) {
 				return false;
 			}
-			// if (comments.get(i).equals("")) return false;
-			// if (delimiters.get(i).equals("")) return false;
 			if (((Boolean) selected.get(i)).booleanValue()) {
 				check = true;
 			}
@@ -241,8 +247,6 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 	}
 
 	public Parameter getParameter() {
-		int numVars = 0; //Variabili che comporranno l'osservazione
-		//Creazione array delle variabili selezione
 		boolean[] boolVariables = new boolean[names.size()];
 		String[] nameVariables = new String[names.size()];
 		int[] typeVariables = new int[names.size()];
@@ -251,9 +255,6 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 		String[] def = new String[defaults.size()];
 		String[] rep = new String[replaces.size()];
 		for (int i = 0; i < selected.size(); i++) {
-			if (((Boolean) selected.get(i)).booleanValue()) {
-				numVars++;
-			}
 			boolVariables[i] = ((Boolean) selected.get(i)).booleanValue();
 			nameVariables[i] = ((String) names.get(i));
 			typeVariables[i] = getTypeInt(i);
@@ -331,7 +332,7 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 		}
 		return true;
 	}
-	
+
 	public boolean checkFittingRequirements() {
 		int count = 0;
 		for (int i = 0; i < names.size(); i++) {
@@ -347,4 +348,5 @@ public class JWatVariableInputTableModel extends AbstractTableModel {
 		}
 		return true;
 	}
+
 }

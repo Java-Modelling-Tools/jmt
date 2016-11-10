@@ -77,8 +77,8 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 	//Table containing class-set data
 	protected ClassTable classTable;
 
-	//ComboBox editor for station type
-	protected ImagedComboBoxCellEditorFactory comboEditor = new ImagedComboBoxCellEditorFactory();
+	//ComboBox editor for class type
+	protected ImagedComboBoxCellEditorFactory comboEditor;
 
 	//Button that allows to add classes one by one
 	protected JButton addClass;
@@ -195,14 +195,14 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 			int index = classTable.getSelectedRow();
 			if (index >= 0 && index < classTable.getRowCount()) {
 				Object key = data.getClassKeys().elementAt(index);
-				DistributionsEditor editor = DistributionsEditor.getInstance(ClassesPanel.this.getParent(), (Distribution) data
-						.getClassDistribution(key));
+				Distribution arrival = (Distribution) data.getClassDistribution(key);
+				DistributionsEditor editor = DistributionsEditor.getInstance(ClassesPanel.this.getParent(), arrival);
 				// Sets editor window title
 				editor.setTitle("Editing " + data.getClassName(key) + " distribution...");
 				// Shows editor window
 				editor.show();
 				// Sets new Distribution to selected class
-				data.setClassDistribution(editor.getResult(), key);
+				data.setClassDistribution(key, editor.getResult());
 
 				// Updates table view. This is needed as Distribution is not contained
 				// into edited cell (but in its left one)
@@ -216,6 +216,8 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 	public ClassesPanel(ClassDefinition cd) {
 		super();
 		classTable = new ClassTable();
+		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
+				ImagedComboBoxCellEditorFactory.OPTION_CLASS_TYPES);
 		initComponents();
 		//forbid column to be moved
 		classTable.getTableHeader().setReorderingAllowed(false);
@@ -225,6 +227,8 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 	/**Default constructor, used to extend this panel for JModel*/
 	public ClassesPanel() {
 		super();
+		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
+				ImagedComboBoxCellEditorFactory.OPTION_CLASS_TYPES);
 	}
 
 	/**Sets data model for this panel.
@@ -305,12 +309,9 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	//adds a new class to the table and, simultaneously to the underlying model data structure
 	protected void addClass() {
-		Distribution defaultClassDistrib = (Distribution) Defaults.getAsNewInstance("classDistribution");
-		if (defaultClassDistrib.hasMean()) {
-			defaultClassDistrib.setMean(defaultClassDistrib.getMean() * 2);
-		}
-		data.addClass(Defaults.get("className") + (++classNameIndex), Defaults.getAsInteger("classType").intValue(), Defaults.getAsInteger(
-				"classPriority").intValue(), Defaults.getAsInteger("classPopulation"), defaultClassDistrib);
+		data.addClass(Defaults.get("className") + (++classNameIndex),
+				Defaults.getAsInteger("classType").intValue(), Defaults.getAsInteger("classPriority"),
+				Defaults.getAsInteger("classPopulation"), Defaults.getAsNewInstance("classDistribution"));
 		refreshComponents();
 	}
 
@@ -432,16 +433,12 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 			if (column == 1) {
 				return comboEditor.getRenderer();
 			} else if (column == 5) {
-				/*if distribution column contains null value, no editor must be displayed,
-				as this class is a closed one (e.g. described by population)*/
-				if (getValueAt(row, column - 1) != null) {
+				if (getValueAt(row, 4) != null) {
 					return new ButtonCellEditor(editDistributionButton);
 				} else {
 					return getDefaultRenderer(String.class);
 				}
-			}
-			//Addition of column that contains delete buttons
-			if (column == 6) {
+			} else if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
 			} else {
 				return getDefaultRenderer(getModel().getColumnClass(column));
@@ -453,23 +450,27 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
 				return comboEditor.getEditor(classTypes);
-			} else if (column == 5 && getValueAt(row, column - 1) != null) {
-				return new ButtonCellEditor(new JButton(editDistribution));
+			} else if (column == 5) {
+				if (getValueAt(row, 4) != null) {
+					return new ButtonCellEditor(new JButton(editDistribution));
+				} else {
+					return getDefaultEditor(String.class);
+				}
 			} else if (column == 6) {
 				return new ButtonCellEditor(new JButton(deleteClass));
 			} else {
-				return super.getCellEditor(row, column);
+				return getDefaultEditor(getModel().getColumnClass(column));
 			}
 		}
 
 		//set sizes for columns and rows of this table.
 		protected void sizeColumnsAndRows() {
 			for (int i = 0; i < columnSizes.length && i < getColumnCount(); i++) {
-				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
+				getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
 				if (i == columnSizes.length - 1) {
 					//delete button and containing table cells as well, must be square
-					this.getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);
-					this.setRowHeight(columnSizes[i]);
+					getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);
+					setRowHeight(columnSizes[i]);
 				}
 			}
 		}
@@ -489,8 +490,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		protected String[] columnNames = new String[] { "Name", "Type", "Priority", "Population", "Interarrival Time Distribution", "", "" };
 
 		//Class declarations for this table's columns.
-		protected Class[] colClasses = new Class[] { String.class, JComboBox.class, String.class, String.class, String.class, Object.class,
-				JButton.class };
+		protected Class<?>[] colClasses = new Class[] { String.class, JComboBox.class, String.class, String.class, String.class, Object.class, JButton.class };
 
 		/**Creates a new instance of class table model*/
 		public ClassTableModel() {
@@ -525,7 +525,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 		/**Returns class describing data contained in specific column.*/
 		@Override
-		public Class getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			if (columnIndex < colClasses.length) {
 				return colClasses[columnIndex];
 			} else {
@@ -538,16 +538,21 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		 * editing functionality is implemented via edit button*/
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			if (columnIndex == 3 && (getValueAt(rowIndex, 1).equals("Open"))) {
+			Object key = data.getClassKeys().get(rowIndex);
+			if (columnIndex == 3 && getValueAt(rowIndex, 1).equals("Open")) {
 				return false;
-			}
-			if (columnIndex == 5 && (getValueAt(rowIndex, 1).equals("Closed"))) {
+			} else if (columnIndex == 4) {
 				return false;
-			}
-			if (columnIndex == 4) {
+			} else if (columnIndex == 5 && getValueAt(rowIndex, 1).equals("Closed")) {
 				return false;
+			} else if (columnIndex == 5 && (STATION_TYPE_FORK.equals(data.getClassRefStation(key))
+					|| STATION_TYPE_CLASSSWITCH.equals(data.getClassRefStation(key))
+					|| STATION_TYPE_SCALER.equals(data.getClassRefStation(key))
+					|| STATION_TYPE_TRANSITION.equals(data.getClassRefStation(key)))) {
+				return false;
+			} else {
+				return true;
 			}
-			return true;
 		}
 
 		/**retrieves value to be displayed in table cell from the underlying model
@@ -559,15 +564,10 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 					return data.getClassName(key);
 				}
 				case (1): {
-					int type = data.getClassType(key);
-					if (type == CLASS_TYPE_CLOSED) {
-						return "Closed";
-					} else if (type == CLASS_TYPE_OPEN) {
-						return "Open";
-					}
+					return (data.getClassType(key) == CLASS_TYPE_OPEN) ? "Open" : "Closed";
 				}
 				case (2): {
-					return new Integer(data.getClassPriority(key));
+					return data.getClassPriority(key);
 				}
 				case (3): {
 					return data.getClassPopulation(key);
@@ -587,22 +587,22 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 			Object key = data.getClassKeys().get(rowIndex);
 			switch (columnIndex) {
 				case (0): {
-					data.setClassName((String) aValue, key);
+					data.setClassName(key, (String) aValue);
 					break;
 				}
 				case (1): {
-					if ((aValue).equals("Closed")) {
-						data.setClassType(CLASS_TYPE_CLOSED, key);
-					} else if ((aValue).equals("Open")) {
-						data.setClassType(CLASS_TYPE_OPEN, key);
+					if ((aValue).equals("Open")) {
+						data.setClassType(key, CLASS_TYPE_OPEN);
+					} else {
+						data.setClassType(key, CLASS_TYPE_CLOSED);
 					}
 					break;
 				}
 				case (2): {
 					try {
-						int priority = Integer.parseInt((String) aValue);
-						if (priority >= 0) {
-							data.setClassPriority(priority, key);
+						Integer priority = Integer.valueOf((String) aValue);
+						if (priority.intValue() >= 0) {
+							data.setClassPriority(key, priority);
 						}
 					} catch (NumberFormatException nfe) {
 					}
@@ -610,17 +610,14 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 				}
 				case (3): {
 					try {
-						Integer population = Integer.decode((String) aValue);
+						Integer population = Integer.valueOf((String) aValue);
 						if (population.intValue() >= 0) {
-							data.setClassPopulation(population, key);
+							data.setClassPopulation(key, population);
 						}
 					} catch (NumberFormatException nfe) {
 					}
 					break;
-				}/*case(5):{
-					data.setClassDistribution(aValue, key);
-					break;
-				}*/
+				}
 			}
 			/*if editing cell belongs to class type column, i must update population and
 			distribution cells*/

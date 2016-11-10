@@ -2161,22 +2161,14 @@ public class ExactModel implements ExactConstants  {
 			for (int k = 0; k < iterations; k++) {
 				//scan columns to get one value per column
 				for (int i = 0; i < retVal.length; i++) {
-					//scan cells of each column
-					for (int j = 0; j < throughput.length; j++) {
-						//throughput is ratio of specific throughput on specific num of visits
-						if (classTypes[i]==CLASS_OPEN) {
-							retVal[i][k] = throughput[j][i][k];
-							break;
-						} else {
-							//retVal[i][k] = throughput[j][i][k] / visits[j][i];
-
-							// Added by Cerotti
-							retVal[i][k] = throughput[ReferenceStation[i]][i][k];
-							break;
-						}
+					//throughput is ratio of specific throughput on specific num of visits
+					if (classTypes[i] == CLASS_OPEN) {
+						retVal[i][k] = throughput[0][i][k] / visits[0][i];
+					} else {
+						// Added by Cerotti
+						retVal[i][k] = throughput[ReferenceStation[i]][i][k];
 					}
 				}
-
 			}
 			return retVal;
 		}

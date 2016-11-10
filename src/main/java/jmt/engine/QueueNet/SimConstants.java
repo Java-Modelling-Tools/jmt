@@ -32,89 +32,92 @@ public class SimConstants {
 
 	//-------------------- SIMULATION MEASURE IDENTIFIERS ----------------------------//
 
-	/** Measure identifier: number of jobs in queue.   */
+	/** Measure identifier: queue length of the node */
 	public static final int QUEUE_LENGTH = 0;
 
-	/** Measure identifier: utilization of server.   */
-	public static final int UTILIZATION = 2;
+	/** Measure identifier: queue time of the node */
+	public static final int QUEUE_TIME = 1;
 
-	/** Measure identifier: throughput of server.   */
-	public static final int THROUGHPUT = 3;
+	/** Measure identifier: response time of the node */
+	public static final int RESPONSE_TIME = 2;
 
-	/** Measure identifier: response of the the node.   */
-	public static final int RESPONSE_TIME = 4;
+	/** Measure identifier: residence time of the node */
+	public static final int RESIDENCE_TIME = 3;
 
-	/** Measure identifier: residence time of the node.   */
-	public static final int RESIDENCE_TIME = 5;
+	/** Measure identifier: utilization of the node */
+	public static final int UTILIZATION = 4;
 
-	/** Measure identifier: queue time of the node.   */
-	public static final int QUEUE_TIME = 6;
+	/** Measure identifier: throughput of the node */
+	public static final int THROUGHPUT = 5;
 
-	/** Measure identifier: drop rate of the node. (Bertoli Marco)  */
-	public static final int DROP_RATE = 7;
+	/** Measure identifier: drop rate of the node */
+	public static final int DROP_RATE = 6;
 
-	/** Measure identifier: response time of the system (Bertoli Marco)  */
-	public static final int SYSTEM_RESPONSE_TIME = 8;
+	/** Measure identifier: response time of the system*/
+	public static final int SYSTEM_RESPONSE_TIME = 7;
 
-	/** Measure identifier: throughput of the system (Bertoli Marco)  */
-	public static final int SYSTEM_THROUGHPUT = 9;
+	/** Measure identifier: throughput of the system */
+	public static final int SYSTEM_THROUGHPUT = 8;
 
-	/** Measure identifier: number of jobs in the system (Bertoli Marco)  */
-	public static final int SYSTEM_JOB_NUMBER = 10;
+	/** Measure identifier: number of jobs in the system */
+	public static final int SYSTEM_NUMBER_OF_JOBS = 9;
 
-	/** Measure identifier: drop rate of the system (Bertoli Marco)  */
-	public static final int SYSTEM_DROP_RATE = 11;
+	/** Measure identifier: drop rate of the system */
+	public static final int SYSTEM_DROP_RATE = 10;
 
-	public static final int SYSTEM_POWER = 12;
+	/** Measure identifier: power of the system */
+	public static final int SYSTEM_POWER = 11;
 
+	/** Measure identifier: response time of the sink */
+	public static final int RESPONSE_TIME_PER_SINK = 12;
+
+	/** Measure identifier: throughput of the sink */
 	public static final int THROUGHPUT_PER_SINK = 13;
-
-	public static final int RESPONSE_TIME_PER_SINK = 14;
 
 	//-------------------- end SIMULATION MEASURE IDENTIFIERS -------------------------//
 
 	//-------------------- JOB LIST MEASURE IDENTIFIERS ----------------------------//
 
-	/** Measure identifier: number of jobs in queue.   */
+	/** Measure identifier: number of jobs in the list */
 	public static final int LIST_NUMBER_OF_JOBS = 21;
 
-	/** Measure identifier: throughput of server.   */
-	public static final int LIST_THROUGHPUT = 22;
+	/** Measure identifier: response time of the list */
+	public static final int LIST_RESPONSE_TIME = 22;
 
-	/** Measure identifier: response of the system until the section of the node.   */
+	/** Measure identifier: residence time of the list */
 	public static final int LIST_RESIDENCE_TIME = 23;
 
-	/** Measure identifier: time spent before reaching this node.   */
-	public static final int LIST_SYSTEM_RESPONSE_TIME = 24;
+	/** Measure identifier: throughput of the list */
+	public static final int LIST_THROUGHPUT = 24;
 
-	/** Measure identifier: residence of the system until the section of the node.   */
-	public static final int LIST_RESPONSE_TIME = 25;
-
-	/** Measure identifier: drop rate of a finite queue.   */
-	public static final int LIST_DROP_RATE = 26;
+	/** Measure identifier: drop rate of the list */
+	public static final int LIST_DROP_RATE = 25;
 
 	//-------------------- end JOB LIST MEASURE IDENTIFIERS -------------------------//
 
 	/** To be used for a blocking region measure */
 	public static final String NODE_TYPE_REGION = "region";
 
-	/** To be used for a station measure. This is default */
+	/** To be used for a station measure */
 	public static final String NODE_TYPE_STATION = "station";
 
-	/** Measure identifier: total weight of a FCRegion.   */
+	/** Measure identifier: total weight of a blocking region. */
 	public static final int FCR_TOTAL_WEIGHT = 27;
 
-	/** Measure identifier: memory occupation of a FCRegion.   */
+	/** Measure identifier: memory occupation of a blocking region. */
 	public static final int FCR_MEMORY_OCCUPATION = 28;
 
-	/** Measure identifier: response time of a F/J area */
-	public static final int FORK_JOIN_RESPONSE_TIME = 29;
+	/** Measure identifier: number of jobs in a fork/join section. */
+	public static final int FORK_JOIN_NUMBER_OF_JOBS = 29;
 
-	/** Measure identifier: number of jobs in a F/J area */
-	public static final int FORK_JOIN_NUMBER_OF_JOBS = 30;
+	/** Measure identifier: response time of a fork/join section. */
+	public static final int FORK_JOIN_RESPONSE_TIME = 30;
+
+	/** Measure identifier: firing throughput of a transition. */
+	public static final int FIRING_THROUGHPUT = 31;
 
 	public static boolean isFJMeasure(int measure) {
-		return measure == FORK_JOIN_RESPONSE_TIME || measure == FORK_JOIN_NUMBER_OF_JOBS;
+		return measure == FORK_JOIN_NUMBER_OF_JOBS || measure == FORK_JOIN_RESPONSE_TIME;
 	}
 
 }

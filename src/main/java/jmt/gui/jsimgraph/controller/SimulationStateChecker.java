@@ -34,7 +34,6 @@ import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
-import jmt.gui.common.CommonConstants;
 import jmt.gui.jsimgraph.JGraphMod.GraphicalQueueState;
 
 /**
@@ -50,16 +49,16 @@ public class SimulationStateChecker {
 
 	private double maxJobCount;
 
-	private Vector servers;
-	private Vector classes;
+	private Vector<Object> servers;
+	private Vector<Object> classes;
 	private Mediator mediator;
 	private Dispatcher_jSIMschema dispatcher;
 	//It implements a mapping between the graphical representation (the CommonModel Key) and the
-	//represenatation at simulation engine level. The key of the HashMap is the Key of
+	//representation at simulation engine level. The key of the HashMap is the Key of
 	//graphical representation
 	HashMap<Object, NetNode> serverMap;
 	//It implements a mapping between the graphical representation (the CommonModel Key) and the
-	//represenatation at simulation engine level. The key of the HashMap is the Key of
+	//representation at simulation engine level. The key of the HashMap is the Key of
 	//graphical representation
 	HashMap<Object, JobClass> classMap;
 	//Hashmap containing for each server (identified by the graphical Key) a
@@ -72,7 +71,7 @@ public class SimulationStateChecker {
 	HashMap<Object, Integer> singleServerContentQueues;
 	//HashMap containing for each class the value of utilization
 	HashMap<Object, Double> singleServerContentUtilizations;
-	//used to draw the queue andutilization state
+	//used to draw the queue and utilization state
 	GraphicalQueueState graphicalRepresentation;
 
 	int iteration;
@@ -86,38 +85,13 @@ public class SimulationStateChecker {
 		classMap = new HashMap<Object, JobClass>(0);
 		singleServerContentQueues = new HashMap<Object, Integer>(0);
 		singleServerContentUtilizations = new HashMap<Object, Double>(0);
+		servers = mediator.getStationDefinition().getStationKeysServer();
 		classes = mediator.getClassDefinition().getClassKeys();
-		Vector stationsTemp = mediator.getStationDefinition().getStationKeysNoSourceSink();
-		servers = new Vector(0, 1);
 		graphicalRepresentation = new GraphicalQueueState(mediator);
-
-		for (int i = 0; i < stationsTemp.size(); i++) {
-			if (mediator.getStationDefinition().getStationType(stationsTemp.get(i)).equals(CommonConstants.STATION_TYPE_SERVER)) {
-				servers.add(stationsTemp.get(i));
-			}
-		}
 		serversContent = new ModelSnapshot(servers, classes);
 		serversUtilization = new ModelSnapshot(servers, classes);
 		iteration = 1;
-
 	}
-
-	/*public void renew(Mediator mediator, Dispatcher_jSIMschema dispatcher) {
-	    reset();
-	    this.mediator = mediator;
-	    this.dispatcher = dispatcher;
-	    serverMap = new HashMap(0);
-	    classMap = new HashMap(0);
-	    singleServerContentQueues = new HashMap(0);
-	    classes = mediator.getClassDefinition().getClassKeys();
-	    Vector stationsTemp = mediator.getStationDefinition().getStationKeysNoSourceSink();
-	    servers = new Vector(0,1);
-	    for (int i=0;i<stationsTemp.size();i++) {
-	        if (mediator.getStationDefinition().getStationType(stationsTemp.get(i)).equals(JSIMConstants.STATION_TYPE_SERVER))
-	        servers.add(stationsTemp.get(i));
-	    }
-	    serversContent = new ModelSnapshot(servers,classes);
-	}*/
 
 	private void reset() {
 		maxJobCount = Double.MIN_VALUE;
@@ -130,10 +104,10 @@ public class SimulationStateChecker {
 		singleServerContentQueues = null;
 		singleServerContentUtilizations.clear();
 		singleServerContentUtilizations = null;
-		classes.removeAllElements();
-		classes = null;
 		servers.removeAllElements();
 		servers = null;
+		classes.removeAllElements();
+		classes = null;
 		serversContent.reset();
 		serversContent = null;
 		serversUtilization.reset();
@@ -196,9 +170,12 @@ public class SimulationStateChecker {
 			Object thisServerKey = servers.get(i);
 			// get the mapped NetNode ...
 			NetNode thisNode = serverMap.get(thisServerKey);
+			if (thisNode == null) {
+				continue;
+			}
+			// get the input section and the service section ...
 			NodeSection thisQueue = null;
 			NodeSection thisServer = null;
-			// get the input section and the service section ...
 			try {
 				thisQueue = thisNode.getSection(NodeSection.INPUT);
 				thisServer = thisNode.getSection(NodeSection.SERVICE);
@@ -209,9 +186,13 @@ public class SimulationStateChecker {
 			for (int j = 0; j < classes.size(); j++) {
 				try {
 					Object thisClassKey = classes.get(j);
+					JobClass thisClass = classMap.get(thisClassKey);
+					if (thisClass == null) {
+						continue;
+					}
 					if (thisQueue != null) {
 						// get the jobs of this class inside the queue
-						int jobsNumber = thisQueue.getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS, classMap.get(thisClassKey));
+						int jobsNumber = thisQueue.getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS, thisClass);
 						//if the job number is greater than the maximum update it
 						if (jobsNumber > maxJobCount) {
 							maxJobCount = jobsNumber;
@@ -221,7 +202,7 @@ public class SimulationStateChecker {
 					}
 					if (thisServer != null) {
 						//get the utilization for this class
-						double utilization = thisServer.getDoubleSectionProperty(NodeSection.PROPERTY_ID_UTILIZATION, classMap.get(thisClassKey));
+						double utilization = thisServer.getDoubleSectionProperty(NodeSection.PROPERTY_ID_UTILIZATION, thisClass);
 						//put the utilization this class inside the treemap
 						singleServerContentUtilizations.put(thisClassKey, new Double(utilization));
 					}
@@ -245,6 +226,9 @@ public class SimulationStateChecker {
 
 		for (int i = 0; i < servers.size(); i++) {
 			Object thisServerKey = servers.get(i);
+			if (!serverMap.containsKey(thisServerKey)) {
+				continue;
+			}
 			String thisServerName = mediator.getStationDefinition().getStationName(thisServerKey);
 			Map perServerMapQueues = (Map) this.serversContent.get(thisServerKey);
 			Map perServerMapUtilizations = (Map) this.serversUtilization.get(thisServerKey);
@@ -253,6 +237,9 @@ public class SimulationStateChecker {
 			System.out.println("        Queues state:");
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClassKey = classes.get(j);
+				if (!classMap.containsKey(thisClassKey)) {
+					continue;
+				}
 				String thisClassName = mediator.getClassDefinition().getClassName(thisClassKey);
 				String jobs = Integer.toString(((Integer) perServerMapQueues.get(thisClassKey)).intValue());
 				System.out.println("                Jobs of " + thisClassName + " at " + thisServerName + ": " + jobs);
@@ -260,6 +247,9 @@ public class SimulationStateChecker {
 			System.out.println("        Utilization state:");
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClassKey = classes.get(j);
+				if (!classMap.containsKey(thisClassKey)) {
+					continue;
+				}
 				String thisClassName = mediator.getClassDefinition().getClassName(thisClassKey);
 				String utilization = Float.toString(((Double) perServerMapUtilizations.get(thisClassKey)).floatValue());
 				System.out.println("                Utilization of " + thisClassName + " at " + thisServerName + ": " + utilization);
@@ -269,6 +259,9 @@ public class SimulationStateChecker {
 			int start = 0;
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClassKey = classes.get(j);
+				if (!classMap.containsKey(thisClassKey)) {
+					continue;
+				}
 				String thisClassName = mediator.getClassDefinition().getClassName(thisClassKey);
 				int degrees = (int) (((Double) perServerMapUtilizations.get(thisClassKey)).floatValue() * 360);
 				System.out.println("                " + thisClassName + " at " + thisServerName + ":    from " + start + "°" + " to "

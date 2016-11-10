@@ -31,6 +31,7 @@ import java.util.Properties;
 import jmt.engine.log.JSimLogger;
 import jmt.framework.data.MacroReplacer;
 import jmt.framework.gui.components.JMTFrame;
+import jmt.gui.common.distributions.Distribution;
 
 /**
  * <p>Title: Simulation Defaults</p>
@@ -72,31 +73,30 @@ public class Defaults implements CommonConstants {
 		def.setProperty("stationName", "Station");
 		def.setProperty("stationType", STATION_TYPE_SERVER);
 		def.setProperty("stationCapacity", "-1");
-		def.setProperty("stationServers", "1");
 		def.setProperty("stationStationQueueStrategy", QUEUE_STRATEGY_STATION_QUEUE);
 		def.setProperty("stationQueueStrategy", QUEUE_STRATEGY_FCFS);
+		def.setProperty("stationServers", "1");
 		def.setProperty("stationServiceStrategy", "jmt.gui.common.distributions.Exponential");
 		def.setProperty("stationDelayServiceStrategy", "jmt.gui.common.distributions.Exponential");
 		def.setProperty("stationRoutingStrategy", "jmt.gui.common.routingStrategies.RandomRouting");
-		//bpmn
-		def.setProperty("stationForkingStrategy", "jmt.gui.common.forkStrategies.ProbabilitiesFork");
+		def.setProperty("stationForkStrategy", "jmt.gui.common.forkStrategies.ProbabilitiesFork");
 		def.setProperty("stationJoinStrategy","jmt.gui.common.joinStrategies.NormalJoin");
 		def.setProperty("stationSemaphoreStrategy","jmt.gui.common.semaphoreStrategies.NormalSemaphore");
 
-		def.setProperty("stationCsRowMatrix", "jmt.gui.common.classSwitch.ClassSwitch");
-		def.setProperty("forkBlock", "-1");
-		def.setProperty("forkJobsPerLink", "1");
 		def.setProperty("dropRule", FINITE_DROP);
+		def.setProperty("forkBlock", "-1");
 		def.setProperty("isSimplifiedFork", "true");
+		def.setProperty("forkJobsPerLink", "1");
 
-		def.setProperty("storeCapacity", "-1");
-		def.setProperty("storeQueueStrategy", QUEUE_STRATEGY_RAND);
-		def.setProperty("storeDropRule", FINITE_DROP);
-		def.setProperty("transitionVector", "jmt.gui.common.transitionStrategies.TransitionVector");
-		def.setProperty("transitionServerNumber", "-1");
-		def.setProperty("transitionTimingStrategy", "jmt.gui.common.distributions.Exponential");
+		def.setProperty("placeCapacity", "-1");
+		def.setProperty("placeQueueCapacity", "-1");
+		def.setProperty("placeQueueStrategy", QUEUE_STRATEGY_RAND);
+		def.setProperty("placeDropRule", FINITE_DROP);
+		def.setProperty("transitionModeName", "Mode");
+		def.setProperty("transitionNumberOfServers", "-1");
+		def.setProperty("transitionFiringTimeDistribution", "jmt.gui.common.distributions.Exponential");
 		def.setProperty("transitionFiringPriority", "-1");
-		def.setProperty("transitionFiringWeight", "1");
+		def.setProperty("transitionFiringWeight", "1.0");
 
 		// Classes parameters defaults
 		def.setProperty("className", "Class");
@@ -136,14 +136,14 @@ public class Defaults implements CommonConstants {
 		def.setProperty("measurePrecision", "0.03");
 		def.setProperty("simulationSeed", "23000");
 		def.setProperty("isSimulationSeedRandom", "true");
-		def.setProperty("maxSimulationSamples", "1000000");
 		def.setProperty("simulationMaxDuration", "-1");
+		def.setProperty("maxSimulatedTime", "-1");
+		def.setProperty("maxSimulationSamples", "1000000");
 		def.setProperty("simulationPolling", "1");
 		// Francesco D'Aquino
 		def.setProperty("isWithAnimation", "true");
 		def.setProperty("representableClasses", "10");
 		// end Francesco D'Aquino
-		def.setProperty("maxSimulatedTime", "-1");
 		// GUI default parameters.
 		def.setProperty("JSIMWindowWidth", "1024");
 		def.setProperty("JSIMWindowHeight", "768");
@@ -226,6 +226,12 @@ public class Defaults implements CommonConstants {
 		Object newClass = null;
 		try {
 			newClass = Class.forName(className).newInstance();
+			if (parameterName.equals("classDistribution")) {
+				Distribution distribution = (Distribution) newClass;
+				if (distribution.hasMean()) {
+					distribution.setMean(distribution.getMean() * 2);
+				}
+			}
 		} catch (InstantiationException e) {
 		} catch (IllegalAccessException e) {
 		} catch (ClassNotFoundException e) {

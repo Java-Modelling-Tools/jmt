@@ -48,9 +48,6 @@ import jmt.gui.exact.table.ExactTableModel;
  */
 public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private StationDefinition data;
 	private ConnectionTable connTab;
@@ -64,7 +61,6 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 	 * Set up the panel contents and layout
 	 */
 	private void initComponents() {
-
 		connTab = new ConnectionTable();
 
 		//create margins for this panel.
@@ -111,9 +107,6 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 
 	private class ConnectionTable extends ExactTable {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		ConnectionTable() {
@@ -133,9 +126,6 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 		protected void createRenderers() {
 			final TableCellRenderer boolRend = getDefaultRenderer(Boolean.class);
 			setDefaultRenderer(Boolean.class, new DisabledCellRenderer() {
-				/**
-				 * 
-				 */
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -154,9 +144,6 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 
 		protected void createEditors() {
 			setDefaultEditor(Boolean.class, new DefaultCellEditor(new JCheckBox()) {
-				/**
-				 * 
-				 */
 				private static final long serialVersionUID = 1L;
 
 				@Override
@@ -170,6 +157,7 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 				}
 			});
 		}
+
 	}
 
 	/**
@@ -178,9 +166,6 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 	 */
 	private class ConnTableModel extends ExactTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		ConnTableModel() {
@@ -197,7 +182,7 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 		}
 
 		@Override
-		public Class getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			if (columnIndex >= 0) {
 				return Boolean.class;
 			} else {

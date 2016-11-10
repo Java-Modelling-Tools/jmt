@@ -20,22 +20,36 @@ package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
+import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.exact.table.ExactTable;
@@ -53,34 +67,32 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String DESCRIPTION =
-			"Each row of the table represents the firing outcome for a class, i.e. the number "
-			+ "of jobs released to each output station on firing the transition.";
-	private static final String NO_NONZERO_ROWS_NOTICE =
-			"Error: The firing table has no non-zero rows. When the transition fires, it will "
-			+ "not release any jobs for any classes.";
-	private static final String ZERO_ROWS_NOTICE =
-			"Warning: The fring table has zero rows. When the transition fires, it will not "
-			+ "release any jobs for classes represented by these rows.";
+	private static final String NO_NONZERO_VALUES_NOTICE =
+			"Warning: The firing table contains no non-zero values. When the transition fires, it "
+			+ "will not release any jobs for this mode.";
 
 	private boolean isInitComplete;
 
-	protected StationDefinition stationData;
-	protected ClassDefinition classData;
-	protected Object stationKey;
-	protected Vector<Object> classes;
-	protected Vector<Object> stationsOut;
+	private StationDefinition stationData;
+	private ClassDefinition classData;
+	private Object stationKey;
+	private Vector<Object> stationOutKeys;
+	private Vector<Object> classKeys;
+	private int currentModeIndex;
 
-	private OutcomeTable firingTable;
-	private JTextArea descriptionText;
+	private WarningScrollTable leftPanel;
+	private TitledBorder firingBorder;
+	private FiringOutcomeTable firingTable;
+	private JScrollPane firingPanel;
+	private JButton addModeButton;
+	private ModeTable modeTable;
 	private JTextArea noticeText;
 
 	public FiringSectionPanel(StationDefinition sd, ClassDefinition cd, Object sk) {
 		isInitComplete = false;
 		setData(sd, cd, sk);
 		initComponents();
-		updateDescription();
-		updateNotice();
+		addDataManagers();
 		isInitComplete = true;
 	}
 
@@ -88,41 +100,39 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		stationData = sd;
 		classData = cd;
 		stationKey = sk;
-		classes = classData.getClassKeys();
-		stationsOut = stationData.getForwardConnections(stationKey);
+		stationOutKeys = stationData.getForwardConnections(stationKey);
+		classKeys = classData.getClassKeys();
+		currentModeIndex = 0;
 		if (isInitComplete) {
+			leftPanel.clearCheckVectors();
+			leftPanel.addCheckVector(stationOutKeys);
+			leftPanel.addCheckVector(classKeys);
 			firingTable.tableChanged(new TableModelEvent(firingTable.getModel(), TableModelEvent.HEADER_ROW));
-			updateDescription();
-			updateNotice();
 		}
 	}
 
 	private void initComponents() {
 		setLayout(new BorderLayout());
 
-		JSplitPane mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		mainPanel.setDividerSize(4);
-		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		mainPanel.setResizeWeight(1.0);
+		String modeName = stationData.getTransitionModeName(stationKey, 0);
+		firingBorder = new TitledBorder(new EtchedBorder(), "Firing Outcome for " + modeName);
+		firingTable = new FiringOutcomeTable();
+		firingPanel = new JScrollPane(firingTable);
+		firingPanel.setBorder(firingBorder);
+		firingPanel.setMinimumSize(new Dimension(300, 240));
 
-		firingTable = new OutcomeTable();
-		JPanel firingTablePanel = new JPanel(new BorderLayout());
-		firingTablePanel.setBorder(new TitledBorder(new EtchedBorder(), "Firing Outcomes"));
-		firingTablePanel.add(new WarningScrollTable(firingTable, WARNING_CLASS_OUTGOING_ROUTING));
-		firingTablePanel.setMinimumSize(new Dimension(300, 240));
+		leftPanel = new WarningScrollTable(firingPanel, WARNING_CLASS_OUTGOING_ROUTING);
+		leftPanel.addCheckVector(stationOutKeys);
+		leftPanel.addCheckVector(classKeys);
 
-		JSplitPane informationPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		informationPanel.setDividerSize(3);
-		informationPanel.setResizeWeight(0.5);
-
-		descriptionText = new JTextArea("");
-		descriptionText.setOpaque(false);
-		descriptionText.setEditable(false);
-		descriptionText.setLineWrap(true);
-		descriptionText.setWrapStyleWord(true);
-		JScrollPane descriptionPanel = new JScrollPane(descriptionText);
-		descriptionPanel.setBorder(new TitledBorder(new EtchedBorder(), "Description"));
-		descriptionPanel.setMinimumSize(new Dimension(200, 120));
+		addModeButton = new JButton("Add Mode");
+		addModeButton.setMinimumSize(DIM_BUTTON_M);
+		modeTable = new ModeTable();
+		JPanel modePanel = new JPanel(new BorderLayout(5, 5));
+		modePanel.setBorder(new TitledBorder(new EtchedBorder(), "Modes"));
+		modePanel.setMinimumSize(new Dimension(200, 120));
+		modePanel.add(addModeButton, BorderLayout.NORTH);
+		modePanel.add(new JScrollPane(modeTable), BorderLayout.CENTER);
 
 		noticeText = new JTextArea("");
 		noticeText.setOpaque(false);
@@ -133,13 +143,53 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		noticePanel.setBorder(new TitledBorder(new EtchedBorder(), "Notice"));
 		noticePanel.setMinimumSize(new Dimension(200, 120));
 
-		informationPanel.setLeftComponent(descriptionPanel);
-		informationPanel.setRightComponent(noticePanel);
+		JSplitPane rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		rightPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+		rightPanel.setDividerSize(4);
+		rightPanel.setResizeWeight(1.0);
+		rightPanel.setLeftComponent(modePanel);
+		rightPanel.setRightComponent(noticePanel);
 
-		mainPanel.setLeftComponent(firingTablePanel);
-		mainPanel.setRightComponent(informationPanel);
+		JSplitPane mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		mainPanel.setDividerSize(4);
+		mainPanel.setResizeWeight(1.0);
+		mainPanel.setLeftComponent(leftPanel);
+		mainPanel.setRightComponent(rightPanel);
 
-		add(mainPanel, BorderLayout.CENTER);
+		add(mainPanel);
+	}
+
+	private void addDataManagers() {
+		addModeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				stopAllCellEditing();
+				int index = stationData.getTransitionModeListSize(stationKey);
+				stationData.addTransitionMode(stationKey, Defaults.get("transitionModeName") + (index + 1));
+				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+			}
+		});
+
+		modeTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				int index = modeTable.getSelectedRow();
+				if (index >= 0) {
+					stopAllCellEditing();
+					String modeName = stationData.getTransitionModeName(stationKey, index);
+					firingBorder.setTitle("Firing Condition for " + modeName);
+					currentModeIndex = index;
+					firingPanel.repaint();
+					updateNotice();
+				} else {
+					if (currentModeIndex >= stationData.getTransitionModeListSize(stationKey)) {
+						currentModeIndex--;
+					}
+					modeTable.setRowSelectionInterval(currentModeIndex, currentModeIndex);
+				}
+			}
+		});
 	}
 
 	/**
@@ -155,10 +205,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 	 */
 	@Override
 	public void lostFocus() {
-		TableCellEditor editor = firingTable.getCellEditor();
-		if (editor != null) {
-			editor.stopCellEditing();
-		}
+		stopAllCellEditing();
 	}
 
 	/**
@@ -166,44 +213,42 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 	 */
 	@Override
 	public void gotFocus() {
+		modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+		modeTable.setRowSelectionInterval(0, 0);
 	}
 
-	private void updateDescription() {
-		if (stationsOut.isEmpty() || classes.isEmpty()) {
-			descriptionText.setText("");
-			return;
+	private void stopAllCellEditing() {
+		TableCellEditor editor = null;
+		editor = firingTable.getCellEditor();
+		if (editor != null) {
+			editor.stopCellEditing();
 		}
-		descriptionText.setText(DESCRIPTION);
+		editor = modeTable.getCellEditor();
+		if (editor != null && editor != modeTable.getCellEditor(0, 1)) {
+			editor.stopCellEditing();
+		}
 	}
 
 	private void updateNotice() {
-		if (stationsOut.isEmpty() || classes.isEmpty()) {
+		if (stationOutKeys.isEmpty() || classKeys.isEmpty()) {
 			noticeText.setText("");
 			noticeText.setForeground(Color.BLACK);
 			return;
 		}
 
-		boolean hasNonzeroRows = false;
-		boolean hasZeroRows = false;
-		for (Object classKey : classes) {
-			boolean isZeroRow = true;
-			for (Object stationOutKey : stationsOut) {
-				int firingValue = stationData.getFiringOutcome(stationKey, classKey, stationOutKey).intValue();
+		boolean hasNonzeroValues = false;
+		for (Object stationInKey : stationOutKeys) {
+			for (Object classKey : classKeys) {
+				int firingValue = stationData.getFiringOutcome(stationKey, currentModeIndex,
+						stationInKey, classKey).intValue();
 				if (firingValue > 0) {
-					isZeroRow = false;
-					hasNonzeroRows = true;
+					hasNonzeroValues = true;
 				}
-			}
-			if (isZeroRow) {
-				hasZeroRows = true;
 			}
 		}
 
-		if (!hasNonzeroRows) {
-			noticeText.setText(NO_NONZERO_ROWS_NOTICE);
-			noticeText.setForeground(Color.RED);
-		} else if (hasZeroRows) {
-			noticeText.setText(ZERO_ROWS_NOTICE);
+		if (!hasNonzeroValues) {
+			noticeText.setText(NO_NONZERO_VALUES_NOTICE);
 			noticeText.setForeground(Color.BLUE);
 		} else {
 			noticeText.setText("");
@@ -211,12 +256,12 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		}
 	}
 
-	private class OutcomeTable extends ExactTable {
+	private class FiringOutcomeTable extends ExactTable {
 
 		private static final long serialVersionUID = 1L;
 
-		public OutcomeTable() {
-			super(new OutcomeTableModel());
+		public FiringOutcomeTable() {
+			super(new FiringOutcomeTableModel());
 			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			setRowHeight(ROW_HEIGHT);
 			setRowSelectionAllowed(false);
@@ -225,36 +270,36 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 
 	}
 
-	private class OutcomeTableModel extends ExactTableModel {
+	private class FiringOutcomeTableModel extends ExactTableModel {
 
 		private static final long serialVersionUID = 1L;
 
-		public OutcomeTableModel() {
-			rowHeaderPrototype = "Class10000";
-			prototype = "Station10000";
+		public FiringOutcomeTableModel() {
+			rowHeaderPrototype = "Station10000";
+			prototype = "Class10000";
 		}
 
 		@Override
 		public int getRowCount() {
-			return classes.size();
+			return stationOutKeys.size();
 		}
 
 		@Override
 		public int getColumnCount() {
-			return stationsOut.size();
+			return classKeys.size();
 		}
 
 		@Override
 		protected String getRowName(int rowIndex) {
-			return classData.getClassName(classes.get(rowIndex));
+			return stationData.getStationName(stationOutKeys.get(rowIndex));
 		}
 
 		@Override
 		public String getColumnName(int columnIndex) {
-			if (columnIndex >= stationsOut.size()) {
+			if (columnIndex >= classKeys.size()) {
 				return "";
 			}
-			return stationData.getStationName(stationsOut.get(columnIndex));
+			return classData.getClassName(classKeys.get(columnIndex));
 		}
 
 		@Override
@@ -282,14 +327,16 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			return stationData.getFiringOutcome(stationKey, classes.get(rowIndex), stationsOut.get(columnIndex));
+			return stationData.getFiringOutcome(stationKey, currentModeIndex,
+					stationOutKeys.get(rowIndex), classKeys.get(columnIndex));
 		}
 
 		@Override
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			try {
 				Integer ivalue = Integer.valueOf((String) value);
-				stationData.setFiringOutcome(stationKey, classes.get(rowIndex), stationsOut.get(columnIndex), ivalue);
+				stationData.setFiringOutcome(stationKey, currentModeIndex,
+						stationOutKeys.get(rowIndex), classKeys.get(columnIndex), ivalue);
 				updateNotice();
 			} catch (NumberFormatException e) {
 				// Aborts modification if String is invalid
@@ -298,8 +345,155 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public void clear(int row, int col) {
-			stationData.setFiringOutcome(stationKey, classes.get(row), stationsOut.get(col), Integer.valueOf(0));
+			stationData.setFiringOutcome(stationKey, currentModeIndex,
+					stationOutKeys.get(row), classKeys.get(col), Integer.valueOf(0));
 			updateNotice();
+		}
+
+	}
+
+	private class ModeTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+		private ButtonCellEditor deleteEditor;
+		private ButtonCellEditor deleteRenderer;
+
+		private AbstractAction deleteMode = new AbstractAction("") {
+
+			private static final long serialVersionUID = 1L;
+
+			{
+				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Delete"));
+				setFocusable(false);
+			}
+
+			public void actionPerformed(ActionEvent e) {
+				stopAllCellEditing();
+				int index = modeTable.getSelectedRow();
+				stationData.deleteTransitionMode(stationKey, index);
+				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+			}
+
+		};
+
+		public ModeTable() {
+			deleteEditor = new ButtonCellEditor(new JButton(deleteMode));
+			deleteRenderer = new DisabledButtonCellRenderer(new JButton(deleteMode));
+			setModel(new ModeTableModel());
+			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			getTableHeader().setReorderingAllowed(false);
+			sizeColumns();
+		}
+
+		private void sizeColumns() {
+			for (int i = 0; i < getColumnCount(); i++) {
+				getColumnModel().getColumn(i).setPreferredWidth(((ModeTableModel) getModel()).getColumnSize(i));
+			}
+		}
+
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+			if (column == 1) {
+				return deleteEditor;
+			} else {
+				return super.getCellEditor(row, column);
+			}
+		}
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+			if (column == 1) {
+				return deleteRenderer;
+			} else {
+				return super.getCellRenderer(row, column);
+			}
+		}
+
+	}
+
+	private class ModeTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+		private String[] columnNames = new String[] { "Mode", "" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
+		private int[] columnSizes = new int[] { 160, 40 };
+
+		@Override
+		public int getRowCount() {
+			return stationData.getTransitionModeListSize(stationKey);
+		}
+
+		@Override
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return columnClasses[columnIndex];
+		}
+
+		public int getColumnSize(int columnIndex) {
+			return columnSizes[columnIndex];
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			if (columnIndex == 1 && stationData.getTransitionModeListSize(stationKey) < 2) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				return stationData.getTransitionModeName(stationKey, rowIndex);
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				String modeName = (String) aValue;
+				stationData.setTransitionModeName(stationKey, rowIndex, modeName);
+				firingBorder.setTitle("Firing Outcome for " + modeName);
+				firingPanel.repaint();
+			}
+		}
+
+	}
+
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+		public DisabledButtonCellRenderer(JButton jbutt) {
+			super(jbutt);
+			button = jbutt;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			if (table.isCellEditable(row, column)) {
+				button.setEnabled(true);
+			} else {
+				button.setEnabled(false);
+			}
+			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
 
 	}

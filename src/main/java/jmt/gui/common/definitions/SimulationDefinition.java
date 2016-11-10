@@ -59,56 +59,60 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
  */
 public interface SimulationDefinition {
 
+	/**Code for queue length measure*/
+	public static final String MEASURE_QL = "Number of Customers";
+	/**Code for queue time measure*/
+	public static final String MEASURE_QT = "Queue Time";
 	/**Code for response time measure*/
 	public static final String MEASURE_RP = "Response Time";
 	/**Code for residence time measure*/
 	public static final String MEASURE_RD = "Residence Time";
-	/**Code for queue length measure*/
-	public static final String MEASURE_QL = "Number of Customers";
-	/**Code for average queue time measure*/
-	public static final String MEASURE_QT = "Queue Time";
-	/**Code for average utilization*/
+	/**Code for utilization measure*/
 	public static final String MEASURE_U = "Utilization";
-	/**Code for average throughput*/
+	/**Code for throughput measure*/
 	public static final String MEASURE_X = "Throughput";
-	/**Code for average system throughput*/
-	public static final String MEASURE_S_X = "System Throughput";
-	/**Code for average system response time*/
-	public static final String MEASURE_S_RP = "System Response Time";
-	/**Code for average system customer number*/
-	public static final String MEASURE_S_CN = "System Number of Customers";
-	/**Code for average drop rate*/
+	/**Code for drop rate measure*/
 	public static final String MEASURE_DR = "Drop Rate";
-	/**Code for average system drop rate*/
+	/**Code for system response time measure*/
+	public static final String MEASURE_S_RP = "System Response Time";
+	/**Code for system throughput measure*/
+	public static final String MEASURE_S_X = "System Throughput";
+	/**Code for system customer number measure*/
+	public static final String MEASURE_S_CN = "System Number of Customers";
+	/**Code for system drop rate measure*/
 	public static final String MEASURE_S_DR = "System Drop Rate";
-
-	public static final String MEASURE_S_SP = "System Power";
-
+	/**Code for system power measure*/
+	public static final String MEASURE_S_P = "System Power";
+	/**Code for response time per sink measure*/
+	public static final String MEASURE_RP_PER_SINK = "Response Time per Sink";
+	/**Code for throughput per sink measure*/
 	public static final String MEASURE_X_PER_SINK = "Throughput per Sink";
-
-	public static final String MEASURE_R_PER_SINK = "Response Time per Sink";
-
-	public static final String MEASURE_FCR_TOTAL_WEIGHT = "FCR Total Weight";
-
-	public static final String MEASURE_FCR_MEMORY_OCCUPATION = "FCR Memory Occupation";
-
-	public static final String MEASURE_FJ_RESPONSE_TIME = "Fork Join Response Time";
-
+	/**Code for FCR total weight measure*/
+	public static final String MEASURE_FCR_TW = "FCR Total Weight";
+	/**Code for FCR memory occupation measure*/
+	public static final String MEASURE_FCR_MO = "FCR Memory Occupation";
+	/**Code for FJ customer number measure*/
 	public static final String MEASURE_FJ_CN = "Fork Join Number of Customers";
+	/**Code for FJ response time measure*/
+	public static final String MEASURE_FJ_RP = "Fork Join Response Time";
+	/**Code for firing throughput measure*/
+	public static final String MEASURE_FX = "Firing Throughput";
 
 	/*------------------------------------------------------------------------------------------
 	------------------------------Parameters for measures definition----------------------------
 	--------------------------------------------------------------------------------------------*/
 
-	/**Adds a new measure for specified class and station (or region)
+	/**
+	 * Adds a new measure for specified class and station (or region)
 	 * @param type: code for measure type.
 	 * @param stationKey: specified station (or region) for measure
 	 * @param classKey: specified class
 	 * @return search key for new measure
-	 * */
+	 */
 	public Object addMeasure(String type, Object stationKey, Object classKey);
 
-	/**Adds a new measure for specified class and station (or region)
+	/**
+	 * Adds a new measure for specified class and station (or region)
 	 * @param type: code for measure type.
 	 * @param stationKey: specified station for measure
 	 * @param classKey: specified class
@@ -116,85 +120,90 @@ public interface SimulationDefinition {
 	 * @param precision: precision parameter for this measure
 	 * @param log: true to log the measure to CSV. False to avoid it.
 	 * @return search key for new measure
-	 * */
+	 */
 	public Object addMeasure(String type, Object stationKey, Object classKey, Double alpha, Double precision, boolean log);
 
-	/**Removes a measure from list, given its search key
+	/**
+	 * Removes a measure from list, given its search key
 	 * @param measureKey: search Key for measure to be removed
 	 */
 	public void removeMeasure(Object measureKey);
 
-	/**Returns list of measure search keys
+	/**
+	 * Returns list of measure search keys
 	 * @return Vector containing all of the measure search keys
 	 */
 	public Vector<Object> getMeasureKeys();
 
-	/**Returns type of measure, given measure search key
+	/**
+	 * Returns type of measure, given measure search key
 	 * @param measureKey: search key
 	 * @return measure type
 	 */
 	public String getMeasureType(Object measureKey);	
 
-	/**Sets type of parameter to be measured
+	/**
+	 * Sets type of parameter to be measured
 	 * @param newType new type for this measure
 	 * @param measureKey search key for this measure
 	 */
 	public void setMeasureType(String newType, Object measureKey);
 
-	/**Returns search key for class this measure refers to.
+	/**
+	 * Returns search key for class this measure refers to.
 	 * @param measureKey search key for measure
 	 * @return search key for class
 	 */
 	public Object getMeasureClass(Object measureKey);
 
-	/**Changes reference class for specified measure, given its search key
+	/**
+	 * Changes reference class for specified measure, given its search key
 	 * @param classKey new class search key
 	 * @param measureKey measure search key
 	 */
 	public void setMeasureClass(Object classKey, Object measureKey);
 
-	/**Returns search key for station a certain measure refers to.
+	/**
+	 * Returns search key for station a certain measure refers to.
 	 * @param measureKey search key for measure
 	 * @return search key for station.
 	 */
 	public Object getMeasureStation(Object measureKey);
 
-	/**Changes reference station for specified measure, given its search key
+	/**
+	 * Changes reference station for specified measure, given its search key
 	 * @param stationKey: search key for station this measure must be referred to.
 	 * @param measureKey: search key for measure.
 	 */
 	public void setMeasureStation(Object stationKey, Object measureKey);
 
-	/**returns value for alpha parameter of a specific measure, given its search key.
+	/**
+	 * Returns value for alpha parameter of a specific measure, given its search key.
 	 * @param measureKey search key for station
 	 * @return value of alpha parameter
 	 */
 	public Double getMeasureAlpha(Object measureKey);
 
-	/**Sets value for alpha parameter of a specific measure, given its search key.
+	/**
+	 * Sets value for alpha parameter of a specific measure, given its search key.
 	 * @param measureKey search key for station
 	 * @param alpha value of alpha parameter
 	 */
 	public void setMeasureAlpha(Double alpha, Object measureKey);
 
-	/**returns value for precision parameter of a specific measure, given its search key.
+	/**
+	 * Returns value for precision parameter of a specific measure, given its search key.
 	 * @param measureKey search key for station
 	 * @return value of precision parameter
 	 */
 	public Double getMeasurePrecision(Object measureKey);
 
-	/**Sets value for alpha parameter of a specific measure, given its search key.
+	/**
+	 * Sets value for alpha parameter of a specific measure, given its search key.
 	 * @param measureKey search key for station
 	 * @param precision value of alpha parameter
 	 */
 	public void setMeasurePrecision(Double precision, Object measureKey);
-
-	/**
-	 * Sets if measure should be logged
-	 * @param log true to log measure, false to avoid (default)
-	 * @param measureKey the key of the measure
-	 */
-	public void setMeasureLog(boolean log, Object measureKey);
 
 	/**
 	 * Tells if a measure should be logged
@@ -204,51 +213,66 @@ public interface SimulationDefinition {
 	public boolean getMeasureLog(Object measureKey);
 
 	/**
-	 * Tells if a given measure is global or local (i.e. if it is station independent
-	 * or station dependent)
-	 * <br>Author: Bertoli Marco
+	 * Sets if measure should be logged
+	 * @param log true to log measure, false to avoid (default)
+	 * @param measureKey the key of the measure
+	 */
+	public void setMeasureLog(boolean log, Object measureKey);
+
+	/**
+	 * Tells if a given measure is global
 	 * @param key search's key for given measure
 	 * @return true if measure is global
 	 */
 	public boolean isGlobalMeasure(Object key);
 
 	/**
-	 * Tells if the Measure is being calculated keeping the Sink as reference,
-	 * Is used for the performance indices of
-	 * ResponseTimePerSink and ThroughputPerSink.
-	 * @param key
-	 * @return
+	 * Tells if a given measure is for sinks only
+	 * @param key search's key for given measure
+	 * @return true if measure is for sinks only
 	 */
 	public boolean isSinkMeasure(Object key);
 
+	/**
+	 * Tells if a given measure is for blocking regions only
+	 * @param key search's key for given measure
+	 * @return true if measure is for blocking regions only
+	 */
 	public boolean isFCRMeasure(Object key);
 
+	/**
+	 * Tells if a given measure is for fork/join sections only
+	 * @param key search's key for given measure
+	 * @return true if measure is for fork/join sections only
+	 */
 	public boolean isFJMeasure(Object key);
 
 	/*------------------------------------------------------------------------------------------
 	------------------------------ Methods for preloading definition ---------------------------
 	--------------------------------------------------------------------------------------------*/
 
-	/**Sets number of jobs to be preloaded at specified station for specified class.
-	 * For closed classes, sum of number of preloaded jobs for a class above all stations
-	 * must be equal to class population, otherwise update is canceled.
-	 * @param jobs number of jobs to be preloaded
-	 * @param stationKey search key for station jobs must preloaded into.
-	 * @param classKey search key for class of jobs that must be preloaded.
-	 */
-	public void setPreloadedJobs(Integer jobs, Object stationKey, Object classKey);
-
-	/**Returns number of jobs set to be preloaded in specified station for specified class.
-	 * @param stationKey: station into which jobs must be preloaded.
-	 * @param classKey: class jobs to be preloaded belong to.
-	 * @return number of jobs to be preloaded.
+	/**
+	 * Returns number of preloaded jobs at specified station for specified class.
+	 * @param stationKey station at which preloaded jobs are preloaded.
+	 * @param classKey class to which preloaded jobs belong.
+	 * @return number of preloaded jobs.
 	 */
 	public Integer getPreloadedJobs(Object stationKey, Object classKey);
 
 	/**
-	 * Returns number of jobs totally allocated for specified class.
-	 * @param classKey class jobs to be preloaded belong to.
-	 * @return number of jobs totally to be preloaded.
+	 * Sets number of preloaded jobs at specified station for specified class.
+	 * For closed classes, total number of preloaded jobs for a class over all
+	 * stations must be equal to class population, otherwise update is canceled.
+	 * @param stationKey station at which preloaded jobs are preloaded.
+	 * @param classKey class to which preloaded jobs belong.
+	 * @param preload number of preloaded jobs.
+	 */
+	public void setPreloadedJobs(Object stationKey, Object classKey, Integer preload);
+
+	/**
+	 * Returns total number of preloaded jobs for specified class.
+	 * @param classKey class to which preloaded jobs belong.
+	 * @return total number of preloaded jobs.
 	 */
 	public Integer getPreloadedJobsNumber(Object classKey);
 
@@ -256,90 +280,96 @@ public interface SimulationDefinition {
 	 * This method is used to manage number of jobs for every class. If class is closed
 	 * all spare jobs will be allocated to its reference source, if for some reasons more
 	 * jobs are allocated than max population, they are reduced. Uses this method only
-	 * when strictly necessary as is can be slow if the model is big.
+	 * when strictly necessary as it can be slow if the model is big.
 	 */
 	public void manageJobs();
 
 	/*------------------------------------------------------------------------------------------
 	---------------------------- Parameters for simulation definition --------------------------
 	--------------------------------------------------------------------------------------------*/
-	/**Sets seed for simulation.
-	 * @param seed seed of simulation to be started.
-	 */
-	public void setSimulationSeed(Long seed);
-
-	/**Gets seed of simulation seed.
+	/**
+	 * Gets seed for simulation.
 	 * @return seed for simulation.
 	 */
 	public Long getSimulationSeed();
 
 	/**
-	 * Tells if random seed must be used for simulation
-	 * @return true iff random seed have to be used
+	 * Sets seed for simulation.
+	 * @param seed seed for simulation.
 	 */
-	public boolean getUseRandomSeed();
+	public void setSimulationSeed(Long seed);
 
 	/**
-	 * Sets if random simulation seed must be used (default: true)
-	 * @param value truth value
+	 * Tells if random seed is used.
+	 * @return true if random seed is used, false otherwise.
 	 */
-	public void setUseRandomSeed(boolean value);
+	public Boolean getUseRandomSeed();
 
-	/**Sets maximum duration for simulation in milliseconds.
-	 * @param durationSeconds seconds of duration of simulation
+	/**
+	 * Sets if random seed is used.
+	 * @param useRandomSeed true if random seed is used, false otherwise.
 	 */
-	public void setMaximumDuration(Double durationSeconds);
+	public void setUseRandomSeed(Boolean useRandomSeed);
 
-	/**Returns maximum duration for simulation, expressed in milliseconds.
-	 * @return milliseconds of maximum duration for simulation.
+	/**
+	 * Returns maximum duration for simulation in seconds.
+	 * @return seconds of maximum duration for simulation.
 	 */
 	public Double getMaximumDuration();
 
-	/**Sets maximum duration for simulation in the time unit implicitly used in the model.
-	 * @param duration maximum length of the simulation in the time unit implicitly used in the model
+	/**
+	 * Sets maximum duration for simulation in seconds.
+	 * @param durationSeconds seconds of maximum duration for simulation.
 	 */
-	public void setMaxSimulatedTime(Double duration);
+	public void setMaximumDuration(Double durationSeconds);
 
-	/**Returns maximum duration for simulation in the time unit implicitly used in the model.
-	 * @return maximum length of the simulation in the time unit implicitly used in the model
+	/**
+	 * Returns maximum duration for simulation in time units.
+	 * @return time units of maximum duration for simulation.
 	 */
 	public Double getMaxSimulatedTime();
 
 	/**
-	 * Gets polling interval for temporary measures
-	 * @return polling interval for temporary measures
+	 * Sets maximum duration for simulation in time units.
+	 * @param duration time units of maximum duration for simulation.
 	 */
-	public double getPollingInterval();
+	public void setMaxSimulatedTime(Double duration);
 
 	/**
-	 * Sets polling interval for temporary measures
-	 * @param pollingInterval polling interval for temporary measures
-	 */
-	public void setPollingInterval(double pollingInterval);
-
-	/**
-	 * Sets maximum number of simulation samples
-	 * @param maxSamples maximum number of simulation samples
-	 */
-	public void setMaxSimulationSamples(Integer maxSamples);
-
-	/**
-	 * Returns maximum number of simulation samples
-	 * @return maximum number of simulation samples
+	 * Returns maximum number of simulation samples.
+	 * @return maximum number of simulation samples.
 	 */
 	public Integer getMaxSimulationSamples();
 
 	/**
-	 * Tells if statistic check was disabled as simulation stopping criteria
-	 * @return the disableStatistic
+	 * Sets maximum number of simulation samples.
+	 * @param maxSamples maximum number of simulation samples.
+	 */
+	public void setMaxSimulationSamples(Integer maxSamples);
+
+	/**
+	 * Tells if statistic check is disabled.
+	 * @return true if statistic check is disabled, false otherwise.
 	 */
 	public Boolean getDisableStatistic();
 
 	/**
-	 * Sets if statistic check was disabled as simulation stopping criteria
-	 * @param disableStatistic the disableStatistic to set
+	 * Sets if statistic check is disabled.
+	 * @param disableStatistic true if statistic check is disabled, false otherwise.
 	 */
 	public void setDisableStatistic(Boolean disableStatistic);
+
+	/**
+	 * Returns polling interval for temporary measures.
+	 * @return polling interval for temporary measures.
+	 */
+	public Double getPollingInterval();
+
+	/**
+	 * Sets polling interval for temporary measures.
+	 * @param pollingInterval polling interval for temporary measures.
+	 */
+	public void setPollingInterval(Double pollingInterval);
 
 	// --- Methods to manage simulation results -- Bertoli Marco --------------------------------------------
 	/**
@@ -356,52 +386,46 @@ public interface SimulationDefinition {
 
 	/**
 	 * Tells if current model contains simulation results
-	 * @return true iff <code>getSimulationResults()</code> returns a non-null object
+	 * @return true if <code>getSimulationResults()</code> returns a non-null object
 	 */
 	public boolean containsSimulationResults();
 	// ------------------------------------------------------------------------------------------------------
 
-	// -------------------- Francesco D'Aquino -----------------------------------
-
 	/**
-	 * Return true if queue animation is enabled
+	 * Tells if queue animation is enabled
 	 * @return true if the animation is enabled
 	 */
 	public boolean isAnimationEnabled();
 
 	/**
-	 * Enable or disable queue animation
-	 * @param isEnabled - set it to true to enable queue animation
+	 * Enable / disable queue animation
+	 * @param enabled - set it to true to enable queue animation
 	 */
 	public void setAnimationEnabled(boolean isEnabled);
 
 	/**
-	 * Checks if the parametric analysis has been enabled
-	 * @return true if the parametric analysis has been enabled
+	 * Tells if parametric analysis is enabled
+	 * @return true if parametric analysis is enabled
 	 */
 	public boolean isParametricAnalysisEnabled();
 
 	/**
 	 * Enable / disable parametric analysis
-	 * @param enabled
+	 * @param enabled - set it to true to enable parametric analysis
 	 */
 	public void setParametricAnalysisEnabled(boolean enabled);
 
 	/**
-	 * Gets the parametricAnalysisModel if parametric analysis was enabled,
-	 * null otherwise
-	 * @return the parametricAnalysisModel if parametric analysis was enabled,
-	 *         null otherwise
+	 * Returns the ParametricAnalysisModel
+	 * @return the parametricAnalysisModel
 	 */
 	public ParametricAnalysisDefinition getParametricAnalysisModel();
 
 	/**
-	 * Sets the parametric analysis definition
-	 * @param pad the parametric analysis definition to be set
+	 * Sets the ParametricAnalysisModel
+	 * @param pad the parametricAnalysisModel to be set
 	 */
 	public void setParametricAnalysisModel(ParametricAnalysisDefinition pad);
-
-	// -------------------- end Francesco D'Aquino --------------------------------
 
 	/**
 	 * Tells model that some data has been changed and need to be saved. This

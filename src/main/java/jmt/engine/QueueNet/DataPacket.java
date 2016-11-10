@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,64 +18,40 @@
 
 package jmt.engine.QueueNet;
 
-import java.util.HashMap;
-import java.util.Set;
-
 /**
  * <p>Title: Data Packet</p>
- * <p>Description: This class implements the data packet.</p>
+ * <p>Description: This interface defines the data packet.</p>
  *
  * @author Lulai Zhu
  * Date: 15-07-2016
  * Time: 21.00.00
  */
-public class DataPacket {
+public interface DataPacket {
 
-	/** FIELD ID: Reference class field.*/
-	public static final int FIELD_REFERENCE_CLASS = 0x0000;
-	/** FIELD ID: Job number field.*/
-	public static final int FIELD_JOB_NUMBER = 0x0001;
+	/** PACKET SIZE: Enabling packet.*/
+	public static final int PACKET_SIZE_ENABLING = 2;
+	/** PACKET SIZE: Timing packet.*/
+	public static final int PACKET_SIZE_TIMING = 5;
+	/** PACKET SIZE: Firing packet.*/
+	public static final int PACKET_SIZE_FIRING = 4;
+
+	/** FIELD ID: Mode index field.*/
+	public static final int FIELD_MODE_INDEX = 0;
 	/** FIELD ID: Enabling degree field.*/
-	public static final int FIELD_ENABLING_DEGREE = 0x0002;
+	public static final int FIELD_ENABLING_DEGREE = 1;
 	/** FIELD ID: Firing delay field.*/
-	public static final int FIELD_FIRING_DELAY = 0x0003;
+	public static final int FIELD_FIRING_DELAY = 1;
+	/** FIELD ID: Total lifetime field.*/
+	public static final int FIELD_TOTAL_LIFETIME = 1;
 	/** FIELD ID: Firing priority field.*/
-	public static final int FIELD_FIRING_PRIORITY = 0x0004;
+	public static final int FIELD_FIRING_PRIORITY = 2;
+	/** FIELD ID: Fork job info field.*/
+	public static final int FIELD_FORK_JOB_INFO = 2;
 	/** FIELD ID: Firing weight field.*/
-	public static final int FIELD_FIRING_WEIGHT = 0x0005;
+	public static final int FIELD_FIRING_WEIGHT = 3;
+	/** FIELD ID: Fork job num field.*/
+	public static final int FIELD_FORK_JOB_NUM = 3;
 	/** FIELD ID: Timing token field.*/
-	public static final int FIELD_TIMING_TOKEN = 0x0006;
-	/** FIELD ID: Total time field.*/
-	public static final int FIELD_TOTAL_LIFETIME = 0x0007;
-
-	private HashMap<Integer, Object> packet;
-
-	public DataPacket() {
-		packet = new HashMap<Integer, Object>(8, 1.0f);
-	}
-
-	public int size() {
-		return packet.size();
-	}
-
-	public boolean isEmpty() {
-		return packet.isEmpty();
-	}
-
-	public boolean containsField(int field) {
-		return packet.containsKey(Integer.valueOf(field));
-	}
-
-	public Set<Integer> fieldSet() {
-		return packet.keySet();
-	}
-
-	public Object getData(int field) {
-		return packet.get(Integer.valueOf(field));
-	}
-
-	public void setData(int field, Object data) {
-		packet.put(Integer.valueOf(field), data);
-	}
+	public static final int FIELD_TIMING_TOKEN = 4;
 
 }

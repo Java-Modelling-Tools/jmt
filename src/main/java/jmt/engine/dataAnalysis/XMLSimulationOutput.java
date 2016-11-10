@@ -77,7 +77,7 @@ import org.w3c.dom.Element;
 public class XMLSimulationOutput extends SimulationOutput {
 
 	private static final String SEPARATOR = System.getProperty("file.separator");
-	final static boolean DEBUG = false;
+	private static final boolean DEBUG = false;
 
 	private JSimLogger logger = JSimLogger.getLogger();
 
@@ -204,17 +204,20 @@ public class XMLSimulationOutput extends SimulationOutput {
 		case SimConstants.QUEUE_TIME:
 			typeName = "Queue Time";
 			break;
+		case SimConstants.RESPONSE_TIME:
+			typeName = "Response Time";
+			break;
+		case SimConstants.RESIDENCE_TIME:
+			typeName = "Residence Time";
+			break;
 		case SimConstants.UTILIZATION:
 			typeName = "Utilization";
 			break;
 		case SimConstants.THROUGHPUT:
 			typeName = "Throughput";
 			break;
-		case SimConstants.RESIDENCE_TIME:
-			typeName = "Residence Time";
-			break;
-		case SimConstants.RESPONSE_TIME:
-			typeName = "Response Time";
+		case SimConstants.DROP_RATE:
+			typeName = "Drop Rate";
 			break;
 		case SimConstants.SYSTEM_RESPONSE_TIME:
 			typeName = "System Response Time";
@@ -222,35 +225,35 @@ public class XMLSimulationOutput extends SimulationOutput {
 		case SimConstants.SYSTEM_THROUGHPUT:
 			typeName = "System Throughput";
 			break;
-		case SimConstants.SYSTEM_JOB_NUMBER:
+		case SimConstants.SYSTEM_NUMBER_OF_JOBS:
 			typeName = "System Number of Customers";
-			break;
-		case SimConstants.DROP_RATE:
-			typeName = "Drop Rate";
 			break;
 		case SimConstants.SYSTEM_DROP_RATE:
 			typeName = "System Drop Rate";
 			break;
 		case SimConstants.SYSTEM_POWER:
 			typeName = "System Power";
-			break;
-		case SimConstants.THROUGHPUT_PER_SINK:
-			typeName = "Throughput per Sink";
-			break;				
+			break;			
 		case SimConstants.RESPONSE_TIME_PER_SINK:
 			typeName = "Response Time per Sink";
 			break;
+		case SimConstants.THROUGHPUT_PER_SINK:
+			typeName = "Throughput per Sink";
+			break;	
 		case SimConstants.FCR_TOTAL_WEIGHT:
 			typeName = "FCR Total Weight";
 			break;
 		case SimConstants.FCR_MEMORY_OCCUPATION:
 			typeName = "FCR Memory Occupation";
 			break;
+		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+			typeName = "Fork Join Number of Customers";
+			break;
 		case SimConstants.FORK_JOIN_RESPONSE_TIME:
 			typeName = "Fork Join Response Time";
 			break;
-		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-			typeName = "Fork Join Number of Customers";
+		case SimConstants.FIRING_THROUGHPUT:
+			typeName = "Firing Throughput";
 			break;
 		}
 
@@ -328,7 +331,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 							el.setAttribute("class", className);
 
 							int arrivedJobs = ns.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS);
-							int droppedJobs = ((BlockingQueue) ns).getDroppedJobPerClass(c);
+							int droppedJobs = ((BlockingQueue) ns).getDroppedJobsPerClass(c);
 
 							double drop_percentage = (double) droppedJobs / arrivedJobs;
 

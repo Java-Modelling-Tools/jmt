@@ -32,29 +32,22 @@ import jmt.gui.common.definitions.ClassDefinition;
  *         Time: 9.44.32
  */
 public interface JmodelClassDefinition extends ClassDefinition {
-	/**Code for class color search*/
-	public int CLASS_COLOR = 5;
-	public int REFERENCE_SOURCE_NAME = 6;
 
 	/**
-	 * Creates a new Class with default parameters and default generated name
-	 * @return search key for newly created class
+	 * Adds a new class to the model and sets all the parameters by default.
+	 * @return search key for the new class.
 	 */
 	public Object addClass();
 
 	/**
-	 * Sets the color of a class
-	 * @param key search key for class
-	 * @param color Color that should be associated with given class
-	 */
-	public void setClassColor(Object key, Color color);
-
-	/**
-	 * Returns a class color
-	 * @param key search key for class
-	 * @return Color associated with given class, or null if class does not exist
+	 * Returns color of the class, given the search key.
 	 */
 	public Color getClassColor(Object key);
+
+	/**
+	 * Sets color of the class, given the search key.
+	 */
+	public void setClassColor(Object key, Color color);
 
 	/**
 	 * Returns a serialized object for a given class, used to support cut/paste,

@@ -96,7 +96,7 @@ public class Measure {
 	 * any more samples). A measure is marked as dead when it reaches maxDeadState.
 	 */
 	private int deadState = 0;
-	private int maxDeadState = 4;
+	private int maxDeadState = 3;
 
 	//-------SCALE FACTOR FOR RESIDENCE TIME MEASURES------------//
 
@@ -496,9 +496,10 @@ public class Measure {
 			String referenceNodeName = jobClass.getReferenceNodeName();
 			int visitsReferenceNode, visitsThisNode;
 			try {
-				if (referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
-						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
-						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_SCALER)) {
+				if (referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
+						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
+						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_SCALER)
+						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
 					visitsReferenceNode = 0;
 				} else {
 					NetNode referenceNode = network.getNode(referenceNodeName);
@@ -507,6 +508,7 @@ public class Measure {
 					visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobClass);
 				}
 				visitsReferenceNode += network.getSwitchedJobs(jobClass);
+				visitsReferenceNode -= network.getConsumedJobs(jobClass);
 				visitsReferenceNode += network.getProducedJobs(jobClass);
 
 				//visits to this node
@@ -525,7 +527,7 @@ public class Measure {
 					// the jobs dropped by the BlockingQueue itself,
 					// because they have been counted
 					// in arrived jobs
-					visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobPerClass(jobClass.getId());
+					visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobsPerClass(jobClass.getId());
 				}
 
 				visitRatio = (double) (visitsThisNode) / (visitsReferenceNode - droppedJobs);
@@ -556,6 +558,7 @@ public class Measure {
 						visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobC);
 					}
 					//visitsReferenceNode += network.getSwitchedJobs(jobC);
+					visitsReferenceNode -= network.getConsumedJobs(jobC);
 					visitsReferenceNode += network.getProducedJobs(jobC);
 
 					//visits to this node
@@ -574,7 +577,7 @@ public class Measure {
 						// the jobs dropped by the BlockingQueue itself,
 						// because they have been counted
 						// in arrived jobs
-						visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobPerClass(jobC.getId());
+						visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobsPerClass(jobC.getId());
 					}
 
 					visitsReferenceNodeSum += visitsReferenceNode;

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import jmt.common.AutoCheck;
  */
 public abstract class SemaphoreStrategy implements AutoCheck {
 
-	public abstract int getSemaphoreThres();
+	public abstract int getThreshold();
 
 	public boolean check() {
 		return true;

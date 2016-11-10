@@ -98,7 +98,7 @@ public class CircularEventQueue implements EventQueue {
 		if (size != 0) {
 			if (index == start) {
 				size++;
-				if (start != 0) {//insert the elemnt at start -1;
+				if (start != 0) {//insert the element at start -1;
 					start--;
 					data[start] = event;
 				} else {
@@ -137,12 +137,12 @@ public class CircularEventQueue implements EventQueue {
 						start = 0;
 						//the new element is considered inserted(see next instruction)
 						end = size - 1;
-						//insert the elemnt in last position
+						//insert the element in last position
 						data[end] = event;
 					} else {
 						//move data at the start of the array to find place
 						System.arraycopy(data, start, data, 0, size - 1);
-						//insert the elemnt in last position
+						//insert the element in last position
 						start = 0;
 						end = size - 1;
 						data[end] = event;

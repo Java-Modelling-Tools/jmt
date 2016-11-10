@@ -34,15 +34,15 @@ public class BigRational implements Comparable<BigRational> {
     /**
      * This is a variable equal to zero.
      */
-    public final static BigRational ZERO = new BigRational(0);
+    public static final BigRational ZERO = new BigRational(0);
     /**
      * This is a variable equal to one.
      */
-    public final static BigRational ONE = new BigRational(1);
+    public static final BigRational ONE = new BigRational(1);
     /**
      * This is a variable equal to minus one.
      */
-    public final static BigRational MINUS_ONE = new BigRational(-1);
+    public static final BigRational MINUS_ONE = new BigRational(-1);
     private BigInteger num;   // the numerator
     private BigInteger den;   // the denominator
     private boolean undefined = false;

@@ -48,9 +48,7 @@ public class NewModel extends AbstractJmodelAction {
 		super("New", "New", mediator);
 		putValue(SHORT_DESCRIPTION, "Create a new model");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
-		// 25/09/03 - Massimo Cattai //////////////////////////////////////////
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_MASK));
-		// 25/09/03 - end /////////////////////////////////////////////////////
 	}
 
 	/**

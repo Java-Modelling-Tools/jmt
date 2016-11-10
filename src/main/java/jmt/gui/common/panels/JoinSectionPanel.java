@@ -51,7 +51,6 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 
 	private JoinSelectionTable joinStrategies;
 	private JoinEditor joinEditor;
-	//private RoutingProbabilitiesEditor routingProbEditor;
 
 	/** Used to display classes with icon */
 	protected ImagedComboBoxCellEditorFactory classEditor;
@@ -71,7 +70,6 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		classEditor.setData(cd);
 	}
 
-	//Francesco D'Aquino
 	public void setSelectedClass(Object classKey) {
 		Vector<Object> temp = classData.getClassKeys();
 		int i;
@@ -91,7 +89,6 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		//layout of main panel
 		WarningScrollTable jsp = new WarningScrollTable(joinStrategies, WARNING_CLASS);
-		//routing strategy selector on the left, routing probabilities editor on the right
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Join Strategies"));
 		mainPanel.setResizeWeight(1.0); // Gives more space to left component
 		jsp.setMinimumSize(new Dimension(200, 100));

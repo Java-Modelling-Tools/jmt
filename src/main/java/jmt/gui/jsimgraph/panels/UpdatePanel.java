@@ -32,33 +32,28 @@ public class UpdatePanel extends WizardPanel {
 	private static final long serialVersionUID = 1L;
 
 	private JProgressBar progress;
-
 	private JButton download;
 	private JButton cancel;
-
 	private List<TemplateData> data;
 	private DefaultPackageTable defaultPackageTable;
-
 	private JPanel parent;
-        
-        private TemplatePanel panel;
-	
+	private TemplatePanel panel;
+
 	public UpdatePanel(List<TemplateData> data) {
 		this.data = data;
 		parent = this;
-                this.panel = null;
+		this.panel = null;
 		initComponents();
 	}
 
-        UpdatePanel(TemplatePanel panel, List<TemplateData> data) {
-                this.data = data;
+	UpdatePanel(TemplatePanel panel, List<TemplateData> data) {
+		this.data = data;
 		parent = this;
-                this.panel = panel;
+		this.panel = panel;
 		initComponents();
-        }
+	}
 
 	public void initComponents() {
-
 		progress = new JProgressBar();
 		progress.setStringPainted(true);
 		progress.setString("0%");
@@ -68,7 +63,7 @@ public class UpdatePanel extends WizardPanel {
 		progress.setPreferredSize(new Dimension(200, 25));
 		download.setPreferredSize(new Dimension(110, 25));
 		cancel.setPreferredSize(new Dimension(110, 25));
-		
+
 		download.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				progress.setValue(0);
@@ -84,7 +79,7 @@ public class UpdatePanel extends WizardPanel {
 				}
 			}
 		});
-		
+
 		cancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				SwingUtilities.getWindowAncestor(parent).setVisible(false);
@@ -130,26 +125,24 @@ public class UpdatePanel extends WizardPanel {
 			setRowHeight(TemplateConstants.CELL_HEIGHT);
 			getTableHeader().setReorderingAllowed(false);
 		}
-		
+
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
 				getColumnModel().getColumn(i).setPreferredWidth(((DefaultPackageTableModel) getModel()).columnSizes[i]);
 			}
 		}
-		
+
 		@Override
 		public String getToolTipText(MouseEvent e) {
 			String tip = null;
-            Point p = e.getPoint();
-            int rowIndex = rowAtPoint(p);
-
-            try {
-                tip = data.get(rowIndex).getToolTip();
-            } catch (Exception e1) {
-            	e1.printStackTrace();
-            }
-
-            return tip;
+			Point p = e.getPoint();
+			int rowIndex = rowAtPoint(p);
+			try {
+				tip = data.get(rowIndex).getToolTip();
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+			return tip;
 		}
 
 	}
@@ -159,10 +152,8 @@ public class UpdatePanel extends WizardPanel {
 		private static final long serialVersionUID = 1L;
 
 		String[] columnNames = { "Template" };
-		Class<?>[] columnClass = { String.class, Boolean.class };
-		
+		Class<?>[] columnClass = { String.class };
 		public int[] columnSizes = new int[] { 520 };
-
 		boolean[] flags = new boolean[data.size()];
 
 		public DefaultPackageTableModel() {
@@ -201,7 +192,7 @@ public class UpdatePanel extends WizardPanel {
 
 		@Override
 		public void setValueAt(Object value, int row, int col) {
-			
+
 		}
 
 	}
@@ -217,32 +208,23 @@ public class UpdatePanel extends WizardPanel {
 		@Override
 		protected Boolean doInBackground() throws Exception {
 			for (int i = 0; i < data.size(); i++) {
-					
-                                String file = data.get(i).getUpdateAddress();
-                                String fileName = data.get(i).getFileName();
+				String file = data.get(i).getUpdateAddress();
+				String fileName = data.get(i).getFileName();
 
-                                try {
-                                        if (fileName != null) {
-                                                fileName = TemplateConstants.TEMPLATE_FOLDER
-                                                                + fileName;
-                                                TemplateFileOperation.download(file, fileName,
-                                                                TemplateConstants.CONN_TIMEOUT,
-                                                                TemplateConstants.READ_TIMEOUT);
-                                        } else {
-                                                throw new Exception();
-                                        }
-                                } catch (Exception e) {
-                                        JOptionPane.showMessageDialog(parent,
-                                                        "<html> Error: Unable to download <br>\n"
-                                                                        + file);
-                                }
+				try {
+					if (fileName != null) {
+						fileName = TemplateConstants.TEMPLATE_FOLDER + fileName;
+						TemplateFileOperation.download(file, fileName, TemplateConstants.CONN_TIMEOUT, TemplateConstants.READ_TIMEOUT);
+					} else {
+						throw new Exception();
+					}
+				} catch (Exception e) {
+					JOptionPane.showMessageDialog(parent, "<html> Error: Unable to download <br>\n" + file);
+				}
 				publish(i + 1);
 			}
-
 			Thread.sleep(300);
-
 			publish(-1);
-
 			return null;
 		}
 
@@ -253,14 +235,13 @@ public class UpdatePanel extends WizardPanel {
 					progress.setValue(value);
 					progress.setString(value + "%");
 				}
-
 				if (task == -1) {
 					download.setEnabled(true);
 					cancel.setEnabled(true);
 					SwingUtilities.getWindowAncestor(parent).setVisible(false);
-                                        if (panel != null) {
-                                                panel.updateTemplates();
-                                        }
+					if (panel != null) {
+						panel.updateTemplates();
+					}
 				}
 			}
 		}

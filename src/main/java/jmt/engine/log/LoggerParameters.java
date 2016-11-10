@@ -33,10 +33,10 @@ public class LoggerParameters {
 	public String path;
 
 	/* Constants for name passing */
-	public final static int LOGGER_AR_ASK = 0;
-	public final static int LOGGER_AR_REPLACE = 1;
-	public final static int LOGGER_AR_APPEND = 2;
-	public final static String GLOBALLOGNAME = "global.csv";
+	public static final int LOGGER_AR_ASK = 0;
+	public static final int LOGGER_AR_REPLACE = 1;
+	public static final int LOGGER_AR_APPEND = 2;
+	public static final String GLOBALLOGNAME = "global.csv";
 
 	/**
 	 * Creates a logger with default parameters.

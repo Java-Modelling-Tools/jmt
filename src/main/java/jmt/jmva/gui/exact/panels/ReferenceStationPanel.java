@@ -308,11 +308,13 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			this.newValue = null;
 			this.addPropertyChangeListener( this );
 			autoResizeMode = AUTO_RESIZE_SUBSEQUENT_COLUMNS;
-                        setRowHeight(CommonConstants.ROW_HEIGHT);
-                        setDisplaysScrollLabels(true);			
+			setRowHeight(CommonConstants.ROW_HEIGHT);
+
+			setDisplaysScrollLabels(true);			
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
 			setClipboardTransferEnabled(true);
+
 			help.addHelp(this,
 					"Click or drag to select cells; to edit data single-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreColumnsLabel, "There are more classes: scroll right to see them");
@@ -322,7 +324,6 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			help.addHelp(tableHeader, "Click, SHIFT-click or drag to select columns");
 			rowHeader.setToolTipText(null);
 			help.addHelp(rowHeader, "Click, SHIFT-click or drag to select rows");
-						
 		}
 
 		/**

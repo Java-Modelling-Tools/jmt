@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat.workloadAnalysis.panels;
 
 import java.awt.BorderLayout;
@@ -39,10 +57,8 @@ import jmt.gui.jwat.workloadAnalysis.clustering.kMean.panels.KMeansOptPanel;
 
 public class ClusterPanel extends WizardPanel implements CommonConstants, JWATConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
 	private final String CLUSTERING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Clustering" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Select clustering algorithm, set options and press solve" + HTML_FONT_NOR_END + HTML_END;
 	private final String[] clusteringString = { "k-Means", "Fuzzy k-Means" };
@@ -55,8 +71,6 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 	private ModelWorkloadAnalysis model = null;
 	private WorkloadAnalysisSession session = null;
 
-	private boolean canGoOn;
-
 	private MainJwatWizard parent;
 	private HoverHelp help = null;
 
@@ -65,7 +79,6 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 		this.model = (ModelWorkloadAnalysis) parent.getModel();
 		this.session = (WorkloadAnalysisSession) parent.getSession();
 		this.help = parent.getHelp();
-		canGoOn = false;
 		initPanel();
 	}
 
@@ -115,8 +128,6 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 		Font f = varList.getFont();
 		varList.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));
 		varList.setBorder(BorderFactory.createLoweredBevelBorder());
-		//varList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		//varList.setPreferredSize(new Dimension(140, 380));
 		varpanel.add(new JScrollPane(varList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 				BorderLayout.CENTER);
 		/*PANEL LIST CLUSTRING*/
@@ -129,11 +140,9 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 
 		clustList.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));
 		clustList.setBorder(BorderFactory.createLoweredBevelBorder());
-		//clustList.setPreferredSize(new Dimension(140, 380));
 		clustList.setListData(clusteringString);
 		clustList.addListSelectionListener(new listClusterListener());
-		cluspanel.add(
-				new JScrollPane(clustList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+		cluspanel.add(new JScrollPane(clustList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED),
 				BorderLayout.CENTER);
 
 		jlistpanel.add(cluspanel);
@@ -168,39 +177,28 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 		public void valueChanged(ListSelectionEvent e) {
 			if (!e.getValueIsAdjusting()) {
 				switch (clustList.getSelectedIndex()) {
-					case 0:
-						optClustering.removeAll();
-						optClustering.add(new KMeansOptPanel(ClusterPanel.this, new loadListener(), model), BorderLayout.CENTER);
-						optClustering.revalidate();
-						optClustering.repaint();
-						if (session.getListOfClustering().size() == 0) {
-							canGoOn = false;
-						}
-						break;
-					case 1:
-						optClustering.removeAll();
-						optClustering.add(new FuzzyOptPanel(ClusterPanel.this, new loadListener(), model), BorderLayout.CENTER);
-						optClustering.revalidate();
-						optClustering.repaint();
-						if (session.getListOfClustering().size() == 0) {
-							canGoOn = false;
-						}
-						break;
-					default:
-						clustList.setSelectedIndex(0);
+				case 0:
+					optClustering.removeAll();
+					optClustering.add(new KMeansOptPanel(ClusterPanel.this, new loadListener(), model), BorderLayout.CENTER);
+					optClustering.revalidate();
+					optClustering.repaint();
+					break;
+				case 1:
+					optClustering.removeAll();
+					optClustering.add(new FuzzyOptPanel(ClusterPanel.this, new loadListener(), model), BorderLayout.CENTER);
+					optClustering.revalidate();
+					optClustering.repaint();
+					break;
+				default:
+					clustList.setSelectedIndex(0);
 				}
 			}
 		}
+
 	}
 
 	public int[] getVarSelected() {
 		return ((myListSelectionModel) varList.getSelectionModel()).getSelected();
-		//return varList.getSelectedIndices();
-	}
-
-	@Override
-	public boolean canGoForward() {
-		return canGoOn;
 	}
 
 	@Override
@@ -213,54 +211,37 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 			clustList.setSelectedIndex(0);
 		}
 		if (session.getListOfClustering().size() > 0) {
-			canGoOn = true;
+			((JWatWizard) getParentWizard()).setEnableButton("Next >", true);
+		} else {
+			((JWatWizard) getParentWizard()).setEnableButton("Next >", false);
 		}
-		parent.setCurrentPanel(WORKLOAD_INPUT_PANEL);
+		parent.setCurrentPanel(WORKLOAD_CLUSTERING_PANEL);
 	}
 
 	private class loadListener implements ProgressStatusListener {
 
 		public void statusEvent(EventStatus e) {
-
 			switch (e.getType()) {
-				case EventStatus.ABORT_EVENT:
-					abortEvent((EventFinishAbort) e);
-					break;
-				case EventStatus.DONE_EVENT:
-					finishedEvent((EventClusteringDone) e);
-					break;
+			case EventStatus.ABORT_EVENT:
+				abortEvent((EventFinishAbort) e);
+				break;
+			case EventStatus.DONE_EVENT:
+				finishedEvent((EventClusteringDone) e);
+				break;
 			}
 		}
 
 		//Abort caricamento file input
 		private void abortEvent(EventFinishAbort e) {
 			JOptionPane.showMessageDialog(ClusterPanel.this, e.getMessage(), "CLUSTERING ABORTED!!", JOptionPane.WARNING_MESSAGE);
-			canGoOn = false;
-			if (session.getListOfClustering().size() == 0) {
-				((JWatWizard) getParentWizard()).setEnableButton("Next >", false);
-			} else {
-				((JWatWizard) getParentWizard()).setEnableButton("Next >", true);
-			}
-			((JWatWizard) getParentWizard()).setEnableButton("Solve", true);
 		}
 
 		//dati caricati
 		private void finishedEvent(EventClusteringDone e) {
-			//	int confirm=JOptionPane.showConfirmDialog(ClusterPanel.this,"Clustering completed, continue?","CLUSTERING COMPLETED!!",JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
-			//	if (confirm==JOptionPane.YES_OPTION) {
 			session.addClustering(e.getClustering());
-			((JWatWizard) getParentWizard()).setEnableButton("Next >", true);
-			((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
-			canGoOn = true;
 			((JWatWizard) getParentWizard()).showNextPanel();
-			//	}
-			/*	else {
-					canGoOn=false;
-					System.gc();
-					((JWatWizard)getParentWizard()).setEnableButton("Next >",false);
-					((JWatWizard)getParentWizard()).setEnableButton("Solve",true);
-				}*/
 		}
+
 	}
 
 	private static final String helpText = "<HTML>" + "In this panel you can choose which clustering algorithm apply to data.<br><br>"
@@ -280,10 +261,9 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 	}
 
 	private class myListSelectionModel extends DefaultListSelectionModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		boolean[] isSelected;
 		int numSelected;
 
@@ -295,7 +275,6 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 
 		@Override
 		public boolean isSelectedIndex(int index) {
-			//System.out.println("IS");
 			return isSelected[index];
 		}
 
@@ -315,7 +294,6 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 
 		public int getIndexSelected(int skip) {
 			int i;
-
 			for (i = 0; i < isSelected.length; i++) {
 				if (isSelected[i]) {
 					if (skip == 0) {
@@ -346,5 +324,7 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 			}
 			return res;
 		}
+
 	}
+
 }

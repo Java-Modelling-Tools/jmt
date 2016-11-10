@@ -59,6 +59,7 @@ import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.GrayCellRenderer;
+import jmt.gui.exact.table.BooleanCellRenderer;
 
 /**
  * <p>Title: All Blocking Region Panel</p>
@@ -303,7 +304,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 	 * Updates region spinner and region list to reflect current blocking regions
 	 */
 	private void update() {
-		regionsNumSpinner.setValue(new Integer(bd.getRegionKeys().size()));
+		regionsNumSpinner.setValue(Integer.valueOf(bd.getRegionKeys().size()));
 		regions.tableChanged(new TableModelEvent(regions.getModel()));
 		regions.repaint();
 		if (bd.getRegionKeys().size() >= MAX_NUMBER_OF_REGIONS) {
@@ -325,10 +326,10 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		private static final long serialVersionUID = 1L;
 		/** Cell renderer for region names */
 		private BlockingElementRenderer blockRenderer;
+		/** Cell renderer for capacity */
+		private TableCellRenderer grayRenderer;
 		/** Cell renderer for deletion */
 		private ButtonCellEditor deleteRenderer;
-		/** Cell renderer for capacity */
-		private TableCellRenderer gray = new GrayCellRenderer();
 
 		/** Button to delete selected region */
 		private JButton delete = new JButton(new AbstractAction() {
@@ -368,6 +369,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		public RegionTable() {
 			super(new RegionTableModel());
 			blockRenderer = new BlockingElementRenderer();
+			grayRenderer = new GrayCellRenderer();
 			delete.setFocusable(false);
 			deleteRenderer = new ButtonCellEditor(delete);
 			setRowHeight(ROW_HEIGHT);
@@ -401,9 +403,9 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 				case 0:
 					return blockRenderer;
 				case 1:
-					return gray;
+					return grayRenderer;
 				case 2:
-					return super.getDefaultRenderer(Boolean.class);
+					return new BooleanCellRenderer();
 				case 3:
 					return deleteRenderer;
 				default:
@@ -511,19 +513,18 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 			// Try catch for concurrency problems when deleting regions
 			try {
 				Object key = bd.getRegionKeys().get(rowIndex);
+				Integer value = null;
 				switch (columnIndex) {
-					case 0:
-						return key;
-					case 1:
-						if (bd.getRegionCustomerConstraint(key).intValue() > 0) {
-							return bd.getRegionCustomerConstraint(key);
-						} else {
-							return "\u221e";
-						}
-					case 2:
-						return Boolean.valueOf(bd.getRegionCustomerConstraint(key).intValue() <= 0);
-					default:
-						return null;
+				case 0:
+					return key;
+				case 1:
+					value = bd.getRegionCustomerConstraint(key);
+					return (value.intValue() > 0) ? value : "\u221e";
+				case 2:
+					value = bd.getRegionCustomerConstraint(key);
+					return Boolean.valueOf(value.intValue() < 1);
+				default:
+					return null;
 				}
 			} catch (Exception e) {
 				return null;
@@ -540,8 +541,8 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		 */
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			Integer value;
 			Object key = bd.getRegionKeys().get(rowIndex);
+			Integer value = null;
 			switch (columnIndex) {
 				case (1):
 					try {
@@ -554,13 +555,12 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 					}
 					break;
 				case (2):
-					boolean val = ((Boolean) aValue).booleanValue();
-					if (val) {
-						bd.setRegionCustomerConstraint(key, new Integer(-1));
+					if (((Boolean) aValue).booleanValue()) {
+						bd.setRegionCustomerConstraint(key, Integer.valueOf(-1));
 					} else {
 						value = Defaults.getAsInteger("blockingMaxJobs");
-						if (value.intValue() <= 0) {
-							value = new Integer(1);
+						if (value.intValue() < 1) {
+							value = Integer.valueOf(1);
 						}
 						bd.setRegionCustomerConstraint(key, value);
 					}
@@ -578,7 +578,8 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		 */
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return columnIndex != 1 || getValueAt(rowIndex, 2).equals(Boolean.FALSE);
+			return columnIndex == 3 || columnIndex == 2 || columnIndex == 0
+					|| (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue());
 		}
 	}
 
@@ -601,7 +602,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		* box that is checked.  <code>null</code> is a
 		* valid value
 		* @param    isSelected    true if the cell is to be rendered with the
-		* selection highlighted; otherwise false
+		* selection highlighted; false otherwise
 		* @param    hasFocus    if true, render cell appropriately.  For
 		* example, put a special border on the cell, if
 		* the cell can be edited, render in the color used

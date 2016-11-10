@@ -223,8 +223,6 @@ public class JWatMainPanel extends WizardPanel {
 		this.add(eastPanel, BorderLayout.EAST);
 		makeToolbar();
 		makeMenubar();
-		parent.setEnableButton("Solve", false);
-	
 	}
 
 	@Override
@@ -269,22 +267,21 @@ public class JWatMainPanel extends WizardPanel {
 		}
 		parent.setToolBar(workloadToolbar);
 	}
-	private AbstractJMTAction HELP = new AbstractJMTAction("JWAT help") {
+
+	private AbstractJMTAction HELP = new AbstractJMTAction("JWAT Help") {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Show JMVA help");
+			putValue(Action.SHORT_DESCRIPTION, "Show JWAT help");
 			setIcon("Help", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			//showHelp(e);
-
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
@@ -295,7 +292,6 @@ public class JWatMainPanel extends WizardPanel {
 				}
 			};
 			EventQueue.invokeLater(r);
-
 		}
 	};
 
@@ -341,15 +337,15 @@ public class JWatMainPanel extends WizardPanel {
 	@Override
 	public void gotFocus() {
 		if (parent.getModel() != null && parent.getModel().getMatrix() != null) {
-			if (JOptionPane.showConfirmDialog(this, "This operation resets all data. Continue ?", "WARNING", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+			if (JOptionPane.showConfirmDialog(this, "This operation resets all data. Continue?", "WARNING", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				parent.getSession().resetSession();
 				parent.resetScreen();
+				((JWatWizard) getParentWizard()).setEnableButton("Next >", false);
 				((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
 			} else {
 				parent.setLastPanel();
 			}
-		} else {
-
 		}
 	}
+
 }

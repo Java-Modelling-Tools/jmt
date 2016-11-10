@@ -192,9 +192,9 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 		VisitTable() {
 			super(new VisitTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
-                        setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowHeight(CommonConstants.ROW_HEIGHT);
 
-                        setDisplaysScrollLabels(true);
+			setDisplaysScrollLabels(true);
 			help.addHelp(this,
 					"Click or drag to select cells; to edit data single-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreColumnsLabel, "There are more classes: scroll right to see them");
@@ -208,7 +208,6 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
 			setClipboardTransferEnabled(true);
-
 		}
 
 	}
@@ -256,15 +255,14 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			try {
 				double newVal = Double.parseDouble((String) value);
-				if (newVal > 0)
+				if (newVal > 0) {
 					visits[rowIndex][columnIndex] = newVal;
-			else if (newVal == 0 && ReferenceStation[columnIndex] == rowIndex)
-					{
-						infoBox("you can not change the number of visits to Zero because you have chosen this station as the ReferenceStation","Warning!");
-						visits[rowIndex][columnIndex] = 1;					
-					}
-				else
-					visits[rowIndex][columnIndex] = 0;										
+				} else if (newVal == 0 && ReferenceStation[columnIndex] == rowIndex) {
+					infoBox("you can not change the number of visits to Zero because you have chosen this station as the ReferenceStation","Warning!");
+					visits[rowIndex][columnIndex] = 1;					
+				} else {
+					visits[rowIndex][columnIndex] = 0;
+				}
 			} catch (NumberFormatException e) {
 			}
 		}

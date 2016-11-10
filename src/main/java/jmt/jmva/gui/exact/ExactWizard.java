@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ public class ExactWizard extends Wizard {
 	private static final long serialVersionUID = 1L;
 
 	private static final String TITLE = "JMVA - Product Form Queueing Network Solver";
-	private final static boolean DEBUG = false;
+	private static final boolean DEBUG = false;
 
 	private ExactModel data;
 	private JLabel helpLabel;
@@ -230,7 +230,7 @@ public class ExactWizard extends Wizard {
 
 	};
 
-	private AbstractJMTAction HELP = new AbstractJMTAction("JMVA help") {
+	private AbstractJMTAction HELP = new AbstractJMTAction("JMVA Help") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -257,7 +257,7 @@ public class ExactWizard extends Wizard {
 
 	};
 
-	private AbstractJMTAction ABOUT = new AbstractJMTAction("About JMVA...") {
+	private AbstractJMTAction ABOUT = new AbstractJMTAction("About JMVA") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -567,7 +567,7 @@ public class ExactWizard extends Wizard {
 		//kourosh123
 		int resultValue = JOptionPane.showConfirmDialog(this, "Visit values will be set to \"1\" Continue?", "JMVA - Warning", JOptionPane.YES_NO_CANCEL_OPTION,
 				JOptionPane.WARNING_MESSAGE);
-		if (resultValue == JOptionPane.YES_OPTION) {			
+		if (resultValue == JOptionPane.YES_OPTION) {
 			((ForceUpdatablePanel) serviceTimesPanel).commitData();
 			((ForceUpdatablePanel) visitsPanel).retrieveData();
 			((ForceUpdatablePanel) visitsPanel).commitData();
@@ -575,9 +575,6 @@ public class ExactWizard extends Wizard {
 			removePanel(visitsPanel);
 			((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
 			addPanel(serviceDemandsPanel, 2);
-
-		}
-		if (resultValue == JOptionPane.CANCEL_OPTION) {
 		}
 	}
 
@@ -632,17 +629,10 @@ public class ExactWizard extends Wizard {
 		/* END */
 
 		try {
-			//OLD
-			//solver.solve(newdata);
-			//NEW Dall'Orso
 			tempFile = solver.solve(newdata);
-			//OLD
-			//NEW
-			//@author Stefano Omini
 		} catch (InputDataException rse) {
 			JOptionPane.showMessageDialog(this, rse.getMessage(), "Input data error", JOptionPane.ERROR_MESSAGE);
 			return;
-			//end NEW
 		} catch (SolverException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage(), "Solver error", JOptionPane.ERROR_MESSAGE);
 			return;

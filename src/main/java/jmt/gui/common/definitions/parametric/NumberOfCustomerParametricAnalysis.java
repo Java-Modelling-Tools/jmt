@@ -52,16 +52,17 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 		classDef = cd;
 		stationDef = sd;
 		simDef = simd;
-		Vector closedClasses = cd.getClosedClassKeys();
+		Vector<Object> closedClasses = cd.getClosedClassKeys();
 		if (closedClasses.size() == 1) {
 			classKey = closedClasses.get(0);
 			singleClass = true;
 		} else {
 			singleClass = SINGLE_CLASS;
 		}
-		initialValue = cd.getTotalCloseClassPopulation();
-		finalValue = cd.getTotalCloseClassPopulation() * 2 + 1;
-		numberOfSteps = this.searchForAvailableSteps();
+		int totalPop = cd.getTotalClosedClassPopulation();
+		initialValue = totalPop;
+		finalValue = totalPop * 2 + 1;
+		numberOfSteps = searchForAvailableSteps();
 		if (numberOfSteps > MAX_STEP_NUMBER) {
 			numberOfSteps = MAX_STEP_NUMBER;
 		}
@@ -148,13 +149,13 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 		if (values != null) {
 			if (singleClass) {
 				Integer refPop = (Integer) ((Vector) values).get(step);
-				classDef.setClassPopulation(refPop, classKey);
+				classDef.setClassPopulation(classKey, refPop);
 			} else {
-				Vector classSet = classDef.getClosedClassKeys();
-				for (int i = 0; i < classSet.size(); i++) {
-					Object thisClass = classSet.get(i);
+				Vector<Object> closedClasses = classDef.getClosedClassKeys();
+				for (int i = 0; i < closedClasses.size(); i++) {
+					Object thisClass = closedClasses.get(i);
 					int thisPop = (int) ((ValuesTable) values).getValue(thisClass, step);
-					classDef.setClassPopulation(new Integer(thisPop), thisClass);
+					classDef.setClassPopulation(thisClass, new Integer(thisPop));
 				}
 			}
 			simDef.manageJobs();
@@ -182,17 +183,20 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 			return max;
 		} else {
 			int availableSteps = 0;
-			Vector classSet = classDef.getClosedClassKeys();
+			Vector<Object> closeClasses = classDef.getClosedClassKeys();
 			//calculate the proportion between classes populations
-			double[] betas = new double[classSet.size()];
-			int totalPop = classDef.getTotalCloseClassPopulation();
-			for (int i = 0; i < classSet.size(); i++) {
-				double thisPop = classDef.getClassPopulation(classSet.get(i)).doubleValue();
-				betas[i] = thisPop / totalPop;
+			double[] betas = new double[closeClasses.size()];
+			int totalPop = classDef.getTotalClosedClassPopulation();
+			for (int i = 0; i < closeClasses.size(); i++) {
+				double thisPop = classDef.getClassPopulation(closeClasses.get(i)).doubleValue();
+				betas[i] = 0;
+				if (totalPop > 0) {
+					betas[i] = thisPop / totalPop;
+				}
 			}
 			for (int i = 0; i < max; i++) {
 				int j;
-				for (j = 0; j < classSet.size(); j++) {
+				for (j = 0; j < closeClasses.size(); j++) {
 					double thisClassNextNumberOfJobs = totalPop * betas[j];
 					double intValue = Math.ceil(thisClassNextNumberOfJobs - 0.5); //get the closest integer
 					//if the next-step number of jobs for this class is not
@@ -202,8 +206,8 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 						break;
 					}
 				}
-				//check if the cycle was exited before checking all classes
-				if (!(j < classSet.size())) {
+				//check if the cycle was exited after checking all classes
+				if (j >= closeClasses.size()) {
 					validParameterValues.add(new Integer(totalPop));
 					availableSteps++;
 				}
@@ -224,41 +228,43 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 		if (singleClass) {
 			values = new Vector(0, 1);
 			double p = (double) (maxSteps - 1) / (double) (numberOfSteps - 1);
-			//int thisStep = 0;
-			int thisStep;
+			int thisStep = 0;
 			double sum = 0;
 			for (int i = 0; i < numberOfSteps; i++) {
 				thisStep = (int) (sum);
 				((Vector<Integer>) values).add(validParameterValues.get(thisStep));
 				sum += p;
 			}
-			originalValues = new Integer(classDef.getClassPopulation(classKey).intValue());
+			originalValues = classDef.getClassPopulation(classKey);
 		} else {
 			double p = (double) (maxSteps - 1) / (double) (numberOfSteps - 1);
-			int thisStep;
+			int thisStep = 0;
 			double sum = 0;
-			Vector<Object> classSet = classDef.getClosedClassKeys();
-			values = new ValuesTable(classDef, classSet, numberOfSteps);
+			Vector<Object> closeClasses = classDef.getClosedClassKeys();
+			values = new ValuesTable(classDef, closeClasses, numberOfSteps);
 			//calculate the proportion between classes populations
-			double[] betas = new double[classSet.size()];
-			double totalPop = classDef.getTotalCloseClassPopulation();
-			for (int i = 0; i < classSet.size(); i++) {
-				double thisPop = classDef.getClassPopulation(classSet.get(i)).doubleValue();
-				betas[i] = thisPop / totalPop;
+			double[] betas = new double[closeClasses.size()];
+			int totalPop = classDef.getTotalClosedClassPopulation();
+			for (int i = 0; i < closeClasses.size(); i++) {
+				double thisPop = classDef.getClassPopulation(closeClasses.get(i)).doubleValue();
+				betas[i] = 0;
+				if (totalPop > 0) {
+					betas[i] = thisPop / totalPop;
+				}
 			}
 			for (int i = 0; i < numberOfSteps; i++) {
 				thisStep = (int) sum;
 				totalPop = validParameterValues.get(thisStep).intValue();
-				for (int j = 0; j < classSet.size(); j++) {
+				for (int j = 0; j < closeClasses.size(); j++) {
 					double thisClassNextNumberOfJobs = totalPop * betas[j];
 					int value = (int) (thisClassNextNumberOfJobs);
-					((ValuesTable) values).setValue(classSet.get(j), value);
+					((ValuesTable) values).setValue(closeClasses.get(j), value);
 				}
 				sum += p;
 			}
-			originalValues = new Vector(classSet.size());
-			for (int i = 0; i < classSet.size(); i++) {
-				Object thisClass = classSet.get(i);
+			originalValues = new Vector(closeClasses.size());
+			for (int i = 0; i < closeClasses.size(); i++) {
+				Object thisClass = closeClasses.get(i);
 				Integer thisValue = new Integer(classDef.getClassPopulation(thisClass).intValue());
 				((Vector<Integer>) originalValues).add(thisValue);
 			}
@@ -272,14 +278,14 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 	@Override
 	public void restoreOriginalValues() {
 		if (singleClass) {
-			classDef.setClassPopulation((Integer) originalValues, classKey);
+			classDef.setClassPopulation(classKey, (Integer) originalValues);
 		} else {
-			Vector vals = (Vector) originalValues;
-			Vector classSet = classDef.getClosedClassKeys();
-			for (int i = 0; i < classSet.size(); i++) {
-				Object thisClass = classSet.get(i);
-				Integer thisVal = new Integer(((Integer) vals.get(i)).intValue());
-				classDef.setClassPopulation(thisVal, thisClass);
+			Vector values = (Vector) originalValues;
+			Vector<Object> closeClasses = classDef.getClosedClassKeys();
+			for (int i = 0; i < closeClasses.size(); i++) {
+				Object thisClass = closeClasses.get(i);
+				Integer thisValue = (Integer) values.get(i);
+				classDef.setClassPopulation(thisClass, thisValue);
 			}
 		}
 		simDef.manageJobs();
@@ -300,10 +306,11 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 	@Override
 	public int checkCorrectness(boolean autocorrect) {
 		int code = 0;
-		Vector closeClasses = classDef.getClosedClassKeys();
+		Vector<Object> closeClasses = classDef.getClosedClassKeys();
 		if (closeClasses.isEmpty()) {
 			code = 2; //This PA model can be no more used
 		} else {
+			int totalPop = classDef.getTotalClosedClassPopulation();
 			//if is single class...
 			if (isSingleClass()) {
 				// ... and the selected close class is no more available
@@ -311,9 +318,8 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 					code = 1;
 					if (autocorrect) {
 						classKey = closeClasses.get(0); //change the reference class
-						int totalPop = classDef.getTotalCloseClassPopulation();
-						double minFinal = totalPop + 1;
 						initialValue = totalPop;
+						double minFinal = totalPop + 1;
 						if (finalValue < minFinal) {
 							finalValue = minFinal;
 						}
@@ -325,12 +331,11 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 				}
 				// else check that the initial value equals the number of jobs belonging to the reference class
 				else {
-					int totalPop = classDef.getTotalCloseClassPopulation();
-					double minFinal = totalPop + 1;
 					if (initialValue != totalPop) {
 						code = 1;
 						if (autocorrect) {
 							initialValue = totalPop;
+							double minFinal = totalPop + 1;
 							if (finalValue < minFinal) { //the initial value was changed,
 								finalValue = minFinal;   //so change the final value and
 							}
@@ -342,18 +347,17 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 					}
 				}
 			} else {
-				int totalPop = classDef.getTotalCloseClassPopulation();
-				double minFinal;
-				if (classDef.getClosedClassKeys().size() == 1) {
-					minFinal = totalPop + 1;
-				} else {
-					minFinal = totalPop * 2 + 1;
-				}
 				// if the total number of job has changed
 				if (initialValue != totalPop) {
 					code = 1;
 					if (autocorrect) {
 						initialValue = totalPop;
+						double minFinal;
+						if (closeClasses.size() == 1) {
+							minFinal = totalPop + 1;
+						} else {
+							minFinal = totalPop * 2 + 1;
+						}
 						if (finalValue < minFinal) { //the initial value was changed,
 							finalValue = minFinal; //so change the final value and
 						}
@@ -365,7 +369,7 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 				} else {
 					Vector<Integer> temp = validParameterValues;
 					int temp2 = searchForAvailableSteps();
-					//if the total nmber job equals initialValue, but the
+					//if the total number job equals initialValue, but the
 					//validParameterValues is different from the old one
 					//it means that something was changed
 					if (!temp.equals(validParameterValues)) {
@@ -408,7 +412,7 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 		if (singleClass) {
 			Vector temp = (Vector) values;
 			double initial = ((Integer) originalValues).doubleValue();
-			double sum = classDef.getTotalCloseClassPopulation() - initial;
+			double sum = classDef.getTotalClosedClassPopulation() - initial;
 			for (int i = 0; i < numberOfSteps; i++) {
 				double val = ((Integer) (temp.get(i))).doubleValue() + sum;
 				assumedValues.add(new Double(val));

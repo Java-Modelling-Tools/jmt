@@ -44,7 +44,7 @@ class NetController {
 
 	//check if some measures have not receive any sample yet
 	//WARNING: this samples number must be a multiple of refreshPeriod!!
-	private int reachabilityTest = refreshPeriod * 3;
+	private int reachabilityTest = refreshPeriod * 10;
 
 	private boolean blocked = false;
 

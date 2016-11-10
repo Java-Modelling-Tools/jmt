@@ -57,37 +57,37 @@ import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
  * Desc: Added new LoadDependent Routing
  *
  * Modified by Vitor S. Lopes (Jul 2016)
- * Desc: Added Semaphore
+ * Desc: Added Semaphore and Scaler
  *
  * Modified by Lulai Zhu (Jul 2016)
  * Desc: Added Place and Transition
  */
 public interface CommonConstants {
 
-	public final static int CLASS_TYPE_OPEN = 0;
-	public final static int CLASS_TYPE_CLOSED = 1;
+	public static final int CLASS_TYPE_OPEN = 0;
+	public static final int CLASS_TYPE_CLOSED = 1;
 
 	/** Table row height */
-	public final static int ROW_HEIGHT = 30;
+	public static final int ROW_HEIGHT = 30;
 
-	public final static String STATION_TYPE_SOURCE = "Source";
-	public final static String STATION_TYPE_SINK = "Sink";
-	public final static String STATION_TYPE_TERMINAL = "Terminal";
-	public final static String STATION_TYPE_ROUTER = "RoutingStation";
-	public final static String STATION_TYPE_DELAY = "Delay";
-	public final static String STATION_TYPE_SERVER = "Server";
-	public final static String STATION_TYPE_FORK = "Fork";
-	public final static String STATION_TYPE_JOIN = "Join";
-	public final static String STATION_TYPE_LOGGER = "Logger";
-	public final static String STATION_TYPE_CLASSSWITCH = "ClassSwitch";
-	public final static String STATION_TYPE_SEMAPHORE = "Semaphore";
-	public final static String STATION_TYPE_SCALER = "Scaler";
-	public final static String STATION_TYPE_PLACE = "Place";
-	public final static String STATION_TYPE_TRANSITION = "Transition";
+	public static final String STATION_TYPE_SOURCE = "Source";
+	public static final String STATION_TYPE_SINK = "Sink";
+	public static final String STATION_TYPE_TERMINAL = "Terminal";
+	public static final String STATION_TYPE_ROUTER = "RoutingStation";
+	public static final String STATION_TYPE_DELAY = "Delay";
+	public static final String STATION_TYPE_SERVER = "Server";
+	public static final String STATION_TYPE_FORK = "Fork";
+	public static final String STATION_TYPE_JOIN = "Join";
+	public static final String STATION_TYPE_LOGGER = "Logger";
+	public static final String STATION_TYPE_CLASSSWITCH = "ClassSwitch";
+	public static final String STATION_TYPE_SEMAPHORE = "Semaphore";
+	public static final String STATION_TYPE_SCALER = "Scaler";
+	public static final String STATION_TYPE_PLACE = "Place";
+	public static final String STATION_TYPE_TRANSITION = "Transition";
 
 	//For BPMN
-	//public final static String STATION_TYPE_INGATEWAY = "InGateWay";
-	//public final static String STATION_TYPE_OUTGATEWAY = "OutGateWay";
+	//public static final String STATION_TYPE_INGATEWAY = "InGateWay";
+	//public static final String STATION_TYPE_OUTGATEWAY = "OutGateWay";
 
 	/** A map that decodes from station type to station name for the GUI */
 
@@ -116,73 +116,73 @@ public interface CommonConstants {
 	};
 
 	/**Constants for GUI scaling*/
-	public final static int MAX_GUI_WIDTH_STARTSCREEN =  800;
-	public final static int MAX_GUI_HEIGHT_STARTSCREEN = 600;
-	public final static int MAX_GUI_WIDTH_ABOUT =  800;
-	public final static int MAX_GUI_HEIGHT_ABOUT = 600;
-	public final static int MAX_GUI_WIDTH_QUICKHTML =  800;
-	public final static int MAX_GUI_HEIGHT_QUICKHTML = 600;
+	public static final int MAX_GUI_WIDTH_STARTSCREEN =  800;
+	public static final int MAX_GUI_HEIGHT_STARTSCREEN = 600;
+	public static final int MAX_GUI_WIDTH_ABOUT =  800;
+	public static final int MAX_GUI_HEIGHT_ABOUT = 600;
+	public static final int MAX_GUI_WIDTH_QUICKHTML =  800;
+	public static final int MAX_GUI_HEIGHT_QUICKHTML = 600;
 
-	//public final static float MIN_GUI_DIALOG_RESIZE_RATIO = 0.8f;
-	public final static int MAX_GUI_WIDTH_DIALOG_DEFAULT =  780;
-	public final static int MAX_GUI_HEIGHT_DIALOG_DEFAULT = 520;
-	public final static int MAX_GUI_WIDTH_COMMON =  1024;
-	public final static int MAX_GUI_HEIGHT_COMMON = 768;
+	//public static final float MIN_GUI_DIALOG_RESIZE_RATIO = 0.8f;
+	public static final int MAX_GUI_WIDTH_DIALOG_DEFAULT =  780;
+	public static final int MAX_GUI_HEIGHT_DIALOG_DEFAULT = 520;
+	public static final int MAX_GUI_WIDTH_COMMON =  1024;
+	public static final int MAX_GUI_HEIGHT_COMMON = 768;
 
-	public final static int MAX_GUI_WIDTH_JSIM_DISTRIB =  480;
-	public final static int MAX_GUI_HEIGHT_JSIM_DISTRIB = 600;
-	public final static int MAX_GUI_WIDTH_JSIM_PROBLEMS =  450;
-	public final static int MAX_GUI_HEIGHT_JSIM_PROBLEMS = 435;
-	public final static int MAX_GUI_WIDTH_JSIM_RESULTS =  1024;
-	public final static int MAX_GUI_HEIGHT_JSIM_RESULTS = 768;
-	public final static int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT =  1152;
-	public final static int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = 864;
+	public static final int MAX_GUI_WIDTH_JSIM_DISTRIB =  480;
+	public static final int MAX_GUI_HEIGHT_JSIM_DISTRIB = 600;
+	public static final int MAX_GUI_WIDTH_JSIM_PROBLEMS =  450;
+	public static final int MAX_GUI_HEIGHT_JSIM_PROBLEMS = 435;
+	public static final int MAX_GUI_WIDTH_JSIM_RESULTS =  1024;
+	public static final int MAX_GUI_HEIGHT_JSIM_RESULTS = 768;
+	public static final int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT =  1152;
+	public static final int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = 864;
 
-	public final static int MAX_GUI_WIDTH_JMVA =  1024;
-	public final static int MAX_GUI_HEIGHT_JMVA = 768;
+	public static final int MAX_GUI_WIDTH_JMVA =  1024;
+	public static final int MAX_GUI_HEIGHT_JMVA = 768;
 
-	public final static int MAX_GUI_WIDTH_JMCH =  800;
-	public final static int MAX_GUI_HEIGHT_JMCH = 600;
+	public static final int MAX_GUI_WIDTH_JMCH =  800;
+	public static final int MAX_GUI_HEIGHT_JMCH = 600;
 
-	public final static int MAX_GUI_WIDTH_JABA =  1024;
-	public final static int MAX_GUI_HEIGHT_JABA = 768;
+	public static final int MAX_GUI_WIDTH_JABA =  1024;
+	public static final int MAX_GUI_HEIGHT_JABA = 768;
 
-	public final static int MAX_GUI_WIDTH_JWAT =  1024;
-	public final static int MAX_GUI_HEIGHT_JWAT = 768;
-	public final static int MAX_GUI_WIDTH_JWAT_STARTSCREEN =  520;
-	public final static int MAX_GUI_HEIGHT_JWAT_STARTSCREEN = 400;
-	public final static int MAX_GUI_WIDTH_JWAT_COLOR =  1024;
-	public final static int MAX_GUI_HEIGHT_JWAT_COLOR = 768;
+	public static final int MAX_GUI_WIDTH_JWAT =  1024;
+	public static final int MAX_GUI_HEIGHT_JWAT = 768;
+	public static final int MAX_GUI_WIDTH_JWAT_STARTSCREEN =  520;
+	public static final int MAX_GUI_HEIGHT_JWAT_STARTSCREEN = 400;
+	public static final int MAX_GUI_WIDTH_JWAT_COLOR =  1024;
+	public static final int MAX_GUI_HEIGHT_JWAT_COLOR = 768;
 
-	public final static int MAX_GUI_WIDTH_LDSTRATEGY =  800;
-	public final static int MAX_GUI_HEIGHT_LDSTRATEGY = 600;
-	public final static int MAX_GUI_WIDTH_LDHELP =  600;
-	public final static int MAX_GUI_HEIGHT_LDHELP = 400;
-	public final static int MAX_GUI_WIDTH_LDROUTING =  800;
-	public final static int MAX_GUI_HEIGHT_LDROUTING = 600;
-	public final static int MAX_GUI_WIDTH_LDEDITING =  400;
-	public final static int MAX_GUI_HEIGHT_LDEDITING = 400;
+	public static final int MAX_GUI_WIDTH_LDSTRATEGY =  800;
+	public static final int MAX_GUI_HEIGHT_LDSTRATEGY = 600;
+	public static final int MAX_GUI_WIDTH_LDHELP =  600;
+	public static final int MAX_GUI_HEIGHT_LDHELP = 400;
+	public static final int MAX_GUI_WIDTH_LDROUTING =  800;
+	public static final int MAX_GUI_HEIGHT_LDROUTING = 600;
+	public static final int MAX_GUI_WIDTH_LDEDITING =  400;
+	public static final int MAX_GUI_HEIGHT_LDEDITING = 400;
 
-	public final static int MAX_GUI_WIDTH_WHATIF_PROGRESS =  640;
-	public final static int MAX_GUI_HEIGHT_WHATIF_PROGRESS = 480;
-	public final static int MAX_GUI_WIDTH_WHATIF_RESULTS =  1024;
-	public final static int MAX_GUI_HEIGHT_WHATIF_RESULTS = 768;
+	public static final int MAX_GUI_WIDTH_WHATIF_PROGRESS =  640;
+	public static final int MAX_GUI_HEIGHT_WHATIF_PROGRESS = 480;
+	public static final int MAX_GUI_WIDTH_WHATIF_RESULTS =  1024;
+	public static final int MAX_GUI_HEIGHT_WHATIF_RESULTS = 768;
 
-	final static Dimension DIM_BUTTON_XS = new Dimension(60, 20);
-	final static Dimension DIM_BUTTON_S = new Dimension(80, 20);
-	final static Dimension DIM_BUTTON_M = new Dimension(110, 20);
-	final static Dimension DIM_BUTTON_L = new Dimension(140, 20);
+	static final Dimension DIM_BUTTON_XS = new Dimension(60, 20);
+	static final Dimension DIM_BUTTON_S = new Dimension(80, 20);
+	static final Dimension DIM_BUTTON_M = new Dimension(110, 20);
+	static final Dimension DIM_BUTTON_L = new Dimension(140, 20);
 
 	/**Constants for selection of queueing strategy*/
-	public final static String QUEUE_STRATEGY_FCFS = "FCFS";
-	public final static String QUEUE_STRATEGY_LCFS = "LCFS";
-	public final static String QUEUE_STRATEGY_RAND = "Random";
-	public final static String QUEUE_STRATEGY_SJF = "SJF";
-	public final static String QUEUE_STRATEGY_LJF = "LJF";
-	public final static String QUEUE_STRATEGY_STATION_PS = "Processor Sharing";
-	public final static String QUEUE_STRATEGY_STATION_SRPT = "Shortest Remaining Processing Time";
-	public final static String QUEUE_STRATEGY_STATION_QUEUE = "Non-preemptive Scheduling";
-	public final static String QUEUE_STRATEGY_STATION_QUEUE_PRIORITY = "Non-preemptive Scheduling (Priority)";
+	public static final String QUEUE_STRATEGY_FCFS = "FCFS";
+	public static final String QUEUE_STRATEGY_LCFS = "LCFS";
+	public static final String QUEUE_STRATEGY_RAND = "Random";
+	public static final String QUEUE_STRATEGY_SJF = "SJF";
+	public static final String QUEUE_STRATEGY_LJF = "LJF";
+	public static final String QUEUE_STRATEGY_STATION_PS = "Processor Sharing";
+	public static final String QUEUE_STRATEGY_STATION_SRPT = "Shortest Remaining Processing Time";
+	public static final String QUEUE_STRATEGY_STATION_QUEUE = "Non-preemptive Scheduling";
+	public static final String QUEUE_STRATEGY_STATION_QUEUE_PRIORITY = "Non-preemptive Scheduling (Priority)";
 
 	/**Constants for service time distributions*/
 	public static final String SERVICE_LOAD_INDEPENDENT = "Load Independent";
@@ -190,114 +190,115 @@ public interface CommonConstants {
 	public static final String SERVICE_ZERO = "Zero Service Time";
 
 	/**Constants for selection of distributions*/
-	public final static String DISTRIBUTION_DETERMINISTIC = "Deterministic";
-	public final static String DISTRIBUTION_EXPONENTIAL = "Exponential";
-	public final static String DISTRIBUTION_NORMAL = "Normal";
-	public final static String DISTRIBUTION_PARETO = "Pareto";
-	public final static String DISTRIBUTION_ERLANG = "Erlang";
-	public final static String DISTRIBUTION_HYPEREXPONENTIAL = "Hyperexponential";
-	public final static String DISTRIBUTION_BURST = "Burst";
-	//public final static String DISTRIBUTION_MAP= "MAP";
-	public final static String DISTRIBUTION_MMPP2 = "MMPP2";
-	public final static String DISTRIBUTION_GAMMA = "Gamma";
-	public final static String DISTRIBUTION_UNIFORM = "Uniform";
-	//public final static String DISTRIBUTION_STUDENTT = "StudentT";
-	//public final static String DISTRIBUTION_POISSON = "Poisson";
-	public final static String DISTRIBUTION_REPLAYER = "Replayer";
+	public static final String DISTRIBUTION_DETERMINISTIC = "Deterministic";
+	public static final String DISTRIBUTION_EXPONENTIAL = "Exponential";
+	public static final String DISTRIBUTION_NORMAL = "Normal";
+	public static final String DISTRIBUTION_PARETO = "Pareto";
+	public static final String DISTRIBUTION_ERLANG = "Erlang";
+	public static final String DISTRIBUTION_HYPEREXPONENTIAL = "Hyperexponential";
+	public static final String DISTRIBUTION_BURST = "Burst";
+	//public static final String DISTRIBUTION_MAP= "MAP";
+	public static final String DISTRIBUTION_MMPP2 = "MMPP2";
+	public static final String DISTRIBUTION_GAMMA = "Gamma";
+	public static final String DISTRIBUTION_UNIFORM = "Uniform";
+	//public static final String DISTRIBUTION_STUDENTT = "StudentT";
+	//public static final String DISTRIBUTION_POISSON = "Poisson";
+	public static final String DISTRIBUTION_REPLAYER = "Replayer";
 
 	/**Constants for selection of timing strategy*/
-	public final static String TIMING_STRATEGY_TIMED = "Timed";
-	public final static String TIMING_STRATEGY_IMMEDIATE = "Immediate";
+	public static final String TIMING_STRATEGY_TIMED = "Timed";
+	public static final String TIMING_STRATEGY_IMMEDIATE = "Immediate";
 
 	/**Constants for selection of region group strategy*/
-	public final static String REGION_GROUP_STRATEGY_FCFS = "FCFS";
-	public final static String REGION_GROUP_STRATEGY_HPS = "HPS";
-	public final static String REGION_GROUP_STRATEGY_HPS_LCFS = "HPS_LCFS";
-	public final static String REGION_GROUP_STRATEGY_HPS_FCFS = "HPS_FCFS";
+	public static final String REGION_GROUP_STRATEGY_FCFS = "FCFS";
+	public static final String REGION_GROUP_STRATEGY_HPS = "HPS";
+	public static final String REGION_GROUP_STRATEGY_HPS_LCFS = "HPS_LCFS";
+	public static final String REGION_GROUP_STRATEGY_HPS_FCFS = "HPS_FCFS";
 
-	public final static RoutingStrategy ROUTING_RANDOM = new RandomRouting();
-	public final static RoutingStrategy ROUTING_ROUNDROBIN = new RoundRobinRouting();
-	public final static RoutingStrategy ROUTING_PROBABILITIES = new ProbabilityRouting();
-	public final static RoutingStrategy ROUTING_SHORTESTQL = new ShortestQueueLengthRouting();
-	public final static RoutingStrategy ROUTING_SHORTESTRT = new ShortestResponseTimeRouting();
-	public final static RoutingStrategy ROUTING_LEASTUTILIZATION = new LeastUtilizationRouting();
-	public final static RoutingStrategy ROUTING_FASTESTSERVICE = new FastestServiceRouting();
-	public final static RoutingStrategy ROUTING_LOADDEPENDENT = new LoadDependentRouting();
+	public static final RoutingStrategy ROUTING_RANDOM = new RandomRouting();
+	public static final RoutingStrategy ROUTING_ROUNDROBIN = new RoundRobinRouting();
+	public static final RoutingStrategy ROUTING_PROBABILITIES = new ProbabilityRouting();
+	public static final RoutingStrategy ROUTING_SHORTESTQL = new ShortestQueueLengthRouting();
+	public static final RoutingStrategy ROUTING_SHORTESTRT = new ShortestResponseTimeRouting();
+	public static final RoutingStrategy ROUTING_LEASTUTILIZATION = new LeastUtilizationRouting();
+	public static final RoutingStrategy ROUTING_FASTESTSERVICE = new FastestServiceRouting();
+	public static final RoutingStrategy ROUTING_LOADDEPENDENT = new LoadDependentRouting();
 
-	public final static ForkStrategy FORKING_PROBABILITIES = new ProbabilitiesFork();
-	public final static ForkStrategy FORKING_COMBINATION = new CombFork();
-	public final static ForkStrategy FORKING_CLASS_SWITCH = new ClassSwitchFork();
-	public final static ForkStrategy FORKING_MULTI_BRANCH_CLASS_SWITCH = new MultiBranchClassSwitchFork();
+	public static final ForkStrategy FORK_PROBABILITIES = new ProbabilitiesFork();
+	public static final ForkStrategy FORK_COMBINATION = new CombFork();
+	public static final ForkStrategy FORK_CLASS_SWITCH = new ClassSwitchFork();
+	public static final ForkStrategy FORK_MULTI_BRANCH_CLASS_SWITCH = new MultiBranchClassSwitchFork();
 
-	public final static JoinStrategy JOINING_NORMAL = new NormalJoin();
-	public final static JoinStrategy JOINING_PARTIAL = new PartialJoin();
-	public final static JoinStrategy JOINING_MIX = new GuardJoin();
+	public static final JoinStrategy JOIN_NORMAL = new NormalJoin();
+	public static final JoinStrategy JOIN_PARTIAL = new PartialJoin();
+	public static final JoinStrategy JOIN_MIX = new GuardJoin();
 
-	public final static SemaphoreStrategy SEMAPHORE_NORMAL = new NormalSemaphore();
+	public static final SemaphoreStrategy SEMAPHORE_NORMAL = new NormalSemaphore();
 
 	/**HTML formats for panels descriptions*/
-	final static String HTML_START = "<html><body align=\"left\">";
-	final static String HTML_END = "</body></html>";
-	final static String HTML_FONT_TITLE = "<font size=\"4\"><b>";
-	final static String HTML_FONT_NORM = "<font size=\"3\">";
-	final static String HTML_FONT_TIT_END = "</b></font><br>";
-	final static String HTML_FONT_NOR_END = "</font>";
+	static final String HTML_START = "<html><body align=\"left\">";
+	static final String HTML_END = "</body></html>";
+	static final String HTML_FONT_TITLE = "<font size=\"4\"><b>";
+	static final String HTML_FONT_NORM = "<font size=\"3\">";
+	static final String HTML_FONT_TIT_END = "</b></font><br>";
+	static final String HTML_FONT_NOR_END = "</font>";
 
 	public static final String FINITE_DROP = "Drop";
 	public static final String FINITE_BLOCK = "BAS blocking";
 	public static final String FINITE_WAITING = "Waiting Queue (no drop)";
 
-	public final static String CLASSES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Classes Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Define type (Open or Closed), name and parameters for each customer " + "class."
-			+ "<br/>" + "<b>Closed Classes:</b> If a ClassSwitch is in the model, then <b>all</b> classes must have the <b>same</b> Reference Station."
-			+ "<br/>" + "<b>Open Classes:</b> A class that has ClassSwitch as Reference Station cannot be generated by a Source Station."
+	public static final String CLASSES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Classes Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Define type (Open or Closed), name and parameters for each customer class."
+			+ "<br/>" + "<b>Closed Classes:</b> If a <b>ClassSwitch</b> is in the model, then <b>all</b> the closed classes must have the <b>same</b> reference station."
+			+ "<br/>" + "<b>Open Classes:</b> An open class that has <b>Fork</b>, <b>ClassSwitch</b>, <b>Scaler</b> or <b>Transition</b> as the reference station are <b>not</b> generated by <b>any</b> Source."
 			+ "<br/>" + "<b>Priorities:</b> A larger value implies a higher priority." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String STATIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Station Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String STATIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Station Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define type and name for each station" + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String CONNECTIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Station Connections" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String CONNECTIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Station Connections" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Click on table entry (i,j) to connect station i to station j." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String STATIONS_PAR_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Station Parameters" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String STATIONS_PAR_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Station Parameters" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "For each station in the list, define the requested parameters" + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String MEASURES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Performance Indices" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Define system performance indices to be collected and " + "plotted by the simulation engine." + HTML_FONT_NOR_END + HTML_END;
+	public static final String MEASURES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Performance Indices" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Define performance indices to be collected and " + "plotted by the simulation engine." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Simulation Parameters" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Simulation Parameters" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define simulation parameters and initial customer locations." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String BATCH_SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "What-if analysis" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String BATCH_SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "What-if Analysis" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Enable parametric analysis and customize it." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String REFSOURCE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Reference Station" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String REFSOURCE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Reference Station" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define reference station for each closed class. This is used " + "to calculate system throughput for that class." + HTML_FONT_NOR_END
 			+ HTML_END;
 
-	public final static String LDSERVICE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Load Dependent Service Time Distribution" + HTML_FONT_TIT_END
+	public static final String LDSERVICE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Load Dependent Service Time Distribution" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Define the distribution and the values of service times for a range of number of jobs inside "
 			+ "the station. Mean value of the distribution can be specified with an arithmetic "
 			+ "expression, as a function of the current value of 'n' (see Help for operators)." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String PARAMETRIC_ANALYSIS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "What-if analysis" + HTML_FONT_TIT_END
-			+ HTML_FONT_NORM + "Define the type of what-if analysis to be performed and modify parameter options." + HTML_FONT_NOR_END + HTML_END;
+	public static final String PARAMETRIC_ANALYSIS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "What-if Analysis" + HTML_FONT_TIT_END
+			+ HTML_FONT_NORM + "Define the type of What-If analysis to be performed and modify parameter options." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String BLOCKING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Finite Capacity Region Characteristics" + HTML_FONT_TIT_END
+	public static final String BLOCKING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Finite Capacity Region Characteristics" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Define number, name, composition, global and class specific constraints for finite capacity regions."
 			+ HTML_FONT_NOR_END + HTML_END;
 
-	public final static String CONVERSION_WARNING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Conversion performed" + HTML_FONT_TIT_END
+	public static final String CONVERSION_WARNING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Conversion performed" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Input model was automatically converted from <b>%PAR1%</b> to <b>%PAR2%</b>. "
 			+ "The conversion was completed with the warnings shown below" + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String LDROUTING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Description" + HTML_FONT_TIT_END +
+	public static final String LDROUTING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Description" + HTML_FONT_TIT_END +
 			HTML_FONT_NORM + "Customers of each class are routed depending on their number on the current station. " +
 			"The outgoing paths must have associated probabilities that should sum to 1 for each range."
 			+ HTML_FONT_NOR_END + HTML_END;
 
-	public final static String MEASURE_LOG_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Statistical Results CSV file" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Check the 'Stat.Res.' button to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size." + HTML_FONT_NOR_END + HTML_END;
+	public static final String MEASURE_LOG_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Statistical Results CSV file" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Check the 'Stat.Res.' button to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size."
+			+ HTML_FONT_NOR_END + HTML_END;
 
 	// String tokens
 	public static final String PAR1 = "%PAR1%";
@@ -310,6 +311,7 @@ public interface CommonConstants {
 	public static final int MAX_NUMBER_OF_GROUPS = 64;
 
 	public static final String ALL_CLASSES = "--- All Classes ---";
+	public static final String ALL_MODES = "--- All Modes ---";
 	public static final String INFINITE_CAPACITY = "Infinite Capacity";
 
 	// Warnings for missing resources

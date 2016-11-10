@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jwat.workloadAnalysis.panels;
 
 import java.awt.BorderLayout;
@@ -54,10 +55,9 @@ import jmt.gui.jwat.JWatWizard;
 import jmt.gui.jwat.MainJwatWizard;
 
 public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	private String demoDescription = "<HTML>" + "<b>Type of demo:</b> Workload analysis <p>"
 			//+ "<b>Description:</b> This demo has been extracted from an Apache log file selecting only some variables<p>"
 			+ "<b># observations:</b> This demo has 4000 observations related to the visits to a website<p>"
@@ -77,7 +77,7 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 			+ "</HTML>";
 
 	private static final String TEMP_DEMO_NAME_WA = "Demo_WA";
-	private static final String DEMO_FILE = "examples/" + TEMP_DEMO_NAME_WA + "Data.jwat";
+	private static final String DEMO_FILE = EXAMPLE_PATH + TEMP_DEMO_NAME_WA + "Data.jwat";
 	private JButton loadDemo;
 	private boolean canGoOn;
 	private ModelWorkloadAnalysis model;
@@ -108,7 +108,6 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 		demos = new JList(new String[] { TEMP_DEMO_NAME_WA });
 		Font f = demos.getFont();
 		demos.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));
-		//demos.setPreferredSize(new Dimension(150,200));
 		demos.setFixedCellWidth(150);
 		demos.addListSelectionListener(new ListSelectionListener() {
 
@@ -147,11 +146,8 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 				}
 				//Calls loader
 				try {
-					
 					Loader.readData(demoFile.getAbsolutePath(), Loader.loadParameter(demoFile.getParentFile(), TEMP_DEMO_NAME_WA),
 							new ProgressMonitorShow(LoadDemoPanel.this, "Loading Data...", 1000), new InputStatusListener());
-					//Loader.readData("D:/" + TEMP_DEMO_NAME_WA + "Data.jwat", Loader.loadParameter(TEMP_DEMO_NAME_WA),
-							//		new ProgressMonitorShow(LoadDemoPanel.this, "Loading Data...", 1000), new InputStatusListener());
 				} catch (FileNotFoundException ee) {
 					JOptionPane.showMessageDialog(LoadDemoPanel.this, "Loading aborted. File not found.", "ABORT!!", JOptionPane.WARNING_MESSAGE);
 				} catch (IOException ee) {
@@ -169,12 +165,12 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 		public void statusEvent(EventStatus e) {
 
 			switch (e.getType()) {
-				case EventStatus.ABORT_EVENT:
-					abortEvent((EventFinishAbort) e);
-					break;
-				case EventStatus.DONE_EVENT:
-					finishedEvent((EventFinishLoad) e);
-					break;
+			case EventStatus.ABORT_EVENT:
+				abortEvent((EventFinishAbort) e);
+				break;
+			case EventStatus.DONE_EVENT:
+				finishedEvent((EventFinishLoad) e);
+				break;
 			}
 
 		}
@@ -185,7 +181,6 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 			canGoOn = false;
 			((JWatWizard) getParentWizard()).setEnableButton("Next >", false);
 			((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
-
 		}
 
 		//		data loaded
@@ -195,7 +190,6 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 			((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
 			canGoOn = true;
 			((JWatWizard) getParentWizard()).showNextPanel();
-
 		}
 	}
 
@@ -220,7 +214,7 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 	// Chiamata quando dal pannello si torna indietro
 	@Override
 	public boolean canGoBack() {
-		if (JOptionPane.showConfirmDialog(this, "Are you sure want to go back to start screen ?", "Back operation", JOptionPane.YES_NO_OPTION,
+		if (JOptionPane.showConfirmDialog(this, "Are you sure you want to go back to start screen?", "Back operation", JOptionPane.YES_NO_OPTION,
 				JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
 			return false;
 		}
@@ -228,4 +222,5 @@ public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATC
 		parent.resetScreen();
 		return true;
 	}
+
 }

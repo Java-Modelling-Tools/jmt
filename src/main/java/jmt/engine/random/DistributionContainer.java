@@ -2,7 +2,7 @@ package jmt.engine.random;
 
 /**
  * <p>Title:Distribution Container</p>
- * <p>Description: Datastructure that stores a nested distribution</p>
+ * <p>Description: Data structure that stores a nested distribution</p>
  * @author Peter Parapatics
  *			Date: 17-dec-1007
  */

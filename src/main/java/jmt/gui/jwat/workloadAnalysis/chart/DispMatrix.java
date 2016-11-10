@@ -203,8 +203,6 @@ public class DispMatrix extends JScrollPane {
 
 							initShow(10000 * (Elenco.length * Elenco.length));
 
-							int Prog = 0;
-
 							// Disegno dei grafici
 							for (int row = 0; row < Elenco.length; row++) {
 								for (int col = 0; col < Elenco.length; col++) {
@@ -223,40 +221,35 @@ public class DispMatrix extends JScrollPane {
 												* HEIGHT_TOT - (int) bounds.getY() + (HEIGHT_TOT - (int) bounds.getHeight()) / 2);
 										g.setFont(new Font("Arial", Font.PLAIN, 12));
 									} else {
-										// Calcolo del passo del grafico
+										/*// Calcolo del passo del grafico
 										double yFoot = HEIGHT_GRAPH / Elenco[row].getUniStats().getRangeValue();
 										double xFoot = WIDTH_GRAPH / Elenco[col].getUniStats().getRangeValue();
 										// Plottaggio del grafico
 										g.setColor(Color.RED);
 										for (int i = 1; i <= WIDTH_GRAPH; i++) {
 											boolean[] done = new boolean[101];
+											int k = 1;
 											for (int j = Elenco[col].getStartInt(i); j < Elenco[col].getEndInt(i); j++) {
-												int k = 1;
 												if ((int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot) > 0) {
 													if (!done[(int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot)]) {
 														updateInfos(((row * Elenco.length) + (col)) * 10000 + i + (k++), "Plotting scatter "
 																+ ((row * Elenco.length) + (col + 1)), false);
-														g.fillOval(col * WIDTH_TOT + 5 + /* i - 1,*/
-														(int) (((Elenco[col].getValue(j) - Elenco[col].getUniStats().getMinValue())) * xFoot) - 1,
+														g.fillOval(col * WIDTH_TOT + 5 +
+																(int) (((Elenco[col].getValue(j) - Elenco[col].getUniStats().getMinValue())) * xFoot) - 1,
 																(((row + 1) * HEIGHT_TOT) - 5 - (int) (((Elenco[col].getValue(j, row) - Elenco[row]
 																		.getUniStats().getMinValue())) * yFoot)), 1, 1);
 														done[(int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot)] = true;
 													}
 												}
 											}
-
-										}
+										}*/
 									}
 								}
 							}
 						} catch (Exception e) {
 							g.setColor(Color.WHITE);
-							g.fillRect(0, 0, 300, 100);
-							g.setColor(Color.BLACK);
-							g.drawString("With this data the graphic cannot be create", 50, 50);
+							g.fillRect(0, 0, WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1);
 							DispersionPanel.this.repaint();
-							e.printStackTrace();
-
 						}
 						updateInfos(10000 * (Elenco.length * Elenco.length) + 1, "End", false);
 						return null;

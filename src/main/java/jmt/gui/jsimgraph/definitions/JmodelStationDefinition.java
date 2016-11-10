@@ -30,10 +30,11 @@ import jmt.gui.common.definitions.StationDefinition;
  *         Time: 10.08.11
  */
 public interface JmodelStationDefinition extends StationDefinition {
+
 	/**
-	 * Adds a new station to the model. Only type is required as a default name will be set.
-	 * @param type Constant string from JMODELConstants interface.
-	 * @return key of search for newly created station
+	 * Adds a new station to the model, given the station type.
+	 * @param type type of the station.
+	 * @return search key for the new station.
 	 */
 	public Object addStation(String type);
 

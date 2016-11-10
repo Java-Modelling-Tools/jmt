@@ -25,8 +25,10 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -531,7 +533,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 				if (value > 0) {
 					return new Integer(value);
 				} else {
-					return "\u221E"; // Infinity character
+					return "\u221e"; // Infinity character
 				}
 			}
 			case (2): {
@@ -560,7 +562,11 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 			switch (columnIndex) {
 			case (0):
 				try {
-					strategy.setRangeFrom(key, Integer.parseInt((String) aValue));
+					int value = Integer.valueOf((String) aValue);
+					if (value < 2) {
+						return;
+					}
+					strategy.setRangeFrom(key, value);
 				} catch (NumberFormatException e) {
 				}
 			break;
@@ -591,14 +597,12 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 		 */
 		protected String FormatNumber(double d) {
 			DecimalFormat nf = new DecimalFormat();
-			String ret;
-			// If module of number is greater than 1e4 or lesser than 1e-4 uses exponential notation
-			if (Math.abs(d) >= 1e-4 && Math.abs(d) <= 1e4 || d == 0) {
+			nf.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
+			String ret = null;
+			// If module of number is greater than 1e-4 or lesser than 1e4 uses ordinary notation
+			if (Math.abs(d) > 1e-4 && Math.abs(d) < 1e4 || d == 0) {
 				nf.applyPattern("#.####");
 				ret = nf.format(d);
-				if (ret.length() > 7) {
-					ret = ret.substring(0, 6);
-				}
 			} else {
 				nf.applyPattern("0.00E00");
 				ret = nf.format(d);

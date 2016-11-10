@@ -34,6 +34,7 @@ import java.awt.Stroke;
  * @author Ernesto
  */
 public class DrawNormal implements DrawConstrains {
+
 	private static final double START_GAP = 5.0;
 	private static final double ELEM_HEIGHT = 30.0;
 	private static final double ELEM_WIDTH = 20.0;
@@ -44,8 +45,7 @@ public class DrawNormal implements DrawConstrains {
 
 	private static final Font F = new Font("Monospaced", Font.BOLD, 12);
 	private static final Font FN = new Font("Verdana", Font.BOLD, 12);
-	private static final Font FS = new Font("Verdana", Font.BOLD,
-			10);
+	private static final Font FS = new Font("Verdana", Font.BOLD, 10);
 	private static final Font FB = new Font("Verdana", Font.BOLD, 14);
 
 	private static final Stroke S = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
@@ -134,4 +134,5 @@ public class DrawNormal implements DrawConstrains {
 	public Font getBigGUIFont() {
 		return FB;
 	}
+
 }

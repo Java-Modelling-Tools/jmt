@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +40,7 @@ import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 
 
-public class ClassSwitchSectionPanel extends WizardPanel implements
-CommonConstants {
+public class ClassSwitchSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
 
@@ -82,7 +81,7 @@ CommonConstants {
 		if (descriptionLabel != null) {
 			descriptionLabel.setVisible(classData.getClassKeys().size() != 0);
 		}
-		if (classData.getClassKeys().size()>0) {
+		if (classData.getClassKeys().size() > 0) {
 			csTable = new ClassSwitchTable();
 			this.errorRows = new boolean[classData.getClassKeys().size()];
 			this.warningRows = new boolean[classData.getClassKeys().size()];
@@ -148,11 +147,13 @@ CommonConstants {
 	private void checkRowLessThanOne() {
 		boolean allIsOk = true;
 		boolean noWarning = true;
-		for (int i = 0; i < classData.getClassKeys().size(); i++) {
+		Vector<Object> classes = classData.getClassKeys();
+		for (int i = 0; i < classes.size(); i++) {
+			Object classInKey = classes.get(i);
 			float row = 0;
-			for (int j = 0; j < classData.getClassKeys().size(); j++) {
-				row += stationData.getClassSwitchMatrix(stationKey,
-						classData.getClassKeys().get(i), classData.getClassKeys().get(j));
+			for (int j = 0; j < classes.size(); j++) {
+				Object classOutKey = classes.get(j);
+				row += stationData.getClassSwitchMatrix(stationKey, classInKey, classOutKey);
 			}
 			if (row < 1) {
 				allIsOk = false;
@@ -179,16 +180,17 @@ CommonConstants {
 
 	private String getPercValueCell(int row, int col) {
 		float sum = 0;
-		for (int j = 0; j < classData.getClassKeys().size(); j++) {
+		Vector<Object> classes = classData.getClassKeys();
+		for (int j = 0; j < classes.size(); j++) {
 			sum += stationData.getClassSwitchMatrix(stationKey,
-					classData.getClassKeys().get(row), classData.getClassKeys().get(j));
+					classes.get(row), classes.get(j));
 		}
 		if (sum <= 0.0000001) {
 			return "0%";
 		}
-		Float res= stationData.getClassSwitchMatrix(stationKey,
-				classData.getClassKeys().get(row), classData.getClassKeys().get(col)) / sum * 100;
-		return Math.round(res)+"%";
+		float res= stationData.getClassSwitchMatrix(stationKey,
+				classes.get(row), classes.get(col)) / sum * 100;
+		return Math.round(res) + "%";
 	}
 
 	protected class ClassSwitchTable extends ExactTable {
@@ -263,20 +265,17 @@ CommonConstants {
 		}
 
 		public int getColumnCount() {
-			int numClass = classData.getClassKeys().size();
-			return numClass;
+			return classData.getClassKeys().size();
 		}
 
 		@Override
 		public String getColumnName(int columnIndex) {
-			Vector<Object> classes = classData.getClassKeys();
-			return classData.getClassName(classes.get(columnIndex));
+			return classData.getClassName(classData.getClassKeys().get(columnIndex));
 		}
 
 		@Override
 		protected Object getRowName(int rowIndex) {
-			Vector<Object> classes = classData.getClassKeys();
-			return classData.getClassName(classes.get(rowIndex));
+			return classData.getClassName(classData.getClassKeys().get(rowIndex));
 		}
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -313,30 +312,27 @@ CommonConstants {
 			if (!isCellEditable(rowIndex, columnIndex))
 				return null;
 			Vector<Object> classes = classData.getClassKeys();
-			//if (columnIndex == -1) {
-			//	return classData.getClassName(classes.get(rowIndex));
-			//}
 			if (csTable.isCellSelected(rowIndex, columnIndex)) {
 				return stationData.getClassSwitchMatrix(stationKey,
 						classes.get(rowIndex), classes.get(columnIndex));
 			} else {
 				return stationData.getClassSwitchMatrix(stationKey,
-						classes.get(rowIndex), classes.get(columnIndex)) + "  (" + getPercValueCell(rowIndex, columnIndex) + ")";
+						classes.get(rowIndex), classes.get(columnIndex))
+						+ " (" + getPercValueCell(rowIndex, columnIndex) + ")";
 			}
 		}
 
 		@Override
 		public void setValueAt(Object input, int rowIndex, int columnIndex) {
-			Float val;
+			float value;
 			Vector<Object> classes = classData.getClassKeys();
 			try {
-				val = Float.parseFloat((String) input);
+				value = Float.parseFloat((String) input);
 			} catch(Exception e) {
-				val = 0f;
+				value = 0;
 			}
 			stationData.setClassSwitchMatrix(stationKey,
-					classes.get(rowIndex), classes.get(columnIndex),
-					val);
+					classes.get(rowIndex), classes.get(columnIndex), value);
 			checkRowLessThanOne();
 		}
 

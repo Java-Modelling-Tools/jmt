@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.exact.table;
 
 import java.awt.Color;
@@ -16,10 +34,8 @@ import javax.swing.plaf.metal.MetalCheckBoxIcon;
 import javax.swing.table.TableCellRenderer;
 
 public class BooleanCellRenderer extends JCheckBox implements TableCellRenderer {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 612631942604268564L;
+
+	private static final long serialVersionUID = 1L;
 	private static final Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
 
 	public BooleanCellRenderer() {
@@ -40,7 +56,7 @@ public class BooleanCellRenderer extends JCheckBox implements TableCellRenderer 
 		} else {
 			setForeground(table.getSelectionForeground());
 			setBackground(table.getSelectionBackground());
-			setIcon(new MyCheckIcon((Boolean)value));
+			setIcon(new MyCheckIcon((Boolean) value));
 		}
 		if (hasFocus) {
 			setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
@@ -51,14 +67,18 @@ public class BooleanCellRenderer extends JCheckBox implements TableCellRenderer 
 	}
 
 	class MyCheckIcon extends MetalCheckBoxIcon {
-		private Boolean isSelected ;
+
+		private static final long serialVersionUID = 1L;
+		private Boolean isSelected;
+
 		MyCheckIcon(Boolean isSelected) {
 			this.isSelected = isSelected;
 		}
+
 		protected void drawCheck(Component c, Graphics g, int x, int y) {
 			Color old = g.getColor();
-			g.setColor(new Color(250, 250, 250)); // modify this colour to get
-													// diff. coloured ticks
+			// modify this colour to get differently coloured ticks
+			g.setColor(new Color(250, 250, 250));
 
 			int controlSize = getControlSize();
 			g.fillRect(x + 3, y + 5, 2, controlSize - 8);
@@ -72,16 +92,17 @@ public class BooleanCellRenderer extends JCheckBox implements TableCellRenderer 
 		@Override
 		public void paintIcon(Component c, Graphics g, int x, int y) {
 			if (!isSelected) {
-			Color old = g.getColor();
-			g.setColor(new Color(250, 250, 250)); // modify this colour to get
-													// diff. coloured ticks
+				Color old = g.getColor();
+				// modify this colour to get differently coloured ticks
+				g.setColor(new Color(250, 250, 250));
 
-			int controlSize = getControlSize();
-			g.fillRect(x , y  , controlSize, controlSize );
-
-			g.setColor(old);
+				int controlSize = getControlSize();
+				g.fillRect(x , y, controlSize, controlSize);
+				g.setColor(old);
 			}
 			super.paintIcon(c, g, x, y);
 		}
+
 	}
+
 }

@@ -43,8 +43,8 @@ public class EditDefaults extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public EditDefaults(Mediator mediator) {
-		super("Default parameters...", "Options", mediator);
-		putValue(SHORT_DESCRIPTION, "Define default value of model's parameters");
+		super("Default Parameters...", "Options", mediator);
+		putValue(SHORT_DESCRIPTION, "Define default parameters");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_D));
 	}
 

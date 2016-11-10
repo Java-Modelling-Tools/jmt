@@ -34,7 +34,6 @@ public class SessionLoader extends TimeConsumingWorker {
 
 	public SessionLoader(String fileName, ProgressShow prg) throws IOException {
 		super(prg);
-		//System.out.println("NAME " + fileName);
 		zf = new ZipFile(fileName);
 		file = fileName.substring(fileName.lastIndexOf(File.separator) + 1, fileName.lastIndexOf("."));
 		zis = zf.getInputStream(new ZipEntry(file + JwatSession.XMLext));

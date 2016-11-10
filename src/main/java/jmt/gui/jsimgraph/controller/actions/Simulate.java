@@ -45,7 +45,7 @@ public class Simulate extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public Simulate(Mediator mediator) {
-		super("Simulate", "Sim", mediator);
+		super("Start Simulation", "Sim", mediator);
 		putValue(SHORT_DESCRIPTION, "Start simulation");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_MASK));
@@ -56,8 +56,6 @@ public class Simulate extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// 06/10/03 - Massimo Cattai //////////////////////////////////////////
 		mediator.startSimulation();
-		// 06/10/03 - end /////////////////////////////////////////////////////
 	}
 }

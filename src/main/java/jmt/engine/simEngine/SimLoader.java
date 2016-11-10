@@ -108,17 +108,12 @@ public class SimLoader {
 	 * @param xmlPath the <em>absolute</em> path of the xml model definition
 	 */
 	public SimLoader(String xmlPath) throws IOException, LoadException {
-		//NEW
-		//@author Stefano Omini
-
 		simModelPath = xmlPath;
 		//xmlPath = "/home/js/Documents/~JModelSimulation3852173409779516183.xml";
 		//xmlPath = "/home/js/Documents/~JModelSimulation5554792256213153684.xml";
-		//System.out.println(xmlPath);
 		InputStream is = new BufferedInputStream(new FileInputStream(xmlPath));
 		//loads the model and creates a Simulation object
 		load(is);
-		//end NEW
 	}
 
 	private void load(InputStream is) throws LoadException {
@@ -277,12 +272,10 @@ public class SimLoader {
 			if (root.hasAttribute("logDelimiter")) {
 				String temp_ld = root.getAttribute("logDelimiter");
 				simParam.setLogDelimiter(temp_ld);
-
 			}
 			if (root.hasAttribute("logDecimalSeparator")) {
 				String temp_ld = root.getAttribute("logDecimalSeparator");
 				simParam.setLogDecimalSeparator(temp_ld);
-
 			}
 			if (root.hasAttribute("logReplaceMode")) {
 				String temp_lr = root.getAttribute("logReplaceMode");
@@ -563,7 +556,6 @@ public class SimLoader {
 					System.out.println("    using default constructor");
 				}
 				return (NodeSection) c.newInstance();
-
 			} else {
 				//creates the array with all parameters & the array with all their classes
 				Object[] initargs = new Object[parameterList.getLength()];
@@ -968,33 +960,30 @@ public class SimLoader {
 	 * @return the int type of measure
 	 */
 	private int obtainMeasureType(String measure, String referenceNode) {
-		if (measure.equalsIgnoreCase("Queue length")//This is for backward compatibility as previously this index was known as Queue Length
-				|| measure.equalsIgnoreCase("Customer Number")//This is also for backward compatibility as Queue Length it was known as Customer Number
+		if (measure.equalsIgnoreCase("Queue Length")
+				|| measure.equalsIgnoreCase("Customer Number")
 				|| (measure.equalsIgnoreCase("Number of Customers") && !"".equalsIgnoreCase(referenceNode))) {
-			// The above is the present name of the performance index, the AND is used to differentiate it from the old label of System Number of Customers
-			// This Perf Index is not system level so it will always refer to some Node. eg Fork, Queueing Station etc.
 			return SimConstants.QUEUE_LENGTH;
+		} else if (measure.equalsIgnoreCase("Queue Time")) {
+			return SimConstants.QUEUE_TIME;
+		} else if (measure.equalsIgnoreCase("Response Time")) {
+			return SimConstants.RESPONSE_TIME;
+		} else if (measure.equalsIgnoreCase("Residence Time")) {
+			return SimConstants.RESIDENCE_TIME;
 		} else if (measure.equalsIgnoreCase("Utilization")) {
 			return SimConstants.UTILIZATION;
 		} else if (measure.equalsIgnoreCase("Throughput")) {
 			return SimConstants.THROUGHPUT;
-		} else if (measure.equalsIgnoreCase("Response time")) {
-			return SimConstants.RESPONSE_TIME;
-		} else if (measure.equalsIgnoreCase("Residence time")) {
-			return SimConstants.RESIDENCE_TIME;
-		} else if (measure.equalsIgnoreCase("Queue time")) {
-			return SimConstants.QUEUE_TIME;
 		} else if (measure.equalsIgnoreCase("Drop Rate")) {
 			return SimConstants.DROP_RATE;
-		} else if (measure.equalsIgnoreCase("System response time")) {
+		} else if (measure.equalsIgnoreCase("System Response Time")) {
 			return SimConstants.SYSTEM_RESPONSE_TIME;
 		} else if (measure.equalsIgnoreCase("System Throughput")) {
 			return SimConstants.SYSTEM_THROUGHPUT;
-		} else if (measure.equalsIgnoreCase("System Number of Customers")//Present name of this perf Index
-				|| measure.equalsIgnoreCase("System Customer Number")//Previous Name of the Perf Index
-				|| (measure.equalsIgnoreCase("Number of Customers") && "".equalsIgnoreCase(referenceNode))) {//Initial Name of the perf index
-			//Above OR conditions are for the backward compatibility
-			return SimConstants.SYSTEM_JOB_NUMBER;
+		} else if (measure.equalsIgnoreCase("System Number of Customers")
+				|| measure.equalsIgnoreCase("System Customer Number")
+				|| (measure.equalsIgnoreCase("Number of Customers") && "".equalsIgnoreCase(referenceNode))) {
+			return SimConstants.SYSTEM_NUMBER_OF_JOBS;
 		} else if (measure.equalsIgnoreCase("System Drop Rate")) {
 			return SimConstants.SYSTEM_DROP_RATE;
 		} else if (measure.equalsIgnoreCase("System Power")) {
@@ -1007,13 +996,15 @@ public class SimLoader {
 			return SimConstants.FCR_TOTAL_WEIGHT;
 		} else if (measure.equalsIgnoreCase("FCR Memory Occupation")) {
 			return SimConstants.FCR_MEMORY_OCCUPATION;
-		} else if (measure.equalsIgnoreCase("Fork Join Response Time")) {
-			return SimConstants.FORK_JOIN_RESPONSE_TIME;
 		} else if (measure.equalsIgnoreCase("Fork Join Number of Customers")) {
 			return SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
+		} else if (measure.equalsIgnoreCase("Fork Join Response Time")) {
+			return SimConstants.FORK_JOIN_RESPONSE_TIME;
+		} else if (measure.equalsIgnoreCase("Firing Throughput")) {
+			return SimConstants.FIRING_THROUGHPUT;
+		} else {
+			return SimConstants.QUEUE_LENGTH;
 		}
-		//default value
-		return SimConstants.UTILIZATION;
 	}
 
 	/**

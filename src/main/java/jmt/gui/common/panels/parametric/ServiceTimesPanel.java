@@ -174,7 +174,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			classChooser.setEnabled(true);
 			classChooser.setSelectedItem(cd.getClassName(STPA.getReferenceClass()));
 			singleClass.setSelected(true);
-			if ((validC.size() < cd.getClassKeys().size()) || (cd.getClosedClassKeys().size() == 1)) {
+			if (cd.getClosedClassKeys().size() == 1 || validC.size() < cd.getClassKeys().size()) {
 				allClass.setEnabled(false);
 			}
 			allClass.setSelected(false);
@@ -240,7 +240,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			//if the panel is enabled the allClass radioButton can be enabled only if all of the class have a service
 			//time distribution with a mean value, in the reference station contained in STPA.
 			Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());
-			if ((validC.size() < cd.getClassKeys().size()) || (cd.getClassKeys().size() == 1)) {
+			if (cd.getClassKeys().size() == 1 || validC.size() < cd.getClassKeys().size()) {
 				allClass.setEnabled(false);
 			} else {
 				allClass.setEnabled(true);
@@ -361,7 +361,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			public void itemStateChanged(ItemEvent e) {
 				String className = (String) classChooser.getSelectedItem();
 				Object classKey = null;
-				Vector classes = cd.getClassKeys();
+				Vector<Object> classes = cd.getClassKeys();
 				//for cycle used to get the key of the selected class
 				for (int i = 0; i < classes.size(); i++) {
 					if (cd.getClassName(classes.get(i)).equals(className)) {

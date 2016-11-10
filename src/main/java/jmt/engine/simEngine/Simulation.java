@@ -31,14 +31,14 @@ import jmt.engine.NodeSections.BlockingRouter;
 import jmt.engine.NodeSections.Fork;
 import jmt.engine.NodeSections.InputSection;
 import jmt.engine.NodeSections.Join;
-import jmt.engine.NodeSections.Link;
+import jmt.engine.NodeSections.Linkage;
 import jmt.engine.NodeSections.OutputSection;
 import jmt.engine.NodeSections.Queue;
 import jmt.engine.NodeSections.RandomSource;
 import jmt.engine.NodeSections.Router;
 import jmt.engine.NodeSections.ServiceSection;
 import jmt.engine.NodeSections.ServiceTunnel;
-import jmt.engine.NodeSections.Store;
+import jmt.engine.NodeSections.Storage;
 import jmt.engine.NodeSections.Terminal;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.Job;
@@ -371,8 +371,6 @@ public class Simulation {
 				n.getNode().initializeSections();
 			}
 
-			//NEW
-			//@author Stefano Omini
 			//add blocking regions
 			BlockingRegion br;
 			for (int i = 0; i < regions.size(); i++) {
@@ -426,10 +424,8 @@ public class Simulation {
 					NodeSection input = innerNode.getSection(NodeSection.INPUT);
 					if (input instanceof Queue) {
 						((Queue) input).redirectionTurnON(br);
-					} else if (input instanceof Join) {
-						((Join) input).addRegion(br);
-					} else if (input instanceof Store) {
-						((Store) input).redirectionTurnON(br);
+					} else if (input instanceof Storage) {
+						((Storage) input).redirectionTurnON(br);
 					} else {
 						throw new NetException("Error in creating blocking region: " + "inner station " + innerNode.getName()
 						+ " has a not compliant input section.");
@@ -440,10 +436,8 @@ public class Simulation {
 					NodeSection output = innerNode.getSection(NodeSection.OUTPUT);
 					if (output instanceof Router) {
 						((Router) output).borderRouterTurnON(br);
-					} else if (output instanceof Fork) {
-						((Fork) output).addRegion(br);
-					} else if (output instanceof Link) {
-						((Link) output).borderRouterTurnON(br);
+					} else if (output instanceof Linkage) {
+						((Linkage) output).borderRouterTurnON(br);
 					} else {
 						throw new NetException("Error in creating blocking region: " + "inner station " + innerNode.getName()
 						+ " has a not compliant output section.");
@@ -460,32 +454,24 @@ public class Simulation {
 					}
 				}
 			}
-			//end NEW
 
-			//NEW
-			//@author Stefano Omini
 			//refresh nodes list, after input stations has been added
 			netNodes = new NetNode[nodes.size()];
 			for (int i = 0; i < nodes.size(); i++) {
 				netNodes[i] = (nodes.get(i)).getNode();
 			}
-			//end NEW
 
 			//add measures
 			SimMeasure ms;
-
 			for (int i = 0; i < measures.size(); i++) {
 				ms = measures.get(i);
 				boolean verbose = ms.getMeasure().getVerbose();
-
 				if (verbose) {
 					//if true, for each Measure sets the corresponding MeasureOutput
 					//a measure output can be a file (xml, txt, ...) which contains
 					//samples and final report of that measure
-
 					new VerboseCSVMeasureOutput(ms.getMeasure(), simParameters);
 				}
-
 				network.addMeasure(ms.getMeasure());
 			}
 
@@ -493,10 +479,8 @@ public class Simulation {
 			for (int i = 0; i < measures.size(); i++) {
 				ms = measures.get(i);
 
-				//NEW
-				//@author Stefano Omini
 				JobClass jClass;
-				if (ms.getjClass() != "") {
+				if (ms.getjClass() != "" && ms.getMeasureType() != SimConstants.FIRING_THROUGHPUT) {
 					//measure relative to a specified class
 					String[] jName = { ms.getjClass() };
 					int[] position = findClassPosition(jName);
@@ -505,7 +489,6 @@ public class Simulation {
 					//aggregated measure
 					jClass = null;
 				}
-				//end NEW
 
 				// If measure is not global
 				if (ms.getNodeName() != null && !ms.getNodeName().equals("")) {
@@ -514,11 +497,18 @@ public class Simulation {
 
 					switch (ms.getMeasureType()) {
 					case SimConstants.QUEUE_LENGTH:
-						//measures the number of jobs in the global node (=mean number of jobs present in node joblist)
 						netNodes[nodePosition].analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
 						break;
+					case SimConstants.QUEUE_TIME:
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RESPONSE_TIME:
+						netNodes[nodePosition].analyze(SimConstants.LIST_RESPONSE_TIME, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RESIDENCE_TIME:
+						netNodes[nodePosition].analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
+						break;
 					case SimConstants.UTILIZATION:
-						//measures the utilization of the service section (=mean number of jobs present in service section joblist)
 						if (netNodes[nodePosition].getSection(NodeSection.INPUT) instanceof Join) {
 							netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeJoin(SimConstants.UTILIZATION, jClass, ms.getMeasure());
 						} else {
@@ -526,27 +516,13 @@ public class Simulation {
 						}
 						break;
 					case SimConstants.THROUGHPUT:
-						//measures the throughput of the output section (= throughput of output section joblist)
 						if (netNodes[nodePosition].getSection(NodeSection.OUTPUT) instanceof Fork) {
 							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
 						} else {
 							netNodes[nodePosition].getSection(NodeSection.OUTPUT).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
 						}
 						break;
-					case SimConstants.RESPONSE_TIME:
-						//measures the response time for all visits
-						netNodes[nodePosition].analyze(SimConstants.LIST_RESPONSE_TIME, jClass, ms.getMeasure());
-						break;
-					case SimConstants.RESIDENCE_TIME:
-						//measures the response time on the global node (= mean residence time in node joblist)
-						netNodes[nodePosition].analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
-						break;
-					case SimConstants.QUEUE_TIME:
-						//measures the queue time spent in the input section (= mean residence time in input section joblist)
-						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
-						break;
 					case SimConstants.DROP_RATE:
-						// measures the drop rate of the global node
 						netNodes[nodePosition].analyze(SimConstants.LIST_DROP_RATE, jClass, ms.getMeasure());
 						break;
 					case SimConstants.RESPONSE_TIME_PER_SINK:
@@ -561,11 +537,14 @@ public class Simulation {
 					case SimConstants.FCR_MEMORY_OCCUPATION:
 						netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeFCR(SimConstants.FCR_MEMORY_OCCUPATION, ms.getMeasure());
 						break;
+					case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+						netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeFJ(SimConstants.FORK_JOIN_NUMBER_OF_JOBS, jClass, ms.getMeasure());
+						break;
 					case SimConstants.FORK_JOIN_RESPONSE_TIME:
 						netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeFJ(SimConstants.FORK_JOIN_RESPONSE_TIME, jClass, ms.getMeasure());
 						break;
-					case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-						netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeFJ(SimConstants.FORK_JOIN_NUMBER_OF_JOBS, jClass, ms.getMeasure());
+					case SimConstants.FIRING_THROUGHPUT:
+						netNodes[nodePosition].getSection(NodeSection.SERVICE).analyzeTransition(SimConstants.FIRING_THROUGHPUT, ms.getjClass(), ms.getMeasure());
 						break;
 					}
 				}
@@ -578,7 +557,7 @@ public class Simulation {
 					case SimConstants.SYSTEM_THROUGHPUT:
 						network.getJobInfoList().analyzeThroughput(jClass, ms.getMeasure());
 						break;
-					case SimConstants.SYSTEM_JOB_NUMBER:
+					case SimConstants.SYSTEM_NUMBER_OF_JOBS:
 						network.getJobInfoList().analyzeJobNumber(jClass, ms.getMeasure());
 						break;
 					case SimConstants.SYSTEM_DROP_RATE:
@@ -592,8 +571,6 @@ public class Simulation {
 			}
 
 			//Preload
-			//NEW
-			//@author Stefano Omini
 			if (preloadEnabled) {
 				//preload enabled: uses the info loaded by SimLoader
 				for (int s = 0; s < preload_stationNames.length; s++) {
@@ -601,8 +578,6 @@ public class Simulation {
 					preload_station(preload_stationNames[s], preload_initialPopulations[s]);
 				}
 			}
-			//end NEW
-
 		} catch (jmt.common.exception.NetException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -710,9 +685,9 @@ public class Simulation {
 				if (section instanceof Queue) {
 					//preload jobs for each class
 					((Queue) section).preloadJobs(jobs);
-				} else if (section instanceof Store) {
+				} else if (section instanceof Storage) {
 					//preload jobs for each class
-					((Store) section).preloadJobs(jobs);
+					((Storage) section).preloadJobs(jobs);
 				}
 			} catch (NetException e) {
 				return;
@@ -732,8 +707,6 @@ public class Simulation {
 		this.name = name;
 	}
 
-	//NEW
-	//@author Stefano Omini
 	public String getXmlModelDefPath() {
 		return xmlModelDefPath;
 	}
@@ -761,11 +734,7 @@ public class Simulation {
 	public boolean hasFinished() {
 		return finished;
 	}
-	//end NEW
 
-	//TODO: servono per blocking
-	//NEW
-	//@author Stefano Omini
 	public QueueNetwork getNetwork() {
 		return network;
 	}
@@ -952,10 +921,6 @@ public class Simulation {
 				this.node.setSimParameters(simParameters);
 			}
 
-			//OLD
-			//if (inSec instanceof RandomSource) {
-			//NEW
-			//@author Stefano Omini
 			if ((inSec instanceof RandomSource) || (inSec instanceof Terminal)) {
 				reference = true;
 			}

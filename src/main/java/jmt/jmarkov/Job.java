@@ -21,6 +21,7 @@ package jmt.jmarkov;
 import jmt.jmarkov.Queues.Processor;
 
 public class Job implements Cloneable {
+
 	private int jobId;
 	//creationTime: when this object is created(when the previous one is entered in the queue
 	private double creationTime;

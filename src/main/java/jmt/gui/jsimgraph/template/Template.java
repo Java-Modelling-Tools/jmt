@@ -157,7 +157,6 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 		
 		int num = (Integer)number.getValue();
 		
-		
 		//-----------------Adding cells to mediator----------------------//
 		mediator.InsertCell(new JMTPoint(50, YBound + 50 * num, false), fork);
 		mediator.InsertCell(new JMTPoint(300, YBound + 50 * num, false), join);
@@ -172,9 +171,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 			
 			clipboard.copyCell(server);
 			JmtCell sub = clipboard.pasteCell(new JMTPoint(150, YBound + 50 + 100 * i, false));
-			
-			
-			
+
 			mediator.connect(fork, sub);
 			mediator.connect(sub, join);
 			

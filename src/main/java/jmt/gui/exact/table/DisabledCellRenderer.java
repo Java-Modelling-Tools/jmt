@@ -37,16 +37,12 @@ import javax.swing.UIManager;
  */
 public class DisabledCellRenderer extends ExactCellRenderer {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private final Color disabledFGColor = UIManager.getColor("Panel.background");
 	private final Color disabledBGColor = disabledFGColor;
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-
 		setForeground(null);
 		setBackground(null);
 

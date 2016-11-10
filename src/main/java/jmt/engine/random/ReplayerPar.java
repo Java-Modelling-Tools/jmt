@@ -35,12 +35,12 @@ import jmt.gui.common.controller.DispatcherThread;
  *         improved by Spicuglia Sebastiano 10:08 28/05/2011
  */
 public class ReplayerPar extends AbstractParameter implements Parameter {
+
 	private static final double EPSILON = 0.000001d;
-	private static final double DEFAULT_VALUE = 0.000001d; // Used when the file
-															// is a bad one.
+	private static final double DEFAULT_VALUE = 0.000001d;
 															
-	private static String BAD_FILE_MSG = "<html><body>Replayer: empty file, or file with no valid values, <br /> used 0 values.</body></html>";
-	private static String BAD_VALUE_MSG = "<html><body>Replayer: some values of the trace have been discarded <p> (only integer and floating-point numbers allowed).</body></html>";
+	private static final String BAD_FILE_MSG = "<html><body>Replayer: empty file, or file with no valid values, <br /> used 0 values.</body></html>";
+	private static final String BAD_VALUE_MSG = "<html><body>Replayer: some values of the trace have been discarded <p> (only integer and floating-point numbers allowed).</body></html>";
 																
 	private String fileName;
 	private FileReader fr;

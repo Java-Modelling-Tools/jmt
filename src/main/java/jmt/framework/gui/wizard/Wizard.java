@@ -170,9 +170,7 @@ public class Wizard extends JMTFrame {
 
 	protected JTabbedPane makeTabbedPane() {
 		return new JTabbedPane() {
-			/**
-			 * 
-			 */
+
 			private static final long serialVersionUID = 1L;
 
 			/*
@@ -202,7 +200,6 @@ public class Wizard extends JMTFrame {
 					updateActions();
 				}
 			}
-			
 
 			@Override
 			public Component getTabComponentAt(int index) {
@@ -219,6 +216,7 @@ public class Wizard extends JMTFrame {
 				}
 				return obj;
 			}
+
 		};
 	}
 
@@ -239,7 +237,6 @@ public class Wizard extends JMTFrame {
 	 * subclasses!
 	 */
 	protected void finish() {
-
 		currentPanel.lostFocus();
 		dispose();
 	}
@@ -304,7 +301,6 @@ public class Wizard extends JMTFrame {
 		ACTION_PREV.setEnabled(currentIndex > 0);
 		ACTION_CANCEL.setEnabled(true);
 		ACTION_FINISH.setEnabled(panelCount > 0);
-
 	}
 
 	/**
@@ -313,9 +309,9 @@ public class Wizard extends JMTFrame {
 	public void addPanel(WizardPanel p) {
 		p.setParentWizard(this);
 		panels.add(p);
-		int size = tabbedPane.getTabCount();
-		tabbedPane.addTab(null, p);
-		tabbedPane.setTabComponentAt(size, new JLabel(p.getName()));
+		int index = tabbedPane.getTabCount();
+		tabbedPane.insertTab(null, null, p, "", index);
+		tabbedPane.setTabComponentAt(index, new JLabel(p.getName()));
 		panelCount = tabbedPane.getTabCount();
 		if (panelCount == 1) {
 			tabbedPane.setSelectedIndex(0);

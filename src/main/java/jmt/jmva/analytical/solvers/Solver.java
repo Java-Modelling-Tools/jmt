@@ -31,13 +31,13 @@ public abstract class Solver {
 	/**--------------CONSTANTS DEFINITION------------------------*/
 
 	/** constant for Load Dependent service center  */
-	public final static int LD = 0;
+	public static final int LD = 0;
 
 	/** constant for Load Independent service center  */
-	public final static int LI = 1;
+	public static final int LI = 1;
 
 	/** constant for delay center*/
-	public final static int DELAY = 2;
+	public static final int DELAY = 2;
 
 	/**---------------MODEL DEFINITION------------------------*/
 

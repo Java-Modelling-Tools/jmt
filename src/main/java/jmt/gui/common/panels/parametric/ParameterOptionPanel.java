@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.common.panels.parametric;
 
 import java.awt.Color;
@@ -35,11 +36,8 @@ import jmt.gui.common.definitions.StationDefinition;
  *         Date: 9-mar-2006
  *         Time: 16.12.06
  */
-
 public abstract class ParameterOptionPanel extends JSplitPane {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	Color DEFAULT_TITLE_COLOR = new TitledBorder("").getTitleColor();
 	TitledBorder title = new TitledBorder("Parameter options");
@@ -59,7 +57,7 @@ public abstract class ParameterOptionPanel extends JSplitPane {
 
 	public Object getClassKey(String name) {
 		Object key = null;
-		Vector classes = cd.getClassKeys();
+		Vector<Object> classes = cd.getClassKeys();
 		for (int i = 0; i < classes.size(); i++) {
 			if (cd.getClassName(classes.get(i)).equals(name)) {
 				key = classes.get(i);
@@ -70,7 +68,7 @@ public abstract class ParameterOptionPanel extends JSplitPane {
 
 	public Object getStationKey(String name) {
 		Object key = null;
-		Vector stations = sd.getStationKeys();
+		Vector<Object> stations = sd.getStationKeys();
 		for (int i = 0; i < stations.size(); i++) {
 			if (sd.getStationName(stations.get(i)).equals(name)) {
 				key = stations.get(i);

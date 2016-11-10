@@ -139,7 +139,7 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 			}
 			//if there is only one class available or if the "all class" simulation is not available
 			//disable the allClass radio button
-			if ((validC.size() < cd.getOpenClassKeys().size()) || (cd.getOpenClassKeys().size() == 1)) {
+			if (cd.getOpenClassKeys().size() == 1 || validC.size() < cd.getOpenClassKeys().size()) {
 				allClass.setEnabled(false);
 			}
 			classChooser.removeAllItems();
@@ -219,7 +219,7 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 			//if the panel is enabled the allClass radioButton can be enabled only if all of the class have a service
 			//time distribution with a mean value, in the reference station contained in STPA.
 			Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvailableClasses();
-			if ((validC.size() < cd.getOpenClassKeys().size() || (cd.getOpenClassKeys().size() == 1))) {
+			if (cd.getOpenClassKeys().size() == 1 || validC.size() < cd.getOpenClassKeys().size()) {
 				allClass.setEnabled(false);
 			} else {
 				allClass.setEnabled(true);
@@ -338,7 +338,7 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 			public void itemStateChanged(ItemEvent e) {
 				String className = (String) classChooser.getSelectedItem();
 				Object classKey = null;
-				Vector classes = cd.getClassKeys();
+				Vector<Object> classes = cd.getClassKeys();
 				//for cycle used to get the key of the selected class
 				for (int i = 0; i < classes.size(); i++) {
 					if (cd.getClassName(classes.get(i)).equals(className)) {

@@ -113,7 +113,7 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 	 */
 	@Override
 	public int checkCorrectness(boolean autocorrect) {
-		if ((classDef.getClassKeys().isEmpty()) && (stationDef.getStationKeys().isEmpty())) {
+		if (classDef.getClassKeys().isEmpty() && stationDef.getStationKeys().isEmpty()) {
 			return 2;
 		} else {
 			return 0;

@@ -94,7 +94,6 @@ public final class Arrivals {
 
 	public void animate(Job job, double time) {
 		notifyGraphics("animate", job.getJobId(), time);
-
 	}
 
 	public Arrivals(QueueLogic ql, JobQueue q) {
@@ -148,7 +147,6 @@ public final class Arrivals {
 	 */
 	private double getInterarrivalTime() throws NoJobsException {
 		return ql.getArrivalTime();
-
 	}
 
 	/**

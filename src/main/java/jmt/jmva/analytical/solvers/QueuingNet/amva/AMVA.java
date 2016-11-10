@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.QueuingNet.amva;
+package jmt.jmva.analytical.solvers.QueuingNet.AMVA;
 
 /**
  * This class implements the abstract superclass for approximate MVA algorithms for solving multi-closed models
@@ -7,7 +7,7 @@ package jmt.jmva.analytical.solvers.QueuingNet.amva;
  *
  */
 public abstract class AMVA extends SolverMulti {
-	public final static double DEFAULT_TOLERANCE = Math.pow(10, -7);
+	public static final double DEFAULT_TOLERANCE = Math.pow(10, -7);
 	protected double tolerance = DEFAULT_TOLERANCE;
 	protected int MAX_ITERATIONS = Integer.MAX_VALUE;
 	protected int[] clsPopulation;

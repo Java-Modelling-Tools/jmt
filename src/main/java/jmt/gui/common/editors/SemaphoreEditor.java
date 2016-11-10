@@ -51,7 +51,7 @@ import jmt.gui.exact.table.ExactCellEditor;
 public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
-	private int semaphoreThres;
+	private int threshold;
 	private Map<Object, Integer> firingMix;
 	private StationDefinition stations;
 	private Object stationKey, classKey;
@@ -121,7 +121,7 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 	}
 
 	private void createDetails(SemaphoreStrategy ss, StationDefinition sd, Object stationKey, Object classKey) {
-		semaphoreThres = ss.getSemaphoreThres();
+		threshold = ss.getThreshold();
 		stations = sd;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
@@ -131,7 +131,7 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 	}
 
 	private void updateSpinner() {
-		jNumField.setValue(semaphoreThres);
+		jNumField.setValue(threshold);
 		jNumField.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -140,8 +140,8 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 					i = new Integer(1);
 					jNumField.setValue(i);
 				}
-				SemaphoreStrategy ss = (SemaphoreStrategy) stations.getSemaphoreStrategy(stationKey, classKey);				
-				ss.setSemaphoreThres(i);
+				SemaphoreStrategy ss = (SemaphoreStrategy) stations.getSemaphoreStrategy(stationKey, classKey);
+				ss.setThreshold(i);
 			}
 		});
 	}
@@ -177,7 +177,7 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		public int[] columnSizes = new int[] { 40, 100 };
 
 		public MixTableModel(ClassDefinition cs) {
-			this.cs = cs;                                    
+			this.cs = cs;
 		}
 
 		public int getRowCount() {
@@ -193,12 +193,12 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		} 
 
 		@Override
-		public String getColumnName(int columnIndex) {			
-			return columnNames[columnIndex];	
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
 		}
 
 		@Override
-		public Class<?> getColumnClass(int columnIndex) {		
+		public Class<?> getColumnClass(int columnIndex) {
 			return columnClasses[columnIndex];
 		}
 

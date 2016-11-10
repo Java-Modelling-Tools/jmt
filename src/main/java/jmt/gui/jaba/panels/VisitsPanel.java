@@ -32,6 +32,7 @@ import javax.swing.ScrollPaneConstants;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.gui.jaba.JabaConstants;
@@ -186,6 +187,7 @@ public final class VisitsPanel extends WizardPanel implements JabaConstants, For
 		VisitTable() {
 			super(new VisitTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
+			setRowHeight(CommonConstants.ROW_HEIGHT);
 
 			setDisplaysScrollLabels(true);
 			help.addHelp(this,
@@ -201,7 +203,6 @@ public final class VisitsPanel extends WizardPanel implements JabaConstants, For
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
 			setClipboardTransferEnabled(true);
-
 		}
 
 	}

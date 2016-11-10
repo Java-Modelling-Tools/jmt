@@ -52,6 +52,7 @@ import jmt.engine.random.EmpiricalEntry;
 import jmt.framework.data.MacroReplacer;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
@@ -107,9 +108,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	public static final String strategiesClasspathBase = "jmt.engine.NetStrategies.";
 	public static final String queueGetStrategiesSuffix = "QueueGetStrategies.";
 	public static final String queuePutStrategiesSuffix = "QueuePutStrategies.";
-	public static final String routingStrategiesSuffix = "RoutingStrategies.";
 	public static final String serviceStrategiesSuffix = "ServiceStrategies.";
-	public static final String transitionStrategiesSuffix = "TransitionStrategies.";
+	public static final String routingStrategiesSuffix = "RoutingStrategies.";
+	public static final String transitionUtilitiesSuffix = "TransitionUtilities.";
 	public static final String distributionContainerClasspath = "jmt.engine.random.DistributionContainer";
 
 	public static void writeXML(String fileName, CommonModel model) {
@@ -136,20 +137,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			transformer.transform(new DOMSource(doc), new StreamResult(
 					new File(fileName)));
 		} catch (TransformerConfigurationException e) {
-			e.printStackTrace(); // To change body of catch statement use
-			// Options | File Templates.
-		} catch (TransformerFactoryConfigurationError transformerFactoryConfigurationError) {
-			transformerFactoryConfigurationError.printStackTrace(); // To change
-			// body of
-			// catch
-			// statement
-			// use
-			// Options |
-			// File
-			// Templates.
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
 		} catch (TransformerException e) {
-			e.printStackTrace(); // To change body of catch statement use
-			// Options | File Templates.
+			e.printStackTrace();
 		}
 	}
 
@@ -180,20 +172,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			transformer.setOutputProperty("encoding", ENCODING);
 			transformer.transform(new DOMSource(modelDoc), res);
 		} catch (TransformerConfigurationException e) {
-			e.printStackTrace(); // To change body of catch statement use
-			// Options | File Templates.
-		} catch (TransformerFactoryConfigurationError transformerFactoryConfigurationError) {
-			transformerFactoryConfigurationError.printStackTrace(); // To change
-			// body of
-			// catch
-			// statement
-			// use
-			// Options |
-			// File
-			// Templates.
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
 		} catch (TransformerException e) {
-			e.printStackTrace(); // To change body of catch statement use
-			// Options | File Templates.
+			e.printStackTrace();
 		}
 	}
 
@@ -206,23 +189,23 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		elem.setAttribute("xmlns:xsi",
 				"http://www.w3.org/2001/XMLSchema-instance");
 		// Simulation seed - Bertoli Marco
-		if (!model.getUseRandomSeed()) {
+		if (!model.getUseRandomSeed().booleanValue()) {
 			elem.setAttribute(XML_A_ROOT_SEED, model.getSimulationSeed()
 					.toString());
 		}
 		// Max simulation time - Bertoli Marco
-		if (model.getMaximumDuration().longValue() > 0) {
+		if (model.getMaximumDuration().doubleValue() > 0) {
 			elem.setAttribute(XML_A_ROOT_DURATION, model.getMaximumDuration()
 					.toString());
 		}
 		// Max simulated time (not real time, but time in system of the simulated process)
-		if (model.getMaxSimulatedTime().longValue() > 0) {
+		if (model.getMaxSimulatedTime().doubleValue() > 0) {
 			elem.setAttribute(XML_A_ROOT_SIMULATED, model.getMaxSimulatedTime()
 					.toString());
 		}
 		// Polling interval - Bertoli Marco
-		elem.setAttribute(XML_A_ROOT_POLLING,
-				Double.toString(model.getPollingInterval()));
+		elem.setAttribute(XML_A_ROOT_POLLING, model
+				.getPollingInterval().toString());
 		// Max Samples - Bertoli Marco
 		elem.setAttribute(XML_A_ROOT_MAXSAMPLES, model
 				.getMaxSimulationSamples().toString());
@@ -253,11 +236,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 	static protected void writeClasses(Document doc, Node simNode,
 			CommonModel model) {
-		Vector<?> v = model.getClassKeys();
-		for (int i = 0; i < v.size(); i++) {
-			Object classKey = v.get(i);
-			String classType = model.getClassType(classKey) == CLASS_TYPE_CLOSED ? "closed"
-					: "open";
+		for (Object classKey : model.getClassKeys()) {
+			String classType = (model.getClassType(classKey) == CLASS_TYPE_OPEN) ?
+					"open" : "closed";
 			Element userClass = doc.createElement(XML_E_CLASS);
 			String[] attrsNames = new String[] { XML_A_CLASS_NAME,
 					XML_A_CLASS_TYPE, XML_A_CLASS_PRIORITY,
@@ -266,7 +247,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					classType,
 					String.valueOf(model.getClassPriority(classKey)),
 					String.valueOf(model.getClassPopulation(classKey)),
-					getSourceNameForClass(classKey, doc, model), };
+					getSourceNameForClass(classKey, doc, model) };
 			for (int j = 0; j < attrsNames.length; j++) {
 				if (attrsValues[j] != null && !"null".equals(attrsValues[j])) {
 					userClass.setAttribute(attrsNames[j], attrsValues[j]);
@@ -278,20 +259,18 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 	/**
 	 * This method returns the name of the reference source for a class to be
-	 * inserted into userclass elemnt's attribute.
+	 * inserted into userclass element's attribute.
 	 */
 	static protected String getSourceNameForClass(Object classKey,
 			Document doc, CommonModel model) {
-		if (CommonConstants.STATION_TYPE_CLASSSWITCH.equals(model.getClassRefStation(classKey)))
-			return CommonConstants.STATION_TYPE_CLASSSWITCH;
-		if (CommonConstants.STATION_TYPE_FORK.equals(model.getClassRefStation(classKey)))
-			return CommonConstants.STATION_TYPE_FORK;
-		if (CommonConstants.STATION_TYPE_SCALER.equals(model.getClassRefStation(classKey)))
-			return CommonConstants.STATION_TYPE_SCALER;
-		if (model.getClassRefStation(classKey) != null) {
-			return model.getStationName(model.getClassRefStation(classKey));
+		Object refStationKey = model.getClassRefStation(classKey);
+		if (STATION_TYPE_FORK.equals(refStationKey)
+				|| STATION_TYPE_CLASSSWITCH.equals(refStationKey)
+				|| STATION_TYPE_SCALER.equals(refStationKey)
+				|| STATION_TYPE_TRANSITION.equals(refStationKey)) {
+			return (String) refStationKey;
 		} else {
-			return null;
+			return model.getStationName(model.getClassRefStation(classKey));
 		}
 	}
 
@@ -301,7 +280,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 	static protected void writeStations(Document doc, Node simNode,
 			CommonModel model) {
-		Vector<?> stations = model.getStationKeys();
+		Vector<Object> stations = model.getStationKeys();
 		Element elem;
 		for (int i = 0; i < stations.size(); i++) {
 			elem = doc.createElement(XML_E_STATION);
@@ -356,9 +335,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeForkSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_PLACE.equals(stationType)) {
-				writeStoreSection(doc, elem, model, stationKey);
+				writeStorageSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
-				writeLinkSection(doc, elem, model, stationKey);
+				writeLinkageSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_TRANSITION.equals(stationType)) {
 				writeEnablingSection(doc, elem, model, stationKey);
 				writeTimingSection(doc, elem, model, stationKey);
@@ -403,20 +382,20 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		block.appendParameterElement(doc, fork);
 		isSim.appendParameterElement(doc, fork);
 
-		Vector<?> classes = model.getClassKeys();
-		XMLParameter[] forkingStrats = new XMLParameter[classes.size()];
+		Vector<Object> classes = model.getClassKeys();
+		XMLParameter[] forkStrats = new XMLParameter[classes.size()];
 		Object currentClass;
-		for (int i = 0; i < forkingStrats.length; i++) {
+		for (int i = 0; i < forkStrats.length; i++) {
 			currentClass = classes.get(i);
-			forkingStrats[i] = ForkingStrategyWriter
-					.getForkingStrategyParameter((ForkStrategy) model
-							.getForkingStrategy(stationKey, currentClass),
+			forkStrats[i] = ForkStrategyWriter
+					.getForkStrategyParameter((ForkStrategy) model
+							.getForkStrategy(stationKey, currentClass),
 							model, currentClass, stationKey);
 		}
-		XMLParameter globalForking = new XMLParameter("ForkStrategy",
-				strategiesClasspathBase + "ForkStrategy", null, forkingStrats,
+		XMLParameter globalFork = new XMLParameter("ForkStrategy",
+				strategiesClasspathBase + "ForkStrategy", null, forkStrats,
 				false);
-		globalForking.appendParameterElement(doc, fork);
+		globalFork.appendParameterElement(doc, fork);
 	}
 
 	/**
@@ -438,7 +417,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		join.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_JOIN);
 		node.appendChild(join);
 
-		Vector<?> classes = model.getClassKeys();
+		Vector<Object> classes = model.getClassKeys();
 		XMLParameter[] joinStrats = new XMLParameter[classes.size()];
 		Object currentClass;
 		for (int i = 0; i < joinStrats.length; i++) {
@@ -472,7 +451,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		semaphore.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_SEMAPHORE);
 		node.appendChild(semaphore);
 
-		Vector<?> classes = model.getClassKeys();
+		Vector<Object> classes = model.getClassKeys();
 		XMLParameter[] semaphoreStrats = new XMLParameter[classes.size()];
 		Object currentClass;
 		for (int i = 0; i < semaphoreStrats.length; i++) {
@@ -544,11 +523,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		queueLength.appendParameterElement(doc, queue);
 
 		// Drop policies. They are different for each customer class
-		XMLParameter[] queueDropStrategies = new XMLParameter[model
-		                                                      .getClassKeys().size()];
+		Vector<Object> classes = model.getClassKeys();
+		XMLParameter[] queueDropStrategies = new XMLParameter[classes.size()];
 		XMLParameter queueDropStrategy = new XMLParameter("dropStrategies",
 				String.class.getName(), null, queueDropStrategies, false);
-		Vector<?> classes = model.getClassKeys();
 		for (int i = 0; i < queueDropStrategies.length; i++) {
 			String dropStrategy = model.getDropRule(stationKey, classes.get(i));
 			queueDropStrategies[i] = new XMLParameter("dropStrategy",
@@ -581,8 +559,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 * At last, queue put parameter, which can be defined differently for
 		 * each customer class, so a more complex parameter structure is required
 		 */
-		XMLParameter[] queuePutStrategies = new XMLParameter[model
-		                                                     .getClassKeys().size()];
+		XMLParameter[] queuePutStrategies = new XMLParameter[classes.size()];
 		XMLParameter queuePutStrategy = new XMLParameter("NetStrategy",
 				strategiesClasspathBase + "QueuePutStrategy", null,
 				queuePutStrategies, false);
@@ -591,10 +568,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					classes.get(i));
 			Map<String, String> map = priority ? PRIORITY_QUEUE_PUT_MAPPING
 					: QUEUE_PUT_MAPPING;
-			String queueputStrategyName = map.get(queueStrategy);
-			queuePutStrategies[i] = new XMLParameter(queueputStrategyName,
+			String queuePutStrategyName = map.get(queueStrategy);
+			queuePutStrategies[i] = new XMLParameter(queuePutStrategyName,
 					strategiesClasspathBase + queuePutStrategiesSuffix
-					+ queueputStrategyName, model.getClassName(classes
+					+ queuePutStrategyName, model.getClassName(classes
 							.get(i)), (String) null, true);
 		}
 		queuePutStrategy.appendParameterElement(doc, queue);
@@ -605,9 +582,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
 		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_TERMINAL);
 		node.appendChild(elem);
-		Vector<?> classes = model.getClassKeys();
+		Vector<Object> classes = model.getClassKeys();
 		// obtain classes that must be generated by this terminal
-		Vector<?> refClasses = getClassesForTerminal(model, stationKey);
+		Vector<Object> refClasses = getClassesForTerminal(model, stationKey);
 		XMLParameter[] distrParams = new XMLParameter[classes.size()];
 		for (int i = 0; i < distrParams.length; i++) {
 			// if current class must be generated by this terminal
@@ -643,7 +620,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		}
 
 		node.appendChild(elem);
-		Vector<?> classes = model.getClassKeys();
+		Vector<Object> classes = model.getClassKeys();
 		// creating number of servers node element
 		Integer maxJobs = model.getStationNumberOfServers(stationKey);
 		XMLParameter numOfServers = new XMLParameter("maxJobs",
@@ -675,7 +652,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	 */
 	protected static XMLParameter getServiceSection(CommonModel model,
 			Object stationKey) {
-		Vector<?> classes = model.getClassKeys();
+		Vector<Object> classes = model.getClassKeys();
 		// creating set of service time distributions
 		XMLParameter[] distrParams = new XMLParameter[classes.size()];
 		Object currentClass;
@@ -837,7 +814,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_ROUTER);
 		node.appendChild(elem);
 		// creating list of parameters for each single routing strategy
-		Vector<?> classes = model.getClassKeys();
+		Vector<Object> classes = model.getClassKeys();
 		XMLParameter[] routingStrats = new XMLParameter[classes.size()];
 		Object currentClass;
 		for (int i = 0; i < routingStrats.length; i++) {
@@ -857,7 +834,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	 * Adds to @doc the tags to store a class
 	 * switch section of a node.
 	 * @param doc the xml where you want to add clas_switch section
-	 * @param node the node owner of the class_switch section
+	 * @param node the node owner of the class switch section
 	 * @param model 
 	 * @param stationKey the station implementing class switching
 	 */
@@ -867,9 +844,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_CLASSSWITCH);
 		node.appendChild(elem);
 		//Data-structure to xml
-		Float 	val;
-		Object 	classInKey 		= null;
-		Object 	classOutKey 	= null;
+		float 	value;
+		Object 	classInKey;
+		Object 	classOutKey;
 		XMLParameter matrix;
 		XMLParameter rows[];
 		Vector<Object> classes;
@@ -881,8 +858,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			classInKey = classes.get(i);
 			for (int j = 0; j < classes.size(); j++) {
 				classOutKey = classes.get(j);
-				val = model.getClassSwitchMatrix(stationKey, classInKey, classOutKey);
-				cells[j] = new XMLParameter("cell", "java.lang.Float", model.getClassName(classOutKey), val.toString(), true);
+				value = model.getClassSwitchMatrix(stationKey, classInKey, classOutKey);
+				cells[j] = new XMLParameter("cell", "java.lang.Float", model.getClassName(classOutKey), Float.toString(value), true);
 			}
 			rows[i] = new XMLParameter("row", "java.lang.Float", model.getClassName(classInKey), cells, true);
 		}
@@ -890,21 +867,33 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		matrix.appendParameterElement(doc, elem);
 	}
 
-	static protected void writeStoreSection(Document doc, Node node,
+	static protected void writeStorageSection(Document doc, Node node,
 			CommonModel model, Object stationKey) {
-		// Store Section
+		// Storage Section
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
-		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_STORE);
+		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_STORAGE);
 		node.appendChild(elem);
 
-		// Capacity
-		Integer ivalue = model.getStationQueueCapacity(stationKey);
-		XMLParameter capacity = new XMLParameter("capacity",
-				Integer.class.getName(), null, ivalue.toString(), false);
-		capacity.appendParameterElement(doc, elem);
+		// Total Capacity
+		Integer totalCap = model.getStationQueueCapacity(stationKey);
+		XMLParameter totalCapacity = new XMLParameter("totalCapacity",
+				Integer.class.getName(), null, totalCap.toString(), false);
+		totalCapacity.appendParameterElement(doc, elem);
+
+		// Capacities
+		Vector<Object> classes = model.getClassKeys();
+		XMLParameter[] capacity = new XMLParameter[classes.size()];
+		for (int i = 0; i < capacity.length; i++) {
+			Integer cap = model.getQueueCapacity(stationKey, classes.get(i));
+			capacity[i] = new XMLParameter("capacity",
+					Integer.class.getName(), model.getClassName(classes.get(i)),
+					cap.toString(), true);
+		}
+		XMLParameter capacities = new XMLParameter("capacities",
+				Integer.class.getName(), null, capacity, false);
+		capacities.appendParameterElement(doc, elem);
 
 		// Drop Rules
-		Vector<Object> classes = model.getClassKeys();
 		XMLParameter[] dropRule = new XMLParameter[classes.size()];
 		for (int i = 0; i < dropRule.length; i++) {
 			String rule = model.getDropRule(stationKey, classes.get(i));
@@ -937,11 +926,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		putStrategies.appendParameterElement(doc, elem);
 	}
 
-	static protected void writeLinkSection(Document doc, Node node,
+	static protected void writeLinkageSection(Document doc, Node node,
 			CommonModel model, Object stationKey) {
-		// Link Section
+		// Linkage Section
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
-		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_LINK);
+		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_LINKAGE);
 		node.appendChild(elem);
 	}
 
@@ -953,60 +942,74 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		node.appendChild(elem);
 
 		// Enabling Conditions
-		Vector<Object> classes = model.getClassKeys();
-		Vector<Object> stationsIn = model.getBackwardConnections(stationKey);
-		XMLParameter[] enablingCondition = new XMLParameter[classes.size()];
+		Vector<Object> stationInKeys = model.getBackwardConnections(stationKey);
+		Vector<Object> classKeys = model.getClassKeys();
+		XMLParameter[] enablingCondition = new XMLParameter[model.getTransitionModeListSize(stationKey)];
 		for (int i = 0; i < enablingCondition.length; i++) {
-			XMLParameter[] enablingEntry = new XMLParameter[stationsIn.size()];
-			for (int j = 0; j < enablingEntry.length; j++) {
-				Integer ivalue = model.getEnablingCondition(stationKey, classes.get(i), stationsIn.get(j));
+			XMLParameter[] enablingVector = new XMLParameter[stationInKeys.size()];
+			for (int j = 0; j < enablingVector.length; j++) {
+				XMLParameter[] enablingEntry = new XMLParameter[classKeys.size()];
+				for (int k = 0; k < enablingEntry.length; k++) {
+					Integer ivalue = model.getEnablingCondition(stationKey, i,
+							stationInKeys.get(j), classKeys.get(k));
+					enablingEntry[k] = new XMLParameter("enablingEntry",
+							Integer.class.getName(), model.getClassName(classKeys.get(k)),
+							ivalue.toString(), true);
+				}
 				XMLParameter stationName = new XMLParameter("stationName",
-						String.class.getName(), null, model.getStationName(stationsIn.get(j)), true);
-				XMLParameter numberOfJobs = new XMLParameter("numberOfJobs",
-						Integer.class.getName(), null, ivalue.toString(), true);
-				enablingEntry[j] = new XMLParameter("enablingEntry",
-						strategiesClasspathBase + transitionStrategiesSuffix + "TransitionEntry",
-						null, new XMLParameter[] { stationName, numberOfJobs }, true);
-				enablingEntry[j].parameterArray = "false";
+						String.class.getName(), null, model.getStationName(stationInKeys.get(j)), true);
+				XMLParameter enablingEntries = new XMLParameter("enablingEntries",
+						Integer.class.getName(), null, enablingEntry, true);
+				enablingVector[j] = new XMLParameter("enablingVector",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+						null, new XMLParameter[] { stationName, enablingEntries }, true);
+				enablingVector[j].parameterArray = "false";
 			}
-			XMLParameter enablingEntries = new XMLParameter("enablingEntries",
-					strategiesClasspathBase + transitionStrategiesSuffix + "TransitionEntry",
-					null, enablingEntry, true);
+			XMLParameter enablingVectors = new XMLParameter("enablingVectors",
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+					null, enablingVector, true);
 			enablingCondition[i] = new XMLParameter("enablingCondition",
-					strategiesClasspathBase + transitionStrategiesSuffix + "TransitionVector",
-					model.getClassName(classes.get(i)), new XMLParameter[] { enablingEntries }, true);
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+					null, new XMLParameter[] { enablingVectors }, true);
 			enablingCondition[i].parameterArray = "false";
 		}
 		XMLParameter enablingConditions = new XMLParameter("enablingConditions",
-				strategiesClasspathBase + transitionStrategiesSuffix + "TransitionVector",
+				strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
 				null, enablingCondition, false);
 		enablingConditions.appendParameterElement(doc, elem);
 
 		// Inhibiting Conditions
-		XMLParameter[] inhibitingCondition = new XMLParameter[classes.size()];
+		XMLParameter[] inhibitingCondition = new XMLParameter[model.getTransitionModeListSize(stationKey)];
 		for (int i = 0; i < inhibitingCondition.length; i++) {
-			XMLParameter[] inhibitingEntry = new XMLParameter[stationsIn.size()];
-			for (int j = 0; j < inhibitingEntry.length; j++) {
-				Integer ivalue = model.getInhibitingCondition(stationKey, classes.get(i), stationsIn.get(j));
+			XMLParameter[] inhibitingVector = new XMLParameter[stationInKeys.size()];
+			for (int j = 0; j < inhibitingVector.length; j++) {
+				XMLParameter[] inhibitingEntry = new XMLParameter[classKeys.size()];
+				for (int k = 0; k < inhibitingEntry.length; k++) {
+					Integer ivalue = model.getInhibitingCondition(stationKey, i,
+							stationInKeys.get(j), classKeys.get(k));
+					inhibitingEntry[k] = new XMLParameter("inhibitingEntry",
+							Integer.class.getName(), model.getClassName(classKeys.get(k)),
+							ivalue.toString(), true);
+				}
 				XMLParameter stationName = new XMLParameter("stationName",
-						String.class.getName(), null, model.getStationName(stationsIn.get(j)), true);
-				XMLParameter numberOfJobs = new XMLParameter("numberOfJobs",
-						Integer.class.getName(), null, ivalue.toString(), true);
-				inhibitingEntry[j] = new XMLParameter("inhibitingEntry",
-						strategiesClasspathBase + transitionStrategiesSuffix + "TransitionEntry",
-						null, new XMLParameter[] { stationName, numberOfJobs }, true);
-				inhibitingEntry[j].parameterArray = "false";
+						String.class.getName(), null, model.getStationName(stationInKeys.get(j)), true);
+				XMLParameter inhibitingEntries = new XMLParameter("inhibitingEntries",
+						Integer.class.getName(), null, inhibitingEntry, true);
+				inhibitingVector[j] = new XMLParameter("inhibitingVector",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+						null, new XMLParameter[] { stationName, inhibitingEntries }, true);
+				inhibitingVector[j].parameterArray = "false";
 			}
-			XMLParameter inhibitingEntries = new XMLParameter("inhibitingEntries",
-					strategiesClasspathBase + transitionStrategiesSuffix + "TransitionEntry",
-					null, inhibitingEntry, true);
+			XMLParameter inhibitingVectors = new XMLParameter("inhibitingVectors",
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+					null, inhibitingVector, true);
 			inhibitingCondition[i] = new XMLParameter("inhibitingCondition",
-					strategiesClasspathBase + transitionStrategiesSuffix + "TransitionVector",
-					model.getClassName(classes.get(i)), new XMLParameter[] { inhibitingEntries }, true);
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+					null, new XMLParameter[] { inhibitingVectors }, true);
 			inhibitingCondition[i].parameterArray = "false";
 		}
 		XMLParameter inhibitingConditions = new XMLParameter("inhibitingConditions",
-				strategiesClasspathBase + transitionStrategiesSuffix + "TransitionVector",
+				strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
 				null, inhibitingCondition, false);
 		inhibitingConditions.appendParameterElement(doc, elem);
 	}
@@ -1018,25 +1021,39 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_TIMING);
 		node.appendChild(elem);
 
-		// Number of Servers
-		Integer ivalue = model.getStationNumberOfServers(stationKey);
-		XMLParameter numberOfServers = new XMLParameter("numberOfServers",
-				Integer.class.getName(), null, ivalue.toString(), false);
-		numberOfServers.appendParameterElement(doc, elem);
+		// Modes Names
+		XMLParameter[] modeName = new XMLParameter[model.getTransitionModeListSize(stationKey)];
+		for (int i = 0; i < modeName.length; i++) {
+			String name = model.getTransitionModeName(stationKey, i);
+			modeName[i] = new XMLParameter("modeName",
+					String.class.getName(), null, name, true);
+		}
+		XMLParameter modeNames = new XMLParameter("modeNames",
+				String.class.getName(), null, modeName, false);
+		modeNames.appendParameterElement(doc, elem);
+
+		// Numbers of Servers
+		XMLParameter[] numberOfServers = new XMLParameter[model.getTransitionModeListSize(stationKey)];
+		for (int i = 0; i < numberOfServers.length; i++) {
+			Integer number = model.getNumberOfServers(stationKey, i);
+			numberOfServers[i] = new XMLParameter("numberOfServers",
+					Integer.class.getName(), null, number.toString(), true);
+		}
+		XMLParameter numbersOfServers = new XMLParameter("numbersOfServers",
+				Integer.class.getName(), null, numberOfServers, false);
+		numbersOfServers.appendParameterElement(doc, elem);
 
 		// Timing Strategies
-		Vector<?> classes = model.getClassKeys();
-		XMLParameter[] timingStrategy = new XMLParameter[classes.size()];
+		XMLParameter[] timingStrategy = new XMLParameter[model.getTransitionModeListSize(stationKey)];
 		for (int i = 0; i < timingStrategy.length; i++) {
-			Object strategy = model.getServiceTimeDistribution(stationKey, classes.get(i));
+			Object strategy = model.getFiringTimeDistribution(stationKey, i);
 			if (strategy instanceof Distribution) {
 				timingStrategy[i] = DistributionWriter.getDistributionParameter(
-						(Distribution) strategy, model, classes.get(i));
+						(Distribution) strategy, model, null);
 				timingStrategy[i].parameterName = "timingStrategy";
 			} else {
 				timingStrategy[i] = new XMLParameter("timingStrategy",
-						ZeroStrategy.getEngineClassPath(),
-						model.getClassName(classes.get(i)), (String) null, true);
+						ZeroStrategy.getEngineClassPath(), null, (String) null, true);
 			}
 		}
 		XMLParameter timingStrategies = new XMLParameter("timingStrategies",
@@ -1044,27 +1061,25 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		timingStrategies.appendParameterElement(doc, elem);
 
 		// Firing Priorities
-		XMLParameter[] firingPriority = new XMLParameter[classes.size()];
+		XMLParameter[] firingPriority = new XMLParameter[model.getTransitionModeListSize(stationKey)];
 		for (int i = 0; i < firingPriority.length; i++) {
-			Integer priority = model.getFiringPriority(stationKey, classes.get(i));
+			Integer priority = model.getFiringPriority(stationKey, i);
 			firingPriority[i] = new XMLParameter("firingPriority",
-					Integer.class.getName(), model.getClassName(classes.get(i)),
-					priority.toString(), true);
+					Integer.class.getName(), null, priority.toString(), true);
 		}
 		XMLParameter firingPriorities = new XMLParameter("firingPriorities",
 				Integer.class.getName(), null, firingPriority, false);
 		firingPriorities.appendParameterElement(doc, elem);
 
 		// Firing Weights
-		XMLParameter[] firingWeight = new XMLParameter[classes.size()];
+		XMLParameter[] firingWeight = new XMLParameter[model.getTransitionModeListSize(stationKey)];
 		for (int i = 0; i < firingWeight.length; i++) {
-			Integer weight = model.getFiringWeight(stationKey, classes.get(i));
+			Double weight = model.getFiringWeight(stationKey, i);
 			firingWeight[i] = new XMLParameter("firingWeight",
-					Integer.class.getName(), model.getClassName(classes.get(i)),
-					weight.toString(), true);
+					Double.class.getName(), null, weight.toString(), true);
 		}
 		XMLParameter firingWeights = new XMLParameter("firingWeights",
-				Integer.class.getName(), null, firingWeight, false);
+				Double.class.getName(), null, firingWeight, false);
 		firingWeights.appendParameterElement(doc, elem);
 	}
 
@@ -1076,32 +1091,39 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		node.appendChild(elem);
 
 		// Firing Outcomes
-		Vector<Object> classes = model.getClassKeys();
-		Vector<Object> stationsOut = model.getForwardConnections(stationKey);
-		XMLParameter[] firingOutcome = new XMLParameter[classes.size()];
+		Vector<Object> stationOutKeys = model.getForwardConnections(stationKey);
+		Vector<Object> classKeys = model.getClassKeys();
+		XMLParameter[] firingOutcome = new XMLParameter[model.getTransitionModeListSize(stationKey)];
 		for (int i = 0; i < firingOutcome.length; i++) {
-			XMLParameter[] firingEntry = new XMLParameter[stationsOut.size()];
-			for (int j = 0; j < firingEntry.length; j++) {
-				Integer ivalue = model.getFiringOutcome(stationKey, classes.get(i), stationsOut.get(j));
+			XMLParameter[] firingVector = new XMLParameter[stationOutKeys.size()];
+			for (int j = 0; j < firingVector.length; j++) {
+				XMLParameter[] firingEntry = new XMLParameter[classKeys.size()];
+				for (int k = 0; k < firingEntry.length; k++) {
+					Integer ivalue = model.getFiringOutcome(stationKey, i,
+							stationOutKeys.get(j), classKeys.get(k));
+					firingEntry[k] = new XMLParameter("firingEntry",
+							Integer.class.getName(), model.getClassName(classKeys.get(k)),
+							ivalue.toString(), true);
+				}
 				XMLParameter stationName = new XMLParameter("stationName",
-						String.class.getName(), null, model.getStationName(stationsOut.get(j)), true);
-				XMLParameter numberOfJobs = new XMLParameter("numberOfJobs",
-						Integer.class.getName(), null, ivalue.toString(), true);
-				firingEntry[j] = new XMLParameter("firingEntry",
-						strategiesClasspathBase + transitionStrategiesSuffix + "TransitionEntry",
-						null, new XMLParameter[] { stationName, numberOfJobs }, true);
-				firingEntry[j].parameterArray = "false";
+						String.class.getName(), null, model.getStationName(stationOutKeys.get(j)), true);
+				XMLParameter firingEntries = new XMLParameter("firingEntries",
+						Integer.class.getName(), null, firingEntry, true);
+				firingVector[j] = new XMLParameter("firingVector",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+						null, new XMLParameter[] { stationName, firingEntries }, true);
+				firingVector[j].parameterArray = "false";
 			}
-			XMLParameter firingEntries = new XMLParameter("firingEntries",
-					strategiesClasspathBase + transitionStrategiesSuffix + "TransitionEntry",
-					null, firingEntry, true);
+			XMLParameter firingVectors = new XMLParameter("firingVectors",
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+					null, firingVector, true);
 			firingOutcome[i] = new XMLParameter("firingOutcome",
-					strategiesClasspathBase + transitionStrategiesSuffix + "TransitionVector",
-					model.getClassName(classes.get(i)), new XMLParameter[] { firingEntries }, true);
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+					null, new XMLParameter[] { firingVectors }, true);
 			firingOutcome[i].parameterArray = "false";
 		}
 		XMLParameter firingOutcomes = new XMLParameter("firingOutcomes",
-				strategiesClasspathBase + transitionStrategiesSuffix + "TransitionVector",
+				strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
 				null, firingOutcome, false);
 		firingOutcomes.appendParameterElement(doc, elem);
 	}
@@ -1110,12 +1132,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	// source station
 	static protected Vector<Object> getClassesForSource(CommonModel model,
 			Object stationKey) {
-		Vector<Object> keys = model.getClassKeys();
 		Vector<Object> classes = new Vector<Object>();
-		for (int i = 0; i < keys.size(); i++) {
-			if (CLASS_TYPE_OPEN == model.getClassType(keys.get(i))
-					&& model.getClassRefStation(keys.get(i)) == stationKey) {
-				classes.add(keys.get(i));
+		for (Object key : model.getOpenClassKeys()) {
+			if (model.getClassRefStation(key) == stationKey) {
+				classes.add(key);
 			}
 		}
 		return classes;
@@ -1125,12 +1145,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	// terminal station
 	static protected Vector<Object> getClassesForTerminal(CommonModel model,
 			Object stationKey) {
-		Vector<Object> keys = model.getClassKeys();
 		Vector<Object> classes = new Vector<Object>();
-		for (int i = 0; i < keys.size(); i++) {
-			if (CLASS_TYPE_CLOSED == model.getClassType(keys.get(i))
-					&& model.getClassRefStation(keys.get(i)) == stationKey) {
-				classes.add(keys.get(i));
+		for (Object key : model.getClosedClassKeys()) {
+			if (model.getClassRefStation(key) == stationKey) {
+				classes.add(key);
 			}
 		}
 		return classes;
@@ -1141,13 +1159,15 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	 *-----------------------------------------------------------------------------------*/
 	static protected void writeMeasures(Document doc, Node simNode,
 			CommonModel model) {
-		Vector<?> v = model.getMeasureKeys();
+		Vector<Object> v = model.getMeasureKeys();
 		for (int i = 0; i < v.size(); i++) {
 			Element elem = doc.createElement(XML_E_MEASURE);
 			Object key = v.get(i);
-			String station = model.getStationName(model.getMeasureStation(key)), userClass = model
-					.getClassName(model.getMeasureClass(key)), type = model
-					.getMeasureType(v.get(i));
+			String type = model.getMeasureType(key);
+			String station = model.getStationName(model.getMeasureStation(key));
+			String userClass = (type.equals(SimulationDefinition.MEASURE_FX))
+					? (String) model.getMeasureClass(key)
+					: model.getClassName(model.getMeasureClass(key));
 			elem.setAttribute(XML_A_MEASURE_TYPE, type);
 			String name = "";
 			// This is a region measure
@@ -1178,8 +1198,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			double alpha = 1 - model.getMeasureAlpha(key).doubleValue();
 			alpha = Math.rint(alpha * 1e10) / 1e10;
 			elem.setAttribute(XML_A_MEASURE_ALPHA, Double.toString(alpha));
-			elem.setAttribute(XML_A_MEASURE_PRECISION, model
-					.getMeasurePrecision(key).toString());
+			elem.setAttribute(XML_A_MEASURE_PRECISION, model.getMeasurePrecision(key).toString());
 			elem.setAttribute(XML_A_MEASURE_NAME, name);
 			elem.setAttribute(XML_A_MEASURE_VERBOSE, Boolean.toString(model.getMeasureLog(key)));
 			simNode.appendChild(elem);
@@ -1191,7 +1210,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	 *-----------------------------------------------------------------------------------*/
 	static protected void writeConnections(Document doc, Node simNode,
 			CommonModel model) {
-		Vector<?> stations = model.getStationKeys();
+		Vector<Object> stations = model.getStationKeys();
 		String[] stationNames = new String[stations.size()];
 		for (int i = 0; i < stationNames.length; i++) {
 			stationNames[i] = model.getStationName(stations.get(i));
@@ -1214,8 +1233,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	static protected void writePreload(Document doc, Node simNode,
 			CommonModel model) {
 		// Finds if and where preloading is needed
-		Vector<?> stations = model.getStationKeys();
-		Vector<?> classes = model.getClassKeys();
+		Vector<Object> stations = model.getStationKeys();
+		Vector<Object> classes = model.getClassKeys();
 		// A map containing all stations that need preloading
 		Vector<Element> p_stations = new Vector<Element>();
 		for (int stat = 0; stat < stations.size(); stat++) {
@@ -1261,7 +1280,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	--------------------------------- Bertoli Marco ------------------------------------*/
 	static protected void writeBlockingRegions(Document doc, Node simNode,
 			CommonModel model) {
-		Vector<?> regions = model.getRegionKeys();
+		Vector<Object> regions = model.getRegionKeys();
 		for (int reg = 0; reg < regions.size(); reg++) {
 			Object key = regions.get(reg);
 			Element region = doc.createElement(XML_E_REGION);
@@ -1272,7 +1291,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			region.setAttribute(XML_A_REGION_TYPE, model.getRegionType(key));
 
 			// Adds nodes (stations) to current region
-			Iterator<?> stations = model.getBlockingRegionStations(key)
+			Iterator<Object> stations = model.getBlockingRegionStations(key)
 					.iterator();
 			while (stations.hasNext()) {
 				Element node = doc.createElement(XML_E_REGIONNODE);
@@ -1295,7 +1314,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			region.appendChild(memoryConstraint);
 
 			// Adds class constraints
-			Iterator<?> classes = model.getClassKeys().iterator();
+			Iterator<Object> classes = model.getClassKeys().iterator();
 			while (classes.hasNext()) {
 				Object classKey = classes.next();
 				Element classConstraint = doc
@@ -1585,7 +1604,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					/*
 					 * although this parameter contains several others, array
 					 * attribute must be set to "false", as their type are not
-					 * neccessarily equal
+					 * necessarily equal
 					 */
 					returnValue.parameterArray = "false";
 					return returnValue;
@@ -1677,58 +1696,33 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			return routingStrategy;
 		}
 
-		/*
-		 * private static void normalizeProbabilities(Map values, Vector
-		 * outputKeys) { Double[] probabilities = new Double[outputKeys.size()];
-		 * Object[] keys = new Object[outputKeys.size()];
-		 * outputKeys.toArray(keys); //extract all values from map in array form
-		 * for (int i=0; i<keys.length; i++) { probabilities[i] =
-		 * (Double)values.get(keys[i]); } values.clear(); //scan for null values
-		 * and for total sum double totalSum = 0.0; int totalNonNull = 0;
-		 * boolean allNull = true; for (int i=0; i<probabilities.length; i++) {
-		 * if (probabilities[i]!=null) { totalSum +=
-		 * probabilities[i].doubleValue(); totalNonNull++; allNull = false; } }
-		 * //modify non null values for their sum to match 1 and put null values
-		 * to 1 for (int i=0; i<probabilities.length; i++) {
-		 * if (probabilities[i]!=null || allNull) { if (totalSum==0) {
-		 * probabilities[i] = new Double(1.0/(double)totalNonNull); } else {
-		 * probabilities[i] = new
-		 * Double(probabilities[i].doubleValue()/totalSum); } } else {
-		 * probabilities[i] = new Double(0.0); } values.put(keys[i],
-		 * probabilities[i]); } }
-		 */
 	}
 
-	protected static class ForkingStrategyWriter {
+	protected static class ForkStrategyWriter {
 
-		static XMLParameter getForkingStrategyParameter(
-				ForkStrategy forkingStrat, CommonModel model, Object classKey,
+		static XMLParameter getForkStrategyParameter(
+				ForkStrategy forkStrat, CommonModel model, Object classKey,
 				Object stationKey) {
-			if (forkingStrat instanceof ProbabilitiesFork) {
+			if (forkStrat instanceof ProbabilitiesFork) {
 				// parameter containing array of empirical entries
 				ArrayList<XMLParameter> outPathEntries = new ArrayList<XMLParameter>();
-				XMLParameter[] innerForkingPar = null;
-				if (forkingStrat.getOutDetails() != null
-						&& forkingStrat instanceof ProbabilitiesFork) {
+				XMLParameter[] innerForkPar = null;
+				if (forkStrat.getOutDetails() != null
+						&& forkStrat instanceof ProbabilitiesFork) {
 					XMLParameter outPathPar = null;
 					Vector<Object> outputs = model
 							.getForwardConnections(stationKey);
-					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) forkingStrat.getOutDetails();
-					// model.normalizeProbabilities(values, outputs, classKey,
-					// stationKey);
+					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) forkStrat.getOutDetails();
+					// model.normalizeProbabilities(values, outputs, classKey, stationKey);
 					ArrayList<XMLParameter> outPathArray = new ArrayList<XMLParameter>();
-					// XMLParameter[] empiricalEntries = new
-					// XMLParameter[outputs
-					// .size()];
+					// XMLParameter[] empiricalEntries = new XMLParameter[outputs.size()];
 					// for (int i = 0; i < outPathArray.length; i++) {
 					for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
 						Map<Object, Double> map = (Map) entry.getValue().getOutParameters();
 						//M Cazzoli
 						model.normalizeProbabilitiesFork(map);
 						//end
-
-						// XMLParameter[] empiricalEntries = new
-						// XMLParameter[map.size()];
+						// XMLParameter[] empiricalEntries = new XMLParameter[map.size()];
 						ArrayList<XMLParameter> empiricalEntries = new ArrayList<XMLParameter>();
 
 						XMLParameter stationDest = new XMLParameter(
@@ -1745,9 +1739,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 						outUnitProb.parameterArray = "false";
 						for (Map.Entry<Object, Double> subEntry : map
 								.entrySet()) {
-
 							if (subEntry.getKey() != null) {
-
 								XMLParameter numOfJobs = new XMLParameter(
 										"numbers", String.class.getName(), null,
 										subEntry.getKey().toString(), true);
@@ -1763,7 +1755,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 										true);
 								numEntry.parameterArray = "false";
 								empiricalEntries.add(numEntry);
-
 							}
 						}
 						XMLParameter JobsPerLinkDis = new XMLParameter(
@@ -1782,32 +1773,31 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 						outPathEntries.add(outPathEntry);
 					}
 
-					XMLParameter probForkingPar = new XMLParameter(
+					XMLParameter probForkPar = new XMLParameter(
 							"EmpiricalEntryArray",
 							jmt.engine.NetStrategies.ForkStrategies.OutPath.class
 							.getName(), null, outPathEntries
 							.toArray(new XMLParameter[outPathEntries
 							                          .size()]), true);
-					innerForkingPar = new XMLParameter[] { probForkingPar };
-
+					innerForkPar = new XMLParameter[] { probForkPar };
 				}
 				// creating parameter for empirical strategy: must be null if
 				// routing is empirical
-				XMLParameter forkingStrategy = new XMLParameter(
-						forkingStrat.getName(), forkingStrat.getClassPath(),
-						model.getClassName(classKey), innerForkingPar, true);
-				forkingStrategy.parameterArray = "false";
-				return forkingStrategy;
-			} else if (forkingStrat instanceof CombFork) {
-				Map<Object, Double> probs = (Map<Object, Double>) forkingStrat.getOutDetails();
+				XMLParameter forkStrategy = new XMLParameter(
+						forkStrat.getName(), forkStrat.getClassPath(),
+						model.getClassName(classKey), innerForkPar, true);
+				forkStrategy.parameterArray = "false";
+				return forkStrategy;
+			} else if (forkStrat instanceof CombFork) {
+				Map<Object, Double> probs = (Map<Object, Double>) forkStrat.getOutDetails();
 				// M Cazzoli
 				// check sum of probabilities equals 1
 				int n = 0;
-				for (Object o: model.getForwardConnections(stationKey)) {
-					if (model.getStationType(o).equals(
-							CommonConstants.STATION_TYPE_SINK)
-							&& model.getClassType(classKey) == CommonConstants.CLASS_TYPE_CLOSED) {
-						n++;
+				if (model.getClassType(classKey) == CLASS_TYPE_CLOSED) {
+					for (Object o: model.getForwardConnections(stationKey)) {
+						if (model.getStationType(o).equals(STATION_TYPE_SINK)) {
+							n++;
+						}
 					}
 				}
 				n = probs.size() - n;
@@ -1830,28 +1820,24 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				}
 				XMLParameter entryArray = new XMLParameter("EmpiricalEntry",
 						EmpiricalEntry.class.getName(), null, combParam, true);
-				XMLParameter forkingStrategy = new XMLParameter(
-						forkingStrat.getName(), forkingStrat.getClassPath(),
+				XMLParameter forkStrategy = new XMLParameter(
+						forkStrat.getName(), forkStrat.getClassPath(),
 						model.getClassName(classKey),
 						new XMLParameter[] { entryArray }, true);
-				forkingStrategy.parameterArray = "false";
-				return forkingStrategy;
-			} else if (forkingStrat instanceof MultiBranchClassSwitchFork || forkingStrat instanceof ClassSwitchFork) {
+				forkStrategy.parameterArray = "false";
+				return forkStrategy;
+			} else if (forkStrat instanceof MultiBranchClassSwitchFork || forkStrat instanceof ClassSwitchFork) {
 				// parameter containing array of empirical entries
-				XMLParameter[] innerForkingPar = null;
-				if (forkingStrat.getOutDetails() != null) {
-					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) forkingStrat.getOutDetails();
-					// model.normalizeProbabilities(values, outputs, classKey,
-					// stationKey);
+				XMLParameter[] innerForkPar = null;
+				if (forkStrat.getOutDetails() != null) {
+					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) forkStrat.getOutDetails();
+					// model.normalizeProbabilities(values, outputs, classKey, stationKey);
 					ArrayList<XMLParameter> classNumArray = new ArrayList<XMLParameter>();
-					// XMLParameter[] empiricalEntries = new
-					// XMLParameter[outputs
-					// .size()];
+					// XMLParameter[] empiricalEntries = new XMLParameter[outputs.size()];
 					// for (int i = 0; i < outPathArray.length; i++) {
 					for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
 						Map<Object, Integer> map = (Map) entry.getValue().getOutParameters();
-						// XMLParameter[] empiricalEntries = new
-						// XMLParameter[map.size()];
+						// XMLParameter[] empiricalEntries = new XMLParameter[map.size()];
 						ArrayList<XMLParameter> classes = new ArrayList<XMLParameter>();
 						ArrayList<XMLParameter> numbers = new ArrayList<XMLParameter>();
 
@@ -1859,9 +1845,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 								"stationName", String.class.getName(), null,
 								(String) entry.getValue().getOutName(), true);
 						for (Object c: model.getClassKeys()) {
-
 							if (map.get(c) != null) {
-
 								XMLParameter jobClass = new XMLParameter(
 										"class", String.class.getName(), null,
 										model.getClassName(c), true);
@@ -1870,7 +1854,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 										"numberOfJobs", String.class.getName(), null,
 										map.get(c).toString(), true);
 								numbers.add(jobNum);
-
 							}
 						}
 						XMLParameter classesPar = new XMLParameter(
@@ -1902,20 +1885,19 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 							.getName(), null, classNumArray
 							.toArray(new XMLParameter[classNumArray
 							                          .size()]), true);
-					innerForkingPar = new XMLParameter[] { classSwitchForkPar };
+					innerForkPar = new XMLParameter[] { classSwitchForkPar };
 
 				}
 				// creating parameter for empirical strategy: must be null if
 				// routing is empirical
-				XMLParameter forkingStrategy = new XMLParameter(
-						forkingStrat.getName(), forkingStrat.getClassPath(),
-						model.getClassName(classKey), innerForkingPar, true);
-				forkingStrategy.parameterArray = "false";
-				return forkingStrategy;
+				XMLParameter forkStrategy = new XMLParameter(
+						forkStrat.getName(), forkStrat.getClassPath(),
+						model.getClassName(classKey), innerForkPar, true);
+				forkStrategy.parameterArray = "false";
+				return forkStrategy;
 			} else {
 				return null;
 			}
-
 		}
 
 	}
@@ -1942,7 +1924,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				ArrayList<XMLParameter> classes = new ArrayList<XMLParameter>();
 				ArrayList<XMLParameter> numbers = new ArrayList<XMLParameter>();
 				for (Object c: model.getClassKeys()) {
-
 					if (map.get(c) != null) {
 						XMLParameter jobClass = new XMLParameter(
 								"class", String.class.getName(), null,
@@ -1973,77 +1954,29 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 						new XMLParameter[] { classesPar, numbersPar }, true);
 				joinStrategy.parameterArray = "false";
 				return joinStrategy;
-
 			} else {
 				return null;
 			}
 		}
+
 	}
 
 	protected static class SemaphoreStrategyWriter {
 
 		static XMLParameter getSemaphoreStrategyParameter(SemaphoreStrategy semaphoreStrat,
 				CommonModel model, Object classKey, Object stationKey) {
-			//if (semaphoreStrat instanceof NormalSemaphore) {
-			XMLParameter SemThres = new XMLParameter("SemThres",
+			XMLParameter threshold = new XMLParameter("threshold",
 					Integer.class.getName(), null,
-					((Integer) semaphoreStrat.getSemaphoreThres()).toString(), true);
+					((Integer) semaphoreStrat.getThreshold()).toString(), true);
 			String name = semaphoreStrat.getName();
 			String classPath = semaphoreStrat.getClassPath();
 			XMLParameter semaphoreStrategy = new XMLParameter(
 					name, classPath, model.getClassName(classKey),
-					new XMLParameter[] { SemThres }, true);
+					new XMLParameter[] { threshold }, true);
 			semaphoreStrategy.parameterArray = "false";
 			return semaphoreStrategy;
-			//} else {
-			//	return null;
-			//}
-
-			/*//if (semaphoreStrat instanceof NormalSemaphore) {
-				String name = semaphoreStrat.getName();
-				String classPath = semaphoreStrat.getClassPath();
-
-				Map<Object, Integer> map = ((NormalSemaphore) semaphoreStrat).getSemaphore();
-				ArrayList<XMLParameter> classes = new ArrayList<XMLParameter>();
-				ArrayList<XMLParameter> numbers = new ArrayList<XMLParameter>();
-				for (Object c: model.getClassKeys()) {						
-					//if (map.get(c) != null) {
-					XMLParameter jobClass = new XMLParameter(
-							"class", String.class.getName(), null,
-							model.getClassName(c), true);
-					classes.add(jobClass);
-					if (map.get(c) == null) {
-						map.put(c, 0);
-					}
-					XMLParameter jobNum = new XMLParameter(
-							"required", String.class.getName(), null,
-							map.get(c).toString(), true);
-					numbers.add(jobNum);
-					//}
-				}
-
-				XMLParameter classesPar = new XMLParameter(
-						"Classes",
-						String.class.getName(),
-						null,
-						classes.toArray(new XMLParameter[classes.size()]),
-						true);
-				XMLParameter numbersPar = new XMLParameter(
-						"Numbers",
-						String.class.getName(),
-						null,
-						numbers.toArray(new XMLParameter[numbers.size()]),
-						true);
-
-				XMLParameter semaphoreStrategy = new XMLParameter(
-						name, classPath, model.getClassName(classKey),
-						new XMLParameter[] { classesPar, numbersPar }, true);
-				semaphoreStrategy.parameterArray = "false";
-				return semaphoreStrategy;
-			//} else {
-			//	return null;
-			//}*/
 		}
+
 	}
 
 }

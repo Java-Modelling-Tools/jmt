@@ -134,7 +134,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 
 	/*public void startParametricAnalysis() {
 		// If a time maximum time is specified, initialize all stuff related
-		if (simd.getMaximumDuration().longValue() > 0) {
+		if (simd.getMaximumDuration().doubleValue() > 0) {
 			timer = new TimerThread(this, simd.getMaximumDuration().doubleValue());
 		}
 		gui.changeSimActionsState(false, true, true);
@@ -160,7 +160,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 			simulationFile.deleteOnExit();
 			XMLWriter.writeXML(simulationFile, (CommonModel) simd);
 			simulator = new Dispatcher_jSIMschema(simulationFile);
-			if (simd.getMaximumDuration().longValue() > 0) {
+			if (simd.getMaximumDuration().doubleValue() > 0) {
 				timer = new PATimerThread(simulator, simd.getMaximumDuration().doubleValue());
 				timer.start();
 			}
@@ -185,11 +185,10 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 			results = new StoredResultsModel();
 			XMLResultsReader.parseXML(doc, results);
 			for (int i = 0; i < results.getMeasureNumber(); i++) {
-				Vector thisMes = results.getValues(i);
+				Vector thisResult = results.getValues(i);
 				int measureState = results.getMeasureState(i);
-				Object value = thisMes.get(0);
-				boolean valid;
-				valid = measureState == MeasureDefinition.MEASURE_SUCCESS;
+				Object value = thisResult.get(0);
+				boolean valid = (measureState == MeasureDefinition.MEASURE_SUCCESS);
 				//valueSet[i].add(value);
 				//validityMap[i].add(Boolean.valueOf(valid));
 				MeasureValue tempValue = (MeasureValue) value;

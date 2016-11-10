@@ -48,7 +48,6 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
-import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 
 /**
  * <p>Title: Blocking Region Parameter Panel</p>
@@ -75,8 +74,6 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 
 	protected BlockingRegionClassPanel classTablePanel;
 	protected BlockingRegionGroupPanel groupTablePanel;
-	/** Used to display classes with icon */
-	protected ImagedComboBoxCellEditorFactory classEditor;
 
 	protected JTabbedPane mainPanel;
 	protected WizardPanel current;
@@ -94,7 +91,6 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		this.cd = cd;
 		this.brd = brd;
 		this.key = key;
-		classEditor = new ImagedComboBoxCellEditorFactory(cd);
 		initComponents();
 		setData(cd, brd, key);
 		addActions();
@@ -110,9 +106,9 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		this.cd = cd;
 		this.brd = brd;
 		this.key = key;
-		classEditor.setData(cd);
 
 		mainPanel.removeAll();
+		mainPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), brd.getRegionName(key) + " Specific Properties"));
 		if (classTablePanel == null) {
 			classTablePanel = new BlockingRegionClassPanel(cd, brd, key);
 		} else {
@@ -243,7 +239,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 					brd.setRegionCustomerConstraint(key, Integer.valueOf(-1));
 				} else {
 					Integer num = Defaults.getAsInteger("blockingMaxJobs");
-					if (num.intValue() <= 0) {
+					if (num.intValue() < 1) {
 						num = Integer.valueOf(1);
 					}
 					number.setValue(num);
@@ -261,7 +257,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 					brd.setRegionMemorySize(key, Integer.valueOf(-1));
 				} else {
 					Integer memorySize = Defaults.getAsInteger("blockingMaxMemory");
-					if (memorySize.intValue() <= 0) {
+					if (memorySize.intValue() < 1) {
 						memorySize = Integer.valueOf(1);
 					}
 					memory.setValue(memorySize);
@@ -437,7 +433,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 
 	protected void addGroup() {
 		groupNameIndex++;
-		brd.addRegionGroup(key,Defaults.get("blockingGroupName") + groupNameIndex,
+		brd.addRegionGroup(key, Defaults.get("blockingGroupName") + groupNameIndex,
 				Defaults.getAsInteger("blockingGroupCapacity").intValue(),
 				Defaults.get("blockingGroupStratagy"));
 		refreshComponents();

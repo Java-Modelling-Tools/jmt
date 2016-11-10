@@ -22,10 +22,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -163,25 +161,25 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		JTabbedPane mainPanel = new JTabbedPane();
 		this.getContentPane().setLayout(new BorderLayout());
 		this.getContentPane().add(mainPanel, BorderLayout.CENTER);
-		addTabPane(mainPanel, "Number of Customers", DESCRIPTION_QUEUELENGTHS, results.getQueueLengthMeasures());
-		addTabPane(mainPanel, "Queue Time", DESCRIPTION_QUEUETIMES, results.getQueueTimeMeasures());
-		addTabPane(mainPanel, "Residence Time", DESCRIPTION_RESIDENCETIMES, results.getResidenceTimeMeasures());
-		addTabPane(mainPanel, "Response Time", DESCRIPTION_RESPONSETIMES, results.getResponseTimeMeasures());
-		addTabPane(mainPanel, "Utilization", DESCRIPTION_UTILIZATIONS, results.getUtilizationMeasures());
-		addTabPane(mainPanel, "Throughput", DESCRIPTION_THROUGHPUTS, results.getThroughputMeasures());
-		addTabPane(mainPanel, "Drop Rate", DESCRIPTION_DROPRATE, results.getDropRateMeasures());
-		addTabPane(mainPanel, "System Throughput", DESCRIPTION_SYSTEMTHROUGHPUTS, results.getSystemThroughputMeasures());
-		addTabPane(mainPanel, "System Response Time", DESCRIPTION_SYSTEMRESPONSETIMES, results.getSystemResponseTimeMeasures());
-		addTabPane(mainPanel, "System Drop Rate", DESCRIPTION_DROPRATE, results.getSystemDropRateMeasures());
-		addTabPane(mainPanel, "System Number of Customers", DESCRIPTION_CUSTOMERNUMBERS, results.getCustomerNumberMeasures());
-		//Added by ASHANKA START
-		//Adds the System Power panel in the results window.
-		addTabPane(mainPanel, "System Power", DESCRIPTION_SYSTEMPOWER, results.getSystemPowerMeasures());
-		//Added by ASHANKA STOP
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_R_PER_SINK, DESCRIPTION_RESPONSETIME_SINK, results.getResponsetimePerSinkMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_SINK, results.getThroughputPerSinkMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CN, results.getFJCustomerNumberMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RESPONSE_TIME, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_QL, DESCRIPTION_QUEUE_LENGTH, results.getQueueLengthMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_QT, DESCRIPTION_QUEUE_TIME, results.getQueueTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP, DESCRIPTION_RESPONSE_TIME, results.getResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_RD, DESCRIPTION_RESIDENCE_TIME, results.getResidenceTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_U, DESCRIPTION_UTILIZATION, results.getUtilizationMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_X, DESCRIPTION_THROUGHPUT, results.getThroughputMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_DR, DESCRIPTION_DROP_RATE, results.getDropRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RP, DESCRIPTION_SYSTEM_RESPONSE_TIME, results.getSystemResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_X, DESCRIPTION_SYSTEM_THROUGHPUT, results.getSystemThroughputMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_DR, DESCRIPTION_SYSTEM_DROP_RATE, results.getSystemDropRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_P, DESCRIPTION_SYSTEM_POWER, results.getSystemPowerMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP_PER_SINK, DESCRIPTION_RESPONSE_TIME_PER_SINK, results.getResponsetimePerSinkMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_PER_SINK, results.getThroughputPerSinkMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_TW, DESCRIPTION_FCR_TOTAL_WEIGHT, results.getFCRTotalWeightMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_MO, DESCRIPTION_FCR_MEMORY_OCCUPATION, results.getFCRMemoryOccupationMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CUSTOMER_NUMBER, results.getFJCustomerNumberMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RP, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_FX, DESCRIPTION_FIRING_THROUGHPUT, results.getFiringThroughputMeasures());
 	}
 
 	public String getXLabel() {
@@ -213,7 +211,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	public String getYLabel(int measureIndex) {
 		int measureType = results.getMeasureType(measureIndex);
 		String subfix = "";
-		if ((measureType == SimConstants.QUEUE_LENGTH) || (measureType == SimConstants.SYSTEM_JOB_NUMBER)) {
+		if ((measureType == SimConstants.QUEUE_LENGTH) || (measureType == SimConstants.SYSTEM_NUMBER_OF_JOBS)) {
 			subfix = " (j)";
 		} else if ((measureType == SimConstants.QUEUE_TIME) || (measureType == SimConstants.RESIDENCE_TIME)
 				|| (measureType == SimConstants.RESPONSE_TIME) || (measureType == SimConstants.SYSTEM_RESPONSE_TIME)) {
@@ -226,6 +224,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		String name = results.getName(measureIndex) + subfix;
 		name = name.replaceFirst("Network_", "");
 		name = name.replaceFirst("All classes_", "");
+		name = name.replaceFirst("All modes_", "");
 		return name;
 	}
 
@@ -257,8 +256,8 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			// Adds panel with measures
 			JPanel scroll = new JPanel(new GridLayout(indices.length, 1, 1, 1));
 			// Adds all measures to this panel
-			for (int indexe : indices) {
-				scroll.add(new PAMeasurePanel(results, indexe));//,thisMeasureValues));
+			for (int index : indices) {
+				scroll.add(new PAMeasurePanel(results, index));//,thisMeasureValues));
 			}
 			mainpanel.add(new JScrollPane(scroll), BorderLayout.CENTER);
 
@@ -266,41 +265,6 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			parent.addTab(name, tabPanel);
 		}
 	}
-
-	/**
-	 * Gets the title of the table showing results
-	 * @return a <code>String</code> containing the title
-	 */
-	/*private String getTableTitle() {
-		if (pad.getType().equals(PA_TYPE_NUMBER_OF_CUSTOMERS)) {
-			return "<html><b>Total number of jobs</b></html>";
-		}
-		else if (pad.getType().equals(PA_TYPE_POPULATION_MIX)) {
-			String className = pad.getReferenceClassName();
-			return "<html><b>Proportion of jobs from " + className + " with respect to total number of jobs</b></html>";
-		}
-		else if (pad.getType().equals(PA_TYPE_SERVICE_TIMES)) {
-			ServiceTimesParametricAnalysis stpa = (ServiceTimesParametricAnalysis)pad;
-			String className = stpa.getReferenceClassName();
-			String stationName = stpa.getReferenceStationName();
-			if (stpa.isSingleClass()) {
-				return "<html><b>Proportion of service time mean value of " + className + " at " + stationName + " with respect to the initial value</b></html>";
-			}
-			else return "<html><b>Proportion of service time mean value at " + stationName + " with respect to the initial value</b></html>";
-		}
-		else if (pad.getType().equals(PA_TYPE_ARRIVAL_RATE)) {
-			ArrivalRateParametricAnalysis arpa = (ArrivalRateParametricAnalysis)pad;
-			String className = arpa.getReferenceClassName();
-			if (arpa.isSingleClass()) {
-				return "<html><b>Proportion of arrival rate mean value of " + className + " with respect to the initial value</b></html>";
-			}
-			else return "<html><b>Proportion of arrival rate mean value with respect to the initial value</b></html>";
-		}
-		else if (pad.getType().equals(PA_TYPE_SEED)) {
-			return "<html><b>Simulation number</b></html>";
-		}
-		else return "Not defined";
-	}*/
 
 	/**
 	 * Inner class to create a panel that holds all the computed performance indices
@@ -324,7 +288,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		protected double YMIN;
 		protected double YMAX;
 
-		public PAMeasurePanel(PAResultsModel rm, int measureIndex) {//, Vector values) { //, Vector validities) {
+		public PAMeasurePanel(PAResultsModel rm, int measureIndex) {
 			this.rm = rm;
 			this.measureIndex = measureIndex;
 			this.values = rm.getValues(measureIndex);
@@ -336,17 +300,13 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 * Used to create the panel holding all measure's data
 		 */
 		protected void createPanel() {
-			JTextField samples;
-			JPanel graphPanel;
-			JLabel textState;
-			this.setLayout(new BorderLayout(5, 5));
+			this.setLayout(new BorderLayout(20, 20));
 			this.setBorder(BorderFactory.createRaisedBevelBorder());
 
 			//Adds mainPanel with all informations on this measure
 			JLabel label;
 			JTextField field;
 			JPanel mainPanel = new JPanel(new SpringLayout());
-			//Vector temp = rm.getParameterValues();
 			//Create graph and initialize ranges
 			graph = new PAPlot(values, rm.getParameterValues(), getXLabel(), getYLabel(measureIndex));
 			graph.drawPlot(true);
@@ -371,7 +331,6 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			}
 			graph.setXRange(XMIN, XMAX);
 			graph.setYRange(YMIN, YMAX);
-
 			// Station name
 			label = new JLabel("Station Name: ");
 			if (rm.getNodeType(measureIndex).equalsIgnoreCase(XMLConstantNames.NODETYPE_REGION)) {
@@ -381,22 +340,34 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			field.setEditable(false);
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
 			label.setLabelFor(field);
-			field.setText(rm.getStationName(measureIndex));
+			String stationName = rm.getStationName(measureIndex);
+			if (SimConstants.isFJMeasure(rm.getMeasureType(measureIndex))) {
+				field.setText(stationName + " (Fork Join)");
+			} else {
+				field.setText(stationName);
+			}
 			field.setToolTipText("Name of the station: " + field.getText());
 			mainPanel.add(label);
 			mainPanel.add(field);
 			// Class name
 			label = new JLabel("Class Name: ");
+			if (rm.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+				label.setText("Mode Name: ");
+			}
 			field = new JTextField();
 			field.setEditable(false);
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
 			label.setLabelFor(field);
 			field.setText(rm.getClassName(measureIndex));
-			field.setToolTipText("Name of the class: " + field.getText());
+			if (rm.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+				field.setToolTipText("Name of the mode: " + field.getText());
+			} else {
+				field.setToolTipText("Name of the class: " + field.getText());
+			}
 			mainPanel.add(label);
 			mainPanel.add(field);
 			// Alpha/Precision
-			label = new JLabel("Conf.Int/Max Rel.Err (0-1): ");
+			label = new JLabel("Conf.Int. / Max Rel.Err. (0-1): ");
 			field = new JTextField();
 			field.setEditable(false);
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
@@ -405,9 +376,9 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			field.setToolTipText("Confidence Interval and Maximum Relative Error requested for this measure: " + field.getText());
 			mainPanel.add(label);
 			mainPanel.add(field);
-			//Samples
-			label = new JLabel("Models ");
-			samples = new JTextField();
+			// Models
+			label = new JLabel("Models: ");
+			JTextField samples = new JTextField();
 			samples.setEditable(false);
 			samples.setMaximumSize(new Dimension(samples.getMaximumSize().width, samples.getMinimumSize().height));
 			label.setLabelFor(samples);
@@ -460,7 +431,6 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(label);
 			mainPanel.add(yMax);
 			//Bounds enabler
-			//label = new JLabel("Show confidence interval range:");
 			boundsEnabler = new JCheckBox("Show confidence interval range");
 			boundsEnabler.setToolTipText("Enable or disable bounds representation");
 			boundsEnabler.setSelected(true);
@@ -476,73 +446,53 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					graph.repaint();
 				}
 			});
-			//mainPanel.add(label);
-			//mainPanel.add(boundsEnabler);
 
 			SpringUtilities.makeCompactGrid(mainPanel, 8, 2, //rows, cols
-					16, 16, //initX, initY
+					20, 10, //initX, initY
 					16, 10);//xPad, yPad
 
-			JPanel pivotPanel = new JPanel(new BorderLayout());
-
+			JLabel mainTitle = new JLabel("<html><b>Description</b></html>");
+			JPanel mainTitlePanel = new JPanel();
+			mainTitlePanel.add(mainTitle);
 			JPanel tempMainPanel = new JPanel(new BorderLayout());
-			JLabel mainPanelTitle = new JLabel("<html><b>Description</b></html>");
-			JPanel mainPanelTitlePanel = new JPanel();
-			mainPanelTitlePanel.add(mainPanelTitle);
-			tempMainPanel.add(mainPanelTitlePanel, BorderLayout.NORTH);
+			tempMainPanel.add(mainTitlePanel, BorderLayout.NORTH);
 			tempMainPanel.add(mainPanel, BorderLayout.CENTER);
-			//Add mainPanel
-			pivotPanel.add(tempMainPanel, BorderLayout.WEST);
 
-			//Create values table and add to JScrollPane
-			ValuesTable table = new ValuesTable(values, rm.getMeasureType(measureIndex));//,validities);
-			JScrollPane jsp = new JScrollPane(table);
-			jsp.setBorder(new EmptyBorder(10, 10, 10, 10));
-			jsp.setPreferredSize(new Dimension(Integer.MAX_VALUE, 105));
-
-			JPanel tempJspPanel = new JPanel(new BorderLayout());
-			//JLabel tableTitle = new JLabel(getTableTitle());
-			JLabel tableTitle = new JLabel("<html><b>Simulation results table</b></html>");
-			JPanel tempTitlePanel = new JPanel();
-			tempTitlePanel.add(tableTitle);
-			tempJspPanel.add(tempTitlePanel, BorderLayout.NORTH);
-			tempJspPanel.add(jsp, BorderLayout.CENTER);
-
-			textState = new JLabel();
-			textState.setText("<html>The values in <font color=\"red\"> red </font> were not be computed with the requested precision</html>");
-			JPanel textStatePanel = new JPanel(new BorderLayout());
-			JPanel tempTextStatePanel = new JPanel(new FlowLayout());
-			tempTextStatePanel.add(textState);
-			textStatePanel.add(tempTextStatePanel, BorderLayout.CENTER);
-			textStatePanel.setBorder(BorderFactory.createEmptyBorder(0, BORDERSIZE / 2, BORDERSIZE / 2, BORDERSIZE / 2));
-			JPanel tablePanel = new JPanel(new BorderLayout());
-			tablePanel.add(textStatePanel, BorderLayout.SOUTH);
-			tablePanel.add(tempJspPanel, BorderLayout.CENTER);
-			tablePanel.setBorder(new EmptyBorder(10, 0, 5, 0));
-
-			//Add graph to pivot panel
-			graphPanel = new JPanel(new BorderLayout());
-			graphPanel.add(graph, BorderLayout.CENTER);
-			graph.add(boundsEnabler, BorderLayout.SOUTH);
-			graphPanel.setBorder(new EmptyBorder(0, 10, 10, 20));
 			JLabel graphTitle = new JLabel("<html><b>Plot</b></html>");
 			JPanel graphTitlePanel = new JPanel();
 			graphTitlePanel.add(graphTitle);
+			JPanel graphPanel = new JPanel(new BorderLayout());
+			graph.add(boundsEnabler);
+			graphPanel.add(graph);
 			JPanel tempGraphPanel = new JPanel(new BorderLayout());
 			tempGraphPanel.add(graphTitlePanel, BorderLayout.NORTH);
-			tempGraphPanel.add(graph, BorderLayout.CENTER);
+			tempGraphPanel.add(graphPanel, BorderLayout.CENTER);
 
-			pivotPanel.add(tempGraphPanel, BorderLayout.CENTER);
+			JPanel upperPanel = new JPanel(new BorderLayout(10, 10));
+			upperPanel.setBorder(new EmptyBorder(20, 0, 0, 20));
+			upperPanel.add(tempMainPanel, BorderLayout.WEST);
+			upperPanel.add(tempGraphPanel, BorderLayout.CENTER);
 
-			//Create a second pivot panel, add the first pivot to it
-			JPanel pivotPanel2 = new JPanel(new BorderLayout());
-			pivotPanel2.add(pivotPanel, BorderLayout.CENTER);
+			JLabel tableTitle = new JLabel("<html><b>Simulation Results</b></html>");
+			JPanel tableTitlePanel = new JPanel();
+			tableTitlePanel.add(tableTitle);
+			ValuesTable table = new ValuesTable(values, rm.getMeasureType(measureIndex));
+			JScrollPane tablePanel = new JScrollPane(table);
+			tablePanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+			tablePanel.setPreferredSize(new Dimension(0, 140));
+			JLabel tableNote = new JLabel("<html>The values in <font color=\"red\">red</font> were not computed with the requested precision</html>");
+			JPanel tableNotePanel = new JPanel();
+			tableNotePanel.add(tableNote);
 
-			//Add the JScrollPane to pivotPanel2
-			pivotPanel2.add(tablePanel, BorderLayout.SOUTH);
+			JPanel lowerPanel = new JPanel(new BorderLayout());
+			lowerPanel.setBorder(new EmptyBorder(0, 20, 20, 20));
+			lowerPanel.add(tableTitlePanel, BorderLayout.NORTH);
+			lowerPanel.add(tablePanel, BorderLayout.CENTER);
+			lowerPanel.add(tableNotePanel, BorderLayout.SOUTH);
 
-			//Add pivotPanel2 to the panel
-			add(pivotPanel2, BorderLayout.CENTER);
+			//Add the upper and lower panels
+			this.add(upperPanel, BorderLayout.CENTER);
+			this.add(lowerPanel, BorderLayout.SOUTH);
 		}
 
 		/**
@@ -575,7 +525,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		}
 
 		/**
-		 * Zooms in by PLOT_ZOOM_FACTOR factor
+		 * Zooms in by the factor PLOT_ZOOM_FACTOR
 		 */
 		public void zoomIn() {
 			double[] xRange = graph.getXRange();
@@ -585,7 +535,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			double newWidth = (xRange[1] - xRange[0]) * PLOT_ZOOM_FACTOR;
 			double newHeight = (yRange[1] - yRange[0]) * PLOT_ZOOM_FACTOR;
 			double newXMin = xRange[0] + (width - newWidth) / 2;
-			//The next 7 lines check that the new range is valid
+			//The next 7 lines check if the new range is valid
 			if (newXMin < XMIN) {
 				newXMin = XMIN;
 			}
@@ -611,7 +561,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		}
 
 		/**
-		 * Zooms in by PLOT_ZOOM_FACTOR factor
+		 * Zooms out by the factor PLOT_ZOOM_FACTOR
 		 */
 		public void zoomOut() {
 			double[] xRange = graph.getXRange();
@@ -621,7 +571,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			double newWidth = (xRange[1] - xRange[0]) * (1 / PLOT_ZOOM_FACTOR);
 			double newHeight = (yRange[1] - yRange[0]) * (1 / PLOT_ZOOM_FACTOR);
 			double newXMin = xRange[0] - (-width + newWidth) / 2;
-			//The next 7 lines check that the new range is valid
+			//The next 7 lines check if the new range is valid
 			if (newXMin < XMIN) {
 				newXMin = XMIN;
 			}
@@ -654,10 +604,12 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void mouseReleased(MouseEvent e) {
 					double[] xRange = graph.getXRange();
 					double[] yRange = graph.getYRange();
+					//if the new x range is valid...
 					if ((xRange[0] >= 0) && (xRange[1] <= XMAX)) {
 						xMin.setValue(new Double(xRange[0]));
 						xMax.setValue(new Double(xRange[1]));
 					} else {
+						//... else where it is not compatible restore the original value
 						double min = xRange[0], max = xRange[1];
 						if (min < 0) {
 							min = 0;
@@ -669,6 +621,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 						xMax.setValue(new Double(max));
 						graph.setXRange(min, max);
 					}
+					//the same as for the x range
 					if ((yRange[0] >= 0) && (yRange[1] <= YMAX)) {
 						yMin.setValue(new Double(yRange[0]));
 						yMax.setValue(new Double(yRange[1]));
@@ -687,17 +640,15 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					graph.repaint();
 				}
 
-				/**
-				 * If the mouse is clicked twice open the related ZoomedFrame
-				 * @param e a MouseEvent
-				 */
 				public void mouseClicked(MouseEvent e) {
+					 //Show a zoomed frame when the mouse is double clicked
 					if (e.getClickCount() == 2) {
 						if (zoomedFrame == null) {
 							zoomedFrame = new ZoomedFrame(rm, measureIndex, values, pad.getParameterValues());
 						}
 						zoomedFrame.show();
 					}
+					//Show a popup menu when the mouse is right clicked
 					if (SwingUtilities.isRightMouseButton(e)) {
 						PlotPopupMenu plotPopup = new PlotPopupMenu(getReference());
 						plotPopup.show(graph, e.getPoint().x, e.getPoint().y);
@@ -709,9 +660,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (xMin.getValue() instanceof Double) {
 						double XMin = ((Double) xMin.getValue()).doubleValue();
+						//the xMax spinner now has a new minimum value, set it
 						SpinnerNumberModel snm = (SpinnerNumberModel) xMax.getModel();
 						snm.setMinimum(new Double(XMin + SPINNER_PRECISION));
 						double[] range = graph.getXRange();
+						//set the new range
 						graph.setXRange(XMin, range[1]);
 						graph.repaint();
 					}
@@ -722,9 +675,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (xMax.getValue() instanceof Double) {
 						double XMax = ((Double) xMax.getValue()).doubleValue();
+						//the xMin spinner now has a new maximum value, set it
 						SpinnerNumberModel snm = (SpinnerNumberModel) xMin.getModel();
 						snm.setMaximum(new Double(XMax - SPINNER_PRECISION));
 						double[] range = graph.getXRange();
+						//set the new range
 						graph.setXRange(range[0], XMax);
 						graph.repaint();
 					}
@@ -735,9 +690,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (yMin.getValue() instanceof Double) {
 						double YMin = ((Double) yMin.getValue()).doubleValue();
+						//the yMax spinner now has a new minimum value, set it
 						SpinnerNumberModel snm = (SpinnerNumberModel) yMax.getModel();
 						snm.setMinimum(new Double(YMin + SPINNER_PRECISION));
 						double[] range = graph.getYRange();
+						//set the new range
 						graph.setYRange(YMin, range[1]);
 						graph.repaint();
 					}
@@ -748,9 +705,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (yMax.getValue() instanceof Double) {
 						double YMax = ((Double) yMax.getValue()).doubleValue();
+						//the yMin spinner now has a new maximum value, set it
 						SpinnerNumberModel snm = (SpinnerNumberModel) yMin.getModel();
 						snm.setMaximum(new Double(YMax - SPINNER_PRECISION));
 						double[] range = graph.getYRange();
+						//set the new range
 						graph.setYRange(range[0], YMax);
 						graph.repaint();
 					}
@@ -799,7 +758,6 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		MeasureDefinition md;
 		int measureIndex;
 		Vector values;
-		//Vector validities;
 		Vector<Number> parameterValues;
 		protected JCheckBox boundsEnabler;
 		protected JSpinner xMin;
@@ -827,81 +785,98 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 * Initialize all gui related stuff
 		 */
 		public void initialize() {
-			JTextField samples;
-			JPanel graphPanel;
-			JLabel textState;
-			this.getContentPane().setLayout(new BorderLayout(5, 5));
+			this.getContentPane().setLayout(new BorderLayout(20, 20));
 
 			//Adds mainPanel with all informations on this measure
 			JLabel label;
 			JTextField field;
 			JPanel mainPanel = new JPanel(new SpringLayout());
-			// Station name
-			label = new JLabel("Station Name: ");
-			field = new JTextField();
-			field.setEditable(false);
-			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
-			label.setLabelFor(field);
-			field.setText(md.getStationName(measureIndex));
-			field.setToolTipText("Name of the station");
-			mainPanel.add(label);
-			mainPanel.add(field);
-			// Class name
-			label = new JLabel("Class Name: ");
-			field = new JTextField();
-			field.setEditable(false);
-			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
-			label.setLabelFor(field);
-			field.setText(md.getClassName(measureIndex));
-			field.setToolTipText("Name of the class");
-			mainPanel.add(label);
-			mainPanel.add(field);
-			// Alpha/Precision
-			label = new JLabel("Conf.Int/Max Rel.Err: ");
-			field = new JTextField();
-			field.setEditable(false);
-			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
-			label.setLabelFor(field);
-			field.setText(md.getAlpha(measureIndex) + " / " + md.getPrecision(measureIndex)); // AnalyzedSamples
-			field.setToolTipText("Confidence Interval and Maximum Relative Error requested for this measure");
-			mainPanel.add(label);
-			mainPanel.add(field);
-			label = new JLabel("Samples: ");
-			samples = new JTextField();
-			samples.setEditable(false);
-			samples.setMaximumSize(new Dimension(samples.getMaximumSize().width, samples.getMinimumSize().height));
-			label.setLabelFor(samples);
-			samples.setText("" + values.size());
-			samples.setToolTipText("Number of models");
-			mainPanel.add(label);
-			mainPanel.add(samples);
-
-			//Create the plot and initialize ranges
+			//Create graph and initialize ranges
 			graph = new PAPlot(values, parameterValues, getXLabel(), getYLabel(measureIndex));
 			graph.drawPlot(true);
 			XMIN = graph.getPlotXMin();
 			XMAX = graph.getPlotXMax();
-			YMIN = graph.getPlotYMin();
-			YMAX = graph.getPlotYMax();
 			//If simulation was stopped and only one result was calculated the XMIN andX YMAX
 			//may equal, the same for YMIN and YMAX. In this case adjust the XMIN, XMAX, YMIN,
 			//and YMAX values
 			if (XMAX == XMIN) {
-				XMIN -= SPINNER_PRECISION;
+				if (XMIN != 0) {
+					XMIN -= SPINNER_PRECISION;
+				}
 				XMAX += SPINNER_PRECISION;
 			}
 			YMIN = graph.getPlotYMin();
 			YMAX = graph.getPlotYMax();
 			if (YMAX == YMIN) {
-				YMIN -= SPINNER_PRECISION;
+				if (YMIN != 0) {
+					YMIN -= SPINNER_PRECISION;
+				}
 				YMAX += SPINNER_PRECISION;
 			}
 			graph.setXRange(XMIN, XMAX);
 			graph.setYRange(YMIN, YMAX);
-
+			// Station name
+			label = new JLabel("Station Name: ");
+			if (md.getNodeType(measureIndex).equalsIgnoreCase(XMLConstantNames.NODETYPE_REGION)) {
+				label.setText("Region Name: ");
+			}
+			field = new JTextField();
+			field.setEditable(false);
+			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
+			label.setLabelFor(field);
+			String stationName = md.getStationName(measureIndex);
+			if (SimConstants.isFJMeasure(md.getMeasureType(measureIndex))) {
+				field.setText(stationName + " (Fork Join)");
+			} else {
+				field.setText(stationName);
+			}
+			field.setToolTipText("Name of the station: " + field.getText());
+			mainPanel.add(label);
+			mainPanel.add(field);
+			// Class name
+			label = new JLabel("Class Name: ");
+			if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+				label.setText("Mode Name: ");
+			}
+			field = new JTextField();
+			field.setEditable(false);
+			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
+			label.setLabelFor(field);
+			field.setText(md.getClassName(measureIndex));
+			if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+				field.setToolTipText("Name of the mode: " + field.getText());
+			} else {
+				field.setToolTipText("Name of the class: " + field.getText());
+			}
+			mainPanel.add(label);
+			mainPanel.add(field);
+			// Alpha/Precision
+			label = new JLabel("Conf.Int. / Max Rel.Err. (0-1): ");
+			field = new JTextField();
+			field.setEditable(false);
+			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
+			label.setLabelFor(field);
+			field.setText(md.getAlpha(measureIndex) + " / " + md.getPrecision(measureIndex)); // AnalyzedSamples
+			field.setToolTipText("Confidence Interval and Maximum Relative Error requested for this measure: " + field.getText());
+			mainPanel.add(label);
+			mainPanel.add(field);
+			// Models
+			label = new JLabel("Models: ");
+			JTextField samples = new JTextField();
+			samples.setEditable(false);
+			samples.setMaximumSize(new Dimension(samples.getMaximumSize().width, samples.getMinimumSize().height));
+			label.setLabelFor(samples);
+			samples.setText("" + values.size());
+			samples.setToolTipText("Number of models: " + samples.getText());
+			mainPanel.add(label);
+			mainPanel.add(samples);
 			//xMin
 			label = new JLabel("X min:");
-			xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX - SPINNER_PRECISION, SPINNER_PRECISION));
+			if (XMAX > SPINNER_PRECISION) {
+				xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX - SPINNER_PRECISION, SPINNER_PRECISION));
+			} else {
+				xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX, SPINNER_PRECISION));
+			}
 			xMin.setToolTipText("Sets the smallest x represented");
 			xMin.setMaximumSize(new Dimension(40, 18));
 			label.setLabelFor(xMin);
@@ -917,7 +892,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(xMax);
 			//yMin
 			label = new JLabel("Y min:");
-			yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX - SPINNER_PRECISION, SPINNER_PRECISION));
+			if (YMAX - SPINNER_PRECISION > YMIN) {
+				yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX - SPINNER_PRECISION, SPINNER_PRECISION));
+			} else {
+				yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX, SPINNER_PRECISION));
+			}
 			yMin.setToolTipText("Sets the smallest y represented");
 			yMin.setMaximumSize(new Dimension(40, 18));
 			label.setLabelFor(yMin);
@@ -925,14 +904,17 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(yMin);
 			//yMax
 			label = new JLabel("Y max:");
-			yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN + SPINNER_PRECISION, YMAX, SPINNER_PRECISION));
+			if (YMIN + SPINNER_PRECISION < YMAX) {
+				yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN + SPINNER_PRECISION, YMAX, SPINNER_PRECISION));
+			} else {
+				yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN, YMAX, SPINNER_PRECISION));
+			}
 			yMax.setToolTipText("Sets the largest y represented");
 			yMax.setMaximumSize(new Dimension(40, 18));
 			label.setLabelFor(yMax);
 			mainPanel.add(label);
 			mainPanel.add(yMax);
 			//Bounds enabler
-			//label = new JLabel("Show confidence interval range:");
 			boundsEnabler = new JCheckBox("Show confidence interval range");
 			boundsEnabler.setToolTipText("Enable or disable bounds representation");
 			boundsEnabler.setSelected(true);
@@ -948,86 +930,76 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					graph.repaint();
 				}
 			});
-			//mainPanel.add(label);
-			//mainPanel.add(boundsEnabler);
 
 			SpringUtilities.makeCompactGrid(mainPanel, 8, 2, //rows, cols
-					16, 16, //initX, initY
+					20, 10, //initX, initY
 					16, 10);//xPad, yPad
 
-			JPanel pivotPanel = new JPanel(new BorderLayout());
+			JLabel mainTitle = new JLabel("<html><b>Description</b></html>");
+			JPanel mainTitlePanel = new JPanel();
+			mainTitlePanel.add(mainTitle);
 			JPanel tempMainPanel = new JPanel(new BorderLayout());
-			JLabel mainPanelTitle = new JLabel("<html><b>Description</b></html>");
-			JPanel mainPanelTitlePanel = new JPanel();
-			mainPanelTitlePanel.add(mainPanelTitle);
-			tempMainPanel.add(mainPanelTitlePanel, BorderLayout.NORTH);
+			tempMainPanel.add(mainTitlePanel, BorderLayout.NORTH);
 			tempMainPanel.add(mainPanel, BorderLayout.CENTER);
-			pivotPanel.add(tempMainPanel, BorderLayout.WEST);
 
-			//Create values table and add to JScrollPane
-			ValuesTable table = new ValuesTable(values, md.getMeasureType(measureIndex));//,validities);
-			JScrollPane jsp = new JScrollPane(table);
-			jsp.setBorder(new EmptyBorder(10, 10, 10, 10));
-			jsp.setPreferredSize(new Dimension(Integer.MAX_VALUE, 102));
-			JPanel tempJspPanel = new JPanel(new BorderLayout());
-			//JLabel tableTitle = new JLabel(getTableTitle());
-			JLabel tableTitle = new JLabel("<html><b>Simulation results</b></html>");
-			JPanel tempTitlePanel = new JPanel();
-			tempTitlePanel.add(tableTitle);
-			tempJspPanel.add(tempTitlePanel, BorderLayout.NORTH);
-			tempJspPanel.add(jsp, BorderLayout.CENTER);
-			textState = new JLabel();
-			textState.setText("<html>The values in <font color=\"red\"> red </font> were not be computed with the requested precision</html>");
-			JPanel textStatePanel = new JPanel(new BorderLayout());
-			JPanel tempTextStatePanel = new JPanel(new FlowLayout());
-			tempTextStatePanel.add(textState);
-			textStatePanel.add(tempTextStatePanel, BorderLayout.CENTER);
-			textStatePanel.setBorder(BorderFactory.createEmptyBorder(0, BORDERSIZE / 2, BORDERSIZE / 2, BORDERSIZE / 2));
-			JPanel tablePanel = new JPanel(new BorderLayout());
-			tablePanel.add(textStatePanel, BorderLayout.SOUTH);
-			tablePanel.add(tempJspPanel, BorderLayout.CENTER);
-			tablePanel.setBorder(new EmptyBorder(10, 0, 5, 0));
-
-			//Add graph to panel
-			graphPanel = new JPanel(new BorderLayout());
-			graphPanel.add(graph, BorderLayout.CENTER);
-			graph.add(boundsEnabler, BorderLayout.SOUTH);
-			graphPanel.setBorder(new EmptyBorder(0, 10, 10, 20));
 			JLabel graphTitle = new JLabel("<html><b>Plot</b></html>");
 			JPanel graphTitlePanel = new JPanel();
 			graphTitlePanel.add(graphTitle);
+			JPanel graphPanel = new JPanel(new BorderLayout());
+			graph.add(boundsEnabler);
+			graphPanel.add(graph);
 			JPanel tempGraphPanel = new JPanel(new BorderLayout());
 			tempGraphPanel.add(graphTitlePanel, BorderLayout.NORTH);
-			tempGraphPanel.add(graph, BorderLayout.CENTER);
+			tempGraphPanel.add(graphPanel, BorderLayout.CENTER);
 
-			pivotPanel.add(tempGraphPanel, BorderLayout.CENTER);
+			JPanel upperPanel = new JPanel(new BorderLayout(10, 10));
+			upperPanel.setBorder(new EmptyBorder(20, 0, 0, 20));
+			upperPanel.add(tempMainPanel, BorderLayout.WEST);
+			upperPanel.add(tempGraphPanel, BorderLayout.CENTER);
 
-			//Create a second pivot panel, add the first pivot to it
-			JPanel pivotPanel2 = new JPanel(new BorderLayout());
-			pivotPanel2.add(pivotPanel, BorderLayout.CENTER);
+			JLabel tableTitle = new JLabel("<html><b>Simulation Results</b></html>");
+			JPanel tableTitlePanel = new JPanel();
+			tableTitlePanel.add(tableTitle);
+			ValuesTable table = new ValuesTable(values, md.getMeasureType(measureIndex));
+			JScrollPane tablePanel = new JScrollPane(table);
+			tablePanel.setBorder(new EmptyBorder(10, 0, 0, 0));
+			tablePanel.setPreferredSize(new Dimension(0, 140));
+			JLabel tableNote = new JLabel("<html>The values in <font color=\"red\">red</font> were not computed with the requested precision</html>");
+			JPanel tableNotePanel = new JPanel();
+			tableNotePanel.add(tableNote);
 
-			//Add the JScrollPane to pivotPanel2
-			pivotPanel2.add(tablePanel, BorderLayout.SOUTH);
+			JPanel lowerPanel = new JPanel(new BorderLayout());
+			lowerPanel.setBorder(new EmptyBorder(0, 20, 20, 20));
+			lowerPanel.add(tableTitlePanel, BorderLayout.NORTH);
+			lowerPanel.add(tablePanel, BorderLayout.CENTER);
+			lowerPanel.add(tableNotePanel, BorderLayout.SOUTH);
 
-			//Add pivotPanel2 to the panel
-			this.getContentPane().add(pivotPanel2, BorderLayout.CENTER);
+			//Add the upper and lower panels
+			this.add(upperPanel, BorderLayout.CENTER);
+			this.add(lowerPanel, BorderLayout.SOUTH);
 
-			Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-			Dimension size = new Dimension(CommonConstants.MAX_GUI_WIDTH_WHATIF_RESULTS, CommonConstants.MAX_GUI_HEIGHT_WHATIF_RESULTS);
-			this.setSize(size);
-			this.setLocation((screenSize.width - size.width) / 2, (screenSize.height - size.height) / 2);
+			//Set this frame into full screen
+			this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		}
 
 		/**
-		 * Gets a reference to the plot
-		 * @return the plot object
+		 * Gets a reference to <code>this</code>
+		 * @return a reference to <code>this</code> ZoomedFrame
+		 */
+		public ZoomedFrame getReference() {
+			return this;
+		}
+
+		/**
+		 * Gets a reference to the PAPlot contained
+		 * @return a reference to the plot
 		 */
 		public PAPlot getPlot() {
 			return graph;
 		}
 
 		/**
-		 * Forces the plot to get its original axis range
+		 * Restores the original ranges
 		 */
 		public void resizePlot() {
 			double[] xRange = { XMIN, XMAX };
@@ -1040,7 +1012,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		}
 
 		/**
-		 * Zooms inside by the factor PLOT_ZOOM_FACTOR
+		 * Zooms in by the factor PLOT_ZOOM_FACTOR
 		 */
 		public void zoomIn() {
 			double[] xRange = graph.getXRange();
@@ -1048,7 +1020,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			double width = xRange[1] - xRange[0];
 			double height = yRange[1] - yRange[0];
 			double newWidth = (xRange[1] - xRange[0]) * PLOT_ZOOM_FACTOR;
-			double newHeight = yRange[1] - yRange[0] * PLOT_ZOOM_FACTOR;
+			double newHeight = (yRange[1] - yRange[0]) * PLOT_ZOOM_FACTOR;
 			double newXMin = xRange[0] + (width - newWidth) / 2;
 			//The next 7 lines check if the new range is valid
 			if (newXMin < XMIN) {
@@ -1076,7 +1048,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		}
 
 		/**
-		 * Zooms outside by the factor PLOT_ZOOM_FACTOR
+		 * Zooms out by the factor PLOT_ZOOM_FACTOR
 		 */
 		public void zoomOut() {
 			double[] xRange = graph.getXRange();
@@ -1086,6 +1058,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			double newWidth = (xRange[1] - xRange[0]) * (1 / PLOT_ZOOM_FACTOR);
 			double newHeight = (yRange[1] - yRange[0]) * (1 / PLOT_ZOOM_FACTOR);
 			double newXMin = xRange[0] - (-width + newWidth) / 2;
+			//The next 7 lines check if the new range is valid
 			if (newXMin < XMIN) {
 				newXMin = XMIN;
 			}
@@ -1111,15 +1084,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		}
 
 		/**
-		 * Gets a reference to <code>this</code>
-		 * @return a reference to <code>this</code> ZoomedFrame object
-		 */
-		public ZoomedFrame getReference() {
-			return this;
-		}
-
-		/**
-		 * Adds all listeners to objects
+		 * Adds listeners to components
 		 */
 		protected void addListeners() {
 			graph.addMouseListener(new MouseAdapter() {
@@ -1128,10 +1093,10 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					double[] yRange = graph.getYRange();
 					//if the new x range is valid...
 					if ((xRange[0] >= 0) && (xRange[1] <= XMAX)) {
-						xMin.setValue(new Double(xRange[0])); // -> set it
+						xMin.setValue(new Double(xRange[0]));
 						xMax.setValue(new Double(xRange[1]));
 					} else {
-						// ... else where it is not compatible restore the original value
+						//... else where it is not compatible restore the original value
 						double min = xRange[0], max = xRange[1];
 						if (min < 0) {
 							min = 0;
@@ -1163,8 +1128,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				}
 
 				public void mouseClicked(MouseEvent e) {
-					//show a popup menu where you can zoom in and out and save
-					//the plot to an image
+					//Show a popup menu when the mouse is right clicked
 					if (SwingUtilities.isRightMouseButton(e)) {
 						PlotPopupMenu plotPopup = new PlotPopupMenu(getReference());
 						plotPopup.show(graph, e.getPoint().x, e.getPoint().y);
@@ -1243,13 +1207,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		private static final long serialVersionUID = 1L;
 
 		Vector values;
-		//Vector validities;
 		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
 
-		public ValuesTable(Vector values, int measureType) {//, Vector validities) {
-			super(new ValuesTableModel(values, measureType));//,validities));
+		public ValuesTable(Vector values, int measureType) {
+			super(new ValuesTableModel(values, measureType));
 			this.values = values;
-			//this.validities = validities;
 			autoResizeMode = AUTO_RESIZE_OFF;
 
 			setRowSelectionAllowed(true);
@@ -1274,7 +1236,6 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			Component c;
 			if (column < values.size()) {
 				c = dtcr.getTableCellRendererComponent(this, values.get(column), false, false, row, column);
-				//if (!((Boolean)(validities.get(column))).booleanValue()) {
 				if (!((PAResultsModel.MeasureValueImpl) values.get(column)).isValid()) {
 					c.setForeground(Color.RED);
 				} else {
@@ -1314,11 +1275,9 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		Vector values;
 		int measureType;
 
-		//Vector validities;
-		public ValuesTableModel(Vector values, int measureType) {//, Vector validities) {
+		public ValuesTableModel(Vector values, int measureType) {
 			this.values = values;
 			this.measureType = measureType;
-			//this.validities = validities;
 			prototype = "XXXX.XXX XXX";
 			rowHeaderPrototype = "Upper bound";
 		}
@@ -1388,7 +1347,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 */
 		protected Object getRowName(int rowIndex) {
 			String subfix = "";
-			if ((measureType == SimConstants.QUEUE_LENGTH) || (measureType == SimConstants.SYSTEM_JOB_NUMBER)) {
+			if ((measureType == SimConstants.QUEUE_LENGTH) || (measureType == SimConstants.SYSTEM_NUMBER_OF_JOBS)) {
 				subfix = " (j)";
 			} else if ((measureType == SimConstants.QUEUE_TIME) || (measureType == SimConstants.RESIDENCE_TIME)
 					|| (measureType == SimConstants.RESPONSE_TIME) || (measureType == SimConstants.SYSTEM_RESPONSE_TIME)) {
@@ -1399,23 +1358,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				subfix = " ";
 			}
 			if (rowIndex == 0) {
-				return ("Mean value" + subfix);
+				return ("Mean Value" + subfix);
 			} else if (rowIndex == 1) {
-				//Modified by ASHANKA START
-				//This Label has been modified to
-				//let the users know that the Min and Max is 
-				//Conf Interval Range and not sample Min or Max.
-				//return ("Max" + subfix);
-				return ("Max" + subfix + " (Conf Int)");
-				//Modified by ASHANKA STOP
+				return ("Max" + subfix + " (Conf.Int.)");
 			} else {
-				//Modified by ASHANKA START
-				//return ("Min" + subfix);
-				return ("Min" + subfix + " (Conf Int)");
-				//This Label has been modified to
-				//let the users know that the Min and Max is 
-				//Conf Interval Range and not sample Min or Max.
-				//Modified by ASHANKA STOP
+				return ("Min" + subfix + " (Conf.Int.)");
 			}
 		}
 

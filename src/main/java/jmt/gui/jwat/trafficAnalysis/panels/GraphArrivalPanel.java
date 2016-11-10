@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jwat.trafficAnalysis.panels;
 
 import java.awt.BorderLayout;
@@ -67,10 +68,9 @@ import jmt.gui.jwat.trafficAnalysis.utils.NewPlot;
  *         Time: 11.01.29
  */
 public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	public static final String[] INDICES_TYPES = { "Years", "Months", "Days", "Hours", "Minutes" };
 	public static final String DESCRIPTION_GRAPH = "<html><body align=\"left\"><font size=\"4\"><b>Arrival values</b>"
 			+ "</font><font size=\"3\"><br>Select granularity to plot the arrival rate. Left-click and drag on the graph to zoom "
@@ -93,7 +93,7 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	// Scrollpane used for table
 	private JScrollPane tableScrollPane;
 	// Dimension of bounds spinners
-	final static Dimension DIM_SPINNER = new Dimension(95, 20);
+	static final Dimension DIM_SPINNER = new Dimension(95, 20);
 	// Current performance index
 	private String currentIndex = "Years";
 	private MainJwatWizard ew;
@@ -129,16 +129,18 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	public GraphArrivalPanel(MainJwatWizard ew) {
 		this.ew = ew;
 		((TrafficAnalysisSession) ew.getSession()).addSetParamsListener(new OnSetParametersListener() {
+
 			public void ParamsSet() {
-				System.err.println("GraphArrival Panel reset");
 				GraphArrivalPanel.this.removeAll();
 				engine = ((TrafficAnalysisSession) GraphArrivalPanel.this.ew.getSession()).getEngine();
 				initGraphics();
 				calcGran();
 				paintIndex(1);
 			}
+
 		});
 		((ModelTrafficAnalysis) ew.getModel()).addResetModelListener(new OnResetModel() {
+
 			public void modelReset() {
 				GraphArrivalPanel.this.removeAll();
 			}
@@ -220,7 +222,6 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		left.add(tableScrollPane, BorderLayout.CENTER);
 		updateSpinners();
 		addActions();
-
 	}
 
 	public void calcGran() {
@@ -242,137 +243,113 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		List<String> l = new Vector<String>();
 
 		String s;
-
 		switch (j) {
-			case (0):
-				res = new double[ArrYear.size()];
-				//ew.getTAP().redraw(ArrYear,0);
-				for (int i = 0; i < ArrYear.size(); i++) {
-
-					line = new Vector<Comparable>();
-					temp = ArrYear.get(i);
-					d = new Date((long) temp[0]);
-					line.add(new Integer(f));
-					f++;
-					s = new String("" + d.getYear());
-					line.add(s);
-					l.add(s);
-					line.add(new Double(df.format(temp[1] / 31104000)));
-					res[i] = temp[1] / 31104000;
-					rows.add(line);
-				}
-				temp = ArrYear.get(0);
+		case 0:
+			res = new double[ArrYear.size()];
+			for (int i = 0; i < ArrYear.size(); i++) {
+				line = new Vector<Comparable>();
+				temp = ArrYear.get(i);
 				d = new Date((long) temp[0]);
+				line.add(new Integer(f));
+				f++;
 				s = new String("" + d.getYear());
-				graph.setXLabel(currentIndex + " from " + s);
-				break;
-			case (1):
-				res = new double[ArrMonth.size()];
-				//ew.getTAP().redraw(ArrMonth,1);
-				for (int i = 0; i < ArrMonth.size(); i++) {
-
-					line = new Vector<Comparable>();
-					temp = ArrMonth.get(i);
-					d = new Date((long) temp[0]);
-					line.add(new Integer(f));
-					f++;
-					s = new String(d.getMonth() + "/" + d.getYear());
-					line.add(s);
-					l.add(s);
-					line.add(new Double(df.format(temp[1] / 2592000)));
-					res[i] = temp[1] / 2592000;
-					rows.add(line);
-				}
-				temp = ArrMonth.get(0);
+				line.add(s);
+				l.add(s);
+				line.add(new Double(df.format(temp[1] / 31104000)));
+				res[i] = temp[1] / 31104000;
+				rows.add(line);
+			}
+			temp = ArrYear.get(0);
+			d = new Date((long) temp[0]);
+			s = new String("" + d.getYear());
+			graph.setXLabel(currentIndex + " from " + s);
+			break;
+		case 1:
+			res = new double[ArrMonth.size()];
+			for (int i = 0; i < ArrMonth.size(); i++) {
+				line = new Vector<Comparable>();
+				temp = ArrMonth.get(i);
 				d = new Date((long) temp[0]);
+				line.add(new Integer(f));
+				f++;
 				s = new String(d.getMonth() + "/" + d.getYear());
-				graph.setXLabel(currentIndex + " from " + s);
-				break;
-			case (2):
-				res = new double[ArrDay.size()];
-				//ew.getTAP().redraw(ArrDay,2);
-				for (int i = 0; i < ArrDay.size(); i++) {
-
-					line = new Vector<Comparable>();
-					temp = ArrDay.get(i);
-					d = new Date((long) temp[0]);
-					line.add(new Integer(f));
-					f++;
-					s = new String(d.getDate() + "/" + d.getMonth() + "/" + d.getYear());
-					line.add(s);
-					l.add(s);
-					line.add(new Double(df.format(temp[1] / 86400)));
-					res[i] = temp[1] / 86400;
-					rows.add(line);
-				}
-				temp = ArrDay.get(0);
+				line.add(s);
+				l.add(s);
+				line.add(new Double(df.format(temp[1] / 2592000)));
+				res[i] = temp[1] / 2592000;
+				rows.add(line);
+			}
+			temp = ArrMonth.get(0);
+			d = new Date((long) temp[0]);
+			s = new String(d.getMonth() + "/" + d.getYear());
+			graph.setXLabel(currentIndex + " from " + s);
+			break;
+		case 2:
+			res = new double[ArrDay.size()];
+			for (int i = 0; i < ArrDay.size(); i++) {
+				line = new Vector<Comparable>();
+				temp = ArrDay.get(i);
 				d = new Date((long) temp[0]);
+				line.add(new Integer(f));
+				f++;
 				s = new String(d.getDate() + "/" + d.getMonth() + "/" + d.getYear());
-				graph.setXLabel(currentIndex + " from " + s);
-				break;
-			case (3):
-
-				res = new double[ArrHour.size()];
-				//ew.getTAP().redraw(ArrHour,3);	
-				for (int i = 0; i < ArrHour.size(); i++) {
-
-					line = new Vector<Comparable>();
-					temp = ArrHour.get(i);
-					d = new Date((long) temp[0]);
-					line.add(new Integer(f));
-					f++;
-
-					SimpleDateFormat dfo = new SimpleDateFormat("dd/MM/yyyy HH.00");
-					s = dfo.format(d);
-					//s=new String(d.getDate()+"/"+d.getMonth()+"/"+d.getYear()+" "+d.getHours()+".00");
-
-					line.add(s);
-					l.add(s);
-					line.add(new Double(df.format(temp[1] / 3600)));
-					res[i] = temp[1] / 3600;
-					rows.add(line);
-				}
-				temp = ArrHour.get(0);
+				line.add(s);
+				l.add(s);
+				line.add(new Double(df.format(temp[1] / 86400)));
+				res[i] = temp[1] / 86400;
+				rows.add(line);
+			}
+			temp = ArrDay.get(0);
+			d = new Date((long) temp[0]);
+			s = new String(d.getDate() + "/" + d.getMonth() + "/" + d.getYear());
+			graph.setXLabel(currentIndex + " from " + s);
+			break;
+		case 3:
+			res = new double[ArrHour.size()];
+			for (int i = 0; i < ArrHour.size(); i++) {
+				line = new Vector<Comparable>();
+				temp = ArrHour.get(i);
 				d = new Date((long) temp[0]);
-
+				line.add(new Integer(f));
+				f++;
 				SimpleDateFormat dfo = new SimpleDateFormat("dd/MM/yyyy HH.00");
 				s = dfo.format(d);
-				//s=new String(d.getDate()+"/"+d.getMonth()+"/"+d.getYear()+" "+d.getHours()+".00");
-
-				graph.setXLabel(currentIndex + " from " + s);
-				break;
-			case (4):
-
-				res = new double[ArrMinute.size()];
-				//ew.getTAP().redraw(ArrMinute,4);
-				for (int i = 0; i < ArrMinute.size(); i++) {
-
-					line = new Vector<Comparable>();
-					temp = ArrMinute.get(i);
-					d = new Date((long) temp[0]);
-					line.add(new Integer(f));
-					f++;
-					SimpleDateFormat dfoM = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-					//s=new String(d.getDate()+"/"+d.getMonth()+"/"+d.getYear()+" "+d.getHours()+"."+d.getMinutes());
-					s = dfoM.format(d);
-					line.add(s);
-					l.add(s);
-					line.add(new Double(df.format(temp[1] / 60)));
-					res[i] = temp[1] / 60;
-					rows.add(line);
-				}
-				temp = ArrMinute.get(0);
+				line.add(s);
+				l.add(s);
+				line.add(new Double(df.format(temp[1] / 3600)));
+				res[i] = temp[1] / 3600;
+				rows.add(line);
+			}
+			temp = ArrHour.get(0);
+			d = new Date((long) temp[0]);
+			SimpleDateFormat dfo = new SimpleDateFormat("dd/MM/yyyy HH.00");
+			s = dfo.format(d);
+			graph.setXLabel(currentIndex + " from " + s);
+			break;
+		case 4:
+			res = new double[ArrMinute.size()];
+			for (int i = 0; i < ArrMinute.size(); i++) {
+				line = new Vector<Comparable>();
+				temp = ArrMinute.get(i);
 				d = new Date((long) temp[0]);
-
+				line.add(new Integer(f));
+				f++;
 				SimpleDateFormat dfoM = new SimpleDateFormat("dd/MM/yyyy HH:mm");
 				s = dfoM.format(d);
-
-				s = new String(d.getDate() + "/" + d.getMonth() + "/" + d.getYear() + " " + d.getHours() + "." + d.getMinutes());
-				graph.setXLabel(currentIndex + " from " + s);
-				break;
-
+				line.add(s);
+				l.add(s);
+				line.add(new Double(df.format(temp[1] / 60)));
+				res[i] = temp[1] / 60;
+				rows.add(line);
+			}
+			temp = ArrMinute.get(0);
+			d = new Date((long) temp[0]);
+			SimpleDateFormat dfoM = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+			s = dfoM.format(d);
+			s = new String(d.getDate() + "/" + d.getMonth() + "/" + d.getYear() + " " + d.getHours() + "." + d.getMinutes());
+			graph.setXLabel(currentIndex + " from " + s);
+			break;
 		}
-
 		Xmin.setModel(new SpinnerListModel(l));
 		Xmax.setModel(new SpinnerListModel(l));
 		Xmax.setValue(l.get(l.size() - 1));
@@ -389,7 +366,6 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		left.add(tableScrollPane, BorderLayout.CENTER);
 
 		mainPanel.updateUI();
-
 	}
 
 	/**
@@ -406,7 +382,6 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		int z = 0;
 		cal2.setTimeInMillis((long) v.getValue(z));
 		while (z < v.Size()) {
-
 			if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)
 					&& cal.get(Calendar.DATE) == cal2.get(Calendar.DATE) && cal.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY)
 					&& cal.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE)) {
@@ -440,13 +415,11 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 					cal2.setTimeInMillis((long) v.getValue(z));
 				}
 			}
-
 		}
 		i = new double[2];
 		i[0] = cal.getTimeInMillis();
 		i[1] = y;
 		ArrMinute.addElement(i);
-
 	}
 
 	/**
@@ -473,7 +446,6 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 				i[0] = cal.getTimeInMillis();
 				i[1] = y;
 				ArrHour.addElement(i);
-
 				if (cal.get(Calendar.HOUR_OF_DAY) == 23) {
 					cal.roll(Calendar.DAY_OF_YEAR, true);
 				}
@@ -490,13 +462,11 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 			if (k != true) {
 				z++;
 			}
-
 		}
 		i = new double[2];
 		i[0] = cal.getTimeInMillis();
 		i[1] = y;
 		ArrHour.addElement(i);
-
 	}
 
 	/**
@@ -527,13 +497,11 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 					y = 0;
 				}
 			}
-
 		}
 		i = new double[2];
 		i[0] = cal.getTimeInMillis();
 		i[1] = y;
 		ArrDay.addElement(i);
-
 	}
 
 	/**
@@ -549,7 +517,6 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		boolean k = false;
 		int z = 0;
 		while (z < v.Size()) {
-
 			cal2.setTimeInMillis((long) v.getValue(z));
 			if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)) {
 				y++;
@@ -562,7 +529,6 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 				cal.roll(Calendar.MONTH, true);
 				if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) && cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)) {
 					y = 1;
-
 				} else {
 					y = 0;
 					k = false;
@@ -576,7 +542,6 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		i[0] = cal.getTimeInMillis();
 		i[1] = y;
 		ArrMonth.addElement(i);
-
 	}
 
 	/**
@@ -638,11 +603,9 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		cal2.setTimeInMillis((long) v.getValue(v.Size() - 1));
 		cal.setTimeInMillis((long) v.getValue(0));
 
-		//cal2.setTimeInMillis(new Date("12/01/2006").getTime());
-		//cal.setTimeInMillis(new Date("12/01/2005").getTime());
 		long year = 1;
 		long month = 1;
-                
+
 		//Se le prima e ultima data hanno mese o anno differente calcolo il numero di mesi e anni di differenza
 		if (cal.get(Calendar.MONTH) != cal2.get(Calendar.MONTH) || cal.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
 			// ?  Non funziona --> conta + anni di quelli esistenti e la funzione roll non incrementa l'anno !!!
@@ -654,7 +617,6 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 					year++;
 				}
 				cal.roll(Calendar.MONTH, true);
-				//System.err.println(new Date(cal.getTimeInMillis()));
 			}
 		}
 		long minute = temp / (1000 * 60);
@@ -665,32 +627,26 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 			this.year = true;
 			ArrNumYear();
 			nYear = year;
-			//return "Years";	
 		}
-
 		if (month > 1 && month < 559) {
 			this.month = true;
 			ArrNumMonth();
 			nMonth = month;
-			//return "Months";
 		}
 		if (day > 1 && day < 559) {
 			this.day = true;
 			ArrNumDay();
 			nDay = day;
-			//return "Days";
 		}
 		if (hour > 1 && hour < 559) {
 			this.hour = true;
 			ArrNumHour();
 			nHour = hour;
-			//return "Hours";
 		}
 		if (minute > 1 && minute < 559) {
 			this.minute = true;
 			ArrNumMinute();
 			nMinute = minute;
-			//return "Minutes";
 		}
 		if (year > 1 && r == null) {
 			return r = "Years";
@@ -716,13 +672,9 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	private void updateSpinners() {
 		// Check for special value used if graph is empty
 		if (graph.getXRange()[0] != Double.MAX_VALUE) {
-			//Xmin.setValue(new Double(graph.getXRange()[0]));
-			// Xmax.setValue(new Double(graph.getXRange()[1]));
 			Ymin.setValue(new Double(graph.getYRange()[0]));
 			Ymax.setValue(new Double(graph.getYRange()[1]));
 		} else {
-			//Xmin.setValue(new Double(0.0));
-			//Xmax.setValue(new Double(0.0));
 			Ymin.setValue(new Double(0.0));
 			Ymax.setValue(new Double(0.0));
 		}
@@ -765,13 +717,10 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	 */
 	private void updateIndex() {
 		String current = (String) index.getSelectedItem();
-
 		currentIndex = current;
 		if (((ModelTrafficAnalysis) ew.getModel()).getMatrix() != null) {
 			paintIndex(1);
-			// Updates graph
 		}
-		// graph.setXLabel(current);
 		graph.repaint();
 	}
 
@@ -799,31 +748,31 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 				if ((((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == "Years" && !year
 						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == "Months" && !month
 						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == "Days" && !day
-						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == "Hours" && !hour || ((String) ((JComboBox) arg0.getSource())
-						.getSelectedItem()) == "Minutes"
-						&& !minute)
+						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == "Hours" && !hour
+						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == "Minutes" && !minute)
 						&& ((ModelTrafficAnalysis) ew.getModel()).getMatrix() != null) {
 					error();
 					return;
 				}
 				updateIndex();
-
 			}
+
 		});
 
 		// Adds a listener to the graph to detect zoom events
 		graph.addRescaleListener(new NewPlot.RescaleListener() {
+
 			public void Rescaled() {
 				forcedUpdate = true;
 				updateSpinners();
 				forcedUpdate = false;
 			}
+
 		});
 	}
 
 	private void error() {
 		JOptionPane.showMessageDialog(this, "The log file is too small or too big for this granuarity", "Error", JOptionPane.ERROR_MESSAGE);
-
 	}
 
 	/**
@@ -914,6 +863,11 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	@Override
 	public String getName() {
 		return "Arrival Values";
+	}
+
+	@Override
+	public void gotFocus() {
+		ew.setCurrentPanel(TRAFFIC_GRAPHARRIVAL_PANEL);
 	}
 
 	@Override

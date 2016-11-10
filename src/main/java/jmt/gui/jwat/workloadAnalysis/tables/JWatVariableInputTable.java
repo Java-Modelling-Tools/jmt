@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat.workloadAnalysis.tables;
 
 import java.awt.Color;
@@ -31,9 +49,7 @@ import jmt.gui.jwat.JWATConstants;
 import jmt.gui.jwat.workloadAnalysis.tables.listeners.RowDeleteListener;
 
 public class JWatVariableInputTable extends JTable implements CommonConstants, JWATConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	/* Set of column dimensions */
@@ -41,14 +57,9 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 
 	public static final Object[] VarTypes = new Object[] { "Numeric", "String", "Date" };
 	protected JComboBox combobox = new JComboBox(VarTypes);
-	//NEW 
-	//public static final Object[] regularExpr = new Object[] {"\\d+.\\d+.\\d+.\\d","\\d\\d/\\w\\w\\w/\\d\\d\\d\\d:\\d\\d:\\d\\d:\\d\\d[^\\]]+"};	//Regular Expr.
-	//protected JComboBox regCombo = new JComboBox(regularExpr);
 
 	protected AbstractAction deleteVar = new AbstractAction("") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -61,12 +72,10 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 			JWatVariableInputTable.this.tableChanged(new TableModelEvent(JWatVariableInputTable.this.getModel()));
 			fireDeleteEvent();
 		}
+
 	};
 
 	protected JButton delVar = new JButton() {
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -80,10 +89,7 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 		super.setModel(tabMod);
 		sizeColumnsAndRows();
 		setRowHeight(ROW_HEIGHT);
-		// Arif Canakoglu: name column is not a combobox 
-		//this.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(combobox));
-		/*this.getColumnModel().getColumn(5).setCellEditor(
-				new DefaultCellEditor(combobox));*/
+		// Arif Canakoglu: name column is not a combobox
 		this.getColumnModel().getColumn(columnSizes.length - 1).setCellEditor(new ButtonCellEditor(new JButton(deleteVar)));
 	}
 
@@ -107,29 +113,18 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 
 	@Override
 	public TableCellRenderer getCellRenderer(int row, int column) {
-		/*if (column == 5)
-			return new ComboBoxCell(regularExpr);*/
-		if (column == 1 || column == 3 || column == 4 || column == 5 || column == 6 || column == 7) {
-			return getDefaultRenderer(String.class);
-		}
-		if (column == columnSizes.length - 1) {
-			return new ButtonCellEditor(delVar);
-		}
-		if (column == 0) {
-			return getDefaultRenderer(Boolean.class);
-		}
 		if (column == 2) {
 			return new ComboBoxCell(VarTypes);
+		} else if (column == columnSizes.length - 1) {
+			return new ButtonCellEditor(delVar);
+		} else {
+			return super.getCellRenderer(row, column);
 		}
-		return null;
 	}
 
 	/* returns customized editor for table cells. */
 	@Override
 	public TableCellEditor getCellEditor(int row, int column) {
-		/*	if (column == 5) {
-				return new DefaultCellEditor(regCombo);
-			}*/
 		if (column == 2) {
 			return new DefaultCellEditor(combobox);
 		} else if (column == columnSizes.length - 1) {
@@ -139,7 +134,6 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 		}
 	}
 
-	//Update 19/10/2006
 	protected MouseHandler mouseHandler;
 	private Vector<RowDeleteListener> deleteLisener = new Vector<RowDeleteListener>(); //<RowDeleteListener>
 
@@ -156,9 +150,7 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 	}
 
 	public AbstractAction CLEAR_ACTION = new AbstractAction("Clear") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -169,12 +161,11 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 		public void actionPerformed(ActionEvent e) {
 			clearCells();
 		}
+
 	};
 
 	public AbstractAction DESEL_ACTION = new AbstractAction("Deselect all") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -186,12 +177,11 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 			((JWatVariableInputTableModel) dataModel).deselectAll();
 			tableChanged(new TableModelEvent(dataModel));
 		}
+
 	};
 
 	private AbstractAction deleteClass = new AbstractAction("Delete selected varaible") {
-		/**
-		* 
-		*/
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -202,12 +192,11 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 		public void actionPerformed(ActionEvent e) {
 			clearCells();
 		}
+
 	};
 
 	private AbstractAction deselectAll = new AbstractAction("Deselect all variables") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -219,6 +208,7 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 			((JWatVariableInputTableModel) dataModel).deselectAll();
 			tableChanged(new TableModelEvent(dataModel));
 		}
+
 	};
 
 	protected void installKeyboard() {
@@ -252,23 +242,24 @@ public class JWatVariableInputTable extends JTable implements CommonConstants, J
 	public JWatVariableInputTable() {
 		super();
 		combobox.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				if (JWatVariableInputTable.this.getSelectedRow() != -1) {
 					switch (combobox.getSelectedIndex()) {
-						case NUMERIC:
-							JWatVariableInputTable.this.setValueAt("", JWatVariableInputTable.this.getSelectedRow(), 4);
-							JWatVariableInputTable.this.setValueAt("([+-])?\\d+([.]\\d+)?", JWatVariableInputTable.this.getSelectedRow(), 5);
-							break;
-						case STRING:
-							JWatVariableInputTable.this.setValueAt("\"", JWatVariableInputTable.this.getSelectedRow(), 4);
-							JWatVariableInputTable.this.setValueAt("\\w+", JWatVariableInputTable.this.getSelectedRow(), 5);
-							break;
-						case DATE:
-							JWatVariableInputTable.this.setValueAt("[]", JWatVariableInputTable.this.getSelectedRow(), 4);
-							JWatVariableInputTable.this.setValueAt("\\d\\d/\\w\\w\\w/\\d\\d\\d\\d:\\d\\d:\\d\\d:\\d\\d[^\\]]+",
-									JWatVariableInputTable.this.getSelectedRow(), 5);
-							break;
-						default:
+					case NUMERIC:
+						JWatVariableInputTable.this.setValueAt("", JWatVariableInputTable.this.getSelectedRow(), 4);
+						JWatVariableInputTable.this.setValueAt("([+-])?\\d+([.]\\d+)?", JWatVariableInputTable.this.getSelectedRow(), 5);
+						break;
+					case STRING:
+						JWatVariableInputTable.this.setValueAt("\"", JWatVariableInputTable.this.getSelectedRow(), 4);
+						JWatVariableInputTable.this.setValueAt("\\w+", JWatVariableInputTable.this.getSelectedRow(), 5);
+						break;
+					case DATE:
+						JWatVariableInputTable.this.setValueAt("[]", JWatVariableInputTable.this.getSelectedRow(), 4);
+						JWatVariableInputTable.this.setValueAt("\\d\\d/\\w\\w\\w/\\d\\d\\d\\d:\\d\\d:\\d\\d:\\d\\d[^\\]]+",
+								JWatVariableInputTable.this.getSelectedRow(), 5);
+						break;
+					default:
 					}
 				}
 			}

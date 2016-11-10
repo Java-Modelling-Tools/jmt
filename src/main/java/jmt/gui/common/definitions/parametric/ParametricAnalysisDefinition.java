@@ -182,14 +182,6 @@ public abstract class ParametricAnalysisDefinition implements ParametricAnalysis
 	 */
 	public abstract String getReferenceClassName();
 
-	///**
-	// * Marks the PA model as "modified"
-	// * @param modified
-	// */
-	//public void setModified(boolean modified) {
-	//    this.modified = modified;
-	//}
-
 	/**
 	 * Gets a Map containing for each property its value. The supported properties are
 	 * defined as constants inside this class.

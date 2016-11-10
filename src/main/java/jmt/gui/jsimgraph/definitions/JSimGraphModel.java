@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import jmt.gui.common.CommonConstants;
-import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -53,10 +51,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	protected HashMap<Object, JMTPoint> stationPositions = new HashMap<Object, JMTPoint>(); // Used to store station positions
 	protected Color[] defaultColor = new Color[] { Color.blue, Color.red, Color.green, Color.magenta, Color.orange, Color.cyan, Color.yellow }; // Defaults color prompted when inserting new class (next ones are generated random)
 
-	//Francesco D'Aquino
 	protected boolean animationEnabled = Defaults.getAsBoolean("isWithAnimation").booleanValue();
-
-	// end Francesco D'Aquino
 
 	// ----- Methods----------------------------------------------------------------
 	/**
@@ -68,32 +63,47 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 
 	// ----- Class Definition Methods ---------------------------------------------------------------------
 	/**
-	 * Creates a new Class with default parameters and default generated name
-	 * @return search key for newly created class
+	 * Adds a new class to the model and sets all the parameters by default.
+	 * @return search key for the new class.
 	 */
 	public Object addClass() {
 		Long num;
 		if (!objectNumber.containsKey(Defaults.get("className"))) {
-			// This if first station of that type
 			num = new Long(1L);
 		} else {
-			// Uses next number
 			num = objectNumber.get(Defaults.get("className"));
 			num = new Long(num.longValue() + 1);
 		}
 		objectNumber.put(Defaults.get("className"), num);
-		Distribution defaultClassDistrib = (Distribution) Defaults.getAsNewInstance("classDistribution");
-		if (defaultClassDistrib.hasMean()) {
-			defaultClassDistrib.setMean(defaultClassDistrib.getMean() * 2);
-		}
-		return addClass(getUniqueClassName(Defaults.get("className") + num.toString()), Defaults.getAsInteger("classType").intValue(),
-				Defaults.getAsInteger("classPriority").intValue(), Defaults.getAsInteger("classPopulation"), defaultClassDistrib);
+		return addClass(getUniqueClassName(Defaults.get("className") + num.toString()),
+				Defaults.getAsInteger("classType").intValue(), Defaults.getAsInteger("classPriority"),
+				Defaults.getAsInteger("classPopulation"), Defaults.getAsNewInstance("classDistribution"));
 	}
 
 	/**
-	 * Delete spefified class
-	 * @param key search key for class to be deleted
-	 * Overrides default one to add "Color"
+	 * Adds a new class to the model and sets all the parameters at once.
+	 * @param name name of the class.
+	 * @param type type of the class.
+	 * @param priority priority of the class.
+	 * @param population population of the class.
+	 * @param distribution inter-arrival time distribution of the class.
+	 * @return search key for the new class.
+	 * Overrides default one to add "Color".
+	 */
+	@Override
+	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution) {
+		Object key = super.addClass(getUniqueClassName(name), type, priority, population, distribution);
+		setClassColor(key, getNewColor());
+		Vector<Object> sources = getStationKeysSource();
+		if (type == CLASS_TYPE_OPEN && !sources.isEmpty()) {
+			setClassRefStation(key, sources.get(0));
+		}
+		return key;
+	}
+
+	/**
+	 * Deletes a class from the model, given the search key.
+	 * Overrides default one to remove "Color".
 	 */
 	@Override
 	public void deleteClass(Object key) {
@@ -102,124 +112,53 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	}
 
 	/**
-	 * Adds a class and sets all class parameters at once.
-	 * @param name name of the class to be added
-	 * @param type type of class
-	 * @param priority value of priority field
-	 * @param population population of this class
-	 * @param distribution initial distribution type
-	 * @return search key identifying the new class.
-	 * Overrides default one to add "Color"
+	 * Sets name of the class, given the search key.
 	 */
 	@Override
-	public Object addClass(String name, int type, int priority, Integer population, Object distribution) {
-		Object tmp = super.addClass(getUniqueClassName(name), type, priority, population, distribution);
-		this.setClassColor(tmp, getNewColor());
-		return tmp;
+	public void setClassName(Object key, String name) {
+		if (getClassName(key).equals(name)) {
+			return;
+		}
+		super.setClassName(key, getUniqueClassName(name));
 	}
 
 	/**
-	 * Sets name of the class linked to the specific key
-	 * @param name name to be set to selected class
-	 * @param key search's key for selected class
+	 * Sets type of the class, given the search key.
 	 */
 	@Override
-	public void setClassName(String name, Object key) {
-		super.setClassName(getUniqueClassName(name), key);
-	}
-
-	/**
-	 * Returns a class parameter, given the class key of search, and the parameter name
-	 * specified by proper code.
-	 * @param key of search for class
-	 * @param parameterName name of parameter to be returned
-	 * @return selected parameter's value
-	 * Overrides default one to add "Color"
-	 */
-	@Override
-	public Object getClassParameter(Object key, int parameterName) {
-		if (parameterName == CLASS_COLOR) {
-			return getClassColor(key);
-		} else if (parameterName == REFERENCE_SOURCE_NAME) {
-			return getClassRefStation(key);
-		} else {
-			return super.getClassParameter(key, parameterName);
+	public void setClassType(Object key, int type) {
+		if (getClassType(key) == type) {
+			return;
+		}
+		super.setClassType(key, type);
+		Vector<Object> sources = getStationKeysSource();
+		if (type == CLASS_TYPE_OPEN && !sources.isEmpty()) {
+			setClassRefStation(key, sources.get(0));
 		}
 	}
 
 	/**
-	 * Sets a class parameter, given the class key of search, and the parameter name
-	 * specified by proper code.
-	 * @param key key of search for class
-	 * @param parameterName name of parameter to be changed
-	 * @param value selected parameter should be set to this value
-	 * Overrides default one to add "Color"
-	 */
-	@Override
-	public void setClassParameter(Object key, int parameterName, Object value) {
-		if (parameterName == CLASS_COLOR) {
-			setClassColor(key, (Color) value);
-		} else if (parameterName == REFERENCE_SOURCE_NAME) {
-			setClassRefStation(key, value);
-		} else {
-			super.setClassParameter(key, parameterName, value);
-		}
-	}
-
-	/**
-	 * Sets type of the class linked to the specific key. Type of class is represented by
-	 * an int number whose value is contained in <code>JMODELConstants</code>.
-	 * */
-	@Override
-	public synchronized void setClassType(int type, Object key) {
-		// If a class type changes, resets its reference station
-		int old = getClassType(key);
-		super.setClassType(type, key);
-		// If type has changed sets ref station to first found source if class is open
-		if (old != type) {
-			setClassRefStation(key, null);
-			if (type == CLASS_TYPE_OPEN) {
-				Vector<Object> stations = this.getStationKeys();
-				for (int i = 0; i < stations.size(); i++) {
-					if (this.getStationType(stations.get(i)).equals(STATION_TYPE_SOURCE)) {
-						setClassRefStation(key, stations.get(i));
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Sets the color of a class
-	 * @param key search key for class
-	 * @param color Color that should be associated with given class
-	 */
-	public void setClassColor(Object key, Color color) {
-		classColor.put(key, color);
-	}
-
-	/**
-	 * Returns a class color
-	 * @param key search key for class
-	 * @return Color associated with given class, or null if class does not exist
+	 * Returns color of the class, given the search key.
 	 */
 	public Color getClassColor(Object key) {
 		return classColor.get(key);
 	}
 
 	/**
-	 * Generates a color for a new class. First enumerates all elements of defaultColor array
-	 * then generates new colors at random.
-	 * @return Newly generated color
+	 * Sets color of the class, given the search key.
+	 */
+	public void setClassColor(Object key, Color color) {
+		classColor.put(key, color);
+	}
+
+	/**
+	 * Generates color for a new class.
 	 */
 	public Color getNewColor() {
 		Long num;
 		if (!objectNumber.containsKey(COLOR_NAME)) {
-			// This if first station of that type
 			num = new Long(0L);
 		} else {
-			// Uses next number
 			num = objectNumber.get(COLOR_NAME);
 			num = new Long(num.longValue() + 1);
 		}
@@ -230,29 +169,6 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			return new Color((int) Math.floor(Math.random() * 256), (int) Math.floor(Math.random() * 256), (int) Math.floor(Math.random() * 256));
 		}
 	}
-
-	//Francesco D'Aquino ---------------------------
-	/**
-	 * Return true if queue animation is enabled
-	 *
-	 * @return true if the animation is enabled
-	 */
-	@Override
-	public boolean isAnimationEnabled() {
-		return this.animationEnabled;
-	}
-
-	/**
-	 * Enable or disable queue animation
-	 *
-	 * @param isEnabled - set it to true to enable queue animation
-	 */
-	@Override
-	public void setAnimationEnabled(boolean isEnabled) {
-		animationEnabled = isEnabled;
-	}
-
-	// end Francesco D'Aquino ----------------------------
 
 	/**
 	 * Returns a serialized object for a given class, used to support cut/paste,
@@ -274,7 +190,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		SerializedClass sc = (SerializedClass) serializedForm;
 		Object newkey = addClass(sc.name, sc.type, sc.priority, sc.population, sc.distribution);
 		setClassColor(newkey, sc.color);
-		setClassRefStation(newkey, sc.referenceStation);
+		setClassRefStation(newkey, sc.refStation);
 		return newkey;
 	}
 
@@ -287,10 +203,10 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		public String name;
 		public Color color;
 		public int type;
-		public int priority;
+		public Integer priority;
 		public Integer population;
 		public Object distribution;
-		public Object referenceStation;
+		public Object refStation;
 
 		/**
 		 * Constructs a new serialized form of specified class
@@ -304,21 +220,22 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			priority = getClassPriority(classkey);
 			population = getClassPopulation(classkey);
 			distribution = getClassDistribution(classkey);
-			referenceStation = getClassRefStation(classkey);
+			refStation = getClassRefStation(classkey);
 		}
 	}
 
 	/**
-	 * Returns given name if a class with the same name does not exists or makes it unique
+	 * Returns given name if a class with the same name does not exist or makes it unique
 	 * @param name class name
 	 * @return unique name
 	 */
 	private String getUniqueClassName(String name) {
-		TreeSet<String> names = new TreeSet<String>(); // Map of all unique names with their first users
+		// Map of all unique names with their first users
+		TreeSet<String> names = new TreeSet<String>();
 		Vector<Object> keys = getClassKeys();
 		// Finds all used names
 		for (int i = 0; i < keys.size(); i++) {
-			names.add(this.getClassName(keys.get(i)));
+			names.add(getClassName(keys.get(i)));
 		}
 
 		// If name is new, returns it
@@ -347,22 +264,30 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		}
 		return name + "_" + num;
 	}
-
 	// ----------------------------------------------------------------------------------------------------
 
 	// ----- Station Definition Methods -------------------------------------------------------------------
 	/**
-	 * Adds a new station to the model. Only type is required as a default name will be set.
-	 * @param type Constant string from JSIMConstants interface.
-	 * @return key of search for newly created station
+	 * Sets name of the station, given the search key.
+	 */
+	@Override
+	public void setStationName(Object key, String name) {
+		if (name.equals(getStationName(key)) || !checkStationName(name)) {
+			return;
+		}
+		super.setStationName(key, getUniqueStationName(name));
+	}
+
+	/**
+	 * Adds a new station to the model, given the station type.
+	 * @param type type of the station.
+	 * @return search key for the new station.
 	 */
 	public Object addStation(String type) {
 		Long num;
 		if (!objectNumber.containsKey(type)) {
-			// This if first station of that type
 			num = new Long(1L);
 		} else {
-			// Uses next number
 			num = objectNumber.get(type);
 			num = new Long(num.longValue() + 1);
 		}
@@ -371,24 +296,10 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	}
 
 	/**
-	 * Sets type of the station, given the search key.
-	 * @param key: search key for station to be modified
-	 * @param name: name of station.
+	 * Deletes a station from the model, given the search key.
 	 */
 	@Override
-	public void setStationName(String name, Object key) {
-		// Changes station name only if needed
-		if (!name.equals(getStationName(key))) {
-			super.setStationName(getUniqueStationName(getCheckStationName(name)), key);
-		}
-	}
-
-	/**
-	 * Deletes station given a search key
-	 * @param key search key for station to be deleted
-	 */
-	@Override
-	public synchronized void deleteStation(Object key) {
+	public void deleteStation(Object key) {
 		super.deleteStation(key);
 		stationPositions.remove(key);
 	}
@@ -422,11 +333,14 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 * @return name assigned to next station of 'type' type.
 	 */
 	public String previewStationName(String type) {
+		Long num;
 		if (!objectNumber.containsKey(type)) {
-			return getUniqueStationName(type + "0");
+			num = new Long(1L);
 		} else {
-			return getUniqueStationName(type + objectNumber.get(type).toString());
+			num = objectNumber.get(type);
+			num = new Long(num.longValue() + 1);
 		}
+		return getUniqueStationName(STATION_NAMES.get(type) + " " + num);
 	}
 
 	/**
@@ -449,18 +363,20 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	public Object deserializeStation(Object serializedForm) {
 		SerializedStation ss = (SerializedStation) ((SerializedStation) serializedForm).clone();
 		ss.name = getUniqueStationName(ss.name);
-		Object key = this.addStation(ss.name, ss.type);
-		setStationQueueCapacity(ss.queueCapacity, key);
-		setStationNumberOfServers(ss.numOfServers, key);
-		// Now sets class-dependant parameters ONLY if stored class exists (so has not been deleted
+		Object key = addStation(ss.name, ss.type);
+		setStationQueueCapacity(key, ss.queueCapacity);
+		setStationQueueStrategy(key, ss.queueStrategy);
+		setStationNumberOfServers(key, ss.numOfServers);
+		// Now sets class-dependent parameters ONLY if stored class exists (so has not been deleted
 		// in the meantime)
-		Object[] classkeyset = ss.serviceStrategy.keySet().toArray();
-		Vector<Object> currentclasses = getClassKeys();
-		for (Object element : classkeyset) {
-			if (currentclasses.contains(element)) {
-				setQueueStrategy(key, element, ss.queueStrategy.get(element));
-				setServiceTimeDistribution(key, element, ss.serviceStrategy.get(element));
-				setRoutingStrategy(key, element, ss.routingStrategy.get(element));
+		Object[] classKeys = ss.queueStrategies.keySet().toArray();
+		Vector<Object> currentClassKeys = getClassKeys();
+		for (Object classKey : classKeys) {
+			if (currentClassKeys.contains(classKey)) {
+				setQueueStrategy(key, classKey, ss.queueStrategies.get(classKey));
+				setDropRule(key, classKey, ss.dropRules.get(classKey));
+				setServiceTimeDistribution(key, classKey, ss.serviceStrategies.get(classKey));
+				setRoutingStrategy(key, classKey, ss.routingStrategies.get(classKey));
 			}
 		}
 		return key;
@@ -474,15 +390,17 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		protected Object key;
 		public String name;
 		public String type;
-		public Integer numOfServers;
 		public Integer queueCapacity;
+		public String queueStrategy;
+		public Integer numOfServers;
 		// Attributes of the tuple (class, this station)
-		public HashMap<Object, String> queueStrategy = new HashMap<Object, String>();
-		public HashMap<Object, ServiceStrategy> serviceStrategy = new HashMap<Object, ServiceStrategy>();
-		public HashMap<Object, RoutingStrategy> routingStrategy = new HashMap<Object, RoutingStrategy>();
+		public HashMap<Object, String> queueStrategies = new HashMap<Object, String>();
+		public HashMap<Object, String> dropRules = new HashMap<Object, String>();
+		public HashMap<Object, ServiceStrategy> serviceStrategies = new HashMap<Object, ServiceStrategy>();
+		public HashMap<Object, RoutingStrategy> routingStrategies = new HashMap<Object, RoutingStrategy>();
 
 		public SerializedStation() {
-
+			return;
 		}
 
 		public SerializedStation(Object key) {
@@ -490,24 +408,22 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			name = getStationName(key);
 			type = getStationType(key);
 			queueCapacity = getStationQueueCapacity(key);
+			queueStrategy = getStationQueueStrategy(key);
 			numOfServers = getStationNumberOfServers(key);
-			// Now sets all attributes of the (station/class) touple
-			Vector<Object> classes = getClassKeys();
-			Object currclass;
-			for (int i = 0; i < classes.size(); i++) {
-				currclass = classes.get(i);
-				queueStrategy.put(currclass, getQueueStrategy(key, currclass));
-				//bugs fixed:
-				//check if null
-				if ( getServiceTimeDistribution(key, currclass) != null) {
-					serviceStrategy.put(currclass, ((ServiceStrategy) getServiceTimeDistribution(key, currclass)).clone());
+			// Now sets all attributes of the (station/class) tuple
+			Vector<Object> classKeys = getClassKeys();
+			for (Object classKey : classKeys) {
+				queueStrategies.put(classKey, getQueueStrategy(key, classKey));
+				dropRules.put(classKey, getDropRule(key, classKey));
+				if (getServiceTimeDistribution(key, classKey) != null) {
+					serviceStrategies.put(classKey, ((ServiceStrategy) getServiceTimeDistribution(key, classKey)).clone());
 				} else {
-					serviceStrategy.put(currclass, null);
+					serviceStrategies.put(classKey, null);
 				}
-				if (getRoutingStrategy(key, currclass) != null) {
-					routingStrategy.put(currclass, ((RoutingStrategy) getRoutingStrategy(key, currclass)).clone());
+				if (getRoutingStrategy(key, classKey) != null) {
+					routingStrategies.put(classKey, ((RoutingStrategy) getRoutingStrategy(key, classKey)).clone());
 				} else {
-					routingStrategy.put(currclass, null);
+					routingStrategies.put(classKey, null);
 				}
 			}
 		}
@@ -522,43 +438,50 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			ss.key = key;
 			ss.name = name;
 			ss.type = type;
-			ss.numOfServers = numOfServers;
 			ss.queueCapacity = queueCapacity;
-			Object[] classes = serviceStrategy.keySet().toArray();
-			// QueueStrategy can share values as they are strings (immutable). On the other hand,
-			// as Distribution and RoutingStrategy are mutable, they have to be cloned explicitly
-			ss.queueStrategy = new HashMap<Object, String>(queueStrategy);
-			for (Object classe : classes) {
-				ss.serviceStrategy.put(classe, serviceStrategy.get(classe).clone());
-				ss.routingStrategy.put(classe, routingStrategy.get(classe).clone());
+			ss.queueStrategy = queueStrategy;
+			ss.numOfServers = numOfServers;
+			ss.queueStrategies = new HashMap<Object, String>(queueStrategies);
+			ss.dropRules = new HashMap<Object, String>(dropRules);
+			Object[] classKeys = serviceStrategies.keySet().toArray();
+			for (Object classKey : classKeys) {
+				if (serviceStrategies.get(classKey) != null) {
+					ss.serviceStrategies.put(classKey, serviceStrategies.get(classKey).clone());
+				} else {
+					ss.serviceStrategies.put(classKey, null);
+				}
+				if (routingStrategies.get(classKey) != null) {
+					ss.routingStrategies.put(classKey, routingStrategies.get(classKey).clone());
+				} else {
+					ss.routingStrategies.put(classKey, null);
+				}
 			}
 			return ss;
 		}
 	}
 
 	/**
-	 * Returns given name if a station with the same name does not exists or makes it unique
+	 * Returns true if the station name is valid, false otherwise
 	 * @param name station name
-	 * @return unique name
+	 * @return true if the station name is valid, false otherwise
 	 */
-	private String getCheckStationName(String name) {
-		String result = name;
-		if (name.equals(CommonConstants.STATION_TYPE_CLASSSWITCH))
-			result = result + "_" + "1";
-		return result;
+	private boolean checkStationName(String name) {
+		return !name.equals(STATION_TYPE_FORK) && !name.equals(STATION_TYPE_CLASSSWITCH)
+				&& !name.equals(STATION_TYPE_SCALER) && !name.equals(STATION_TYPE_TRANSITION);
 	}
 
 	/**
-	 * Returns given name if a station with the same name does not exists or makes it unique
+	 * Returns given name if a station with the same name does not exist or makes it unique
 	 * @param name station name
 	 * @return unique name
 	 */
 	private String getUniqueStationName(String name) {
-		TreeSet<String> names = new TreeSet<String>(); // Map of all unique names with their first users
+		// Map of all unique names with their first users
+		TreeSet<String> names = new TreeSet<String>();
 		Vector<Object> keys = getStationKeys();
 		// Finds all used names
 		for (int i = 0; i < keys.size(); i++) {
-			names.add(this.getStationName(keys.get(i)));
+			names.add(getStationName(keys.get(i)));
 		}
 
 		// If name is new, returns it
@@ -587,10 +510,9 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		}
 		return name + "_" + num;
 	}
-
 	// ----------------------------------------------------------------------------------------------------
-	// ----- Blocking Region Definition Methods -----------------------------------------------------------
 
+	// ----- Blocking Region Definition Methods -----------------------------------------------------------
 	/**
 	 * Adds a new blocking region with unique name to current model
 	 * @return search's key for created blocking region
@@ -614,5 +536,23 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		return addBlockingRegion(name, Defaults.get("blockingRegionType"));
 	}
 	// ----------------------------------------------------------------------------------------------------
+
+	/**
+	 * Tells if queue animation is enabled
+	 * @return true if the animation is enabled
+	 */
+	@Override
+	public boolean isAnimationEnabled() {
+		return animationEnabled;
+	}
+
+	/**
+	 * Enable / disable queue animation
+	 * @param enabled - set it to true to enable queue animation
+	 */
+	@Override
+	public void setAnimationEnabled(boolean isEnabled) {
+		animationEnabled = isEnabled;
+	}
 
 }

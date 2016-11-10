@@ -103,8 +103,8 @@ public class GuiXMLWriter implements GuiXMLConstants {
 			transformer.transform(new DOMSource(modelDoc), res);
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError transformerFactoryConfigurationError) {
-			transformerFactoryConfigurationError.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
@@ -154,9 +154,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 	 * @param model data structure
 	 */
 	static protected void writeClasses(Document doc, Node guiNode, JSimGraphModel model) {
-		Vector v = model.getClassKeys();
-		for (int i = 0; i < v.size(); i++) {
-			Object classKey = v.get(i);
+		for (Object classKey : model.getClassKeys()) {
 			// Now transforms Class color in hexadecimal (Web like) representation
 			String classColor = "#" + Integer.toHexString(model.getClassColor(classKey).getRGB()).toUpperCase();
 			Element userClass = doc.createElement(XML_E_CLASS);
@@ -173,7 +171,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 	 * @param model data structure
 	 */
 	static protected void writeStations(Document doc, Node guiNode, JSimGraphModel model) {
-		Vector stations = model.getStationKeys();
+		Vector<Object> stations = model.getStationKeys();
 		Element station, position;
 		for (int i = 0; i < stations.size(); i++) {
 			Object stationKey = stations.get(i);

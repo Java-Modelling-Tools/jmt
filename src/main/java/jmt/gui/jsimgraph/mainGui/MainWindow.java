@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,16 +96,9 @@ public class MainWindow extends JMTFrame {
 	 * @param newGraph
 	 */
 	public void setGraph(JGraph newGraph) {
-		// 23/07/03 - Massimo Cattai //////////////////////////////////////////
-		//removeEditor();
 		mainPane.remove(scroll);
-		// Old Code - remove(scroll);
-		// 23/07/03 - end /////////////////////////////////////////////////////
 		scroll = new JScrollPane(newGraph);
-		// 23/07/03 - Massimo Cattai //////////////////////////////////////////
 		mainPane.add(scroll, BorderLayout.CENTER);
-		// Old Code - getContentPane().add(scroll);
-		// 23/07/03 - end /////////////////////////////////////////////////////
 		getContentPane().validate();
 	}
 

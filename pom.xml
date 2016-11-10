@@ -130,7 +130,7 @@
 											<fileset dir="${basedir}/templates"/>
 										</copy> -->
 										<copy file="${project.build.directory}/JMT-installer-${jmt.version}.jar" tofile="${izpack.staging}/JMT.jar"/>
-										<copy file="${basedir}/license/License_JMT.txt" tofile="${izpack.staging}/License_JMT.txt"/>
+										<copy file="${basedir}/license/LICENSE_JMT.txt" tofile="${izpack.staging}/LICENSE_JMT.txt"/>
 									</tasks>
 								</configuration>
 							</execution>

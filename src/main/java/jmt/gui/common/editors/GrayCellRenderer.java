@@ -36,17 +36,13 @@ import jmt.gui.exact.table.DisabledCellRenderer;
  *         Time: 19.16.29
  */
 public class GrayCellRenderer extends DisabledCellRenderer {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 		Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-
-		// Paints infinity symbol as a number
-		if (value instanceof String && "\u221E".equals(value)) {
+		if (value instanceof String && ("\u221e".equals(value) || "--".equals(value))) {
 			super.setHorizontalAlignment(SwingConstants.RIGHT);
 		}
 		if (!table.isCellEditable(row, col)) {

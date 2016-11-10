@@ -47,22 +47,23 @@ public class StoredResultsModel implements MeasureDefinition {
 	protected double pollingInterval = 1;
 	private Vector<Integer> queueLength = new Vector<Integer>();
 	private Vector<Integer> queueTime = new Vector<Integer>();
-	private Vector<Integer> residenceTime = new Vector<Integer>();
 	private Vector<Integer> responseTime = new Vector<Integer>();
+	private Vector<Integer> residenceTime = new Vector<Integer>();
 	private Vector<Integer> utilization = new Vector<Integer>();
 	private Vector<Integer> throughput = new Vector<Integer>();
 	private Vector<Integer> dropRate = new Vector<Integer>();
 	private Vector<Integer> systemResponseTime = new Vector<Integer>();
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
-	private Vector<Integer> customerNumber = new Vector<Integer>();
+	private Vector<Integer> systemCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
-	private Vector<Integer> meanWeight = new Vector<Integer>();
-	private Vector<Integer> meanMemoryOccupation = new Vector<Integer>();
 	private Vector<Integer> systemPower = new Vector<Integer>();
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputTimePerSink = new Vector<Integer>();
-	private Vector<Integer> FJResponseTime = new Vector<Integer>();
+	private Vector<Integer> FCRTotalWeight = new Vector<Integer>();
+	private Vector<Integer> FCRMemoryOccupation = new Vector<Integer>();
 	private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
+	private Vector<Integer> FJResponseTime = new Vector<Integer>();
+	private Vector<Integer> firingThroughput = new Vector<Integer>();
 
 	public Vector<Measure> getMeasures() {
 		return measures;
@@ -200,7 +201,6 @@ public class StoredResultsModel implements MeasureDefinition {
 		return measures.get(measureIndex).type;
 	}
 
-	//ADDED by ANEISH START.
 	/**
 	 * Returns true if the measure is a Time Or Number
 	 * @param measureIndex index of the measure
@@ -214,7 +214,6 @@ public class StoredResultsModel implements MeasureDefinition {
 			return false;
 		}
 	}
-	//ADDED by ANEISH STOP.
 
 	/**
 	 * Returns an array with the measureIndex of every queue length measure
@@ -224,18 +223,6 @@ public class StoredResultsModel implements MeasureDefinition {
 		int[] tmp = new int[queueLength.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = queueLength.get(i).intValue();
-		}
-		return tmp;
-	}
-
-	/**
-	 * Returns an array with the measureIndex of every throughput measure
-	 * @return an array with measures' index
-	 */
-	public int[] getThroughputMeasures() {
-		int[] tmp = new int[throughput.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = throughput.get(i).intValue();
 		}
 		return tmp;
 	}
@@ -253,18 +240,6 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns an array with the measureIndex of every residence time measure
-	 * @return an array with measures' index
-	 */
-	public int[] getResidenceTimeMeasures() {
-		int[] tmp = new int[residenceTime.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = residenceTime.get(i).intValue();
-		}
-		return tmp;
-	}
-
-	/**
 	 * Returns an array with the measureIndex of every response time measure
 	 * @return an array with measures' index
 	 */
@@ -277,25 +252,13 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns an array with the measureIndex of every drop rate measure
+	 * Returns an array with the measureIndex of every residence time measure
 	 * @return an array with measures' index
 	 */
-	public int[] getDropRateMeasures() {
-		int[] tmp = new int[dropRate.size()];
+	public int[] getResidenceTimeMeasures() {
+		int[] tmp = new int[residenceTime.size()];
 		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = dropRate.get(i).intValue();
-		}
-		return tmp;
-	}
-
-	/**
-	 * Returns an array with the measureIndex of every system drop rate measure
-	 * @return an array with measures' index
-	 */
-	public int[] getSystemDropRateMeasures() {
-		int[] tmp = new int[systemDropRate.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = systemDropRate.get(i).intValue();
+			tmp[i] = residenceTime.get(i).intValue();
 		}
 		return tmp;
 	}
@@ -313,8 +276,31 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
+	 * Returns an array with the measureIndex of every throughput measure
+	 * @return an array with measures' index
+	 */
+	public int[] getThroughputMeasures() {
+		int[] tmp = new int[throughput.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = throughput.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
+	 * Returns an array with the measureIndex of every drop rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getDropRateMeasures() {
+		int[] tmp = new int[dropRate.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = dropRate.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
 	 * Returns an array with the measureIndex of every system response time measure
-	 *
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemResponseTimeMeasures() {
@@ -327,7 +313,6 @@ public class StoredResultsModel implements MeasureDefinition {
 
 	/**
 	 * Returns an array with the measureIndex of every system throughput measure
-	 *
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemThroughputMeasures() {
@@ -339,24 +324,31 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns an array with the measureIndex of every customer number measure
-	 *
+	 * Returns an array with the measureIndex of every system customer number measure
 	 * @return an array with measures' index
 	 */
-	public int[] getCustomerNumberMeasures() {
-		int[] tmp = new int[customerNumber.size()];
+	public int[] getSystemCustomerNumberMeasures() {
+		int[] tmp = new int[systemCustomerNumber.size()];
 		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = customerNumber.get(i).intValue();
+			tmp[i] = systemCustomerNumber.get(i).intValue();
 		}
 		return tmp;
 	}
 
-	//Added by ASHANKA START
-	//Returns each indices of the System Power as a part of the process of adding the System Power as a new performance index to the 
-	//JSIM
 	/**
-	 * Returns an array with the measureIndex of every customer number measure
-	 *
+	 * Returns an array with the measureIndex of every system drop rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemDropRateMeasures() {
+		int[] tmp = new int[systemDropRate.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemDropRate.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
+	 * Returns an array with the measureIndex of every system power measure
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemPowerMeasures() {
@@ -366,8 +358,11 @@ public class StoredResultsModel implements MeasureDefinition {
 		}
 		return tmp;
 	}
-	//Added by ASHANKA STOP
 
+	/**
+	 * Returns an array with the measureIndex of every response time per sink measure
+	 * @return an array with measures' index
+	 */
 	public int[] getResponsetimePerSinkMeasures() {
 		int[] tmp = new int[responseTimePerSink.size()];
 		for (int i = 0; i < tmp.length; i++) {
@@ -376,6 +371,10 @@ public class StoredResultsModel implements MeasureDefinition {
 		return tmp;
 	}
 
+	/**
+	 * Returns an array with the measureIndex of every throughput per sink measure
+	 * @return an array with measures' index
+	 */
 	public int[] getThroughputPerSinkMeasures() {
 		int[] tmp = new int[throughputTimePerSink.size()];
 		for (int i = 0; i < tmp.length; i++) {
@@ -384,22 +383,46 @@ public class StoredResultsModel implements MeasureDefinition {
 		return tmp;
 	}
 
-	public int[] getMeanWeightMeasures() {
-		int[] tmp = new int[meanWeight.size()];
+	/**
+	 * Returns an array with the measureIndex of every FCR total weight measure
+	 * @return an array with measures' index
+	 */
+	public int[] getFCRTotalWeightMeasures() {
+		int[] tmp = new int[FCRTotalWeight.size()];
 		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = meanWeight.get(i).intValue();
+			tmp[i] = FCRTotalWeight.get(i).intValue();
 		}
 		return tmp;
 	}
 
-	public int[] getMeanMemoryOccupationMeasures() {
-		int[] tmp = new int[meanMemoryOccupation.size()];
+	/**
+	 * Returns an array with the measureIndex of every FCR memory occupation measure
+	 * @return an array with measures' index
+	 */
+	public int[] getFCRMemoryOccupationMeasures() {
+		int[] tmp = new int[FCRMemoryOccupation.size()];
 		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = meanMemoryOccupation.get(i).intValue();
+			tmp[i] = FCRMemoryOccupation.get(i).intValue();
 		}
 		return tmp;
 	}
 
+	/**
+	 * Returns an array with the measureIndex of every FJ customer number measure
+	 * @return an array with measures' index
+	 */
+	public int[] getFJCustomerNumberMeasures() {
+		int[] tmp = new int[FJCustomerNumber.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = FJCustomerNumber.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
+	 * Returns an array with the measureIndex of every FJ response time measure
+	 * @return an array with measures' index
+	 */
 	public int[] getFJResponseTimeMeasures() {
 		int[] tmp = new int[FJResponseTime.size()];
 		for (int i = 0; i < tmp.length; i++) {
@@ -408,10 +431,14 @@ public class StoredResultsModel implements MeasureDefinition {
 		return tmp;
 	}
 
-	public int[] getFJCustomerNumberMeasures() {
-		int[] tmp = new int[FJCustomerNumber.size()];
+	/**
+	 * Returns an array with the measureIndex of every firing throughput measure
+	 * @return an array with measures' index
+	 */
+	public int[] getFiringThroughputMeasures() {
+		int[] tmp = new int[firingThroughput.size()];
 		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = FJCustomerNumber.get(i).intValue();
+			tmp[i] = firingThroughput.get(i).intValue();
 		}
 		return tmp;
 	}
@@ -463,14 +490,17 @@ public class StoredResultsModel implements MeasureDefinition {
 		names.put(name, tmp);
 		// Adds measure index to the right Vector
 		switch (type) {
+		case SimConstants.QUEUE_LENGTH:
+			queueLength.add(new Integer(measures.size() - 1));
+			break;
 		case SimConstants.QUEUE_TIME:
 			queueTime.add(new Integer(measures.size() - 1));
 			break;
-		case SimConstants.RESIDENCE_TIME:
-			residenceTime.add(new Integer(measures.size() - 1));
-			break;
 		case SimConstants.RESPONSE_TIME:
 			responseTime.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.RESIDENCE_TIME:
+			residenceTime.add(new Integer(measures.size() - 1));
 			break;
 		case SimConstants.UTILIZATION:
 			utilization.add(new Integer(measures.size() - 1));
@@ -478,20 +508,17 @@ public class StoredResultsModel implements MeasureDefinition {
 		case SimConstants.THROUGHPUT:
 			throughput.add(new Integer(measures.size() - 1));
 			break;
-		case SimConstants.QUEUE_LENGTH:
-			queueLength.add(new Integer(measures.size() - 1));
+		case SimConstants.DROP_RATE:
+			dropRate.add(new Integer(measures.size() - 1));
 			break;
 		case SimConstants.SYSTEM_RESPONSE_TIME:
 			systemResponseTime.add(new Integer(measures.size() - 1));
 			break;
-		case SimConstants.SYSTEM_JOB_NUMBER:
-			customerNumber.add(new Integer(measures.size() - 1));
-			break;
 		case SimConstants.SYSTEM_THROUGHPUT:
 			systemThroughput.add(new Integer(measures.size() - 1));
 			break;
-		case SimConstants.DROP_RATE:
-			dropRate.add(new Integer(measures.size() - 1));
+		case SimConstants.SYSTEM_NUMBER_OF_JOBS:
+			systemCustomerNumber.add(new Integer(measures.size() - 1));
 			break;
 		case SimConstants.SYSTEM_DROP_RATE:
 			systemDropRate.add(new Integer(measures.size() - 1));
@@ -506,16 +533,19 @@ public class StoredResultsModel implements MeasureDefinition {
 			throughputTimePerSink.add(new Integer(measures.size() - 1));
 			break;
 		case SimConstants.FCR_TOTAL_WEIGHT:
-			meanWeight.add(new Integer(measures.size() - 1));
+			FCRTotalWeight.add(new Integer(measures.size() - 1));
 			break;
 		case SimConstants.FCR_MEMORY_OCCUPATION:
-			meanMemoryOccupation.add(new Integer(measures.size() - 1));
+			FCRMemoryOccupation.add(new Integer(measures.size() - 1));
+			break;
+		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+			FJCustomerNumber.add(new Integer(measures.size() - 1));
 			break;
 		case SimConstants.FORK_JOIN_RESPONSE_TIME:
 			FJResponseTime.add(new Integer(measures.size() - 1));
 			break;
-		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-			FJCustomerNumber.add(new Integer(measures.size() - 1));
+		case SimConstants.FIRING_THROUGHPUT:
+			firingThroughput.add(new Integer(measures.size() - 1));
 			break;
 		}
 	}

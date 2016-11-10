@@ -22,10 +22,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import jmt.common.exception.NetException;
-import jmt.engine.NetStrategies.ForkStrategies.ClassSwitchFork;
 import jmt.engine.NetStrategies.ForkStrategy;
-import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.ForkJobInfo;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
@@ -37,6 +36,7 @@ import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeListWithJobNum;
 import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * <p>Title: Fork</p>
@@ -72,11 +72,14 @@ public class Fork extends OutputSection {
 
 	private ForkStrategy[] forkStrategies;
 
+	private int droppedJobs;
+	private int[] droppedJobsPerClass;
 	private int switchedJobs;
 	private int[] switchedJobsPerClass; 
 
 	private JobInfoList nodeJobsList;
 	private GlobalJobInfoList netJobsList;
+	private RandomEngine randomEngine;
 
 	// --- Constructors -----------------------------------------------------------------------------
 	/**
@@ -122,10 +125,14 @@ public class Fork extends OutputSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) {
+		droppedJobs = 0;
+		droppedJobsPerClass = new int[getJobClasses().size()];
+		Arrays.fill(droppedJobsPerClass, 0);
 		switchedJobs = 0;
 		switchedJobsPerClass = new int[getJobClasses().size()];
 		Arrays.fill(switchedJobsPerClass, 0);
 		nodeJobsList = node.getJobInfoList();
+		randomEngine = RandomEngine.makeDefault();
 	};
 
 	/**
@@ -138,9 +145,8 @@ public class Fork extends OutputSection {
 	 */
 	@Override
 	protected int process(NetMessage message) throws NetException {
-		Job job = message.getJob();
+		Job job;
 
-		// Finds event type
 		switch (message.getEvent()) {
 
 		case NetEvent.EVENT_START:
@@ -148,8 +154,9 @@ public class Fork extends OutputSection {
 			break;
 
 		case NetEvent.EVENT_JOB:
-			NodeList output = null;
+			job = message.getJob();
 			JobClass jobClass = job.getJobClass();
+			NodeList output = null;
 			NodeListWithJobNum outputInfo = forkStrategies[jobClass.getId()].getOutNodes(this, jobClass);
 			if (isSimplifiedFork) {
 				output = getOwnerNode().getOutputNodes();
@@ -160,90 +167,83 @@ public class Fork extends OutputSection {
 			}
 			ackCount = 0;
 
-			// Removes job from global node list
-			JobInfo jobData = nodeJobsList.lookFor(job);
-			if (jobData != null) {
-				nodeJobsList.remove(jobData);
+			if (numOut > 0) {
+				//removes job from node jobInfoList
+				JobInfo jobData = nodeJobsList.lookFor(job);
+				if (jobData != null) {
+					nodeJobsList.remove(jobData);
+				}
+			} else {
+				if (!(job instanceof ForkJob)) {
+					//drops job from global jobInfoList
+					netJobsList.dropJob(job);
+					droppedJobs++;
+					droppedJobsPerClass[jobClass.getId()]++;
+				}
+				//drops job from node jobInfoList and then sends ack back
+				sendAckAfterDrop(job, 0.0, NodeSection.SERVICE, getOwnerNode());
+				break;
 			}
 
+			ForkJobInfo newJobInfo = new ForkJobInfo(job, numOut, getOwnerNode());
 			// Sends "jobsPerLink" jobs on each output link
-			Iterator<NetNode> i = output.randomNodes().iterator();
-			boolean flag = false;
-			while (i.hasNext()) {
-				NetNode outNode = i.next();
-				if (!isSimplifiedFork) {
+			Iterator<NetNode> it = output.randomNodes().iterator();
+			while (it.hasNext()) {
+				NetNode outNode = it.next();
+				if (isSimplifiedFork) {
+					for (int n = 0; n < jobsPerLink; n++) {
+						ForkJob newJob = new ForkJob(jobClass, newJobInfo);
+						// Sends new job to the following station
+						send(newJob, 0.0, outNode);
+					}
+				} else {
+					// Releases new jobs in the random order
+					ForkJob[] newJobPermutation = new ForkJob[outputInfo.getTotalNum(outNode)];
+					int index = 0;
 					for (JobClass c : outputInfo.getClassesWithNum(outNode).keySet()) {
-						for (int n = 0; n < outputInfo.getClassesWithNum(outNode).get(c); n++) {
-							ForkJob newJob;
-							if (forkStrategies[jobClass.getId()] instanceof ClassSwitchFork) {
-								newJob = new ForkJob(numOut, job, this, c, outputInfo.getClassesWithNum(outNode).get(c));
-							} else {
-								newJob = new ForkJob(numOut, job, this);
-							}
-
-							if (myRegion != null) {
-								myRegion.getInputStation().getJobInfoList().add(new JobInfo(newJob));
-								if (flag) {
-									//myRegion.increaseOccupation(job.getJobClass());
-									myRegion.increaseOccupation(job);
-								}
-								flag = true;
-							}
-							// Sends new job to all following stations
-							send(newJob, 0.0, outNode);
+						for (int n = 0; n < outputInfo.getClassesWithNum(outNode).get(c).intValue(); n++) {
+							newJobPermutation[index] = new ForkJob(c, newJobInfo);
+							index++;
 						}
-						if (!hasBeenClass(c, job)) {
+						if (outputInfo.getClassesWithNum(outNode).get(c).intValue() > 0 && !hasBeenClass(c, job)) {
 							switchedJobs++;
 							switchedJobsPerClass[c.getId()]++;
 							job.addClass(c);
 						}
 					}
-				} else {
-					for (int n = 0; n < jobsPerLink; n++) {
-						ForkJob newJob = new ForkJob(numOut, job, this);
-						if (myRegion != null) {
-							myRegion.getInputStation().getJobInfoList().add(new JobInfo(newJob));
-							if (flag) {
-								//myRegion.increaseOccupation(job.getJobClass());
-								myRegion.increaseOccupation(job);
-							}
-							flag = true;
-						}
-						// Sends new job to all following stations
+
+					for (int i = newJobPermutation.length - 1; i > 0; i--) {
+						int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+						ForkJob newJob = newJobPermutation[i];
+						newJobPermutation[i] = newJobPermutation[j];
+						newJobPermutation[j] = newJob;
+					}
+
+					for (int i = 0; i < newJobPermutation.length; i++) {
+						ForkJob newJob = newJobPermutation[i];
+						// Sends new job to the following station
 						send(newJob, 0.0, outNode);
 					}
 				}
 			}
 			jobNum++;
-
-			//if the jobs are blocked in the fork section, send the fake msgs to the former nodes
-			if (numOut == 0) {
-				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
-				netJobsList.dropJob(job);
-				jobNum--;
-			}
-
-			//remove from the blocking region input node
-			if (myRegion != null) {
-				JobInfo ji = myRegion.getInputStation().getJobInfoList().lookFor(job);
-				myRegion.getInputStation().getJobInfoList().remove(ji);
-			}
 			break;
 
 		case NetEvent.EVENT_ACK:
 			ackCount++;
-			// If this fork does not block, sends ACK back when all messages are delivered to unlock this fork
+			// If this fork does not block, sends ack back when all messages are delivered to unlock this fork
+			job = ((ForkJob) message.getJob()).getForkedJob();
 			if ((jobNum < block || block <= 0) && ackCount == numOut) {
 				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 			}
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			// If this fork blocks, finally sends ACK back and unlocks this
-			Job j = (Job) message.getData();
-			send(NetEvent.EVENT_JOIN, j, 0.0, NodeSection.INPUT, getOwnerNode());
+			// If this fork blocks, finally sends ack back and unlocks this
+			job = (Job) message.getData();
+			send(NetEvent.EVENT_JOIN, job, 0.0, NodeSection.INPUT, getOwnerNode());
 			if (jobNum == block) {
-				sendBackward(NetEvent.EVENT_ACK, j, 0.0);
+				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 			}
 			jobNum--;
 			break;
@@ -265,14 +265,21 @@ public class Fork extends OutputSection {
 		return job.hasBeenClass(jobClass);
 	}
 
-	private boolean redirectionON;
-	private BlockingRegion myRegion;
-	private NetNode regionInputStation;
+	/**
+	 * Gets the total number of dropped jobs
+	 * @return the total number of dropped jobs
+	 */
+	public int getDroppedJobs() {
+		return droppedJobs;
+	}
 
-	public void addRegion(BlockingRegion region) {
-		redirectionON = true;
-		myRegion = region;
-		regionInputStation = myRegion.getInputStation();
+	/**
+	 * Gets the number of dropped jobs for the specified class
+	 * @param classIndex the index of the job class
+	 * @return the number of dropped jobs for the specified class
+	 */
+	public int getDroppedJobsPerClass(int classIndex) {
+		return droppedJobsPerClass[classIndex];
 	}
 
 	/**

@@ -1,5 +1,3 @@
-package jmt.framework.gui.graph;
-
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
@@ -18,22 +16,22 @@ package jmt.framework.gui.graph;
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+package jmt.framework.gui.graph;
+
 import java.util.Vector;
 
 import ptolemy.plot.Plot;
 
 /**
  * <p>Title: PAPlot</p>
- * <p>Description: a simple plot panel, created extanding the Plot class</p>
+ * <p>Description: a simple plot panel, created extending the Plot class</p>
  *
  * @author Francesco D'Aquino
  *         Date: 10-feb-2006
  *         Time: 16.17.48
  */
 public class PAPlot extends Plot {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	private final int VALUE = 0;

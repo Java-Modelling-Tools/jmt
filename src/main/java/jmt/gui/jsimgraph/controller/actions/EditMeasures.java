@@ -46,7 +46,7 @@ public class EditMeasures extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public EditMeasures(Mediator mediator) {
-		super("Performance indices...", "GUIMeasure", mediator);
+		super("Performance Indices...", "GUIMeasure", mediator);
 		putValue(SHORT_DESCRIPTION, "Define performance indices");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_M));
 		setEnabled(false);

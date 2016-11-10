@@ -34,6 +34,7 @@ import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.exact.table.BooleanCellRenderer;
 
 public class BlockingRegionClassPanel extends WizardPanel implements CommonConstants {
 
@@ -90,7 +91,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 		private static final long serialVersionUID = 1L;
 
 		protected String[] dropRules = new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() };
-		protected TableCellRenderer gray = new GrayCellRenderer();
+		protected TableCellRenderer grayRenderer = new GrayCellRenderer();
 		int[] columnSizes = new int[] { 150, 60, 30, 50, 40, 40 };		
 
 		public BlockingClassTable() {
@@ -106,7 +107,9 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 			if (column == 0) {
 				return classEditor.getRenderer();
 			} else if (column == 1 || column == 4 || column == 5) {
-				return gray;
+				return grayRenderer;
+			} else if (column == 2) {
+				return new BooleanCellRenderer();
 			} else if (column == 3) {
 				return ComboBoxCellEditor.getRendererInstance();
 			} else {
@@ -160,7 +163,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 			// Disable the Weight setting
 			return  //columnIndex == 5 ||
 					columnIndex == 4 || columnIndex == 3 || columnIndex == 2
-					|| (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, columnIndex + 1)).booleanValue());
+					|| (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue());
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
@@ -174,7 +177,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 				return (ivalue.intValue() > 0) ? ivalue : "\u221e";
 			case (2):
 				ivalue = brd.getRegionClassCustomerConstraint(key, classKey);
-				return (ivalue.intValue() <= 0) ? Boolean.TRUE : Boolean.FALSE;
+				return Boolean.valueOf(ivalue.intValue() < 1);
 			case (3):
 				return brd.getRegionClassDropRule(key, classKey).toString();
 			case (4):
@@ -205,7 +208,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 					brd.setRegionClassCustomerConstraint(key, classKey, Integer.valueOf(-1));
 				} else {
 					ivalue = Defaults.getAsInteger("blockingMaxJobsPerClass");
-					if (ivalue.intValue() <= 0) {
+					if (ivalue.intValue() < 1) {
 						ivalue = Integer.valueOf(1);
 					}
 					brd.setRegionClassCustomerConstraint(key, classKey, ivalue);

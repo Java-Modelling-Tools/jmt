@@ -80,11 +80,6 @@ public class ComponentBar extends JMTToolBar {
 		int index = 0;
 		try {
 			for (Field field : fields) {
-				// Disable place and transition stations
-				if (field.getName().equals("STATION_TYPE_PLACE") || field.getName().equals("STATION_TYPE_TRANSITION")) {	
-					continue;
-				}
-
 				if (field.getName().startsWith("STATION_TYPE_")) {
 					// Checks for existence of graphic component
 					String name = ((String) field.get(null)).replaceAll(" ", "") + "Cell";

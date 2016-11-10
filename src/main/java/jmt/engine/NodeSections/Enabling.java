@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,14 @@ package jmt.engine.NodeSections;
 
 import java.util.Arrays;
 
+import javax.swing.JOptionPane;
+
 import jmt.common.exception.NetException;
-import jmt.engine.NetStrategies.TransitionStrategies.TransitionVector;
+import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
+import jmt.engine.NetStrategies.TransitionUtilities.TransitionVector;
 import jmt.engine.QueueNet.DataPacket;
+import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.ForkJobInfo;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
@@ -43,20 +48,26 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class Enabling extends InputSection {
 
-	private TransitionVector[] enablingConditions;
-	private TransitionVector[] inhibitingConditions;
-	private TransitionVector[] inputSituations;
+	private TransitionMatrix[] enablingConditions;
+	private TransitionMatrix[] inhibitingConditions;
+
+	private JobClassList jobClasses;
 	private GlobalJobInfoList netJobsList;
+	private TransitionMatrix storageSituation;
 	private int[] enablingDegrees;
+	private int currentModeIndex;
 	private int unfinishedRequests;
-	private double totalLifetime;
+	private double[] totalLifetime;
+	private ForkJobInfo[] forkJobInfo;
+	private int[] forkJobNum;
+	private boolean isForkJobInfoWarningShown;
 	private int consumedJobs;
 	private int[] consumedJobsPerClass;
 
 	/**
 	 * Creates a new instance of the enabling section.
 	 */
-	public Enabling(TransitionVector[] enablingConditions, TransitionVector[] inhibitingConditions) {
+	public Enabling(TransitionMatrix[] enablingConditions, TransitionMatrix[] inhibitingConditions) {
 		super(true);
 		this.enablingConditions = enablingConditions;
 		this.inhibitingConditions = inhibitingConditions;
@@ -64,18 +75,22 @@ public class Enabling extends InputSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) {
-		JobClassList jobClasses = getJobClasses();
-		inputSituations = new TransitionVector[jobClasses.size()];
-		for (int i = 0; i < inputSituations.length; i++) {
-			inputSituations[i] = new TransitionVector();
-			for (String nodeName : enablingConditions[i].keySet()) {
-				inputSituations[i].setValue(nodeName, Integer.valueOf(0));
-			}
+		jobClasses = getJobClasses();
+		storageSituation = new TransitionMatrix(jobClasses.size());
+		for (String nodeName : enablingConditions[0].keySet()) {
+			storageSituation.setVector(new TransitionVector(nodeName, jobClasses.size()));
 		}
-		enablingDegrees = new int[jobClasses.size()];
+		enablingDegrees = new int[enablingConditions.length];
 		Arrays.fill(enablingDegrees, 0);
+		currentModeIndex = -1;
 		unfinishedRequests = 0;
-		totalLifetime = 0.0;
+		totalLifetime = new double[jobClasses.size()];
+		Arrays.fill(totalLifetime, 0.0);
+		forkJobInfo = new ForkJobInfo[jobClasses.size()];
+		Arrays.fill(forkJobInfo, null);
+		forkJobNum = new int[jobClasses.size()];
+		Arrays.fill(forkJobNum, 0);
+		isForkJobInfoWarningShown = false;
 		consumedJobs = 0;
 		consumedJobsPerClass = new int[jobClasses.size()];
 		Arrays.fill(consumedJobsPerClass, 0);
@@ -84,9 +99,7 @@ public class Enabling extends InputSection {
 	@Override
 	protected int process(NetMessage message) throws NetException {
 		Object data = message.getData();
-		Job job = message.getJob();
 		NetNode source = message.getSource();
-		byte sourceSection = message.getSourceSection();
 
 		switch (message.getEvent()) {
 
@@ -98,9 +111,23 @@ public class Enabling extends InputSection {
 
 		case NetEvent.EVENT_JOB:
 		{
-			totalLifetime += NetSystem.getTime() - job.getSystemEnteringTime();
-			sendAckAfterConsume(job, 0.0, sourceSection, source);
-			netJobsList.consumeJob(job);
+			Job job = message.getJob();
+			JobClass jobClass = job.getJobClass();
+			totalLifetime[jobClass.getId()] += NetSystem.getTime() - job.getSystemEnteringTime();
+			if (job instanceof ForkJob) {
+				ForkJob fJob = (ForkJob) job;
+				if (forkJobInfo[jobClass.getId()] == null) {
+					forkJobInfo[jobClass.getId()] = fJob.getForkJobInfo();
+				} else if (fJob.getForkJobInfo() != forkJobInfo[jobClass.getId()]) {
+					showForkJobInfoWarning();
+				}
+				forkJobNum[jobClass.getId()]++;
+			} else {
+				netJobsList.consumeJob(job);
+				consumedJobs++;
+				consumedJobsPerClass[jobClass.getId()]++;
+			}
+			sendAckAfterConsume(job, 0.0, NodeSection.OUTPUT, source);
 			break;
 		}
 
@@ -109,79 +136,95 @@ public class Enabling extends InputSection {
 
 		case NetEvent.EVENT_JOB_CHANGE:
 		{
-			JobClass jobClass = (JobClass) ((DataPacket) data).getData(DataPacket.FIELD_REFERENCE_CLASS);
-			int presentJobs = ((Integer) ((DataPacket) data).getData(DataPacket.FIELD_JOB_NUMBER)).intValue();
-			int classIndex = jobClass.getId();
-			inputSituations[classIndex].setValue(source.getName(), Integer.valueOf(presentJobs));
-			int enablingDegree = -1;
-			for (String name : inputSituations[classIndex].keySet()) {
-				int availableJobs = inputSituations[classIndex].getValue(name).intValue();
-				int requiredJobsForEnabling = enablingConditions[classIndex].getValue(name).intValue();
-				int requiredJobsForInhibiting = inhibitingConditions[classIndex].getValue(name).intValue();
-				if (requiredJobsForEnabling > 0) {
-					if (enablingDegree < 0) {
-						enablingDegree = availableJobs / requiredJobsForEnabling;
-					} else {
-						enablingDegree = Math.min(enablingDegree, availableJobs / requiredJobsForEnabling);
-					}
-				}
-				if (requiredJobsForInhibiting > 0 && availableJobs >= requiredJobsForInhibiting) {
-					enablingDegree = 0;
-					break;
-				}
+			TransitionVector storageVector = (TransitionVector) data;
+			for (int i = 0; i < jobClasses.size(); i++) {
+				storageSituation.setEntry(storageVector.getKey(), i, storageVector.getEntry(i));
 			}
 
-			if (enablingDegree >= 0 && enablingDegree != enablingDegrees[classIndex]) {
-				DataPacket packet = new DataPacket();
-				packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
-				packet.setData(DataPacket.FIELD_ENABLING_DEGREE, enablingDegree);
-				sendForward(NetEvent.EVENT_ENABLING, packet, 0.0);
-				enablingDegrees[classIndex] = enablingDegree;
+			for (int i = 0; i < enablingConditions.length; i++) {
+				if (i == currentModeIndex) {
+					continue;
+				}
+
+				int enablingDegree = -1;
+				OUTER_LOOP:
+				for (String nodeName : enablingConditions[i].keySet()) {
+					if (enablingConditions[i].getTotal(nodeName) > 0) {
+						for (int j = 0; j < jobClasses.size(); j++) {
+							int availableJobs = storageSituation.getEntry(nodeName, j);
+							int requiredJobsForEnabling = enablingConditions[i].getEntry(nodeName, j);
+							if (requiredJobsForEnabling > 0) {
+								if (enablingDegree < 0) {
+									enablingDegree = availableJobs / requiredJobsForEnabling;
+								} else {
+									enablingDegree = Math.min(enablingDegree, availableJobs / requiredJobsForEnabling);
+								}
+								if (enablingDegree == 0) {
+									break OUTER_LOOP;
+								}
+							}
+						}
+					}
+					if (inhibitingConditions[i].getTotal(nodeName) > 0) {
+						for (int j = 0; j < jobClasses.size(); j++) {
+							int availableJobs = storageSituation.getEntry(nodeName, j);
+							int requiredJobsForInhibiting = inhibitingConditions[i].getEntry(nodeName, j);
+							if (requiredJobsForInhibiting > 0 && availableJobs >= requiredJobsForInhibiting) {
+								enablingDegree = 0;
+								break OUTER_LOOP;
+							}
+						}
+					}
+				}
+
+				if (enablingDegree >= 0 && enablingDegree != enablingDegrees[i]) {
+					enablingDegrees[i] = enablingDegree;
+					Object[] packet = new Object[DataPacket.PACKET_SIZE_ENABLING];
+					packet[DataPacket.FIELD_MODE_INDEX] = Integer.valueOf(i);
+					packet[DataPacket.FIELD_ENABLING_DEGREE] = Integer.valueOf(enablingDegree);
+					sendForward(NetEvent.EVENT_ENABLING, packet, 0.0);
+				}
 			}
 			break;
 		}
 
 		case NetEvent.EVENT_FIRING:
 		{
-			JobClass jobClass = (JobClass) ((DataPacket) data).getData(DataPacket.FIELD_REFERENCE_CLASS);
-			int classIndex = jobClass.getId();
-			if (enablingDegrees[classIndex] <= 0) {
+			int modeIndex = ((Integer) data).intValue();
+			if (enablingDegrees[modeIndex] <= 0) {
 				return MSG_NOT_PROCESSED;
 			}
-			enablingDegrees[classIndex]--;
-
-			for (String nodeName : enablingConditions[classIndex].keySet()) {
-				int requiredJobs = enablingConditions[classIndex].getValue(nodeName).intValue();
-				if (requiredJobs > 0) {
-					DataPacket packet = new DataPacket();
-					packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
-					packet.setData(DataPacket.FIELD_JOB_NUMBER, Integer.valueOf(requiredJobs));
-					send(NetEvent.EVENT_JOB_REQUEST, packet, 0.0, NodeSection.OUTPUT, NetSystem.getNode(nodeName));
+			enablingDegrees[modeIndex]--;
+			currentModeIndex = modeIndex;
+			for (String nodeName : enablingConditions[modeIndex].keySet()) {
+				int requiredJobsFromNode = enablingConditions[modeIndex].getTotal(nodeName);
+				if (requiredJobsFromNode > 0) {
+					send(NetEvent.EVENT_JOB_REQUEST, enablingConditions[modeIndex].getVector(nodeName), 0.0,
+							NodeSection.OUTPUT, NetSystem.getNode(nodeName));
 					unfinishedRequests++;
 				}
 			}
+			Arrays.fill(totalLifetime, 0.0);
+			Arrays.fill(forkJobInfo, null);
+			Arrays.fill(forkJobNum, 0);
 			break;
 		}
 
 		case NetEvent.EVENT_JOB_FINISH:
 		{
-			JobClass jobClass = (JobClass) ((DataPacket) data).getData(DataPacket.FIELD_REFERENCE_CLASS);
-			int requiredJobs = ((Integer) ((DataPacket) data).getData(DataPacket.FIELD_JOB_NUMBER)).intValue();
-			int classIndex = jobClass.getId();
 			if (unfinishedRequests <= 0) {
 				return MSG_NOT_PROCESSED;
 			}
 			unfinishedRequests--;
-
 			if (unfinishedRequests == 0) {
-				DataPacket packet = new DataPacket();
-				packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
-				packet.setData(DataPacket.FIELD_TOTAL_LIFETIME, Double.valueOf(totalLifetime));
+				Object[] packet = new Object[DataPacket.PACKET_SIZE_FIRING];
+				packet[DataPacket.FIELD_MODE_INDEX] = Integer.valueOf(currentModeIndex);
+				packet[DataPacket.FIELD_TOTAL_LIFETIME] = totalLifetime;
+				packet[DataPacket.FIELD_FORK_JOB_INFO] = forkJobInfo;
+				packet[DataPacket.FIELD_FORK_JOB_NUM] = forkJobNum;
 				sendForward(NetEvent.EVENT_FIRING, packet, 0.0);
-				totalLifetime = 0.0;
+				currentModeIndex = -1;
 			}
-			consumedJobs += requiredJobs;
-			consumedJobsPerClass[classIndex] += requiredJobs;
 			break;
 		}
 
@@ -207,6 +250,24 @@ public class Enabling extends InputSection {
 	 */
 	public int getConsumedJobsPerClass(int jobClass) {
 		return consumedJobsPerClass[jobClass];
+	}
+
+	public void showForkJobInfoWarning() {
+		if (!isForkJobInfoWarningShown) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(800);
+					} catch (InterruptedException e) {
+					}
+					JOptionPane.showMessageDialog(null, getOwnerNode().getName()
+							+ " failed to maintain the dependency between the input tasks and their parent job.",
+							"JMT - Warning", JOptionPane.WARNING_MESSAGE);
+				}
+			}).start();
+			isForkJobInfoWarningShown = true;
+		}
 	}
 
 }

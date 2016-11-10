@@ -1619,7 +1619,7 @@ public class SolverSingleClosedMVA extends Solver {
 		byte[] expMultCorr = new byte[customers + 1];
 		int[] puntProb = new int[customers + 2];
 
-		int num;// number of elemnts in vector puntProb[c]
+		int num;// number of elements in vector puntProb[c]
 
 		double[][] nsPrec = new double[stations][customers + 1];
 		double[][] nsCorr = new double[stations][customers + 1];

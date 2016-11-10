@@ -43,7 +43,7 @@ public class CloseModel extends AbstractJmodelAction {
 	 */
 	public CloseModel(Mediator mediator) {
 		super("Close", mediator);
-		putValue(SHORT_DESCRIPTION, "close opened model");
+		putValue(SHORT_DESCRIPTION, "Close this model");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_L));
 		setEnabled(false);
 	}

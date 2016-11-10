@@ -114,7 +114,6 @@ public class RandomSource extends InputSection {
 
 				//no control is made on the number of jobs created
 				//it is an open class
-				job.born();
 
 				// in RandomSource the job is created (--> SystemEnteringTime is initialized)
 				// but then is delayed as long as the random interarrival time ("delay")
@@ -155,7 +154,6 @@ public class RandomSource extends InputSection {
 			if (waitingJobs.size() != 0) {
 				job = waitingJobs.removeFirst();
 				c = job.getJobClass().getId();
-				job.born();
 
 				// in RandomSource the job is created (--> SystemEnteringTime is initialized)
 				// but then is delayed as long as the random interarrival time ("delay")

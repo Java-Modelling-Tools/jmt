@@ -85,8 +85,7 @@ public class StationNamePanel extends JPanel {
 		 * Update station's name
 		 */
 		protected void updateValues() {
-			sd.setStationName(name.getText(), key);
-
+			sd.setStationName(key, name.getText());
 			name.setText(sd.getStationName(key));
 		}
 

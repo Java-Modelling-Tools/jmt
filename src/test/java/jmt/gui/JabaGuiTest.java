@@ -43,9 +43,10 @@ public class JabaGuiTest {
 		FrameFixture jaba = WindowFinder.findFrame(JabaWizard.class).using(window.robot);
 		jaba.show();
 	}
-	
+
 	@After
 	public void tearDown() {
 		window.cleanUp();
 	}
+
 }

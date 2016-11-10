@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat.fitting.panels;
 
 import java.awt.BorderLayout;
@@ -36,14 +54,11 @@ import jmt.gui.jwat.JWATConstants;
 import jmt.gui.jwat.JWatWizard;
 import jmt.gui.jwat.MainJwatWizard;
 
-
 public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants, JWATConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	private String demoDescription = "<HTML>" + "<b>Type of demo:</b> Fitting algorithm <p>"
-			//+ "<b>Description:</b> This demo has been extracted from an Apache log file selecting only some variables<p>"
 			+ "<b># observations:</b> This demo has 500 observations <p>"
 			+ "<b># variables:</b> Each observation is characterized by one numeric variable<p>"
 			+ "After the fitting you will discover that the data is Pareto distributed";
@@ -52,8 +67,8 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 			+ "<b>STEP 2:</b> Analyze the results of the fitting in the Exponential and Pareto panels.<p><p>"
 			+ "</HTML>";
 
-	private static final String TEMP_DEMO_NAME_FITTING = "DemoFittingPareto";
-	private static final String DEMO_FILE = "examples/" + TEMP_DEMO_NAME_FITTING + "Data.jwat";
+	private static final String TEMP_DEMO_NAME_FITTING = "Demo_FittingPareto";
+	private static final String DEMO_FILE = EXAMPLE_PATH + TEMP_DEMO_NAME_FITTING + "Data.jwat";
 	private JButton loadDemo;
 	private boolean canGoOn;
 	private ModelFitting model;
@@ -84,7 +99,6 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 		demos = new JList(new String[] { TEMP_DEMO_NAME_FITTING });
 		Font f = demos.getFont();
 		demos.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));
-		//demos.setPreferredSize(new Dimension(150,200));
 		demos.setFixedCellWidth(150);
 		demos.addListSelectionListener(new ListSelectionListener() {
 
@@ -125,8 +139,6 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 				try {
 					Loader.readData(demoFile.getAbsolutePath(), Loader.loadParameter(demoFile.getParentFile(), TEMP_DEMO_NAME_FITTING),
 							new ProgressMonitorShow(LoadDemoFittingPanel.this, "Loading Data...", 1000), new InputStatusListener());
-					//Loader.readData("D:/" + TEMP_DEMO_NAME_FITTING + "Data.jwat", Loader.loadParameter(TEMP_DEMO_NAME_FITTING),
-						//		new ProgressMonitorShow(LoadDemoFittingPanel.this, "Loading Data...", 1000), new InputStatusListener());
 				} catch (FileNotFoundException ee) {
 					JOptionPane.showMessageDialog(LoadDemoFittingPanel.this, "Loading aborted. File not found.", "ABORT!!", JOptionPane.WARNING_MESSAGE);
 				} catch (IOException ee) {
@@ -144,12 +156,12 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 		public void statusEvent(EventStatus e) {
 
 			switch (e.getType()) {
-				case EventStatus.ABORT_EVENT:
-					abortEvent((EventFinishAbort) e);
-					break;
-				case EventStatus.DONE_EVENT:
-					finishedEvent((EventFinishLoad) e);
-					break;
+			case EventStatus.ABORT_EVENT:
+				abortEvent((EventFinishAbort) e);
+				break;
+			case EventStatus.DONE_EVENT:
+				finishedEvent((EventFinishLoad) e);
+				break;
 			}
 
 		}
@@ -160,7 +172,6 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 			canGoOn = false;
 			((JWatWizard) getParentWizard()).setEnableButton("Next >", false);
 			((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
-
 		}
 
 		//		data loaded
@@ -170,7 +181,6 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 			((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
 			canGoOn = true;
 			((JWatWizard) getParentWizard()).showNextPanel();
-
 		}
 	}
 
@@ -195,7 +205,7 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 	// Chiamata quando dal pannello si torna indietro
 	@Override
 	public boolean canGoBack() {
-		if (JOptionPane.showConfirmDialog(this, "Are you sure want to go back to start screen ?", "Back operation", JOptionPane.YES_NO_OPTION,
+		if (JOptionPane.showConfirmDialog(this, "Are you sure you want to go back to start screen?", "Back operation", JOptionPane.YES_NO_OPTION,
 				JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
 			return false;
 		}
@@ -203,4 +213,5 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 		parent.resetScreen();
 		return true;
 	}
+
 }

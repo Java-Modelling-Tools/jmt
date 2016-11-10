@@ -63,7 +63,7 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 	public SemaphoreSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
 		classEditor = new ImagedComboBoxCellEditorFactory(cd);
 		setData(sd, cd, stationKey);
-		semaphoreStrategies = new SemaphoreSelectionTable();		
+		semaphoreStrategies = new SemaphoreSelectionTable();
 		semaphoreEditor = new SemaphoreEditor(stationData, cd, stationKey, null);
 		initComponents();
 	}

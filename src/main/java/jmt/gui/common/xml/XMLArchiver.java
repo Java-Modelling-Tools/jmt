@@ -67,11 +67,11 @@ public class XMLArchiver implements GuiXMLConstants {
 			transformer.setOutputProperty("encoding", ENCODING);
 			transformer.transform(new DOMSource(modelDoc), new StreamResult(archiveName));
 		} catch (TransformerConfigurationException e) {
-			e.printStackTrace(); //To change body of catch statement use Options | File Templates.
-		} catch (TransformerFactoryConfigurationError transformerFactoryConfigurationError) {
-			transformerFactoryConfigurationError.printStackTrace(); //To change body of catch statement use Options | File Templates.
+			e.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
 		} catch (TransformerException e) {
-			e.printStackTrace(); //To change body of catch statement use Options | File Templates.
+			e.printStackTrace();
 		}
 	}
 

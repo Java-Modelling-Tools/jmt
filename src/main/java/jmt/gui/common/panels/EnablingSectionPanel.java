@@ -23,25 +23,37 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.exact.table.ExactCellRenderer;
@@ -60,46 +72,38 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String DESCRIPTION =
-			"Each row of the upper table represents the enabling condition for a class, i.e. "
-			+ "the number of jobs required in each input place for enabling the transition. "
-			+ "Each row of the lower table represents the inhibiting condition for a class, "
-			+ "i.e. the number of jobs required in an input place for inhibiting the transition "
-			+ "(set 0 for infinity).";
-	private static final String NO_NONZERO_ROWS_NOTICE =
-			"Error: The enabling table contains no non-zero rows. The transition will not be "
-			+ "enabled for any classes.";
-	private static final String NO_ROWS_WITH_ALL_VALUES_VALID_NOTICE =
-			"Error: The enabling table contains no rows with all the values less than those "
-			+ "corresponding in the inhibiting table. The transition will not be enabled for "
-			+ "any classes.";
-	private static final String ZERO_ROWS_NOTICE =
-			"Warning: The enabling table contains zero rows. The transition will not be enabled "
-			+ "for classes represented by these rows.";
-	private static final String ROWS_WITH_VALUES_INVALID_NOTICE =
-			"Warning: The enabling table contains rows with values no less than those corresponding "
-			+ "in the inhibiting table. The transition will not be enabled for classes represented "
-			+ "by these rows.";
+	private static final String NO_NONZERO_VALUES_NOTICE =
+			"Error: The enabling table contains no non-zero values. The transition will not be "
+			+ "enabled for this mode.";
+	private static final String INVALID_VALUES_NOTICE =
+			"Error: The enabling table contains values no less than those corresponding in the "
+			+ "inhibiting table. The transition will not be enabled for this mode.";
 
 	private boolean isInitComplete;
 
-	protected StationDefinition stationData;
-	protected ClassDefinition classData;
-	protected Object stationKey;
-	protected Vector<Object> classes;
-	protected Vector<Object> stationsIn;
+	private StationDefinition stationData;
+	private ClassDefinition classData;
+	private Object stationKey;
+	private Vector<Object> stationInKeys;
+	private Vector<Object> classKeys;
+	private int currentModeIndex;
 
+	private WarningScrollTable leftPanel;
+	private TitledBorder enablingBorder;
 	private ConditionTable enablingTable;
+	private JScrollPane enablingPanel;
+	private TitledBorder inhibitingBorder;
 	private ConditionTable inhibitingTable;
-	private JTextArea descriptionText;
+	private JScrollPane inhibitingPanel;
+	private JButton addModeButton;
+	private ModeTable modeTable;
 	private JTextArea noticeText;
 
 	public EnablingSectionPanel(StationDefinition sd, ClassDefinition cd, Object sk) {
 		isInitComplete = false;
 		setData(sd, cd, sk);
 		initComponents();
-		updateDescription();
-		updateNotice();
+		addDataManagers();
 		isInitComplete = true;
 	}
 
@@ -107,57 +111,50 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		stationData = sd;
 		classData = cd;
 		stationKey = sk;
-		classes = classData.getClassKeys();
-		stationsIn = stationData.getBackwardConnections(stationKey);
+		stationInKeys = sd.getBackwardConnections(stationKey);
+		classKeys = cd.getClassKeys();
+		currentModeIndex = 0;
 		if (isInitComplete) {
+			leftPanel.clearCheckVectors();
+			leftPanel.addCheckVector(stationInKeys);
+			leftPanel.addCheckVector(classKeys);
 			enablingTable.tableChanged(new TableModelEvent(enablingTable.getModel(), TableModelEvent.HEADER_ROW));
 			inhibitingTable.tableChanged(new TableModelEvent(inhibitingTable.getModel(), TableModelEvent.HEADER_ROW));
-			updateDescription();
-			updateNotice();
 		}
 	}
 
 	private void initComponents() {
 		setLayout(new BorderLayout());
 
-		JSplitPane mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-		mainPanel.setDividerSize(4);
-		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-		mainPanel.setResizeWeight(1.0);
-
-		JPanel tablePanel = new JPanel(new GridLayout(2, 1, 3, 3));
-
+		String modeName = stationData.getTransitionModeName(stationKey, 0);
+		enablingBorder = new TitledBorder(new EtchedBorder(), "Enabling Condition for " + modeName);
 		enablingTable = new ConditionTable(true);
-		JScrollPane enablingTablePanel = new JScrollPane();
-		enablingTablePanel.setBorder(new TitledBorder(new EtchedBorder(), "Enabling Conditions"));
-		enablingTablePanel.setViewportView(enablingTable);
-		enablingTablePanel.setMinimumSize(new Dimension(300, 120));
+		enablingPanel = new JScrollPane(enablingTable);
+		enablingPanel.setBorder(enablingBorder);
+		enablingPanel.setMinimumSize(new Dimension(300, 120));
 
+		inhibitingBorder = new TitledBorder(new EtchedBorder(), "Inhibiting Condition for " + modeName);
 		inhibitingTable = new ConditionTable(false);
-		JScrollPane inhibitingTablePanel = new JScrollPane();
-		inhibitingTablePanel.setBorder(new TitledBorder(new EtchedBorder(), "Inhibiting Conditions"));
-		inhibitingTablePanel.setViewportView(inhibitingTable);
-		inhibitingTablePanel.setMinimumSize(new Dimension(300, 120));
+		inhibitingPanel = new JScrollPane(inhibitingTable);
+		inhibitingPanel.setBorder(inhibitingBorder);
+		inhibitingPanel.setMinimumSize(new Dimension(300, 120));
 
-		tablePanel.add(enablingTablePanel);
-		tablePanel.add(inhibitingTablePanel);
+		JPanel conditionPanel = new JPanel(new GridLayout(2, 1, 3, 3));
+		conditionPanel.add(enablingPanel);
+		conditionPanel.add(inhibitingPanel);
 
-		WarningScrollTable warningTablePanel = new WarningScrollTable(tablePanel, WARNING_CLASS_INCOMING_ROUTING);
-		warningTablePanel.addCheckVector(classes);
-		warningTablePanel.addCheckVector(stationsIn);
+		leftPanel = new WarningScrollTable(conditionPanel, WARNING_CLASS_INCOMING_ROUTING);
+		leftPanel.addCheckVector(stationInKeys);
+		leftPanel.addCheckVector(classKeys);
 
-		JSplitPane informationPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		informationPanel.setDividerSize(3);
-		informationPanel.setResizeWeight(0.5);
-
-		descriptionText = new JTextArea("");
-		descriptionText.setOpaque(false);
-		descriptionText.setEditable(false);
-		descriptionText.setLineWrap(true);
-		descriptionText.setWrapStyleWord(true);
-		JScrollPane descriptionPanel = new JScrollPane(descriptionText);
-		descriptionPanel.setBorder(new TitledBorder(new EtchedBorder(), "Description"));
-		descriptionPanel.setMinimumSize(new Dimension(200, 120));
+		addModeButton = new JButton("Add Mode");
+		addModeButton.setMinimumSize(DIM_BUTTON_M);
+		modeTable = new ModeTable();
+		JPanel modePanel = new JPanel(new BorderLayout(5, 5));
+		modePanel.setBorder(new TitledBorder(new EtchedBorder(), "Modes"));
+		modePanel.setMinimumSize(new Dimension(200, 120));
+		modePanel.add(addModeButton, BorderLayout.NORTH);
+		modePanel.add(new JScrollPane(modeTable), BorderLayout.CENTER);
 
 		noticeText = new JTextArea("");
 		noticeText.setOpaque(false);
@@ -168,13 +165,55 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		noticePanel.setBorder(new TitledBorder(new EtchedBorder(), "Notice"));
 		noticePanel.setMinimumSize(new Dimension(200, 120));
 
-		informationPanel.setLeftComponent(descriptionPanel);
-		informationPanel.setRightComponent(noticePanel);
+		JSplitPane rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+		rightPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+		rightPanel.setDividerSize(4);
+		rightPanel.setResizeWeight(1.0);
+		rightPanel.setLeftComponent(modePanel);
+		rightPanel.setRightComponent(noticePanel);
 
-		mainPanel.setLeftComponent(warningTablePanel);
-		mainPanel.setRightComponent(informationPanel);
+		JSplitPane mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		mainPanel.setDividerSize(4);
+		mainPanel.setResizeWeight(1.0);
+		mainPanel.setLeftComponent(leftPanel);
+		mainPanel.setRightComponent(rightPanel);
 
-		add(mainPanel, BorderLayout.CENTER);
+		add(mainPanel);
+	}
+
+	private void addDataManagers() {
+		addModeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				stopAllCellEditing();
+				int index = stationData.getTransitionModeListSize(stationKey);
+				stationData.addTransitionMode(stationKey, Defaults.get("transitionModeName") + (index + 1));
+				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+			}
+		});
+
+		modeTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				int index = modeTable.getSelectedRow();
+				if (index >= 0) {
+					stopAllCellEditing();
+					String modeName = stationData.getTransitionModeName(stationKey, index);
+					enablingBorder.setTitle("Enabling Condition for " + modeName);
+					inhibitingBorder.setTitle("Inhibiting Condition for " + modeName);
+					currentModeIndex = index;
+					enablingPanel.repaint();
+					inhibitingPanel.repaint();
+					updateNotice();
+				} else {
+					if (currentModeIndex >= stationData.getTransitionModeListSize(stationKey)) {
+						currentModeIndex--;
+					}
+					modeTable.setRowSelectionInterval(currentModeIndex, currentModeIndex);
+				}
+			}
+		});
 	}
 
 	/**
@@ -190,6 +229,19 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 	 */
 	@Override
 	public void lostFocus() {
+		stopAllCellEditing();
+	}
+
+	/**
+	 * called by the Wizard when the panel becomes active
+	 */
+	@Override
+	public void gotFocus() {
+		modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+		modeTable.setRowSelectionInterval(0, 0);
+	}
+
+	private void stopAllCellEditing() {
 		TableCellEditor editor = null;
 		editor = enablingTable.getCellEditor();
 		if (editor != null) {
@@ -199,69 +251,42 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		if (editor != null) {
 			editor.stopCellEditing();
 		}
-	}
-
-	/**
-	 * called by the Wizard when the panel becomes active
-	 */
-	@Override
-	public void gotFocus() {
-	}
-
-	private void updateDescription() {
-		if (stationsIn.isEmpty() || classes.isEmpty()) {
-			descriptionText.setText("");
-			return;
+		editor = modeTable.getCellEditor();
+		if (editor != null && editor != modeTable.getCellEditor(0, 1)) {
+			editor.stopCellEditing();
 		}
-		descriptionText.setText(DESCRIPTION);
 	}
 
 	private void updateNotice() {
-		if (stationsIn.isEmpty() || classes.isEmpty()) {
+		if (stationInKeys.isEmpty() || classKeys.isEmpty()) {
 			noticeText.setText("");
 			noticeText.setForeground(Color.BLACK);
 			return;
 		}
 
-		boolean hasNonzeroRows = false;
-		boolean hasZeroRows = false;
-		boolean hasRowsWithValuesInvalid = false;
-		boolean hasRowsWithAllValuesValid = false;
-		for (Object classKey : classes) {
-			boolean isZeroRow = true;
-			boolean isRowWithAllValuesValid = true;
-			for (Object stationInKey : stationsIn) {
-				int enablingValue = stationData.getEnablingCondition(stationKey, classKey, stationInKey).intValue();
-				int inhibitingValue = stationData.getInhibitingCondition(stationKey, classKey, stationInKey).intValue();
+		boolean hasNonzeroValues = false;
+		boolean hasInvalidValues = false;
+		for (Object stationInKey : stationInKeys) {
+			for (Object classKey : classKeys) {
+				int enablingValue = stationData.getEnablingCondition(stationKey, currentModeIndex,
+						stationInKey, classKey).intValue();
+				int inhibitingValue = stationData.getInhibitingCondition(stationKey, currentModeIndex,
+						stationInKey, classKey).intValue();
 				if (enablingValue > 0) {
-					isZeroRow = false;
-					hasNonzeroRows = true;
+					hasNonzeroValues = true;
 				}
-				if (enablingValue > 0 && inhibitingValue > 0 && enablingValue >= inhibitingValue) {
-					isRowWithAllValuesValid = false;
-					hasRowsWithValuesInvalid = true;
+				if (inhibitingValue > 0 && enablingValue >= inhibitingValue) {
+					hasInvalidValues = true;
 				}
-			}
-			if (isZeroRow) {
-				hasZeroRows = true;
-			}
-			if (isRowWithAllValuesValid) {
-				hasRowsWithAllValuesValid = true;
 			}
 		}
 
-		if (!hasNonzeroRows) {
-			noticeText.setText(NO_NONZERO_ROWS_NOTICE);
+		if (!hasNonzeroValues) {
+			noticeText.setText(NO_NONZERO_VALUES_NOTICE);
 			noticeText.setForeground(Color.RED);
-		} else if (!hasRowsWithAllValuesValid) {
-			noticeText.setText(NO_ROWS_WITH_ALL_VALUES_VALID_NOTICE);
+		} else if (hasInvalidValues) {
+			noticeText.setText(INVALID_VALUES_NOTICE);
 			noticeText.setForeground(Color.RED);
-		} else if (hasZeroRows) {
-			noticeText.setText(ZERO_ROWS_NOTICE);
-			noticeText.setForeground(Color.BLUE);
-		} else if (hasRowsWithValuesInvalid) {
-			noticeText.setText(ROWS_WITH_VALUES_INVALID_NOTICE);
-			noticeText.setForeground(Color.BLUE);
 		} else {
 			noticeText.setText("");
 			noticeText.setForeground(Color.BLACK);
@@ -273,12 +298,12 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		private static final long serialVersionUID = 1L;
 
 		private boolean isEnablingTable;
-		private InfiniteExactCellRenderer inhibitingCellRenderer;
+		private InfiniteExactCellRenderer inhibitingRenderer;
 
 		public ConditionTable(boolean isEnabling) {
 			super(new ConditionTableModel(isEnabling));
 			isEnablingTable = isEnabling;
-			inhibitingCellRenderer = isEnabling ? null : new InfiniteExactCellRenderer();
+			inhibitingRenderer = isEnabling ? null : new InfiniteExactCellRenderer();
 			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			setRowHeight(ROW_HEIGHT);
 			setRowSelectionAllowed(false);
@@ -288,7 +313,7 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			if (!isEnablingTable) {
-				return inhibitingCellRenderer;
+				return inhibitingRenderer;
 			} else {
 				return super.getCellRenderer(row, column);
 			}
@@ -300,35 +325,35 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 
 		private static final long serialVersionUID = 1L;
 
-		private boolean isEnablingTableModel;
+		private boolean isEnablingModel;
 
 		public ConditionTableModel(boolean isEnabling) {
-			rowHeaderPrototype = "Class10000";
-			prototype = "Station10000";
-			isEnablingTableModel = isEnabling;
+			rowHeaderPrototype = "Station10000";
+			prototype = "Class10000";
+			isEnablingModel = isEnabling;
 		}
 
 		@Override
 		public int getRowCount() {
-			return classes.size();
+			return stationInKeys.size();
 		}
 
 		@Override
 		public int getColumnCount() {
-			return stationsIn.size();
+			return classKeys.size();
 		}
 
 		@Override
 		protected String getRowName(int rowIndex) {
-			return classData.getClassName(classes.get(rowIndex));
+			return stationData.getStationName(stationInKeys.get(rowIndex));
 		}
 
 		@Override
 		public String getColumnName(int columnIndex) {
-			if (columnIndex >= stationsIn.size()) {
+			if (columnIndex >= classKeys.size()) {
 				return "";
 			}
-			return stationData.getStationName(stationsIn.get(columnIndex));
+			return classData.getClassName(classKeys.get(columnIndex));
 		}
 
 		@Override
@@ -356,10 +381,12 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			if (isEnablingTableModel) {
-				return stationData.getEnablingCondition(stationKey, classes.get(rowIndex), stationsIn.get(columnIndex));
+			if (isEnablingModel) {
+				return stationData.getEnablingCondition(stationKey, currentModeIndex,
+						stationInKeys.get(rowIndex), classKeys.get(columnIndex));
 			} else {
-				return stationData.getInhibitingCondition(stationKey, classes.get(rowIndex), stationsIn.get(columnIndex));
+				return stationData.getInhibitingCondition(stationKey, currentModeIndex,
+						stationInKeys.get(rowIndex), classKeys.get(columnIndex));
 			}
 		}
 
@@ -367,10 +394,12 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			try {
 				Integer ivalue = Integer.valueOf((String) value);
-				if (isEnablingTableModel) {
-					stationData.setEnablingCondition(stationKey, classes.get(rowIndex), stationsIn.get(columnIndex), ivalue);
+				if (isEnablingModel) {
+					stationData.setEnablingCondition(stationKey, currentModeIndex,
+							stationInKeys.get(rowIndex), classKeys.get(columnIndex), ivalue);
 				} else {
-					stationData.setInhibitingCondition(stationKey, classes.get(rowIndex), stationsIn.get(columnIndex), ivalue);
+					stationData.setInhibitingCondition(stationKey, currentModeIndex,
+							stationInKeys.get(rowIndex), classKeys.get(columnIndex), ivalue);
 				}
 				updateNotice();
 			} catch (NumberFormatException e) {
@@ -380,10 +409,12 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 
 		@Override
 		public void clear(int row, int col) {
-			if (isEnablingTableModel) {
-				stationData.setEnablingCondition(stationKey, classes.get(row), stationsIn.get(col), Integer.valueOf(0));
+			if (isEnablingModel) {
+				stationData.setEnablingCondition(stationKey, currentModeIndex,
+						stationInKeys.get(row), classKeys.get(col), Integer.valueOf(0));
 			} else {
-				stationData.setInhibitingCondition(stationKey, classes.get(row), stationsIn.get(col), Integer.valueOf(0));
+				stationData.setInhibitingCondition(stationKey, currentModeIndex,
+						stationInKeys.get(row), classKeys.get(col), Integer.valueOf(0));
 			}
 			updateNotice();
 		}
@@ -403,13 +434,161 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			if (((Integer) value).intValue() == 0) {
+			if (value != null && ((Integer) value).intValue() <= 0) {
 				if (hasFocus) {
 					label.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
 				} else {
 					label.setBorder(noFocusBorder);
 				}
 				return label;
+			}
+			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		}
+
+	}
+
+	private class ModeTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+		private ButtonCellEditor deleteEditor;
+		private ButtonCellEditor deleteRenderer;
+
+		private AbstractAction deleteMode = new AbstractAction("") {
+
+			private static final long serialVersionUID = 1L;
+
+			{
+				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Delete"));
+				setFocusable(false);
+			}
+
+			public void actionPerformed(ActionEvent e) {
+				stopAllCellEditing();
+				int index = modeTable.getSelectedRow();
+				stationData.deleteTransitionMode(stationKey, index);
+				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+			}
+
+		};
+
+		public ModeTable() {
+			deleteEditor = new ButtonCellEditor(new JButton(deleteMode));
+			deleteRenderer = new DisabledButtonCellRenderer(new JButton(deleteMode));
+			setModel(new ModeTableModel());
+			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			getTableHeader().setReorderingAllowed(false);
+			sizeColumns();
+		}
+
+		private void sizeColumns() {
+			for (int i = 0; i < getColumnCount(); i++) {
+				getColumnModel().getColumn(i).setPreferredWidth(((ModeTableModel) getModel()).getColumnSize(i));
+			}
+		}
+
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+			if (column == 1) {
+				return deleteEditor;
+			} else {
+				return super.getCellEditor(row, column);
+			}
+		}
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+			if (column == 1) {
+				return deleteRenderer;
+			} else {
+				return super.getCellRenderer(row, column);
+			}
+		}
+
+	}
+
+	private class ModeTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+		private String[] columnNames = new String[] { "Mode", "" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
+		private int[] columnSizes = new int[] { 160, 40 };
+
+		@Override
+		public int getRowCount() {
+			return stationData.getTransitionModeListSize(stationKey);
+		}
+
+		@Override
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return columnClasses[columnIndex];
+		}
+
+		public int getColumnSize(int columnIndex) {
+			return columnSizes[columnIndex];
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			if (columnIndex == 1 && stationData.getTransitionModeListSize(stationKey) < 2) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				return stationData.getTransitionModeName(stationKey, rowIndex);
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if (columnIndex == 0) {
+				String modeName = (String) aValue;
+				stationData.setTransitionModeName(stationKey, rowIndex, modeName);
+				enablingBorder.setTitle("Enabling Condition for " + modeName);
+				inhibitingBorder.setTitle("Inhibiting Condition for " + modeName);
+				enablingPanel.repaint();
+				inhibitingPanel.repaint();
+			}
+		}
+
+	}
+
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+		public DisabledButtonCellRenderer(JButton jbutt) {
+			super(jbutt);
+			button = jbutt;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			if (table.isCellEditable(row, column)) {
+				button.setEnabled(true);
+			} else {
+				button.setEnabled(false);
 			}
 			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}

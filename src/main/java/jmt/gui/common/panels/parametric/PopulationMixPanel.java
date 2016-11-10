@@ -109,7 +109,7 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 		}
 		steps = new JSpinner(new SpinnerNumberModel(PMPA.getNumberOfSteps(), 2, maxSteps, 1));
 		steps.setToolTipText("Sets the number of steps to be performed");
-		Vector classes = cd.getClosedClassKeys();
+		Vector<Object> classes = cd.getClosedClassKeys();
 		String[] classNames = new String[classes.size()];
 		for (int i = 0; i < classes.size(); i++) {
 			classNames[i] = cd.getClassName(classes.get(i));
@@ -255,7 +255,7 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 			public void itemStateChanged(ItemEvent e) {
 				String className = (String) classChooser.getSelectedItem();
 				Object classKey = null;
-				Vector classes = cd.getClassKeys();
+				Vector<Object> classes = cd.getClassKeys();
 				//for cycle used to get the key of the selected class
 				for (int i = 0; i < classes.size(); i++) {
 					if (cd.getClassName(classes.get(i)).equals(className)) {

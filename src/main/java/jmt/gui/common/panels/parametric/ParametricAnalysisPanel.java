@@ -84,11 +84,10 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 	}
 
 	public void initGui() {
-		enabler = new JCheckBox("Enable what-if analysis");
-		enabler.setToolTipText("Enable or disable what-if analysis");
+		enabler = new JCheckBox("Enable What-If analysis");
+		enabler.setToolTipText("Enable or disable What-If analysis");
 		enablerPanel = new JPanel(new BorderLayout());
 		enablerPanel.add(enabler, BorderLayout.WEST);
-		//enablerPanel.setBorder(new EmptyBorder(30,10,10,10));
 		upperPanel = new JPanel(new BorderLayout());
 		chooserPanel = new JPanel();
 		tb = new TitledBorder("Parameter selection for the control of repeated executions");
@@ -98,7 +97,8 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 		chooser.setToolTipText("Choose the what-if analysis to be performed");
 		chooserPanel.add(chooser, BorderLayout.NORTH);
 		JLabel description = new JLabel(PARAMETRIC_ANALYSIS_DESCRIPTION);
-		JLabel Warning = new JLabel (HTML_START + HTML_FONT_TITLE + "WARNING: "+ HTML_FONT_TIT_END + HTML_FONT_NORM + "Enabling What-If Analysis will disable all Statistical Outputs." + HTML_FONT_NOR_END + HTML_END);
+		JLabel Warning = new JLabel (HTML_START + HTML_FONT_TITLE + "WARNING: "+ HTML_FONT_TIT_END + HTML_FONT_NORM
+				+ "Enabling What-If analysis will disable all statistical outputs." + HTML_FONT_NOR_END + HTML_END);
 		JPanel northPanel = new JPanel(new BorderLayout());
 		northPanel.setBorder(new EmptyBorder(0, 0, 15, 0));
 		northPanel.add(description, "Center");
@@ -234,7 +234,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 	 */
 	@Override
 	public String getName() {
-		return "What-if analysis";
+		return "What-if Analysis";
 	}
 
 	public void setData(ClassDefinition cd, StationDefinition sd, SimulationDefinition simd) {
@@ -248,48 +248,6 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 		this.validate();
 		this.repaint();
 	}
-
-	/*
-	private void checkIfCanBeEnabled() {
-	    ParametricAnalysisChecker pac = new ParametricAnalysisChecker(cd,sd,simd);
-	    if (!pac.canBeEnabled()) {
-	        enabler.setEnabled(false);
-	        parameterOptionPanel = createPanel(null);
-	        simd.setParametricAnalysisModel(null);
-	        simd.setParametricAnalysisEnabled(false);
-	    }
-	    else {
-	        enabler.setEnabled(true);
-	        enabler.setSelected(simd.isParametricAnalysisEnabled());
-	        ParametricAnalysisDefinition pad = simd.getParametricAnalysisModel();
-	        ItemListener i = chooser.getItemListeners()[0];
-	        chooser.removeItemListener(i);
-	        chooser.removeAllItems();
-	        parameters = pac.getRunnableParametricAnalysis();
-	        for (int k=0;k<parameters.length;k++) chooser.addItem(parameters[k]);
-	        chooser.addItemListener(i);
-	        String temp = parameters[0];
-	        if (pad == null) {
-	            pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(temp,cd,sd,simd);
-	            simd.setParametricAnalysisModel(pad);
-	        }
-	        /*else {
-	            int code = pad.checkCorrectness(true);  //check correctness of the PAD and if it is possible corrects it
-	            if (code != 2) chooser.setSelectedItem(pad.getType());
-	            else { //the old type of parametric analysis is no more available
-	                pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(temp,cd,sd,simd);
-	                simd.setParametricAnalysisModel(pad);
-	            }
-	        }
-	        remove(parameterOptionPanel);
-	        parameterOptionPanel = createPanel(pad);
-	        //simd.setParametricAnalysisModel(temp);
-	        //parameterOptionPanel = createPanel(temp);
-	        add(parameterOptionPanel,BorderLayout.CENTER);
-	        doLayout();
-	        parameterOptionPanel.validate();
-	    }
-	}*/
 
 	/**
 	 * Called in JSIM when the What-if analysis panel is selected

@@ -25,8 +25,6 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
 import java.util.Vector;
 
@@ -52,6 +50,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.SimulationDefinition;
@@ -138,7 +137,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		SpinnerNumberModel toModel;
 		int minTo;
 		if (NCPA.isSingleClass()) {
-			Vector classes = cd.getClosedClassKeys();
+			Vector<Object> classes = cd.getClosedClassKeys();
 			String[] classNames = new String[classes.size()];
 			for (int i = 0; i < classes.size(); i++) {
 				classNames[i] = cd.getClassName(classes.get(i));
@@ -152,7 +151,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			singleClass.setSelected(true);
 			allClass.setSelected(false);
 			//set the minimum final value
-			minTo = cd.getTotalCloseClassPopulation() + 1;
+			minTo = cd.getTotalClosedClassPopulation() + 1;
 		} else {
 			classChooser.removeAllItems();
 			classChooser.addItem("All closed classes");
@@ -161,9 +160,9 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			allClass.setSelected(true);
 			// set the minimum final value.
 			if (cd.getClosedClassKeys().size() > 1) {
-				minTo = cd.getTotalCloseClassPopulation() * 2 + 1;
+				minTo = cd.getTotalClosedClassPopulation() * 2 + 1;
 			} else {
-				minTo = cd.getTotalCloseClassPopulation() + 1;
+				minTo = cd.getTotalClosedClassPopulation() + 1;
 			}
 		}
 		fromLabel = new JLabel("From N: ");
@@ -206,7 +205,6 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		editPanel.setBorder(new EmptyBorder(10, 0, 0, 10));
 		//Create values table and add to JScrollPane
 		tablePanel = new TablePanel();
-		//tablePanel.setBorder(new EmptyBorder(15,0,0,0));
 		globalEditPanel = new JPanel(new BorderLayout());
 		globalEditPanel.add(tablePanel, BorderLayout.CENTER);
 		globalEditPanel.add(editPanel, BorderLayout.NORTH);
@@ -236,25 +234,6 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		setListeners();
 		this.setBorder(new EmptyBorder(5, 0, 5, 0));
 	}
-
-	/*private String getTextForPop() {
-	    String text = "<html>";
-	    text += cd.getTotalCloseClassPopulation() + "  (";
-	    Vector classes = cd.getClosedClassKeys();
-	    for (int i=0; i<classes.size(); i++) {
-	        Object thisClass = classes.get(i);
-	        int n = cd.getClassPopulation(classes.get(i)).intValue();
-	        if ((NCPA.isSingleClass()) && (thisClass == NCPA.getReferenceClass())) {
-	            text += "<font color=\"blue\">" + n + "</font>";
-	        }
-	        else {
-	            text += n;
-	        }
-	        if (i != classes.size()-1) text+=",";
-	    }
-	    text += ")</html>";
-	    return text;
-	}*/
 
 	@Override
 	public void setEnabled(boolean enabled) {
@@ -294,7 +273,6 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			title.setTitleColor(DEFAULT_TITLE_COLOR);
 			descriptionTitle.setTitleColor(DEFAULT_TITLE_COLOR);
 			tablePanel = new TablePanel();
-			//tablePanel.setBorder(new EmptyBorder(15,0,0,0));
 			globalEditPanel.add(tablePanel, BorderLayout.CENTER);
 			globalEditPanel.doLayout();
 			globalEditPanel.validate();
@@ -302,14 +280,6 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 	}
 
 	private void setListeners() {
-		from.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount() == 2) {
-					gui.showClassPanel();
-				}
-			}
-		});
 		singleClass.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -318,7 +288,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 					ItemListener listener = classChooser.getItemListeners()[0];
 					classChooser.removeItemListener(listener);
 					classChooser.removeAllItems();
-					Vector classes = cd.getClosedClassKeys();
+					Vector<Object> classes = cd.getClosedClassKeys();
 					String[] classNames = new String[classes.size()];
 					for (int i = 0; i < classes.size(); i++) {
 						classNames[i] = cd.getClassName(classes.get(i));
@@ -331,7 +301,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 						NCPA.setReferenceClass(classes.get(0));
 					}
 					classChooser.setSelectedItem(cd.getClassName(NCPA.getReferenceClass()));
-					int classPop = cd.getTotalCloseClassPopulation();
+					int classPop = cd.getTotalClosedClassPopulation();
 					int minTo = classPop + 1;
 					ChangeListener cl = to.getChangeListeners()[0];
 					to.removeChangeListener(cl);
@@ -359,7 +329,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					NCPA.setSingleClass(false);
-					int classPop = cd.getTotalCloseClassPopulation();
+					int classPop = cd.getTotalClosedClassPopulation();
 					int minTo;
 					if (cd.getClosedClassKeys().size() > 1) {
 						minTo = classPop * 2 + 1;
@@ -436,7 +406,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			public void itemStateChanged(ItemEvent e) {
 				String className = (String) classChooser.getSelectedItem();
 				Object classKey = null;
-				Vector classes = cd.getClassKeys();
+				Vector<Object> classes = cd.getClassKeys();
 				//for cycle used to get the key of the selected class
 				for (int i = 0; i < classes.size(); i++) {
 					if (cd.getClassName(classes.get(i)).equals(className)) {
@@ -478,7 +448,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			table.setAutoscrolls(true);
 			jsp = new JScrollPane(table);
 			jsp.setBorder(new EmptyBorder(10, 10, 10, 10));
-			jsp.setPreferredSize(new Dimension(202, 92));
+			jsp.setPreferredSize(new Dimension(202, 122));
 			title = new JLabel("<html><b>Population mix</b>");
 			titlePanel = new JPanel(new FlowLayout());
 			titlePanel.add(title);
@@ -491,7 +461,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 
 		public void setSelectedClass(Object selectedClass) {
 			int column = 0;
-			Vector closedClasses = cd.getClosedClassKeys();
+			Vector<Object> closedClasses = cd.getClosedClassKeys();
 			if (NCPA.isSingleClass()) {
 				for (int i = 0; i < closedClasses.size(); i++) {
 					if (closedClasses.get(i) == selectedClass) {
@@ -522,7 +492,8 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			setRowSelectionAllowed(false);
 			setColumnSelectionAllowed(false);
 			setClipboardTransferEnabled(false);
-			this.setRowHeaderWidth(40);
+			setRowHeaderWidth(40);
+			setRowHeight(CommonConstants.ROW_HEIGHT);
 		}
 
 		/**
@@ -537,7 +508,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			dtcr.setHorizontalAlignment(SwingConstants.CENTER);
 			Component c;
 			if (column < cd.getClosedClassKeys().size()) {
-				Vector closedClasses = cd.getClosedClassKeys();
+				Vector<Object> closedClasses = cd.getClosedClassKeys();
 				Object thisClass = closedClasses.get(column);
 				int thisPop = cd.getClassPopulation(thisClass).intValue();
 				c = dtcr.getTableCellRendererComponent(this, Integer.toString(thisPop), false, false, row, column);
@@ -579,7 +550,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			if (i == -1) {
 				return rowHeaderPrototype;
 			} else {
-				Vector classes = cd.getClosedClassKeys();
+				Vector<Object> classes = cd.getClosedClassKeys();
 				int max = 0;
 				int index = 0;
 				for (int k = 0; k < classes.size(); k++) {
@@ -607,12 +578,15 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			String toReturn;
 			Object thisClass = cd.getClosedClassKeys().get(columnIndex);
 			double thisPop = cd.getClassPopulation(thisClass).doubleValue();
-			double totalPop = cd.getTotalCloseClassPopulation();
+			double totalPop = cd.getTotalClosedClassPopulation();
 			if (rowIndex == 0) {
 				toReturn = Integer.toString((int) thisPop);
 			} else {
 				DecimalFormat twoDec = new DecimalFormat("0.00");
-				double beta = thisPop / totalPop;
+				double beta = 0;
+				if (totalPop > 0) {
+					beta = thisPop / totalPop;
+				}
 				toReturn = twoDec.format(beta);
 			}
 			return toReturn;
@@ -641,8 +615,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		 */
 		@Override
 		public String getColumnName(int index) {
-			Object thisClass = cd.getClosedClassKeys().get(index);
-			return cd.getClassName(thisClass);
+			return cd.getClassName(cd.getClosedClassKeys().get(index));
 		}
 	}
 }

@@ -54,11 +54,10 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	protected ForkSectionPanel fsPane;
 	protected LoggerSectionPanel lsPane;
 	protected ClassSwitchSectionPanel csPane;
-	// For BPMN
 	protected InGateWaySectionPanel gsPane;
 	protected JoinSectionPanel jsPane;
 	protected SemaphoreSectionPanel smsPane;
-	protected StoreSectionPanel stPane;
+	protected StorageSectionPanel stPane;
 	protected EnablingSectionPanel enPane;
 	protected TimingSectionPanel tiPane;
 	protected FiringSectionPanel fiPane;
@@ -110,8 +109,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		this.stationKey = stationKey;
 		String type = stationData.getStationType(stationKey);
 		// Stores information on previously shown panel
-		Component oldComponent;
-		oldComponent = mainPanel.getSelectedComponent();
+		Component oldComponent = mainPanel.getSelectedComponent();
 
 		mainPanel.removeAll();
 		if (stationData.getStationName(stationKey) != null) {
@@ -173,7 +171,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			}
 		}
 		if (hasLoggerSection(type)) {
-			// GC: this if was misbehaving in the presence of two or more loggers: https://sourceforge.net/p/jmt/bugs/42/
+			// GC: this is misbehaving in the presence of two or more loggers: https://sourceforge.net/p/jmt/bugs/42/
 			//if (lsPane == null) {
 			lsPane = new LoggerSectionPanel(stationData, classData, stationKey);
 			//} else {
@@ -225,7 +223,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 				mainPanel.setSelectedComponent(oldComponent);
 			}
 		}
-		// For BPMN
 		if (hasInGateWaySection(type)) {
 			if (gsPane == null) {
 				gsPane = new InGateWaySectionPanel(stationData, classData, stationKey);
@@ -233,16 +230,15 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 				gsPane.setData(stationData, classData, stationKey);
 			}
 			mainPanel.add(gsPane, gsPane.getName());
-			//mainPanel.setEnabledAt(2, !stationData.getIsSimplifiedFork(stationKey));
 
 			// If this was previously selected, selects this
 			if (oldComponent == gsPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
 		}
-		if (hasStoreSection(type)) {
+		if (hasStorageSection(type)) {
 			if (stPane == null) {
-				stPane = new StoreSectionPanel(stationData, classData, stationKey);
+				stPane = new StorageSectionPanel(stationData, classData, stationKey);
 			} else {
 				stPane.setData(stationData, classData, stationKey);
 			}
@@ -363,7 +359,6 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		}
 	}
 
-	// For BPMN
 	private boolean hasInGateWaySection(String type) {
 		if (checkNullValues()) {
 			return false;
@@ -372,7 +367,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		}
 	}
 
-	private boolean hasStoreSection(String type) {
+	private boolean hasStorageSection(String type) {
 		if (checkNullValues()) {
 			return false;
 		} else {
@@ -417,13 +412,11 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	}
 
 	public void showJoinSectionPanel(Object classKey) {
-		jsPane.setData(stationData, classData, stationKey);
 		jsPane.setSelectedClass(classKey);
 		mainPanel.setSelectedComponent(jsPane);
 	}
 
 	public void showSemaphoreSectionPanel(Object classKey) {
-		smsPane.setData(stationData, classData, stationKey);
 		smsPane.setSelectedClass(classKey);
 		mainPanel.setSelectedComponent(smsPane);
 	}
@@ -441,16 +434,15 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	}
 
 	public void showRoutingSectionPanel(Object classKey) {
-		rsPane.setData(stationData, classData, stationKey);
 		rsPane.setSelectedClass(classKey);
 		mainPanel.setSelectedComponent(rsPane);
 	}
 
-	public void showEnablingSectionPanel(Object classKey) {
+	public void showEnablingSectionPanel() {
 		mainPanel.setSelectedComponent(enPane);
 	}
 
-	public void showFiringSectionPanel(Object classKey) {
+	public void showFiringSectionPanel() {
 		mainPanel.setSelectedComponent(fiPane);
 	}
 

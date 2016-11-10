@@ -1,14 +1,17 @@
 package jmt.gui.jwat;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 
-import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
@@ -24,6 +27,7 @@ public class JWatWizard extends Wizard {
 	private JLabel helpLabel;
 	private JButton[] btnList;
 	protected JToolBar toolBar;
+	protected JMenuBar mMenuBar;
 
 	public JWatWizard() {
 	}
@@ -78,45 +82,81 @@ public class JWatWizard extends Wizard {
 		return buttonBox;
 	}
 
-	public void setEnableButton(String button, boolean enabl) {
+	public void setEnableButton(String button, boolean enabled) {
 		for (JButton element : btnList) {
-			try {
-				if (element.getText().equals(button)) {
-					element.setEnabled(enabl);
-					break;
-				}
-			} catch (ClassCastException e) {
-				System.err.println("DEBUG: Casting not allowed");
+			if (element.getText().equals(button)) {
+				element.setEnabled(enabled);
+				break;
 			}
 		}
-		if (toolBar != null) {
+		if (button.equals("Solve")) {
 			for (int i = 0; i < toolBar.getComponentCount(); i++) {
-				if (toolBar.getComponent(i).getName() != null && toolBar.getComponent(i).getName().equals("Solve")) {
-					toolBar.getComponent(i).setEnabled(enabl);
-					break;
+				Component component = toolBar.getComponent(i);
+				if (component instanceof JButton) {
+					JButton item = (JButton) component;
+					String description = (String) item.getAction().getValue(Action.SHORT_DESCRIPTION);
+					if (description.equals("Clusterize")) {
+						item.setEnabled(enabled);
+						break;
+					}
+				}
+			}
+			for (int i = 0; i < mMenuBar.getMenuCount(); i++) {
+				JMenu menu = mMenuBar.getMenu(i);
+				for (int j = 0; j < menu.getMenuComponentCount(); j++) {
+					Component component = menu.getMenuComponent(j);
+					if (component instanceof JMenuItem) {
+						JMenuItem item = (JMenuItem) component;
+						String description = (String) item.getAction().getValue(Action.SHORT_DESCRIPTION);
+						if (description.equals("Clusterize")) {
+							item.setEnabled(enabled);
+							break;
+						}
+					}
 				}
 			}
 		}
-
 	}
 
-	public void setActionButton(String button, AbstractAction a) {
+	public void setActionButton(String button, Action action) {
 		for (JButton element : btnList) {
-			try {
-				if (element.getText().equals(button)) {
-					a.putValue(Action.NAME, button);
-					element.setAction(a);
-					break;
-				}
-			} catch (ClassCastException e) {
-				System.err.println("DEBUG: Casting not allowed");
+			if (element.getText().equals(button)) {
+				element.setAction(action);
+				element.setText(button);
+				break;
 			}
 		}
 	}
 
-	public void setActionTool(AbstractAction a) {
-		if (toolBar != null && toolBar.getComponentCount() >= 4) {
-			((JButton) toolBar.getComponent(4)).setAction(a);
+	public void setActionToolBar(String toolItem, Action action) {
+		for (int i = 0; i < toolBar.getComponentCount(); i++) {
+			Component component = toolBar.getComponent(i);
+			if (component instanceof JButton) {
+				JButton item = (JButton) component;
+				String description = (String) item.getAction().getValue(Action.SHORT_DESCRIPTION);
+				if (description.equals(toolItem)) {
+					item.setAction(action);
+					break;
+				}
+			}
+		}
+	}
+
+	public void setActionMenuBar(String menuItem, Action action) {
+		for (int i = 0; i < mMenuBar.getMenuCount(); i++) {
+			JMenu menu = mMenuBar.getMenu(i);
+			for (int j = 0; j < menu.getMenuComponentCount(); j++) {
+				Component component = menu.getMenuComponent(j);
+				if (component instanceof JMenuItem) {
+					JMenuItem item = (JMenuItem) component;
+					String description = (String) item.getAction().getValue(Action.SHORT_DESCRIPTION);
+					if (description.equals(menuItem)) {
+						item.setAction(action);
+						item.setText(menuItem);
+						break;
+					}
+				}
+			}
 		}
 	}
 

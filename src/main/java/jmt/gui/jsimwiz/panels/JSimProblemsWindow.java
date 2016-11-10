@@ -35,7 +35,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import javax.swing.BorderFactory;
@@ -89,12 +88,9 @@ public class JSimProblemsWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private final static int DESCRIPTION_HTML_WIDTH = 662;
+	private static final int DESCRIPTION_HTML_WIDTH = 662;
 
 	GuiInterface gi;
-
-	//private boolean canBeRun;
-	//private boolean operationCanceled;
 
 	private boolean isToJMVAConversion;
 
@@ -114,15 +110,11 @@ public class JSimProblemsWindow extends JFrame {
 
 	public JSimProblemsWindow(ModelChecker checker, GuiInterface gi) {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		//super("Simulation diagnostic");
 		mc = checker;
 		isToJMVAConversion = mc.isToJMVA();
 		setTitleOfWindow();
 		this.setAlwaysOnTop(true);
 		this.gi = gi;
-		//canBeRun = false;
-		//operationCanceled = true;
-		//this.toMVAConversion = toMVAConversion;
 		GridBagLayout gblayout = new GridBagLayout();
 		GridBagConstraints gbconstants = new GridBagConstraints();
 		getContentPane().setLayout(gblayout);
@@ -146,7 +138,7 @@ public class JSimProblemsWindow extends JFrame {
 			public void mouseClicked(MouseEvent e) {
 				ProblemElement temp = (ProblemElement) problemsList.getSelectedValue();
 				if (temp != null) {
-					toBack();;
+					toBack();
 					int pType = temp.getProblemType();
 					int pSubType = temp.getProblemSubType();
 					getRelatedPanel(pType, pSubType, temp.getRelatedStationKey(), temp.getRelatedClassKey());
@@ -230,15 +222,7 @@ public class JSimProblemsWindow extends JFrame {
 		isToJMVAConversion = mc.isToJMVA();
 	}
 
-	/*public void setToJMVAConversion(boolean toMVAConversion) {
-		this.toMVAConversion = toMVAConversion;
-		if (toMVAConversion) this.setTitle("Problems while trying to convert to JMVA");
-		else this.setTitle("Simulation Diagnostic");
-	}*/
-
 	public void updateProblemsShown(boolean updating) {
-		//canBeRun = false;
-		//operationCanceled = true;
 		setTitleOfWindow();
 		problems.removeAllElements();
 		if (updating) {
@@ -267,7 +251,7 @@ public class JSimProblemsWindow extends JFrame {
 			}
 			if (mc.isThereNoStationError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_STATION_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No station defined.</div></html>", null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No stations defined.</div></html>", null, null));
 			}
 			if (mc.isThereOpenClassButNoSourceError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR,
@@ -283,35 +267,6 @@ public class JSimProblemsWindow extends JFrame {
 									+ className + ".</div></html>", null, classKey));
 				}
 			}
-			/*if (mc.isThereOpenClassReferenceStationError()) {
-				Vector<Object> openClasses = mc.getKeysOfOpenClassesWithoutRefStation();
-				for (int i = 0; i < openClasses.size(); i++) {
-					String className = mc.getClassModel().getClassName(openClasses.get(i));
-					problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.OPEN_CLASS_REFERENCE_STATION_ERROR,
-							"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>"
-									+ "Open class " + className + " has not a reference station.", null, null));
-				}
-			}*/
-			/*if (mc.isThereNoExpFoundWarning()) {
-				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.NO_EXP_FOUND_WARNING,
-						"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>"
-								+ "A non-exponential time distribution was found.", null, null));
-			}*/
-			/*if (mc.isThereDelaysFoundError()) {
-				problems.add(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.DELAYS_FOUND_ERROR,
-						"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>"
-								+ "Delays not supported in JModel to JMVA conversion.", null, null));
-			}*/
-			/*if (mc.isThereDifferentServiceTimeWarning()) {
-				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.DIFFERENT_SERVICE_TIME_WARNING,
-						"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>"
-								+ "A station with different mean service time per class was found.", null, null));
-			}*/
-			/*if (mc.isThereNonFCFSWarning()) {
-				problems.add(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.NON_FCFS_WARNING,
-						"<html><font color=\"white\">--</font><i>Warning</i><font color=\"white\">--------</font>"
-								+ "A non FCFS queue strategy was found.", null, null));
-			}*/
 			if (mc.isThereBCMPDifferentQueueingStrategyWarning()) {
 				Vector<Object> temp = mc.getBCMPserversWithDifferentQueueStrategy();
 				for (int i = 0; i < temp.size(); i++) {
@@ -379,7 +334,7 @@ public class JSimProblemsWindow extends JFrame {
 			}
 			if (mc.isThereNoStationError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_STATION_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No station defined.</div></html>", null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No stations defined.</div></html>", null, null));
 			}
 			if (mc.isThereStationLinkError()) {
 				Vector<Object> temp = mc.getKeysOfStationsWithLinkProblems();
@@ -448,33 +403,33 @@ public class JSimProblemsWindow extends JFrame {
 									+ className + ".</div></html>", null, classKey));
 				}
 			}
-			if (mc.isThereNoSinkWithOpenClassesError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_SINK_WITH_OPEN_CLASSES_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Open classes were found but no sink have been defined.</div></html>", null, null));
-			}
-			if (mc.isThereSinkButNoOpenClassError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_BUT_NO_OPEN_CLASSES_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sink without open classes", null, null));
-			}
-			if (mc.isThereOpenClassButNoSourceError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">An open class was found but no source has been defined.</div></html>", null, null));
-			}
-			if (mc.isThereSourceWithNoClassesError()) {
-				Vector<Object> temp = mc.getKeysOfSourceWithoutClasses();
+			if (mc.isThereSourceWithoutOpenClassError()) {
+				Vector<Object> temp = mc.getKeysOfSourceWithoutOpenClass();
 				for (int i = 0; i < temp.size(); i++) {
 					Object sourceKey = temp.get(i);
 					String sourceName = mc.getStationModel().getStationName(sourceKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SOURCE_WITH_NO_OPEN_CLASSES_ERROR,
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SOURCE_WITHOUT_OPEN_CLASS_ERROR,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + sourceName
-							+ " without open classes associated.</div></html>", sourceKey, null));
+							+ " were found without associated open classes.</div></html>", sourceKey, null));
 				}
+			}
+			if (mc.isThereSinkButNoOpenClassError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_BUT_NO_OPEN_CLASS_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sinks were found but no open classes have been defined.", null, null));
+			}
+			if (mc.isThereOpenClassButNoSourceError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Open classes were found but no sources have been defined.</div></html>", null, null));
+			}
+			if (mc.isThereOpenClassButNoSinkError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.OPEN_CLASS_BUT_NO_SINK_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Open classes were found but no sinks have been defined.</div></html>", null, null));
 			}
 			if (mc.isThereSinkPerfIndicesWithNoSinkError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_PERF_IND_WITH_NO_SINK_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per sink should not be used "
-								+ "if there is no Sink defined in the model.</div></html>", null, null));
-			}			
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per Sink should not be used "
+								+ "if there are no sinks defined in the model.</div></html>", null, null));
+			}
 			if (mc.isThereInconsistentMeasureError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.INCONSISTENT_MEASURE_ERROR,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Undefined station in performance index.</div></html>", null, null));
@@ -497,9 +452,9 @@ public class JSimProblemsWindow extends JFrame {
 				}
 			}
 			if (mc.isTherePreloadingInBlockingRegionError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.PRELOADING_WITH_BLOCKING,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations exceeds global or class constraints "
-								+ "(weights have not been considered).</div></html>", null, null));
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.PRELOADING_IN_BLOCKING_REGION,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations in finite capacity regions "
+								+ "exceeds global or class constraints (weights have not been considered).</div></html>", null, null));
 			}
 			if (mc.isThereMoreThanOneSinkWarning()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM,ModelChecker.MORE_THAN_ONE_SINK_WARNING,
@@ -535,14 +490,14 @@ public class JSimProblemsWindow extends JFrame {
 			}
 			if (mc.isSinkPerfIndicesWithClosedClassError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_PERF_WITH_CLOSED_CLASS_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per sink "
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per Sink "
 								+ "should not be used for closed class.</div></html>", null, null));
 			}
 			if (mc.isThereSinkProbabilityUpdateWarning()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.SINK_PROBABILITY_UPDATE_WARNING,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sink Probability of the Closed Class(s) "
-								+ mc.getClassModel().getsinkProbabilityUpdateClasses() + " of Station(s) "
-								+ mc.getStationModel().getsinkProbabilityUpdateStations() + " has been updated to 0.0.</div></html>", null, null));
+								+ mc.getClassModel().getSinkProbabilityUpdateClasses() + " of Station(s) "
+								+ mc.getStationModel().getSinkProbabilityUpdateStations() + " has been updated to 0.0.</div></html>", null, null));
 				//Reset after displaying the offending Station and Class names.
 				mc.getClassModel().resetSinkProbabilityUpdateClasses();
 				mc.getStationModel().resetSinkProbabilityUpdateStations();
@@ -594,13 +549,13 @@ public class JSimProblemsWindow extends JFrame {
 			}
 			if (mc.isThereCsReferenceStation()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_REFERENCE_STATION,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a ClassSwitch is in the model, "
-								+ "then <b>all</b> classes must have the <b>same</b> Reference Station.</div></html>", null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a class switch is in the model, "
+								+ "all the closed classes must have the same reference station.</div></html>", null, null));
 			}
 			if (mc.isThereCsSystemThroughputClass()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">With <b>ClassSwitch</b>, "
-								+ "the <b>per-class</b> system throughput cannot be computed.</div></html>", null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a class switch is in the model, "
+								+ "the system throughput per class cannot be computed.</div></html>", null, null));
 			}
 			if (mc.isThereClosedClassZeroPopulation()) {
 				for (Object classKey:mc.getClosedZeroPopulation()) {
@@ -612,41 +567,34 @@ public class JSimProblemsWindow extends JFrame {
 			}
 			if (mc.isThereCsAllClosedZeroPopulation()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_ALL_CLOSED_ZERO_POPULATION,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">All the closed classes have zero population.</div></html>", null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a class switch is in the model,"
+								+ "at least one closed class must have non-zero population.</div></html>", null, null));
 			}
 			// M: Cazzoli: Substituted error for cs with fj or fcr with warning for cs with fj
 			if (mc.isThereCsWithForkJoin()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CS_WITH_FORK_JOIN,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">If you use a ClassSwitch station and a Fork/Join region in the same model, "
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">If you use a Class Switch station and a Fork/Join section in the same model, "
 								+ "depending on the layout of the model, some indices may not be computed exactly (e.g., the System Response Time). "
-								+ "You may consider also to use the new Fork Strategy \"class switch\" that allows the generation of new classes of tasks within a Fork/Join region.</div></html>", null, null));
+								+ "You may consider also to use the Class Switch Fork strategy that allows the generation of new classes of tasks within a Fork/Join section.</div></html>", null, null));
 			}
 			if (mc.isThereGuardStrategyZeroTasks()) {
-				HashMap<Object, List<Object>> temp = mc.getKeysOfAllGuardStrategyZeroTask();
-				List<Object> stationKeys = mc.getStationModel().getStationKeys();
+				HashMap<Object, Vector<Object>> temp = mc.getKeysOfAllGuardStrategyZeroTask();
+				Vector<Object> stationKeys = mc.getStationModel().getStationKeys();
 				for (int i = 0; i < stationKeys.size(); i++) {
 					Object stationKey = stationKeys.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					List<Object> classes = temp.get(stationKey);
+					Vector<Object> classes = temp.get(stationKey);
 					if (classes != null) {
 						for (int j = 0; j < classes.size(); j++) {
 							Object classKey = classes.get(j);
 							String className = mc.getClassModel().getClassName(classKey);
 							problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.GUARD_STRATEGY_ZERO_TASKS,
 									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Station " + stationName
-									+ " has Guard Strategy at class " + className + " with zero tasks.</div></html>", stationKey, classKey));
+									+ " has the Guard strategy for class " + className + " with zero tasks.</div></html>", stationKey, classKey));
 						}
 					}
 				}
 			}
-			//if (mc.isThereGuardStrategyClosedZeroPopulation()) {
-			//	for (Object classKey:mc.getClosedZeroPopulation()) {
-			//		String className = mc.getClassModel().getClassName(classKey);
-			//		problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.GUARD_STRATEGY_CLOSED_ZERO_POPULATION,
-			//				"<html><font color=\"white\">----</font><b>Error</b><font color=\"white\">---------</font>"
-			//						+ "Exixts a Guard Strategy and " + className + " population is set to zero.", null, classKey));
-			//	}
-			//}
 			if (mc.isThereSemaphoreNotBetweenForkJoin()) {
 				Vector<Object> temp = mc.getSemaphoreNotBetweenForkJoin();
 				for (int i = 0; i < temp.size(); i++) {
@@ -657,77 +605,38 @@ public class JSimProblemsWindow extends JFrame {
 							+ " is not located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
 				}
 			}
-			if (mc.isTherePlaceBetweenForkJoin()) {
-				Vector<Object> temp = mc.getPlaceBetweenForkJoin();
-				for (int i = 0; i < temp.size(); i++) {
-					Object stationKey = temp.get(i);
-					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.PLACE_BETWEEN_FORK_JOIN,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " is located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
-				}
-			}
 			if (mc.isThereTransitionBetweenForkJoin()) {
 				Vector<Object> temp = mc.getTransitionBetweenForkJoin();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_BETWEEN_FORK_JOIN,
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_BETWEEN_FORK_JOIN,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " is located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
+							+ " seems to be located between fork/join.</div></html>", stationKey, null));
 				}
 			}
-			if (mc.isThereTransitionWithoutValidEnablingOrInhibitingCondition()) {
-				Vector<Object> temp = mc.getTransitionWithoutValidEnablingOrInhibitingCondition();
+			if (mc.isThereTransitionWithInvalidConditions()) {
+				Vector<Object> temp = mc.getTransitionWithInvalidConditions();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_WITHOUT_VALID_ENABLING_OR_INHIBITING_CONDITION,
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_WITH_INVALID_CONDITIONS,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " has no valid enabling or inhibiting conditions for all classes.</div></html>", stationKey, null));
+							+ " has invalid enabling or inhibiting conditions for some modes.</div></html>", stationKey, null));
 				}
 			}
-			if (mc.isThereTransitionWithoutValidFiringOutcome()) {
-				Vector<Object> temp = mc.getTransitionWithoutValidFiringOutcome();
+			if (mc.isThereTransitionWithInvalidOutcomes()) {
+				Vector<Object> temp = mc.getTransitionWithInvalidOutcomes();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_WITHOUT_VALID_FIRING_OUTCOME,
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_WITH_INVALID_OUTCOMES,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " has no valid firing outcomes for all classes.</div></html>", stationKey, null));
-				}
-			}
-			if (mc.isThereTransitionWithInvalidEnablingOrInhibitingCondition()) {
-				Vector<Object> temp = mc.getTransitionWithInvalidEnablingOrInhibitingCondition();
-				for (int i = 0; i < temp.size(); i++) {
-					Object stationKey = temp.get(i);
-					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_WITH_INVALID_ENABLING_OR_INHIBITING_CONDITION,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " has invalid enabling or inhibiting conditions for some classes.</div></html>", stationKey, null));
-				}
-			}
-			if (mc.isThereTransitionWithInvalidFiringOutcome()) {
-				Vector<Object> temp = mc.getTransitionWithInvalidFiringOutcome();
-				for (int i = 0; i < temp.size(); i++) {
-					Object stationKey = temp.get(i);
-					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_WITH_INVALID_FIRING_OUTCOME,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " has invalid firing outcomes for some classes.</div></html>", stationKey, null));
+							+ " has invalid firing outcomes for some modes.</div></html>", stationKey, null));
 				}
 			}
 		}
 	}
-
-	/**
-	 * Enable or not to run simulation
-	 * @return true if the simulation is runnable and user wants to run simulation
-	 */
-	//public boolean simulationRunnable() {
-	//	if ((!operationCanceled)&&(mc.isErrorFree())) canBeRun = true;
-	//		return canBeRun;
-	//}
 
 	private void addComponent(Component component, GridBagLayout gbl, GridBagConstraints gbc, int row, int column, int width, int heigth) {
 		Container c = this.getContentPane();
@@ -844,7 +753,6 @@ public class JSimProblemsWindow extends JFrame {
 
 		public void actionPerformed(ActionEvent e) {
 			if (e.getSource() == cancelButton) {
-				//operationCanceled = true;
 				dispose();
 			} else if (e.getSource() == continueButton) {
 				setVisible(false);

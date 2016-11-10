@@ -96,8 +96,8 @@ public class XMLResultsWriter implements XMLResultsConstants {
 			transformer.transform(new DOMSource(modelDoc), res);
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError transformerFactoryConfigurationError) {
-			transformerFactoryConfigurationError.printStackTrace();
+		} catch (TransformerFactoryConfigurationError e) {
+			e.printStackTrace();
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}

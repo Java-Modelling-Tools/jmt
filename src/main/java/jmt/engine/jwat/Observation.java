@@ -34,7 +34,7 @@ public class Observation implements Comparable {
 	private int ID;
 
 	/**
-	 * Constructor, creates an instance of observation which contains the values passed throught obsList 
+	 * Constructor, creates an instance of observation which contains the values passed through obsList 
 	 * double list.
 	 * @param obsList Elements of observation
 	 */

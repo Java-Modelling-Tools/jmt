@@ -119,9 +119,10 @@ public class ModelWorkloadAnalysis implements JWatModel {
 		setTransformation();
 	}
 
-        //UPDATE 28/10/2006: move operations of transform and sampling in MatrixObservations 
+	//UPDATE 28/10/2006: move operations of transform and sampling in MatrixObservations 
 	public void resetModel() {
 		matrix = null;
 		fireNotifyOnResetMatrixObservation();
 	}
+
 }

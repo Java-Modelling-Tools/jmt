@@ -34,11 +34,12 @@ public abstract class EngineUtils {
 	 */
 	public static boolean isInverseMeasure(int measureType) {
 		return measureType == SimConstants.THROUGHPUT
-				|| measureType == SimConstants.SYSTEM_THROUGHPUT
 				|| measureType == SimConstants.DROP_RATE
+				|| measureType == SimConstants.SYSTEM_THROUGHPUT
 				|| measureType == SimConstants.SYSTEM_DROP_RATE
 				|| measureType == SimConstants.SYSTEM_POWER
-				|| measureType == SimConstants.THROUGHPUT_PER_SINK;
+				|| measureType == SimConstants.THROUGHPUT_PER_SINK
+				|| measureType == SimConstants.FIRING_THROUGHPUT;
 	}
 
 }

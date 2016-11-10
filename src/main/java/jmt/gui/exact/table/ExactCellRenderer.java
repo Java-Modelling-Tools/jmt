@@ -21,12 +21,11 @@ package jmt.gui.exact.table;
 import java.awt.Component;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.ParseException;
+import java.util.Locale;
 
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.text.NumberFormatter;
 
 /**
  * A CellRenderer displaying numbers and string with correct alignment and format
@@ -34,35 +33,15 @@ import javax.swing.text.NumberFormatter;
 public class ExactCellRenderer extends DefaultTableCellRenderer {
 
 	private static final long serialVersionUID = 1L;
-	private static DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+
+	private static DecimalFormat df = new DecimalFormat();
 
 	static {
-		dfs.setDecimalSeparator('.');
+		df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
 	}
-
-	private DecimalFormat df = new DecimalFormat("0.000000;-0.000000", dfs);
-	private NumberFormatter nf = new NumberFormatter(df);
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-
-		//Federico Dall'Orso 22/6/2005
-		//OLD
-		/* called side effects
-		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-
-		/* adjust alignment */
-		/*
-		if (value instanceof Number) {
-			setHorizontalAlignment(SwingConstants.RIGHT);
-		} else {
-			setHorizontalAlignment(SwingConstants.CENTER);
-		}
-
-		return this;
-		*/
-
-		//NEW
 		if (value instanceof Number) {
 			super.setHorizontalAlignment(SwingConstants.RIGHT);
 		} else if (value instanceof Boolean) {
@@ -70,23 +49,29 @@ public class ExactCellRenderer extends DefaultTableCellRenderer {
 		} else {
 			super.setHorizontalAlignment(SwingConstants.CENTER);
 		}
-		Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-
-		return c;
-		//END Federico Dall'Orso
+		return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 	}
 
 	@Override
 	public void setValue(Object o) {
 		if (o instanceof Double) {
-			try {
-				setText(nf.valueToString(o));
-			} catch (ParseException e) {
-				throw new RuntimeException(e);
-			}
+			setText(FormatNumber(((Double) o).doubleValue()));
 		} else {
 			super.setValue(o);
 		}
+	}
+
+	protected String FormatNumber(double d) {
+		String ret = null;
+		// If module of number is greater than 1e-4 or lesser than 1e7 uses ordinary notation
+		if (Math.abs(d) > 1e-4 && Math.abs(d) < 1e7 || d == 0) {
+			df.applyPattern("0.0000");
+			ret = df.format(d);
+		} else {
+			df.applyPattern("0.0000E00");
+			ret = df.format(d);
+		}
+		return ret;
 	}
 
 }

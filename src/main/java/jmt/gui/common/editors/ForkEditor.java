@@ -76,9 +76,9 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	private WarningScrollTable cnPane;
 	private OutComboBox jl;
 	private JTextArea descrTextPane = new JTextArea("");
-	private ForkingTable forkingTable = new ForkingTable();
+	private ForkTable forkTable = new ForkTable();
 	private OutPathTable outTable = new OutPathTable();
-	private ForkingSwitchTable switchTable = new ForkingSwitchTable();
+	private ForkSwitchTable switchTable = new ForkSwitchTable();
 	private OutNumTable numTable;
 	private CombTable combTable = new CombTable();
 	private ClassNumTable classNumTable;
@@ -103,7 +103,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	}
 
 	private void initComponents() {
-		rtPane = new WarningScrollTable(forkingTable, WARNING_OUTGOING_ROUTING);
+		rtPane = new WarningScrollTable(forkTable, WARNING_OUTGOING_ROUTING);
 		otPane = new WarningScrollTable(outTable, "Select a branch");
 		cbPane = new WarningScrollTable(combTable, WARNING_OUTGOING_ROUTING);
 		csPane = new WarningScrollTable(switchTable, WARNING_OUTGOING_ROUTING);
@@ -128,7 +128,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			}
 		});
 
-		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Forking Options"));
+		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Fork Options"));
 		noOptLabel.setOpaque(false);
 		noOptLabel.setEditable(false);
 		noOptLabel.setLineWrap(true);
@@ -138,7 +138,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		descrTextPane.setEditable(false);
 		descrTextPane.setLineWrap(true);
 		descrTextPane.setWrapStyleWord(true);
-		cbPane.setBorder(new TitledBorder(new EtchedBorder(), "Forking Options"));
+		cbPane.setBorder(new TitledBorder(new EtchedBorder(), "Fork Options"));
 		csPane.setBorder(new TitledBorder(new EtchedBorder(), "Branch"));
 		onPane.setBorder(new TitledBorder(new EtchedBorder(), "Number of tasks per class"));
 		cnPane.setBorder(new TitledBorder(new EtchedBorder(), "Number of tasks per class"));
@@ -195,11 +195,11 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	}
 
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-		ForkStrategy fs = (ForkStrategy) sd.getForkingStrategy(stationKey, classKey);
+		ForkStrategy fs = (ForkStrategy) sd.getForkStrategy(stationKey, classKey);
 		numTable.clearSelection();
 		outTable.clearSelection();
 		jsp2.getRightComponent().setVisible(false);
-		forkingTable.clearSelection();
+		forkTable.clearSelection();
 		combTable.clearSelection();
 		switchTable.clearSelection();
 		jl.setSelectedIndex(-1);
@@ -237,7 +237,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		this.stationKey = stationKey;
 		this.classKey = classKey;
 		if (outPaths.isEmpty()) {
-			setupForking();
+			setupFork();
 		}
 		if (stations.getForwardConnections(stationKey).size() == 1) {
 			jl.setSelectedIndex(0);
@@ -259,7 +259,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		out = null;
 		keys = null;
 		if (combProbs.isEmpty()) {
-			setupCombForking();
+			setupCombFork();
 		}
 		setLeftComponent(cbPane);
 		setRightComponent(new JPanel());
@@ -275,7 +275,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		combProbs = null;
 		keys = null;
 		if (outPaths.isEmpty()) {
-			setupClassSwitchForking();
+			setupClassSwitchFork();
 		}
 		if (outPaths.size() > 0) {
 			out = outPaths.values().iterator().next().getOutParameters();
@@ -294,7 +294,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		combProbs = null;
 		keys = null;
 		if (outPaths.isEmpty()) {
-			setupMultiBranchClassSwitchForking();
+			setupMultiBranchClassSwitchFork();
 		}
 		if (stations.getForwardConnections(stationKey).isEmpty()) {
 			setLeftComponent(csPane);
@@ -309,7 +309,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	 * sets up all of the entries in routing table from output connections for
 	 * specified station
 	 */
-	protected void setupForking() {
+	protected void setupFork() {
 		if (stationKey == null || classKey == null || stations == null) {
 			return;
 		}
@@ -339,7 +339,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		}
 	}
 
-	protected void setupCombForking() {
+	protected void setupCombFork() {
 		if (stationKey == null || classKey == null || stations == null || combProbs == null) {
 			return;
 		}
@@ -360,7 +360,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		}
 	}
 
-	protected void setupClassSwitchForking() {
+	protected void setupClassSwitchFork() {
 		if (stationKey == null || classKey == null || stations == null || outPaths == null) {
 			return;
 		}
@@ -393,7 +393,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		}
 	}
 
-	protected void setupMultiBranchClassSwitchForking() {
+	protected void setupMultiBranchClassSwitchFork() {
 		if (stationKey == null || classKey == null || stations == null) {
 			return;
 		}
@@ -427,21 +427,21 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	}
 
 	public void stopEditing() {
-		if (forkingTable.getCellEditor() != null) {
-			forkingTable.getCellEditor().stopCellEditing();
+		if (forkTable.getCellEditor() != null) {
+			forkTable.getCellEditor().stopCellEditing();
 		}
 		if (outTable.getCellEditor() != null) {
 			outTable.getCellEditor().stopCellEditing();
 		}
 	}
 
-	protected class ForkingTable extends JTable {
+	protected class ForkTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
 
-		public ForkingTable() {
+		public ForkTable() {
 			super();
-			setModel(new ForkingTableModel());
+			setModel(new ForkTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
 			getTableHeader().setReorderingAllowed(false);
@@ -449,13 +449,13 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(((ForkingTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((ForkTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
 	}
 
-	protected class ForkingTableModel extends AbstractTableModel {
+	protected class ForkTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 		private String[] columnNames = new String[] { "Destination", "Probability" };
@@ -507,7 +507,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			if (columnIndex == 1) {
 				try {
 					Double value = Double.valueOf((String) aValue);
-					if (value.doubleValue() >= 0 && value.doubleValue() <= 1.0) {
+					if (value.doubleValue() >= 0 && value.doubleValue() <= 1) {
 						outPaths.get(indexToKey(rowIndex)).setOutName(stations.getStationName(indexToKey(rowIndex)));
 						outPaths.get(indexToKey(rowIndex)).setProb(value.doubleValue());
 					}
@@ -878,13 +878,13 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 	}
 
-	protected class ForkingSwitchTable extends JTable {
+	protected class ForkSwitchTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
 
-		public ForkingSwitchTable() {
+		public ForkSwitchTable() {
 			super();
-			setModel(new ForkingSwitchTableModel());
+			setModel(new ForkSwitchTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
 			getTableHeader().setReorderingAllowed(false);
@@ -892,13 +892,13 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(((ForkingSwitchTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((ForkSwitchTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
 	}
 
-	protected class ForkingSwitchTableModel extends AbstractTableModel {
+	protected class ForkSwitchTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 		private String[] columnNames = new String[] { "Destination" };

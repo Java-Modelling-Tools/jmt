@@ -36,7 +36,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
 import jmt.engine.jwat.fitting.FittingAlgorithm;
-import jmt.engine.jwat.fitting.ParetoFitting;
 import jmt.engine.jwat.fitting.utils.ModelFitting;
 import jmt.engine.jwat.workloadAnalysis.utils.ChangeVariableListener;
 import jmt.gui.jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileChooser;

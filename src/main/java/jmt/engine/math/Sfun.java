@@ -28,10 +28,10 @@ package jmt.engine.math;
  */
 public class Sfun {
 	/** The smallest relative spacing for doubles.*/
-	public final static double EPSILON_SMALL = 1.1102230246252e-16;
+	public static final double EPSILON_SMALL = 1.1102230246252e-16;
 
 	/** The largest relative spacing for doubles. */
-	public final static double EPSILON_LARGE = 2.2204460492503e-16;
+	public static final double EPSILON_LARGE = 2.2204460492503e-16;
 
 	// Series on [0,0.0625]
 	private static final double COT_COEF[] = { .240259160982956302509553617744970e+0, -.165330316015002278454746025255758e-1,

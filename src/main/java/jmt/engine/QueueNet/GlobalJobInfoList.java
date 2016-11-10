@@ -200,7 +200,7 @@ public class GlobalJobInfoList {
 	}
 
 	/**
-	 * This method must be called each time a job is dropped by a queue, a store or
+	 * This method must be called each time a job is dropped by a queue, a place or
 	 * a blocking region
 	 * @param job identifier of dropped job
 	 */

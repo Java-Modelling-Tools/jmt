@@ -79,8 +79,8 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 	private JTextArea descrTextPane = new JTextArea("");
 	private JScrollPane descrPane = new JScrollPane();
 
-	private ForkingSelectionTable forkingStrategies;
-	private ForkEditor forkingProbEditor;
+	private ForkSelectionTable forkStrategies;
+	private ForkEditor forkProbEditor;
 
 	protected ImagedComboBoxCellEditorFactory classEditor;
 
@@ -93,8 +93,8 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 	public InGateWaySectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
 		classEditor = new ImagedComboBoxCellEditorFactory(cd);
 		setDataInternal(sd, cd, stationKey);
-		forkingStrategies = new ForkingSelectionTable();
-		forkingProbEditor = new ForkEditor(sd, cd, stationKey, null);
+		forkStrategies = new ForkSelectionTable();
+		forkProbEditor = new ForkEditor(sd, cd, stationKey, null);
 		useSim = new JCheckBox();
 		updateSpinner();
 		initComponents();
@@ -126,10 +126,10 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		forkStrategiesPane.setDividerSize(4);
 		forkStrategiesPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		JSplitPane leftPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-		WarningScrollTable jsp = new WarningScrollTable(forkingStrategies, WARNING_CLASS);
+		WarningScrollTable jsp = new WarningScrollTable(forkStrategies, WARNING_CLASS);
 		leftPane.setResizeWeight(.65);
 
-		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Advanced forking strategies"));
+		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Advanced fork strategies"));
 		forkStrategiesPane.setResizeWeight(.75); // Gives more space to left component
 		jsp.setMinimumSize(new Dimension(180, 100));
 
@@ -145,9 +145,8 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		leftPane.setRightComponent(descrPane);
 
 		forkStrategiesPane.setLeftComponent(leftPane);
-		forkingProbEditor.setMinimumSize(new Dimension(160, 100));
-		forkStrategiesPane.setRightComponent(forkingProbEditor);
-		//enableComponents(forkStrategiesPane, !sd.getIsSimplifiedFork(stationKey));
+		forkProbEditor.setMinimumSize(new Dimension(160, 100));
+		forkStrategiesPane.setRightComponent(forkProbEditor);
 
 		gPaneAdvanced.getContentPane().add(forkStrategiesPane);
 		gPaneAdvanced.setGlassPane(new GlassPane());
@@ -157,7 +156,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		JPanel fragnum = new JPanel();
 		fragnum.setLayout(new BorderLayout());
 		fragnum.setBorder(new TitledBorder(new EtchedBorder(), "Standard fork strategy"));
-		useSim.setText("Enable the advanced forking strategies.");
+		useSim.setText("Enable the advanced fork strategies.");
 		//fragnum.add(useSim, BorderLayout.CENTER);
 		JLabel text = new JLabel("Number of tasks to be generated on each output link for each input job (customer) to the Fork:");
 		text.setLabelFor(numForkSpinner);
@@ -199,12 +198,12 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 	@Override
 	public void lostFocus() {
 		// Aborts editing of table
-		TableCellEditor editor = forkingStrategies.getCellEditor();
+		TableCellEditor editor = forkStrategies.getCellEditor();
 		if (editor != null) {
 			editor.stopCellEditing();
 		}
-		if (forkingProbEditor != null) {
-			forkingProbEditor.stopEditing();
+		if (forkProbEditor != null) {
+			forkProbEditor.stopEditing();
 		}
 	}
 
@@ -214,14 +213,14 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 	@Override
 	public void gotFocus() {
 		classEditor.clearCache();
-		if (forkingStrategies != null && forkingStrategies.getRowCount() > 0) {
-			if (forkingStrategies.getSelectedRow() == -1) {
-				forkingStrategies.setRowSelectionInterval(0, 0);
+		if (forkStrategies != null && forkStrategies.getRowCount() > 0) {
+			if (forkStrategies.getSelectedRow() == -1) {
+				forkStrategies.setRowSelectionInterval(0, 0);
 			}
-			forkingProbEditor.setData(sd, cd, stationKey, cd.getClassKeys().get(forkingStrategies.getSelectedRow()));
-			descrTextPane.setText(((ForkStrategy)sd.getForkingStrategy(stationKey, cd.getClassKeys().get(forkingStrategies.getSelectedRow()))).getDescription());
+			forkProbEditor.setData(sd, cd, stationKey, cd.getClassKeys().get(forkStrategies.getSelectedRow()));
+			descrTextPane.setText(((ForkStrategy)sd.getForkStrategy(stationKey, cd.getClassKeys().get(forkStrategies.getSelectedRow()))).getDescription());
 		} else {
-			forkingProbEditor.setData(sd, cd,  stationKey, 0);
+			forkProbEditor.setData(sd, cd,  stationKey, 0);
 			descrTextPane.setText("");
 		}
 	}
@@ -231,13 +230,13 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		return "Fork Strategies";
 	}
 
-	protected class ForkingSelectionTable extends JTable {
+	protected class ForkSelectionTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
 
-		public ForkingSelectionTable() {
+		public ForkSelectionTable() {
 			super();
-			setModel(new ForkingSelectionTableModel());
+			setModel(new ForkSelectionTableModel());
 			sizeColumns();
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 			getTableHeader().setReorderingAllowed(false);
@@ -246,14 +245,14 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
-				ForkStrategy[] forkingStrategies = null;
+				ForkStrategy[] forkStrategies = null;
 				Vector<Object> sources = sd.getStationKeysSource();
 				if (sources.contains(stationKey)) {
-					forkingStrategies = ForkStrategy.findAllForSource();
+					forkStrategies = ForkStrategy.findAllForSource();
 				} else {
-					forkingStrategies = ForkStrategy.findAll();
+					forkStrategies = ForkStrategy.findAll();
 				}
-				return ComboBoxCellEditor.getEditorInstance(forkingStrategies);
+				return ComboBoxCellEditor.getEditorInstance(forkStrategies);
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -271,7 +270,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		}
 
 		private void sizeColumns() {
-			int[] columnSizes = ((ForkingSelectionTableModel) getModel()).columnSizes;
+			int[] columnSizes = ((ForkSelectionTableModel) getModel()).columnSizes;
 			for (int i = 0; i < columnSizes.length; i++) {
 				getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
 			}
@@ -282,10 +281,10 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 			super.valueChanged(e);
 			int row = getSelectedRow();
 			if (row != -1) {
-				if (forkingProbEditor != null) {
-					forkingProbEditor.stopEditing();
-					forkingProbEditor.setData(sd, cd,  stationKey, cd.getClassKeys().get(row));
-					descrTextPane.setText(((ForkStrategy) sd.getForkingStrategy(stationKey, cd.getClassKeys().get(row))).getDescription());
+				if (forkProbEditor != null) {
+					forkProbEditor.stopEditing();
+					forkProbEditor.setData(sd, cd,  stationKey, cd.getClassKeys().get(row));
+					descrTextPane.setText(((ForkStrategy) sd.getForkStrategy(stationKey, cd.getClassKeys().get(row))).getDescription());
 					InGateWaySectionPanel.this.doLayout();
 					InGateWaySectionPanel.this.repaint();
 				}
@@ -294,7 +293,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 
 	}
 
-	protected class ForkingSelectionTableModel extends AbstractTableModel {
+	protected class ForkSelectionTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 		private String[] columnNames = new String[] { "Class", "Fork Strategy" };
@@ -329,7 +328,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 			if (columnIndex == 0) {
 				return key;
 			} else if (columnIndex == 1) {
-				return sd.getForkingStrategy(stationKey, key);
+				return sd.getForkStrategy(stationKey, key);
 			} else {
 				return null;
 			}
@@ -339,11 +338,11 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			if (columnIndex == 1) {
 				Object classKey = indexToKey(rowIndex);
-				if (!value.equals(sd.getForkingStrategy(stationKey, classKey))) {
-					sd.setForkingStrategy(stationKey, classKey, ((ForkStrategy) value).clone());
+				if (!value.equals(sd.getForkStrategy(stationKey, classKey))) {
+					sd.setForkStrategy(stationKey, classKey, ((ForkStrategy) value).clone());
 				}			
-				forkingProbEditor.setData(sd, cd, stationKey, classKey);
-				descrTextPane.setText(((ForkStrategy) sd.getForkingStrategy(stationKey, classKey)).getDescription());
+				forkProbEditor.setData(sd, cd, stationKey, classKey);
+				descrTextPane.setText(((ForkStrategy) sd.getForkStrategy(stationKey, classKey)).getDescription());
 				//doLayout();
 				//repaint();
 				InGateWaySectionPanel.this.doLayout();
@@ -371,7 +370,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 							serverNum = new Integer(1);
 							numForkSpinner.setValue(serverNum);
 						}
-						sd.setStationNumberOfServers(serverNum, stationKey);
+						sd.setStationNumberOfServers(stationKey, serverNum);
 					}
 				}
 			});

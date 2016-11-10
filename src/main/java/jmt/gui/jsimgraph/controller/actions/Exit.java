@@ -43,7 +43,7 @@ public class Exit extends AbstractJmodelAction {
 	 */
 	public Exit(Mediator mediator) {
 		super("Exit", mediator);
-		putValue(SHORT_DESCRIPTION, "quits from JMODEL");
+		putValue(SHORT_DESCRIPTION, "Exit JSIMgraph");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_X));
 	}
 

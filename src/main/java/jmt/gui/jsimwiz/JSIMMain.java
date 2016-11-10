@@ -114,20 +114,18 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	private SimulationPanel simulation;
 	private AllBlockingRegionsPanel blocking;
 
-	//Francesco D'Aquino
 	private ModelChecker mc;
 	private JSimProblemsWindow pw;
 	private PADispatcherThread batchThread;
 	private PAProgressWindow progressWindow;
 	private ParametricAnalysisPanel parametricAnalysis;
-	// end
 
 	private AbstractJMTAction FILE_NEW = new AbstractJMTAction("New") {
 
 		private static final long serialVersionUID = 1L;
 		{
 			setIcon("New", JMTImageLoader.getImageLoader());
-			putValue(Action.SHORT_DESCRIPTION, "New Model");
+			putValue(Action.SHORT_DESCRIPTION, "Create a new model");
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
 		}
@@ -144,7 +142,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 		{
 			setIcon("Open", JMTImageLoader.getImageLoader());
-			putValue(Action.SHORT_DESCRIPTION, "Open Saved Model");
+			putValue(Action.SHORT_DESCRIPTION, "Open a saved model");
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_O));
 		}
@@ -172,7 +170,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 	};
 
-	private AbstractJMTAction FILE_SAVEAS = new AbstractJMTAction("Save as") {
+	private AbstractJMTAction FILE_SAVEAS = new AbstractJMTAction("Save as...") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -180,7 +178,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			setMnemonicKey(KeyEvent.VK_A);
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
 			setIcon("Save", JMTImageLoader.getImageLoader());
-			putValue(Action.SHORT_DESCRIPTION, "Save this model as ");
+			putValue(Action.SHORT_DESCRIPTION, "Save this model as...");
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -194,7 +192,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Exit JSIM");
+			putValue(Action.SHORT_DESCRIPTION, "Exit JSIMwiz");
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Q, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_X));
 		}
@@ -222,28 +220,12 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 	};
 
-	/*private AbstractJMTAction ACTION_RAND = new AbstractJMTAction("Randomize") {
-
-		private static final long serialVersionUID = 1L;
-
-		{
-			putValue(Action.SHORT_DESCRIPTION, "Generate Randomized Model");
-			setIcon("Dice", JMTImageLoader.getImageLoader());
-			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_R));
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			randomizeModel();
-		}
-
-	};*/
-
 	private AbstractJMTAction SIM_START = new AbstractJMTAction("Start Simulation") {
 
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Start Simulation");
+			putValue(Action.SHORT_DESCRIPTION, "Start simulation");
 			setIcon("Sim", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_M, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_M));
@@ -255,12 +237,12 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 	};
 
-	private AbstractJMTAction SIM_PAUSE = new AbstractJMTAction("Pause") {
+	private AbstractJMTAction SIM_PAUSE = new AbstractJMTAction("Pause Simulation") {
 
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Pause Simulation");
+			putValue(Action.SHORT_DESCRIPTION, "Pause simulation");
 			setIcon("Pause", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_P));
@@ -274,12 +256,12 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 	};
 
-	private AbstractJMTAction SIM_STOP = new AbstractJMTAction("Stop") {
+	private AbstractJMTAction SIM_STOP = new AbstractJMTAction("Stop Simulation") {
 
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Stop Simulation");
+			putValue(Action.SHORT_DESCRIPTION, "Stop simulation");
 			setIcon("Stop", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_T, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_T));
@@ -293,12 +275,12 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 	};
 
-	private AbstractJMTAction OPTIONS_DEFAULTS = new AbstractJMTAction("Default parameters...") {
+	private AbstractJMTAction OPTIONS_DEFAULTS = new AbstractJMTAction("Default Parameters...") {
 
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Define default value of model's parameters");
+			putValue(Action.SHORT_DESCRIPTION, "Define default parameters");
 			setIcon("Options", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_D));
@@ -310,7 +292,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 	};
 
-	private AbstractJMTAction HELP_SHOWHELP = new AbstractJMTAction("JSIMwiz help") {
+	private AbstractJMTAction HELP_SHOWHELP = new AbstractJMTAction("JSIMwiz Help") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -351,7 +333,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 	};
 
-	public AbstractJMTAction SHOW_RESULTS = new AbstractJMTAction("Results") {
+	public AbstractJMTAction SHOW_RESULTS = new AbstractJMTAction("Show Results") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -524,7 +506,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 	private void toJMVA() {
 		mc = new ModelChecker(model, model, model, model, true);
-		//pw.setToJMVAConversion(true);
 		pw.setModelChecker(mc);
 		pw.updateProblemsShown(false);
 		if (!mc.isEverythingOkToJMVA()) {
@@ -546,9 +527,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 	}
 
-	/*private void randomizeModel() {
-	}*/
-
 	private void startSimulation() {
 		//if simulation is not in pause state
 		if (!SIM_STOP.isEnabled()) {
@@ -560,8 +538,8 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					parent = resultsWindow;
 				}
 
-				int resultValue = JOptionPane.showConfirmDialog(parent, "This operation will overwrite old simulation results." + "Continue anyway?",
-						"JMT - Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				int resultValue = JOptionPane.showConfirmDialog(parent, "This operation will overwrite old simulation results. "
+						+ "Continue anyway?", "JMT - Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if (resultValue == JOptionPane.NO_OPTION) {
 					return;
 				}
@@ -576,7 +554,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			}
 			mc = new ModelChecker(model, model, model, model, false);
 			pw.setModelChecker(mc);
-			//pw.setToJMVAConversion(false);
 			pw.updateProblemsShown(false);
 			if (!mc.isEverythingOkNormal()) {
 				pw.show();
@@ -602,7 +579,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 				// Creates results data structure
 				String logCSVDelimiter = model.getLoggingGlbParameter("delim");
 				String logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
-				model.setSimulationResults(new ResultsModel(model.getPollingInterval(), logCSVDelimiter, logDecimalSeparator));
+				model.setSimulationResults(new ResultsModel(model.getPollingInterval().doubleValue(), logCSVDelimiter, logDecimalSeparator));
 				SHOW_RESULTS.setEnabled(true);
 				dispatcher = new DispatcherThread(this, model, (ResultsModel) model.getSimulationResults());
 				dispatcher.startSimulation(temp);
@@ -611,10 +588,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			}
 		} else {
 			SHOW_RESULTS.setEnabled(false);
-			// Removes previous ResultsWindow
-			//if (parametricResultsWindow != null) {
-			//	parametricResultsWindow.dispose();
-			//}
 			if (progressWindow == null) {
 				progressWindow = new PAProgressWindow(this, SIM_START, SIM_PAUSE, SIM_STOP, model.getParametricAnalysisModel());
 			}
@@ -792,16 +765,16 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.STATION_LINK_ERROR)) {
 			tabbedPane.setSelectedIndex(2);
 		}
-		//if it is an allForwardSinkError show the link panel
+		//if it is an all forward sink error show the link panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ALL_FORWARD_STATION_ARE_SINK_ERROR)) {
 			tabbedPane.setSelectedIndex(2);
 		}
 		//if it is a routing error show the link panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ROUTING_ERROR)) {
-			AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
+			tabbedPane.setSelectedIndex(3);
+			AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
 			//set temp to show routing section panel
 			temp.showStationParameterPanel(relatedStation, relatedClass, 2);
-			tabbedPane.setSelectedIndex(3);
 		}
 		//if no measure have been defined show the measure panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SIMULATION_ERROR)) {
@@ -835,10 +808,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					+ "for each class, but different per class queue strategy were found at " + name + ".\nDo you want to edit " + name
 					+ " queue strategy?\n\n", "Mixed queue strategy found", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
-				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
+				tabbedPane.setSelectedIndex(3);
+				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
 				//set the station parameter panel to show the queue section
 				temp.showStationParameterPanel(relatedStation, null, 0);
-				tabbedPane.setSelectedIndex(3);
 			}
 		}
 		//used only in JMVA conversion
@@ -848,10 +821,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					+ "for each class,\nbut at " + name + " the service strategy is mixed, i.e. both load dependent and independent were found.\n"
 					+ "Do you want to edit " + name + " service parameters?\n\n", "Mixed service strategies found", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
-				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
+				tabbedPane.setSelectedIndex(3);
+				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
 				//set the station parameter panel to show the service section
 				temp.showStationParameterPanel(relatedStation, null, 1);
-				tabbedPane.setSelectedIndex(3);
 			}
 		}
 		//used only in JMVA conversion
@@ -861,10 +834,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					+ "must be exponential, but at " + name + " at least one non exponential distribution was found.\nDo you want to edit " + name
 					+ " service parameters?\n\n", "Non exponential distribution in FCFS server", JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
-				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
+				tabbedPane.setSelectedIndex(3);
+				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
 				//set the station parameter panel to show the service section
 				temp.showStationParameterPanel(relatedStation, null, 1);
-				tabbedPane.setSelectedIndex(3);
 			}
 		}
 		//used only in JMVA conversion
@@ -875,10 +848,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					+ "each class.\nDo you want to edit " + name + " service parameters?\n\n", "Non exponential distribution in FCFS server",
 					JOptionPane.WARNING_MESSAGE);
 			if (k == 0) {
-				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponent(3);
+				tabbedPane.setSelectedIndex(3);
+				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
 				//set the station parameter panel to show the queue section
 				temp.showStationParameterPanel(relatedStation, null, 1);
-				tabbedPane.setSelectedIndex(3);
 			}
 		}
 		//used only in JMVA conversion
@@ -917,6 +890,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)) {
 			JOptionPane.showMessageDialog(this, "A fork was found but no join. Please check the topology.", "Warning",
 					JOptionPane.WARNING_MESSAGE);
+			tabbedPane.setSelectedIndex(1);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.EMPTY_BLOCKING_REGION)) {
 			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n",
@@ -925,7 +899,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 				mc.deleteEmptyBlockingRegions();
 			}
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_IN_BLOCKING_REGION)) {
 			tabbedPane.setSelectedIndex(7);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_PERF_IND_WITH_NO_SINK_ERROR)) {
@@ -935,36 +909,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			tabbedPane.setSelectedIndex(4);
 		}
 	}
-
-	/**
-	 * Shows the class panel
-	 */
-	public void showClassPanel() {
-		tabbedPane.setSelectedIndex(0);
-	}
-
-	/**
-	 * Sets the Parametric Analysis Results Window
-	 *
-	 * @param parw the Parametric Analysis Results Window to be set
-	 */
-	/*public void setPAResultsWindow(PAResultsWindow parw) {
-		parametricResultsWindow = parw;
-		parw.addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				resultsButton.setSelected(false);
-			}
-		});
-	}*/
-
-	/**
-	 * Sets the availability of results in case of parametric analysis
-	 *
-	 * @param available true if they are available
-	 */
-	/*public void setPAResultsAvailable(boolean available) {
-		resultsButton.setEnabled(available);
-	}*/
 
 	/**
 	 * Used to discover if the instance can display simulation animation

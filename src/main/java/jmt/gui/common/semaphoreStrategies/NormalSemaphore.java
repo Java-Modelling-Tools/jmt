@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ package jmt.gui.common.semaphoreStrategies;
  */
 public class NormalSemaphore extends SemaphoreStrategy {
 
-	private int semaphoreThres = 1;
+	private int threshold = 1;
 
 	public NormalSemaphore() {
 		description = "The semaphore stops a percentage of forked tasks in each class "
@@ -39,19 +39,19 @@ public class NormalSemaphore extends SemaphoreStrategy {
 	}
 
 	@Override
-	public int getSemaphoreThres() {
-		return semaphoreThres;
+	public int getThreshold() {
+		return threshold;
 	}
 
 	@Override
-	public void setSemaphoreThres(int i) {
-		semaphoreThres = i;
+	public void setThreshold(int i) {
+		threshold = i;
 	}
 
 	@Override
 	public SemaphoreStrategy clone() {
 		NormalSemaphore s = new NormalSemaphore();
-		s.semaphoreThres = semaphoreThres;
+		s.threshold = threshold;
 		return s;
 	}
 

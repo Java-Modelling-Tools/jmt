@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,14 +18,15 @@
 
 package jmt.engine.NodeSections;
 
-import java.util.Arrays;
+import javax.swing.JOptionPane;
 
 import jmt.common.exception.NetException;
-import jmt.engine.NetStrategies.TransitionStrategies.TransitionVector;
+import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
 import jmt.engine.QueueNet.DataPacket;
+import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.ForkJobInfo;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
-import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
@@ -34,6 +35,7 @@ import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * <p>Title: Firing</p>
@@ -45,35 +47,32 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class Firing extends OutputSection {
 
-	private TransitionVector[] firingOutcomes;
+	private TransitionMatrix[] firingOutcomes;
+
+	private JobClassList jobClasses;
 	private JobInfoList nodeJobsList;
 	private GlobalJobInfoList netJobsList;
-	private int[] releasedJobsPerClass;
+	private boolean isForkJobNumWarningShown;
+	private RandomEngine randomEngine;
 	private int producedJobs;
 	private int[] producedJobsPerClass;
 
 	/**
 	 * Creates a new instance of the firing section.
 	 */
-	public Firing(TransitionVector[] firingOutcomes) {
+	public Firing(TransitionMatrix[] firingOutcomes) {
 		super(true);
 		this.firingOutcomes = firingOutcomes;
 	}
 
 	@Override
 	protected void nodeLinked(NetNode node) {
+		jobClasses = getJobClasses();
 		nodeJobsList = node.getJobInfoList();
-		JobClassList jobClasses = getJobClasses();
-		releasedJobsPerClass = new int[jobClasses.size()];
-		Arrays.fill(releasedJobsPerClass, 0);
-		for (int i = 0; i < releasedJobsPerClass.length; i++) {
-			for (String nodeName : firingOutcomes[i].keySet()) {
-				releasedJobsPerClass[i] += firingOutcomes[i].getValue(nodeName).intValue();
-			}
-		}
+		isForkJobNumWarningShown = false;
+		randomEngine = RandomEngine.makeDefault();
 		producedJobs = 0;
 		producedJobsPerClass = new int[jobClasses.size()];
-		Arrays.fill(producedJobsPerClass, 0);
 	}
 
 	@Override
@@ -96,33 +95,63 @@ public class Firing extends OutputSection {
 
 		case NetEvent.EVENT_FIRING:
 		{
-			JobClass jobClass = (JobClass) ((DataPacket) data).getData(DataPacket.FIELD_REFERENCE_CLASS);
-			double totalLifetime = ((Double) ((DataPacket) data).getData(DataPacket.FIELD_TOTAL_LIFETIME)).doubleValue();
-			int classIndex = jobClass.getId();
-			double avgEnteringTime = NetSystem.getTime() - totalLifetime / releasedJobsPerClass[classIndex];
-			for (String nodeName : firingOutcomes[classIndex].keySet()) {
-				int releasedJobs = firingOutcomes[classIndex].getValue(nodeName).intValue();
-				DataPacket packet = new DataPacket();
-				packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
-				packet.setData(DataPacket.FIELD_JOB_NUMBER, Integer.valueOf(releasedJobs));
-				send(NetEvent.EVENT_JOB_RELEASE, packet, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
-
-				for (int i = 0; i < releasedJobs; i++) {
-					Job job = new Job(jobClass);
-					job.setSystemEnteringTime(avgEnteringTime);
-					JobInfo jobInfo = new JobInfo(job);
-					jobsList.produceJob(jobInfo);
-					nodeJobsList.produceJob(jobInfo);
-					netJobsList.produceJob(job);
-					send(job, 0.0, NetSystem.getNode(nodeName));
+			Object[] packet = (Object[]) data;
+			int modeIndex = ((Integer) packet[DataPacket.FIELD_MODE_INDEX]).intValue();
+			double[] totalLifetime = (double[]) packet[DataPacket.FIELD_TOTAL_LIFETIME];
+			ForkJobInfo[] forkJobInfo = (ForkJobInfo[]) packet[DataPacket.FIELD_FORK_JOB_INFO];
+			int[] forkJobNum = (int[]) packet[DataPacket.FIELD_FORK_JOB_NUM];
+			double[] avgEnteringTime = new double[jobClasses.size()];
+			for (int i = 0; i < jobClasses.size(); i++) {
+				int releasedJobs = firingOutcomes[modeIndex].getTotal(i);
+				avgEnteringTime[i] = NetSystem.getTime() - (totalLifetime[i] / releasedJobs);
+				if (forkJobNum[i] > 0 && releasedJobs != forkJobNum[i]) {
+					showForkJobNumWarning();
 				}
+			}
 
-				packet = new DataPacket();
-				packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
-				packet.setData(DataPacket.FIELD_JOB_NUMBER, Integer.valueOf(releasedJobs));
-				send(NetEvent.EVENT_JOB_FINISH, packet, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
-				producedJobs += releasedJobs;
-				producedJobsPerClass[classIndex] += releasedJobs;
+			for (String nodeName : firingOutcomes[modeIndex].keySet()) {
+				int releasedJobsToNode = firingOutcomes[modeIndex].getTotal(nodeName);
+				if (releasedJobsToNode > 0) {
+					send(NetEvent.EVENT_JOB_RELEASE, null, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
+					// Releases jobs in the random order
+					Job[] jobPermutation = new Job[releasedJobsToNode];
+					int index = 0;
+					for (int i = 0; i < jobClasses.size(); i++) {
+						int releasedJobs = firingOutcomes[modeIndex].getEntry(nodeName, i);
+						for (int j = 0; j < releasedJobs; j++) {
+							Job job = null;
+							if (forkJobInfo[i] != null) {
+								job = new ForkJob(jobClasses.get(i), forkJobInfo[i]);
+							} else {
+								job = new Job(jobClasses.get(i));
+							}
+							job.setSystemEnteringTime(avgEnteringTime[i]);
+							jobPermutation[index] = job;
+							index++;
+						}
+					}
+
+					for (int i = jobPermutation.length - 1; i > 0; i--) {
+						int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+						Job job = jobPermutation[i];
+						jobPermutation[i] = jobPermutation[j];
+						jobPermutation[j] = job;
+					}
+
+					for (int i = 0; i < jobPermutation.length; i++) {
+						Job job = jobPermutation[i];
+						JobInfo jobInfo = new JobInfo(job);
+						jobsList.produceJob(jobInfo);
+						nodeJobsList.produceJob(jobInfo);
+						if (!(job instanceof ForkJob)) {
+							netJobsList.produceJob(job);
+							producedJobs++;
+							producedJobsPerClass[job.getJobClass().getId()]++;
+						}
+						send(job, 0.0, NetSystem.getNode(nodeName));
+					}
+					send(NetEvent.EVENT_JOB_FINISH, null, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
+				}
 			}
 			break;
 		}
@@ -149,6 +178,24 @@ public class Firing extends OutputSection {
 	 */
 	public int getProducedJobsPerClass(int jobClass) {
 		return producedJobsPerClass[jobClass];
+	}
+
+	private void showForkJobNumWarning() {
+		if (!isForkJobNumWarningShown) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(800);
+					} catch (InterruptedException e) {
+					}
+					JOptionPane.showMessageDialog(null, getOwnerNode().getName()
+							+ " failed to maintain the equilibrium between the input and output tasks.",
+							"JMT - Warning", JOptionPane.WARNING_MESSAGE);
+				}
+			}).start();
+			isForkJobNumWarningShown = true;
+		}
 	}
 
 }

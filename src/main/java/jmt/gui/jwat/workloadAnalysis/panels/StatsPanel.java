@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jwat.workloadAnalysis.panels;
 
 import java.awt.BorderLayout;
@@ -84,9 +85,7 @@ import jmt.gui.jwat.workloadAnalysis.tables.JWatUnivariateStatsTable;
 import jmt.gui.jwat.workloadAnalysis.tables.JWatUnivariateStatsTableModel;
 
 public class StatsPanel extends WizardPanel implements CommonConstants, JWATConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	//UPDATE 15/11/2006
@@ -115,41 +114,41 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 	private static String TRANSF_COMBO = "Select transformation to apply";
 
 	// Descrizione del pannello unviariaet stats
-	public final static String UNIV_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Univariate statistics" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String UNIV_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Univariate statistics" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "This panel shows univariate statistics and graphs" + HTML_FONT_NOR_END + HTML_END;
 
 	// Descrizione del pannello bivariate stats
-	public final static String BIVARIATE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Bivariate statistics" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String BIVARIATE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Bivariate statistics" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "This panel shows the correlation coefficient" + HTML_FONT_NOR_END + HTML_END;
 
 	// Descrizione del pannello di sampling e descrizioni dei sampling
-	public final static String SAMPLING_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Sample construction (<I>Optional</I>)" + HTML_FONT_TIT_END
+	public static final String SAMPLING_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Sample construction (<I>Optional</I>)" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Allows the construction of a sample extracted from observations" + HTML_FONT_NOR_END + HTML_END;
 
 	// Descrizione del pannello degli scatterplot
-	public final static String MATRIX_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Scatter plot matrix" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String MATRIX_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Scatter plot matrix" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "This panel show scatter plot matrix of all variables. Double click on a scatter plot to open it in a new panel " + HTML_FONT_NOR_END
 			+ HTML_END;
 
 	// Descrizione del pannello degli scatterplot QQ
-	public final static String QQ_MATRIX_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "QQ-plot matrix" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String QQ_MATRIX_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "QQ-plot matrix" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "This panel show QQ-plot matrix of all variables. Double click on a QQ-plot to open it in a new panel " + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String SAMPLING_TRIMMING_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Trimming Sampling<p>description" + HTML_FONT_TIT_END
+	public static final String SAMPLING_TRIMMING_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Trimming Sampling<p>description" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "This operation allows to remove<p>undesired data from source<p>observations" + " specifying<p>percentiles."/*from<p>which or to remove<p>observations"*/
 			+ HTML_FONT_NOR_END + HTML_END;
 
-	public final static String SAMPLING_RANDOM_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Random Sampling<p>description" + HTML_FONT_TIT_END
+	public static final String SAMPLING_RANDOM_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Random Sampling<p>description" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Specify the number of<p>" + "observations to be<p>" + "considered." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String SAMPLING_INTERVAL_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Observ. # interval<p>description" + HTML_FONT_TIT_END
+	public static final String SAMPLING_INTERVAL_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Observ. # interval<p>description" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Specify the start ID and<p>" + "end ID of observations<p>" + "to be considered." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String SAMPLING_FILTERING_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Interval Sampling<p>description" + HTML_FONT_TIT_END
+	public static final String SAMPLING_FILTERING_DESCRITPION = HTML_START + HTML_FONT_TITLE + "Interval Sampling<p>description" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Specify observations to be<p>" + "considered specifying interval<p>" + "values (date and number type) or<p>"
 			+ "substring (string type)." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String SAMPLING_TRIMMING_PANEL_DESC = HTML_START
+	public static final String SAMPLING_TRIMMING_PANEL_DESC = HTML_START
 			+ HTML_FONT_TITLE
 			+ "WARNING"
 			+ HTML_FONT_TIT_END
@@ -158,11 +157,11 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			+ "if you undo a transformation, applied before a sampling, this completely resets the sample; "
 			+ "if you undo a sampling it completely resets the sample." + HTML_FONT_NOR_END + HTML_END;
 
-	public final static String TRANSF_BORDER_TEXT = "Variable: ";
+	public static final String TRANSF_BORDER_TEXT = "Variable: ";
 
-	public final static String TRANSF_LABEL_APPLIED = "Transformations applied to variable ";
+	public static final String TRANSF_LABEL_APPLIED = "Transformations applied to variable ";
 
-	public final static String SAMPLING_LABEL_PANEL = "Option of the sampling operation";
+	public static final String SAMPLING_LABEL_PANEL = "Option of the sampling operation";
 
 	// Table bivariate statistics and model
 	private JWatBivariateStatsTable tableBivariate;
@@ -174,10 +173,9 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 
 	// Add apply transformatio Action
 	protected AbstractAction applyTranformation = new AbstractAction("Apply transformation") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Apply transformation to current selected variable");
 		}
@@ -218,14 +216,14 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 			}
 		}
+
 	};
 
 	// Add undo transformation Action
 	protected AbstractAction undoTranformation = new AbstractAction("Undo transformation") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Undo previous transformation (if one) to current selected variable");
 		}
@@ -242,7 +240,9 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 				variableTable.setRowSelectionInterval(curr, curr);
 			}
 		}
+
 	};
+
 	private HoverHelp help = null;
 	private MainJwatWizard parent;
 
@@ -259,6 +259,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 		session = (WorkloadAnalysisSession) parent.getSession();
 		help = parent.getHelp();
 		model.addOnSetMatrixObservationListener(new SetMatrixListener() {
+
 			public void onSetMatrixObservation() {
 				((JWatUnivariateStatsTableModel) variableTable.getModel()).setMatrixObs(model.getMatrix());
 				variableTable.tableChanged(new TableModelEvent(variableTable.getModel()));
@@ -286,6 +287,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 				samplingList.clearSelection();
 				samplingList.setSelectedIndex(0);
 			}
+
 		});
 		this.setLayout(new GridLayout(1, 1));
 		this.add(statisticsTabbed);
@@ -372,9 +374,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 
 	//UPDATE DB 20/10/2006
 	protected AbstractAction EXECUTE_SAMPLING = new AbstractAction("Do Sampling") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
@@ -389,67 +389,66 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			int varSel = varsList.getSelectedIndex();
 			int sampSel = samplingList.getSelectedIndex();
 			switch (sampSel) {
-				/** TRIMMING **/
-				case 0:
-					isSampled = true;
-					int percentile = ((Integer) quantile.getValue()).intValue();
-					if (!between.isSelected()) {
-						model.doSamplingOnVariable(varSel, new TrimmingFilter(
-								model.getMatrix().getVariables()[varSel].getUniStats().getQuantili()[percentile - 1], up.isSelected()));
-					} else {
-						model.doSamplingOnVariable(varSel,
-								new TrimmingBetweenFilter(model.getMatrix().getVariables()[varSel].getUniStats().getQuantili()[percentile - 1],
-										model.getMatrix().getVariables()[varSel].getUniStats().getQuantili()[((Integer) quantileB.getValue())
-												.intValue() - 1]));
-					}
+			/** TRIMMING **/
+			case 0:
+				isSampled = true;
+				int percentile = ((Integer) quantile.getValue()).intValue();
+				if (!between.isSelected()) {
+					model.doSamplingOnVariable(varSel, new TrimmingFilter(
+							model.getMatrix().getVariables()[varSel].getUniStats().getQuantili()[percentile - 1], up.isSelected()));
+				} else {
+					model.doSamplingOnVariable(varSel,
+							new TrimmingBetweenFilter(model.getMatrix().getVariables()[varSel].getUniStats().getQuantili()[percentile - 1],
+									model.getMatrix().getVariables()[varSel].getUniStats().getQuantili()[((Integer) quantileB.getValue())
+									                                                                     .intValue() - 1]));
+				}
+				undoSam.setEnabled(true);
+				break;
+			case 1:
+				isSampled = true;
+				int nObs = ((Integer) random.getValue()).intValue();
+				model.doSamplingOnVariable(0, new RandomFilter(model.getMatrix().getVariables()[0].Size(), nObs));
+				undoSam.setEnabled(true);
+				break;
+			case 2:
+				isSampled = true;
+				int min = ((Integer) fromO.getValue()).intValue();
+				int max = ((Integer) toO.getValue()).intValue();
+				model.doSamplingOnVariable(0, new IntervalFilter(min, max));
+				undoSam.setEnabled(true);
+				break;
+			case 3:
+				isSampled = true;
+				switch (model.getMatrix().getVariables()[varsList.getSelectedIndex()].getType()) {
+				case STRING:
+					model.doSamplingOnVariable(varsList.getSelectedIndex(), new FilterOnString(varsList.getSelectedIndex(),
+							((VariableString) model.getMatrix().getVariables()[varsList.getSelectedIndex()])
+							.getListOfMatching(subs.getText())));
 					undoSam.setEnabled(true);
 					break;
-				case 1:
-					isSampled = true;
-					int nObs = ((Integer) random.getValue()).intValue();
-					model.doSamplingOnVariable(0, new RandomFilter(model.getMatrix().getVariables()[0].Size(), nObs));
+				case NUMERIC:
+					model.doSamplingOnVariable(varsList.getSelectedIndex(), new FilterOnNumeric(((Double) minN.getValue()).doubleValue(),
+							((Double) maxN.getValue()).doubleValue(), varsList.getSelectedIndex()));
 					undoSam.setEnabled(true);
 					break;
-				case 2:
-					isSampled = true;
-					int min = ((Integer) fromO.getValue()).intValue();
-					int max = ((Integer) toO.getValue()).intValue();
-					model.doSamplingOnVariable(0, new IntervalFilter(min, max));
+				case DATE:
+					model.doSamplingOnVariable(varsList.getSelectedIndex(), new FilterOnData(((Date) fromD.getValue()), ((Date) toD
+							.getValue()), varsList.getSelectedIndex()));
 					undoSam.setEnabled(true);
 					break;
-				case 3:
-					isSampled = true;
-					switch (model.getMatrix().getVariables()[varsList.getSelectedIndex()].getType()) {
-						case STRING:
-							model.doSamplingOnVariable(varsList.getSelectedIndex(), new FilterOnString(varsList.getSelectedIndex(),
-									((VariableString) model.getMatrix().getVariables()[varsList.getSelectedIndex()])
-											.getListOfMatching(subs.getText())));
-							undoSam.setEnabled(true);
-							break;
-						case NUMERIC:
-							model.doSamplingOnVariable(varsList.getSelectedIndex(), new FilterOnNumeric(((Double) minN.getValue()).doubleValue(),
-									((Double) maxN.getValue()).doubleValue(), varsList.getSelectedIndex()));
-							undoSam.setEnabled(true);
-							break;
-						case DATE:
-							model.doSamplingOnVariable(varsList.getSelectedIndex(), new FilterOnData(((Date) fromD.getValue()), ((Date) toD
-									.getValue()), varsList.getSelectedIndex()));
-							undoSam.setEnabled(true);
-							break;
-					}
-					break;
+				}
+				break;
 			}
 		}
+
 	};
 	protected AbstractAction UNDO_SAMPLING = new AbstractAction("Undo Sampling") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
 			if (session.getListOfClustering().size() >= 0) {
-				if (JOptionPane.showConfirmDialog(StatsPanel.this.getParentWizard(), "This operation will reset all clusterings done. Continue ?",
+				if (JOptionPane.showConfirmDialog(StatsPanel.this.getParentWizard(), "This operation will reset all clusterings done. Continue?",
 						"WARNING", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 					model.undoSamplingOnVariable(varsList.getSelectedIndex());
 					session.removeAllClustering();
@@ -460,6 +459,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 			}
 		}
+
 	};
 
 	private JList varsList = null;
@@ -487,33 +487,34 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			varsList.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));
 			varsList.setBorder(BorderFactory.createLoweredBevelBorder());
 			varsList.addListSelectionListener(new ListSelectionListener() {
+
 				public void valueChanged(ListSelectionEvent e) {
 					if (!e.getValueIsAdjusting() && model.getMatrix() != null) {
 						int select = varsList.getSelectedIndex();
 						if (select >= 0) {
 							switch (model.getMatrix().getVariables()[select].getType()) {
-								case STRING:
-									varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a String variable and it has been transformed has "
-											+ model.getMatrix().getVariables()[select].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
-									varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
-											.getVariableNames()[select]
-											+ " information")));
-									break;
-								case NUMERIC:
-									varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a Numeric variable and it has been transformed has "
-											+ model.getMatrix().getVariables()[select].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
-									varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
-											.getVariableNames()[select]
-											+ " information")));
-									break;
-								case DATE:
-									varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a Date variable and it has been transformed has "
-											+ model.getMatrix().getVariables()[select].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
-									varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
-											.getVariableNames()[select]
-											+ " information")));
-									break;
-								default:
+							case STRING:
+								varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a String variable and it has been transformed has "
+										+ model.getMatrix().getVariables()[select].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
+								varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
+										.getVariableNames()[select]
+												+ " information")));
+								break;
+							case NUMERIC:
+								varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a Numeric variable and it has been transformed has "
+										+ model.getMatrix().getVariables()[select].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
+								varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
+										.getVariableNames()[select]
+												+ " information")));
+								break;
+							case DATE:
+								varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a Date variable and it has been transformed has "
+										+ model.getMatrix().getVariables()[select].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
+								varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
+										.getVariableNames()[select]
+												+ " information")));
+								break;
+							default:
 							}
 							//Abilitazione pulsanti di sampling e undo
 							executeSam.setEnabled(true);
@@ -530,22 +531,10 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 							}
 						} else {
 							varsList.setSelectedIndex(0);
-							/*varLabel.setText(HTML_START + HTML_FONT_NORM +
-									"No variable selected"
-									+ HTML_FONT_NOR_END + HTML_END);
-							varInfo.setBorder(new TitledBorder(new TitledBorder(
-									new EtchedBorder(EtchedBorder.LOWERED), "No variable selected")));
-							//DisAbilitazione pulsanti di sampling e undo
-							executeSam.setEnabled(false);
-							undoSam.setEnabled(false);
-							//Controllo su sampling selezionato
-							if (samplingList.getSelectedIndex() == 3) {
-								samplingList.clearSelection();
-								samplingList.setSelectedIndex(3);
-							}*/
 						}
 					}
 				}
+
 			});
 		}
 		return varsList;
@@ -565,61 +554,56 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			samplingList.setBorder(BorderFactory.createLoweredBevelBorder());
 			samplingList.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
+
 					if (!e.getValueIsAdjusting() && model.getMatrix() != null) {
 						int index = ((JList) e.getSource()).getSelectedIndex();
 						switch (index) {
-							case 0:
-								sampleDescr.setText(SAMPLING_TRIMMING_DESCRITPION);
-								optpanel.remove(options);
-								south.setVisible(true);
-								options = getTrimmingPanel();
-								optpanel.add(options, BorderLayout.CENTER);
-								optpanel.revalidate();
-								optpanel.repaint();
-								varsList.setEnabled(true);
-								break;
-							case 1:
-								sampleDescr.setText(SAMPLING_RANDOM_DESCRITPION);
-								optpanel.remove(options);
-								south.setVisible(true);
-								options = getRandomPanelOption();
-								optpanel.add(options, BorderLayout.CENTER);
-								optpanel.revalidate();
-								optpanel.repaint();
-								varsList.setEnabled(false);
-								break;
-							case 2:
-								sampleDescr.setText(SAMPLING_INTERVAL_DESCRITPION);
-								optpanel.remove(options);
-								south.setVisible(true);
-								options = getIntervalPanelOption();
-								optpanel.add(options, BorderLayout.CENTER);
-								optpanel.revalidate();
-								optpanel.repaint();
-								varsList.setEnabled(false);
-								break;
-							case 3:
-								sampleDescr.setText(SAMPLING_FILTERING_DESCRITPION);
-								optpanel.remove(options);
-								south.setVisible(true);
-								options = getFilteringPanelOption();
-								optpanel.add(options, BorderLayout.CENTER);
-								optpanel.revalidate();
-								optpanel.repaint();
-								varsList.setEnabled(true);
-								break;
-							default:
-								samplingList.setSelectedIndex(0);
-								/*							sampleDescr.setText("");
-														optpanel.remove(options);
-														south.setVisible(false);
-														options = new JPanel();
-														optpanel.add(options,BorderLayout.CENTER);
-														optpanel.revalidate();
-														optpanel.repaint();*/
+						case 0:
+							sampleDescr.setText(SAMPLING_TRIMMING_DESCRITPION);
+							optpanel.remove(options);
+							south.setVisible(true);
+							options = getTrimmingPanel();
+							optpanel.add(options, BorderLayout.CENTER);
+							optpanel.revalidate();
+							optpanel.repaint();
+							varsList.setEnabled(true);
+							break;
+						case 1:
+							sampleDescr.setText(SAMPLING_RANDOM_DESCRITPION);
+							optpanel.remove(options);
+							south.setVisible(true);
+							options = getRandomPanelOption();
+							optpanel.add(options, BorderLayout.CENTER);
+							optpanel.revalidate();
+							optpanel.repaint();
+							varsList.setEnabled(false);
+							break;
+						case 2:
+							sampleDescr.setText(SAMPLING_INTERVAL_DESCRITPION);
+							optpanel.remove(options);
+							south.setVisible(true);
+							options = getIntervalPanelOption();
+							optpanel.add(options, BorderLayout.CENTER);
+							optpanel.revalidate();
+							optpanel.repaint();
+							varsList.setEnabled(false);
+							break;
+						case 3:
+							sampleDescr.setText(SAMPLING_FILTERING_DESCRITPION);
+							optpanel.remove(options);
+							south.setVisible(true);
+							options = getFilteringPanelOption();
+							optpanel.add(options, BorderLayout.CENTER);
+							optpanel.revalidate();
+							optpanel.repaint();
+							varsList.setEnabled(true);
+							break;
+						default:
+							samplingList.setSelectedIndex(0);
 						}
 					}
 				}
+
 			});
 		}
 		return samplingList;
@@ -644,37 +628,39 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 		mainbox.add(Box.createVerticalStrut(15));
 		/** Listener on trasformation per change label **/
 		model.addOnChangeVariableValue(new ChangeVariableListener() {
+
 			public void onChangeVariableValues() {
 				if (varsList.getSelectedIndex() >= 0) {
 					switch (model.getMatrix().getVariables()[varsList.getSelectedIndex()].getType()) {
-						case STRING:
-							varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a String variable and it has been transformed has "
-									+ model.getMatrix().getVariables()[varsList.getSelectedIndex()].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
-							varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
-									.getVariableNames()[varsList.getSelectedIndex()]
-									+ " information")));
-							break;
-						case NUMERIC:
-							varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a Numeric variable and it has been transformed has "
-									+ model.getMatrix().getVariables()[varsList.getSelectedIndex()].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
-							varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
-									.getVariableNames()[varsList.getSelectedIndex()]
-									+ " information")));
-							break;
-						case DATE:
-							varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a Date variable and it has been transformed has "
-									+ model.getMatrix().getVariables()[varsList.getSelectedIndex()].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
-							varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
-									.getVariableNames()[varsList.getSelectedIndex()]
-									+ " information")));
-							break;
-						default:
+					case STRING:
+						varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a String variable and it has been transformed has "
+								+ model.getMatrix().getVariables()[varsList.getSelectedIndex()].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
+						varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
+								.getVariableNames()[varsList.getSelectedIndex()]
+										+ " information")));
+						break;
+					case NUMERIC:
+						varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a Numeric variable and it has been transformed has "
+								+ model.getMatrix().getVariables()[varsList.getSelectedIndex()].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
+						varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
+								.getVariableNames()[varsList.getSelectedIndex()]
+										+ " information")));
+						break;
+					case DATE:
+						varLabel.setText(HTML_START + HTML_FONT_NORM + "This is a Date variable and it has been transformed has "
+								+ model.getMatrix().getVariables()[varsList.getSelectedIndex()].getTrasfStr() + HTML_FONT_NOR_END + HTML_END);
+						varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), model.getMatrix()
+								.getVariableNames()[varsList.getSelectedIndex()]
+										+ " information")));
+						break;
+					default:
 					}
 				} else {
 					varLabel.setText(HTML_START + HTML_FONT_NORM + "No variable selected" + HTML_FONT_NOR_END + HTML_END);
 					varInfo.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), "No variable selected")));
 				}
 			}
+
 		});
 		/** DESCRIPTION LABEL OF PANEL **/
 		JPanel jpdesclabel = new JPanel(new GridLayout(1, 1));
@@ -849,23 +835,24 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			variableTable.setShowGrid(true);
 			variableTable.setModel(getModel());
 			variableTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+
 				public void valueChanged(ListSelectionEvent e) {
 					if (variableTable.getSelectedRow() >= 0) {
 						mainTransf.removeAll();
 						switch (model.getMatrix().getVariables()[variableTable.getSelectedRow()].getType()) {
-							case VariableNumber.NUMERIC:
-								mainTransf.add(transfPanel);
-								break;
-							case VariableNumber.DATE:
-								blankPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), TRANSF_BORDER_TEXT
-										+ model.getMatrix().getVariables()[(variableTable.getSelectedRow())].getName() + " - Type: Date"));
-								mainTransf.add(blankPanel);
-								break;
-							case VariableNumber.STRING:
-								blankPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), TRANSF_BORDER_TEXT
-										+ model.getMatrix().getVariables()[(variableTable.getSelectedRow())].getName() + " - Type: String"));
-								mainTransf.add(blankPanel);
-								break;
+						case VariableNumber.NUMERIC:
+							mainTransf.add(transfPanel);
+							break;
+						case VariableNumber.DATE:
+							blankPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), TRANSF_BORDER_TEXT
+									+ model.getMatrix().getVariables()[(variableTable.getSelectedRow())].getName() + " - Type: Date"));
+							mainTransf.add(blankPanel);
+							break;
+						case VariableNumber.STRING:
+							blankPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), TRANSF_BORDER_TEXT
+									+ model.getMatrix().getVariables()[(variableTable.getSelectedRow())].getName() + " - Type: String"));
+							mainTransf.add(blankPanel);
+							break;
 						}
 						mainTransf.revalidate();
 						mainTransf.repaint();
@@ -875,6 +862,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 						}
 					}
 				}
+
 			});
 		}
 		return variableTable;
@@ -893,8 +881,9 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 	}
 
 	public void gotFocus() {
+		((JWatWizard) getParentWizard()).setEnableButton("Next >", true);
 		((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
-		parent.setCurrentPanel(WORKLOAD_INPUT_PANEL);
+		parent.setCurrentPanel(WORKLOAD_BIVARIATE_PANEL);
 	}
 
 	private SmallPlotDistGraph plo;
@@ -926,12 +915,14 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			JPanel centerCenter = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			centerCenter.add(new JLabel("        Percentile: "));
 			quantile = new JSpinner(new SpinnerNumberModel(5, 1, 99, 1)) {
+
 				public void setValue(Object o) {
 					super.setValue(o);
 					if (((Integer) quantile.getValue()).intValue() >= ((Integer) quantileB.getValue()).intValue()) {
 						quantileB.setValue(new Integer(((Integer) quantile.getValue()).intValue() + 1));
 					}
 				}
+
 			};
 			quantile.setPreferredSize(new Dimension(60, 20));
 			centerCenter.add(quantile);
@@ -939,6 +930,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			//UPDATE 10/11/06
 			between = new JRadioButton("Perc.< x < Perc.");
 			between.addChangeListener(new ChangeListener() {
+
 				public void stateChanged(ChangeEvent arg0) {
 					if (between.isSelected()) {
 						quantileB.setEnabled(true);
@@ -946,15 +938,18 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 						quantileB.setEnabled(false);
 					}
 				}
+
 			});
 			JPanel c = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			quantileB = new JSpinner(new SpinnerNumberModel(5, 2, 99, 1)) {
+
 				public void setValue(Object o) {
 					super.setValue(o);
 					if (((Integer) quantileB.getValue()).intValue() <= ((Integer) quantile.getValue()).intValue()) {
 						quantile.setValue(new Integer(((Integer) quantileB.getValue()).intValue() - 1));
 					}
 				}
+
 			};
 			quantileB.setPreferredSize(new Dimension(60, 20));
 			c.add(new JLabel("        Percentile: "));
@@ -964,9 +959,8 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			p.add(centerCenter);
 			p.add(c);
 			centerP.add(p, BorderLayout.CENTER);
-			//UPDATE 10/11/06
 
-			//centerP.add(centerCenter,BorderLayout.CENTER);
+			//UPDATE 10/11/06
 			ButtonGroup opt = new ButtonGroup();
 			up = new JRadioButton(" x > Percentile");
 			down = new JRadioButton(" x < Percentile");
@@ -1026,12 +1020,14 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			lbl.setPreferredSize(new Dimension(100, 25));
 			centerP.add(lbl);
 			fromO = new JSpinner(new SpinnerNumberModel(1, 1, model.getMatrix().getVariables()[0].Size() - 1, 1)) {
+
 				public void setValue(Object o) {
 					super.setValue(o);
 					if (((Integer) fromO.getValue()).intValue() >= ((Integer) toO.getValue()).intValue()) {
 						toO.setValue(new Integer(((Integer) fromO.getValue()).intValue() + 1));
 					}
 				}
+
 			};
 			fromO.setPreferredSize(new Dimension(70, 25));
 			centerP.add(fromO);
@@ -1039,12 +1035,14 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			lbl2.setPreferredSize(new Dimension(100, 25));
 			centerP.add(lbl2);
 			toO = new JSpinner(new SpinnerNumberModel(2, 2, model.getMatrix().getVariables()[0].Size(), 1)) {
+
 				public void setValue(Object o) {
 					super.setValue(o);
 					if (((Integer) toO.getValue()).intValue() <= ((Integer) fromO.getValue()).intValue()) {
 						fromO.setValue(new Integer(((Integer) toO.getValue()).intValue() - 1));
 					}
 				}
+
 			};
 			toO.setPreferredSize(new Dimension(70, 25));
 			centerP.add(toO);
@@ -1102,20 +1100,24 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			//Pannello di filtering on Numeric
 			filterN = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			minN = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 0.0, 1)) {
+
 				public void setValue(Object o) {
 					super.setValue(o);
 					if (((Double) minN.getValue()).doubleValue() >= ((Double) maxN.getValue()).doubleValue()) {
 						maxN.setValue(new Double(((Double) minN.getValue()).doubleValue() + 1));
 					}
 				}
+
 			};
 			maxN = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 0.0, 1)) {
+
 				public void setValue(Object o) {
 					super.setValue(o);
 					if (((Double) maxN.getValue()).doubleValue() <= ((Double) minN.getValue()).doubleValue()) {
 						minN.setValue(new Double(((Double) maxN.getValue()).doubleValue() - 1));
 					}
 				}
+
 			};
 			JLabel min = new JLabel("Minimum value: ");
 			min.setPreferredSize(new Dimension(90, 25));
@@ -1139,23 +1141,23 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 		} else {
 			FilteringPanelOption.removeAll();
 			switch (model.getMatrix().getVariables()[varsList.getSelectedIndex()].getType()) {
-				case STRING:
-					FilteringPanelOption.add(filterS, BorderLayout.CENTER);
-					break;
-				case DATE:
-					FilteringPanelOption.add(filterD, BorderLayout.CENTER);
-					fromD.setValue(new Date((long) model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMinValue()));
-					toD.setValue(new Date((long) model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMaxValue()));
-					break;
-				case NUMERIC:
-					FilteringPanelOption.add(filterN, BorderLayout.CENTER);
-					minN.setModel(new SpinnerNumberModel(model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMinValue(),
-							model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMinValue(), model.getMatrix()
-									.getVariables()[varsList.getSelectedIndex()].getUniStats().getMaxValue(), 1));
-					maxN.setModel(new SpinnerNumberModel(model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMaxValue(),
-							model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMinValue(), model.getMatrix()
-									.getVariables()[varsList.getSelectedIndex()].getUniStats().getMaxValue(), 1));
-					break;
+			case STRING:
+				FilteringPanelOption.add(filterS, BorderLayout.CENTER);
+				break;
+			case DATE:
+				FilteringPanelOption.add(filterD, BorderLayout.CENTER);
+				fromD.setValue(new Date((long) model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMinValue()));
+				toD.setValue(new Date((long) model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMaxValue()));
+				break;
+			case NUMERIC:
+				FilteringPanelOption.add(filterN, BorderLayout.CENTER);
+				minN.setModel(new SpinnerNumberModel(model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMinValue(),
+						model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMinValue(), model.getMatrix()
+						.getVariables()[varsList.getSelectedIndex()].getUniStats().getMaxValue(), 1));
+				maxN.setModel(new SpinnerNumberModel(model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMaxValue(),
+						model.getMatrix().getVariables()[varsList.getSelectedIndex()].getUniStats().getMinValue(), model.getMatrix()
+						.getVariables()[varsList.getSelectedIndex()].getUniStats().getMaxValue(), 1));
+				break;
 			}
 			FilteringPanelOption.revalidate();
 			FilteringPanelOption.repaint();

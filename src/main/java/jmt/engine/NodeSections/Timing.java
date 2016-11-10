@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,13 @@ import java.util.LinkedList;
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.DataPacket;
-import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
+import jmt.engine.QueueNet.SimConstants;
+import jmt.engine.dataAnalysis.InverseMeasure;
+import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.random.engine.RandomEngine;
 import jmt.engine.simEngine.RemoveToken;
 
@@ -42,22 +44,31 @@ import jmt.engine.simEngine.RemoveToken;
  */
 public class Timing extends ServiceSection {
 
-	private int numberOfServers;
+	private String[] modeNames;
+	private int[] numbersOfServers;
 	private ServiceStrategy[] timingStrategies;
 	private Integer[] firingPriorities;
-	private Integer[] firingWeights;
-	private int idleServers;
+	private Double[] firingWeights;
+
+	private LinkedList[] timingTokenLists;
+	private int[] extraEnablingDegrees;
 	private RandomEngine randomEngine;
-	private LinkedList[] timingTokenQueues;
-	private int[] extraEnablingSets;
-	private LinkedList<JobClass> extraEnablingSetQueue;
+	private InverseMeasure firingThroughput;
+	private InverseMeasure[] firingThroughputs;
+	private double lastFiringTime;
+	private double lastFiringTimes[];
 
 	/**
 	 * Creates a new instance of the timing section.
 	 */
-	public Timing(Integer numberOfServers, ServiceStrategy[] timingStrategies, Integer[] firingPriorities, Integer[] firingWeights) {
+	public Timing(String[] modeNames, Integer[] numbersOfServers, ServiceStrategy[] timingStrategies,
+			Integer[] firingPriorities, Double[] firingWeights) {
 		super(true);
-		this.numberOfServers = numberOfServers;
+		this.modeNames = modeNames;
+		this.numbersOfServers = new int[numbersOfServers.length];
+		for (int i = 0; i < numbersOfServers.length; i++) {
+			this.numbersOfServers[i] = numbersOfServers[i].intValue();
+		}
 		this.timingStrategies = timingStrategies;
 		this.firingPriorities = firingPriorities;
 		this.firingWeights = firingWeights;
@@ -65,16 +76,16 @@ public class Timing extends ServiceSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) {
-		idleServers = numberOfServers;
-		randomEngine = RandomEngine.makeDefault();
-		JobClassList jobClasses = getJobClasses();
-		timingTokenQueues = new LinkedList[jobClasses.size()];
-		for (int i = 0; i < timingTokenQueues.length; i++) {
-			timingTokenQueues[i] = new LinkedList<RemoveToken>();
+		timingTokenLists = new LinkedList[modeNames.length];
+		for (int i = 0; i < timingTokenLists.length; i++) {
+			timingTokenLists[i] = new LinkedList<RemoveToken>();
 		}
-		extraEnablingSets = new int[jobClasses.size()];
-		Arrays.fill(extraEnablingSets, 0);
-		extraEnablingSetQueue = new LinkedList<JobClass>();
+		extraEnablingDegrees = new int[modeNames.length];
+		Arrays.fill(extraEnablingDegrees, 0);
+		randomEngine = RandomEngine.makeDefault();
+		lastFiringTime = 0.0;
+		lastFiringTimes = new double[modeNames.length];
+		Arrays.fill(lastFiringTimes, 0.0);
 	}
 
 	@Override
@@ -96,59 +107,40 @@ public class Timing extends ServiceSection {
 
 		case NetEvent.EVENT_ENABLING:
 		{
-			JobClass jobClass = (JobClass) ((DataPacket) data).getData(DataPacket.FIELD_REFERENCE_CLASS);
-			int enablingDegree = ((Integer) ((DataPacket) data).getData(DataPacket.FIELD_ENABLING_DEGREE)).intValue();
-			int classIndex = jobClass.getId();
-			int timingEvents = timingTokenQueues[classIndex].size();
+			Object[] packet = (Object[]) data;
+			int modeIndex = ((Integer) packet[DataPacket.FIELD_MODE_INDEX]).intValue();
+			int enablingDegree = ((Integer) packet[DataPacket.FIELD_ENABLING_DEGREE]).intValue();
+			int timingEvents = timingTokenLists[modeIndex].size();
 			int deltaTimingEvents = 0;
-			int deltaExtraEnablingSets = 0;
-			if (numberOfServers < 0) {
+			if (numbersOfServers[modeIndex] < 0) {
 				deltaTimingEvents = enablingDegree - timingEvents;
 			} else {
-				int availableServers = timingEvents + idleServers;
-				if (enablingDegree <= availableServers) {
+				if (enablingDegree <= numbersOfServers[modeIndex]) {
 					deltaTimingEvents = enablingDegree - timingEvents;
-					idleServers = availableServers - enablingDegree;
-					deltaExtraEnablingSets = 0 - extraEnablingSets[classIndex];
-					extraEnablingSets[classIndex] = 0;
+					extraEnablingDegrees[modeIndex] = 0;
 				} else {
-					deltaTimingEvents = idleServers;
-					idleServers = 0;
-					deltaExtraEnablingSets = (enablingDegree - availableServers) - extraEnablingSets[classIndex];
-					extraEnablingSets[classIndex] = enablingDegree - availableServers;
+					deltaTimingEvents = numbersOfServers[modeIndex] - timingEvents;
+					extraEnablingDegrees[modeIndex] = enablingDegree - numbersOfServers[modeIndex];
 				}
 			}
 
 			if (deltaTimingEvents >= 0) {
 				for (int i = 0; i < deltaTimingEvents; i++) {
-					double delay = timingStrategies[classIndex].wait(this);
-					DataPacket packet = new DataPacket();
-					packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
-					packet.setData(DataPacket.FIELD_FIRING_DELAY, Double.valueOf(delay));
-					packet.setData(DataPacket.FIELD_FIRING_PRIORITY, Integer.valueOf(firingPriorities[classIndex]));
-					packet.setData(DataPacket.FIELD_FIRING_WEIGHT, Integer.valueOf(firingWeights[classIndex]));
+					double delay = timingStrategies[modeIndex].wait(this);
+					packet = new Object[DataPacket.PACKET_SIZE_TIMING];
+					packet[DataPacket.FIELD_MODE_INDEX] = Integer.valueOf(modeIndex);
+					packet[DataPacket.FIELD_FIRING_DELAY] = Double.valueOf(delay);
+					packet[DataPacket.FIELD_FIRING_PRIORITY] = firingPriorities[modeIndex];
+					packet[DataPacket.FIELD_FIRING_WEIGHT] = firingWeights[modeIndex];
 					RemoveToken token = sendMe(NetEvent.EVENT_TIMING, packet, delay);
-					packet.setData(DataPacket.FIELD_TIMING_TOKEN, token);
-					int index = (int) (randomEngine.raw() * (timingTokenQueues[classIndex].size() + 1));
-					timingTokenQueues[classIndex].add(index, token);
-					//timingTokenQueues[classIndex].add(token);
+					packet[DataPacket.FIELD_TIMING_TOKEN] = token;
+					int index = (int) (randomEngine.raw() * (timingTokenLists[modeIndex].size() + 1));
+					timingTokenLists[modeIndex].add(index, token);
 				}
 			} else {
 				for (int i = 0; i > deltaTimingEvents; i--) {
-					RemoveToken token = (RemoveToken) timingTokenQueues[classIndex].removeLast();
+					RemoveToken token = (RemoveToken) timingTokenLists[modeIndex].remove();
 					removeMessage(token);
-				}
-			}
-
-			if (deltaExtraEnablingSets >= 0) {
-				for (int i = 0; i < deltaExtraEnablingSets; i++) {
-					int index = (int) (randomEngine.raw() * (extraEnablingSetQueue.size() + 1));
-					extraEnablingSetQueue.add(index, jobClass);
-					//extraEnablingSetQueue.add(jobClass);
-				}
-			} else {
-				for (int i = 0; i > deltaExtraEnablingSets; i--) {
-					extraEnablingSetQueue.removeLast();
 				}
 			}
 			break;
@@ -156,54 +148,95 @@ public class Timing extends ServiceSection {
 
 		case NetEvent.EVENT_TIMING:
 		{
-			JobClass jobClass = (JobClass) ((DataPacket) data).getData(DataPacket.FIELD_REFERENCE_CLASS);
-			RemoveToken token = (RemoveToken) ((DataPacket) data).getData(DataPacket.FIELD_TIMING_TOKEN);
-			int classIndex = jobClass.getId();
-			timingTokenQueues[classIndex].remove(token);
+			Object[] packet = (Object[]) data;
+			int modeIndex = ((Integer) packet[DataPacket.FIELD_MODE_INDEX]).intValue();
+			RemoveToken token = (RemoveToken) packet[DataPacket.FIELD_TIMING_TOKEN];
+			timingTokenLists[modeIndex].remove(token);
+			sendBackward(NetEvent.EVENT_FIRING, Integer.valueOf(modeIndex), 0.0);
 
-			DataPacket packet = new DataPacket();
-			packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
-			sendBackward(NetEvent.EVENT_FIRING, packet, 0.0);
-
-			if (numberOfServers >= 0) {
-				if (extraEnablingSetQueue.size() > 0) {
-					jobClass = extraEnablingSetQueue.removeFirst();
-					classIndex = jobClass.getId();
-					extraEnablingSets[classIndex]--;
-					double delay = timingStrategies[classIndex].wait(this);
-					packet = new DataPacket();
-					packet.setData(DataPacket.FIELD_REFERENCE_CLASS, jobClass);
-					packet.setData(DataPacket.FIELD_FIRING_DELAY, Double.valueOf(delay));
-					packet.setData(DataPacket.FIELD_FIRING_PRIORITY, Integer.valueOf(firingPriorities[classIndex]));
-					packet.setData(DataPacket.FIELD_FIRING_WEIGHT, Integer.valueOf(firingWeights[classIndex]));
-					token = sendMe(NetEvent.EVENT_TIMING, packet, delay);
-					packet.setData(DataPacket.FIELD_TIMING_TOKEN, token);
-					int index = (int) (randomEngine.raw() * (timingTokenQueues[classIndex].size() + 1));
-					timingTokenQueues[classIndex].add(index, token);
-					//timingTokenQueues[classIndex].add(token);
-				} else {
-					idleServers++;
-				}
+			if (extraEnablingDegrees[modeIndex] > 0) {
+				double delay = timingStrategies[modeIndex].wait(this);
+				packet = new Object[DataPacket.PACKET_SIZE_TIMING];
+				packet[DataPacket.FIELD_MODE_INDEX] = Integer.valueOf(modeIndex);
+				packet[DataPacket.FIELD_FIRING_DELAY] = Double.valueOf(delay);
+				packet[DataPacket.FIELD_FIRING_PRIORITY] = firingPriorities[modeIndex];
+				packet[DataPacket.FIELD_FIRING_WEIGHT] = firingWeights[modeIndex];
+				token = sendMe(NetEvent.EVENT_TIMING, packet, delay);
+				packet[DataPacket.FIELD_TIMING_TOKEN] = token;
+				int index = (int) (randomEngine.raw() * (timingTokenLists[modeIndex].size() + 1));
+				timingTokenLists[modeIndex].add(index, token);
+				extraEnablingDegrees[modeIndex]--;
 			}
 			break;
 		}
 
 		case NetEvent.EVENT_FIRING:
 		{
+			Object[] packet = (Object[]) data;
+			int modeIndex = ((Integer) packet[DataPacket.FIELD_MODE_INDEX]).intValue();
 			sendForward(NetEvent.EVENT_FIRING, data, 0.0);
+			updateFiringThroughput(modeIndex);
+			lastFiringTimes[modeIndex] = lastFiringTime = NetSystem.getTime();
 			break;
 		}
 
 		case NetEvent.EVENT_STOP:
-		{
 			break;
-		}
 
 		default:
 			return MSG_NOT_PROCESSED;
 		}
 
 		return MSG_PROCESSED;
+	}
+
+	public void analyzeTransition(int name, String modeName, Measure measurement) throws NetException {
+		switch (name) {
+		case SimConstants.FIRING_THROUGHPUT:
+			if (!analyzeFiringThroughput(modeName, (InverseMeasure) measurement)) {
+				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+			}
+			break;
+		default:
+			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+		}
+	}
+
+	private boolean analyzeFiringThroughput(String modeName, InverseMeasure measurement) throws NetException {
+		if (modeName != "") {
+			int modeIndex = getModeIndexByName(modeName);
+			if (modeIndex < 0) {
+				return false;
+			}
+			if (firingThroughputs == null) {
+				firingThroughputs = new InverseMeasure[modeNames.length];
+			}
+			firingThroughputs[modeIndex] = measurement;
+		} else {
+			firingThroughput = measurement;
+		}
+		return true;
+	}
+
+	private void updateFiringThroughput(int modeIndex) {
+		if (firingThroughputs != null) {
+			Measure m = firingThroughputs[modeIndex];
+			if (m != null) {
+				m.update(NetSystem.getTime() - lastFiringTimes[modeIndex], 1.0);
+			}
+		}
+		if (firingThroughput != null) {
+			firingThroughput.update(NetSystem.getTime() - lastFiringTime, 1.0);
+		}
+	}
+
+	private int getModeIndexByName(String modeName) {
+		for (int i = 0; i < modeNames.length; i++) {
+			if (modeNames[i].equals(modeName)) {
+				return i;
+			}
+		}
+		return -1;
 	}
 
 }

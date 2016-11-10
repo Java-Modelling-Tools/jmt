@@ -33,12 +33,8 @@ public abstract class RandomEngine {
 
 	private static RandomEngine defaultEngine = new MersenneTwister();
 
-	//NEW
-	//@author Stefano Omini
 	//should be set by the class Simulation to initialize the default RandomEngine
 	private long simulationSeed;
-
-	//end NEW
 
 	/**
 	 * Makes this class non instantiable, but still lets others inherit from it.

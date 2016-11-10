@@ -59,7 +59,7 @@ public class IterationSelector extends WizardPanel {
 	// Data structure
 	private ExactModel model;
 	// Dimension of spinner
-	final static Dimension DIM_SPINNER = new Dimension(60, 20);
+	static final Dimension DIM_SPINNER = new Dimension(60, 20);
 
 	private JTabbedPane tabber = new JTabbedPane();
 	private JLabel description = new JLabel();

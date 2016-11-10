@@ -31,15 +31,13 @@ import java.util.Vector;
  *         Time: 12.03.53
  */
 public class ModelSnapshot extends HashMap {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
-	Vector stations;
-	Vector classes;
+	Vector<Object> stations;
+	Vector<Object> classes;
 	double maxValue;
 
-	public ModelSnapshot(Vector stationKeys, Vector classKeys) {
+	public ModelSnapshot(Vector<Object> stationKeys, Vector<Object> classKeys) {
 		stations = stationKeys;
 		classes = classKeys;
 	}
@@ -68,8 +66,12 @@ public class ModelSnapshot extends HashMap {
 		return value;
 	}
 
-	public Vector getServers() {
+	public Vector<Object> getStations() {
 		return stations;
+	}
+
+	public Vector<Object> getClasses() {
+		return classes;
 	}
 
 	public void reset() {

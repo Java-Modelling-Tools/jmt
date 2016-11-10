@@ -65,7 +65,6 @@ public interface ParametricAnalysis {
 				table.put(classSet.get(i), new Vector(numberOfSteps));
 			}
 			classDef = cd;
-
 		}
 
 		/**

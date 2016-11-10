@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import jmt.engine.NetStrategies.QueuePutStrategy;
 import jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
+import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
@@ -413,7 +414,6 @@ public class Queue extends InputSection {
 
 			//----REDIRECTION BEHAVIOUR----------//
 			if (isRedirectionON()) {
-
 				NetNode source = message.getSource();
 				boolean fromTheInside = myRegion.belongsToRegion(source);
 
@@ -490,13 +490,6 @@ public class Queue extends InputSection {
 						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 					}
 				} else {
-					// if drop, send ack event to source
-					droppedJobs++;
-					droppedJobsPerClass[job.getJobClass().getId()]++;
-
-					// Removes job from global jobInfoList - Bertoli Marco
-					netJobsList.dropJob(job);
-
 					//after arriving to this section, the job has been inserted in the job
 					//lists of both node section and node.
 					//If drop = true, the job must be removed if the queue is full.
@@ -504,6 +497,13 @@ public class Queue extends InputSection {
 					//from the job info list of node section and of node, then it was
 					//sent later, after receiving one or more ack.
 
+					if (!(job instanceof ForkJob)) {
+						//drops job from global jobInfoList
+						netJobsList.dropJob(job);
+						droppedJobs++;
+						droppedJobsPerClass[job.getJobClass().getId()]++;
+					}
+					//drops job from node jobInfoList and then sends ack back
 					sendAckAfterDrop(job, 0.0, message.getSourceSection(), message.getSource());
 
 					//if the queue is inside a blocking region, the jobs
@@ -535,8 +535,7 @@ public class Queue extends InputSection {
 			// if there is a waiting request send ack to the first node
 			//(note that with infinite queue there are no waiting requests)
 			if (waitingRequests.size() != 0) {
-				WaitingRequest wr;
-				wr = (WaitingRequest) waitingRequests.removeFirst();
+				WaitingRequest wr = (WaitingRequest) waitingRequests.removeFirst();
 
 				// If the source is not the owner node sends ack if blocking is enabled. Otherwise 
 				// ack was already sent.
@@ -562,14 +561,14 @@ public class Queue extends InputSection {
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			Job j = (Job) message.getData();
-			JobInfo jData = null;
+			job = (Job) message.getData();
+			JobInfo jobData = null;
 			if (FJList != null) {
-				jData = FJList.lookFor(j);
+				jobData = FJList.lookFor(job);
 			}
-			if (jData != null && FJList != null) {
-				FJList.remove(jData);
-				netJobsList.updateResponseSum(jData);
+			if (jobData != null && FJList != null) {
+				FJList.remove(jobData);
+				netJobsList.updateResponseSum(jobData);
 			}
 			break;
 
@@ -606,7 +605,7 @@ public class Queue extends InputSection {
 	 * @param classIndex the index of the job class
 	 * @return the number of dropped jobs for the specified class
 	 */
-	public int getDroppedJobPerClass(int classIndex) {
+	public int getDroppedJobsPerClass(int classIndex) {
 		return droppedJobsPerClass[classIndex];
 	}
 
@@ -658,11 +657,11 @@ public class Queue extends InputSection {
 			FJList = new LinkedJobInfoList(jobClasses.size(), true);
 		}
 		switch (name) {
-		case SimConstants.FORK_JOIN_RESPONSE_TIME:
-			FJList.analyzeResponseTime(jobClass, measurement);
-			break;
 		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
 			FJList.analyzeQueueLength(jobClass, measurement);
+			break;
+		case SimConstants.FORK_JOIN_RESPONSE_TIME:
+			FJList.analyzeResponseTime(jobClass, measurement);
 			break;
 		default:
 			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");

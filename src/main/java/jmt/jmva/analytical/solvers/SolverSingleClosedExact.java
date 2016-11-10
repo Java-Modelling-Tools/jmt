@@ -194,7 +194,7 @@ public class SolverSingleClosedExact extends Solver {
 	//end NEW
 
 	/**
-	 * Solves the system throught the normalization constant algorithm.
+	 * Solves the system through the normalization constant algorithm.
 	 *  For a description of the algorithm see:
 	 *  <em>
 	 *  S.C. Bruell, G. Balbo,<br>

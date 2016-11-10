@@ -37,10 +37,10 @@ import jmt.jmarkov.utils.Formatter;
 
 // this is using for saving log in to the csv file
 public class LogFile implements Notifier {
-	private final static String newline = System.getProperty("line.separator");
-	public final static int TABBED_DELIMITED = 0;
-	public final static int COMMA_DELIMITED = 1;
-	public final static int SEMI_COLON_DELIMITED = 2;
+	private static final String newline = System.getProperty("line.separator");
+	public static final int TABBED_DELIMITED = 0;
+	public static final int COMMA_DELIMITED = 1;
+	public static final int SEMI_COLON_DELIMITED = 2;
 	private LinkedList<Object> tempList = new LinkedList<Object>();
 	private int lastGeneratedRow = 0;
 

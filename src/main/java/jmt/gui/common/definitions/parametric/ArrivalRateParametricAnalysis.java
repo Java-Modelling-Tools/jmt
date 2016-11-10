@@ -60,16 +60,16 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 		stationDef = sd;
 		simDef = simd;
 		Vector<Object> available = new ParametricAnalysisChecker(cd, sd, simd).checkForArrivalRatesParametricSimulationAvailableClasses();
-		if ((cd.getOpenClassKeys().size() == 1) || (available.size() < cd.getOpenClassKeys().size())) {
+		if (cd.getOpenClassKeys().size() == 1 || available.size() < cd.getOpenClassKeys().size()) {
 			singleClass = true;
 			classKey = available.get(0);
-			double arrivalRate = 1 / (((Distribution) cd.getClassDistribution(classKey)).getMean());
+			double arrivalRate = 1 / ((Distribution) cd.getClassDistribution(classKey)).getMean();
 			initialValue = arrivalRate;
 			finalValue = arrivalRate * INCREMENT_SINGLE;
 		} else {
 			singleClass = SINGLE_CLASS;
 			if (SINGLE_CLASS) {
-				double arrivalRate = 1 / (((Distribution) cd.getClassDistribution(classKey)).getMean());
+				double arrivalRate = 1 / ((Distribution) cd.getClassDistribution(classKey)).getMean();
 				initialValue = arrivalRate;
 				finalValue = arrivalRate * INCREMENT_SINGLE;
 			} else {
@@ -81,16 +81,16 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	}
 
 	/**
-	 * Returns true if only the arrrival rate of one class will be increased
-	 * @return true if only the arrrival rate of one class will be increased
+	 * Returns true if only the arrival rate of one class will be increased
+	 * @return true if only the arrival rate of one class will be increased
 	 */
 	public boolean isSingleClass() {
 		return singleClass;
 	}
 
 	/**
-	 * Sets the type of arrrival rate increase. If <code> isSingleClass</code>
-	 * param is true only the arrrival rate of one class will be increased
+	 * Sets the type of arrival rate increase. If <code> isSingleClass</code>
+	 * param is true only the arrival rate of one class will be increased
 	 * @param isSingleClass
 	 */
 	public void setSingleClass(boolean isSingleClass) {
@@ -105,7 +105,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	 */
 	public void setDefaultInitialValue() {
 		if (singleClass) {
-			double rate = 1 / ((Distribution) (classDef.getClassDistribution(classKey))).getMean();
+			double rate = 1 / ((Distribution) classDef.getClassDistribution(classKey)).getMean();
 			initialValue = rate;
 		} else {
 			initialValue = FROM_ALL;
@@ -117,7 +117,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	 */
 	public void setDefaultFinalValue() {
 		if (singleClass) {
-			double rate = (1 / ((Distribution) (classDef.getClassDistribution(classKey))).getMean()) * INCREMENT_SINGLE;
+			double rate = (1 / ((Distribution) classDef.getClassDistribution(classKey)).getMean()) * INCREMENT_SINGLE;
 			finalValue = rate;
 		} else {
 			finalValue = TO_ALL;
@@ -125,10 +125,10 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	}
 
 	/**
-	 * Gets the class key of the class whose arrrival rate will be
+	 * Gets the class key of the class whose arrival rate will be
 	 * increased. If the simulation is not single class, the <code> null </code>
 	 * value will be returned
-	 * @return the key of the class whose arrrival rate will be increased if the
+	 * @return the key of the class whose arrival rate will be increased if the
 	 *         parametric analysis is single class, <code> null </code> otherwise.
 	 */
 	@Override
@@ -141,7 +141,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	}
 
 	/**
-	 * Sets the class whose arrrival rate will be increased. If <code> singleClass </code>
+	 * Sets the class whose arrival rate will be increased. If <code> singleClass </code>
 	 * value is not true nothing will be done
 	 * @param classKey the key of the class whose number of job will be
 	 *        increased
@@ -178,7 +178,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 			if (singleClass) {
 				Double refAR = (Double) ((Vector) values).get(step);
 				Distribution distr = (Distribution) classDef.getClassDistribution(classKey);
-				distr.setMean(1 / (refAR.doubleValue()));
+				distr.setMean(1 / refAR.doubleValue());
 			} else {
 				for (int i = 0; i < availableClasses.size(); i++) {
 					Object thisClass = availableClasses.get(i);
@@ -221,10 +221,10 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 			double sum = 1;
 			double increment = (finalValue - initialValue) / (100 * (double) (numberOfSteps - 1));
 			//find the set of available classes
-			Vector allClasses = classDef.getOpenClassKeys();
+			Vector<Object> openClasses = classDef.getOpenClassKeys();
 			availableClasses = new Vector<Object>(0, 1);
-			for (int i = 0; i < allClasses.size(); i++) {
-				Object thisClass = allClasses.get(i);
+			for (int i = 0; i < openClasses.size(); i++) {
+				Object thisClass = openClasses.get(i);
 				Object temp = classDef.getClassDistribution(thisClass);
 				if (temp instanceof Distribution) {
 					Distribution distr = (Distribution) temp;
@@ -237,7 +237,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 			for (int i = 0; i < numberOfSteps; i++) {
 				for (int k = 0; k < availableClasses.size(); k++) {
 					Object thisClass = availableClasses.get(k);
-					double thisInitialArrivalRate = 1 / (((Distribution) classDef.getClassDistribution(thisClass)).getMean());
+					double thisInitialArrivalRate = 1 / ((Distribution) classDef.getClassDistribution(thisClass)).getMean();
 					double value = thisInitialArrivalRate * (sum);
 					((ValuesTable) values).setValue(thisClass, value);
 				}
@@ -247,7 +247,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 			originalValues = new Vector(availableClasses.size());
 			for (int i = 0; i < availableClasses.size(); i++) {
 				Object thisClass = availableClasses.get(i);
-				double thisRate = 1 / (((Distribution) classDef.getClassDistribution(thisClass)).getMean());
+				double thisRate = 1 / ((Distribution) classDef.getClassDistribution(thisClass)).getMean();
 				((Vector<Double>) originalValues).add(new Double(thisRate));
 			}
 		}
@@ -262,15 +262,15 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 			if (singleClass) {
 				Distribution distr = (Distribution) classDef.getClassDistribution(classKey);
 				Double rate = (Double) originalValues;
-				distr.setMean(1 / (rate.doubleValue()));
+				distr.setMean(1 / rate.doubleValue());
 			} else {
 				Vector values = (Vector) originalValues;
-				Vector availableClasses = classDef.getOpenClassKeys();
-				for (int i = 0; i < availableClasses.size(); i++) {
-					Object thisClass = availableClasses.get(i);
+				Vector<Object> openClasses = classDef.getOpenClassKeys();
+				for (int i = 0; i < openClasses.size(); i++) {
+					Object thisClass = openClasses.get(i);
 					Distribution distr = (Distribution) classDef.getClassDistribution(thisClass);
 					Double thisRate = (Double) values.get(i);
-					distr.setMean(1 / (thisRate.doubleValue()));
+					distr.setMean(1 / thisRate.doubleValue());
 				}
 			}
 		}
@@ -291,7 +291,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	public int checkCorrectness(boolean autocorrect) {
 		int code = 0;
 		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(classDef, stationDef, simDef);
-		Vector openClasses = classDef.getOpenClassKeys();
+		Vector<Object> openClasses = classDef.getOpenClassKeys();
 		Vector<Object> availableClasses = checker.checkForArrivalRatesParametricSimulationAvailableClasses();
 		if (availableClasses.isEmpty()) {
 			code = 2;
@@ -307,7 +307,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 						setDefaultFinalValue();
 					}
 				} else {
-					double refRate = 1 / (((Distribution) classDef.getClassDistribution(classKey)).getMean());
+					double refRate = 1 / ((Distribution) classDef.getClassDistribution(classKey)).getMean();
 					//If the arrival rate of reference class was changed...
 					if (initialValue != refRate) {
 						code = 1;
@@ -318,7 +318,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 					}
 				}
 			} else {
-				if ((availableClasses.size() < openClasses.size()) || (openClasses.size() == 1)) {
+				if (openClasses.size() == 1 || availableClasses.size() < openClasses.size()) {
 					code = 1;
 					if (autocorrect) {
 						classKey = availableClasses.get(0);

@@ -64,7 +64,6 @@ public final class Processor {
 					processingJob = job;
 				}
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -137,4 +136,5 @@ public final class Processor {
 	public void setProcesserId(int processerId) {
 		this.processerId = processerId;
 	}
+
 }

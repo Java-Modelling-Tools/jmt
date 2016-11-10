@@ -43,7 +43,7 @@ public class EditSimParams extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public EditSimParams(Mediator mediator) {
-		super("Simulation parameters...", "SimParam", mediator);
+		super("Simulation Parameters...", "SimParam", mediator);
 		putValue(SHORT_DESCRIPTION, "Define simulation parameters");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
 		setEnabled(false);

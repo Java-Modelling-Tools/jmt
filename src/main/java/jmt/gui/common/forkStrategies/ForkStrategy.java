@@ -65,7 +65,7 @@ public abstract class ForkStrategy {
 		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		try {
 			for (Field field : fields) {
-				if (field.getName().startsWith("FORKING_")) {
+				if (field.getName().startsWith("FORK_")) {
 					strategies.add((ForkStrategy) field.get(null));
 				}
 			}
@@ -90,7 +90,7 @@ public abstract class ForkStrategy {
 		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		try {
 			for (Field field : fields) {
-				if (field.getName().startsWith("Fork_") && !field.getName().endsWith("LOADDEPENDANT") ) {
+				if (field.getName().startsWith("Fork_") && !field.getName().endsWith("LOADDEPENDENT") ) {
 					strategies.add((ForkStrategy) field.get(null));
 				}
 			}

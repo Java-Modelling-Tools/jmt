@@ -52,7 +52,6 @@ public class JmtErrorHandler implements ErrorHandler {
 	 */
 	public void warning(SAXParseException exception) throws SAXException {
 		System.err.println("Warning: " + exception.getMessage());
-		//		XMLLoader.success = false;
 		throw exception;
 	}
 
@@ -82,8 +81,6 @@ public class JmtErrorHandler implements ErrorHandler {
 	 * @see org.xml.sax.SAXParseException
 	 */
 	public void error(SAXParseException exception) throws SAXException {
-		//		System.err.println(exception.getColumnNumber());
-		//		throw new SAXException(exception.getSystemId());
 		System.err.println("Error while parsing: " + exception.getMessage());
 		throw exception;
 	}

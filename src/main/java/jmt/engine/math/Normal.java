@@ -103,7 +103,7 @@ public class Normal {
 	private static final double THRESHOLD = 0.46875D;
 
 	/* **************************************
-	 * Hardware dependant constants were calculated
+	 * Hardware dependent constants were calculated
 	 * on Dell "Dimension 4100":
 	 * - Pentium III 800 MHz
 	 * running Microsoft Windows 2000

@@ -41,7 +41,7 @@ public class TANotifier extends JTable implements Notifier {
 		 */
 	private static final long serialVersionUID = 1L;
 
-	//	private final static String newline = System.getProperty("line.separator");
+	//	private static final String newline = System.getProperty("line.separator");
 	DefaultTableModel model;
 	//	private int MAXIMUM_LOG = 1000000;
 

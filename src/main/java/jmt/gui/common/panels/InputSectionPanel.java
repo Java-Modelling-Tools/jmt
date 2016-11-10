@@ -159,7 +159,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 						queueLength = new Integer(1);
 						queueLengthSpinner.setValue(queueLength);
 					}
-					data.setStationQueueCapacity(queueLength, stationKey);
+					data.setStationQueueCapacity(stationKey, queueLength);
 					queueTable.repaint();
 				}
 			}
@@ -195,7 +195,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 
 	private void getQueueLength() {
 		Integer queueLength = data.getStationQueueCapacity(stationKey);
-		if (queueLength.intValue() < 0) {
+		if (queueLength.intValue() < 1) {
 			queueLengthGroup.setSelected(infiniteQueueSelector.getModel(), true);
 			queueLengthSpinner.setEnabled(false);
 		} else {
@@ -208,7 +208,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	private void setQueueLength() {
 		if (infiniteQueueSelector.isSelected()) {
 			queueLengthSpinner.setEnabled(false);
-			data.setStationQueueCapacity(new Integer(-1), stationKey);
+			data.setStationQueueCapacity(stationKey, new Integer(-1));
 			TableCellEditor editor = queueTable.getCellEditor();
 			if (editor != null) {
 				editor.cancelCellEditing();
@@ -216,7 +216,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			queueTable.repaint();
 		} else {
 			queueLengthSpinner.setEnabled(true);
-			data.setStationQueueCapacity((Integer) queueLengthSpinner.getValue(), stationKey);
+			data.setStationQueueCapacity(stationKey, (Integer) queueLengthSpinner.getValue());
 			queueTable.repaint();
 		}
 	}
@@ -333,9 +333,16 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return (columnIndex == 1 && !data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS)
-					&& !data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_SRPT))
-					|| (columnIndex == 2 && data.getStationQueueCapacity(stationKey).intValue() >= 0);
+			if (columnIndex == 0) {
+				return false;
+			} else if (columnIndex == 1 && (data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS)
+					|| data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_SRPT))) {
+				return false;
+			} else if (columnIndex == 2 && data.getStationQueueCapacity(stationKey).intValue() < 1) {
+				return false;
+			} else {
+				return true;
+			}
 		}
 
 		@Override
@@ -410,7 +417,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 					return label;
 				}
 			} else if (column == 2) {
-				if (data.getStationQueueCapacity(stationKey).intValue() < 0) {
+				if (data.getStationQueueCapacity(stationKey).intValue() < 1) {
 					if (isSelected) {
 						label.setBackground(table.getSelectionBackground());
 					} else {

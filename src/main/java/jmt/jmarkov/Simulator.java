@@ -53,14 +53,13 @@ public class Simulator implements Runnable {
 	private double timeMultiplier = 1.0;
 
 	private boolean running = false;
-
 	private boolean started = false;
 
 	public Simulator(Arrivals arrival, Processor[] processors, double timeMultiplier, Notifier[] n) {
 		super();
 		jobList = new LinkedList<Job>();
 		// waitingJobList = new LinkedList();
-		//endJobList = new LinkedList();
+		// endJobList = new LinkedList();
 		this.arrival = arrival;
 		currentTime = 0;
 		this.processors = processors;
@@ -120,13 +119,10 @@ public class Simulator implements Runnable {
 					if ((long) currentTimeMultiplied + 300 > realTimeCurrent) {
 						animate(job);
 					}
-					//				else
-					//					System.out.println("no animation");
 					break;
 				case Job.CURRENT_STATE_IN_CPU:
 					exitProcessor(job);
 					break;
-
 			}
 		}
 
@@ -170,7 +166,6 @@ public class Simulator implements Runnable {
 		for (Processor processor : processors) {
 			processor.animate(currentTime);
 		}
-
 	}
 
 	private void startProcess() {// if there is an empty processor start it
@@ -199,7 +194,6 @@ public class Simulator implements Runnable {
 				}
 			}
 		}
-
 	}
 
 	private void exitProcessor(Job job) {
@@ -259,7 +253,6 @@ public class Simulator implements Runnable {
 		} else {
 			paused = true;
 		}
-
 	}
 
 	public void start() {

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat.workloadAnalysis.panels;
 
 import java.awt.BorderLayout;
@@ -42,9 +60,8 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jwat.JWATConstants;
+import jmt.gui.jwat.JWatWizard;
 import jmt.gui.jwat.MainJwatWizard;
-import jmt.gui.jwat.workloadAnalysis.chart.DispFuzzyMatrix;
-import jmt.gui.jwat.workloadAnalysis.chart.DispKMeanMatrix;
 import jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels.DispersionFuzzyPanel;
 import jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels.FuzzyInfoCluster;
 import jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels.FuzzyInfoClustering;
@@ -54,10 +71,8 @@ import jmt.gui.jwat.workloadAnalysis.clustering.kMean.panels.KMeansInfoClusterin
 
 public class ClusteringInfoPanel extends WizardPanel implements CommonConstants, JWATConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
 	private final String CLUSTERING_INFO_DESCRIPTION = HTML_START
 			+ HTML_FONT_TITLE
 			+ "Clustering information"
@@ -75,17 +90,13 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 
 	private boolean changedType = false;
 
-	private DispKMeanMatrix matrix;
-	private DispFuzzyMatrix matrix2;
 	private JPanel clusingP;
 	private JPanel clustP;
 	private JPanel matrixPanel;
 	private JPanel cluster = new JPanel(new BorderLayout(0, 5));
 
 	protected AbstractAction deleteVar = new AbstractAction("") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -104,18 +115,18 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 				}
 			}
 		}
+
 	};
 
 	protected JButton delVar = new JButton() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
 			setAction(deleteVar);
 			setFocusable(true);
 		}
+
 	};
 
 	private MainJwatWizard parent;
@@ -142,7 +153,6 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		label.add(Box.createVerticalStrut(10));
 		label.add(new JLabel(CLUSTERING_INFO_DESCRIPTION));
 		this.add(label, BorderLayout.NORTH);
-		//JPanel p1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JPanel p1 = new JPanel(new BorderLayout());
 
 		/*Set list of clustering*/
@@ -156,16 +166,11 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		listsPanel.add(Box.createHorizontalStrut(10));
 
 		JPanel clusting = new JPanel(new BorderLayout(0, 5));
-		//JPanel cluster=new JPanel(new BorderLayout(0,5));
 
 		//La Table del clustering sempre presente e poi aggiunta a seconda del tipo
 		clusting.add(new JLabel(HTML_START + HTML_FONT_TITLE + "Clusterings" + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM), BorderLayout.NORTH);
 		clusting.add(new JScrollPane(getClusteringTable(), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-
-		//cluster.add(new JLabel(HTML_START
-		//		+ HTML_FONT_TITLE +"Num. Of Clusters"+ HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM),BorderLayout.NORTH);
-		//cluster.add(new JScrollPane(getClusterTable(),JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),BorderLayout.CENTER);
 
 		west.add(clusting);
 		west.add(cluster);
@@ -196,9 +201,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 
 	private JTable getClusteringTable() {
 		clusteringTable = new JTable(new ClusteringTableModel(session.getListOfClustering())) {
-			/**
-			 * 
-			 */
+
 			private static final long serialVersionUID = 1L;
 			{
 				getColumnModel().getColumn(0).setPreferredWidth(110);
@@ -222,6 +225,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 				}
 				return super.getCellEditor(row, column);
 			}
+
 		};
 		clusteringTable.setFont(new Font(clusteringTable.getFont().getName(), clusteringTable.getFont().getStyle(), clusteringTable.getFont()
 				.getSize() + 1));
@@ -236,34 +240,34 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 						changedType = true;
 						//Selezionare il tipo do clustering corrente
 						switch (session.getListOfClustering().get(clusteringTable.getSelectedRow()).getClusteringType()) {
-							case KMEANS:
-								resetPanels();
-								cluster.removeAll();
-								cluster.add(
-										new JLabel(HTML_START + HTML_FONT_TITLE + "Num. of clusters" + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM),
-										BorderLayout.NORTH);
-								cluster.add(new JScrollPane(getClusterTable(), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-										ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-								cluster.revalidate();
-								cluster.repaint();
-								((ClusterTableModelKMeans) clusterTable.getModel()).setCluster(((KMean) session.getListOfClustering().get(
-										clusteringTable.getSelectedRow())).getResults());
-								tabbed.setSelectedIndex(0);
-								break;
-							case FUZZYK:
-								resetPanels();
-								cluster.removeAll();
-								cluster.add(
-										new JLabel(HTML_START + HTML_FONT_TITLE + "Num. of clusters" + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM),
-										BorderLayout.NORTH);
-								cluster.add(new JScrollPane(getClusterTable(), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-										ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
-								cluster.revalidate();
-								cluster.repaint();
-								((ClusterTableModelFuzzy) clusterTable.getModel()).setCluster(((FuzzyKMean) session.getListOfClustering().get(
-										clusteringTable.getSelectedRow())).getEntropy());
-								tabbed.setSelectedIndex(0);
-								break;
+						case KMEANS:
+							resetPanels();
+							cluster.removeAll();
+							cluster.add(
+									new JLabel(HTML_START + HTML_FONT_TITLE + "Num. of clusters" + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM),
+									BorderLayout.NORTH);
+							cluster.add(new JScrollPane(getClusterTable(), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+									ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+							cluster.revalidate();
+							cluster.repaint();
+							((ClusterTableModelKMeans) clusterTable.getModel()).setCluster(((KMean) session.getListOfClustering().get(
+									clusteringTable.getSelectedRow())).getResults());
+							tabbed.setSelectedIndex(0);
+							break;
+						case FUZZYK:
+							resetPanels();
+							cluster.removeAll();
+							cluster.add(
+									new JLabel(HTML_START + HTML_FONT_TITLE + "Num. of clusters" + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM),
+									BorderLayout.NORTH);
+							cluster.add(new JScrollPane(getClusterTable(), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+									ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+							cluster.revalidate();
+							cluster.repaint();
+							((ClusterTableModelFuzzy) clusterTable.getModel()).setCluster(((FuzzyKMean) session.getListOfClustering().get(
+									clusteringTable.getSelectedRow())).getEntropy());
+							tabbed.setSelectedIndex(0);
+							break;
 						}
 						clusterTable.setRowSelectionInterval(0, 0);
 					} else {
@@ -318,23 +322,20 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 								matrixPanel.removeAll();
 							}
 							switch (session.getListOfClustering().get(clusteringTable.getSelectedRow()).getClusteringType()) {
-								case KMEANS:
-									clusingP.add(new KMeansInfoClustering((ClusteringInfosKMean) ((KMean) session.getListOfClustering().get(
-											clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow() + 1), clusterTable
-											.getSelectedRow() + 2, model));
-									clustP.add(new KMeansInfoCluster((ClusteringInfosKMean) ((KMean) session.getListOfClustering().get(
-											clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow() + 1), clusterTable
-											.getSelectedRow() + 2, session, clusteringTable.getSelectedRow()));
-									if (changedType) {
-										//matrix = new DispKMeanMatrix(model,-1);
-										//matrixPanel.add(matrix);
-										panelDisp = new DispersionkMeanPanel(session, clusteringTable.getSelectedRow(),
-												clusterTable.getSelectedRow() + 1);
-										matrixPanel.add(panelDisp);
-									}
-									panelDisp.setClustering(clusterTable.getSelectedRow() + 1);
-									//matrix.setClustering(clusteringTable.getSelectedRow(),clusterTable.getSelectedRow()+1);
-									break;
+							case KMEANS:
+								clusingP.add(new KMeansInfoClustering((ClusteringInfosKMean) ((KMean) session.getListOfClustering().get(
+										clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow() + 1), clusterTable
+										.getSelectedRow() + 2, model));
+								clustP.add(new KMeansInfoCluster((ClusteringInfosKMean) ((KMean) session.getListOfClustering().get(
+										clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow() + 1), clusterTable
+										.getSelectedRow() + 2, session, clusteringTable.getSelectedRow()));
+								if (changedType) {
+									panelDisp = new DispersionkMeanPanel(session, clusteringTable.getSelectedRow(),
+											clusterTable.getSelectedRow() + 1);
+									matrixPanel.add(panelDisp);
+								}
+								panelDisp.setClustering(clusterTable.getSelectedRow() + 1);
+								break;
 							}
 							matrixPanel.revalidate();
 							matrixPanel.repaint();
@@ -371,31 +372,28 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 								matrixPanel.removeAll();
 							}
 							switch (session.getListOfClustering().get(clusteringTable.getSelectedRow()).getClusteringType()) {
-								case FUZZYK:
-									ClusteringInfosFuzzy infos = ((ClusteringInfosFuzzy) ((FuzzyKMean) session.getListOfClustering().get(
-											clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow()));
-									if (infos.getError() == -1) {
-										infos.setError(model.getMatrix(), 0.1);
-									}
-									if (changedType) {
-										panelDispF = new DispersionFuzzyPanel(session, clusteringTable.getSelectedRow(), clusterTable
-												.getSelectedRow());
-										//matrix2 = new DispFuzzyMatrix(model,-1);
-										//matrixPanel.add(matrix2);
-										matrixPanel.add(panelDispF);
-									}
-									//matrix2.setClustering(clusteringTable.getSelectedRow(),clusterTable.getSelectedRow());
-									panelDispF.setClustering(clusterTable.getSelectedRow());
-									FuzzyInfoClustering ficg = new FuzzyInfoClustering(model.getMatrix(), panelDispF.getMatrix(), clusterTable
-											.getSelectedRow() + 2, ((FuzzyKMean) session.getListOfClustering().get(clusteringTable.getSelectedRow()))
-											.getEntropy()[clusterTable.getSelectedRow()], infos);
-									clusingP.add(ficg);
-									FuzzyInfoCluster fic = new FuzzyInfoCluster(infos, clusterTable.getSelectedRow() + 2, session, clusteringTable
+							case FUZZYK:
+								ClusteringInfosFuzzy infos = ((ClusteringInfosFuzzy) ((FuzzyKMean) session.getListOfClustering().get(
+										clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow()));
+								if (infos.getError() == -1) {
+									infos.setError(model.getMatrix(), 0.1);
+								}
+								if (changedType) {
+									panelDispF = new DispersionFuzzyPanel(session, clusteringTable.getSelectedRow(), clusterTable
 											.getSelectedRow());
-									ficg.setPanelCluster(fic);
-									clustP.add(fic);
-									tabbed.setSelectedIndex(0);
-									break;
+									matrixPanel.add(panelDispF);
+								}
+								panelDispF.setClustering(clusterTable.getSelectedRow());
+								FuzzyInfoClustering ficg = new FuzzyInfoClustering(model.getMatrix(), panelDispF.getMatrix(), clusterTable
+										.getSelectedRow() + 2, ((FuzzyKMean) session.getListOfClustering().get(clusteringTable.getSelectedRow()))
+										.getEntropy()[clusterTable.getSelectedRow()], infos);
+								clusingP.add(ficg);
+								FuzzyInfoCluster fic = new FuzzyInfoCluster(infos, clusterTable.getSelectedRow() + 2, session, clusteringTable
+										.getSelectedRow());
+								ficg.setPanelCluster(fic);
+								clustP.add(fic);
+								tabbed.setSelectedIndex(0);
+								break;
 							}
 							matrixPanel.revalidate();
 							matrixPanel.repaint();
@@ -421,15 +419,17 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		((ClusteringTableModel) clusteringTable.getModel()).setClustering(session.getListOfClustering());
 		if (clusteringTable.getRowCount() > 0) {
 			clusteringTable.setRowSelectionInterval(0, 0);
+			((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
+			parent.setCurrentPanel(WORKLOAD_INFOCLUSTERING_PANEL);
+		} else {
+			parent.setLastPanel();
 		}
-		parent.setCurrentPanel(WORKLOAD_INPUT_PANEL);
 	}
 
 	private class ClusteringTableModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		private String[] header = { "Clustering", "Cl.", "" };
 		private Vector<Clustering> clusterings = null;
 
@@ -444,12 +444,12 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (rowIndex < clusterings.size()) {
 				switch (columnIndex) {
-					case 0:
-						return "  " + clusterings.get(rowIndex).getName();
-					case 1:
-						return Integer.toString(clusterings.get(rowIndex).getNumCluster());
-					default:
-						return null;
+				case 0:
+					return "  " + clusterings.get(rowIndex).getName();
+				case 1:
+					return Integer.toString(clusterings.get(rowIndex).getNumCluster());
+				default:
+					return null;
 				}
 			}
 			return null;
@@ -481,7 +481,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		}
 
 		@Override
-		public Class getColumnClass(int index) {
+		public Class<?> getColumnClass(int index) {
 			if (index == 2) {
 				return JButton.class;
 			}
@@ -492,12 +492,11 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 			clusterings = cl;
 			fireTableDataChanged();
 		}
+
 	}
 
 	private class ClusterTableFuzzy extends JTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public ClusterTableFuzzy(AbstractTableModel model) {
@@ -506,13 +505,13 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 			getColumnModel().getColumn(1).setPreferredWidth(75);
 			getColumnModel().getColumn(2).setPreferredWidth(75);
 		}
+
 	}
 
 	private class ClusterTableModelFuzzy extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		private String[] header = { "Cl", "Entropy", "Ratio" };
 		private double[] entropy;
 
@@ -527,17 +526,17 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (rowIndex < entropy.length) {
 				switch (columnIndex) {
-					case 0:
-						return new Integer(rowIndex + 2);
-					case 1:
-						return defaultFormat.format(entropy[rowIndex]);
-					case 2:
-						if (rowIndex == 0) {
-							return " -";//defaultFormat.format(Double.NaN); 
-						}
-						return defaultFormat.format(entropy[rowIndex] / entropy[rowIndex - 1]);
-					default:
-						return null;
+				case 0:
+					return new Integer(rowIndex + 2);
+				case 1:
+					return defaultFormat.format(entropy[rowIndex]);
+				case 2:
+					if (rowIndex == 0) {
+						return " -";//defaultFormat.format(Double.NaN); 
+					}
+					return defaultFormat.format(entropy[rowIndex] / entropy[rowIndex - 1]);
+				default:
+					return null;
 				}
 			}
 			return null;
@@ -570,7 +569,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		}
 
 		@Override
-		public Class getColumnClass(int index) {
+		public Class<?> getColumnClass(int index) {
 			if (index == 0) {
 				return Integer.class;
 			}
@@ -581,12 +580,11 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 			entropy = cl;
 			fireTableDataChanged();
 		}
+
 	}
 
 	private class ClusterTableKMeans extends JTable {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public ClusterTableKMeans(AbstractTableModel model) {
@@ -596,13 +594,13 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 			getColumnModel().getColumn(2).setPreferredWidth(75);
 			getColumnModel().getColumn(3).setPreferredWidth(75);
 		}
+
 	}
 
 	private class ClusterTableModelKMeans extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		private String[] header = { "Cl", "G", "OMSR", "Ratio" };
 		private ClusteringInfosKMean[] clusters = null;
 
@@ -617,20 +615,20 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (rowIndex < clusters.length) {
 				switch (columnIndex) {
-					case 0:
-						return new Integer(rowIndex + 2);
-					case 1:
-						if ((clusters[rowIndex + 1]).isGoodCluster == 1) {
-							return JMTImageLoader.loadImage("Measure_ok", new Dimension((int) (BUTTONSIZE * 0.5), (int) (BUTTONSIZE * 0.5)));
-						} else {
-							return JMTImageLoader.loadImage("Measure_fail", new Dimension((int) (BUTTONSIZE * 0.5), (int) (BUTTONSIZE * 0.5)));
-						}
-					case 2:
-						return defaultFormat.format((clusters[rowIndex + 1]).omsr);
-					case 3:
-						return defaultFormat.format((clusters[rowIndex + 1]).ratio);
-					default:
-						return null;
+				case 0:
+					return new Integer(rowIndex + 2);
+				case 1:
+					if ((clusters[rowIndex + 1]).isGoodCluster == 1) {
+						return JMTImageLoader.loadImage("Measure_ok", new Dimension((int) (BUTTONSIZE * 0.5), (int) (BUTTONSIZE * 0.5)));
+					} else {
+						return JMTImageLoader.loadImage("Measure_fail", new Dimension((int) (BUTTONSIZE * 0.5), (int) (BUTTONSIZE * 0.5)));
+					}
+				case 2:
+					return defaultFormat.format((clusters[rowIndex + 1]).omsr);
+				case 3:
+					return defaultFormat.format((clusters[rowIndex + 1]).ratio);
+				default:
+					return null;
 				}
 			}
 			return null;
@@ -663,7 +661,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		}
 
 		@Override
-		public Class getColumnClass(int index) {
+		public Class<?> getColumnClass(int index) {
 			if (index == 0) {
 				return Integer.class;
 			}
@@ -677,6 +675,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 			clusters = cl;
 			fireTableDataChanged();
 		}
+
 	}
 
 	private static final String helpText = "<HTML>" + "This panel shows clustering results information.<br>"
@@ -693,4 +692,5 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 	public void lostFocus() {
 		parent.setLastPanel(WORKLOAD_INFOCLUSTERING_PANEL);
 	}
+
 }

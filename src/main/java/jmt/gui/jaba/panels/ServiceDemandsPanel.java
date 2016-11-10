@@ -261,10 +261,9 @@ public final class ServiceDemandsPanel extends WizardPanel implements JabaConsta
 		STTable() {
 			super(new STTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
-                        setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowHeight(CommonConstants.ROW_HEIGHT);
 
 			setDisplaysScrollLabels(true);
-
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
 			setClipboardTransferEnabled(true);
@@ -278,7 +277,6 @@ public final class ServiceDemandsPanel extends WizardPanel implements JabaConsta
 			help.addHelp(tableHeader, "Click, SHIFT-click or drag to select columns");
 			rowHeader.setToolTipText(null);
 			help.addHelp(rowHeader, "Click, SHIFT-click or drag to select rows");
-
 		}
 
 		/**

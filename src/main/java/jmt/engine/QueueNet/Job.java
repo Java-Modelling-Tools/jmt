@@ -34,8 +34,6 @@ public class Job implements Cloneable {
 
 	//Class of this job
 	private JobClass jobClass;
-	//used to compute residence time: born time is reset when a job enters a station
-	private double BornTime;
 	//used to compute system response time
 	protected double systemEnteringTime;
 
@@ -59,11 +57,9 @@ public class Job implements Cloneable {
 	 *  @param jobClass Reference to the class of the job.
 	 */
 	public Job(JobClass jobClass) {
-		//setClass(jobClass);
 		this.jobClass = jobClass;
 		// Job Id is used only for logging
 		this.Id = counter++;
-
 		resetSystemEnteringTime();
 	}
 
@@ -72,23 +68,6 @@ public class Job implements Cloneable {
 	 */
 	public JobClass getJobClass() {
 		return jobClass;
-	}
-
-	/** Sets born time.*/
-	public void born() {
-		BornTime = NetSystem.getTime();
-	}
-
-	/** Gets born time.
-	 * @return Born time.
-	 */
-	public double getBornTime() {
-		return BornTime;
-	}
-
-	/** Resets born time of the job. */
-	void reborn() {
-		BornTime = NetSystem.getTime();
 	}
 
 	/** Gets job id: job id is used mainly for logging.
@@ -159,7 +138,6 @@ public class Job implements Cloneable {
 	public void setClass(JobClass newClass) {
 		jobClass = newClass;
 		classesBitwise |= newClass.getIdBitwise();
-		//Long.toBinaryString(classesBitwise);
 	}
 
 	/** Adds a class to job history
@@ -167,7 +145,6 @@ public class Job implements Cloneable {
 	 */
 	public void addClass(JobClass newClass) {
 		classesBitwise |= newClass.getIdBitwise();
-		//Long.toBinaryString(classesBitwise);
 	}
 
 	/**
@@ -193,7 +170,7 @@ public class Job implements Cloneable {
 	 */
 	public boolean hasBeenClass(int jobClassId) {
 		long idBitwise = JobClass.getIdBitwise(jobClassId);
-		return  hasBeenClass(idBitwise);
+		return hasBeenClass(idBitwise);
 	}
 
 	/** 
@@ -212,4 +189,5 @@ public class Job implements Cloneable {
 	public void setServiceTime(double time) {
 		serviceTime = time;
 	}
+
 }

@@ -79,7 +79,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	//Enabled types of station for station editing
 	Object[] stationTypes = new Object[] { STATION_TYPE_DELAY, STATION_TYPE_SERVER, STATION_TYPE_FORK, STATION_TYPE_JOIN, STATION_TYPE_ROUTER,
-			STATION_TYPE_LOGGER, STATION_TYPE_CLASSSWITCH, STATION_TYPE_SEMAPHORE, STATION_TYPE_SCALER }; //, STATION_TYPE_PLACE, STATION_TYPE_TRANSITION };
+			STATION_TYPE_LOGGER, STATION_TYPE_CLASSSWITCH, STATION_TYPE_SEMAPHORE, STATION_TYPE_SCALER, STATION_TYPE_PLACE, STATION_TYPE_TRANSITION };
 
 	//Component responsible of setting global number of classes at once
 	private JSpinner stationNumSpinner = new JSpinner() {
@@ -165,11 +165,12 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		}
 	};
 
-	/**Creates a new instance of <code>ClassesPanel</code> given a model definition.*/
+	/**Creates a new instance of <code>StationsPanel</code> given a model definition.*/
 	public StationsPanel(StationDefinition sd, ClassDefinition cd) {
 		super();
 		stationTable = new StationTable();
-		comboEditor = new ImagedComboBoxCellEditorFactory(true);
+		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
+				ImagedComboBoxCellEditorFactory.OPTION_STATION_TYPES);
 		initComponents();
 		//forbid column to be moved
 		stationTable.getTableHeader().setReorderingAllowed(false);
@@ -385,7 +386,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 			} else if (column == getColumnCount() - 1) {
 				return new ButtonCellEditor(deleteButton);
 			} else {
-				return super.getCellEditor(row, column);
+				return getDefaultEditor(getModel().getColumnClass(column));
 			}
 		}
 
@@ -504,11 +505,11 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 			Object key = data.getStationKeys().get(rowIndex);
 			switch (columnIndex) {
 			case (0): {
-				data.setStationName((String) aValue, key);
+				data.setStationName(key, (String) aValue);
 				break;
 			}
 			case (1): {
-				data.setStationType((String) aValue, key);
+				data.setStationType(key, (String) aValue);
 				break;
 			}
 			}

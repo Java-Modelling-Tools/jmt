@@ -79,7 +79,7 @@ public class JabaWizard extends Wizard {
 
 	private static final long serialVersionUID = 1L;
 
-	private final static boolean DEBUG = false;
+	private static final boolean DEBUG = false;
 
 	private JabaModel data;
 	private JLabel helpLabel;
@@ -246,7 +246,7 @@ public class JabaWizard extends Wizard {
 	};
 
 
-	private AbstractJMTAction HELP = new AbstractJMTAction("JABA help") {
+	private AbstractJMTAction HELP = new AbstractJMTAction("JABA Help") {
 
 		private static final long serialVersionUID = 1L;
 

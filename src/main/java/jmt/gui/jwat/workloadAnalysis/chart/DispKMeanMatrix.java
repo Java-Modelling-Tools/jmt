@@ -94,7 +94,6 @@ public class DispKMeanMatrix extends JScrollPane {
 		 */
 		private static final long serialVersionUID = 1L;
 		private int curClust;
-		private Color[] colors = { Color.RED, Color.GREEN, Color.BLACK, Color.PINK, Color.BLUE, Color.YELLOW, Color.CYAN, Color.ORANGE, Color.MAGENTA };
 		private int clustering = 0;
 
 		public DispersionPanel() {
@@ -237,25 +236,22 @@ public class DispKMeanMatrix extends JScrollPane {
 														updateInfos(((row * Elenco.length) + (col)) * 10000 + i + (k++), "Plotting scatter "
 																+ ((row * Elenco.length) + (col + 1)), false);
 														g.setColor(JavaWatColor.getColor(c1[curClust][Elenco[col].getObsID(j) - 1]));
-														g.fillOval(col * WIDTH_TOT + 5 + /*i - 1,*/
-														(int) (((Elenco[col].getValue(j) - Elenco[col].getUniStats().getMinValue())) * xFoot) - 1,
+														g.fillOval(col * WIDTH_TOT + 5 +
+																(int) (((Elenco[col].getValue(j) - Elenco[col].getUniStats().getMinValue())) * xFoot) - 1,
 																(((row + 1) * HEIGHT_TOT) - 5 - (int) (((Elenco[col].getValue(j, row) - Elenco[row]
 																		.getUniStats().getMinValue())) * yFoot)), 1, 1);
 														done[(int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot)] = true;
 													}
 												}
 											}
-
 										}
 									}
 								}
 							}
 						} catch (Exception e) {
 							g.setColor(Color.WHITE);
-							g.fillRect(0, 0, 300, 100);
-							g.setColor(Color.BLACK);
-							g.drawString("With this data the graphic cannot be create", 50, 50);
-							e.printStackTrace();
+							g.fillRect(0, 0, WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1);
+							DispersionPanel.this.repaint();
 						}
 						updateInfos(10000 * (Elenco.length * Elenco.length) + 1, "End", false);
 						return null;

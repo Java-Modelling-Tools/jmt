@@ -130,7 +130,6 @@ public class WarningScrollTable extends JRootPane {
 				break;
 			}
 		}
-
 		return res;
 	}
 

@@ -19,7 +19,6 @@
 package jmt.gui.jsimwiz.panels;
 
 import java.awt.BorderLayout;
-import java.util.Vector;
 
 import javax.swing.JTable;
 import javax.swing.event.TableModelEvent;
@@ -44,18 +43,13 @@ import jmt.gui.common.panels.WarningScrollTable;
  */
 public class RefSourcePanel extends WizardPanel implements CommonConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
 	protected ClassDefinition classData;
 	protected StationDefinition stationData;
 	protected SimulationDefinition simData;
-
 	protected WarningScrollTable warning;
-
 	private RefSourceTable refSourceTable;
-
 	protected ImagedComboBoxCellEditorFactory combos;
 
 	public RefSourcePanel(ClassDefinition classes, StationDefinition stations, SimulationDefinition sim) {
@@ -69,7 +63,6 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 	private void initComponents() {
 		refSourceTable = new RefSourceTable();
 		setLayout(new BorderLayout());
-		//setBorder(new TitledBorder(new EtchedBorder(), "Reference Stations"));
 		warning = new WarningScrollTable(refSourceTable, WARNING_CLASS_STATION);
 		warning.addCheckVector(classData.getClassKeys());
 		warning.addCheckVector(stationData.getStationKeys());
@@ -103,10 +96,8 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 
 	protected class RefSourceTable extends JTable {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
+
 		int[] columnWidths = new int[] { 80, 100 };
 
 		public RefSourceTable() {
@@ -122,10 +113,11 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
-				if (classData.getClassType(classData.getClassKeys().get(row)) == CLASS_TYPE_OPEN)
-					return combos.getEditor(stationData.getStationKeysSource());
-				else  
-				return combos.getEditor(stationData.getStationKeysNoSourceSink());
+				if (classData.getClassType(classData.getClassKeys().get(row)) == CLASS_TYPE_OPEN) {
+					return combos.getEditor(stationData.getStationKeysRefSource());
+				} else {
+					return combos.getEditor(stationData.getStationKeysNoSourceSink());
+				}
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -139,12 +131,11 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 				return super.getCellRenderer(row, column);
 			}
 		}
+
 	}
 
 	protected class RefSourceTableModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public int getRowCount() {
@@ -167,7 +158,7 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 		}
 
 		@Override
-		public Class getColumnClass(int columnIndex) {
+		public Class<?> getColumnClass(int columnIndex) {
 			return String.class;
 		}
 
@@ -175,11 +166,9 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			if (columnIndex == 0) {
 				return false;
-			}
-			if (classData.getClassType(classData.getClassKeys().get(rowIndex)) == CLASS_TYPE_OPEN) {
+			} else {
 				return true;
 			}
-			return true;
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
@@ -230,4 +219,5 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 			editor.stopCellEditing();
 		}
 	}
+
 }

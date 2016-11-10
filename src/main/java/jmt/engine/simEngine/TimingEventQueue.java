@@ -36,7 +36,7 @@ import jmt.framework.data.CircularList;
  */
 public class TimingEventQueue implements EventQueue {
 
-	private final static int DEFAULT_INITIAL_CAPACITY = 111;
+	private static final int DEFAULT_INITIAL_CAPACITY = 111;
 
 	private TimingEventComparator comparator;
 	private CircularList<SimEvent> current;
@@ -82,21 +82,21 @@ public class TimingEventQueue implements EventQueue {
 			return null;
 		}
 
-		long totalWeight = 0;
+		double totalWeight = 0.0;
 		Iterator<SimEvent> it = current.iterator();
-		DataPacket packet = null;
+		Object[] packet = null;
 		while (it.hasNext()) {
-			packet = (DataPacket) it.next().getData();
-			totalWeight += ((Integer) packet.getData(DataPacket.FIELD_FIRING_WEIGHT)).intValue();
+			packet = (Object[]) it.next().getData();
+			totalWeight += ((Double) packet[DataPacket.FIELD_FIRING_WEIGHT]).doubleValue();
 		}
 		SimEvent event = null;
-		long summedWeight = 0;
-		long randomIndex = (long) (randomEngine.nextDouble() * totalWeight);
+		double summedWeight = 0.0;
+		double randomIndex = randomEngine.nextDouble() * totalWeight;
 		it = current.iterator();
 		while (summedWeight <= randomIndex) {
 			event = it.next();
-			packet = (DataPacket) event.getData();
-			summedWeight += ((Integer) packet.getData(DataPacket.FIELD_FIRING_WEIGHT)).intValue();
+			packet = (Object[]) event.getData();
+			summedWeight += ((Double) packet[DataPacket.FIELD_FIRING_WEIGHT]).doubleValue();
 		}
 		it.remove();
 		return event;
@@ -163,17 +163,17 @@ public class TimingEventQueue implements EventQueue {
 			} else if (time1 < time2) {
 				return -1;
 			}
-			DataPacket packet1 = (DataPacket) e1.getData();
-			DataPacket packet2 = (DataPacket) e2.getData();
-			double delay1 = ((Double) packet1.getData(DataPacket.FIELD_FIRING_DELAY)).doubleValue();
-			double delay2 = ((Double) packet2.getData(DataPacket.FIELD_FIRING_DELAY)).doubleValue();
+			Object[] packet1 = (Object[]) e1.getData();
+			Object[] packet2 = (Object[]) e2.getData();
+			double delay1 = ((Double) packet1[DataPacket.FIELD_FIRING_DELAY]).doubleValue();
+			double delay2 = ((Double) packet2[DataPacket.FIELD_FIRING_DELAY]).doubleValue();
 			if (delay1 > delay2) {
 				return 1;
 			} else if (delay1 < delay2) {
 				return -1;
 			}
-			int priority1 = ((Integer) packet1.getData(DataPacket.FIELD_FIRING_PRIORITY)).intValue();
-			int priority2 = ((Integer) packet2.getData(DataPacket.FIELD_FIRING_PRIORITY)).intValue();
+			int priority1 = ((Integer) packet1[DataPacket.FIELD_FIRING_PRIORITY]).intValue();
+			int priority2 = ((Integer) packet2[DataPacket.FIELD_FIRING_PRIORITY]).intValue();
 			if (priority1 > priority2) {
 				return -1;
 			} else if (priority1 < priority2) {

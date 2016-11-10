@@ -33,120 +33,110 @@ import jmt.gui.common.definitions.CommonModel;
  */
 public class JSIMModel extends CommonModel {
 
-	private int openClasses = 0;
-	Object src; // Pointer to source and sink reference
+	//keys for source and sink
+	Object src;
 	Object snk;
 
 	//intercept each call for addition of a new class
 	@Override
-	public Object addClass(String name, int type, int priority, Integer population, Object distribution) {
-		if (type == CLASS_TYPE_OPEN) {
-			if (openClasses == 0) {
-				addSourceAndSink();
-			}
-			openClasses++;
-		}
+	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution) {
 		Object key = super.addClass(name, type, priority, population, distribution);
 		if (type == CLASS_TYPE_OPEN) {
+			if (getOpenClassKeys().size() == 1) {
+				addSourceAndSink();
+			}
 			setClassRefStation(key, src);
 		}
 		return key;
 	}
 
-	/**Adds a new station to the model. Name and type must be specified. If station is a source
-	 * or a sink, returns unique ones
-	 * @param name: name of the new station
-	 * @param type: string representing station type. it is value is contained in
-	 * <code>JSIMConstants</code> interface.
-	 * @return : key of search for this class*/
+	//Intercept each call to the deletion of a class
+	@Override
+	public void deleteClass(Object key) {
+		int type = getClassType(key);
+		super.deleteClass(key);
+		if (type == CLASS_TYPE_OPEN) {
+			if (getOpenClassKeys().size() == 0) {
+				deleteSourceAndSink();
+			}
+		}
+	}
+
+	//intercept each call for change of class type
+	@Override
+	public void setClassType(Object key, int type) {
+		if (getClassType(key) == type) {
+			return;
+		}
+		super.setClassType(key, type);
+		if (type == CLASS_TYPE_OPEN) {
+			if (getOpenClassKeys().size() == 1) {
+				addSourceAndSink();
+			}
+			setClassRefStation(key, src);
+		} else {
+			if (getOpenClassKeys().size() == 0) {
+				deleteSourceAndSink();
+			}
+		}
+	}
+
+	//intercept each call for addition of a new station
 	@Override
 	public Object addStation(String name, String type) {
 		if (type.equals(STATION_TYPE_SOURCE)) {
-			if (src == null) {
-				addSourceAndSink();
-			}
 			return src;
 		} else if (type.equals(STATION_TYPE_SINK)) {
-			if (snk == null) {
-				addSourceAndSink();
-			}
 			return snk;
 		} else {
 			return super.addStation(name, type);
 		}
 	}
 
-	//intercept each call for change of class type
+	//intercept each call for deletion of a station
 	@Override
-	public void setClassType(int type, Object classKey) {
-		if (getClassType(classKey) != type) {
-			if (type == CLASS_TYPE_OPEN) {
-				if (openClasses == 0) {
-					addSourceAndSink();
-				}
-				openClasses++;
-				this.setClassRefStation(classKey, src);
-			} else {
-				if (openClasses == 1) {
-					deleteSourceAndSink();
-				}
-				openClasses--;
-			}
-		}
-		super.setClassType(type, classKey);
-	}
-
-	//Intercept each call to the deletion of a class
-	@Override
-	public void deleteClass(Object classKey) {
-		if (getClassType(classKey) == CLASS_TYPE_OPEN) {
-			if (openClasses == 1) {
-				deleteSourceAndSink();
-			}
-			openClasses--;
-		}
-		super.deleteClass(classKey);
-	}
-
-	//intercept also calls to station deletion to avoid sink and source deletion
-	@Override
-	public void deleteStation(Object stationKey) {
-		String type = getStationType(stationKey);
-		if (STATION_TYPE_SOURCE.equals(type) || STATION_TYPE_SINK.equals(type)) {
+	public void deleteStation(Object key) {
+		String type = getStationType(key);
+		if (type.equals(STATION_TYPE_SOURCE) || type.equals(STATION_TYPE_SINK)) {
 			return;
 		}
-		super.deleteStation(stationKey);
+		super.deleteStation(key);
 	}
 
-	//intercept calls to station type modification as well
+	//intercept each calls for change of station type
 	@Override
-	public void setStationType(String type, Object stationKey) {
-		String currentType = getStationType(stationKey);
-		if (STATION_TYPE_SOURCE.equals(currentType) || STATION_TYPE_SINK.equals(currentType)) {
+	public void setStationType(Object key, String type) {
+		String oldType = getStationType(key);
+		if (oldType == type || (oldType.equals(STATION_TYPE_SOURCE) || oldType.equals(STATION_TYPE_SINK))
+				|| (type.equals(STATION_TYPE_SOURCE) || type.equals(STATION_TYPE_SINK))) {
 			return;
 		}
-		super.setStationType(type, stationKey);
+		super.setStationType(key, type);
 	}
 
-	//addition of source and sink for new open and closed classes
+	//addition of source and sink
 	private void addSourceAndSink() {
-		src = super.addStation("Source", STATION_TYPE_SOURCE);
-		snk = super.addStation("Sink", STATION_TYPE_SINK);
-		//put source and sink at the head of the station list
+		if (src == null) {
+			src = super.addStation("Source", STATION_TYPE_SOURCE);
+		}
+		if (snk == null) {
+			snk = super.addStation("Sink", STATION_TYPE_SINK);
+		}
 		stationsKeyset.remove(src);
 		stationsKeyset.remove(snk);
-		stationsKeyset.add(0, snk);
 		stationsKeyset.add(0, src);
+		stationsKeyset.add(1, snk);
 	}
 
-	//deletion of source and sink if all open classes are removed
+	//deletion of source and sink
 	private void deleteSourceAndSink() {
-		for (int i = 0; i < stationsKeyset.size(); i++) {
-			String currentType = getStationType(stationsKeyset.get(i));
-			if (STATION_TYPE_SOURCE.equals(currentType) || STATION_TYPE_SINK.equals(currentType)) {
-				super.deleteStation(stationsKeyset.get(i));
-				i--;
-			}
+		if (src != null) {
+			super.deleteStation(src);
+			src = null;
+		}
+		if (snk != null) {
+			super.deleteStation(snk);
+			snk = null;
 		}
 	}
 }

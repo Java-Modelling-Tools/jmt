@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jwat.fitting.panels;
 
 import java.awt.BorderLayout;
@@ -45,7 +46,6 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.ToolTipManager;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -64,7 +64,6 @@ import jmt.engine.jwat.input.Parameter;
 import jmt.engine.jwat.input.ProgressMonitorShow;
 import jmt.engine.jwat.workloadAnalysis.utils.FormatFileReader;
 import jmt.engine.jwat.workloadAnalysis.utils.FormatFileWriter;
-import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import jmt.engine.jwat.workloadAnalysis.utils.SteppedComboBox;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
@@ -85,10 +84,9 @@ import jmt.gui.jwat.workloadAnalysis.tables.listeners.RowDeleteListener;
  * Created: 30-lug-2006 10.54.14 Darksch
  */
 public class InputPanel extends WizardPanel implements CommonConstants, JWATConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	/*** Help strings ***/
 	private static String ADD_NEW_VARIABLE = "Add new variable";
 	private static String SPINNER_VARIABLE = "Enter the number of variables";
@@ -103,20 +101,20 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 	private String FILTER_TEXT_INTERVAL = "By interval";
 	/** Description of main and subpanels **/
 	// Main description
-	private final static String INPUT_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Input record description of the file to be fitted" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	private static final String INPUT_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Input record description of the file to be fitted" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define a new input format or open a saved format" + HTML_FONT_NOR_END + HTML_END;
 	// Text of label of log file input
-	private final static String LOAD_FILE_LABEL = HTML_START + HTML_FONT_NORM + "Load file name" + HTML_FONT_NOR_END + HTML_END;
+	private static final String LOAD_FILE_LABEL = HTML_START + HTML_FONT_NORM + "Load file name" + HTML_FONT_NOR_END + HTML_END;
 	// Text of label of format input file
-	public final static String LOAD_FORMAT_LABEL = HTML_START + HTML_FONT_NORM + "Load saved format " + HTML_FONT_NOR_END + HTML_END;
+	public static final String LOAD_FORMAT_LABEL = HTML_START + HTML_FONT_NORM + "Load saved format " + HTML_FONT_NOR_END + HTML_END;
 	// Text of label of filter on input file
-	public final static String LOAD_FILTER_LABEL = HTML_START + HTML_FONT_NORM + "Choose sampling method " + HTML_FONT_NOR_END + HTML_END;
+	public static final String LOAD_FILTER_LABEL = HTML_START + HTML_FONT_NORM + "Choose sampling method " + HTML_FONT_NOR_END + HTML_END;
 	// Text button save new format
-	public final static String BUTTON_SAVE_FORMAT = HTML_START + HTML_FONT_NORM + "Save format" + HTML_FONT_NOR_END + HTML_END;
+	public static final String BUTTON_SAVE_FORMAT = HTML_START + HTML_FONT_NORM + "Save format" + HTML_FONT_NOR_END + HTML_END;
 	//Text button load
-	public final static String LOAD_LOG = HTML_START + HTML_FONT_NORM + "LOAD" + HTML_FONT_NOR_END + HTML_END;
+	public static final String LOAD_LOG = HTML_START + HTML_FONT_NORM + "LOAD" + HTML_FONT_NOR_END + HTML_END;
 	// Text information about filtering on variable
-	public final static String FILTER_NEXT_STEP = HTML_START + HTML_FONT_NORM + "<CENTER>For filtering on variable see next step</CENTER>"
+	public static final String FILTER_NEXT_STEP = HTML_START + HTML_FONT_NORM + "<CENTER>For filtering on variable see next step</CENTER>"
 			+ HTML_FONT_NOR_END + HTML_END;
 	// String of browsing for a new file used in input file panel
 	private static String browseInputPanelText = "Browse...";
@@ -169,9 +167,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 	private HoverHelp help = null;
 	// Format file chooser window
 	private JFileChooser fileSaveF = new JFileChooser(Defaults.getWorkingPath()) {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -196,6 +192,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			setApproveButtonText("Save");
 			setFileSelectionMode(JFileChooser.FILES_ONLY);
 		}
+
 	};
 	// Input log file chooser window
 	private JFileChooser file = new JFileChooser(Defaults.getWorkingPath()) {
@@ -203,6 +200,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 	};
 	// Spinner listener for format definition
 	private ChangeListener spinnerListener = new ChangeListener() {
+
 		public void stateChanged(ChangeEvent ce) {
 			/** Reset format combo box **/
 			if (((Integer) numOfVars.getValue()).intValue() == 0 || inputTable.getRowCount() == 0) {
@@ -220,12 +218,11 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 				addVariable();
 			}
 		}
+
 	};
 	// Spinner and button used in format definition in main panel
 	private JSpinner numOfVars = new JSpinner(new SpinnerNumberModel(0, 0, 50, 1)) {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -247,14 +244,14 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 			}, KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 		}
+
 	};
 	private JButton addVar = null;
 	// Loading action associated with LOAD button
 	protected AbstractAction loadFile = new AbstractAction(LOAD_LOG) {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Loads data from file and fits it for both Pareto and Exponential distributions");
 		}
@@ -308,13 +305,13 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 			}
 		}
+
 	};
 	// Action applied to add new variable button used to add a variable definition to inputTable
 	protected AbstractAction addNewVariable = new AbstractAction("Add new var") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, ADD_NEW_VARIABLE);
 		}
@@ -325,6 +322,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 				addVariable();
 			}
 		}
+
 	};
 
 	// Add new variable to format
@@ -343,10 +341,9 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 
 	// Add save new format Action, this action saves new format in format directory
 	protected AbstractAction saveFormat = new AbstractAction(BUTTON_SAVE_FORMAT) {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Save current defined format");
 		}
@@ -364,7 +361,6 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 						JWatVariableInputTableModel mod = ((JWatVariableInputTableModel) inputTable.getModel());
 						new FormatFileWriter(mod.getNames(), mod.getComments(), mod.getDelimiters(), mod.getRegExpr(), mod.getTypes(), file
 								.getAbsolutePath(), mod.getDefaults(), mod.getReplaces());
-						//refreshComboFormatPanel();
 						formatchooser.setSelectedItem(file.getAbsolutePath());
 					} else {
 						chooseFile();
@@ -411,7 +407,6 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					} else {
 						formatchooser.setSelectedItem(fFile.getAbsolutePath());
 					}
-
 				} else {
 					JWatVariableInputTableModel mod = ((JWatVariableInputTableModel) inputTable.getModel());
 					if (fFile.getName().indexOf(".jwatformat") == -1) {
@@ -424,6 +419,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 			}
 		}
+
 	};
 
 	/**
@@ -458,11 +454,6 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 		JPanel buttonNewVariable = new JPanel(new BorderLayout());
 
 		JPanel spinnerP = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		//numOfVars = new JSpinner(new SpinnerNumberModel(0,0,50,1));
-		//numOfVars.setMaximumSize(new Dimension(600,25));
-		//numOfVars.setToolTipText(SPINNER_VARIABLE);
-		//((DefaultFormatter)((JSpinner.DefaultEditor)numOfVars.getEditor()).getTextField().getFormatter()).setAllowsInvalid(false);
-		
 		help.addHelp(numOfVars, SPINNER_VARIABLE);
 		spinnerP.add(new JLabel("Number:"));
 		spinnerP.add(numOfVars);
@@ -526,7 +517,6 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 
 		infoFile.add(infoPanel, BorderLayout.SOUTH);
 
-		//rightPanel.add(inputPanel, BorderLayout.NORTH);
 		rightPanel.add(infoFile, BorderLayout.NORTH);
 
 		JPanel centerInputPanel = new JPanel(new BorderLayout());
@@ -567,7 +557,6 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 		JPanel loadPanel = new JPanel();
 		loadFileBtn.setPreferredSize(new Dimension((int) (BUTTONSIZE * 4.5), (int) (BUTTONSIZE * 0.8)));
 		loadFileBtn.setBackground(Color.RED);
-		//help.addHelp(loadFileBtn, "This button loads the data from the file and fits them for both Pareto and Exponential distribution");
 		loadPanel.add(loadFileBtn);
 
 		southPanel.add(loadPanel, BorderLayout.SOUTH);
@@ -598,6 +587,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 		filechooser.setSelectedIndex(-1);
 
 		filechooser.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent event) {
 				String choice = (String) ((JComboBox) event.getSource()).getSelectedItem();
 				if (choice != null && choice.equals(browseInputPanelText)) {
@@ -666,13 +656,12 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					}
 				}
 			}
+
 		});
 	}
 
-	/**
-	 * 
-	 */
 	private JFileChooser fileF = new JFileChooser(Defaults.getWorkingPath()) {
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -695,6 +684,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			});
 			setAcceptAllFileFilterUsed(false);
 		}
+
 	};
 
 	/**
@@ -706,11 +696,9 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 		addListenersComboFormatPanel();
 	}
 
-	/**
-	 *
-	 */
 	private void addListenersComboFormatPanel() {
 		formatchooser.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent event) {
 				String choice = (String) ((JComboBox) event.getSource()).getSelectedItem();
 				if (choice != null && choice.equals(browseInputPanelText)) {
@@ -727,15 +715,15 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 							for (int i = 0; i < form.getNumVars(); i++) {
 								String tipo = "";
 								switch (form.getType()) {
-									case Parameter.NUMBER:
-										tipo = "Numeric";
-										break;
-									case Parameter.STRING:
-										tipo = "String";
-										break;
-									case Parameter.DATE:
-										tipo = "Date";
-										break;
+								case Parameter.NUMBER:
+									tipo = "Numeric";
+									break;
+								case Parameter.STRING:
+									tipo = "String";
+									break;
+								case Parameter.DATE:
+									tipo = "Date";
+									break;
 								}
 								((JWatVariableInputTableModel) inputTable.getModel()).addNewRow(form.getName(), tipo, form.getComment(), form
 										.getDelimiters(), form.getRegExpr(), form.getDefaults(), form.getReplace());
@@ -795,15 +783,15 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 									for (int i = 0; i < form.getNumVars(); i++) {
 										String tipo = "";
 										switch (form.getType()) {
-											case Parameter.NUMBER:
-												tipo = "Numeric";
-												break;
-											case Parameter.STRING:
-												tipo = "String";
-												break;
-											case Parameter.DATE:
-												tipo = "Date";
-												break;
+										case Parameter.NUMBER:
+											tipo = "Numeric";
+											break;
+										case Parameter.STRING:
+											tipo = "String";
+											break;
+										case Parameter.DATE:
+											tipo = "Date";
+											break;
 										}
 										((JWatVariableInputTableModel) inputTable.getModel()).addNewRow(form.getName(), tipo, form.getComment(), form
 												.getDelimiters(), form.getRegExpr(), form.getDefaults(), form.getReplace());
@@ -843,15 +831,15 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 									for (int i = 0; i < form.getNumVars(); i++) {
 										String tipo = "";
 										switch (form.getType()) {
-											case Parameter.NUMBER:
-												tipo = "Numeric";
-												break;
-											case Parameter.STRING:
-												tipo = "String";
-												break;
-											case Parameter.DATE:
-												tipo = "Date";
-												break;
+										case Parameter.NUMBER:
+											tipo = "Numeric";
+											break;
+										case Parameter.STRING:
+											tipo = "String";
+											break;
+										case Parameter.DATE:
+											tipo = "Date";
+											break;
 										}
 										((JWatVariableInputTableModel) inputTable.getModel()).addNewRow(form.getName(), tipo, form.getComment(), form
 												.getDelimiters(), form.getRegExpr(), form.getDefaults(), form.getReplace());
@@ -887,6 +875,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					}
 				}
 			}
+
 		});
 	}
 
@@ -903,31 +892,30 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 		createRandomOptionPanel();
 
 		filterchooser.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent event) {
 				int index = ((JComboBox) event.getSource()).getSelectedIndex();
 				switch (index) {
-					case 0:
-						optionFilterPanel.removeAll();
-						//optionFilterPanel.add(new JLabel(FILTER_NEXT_STEP), BorderLayout.SOUTH);
-						optionFilterPanel.revalidate();
-						optionFilterPanel.repaint();
-						break;
-					case 1:
-						optionFilterPanel.removeAll();
-						optionFilterPanel.add(createRandomOptionPanel(), BorderLayout.CENTER);
-						//optionFilterPanel.add(new JLabel(FILTER_NEXT_STEP), BorderLayout.SOUTH);
-						optionFilterPanel.revalidate();
-						optionFilterPanel.repaint();
-						break;
-					case 2:
-						optionFilterPanel.removeAll();
-						optionFilterPanel.add(createIntervalOptionPanel(), BorderLayout.CENTER);
-						//optionFilterPanel.add(new JLabel(FILTER_NEXT_STEP), BorderLayout.SOUTH);
-						optionFilterPanel.revalidate();
-						optionFilterPanel.repaint();
-						break;
+				case 0:
+					optionFilterPanel.removeAll();
+					optionFilterPanel.revalidate();
+					optionFilterPanel.repaint();
+					break;
+				case 1:
+					optionFilterPanel.removeAll();
+					optionFilterPanel.add(createRandomOptionPanel(), BorderLayout.CENTER);
+					optionFilterPanel.revalidate();
+					optionFilterPanel.repaint();
+					break;
+				case 2:
+					optionFilterPanel.removeAll();
+					optionFilterPanel.add(createIntervalOptionPanel(), BorderLayout.CENTER);
+					optionFilterPanel.revalidate();
+					optionFilterPanel.repaint();
+					break;
 				}
 			}
+
 		});
 		filterchooser.setSelectedIndex(0);
 	}
@@ -942,7 +930,6 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			randomOptionPanel = new JPanel();
 			randomNObs = new JSpinner(new SpinnerNumberModel(0, 0, 0, 1));
 			randomNObs.setPreferredSize(new Dimension(70, 25));
-
 			randomOptionPanel.add(new JLabel("Number of observations:"), BorderLayout.NORTH);
 			randomOptionPanel.add(randomNObs, BorderLayout.SOUTH);
 		} else {
@@ -965,17 +952,18 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 
 			JPanel fromPanel = new JPanel(new GridLayout(1, 2));
 			JLabel fromLabel = new JLabel("From observation #: ", JLabel.RIGHT);
-			//fromLabel.setPreferredSize(new Dimension(70, 25));
 			fromPanel.add(fromLabel);
 			intervalFromObs = new JSpinner(new SpinnerNumberModel(0, 0, 0, 1));
 			intervalFromObs.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
+
 					if (((SpinnerNumberModel) intervalFromObs.getModel()).getNumber().longValue() >= ((SpinnerNumberModel) intervalToObs.getModel())
 							.getNumber().longValue()) {
 						((SpinnerNumberModel) intervalToObs.getModel()).setValue(new Integer(((SpinnerNumberModel) intervalFromObs.getModel())
 								.getNumber().intValue() + 1));
 					}
 				}
+
 			});
 			intervalFromObs.setPreferredSize(new Dimension(70, 25));
 			JPanel fromPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -1023,7 +1011,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 	// TODO controllare con Fuma cosa fare
 	// Chiamata quando dal pannello si torna indietro
 	public boolean canGoBack() {
-		if (JOptionPane.showConfirmDialog(this, "Are you sure want to go back to start screen ?", "Back operation", JOptionPane.YES_NO_OPTION,
+		if (JOptionPane.showConfirmDialog(this, "Are you sure you want to go back to start screen?", "Back operation", JOptionPane.YES_NO_OPTION,
 				JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
 			return false;
 		}
@@ -1038,14 +1026,15 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 	 *
 	 */
 	private class InputStatusListener implements ProgressStatusListener {
+
 		public void statusEvent(EventStatus e) {
 			switch (e.getType()) {
-				case EventStatus.ABORT_EVENT:
-					abortEvent((EventFinishAbort) e);
-					break;
-				case EventStatus.DONE_EVENT:
-					finishedEvent((EventFinishLoad) e);
-					break;
+			case EventStatus.ABORT_EVENT:
+				abortEvent((EventFinishAbort) e);
+				break;
+			case EventStatus.DONE_EVENT:
+				finishedEvent((EventFinishLoad) e);
+				break;
 			}
 		}
 
@@ -1068,14 +1057,13 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			optBtn[2] = new JButton("Cancel");
 
 			pane = new JOptionPane("# observations processed: " + e.valToRead() + "\n# correct observations " + e.valReaded()
-					+ "\nTo see errors press Show Log", JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, optBtn, null);
+			+ "\nTo see errors press Show Log", JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, optBtn, null);
 			final JDialog dialog = pane.createDialog(InputPanel.this.getParentWizard(), "Loading Complete");
 			pane.selectInitialValue();
 
 			optBtn[0].addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent ev) {
-
 					dialog.dispose();
 					try {
 						model.setMatrix(e.getSession());
@@ -1090,7 +1078,6 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					loadOnRun = false;
 					canGoOn = true;
 					((JWatWizard) getParentWizard()).showNextPanel();
-
 				}
 
 			});
@@ -1098,7 +1085,6 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			optBtn[1].addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent ev) {
-					//dialog.setVisible(false);
 					final JDialog f = new JDialog();
 					f.setModal(true);
 					f.setTitle("Error log");
@@ -1107,12 +1093,10 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					f.addWindowListener(new WindowAdapter() {
 						public void windowClosing(WindowEvent e) {
 							f.dispose();
-							//dialog.setVisible(true);
 						}
 
 						public void windowClosed(WindowEvent e) {
 							f.dispose();
-							//dialog.setVisible(true);
 						}
 					});
 					f.setVisible(true);
@@ -1139,6 +1123,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 
 			dialog.show();
 		}
+
 	}
 
 	private static final String helpText = "<html>In this panel you can choose input data file and define or select a file format.<br><br>"
@@ -1154,22 +1139,23 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 	public void gotFocus() {
 		// Chiedere a utente se cancellare tutto
 		if (model.getMatrix() != null) {
-			System.out.println("MODEL");
-			if (JOptionPane.showConfirmDialog(this, "This operation resets all data. Continue ?", "WARNING", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+			if (JOptionPane.showConfirmDialog(this, "This operation resets all data. Continue?", "WARNING", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				model.resetModel();
 				resetOnNew();
+				((JWatWizard) getParentWizard()).setEnableButton("Next >", false);
 				((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
 			} else {
 				parent.setLastPanel();
 			}
 		} else {
+			((JWatWizard) getParentWizard()).setEnableButton("Next >", false);
 			((JWatWizard) getParentWizard()).setEnableButton("Solve", false);
 		}
-		parent.setCurrentPanel(WORKLOAD_INPUT_PANEL);
+		parent.setCurrentPanel(FITTING_INPUT_PANEL);
 	}
 
 	public void lostFocus() {
-		parent.setLastPanel(WORKLOAD_INPUT_PANEL);
+		parent.setLastPanel(FITTING_INPUT_PANEL);
 	}
 
 	public void resetOnNew() {
@@ -1183,4 +1169,5 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 		observationNumb.setText(obsNumbString);
 		fileName.setText(obsFileName);
 	}
+
 }

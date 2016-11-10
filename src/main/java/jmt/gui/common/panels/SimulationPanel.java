@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,6 +69,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	protected JCheckBox infDuration;
 	protected JCheckBox noStatistic;
 	protected JCheckBox infSimulated;
+	protected JCheckBox animationEnabler;
 	protected JSpinner seed;
 	protected JSpinner duration;
 	protected JSpinner polling;
@@ -76,11 +77,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	protected JSpinner simulated;
 	protected JTable preloadTable;
 
-	//Francesco D'Aquino
-	protected JCheckBox animationEnabler;
 	private GuiInterface gui;
-
-	// end Francesco D'Aquino
 
 	/**
 	 * Builds a new simulation panel
@@ -90,10 +87,8 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	 */
 	public SimulationPanel(ClassDefinition cd, StationDefinition sd, SimulationDefinition simd, GuiInterface gui) {
 		setData(cd, sd, simd);
-		//Francesco D'Aquino
 		this.gui = gui;
 		InitGUI(this.gui);
-		// end Francesco D'Aquino
 		InitActions();
 	}
 
@@ -116,13 +111,12 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	 * not be up-to-date)
 	 */
 	protected void refreshDataStructures() {
-		// Creates an hashmap with unallocated jobs for every class closed class
+		// Creates an hashmap with unallocated jobs for every closed class
 		unallocated = new HashMap<Object, Integer>();
-		for (int i = 0; i < cd.getClassKeys().size(); i++) {
-			Object key = cd.getClassKeys().get(i);
-			if (cd.getClassType(key) == CLASS_TYPE_CLOSED) {
-				unallocated.put(key, new Integer(cd.getClassPopulation(key).intValue() - simd.getPreloadedJobsNumber(key).intValue()));
-			}
+		for (Object key : cd.getClosedClassKeys()) {
+			int population = cd.getClassPopulation(key).intValue();
+			int preload = simd.getPreloadedJobsNumber(key).intValue();
+			unallocated.put(key, new Integer(population - preload));
 		}
 	}
 
@@ -151,14 +145,6 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	}
 
 	/**
-	 * Sets the tab to be shown
-	 * @param tabNumber the index of the tab to be shown
-	 */
-	/*public void setSelectedTab(int tabNumber) {
-	    tabbedPane.setSelectedIndex(tabNumber);    
-	}*/
-
-	/**
 	 * Initialize all GUI related stuff
 	 *
 	 * Modified by Francesco D'Aquino.
@@ -166,10 +152,6 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	 * JCheckBox used to enable queue animation.
 	 */
 	protected void InitGUI(GuiInterface gui) {
-		// ------------ Francesco D'Aquino  ------------------------------------
-		//tabbedPane = new JTabbedPane();
-		// ----------- end Francesco D'Aquino ----------------------------------
-
 		// Adds margins and a central main panel
 		this.setLayout(new BorderLayout());
 		this.add(Box.createVerticalStrut(BORDERSIZE), BorderLayout.NORTH);
@@ -190,14 +172,10 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		preloadTable = new PreloadingTable();
 		preloadTable.setRowHeight(CommonConstants.ROW_HEIGHT);
 		WarningScrollTable preloadPanel = new WarningScrollTable(preloadTable, WARNING_CLASS_STATION);
-		//tabbedPane.addTab("Initial state",preloadPanel);
-		//ParametricAnalysisPanel parametricAnalysisPanel = new ParametricAnalysisPanel();
-		//tabbedPane.addTab("Parametric analysis options",parametricAnalysisPanel);
-		//mainpanel.add(tabbedPane, BorderLayout.CENTER);
 		mainpanel.add(preloadPanel, BorderLayout.CENTER);
-		upperPanel.add(new JLabel("<HTML>" + 
+		upperPanel.add(new JLabel("<HTML>" +
 				"Initial customer locations:" + "<br/>" +
-				"Jobs located in <b>ClassSwitch</b>, <b>Router</b> and <b>Fork</b> are treated as arriving into these stations."
+				"Jobs located in <b>Router</b>, <b>Fork</b>, <b>Logger</b> and <b>ClassSwitch</b> are treated as arriving into these stations."
 				+"</HTML>"), BorderLayout.SOUTH);
 
 		// Adds simulation parameters
@@ -211,7 +189,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		label.setLabelFor(seed);
 		simPanel.add(seed);
 		randomSeed = new JCheckBox("random");
-		if (simd.getUseRandomSeed()) {
+		if (simd.getUseRandomSeed().booleanValue()) {
 			randomSeed.setSelected(true);
 			seed.setEnabled(false);
 			randomSeed.setToolTipText("Uses a random seed to initialize the random number generator");
@@ -226,7 +204,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		simPanel.add(duration);
 		infDuration = new JCheckBox("infinite");
 		infDuration.setToolTipText("Disables the automatic timer used to stop simulation");
-		if (simd.getMaximumDuration().longValue() == -1) {
+		if (simd.getMaximumDuration().doubleValue() < 0) {
 			infDuration.setSelected(true);
 			duration.setValue(new Double(600));
 			duration.setEnabled(false);
@@ -242,7 +220,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		simPanel.add(simulated);
 		infSimulated = new JCheckBox("infinite");
 		infSimulated.setToolTipText("Disables the bound on the simulated time");
-		if (simd.getMaxSimulatedTime().longValue() == -1) {
+		if (simd.getMaxSimulatedTime().doubleValue() < 0) {
 			infSimulated.setSelected(true);
 			simulated.setValue(new Double(600));
 			simulated.setEnabled(false);
@@ -253,7 +231,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		label = new JLabel("Maximum number of samples: ");
 		label.setToolTipText("The term samples stands for observations");
 		simPanel.add(label);
-		maxSamples = new JSpinner(new SpinnerNumberModel(500000, 100000, Integer.MAX_VALUE, 50000));
+		maxSamples = new JSpinner(new SpinnerNumberModel(100000, 100000, Integer.MAX_VALUE, 50000));
 		maxSamples.setValue(simd.getMaxSimulationSamples());
 		maxSamples.setToolTipText("The term sample stands for observation.");
 		label.setLabelFor(maxSamples);
@@ -264,7 +242,6 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		noStatistic.setSelected(simd.getDisableStatistic().booleanValue());
 		simPanel.add(noStatistic);
 
-		//Francesco D'Aquino
 		if (gui.isAnimationDisplayable()) {
 			animationEnabler = new JCheckBox("animation");
 			animationEnabler.setToolTipText("Shows queue animation during simulation");
@@ -272,13 +249,12 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 				animationEnabler.setSelected(true);
 			}
 		}
-		// end Francesco D'Aquino
 
 		// Maximum duration
 		label = new JLabel("Animation update interval (sec): ");
 		simPanel.add(label);
 		polling = new JSpinner(new SpinnerNumberModel(1, .1, Integer.MAX_VALUE, 1));
-		polling.setValue(new Double(simd.getPollingInterval()));
+		polling.setValue(simd.getPollingInterval());
 		label.setLabelFor(polling);
 		simPanel.add(polling);
 
@@ -290,9 +266,8 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		SpringUtilities.makeCompactGrid(simPanel, 5, 3, //rows, cols
 				16, 6, //initX, initY
-				6, 6);//xPad, yPad
+				6, 6); //xPad, yPad
 		upperPanel.add(simPanel, BorderLayout.CENTER);
-
 	}
 
 	/**
@@ -303,30 +278,12 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		randomSeed.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				if (randomSeed.isSelected()) {
-					simd.setUseRandomSeed(true);
+					simd.setUseRandomSeed(new Boolean(true));
 					seed.setEnabled(false);
 				} else {
-					simd.setUseRandomSeed(false);
+					simd.setUseRandomSeed(new Boolean(false));
 					seed.setEnabled(true);
 				}
-			}
-		});
-		// Seed value
-		seed.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				Object value = seed.getValue();
-				if (value instanceof Long) {
-					Long l = (Long) value;
-					if (l.longValue() >= 0) {
-						simd.setSimulationSeed(l);
-					}
-				} else if (value instanceof Integer) {
-					Integer i = (Integer) value;
-					if (i.intValue() >= 0) {
-						simd.setSimulationSeed(new Long(i.intValue()));
-					}
-				}
-				seed.setValue(simd.getSimulationSeed());
 			}
 		});
 
@@ -366,6 +323,13 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 			}
 		});
 
+		// Disable statistic
+		noStatistic.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				simd.setDisableStatistic(new Boolean(noStatistic.isSelected()));
+			}
+		});
+
 		if (animationEnabler != null) {
 			animationEnabler.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
@@ -377,6 +341,25 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 				}
 			});
 		}
+
+		// Seed
+		seed.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Object value = seed.getValue();
+				if (value instanceof Long) {
+					Long l = (Long) value;
+					if (l.longValue() >= 0) {
+						simd.setSimulationSeed(l);
+					}
+				} else if (value instanceof Integer) {
+					Integer i = (Integer) value;
+					if (i.intValue() >= 0) {
+						simd.setSimulationSeed(new Long(i.intValue()));
+					}
+				}
+				seed.setValue(simd.getSimulationSeed());
+			}
+		});
 
 		// Duration
 		duration.addChangeListener(new ChangeListener() {
@@ -437,22 +420,15 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 				if (value instanceof Double) {
 					Double d = (Double) value;
 					if (d.doubleValue() > 0) {
-						simd.setPollingInterval(d.doubleValue());
+						simd.setPollingInterval(d);
 					}
 				} else if (value instanceof Integer) {
 					Integer i = (Integer) value;
 					if (i.intValue() > 0) {
-						simd.setPollingInterval(i.doubleValue());
+						simd.setPollingInterval(new Double(i.intValue()));
 					}
 				}
-				polling.setValue(new Double(simd.getPollingInterval()));
-			}
-		});
-
-		// Disable statistic
-		noStatistic.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				simd.setDisableStatistic(new Boolean(noStatistic.isSelected()));
+				polling.setValue(simd.getPollingInterval());
 			}
 		});
 	}
@@ -469,7 +445,6 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 			setDefaultEditor(Integer.class, new jmt.gui.exact.table.ExactCellEditor());
 			autoResizeMode = AUTO_RESIZE_OFF;
 			setDisplaysScrollLabels(true);
-
 			setRowSelectionAllowed(false);
 			setColumnSelectionAllowed(false);
 			setClipboardTransferEnabled(false);
@@ -566,9 +541,9 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 					int oldjobs = simd.getPreloadedJobs(getStationKey(columnIndex), key).intValue();
 					if (i >= 0) {
 						if (cd.getClassType(key) == CLASS_TYPE_OPEN) {
-							simd.setPreloadedJobs(new Integer(i), getStationKey(columnIndex), key);
+							simd.setPreloadedJobs(getStationKey(columnIndex), key, new Integer(i));
 						} else if (i - oldjobs <= unallocated.get(key).intValue()) {
-							simd.setPreloadedJobs(new Integer(i), getStationKey(columnIndex), key);
+							simd.setPreloadedJobs(getStationKey(columnIndex), key, new Integer(i));
 							int newunallocated = unallocated.get(key).intValue() - i + oldjobs;
 							unallocated.put(key, new Integer(newunallocated));
 						}
@@ -582,8 +557,8 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		@Override
 		public void clear(int row, int col) {
 			int oldjobs = simd.getPreloadedJobs(getStationKey(col), getClassKey(row)).intValue();
-			simd.setPreloadedJobs(new Integer(0), getStationKey(col), getClassKey(row));
-			// If class is closed, put back oldjobs into unallocated data structure
+			simd.setPreloadedJobs(getStationKey(col), getClassKey(row), new Integer(0));
+			// If class is closed, put back old jobs into unallocated data structure
 			if (cd.getClassType(getClassKey(row)) == CLASS_TYPE_CLOSED) {
 				int newunallocated = unallocated.get(getClassKey(row)).intValue() + oldjobs;
 				unallocated.put(getClassKey(row), new Integer(newunallocated));

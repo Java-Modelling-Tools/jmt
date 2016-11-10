@@ -253,16 +253,12 @@ public abstract class Distribution implements ServiceStrategy {
 	 */
 	protected String FormatNumber(double d) {
 		DecimalFormat nf = new DecimalFormat();
-		// Puts '.' as decimal separator.
 		nf.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
-		String ret;
-		// If module of number is greater than 1e3 or lesser than 1e-3 uses exponential notation
-		if (Math.abs(d) >= 1e-3 && Math.abs(d) <= 1e3 || d == 0) {
+		String ret = null;
+		// If module of number is greater than 1e-3 or lesser than 1e3 uses ordinary notation
+		if (Math.abs(d) > 1e-3 && Math.abs(d) < 1e3 || d == 0) {
 			nf.applyPattern("#.###");
 			ret = nf.format(d);
-			if (ret.length() > 7) {
-				ret = ret.substring(0, 6);
-			}
 		} else {
 			nf.applyPattern("0.00E00");
 			ret = nf.format(d);
@@ -271,9 +267,9 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Return an array with an istance of every allowed Distribution. Uses internal
+	 * Return an array with an instance of every allowed Distribution. Uses internal
 	 * caching to search for distributions only the first time that this method is called.
-	 * @return an array with an istance of every allowed Distribution
+	 * @return an array with an instance of every allowed Distribution
 	 */
 	public static Distribution[] findAll() {
 		if (all != null) {
@@ -308,9 +304,9 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Return an array with an istance of every Distribution that allows mean setting. Uses internal
+	 * Return an array with an instance of every Distribution that allows mean setting. Uses internal
 	 * caching to search for distributions only the first time that this method is called.
-	 * @return an array with an istance of every Distribution in which mean value can be specified
+	 * @return an array with an instance of every Distribution in which mean value can be specified
 	 */
 	public static Distribution[] findAllWithMean() {
 		if (allWithMean != null) {
@@ -333,9 +329,9 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Return an array with an istance of every nestable Distribution. Uses internal
+	 * Return an array with an instance of every nestable Distribution. Uses internal
 	 * caching to search for distributions only the first time that this method is called.
-	 * @return an array with an istance of every nestable Distribution
+	 * @return an array with an instance of every nestable Distribution
 	 */
 	public static Distribution[] findNestableDistributions() {
 		if (nestableDistributions != null) {

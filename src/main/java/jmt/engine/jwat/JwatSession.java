@@ -55,8 +55,6 @@ public abstract class JwatSession {
 		MatrixObservations matrix = model.getMatrix();
 		this.filepath = filepath;
 		this.filename = filename;
-		//System.out.println("PATH " + filepath);
-		//System.out.println("NAME " + filename);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		try {
 			ZipOutputStream zos = new ZipOutputStream((new FileOutputStream(filepath + filename + ZIPext)));
@@ -113,16 +111,13 @@ public abstract class JwatSession {
 	}
 
 	private void saveDataInfo(Observation[] obs, Document doc, Element root, ZipOutputStream zos) {
-
 		Element dataEl = doc.createElement("Data");
 		dataEl.setAttribute("size", String.valueOf(obs.length));
 		dataEl.setAttribute("filename", filename + BINext);
-
 		root.appendChild(dataEl);
 	}
 
 	private void saveMatrixData(Observation[] obs, VariableNumber[] var, ZipOutputStream zos) {
-		//System.out.println("Saving matrix");
 		try {
 			int i, j;
 			int size;
@@ -146,16 +141,12 @@ public abstract class JwatSession {
 			}
 			dos.flush();
 			zos.closeEntry();
-
-			//System.out.println("Save done");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	private void saveVarMapping(VariableNumber var, ZipOutputStream zos) throws IOException {
-		//System.out.println("VAR "+ filepath + var.getName()+"_Map"+BINext);
-
 		zos.putNextEntry(new ZipEntry(var.getName() + "_Map" + BINext));
 		DataOutputStream dos = new DataOutputStream(zos);
 
@@ -168,7 +159,6 @@ public abstract class JwatSession {
 		}
 		dos.flush();
 		zos.closeEntry();
-
 	}
 
 	public abstract void appendXMLResults(Document doc, Element root, ZipOutputStream zos);

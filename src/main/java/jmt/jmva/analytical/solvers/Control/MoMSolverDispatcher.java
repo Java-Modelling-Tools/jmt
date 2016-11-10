@@ -55,11 +55,11 @@ public class MoMSolverDispatcher {
     protected int nThreads;
     /**--------------CONSTANTS DEFINITION------------------------*/
     /** constant for Load Dependent service center  */
-    public final static int LD = 0;
+    public static final int LD = 0;
     /** constant for Load Independent service center  */
-    public final static int LI = 1;
+    public static final int LI = 1;
     /** constant for delay center*/
-    public final static int DELAY = 2;
+    public static final int DELAY = 2;
     /**---------------MODEL DEFINITION------------------------*/
     /**number of resources*/
     protected int stations = 0;
@@ -152,7 +152,7 @@ public class MoMSolverDispatcher {
     }
 
     /**
-     * Solves the system throught the MoM algorithm.
+     * Solves the system through the MoM algorithm.
      * input(...) must have been called first.
      *
      * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities

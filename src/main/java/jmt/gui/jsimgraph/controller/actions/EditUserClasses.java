@@ -42,7 +42,7 @@ public class EditUserClasses extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public EditUserClasses(Mediator mediator) {
-		super("Customer classes...", "Class", mediator);
+		super("Customer Classes...", "Class", mediator);
 		putValue(SHORT_DESCRIPTION, "Define customer classes");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_U));
 		setEnabled(false);

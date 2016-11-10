@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2012, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ import jmt.framework.data.CircularList;
  */
 public class HybridEventQueue implements EventQueue {
 
-	private final static int DEFAULT_INITIAL_CAPACITY = 111;
+	private static final int DEFAULT_INITIAL_CAPACITY = 111;
 
 	/** Current events */
 	private CircularList<SimEvent> current;

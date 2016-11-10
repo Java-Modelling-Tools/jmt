@@ -87,7 +87,7 @@ import jmt.manual.PDFViewerBuffer;
  * @author Arif Canakoglu
  *
  */
-public class MMQueues extends JMTFrame { 
+public class MMQueues extends JMTFrame {
 
 	private static final long serialVersionUID = 1L;
 
@@ -307,6 +307,7 @@ public class MMQueues extends JMTFrame {
 			accelerationP.add(accelerationS, gbc);
 			accelerationS.setValue(50);
 			accelerationS.addChangeListener(new ChangeListener() {
+
 				public void stateChanged(ChangeEvent evt) {
 					int value = accelerationS.getValue();
 					if (sim != null) {
@@ -762,13 +763,8 @@ public class MMQueues extends JMTFrame {
 			helpMenu = new JMenu("Help");
 
 			JMenuItem help = new JMenuItem();
-			help.setText("JMCH help");
-			help.setToolTipText("Show help JMCH");
-
-			// OLD
-			// helpMenuItem = helpMenu.add("Help");
-			// NEW
-			// @author Stefano Omini
+			help.setText("JMCH Help");
+			help.setToolTipText("Show JMCH help");
 			help.addActionListener(new ActionListener() {
 				/**
 				 * Invoked when an action occurs.
@@ -786,12 +782,8 @@ public class MMQueues extends JMTFrame {
 					EventQueue.invokeLater(r);
 				}
 			});
-
 			helpMenu.add(help);
 
-			// end NEW
-
-			// NEW Bertoli Marco
 			helpMenu.addSeparator();
 
 			JMenuItem about = new JMenuItem();
@@ -805,12 +797,9 @@ public class MMQueues extends JMTFrame {
 					AboutDialogFactory.showJMCH(MMQueues.this);
 				}
 			});
-
 			helpMenu.add(about);
-			// END new
 
 			menuB.add(helpMenu);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -857,6 +846,7 @@ public class MMQueues extends JMTFrame {
 		buffS.setMinimum(cpuNumber + 1);
 		buffS.setValue(buffer + cpuNumber);
 		switch (queueType) {
+
 		case 0:
 			buffer = 0;
 			ql = new MM1Logic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier);
@@ -1154,7 +1144,6 @@ public class MMQueues extends JMTFrame {
 						lambdaS.setValue((lambdaS.getValue() + 1) / 5);
 					}
 					lambdaMultiplierChange++;
-					//System.out.println("LambdaMultiplier:" + lambdaMultiplier);
 				} else {
 					break;
 				}
@@ -1170,7 +1159,6 @@ public class MMQueues extends JMTFrame {
 						lambdaS.setValue(lambdaS.getValue() * 5);
 					}
 					lambdaMultiplierChange--;
-					//System.out.println("LambdaMultiplier:" + lambdaMultiplier);
 				} else {
 					break;
 				}
@@ -1194,7 +1182,6 @@ public class MMQueues extends JMTFrame {
 						sS.setValue((sS.getValue() + 1) / 5);
 					}
 					sMultiplierChange++;
-					//System.out.println("SMultiplier:" + sMultiplier);
 				} else {
 					break;
 				}
@@ -1210,7 +1197,6 @@ public class MMQueues extends JMTFrame {
 						sS.setValue(sS.getValue() * 5);
 					}
 					sMultiplierChange--;
-					//System.out.println("SMultiplier:" + sMultiplier);
 				} else {
 					break;
 				}
@@ -1237,7 +1223,6 @@ public class MMQueues extends JMTFrame {
 		methodDialog.setVisible(true);
 
 		String selectedMethod = methodDialog.getSelectedMethod();
-		//		System.out.println(selectedMethod);
 		if (selectedMethod == "mm1") {
 			showQueue(0, 1);
 		} else if (selectedMethod == "mm1k") {

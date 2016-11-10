@@ -200,10 +200,8 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 		}
 
 		for (Object stationObjKey : stations.getForwardConnections(stationKey))  {
-			boolean isClassClosed = CommonConstants.CLASS_TYPE_CLOSED == classes.getClassType(classKey);
-			boolean stationIsSink = CommonConstants.STATION_TYPE_SINK.equalsIgnoreCase(stations.getStationType(stationObjKey));
-			if (isClassClosed) {
-				if (!stationIsSink) {
+			if (classes.getClassType(classKey) == CommonConstants.CLASS_TYPE_CLOSED) {
+				if (!stations.getStationType(stationObjKey).equals(CommonConstants.STATION_TYPE_SINK)) {
 					routingStrategy.addEmricalEntryForFrom(newFrom, stations.getStationName(stationObjKey), 0.0);
 				}
 			} else {
@@ -286,7 +284,6 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 			columnSizes[0] = 20;
 			columnSizes[1] = 20;
 			for (int index=2; index < columnSizes.length ; index++) {
-
 				columnSizes[index] = 50;
 				if (index == columnSizes.length - 1) {
 					columnSizes[index] = 20;
@@ -298,7 +295,6 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 			setDefaultEditor(Object.class, new jmt.gui.exact.table.ExactCellEditor());
 			getTableHeader().setReorderingAllowed(false);
 		}
-
 
 		//returns a component to be contained inside a table column(or cell)
 		@Override
@@ -419,7 +415,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 		 */
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Integer from = mapRowIndexAndFrom.get(rowIndex);
-			Object to = "\u221E";
+			Object to = "\u221e";
 			int nextRowIndex = rowIndex + 1;
 			if (mapRowIndexAndFrom.get(nextRowIndex) != null) {
 				Integer nextRowFrom = mapRowIndexAndFrom.get(nextRowIndex);
@@ -430,13 +426,12 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 				return from;
 			}
 			case (1): {
-
 				return to;
 			}
 			default: {
 				LoadDependentRouting.EmpiricalEntry[] columnEntries = routingStrategy.getEmpiricalEntryForFrom(from);
 				if (columnEntries != null && columnIndex < columnEntries.length + 2) {
-					return columnEntries[columnIndex -2].getProbability();
+					return columnEntries[columnIndex - 2].getProbability();
 				} else {
 					return null;
 				}
@@ -458,29 +453,34 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Integer from = mapRowIndexAndFrom.get(rowIndex);
 			switch (columnIndex) {
-			case (0):
+			case (0): {
 				try {
-					if (mapRowIndexAndFrom.values().contains(Integer.parseInt((String) aValue))) {
+					Integer value = Integer.valueOf((String) aValue);
+					if (value.intValue() < 2) {
+						return;
+					}
+					if (mapRowIndexAndFrom.values().contains(value)) {
 						return;
 					}
 					LoadDependentRouting.EmpiricalEntry[] listToCopy = routingStrategy.getEmpiricalEntryForFrom(from);
 					for (LoadDependentRouting.EmpiricalEntry o : listToCopy) {
-						routingStrategy.addEmricalEntryForFrom(Integer.parseInt((String) aValue), o.getStationName(), o.getProbability());
+						routingStrategy.addEmricalEntryForFrom(value, o.getStationName(), o.getProbability());
 					}
 					routingStrategy.deleteEmpricalEntryForFrom(from);
-					mapRowIndexAndFrom.put(rowIndex, Integer.parseInt((String) aValue));
+					mapRowIndexAndFrom.put(rowIndex, value);
 				} catch (NumberFormatException ignored) {
-
 				}
-			break;
-			case (1):
 				break;
-
+			}
+			case (1): {
+				break;
+			}
 			default: {
 				LoadDependentRouting.EmpiricalEntry[] coulmEntries = routingStrategy.getEmpiricalEntryForFrom(from);
 				if (coulmEntries != null && columnIndex < coulmEntries.length + 2) {
 					coulmEntries[columnIndex -2].setProbability(Double.parseDouble((String)aValue));
 				}
+				break;
 			}
 			}
 
@@ -507,8 +507,8 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 	private void setValidForwardStationKeys() {
 		Vector<Object> forwardConnectionKeys = stations.getForwardConnections(stationKey);
 		for (Object fStationKey : forwardConnectionKeys) {
-			if (CommonConstants.CLASS_TYPE_CLOSED == classes.getClassType(classKey)) {
-				if (!CommonConstants.STATION_TYPE_SINK.equalsIgnoreCase(stations.getStationType(fStationKey))) {
+			if (classes.getClassType(classKey) == CommonConstants.CLASS_TYPE_CLOSED) {
+				if (!stations.getStationType(fStationKey).equals(CommonConstants.STATION_TYPE_SINK)) {
 					validForwardStationKeys.add(fStationKey);
 				}
 			} else {

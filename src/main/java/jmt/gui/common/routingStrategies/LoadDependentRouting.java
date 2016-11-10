@@ -1,9 +1,5 @@
 package jmt.gui.common.routingStrategies;
 
-import jmt.gui.common.CommonConstants;
-import jmt.gui.common.definitions.StationDefinition;
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -144,17 +140,20 @@ public class LoadDependentRouting extends RoutingStrategy {
      * @param stationName
      */
     public void refreshRoutingOnStationDeletion(String stationName) {
-        LoadDependentRouting cloneRouting = (LoadDependentRouting)this.clone();
-        this.values.clear();
-        for (Iterator<Integer> itEntries = cloneRouting.values.keySet().iterator(); itEntries.hasNext();) {
-            Integer from = itEntries.next();
-            EmpiricalEntry[] entries = cloneRouting.getEmpiricalEntryForFrom(from);
-            for (EmpiricalEntry entry : entries) {
-                if (!entry.getStationName().equalsIgnoreCase(stationName)) {
-                    this.addEmricalEntryForFrom(from, entry.getStationName(), entry.getProbability());
+    	if (this.values != null && this.values.size() > 0) {
+            LoadDependentRouting cloneRouting = (LoadDependentRouting) this.clone();
+            this.values.clear();
+            Iterator<Integer> itEntries = cloneRouting.values.keySet().iterator();
+            while (itEntries.hasNext()) {
+                Integer from = itEntries.next();
+                EmpiricalEntry[] entries = cloneRouting.getEmpiricalEntryForFrom(from);
+                for (EmpiricalEntry entry : entries) {
+                    if (!entry.getStationName().equalsIgnoreCase(stationName)) {
+                        this.addEmricalEntryForFrom(from, entry.getStationName(), entry.getProbability());
+                    }
                 }
             }
-        }
+    	}
     }
 
     public void refreshRouting(Set<String> fstationNames) {

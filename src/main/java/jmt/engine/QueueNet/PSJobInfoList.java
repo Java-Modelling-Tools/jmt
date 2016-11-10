@@ -91,6 +91,7 @@ public class PSJobInfoList implements JobInfoList {
 	private int serverNumber = 1;
 
 	public PSJobInfoList(int numberOfJobClasses, boolean save) {
+		this.numberOfJobClasses = numberOfJobClasses;
 		list = new LinkedJobInfoList(numberOfJobClasses, save);
 
 		// Initialize all the arrays

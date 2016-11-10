@@ -27,8 +27,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -37,13 +35,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 
-import jmt.engine.jwat.VariableNumber;
 import jmt.engine.jwat.fitting.FittingAlgorithm;
-import jmt.engine.jwat.fitting.ParetoFitting;
 import jmt.engine.jwat.fitting.utils.ModelFitting;
 import jmt.engine.jwat.workloadAnalysis.utils.ChangeVariableListener;
-import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
-import jmt.gui.jwat.JWATConstants;
 import jmt.gui.jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileChooser;
 import jmt.gui.jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileFilter;
 import ptolemy.plot.Plot;

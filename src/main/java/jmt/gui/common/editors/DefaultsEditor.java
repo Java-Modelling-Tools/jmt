@@ -251,15 +251,15 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	protected void initWindow(int target) {
 		this.target = target;
 		// Sets default title, close operation and dimensions
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		this.setTitle("Editing Default Values...");
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setTitle("Editing Default Parameters...");
 		int width = 800, height = 600;
 
 		// Centers this dialog on the screen
 		Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();
-		this.setBounds((scrDim.width - width) / 2, (scrDim.height - height) / 2, width, height);
+		setBounds((scrDim.width - width) / 2, (scrDim.height - height) / 2, width, height);
 		// If user closes this window, act as cancel and reloads saved parameters
-		this.addWindowStateListener(new WindowAdapter() {
+		addWindowStateListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				Defaults.reload();
@@ -277,11 +277,11 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		JPanel mainpanel = new JPanel(new BorderLayout());
 		mainpanel.setLayout(new BorderLayout());
 		mainpanel.setBorder(BorderFactory.createEmptyBorder(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE));
-		this.getContentPane().add(mainpanel, BorderLayout.CENTER);
+		getContentPane().add(mainpanel, BorderLayout.CENTER);
 
 		// Adds bottom_panel to contentpane
 		JPanel bottom_panel = new JPanel(new FlowLayout());
-		this.getContentPane().add((bottom_panel), BorderLayout.SOUTH);
+		getContentPane().add((bottom_panel), BorderLayout.SOUTH);
 
 		// Adds Okay button to bottom_panel
 		JButton okaybutton = new JButton(okayAction);
@@ -304,7 +304,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Class Parameters
 		JPanel class_panel = new JPanel(new SpringLayout());
 		int classpanelnum = 0; // Counts all inserted elements
-		class_panel.setBorder(new TitledBorder(new EtchedBorder(), "Class parameters"));
+		class_panel.setBorder(new TitledBorder(new EtchedBorder(), "Class Parameters"));
 
 		// Name
 		addInputString("Name", "className", class_panel);
@@ -312,8 +312,8 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 
 		// Type
 		tmpMap = new TreeMap<String, String>();
-		tmpMap.put("" + CommonConstants.CLASS_TYPE_CLOSED, "Closed");
 		tmpMap.put("" + CommonConstants.CLASS_TYPE_OPEN, "Open");
+		tmpMap.put("" + CommonConstants.CLASS_TYPE_CLOSED, "Closed");
 		addInputCombo("Type", "classType", class_panel, tmpMap);
 		classpanelnum++;
 
@@ -337,7 +337,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Station Parameters
 		JPanel station_panel = new JPanel(new SpringLayout());
 		int stationpanelnum = 0; // Counts all inserted elements
-		station_panel.setBorder(new TitledBorder(new EtchedBorder(), "Station parameters"));
+		station_panel.setBorder(new TitledBorder(new EtchedBorder(), "Station Parameters"));
 
 		// Name (JSIM only)
 		if (target == JSIM) {
@@ -357,8 +357,8 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 			tmpMap.put(STATION_TYPE_CLASSSWITCH, STATION_NAMES.get(STATION_TYPE_CLASSSWITCH));
 			tmpMap.put(STATION_TYPE_SEMAPHORE, STATION_NAMES.get(STATION_TYPE_SEMAPHORE));
 			tmpMap.put(STATION_TYPE_SCALER, STATION_NAMES.get(STATION_TYPE_SCALER));
-			//tmpMap.put(STATION_TYPE_PLACE, STATION_NAMES.get(STATION_TYPE_PLACE));
-			//tmpMap.put(STATION_TYPE_TRANSITION, STATION_NAMES.get(STATION_TYPE_TRANSITION));
+			tmpMap.put(STATION_TYPE_PLACE, STATION_NAMES.get(STATION_TYPE_PLACE));
+			tmpMap.put(STATION_TYPE_TRANSITION, STATION_NAMES.get(STATION_TYPE_TRANSITION));
 			addInputCombo("Type", "stationType", station_panel, tmpMap);
 			stationpanelnum++;
 		}
@@ -407,7 +407,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Simulation Parameters
 		JPanel sim_panel = new JPanel(new SpringLayout());
 		int simpanelnum = 0; // Counts all inserted elements
-		sim_panel.setBorder(new TitledBorder(new EtchedBorder(), "Simulation parameters"));
+		sim_panel.setBorder(new TitledBorder(new EtchedBorder(), "Simulation Parameters"));
 
 		// Measure Alpha
 		addInput01Spinner("Confidence Interval Measure (0-1)", "measureAlpha", sim_panel);
@@ -441,7 +441,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Francesco D'Aquino
 		// Animation enabled/disabled
 		simpanelnum++;
-		this.addInputAnimationSpinner("Number of classes in queue animation", "isWithAnimation", "representableClasses", sim_panel, 1, 10);
+		addInputAnimationSpinner("Number of classes in queue animation", "isWithAnimation", "representableClasses", sim_panel, 1, 10);
 		// end Francesco D'Aquino
 
 		SpringUtilities.makeCompactGrid(sim_panel, simpanelnum, 2, //rows, cols

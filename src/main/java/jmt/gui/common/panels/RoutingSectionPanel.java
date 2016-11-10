@@ -207,7 +207,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 			if (row != -1) {
 				if (routingProbEditor != null) {
 					routingProbEditor.stopEditing();
-					routingProbEditor.setData(stationData, classData,  stationKey, classData.getClassKeys().get(row));
+					routingProbEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(row));
 					RoutingSectionPanel.this.doLayout();
 					RoutingSectionPanel.this.repaint();
 				}
@@ -302,7 +302,6 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 					value = ((ProbabilityRouting) aValue).clone();
 				}
 				else if (aValue instanceof LoadDependentRouting) {
-
 					value = ((LoadDependentRouting) aValue).clone();
 				}
 				if (!value.equals(stationData.getRoutingStrategy(stationKey, classKey))) {

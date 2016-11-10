@@ -165,7 +165,7 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 						serverNum = new Integer(1);
 						numForkSpinner.setValue(serverNum);
 					}
-					sd.setStationNumberOfServers(serverNum, stationKey);
+					sd.setStationNumberOfServers(stationKey, serverNum);
 				}
 			}
 		});

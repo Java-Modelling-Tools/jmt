@@ -55,6 +55,7 @@ public class TrafficAnalysisSession extends JwatSession {
 	@Override
 	public void resetSession() {
 		model.resetModel();
+		epochs = -1;
 	}
 
 	public void setMatrix(MatrixObservations m) {

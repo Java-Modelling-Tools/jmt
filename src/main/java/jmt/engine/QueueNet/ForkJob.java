@@ -15,88 +15,63 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.engine.QueueNet;
 
-import jmt.engine.NodeSections.Fork;
-
 /**
- * <p>Title: ForkJob</p>
- * <p>Description: This is a special job created by Fork component. This is designed
- * to hold a reference to fork node and forked job.</p>
+ * <p>Title: Fork Job</p>
+ * <p>Description: This class implements the fork job.</p>
  *
- * @author Bertoli Marco
- *         Date: 13-mar-2006
- *         Time: 15.48.33
- * 
- * Modified by J. Shuai & M. Cazzoli, implemented fork and join strategies
+ * @author Lulai Zhu
+ * Date: 06-10-2016
+ * Time: 14.00.00
  */
 public class ForkJob extends Job {
 
-	/** Reference to original job */
-	protected Job forkedJob;
-	/** Number of child jobs */
-	protected int jobNum;
-	/** Number of child jobs of same class */
-	protected int jobNumClass;
-	/** Reference to Fork node */
-	protected Fork forkNode;
+	/** Reference to fork job info */
+	private ForkJobInfo forkJobInfo;
 
 	/**
-	 * Creates a new ForkJob, given number of jobs, original job and reference fork
-	 * @param jobNum number of jobs in which this one must be split
-	 * @param forkedJob original job to split
-	 * @param forkNode reference to splitting node (used for blocking)
+	 * Creates a new ForkJob, given job class and shared information
+	 * @param jobClass class of the fork job
+	 * @param forkJobInfo info of the fork job
 	 */
-	public ForkJob(int jobNum, Job forkedJob, Fork forkNode) {
-		super(forkedJob.getJobClass());
-		this.forkedJob = forkedJob;
-		this.jobNum = jobNum;
-		this.forkNode = forkNode;
-		this.systemEnteringTime = forkedJob.systemEnteringTime;
-		this.jobNumClass = jobNum;
-		this.born();
+	public ForkJob(JobClass jobClass, ForkJobInfo forkJobInfo) {
+		super(jobClass);
+		systemEnteringTime = forkJobInfo.getForkedJob().systemEnteringTime;
+		this.forkJobInfo = forkJobInfo;
 	}
 
 	/**
-	 * Creates a new ForkJob, given number of jobs, original job and reference fork
-	 * @param jobNum number of jobs in which this one must be split
-	 * @param forkedJob original job to split
-	 * @param forkNode reference to splitting node (used for blocking)
-	 * @param jobClass the class of the ForkJob
-	 * @param jobNum number of jobs of class {@code jobClass} in which this one must be split
-	 */
-	public ForkJob(int jobNum, Job forkedJob, Fork forkNode, JobClass jobClass, int jobNumClass) {
-		this(jobNum, forkedJob, forkNode);
-		this.jobNumClass = jobNumClass;
-		super.setClass(jobClass);
-	}
-
-	/**
-	 * Gets original job that was split in this piece
-	 * @return original job that was split in this piece
+	 * Gets original job that was forked
+	 * @return original job that was forked
 	 */
 	public Job getForkedJob() {
-		return forkedJob;
+		return forkJobInfo.getForkedJob();
 	}
 
 	/**
-	 * Gets number of split created from original job
-	 * @return number number of split created from original job
+	 * Gets number of child jobs forked from the original job
+	 * @return number of child jobs forked from the original job
 	 */
-	public int getForkedNumber() {
-		return jobNum;
+	public int getForkedNum() {
+		return forkJobInfo.getForkedNum();
 	}
 
 	/**
-	 * Gets the Fork node that created this split
-	 * @return reference to Fork node that created this split
+	 * Gets fork node that forked the original job
+	 * @return fork node that forked the original job
 	 */
-	public Fork getReferenceFork() {
-		return forkNode;
-	}       
+	public NetNode getForkNode() {
+		return forkJobInfo.getForkNode();
+	}
 
-	public int getjobNumClass() {
-		return jobNumClass;
+	/**
+	 * Gets info of the fork job
+	 * @return info of the fork job
+	 */
+	public ForkJobInfo getForkJobInfo() {
+		return forkJobInfo;
 	}
 
 }

@@ -67,13 +67,13 @@ public abstract class RoutingStrategy {
 	public abstract String getClassPath();
 
 	/**
-	 * Return an array with an istance of every allowed Routing Strategy. Uses Reflection on
+	 * Return an array with an instance of every allowed Routing Strategy. Uses Reflection on
 	 * <code>JMODELConstants</code> field to find all strategies and uses internal
-	 * caching to search for strategiess only the first time that this method is called.
+	 * caching to search for strategies only the first time that this method is called.
 	 * <br>
 	 * Author: Bertoli Marco
 	 *
-	 * @return an array with an istance of every allowed RoutingStrategy
+	 * @return an array with an instance of every allowed RoutingStrategy
 	 */
 	public static RoutingStrategy[] findAll() {
 		if (all != null) {
@@ -107,7 +107,7 @@ public abstract class RoutingStrategy {
 		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
 		try {
 			for (Field field : fields) {
-				if (field.getName().startsWith("ROUTING_") && !field.getName().endsWith("LOADDEPENDANT") ) {
+				if (field.getName().startsWith("ROUTING_") && !field.getName().endsWith("LOADDEPENDENT") ) {
 					strategies.add((RoutingStrategy) field.get(null));
 				}
 			}

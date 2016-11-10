@@ -107,7 +107,7 @@ public class ProbabilitiesFork extends ForkStrategy {
 				if (nodePos == 0 && nodeList.contains(nodes[i])) {
 					EmpiricalEntry[] JobsPerLinkDis = outPaths[i].getJobsPerLinkDis();
 					EmpiricalPar numParam = new EmpiricalPar(JobsPerLinkDis);
-					Integer num = Integer.parseInt((String) JobsPerLinkDis[(int) distribution.nextRand(numParam)].getValue());
+					Integer num = Integer.valueOf((String) JobsPerLinkDis[(int) distribution.nextRand(numParam)].getValue());
 					Map<JobClass, Integer> map = new HashMap<JobClass, Integer>();
 					map.put(jobClass, num);
 					nl.add(nodes[i], map);

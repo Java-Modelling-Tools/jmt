@@ -42,17 +42,17 @@ public class JmchGuiTest {
 	 * (which is the JMCH frame).
 	 */
 	@Test
-	public void mainJMVAWindowDisplaysCorrectly() {
+	public void mainJMCHWindowDisplaysCorrectly() {
 		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JMCH_SHORT_DESCRIPTION)).click();
 		FrameFixture jmch = WindowFinder.findFrame(MMQueues.class).using(window.robot);
 		DialogFixture popup = WindowFinder.findDialog(JDialog.class).using(window.robot);
 		popup.button(new TextButtonMatcher("Enter")).click();
 		jmch.show();
-		
 	}
-	
+
 	@After
 	public void tearDown() {
 		window.cleanUp();
 	}
+
 }

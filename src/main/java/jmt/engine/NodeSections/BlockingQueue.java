@@ -24,6 +24,7 @@ import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.BlockingRegion;
+import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfo;
@@ -187,9 +188,6 @@ public class BlockingQueue extends InputSection {
 			//the input station receives the "start" event because it has no nodes in input
 			//then it is marked as reference node
 
-			//NEW
-			//@author Stefano Omini
-
 			//checks whether there are jobs in queue
 			if (jobsList.size() == 0) {
 				//no jobs in queue
@@ -257,17 +255,6 @@ public class BlockingQueue extends InputSection {
 				//become globally or class blocked
 
 				//the job is sent to service section
-
-				//OLD
-				/*Job firstNotBlocked = getFirstNotBlockedJob();
-				if (firstNotBlocked != null) {
-					forward(firstNotBlocked);
-					if (DEBUG) {
-						System.out.println("SendJobIn");
-					}
-
-					blockingRegion.increaseOccupation(jobClass);
-				}*/
 				forward(job);
 				if (DEBUG) {
 					System.out.println("SendJobIn");
@@ -363,12 +350,9 @@ public class BlockingQueue extends InputSection {
 	 */
 	private void drop(Job job) throws NetException {
 		int c = job.getJobClass().getId();
-		droppedJobs++;
-		droppedJobsPerClass[c]++;
-
 		JobInfo jobInfo = jobsList.lookFor(job);
 		if (jobInfo != null) {
-			//removes job from the jobInfoList of the node section
+			//drops job from the section jobInfoList
 			jobsList.dropJob(jobInfo);
 		}
 
@@ -377,11 +361,15 @@ public class BlockingQueue extends InputSection {
 		}
 		JobInfo jobInfo_node = jobsList_node.lookFor(job);
 		if (jobInfo_node != null) {
-			//removes job from the jobInfoList of the node
+			//drops job from the node jobInfoList
 			jobsList_node.dropJob(jobInfo_node);
 		}
-		// Removes job from global jobInfoList - Bertoli Marco
-		getOwnerNode().getQueueNet().getJobInfoList().dropJob(job);
+		if (!(job instanceof ForkJob)) {
+			//drops job from the global jobInfoList
+			getOwnerNode().getQueueNet().getJobInfoList().dropJob(job);
+			droppedJobs++;
+			droppedJobsPerClass[c]++;
+		}
 	}
 
 	/**
@@ -397,7 +385,7 @@ public class BlockingQueue extends InputSection {
 	 * @param classIndex the index of the job class
 	 * @return the number of dropped jobs for the specified class
 	 */
-	public int getDroppedJobPerClass(int classIndex) {
+	public int getDroppedJobsPerClass(int classIndex) {
 		return droppedJobsPerClass[classIndex];
 	}
 

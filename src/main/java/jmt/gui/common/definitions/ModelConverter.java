@@ -96,12 +96,12 @@ public class ModelConverter {
 
 			if (type == ExactConstants.CLASS_CLOSED) {
 				// Closed class
-				key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, 0, new Integer((int) data), null);
+				key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, new Integer(0), new Integer((int) data), null);
 			} else {
 				// Open class
 				Exponential ex = new Exponential();
 				ex.setMean(1 / data);
-				key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, 0, null, ex);
+				key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, new Integer(0), null, ex);
 			}
 			classKeys[i] = key;
 		}
@@ -149,7 +149,7 @@ public class ModelConverter {
 				case ExactConstants.STATION_LI:
 					// Load independent
 					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER);
-					output.setStationNumberOfServers(new Integer(servers), key);
+					output.setStationNumberOfServers(key, new Integer(servers));
 					output.setStationQueueStrategy(key, CommonConstants.QUEUE_STRATEGY_STATION_PS);
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
@@ -162,7 +162,7 @@ public class ModelConverter {
 					// Load dependent - this is single class only, but here
 					// we support multiclass too (future extensions).
 					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER);
-					output.setStationNumberOfServers(new Integer(servers), key);
+					output.setStationNumberOfServers(key, new Integer(servers));
 					output.setStationQueueStrategy(key, CommonConstants.QUEUE_STRATEGY_STATION_PS);
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
@@ -349,7 +349,7 @@ public class ModelConverter {
 					} else {
 						serviceTimes[st][cl][0] = 1;
 						res.add(output.getStationNames()[st] + " service time distribution for " + output.getClassNames()[cl]
-								+ " does not have a valid mean value." + " Service time is set to default value 1");
+								+ " does not have a valid mean value. Service time was set to default value 1");
 					}
 				} else if (serv instanceof ZeroStrategy) {
 					serviceTimes[st][cl] = new double[1];
@@ -366,7 +366,7 @@ public class ModelConverter {
 					} else {
 						serviceTimes[st][cl] = new double[1]; // This is not load dependent
 						serviceTimes[st][cl][0] = lds.getMeanValue(1);
-						res.add("LD stations are supported only if model is closed and " + "single class. " + stationNames[st]
+						res.add("LD stations are supported only if model is closed and single class. " + stationNames[st]
 								+ " was converted to a LI station.");
 					}
 				}
@@ -383,12 +383,12 @@ public class ModelConverter {
 		serviceTimes = null;
 
 		// Now calculates visits starting from routing.
-		Vector<Object> stations; // This is not equivalent to stationKeys as routers are considered
 		double[][] visits = new double[stationNum][classNum];
 		double[] vis = null; // array used to store results of mldivide
 		for (int cl = 0; cl < classNum; cl++) {
+			// This is not equivalent to stationKeys as routers are considered
+			Vector<Object> stations = input.getStationKeysNoSourceSink();
 			if (output.getClassTypes()[cl] == ExactConstants.CLASS_OPEN) {
-				stations = input.getStationKeysNoSourceSink();
 				// Open class, must calculate routing from source
 				Object refStat = input.getClassRefStation(classKeys.get(cl));
 				double[] p0;
@@ -397,10 +397,10 @@ public class ModelConverter {
 					Vector<Object> sources = input.getStationKeysSource();
 					if (sources.size() > 0) {
 						refStat = sources.get(0);
-						res.add("Reference station for " + output.getClassNames()[cl] + " was " + "not set. " + input.getStationName(refStat)
+						res.add("Reference station for " + output.getClassNames()[cl] + " was not set. " + input.getStationName(refStat)
 								+ " was chosen.");
 					} else {
-						res.add("Reference station for " + output.getClassNames()[cl] + " was " + "not set. " + output.getStationNames()[0]
+						res.add("Reference station for " + output.getClassNames()[cl] + " was not set. " + output.getStationNames()[0]
 								+ " was chosen.");
 					}
 				}
@@ -419,18 +419,15 @@ public class ModelConverter {
 					vis = V.getColumnPackedCopy();
 				} catch (Exception e) {
 					// Matrix is singular
-					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as" + " network topology was badly specified");
+					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as network topology was badly specified");
 				}
-
 			} else {
-				// Closed class, system is indefinded, so sets visits to reference station to
+				// Closed class, system is undefined, so sets visits to reference station to
 				// 1 and builds a smaller P matrix
-				stations = new Vector<Object>(input.getStationKeysNoSourceSink());
-				// Finds reference station
 				Object refStat = input.getClassRefStation(classKeys.get(cl));
 				if (refStat == null) {
 					refStat = stations.get(0);
-					res.add("Reference station for " + output.getClassNames()[cl] + " was " + "not set. " + input.getStationName(refStat)
+					res.add("Reference station for " + output.getClassNames()[cl] + " was not set. " + input.getStationName(refStat)
 							+ " was chosen.");
 				}
 
@@ -450,7 +447,7 @@ public class ModelConverter {
 					vis = V.getColumnPackedCopy();
 				} catch (Exception e) {
 					// Matrix is singular
-					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as" + " network topology was badly specified");
+					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as network topology was badly specified");
 				}
 			}
 
@@ -481,12 +478,12 @@ public class ModelConverter {
 		double[] p = new double[stations.size()];
 		RoutingStrategy strategy = (RoutingStrategy) model.getRoutingStrategy(stationKey, classKey);
 		if (strategy instanceof ProbabilityRouting && !model.getStationType(stationKey).equals(CommonConstants.STATION_TYPE_FORK)) {
-			Map routingMap = strategy.getValues();
-			Iterator it = routingMap.keySet().iterator();
+			Map<Object, Double> routingMap = strategy.getValues();
+			Iterator<Object> it = routingMap.keySet().iterator();
 			while (it.hasNext()) {
 				Object dest = it.next();
 				if (stations.lastIndexOf(dest) >= 0) {
-					p[stations.lastIndexOf(dest)] = ((Double) routingMap.get(dest)).doubleValue();
+					p[stations.lastIndexOf(dest)] = (routingMap.get(dest)).doubleValue();
 				}
 			}
 		} else {

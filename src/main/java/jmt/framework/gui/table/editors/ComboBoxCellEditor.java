@@ -164,7 +164,7 @@ public class ComboBoxCellEditor extends AbstractCellEditor implements TableCellE
 	 * box that is checked.  <code>null</code> is a
 	 * valid value
 	 * @param    isSelected    true if the cell is to be rendered with the
-	 * selection highlighted; otherwise false
+	 * selection highlighted; false otherwise
 	 * @param    hasFocus    if true, render cell appropriately.  For
 	 * example, put a special border on the cell, if
 	 * the cell can be edited, render in the color used

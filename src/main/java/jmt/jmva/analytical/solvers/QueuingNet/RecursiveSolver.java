@@ -117,12 +117,12 @@ public class RecursiveSolver extends QNSolver {
 
     /**
      * Stores at a particular Map<PopulationVector, Map<MultiplicitiesVector, BigRational>>
-     * datastructure a computed normalising constant value for future re-use.
+     * data structure a computed normalising constant value for future re-use.
      *
      * @param m The MultiplicitiesVector
      * @param p The PopulationVector
      * @param Gval The corresponding normalising constant that has been computed
-     * @param map The datastructure at which the constant will be stored
+     * @param map The data structure at which the constant will be stored
      */
     protected void storeG(MultiplicitiesVector m, PopulationVector p, BigRational Gval, Map<PopulationVector, Map<MultiplicitiesVector, BigRational>> map) {
         Map<MultiplicitiesVector, BigRational> step1 = map.get(p);

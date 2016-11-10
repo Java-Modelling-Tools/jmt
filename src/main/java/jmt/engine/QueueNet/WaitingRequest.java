@@ -18,16 +18,16 @@
 
 package jmt.engine.QueueNet;
 
-/** This class implements a waiting request of a job to be processed by a
- section: it contains information about the job and the node/the section which
- sent the job. This class should be used to build a list of jobs sent by other
- nodes/sections which could not be processed immediately: a section can use this
- class to retrieve node/section to be acked when job could be processed.
+/**
+ * This class implements a waiting request of a job to be processed by a
+ * section: it contains information about the job and the node/the section which
+ * sent the job. This class should be used to build a list of jobs sent by other
+ * nodes/sections which could not be processed immediately: a section can use this
+ * class to retrieve node/section to be acked when job could be processed.
  */
 public class WaitingRequest extends JobInfo {
 
 	private NetNode Node;
-
 	private byte Section;
 
 	/**
@@ -55,4 +55,5 @@ public class WaitingRequest extends JobInfo {
 	public byte getSection() {
 		return Section;
 	}
+
 }

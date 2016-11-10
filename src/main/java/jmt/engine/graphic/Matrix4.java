@@ -31,12 +31,12 @@ public class Matrix4 {
 	protected float[]			m			= new float[ 16 ];
 	
 	// Identity matrix.
-	public final static Matrix4	IDENTITY	= new Matrix4( 1.0f );
+	public static final Matrix4	IDENTITY	= new Matrix4( 1.0f );
 	
 	// Axes indices.
-	public final static int		X_INDEX		= 0;
-	public final static int		Y_INDEX		= 1;
-	public final static int		Z_INDEX		= 2;
+	public static final int		X_INDEX		= 0;
+	public static final int		Y_INDEX		= 1;
+	public static final int		Z_INDEX		= 2;
 	
 	
 	public Matrix4() {

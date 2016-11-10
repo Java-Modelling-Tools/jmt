@@ -196,11 +196,8 @@ public class Mediator implements GuiInterface {
 	private DialogFactory dialogFactory;
 	// Cell factory
 	private CellFactory cellFactory;
-
-	// S Jiang
 	// Dialog Factory to display template input panels.
 	private CustomizableDialogFactory customizableDialogFactory;
-	// end
 
 	private AbstractJmodelAction closeModel;
 	private AbstractJmodelAction newModel;
@@ -228,20 +225,16 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction editSimParams;
 	private AbstractJmodelAction showResults;
 
-	// S Jiang
 	private AbstractJmodelAction useTemplate;
-	// end
 
 	private AbstractJmodelAction about;
 	private AbstractJmodelAction addBlockingRegion;
 	private AbstractJmodelAction takeScreenShot;
-	private AbstractJmodelAction // Giuseppe De CIcco & Fabio Granara
-	actionRotate;
+	private AbstractJmodelAction actionRotate;
 	private AbstractJmodelAction actionSetRight;
-	private AbstractJmodelAction // Conti Andrea
-	editUndo;
+	private AbstractJmodelAction editUndo;
 	private AbstractJmodelAction editRedo;
-	//S Jiang
+
 	private AbstractJmodelAction downloadDefaultTemplates;
 
 	private JmtJGraph graph;
@@ -254,53 +247,37 @@ public class Mediator implements GuiInterface {
 	private Cursor cursor;
 	private Cursor oldCursor;
 
-	// Bertoli Marco
 	private JSimGraphModel model;
 	private JFrame resultsWindow;
 	private JmtClipboard clipboard;
-	private DispatcherThread dispatcher = null; // To control simulation
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL); // To
-	// Save
-	// /
-	// Load
+	private DispatcherThread dispatcher = null;
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL);
 	private JMTToolBar componentBar;
-	// end
 
-	// Francesco D'Aquino
 	private ModelChecker mc;
 	private JModelProblemsWindow pw;
 	private PADispatcherThread batchThread;
 	private PAProgressWindow progressWindow;
 	private AbstractJmodelAction editPAParams;
-	// end
 
-	// Giuseppe De Cicco
 	private JmtOverlapping overlapping;
-	// end
 
 	public Mediator(final JmtJGraph graph, MainWindow mainWindow) {
 		this.mainWindow = mainWindow;
 		dialogFactory = new DialogFactory(mainWindow);
 		cellFactory = new CellFactory(this);
-
-		// S Jiang
 		customizableDialogFactory = new CustomizableDialogFactory(mainWindow);
 
 		if (Defaults.getAsBoolean("showDefaultTemplates")) {
-			int result = JOptionPane
-					.showConfirmDialog(mainWindow,
-							"Would you like to download some recommended templates for JSIMGraph?");
-
+			int result = JOptionPane.showConfirmDialog(mainWindow, "Would you like to download some recommended templates for JSIMGraph?");
 			if (result == JOptionPane.YES_OPTION) {
 				downloadDefaultTemplates();
 			}
-
 			if (result == JOptionPane.NO_OPTION) {
 				Defaults.set("showDefaultTemplates", "false");
 				Defaults.save();
 			}
 		}
-		// end
 
 		this.graph = graph;
 		closeModel = new CloseModel(this);
@@ -319,13 +296,12 @@ public class Mediator implements GuiInterface {
 
 		solveAnalitic = new SolveAnalytic(this);
 		solveApp = new SolveApprox(this);
-		// Conti Andrea - undo
+
 		undoManager = new GraphUndoManager();
 		undoProxy = new UndoManagerProxy(undoManager);
 		editUndo = new ActionUndo(this, undoManager);
 		editRedo = new ActionRedo(this, undoManager);
-		// end
-		// Bertoli Marco
+
 		pauseSimulation = new PauseSimulation(this);
 		stopSimulation = new StopSimulation(this);
 		exit = new Exit(this);
@@ -336,23 +312,17 @@ public class Mediator implements GuiInterface {
 		editPAParams = new EditPAParams(this);
 		showResults = new ShowResults(this);
 
-		// S Jiang
 		useTemplate = new UseTemplate(this);
 		downloadDefaultTemplates = new DownloadDefaultTemplates(this);
-		// end
 
 		about = new About(this);
 		addBlockingRegion = new AddBlockingRegion(this);
-		// fg
+
 		actionSetRight = new ActionSetRight(this);
-
 		takeScreenShot = new TakeScreenShot(this);
-		// end
 
-		// GDC & FG
 		actionRotate = new ActionRotate(this);
 		overlapping = new JmtOverlapping(this);
-		// end
 
 		editUserClasses = new EditUserClasses(this);
 		editMeasures = new EditMeasures(this);
@@ -369,7 +339,6 @@ public class Mediator implements GuiInterface {
 		JMTToolBar toolbar = new JMTToolBar(JMTImageLoader.getImageLoader());
 		// Builds an array with all actions to be put in the toolbar
 		AbstractJmodelAction[] actions = new AbstractJmodelAction[] { newModel, openModel, saveModel, null,
-				// editUndo, editRedo, null,
 				actionCut, actionCopy, actionPaste, null, editUserClasses, editMeasures, editSimParams, editPAParams, null, switchToExactSolver,
 				null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp, null, useTemplate };
 		toolbar.populateToolbar(actions);
@@ -388,14 +357,11 @@ public class Mediator implements GuiInterface {
 		menu.addMenu(action);
 
 		// Edit menu
-		action = new MenuAction("Edit", new AbstractJmodelAction[] {
-				// editUndo, editRedo, null
-				actionCut, actionCopy, actionPaste, actionDelete, null, takeScreenShot });
+		action = new MenuAction("Edit", new AbstractJmodelAction[] { actionCut, actionCopy, actionPaste, actionDelete, null, takeScreenShot });
 		menu.addMenu(action);
 
 		// Define menu
-		action = new MenuAction("Define",
-				new AbstractJmodelAction[] { editUserClasses, editMeasures, editSimParams, editPAParams, null, editDefaults });
+		action = new MenuAction("Define", new AbstractJmodelAction[] { editUserClasses, editMeasures, editSimParams, editPAParams, null, editDefaults });
 		menu.addMenu(action);
 
 		// Solve menu
@@ -420,7 +386,6 @@ public class Mediator implements GuiInterface {
 
 	private File openedArchive;
 
-	// Bertoli Marco
 	public AbstractJmodelAction getEditUserClasses() {
 		return editUserClasses;
 	}
@@ -449,12 +414,10 @@ public class Mediator implements GuiInterface {
 		addBlockingRegion.setEnabled(state);
 	}
 
-	// Giuseppe De CIcco & Fabio Granara
 	public void enableSetRight(boolean state) {
 		actionSetRight.setEnabled(state);
 	}
 
-	// Giuseppe De CIcco & Fabio Granara
 	public AbstractJmodelAction getSetRight() {
 		return actionSetRight;
 	}
@@ -494,9 +457,7 @@ public class Mediator implements GuiInterface {
 	public AbstractJmodelAction getAbout() {
 		return about;
 	}
-	// end
 
-	// Conti Andrea - undo
 	private GraphUndoManager undoManager;
 	private UndoManagerProxy undoProxy;
 
@@ -531,26 +492,21 @@ public class Mediator implements GuiInterface {
 	public void setUndoManager(GraphUndoManager um) {
 		undoManager = um;
 	}
-	// end
 
 	public void setConnectState() {
 		setSelect.setEnabled(true);
-		// DEK (Federico Granata) 14-11-2003
 		oldCursor = cursor;
 		cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 		setGraphCursor(cursor);
-		// end 14-11-2003
 		mouseListener.setConnectState();
 	}
 
 	public void setCopyState() {
 		setSelect.setEnabled(true);
-		// mouseListener.setCopyState();
 	}
 
 	public void setCutState() {
 		setSelect.setEnabled(true);
-		// mouseListener.setCutState();
 	}
 
 	public void setInsertState(String className) {
@@ -561,8 +517,6 @@ public class Mediator implements GuiInterface {
 	public void setSelectState() {
 		setSelect.setEnabled(true);
 		mouseListener.setSelectState();
-		// DEK (Federico Granata)
-		// mainWindow.getAlbero().setSelectedButton(true);
 	}
 
 	public AbstractJmodelAction getDeleteAction() {
@@ -586,7 +540,6 @@ public class Mediator implements GuiInterface {
 		actionCopy.setEnabled(state);
 	}
 
-	// Giuseppe De CIcco & Fabio Granara
 	public void enableRotateAction(boolean state) {
 		actionRotate.setEnabled(state);
 	}
@@ -675,23 +628,17 @@ public class Mediator implements GuiInterface {
 		graph = new JmtJGraph(this);
 		graph.setModel(new DefaultGraphModel());
 
-		// Giuseppe De Cicco
 		graph.getGraphLayoutCache().setFactory(new JmtDefaultCellViewFactory(this) {
+			private static final long serialVersionUID = 1L;
 
-			private static final long serialVersionUID = -8352272370225918131L;
-
-			// Override per creare il RENDERER - Giuseppe De Cicco
 			protected EdgeView createEdgeView(Object cell) {
-
 				if (cell instanceof Edge || cell instanceof JmtEdge) {
-					// System.out.println("Lato personalizzato");
 					return new JmtEdgeView(cell, mediator);
 				} else {
 					return new JmtEdgeView(cell, mediator);
 				}
 			}
 		});
-		// end
 
 		// Sets the cloneable flag to 'false'
 		graph.setCloneable(false);
@@ -704,16 +651,11 @@ public class Mediator implements GuiInterface {
 		graph.addMouseListener(mouseListener);
 		graph.addMouseMotionListener(mouseListener);
 
-		// Conti Andrea
 		undoProxy.discardAllEdits();
 		graph.getModel().addUndoableEditListener(undoProxy);
-		// end
 
-		// Bertoli Marco
-		// Instantiates a new JMODELModel data structure to store the entire
-		// model
+		// Instantiates a new JMODELModel data structure to store the entire model
 		model = new JSimGraphModel();
-		// end
 
 		mainWindow.setGraph(graph);
 		closeModel.setEnabled(true);
@@ -721,11 +663,8 @@ public class Mediator implements GuiInterface {
 		saveModelAs.setEnabled(true);
 		editMeasures.setEnabled(true);
 
-		// S Jiang
 		useTemplate.setEnabled(true);
-		// end
 
-		// Bertoli Marco
 		// Show only insert options on ComponentBar
 		componentBar.clearButtonGroupSelection(0);
 		componentBar.enableButtonGroup(0, true);
@@ -738,12 +677,10 @@ public class Mediator implements GuiInterface {
 		}
 		resultsWindow = null;
 
-		// Disables cut/copy/delete (leave paste enabled as clipboard is not
-		// flushed)
+		// Disables cut/copy/delete (leave paste enabled as clipboard is not flushed)
 		enableCopyAction(false);
 		enableCutAction(false);
 		enableDeleteAction(false);
-		// end
 
 		// Disables creation of blocking region
 		enableAddBlockingRegion(false);
@@ -785,8 +722,7 @@ public class Mediator implements GuiInterface {
 				model.resetSaveState();
 			}
 			newModel();
-			// At this point loading was successful, so substitutes old model
-			// with loaded one
+			// At this point loading was successful, so substitutes old model with loaded one
 			model = tmpmodel;
 			this.populateGraph();
 			setSelect.setEnabled(true);
@@ -814,7 +750,6 @@ public class Mediator implements GuiInterface {
 		if (state == ModelLoader.WARNING) {
 			new WarningWindow(modelLoader.getLastWarnings(), mainWindow, modelLoader.getInputFileFormat(), CommonConstants.JSIM).show();
 		}
-
 	}
 
 	public void closeModel() {
@@ -827,8 +762,7 @@ public class Mediator implements GuiInterface {
 		// clear undo history
 		graph.getModel().removeUndoableEditListener(undoProxy);
 		undoProxy.discardAllEdits();
-		// end
-		// graph.setModel(null); //wreaks quite a bit of havoc
+	
 		mainWindow.removeGraph();
 		graph = null;
 		closeModel.setEnabled(false);
@@ -842,7 +776,6 @@ public class Mediator implements GuiInterface {
 		actionCut.setEnabled(false);
 		actionPaste.setEnabled(false);
 		actionDelete.setEnabled(false);
-		// FG
 		actionSetRight.setEnabled(false);
 		actionRotate.setEnabled(false);
 
@@ -857,9 +790,7 @@ public class Mediator implements GuiInterface {
 		simulate.setEnabled(false);
 		editSimParams.setEnabled(false);
 
-		// S Jiang
 		useTemplate.setEnabled(false);
-		// end
 
 		editPAParams.setEnabled(false);
 		takeScreenShot.setEnabled(false);
@@ -938,10 +869,7 @@ public class Mediator implements GuiInterface {
 	 * @return this components graphics context
 	 */
 	public Graphics2D getGraphGraphics() {
-		// DEK (Federico Granata) 17-11-2003
 		return (Graphics2D) graph.getGraphics();
-		// end 17-11-2003
-		// return mainWindow.getGraphics();
 	}
 
 	public CellView getNextViewAt(CellView current, double x, double y) {
@@ -1059,8 +987,6 @@ public class Mediator implements GuiInterface {
 		return graph.getMarqueeColor();
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
-	// protected boolean no = true;
 	public void connect(Point2D start, Point2D current, PortView inPort, PortView outPort) {
 		Point2D p = fromScreen(start);
 		Point2D p2 = fromScreen(current);
@@ -1076,8 +1002,7 @@ public class Mediator implements GuiInterface {
 			GraphConstants.setEndFill(map, true);
 			GraphConstants.setDisconnectable(map, false);
 			Map<Object, Map> viewMap = new Hashtable<Object, Map>();
-			// ---- Adds connection into underlying data structure -- BERTOLI
-			// MARCO
+			// Adds connection into underlying data structure
 			Object sourceKey = ((CellComponent) ((JmtCell) ((OutputPort) (outPort.getCell())).getUserObject()).getUserObject()).getKey();
 			Object targetKey = ((CellComponent) ((JmtCell) ((InputPort) (inPort.getCell())).getUserObject()).getUserObject()).getKey();
 			JmtEdge connection = new JmtEdge(sourceKey, targetKey, this);
@@ -1086,14 +1011,10 @@ public class Mediator implements GuiInterface {
 			ConnectionSet cs = new ConnectionSet();
 			cs.connect(connection, outPort.getCell(), true);
 			cs.connect(connection, inPort.getCell(), false);
-			// Visualize connection only if it can be created into data
-			// structure
+			// Visualizes connection only if it can be created into data structure
 			if (model.setConnected(sourceKey, targetKey, true)) {
 				graph.getModel().insert(insert, viewMap, cs, null, null);
-				// FG
-				// no = false;
 			}
-			// ---- End -- BERTOLI MARCO
 		}
 	}
 
@@ -1161,8 +1082,7 @@ public class Mediator implements GuiInterface {
 		if (sourcePort != null && targetPort != null) {
 			cs.connect(connection, sourcePort, true);
 			cs.connect(connection, targetPort, false);
-			// Adds connection to the graph only if it can be created into data
-			// structure
+			// Adds connection to the graph only if it can be created into data structure
 			if (model.setConnected(sourceKey, targetKey, true) || forced) {
 				graph.getModel().insert(insert, viewMap, cs, null, null);
 				return connection;
@@ -1251,8 +1171,7 @@ public class Mediator implements GuiInterface {
 			Map attr = jcell.getAttributes();
 			Rectangle2D oldBounds = GraphConstants.getBounds(attr);
 			if (oldBounds.getWidth() != cellDimension.getWidth()) {
-				GraphConstants.setBounds(attr, new Rectangle2D.Double(oldBounds.getX(), oldBounds.getY(), cellDimension.getWidth(), cellDimension
-						.getHeight()));
+				GraphConstants.setBounds(attr, new Rectangle2D.Double(oldBounds.getX(), oldBounds.getY(), cellDimension.getWidth(), cellDimension.getHeight()));
 				nest.put(cell, attr);
 				jcell.updatePortPositions(nest, GraphConstants.getIcon(attr), cellDimension);
 				graph.getGraphLayoutCache().edit(nest);
@@ -1266,38 +1185,27 @@ public class Mediator implements GuiInterface {
 		}
 	}
 
-	//S Jiang	
 	public void startEditingAtAbstractCell(Object cell) {
 		graph.startEditingAtCell(cell);
 		if ((cell != null) && (cell instanceof JmtCell)) {
 			JmtCell jcell = (JmtCell) cell;
-			StationParameterPanel stationPanel = new jmt.gui.common.panels.StationParameterPanel(
-					model, model,
-					((CellComponent) jcell.getUserObject()).getKey());
+			StationParameterPanel stationPanel = new jmt.gui.common.panels.StationParameterPanel(model, model, ((CellComponent) jcell.getUserObject()).getKey());
 			// Adds on the top a panel to change station name
-			stationPanel.add(
-					new StationNamePanel(model, ((CellComponent) jcell
-							.getUserObject()).getKey()), BorderLayout.NORTH);
-			dialogFactory.getDialog(stationPanel, "Editing "
-					+ jcell.getUserObject().toString() + " Properties...");
+			stationPanel.add(new StationNamePanel(model, ((CellComponent) jcell.getUserObject()).getKey()), BorderLayout.NORTH);
+			dialogFactory.getDialog(stationPanel, "Editing " + jcell.getUserObject().toString() + " Properties...");
 
 		}
 		// Blocking region editing
 		else if ((cell != null) && (cell instanceof BlockingRegion)) {
 			Object regionKey = ((BlockingRegion) cell).getKey();
-			dialogFactory.getDialog(new BlockingRegionParameterPanel(model,
-					model, regionKey),
-					"Editing " + model.getRegionName(regionKey)
-					+ " Properties...");
+			dialogFactory.getDialog(new BlockingRegionParameterPanel(model, model, regionKey), "Editing " + model.getRegionName(regionKey) + " Properties...");
 		}
 	}
-	//end
 
 	/**
 	 * Cuts the selection of the graph.
 	 */
 	public void cutSelection() {
-		// Bertoli Marco
 		clipboard.cut();
 	}
 
@@ -1305,9 +1213,7 @@ public class Mediator implements GuiInterface {
 	 * Pastes the selection on the graph.
 	 */
 	public void pasteSelection() {
-		// Bertoli Marco
 		clipboard.paste();
-
 		// If more than one stations are present enables link button
 		if (graph.getModel().getRootCount() > 1) {
 			setConnect.setEnabled(true);
@@ -1322,7 +1228,6 @@ public class Mediator implements GuiInterface {
 	 * Copies the selection of the graph.
 	 */
 	public void copySelection() {
-		// Bertoli Marco
 		clipboard.copy();
 	}
 
@@ -1333,7 +1238,6 @@ public class Mediator implements GuiInterface {
 	 * @param message error to be displayed.
 	 */
 	public void displayGraphErrMsg(String message) {
-		// per ora faccio printare nell'output, assolutamente provvisorio.
 		System.out.println("message = " + message);
 	}
 
@@ -1357,31 +1261,10 @@ public class Mediator implements GuiInterface {
 		// Set with all JmtCells that we are removing
 		Set<Object> jmtCells = new HashSet<Object>();
 
-		// Giuseppe De Cicco & Fabio Granara
-		// for (int k=0; k<cells.length; k++) {
-		// if (cells[k] instanceof JmtEdge) {
-		// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)cells[k])))).SubOut();
-		// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)cells[k])))).SubIn();
-		// }
-		//
-		// }
 		for (int i = 0; i < cells.length; i++) {
 			if (!(cells[i] instanceof BlockingRegion)) {
 				// Adds edge for removal
 				edges.addAll(DefaultGraphModel.getEdges(graphmodel, new Object[] { cells[i] }));
-				// Giuseppe De Cicco & Fabio Granara
-				// quando vado a eliminare un nodo, a cui è collegato un arco,
-				// vado ad incrementare o diminuire il contatore per il
-				// pulsanteAGGIUSTATUTTO
-				// Iterator iter = edges.iterator();
-				// while (iter.hasNext()) {
-				// Object next = iter.next();
-				// if (next instanceof JmtEdge) {
-				// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)next)))).SubOut();
-				// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)next)))).SubIn();
-				// }
-				//
-				// }
 				// Stores parents information and cell
 				if (cells[i] instanceof JmtCell) {
 					if (((JmtCell) cells[i]).getParent() instanceof BlockingRegion) {
@@ -1564,7 +1447,6 @@ public class Mediator implements GuiInterface {
 			cell = cellFactory.createStationCell(station);
 			JMTPoint position = model.getStationPosition(station);
 			// If position is not present, auto-position this station
-
 			while (position == null) {
 				containPosition = false;
 				JMTPoint tmp = new JMTPoint(X0 + X * (count / colCount), Y0 + Y * (count % colCount), false);
@@ -1601,16 +1483,12 @@ public class Mediator implements GuiInterface {
 			addCellsToBlockingRegion(regionStation.toArray(), key);
 		}
 
-		// graph.repaint();
-
-		// whether the Position is Null, the application call the reposition's
-		// method
+		// whether the Position is Null, the application call the reposition's method
 		if (!containPosition) {
 			adjustGraph();
 		}
 		graphRepaint();
 		graph.getGraphLayoutCache().reload();
-		// graph.repaint();
 	}
 
 	/**
@@ -1626,8 +1504,8 @@ public class Mediator implements GuiInterface {
 	public void editUserClasses() {
 		dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Define customer classes",
 				Defaults.getAsInteger("JSIMClassDefWindowWidth").intValue(),
-				Defaults.getAsInteger("JSIMClassDefWindowHeight").intValue(), true,
-				"JSIMClassDefWindowWidth", "JSIMClassDefWindowHeight");
+				Defaults.getAsInteger("JSIMClassDefWindowHeight").intValue(),
+				true, "JSIMClassDefWindowWidth", "JSIMClassDefWindowHeight");
 	}
 
 	/**
@@ -1647,8 +1525,6 @@ public class Mediator implements GuiInterface {
 		for (int i = 0; i < nCells; i++) {
 			Object cell = graph.getModel().getRootAt(i);
 			if (cell instanceof JmtCell) {
-				// Map attributes = ((JmtCell) cell).getAttributes();
-				// String cellName = (String) attributes.get("NAME");
 				String cellName = ((JmtCell) cell).getUserObject().toString();
 				if (cellName.equals(name)) {
 					return true;
@@ -1657,70 +1533,6 @@ public class Mediator implements GuiInterface {
 		}
 		return false;
 	}
-
-	// /**
-	// * This function will put selected cells in place avoiding overlapping with other cells
-	// * in graph window
-	// * <br>
-	// * Author: Bertoli Marco
-	// */
-	// // OLD ALGORITHM
-	// public void putSelectedCellsInGoodPlace() {
-	// Object[] cells = graph.getDescendants(graph.getSelectionCells());
-	// for (int i=0; i<cells.length;i++)
-	// if (cells[i] instanceof JmtCell)
-	// putCellInGoodPlace((JmtCell) cells[i]);
-	// }
-
-	// /**
-	// * This function will put given cell in place avoiding overlapping with other cells
-	// * in graph window
-	// * <br>
-	// * Author: Bertoli Marco
-	// * @param cell Identifier of the cell to be moved
-	// */
-	// // OLD ALGORITHM
-	// public void putCellInGoodPlace(JmtCell cell) {
-	// Rectangle bounds =
-	// GraphConstants.getBounds(cell.getAttributes()).getBounds();
-	// // Avoids negative starting point
-	// if (bounds.getX() < 0)
-	// bounds.setLocation(0, (int)bounds.getY());
-	// if (bounds.getY() < 0)
-	// bounds.setLocation((int)bounds.getX(), 0);
-	//
-	// Object[] overlapping = graph.getDescendants(graph.getRoots(bounds));
-	// Point2D zero = new Point(0,0);
-	// while (overlapping.length > 0) {
-	// // Moves bounds until it does not overlap with anything
-	// Point2D last = (Point2D) zero.clone();
-	// for (int j=0; j<overlapping.length; j++) {
-	// // Puts last to last corner of overlapping cells
-	// if (overlapping[j] instanceof JmtCell && overlapping[j] != cell) {
-	// Rectangle2D b =
-	// GraphConstants.getBounds(((JmtCell)overlapping[j]).getAttributes());
-	// // Consider only rectangles that intersects with given bound
-	// if (b.intersects(bounds)) {
-	// if (b.getMaxX() > last.getX())
-	// last.setLocation(b.getMaxX(), last.getY());
-	// if (b.getMaxY() > last.getY())
-	// last.setLocation(last.getX(), b.getMaxY());
-	// }
-	// }
-	// }
-	// // if last is still zero, only Blocking section were found overlapping
-	// // so leave everything as before
-	// if (last.equals(zero))
-	// break;
-	// // Rounds last and moves bounds to found point
-	// bounds.setLocation(new
-	// Point((int)(last.getX()+.5),(int)(last.getY()+.5)));
-	// overlapping = graph.getDescendants(graph.getRoots(bounds));
-	// }
-	//
-	// // Puts this cell in found position
-	// GraphConstants.setBounds(cell.getAttributes(), bounds);
-	// }
 
 	/**
 	 * This function will put selected cells in place avoiding overlapping with other cells
@@ -1744,7 +1556,6 @@ public class Mediator implements GuiInterface {
 						putCellInGoodPlace((JmtCell) element, -1, -1, false);
 					}
 				}
-				// putBlockingRegionInGoodPlace((BlockingRegion) cells[i]);
 			}
 		}
 		graph.getGraphLayoutCache().reload();
@@ -1764,24 +1575,12 @@ public class Mediator implements GuiInterface {
 	int sp = 0;
 
 	public void putCellInGoodPlace(JmtCell cell, int x, int y, boolean flag) {
-		// questo metodo viene chiamato solamente quando la classe viene
-		// selezionata
-		// e si ripete per il numero di classi selezionate, non risulta quindi
-		// essere
-		// pesante.
-		// System.out.println("Valore di Sp "+sp);
 		if (sp > 9) {
 			sp = 0;
 		}
 		int oldPointX = 0;
 		int oldPointY = 0;
 		boolean inGroup = false;
-		// Il flag è stato creato per capire sapere se e' una block regione e
-		// quindi utilizzare
-		// il vecchio metodo oppure se e' una cella quindi flag=true allora uso
-		// il nuovo
-		// System.out.println("------------PUT CELL IN GOOD PLACE
-		// ----------------------");
 
 		if (flag) {
 			Rectangle bounds = GraphConstants.getBounds(cell.getAttributes()).getBounds();
@@ -1789,19 +1588,7 @@ public class Mediator implements GuiInterface {
 
 			oldPointX = x;
 			oldPointY = y;
-			// ---------inzio
-			// Object[] cells=(graph).getDescendants(graph.getRoots());
-			// for (int j=0;j<cells.length;j++) {
-			// if ((cells[j] instanceof JmtCell) &&(cells[j]!=cell)) {
-			// Rectangle
-			// boundcell=GraphConstants.getBounds(((JmtCell)cells[j]).getAttributes()).getBounds();
-			// if (boundcell.intersects(bounds2)) {
-			// System.out.println("true");
-			// }
-			// }
-			// }
 
-			// ---------------fine
 			// check if a cell isInGroup
 			if (isInGroup(cell)) {
 				inGroup = true;
@@ -1815,37 +1602,24 @@ public class Mediator implements GuiInterface {
 				bounds.setLocation((int) bounds.getX(), 0);
 			}
 
-			// Qua ho le celle e archi che intersecano la mia cella
-			// selezionata..bounds (molto efficente dal punto di vista della
-			// pesantezza)
 			Object[] overlapping = graph.getDescendants(graph.getRoots(bounds2));
 
 			Point2D zero = new Point(20, 0);
 			resetOverLapping = 0;
 			while (overlapping.length > 0) {
-
 				// Moves bounds until it does not overlap with anything
 				Point2D last = (Point2D) zero.clone();
 				for (int j = 0; j < overlapping.length; j++) {
-
 					resetOverLapping++;
-					// resetOverLapping is inserted for an anormall behavior of
-					// Tool
-					// in fact, if you disable this variable you can see that
-					// the tools
-					// stop and "for cycle" will be repeated infinite times
+					// resetOverLapping is inserted for an abnormal behavior, 
+					// if you disable this variable you can see that the tool
+					// stops and "for cycle" will be repeated infinite times
 					if (resetOverLapping > 50) {
 						bounds.setLocation(new Point(oldPointX, oldPointY));
 						GraphConstants.setBounds(cell.getAttributes(), bounds);
 						resetOverLapping = 0;
 						return;
 					}
-					// System.out.println("---flag in for---");
-					// if (overlapping[j] instanceof JmtEdge
-					// &&((JmtEdge)overlapping[j]).intersects((EdgeView)(graph.getGraphLayoutCache()).getMapping(overlapping[j],
-					// false),
-					// GraphConstants.getBounds(((JmtCell)cell).getAttributes())))
-					// System.out.println("Intersect è TRUE");
 
 					// Puts last to last corner of overlapping cells
 					if (overlapping[j] instanceof JmtCell && overlapping[j] != cell && inGroup) {
@@ -1864,16 +1638,13 @@ public class Mediator implements GuiInterface {
 					int numberOfChild = cell.getChildCount();
 
 					if (!inGroup && overlapping[j] instanceof JmtCell && overlapping[j] != cell) {
-
 						Rectangle2D b = GraphConstants.getBounds(((JmtCell) overlapping[j]).getAttributes());
-						// Consider only rectangles that intersects with given
-						// bound
+						// Consider only rectangles that intersects with given bound
 						if (b.intersects(bounds2)) {
 							last.setLocation(new Point(oldPointX, oldPointY));
-
 						}
 					}
-					// inizio a controllare se l intersezione e' un lato
+
 					if (overlapping[j] instanceof JmtEdge
 							&& overlapping[j] != cell
 							&& !isInGroup(overlapping[j])
@@ -1881,17 +1652,10 @@ public class Mediator implements GuiInterface {
 									GraphConstants.getBounds(cell.getAttributes())) && ((JmtEdge) overlapping[j]).getSource() != cell.getChildAt(0)) {
 						boolean access = false;
 						boolean access2 = false;
-
-						// Nonostatne SourceCell e SinkCell estendano JMTCell
-						// avevo problemi di nullPointerException per questo
-						// verifico di che
-						// tipo sono
-
 						if (cell instanceof SourceCell
 								&& ((JmtEdge) overlapping[j]).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(overlapping[j], false),
 										GraphConstants.getBounds(((SourceCell) cell).getAttributes()))) {
 							if (((JmtEdge) overlapping[j]).getSource() != cell.getChildAt(0)) {
-								// _______INIZIO_____
 								ArrayList<Point2D> intersectionPoints = ((JmtEdge) overlapping[j]).getIntersectionVertexPoint();
 								Point2D tmp = (intersectionPoints.get(0));
 								Rectangle2D cellBound = GraphConstants.getBounds(((SourceCell) cell).getAttributes());
@@ -1904,21 +1668,17 @@ public class Mediator implements GuiInterface {
 								boolean leftSideIntersaction = ((JmtEdge) overlapping[j]).getLeftSideIntersaction();
 								boolean rightSideIntersaction = ((JmtEdge) overlapping[j]).getRightSideIntersaction();
 								if (upperSideIntersaction && lowerSideIntersaction) {
-
 									int valoreIntermedio = ((int) vertexMaxX - (int) (vertexWidth / 2));
 									if ((int) tmp.getX() < valoreIntermedio) {
-
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												false, false, true, false);
 										bounds.setLocation(newPosition);
 									} else {
-
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												false, false, false, true);
 										bounds.setLocation(newPosition);
 									}
 								} else if (leftSideIntersaction && rightSideIntersaction) {
-
 									int valoreIntermedio = ((int) vertexMaxY - (int) (vertexHeight / 2));
 									if ((int) tmp.getY() < valoreIntermedio) {
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
@@ -1926,49 +1686,37 @@ public class Mediator implements GuiInterface {
 										Point newPosition2 = new Point(newPosition.x, newPosition.y + sp);
 										bounds.setLocation(newPosition2);
 										sp = sp + 2;
-										// cellBounds.setLocation(newPosition);
-										// GraphConstants.setBounds(((SinkCell)cell).getAttributes(),
-										// cellBounds);
 									} else {
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												true, false, false, false);
-
 										bounds.setLocation(newPosition);
 									}
 								} else if (upperSideIntersaction && rightSideIntersaction) {
-
 									Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp, false,
 											false, false, true);
 									bounds.setLocation(newPosition);
-
 								} else if (upperSideIntersaction && leftSideIntersaction) {
-
 									Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp, false,
 											false, true, false);
 									bounds.setLocation(newPosition);
 								} else if (lowerSideIntersaction && rightSideIntersaction) {
-
 									Point2D tmp1 = (intersectionPoints.get(1));
 									Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp1, false,
 											false, false, true);
 									bounds.setLocation(newPosition);
 								} else if (lowerSideIntersaction && leftSideIntersaction) {
-
 									Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp, false,
 											false, true, false);
 									bounds.setLocation(newPosition);
 								}
 								access = true;
 							}
-
 						}
+
 						if (cell instanceof SinkCell) {
-
 							if (((JmtEdge) overlapping[j]).getTarget() != cell.getChildAt(0)) {
-
 								if (((JmtEdge) overlapping[j]).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(overlapping[j], false),
 										GraphConstants.getBounds(((SinkCell) cell).getAttributes()))) {
-
 									ArrayList<Point2D> intersectionPoints = ((JmtEdge) overlapping[j]).getIntersectionVertexPoint();
 									Point2D tmp = (intersectionPoints.get(0));
 									Rectangle2D cellBound = GraphConstants.getBounds(((SinkCell) cell).getAttributes());
@@ -1981,20 +1729,17 @@ public class Mediator implements GuiInterface {
 									boolean leftSideIntersaction = ((JmtEdge) overlapping[j]).getLeftSideIntersaction();
 									boolean rightSideIntersaction = ((JmtEdge) overlapping[j]).getRightSideIntersaction();
 									if (upperSideIntersaction && lowerSideIntersaction) {
-
 										int valoreIntermedio = ((int) vertexMaxX - (int) (vertexWidth / 2));
 										if ((int) tmp.getX() < valoreIntermedio) {
 											Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 													false, false, true, false);
 											bounds.setLocation(newPosition);
 										} else {
-
 											Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 													false, false, false, true);
 											bounds.setLocation(newPosition);
 										}
 									} else if (leftSideIntersaction && rightSideIntersaction) {
-
 										int valoreIntermedio = ((int) vertexMaxY - (int) (vertexHeight / 2));
 										if ((int) tmp.getY() < valoreIntermedio) {
 											Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
@@ -2002,43 +1747,34 @@ public class Mediator implements GuiInterface {
 											Point newPosition2 = new Point(newPosition.x, newPosition.y + sp);
 											bounds.setLocation(newPosition2);
 											sp = sp + 3;
-											// bounds.setLocation(newPosition);
 										} else {
 											Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 													true, false, false, false);
-
 											bounds.setLocation(newPosition);
 										}
 									} else if (upperSideIntersaction && rightSideIntersaction) {
-
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												false, false, false, true);
 										bounds.setLocation(newPosition);
-
 									} else if (upperSideIntersaction && leftSideIntersaction) {
-
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												false, false, true, false);
 										bounds.setLocation(newPosition);
 									} else if (lowerSideIntersaction && rightSideIntersaction) {
-
 										Point2D tmp1 = (intersectionPoints.get(1));
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp1,
 												false, false, false, true);
 										bounds.setLocation(newPosition);
 									} else if (lowerSideIntersaction && leftSideIntersaction) {
-
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												false, false, true, false);
 										bounds.setLocation(newPosition);
-										// GraphConstants.setBounds(((SinkCell)cell).getAttributes(),
-										// cellBounds);
 									}
 									access2 = true;
 								}
 							}
-
 						}
+
 						if (!isInGroup(overlapping[j]) && !access && !access2 && overlapping[j] instanceof JmtEdge) {
 							if ((numberOfChild == 2)
 									&& ((JmtEdge) overlapping[j]).getSource() != cell.getChildAt(0)
@@ -2047,9 +1783,7 @@ public class Mediator implements GuiInterface {
 									&& ((JmtEdge) overlapping[j]).getTarget() != cell.getChildAt(1)
 									&& ((JmtEdge) overlapping[j]).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(overlapping[j],
 											false), GraphConstants.getBounds(cell.getAttributes()))) {
-
 								access = access2 = false;
-
 								ArrayList<Point2D> intersectionPoints = ((JmtEdge) overlapping[j]).getIntersectionVertexPoint();
 								if ((intersectionPoints == null) || intersectionPoints.size() <= 0) {
 									bounds.setLocation(new Point(oldPointX, oldPointY));
@@ -2058,7 +1792,6 @@ public class Mediator implements GuiInterface {
 									return;
 								} else {
 									Point2D tmp = (intersectionPoints.get(0));
-
 									Rectangle2D cellBound = GraphConstants.getBounds(cell.getAttributes());
 									double vertexMaxX = (int) cellBound.getMaxX();
 									double vertexMaxY = (int) cellBound.getMaxY();
@@ -2069,56 +1802,43 @@ public class Mediator implements GuiInterface {
 									boolean leftSideIntersaction = ((JmtEdge) overlapping[j]).getLeftSideIntersaction();
 									boolean rightSideIntersaction = ((JmtEdge) overlapping[j]).getRightSideIntersaction();
 									if (upperSideIntersaction && lowerSideIntersaction) {
-
 										int valoreIntermedio = ((int) vertexMaxX - (int) (vertexWidth / 2));
 										if ((int) tmp.getX() < valoreIntermedio) {
-
 											Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 													false, false, true, false);
 											bounds.setLocation(newPosition);
 										} else {
-
-											;
 											Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 													false, false, false, true);
 											bounds.setLocation(newPosition);
 										}
 									} else if (leftSideIntersaction && rightSideIntersaction) {
-
 										int valoreIntermedio = ((int) vertexMaxY - (int) (vertexHeight / 2));
 										if ((int) tmp.getY() < valoreIntermedio) {
-
 											Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 													false, true, false, false);
 											Point newPosition2 = new Point(newPosition.x, newPosition.y + sp);
 											bounds.setLocation(newPosition2);
 											sp = sp + 3;
-											// bounds.setLocation(newPosition);
-											// GraphConstants.setBounds(((SinkCell)cell).getAttributes(),
-											// cellBounds);
 										} else {
 											Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 													true, false, false, false);
 											bounds.setLocation(newPosition);
 										}
 									} else if (upperSideIntersaction && rightSideIntersaction) {
-
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												false, false, false, true);
 										bounds.setLocation(newPosition);
 									} else if (upperSideIntersaction && leftSideIntersaction) {
-
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												false, false, true, false);
 										bounds.setLocation(newPosition);
 									} else if (lowerSideIntersaction && rightSideIntersaction) {
-
 										Point2D tmp1 = (intersectionPoints.get(1));
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp1,
 												false, false, false, true);
 										bounds.setLocation(newPosition);
 									} else if (lowerSideIntersaction && leftSideIntersaction) {
-
 										Point newPosition = (this.overlapping).findFreePosition(((JmtEdge) overlapping[j]), cell, cellBound, tmp,
 												false, false, true, false);
 										bounds.setLocation(newPosition);
@@ -2126,22 +1846,18 @@ public class Mediator implements GuiInterface {
 								}
 							}
 						}
-					} // end if of edge
+					}
 				}
 
 				if (last.equals(zero)) {
 					break;
 				}
-
 				bounds.setLocation(new Point((int) (last.getX()), (int) (last.getY())));
 				overlapping = graph.getDescendants(graph.getRoots(bounds));
 			}
 
-			// Puts this cell in found position
 			GraphConstants.setBounds(cell.getAttributes(), bounds);
-
 		} else {
-
 			Rectangle bounds = GraphConstants.getBounds(cell.getAttributes()).getBounds();
 			if (isInGroup(cell)) {
 				inGroup = true;
@@ -2173,10 +1889,8 @@ public class Mediator implements GuiInterface {
 							if (b2.getMaxY() > last.getY()) {
 								last.setLocation(last.getX(), b2.getMaxY());
 							}
-
 							last.setLocation(new Point((int) (last.getX() + .5), (int) (last.getY() + .5)));
 						}
-
 					}
 					if (!inGroup && element instanceof JmtCell && element != cell) {
 						last.setLocation(new Point((int) (last.getX() + .5), (int) (last.getY() + .5)));
@@ -2190,16 +1904,17 @@ public class Mediator implements GuiInterface {
 								&& ((JmtEdge) element).getTarget() != cell.getChildAt(1)
 								&& ((JmtEdge) element).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(element, false), GraphConstants
 										.getBounds(cell.getAttributes()))) {
+							;
 						}
 						Rectangle2D b2 = GraphConstants.getBounds(((JmtEdge) element).getAttributes());
 						if (b2.intersects(bounds)) {
-							// ___
+							;
 						}
 
 						last.setLocation(new Point((int) (last.getX() + .5), (int) (last.getY() + .5)));
 					}
-
 				}
+
 				if (last.equals(zero)) {
 					break;
 				}
@@ -2229,11 +1944,9 @@ public class Mediator implements GuiInterface {
 	 */
 	public boolean overlapCells(Point2D p, JmtCell cell) {
 		Map attributes;
-
 		// Creates a rectangle representing the new cell bounds and position
 		Dimension cellsize = cell.getSize(graph);
 		Rectangle r = new Rectangle2D.Double(p.getX(), p.getY(), cellsize.getWidth(), cellsize.getHeight()).getBounds();
-
 		// Gets all cells that can overlap with given one
 		Object[] cells = graph.getDescendants(graph.getRoots(r));
 		for (Object cell2 : cells) {
@@ -2279,7 +1992,6 @@ public class Mediator implements GuiInterface {
 			if (cell instanceof JmtCell || cell instanceof BlockingRegion || cell instanceof SourceCell || cell instanceof SinkCell) {
 				overlapCells = true;
 			}
-
 		}
 		return overlapCells;
 	}
@@ -2306,8 +2018,8 @@ public class Mediator implements GuiInterface {
 					parent = resultsWindow;
 				}
 
-				int resultValue = JOptionPane.showConfirmDialog(parent, "This operation will overwrite old simulation results. Continue anyway?",
-						"JMT - Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				int resultValue = JOptionPane.showConfirmDialog(parent, "This operation will overwrite old simulation results. "
+						+ "Continue anyway?", "JMT - Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 				if (resultValue == JOptionPane.NO_OPTION) {
 					return;
 				}
@@ -2368,11 +2080,9 @@ public class Mediator implements GuiInterface {
 								return;
 							}
 						}
-					} else {
-						//System.out.println("Empty file");
 					}
 				}
-			} // end confirmation if file exists
+			}
 			// Correct eventual problems on preloading for closed classes
 			model.manageJobs();
 			mc = new ModelChecker(model, model, model, model, false);
@@ -2395,7 +2105,7 @@ public class Mediator implements GuiInterface {
 						// Creates results data structure
 						String logCSVDelimiter = model.getLoggingGlbParameter("delim");
 						String logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
-						model.setSimulationResults(new ResultsModel(model.getPollingInterval(), logCSVDelimiter, logDecimalSeparator));
+						model.setSimulationResults(new ResultsModel(model.getPollingInterval().doubleValue(), logCSVDelimiter, logDecimalSeparator));
 						showResults.setEnabled(true);
 						dispatcher = new DispatcherThread(this, model, (ResultsModel) model.getSimulationResults());
 						dispatcher.startSimulation(temp);
@@ -2470,9 +2180,6 @@ public class Mediator implements GuiInterface {
 		pauseSimulation.setEnabled(pause);
 	}
 
-	// ///////////////////////////////////////////
-	// METHODS THAT MANAGE MEASURES
-
 	/**
 	 * Launches the <code>Measure</code> editor.
 	 * Author: Bertoli Marco
@@ -2480,8 +2187,8 @@ public class Mediator implements GuiInterface {
 	public void editMeasures() {
 		dialogFactory.getDialog(new MeasurePanel(model, model, model), "Define performance indices",
 				Defaults.getAsInteger("JSIMMeasuresDefWindowWidth").intValue(),
-				Defaults.getAsInteger("JSIMMeasuresDefWindowHeight").intValue(), true,
-				"JSIMMeasuresDefWindowWidth", "JSIMMeasuresDefWindowHeight");
+				Defaults.getAsInteger("JSIMMeasuresDefWindowHeight").intValue(),
+				true, "JSIMMeasuresDefWindowWidth", "JSIMMeasuresDefWindowHeight");
 	}
 
 	/**
@@ -2490,8 +2197,6 @@ public class Mediator implements GuiInterface {
 	public AbstractJmodelAction getEditMeasures() {
 		return editMeasures;
 	}
-
-	// ///////////////////////////////////////////
 
 	/**
 	 * Checks if there's an old graph to save. This methods is called when creates/closes/opens a graph.
@@ -2521,8 +2226,6 @@ public class Mediator implements GuiInterface {
 		return switchToExactSolver;
 	}
 
-	// 13/10/03 - end /////////////////////////////////////////////////////
-
 	public Cursor getOldCursor() {
 		return oldCursor;
 	}
@@ -2537,12 +2240,10 @@ public class Mediator implements GuiInterface {
 		setGraphCursor(cursor);
 	}
 
-	// --- Bertoli Marco ---------------------
 	/**
 	 * Sends an exit signal to main window
 	 */
 	public void exit() {
-		// Send a closing signal to main window.
 		mainWindow.dispatchEvent(new WindowEvent(mainWindow, WindowEvent.WINDOW_CLOSING));
 	}
 
@@ -2611,8 +2312,6 @@ public class Mediator implements GuiInterface {
 			if (checkForSave("<html>Save changes before switching?</html>")) {
 				return;
 			}
-			// try {
-			// New Converter by Bertoli Marco
 			ExactModel output = new ExactModel();
 			List<String> res = ModelConverter.convertJSIMtoJMVA(model, output);
 			ExactWizard jmva = new ExactWizard(output);
@@ -2620,26 +2319,6 @@ public class Mediator implements GuiInterface {
 			if (res.size() > 0) {
 				new WarningWindow(res, jmva, CommonConstants.JSIM, CommonConstants.JMVA).show();
 			}
-
-			/*
-			 * Old code to use XSLT transformer (really bugged and unfinished)
-			 * 
-			 * File xmlTempFile = File.createTempFile("~SIMtoMVA", ".xml");
-			 * xmlTempFile.deleteOnExit(); File destFile =
-			 * File.createTempFile("~MVA", ".xml"); destFile.deleteOnExit();
-			 * InputStream stream =
-			 * XSDSchemaLoader.loadSchemaAsStream(XSDSchemaLoader.JSIM_TO_JMVA);
-			 * if (stream==null) { System.out.println("stream is null"); return; }
-			 * XMLWriter.writeXML(xmlTempFile, model); InputStream is = new
-			 * BufferedInputStream(stream); Transformer transformer =
-			 * TransformerFactory.newInstance().newTransformer(new
-			 * StreamSource(is)); StreamSource ssrc = new
-			 * StreamSource(xmlTempFile); StreamResult srst = new
-			 * StreamResult(destFile); transformer.transform(ssrc, srst);
-			 * xmlTempFile.delete(); ExactModel xm = new ExactModel();
-			 * xm.loadDocument(new XMLUtils().loadXML(destFile)); new
-			 * ExactWizard(xm); }catch (Exception e) { handleException(e); }
-			 */
 		}
 	}
 
@@ -2647,17 +2326,15 @@ public class Mediator implements GuiInterface {
 	 * Called when EditSimParams action is triggered
 	 */
 	public void editSimulationParameters() {
-		dialogFactory.getDialog(new SimulationPanel(model, model, model, this), "Define Simulation Parameters");
+		dialogFactory.getDialog(new SimulationPanel(model, model, model, this), "Define simulation parameters");
 	}
 
-	// S Jiang
 	/**
 	 * Called when UseTemplate action is triggered
 	 */
 	public void editTemplate() {
-		customizableDialogFactory.getDialog(700, 300, new TemplatePanel(this), "Add/use templates");
+		customizableDialogFactory.getDialog(700, 300, new TemplatePanel(this), "Add/Use templates");
 	}
-	// end
 
 	/**
 	 * Called when EditPAParams action is triggered
@@ -2678,8 +2355,7 @@ public class Mediator implements GuiInterface {
 		} else {
 			showResults.setEnabled(true);
 		}
-		// Adds a listener that will unselect Show results button upon results
-		// window closing
+		// Adds a listener that will unselect Show results button upon results window closing
 		rsw.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				showResults.setSelected(false);
@@ -2752,10 +2428,6 @@ public class Mediator implements GuiInterface {
 		graph.showScreenShotDialog();
 	}
 
-	// --- end Bertoli Marco ---------------------
-
-	// --------------------------------- Francesco D'Aquino
-	// -----------------------
 	/**
 	 *  Shows the panel to solve a problem
 	 */
@@ -2813,9 +2485,6 @@ public class Mediator implements GuiInterface {
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CS_SYSTEM_THROUGHPUT_CLASS)) {
 			dialogFactory.getDialog(new MeasurePanel(model, model, model), "Edit Performance Indices");
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SOURCE_WITH_NO_OPEN_CLASSES_ERROR)) {
-			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
-		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ROUTING_ERROR)) {
 			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 			String stationName = model.getStationName(relatedStation);
@@ -2830,18 +2499,21 @@ public class Mediator implements GuiInterface {
 			JOptionPane.showMessageDialog(null, "Close class " + className + " may be routed into " + stationName
 					+ " whose forward stations are all sinks.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-		// if no open classes defined but at least a sink has been defined show the class panel
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_BUT_NO_OPEN_CLASSES_ERROR)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SOURCE_WITHOUT_OPEN_CLASS_ERROR)) {
 			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 		}
-		// if an open class defined but no sink have been defined show an error message
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_SINK_WITH_OPEN_CLASSES_ERROR)) {
-			JOptionPane.showMessageDialog(null, "Open classes defined but no sink, add a sink to the model.", "Error",
-					JOptionPane.ERROR_MESSAGE);
+		// if no open classes defined but at least a sink has been defined show the class panel
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_BUT_NO_OPEN_CLASS_ERROR)) {
+			dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 		}
 		// if an open class defined but no source show an error message
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR)) {
 			JOptionPane.showMessageDialog(null, "Open classes defined but no source, add a source to the model.", "Error",
+					JOptionPane.ERROR_MESSAGE);
+		}
+		// if an open class defined but no sink have been defined show an error message
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.OPEN_CLASS_BUT_NO_SINK_ERROR)) {
+			JOptionPane.showMessageDialog(null, "Open classes defined but no sink, add a sink to the model.", "Error",
 					JOptionPane.ERROR_MESSAGE);
 		}
 		// if there is a station link error show an error message
@@ -2854,11 +2526,6 @@ public class Mediator implements GuiInterface {
 			JOptionPane.showMessageDialog(null, "A join was found but no fork. Please remove all joins or add a fork",
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
-		//else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.OPEN_CLASS_REFERENCE_STATION_ERROR)) {
-		//	// if it is a reference station error show the class panel
-		//	dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
-		//	model.manageJobs(); //a close class may be added
-		//}
 		// used only in JMVA conversion
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING)) {
 			String name = this.getStationDefinition().getStationName(relatedStation);
@@ -2964,7 +2631,7 @@ public class Mediator implements GuiInterface {
 				mc.deleteEmptyBlockingRegions();
 			}
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_WITH_BLOCKING)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_IN_BLOCKING_REGION)) {
 			editSimulationParameters();
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID)) {
@@ -3002,39 +2669,26 @@ public class Mediator implements GuiInterface {
 			JOptionPane.showMessageDialog(null, name + " is not located between fork/join. This topology is not allowed.",
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PLACE_BETWEEN_FORK_JOIN)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN)) {
 			String name = this.getStationDefinition().getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, name + " is located between fork/join. This topology is not allowed.",
-					"Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, name + " seems to be located between fork/join. On each firing of a transition between "
+					+ "fork/join,\nthe input tasks for a class must be forked from the same parent job, and the number of ouput tasks\n"
+					+ "for a class must be equal to the number of input tasks for that class.", "Warning", JOptionPane.WARNING_MESSAGE);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN)) {
-			String name = this.getStationDefinition().getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, name + " is located between fork/join. This topology is not allowed.",
-					"Error", JOptionPane.ERROR_MESSAGE);
-		}
-		else if (((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITHOUT_VALID_ENABLING_OR_INHIBITING_CONDITION))
-				|| ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITH_INVALID_ENABLING_OR_INHIBITING_CONDITION))) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITH_INVALID_CONDITIONS)) {
 			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 			String stationName = model.getStationName(relatedStation);
 			// set the station parameter panel to show the enabling section
-			tempPanel.showEnablingSectionPanel(relatedClass);
+			tempPanel.showEnablingSectionPanel();
 			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
 		}
-		else if (((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITHOUT_VALID_FIRING_OUTCOME))
-				|| ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITH_INVALID_FIRING_OUTCOME))) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITH_INVALID_OUTCOMES)) {
 			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
 			String stationName = model.getStationName(relatedStation);
 			// set the station parameter panel to show the firing section
-			tempPanel.showFiringSectionPanel(relatedClass);
+			tempPanel.showFiringSectionPanel();
 			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
 		}
-	}
-
-	/**
-	 * Shows the class panel
-	 */
-	public void showClassPanel() {
-		dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Manage User Classes");
 	}
 
 	/**
@@ -3055,8 +2709,6 @@ public class Mediator implements GuiInterface {
 		return GraphConstants.getBounds(cell.getAttributes());
 	}
 
-	// --- Methods to handle blocking regions - Bertoli Marco
-	// -------------------------------------
 	/**
 	 * Adds given JmtCells to a freshly created blocking station. This method will not modify
 	 * data structure and is used during load operation
@@ -3091,8 +2743,7 @@ public class Mediator implements GuiInterface {
 				break;
 			}
 		}
-		// If blocking region can be added, adds it to graph window, otherwise
-		// deletes it
+		// If blocking region can be added, adds it to graph window, otherwise deletes it
 		if (canBeAdded && stations.size() > 0) {
 			BlockingRegion bl = new BlockingRegion(this, regionKey);
 			Object[] stationCells = stations.keySet().toArray();
@@ -3146,14 +2797,12 @@ public class Mediator implements GuiInterface {
 					// Object added to a blocking region
 					newRegionKey = ((BlockingRegion) cell.getParent()).getKey();
 					if (!model.addRegionStation(newRegionKey, key)) {
-						// object cannot be added to blocking region (for
-						// example it is a source)
+						// object cannot be added to blocking region (for example it is a source)
 						cell.removeFromParent();
 						graph.getModel().insert(new Object[] { cell }, null, null, null, null);
 						putBack.add(cell);
 					}
-					// Does not allow adding of selected objects to a new
-					// blocking region
+					// Does not allow adding of selected objects to a new blocking region
 					enableAddBlockingRegion(false);
 				}
 				// Resets parent for this cell
@@ -3172,10 +2821,6 @@ public class Mediator implements GuiInterface {
 		graph.getModel().toBack(putBack.toArray());
 	}
 
-	// --------------------------------------------------------------------------------------------
-	// ___________________GIUSEPPE DE CICCO & FABIO
-	// GRANARA____________________________
-
 	/**
 	 * Method that rotate components
 	 *
@@ -3187,13 +2832,11 @@ public class Mediator implements GuiInterface {
 		}
 
 		for (Object cell : cells) {
-
 			if ((cell instanceof BlockingRegion) || cell instanceof JmtEdge) {
 				continue;
 			}
 
 			JmtCell current = (JmtCell) cell;
-
 			Map<Object, Map> nested = new Hashtable<Object, Map>();
 			Map attributeMap = new Hashtable();
 			ImageIcon icon;
@@ -3207,31 +2850,24 @@ public class Mediator implements GuiInterface {
 			nested.put(cell, attributeMap);
 			current.setLeftInputCell(!current.isLeftInputCell());
 			current.updatePortPositions(nested, icon, current.getSize(graph));
-			// _____DA INSERIRE QUI L AGGIORNAMENTO DELLA DECORAZIONE DELLA
-			// FRECCIA______
 			graph.getGraphLayoutCache().edit(nested);
 		}
 		avoidOverlappingCell(cells);
 	}
 
-	// Giuseppe De Cicco and Fabio Granara
 	public AbstractJmodelAction getRotate() {
 		return actionRotate;
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
 	public boolean isInGroup(Object cell) {
 		Object[] celgru = null;
 		Object[] celless = null;
-
 		cells = graph.getDescendants(graph.getRoots());
 		if (cells.length > 0) {
 			for (Object cell2 : cells) {
 				if (cell2 instanceof BlockingRegion) {
 					celgru = new Object[1];
 					celgru[0] = cell2;
-
-					// celle presenti nel blocking region incluse port e regione
 					celless = graph.getDescendants(celgru);
 					for (Object celles : celless) {
 						if (celles.equals(cell)) {
@@ -3244,14 +2880,12 @@ public class Mediator implements GuiInterface {
 		return false;
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
 	public void avoidOverlappingCell(Object[] cells2) {
 		overlapping.avoidOverlappingCell(cells2);
 		graphRepaint();
 		graph.getGraphLayoutCache().reload();
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
 	int e = -1;
 	int x = 25;
 	int y = 90;
@@ -3266,8 +2900,6 @@ public class Mediator implements GuiInterface {
 	public void adjustGraph() {
 		Object[] cells;
 
-		// queste variabili mi servono per capire quali sono le celle che hanno
-		// meno link in ingresso per iniziare l'algoritmo
 		int inMin = 100;
 		int inMax = 0;
 
@@ -3277,8 +2909,6 @@ public class Mediator implements GuiInterface {
 		cells = graph.getDescendants(graph.getRoots());
 		for (int i = 0; i < cells.length; i++) {
 			if (cells[i] instanceof JmtCell) {
-				// System.out.println("scandendo cella x cella: " +
-				// (JmtCell)cells[i]);
 				Rectangle bounds = GraphConstants.getBounds(((JmtCell) cells[i]).getAttributes()).getBounds();
 				if (bounds.getWidth() > widthMax) {
 					widthMax = (int) bounds.getWidth();
@@ -3286,7 +2916,6 @@ public class Mediator implements GuiInterface {
 				if (bounds.getHeight() > heightMax) {
 					heightMax = (int) bounds.getHeight();
 				}
-
 				if (!((JmtCell) cells[i]).isLeftInputCell()) {
 					rotateComponent(new Object[] { cells[i] });
 				}
@@ -3297,9 +2926,6 @@ public class Mediator implements GuiInterface {
 		for (int i = 0; i < cells.length; i++) {
 			if (cells[i] instanceof JmtCell) {
 				((JmtCell) cells[i]).in = (DefaultGraphModel.getIncomingEdges(graph.getModel(), cells[i])).length;
-			}
-
-			if (cells[i] instanceof JmtCell) {
 				if (((JmtCell) cells[i]).in < inMin) {
 					inMin = ((JmtCell) cells[i]).in;
 				}
@@ -3307,7 +2933,6 @@ public class Mediator implements GuiInterface {
 					inMax = ((JmtCell) cells[i]).in;
 				}
 			}
-
 		}
 
 		boolean projectClose = true;
@@ -3335,7 +2960,6 @@ public class Mediator implements GuiInterface {
 			}
 		}
 
-		// Questa parte gestisce quando abbiamo un progetto close
 		if (!sourceIn && projectClose && !serverWithZeroIn) {
 			int tmpMax = 0;
 			JmtCell tmpCell = null;
@@ -3367,13 +2991,10 @@ public class Mediator implements GuiInterface {
 
 			e += ((JmtCell) min.get(q)).sons;
 
-			// x = 4 + widthMax/2;
-			// w=w+10;
 			flag1 = false;
 			flag2 = false;
 		}
 
-		// controllo
 		min = new ArrayList<Object>();
 		for (int w2 = 0; w2 < cells.length; w2++) {
 			if (cells[w2] instanceof JmtCell) {
@@ -3408,7 +3029,6 @@ public class Mediator implements GuiInterface {
 		avoidOverlappingCell(cells);
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
 	private int searchNext(JmtCell prev) {
 		Rectangle boundspadre = GraphConstants.getBounds((prev).getAttributes()).getBounds();
 		Object[] listEdges = null;
@@ -3416,8 +3036,6 @@ public class Mediator implements GuiInterface {
 		List<Object> next = new ArrayList<Object>();
 
 		if (flag1 == false && prev.seen == false) {
-			// Rectangle bounds =
-			// GraphConstants.getBounds(((JmtCell)prev).getAttributes()).getBounds();
 			if (!flag2) {
 				boundspadre.setLocation(x, y + ((e + 1) * (42 + heightMax)) - (int) (boundspadre.getHeight() / 2) + 30);
 			} else {
@@ -3431,8 +3049,6 @@ public class Mediator implements GuiInterface {
 			flag2 = true;
 		}
 
-		// inserisco tutti gli archi uscenti e entranti di min.get(j) in
-		// listEdges
 		listEdges = DefaultGraphModel.getOutgoingEdges(graphmodel, prev);
 		Vector<Object> listEdgestmp = new Vector<Object>();
 		for (Object listEdge : listEdges) {
@@ -3457,8 +3073,8 @@ public class Mediator implements GuiInterface {
 			j = searchNext((JmtCell) next.get(0));
 		} else if (inRepositionSons == true && ((JmtCell) next.get(0)).seen == false) {
 			Rectangle bounds = GraphConstants.getBounds(((JmtCell) next.get(0)).getAttributes()).getBounds();
-			bounds.setLocation((int) (boundspadre.getCenterX()) + widthMax + 50 - (int) (bounds.getWidth() / 2), (int) boundspadre.getCenterY()
-					- (int) (bounds.getHeight() / 2));
+			bounds.setLocation((int) (boundspadre.getCenterX()) + widthMax + 50 - (int) (bounds.getWidth() / 2),
+					(int) boundspadre.getCenterY() - (int) (bounds.getHeight() / 2));
 			GraphConstants.setBounds(((JmtCell) next.get(0)).getAttributes(), bounds);
 
 			((JmtCell) next.get(0)).seen = true;
@@ -3482,7 +3098,6 @@ public class Mediator implements GuiInterface {
 		return prev.sons;
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
 	private void repositionSons(JmtCell padre, List<Object> sons, int numero, int cont) {
 		inRepositionSons = true;
 		Object[] listEdges = null;
@@ -3497,12 +3112,11 @@ public class Mediator implements GuiInterface {
 		for (int i = cont; i < sons.size(); i++) {
 			if (((JmtCell) sons.get(i)).seen == false) {
 				Rectangle bounds = GraphConstants.getBounds(((JmtCell) sons.get(i)).getAttributes()).getBounds();
-				bounds.setLocation((int) (boundspadre.getCenterX()) + widthMax + 50 - (int) (bounds.getWidth() / 2), w
-						- (int) (bounds.getHeight() / 2) + 80);
-
+				bounds.setLocation((int) (boundspadre.getCenterX()) + widthMax + 50 - (int) (bounds.getWidth() / 2),
+						w - (int) (bounds.getHeight() / 2) + 80);
 				GraphConstants.setBounds(((JmtCell) sons.get(i)).getAttributes(), bounds);
-				((JmtCell) sons.get(i)).seen = true;
 
+				((JmtCell) sons.get(i)).seen = true;
 				listEdges = DefaultGraphModel.getOutgoingEdges(graphmodel, sons.get(i));
 
 				if (listEdges.length > 0) {
@@ -3533,12 +3147,10 @@ public class Mediator implements GuiInterface {
 		return isReleased;
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
 	public void zoomIn() {
 		graph.setScale(graph.getScale() * 1.25);
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
 	public void zoomOut() {
 		graph.setScale(graph.getScale() / 1.25);
 	}
@@ -3552,7 +3164,6 @@ public class Mediator implements GuiInterface {
 		return model;
 	}
 
-	// S Jiang
 	public MainWindow getMainWindow() {
 		return this.mainWindow;
 	}
@@ -3567,17 +3178,14 @@ public class Mediator implements GuiInterface {
 		int nCells = graph.getModel().getRootCount();
 		double Y = 10.0;
 		for (int i = 0; i < nCells; i++) {
-			double temp = graph.getCellBounds(graph.getModel().getRootAt(i))
-					.getMaxY();
+			double temp = graph.getCellBounds(graph.getModel().getRootAt(i)).getMaxY();
 			if (Y < temp) {
 				Y = temp;
 			}
 		}
 		return Y;
 	}
-	// end
 
-	//S Jiang
 	public void deleteCells(Object[] cells) {
 		GraphModel graphmodel = graph.getModel();
 
@@ -3591,30 +3199,10 @@ public class Mediator implements GuiInterface {
 		// Set with all JmtCells that we are removing
 		Set<Object> jmtCells = new HashSet<Object>();
 
-		// Giuseppe De Cicco & Fabio Granara
-		// for (int k=0; k<cells.length; k++) {
-		// if (cells[k] instanceof JmtEdge) {
-		// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)cells[k])))).SubOut();
-		// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)cells[k])))).SubIn();
-		// }
-		// }
 		for (int i = 0; i < cells.length; i++) {
 			if (!(cells[i] instanceof BlockingRegion)) {
 				// Adds edge for removal
-				edges.addAll(DefaultGraphModel.getEdges(graphmodel,
-						new Object[] { cells[i] }));
-				// Giuseppe De Cicco & Fabio Granara
-				// quando vado a eliminare un nodo, a cui è collegato un arco,
-				// vado ad incrementare o diminuire il contatore per il
-				// pulsanteAGGIUSTATUTTO
-				// Iterator iter = edges.iterator();
-				// while (iter.hasNext()) {
-				// Object next = iter.next();
-				// if (next instanceof JmtEdge) {
-				// ((JmtCell)(graphmodel.getParent(graphmodel.getSource((JmtEdge)next)))).SubOut();
-				// ((JmtCell)(graphmodel.getParent(graphmodel.getTarget((JmtEdge)next)))).SubIn();
-				// }
-				// }
+				edges.addAll(DefaultGraphModel.getEdges(graphmodel, new Object[] { cells[i] }));
 				// Stores parents information and cell
 				if (cells[i] instanceof JmtCell) {
 					if (((JmtCell) cells[i]).getParent() instanceof BlockingRegion) {
@@ -3650,8 +3238,7 @@ public class Mediator implements GuiInterface {
 			List child = region.getChildren();
 			boolean empty = true;
 			for (int i = 0; i < child.size(); i++) {
-				if (child.get(i) instanceof JmtCell
-						&& !jmtCells.contains(child.get(i))) {
+				if (child.get(i) instanceof JmtCell && !jmtCells.contains(child.get(i))) {
 					empty = false;
 					break;
 				}
@@ -3665,12 +3252,10 @@ public class Mediator implements GuiInterface {
 		// Removes cells from data structure
 		for (Object cell : cells) {
 			if (cell instanceof JmtCell) {
-				model.deleteStation(((CellComponent) ((JmtCell) cell)
-						.getUserObject()).getKey());
+				model.deleteStation(((CellComponent) ((JmtCell) cell).getUserObject()).getKey());
 			} else if (cell instanceof JmtEdge) {
 				JmtEdge link = (JmtEdge) cell;
-				model.setConnected(link.getSourceKey(), link.getTargetKey(),
-						false);
+				model.setConnected(link.getSourceKey(), link.getTargetKey(), false);
 			}
 		}
 
@@ -3694,7 +3279,6 @@ public class Mediator implements GuiInterface {
 			}
 		}
 	}
-	//end
 
 	@Override
 	public String getFileName() {

@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels;
 
 import java.awt.BorderLayout;
@@ -41,10 +59,9 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.jwat.workloadAnalysis.chart.KMeanSingleClusterScatter;
 
 public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	private JButton loadInfo;
 	private JButton saveInfo;
 	private JTextArea infoCluster;
@@ -88,6 +105,7 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 
 		loadInfo = new JButton("Show Obser.");
 		loadInfo.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				int ret = JOptionPane.showConfirmDialog(SingleKMeanClusterInfo.this, "This operation may require several minutes, continue? ",
 						"Warning!!", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -103,6 +121,7 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 					infoCluster.setText(s);
 				}
 			}
+
 		});
 		saveInfo = new JButton("Save Info");
 
@@ -116,16 +135,20 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 			yVar.setSelectedIndex(0);
 		}
 		xVar.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				redraw = true;
 				panel.repaint();
 			}
+
 		});
 		yVar.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 				redraw = true;
 				panel.repaint();
 			}
+
 		});
 		xVar.setPreferredSize(new Dimension(80, 18));
 		JPanel uno = new JPanel();
@@ -139,24 +162,27 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 		combos.add(due);
 
 		JPanel left = new JPanel(new BorderLayout());
-		JPanel graph = new JPanel();
 
 		JPanel t = new JPanel(new BorderLayout());
 		JPanel buttons = new JPanel(new FlowLayout());
 		loadInfo.setPreferredSize(DIM_BUTTON_S);
 		loadInfo.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 
 			}
+
 		});
 		buttons.add(loadInfo);
 
 		saveInfo.setPreferredSize(DIM_BUTTON_S);
 		saveInfo.setEnabled(false);
 		saveInfo.addActionListener(new ActionListener() {
+
 			public void actionPerformed(ActionEvent e) {
 
 			}
+
 		});
 		buttons.add(saveInfo);
 
@@ -170,10 +196,9 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 	}
 
 	private class SingleScatter extends JPanel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
+
 		private int WIDTH = 100;
 		private int HEIGHT = 100;
 		private BufferedImage graph = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
@@ -186,7 +211,6 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 				public void mouseClicked(MouseEvent e) {
 					if (e.getClickCount() == 2) {
 						final JFrame f = new JFrame();
-
 						JWatWorkloadManager.addJMTWindow(f);
 						f.addWindowListener(new WindowAdapter() {
 							@Override
@@ -199,14 +223,12 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 								JWatWorkloadManager.exit(f);
 							}
 						});
-
 						f.setSize(640, 690);
 						f.setTitle("Single cluster K-Means scatter plot");
 						f.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 						f.setContentPane(new KMeanSingleClusterScatter(xVar.getSelectedIndex(), yVar.getSelectedIndex(), session, f, clustering,
 								cluster - 1, match));
 						f.setVisible(true);
-
 					}
 				}
 
@@ -248,14 +270,11 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 				g2.setColor(Color.WHITE);
 				g2.fillRect(1, 1, WIDTH - 1, HEIGHT - 1);
 				//Calcolo del passo del grafico
-				double yFoot = (HEIGHT - 1) / y.getUniStats().getRangeValue();
+				/*double yFoot = (HEIGHT - 1) / y.getUniStats().getRangeValue();
 				for (int i = 1; i <= WIDTH - 1; i++) {
 					boolean[] done = new boolean[101];
-					int k = 1;
-					//System.err.println("STart interval : " + x.getStartInt(i) + " end : " + x.getEndInt(i));
 					for (int j = x.getStartInt(i); j < x.getEndInt(i); j++) {
 						if ((int) ((x.getValue(j, row) - y.getUniStats().getMinValue()) * yFoot) >= 0) {
-							//System.err.println(x.getValue(j,row) +" " + y.getUniStats().getMinValue() +" " + yFoot);
 							if (!done[(int) ((x.getValue(j, row) - y.getUniStats().getMinValue()) * yFoot)]) {
 								if (c1[x.getObsID(j) - 1] == match) {
 									g2.setColor(JavaWatColor.getColor(c1[x.getObsID(j) - 1]));
@@ -265,12 +284,12 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 							}
 						}
 					}
-				}
+				}*/
 				redraw = false;
 				repaint();
 			}
 			g1.drawImage(graph, 1, 1, null);
-
 		}
 	}
+
 }

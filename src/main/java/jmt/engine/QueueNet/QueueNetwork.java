@@ -21,6 +21,8 @@ package jmt.engine.QueueNet;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import javax.swing.JOptionPane;
+
 import jmt.common.exception.NetException;
 import jmt.engine.NodeSections.BlockingQueue;
 import jmt.engine.NodeSections.ClassSwitch;
@@ -28,7 +30,7 @@ import jmt.engine.NodeSections.Enabling;
 import jmt.engine.NodeSections.Firing;
 import jmt.engine.NodeSections.Fork;
 import jmt.engine.NodeSections.Queue;
-import jmt.engine.NodeSections.Store;
+import jmt.engine.NodeSections.Storage;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
 
@@ -49,33 +51,33 @@ public class QueueNetwork {
 	public static final int NODE = 0x0002;
 
 	/** Behaviour ID: Aborts the simulation when a measure has been obtained.*/
-	public final static int BEHAVIOUR_ABORT = 0x001;
+	public static final int BEHAVIOUR_ABORT = 0x001;
 	/** Behaviour ID: Stops the simulation when a measure has been obtained.*/
-	public final static int BEHAVIOUR_STOP = 0x002;
+	public static final int BEHAVIOUR_STOP = 0x002;
 	/** Behaviour ID: Continues the simulation when a measure has been obtained.*/
-	public final static int BEHAVIOUR_CONTINUE = 0x003;
+	public static final int BEHAVIOUR_CONTINUE = 0x003;
 	/** Behaviour ID: Continues and waits other measures when a measure has been obtained.*/
-	public final static int BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_ABORT = 0x004;
+	public static final int BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_ABORT = 0x004;
 	/** Behaviour ID: Continues and waits other measures when a measure has been obtained.*/
-	public final static int BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP = 0x005;
+	public static final int BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP = 0x005;
 
 	/** State ID: Initial state, the network is ready to be started.*/
-	public final static int STATE_READY = 0x0001;
+	public static final int STATE_READY = 0x0001;
 	/** State ID: The network is running.*/
-	public final static int STATE_RUNNING = 0x0002;
+	public static final int STATE_RUNNING = 0x0002;
 	/** State ID: The network has been stopped.*/
-	public final static int STATE_STOPPED = 0x0003;
+	public static final int STATE_STOPPED = 0x0003;
 	/** State ID: The network has been aborted.*/
-	public final static int STATE_ABORTED = 0x0004;
+	public static final int STATE_ABORTED = 0x0004;
 	/** State ID: The network is in final state.*/
-	public final static int STATE_FINAL = 0x0005;
+	public static final int STATE_FINAL = 0x0005;
 
 	/** Measure ID: queue length */
-	public final static int QUEUE_LENGTH = 0x001;
+	public static final int QUEUE_LENGTH = 0x001;
 	/** Measure ID: residence time */
-	public final static int RESIDENCE_TIME = 0x002;
+	public static final int RESIDENCE_TIME = 0x002;
 	/** Measure ID: residence time */
-	public final static int SERVICE_TIME = 0x003;
+	public static final int SERVICE_TIME = 0x003;
 
 	private NodeList referenceNodes;
 
@@ -93,7 +95,7 @@ public class QueueNetwork {
 
 	private GlobalJobInfoList jobInfoList;
 
-	private boolean taskWarningShown;
+	private boolean isForkJobExitWarningShown;
 
 	/** Creates a new instance of QueueNetwork. */
 	public QueueNetwork(String name) {
@@ -104,7 +106,7 @@ public class QueueNetwork {
 		measures = new LinkedList<Measure>();
 		behaviour = BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP;
 		state = STATE_READY;
-		taskWarningShown = false;
+		isForkJobExitWarningShown = false;
 	}
 
 	/** Adds a generic node to the network. If the node has no inputs the node
@@ -325,15 +327,20 @@ public class QueueNetwork {
 		int dropped = 0;
 		for (int i = 0; i < nodes.size(); i++) {
 			NetNode node = nodes.get(i);
-			NodeSection inputSection;
+			NodeSection section;
 			try {
-				inputSection = node.getSection(NodeSection.INPUT);
-				if (inputSection instanceof Queue) {
-					dropped += ((Queue) inputSection).getDroppedJobs();
-				} else if (inputSection instanceof Store) {
-					dropped += ((Store) inputSection).getDroppedJobs();
-				} else if (inputSection instanceof BlockingQueue) {
-					dropped += ((BlockingQueue) inputSection).getDroppedJobs();
+				section = node.getSection(NodeSection.INPUT);
+				if (section instanceof Queue) {
+					dropped += ((Queue) section).getDroppedJobs();
+				} else if (section instanceof Storage) {
+					dropped += ((Storage) section).getDroppedJobs();
+				} else if (section instanceof BlockingQueue) {
+					dropped += ((BlockingQueue) section).getDroppedJobs();
+				}
+
+				section = node.getSection(NodeSection.OUTPUT);
+				if (section instanceof Fork) {
+					dropped += ((Fork) section).getDroppedJobs();
 				}
 			} catch (NetException ne) {
 				continue;
@@ -353,15 +360,20 @@ public class QueueNetwork {
 		int classIndex = jobClass.getId();
 		for (int i = 0; i < nodes.size(); i++) {
 			NetNode node = nodes.get(i);
-			NodeSection inputSection;
+			NodeSection section;
 			try {
-				inputSection = node.getSection(NodeSection.INPUT);
-				if (inputSection instanceof Queue) {
-					dropped += ((Queue) inputSection).getDroppedJobPerClass(classIndex);
-				} else if (inputSection instanceof Store) {
-					dropped += ((Store) inputSection).getDroppedJobPerClass(classIndex);
-				} else if (inputSection instanceof BlockingQueue) {
-					dropped += ((BlockingQueue) inputSection).getDroppedJobPerClass(classIndex);
+				section = node.getSection(NodeSection.INPUT);
+				if (section instanceof Queue) {
+					dropped += ((Queue) section).getDroppedJobsPerClass(classIndex);
+				} else if (section instanceof Storage) {
+					dropped += ((Storage) section).getDroppedJobsPerClass(classIndex);
+				} else if (section instanceof BlockingQueue) {
+					dropped += ((BlockingQueue) section).getDroppedJobsPerClass(classIndex);
+				}
+
+				section = node.getSection(NodeSection.OUTPUT);
+				if (section instanceof Fork) {
+					dropped += ((Fork) section).getDroppedJobsPerClass(classIndex);
 				}
 			} catch (NetException ne) {
 				continue;
@@ -386,6 +398,7 @@ public class QueueNetwork {
 				if (section instanceof ClassSwitch) {
 					switched += ((ClassSwitch) section).getSwitchedJobs();
 				}
+
 				section = node.getSection(NodeSection.OUTPUT);
 				if (section instanceof Fork) {
 					switched += ((Fork) section).getSwitchedJobs();
@@ -413,6 +426,7 @@ public class QueueNetwork {
 				if (section instanceof ClassSwitch) {
 					switched += ((ClassSwitch) section).getSwitchedJobsPerClass(jobClass.getId());
 				}
+
 				section = node.getSection(NodeSection.OUTPUT);
 				if (section instanceof Fork) {
 					switched += ((Fork) section).getSwitchedJobsPerClass(jobClass.getId());
@@ -422,6 +436,52 @@ public class QueueNetwork {
 			}
 		}
 		return switched;
+	}
+
+	/**
+	 * Gets the total number of consumed jobs in the whole network
+	 * @param jobClass the job class
+	 * @return the total number of consumed jobs in the whole network
+	 */
+	public int getConsumedJobs() {
+		//consumed jobs
+		int consumed = 0;
+		for (int i = 0; i < nodes.size(); i++) {
+			NetNode node = nodes.get(i);
+			NodeSection section;
+			try {
+				section = node.getSection(NodeSection.INPUT);
+				if (section instanceof Enabling) {
+					consumed += ((Enabling) section).getConsumedJobs();
+				}
+			} catch (NetException ne) {
+				continue;
+			}
+		}
+		return consumed;
+	}
+
+	/**
+	 * Gets the total number of consumed jobs in the whole network for the specified class
+	 * @param jobClass the job class
+	 * @return the total number of consumed jobs in the whole network for the specified class
+	 */
+	public int getConsumedJobs(JobClass jobClass) {
+		//consumed jobs
+		int consumed = 0;
+		for (int i = 0; i < nodes.size(); i++) {
+			NetNode node = nodes.get(i);
+			NodeSection section;
+			try {
+				section = node.getSection(NodeSection.INPUT);
+				if (section instanceof Enabling) {
+					consumed += ((Enabling) section).getConsumedJobsPerClass(jobClass.getId());
+				}
+			} catch (NetException ne) {
+				continue;
+			}
+		}
+		return consumed;
 	}
 
 	/**
@@ -436,10 +496,6 @@ public class QueueNetwork {
 			NetNode node = nodes.get(i);
 			NodeSection section;
 			try {
-				section = node.getSection(NodeSection.INPUT);
-				if (section instanceof Enabling) {
-					produced -= ((Enabling) section).getConsumedJobs();
-				}
 				section = node.getSection(NodeSection.OUTPUT);
 				if (section instanceof Firing) {
 					produced += ((Firing) section).getProducedJobs();
@@ -463,10 +519,6 @@ public class QueueNetwork {
 			NetNode node = nodes.get(i);
 			NodeSection section;
 			try {
-				section = node.getSection(NodeSection.INPUT);
-				if (section instanceof Enabling) {
-					produced -= ((Enabling) section).getConsumedJobsPerClass(jobClass.getId());
-				}
 				section = node.getSection(NodeSection.OUTPUT);
 				if (section instanceof Firing) {
 					produced += ((Firing) section).getProducedJobsPerClass(jobClass.getId());
@@ -491,12 +543,22 @@ public class QueueNetwork {
 		}
 	}
 
-	public boolean isTaskWarningShown() {
-		return taskWarningShown;
-	}
-
-	public void setTaskWarningShown(boolean taskWarningShown) {
-		this.taskWarningShown = taskWarningShown;
+	public void showForkJobExitWarning() {
+		if (!isForkJobExitWarningShown) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(800);
+					} catch (InterruptedException e) {
+					}
+					JOptionPane.showMessageDialog(null,
+							"Some tasks generated by a fork exit the model without merging at a join.",
+							"JMT - Warning", JOptionPane.WARNING_MESSAGE);
+				}
+			}).start();
+			isForkJobExitWarningShown = true;
+		}
 	}
 
 }

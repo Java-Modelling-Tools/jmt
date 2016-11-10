@@ -25,151 +25,118 @@ import java.util.Vector;
  * User: OrsotronIII
  * Date: 23-mag-2005
  * Time: 9.34.34
- *This interface provides methods for editation of model's classes details. In the implementing
+ * This interface provides methods for editation of model's classes details. In the implementing
  * class of this interface, model's userclasses must be accessed through a research key that must
  * be represented by a number. This gives possibility of a smarter implementation for search and
  * editing methods than a name-based search modality.
- *
- *
- *
- *
+ * 
  * Modified by Francesco D'Aquino 21/11/2005
  */
 public interface ClassDefinition {
 
-	/**Code for class name search*/
-	public int CLASS_NAME = 0;
-	/**Code for class type search*/
-	public int CLASS_TYPE = 1;
-	/**Code for class priority search*/
-	public int CLASS_PRIORITY = 2;
-	/**Code for class population search*/
-	public int CLASS_POPULATION = 3;
-	/**Code for class distribution search*/
-	public int CLASS_DISTRIBUTION = 4;
-
 	/**
-	 * This method returns the entire set of class keys.
+	 * This method returns the key set of all classes.
 	 */
 	public Vector<Object> getClassKeys();
 
 	/**
-	 * This method returns the set of open class keys.
-	 *
-	 * Author: Francesco D'Aquino
+	 * This method returns the key set of open classes.
 	 */
 	public Vector<Object> getOpenClassKeys();
 
 	/**
-	 * This method returns the sum of population of each close class
-	 * @return the total close class population
-	 * 
-	 * Author: Francesco D'Aquino
+	 * This method returns the key set of closed classes.
 	 */
-	public int getTotalCloseClassPopulation();
-
-	/**
-	* This method returns the set of closed class keys.
-	*/
 	public Vector<Object> getClosedClassKeys();
 
 	/**
-	 * Returns name of the class linked to the specific key
-	 * */
+	 * Returns name of the class, given the search key.
+	 */
 	public String getClassName(Object key);
 
 	/**
-	 * Sets name of the class linked to the specific key
-	 * */
-	public void setClassName(String name, Object key);
+	 * Sets name of the class, given the search key.
+	 */
+	public void setClassName(Object key, String name);
 
 	/**
-	 * Returns type of the class linked to the specific key. Type of class is represented by
-	 * an int number whose value is contained in <code>JSIMConstants</code>.
-	 * */
+	 * Returns type of the class, given the search key.
+	 */
 	public int getClassType(Object key);
 
 	/**
-	 * Sets type of the class linked to the specific key. Type of class is represented by
-	 * an int number whose value is contained in <code>JSIMConstants</code>.
-	 * */
-	public void setClassType(int type, Object key);
+	 * Sets type of the class, given the search key.
+	 */
+	public void setClassType(Object key, int type);
 
 	/**
-	 * Returns name of the class linked to the specific key
-	 * */
-	public int getClassPriority(Object key);
+	 * Returns priority of the class, given the search key.
+	 */
+	public Integer getClassPriority(Object key);
 
 	/**
-	 * Sets name of the class linked to the specific key
-	 * */
-	public void setClassPriority(int priority, Object key);
+	 * Sets priority of the class, given the search key.
+	 */
+	public void setClassPriority(Object key, Integer priority);
 
 	/**
-	 * Returns population of the class linked to the specific key. Return value is an integer
-	 * if specified class is a closed class, null, otherwise.
-	 * */
+	 * Returns population of the class, given the search key.
+	 */
 	public Integer getClassPopulation(Object key);
 
 	/**
-	 * Sets population of the class linked to the specific key
-	 * */
-	public void setClassPopulation(Integer population, Object key);
+	 * Sets population of the class, given the search key.
+	 */
+	public void setClassPopulation(Object key, Integer population);
 
 	/**
-	 * Returns inter-arrival time distribution of the class linked to the specific key.
-	 * Return value is an object representing distribution if specified class is an open
-	 *  class, null otherwise.
-	 * */
+	 * Returns inter-arrival time distribution of the class, given the search key.
+	 */
 	public Object getClassDistribution(Object key);
 
 	/**
-	 * Sets inter-arrival time distribution of the class linked to the specific key
-	 * */
-	public void setClassDistribution(Object distribution, Object key);
+	 * Sets inter-arrival time distribution of the class, given the search key.
+	 */
+	public void setClassDistribution(Object key, Object distribution);
 
-	/**Returns a class parameter, given the class key of search, and the parameter name
-	 * specified by proper code.*/
-	public Object getClassParameter(Object key, int parameterName);
+	/**
+	 * Returns reference station of a class, given the search key.
+	 */
+	public Object getClassRefStation(Object key);
 
-	/**Sets a class parameter, given the class key of search, and the parameter name
-	 * specified by proper code.*/
-	public void setClassParameter(Object key, int parameterName, Object value);
+	/**
+	 * Sets reference station of a class, given the search key.
+	 */
+	public void setClassRefStation(Object key, Object refStation);
 
-	/**Sets all class parameters at once given the class' search key. If search key does not exist,
-	 *  a new class is created*/
-	public void setClassParameters(Object key, String name, int type, int priority, Integer population, Object distribution);
+	/**
+	 * Adds a new class to the model and sets all class parameters at once.
+	 * @param name name of the class.
+	 * @param type type of the class.
+	 * @param priority priority of the class.
+	 * @param population population of the class.
+	 * @param distribution inter-arrival time distribution of the class.
+	 * @return search key for the new class.
+	 */
+	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution);
 
-	/**Adds a class and sets all class parameters at once, return the new search key
-	 * identifying the new class.*/
-	public Object addClass(String name, int type, int priority, Integer population, Object distribution);
-
-	/**Deletes class given its search key. */
+	/**
+	 * Deletes a class from the model, given the search key.
+	 */
 	public void deleteClass(Object key);
 
 	/**
-	 * Sets the reference station for a given class
-	 * @param classKey search key for class
-	 * @param stationKey search key for referenced station
-	 */
-	public void setClassRefStation(Object classKey, Object stationKey);
-
-	/**
-	 * Returns the reference station for a given class
-	 * @param classKey search key for class
-	 * @return search key for referenced station or null if it was not specified yet
-	 */
-	public Object getClassRefStation(Object classKey);
-
-	/**
-	 * Returns the class key given its name. It returns <code>null</code>
-	 * if no such class is found.
-	 * @param className the name of the class
-	 * @return  the key of the class whose name is <code>className</code>
+	 * Returns the search key for the class, given the class name.
 	 */
 	public Object getClassByName(String className);
-	
-	public Vector<String> getsinkProbabilityUpdateClasses();
-	
+
+	/**
+	 * Returns total population of closed classes
+	 */
+	public int getTotalClosedClassPopulation();
+
+	public Vector<String> getSinkProbabilityUpdateClasses();
+
 	public void resetSinkProbabilityUpdateClasses();
+
 }

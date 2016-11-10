@@ -3,8 +3,8 @@ package jmt.jmva.analytical.solvers.QueuingNet;
 
 import jmt.jmva.analytical.solvers.DataStructures.*;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueuingNet.amva.Linearizer;
-import jmt.jmva.analytical.solvers.QueuingNet.amva.Solver;
+import jmt.jmva.analytical.solvers.QueuingNet.AMVA.Linearizer;
+import jmt.jmva.analytical.solvers.QueuingNet.AMVA.Solver;
 import jmt.jmva.analytical.solvers.Utilities.MiscFunctions;
 
 import java.util.*;

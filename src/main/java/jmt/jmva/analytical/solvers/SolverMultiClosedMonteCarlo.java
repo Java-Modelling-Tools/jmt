@@ -15,7 +15,7 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
-    public final static int MAX_SAMPLES = 10000;
+    public static final int MAX_SAMPLES = 10000;
     //Array containing population for each class
     protected int[] population;
     private Integer scale = 1000000;

@@ -30,12 +30,9 @@ import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import jmt.engine.jwat.VariableNumber;
 import jmt.engine.jwat.fitting.FittingAlgorithm;
-import jmt.engine.jwat.fitting.ParetoFitting;
 import jmt.engine.jwat.fitting.utils.ModelFitting;
 import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
-import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 
 public class SmallQQPlot extends JPanel {
 	/**
@@ -125,17 +122,14 @@ public class SmallQQPlot extends JPanel {
 		g.drawLine(1, 201, 201, 1);
 
 		g.setColor(Color.BLUE);
-		
-		//System.out.println("x.length: "+x.length+" y.length: "+y.length);
+
 		for (int i = 0; i < x.length; i++) {
-			//System.out.println(x[i] + " ***** "+y[i]);
-			//System.out.println((int) Math.round((x[i] / x[x.length-1]) * 200) + " ----- " + (int) Math.round((y[i] / y[y.length-1]) * 120));
-			if (y[i] <= x[x.length-1])
+			if (y[i] <= x[x.length-1]) {
 				g.fillOval((int) Math.round((x[i] / x[x.length-1]) * 200),
 					200 - (int) Math.round((y[i] / x[x.length-1]) * 200), 5, 5);
+			}
 		}
-
-}
+	}
 
 
 	public void setDistribution(int dis) {

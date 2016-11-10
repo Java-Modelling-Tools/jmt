@@ -422,13 +422,8 @@ public class LinkedJobInfoList implements JobInfoList {
 			updateThroughput(job);
 			updateUtilization(jobClass);
 			updateUtilizationJoin(jobClass);
-
-			//NEW
-			//@author Stefano Omini
 			updateQueueLength(jobClass);
 			updateResidenceTime(jobInfo);
-			//end NEW
-
 			updateResponseTime(jobInfo);
 
 			finalRemove(jobInfo, listPerClass[c], perClassPosition);
@@ -785,10 +780,6 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	//NEW
-	//@author Stefano Omini
-	//modified 21/5/2004
-
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeQueueLength(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
@@ -823,11 +814,6 @@ public class LinkedJobInfoList implements JobInfoList {
 			queueLength.update(list.size(), NetSystem.getTime() - getLastModifyTime());
 		}
 	}
-
-	//END NEW
-
-	//NEW
-	//@author Stefano Omini
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#removeJob(jmt.engine.QueueNet.JobInfo)

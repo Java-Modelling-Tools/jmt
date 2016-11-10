@@ -82,8 +82,8 @@ public class GuiXMLReader implements GuiXMLConstants {
 	protected static void setUserClasses(Element root, JSimGraphModel model) {
 		NodeList classes = root.getElementsByTagName(XML_E_CLASS);
 		// Build a map of class name -> class key
-		HashMap names = new HashMap();
-		Vector keys = model.getClassKeys();
+		HashMap<String, Object> names = new HashMap<String, Object>();
+		Vector<Object> keys = model.getClassKeys();
 		for (int i = 0; i < keys.size(); i++) {
 			names.put(model.getClassName(keys.get(i)), keys.get(i));
 		}
@@ -126,8 +126,8 @@ public class GuiXMLReader implements GuiXMLConstants {
 	protected static void setStations(Element root, JSimGraphModel model) {
 		NodeList stations = root.getElementsByTagName(XML_E_STATION);
 		// Build a map of station name -> station key
-		HashMap names = new HashMap();
-		Vector keys = model.getStationKeys();
+		HashMap<String, Object> names = new HashMap<String, Object>();
+		Vector<Object> keys = model.getStationKeys();
 		for (int i = 0; i < keys.size(); i++) {
 			names.put(model.getStationName(keys.get(i)), keys.get(i));
 		}
@@ -163,7 +163,7 @@ public class GuiXMLReader implements GuiXMLConstants {
 				model.setParametricAnalysisEnabled(true);
 				String classPath = parametric.getAttribute(XML_A_PARAMETRIC_CLASSPATH);
 				try {
-					Class[] paramClasses = { ClassDefinition.class, StationDefinition.class, SimulationDefinition.class };
+					Class<?>[] paramClasses = { ClassDefinition.class, StationDefinition.class, SimulationDefinition.class };
 					Object[] params = { model, model, model };
 					ParametricAnalysisDefinition pad = (ParametricAnalysisDefinition) Class.forName(classPath).getConstructor(paramClasses)
 							.newInstance(params);

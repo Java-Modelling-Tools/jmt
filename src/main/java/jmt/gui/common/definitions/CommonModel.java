@@ -35,7 +35,7 @@ import jmt.framework.data.CachedHashMap;
 import jmt.framework.data.MacroReplacer;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
-import jmt.gui.common.classSwitch.ClassSwitch;
+import jmt.gui.common.classSwitchUtilities.ClassSwitchRow;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.ForkStrategy;
@@ -45,7 +45,8 @@ import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
-import jmt.gui.common.transitionStrategies.TransitionVector;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.transitionUtilities.TransitionMatrix;
 
 /**
  * Created by IntelliJ IDEA.
@@ -76,56 +77,129 @@ import jmt.gui.common.transitionStrategies.TransitionVector;
 public class CommonModel implements CommonConstants, ClassDefinition, StationDefinition, SimulationDefinition, BlockingRegionDefinition {
 
 	//key generator
-	long incrementalKey = 0;
-	Long seed;
-	Integer maxSamples;
-	Double maxDuration;
-	boolean useRandomSeed = true;
-	Double maxSimulatedTime;
-	double pollingInterval;
-	protected MeasureDefinition results = null;
-	protected Boolean disableStatistic = Boolean.FALSE;
+	protected long incrementalKey = 0;
+	protected Long seed;
+	protected Boolean useRandomSeed;
+	protected Double maxDuration;
+	protected Double maxSimulatedTime;
+	protected Integer maxSamples;
+	protected Boolean disableStatistic;
+	protected Double pollingInterval;
+	protected MeasureDefinition results;
 	protected LoggerGlobalParameters loggerGlbParams;
 	// Used to tell if model have to be saved
 	protected boolean save = false;
-	private static JSimLogger debugLog = JSimLogger.getRootLogger();;
+	private static JSimLogger debugLog = JSimLogger.getRootLogger();
 
 	/**
-	 * search keysets for classes, stations and measures
+	 * search key set of all classes
 	 */
 	protected Vector<Object> classesKeyset = new Vector<Object>();
+
 	/**
-	 * search keysets for classes, stations and measures
+	 * search key set of open classes
+	 */
+	protected Vector<Object> openClassesKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of closed classes
+	 */
+	protected Vector<Object> closedClassesKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of all stations
 	 */
 	protected Vector<Object> stationsKeyset = new Vector<Object>();
+
 	/**
-	 * search keysets for classes, stations and measures
+	 * search key set of sources
 	 */
-	protected Vector<Object> noSourceSinkKeyset = new Vector<Object>();
+	protected Vector<Object> sourcesKeyset = new Vector<Object>();
+
 	/**
-	 * search keysets for classes, stations and measures
+	 * search key set of sinks
 	 */
-	protected Vector<Object> FJKeyset = new Vector<Object>();
+	protected Vector<Object> sinksKeyset = new Vector<Object>();
+
 	/**
-	 * search keysets for classes, stations and measures
+	 * search key set of terminals
+	 */
+	protected Vector<Object> terminalsKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of routers
+	 */
+	protected Vector<Object> routersKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of delays
+	 */
+	protected Vector<Object> delaysKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of servers
+	 */
+	protected Vector<Object> serversKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of forks
+	 */
+	protected Vector<Object> forksKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of joins
+	 */
+	protected Vector<Object> joinsKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of loggers
+	 */
+	protected Vector<Object> loggersKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of class switches
+	 */
+	protected Vector<Object> classSwitchesKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of semaphores
+	 */
+	protected Vector<Object> semaphoresKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of scalers
+	 */
+	protected Vector<Object> scalersKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of places
+	 */
+	protected Vector<Object> placesKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of transitions
+	 */
+	protected Vector<Object> transitionsKeyset = new Vector<Object>();
+
+	/**
+	 * search key set of preloadable stations
 	 */
 	protected Vector<Object> preloadableKeyset = new Vector<Object>();
+
 	/**
-	 * search keysets for classes, stations and measures
-	 */
-	protected Vector<Object> measuresKeyset = new Vector<Object>();
-	/**
-	 * search keysets for classes, stations and measures
+	 * search key set of blocking regions
 	 */
 	protected Vector<Object> blockingRegionsKeyset = new Vector<Object>();
+
 	/**
-	 * search keysets for classes, stations and measures
+	 * search key set of blockable stations
 	 */
-	protected Vector<Object> measuresBlockingKeyset = new Vector<Object>();
+	protected Vector<Object> blockableKeyset = new Vector<Object>();
+
 	/**
-	 * search keysets for classes, stations and measures
+	 * search key set of measures
 	 */
-	protected Vector<Object> blockableStations = new Vector<Object>();
+	protected Vector<Object> measuresKeyset = new Vector<Object>();
 
 	/**
 	 * Hashmap for classes parameters
@@ -148,30 +222,23 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected HashMap<Object, Object> blockingDataHM = new CachedHashMap<Object, Object>();
 
 	/**
-	 * Hashmap containing measure parameters
-	 */
-	protected HashMap<Object, Object> blockingMeasureDataHM = new CachedHashMap<Object, Object>();
-
-	/**
 	 * BDMap containing station connections. On X coordinate will be put stationKeys for
 	 * connection targets, on Y for sources.
 	 */
 	//protected BDMap connectionsBDM = new CachedBDMap(),
 	protected BDMap connectionsBDM = new BDMapImpl();
+
 	/**
 	 * BDMap containing a set of station details for each station and each class.
 	 * on X coordinate must be put class search keys, on Y station search keys.
 	 */
 	protected BDMap stationDetailsBDM = new BDMapImpl();
+
 	/**
 	 * BDMap containing a set of blocking region details for each blocking region and each class.
 	 * on X coordinate must be put class search keys, on Y blocking region search keys.
 	 */
 	protected BDMap blockingDetailsBDM = new BDMapImpl();
-
-	//S Jiang
-	protected HashMap<Object, Vector<Object>> fakeForwardConnection = new CachedHashMap<Object, Vector<Object>>();
-	//end
 
 	// ------------------ Francesco D'Aquino ----------------------
 	private ParametricAnalysisDefinition parametricAnalysisModel;
@@ -199,244 +266,208 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**Creates a new instance of <code>CommonModel</code>*/
 	public CommonModel() {
 		seed = Defaults.getAsLong("simulationSeed");
-		useRandomSeed = Defaults.getAsBoolean("isSimulationSeedRandom").booleanValue();
+		useRandomSeed = Defaults.getAsBoolean("isSimulationSeedRandom");
 		maxDuration = Defaults.getAsDouble("simulationMaxDuration");
 		maxSimulatedTime = Defaults.getAsDouble("maxSimulatedTime");
 		maxSamples = Defaults.getAsInteger("maxSimulationSamples");
-		pollingInterval = Defaults.getAsDouble("simulationPolling").doubleValue();
+		disableStatistic = Boolean.FALSE;
+		pollingInterval = Defaults.getAsDouble("simulationPolling");
 		//TODO: eventually load the parametricAnalysisEnabled state from default
 		parametricAnalysisEnabled = false;
 	}
 
 	//model class definition methods
 	/**
-	 * This method returns the entire set of class keys.
+	 * This method returns the key set of all classes.
 	 */
 	@Override
-	public synchronized Vector<Object> getClassKeys() {
+	public Vector<Object> getClassKeys() {
 		return classesKeyset;
 	}
 
 	/**
-	 * This method returns the set of open class keys.
-	 *
-	 * Author: Francesco D'Aquino
+	 * This method returns the key set of open classes.
 	 */
 	@Override
 	public Vector<Object> getOpenClassKeys() {
-		Vector<Object> classes = this.getClassKeys();
-		Vector<Object> openClassKeys = new Vector<Object>(0, 1);
-		for (int i = 0; i < classes.size(); i++) {
-			Object thisClass = classes.get(i);
-			if (this.getClassType(thisClass) == CommonConstants.CLASS_TYPE_OPEN) {
-				openClassKeys.add(thisClass);
-			}
-		}
-		return openClassKeys;
+		return openClassesKeyset;
 	}
 
 	/**
-	 * This method returns the sum of population of each close class
-	 *
-	 * @return the total close class population
-	 *
-	 * Author: Francesco D'Aquino
+	 * This method returns the key set of closed classes.
 	 */
 	@Override
-	public int getTotalCloseClassPopulation() {
-		int sum = 0;
-		Vector<Object> closeClasses = getClosedClassKeys();
-		for (int i = 0; i < closeClasses.size(); i++) {
-			sum += getClassPopulation(closeClasses.get(i)).intValue();
-		}
-		return sum;
+	public Vector<Object> getClosedClassKeys() {
+		return closedClassesKeyset;
 	}
 
 	/**
-	 * This method returns the set of closed class keys.
+	 * Returns name of the class, given the search key.
 	 */
 	@Override
-	public synchronized Vector<Object> getClosedClassKeys() {
-		Vector<Object> closedClasses = new Vector<Object>(0, 1);
-		for (int i = 0; i < classesKeyset.size(); i++) {
-			Object thisClassKey = classesKeyset.get(i);
-			int classType = getClassType(thisClassKey);
-			if (classType == CommonConstants.CLASS_TYPE_CLOSED) {
-				closedClasses.add(thisClassKey);
-			}
-		}
-		return closedClasses;
-	}
-
-	/**
-	 * Returns name of the class linked to the specific key
-	 * */
-	@Override
-	public synchronized String getClassName(Object key) {
-		if (classesKeyset.contains(key)) {
-			return ((ClassData) classDataHM.get(key)).name;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Sets name of the class linked to the specific key
-	 * */
-	@Override
-	public synchronized void setClassName(String name, Object key) {
-		if (classDataHM.containsKey(key)) {
-			String oldName = ((ClassData) classDataHM.get(key)).name;
-			((ClassData) classDataHM.get(key)).name = name;
-			if (!oldName.equals(name)) {
-				save = true;
-			}
-		}
-	}
-
-	/**
-	 * Returns type of the class linked to the specific key. Type of class is represented by
-	 * an int number whose value is contained in <code>JSIMConstants</code>.
-	 * */
-	@Override
-	public synchronized int getClassType(Object key) {
-		if (classesKeyset.contains(key)) {
-			return ((ClassData) classDataHM.get(key)).type;
-		} else {
-			return -1;
-		}
-	}
-
-	/**
-	 * Sets type of the class linked to the specific key. Type of class is represented by
-	 * an int number whose value is contained in <code>JSIMConstants</code>.
-	 * */
-	@Override
-	public synchronized void setClassType(int type, Object key) {
-		//Must check for class presence
+	public String getClassName(Object key) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
-			cd = ((ClassData) classDataHM.get(key));
-		} else {
-			return;
-		}
-		int classTypeInt = cd.type;
-		//if new type is different from the former one, population and distribution
-		//values are senseless, so they must be erased both
-		if (classTypeInt != type) {
-			save = true;
-			cd.distribution = cd.population = null;
-			cd.type = type;
-			if (type == CLASS_TYPE_OPEN) {
-				cd.distribution = Defaults.getAsNewInstance("classDistribution");
-			} else if (type == CLASS_TYPE_CLOSED) {
-				cd.population = Defaults.getAsInteger("classPopulation");
-				cd.refSource = null;
-			}
-		}
-		for (Object station: this.getStationKeys()) {
-			for (Object classK: this.getClassKeys()) {
-				Object strategy = this.getForkingStrategy(station, classK);
-				if (strategy instanceof MultiBranchClassSwitchFork) {
-					Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
-					for (OutPath o: m.values()) {
-						o.getOutParameters().put(key, 0);
-					}
-				}
-				if (strategy instanceof ClassSwitchFork) {
-					Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
-					for (OutPath o: m.values()) {
-						o.getOutParameters().put(key, 0);
-					}
-				}
-				strategy = this.getJoinStrategy(station, classK);
-				if (strategy instanceof GuardJoin) {
-					((GuardJoin) strategy).getGuard().put(key, 0);
-				}
-				/*strategy = this.getSemaphoreStrategy(station, classK);
-				if (strategy instanceof NormalSemaphore) {
-					((NormalSemaphore) strategy).getSemaphore().put(key, 0);
-				}*/
-			}
-		}
-	}
-
-	/**
-	 * Returns name of the class linked to the specific key
-	 * */
-	@Override
-	public synchronized int getClassPriority(Object key) {
-		if (classesKeyset.contains(key)) {
-			return ((ClassData) classDataHM.get(key)).priority;
-		} else {
-			return -1;
-		}
-	}
-
-	/**
-	 * Sets name of the class linked to the specific key
-	 * */
-	@Override
-	public synchronized void setClassPriority(int priority, Object key) {
-		if (classDataHM.containsKey(key)) {
-			int oldPriority = ((ClassData) classDataHM.get(key)).priority;
-			((ClassData) classDataHM.get(key)).priority = priority;
-			if (oldPriority != priority) {
-				save = true;
-			}
-		}
-	}
-
-	/**
-	 * Returns population of the class linked to the specific key. Return value is an integer
-	 * if specified class is a closed class, null, otherwise.
-	 * */
-	@Override
-	public synchronized Integer getClassPopulation(Object key) {
-		if (classDataHM.containsKey(key)) {
-			return ((ClassData) classDataHM.get(key)).population;
+			cd = (ClassData) classDataHM.get(key);
 		} else {
 			return null;
 		}
+		return cd.name;
 	}
 
 	/**
-	 * Sets population of the class linked to the specific key
-	 * */
+	 * Sets name of the class, given the search key.
+	 */
 	@Override
-	public synchronized void setClassPopulation(Integer population, Object key) {
+	public void setClassName(Object key, String name) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
 			cd = (ClassData) classDataHM.get(key);
 		} else {
 			return;
 		}
-		if (cd.type == CLASS_TYPE_CLOSED) {
-			if (!cd.population.equals(population)) {
-				save = true;
-			}
-			cd.population = population;
-		} else {
-			cd.population = null;
+		if (cd.name == null || !cd.name.equals(name)) {
+			cd.name = name;
+			save = true;
 		}
 	}
 
 	/**
-	 * Returns inter-arrival time distribution of the class linked to the specific key.
-	 * Return value is an object representing distribution if specified class is an open
-	 *  class and reference station is not class switch, null otherwise.
-	 * */
+	 * Returns type of the class, given the search key.
+	 */
 	@Override
-	public synchronized Object getClassDistribution(Object key) {
+	public int getClassType(Object key) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
-			ClassData classData = ((ClassData) classDataHM.get(key));
-			if (classData.refSource != null
-					&& (classData.refSource.equals(STATION_TYPE_CLASSSWITCH)
-							|| classData.refSource.equals(STATION_TYPE_FORK)
-							|| classData.refSource.equals(STATION_TYPE_SCALER))) {
-				return null;
+			cd = (ClassData) classDataHM.get(key);
+		} else {
+			return -1;
+		}
+		return cd.type;
+	}
+
+	/**
+	 * Sets type of the class, given the search key.
+	 */
+	@Override
+	public void setClassType(Object key, int type) {
+		ClassData cd;
+		if (classDataHM.containsKey(key)) {
+			cd = ((ClassData) classDataHM.get(key));
+		} else {
+			return;
+		}
+
+		if (cd.type != type) {
+			cd.type = type;
+			save = true;
+			if (type == CLASS_TYPE_OPEN) {
+				cd.population = null;
+				cd.distribution = Defaults.getAsNewInstance("classDistribution");
+				cd.refStation = null;
+				openClassesKeyset.add(key);
+				closedClassesKeyset.remove(key);
+			} else {
+				cd.population = Defaults.getAsInteger("classPopulation");
+				cd.distribution = null;
+				cd.refStation = null;
+				openClassesKeyset.remove(key);
+				closedClassesKeyset.add(key);
 			}
+
+			for (Object stationKey : stationsKeyset) {
+				for (Object classKey : classesKeyset) {
+					Object strategy = getForkStrategy(stationKey, classKey);
+					if (strategy instanceof MultiBranchClassSwitchFork) {
+						Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
+						for (OutPath o: m.values()) {
+							o.getOutParameters().put(key, 0);
+						}
+					}
+					if (strategy instanceof ClassSwitchFork) {
+						Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
+						for (OutPath o: m.values()) {
+							o.getOutParameters().put(key, 0);
+						}
+					}
+					strategy = getJoinStrategy(stationKey, classKey);
+					if (strategy instanceof GuardJoin) {
+						((GuardJoin) strategy).getGuard().put(key, 0);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns priority of the class, given the search key.
+	 */
+	@Override
+	public Integer getClassPriority(Object key) {
+		ClassData cd;
+		if (classDataHM.containsKey(key)) {
+			cd = (ClassData) classDataHM.get(key);
+		} else {
+			return null;
+		}
+		return cd.priority;
+	}
+
+	/**
+	 * Sets priority of the class, given the search key.
+	 */
+	@Override
+	public void setClassPriority(Object key, Integer priority) {
+		ClassData cd;
+		if (classDataHM.containsKey(key)) {
+			cd = (ClassData) classDataHM.get(key);
+		} else {
+			return;
+		}
+		if (cd.priority == null || !cd.priority.equals(priority)) {
+			cd.priority = priority;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns population of the class, given the search key.
+	 */
+	@Override
+	public Integer getClassPopulation(Object key) {
+		ClassData cd;
+		if (classDataHM.containsKey(key)) {
+			cd = (ClassData) classDataHM.get(key);
+		} else {
+			return null;
+		}
+		return cd.population;
+	}
+
+	/**
+	 * Sets population of the class, given the search key.
+	 */
+	@Override
+	public void setClassPopulation(Object key, Integer population) {
+		ClassData cd;
+		if (classDataHM.containsKey(key)) {
+			cd = (ClassData) classDataHM.get(key);
+		} else {
+			return;
+		}
+		if (cd.population == null || !cd.population.equals(population)) {
+			cd.population = population;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns inter-arrival time distribution of the class, given the search key.
+	 */
+	@Override
+	public Object getClassDistribution(Object key) {
+		ClassData cd;
+		if (classDataHM.containsKey(key)) {
 			cd = (ClassData) classDataHM.get(key);
 		} else {
 			return null;
@@ -445,135 +476,93 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Sets inter-arrival time distribution of the class linked to the specific key
-	 * */
+	 * Sets inter-arrival time distribution of the class, given the search key.
+	 */
 	@Override
-	public synchronized void setClassDistribution(Object distribution, Object key) {
+	public void setClassDistribution(Object key, Object distribution) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
 			cd = (ClassData) classDataHM.get(key);
 		} else {
 			return;
 		}
-		if (cd.type == CLASS_TYPE_OPEN) {
-			if (!cd.distribution.equals(distribution)) {
-				save = true;
-			}
+		if (cd.distribution == null || !cd.distribution.equals(distribution)) {
 			cd.distribution = distribution;
-		} else {
-			cd.population = null;
+			save = true;
 		}
 	}
 
-	/**Returns a class parameter, given the class key of search, and the parameter name
-	 * specified by proper code.*/
+	/**
+	 * Returns reference station of the class, given the search key.
+	 */
 	@Override
-	public synchronized Object getClassParameter(Object key, int parameterName) {
+	public Object getClassRefStation(Object key) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
 			cd = (ClassData) classDataHM.get(key);
 		} else {
 			return null;
 		}
-		switch (parameterName) {
-		case CLASS_NAME: {
-			return cd.name;
-		}
-		case CLASS_TYPE: {
-			return new Integer(cd.type);
-		}
-		case CLASS_PRIORITY: {
-			return new Integer(cd.priority);
-		}
-		case CLASS_POPULATION: {
-			return cd.population;
-		}
-		case CLASS_DISTRIBUTION: {
-			return cd.distribution;
-		}
-		default: {
-			return null;
-		}
-		}
+		return cd.refStation;
 	}
 
-	/**Sets a class parameter, given the class key of search, and the parameter name
-	 * specified by proper code. User is responsible for passing correct type for
-	 * parameters, e.g. name must be a String, type, priority and population must be an
-	 * integer. Distribution must be an object. If type for a field is not correct, a
-	 * <code> ClassCastException</code> will be raised.*/
+	/**
+	 * Sets reference station of the class, given the search key.
+	 */
 	@Override
-	public synchronized void setClassParameter(Object key, int parameterName, Object value) {
+	public void setClassRefStation(Object key, Object refStation) {
 		ClassData cd;
 		if (classDataHM.containsKey(key)) {
 			cd = (ClassData) classDataHM.get(key);
 		} else {
 			return;
 		}
-		switch (parameterName) {
-		case CLASS_NAME: {
-			cd.name = (String) value;
-			break;
+		if (cd.refStation == null || !cd.refStation.equals(refStation)) {
+			cd.refStation = refStation;
+			save = true;
+			if (cd.type == CLASS_TYPE_OPEN) {
+				if (cd.distribution == null && (refStation == null
+						|| getStationType(refStation).equals(STATION_TYPE_SOURCE))) {
+					cd.distribution = Defaults.getAsNewInstance("classDistribution");
+				}
+				if (cd.distribution != null && (STATION_TYPE_FORK.equals(refStation)
+						|| STATION_TYPE_CLASSSWITCH.equals(refStation)
+						|| STATION_TYPE_SCALER.equals(refStation)
+						|| STATION_TYPE_TRANSITION.equals(refStation))) {
+					cd.distribution = null;
+				}
+			}
 		}
-		case CLASS_TYPE: {
-			cd.type = ((Integer) value).intValue();
-			break;
-		}
-		case CLASS_PRIORITY: {
-			cd.priority = ((Integer) value).intValue();
-			break;
-		}
-		case CLASS_POPULATION: {
-			cd.population = (Integer) value;
-			break;
-		}
-		case CLASS_DISTRIBUTION: {
-			cd.distribution = value;
-			break;
-		}
-		}
-		save = true;
 	}
 
-	/**Sets all class parameters at once given the class' search key. If search key does
-	 * not exist, no class will be added.*/
+	/**
+	 * Adds a new class to the model and sets all class parameters at once.
+	 * @param name name of the class.
+	 * @param type type of the class.
+	 * @param priority priority of the class.
+	 * @param population population of the class.
+	 * @param distribution inter-arrival time distribution of the class.
+	 * @return search key for the new class.
+	 */
 	@Override
-	public synchronized void setClassParameters(Object key, String name, int type, int priority, Integer population, Object distribution) {
-		if (!classesKeyset.contains(key)) {
-			return;
-		}
-		if (type == CLASS_TYPE_CLOSED) {
-			distribution = null;
-		} else if (type == CLASS_TYPE_OPEN) {
-			population = null;
-		}
-		classDataHM.put(key, new ClassData(name, type, priority, population, distribution));
-		save = true;
-	}
-
-	/**Adds a class and sets all class parameters at once, return the new search key
-	 * identifying the new class.*/
-	@Override
-	public synchronized Object addClass(String name, int type, int priority, Integer population, Object distribution) {
-		//generating a new key
-		incrementalKey++;
-		Object key = new Long(incrementalKey);
+	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution) {
+		Object key = new Long(++incrementalKey);
 		classesKeyset.add(key);
-
-		if (type == CLASS_TYPE_CLOSED) {
-			distribution = null;
-		} else if (type == CLASS_TYPE_OPEN) {
-			population = null;
+		ClassData cd;
+		if (type == CLASS_TYPE_OPEN) {
+			cd = new ClassData(name, type, priority, null, distribution);
+			openClassesKeyset.add(key);
+		} else {
+			cd = new ClassData(name, type, priority, population, null);
+			closedClassesKeyset.add(key);
 		}
-		//add class to model
-		classDataHM.put(key, new ClassData(name, type, priority, population, distribution));
-		//add per-class station details
+		classDataHM.put(key, cd);
+
 		addStationDetailsForClass(key);
-		//add per-class blocking region details
 		addBlockingDetailsForClass(key);
-		for (Object station: this.getStationKeys()) {
-			for (Object classK: this.getClassKeys()) {
-				Object strategy = this.getForkingStrategy(station, classK);
+		for (Object stationKey : stationsKeyset) {
+			for (Object classKey : classesKeyset) {
+				Object strategy = getForkStrategy(stationKey, classKey);
 				if (strategy instanceof MultiBranchClassSwitchFork) {
 					Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
 					for (OutPath o: m.values()) {
@@ -586,76 +575,31 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 						o.getOutParameters().put(key, 0);
 					}
 				}
-				strategy = this.getJoinStrategy(station, classK);
+				strategy = getJoinStrategy(stationKey, classKey);
 				if (strategy instanceof GuardJoin) {
 					((GuardJoin) strategy).getGuard().put(key, 0);
 				}
-				/*strategy = this.getSemaphoreStrategy(station, classK);
-				if (strategy instanceof NormalSemaphore) {
-					((NormalSemaphore) strategy).getSemaphore().put(key, 0);
-				}*/
 			}
 		}
 		save = true;
 		return key;
 	}
 
-	/**Deletes class given its search key. */
+	/**
+	 * Deletes a class from the model, given the search key.
+	 */
 	@Override
-	public synchronized void deleteClass(Object key) {
+	public void deleteClass(Object key) {
 		if (classesKeyset.contains(key)) {
 			classesKeyset.remove(key);
 			classDataHM.remove(key);
+			openClassesKeyset.remove(key);
+			closedClassesKeyset.remove(key);
 			deleteStationDetailsForClass(key);
 			deleteBlockingDetailsForClass(key);
+			deleteClassMeasures(key);
 			save = true;
 		}
-	}
-
-	/**
-	 * Sets the reference station for a given class
-	 * @param classKey search key for class
-	 * @param stationKey search key for referenced station
-	 */
-	@Override
-	public void setClassRefStation(Object classKey, Object stationKey) {
-		ClassData cd = (ClassData) classDataHM.get(classKey);
-		if (cd == null) {
-			return;
-		}
-		Object oldRef = cd.refSource;
-		if (CommonConstants.STATION_TYPE_CLASSSWITCH.equals(stationKey))
-			cd.refSource = CommonConstants.STATION_TYPE_CLASSSWITCH;
-		else if (CommonConstants.STATION_TYPE_FORK.equals(stationKey))
-			cd.refSource = CommonConstants.STATION_TYPE_FORK;
-		else if (CommonConstants.STATION_TYPE_SCALER.equals(stationKey))
-			cd.refSource = CommonConstants.STATION_TYPE_SCALER;
-		else
-			cd.refSource = stationsKeyset.contains(stationKey) ? stationKey : null;
-		if (oldRef != stationKey) {
-			save = true;
-		}
-	}
-
-	/**
-	 * Returns the reference station for a given class
-	 * @param classKey search key for class
-	 * @return search key for referenced station or null if it was not specified yet
-	 */
-	@Override
-	public Object getClassRefStation(Object classKey) {
-		ClassData cd = (ClassData) classDataHM.get(classKey);
-		if (cd == null) {
-			return null;
-		}
-		//if previously saved refSource has been deleted, delete it to maintain coherence
-		if (!stationsKeyset.contains(cd.refSource)
-				&& !CommonConstants.STATION_TYPE_CLASSSWITCH.equals(cd.refSource)
-				&& !CommonConstants.STATION_TYPE_FORK.equals(cd.refSource)
-				&& !CommonConstants.STATION_TYPE_SCALER.equals(cd.refSource)) { 
-			cd.refSource = null;
-		}
-		return cd.refSource;
 	}
 
 	/*-------------------------------------------------------------------------------
@@ -663,191 +607,127 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *-------------------------------------------------------------------------------*/
 
 	/**
-	 * This method returns the key set of sources
-	 *
-	 * @return an array containing the entire set of source keys
-	 *
-	 * Author: Francesco D'Aquino
+	 * This method returns the key set of all stations.
 	 */
-	@Override
-	public Vector<Object> getStationKeysSource() {
-		Vector<Object> stations = this.getStationKeys();
-		Vector<Object> sources = new Vector<Object>(0, 1);
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_SOURCE)) {
-				sources.add(thisStation);
-			}
-		}
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_CLASSSWITCH)) {
-				sources.add(CommonConstants.STATION_TYPE_CLASSSWITCH);
-				break;
-			}
-		}
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_FORK)) {
-				sources.add(CommonConstants.STATION_TYPE_FORK);
-				break;
-			}
-		}
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_SCALER)) {
-				sources.add(CommonConstants.STATION_TYPE_SCALER);
-				break;
-			}
-		}
-		return sources;
-	}
-
-	/**
-	 * This method returns the key set of servers
-	 *
-	 * @return an array containing the entire set of server keys
-	 *
-	 * Author: Francesco D'Aquino
-	 */
-	@Override
-	public Vector<Object> getStationKeysServer() {
-		Vector<Object> stations = this.getStationKeys();
-		Vector<Object> servers = new Vector<Object>(0, 1);
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_SERVER)) {
-				servers.add(thisStation);
-			}
-		}
-		return servers;
-	}
-
-	/**
-	 * This method returns the key set of delays
-	 *
-	 * @return an array containing the entire set of delay keys
-	 *
-	 * Author: Francesco D'Aquino
-	 */
-	@Override
-	public Vector<Object> getStationKeysDelay() {
-		Vector<Object> stations = this.getStationKeys();
-		Vector<Object> delays = new Vector<Object>(0, 1);
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_DELAY)) {
-				delays.add(thisStation);
-			}
-		}
-		return delays;
-	}
-
-	/**
-	 * This method returns the key set of sinks
-	 *
-	 * @return an array containing the entire set of sink keys
-	 *
-	 * Author: Francesco D'Aquino
-	 */
-	@Override
-	public Vector<Object> getStationKeysSink() {
-		Vector<Object> stations = this.getStationKeys();
-		Vector<Object> sinks = new Vector<Object>(0, 1);
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_SINK)) {
-				sinks.add(thisStation);
-			}
-		}
-		return sinks;
-	}
-
-	/**
-	 * This method returns the key set of loggers
-	 *
-	 * @return an array containing the entire set of logger keys
-	 *
-	 * Author: Michael Fercu (Marco Bertoli) 0.7.4
-	 */
-	@Override
-	public Vector<Object> getStationKeysLogger() {
-		Vector<Object> stations = this.getStationKeys();
-		Vector<Object> loggers = new Vector<Object>(0, 1);
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_LOGGER)) {
-				loggers.add(thisStation);
-			}
-		}
-		return loggers;
-	}
-
-	/**
-	 * This method returns the key set of places
-	 *
-	 * @return an array containing the entire set of place keys
-	 *
-	 * Author: Lulai Zhu
-	 */
-	@Override
-	public Vector<Object> getStationKeysPlace() {
-		Vector<Object> stations = this.getStationKeys();
-		Vector<Object> places = new Vector<Object>(0, 1);
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_PLACE)) {
-				places.add(thisStation);
-			}
-		}
-		return places;
-	}
-
-	/**
-	 * This method returns the key set of transitions
-	 *
-	 * @return an array containing the entire set of transition keys
-	 *
-	 * Author: Lulai Zhu
-	 */
-	@Override
-	public Vector<Object> getStationKeysTransition() {
-		Vector<Object> stations = this.getStationKeys();
-		Vector<Object> transitions = new Vector<Object>(0, 1);
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			if (this.getStationType(thisStation).equals(CommonConstants.STATION_TYPE_TRANSITION)) {
-				transitions.add(thisStation);
-			}
-		}
-		return transitions;
-	}
-
-	/**Returns entire key set for search of stations. Objects contained  in returned vector
-	 * can be directly passed to methods for parameters retrieval.*/
 	@Override
 	public Vector<Object> getStationKeys() {
 		return stationsKeyset;
 	}
 
 	/**
-	 * This method returns all station keys without source and sink ones.
+	 * This method returns the key set of sources.
 	 */
 	@Override
-	public Vector<Object> getStationKeysNoSourceSink() {
-		return noSourceSinkKeyset;
+	public Vector<Object> getStationKeysSource() {
+		return sourcesKeyset;
 	}
 
 	/**
-	 * This method returns all fork/join keys.
+	 * This method returns the key set of sinks.
 	 */
 	@Override
-	public Vector<Object> getFJKeys() {
-		return FJKeyset;
+	public Vector<Object> getStationKeysSink() {
+		return sinksKeyset;
 	}
 
 	/**
-	 * This method returns all preloadable station keys.
+	 * This method returns the key set of terminals.
+	 */
+	@Override
+	public Vector<Object> getStationKeysTerminal() {
+		return terminalsKeyset;
+	}
+
+	/**
+	 * This method returns the key set of routers.
+	 */
+	@Override
+	public Vector<Object> getStationKeysRouter() {
+		return routersKeyset;
+	}
+
+	/**
+	 * This method returns the key set of delays.
+	 */
+	@Override
+	public Vector<Object> getStationKeysDelay() {
+		return delaysKeyset;
+	}
+
+	/**
+	 * This method returns the key set of servers.
+	 */
+	@Override
+	public Vector<Object> getStationKeysServer() {
+		return serversKeyset;
+	}
+
+	/**
+	 * This method returns the key set of forks.
+	 */
+	@Override
+	public Vector<Object> getStationKeysFork() {
+		return forksKeyset;
+	}
+
+	/**
+	 * This method returns the key set of joins.
+	 */
+	@Override
+	public Vector<Object> getStationKeysJoin() {
+		return joinsKeyset;
+	}
+
+	/**
+	 * This method returns the key set of loggers.
+	 */
+	@Override
+	public Vector<Object> getStationKeysLogger() {
+		return loggersKeyset;
+	}
+
+	/**
+	 * This method returns the key set of class switches.
+	 */
+	@Override
+	public Vector<Object> getStationKeysClassSwitch() {
+		return classSwitchesKeyset;
+	}
+
+	/**
+	 * This method returns the key set of semaphores.
+	 */
+	@Override
+	public Vector<Object> getStationKeysSemaphore() {
+		return semaphoresKeyset;
+	}
+
+	/**
+	 * This method returns the key set of scalers.
+	 */
+	@Override
+	public Vector<Object> getStationKeysScaler() {
+		return scalersKeyset;
+	}
+
+	/**
+	 * This method returns the key set of places.
+	 */
+	@Override
+	public Vector<Object> getStationKeysPlace() {
+		return placesKeyset;
+	}
+
+	/**
+	 * This method returns the key set of transitions.
+	 */
+	@Override
+	public Vector<Object> getStationKeysTransition() {
+		return transitionsKeyset;
+	}
+
+	/**
+	 * This method returns the key set of preloadable stations.
 	 */
 	@Override
 	public Vector<Object> getStationKeysPreloadable() {
@@ -855,7 +735,52 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * This method returns all blocking region keys.
+	 * This method returns all station (except sources and sinks) keys.
+	 */
+	@Override
+	public Vector<Object> getStationKeysNoSourceSink() {
+		Vector<Object> keyset = new Vector<Object>();
+		keyset.addAll(stationsKeyset);
+		keyset.removeAll(sourcesKeyset);
+		keyset.removeAll(sinksKeyset);
+		return keyset;
+	}
+
+	/**
+	 * This method returns reference source keys.
+	 */
+	@Override
+	public Vector<Object> getStationKeysRefSource() {
+		Vector<Object> keyset = new Vector<Object>();
+		keyset.addAll(sourcesKeyset);
+		if (!forksKeyset.isEmpty()) {
+			keyset.add(STATION_TYPE_FORK);
+		}
+		if (!classSwitchesKeyset.isEmpty()) {
+			keyset.add(STATION_TYPE_CLASSSWITCH);
+		}
+		if (!scalersKeyset.isEmpty()) {
+			keyset.add(STATION_TYPE_SCALER);
+		}
+		if (!transitionsKeyset.isEmpty()) {
+			keyset.add(STATION_TYPE_TRANSITION);
+		}
+		return keyset;
+	}
+
+	/**
+	 * This method returns fork/join section keys.
+	 */
+	@Override
+	public Vector<Object> getFJKeys() {
+		Vector<Object> keyset = new Vector<Object>();
+		keyset.addAll(forksKeyset);
+		keyset.addAll(scalersKeyset);
+		return keyset;
+	}
+
+	/**
+	 * This method returns the key set of blocking regions.
 	 */
 	@Override
 	public Vector<Object> getFCRegionKeys() {
@@ -867,17 +792,19 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	@Override
 	public Vector<Object> getStationRegionKeysNoSourceSink() {
-		Vector<Object> vect = new Vector<Object>(noSourceSinkKeyset);
-		vect.addAll(blockingRegionsKeyset);
-		return vect;
+		Vector<Object> keyset = new Vector<Object>();
+		keyset.addAll(stationsKeyset);
+		keyset.removeAll(sourcesKeyset);
+		keyset.removeAll(sinksKeyset);
+		keyset.addAll(blockingRegionsKeyset);
+		return keyset;
 	}
 
-	/** Returns name of the station in <code>String</code> representation, given the
-	 * search key.
-	 * @param key: search key for station to be modified
-	 * @return : name of station.*/
+	/**
+	 * Returns name of the station, given the search key.
+	 */
 	@Override
-	public synchronized String getStationName(Object key) {
+	public String getStationName(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
@@ -887,135 +814,28 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return sd.name;
 	}
 
-	/** Sets type of the station, given the search key.
-	 * @param key: search key for station to be modified
-	 * @param name: name of station.*/
+	/**
+	 * Sets name of the station, given the search key.
+	 */
 	@Override
-	public synchronized void setStationName(String name, Object key) {
+	public void setStationName(Object key, String name) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return;
 		}
-		if (sd.name != name) {
+		if (sd.name == null || !sd.name.equals(name)) {
+			sd.name = name;
 			save = true;
 		}
-		sd.name = name;
 	}
 
-	/** Returns queue capacity of the station, given the search key.*/
+	/**
+	 * Returns type of the station, given the search key.
+	 */
 	@Override
-	public synchronized Integer getStationQueueCapacity(Object key) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return null;
-		}
-		return sd.queueCapacity;
-	}
-
-	/** Sets queue capacity of the station, given the search key.*/
-	@Override
-	public synchronized void setStationQueueCapacity(Integer queueCapacity, Object key) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return;
-		}
-		if (!sd.queueCapacity.equals(queueCapacity)) {
-			save = true;
-		}
-		sd.queueCapacity = queueCapacity;
-	}
-
-	/** Returns number of servers or number of forked job for the station given the search key.*/
-	@Override
-	public synchronized Integer getStationNumberOfServers(Object key) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return null;
-		}
-		return sd.numOfServers;
-	}
-
-	/** Sets number of servers or number of forked job for the station, given the search key.*/
-	@Override
-	public synchronized void setStationNumberOfServers(Integer numberOfServers, Object key) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return;
-		}
-		if (!sd.numOfServers.equals(numberOfServers)) {
-			save = true;
-		}
-		sd.numOfServers = numberOfServers;
-	}
-
-	/** Returns parameter for the station given the search key and parameter code.*/
-	@Override
-	public synchronized Object getStationParameter(Object key, int parameterCode) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return null;
-		}
-		switch (parameterCode) {
-		case STATION_NAME: {
-			return sd.name;
-		}
-		case STATION_TYPE: {
-			return sd.type;
-		}
-		case STATION_QUEUE_CAPACITY: {
-			return sd.queueCapacity;
-		}
-		case STATION_NUMBER_OF_SERVERS: {
-			return sd.numOfServers;
-		}
-		default: {
-			return null;
-		}
-		}
-	}
-
-	/** Sets parameter for the station, given the search key and parameter code.*/
-	@Override
-	public synchronized void setStationParameter(Object value, Object key, int parameterCode) {
-		switch (parameterCode) {
-		case STATION_NAME: {
-			setStationName((String) value, key);
-			break;
-		}
-		case STATION_TYPE: {
-			setStationType((String) value, key);
-			break;
-		}
-		case STATION_QUEUE_CAPACITY: {
-			setStationQueueCapacity((Integer) value, key);
-			break;
-		}
-		case STATION_NUMBER_OF_SERVERS: {
-			setStationNumberOfServers((Integer) value, key);
-			break;
-		}
-		}
-		save = true;
-	}
-
-	/** Returns type of the station in <code>String</code> representation, given the
-	 * search key.
-	 * @param key: search key for station to be modified
-	 * @return : type of station.*/
-	@Override
-	public synchronized String getStationType(Object key) {
+	public String getStationType(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
@@ -1025,40 +845,95 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return sd.type;
 	}
 
-	/** Sets name of the station, given the search key.
-	 * @param key: search key for station to be modified
-	 * @param type: type of station.*/
+	/**
+	 * Sets type of the station, given the search key.
+	 */
 	@Override
-	public synchronized void setStationType(String type, Object key) {
+	public void setStationType(Object key, String type) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return;
 		}
-		String oldType = sd.type;
-		sd.type = type;
-		//If type has changed, all of the parameters must be reset to defaults
-		if (!oldType.equals(sd.type)) {
+
+		if (sd.type == null || !sd.type.equals(type)) {
+			sd.type = type;
 			save = true;
 			setDefaultsForStation(sd);
+			addNewStationDetails(key);
 			deleteStationConnections(key);
 			addNewStationConnections(key);
-			addNewStationDetails(key);
-			// If new type is not source or sink add to noSourceSink
-			if (!type.equals(STATION_TYPE_SOURCE) && !type.equals(STATION_TYPE_SINK)) {
-				if (!noSourceSinkKeyset.contains(key)) {
-					noSourceSinkKeyset.add(key);
-				}
+			deleteStationMeasures(key);
+			if (type.equals(STATION_TYPE_SOURCE)) {
+				sourcesKeyset.add(key);
 			} else {
-				noSourceSinkKeyset.remove(key);
+				sourcesKeyset.remove(key);
 			}
-			if (type.equals(STATION_TYPE_FORK) || type.equals(STATION_TYPE_SCALER)) {
-				if (!FJKeyset.contains(key)) {
-					FJKeyset.add(key);
-				}
+			if (type.equals(STATION_TYPE_SINK)) {
+				sinksKeyset.add(key);
 			} else {
-				FJKeyset.remove(key);
+				sinksKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_TERMINAL)) {
+				terminalsKeyset.add(key);
+			} else {
+				terminalsKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_ROUTER)) {
+				routersKeyset.add(key);
+			} else {
+				routersKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_DELAY)) {
+				delaysKeyset.add(key);
+			} else {
+				delaysKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_SERVER)) {
+				serversKeyset.add(key);
+			} else {
+				serversKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_FORK)) {
+				forksKeyset.add(key);
+			} else {
+				forksKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_JOIN)) {
+				joinsKeyset.add(key);
+			} else {
+				joinsKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_LOGGER)) {
+				loggersKeyset.add(key);
+			} else {
+				loggersKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_CLASSSWITCH)) {
+				classSwitchesKeyset.add(key);
+			} else {
+				classSwitchesKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_SEMAPHORE)) {
+				semaphoresKeyset.add(key);
+			} else {
+				semaphoresKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_SCALER)) {
+				scalersKeyset.add(key);
+			} else {
+				scalersKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_PLACE)) {
+				placesKeyset.add(key);
+			} else {
+				placesKeyset.remove(key);
+			}
+			if (type.equals(STATION_TYPE_TRANSITION)) {
+				transitionsKeyset.add(key);
+			} else {
+				transitionsKeyset.remove(key);
 			}
 			if (isStationTypePreloadable(type)) {
 				if (!preloadableKeyset.contains(key)) {
@@ -1067,168 +942,121 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			} else {
 				preloadableKeyset.remove(key);
 			}
-			// If station is in a blocking region removes it if its type is not valid
 			if (sd.blockingRegion != null) {
-				if (!canStationTypeBeBlocked(sd.type)) {
-					this.removeRegionStation(sd.blockingRegion, key);
+				if (!canStationTypeBeBlocked(type)) {
+					removeRegionStation(sd.blockingRegion, key);
 				}
 			} else {
-				if (canStationTypeBeBlocked(sd.type) && !blockableStations.contains(key)) {
-					blockableStations.add(key);
-				} else if (!canStationTypeBeBlocked(sd.type)) {
-					blockableStations.remove(key);
+				if (canStationTypeBeBlocked(type)) {
+					if (!blockableKeyset.contains(key)) {
+						blockableKeyset.add(key);
+					}
+				} else {
+					blockableKeyset.remove(key);
 				}
 			}
+			manageRefStations();
 		}
 	}
 
-	/*sets default values for station parameters. To be used when type of station has
-	 * been changed*/
-	private void setDefaultsForStation(StationData sd) {
-		sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
-		if (sd.type.equals(STATION_TYPE_SERVER)) {
-			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
-		} else if (sd.type.equals(STATION_TYPE_FORK)) {
-			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
-			if (sd.queueStrategy.equals(QUEUE_STRATEGY_STATION_PS) || sd.queueStrategy.equals(QUEUE_STRATEGY_STATION_SRPT)) {
-				sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
-			}
-		}
-
-		sd.numOfServers = Defaults.getAsInteger("stationServers");
-		sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
-
-		if (sd.type.equals(STATION_TYPE_DELAY)) {
-			/*Delay stations have infinite number of servers and no queue*/
-			sd.numOfServers = new Integer(-1);
-		} else if (sd.type.equals(STATION_TYPE_SOURCE) || sd.type.equals(STATION_TYPE_SINK) || sd.type.equals(STATION_TYPE_TERMINAL)
-				|| sd.type.equals(STATION_TYPE_ROUTER) || sd.type.equals(STATION_TYPE_JOIN) || sd.type.equals(STATION_TYPE_LOGGER)
-				|| sd.type.equals(STATION_TYPE_SEMAPHORE) || sd.type.equals(STATION_TYPE_PLACE)) {
-			/*If this station has no queue and no service section, there's no need to
-			 * set any parameter value for these sections.*/
-			sd.numOfServers = null;
-		} else if (sd.type.equals(STATION_TYPE_FORK) || sd.type.equals(STATION_TYPE_SCALER)) {
-			sd.forkBlock = Defaults.getAsInteger("forkBlock");
-			sd.numOfServers = Defaults.getAsInteger("forkJobsPerLink");
-		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
-			sd.numOfServers = Defaults.getAsInteger("transitionServerNumber");
-		}
-
-		if (sd.type.equals(STATION_TYPE_PLACE)) {
-			sd.queueCapacity = Defaults.getAsInteger("storeCapacity");
-		}
-	}
-
-	/**Adds a new station to the model. Name and type must be specified.
-	 * @param name: name of the new station
-	 * @param type: string representing station type. it is value is contained in
-	 * <code>JSIMConstants</code> interface.
-	 * @return : key of search for this class*/
+	/**
+	 * Returns queue capacity of the station, given the search key.
+	 */
 	@Override
-	public synchronized Object addStation(String name, String type) {
-		Object key = new Long(++incrementalKey);
-		//If this station has already been created, do not add search key to the list.
-		if (!stationsKeyset.contains(key)) {
-			stationsKeyset.add(key);
-			if (!type.equals(STATION_TYPE_SOURCE) && !type.equals(STATION_TYPE_SINK)) {
-				noSourceSinkKeyset.add(key);
-			}
-			if (type.equals(STATION_TYPE_FORK) || type.equals(STATION_TYPE_SCALER)) {
-				FJKeyset.add(key);
-			}
-			if (isStationTypePreloadable(type)) {
-				preloadableKeyset.add(key);
-			}
-			// If this station can be blocked, adds it to blockable stations vector
-			if (canStationTypeBeBlocked(type)) {
-				blockableStations.add(key);
-			}
-		}
-		StationData newStation = new StationData(name, type, null, null);
-		setDefaultsForStation(newStation);
-		//add station to the correspondent hashmap
-		stationDataHM.put(key, newStation);
-		//setup connection defaults
-		addNewStationConnections(key);
-		//setup station details
-		addNewStationDetails(key);
-		save = true;
-		//return key
-		return key;
-	}
-
-	/**Deletes station given a search key.*/
-	@Override
-	public synchronized void deleteStation(Object key) {
-		if (stationsKeyset.contains(key)) {
-			// Removes this station from owner blocking region (if needed)
-			StationData sd = (StationData) stationDataHM.get(key);
-			//Part where LoadDependant Routing must be refreshed:
-			Vector<Object> bacwardStationKeys = this.getBackwardConnections(key);
-			for (Iterator<Object> it = bacwardStationKeys.iterator(); it.hasNext();) {
-				Object stationKey = it.next();
-				Vector<Object> classKeys = this.getClassKeys();
-				for (Object classKey : classKeys) {
-					RoutingStrategy rs = (RoutingStrategy)this.getRoutingStrategy(stationKey, classKey);
-					ForkStrategy fs = (ForkStrategy) this.getForkingStrategy(stationKey, classKey);
-					if (rs instanceof LoadDependentRouting) {
-						LoadDependentRouting ld = (LoadDependentRouting) rs;
-						ld.refreshRoutingOnStationDeletion(this.getStationName(key));
-					}
-					if (fs != null) {
-						fs.removeStation(key);
-					}
-				}
-			}
-
-			if (sd.blockingRegion != null) {
-				removeRegionStation(sd.blockingRegion, key);
-			}
-			stationsKeyset.remove(key);
-			stationDataHM.remove(key);
-			deleteStationConnections(key);
-			deleteStationDetails(key);
-			deleteStationMeasures(key);
-			noSourceSinkKeyset.remove(key);
-			FJKeyset.remove(key);
-			preloadableKeyset.remove(key);
-			blockableStations.remove(key);
-			save = true;
-		}
-
-	}
-
-	// check if use simplified fork strategy
-	@Override
-	public Boolean getIsSimplifiedFork(Object key) {
+	public Integer getStationQueueCapacity(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return null;
 		}
-		return sd.isSimplifiedFork;
+		return sd.queueCapacity;
 	}
 
+	/**
+	 * Sets queue capacity of the station, given the search key.
+	 */
 	@Override
-	public void setIsSimplifiedFork(Object key, Boolean value) {
+	public void setStationQueueCapacity(Object key, Integer queueCapacity) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return;
 		}
-		if (!sd.isSimplifiedFork.equals(value)) {
+		if (sd.queueCapacity == null || !sd.queueCapacity.equals(queueCapacity)) {
+			sd.queueCapacity = queueCapacity;
 			save = true;
 		}
-		sd.isSimplifiedFork = value;
+	}
+
+	/**
+	 * Returns queue strategy of the station, given the search key.
+	 */
+	@Override
+	public String getStationQueueStrategy(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.queueStrategy;
+	}
+
+	/**
+	 * Sets queue strategy of the station, given the search key.
+	 */
+	@Override
+	public void setStationQueueStrategy(Object key, String queueStrategy) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.queueStrategy == null || !sd.queueStrategy.equals(queueStrategy)) {
+			sd.queueStrategy = queueStrategy;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns number of servers of the station, given the search key.
+	 */
+	@Override
+	public Integer getStationNumberOfServers(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.numOfServers;
+	}
+
+	/**
+	 * Sets number of servers of the station, given the search key.
+	 */
+	@Override
+	public void setStationNumberOfServers(Object key, Integer numberOfServers) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.numOfServers == null || !sd.numOfServers.equals(numberOfServers)) {
+			sd.numOfServers = numberOfServers;
+			save = true;
+		}
 	}
 
 	/**
 	 * Tells if a fork is blocking
 	 * <br>Author: Bertoli Marco
-	 * @param key search's key for fork
-	 * @return maximum number of jobs allowed in a fork-join
+	 * @param key: search's key for fork
+	 * @return maximum number of jobs allowed in the fork-join
 	 * region (-1 is infinity)
 	 */
 	@Override
@@ -1245,8 +1073,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Sets if a fork is blocking
 	 * <br>Author: Bertoli Marco
-	 * @param key search's key for fork
-	 * @param value maximum number of jobs allowed in a fork-join
+	 * @param key: search's key for fork
+	 * @param value: maximum number of jobs allowed in the fork-join
 	 * region (-1 is infinity)
 	 */
 	@Override
@@ -1257,10 +1085,225 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else {
 			return;
 		}
-		if (!sd.forkBlock.equals(value)) {
+		if (sd.forkBlock == null || !sd.forkBlock.equals(value)) {
+			sd.forkBlock = value;
 			save = true;
 		}
-		sd.forkBlock = value;
+	}
+
+	/**
+	 * Tells if a fork is simplified
+	 * <br>Author: Bertoli Marco
+	 * @param key: search's key for fork
+	 * @return true if the fork is simplified, false otherwise
+	 */
+	@Override
+	public Boolean getIsSimplifiedFork(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.isSimplifiedFork;
+	}
+
+	/**
+	 * Sets if a fork is simplified
+	 * <br>Author: Bertoli Marco
+	 * @param key: search's key for fork
+	 * @param value: true if the fork is simplified, false otherwise
+	 */
+	@Override
+	public void setIsSimplifiedFork(Object key, Boolean value) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.isSimplifiedFork == null || !sd.isSimplifiedFork.equals(value)) {
+			sd.isSimplifiedFork = value;
+			save = true;
+		}
+	}
+
+	/**
+	 * Adds a new station to the model, given the station name and type.
+	 * @param name name of the station.
+	 * @param type type of the station.
+	 * @return search key for the new station.
+	 */
+	@Override
+	public Object addStation(String name, String type) {
+		Object key = new Long(++incrementalKey);
+		stationsKeyset.add(key);
+		StationData sd = new StationData(name, type);
+		stationDataHM.put(key, sd);
+		setDefaultsForStation(sd);
+		addNewStationDetails(key);
+		addNewStationConnections(key);
+		if (type.equals(STATION_TYPE_SOURCE)) {
+			sourcesKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_SINK)) {
+			sinksKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_TERMINAL)) {
+			terminalsKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_ROUTER)) {
+			routersKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_DELAY)) {
+			delaysKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_SERVER)) {
+			serversKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_FORK)) {
+			forksKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_JOIN)) {
+			joinsKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_LOGGER)) {
+			loggersKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_CLASSSWITCH)) {
+			classSwitchesKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_SEMAPHORE)) {
+			semaphoresKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_SCALER)) {
+			scalersKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_PLACE)) {
+			placesKeyset.add(key);
+		}
+		if (type.equals(STATION_TYPE_TRANSITION)) {
+			transitionsKeyset.add(key);
+		}
+		if (isStationTypePreloadable(type)) {
+			preloadableKeyset.add(key);
+		}
+		if (canStationTypeBeBlocked(type)) {
+			blockableKeyset.add(key);
+		}
+		save = true;
+		return key;
+	}
+
+	/**
+	 * Deletes a station from the model, given the search key.
+	 */
+	@Override
+	public void deleteStation(Object key) {
+		if (stationsKeyset.contains(key)) {
+			Vector<Object> stationKeys = getBackwardConnections(key);
+			for (Object stationKey : stationKeys) {
+				for (Object classKey : classesKeyset) {
+					RoutingStrategy rs = (RoutingStrategy) getRoutingStrategy(stationKey, classKey);
+					ForkStrategy fs = (ForkStrategy) getForkStrategy(stationKey, classKey);
+					if (rs instanceof LoadDependentRouting) {
+						LoadDependentRouting ld = (LoadDependentRouting) rs;
+						ld.refreshRoutingOnStationDeletion(getStationName(key));
+					}
+					if (fs != null) {
+						fs.removeStation(key);
+					}
+				}
+			}
+
+			StationData sd = (StationData) stationDataHM.get(key);
+			if (sd.blockingRegion != null) {
+				removeRegionStation(sd.blockingRegion, key);
+			}
+			stationsKeyset.remove(key);
+			stationDataHM.remove(key);
+			deleteStationConnections(key);
+			deleteStationDetails(key);
+			deleteStationMeasures(key);
+			sourcesKeyset.remove(key);
+			sinksKeyset.remove(key);
+			terminalsKeyset.remove(key);
+			routersKeyset.remove(key);
+			delaysKeyset.remove(key);
+			serversKeyset.remove(key);
+			forksKeyset.remove(key);
+			joinsKeyset.remove(key);
+			loggersKeyset.remove(key);
+			classSwitchesKeyset.remove(key);
+			semaphoresKeyset.remove(key);
+			scalersKeyset.remove(key);
+			placesKeyset.remove(key);
+			transitionsKeyset.remove(key);
+			preloadableKeyset.remove(key);
+			blockableKeyset.remove(key);
+			manageRefStations();
+			save = true;
+		}
+	}
+
+	/**
+	 * Sets the station parameters by default.
+	 */
+	private void setDefaultsForStation(StationData sd) {
+		String queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+		if (sd.type.equals(STATION_TYPE_SERVER)) {
+			queueStrategy = Defaults.get("stationStationQueueStrategy");
+		} else if (sd.type.equals(STATION_TYPE_FORK)) {
+			queueStrategy = Defaults.get("stationStationQueueStrategy");
+			if (queueStrategy.equals(QUEUE_STRATEGY_STATION_PS) || queueStrategy.equals(QUEUE_STRATEGY_STATION_SRPT)) {
+				queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+			}
+		}
+
+		if (sd.type.equals(STATION_TYPE_SOURCE)) {
+			// Do nothing
+		} else if (sd.type.equals(STATION_TYPE_SINK)) {
+			// Do nothing
+		} else if (sd.type.equals(STATION_TYPE_TERMINAL)) {
+			// Do nothing
+		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
+			sd.queueCapacity = Integer.valueOf(-1);
+			sd.queueStrategy = queueStrategy;
+		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
+			sd.queueCapacity = Integer.valueOf(-1);
+			sd.queueStrategy = queueStrategy;
+			sd.numOfServers = Integer.valueOf(-1);
+		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
+			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
+			sd.queueStrategy = queueStrategy;
+			sd.numOfServers = Defaults.getAsInteger("stationServers");
+		} else if (sd.type.equals(STATION_TYPE_FORK)) {
+			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
+			sd.queueStrategy = queueStrategy;
+			sd.forkBlock = Defaults.getAsInteger("forkBlock");
+			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
+			sd.numOfServers = Defaults.getAsInteger("forkJobsPerLink");
+		} else if (sd.type.equals(STATION_TYPE_JOIN)) {
+			// Do nothing
+		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
+			sd.queueCapacity = Integer.valueOf(-1);
+			sd.queueStrategy = queueStrategy;
+		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
+			sd.queueCapacity = Integer.valueOf(-1);
+			sd.queueStrategy = queueStrategy;
+		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
+			// Do nothing
+		} else if (sd.type.equals(STATION_TYPE_SCALER)) {
+			sd.forkBlock = Defaults.getAsInteger("forkBlock");
+			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
+			sd.numOfServers = Defaults.getAsInteger("forkJobsPerLink");
+		} else if (sd.type.equals(STATION_TYPE_PLACE)) {
+			sd.queueCapacity = Defaults.getAsInteger("placeCapacity");
+			sd.queueStrategy = queueStrategy;
+		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
+			sd.transitionModeList = new ArrayList<Object>();
+			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
+		}
 	}
 
 	/*------------------------------------------------------------------------------
@@ -1268,197 +1311,316 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 *------------------------------------------------------------------------------*/
 
 	/**
-	 * Returns drop rule associated with given station queue section if capacity is finite
+	 * Returns queue capacity for a station and a class, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return integer for queue capacity.
+	 */
+	@Override
+	public Integer getQueueCapacity(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.queueCapacity;
+	}
+
+	/**
+	 * Sets queue capacity for a station and a class, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return queueCapacity: integer for queue capacity.
+	 */
+	@Override
+	public void setQueueCapacity(Object stationKey, Object classKey, Integer queueCapacity) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.queueCapacity == null || !scd.queueCapacity.equals(queueCapacity)) {
+			scd.queueCapacity = queueCapacity;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns queue strategy for a station and a class, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return string name for queue strategy.
+	 */
+	@Override
+	public String getQueueStrategy(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.queueStrategy;
+	}
+
+	/**
+	 * Sets queue strategy for a station and a class, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param queueStrategy: string name for queue strategy.
+	 */
+	@Override
+	public void setQueueStrategy(Object stationKey, Object classKey, String queueStrategy) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.queueStrategy == null || !scd.queueStrategy.equals(queueStrategy)) {
+			scd.queueStrategy = queueStrategy;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns drop rule associated with given station queue section if capacity is finite.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
 	 */
 	@Override
 	public String getDropRule(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			return current.dropRule;
-		} else {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
 			return null;
 		}
+		return scd.dropRule;
 	}
 
 	/**
-	 * Sets drop rule associated with given station queue section if capacity is finite
+	 * Sets drop rule associated with given station queue section if capacity is finite.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param rule: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
+	 * @param dropRule: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
 	 */
 	@Override
-	public void setDropRule(Object stationKey, Object classKey, String rule) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null && rule != null) {
-			if (!current.dropRule.equals(rule)) {
-				save = true;
-			}
-			current.dropRule = rule;
+	public void setDropRule(Object stationKey, Object classKey, String dropRule) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
 		}
-	}
-
-	@Override
-	public void setStationQueueStrategy(Object stationKey, String strategy) {
-		StationData station = (StationData) stationDataHM.get(stationKey);
-		if (station != null) {
-			if (!station.queueStrategy.equals(strategy)) {
-				save = true;
-			}
-			station.queueStrategy = strategy;
-		}
-	}
-
-	@Override
-	public String getStationQueueStrategy(Object stationKey) {
-		StationData station = (StationData) stationDataHM.get(stationKey);
-		if (station != null) {
-			return station.queueStrategy;
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public void setQueueStrategy(Object stationKey, Object classKey, String queueStrategy) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			if (!current.queueStrategy.equals(queueStrategy)) {
-				save = true;
-			}
-			current.queueStrategy = queueStrategy;
-		}
-	}
-
-	@Override
-	public String getQueueStrategy(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			return current.queueStrategy;
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object distribution) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			if (!distribution.equals(current.serviceDistribution)) {
-				save = true;
-			}
-			current.serviceDistribution = distribution;
-		}
-	}
-
-	@Override
-	public Object getServiceTimeDistribution(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			return current.serviceDistribution;
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public void setRoutingStrategy(Object stationKey, Object classKey, Object routingStrategy) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			if (!routingStrategy.equals(current.routingStrategy)) {
-				save = true;
-			}
-			current.routingStrategy = routingStrategy;
-		}
-	}
-
-	@Override
-	public void setForkingStrategy(Object stationKey, Object classKey,
-			Object forkingStrategy) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(
-				classKey, stationKey);
-		if (current != null) {
-			if (!forkingStrategy.equals(current.forkingStrategy)) {
-				save = true;
-			}
-			current.forkingStrategy = forkingStrategy;
-		}
-	}
-
-	@Override
-	public void setJoinStrategy(Object stationKey, Object classKey,
-			Object joinStrategy) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(
-				classKey, stationKey);
-		if (current != null) {
-			//if (!joinStrategy.equals(current.joinStrategy)) {
+		if (scd.dropRule == null || !scd.dropRule.equals(dropRule)) {
+			scd.dropRule = dropRule;
 			save = true;
-			//}
-			current.joinStrategy = joinStrategy;
-		}
-	}
-
-	@Override
-	public void setSemaphoreStrategy(Object stationKey, Object classKey,
-			Object semaphoreStrategy) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(
-				classKey, stationKey);
-		if (current != null) {
-			//if (!semaphoreStrategy.equals(current.semaphoreStrategy)) {
-			save = true;
-			//}
-			current.semaphoreStrategy = semaphoreStrategy;
-		}
-	}
-
-	@Override
-	public Object getRoutingStrategy(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			return current.routingStrategy;
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public Object getForkingStrategy(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(
-				classKey, stationKey);
-		if (current != null) {
-			return current.forkingStrategy;
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public Object getJoinStrategy(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(
-				classKey, stationKey);
-		if (current != null) {
-			return current.joinStrategy;
-		} else {
-			return null;
-		}
-	}
-
-	@Override
-	public Object getSemaphoreStrategy(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(
-				classKey, stationKey);
-		if (current != null) {
-			return current.semaphoreStrategy;
-		} else {
-			return null;
 		}
 	}
 
 	/**
-	 * Michael Fercu (Marco Bertoli) - 0.7.4
-	 * Access methods for "Logger"
+	 * Returns service time distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return distribution for specified class and station.
+	 */
+	@Override
+	public Object getServiceTimeDistribution(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.serviceDistribution;
+	}
+
+	/**
+	 * Sets service time distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
+	@Override
+	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object distribution) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.serviceDistribution == null || !scd.serviceDistribution.equals(distribution)) {
+			scd.serviceDistribution = distribution;
+			save = true;
+		}
+	}
+	
+	/**
+	 * Returns routing strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return routing strategy for specified class and station.
+	 */
+	@Override
+	public Object getRoutingStrategy(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.routingStrategy;
+	}
+
+	/**
+	 * Sets routing strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param routingStrategy: routing strategy to be set for specified class and station.
+	 */
+	@Override
+	public void setRoutingStrategy(Object stationKey, Object classKey, Object routingStrategy) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.routingStrategy == null || !scd.routingStrategy.equals(routingStrategy)) {
+			scd.routingStrategy = routingStrategy;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns fork strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return fork strategy for specified class and station.
+	 */
+	@Override
+	public Object getForkStrategy(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.forkStrategy;
+	}
+
+	/**
+	 * Sets fork strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param forkStrategy: fork strategy to be set for specified class and station.
+	 */
+	@Override
+	public void setForkStrategy(Object stationKey, Object classKey, Object forkStrategy) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.forkStrategy == null || !scd.forkStrategy.equals(forkStrategy)) {
+			scd.forkStrategy = forkStrategy;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns join strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return join strategy for specified class and station.
+	 */
+	@Override
+	public Object getJoinStrategy(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.joinStrategy;
+	}
+
+	/**
+	 * Sets join strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param joinStrategy: join strategy to be set for specified class and station.
+	 */
+	@Override
+	public void setJoinStrategy(Object stationKey, Object classKey, Object joinStrategy) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.joinStrategy == null || !scd.joinStrategy.equals(joinStrategy)) {
+			scd.joinStrategy = joinStrategy;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns semaphore strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return semaphore strategy for specified class and station.
+	 */
+	@Override
+	public Object getSemaphoreStrategy(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.semaphoreStrategy;
+	}
+
+	/**
+	 * Sets semaphore strategy for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param semaphoreStrategy: semaphore strategy to be set for specified class and station.
+	 */
+	@Override
+	public void setSemaphoreStrategy(Object stationKey, Object classKey, Object semaphoreStrategy) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.semaphoreStrategy == null || !scd.semaphoreStrategy.equals(semaphoreStrategy)) {
+			scd.semaphoreStrategy = semaphoreStrategy;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns logging parameters for the logger. <I>MF'08 0.7.4</I>
+	 * @param stationKey: search key for station.
+	 */
+	@Override
+	public Object getLoggingParameters(Object stationKey) {
+		StationData sd;
+		if (stationDataHM.containsKey(stationKey)) {
+			sd = (StationData) stationDataHM.get(stationKey);
+		} else {
+			return null;
+		}
+		return (sd.loggerParameters != null) ? sd.loggerParameters : new LoggerParameters();
+	}
+
+	/**
+	 * Sets logging parameters for the logger. <I>MF'08 0.7.4</I>
+	 * @param stationKey: search key for station.
+	 * @param loggerParameters: local LoggerParameters.
 	 */
 	@Override
 	public void setLoggingParameters(Object stationKey, Object loggerParameters) {
@@ -1468,28 +1630,16 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else {
 			return;
 		}
-
-		if (sd.loggerParameters == null) {
-			save = true;
-		} else if (!sd.loggerParameters.equals(loggerParameters)) {
+		if (sd.loggerParameters == null || !sd.loggerParameters.equals(loggerParameters)) {
+			sd.loggerParameters = loggerParameters;
 			save = true;
 		}
-
-		sd.loggerParameters = loggerParameters;
 	}
 
-	@Override
-	public Object getLoggingParameters(Object stationKey) {
-		Object loggerParams = null;
-		if (stationDataHM.containsKey(stationKey)) {
-			StationData sd = (StationData) stationDataHM.get(stationKey);
-			loggerParams = (sd.loggerParameters != null) ? sd.loggerParameters : new LoggerParameters();
-		} else {
-			return null;
-		}
-		return loggerParams;
-	}
-
+	/**
+	 * Returns logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
+	 * @param selector: either "path", "delim", or "autoAppend" 
+	 */
 	@Override
 	public String getLoggingGlbParameter(String selector) {
 		// The global parameters must be instantiated for a new file
@@ -1511,6 +1661,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return null;
 	}
 
+	/**
+	 * Sets logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
+	 * @param selector: either "path", "delim", "decimalSeparator", or "autoAppend" 
+	 * @param value: String to assign to variable named by selector.
+	 */
 	@Override
 	public void setLoggingGlbParameter(String selector, String value) {
 		// The global parameters must be instantiated for a new file
@@ -1522,18 +1677,17 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		debugLog.debug("glbParameter <" + selector + "=" + value + ">");
 
 		if (selector.equalsIgnoreCase("path") == true) {
-			this.loggerGlbParams.path = value;
+			loggerGlbParams.path = value;
 		} else if (selector.equalsIgnoreCase("decimalSeparator") == true) {
-			this.loggerGlbParams.decimalSeparator = value;
+			loggerGlbParams.decimalSeparator = value;
 		} else if (selector.equalsIgnoreCase("delim") == true) {
-			this.loggerGlbParams.delimiter = value;
+			loggerGlbParams.delimiter = value;
 		} else if (selector.equalsIgnoreCase("autoAppend") == true) {
-			this.loggerGlbParams.autoAppendMode = new Integer(value);
+			loggerGlbParams.autoAppendMode = new Integer(value);
 		} else {
 			debugLog.error("No such selector " + selector + " for " + new Exception().getStackTrace()[0] + "\n" + new Exception().getStackTrace()[1]);
 			return;
 		}
-
 		save = true;
 	}
 
@@ -1544,16 +1698,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @return String[] of the filename of all log files that will be written to.
 	 */
 	public String[] getLoggerNameList() {
-		Vector<Object> loggerkeys = getStationKeysLogger();
-		int loggerkeyssize = loggerkeys.size();
-		String[] lknames = new String[loggerkeyssize];
-		String[] lknames2;
+		String[] lknames = new String[loggersKeyset.size()];
 		int size = 0;
 		boolean globalWasProcessed = false;
 
 		// get the list of all filenames from their keys
-		for (int i = 0; i < loggerkeyssize; i++) {
-			LoggerParameters lp = (LoggerParameters) getLoggingParameters(loggerkeys.get(i));
+		for (Object loggerKey : loggersKeyset) {
+			LoggerParameters lp = (LoggerParameters) getLoggingParameters(loggerKey);
 			if (lp.name.equalsIgnoreCase("global") == false) {
 				lknames[size++] = lp.name;
 			} else if ((lp.name.equalsIgnoreCase("global") == true) && (globalWasProcessed == false)) {
@@ -1562,11 +1713,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			}
 		}
 
-		lknames2 = new String[size];
+		String[] lknames2 = new String[size];
 		for (int i = 0; i < size; i++) {
 			lknames2[i] = lknames[i];
 		}
-
 		return lknames2;
 	}
 
@@ -1576,28 +1726,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	@Override
 	public void manageProbabilities() {
-		//get the vector of the stations
-		Vector<Object> stations = getStationKeys();
-		//get the vector of the classes
-		Vector<Object> classes = getClassKeys();
-		//for each station ...
-		for (int i = 0; i < stations.size(); i++) {
-			//get the station at i from the station vector
-			Object thisStation = stations.get(i);
-			//if it is not a sink...
-			if (!getStationType(thisStation).equals(CommonConstants.STATION_TYPE_SINK)) {
-				//Aboce :-^All stations have router except Sink
-				//for each class...
-				for (int j = 0; j < classes.size(); j++) {
-					Object thisClass = classes.get(j);
-					//check if the routing strategy in thisStation is ProbabilityRouting
-					if (getRoutingStrategy(thisStation, thisClass) instanceof ProbabilityRouting) {
-						//if it is so, normalize routing probabilities
-						Vector<Object> outputKeys = getForwardConnections(thisStation);
-						ProbabilityRouting pr = (ProbabilityRouting) getRoutingStrategy(thisStation, thisClass);
-						Map<Object, Double> values = pr.getValues();
-						normalizeProbabilities(values, outputKeys, thisClass, thisStation);
-					}
+		for (Object stationKey : stationsKeyset) {
+			for (Object classKey : classesKeyset) {
+				if (getRoutingStrategy(stationKey, classKey) instanceof ProbabilityRouting) {
+					Vector<Object> outputKeys = getForwardConnections(stationKey);
+					ProbabilityRouting pr = (ProbabilityRouting) getRoutingStrategy(stationKey, classKey);
+					Map<Object, Double> values = pr.getValues();
+					normalizeProbabilities(values, outputKeys, classKey, stationKey);
 				}
 			}
 		}
@@ -1605,34 +1740,35 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	// NB: cut from jmt.gui.common.xml.XMLWriter
 	public void normalizeProbabilities(Map<Object,Double> values, Vector<Object> outputKeys, Object thisClassKey, Object thisStation) {
-		Vector<Object> sinkClosedprobabilities = new Vector<Object>();
+		Vector<Object> sinkClosedProbabilities = new Vector<Object>();
 		Vector<Object> normalProbabilities = new Vector<Object>();
 		boolean allSink = true;
-		for (int i=0; i<outputKeys.size(); i++) {
-			if (isClosedClassSinkProbability(outputKeys.get(i),thisClassKey)) {
-				sinkClosedprobabilities.add(outputKeys.get(i));
+		for (int i = 0; i < outputKeys.size(); i++) {
+			if (getClassType(thisClassKey) == CLASS_TYPE_CLOSED && getStationType(outputKeys.get(i)).equals(STATION_TYPE_SINK)) {
+				sinkClosedProbabilities.add(outputKeys.get(i));
 			} else {
 				normalProbabilities.add(outputKeys.get(i));
 				allSink = false;
 			}			
 		}
 		if (allSink) {
-			normalProbabilities.addAll(sinkClosedprobabilities);
-			sinkClosedprobabilities.clear();
+			normalProbabilities.addAll(sinkClosedProbabilities);
+			sinkClosedProbabilities.clear();
 		}
 		Double[] probabilities = new Double[outputKeys.size()];
 		Object[] keys = new Object[outputKeys.size()];
 		outputKeys.toArray(keys);
 		//extract all values from map in array form
-		for (int i=0; i<keys.length; i++) {
-			probabilities[i] = (Double)values.get(keys[i]);
+		for (int i = 0; i < keys.length; i++) {
+			probabilities[i] = (Double) values.get(keys[i]);
 		}
-		for (int i=0; i<probabilities.length; i++) {	    	
-			if (probabilities[i] != null && probabilities[i].doubleValue() != 0.0 && sinkClosedprobabilities.contains(keys[i])) {
+		for (int i = 0; i < probabilities.length; i++) {	    	
+			if (probabilities[i] != null && probabilities[i].doubleValue() != 0.0 && sinkClosedProbabilities.contains(keys[i])) {
 				probabilities[i] = new Double(0.0);
 				String className = getClassName(thisClassKey);
 				String stationName = getStationName(thisStation);
-				if (!sinkProbabilityUpdateClasses.contains(className)) {//I dont want the Names repeated.
+				//I don't want the Names repeated.
+				if (!sinkProbabilityUpdateClasses.contains(className)) {
 					sinkProbabilityUpdateClasses.add(className);
 				}
 				if (!sinkProbabilityUpdateStations.contains(stationName)) {
@@ -1642,24 +1778,24 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			}	    	
 		}
 		values.clear();
-		//scan for null values and for total sum
+		// scan for null values and for total sum
 		double totalSum = 0.0;
 		int totalNonNull = 0;
 		boolean allNull = true;
-		for (int i=0; i<probabilities.length; i++) {
-			if (probabilities[i]!=null && normalProbabilities.contains(keys[i])) {
+		for (int i = 0; i < probabilities.length; i++) {
+			if (probabilities[i] != null && normalProbabilities.contains(keys[i])) {
 				totalSum += probabilities[i].doubleValue();
 				totalNonNull++;
 				allNull = false;
 			}
 		}
-		//modify non null values for their sum to match 1 and put null values to 1
-		for (int i=0; i<probabilities.length; i++) {
-			if ((probabilities[i]!=null || allNull) && normalProbabilities.contains(keys[i])) {
-				if (totalSum==0) {
-					probabilities[i] = new Double(1.0/totalNonNull);
+		// modify non null values for their sum to match 1 and put null values to 1
+		for (int i = 0; i < probabilities.length; i++) {
+			if ((probabilities[i] != null || allNull) && normalProbabilities.contains(keys[i])) {
+				if (totalSum == 0) {
+					probabilities[i] = new Double(1.0 / totalNonNull);
 				} else {
-					probabilities[i] = new Double(probabilities[i].doubleValue()/totalSum);
+					probabilities[i] = new Double(probabilities[i].doubleValue() / totalSum);
 				}
 			} else {
 				probabilities[i] = new Double(0.0);
@@ -1671,7 +1807,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	// M Cazzoli
 	public void normalizeProbabilitiesFork(Map<Object, Double> values) {
 		Set<Object> keys = values.keySet();
-
 		Double[] probabilities = new Double[keys.size()];
 		Object[] keyList = keys.toArray();
 		// extract all values from map in array form
@@ -1691,15 +1826,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				allNull = false;
 			}
 		}
-		// modify non null values for their sum to match 1 and put null values
-		// to 1
+		// modify non null values for their sum to match 1 and put null values to 1
 		for (int i = 0; i < probabilities.length; i++) {
 			if ((probabilities[i] != null || allNull)) {
 				if (totalSum == 0) {
 					probabilities[i] = new Double(1.0 / totalNonNull);
 				} else {
-					probabilities[i] = new Double(
-							probabilities[i].doubleValue() / totalSum);
+					probabilities[i] = new Double(probabilities[i].doubleValue() / totalSum);
 				}
 			} else {
 				probabilities[i] = new Double(0.0);
@@ -1708,175 +1841,161 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
-	private boolean isClosedClassSinkProbability(Object stationKey, Object classKey) {
-		boolean ret = false;
-		if (this.getStationType(stationKey).equals(CommonConstants.STATION_TYPE_SINK)
-				&& this.getClassType(classKey) == CommonConstants.CLASS_TYPE_CLOSED) {
-			ret = true;
+	/**
+	 * Adds station details for a new station, given the search key.
+	 */
+	protected void addNewStationDetails(Object key) {
+		StationData sd = (StationData) stationDataHM.get(key);
+		for (Object classKey : classesKeyset) {
+			stationDetailsBDM.put(classKey, key, getDefaultDetailsForStationType(sd));
 		}
-		return ret;
 	}
 
 	/**
-	 * Used to set Defaults Class-Station parameters for a new Station.
-	 * This method is called when a station type is changed too.
-	 * @param sd StationData data structure for current station
-	 * @return created StationClassData object
-	 * Modified by Bertoli Marco
+	 * Adds station details for a new class, given the search key.
+	 */
+	protected void addStationDetailsForClass(Object key) {
+		for (Object stationKey : stationsKeyset) {
+			StationData sd = (StationData) stationDataHM.get(stationKey);
+			StationClassData scd = getDefaultDetailsForStationType(sd);
+			stationDetailsBDM.put(key, stationKey, scd);
+		}
+	}
+
+	/**
+	 * Deletes station details for a station, given the search key.
+	 */
+	protected void deleteStationDetails(Object key) {
+		stationDetailsBDM.remove(key, BDMap.Y);
+	}
+
+	/**
+	 * Deletes station details for a class, given the search key.
+	 */
+	protected void deleteStationDetailsForClass(Object key) {
+		stationDetailsBDM.remove(key, BDMap.X);
+		for (Object stationKey : stationsKeyset) {
+			for (Object classKey : classesKeyset) {
+				Object strategy = getForkStrategy(stationKey, classKey);
+				if (strategy instanceof MultiBranchClassSwitchFork) {
+					Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
+					for (OutPath o: m.values()) {
+						o.getOutParameters().remove(key);
+					}
+				}
+				if (strategy instanceof ClassSwitchFork) {
+					Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
+					for (OutPath o: m.values()) {
+						o.getOutParameters().remove(key);
+					}
+				}
+				strategy = getJoinStrategy(stationKey, classKey);
+				if (strategy instanceof GuardJoin) {
+					((GuardJoin) strategy).getGuard().remove(key);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Generates a station-class data structure by default.
 	 */
 	private StationClassData getDefaultDetailsForStationType(StationData sd) {
-		StationClassData defaultDetails = null;
-		if (sd == null) {
-			return null;
-		}
-
 		String queueStrategy = QUEUE_STRATEGY_FCFS;
-		if (STATION_TYPE_SERVER.equals(sd.type)) {
+		if (sd.type.equals(STATION_TYPE_SERVER)) {
 			queueStrategy = Defaults.get("stationQueueStrategy");
-		} else if (STATION_TYPE_FORK.equals(sd.type)) {
+		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			queueStrategy = Defaults.get("stationQueueStrategy");
 			if (queueStrategy.equals(QUEUE_STRATEGY_SJF) || queueStrategy.equals(QUEUE_STRATEGY_LJF)) {
 				queueStrategy = QUEUE_STRATEGY_FCFS;
 			}
 		}
 
-		if (STATION_TYPE_SOURCE.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_SINK.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null, null, null, null, null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_TERMINAL.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_ROUTER.equals(sd.type)) {
-			defaultDetails = new StationClassData(
-					queueStrategy, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null,
-					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_DELAY.equals(sd.type)) {
-			defaultDetails = new StationClassData(
-					queueStrategy,
-					Defaults.getAsNewInstance("stationDelayServiceStrategy"),
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null,
-					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_SERVER.equals(sd.type)) {
-			defaultDetails = new StationClassData(
-					queueStrategy,
-					Defaults.getAsNewInstance("stationServiceStrategy"),
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null,
-					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_FORK.equals(sd.type)) {
-			defaultDetails = new StationClassData(
-					queueStrategy, null, null, null,
-					Defaults.get("dropRule"),
-					Defaults.getAsNewInstance("stationForkingStrategy"), null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_JOIN.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null,
-					Defaults.getAsNewInstance("stationJoinStrategy"), null, null, null, null, null, null);
-		} else if (STATION_TYPE_LOGGER.equals(sd.type)) {
-			defaultDetails = new StationClassData(
-					queueStrategy, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null,
-					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_CLASSSWITCH.equals(sd.type)) {
-			defaultDetails = new StationClassData(
-					queueStrategy, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"),
-					Defaults.getAsNewInstance("stationCsRowMatrix"),
-					Defaults.get("dropRule"), null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_SEMAPHORE.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null,
-					Defaults.getAsNewInstance("stationRoutingStrategy"), null, null, null, null,
-					Defaults.getAsNewInstance("stationSemaphoreStrategy"), null, null, null, null, null);
-		} else if (STATION_TYPE_SCALER.equals(sd.type)) {
-			defaultDetails = new StationClassData(null, null, null, null, null,
-					Defaults.getAsNewInstance("stationForkingStrategy"),
-					Defaults.getAsNewInstance("stationJoinStrategy"), null, null, null, null, null, null);
-		} else if (STATION_TYPE_PLACE.equals(sd.type)) {
-			defaultDetails = new StationClassData(
-					Defaults.get("storeQueueStrategy"), null, null, null,
-					Defaults.get("storeDropRule"), null, null, null, null, null, null, null, null);
-		} else if (STATION_TYPE_TRANSITION.equals(sd.type)) {
-			defaultDetails = new StationClassData(null,
-					Defaults.getAsNewInstance("transitionTimingStrategy"), null, null, null, null, null, null,
-					Defaults.getAsNewInstance("transitionVector"),
-					Defaults.getAsNewInstance("transitionVector"),
-					Defaults.getAsNewInstance("transitionVector"),
-					Defaults.getAsInteger("transitionFiringPriority"),
-					Defaults.getAsInteger("transitionFiringWeight"));
+		StationClassData scd = new StationClassData();
+		if (sd.type.equals(STATION_TYPE_SOURCE)) {
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+		} else if (sd.type.equals(STATION_TYPE_SINK)) {
+			// Do nothing
+		} else if (sd.type.equals(STATION_TYPE_TERMINAL)) {
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
+			scd.queueStrategy = queueStrategy;
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+			scd.dropRule = Defaults.get("dropRule");
+		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
+			scd.queueStrategy = queueStrategy;
+			scd.serviceDistribution = Defaults.getAsNewInstance("stationDelayServiceStrategy");
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+			scd.dropRule = Defaults.get("dropRule");
+		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
+			scd.queueStrategy = queueStrategy;
+			scd.serviceDistribution = Defaults.getAsNewInstance("stationServiceStrategy");
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+			scd.dropRule = Defaults.get("dropRule");
+		} else if (sd.type.equals(STATION_TYPE_FORK)) {
+			scd.queueStrategy = queueStrategy;
+			scd.dropRule = Defaults.get("dropRule");
+			scd.forkStrategy = Defaults.getAsNewInstance("stationForkStrategy");
+		} else if (sd.type.equals(STATION_TYPE_JOIN)) {
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+			scd.joinStrategy = Defaults.getAsNewInstance("stationJoinStrategy");
+		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
+			scd.queueStrategy = queueStrategy;
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+			scd.dropRule = Defaults.get("dropRule");
+		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
+			scd.queueStrategy = queueStrategy;
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+			scd.classSwitchProb = new ClassSwitchRow();
+			scd.dropRule = Defaults.get("dropRule");
+		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+			scd.semaphoreStrategy = Defaults.getAsNewInstance("stationSemaphoreStrategy");
+		} else if (sd.type.equals(STATION_TYPE_SCALER)) {
+			scd.forkStrategy = Defaults.getAsNewInstance("stationForkStrategy");
+			scd.joinStrategy = Defaults.getAsNewInstance("stationJoinStrategy");
+		} else if (sd.type.equals(STATION_TYPE_PLACE)) {
+			scd.queueCapacity = Defaults.getAsInteger("placeQueueCapacity");
+			scd.queueStrategy = Defaults.get("placeQueueStrategy");
+			scd.dropRule = Defaults.get("placeDropRule");
+		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
+			// Do nothing
 		}
-
-		return defaultDetails;
+		return scd;
 	}
 
-	/**Adds details for a new station. For each type of station proper parameter
-	 * values are set.*/
-	protected void addNewStationDetails(Object stationKey) {
-		StationData sd = (StationData) stationDataHM.get(stationKey);
-		Vector<Object> classKeys = getClassKeys();
-		for (int i = 0; i < classKeys.size(); i++) {
-			stationDetailsBDM.put(classKeys.get(i), stationKey, getDefaultDetailsForStationType(sd));
-		}
-	}
-
-	/**Adds details for a new station. For each type of station proper parameter
-	 * values are set.*/
-	protected void addStationDetailsForClass(Object classKey) {
-		Vector<Object> stationKeys = getStationKeys();
-		for (int i = 0; i < stationKeys.size(); i++) {
-			StationData sd = (StationData) stationDataHM.get(stationKeys.get(i));
-			StationClassData defaultDetails = getDefaultDetailsForStationType(sd);
-			stationDetailsBDM.put(classKey, stationKeys.get(i), defaultDetails);
-		}
-	}
-
-	/**Deletes station details from repository, given station search key.*/
-	protected void deleteStationDetails(Object stationKey) {
-		stationDetailsBDM.remove(stationKey, BDMap.Y);
-	}
-
-	/**Deletes station details about a certain class, given its search key*/
-	protected void deleteStationDetailsForClass(Object classKey) {
-		stationDetailsBDM.remove(classKey, BDMap.X);
-		for (Object station: this.getStationKeys()) {
-			for (Object classK: this.getClassKeys()) {
-				Object strategy = this.getForkingStrategy(station, classK);
-				if (strategy instanceof MultiBranchClassSwitchFork) {
-					Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
-					for (OutPath o: m.values()) {
-						o.getOutParameters().remove(classKey);
-					}
+	/**
+	 * Manages reference station for every class.
+	 */
+	private void manageRefStations() {
+		Vector<Object> openRefCandidateKeys = getStationKeysRefSource();
+		Vector<Object> closedRefCandidateKeys = getStationKeysNoSourceSink();
+		for (Object classKey : classesKeyset) {
+			int classType = getClassType(classKey);
+			Object refStationKey = getClassRefStation(classKey);
+			if (classType == CLASS_TYPE_OPEN) {
+				if (!openRefCandidateKeys.contains(refStationKey)) {
+					setClassRefStation(classKey, null);
 				}
-				if (strategy instanceof ClassSwitchFork) {
-					Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
-					for (OutPath o: m.values()) {
-						o.getOutParameters().remove(classKey);
-					}
+			} else {
+				if (!closedRefCandidateKeys.contains(refStationKey)) {
+					setClassRefStation(classKey, null);
 				}
-				strategy = this.getJoinStrategy(station, classK);
-				if (strategy instanceof GuardJoin) {
-					((GuardJoin) strategy).getGuard().remove(classKey);
-				}
-				/*strategy = this.getSemaphoreStrategy(station, classK);
-				if (strategy instanceof NormalSemaphore) {
-					((NormalSemaphore) strategy).getSemaphore().remove(classKey);
-				}*/
 			}
 		}
 	}
 
-	/*------------------------------------------------------------------------------
+	/*-------------------------------------------------------------------------------
 	 *-------------  methods for inter-station connections definition  --------------
 	 *-------------------------------------------------------------------------------*/
-	/**Adds a connection between two stations in this model, given search keys of
-	 * source and target stations. If connection could not be created (if, for example,
-	 * target station's type is "Source") false value is returned.
+	/**
+	 * Adds a connection between two stations in this model, given search keys of
+	 * source and target stations.
 	 * @param sourceKey: search key for source station
 	 * @param targetKey: search key for target station
 	 * @param areConnected: true if stations must be connected, false otherwise.
-	 * @return : true if connection was created, false otherwise.
-	 * */
+	 * @return : true if connection status was changed, false otherwise.
+	 */
 	@Override
 	public boolean setConnected(Object sourceKey, Object targetKey, boolean areConnected) {
 		Connection toSet = (Connection) connectionsBDM.get(targetKey, sourceKey);
@@ -1888,24 +2007,33 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (!toSet.isConnectable) {
 			return false;
 		}
-		//is already been connected: cannot be connected twice, but can be disconnected
+		//has already been connected: cannot be connected twice, but can be disconnected
 		if (toSet.isConnected) {
-			save = true;
 			//must disconnect
 			if (!areConnected) {
 				toSet.isConnected = false;
+				save = true;
+				for (Object classKey: classesKeyset) {
+					ForkStrategy fs = (ForkStrategy) getForkStrategy(sourceKey, classKey);
+					if (fs != null) {
+						fs.removeStation(targetKey);
+					}
+				}
+				return true;
 			}
 		} else {
-			toSet.isConnected = areConnected;
+			//must connect
 			if (areConnected) {
-				for (Object c: this.getClassKeys()) {
-					ForkStrategy fs = (ForkStrategy) this.getForkingStrategy(sourceKey, c);
+				toSet.isConnected = true;
+				save = true;
+				for (Object classKey: classesKeyset) {
+					ForkStrategy fs = (ForkStrategy) getForkStrategy(sourceKey, classKey);
 					if (fs != null) {
-						fs.addStation(this.getStationName(targetKey), targetKey, c, this.getClassKeys());
+						fs.addStation(getStationName(targetKey), targetKey, classKey, classesKeyset);
 					}
-				}                    
+				}
+				return true;
 			}
-			return toSet.isConnected;
 		}
 		return false;
 	}
@@ -1964,7 +2092,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return scanForConnections(conns);
 	}
 
-	//finds out connections, given a connection set
+	/**
+	 * Finds out connections, given a connection set
+	 */
 	private Vector<Object> scanForConnections(Map conns) {
 		Vector<Object> retval = new Vector<Object>(0);
 		//check returned map not to be null
@@ -2002,10 +2132,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (source.type.equals(STATION_TYPE_SINK)) {
 			return false;
 		}
-		// No connection between a router, fork, join, logger, semaphore or scaler and itself
+		// No connection between a router, fork, join, logger, semaphore, scaler, place or transition and itself
 		if (sourceKey == targetKey
 				&& (source.type.equals(STATION_TYPE_ROUTER) || source.type.equals(STATION_TYPE_FORK) || source.type.equals(STATION_TYPE_JOIN)
-						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_SEMAPHORE) || source.type.equals(STATION_TYPE_SCALER))) {
+						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_SEMAPHORE) || source.type.equals(STATION_TYPE_SCALER)
+						|| source.type.equals(STATION_TYPE_PLACE) || source.type.equals(STATION_TYPE_TRANSITION))) {
 			return false;
 		}
 		//no direct connections from source to sink
@@ -2070,14 +2201,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.SimulationDefinition#addMeasure(java.lang.String, java.lang.Object, java.lang.Object, java.lang.Double, java.lang.Double, jmt.gui.common.definitions.OutputParameters)
+	 * @see jmt.gui.common.definitions.SimulationDefinition#addMeasure(java.lang.String, java.lang.Object, java.lang.Object, java.lang.Double, java.lang.Double, boolean)
 	 */
 	@Override
 	public Object addMeasure(String type, Object stationKey, Object classKey, Double alpha, Double precision, boolean log) {
 		Object key = new Long(++incrementalKey);
+		measuresKeyset.add(key);
 		MeasureData md = new MeasureData(stationKey, classKey, type, alpha, precision, log);
 		measureDataHM.put(key, md);
-		measuresKeyset.add(key);
 		save = true;
 		return key;
 	}
@@ -2091,8 +2222,16 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	private void deleteClassMeasures(Object key) {
+		for (Object measureKey : measuresKeyset.toArray()) {
+			if (getMeasureClass(measureKey) == key) {
+				removeMeasure(measureKey);
+			}
+		}
+	}
+
 	private void deleteStationMeasures(Object key) {
-		for (Object measureKey: measuresKeyset.toArray()) {
+		for (Object measureKey : measuresKeyset.toArray()) {
 			if (getMeasureStation(measureKey) == key) {
 				removeMeasure(measureKey);
 			}
@@ -2209,7 +2348,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.SimulationDefinition#setLogMeasure(boolean, java.lang.Object)
+	 * @see jmt.gui.common.definitions.SimulationDefinition#setMeasureLog(boolean, java.lang.Object)
 	 */
 	@Override
 	public void setMeasureLog(boolean log, Object measureKey) {
@@ -2221,7 +2360,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.SimulationDefinition#getLogMeasure(java.lang.Object)
+	 * @see jmt.gui.common.definitions.SimulationDefinition#getMeasureLog(java.lang.Object)
 	 */
 	@Override
 	public boolean getMeasureLog(Object measureKey) {
@@ -2233,122 +2372,184 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Tells if a given measure is global or local (i.e. if it is station independent
-	 * or station dependent)
-	 * <br>Author: Bertoli Marco
+	 * Tells if a given measure is global
 	 * @param key search's key for given measure
 	 * @return true if measure is global
 	 */
 	@Override
 	public boolean isGlobalMeasure(Object key) {
 		String type = getMeasureType(key);
-		return type.equals(SimulationDefinition.MEASURE_S_X) || type.equals(SimulationDefinition.MEASURE_S_RP)
-				|| type.equals(SimulationDefinition.MEASURE_S_CN) || type.equals(SimulationDefinition.MEASURE_S_DR)
-				//Added by ASHANKA START
-				//Here this helps to avoid the display of the Individual Queue Service Stations in the 
-				//Combo Box in the Measure Panel as System Power is calculated at whole System or each class
-				//level but has no meaning for each station level.
-				|| type.equals(SimulationDefinition.MEASURE_S_SP)
-				//Added by ASHANKA END
-				;
+		return type.equals(MEASURE_S_X) || type.equals(MEASURE_S_RP) || type.equals(MEASURE_S_CN)
+				|| type.equals(MEASURE_S_DR) || type.equals(MEASURE_S_P);
 	}
 
 	/**
-	 * Tells if the Measure is being calculated keeping the Sink as reference,
-	 * Is used for the performance indices of
-	 * ResponseTimePerSink and ThroughputPerSink.
-	 * @param key
-	 * @return
+	 * Tells if a given measure is for sinks only
+	 * @param key search's key for given measure
+	 * @return true if measure is for sinks only
 	 */
 	@Override
 	public boolean isSinkMeasure(Object key) {
 		String type = getMeasureType(key);
-		boolean ret = false;
-		ret = (type.equals(SimulationDefinition.MEASURE_R_PER_SINK) 
-				|| type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) ? true : false;
-		return ret;
+		return type.equals(MEASURE_RP_PER_SINK) || type.equals(MEASURE_X_PER_SINK);
 	}
 
+	/**
+	 * Tells if a given measure is for blocking regions only
+	 * @param key search's key for given measure
+	 * @return true if measure is for blocking regions only
+	 */
 	@Override
 	public boolean isFCRMeasure(Object key) {
 		String type = getMeasureType(key);
-		boolean ret = false;
-		ret = (type.equals(SimulationDefinition.MEASURE_FCR_TOTAL_WEIGHT)
-				|| type.equals(SimulationDefinition.MEASURE_FCR_MEMORY_OCCUPATION)) ? true : false;
-		return ret;
+		return type.equals(MEASURE_FCR_TW) || type.equals(MEASURE_FCR_MO);
 	}
 
+	/**
+	 * Tells if a given measure is for fork/join sections only
+	 * @param key search's key for given measure
+	 * @return true if measure is for fork/join sections only
+	 */
 	@Override
 	public boolean isFJMeasure(Object key) {
 		String type = getMeasureType(key);
-		boolean ret = false;
-		ret = (type.equals(SimulationDefinition.MEASURE_FJ_CN)
-				|| type.equals(SimulationDefinition.MEASURE_FJ_RESPONSE_TIME)) ? true : false;
-		return ret;
+		return type.equals(MEASURE_FJ_CN) || type.equals(MEASURE_FJ_RP);
 	}
 
 	/**
-	 * Sets preloaded jobs on a given station for a given class
-	 * @param jobs number of jobs to be put in queue
-	 * @param stationKey search's key for station
-	 * @param classKey search's key for class
-	 * Author: Bertoli Marco
-	 */
-	@Override
-	public void setPreloadedJobs(Integer jobs, Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			if (!current.preload.equals(jobs)) {
-				save = true;
-			}
-			current.preload = jobs;
-		}
-	}
-
-	/**
-	 * Gets preloaded jobs on a given station for given class
-	 * @param stationKey search's key for station
-	 * @param classKey search's key for class
-	 * @return preloaded jobs
-	 * Author: Bertoli Marco
+	 * Returns number of preloaded jobs at specified station for specified class.
+	 * @param stationKey station at which preloaded jobs are preloaded.
+	 * @param classKey class to which preloaded jobs belong.
+	 * @return number of preloaded jobs.
 	 */
 	@Override
 	public Integer getPreloadedJobs(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			return current.preload;
-		} else {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
 			return null;
+		}
+		return scd.preload;
+	}
+
+	/**
+	 * Sets number of preloaded jobs at specified station for specified class.
+	 * For closed classes, total number of preloaded jobs for a class over all
+	 * stations must be equal to class population, otherwise update is canceled.
+	 * @param stationKey station at which preloaded jobs are preloaded.
+	 * @param classKey class to which preloaded jobs belong.
+	 * @param preload number of preloaded jobs.
+	 */
+	@Override
+	public void setPreloadedJobs(Object stationKey, Object classKey, Integer preload) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (!scd.preload.equals(preload)) {
+			scd.preload = preload;
+			save = true;
 		}
 	}
 
 	/**
-	 * Returns number of jobs totally allocated for specified class.
-	 * @param classKey class jobs to be preloaded belong to.
-	 * @return number of jobs totally to be preloaded.
+	 * Returns total number of preloaded jobs for specified class.
+	 * @param classKey class to which preloaded jobs belong.
+	 * @return total number of preloaded jobs.
 	 */
 	@Override
-	public synchronized Integer getPreloadedJobsNumber(Object classKey) {
+	public Integer getPreloadedJobsNumber(Object classKey) {
 		int foundJob = 0;
-		for (int i = 0; i < stationsKeyset.size(); i++) {
-			foundJob += this.getPreloadedJobs(stationsKeyset.get(i), classKey).intValue();
+		for (Object stationKey : stationsKeyset) {
+			foundJob += getPreloadedJobs(stationKey, classKey).intValue();
 		}
 		return new Integer(foundJob);
 	}
 
+	/**
+	 * This method is used to manage number of jobs for every class. If class is closed
+	 * all spare jobs will be allocated to its reference source, if for some reasons more
+	 * jobs are allocated than max population, they are reduced. Uses this method only
+	 * when strictly necessary as it can be slow if the model is big.
+	 */
 	@Override
-	public boolean getUseRandomSeed() {
-		return useRandomSeed;
-	}
-
-	@Override
-	public void setUseRandomSeed(boolean value) {
-		if (useRandomSeed != value) {
-			save = true;
+	public void manageJobs() {
+		for (Object classKey : classesKeyset) {
+			manageJobs(classKey);
 		}
-		this.useRandomSeed = value;
 	}
 
+	/**
+	 * This method is used to manage number of jobs for a given class. If class is closed
+	 * all spare jobs will be allocated to its reference source (if it is not in a blocking
+	 * region, otherwise a different station is chosen), if for some reasons more jobs are
+	 * allocated than max population, they are reduced.
+	 * @param classKey class to which managed jobs belong.
+	 */
+	public void manageJobs(Object classKey) {
+		if (getClassType(classKey) == CLASS_TYPE_CLOSED) {
+			int population = getClassPopulation(classKey).intValue();
+			int foundJob = getPreloadedJobsNumber(classKey).intValue();
+			if (population > foundJob) {
+				Object refStation = getClassRefStation(classKey);
+				if (refStation == null) {
+					return;
+				}
+				// If refStation is not preloadable or is inside a blocking region, choose the preloadable station
+				// that is not inside any blocking region and has the most preloaded jobs
+				if (!isStationTypePreloadable(getStationType(refStation)) || getStationBlockingRegion(refStation) != null) {
+					int preloadMax = -1;
+					for (Object stationKey : stationsKeyset) {
+						if (isStationTypePreloadable(getStationType(stationKey)) && getStationBlockingRegion(stationKey) == null
+								&& getPreloadedJobs(stationKey, classKey).intValue() > preloadMax) {
+							preloadMax = getPreloadedJobs(stationKey, classKey).intValue();
+							refStation = stationKey;
+						}
+					}
+				}
+				// Increments amount of jobs in the chosen station to cover all spare ones
+				int allocate = population - foundJob + getPreloadedJobs(refStation, classKey).intValue();
+				setPreloadedJobs(refStation, classKey, new Integer(allocate));
+			} else if (population < foundJob) {
+				// Removes jobs from stations until allocated jobs = population
+				for (Object stationKey : stationsKeyset) {
+					int jobs = getPreloadedJobs(stationKey, classKey).intValue();
+					if (jobs < foundJob - population) {
+						setPreloadedJobs(stationKey, classKey, new Integer(0));
+						foundJob -= jobs;
+					} else {
+						setPreloadedJobs(stationKey, classKey, new Integer(jobs - (foundJob - population)));
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Tells if a given station type is preloadable
+	 * @param stationType type of station
+	 * @return true if station of that type is preloadable, false otherwise
+	 */
+	protected boolean isStationTypePreloadable(String stationType) {
+		return !stationType.equals(STATION_TYPE_SOURCE) && !stationType.equals(STATION_TYPE_SINK)
+				&& !stationType.equals(STATION_TYPE_TERMINAL) && !stationType.equals(STATION_TYPE_JOIN)
+				&& !stationType.equals(STATION_TYPE_SEMAPHORE) && !stationType.equals(STATION_TYPE_SCALER)
+				&& !stationType.equals(STATION_TYPE_TRANSITION);
+	}
+
+	/**
+	 * Gets seed for simulation.
+	 * @return seed for simulation.
+	 */
+	@Override
+	public Long getSimulationSeed() {
+		return seed;
+	}
+
+	/**
+	 * Sets seed for simulation.
+	 * @param seed seed for simulation.
+	 */
 	@Override
 	public void setSimulationSeed(Long seed) {
 		if (!this.seed.equals(seed)) {
@@ -2357,11 +2558,40 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		this.seed = seed;
 	}
 
+	/**
+	 * Tells if random seed is used.
+	 * @return true if random seed is used, false otherwise.
+	 */
 	@Override
-	public Long getSimulationSeed() {
-		return seed;
+	public Boolean getUseRandomSeed() {
+		return useRandomSeed;
 	}
 
+	/**
+	 * Sets if random seed is used.
+	 * @param useRandomSeed true if random seed is used, false otherwise.
+	 */
+	@Override
+	public void setUseRandomSeed(Boolean useRandomSeed) {
+		if (!this.useRandomSeed.equals(useRandomSeed)) {
+			save = true;
+		}
+		this.useRandomSeed = useRandomSeed;
+	}
+
+	/**
+	 * Returns maximum duration for simulation in seconds.
+	 * @return seconds of maximum duration for simulation.
+	 */
+	@Override
+	public Double getMaximumDuration() {
+		return maxDuration;
+	}
+
+	/**
+	 * Sets maximum duration for simulation in seconds.
+	 * @param durationSeconds seconds of maximum duration for simulation.
+	 */
 	@Override
 	public void setMaximumDuration(Double durationSeconds) {
 		if (!this.maxDuration.equals(durationSeconds)) {
@@ -2370,20 +2600,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		this.maxDuration = durationSeconds;
 	}
 
-	@Override
-	public Double getMaximumDuration() {
-		return maxDuration;
-	}
-
-	@Override
-	public void setMaxSimulatedTime(Double duration)
-	{
-		if (!this.maxSimulatedTime.equals(duration)) {
-			save = true;
-		}
-		this.maxSimulatedTime = duration;
-	}
-
+	/**
+	 * Returns maximum duration for simulation in time units.
+	 * @return time units of maximum duration for simulation.
+	 */
 	@Override
 	public Double getMaxSimulatedTime()
 	{
@@ -2391,30 +2611,29 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Gets polling interval for temporary measures
-	 * @return polling interval for temporary measures
+	 * Sets maximum duration for simulation in time units.
+	 * @param duration time units of maximum duration for simulation.
 	 */
 	@Override
-	public double getPollingInterval() {
-		return pollingInterval;
-	}
-
-	/**
-	 * Sets polling interval for temporary measures
-	 * @param pollingInterval polling interval for temporary measures
-	 */
-	@Override
-	public void setPollingInterval(double pollingInterval) {
-		if (this.pollingInterval != pollingInterval) {
+	public void setMaxSimulatedTime(Double duration) {
+		if (!this.maxSimulatedTime.equals(duration)) {
 			save = true;
 		}
-		this.pollingInterval = pollingInterval;
+		this.maxSimulatedTime = duration;
 	}
 
 	/**
-	 * Sets maximum number of simulation samples
-	 *
-	 * @param maxSamples maximum number of simulation samples
+	 * Returns maximum number of simulation samples.
+	 * @return maximum number of simulation samples.
+	 */
+	@Override
+	public Integer getMaxSimulationSamples() {
+		return maxSamples;
+	}
+
+	/**
+	 * Sets maximum number of simulation samples.
+	 * @param maxSamples maximum number of simulation samples.
 	 */
 	@Override
 	public void setMaxSimulationSamples(Integer maxSamples) {
@@ -2425,18 +2644,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Returns maximum number of simulation samples
-	 *
-	 * @return maximum number of simulation samples
-	 */
-	@Override
-	public Integer getMaxSimulationSamples() {
-		return maxSamples;
-	}
-
-	/**
-	 * Tells if statistic check was disabled as simulation stopping criteria
-	 * @return the disableStatistic
+	 * Tells if statistic check is disabled.
+	 * @return true if statistic check is disabled, false otherwise.
 	 */
 	@Override
 	public Boolean getDisableStatistic() {
@@ -2444,75 +2653,36 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Sets if statistic check was disabled as simulation stopping criteria
-	 * @param disableStatistic the disableStatistic to set
+	 * Sets if statistic check is disabled.
+	 * @param disableStatistic true if statistic check is disabled, false otherwise.
 	 */
 	@Override
 	public void setDisableStatistic(Boolean disableStatistic) {
+		if (!this.disableStatistic.equals(disableStatistic)) {
+			save = true;
+		}
 		this.disableStatistic = disableStatistic;
 	}
 
 	/**
-	 * This method is used to manage number of jobs for a given class. If class is closed
-	 * all spare jobs will be allocated to its reference source (if it is not in a
-	 * blocking region, otherwise a different station is chosen), if for some reasons more
-	 * jobs are allocated than max population, they are reduced.
-	 * @param classKey search's key for class to be considered
-	 * Author: Bertoli Marco
+	 * Returns polling interval for temporary measures.
+	 * @return polling interval for temporary measures.
 	 */
-	public synchronized void manageJobs(Object classKey) {
-		if (this.getClassType(classKey) == CLASS_TYPE_CLOSED) {
-			int population = this.getClassPopulation(classKey).intValue();
-			int foundJob = getPreloadedJobsNumber(classKey).intValue();
-			if (population > foundJob) {
-				Object chosenStation = this.getClassRefStation(classKey);
-				if (chosenStation == null) {
-					return;
-				}
-				// If refStation is not preloadable or is inside a blocking region, choose the preloadable station
-				// that is not inside any blocking region and has the most preloaded jobs
-				if (!isStationTypePreloadable(getStationType(chosenStation)) || getStationBlockingRegion(chosenStation) != null) {
-					int preloadMax = -1;
-					for (int i = 0; i < stationsKeyset.size(); i++) {
-						Object key = stationsKeyset.get(i);
-						if (isStationTypePreloadable(getStationType(key)) && getStationBlockingRegion(key) == null
-								&& getPreloadedJobs(key, classKey).intValue() > preloadMax) {
-							preloadMax = getPreloadedJobs(key, classKey).intValue();
-							chosenStation = key;
-						}
-					}
-				}
-				// Increments amount of jobs in chosen station to cover all spare one
-				int allocate = population - foundJob + this.getPreloadedJobs(chosenStation, classKey).intValue();
-				this.setPreloadedJobs(new Integer(allocate), chosenStation, classKey);
-			} else if (population < foundJob) {
-				// Removes jobs from stations until allocated jobs = population
-				for (int i = 0; i < stationsKeyset.size() && population < foundJob; i++) {
-					int jobs = this.getPreloadedJobs(stationsKeyset.get(i), classKey).intValue();
-					if (jobs <= foundJob - population) {
-						this.setPreloadedJobs(new Integer(0), stationsKeyset.get(i), classKey);
-						foundJob -= jobs;
-					} else {
-						this.setPreloadedJobs(new Integer(jobs - (foundJob - population)), stationsKeyset.get(i), classKey);
-						break;
-					}
-				}
-			}
-		}
+	@Override
+	public Double getPollingInterval() {
+		return pollingInterval;
 	}
 
 	/**
-	 * This method is used to manage number of jobs for every class. If class is closed
-	 * all spare jobs will be allocated to its reference source, if for some reasons more
-	 * jobs are allocated than max population, they are reduced. Uses this method only
-	 * when strictly necessary as is can be slow if the model is big.
-	 * Author: Bertoli Marco
+	 * Sets polling interval for temporary measures.
+	 * @param pollingInterval polling interval for temporary measures.
 	 */
 	@Override
-	public void manageJobs() {
-		for (int i = 0; i < classesKeyset.size(); i++) {
-			manageJobs(classesKeyset.get(i));
+	public void setPollingInterval(Double pollingInterval) {
+		if (!this.pollingInterval.equals(pollingInterval)) {
+			save = true;
 		}
+		this.pollingInterval = pollingInterval;
 	}
 
 	// --- Methods to manage simulation results -- Bertoli Marco --------------------------------------------
@@ -2537,18 +2707,16 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Tells if current model contains simulation results
-	 * @return true iff <code>getSimulationResults()</code> returns a non-null object
+	 * @return true if <code>getSimulationResults()</code> returns a non-null object
 	 */
 	@Override
 	public boolean containsSimulationResults() {
 		return (results != null);
 	}
-
-	//Francesco D'Aquino ----------------------
+	// ------------------------------------------------------------------------------------------------------
 
 	/**
-	 * Return true if queue animation is enabled
-	 *
+	 * Tells if queue animation is enabled
 	 * @return true if the animation is enabled
 	 */
 	@Override
@@ -2557,19 +2725,17 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Enable or disable queue animation
-	 *
-	 * @param isEnabled - set it to true to enable queue animation
+	 * Enable / disable queue animation
+	 * @param enabled - set it to true to enable queue animation
 	 */
 	@Override
-	public void setAnimationEnabled(boolean isEnabled) {
-
+	public void setAnimationEnabled(boolean enabled) {
+		return;
 	}
 
 	/**
-	 * Checks if the parametric analysis has been enabled
-	 *
-	 * @return true if the parametric analysis has been enabled
+	 * Tells if parametric analysis is enabled
+	 * @return true if parametric analysis is enabled
 	 */
 	@Override
 	public boolean isParametricAnalysisEnabled() {
@@ -2578,7 +2744,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Enable / disable parametric analysis
-	 * @param enabled
+	 * @param enabled - set it to true to enable parametric analysis
 	 */
 	@Override
 	public void setParametricAnalysisEnabled(boolean enabled) {
@@ -2589,9 +2755,17 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Sets the parametric analysis definition
-	 *
-	 * @param pad the parametric analysis definition to be set
+	 * Returns the ParametricAnalysisModel
+	 * @return the parametricAnalysisModel
+	 */
+	@Override
+	public ParametricAnalysisDefinition getParametricAnalysisModel() {
+		return parametricAnalysisModel;
+	}
+
+	/**
+	 * Sets the ParametricAnalysisModel
+	 * @param pad the parametricAnalysisModel to be set
 	 */
 	@Override
 	public void setParametricAnalysisModel(ParametricAnalysisDefinition pad) {
@@ -2608,50 +2782,30 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Gets the ParametricAnalysisModel. If parametric analysis is not enabled
-	 * the returned value may be not meaningful.
-	 * @return the parametricAnalysisModel
-	 */
-	@Override
-	public ParametricAnalysisDefinition getParametricAnalysisModel() {
-		return parametricAnalysisModel;
-	}
-
-	/**
-	 * Returns the class key given its name. It returns <code>null</code>
-	 * if no such class is found.
-	 * @param className the name of the class
-	 * @return  the key of the class whose name is <code>className</code>
+	 * Returns the search key for the class, given the class name.
 	 */
 	@Override
 	public Object getClassByName(String className) {
-		for (int i = 0; i < classesKeyset.size(); i++) {
-			Object thisClass = classesKeyset.get(i);
-			if (getClassName(thisClass).equals(className)) {
-				return thisClass;
+		for (Object classKey : classesKeyset) {
+			if (getClassName(classKey).equals(className)) {
+				return classKey;
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * Returns the key of the station whose name is <code>stationName</code>. It
-	 * returns <code>null</code> if no such station is found.
-	 * @param stationName the name of the station
-	 * @return the key of the station
+	 * Returns the search key for the station, given the station name.
 	 */
 	@Override
 	public Object getStationByName(String stationName) {
-		for (int i = 0; i < stationsKeyset.size(); i++) {
-			Object thisStation = stationsKeyset.get(i);
-			if (getStationName(thisStation).equals(stationName)) {
-				return thisStation;
+		for (Object stationKey : stationsKeyset) {
+			if (getStationName(stationKey).equals(stationName)) {
+				return stationKey;
 			}
 		}
 		return null;
 	}
-
-	// end Francesco D'Aquino ------------------------------
 
 	// --- Blocking Region Definition --- Bertoli Marco ----------------------------------------------
 	/**
@@ -2692,11 +2846,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				((StationData) stationDataHM.get(stationKey)).blockingRegion = null;
 				// Adds this station to blockable ones
 				if (canStationTypeBeBlocked(((StationData) stationDataHM.get(stationKey)).type)) {
-					blockableStations.add(stationKey);
+					blockableKeyset.add(stationKey);
 				}
 			}
 			blockingRegionsKeyset.remove(key);
-
 			deleteBlockingDetails(key);
 			save = true;
 		}
@@ -2711,13 +2864,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	@Override
 	public boolean addRegionStation(Object regionKey, Object stationKey) {
-		if (!this.canRegionStationBeAdded(regionKey, stationKey)) {
+		if (!canRegionStationBeAdded(regionKey, stationKey)) {
 			return false;
 		}
 		((BlockingRegionData) blockingDataHM.get(regionKey)).stations.add(stationKey);
 		((StationData) stationDataHM.get(stationKey)).blockingRegion = regionKey;
 		// Removes this station from blockable list as it is added to a blocking region
-		blockableStations.remove(stationKey);
+		blockableKeyset.remove(stationKey);
 		save = true;
 		return true;
 	}
@@ -2806,11 +2959,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @return true if station of that type can be added, false otherwise
 	 */
 	protected boolean canStationTypeBeBlocked(String stationType) {
-		return !stationType.equals(CommonConstants.STATION_TYPE_SOURCE) && !stationType.equals(CommonConstants.STATION_TYPE_SINK)
-				&& !stationType.equals(CommonConstants.STATION_TYPE_TERMINAL) && !stationType.equals(CommonConstants.STATION_TYPE_FORK)
-				&& !stationType.equals(CommonConstants.STATION_TYPE_JOIN) && !stationType.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
-				&& !stationType.equals(CommonConstants.STATION_TYPE_SEMAPHORE) && !stationType.equals(CommonConstants.STATION_TYPE_SCALER)
-				&& !stationType.equals(CommonConstants.STATION_TYPE_TRANSITION);
+		return !stationType.equals(STATION_TYPE_SOURCE) && !stationType.equals(STATION_TYPE_SINK)
+				&& !stationType.equals(STATION_TYPE_TERMINAL) && !stationType.equals(STATION_TYPE_FORK)
+				&& !stationType.equals(STATION_TYPE_JOIN) && !stationType.equals(STATION_TYPE_CLASSSWITCH)
+				&& !stationType.equals(STATION_TYPE_SEMAPHORE) && !stationType.equals(STATION_TYPE_SCALER)
+				&& !stationType.equals(STATION_TYPE_TRANSITION);
 	}
 
 	/**
@@ -2828,7 +2981,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		((StationData) stationDataHM.get(stationKey)).blockingRegion = null;
 		// If this station can be blocked, adds it to blockable stations vector
 		if (canStationTypeBeBlocked(((StationData) stationDataHM.get(stationKey)).type)) {
-			blockableStations.add(stationKey);
+			blockableKeyset.add(stationKey);
 		}
 		save = true;
 	}
@@ -2974,11 +3127,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Gets a vector with every station that can be added to a blocking region
 	 *
 	 * @return a vector of search's keys of every station that can be added
-	 *         to a blocking region
+	 * to a blocking region
 	 */
 	@Override
 	public Vector<Object> getBlockableStationKeys() {
-		return blockableStations;
+		return blockableKeyset;
 	}
 
 	/**
@@ -2986,9 +3139,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey search's key for created class
 	 */
 	protected void addBlockingDetailsForClass(Object classKey) {
-		Vector<Object> blockingKeys = getRegionKeys();
-		for (int i = 0; i < blockingKeys.size(); i++) {
-			blockingDetailsBDM.put(classKey, blockingKeys.get(i), new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
+		for (Object regionKey : blockingRegionsKeyset) {
+			blockingDetailsBDM.put(classKey, regionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
 					Defaults.getAsBoolean("blockingDropPerClass"), Defaults.getAsInteger("weight"),Defaults.getAsInteger("size")));
 		}
 	}
@@ -2998,9 +3150,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param blockingRegionKey search's key for created blocking region
 	 */
 	protected void addBlockingDetails(Object blockingRegionKey) {
-		Vector<Object> classKeys = getClassKeys();
-		for (int i = 0; i < classKeys.size(); i++) {
-			blockingDetailsBDM.put(classKeys.get(i), blockingRegionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
+		for (Object classKey : classesKeyset) {
+			blockingDetailsBDM.put(classKey, blockingRegionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
 					Defaults.getAsBoolean("blockingDropPerClass"), Defaults.getAsInteger("weight"), Defaults.getAsInteger("size")));
 		}
 	}
@@ -3245,24 +3396,21 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * such as connections) need to be stored in other type of data structure and should not
 	 * be stored inside this class*/
 	protected class StationData {
-		public String queueStrategy;
 		public String name;
 		public String type;
-		public Integer numOfServers;
 		public Integer queueCapacity;
+		public String queueStrategy;
+		public Integer numOfServers;
 		public Integer forkBlock;
+		public Boolean isSimplifiedFork;
 		public Object loggerParameters;
+		public List<Object> transitionModeList;
 		/** Reference to owner blocking station or null */
 		public Object blockingRegion;
-		public Boolean isSimplifiedFork;
 
-		public StationData(String name, String type, Integer numOfServers, Integer queueCapacity) {
+		public StationData(String name, String type) {
 			this.name = name;
 			this.type = type;
-			this.numOfServers = numOfServers;
-			this.queueCapacity = queueCapacity;
-			this.loggerParameters = null;
-			this.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
 		}
 	}
 
@@ -3271,12 +3419,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected class ClassData {
 		public String name;
 		public int type;
-		public int priority;
+		public Integer priority;
 		public Integer population;
 		public Object distribution;
-		public Object refSource = null;
+		public Object refStation;
 
-		public ClassData(String name, int type, int priority, Integer population, Object distribution) {
+		public ClassData(String name, int type, Integer priority, Integer population, Object distribution) {
 			this.name = name;
 			this.type = type;
 			this.priority = priority;
@@ -3359,40 +3507,19 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * class and station. These data include queue policy, service time distribution
 	 * and routing strategy*/
 	protected class StationClassData {
+		public Integer queueCapacity;
 		public String queueStrategy;
+		public String dropRule;
 		public Object serviceDistribution;
 		public Object routingStrategy;
-		public Object classSwitchProb; //this is a row of the cs matrix
 		public Integer preload;
-		public String dropRule;
-		//bpmn
-		public Object forkingStrategy;
+		public Object classSwitchProb;
+		public Object forkStrategy;
 		public Object joinStrategy;
 		public Object semaphoreStrategy;
-		public Object enablingCondition;
-		public Object inhibitingCondition;
-		public Object firingOutcome;
-		public Integer firingPriority;
-		public Integer firingWeight;
 
-		public StationClassData(String queueStrategy, Object serviceDistribution, Object routingStrategy,
-				Object classSwitchProb, String dropRule, Object forkingStrategy, Object joinStrategy,
-				Object semaphoreStrategy, Object enablingCondition, Object inhibitingCondition, Object firingOutcome,
-				Integer firingPriority, Integer firingWeight) {
-			this.queueStrategy = queueStrategy;
-			this.serviceDistribution = serviceDistribution;
-			this.routingStrategy = routingStrategy;
-			this.classSwitchProb = classSwitchProb;
+		public StationClassData() {
 			this.preload = new Integer(0);
-			this.dropRule = dropRule;
-			this.forkingStrategy = forkingStrategy;
-			this.joinStrategy = joinStrategy;
-			this.semaphoreStrategy = semaphoreStrategy;
-			this.enablingCondition = enablingCondition;
-			this.inhibitingCondition = inhibitingCondition;
-			this.firingOutcome = firingOutcome;
-			this.firingPriority = firingPriority;
-			this.firingWeight = firingWeight;
 		}
 	}
 
@@ -3431,6 +3558,40 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	public class TransitionModeData {
+		public String name;
+		public TransitionMatrix enablingCondition;
+		public TransitionMatrix inhibitingCondition;
+		public Integer numberOfServers;
+		public Object firingTimeDistribution;
+		public Integer firingPriority;
+		public Double firingWeight;
+		public TransitionMatrix firingOutcome;
+
+		public TransitionModeData(String name) {
+			this.name = name;
+			enablingCondition = new TransitionMatrix();
+			inhibitingCondition = new TransitionMatrix();
+			numberOfServers = Defaults.getAsInteger("transitionNumberOfServers");
+			firingTimeDistribution = Defaults.getAsNewInstance("transitionFiringTimeDistribution");
+			firingPriority = Defaults.getAsInteger("transitionFiringPriority");
+			firingWeight = Defaults.getAsDouble("transitionFiringWeight");
+			firingOutcome = new TransitionMatrix();
+		}
+	}
+
+	/**
+	 * Returns total population of closed classes
+	 */
+	@Override
+	public int getTotalClosedClassPopulation() {
+		int sum = 0;
+		for (Object closedClassKey : closedClassesKeyset) {
+			sum += getClassPopulation(closedClassKey).intValue();
+		}
+		return sum;
+	}
+
 	@Override
 	public boolean isSinkProbabilityUpdated() {
 		return sinkProbabilityUpdate;
@@ -3442,12 +3603,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	@Override
-	public Vector<String> getsinkProbabilityUpdateClasses() {		
+	public Vector<String> getSinkProbabilityUpdateClasses() {
 		return sinkProbabilityUpdateClasses;
 	}
 
 	@Override
-	public Vector<String> getsinkProbabilityUpdateStations() {		
+	public Vector<String> getSinkProbabilityUpdateStations() {
 		return sinkProbabilityUpdateStations;
 	}
 
@@ -3462,167 +3623,336 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 *	Returns the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class
-	 *  switch matrix of station <code>stationKey</code>.
+	 * Returns the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class
+	 * switch matrix for station <code>stationKey</code>.
 	 */
 	@Override
 	public float getClassSwitchMatrix(Object stationKey, Object classInKey, Object classOutKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classInKey, stationKey);
-		ClassSwitch row = (ClassSwitch) current.classSwitchProb;
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classInKey, stationKey);
+		ClassSwitchRow row = (ClassSwitchRow) scd.classSwitchProb;
 		return row.getValue(classInKey, classOutKey);
 	}
 
 	/**
-	 *  Sets the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class
-	 *  switch matrix of station <code>stationKey</code>.
+	 * Sets the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class
+	 * switch matrix for station <code>stationKey</code>.
 	 */
 	@Override
-	public void setClassSwitchMatrix(Object stationKey, Object classInKey, Object classOutKey, float val) {
-		if (val != getClassSwitchMatrix(stationKey, classInKey, classOutKey))
+	public void setClassSwitchMatrix(Object stationKey, Object classInKey, Object classOutKey, float value) {
+		if (value != getClassSwitchMatrix(stationKey, classInKey, classOutKey))
 			save = true;
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classInKey, stationKey);
-		ClassSwitch row = (ClassSwitch) current.classSwitchProb;
-		row.setValue(classInKey, classOutKey, val);
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classInKey, stationKey);
+		ClassSwitchRow row = (ClassSwitchRow) scd.classSwitchProb;
+		row.setValue(classInKey, classOutKey, value);
 	}
 
 	/**
-	 * Tells if a given station type is preloadable
-	 * @param stationType type of station
-	 * @return true if station of that type is preloadable, false otherwise
-	 */
-	protected boolean isStationTypePreloadable(String stationType) {
-		return !stationType.equals(STATION_TYPE_SOURCE) && !stationType.equals(STATION_TYPE_SINK)
-				&& !stationType.equals(STATION_TYPE_TERMINAL) && !stationType.equals(STATION_TYPE_JOIN)
-				&& !stationType.equals(STATION_TYPE_SEMAPHORE) && !stationType.equals(STATION_TYPE_SCALER)
-				&& !stationType.equals(STATION_TYPE_TRANSITION);
-	}
-
-	/**
-	 *  Returns the entry <code>stationInKey</code> of the enabling condition for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
-	 */
-	public Integer getEnablingCondition(Object stationKey, Object classKey, Object stationInKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		TransitionVector vector = (TransitionVector) current.enablingCondition;
-		return vector.getValue(stationInKey);
-	}
-
-	/**
-	 *  Sets the entry <code>stationInKey</code> of the enabling condition for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
+	 * Returns the threshold for semaphore <code>stationKey</code> and class <code>classKey</code>.
 	 */
 	@Override
-	public void setEnablingCondition(Object stationKey, Object classKey, Object stationInKey, Integer value) {
-		if (!value.equals(getEnablingCondition(stationKey, classKey, stationInKey)))
+	public Integer getSemaphoreThreshold(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		SemaphoreStrategy ss =  (SemaphoreStrategy) scd.semaphoreStrategy;
+		return Integer.valueOf(ss.getThreshold());
+	}
+
+	/**
+	 * Sets the threshold for semaphore <code>stationKey</code> and class <code>classKey</code>.
+	 */
+	@Override
+	public void setSemaphoreThreshold(Object stationKey, Object classKey, Integer threshold) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		SemaphoreStrategy ss =  (SemaphoreStrategy) scd.semaphoreStrategy;
+		if (ss.getThreshold() != threshold.intValue()) {
+			ss.setThreshold(threshold.intValue());
 			save = true;
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		TransitionVector vector = (TransitionVector) current.enablingCondition;
-		vector.setValue(stationInKey, value);
-	}
-
-	/**
-	 *  Returns the entry <code>stationInKey</code> of the inhibiting condition for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
-	 */
-	public Integer getInhibitingCondition(Object stationKey, Object classKey, Object stationInKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		TransitionVector vector = (TransitionVector) current.inhibitingCondition;
-		return vector.getValue(stationInKey);
-	}
-
-	/**
-	 *  Sets the entry <code>stationInKey</code> of the inhibiting condition for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
-	 */
-	@Override
-	public void setInhibitingCondition(Object stationKey, Object classKey, Object stationInKey, Integer value) {
-		if (!value.equals(getEnablingCondition(stationKey, classKey, stationInKey)))
-			save = true;
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		TransitionVector vector = (TransitionVector) current.inhibitingCondition;
-		vector.setValue(stationInKey, value);
-	}
-
-	/**
-	 *  Returns the entry <code>stationOutKey</code> of the firing outcome for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
-	 */
-	@Override
-	public Integer getFiringOutcome(Object stationKey, Object classKey, Object stationOutKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		TransitionVector vector = (TransitionVector) current.firingOutcome;
-		return vector.getValue(stationOutKey);
-	}
-
-	/**
-	 *  Sets the entry <code>stationOutKey</code> of the firing outcome for
-	 *  station <code>stationKey</code> and class <code>classKey</code>.
-	 */
-	@Override
-	public void setFiringOutcome(Object stationKey, Object classKey, Object stationOutKey, Integer value) {
-		if (!value.equals(getFiringOutcome(stationKey, classKey, stationOutKey)))
-			save = true;
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		TransitionVector vector = (TransitionVector) current.firingOutcome;
-		vector.setValue(stationOutKey, value);
-	}
-
-	/**
-	 * Returns the firing priority for station <code>stationKey</code> and class
-	 * <code>classKey</code>.
-	 */
-	@Override
-	public Integer getFiringPriority(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			return current.firingPriority;
-		} else {
-			return null;
 		}
 	}
 
 	/**
-	 * Sets the firing priority for station <code>stationKey</code> and class
-	 * <code>classKey</code>.
+	 * Returns the size of the mode list for transition <code>stationKey</code>.
 	 */
 	@Override
-	public void setFiringPriority(Object stationKey, Object classKey, Integer value) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			if (!current.firingPriority.equals(value)) {
-				save = true;
+	public int getTransitionModeListSize(Object stationKey) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		return sd.transitionModeList.size();
+	}
+
+	/**
+	 * Adds a new mode for transition <code>stationKey</code>.
+	 */
+	@Override
+	public void addTransitionMode(Object stationKey, String name) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		sd.transitionModeList.add(new TransitionModeData(getUniqueTransitionModeName(stationKey, name)));
+		save = true;
+	}
+
+	/**
+	 * Deletes a mode for transition <code>stationKey</code>.
+	 */
+	@Override
+	public void deleteTransitionMode(Object stationKey, int modeIndex) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		deleteClassMeasures(tmd.name);
+		sd.transitionModeList.remove(modeIndex);
+		save = true;
+	}
+
+	/**
+	 * Returns the name of mode <code>modeIndex</code> for transition <code>stationKey</code>.
+	 */
+	@Override
+	public String getTransitionModeName(Object stationKey, int modeIndex) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		return tmd.name;
+	}
+
+	/**
+	 * Returns the names of all the modes for transition <code>stationKey</code>.
+	 */
+	@Override
+	public List<String> getAllTransitionModeNames(Object stationKey) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		List<String> list = new ArrayList<String>();
+		for (int i = 0; i < sd.transitionModeList.size(); i++) {
+			list.add(((TransitionModeData) sd.transitionModeList.get(i)).name);
+		}
+		return list;
+	}
+
+	/**
+	 * Sets the name of mode <code>modeIndex</code> for transition <code>stationKey</code>.
+	 */
+	@Override
+	public void setTransitionModeName(Object stationKey, int modeIndex, String name) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		if (!tmd.name.equals(name)) {
+			name = getUniqueTransitionModeName(stationKey, name);
+			for (Object measureKey : measuresKeyset) {
+				if (getMeasureClass(measureKey) == tmd.name) {
+					setMeasureClass(name, measureKey);
+				}
 			}
-			current.firingPriority = value;
+			tmd.name = name;
+			save = true;
 		}
 	}
 
 	/**
-	 * Returns the firing weight for station <code>stationKey</code> and class
-	 * <code>classKey</code>.
+	 * Returns the entry (<code>stationInKey</code>, <code>classKey</code>) of the enabling
+	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
 	 */
 	@Override
-	public Integer getFiringWeight(Object stationKey, Object classKey) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			return current.firingWeight;
-		} else {
-			return null;
+	public Integer getEnablingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		return tmd.enablingCondition.getEntry(stationInKey, classKey);
+	}
+
+	/**
+	 * Sets the entry (<code>stationInKey</code>, <code>classKey</code>) of the enabling
+	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	@Override
+	public void setEnablingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey, Integer value) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		if (!tmd.enablingCondition.getEntry(stationInKey, classKey).equals(value)) {
+			tmd.enablingCondition.setEntry(stationInKey, classKey, value);
+			save = true;
 		}
 	}
 
 	/**
-	 * Sets the firing weight for station <code>stationKey</code> and class
-	 * <code>classKey</code>.
+	 * Returns the entry (<code>stationInKey</code>, <code>classKey</code>) of the inhibiting
+	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
 	 */
 	@Override
-	public void setFiringWeight(Object stationKey, Object classKey, Integer value) {
-		StationClassData current = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (current != null) {
-			if (!current.firingWeight.equals(value)) {
-				save = true;
-			}
-			current.firingWeight = value;
+	public Integer getInhibitingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		return tmd.inhibitingCondition.getEntry(stationInKey, classKey);
+	}
+
+	/**
+	 * Sets the entry (<code>stationInKey</code>, <code>classKey</code>) of the inhibiting
+	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	@Override
+	public void setInhibitingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey, Integer value) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		if (!tmd.inhibitingCondition.getEntry(stationInKey, classKey).equals(value)) {
+			tmd.inhibitingCondition.setEntry(stationInKey, classKey, value);
+			save = true;
 		}
+	}
+
+	/**
+	 * Returns the number of servers for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	@Override
+	public Integer getNumberOfServers(Object stationKey, int modeIndex) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		return tmd.numberOfServers;
+	}
+
+	/**
+	 * Sets the number of servers for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	@Override
+	public void setNumberOfServers(Object stationKey, int modeIndex, Integer number) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		if (!tmd.numberOfServers.equals(number)) {
+			tmd.numberOfServers = number;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns the firing time distribution for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	@Override
+	public Object getFiringTimeDistribution(Object stationKey, int modeIndex) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		return tmd.firingTimeDistribution;
+	}
+
+	/**
+	 * Sets the firing time distribution for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	@Override
+	public void setFiringTimeDistribution(Object stationKey, int modeIndex, Object distribution) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		if (!tmd.firingTimeDistribution.equals(distribution)) {
+			tmd.firingTimeDistribution = distribution;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns the firing priority for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	@Override
+	public Integer getFiringPriority(Object stationKey, int modeIndex) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		return tmd.firingPriority;
+	}
+
+	/**
+	 * Sets the firing priority for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	@Override
+	public void setFiringPriority(Object stationKey, int modeIndex, Integer priority) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		if (!tmd.firingPriority.equals(priority)) {
+			tmd.firingPriority = priority;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns the firing weight for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	@Override
+	public Double getFiringWeight(Object stationKey, int modeIndex) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		return tmd.firingWeight;
+	}
+
+	/**
+	 * Sets the firing weight for transition <code>stationKey</code> and mode
+	 * <code>modeIndex</code>.
+	 */
+	@Override
+	public void setFiringWeight(Object stationKey, int modeIndex, Double weight) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		if (!tmd.firingWeight.equals(weight)) {
+			tmd.firingWeight = weight;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns the entry (<code>stationOutKey</code>, <code>classKey</code>) of the firing
+	 * outcome for transition <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	@Override
+	public Integer getFiringOutcome(Object stationKey, int modeIndex, Object stationOutKey, Object classKey) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		return tmd.firingOutcome.getEntry(stationOutKey, classKey);
+	}
+
+	/**
+	 * Sets the entry (<code>stationOutKey</code>, <code>classKey</code>) of the firing
+	 * outcome for transition <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	@Override
+	public void setFiringOutcome(Object stationKey, int modeIndex, Object stationOutKey, Object classKey, Integer value) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = (TransitionModeData) sd.transitionModeList.get(modeIndex);
+		if (!tmd.firingOutcome.getEntry(stationOutKey, classKey).equals(value)) {
+			tmd.firingOutcome.setEntry(stationOutKey, classKey, value);
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns given name if a mode with the same name does not exist or makes it unique
+	 * for a transition
+	 * @param key station key
+	 * @param name mode name
+	 * @return unique name
+	 */
+	private String getUniqueTransitionModeName(Object key, String name) {
+		// Map of all unique names with their first users
+		List<String> names = getAllTransitionModeNames(key);
+
+		// If name is new, returns it
+		if (!names.contains(name)) {
+			return name;
+		}
+
+		int num;
+		// If format is already '*_[number]' increment number
+		char[] charname = name.toCharArray();
+		int n = charname.length - 1;
+		while (charname[n] >= '0' && charname[n] <= '9' && n > 0) {
+			n--;
+		}
+		if (charname[n] == '_') {
+			num = Integer.parseInt(name.substring(n + 1));
+			name = name.substring(0, n); // Removes suffix
+		}
+		// Otherwise uses number 1
+		else {
+			num = 1;
+		}
+		// Finds unique number
+		while (names.contains(name + "_" + num)) {
+			num++;
+		}
+		return name + "_" + num;
 	}
 
 }

@@ -8,13 +8,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -31,7 +27,6 @@ import jmt.common.ConnectionCheck;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.xml.TemplateFileOperation;
-import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.template.TemplateConstants;
 import static jmt.gui.jsimgraph.template.TemplateConstants.CONN_TIMEOUT;
 import static jmt.gui.jsimgraph.template.TemplateConstants.DEFAULT_SITE;
@@ -44,22 +39,16 @@ public class AutoDownloadPanel extends WizardPanel {
 	private static final long serialVersionUID = 1L;
 
 	private String indexFile;
-
 	private JProgressBar progress;
-
 	private JButton download;
 	private JButton cancel;
 	private JButton retry;
-
 	private JLabel errorLabel = new JLabel("Connection error");
 	private JLabel progLabel = new JLabel("PROGRESS:");
 	private JPanel bottomPane;
-
 	private List<TemplateData> data;
 	private DefaultPackageTable defaultPackageTable;
-
 	private JPanel parent;
-
 	private TemplatePanel panel;
 	private boolean error;
 
@@ -70,7 +59,6 @@ public class AutoDownloadPanel extends WizardPanel {
 	}
 
 	public void initComponents() {
-
 		downloadIndex();
 
 		progress = new JProgressBar();
@@ -152,8 +140,7 @@ public class AutoDownloadPanel extends WizardPanel {
 			File index = File.createTempFile(F_NAME_INDEX, "");
 			index.deleteOnExit();
 			indexFile = index.getAbsolutePath();
-			TemplateFileOperation.download(DEFAULT_SITE + "/" + F_NAME_INDEX , indexFile,
-					CONN_TIMEOUT, READ_TIMEOUT);
+			TemplateFileOperation.download(DEFAULT_SITE + "/" + F_NAME_INDEX , indexFile, CONN_TIMEOUT, READ_TIMEOUT);
 			data = TemplateFileOperation.getDefaultTemplatesFromIndex(indexFile);
 			error = false;
 		} catch (Exception e) {
@@ -208,13 +195,11 @@ public class AutoDownloadPanel extends WizardPanel {
 			String tip = null;
 			Point p = e.getPoint();
 			int rowIndex = rowAtPoint(p);
-
 			try {
 				tip = data.get(rowIndex).getToolTip();
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
-
 			return tip;
 		}
 
@@ -226,9 +211,7 @@ public class AutoDownloadPanel extends WizardPanel {
 
 		String[] columnNames = { "Template", "Download" };
 		Class<?>[] columnClass = { String.class, Boolean.class };
-
 		public int[] columnSizes = new int[] { 420,100 };
-
 		boolean[] flags = new boolean[data.size()];
 
 		public void setFlags(int size) {
@@ -309,18 +292,13 @@ public class AutoDownloadPanel extends WizardPanel {
 				String fileName = toDownload.get(i).getFileName();
 				try {
 					if (fileName != null) {
-						fileName = TemplateConstants.TEMPLATE_FOLDER
-								+ fileName;
-						TemplateFileOperation.download(file, fileName,
-								TemplateConstants.CONN_TIMEOUT,
-								TemplateConstants.READ_TIMEOUT);
+						fileName = TemplateConstants.TEMPLATE_FOLDER + fileName;
+						TemplateFileOperation.download(file, fileName, TemplateConstants.CONN_TIMEOUT, TemplateConstants.READ_TIMEOUT);
 					} else {
 						throw new Exception();
 					}
 				} catch (Exception e) {
-					JOptionPane.showMessageDialog(parent,
-							"<html> Error: Unable to download <br>\n"
-									+ file);
+					JOptionPane.showMessageDialog(parent, "<html> Error: Unable to download <br>\n" + file);
 				}
 				publish(i + 1);
 			}
@@ -336,7 +314,6 @@ public class AutoDownloadPanel extends WizardPanel {
 					progress.setValue(value);
 					progress.setString(value + "%");
 				}
-
 				if (task == -1) {
 					download.setEnabled(true);
 					cancel.setEnabled(true);

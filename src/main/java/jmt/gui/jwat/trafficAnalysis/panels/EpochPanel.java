@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.jwat.trafficAnalysis.panels;
 
 import java.awt.BorderLayout;
@@ -24,10 +42,8 @@ import jmt.gui.jwat.MainJwatWizard;
 
 public class EpochPanel extends WizardPanel implements JWATConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
+
 	private MainJwatWizard burstwizard = null;
 	private JSpinner epochs = null;
 	private ModelTrafficAnalysis model = null;
@@ -42,10 +58,13 @@ public class EpochPanel extends WizardPanel implements JWATConstants {
 
 		initComponents();
 		((ModelTrafficAnalysis) this.burstwizard.getModel()).addResetModelListener(new OnResetModel() {
+
 			public void modelReset() {
 				EpochPanel.this.removeAll();
 				initComponents();
+				canGoOn = false;
 			}
+
 		});
 	}
 
@@ -62,9 +81,6 @@ public class EpochPanel extends WizardPanel implements JWATConstants {
 		setEpoch.setPreferredSize(new Dimension(85, 35));
 		flowTemp.add(setEpoch);
 		epochOption.add(flowTemp, BorderLayout.CENTER);
-		//JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		//btnPanel.add(setEpoch);
-		//epochOption.add(btnPanel,BorderLayout.SOUTH);
 		this.add(epochOption, BorderLayout.NORTH);
 	}
 
@@ -74,9 +90,7 @@ public class EpochPanel extends WizardPanel implements JWATConstants {
 	}
 
 	private Action setEpoch = new AbstractAction("Set epoch") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public void actionPerformed(ActionEvent e) {
@@ -86,6 +100,7 @@ public class EpochPanel extends WizardPanel implements JWATConstants {
 			canGoOn = true;
 			((JWatWizard) getParentWizard()).showNextPanel();
 		}
+
 	};
 
 	//	 TODO controllare validita dei dati forniti nel pannello e creazione e passaggio informazioni al modello per il prossimo panello
@@ -103,7 +118,13 @@ public class EpochPanel extends WizardPanel implements JWATConstants {
 	}
 
 	@Override
+	public void gotFocus() {
+		burstwizard.setCurrentPanel(TRAFFIC_EPOCH_PANEL);
+	}
+
+	@Override
 	public void lostFocus() {
 		burstwizard.setLastPanel(TRAFFIC_EPOCH_PANEL);
 	}
+
 }

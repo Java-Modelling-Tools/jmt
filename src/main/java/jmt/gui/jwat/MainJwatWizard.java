@@ -83,7 +83,6 @@ public class MainJwatWizard extends JWatWizard {
 	private static final String BURSTINESS_TITLE = "Traffic Analysis  - Burstiness";
 	private static final String FITTING_TITLE = "Fitting Workload Data";
 	private JPanel menus = null;
-	private JMenuBar mMenuBar = null;
 
 	//private JWatModel model = null;
 	private JwatSession session = null;
@@ -142,6 +141,7 @@ public class MainJwatWizard extends JWatWizard {
 		//Aggiunta del pannello principale dell'applicazione
 		mainPanel = new JWatMainPanel(this);
 		this.addPanel(mainPanel);
+		setEnableButton("Solve", false);
 	}
 
 	public void setFittingEnv(String mode) {
@@ -160,18 +160,18 @@ public class MainJwatWizard extends JWatWizard {
 		JWatPanels.add(p);
 		this.addPanel(p);
 
-		p = new FittingPanel(this,FittingPanel.PARETO);
+		p = new FittingPanel(this, FittingPanel.PARETO);
 		JWatPanels.add(p);
 		this.addPanel(p);
 
-		p = new FittingPanel(this,FittingPanel.EXPO);
+		p = new FittingPanel(this, FittingPanel.EXPO);
 		JWatPanels.add(p);
 		this.addPanel(p);
 
-		getFittingToolbar();
-		getFittingMenubar();
-
-		this.setEnableButton("Solve", false);
+		getFittingToolbar(mode);
+		getFittingMenubar(mode);
+		setEnableButton("Next >", false);
+		setEnableButton("Solve", false);
 		//Shows next panel, the first of traffic analysis wizard
 		showNextPanel();
 	}
@@ -201,11 +201,11 @@ public class MainJwatWizard extends JWatWizard {
 		p = new GraphArrivalPanel(this);
 		JWatPanels.add(p);
 		this.addPanel(p);
-		//Sets menu and tool bars
+
 		getTrafficToolbar();
 		getTrafficMenubar();
-		//Disables Solve button
-		this.setEnableButton("Solve", false);
+		setEnableButton("Next >", false);
+		setEnableButton("Solve", false);
 		//Shows next panel, the first of traffic analysis wizard
 		showNextPanel();
 	}
@@ -232,9 +232,9 @@ public class MainJwatWizard extends JWatWizard {
 		JWatPanels.add(p);
 		this.addPanel(p);
 		//Set Workload ToolBar
-		getWorkloadToolbar();
+		getWorkloadToolbar(mode);
 		//Set Workload MenuBar
-		getWorkloadMenuBar();
+		getWorkloadMenubar(mode);
 		setEnableButton("Next >", false);
 		setEnableButton("Solve", false);
 		lastPanel = 1;
@@ -302,7 +302,7 @@ public class MainJwatWizard extends JWatWizard {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			cancel();
+			close();
 		}
 
 	};
@@ -338,20 +338,11 @@ public class MainJwatWizard extends JWatWizard {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Credits");
+			putValue(Action.SHORT_DESCRIPTION, "About JWAT");
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			Runnable r = new Runnable() {
-				public void run() {
-					try {
-						new PDFViewerBuffer("JWAT manual", ManualBookmarkers.JWAT);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			};
-			EventQueue.invokeLater(r);
+			workloadShowAbout();
 		}
 
 	};
@@ -361,7 +352,7 @@ public class MainJwatWizard extends JWatWizard {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "New input file");
+			putValue(Action.SHORT_DESCRIPTION, "Create session");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("New"));
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
@@ -371,12 +362,33 @@ public class MainJwatWizard extends JWatWizard {
 			if (JOptionPane.showConfirmDialog(MainJwatWizard.this, "This operation will reset data. Continue?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 				//Reset model and set first panel
 				session.resetSession();
-				tabbedPane.setSelectedIndex(1);
-				try {
-					((InputPanel) tabbedPane.getComponentAt(1)).resetOnNew();
-				} catch (ClassCastException cce) {
-					return;
+				tabbedPane.setSelectedIndex(JWATConstants.WORKLOAD_INPUT_PANEL);
+				((InputPanel) tabbedPane.getComponentAt(JWATConstants.WORKLOAD_INPUT_PANEL)).resetOnNew();
+			}
+		}
+
+	};
+
+	private AbstractAction WL_FILE_OPEN = new AbstractAction("Open") {
+
+		private static final long serialVersionUID = 1L;
+
+		{
+			putValue(Action.SHORT_DESCRIPTION, "Open session");
+			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Open"));
+			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_O));
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (fileOpenF.showOpenDialog(MainJwatWizard.this) == JFileChooser.APPROVE_OPTION) {
+				if (currentPanel != JWATConstants.WORKLOAD_INPUT_PANEL) {
+					tabbedPane.setSelectedIndex(JWATConstants.WORKLOAD_INPUT_PANEL);
 				}
+				File fFile = fileOpenF.getSelectedFile();
+				String fileName = fFile.getAbsolutePath();
+				Loader.loadSession(fileName, new ProgressMonitorShow(tabbedPane.getComponentAt(currentPanel), "Loading Session...", 1000),
+						new SessionStatusListener(), session);
 			}
 		}
 
@@ -397,36 +409,9 @@ public class MainJwatWizard extends JWatWizard {
 			if (fileSaveF.showOpenDialog(MainJwatWizard.this) == JFileChooser.APPROVE_OPTION) {
 				File fFile = fileSaveF.getSelectedFile();
 				String fileName = fFile.getAbsolutePath();
-				System.out.println(fileName);
 				MainJwatWizard.this.session.saveSession(fileName.substring(0, fileName.lastIndexOf("\\")) + "\\", fileName.substring(fileName
 						.lastIndexOf("\\") + 1), JwatSession.WORKLOAD_SAVE);
 			}
-		}
-
-	};
-
-	private AbstractAction WL_FILE_OPEN = new AbstractAction("Open...") {
-
-		private static final long serialVersionUID = 1L;
-
-		{
-			putValue(Action.SHORT_DESCRIPTION, "Open session");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Open"));
-			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
-			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_O));
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			if (fileOpenF.showOpenDialog(MainJwatWizard.this) == JFileChooser.APPROVE_OPTION) {
-				if (currentPanel != JWATConstants.WORKLOAD_INPUT_PANEL) {
-					tabbedPane.setSelectedIndex(JWATConstants.WORKLOAD_INPUT_PANEL);
-				}
-				File fFile = fileOpenF.getSelectedFile();
-				String fileName = fFile.getAbsolutePath();
-				Loader.loadSession(fileName, new ProgressMonitorShow(tabbedPane.getComponent(currentPanel), "Loading Session...", 1000),
-						new SessionStatusListener(), session);
-			}
-
 		}
 
 	};
@@ -446,9 +431,9 @@ public class MainJwatWizard extends JWatWizard {
 
 		//Abort caricamento file input
 		private void abortEvent(EventFinishAbort e) {
-			JWatWizard wizard = (JWatWizard) ((WizardPanel) tabbedPane.getComponent(currentPanel)).getParentWizard();
-			JOptionPane.showMessageDialog(tabbedPane.getComponent(currentPanel), e.getMessage(), "LOADING ABORTED!!", JOptionPane.WARNING_MESSAGE);
-			((InputPanel) tabbedPane.getComponent(JWATConstants.WORKLOAD_INPUT_PANEL)).setCanGoForward(false);
+			JWatWizard wizard = (JWatWizard) ((WizardPanel) tabbedPane.getComponentAt(currentPanel)).getParentWizard();
+			JOptionPane.showMessageDialog(tabbedPane.getComponentAt(currentPanel), e.getMessage(), "LOADING ABORTED!!", JOptionPane.WARNING_MESSAGE);
+			((InputPanel) tabbedPane.getComponentAt(JWATConstants.WORKLOAD_INPUT_PANEL)).setCanGoForward(false);
 			wizard.setEnableButton("Next >", false);
 			wizard.setEnableButton("Solve", false);
 		}
@@ -457,13 +442,13 @@ public class MainJwatWizard extends JWatWizard {
 		private void finishedEvent(final EventSessionLoaded e) {
 			JButton[] optBtn = new JButton[2];
 			JOptionPane pane;
-			((InputPanel) tabbedPane.getComponent(JWATConstants.WORKLOAD_INPUT_PANEL)).setCanGoForward(false);
-			JWatWizard wizard = (JWatWizard) ((WizardPanel) tabbedPane.getComponent(currentPanel)).getParentWizard();
+			((InputPanel) tabbedPane.getComponentAt(JWATConstants.WORKLOAD_INPUT_PANEL)).setCanGoForward(false);
+			JWatWizard wizard = (JWatWizard) ((WizardPanel) tabbedPane.getComponentAt(currentPanel)).getParentWizard();
 
 			optBtn[0] = new JButton("Continue");
 			optBtn[1] = new JButton("Cancel");
 
-			pane = new JOptionPane("Load session done: ", JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, optBtn, null);
+			pane = new JOptionPane("Load session done.", JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, optBtn, null);
 			final JDialog dialog = pane.createDialog(wizard, "Loading Complete");
 			pane.selectInitialValue();
 
@@ -472,22 +457,22 @@ public class MainJwatWizard extends JWatWizard {
 				public void actionPerformed(ActionEvent ev) {
 					JwatSession newSession = e.getSession();
 					dialog.dispose();
-					JWatWizard wizard = (JWatWizard) ((WizardPanel) tabbedPane.getComponent(currentPanel)).getParentWizard();
+					JWatWizard wizard = (JWatWizard) ((WizardPanel) tabbedPane.getComponentAt(currentPanel)).getParentWizard();
 					session.copySession(newSession);
 					wizard.setEnableButton("Next >", true);
 					wizard.setEnableButton("Solve", false);
-					((InputPanel) tabbedPane.getComponent(JWATConstants.WORKLOAD_INPUT_PANEL)).setCanGoForward(true);
+					((InputPanel) tabbedPane.getComponentAt(JWATConstants.WORKLOAD_INPUT_PANEL)).setCanGoForward(true);
 					wizard.showNextPanel();
-
 				}
+
 			});
 
 			optBtn[1].addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent ev) {
-					JWatWizard wizard = (JWatWizard) ((WizardPanel) tabbedPane.getComponent(currentPanel)).getParentWizard();
+					JWatWizard wizard = (JWatWizard) ((WizardPanel) tabbedPane.getComponentAt(currentPanel)).getParentWizard();
 					dialog.dispose();
-					((InputPanel) tabbedPane.getComponent(JWATConstants.WORKLOAD_INPUT_PANEL)).setCanGoForward(true);
+					((InputPanel) tabbedPane.getComponentAt(JWATConstants.WORKLOAD_INPUT_PANEL)).setCanGoForward(true);
 					System.gc();
 					wizard.setEnableButton("Next >", false);
 					wizard.setEnableButton("Solve", false);
@@ -517,74 +502,9 @@ public class MainJwatWizard extends JWatWizard {
 	};
 
 	/**
-	 * @return the toolbar for the jaba wizard. Shamelessly uses icon from the main jmt frame
-	 */
-	protected void getFittingToolbar() {
-		JToolBar tb = new JToolBar();
-		tb.setRollover(true);
-		tb.setOrientation(SwingConstants.HORIZONTAL);
-		tb.setFloatable(false);
-
-		Action[] actions = { FI_FILE_NEW, null, FI_HELP };
-		//Action[] actions = {FILE_NEW,null, ACTION_FINISH,null, HELP};
-		//String[] icons = {"New","Sim", "Help"};
-		//String[] htext = {"Creates a new model","Solves the current model", "Show help"};
-		String[] icons = { "New", "Help" };
-		//String[] htext = { "Creates a new model", "Show help" };
-
-		JButton button;
-		tb.setBorderPainted(true);
-
-		for (int i = 0, j = 0; i < actions.length; i++, j++) {
-			if (actions[i] == null) {
-				j--;
-				tb.addSeparator(new Dimension(20, 2));
-			} else {
-				button = new JButton(actions[i]);
-				button.setText("");
-				button.setIcon(JMTImageLoader.loadImage(icons[j]));
-				button.setRolloverIcon(JMTImageLoader.loadImage(icons[j] + "RO"));
-				button.setPressedIcon(JMTImageLoader.loadImage(icons[j] + "P"));
-				button.setFocusPainted(false);
-				button.setContentAreaFilled(false);
-				button.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-				tb.add(button);
-
-			}
-		}
-		setToolBar(tb);
-	}
-
-	private void getFittingMenubar() {
-		JMenuBar jmb = new JMenuBar();
-
-		/*JMenuItem[][] menuItems = { {new JMenuItem(FILE_NEW),null, new JMenuItem(FILE_EXIT)},
-				{new JMenuItem(ACTION_SOLVE), null, new JMenuItem(ACTION_NEXT), new JMenuItem(ACTION_PREV)},
-				{new JMenuItem(HELP), null, new JMenuItem(ABOUT)} };*/
-		JMenuItem[][] menuItems = { { new JMenuItem(FI_FILE_NEW), null, new JMenuItem(FI_FILE_EXIT) },
-				{ new JMenuItem(FI_HELP), null, new JMenuItem(FI_ABOUT) } };
-
-		String[] menuTitles = { "File", "Help" };
-		char[] chars = { 'F', 'e' };
-		for (int i = 0; i < menuItems.length; i++) {
-			JMenu menu = new JMenu(menuTitles[i]);
-			menu.setMnemonic(chars[i]);
-			for (int j = 0; j < menuItems[i].length; j++) {
-				if (menuItems[i][j] == null) {
-					menu.addSeparator();
-				} else {
-					menu.add(menuItems[i][j]);
-				}
-			}
-			jmb.add(menu);
-		}
-		setMenuBar(jmb);
-	}
-
-	/**
 	 * @return the toolbar for the exact wizard. Shamelessly uses icon from the main jmt frame
 	 */
-	protected void getWorkloadToolbar() {
+	protected void getWorkloadToolbar(String mode) {
 		JToolBar workloadToolbar = new JToolBar();
 		workloadToolbar.setRollover(true);
 		workloadToolbar.setOrientation(SwingConstants.HORIZONTAL);
@@ -592,7 +512,7 @@ public class MainJwatWizard extends JWatWizard {
 		//null values add a gap between toolbar icons
 		Action[] actions = { WL_FILE_NEW, WL_FILE_OPEN, WL_FILE_SAVE, null, WL_ACTION_SOLVE, null, WL_HELP_SHOWHELP };
 		String[] icons = { "New", "Open", "Save", "Sim", "Help" };
-		String[] htext = { "Select new input file", "Opens a saved session", "Saves the current session", "Clusterize", "Show help" };
+		String[] htext = { "Creates a new session", "Opens a saved session", "Saves the current session", "Clusterize", "Show help" };
 		JButton button;
 		workloadToolbar.setBorderPainted(true);
 		//i index scans actions' array which includes null values, while j scans other arrays.
@@ -612,7 +532,7 @@ public class MainJwatWizard extends JWatWizard {
 				button.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 				workloadToolbar.add(button);
 				help.addHelp(button, htext[j]);
-				if (j == 1 || j == 2 || j == 3 /*|| j == 4*/) {
+				if ((j == 0 && mode.equals("demo")) || j == 1 || j == 2|| j == 3) {
 					button.setEnabled(false);
 				}
 			}
@@ -620,25 +540,11 @@ public class MainJwatWizard extends JWatWizard {
 		setToolBar(workloadToolbar);
 	}
 
-	/**
-	 * Creates workload analysis menu
-	 * @return menu
-	 */
-	private void getWorkloadMenuBar() {
+	private void getWorkloadMenubar(String mode) {
 		JMenuBar workloadMenubar = new JMenuBar();
 		JMenuItem[][] menuItems = {
-				{ new JMenuItem(WL_FILE_NEW), new JMenuItem(WL_FILE_SAVE), new JMenuItem(WL_FILE_OPEN), null, new JMenuItem(WL_EXIT_ACTION) },
-				{ new JMenuItem(WL_ACTION_SOLVE) {
-					private static final long serialVersionUID = 1L;
-					{
-						setEnabled(false);
-					}
-				} }, { new JMenuItem(WL_HELP_SHOWHELP) {
-					private static final long serialVersionUID = 1L;
-					{
-						setEnabled(true);
-					}
-				}, null, new JMenuItem(WL_HELP_CREDITS) } };
+				{ new JMenuItem(WL_FILE_NEW), new JMenuItem(WL_FILE_OPEN), new JMenuItem(WL_FILE_SAVE), null, new JMenuItem(WL_EXIT_ACTION) },
+				{ new JMenuItem(WL_ACTION_SOLVE) }, { new JMenuItem(WL_HELP_SHOWHELP), null, new JMenuItem(WL_HELP_CREDITS) } };
 		String[] menuTitles = { "File", "Action", "Help" };
 		char[] chars = { 'F', 'A', 'e' };
 		for (int i = 0; i < menuItems.length; i++) {
@@ -649,6 +555,9 @@ public class MainJwatWizard extends JWatWizard {
 					menu.addSeparator();
 				} else {
 					menu.add(menuItems[i][j]);
+					if ((i == 0 && ((j == 0 && mode.equals("demo")) || j == 1 || j == 2)) || (i == 1 && j == 0)) {
+						menuItems[i][j].setEnabled(false);
+					}
 				}
 			}
 			workloadMenubar.add(menu);
@@ -666,6 +575,27 @@ public class MainJwatWizard extends JWatWizard {
 		this.validate();
 	}
 
+	private void getTrafficMenubar() {
+		JMenuBar jmb = new JMenuBar();
+		JMenuItem[][] menuItems = { { new JMenuItem(TR_FILE_NEW), null, new JMenuItem(TR_FILE_EXIT) },
+				{ new JMenuItem(TR_HELP), null, new JMenuItem(TR_ABOUT) } };
+		String[] menuTitles = { "File", "Help" };
+		char[] chars = { 'F', 'e' };
+		for (int i = 0; i < menuItems.length; i++) {
+			JMenu menu = new JMenu(menuTitles[i]);
+			menu.setMnemonic(chars[i]);
+			for (int j = 0; j < menuItems[i].length; j++) {
+				if (menuItems[i][j] == null) {
+					menu.addSeparator();
+				} else {
+					menu.add(menuItems[i][j]);
+				}
+			}
+			jmb.add(menu);
+		}
+		setMenuBar(jmb);
+	}
+
 	/**
 	 * @return the toolbar for the jaba wizard. Shamelessly uses icon from the main jmt frame
 	 */
@@ -674,16 +604,11 @@ public class MainJwatWizard extends JWatWizard {
 		tb.setRollover(true);
 		tb.setOrientation(SwingConstants.HORIZONTAL);
 		tb.setFloatable(false);
+		tb.setBorderPainted(true);
 
 		Action[] actions = { TR_FILE_NEW, null, TR_HELP };
-		//Action[] actions = {FILE_NEW,null, ACTION_FINISH,null, HELP};
-		//String[] icons = {"New","Sim", "Help"};
-		//String[] htext = {"Creates a new model","Solves the current model", "Show help"};
 		String[] icons = { "New", "Help" };
-		//String[] htext = { "Creates a new model", "Show help" };
-
 		JButton button;
-		tb.setBorderPainted(true);
 
 		for (int i = 0, j = 0; i < actions.length; i++, j++) {
 			if (actions[i] == null) {
@@ -704,17 +629,12 @@ public class MainJwatWizard extends JWatWizard {
 		setToolBar(tb);
 	}
 
-	private void getTrafficMenubar() {
+	private void getFittingMenubar(String mode) {
 		JMenuBar jmb = new JMenuBar();
-
-		/*JMenuItem[][] menuItems = { {new JMenuItem(FILE_NEW),null, new JMenuItem(FILE_EXIT)},
-				{new JMenuItem(ACTION_SOLVE), null, new JMenuItem(ACTION_NEXT), new JMenuItem(ACTION_PREV)},
-				{new JMenuItem(HELP), null, new JMenuItem(ABOUT)} };*/
-		JMenuItem[][] menuItems = { { new JMenuItem(TR_FILE_NEW), null, new JMenuItem(TR_FILE_EXIT) },
-				{ new JMenuItem(ACTION_NEXT), new JMenuItem(ACTION_PREV) }, { new JMenuItem(TR_HELP), null, new JMenuItem(TR_ABOUT) } };
-
-		String[] menuTitles = { "File", "Action", "Help" };
-		char[] chars = { 'F', 'A', 'e' };
+		JMenuItem[][] menuItems = { { new JMenuItem(FI_FILE_NEW), null, new JMenuItem(FI_FILE_EXIT) },
+				{ new JMenuItem(FI_HELP), null, new JMenuItem(FI_ABOUT) } };
+		String[] menuTitles = { "File", "Help" };
+		char[] chars = { 'F', 'e' };
 		for (int i = 0; i < menuItems.length; i++) {
 			JMenu menu = new JMenu(menuTitles[i]);
 			menu.setMnemonic(chars[i]);
@@ -723,11 +643,50 @@ public class MainJwatWizard extends JWatWizard {
 					menu.addSeparator();
 				} else {
 					menu.add(menuItems[i][j]);
+					if (i == 0 && (j == 0 && mode.equals("demo"))) {
+						menuItems[i][j].setEnabled(false);
+					}
 				}
 			}
 			jmb.add(menu);
 		}
 		setMenuBar(jmb);
+	}
+
+	/**
+	 * @return the toolbar for the jaba wizard. Shamelessly uses icon from the main jmt frame
+	 */
+	protected void getFittingToolbar(String mode) {
+		JToolBar tb = new JToolBar();
+		tb.setRollover(true);
+		tb.setOrientation(SwingConstants.HORIZONTAL);
+		tb.setFloatable(false);
+		tb.setBorderPainted(true);
+
+		Action[] actions = { FI_FILE_NEW, null, FI_HELP };
+		String[] icons = { "New", "Help" };
+		JButton button;
+
+		for (int i = 0, j = 0; i < actions.length; i++, j++) {
+			if (actions[i] == null) {
+				j--;
+				tb.addSeparator(new Dimension(20, 2));
+			} else {
+				button = new JButton(actions[i]);
+				button.setText("");
+				button.setIcon(JMTImageLoader.loadImage(icons[j]));
+				button.setRolloverIcon(JMTImageLoader.loadImage(icons[j] + "RO"));
+				button.setPressedIcon(JMTImageLoader.loadImage(icons[j] + "P"));
+				button.setFocusPainted(false);
+				button.setContentAreaFilled(false);
+				button.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+				tb.add(button);
+				if (i == 0 && mode.equals("demo")) {
+					button.setEnabled(false);
+				}
+			}
+		}
+		setToolBar(tb);
 	}
 
 	private AbstractAction TR_FILE_NEW = new AbstractAction("New...") {
@@ -775,7 +734,7 @@ public class MainJwatWizard extends JWatWizard {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			cancel();
+			close();
 		}
 
 	};
@@ -791,12 +750,12 @@ public class MainJwatWizard extends JWatWizard {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			cancel();
+			close();
 		}
 
 	};
 
-	private AbstractAction TR_HELP = new AbstractAction("Burstiness help") {
+	private AbstractAction TR_HELP = new AbstractAction("Burstiness Help") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -822,7 +781,7 @@ public class MainJwatWizard extends JWatWizard {
 
 	};
 
-	private AbstractAction FI_HELP = new AbstractAction("Fitting help") {
+	private AbstractAction FI_HELP = new AbstractAction("Fitting Help") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -848,13 +807,12 @@ public class MainJwatWizard extends JWatWizard {
 
 	};
 
-	private AbstractAction TR_ABOUT = new AbstractAction("About Burstiness...") {
+	private AbstractAction TR_ABOUT = new AbstractAction("About Burstiness") {
 
 		private static final long serialVersionUID = 1L;
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "About Burstiness");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("helpIcon"));
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.ALT_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
 		}
@@ -865,38 +823,18 @@ public class MainJwatWizard extends JWatWizard {
 
 	};
 
-	private AbstractAction FI_ABOUT = new AbstractAction("About Fitting...") {
+	private AbstractAction FI_ABOUT = new AbstractAction("About Fitting") {
 
 		private static final long serialVersionUID = 1L;
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "About Fitting");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("helpIcon"));
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.ALT_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			trafficShowAbout();
-		}
-
-	};
-
-	private AbstractAction TR_ACTION_SOLVE = new AbstractAction("Solve") {
-
-		private static final long serialVersionUID = 1L;
-
-		{
-			putValue(Action.SHORT_DESCRIPTION, "Solve model");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Sim"));
-			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
-			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_L));
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			if (checkFinish()) {
-				finish();
-			}
+			fittingShowAbout();
 		}
 
 	};
@@ -905,12 +843,8 @@ public class MainJwatWizard extends JWatWizard {
 		if (JOptionPane.showConfirmDialog(MainJwatWizard.this, "This operation will reset data. Continue?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 			//Reset model and set first panel
 			session.resetSession();
-			tabbedPane.setSelectedIndex(1);
-			try {
-				((jmt.gui.jwat.trafficAnalysis.panels.InputPanel) tabbedPane.getComponentAt(1)).resetOnNew();
-			} catch (ClassCastException cce) {
-				return;
-			}
+			tabbedPane.setSelectedIndex(JWATConstants.WORKLOAD_INPUT_PANEL);
+			((jmt.gui.jwat.trafficAnalysis.panels.InputPanel) tabbedPane.getComponentAt(JWATConstants.WORKLOAD_INPUT_PANEL)).resetOnNew();
 		}
 	}
 
@@ -918,17 +852,21 @@ public class MainJwatWizard extends JWatWizard {
 		if (JOptionPane.showConfirmDialog(MainJwatWizard.this, "This operation will reset data. Continue?", "Warning", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 			//Reset model and set first panel
 			session.resetSession();
-			tabbedPane.setSelectedIndex(1);
-			try {
-				((jmt.gui.jwat.fitting.panels.InputPanel) tabbedPane.getComponentAt(1)).resetOnNew();
-			} catch (ClassCastException cce) {
-				return;
-			}
+			tabbedPane.setSelectedIndex(JWATConstants.WORKLOAD_INPUT_PANEL);
+			((jmt.gui.jwat.fitting.panels.InputPanel) tabbedPane.getComponentAt(JWATConstants.WORKLOAD_INPUT_PANEL)).resetOnNew();
 		}
 	}
 
+	private void workloadShowAbout() {
+		JOptionPane.showMessageDialog(this, "Sorry, this is not available", "About JWAT not found", JOptionPane.ERROR_MESSAGE);
+	}
+
 	private void trafficShowAbout() {
-		JOptionPane.showMessageDialog(this, "Sorry, is not available", "About Burstiness not found", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(this, "Sorry, this is not available", "About Burstiness not found", JOptionPane.ERROR_MESSAGE);
+	}
+
+	private void fittingShowAbout() {
+		JOptionPane.showMessageDialog(this, "Sorry, this is not available", "About Fitting not found", JOptionPane.ERROR_MESSAGE);
 	}
 
 }

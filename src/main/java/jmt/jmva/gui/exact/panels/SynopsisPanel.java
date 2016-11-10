@@ -116,7 +116,6 @@ public class SynopsisPanel extends WizardPanel {
 		StreamResult sResult;
 		try {
 			InputStream transfUrlStream = SynopsisPanel.class.getResourceAsStream(XSLT_FILE);
-			//System.out.println(transfUrlStream);
 			if (transfUrlStream == null) {
 				synView.setText("<html><body><center><font face=\"bold\" size=\"2\">Resource " + XSLT_FILE
 						+ " not found.</font></center></body></html>");
@@ -141,12 +140,11 @@ public class SynopsisPanel extends WizardPanel {
 		} catch (TransformerException e) {
 			JOptionPane.showMessageDialog(null, e.getMessage(), "Transform Exception", JOptionPane.ERROR_MESSAGE);
 			return;
-		}/*
-			       catch (FileNotFoundException fnfe) {
-			           JOptionPane.showMessageDialog(null, fnfe.getMessage(), "File Error", JOptionPane.ERROR_MESSAGE);
-			           return;
-			       }
-			       */
+		}
+		/*catch (FileNotFoundException fnfe) {
+			JOptionPane.showMessageDialog(null, fnfe.getMessage(), "File Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}*/
 	}
 
 	public void setDoc(File xmlFile) {

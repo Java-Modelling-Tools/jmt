@@ -119,32 +119,37 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	protected static final String[] measureTypes = new String[] {
 			"---Select an index---",
 			SimulationDefinition.MEASURE_DR,
-			SimulationDefinition.MEASURE_FCR_TOTAL_WEIGHT,
-			SimulationDefinition.MEASURE_FCR_MEMORY_OCCUPATION,
+			SimulationDefinition.MEASURE_FCR_TW,
+			SimulationDefinition.MEASURE_FCR_MO,
 			SimulationDefinition.MEASURE_FJ_CN,
-			SimulationDefinition.MEASURE_FJ_RESPONSE_TIME,
+			SimulationDefinition.MEASURE_FJ_RP,
 			SimulationDefinition.MEASURE_QL,
 			SimulationDefinition.MEASURE_QT,
 			SimulationDefinition.MEASURE_RD,
 			SimulationDefinition.MEASURE_RP,
-			SimulationDefinition.MEASURE_R_PER_SINK,
+			SimulationDefinition.MEASURE_RP_PER_SINK,
 			SimulationDefinition.MEASURE_S_DR,
 			SimulationDefinition.MEASURE_S_CN,
-			SimulationDefinition.MEASURE_S_SP,
+			SimulationDefinition.MEASURE_S_P,
 			SimulationDefinition.MEASURE_S_RP,
 			SimulationDefinition.MEASURE_S_X,
 			SimulationDefinition.MEASURE_X,
 			SimulationDefinition.MEASURE_X_PER_SINK,
-			SimulationDefinition.MEASURE_U	
+			SimulationDefinition.MEASURE_U,
+			SimulationDefinition.MEASURE_FX
 	};
 
 	// Measure selection ComboBox
 	protected JComboBox measureSelection = new JComboBox(measureTypes);
 
 	/** Editors and renderers for table */
+	protected ImagedComboBoxCellEditorFactory classesCombos;
+	/** Editors and renderers for table */
 	protected ImagedComboBoxCellEditorFactory stationsCombos;
 	/** Editors and renderers for table */
-	protected ImagedComboBoxCellEditorFactory classesCombos;
+	protected ImagedComboBoxCellEditorFactory FJsCombos;
+	/** Editors and renderers for table */
+	protected ImagedComboBoxCellEditorFactory modesCombos;
 
 	//deletes a measure from list
 	protected AbstractAction deleteMeasure = new AbstractAction("") {
@@ -182,9 +187,12 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	};
 
 	public MeasurePanel(ClassDefinition classes, StationDefinition stations, SimulationDefinition simParams) {
-		stationsCombos = new ImagedComboBoxCellEditorFactory(stations);
 		classesCombos = new ImagedComboBoxCellEditorFactory(classes);
-		classesCombos.setAllowsNull(true);
+		stationsCombos = new ImagedComboBoxCellEditorFactory(stations);
+		FJsCombos = new ImagedComboBoxCellEditorFactory(null, stations,
+				ImagedComboBoxCellEditorFactory.OPTION_FJ_STATION_NAMES);
+		modesCombos = new ImagedComboBoxCellEditorFactory(null, null,
+				ImagedComboBoxCellEditorFactory.OPTION_TRANSITION_MODES);
 		setData(classes, stations, simParams);
 		initComponents();
 	}
@@ -296,8 +304,10 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		classData = classes;
 		stationData = stations;
 		simData = simParams;
-		stationsCombos.setData(stations);
 		classesCombos.setData(classes);
+		stationsCombos.setData(stations);
+		FJsCombos.setData(stations);
+		modesCombos.clearCache();
 		refreshComponents();
 	}
 
@@ -308,6 +318,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	public void gotFocus() {
 		stationsCombos.clearCache();
 		classesCombos.clearCache();
+		FJsCombos.clearCache();
+		modesCombos.clearCache();
 		refreshComponents();
 	}
 
@@ -331,8 +343,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	private void addMeasure() {
 		if (measureSelection.getSelectedIndex() <= 0) {
 			return;
-		}			
-		if (stationData.getStationRegionKeysNoSourceSink().size() == 0 || classData.getClassKeys().size() == 0) {
+		}
+		if (classData.getClassKeys().isEmpty() || stationData.getStationRegionKeysNoSourceSink().isEmpty()) {
 			measureSelection.setSelectedIndex(0);
 			return;
 		}
@@ -380,36 +392,35 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
+			Object key = simData.getMeasureKeys().get(row);
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
-			} else if (column == 2 && simData.isSinkMeasure(simData.getMeasureKeys().get(row))) {
+			} else if (column == 2 && simData.isSinkMeasure(key)) {
 				return stationsCombos.getEditor(stationData.getStationKeysSink());
-			} else if (column == 2 && simData.getMeasureType(simData.getMeasureKeys().get(row)).equals(SimulationDefinition.MEASURE_X)) {
-				Vector<Object> l1 = stationData.getStationRegionKeysNoSourceSink();
-				Vector<Object> l2 = stationData.getStationKeysSource();
-				l1.addAll(l2);
-				//ARIF: remove generic elements if exists
-				l1.removeElement(STATION_TYPE_CLASSSWITCH);
-				l1.removeElement(STATION_TYPE_FORK);
-				l1.removeElement(STATION_TYPE_SCALER);
-				return stationsCombos.getEditor(l1);
-			} else if (column == 2 && simData.isFCRMeasure(simData.getMeasureKeys().get(row))) {
-				Vector<Object> l1 = stationData.getFCRegionKeys();
-				return stationsCombos.getEditor(l1);
-			} else if (column == 2 && simData.isFJMeasure(simData.getMeasureKeys().get(row))) {
-				Vector<Object> l1 = stationData.getFJKeys();
-				return stationsCombos.getEditorFJ(l1);
-			} else if (column == 2 && simData.getMeasureType(simData.getMeasureKeys().get(row)).equals(SimulationDefinition.MEASURE_U)) {
-				Vector<Object> l1 = stationData.getStationRegionKeysNoSourceSink();
-				Vector<Object> l2 = stationData.getStationKeysPlace();
-				Vector<Object> l3 = stationData.getStationKeysTransition();
-				l1.removeAll(l2);
-				l1.removeAll(l3);
-				return stationsCombos.getEditor(l1);
+			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_X)) {
+				Vector<Object> vector = new Vector<Object>();
+				vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+				vector.addAll(stationData.getStationKeysSource());
+				return stationsCombos.getEditor(vector);
+			} else if (column == 2 && simData.isFCRMeasure(key)) {
+				return stationsCombos.getEditor(stationData.getFCRegionKeys());
+			} else if (column == 2 && simData.isFJMeasure(key)) {
+				return FJsCombos.getEditor(stationData.getFJKeys());
+			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_U)) {
+				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
+			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
+				return stationsCombos.getEditor(stationData.getStationKeysTransition());
 			} else if (column == 2) {
 				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
-			} else if (column == 1 && simData.isFCRMeasure(simData.getMeasureKeys().get(row))) {
+			} else if (column == 1 && simData.isFCRMeasure(key)) {
 				return classesCombos.getEditor(new ArrayList<Object>());
+			} else if (column == 1 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
+				Object station = simData.getMeasureStation(key);
+				if (station == null) {
+					return modesCombos.getEditor(new ArrayList<String>());
+				} else {
+					return modesCombos.getEditor(stationData.getAllTransitionModeNames(station));
+				}
 			} else if (column == 1) {
 				return classesCombos.getEditor(classData.getClassKeys());
 			} else {
@@ -419,18 +430,23 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
+			Object key = simData.getMeasureKeys().get(row);
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
-			} else if (column == 2 && !simData.isGlobalMeasure(simData.getMeasureKeys().get(row))) {
-				if (simData.isFJMeasure(simData.getMeasureKeys().get(row))) {
-					return stationsCombos.getRendererFJ();
+			} else if (column == 3) {
+				return new BooleanCellRenderer();
+			} else if (column == 2 && !simData.isGlobalMeasure(key)) {
+				if (simData.isFJMeasure(key)) {
+					return FJsCombos.getRenderer();
 				} else {
 					return stationsCombos.getRenderer();
 				}
 			} else if (column == 1) {
-				return classesCombos.getRenderer();
-			} else if (column == 3) {
-				return new BooleanCellRenderer();
+				if (simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
+					return modesCombos.getRenderer();
+				} else {
+					return classesCombos.getRenderer();
+				}
 			} else {
 				return super.getCellRenderer(row, column);
 			}
@@ -442,8 +458,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 
-		private String[] columnNames = new String[] { "Performance Index", "Class", "Station/Region", "Stat.Res.", "Conf.Int.",
-				"Max Rel.Err.", "" };
+		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region", "Stat.Res.", "Conf.Int.", "Max Rel.Err.", "" };
 		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Boolean.class, Double.class, Double.class, Object.class };
 		public int[] columnWidths = new int[] { 120, 80, 120, 30, 60, 60, 20 };
 
@@ -487,7 +502,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				return simData.getMeasureClass(key);
 			case 2: 
 				return simData.getMeasureStation(key);
-			case 3:
+			case 3: 
 				return simData.getMeasureLog(key);
 			case 4: 
 				return simData.getMeasureAlpha(key);
@@ -509,6 +524,11 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				break;
 			case 2: 
 				simData.setMeasureStation(aValue, key);
+				if (simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
+					simData.setMeasureClass(null, key);
+					repaint();
+					measureTable.setRowSelectionInterval(rowIndex, rowIndex);
+				}
 				break;
 			case 3: 
 				simData.setMeasureLog((Boolean)aValue, key);
