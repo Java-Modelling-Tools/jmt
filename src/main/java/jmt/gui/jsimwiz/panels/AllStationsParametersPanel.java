@@ -183,6 +183,7 @@ public class AllStationsParametersPanel extends WizardPanel implements CommonCon
 			label.setFont(isSelected ? label.getFont().deriveFont(Font.BOLD) : label.getFont().deriveFont(Font.ROMAN_BASELINE));
 			return label;
 		}
+
 	}
 
 }

@@ -19,6 +19,7 @@
 package jmt.gui.common.definitions;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -432,9 +433,19 @@ public interface StationDefinition {
 	public void setLoggingGlbParameter(String selector, String value);
 
 	/**
-	 * Normalizes the routing probabilities
+	 * Manages the routing and fork probabilities.
 	 */
 	public void manageProbabilities();
+
+	/**
+	 * Normalizes the routing probabilities.
+	 */
+	public void normalizeRoutingProbabilities(Object stationKey, Object classKey, Map<Object,Double> values);
+
+	/**
+	 * Normalizes the fork probabilities.
+	 */
+	public void normalizeForkProbabilities(Map<Object, Double> values);
 
 	/*------------------------------------------------------------------------------
 	 *-------------  methods for inter-station connections definition  --------------

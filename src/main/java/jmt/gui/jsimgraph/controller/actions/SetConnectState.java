@@ -38,8 +38,7 @@ public class SetConnectState extends AbstractJmodelAction {
 
 	public SetConnectState(Mediator mediator) {
 		super("Connect", "Link", mediator);
-		putValue(SHORT_DESCRIPTION, "Connect two elements");
-		//		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_X));
+		putValue(SHORT_DESCRIPTION, "Connect two stations");
 		setSelectable(true);
 		setGroup(0);
 		setEnabled(false);

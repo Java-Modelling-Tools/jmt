@@ -28,6 +28,7 @@ import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -60,7 +61,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	private JScrollPane descrPane = new JScrollPane();
 	private JTextArea noOptLabel = new JTextArea("No options available for this join strategy");
 	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);
-	private MixTable mixTable;
+	private MixTable mixTable = new MixTable();
 	private WarningScrollTable mixPane;
 
 	public JoinEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
@@ -68,8 +69,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 		super.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		super.setDividerSize(3);
 		super.setBorder(new EmptyBorder(0, 0, 0, 0));
-		this.setResizeWeight(.5);
-		mixTable = new MixTable(cs);
+		this.setResizeWeight(0.5);
 		setData(sd, cs, stationKey, classKey);
 		initComponents();
 	}
@@ -100,6 +100,7 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		JoinStrategy js = (JoinStrategy) sd.getJoinStrategy(stationKey, classKey);
 		if (js == null) {
+			descrTextPane.setText("");
 			emptyPane();
 		} else {
 			descrTextPane.setText(js.getDescription());
@@ -115,8 +116,8 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	}
 
 	private void emptyPane() {
-		firingMix = null;
 		setRightComponent(noOptLabelPanel);
+		firingMix = null;
 	}
 
 	private void createDetails(JoinStrategy js, StationDefinition sd, Object stationKey, Object classKey) {
@@ -166,17 +167,23 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 		});
 	}
 
+	public void stopEditing() {
+		if (mixTable.getCellEditor() != null) {
+			mixTable.getCellEditor().stopCellEditing();
+		}
+	}
+
 	protected class MixTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
-		ClassDefinition cs;
 
-		public MixTable(ClassDefinition cs) {
+		public MixTable() {
 			super();
-			setModel(new MixTableModel(cs));
+			setModel(new MixTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
-			this.setDefaultRenderer(Object.class, new DisabledCellRenderer());
+			setDefaultRenderer(Object.class, new DisabledCellRenderer());
 			sizeColumns();
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
@@ -191,14 +198,9 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 	protected class MixTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
-		private ClassDefinition cs;
 		private String[] columnNames = new String[] { "Class", "Required Tasks" };
 		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
-		public int[] columnSizes = new int[] { 40, 100 };
-
-		public MixTableModel(ClassDefinition cs) {
-			this.cs = cs;
-		}
+		public int[] columnSizes = new int[] { 80, 80 };
 
 		public int getRowCount() {
 			if (classes.getClassKeys() != null) {
@@ -224,8 +226,8 @@ public class JoinEditor extends JSplitPane implements CommonConstants {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			int rowClassType = cs.getClassType(indexToKey(rowIndex));
-			int classType = cs.getClassType(classKey);
+			int rowClassType = classes.getClassType(indexToKey(rowIndex));
+			int classType = classes.getClassType(classKey);
 			return (columnIndex == 1) && (rowClassType == classType);
 		}
 

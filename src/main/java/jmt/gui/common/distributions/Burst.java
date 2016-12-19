@@ -19,8 +19,7 @@ import jmt.gui.common.JMTImageLoader;
 public class Burst extends Distribution {
 
 	/**
-	 * constructs a new Burst distribution
-	 *
+	 * Construct a new Burst distribution
 	 */
 	public Burst() {
 		super("Burst (General)", "jmt.engine.random.Burst", "jmt.engine.random.BurstPar", "Burst definition");
@@ -29,10 +28,8 @@ public class Burst extends Distribution {
 		isNestable = false;
 		//Add a value checker to check if every distribution has been specified
 		this.setValueChecker(new ValueChecker() {
-
 			public boolean checkValue(Object value) {
 				Burst b = (Burst) value;
-
 				for (int i = 0; i < 6; i++) {
 					if (b.getParameter(i).getValue() == null) {
 						return false;
@@ -40,7 +37,6 @@ public class Burst extends Distribution {
 				}
 				return true;
 			}
-
 		});
 	}
 
@@ -51,9 +47,7 @@ public class Burst extends Distribution {
 	 */
 	@Override
 	protected ImageIcon setImage() {
-		ImageIcon icon = JMTImageLoader.loadImage("Burst");
-
-		return icon;
+		return JMTImageLoader.loadImage("Burst");
 	}
 
 	/**
@@ -113,8 +107,6 @@ public class Burst extends Distribution {
 		DecimalFormat df = new DecimalFormat("#.############");
 		df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
 		Double probability = (Double) parameters[0].getValue();
-
-		//		double revProp = 1-probability.doubleValue();
 		return "burst" + "(" + df.format(probability) + "," + parameters[2].getValue() + "," + parameters[4].getValue() + ")";
 	}
 

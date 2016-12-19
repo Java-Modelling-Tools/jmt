@@ -86,7 +86,7 @@ import jmt.gui.common.definitions.GuiInterface;
  * Updated the Manage Probabilities. Closed Classes routed to Sink with probability <> 0.0 should show warning to Users.
  * 
  * Modified by Mattia Cazzoli
- * LOng messages are now visualized on multilple lines.
+ * Long messages are now visualized on multilple lines.
  * 
  */
 public class JModelProblemsWindow extends JDialog {
@@ -161,10 +161,9 @@ public class JModelProblemsWindow extends JDialog {
 					if (mc.isErrorFreeToJMVA()) {
 						continueButton.setEnabled(true);
 					}
-					//else continueButton.setEnabled(false);
-					if ((pType == ModelChecker.ERROR_PROBLEM)
-							&& ((pSubType == ModelChecker.NO_STATION_ERROR)
-									|| (pSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR))) {
+					if (pType == ModelChecker.ERROR_PROBLEM
+							&& (pSubType == ModelChecker.NO_STATION_ERROR
+									|| pSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR)) {
 						setVisible(false);
 					} else {
 						if (!mc.isEverythingOkToJMVA()) {
@@ -183,13 +182,16 @@ public class JModelProblemsWindow extends JDialog {
 									|| (pSubType == ModelChecker.STATION_LINK_ERROR)
 									|| (pSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)
 									|| (pSubType == ModelChecker.CS_FOLLOWED_BY_A_BAS)
-									|| (pSubType == ModelChecker.CS_BETWEEN_FORK_JOIN)
 									|| (pSubType == ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN)
-									|| (pSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN)))
+									|| (pSubType == ModelChecker.SCALER_NOT_BETWEEN_FORK_JOIN)))
 							|| ((pType == ModelChecker.WARNING_PROBLEM)
 									&& ((pSubType == ModelChecker.MORE_THAN_ONE_SINK_WARNING)
 											|| (pSubType == ModelChecker.NO_BACKWARD_LINK_WARNING)
-											|| (pSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)))) {
+											|| (pSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)
+											|| (pSubType == ModelChecker.CS_BETWEEN_FORK_JOIN)
+											|| (pSubType == ModelChecker.CS_WITH_FORK_JOIN)
+											|| (pSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN)
+											|| (pSubType == ModelChecker.TRANSITION_WITHOUT_FORWARD_LINKS)))) {
 						setVisible(false);
 					} else {
 						if (!mc.isEverythingOkNormal()) {
@@ -268,8 +270,8 @@ public class JModelProblemsWindow extends JDialog {
 	 */
 	private void initializeList() {
 		if (isToJMVAConversion) {
-			if (mc.isThereNoClassesError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_CLASSES_ERROR,
+			if (mc.isThereNoClassError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_CLASS_ERROR,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No classes defined.</div></html>", null, null));
 			}
 			if (mc.isThereNoStationError()) {
@@ -296,15 +298,6 @@ public class JModelProblemsWindow extends JDialog {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Different per class queueing strategy found at "
-									+ thisStation + ".</div></html>", temp.get(i), null));
-				}
-			}
-			if (mc.isThereBCMPNonSymmetricSchedulingPolicies()) {
-				Vector<Object> temp = mc.getBCMPserversWithNonSymmetricScheduling();
-				for (int i = 0; i < temp.size(); i++) {
-					String thisStation = mc.getStationModel().getStationName(temp.get(i));
-					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_NON_SYMMETRIC_SCHEDULING,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Unsupported scheduling policy found at "
 									+ thisStation + ".</div></html>", temp.get(i), null));
 				}
 			}
@@ -339,7 +332,7 @@ public class JModelProblemsWindow extends JDialog {
 				Vector<Object> temp = mc.getBCMPdelaysWithNonRationalServiceDistribution();
 				for (int i = 0; i < temp.size(); i++) {
 					String thisStation = mc.getStationModel().getStationName(temp.get(i));
-					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_FCFS_EXPONENTIAL_WARNING,
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_DELAY_WARNING,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + thisStation
 							+ " with non valid service time distribution.</div></html>", temp.get(i), null));
 				}
@@ -348,26 +341,39 @@ public class JModelProblemsWindow extends JDialog {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">A non state independent routing strategy was found.</div></html>", null, null));
 			}
-			//TODO: Lcfs case handling
-			//TODO: Processor Sharing handling
+			if (mc.isThereBCMPNonSymmetricSchedulingPolicies()) {
+				Vector<Object> temp = mc.getBCMPserversWithNonSymmetricScheduling();
+				for (int i = 0; i < temp.size(); i++) {
+					String thisStation = mc.getStationModel().getStationName(temp.get(i));
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_NON_SYMMETRIC_SCHEDULING,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Unsupported scheduling policy found at "
+									+ thisStation + ".</div></html>", temp.get(i), null));
+				}
+			}
+			//TODO: BCMP_PROCESSOR_SHARING_WARNING
+			//TODO: BCMP_LCFS_PREEMPTIVE_WARNING
 		} else {
-			if (mc.isThereNoClassesError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_CLASSES_ERROR,
+			if (mc.isThereNoClassError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_CLASS_ERROR,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No classes defined.</div></html>", null, null));
 			}
 			if (mc.isThereNoStationError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_STATION_ERROR,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No stations defined.</div></html>", null, null));
 			}
+			if (mc.isThereNoMeasureError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_MEASURE_ERROR,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No performance indices defined.</div></html>", null, null));
+			}
 			if (mc.isThereStationLinkError()) {
 				Vector<Object> temp = mc.getKeysOfStationsWithLinkProblems();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					String description;
+					String description = null;
 					if (mc.getStationModel().getStationType(stationKey).equals(CommonConstants.STATION_TYPE_SINK)) {
 						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-								+ " has no ingoing links! No routing is possible.</div></html>");
+								+ " has no incoming links! No routing is possible.</div></html>");
 					} else {
 						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
 								+ " has no outgoing links! No routing is possible.</div></html>");
@@ -406,15 +412,11 @@ public class JModelProblemsWindow extends JDialog {
 							Object stationKey = stationWithRoutingProblems.get(j);
 							String stationName = mc.getStationModel().getStationName(stationKey);
 							problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.ROUTING_ERROR,
-									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Close class " + className
+									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Closed class " + className
 									+ " at station " + stationName + " is routed to sink with p=1.</div></html>", stationKey, classKey));
 						}
 					}
 				}
-			}
-			if (mc.isThereSimulationError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SIMULATION_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">No performance indices defined.</div></html>", null, null));
 			}
 			if (mc.isThereClassesWithoutRefStationError()) {
 				Vector<Object> temp = mc.getKeysOfClassesWithoutRefStation();
@@ -494,6 +496,10 @@ public class JModelProblemsWindow extends JDialog {
 							+ " is not backward linked.</div></html>", stationKey, null));
 				}
 			}
+			if (mc.isThereForkWithoutJoinWarnings()) {
+				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.FORK_WITHOUT_JOIN_WARNING,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Fork found but no join.</div></html>", null, null));
+			}
 			if (mc.isThereParametricAnalysisModelModifiedWarning()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">What-if analysis model modified.</div></html>", null, null));
@@ -501,15 +507,6 @@ public class JModelProblemsWindow extends JDialog {
 			if (mc.isThereParametricAnalysisNoMoreAvailableWarning()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">What-if analysis not available.</div></html>", null, null));
-			}
-			if (mc.isThereForkWithoutJoinWarnings()) {
-				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.FORK_WITHOUT_JOIN_WARNING,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Fork found but no join.</div></html>", null, null));
-			}
-			if (mc.isThereSlowFCFSSamePriorities()) {
-				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.SLOW_FCFS_SAME_PRIORITIES,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Priority scheduling is used, but all classes have the same priorities. "
-								+ "The simulation may run slower than usual.</div></html>", null, null));
 			}
 			if (mc.isSinkPerfIndicesWithClosedClassError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SINK_PERF_WITH_CLOSED_CLASS_ERROR,
@@ -545,16 +542,6 @@ public class JModelProblemsWindow extends JDialog {
 							+ " is followed by a queue with BAS strategy scheduling.</div></html>", stationKey, null));
 				}				
 			}
-			if (mc.isThereCsBetweenForkJoin()) {
-				Vector<Object> temp = mc.getCsBetweenForkJoin();
-				for (int i = 0; i < temp.size(); i++) {
-					Object stationKey = temp.get(i);
-					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CS_BETWEEN_FORK_JOIN,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " is located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
-				}
-			}
 			if (mc.isThereLoadDependentRoutingError()) {
 				Map<Object, HashMap<Object, Object>> temp = mc.getInvalidLoadDependentRoutingStations();
 				for (Iterator<Object> it = temp.keySet().iterator(); it.hasNext();) {
@@ -568,6 +555,16 @@ public class JModelProblemsWindow extends JDialog {
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Station: " + sourceName + " for class: "
 									+ className	+ " with invalid LoadDependentRouting.</div></html>", stationKey, classKey));
+				}
+			}
+			if (mc.isThereCsBetweenForkJoin()) {
+				Vector<Object> temp = mc.getCsBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CS_BETWEEN_FORK_JOIN,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " seems to be located between fork/join.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereCsReferenceStation()) {
@@ -593,12 +590,9 @@ public class JModelProblemsWindow extends JDialog {
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a class switch is in the model, "
 						+ "at least one closed class must have non-zero population.</div></html>", null, null));
 			}
-			// M: Cazzoli: Substituted error for cs with fj or fcr with warning for cs with fj
 			if (mc.isThereCsWithForkJoin()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CS_WITH_FORK_JOIN,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">If you use a Class Switch station and a Fork/Join section in the same model, "
-								+ "depending on the layout of the model, some indices may not be computed exactly (e.g., the System Response Time). "
-								+ "You may consider also to use the Class Switch Fork strategy that allows the generation of new classes of tasks within a Fork/Join section.</div></html>", null, null));
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Class switches and Fork/Join sections are in the same model.</div></html>", null, null));
 			}
 			if (mc.isThereGuardStrategyZeroTasks()) {
 				HashMap<Object, Vector<Object>> temp = mc.getKeysOfAllGuardStrategyZeroTask();
@@ -618,12 +612,27 @@ public class JModelProblemsWindow extends JDialog {
 					}
 				}
 			}
+			if (mc.isThereSchedulingSamePriorities()) {
+				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.SCHEDULING_SAME_PRIORITIES,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Priority scheduling is used but all the classes have the same priorities. "
+								+ "The simulation may run slower than usual.</div></html>", null, null));
+			}
 			if (mc.isThereSemaphoreNotBetweenForkJoin()) {
 				Vector<Object> temp = mc.getSemaphoreNotBetweenForkJoin();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " is not located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereScalerNotBetweenForkJoin()) {
+				Vector<Object> temp = mc.getScalerNotBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.SCALER_NOT_BETWEEN_FORK_JOIN,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
 							+ " is not located between fork/join. This topology is not allowed.</div></html>", stationKey, null));
 				}
@@ -636,6 +645,16 @@ public class JModelProblemsWindow extends JDialog {
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_BETWEEN_FORK_JOIN,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
 							+ " seems to be located between fork/join.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereTransitionWithoutForwardLinks()) {
+				Vector<Object> temp = mc.getTransitionWithoutForwardLinks();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_WITHOUT_FORWARD_LINKS,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " is not forward linked.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereTransitionWithInvalidConditions()) {

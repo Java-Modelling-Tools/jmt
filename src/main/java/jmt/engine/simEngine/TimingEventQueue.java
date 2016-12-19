@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
-import jmt.engine.QueueNet.DataPacket;
+import jmt.engine.NetStrategies.TransitionUtilities.TimingPacket;
 import jmt.engine.random.engine.RandomEngine;
 import jmt.framework.data.CircularList;
 
@@ -84,19 +84,20 @@ public class TimingEventQueue implements EventQueue {
 
 		double totalWeight = 0.0;
 		Iterator<SimEvent> it = current.iterator();
-		Object[] packet = null;
-		while (it.hasNext()) {
-			packet = (Object[]) it.next().getData();
-			totalWeight += ((Double) packet[DataPacket.FIELD_FIRING_WEIGHT]).doubleValue();
-		}
 		SimEvent event = null;
+		TimingPacket packet = null;
+		while (it.hasNext()) {
+			event = it.next();
+			packet = (TimingPacket) event.getData();
+			totalWeight += packet.getFiringWeight();
+		}
 		double summedWeight = 0.0;
 		double randomIndex = randomEngine.nextDouble() * totalWeight;
 		it = current.iterator();
 		while (summedWeight <= randomIndex) {
 			event = it.next();
-			packet = (Object[]) event.getData();
-			summedWeight += ((Double) packet[DataPacket.FIELD_FIRING_WEIGHT]).doubleValue();
+			packet = (TimingPacket) event.getData();
+			summedWeight += packet.getFiringWeight();
 		}
 		it.remove();
 		return event;
@@ -163,17 +164,17 @@ public class TimingEventQueue implements EventQueue {
 			} else if (time1 < time2) {
 				return -1;
 			}
-			Object[] packet1 = (Object[]) e1.getData();
-			Object[] packet2 = (Object[]) e2.getData();
-			double delay1 = ((Double) packet1[DataPacket.FIELD_FIRING_DELAY]).doubleValue();
-			double delay2 = ((Double) packet2[DataPacket.FIELD_FIRING_DELAY]).doubleValue();
+			TimingPacket packet1 = (TimingPacket) e1.getData();
+			TimingPacket packet2 = (TimingPacket) e2.getData();
+			double delay1 = packet1.getFiringDelay();
+			double delay2 = packet2.getFiringDelay();
 			if (delay1 > delay2) {
 				return 1;
 			} else if (delay1 < delay2) {
 				return -1;
 			}
-			int priority1 = ((Integer) packet1[DataPacket.FIELD_FIRING_PRIORITY]).intValue();
-			int priority2 = ((Integer) packet2[DataPacket.FIELD_FIRING_PRIORITY]).intValue();
+			int priority1 = packet1.getFiringPriority();
+			int priority2 = packet2.getFiringPriority();
 			if (priority1 > priority2) {
 				return -1;
 			} else if (priority1 < priority2) {

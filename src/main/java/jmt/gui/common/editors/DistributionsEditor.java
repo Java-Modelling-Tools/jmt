@@ -473,9 +473,7 @@ public class DistributionsEditor extends JMTDialog {
 			// Shows editor window
 			editor.show();
 			// Sets new Distribution to selected class
-
 			current.getParameter(key).setValue(editor.getResult());
-
 			refreshValues();
 		}
 
@@ -603,7 +601,6 @@ public class DistributionsEditor extends JMTDialog {
 	// ------------------------------------------------------------------
 	protected void refreshView() {
 		if (current != null) {
-
 			// Flushes param_panel
 			param_panel.removeAll();
 			mean_c_panel.removeAll();
@@ -646,7 +643,6 @@ public class DistributionsEditor extends JMTDialog {
 				rend.addDistribution(INTERVAL_LENGTH_DISTRIBUTION, 3,
 						intervalPanels[2]);
 				rend.addDistribution(VALUE_DISTRIBUTION, 4, intervalPanels[2]);
-
 			} else {
 				// resets the layout manager's rows number to two, since
 				// non-Burst

@@ -35,6 +35,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
@@ -52,6 +53,8 @@ import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.exact.table.DisabledCellRenderer;
+import jmt.gui.exact.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -219,8 +222,6 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
 				ImagedComboBoxCellEditorFactory.OPTION_CLASS_TYPES);
 		initComponents();
-		//forbid column to be moved
-		classTable.getTableHeader().setReorderingAllowed(false);
 		setData(cd);
 	}
 
@@ -421,9 +422,10 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		public void setModel(ClassTableModel tabMod) {
 			super.setModel(tabMod);
 			sizeColumnsAndRows();
-			setDefaultRenderer(String.class, new jmt.gui.exact.table.DisabledCellRenderer());
-			setDefaultEditor(Object.class, new jmt.gui.exact.table.ExactCellEditor());
+			setDefaultRenderer(String.class, new DisabledCellRenderer());
+			setDefaultEditor(Object.class, new ExactCellEditor());
 			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 

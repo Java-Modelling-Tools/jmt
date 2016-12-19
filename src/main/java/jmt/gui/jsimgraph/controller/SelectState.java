@@ -236,7 +236,7 @@ public class SelectState extends UIStateDefault {
 
 	}
 
-	//Heavely modified by Giuseppe De Cicco & Fabio Granara
+	// Heavily modified by Giuseppe De Cicco & Fabio Granara
 	@Override
 	public void handleRelease(MouseEvent e) {
 		mediator.setIsReleased(true);

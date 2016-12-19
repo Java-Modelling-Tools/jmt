@@ -38,9 +38,11 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.classSwitchUtilities.ClassSwitchRow;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.CombFork;
 import jmt.gui.common.forkStrategies.ForkStrategy;
 import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
 import jmt.gui.common.forkStrategies.OutPath;
+import jmt.gui.common.forkStrategies.ProbabilitiesFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
@@ -378,15 +380,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			for (Object stationKey : stationsKeyset) {
 				for (Object classKey : classesKeyset) {
 					Object strategy = getForkStrategy(stationKey, classKey);
-					if (strategy instanceof MultiBranchClassSwitchFork) {
-						Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
-						for (OutPath o: m.values()) {
+					if (strategy instanceof ClassSwitchFork) {
+						Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
+						for (OutPath o : m.values()) {
 							o.getOutParameters().put(key, 0);
 						}
 					}
-					if (strategy instanceof ClassSwitchFork) {
-						Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
-						for (OutPath o: m.values()) {
+					if (strategy instanceof MultiBranchClassSwitchFork) {
+						Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
+						for (OutPath o : m.values()) {
 							o.getOutParameters().put(key, 0);
 						}
 					}
@@ -563,15 +565,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		for (Object stationKey : stationsKeyset) {
 			for (Object classKey : classesKeyset) {
 				Object strategy = getForkStrategy(stationKey, classKey);
-				if (strategy instanceof MultiBranchClassSwitchFork) {
-					Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
-					for (OutPath o: m.values()) {
+				if (strategy instanceof ClassSwitchFork) {
+					Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
+					for (OutPath o : m.values()) {
 						o.getOutParameters().put(key, 0);
 					}
 				}
-				if (strategy instanceof ClassSwitchFork) {
-					Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
-					for (OutPath o: m.values()) {
+				if (strategy instanceof MultiBranchClassSwitchFork) {
+					Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
+					for (OutPath o : m.values()) {
 						o.getOutParameters().put(key, 0);
 					}
 				}
@@ -1721,123 +1723,125 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Francesco D'Aquino
-	 * Normalizes the routing probabilities for each station
+	 * Manages the routing and fork probabilities.
 	 */
 	@Override
 	public void manageProbabilities() {
 		for (Object stationKey : stationsKeyset) {
 			for (Object classKey : classesKeyset) {
 				if (getRoutingStrategy(stationKey, classKey) instanceof ProbabilityRouting) {
-					Vector<Object> outputKeys = getForwardConnections(stationKey);
 					ProbabilityRouting pr = (ProbabilityRouting) getRoutingStrategy(stationKey, classKey);
 					Map<Object, Double> values = pr.getValues();
-					normalizeProbabilities(values, outputKeys, classKey, stationKey);
+					normalizeRoutingProbabilities(stationKey, classKey, values);
+				}
+				if (getForkStrategy(stationKey, classKey) instanceof ProbabilitiesFork) {
+					ProbabilitiesFork pf = (ProbabilitiesFork) getForkStrategy(stationKey, classKey);
+					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) pf.getOutDetails();
+					for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
+						Map<Object, Double> values = (Map) entry.getValue().getOutParameters();
+						normalizeForkProbabilities(values);
+					}
+				}
+				if (getForkStrategy(stationKey, classKey) instanceof CombFork) {
+					CombFork cf = (CombFork) getForkStrategy(stationKey, classKey);
+					Map<Object, Double> values = (Map<Object, Double>) cf.getOutDetails();
+					normalizeForkProbabilities(values);
 				}
 			}
 		}
 	}
 
-	// NB: cut from jmt.gui.common.xml.XMLWriter
-	public void normalizeProbabilities(Map<Object,Double> values, Vector<Object> outputKeys, Object thisClassKey, Object thisStation) {
-		Vector<Object> sinkClosedProbabilities = new Vector<Object>();
-		Vector<Object> normalProbabilities = new Vector<Object>();
-		boolean allSink = true;
-		for (int i = 0; i < outputKeys.size(); i++) {
-			if (getClassType(thisClassKey) == CLASS_TYPE_CLOSED && getStationType(outputKeys.get(i)).equals(STATION_TYPE_SINK)) {
-				sinkClosedProbabilities.add(outputKeys.get(i));
-			} else {
-				normalProbabilities.add(outputKeys.get(i));
-				allSink = false;
-			}			
-		}
-		if (allSink) {
-			normalProbabilities.addAll(sinkClosedProbabilities);
-			sinkClosedProbabilities.clear();
-		}
-		Double[] probabilities = new Double[outputKeys.size()];
-		Object[] keys = new Object[outputKeys.size()];
-		outputKeys.toArray(keys);
-		//extract all values from map in array form
-		for (int i = 0; i < keys.length; i++) {
-			probabilities[i] = (Double) values.get(keys[i]);
-		}
-		for (int i = 0; i < probabilities.length; i++) {	    	
-			if (probabilities[i] != null && probabilities[i].doubleValue() != 0.0 && sinkClosedProbabilities.contains(keys[i])) {
-				probabilities[i] = new Double(0.0);
-				String className = getClassName(thisClassKey);
-				String stationName = getStationName(thisStation);
-				//I don't want the Names repeated.
-				if (!sinkProbabilityUpdateClasses.contains(className)) {
-					sinkProbabilityUpdateClasses.add(className);
+	/**
+	 * Normalizes the routing probabilities.
+	 */
+	@Override
+	public void normalizeRoutingProbabilities(Object stationKey, Object classKey, Map<Object,Double> values) {
+		Vector<Object> outputs = getForwardConnections(stationKey);
+		Vector<Object> normalOutputs = new Vector<Object>();
+		normalOutputs.addAll(outputs);
+		if (getClassType(classKey) == CLASS_TYPE_CLOSED) {
+			boolean allSink = true;
+			for (int i = 0; i < outputs.size(); i++) {
+				if (getStationType(outputs.get(i)).equals(STATION_TYPE_SINK)) {
+					normalOutputs.remove(outputs.get(i));
+				} else {
+					allSink = false;
 				}
-				if (!sinkProbabilityUpdateStations.contains(stationName)) {
-					sinkProbabilityUpdateStations.add(stationName);
-				}	        	
-				sinkProbabilityUpdate = true;
-			}	    	
-		}
-		values.clear();
-		// scan for null values and for total sum
-		double totalSum = 0.0;
-		int totalNonNull = 0;
-		boolean allNull = true;
-		for (int i = 0; i < probabilities.length; i++) {
-			if (probabilities[i] != null && normalProbabilities.contains(keys[i])) {
-				totalSum += probabilities[i].doubleValue();
-				totalNonNull++;
-				allNull = false;
+			}
+			if (allSink) {
+				normalOutputs.addAll(outputs);
 			}
 		}
-		// modify non null values for their sum to match 1 and put null values to 1
+
+		Double[] probabilities = new Double[outputs.size()];
+		Object[] keys = outputs.toArray();
 		for (int i = 0; i < probabilities.length; i++) {
-			if ((probabilities[i] != null || allNull) && normalProbabilities.contains(keys[i])) {
-				if (totalSum == 0) {
-					probabilities[i] = new Double(1.0 / totalNonNull);
+			probabilities[i] = (Double) values.get(keys[i]);
+			if (probabilities[i] == null) {
+				probabilities[i] = new Double(0.0);
+			}
+		}
+		values.clear();
+
+		double totalSum = 0.0;
+		for (int i = 0; i < probabilities.length; i++) {
+			if (normalOutputs.contains(keys[i])) {
+				totalSum += probabilities[i].doubleValue();
+			}
+		}
+		for (int i = 0; i < probabilities.length; i++) {
+			if (normalOutputs.contains(keys[i])) {
+				if (totalSum == 0.0) {
+					probabilities[i] = new Double(1.0 / normalOutputs.size());
 				} else {
 					probabilities[i] = new Double(probabilities[i].doubleValue() / totalSum);
 				}
 			} else {
-				probabilities[i] = new Double(0.0);
+				if (probabilities[i].doubleValue() > 0.0) {
+					probabilities[i] = new Double(0.0);
+					String className = getClassName(classKey);
+					String stationName = getStationName(stationKey);
+					if (!sinkProbabilityUpdateClasses.contains(className)) {
+						sinkProbabilityUpdateClasses.add(className);
+					}
+					if (!sinkProbabilityUpdateStations.contains(stationName)) {
+						sinkProbabilityUpdateStations.add(stationName);
+					}	        	
+					sinkProbabilityUpdate = true;
+				}
 			}
 			values.put(keys[i], probabilities[i]);
 		}
 	}
 
-	// M Cazzoli
-	public void normalizeProbabilitiesFork(Map<Object, Double> values) {
-		Set<Object> keys = values.keySet();
-		Double[] probabilities = new Double[keys.size()];
-		Object[] keyList = keys.toArray();
-		// extract all values from map in array form
-		for (int i = 0; i < keyList.length; i++) {
-			probabilities[i] = (Double) values.get(keyList[i]);
+	/**
+	 * Normalizes the fork probabilities.
+	 */
+	@Override
+	public void normalizeForkProbabilities(Map<Object, Double> values) {
+		Double[] probabilities = new Double[values.size()];
+		Object[] keys = values.keySet().toArray();
+		for (int i = 0; i < probabilities.length; i++) {
+			probabilities[i] = (Double) values.get(keys[i]);
+			if (probabilities[i] == null) {
+				probabilities[i] = new Double(0.0);
+			}
 		}
-
 		values.clear();
-		// scan for null values and for total sum
+
 		double totalSum = 0.0;
-		int totalNonNull = 0;
-		boolean allNull = true;
 		for (int i = 0; i < probabilities.length; i++) {
 			if (probabilities[i] != null) {
 				totalSum += probabilities[i].doubleValue();
-				totalNonNull++;
-				allNull = false;
 			}
 		}
-		// modify non null values for their sum to match 1 and put null values to 1
 		for (int i = 0; i < probabilities.length; i++) {
-			if ((probabilities[i] != null || allNull)) {
-				if (totalSum == 0) {
-					probabilities[i] = new Double(1.0 / totalNonNull);
-				} else {
-					probabilities[i] = new Double(probabilities[i].doubleValue() / totalSum);
-				}
+			if (totalSum == 0.0) {
+				probabilities[i] = new Double(1.0 / probabilities.length);
 			} else {
-				probabilities[i] = new Double(0.0);
+				probabilities[i] = new Double(probabilities[i].doubleValue() / totalSum);
 			}
-			values.put(keyList[i], probabilities[i]);
+			values.put(keys[i], probabilities[i]);
 		}
 	}
 
@@ -1877,15 +1881,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		for (Object stationKey : stationsKeyset) {
 			for (Object classKey : classesKeyset) {
 				Object strategy = getForkStrategy(stationKey, classKey);
-				if (strategy instanceof MultiBranchClassSwitchFork) {
-					Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
-					for (OutPath o: m.values()) {
+				if (strategy instanceof ClassSwitchFork) {
+					Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
+					for (OutPath o : m.values()) {
 						o.getOutParameters().remove(key);
 					}
 				}
-				if (strategy instanceof ClassSwitchFork) {
-					Map<Object, OutPath> m = ((ClassSwitchFork) strategy).getOutDetails();
-					for (OutPath o: m.values()) {
+				if (strategy instanceof MultiBranchClassSwitchFork) {
+					Map<Object, OutPath> m = ((MultiBranchClassSwitchFork) strategy).getOutDetails();
+					for (OutPath o : m.values()) {
 						o.getOutParameters().remove(key);
 					}
 				}
@@ -2485,7 +2489,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * allocated than max population, they are reduced.
 	 * @param classKey class to which managed jobs belong.
 	 */
-	public void manageJobs(Object classKey) {
+	private void manageJobs(Object classKey) {
 		if (getClassType(classKey) == CLASS_TYPE_CLOSED) {
 			int population = getClassPopulation(classKey).intValue();
 			int foundJob = getPreloadedJobsNumber(classKey).intValue();

@@ -21,6 +21,7 @@ package jmt.gui.jsimwiz.panels;
 import java.awt.BorderLayout;
 
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
@@ -107,6 +108,7 @@ public class RefSourcePanel extends WizardPanel implements CommonConstants {
 				getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
 			}
 			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 

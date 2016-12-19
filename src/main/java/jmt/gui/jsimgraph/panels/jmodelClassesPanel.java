@@ -64,7 +64,6 @@ public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstan
 		stations = new ImagedComboBoxCellEditorFactory(sd);
 		classTable = new jmodelClassTable();
 		initComponents();
-		classTable.getTableHeader().setReorderingAllowed(false);
 		setData(cd);
 	}
 

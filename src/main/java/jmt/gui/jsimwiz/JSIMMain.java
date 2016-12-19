@@ -754,12 +754,16 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	 */
 	public void showRelatedPanel(int problemType, int problemSubType, Object relatedStation, Object relatedClass) {
 		//if it is a no class error show the class panel
-		if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_CLASSES_ERROR)) {
+		if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_CLASS_ERROR)) {
 			tabbedPane.setSelectedIndex(0);
 		}
 		//if it is a no station error show the station panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_STATION_ERROR)) {
 			tabbedPane.setSelectedIndex(1);
+		}
+		//if it is a no measure error show the measure panel
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_MEASURE_ERROR)) {
+			tabbedPane.setSelectedIndex(4);
 		}
 		//if it is a link error show the link panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.STATION_LINK_ERROR)) {
@@ -775,10 +779,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
 			//set temp to show routing section panel
 			temp.showStationParameterPanel(relatedStation, relatedClass, 2);
-		}
-		//if no measure have been defined show the measure panel
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SIMULATION_ERROR)) {
-			tabbedPane.setSelectedIndex(4);
 		}
 		//if a measure is inconsistent (i.e have one or more 'null' field) show performance indices panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INCONSISTENT_MEASURE_ERROR)) {
@@ -868,6 +868,11 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.NO_BACKWARD_LINK_WARNING)) {
 			tabbedPane.setSelectedIndex(2);
 		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)) {
+			JOptionPane.showMessageDialog(this, "A fork was found but no join. Please check the topology.", "Warning",
+					JOptionPane.WARNING_MESSAGE);
+			tabbedPane.setSelectedIndex(1);
+		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING)) {
 			String message = "Check parametric analysis model?\n\nThe parametric analysis model previously defined had become inconsistent with the\n"
 					+ "simulation model. It will be automatically modified when simulation will be started.\nDo you want to autocorrect and check "
@@ -886,11 +891,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 				model.setParametricAnalysisEnabled(false);
 				model.setParametricAnalysisModel(null);
 			}
-		}
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)) {
-			JOptionPane.showMessageDialog(this, "A fork was found but no join. Please check the topology.", "Warning",
-					JOptionPane.WARNING_MESSAGE);
-			tabbedPane.setSelectedIndex(1);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.EMPTY_BLOCKING_REGION)) {
 			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n",

@@ -32,7 +32,7 @@ public class ProbabilityRouting extends RoutingStrategy {
 
 	public ProbabilityRouting() {
 		description = "It is possible to define the routing probability for each connected station. "
-				+ "If the sum of the probabilities is different from 1, all the values will be " + "scaled to sum 1.";
+				+ "If the sum of the probabilities is different from 1, all the values will be scaled to sum 1.";
 	}
 
 	private HashMap<Object, Double> probabilities = new HashMap<Object, Double>();
@@ -71,4 +71,5 @@ public class ProbabilityRouting extends RoutingStrategy {
 	public boolean isModelStateDependent() {
 		return false;
 	}
+
 }

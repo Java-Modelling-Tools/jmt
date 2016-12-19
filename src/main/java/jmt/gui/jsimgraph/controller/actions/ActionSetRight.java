@@ -24,8 +24,7 @@ public class ActionSetRight extends AbstractJmodelAction {
 	 */
 	public ActionSetRight(Mediator mediator) {
 		super("Adjust the graph", "Order", mediator);
-		//Giuseppe De Cicco & Fabio Granara
-		putValue(SHORT_DESCRIPTION, "Optimize graph");
+		putValue(SHORT_DESCRIPTION, "Optimize the graph");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_Q));
 		setEnabled(false);
 	}
@@ -36,7 +35,6 @@ public class ActionSetRight extends AbstractJmodelAction {
 	boolean repeat = false;
 
 	public void actionPerformed(ActionEvent e) {
-		//GDC & FG
 		mediator.adjustGraph();
 	}
 }

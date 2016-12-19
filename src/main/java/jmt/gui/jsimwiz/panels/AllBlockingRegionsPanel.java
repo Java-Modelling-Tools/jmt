@@ -373,6 +373,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 			delete.setFocusable(false);
 			deleteRenderer = new ButtonCellEditor(delete);
 			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 
 			// Sets column size

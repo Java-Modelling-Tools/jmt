@@ -47,11 +47,8 @@ public class ActionCut extends AbstractJmodelAction {
 	public ActionCut(Mediator mediator) {
 		super("Cut", "Cut", mediator);
 		putValue(SHORT_DESCRIPTION, "Cut");
-		//Conti Andrea
-		//putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_X));
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_T));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
-		//end
 		setEnabled(false);
 	}
 
@@ -59,9 +56,7 @@ public class ActionCut extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// 04/08/03 - Conti Andrea //////////////////////////////////////////
 		mediator.cutSelection();
 		mediator.enablePasteAction(true);
-		// 04/08/03 - end /////////////////////////////////////////////////////
 	}
 }

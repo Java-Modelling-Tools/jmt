@@ -24,6 +24,7 @@ import java.util.Vector;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -88,7 +89,6 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		}
 	}
 
-	//Francesco D'Aquino
 	public void setSelectedClass(Object classKey) {
 		Vector<Object> temp = classData.getClassKeys();
 		int i;
@@ -108,12 +108,11 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		//layout of main panel
 		WarningScrollTable jsp = new WarningScrollTable(routingStrategies, WARNING_CLASS);
-		//routing strategy selector on the left, routing probabilities editor on the right
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Routing Strategies"));
-		mainPanel.setResizeWeight(1.0); // Gives more space to left component
+		mainPanel.setResizeWeight(1.0);
 		jsp.setMinimumSize(new Dimension(200, 100));
 		mainPanel.setLeftComponent(jsp);
-		routingProbEditor.setMinimumSize(new Dimension(230, 100));
+		routingProbEditor.setMinimumSize(new Dimension(225, 100));
 		mainPanel.setRightComponent(routingProbEditor);
 		add(mainPanel, BorderLayout.CENTER);
 	}
@@ -139,9 +138,10 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 	@Override
 	public void gotFocus() {
 		classEditor.clearCache();
-		// Select first routing strategy
 		if (routingStrategies != null && routingStrategies.getRowCount() > 0) {
 			routingStrategies.setRowSelectionInterval(0, 0);
+		} else {
+			routingProbEditor.setData(stationData, classData, stationKey, null);
 		}
 	}
 
@@ -160,23 +160,24 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		public RoutingSelectionTable() {
 			super();
 			setModel(new RoutingSelectionTableModel());
-			this.setDefaultRenderer(Object.class, new RoutingSelectionTableRenderer());
+			setDefaultRenderer(Object.class, new RoutingSelectionTableRenderer());
 			sizeColumns();
-			setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
-				RoutingStrategy[] routingStrategies = null;
+				RoutingStrategy[] strategies = null;
 				Vector<Object> sources = stationData.getStationKeysSource();
 				if (sources.contains(stationKey)) {
-					routingStrategies = RoutingStrategy.findAllForSource();
+					strategies = RoutingStrategy.findAllForSource();
 				} else {
-					routingStrategies = RoutingStrategy.findAll();
+					strategies = RoutingStrategy.findAll();
 				}
-				return ComboBoxCellEditor.getEditorInstance(routingStrategies);
+				return ComboBoxCellEditor.getEditorInstance(strategies);
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -300,8 +301,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 				Object value = aValue;
 				if (aValue instanceof ProbabilityRouting) {
 					value = ((ProbabilityRouting) aValue).clone();
-				}
-				else if (aValue instanceof LoadDependentRouting) {
+				} else if (aValue instanceof LoadDependentRouting) {
 					value = ((LoadDependentRouting) aValue).clone();
 				}
 				if (!value.equals(stationData.getRoutingStrategy(stationKey, classKey))) {
@@ -315,11 +315,11 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 					Container parent = (Container)RoutingSectionPanel.this;
 					HashMap<String, Object> params = new HashMap<String, Object>();
 					params.put("ClassDefinition", classData);
-					params.put("StationDefinition",stationData);
+					params.put("StationDefinition", stationData);
 					String stationName = stationData.getStationName(stationKey);
-					params.put("stationKey",stationKey);
-					params.put("classKey",classKey);
-					params.put("title", "Editing for [Class] "+className + " for [Station] " + stationName + " Load Dependent Routing ...");
+					params.put("stationKey", stationKey);
+					params.put("classKey", classKey);
+					params.put("title", "Editing for [Class] " + className + " for [Station] " + stationName + " Load Dependent Routing ...");
 					if (stationData.getForwardConnections(stationKey) != null
 							&& stationData.getForwardConnections(stationKey).size() != 0) {
 						RoutingSectionPanel.openLoadDependentRoutingEditor(parent,params);

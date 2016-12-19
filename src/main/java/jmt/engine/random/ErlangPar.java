@@ -76,10 +76,10 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	 */
 	private void testParameters() throws IncorrectDistributionParameterException {
 		if (alpha <= 0) {
-			throw new IncorrectDistributionParameterException("alpha <=0");
+			throw new IncorrectDistributionParameterException("alpha <= 0");
 		}
 		if (r <= 0) {
-			throw new IncorrectDistributionParameterException("r <=0");
+			throw new IncorrectDistributionParameterException("r <= 0");
 		}
 	}
 

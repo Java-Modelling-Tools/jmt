@@ -41,16 +41,14 @@ import javax.swing.table.TableCellRenderer;
  * <p>Title: Color Cell Editor</p>
  * <p>Description: Implements both a TableCellRender component and a TableCellEditor to add
  * support for managing colors into table's field. The render will display a rectangle
- * with defined Color while the editor will show a panel to chose the color from.</p>
+ * with defined Color while the editor will show a panel to choose the color from.</p>
  * 
  * @author Bertoli Marco
  *         Date: 15-giu-2005
  *         Time: 12.27.22
  */
 public class ColorCellEditor extends AbstractCellEditor implements TableCellEditor, CellEditor, ActionListener, TableCellRenderer {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	protected Color currentColor;
 	protected JButton button;

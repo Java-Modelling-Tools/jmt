@@ -30,8 +30,8 @@ import java.util.Map;
 public class RandomRouting extends RoutingStrategy {
 
 	public RandomRouting() {
-		description = "Jobs are routed randomly to one of the stations " + "connected to the current one. All routes "
-				+ "have the same probability to be selected.";
+		description = "Jobs are routed randomly to one of the stations connected to the current one. "
+				+ "All routes have the same probability to be selected.";
 	}
 
 	@Override
@@ -66,4 +66,5 @@ public class RandomRouting extends RoutingStrategy {
 	public boolean isModelStateDependent() {
 		return false;
 	}
+
 }

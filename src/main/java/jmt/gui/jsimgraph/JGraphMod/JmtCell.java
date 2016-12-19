@@ -125,7 +125,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 		out += 1;
 	}
 
-	//	 Giuseppe De Cicco & Fabio Granara
+	// Giuseppe De Cicco & Fabio Granara
 	public void SubOut() {
 		out -= 1;
 	}
@@ -161,7 +161,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 	public abstract Port[] createPorts();
 
 	/**
-	 * Sets all the attribults like background colour, dimensions, port number
+	 * Sets all the attributes like background colour, dimensions, port number
 	 * & position
 	 *
 	 * @param pt

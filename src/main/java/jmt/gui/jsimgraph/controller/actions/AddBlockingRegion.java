@@ -42,7 +42,7 @@ public class AddBlockingRegion extends AbstractJmodelAction {
 	 */
 	public AddBlockingRegion(Mediator mediator) {
 		super("Add Finite Capacity Region", "Blocking", mediator);
-		putValue(SHORT_DESCRIPTION, "Adds selected stations to a new finite capacity region");
+		putValue(SHORT_DESCRIPTION, "Add selected stations to a new finite capacity region");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_B));
 		setEnabled(false);
 	}

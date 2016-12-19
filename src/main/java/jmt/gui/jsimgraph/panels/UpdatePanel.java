@@ -27,7 +27,7 @@ import jmt.gui.common.xml.TemplateFileOperation;
 import jmt.gui.jsimgraph.template.TemplateConstants;
 import jmt.gui.jsimgraph.template.TemplateData;
 
-public class UpdatePanel extends WizardPanel {
+public class UpdatePanel extends WizardPanel implements TemplateConstants {
 
 	private static final long serialVersionUID = 1L;
 
@@ -70,7 +70,7 @@ public class UpdatePanel extends WizardPanel {
 				progress.setString("0%");
 				download.setEnabled(false);
 				cancel.setEnabled(false);
-				if (ConnectionCheck.netCheck(TemplateConstants.CONN_TEST_ADDRESSES)) {
+				if (ConnectionCheck.netCheck(CONN_TEST_ADDRESSES)) {
 					new Downloader(progress).execute();
 				} else {
 					download.setEnabled(true);
@@ -122,7 +122,7 @@ public class UpdatePanel extends WizardPanel {
 			super();
 			setModel(new DefaultPackageTableModel());
 			sizeColumns();
-			setRowHeight(TemplateConstants.CELL_HEIGHT);
+			setRowHeight(CELL_HEIGHT);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
@@ -213,8 +213,8 @@ public class UpdatePanel extends WizardPanel {
 
 				try {
 					if (fileName != null) {
-						fileName = TemplateConstants.TEMPLATE_FOLDER + fileName;
-						TemplateFileOperation.download(file, fileName, TemplateConstants.CONN_TIMEOUT, TemplateConstants.READ_TIMEOUT);
+						fileName = TEMPLATE_FOLDER + fileName;
+						TemplateFileOperation.download(file, fileName, CONN_TIMEOUT, READ_TIMEOUT);
 					} else {
 						throw new Exception();
 					}

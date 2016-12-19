@@ -26,7 +26,6 @@ import java.util.Vector;
 public abstract class ForkStrategy {
 
 	protected static ForkStrategy[] all = null;
-	protected static ForkStrategy[] allForSource = null;
 
 	protected String description;
 
@@ -62,7 +61,7 @@ public abstract class ForkStrategy {
 			return all;
 		}
 		ArrayList<ForkStrategy> strategies = new ArrayList<ForkStrategy>();
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
+		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();
 		try {
 			for (Field field : fields) {
 				if (field.getName().startsWith("FORK_")) {
@@ -73,37 +72,11 @@ public abstract class ForkStrategy {
 			System.err.println("A security manager has blocked reflection");
 			ex.printStackTrace();
 		}
-		ForkStrategy[] ret = new ForkStrategy[strategies.size()];
+		all = new ForkStrategy[strategies.size()];
 		for (int i = 0; i < strategies.size(); i++) {
-			ret[i] = strategies.get(i);
+			all[i] = strategies.get(i);
 		}
-		all = ret;
-		return ret;
-	}
-
-	//TODO:modify this piece of code
-	public static ForkStrategy[] findAllForSource() {
-		if (allForSource != null) {
-			return allForSource;
-		}
-		ArrayList<ForkStrategy> strategies = new ArrayList<ForkStrategy>();
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
-		try {
-			for (Field field : fields) {
-				if (field.getName().startsWith("Fork_") && !field.getName().endsWith("LOADDEPENDENT") ) {
-					strategies.add((ForkStrategy) field.get(null));
-				}
-			}
-		} catch (IllegalAccessException ex) {
-			System.err.println("A security manager has blocked reflection");
-			ex.printStackTrace();
-		}
-		ForkStrategy[] ret = new ForkStrategy[strategies.size()];
-		for (int i = 0; i < strategies.size(); i++) {
-			ret[i] = strategies.get(i);
-		}
-		allForSource = ret;
-		return ret;
+		return all;
 	}
 
 	public abstract void removeStation(Object stationKey);

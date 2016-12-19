@@ -100,7 +100,7 @@ public class TStudent {
 		} else if (ndf < 1 + eps) { /* df ~= 1 */
 			prob = P * M_PI_2;
 			q = Math.cos(prob) / Math.sin(prob);
-		} else { /*-- usual case;  including, e.g.,  df = 1.1 */
+		} else { /*-- usual case;  including, e.g., df = 1.1 */
 			a = 1 / (ndf - 0.5);
 			b = 48 / (a * a);
 			c = ((20700 * a / b - 98) * a - 16) * a + 96.36;

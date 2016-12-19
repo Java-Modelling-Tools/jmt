@@ -66,7 +66,7 @@ public abstract class SemaphoreStrategy {
 			return all;
 		}
 		ArrayList<SemaphoreStrategy> strategies = new ArrayList<SemaphoreStrategy>();
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
+		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();
 		try {
 			for (Field field : fields) {
 				if (field.getName().startsWith("SEMAPHORE_")) {
@@ -77,37 +77,11 @@ public abstract class SemaphoreStrategy {
 			System.err.println("A security manager has blocked reflection");
 			ex.printStackTrace();
 		}
-		SemaphoreStrategy[] ret = new SemaphoreStrategy[strategies.size()];
+		all = new SemaphoreStrategy[strategies.size()];
 		for (int i = 0; i < strategies.size(); i++) {
-			ret[i] = strategies.get(i);
+			all[i] = strategies.get(i);
 		}
-		all = ret;
-		return ret;
-	}
-
-	//TODO:modify this piece of code
-	public static SemaphoreStrategy[] findAllForSource() {
-		if (allForSource != null) {
-			return allForSource;
-		}
-		ArrayList<SemaphoreStrategy> strategies = new ArrayList<SemaphoreStrategy>();
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
-		try {
-			for (Field field : fields) {
-				if (field.getName().startsWith("Semaphore_") && !field.getName().endsWith("LOADDEPENDENT") ) {
-					strategies.add((SemaphoreStrategy) field.get(null));
-				} 
-			}
-		} catch (IllegalAccessException ex) {
-			System.err.println("A security manager has blocked reflection");
-			ex.printStackTrace();
-		}
-		SemaphoreStrategy[] ret = new SemaphoreStrategy[strategies.size()];
-		for (int i = 0; i < strategies.size(); i++) {
-			ret[i] = strategies.get(i);
-		}
-		allForSource = ret;
-		return ret;
+		return all;
 	}
 
 	public abstract boolean isModelStateDependent();

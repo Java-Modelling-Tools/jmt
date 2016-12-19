@@ -31,7 +31,7 @@ import java.util.Map;
 public class ShortestQueueLengthRouting extends RoutingStrategy {
 
 	public ShortestQueueLengthRouting() {
-		description = "Jobs are routed to the station with the smallest " + "queue length (number of jobs, current value).";
+		description = "Jobs are routed to the station with the smallest queue length (number of jobs, current value).";
 	}
 
 	@Override

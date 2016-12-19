@@ -536,7 +536,7 @@ public class QueueNetwork {
 	public void abortAllMeasures() {
 		LinkedList<Measure> measures = this.getMeasures();
 		TempMeasure tmp;
-		for (Measure m: measures) {
+		for (Measure m : measures) {
 			tmp = new TempMeasure(m);
 			tmp.refreshMeasure();
 			tmp.abort();

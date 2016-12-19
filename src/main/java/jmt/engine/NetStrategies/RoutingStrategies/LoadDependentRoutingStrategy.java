@@ -49,7 +49,7 @@ public class LoadDependentRoutingStrategy extends RoutingStrategy {
 	 */
 	@Override
 	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
-		return nodes.get(1);  //To change body of implemented methods use File | Settings | File Templates.
+		return nodes.get(1);
 	}
 
 	@Override

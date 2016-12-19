@@ -1059,10 +1059,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						// For each empirical entry get station name and
 						// probability
 						for (int j = 0; j < entries.size(); j++) {
-
 							OutPath op = new OutPath();
-							op.putEntry(1, 1.0);
-
 							Node temp = entries.get(j).getFirstChild();
 							while (temp.getNodeType() != Node.ELEMENT_NODE
 									|| !temp.getNodeName().equals(
@@ -1079,8 +1076,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 											.getElementsByTagName(
 													XML_E_PARAMETER_VALUE)
 											.item(0)));
-							op.setOutName(stationName);
-							op.setProb(probability);
+							op.setProbability(probability);
 							temp = temp.getNextSibling();
 							while (temp.getNodeType() != Node.ELEMENT_NODE
 									|| !temp.getNodeName().equals(
@@ -1107,9 +1103,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 								Node temp3 = probs.get(k);
 								NodeList results = ((Element) temp3)
 										.getElementsByTagName(XML_E_SUBPARAMETER);
-								String num = findText(((Element) results
-										.item(0)).getElementsByTagName(
-												XML_E_PARAMETER_VALUE).item(0));
+								Integer num = Integer
+										.valueOf(findText(((Element) results
+												.item(0)).getElementsByTagName(
+														XML_E_PARAMETER_VALUE).item(0)));
 								Double prob = Double
 										.valueOf(findText(((Element) results
 												.item(1)).getElementsByTagName(
@@ -1153,15 +1150,16 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 							String num = findText(((Element) values.item(0))
 									.getElementsByTagName(XML_E_PARAMETER_VALUE)
 									.item(0));
-							Double probability = Double
+							Double prob = Double
 									.valueOf(findText(((Element) values.item(1))
 											.getElementsByTagName(XML_E_PARAMETER_VALUE)
 											.item(0)));
-							tmp.put(num, probability);	
+							tmp.put(num, prob);
 						}
 						combFork.put(
 								new Object[] { key, classes.get(className2) }, tmp);
-					} else if (fs instanceof MultiBranchClassSwitchFork || fs instanceof ClassSwitchFork) {
+					} else if (fs instanceof ClassSwitchFork
+							|| fs instanceof MultiBranchClassSwitchFork) {
 						ArrayList<Node> entries = new ArrayList<Node>();
 						// Finds EntryArray node
 						Node entryArray = fork.get(className2)
@@ -1189,22 +1187,16 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						// For each empirical entry get station name and
 						// probability
 						for (int j = 0; j < entries.size(); j++) {
-
 							OutPath op = new OutPath();
-							op.putEntry(1, 1.0);
-
 							Node temp = entries.get(j).getFirstChild();
 							while (temp.getNodeType() != Node.ELEMENT_NODE
 									|| !temp.getNodeName().equals(
 											XML_E_SUBPARAMETER)) {
 								temp = temp.getNextSibling();
 							}
-							//NodeList values = ((Element) entries.get(j))
-							//		.getElementsByTagName(XML_E_SUBPARAMETER);
 							String stationName = findText(((Element) temp)
 									.getElementsByTagName(
 											XML_E_PARAMETER_VALUE).item(0));
-							op.setOutName(stationName);
 							temp = temp.getNextSibling();
 							while (temp.getNodeType() != Node.ELEMENT_NODE
 									|| !temp.getNodeName().equals(
@@ -1231,9 +1223,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 								String jobClass = findText(((Element) probs.get(k))
 										.getElementsByTagName(
 												XML_E_PARAMETER_VALUE).item(0));
-								//findText(((Element) results
-								//		.item(0)).getElementsByTagName(
-								//				XML_E_PARAMETER_VALUE).item(0));
 								classes.add(jobClass);
 							}
 							temp = temp.getNextSibling();
@@ -1357,7 +1346,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				}
 			}
 		} else {
-			for (Object o: classes.values()) {
+			for (Object o : classes.values()) {
 				model.setJoinStrategy(key, o, JOIN_NORMAL.clone());
 			}
 		}
@@ -1411,7 +1400,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				}
 			}
 		} else {
-			for (Object o: classes.values()) {
+			for (Object o : classes.values()) {
 				model.setSemaphoreStrategy(key, o, SEMAPHORE_NORMAL.clone());
 			}
 		}

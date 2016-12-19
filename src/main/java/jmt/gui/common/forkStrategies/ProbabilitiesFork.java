@@ -67,9 +67,8 @@ public class ProbabilitiesFork extends ForkStrategy {
 	@Override
 	public void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys) {
 		OutPath tempPath = new OutPath();
-		tempPath.putEntry(1, 1.0);
-		tempPath.setOutName(stationName);
-		tempPath.setProb(1.0);
+		tempPath.setProbability(1.0);
+		tempPath.putEntry(1, 0.0);
 		outPaths.put(stationKey, tempPath);
 	}
 

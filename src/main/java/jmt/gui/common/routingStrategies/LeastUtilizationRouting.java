@@ -30,7 +30,7 @@ import java.util.Map;
 public class LeastUtilizationRouting extends RoutingStrategy {
 
 	public LeastUtilizationRouting() {
-		description = "Jobs are routed to the station with " + "the smallest average utilization.";
+		description = "Jobs are routed to the station with the smallest average utilization.";
 	}
 
 	@Override
@@ -65,4 +65,5 @@ public class LeastUtilizationRouting extends RoutingStrategy {
 	public boolean isModelStateDependent() {
 		return true;
 	}
+
 }

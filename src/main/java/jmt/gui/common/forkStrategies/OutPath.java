@@ -22,11 +22,20 @@ import java.util.HashMap;
 
 public class OutPath {
 
-	private HashMap<Object, Object> outParameters = new HashMap<Object, Object>();
-	private Object outName;
-	private Double prob;
+	private Double probability;
+	private HashMap<Object, Object> outParameters;
 
 	public OutPath() {
+		probability = 0.0;
+		outParameters = new HashMap<Object, Object>();
+	}
+
+	public Double getProbability() {
+		return probability;
+	}
+
+	public void setProbability(Double probability) {
+		this.probability = probability;
 	}
 
 	public void putEntry(Object o, Object d) {
@@ -37,24 +46,8 @@ public class OutPath {
 		return outParameters;
 	}
 
-	public void setOutParameters(HashMap<Object, Object> outProbabilities) {
-		this.outParameters = outProbabilities;
-	}
-
-	public Object getOutName() {
-		return outName;
-	}
-
-	public void setOutName(Object outName) {
-		this.outName = outName;
-	}
-
-	public Double getProb() {
-		return prob;
-	}
-
-	public void setProb(Double prob) {
-		this.prob = prob;
+	public void setOutParameters(HashMap<Object, Object> outParameters) {
+		this.outParameters = outParameters;
 	}
 
 }

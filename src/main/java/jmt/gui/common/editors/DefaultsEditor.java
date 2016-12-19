@@ -35,7 +35,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.TreeMap;
@@ -530,7 +529,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	}
 
 	/**
-	 * Adds an input field to chose a number from a Spinner
+	 * Adds an input field to choose a number from a Spinner
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
@@ -578,7 +577,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	}
 
 	/**
-	 * Adds an input field to chose a number from a Spinner. Number is between 0 and 1
+	 * Adds an input field to choose a number from a Spinner. Number is between 0 and 1
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
@@ -625,7 +624,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	}
 
 	/**
-	 * Adds an input field to chose a for a Distribution.
+	 * Adds an input field to choose a distribution.
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
@@ -642,14 +641,14 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	}
 
 	/**
-	 * Adds an input field to chose a for a Routing strategy. Uses reflection to find all
+	 * Adds an input field to choose a Routing strategy. Uses reflection to find all
 	 * available strategies
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
 	 */
 	protected void addInputRouting(String text, final String property, Container cont) {
-		// Creates a Map with Routing Strategies Names, then delegates addInputCombo to create
+		// Creates a Map with Routing strategy names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> distributions = new TreeMap<String, String>();
 		RoutingStrategy[] all = RoutingStrategy.findAll();
@@ -660,14 +659,14 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	}
 
 	/**
-	 * Adds an input field to chose a for a Queue strategy. Uses reflection to find all
+	 * Adds an input field to choose a Queue strategy. Uses reflection to find all
 	 * available strategies
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
 	 */
 	protected void addInputQueueStrategy(String text, final String property, Container cont) {
-		// Creates a Map with Queue Strategies Names, then delegates addInputCombo to create
+		// Creates a Map with Queue strategy names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> distributions = new TreeMap<String, String>();
 		distributions.put(CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.QUEUE_STRATEGY_FCFS);
@@ -679,32 +678,24 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	}
 
 	/**
-	 * Adds an input field to chose a for a Drop Rule. Uses reflection to find all
+	 * Adds an input field to choose a Drop rule. Uses reflection to find all
 	 * available strategies
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
 	 */
 	protected void addInputDropRule(String text, final String property, Container cont) {
-		// Creates a Map with Queue Strategies Names, then delegates addInputCombo to create
+		// Creates a Map with Drop rule names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> distributions = new TreeMap<String, String>();
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
-		try {
-			for (Field field : fields) {
-				if (field.getName().startsWith("FINITE_")) {
-					distributions.put(field.get(null).toString(), field.get(null).toString());
-				}
-			}
-		} catch (IllegalAccessException ex) {
-			System.err.println("A security manager has blocked reflection");
-			ex.printStackTrace();
-		}
+		distributions.put(CommonConstants.FINITE_DROP, CommonConstants.FINITE_DROP);
+		distributions.put(CommonConstants.FINITE_BLOCK, CommonConstants.FINITE_BLOCK);
+		distributions.put(CommonConstants.FINITE_WAITING, CommonConstants.FINITE_WAITING);
 		addInputCombo(text, property, cont, distributions);
 	}
 
 	/**
-	 * Adds an input field to chose a number from a Spinner. A special infinite value can be chosen
+	 * Adds an input field to choose a number from a Spinner. A special infinite value can be chosen
 	 * with a checkbox
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults

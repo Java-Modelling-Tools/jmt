@@ -23,9 +23,10 @@ import java.util.Arrays;
 import javax.swing.JOptionPane;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.TransitionUtilities.EnablingPacket;
+import jmt.engine.NetStrategies.TransitionUtilities.FiringPacket;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionVector;
-import jmt.engine.QueueNet.DataPacket;
 import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.ForkJobInfo;
 import jmt.engine.QueueNet.GlobalJobInfoList;
@@ -179,9 +180,7 @@ public class Enabling extends InputSection {
 
 				if (enablingDegree >= 0 && enablingDegree != enablingDegrees[i]) {
 					enablingDegrees[i] = enablingDegree;
-					Object[] packet = new Object[DataPacket.PACKET_SIZE_ENABLING];
-					packet[DataPacket.FIELD_MODE_INDEX] = Integer.valueOf(i);
-					packet[DataPacket.FIELD_ENABLING_DEGREE] = Integer.valueOf(enablingDegree);
+					EnablingPacket packet = new EnablingPacket(i, enablingDegree);
 					sendForward(NetEvent.EVENT_ENABLING, packet, 0.0);
 				}
 			}
@@ -217,11 +216,7 @@ public class Enabling extends InputSection {
 			}
 			unfinishedRequests--;
 			if (unfinishedRequests == 0) {
-				Object[] packet = new Object[DataPacket.PACKET_SIZE_FIRING];
-				packet[DataPacket.FIELD_MODE_INDEX] = Integer.valueOf(currentModeIndex);
-				packet[DataPacket.FIELD_TOTAL_LIFETIME] = totalLifetime;
-				packet[DataPacket.FIELD_FORK_JOB_INFO] = forkJobInfo;
-				packet[DataPacket.FIELD_FORK_JOB_NUM] = forkJobNum;
+				FiringPacket packet = new FiringPacket(currentModeIndex, totalLifetime, forkJobInfo, forkJobNum);
 				sendForward(NetEvent.EVENT_FIRING, packet, 0.0);
 				currentModeIndex = -1;
 			}

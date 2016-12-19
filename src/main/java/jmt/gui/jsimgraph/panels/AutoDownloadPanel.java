@@ -19,22 +19,21 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
 
 import jmt.common.ConnectionCheck;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.xml.TemplateFileOperation;
+import jmt.gui.exact.table.BooleanCellRenderer;
 import jmt.gui.jsimgraph.template.TemplateConstants;
-import static jmt.gui.jsimgraph.template.TemplateConstants.CONN_TIMEOUT;
-import static jmt.gui.jsimgraph.template.TemplateConstants.DEFAULT_SITE;
-import static jmt.gui.jsimgraph.template.TemplateConstants.F_NAME_INDEX;
-import static jmt.gui.jsimgraph.template.TemplateConstants.READ_TIMEOUT;
 import jmt.gui.jsimgraph.template.TemplateData;
 
-public class AutoDownloadPanel extends WizardPanel {
+public class AutoDownloadPanel extends WizardPanel implements TemplateConstants {
 
 	private static final long serialVersionUID = 1L;
 
@@ -75,7 +74,7 @@ public class AutoDownloadPanel extends WizardPanel {
 
 		download.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				File folder = new File(TemplateConstants.TEMPLATE_FOLDER);
+				File folder = new File(TEMPLATE_FOLDER);
 				if (!folder.exists()) {
 					folder.mkdir();
 				}
@@ -83,7 +82,7 @@ public class AutoDownloadPanel extends WizardPanel {
 				progress.setString("0%");
 				download.setEnabled(false);
 				cancel.setEnabled(false);
-				if (ConnectionCheck.netCheck(TemplateConstants.CONN_TEST_ADDRESSES)) {
+				if (ConnectionCheck.netCheck(CONN_TEST_ADDRESSES)) {
 					new Downloader().execute();
 				} else {
 					download.setEnabled(true);
@@ -180,13 +179,23 @@ public class AutoDownloadPanel extends WizardPanel {
 			super();
 			setModel(new DefaultPackageTableModel());
 			sizeColumns();
-			setRowHeight(TemplateConstants.CELL_HEIGHT);
+			setRowHeight(CELL_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
 				getColumnModel().getColumn(i).setPreferredWidth(((DefaultPackageTableModel) getModel()).columnSizes[i]);
+			}
+		}
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+			if (column == 1) {
+				return new BooleanCellRenderer();
+			} else {
+				return super.getCellRenderer(row, column);
 			}
 		}
 
@@ -214,6 +223,10 @@ public class AutoDownloadPanel extends WizardPanel {
 		public int[] columnSizes = new int[] { 420,100 };
 		boolean[] flags = new boolean[data.size()];
 
+		public DefaultPackageTableModel() {
+			Arrays.fill(flags, true);
+		}
+
 		public void setFlags(int size) {
 			flags = new boolean[data.size()];
 			Arrays.fill(flags, true);
@@ -221,10 +234,6 @@ public class AutoDownloadPanel extends WizardPanel {
 
 		public void fireDataChanged() {
 			super.fireTableDataChanged();
-		}
-
-		public DefaultPackageTableModel() {
-			Arrays.fill(flags, true);
 		}
 
 		@Override
@@ -292,8 +301,8 @@ public class AutoDownloadPanel extends WizardPanel {
 				String fileName = toDownload.get(i).getFileName();
 				try {
 					if (fileName != null) {
-						fileName = TemplateConstants.TEMPLATE_FOLDER + fileName;
-						TemplateFileOperation.download(file, fileName, TemplateConstants.CONN_TIMEOUT, TemplateConstants.READ_TIMEOUT);
+						fileName = TEMPLATE_FOLDER + fileName;
+						TemplateFileOperation.download(file, fileName, CONN_TIMEOUT, READ_TIMEOUT);
 					} else {
 						throw new Exception();
 					}

@@ -99,8 +99,8 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 
 		// Adds a checkbox to block panel to select block function
 		final JCheckBox check = new JCheckBox();
-		check.setText("<html>Enable Finite Capacity: limit maximum number of jobs (customers) inside a fork-join section.</html>");
-		check.setToolTipText("Limit the maximum allowed number of jobs inside a fork-join section. Following jobs will be queued.");
+		check.setText("Enable Finite Capacity: limit maximum number of jobs (customers) inside a fork-join section");
+		check.setToolTipText("Limit the maximum number of jobs allowed inside a fork-join section. Following jobs will be queued.");
 
 		// Adds a spinner to block panel to select block number
 		JLabel label = new JLabel("Capacity (max number of jobs, NOT tasks): ");

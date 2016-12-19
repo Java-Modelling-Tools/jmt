@@ -52,6 +52,7 @@ import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.exact.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -162,7 +163,6 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 				showErrorMessageToUser(msg.toString());
 				refreshComponents();
 			} else {
-				//LoadDependentRoutingEditor.this.close();
 				LoadDependentRoutingEditor.this.setVisible(false);
 			}
 		}
@@ -292,7 +292,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 
 			sizeColumnsAndRows();
 			setDefaultRenderer(String.class, new GrayCellRenderer());
-			setDefaultEditor(Object.class, new jmt.gui.exact.table.ExactCellEditor());
+			setDefaultEditor(Object.class, new ExactCellEditor());
 			getTableHeader().setReorderingAllowed(false);
 		}
 
@@ -371,7 +371,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 		 * @see #getColumnCount
 		 */
 		public int getRowCount() {
-			return (routingStrategy != null && routingStrategy.getEmpiricalEntries() != null) ? routingStrategy.getEmpiricalEntries().size() : 0;  //To change body of implemented methods use File | Settings | File Templates.
+			return (routingStrategy != null && routingStrategy.getEmpiricalEntries() != null) ? routingStrategy.getEmpiricalEntries().size() : 0;
 		}
 
 		/**
@@ -383,7 +383,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 		 * @see #getRowCount
 		 */
 		public int getColumnCount() {
-			return columnNames.length; //To change body of implemented methods use File | Settings | File Templates.
+			return columnNames.length;
 		}
 
 		@Override

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 public abstract class JoinStrategy {
 
 	protected static JoinStrategy[] all = null;
-	protected static JoinStrategy[] allForSource = null;
 
 	protected String description;
 
@@ -62,7 +61,7 @@ public abstract class JoinStrategy {
 			return all;
 		}
 		ArrayList<JoinStrategy> strategies = new ArrayList<JoinStrategy>();
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
+		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();
 		try {
 			for (Field field : fields) {
 				if (field.getName().startsWith("JOIN_")) {
@@ -73,37 +72,11 @@ public abstract class JoinStrategy {
 			System.err.println("A security manager has blocked reflection");
 			ex.printStackTrace();
 		}
-		JoinStrategy[] ret = new JoinStrategy[strategies.size()];
+		all = new JoinStrategy[strategies.size()];
 		for (int i = 0; i < strategies.size(); i++) {
-			ret[i] = strategies.get(i);
+			all[i] = strategies.get(i);
 		}
-		all = ret;
-		return ret;
-	}
-
-	//TODO:modify this piece of code
-	public static JoinStrategy[] findAllForSource() {
-		if (allForSource != null) {
-			return allForSource;
-		}
-		ArrayList<JoinStrategy> strategies = new ArrayList<JoinStrategy>();
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
-		try {
-			for (Field field : fields) {
-				if (field.getName().startsWith("Join_") && !field.getName().endsWith("LOADDEPENDENT") ) {
-					strategies.add((JoinStrategy) field.get(null));
-				}
-			}
-		} catch (IllegalAccessException ex) {
-			System.err.println("A security manager has blocked reflection");
-			ex.printStackTrace();
-		}
-		JoinStrategy[] ret = new JoinStrategy[strategies.size()];
-		for (int i = 0; i < strategies.size(); i++) {
-			ret[i] = strategies.get(i);
-		}
-		allForSource = ret;
-		return ret;
+		return all;
 	}
 
 	public abstract boolean isModelStateDependent();

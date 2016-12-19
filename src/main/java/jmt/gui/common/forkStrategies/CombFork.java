@@ -23,14 +23,18 @@ import java.util.Map;
 import java.util.Vector;
 
 public class CombFork extends ForkStrategy {
+
 	private Map<Object, Double> outProbabilities = new HashMap<Object, Double>();
 
-	@Override
-	public String getName() {
+	public CombFork() {
 		description = "The tasks will be generated in a subset of the output links "
 				+ "(one on each output link of the subset). The dimension of the "
 				+ "subset is defined by a probability distribution, the output links "
 				+ "that will form the subset are selected randomly.";
+	}
+
+	@Override
+	public String getName() {
 		return "Random Subset";
 	}
 

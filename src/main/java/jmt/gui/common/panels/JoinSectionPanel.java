@@ -24,10 +24,12 @@ import java.util.Vector;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -41,7 +43,7 @@ import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.common.editors.JoinEditor;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 
-public class JoinSectionPanel extends WizardPanel implements CommonConstants{
+public class JoinSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
 	private StationDefinition stationData;
@@ -68,6 +70,9 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		classData = cd;
 		this.stationKey = stationKey;
 		classEditor.setData(cd);
+		if (joinStrategies != null) {
+			joinStrategies.tableChanged(new TableModelEvent(joinStrategies.getModel()));
+		}
 	}
 
 	public void setSelectedClass(Object classKey) {
@@ -90,10 +95,10 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		//layout of main panel
 		WarningScrollTable jsp = new WarningScrollTable(joinStrategies, WARNING_CLASS);
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Join Strategies"));
-		mainPanel.setResizeWeight(1.0); // Gives more space to left component
+		mainPanel.setResizeWeight(1.0);
 		jsp.setMinimumSize(new Dimension(200, 100));
 		mainPanel.setLeftComponent(jsp);
-		joinEditor.setMinimumSize(new Dimension(200, 100));
+		joinEditor.setMinimumSize(new Dimension(225, 100));
 		mainPanel.setRightComponent(joinEditor);
 		add(mainPanel, BorderLayout.CENTER);
 	}
@@ -108,6 +113,9 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 		if (editor != null) {
 			editor.stopCellEditing();
 		}
+		if (joinEditor != null) {
+			joinEditor.stopEditing();
+		}
 	}
 
 	/**
@@ -117,14 +125,10 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 	public void gotFocus() {
 		classEditor.clearCache();
 		if (joinStrategies != null && joinStrategies.getRowCount() > 0) {
-			if (joinStrategies.getSelectedRow() == -1) {
-				joinStrategies.setRowSelectionInterval(0, 0);
-			}
-			joinEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(joinStrategies.getSelectedRow()));
+			joinStrategies.setRowSelectionInterval(0, 0);
 		} else {
-			joinEditor.setData(stationData, classData, stationKey, 0);
+			joinEditor.setData(stationData, classData, stationKey, null);
 		}
-
 	}
 
 	/**
@@ -143,21 +147,15 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 			super();
 			setModel(new JoinSelectionTableModel());
 			sizeColumns();
-			setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
-				JoinStrategy[] joinStrategies = null;
-				Vector<Object> sources = stationData.getStationKeysSource();
-				if (sources.contains(stationKey)) {
-					joinStrategies = JoinStrategy.findAllForSource();
-				} else {
-					joinStrategies = JoinStrategy.findAll();
-				}
-				return ComboBoxCellEditor.getEditorInstance(joinStrategies);
+				return ComboBoxCellEditor.getEditorInstance(JoinStrategy.findAll());
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -187,7 +185,7 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 			int row = getSelectedRow();
 			if (row != -1) {
 				if (joinEditor != null) {
-					//joinEditor.stopEditing();
+					joinEditor.stopEditing();
 					joinEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(row));
 					JoinSectionPanel.this.doLayout();
 					JoinSectionPanel.this.repaint();
@@ -245,7 +243,6 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants{
 				if (!value.equals(stationData.getJoinStrategy(stationKey, classKey))) {
 					stationData.setJoinStrategy(stationKey, classKey, ((JoinStrategy) value).clone());
 				}
-
 				joinEditor.setData(stationData, classData, stationKey, classKey);
 				doLayout();
 				repaint();

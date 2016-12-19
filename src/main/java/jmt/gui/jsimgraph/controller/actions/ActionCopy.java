@@ -48,9 +48,7 @@ public class ActionCopy extends AbstractJmodelAction {
 		super("Copy", "Copy", mediator);
 		putValue(SHORT_DESCRIPTION, "Copy");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_C));
-		//Conti Andrea
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
-		//end
 		setEnabled(false);
 	}
 
@@ -58,9 +56,7 @@ public class ActionCopy extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// 04/08/03 - Conti Andrea //////////////////////////////////////////
 		mediator.copySelection();
 		mediator.enablePasteAction(true);
-		// 04/08/03 - end /////////////////////////////////////////////////////
 	}
 }

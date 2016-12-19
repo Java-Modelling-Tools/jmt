@@ -39,7 +39,6 @@ public class ExponentialPar extends AbstractParameter implements Parameter {
 	 * It creates a new empty exponential parameter that must be set to be used.
 	 *
 	 */
-
 	public ExponentialPar() {
 	}
 
@@ -66,7 +65,6 @@ public class ExponentialPar extends AbstractParameter implements Parameter {
 	 * @return double with lamda
 	 *
 	 */
-
 	public double getLambda() {
 		return lambda;
 	}

@@ -31,7 +31,7 @@ import java.util.Map;
 public class DelayedSQL extends RoutingStrategy {
 
 	public DelayedSQL() {
-		description = "Jobs are routed to the station which has the smallest " + "queue length.";
+		description = "Jobs are routed to the station which has the smallest queue length.";
 	}
 
 	@Override

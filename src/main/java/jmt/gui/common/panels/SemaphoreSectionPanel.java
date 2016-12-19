@@ -24,6 +24,7 @@ import java.util.Vector;
 
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -46,7 +47,7 @@ import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
  *
  * @author Vitor S. Lopes
  */
-public class SemaphoreSectionPanel extends WizardPanel implements CommonConstants{
+public class SemaphoreSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
 	private StationDefinition stationData;
@@ -97,12 +98,11 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		//layout of main panel
 		WarningScrollTable jsp = new WarningScrollTable(semaphoreStrategies, WARNING_CLASS);
-		//routing strategy selector on the left, routing probabilities editor on the right
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Semaphore Strategies"));
-		mainPanel.setResizeWeight(1.0); // Gives more space to left component
+		mainPanel.setResizeWeight(1.0);
 		jsp.setMinimumSize(new Dimension(200, 100));
 		mainPanel.setLeftComponent(jsp);
-		semaphoreEditor.setMinimumSize(new Dimension(200, 100));
+		semaphoreEditor.setMinimumSize(new Dimension(225, 100));
 		mainPanel.setRightComponent(semaphoreEditor);
 		add(mainPanel, BorderLayout.CENTER);
 	}
@@ -117,8 +117,8 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		if (editor != null) {
 			editor.stopCellEditing();
 		}
-		if (semaphoreStrategies != null && semaphoreStrategies.getRowCount() > 0) {
-			semaphoreStrategies.setRowSelectionInterval(0, 0);
+		if (semaphoreEditor != null) {
+			semaphoreEditor.stopEditing();
 		}
 	}
 
@@ -128,10 +128,10 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 	@Override
 	public void gotFocus() {
 		classEditor.clearCache();
-		// Select first routing strategy
 		if (semaphoreStrategies != null && semaphoreStrategies.getRowCount() > 0) {
-			int sel = semaphoreStrategies.getSelectedRow() < 0 ? 0 : semaphoreStrategies.getSelectedRow();
-			semaphoreStrategies.setRowSelectionInterval(sel, sel);
+			semaphoreStrategies.setRowSelectionInterval(0, 0);
+		} else {
+			semaphoreEditor.setData(stationData, classData, stationKey, null);
 		}
 	}
 
@@ -152,20 +152,14 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 			setModel(new SemaphoreSelectionTableModel());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
-				SemaphoreStrategy[] semaphoreStrategies = null;
-				Vector<Object> sources = stationData.getStationKeysSource();
-				if (sources.contains(stationKey)) {
-					semaphoreStrategies = SemaphoreStrategy.findAllForSource();
-				} else {
-					semaphoreStrategies = SemaphoreStrategy.findAll();
-				}
-				return ComboBoxCellEditor.getEditorInstance(semaphoreStrategies);
+				return ComboBoxCellEditor.getEditorInstance(SemaphoreStrategy.findAll());
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -195,7 +189,7 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 			int row = getSelectedRow();
 			if (row != -1) {
 				if (semaphoreEditor != null) {
-					//semaphoreEditor.stopEditing();
+					semaphoreEditor.stopEditing();
 					semaphoreEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(row));
 					SemaphoreSectionPanel.this.doLayout();
 					SemaphoreSectionPanel.this.repaint();
@@ -253,7 +247,6 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 				if (!value.equals(stationData.getSemaphoreStrategy(stationKey, classKey))) {
 					stationData.setSemaphoreStrategy(stationKey, classKey, ((SemaphoreStrategy) value).clone());
 				}
-
 				semaphoreEditor.setData(stationData, classData, stationKey, classKey);
 				doLayout();
 				repaint();

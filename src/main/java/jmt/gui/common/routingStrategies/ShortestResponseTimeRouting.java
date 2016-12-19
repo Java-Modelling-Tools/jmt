@@ -31,7 +31,7 @@ import java.util.Map;
 public class ShortestResponseTimeRouting extends RoutingStrategy {
 
 	public ShortestResponseTimeRouting() {
-		description = "Jobs are routed to the station with the smallest " + "average response time, for this customer class.";
+		description = "Jobs are routed to the station with the smallest average response time, for this customer class.";
 	}
 
 	@Override

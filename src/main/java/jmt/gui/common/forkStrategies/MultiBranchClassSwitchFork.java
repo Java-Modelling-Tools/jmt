@@ -30,9 +30,12 @@ public class MultiBranchClassSwitchFork extends ForkStrategy {
 
 	private HashMap<Object, OutPath> outPaths = new HashMap<Object, OutPath>();
 
+	public MultiBranchClassSwitchFork() {
+		description = "Generates tasks of multiple classes.";
+	}
+
 	@Override
 	public String getName() {
-		description = "Generates tasks of multiple classes.";
 		return "Multi-Branch Class Switch";
 	}
 
@@ -66,9 +69,7 @@ public class MultiBranchClassSwitchFork extends ForkStrategy {
 	@Override
 	public void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys) {
 		OutPath tempPath = new OutPath();
-		tempPath.setOutName(stationName);
-		tempPath.setProb(1.0);
-		for (Object o: classKeys) {
+		for (Object o : classKeys) {
 			if (o == classKey) {
 				tempPath.putEntry(o, 1);
 			} else {

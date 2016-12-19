@@ -39,6 +39,7 @@ import jmt.gui.common.panels.WarningScrollTable;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.exact.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -67,7 +68,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		super.setOrientation(JSplitPane.VERTICAL_SPLIT);
 		super.setDividerSize(3);
 		super.setBorder(new EmptyBorder(0, 0, 0, 0));
-		this.setResizeWeight(.5);
+		this.setResizeWeight(0.5);
 		initComponents();
 		setData(sd, cs, stationKey, classKey);
 	}
@@ -92,6 +93,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		RoutingStrategy rs = (RoutingStrategy) sd.getRoutingStrategy(stationKey, classKey);
 		if (rs == null) {
+			descrTextPane.setText("");
 			emptyPane();
 		} else {
 			descrTextPane.setText(rs.getDescription());
@@ -103,13 +105,13 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 				if (sd.getForwardConnections(stationKey) != null && sd.getForwardConnections(stationKey).size() != 0) {
 					JButton editLoadDependentRoutingButton = new JButton("Edit LD Routing..");
 					HashMap<String, Object> ldParameters = new HashMap<String, Object>();
-					ldParameters.put("ClassDefinition",cs);
-					ldParameters.put("StationDefinition",sd);
-					ldParameters.put("stationKey",stationKey);
-					ldParameters.put("classKey",classKey);
+					ldParameters.put("ClassDefinition", cs);
+					ldParameters.put("StationDefinition", sd);
+					ldParameters.put("stationKey", stationKey);
+					ldParameters.put("classKey", classKey);
 					String stationName = sd.getStationName(stationKey);
 					String className = cs.getClassName(classKey);
-					ldParameters.put("title","Editing for [Class] "+className + " for [Station] " + stationName + " Load Dependent Routing ...");
+					ldParameters.put("title", "Editing for [Class] " + className + " for [Station] " + stationName + " Load Dependent Routing ...");
 					editLoadDependentRoutingButton.addActionListener(new EditLoadDependentRoutingListener(ldParameters));
 					LDRoutingPanel.add(editLoadDependentRoutingButton);
 				} else {
@@ -164,6 +166,12 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		if (routingTable.getCellEditor() != null) {
 			routingTable.getCellEditor().stopCellEditing();
 		}
+		if (stations != null) {
+			RoutingStrategy rs = (RoutingStrategy) stations.getRoutingStrategy(stationKey, classKey);
+			if (rs instanceof ProbabilityRouting && routingProbs != null) {
+				stations.normalizeRoutingProbabilities(stationKey, classKey, routingProbs);
+			}
+		}
 	}
 
 	protected class RoutingTable extends JTable {
@@ -173,8 +181,9 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		public RoutingTable() {
 			super();
 			setModel(new RoutingTableModel());
-			setDefaultEditor(Object.class, new jmt.gui.exact.table.ExactCellEditor());
+			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
@@ -191,7 +200,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		private static final long serialVersionUID = 1L;
 		private String[] columnNames = new String[] { "Destination", "Probability" };
 		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
-		public int[] columnSizes = new int[] { 80, 60 };
+		public int[] columnSizes = new int[] { 80, 80 };
 
 		public int getRowCount() {
 			if (stationKey != null) {

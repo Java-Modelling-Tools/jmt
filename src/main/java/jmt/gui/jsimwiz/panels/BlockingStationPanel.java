@@ -301,12 +301,12 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 		 */
 		public StationTable() {
 			super(new StationTableModel());
-			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			delete.setFocusable(false);
 			deleteRenderer = new ButtonCellEditor(delete);
 			getColumnModel().getColumn(1).setMaxWidth(ROW_HEIGHT);
 			getColumnModel().setColumnSelectionAllowed(false);
 			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 

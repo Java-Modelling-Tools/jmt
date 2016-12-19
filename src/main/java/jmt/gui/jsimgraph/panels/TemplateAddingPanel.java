@@ -59,6 +59,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.TreeSelectionEvent;
@@ -355,7 +356,9 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 			super();
 			setTreeTableModel(new AvailableTreeTableModel(data.getRoot()));
 			sizeColumns();
-			setRowHeight(TemplateConstants.CELL_HEIGHT);
+			setRowHeight(CELL_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			getTableHeader().setReorderingAllowed(false);
 
 			addTreeSelectionListener(new TreeSelectionListener() {
 				@Override
@@ -434,8 +437,7 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 					case 4:
 						return ((TemplateData) ((TreeTableNode) parent).getData()[0]).getShortDescription();
 					case 5:
-						Path temPath = Paths.get(TemplateConstants.TEMPLATE_FOLDER
-								+ ((TemplateData) ((TreeTableNode) parent).getData()[0]).getFileName());
+						Path temPath = Paths.get(TEMPLATE_FOLDER + ((TemplateData) ((TreeTableNode) parent).getData()[0]).getFileName());
 						try {
 							BasicFileAttributes view = Files.getFileAttributeView(temPath,BasicFileAttributeView.class).readAttributes();
 							FileTime creationTime = view.creationTime();
@@ -626,7 +628,7 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 				try {
 					publish("Connecting to the site (time out: " + READ_TIMEOUT / 1000 + " s)");
 					temp = TemplateFileOperation.download(myURL, fileName, CONN_TIMEOUT, READ_TIMEOUT);
-					templates = TemplateFileOperation.findTemplateFiles(TemplateConstants.TEMPLATE_FOLDER);
+					templates = TemplateFileOperation.findTemplateFiles(TEMPLATE_FOLDER);
 					publish("template is downloaded successfully");
 					Thread.sleep(100);
 					publish("Updating template list");

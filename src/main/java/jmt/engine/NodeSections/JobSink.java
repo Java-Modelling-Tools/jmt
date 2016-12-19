@@ -68,23 +68,19 @@ public class JobSink extends InputSection {
 
 			Job job = message.getJob();
 
-			// M. Cazzoli, warning for tasks exiting model
 			if (job instanceof ForkJob) {
+				//shows a warning that tasks exit the model
 				getOwnerNode().getQueueNet().showForkJobExitWarning();
 			}
 
 			send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 
-			//BUG FIXED!
-			//jobSink does not add JobInfo objects to its own list, so there
-			//is no need to remove them
-			//the owner node, on the contrary, adds them when the job message
-			//is received before the jobinfo objects were not removed (often
-			//causing outOfMemory errors!!!)
-
-			if (jobsList_node == null) {
-				jobsList_node = getOwnerNode().getJobInfoList();
+			JobInfo jobInfo = jobsList.lookFor(job);
+			if (jobInfo != null) {
+				//removes job from the jobInfoList of the section
+				jobsList.removeJob(jobInfo);
 			}
+
 			JobInfo jobInfo_node = jobsList_node.lookFor(job);
 			if (jobInfo_node != null) {
 				//removes job from the jobInfoList of the node

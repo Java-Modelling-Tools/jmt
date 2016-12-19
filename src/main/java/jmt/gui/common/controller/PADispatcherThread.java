@@ -54,6 +54,7 @@ import org.w3c.dom.Document;
  * Fixed by Bertoli Marco
  */
 public class PADispatcherThread extends Thread implements AbortMeasure {
+
 	private SimulationDefinition simd;
 	//private CommonModel model;
 	private GuiInterface gui;
@@ -131,15 +132,6 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 	public void abortMeasure(int index) {
 		simulator.abortMeasureAtRefresh(index);
 	}
-
-	/*public void startParametricAnalysis() {
-		// If a time maximum time is specified, initialize all stuff related
-		if (simd.getMaximumDuration().doubleValue() > 0) {
-			timer = new TimerThread(this, simd.getMaximumDuration().doubleValue());
-		}
-		gui.changeSimActionsState(false, true, true);
-		start();
-	}*/
 
 	@Override
 	public void run() {

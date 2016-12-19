@@ -47,11 +47,8 @@ public class ActionPaste extends AbstractJmodelAction {
 	public ActionPaste(Mediator mediator) {
 		super("Paste", "Paste", mediator);
 		putValue(SHORT_DESCRIPTION, "Paste");
-		//Conti Andrea
-		//putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_V));
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_P));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
-		//end
 		setEnabled(false);
 	}
 
@@ -59,9 +56,6 @@ public class ActionPaste extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// 27/08/03 - Conti Andrea //////////////////////////////////////////
 		mediator.pasteSelection();
-		mediator.enableDeleteAction(true); // pasting does not activate
-		// 27/08/03 - end //////////////////////////////////////////
 	}
 }

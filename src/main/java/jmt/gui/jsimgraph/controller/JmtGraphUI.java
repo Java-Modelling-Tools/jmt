@@ -51,14 +51,11 @@ public class JmtGraphUI extends BasicGraphUI {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	Mediator mediator;
+	protected Mediator mediator;
 
-	// Conti Andrea
 	public JmtGraphUI(Mediator mediator) {
 		setMediator(mediator);
 	}
-
-	//end
 
 	/**
 	 * Messages to stop the editing session. If the UI the receiver
@@ -86,9 +83,6 @@ public class JmtGraphUI extends BasicGraphUI {
 		return null;
 	}
 
-	// Conti Andrea 29-08-2003
-	/* We want some actions to be enabled/disabled in response to selection changes:
-	    a good way to accomplish this is through a GraphSelectionListener */
 	@Override
 	protected GraphSelectionListener createGraphSelectionListener() {
 		return new JmtGraphSelectionHandler();
@@ -96,7 +90,6 @@ public class JmtGraphUI extends BasicGraphUI {
 
 	/**
 	 * A GraphSelectionHandler that can enable/disable UI actions
-	 * @author ac
 	 */
 	public class JmtGraphSelectionHandler extends GraphSelectionHandler {
 
@@ -115,8 +108,9 @@ public class JmtGraphUI extends BasicGraphUI {
 			// New --- Bertoli Marco ---
 			// Checks selection cells to enables correct toolbar elements
 			boolean foundStations = false;
-			boolean cannotAddBlockingRegion = false;
+			boolean foundBlockingRegion = false;
 			boolean foundConnection = false;
+			boolean cannotAddBlockingRegion = false;
 			Object[] cells = sm.getSelectionCells();
 			for (Object cell : cells) {
 				if (cell instanceof JmtCell) {
@@ -130,44 +124,45 @@ public class JmtGraphUI extends BasicGraphUI {
 						cannotAddBlockingRegion = true;
 					}
 				} else if (cell instanceof BlockingRegion) {
+					foundBlockingRegion = true;
 					cannotAddBlockingRegion = true;
 				} else if (cell instanceof JmtEdge) {
 					foundConnection = true;
 				}
 				// Shorten cycle to avoid useless computation
-				if (cannotAddBlockingRegion && foundStations) {
+				if (foundStations && foundBlockingRegion) {
 					break;
 				}
 			}
 
-			if (foundStations || cannotAddBlockingRegion) {
+			if (foundStations) {
 				mediator.enableCopyAction(true);
 				mediator.enableCutAction(true);
 				mediator.enableDeleteAction(true);
 				mediator.enableAddBlockingRegion(!cannotAddBlockingRegion);
-
-				//Giuseppe De Cicco & Fabio Granara
 				mediator.enableRotateAction(true);
 				mediator.enableSetRight(true);
-
+			} else if (foundBlockingRegion) {
+				mediator.enableCopyAction(true);
+				mediator.enableCutAction(true);
+				mediator.enableDeleteAction(true);
+				mediator.enableAddBlockingRegion(false);
+				mediator.enableRotateAction(false);
 			} else {
 				mediator.enableCopyAction(false);
 				mediator.enableCutAction(false);
 				mediator.enableDeleteAction(false);
 				mediator.enableAddBlockingRegion(false);
+				mediator.enableRotateAction(false);
 			}
 			if (foundConnection) {
 				mediator.enableDeleteAction(true);
-				// End new --- Bertoli Marco ---
 			}
+			// End new --- Bertoli Marco ---
 		}
+
 	}
 
-	// end
-
-	// Conti Andrea 29-08-2003
-	// fix that wrong-selection-color-on-insert bug
-	// btw, what is "LockedHandle" supposed to mean??? "Focused" maybe???
 	@Override
 	protected void installDefaults() {
 		super.installDefaults();
@@ -175,30 +170,15 @@ public class JmtGraphUI extends BasicGraphUI {
 		graph.setMarqueeColor(Color.GRAY); // make it a little more visible
 	}
 
-	//end
-
-	// Conti Andrea 29-08-2003
-	/* JGraph comes with a boilerplate(?) InputMap/ActionMap set containing some
-	 "standard" keystroke->action mappings (see BasicGraphUI.installKeyboardActions).
-	 Handy as it might look, this is quite a pain if you're trying to assign the
-	 same keystrokes to your own actions through some other means, such as accelerator keys in
-	 menuitems. In this case you have to remove the mappings from the graph's ActionMap or
-	 the keystrokes will trigger the "default" actions instead of your ones.
-	 */
 	@Override
 	protected void installKeyboardActions() {
 		super.installKeyboardActions();
 		ActionMap am = SwingUtilities.getUIActionMap(graph);
-
 		am.remove(TransferHandler.getCutAction().getValue(Action.NAME));
 		am.remove(TransferHandler.getCopyAction().getValue(Action.NAME));
 		am.remove(TransferHandler.getPasteAction().getValue(Action.NAME));
-
 		SwingUtilities.replaceUIActionMap(graph, am);
-
 	}
-
-	//end
 
 	public void setMediator(Mediator mediator) {
 		this.mediator = mediator;
@@ -209,7 +189,6 @@ public class JmtGraphUI extends BasicGraphUI {
 	 */
 	@Override
 	public void updateHandle() {
-		//    	System.out.println("UPDATEHANDLE IN JMTGRAPHUI");
 		if (graphLayoutCache != null) {
 			Object[] cells = graph.getSelectionCells();
 			if (cells != null && cells.length > 0) {
@@ -219,4 +198,5 @@ public class JmtGraphUI extends BasicGraphUI {
 			}
 		}
 	}
+
 }

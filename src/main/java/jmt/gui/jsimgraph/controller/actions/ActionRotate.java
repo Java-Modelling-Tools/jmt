@@ -24,12 +24,8 @@ public class ActionRotate extends AbstractJmodelAction {
 	 */
 	public ActionRotate(Mediator mediator) {
 		super("Rotate", "Rotate", mediator);
-		//Giuseppe De Cicco & Fabio Granara
-		putValue(SHORT_DESCRIPTION, "Rotate the component");
+		putValue(SHORT_DESCRIPTION, "Rotate selected stations");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_R));
-		//putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_R));
-		//putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_MASK));
-		//end
 		setEnabled(false);
 	}
 
@@ -37,8 +33,6 @@ public class ActionRotate extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		//GDC & FG
 		mediator.rotateComponent(null);
-
 	}
 }

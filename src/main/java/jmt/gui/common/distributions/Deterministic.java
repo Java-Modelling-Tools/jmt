@@ -31,8 +31,9 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 13.52.30
  */
 public class Deterministic extends Distribution {
+
 	/**
-	 * Construct a new Constant Distribution
+	 * Construct a new Deterministic Distribution
 	 */
 	public Deterministic() {
 		super("Deterministic", "jmt.engine.random.DeterministicDistr", "jmt.engine.random.DeterministicDistrPar", "Deterministic distribution");
@@ -61,7 +62,6 @@ public class Deterministic extends Distribution {
 				}
 			}
 		});
-
 		return parameters;
 	}
 
@@ -90,7 +90,6 @@ public class Deterministic extends Distribution {
 	 */
 	@Override
 	public void setMean(double value) {
-		// mean = value
 		if (getParameter(0).setValue(new Double(value))) {
 			mean = value;
 		}
@@ -104,4 +103,5 @@ public class Deterministic extends Distribution {
 	public void updateCM() {
 		mean = ((Double) getParameter(0).getValue()).doubleValue();
 	}
+
 }

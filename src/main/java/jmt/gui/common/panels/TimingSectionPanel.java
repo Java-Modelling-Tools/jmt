@@ -28,6 +28,7 @@ import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -203,6 +204,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 			deleteRenderer = new DisabledButtonCellRenderer(new JButton(deleteMode));
 			setModel(new TimingOptionTableModel());
 			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 			sizeColumns();
 		}

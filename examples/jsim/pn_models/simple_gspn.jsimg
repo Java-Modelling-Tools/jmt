@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="simple_gspn.jsimg" timestamp="Thu Nov 10 16:25:54 GMT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="simple_gspn.jsimg" timestamp="Sun Nov 13 14:59:54 GMT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="simple_gspn.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass customers="30" name="Class1" priority="0" referenceSource="Place 1" type="closed"/>
 <node name="Place 1">
@@ -22,7 +22,7 @@
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
 <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="putStrategies">
 <refClass>Class1</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -226,7 +226,7 @@
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
 <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="putStrategies">
 <refClass>Class1</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>

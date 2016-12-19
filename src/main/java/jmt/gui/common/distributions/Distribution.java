@@ -38,6 +38,7 @@ import jmt.gui.common.serviceStrategies.ServiceStrategy;
  *         Time: 14.47.12
  */
 public abstract class Distribution implements ServiceStrategy {
+
 	protected static Distribution[] all = null; // Used to store all distributions
 	protected static Distribution[] allWithMean = null; // Used to store all distributions with Mean value adjustable
 	protected static Distribution[] nestableDistributions = null; // Used to store nestable distributions
@@ -276,8 +277,7 @@ public abstract class Distribution implements ServiceStrategy {
 			return all;
 		}
 		String path = "jmt.gui.common.distributions.";
-
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
+		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();
 		ArrayList<Distribution> tmp = new ArrayList<Distribution>();
 		try {
 			for (Field field : fields) {
@@ -295,12 +295,11 @@ public abstract class Distribution implements ServiceStrategy {
 			System.err.println("Reflection Error: Cannot instantiate a distribution");
 			e.printStackTrace();
 		}
-		Distribution[] ret = new Distribution[tmp.size()];
+		all = new Distribution[tmp.size()];
 		for (int i = 0; i < tmp.size(); i++) {
-			ret[i] = tmp.get(i);
+			all[i] = tmp.get(i);
 		}
-		all = ret;
-		return ret;
+		return all;
 	}
 
 	/**
@@ -400,6 +399,7 @@ public abstract class Distribution implements ServiceStrategy {
 	public abstract String toString();
 
 	// ----- Methods that must be implemented ONLY if hasC or hasMean are true ----------------------------
+
 	/**
 	 * Sets the variation coefficient C for this distribution
 	 * @param value variation coefficient C value
@@ -430,6 +430,7 @@ public abstract class Distribution implements ServiceStrategy {
 	 * but will be accessed with public methods
 	 */
 	public class Parameter implements Cloneable {
+
 		protected Class<?> valueClass;
 		protected Object value;
 		protected String name;
@@ -595,6 +596,7 @@ public abstract class Distribution implements ServiceStrategy {
 			tmp.setValueChecker(this.checker);
 			return tmp;
 		}
+
 	}
 
 	/**
@@ -602,6 +604,7 @@ public abstract class Distribution implements ServiceStrategy {
 	 * value's range).
 	 */
 	protected interface ValueChecker {
+
 		/**
 		 * Checks if value of this object is correct. Note that when this method is called,
 		 * parameter's value is granted to be instance of the correct class.
@@ -609,5 +612,7 @@ public abstract class Distribution implements ServiceStrategy {
 		 * @return true iff value is correct for this distribution parameter
 		 */
 		public boolean checkValue(Object value);
+
 	}
+
 }

@@ -29,7 +29,7 @@ import javax.swing.table.AbstractTableModel;
  */
 
 /**
- * An utility abstract class implementing a framework for RowHeader-aware TableModels with identical column prototypes. Subclassers must
+ * An utility abstract class implementing a framework for RowHeader-aware TableModels with identical column prototypes. Subclasses must
  * fill in <code>prototype</code> and <code>rowHeaderPrototype</code> and implement <code>getRowName()</code> and <code>getValueAtImpl()</code>.
  * The latter two need <b>not</b> be row-header aware. For tables with different column types you must override <code>getPrototype</code> to get a correct behavior
  */

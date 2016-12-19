@@ -695,9 +695,8 @@ public class PAResultsModel implements MeasureDefinition {
 	 * @return measure state
 	 */
 	public int getMeasureState(int measureIndex) {
-		return 0; //To change body of implemented methods use File | Settings | File Templates.
+		return 0;
 	}
-
 
 	// ------------------------- end USELESS METHODS --------------------------------
 

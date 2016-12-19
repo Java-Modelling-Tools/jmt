@@ -165,7 +165,7 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 	 */
 	@Override
 	public Object getReferenceClass() {
-		return null; //To change body of implemented methods use File | Settings | File Templates.
+		return null;
 	}
 
 	/**
@@ -175,7 +175,7 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 	 */
 	@Override
 	public String getReferenceClassName() {
-		return null; //To change body of implemented methods use File | Settings | File Templates.
+		return null;
 	}
 	// ---------------------- end USELESS METHODS --------------------------
 }

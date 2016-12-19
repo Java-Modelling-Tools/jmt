@@ -21,8 +21,8 @@ package jmt.engine.NodeSections;
 import javax.swing.JOptionPane;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.TransitionUtilities.FiringPacket;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
-import jmt.engine.QueueNet.DataPacket;
 import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.ForkJobInfo;
 import jmt.engine.QueueNet.GlobalJobInfoList;
@@ -95,11 +95,10 @@ public class Firing extends OutputSection {
 
 		case NetEvent.EVENT_FIRING:
 		{
-			Object[] packet = (Object[]) data;
-			int modeIndex = ((Integer) packet[DataPacket.FIELD_MODE_INDEX]).intValue();
-			double[] totalLifetime = (double[]) packet[DataPacket.FIELD_TOTAL_LIFETIME];
-			ForkJobInfo[] forkJobInfo = (ForkJobInfo[]) packet[DataPacket.FIELD_FORK_JOB_INFO];
-			int[] forkJobNum = (int[]) packet[DataPacket.FIELD_FORK_JOB_NUM];
+			int modeIndex = ((FiringPacket) data).getModeIndex();
+			double[] totalLifetime = ((FiringPacket) data).getTotalLifetime();
+			ForkJobInfo[] forkJobInfo = ((FiringPacket) data).getForkJobInfo();
+			int[] forkJobNum = ((FiringPacket) data).getForkJobNum();
 			double[] avgEnteringTime = new double[jobClasses.size()];
 			for (int i = 0; i < jobClasses.size(); i++) {
 				int releasedJobs = firingOutcomes[modeIndex].getTotal(i);

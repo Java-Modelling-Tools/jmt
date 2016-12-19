@@ -23,7 +23,9 @@ import java.util.LinkedList;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
-import jmt.engine.QueueNet.DataPacket;
+import jmt.engine.NetStrategies.TransitionUtilities.EnablingPacket;
+import jmt.engine.NetStrategies.TransitionUtilities.FiringPacket;
+import jmt.engine.NetStrategies.TransitionUtilities.TimingPacket;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
@@ -47,8 +49,8 @@ public class Timing extends ServiceSection {
 	private String[] modeNames;
 	private int[] numbersOfServers;
 	private ServiceStrategy[] timingStrategies;
-	private Integer[] firingPriorities;
-	private Double[] firingWeights;
+	private int[] firingPriorities;
+	private double[] firingWeights;
 
 	private LinkedList[] timingTokenLists;
 	private int[] extraEnablingDegrees;
@@ -70,8 +72,14 @@ public class Timing extends ServiceSection {
 			this.numbersOfServers[i] = numbersOfServers[i].intValue();
 		}
 		this.timingStrategies = timingStrategies;
-		this.firingPriorities = firingPriorities;
-		this.firingWeights = firingWeights;
+		this.firingPriorities = new int[firingPriorities.length];
+		for (int i = 0; i < firingPriorities.length; i++) {
+			this.firingPriorities[i] = firingPriorities[i].intValue();
+		}
+		this.firingWeights = new double[firingWeights.length];
+		for (int i = 0; i < firingWeights.length; i++) {
+			this.firingWeights[i] = firingWeights[i].doubleValue();
+		}
 	}
 
 	@Override
@@ -107,9 +115,8 @@ public class Timing extends ServiceSection {
 
 		case NetEvent.EVENT_ENABLING:
 		{
-			Object[] packet = (Object[]) data;
-			int modeIndex = ((Integer) packet[DataPacket.FIELD_MODE_INDEX]).intValue();
-			int enablingDegree = ((Integer) packet[DataPacket.FIELD_ENABLING_DEGREE]).intValue();
+			int modeIndex = ((EnablingPacket) data).getModeIndex();
+			int enablingDegree = ((EnablingPacket) data).getEnablingDegree();
 			int timingEvents = timingTokenLists[modeIndex].size();
 			int deltaTimingEvents = 0;
 			if (numbersOfServers[modeIndex] < 0) {
@@ -126,14 +133,11 @@ public class Timing extends ServiceSection {
 
 			if (deltaTimingEvents >= 0) {
 				for (int i = 0; i < deltaTimingEvents; i++) {
-					double delay = timingStrategies[modeIndex].wait(this);
-					packet = new Object[DataPacket.PACKET_SIZE_TIMING];
-					packet[DataPacket.FIELD_MODE_INDEX] = Integer.valueOf(modeIndex);
-					packet[DataPacket.FIELD_FIRING_DELAY] = Double.valueOf(delay);
-					packet[DataPacket.FIELD_FIRING_PRIORITY] = firingPriorities[modeIndex];
-					packet[DataPacket.FIELD_FIRING_WEIGHT] = firingWeights[modeIndex];
-					RemoveToken token = sendMe(NetEvent.EVENT_TIMING, packet, delay);
-					packet[DataPacket.FIELD_TIMING_TOKEN] = token;
+					double firingDelay = timingStrategies[modeIndex].wait(this);
+					TimingPacket packet = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],
+							firingWeights[modeIndex]);
+					RemoveToken token = sendMe(NetEvent.EVENT_TIMING, packet, firingDelay);
+					packet.setTimingToken(token);
 					int index = (int) (randomEngine.raw() * (timingTokenLists[modeIndex].size() + 1));
 					timingTokenLists[modeIndex].add(index, token);
 				}
@@ -148,21 +152,17 @@ public class Timing extends ServiceSection {
 
 		case NetEvent.EVENT_TIMING:
 		{
-			Object[] packet = (Object[]) data;
-			int modeIndex = ((Integer) packet[DataPacket.FIELD_MODE_INDEX]).intValue();
-			RemoveToken token = (RemoveToken) packet[DataPacket.FIELD_TIMING_TOKEN];
+			int modeIndex = ((TimingPacket) data).getModeIndex();
+			RemoveToken token = ((TimingPacket) data).getTimingToken();
 			timingTokenLists[modeIndex].remove(token);
 			sendBackward(NetEvent.EVENT_FIRING, Integer.valueOf(modeIndex), 0.0);
 
 			if (extraEnablingDegrees[modeIndex] > 0) {
-				double delay = timingStrategies[modeIndex].wait(this);
-				packet = new Object[DataPacket.PACKET_SIZE_TIMING];
-				packet[DataPacket.FIELD_MODE_INDEX] = Integer.valueOf(modeIndex);
-				packet[DataPacket.FIELD_FIRING_DELAY] = Double.valueOf(delay);
-				packet[DataPacket.FIELD_FIRING_PRIORITY] = firingPriorities[modeIndex];
-				packet[DataPacket.FIELD_FIRING_WEIGHT] = firingWeights[modeIndex];
-				token = sendMe(NetEvent.EVENT_TIMING, packet, delay);
-				packet[DataPacket.FIELD_TIMING_TOKEN] = token;
+				double firingDelay = timingStrategies[modeIndex].wait(this);
+				TimingPacket packet = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],
+						firingWeights[modeIndex]);
+				token = sendMe(NetEvent.EVENT_TIMING, packet, firingDelay);
+				packet.setTimingToken(token);
 				int index = (int) (randomEngine.raw() * (timingTokenLists[modeIndex].size() + 1));
 				timingTokenLists[modeIndex].add(index, token);
 				extraEnablingDegrees[modeIndex]--;
@@ -172,8 +172,7 @@ public class Timing extends ServiceSection {
 
 		case NetEvent.EVENT_FIRING:
 		{
-			Object[] packet = (Object[]) data;
-			int modeIndex = ((Integer) packet[DataPacket.FIELD_MODE_INDEX]).intValue();
+			int modeIndex = ((FiringPacket) data).getModeIndex();
 			sendForward(NetEvent.EVENT_FIRING, data, 0.0);
 			updateFiringThroughput(modeIndex);
 			lastFiringTimes[modeIndex] = lastFiringTime = NetSystem.getTime();

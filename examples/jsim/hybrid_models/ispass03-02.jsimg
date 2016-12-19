@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="ispass03-02.jsimg" timestamp="Thu Nov 10 16:55:38 GMT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="ispass03-02.jsimg" timestamp="Sun Nov 13 14:59:18 GMT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="ispass03-02.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass customers="10" name="x1" priority="0" referenceSource="Client-Q" type="closed"/>
 <userClass customers="10" name="x2" priority="0" referenceSource="Client-Q" type="closed"/>
@@ -58,15 +58,15 @@
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
 <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="putStrategies">
 <refClass>x1</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -602,11 +602,11 @@
 <refClass>x2</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -904,11 +904,11 @@
 <refClass>x2</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -1336,11 +1336,11 @@
 <refClass>x2</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -1768,11 +1768,11 @@
 <refClass>x2</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -2124,11 +2124,11 @@
 <refClass>x2</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -2326,7 +2326,7 @@
 <userClass color="#FFFF00FF" name="c"/>
 <userClass color="#FFFFC800" name="p"/>
 <station name="WLS-Thread-Pool">
-<position rotate="true" x="504.0" y="60.0"/>
+<position rotate="true" x="506.0" y="60.0"/>
 </station>
 <station name="t1">
 <position rotate="false" x="76.0" y="176.0"/>
@@ -2338,37 +2338,37 @@
 <position rotate="false" x="243.0" y="176.0"/>
 </station>
 <station name="t2">
-<position rotate="false" x="344.0" y="176.0"/>
+<position rotate="false" x="342.0" y="176.0"/>
 </station>
 <station name="DBS-PQ">
-<position rotate="false" x="396.0" y="176.0"/>
+<position rotate="false" x="389.0" y="176.0"/>
 </station>
 <station name="t3">
-<position rotate="false" x="475.0" y="176.0"/>
+<position rotate="false" x="471.0" y="176.0"/>
 </station>
 <station name="DBS-CPU-Q">
-<position rotate="false" x="525.0" y="173.0"/>
+<position rotate="false" x="526.0" y="173.0"/>
 </station>
 <station name="DBS-CPU-D">
-<position rotate="false" x="641.0" y="176.0"/>
+<position rotate="false" x="639.0" y="176.0"/>
 </station>
 <station name="t4">
-<position rotate="false" x="733.0" y="175.0"/>
+<position rotate="false" x="731.0" y="175.0"/>
 </station>
 <station name="DBS-I/O-Q">
-<position rotate="false" x="785.0" y="172.0"/>
+<position rotate="false" x="783.0" y="172.0"/>
 </station>
 <station name="DBS-I/O-D">
-<position rotate="false" x="896.0" y="175.0"/>
+<position rotate="false" x="894.0" y="175.0"/>
 </station>
 <station name="t5">
-<position rotate="false" x="985.0" y="175.0"/>
+<position rotate="false" x="983.0" y="175.0"/>
 </station>
 <station name="Client-D">
-<position rotate="true" x="745.0" y="286.0"/>
+<position rotate="true" x="750.0" y="286.0"/>
 </station>
 <station name="Client-Q">
-<position rotate="true" x="827.0" y="263.0"/>
+<position rotate="true" x="832.0" y="263.0"/>
 </station>
 </jmodel>
 <results logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">

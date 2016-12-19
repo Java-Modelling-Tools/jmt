@@ -539,7 +539,7 @@ public abstract class NodeSection {
 	void setOwnerNode(NetNode ownerNode) {
 		this.ownerNode = ownerNode;
 		//if (auto)
-		jobsList = new LinkedJobInfoList(getJobClasses().size(), ownerNode.getOutputNodes().size() > 0);
+		jobsList = new LinkedJobInfoList(getJobClasses().size(), true);
 		nodeLinked(ownerNode);
 	}
 

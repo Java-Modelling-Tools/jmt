@@ -72,6 +72,7 @@ public class ModelChecker implements CommonConstants {
 	private boolean[] errors;
 	//Variable that contains information about warnings
 	private boolean[] warnings;
+
 	//Vector containing the keys of the classes without a reference station
 	private Vector<Object> classesWithoutRefStation;
 	//Vector containing only the keys of the open classes without a reference station
@@ -133,11 +134,15 @@ public class ModelChecker implements CommonConstants {
 	//HashMap containing the vector of keys of the classes for
 	//which Guard strategies has zero tasks at this join. The
 	//key of the HashMap is the key of the join considered
-	private HashMap<Object, Vector<Object>> GuardStrategyZeroTasks;
+	private HashMap<Object, Vector<Object>> guardStrategyZeroTasks;
 	//Vector containing the keys of semaphores not between fork/join
 	private Vector<Object> semaphoreNotBetweenForkJoin;
+	//Vector containing the keys of scalers not between fork/join
+	private Vector<Object> scalerNotBetweenForkJoin;
 	//Vector containing the keys of transitions between fork/join
 	private Vector<Object> transitionBetweenForkJoin;
+	//Vector containing the keys of transitions without forward links
+	private Vector<Object> transitionWithoutForwardLinks;
 	//Vector containing the keys of transitions with invalid conditions for some modes
 	private Vector<Object> transitionWithInvalidConditions;
 	//Vector containing the keys of transitions with invalid outcomes for some modes
@@ -147,12 +152,13 @@ public class ModelChecker implements CommonConstants {
 	public static final int ERROR_PROBLEM = 0;
 	//constant used to define a warning
 	public static final int WARNING_PROBLEM = 1;
+
 	//it occurs when no classes have been defined
-	public static final int NO_CLASSES_ERROR = 0;
-	//it occurs when no station have been defined
+	public static final int NO_CLASS_ERROR = 0;
+	//it occurs when no stations have been defined
 	public static final int NO_STATION_ERROR = 1;
-	//it occurs when no measure have been defined
-	public static final int SIMULATION_ERROR = 2;
+	//it occurs when no measures have been defined
+	public static final int NO_MEASURE_ERROR = 2;
 	//it occurs when there is a source without associated open classes
 	public static final int SOURCE_WITHOUT_OPEN_CLASS_ERROR = 3;
 	//it occurs when there is a sink but no open classes have been defined
@@ -189,24 +195,22 @@ public class ModelChecker implements CommonConstants {
 	public static final int CS_MATRIX_HAS_ROWS_LESS_THAN_ONE = 19;
 	//Checks if exist some cs followed by a queue with bas drop strategy.
 	public static final int CS_FOLLOWED_BY_A_BAS = 20;
-	//Checks if exist some cs between a fork and a join.
-	public static final int CS_BETWEEN_FORK_JOIN = 21;
 
-	public static final int LOAD_DEPENDENT_ROUTING_INVALID = 22;
+	public static final int LOAD_DEPENDENT_ROUTING_INVALID = 21;
 	//Checks the different reference station of closed class if there exists class switch.
-	public static final int CS_REFERENCE_STATION = 23;
+	public static final int CS_REFERENCE_STATION = 22;
 	//Checks existence of the system throughput per class with class switch.
-	public static final int CS_SYSTEM_THROUGHPUT_CLASS = 24;
+	public static final int CS_SYSTEM_THROUGHPUT_CLASS = 23;
 	//Checks if all the closed classes population is zero with class switch.
-	public static final int CS_ALL_CLOSED_ZERO_POPULATION = 25;
+	public static final int CS_ALL_CLOSED_ZERO_POPULATION = 24;
 	//Checks if there are any joins that have Guard strategies with zero tasks.
-	public static final int GUARD_STRATEGY_ZERO_TASKS = 26;
+	public static final int GUARD_STRATEGY_ZERO_TASKS = 25;
 	//Checks if there are any semaphores not between a fork and a join.
-	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN = 27;
+	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN = 26;
+	//Checks if there are any scalers not between a fork and a join.
+	public static final int SCALER_NOT_BETWEEN_FORK_JOIN = 27;
 	//Checks if any transitions have invalid conditions for some modes.
 	public static final int TRANSITION_WITH_INVALID_CONDITIONS = 28;
-	//Checks if any transitions have no valid outcomes for all modes.
-	public static final int TRANSITION_WITHOUT_VALID_OUTCOMES = 29;
 
 	//it occurs when more than one sink have been defined
 	public static final int MORE_THAN_ONE_SINK_WARNING = 0;
@@ -251,7 +255,7 @@ public class ModelChecker implements CommonConstants {
 	//queueing strategy but it is not possible to define a
 	//Laplace rational transform for the service time distribution
 	// (only when trying to convert to JMVA)
-	public static final int BCMP_LCFS_PR_WARNING = 11;
+	public static final int BCMP_LCFS_PREEMPTIVE_WARNING = 11;
 	//Thrown if the routing strategy is state dependent
 	// (only when trying to convert to JMVA)
 	public static final int BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING = 12;
@@ -261,20 +265,24 @@ public class ModelChecker implements CommonConstants {
 	public static final int BCMP_NON_SYMMETRIC_SCHEDULING = 13;
 
 	public static final int SINK_PROBABILITY_UPDATE_WARNING = 14;
-	//Checks if the closed classes population is zero
+	//Checks if the closed classes population is zero.
 	public static final int CLOSED_ZERO_POPULATION = 15;
-	//Checks if exist some cs and fork/join section
-	public static final int CS_WITH_FORK_JOIN = 16;
-	//Throws a warning if FCFS Priorities is used but all classes have the same priorities
-	public static final int SLOW_FCFS_SAME_PRIORITIES = 17;
+	//Checks if exist some cs between a fork and a join.
+	public static final int CS_BETWEEN_FORK_JOIN = 16;
+	//Checks if exist some cs and fork/join section.
+	public static final int CS_WITH_FORK_JOIN = 17;
+	//Checks if priority scheduling is used but all the classes have the same priorities.
+	public static final int SCHEDULING_SAME_PRIORITIES = 18;
 	//Checks if there are any transitions between a fork and a join.
-	public static final int TRANSITION_BETWEEN_FORK_JOIN = 18;
+	public static final int TRANSITION_BETWEEN_FORK_JOIN = 19;
+	//Checks if there are any transitions without forward links.
+	public static final int TRANSITION_WITHOUT_FORWARD_LINKS = 20;
 	//Checks if any transitions have invalid outcomes for some modes.
-	public static final int TRANSITION_WITH_INVALID_OUTCOMES = 19;
+	public static final int TRANSITION_WITH_INVALID_OUTCOMES = 21;
 
 	private static final int NUMBER_OF_ERROR_TYPES = 29;
 	private static final int NUMBER_OF_NORMAL_ERROR_TYPES = 29;
-	private static final int NUMBER_OF_WARNING_TYPES = 20;
+	private static final int NUMBER_OF_WARNING_TYPES = 22;
 	private static final int NUMBER_OF_NORMAL_WARNING_TYPES = 5;
 
 	/**
@@ -317,9 +325,11 @@ public class ModelChecker implements CommonConstants {
 		closedZeroPopulation = new Vector<Object>(0, 1);
 		emptyBlockingRegions = new Vector<Object>(0, 1);
 		invalidLoadDependentRouting = new HashMap<Object, HashMap<Object, Object>>(0);
-		GuardStrategyZeroTasks = new HashMap<Object, Vector<Object>>(0, 1);
+		guardStrategyZeroTasks = new HashMap<Object, Vector<Object>>(0, 1);
 		semaphoreNotBetweenForkJoin = new Vector<Object>(0, 1);
+		scalerNotBetweenForkJoin = new Vector<Object>(0, 1);
 		transitionBetweenForkJoin = new Vector<Object>(0, 1);
+		transitionWithoutForwardLinks = new Vector<Object>(0, 1);
 		transitionWithInvalidConditions = new Vector<Object>(0, 1);
 		transitionWithInvalidOutcomes = new Vector<Object>(0, 1);
 		isToJMVAChecker = isToJMVA;
@@ -351,9 +361,11 @@ public class ModelChecker implements CommonConstants {
 		closedZeroPopulation.removeAllElements();
 		emptyBlockingRegions.removeAllElements();
 		invalidLoadDependentRouting.clear();
-		GuardStrategyZeroTasks.clear();
+		guardStrategyZeroTasks.clear();
 		semaphoreNotBetweenForkJoin.removeAllElements();
+		scalerNotBetweenForkJoin.removeAllElements();
 		transitionBetweenForkJoin.removeAllElements();
+		transitionWithoutForwardLinks.removeAllElements();
 		transitionWithInvalidConditions.removeAllElements();
 		transitionWithInvalidOutcomes.removeAllElements();
 		for (int i = 0; i < NUMBER_OF_ERROR_TYPES; i++) {
@@ -379,13 +391,14 @@ public class ModelChecker implements CommonConstants {
 			checkForBCMPFcfsDifferentServiceTimesWarning();
 			checkForBCMPProcessorSharingWarning();
 			checkForBCMPDelayWarning();
-			checkForBCMPLcfsPrWarning();
+			checkForBCMPLcfsPreemptiveWarning();
 			checkForBCMPNonStateIndependentRoutingWarning();
 			checkForBCMPNonSymmetricSchedulingPolicies();
 		} else {
 			station_def.manageProbabilities();
 			checkForNoClassError();
 			checkForNoStationError();
+			checkForNoMeasureError();
 			checkForRefStationError();
 			checkForSourceWithoutOpenClassError();
 			checkForSinkButNoOpenClassError();
@@ -394,7 +407,6 @@ public class ModelChecker implements CommonConstants {
 			checkForStationLinkError();
 			checkForRoutingError();
 			checkForAllForwardStationsAreSinkError();
-			checkForSimulationError();
 			checkForMeasureError();
 			checkForInconsistentMeasureError();
 			checkForLoadDependentRoutingError();
@@ -412,14 +424,16 @@ public class ModelChecker implements CommonConstants {
 			checkForCsMatrixProbabilities();
 			checkForCsFollowedByBAS();
 			checkForCsBetweenForkJoin();
-			checkCsReferenceStation();
-			checkCsSystemThroughputClass();
-			checkZeroPopulation();
-			checkCsWithForkJoin();
-			checkGuardStrategyZeroTasks();
-			checkSlowFCFSPriorities();
+			checkForCsReferenceStation();
+			checkForCsSystemThroughputClass();
+			checkForZeroPopulation();
+			checkForCsWithForkJoin();
+			checkForGuardStrategyZeroTasks();
+			checkForSchedulingSamePriorities();
 			checkForSemaphoreNotBetweenForkJoin();
+			checkForScalerNotBetweenForkJoin();
 			checkForTransitionBetweenForkJoin();
+			checkForTransitionWithoutForwardLink();
 			checkForTransitionWithInvalidConditions();
 			checkForTransitionWithInvalidOutcomes();
 		}
@@ -475,8 +489,9 @@ public class ModelChecker implements CommonConstants {
 			}
 		}
 		//Added warnings here separately otherwise we had to redo the numbering
-		if (warnings[SINK_PROBABILITY_UPDATE_WARNING] || warnings[CLOSED_ZERO_POPULATION] || warnings[CS_WITH_FORK_JOIN]
-				|| warnings[SLOW_FCFS_SAME_PRIORITIES] || warnings[TRANSITION_BETWEEN_FORK_JOIN] || warnings[TRANSITION_WITH_INVALID_OUTCOMES]) {
+		if (warnings[SINK_PROBABILITY_UPDATE_WARNING] || warnings[CLOSED_ZERO_POPULATION] || warnings[CS_BETWEEN_FORK_JOIN]
+				|| warnings[CS_WITH_FORK_JOIN] || warnings[SCHEDULING_SAME_PRIORITIES] || warnings[TRANSITION_BETWEEN_FORK_JOIN]
+				|| warnings[TRANSITION_WITHOUT_FORWARD_LINKS] || warnings[TRANSITION_WITH_INVALID_OUTCOMES]) {
 			ok = false;
 		}
 		return ok;
@@ -484,7 +499,7 @@ public class ModelChecker implements CommonConstants {
 
 	public boolean isErrorFreeToJMVA() {
 		boolean ok = true;
-		if (errors[NO_CLASSES_ERROR] || errors[NO_STATION_ERROR] || errors[OPEN_CLASS_BUT_NO_SOURCE_ERROR] || errors[REFERENCE_STATION_ERROR]) {
+		if (errors[NO_CLASS_ERROR] || errors[NO_STATION_ERROR] || errors[OPEN_CLASS_BUT_NO_SOURCE_ERROR] || errors[REFERENCE_STATION_ERROR]) {
 			ok = false;
 		}
 		return ok;
@@ -493,9 +508,9 @@ public class ModelChecker implements CommonConstants {
 	public boolean isWarningFreeToJMVA() {
 		boolean ok = true;
 		if (warnings[BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING] || warnings[BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING]
-				|| warnings[BCMP_FCFS_EXPONENTIAL_WARNING] || (warnings[BCMP_NON_SYMMETRIC_SCHEDULING]) || warnings[BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING]
-				|| warnings[BCMP_PROCESSOR_SHARING_WARNING] || warnings[BCMP_DELAY_WARNING] || warnings[BCMP_LCFS_PR_WARNING]
-				|| warnings[BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING]) {
+				|| warnings[BCMP_FCFS_EXPONENTIAL_WARNING] || warnings[BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING]
+				|| warnings[BCMP_PROCESSOR_SHARING_WARNING] || warnings[BCMP_DELAY_WARNING] || warnings[BCMP_LCFS_PREEMPTIVE_WARNING]
+				|| warnings[BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING] || warnings[BCMP_NON_SYMMETRIC_SCHEDULING]) {
 			ok = false;
 		}
 		return ok;
@@ -506,8 +521,8 @@ public class ModelChecker implements CommonConstants {
 	 *
 	 * @return false, if there is at least one class
 	 */
-	public boolean isThereNoClassesError() {
-		return errors[NO_CLASSES_ERROR];
+	public boolean isThereNoClassError() {
+		return errors[NO_CLASS_ERROR];
 	}
 
 	/**
@@ -517,6 +532,15 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public boolean isThereNoStationError() {
 		return errors[NO_STATION_ERROR];
+	}
+
+	/**
+	 * Returns true if no measures have been defined
+	 *
+	 * @return true if the problem occurs
+	 */
+	public boolean isThereNoMeasureError() {
+		return errors[NO_MEASURE_ERROR];
 	}
 
 	/**
@@ -598,15 +622,6 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns true if no measures have been defined
-	 *
-	 * @return true if the problem occurs
-	 */
-	public boolean isThereSimulationError() {
-		return errors[SIMULATION_ERROR];
-	}
-
-	/**
 	 * Returns true if the same measure is defined more than one time
 	 *
 	 * @return true if the same measure is defined more than one time
@@ -637,20 +652,18 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns if there are empty blocking regions.
+	 * Returns true if there are empty blocking regions.
 	 *
-	 * @return if there are empty blocking regions.
-	 * <br>Author: Bertoli Marco
+	 * @return true if there are empty blocking regions.
 	 */
 	public boolean isThereEmptyBlockingRegionError() {
 		return errors[EMPTY_BLOCKING_REGION];
 	}
 
 	/**
-	 * Returns if preloading in blocking regions exceeds the constraints.
+	 * Returns true if preloading in blocking regions exceeds the constraints.
 	 *
-	 * @return if preloading in blocking regions exceeds the constraints.
-	 * <br>Author: Bertoli Marco
+	 * @return true if preloading in blocking regions exceeds the constraints.
 	 */
 	public boolean isTherePreloadingInBlockingRegionError() {
 		return errors[PRELOADING_IN_BLOCKING_REGION];
@@ -693,7 +706,7 @@ public class ModelChecker implements CommonConstants {
 	 * join, false otherwise.
 	 */
 	public boolean isThereCsBetweenForkJoin() {
-		return errors[CS_BETWEEN_FORK_JOIN];
+		return warnings[CS_BETWEEN_FORK_JOIN];
 	}
 
 	/**
@@ -774,6 +787,17 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
+	 * Returns true if there are any scalers not between a fork and a join,
+	 * false otherwise.
+	 *
+	 * @return true if there are any scalers not between a fork and a join,
+	 * false otherwise.
+	 */
+	public boolean isThereScalerNotBetweenForkJoin() {
+		return errors[SCALER_NOT_BETWEEN_FORK_JOIN];
+	}
+
+	/**
 	 * Returns true if any transitions have invalid conditions for some modes,
 	 * false otherwise.
 	 *
@@ -785,10 +809,9 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns true if more than one Sink have been defined. In order to
-	 * maintain the accuracy of the measured throughput.
+	 * Returns true if more than one Sink have been defined.
 	 *
-	 * @return true if more than one Sink have been defined
+	 * @return true if more than one Sink have been defined.
 	 */
 	public boolean isThereMoreThanOneSinkWarning() {
 		return warnings[MORE_THAN_ONE_SINK_WARNING];
@@ -796,112 +819,13 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns true if there are stations (no sources or sinks) not backward
-	 * linked
+	 * linked.
 	 *
 	 * @return true if there are stations (no sources or sinks) not backward
-	 * linked
+	 * linked.
 	 */
 	public boolean isThereNoBackwardLinkWarning() {
 		return warnings[NO_BACKWARD_LINK_WARNING];
-	}
-
-	/**
-	 * Returns true if the PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING occurs
-	 *
-	 * @return true if the parametric analysis model had become inconsistent
-	 * consequently it was modified
-	 */
-	public boolean isThereParametricAnalysisModelModifiedWarning() {
-		return warnings[PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING];
-	}
-
-	/**
-	 * Returns true if PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING occurs
-	 *
-	 * @return true if no PA are available but a PA model was previously defined
-	 */
-	public boolean isThereParametricAnalysisNoMoreAvailableWarning() {
-		return warnings[PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING];
-	}
-
-	/**
-	 * Checks if there are servers with per class different queueing strategy
-	 *
-	 * @return true if servers with per class different queueing strategy are
-	 * found
-	 */
-	public boolean isThereBCMPDifferentQueueingStrategyWarning() {
-		return warnings[BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING];
-	}
-
-	/**
-	 * Checks if there are FCFS servers with a mixed service type
-	 *
-	 * @return true if FCFS servers with with a mixed service type are found
-	 */
-	public boolean isThereBCMPDifferentServiceTypeWarning() {
-		return warnings[BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING];
-	}
-
-	/**
-	 * Checks if there are FCFS servers with homogeneous but non exponential
-	 * service type
-	 *
-	 * @return true if FCFS servers with homogeneous but non exponential service
-	 * type are found
-	 */
-	public boolean isThereBCMPFcfsNonExponentialWarning() {
-		return warnings[BCMP_FCFS_EXPONENTIAL_WARNING];
-	}
-
-	/**
-	 * Checks if there are FCFS servers with homogeneous exponential service
-	 * type, but with different per class service times mean values. If the
-	 * service type is Load Dependent it checks that for each class the load
-	 * dependent strategies are the same, i.e. :
-	 * <br>1) have the same number of ranges</br>
-	 * <br>2) have the same distribution in each range (Exponential)</br>
-	 * <br>3) have the same mean value in each range</br>
-	 * <br>4) have the same 'from' and 'to' values in each range</br>
-	 *
-	 * @return true if FCFS servers with homogeneous exponential service type
-	 * with different per class service times mean values are found
-	 */
-	public boolean isThereBCMPFcfsDifferentServiceTimesWarning() {
-		return warnings[BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING];
-	}
-
-	/**
-	 * Checks if the scheduling policies other than PS, FCFS, or RAND are used
-	 *
-	 * @return true if the scheduling policies other than PS, FCFS, or RAND are
-	 * used
-	 */
-	public boolean isThereBCMPNonSymmetricSchedulingPolicies() {
-		return warnings[BCMP_NON_SYMMETRIC_SCHEDULING];
-
-	}
-
-	/**
-	 * Checks if there are delays with a service time distribution whose Laplace
-	 * transform is not rational
-	 *
-	 * @return true if delays with a service time distribution with a non
-	 * rational Laplace transform are found
-	 */
-	public boolean isThereBCMPDelayWarning() {
-		return warnings[BCMP_DELAY_WARNING];
-	}
-
-	/**
-	 * Checks if there are LCFS-PR stations with service time distribution whose
-	 * Laplace transform is not rational
-	 *
-	 * @return true if LCFS-PR stations with service time distribution whose
-	 * Laplace transform is not rational
-	 */
-	public boolean isThereBCMPLcfsPrWarning() {
-		return warnings[BCMP_LCFS_PR_WARNING];
 	}
 
 	/**
@@ -915,29 +839,136 @@ public class ModelChecker implements CommonConstants {
 		return warnings[FORK_WITHOUT_JOIN_WARNING];
 	}
 
-	public boolean isThereSlowFCFSSamePriorities() {
-		return warnings[SLOW_FCFS_SAME_PRIORITIES];
-	}    
+	/**
+	 * Returns true if the parametric analysis model had become inconsistent
+	 * consequently it was modified.
+	 *
+	 * @return true if the parametric analysis model had become inconsistent
+	 * consequently it was modified.
+	 */
+	public boolean isThereParametricAnalysisModelModifiedWarning() {
+		return warnings[PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING];
+	}
 
 	/**
-	 * Checks if there are stations with Processor Sharing service strategy with
-	 * a service time distribution whose Laplace transform is not rational
+	 * Returns true if no PA are available but a PA model was previously defined.
 	 *
-	 * @return true if stations with Processor Sharing service strategy with a
-	 * service time distribution whose Laplace transform is not rational are
-	 * found
+	 * @return true if no PA are available but a PA model was previously defined.
+	 */
+	public boolean isThereParametricAnalysisNoMoreAvailableWarning() {
+		return warnings[PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING];
+	}
+
+	/**
+	 * Returns true if there are servers with per class different queueing
+	 * strategy.
+	 *
+	 * @return true if there are servers with per class different queueing
+	 * strategy.
+	 */
+	public boolean isThereBCMPDifferentQueueingStrategyWarning() {
+		return warnings[BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING];
+	}
+
+	/**
+	 * Returns true if there are FCFS servers with a mixed service type.
+	 *
+	 * @return true if there are FCFS servers with a mixed service type.
+	 */
+	public boolean isThereBCMPDifferentServiceTypeWarning() {
+		return warnings[BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING];
+	}
+
+	/**
+	 * Returns true if there are FCFS servers with homogeneous but non exponential
+	 * service type.
+	 *
+	 * @return true if there are FCFS servers with homogeneous but non exponential
+	 * service type.
+	 */
+	public boolean isThereBCMPFcfsNonExponentialWarning() {
+		return warnings[BCMP_FCFS_EXPONENTIAL_WARNING];
+	}
+
+	/**
+	 * Returns true if there are FCFS servers with homogeneous exponential service
+	 * type with different per class service times mean values. If the service
+	 * type is Load Dependent it checks that for each class the load dependent
+	 * strategies are the same, i.e.:
+	 * <br>1) have the same number of ranges</br>
+	 * <br>2) have the same distribution in each range (Exponential)</br>
+	 * <br>3) have the same mean value in each range</br>
+	 * <br>4) have the same 'from' and 'to' values in each range</br>
+	 *
+	 * @return true if there are FCFS servers with homogeneous exponential service
+	 * type with different per class service times mean values.
+	 */
+	public boolean isThereBCMPFcfsDifferentServiceTimesWarning() {
+		return warnings[BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING];
+	}
+
+	/**
+	 * Returns true if there are stations with Processor Sharing service strategy
+	 * with a service time distribution whose Laplace transform is not rational.
+	 *
+	 * @return true if there are stations with Processor Sharing service strategy
+	 * with a service time distribution whose Laplace transform is not rational.
 	 */
 	public boolean isThereBCMPProcessorSharingWarning() {
 		return warnings[BCMP_PROCESSOR_SHARING_WARNING];
 	}
 
 	/**
-	 * Use it to check if a non random routing is used
+	 * Returns true if there are delays with a service time distribution whose
+	 * Laplace transform is not rational.
 	 *
-	 * @return true if a non random routing is used
+	 * @return true if there are delays with a service time distribution whose
+	 * Laplace transform is not rational.
+	 */
+	public boolean isThereBCMPDelayWarning() {
+		return warnings[BCMP_DELAY_WARNING];
+	}
+
+	/**
+	 * Returns true if there are LCFS-PR stations with service time distribution
+	 * whose Laplace transform is not rational.
+	 *
+	 * @return true if there are LCFS-PR stations with service time distribution
+	 * whose Laplace transform is not rational.
+	 */
+	public boolean isThereBCMPLcfsPreemptiveWarning() {
+		return warnings[BCMP_LCFS_PREEMPTIVE_WARNING];
+	}
+
+	/**
+	 * Returns true if a non random routing is used.
+	 *
+	 * @return true if a non random routing is used.
 	 */
 	public boolean isThereBCMPNonStateIndependentRoutingWarning() {
 		return warnings[BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING];
+	}
+
+	/**
+	 * Returns true if the scheduling policies other than PS, FCFS, or RAND are
+	 * used.
+	 *
+	 * @return true if the scheduling policies other than PS, FCFS, or RAND are
+	 * used.
+	 */
+	public boolean isThereBCMPNonSymmetricSchedulingPolicies() {
+		return warnings[BCMP_NON_SYMMETRIC_SCHEDULING];
+	}
+
+	/**
+	 * Returns true if priority scheduling is used but all the classes have the same
+	 * priorities.
+	 *
+	 * @return true if priority scheduling is used but all the classes have the same
+	 * priorities.
+	 */
+	public boolean isThereSchedulingSamePriorities() {
+		return warnings[SCHEDULING_SAME_PRIORITIES];
 	}
 
 	/**
@@ -949,6 +980,17 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public boolean isThereTransitionBetweenForkJoin() {
 		return warnings[TRANSITION_BETWEEN_FORK_JOIN];
+	}
+
+	/**
+	 * Returns true if there are any transitions without forward links,
+	 * false otherwise.
+	 *
+	 * @return true if there are any transitions without forward links,
+	 * false otherwise.
+	 */
+	public boolean isThereTransitionWithoutForwardLinks() {
+		return warnings[TRANSITION_WITHOUT_FORWARD_LINKS];
 	}
 
 	/**
@@ -1050,17 +1092,6 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of servers with per class
-	 * different queue strategies.
-	 *
-	 * @return a Vector<Object> containing the keys of servers with per class
-	 * different queue strategies.
-	 */
-	public Vector<Object> getBCMPserversWithNonSymmetricScheduling() {
-		return BCMPserverWithNonSymmetricSchedulingPolicy;
-	}
-
-	/**
 	 * Returns a Vector<Object> containing the keys of servers with FCFS queueing
 	 * strategy but mixed types of service.
 	 *
@@ -1069,6 +1100,50 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public Vector<Object> getBCMPserversWithDifferentServiceTypes() {
 		return BCMPserversWithDifferentServiceTypes;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of servers with FCFS queueing
+	 * strategy but a non exponential distribution.
+	 *
+	 * @return a Vector<Object> containing the keys of servers with FCFS queueing
+	 * strategy but a non exponential distribution.
+	 */
+	public Vector<Object> getBCMPserversFCFSWithoutExponential() {
+		return BCMPserversFCFSWithoutExponential;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of servers with FCFS queueing
+	 * strategy, exponential distribution but different per class service times.
+	 *
+	 * @return a Vector<Object> containing the keys of servers with FCFS queueing
+	 * strategy, exponential distribution but different per class service times.
+	 */
+	public Vector<Object> getBCMPFcfsServersWithDifferentServiceTimes() {
+		return BCMPFcfsServersWithDifferentServiceTimes;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of delays with at least a
+	 * service time distribution with a non rational Laplace transform.
+	 *
+	 * @return a Vector<Object> containing the keys of delays with at least a
+	 * service time distribution with a non rational Laplace transform.
+	 */
+	public Vector<Object> getBCMPdelaysWithNonRationalServiceDistribution() {
+		return BCMPdelaysWithNonRationalServiceDistribution;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of servers with per class
+	 * different queue strategies.
+	 *
+	 * @return a Vector<Object> containing the keys of servers with per class
+	 * different queue strategies.
+	 */
+	public Vector<Object> getBCMPserversWithNonSymmetricScheduling() {
+		return BCMPserverWithNonSymmetricSchedulingPolicy;
 	}
 
 	/**
@@ -1124,39 +1199,6 @@ public class ModelChecker implements CommonConstants {
 		return closedZeroPopulation;
 	}
 
-	/**
-	 * Returns a Vector<Object> containing the keys of servers with FCFS queueing
-	 * strategy but a non exponential distribution.
-	 *
-	 * @return a Vector<Object> containing the keys of servers with FCFS queueing
-	 * strategy but a non exponential distribution.
-	 */
-	public Vector<Object> getBCMPserversFCFSWithoutExponential() {
-		return BCMPserversFCFSWithoutExponential;
-	}
-
-	/**
-	 * Returns a Vector<Object> containing the keys of servers with FCFS queueing
-	 * strategy, exponential distribution but different per class service times.
-	 *
-	 * @return a Vector<Object> containing the keys of servers with FCFS queueing
-	 * strategy, exponential distribution but different per class service times.
-	 */
-	public Vector<Object> getBCMPFcfsServersWithDifferentServiceTimes() {
-		return BCMPFcfsServersWithDifferentServiceTimes;
-	}
-
-	/**
-	 * Returns a Vector<Object> containing the keys of delays with at least a
-	 * service time distribution with a non rational Laplace transform.
-	 *
-	 * @return a Vector<Object> containing the keys of delays with at least a
-	 * service time distribution with a non rational Laplace transform.
-	 */
-	public Vector<Object> getBCMPdelaysWithNonRationalServiceDistribution() {
-		return BCMPdelaysWithNonRationalServiceDistribution;
-	}
-
 	public Map<Object, HashMap<Object, Object>> getInvalidLoadDependentRoutingStations() {
 		return invalidLoadDependentRouting;
 	}
@@ -1169,7 +1211,7 @@ public class ModelChecker implements CommonConstants {
 	 * @return a HashMap where the key is the key of a join.
 	 */
 	public HashMap<Object, Vector<Object>> getKeysOfAllGuardStrategyZeroTask() {
-		return GuardStrategyZeroTasks;
+		return guardStrategyZeroTasks;
 	}
 
 	/**
@@ -1184,12 +1226,36 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of transitions between fork/join.
+	 * Returns a Vector<Object> containing the keys of scalers not between
+	 * fork/join.
 	 *
-	 * @return a Vector<Object> containing the keys of transitions between fork/join.
+	 * @return a Vector<Object> containing the keys of scalers not between
+	 * fork/join.
+	 */
+	public Vector<Object> getScalerNotBetweenForkJoin() {
+		return scalerNotBetweenForkJoin;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of transitions between
+	 * fork/join.
+	 *
+	 * @return a Vector<Object> containing the keys of transitions between
+	 * fork/join.
 	 */
 	public Vector<Object> getTransitionBetweenForkJoin() {
 		return transitionBetweenForkJoin;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of transitions without forward
+	 * links.
+	 *
+	 * @return a Vector<Object> containing the keys of transitions without forward
+	 * links.
+	 */
+	public Vector<Object> getTransitionWithoutForwardLinks() {
+		return transitionWithoutForwardLinks;
 	}
 
 	/**
@@ -1215,24 +1281,32 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Check that there is at least one class in the model. If a problem is
-	 * found it raises to "true" the corresponding position inside the problems
-	 * array.
+	 * Checks that there is at least one class defined. If a problem is found
+	 * it raises to "true" the corresponding position inside the problems array.
 	 */
 	private void checkForNoClassError() {
 		if (class_def.getClassKeys().isEmpty()) {
-			errors[NO_CLASSES_ERROR] = true;
+			errors[NO_CLASS_ERROR] = true;
 		}
 	}
 
 	/**
-	 * Check that there is at least one station in the model. If a problem is
-	 * found it raises to "true" the corresponding position inside the problems
-	 * array.
+	 * Checks that there is at least one station defined. If a problem is found
+	 * it raises to "true" the corresponding position inside the problems array.
 	 */
 	private void checkForNoStationError() {
 		if (station_def.getStationKeysNoSourceSink().isEmpty()) {
 			errors[NO_STATION_ERROR] = true;
+		}
+	}
+
+	/**
+	 * Checks that there is at least one measure defined. If a problem is found
+	 * it raises to "true" the corresponding position inside the problems array.
+	 */
+	private void checkForNoMeasureError() {
+		if (simulation_def.getMeasureKeys().isEmpty()) {
+			errors[NO_MEASURE_ERROR] = true;
 		}
 	}
 
@@ -1323,27 +1397,29 @@ public class ModelChecker implements CommonConstants {
 			Object thisStation = stations.get(i);
 			//get the type of the station
 			String thisStationType = station_def.getStationType(thisStation);
-			if (thisStationType.equals(STATION_TYPE_SOURCE)) {
+			if (thisStationType.equals(STATION_TYPE_TRANSITION)) {
+				continue;
+			} else if (thisStationType.equals(STATION_TYPE_SOURCE)) {
 				//get the vector of forward links
-				Vector<Object> connections = station_def.getForwardConnections(thisStation);
+				Vector<Object> forwardStations = station_def.getForwardConnections(thisStation);
 				//if the vector is empty the Source is not forward connected
-				if (connections.isEmpty()) {
+				if (forwardStations.isEmpty()) {
 					stationsWithLinkErrors.add(thisStation);
 					errors[STATION_LINK_ERROR] = true;
 				}
 			} else if (thisStationType.equals(STATION_TYPE_SINK)) {
 				//get the vector of backward links
-				Vector<Object> connections = station_def.getBackwardConnections(thisStation);
+				Vector<Object> backwardStations = station_def.getBackwardConnections(thisStation);
 				//if the vector is empty the Sink is not backward connected
-				if (connections.isEmpty()) {
+				if (backwardStations.isEmpty()) {
 					stationsWithLinkErrors.add(thisStation);
 					errors[STATION_LINK_ERROR] = true;
 				}
 			} else {
 				//get the vector of forward links
-				Vector<Object> connections = station_def.getForwardConnections(thisStation);
+				Vector<Object> forwardStations = station_def.getForwardConnections(thisStation);
 				//if the vector is empty the Server is not forward connected
-				if (connections.isEmpty()) {
+				if (forwardStations.isEmpty()) {
 					stationsWithLinkErrors.add(thisStation);
 					errors[STATION_LINK_ERROR] = true;
 				}
@@ -1353,7 +1429,6 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Checks if there are empty blocking regions.
-	 * <br>Author: Bertoli Marco
 	 */
 	private void checkForEmptyBlockingRegions() {
 		Vector<Object> regionKeys = blocking_def.getRegionKeys();
@@ -1367,7 +1442,6 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Checks if preloading in blocking regions exceeds the constraints.
-	 * <br>Author: Bertoli Marco
 	 */
 	private void checkForPreloadingInBlockingRegions() {
 		Vector<Object> regionKeys = blocking_def.getRegionKeys();
@@ -1502,19 +1576,7 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Checks that there is at least one measure defined. If a problem is found
-	 * it raises to "true" the corresponding position inside the problems array.
-	 */
-	private void checkForSimulationError() {
-		Vector<Object> measures = simulation_def.getMeasureKeys();
-		if (measures.isEmpty()) {
-			errors[SIMULATION_ERROR] = true;
-		}
-	}
-
-	/**
-	 * Checks that each measure is defined only one time
-	 * <br> Fixed by Bertoli Marco to support global measures
+	 * Checks that each measure is defined only one time.
 	 */
 	private void checkForMeasureError() {
 		Vector<Object> measures = simulation_def.getMeasureKeys();
@@ -1549,7 +1611,6 @@ public class ModelChecker implements CommonConstants {
 	/**
 	 * Checks that each performance index is consistent, i.e. it has no 'null'
 	 * field in reference station.
-	 * <br> Fixed by Bertoli Marco to support global measures
 	 */
 	private void checkForInconsistentMeasureError() {
 		Vector<Object> measures = simulation_def.getMeasureKeys();
@@ -1575,28 +1636,6 @@ public class ModelChecker implements CommonConstants {
 						innerVal.put(stationKey, classKey);
 						invalidLoadDependentRouting.put(strategy, innerVal);
 						errors[LOAD_DEPENDENT_ROUTING_INVALID] = true;
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Checks if a non random routing is used inside a station
-	 */
-	private void checkForBCMPNonStateIndependentRoutingWarning() {
-		Vector<Object> stations = station_def.getStationKeysNoSourceSink();
-		Vector<Object> classes = class_def.getClassKeys();
-		for (int i = 0; i < stations.size(); i++) {
-			Object thisStation = stations.get(i);
-			for (int j = 0; j < classes.size(); j++) {
-				Object thisClass = classes.get(j);
-				RoutingStrategy thisRoutingStrategy = (RoutingStrategy) station_def.getRoutingStrategy(thisStation, thisClass);
-				if (thisRoutingStrategy != null) {
-					if (thisRoutingStrategy.isModelStateDependent()) {
-						BCMPnonStateIndependentRoutingStations.add(thisStation);
-						warnings[BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING] = true;
-						break;
 					}
 				}
 			}
@@ -1784,11 +1823,27 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> stations = station_def.getStationKeysNoSourceSink();
 		for (int i = 0; i < stations.size(); i++) {
 			Object thisStation = stations.get(i);
-			Vector<Object> backwardConnections = station_def.getBackwardConnections(thisStation);
-			if (backwardConnections.isEmpty()) {
+			Vector<Object> backwardStations = station_def.getBackwardConnections(thisStation);
+			if (backwardStations.isEmpty()) {
 				stationWithoutBackwardLinks.add(thisStation);
 				warnings[NO_BACKWARD_LINK_WARNING] = true;
 			}
+		}
+	}
+
+	private void checkForJoinWithoutForkErrors() {
+		Vector<Object> forks = station_def.getStationKeysFork();
+		Vector<Object> joins = station_def.getStationKeysJoin();
+		if (forks.isEmpty() && !joins.isEmpty()) {
+			errors[JOIN_WITHOUT_FORK_ERROR] = true;
+		}
+	}
+
+	private void checkForForkWithoutJoinWarnings() {
+		Vector<Object> forks = station_def.getStationKeysFork();
+		Vector<Object> joins = station_def.getStationKeysJoin();
+		if (!forks.isEmpty() && joins.isEmpty()) {
+			warnings[FORK_WITHOUT_JOIN_WARNING] = true;
 		}
 	}
 
@@ -1819,48 +1874,6 @@ public class ModelChecker implements CommonConstants {
 		ParametricAnalysisChecker pac = new ParametricAnalysisChecker(class_def, station_def, simulation_def);
 		if (simulation_def.isParametricAnalysisEnabled() && !pac.canBeEnabled()) {
 			warnings[PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING] = true;
-		}
-	}
-
-	private void checkForJoinWithoutForkErrors() {
-		Vector<Object> forks = station_def.getStationKeysFork();
-		Vector<Object> joins = station_def.getStationKeysJoin();
-		if (forks.isEmpty() && !joins.isEmpty()) {
-			errors[JOIN_WITHOUT_FORK_ERROR] = true;
-		}
-	}
-
-	private void checkForForkWithoutJoinWarnings() {
-		Vector<Object> forks = station_def.getStationKeysFork();
-		Vector<Object> joins = station_def.getStationKeysJoin();
-		if (!forks.isEmpty() && joins.isEmpty()) {
-			warnings[FORK_WITHOUT_JOIN_WARNING] = true;
-		}
-	}
-
-	private void checkSlowFCFSPriorities() {
-		Vector<Object> classes = class_def.getClassKeys();
-		if (classes.size() <= 1) {
-			return;
-		}
-		for (int i = 1; i < classes.size(); i++) {
-			Object lastClass = classes.get(i - 1);
-			Object thisClass = classes.get(i);
-			Integer lastPriority = class_def.getClassPriority(lastClass);
-			Integer thisPriority = class_def.getClassPriority(thisClass);
-			if (!thisPriority.equals(lastPriority)) {
-				return;
-			}
-		}
-
-		Vector<Object> servers = station_def.getStationKeysServer();
-		for (int i = 0; i < servers.size(); i++) {
-			Object thisServer = servers.get(i);
-			String stationStrategy = station_def.getStationQueueStrategy(thisServer);
-			if (stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_QUEUE_PRIORITY)) {
-				warnings[SLOW_FCFS_SAME_PRIORITIES] = true;
-				break;
-			}                
 		}
 	}
 
@@ -2015,8 +2028,27 @@ public class ModelChecker implements CommonConstants {
 		}
 	}
 
-	private void checkForBCMPLcfsPrWarning() {
+	private void checkForBCMPLcfsPreemptiveWarning() {
 		//TODO:implementation
+	}
+
+	private void checkForBCMPNonStateIndependentRoutingWarning() {
+		Vector<Object> stations = station_def.getStationKeysNoSourceSink();
+		Vector<Object> classes = class_def.getClassKeys();
+		for (int i = 0; i < stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			for (int j = 0; j < classes.size(); j++) {
+				Object thisClass = classes.get(j);
+				RoutingStrategy thisRoutingStrategy = (RoutingStrategy) station_def.getRoutingStrategy(thisStation, thisClass);
+				if (thisRoutingStrategy != null) {
+					if (thisRoutingStrategy.isModelStateDependent()) {
+						BCMPnonStateIndependentRoutingStations.add(thisStation);
+						warnings[BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING] = true;
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	private void checkForBCMPNonSymmetricSchedulingPolicies() {
@@ -2091,7 +2123,6 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Deletes all empty blocking regions
-	 * <br>Author: Bertoli Marco
 	 */
 	public void deleteEmptyBlockingRegions() {
 		for (int i = 0; i < emptyBlockingRegions.size(); i++) {
@@ -2169,12 +2200,12 @@ public class ModelChecker implements CommonConstants {
 			Object thisFork = forks.get(i);
 			Vector<Object> result = searchForStationBetweenForkJoin(STATION_TYPE_CLASSSWITCH, thisFork);
 			if (result != null) {
-				result.addAll(csBetweenForkJoin);
+				result.removeAll(csBetweenForkJoin);
 				csBetweenForkJoin.addAll(result);
 			}
 		}
 		if (!csBetweenForkJoin.isEmpty()) {
-			errors[CS_BETWEEN_FORK_JOIN] = true;
+			warnings[CS_BETWEEN_FORK_JOIN] = true;
 		}
 	}
 
@@ -2182,7 +2213,7 @@ public class ModelChecker implements CommonConstants {
 	 * It checks the different reference station of closed class if there exists
 	 * class switch.
 	 */
-	private void checkCsReferenceStation() {
+	private void checkForCsReferenceStation() {
 		if (csExists()) {
 			Vector<Object> closedClasses = class_def.getClosedClassKeys();
 			Object closedRefStation = null;
@@ -2201,7 +2232,7 @@ public class ModelChecker implements CommonConstants {
 		}
 	}
 
-	private void checkCsSystemThroughputClass() {
+	private void checkForCsSystemThroughputClass() {
 		if (csExists()) {
 			for (Object measure : simulation_def.getMeasureKeys()) {
 				String thisMeasureType = simulation_def.getMeasureType(measure);
@@ -2214,7 +2245,7 @@ public class ModelChecker implements CommonConstants {
 		}
 	}
 
-	private void checkZeroPopulation() {
+	private void checkForZeroPopulation() {
 		if (csExists()) {
 			if (!class_def.getClosedClassKeys().isEmpty() && class_def.getTotalClosedClassPopulation() == 0) {
 				errors[CS_ALL_CLOSED_ZERO_POPULATION] = true;
@@ -2229,7 +2260,7 @@ public class ModelChecker implements CommonConstants {
 		}
 	}
 
-	private void checkCsWithForkJoin() {
+	private void checkForCsWithForkJoin() {
 		if (csExists() && forkExists()) {
 			warnings[CS_WITH_FORK_JOIN] = true;
 		}
@@ -2247,7 +2278,7 @@ public class ModelChecker implements CommonConstants {
 		return !station_def.getStationKeysTransition().isEmpty();
 	}
 
-	private void checkGuardStrategyZeroTasks() {
+	private void checkForGuardStrategyZeroTasks() {
 		for (Object stationKey : station_def.getStationKeys()) {
 			Vector<Object> classes = new Vector<Object>(0, 1);
 			for (Object classKey : class_def.getClassKeys()) {
@@ -2263,7 +2294,7 @@ public class ModelChecker implements CommonConstants {
 				}
 			}
 			if (!classes.isEmpty()) {
-				GuardStrategyZeroTasks.put(stationKey, classes);
+				guardStrategyZeroTasks.put(stationKey, classes);
 				errors[GUARD_STRATEGY_ZERO_TASKS] = true;
 			}
 		}
@@ -2319,12 +2350,41 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Search for all the stations of a given type between a fork and a
-	 * join.
+	 * It checks if priority scheduling is used but all the classes have the
+	 * same priorities.
+	 */
+	private void checkForSchedulingSamePriorities() {
+		Vector<Object> classes = class_def.getClassKeys();
+		if (classes.size() <= 1) {
+			return;
+		}
+		for (int i = 1; i < classes.size(); i++) {
+			Object lastClass = classes.get(i - 1);
+			Object thisClass = classes.get(i);
+			Integer lastPriority = class_def.getClassPriority(lastClass);
+			Integer thisPriority = class_def.getClassPriority(thisClass);
+			if (!thisPriority.equals(lastPriority)) {
+				return;
+			}
+		}
+
+		Vector<Object> servers = station_def.getStationKeysServer();
+		for (int i = 0; i < servers.size(); i++) {
+			Object thisServer = servers.get(i);
+			String stationStrategy = station_def.getStationQueueStrategy(thisServer);
+			if (stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_QUEUE_PRIORITY)) {
+				warnings[SCHEDULING_SAME_PRIORITIES] = true;
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Search for all the stations of a given type between a fork and a join.
 	 * @param type: the type of the stations to be searched for.
 	 * @param start: the fork at which the search begins.
-	 * @return all the stations of the given type found between the fork
-	 * and the join, or null if source is not a fork.
+	 * @return all the stations of the given type found between the fork and
+	 * the join, or null if source is not a fork.
 	 */
 	private Vector<Object> searchForStationBetweenForkJoin(String type, Object start) {
 		if (!station_def.getStationType(start).equals(STATION_TYPE_FORK)) {
@@ -2332,24 +2392,32 @@ public class ModelChecker implements CommonConstants {
 		}
 		Vector<Object> found = new Vector<Object>(0, 1);
 		Map<Object, Boolean> reachable = new HashMap<Object, Boolean>(0, 1);
-		searchForStationBetweenForkJoinAux(type, start, start, reachable, found);
+		searchForStationBetweenForkJoinAux(type, start, start, 0, reachable, found);
 		return found;
 	}
 
 	private void searchForStationBetweenForkJoinAux(String type, Object start, Object source,
-			Map<Object, Boolean> reachable, Vector<Object> found) {
+			int nest, Map<Object, Boolean> reachable, Vector<Object> found) {
 		Vector<Object> forwardStations = station_def.getForwardConnections(source);
+		if (station_def.getStationType(source).equals(STATION_TYPE_FORK)) {
+			nest++;
+		}
+		if (station_def.getStationType(source).equals(STATION_TYPE_JOIN)) {
+			nest--;
+		}
 		reachable.put(source, false);
 		for (Object next : forwardStations) {
-			if (station_def.getStationType(next).equals(STATION_TYPE_JOIN)) {
-				reachable.put(source, true);
-				continue;
-			}
 			if (next.equals(start)) {
 				continue;
 			}
+			if (station_def.getStationType(next).equals(STATION_TYPE_JOIN)) {
+				reachable.put(source, true);
+				if (nest == 1) {
+					continue;
+				}
+			}
 			if (!reachable.containsKey(next)) {
-				searchForStationBetweenForkJoinAux(type, start, next, reachable, found);
+				searchForStationBetweenForkJoinAux(type, start, next, nest, reachable, found);
 			}
 			// The reachable state may be missed when the next station has not been finished.
 			if (reachable.get(next)) {
@@ -2382,6 +2450,25 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
+	 * It checks if there are any scalers not between a fork and a join.
+	 */
+	private void checkForScalerNotBetweenForkJoin() {
+		Vector<Object> scalers = station_def.getStationKeysScaler();
+		Vector<Object> forks = station_def.getStationKeysFork();
+		scalerNotBetweenForkJoin.addAll(scalers);
+		for (int i = 0; i < forks.size(); i++) {
+			Object thisFork = forks.get(i);
+			Vector<Object> result = searchForStationBetweenForkJoin(STATION_TYPE_SCALER, thisFork);
+			if (result != null) {
+				scalerNotBetweenForkJoin.removeAll(result);
+			}
+		}
+		if (!scalerNotBetweenForkJoin.isEmpty()) {
+			errors[SCALER_NOT_BETWEEN_FORK_JOIN] = true;
+		}
+	}
+
+	/**
 	 * It checks if there are any transitions between a fork and a join.
 	 */
 	private void checkForTransitionBetweenForkJoin() {
@@ -2396,6 +2483,23 @@ public class ModelChecker implements CommonConstants {
 		}
 		if (!transitionBetweenForkJoin.isEmpty()) {
 			warnings[TRANSITION_BETWEEN_FORK_JOIN] = true;
+		}
+	}
+
+	/**
+	 * It checks if there are any transitions without forward links.
+	 */
+	private void checkForTransitionWithoutForwardLink() {
+		Vector<Object> transitions = station_def.getStationKeysTransition();
+		for (int i = 0; i < transitions.size(); i++) {
+			Object thisTransition = transitions.get(i);
+			Vector<Object> forwardStations = station_def.getForwardConnections(thisTransition);
+			if (forwardStations.isEmpty()) {
+				transitionWithoutForwardLinks.add(thisTransition);
+			}
+		}
+		if (!transitionWithoutForwardLinks.isEmpty()) {
+			warnings[TRANSITION_WITHOUT_FORWARD_LINKS] = true;
 		}
 	}
 

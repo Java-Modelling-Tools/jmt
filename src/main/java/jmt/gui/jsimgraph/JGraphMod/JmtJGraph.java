@@ -55,9 +55,6 @@ public class JmtJGraph extends JGraph {
 
 	static DefaultCellViewFactory cellViewFactory = new DefaultCellViewFactory();
 
-	// Conti Andrea 29-08-2003
-	// added a Mediator reference with get/set and constructor parameters.
-
 	protected Mediator mediator;
 
 	/**
@@ -205,23 +202,12 @@ public class JmtJGraph extends JGraph {
 			}
 		}
 		return null;
-		//		Object cell = null;
-		//		Object oldCell = null;
-		//		do {
-		//			cell = getNextCellForLocation(oldCell, x, y);
-		//			if (oldCell == cell)
-		//				return null;
-		//			else
-		//				oldCell = cell;
-		//		} while (!((cell instanceof JmtCell) || cell == null));
-
 	}
 
-	// Conti Andrea 29-08-2003
 	/**
 	 * Notification from the <code>UIManager</code> that the L&F has changed.
 	 * Replaces the current UI object with the latest version from the
-	 * <code>UIManager</code>. Subclassers can override this to support
+	 * <code>UIManager</code>. Subclasses can override this to support
 	 * different GraphUIs.
 	 * @see javax.swing.JComponent#updateUI
 	 *
@@ -231,8 +217,6 @@ public class JmtJGraph extends JGraph {
 		setUI(new jmt.gui.jsimgraph.controller.JmtGraphUI(mediator));
 		invalidate();
 	}
-
-	// end
 
 	// --- Methods used to catch ScreenShots in vectorial format --------------------------------
 	/**

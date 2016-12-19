@@ -153,7 +153,6 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			return -Math.log(engine.raw()) / ((ExponentialPar) p).getLambda();

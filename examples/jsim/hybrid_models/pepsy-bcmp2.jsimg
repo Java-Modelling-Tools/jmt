@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="pepsy-bcmp2.jsimg" timestamp="Thu Nov 10 16:55:48 GMT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="pepsy-bcmp2.jsimg" timestamp="Sun Nov 13 14:59:22 GMT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="pepsy-bcmp2.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass customers="10" name="Class1" priority="0" referenceSource="Terminals-Q" type="closed"/>
 <userClass customers="12" name="Class2" priority="0" referenceSource="Terminals-Q" type="closed"/>

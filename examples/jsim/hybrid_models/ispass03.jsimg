@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="ispass03.jsimg" timestamp="Thu Nov 10 16:55:33 GMT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="ispass03.jsimg" timestamp="Sun Nov 13 14:59:13 GMT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="ispass03.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass customers="80" name="x1" priority="0" referenceSource="Client-Q" type="closed"/>
 <userClass customers="0" name="x2" priority="0" referenceSource="Client-Q" type="closed"/>
@@ -58,15 +58,15 @@
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
 <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="putStrategies">
 <refClass>x1</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -440,13 +440,13 @@
 <refClass>x1</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -690,13 +690,13 @@
 <refClass>x1</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -1070,13 +1070,13 @@
 <refClass>x1</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -1396,13 +1396,13 @@
 <refClass>x1</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -1671,13 +1671,13 @@
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
 <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="putStrategies">
 <refClass>x1</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
@@ -1737,15 +1737,15 @@
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
 <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="putStrategies">
 <refClass>x1</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>
@@ -1805,13 +1805,13 @@
 <refClass>x1</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>x2</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>t</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>c</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 <refClass>p</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="putStrategy"/>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
 </parameter>
 </section>
 <section className="ServiceTunnel"/>

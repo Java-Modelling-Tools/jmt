@@ -42,11 +42,8 @@ public class ActionDelete extends AbstractJmodelAction {
 	public ActionDelete(Mediator mediator) {
 		super("Delete", "Delete2", mediator);
 		putValue(SHORT_DESCRIPTION, "Delete");
-		// Conti Andrea
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_D));
 		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-		// putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_CANCEL));
-		// end
 		setEnabled(false);
 	}
 
@@ -55,11 +52,6 @@ public class ActionDelete extends AbstractJmodelAction {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		mediator.deleteSelected();
-		if (!mediator.isSomethingSelected()) {
-			mediator.enableCopyAction(false);
-			mediator.enableCutAction(false);
-			mediator.enableDeleteAction(false);
-		}
 	}
 
 }

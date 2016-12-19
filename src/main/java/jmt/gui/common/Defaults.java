@@ -90,7 +90,7 @@ public class Defaults implements CommonConstants {
 
 		def.setProperty("placeCapacity", "-1");
 		def.setProperty("placeQueueCapacity", "-1");
-		def.setProperty("placeQueueStrategy", QUEUE_STRATEGY_RAND);
+		def.setProperty("placeQueueStrategy", QUEUE_STRATEGY_FCFS);
 		def.setProperty("placeDropRule", FINITE_DROP);
 		def.setProperty("transitionModeName", "Mode");
 		def.setProperty("transitionNumberOfServers", "-1");

@@ -39,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
@@ -375,6 +376,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			sizeColumns();
 			setDefaultEditor(Double.class, new ExactCellEditor());
 			setDefaultRenderer(Object.class, new DisabledCellRenderer());
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 

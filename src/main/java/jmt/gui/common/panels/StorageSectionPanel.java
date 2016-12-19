@@ -28,6 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -206,6 +207,7 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 			dropRuleRenderer = new DisabledComboBoxCellRenderer(INFINITE_CAPACITY);
 			setModel(new StorageOptionTableModel());
 			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 			sizeColumns();
 		}

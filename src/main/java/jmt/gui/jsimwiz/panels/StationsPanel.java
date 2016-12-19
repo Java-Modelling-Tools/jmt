@@ -35,6 +35,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
@@ -172,8 +173,6 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
 				ImagedComboBoxCellEditorFactory.OPTION_STATION_TYPES);
 		initComponents();
-		//forbid column to be moved
-		stationTable.getTableHeader().setReorderingAllowed(false);
 		setData(sd, cd);
 	}
 
@@ -358,7 +357,8 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 			super.setModel(tabMod);
 			sizeColumnsAndRows();
 			setRowHeight(ROW_HEIGHT);
-			setDefaultRenderer(String.class, new jmt.gui.exact.table.DisabledCellRenderer());
+			setDefaultRenderer(String.class, new DisabledCellRenderer());
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 

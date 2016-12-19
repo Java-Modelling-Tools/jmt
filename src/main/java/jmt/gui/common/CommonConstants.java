@@ -244,7 +244,7 @@ public interface CommonConstants {
 	static final String HTML_FONT_NOR_END = "</font>";
 
 	public static final String FINITE_DROP = "Drop";
-	public static final String FINITE_BLOCK = "BAS blocking";
+	public static final String FINITE_BLOCK = "BAS Blocking";
 	public static final String FINITE_WAITING = "Waiting Queue (no drop)";
 
 	public static final String CLASSES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Classes Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM

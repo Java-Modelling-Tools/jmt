@@ -37,6 +37,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
@@ -285,6 +286,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			setModel(new BlockingGroupTableModel());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
@@ -486,6 +488,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 				setModel(new GroupEditTableModel());
 				sizeColumns();
 				setRowHeight(ROW_HEIGHT);
+				setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 				getTableHeader().setReorderingAllowed(false);
 			}
 

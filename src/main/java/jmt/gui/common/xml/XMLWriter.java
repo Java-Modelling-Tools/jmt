@@ -531,7 +531,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			String dropStrategy = model.getDropRule(stationKey, classes.get(i));
 			queueDropStrategies[i] = new XMLParameter("dropStrategy",
 					String.class.getName(), model.getClassName(classes.get(i)),
-					(String) DROP_RULES_MAPPING.get(dropStrategy), true);
+					DROP_RULES_MAPPING.get(dropStrategy), true);
 		}
 		queueDropStrategy.appendParameterElement(doc, queue);
 
@@ -1635,8 +1635,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				XMLParameter probRoutingPar = null;
 				Vector<Object> outputs = model.getForwardConnections(stationKey);
 				Map<Object, Double> values = routingStrat.getValues();
-				model.normalizeProbabilities(values, outputs, classKey,
-						stationKey);
 				XMLParameter[] empiricalEntries = new XMLParameter[outputs
 				                                                   .size()];
 				for (int i = 0; i < empiricalEntries.length; i++) {
@@ -1707,28 +1705,16 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				// parameter containing array of empirical entries
 				ArrayList<XMLParameter> outPathEntries = new ArrayList<XMLParameter>();
 				XMLParameter[] innerForkPar = null;
-				if (forkStrat.getOutDetails() != null
-						&& forkStrat instanceof ProbabilitiesFork) {
-					XMLParameter outPathPar = null;
-					Vector<Object> outputs = model
-							.getForwardConnections(stationKey);
+				if (forkStrat.getOutDetails() != null) {
 					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) forkStrat.getOutDetails();
-					// model.normalizeProbabilities(values, outputs, classKey, stationKey);
-					ArrayList<XMLParameter> outPathArray = new ArrayList<XMLParameter>();
-					// XMLParameter[] empiricalEntries = new XMLParameter[outputs.size()];
-					// for (int i = 0; i < outPathArray.length; i++) {
 					for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
 						Map<Object, Double> map = (Map) entry.getValue().getOutParameters();
-						//M Cazzoli
-						model.normalizeProbabilitiesFork(map);
-						//end
-						// XMLParameter[] empiricalEntries = new XMLParameter[map.size()];
 						ArrayList<XMLParameter> empiricalEntries = new ArrayList<XMLParameter>();
 
 						XMLParameter stationDest = new XMLParameter(
 								"stationName", String.class.getName(), null,
-								(String) entry.getValue().getOutName(), true);
-						String outProb = entry.getValue().getProb().toString();
+								model.getStationName(entry.getKey()), true);
+						String outProb = entry.getValue().getProbability().toString();
 						XMLParameter routProb = new XMLParameter("probability",
 								Double.class.getName(), null, outProb, true);
 						XMLParameter outUnitProb = new XMLParameter(
@@ -1790,19 +1776,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				return forkStrategy;
 			} else if (forkStrat instanceof CombFork) {
 				Map<Object, Double> probs = (Map<Object, Double>) forkStrat.getOutDetails();
-				// M Cazzoli
-				// check sum of probabilities equals 1
-				int n = 0;
-				if (model.getClassType(classKey) == CLASS_TYPE_CLOSED) {
-					for (Object o: model.getForwardConnections(stationKey)) {
-						if (model.getStationType(o).equals(STATION_TYPE_SINK)) {
-							n++;
-						}
-					}
-				}
-				n = probs.size() - n;
-				model.normalizeProbabilitiesFork(probs);
-				//end
 				XMLParameter[] combParam = new XMLParameter[probs.size()];
 				for (int i = 0; i < probs.size(); i++) {
 					XMLParameter stationDest = new XMLParameter(
@@ -1826,24 +1799,21 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 						new XMLParameter[] { entryArray }, true);
 				forkStrategy.parameterArray = "false";
 				return forkStrategy;
-			} else if (forkStrat instanceof MultiBranchClassSwitchFork || forkStrat instanceof ClassSwitchFork) {
+			} else if (forkStrat instanceof ClassSwitchFork
+					|| forkStrat instanceof MultiBranchClassSwitchFork) {
 				// parameter containing array of empirical entries
 				XMLParameter[] innerForkPar = null;
 				if (forkStrat.getOutDetails() != null) {
 					Map<Object, OutPath> outPaths = (Map<Object, OutPath>) forkStrat.getOutDetails();
-					// model.normalizeProbabilities(values, outputs, classKey, stationKey);
 					ArrayList<XMLParameter> classNumArray = new ArrayList<XMLParameter>();
-					// XMLParameter[] empiricalEntries = new XMLParameter[outputs.size()];
-					// for (int i = 0; i < outPathArray.length; i++) {
 					for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
 						Map<Object, Integer> map = (Map) entry.getValue().getOutParameters();
-						// XMLParameter[] empiricalEntries = new XMLParameter[map.size()];
 						ArrayList<XMLParameter> classes = new ArrayList<XMLParameter>();
 						ArrayList<XMLParameter> numbers = new ArrayList<XMLParameter>();
 
 						XMLParameter stationDest = new XMLParameter(
 								"stationName", String.class.getName(), null,
-								(String) entry.getValue().getOutName(), true);
+								model.getStationName(entry.getKey()), true);
 						for (Object c: model.getClassKeys()) {
 							if (map.get(c) != null) {
 								XMLParameter jobClass = new XMLParameter(
@@ -1886,7 +1856,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 							.toArray(new XMLParameter[classNumArray
 							                          .size()]), true);
 					innerForkPar = new XMLParameter[] { classSwitchForkPar };
-
 				}
 				// creating parameter for empirical strategy: must be null if
 				// routing is empirical
