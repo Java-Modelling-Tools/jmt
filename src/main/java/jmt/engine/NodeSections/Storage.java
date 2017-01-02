@@ -186,6 +186,9 @@ public class Storage extends InputSection {
 			putStrategies[job.getJobClass().getId()].put(job, jobsList, this);
 			nodeJobsList.add(jobInfo);
 			netJobsList.addJob(job);
+			if (redirectionON) {
+				myRegion.increaseOccupation(job);
+			}
 		}
 	}
 

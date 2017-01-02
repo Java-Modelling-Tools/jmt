@@ -29,7 +29,6 @@ import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
-import jmt.engine.QueueNet.LinkedJobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
@@ -106,7 +105,6 @@ public class BlockingQueue extends InputSection {
 	@Override
 	protected void nodeLinked(NetNode node) {
 		// Sets netnode dependent properties
-		jobsList = new LinkedJobInfoList(getJobClasses().size(), true);
 		jobsList_node = node.getJobInfoList();
 
 		//copies drop properties from blocking region

@@ -413,7 +413,7 @@ public class Queue extends InputSection {
 			job = message.getJob();
 
 			//----REDIRECTION BEHAVIOUR----------//
-			if (isRedirectionON()) {
+			if (redirectionON) {
 				NetNode source = message.getSource();
 				boolean fromTheInside = myRegion.belongsToRegion(source);
 
@@ -508,7 +508,7 @@ public class Queue extends InputSection {
 
 					//if the queue is inside a blocking region, the jobs
 					//counter must be decreased
-					if (isRedirectionON()) {
+					if (redirectionON) {
 						//decrease the number of jobs
 						//myRegion.decreaseOccupation(job.getJobClass());
 						myRegion.decreaseOccupation(job);
@@ -648,6 +648,9 @@ public class Queue extends InputSection {
 			}
 			nodeJobsList.add(jobInfo);
 			netJobsList.addJob(job);
+			if (redirectionON) {
+				myRegion.increaseOccupation(job);
+			}
 		}
 	}
 

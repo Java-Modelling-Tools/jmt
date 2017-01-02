@@ -1397,7 +1397,7 @@ public class ModelChecker implements CommonConstants {
 			Object thisStation = stations.get(i);
 			//get the type of the station
 			String thisStationType = station_def.getStationType(thisStation);
-			if (thisStationType.equals(STATION_TYPE_TRANSITION)) {
+			if (thisStationType.equals(STATION_TYPE_PLACE) || thisStationType.equals(STATION_TYPE_TRANSITION)) {
 				continue;
 			} else if (thisStationType.equals(STATION_TYPE_SOURCE)) {
 				//get the vector of forward links
@@ -2246,11 +2246,13 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	private void checkForZeroPopulation() {
-		if (csExists()) {
+		if (transitionExists()) {
+			return;
+		} else if (csExists()) {
 			if (!class_def.getClosedClassKeys().isEmpty() && class_def.getTotalClosedClassPopulation() == 0) {
 				errors[CS_ALL_CLOSED_ZERO_POPULATION] = true;
 			}
-		} else if (!transitionExists()) {
+		} else {
 			for (Object closedClassKey : class_def.getClosedClassKeys()) {
 				if (class_def.getClassPopulation(closedClassKey).intValue() == 0) {
 					closedZeroPopulation.add(closedClassKey);

@@ -26,7 +26,7 @@
 		<javac srcdir="${src}" destdir="${class}" source="1.7" target="1.7" encoding="UTF-8" includeantruntime="false">
 			<classpath>
 				<fileset dir="${lib}">
-					<include name="*.jar "/>
+					<include name="*.jar" />
 				</fileset>
 			</classpath>
 		</javac>
@@ -39,7 +39,7 @@
 		</copy>
 
 		<!-- Copy License and Readme to class folder -->
-		<copy file="license\LICENSE_JMT.txt" tofile="${class}/License.txt" />
+		<copy file="license/LICENSE_JMT.txt" tofile="${class}/License.txt" />
 		<copy file="README.txt" todir="${class}" />
 	</target>
 
