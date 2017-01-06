@@ -89,7 +89,7 @@ public class ConnectState extends UIStateDefault {
 			if (!e.isConsumed()) {
 				Graphics2D g = mediator.getGraphGraphics();
 				Color bg = mediator.getGraphBackground();
-				Color fg = Color.black;
+				Color fg = Color.BLACK;
 				g.setColor(fg);
 				g.setXORMode(bg);
 				overlay(g);

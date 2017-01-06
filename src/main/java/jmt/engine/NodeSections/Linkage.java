@@ -103,8 +103,7 @@ public class Linkage extends OutputSection {
 			Job job = message.getJob();
 			send(job, 0.0, requestSource);
 			if (borderRouterON && !myRegion.belongsToRegion(requestSource)) {
-				//myRegion.decreaseOccupation(job.getJobClass());
-				myRegion.decreaseOccupation(job);
+				myRegion.decreaseOccupation(job.getJobClass());
 				send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);
 			}
 			break;

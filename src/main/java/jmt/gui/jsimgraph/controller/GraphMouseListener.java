@@ -55,10 +55,10 @@ public class GraphMouseListener implements MouseInputListener {
 	/** The focused cell under the mousepointer. */
 	protected CellView focus;
 
-	/* The cell under the mousepointer. */
+	/** The cell under the mousepointer. */
 	protected CellView cell;
 
-	/* The object that handles mouse operations. */
+	/** The object that handles mouse operations. */
 	protected Object handler;
 
 	/** Handle that we are going to use. */

@@ -1076,8 +1076,8 @@ public class SimLoader {
 			NodeList globalConstraints = region.getElementsByTagName("globalConstraint");
 
 			if (globalConstraints.item(0) != null) {
-				Element globalConst = (Element) globalConstraints.item(0);
-				maxCapacity = Double.parseDouble(globalConst.getAttribute("maxJobs"));
+				Element globalConstraint = (Element) globalConstraints.item(0);
+				maxCapacity = Double.parseDouble(globalConstraint.getAttribute("maxJobs"));
 				if (DEBUG) {
 					System.out.println("   global constraint = " + Double.toString(maxCapacity));
 				}
@@ -1091,8 +1091,8 @@ public class SimLoader {
 			NodeList globalMemoryConstraints = region.getElementsByTagName("globalMemoryConstraint");
 
 			if (globalMemoryConstraints.item(0) != null) {
-				Element globalMemoryConst = (Element) globalMemoryConstraints.item(0);
-				maxMemory = Double.parseDouble(globalMemoryConst.getAttribute("maxMemory"));
+				Element globalMemoryConstraint = (Element) globalMemoryConstraints.item(0);
+				maxMemory = Double.parseDouble(globalMemoryConstraint.getAttribute("maxMemory"));
 				if (DEBUG) {
 					System.out.println("   global memory constraint = " + Double.toString(maxMemory));
 				}
@@ -1127,12 +1127,6 @@ public class SimLoader {
 					System.out.println("Loading specified drop rules...");
 				}
 
-				//the number of drop rules must be exactly equal
-				//to the number of classes
-				/*if (dropRules.getLength() != classNumber) {
-					throw new LoadException("One drop rule is required for each class.");
-				}*/
-
 				Element dropRule = null;
 				int classPosition;
 				String className;
@@ -1153,7 +1147,7 @@ public class SimLoader {
 					}
 
 					if (DEBUG) {
-						System.out.println("   drop class " + className + " = " + dropThisClass[classPosition]);
+						System.out.println("   drop for class " + className + " = " + dropThisClass[classPosition]);
 					}
 				}
 			}
@@ -1167,12 +1161,6 @@ public class SimLoader {
 			Arrays.fill(maxCapacityPerClass, -1.0);
 
 			if (classConstraints.getLength() > 0) {
-				//the number of class constraints must be exactly equal
-				//to the number of classes
-				/*if (classConstraints.getLength() != classNumber) {
-					throw new LoadException("One class constraint is required for each class.");
-				}*/
-
 				Element clsConst = null;
 				int classPosition;
 				String className;
@@ -1187,7 +1175,7 @@ public class SimLoader {
 
 					if (classPosition == -1) {
 						//class not exists
-						throw new LoadException("The job class associated to this class constraint does not exist in model");
+						throw new LoadException("The job class associated to this constraint does not exist in model");
 					} else {
 						//set max capacity for this class
 						maxCapacityPerClass[classPosition] = Double.parseDouble(clsConst.getAttribute("maxJobsPerClass"));
@@ -1195,6 +1183,41 @@ public class SimLoader {
 
 					if (DEBUG) {
 						System.out.println("   constraint for class " + className + " = " + Double.toString(maxCapacityPerClass[classPosition]));
+					}
+				}
+			}
+
+			//-----------------CLASS MEMORY CONSTRAINTS-----------------//
+			NodeList classMemoryConstraints = region.getElementsByTagName("classMemoryConstraint");
+
+			//max memory for each class (-1 means no constraint)
+			double[] maxMemoryPerClass = new double[classNumber];
+			//init
+			Arrays.fill(maxMemoryPerClass, -1.0);
+
+			if (classMemoryConstraints.getLength() > 0) {
+				Element clsMemConst = null;
+				int classPosition;
+				String className;
+
+				for (int cmc = 0; cmc < classMemoryConstraints.getLength(); cmc++) {
+					clsMemConst = (Element) classMemoryConstraints.item(cmc);
+
+					className = clsMemConst.getAttribute("jobClass");
+
+					//entries may be in a wrong order: find the right position
+					classPosition = getJobClassPosition(className);
+
+					if (classPosition == -1) {
+						//class not exists
+						throw new LoadException("The job class associated to this memory constraint does not exist in model");
+					} else {
+						//set max memory for this class
+						maxMemoryPerClass[classPosition] = Double.parseDouble(clsMemConst.getAttribute("maxMemoryPerClass"));
+					}
+
+					if (DEBUG) {
+						System.out.println("   memory constraint for class " + className + " = " + Double.toString(maxMemoryPerClass[classPosition]));
 					}
 				}
 			}
@@ -1207,18 +1230,12 @@ public class SimLoader {
 			Arrays.fill(regionClassWeights, 1.0);
 
 			if (classWeights.getLength() > 0) {
-				//the number of class weights must be exactly equal
-				//to the number of classes
-				/*if (classWeights.getLength() != classNumber) {
-					throw new LoadException("One class weight is required for each class.");
-				}*/
-
 				Element clsWeight = null;
 				int classPosition;
 				String className;
 
-				for (int c = 0; c < classWeights.getLength(); c++) {
-					clsWeight = (Element) classWeights.item(c);
+				for (int cw = 0; cw < classWeights.getLength(); cw++) {
+					clsWeight = (Element) classWeights.item(cw);
 
 					className = clsWeight.getAttribute("jobClass");
 
@@ -1238,26 +1255,20 @@ public class SimLoader {
 				}
 			}
 
-			//------------------Memory Size Each Class--------------//
-			NodeList classSizes = root.getElementsByTagName("classMemorySize");
+			//----------------CLASS SIZES----------------//
+			NodeList classSizes = root.getElementsByTagName("classSize");
 
 			double[] regionClassSizes = new double[classNumber];
 			//init
 			Arrays.fill(regionClassSizes, 1.0);
 
 			if (classSizes.getLength() > 0) {
-				//the number of class weights must be exactly equal
-				//to the number of classes
-				/*if (classWeights.getLength() != classNumber) {
-					throw new LoadException("One class weight is required for each class.");
-				}*/
-
 				Element clsSize = null;
 				int classPosition;
 				String className;
 
-				for (int c = 0; c < classSizes.getLength(); c++) {
-					clsSize = (Element) classSizes.item(c);
+				for (int cs = 0; cs < classSizes.getLength(); cs++) {
+					clsSize = (Element) classSizes.item(cs);
 
 					className = clsSize.getAttribute("jobClass");
 
@@ -1277,7 +1288,7 @@ public class SimLoader {
 				}
 			}
 
-			//------------------Group Constraints---------------------//
+			//----------------GROUP CONSTRAINTS----------------//
 			NodeList groupConstraints = region.getElementsByTagName("groupConstraint");
 			int groupNumber = groupConstraints.getLength();
 			String[] groupNames = new String[groupNumber];
@@ -1288,15 +1299,15 @@ public class SimLoader {
 				maxCapacityPerGroup[j] = Double.parseDouble(groupConstraint.getAttribute("maxJobsPerGroup"));
 			}
 
-			//------------------Group Strategies----------------------//
-			NodeList groupStrategies = region.getElementsByTagName("groupStrategy");
-			String[] groupStrategy = new String[groupNumber];
+			//----------------GROUP MEMORY CONSTRAINTS----------------//
+			NodeList groupMemoryConstraints = region.getElementsByTagName("groupMemoryConstraint");
+			double[] maxMemoryPerGroup = new double[groupNumber];
 			for (int j = 0; j < groupNumber; j++) {
-				Element groupStrategyElement = (Element) groupStrategies.item(j);
-				groupStrategy[j] = groupStrategyElement.getAttribute("strategy");
+				Element groupMemoryConstraint = (Element) groupMemoryConstraints.item(j);
+				maxMemoryPerGroup[j] = Double.parseDouble(groupMemoryConstraint.getAttribute("maxMemoryPerGroup"));
 			}
 
-			//------------------Group ClassesList---------------------//
+			//----------------GROUP CLASSLISTS----------------//
 			NodeList groupClassLists  = region.getElementsByTagName("groupClassList");
 			List<List<Integer>> groupClassIndexLists = new ArrayList<List<Integer>>();
 			for (int j = 0; j < groupNumber; j++) {
@@ -1310,11 +1321,9 @@ public class SimLoader {
 				}
 			}
 
-			//------------------ADD BLOCKING REGION TO SIM ---------//
-			//sim.addRegion(regionName, maxCapacity, maxCapacityPerClass, regionClassWeights, dropThisClass, stationNames);
-			//sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, regionClassSizes, regionClassWeights, dropThisClass, stationNames);
-			sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, regionClassSizes, regionClassWeights, dropThisClass,
-					groupNames, maxCapacityPerGroup, groupStrategy, groupClassIndexLists, stationNames);
+			//------------------ADD BLOCKING REGION TO SIM------------------//
+			sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, maxMemoryPerClass, dropThisClass, regionClassWeights, regionClassSizes,
+					groupNames, maxCapacityPerGroup, maxMemoryPerGroup, groupClassIndexLists, stationNames);
 			if (DEBUG) {
 				System.out.println("added region " + regionName);
 			}

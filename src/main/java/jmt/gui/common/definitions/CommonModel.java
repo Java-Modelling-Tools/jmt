@@ -2812,12 +2812,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	// --- Blocking Region Definition --- Bertoli Marco ----------------------------------------------
+
 	/**
 	 * Adds a new blocking region to the model
-	 *
-	 * @param name name of new blocking region
-	 * @param type type of new blocking region
-	 * @return search's key for new blocking region
+	 * @param name name of the new region
+	 * @param type type of the new region
+	 * @return search's key for new region
 	 */
 	@Override
 	public Object addBlockingRegion(String name, String type) {
@@ -2826,7 +2826,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (!blockingRegionsKeyset.contains(key)) {
 			blockingRegionsKeyset.add(key);
 		}
-		BlockingRegionData newBlocking = new BlockingRegionData(name, type, Defaults.getAsInteger("blockingMaxJobs"), Defaults.getAsInteger("blockingMaxMemory"));
+		BlockingRegionData newBlocking = new BlockingRegionData(name, type,
+				Defaults.getAsInteger("blockingMaxJobs"), Defaults.getAsInteger("blockingMaxMemory"));
 		blockingDataHM.put(key, newBlocking);
 		// Adds region-class specific data
 		addBlockingDetails(key);
@@ -2835,9 +2836,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Removes a blocking region from the model
-	 *
-	 * @param key Search's key for region to be deleted
+	 * Deletes a blocking region from the model
+	 * @param key search's key for region
 	 */
 	@Override
 	public void deleteBlockingRegion(Object key) {
@@ -2860,11 +2860,320 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Adds a new station to specified blocking region
-	 *
-	 * @param regionKey  Search's key for region
-	 * @param stationKey Search's key for station
-	 * @return true if station can be put inside specified region
+	 * Returns the entire set of blocking region keys
+	 * @return the entire set of blocking region keys
+	 */
+	@Override
+	public Vector<Object> getRegionKeys() {
+		return blockingRegionsKeyset;
+	}
+
+	/**
+	 * Gets the name of a blocking region
+	 * @param regionKey search's key for region
+	 * @return name of the region
+	 */
+	@Override
+	public String getRegionName(Object regionKey) {
+		if (blockingRegionsKeyset.contains(regionKey)) {
+			return ((BlockingRegionData) blockingDataHM.get(regionKey)).name;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Sets the name of a blocking region
+	 * @param regionKey search's key for region
+	 * @param name name of the region
+	 */
+	@Override
+	public void setRegionName(Object regionKey, String name) {
+		if (blockingRegionsKeyset.contains(regionKey)) {
+			if (!((BlockingRegionData) blockingDataHM.get(regionKey)).name.equals(name)) {
+				save = true;
+			}
+			((BlockingRegionData) blockingDataHM.get(regionKey)).name = name;
+		}
+	}
+
+	/**
+	 * Gets the type of a blocking region
+	 * @param regionKey search's key for region
+	 * @return type of the region
+	 */
+	@Override
+	public String getRegionType(Object regionKey) {
+		if (blockingRegionsKeyset.contains(regionKey)) {
+			return ((BlockingRegionData) blockingDataHM.get(regionKey)).type;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Sets the type of a blocking region
+	 * @param regionKey search's key for region
+	 * @param type type of the region
+	 */
+	@Override
+	public void setRegionType(Object regionKey, String type) {
+		if (blockingRegionsKeyset.contains(regionKey)) {
+			if (!((BlockingRegionData) blockingDataHM.get(regionKey)).type.equals(type)) {
+				save = true;
+			}
+			((BlockingRegionData) blockingDataHM.get(regionKey)).type = type;
+		}
+	}
+
+	/**
+	 * Gets the global customer number constraint for a blocking region
+	 * @param regionKey search's key for region
+	 * @return maximum number of allowed customers (-1 means infinity)
+	 */
+	@Override
+	public Integer getRegionCustomerConstraint(Object regionKey) {
+		if (!blockingRegionsKeyset.contains(regionKey)) {
+			return null;
+		}
+		return ((BlockingRegionData) blockingDataHM.get(regionKey)).maxJobs;
+	}
+
+	/**
+	 * Sets the global customer number constraint for a blocking region
+	 * @param regionKey search's key for region
+	 * @param maxJobs maximum number of allowed customers (-1 means infinity)
+	 */
+	@Override
+	public void setRegionCustomerConstraint(Object regionKey, Integer maxJobs) {
+		if (!blockingRegionsKeyset.contains(regionKey)) {
+			return;
+		}
+		if (!((BlockingRegionData) blockingDataHM.get(regionKey)).maxJobs.equals(maxJobs)) {
+			save = true;
+		}
+		((BlockingRegionData) blockingDataHM.get(regionKey)).maxJobs = maxJobs;
+	}
+
+	/**
+	 * Gets the global memory size constraint for a blocking region
+	 * @param regionKey search's key for region
+	 * @return maximum size of allowed memory (-1 means infinity)
+	 */
+	@Override
+	public Integer getRegionMemorySize(Object regionKey) {
+		if (!blockingRegionsKeyset.contains(regionKey)) {
+			return null;
+		}
+		return ((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory;
+	}
+
+	/**
+	 * Sets the global memory size constraint for a blocking region
+	 * @param regionKey search's key for region
+	 * @param maxMemory maximum size of allowed memory (-1 means infinity)
+	 */
+	@Override
+	public void setRegionMemorySize(Object regionKey, Integer maxMemory) {
+		if (!blockingRegionsKeyset.contains(regionKey)) {
+			return;
+		}
+		if (!((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory.equals(maxMemory)) {
+			save = true;
+		}
+		((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory = maxMemory;
+	}
+
+	/**
+	 * Gets the customer number constraint for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @return maximum number of allowed customers for specified class (-1 means infinity)
+	 */
+	@Override
+	public Integer getRegionClassCustomerConstraint(Object regionKey, Object classKey) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return null;
+		}
+		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxJobs;
+	}
+
+	/**
+	 * Sets the customer number constraint for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @param maxJobs maximum number of allowed customers for specified class (-1 means infinity)
+	 */
+	@Override
+	public void setRegionClassCustomerConstraint(Object regionKey, Object classKey, Integer maxJobs) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return;
+		}
+		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxJobs.equals(maxJobs)) {
+			save = true;
+		}
+		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxJobs = maxJobs;
+	}
+
+	/**
+	 * Gets the memory size constraint for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @return maximum size of allowed memory for specified class (-1 means infinity)
+	 */
+	@Override
+	public Integer getRegionClassMemorySize(Object regionKey, Object classKey) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return null;
+		}
+		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxMemory;
+	}
+
+	/**
+	 * Sets the memory size constraint for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @param maxMemory maximum size of allowed memory for specified class (-1 means infinity)
+	 */
+	@Override
+	public void setRegionClassMemorySize(Object regionKey, Object classKey, Integer maxMemory) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return;
+		}
+		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxMemory.equals(maxMemory)) {
+			save = true;
+		}
+		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxMemory = maxMemory;
+	}
+
+	/**
+	 * Gets the drop rule for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @return true if jobs of specified class can be dropped, false otherwise
+	 */
+	@Override
+	public Boolean getRegionClassDropRule(Object regionKey, Object classKey) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return null;
+		}
+		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).drop;
+	}
+
+	/**
+	 * Sets the drop rule for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @param drop true if jobs of specified class can be dropped, false otherwise
+	 */
+	@Override
+	public void setRegionClassDropRule(Object regionKey, Object classKey, Boolean drop) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return;
+		}
+		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).drop.equals(drop)) {
+			save = true;
+		}
+		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).drop = drop;
+	}
+
+	/**
+	 * Gets the weight of each job for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @return weight of each job for specified class
+	 */
+	@Override 
+	public Integer getRegionClassWeight(Object regionKey, Object classKey) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return null;
+		}
+		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight;
+	}
+
+	/**
+	 * Sets the weight of each job for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @param weight weight of each job for specified class
+	 */
+	@Override
+	public void setRegionClassWeight(Object regionKey, Object classKey, Integer weight) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return;
+		}
+		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight.equals(weight)) {
+			save = true;
+		}
+		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight = weight;
+	}
+
+	/**
+	 * Gets the size of each job for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @return size of each job for specified class
+	 */
+	@Override 
+	public Integer getRegionClassSize(Object regionKey, Object classKey) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return null;
+		}
+		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size;
+	}
+
+	/**
+	 * Sets the size of each job for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @param size size of each job for specified class
+	 */
+	@Override
+	public void setRegionClassSize(Object regionKey, Object classKey, Integer size) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return;
+		}
+		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size.equals(size)) {
+			save = true;
+		}
+		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size = size;
+	}
+
+	/**
+	 * Tells if a station can be added to a blocking region
+	 * (all the stations that create or destroy jobs cannot be added)
+	 * @param regionKey search's key for region
+	 * @param stationKey search's key for station
+	 * @return true if the station can be added to specified region
+	 */
+	@Override
+	public boolean canRegionStationBeAdded(Object regionKey, Object stationKey) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !stationsKeyset.contains(stationKey)) {
+			return false;
+		}
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		return (sd.blockingRegion == null || sd.blockingRegion == regionKey) && canStationTypeBeBlocked(sd.type);
+	}
+
+	/**
+	 * Tells if a station of a given type can be added to a blocking region
+	 * (all the stations that create or destroy jobs cannot be added)
+	 * @param stationType type of station to be added
+	 * @return true if a station of that type can be added, false otherwise
+	 */
+	protected boolean canStationTypeBeBlocked(String stationType) {
+		return !stationType.equals(STATION_TYPE_SOURCE) && !stationType.equals(STATION_TYPE_SINK)
+				&& !stationType.equals(STATION_TYPE_TERMINAL) && !stationType.equals(STATION_TYPE_FORK)
+				&& !stationType.equals(STATION_TYPE_JOIN) && !stationType.equals(STATION_TYPE_CLASSSWITCH)
+				&& !stationType.equals(STATION_TYPE_SEMAPHORE) && !stationType.equals(STATION_TYPE_SCALER)
+				&& !stationType.equals(STATION_TYPE_TRANSITION);
+	}
+
+	/**
+	 * Adds a station to a blocking region
+	 * @param regionKey search's key for region
+	 * @param stationKey search's key for station
+	 * @return true if the station has been added to specified region
 	 */
 	@Override
 	public boolean addRegionStation(Object regionKey, Object stationKey) {
@@ -2880,101 +3189,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Sets the name of a blocking region
-	 *
-	 * @param regionKey Search's key for region
-	 * @param name      name of the blocking region
-	 */
-	@Override
-	public void setRegionName(Object regionKey, String name) {
-		if (blockingRegionsKeyset.contains(regionKey)) {
-			if (!((BlockingRegionData) blockingDataHM.get(regionKey)).name.equals(name)) {
-				save = true;
-			}
-			((BlockingRegionData) blockingDataHM.get(regionKey)).name = name;
-		}
-	}
-
-	/**
-	 * Returns the name of a blocking region
-	 *
-	 * @param regionKey Search's key for region
-	 * @return name of the blocking region
-	 */
-	@Override
-	public String getRegionName(Object regionKey) {
-		if (blockingRegionsKeyset.contains(regionKey)) {
-			return ((BlockingRegionData) blockingDataHM.get(regionKey)).name;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Sets the type of a blocking region
-	 *
-	 * @param regionKey Search's key for region
-	 * @param type      type of the blocking region
-	 */
-	@Override
-	public void setRegionType(Object regionKey, String type) {
-		if (blockingRegionsKeyset.contains(regionKey)) {
-			if (!((BlockingRegionData) blockingDataHM.get(regionKey)).type.equals(type)) {
-				save = true;
-			}
-			((BlockingRegionData) blockingDataHM.get(regionKey)).type = type;
-		}
-	}
-
-	/**
-	 * Returns the type of a blocking region
-	 *
-	 * @param regionKey Search's key for region
-	 * @return type of the blocking region
-	 */
-	@Override
-	public String getRegionType(Object regionKey) {
-		if (blockingRegionsKeyset.contains(regionKey)) {
-			return ((BlockingRegionData) blockingDataHM.get(regionKey)).type;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Tells if a station can be added to specified blocking region
-	 * (all stations that creates or destroy jobs cannot be added)
-	 * @param regionKey  Search's key for region
-	 * @param stationKey Search's key for station
-	 * @return true if station can be put inside specified region
-	 */
-	@Override
-	public boolean canRegionStationBeAdded(Object regionKey, Object stationKey) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !stationsKeyset.contains(stationKey)) {
-			return false;
-		}
-		StationData sd = (StationData) stationDataHM.get(stationKey);
-		return (sd.blockingRegion == null || sd.blockingRegion == regionKey) && canStationTypeBeBlocked(sd.type);
-	}
-
-	/**
-	 * Tells if a given station type can be added to a blocking region
-	 * @param stationType type of station to be added
-	 * @return true if station of that type can be added, false otherwise
-	 */
-	protected boolean canStationTypeBeBlocked(String stationType) {
-		return !stationType.equals(STATION_TYPE_SOURCE) && !stationType.equals(STATION_TYPE_SINK)
-				&& !stationType.equals(STATION_TYPE_TERMINAL) && !stationType.equals(STATION_TYPE_FORK)
-				&& !stationType.equals(STATION_TYPE_JOIN) && !stationType.equals(STATION_TYPE_CLASSSWITCH)
-				&& !stationType.equals(STATION_TYPE_SEMAPHORE) && !stationType.equals(STATION_TYPE_SCALER)
-				&& !stationType.equals(STATION_TYPE_TRANSITION);
-	}
-
-	/**
-	 * Removes a station from a specified blocking region
-	 *
-	 * @param regionKey  Search's key for region
-	 * @param stationKey Search's key for station
+	 * Removes a station from a blocking region
+	 * @param regionKey search's key for region
+	 * @param stationKey search's key for station
 	 */
 	@Override
 	public void removeRegionStation(Object regionKey, Object stationKey) {
@@ -2991,117 +3208,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Returns the entire set of blocking region keys
-	 *
-	 * @return the entire set of blocking region keys
-	 */
-	@Override
-	public Vector<Object> getRegionKeys() {
-		return blockingRegionsKeyset;
-	}
-
-	/**
-	 * Sets a customer number constraint for a given region and an user class
-	 *
-	 * @param regionKey       search's key for blocking region
-	 * @param classKey        search's key for customer class
-	 * @param maxJobsPerClass maximum number of allowed customer. -1 means infinity.
-	 */
-	@Override
-	public void setRegionClassCustomerConstraint(Object regionKey, Object classKey, Integer maxJobsPerClass) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
-			return;
-		}
-		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxJobs.equals(maxJobsPerClass)) {
-			save = true;
-		}
-		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxJobs = maxJobsPerClass;
-	}
-
-	/**
-	 * Sets a drop rule for a given region and an user class
-	 *
-	 * @param regionKey search's key for blocking region
-	 * @param classKey  search's key for customer class
-	 * @param drop      true if jobs of specified class can be dropped, false otherwise
-	 */
-	@Override
-	public void setRegionClassDropRule(Object regionKey, Object classKey, Boolean drop) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
-			return;
-		}
-		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).drop.equals(drop)) {
-			save = true;
-		}
-		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).drop = drop;
-	}
-
-	/**
-	 * Sets a global customer number constraint for a given region
-	 *
-	 * @param regionKey       search's key for blocking region
-	 * @param maxJobs maximum number of allowed customer. -1 means infinity.
-	 */
-	@Override
-	public void setRegionCustomerConstraint(Object regionKey, Integer maxJobs) {
-		if (!blockingRegionsKeyset.contains(regionKey)) {
-			return;
-		}
-		if (!((BlockingRegionData) blockingDataHM.get(regionKey)).maxJobs.equals(maxJobs)) {
-			save = true;
-		}
-		((BlockingRegionData) blockingDataHM.get(regionKey)).maxJobs = maxJobs;
-	}
-
-	/**
-	 * Gets customer number constraint for a given region and an user class
-	 *
-	 * @param regionKey search's key for blocking region
-	 * @param classKey  search's key for customer class
-	 * @return maximum number of allowed customer. -1 means infinity.
-	 */
-	@Override
-	public Integer getRegionClassCustomerConstraint(Object regionKey, Object classKey) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
-			return null;
-		}
-		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).maxJobs;
-	}
-
-	/**
-	 * Gets drop rule for a given region and an user class
-	 *
-	 * @param regionKey search's key for blocking region
-	 * @param classKey  search's key for customer class
-	 * @return true if jobs of specified class can be dropped, false otherwise
-	 */
-	@Override
-	public Boolean getRegionClassDropRule(Object regionKey, Object classKey) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
-			return null;
-		}
-		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).drop;
-	}
-
-	/**
-	 * Gets global customer number constraint for a given region
-	 *
-	 * @param regionKey search's key for blocking region
-	 * @return maximum number of allowed customer. -1 means infinity.
-	 */
-	@Override
-	public Integer getRegionCustomerConstraint(Object regionKey) {
-		if (!blockingRegionsKeyset.contains(regionKey)) {
-			return null;
-		}
-		return ((BlockingRegionData) blockingDataHM.get(regionKey)).maxJobs;
-	}
-
-	/**
-	 * Returns a list of every station inside a blocking region
-	 *
-	 * @param regionKey search's key for given blocking region
-	 * @return a set with every station inside given blocking region
+	 * Returns a set of all the stations in a blocking region
+	 * @param regionKey search's key for region
+	 * @return a set of all the stations in specified region
 	 */
 	@Override
 	public Set<Object> getBlockingRegionStations(Object regionKey) {
@@ -3113,10 +3222,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Gets blocking region of a given station
-	 *
-	 * @param stationKey search's key for given station
-	 * @return search's key for its blocking region or null if it is undefined
+	 * Gets the blocking region of a station
+	 * @param stationKey search's key for station
+	 * @return search's key for region or null if it is undefined
 	 */
 	@Override
 	public Object getStationBlockingRegion(Object stationKey) {
@@ -3128,10 +3236,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Gets a vector with every station that can be added to a blocking region
-	 *
-	 * @return a vector of search's keys of every station that can be added
-	 * to a blocking region
+	 * Gets a vector of stations that can be added to a blocking region
+	 * @return a vector of stations that can be added to a blocking region
 	 */
 	@Override
 	public Vector<Object> getBlockableStationKeys() {
@@ -3145,109 +3251,57 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected void addBlockingDetailsForClass(Object classKey) {
 		for (Object regionKey : blockingRegionsKeyset) {
 			blockingDetailsBDM.put(classKey, regionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
-					Defaults.getAsBoolean("blockingDropPerClass"), Defaults.getAsInteger("weight"),Defaults.getAsInteger("size")));
+					Defaults.getAsInteger("blockingMaxMemoryPerClass"), Defaults.getAsBoolean("blockingDropPerClass"),
+					Defaults.getAsInteger("blockingWeightPerClass"), Defaults.getAsInteger("blockingSizePerClass")));
 		}
 	}
 
 	/**
 	 * Adds default values for newly created blocking regions
-	 * @param blockingRegionKey search's key for created blocking region
+	 * @param regionKey search's key for created blocking region
 	 */
-	protected void addBlockingDetails(Object blockingRegionKey) {
+	protected void addBlockingDetails(Object regionKey) {
 		for (Object classKey : classesKeyset) {
-			blockingDetailsBDM.put(classKey, blockingRegionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
-					Defaults.getAsBoolean("blockingDropPerClass"), Defaults.getAsInteger("weight"), Defaults.getAsInteger("size")));
+			blockingDetailsBDM.put(classKey, regionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
+					Defaults.getAsInteger("blockingMaxMemoryPerClass"), Defaults.getAsBoolean("blockingDropPerClass"),
+					Defaults.getAsInteger("blockingWeightPerClass"), Defaults.getAsInteger("blockingSizePerClass")));
 		}
 	}
 
 	/**
-	 * Deletes blocking region details about a certain class, given its search key
+	 * Deletes blocking region details for a class, given class search key
 	 */
 	protected void deleteBlockingDetailsForClass(Object classKey) {
 		blockingDetailsBDM.remove(classKey, BDMap.X);
 	}
 
 	/**
-	 * Deletes blocking region details from repository, given station search key.
+	 * Deletes blocking region details from repository, given station search key
 	 */
-	protected void deleteBlockingDetails(Object blockingRegionKey) {
-		blockingDetailsBDM.remove(blockingRegionKey, BDMap.Y);
+	protected void deleteBlockingDetails(Object regionKey) {
+		blockingDetailsBDM.remove(regionKey, BDMap.Y);
 	}
 
+	/**
+	 * Adds a new group to a blocking region
+	 * @param regionKey search's key for region
+	 * @param name name of the new group
+	 */
 	@Override
-	public Integer getRegionMemorySize(Object regionKey) {
-		if (!blockingRegionsKeyset.contains(regionKey)) {
-			return null;
-		}
-		return ((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory;
-	}
-
-	@Override
-	public void setRegionMemorySize(Object regionKey, Integer memorySize) {
+	public void addRegionGroup(Object regionKey, String name) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return;
 		}
-		if (!((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory.equals(memorySize)) {
-			save = true;
-		}
-		((BlockingRegionData) blockingDataHM.get(regionKey)).maxMemory = memorySize;
-	}
-
-	@Override 
-	public Integer getRegionClassWeight(Object regionKey, Object classKey) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
-			return null;
-		}
-		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight;
-	}
-
-	@Override
-	public void setRegionClassWeight(Object regionKey, Object classKey, Integer weight) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
-			return;
-		}
-		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight.equals(weight)) {
-			save = true;
-		}
-		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).weight = weight;
-	}
-
-	@Override 
-	public Integer getRegionClassSize(Object regionKey, Object classKey) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
-			return null;
-		}
-		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size;
-	}
-
-	@Override
-	public void setRegionClassSize(Object regionKey, Object classKey, Integer size) {
-		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
-			return;
-		}
-		if (!((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size.equals(size)) {
-			save = true;
-		}
-		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).size = size;
-	}
-
-	@Override
-	public List<BlockingGroupData> getRegionGroupList(Object regionKey) {
-		if (!blockingRegionsKeyset.contains(regionKey)) {
-			return null;
-		}
-		return ((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList;
-	}
-
-	@Override
-	public void addRegionGroup(Object regionKey, String name, Integer capacity, String strategy) {
-		if (!blockingRegionsKeyset.contains(regionKey)) {
-			return;
-		}
-		((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.add(new BlockingGroupData(name, capacity, strategy));
+		((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.add(new BlockingGroupData(name,
+				Defaults.getAsInteger("blockingGroupMaxJobs"), Defaults.getAsInteger("blockingGroupMaxMemory")));
 		save = true;
 	}
 
+	/**
+	 * Deletes a group from a blocking region
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 */
 	@Override
 	public void deleteRegionGroup(Object regionKey, int index) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
@@ -3260,6 +3314,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		save = true;
 	}
 
+	/**
+	 * Deletes all the groups from a blocking region
+	 * @param regionKey search's key for region
+	 */
 	@Override
 	public void deleteAllRegionGroups(Object regionKey) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
@@ -3269,6 +3327,25 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		save = true;
 	}
 
+	/**
+	 * Returns a list of the group data for a blocking region
+	 * @param regionKey search's key for region
+	 * @return a list of the group data for specified region
+	 */
+	@Override
+	public List<BlockingGroupData> getRegionGroupList(Object regionKey) {
+		if (!blockingRegionsKeyset.contains(regionKey)) {
+			return null;
+		}
+		return ((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList;
+	}
+
+	/**
+	 * Gets the name of a group for a blocking region
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @return name of the group
+	 */
 	@Override
 	public String getRegionGroupName(Object regionKey, int index) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
@@ -3280,6 +3357,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return ((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).name;
 	}
 
+	/**
+	 * Sets the name of a group for a blocking region
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @param name name of the group
+	 */
 	@Override
 	public void setRegionGroupName(Object regionKey, int index, String name) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
@@ -3292,8 +3375,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		save = true;
 	}
 
+	/**
+	 * Gets the customer number constraint for a blocking region and a group
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @return maximum number of allowed customers for specified group (-1 means infinity)
+	 */
 	@Override
-	public Integer getRegionGroupCapacity(Object regionKey, int index) {
+	public Integer getRegionGroupCustomerConstraint(Object regionKey, int index) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return null;
 		}
@@ -3303,8 +3392,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return ((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).maxJobs;
 	}
 
+	/**
+	 * Sets the customer number constraint for a blocking region and a group
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @param maxJobs maximum number of allowed customers for specified group (-1 means infinity)
+	 */
 	@Override
-	public void setRegionGroupCapacity(Object regionKey, int index, Integer maxJobs) {
+	public void setRegionGroupCustomerConstraint(Object regionKey, int index, Integer maxJobs) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return;
 		}
@@ -3315,40 +3410,47 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		save = true;
 	}
 
+	/**
+	 * Gets the memory size constraint for a blocking region and a group
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @return maximum size of allowed memory for specified group (-1 means infinity)
+	 */
 	@Override
-	public String getRegionGroupStrategy(Object regionKey, int index) {
+	public Integer getRegionGroupMemorySize(Object regionKey, int index) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return null;
 		}
 		if (((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.size() <= index) {
 			return null;
 		}
-		return ((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).strategy;
+		return ((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).maxMemory;
 	}
 
+	/**
+	 * Sets the memory size constraint for a blocking region and a group
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @param maxMemory maximum size of allowed memory for specified group (-1 means infinity)
+	 */
 	@Override
-	public void setRegionGroupStrategy(Object regionKey, int index, String strategy) {
+	public void setRegionGroupMemorySize(Object regionKey, int index, Integer maxMemory) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return;
 		}
 		if (((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.size() <= index) {
 			return;
 		}
-		((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).strategy = strategy;
+		((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).maxMemory = maxMemory;
 		save = true;
 	}
 
-	@Override
-	public List<Object> getRegionGroupClassList(Object regionKey, int index) {
-		if (!blockingRegionsKeyset.contains(regionKey)) {
-			return null;
-		}
-		if (((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.size() <= index) {
-			return null;
-		}
-		return ((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).classList;
-	}
-
+	/**
+	 * Adds a class to a group for a blocking region
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @param classKey search's key for class
+	 */
 	@Override
 	public void addClassIntoRegionGroup(Object regionKey, int index, Object classKey) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
@@ -3364,8 +3466,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		save = true;
 	}
 
+	/**
+	 * Removes a class from a group for a blocking region
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @param classKey search's key for class
+	 */
 	@Override
-	public void deleteClassFromRegionGroup(Object regionKey, int index, Object classKey) {
+	public void removeClassFromRegionGroup(Object regionKey, int index, Object classKey) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return;
 		}
@@ -3379,8 +3487,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		save = true;
 	}
 
+	/**
+	 * Removes all the classes from a group for a blocking region
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 */
 	@Override
-	public void deleteAllClassesFromRegionGroup(Object regionKey, int index) {
+	public void removeAllClassesFromRegionGroup(Object regionKey, int index) {
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return;
 		}
@@ -3389,6 +3502,23 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).classList.clear();
 		save = true;
+	}
+
+	/**
+	 * Returns a list of classes in a group for a blocking region
+	 * @param regionKey search's key for region
+	 * @param index indexing number for group
+	 * @return a list of classes in specified group
+	 */
+	@Override
+	public List<Object> getRegionGroupClassList(Object regionKey, int index) {
+		if (!blockingRegionsKeyset.contains(regionKey)) {
+			return null;
+		}
+		if (((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.size() <= index) {
+			return null;
+		}
+		return ((BlockingRegionData) blockingDataHM.get(regionKey)).GroupList.get(index).classList;
 	}
 
 	// --- end Blocking Region Definition ------------------------------------------------------------
@@ -3461,36 +3591,38 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
+	 * This class is used to store blocking region / class data
+	 */
+	protected class BlockingClassData {
+		public Integer maxJobs;
+		public Integer maxMemory;
+		public Boolean drop;
+		public Integer weight;
+		public Integer size;
+
+		public BlockingClassData(Integer maxJobs, Integer maxMemory, Boolean drop, Integer weight, Integer size) {
+			this.maxJobs = maxJobs;
+			this.maxMemory = maxMemory;
+			this.drop = drop;
+			this.weight = weight;
+			this.size = size;
+		}
+	}
+
+	/**
 	 * This class is used to store blocking region / group data
 	 */
 	public class BlockingGroupData {
 		public String name;
 		public Integer maxJobs;
-		public String strategy;
+		public Integer maxMemory;
 		public List<Object> classList;
 
-		public BlockingGroupData(String name,Integer maxJobs,String strategy) {
+		public BlockingGroupData(String name, Integer maxJobs, Integer maxMemory) {
 			this.name = name;
 			this.maxJobs = maxJobs;
-			this.strategy = strategy;
+			this.maxMemory = maxMemory;
 			classList = new ArrayList<Object>();
-		}
-	}
-
-	/**
-	 * This class is used to store blocking region / class data
-	 */
-	protected class BlockingClassData {
-		public Integer maxJobs;
-		public Boolean drop;
-		public Integer weight;
-		public Integer size;
-
-		public BlockingClassData(Integer maxJobs, Boolean drop, Integer weight, Integer size) {
-			this.maxJobs = maxJobs;
-			this.drop = drop;
-			this.weight = weight;
-			this.size = size;
 		}
 	}
 

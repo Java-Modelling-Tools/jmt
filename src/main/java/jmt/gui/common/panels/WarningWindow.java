@@ -110,7 +110,7 @@ public class WarningWindow {
 			box.add(getEntry(i.next()));
 		}
 
-		box.setBackground(Color.white);
+		box.setBackground(Color.WHITE);
 
 		main.add(new JScrollPane(box), BorderLayout.CENTER);
 

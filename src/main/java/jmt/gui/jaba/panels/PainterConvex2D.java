@@ -107,7 +107,7 @@ public class PainterConvex2D {
 			Stroke oldStro = g.getStroke();
 			Stroke stroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 			g.setStroke(stroke);
-			g.setColor(Color.black);
+			g.setColor(Color.BLACK);
 			g.drawLine((int) (p1.getX() * scale) + tran_x, tran_y - (int) (p1.getY() * scale), (int) (p2.getX() * scale) + tran_x, tran_y
 					- (int) (p2.getY() * scale));
 			g.setStroke(oldStro);
@@ -197,7 +197,7 @@ public class PainterConvex2D {
 	 * @param className The name of the classes
 	 */
 	public void axis(Graphics2D g, String[] className) {
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		//Axis
 		g.drawLine(tran_x, tran_y, tran_x, fromBorderY);
 		g.drawLine(tran_x, tran_y, width - fromBorderX, tran_y);
@@ -253,19 +253,19 @@ public class PainterConvex2D {
 		g.setFont(f);
 
 		//Potential Bottleneck
-		g.setColor(Color.red);
+		g.setColor(Color.RED);
 		g.fillOval(5 + (x) - ((size / 2)), (int) (y + (0.5) * fontSize) - ((Math.min(pointSize + 1, 9) / 2)), Math.min(pointSize + 1, 9), Math.min(
 				pointSize + 1, 9));
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		g.drawString("Potential", x + 11 + ((size / 2)), y);
 		g.drawString("Bottleneck", x + 11 + ((size / 2)), y + fontSize);
 		g.drawString("Stations", x + 11 + ((size / 2)), y + 2 * fontSize);
 
 		//Masked-off
-		g.setColor(Color.blue);
+		g.setColor(Color.BLUE);
 		g.fillOval(5 + (x) - ((size / 2)), -3 + y + (4) * fontSize - Math.min(pointSize + 1, 9), Math.min(pointSize + 1, 9), Math.min(pointSize + 1,
 				9));
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		g.drawString("Masked-off", x + 11 + ((size / 2)), 3 + y + (3) * fontSize);
 		g.drawString("Stations", x + 11 + ((size / 2)), 3 + y + (4) * fontSize);
 
@@ -273,7 +273,7 @@ public class PainterConvex2D {
 		g.setColor(new Color(15, 185, 100));
 		g.fillOval(5 + (x) - ((size / 2)), 6 + y + (((6 * fontSize) + (5 * fontSize)) / 2) - Math.min(pointSize + 1, 9), Math.min(pointSize + 1, 9),
 				Math.min(pointSize + 1, 9));
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		g.drawString("Dominated", x + 11 + ((size / 2)), 6 + y + (5) * fontSize);
 		g.drawString("Stations", x + 11 + ((size / 2)), 6 + y + (6) * fontSize);
 
@@ -287,13 +287,13 @@ public class PainterConvex2D {
 
 		Polygon p = twoPointRectangle(xP1, yP1, xP2, yP2);
 
-		g.setColor(Color.orange);
+		g.setColor(Color.ORANGE);
 		g.fill(p);
-		g.setColor(Color.gray);
+		g.setColor(Color.GRAY);
 		g.draw(p);
 
 		//Dominated Area
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		g.drawString("Dominated", x + 11 + ((size / 2)), 3 + y + (10) * fontSize);
 		g.drawString("Area", x + 11 + ((size / 2)), 3 + y + (11) * fontSize);
 		xP1 = 4 + x - ((size / 2));
@@ -305,7 +305,7 @@ public class PainterConvex2D {
 
 		g.setColor(new Color(255, 250, 120));
 		g.fill(p);
-		g.setColor(Color.gray);
+		g.setColor(Color.GRAY);
 		g.draw(p);
 	}
 
@@ -365,7 +365,7 @@ public class PainterConvex2D {
 
 		g.drawOval((int) X - (((size / 2))), (int) Y - (((size / 2))), size, size);
 
-		g.setColor(Color.gray);
+		g.setColor(Color.GRAY);
 		Composite oldComp = g.getComposite();
 		Composite alphaComp = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
 		g.setComposite(alphaComp);
@@ -439,7 +439,7 @@ public class PainterConvex2D {
 	 * @param points The vector with all points
 	 */
 	public void pointLabel(Graphics2D g, Vector<Point2D> points) {
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 
 		//Setting the Font
 		int fontSize = 7 + pointSize;
@@ -475,7 +475,7 @@ public class PainterConvex2D {
 					p2 = (DPoint) dominant.get(k);
 					if (p2.isSelect()) {
 
-						g.setColor(Color.magenta);
+						g.setColor(Color.MAGENTA);
 						//Draw Arrow
 
 						//The angle is calculete throw the rotator point
@@ -520,7 +520,7 @@ public class PainterConvex2D {
 	 * @param dragPoint The position of the mouse
 	 */
 	public void drawMousePosition(Graphics2D g, Point dragPoint) {
-		g.setColor(Color.darkGray);
+		g.setColor(Color.DARK_GRAY);
 		//Draw the line
 		g.drawLine(1 + tran_x, (int) (dragPoint.getY()), pointSize + tran_x - 1, (int) (dragPoint.getY()));
 		g.drawLine((int) (dragPoint.getX()), tran_y - pointSize + 1, (int) dragPoint.getX(), tran_y);
@@ -544,7 +544,7 @@ public class PainterConvex2D {
 		Stroke stroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 		g.setStroke(stroke);
 
-		g.setColor(Color.gray);
+		g.setColor(Color.GRAY);
 		Composite oldComp = g.getComposite();
 		Composite alphaComp = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
 		g.setComposite(alphaComp);

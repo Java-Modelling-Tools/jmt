@@ -136,9 +136,9 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	 *
 	 */
 	private void init() {
-		probC = Color.green;
-		queueProbC = Color.green.brighter();
-		queueC = Color.green.darker();
+		probC = Color.GREEN;
+		queueProbC = Color.GREEN.brighter();
+		queueC = Color.GREEN.darker();
 		emptyC = Color.WHITE;
 		borderC = Color.BLACK;
 		animBorderC = Color.BLACK;
@@ -195,7 +195,7 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 		Graphics2D g2d = (Graphics2D) g;
 		g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g2d.setStroke(stroke);
-		g2d.setBackground(Color.white);
+		g2d.setBackground(Color.WHITE);
 		g2d.clearRect(0, 0, this.getWidth(), this.getHeight());
 		changeDrawSettings(dCst);
 		START_GAP = START_GAP

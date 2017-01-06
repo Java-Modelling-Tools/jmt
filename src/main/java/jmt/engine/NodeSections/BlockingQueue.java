@@ -139,30 +139,15 @@ public class BlockingQueue extends InputSection {
 
 		List<JobInfo> jobList = jobsList.getJobList();
 		ListIterator<JobInfo> iterator = jobList.listIterator();
-		boolean hasGroupConstraint = blockingRegion.hasGroupConstraint();
-		boolean isHPSGroupActive = blockingRegion.isHPSGroupActive();
 		Job nextJob = null;
 		int nextJobPriority = 0;
 		while (iterator.hasNext()) {
 			JobInfo info = iterator.next();
 			JobClass jobClass = info.getJob().getJobClass();
-			if (hasGroupConstraint) {
-				if (nextJob == null || nextJobPriority < jobClass.getPriority() || (nextJobPriority == jobClass.getPriority()
-						&& blockingRegion.getHPSStrategy().equals(BlockingRegion.REGION_GROUP_HPS_LCFS_STRATEGY))) {
-					if (!blockingRegion.isBlocked(jobClass)) {
-						nextJob = info.getJob();
-						nextJobPriority = jobClass.getPriority();
-						if (!isHPSGroupActive) {
-							break;
-						}
-					}
-				}
-			} else {
-				if (nextJob == null || nextJobPriority < jobClass.getPriority()) {
-					if (!blockingRegion.isBlocked(jobClass)) {
-						nextJob = info.getJob();
-						nextJobPriority = jobClass.getPriority();
-					}
+			if (nextJob == null || nextJobPriority < jobClass.getPriority()) {
+				if (!blockingRegion.isBlocked(jobClass)) {
+					nextJob = info.getJob();
+					nextJobPriority = jobClass.getPriority();
 				}
 			}
 		}
@@ -201,10 +186,10 @@ public class BlockingQueue extends InputSection {
 				//nothing else to do
 			} else {
 				//get class
-				//jobClass = notBlockedJob.getJobClass();
+				jobClass = notBlockedJob.getJobClass();
 				//forward job and increase occupation
 				forward(notBlockedJob);
-				blockingRegion.increaseOccupation(notBlockedJob);
+				blockingRegion.increaseOccupation(jobClass);
 			}
 			break;
 
@@ -244,7 +229,7 @@ public class BlockingQueue extends InputSection {
 				// If coolStart is true, this job is sent immediately to the next
 				// section and coolStart set to false.
 				forward(job);
-				blockingRegion.increaseOccupation(job);
+				blockingRegion.increaseOccupation(jobClass);
 
 				coolStart = false;
 			} else {
@@ -258,7 +243,7 @@ public class BlockingQueue extends InputSection {
 					System.out.println("SendJobIn");
 				}
 
-				blockingRegion.increaseOccupation(job);
+				blockingRegion.increaseOccupation(jobClass);
 			}
 			break;
 
@@ -279,9 +264,9 @@ public class BlockingQueue extends InputSection {
 			notBlockedJob = getNextNotBlockedJob();
 
 			if (notBlockedJob != null) {
-				//jobClass = notBlockedJob.getJobClass();
+				jobClass = notBlockedJob.getJobClass();
 				forward(notBlockedJob);
-				blockingRegion.increaseOccupation(notBlockedJob);
+				blockingRegion.increaseOccupation(jobClass);
 			} else {
 				//all jobs in queue are blocked
 				//nothing else to do
@@ -317,9 +302,9 @@ public class BlockingQueue extends InputSection {
 			notBlockedJob = getNextNotBlockedJob();
 
 			if (notBlockedJob != null) {
-				//jobClass = notBlockedJob.getJobClass();
+				jobClass = notBlockedJob.getJobClass();
 				forward(notBlockedJob);
-				blockingRegion.increaseOccupation(notBlockedJob);
+				blockingRegion.increaseOccupation(jobClass);
 			} else {
 				//all jobs in queue are blocked
 				//nothing else to do

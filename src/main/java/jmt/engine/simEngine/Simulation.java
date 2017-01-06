@@ -262,40 +262,12 @@ public class Simulation {
 
 	/**
 	 * Creates a blocking region.
-	 *
-	 * @param name The name of the blocking region
-	 * @param maxCapacity the max capacity of the region
-	 * @param maxCapacityPerClass the max capacity for each class
-	 * @param classWeights the weight of each class (tokens per job request)
-	 * @param drop for each class, specifies if jobs should be dropped or not when the region is blocked
-	 * @param stations the array of the names of the stations contained in the region
-	 *
-	 * @throws LoadException if some errors occur during the region creation
 	 */
-	//public void addRegion(String name, double maxCapacity, double[] maxCapacityPerClass, double[] classWeights, boolean[] drop, String[] stations)
-	//		throws LoadException {
-	//	//TODO: andrebbero aggiunti controlli (nome non univoco, jobs<0, ecc...)
-	//	regions.add(new BlockingRegion(name, maxCapacity, maxCapacityPerClass, classWeights, drop, this, stations));
-	//}
-
-	//public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] classSizes, double[] classWeights, boolean[] drop, String[] stations)
-	//		throws LoadException {
-	//	//if (true) {
-	//		regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, classSizes ,classWeights, drop, this, stations));
-	//	//} else {
-	//	//	throw new LoadException("Exception while creating a blocking region.");
-	//	//}
-	//}
-
-	public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] classSizes, double[] classWeights, boolean[] drop,
-			String[] groupNames, double[] maxCapacityPerGroup, String[] groupStrategies, List<List<Integer>> groupClassIndexLists, String[] stations)
+	public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] maxMemoryPerClass, boolean[] drop, double[] classWeights, double[] classSizes,
+			String[] groupNames, double[] maxCapacityPerGroup, double[] maxMemoryPerGroup, List<List<Integer>> groupClassIndexLists, String[] stations)
 			throws LoadException {
-		//if (true) {
-		regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, classSizes ,classWeights, drop, 
-				groupNames, maxCapacityPerGroup, groupStrategies, groupClassIndexLists, this, stations));
-		//} else {
-		//	throw new LoadException("Exception while creating a blocking region.");
-		//}
+		regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, maxMemoryPerClass, drop, classWeights, classSizes,
+				groupNames, maxCapacityPerGroup, maxMemoryPerGroup, groupClassIndexLists, this, stations));
 	}
 
 	//--------------end METHODS TO ADD SIMULATION COMPONENTS---------------//
@@ -306,7 +278,6 @@ public class Simulation {
 	 * Initializes all the components of this Simulation.
 	 * This method assures that all the operations are
 	 * executed in the correct order.
-	 *
 	 */
 	public void initialize() throws NetException {
 		// Sets the max simulated time for the system, when reached simulation is stopped

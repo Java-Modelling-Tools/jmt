@@ -159,7 +159,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 
 	void init() {
 		changeDrawSettings(new DrawNormal());
-		setColors(Color.white, Color.BLUE, Color.RED, true);
+		setColors(Color.WHITE, Color.BLUE, Color.RED, true);
 		legendaS = new String[3];
 		legendaC = new Color[3];
 		legendaS[0] = "current queue";
@@ -258,15 +258,15 @@ public class QueueDrawer extends JComponent implements Notifier {
 
 		for (int i = 0; i < queueLength(); i++) {
 			if (i < jobs) {
-				drawQueueStatus(queueLength() - i - 1, queueC, Color.black, gradientF, g2d);
+				drawQueueStatus(queueLength() - i - 1, queueC, Color.BLACK, gradientF, g2d);
 			} else {
-				drawQueueStatus(queueLength() - i - 1, emptyC, Color.black, gradientF, g2d);
+				drawQueueStatus(queueLength() - i - 1, emptyC, Color.BLACK, gradientF, g2d);
 			}
 		}
 
 		drawProcessorView(view, g2d);
 		if ((jobs > queueLength()) && ((queueLength() < queueMax) || (queueMax == -1))) {
-			drawMoreStatus(queueC, emptyC, Color.black, gradientF, g2d);
+			drawMoreStatus(queueC, emptyC, Color.BLACK, gradientF, g2d);
 		}
 		drawJobs(g2d);
 		if (lostJobs > 0) {
@@ -279,9 +279,9 @@ public class QueueDrawer extends JComponent implements Notifier {
 				jobsInTheSystem++;
 			}
 		}
-		txtBounds = drawCenteredText("cust. in the system:" + jobsInTheSystem, queueC, Color.white, panelW / 2.0, panelH - ELEM_HEIGHT, g2d, false,
+		txtBounds = drawCenteredText("cust. in the system:" + jobsInTheSystem, queueC, Color.WHITE, panelW / 2.0, panelH - ELEM_HEIGHT, g2d, false,
 				false);
-		drawCenteredText("cust. in the station:" + jobsInTheSystem, queueC, Color.white, panelW / 2.0, panelH - txtBounds.getHeight() / 2.0, g2d,
+		drawCenteredText("cust. in the station:" + jobsInTheSystem, queueC, Color.WHITE, panelW / 2.0, panelH - txtBounds.getHeight() / 2.0, g2d,
 				false, true);
 		drawLegend(legendaC, legendaS, dCst.getFont(), dCst.getStartingGap(), dCst.getStartingGap(), g2d, true);
 	}
@@ -292,16 +292,16 @@ public class QueueDrawer extends JComponent implements Notifier {
 	private void drawProcessorView(int view, Graphics2D g2d) {
 
 		if (nCpu == 1) {
-			drawProcessor(Color.white, Color.black, gradientF, g2d);
+			drawProcessor(Color.WHITE, Color.BLACK, gradientF, g2d);
 		} else if (nCpu == 2) {
-			drawProcessor2(Color.white, Color.black, gradientF, g2d, 0);
-			drawProcessor2(Color.white, Color.black, gradientF, g2d, 1);
+			drawProcessor2(Color.WHITE, Color.BLACK, gradientF, g2d, 0);
+			drawProcessor2(Color.WHITE, Color.BLACK, gradientF, g2d, 1);
 		} else if (nCpu > 2) {
-			drawProcessorMulti(Color.white, Color.black, gradientF, g2d, 0);
-			drawProcessorMulti(Color.white, Color.black, gradientF, g2d, 1);
+			drawProcessorMulti(Color.WHITE, Color.BLACK, gradientF, g2d, 0);
+			drawProcessorMulti(Color.WHITE, Color.BLACK, gradientF, g2d, 1);
 
-			drawPoint(Color.white, Color.black, gradientF, g2d, 0);
-			drawPoint(Color.white, Color.black, gradientF, g2d, 1);
+			drawPoint(Color.WHITE, Color.BLACK, gradientF, g2d, 0);
+			drawPoint(Color.WHITE, Color.BLACK, gradientF, g2d, 1);
 		}
 		double U = 1.0;
 		try {
@@ -316,10 +316,10 @@ public class QueueDrawer extends JComponent implements Notifier {
 		switch (view) {
 			case 1:
 				if (nCpu == 1) {
-					drawOccupiedPercentage(animC, Color.black, gradientF, g2d);
+					drawOccupiedPercentage(animC, Color.BLACK, gradientF, g2d);
 				} else if (nCpu == 2) {
-					drawOccupiedPercentage2(animC, Color.black, gradientF, g2d, 0);
-					drawOccupiedPercentage2(animC, Color.black, gradientF, g2d, 1);
+					drawOccupiedPercentage2(animC, Color.BLACK, gradientF, g2d, 0);
+					drawOccupiedPercentage2(animC, Color.BLACK, gradientF, g2d, 1);
 				}
 				legendaS[2] = "residual time";
 				legendaC[2] = animC;
@@ -327,13 +327,13 @@ public class QueueDrawer extends JComponent implements Notifier {
 
 			default:
 				if (nCpu == 1) {
-					drawUtilization(U, busyC, Color.black, gradientF, g2d);
+					drawUtilization(U, busyC, Color.BLACK, gradientF, g2d);
 				} else if (nCpu == 2) {
-					drawUtilization2(U, busyC, Color.black, gradientF, g2d, 0);
-					drawUtilization2(U, busyC, Color.black, gradientF, g2d, 1);
+					drawUtilization2(U, busyC, Color.BLACK, gradientF, g2d, 0);
+					drawUtilization2(U, busyC, Color.BLACK, gradientF, g2d, 1);
 				} else if (nCpu > 2) {
-					drawUtilizationMulti(U, busyC, Color.black, gradientF, g2d, 0);
-					drawUtilizationMulti(U, busyC, Color.black, gradientF, g2d, 1);
+					drawUtilizationMulti(U, busyC, Color.BLACK, gradientF, g2d, 0);
+					drawUtilizationMulti(U, busyC, Color.BLACK, gradientF, g2d, 1);
 				}
 				legendaS[2] = "avg.utilization";
 				legendaC[2] = busyC.brighter();
@@ -789,7 +789,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 		rc = new Color(r, g, b);
 
 		if (c == Color.BLUE) {
-			rc = Color.cyan;
+			rc = Color.CYAN;
 		}
 		return rc;
 	}
@@ -926,7 +926,7 @@ public class QueueDrawer extends JComponent implements Notifier {
 		}
 
 		if (nCpu > 2) {
-			fg = Color.darkGray.brighter().brighter();
+			fg = Color.DARK_GRAY.brighter().brighter();
 			bg = Color.LIGHT_GRAY;
 		}
 

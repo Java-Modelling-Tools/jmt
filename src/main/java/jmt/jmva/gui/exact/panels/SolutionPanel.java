@@ -129,7 +129,7 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 	protected void initComponents() {
 		table = new ResultsTable(getTableModel(), help);
                 table.setRowHeight(CommonConstants.ROW_HEIGHT);
-		statusLabel.setForeground(Color.red);
+		statusLabel.setForeground(Color.RED);
 		statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
 		statusLabel.setText("WARNING: parameters have been changed since this solution was computed!");
 		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);

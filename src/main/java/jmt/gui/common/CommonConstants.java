@@ -209,12 +209,6 @@ public interface CommonConstants {
 	public static final String TIMING_STRATEGY_TIMED = "Timed";
 	public static final String TIMING_STRATEGY_IMMEDIATE = "Immediate";
 
-	/**Constants for selection of region group strategy*/
-	public static final String REGION_GROUP_STRATEGY_FCFS = "FCFS";
-	public static final String REGION_GROUP_STRATEGY_HPS = "HPS";
-	public static final String REGION_GROUP_STRATEGY_HPS_LCFS = "HPS_LCFS";
-	public static final String REGION_GROUP_STRATEGY_HPS_FCFS = "HPS_FCFS";
-
 	public static final RoutingStrategy ROUTING_RANDOM = new RandomRouting();
 	public static final RoutingStrategy ROUTING_ROUNDROBIN = new RoundRobinRouting();
 	public static final RoutingStrategy ROUTING_PROBABILITIES = new ProbabilityRouting();

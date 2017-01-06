@@ -1961,40 +1961,26 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
 			// Now parses global constraint
 			Element globalConstraint = (Element) region.getElementsByTagName(XML_E_GLOBALCONSTRAINT).item(0);
-			//TODO Add support for Double global constraints
-			int ivalue = Double.valueOf(globalConstraint.getAttribute(XML_A_GLOBALCONSTRAINT_MAXJOBS)).intValue();
-			model.setRegionCustomerConstraint(key, Integer.valueOf(ivalue));
+			model.setRegionCustomerConstraint(key, Integer.valueOf(globalConstraint.getAttribute(XML_A_GLOBALCONSTRAINT_MAXJOBS)));
 
 			Element memoryConstraint = (Element) region.getElementsByTagName(XML_E_GLOBALMEMORYCONSTRAINT).item(0);
-			if (memoryConstraint == null) {
-				ivalue = -1;
-			} else {
-				ivalue = Double.valueOf(memoryConstraint.getAttribute(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY)).intValue();
+			if (memoryConstraint != null) {
+				model.setRegionMemorySize(key, Integer.valueOf(memoryConstraint.getAttribute(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY)));
 			}
-			model.setRegionMemorySize(key, Integer.valueOf(ivalue));
 
 			// Now parses class constraints
 			NodeList classConstraints = region.getElementsByTagName(XML_E_CLASSCONSTRAINT);
 			for (int j = 0; j < classConstraints.getLength(); j++) {
 				Element classConstraint = (Element) classConstraints.item(j);
-				//TODO Add support for Double class constraints
-				ivalue = Double.valueOf(classConstraint.getAttribute(XML_A_CLASSCONSTRAINT_MAXJOBS)).intValue();
 				model.setRegionClassCustomerConstraint(key, classes.get(classConstraint.getAttribute(XML_A_CLASSCONSTRAINT_CLASS)),
-						Integer.valueOf(ivalue));
+						Integer.valueOf(classConstraint.getAttribute(XML_A_CLASSCONSTRAINT_MAXJOBS)));
 			}
 
-			NodeList classWeights = region.getElementsByTagName(XML_E_CLASSWEIGHT);
-			for (int j = 0; j < classWeights.getLength(); j++) {
-				Element classWeight = (Element) classWeights.item(j);
-				model.setRegionClassWeight(key, classes.get(classWeight.getAttribute(XML_A_CLASSWEIGHT_CLASS)),
-						Integer.valueOf(classWeight.getAttribute(XML_A_CLASSWEIGHT_WEIGHT)));
-			}
-
-			NodeList classSizes = region.getElementsByTagName(XML_E_CLASSMEMORYSIZE);
-			for (int j = 0; j < classSizes.getLength(); j++) {
-				Element classSize = (Element) classSizes.item(j);
-				model.setRegionClassSize(key, classes.get(classSize.getAttribute(XML_A_CLASSMEMORY_CLASS)),
-						Integer.valueOf(classSize.getAttribute(XML_A_CLASSMEMORY_SIZE)));
+			NodeList classMemoryConstraints = region.getElementsByTagName(XML_E_CLASSMEMORYCONSTRAINT);
+			for (int j = 0; j < classMemoryConstraints.getLength(); j++) {
+				Element classMemoryConstraint = (Element) classMemoryConstraints.item(j);
+				model.setRegionClassMemorySize(key, classes.get(classMemoryConstraint.getAttribute(XML_A_CLASSMEMORYCONSTRAINT_CLASS)),
+						Integer.valueOf(classMemoryConstraint.getAttribute(XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY)));
 			}
 
 			NodeList dropRules = region.getElementsByTagName(XML_E_DROPRULES);
@@ -2004,19 +1990,32 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						Boolean.valueOf(dropRule.getAttribute(XML_A_DROPRULE_DROP)));
 			}
 
+			NodeList classWeights = region.getElementsByTagName(XML_E_CLASSWEIGHT);
+			for (int j = 0; j < classWeights.getLength(); j++) {
+				Element classWeight = (Element) classWeights.item(j);
+				model.setRegionClassWeight(key, classes.get(classWeight.getAttribute(XML_A_CLASSWEIGHT_CLASS)),
+						Integer.valueOf(classWeight.getAttribute(XML_A_CLASSWEIGHT_WEIGHT)));
+			}
+
+			NodeList classSizes = region.getElementsByTagName(XML_E_CLASSSIZE);
+			for (int j = 0; j < classSizes.getLength(); j++) {
+				Element classSize = (Element) classSizes.item(j);
+				model.setRegionClassSize(key, classes.get(classSize.getAttribute(XML_A_CLASSSIZE_CLASS)),
+						Integer.valueOf(classSize.getAttribute(XML_A_CLASSSIZE_SIZE)));
+			}
+
 			// Now parses group constraints
 			NodeList groupConstraints = region.getElementsByTagName(XML_E_GROUPCONSTRAINT);
 			for (int j = 0; j < groupConstraints.getLength(); j++) {
 				Element groupConstraint = (Element) groupConstraints.item(j);
-				//TODO Add support for Double group constraints
-				ivalue = Double.valueOf(groupConstraint.getAttribute(XML_A_GROUPCONSTRAINT_MAXJOBS)).intValue();
-				model.addRegionGroup(key, groupConstraint.getAttribute(XML_A_GROUPCONSTRAINT_GROUP), Integer.valueOf(ivalue), "");
+				model.addRegionGroup(key, groupConstraint.getAttribute(XML_A_GROUPCONSTRAINT_GROUP));
+				model.setRegionGroupCustomerConstraint(key, j, Integer.valueOf(groupConstraint.getAttribute(XML_A_GROUPCONSTRAINT_MAXJOBS)));
 			}
 
-			NodeList groupStrategies = region.getElementsByTagName(XML_E_GROUPSTRATEGY);
-			for (int j = 0; j < groupStrategies.getLength(); j++) {
-				Element groupStrategy = (Element) groupStrategies.item(j);
-				model.setRegionGroupStrategy(key, j, groupStrategy.getAttribute(XML_A_GROUPSTRATEGY_STRATEGY));
+			NodeList groupMemoryConstraints = region.getElementsByTagName(XML_E_GROUPMEMORYCONSTRAINT);
+			for (int j = 0; j < groupMemoryConstraints.getLength(); j++) {
+				Element groupMemoryConstraint = (Element) groupMemoryConstraints.item(j);
+				model.setRegionGroupMemorySize(key, j, Integer.valueOf(groupMemoryConstraint.getAttribute(XML_A_GROUPMEMORYCONSTRAINT_MAXMEMORY)));
 			}
 
 			NodeList groupClassLists = region.getElementsByTagName(XML_E_GROUPCLASSLIST);

@@ -23,6 +23,7 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -85,6 +86,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 	@Override
 	public void gotFocus() {
 		classEditor.clearCache();
+		classTable.tableChanged(new TableModelEvent(classTable.getModel()));
 	}
 
 	protected class BlockingClassTable extends JTable {
@@ -93,7 +95,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 
 		protected String[] dropRules = new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() };
 		protected TableCellRenderer grayRenderer = new GrayCellRenderer();
-		int[] columnSizes = new int[] { 150, 60, 30, 50, 40, 40 };		
+		int[] columnSizes = new int[] { 150, 60, 30, 60, 30, 50, 40, 40 };		
 
 		public BlockingClassTable() {
 			super();
@@ -108,12 +110,18 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			if (column == 0) {
 				return classEditor.getRenderer();
-			} else if (column == 1 || column == 4 || column == 5) {
+			} else if (column == 1) {
 				return grayRenderer;
 			} else if (column == 2) {
 				return new BooleanCellRenderer();
 			} else if (column == 3) {
+				return grayRenderer;
+			} else if (column == 4) {
+				return new BooleanCellRenderer();
+			} else if (column == 5) {
 				return ComboBoxCellEditor.getRendererInstance();
+			} else if (column == 6 || column == 7) {
+				return grayRenderer;
 			} else {
 				return super.getCellRenderer(row, column);
 			}
@@ -121,7 +129,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
-			if (column == 3) {
+			if (column == 5) {
 				return ComboBoxCellEditor.getEditorInstance(dropRules);
 			} else {
 				return super.getCellEditor(row, column);
@@ -133,14 +141,17 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
 			}
 		}
+
 	}
 
 	protected class BlockingClassTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 
-		private Class<?>[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class, String.class, String.class };
-		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Drop", "Memory Size", "Weight" };
+		private Class<?>[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class, Boolean.class,
+				String.class, String.class, String.class };
+		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Memory Size", "\u221e",
+				"Drop", "Weight", "Size" };
 
 		public int getRowCount() {
 			return cd.getClassKeys().size();
@@ -162,30 +173,35 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			// Disable the Weight setting
-			return  //columnIndex == 5 ||
-					columnIndex == 4 || columnIndex == 3 || columnIndex == 2
-					|| (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue());
+			return  (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue()) || columnIndex == 2
+					|| (columnIndex == 3 && !((Boolean) getValueAt(rowIndex, 4)).booleanValue()) || columnIndex == 4
+					|| columnIndex == 5 || columnIndex == 7;
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object classKey = cd.getClassKeys().get(rowIndex);
 			Integer ivalue = null;
 			switch (columnIndex) {
-			case (0):
+			case 0:
 				return classKey;
-			case (1):
+			case 1:
 				ivalue = brd.getRegionClassCustomerConstraint(key, classKey);
 				return (ivalue.intValue() > 0) ? ivalue : "\u221e";
-			case (2):
+			case 2:
 				ivalue = brd.getRegionClassCustomerConstraint(key, classKey);
 				return Boolean.valueOf(ivalue.intValue() < 1);
-			case (3):
+			case 3:
+				ivalue = brd.getRegionClassMemorySize(key, classKey);
+				return (ivalue.intValue() > 0) ? ivalue : "\u221e";
+			case 4:
+				ivalue = brd.getRegionClassMemorySize(key, classKey);
+				return Boolean.valueOf(ivalue.intValue() < 1);
+			case 5:
 				return brd.getRegionClassDropRule(key, classKey).toString();
-			case (4):
-				return brd.getRegionClassSize(key, classKey);
-			case (5):
+			case 6:
 				return brd.getRegionClassWeight(key, classKey);
+			case 7:
+				return brd.getRegionClassSize(key, classKey);
 			}
 			return null;
 		}
@@ -195,7 +211,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 			Object classKey = cd.getClassKeys().get(rowIndex);
 			Integer ivalue = null;
 			switch (columnIndex) {
-			case (1):
+			case 1:
 				try {
 					ivalue = Integer.valueOf((String) aValue);
 					if (ivalue.intValue() > 0) {
@@ -205,7 +221,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 					// Do nothing
 				}
 				break;
-			case (2):
+			case 2:
 				if (((Boolean) aValue).booleanValue()) {
 					brd.setRegionClassCustomerConstraint(key, classKey, Integer.valueOf(-1));
 				} else {
@@ -216,24 +232,45 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 					brd.setRegionClassCustomerConstraint(key, classKey, ivalue);
 				}
 				break;
-			case (3):
-				brd.setRegionClassDropRule(key, classKey, Boolean.valueOf((String) aValue));
-				break;
-			case (4):
+			case 3:
 				try {
 					ivalue = Integer.valueOf((String) aValue);
 					if (ivalue.intValue() > 0) {
-						brd.setRegionClassSize(key, classKey, ivalue);
+						brd.setRegionClassMemorySize(key, classKey, ivalue);
 					}
 				} catch (NumberFormatException e) {
 					// Do nothing
 				}
 				break;
-			case (5):
+			case 4:
+				if (((Boolean) aValue).booleanValue()) {
+					brd.setRegionClassMemorySize(key, classKey, Integer.valueOf(-1));
+				} else {
+					ivalue = Defaults.getAsInteger("blockingMaxMemoryPerClass");
+					if (ivalue.intValue() < 1) {
+						ivalue = Integer.valueOf(1);
+					}
+					brd.setRegionClassMemorySize(key, classKey, ivalue);
+				}
+				break;
+			case 5:
+				brd.setRegionClassDropRule(key, classKey, Boolean.valueOf((String) aValue));
+				break;
+			case 6:
 				try {
 					ivalue = Integer.valueOf((String) aValue);
 					if (ivalue.intValue() > 0) {
 						brd.setRegionClassWeight(key, classKey, ivalue);
+					}
+				} catch (NumberFormatException e) {
+					// Do nothing
+				}
+				break;
+			case 7:
+				try {
+					ivalue = Integer.valueOf((String) aValue);
+					if (ivalue.intValue() > 0) {
+						brd.setRegionClassSize(key, classKey, ivalue);
 					}
 				} catch (NumberFormatException e) {
 					// Do nothing

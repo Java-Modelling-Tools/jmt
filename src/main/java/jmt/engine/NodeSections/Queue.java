@@ -510,8 +510,7 @@ public class Queue extends InputSection {
 					//counter must be decreased
 					if (redirectionON) {
 						//decrease the number of jobs
-						//myRegion.decreaseOccupation(job.getJobClass());
-						myRegion.decreaseOccupation(job);
+						myRegion.decreaseOccupation(job.getJobClass());
 						//sends an event to the input station (which may be blocked)
 						send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);
 						//Since now for blocking regions the job dropping is handles manually at node 
@@ -649,7 +648,7 @@ public class Queue extends InputSection {
 			nodeJobsList.add(jobInfo);
 			netJobsList.addJob(job);
 			if (redirectionON) {
-				myRegion.increaseOccupation(job);
+				myRegion.increaseOccupation(job.getJobClass());
 			}
 		}
 	}

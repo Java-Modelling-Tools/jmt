@@ -147,6 +147,7 @@ import org.jgraph.graph.CellHandle;
 import org.jgraph.graph.CellView;
 import org.jgraph.graph.ConnectionSet;
 import org.jgraph.graph.DefaultGraphModel;
+import org.jgraph.graph.DefaultGraphModel.GraphModelEdit;
 import org.jgraph.graph.DefaultPort;
 import org.jgraph.graph.Edge;
 import org.jgraph.graph.EdgeView;
@@ -712,7 +713,7 @@ public class Mediator implements GuiInterface {
 		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
 			return;
 		}
-		if (animationHolder != null ) {
+		if (animationHolder != null) {
 			animationHolder.stop();
 		}
 		JSimGraphModel tmpmodel = new JSimGraphModel();
@@ -1282,7 +1283,7 @@ public class Mediator implements GuiInterface {
 						select.add(node);
 					}
 				}
-				// Removes blocking region from data structure
+				// Deletes blocking region from data structure
 				model.deleteBlockingRegion(((BlockingRegion) cells[i]).getKey());
 			}
 		}
@@ -2277,6 +2278,8 @@ public class Mediator implements GuiInterface {
 	 */
 	public void resetMouseState() {
 		mouseListener.setDefaultState();
+		mouseListener.setFocus(null);
+		mouseListener.setCell(null);
 		componentBar.clearButtonGroupSelection(0);
 		if (graph != null) {
 			graph.clearSelection();
@@ -2654,7 +2657,10 @@ public class Mediator implements GuiInterface {
 				mc.deleteEmptyBlockingRegions();
 			}
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOADING_IN_BLOCKING_REGION)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOAD_BEYOND_CAPACITY)) {
+			editSimulationParameters();
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOAD_BEYOND_MEMORY)) {
 			editSimulationParameters();
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CS_MATRIX_HAS_ROWS_LESS_THAN_ONE)) {
@@ -2816,7 +2822,7 @@ public class Mediator implements GuiInterface {
 					putBack.add(cell2);
 					oldRegionKey = ((BlockingRegion) cell.getPrevParent()).getKey();
 					model.removeRegionStation(oldRegionKey, key);
-					// If region is empty, removes region too
+					// If region is empty, deletes region
 					if (model.getBlockingRegionStations(oldRegionKey).size() == 0) {
 						model.deleteBlockingRegion(oldRegionKey);
 					}
@@ -2826,7 +2832,7 @@ public class Mediator implements GuiInterface {
 					// Object changed blocking region
 					oldRegionKey = ((BlockingRegion) cell.getPrevParent()).getKey();
 					model.removeRegionStation(oldRegionKey, key);
-					// If region is empty, removes region too
+					// If region is empty, deletes region
 					if (model.getBlockingRegionStations(oldRegionKey).size() == 0) {
 						model.deleteBlockingRegion(oldRegionKey);
 					}
@@ -3258,7 +3264,7 @@ public class Mediator implements GuiInterface {
 						select.add(node);
 					}
 				}
-				// Removes blocking region from data structure
+				// Deletes blocking region from data structure
 				model.deleteBlockingRegion(((BlockingRegion) cells[i]).getKey());
 			}
 		}

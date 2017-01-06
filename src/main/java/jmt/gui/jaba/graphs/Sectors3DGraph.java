@@ -63,7 +63,7 @@ public class Sectors3DGraph extends JabaGraph implements MouseListener {
 	private static final Color SINGLE = new Color(255, 200, 0);
 	private static final Color DOUBLE = new Color(255, 150, 75);
 	private static final Color MORE = new Color(192, 0, 0);
-	private static final Color LINESINGLE = Color.gray;
+	private static final Color LINESINGLE = Color.GRAY;
 	private static final Color LINEDOUBLE = Color.CYAN;
 	private static final Color LINEMORE = Color.BLUE;
 	private static final Color BLACK = new Color(0, 0, 0);

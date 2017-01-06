@@ -476,10 +476,15 @@ public class JModelProblemsWindow extends JDialog {
 							+ " is empty.</div></html>", regionKeys.get(i), null));
 				}
 			}
-			if (mc.isTherePreloadingInBlockingRegionError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.PRELOADING_IN_BLOCKING_REGION,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloading of stations in finite capacity regions "
-								+"exceeds global or class constraints (weights have not been considered).</div></html>", null, null));
+			if (mc.isTherePreloadBeyondCapacityError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.PRELOAD_BEYOND_CAPACITY,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloads of stations in finite capacity regions "
+								+"exceed the global, class or group capacity constraints (weights have been considered).</div></html>", null, null));
+			}
+			if (mc.isTherePreloadBeyondMemoryError()) {
+				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.PRELOAD_BEYOND_MEMORY,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Preloads of stations in finite capacity regions "
+								+"exceed the global, class or group memory constraints (sizes have been considered).</div></html>", null, null));
 			}
 			if (mc.isThereMoreThanOneSinkWarning()) {
 				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM,ModelChecker.MORE_THAN_ONE_SINK_WARNING,

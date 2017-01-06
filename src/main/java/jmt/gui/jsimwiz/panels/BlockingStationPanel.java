@@ -76,8 +76,8 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 	protected StationDefinition sd;
 	/** Current region key */
 	protected Object regionKey;
-	/** Inner panel to specify class constraints */
-	protected BlockingRegionParameterPanel blockingPanel;
+	/** Inner panel to specify class and group constraints */
+	protected BlockingRegionParameterPanel parameterPanel;
 
 	/** Panel used to display stations */
 	protected JPanel stationPanel;
@@ -114,8 +114,8 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 	 */
 	@Override
 	public void lostFocus() {
-		if (blockingPanel != null) {
-			blockingPanel.lostFocus();
+		if (parameterPanel != null) {
+			parameterPanel.lostFocus();
 		}
 		// Aborts editing of table
 		TableCellEditor editor = stationTable.getCellEditor();
@@ -130,8 +130,8 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 	 */
 	@Override
 	public void gotFocus() {
-		if (blockingPanel != null) {
-			blockingPanel.gotFocus();
+		if (parameterPanel != null) {
+			parameterPanel.gotFocus();
 		}
 		if (warningPanel != null) {
 			warningPanel.clearCheckVectors();
@@ -171,7 +171,7 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 		this.bd = brd;
 		this.regionKey = key;
 		comboFactory.setData(sd);
-		blockingPanel.setData(cd, brd, key);
+		parameterPanel.setData(cd, brd, key);
 		stationPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Stations in " + bd.getRegionName(regionKey)));
 	}
 
@@ -208,11 +208,11 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 		stationPanel.add(warningPanel);
 		add(stationPanel);
 
-		// Creates blocking region panel
-		blockingPanel = new BlockingRegionParameterPanel(cd, bd, regionKey);
+		// Creates the inner parameter panel
+		parameterPanel = new BlockingRegionParameterPanel(cd, bd, regionKey);
 		// Hides unneeded global properties (specified by table)
-		blockingPanel.setGlobalVisible(false);
-		add(blockingPanel);
+		parameterPanel.setGlobalVisible(false);
+		add(parameterPanel);
 	}
 
 	/**
@@ -283,6 +283,20 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 		} else {
 			addStation.setEnabled(false);
 		}
+	}
+
+	/**
+	 * Sets the group number for current blocking region
+	 */
+	protected void setGroupNumber(int number) {
+		parameterPanel.setGroupNumber(number);
+	}
+
+	/**
+	 * Sets grouping enabled/disabled for current blocking region
+	 */
+	protected void setGroupEnable(boolean enable) {
+		parameterPanel.setGroupEnable(enable);
 	}
 
 	/**

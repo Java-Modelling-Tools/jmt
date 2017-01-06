@@ -545,7 +545,7 @@ public class DistributionsEditor extends JMTDialog {
 		scrolledPanel.add(param_panel);
 		scrolledPanel.add(mean_c_panel);
 		mean_c_panel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0,
-				Color.gray));
+				Color.GRAY));
 
 		// Adds bottom_panel to contentpane
 		JPanel bottom_panel = new JPanel(new FlowLayout());
@@ -952,10 +952,10 @@ public class DistributionsEditor extends JMTDialog {
 			// Set black border around the interval.
 			// The name of the interval is displayed on the border
 			panel.setBorder(BorderFactory.createTitledBorder(BorderFactory
-					.createMatteBorder(1, 1, 1, 1, Color.black), name,
+					.createMatteBorder(1, 1, 1, 1, Color.BLACK), name,
 					TitledBorder.DEFAULT_JUSTIFICATION,
 					TitledBorder.DEFAULT_POSITION, new Font("Dialog",
-							Font.BOLD, 12), Color.black));
+							Font.BOLD, 12), Color.BLACK));
 
 			burstContentPanel.add(panel);
 		}

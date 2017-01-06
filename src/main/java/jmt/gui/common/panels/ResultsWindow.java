@@ -189,7 +189,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
 		progressBar.setForeground(Color.BLUE);
-		UIManager.put( "ProgressBar.selectionForeground", Color.white );
+		UIManager.put("ProgressBar.selectionForeground", Color.WHITE);
 		setProgressBar(results.getProgressTime());
 		toolbar.add(progressBar);
 		// Add close window button

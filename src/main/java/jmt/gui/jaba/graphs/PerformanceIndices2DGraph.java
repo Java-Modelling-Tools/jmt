@@ -77,8 +77,8 @@ public class PerformanceIndices2DGraph extends JabaGraph implements
 
 	private int index = 0;
 
-	private Color defaultColors[] = { Color.blue, Color.green, Color.magenta,
-			Color.orange, Color.red };
+	private Color defaultColors[] = { Color.BLUE, Color.GREEN, Color.MAGENTA,
+			Color.ORANGE, Color.RED };
 	// This flag avoids lines change color when we repaint
 	// even if data have not changed ( e.g. when we show
 	// the coords of points)
@@ -210,13 +210,13 @@ public class PerformanceIndices2DGraph extends JabaGraph implements
 			i = i - 2;
 			valuesOnRightY.add(util[j].get(i + 1));
 		}
-		// g2.setColor(Color.black);
+		// g2.setColor(Color.BLACK);
 		// plane.drawSegment(new DPoint(0, 1), new DPoint(1, 1));
 		g2.setStroke(LINES);
 
 		drawSummary(g, stationColors);
 
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		{// we always draw certain points
 			if (!valuesOnLeftY.contains(new DPoint(0, 1)))
 				valuesOnLeftY.add(new DPoint(0, 1));
@@ -252,7 +252,7 @@ public class PerformanceIndices2DGraph extends JabaGraph implements
 			g.fillRect((int) tooltip.getX(), (int) tooltip.getY()
 					- (int) bounds.getHeight() + 1, (int) bounds.getWidth(),
 					(int) bounds.getHeight() + 2);
-			g.setColor(Color.black);
+			g.setColor(Color.BLACK);
 			g.drawString(content, (int) tooltip.getX(), (int) tooltip.getY());
 		}
 		g.dispose();
@@ -270,11 +270,11 @@ public class PerformanceIndices2DGraph extends JabaGraph implements
 				g.fillRect(xBase, yBase - (g.getFontMetrics().getHeight() / 2),
 						8, 8);
 			} else {
-				g.setColor(Color.black);
+				g.setColor(Color.BLACK);
 				g.drawRect(xBase, yBase - (g.getFontMetrics().getHeight() / 2),
 						8, 8);
 			}
-			g.setColor(Color.black);
+			g.setColor(Color.BLACK);
 			g.drawString(data.getStationNames()[i], xBase + 10, yBase);
 			stationLabels[i] = new Rectangle(xBase, yBase
 					- (g.getFontMetrics().getHeight() / 2),

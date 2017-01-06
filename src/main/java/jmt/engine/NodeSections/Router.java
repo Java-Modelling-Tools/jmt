@@ -175,8 +175,7 @@ public class Router extends OutputSection {
 				//the region, it means that one job has left the blocking region so the region
 				//input station (its blocking router) must receive a particular message
 				if (!myRegion.belongsToRegion(outNode)) {
-					//myRegion.decreaseOccupation(jobClass);
-					myRegion.decreaseOccupation(job);
+					myRegion.decreaseOccupation(jobClass);
 					send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);
 					//Since now for blocking regions the job dropping is handles manually at node 
 					//level hence need to create events with Jobs ..Modified for FCR Bug Fix

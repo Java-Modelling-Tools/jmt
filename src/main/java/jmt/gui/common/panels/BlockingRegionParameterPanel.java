@@ -108,14 +108,14 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		this.key = key;
 
 		mainPanel.removeAll();
-		mainPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), brd.getRegionName(key) + " Specific Properties"));
+		mainPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Specific Properties of " + brd.getRegionName(key)));
 		if (classTablePanel == null) {
 			classTablePanel = new BlockingRegionClassPanel(cd, brd, key);
 		} else {
 			classTablePanel.setData(cd, brd, key);
 		}
 		if (groupTablePanel == null) {
-			groupTablePanel = new BlockingRegionGroupPanel(cd, brd, key, gEnable);
+			groupTablePanel = new BlockingRegionGroupPanel(cd, brd, key, gNumber);
 		} else {
 			groupTablePanel.setData(cd, brd, key);
 		}
@@ -134,9 +134,9 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 
 		// Panel with global region parameters
 		globalPanel = new JPanel(new SpringLayout());
-		globalPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), brd.getRegionName(key) + " Global Properties"));
+		globalPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Global Properties of " + brd.getRegionName(key)));
 		mainPanel = new JTabbedPane();
-		mainPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), brd.getRegionName(key) + " Specific Properties"));
+		mainPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Specific Properties of " + brd.getRegionName(key)));
 
 		// Enter region name
 		JLabel label = new JLabel("Region Name: ");
@@ -156,8 +156,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		inf = new JCheckBox("Infinite");
 		mInf = new JCheckBox("Infinite");
 		gEnable = new JCheckBox("Enable");
-		// Disable grouping feature
-		gEnable.setEnabled(false);
+		gEnable.setEnabled(true);
 		JLabel mLabel = new JLabel("Region Memory Size: ");
 		JLabel gLabel = new JLabel("Region Groups: ");
 		tmpPanel.add(number, BorderLayout.CENTER);
@@ -179,7 +178,6 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		SpringUtilities.makeCompactGrid(globalPanel, 4, 2, 20, 4, 20, 10);
 		add(globalPanel, BorderLayout.NORTH);		
 		add(mainPanel, BorderLayout.CENTER);
-		groupNameIndex = brd.getRegionGroupList(key).size();
 	}
 
 	/**
@@ -312,6 +310,33 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 	}
 
 	/**
+	 * called by the Wizard before when switching to another panel
+	 */
+	@Override
+	public void lostFocus() {
+		if (classTablePanel != null) {
+			classTablePanel.lostFocus();
+		}
+		if (groupTablePanel != null) {
+			groupTablePanel.lostFocus();
+		}
+	}
+
+	/**
+	 * called by the Wizard when the panel becomes active
+	 */
+	@Override
+	public void gotFocus() {
+		if (classTablePanel != null) {
+			classTablePanel.gotFocus();
+		}
+		if (groupTablePanel != null) {
+			groupTablePanel.gotFocus();
+		}
+		groupNameIndex = brd.getRegionGroupList(key).size();
+	}
+
+	/**
 	 * This method will update data inside table and input components
 	 */
 	protected void updateData() {
@@ -400,9 +425,16 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 
 	}
 
-	/**
-	 * Modifies global number of classes for this model all at once.
-	 */
+	public void setGroupNumber(int number) {
+		gNumber.setValue(number);
+	}
+
+	public void setGroupEnable(boolean enable) {
+		if (enable != gEnable.isSelected()) {
+			gEnable.doClick();
+		}
+	}
+
 	protected void setNumberOfGroups(int newNumber) {
 		// If new number is greater than a certain number, do nothing
 		if (newNumber > MAX_NUMBER_OF_GROUPS) {
@@ -433,9 +465,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 
 	protected void addGroup() {
 		groupNameIndex++;
-		brd.addRegionGroup(key, Defaults.get("blockingGroupName") + groupNameIndex,
-				Defaults.getAsInteger("blockingGroupCapacity").intValue(),
-				Defaults.get("blockingGroupStratagy"));
+		brd.addRegionGroup(key, Defaults.get("blockingGroupName") + groupNameIndex);
 		refreshComponents();
 	}
 

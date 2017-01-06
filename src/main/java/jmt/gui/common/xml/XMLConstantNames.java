@@ -103,34 +103,37 @@ public interface XMLConstantNames {
 	public static final String XML_A_REGION_TYPE = "type";
 	public static final String XML_E_REGIONNODE = "regionNode";
 	public static final String XML_A_REGIONNODE_NAME = "nodeName";
-	public static final String XML_E_CLASSCONSTRAINT = "classConstraint";
-	public static final String XML_A_CLASSCONSTRAINT_CLASS = "jobClass";
-	public static final String XML_A_CLASSCONSTRAINT_MAXJOBS = "maxJobsPerClass";
 	public static final String XML_E_GLOBALCONSTRAINT = "globalConstraint";
 	public static final String XML_A_GLOBALCONSTRAINT_MAXJOBS = "maxJobs";
 	public static final String XML_E_GLOBALMEMORYCONSTRAINT = "globalMemoryConstraint";
 	public static final String XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY = "maxMemory";
 
-	public static final String XML_E_GROUPCONSTRAINT = "groupConstraint";
-	public static final String XML_A_GROUPCONSTRAINT_GROUP = "jobGroup";
-	public static final String XML_A_GROUPCONSTRAINT_MAXJOBS = "maxJobsPerGroup";
-	public static final String XML_E_GROUPSTRATEGY = "groupStrategy";
-	public static final String XML_A_GROUPSTRATEGY_GROUP = "jobGroup";
-	public static final String XML_A_GROUPSTRATEGY_STRATEGY = "strategy";
-	public static final String XML_E_GROUPCLASSLIST = "groupClassList";
-	public static final String XML_E_GROUPCLASS = "groupClass";
-	public static final String XML_A_GROUPCLASS_GROUP = "jobGroup";
-	public static final String XML_A_GROUPCLASS_CLASS = "jobClass";
-
+	public static final String XML_E_CLASSCONSTRAINT = "classConstraint";
+	public static final String XML_A_CLASSCONSTRAINT_CLASS = "jobClass";
+	public static final String XML_A_CLASSCONSTRAINT_MAXJOBS = "maxJobsPerClass";
+	public static final String XML_E_CLASSMEMORYCONSTRAINT = "classMemoryConstraint";
+	public static final String XML_A_CLASSMEMORYCONSTRAINT_CLASS = "jobClass";
+	public static final String XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY = "maxMemoryPerClass";
 	public static final String XML_E_DROPRULES = "dropRules";
 	public static final String XML_A_DROPRULE_CLASS = "jobClass";
 	public static final String XML_A_DROPRULE_DROP = "dropThisClass";
 	public static final String XML_E_CLASSWEIGHT = "classWeight";
 	public static final String XML_A_CLASSWEIGHT_CLASS = "jobClass";
 	public static final String XML_A_CLASSWEIGHT_WEIGHT = "weight";
-	public static final String XML_E_CLASSMEMORYSIZE = "classMemorySize";
-	public static final String XML_A_CLASSMEMORY_CLASS = "jobClass";
-	public static final String XML_A_CLASSMEMORY_SIZE = "size";
+	public static final String XML_E_CLASSSIZE = "classSize";
+	public static final String XML_A_CLASSSIZE_CLASS = "jobClass";
+	public static final String XML_A_CLASSSIZE_SIZE = "size";
+
+	public static final String XML_E_GROUPCONSTRAINT = "groupConstraint";
+	public static final String XML_A_GROUPCONSTRAINT_GROUP = "jobGroup";
+	public static final String XML_A_GROUPCONSTRAINT_MAXJOBS = "maxJobsPerGroup";
+	public static final String XML_E_GROUPMEMORYCONSTRAINT = "groupMemoryConstraint";
+	public static final String XML_A_GROUPMEMORYCONSTRAINT_GROUP = "jobGroup";
+	public static final String XML_A_GROUPMEMORYCONSTRAINT_MAXMEMORY = "maxMemoryPerGroup";
+	public static final String XML_E_GROUPCLASSLIST = "groupClassList";
+	public static final String XML_E_GROUPCLASS = "groupClass";
+	public static final String XML_A_GROUPCLASS_GROUP = "jobGroup";
+	public static final String XML_A_GROUPCLASS_CLASS = "jobClass";
 
 	public static final String CLASSNAME_SOURCE = "RandomSource";
 	public static final String CLASSNAME_TERMINAL = "Terminal";

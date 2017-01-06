@@ -63,7 +63,7 @@ public class CustomSeparator extends JComponent {
 		try {
 			JToolBar parent = (JToolBar) this.getParent();
 			Dimension d = this.getSize();
-			g.setColor(Color.gray);
+			g.setColor(Color.GRAY);
 			if (parent.getOrientation() == SwingConstants.HORIZONTAL) {
 				if (orientation != SwingConstants.HORIZONTAL) {
 					setMaximumSize(Horizontal);

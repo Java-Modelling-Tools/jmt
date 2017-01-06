@@ -183,11 +183,9 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 
 		// Creates blocking regions list
 		regions = new RegionTable();
-		regions.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
 		JScrollPane jsp = new JScrollPane(regions, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		jsp.setPreferredSize(new Dimension(220, 200));
+		jsp.setPreferredSize(new Dimension(500, 200));
 		add(jsp, BorderLayout.WEST);
 		update();
 	}
@@ -224,7 +222,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 					// If value is valid
 					if (val >= 0) {
 						int diff = val - bd.getRegionKeys().size();
-						// Avoid ciclic updates whenever no differences are inserted
+						// Avoid cyclic updates whenever no differences are inserted
 						if (diff == 0) {
 							return;
 						}
@@ -235,7 +233,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 							diff--;
 						}
 						while (diff < 0) {
-							// Removes last region
+							// Delete last region
 							bd.deleteBlockingRegion(bd.getRegionKeys().lastElement());
 							diff++;
 						}
@@ -379,8 +377,12 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 			// Sets column size
 			getColumnModel().getColumn(0).setPreferredWidth(120);
 			getColumnModel().getColumn(1).setPreferredWidth(50);
-			getColumnModel().getColumn(2).setMaxWidth(20);
-			getColumnModel().getColumn(3).setMaxWidth(ROW_HEIGHT);
+			getColumnModel().getColumn(2).setMaxWidth(25);
+			getColumnModel().getColumn(3).setPreferredWidth(50);
+			getColumnModel().getColumn(4).setMaxWidth(25);
+			getColumnModel().getColumn(5).setPreferredWidth(50);
+			getColumnModel().getColumn(6).setMaxWidth(25);
+			getColumnModel().getColumn(7).setMaxWidth(ROW_HEIGHT);
 			getColumnModel().setColumnSelectionAllowed(false);
 		}
 
@@ -408,6 +410,14 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 				case 2:
 					return new BooleanCellRenderer();
 				case 3:
+					return grayRenderer;
+				case 4:
+					return new BooleanCellRenderer();
+				case 5:
+					return grayRenderer;
+				case 6:
+					return new BooleanCellRenderer();
+				case 7:
 					return deleteRenderer;
 				default:
 					return null;
@@ -439,6 +449,14 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 				case 2:
 					return super.getDefaultEditor(Boolean.class);
 				case 3:
+					return super.getDefaultEditor(String.class);
+				case 4:
+					return super.getDefaultEditor(Boolean.class);
+				case 5:
+					return super.getDefaultEditor(String.class);
+				case 6:
+					return super.getDefaultEditor(Boolean.class);
+				case 7:
 					return new ButtonCellEditor(delete);
 				default:
 					return null;
@@ -462,7 +480,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		 * @see #getRowCount
 		 */
 		public int getColumnCount() {
-			return 4;
+			return 8;
 		}
 
 		/**
@@ -483,6 +501,14 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 				case 2:
 					return "\u221e";
 				case 3:
+					return "Memory Size";
+				case 4:
+					return "\u221e";
+				case 5:
+					return "Groups";
+				case 6:
+					return "ON";
+				case 7:
 					return "";
 				default:
 					return null;
@@ -524,6 +550,18 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 				case 2:
 					value = bd.getRegionCustomerConstraint(key);
 					return Boolean.valueOf(value.intValue() < 1);
+				case 3:
+					value = bd.getRegionMemorySize(key);
+					return (value.intValue() > 0) ? value : "\u221e";
+				case 4:
+					value = bd.getRegionMemorySize(key);
+					return Boolean.valueOf(value.intValue() < 1);
+				case 5:
+					value = bd.getRegionGroupList(key).size();
+					return (value.intValue() > 0) ? value : "--";
+				case 6:
+					value = bd.getRegionGroupList(key).size();
+					return Boolean.valueOf(value.intValue() > 0);
 				default:
 					return null;
 				}
@@ -545,7 +583,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 			Object key = bd.getRegionKeys().get(rowIndex);
 			Integer value = null;
 			switch (columnIndex) {
-				case (1):
+				case 1:
 					try {
 						value = Integer.decode((String) aValue);
 						if (value.intValue() > 0) {
@@ -555,7 +593,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 						// Do nothing
 					}
 					break;
-				case (2):
+				case 2:
 					if (((Boolean) aValue).booleanValue()) {
 						bd.setRegionCustomerConstraint(key, Integer.valueOf(-1));
 					} else {
@@ -564,6 +602,44 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 							value = Integer.valueOf(1);
 						}
 						bd.setRegionCustomerConstraint(key, value);
+					}
+					break;
+				case 3:
+					try {
+						value = Integer.decode((String) aValue);
+						if (value.intValue() > 0) {
+							bd.setRegionMemorySize(key, value);
+						}
+					} catch (NumberFormatException e) {
+						// Do nothing
+					}
+					break;
+				case 4:
+					if (((Boolean) aValue).booleanValue()) {
+						bd.setRegionMemorySize(key, Integer.valueOf(-1));
+					} else {
+						value = Defaults.getAsInteger("blockingMaxMemory");
+						if (value.intValue() < 1) {
+							value = Integer.valueOf(1);
+						}
+						bd.setRegionMemorySize(key, value);
+					}
+					break;
+				case 5:
+					try {
+						value = Integer.decode((String) aValue);
+						if (value.intValue() > 0) {
+							blockingPanel.setGroupNumber(value.intValue());
+						}
+					} catch (NumberFormatException e) {
+						// Do nothing
+					}
+					break;
+				case 6:
+					if (((Boolean) aValue).booleanValue()) {
+						blockingPanel.setGroupEnable(true);
+					} else {
+						blockingPanel.setGroupEnable(false);
 					}
 					break;
 			}
@@ -579,8 +655,11 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		 */
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return columnIndex == 3 || columnIndex == 2 || columnIndex == 0
-					|| (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue());
+			return columnIndex == 0
+					|| (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue()) || columnIndex == 2
+					|| (columnIndex == 3 && !((Boolean) getValueAt(rowIndex, 4)).booleanValue()) || columnIndex == 4
+					|| (columnIndex == 5 && ((Boolean) getValueAt(rowIndex, 6)).booleanValue()) || columnIndex == 6
+					|| columnIndex == 7;
 		}
 	}
 

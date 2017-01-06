@@ -187,7 +187,7 @@ public class Storage extends InputSection {
 			nodeJobsList.add(jobInfo);
 			netJobsList.addJob(job);
 			if (redirectionON) {
-				myRegion.increaseOccupation(job);
+				myRegion.increaseOccupation(job.getJobClass());
 			}
 		}
 	}
@@ -243,8 +243,7 @@ public class Storage extends InputSection {
 				}
 				sendAckAfterDrop(job, 0.0, sourceSection, source);
 				if (redirectionON) {
-					//myRegion.decreaseOccupation(job.getJobClass());
-					myRegion.decreaseOccupation(job);
+					myRegion.decreaseOccupation(jobClass);
 					send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);
 				}
 			} else if (block[jobClass.getId()]) {

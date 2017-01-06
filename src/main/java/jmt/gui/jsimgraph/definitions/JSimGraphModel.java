@@ -49,7 +49,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	protected HashMap<String, Long> objectNumber = new HashMap<String, Long>(); // Used to generate progressive unique default names
 	protected HashMap<Object, Color> classColor = new HashMap<Object, Color>(); // Used to store classes color
 	protected HashMap<Object, JMTPoint> stationPositions = new HashMap<Object, JMTPoint>(); // Used to store station positions
-	protected Color[] defaultColor = new Color[] { Color.blue, Color.red, Color.green, Color.magenta, Color.orange, Color.cyan, Color.yellow }; // Defaults color prompted when inserting new class (next ones are generated random)
+	protected Color[] defaultColor = new Color[] { Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.YELLOW }; // Defaults color prompted when inserting new class (next ones are generated random)
 
 	protected boolean animationEnabled = Defaults.getAsBoolean("isWithAnimation").booleanValue();
 

@@ -126,14 +126,14 @@ public class TANotifier extends JTable implements Notifier {
 				Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 				if (!isSelected) {
 					if (column == 0) {
-						cell.setBackground(Color.lightGray);
+						cell.setBackground(Color.LIGHT_GRAY);
 					} else {
-						cell.setBackground(Color.white);
+						cell.setBackground(Color.WHITE);
 					}
 				} else if (column == 0) {
-					cell.setBackground(Color.darkGray);
+					cell.setBackground(Color.DARK_GRAY);
 				} else {
-					cell.setBackground(Color.blue);
+					cell.setBackground(Color.BLUE);
 				}
 
 				return cell;

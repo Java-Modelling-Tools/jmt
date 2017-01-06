@@ -1022,7 +1022,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			String name = (String) className.getSelectedItem();
 			// Sets color of selected elements
 			if ((name.equals(ALL_CLASSES) || getColumnName(column).equals(name)) && column != 0) {
-				comp.setForeground(Color.red);
+				comp.setForeground(Color.RED);
 			} else {
 				comp.setForeground(getForeground());
 			}
@@ -1031,7 +1031,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				comp.setBackground(this.getTableHeader().getBackground());
 				comp.setFont(comp.getFont().deriveFont(Font.BOLD));
 			} else {
-				comp.setBackground(Color.white);
+				comp.setBackground(Color.WHITE);
 				comp.setFont(comp.getFont().deriveFont(Font.PLAIN));
 			}
 			return comp;

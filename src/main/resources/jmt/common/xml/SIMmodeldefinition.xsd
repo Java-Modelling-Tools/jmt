@@ -99,16 +99,10 @@
 									<xs:attribute name="maxJobsPerClass" type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
-							<xs:element name="classWeight" minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="classMemoryConstraint" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="jobClass" type="xs:string" use="required"/>
-									<xs:attribute name="weight" type="jdouble" use="required"/>
-								</xs:complexType>
-							</xs:element>
-							<xs:element name="classMemorySize" minOccurs="0" maxOccurs="unbounded">
-								<xs:complexType>
-									<xs:attribute name="jobClass" type="xs:string" use="required"/>
-									<xs:attribute name="size" type="xs:integer" use="required"/>
+									<xs:attribute name="maxMemoryPerClass" type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="dropRules" minOccurs="0" maxOccurs="unbounded">
@@ -117,16 +111,28 @@
 									<xs:attribute name="dropThisClass" type="xs:boolean" use="required"/>
 								</xs:complexType>
 							</xs:element>
+							<xs:element name="classWeight" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="jobClass" type="xs:string" use="required"/>
+									<xs:attribute name="weight" type="jdouble" use="required"/>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="classSize" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="jobClass" type="xs:string" use="required"/>
+									<xs:attribute name="size" type="jdouble" use="required"/>
+								</xs:complexType>
+							</xs:element>
 							<xs:element name="groupConstraint" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="jobGroup" type="xs:string" use="required"/>
-									<xs:attribute name="maxJobsPerGroup" type="xs:integer" use="required"/>
+									<xs:attribute name="maxJobsPerGroup" type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
-							<xs:element name="groupStrategy" minOccurs="0" maxOccurs="unbounded">
+							<xs:element name="groupMemoryConstraint" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="jobGroup" type="xs:string" use="required"/>
-									<xs:attribute name="strategy" type="xs:string" use="required"/>
+									<xs:attribute name="maxMemoryPerGroup" type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
 							<xs:element name="groupClassList" minOccurs="0" maxOccurs="unbounded">

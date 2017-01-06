@@ -22,20 +22,17 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
@@ -43,9 +40,6 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.plaf.UIResource;
 import javax.swing.table.AbstractTableModel;
@@ -54,16 +48,16 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
 import jmt.framework.gui.table.editors.ButtonCellEditor;
-import jmt.framework.gui.table.editors.ComboBoxCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
-
+import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
 
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.exact.table.BooleanCellRenderer;
 import jmt.gui.jsimgraph.DialogFactory;
 
 public class BlockingRegionGroupPanel extends WizardPanel implements CommonConstants {
@@ -75,13 +69,9 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 	protected ClassDefinition cd;
 	protected Object key;
 	protected JPanel groupPanel;
-	protected JCheckBox gEnable;
-	protected JPanel configHPSPanel;
-	protected ButtonGroup configHPSGroup;
-	protected JRadioButton HPS_LCFS;
-	protected JRadioButton HPS_FCFS;
+	protected JSpinner gNumber;
 	private DialogFactory dialogFactory;
-	private boolean[] classAssignTogroup;
+	private boolean[] classAssignToGroup;
 
 	protected AbstractAction editMemberClasses = new AbstractAction("Edit") {
 
@@ -119,15 +109,10 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 	};
 
-	public BlockingRegionGroupPanel(ClassDefinition cd, BlockingRegionDefinition brd, Object key, JCheckBox gEnable) {
-		this.brd = brd;
-		this.cd = cd;
-		this.key = key;
-		this.gEnable = gEnable;
-
-		setData(cd,brd, key);
+	public BlockingRegionGroupPanel(ClassDefinition cd, BlockingRegionDefinition brd, Object key, JSpinner gNumber) {
+		this.gNumber = gNumber;
+		setData(cd, brd, key);
 		initComponents();
-		addDataManagers(); 
 	}
 
 	public void setData(ClassDefinition cd, BlockingRegionDefinition brd, Object key) {
@@ -144,77 +129,15 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 		groupPanel.add(new WarningScrollTable(groupTable, WARNING_CLASS));
 		add(groupPanel, BorderLayout.CENTER);
 
-		classAssignTogroup = new boolean[cd.getClassKeys().size()];
+		classAssignToGroup = new boolean[cd.getClassKeys().size()];
 		for (int i = 0; i < cd.getClassKeys().size(); i++) {
-			classAssignTogroup[i] = false;
+			classAssignToGroup[i] = false;
 			for (int j = 0; j < brd.getRegionGroupList(key).size(); j++) {
-				if (brd.getRegionGroupStrategy(key, j).contains(REGION_GROUP_STRATEGY_HPS)) {
-					continue;
-				}
 				if (brd.getRegionGroupClassList(key, j).contains(cd.getClassKeys().get(i))) {
-					classAssignTogroup[i] = true;
+					classAssignToGroup[i] = true;
 					break;
 				}
 			}
-		}
-
-		HPS_LCFS = new JRadioButton(REGION_GROUP_STRATEGY_HPS_LCFS);
-		HPS_FCFS = new JRadioButton(REGION_GROUP_STRATEGY_HPS_FCFS);
-		configHPSGroup = new ButtonGroup();
-		configHPSGroup.add(HPS_LCFS);
-		configHPSGroup.add(HPS_FCFS);
-		configHPSPanel = new JPanel(new GridLayout(2, 1));
-		configHPSPanel.setPreferredSize(new Dimension(100, 250));
-		configHPSPanel.setBorder(new TitledBorder(new EtchedBorder(), "HPS Strategy"));
-		configHPSPanel.setAlignmentY(Component.BOTTOM_ALIGNMENT);
-		configHPSPanel.add(HPS_LCFS);
-		configHPSPanel.add(HPS_FCFS);
-		add(configHPSPanel, BorderLayout.EAST);
-		getHPSStrategy();
-	}
-
-	private void addDataManagers() {
-		ChangeListener buttonListener = new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				if (HPS_LCFS.isSelected()) {
-					updateHPSStrategy(REGION_GROUP_STRATEGY_HPS_LCFS);
-				} else {
-					updateHPSStrategy(REGION_GROUP_STRATEGY_HPS_FCFS);
-				}
-				TableCellEditor editor = groupTable.getCellEditor();
-				if (editor != null) {
-					editor.stopCellEditing();
-				}
-				groupTable.repaint();
-			}
-		};
-
-		HPS_LCFS.addChangeListener(buttonListener);
-		HPS_FCFS.addChangeListener(buttonListener);
-	}
-
-	private void updateHPSStrategy(String name) {
-		for (int i = 0; i < brd.getRegionGroupList(key).size(); i++) {
-			if (brd.getRegionGroupStrategy(key, i).contains(REGION_GROUP_STRATEGY_HPS)) {
-				brd.setRegionGroupStrategy(key, i, name);
-			}
-		}
-	}
-
-	private void getHPSStrategy() {
-		String HPSStrategy = "";
-		for (int i = 0; i < brd.getRegionGroupList(key).size(); i++) {
-			if (brd.getRegionGroupStrategy(key, i).contains(REGION_GROUP_STRATEGY_HPS)) {
-				HPSStrategy = brd.getRegionGroupStrategy(key, i);
-				break;
-			}
-		}
-		if (HPSStrategy.equals(REGION_GROUP_STRATEGY_HPS_LCFS)) {
-			configHPSGroup.setSelected(HPS_LCFS.getModel(), true);
-		} else if (HPSStrategy.equals(REGION_GROUP_STRATEGY_HPS_FCFS)) {
-			configHPSGroup.setSelected(HPS_FCFS.getModel(), true);
-		} else {
-			configHPSGroup.setSelected(HPS_LCFS.getModel(), true);
 		}
 	}
 
@@ -238,9 +161,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 	protected void deleteGroup(int index) {
 		brd.deleteRegionGroup(key, index);
 		Refresh();
-		if (brd.getRegionGroupList(key).size() == 0) {
-			gEnable.doClick();
-		}
+		gNumber.setValue(brd.getRegionGroupList(key).size());
 	}
 
 	public void Refresh() {
@@ -258,11 +179,8 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 		private static final long serialVersionUID = 1L;
 
-		protected String[][] strategies = new String[][]{
-			new String[]{ REGION_GROUP_STRATEGY_FCFS, REGION_GROUP_STRATEGY_HPS_LCFS },
-			new String[]{ REGION_GROUP_STRATEGY_FCFS, REGION_GROUP_STRATEGY_HPS_FCFS } };
 		protected TableCellRenderer grayRenderer = new GrayCellRenderer();
-		int[] columnSizes = new int[] { 150, 50, 50, 50, 20 };
+		int[] columnSizes = new int[] { 120, 60, 30, 60, 30, 60, 30 };
 
 		protected JButton editButton = new JButton() {
 			private static final long serialVersionUID = 1L;
@@ -295,11 +213,15 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			if (column == 1) {
 				return grayRenderer;
 			} else if (column == 2) {
-				return ComboBoxCellEditor.getRendererInstance();
+				return new BooleanCellRenderer();
 			} else if (column == 3) {
-				return new ButtonCellEditor(editButton); 
+				return grayRenderer;
 			} else if (column == 4) {
-				return new ButtonCellEditor(deleteButton);
+				return new BooleanCellRenderer();
+			} else if (column == 5) {
+				return new ButtonCellEditor(editButton);
+			} else if (column == 6) {
+				return new DisabledButtonCellRenderer(deleteButton);
 			} else {
 				return super.getCellRenderer(row, column);
 			}
@@ -307,15 +229,9 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
-			if (column == 2) {
-				if (HPS_LCFS.isSelected()) {
-					return ComboBoxCellEditor.getEditorInstance(strategies[0]);
-				} else {
-					return ComboBoxCellEditor.getEditorInstance(strategies[1]);
-				}
-			} else if (column == 3) {
+			if (column == 5) {
 				return new ButtonCellEditor(new JButton(editMemberClasses));
-			} else if (column == 4) {
+			} else if (column == 6) {
 				return new ButtonCellEditor(new JButton(deleteGroup));
 			} else {
 				return super.getCellEditor(row, column);
@@ -328,24 +244,16 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			}
 		}
 
-		protected void sizeColumnsAndRows() {
-			for (int i = 0; i < columnSizes.length && i < getColumnCount(); i++) {
-				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
-				if (i == columnSizes.length - 1) {
-					this.getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);
-					this.setRowHeight(columnSizes[i]);
-				}
-			}
-		}
-
 	}
 
 	protected class BlockingGroupTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 
-		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Object.class, Object.class };
-		private String[] columnNames = new String[] { "Group", "Capacity", "Strategy", "Member Classes", "" };
+		private Class<?>[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class, Boolean.class,
+				Object.class, Object.class };
+		private String[] columnNames = new String[] { "Group", "Capacity", "\u221e", "Memory Size", "\u221e",
+				"Member Classes", "" };
 
 		public int getRowCount() {
 			return brd.getRegionGroupList(key).size();
@@ -367,17 +275,29 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return (columnIndex == 0 || columnIndex == 1 || columnIndex == 2|| columnIndex == 3 || columnIndex == 4);
+			return columnIndex == 0
+					|| (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue()) || columnIndex == 2
+					|| (columnIndex == 3 && !((Boolean) getValueAt(rowIndex, 4)).booleanValue()) || columnIndex == 4
+					|| columnIndex == 5 || (columnIndex == 6 && brd.getRegionGroupList(key).size() > 1);
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
+			Integer ivalue = null;
 			switch (columnIndex) {
-			case (0):
+			case 0:
 				return brd.getRegionGroupName(key, rowIndex);
-			case (1):
-				return brd.getRegionGroupCapacity(key, rowIndex);
-			case (2):
-				return brd.getRegionGroupStrategy(key, rowIndex);
+			case 1:
+				ivalue = brd.getRegionGroupCustomerConstraint(key, rowIndex);
+				return (ivalue.intValue() > 0) ? ivalue : "\u221e";
+			case 2:
+				ivalue = brd.getRegionGroupCustomerConstraint(key, rowIndex);
+				return Boolean.valueOf(ivalue.intValue() < 1);
+			case 3:
+				ivalue = brd.getRegionGroupMemorySize(key, rowIndex);
+				return (ivalue.intValue() > 0) ? ivalue : "\u221e";
+			case 4:
+				ivalue = brd.getRegionGroupMemorySize(key, rowIndex);
+				return Boolean.valueOf(ivalue.intValue() < 1);
 			}
 			return null;
 		}
@@ -387,39 +307,79 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			String svalue = null;
 			Integer ivalue = null;
 			switch (columnIndex) {
-			case (0):
+			case 0:
 				svalue = (String) aValue;
 				if (!svalue.equals("")) {
 					brd.setRegionGroupName(key, rowIndex, svalue);
 				}
 				break;
-			case (1):
+			case 1:
 				try {
 					ivalue = Integer.valueOf((String) aValue);
 					if (ivalue.intValue() > 0) {
-						brd.setRegionGroupCapacity(key, rowIndex, ivalue);
+						brd.setRegionGroupCustomerConstraint(key, rowIndex, ivalue);
 					}
 				} catch (NumberFormatException e) {
 					// Do nothing
 				}
 				break;
-			case (2):
-				svalue = (String) aValue;
-				if (svalue.equals(REGION_GROUP_STRATEGY_FCFS) && brd.getRegionGroupStrategy(key, rowIndex).contains(REGION_GROUP_STRATEGY_HPS)) {
-					brd.deleteAllClassesFromRegionGroup(key, rowIndex);
-				}
-				if (svalue.contains(REGION_GROUP_STRATEGY_HPS) && brd.getRegionGroupStrategy(key, rowIndex).equals(REGION_GROUP_STRATEGY_FCFS)) {
-					for (int i = 0; i < cd.getClassKeys().size(); i++) {
-						if (brd.getRegionGroupClassList(key, rowIndex).contains(cd.getClassKeys().get(i))) {
-							classAssignTogroup[i] = false;
-						}
+			case 2:
+				if (((Boolean) aValue).booleanValue()) {
+					brd.setRegionGroupCustomerConstraint(key, rowIndex, Integer.valueOf(-1));
+				} else {
+					ivalue = Defaults.getAsInteger("blockingGroupMaxJobs");
+					if (ivalue.intValue() < 1) {
+						ivalue = Integer.valueOf(1);
 					}
-					brd.deleteAllClassesFromRegionGroup(key, rowIndex);
+					brd.setRegionGroupCustomerConstraint(key, rowIndex, ivalue);
 				}
-				brd.setRegionGroupStrategy(key, rowIndex, svalue);
+				break;
+			case 3:
+				try {
+					ivalue = Integer.valueOf((String) aValue);
+					if (ivalue.intValue() > 0) {
+						brd.setRegionGroupMemorySize(key, rowIndex, ivalue);
+					}
+				} catch (NumberFormatException e) {
+					// Do nothing
+				}
+				break;
+			case 4:
+				if (((Boolean) aValue).booleanValue()) {
+					brd.setRegionGroupMemorySize(key, rowIndex, Integer.valueOf(-1));
+				} else {
+					ivalue = Defaults.getAsInteger("blockingGroupMaxMemory");
+					if (ivalue.intValue() < 1) {
+						ivalue = Integer.valueOf(1);
+					}
+					brd.setRegionGroupMemorySize(key, rowIndex, ivalue);
+				}
 				break;
 			}
 			repaint();
+		}
+
+	}
+
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+		public DisabledButtonCellRenderer(JButton jbutt) {
+			super(jbutt);
+			button = jbutt;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			if (table.isCellEditable(row, column)) {
+				button.setEnabled(true);
+			} else {
+				button.setEnabled(false);
+			}
+			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
 
 	}
@@ -443,7 +403,6 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			this.key = key;
 			this.groupIndex = groupIndex;		
 			classEditor = new ImagedComboBoxCellEditorFactory(cd);
-
 			initComponents();
 			setData(cd, brd, key, groupIndex);
 		}
@@ -543,17 +502,16 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
-				return  columnIndex == 1 && (brd.getRegionGroupStrategy(key, groupIndex).contains(REGION_GROUP_STRATEGY_HPS)
-						|| !classAssignTogroup[rowIndex]
+				return  columnIndex == 1 && (!classAssignToGroup[rowIndex]
 						|| brd.getRegionGroupClassList(key, groupIndex).contains(cd.getClassKeys().get(rowIndex)));
 			}
 
 			public Object getValueAt(int rowIndex, int columnIndex) {
 				Object classKey = cd.getClassKeys().get(rowIndex);
 				switch (columnIndex) {
-				case (0):
+				case 0:
 					return classKey;
-				case (1):
+				case 1:
 					return brd.getRegionGroupClassList(key, groupIndex).contains(classKey);
 				}
 				return null;
@@ -563,17 +521,13 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 				Object classKey = cd.getClassKeys().get(rowIndex);
 				switch (columnIndex) {
-				case (1):
+				case 1:
 					if (((Boolean) aValue).booleanValue()) {
-						if (!brd.getRegionGroupStrategy(key, groupIndex).contains(REGION_GROUP_STRATEGY_HPS)) {
-							classAssignTogroup[rowIndex] = true;
-						}
+						classAssignToGroup[rowIndex] = true;
 						brd.addClassIntoRegionGroup(key, groupIndex, classKey);
 					} else {
-						if (!brd.getRegionGroupStrategy(key, groupIndex).contains(REGION_GROUP_STRATEGY_HPS)) {
-							classAssignTogroup[rowIndex] = false;
-						}
-						brd.deleteClassFromRegionGroup(key, groupIndex, classKey);
+						classAssignToGroup[rowIndex] = false;
+						brd.removeClassFromRegionGroup(key, groupIndex, classKey);
 					}
 					break;
 				}
@@ -602,10 +556,9 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 					setForeground(table.getForeground());
 					setBackground(table.getBackground());
 				}
-				if (brd.getRegionGroupStrategy(key, groupIndex).contains(REGION_GROUP_STRATEGY_HPS)
-						|| !classAssignTogroup[row]
+				if (!classAssignToGroup[row]
 						|| brd.getRegionGroupClassList(key, groupIndex).contains(cd.getClassKeys().get(row))) {
-					setBackground(Color.white);
+					setBackground(Color.WHITE);
 				} else {
 					setBackground(Color.LIGHT_GRAY);
 				}

@@ -216,7 +216,7 @@ public class Sectors2DGraph extends JabaGraph implements MouseListener,
 			g.fillRect((int) tooltip.getX(), (int) tooltip.getY()
 					- (int) bounds.getHeight() + 1, (int) bounds.getWidth(),
 					(int) bounds.getHeight() + 2);
-			g.setColor(Color.black);
+			g.setColor(Color.BLACK);
 			g.drawString(content, (int) tooltip.getX(), (int) tooltip.getY());
 		}
 

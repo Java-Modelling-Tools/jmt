@@ -180,27 +180,27 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 		} catch (Exception e) {
 			return;
 		}
-		fillArea(g2, data.getResults().getAllConvex(), Color.orange);
+		fillArea(g2, data.getResults().getAllConvex(), Color.ORANGE);
 		for (Point2D p : data.getResults().getDominants()) {
 			drawMaskedOffRectangle(g2, p, new Color(255, 250, 120));
 		}
-		drawArea(g2, data.getResults().getAllConvex(), Color.gray);
+		drawArea(g2, data.getResults().getAllConvex(), Color.GRAY);
 		if (showAllLabels) {
-			drawPoint(g2, data.getResults().getDominants(), Color.blue,
+			drawPoint(g2, data.getResults().getDominants(), Color.BLUE,
 					getPointSize() + 1);
 			drawPoint(g2, data.getResults().getDominates(), new Color(15, 185,
 					100), getPointSize() + 1);
-			drawPoint(g2, data.getResults().getFiltDominants(), Color.black,
+			drawPoint(g2, data.getResults().getFiltDominants(), Color.BLACK,
 					getPointSize() + 1);
-			drawPoint(g2, data.getResults().getFiltDominates(), Color.gray,
+			drawPoint(g2, data.getResults().getFiltDominates(), Color.GRAY,
 					getPointSize() + 1);
-			drawPoint(g2, data.getResults().getFiltConvex(), Color.black,
+			drawPoint(g2, data.getResults().getFiltConvex(), Color.BLACK,
 					getPointSize() + 1);
 			pointLabel(g2, data.getResults().getPoints());
 		} else {
 			pointLabel(g2, data.getResults().getConvex());
 		}
-		drawPoint(g2, data.getResults().getConvex(), Color.red,
+		drawPoint(g2, data.getResults().getConvex(), Color.RED,
 				getPointSize() + 3);
 
 		if (selectedConvexSegment != null) {
@@ -283,7 +283,7 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 			Stroke stroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND,
 					BasicStroke.JOIN_ROUND);
 			g.setStroke(stroke);
-			g.setColor(Color.black);
+			g.setColor(Color.BLACK);
 			g.drawLine(plane.getTrueX(p1.getX()), plane.getTrueY(p1.getY()),
 					plane.getTrueX(p2.getX()), plane.getTrueY(p2.getY()));
 			g.setStroke(oldStro);
@@ -357,23 +357,23 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 		g.setFont(f);
 
 		// Potential Bottleneck
-		g.setColor(Color.red);
+		g.setColor(Color.RED);
 		g.fillOval(5 + (x) - ((size / 2)), (int) (y + (0.5) * fontSize)
 				- ((Math.min(getPointSize() + 1, 9) / 2)),
 				Math.min(getPointSize() + 1, 9),
 				Math.min(getPointSize() + 1, 9));
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		g.drawString("Potential", x + 11 + ((size / 2)), y);
 		g.drawString("Bottleneck", x + 11 + ((size / 2)), y + fontSize);
 		g.drawString("Stations", x + 11 + ((size / 2)), y + 2 * fontSize);
 
 		// Masked-off
-		g.setColor(Color.blue);
+		g.setColor(Color.BLUE);
 		g.fillOval(5 + (x) - ((size / 2)),
 				-3 + y + (4) * fontSize - Math.min(getPointSize() + 1, 9),
 				Math.min(getPointSize() + 1, 9),
 				Math.min(getPointSize() + 1, 9));
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		g.drawString("Masked-off", x + 11 + ((size / 2)), 3 + y + (3)
 				* fontSize);
 		g.drawString("Stations", x + 11 + ((size / 2)), 3 + y + (4) * fontSize);
@@ -386,7 +386,7 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 						- Math.min(getPointSize() + 1, 9),
 				Math.min(getPointSize() + 1, 9),
 				Math.min(getPointSize() + 1, 9));
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		g.drawString("Dominated", x + 11 + ((size / 2)), 6 + y + (5) * fontSize);
 		g.drawString("Stations", x + 11 + ((size / 2)), 6 + y + (6) * fontSize);
 
@@ -401,13 +401,13 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 
 		Polygon p = twoPointRectangle(xP1, yP1, xP2, yP2);
 
-		g.setColor(Color.orange);
+		g.setColor(Color.ORANGE);
 		g.fill(p);
-		g.setColor(Color.gray);
+		g.setColor(Color.GRAY);
 		g.draw(p);
 
 		// Dominated Area
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 		g.drawString("Dominated", x + 11 + ((size / 2)), 3 + y + (10)
 				* fontSize);
 		g.drawString("Area", x + 11 + ((size / 2)), 3 + y + (11) * fontSize);
@@ -420,7 +420,7 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 
 		g.setColor(new Color(255, 250, 120));
 		g.fill(p);
-		g.setColor(Color.gray);
+		g.setColor(Color.GRAY);
 		g.draw(p);
 	}
 
@@ -497,7 +497,7 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 		g.drawOval((int) x - (((size / 2))), (int) y - (((size / 2))), size,
 				size);
 
-		g.setColor(Color.gray);
+		g.setColor(Color.GRAY);
 		Composite oldComp = g.getComposite();
 		Composite alphaComp = AlphaComposite.getInstance(
 				AlphaComposite.SRC_OVER, 0.3f);
@@ -582,7 +582,7 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 	 *            The vector with all points
 	 */
 	public void pointLabel(Graphics2D g, Vector<Point2D> points) {
-		g.setColor(Color.black);
+		g.setColor(Color.BLACK);
 
 		// Setting the Font
 		int fontSize = 7 + getPointSize();

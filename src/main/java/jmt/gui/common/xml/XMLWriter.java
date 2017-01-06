@@ -1291,8 +1291,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			region.setAttribute(XML_A_REGION_TYPE, model.getRegionType(key));
 
 			// Adds nodes (stations) to current region
-			Iterator<Object> stations = model.getBlockingRegionStations(key)
-					.iterator();
+			Iterator<Object> stations = model.getBlockingRegionStations(key).iterator();
 			while (stations.hasNext()) {
 				Element node = doc.createElement(XML_E_REGIONNODE);
 				node.setAttribute(XML_A_REGIONNODE_NAME,
@@ -1301,52 +1300,37 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			}
 
 			// Adds global constraint
-			Element globalConstraint = doc
-					.createElement(XML_E_GLOBALCONSTRAINT);
+			Element globalConstraint = doc.createElement(XML_E_GLOBALCONSTRAINT);
 			globalConstraint.setAttribute(XML_A_GLOBALCONSTRAINT_MAXJOBS,
 					model.getRegionCustomerConstraint(key).toString());
 			region.appendChild(globalConstraint);
 
-			Element memoryConstraint = doc
-					.createElement(XML_E_GLOBALMEMORYCONSTRAINT);
-			memoryConstraint.setAttribute(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY,
+			Element globalMemoryConstraint = doc.createElement(XML_E_GLOBALMEMORYCONSTRAINT);
+			globalMemoryConstraint.setAttribute(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY,
 					model.getRegionMemorySize(key).toString());
-			region.appendChild(memoryConstraint);
+			region.appendChild(globalMemoryConstraint);
 
 			// Adds class constraints
 			Iterator<Object> classes = model.getClassKeys().iterator();
 			while (classes.hasNext()) {
 				Object classKey = classes.next();
-				Element classConstraint = doc
-						.createElement(XML_E_CLASSCONSTRAINT);
+				Element classConstraint = doc.createElement(XML_E_CLASSCONSTRAINT);
 				classConstraint.setAttribute(XML_A_CLASSCONSTRAINT_CLASS,
 						model.getClassName(classKey));
 				classConstraint.setAttribute(XML_A_CLASSCONSTRAINT_MAXJOBS,
-						model.getRegionClassCustomerConstraint(key, classKey)
-						.toString());
+						model.getRegionClassCustomerConstraint(key, classKey).toString());
 				region.appendChild(classConstraint);
 			}
 
 			classes = model.getClassKeys().iterator();
 			while (classes.hasNext()) {
 				Object classKey = classes.next();
-				Element classWeight = doc.createElement(XML_E_CLASSWEIGHT);
-				classWeight.setAttribute(XML_A_CLASSWEIGHT_CLASS,
+				Element classMemoryConstraint = doc.createElement(XML_E_CLASSMEMORYCONSTRAINT);
+				classMemoryConstraint.setAttribute(XML_A_CLASSMEMORYCONSTRAINT_CLASS,
 						model.getClassName(classKey));
-				classWeight.setAttribute(XML_A_CLASSWEIGHT_WEIGHT, model
-						.getRegionClassWeight(key, classKey).toString());
-				region.appendChild(classWeight);
-			}
-
-			classes = model.getClassKeys().iterator();
-			while (classes.hasNext()) {
-				Object classKey = classes.next();
-				Element classSize = doc.createElement(XML_E_CLASSMEMORYSIZE);
-				classSize.setAttribute(XML_A_CLASSMEMORY_CLASS,
-						model.getClassName(classKey));
-				classSize.setAttribute(XML_A_CLASSMEMORY_SIZE, model
-						.getRegionClassSize(key, classKey).toString());
-				region.appendChild(classSize);
+				classMemoryConstraint.setAttribute(XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY,
+						model.getRegionClassMemorySize(key, classKey).toString());
+				region.appendChild(classMemoryConstraint);
 			}
 
 			classes = model.getClassKeys().iterator();
@@ -1355,35 +1339,54 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				Element dropRule = doc.createElement(XML_E_DROPRULES);
 				dropRule.setAttribute(XML_A_DROPRULE_CLASS,
 						model.getClassName(classKey));
-				dropRule.setAttribute(XML_A_DROPRULE_DROP, model
-						.getRegionClassDropRule(key, classKey).toString());
+				dropRule.setAttribute(XML_A_DROPRULE_DROP,
+						model.getRegionClassDropRule(key, classKey).toString());
 				region.appendChild(dropRule);
+			}
+
+			classes = model.getClassKeys().iterator();
+			while (classes.hasNext()) {
+				Object classKey = classes.next();
+				Element classWeight = doc.createElement(XML_E_CLASSWEIGHT);
+				classWeight.setAttribute(XML_A_CLASSWEIGHT_CLASS,
+						model.getClassName(classKey));
+				classWeight.setAttribute(XML_A_CLASSWEIGHT_WEIGHT,
+						model.getRegionClassWeight(key, classKey).toString());
+				region.appendChild(classWeight);
+			}
+
+			classes = model.getClassKeys().iterator();
+			while (classes.hasNext()) {
+				Object classKey = classes.next();
+				Element classSize = doc.createElement(XML_E_CLASSSIZE);
+				classSize.setAttribute(XML_A_CLASSSIZE_CLASS,
+						model.getClassName(classKey));
+				classSize.setAttribute(XML_A_CLASSSIZE_SIZE,
+						model.getRegionClassSize(key, classKey).toString());
+				region.appendChild(classSize);
 			}
 
 			// Adds group constraints
 			for (int i = 0; i < model.getRegionGroupList(key).size(); i++) {
-				Element groupConstraint = doc
-						.createElement(XML_E_GROUPCONSTRAINT);
+				Element groupConstraint = doc.createElement(XML_E_GROUPCONSTRAINT);
 				groupConstraint.setAttribute(XML_A_GROUPCONSTRAINT_GROUP,
 						model.getRegionGroupName(key, i));
 				groupConstraint.setAttribute(XML_A_GROUPCONSTRAINT_MAXJOBS,
-						model.getRegionGroupCapacity(key, i).toString());
+						model.getRegionGroupCustomerConstraint(key, i).toString());
 				region.appendChild(groupConstraint);
 			}
 
 			for (int i = 0; i < model.getRegionGroupList(key).size(); i++) {
-				Element groupStrategy = doc
-						.createElement(XML_E_GROUPSTRATEGY);
-				groupStrategy.setAttribute(XML_A_GROUPSTRATEGY_GROUP,
+				Element groupMemoryConstraint = doc.createElement(XML_E_GROUPMEMORYCONSTRAINT);
+				groupMemoryConstraint.setAttribute(XML_A_GROUPMEMORYCONSTRAINT_GROUP,
 						model.getRegionGroupName(key, i));
-				groupStrategy.setAttribute(XML_A_GROUPSTRATEGY_STRATEGY,
-						model.getRegionGroupStrategy(key, i));
-				region.appendChild(groupStrategy);
+				groupMemoryConstraint.setAttribute(XML_A_GROUPMEMORYCONSTRAINT_MAXMEMORY,
+						model.getRegionGroupMemorySize(key, i).toString());
+				region.appendChild(groupMemoryConstraint);
 			}
 
 			for (int i = 0; i < model.getRegionGroupList(key).size(); i++) {
-				Element groupClassList = doc
-						.createElement(XML_E_GROUPCLASSLIST);
+				Element groupClassList = doc.createElement(XML_E_GROUPCLASSLIST);
 				classes = model.getRegionGroupClassList(key, i).iterator();
 				while (classes.hasNext()) {
 					Object classKey = classes.next();

@@ -185,32 +185,34 @@ public class ModelChecker implements CommonConstants {
 	public static final int FORK_JOIN_ROUTING_ERROR = 14;
 	//Checks if there are empty blocking regions.
 	public static final int EMPTY_BLOCKING_REGION = 15;
-	//Checks if preloading in blocking regions exceeds the constraints.
-	public static final int PRELOADING_IN_BLOCKING_REGION = 16;
+	//Checks if preloads in blocking regions exceed the capacity constraints.
+	public static final int PRELOAD_BEYOND_CAPACITY = 16;
+	//Checks if preloads in blocking regions exceed the memory constraints.
+	public static final int PRELOAD_BEYOND_MEMORY = 17;
 	//Checks if XperSink and RperSink is selected without sinks in the model.
-	public static final int SINK_PERF_IND_WITH_NO_SINK_ERROR = 17;
+	public static final int SINK_PERF_IND_WITH_NO_SINK_ERROR = 18;
 	//Checks if XperSink and RperSink is selected for closed classes.
-	public static final int SINK_PERF_WITH_CLOSED_CLASS_ERROR = 18;
+	public static final int SINK_PERF_WITH_CLOSED_CLASS_ERROR = 19;
 	//Checks if exist some rows of a cs matrix that sum to a number less than one.
-	public static final int CS_MATRIX_HAS_ROWS_LESS_THAN_ONE = 19;
+	public static final int CS_MATRIX_HAS_ROWS_LESS_THAN_ONE = 20;
 	//Checks if exist some cs followed by a queue with bas drop strategy.
-	public static final int CS_FOLLOWED_BY_A_BAS = 20;
+	public static final int CS_FOLLOWED_BY_A_BAS = 21;
 
-	public static final int LOAD_DEPENDENT_ROUTING_INVALID = 21;
+	public static final int LOAD_DEPENDENT_ROUTING_INVALID = 22;
 	//Checks the different reference station of closed class if there exists class switch.
-	public static final int CS_REFERENCE_STATION = 22;
+	public static final int CS_REFERENCE_STATION = 23;
 	//Checks existence of the system throughput per class with class switch.
-	public static final int CS_SYSTEM_THROUGHPUT_CLASS = 23;
+	public static final int CS_SYSTEM_THROUGHPUT_CLASS = 24;
 	//Checks if all the closed classes population is zero with class switch.
-	public static final int CS_ALL_CLOSED_ZERO_POPULATION = 24;
+	public static final int CS_ALL_CLOSED_ZERO_POPULATION = 25;
 	//Checks if there are any joins that have Guard strategies with zero tasks.
-	public static final int GUARD_STRATEGY_ZERO_TASKS = 25;
+	public static final int GUARD_STRATEGY_ZERO_TASKS = 26;
 	//Checks if there are any semaphores not between a fork and a join.
-	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN = 26;
+	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN = 27;
 	//Checks if there are any scalers not between a fork and a join.
-	public static final int SCALER_NOT_BETWEEN_FORK_JOIN = 27;
+	public static final int SCALER_NOT_BETWEEN_FORK_JOIN = 28;
 	//Checks if any transitions have invalid conditions for some modes.
-	public static final int TRANSITION_WITH_INVALID_CONDITIONS = 28;
+	public static final int TRANSITION_WITH_INVALID_CONDITIONS = 29;
 
 	//it occurs when more than one sink have been defined
 	public static final int MORE_THAN_ONE_SINK_WARNING = 0;
@@ -280,8 +282,8 @@ public class ModelChecker implements CommonConstants {
 	//Checks if any transitions have invalid outcomes for some modes.
 	public static final int TRANSITION_WITH_INVALID_OUTCOMES = 21;
 
-	private static final int NUMBER_OF_ERROR_TYPES = 29;
-	private static final int NUMBER_OF_NORMAL_ERROR_TYPES = 29;
+	private static final int NUMBER_OF_ERROR_TYPES = 30;
+	private static final int NUMBER_OF_NORMAL_ERROR_TYPES = 30;
 	private static final int NUMBER_OF_WARNING_TYPES = 22;
 	private static final int NUMBER_OF_NORMAL_WARNING_TYPES = 5;
 
@@ -417,7 +419,7 @@ public class ModelChecker implements CommonConstants {
 			checkForJoinWithoutForkErrors();
 			checkForForkWithoutJoinWarnings();
 			checkForEmptyBlockingRegions();
-			checkForPreloadingInBlockingRegions();
+			checkForPreloadsInBlockingRegions();
 			checkForSinkPerfIndicesWithNoSink();
 			checkForSinkPerfIndicesWithClosedClass();
 			checkForSinkProbabilityUpdateWarning();
@@ -661,12 +663,25 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns true if preloading in blocking regions exceeds the constraints.
+	 * Returns true if preloads in blocking regions exceed the capacity
+	 * constraints.
 	 *
-	 * @return true if preloading in blocking regions exceeds the constraints.
+	 * @return true if preloads in blocking regions exceed the capacity
+	 * constraints.
 	 */
-	public boolean isTherePreloadingInBlockingRegionError() {
-		return errors[PRELOADING_IN_BLOCKING_REGION];
+	public boolean isTherePreloadBeyondCapacityError() {
+		return errors[PRELOAD_BEYOND_CAPACITY];
+	}
+
+	/**
+	 * Returns true if preloads in blocking regions exceed the memory
+	 * constraints.
+	 *
+	 * @return true if preloads in blocking regions exceed the memory
+	 * constraints.
+	 */
+	public boolean isTherePreloadBeyondMemoryError() {
+		return errors[PRELOAD_BEYOND_MEMORY];
 	}
 
 	public boolean isThereSinkPerfIndicesWithNoSinkError() {
@@ -1441,33 +1456,69 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Checks if preloading in blocking regions exceeds the constraints.
+	 * Checks if preloads in blocking regions exceed the constraints.
 	 */
-	private void checkForPreloadingInBlockingRegions() {
+	private void checkForPreloadsInBlockingRegions() {
 		Vector<Object> regionKeys = blocking_def.getRegionKeys();
 		Vector<Object> classKeys = class_def.getClassKeys();
 		for (Object regionKey : regionKeys) {
-			int totalPreloaded = 0;
-			int[] totalPreloadedClass = new int[classKeys.size()];
-			Arrays.fill(totalPreloadedClass, 0);
-
+			int globalPreload = 0;
+			int[] classPreload = new int[classKeys.size()];
+			int globalMemoryPreload = 0;
+			int[] classMemoryPreload = new int[classKeys.size()];
 			Set<Object> stationKeys = blocking_def.getBlockingRegionStations(regionKey);
 			for (Object stationKey : stationKeys) {
 				for (int i = 0; i < classKeys.size(); i++) {
-					totalPreloaded += simulation_def.getPreloadedJobs(stationKey, classKeys.get(i)).intValue();
-					totalPreloadedClass[i] += simulation_def.getPreloadedJobs(stationKey, classKeys.get(i)).intValue();
+					int preload = simulation_def.getPreloadedJobs(stationKey, classKeys.get(i)).intValue();
+					int weight = blocking_def.getRegionClassWeight(regionKey, classKeys.get(i)).intValue();
+					int size = blocking_def.getRegionClassSize(regionKey, classKeys.get(i)).intValue();
+					globalPreload += preload * weight;
+					classPreload[i] += preload * weight;
+					globalMemoryPreload += preload * size;
+					classMemoryPreload[i] += preload * size;
 				}
 			}
 
 			int globalConstraint = blocking_def.getRegionCustomerConstraint(regionKey).intValue();
-			if (globalConstraint > 0 && totalPreloaded > globalConstraint) {
-				errors[PRELOADING_IN_BLOCKING_REGION] = true;
+			if (globalConstraint > 0 && globalPreload > globalConstraint) {
+				errors[PRELOAD_BEYOND_CAPACITY] = true;
+			}
+			int globalMemoryConstraint = blocking_def.getRegionMemorySize(regionKey).intValue();
+			if (globalMemoryConstraint > 0 && globalMemoryPreload > globalMemoryConstraint) {
+				errors[PRELOAD_BEYOND_MEMORY] = true;
 			}
 
 			for (int i = 0; i < classKeys.size(); i++) {
 				int classConstraint = blocking_def.getRegionClassCustomerConstraint(regionKey, classKeys.get(i)).intValue();
-				if (classConstraint > 0 && totalPreloadedClass[i] > classConstraint) {
-					errors[PRELOADING_IN_BLOCKING_REGION] = true;
+				if (classConstraint > 0 && classPreload[i] > classConstraint) {
+					errors[PRELOAD_BEYOND_CAPACITY] = true;
+				}
+				int classMemoryConstraint = blocking_def.getRegionClassMemorySize(regionKey, classKeys.get(i)).intValue();
+				if (classMemoryConstraint > 0 && classMemoryPreload[i] > classMemoryConstraint) {
+					errors[PRELOAD_BEYOND_MEMORY] = true;
+				}
+			}
+
+			for (int i = 0; i < blocking_def.getRegionGroupList(regionKey).size(); i++) {
+				int groupConstraint = blocking_def.getRegionGroupCustomerConstraint(regionKey, i).intValue();
+				int groupPreload = 0;
+				for (int j = 0; j < classKeys.size(); j++) {
+					if (blocking_def.getRegionGroupClassList(regionKey, i).contains(classKeys.get(j))) {
+						groupPreload += classPreload[j];
+					}
+				}
+				if (groupConstraint > 0 && groupPreload > groupConstraint) {
+					errors[PRELOAD_BEYOND_CAPACITY] = true;
+				}
+				int groupMemoryConstraint = blocking_def.getRegionGroupMemorySize(regionKey, i).intValue();
+				int groupMemoryPreload = 0;
+				for (int j = 0; j < classKeys.size(); j++) {
+					if (blocking_def.getRegionGroupClassList(regionKey, i).contains(classKeys.get(j))) {
+						groupMemoryPreload += classMemoryPreload[j];
+					}
+				}
+				if (groupMemoryConstraint > 0 && groupMemoryPreload > groupMemoryConstraint) {
+					errors[PRELOAD_BEYOND_MEMORY] = true;
 				}
 			}
 		}

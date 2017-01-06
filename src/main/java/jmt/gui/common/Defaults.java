@@ -106,16 +106,17 @@ public class Defaults implements CommonConstants {
 		def.setProperty("classDistribution", "jmt.gui.common.distributions.Exponential");
 
 		// Blocking Region Parameters
-		def.setProperty("blockingMaxJobsPerClass", "-1");
-		def.setProperty("blockingDropPerClass", "true");
-		def.setProperty("blockingMaxJobs", "-1");
 		def.setProperty("blockingRegionName", "FCRegion");
+		def.setProperty("blockingMaxJobs", "-1");
 		def.setProperty("blockingMaxMemory", "-1");
-		def.setProperty("weight", "1");
-		def.setProperty("size", "1");
+		def.setProperty("blockingMaxJobsPerClass", "-1");
+		def.setProperty("blockingMaxMemoryPerClass", "-1");
+		def.setProperty("blockingDropPerClass", "true");
+		def.setProperty("blockingWeightPerClass", "1");
+		def.setProperty("blockingSizePerClass", "1");
 		def.setProperty("blockingGroupName", "Group");
-		def.setProperty("blockingGroupCapacity", "1");
-		def.setProperty("blockingGroupStratagy", REGION_GROUP_STRATEGY_FCFS);
+		def.setProperty("blockingGroupMaxJobs", "-1");
+		def.setProperty("blockingGroupMaxMemory", "-1");
 		// Not used parameter...
 		def.setProperty("blockingRegionType", "default");
 
