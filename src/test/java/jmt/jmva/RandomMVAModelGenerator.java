@@ -321,25 +321,25 @@ public class RandomMVAModelGenerator {
 		classTypes = new int[classes];
 
 		switch (modelType) {
-			case CLOSED_MODEL:
-				for (int c = 0; c < classes; c++) {
+		case CLOSED_MODEL:
+			for (int c = 0; c < classes; c++) {
+				classTypes[c] = CLASS_CLOSED;
+			}
+			break;
+		case OPEN_MODEL:
+			for (int c = 0; c < classes; c++) {
+				classTypes[c] = CLASS_OPEN;
+			}
+			break;
+		case MIXED_MODEL:
+			for (int c = 0; c < classes; c++) {
+				if (randomGenerator.nextDouble() < 0.5) {
 					classTypes[c] = CLASS_CLOSED;
-				}
-				break;
-			case OPEN_MODEL:
-				for (int c = 0; c < classes; c++) {
+				} else {
 					classTypes[c] = CLASS_OPEN;
 				}
-				break;
-			case MIXED_MODEL:
-				for (int c = 0; c < classes; c++) {
-					if (randomGenerator.nextDouble() < 0.5) {
-						classTypes[c] = CLASS_CLOSED;
-					} else {
-						classTypes[c] = CLASS_OPEN;
-					}
-				}
-				break;
+			}
+			break;
 		}
 	}
 
@@ -368,11 +368,142 @@ public class RandomMVAModelGenerator {
 		classData = new double[classes];
 
 		switch (modelType) {
-			case CLOSED_MODEL:
-				//only closed classes
+		case CLOSED_MODEL:
+			//only closed classes
 
-				for (int c = 0; c < classes; c++) {
-					//computes total think time (i.e. the sum of all delays for this class)
+			for (int c = 0; c < classes; c++) {
+				//computes total think time (i.e. the sum of all delays for this class)
+				double z = 0.0;
+				double maxD = 0.0;
+				double temp;
+
+				for (int s = 0; s < stations; s++) {
+					temp = serviceTimes[s][c][0] * visits[s][c];
+
+					//computes Dmax
+					if (temp > maxD) {
+						maxD = temp;
+					}
+
+					if (stationTypes[s] == STATION_DELAY) {
+						z += temp;
+					}
+
+				}
+
+				//the chosen population is influenced by think time and Dmax
+				classData[c] = Math.floor(50 * randomGenerator.nextDouble() + z / maxD + 1);
+
+			}
+			break;
+
+		case OPEN_MODEL:
+
+			//only open classes
+
+			for (int c = 0; c < classes; c++) {
+				//sets lambda from [0,1)
+				classData[c] = randomGenerator.nextDouble();
+			}
+
+			//computes the actual Umax
+			double Umax = 0.0;
+
+			for (int s = 0; s < stations; s++) {
+
+				double Ustation = 0.0;
+
+				//do not consider delay stations
+				if (stationTypes[s] == STATION_LI) {
+					for (int c = 0; c < classes; c++) {
+						Ustation += classData[c] * visits[s][c] * serviceTimes[s][c][0];
+					}
+
+					//is Umax?
+					if (Ustation > Umax) {
+						Umax = Ustation;
+					}
+				}
+			}
+
+			//chooses the wanted Umax*, included in [U_min_bottleneck , U_max_bottleneck] (example: [0.1 , 0.7])
+			double Umax_desired = U_min_bottleneck + randomGenerator.nextDouble() * (U_max_bottleneck - U_min_bottleneck);
+
+			//then scales all the service times of LI stations in order to obtain that U*
+			double scaleFactor = Umax_desired / Umax;
+
+			for (int s = 0; s < stations; s++) {
+				if (stationTypes[s] == STATION_LI) {
+					for (int c = 0; c < classes; c++) {
+						serviceTimes[s][c][0] *= scaleFactor;
+					}
+				}
+			}
+			break;
+
+		case MIXED_MODEL:
+
+			//both open and closed classes
+
+			//first of all, sets the lambda
+			for (int c = 0; c < classes; c++) {
+
+				if (classTypes[c] == CLASS_OPEN) {
+					//sets lambda from [0,1)
+					double rand;
+					do {
+						rand = randomGenerator.nextDouble();
+						classData[c] = rand;
+					} while (rand == 0);
+				}
+			}
+
+			//computes the actual Umax
+			double Umax2 = 0.0;
+
+			for (int s = 0; s < stations; s++) {
+
+				double Ustation = 0.0;
+				//do not consider delay stations
+				if (stationTypes[s] == STATION_LI) {
+					for (int c = 0; c < classes; c++) {
+						if (classTypes[c] == CLASS_OPEN) {
+							Ustation += classData[c] * visits[s][c] * serviceTimes[s][c][0];
+						}
+					}
+					//is Umax?
+					if (Ustation > Umax2) {
+						Umax2 = Ustation;
+					}
+				}
+			}
+
+			//if only closed class are present, Umax2 will be 0
+			//therefore there is no need to rescale service times
+
+			//if Umax2 > 0 rescale service times 
+			if (Umax2 > 0) {
+
+				//chooses the wanted Umax*, included in [U_min_bottleneck , U_max_bottleneck] (example: [0.1 , 0.7])
+				double Umax_desired2 = U_min_bottleneck + randomGenerator.nextDouble() * (U_max_bottleneck - U_min_bottleneck);
+
+				//then scales all the service times in order to obtain that U*
+				double scaleFactor2 = Umax_desired2 / Umax2;
+
+				for (int s = 0; s < stations; s++) {
+					if (stationTypes[s] == STATION_LI) {
+						for (int c = 0; c < classes; c++) {
+							serviceTimes[s][c][0] *= scaleFactor2;
+						}
+					}
+				}
+
+			}
+
+			//now consider closed classes
+			for (int c = 0; c < classes; c++) {
+				if (classTypes[c] == CLASS_CLOSED) {
+
 					double z = 0.0;
 					double maxD = 0.0;
 					double temp;
@@ -380,149 +511,18 @@ public class RandomMVAModelGenerator {
 					for (int s = 0; s < stations; s++) {
 						temp = serviceTimes[s][c][0] * visits[s][c];
 
-						//computes Dmax
 						if (temp > maxD) {
 							maxD = temp;
 						}
 
-						if (stationTypes[s] == STATION_DELAY) {
-							z += temp;
-						}
-
+						z += temp;
 					}
 
-					//the chosen population is influenced by think time and Dmax
 					classData[c] = Math.floor(50 * randomGenerator.nextDouble() + z / maxD + 1);
 
 				}
-				break;
-
-			case OPEN_MODEL:
-
-				//only open classes
-
-				for (int c = 0; c < classes; c++) {
-					//sets lambda from [0,1)
-					classData[c] = randomGenerator.nextDouble();
-				}
-
-				//computes the actual Umax
-				double Umax = 0.0;
-
-				for (int s = 0; s < stations; s++) {
-
-					double Ustation = 0.0;
-
-					//do not consider delay stations
-					if (stationTypes[s] == STATION_LI) {
-						for (int c = 0; c < classes; c++) {
-							Ustation += classData[c] * visits[s][c] * serviceTimes[s][c][0];
-						}
-
-						//is Umax?
-						if (Ustation > Umax) {
-							Umax = Ustation;
-						}
-					}
-				}
-
-				//chooses the wanted Umax*, included in [U_min_bottleneck , U_max_bottleneck] (example: [0.1 , 0.7])
-				double Umax_desired = U_min_bottleneck + randomGenerator.nextDouble() * (U_max_bottleneck - U_min_bottleneck);
-
-				//then scales all the service times of LI stations in order to obtain that U*
-				double scaleFactor = Umax_desired / Umax;
-
-				for (int s = 0; s < stations; s++) {
-					if (stationTypes[s] == STATION_LI) {
-						for (int c = 0; c < classes; c++) {
-							serviceTimes[s][c][0] *= scaleFactor;
-						}
-					}
-				}
-				break;
-
-			case MIXED_MODEL:
-
-				//both open and closed classes
-
-				//first of all, sets the lambda
-				for (int c = 0; c < classes; c++) {
-
-					if (classTypes[c] == CLASS_OPEN) {
-						//sets lambda from [0,1)
-						double rand;
-						do {
-							rand = randomGenerator.nextDouble();
-							classData[c] = rand;
-						} while (rand == 0);
-					}
-				}
-
-				//computes the actual Umax
-				double Umax2 = 0.0;
-
-				for (int s = 0; s < stations; s++) {
-
-					double Ustation = 0.0;
-					//do not consider delay stations
-					if (stationTypes[s] == STATION_LI) {
-						for (int c = 0; c < classes; c++) {
-							if (classTypes[c] == CLASS_OPEN) {
-								Ustation += classData[c] * visits[s][c] * serviceTimes[s][c][0];
-							}
-						}
-						//is Umax?
-						if (Ustation > Umax2) {
-							Umax2 = Ustation;
-						}
-					}
-				}
-
-				//if only closed class are present, Umax2 will be 0
-				//therefore there is no need to rescale service times
-
-				//if Umax2 > 0 rescale service times 
-				if (Umax2 > 0) {
-
-					//chooses the wanted Umax*, included in [U_min_bottleneck , U_max_bottleneck] (example: [0.1 , 0.7])
-					double Umax_desired2 = U_min_bottleneck + randomGenerator.nextDouble() * (U_max_bottleneck - U_min_bottleneck);
-
-					//then scales all the service times in order to obtain that U*
-					double scaleFactor2 = Umax_desired2 / Umax2;
-
-					for (int s = 0; s < stations; s++) {
-						if (stationTypes[s] == STATION_LI) {
-							for (int c = 0; c < classes; c++) {
-								serviceTimes[s][c][0] *= scaleFactor2;
-							}
-						}
-					}
-
-				}
-
-				//now consider closed classes
-				for (int c = 0; c < classes; c++) {
-					if (classTypes[c] == CLASS_CLOSED) {
-
-						double z = 0.0;
-						double maxD = 0.0;
-						double temp;
-
-						for (int s = 0; s < stations; s++) {
-							temp = serviceTimes[s][c][0] * visits[s][c];
-
-							if (temp > maxD) {
-								maxD = temp;
-							}
-
-							z += temp;
-						}
-
-						classData[c] = Math.floor(50 * randomGenerator.nextDouble() + z / maxD + 1);
-
-					}
-				}
-				break;
+			}
+			break;
 
 		}
 
@@ -613,103 +613,103 @@ public class RandomMVAModelGenerator {
 
 		switch (this.stationTypes[stationNum]) {
 
-			case STATION_LI:
+		case STATION_LI:
 
-				station_element = root.createElement("listation");
-				station_element.setAttribute("name", this.stationNames[stationNum]);
+			station_element = root.createElement("listation");
+			station_element.setAttribute("name", this.stationNames[stationNum]);
 
-				/* create the section for service times */
-				servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
-				station_element.appendChild(servicetimes_element);
+			/* create the section for service times */
+			servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
+			station_element.appendChild(servicetimes_element);
 
-				/* create the section for visits */
-				visits_element = station_element.appendChild(root.createElement("visits"));
-				station_element.appendChild(visits_element);
+			/* create the section for visits */
+			visits_element = station_element.appendChild(root.createElement("visits"));
+			station_element.appendChild(visits_element);
 
-				/* for each customer class */
-				for (int j = 0; j < classes; j++) {
-					String class_name = this.classNames[j];
-					/* set service time */
-					Element st_element = root.createElement("servicetime");
-					st_element.setAttribute("customerclass", class_name);;
-					st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
-					servicetimes_element.appendChild(st_element);
-					/* set visit */
-					Element visit_element = root.createElement("visit");
-					visit_element.setAttribute("customerclass", class_name);
-					visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
-					visits_element.appendChild(visit_element);
-				}
+			/* for each customer class */
+			for (int j = 0; j < classes; j++) {
+				String class_name = this.classNames[j];
+				/* set service time */
+				Element st_element = root.createElement("servicetime");
+				st_element.setAttribute("customerclass", class_name);;
+				st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
+				servicetimes_element.appendChild(st_element);
+				/* set visit */
+				Element visit_element = root.createElement("visit");
+				visit_element.setAttribute("customerclass", class_name);
+				visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
+				visits_element.appendChild(visit_element);
+			}
 
-				break;
+			break;
 
-			case STATION_DELAY: //TODO: è uguale al caso Li ad eccezione del nome (forse si può semplificare)
+		case STATION_DELAY: //TODO: è uguale al caso Li ad eccezione del nome (forse si può semplificare)
 
-				station_element = root.createElement("delaystation");
-				station_element.setAttribute("name", this.stationNames[stationNum]);
+			station_element = root.createElement("delaystation");
+			station_element.setAttribute("name", this.stationNames[stationNum]);
 
-				/* create the section for service times */
-				servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
-				station_element.appendChild(servicetimes_element);
+			/* create the section for service times */
+			servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
+			station_element.appendChild(servicetimes_element);
 
-				/* create the section for visits */
-				visits_element = station_element.appendChild(root.createElement("visits"));
-				station_element.appendChild(visits_element);
+			/* create the section for visits */
+			visits_element = station_element.appendChild(root.createElement("visits"));
+			station_element.appendChild(visits_element);
 
-				/* for each customer class */
-				for (int j = 0; j < classes; j++) {
-					String class_name = this.classNames[j];
-					/* set service time */
-					Element st_element = root.createElement("servicetime");
-					st_element.setAttribute("customerclass", class_name);;
-					st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
-					servicetimes_element.appendChild(st_element);
-					/* set visit */
-					Element visit_element = root.createElement("visit");
-					visit_element.setAttribute("customerclass", class_name);
-					visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
-					visits_element.appendChild(visit_element);
-				}
+			/* for each customer class */
+			for (int j = 0; j < classes; j++) {
+				String class_name = this.classNames[j];
+				/* set service time */
+				Element st_element = root.createElement("servicetime");
+				st_element.setAttribute("customerclass", class_name);;
+				st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
+				servicetimes_element.appendChild(st_element);
+				/* set visit */
+				Element visit_element = root.createElement("visit");
+				visit_element.setAttribute("customerclass", class_name);
+				visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
+				visits_element.appendChild(visit_element);
+			}
 
-				break;
+			break;
 
-			case STATION_LD:
+		case STATION_LD:
 
-				station_element = root.createElement("ldstation");
-				station_element.setAttribute("name", this.stationNames[stationNum]);
+			station_element = root.createElement("ldstation");
+			station_element.setAttribute("name", this.stationNames[stationNum]);
 
-				/* create the section for service times */
-				servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
-				station_element.appendChild(servicetimes_element);
+			/* create the section for service times */
+			servicetimes_element = station_element.appendChild(root.createElement("servicetimes"));
+			station_element.appendChild(servicetimes_element);
 
-				/* create the section for visits */
-				visits_element = station_element.appendChild(root.createElement("visits"));
-				station_element.appendChild(visits_element);
+			/* create the section for visits */
+			visits_element = station_element.appendChild(root.createElement("visits"));
+			station_element.appendChild(visits_element);
 
-				/* for each customer class */
-				for (int j = 0; j < classes; j++) {
-					String class_name = this.classNames[j];
-					/* set service times, one for each population (values are CSV formatted) */
-					Element st_element = root.createElement("servicetimes");
-					st_element.setAttribute("customerclass", class_name);;
-					//TODO: questa parte va cambiata, devo avere una stringa csv con tutti i serv times (tranne l'elem 0 che è nullo)
+			/* for each customer class */
+			for (int j = 0; j < classes; j++) {
+				String class_name = this.classNames[j];
+				/* set service times, one for each population (values are CSV formatted) */
+				Element st_element = root.createElement("servicetimes");
+				st_element.setAttribute("customerclass", class_name);;
+				//TODO: questa parte va cambiata, devo avere una stringa csv con tutti i serv times (tranne l'elem 0 che è nullo)
 
-					String serv_t = ArrayUtils.toCSV(serviceTimes[stationNum][j]);
+				String serv_t = ArrayUtils.toCSV(serviceTimes[stationNum][j]);
 
-					st_element.appendChild(root.createTextNode(serv_t));
+				st_element.appendChild(root.createTextNode(serv_t));
 
-					servicetimes_element.appendChild(st_element);
-					/* set visit */
-					Element visit_element = root.createElement("visit");
-					visit_element.setAttribute("customerclass", class_name);
-					visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
-					visits_element.appendChild(visit_element);
-				}
+				servicetimes_element.appendChild(st_element);
+				/* set visit */
+				Element visit_element = root.createElement("visit");
+				visit_element.setAttribute("customerclass", class_name);
+				visit_element.appendChild(root.createTextNode(Double.toString(this.visits[stationNum][j])));
+				visits_element.appendChild(visit_element);
+			}
 
-				break;
+			break;
 
-			default:
-				station_element = null;
+		default:
+			station_element = null;
 		}//end switch
 
 		return station_element;
@@ -733,15 +733,15 @@ public class RandomMVAModelGenerator {
 			String modelT = "";
 
 			switch (modelType) {
-				case CLOSED_MODEL:
-					modelT = "closed";
-					break;
-				case OPEN_MODEL:
-					modelT = "open";
-					break;
-				case MIXED_MODEL:
-					modelT = "mixed";
-					break;
+			case CLOSED_MODEL:
+				modelT = "closed";
+				break;
+			case OPEN_MODEL:
+				modelT = "open";
+				break;
+			case MIXED_MODEL:
+				modelT = "mixed";
+				break;
 
 			}
 
@@ -794,7 +794,6 @@ public class RandomMVAModelGenerator {
 			//uses automatic seed for model generation
 			randomGen = new RandomMVAModelGenerator(classN, statN, modelType, -1);
 			model = randomGen.saveToFile();
-
 		}
 
 	}

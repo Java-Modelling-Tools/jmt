@@ -26,26 +26,24 @@
 						<version>2.19.1</version>
 						<configuration>
 							<excludes>
-								<exclude>**/TestWizardPanel.class</exclude>
 								<exclude>**/JabaGuiTest.class</exclude>
-								<exclude>**/MainGuiTest.class</exclude>
 								<exclude>**/JmchGuiTest.class</exclude>
+								<exclude>**/JmvaGuiTest.class</exclude>
 								<exclude>**/JSIMgraphGuiTest.class</exclude>
 								<exclude>**/JSIMwizGuiTest.class</exclude>
 								<exclude>**/JwatGuiTest.class</exclude>
-								<exclude>**/JmvaGuiTest.class</exclude>
+								<exclude>**/MainGuiTest.class</exclude>
+								<exclude>**/TestWizardPanel.class</exclude>
 								<exclude>**/AMVATest.class</exclude>
 								<exclude>**/AnalyticalTest.class</exclude>
-								<exclude>**/Jmt.class</exclude>
 								<exclude>**/BatchTest.class</exclude>
 								<exclude>**/CommandLineTest.class</exclude>
-								<exclude>**/RandomMVAModelGenerator.class</exclude>
-								<exclude>**/ResultsCheck.class</exclude>
-								<exclude>**/TestExact.class</exclude>
 								<exclude>**/JmvaClosedModelTest.class</exclude>
-								<exclude>**/PauseThreadTest.class</exclude>
 								<exclude>**/JmvaMixedModelTest.class</exclude>
 								<exclude>**/JmvaOpenModelTest.class</exclude>
+								<exclude>**/PauseThreadTest.class</exclude>
+								<exclude>**/RandomMVAModelGenerator.class</exclude>
+								<exclude>**/ResultsCheck.class</exclude>
 							</excludes>
 						</configuration>
 					</plugin>

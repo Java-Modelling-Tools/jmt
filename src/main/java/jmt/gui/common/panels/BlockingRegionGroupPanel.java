@@ -23,6 +23,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Frame;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
@@ -36,12 +38,8 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
-import javax.swing.UIManager;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.TableModelEvent;
-import javax.swing.plaf.UIResource;
 import javax.swing.table.AbstractTableModel;
 
 import javax.swing.table.TableCellEditor;
@@ -70,8 +68,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 	protected Object key;
 	protected JPanel groupPanel;
 	protected JSpinner gNumber;
-	private DialogFactory dialogFactory;
-	private boolean[] classAssignToGroup;
+	protected DialogFactory dialogFactory;
 
 	protected AbstractAction editMemberClasses = new AbstractAction("Edit") {
 
@@ -123,22 +120,10 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 	private void initComponents() {
 		setLayout(new BorderLayout(5, 5));
-
 		groupPanel = new JPanel(new BorderLayout());
 		groupTable = new BlockingGroupTable();
 		groupPanel.add(new WarningScrollTable(groupTable, WARNING_CLASS));
 		add(groupPanel, BorderLayout.CENTER);
-
-		classAssignToGroup = new boolean[cd.getClassKeys().size()];
-		for (int i = 0; i < cd.getClassKeys().size(); i++) {
-			classAssignToGroup[i] = false;
-			for (int j = 0; j < brd.getRegionGroupList(key).size(); j++) {
-				if (brd.getRegionGroupClassList(key, j).contains(cd.getClassKeys().get(i))) {
-					classAssignToGroup[i] = true;
-					break;
-				}
-			}
-		}
 	}
 
 	@Override
@@ -392,19 +377,15 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 		protected ClassDefinition cd;
 		protected Object key;
 		protected int groupIndex;
+		protected boolean[] classAvailableToGroup;
 		protected ImagedComboBoxCellEditorFactory classEditor;
 
 		protected JPanel dialogPanel;
 		protected GroupEditTable table;
 
 		public GroupEditor(ClassDefinition cd, BlockingRegionDefinition brd, Object key, int groupIndex) {
-			this.brd = brd;
-			this.cd = cd;
-			this.key = key;
-			this.groupIndex = groupIndex;		
-			classEditor = new ImagedComboBoxCellEditorFactory(cd);
-			initComponents();
 			setData(cd, brd, key, groupIndex);
+			initComponents();
 		}
 
 		public void setData(ClassDefinition cd, BlockingRegionDefinition brd, Object key, int groupIndex) {
@@ -412,7 +393,19 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			this.cd = cd;
 			this.key = key;
 			this.groupIndex = groupIndex;
-			classEditor.setData(cd);
+			classAvailableToGroup = new boolean[cd.getClassKeys().size()];
+			for (int i = 0; i < cd.getClassKeys().size(); i++) {
+				classAvailableToGroup[i] = true;
+				for (int j = 0; j < brd.getRegionGroupList(key).size(); j++) {
+					if (brd.getRegionGroupClassList(key, j).contains(cd.getClassKeys().get(i))) {
+						if (j != groupIndex) {
+							classAvailableToGroup[i] = false;
+						}
+						break;
+					}
+				}
+			}
+			classEditor = new ImagedComboBoxCellEditorFactory(cd);
 		}
 
 		protected void initComponents() {
@@ -427,19 +420,14 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 		@Override
 		public String getName() {
-			return "Blocking Region Group Panel";
-		}
-
-		@Override
-		public void gotFocus() {
-			classEditor.clearCache();
+			return "Group Editor";
 		}
 
 		protected class GroupEditTable extends JTable {
 
 			private static final long serialVersionUID = 1L;
 
-			protected TableCellRenderer grayRenderer = new BooleanRenderer();
+			protected TableCellRenderer grayRenderer = new GrayBooleanCellRenderer();
 			int[] columnSizes = new int[] { 320, 50 };
 
 			public GroupEditTable() {
@@ -502,8 +490,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 
 			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
-				return  columnIndex == 1 && (!classAssignToGroup[rowIndex]
-						|| brd.getRegionGroupClassList(key, groupIndex).contains(cd.getClassKeys().get(rowIndex)));
+				return  columnIndex == 1 && classAvailableToGroup[rowIndex];
 			}
 
 			public Object getValueAt(int rowIndex, int columnIndex) {
@@ -523,10 +510,8 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 				switch (columnIndex) {
 				case 1:
 					if (((Boolean) aValue).booleanValue()) {
-						classAssignToGroup[rowIndex] = true;
 						brd.addClassIntoRegionGroup(key, groupIndex, classKey);
 					} else {
-						classAssignToGroup[rowIndex] = false;
 						brd.removeClassFromRegionGroup(key, groupIndex, classKey);
 					}
 					break;
@@ -535,38 +520,32 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			}
 		}
 
-		protected class BooleanRenderer extends JCheckBox implements TableCellRenderer, UIResource {
+		protected class GrayBooleanCellRenderer extends JCheckBox implements TableCellRenderer {
 
 			private static final long serialVersionUID = 1L;
 
-			private final Border noFocusBorder = new EmptyBorder(1, 1, 1, 1);
-
-			public BooleanRenderer() {
-				super();
+			public GrayBooleanCellRenderer() {
+				setLayout(new GridBagLayout());
+				setMargin(new Insets(0, 0, 0, 0));
 				setHorizontalAlignment(JLabel.CENTER);
-				setBorderPainted(true);
 			}
 
 			@Override
 			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+				if (value instanceof Boolean) {
+					setSelected((Boolean) value);
+				}
 				if (isSelected) {
 					setForeground(table.getSelectionForeground());
-					super.setBackground(table.getSelectionBackground());
+					setBackground(table.getSelectionBackground());
 				} else {
 					setForeground(table.getForeground());
 					setBackground(table.getBackground());
 				}
-				if (!classAssignToGroup[row]
-						|| brd.getRegionGroupClassList(key, groupIndex).contains(cd.getClassKeys().get(row))) {
+				if (classAvailableToGroup[row]) {
 					setBackground(Color.WHITE);
 				} else {
 					setBackground(Color.LIGHT_GRAY);
-				}
-				setSelected(value != null && ((Boolean) value).booleanValue());
-				if (hasFocus) {
-					setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-				} else {
-					setBorder(noFocusBorder);
 				}
 				return this;
 			}

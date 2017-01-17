@@ -20,9 +20,10 @@ public class PartialTitleFrameMatcher extends GenericTypeMatcher<JFrame> {
 		super(JFrame.class);
 		this.textToMatch = textToMatch;
 	}
-	
+
 	@Override
 	public boolean isMatching(JFrame frame) {
 		return frame.isVisible() && frame.getTitle().startsWith(textToMatch);
 	}
+
 }

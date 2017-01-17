@@ -35,7 +35,7 @@ import org.junit.Test;
  * @author Stefano Omini
  */
 public class PauseThreadTest {
-	
+
 	private static final int MAX_WAIT_TIME = 15000;
 
 	private static void test1() {
@@ -99,6 +99,7 @@ class Thread1 extends Thread {
 		BatchTest.comboTest(1, 1, models, 1, 1);
 
 	}
+
 }
 
 class Thread2 extends Thread {
@@ -151,6 +152,7 @@ class Thread2 extends Thread {
 		} while (models > 0);
 
 	}
+
 }
 
 class Thread3 extends Thread {
@@ -167,6 +169,7 @@ class Thread3 extends Thread {
 		disp.solveModel();
 
 	}
+
 }
 
 class Thread4 extends Thread {
@@ -206,6 +209,7 @@ class Thread4 extends Thread {
 		}
 
 	}
+
 }
 
 class Thread5 extends Thread {
@@ -244,4 +248,5 @@ class Thread5 extends Thread {
 		}
 
 	}
+
 }

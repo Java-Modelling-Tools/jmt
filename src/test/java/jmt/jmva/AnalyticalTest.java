@@ -47,12 +47,12 @@ import org.junit.rules.TestName;
  * @version 7-giu-2004 10.01.14
  */
 public class AnalyticalTest {
-	
+
 	@Rule public TestName name = new TestName();
 
 	@Test
 	public void testMultiOpenLI() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Sistema aperto con 2 classi");
@@ -116,7 +116,7 @@ public class AnalyticalTest {
 	public void testMultiOpenLI2() throws IOException, URISyntaxException {
 
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
-		
+
 		tempFile.println("Sistema aperto con 3 classi");
 		long start = System.currentTimeMillis();
 
@@ -173,7 +173,7 @@ public class AnalyticalTest {
 
 	@Test
 	public void testMultiClosedLI() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Sistema chiuso con 2 classi");
@@ -229,7 +229,7 @@ public class AnalyticalTest {
 
 	@Test
 	public void testMultiClosedLI_visits_not1() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Sistema chiuso con 2 classi");
@@ -274,13 +274,13 @@ public class AnalyticalTest {
 		} else {
 			tempFile.println("Wrong input!!");
 		}
-		
+
 		assertCorrectOutput(tempFile);
 	}
 
 	@Test
 	public void testMultiClosedLI_big() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Sistema chiuso con 4 classi");
@@ -335,13 +335,13 @@ public class AnalyticalTest {
 		} else {
 			tempFile.println("Wrong input!!");
 		}
-		
+
 		assertCorrectOutput(tempFile);
 	}
 
 	@Test
 	public void testMultiMixed() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Sistema misto con 2 classi");
@@ -394,13 +394,13 @@ public class AnalyticalTest {
 		} else {
 			tempFile.println("Wrong input!!");
 		}
-		
+
 		assertCorrectOutput(tempFile);
 	}
 
 	@Test
 	public void testMultiMixed2() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Sistema misto con 2 classi");
@@ -459,7 +459,7 @@ public class AnalyticalTest {
 
 	@Test
 	public void testMultiMixed3() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Sistema misto con 2 classi");
@@ -518,7 +518,7 @@ public class AnalyticalTest {
 
 	@Test
 	public void testMultiMixed_4C_2S() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Sistema misto con 4 classi");
@@ -592,9 +592,9 @@ public class AnalyticalTest {
 	 * Method used for testing LI models
 	 */
 	public void testSingleClosedLI_1() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
-		
+
 		int n = 10;
 		tempFile.println("Sistema con: " + n + " customers");
 		long start = System.currentTimeMillis();
@@ -614,7 +614,7 @@ public class AnalyticalTest {
 		tempFile.println("End LI");
 		long stop = System.currentTimeMillis();
 		System.out.print("Tempo trascorso: " + (stop - start));
-		
+
 		assertCorrectOutput(tempFile);
 	}
 
@@ -623,7 +623,7 @@ public class AnalyticalTest {
 	 * Method used for testing LI models
 	 */
 	public void testSingleClosedLI_2() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		int n = 100;
@@ -651,7 +651,7 @@ public class AnalyticalTest {
 	 * Method used for testing LI models
 	 */
 	public void testSingleClosedLI_3() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		int n = 5000000;
@@ -682,7 +682,7 @@ public class AnalyticalTest {
 	 * Method used for testing LI models with intermediate results of mva
 	 */
 	public void testSingleClosedLI_4() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		int n = 3;
@@ -716,7 +716,7 @@ public class AnalyticalTest {
 	 * Method used for testing LI models with intermediate results of mva
 	 */
 	public void testSingleClosedLI_scalability() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		for (int pop = 20000; pop < 100000; pop = pop + 10000) {
@@ -741,7 +741,7 @@ public class AnalyticalTest {
 			System.out.print("Tempo trascorso: " + (stop - start));
 			System.out.println();
 		}
-		
+
 		assertCorrectOutput(tempFile);
 	}
 
@@ -750,7 +750,7 @@ public class AnalyticalTest {
 	 * Method used for testing LD models
 	 */
 	public void testSingleClosedLD() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		SolverSingleClosedMVA mva = new SolverSingleClosedMVA(3, 4);
@@ -779,7 +779,7 @@ public class AnalyticalTest {
 	 * Method used for testing LD models
 	 */
 	public void testSingleClosedLD2() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		SolverSingleClosedMVA mva = new SolverSingleClosedMVA(3, 4);
@@ -803,7 +803,7 @@ public class AnalyticalTest {
 	 * Method used for testing LD models
 	 */
 	public void testSingleClosedLD_step() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		tempFile.println("Customers: 1");
@@ -857,7 +857,7 @@ public class AnalyticalTest {
 	 * Method used for testing LD models
 	 */
 	public void testSingleClosedLD_big() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		int n = 50000; //customers
@@ -897,11 +897,11 @@ public class AnalyticalTest {
 		System.out.println(elapsed2);
 
 		tempFile.println("End LD");
-		
+
 		assertCorrectOutput(tempFile);
 	}
 
-	
+
 	/**
 	 * Method used for testing
 	 */
@@ -994,7 +994,7 @@ public class AnalyticalTest {
 	 * Method used for testing LI models
 	 */
 	public void testSingleClosedLI_5() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		int n = 5;
@@ -1025,7 +1025,7 @@ public class AnalyticalTest {
 	 * Method used for testing LI models
 	 */
 	public void testSingleClosedLI_6() throws IOException, URISyntaxException {
-		
+
 		TempTextFile tempFile = new TempTextFile(name.getMethodName());
 
 		int n = 5;
@@ -1080,7 +1080,7 @@ public class AnalyticalTest {
 	 * @param N array of class populations
 	 */
 	public static void solveClosedPFQN(int M, int R, double[][][] L, int[] N) {
-		
+
 		long tic = System.currentTimeMillis();
 		SolverMultiClosedMVA mClosed = new SolverMultiClosedMVA(R, M);
 
@@ -1135,9 +1135,7 @@ public class AnalyticalTest {
 		//testMultiClosedLI();
 		//testSingleClosedLI_6();
 		//testSingleClosedLD();
-
 		//testSingleClosedLD_big();
-
 		//testMultiOpenLI();
 		//testMultiOpenLI2();
 		//testMultiClosedLI();
@@ -1145,10 +1143,9 @@ public class AnalyticalTest {
 		//testMultiClosedLI_visits_not1();
 		//testMultiMixed3();
 		//testMultiMixed_4C_2S();
-		return;
 
 	}
-	
+
 	private void assertCorrectOutput(TempTextFile actual) throws IOException, URISyntaxException {
 		File actualFile = actual.getFile();		
 		File expectedFile = new File(getClass().getResource(this.name.getMethodName() + ".txt").toURI().getSchemeSpecificPart());

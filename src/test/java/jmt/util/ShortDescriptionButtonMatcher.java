@@ -20,7 +20,7 @@ public class ShortDescriptionButtonMatcher extends GenericTypeMatcher<JButton> {
 		super(JButton.class);
 		this.textToMatch = textToMatch;
 	}
-	
+
 	@Override
 	protected boolean isMatching(JButton button) {
 		return button.getAction() != null && 

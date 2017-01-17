@@ -35,25 +35,25 @@ public class AMVATest {
 
 	public static void main(String[] args) {
 		//testMultiClosedLI();
-//		System.out.println("\n------------------------FOO 1----------------------------\n");
-//		testMultiClosedLI_visits_not1();
-//		System.out.println("\n------------------------FOO 2----------------------------\n");
-//		testMultiClosedLI_big();
-//		System.out.println("\n------------------------FOO 3----------------------------\n");
-//		testLinearizerExample();
-//		System.out.println("\n------------------------FOO 4----------------------------\n");
-//		testMultiClosedLI_huge();
+		//System.out.println("\n------------------------FOO 1----------------------------\n");
+		//testMultiClosedLI_visits_not1();
+		//System.out.println("\n------------------------FOO 2----------------------------\n");
+		//testMultiClosedLI_big();
+		//System.out.println("\n------------------------FOO 3----------------------------\n");
+		//testLinearizerExample();
+		//System.out.println("\n------------------------FOO 4----------------------------\n");
+		//testMultiClosedLI_huge();
 		//testMultiClosedLI_MoM_huge();
-//		testMultiClosedLI2();
-		
+		//testMultiClosedLI2();
+
 		AMVATest test = new AMVATest();
 		//test.runTests2();
 		//test.runTests3();
 		test.runTests();
 	}
-	
+
 	@Rule public TestName name = new TestName();
-	
+
 	@Ignore
 	@Test
 	/**
@@ -67,10 +67,10 @@ public class AMVATest {
 		//double[] tolerances = {Math.pow(10, -2), Math.pow(10, -4), Math.pow(10, -7)};
 		//double[] tolerances = {Math.pow(10, -2), Math.pow(10, -5)};
 		double[] tolerances = {Math.pow(10, -7)};
-		
+
 		// error = max_{c,k}((Q_{c,k} - Q*{c,k})/N_c)
 		// Q* are the exact values
-		
+
 		for (int c = 5; c <= classes; c++) {
 			for (int k = 5; k <= queues; k++) {
 				for (int pop : populations) {
@@ -91,7 +91,7 @@ public class AMVATest {
 			}
 		}
 	}
-	
+
 	private void runTest2(int classes, int stations, int population, double tolerance) {
 		int[] pop = new int[classes];
 		String[] name = new String[stations];
@@ -103,11 +103,11 @@ public class AMVATest {
 		for (int i = 0; i < classes; i++) {
 			pop[i] = (int)Math.ceil(population/classes);
 		}
-		
+
 		// service demands here
 		double[][][] servt = new double[stations][classes][1];
 		double[][] visits = new double[stations][classes];
-		
+
 		Random rand = new Random();
 		for (int k = 0; k < stations; k++) {
 			for (int c = 0; c < classes; c++) {
@@ -115,13 +115,13 @@ public class AMVATest {
 				visits[k][c] = 1;
 			}
 		}
-		
+
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
-		
+
 		double[][] mvaQueueLen = null;
 		SolverMulti solver;
 		String algorithm;
@@ -141,7 +141,7 @@ public class AMVATest {
 				System.out.print(((stop-start)/(double)1000) + ",");
 				//System.out.println("Elapsed time (ms) = " + (stop - start));
 				start = 0; stop = 0;
-				
+
 				long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 				solver = null;
 				System.gc(); System.gc(); System.gc(); System.gc();
@@ -150,18 +150,18 @@ public class AMVATest {
 				System.gc(); System.gc(); System.gc(); System.gc();
 				System.gc(); System.gc(); System.gc(); System.gc();
 				long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-				
+
 				System.out.print(((mem0-mem1)/(double)1024) + ",");
 				System.out.print((mem0/(double)1024) + "\n");
-	//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-	//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-	//			System.out.println("-------------------------------------");
+				//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+				//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+				//System.out.println("-------------------------------------");
 				mem0 = 0; mem1 = 0;
 			} else {
 				System.out.println("Wrong input!!");
 			}
 		}
-		
+
 		solver = new SolverMultiClosedChow(classes, stations, pop);
 		algorithm = "Chow";
 		if (solver.input(name, type, servt, visits)) {
@@ -176,7 +176,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -185,12 +185,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -210,7 +210,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -219,12 +219,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -244,7 +244,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -253,12 +253,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -278,7 +278,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -287,12 +287,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -312,7 +312,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -321,12 +321,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -348,7 +348,7 @@ public class AMVATest {
 				System.out.print(((stop-start)/(double)1000) + ",");
 				//System.out.println("Elapsed time (ms) = " + (stop - start));
 				start = 0; stop = 0;
-				
+
 				long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 				solver = null;
 				System.gc(); System.gc(); System.gc(); System.gc();
@@ -357,18 +357,18 @@ public class AMVATest {
 				System.gc(); System.gc(); System.gc(); System.gc();
 				System.gc(); System.gc(); System.gc(); System.gc();
 				long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-				
+
 				System.out.print(((mem0-mem1)/(double)1024) + ",");
 				System.out.print((mem0/(double)1024) + "\n");
-	//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-	//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-	//			System.out.println("-------------------------------------");
+				//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+				//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+				//System.out.println("-------------------------------------");
 				mem0 = 0; mem1 = 0;
 			} else {
 				System.out.println("Wrong input!!");
 			}
 		}
-		
+
 	}
 	@Ignore
 	@Test
@@ -378,55 +378,55 @@ public class AMVATest {
 		int[][] populations1 = {{10000, 5000, 1000, 500, 100, 50, 10}};
 		//double[] tolerances = {Math.pow(10, -4), Math.pow(10, -7)};
 		double[] tolerances = {Math.pow(10, -7)};
-		
+
 		// error = max_{c,k}((Q_{c,k} - Q*{c,k})/N_c)
 		// Q* are the exact values
-		
+
 		double[][][] servt = new double[queues][classes][1];
 		double[][] visits = new double[queues][classes];
-		
+
 		servt[0][0][0] = 64;
 		servt[1][0][0] = 68;
 		servt[2][0][0] = 28;
 		servt[3][0][0] = 35;
 		servt[4][0][0] = 10;
-		
+
 		servt[0][1][0] = 77;
 		servt[1][1][0] = 70;
 		servt[2][1][0] = 2;
 		servt[3][1][0] = 97;
 		servt[4][1][0] = 85;
-		
+
 		servt[0][2][0] = 93;
 		servt[1][2][0] = 14;
 		servt[2][2][0] = 68;
 		servt[3][2][0] = 69;
 		servt[4][2][0] = 88;
-		
+
 		servt[0][3][0] = 27;
 		servt[1][3][0] = 22;
 		servt[2][3][0] = 34;
 		servt[3][3][0] = 15;
 		servt[4][3][0] = 71;
-		
+
 		servt[0][4][0] = 19;
 		servt[1][4][0] = 32;
 		servt[2][4][0] = 22;
 		servt[3][4][0] = 82;
 		servt[4][4][0] = 62;
-		
+
 		servt[0][5][0] = 60;
 		servt[1][5][0] = 2;
 		servt[2][5][0] = 47;
 		servt[3][5][0] = 83;
 		servt[4][5][0] = 79;
-		
+
 		servt[0][6][0] = 8;
 		servt[1][6][0] = 64;
 		servt[2][6][0] = 81;
 		servt[3][6][0] = 10;
 		servt[4][6][0] = 98;
-		
+
 		int[] type = new int[queues];
 		for (int k = 0; k < queues; k++) {
 			type[k] = Solver.LI;
@@ -434,7 +434,7 @@ public class AMVATest {
 				visits[k][c] = 1;
 			}
 		}
-		
+
 		for (int[] pop : populations1) {
 			for (double tol : tolerances) {
 				//System.out.println("##############################################");
@@ -461,13 +461,13 @@ public class AMVATest {
 		int[][] populations2 = {{10000, 5000, 1000, 500, 100, 50, 10}};
 		//double[] tolerances = {Math.pow(10, -4), Math.pow(10, -7)};
 		double[] tolerances = {Math.pow(10, -7)};
-		
+
 		// error = max_{c,k}((Q_{c,k} - Q*{c,k})/N_c)
 		// Q* are the exact values
-		
+
 		double[][][] servt = new double[queues][classes][1];
 		double[][] visits = new double[queues][classes];
-		
+
 		for (int k = 0; k < 9; k++) {
 			servt[k][0][0] = 12.98;
 			servt[k][1][0] = 13.64;
@@ -492,7 +492,7 @@ public class AMVATest {
 		servt[12][2][0] = 2000;
 		servt[12][3][0] = 2000;
 		servt[12][4][0] = 3000;
-		
+
 		int[] type = new int[queues];
 		for (int k = 0; k < queues; k++) {
 			if (k == queues - 1) {
@@ -505,7 +505,7 @@ public class AMVATest {
 				visits[k][c] = 1;
 			}
 		}
-		
+
 		for (int[] pop : populations1) {
 			for (double tol : tolerances) {
 				//System.out.println("##############################################");
@@ -528,13 +528,13 @@ public class AMVATest {
 		for (int i = 0; i < stations; i++) {
 			name[i] = "Station " + i;
 		}
-		
+
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
-		
+
 		SolverMulti solver = new SolverMultiClosedChow(classes, stations, pop);
 		String algorithm = "Chow";
 		if (solver.input(name, type, servt, visits)) {
@@ -542,7 +542,7 @@ public class AMVATest {
 			solver.solve();
 			System.out.println(algorithm);
 			System.out.println(solver);
-			
+
 			System.out.print(algorithm+",");
 			//System.out.println(algorithm);
 			//System.out.println("-------------------------------------");
@@ -551,7 +551,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -560,13 +560,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-			
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -579,7 +578,7 @@ public class AMVATest {
 			solver.solve();
 			System.out.println(algorithm);
 			System.out.println(solver);
-			
+
 			System.out.print(algorithm+",");
 			//System.out.println(algorithm);
 			//System.out.println("-------------------------------------");
@@ -588,7 +587,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -597,12 +596,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -615,7 +614,7 @@ public class AMVATest {
 			solver.solve();
 			System.out.println(algorithm);
 			System.out.println(solver);
-			
+
 			System.out.print(algorithm+",");
 			//System.out.println(algorithm);
 			//System.out.println("-------------------------------------");
@@ -624,7 +623,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -633,12 +632,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -651,7 +650,7 @@ public class AMVATest {
 			solver.solve();
 			System.out.println(algorithm);
 			System.out.println(solver);
-			
+
 			System.out.print(algorithm+",");
 			//System.out.println(algorithm);
 			//System.out.println("-------------------------------------");
@@ -660,7 +659,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -669,12 +668,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -687,7 +686,7 @@ public class AMVATest {
 			solver.solve();
 			System.out.println(algorithm);
 			System.out.println(solver);
-			
+
 			System.out.print(algorithm+",");
 			//System.out.println(algorithm);
 			//System.out.println("-------------------------------------");
@@ -696,7 +695,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -705,19 +704,19 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
 		}
 
 	}	
-	
+
 	private double maxDiff(int[] pop, double[][] queueLen1, double[][] queueLen2) {
 		double maxDiff = 0;
 		for (int k = 0; k < queueLen1.length; k++) {
@@ -730,7 +729,7 @@ public class AMVATest {
 		}
 		return maxDiff;
 	}
-	
+
 	private void runTest(int classes, int stations, int population, double tolerance) {
 		int[] pop = new int[classes];
 		String[] name = new String[stations];
@@ -742,11 +741,11 @@ public class AMVATest {
 		for (int i = 0; i < classes; i++) {
 			pop[i] = (int)Math.ceil(population/classes);
 		}
-		
+
 		// service demands here
 		double[][][] servt = new double[stations][classes][1];
 		double[][] visits = new double[stations][classes];
-		
+
 		Random rand = new Random();
 		for (int k = 0; k < stations; k++) {
 			for (int c = 0; c < classes; c++) {
@@ -754,19 +753,19 @@ public class AMVATest {
 				visits[k][c] = 1;
 			}
 		}
-		
+
 		/*
 		Map<String, SolverMulti> models = new LinkedHashMap<String, SolverMulti>();
 		Map<String, Long> elapsedTimes = new LinkedHashMap<String, Long>();
 		Map<String, Long> memoryUsage = new LinkedHashMap<String, Long>();
-		
+
 		String algorithm1 = "MVA";
 		String algorithm2 = "Chow";
 		String algorithm3 = "Bard-Schweitzer";
 		String algorithm4 = "AQL";
 		String algorithm5 = "Linearizer";
 		String algorithm6 = "DeSouza-Muntz Linearizer";
-		
+
 		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(classes, stations);
 		models.put(algorithm1, mClosedMVA);
 		SolverMultiClosedChow mClosedChow = new SolverMultiClosedChow(classes, stations, pop);
@@ -779,16 +778,16 @@ public class AMVATest {
 		models.put(algorithm5, mClosedLinearizer);
 		SolverMultiClosedLinearizer mClosedDeSouzaMuntzLinearizer = new SolverMultiClosedLinearizer(classes, stations, pop, true);
 		models.put(algorithm6, mClosedDeSouzaMuntzLinearizer);
-		*/
-		
+		 */
+
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
 		System.gc(); System.gc(); System.gc(); System.gc();
-		
+
 		double[][] mvaQueueLen = null;
-		
+
 		SolverMulti solver = new SolverMultiClosedMVA(classes, stations);
 		String algorithm = "MVA";
 		if (((SolverMultiClosedMVA)solver).input(name, type, servt, visits, pop)) {
@@ -804,7 +803,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -813,17 +812,17 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		solver = new SolverMultiClosedChow(classes, stations, pop);
 		algorithm = "Chow";
 		if (solver.input(name, type, servt, visits)) {
@@ -838,7 +837,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -847,12 +846,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -872,7 +871,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -881,12 +880,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -906,7 +905,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -915,12 +914,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -940,7 +939,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -949,12 +948,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -974,7 +973,7 @@ public class AMVATest {
 			System.out.print(((stop-start)/(double)1000) + ",");
 			//System.out.println("Elapsed time (ms) = " + (stop - start));
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			solver = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -983,12 +982,12 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			System.out.print(((mem0-mem1)/(double)1024) + ",");
 			System.out.print((mem0/(double)1024) + "\n");
-//			System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
-//			System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
-//			System.out.println("-------------------------------------");
+			//System.out.println("Memory Usage (KB) = " + ((mem0 - mem1)/(double)1024));
+			//System.out.println("Memory Usage w/o diff (KB) = " + ((mem0)/(double)1024));
+			//System.out.println("-------------------------------------");
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
@@ -1001,11 +1000,11 @@ public class AMVATest {
 			solver.solve();
 			System.out.println(algorithm + "\n-------------------------------------");
 			System.out.println(queueLength(stations, classes, solver));
-			
+
 			long stop = System.currentTimeMillis();
 			elapsedTimes.put(algorithm6, stop - start);
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			mClosedMVA = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -1014,20 +1013,20 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			memoryUsage.put(algorithm1, mem0-mem1);
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		if (mClosedChow.input(name, type, servt, visits)) {
 			long start = System.currentTimeMillis();
 			mClosedChow.solve();
 			long stop = System.currentTimeMillis();
 			elapsedTimes.put(algorithm6, stop - start);
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			mClosedChow = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -1036,20 +1035,20 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			memoryUsage.put(algorithm1, mem0-mem1);
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		if (mClosedBS.input(name, type, servt, visits)) {
 			long start = System.currentTimeMillis();
 			mClosedBS.solve();
 			long stop = System.currentTimeMillis();
 			elapsedTimes.put(algorithm6, stop - start);
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			mClosedBS = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -1058,20 +1057,20 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			memoryUsage.put(algorithm1, mem0-mem1);
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		if (mClosedAQL.input(name, type, servt, visits)) {
 			long start = System.currentTimeMillis();
 			mClosedAQL.solve();
 			long stop = System.currentTimeMillis();
 			elapsedTimes.put(algorithm6, stop - start);
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			mClosedAQL = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -1080,20 +1079,20 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			memoryUsage.put(algorithm1, mem0-mem1);
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		if (mClosedLinearizer.input(name, type, servt, visits)) {
 			long start = System.currentTimeMillis();
 			mClosedLinearizer.solve();
 			long stop = System.currentTimeMillis();
 			elapsedTimes.put(algorithm6, stop - start);
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			mClosedLinearizer = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -1102,20 +1101,20 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			memoryUsage.put(algorithm1, mem0-mem1);
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		if (mClosedDeSouzaMuntzLinearizer.input(name, type, servt, visits)) {
 			long start = System.currentTimeMillis();
 			mClosedDeSouzaMuntzLinearizer.solve();
 			long stop = System.currentTimeMillis();
 			elapsedTimes.put(algorithm6, stop - start);
 			start = 0; stop = 0;
-			
+
 			long mem0 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
 			mClosedDeSouzaMuntzLinearizer = null;
 			System.gc(); System.gc(); System.gc(); System.gc();
@@ -1124,13 +1123,13 @@ public class AMVATest {
 			System.gc(); System.gc(); System.gc(); System.gc();
 			System.gc(); System.gc(); System.gc(); System.gc();
 			long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-			
+
 			memoryUsage.put(algorithm1, mem0-mem1);
 			mem0 = 0; mem1 = 0;
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		System.out.println("Elapsed times (ms): ");
 		for (String algorithm : elapsedTimes.keySet()) {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
@@ -1139,11 +1138,11 @@ public class AMVATest {
 		for (String algorithm : memoryUsage.keySet()) {
 			System.out.println("  " + algorithm + " - " + (memoryUsage.get(algorithm)/(double)1024));
 		}
-		
+
 		System.out.println(toString(stations, classes, models));
-		*/
+		 */
 	}
-	
+
 	private String queueLength(int stations, int classes, SolverMulti solver) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("Queue Length (Q)");
@@ -1157,7 +1156,7 @@ public class AMVATest {
 		}
 		return buf.toString();
 	}
-	
+
 	@Test
 	public void testMultiClosedLI_differentAlgorithms() throws IOException, URISyntaxException {
 
@@ -1197,10 +1196,10 @@ public class AMVATest {
 
 		Map<String, SolverMulti> models = new LinkedHashMap<String, SolverMulti>();
 		Map<String, Double> elapsedTimes = new LinkedHashMap<String, Double>();
-		
+
 		int stations = 2;
 		int classes = 3;
-		
+
 		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(classes, stations);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
 			String algorithm = "MVA";
@@ -1223,7 +1222,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedBardSchweitzer mClosedBS = new SolverMultiClosedBardSchweitzer(classes, stations, pop);
 		if (mClosedBS.input(name, type, servt, visits)) {
@@ -1235,7 +1234,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedAQL mClosedAQL = new SolverMultiClosedAQL(classes, stations, pop);
 		if (mClosedAQL.input(name, type, servt, visits)) {
@@ -1259,7 +1258,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedLinearizer mClosedOptimisedLinearizer = new SolverMultiClosedLinearizer(classes, stations, pop, true);
 		if (mClosedOptimisedLinearizer.input(name, type, servt, visits)) {
@@ -1271,17 +1270,18 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		System.out.println("Elapsed times (s): ");
 		for (String algorithm : elapsedTimes.keySet()) {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
-		
+
 		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
-		
+
 		tempFile.println(toString(stations, classes, models));
 		assertCorrectOutput(tempFile);
-/*		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(3, 2);
+		/*
+		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(3, 2);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
 			mClosedMVA.solve();
 			System.out.println(mClosedMVA);
@@ -1324,7 +1324,8 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-*/	}
+		 */
+	}
 
 	@Test
 	public void testMultiClosedLI_visits_not1_differentAlgorithms() throws IOException, URISyntaxException {
@@ -1360,10 +1361,10 @@ public class AMVATest {
 
 		Map<String, SolverMulti> models = new LinkedHashMap<String, SolverMulti>();
 		Map<String, Double> elapsedTimes = new LinkedHashMap<String, Double>();
-		
+
 		int stations = 2;
 		int classes = 2;
-		
+
 		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(classes, stations);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
 			String algorithm = "MVA";
@@ -1386,7 +1387,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedBardSchweitzer mClosedBS = new SolverMultiClosedBardSchweitzer(classes, stations, pop);
 		if (mClosedBS.input(name, type, servt, visits)) {
@@ -1398,7 +1399,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedAQL mClosedAQL = new SolverMultiClosedAQL(classes, stations, pop);
 		if (mClosedAQL.input(name, type, servt, visits)) {
@@ -1422,7 +1423,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedLinearizer mClosedOptimisedLinearizer = new SolverMultiClosedLinearizer(classes, stations, pop, true);
 		if (mClosedOptimisedLinearizer.input(name, type, servt, visits)) {
@@ -1434,14 +1435,14 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		System.out.println("Elapsed times (s): ");
 		for (String algorithm : elapsedTimes.keySet()) {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
-		
+
 		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
-		
+
 		tempFile.println(toString(stations, classes, models));
 		assertCorrectOutput(tempFile);
 		/*
@@ -1488,7 +1489,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		*/
+		 */
 	}
 
 	@Test
@@ -1535,10 +1536,10 @@ public class AMVATest {
 
 		Map<String, SolverMulti> models = new LinkedHashMap<String, SolverMulti>();
 		Map<String, Double> elapsedTimes = new LinkedHashMap<String, Double>();
-		
+
 		int stations = 2;
 		int classes = 4;
-		
+
 		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(classes, stations);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
 			String algorithm = "MVA";
@@ -1561,7 +1562,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedBardSchweitzer mClosedBS = new SolverMultiClosedBardSchweitzer(classes, stations, pop);
 		if (mClosedBS.input(name, type, servt, visits)) {
@@ -1573,7 +1574,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedAQL mClosedAQL = new SolverMultiClosedAQL(classes, stations, pop);
 		if (mClosedAQL.input(name, type, servt, visits)) {
@@ -1597,7 +1598,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedLinearizer mClosedOptimisedLinearizer = new SolverMultiClosedLinearizer(classes, stations, pop, true);
 		if (mClosedOptimisedLinearizer.input(name, type, servt, visits)) {
@@ -1609,14 +1610,14 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		System.out.println("Elapsed times (s): ");
 		for (String algorithm : elapsedTimes.keySet()) {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
-		
+
 		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
-		
+
 		tempFile.println(toString(stations, classes, models));
 		assertCorrectOutput(tempFile);
 		/*
@@ -1648,7 +1649,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedLinearizer mClosedLinearizer = new SolverMultiClosedLinearizer(4, 2, pop, false);
 		if (mClosedLinearizer.input(name, type, servt, visits)) {
@@ -1663,7 +1664,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		*/
+		 */
 	}
 
 	@Test
@@ -1700,10 +1701,10 @@ public class AMVATest {
 
 		Map<String, SolverMulti> models = new LinkedHashMap<String, SolverMulti>();
 		Map<String, Double> elapsedTimes = new LinkedHashMap<String, Double>();
-		
+
 		int stations = 2;
 		int classes = 2;
-		
+
 		SolverMultiClosedMVA mClosedMVA = new SolverMultiClosedMVA(classes, stations);
 		if (mClosedMVA.input(name, type, servt, visits, pop)) {
 			String algorithm = "MVA";
@@ -1726,7 +1727,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedBardSchweitzer mClosedBS = new SolverMultiClosedBardSchweitzer(classes, stations, pop);
 		if (mClosedBS.input(name, type, servt, visits)) {
@@ -1738,7 +1739,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedAQL mClosedAQL = new SolverMultiClosedAQL(classes, stations, pop);
 		if (mClosedAQL.input(name, type, servt, visits)) {
@@ -1762,7 +1763,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedLinearizer mClosedOptimisedLinearizer = new SolverMultiClosedLinearizer(classes, stations, pop, true);
 		if (mClosedOptimisedLinearizer.input(name, type, servt, visits)) {
@@ -1774,14 +1775,14 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		System.out.println("Elapsed times (s): ");
 		for (String algorithm : elapsedTimes.keySet()) {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
-		
+
 		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
-		
+
 		tempFile.println(toString(stations, classes, models));
 		assertCorrectOutput(tempFile);
 		/*
@@ -1828,7 +1829,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		*/
+		 */
 	}
 
 	@Test
@@ -1839,71 +1840,71 @@ public class AMVATest {
 
 		String[] name = new String[25];
 		int[] type = new int[25];
-        for (int i=0; i<25; i++) {
-            name[i] = "Station"+i;
-            type[i] = Solver.LI;
-        }
+		for (int i=0; i<25; i++) {
+			name[i] = "Station"+i;
+			type[i] = Solver.LI;
+		}
 		double[][][] servt = new double[25][6][1];
 		double[][] visits = new double[25][6];
 
 		int[] pop = new int[6];
-        for (int r=0; r<6; r++) {
-            pop[r] = 1000;
-        }
+		for (int r=0; r<6; r++) {
+			pop[r] = 1000;
+		}
 
-        for (int m=0; m<12; m++) {
-            servt[m][1][0] = 17.0;
-            visits[m][1] = 1.0;
-            servt[m][2][0] = 4.0;
-            visits[m][2] = 1.0;
-            servt[m][3][0] = 15.0;
-            visits[m][3] = 1.0;
-            servt[m][4][0] = 6.0;
-            visits[m][4] = 1.0;
-            servt[m][5][0] = 20.0;
-            visits[m][5] = 1.0;
-            servt[m][0][0] = 2.0;
-            visits[m][0] = 1.0;
-        }
+		for (int m=0; m<12; m++) {
+			servt[m][1][0] = 17.0;
+			visits[m][1] = 1.0;
+			servt[m][2][0] = 4.0;
+			visits[m][2] = 1.0;
+			servt[m][3][0] = 15.0;
+			visits[m][3] = 1.0;
+			servt[m][4][0] = 6.0;
+			visits[m][4] = 1.0;
+			servt[m][5][0] = 20.0;
+			visits[m][5] = 1.0;
+			servt[m][0][0] = 2.0;
+			visits[m][0] = 1.0;
+		}
 
-        for (int m=12; m<17; m++) {
-            servt[m][1][0] = 16.0;
-            visits[m][1] = 1.0;
-            servt[m][2][0] = 7.0;
-            visits[m][2] = 1.0;
-            servt[m][3][0] = 16.0;
-            visits[m][3] = 1.0;
-            servt[m][4][0] = 17.0;
-            visits[m][4] = 1.0;
-            servt[m][5][0] = 5.0;
-            visits[m][5] = 1.0;
-            servt[m][0][0] = 17.0;
-            visits[m][0] = 1.0;
-        }
+		for (int m=12; m<17; m++) {
+			servt[m][1][0] = 16.0;
+			visits[m][1] = 1.0;
+			servt[m][2][0] = 7.0;
+			visits[m][2] = 1.0;
+			servt[m][3][0] = 16.0;
+			visits[m][3] = 1.0;
+			servt[m][4][0] = 17.0;
+			visits[m][4] = 1.0;
+			servt[m][5][0] = 5.0;
+			visits[m][5] = 1.0;
+			servt[m][0][0] = 17.0;
+			visits[m][0] = 1.0;
+		}
 
-        for (int m=17; m<25; m++) {
-            servt[m][1][0] = 2.0;
-            visits[m][1] = 1.0;
-            servt[m][2][0] = 18.0;
-            visits[m][2] = 1.0;
-            servt[m][3][0] = 19.0;
-            visits[m][3] = 1.0;
-            servt[m][4][0] = 8.0;
-            visits[m][4] = 1.0;
-            servt[m][5][0] = 18.0;
-            visits[m][5] = 1.0;
-            servt[m][0][0] = 12.0;
-            visits[m][0] = 1.0;
-        }
-                
+		for (int m=17; m<25; m++) {
+			servt[m][1][0] = 2.0;
+			visits[m][1] = 1.0;
+			servt[m][2][0] = 18.0;
+			visits[m][2] = 1.0;
+			servt[m][3][0] = 19.0;
+			visits[m][3] = 1.0;
+			servt[m][4][0] = 8.0;
+			visits[m][4] = 1.0;
+			servt[m][5][0] = 18.0;
+			visits[m][5] = 1.0;
+			servt[m][0][0] = 12.0;
+			visits[m][0] = 1.0;
+		}
+
 		start = System.currentTimeMillis();
-		
+
 		Map<String, SolverMulti> models = new LinkedHashMap<String, SolverMulti>();
 		Map<String, Double> elapsedTimes = new LinkedHashMap<String, Double>();
-		
+
 		int stations = 25;
 		int classes = 6;
-		
+
 		SolverMultiClosedChow mClosedChow = new SolverMultiClosedChow(classes, stations, pop);
 		if (mClosedChow.input(name, type, servt, visits)) {
 			String algorithm = "Chow";
@@ -1914,7 +1915,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedBardSchweitzer mClosedBS = new SolverMultiClosedBardSchweitzer(classes, stations, pop);
 		if (mClosedBS.input(name, type, servt, visits)) {
@@ -1926,7 +1927,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedAQL mClosedAQL = new SolverMultiClosedAQL(classes, stations, pop);
 		if (mClosedAQL.input(name, type, servt, visits)) {
@@ -1950,7 +1951,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		start = System.currentTimeMillis();
 		SolverMultiClosedLinearizer mClosedOptimisedLinearizer = new SolverMultiClosedLinearizer(classes, stations, pop, true);
 		if (mClosedOptimisedLinearizer.input(name, type, servt, visits)) {
@@ -1962,16 +1963,16 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		
+
 		System.out.println("Elapsed times (s): ");
 		for (String algorithm : elapsedTimes.keySet()) {
 			System.out.println("  " + algorithm + " - " + elapsedTimes.get(algorithm));
 		}
-		
+
 		TempTextFile tempFile = new TempTextFile(this.name.getMethodName());
-		
+
 		tempFile.println(toString(stations, classes, models));
-		
+
 		assertCorrectOutput(tempFile);
 		/*
 		SolverMultiClosedAQL mClosedAQL = new SolverMultiClosedAQL(6, 25, pop);
@@ -2002,7 +2003,7 @@ public class AMVATest {
 		} else {
 			System.out.println("Wrong input!!");
 		}
-		*/
+		 */
 	}
 
 	public static String toString(int stations, int classes, Map<String, SolverMulti> models) {
@@ -2015,7 +2016,7 @@ public class AMVATest {
 		buf.append("\n------------------------------------\n");
 		for (String algorithm : models.keySet()) {
 			double[][] queueLen = models.get(algorithm).getQueueLen();
-			
+
 			buf.append("Algorithm: " + algorithm + "\n");
 			for (int m = 0; m < stations; m++) {
 				buf.append("[   ");
@@ -2031,7 +2032,7 @@ public class AMVATest {
 		buf.append("\n------------------------------------\n");
 		for (String algorithm : models.keySet()) {
 			double[][] residenceTime = models.get(algorithm).getResTime();
-			
+
 			buf.append("Algorithm: " + algorithm + "\n");
 			for (int m = 0; m < stations; m++) {
 				buf.append("[   ");
@@ -2047,7 +2048,7 @@ public class AMVATest {
 		buf.append("\n------------------------------------\n");
 		for (String algorithm : models.keySet()) {
 			double[][] throughput = models.get(algorithm).getThroughput();
-			
+
 			buf.append("Algorithm: " + algorithm + "\n");
 			for (int m = 0; m < stations; m++) {
 				buf.append("[   ");
@@ -2063,7 +2064,7 @@ public class AMVATest {
 		buf.append("\n------------------------------------\n");
 		for (String algorithm : models.keySet()) {
 			double[][] utilization = models.get(algorithm).getUtilization();
-			
+
 			buf.append("Algorithm: " + algorithm + "\n");
 			for (int m = 0; m < stations; m++) {
 				buf.append("[   ");
@@ -2081,7 +2082,7 @@ public class AMVATest {
 				double[] scThroughput = models.get(algorithm).getAggrThroughput();
 				double[] scQueueLen = models.get(algorithm).getAggrQueueLen();
 				double[] scResidTime = models.get(algorithm).getAggrResTime();
-				
+
 				buf.append("\nAlgorithm: " + algorithm);
 				buf.append("\n  throughput       : " + scThroughput[i]);
 				buf.append("\n  utilization      : " + scUtilization[i]);
@@ -2094,7 +2095,7 @@ public class AMVATest {
 			for (String algorithm : models.keySet()) {
 				double[] clsThroughput = models.get(algorithm).getClsThroughput();
 				double[] clsRespTime = models.get(algorithm).getClsResTime();
-				
+
 				buf.append("\nAlgorithm: " + algorithm);
 				buf.append("\n  response time       : " + clsRespTime[j]);
 				buf.append("\n  throughput          : " + clsThroughput[j]);
@@ -2109,7 +2110,7 @@ public class AMVATest {
 			for (int k = 0; k < stations; k++) {
 				sysNumJobs += models.get(algorithm).getAggrQueueLen(k);
 			}
-			
+
 			buf.append("\nAlgorithm: " + algorithm);
 			buf.append("\n  System Response Time    : " + sysResponseTime);
 			buf.append("\n  System Throughput       : " + sysThroughput);
@@ -2118,7 +2119,7 @@ public class AMVATest {
 
 		return buf.toString();
 	}
-	
+
 	private void assertCorrectOutput(TempTextFile actual) throws IOException, URISyntaxException {
 		File actualFile = actual.getFile();		
 		File expectedFile = new File(getClass().getResource(this.name.getMethodName() + ".txt").toURI().getSchemeSpecificPart());
@@ -2128,5 +2129,5 @@ public class AMVATest {
 				+ "\nActual: \n" + FileUtils.readFileToString(actualFile), 
 				FileUtils.contentEquals(actualFile, expectedFile));
 	}
-	
+
 }
