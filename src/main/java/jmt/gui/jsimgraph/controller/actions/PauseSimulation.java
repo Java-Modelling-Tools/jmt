@@ -24,19 +24,13 @@ import jmt.gui.jsimgraph.controller.Mediator;
 
 /**
 
- * <p>Title: Pause Simulation Action</p>
- * <p>Description: Action performed when pressing the Pause Simulation... menu item.</p>
- *
  * @author Bertoli Marco
- *         Date: 07-set-2005
- *         Time: 14.19.21
+ * Date: 07-set-2005
+ * Time: 14.19.21
 
  */
 public class PauseSimulation extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -46,7 +40,7 @@ public class PauseSimulation extends AbstractJmodelAction {
 	public PauseSimulation(Mediator mediator) {
 		super("Pause Simulation", "Pause", mediator);
 		putValue(SHORT_DESCRIPTION, "Pause simulation");
-		//		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
+		//putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
 		setEnabled(false);
 	}
 
@@ -56,4 +50,5 @@ public class PauseSimulation extends AbstractJmodelAction {
 	public void actionPerformed(ActionEvent e) {
 		mediator.pauseSimulation();
 	}
+
 }

@@ -19,25 +19,24 @@
 package jmt.gui.jsimgraph.controller;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Vector;
 
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.jsimgraph.JGraphMod.BlockingRegion;
 import jmt.gui.jsimgraph.JGraphMod.CellComponent;
 import jmt.gui.jsimgraph.JGraphMod.JmtCell;
 import jmt.gui.jsimgraph.JGraphMod.JmtEdge;
+import jmt.gui.jsimgraph.definitions.JMTPoint;
+import jmt.gui.jsimgraph.definitions.JmodelBlockingRegionDefinition;
+import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
-
-import org.jgraph.JGraph;
-import org.jgraph.graph.DefaultGraphCell;
 
 /**
  * <p>Title: Jmt Clipboard</p>
  * <p>Description: This class provides clipboard facility to copy and paste selected sections
- * of current model. It will operate both on data structure (jmodelStationDefinition) end
+ * of current model. It will operate both on data structure (jmodelStationDefinition) end and
  * on graphic representation (Jgraph through mediator calls).</p>
  * 
  * @author Bertoli Marco
@@ -45,183 +44,168 @@ import org.jgraph.graph.DefaultGraphCell;
  *         Time: 11.49.57
  */
 public class JmtClipboard {
+
+	protected static final int move = 20;
+
 	protected Mediator mediator;
+	protected HashMap<Object, Object> classes;
 	protected HashMap<Object, Object> stations;
-	protected HashMap<Object, Point2D> stationpositions;
-	protected Vector<Connection> links;
+	protected HashMap<Object, JMTPoint> stationPositions;
+	protected Vector<Connection> connections;
+	protected HashMap<Object, Object> regions;
+	protected HashMap<Object, HashSet<Object>> regionStations;
 	protected Point2D zero;
 
 	/**
-	 * When trying to paste over existing cells, try to move of 'move' down and right
+	 * Initializes a new JmtClipboard with the given mediator.
+	 * @param mediator mediator to be referenced
 	 */
-	protected static final int move = 20;
-
-	/**
-	 * Initializes a new JmtClipboard with given mediator
-	 * @param m Mediator to be referenced
-	 */
-	public JmtClipboard(Mediator m) {
-		this.mediator = m;
+	public JmtClipboard(Mediator mediator) {
+		this.mediator = mediator;
 	}
 
 	/**
-	 * Flushes this clipboard. This method will be called upon copy and can be called whenever
-	 * user wants to flush clipboard
+	 * Flushes the clipboard.
 	 */
 	public void flush() {
+		classes = new HashMap<Object, Object>();
 		stations = new HashMap<Object, Object>();
-		stationpositions = new HashMap<Object, Point2D>();
-		links = new Vector<Connection>();
+		stationPositions = new HashMap<Object, JMTPoint>();
+		connections = new Vector<Connection>();
+		regions = new HashMap<Object, Object>();
+		regionStations = new HashMap<Object, HashSet<Object>>();
 		zero = null;
 	}
 
 	/**
-	 * Copy current selected Stations and Edges into clipboard
+	 * Copies the given elements into clipboard and deletes them from graph.
 	 */
-	public void copy() {
+	public void cut(Object[] cells) {
+		copy(cells);
+		mediator.delete(cells);
+	}
+
+	/**
+	 * Copies the given elements into clipboard.
+	 */
+	public void copy(Object[] cells) {
 		flush();
-		// Gets selected cells
+		JmodelClassDefinition cd = mediator.getClassDefinition();
 		JmodelStationDefinition sd = mediator.getStationDefinition();
-		JGraph graph = mediator.getGraph();
-		Object cells[] = graph.getDescendants(graph.getSelectionCells());
-		// Temp variables
-		Object key; // Station key
-		JmtEdge edgetmp;
-		JmtCell celltmp;
-		Point2D location; // position of a station
-		// Saves into data structure selected stations (including position) and links
+		JmodelBlockingRegionDefinition brd = mediator.getBlockingRegionDefinition();
+		// Saves the classes into data structure
+		for (Object classKey : cd.getClassKeys()) {
+			classes.put(classKey, cd.serializeClass(classKey));
+		}
+		// Saves the stations, connections and blocking regions into data structure
+		mediator.updateStationPositions();
 		for (Object cell : cells) {
 			if (cell instanceof JmtCell) {
-				celltmp = (JmtCell) cell;
-				key = ((CellComponent) celltmp.getUserObject()).getKey();
-				stations.put(key, sd.serializeStation(key));
-				location = mediator.getCellCoordinates(celltmp);
-				stationpositions.put(key, location);
-				// Initialize 'zero' as the upper-leftmost point of selected stations
-				// Will be used as a bias while pasting
+				Object stationKey = ((CellComponent) ((JmtCell) cell).getUserObject()).getKey();
+				stations.put(stationKey, sd.serializeStation(stationKey));
+				JMTPoint position = sd.getStationPosition(stationKey);
+				stationPositions.put(stationKey, position);
 				if (zero == null) {
-					zero = location;
+					zero = new Point2D.Double(position.getX(), position.getY());
 				}
-				if (zero.getX() > location.getX()) {
-					zero = new Point2D.Double(location.getX(), zero.getY());
+				if (zero.getX() > position.getX()) {
+					zero.setLocation(position.getX(), zero.getY());
 				}
-				if (zero.getY() > location.getY()) {
-					zero = new Point2D.Double(zero.getX(), location.getY());
+				if (zero.getY() > position.getY()) {
+					zero.setLocation(zero.getX(), position.getY());
 				}
 			} else if (cell instanceof JmtEdge) {
-				edgetmp = (JmtEdge) cell;
-				links.add(new Connection(edgetmp.getSourceKey(), edgetmp.getTargetKey()));
+				Object sourceKey = ((JmtEdge) cell).getSourceKey();
+				Object targetKey = ((JmtEdge) cell).getTargetKey();
+				connections.add(new Connection(sourceKey, targetKey));
+			} else if (cell instanceof BlockingRegion) {
+				Object regionKey = ((BlockingRegion) cell).getKey();
+				regions.put(regionKey, brd.serializeBlockingRegion(regionKey));
+				regionStations.put(regionKey, new HashSet<Object>(brd.getBlockingRegionStations(regionKey)));
 			}
 		}
 	}
 
 	/**
-	 * Copy current selected Stations and Edges into clipboard and deletes them from current graph.
-	 * It simply calls copy() and then mediator.deleteSelected()
-	 */
-	public void cut() {
-		copy();
-		mediator.deleteSelected();
-	}
-
-	/**
-	 * Pastes previously copied elements into graph, beginning from the point indicated by where
-	 * and constructing new data structures.
-	 * @param where upper-left point of the region where pasted components will be put.
-	 */
-	public void paste(Point2D where) {
-		// Used as a translator from old key to new one to paste correct links
-		HashMap<Object, Object> tempkey = new HashMap<Object, Object>();
-		// Used to store newly created stations
-		HashMap<Object, JmtCell> newstations = new HashMap<Object, JmtCell>();
-		// Elements to be selected after paste
-		Vector<DefaultGraphCell> select = new Vector<DefaultGraphCell>();
-		// Temp variables
-		JmtCell newcell; //New created cell
-		JmtEdge newEdge; //New created edge (link)
-		Object newkey; // New station key
-		Object oldkey; // Old station key
-		Iterator<Object> keys; // All keys in Hashmap stations
-		Point2D oldpos; // Old station position
-		Point2D newpos; // New station position
-		if (stations == null || stations.size() == 0) {
-			return;
-		}
-
-		JmodelStationDefinition sd = mediator.getStationDefinition();
-
-		// Recreates all stations and position them
-		keys = stations.keySet().iterator();
-		while (keys.hasNext()) {
-			oldkey = keys.next();
-			// Creates a new station with parameters got from previous copy operation
-			newkey = sd.deserializeStation(stations.get(oldkey));
-			newcell = mediator.getCellFactory().createCell(sd.getStationType(newkey) + "Cell", new CellComponent(newkey, sd));
-			tempkey.put(oldkey, newkey);
-			// Calculates where this station should be put
-			oldpos = stationpositions.get(oldkey);
-			newpos = new Point2D.Double(where.getX() + oldpos.getX() - zero.getX(), where.getY() + oldpos.getY() - zero.getY());
-			// Insert created station into JGraph. Finds the first empty position going
-			// down and right with respect of original position
-			while (mediator.overlapCells(newpos, newcell)) {
-				newpos.setLocation(newpos.getX() + move, newpos.getY() + move);
-			}
-			mediator.InsertCell(newpos, newcell);
-			newstations.put(newkey, newcell);
-			select.add(newcell);
-		}
-
-		Object sourceKey;
-		Object targetKey;
-
-		// Creates new links and show them on graph
-		for (int i = 0; i < links.size(); i++) {
-			// Translates old key values in new ones
-			sourceKey = tempkey.get(links.get(i).sourceKey);
-			targetKey = tempkey.get(links.get(i).targetKey);
-			newEdge = mediator.connect(newstations.get(sourceKey), newstations.get(targetKey));
-			if (newEdge != null) {
-				select.add(newEdge);
-			}
-		}
-
-		// Now adjusts Empirical Routing (if any) - Now named Probability Routing
-		keys = tempkey.keySet().iterator();
-		Vector<Object> classKeys = mediator.getClassDefinition().getClassKeys();
-		RoutingStrategy rs;
-		Map oldRouting, newRouting;
-		// Search in every new inserted station
-		while (keys.hasNext()) {
-			newkey = tempkey.get(keys.next());
-			for (Object classKey : classKeys) {
-				rs = (RoutingStrategy) mediator.getStationDefinition().getRoutingStrategy(newkey, classKey);
-				if (rs instanceof ProbabilityRouting) {
-					oldRouting = rs.getValues();
-					newRouting = new HashMap();
-					// For each old destination, set new one if it was copied with
-					Object[] oldDest = oldRouting.keySet().toArray();
-					for (Object element : oldDest) {
-						// Now checks if target station was copied with source one and a link connecting them exists
-						if (tempkey.containsKey(element) && mediator.getStationDefinition().areConnected(newkey, tempkey.get(element))) {
-							newRouting.put(tempkey.get(element), oldRouting.get(element));
-						}
-					}
-					rs.getValues().clear();
-					rs.getValues().putAll(newRouting);
-				}
-			}
-		}
-
-		// Selects every inserted element
-		mediator.getGraph().setSelectionCells(select.toArray());
-	}
-
-	/**
-	 * Pastes previously copied elements into graph, constructing new data structures.
-	 * Elements are copied near original ones.
+	 * Pastes previously copied elements into graph at the original point.
 	 */
 	public void paste() {
 		paste(zero);
+	}
+
+	/**
+	 * Pastes previously copied elements into graph at the given point.
+	 * @param where point where pasted elements will be put.
+	 * @return array of pasted elements.
+	 */
+	public Object[] paste(Point2D where) {
+		if (stations == null || stations.size() == 0) {
+			return null;
+		}
+
+		JmodelStationDefinition sd = mediator.getStationDefinition();
+		JmodelBlockingRegionDefinition brd = mediator.getBlockingRegionDefinition();
+		HashMap<Object, Object> stationKeyMap = new HashMap<Object, Object>();
+		HashMap<Object, Object> reverseStationKeyMap = new HashMap<Object, Object>();
+		HashMap<Object, JmtCell> stationCellMap = new HashMap<Object, JmtCell>();
+		ArrayList<Object> cellList = new ArrayList<Object>();
+
+		// Adds every station with name and type from its serialized form
+		for (Object oldStationKey : stations.keySet()) {
+			Object newStationKey = sd.addStation(stations.get(oldStationKey));
+			JmtCell newStationCell = mediator.getCellFactory().createStationCell(newStationKey);
+			JMTPoint oldPosition = stationPositions.get(oldStationKey);
+			JMTPoint newPosition = new JMTPoint(where.getX() + oldPosition.getX() - zero.getX(),
+					where.getY() + oldPosition.getY() - zero.getY(), oldPosition.isRotate());
+			while (mediator.overlapCells(newPosition, newStationCell)) {
+				newPosition.setLocation(newPosition.getX() + move, newPosition.getY() + move);
+			}
+			mediator.InsertCell(newPosition, newStationCell);
+			if (newPosition.isRotate()) {
+				mediator.rotateComponent(new Object[] { newStationCell });
+			}
+			stationKeyMap.put(oldStationKey, newStationKey);
+			reverseStationKeyMap.put(newStationKey, oldStationKey);
+			stationCellMap.put(newStationKey, newStationCell);
+			cellList.add(newStationCell);
+		}
+
+		// Creates every connection
+		for (Connection connection : connections) {
+			Object sourceKey = stationKeyMap.get(connection.sourceKey);
+			Object targetKey = stationKeyMap.get(connection.targetKey);
+			JmtEdge newEdgeCell = mediator.connect(stationCellMap.get(sourceKey), stationCellMap.get(targetKey));
+			if (newEdgeCell != null) {
+				cellList.add(newEdgeCell);
+			}
+		}
+
+		// Loads parameters of every station from its serialized form
+		for (Object oldStationKey : stations.keySet()) {
+			sd.LoadStation(stations.get(oldStationKey), stationKeyMap.get(oldStationKey), classes, reverseStationKeyMap);
+		}
+
+		// Inserts every blocking region according to its serialized form
+		for (Object oldRegionKey : regions.keySet()) {
+			Object newRegionKey = brd.deserializeBlockingRegion(regions.get(oldRegionKey), classes);
+			HashMap<Object, JmtCell> regionStationCellMap = new HashMap<Object, JmtCell>();
+			for (Object oldStationKey : regionStations.get(oldRegionKey)) {
+				Object newStationKey = stationKeyMap.get(oldStationKey);
+				regionStationCellMap.put(newStationKey, stationCellMap.get(newStationKey));
+			}
+			for (Object newStationKey : regionStationCellMap.keySet()) {
+				brd.addRegionStation(newRegionKey, newStationKey);
+			}
+			BlockingRegion newRegionCell = new BlockingRegion(mediator, newRegionKey);
+			newRegionCell.addStations(regionStationCellMap.values().toArray());
+			cellList.add(newRegionCell);
+		}
+
+		// Selects every inserted element
+		Object[] cellArray = cellList.toArray();
+		mediator.getGraph().clearSelection();
+		mediator.getGraph().addSelectionCells(cellArray);
+		return cellArray;
 	}
 
 	/**
@@ -237,129 +221,27 @@ public class JmtClipboard {
 		}
 	}
 
-	//modified from the copy() and paste() functions
-	public void copyCell(Object cell) {
+	/**
+	 * Copies the given station into clipboard.
+	 */
+	public void copyCell(JmtCell cell) {
 		flush();
-		// Gets selected cells
-		JmodelStationDefinition sd = mediator.getStationDefinition();
-		// Temp variables
-		Object key; // Station key
-		JmtEdge edgetmp;
-		JmtCell celltmp;
-		Point2D location; // position of a station
-		// Saves into data structure selected stations (including position) and links
-		if (cell instanceof JmtCell) {
-			celltmp = (JmtCell) cell;
-			key = ((CellComponent) celltmp.getUserObject()).getKey();
-			stations.put(key, sd.serializeStation(key));
-			location = mediator.getCellCoordinates(celltmp);
-			stationpositions.put(key, location);
-			// Initialize 'zero' as the upper-leftmost point of selected stations
-			// Will be used as a bias while pasting
-			if (zero == null) {
-				zero = location;
-			}
-			if (zero.getX() > location.getX()) {
-				zero = new Point2D.Double(location.getX(), zero.getY());
-			}
-			if (zero.getY() > location.getY()) {
-				zero = new Point2D.Double(zero.getX(), location.getY());
-			}
-		} else if (cell instanceof JmtEdge) {
-			edgetmp = (JmtEdge) cell;
-			links.add(new Connection(edgetmp.getSourceKey(), edgetmp.getTargetKey()));
-		}
+		copy(new Object[] { cell });
 	}
 
+	/**
+	 * Pastes a previously copied station into graph at the given point.
+	 * @param where point where the pasted station will be put.
+	 * @return pasted station.
+	 */
 	public JmtCell pasteCell(Point2D where) {
-		// Used as a translator from old key to new one to paste correct links
-		HashMap<Object, Object> tempkey = new HashMap<Object, Object>();
-		// Used to store newly created stations
-		HashMap<Object, JmtCell> newstations = new HashMap<Object, JmtCell>();
-		// Elements to be selected after paste
-		Vector<DefaultGraphCell> select = new Vector<DefaultGraphCell>();
-		// Temp variables
-		JmtCell newcell; // New created cell
-		JmtEdge newEdge; // New created edge (link)
-		Object newkey; // New station key
-		Object oldkey; // Old station key
-		Iterator<Object> keys; // All keys in Hashmap stations
-		Point2D oldpos; // Old station position
-		Point2D newpos; // New station position
-		if (stations == null || stations.size() == 0) {
-			return null;
-		}
-
-		JmodelStationDefinition sd = mediator.getStationDefinition();
-
-		// Recreates all stations and position them
-		keys = stations.keySet().iterator();
-		while (keys.hasNext()) {
-			oldkey = keys.next();
-			// Creates a new station with parameters got from previous copy operation
-			newkey = sd.deserializeStation(stations.get(oldkey));
-			newcell = mediator.getCellFactory().createCell(
-					sd.getStationType(newkey) + "Cell",
-					new CellComponent(newkey, sd));
-			tempkey.put(oldkey, newkey);
-			// Calculates where this station should be put
-			oldpos = stationpositions.get(oldkey);
-			newpos = new Point2D.Double(where.getX() + oldpos.getX()
-					- zero.getX(), where.getY() + oldpos.getY() - zero.getY());
-			// Insert created station into JGraph. Finds the first empty position going
-			// down and right with respect of original position
-			while (mediator.overlapCells(newpos, newcell)) {
-				newpos.setLocation(newpos.getX() + move, newpos.getY() + move);
-			}
-			mediator.InsertCell(newpos, newcell);
-			newstations.put(newkey, newcell);
-			select.add(newcell);
-		}
-
-		Object sourceKey;
-		Object targetKey;
-
-		// Creates new links and show them on graph
-		for (int i = 0; i < links.size(); i++) {
-			// Translates old key values in new ones
-			sourceKey = tempkey.get(links.get(i).sourceKey);
-			targetKey = tempkey.get(links.get(i).targetKey);
-			newEdge = mediator.connect(newstations.get(sourceKey),
-					newstations.get(targetKey));
-			if (newEdge != null) {
-				select.add(newEdge);
+		Object[] cells = paste(where);
+		for (Object cell : cells) {
+			if (cell instanceof JmtCell) {
+				return (JmtCell) cell;
 			}
 		}
-
-		// Now adjusts Empirical Routing (if any) - Now named Probability Routing
-		keys = tempkey.keySet().iterator();
-		Vector<Object> classKeys = mediator.getClassDefinition().getClassKeys();
-		RoutingStrategy rs;
-		Map oldRouting, newRouting;
-		// Search in every new inserted station
-		while (keys.hasNext()) {
-			newkey = tempkey.get(keys.next());
-			for (Object classKey : classKeys) {
-				rs = (RoutingStrategy) mediator.getStationDefinition().getRoutingStrategy(newkey, classKey);
-				if (rs instanceof ProbabilityRouting) {
-					oldRouting = rs.getValues();
-					newRouting = new HashMap();
-					// For each old destination, set new one if it was copied with
-					Object[] oldDest = oldRouting.keySet().toArray();
-					for (Object element : oldDest) {
-						// Now checks if target station was copied with source one and a link connecting them exists
-						if (tempkey.containsKey(element) && mediator.getStationDefinition().areConnected(newkey, tempkey.get(element))) {
-							newRouting.put(tempkey.get(element), oldRouting.get(element));
-						}
-					}
-					rs.getValues().clear();
-					rs.getValues().putAll(newRouting);
-				}
-			}
-		}
-
-		// Selects every inserted element
-		mediator.getGraph().setSelectionCells(select.toArray());
-		return (JmtCell) select.get(0);
+		return null;
 	}
+
 }

@@ -66,4 +66,14 @@ public class FastestServiceRouting extends RoutingStrategy {
 		return true;
 	}
 
+	@Override
+	public void addStation(Object stationKey) {
+		return;
+	}
+
+	@Override
+	public void removeStation(Object stationKey) {
+		return;
+	}
+
 }

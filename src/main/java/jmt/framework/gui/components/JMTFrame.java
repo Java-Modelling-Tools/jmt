@@ -217,7 +217,7 @@ public class JMTFrame extends JFrame {
 	}
 
 	/**
-	 * Sets default operation to be performed when whif window is closed.
+	 * Sets default operation to be performed when what-if window is closed.
 	 * @see WindowConstants#DISPOSE_ON_CLOSE
 	 * @see WindowConstants#DO_NOTHING_ON_CLOSE
 	 * @see JFrame#EXIT_ON_CLOSE

@@ -30,12 +30,12 @@ import java.util.Map;
  */
 public class ProbabilityRouting extends RoutingStrategy {
 
+	private Map<Object, Double> values = new HashMap<Object, Double>();
+
 	public ProbabilityRouting() {
 		description = "It is possible to define the routing probability for each connected station. "
 				+ "If the sum of the probabilities is different from 1, all the values will be scaled to sum 1.";
 	}
-
-	private HashMap<Object, Double> probabilities = new HashMap<Object, Double>();
 
 	@Override
 	public String getName() {
@@ -44,13 +44,15 @@ public class ProbabilityRouting extends RoutingStrategy {
 
 	@Override
 	public Map<Object, Double> getValues() {
-		return probabilities;
+		return values;
 	}
 
 	@Override
 	public ProbabilityRouting clone() {
 		ProbabilityRouting pr = new ProbabilityRouting();
-		pr.probabilities = new HashMap<Object, Double>(probabilities);
+		for (Object stationKey : values.keySet()) {
+			pr.values.put(stationKey, values.get(stationKey));
+		}
 		return pr;
 	}
 
@@ -70,6 +72,16 @@ public class ProbabilityRouting extends RoutingStrategy {
 	@Override
 	public boolean isModelStateDependent() {
 		return false;
+	}
+
+	@Override
+	public void addStation(Object stationKey) {
+		values.put(stationKey, new Double(0.0));
+	}
+
+	@Override
+	public void removeStation(Object stationKey) {
+		values.remove(stationKey);
 	}
 
 }

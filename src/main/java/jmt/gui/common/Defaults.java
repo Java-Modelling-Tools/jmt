@@ -152,6 +152,10 @@ public class Defaults implements CommonConstants {
 		def.setProperty("JSIMClassDefWindowHeight", "520");
 		def.setProperty("JSIMMeasuresDefWindowWidth", "1024");
 		def.setProperty("JSIMMeasuresDefWindowHeight", "520");
+		def.setProperty("JSIMSimulationDefWindowWidth", "780");
+		def.setProperty("JSIMSimulationDefWindowHeight", "520");
+		def.setProperty("JSIMPADefWindowWidth", "780");
+		def.setProperty("JSIMPADefWindowHeight", "520");
 		// Templates dialogs default parameters
 		def.setProperty("showDefaultTemplates", "true");
 		def.setProperty("showTemplateDialog", "true");

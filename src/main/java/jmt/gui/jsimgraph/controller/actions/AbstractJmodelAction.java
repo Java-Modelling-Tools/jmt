@@ -22,7 +22,8 @@ import jmt.framework.gui.listeners.AbstractJMTAction;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jsimgraph.controller.Mediator;
 
-/** Defines the Abstract action of this application, it is connected to the
+/**
+ * Defines the Abstract action of this application, it is connected to the
  * mediator which has the responsibility to react to it.
 
  * @author Federico Granata
@@ -32,18 +33,16 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public abstract class AbstractJmodelAction extends AbstractJMTAction {
 
-	/* Conti Andrea
-	 Actions and accelerator keys:
-	 When you create a new action with an accelerator key you must make sure that the keystroke
-	 is not already mapped to some "default" action through the graph's InputMap and ActionMap
-	 (take a look at BasicGraphUI.createActionMap). In case it is, you have to remove the
-	 mapping (see JmtGraphUI.installKeyboardActions()) or the keystroke will trigger the default
-	 action instead of yours (and you'll get a bad headache trying to understand why ;)
+	/**
+	 * Conti Andrea
+	 * Actions and accelerator keys:
+	 * When you create a new action with an accelerator key you must make sure that the keystroke
+	 * is not already mapped to some "default" action through the graph's InputMap and ActionMap
+	 * (take a look at BasicGraphUI.createActionMap). In case it is, you have to remove the
+	 * mapping (see JmtGraphUI.installKeyboardActions()) or the keystroke will trigger the default
+	 * action instead of yours (and you'll get a bad headache trying to understand why)
 	 */
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	protected Mediator mediator;
 

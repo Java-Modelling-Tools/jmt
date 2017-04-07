@@ -30,6 +30,7 @@ import javax.swing.JFrame;
  *         Time: 11.12.07
  */
 public interface GuiInterface {
+
 	/**
 	 * Shows a panel with an error message
 	 * @param message specified error message

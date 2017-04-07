@@ -18,12 +18,14 @@
 
 package jmt.gui.jsimgraph.definitions;
 
+import java.util.Map;
+
 import jmt.gui.common.definitions.StationDefinition;
 
 /**
- * <p>Title:Jmodel Station Definition Interface</p>
+ * <p>Title: Jmodel Station Definition Interface</p>
  * <p>Description: This interface provides methods for editing stations for JMODEL models.
- * It actually extends JSIM StationDefinition interface to provide a compatibility layer</p>
+ * It actually extends JSIM StationDefinition interface to provide a compatibility layer.</p>
  * 
  * @author Bertoli Marco
  *         Date: 3-giu-2005
@@ -33,50 +35,52 @@ public interface JmodelStationDefinition extends StationDefinition {
 
 	/**
 	 * Adds a new station to the model, given the station type.
-	 * @param type type of the station.
+	 * @param type type of the new station.
 	 * @return search key for the new station.
 	 */
 	public Object addStation(String type);
 
 	/**
-	 * Gets a preview of name that will be assigned automatically to new created object of
-	 * specified type. This method is used to calculate dimensions of caption to be displayed
-	 * under component on jgraph window
-	 * @param type Constant string from JMODELConstants interface.
-	 * @return name assigned to next station of 'type' type.
+	 * Deletes a station from the model, given the search key.
+	 */
+	public void deleteStation(Object key);
+
+	/**
+	 * Returns name of the next station, given the station type.
 	 */
 	public String previewStationName(String type);
 
 	/**
-	 * Returns a serialized form of a given station to support cut/copy operations
-	 * @param key Search's key for station
-	 * @return serialized station or null if station key does not exists
-	 */
-	public Object serializeStation(Object key);
-
-	/**
-	 * Inserts a serialized station into data structure, used to support paste operation.
-	 * @param serializedForm station's Serialized form got from <code>serializeStation</code>
-	 * method.
-	 * @return search's key for inserted station
-	 */
-	public Object deserializeStation(Object serializedForm);
-
-	/**
-	 * Sets position for a target station into jgraph window. This method is used to
-	 * implement save routine
-	 * @param key key of search for target station
-	 * @param position position where target station is placed
+	 * Sets position of the station, given the search key.
 	 */
 	public void setStationPosition(Object key, JMTPoint position);
 
 	/**
-	 * Returns stored position for a given station into jgraph window
-	 * (Note that this is stored position, not original position. This method
-	 * is used to implement load routine)
-	 * @param key key of search for target station
-	 * @return position where target station has to be placed
+	 * Returns position of the station, given the search key.
 	 */
 	public JMTPoint getStationPosition(Object key);
+
+	/**
+	 * Returns serialized form of a station.
+	 * @param key search key for the station.
+	 * @return serialized form of the station.
+	 */
+	public Object serializeStation(Object key);
+
+	/**
+	 * Adds a new station with name and type from its serialized form.
+	 * @param station serialized form of the new station.
+	 * @return search key for the new station.
+	 */
+	public Object addStation(Object station);
+
+	/**
+	 * Loads parameters of a station from its serialized form.
+	 * @param station serialized form of the station.
+	 * @param key search key for the station.
+	 * @param classMap map of serialized forms for the station.
+	 * @param stationKeyMap map of search keys for stations.
+	 */
+	public void LoadStation(Object station, Object key, Map<Object, Object> classMap, Map<Object, Object> stationKeyMap);
 
 }

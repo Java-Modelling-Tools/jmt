@@ -43,22 +43,17 @@ public class CachedBDMap extends BDMapImpl {
 
 	@Override
 	public Object get(Object xKey, Object yKey) {
-		/*        System.out.println("yKey = "+yKey+"; mruYKey ="+mruYKey+" yMap="+mruYMap);
-		        System.out.println("xKey = "+xKey+"; mruXKey ="+mruXKey+" xMap="+mruXMap);
-		*/if (xKey != null && yKey != null) {
+		if (xKey != null && yKey != null) {
 			//if both x and y keys match given keys
 			if (xKey.equals(mruXKey) && yKey.equals(mruYKey)) {
 				return mruXYMatch;
 			} else if (xKey.equals(mruXKey)) {
-				//                System.out.println("xMatch");
 				//if only x or y keys match current key, return matching found inside proper
 				//map.
 				return mruXMap.get(yKey);
 			} else if (yKey.equals(mruYKey)) {
-				//                System.out.println("yMatch");
 				return mruYMap.get(xKey);
 			} else {
-				//                System.out.println("no match");
 				//no matching found. Refresh all matchings.
 				mruXKey = xKey;
 				mruYKey = yKey;

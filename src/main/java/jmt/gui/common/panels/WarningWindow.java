@@ -55,6 +55,7 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 14.34.42
  */
 public class WarningWindow {
+
 	private JDialog dialog;
 	private List<String> warnings;
 	private JLabel header;
@@ -161,9 +162,7 @@ public class WarningWindow {
 	 * Inner class to display a panel with vertical scrollbars only
 	 */
 	public class ScrollablePanel extends JPanel implements Scrollable {
-		/**
-		* 
-		*/
+
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -214,6 +213,7 @@ public class WarningWindow {
 				return rv;
 			}
 		}
+
 	}
 
 }

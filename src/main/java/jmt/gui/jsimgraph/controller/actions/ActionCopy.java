@@ -35,9 +35,6 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class ActionCopy extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -59,4 +56,5 @@ public class ActionCopy extends AbstractJmodelAction {
 		mediator.copySelection();
 		mediator.enablePasteAction(true);
 	}
+
 }

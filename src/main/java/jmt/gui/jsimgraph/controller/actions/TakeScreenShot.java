@@ -31,9 +31,7 @@ import jmt.gui.jsimgraph.controller.Mediator;
  *         Time: 2:41:28 PM
  */
 public class TakeScreenShot extends AbstractJmodelAction {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	/**

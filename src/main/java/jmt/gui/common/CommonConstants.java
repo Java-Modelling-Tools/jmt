@@ -123,7 +123,6 @@ public interface CommonConstants {
 	public static final int MAX_GUI_WIDTH_QUICKHTML =  800;
 	public static final int MAX_GUI_HEIGHT_QUICKHTML = 600;
 
-	//public static final float MIN_GUI_DIALOG_RESIZE_RATIO = 0.8f;
 	public static final int MAX_GUI_WIDTH_DIALOG_DEFAULT =  780;
 	public static final int MAX_GUI_HEIGHT_DIALOG_DEFAULT = 520;
 	public static final int MAX_GUI_WIDTH_COMMON =  1024;

@@ -103,12 +103,13 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 		demos.addListSelectionListener(new ListSelectionListener() {
 
 			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()) {
-					if (demos.getSelectedIndex() >= 0) {
-						//TODO insert peculiar strings for demo
-					} else {
-						demos.setSelectedIndex(0);
-					}
+				if (e.getValueIsAdjusting()) {
+					return;
+				}
+				if (demos.getSelectedIndex() >= 0) {
+					//TODO insert peculiar strings for demo
+				} else {
+					demos.setSelectedIndex(0);
 				}
 			}
 

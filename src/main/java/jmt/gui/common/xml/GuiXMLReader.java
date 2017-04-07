@@ -40,19 +40,19 @@ import org.w3c.dom.NodeList;
 /**
  * <p>Title: Gui XML Reader</p>
  * <p>Description: Reads JModel GUI specific information from an XML file. This
- * class provide methods for model load. This class is designed to be called
- * only once simulation's specific informations have already be inserted.</p>
+ * class provides methods for model load.</p>
  *
  * @author Bertoli Marco
  *         Date: 27-lug-2005
  *         Time: 11.04.13
  */
 public class GuiXMLReader implements GuiXMLConstants {
+
 	/**
 	 * Parses given Gui XML Document to reconstruct all gui related stuff. This method
 	 * is designed to be called ONLY when all simulation's data has already been put into
 	 * data structure (as will never create new user classes or stations)
-	 * @param xml Document to be parsed
+	 * @param xml document to be parsed
 	 * @param model data model to be elaborated
 	 */
 	public static void parseXML(Document xml, CommonModel model) {
@@ -100,20 +100,19 @@ public class GuiXMLReader implements GuiXMLConstants {
 			if (str_color.startsWith("#")) {
 				str_color = str_color.substring(1, str_color.length());
 			} else {
-				System.out.println("Warning - Bad Color format for class '" + name + "'.");
+				System.out.println("Warning - Bad color format for class '" + name + "'.");
 			}
 			try {
-				color = new Color((int) Long.parseLong(str_color, 16));
-			} catch (NumberFormatException ex) {
-				System.out.println("Warning - Bad Color format for class '" + name + "'. " + "Assigning a default one");
+				color = new Color((int) Long.parseLong(str_color, 16), true);
+			} catch (NumberFormatException e) {
+				System.out.println("Warning - Bad color format for class '" + name + "'. " + "Assign a new color to it.");
 				color = model.getNewColor();
-				ex.printStackTrace();
 			}
 			// Sets color for current class only if exists in current model
 			if (names.containsKey(name)) {
 				model.setClassColor(names.get(name), color);
 			} else {
-				System.out.println("Warning - Found color info for class '" + name + "' which is not present into current model.");
+				System.out.println("Warning - Found color info for class '" + name + "' which is not present in the model.");
 			}
 		}
 	}
@@ -149,11 +148,16 @@ public class GuiXMLReader implements GuiXMLConstants {
 			if (names.containsKey(name)) {
 				model.setStationPosition(names.get(name), new JMTPoint(x, y, rotate));
 			} else {
-				System.out.println("Error - Found position info for station '" + name + "' which is not present into current model.");
+				System.out.println("Error - Found position info for station '" + name + "' which is not present in the model.");
 			}
 		}
 	}
 
+	/**
+	 * Sets gui specific parametric analysis parameters
+	 * @param root GuiXML document root
+	 * @param model data structure where properties have to be set
+	 */
 	protected static void setParametricAnalysis(Element root, CommonModel model) {
 		NodeList temp = root.getElementsByTagName(XML_E_PARAMETRIC);
 		if (temp.getLength() != 0) {
@@ -186,9 +190,10 @@ public class GuiXMLReader implements GuiXMLConstants {
 				} catch (InstantiationException ie) {
 					JOptionPane.showMessageDialog(null, "Instantiation exception: " + classPath);
 				} catch (IllegalAccessException iae) {
-					JOptionPane.showMessageDialog(null, "Illegal acces exception: " + classPath);
+					JOptionPane.showMessageDialog(null, "Illegal access exception: " + classPath);
 				}
 			}
 		}
 	}
+
 }

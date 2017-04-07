@@ -68,11 +68,10 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 	private WarningScrollTable mixPane;
 
 	public SemaphoreEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-		super();
-		super.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		super.setDividerSize(3);
-		super.setBorder(new EmptyBorder(0, 0, 0, 0));
-		this.setResizeWeight(0.5);
+		setOrientation(JSplitPane.VERTICAL_SPLIT);
+		setDividerSize(3);
+		setBorder(new EmptyBorder(0, 0, 0, 0));
+		setResizeWeight(0.5);
 		setData(sd, cs, stationKey, classKey);
 		initComponents();
 	}
@@ -128,7 +127,7 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		this.classKey = classKey;
 		firingMix = null;
 		setRightComponent(semaphorePane);
-		this.updateSpinner();
+		updateSpinner();
 	}
 
 	private void updateSpinner() {
@@ -158,7 +157,6 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		private static final long serialVersionUID = 1L;
 
 		public MixTable() {
-			super();
 			setModel(new MixTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			setDefaultRenderer(Object.class, new DisabledCellRenderer());

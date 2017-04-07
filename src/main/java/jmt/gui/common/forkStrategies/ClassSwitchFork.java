@@ -47,7 +47,9 @@ public class ClassSwitchFork extends ForkStrategy {
 	@Override
 	public ForkStrategy clone() {
 		ClassSwitchFork csf = new ClassSwitchFork();
-		csf.outPaths = new HashMap<Object, OutPath>(outPaths);
+		for (Object stationKey : outPaths.keySet()) {
+			csf.outPaths.put(stationKey, (OutPath) (outPaths.get(stationKey)).clone());
+		}
 		return csf;
 	}
 
@@ -62,12 +64,7 @@ public class ClassSwitchFork extends ForkStrategy {
 	}
 
 	@Override
-	public void removeStation(Object stationKey) {
-		outPaths.remove(stationKey);
-	}
-
-	@Override
-	public void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys) {
+	public void addStation(Object stationKey, Object classKey, Vector<Object> classKeys) {
 		OutPath tempPath = new OutPath();
 		if (!outPaths.values().isEmpty()) {
 			OutPath path = outPaths.values().iterator().next();
@@ -84,6 +81,11 @@ public class ClassSwitchFork extends ForkStrategy {
 			}
 		}
 		outPaths.put(stationKey, tempPath);
+	}
+
+	@Override
+	public void removeStation(Object stationKey) {
+		outPaths.remove(stationKey);
 	}
 
 }

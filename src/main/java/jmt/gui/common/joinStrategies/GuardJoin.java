@@ -27,11 +27,10 @@ import java.util.Map;
  */
 public class GuardJoin extends JoinStrategy {
 
-	private Map<Object, Integer> guard;
+	private Map<Object, Integer> guard = new HashMap<Object, Integer>();
 
 	public GuardJoin() {
 		description = "Fires the join upon arrival of a subset of forked tasks in each class.";
-		guard = new HashMap<>();
 	}
 
 	@Override
@@ -49,6 +48,7 @@ public class GuardJoin extends JoinStrategy {
 
 	@Override
 	public void setRequiredNum(int i) {
+		return;
 	}
 
 	public Map<Object, Integer> getGuard() {
@@ -61,9 +61,11 @@ public class GuardJoin extends JoinStrategy {
 
 	@Override
 	public JoinStrategy clone() {
-		GuardJoin j = new GuardJoin();
-		j.guard = new HashMap<Object, Integer>(guard);
-		return j;
+		GuardJoin gj = new GuardJoin();
+		for (Object classKey : guard.keySet()) {
+			gj.guard.put(classKey, guard.get(classKey));
+		}
+		return gj;
 	}
 
 	@Override

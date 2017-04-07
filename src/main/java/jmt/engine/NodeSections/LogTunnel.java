@@ -81,7 +81,7 @@ public class LogTunnel extends ServiceTunnel {
 	public LogTunnel(String argFN, String argFP, Boolean argET, Boolean argBLN, Boolean argBTS, Boolean argBJID, Boolean argBJC, Boolean argBTSC,
 			Boolean argBTAC, Integer numClasses) {
 		/* Create an object to hold the Logger's parameters, with parameters from XMLReader */
-		lp = new LoggerParameters(argET, argFN, argFP, argBLN, argBTS, argBJID, argBJC, argBTSC, argBTAC);
+		lp = new LoggerParameters(argFN, argFP, argET, argBLN, argBTS, argBJID, argBJC, argBTSC, argBTAC);
 	}
 
 	/**

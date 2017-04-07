@@ -126,7 +126,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 	protected ClassDefinition data;
 
 	//Index for temporary class name assignment
-	protected int classNameIndex = 0;
+	protected int classNameIndex;
 
 	//deletion of classes after a multiple selection
 	protected AbstractAction deleteSelectedClasses = new AbstractAction("Delete selected classes") {
@@ -240,6 +240,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		classTable.setModel(new ClassTableModel());
 		classNumSpinner.setValue(new Integer(data.getClassKeys().size()));
 		comboEditor.clearCache();
+		classNameIndex = cd.getClassKeys().size();
 	}
 
 	/**Gets data model for this panel.

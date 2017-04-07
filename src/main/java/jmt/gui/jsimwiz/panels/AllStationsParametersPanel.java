@@ -85,6 +85,9 @@ public class AllStationsParametersPanel extends WizardPanel implements CommonCon
 		add(jsp, BorderLayout.WEST);
 		stationsList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting()) {
+					return;
+				}
 				updateParsPane();
 			}
 		});

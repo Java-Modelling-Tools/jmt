@@ -36,6 +36,15 @@ public class TransitionMatrix {
 		matrix = new HashMap<Object, TransitionVector>();
 	}
 
+	@Override
+	public Object clone() {
+		TransitionMatrix tm = new TransitionMatrix();
+		for (Object rowKey : matrix.keySet()) {
+			tm.matrix.put(rowKey, (TransitionVector) matrix.get(rowKey).clone());
+		}
+		return tm;
+	}
+
 	public Integer getEntry(Object rowKey, Object colKey) {
 		if (!matrix.containsKey(rowKey)) {
 			matrix.put(rowKey, new TransitionVector());
@@ -48,6 +57,16 @@ public class TransitionMatrix {
 			matrix.put(rowKey, new TransitionVector());
 		}
 		matrix.get(rowKey).setEntry(colKey, value);
+	}
+
+	public void removeRow(Object rowKey) {
+		matrix.remove(rowKey);
+	}
+
+	public void removeCol(Object colKey) {
+		for (Object rowKey : matrix.keySet()) {
+			matrix.get(rowKey).setEntry(colKey, Integer.valueOf(0));
+		}
 	}
 
 }

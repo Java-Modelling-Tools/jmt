@@ -25,6 +25,7 @@ import java.util.Vector;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -52,6 +53,7 @@ import org.w3c.dom.Node;
  *         Time: 10.36.30
  */
 public class XMLResultsWriter implements XMLResultsConstants {
+
 	/**
 	 * Writes results into an XML file
 	 * @param fileName name of the file to be created
@@ -63,7 +65,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 
 	/**
 	 * Writes results into an XML file
-	 * @param xmlFile Handler to the file to be created
+	 * @param xmlFile handler to the file to be created
 	 * @param measure data structure
 	 */
 	public static void writeXML(File xmlFile, MeasureDefinition measure) {
@@ -81,19 +83,19 @@ public class XMLResultsWriter implements XMLResultsConstants {
 
 	/**
 	 * Helper method used to call transformer to build up an XML file from a Document
-	 * @param res Result where created xml should be put
+	 * @param result result where created xml should be put
 	 * @param measure data structure
 	 */
-	private static void writeToResult(Result res, MeasureDefinition measure) {
+	private static void writeToResult(Result result, MeasureDefinition measure) {
 		Document modelDoc = getDocument(measure);
 		if (modelDoc == null) {
 			return;
 		}
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty("indent", "yes");
-			transformer.setOutputProperty("encoding", ENCODING);
-			transformer.transform(new DOMSource(modelDoc), res);
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.transform(new DOMSource(modelDoc), result);
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
 		} catch (TransformerFactoryConfigurationError e) {
@@ -136,7 +138,6 @@ public class XMLResultsWriter implements XMLResultsConstants {
 		elem.setAttribute(XML_A_ROOT_POLLING, Double.toString(measure.getPollingInterval()));
 		elem.setAttribute(XML_A_ROOT_LOG_DECIMAL_SEP, measure.getLogDecimalSeparator());
 		elem.setAttribute(XML_A_ROOT_LOG_DELIMITER, measure.getLogCsvDelimiter());
-
 		writeMeasures(resultsDoc, elem, measure);
 	}
 
@@ -227,7 +228,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 				sample.setAttribute(XML_A_SAMPLE_MEAN, Double.toString(value.getMeanValue()));
 				sample.setAttribute(XML_A_LAST_INTERVAL_AVG_VALUE, Double.toString(value.getLastIntervalAvgValue()));
 				sample.setAttribute(XML_A_TIME, Double.toString(value.getSimTime()));
-					
+
 				if (value.getLowerBound() > 0 && !Double.isInfinite(value.getLowerBound())) {
 					sample.setAttribute(XML_A_SAMPLE_LOWERBOUND, Double.toString(value.getLowerBound()));
 				}

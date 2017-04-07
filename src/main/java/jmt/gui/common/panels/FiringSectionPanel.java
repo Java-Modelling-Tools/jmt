@@ -83,7 +83,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 	private WarningScrollTable leftPanel;
 	private TitledBorder firingBorder;
 	private FiringOutcomeTable firingTable;
-	private JScrollPane firingPanel;
+	private JScrollPane firingPane;
 	private JButton addModeButton;
 	private ModeTable modeTable;
 	private JTextArea noticeText;
@@ -117,11 +117,11 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		String modeName = stationData.getTransitionModeName(stationKey, 0);
 		firingBorder = new TitledBorder(new EtchedBorder(), "Firing Outcome for " + modeName);
 		firingTable = new FiringOutcomeTable();
-		firingPanel = new JScrollPane(firingTable);
-		firingPanel.setBorder(firingBorder);
-		firingPanel.setMinimumSize(new Dimension(300, 240));
+		firingPane = new JScrollPane(firingTable);
+		firingPane.setBorder(firingBorder);
+		firingPane.setMinimumSize(new Dimension(300, 240));
 
-		leftPanel = new WarningScrollTable(firingPanel, WARNING_CLASS_OUTGOING_ROUTING);
+		leftPanel = new WarningScrollTable(firingPane, WARNING_CLASS_OUTGOING_ROUTING);
 		leftPanel.addCheckVector(stationOutKeys);
 		leftPanel.addCheckVector(classKeys);
 
@@ -139,16 +139,16 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		noticeText.setEditable(false);
 		noticeText.setLineWrap(true);
 		noticeText.setWrapStyleWord(true);
-		JScrollPane noticePanel = new JScrollPane(noticeText);
-		noticePanel.setBorder(new TitledBorder(new EtchedBorder(), "Notice"));
-		noticePanel.setMinimumSize(new Dimension(200, 120));
+		JScrollPane noticePane = new JScrollPane(noticeText);
+		noticePane.setBorder(new TitledBorder(new EtchedBorder(), "Notice"));
+		noticePane.setMinimumSize(new Dimension(200, 120));
 
 		JSplitPane rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		rightPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		rightPanel.setDividerSize(4);
 		rightPanel.setResizeWeight(1.0);
 		rightPanel.setLeftComponent(modePanel);
-		rightPanel.setRightComponent(noticePanel);
+		rightPanel.setRightComponent(noticePane);
 
 		JSplitPane mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -174,13 +174,16 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		modeTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting()) {
+					return;
+				}
 				int index = modeTable.getSelectedRow();
 				if (index >= 0) {
 					stopAllCellEditing();
 					String modeName = stationData.getTransitionModeName(stationKey, index);
 					firingBorder.setTitle("Firing Condition for " + modeName);
 					currentModeIndex = index;
-					firingPanel.repaint();
+					firingPane.repaint();
 					updateNotice();
 				} else {
 					if (currentModeIndex >= stationData.getTransitionModeListSize(stationKey)) {
@@ -469,7 +472,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 				String modeName = (String) aValue;
 				stationData.setTransitionModeName(stationKey, rowIndex, modeName);
 				firingBorder.setTitle("Firing Outcome for " + modeName);
-				firingPanel.repaint();
+				firingPane.repaint();
 			}
 		}
 

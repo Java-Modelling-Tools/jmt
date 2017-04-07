@@ -24,18 +24,14 @@ import java.awt.event.KeyEvent;
 import jmt.gui.jsimgraph.controller.Mediator;
 
 /**
- * <p>Title: Edit Simulation Parameters</p>
- * <p>Description: Action performed when pressing the Edit Simulation parameters... menu item.</p>
- *
+
  * @author Bertoli Marco
- *         Date: 20-set-2005
- *         Time: 13.29.00
+ * Date: 20-set-2005
+ * Time: 13.29.00
+
  */
 public class EditSimParams extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -53,7 +49,7 @@ public class EditSimParams extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// Edits
 		mediator.editSimulationParameters();
 	}
+
 }

@@ -67,7 +67,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 	private static final String[] timingStrategies = { TIMING_STRATEGY_TIMED, TIMING_STRATEGY_IMMEDIATE };
 
 	private StationDefinition stationData;
-	private ClassDefinition classData;
+	//private ClassDefinition classData;
 	private Object stationKey;
 
 	private JButton addModeButton;
@@ -81,7 +81,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 
 	public void setData(StationDefinition sd, ClassDefinition cd, Object sk) {
 		stationData = sd;
-		classData = cd;
+		//classData = cd;
 		stationKey = sk;
 	}
 
@@ -93,11 +93,11 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 		addModeButton.setMinimumSize(DIM_BUTTON_M);
 
 		OptionTable = new TimingOptionTable();
-		JScrollPane OptionPanel = new JScrollPane(OptionTable);
-		OptionPanel.setBorder(new TitledBorder(new EtchedBorder(), "Timing Options"));
+		JScrollPane OptionPane = new JScrollPane(OptionTable);
+		OptionPane.setBorder(new TitledBorder(new EtchedBorder(), "Timing Options"));
 
 		add(addModeButton, BorderLayout.NORTH);
-		add(OptionPanel, BorderLayout.CENTER);
+		add(OptionPane, BorderLayout.CENTER);
 	}
 
 	private void addDataManagers() {
@@ -367,7 +367,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 			} else if (columnIndex == 3) {
 				if (((String) aValue).equals(TIMING_STRATEGY_TIMED)) {
 					if (!(stationData.getFiringTimeDistribution(stationKey, rowIndex) instanceof Distribution)) {
-						Object distribution = Defaults.getAsNewInstance("transitionFiringTimeDistribution");
+						Distribution distribution = (Distribution) Defaults.getAsNewInstance("transitionFiringTimeDistribution");
 						stationData.setFiringTimeDistribution(stationKey, rowIndex, distribution);
 						stationData.setFiringPriority(stationKey, rowIndex, Integer.valueOf(-1));
 						stationData.setFiringWeight(stationKey, rowIndex, Double.valueOf(1.0));

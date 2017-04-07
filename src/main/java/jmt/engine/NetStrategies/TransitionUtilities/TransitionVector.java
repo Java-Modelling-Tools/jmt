@@ -65,25 +65,24 @@ public class TransitionVector {
 	}
 
 	public int getEntry(int index) {
-		if (index < 0 || index >= entries.length) {
-			throw new IndexOutOfBoundsException();
-		}
 		return entries[index];
 	}
 
 	public void setEntry(int index, int value) {
-		if (index < 0 || index >= entries.length) {
-			throw new IndexOutOfBoundsException();
-		}
 		if (value < 0) {
 			value = 0;
 		}
-		total -= entries[index];
 		entries[index] = value;
-		total += entries[index];
+		total = -1;
 	}
 
 	public int getTotal() {
+		if (total < 0) {
+			total = 0;
+			for (int i = 0; i < entries.length; i++) {
+				total += entries[i];
+			}
+		}
 		return total;
 	}
 

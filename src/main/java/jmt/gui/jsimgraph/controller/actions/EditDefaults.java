@@ -33,9 +33,7 @@ import jmt.gui.jsimgraph.controller.Mediator;
  *         Time: 16.47.26
  */
 public class EditDefaults extends AbstractJmodelAction {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -54,4 +52,5 @@ public class EditDefaults extends AbstractJmodelAction {
 	public void actionPerformed(ActionEvent e) {
 		mediator.showDefaultsEditor();
 	}
+
 }

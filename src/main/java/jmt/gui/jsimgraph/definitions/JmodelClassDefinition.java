@@ -25,7 +25,7 @@ import jmt.gui.common.definitions.ClassDefinition;
 /**
  * <p>Title: Jmodel Class Definition Interface</p>
  * <p>Description: This interface provides methods for editing classes for JMODEL models.
- * It actually extends JSIM ClassDefinition interface to provide a compatibility layer</p>
+ * It actually extends JSIM ClassDefinition interface to provide a compatibility layer.</p>
  * 
  * @author Bertoli Marco
  *         Date: 14-giu-2005
@@ -40,6 +40,22 @@ public interface JmodelClassDefinition extends ClassDefinition {
 	public Object addClass();
 
 	/**
+	 * Adds a new class to the model and sets all the parameters at once.
+	 * @param name name of the new class.
+	 * @param type type of the new class.
+	 * @param priority priority of the new class.
+	 * @param population population of the new class.
+	 * @param distribution inter-arrival time distribution of the new class.
+	 * @return search key for the new class.
+	 */
+	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution);
+
+	/**
+	 * Deletes a class from the model, given the search key.
+	 */
+	public void deleteClass(Object key);
+
+	/**
 	 * Returns color of the class, given the search key.
 	 */
 	public Color getClassColor(Object key);
@@ -50,19 +66,17 @@ public interface JmodelClassDefinition extends ClassDefinition {
 	public void setClassColor(Object key, Color color);
 
 	/**
-	 * Returns a serialized object for a given class, used to support cut/paste,
-	 * undo/redo operations
-	 * @param classKey Search's key for station
-	 * @return Serialized class object
+	 * Returns serialized form of a class.
+	 * @param key search key for the class.
+	 * @return serialized form of the class.
 	 */
 	public Object serializeClass(Object classKey);
 
 	/**
-	 * Deserializes given class
-	 * @param serializedForm class's Serialized form got from <code>serializeClass</code>
-	 * method.
-	 * @return search's key for inserted class
+	 * Inserts a new class according to its serialized form.
+	 * @param Class serialized form of the new class.
+	 * @return search key for the new class.
 	 */
-	public Object deserializeClass(Object serializedForm);
+	public Object deserializeClass(Object Class);
 
 }

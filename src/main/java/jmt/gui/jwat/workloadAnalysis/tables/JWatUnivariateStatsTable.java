@@ -41,32 +41,34 @@ public class JWatUnivariateStatsTable extends JTable implements CommonConstants 
 		this.setColumnSelectionAllowed(false);
 		this.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()) {
-					if (JWatUnivariateStatsTable.this.getSelectedRow() >= 0) {
-						if (graphF != null) {
-							graphF.draw(JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
-									.getSelectedRow())], (JWatUnivariateStatsTable.this.getSelectedRow()));
-							graphQQ.setCurrentVar((JWatUnivariateStatsTable.this.getSelectedRow()));
+				if (e.getValueIsAdjusting()) {
+					return;
+				}
+				if (JWatUnivariateStatsTable.this.getSelectedRow() >= 0) {
+					if (graphF != null) {
+						graphF.draw(JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
+								.getSelectedRow())], (JWatUnivariateStatsTable.this.getSelectedRow()));
+						graphQQ.setCurrentVar((JWatUnivariateStatsTable.this.getSelectedRow()));
+					}
+					if (label != null) {
+						if (JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this.getSelectedRow())]
+								.getTrasfStr().length() > 0) {
+							label.setText(StatsPanel.TRANSF_LABEL_APPLIED
+									+ JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
+											.getSelectedRow())].getName()
+									+ " = "
+									+ JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
+											.getSelectedRow())].getTrasfStr());
+						} else {
+							label.setText(StatsPanel.TRANSF_LABEL_APPLIED
+									+ JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
+											.getSelectedRow())].getName() + " = none");
 						}
-						if (label != null) {
-							if (JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this.getSelectedRow())]
-									.getTrasfStr().length() > 0) {
-								label.setText(StatsPanel.TRANSF_LABEL_APPLIED
-										+ JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
-												.getSelectedRow())].getName()
-										+ " = "
-										+ JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
-												.getSelectedRow())].getTrasfStr());
-							} else {
-								label.setText(StatsPanel.TRANSF_LABEL_APPLIED
-										+ JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
-												.getSelectedRow())].getName() + " = none");
-							}
-						}
-						if (labelPanel != null) {
-							String ty = null;
-							switch (JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this.getSelectedRow())]
-									.getType()) {
+					}
+					if (labelPanel != null) {
+						String ty = null;
+						switch (JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this.getSelectedRow())]
+								.getType()) {
 								case JWATConstants.NUMERIC:
 									ty = "Numeric";
 									break;
@@ -76,13 +78,12 @@ public class JWatUnivariateStatsTable extends JTable implements CommonConstants 
 								case JWATConstants.STRING:
 									ty = "String";
 									break;
-							}
-							((TitledBorder) labelPanel.getBorder())
-									.setTitle(StatsPanel.TRANSF_BORDER_TEXT
-											+ JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
-													.getSelectedRow())].getName() + " - Type: " + ty);
-							labelPanel.repaint();
 						}
+						((TitledBorder) labelPanel.getBorder())
+						.setTitle(StatsPanel.TRANSF_BORDER_TEXT
+								+ JWatUnivariateStatsTable.this.model.getMatrix().getVariables()[(JWatUnivariateStatsTable.this
+										.getSelectedRow())].getName() + " - Type: " + ty);
+						labelPanel.repaint();
 					}
 				}
 			}

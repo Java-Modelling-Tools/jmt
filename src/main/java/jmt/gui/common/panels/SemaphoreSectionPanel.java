@@ -187,7 +187,7 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		public void valueChanged(ListSelectionEvent e) {
 			super.valueChanged(e);
 			int row = getSelectedRow();
-			if (row != -1) {
+			if (!e.getValueIsAdjusting() && row > -1) {
 				if (semaphoreEditor != null) {
 					semaphoreEditor.stopEditing();
 					semaphoreEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(row));

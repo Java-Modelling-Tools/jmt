@@ -34,9 +34,7 @@ import jmt.gui.jsimgraph.controller.Mediator;
  *         Time: 15.44.11
  */
 public class ShowResults extends AbstractJmodelAction {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -45,11 +43,11 @@ public class ShowResults extends AbstractJmodelAction {
 	 */
 	public ShowResults(Mediator mediator) {
 		super("Show Results", "Results", mediator);
-		this.setTooltipText("Show simulation results");
-		this.setMnemonicKey(KeyEvent.VK_R);
-		this.setAcceleratorKey(KeyEvent.VK_R, InputEvent.ALT_MASK);
-		this.setSelectable(true);
-		this.setEnabled(false);
+		setTooltipText("Show simulation results");
+		setMnemonicKey(KeyEvent.VK_R);
+		setAcceleratorKey(KeyEvent.VK_R, InputEvent.ALT_MASK);
+		setSelectable(true);
+		setEnabled(false);
 	}
 
 	/**
@@ -58,4 +56,5 @@ public class ShowResults extends AbstractJmodelAction {
 	public void actionPerformed(ActionEvent e) {
 		mediator.showResultsWindow(isSelected());
 	}
+
 }

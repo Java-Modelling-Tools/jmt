@@ -97,6 +97,16 @@
 										</transformer>
 									</transformers>
 									<dependencyReducedPomLocation>${basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+									<filters>
+										<filter>
+											<artifact>*:*</artifact>
+											<excludes>
+												<exclude>META-INF/*.SF</exclude>
+												<exclude>META-INF/*.DSA</exclude>
+												<exclude>META-INF/*.RSA</exclude>
+											</excludes>
+										</filter>
+									</filters>
 								</configuration>
 							</execution>
 						</executions>
@@ -233,6 +243,16 @@
 											<mainClass>jmt.jmva.gui.exact.ExactWizard</mainClass>
 										</transformer>
 									</transformers>
+									<filters>
+										<filter>
+											<artifact>*:*</artifact>
+											<excludes>
+												<exclude>META-INF/*.SF</exclude>
+												<exclude>META-INF/*.DSA</exclude>
+												<exclude>META-INF/*.RSA</exclude>
+											</excludes>
+										</filter>
+									</filters>
 								</configuration>
 							</execution>
 						</executions>
@@ -382,6 +402,71 @@
 			<groupId>org.swinglabs</groupId>
 			<artifactId>swingx</artifactId>
 			<version>1.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.lip6.pnml</groupId>
+			<artifactId>fr.lip6.pnml.framework.3rdpartimports</artifactId>
+			<version>2.2.12</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.lip6.pnml</groupId>
+			<artifactId>fr.lip6.pnml.framework.utils</artifactId>
+			<version>2.2.12</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.lip6.pnml</groupId>
+			<artifactId>fr.lip6.pnml.framework.coremodel</artifactId>
+			<version>2.2.12</version>
+		</dependency>
+		<dependency>
+			<groupId>fr.lip6.pnml</groupId>
+			<artifactId>fr.lip6.pnml.framework.ptnet</artifactId>
+			<version>2.2.12</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.ecore</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.ecore.xmi</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.codegen</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.emf</groupId>
+			<artifactId>org.eclipse.emf.codegen.ecore</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.emf</groupId> 
+			<artifactId>org.eclipse.emf.common</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse</groupId>
+			<artifactId>ocl</artifactId>
+			<version>3.6.100</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.ocl</groupId>
+			<artifactId>ecore</artifactId>
+			<version>3.6.100</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.ocl</groupId>
+			<artifactId>common</artifactId>
+			<version>1.4.100</version>
+		</dependency>
+		<dependency>
+			<groupId>lpg.runtime</groupId>
+			<artifactId>java</artifactId>
+			<version>2.0.17</version>
 		</dependency>
 	</dependencies>
 </project>

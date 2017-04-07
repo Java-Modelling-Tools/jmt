@@ -106,7 +106,6 @@ public class ConnectState extends UIStateDefault {
 				e.consume();
 			}
 		}
-
 	}
 
 	// Heavily modified by Giuseppe De Cicco & Fabio Granara
@@ -133,8 +132,8 @@ public class ConnectState extends UIStateDefault {
 		current = null;
 	}
 
-	/** gets the first portView of the input port of the cell at position
-	 *
+	/**
+	 * Gets the first portView of the input port of the cell at position
 	 * @param x
 	 * @param y
 	 * @return portView of the input port
@@ -143,8 +142,8 @@ public class ConnectState extends UIStateDefault {
 		return mediator.getInPortViewAt(x, y);
 	}
 
-	/** gets the first portView of the output port of the cell at position
-	 *
+	/**
+	 * Gets the first portView of the output port of the cell at position
 	 * @param x
 	 * @param y
 	 * @return portView of the output port

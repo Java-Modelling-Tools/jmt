@@ -40,10 +40,10 @@ public class Jmt {
 	public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer transformer = tf.newTransformer();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 		transformer.transform(new DOMSource(doc), new StreamResult(new OutputStreamWriter(out, "UTF-8")));
 	}
@@ -55,7 +55,7 @@ public class Jmt {
 		System.err.println("sim options:");
 		System.err.println("  -seed 1234 : sets the simulation seed to 1234");
 		System.err.println("  -maxtime 60 : sets the maximum simulation time to 60 seconds");
-		System.exit(2);
+		System.exit(0);
 	}
 
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
@@ -75,8 +75,7 @@ public class Jmt {
 			long count =0;
 			long size = source.size();                
 			while ((count += destination.transferFrom(source, 0, size-count))<size);
-		}
-		finally {
+		} finally {
 			if (source != null) {
 				source.close();
 			}
@@ -103,8 +102,7 @@ public class Jmt {
 
 			// Starts the solution
 			dispatcher.solve(model);
-			copyFile(model, result);			
-
+			copyFile(model, result);
 		} else if (args[0].equals("sim")) {
 			Map<String,String> options = parseParameters(args, 2);
 
@@ -120,7 +118,6 @@ public class Jmt {
 
 			File temp = File.createTempFile("tempfileSim",".jsim");
 			temp.deleteOnExit();
-
 
 			Document doc = db.parse(model);
 			Element sim = XMLArchiver.getSimFromArchiveDocument(doc);
@@ -141,6 +138,7 @@ public class Jmt {
 			aTransformer.transform(src, dest);  
 
 			Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(temp);
+			dispatcher.setTerminalSimulation(true);
 			// Sets simulation seed if required
 			if (options.containsKey(OPTION_SEED)) {
 				try {
@@ -162,14 +160,10 @@ public class Jmt {
 
 			// Starts the simulation
 			dispatcher.solveModel();
-
 			File output = dispatcher.getOutputFile();
-
 			File result = new File(args[1]+"-result.jsim");
-
 			copyFile(output, result);
 			output.delete();
-
 		} else {
 			help();
 		}

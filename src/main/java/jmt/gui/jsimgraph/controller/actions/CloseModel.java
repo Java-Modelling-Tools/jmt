@@ -32,9 +32,6 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class CloseModel extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -54,4 +51,5 @@ public class CloseModel extends AbstractJmodelAction {
 	public void actionPerformed(ActionEvent e) {
 		mediator.closeModel();
 	}
+
 }

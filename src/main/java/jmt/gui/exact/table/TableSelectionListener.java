@@ -51,6 +51,9 @@ public abstract class TableSelectionListener implements ListSelectionListener {
 	 * row selection events
 	 */
 	public final void valueChanged(ListSelectionEvent e) {
+		if (e.getValueIsAdjusting()) {
+			return;
+		}
 		Object source = e.getSource();
 		if (source == rowSelectionModel) {
 			selectionChanged(table, e, TYPE_ROW);

@@ -30,15 +30,8 @@ import jmt.gui.jsimgraph.controller.Mediator;
  * Time: 12.31.41
 
  */
-
-/**
- * Action to perform editing Measures.
- */
 public class EditMeasures extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -56,7 +49,7 @@ public class EditMeasures extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// Edits
 		mediator.editMeasures();
 	}
+
 }

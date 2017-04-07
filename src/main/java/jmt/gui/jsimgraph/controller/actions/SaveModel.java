@@ -35,9 +35,6 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class SaveModel extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -58,4 +55,5 @@ public class SaveModel extends AbstractJmodelAction {
 	public void actionPerformed(ActionEvent e) {
 		mediator.saveModel();
 	}
+
 }

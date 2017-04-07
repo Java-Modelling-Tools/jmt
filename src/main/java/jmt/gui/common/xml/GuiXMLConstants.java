@@ -20,7 +20,7 @@ package jmt.gui.common.xml;
 
 /**
  * <p>Title: Gui XML Constants</p>
- * <p>Description: Constants used by <code>GuiXMLWriter</code>, <code>GuiXMLReader</code>
+ * <p>Description: Constants used by <code>GuiXMLReader</code>, <code>GuiXMLWriter</code>
  * and <code>XMLArchiver</code> to read and write XML.</p>
  * 
  * @author Bertoli Marco
@@ -28,6 +28,7 @@ package jmt.gui.common.xml;
  *         Time: 18.01.33
  */
 public interface GuiXMLConstants {
+
 	public static final String XML_DOCUMENT_XSD = "JModelGUI.xsd";
 	public static final String XML_DOCUMENT_ROOT = "jmodel";
 
@@ -55,5 +56,4 @@ public interface GuiXMLConstants {
 	public static final String XML_ARCHIVE_A_NAME = "name";
 	public static final String XML_ARCHIVE_A_TIMESTAMP = "timestamp";
 
-	public static final String ENCODING = "ISO-8859-1";
 }

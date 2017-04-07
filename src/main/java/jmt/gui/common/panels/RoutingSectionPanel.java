@@ -205,7 +205,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		public void valueChanged(ListSelectionEvent e) {
 			super.valueChanged(e);
 			int row = getSelectedRow();
-			if (row != -1) {
+			if (!e.getValueIsAdjusting() && row > -1) {
 				if (routingProbEditor != null) {
 					routingProbEditor.stopEditing();
 					routingProbEditor.setData(stationData, classData, stationKey, classData.getClassKeys().get(row));
@@ -312,7 +312,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 				repaint();
 				RoutingSectionPanel.this.doLayout();
 				if (aValue instanceof LoadDependentRouting) {
-					Container parent = (Container)RoutingSectionPanel.this;
+					Container parent = (Container) RoutingSectionPanel.this;
 					HashMap<String, Object> params = new HashMap<String, Object>();
 					params.put("ClassDefinition", classData);
 					params.put("StationDefinition", stationData);
@@ -320,8 +320,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 					params.put("stationKey", stationKey);
 					params.put("classKey", classKey);
 					params.put("title", "Editing for [Class] " + className + " for [Station] " + stationName + " Load Dependent Routing ...");
-					if (stationData.getForwardConnections(stationKey) != null
-							&& stationData.getForwardConnections(stationKey).size() != 0) {
+					if (stationData.getForwardConnections(stationKey).size() > 0) {
 						RoutingSectionPanel.openLoadDependentRoutingEditor(parent,params);
 					}
 				}

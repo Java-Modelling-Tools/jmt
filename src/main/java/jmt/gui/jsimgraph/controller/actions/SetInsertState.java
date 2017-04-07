@@ -34,11 +34,8 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class SetInsertState extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	private String className;//name of the class that will be instatiated
+	private String className;//name of the class that will be instantiated
 
 	/**
 	 * Creates an action that sets MouseListener in Insert mode
@@ -59,6 +56,9 @@ public class SetInsertState extends AbstractJmodelAction {
 		this.className = className;
 	}
 
+	/**
+	 * Invoked when an action occurs.
+	 */
 	public void actionPerformed(ActionEvent e) {
 		mediator.setInsertState(className);
 	}

@@ -127,7 +127,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 	private ClassDefinition classData;
 
 	//Index for temporary station name assignment
-	private int stationNameIndex = 0;
+	private int stationNameIndex;
 
 	//deletion of one class
 	private AbstractAction deleteStation = new AbstractAction("") {
@@ -185,6 +185,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		stationTable.setModel(new StationTableModel());
 		stationNumSpinner.setValue(new Integer(data.getStationKeys().size()));
 		comboEditor.clearCache();
+		stationNameIndex = sd.getStationKeysNoSourceSink().size();
 	}
 
 	/**Gets data model for this panel.

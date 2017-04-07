@@ -103,7 +103,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	private JFrame resultsWindow;
 	private DispatcherThread dispatcher;
 
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JSIM);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE);
 
 	private ClassesPanel classes;
 	private StationsPanel stations;
@@ -451,13 +451,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			saveFileAs();
 			return;
 		}
-
 		int status = modelLoader.saveModel(model, this, currentFile);
-
 		if (status == ModelLoader.FAILURE) {
 			showErrorMessage(modelLoader.getFailureMotivation());
 		}
-
 		setTitle(WINDOW_TITLE + " - " + currentFile.getName());
 		model.resetSaveState();
 	}
@@ -485,10 +482,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		if (checkForSave("<html>Save changes before closing?</html>")) {
 			return false;
 		}
-		Dimension d = getSize();
-		Defaults.set("JSIMWindowWidth", String.valueOf(d.width));
-		Defaults.set("JSIMWindowHeight", String.valueOf(d.height));
-		Defaults.save();
 		// Stops simulation if active
 		if (SIM_STOP.isEnabled()) {
 			stopSimulation();
@@ -501,6 +494,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			progressWindow.stopAnimation();
 			progressWindow.dispose();
 		}
+		Dimension d = getSize();
+		Defaults.set("JSIMWindowWidth", String.valueOf(d.width));
+		Defaults.set("JSIMWindowHeight", String.valueOf(d.height));
+		Defaults.save();
 		return true;
 	}
 

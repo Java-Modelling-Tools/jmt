@@ -57,6 +57,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 	// Used to determine if parent of this cell has changed (to detect enter and exit from
 	// blocking regions)
 	private TreeNode parentRef;
+
 	/**
 	 * Different kind of nodes.
 	 */
@@ -168,11 +169,11 @@ public abstract class JmtCell extends DefaultGraphCell {
 	 * @return created map
 	 */
 	public Hashtable<Object, Map> setAttributes(Point2D pt, JGraph graph) {
-		//contains attribute of the cell & ports
+		//contains attributes of the cell & ports
 		Hashtable<Object, Map> nest = new Hashtable<Object, Map>();
 
 		Dimension cellDimension = getSize(graph);
-		//contains attrib of cell
+		//contains attributes of the cell
 		Map attr = getAttributes();
 		GraphConstants.setBounds(attr, new Rectangle2D.Double(pt.getX(), pt.getY(), cellDimension.getWidth(), cellDimension.getHeight()));
 		GraphConstants.setEditable(attr, false);

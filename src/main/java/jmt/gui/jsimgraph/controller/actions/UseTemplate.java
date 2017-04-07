@@ -31,6 +31,10 @@ public class UseTemplate extends AbstractJmodelAction {
 
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Defines an <code>Action</code> object with a default
+	 * description string and default icon.
+	 */
 	public UseTemplate(Mediator mediator) {
 		super("Use Template", "Template", mediator);
 		putValue(SHORT_DESCRIPTION, "Add/Use templates");
@@ -38,7 +42,9 @@ public class UseTemplate extends AbstractJmodelAction {
 		setEnabled(false);
 	}
 
-	@Override
+	/**
+	 * Invoked when an action occurs.
+	 */
 	public void actionPerformed(ActionEvent arg0) {
 		mediator.editTemplate();
 	}

@@ -28,7 +28,7 @@ package jmt.gui.common.xml;
  *         Time: 10.26.55
  */
 public interface XMLResultsConstants {
-	public static final String ENCODING = "ISO-8859-1";
+
 	public static final String XML_DOCUMENT_XSD = "Results.xsd";
 	public static final String XML_DOCUMENT_ROOT = "results";
 	public static final String XML_A_ROOT_POLLING = "pollingInterval";

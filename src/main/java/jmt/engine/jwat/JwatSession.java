@@ -78,7 +78,7 @@ public abstract class JwatSession {
 			Transformer tr = TransformerFactory.newInstance().newTransformer();
 			tr.setOutputProperty(OutputKeys.INDENT, "yes");
 			tr.setOutputProperty(OutputKeys.METHOD, "xml");
-			tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "3");
+			tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
 			//Write XML file into zip
 			zos.putNextEntry(new ZipEntry(filename + XMLext));

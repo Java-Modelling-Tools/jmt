@@ -22,6 +22,7 @@ import java.awt.Graphics;
 
 import jmt.common.GlobalSettings;
 import jmt.gui.common.Defaults;
+import jmt.gui.jsimgraph.controller.JmtGraphUI;
 import jmt.gui.jsimgraph.controller.Mediator;
 
 import org.freehep.graphics2d.VectorGraphics;
@@ -48,9 +49,7 @@ import org.jgraph.graph.GraphModel;
 
  */
 public class JmtJGraph extends JGraph {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	static DefaultCellViewFactory cellViewFactory = new DefaultCellViewFactory();
@@ -150,11 +149,12 @@ public class JmtJGraph extends JGraph {
 		return new JmtGraphLayoutCache(graph.getModel(), cellViewFactory);
 	}
 
-	/** Gets the inport port for the cell under Point(x,y)
+	/**
+	 * Gets the input port for the cell under Point(x,y)
 	 *
 	 * @param x  horizontal coordinate
 	 * @param y  vertical coordinate
-	 * @return the inport port if available else null
+	 * @return the input port if available else null
 	 */
 	public InputPort getInPortAt(int x, int y) {
 		JmtCell cell = getVertexAt(x, y);
@@ -167,11 +167,12 @@ public class JmtJGraph extends JGraph {
 		return null;
 	}
 
-	/** Gets the outport port for the cell under Point(x,y)
+	/**
+	 * Gets the output port for the cell under Point(x,y)
 	 *
 	 * @param x  horizontal coordinate
 	 * @param y  vertical coordinate
-	 * @return the outport port if available else null
+	 * @return the output port if available else null
 	 */
 	public OutputPort getOutPortAt(int x, int y) {
 		Object cell = getVertexAt(x, y);
@@ -186,7 +187,8 @@ public class JmtJGraph extends JGraph {
 		return null;
 	}
 
-	/** Gets the first vertex at this position.
+	/**
+	 * Gets the first vertex at this position.
 	 *
 	 * @param x horizontal coordinate
 	 * @param y vertical coordinate
@@ -214,7 +216,7 @@ public class JmtJGraph extends JGraph {
 	 */
 	@Override
 	public void updateUI() {
-		setUI(new jmt.gui.jsimgraph.controller.JmtGraphUI(mediator));
+		setUI(new JmtGraphUI(mediator));
 		invalidate();
 	}
 

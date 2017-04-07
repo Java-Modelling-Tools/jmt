@@ -164,6 +164,7 @@ public class Server extends ServiceSection {
 			return super.getObject(id);
 		}
 	}
+
 	public ServiceStrategy[] getServiceStrategy() {
 		return serviceStrategy;
 	}

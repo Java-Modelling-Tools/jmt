@@ -111,11 +111,11 @@ public interface ClassDefinition {
 
 	/**
 	 * Adds a new class to the model and sets all class parameters at once.
-	 * @param name name of the class.
-	 * @param type type of the class.
-	 * @param priority priority of the class.
-	 * @param population population of the class.
-	 * @param distribution inter-arrival time distribution of the class.
+	 * @param name name of the new class.
+	 * @param type type of the new class.
+	 * @param priority priority of the new class.
+	 * @param population population of the new class.
+	 * @param distribution inter-arrival time distribution of the new class.
 	 * @return search key for the new class.
 	 */
 	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution);
@@ -134,9 +134,5 @@ public interface ClassDefinition {
 	 * Returns total population of closed classes
 	 */
 	public int getTotalClosedClassPopulation();
-
-	public Vector<String> getSinkProbabilityUpdateClasses();
-
-	public void resetSinkProbabilityUpdateClasses();
 
 }

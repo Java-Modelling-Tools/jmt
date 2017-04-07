@@ -21,7 +21,6 @@ package jmt.gui.jsimgraph.JGraphMod;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -97,8 +96,7 @@ public class GraphicalQueueState {
 		double height = QUEUE_HEIGHT - 2 * V_MARGIN;
 
 		int H_FREE_SPACE = 2;
-		int V_FREE_SPACE = (int) ((QUEUE_HEIGHT - (((int) (height / nClasses)) * nClasses)) / 2);
-		//int V_FREE_SPACE = 1;
+		int V_FREE_SPACE = 1;
 
 		Graphics2D g = mediator.getGraphGraphics();
 
@@ -213,20 +211,13 @@ public class GraphicalQueueState {
 			if (cell == null) {
 				continue;
 			}
-			g.setColor(Color.LIGHT_GRAY);
 			Point2D p = mediator.getCellCoordinates(cell);
 			double offset;
 			double xStart;
 			double yStart;
 			offset = (int) ((mediator.getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT) / 2);
-			if (cell.isLeftInputCell()) {
-				g.fill(new Rectangle2D.Double(p.getX()  + offset, p.getY(), (int) width , (int) height ));
-				yStart = p.getY() + V_FREE_SPACE;
-			}
-			else {
-				g.fill(new Rectangle2D.Double(p.getX() + QUEUE_HEIGHT + offset, p.getY(), (int) width, (int) height ));
-				yStart = p.getY() + V_FREE_SPACE;
-			}
+			V_FREE_SPACE += (int) ((QUEUE_HEIGHT - (((int) (height / nClasses)) * nClasses)) / 2);
+			yStart = p.getY() + V_FREE_SPACE;
 
 			//First draw the queues ....
 			//if the number of classes is less then MAX_NUMBER_OF_CLASSES_QUEUE
@@ -240,11 +231,11 @@ public class GraphicalQueueState {
 					Color color = mediator.getClassDefinition().getClassColor(classes.get(j));
 					g.setColor(color);
 					if (cell.isLeftInputCell()) {
-					xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
-					g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
+						xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
+						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 					}
 					else {
-						xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE + QUEUE_HEIGHT;
+						xStart = p.getX() + offset + H_FREE_SPACE + QUEUE_HEIGHT;
 						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 					}
 					yStart += thisHeight;
@@ -254,7 +245,7 @@ public class GraphicalQueueState {
 			// else draw only the first MAX_NUMBER_OF_CLASSES_QUEUE with the greatest
 			// number of job inside thisStation
 			else {
-				V_FREE_SPACE = (int) ((QUEUE_HEIGHT - (((int) (height / MAX_NUMBER_OF_CLASSES_QUEUE)) * (double) MAX_NUMBER_OF_CLASSES_QUEUE)) / 2);
+				V_FREE_SPACE += (int) ((QUEUE_HEIGHT - (((int) (height / MAX_NUMBER_OF_CLASSES_QUEUE)) * (double) MAX_NUMBER_OF_CLASSES_QUEUE)) / 2);
 				yStart = p.getY() + V_FREE_SPACE;
 
 				Vector<Object> classesReplication = new Vector<Object>(classes);
@@ -288,11 +279,11 @@ public class GraphicalQueueState {
 						Color color = mediator.getClassDefinition().getClassColor(thisStation);
 						g.setColor(color);
 						if (cell.isLeftInputCell()) {
-						xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
-						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
+							xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
+							g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 						}
 						else {
-							xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE + QUEUE_HEIGHT;
+							xStart = p.getX() + offset + H_FREE_SPACE + QUEUE_HEIGHT;
 							g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 						}
 						yStart += thisHeight;
@@ -306,14 +297,12 @@ public class GraphicalQueueState {
 			int startAngle = 0;
 			int arcDiameter = (int) (QUEUE_HEIGHT) - 2;
 			if (cell.isLeftInputCell()) {
-			xStart = p.getX() + offset + (int) QUEUE_WIDTH + 1;
+				xStart = p.getX() + offset + (int) QUEUE_WIDTH + 1;
 			}
 			else {
 				xStart = p.getX() + offset + 1;
 			}
 			yStart = p.getY() + 1;
-			g.setColor(Color.LIGHT_GRAY);
-			g.fill(new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, 0, 360, Arc2D.PIE));
 
 			for (int j = 0; j < nClasses; j++) {
 				double utilization = utilizationState.getValue(servers.get(i), classes.get(j));

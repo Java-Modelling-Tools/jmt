@@ -37,13 +37,9 @@ import jmt.gui.jsimgraph.controller.Mediator;
  * of all created instances and scanning through it at every update.<br>
  * That said, the main function of this class is to provide a means to update the state of all
  * Undo/redo actions through its static method <code>updateAll()</code>
- *
  */
 public abstract class AbstractUndoRedoAction extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	protected static Vector<AbstractUndoRedoAction> instances = new Vector<AbstractUndoRedoAction>(); //a list holding all the instances of this action
 	protected static int instanceCount = 0; //local copy of instances.size();

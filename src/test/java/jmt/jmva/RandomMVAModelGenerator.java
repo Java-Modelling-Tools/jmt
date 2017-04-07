@@ -727,8 +727,8 @@ public class RandomMVAModelGenerator {
 			//set up a transformer
 			TransformerFactory transfac = TransformerFactory.newInstance();
 			Transformer trans = transfac.newTransformer();
-			trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 			trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 
 			String modelT = "";
 

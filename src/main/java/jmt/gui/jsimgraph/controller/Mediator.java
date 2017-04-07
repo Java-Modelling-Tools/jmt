@@ -57,7 +57,6 @@ import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.DispatcherThread;
 import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.controller.PADispatcherThread;
-import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.ModelConverter;
 import jmt.gui.common.definitions.PAResultsModel;
@@ -130,6 +129,7 @@ import jmt.gui.jsimgraph.controller.actions.TakeScreenShot;
 import jmt.gui.jsimgraph.controller.actions.UseTemplate;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
+import jmt.gui.jsimgraph.definitions.JmodelBlockingRegionDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
 import jmt.gui.jsimgraph.mainGui.ComponentBar;
@@ -147,7 +147,6 @@ import org.jgraph.graph.CellHandle;
 import org.jgraph.graph.CellView;
 import org.jgraph.graph.ConnectionSet;
 import org.jgraph.graph.DefaultGraphModel;
-import org.jgraph.graph.DefaultGraphModel.GraphModelEdit;
 import org.jgraph.graph.DefaultPort;
 import org.jgraph.graph.Edge;
 import org.jgraph.graph.EdgeView;
@@ -206,12 +205,12 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction openModel;
 	private AbstractJmodelAction saveModel;
 	private AbstractJmodelAction setConnect;
-	private AbstractJmodelAction actionCopy;
 	private AbstractJmodelAction actionCut;
-	private AbstractJmodelAction setOptions;
+	private AbstractJmodelAction actionCopy;
 	private AbstractJmodelAction actionPaste;
-	private AbstractJmodelAction setSelect;
 	private AbstractJmodelAction actionDelete;
+	private AbstractJmodelAction setOptions;
+	private AbstractJmodelAction setSelect;
 	private AbstractJmodelAction simulate;
 	private AbstractJmodelAction solveAnalitic;
 	private AbstractJmodelAction solveApp;
@@ -252,7 +251,7 @@ public class Mediator implements GuiInterface {
 	private JFrame resultsWindow;
 	private JmtClipboard clipboard;
 	private DispatcherThread dispatcher = null;
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE);
 	private JMTToolBar componentBar;
 
 	private ModelChecker mc;
@@ -287,12 +286,12 @@ public class Mediator implements GuiInterface {
 		openModel = new OpenModel(this);
 		saveModel = new SaveModel(this);
 		setConnect = new SetConnectState(this);
-		actionCopy = new ActionCopy(this);
 		actionCut = new ActionCut(this);
-		setOptions = new SetOptions(this);
+		actionCopy = new ActionCopy(this);
 		actionPaste = new ActionPaste(this);
-		setSelect = new SetSelectState(this);
 		actionDelete = new ActionDelete(this);
+		setOptions = new SetOptions(this);
+		setSelect = new SetSelectState(this);
 		simulate = new Simulate(this);
 
 		solveAnalitic = new SolveAnalytic(this);
@@ -340,8 +339,8 @@ public class Mediator implements GuiInterface {
 		JMTToolBar toolbar = new JMTToolBar(JMTImageLoader.getImageLoader());
 		// Builds an array with all actions to be put in the toolbar
 		AbstractJmodelAction[] actions = new AbstractJmodelAction[] { newModel, openModel, saveModel, null,
-				actionCut, actionCopy, actionPaste, null, editUserClasses, editMeasures, editSimParams, editPAParams, null, switchToExactSolver,
-				null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp, null, useTemplate };
+				actionCut, actionCopy, actionPaste, actionDelete, null, editUserClasses, editMeasures, editSimParams, editPAParams, null,
+				switchToExactSolver, null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp, null, useTemplate };
 		toolbar.populateToolbar(actions);
 		return toolbar;
 	}
@@ -366,8 +365,7 @@ public class Mediator implements GuiInterface {
 		menu.addMenu(action);
 
 		// Solve menu
-		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null,
-				showResults });
+		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults });
 		menu.addMenu(action);
 
 		// Help menu
@@ -395,11 +393,11 @@ public class Mediator implements GuiInterface {
 		return exit;
 	}
 
-	public JmodelStationDefinition getStationDefinition() {
+	public JmodelClassDefinition getClassDefinition() {
 		return model;
 	}
 
-	public JmodelClassDefinition getClassDefinition() {
+	public JmodelStationDefinition getStationDefinition() {
 		return model;
 	}
 
@@ -407,7 +405,7 @@ public class Mediator implements GuiInterface {
 		return model;
 	}
 
-	public BlockingRegionDefinition getBlockingRegionDefinition() {
+	public JmodelBlockingRegionDefinition getBlockingRegionDefinition() {
 		return model;
 	}
 
@@ -415,24 +413,24 @@ public class Mediator implements GuiInterface {
 		addBlockingRegion.setEnabled(state);
 	}
 
+	public void enableRotateAction(boolean state) {
+		actionRotate.setEnabled(state);
+	}
+
 	public void enableSetRight(boolean state) {
 		actionSetRight.setEnabled(state);
-	}
-
-	public AbstractJmodelAction getSetRight() {
-		return actionSetRight;
-	}
-
-	public AbstractJmodelAction getEditDefaults() {
-		return editDefaults;
 	}
 
 	public AbstractJmodelAction getAddBlockingRegion() {
 		return addBlockingRegion;
 	}
 
-	public AbstractJmodelAction getSaveModelAs() {
-		return saveModelAs;
+	public AbstractJmodelAction getRotate() {
+		return actionRotate;
+	}
+
+	public AbstractJmodelAction getSetRight() {
+		return actionSetRight;
 	}
 
 	public AbstractJmodelAction getPauseSimulation() {
@@ -441,6 +439,10 @@ public class Mediator implements GuiInterface {
 
 	public AbstractJmodelAction getStopSimulation() {
 		return stopSimulation;
+	}
+
+	public AbstractJmodelAction getEditDefaults() {
+		return editDefaults;
 	}
 
 	public AbstractJmodelAction getEditSimParams() {
@@ -502,14 +504,6 @@ public class Mediator implements GuiInterface {
 		mouseListener.setConnectState();
 	}
 
-	public void setCopyState() {
-		setSelect.setEnabled(true);
-	}
-
-	public void setCutState() {
-		setSelect.setEnabled(true);
-	}
-
 	public void setInsertState(String className) {
 		setSelect.setEnabled(true);
 		mouseListener.setInsertState(className);
@@ -518,10 +512,6 @@ public class Mediator implements GuiInterface {
 	public void setSelectState() {
 		setSelect.setEnabled(true);
 		mouseListener.setSelectState();
-	}
-
-	public AbstractJmodelAction getDeleteAction() {
-		return actionDelete;
 	}
 
 	public void activateSelect() {
@@ -533,16 +523,12 @@ public class Mediator implements GuiInterface {
 		actionCut.setEnabled(state);
 	}
 
-	public void enablePasteAction(boolean state) {
-		actionPaste.setEnabled(state);
-	}
-
 	public void enableCopyAction(boolean state) {
 		actionCopy.setEnabled(state);
 	}
 
-	public void enableRotateAction(boolean state) {
-		actionRotate.setEnabled(state);
+	public void enablePasteAction(boolean state) {
+		actionPaste.setEnabled(state);
 	}
 
 	public void enableDeleteAction(boolean state) {
@@ -557,16 +543,12 @@ public class Mediator implements GuiInterface {
 		this.mouseListener.setHandle(handle);
 	}
 
-	public AbstractJmodelAction getCloseModel() {
-		return closeModel;
+	public AbstractJmodelAction getOpenHelp() {
+		return openHelp;
 	}
 
 	public AbstractJmodelAction getNewModel() {
 		return newModel;
-	}
-
-	public AbstractJmodelAction getOpenHelp() {
-		return openHelp;
 	}
 
 	public AbstractJmodelAction getOpenModel() {
@@ -577,24 +559,36 @@ public class Mediator implements GuiInterface {
 		return saveModel;
 	}
 
-	public AbstractJmodelAction getSetConnect() {
-		return setConnect;
+	public AbstractJmodelAction getSaveModelAs() {
+		return saveModelAs;
 	}
 
-	public AbstractJmodelAction getCopyAction() {
-		return actionCopy;
+	public AbstractJmodelAction getCloseModel() {
+		return closeModel;
+	}
+
+	public AbstractJmodelAction getSetConnect() {
+		return setConnect;
 	}
 
 	public AbstractJmodelAction getCutAction() {
 		return actionCut;
 	}
 
-	public AbstractJmodelAction getSetOptions() {
-		return setOptions;
+	public AbstractJmodelAction getCopyAction() {
+		return actionCopy;
 	}
 
 	public AbstractJmodelAction getPasteAction() {
 		return actionPaste;
+	}
+
+	public AbstractJmodelAction getDeleteAction() {
+		return actionDelete;
+	}
+
+	public AbstractJmodelAction getSetOptions() {
+		return setOptions;
 	}
 
 	public AbstractJmodelAction getSetSelect() {
@@ -679,8 +673,8 @@ public class Mediator implements GuiInterface {
 		resultsWindow = null;
 
 		// Disables cut/copy/delete (leave paste enabled as clipboard is not flushed)
-		enableCopyAction(false);
 		enableCutAction(false);
+		enableCopyAction(false);
 		enableDeleteAction(false);
 
 		// Disables creation of blocking region
@@ -775,8 +769,8 @@ public class Mediator implements GuiInterface {
 		componentBar.clearButtonGroupSelection(0);
 		componentBar.enableButtonGroup(0, false);
 		setConnect.setEnabled(false);
-		actionCopy.setEnabled(false);
 		actionCut.setEnabled(false);
+		actionCopy.setEnabled(false);
 		actionPaste.setEnabled(false);
 		actionDelete.setEnabled(false);
 		actionRotate.setEnabled(false);
@@ -999,10 +993,10 @@ public class Mediator implements GuiInterface {
 			list.add(p2);
 			Map map = new Hashtable();
 			GraphConstants.setPoints(map, list);
-			GraphConstants.setRouting(map, GraphConstants.ROUTING_SIMPLE);
 			GraphConstants.setRouting(map, JmtGraphConstants.ROUTING_JMT);
 			GraphConstants.setLineEnd(map, GraphConstants.ARROW_CLASSIC);
 			GraphConstants.setEndFill(map, true);
+			GraphConstants.setConnectable(map, false);
 			GraphConstants.setDisconnectable(map, false);
 			Map<Object, Map> viewMap = new Hashtable<Object, Map>();
 			// Adds connection into underlying data structure
@@ -1052,10 +1046,10 @@ public class Mediator implements GuiInterface {
 		Object targetKey = ((CellComponent) target.getUserObject()).getKey();
 		// Initializes correct layout for routing edges
 		Map map = new Hashtable();
-		GraphConstants.setRouting(map, GraphConstants.ROUTING_SIMPLE);
 		GraphConstants.setRouting(map, JmtGraphConstants.ROUTING_JMT);
 		GraphConstants.setLineEnd(map, GraphConstants.ARROW_CLASSIC);
 		GraphConstants.setEndFill(map, true);
+		GraphConstants.setConnectable(map, false);
 		GraphConstants.setDisconnectable(map, false);
 		Map<Object, Map> viewMap = new Hashtable<Object, Map>();
 		JmtEdge connection = new JmtEdge(sourceKey, targetKey, this);
@@ -1114,8 +1108,8 @@ public class Mediator implements GuiInterface {
 		return graph.getModel().getParent(child);
 	}
 
-	/** gets the first portView of the input port of the cell at position
-	 *
+	/**
+	 * Gets the first portView of the input port of the cell at position
 	 * @param x
 	 * @param y
 	 * @return portView of the input port
@@ -1124,8 +1118,8 @@ public class Mediator implements GuiInterface {
 		return (PortView) graph.getGraphLayoutCache().getMapping(graph.getInPortAt(x, y), false);
 	}
 
-	/** gets the first portView of the output port of the cell at position
-	 *
+	/**
+	 * Gets the first portView of the output port of the cell at position
 	 * @param x
 	 * @param y
 	 * @return portView of the output port
@@ -1135,9 +1129,18 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Returns if a given cell is visible on graph
+	 * Tells if a given cell exists in the graph
 	 * @param cell
-	 * @return true iff cell is visible
+	 * @return true iff the cell exists
+	 */
+	public boolean containsCell(Object cell) {
+		return graph.getModel().contains(cell);
+	}
+
+	/**
+	 * Returns if a given cell is visible in the graph
+	 * @param cell
+	 * @return true iff the cell is visible
 	 */
 	public boolean isCellVisible(Object cell) {
 		return ((JmtGraphUI) graph.getUI()).getGraphLayoutCache().isVisible(cell);
@@ -1162,8 +1165,7 @@ public class Mediator implements GuiInterface {
 		graph.startEditingAtCell(cell);
 		if ((cell != null) && (cell instanceof JmtCell)) {
 			JmtCell jcell = (JmtCell) cell;
-			StationParameterPanel stationPanel = new jmt.gui.common.panels.StationParameterPanel(model, model,
-					((CellComponent) jcell.getUserObject()).getKey());
+			StationParameterPanel stationPanel = new StationParameterPanel(model, model, ((CellComponent) jcell.getUserObject()).getKey());
 			// Adds on the top a panel to change station name
 			stationPanel.add(new StationNamePanel(model, ((CellComponent) jcell.getUserObject()).getKey()), BorderLayout.NORTH);
 			dialogFactory.getDialog(stationPanel, "Editing " + jcell.getUserObject().toString() + " Properties...");
@@ -1192,11 +1194,10 @@ public class Mediator implements GuiInterface {
 		graph.startEditingAtCell(cell);
 		if ((cell != null) && (cell instanceof JmtCell)) {
 			JmtCell jcell = (JmtCell) cell;
-			StationParameterPanel stationPanel = new jmt.gui.common.panels.StationParameterPanel(model, model, ((CellComponent) jcell.getUserObject()).getKey());
+			StationParameterPanel stationPanel = new StationParameterPanel(model, model, ((CellComponent) jcell.getUserObject()).getKey());
 			// Adds on the top a panel to change station name
 			stationPanel.add(new StationNamePanel(model, ((CellComponent) jcell.getUserObject()).getKey()), BorderLayout.NORTH);
 			dialogFactory.getDialog(stationPanel, "Editing " + jcell.getUserObject().toString() + " Properties...");
-
 		}
 		// Blocking region editing
 		else if ((cell != null) && (cell instanceof BlockingRegion)) {
@@ -1206,14 +1207,21 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Cuts the selection of the graph.
+	 * Cuts all the selected stations, connections and blocking regions.
 	 */
 	public void cutSelection() {
-		clipboard.cut();
+		clipboard.cut(graph.getDescendants(graph.getSelectionCells()));
 	}
 
 	/**
-	 * Pastes the selection on the graph.
+	 * Copies all the selected stations, connections and blocking regions.
+	 */
+	public void copySelection() {
+		clipboard.copy(graph.getDescendants(graph.getSelectionCells()));
+	}
+
+	/**
+	 * Pastes all the cut/copied stations, connections and blocking regions.
 	 */
 	public void pasteSelection() {
 		clipboard.paste();
@@ -1228,10 +1236,87 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Copies the selection of the graph.
+	 * Deletes all the selected stations, connections and blocking regions.
 	 */
-	public void copySelection() {
-		clipboard.copy();
+	public void deleteSelection() {
+		delete(graph.getSelectionCells());
+	}
+
+	/**
+	 * Deletes the given elements from graph.
+	 */
+	public void delete(Object[] cells) {
+		GraphModel graphModel = graph.getModel();
+		// Set of the edges from/to removed stations
+		Set<Object> edges = new HashSet<Object>();
+		// Set of the ports on removed stations
+		Set<Object> ports = new HashSet<Object>();
+		// Set of the stations in removed blocking regions
+		Set<Object> children = new HashSet<Object>();
+		// Set of the blocking regions with deleted stations
+		Set<Object> regions = new HashSet<Object>();
+		for (Object cell : cells) {
+			if (cell instanceof JmtCell) {
+				for (Object c : ((JmtCell) cell).getChildren()) {
+					if (c instanceof DefaultPort) {
+						edges.addAll(((DefaultPort) c).getEdges());
+						ports.add(c);
+					}
+				}
+				Object p = ((JmtCell) cell).getParent();
+				if (p instanceof BlockingRegion) {
+					regions.add(p);
+				}
+			} else if (cell instanceof BlockingRegion) {
+				for (Object c : ((BlockingRegion) cell).getChildren()) {
+					if (c instanceof JmtCell) {
+						children.add(c);
+					}
+				}
+			}
+		}
+
+		// Removes edges from graph
+		graphModel.remove(edges.toArray());
+		// Removes elements from graph
+		graphModel.remove(cells);
+		// Removes ports from graph
+		graphModel.remove(ports.toArray());
+		// Resets parents of the stations
+		for (Object c : children) {
+			((JmtCell) c).resetParent();
+		}
+		// Removes elements from data structure
+		for (Object cell : cells) {
+			if (cell instanceof JmtCell) {
+				model.deleteStation(((CellComponent) ((JmtCell) cell).getUserObject()).getKey());
+			} else if (cell instanceof JmtEdge) {
+				model.setConnected(((JmtEdge) cell).getSourceKey(), ((JmtEdge) cell).getTargetKey(), false);
+			} else if (cell instanceof BlockingRegion) {
+				model.deleteBlockingRegion(((BlockingRegion) cell).getKey());
+			}
+		}
+
+		// Checks for empty blocking regions
+		Iterator<Object> it = regions.iterator();
+		while (it.hasNext()) {
+			if (!((BlockingRegion) it.next()).getChildren().isEmpty()) {
+				it.remove();
+			}
+		}
+		// Removes empty blocking regions from graph and data structure
+		graphModel.remove(regions.toArray());
+		for (Object r : regions) {
+			model.deleteBlockingRegion(((BlockingRegion) r).getKey());
+		}
+
+		// Disables the buttons if nothing remains
+		if (graphModel.getRootCount() == 0) {
+			componentBar.clearButtonGroupSelection(0);
+			setConnect.setEnabled(false);
+			setSelect.setEnabled(false);
+			actionSetRight.setEnabled(false);
+		}
 	}
 
 	/**
@@ -1245,126 +1330,12 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Deletes all the vertices & edges that are selected. it deletes also the
-	 * edges that are connected to the eliminated vertexes.
-
-	 * Bertoli Marco 03-06-2005
-	 */
-	public void deleteSelected() {
-		Object cells[] = graph.getSelectionCells();
-		GraphModel graphmodel = graph.getModel();
-
-		// If a cell is a blocking region avoid removing its edges and
-		// select its element at the end of the removal process
-		Set<Object> edges = new HashSet<Object>();
-		Set<Object> select = new HashSet<Object>();
-
-		// Set with all regions that can be deleted as its child were removed
-		Set<Object> regions = new HashSet<Object>();
-		// Set with all JmtCells that we are removing
-		Set<Object> jmtCells = new HashSet<Object>();
-
-		for (int i = 0; i < cells.length; i++) {
-			if (!(cells[i] instanceof BlockingRegion)) {
-				// Adds edge for removal
-				edges.addAll(DefaultGraphModel.getEdges(graphmodel, new Object[] { cells[i] }));
-				// Stores parents information and cell
-				if (cells[i] instanceof JmtCell) {
-					if (((JmtCell) cells[i]).getParent() instanceof BlockingRegion) {
-						regions.add(((JmtCell) cells[i]).getParent());
-					}
-					jmtCells.add(cells[i]);
-				}
-			} else {
-				// Adds node for selection
-				Object[] nodes = graph.getDescendants(new Object[] { cells[i] });
-				for (Object node : nodes) {
-					if (node instanceof JmtCell || node instanceof JmtEdge) {
-						select.add(node);
-					}
-				}
-				// Deletes blocking region from data structure
-				model.deleteBlockingRegion(((BlockingRegion) cells[i]).getKey());
-			}
-		}
-
-		if (!edges.isEmpty()) {
-			// Removes edges from graph
-			graphmodel.remove(edges.toArray());
-		}
-		// Removes cells from graph
-		graphmodel.remove(cells);
-
-		// Checks if all children of a blocking region have been removed
-		Iterator<Object> it = regions.iterator();
-		while (it.hasNext()) {
-			jmtCells.add(null);
-			BlockingRegion region = (BlockingRegion) it.next();
-			List child = region.getChildren();
-			boolean empty = true;
-			for (int i = 0; i < child.size(); i++) {
-				if (child.get(i) instanceof JmtCell && !jmtCells.contains(child.get(i))) {
-					empty = false;
-					break;
-				}
-			}
-			if (empty) {
-				model.deleteBlockingRegion(region.getKey());
-				graphmodel.remove(new Object[] { region });
-			}
-		}
-
-		// Adds port for removal
-		Set<Object> ports = new HashSet<Object>();
-		for (int i = 0; i < graphmodel.getRootCount(); i++) {
-			Object root = graphmodel.getRootAt(i);
-			if (root instanceof InputPort || root instanceof OutputPort) {
-				ports.add(root);
-			}
-		}
-		if (!ports.isEmpty()) {
-			// Removes ports from graph
-			graphmodel.remove(ports.toArray());
-		}
-
-		// Removes cells from data structure
-		for (Object cell : cells) {
-			if (cell instanceof JmtCell) {
-				model.deleteStation(((CellComponent) ((JmtCell) cell).getUserObject()).getKey());
-			} else if (cell instanceof JmtEdge) {
-				JmtEdge link = (JmtEdge) cell;
-				model.setConnected(link.getSourceKey(), link.getTargetKey(), false);
-			}
-		}
-
-		// If no stations remains gray select and link buttons
-		if (graphmodel.getRootCount() == 0) {
-			componentBar.clearButtonGroupSelection(0);
-			setConnect.setEnabled(false);
-			setSelect.setEnabled(false);
-			actionSetRight.setEnabled(false);
-		}
-
-		// Selects components from removed blocking regions
-		if (select.size() > 0) {
-			graph.setSelectionCells(select.toArray());
-			// Resets parent information of cells that changed parent
-			it = select.iterator();
-			while (it.hasNext()) {
-				Object next = it.next();
-				if (next instanceof JmtCell) {
-					((JmtCell) next).resetParent();
-				}
-			}
-		}
-	}
-
-	/**
 	 * Shows the panel that opens when the right button is clicked.
 	 *
 	 * @param p point where the right button is clicked on the graph
 	 */
 	public void showOPanel(Point p) {
+		return;
 	}
 
 	/**
@@ -1376,7 +1347,6 @@ public class Mediator implements GuiInterface {
 			saveModelAs();
 			return;
 		}
-
 		// Updates station positions into data structure
 		updateStationPositions();
 		int status = modelLoader.saveModel(model, mainWindow, openedArchive);
@@ -1498,7 +1468,7 @@ public class Mediator implements GuiInterface {
 				regionStation.add(cells.get(stationKeys.next()));
 			}
 			// Adds cells to blocking region
-			addCellsToBlockingRegion(regionStation.toArray(), key);
+			addCellsToBlockingRegion(key, regionStation.toArray());
 		}
 
 		// whether the Position is Null, the application call the reposition's method
@@ -1531,25 +1501,6 @@ public class Mediator implements GuiInterface {
 	 */
 	public void enableEditUserClasses(boolean state) {
 		editUserClasses.setEnabled(state);
-	}
-
-	/**
-	 * Searches the cell with the given <i>name</i>.
-	 * @param name A given cell name.
-	 * @return <code>true</code> - if the searched cell will be found.
-	 */
-	public boolean existCell(String name) {
-		int nCells = graph.getModel().getRootCount();
-		for (int i = 0; i < nCells; i++) {
-			Object cell = graph.getModel().getRootAt(i);
-			if (cell instanceof JmtCell) {
-				String cellName = ((JmtCell) cell).getUserObject().toString();
-				if (cellName.equals(name)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -1924,10 +1875,10 @@ public class Mediator implements GuiInterface {
 										.getBounds(cell.getAttributes()))) {
 							;
 						}
-						Rectangle2D b2 = GraphConstants.getBounds(((JmtEdge) element).getAttributes());
-						if (b2.intersects(bounds)) {
-							;
-						}
+						//Rectangle2D b2 = GraphConstants.getBounds(((JmtEdge) element).getAttributes());
+						//if (b2.intersects(bounds)) {
+						//	;
+						//}
 
 						last.setLocation(new Point((int) (last.getX() + .5), (int) (last.getY() + .5)));
 					}
@@ -2346,7 +2297,10 @@ public class Mediator implements GuiInterface {
 	 * Called when EditSimParams action is triggered
 	 */
 	public void editSimulationParameters() {
-		dialogFactory.getDialog(new SimulationPanel(model, model, model, this), "Define simulation parameters");
+		dialogFactory.getDialog(new SimulationPanel(model, model, model, this), "Define simulation parameters",
+				Defaults.getAsInteger("JSIMSimulationDefWindowWidth").intValue(),
+				Defaults.getAsInteger("JSIMSimulationDefWindowHeight").intValue(),
+				true, "JSIMSimulationDefWindowWidth", "JSIMSimulationDefWindowHeight");
 	}
 
 	/**
@@ -2360,7 +2314,10 @@ public class Mediator implements GuiInterface {
 	 * Called when EditPAParams action is triggered
 	 */
 	public void editPAParameters() {
-		dialogFactory.getDialog(new ParametricAnalysisPanel(model, model, model, this), "Define What-if analysis parameters");
+		dialogFactory.getDialog(new ParametricAnalysisPanel(model, model, model, this), "Define What-if analysis parameters",
+				Defaults.getAsInteger("JSIMPADefWindowWidth").intValue(),
+				Defaults.getAsInteger("JSIMPADefWindowHeight").intValue(),
+				true, "JSIMPADefWindowWidth", "JSIMPADefWindowHeight");
 	}
 
 	/**
@@ -2674,13 +2631,6 @@ public class Mediator implements GuiInterface {
 			JOptionPane.showMessageDialog(null, name + " is followed by a queue implementing a BAS strategy. "
 					+ "This topology is not allowed.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID)) {
-			StationParameterPanel tempPanel = new StationParameterPanel(model, model, relatedStation);
-			String stationName = model.getStationName(relatedStation);
-			// set the station parameter panel to show the routing section
-			tempPanel.showRoutingSectionPanel(relatedClass);
-			dialogFactory.getDialog(tempPanel, "Editing " + stationName + " Properties...");
-		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.CS_BETWEEN_FORK_JOIN)) {
 			String name = getStationDefinition().getStationName(relatedStation);
 			JOptionPane.showMessageDialog(null, name + " seems to be located between fork/join. The switched tasks may fail "
@@ -2711,9 +2661,9 @@ public class Mediator implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN)) {
 			String name = getStationDefinition().getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, name + " seems to be located between fork/join. On each firing of a transition between "
-					+ "fork/join,\nthe input tasks for a class must be forked from the same parent job, and the number of ouput tasks\n"
-					+ "for a class must be equal to the number of input tasks for that class.", "Warning", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(null, name + " seems to be located between fork/join. On any firing of a transition between "
+					+ "fork/join,\nthe input tasks for each class must be forked from the same parent job, and the number of output\n"
+					+ "tasks for each class must be equal to the number of input tasks for that class.", "Warning", JOptionPane.WARNING_MESSAGE);
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_WITHOUT_FORWARD_LINKS)) {
 			String stationName = model.getStationName(relatedStation);
@@ -2755,16 +2705,16 @@ public class Mediator implements GuiInterface {
 	}
 
 	/**
-	 * Adds given JmtCells to a freshly created blocking station. This method will not modify
+	 * Adds given JmtCells to a freshly created blocking region. This method will not modify
 	 * data structure and is used during load operation
 	 */
-	public void addCellsToBlockingRegion(Object[] cells, Object regionKey) {
+	public void addCellsToBlockingRegion(Object regionKey, Object[] cells) {
 		BlockingRegion bl = new BlockingRegion(this, regionKey);
 		bl.addStations(cells);
 	}
 
 	/**
-	 * Adds a new Blocking region that contains selected cells,
+	 * Adds a new blocking region that contains selected cells,
 	 * if this does not overlap with existing one
 	 */
 	public void addSelectionToNewBlockingRegion() {
@@ -2780,7 +2730,7 @@ public class Mediator implements GuiInterface {
 					canBeAdded = false;
 					break;
 				} else {
-					stations.put(cell, stationKey);
+					stations.put(stationKey, cell);
 				}
 			} else if (cell instanceof BlockingRegion) {
 				// A blocking region cannot overlap another one
@@ -2790,13 +2740,11 @@ public class Mediator implements GuiInterface {
 		}
 		// If blocking region can be added, adds it to graph window, otherwise deletes it
 		if (canBeAdded && stations.size() > 0) {
-			BlockingRegion bl = new BlockingRegion(this, regionKey);
-			Object[] stationCells = stations.keySet().toArray();
-			bl.addStations(stationCells);
 			// Adds stations to blocking region into data structure
-			for (Object stationCell : stationCells) {
-				model.addRegionStation(regionKey, stations.get(stationCell));
+			for (Object stationKey : stations.keySet()) {
+				model.addRegionStation(regionKey, stationKey);
 			}
+			addCellsToBlockingRegion(regionKey, stations.values().toArray());
 		} else {
 			model.deleteBlockingRegion(regionKey);
 		}
@@ -2808,18 +2756,17 @@ public class Mediator implements GuiInterface {
 	 * blocking region over them
 	 */
 	public void handlesBlockingRegionDrag() {
-		Object[] cells = graph.getDescendants(graph.getSelectionCells());
-		// Put cells not in a blocking region to back
+		Object[] cells = graph.getSelectionCells();
 		HashSet<Object> putBack = new HashSet<Object>();
-		for (Object cell2 : cells) {
-			if (cell2 instanceof JmtCell && ((JmtCell) cell2).parentChanged()) {
+		for (Object c : cells) {
+			if (c instanceof JmtCell && ((JmtCell) c).parentChanged()) {
 				// This cell was moved in, out or between blocking regions
-				JmtCell cell = (JmtCell) cell2;
+				JmtCell cell = (JmtCell) c;
 				Object key = ((CellComponent) cell.getUserObject()).getKey();
 				Object oldRegionKey, newRegionKey;
 				if (!(cell.getParent() instanceof BlockingRegion)) {
 					// Object removed from blocking region
-					putBack.add(cell2);
+					putBack.add(cell);
 					oldRegionKey = ((BlockingRegion) cell.getPrevParent()).getKey();
 					model.removeRegionStation(oldRegionKey, key);
 					// If region is empty, deletes region
@@ -2853,16 +2800,26 @@ public class Mediator implements GuiInterface {
 				// Resets parent for this cell
 				cell.resetParent();
 			}
-			// Avoid insertion of a blocking region in an other
-			else if (cell2 instanceof BlockingRegion) {
-				BlockingRegion region = (BlockingRegion) cell2;
+			// Avoids insertion of an edge to a blocking region
+			else if (c instanceof JmtEdge) {
+				JmtEdge edge = (JmtEdge) c;
+				if (edge.getParent() != null) {
+					edge.removeFromParent();
+					graph.getModel().insert(new Object[] { edge }, null, null, null, null);
+					putBack.add(edge);
+				}
+			}
+			// Avoids insertion of a blocking region to another
+			else if (c instanceof BlockingRegion) {
+				BlockingRegion region = (BlockingRegion) c;
 				if (region.getParent() != null) {
 					region.removeFromParent();
 					graph.getModel().insert(new Object[] { region }, null, null, null, null);
+					putBack.add(region);
 				}
 			}
 		}
-		// Puts cells removed from blocking region on background
+		// Puts cells removed from blocking regions to back
 		graph.getModel().toBack(putBack.toArray());
 	}
 
@@ -2898,10 +2855,6 @@ public class Mediator implements GuiInterface {
 			graph.getGraphLayoutCache().edit(nested);
 		}
 		avoidOverlappingCell(cells);
-	}
-
-	public AbstractJmodelAction getRotate() {
-		return actionRotate;
 	}
 
 	public boolean isInGroup(Object cell) {
@@ -3230,114 +3183,6 @@ public class Mediator implements GuiInterface {
 			}
 		}
 		return Y;
-	}
-
-	public void deleteCells(Object[] cells) {
-		GraphModel graphmodel = graph.getModel();
-
-		// If a cell is a blocking region avoid removing its edges and
-		// select its element at the end of the removal process
-		Set edges = new HashSet();
-		Set<Object> select = new HashSet<Object>();
-
-		// Set with all regions that can be deleted as its child were removed
-		Set<Object> regions = new HashSet<Object>();
-		// Set with all JmtCells that we are removing
-		Set<Object> jmtCells = new HashSet<Object>();
-
-		for (int i = 0; i < cells.length; i++) {
-			if (!(cells[i] instanceof BlockingRegion)) {
-				// Adds edge for removal
-				edges.addAll(DefaultGraphModel.getEdges(graphmodel, new Object[] { cells[i] }));
-				// Stores parents information and cell
-				if (cells[i] instanceof JmtCell) {
-					if (((JmtCell) cells[i]).getParent() instanceof BlockingRegion) {
-						regions.add(((JmtCell) cells[i]).getParent());
-					}
-					jmtCells.add(cells[i]);
-				}
-			} else {
-				// Adds node for selection
-				Object[] nodes = graph.getDescendants(new Object[] { cells[i] });
-				for (Object node : nodes) {
-					if (node instanceof JmtCell || node instanceof JmtEdge) {
-						select.add(node);
-					}
-				}
-				// Deletes blocking region from data structure
-				model.deleteBlockingRegion(((BlockingRegion) cells[i]).getKey());
-			}
-		}
-
-		if (!edges.isEmpty()) {
-			// Removes edges from graph
-			graphmodel.remove(edges.toArray());
-		}
-		// Removes cells from graph
-		graphmodel.remove(cells);
-
-		// Checks if all children of a blocking region have been removed
-		Iterator<Object> it = regions.iterator();
-		while (it.hasNext()) {
-			jmtCells.add(null);
-			BlockingRegion region = (BlockingRegion) it.next();
-			List child = region.getChildren();
-			boolean empty = true;
-			for (int i = 0; i < child.size(); i++) {
-				if (child.get(i) instanceof JmtCell && !jmtCells.contains(child.get(i))) {
-					empty = false;
-					break;
-				}
-			}
-			if (empty) {
-				model.deleteBlockingRegion(region.getKey());
-				graphmodel.remove(new Object[] { region });
-			}
-		}
-
-		// Adds port for removal
-		Set<Object> ports = new HashSet<Object>();
-		for (int i = 0; i < graphmodel.getRootCount(); i++) {
-			Object root = graphmodel.getRootAt(i);
-			if (root instanceof InputPort || root instanceof OutputPort) {
-				ports.add(root);
-			}
-		}
-		if (!ports.isEmpty()) {
-			// Removes ports from graph
-			graphmodel.remove(ports.toArray());
-		}
-
-		// Removes cells from data structure
-		for (Object cell : cells) {
-			if (cell instanceof JmtCell) {
-				model.deleteStation(((CellComponent) ((JmtCell) cell).getUserObject()).getKey());
-			} else if (cell instanceof JmtEdge) {
-				JmtEdge link = (JmtEdge) cell;
-				model.setConnected(link.getSourceKey(), link.getTargetKey(), false);
-			}
-		}
-
-		// If no stations remains gray select and link buttons
-		if (graphmodel.getRootCount() == 0) {
-			componentBar.clearButtonGroupSelection(0);
-			setConnect.setEnabled(false);
-			setSelect.setEnabled(false);
-			actionSetRight.setEnabled(false);
-		}
-
-		// Selects components from removed blocking regions
-		if (select.size() > 0) {
-			graph.setSelectionCells(select.toArray());
-			// Resets parent information of cells that changed parent
-			it = select.iterator();
-			while (it.hasNext()) {
-				Object next = it.next();
-				if (next instanceof JmtCell) {
-					((JmtCell) next).resetParent();
-				}
-			}
-		}
 	}
 
 	@Override

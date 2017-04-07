@@ -30,6 +30,16 @@ public class ClassSwitchRow {
 		this.rowValues = new HashMap<Object, Float>();
 	}
 
+	@Override
+	public Object clone() {
+		ClassSwitchRow csr = new ClassSwitchRow();
+		csr.classInKey = classInKey;
+		for (Object classOutKey : rowValues.keySet()) {
+			csr.rowValues.put(classOutKey, rowValues.get(classOutKey));
+		}
+		return csr;
+	}
+
 	public float getValue(Object classInKey, Object classOutKey) {
 		if (this.classInKey == null) {
 			this.classInKey = classInKey;

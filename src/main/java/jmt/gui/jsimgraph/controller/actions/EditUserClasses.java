@@ -32,9 +32,6 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class EditUserClasses extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -52,7 +49,7 @@ public class EditUserClasses extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		// Edits
 		mediator.editUserClasses();
 	}
+
 }

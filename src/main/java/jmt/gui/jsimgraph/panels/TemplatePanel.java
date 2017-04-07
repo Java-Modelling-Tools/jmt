@@ -184,6 +184,9 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 		selectionModel.addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting()) {
+					return;
+				}
 				if (templateTable.getSelectedRowCount() > 0) {
 					update.setEnabled(true);
 				} else {

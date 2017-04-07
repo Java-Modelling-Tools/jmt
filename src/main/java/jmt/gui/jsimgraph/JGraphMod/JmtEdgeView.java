@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jsimgraph.JGraphMod;
 
 import java.awt.Shape;
@@ -31,12 +32,8 @@ import org.jgraph.graph.EdgeView;
  * 		Date: 15-ott-2006
  * 
  */
-
 public class JmtEdgeView extends EdgeView {
 
-	/**
-		 * 
-		 */
 	private static final long serialVersionUID = 1L;
 	private static JmtEdgeRenderer renderer = new JmtEdgeRenderer();
 	private Mediator mediator;
@@ -45,40 +42,29 @@ public class JmtEdgeView extends EdgeView {
 		super();
 	}
 
-	/**
-	 */
 	public JmtEdgeView(Object cell) {
 		super(cell);
 
 	}
 
 	public JmtEdgeView(Object cell, Mediator factory) {
-		// TODO Auto-generated constructor stub
 		super(cell);
 		this.mediator = factory;
 	}
 
 	@Override
 	public CellViewRenderer getRenderer() {
-
 		return renderer;
 	}
 
-	// Giuseppe De Cicco & Fabio Granara
 	@Override
 	public Shape getShape() {
-		//		System.out.println("chiamato");
-
 		if (sharedPath != null) {
 			return sharedPath;
 		} else if (mediator.getIsReleased()) {
-			//			System.out.println("VAlore in View: "+((JmtEdge)(this.getCell())).latiDiIntersezione.size());
-			//			System.out.println("**********RESTITUISCO IL RENDERER***********");
 			return sharedPath = (GeneralPath) renderer.createShape();
 		} else {
-
 			return sharedPath = (GeneralPath) renderer.createShape2();
-
 		}
 	}
 

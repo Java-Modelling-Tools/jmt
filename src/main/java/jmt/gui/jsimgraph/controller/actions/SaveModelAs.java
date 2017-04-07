@@ -24,18 +24,14 @@ import java.awt.event.KeyEvent;
 import jmt.gui.jsimgraph.controller.Mediator;
 
 /**
- * <p>Title: Save Model As... Action</p>
- * <p>Description: Action performed when pressing the Save As... menu item.</p>
- * 
+
  * @author Bertoli Marco
- *         Date: 22-lug-2005
- *         Time: 12.19.21
+ * Date: 22-lug-2005
+ * Time: 12.19.21
+
  */
 public class SaveModelAs extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -55,4 +51,5 @@ public class SaveModelAs extends AbstractJmodelAction {
 	public void actionPerformed(ActionEvent e) {
 		mediator.saveModelAs();
 	}
+
 }

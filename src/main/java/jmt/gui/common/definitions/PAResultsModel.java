@@ -43,8 +43,8 @@ import jmt.gui.common.xml.XMLConstantNames;
  * Description: Added new Performance index for the capturing the 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
- *              each sink per class. 
- *              
+ *              each sink per class.
+ * 
  * Modified by Ashanka (Oct 2010):
  * Patch: To bug fix Multi-Sink Indices.
  * Description: Implemented the throughputTimePerSink and responseTimePerSink for the what if/parameteric simulation.

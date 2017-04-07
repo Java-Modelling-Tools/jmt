@@ -20,12 +20,25 @@ package jmt.gui.jsimgraph.definitions;
 
 import java.awt.Color;
 import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.Map;
 import java.util.Vector;
 
+import jmt.engine.log.LoggerParameters;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.CombFork;
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
+import jmt.gui.common.forkStrategies.OutPath;
+import jmt.gui.common.forkStrategies.ProbabilitiesFork;
+import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.ServiceStrategy;
 import jmt.gui.jsimgraph.JSimGraphConstants;
 
@@ -43,10 +56,10 @@ import jmt.gui.jsimgraph.JSimGraphConstants;
  * Modified by Francesco D'Aquino 11/11/2005
  */
 //todo MMM JMVA bridge, undo/redo
-public class JSimGraphModel extends CommonModel implements JmodelClassDefinition, JmodelStationDefinition, JSimGraphConstants {
+public class JSimGraphModel extends CommonModel implements JmodelClassDefinition, JmodelStationDefinition, JmodelBlockingRegionDefinition, JSimGraphConstants {
 
 	// ----- Variables -------------------------------------------------------------
-	protected HashMap<String, Long> objectNumber = new HashMap<String, Long>(); // Used to generate progressive unique default names
+	protected HashMap<String, Integer> objectNumber = new HashMap<String, Integer>(); // Used to generate progressive unique default names
 	protected HashMap<Object, Color> classColor = new HashMap<Object, Color>(); // Used to store classes color
 	protected HashMap<Object, JMTPoint> stationPositions = new HashMap<Object, JMTPoint>(); // Used to store station positions
 	protected Color[] defaultColor = new Color[] { Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.YELLOW }; // Defaults color prompted when inserting new class (next ones are generated random)
@@ -66,60 +79,46 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 * Adds a new class to the model and sets all the parameters by default.
 	 * @return search key for the new class.
 	 */
+	@Override
 	public Object addClass() {
-		Long num;
+		int num = 0;
 		if (!objectNumber.containsKey(Defaults.get("className"))) {
-			num = new Long(1L);
+			num = classesKeyset.size();
 		} else {
-			num = objectNumber.get(Defaults.get("className"));
-			num = new Long(num.longValue() + 1);
+			num = objectNumber.get(Defaults.get("className")).intValue();
 		}
-		objectNumber.put(Defaults.get("className"), num);
-		return addClass(getUniqueClassName(Defaults.get("className") + num.toString()),
+		objectNumber.put(Defaults.get("className"), new Integer(++num));
+		return addClass(Defaults.get("className") + num,
 				Defaults.getAsInteger("classType").intValue(), Defaults.getAsInteger("classPriority"),
 				Defaults.getAsInteger("classPopulation"), Defaults.getAsNewInstance("classDistribution"));
 	}
 
 	/**
 	 * Adds a new class to the model and sets all the parameters at once.
-	 * @param name name of the class.
-	 * @param type type of the class.
-	 * @param priority priority of the class.
-	 * @param population population of the class.
-	 * @param distribution inter-arrival time distribution of the class.
+	 * @param name name of the new class.
+	 * @param type type of the new class.
+	 * @param priority priority of the new class.
+	 * @param population population of the new class.
+	 * @param distribution inter-arrival time distribution of the new class.
 	 * @return search key for the new class.
-	 * Overrides default one to add "Color".
 	 */
 	@Override
 	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution) {
-		Object key = super.addClass(getUniqueClassName(name), type, priority, population, distribution);
+		Object key = super.addClass(name, type, priority, population, distribution);
 		setClassColor(key, getNewColor());
-		Vector<Object> sources = getStationKeysSource();
-		if (type == CLASS_TYPE_OPEN && !sources.isEmpty()) {
-			setClassRefStation(key, sources.get(0));
+		if (type == CLASS_TYPE_OPEN && !sourcesKeyset.isEmpty()) {
+			setClassRefStation(key, sourcesKeyset.get(0));
 		}
 		return key;
 	}
 
 	/**
 	 * Deletes a class from the model, given the search key.
-	 * Overrides default one to remove "Color".
 	 */
 	@Override
 	public void deleteClass(Object key) {
 		super.deleteClass(key);
 		classColor.remove(key);
-	}
-
-	/**
-	 * Sets name of the class, given the search key.
-	 */
-	@Override
-	public void setClassName(Object key, String name) {
-		if (getClassName(key).equals(name)) {
-			return;
-		}
-		super.setClassName(key, getUniqueClassName(name));
 	}
 
 	/**
@@ -131,15 +130,15 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			return;
 		}
 		super.setClassType(key, type);
-		Vector<Object> sources = getStationKeysSource();
-		if (type == CLASS_TYPE_OPEN && !sources.isEmpty()) {
-			setClassRefStation(key, sources.get(0));
+		if (type == CLASS_TYPE_OPEN && !sourcesKeyset.isEmpty()) {
+			setClassRefStation(key, sourcesKeyset.get(0));
 		}
 	}
 
 	/**
 	 * Returns color of the class, given the search key.
 	 */
+	@Override
 	public Color getClassColor(Object key) {
 		return classColor.get(key);
 	}
@@ -147,152 +146,98 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	/**
 	 * Sets color of the class, given the search key.
 	 */
+	@Override
 	public void setClassColor(Object key, Color color) {
 		classColor.put(key, color);
 	}
 
 	/**
-	 * Generates color for a new class.
+	 * Returns a new color.
 	 */
 	public Color getNewColor() {
-		Long num;
-		if (!objectNumber.containsKey(COLOR_NAME)) {
-			num = new Long(0L);
-		} else {
-			num = objectNumber.get(COLOR_NAME);
-			num = new Long(num.longValue() + 1);
+		int num = 0;
+		if (objectNumber.containsKey(COLOR_NAME)) {
+			num = objectNumber.get(COLOR_NAME).intValue();
 		}
-		objectNumber.put(COLOR_NAME, num);
-		if (num.longValue() < defaultColor.length) {
-			return defaultColor[num.intValue()];
+		objectNumber.put(COLOR_NAME, new Integer(++num));
+		if (num <= defaultColor.length) {
+			return defaultColor[num - 1];
 		} else {
-			return new Color((int) Math.floor(Math.random() * 256), (int) Math.floor(Math.random() * 256), (int) Math.floor(Math.random() * 256));
+			return new Color((int) Math.floor(Math.random() * 256),
+					(int) Math.floor(Math.random() * 256),
+					(int) Math.floor(Math.random() * 256));
 		}
 	}
 
 	/**
-	 * Returns a serialized object for a given class, used to support cut/paste,
-	 * undo/redo operations
-	 * @param classKey Search's key for station
-	 * @return Serialized class object
+	 * Returns serialized form of a class.
+	 * @param key search key for the class.
+	 * @return serialized form of the class.
 	 */
-	public Object serializeClass(Object classKey) {
-		return new SerializedClass(classKey);
+	@Override
+	public Object serializeClass(Object key) {
+		return new SerializedClass(key);
 	}
 
 	/**
-	 * Deserializes given class
-	 * @param serializedForm class's Serialized form got from <code>serializeClass</code>
-	 * method.
-	 * @return search's key for inserted class
+	 * Inserts a new class according to its serialized form.
+	 * @param Class serialized form of the new class.
+	 * @return search key for the new class.
 	 */
-	public Object deserializeClass(Object serializedForm) {
-		SerializedClass sc = (SerializedClass) serializedForm;
-		Object newkey = addClass(sc.name, sc.type, sc.priority, sc.population, sc.distribution);
-		setClassColor(newkey, sc.color);
-		setClassRefStation(newkey, sc.refStation);
-		return newkey;
+	@Override
+	public Object deserializeClass(Object Class) {
+		SerializedClass sc = (SerializedClass) Class;
+		Object key = addClass(sc.data.name, sc.data.type, sc.data.priority, sc.data.population, null);
+		if (sc.data.distribution != null) {
+			setClassDistribution(key, ((Distribution) sc.data.distribution).clone());
+		}
+		if (stationsKeyset.contains(sc.data.refStation)) {
+			setClassRefStation(key, sc.data.refStation);
+		}
+		return key;
 	}
 
 	/**
-	 * Object returned when asking for serializedClass
+	 * Object returned when asking for SerializedClass.
 	 */
 	public class SerializedClass {
-		// Attributes of this class
 		public Object key;
-		public String name;
-		public Color color;
-		public int type;
-		public Integer priority;
-		public Integer population;
-		public Object distribution;
-		public Object refStation;
+		public ClassData data;
 
 		/**
-		 * Constructs a new serialized form of specified class
-		 * @param classkey key of search for specified class
+		 * Constructs a new serialized form of specified class.
+		 * @param key search key for specified class.
 		 */
-		public SerializedClass(Object classkey) {
-			key = classkey;
-			name = getClassName(classkey);
-			color = getClassColor(classkey);
-			type = getClassType(classkey);
-			priority = getClassPriority(classkey);
-			population = getClassPopulation(classkey);
-			distribution = getClassDistribution(classkey);
-			refStation = getClassRefStation(classkey);
+		public SerializedClass(Object key) {
+			if (!classesKeyset.contains(key)) {
+				return;
+			}
+			this.key = key;
+			data = (ClassData) ((ClassData) classDataHM.get(key)).clone();
 		}
-	}
-
-	/**
-	 * Returns given name if a class with the same name does not exist or makes it unique
-	 * @param name class name
-	 * @return unique name
-	 */
-	private String getUniqueClassName(String name) {
-		// Map of all unique names with their first users
-		TreeSet<String> names = new TreeSet<String>();
-		Vector<Object> keys = getClassKeys();
-		// Finds all used names
-		for (int i = 0; i < keys.size(); i++) {
-			names.add(getClassName(keys.get(i)));
-		}
-
-		// If name is new, returns it
-		if (!names.contains(name)) {
-			return name;
-		}
-
-		int num;
-		// If format is already '*_[number]' increment number
-		char[] charname = name.toCharArray();
-		int n = charname.length - 1;
-		while (charname[n] >= '0' && charname[n] <= '9' && n > 0) {
-			n--;
-		}
-		if (charname[n] == '_') {
-			num = Integer.parseInt(name.substring(n + 1));
-			name = name.substring(0, n); // Removes suffix
-		}
-		// Otherwise uses number 1
-		else {
-			num = 1;
-		}
-		// Finds unique number
-		while (names.contains(name + "_" + num)) {
-			num++;
-		}
-		return name + "_" + num;
 	}
 	// ----------------------------------------------------------------------------------------------------
 
 	// ----- Station Definition Methods -------------------------------------------------------------------
 	/**
-	 * Sets name of the station, given the search key.
-	 */
-	@Override
-	public void setStationName(Object key, String name) {
-		if (name.equals(getStationName(key)) || !checkStationName(name)) {
-			return;
-		}
-		super.setStationName(key, getUniqueStationName(name));
-	}
-
-	/**
 	 * Adds a new station to the model, given the station type.
-	 * @param type type of the station.
+	 * @param type type of the new station.
 	 * @return search key for the new station.
 	 */
+	@Override
 	public Object addStation(String type) {
-		Long num;
+		int num = 0;
 		if (!objectNumber.containsKey(type)) {
-			num = new Long(1L);
+			for (Object stationKey : stationsKeyset) {
+				if (getStationType(stationKey).equals(type)) {
+					num++;
+				}
+			}
 		} else {
-			num = objectNumber.get(type);
-			num = new Long(num.longValue() + 1);
+			num = objectNumber.get(type).intValue();
 		}
-		objectNumber.put(type, num);
-		return super.addStation(getUniqueStationName(STATION_NAMES.get(type) + " " + num), type);
+		objectNumber.put(type, new Integer(++num));
+		return super.addStation(STATION_NAMES.get(type) + " " + num, type);
 	}
 
 	/**
@@ -305,235 +250,336 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	}
 
 	/**
-	 * Sets position for a target station into jgraph window. This method is used to
-	 * implement save routine
-	 * @param key key of search for target station
-	 * @param position position where target station is placed
+	 * Returns name of the next station, given the station type.
 	 */
+	@Override
+	public String previewStationName(String type) {
+		int num = 0;
+		if (!objectNumber.containsKey(type)) {
+			for (Object stationKey : stationsKeyset) {
+				if (getStationType(stationKey).equals(type)) {
+					num++;
+				}
+			}
+		} else {
+			num = objectNumber.get(type).intValue();
+		}
+		return getUniqueStationName(STATION_NAMES.get(type) + " " + (++num));
+	}
+
+	/**
+	 * Sets position of the station, given the search key.
+	 */
+	@Override
 	public void setStationPosition(Object key, JMTPoint position) {
 		stationPositions.put(key, position);
 	}
 
 	/**
-	 * Returns stored position for a given station into jgraph window
-	 * (Note that this is stored position, not original position. This method
-	 * is used to implement load routine)
-	 * @param key key of search for target station
-	 * @return position where target station has to be placed
+	 * Returns position of the station, given the search key.
 	 */
+	@Override
 	public JMTPoint getStationPosition(Object key) {
 		return stationPositions.get(key);
 	}
 
 	/**
-	 * Gets a preview of name that will be assigned automatically to new created object of
-	 * specified type. This method is used to calculate dimensions of caption to be displayed
-	 * under component on jgraph window
-	 * @param type Constant string from JMODELConstants interface.
-	 * @return name assigned to next station of 'type' type.
+	 * Returns serialized form of a station.
+	 * @param key search key for the station.
+	 * @return serialized form of the station.
 	 */
-	public String previewStationName(String type) {
-		Long num;
-		if (!objectNumber.containsKey(type)) {
-			num = new Long(1L);
-		} else {
-			num = objectNumber.get(type);
-			num = new Long(num.longValue() + 1);
-		}
-		return getUniqueStationName(STATION_NAMES.get(type) + " " + num);
-	}
-
-	/**
-	 * Returns a serialized form of a given station to support cut/copy, undo/redo operations
-	 * @param key Search's key for station
-	 * @return serialized station or null if station key does not exists
-	 */
+	@Override
 	public Object serializeStation(Object key) {
 		return new SerializedStation(key);
 	}
 
 	/**
-	 * Inserts a serialized station into data structure, used to support paste operation.
-	 * Note that Empirical routing strategy can be inconsistent with station's current connections.
-	 * (will be resolved in <code>JmtClipboard</code>
-	 * @param serializedForm station's Serialized form got from <code>serializeStation</code>
-	 * method.
-	 * @return search's key for inserted station
+	 * Adds a new station with name and type from its serialized form.
+	 * @param station serialized form of the new station.
+	 * @return search key for the new station.
 	 */
-	public Object deserializeStation(Object serializedForm) {
-		SerializedStation ss = (SerializedStation) ((SerializedStation) serializedForm).clone();
-		ss.name = getUniqueStationName(ss.name);
-		Object key = addStation(ss.name, ss.type);
-		setStationQueueCapacity(key, ss.queueCapacity);
-		setStationQueueStrategy(key, ss.queueStrategy);
-		setStationNumberOfServers(key, ss.numOfServers);
-		// Now sets class-dependent parameters ONLY if stored class exists (so has not been deleted
-		// in the meantime)
-		Object[] classKeys = ss.queueStrategies.keySet().toArray();
-		Vector<Object> currentClassKeys = getClassKeys();
-		for (Object classKey : classKeys) {
-			if (currentClassKeys.contains(classKey)) {
-				setQueueStrategy(key, classKey, ss.queueStrategies.get(classKey));
-				setDropRule(key, classKey, ss.dropRules.get(classKey));
-				setServiceTimeDistribution(key, classKey, ss.serviceStrategies.get(classKey));
-				setRoutingStrategy(key, classKey, ss.routingStrategies.get(classKey));
-			}
-		}
-		return key;
+	@Override
+	public Object addStation(Object station) {
+		SerializedStation ss = (SerializedStation) station;
+		return addStation(ss.data.name, ss.data.type);
 	}
 
 	/**
-	 * Object returned when asking for serializedStation
+	 * Loads parameters of a station from its serialized form.
+	 * @param station serialized form of the station.
+	 * @param key search key for the station.
+	 * @param classes map of serialized forms of classes.
+	 * @param stationKeyMap map of search keys for stations.
+	 */
+	@Override
+	public void LoadStation(Object station, Object key, Map<Object, Object> classes, Map<Object, Object> stationKeyMap) {
+		SerializedStation ss = (SerializedStation) station;
+		setStationQueueCapacity(key, ss.data.queueCapacity);
+		setStationQueueStrategy(key, ss.data.queueStrategy);
+		setStationNumberOfServers(key, ss.data.numberOfServers);
+		setForkBlock(key, ss.data.forkBlock);
+		setIsSimplifiedFork(key, ss.data.isSimplifiedFork);
+		if (ss.data.loggerParameters != null) {
+			setLoggingParameters(key, (LoggerParameters) ss.data.loggerParameters.clone());
+		}
+		Vector<Object> oldClassKeys = new Vector<Object>();
+		for (Object classKey : classesKeyset) {
+			if (classes.containsKey(classKey) && ((SerializedClass) classes.get(classKey)).data.type == getClassType(classKey)) {
+				oldClassKeys.add(classKey);
+			}
+		}
+		if (ss.data.transitionModeList != null) {
+			deleteTransitionMode(key, 0);
+			for (int i = 0; i < ss.data.transitionModeList.size(); i++) {
+				TransitionModeData oldTmd = ss.data.transitionModeList.get(i);
+				addTransitionMode(key, oldTmd.name);
+				for (Object newStationInKey : getBackwardConnections(key)) {
+					Object oldStationInKey = stationKeyMap.get(newStationInKey);
+					for (Object oldClassKey : oldClassKeys) {
+						setEnablingCondition(key, i, newStationInKey, oldClassKey, oldTmd.enablingCondition.getEntry(oldStationInKey, oldClassKey));
+						setInhibitingCondition(key, i, newStationInKey, oldClassKey, oldTmd.inhibitingCondition.getEntry(oldStationInKey, oldClassKey));
+					}
+				}
+				setNumberOfServers(key, i, oldTmd.numberOfServers);
+				setFiringTimeDistribution(key, i, ((ServiceStrategy) oldTmd.firingTimeDistribution).clone());
+				setFiringPriority(key, i, oldTmd.firingPriority);
+				setFiringWeight(key, i, oldTmd.firingWeight);
+				for (Object newStationOutKey : getForwardConnections(key)) {
+					Object oldStationOutKey = stationKeyMap.get(newStationOutKey);
+					for (Object oldClassKey : oldClassKeys) {
+						setFiringOutcome(key, i, newStationOutKey, oldClassKey, oldTmd.firingOutcome.getEntry(oldStationOutKey, oldClassKey));
+					}
+				}
+			}
+		}
+		for (Object oldClassKey : oldClassKeys) {
+			StationClassData scd = ss.classData.get(oldClassKey);
+			setQueueCapacity(key, oldClassKey, scd.queueCapacity);
+			setQueueStrategy(key, oldClassKey, scd.queueStrategy);
+			setDropRule(key, oldClassKey, scd.dropRule);
+			if (scd.serviceDistribution != null) {
+				setServiceTimeDistribution(key, oldClassKey, ((ServiceStrategy) scd.serviceDistribution).clone());
+			}
+			if (scd.routingStrategy != null) {
+				if (scd.routingStrategy instanceof ProbabilityRouting) {
+					setRoutingStrategy(key, oldClassKey, new ProbabilityRouting());
+					Map<Object, Double> oldValues = ((ProbabilityRouting) scd.routingStrategy).getValues();
+					Map<Object, Double> newValues = ((ProbabilityRouting) getRoutingStrategy(key, oldClassKey)).getValues();
+					for (Object newStationOutKey : getForwardConnections(key)) {
+						Object oldStationOutKey = stationKeyMap.get(newStationOutKey);
+						newValues.put(newStationOutKey, oldValues.get(oldStationOutKey));
+					}
+				} else if (scd.routingStrategy instanceof LoadDependentRouting) {
+					setRoutingStrategy(key, oldClassKey, new LoadDependentRouting());
+					Map<Integer, Map<Object, Double>> oldAllEntries = ((LoadDependentRouting) scd.routingStrategy).getAllEmpiricalEntries();
+					Map<Integer, Map<Object, Double>> newAllEntries = ((LoadDependentRouting) getRoutingStrategy(key, oldClassKey)).getAllEmpiricalEntries();
+					for (Integer from : oldAllEntries.keySet()) {
+						newAllEntries.put(from, new HashMap<Object, Double>());
+						Map<Object, Double> oldEntries = oldAllEntries.get(from);
+						Map<Object, Double> newEntries = newAllEntries.get(from);
+						for (Object newStationOutKey : getForwardConnections(key)) {
+							Object oldStationOutKey = stationKeyMap.get(newStationOutKey);
+							newEntries.put(newStationOutKey, oldEntries.get(oldStationOutKey));
+						}
+					}
+				} else {
+					setRoutingStrategy(key, oldClassKey, ((RoutingStrategy) scd.routingStrategy).clone());
+				}
+			}
+			if (scd.joinStrategy != null) {
+				if (scd.joinStrategy instanceof GuardJoin) {
+					setJoinStrategy(key, oldClassKey, new GuardJoin());
+					Map<Object, Integer> oldGuard = ((GuardJoin) scd.joinStrategy).getGuard();
+					Map<Object, Integer> newGuard = ((GuardJoin) getJoinStrategy(key, oldClassKey)).getGuard();
+					for (Object classKey : classesKeyset) {
+						if (oldClassKeys.contains(classKey)) {
+							newGuard.put(classKey, oldGuard.get(classKey));
+						} else {
+							newGuard.put(classKey, Integer.valueOf(0));
+						}
+					}
+				} else {
+					setJoinStrategy(key, oldClassKey, ((JoinStrategy) scd.joinStrategy).clone());
+				}
+			}
+			if (scd.forkStrategy != null) {
+				if (scd.forkStrategy instanceof ProbabilitiesFork) {
+					setForkStrategy(key, oldClassKey, new ProbabilitiesFork());
+					Map<Object, OutPath> oldOutDetails = ((ProbabilitiesFork) scd.forkStrategy).getOutDetails();
+					Map<Object, OutPath> newOutDetails = ((ProbabilitiesFork) getForkStrategy(key, oldClassKey)).getOutDetails();
+					for (Object newStationOutKey : getForwardConnections(key)) {
+						newOutDetails.put(newStationOutKey, new OutPath());
+						Object oldStationOutKey = stationKeyMap.get(newStationOutKey);
+						OutPath oldOutPath = oldOutDetails.get(oldStationOutKey);
+						OutPath newOutPath = newOutDetails.get(newStationOutKey);
+						newOutPath.setProbability(oldOutPath.getProbability());
+						Map<Object, Object> oldOutParams = oldOutPath.getOutParameters();
+						Map<Object, Object> newOutParams = newOutPath.getOutParameters();
+						for (Object numberOfTasks : oldOutParams.keySet()) {
+							newOutParams.put(numberOfTasks, oldOutParams.get(numberOfTasks));
+						}
+					}
+				} else if (scd.forkStrategy instanceof CombFork) {
+					setForkStrategy(key, oldClassKey, new CombFork());
+					Map<Object, Double> oldOutDetails = ((CombFork) scd.forkStrategy).getOutDetails();
+					Map<Object, Double> newOutDetails = ((CombFork) getForkStrategy(key, oldClassKey)).getOutDetails();
+					int totalNumberOfBranches = getForwardConnections(key).size();
+					for (int i = 0; i < totalNumberOfBranches; i++) {
+						newOutDetails.put(Integer.toString(i + 1), oldOutDetails.get(Integer.toString(i + 1)));
+					}
+				} else if (scd.forkStrategy instanceof ClassSwitchFork || scd.forkStrategy instanceof MultiBranchClassSwitchFork) {
+					try {
+						setForkStrategy(key, oldClassKey, scd.forkStrategy.getClass().newInstance());
+					} catch (Exception e) {
+					}
+					Map<Object, OutPath> oldOutDetails = (Map<Object, OutPath>) ((ForkStrategy) scd.forkStrategy).getOutDetails();
+					Map<Object, OutPath> newOutDetails = (Map<Object, OutPath>) ((ForkStrategy) getForkStrategy(key, oldClassKey)).getOutDetails();
+					for (Object newStationOutKey : getForwardConnections(key)) {
+						newOutDetails.put(newStationOutKey, new OutPath());
+						Object oldStationOutKey = stationKeyMap.get(newStationOutKey);
+						OutPath oldOutPath = oldOutDetails.get(oldStationOutKey);
+						OutPath newOutPath = newOutDetails.get(newStationOutKey);
+						Map<Object, Object> oldOutParams = oldOutPath.getOutParameters();
+						Map<Object, Object> newOutParams = newOutPath.getOutParameters();
+						for (Object classKey : classesKeyset) {
+							if (oldClassKeys.contains(classKey)) {
+								newOutParams.put(classKey, oldOutParams.get(classKey));
+							} else {
+								newOutParams.put(classKey, Integer.valueOf(0));
+							}
+						}
+					}
+				} else {
+					setForkStrategy(key, oldClassKey, ((ForkStrategy) scd.forkStrategy).clone());
+				}
+			}
+			if (scd.semaphoreStrategy != null) {
+				setSemaphoreStrategy(key, oldClassKey, ((SemaphoreStrategy) scd.semaphoreStrategy).clone());
+			}
+			if (scd.classSwitchProb != null) {
+				for (Object oldClassOutKey : oldClassKeys) {
+					setClassSwitchMatrix(key, oldClassKey, oldClassOutKey, scd.classSwitchProb.getValue(oldClassKey, oldClassOutKey));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Object returned when asking for SerializedStation.
 	 */
 	public class SerializedStation {
-		// Attributes of this station only
-		protected Object key;
-		public String name;
-		public String type;
-		public Integer queueCapacity;
-		public String queueStrategy;
-		public Integer numOfServers;
-		// Attributes of the tuple (class, this station)
-		public HashMap<Object, String> queueStrategies = new HashMap<Object, String>();
-		public HashMap<Object, String> dropRules = new HashMap<Object, String>();
-		public HashMap<Object, ServiceStrategy> serviceStrategies = new HashMap<Object, ServiceStrategy>();
-		public HashMap<Object, RoutingStrategy> routingStrategies = new HashMap<Object, RoutingStrategy>();
-
-		public SerializedStation() {
-			return;
-		}
-
-		public SerializedStation(Object key) {
-			this.key = key;
-			name = getStationName(key);
-			type = getStationType(key);
-			queueCapacity = getStationQueueCapacity(key);
-			queueStrategy = getStationQueueStrategy(key);
-			numOfServers = getStationNumberOfServers(key);
-			// Now sets all attributes of the (station/class) tuple
-			Vector<Object> classKeys = getClassKeys();
-			for (Object classKey : classKeys) {
-				queueStrategies.put(classKey, getQueueStrategy(key, classKey));
-				dropRules.put(classKey, getDropRule(key, classKey));
-				if (getServiceTimeDistribution(key, classKey) != null) {
-					serviceStrategies.put(classKey, ((ServiceStrategy) getServiceTimeDistribution(key, classKey)).clone());
-				} else {
-					serviceStrategies.put(classKey, null);
-				}
-				if (getRoutingStrategy(key, classKey) != null) {
-					routingStrategies.put(classKey, ((RoutingStrategy) getRoutingStrategy(key, classKey)).clone());
-				} else {
-					routingStrategies.put(classKey, null);
-				}
-			}
-		}
+		public Object key;
+		public StationData data;
+		public Map<Object, StationClassData> classData;
 
 		/**
-		 * Returns a deep copy of this object
-		 * @return A deep copy of this object
+		 * Constructs a new serialized form of specified station.
+		 * @param key search key for specified station.
 		 */
-		@Override
-		public Object clone() {
-			SerializedStation ss = new SerializedStation();
-			ss.key = key;
-			ss.name = name;
-			ss.type = type;
-			ss.queueCapacity = queueCapacity;
-			ss.queueStrategy = queueStrategy;
-			ss.numOfServers = numOfServers;
-			ss.queueStrategies = new HashMap<Object, String>(queueStrategies);
-			ss.dropRules = new HashMap<Object, String>(dropRules);
-			Object[] classKeys = serviceStrategies.keySet().toArray();
-			for (Object classKey : classKeys) {
-				if (serviceStrategies.get(classKey) != null) {
-					ss.serviceStrategies.put(classKey, serviceStrategies.get(classKey).clone());
-				} else {
-					ss.serviceStrategies.put(classKey, null);
-				}
-				if (routingStrategies.get(classKey) != null) {
-					ss.routingStrategies.put(classKey, routingStrategies.get(classKey).clone());
-				} else {
-					ss.routingStrategies.put(classKey, null);
-				}
+		public SerializedStation(Object key) {
+			if (!stationsKeyset.contains(key)) {
+				return;
 			}
-			return ss;
+			this.key = key;
+			data = (StationData) ((StationData) stationDataHM.get(key)).clone();
+			classData = new HashMap<Object, StationClassData>();
+			for (Object classKey : classesKeyset) {
+				classData.put(classKey, (StationClassData) ((StationClassData) stationDetailsBDM.get(classKey, key)).clone());
+			}
 		}
-	}
-
-	/**
-	 * Returns true if the station name is valid, false otherwise
-	 * @param name station name
-	 * @return true if the station name is valid, false otherwise
-	 */
-	private boolean checkStationName(String name) {
-		return !name.equals(STATION_TYPE_FORK) && !name.equals(STATION_TYPE_CLASSSWITCH)
-				&& !name.equals(STATION_TYPE_SCALER) && !name.equals(STATION_TYPE_TRANSITION);
-	}
-
-	/**
-	 * Returns given name if a station with the same name does not exist or makes it unique
-	 * @param name station name
-	 * @return unique name
-	 */
-	private String getUniqueStationName(String name) {
-		// Map of all unique names with their first users
-		TreeSet<String> names = new TreeSet<String>();
-		Vector<Object> keys = getStationKeys();
-		// Finds all used names
-		for (int i = 0; i < keys.size(); i++) {
-			names.add(getStationName(keys.get(i)));
-		}
-
-		// If name is new, returns it
-		if (!names.contains(name)) {
-			return name;
-		}
-
-		int num;
-		// If format is already '*_[number]' increment number
-		char[] charname = name.toCharArray();
-		int n = charname.length - 1;
-		while (charname[n] >= '0' && charname[n] <= '9' && n > 0) {
-			n--;
-		}
-		if (charname[n] == '_') {
-			num = Integer.parseInt(name.substring(n + 1));
-			name = name.substring(0, n); // Removes suffix
-		}
-		// Otherwise uses number 1
-		else {
-			num = 1;
-		}
-		// Finds unique number
-		while (names.contains(name + "_" + num)) {
-			num++;
-		}
-		return name + "_" + num;
 	}
 	// ----------------------------------------------------------------------------------------------------
 
 	// ----- Blocking Region Definition Methods -----------------------------------------------------------
 	/**
-	 * Adds a new blocking region with unique name to current model
-	 * @return search's key for created blocking region
+	 * Adds a new blocking region to the model.
+	 * @return search key for the new region.
 	 */
+	@Override
 	public Object addBlockingRegion() {
-		long num = 1L;
-		String baseName = Defaults.get("blockingRegionName");
-
-		// Gets all blocking region names to find an unique name
-		TreeSet<String> names = new TreeSet<String>();
-		Vector<Object> keys = getRegionKeys();
-		for (int i = 0; i < keys.size(); i++) {
-			names.add(getRegionName(keys.get(i)));
+		int num = 0;
+		if (!objectNumber.containsKey(Defaults.get("blockingRegionName"))) {
+			num = blockingRegionsKeyset.size();
+		} else {
+			num = objectNumber.get(Defaults.get("blockingRegionName")).intValue();
 		}
+		objectNumber.put(Defaults.get("blockingRegionName"), new Integer(++num));
+		return addBlockingRegion(Defaults.get("blockingRegionName") + num, Defaults.get("blockingRegionType"));
+	}
 
-		String name = baseName + num;
-		while (names.contains(name)) {
-			name = baseName + (++num);
+	/**
+	 * Returns serialized form of a blocking region.
+	 * @param key search key for the region.
+	 * @return serialized form of the region.
+	 */
+	@Override
+	public Object serializeBlockingRegion(Object key) {
+		return new SerializedBlockingRegion(key);
+	}
+
+	/**
+	 * Inserts a new blocking region according to its serialized form.
+	 * @param region serialized form of the new region.
+	 * @param classes map of serialized forms of classes.
+	 * @return search key for the new region.
+	 */
+	@Override
+	public Object deserializeBlockingRegion(Object region, Map<Object, Object> classes) {
+		SerializedBlockingRegion sbr = (SerializedBlockingRegion) region;
+		Object key = addBlockingRegion(sbr.data.name, sbr.data.type);
+		Vector<Object> oldClassKeys = new Vector<Object>();
+		for (Object classKey : classesKeyset) {
+			if (classes.containsKey(classKey) && ((SerializedClass) classes.get(classKey)).data.type == getClassType(classKey)) {
+				oldClassKeys.add(classKey);
+			}
 		}
+		setRegionCustomerConstraint(key, sbr.data.maxJobs);
+		setRegionMemorySize(key, sbr.data.maxMemory);
+		for (int i = 0; i < sbr.data.groupList.size(); i++) {
+			BlockingGroupData bgd = sbr.data.groupList.get(i);
+			addRegionGroup(key, bgd.name);
+			setRegionGroupCustomerConstraint(key, i, bgd.maxJobs);
+			setRegionGroupMemorySize(key, i, bgd.maxMemory);
+			for (Object classKey : bgd.classList) {
+				if (oldClassKeys.contains(classKey)) {
+					addClassIntoRegionGroup(key, i, classKey);
+				}
+			}
+		}
+		for (Object oldClassKey : oldClassKeys) {
+			BlockingClassData bcd = sbr.classData.get(oldClassKey);
+			setRegionClassCustomerConstraint(key, oldClassKey, bcd.maxJobs);
+			setRegionClassMemorySize(key, oldClassKey, bcd.maxMemory);
+			setRegionClassDropRule(key, oldClassKey, bcd.drop);
+			setRegionClassWeight(key, oldClassKey, bcd.weight);
+			setRegionClassSize(key, oldClassKey, bcd.size);
+		}
+		return key;
+	}
 
-		return addBlockingRegion(name, Defaults.get("blockingRegionType"));
+	/**
+	 * Object returned when asking for SerializedBlockingRegion.
+	 */
+	public class SerializedBlockingRegion {
+		public Object key;
+		public BlockingRegionData data;
+		public Map<Object, BlockingClassData> classData;
+
+		/**
+		 * Constructs a new serialized form of specified blocking region.
+		 * @param key search key for specified blocking region.
+		 */
+		public SerializedBlockingRegion(Object key) {
+			if (!blockingRegionsKeyset.contains(key)) {
+				return;
+			}
+			this.key = key;
+			data = (BlockingRegionData) ((BlockingRegionData) blockingDataHM.get(key)).clone();
+			classData = new HashMap<Object, BlockingClassData>();
+			for (Object classKey : classesKeyset) {
+				classData.put(classKey, (BlockingClassData) ((BlockingClassData) blockingDetailsBDM.get(classKey, key)).clone());
+			}
+		}
 	}
 	// ----------------------------------------------------------------------------------------------------
 
@@ -551,8 +597,8 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 * @param enabled - set it to true to enable queue animation
 	 */
 	@Override
-	public void setAnimationEnabled(boolean isEnabled) {
-		animationEnabled = isEnabled;
+	public void setAnimationEnabled(boolean enabled) {
+		animationEnabled = enabled;
 	}
 
 }

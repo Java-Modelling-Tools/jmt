@@ -31,6 +31,7 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 11.47.50
  */
 public class Exponential extends Distribution {
+
 	/**
 	 * Construct a new Exponential Distribution
 	 */

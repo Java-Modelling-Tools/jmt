@@ -30,6 +30,7 @@ import java.awt.geom.Point2D;
  * @version 1.0
  */
 public class JMTPoint extends Point2D {
+
 	private double x;
 	private double y;
 	private boolean rotate;

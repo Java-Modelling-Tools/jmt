@@ -26,7 +26,7 @@ package jmt.engine.QueueNet;
  * Description: Added new Performance index for the capturing the 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
- *              each sink per class. 
+ *              each sink per class.
  */
 public class SimConstants {
 

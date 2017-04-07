@@ -208,7 +208,6 @@ public class Dispatcher_jMVAschema {
 				//if automaticSeed == false, then a user defined seed is present
 				sim.setRandomEngineSeed(simulationSeed);
 				sim.initialize();
-
 				logger.debug("jSIM correctly initialized with simulation seed = " + simulationSeed);
 			} else {
 				sim.initialize();
@@ -477,7 +476,7 @@ public class Dispatcher_jMVAschema {
 		try {
 			SimLoader simLoader = new SimLoader(simModelDefinitionPath);
 			Simulation sim = simLoader.getSim();
-			//sim.MONITOR_BLOCKING_REGION = true;            
+         
 			//sets in the Simulation object the path of the original (i.e. MVA)
 			//xml model definition
 			sim.setXmlModelDefPath(modelDefinitionPath);
@@ -486,7 +485,6 @@ public class Dispatcher_jMVAschema {
 				//if automaticSeed == false, then a user defined seed is present
 				sim.setRandomEngineSeed(simulationSeed);
 				sim.initialize();
-
 				logger.debug("jSIM correctly initialized with simulation seed = " + simulationSeed);
 			} else {
 				sim.initialize();
@@ -850,8 +848,8 @@ public class Dispatcher_jMVAschema {
 			e.printStackTrace();
 			logger.error("Error while computing the length of input file " + input.getAbsolutePath());
 			try {
-				outputStream_file1.close();
 				inputStream.close();
+				outputStream_file1.close();
 			} catch (IOException e1) {
 				logger.error("Error while closing stream");
 			}
@@ -872,6 +870,12 @@ public class Dispatcher_jMVAschema {
 		} catch (IOException e) {
 			e.printStackTrace();
 			logger.error("Error while copying input file " + input.getAbsolutePath());
+			try {
+				inputStream.close();
+				outputStream_file1.close();
+			} catch (IOException e1) {
+				logger.error("Error while closing stream");
+			}
 			return false;
 		}
 

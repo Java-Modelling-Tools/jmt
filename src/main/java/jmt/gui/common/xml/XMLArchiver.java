@@ -24,6 +24,7 @@ import java.util.Date;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -41,7 +42,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * <p>Title: XML Manager</p>
+ * <p>Title: XML Archiver</p>
  * <p>Description: Used to save and load model information to be used for the simulation and
  * for the save/load capability.</p>
  *
@@ -63,8 +64,8 @@ public class XMLArchiver implements GuiXMLConstants {
 		}
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty("indent", "yes");
-			transformer.setOutputProperty("encoding", ENCODING);
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.transform(new DOMSource(modelDoc), new StreamResult(archiveName));
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
@@ -83,7 +84,7 @@ public class XMLArchiver implements GuiXMLConstants {
 	 *
 	 * Modified by Francesco D'Aquino
 	 */
-	public static void loadModel(CommonModel model, File archiveName) {
+	public static void loadModel(File archiveName, CommonModel model) {
 		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMT_ARCHIVE));
 		// If document is simulation file, loads it only, if it is an archive loads everything
 		if (doc.getElementsByTagName(XML_ARCHIVE_DOCUMENT_ROOT).getLength() == 0) {

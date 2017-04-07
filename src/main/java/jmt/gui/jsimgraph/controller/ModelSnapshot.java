@@ -24,7 +24,7 @@ import java.util.Vector;
 
 /**
  * <p>Title: Model Snapshot</p>
- * <p>Description: it is a snapshot of the model. It extends HashMap. </p>
+ * <p>Description: This class provides a snapshot of the model.</p>
  *
  * @author Francesco D'Aquino
  *         Date: 9-nov-2005

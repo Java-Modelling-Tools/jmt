@@ -32,11 +32,12 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class SetOptions extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Defines an <code>Action</code> object with a default
+	 * description string and default icon.
+	 */
 	public SetOptions(Mediator mediator) {
 		super("Options", mediator);
 		putValue(SHORT_DESCRIPTION, "Set options");
@@ -48,4 +49,5 @@ public class SetOptions extends AbstractJmodelAction {
 	 */
 	public void actionPerformed(ActionEvent e) {
 	}
+
 }

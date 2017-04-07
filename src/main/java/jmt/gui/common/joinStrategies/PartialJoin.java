@@ -36,7 +36,7 @@ public class PartialJoin extends JoinStrategy {
 
 	@Override
 	public int getRequiredNum() {
-		return this.requiredNum;
+		return requiredNum;
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class PartialJoin extends JoinStrategy {
 	@Override
 	public JoinStrategy clone() {
 		PartialJoin ps = new PartialJoin();
-		ps.requiredNum = this.requiredNum;
+		ps.requiredNum = requiredNum;
 		return ps;
 	}
 

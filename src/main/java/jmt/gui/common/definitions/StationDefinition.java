@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import jmt.engine.log.LoggerParameters;
+
 /**
  * Created by IntelliJ IDEA.
  * User: OrsotronIII
@@ -235,9 +237,9 @@ public interface StationDefinition {
 
 	/**
 	 * Adds a new station to the model, given the station name and type.
-	 * @param name name of the station.
-	 * @param type type of the station.
-	 * @return search key for the new station.
+	 * @param name name of the new station.
+	 * @param type type of the new station.
+	 * @return search key for the new new station.
 	 */
 	public Object addStation(String name, String type);
 
@@ -410,14 +412,14 @@ public interface StationDefinition {
 	 * Returns logging parameters for the logger. <I>MF'08 0.7.4</I>
 	 * @param stationKey: search key for station.
 	 */
-	public Object getLoggingParameters(Object stationKey);
+	public LoggerParameters getLoggingParameters(Object stationKey);
 
 	/**
 	 * Sets logging parameters for the logger. <I>MF'08 0.7.4</I>
 	 * @param stationKey: search key for station.
 	 * @param loggerParameters: local LoggerParameters.
 	 */
-	public void setLoggingParameters(Object stationKey, Object loggerParameters);
+	public void setLoggingParameters(Object stationKey, LoggerParameters loggerParameters);
 
 	/**
 	 * Returns logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
@@ -440,7 +442,7 @@ public interface StationDefinition {
 	/**
 	 * Normalizes the routing probabilities.
 	 */
-	public void normalizeRoutingProbabilities(Object stationKey, Object classKey, Map<Object,Double> values);
+	public void normalizeRoutingProbabilities(Object stationKey, Object classKey, Map<Object, Double> values);
 
 	/**
 	 * Normalizes the fork probabilities.
@@ -492,14 +494,6 @@ public interface StationDefinition {
 	 * Returns the search key for the station, given the station name.
 	 */
 	public Object getStationByName(String stationName);
-
-	public boolean isSinkProbabilityUpdated();
-
-	public void setSinkProbabilityUpdatedVar(boolean param);
-
-	public Vector<String> getSinkProbabilityUpdateStations();
-
-	public void resetSinkProbabilityUpdateStations();
 
 	/**
 	 * Returns the cell (<code>classInKey</code>, <code>classOutKey</code>) of the class

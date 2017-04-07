@@ -175,23 +175,24 @@ public class ClusterPanel extends WizardPanel implements CommonConstants, JWATCo
 	private class listClusterListener implements ListSelectionListener {
 
 		public void valueChanged(ListSelectionEvent e) {
-			if (!e.getValueIsAdjusting()) {
-				switch (clustList.getSelectedIndex()) {
-				case 0:
-					optClustering.removeAll();
-					optClustering.add(new KMeansOptPanel(ClusterPanel.this, new loadListener(), model), BorderLayout.CENTER);
-					optClustering.revalidate();
-					optClustering.repaint();
-					break;
-				case 1:
-					optClustering.removeAll();
-					optClustering.add(new FuzzyOptPanel(ClusterPanel.this, new loadListener(), model), BorderLayout.CENTER);
-					optClustering.revalidate();
-					optClustering.repaint();
-					break;
-				default:
-					clustList.setSelectedIndex(0);
-				}
+			if (e.getValueIsAdjusting()) {
+				return;
+			}
+			switch (clustList.getSelectedIndex()) {
+			case 0:
+				optClustering.removeAll();
+				optClustering.add(new KMeansOptPanel(ClusterPanel.this, new loadListener(), model), BorderLayout.CENTER);
+				optClustering.revalidate();
+				optClustering.repaint();
+				break;
+			case 1:
+				optClustering.removeAll();
+				optClustering.add(new FuzzyOptPanel(ClusterPanel.this, new loadListener(), model), BorderLayout.CENTER);
+				optClustering.revalidate();
+				optClustering.repaint();
+				break;
+			default:
+				clustList.setSelectedIndex(0);
 			}
 		}
 

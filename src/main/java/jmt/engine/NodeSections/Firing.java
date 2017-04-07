@@ -179,20 +179,28 @@ public class Firing extends OutputSection {
 		return producedJobsPerClass[jobClass];
 	}
 
+	/**
+	 * Shows the fork job number warning
+	 */
 	private void showForkJobNumWarning() {
 		if (!isForkJobNumWarningShown) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(800);
-					} catch (InterruptedException e) {
+			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
+				System.out.println("JMT - Warning: " + getOwnerNode().getName()
+						+ " failed to maintain the equilibrium between input and output tasks.");
+			} else {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(800);
+						} catch (InterruptedException e) {
+						}
+						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
+								+ " failed to maintain the equilibrium between input and output tasks.",
+								"JMT - Warning", JOptionPane.WARNING_MESSAGE);
 					}
-					JOptionPane.showMessageDialog(null, getOwnerNode().getName()
-							+ " failed to maintain the equilibrium between the input and output tasks.",
-							"JMT - Warning", JOptionPane.WARNING_MESSAGE);
-				}
-			}).start();
+				}).start();
+			}
 			isForkJobNumWarningShown = true;
 		}
 	}

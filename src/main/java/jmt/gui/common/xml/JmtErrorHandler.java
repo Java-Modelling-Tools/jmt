@@ -30,6 +30,7 @@ import org.xml.sax.SAXParseException;
 
  */
 public class JmtErrorHandler implements ErrorHandler {
+
 	/**
 	 * Receive notification of a warning.
 	 *
@@ -109,4 +110,5 @@ public class JmtErrorHandler implements ErrorHandler {
 		System.err.println("Fatal error while parsing: " + exception.getMessage());
 		throw exception;
 	}
+
 }

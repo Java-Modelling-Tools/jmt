@@ -31,11 +31,12 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class SetConnectState extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Defines an <code>Action</code> object with a default
+	 * description string and default icon.
+	 */
 	public SetConnectState(Mediator mediator) {
 		super("Connect", "Link", mediator);
 		putValue(SHORT_DESCRIPTION, "Connect two stations");
@@ -50,4 +51,5 @@ public class SetConnectState extends AbstractJmodelAction {
 	public void actionPerformed(ActionEvent e) {
 		mediator.setConnectState();
 	}
+
 }

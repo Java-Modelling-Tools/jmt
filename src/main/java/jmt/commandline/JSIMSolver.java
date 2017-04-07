@@ -54,7 +54,7 @@ public class JSIMSolver {
 		}
 
 		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(model);
-		dispatcher.setIsTerminalSimulation(true);
+		dispatcher.setTerminalSimulation(true);
 		// Sets simulation seed if required
 		if (args.length > 1) {
 			try {
@@ -67,7 +67,6 @@ public class JSIMSolver {
 
 		// Starts the simulation
 		dispatcher.solveModel();
-
 		File output = dispatcher.getOutputFile();
 		System.out.println("Output file stored in path: " + output.getAbsolutePath());
 	}

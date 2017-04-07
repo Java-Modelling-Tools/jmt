@@ -20,7 +20,12 @@ package jmt.gui.jsimgraph.template;
 
 import java.io.File;
 
+/**
+ * @author S Jiang
+ * 
+ */
 public class TemplateData {
+
 	//available in both manifest and index.xml
 	private String name;
 	private String fileName;

@@ -59,9 +59,9 @@ public interface XMLConstantNames {
 	public static final String XML_A_PARAMETER_DIRECT = "isDirect";
 	public static final String XML_E_PARAMETER_VALUE = "value";
 	public static final String XML_E_PARAMETER_REFCLASS = "refClass";
+
 	public static final String XML_E_SUBPARAMETER = "subParameter";
 	public static final String XML_A_SUBPARAMETER_NAME = "name";
-
 	public static final String XML_A_SUBPARAMETER_CLASSPATH = "classPath";
 	public static final String XML_A_SUBPARAMETER_ARRAY = "array";
 	public static final String XML_E_SUBPARAMETER_VALUE = "value";
@@ -160,8 +160,6 @@ public interface XMLConstantNames {
 
 	public static final String NODETYPE_REGION = "region";
 	public static final String NODETYPE_STATION = "station";
-
-	public static final String ENCODING = "ISO-8859-1";
 
 	/**
 	 * Parser features

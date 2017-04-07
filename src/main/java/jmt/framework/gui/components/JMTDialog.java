@@ -112,9 +112,10 @@ public class JMTDialog extends JDialog {
 	public void centerWindow() {
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		//gets dimensions of the screen to center window.
-		int xOffset = ((int) tk.getScreenSize().getWidth() - getWidth()) / 2, yOffset = ((int) tk.getScreenSize().getHeight() - getHeight()) / 2;
+		int xOffset = ((int) tk.getScreenSize().getWidth() - getWidth()) / 2;
+		int yOffset = ((int) tk.getScreenSize().getHeight() - getHeight()) / 2;
 
-		setBounds(xOffset, yOffset, this.getWidth(), this.getHeight());
+		setBounds(xOffset, yOffset, getWidth(), getHeight());
 	}
 
 	/**
@@ -123,9 +124,10 @@ public class JMTDialog extends JDialog {
 	public void moveToLowerRightCorner() {
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		//gets dimensions of the screen to center window.
-		int xOffset = ((int) tk.getScreenSize().getWidth() - getWidth()), yOffset = ((int) tk.getScreenSize().getHeight() - getHeight());
+		int xOffset = ((int) tk.getScreenSize().getWidth() - getWidth());
+		int yOffset = ((int) tk.getScreenSize().getHeight() - getHeight());
 
-		setBounds(xOffset, yOffset, this.getWidth(), this.getHeight());
+		setBounds(xOffset, yOffset, getWidth(), getHeight());
 	}
 
 	/**
@@ -148,7 +150,8 @@ public class JMTDialog extends JDialog {
 	public void centerWindowWithOffset(int width, int height, int xOffsetFromCenter, int yOffsetFromCenter) {
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		//gets dimensions of the screen to center window.
-		int xOffset = ((int) tk.getScreenSize().getWidth() - width) / 2, yOffset = ((int) tk.getScreenSize().getHeight() - height) / 2;
+		int xOffset = ((int) tk.getScreenSize().getWidth() - width) / 2;
+		int yOffset = ((int) tk.getScreenSize().getHeight() - height) / 2;
 
 		//add the offset from the center
 		xOffset += xOffsetFromCenter;
@@ -180,7 +183,7 @@ public class JMTDialog extends JDialog {
 	}
 
 	/**
-	 * Sets default operation to be performed when whif window is closed.
+	 * Sets default operation to be performed when what-if window is closed.
 	 * @see WindowConstants#DISPOSE_ON_CLOSE
 	 * @see WindowConstants#DO_NOTHING_ON_CLOSE
 	 * @see JFrame#EXIT_ON_CLOSE

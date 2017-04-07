@@ -28,13 +28,12 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -82,12 +81,8 @@ import jmt.gui.common.definitions.GuiInterface;
  * are routed to the it. So sink should be chosen only when a open class 
  * is present : isSinkPerfIndicesWithClosedClassError.
  * 
- * Modified by Ashanka (June 2010):
- * Updated the Manage Probabilities. Closed Classes routed to Sink with probability <> 0.0 should show warning to Users.
- * 
  * Modified by Mattia Cazzoli
  * Long messages are now visualized on multilple lines.
- * 
  */
 public class JModelProblemsWindow extends JDialog {
 
@@ -260,7 +255,7 @@ public class JModelProblemsWindow extends JDialog {
 		gbconstants.insets.right = -45;
 		this.addComponent(cancelButton, gblayout, gbconstants, 3, 1, 1, 1);
 		this.setSize(CommonConstants.MAX_GUI_WIDTH_JSIM_PROBLEMS, CommonConstants.MAX_GUI_HEIGHT_JSIM_PROBLEMS);
-		this.setLocation(300, 190);
+		this.centerWindow();
 		this.setModal(true);
 		this.setResizable(false);
 	}
@@ -518,15 +513,6 @@ public class JModelProblemsWindow extends JDialog {
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per Sink "
 								+ "should not be used for closed class.</div></html>", null, null));
 			}
-			if (mc.isThereSinkProbabilityUpdateWarning()) {
-				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.SINK_PROBABILITY_UPDATE_WARNING,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sink Probability of the Closed Class(s) "
-								+ mc.getClassModel().getSinkProbabilityUpdateClasses() + " of Station(s) "
-								+ mc.getStationModel().getSinkProbabilityUpdateStations() + " has been updated to 0.0.</div></html>", null, null));
-				//Reset after displaying the offending Station and Class names.
-				mc.getClassModel().resetSinkProbabilityUpdateClasses();
-				mc.getStationModel().resetSinkProbabilityUpdateStations();
-			}
 			if (mc.isThereCsMatrixRowSumError()) {
 				Vector<Object> temp = mc.getCsWithWrongMatrix();
 				for (int i = 0; i < temp.size(); i++) {
@@ -546,21 +532,6 @@ public class JModelProblemsWindow extends JDialog {
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
 							+ " is followed by a queue with BAS strategy scheduling.</div></html>", stationKey, null));
 				}				
-			}
-			if (mc.isThereLoadDependentRoutingError()) {
-				Map<Object, HashMap<Object, Object>> temp = mc.getInvalidLoadDependentRoutingStations();
-				for (Iterator<Object> it = temp.keySet().iterator(); it.hasNext();) {
-					Object key = it.next();
-					HashMap<Object, Object> val = (HashMap<Object, Object>)temp.get(key);
-					Map.Entry<Object, Object> m = val.entrySet().iterator().next();
-					Object stationKey = m.getKey();
-					Object classKey = m.getValue();
-					String className = mc.getClassModel().getClassName(classKey);
-					String sourceName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Station: " + sourceName + " for class: "
-									+ className	+ " with invalid LoadDependentRouting.</div></html>", stationKey, classKey));
-				}
 			}
 			if (mc.isThereCsBetweenForkJoin()) {
 				Vector<Object> temp = mc.getCsBetweenForkJoin();
@@ -713,6 +684,15 @@ public class JModelProblemsWindow extends JDialog {
 
 		gbl.setConstraints(component, gbc);
 		c.add(component);
+	}
+
+	public void centerWindow() {
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		//gets dimensions of the screen to center window.
+		int xOffset = ((int) tk.getScreenSize().getWidth() - getWidth()) / 2;
+		int yOffset = ((int) tk.getScreenSize().getHeight() - getHeight()) / 2;
+
+		setBounds(xOffset, yOffset, getWidth(), getHeight());
 	}
 
 	private void getRelatedPanel(int problemType, int problemSubType, Object relatedStation, Object relatedClass) {

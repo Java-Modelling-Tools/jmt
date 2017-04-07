@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jsimgraph.JGraphMod;
 
 import java.awt.Color;
@@ -37,9 +38,7 @@ import org.jgraph.graph.GraphConstants;
  *         Time: 14.15.00
  */
 public class BlockingRegion extends DefaultGraphCell {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	// Reference to Mediator
 	private Mediator mediator;
@@ -63,7 +62,7 @@ public class BlockingRegion extends DefaultGraphCell {
 	}
 
 	/**
-	 * Define apparence of this component
+	 * Define appearance of this component
 	 */
 	private void setLayout() {
 		GraphConstants.setSizeable(attributes, false);
@@ -72,7 +71,7 @@ public class BlockingRegion extends DefaultGraphCell {
 		GraphConstants.setGradientColor(attributes, new Color(.1F, .1F, .9F, .3F));
 		titledBorder = BorderFactory.createTitledBorder(" " + name + " ");
 		GraphConstants.setBorder(attributes, titledBorder);
-		GraphConstants.setInset(attributes, 15);
+		GraphConstants.setInset(attributes, (int) (GraphConstants.DEFAULTFONT.getSize() * 1.4));
 		GraphConstants.setEditable(attributes, false);
 	}
 
@@ -92,7 +91,7 @@ public class BlockingRegion extends DefaultGraphCell {
 
 	/**
 	 * Return search's key for this component
-	 * @return search's key for this blocking station
+	 * @return search's key for this blocking region
 	 */
 	public Object getKey() {
 		return key;
@@ -111,7 +110,7 @@ public class BlockingRegion extends DefaultGraphCell {
 			titledBorder.setTitle(" " + newName + " ");
 			name = newName;
 		}
-
 		return "";
 	}
+
 }

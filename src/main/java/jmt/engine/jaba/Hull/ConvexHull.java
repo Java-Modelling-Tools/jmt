@@ -96,8 +96,6 @@ public class ConvexHull extends DSurface {
 			checkVertex(v3);
 			checkVertex(v4);
 
-			int i = 0;
-
 			// Add vertices to the hull one at a time
 			for (; e.hasMoreElements();) {
 				addVertex(e.nextElement());

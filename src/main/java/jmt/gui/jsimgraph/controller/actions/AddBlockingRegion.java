@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jsimgraph.controller.actions;
 
 import java.awt.event.ActionEvent;
@@ -31,9 +32,6 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class AddBlockingRegion extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -53,4 +51,5 @@ public class AddBlockingRegion extends AbstractJmodelAction {
 	public void actionPerformed(ActionEvent e) {
 		mediator.addSelectionToNewBlockingRegion();
 	}
+
 }

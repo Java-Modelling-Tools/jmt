@@ -29,6 +29,7 @@ import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -51,7 +52,7 @@ import org.w3c.dom.Node;
 /**
  * <p>Title: Gui XML Writer</p>
  * <p>Description: Writes JModel GUI specific information to an XML file. This
- * class provide methods for model save.</p>
+ * class provides methods for model save.</p>
  * 
  * @author Bertoli Marco
  *         Date: 22-lug-2005
@@ -70,7 +71,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 
 	/**
 	 * Writes gui model informations into an XML file
-	 * @param xmlFile Handler to the file to be created
+	 * @param xmlFile handler to the file to be created
 	 * @param model data structure
 	 */
 	public static void writeXML(File xmlFile, CommonModel model) {
@@ -88,19 +89,19 @@ public class GuiXMLWriter implements GuiXMLConstants {
 
 	/**
 	 * Helper method used to call transformer to build up an XML file from a Document
-	 * @param res Result where created xml should be put
+	 * @param result result where created xml should be put
 	 * @param model data structure
 	 */
-	private static void writeToResult(Result res, CommonModel model) {
+	private static void writeToResult(Result result, CommonModel model) {
 		Document modelDoc = getDocument(model);
 		if (modelDoc == null) {
 			return;
 		}
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty("indent", "yes");
-			transformer.setOutputProperty("encoding", ENCODING);
-			transformer.transform(new DOMSource(modelDoc), res);
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.transform(new DOMSource(modelDoc), result);
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
 		} catch (TransformerFactoryConfigurationError e) {
@@ -132,7 +133,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 
 	/**
 	 * Creates root element and adds schema informations to it
-	 * @param guiDoc Document root
+	 * @param guiDoc document root
 	 * @param model data structure
 	 */
 	static protected void writeGuiInfos(Document guiDoc, CommonModel model) {
@@ -149,7 +150,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 
 	/**
 	 * Write informations for user Classes (name and color)
-	 * @param doc Document root
+	 * @param doc document root
 	 * @param guiNode parent node where class informations should be added
 	 * @param model data structure
 	 */
@@ -166,7 +167,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 
 	/**
 	 * Write informations for stations (name and position)
-	 * @param doc Document root
+	 * @param doc document root
 	 * @param guiNode parent node where station informations should be added
 	 * @param model data structure
 	 */
@@ -190,7 +191,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 	 *  Write informations about parametric analysis. If the parametric analysis model
 	 *  is no more consistent with the simulation model the user will be asked to choose
 	 *  about trying to automatically correct it
-	 * @param doc Document root
+	 * @param doc document root
 	 * @param guiNode parent node where station informations should be added
 	 * @param model data structure
 	 */

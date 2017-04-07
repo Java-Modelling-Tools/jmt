@@ -183,15 +183,16 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 
 			clustList.addListSelectionListener(new ListSelectionListener() {
 				public void valueChanged(ListSelectionEvent e) {
+					if (e.getValueIsAdjusting()) {
+						return;
+					}
 					if (clustInfo != null && clustList.getSelectedIndex() >= 0) {
-						if (!e.getValueIsAdjusting()) {
-							((clustTableModel) clustInfo.getModel()).setData(infos.infoCluster[clustList.getSelectedIndex()].statClust);
-							clustInfo.tableChanged(new TableModelEvent(clustInfo.getModel()));
-							clustDet.setCluster(clustList.getSelectedIndex());
-							String cur = DESCR_LABEL.replaceFirst("X", Integer.toString(clustList.getSelectedIndex() + 1));
-							cur = cur.replaceFirst("Y", Integer.toString(numClusters));
-							desctText.setText(cur.replaceFirst("Z", Integer.toString(infos.numElem[clustList.getSelectedIndex()])));
-						}
+						((clustTableModel) clustInfo.getModel()).setData(infos.infoCluster[clustList.getSelectedIndex()].statClust);
+						clustInfo.tableChanged(new TableModelEvent(clustInfo.getModel()));
+						clustDet.setCluster(clustList.getSelectedIndex());
+						String cur = DESCR_LABEL.replaceFirst("X", Integer.toString(clustList.getSelectedIndex() + 1));
+						cur = cur.replaceFirst("Y", Integer.toString(numClusters));
+						desctText.setText(cur.replaceFirst("Z", Integer.toString(infos.numElem[clustList.getSelectedIndex()])));
 					}
 				}
 			});

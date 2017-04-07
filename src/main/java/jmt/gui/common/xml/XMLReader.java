@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -76,8 +77,8 @@ import org.xml.sax.SAXException;
 
 /**
  * <p>Title: XML Reader</p>
- * <p>Description: Reads model information from an XML file. This
- * class provide methods for model load. it is designed to be used by both JModel and JSim.</p>
+ * <p>Description: Reads model information from an XML file. This class provides
+ * methods for model load.</p>
  *
  * @author Bertoli Marco
  *         Date: 27-lug-2005
@@ -101,17 +102,17 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static HashMap<Object, String> refStations; // Data structure used to hold classes' reference stations
 	protected static HashMap<Object, List<String>> modeNameLists; // Data structure used to hold transitions' mode name lists
 	protected static HashMap<Object[], Map<String, Double>> empiricalRouting;
+	protected static HashMap<Object[], Map<String, Double>> empiricalLDRouting;
 	protected static HashMap<Object[], Map<String, OutPath>> empiricalFork;
 	protected static HashMap<Object[], Map<String, Double>> combFork;
 	protected static HashMap<Object[], Integer> enablingConditionMap;
 	protected static HashMap<Object[], Integer> inhibitingConditionMap;
 	protected static HashMap<Object[], Integer> firingOutcomeMap;
 
-	/*defines the default logger (used to report errors and information for debugging purposes)*/
+	/**defines the default logger (used to report errors and information for debugging purposes).*/
 	private static final jmt.engine.log.JSimLogger debugLog = jmt.engine.log.JSimLogger.getLogger(JSimLogger.STD_LOGGER);
 
-	/**defines matching between engine representation and gui names for drop
-	rules.*/
+	/**defines matching between engine representation and gui names for drop rules.*/
 	protected static final Map<String,String> DROP_RULES_MAPPING;
 
 	static {
@@ -139,7 +140,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static final String distributionContainer = "jmt.engine.random.DistributionContainer";
 
 	/**
-	 * Restore a model saved in an XML file, given the name of the file. If specified file
+	 * Loads a model saved in an XML file, given the name of the file. If specified file
 	 * is a jmodel archive, extracts model informations from it and uses them to reconstruct
 	 * the model. This method is provided to be used with JSIM
 	 * @param fileName name of the file to be opened
@@ -162,7 +163,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Restore a model saved in an XML file, given the handler to the file. If specified file
+	 * Loads a model saved in an XML file, given the handler to the file. If specified file
 	 * is a jmodel archive, extracts model informations from it and uses them to reconstruct
 	 * the model. This method is provided to be used with JSIM
 	 * @param xmlFile handler to the file to be opened
@@ -175,7 +176,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Parses given Gui XML Document to reconstruct simulation model.
+	 * Parses given XML Document to reconstruct simulation model.
 	 * @param root root of document to be parsed
 	 * @param model data model to be elaborated
 	 */
@@ -257,6 +258,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
 		parseClasses(root, model);
 		empiricalRouting = new HashMap<Object[], Map<String, Double>>();
+		empiricalLDRouting = new HashMap<Object[], Map<String, Double>>();
 		empiricalFork = new HashMap<Object[], Map<String, OutPath>>();
 		combFork = new HashMap<Object[], Map<String, Double>>();
 		enablingConditionMap = new HashMap<Object[], Integer>();
@@ -291,6 +293,16 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Object[] names = values.keySet().toArray();
 			for (Object name : names) {
 				routing.put(stations.get(name), values.get(name));
+			}
+		}
+		keys = empiricalLDRouting.keySet().toArray();
+		for (Object key : keys) {
+			Object[] triplekey = (Object[]) key;
+			LoadDependentRouting ldr = (LoadDependentRouting) model.getRoutingStrategy(triplekey[0], triplekey[1]);
+			Map<String, Double> values = empiricalLDRouting.get(key);
+			Object[] names = values.keySet().toArray();
+			for (Object name : names) {
+				ldr.addEmpiricalEntry((Integer) triplekey[2], stations.get(name), values.get(name));
 			}
 		}
 		keys = empiricalFork.keySet().toArray();
@@ -339,7 +351,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Parses given Gui XML Document to reconstruct simulation model.
+	 * Parses given XML Document to reconstruct simulation model.
 	 * @param xml Document to be parsed
 	 * @param model data model to be elaborated
 	 */
@@ -485,7 +497,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Source section. If this source is reference class
+	 * Parses all informations regarding Source section. If this source is reference class
 	 * for any kind of open class, uses service time informations stored here to set distribution
 	 * for this class.
 	 * @param section input section of source station
@@ -515,10 +527,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Queue section.
-	 * @param section input section of source station
+	 * Parses all informations regarding Queue section.
+	 * @param section input section of queue or delay station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this queue or delay station into data structure
 	 */
 	protected static void parseQueueSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
@@ -627,10 +639,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Delay section.
-	 * @param section input section of source station
+	 * Parses all informations regarding Delay section.
+	 * @param section service section of delay station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this delay station into data structure
 	 */
 	protected static void parseDelaySection(Element section, CommonModel model, Object key) {
 		Element parameter = (Element) section.getElementsByTagName(XML_E_PARAMETER).item(0);
@@ -644,10 +656,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Delay section.
-	 * @param section input section of source station
+	 * Parses all informations regarding Server section.
+	 * @param section service section of queue station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this queue station into data structure
 	 */
 	protected static void parseServerSection(Element section, CommonModel model, Object key) {
 		String className = section.getAttribute(XML_A_STATION_SECTION_CLASSNAME);
@@ -681,7 +693,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Parses A Parameter Array node, returning a Map of ClassName -> subParameter
+	 * Parses a Parameter array and returns a Map of ClassName -> subParameter
 	 * @param parameterNode
 	 * @return a Map of ClassName -> subParameter
 	 */
@@ -691,6 +703,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		TreeMap<String, Node> res = new TreeMap<String, Node>();
 		Node child = parameterNode.getFirstChild();
 		String refClass;
+
 		// This manual parsing is a bit unclean but works well and it is really fast.
 		// I was forced to do in this way for the problem said before.
 		while (child != null) {
@@ -740,11 +753,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			ret.add(child);
 			child = child.getNextSibling();
 		}
+
 		return ret;
 	}
 
 	/**
-	 * Parse router section
+	 * Parses router section
 	 * @param section router section
 	 * @param model data structure
 	 * @param key station's key
@@ -811,22 +825,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				// Put into empiricalRouting a pair of station key and class key and map with
 				// station names instead of station key
 				empiricalRouting.put(new Object[] { key, classes.get(className2) }, tmp);
-			}
-			if (rs instanceof LoadDependentRouting) {
+			} else if (rs instanceof LoadDependentRouting) {
 				Node entryArray = routing.get(className2).getFirstChild();
-				Vector<Node> entriesNew = new Vector<Node>();
 				while (entryArray != null && (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER))) {
 					entryArray = entryArray.getNextSibling();//This is a SubParameter..So next time it wont enter.
-					String name = null;
-					try {
-						name = ((Element) entryArray).getAttribute("name");//LDParameter Here
-						name = ((Element) entryArray).getAttribute("classPath");//"jmt.engine.NetStrategies.RoutingStrategies.LDParameter"
-						name = ((Element) entryArray).getAttribute("array");//true
-					} catch (Exception e) {
-					}
-					if (entryArray != null) {
-						entriesNew.add(entryArray.getFirstChild());
-					}
 				}
 				Vector<Node> from = new Vector<Node>();
 				while (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER)) {
@@ -837,52 +839,38 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				while (child != null) {
 					while (child != null && (child.getNodeType() != Node.ELEMENT_NODE || !child.getNodeName().equals(XML_E_SUBPARAMETER))) {
 						child = child.getNextSibling();//This is a SubParameter
-						String name = null;
-						try {
-							name = ((Element) child).getAttribute("name");//LDParameter Here
-							name = ((Element) child).getAttribute("classPath");//"jmt.engine.NetStrategies.ServiceStrategies.LDParameter"
-							name = ((Element) child).getAttribute("array");//false
-						} catch (Exception e) {
-						}
 					}
 					if (child != null) {
 						from.add(child);
 						child = child.getNextSibling();//TXT
 					}
 				}
-				LoadDependentRouting ld = new LoadDependentRouting();
 				for (int j = 0; j < from.size(); j++) {
 					NodeList values = ((Element) from.get(j)).getElementsByTagName(XML_E_SUBPARAMETER);
 					String fromValue = findText(((Element) values.item(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-					int fromVal = new Integer(fromValue);
 					values = ((Element) values.item(1)).getElementsByTagName(XML_E_SUBPARAMETER);
-
+					Map<String, Double> tmp = new TreeMap<String, Double>();
 					for (int n = 0; n < values.getLength(); n++) {
-						try{//Empirical Entry..Station Name..probability Keeps repeating..
-							String atrName = ((Element) values.item(n)).getAttribute("name");//Empirical Entry..Station Name..probability..for a from.
-							if ("EmpiricalEntry".equalsIgnoreCase(atrName)) {
-								Node empiricalEntry = values.item(n);
-								Node station = empiricalEntry.getFirstChild().getNextSibling();
-								String stationName = findText(((Element)station).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-								Node probability = empiricalEntry.getFirstChild().getNextSibling().getNextSibling().getNextSibling();
-								String probabilityValue = findText(((Element)probability).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-								Double prob = Double.parseDouble(probabilityValue);
-								//ld.getRange(fromVal).setProbabilities(stationName, probVal);
-								ld.addEmricalEntryForFrom(new Integer(fromVal), stationName, prob);
-							}
-						}catch(Exception e) {
+						//Empirical Entry..Station Name..probability Keeps repeating..
+						String atrName = ((Element) values.item(n)).getAttribute("name");//Empirical Entry..Station Name..probability..for a from.
+						if ("EmpiricalEntry".equalsIgnoreCase(atrName)) {
+							Node empiricalEntry = values.item(n);
+							Node station = empiricalEntry.getFirstChild().getNextSibling();
+							String stationName = findText(((Element) station).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+							Node probability = empiricalEntry.getFirstChild().getNextSibling().getNextSibling().getNextSibling();
+							String probabilityValue = findText(((Element) probability).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+							tmp.put(stationName, Double.valueOf(probabilityValue));
 						}
+						empiricalLDRouting.put(new Object[] { key, classes.get(className2), Integer.valueOf(fromValue) }, tmp);
 					}
 				}
-				rs = ld;
-				model.setRoutingStrategy(key, classes.get(className2), rs);
 			}
 		}
 	}
 
 	/**
-	 * Parse class switch section
-	 * @param section router section
+	 * Parses class switch section
+	 * @param section class switch section
 	 * @param model data structure
 	 * @param key station's key
 	 */
@@ -920,12 +908,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all parameters for a Logger section from the XML document.
+	 * Parses all parameters for a Logger section from the XML document.
 	 * The information from parseLogger is passed to LogTunnel.
 	 * 
-	 * @param section input section of source station
+	 * @param section service section of logger station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this logger station into data structure
 	 * @author Michael Fercu (Bertoli Marco)
 	 *		   Date: 08-aug-2008
 	 * @see jmt.engine.log.LoggerParameters LoggerParameters
@@ -978,10 +966,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Fork section.
-	 * @param section input section of source station
+	 * Parses all informations regarding Fork section.
+	 * @param section output section of fork station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this fork station into data structure
 	 */
 	protected static void parseForkSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
@@ -1270,6 +1258,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		}
 	}
 
+	/**
+	 * Parses all informations regarding Join section.
+	 * @param section input section of join station
+	 * @param model link to data structure
+	 * @param key key of search for this join station into data structure
+	 */
 	protected static void parseJoinSection(Element section, CommonModel model,
 			Object key) {
 		Element parameter = (Element) section.getElementsByTagName(
@@ -1352,6 +1346,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		}
 	}
 
+	/**
+	 * Parses all informations regarding Semaphore section.
+	 * @param section input section of semaphore station
+	 * @param model link to data structure
+	 * @param key key of search for this semaphore station into data structure
+	 */
 	protected static void parseSemaphoreSection(Element section, CommonModel model,
 			Object key) {
 		Element parameter = (Element) section.getElementsByTagName(
@@ -1407,10 +1407,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Storage section.
-	 * @param section input section of source station
+	 * Parses all informations regarding Storage section.
+	 * @param section input section of place station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this place station into data structure
 	 */
 	protected static void parseStorageSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
@@ -1463,10 +1463,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Enabling section.
-	 * @param section input section of source station
+	 * Parses all informations regarding Enabling section.
+	 * @param section input section of transition station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this transition station into data structure
 	 */
 	protected static void parseEnablingSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
@@ -1521,10 +1521,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Timing section.
-	 * @param section input section of source station
+	 * Parses all informations regarding Timing section.
+	 * @param section service section of transition station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this transition station into data structure
 	 */
 	protected static void parseTimingSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
@@ -1596,10 +1596,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	/**
-	 * Extract all informations regarding Firing section.
-	 * @param section input section of source station
+	 * Parses all informations regarding Firing section.
+	 * @param section output section of transition station
 	 * @param model link to data structure
-	 * @param key key of search for this source station into data structure
+	 * @param key key of search for this transition station into data structure
 	 */
 	protected static void parseFiringSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
@@ -1640,7 +1640,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 */
 	protected static Object parseServiceStrategy(Element serviceTimeStrategy) {
 		String serviceClassPath = serviceTimeStrategy.getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
-
 		if (serviceClassPath.equals(ZeroStrategy.getEngineClassPath())) {
 			// Zero Service Time Strategy
 			return new ZeroStrategy();
@@ -1712,7 +1711,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			param_name = currpar.getAttribute(XML_A_SUBPARAMETER_NAME);
 			//if current parameter is a nested Distribution
 			if (currpar.getAttribute(XML_A_SUBPARAMETER_CLASSPATH).equals(distributionContainer)) {
-
 				//parse the currentparameter to get DIRECT subparameters
 				Vector<Node> nestedDistr = parseParameterArray(currpar);
 				// If distribution is not set, returns null
@@ -1724,14 +1722,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					param_value = parseDistribution((Element) nestedDistr.get(0), (Element) nestedDistr.get(1));
 					dist.getParameter(param_name).setValue(param_value);
 				}
-
 			} else {
 				String param_value = findText(currpar.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0));
 				dist.getParameter(param_name).setValue(param_value);
 			}
-
-			dist.updateCM(); // Updates values of c and mean
 		}
+		dist.updateCM(); // Updates values of c and mean
 		return dist;
 	}
 
@@ -2089,8 +2085,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static void write(Node node) {
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty("indent", "yes");
-			transformer.setOutputProperty("encoding", ENCODING);
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.transform(new DOMSource(node), new StreamResult(System.out));
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
@@ -2099,7 +2095,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		}
-
 	}
 	// -----------------------------------------------------------------------------------------------
 

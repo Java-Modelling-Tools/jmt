@@ -83,11 +83,10 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	private JPanel buttons;
 
 	public ForkEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-		super();
-		super.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		super.setDividerSize(3);
-		super.setBorder(new EmptyBorder(0, 0, 0, 0));
-		this.setResizeWeight(0.5);
+		setOrientation(JSplitPane.VERTICAL_SPLIT);
+		setDividerSize(3);
+		setBorder(new EmptyBorder(0, 0, 0, 0));
+		setResizeWeight(0.5);
 		initComponents();
 		setData(sd, cs, stationKey, classKey);
 	}
@@ -319,16 +318,16 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			return;
 		}
 		// fetching output-connected stations list
-		Vector<Object> output = stations.getForwardConnections(stationKey);
+		Vector<Object> outputs = stations.getForwardConnections(stationKey);
 		// saving all entries of routing strategy in a temporary data structure
-		HashMap<Object, OutPath> temp2 = new HashMap<Object, OutPath>(outPaths);
+		HashMap<Object, OutPath> temp = new HashMap<Object, OutPath>(outPaths);
 		outPaths.clear();
-		for (int i = 0; i < output.size(); i++) {
+		for (int i = 0; i < outputs.size(); i++) {
 			// add old entries to map only if they are still in the current
 			// connection set
-			Object currentKey = output.get(i);
-			if (temp2.containsKey(currentKey)) {
-				outPaths.put(currentKey, temp2.get(currentKey));
+			Object currentKey = outputs.get(i);
+			if (temp.containsKey(currentKey)) {
+				outPaths.put(currentKey, temp.get(currentKey));
 			} else {
 				// if connection set contains new entries, set them to (1, 1.0)
 				// by default
@@ -344,10 +343,10 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		if (stationKey == null || classKey == null || stations == null || combProbs == null) {
 			return;
 		}
-		Vector<Object> output = stations.getForwardConnections(stationKey);
+		Vector<Object> outputs = stations.getForwardConnections(stationKey);
 		HashMap<Object, Double> temp = new HashMap<Object, Double>(combProbs);
 		combProbs.clear();
-		for (int i = 0; i < output.size(); i++) {
+		for (int i = 0; i < outputs.size(); i++) {
 			// add old entries to map only if they are still in the current
 			// connection set
 			String key = Integer.toString(i + 1);
@@ -366,21 +365,21 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			return;
 		}
 		// fetching output-connected stations list
-		Vector<Object> output = stations.getForwardConnections(stationKey);
+		Vector<Object> outputs = stations.getForwardConnections(stationKey);
 		// saving all entries of routing strategy in a temporary data structure
-		HashMap<Object, OutPath> temp2 = new HashMap<Object, OutPath>(outPaths);
+		HashMap<Object, OutPath> temp = new HashMap<Object, OutPath>(outPaths);
 		outPaths.clear();
-		for (int i = 0; i < output.size(); i++) {
+		for (int i = 0; i < outputs.size(); i++) {
 			// add old entries to map only if they are still in the current
 			// connection set
-			Object currentKey = output.get(i);
+			Object currentKey = outputs.get(i);
 
-			if (temp2.containsKey(currentKey)) {
-				outPaths.put(currentKey, temp2.get(currentKey));
+			if (temp.containsKey(currentKey)) {
+				outPaths.put(currentKey, temp.get(currentKey));
 			} else {
 				OutPath tempPath = new OutPath();
 				for (Object o : classes.getClassKeys()) {
-					if (o == this.classKey) {
+					if (o == classKey) {
 						tempPath.putEntry(o, 1);
 					} else {
 						tempPath.putEntry(o, 0);
@@ -396,21 +395,21 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			return;
 		}
 		// fetching output-connected stations list
-		Vector<Object> output = stations.getForwardConnections(stationKey);
+		Vector<Object> outputs = stations.getForwardConnections(stationKey);
 		// saving all entries of routing strategy in a temporary data structure
 		HashMap<Object, OutPath> temp2 = new HashMap<Object, OutPath>(outPaths);
 		outPaths.clear();
-		for (int i = 0; i < output.size(); i++) {
+		for (int i = 0; i < outputs.size(); i++) {
 			// add old entries to map only if they are still in the current
 			// connection set
-			Object currentKey = output.get(i);
+			Object currentKey = outputs.get(i);
 
 			if (temp2.containsKey(currentKey)) {
 				outPaths.put(currentKey, temp2.get(currentKey));
 			} else {
 				OutPath tempPath = new OutPath();
 				for (Object o : classes.getClassKeys()) {
-					if (o == this.classKey) {
+					if (o == classKey) {
 						tempPath.putEntry(o, 1);
 					} else {
 						tempPath.putEntry(o, 0);
@@ -455,7 +454,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		private static final long serialVersionUID = 1L;
 
 		public ForkTable() {
-			super();
 			setModel(new ForkTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
@@ -523,8 +521,8 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			if (columnIndex == 1) {
 				try {
 					Double value = Double.valueOf((String) aValue);
-					if (value.doubleValue() >= 0 && value.doubleValue() <= 1) {
-						outPaths.get(indexToKey(rowIndex)).setProbability(value.doubleValue());
+					if (value.doubleValue() >= 0.0 && value.doubleValue() <= 1.0) {
+						outPaths.get(indexToKey(rowIndex)).setProbability(value);
 					}
 				} catch (NumberFormatException e) {
 				}
@@ -546,7 +544,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		private static final long serialVersionUID = 1L;
 
 		public OutPathTable() {
-			super();
 			setModel(new OutPathTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
@@ -627,7 +624,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			if (columnIndex == 1) {
 				try {
 					Double value = Double.valueOf((String) aValue);
-					if (value.doubleValue() >= 0.0 && value.doubleValue() <= 1.0) {
+					if (value.doubleValue() >= 0.0) {
 						out.put(indexToKey(rowIndex), value);
 					}
 				} catch (NumberFormatException e) {
@@ -651,7 +648,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		private static final long serialVersionUID = 1L;
 
 		public CombTable() {
-			super();
 			setModel(new CombTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
@@ -720,7 +716,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			if (columnIndex == 1) {
 				try {
 					Double value = Double.valueOf((String) aValue);
-					if (value.doubleValue() >= 0.0 && value.doubleValue() <= 1.0) {
+					if (value.doubleValue() >= 0.0) {
 						combProbs.put(indexToKey(rowIndex), value);
 					}
 				} catch (NumberFormatException e) {
@@ -739,7 +735,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		private static final long serialVersionUID = 1L;
 
 		public ClassNumTable() {
-			super();
 			setModel(new ClassNumTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			setDefaultRenderer(Object.class, new DisabledCellRenderer());
@@ -811,7 +806,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			if (columnIndex == 1) {
 				try {
 					Integer value = Integer.valueOf((String) aValue);
-					if (value >= 0) {
+					if (value.intValue() >= 0) {
 						for (Entry<Object, OutPath> m : outPaths.entrySet()) {
 							m.getValue().getOutParameters().put(indexToKey(rowIndex), value);
 						}
@@ -832,7 +827,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		private static final long serialVersionUID = 1L;
 
 		public ForkSwitchTable() {
-			super();
 			setModel(new ForkSwitchTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
@@ -910,7 +904,6 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		private static final long serialVersionUID = 1L;
 
 		public OutNumTable() {
-			super();
 			setModel(new OutNumTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			setDefaultRenderer(Object.class, new DisabledCellRenderer());
@@ -945,7 +938,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			if (columnIndex == 1) {
 				try {
 					Integer value = Integer.valueOf((String) aValue);
-					if (value >= 0) {
+					if (value.intValue() >= 0) {
 						out.put(super.indexToKey(rowIndex), value);
 					}
 				} catch (NumberFormatException e) {

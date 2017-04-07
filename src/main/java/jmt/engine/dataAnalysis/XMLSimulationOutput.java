@@ -71,8 +71,7 @@ import org.w3c.dom.Element;
  * Description: Added new Performance index for the capturing the 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
- *              each sink per class. 
- * 
+ *              each sink per class.
  */
 public class XMLSimulationOutput extends SimulationOutput {
 
@@ -101,7 +100,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 	public XMLSimulationOutput(Simulation simulation) {
 		super(simulation);
 
-		this.isTerminalSimulation = simulation.isIsTerminalSimulation();
+		this.isTerminalSimulation = simulation.isTerminalSimulation();
 
 		try {
 			/////////////////////////////
@@ -280,25 +279,27 @@ public class XMLSimulationOutput extends SimulationOutput {
 		//log file if verbose measure was selected
 		if (measure.getOutput() != null && measure.getOutput().getOutputFile() != null) {
 			elem.setAttribute("logFile", measure.getOutput().getOutputFile().getAbsolutePath());
-			if (isTerminalSimulation) try {
-				StatisticalOutputsLoader loader = new StatisticalOutputsLoader(measure, decimalSeparator, logDelimiter);
-				SampleStatistics stat = loader.getStatistics();
-				elem.setAttribute("mean", Double.toString(stat.getMean()));
-				elem.setAttribute("variance", Double.toString(stat.getVariance()));
-				elem.setAttribute("standardDeviation", Double.toString(stat.getStandardDeviation()));
-				elem.setAttribute("coefficientOfVariation", Double.toString(stat.getCoefficienfOfVariation()));
-				elem.setAttribute("skeweness", Double.toString(stat.getSkew()));
-				elem.setAttribute("kurtosis", Double.toString(stat.getKurtosis()));
-				elem.setAttribute("firstPowerMoment", Double.toString(stat.getMean()));
-				elem.setAttribute("secondPowerMoment", Double.toString(stat.getMoment2()));
-				elem.setAttribute("thirdPowerMoment", Double.toString(stat.getMoment3()));
-				elem.setAttribute("fourthPowerMoment", Double.toString(stat.getMoment4()));
-				elem.setAttribute("minValue", Double.toString(stat.getMin()));
-				elem.setAttribute("maxValue", Double.toString(stat.getMax()));
-				elem.setAttribute("minSimulationTime", Double.toString(stat.getMinSimTime()));
-				elem.setAttribute("maxSimulationTime", Double.toString(stat.getMaxSimTime()));
-			} catch (IOException | ParseException ex) {
-				Logger.getLogger(XMLSimulationOutput.class.getName()).log(Level.SEVERE, null, ex);
+			if (isTerminalSimulation) {
+				try {
+					StatisticalOutputsLoader loader = new StatisticalOutputsLoader(measure, decimalSeparator, logDelimiter);
+					SampleStatistics stat = loader.getStatistics();
+					elem.setAttribute("mean", Double.toString(stat.getMean()));
+					elem.setAttribute("variance", Double.toString(stat.getVariance()));
+					elem.setAttribute("standardDeviation", Double.toString(stat.getStandardDeviation()));
+					elem.setAttribute("coefficientOfVariation", Double.toString(stat.getCoefficienfOfVariation()));
+					elem.setAttribute("skeweness", Double.toString(stat.getSkew()));
+					elem.setAttribute("kurtosis", Double.toString(stat.getKurtosis()));
+					elem.setAttribute("firstPowerMoment", Double.toString(stat.getMean()));
+					elem.setAttribute("secondPowerMoment", Double.toString(stat.getMoment2()));
+					elem.setAttribute("thirdPowerMoment", Double.toString(stat.getMoment3()));
+					elem.setAttribute("fourthPowerMoment", Double.toString(stat.getMoment4()));
+					elem.setAttribute("minValue", Double.toString(stat.getMin()));
+					elem.setAttribute("maxValue", Double.toString(stat.getMax()));
+					elem.setAttribute("minSimulationTime", Double.toString(stat.getMinSimTime()));
+					elem.setAttribute("maxSimulationTime", Double.toString(stat.getMaxSimTime()));
+				} catch (IOException | ParseException ex) {
+					Logger.getLogger(XMLSimulationOutput.class.getName()).log(Level.SEVERE, null, ex);
+				}
 			}
 		}
 	}
@@ -453,8 +454,8 @@ public class XMLSimulationOutput extends SimulationOutput {
 			//set up a transformer
 			TransformerFactory transfac = TransformerFactory.newInstance();
 			Transformer trans = transfac.newTransformer();
-			trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 			trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 
 			//we want to save the xml results in the same directory of the model definition file
 			String parent = null;

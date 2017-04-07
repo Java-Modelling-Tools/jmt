@@ -136,21 +136,21 @@ public class JmtGraphUI extends BasicGraphUI {
 			}
 
 			if (foundStations) {
-				mediator.enableCopyAction(true);
 				mediator.enableCutAction(true);
+				mediator.enableCopyAction(true);
 				mediator.enableDeleteAction(true);
 				mediator.enableAddBlockingRegion(!cannotAddBlockingRegion);
 				mediator.enableRotateAction(true);
 				mediator.enableSetRight(true);
 			} else if (foundBlockingRegion) {
-				mediator.enableCopyAction(true);
 				mediator.enableCutAction(true);
+				mediator.enableCopyAction(true);
 				mediator.enableDeleteAction(true);
 				mediator.enableAddBlockingRegion(false);
 				mediator.enableRotateAction(false);
 			} else {
-				mediator.enableCopyAction(false);
 				mediator.enableCutAction(false);
+				mediator.enableCopyAction(false);
 				mediator.enableDeleteAction(false);
 				mediator.enableAddBlockingRegion(false);
 				mediator.enableRotateAction(false);

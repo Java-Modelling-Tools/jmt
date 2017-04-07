@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.common.xml;
 
 import java.awt.Component;
@@ -48,17 +49,22 @@ import org.w3c.dom.Document;
  *         Time: 15.36.51
  */
 public class ModelLoader {
+
 	/**
 	 * Filters for input files
 	 */
-	public static final JmtFileFilter JMODEL = new JmtFileFilter(".jsimg;.jmodel", "JSIMgraph data file");
-	public static final JmtFileFilter JSIM = new JmtFileFilter(".jsimw;.jsim", "JSIMwiz data file");
+	public static final JmtFileFilter ALL = new JmtFileFilter(".jsimg;.jsimw;.jmva;.jaba;.jsim;.jmodel;.pnml", "All JMT data files");
+	public static final JmtFileFilter ALL_NOTJABA = new JmtFileFilter(".jsimg;.jsimw;.jmva;.jsim;.jmodel;.pnml", "All compatible JMT data files");
+
+	public static final JmtFileFilter JMODEL = new JmtFileFilter(".jsimg;.jmodel;.pnml", "JSIMgraph data file");
+	public static final JmtFileFilter JSIM = new JmtFileFilter(".jsimw;.jsim;.pnml", "JSIMwiz data file");
 	public static final JmtFileFilter JMVA = new JmtFileFilter(".jmva", "JMVA data file");
 	public static final JmtFileFilter JABA = new JmtFileFilter(".jaba", "JABA data file");
-	public static final JmtFileFilter XML = new JmtFileFilter(".xml", "Engine XML i/o file");
-	public static final JmtFileFilter ALL = new JmtFileFilter(".jsimg;.jsimw;.jmva;.jaba;.xml;.jsim;.jmodel", "All JMT data files");
 
-	public static final JmtFileFilter ALL_NOTJABA = new JmtFileFilter(".jsimg;.jsimw;.jmva;.xml;.jsim;.jmodel", "All compatible JMT data files");
+	public static final JmtFileFilter JMODEL_SAVE = new JmtFileFilter(".jsimg;.pnml", "JSIMgraph data file");
+	public static final JmtFileFilter JSIM_SAVE = new JmtFileFilter(".jsimw;.pnml", "JSIMwiz data file");
+	public static final JmtFileFilter JMVA_SAVE = new JmtFileFilter(".jmva", "JMVA data file");
+	public static final JmtFileFilter JABA_SAVE = new JmtFileFilter(".jaba", "JABA data file");
 
 	/**
 	 * Constants used for output
@@ -74,9 +80,10 @@ public class ModelLoader {
 	protected static final int XML_SIM = 0;
 	protected static final int XML_ARCHIVE = 1;
 	protected static final int XML_MVA = 2;
-	protected static final int XML_JABA = 5;
-	protected static final int XML_RES_SIM = 3;
-	protected static final int XML_RES_GUI = 4;
+	protected static final int XML_JABA = 3;
+	protected static final int XML_RES_SIM = 4;
+	protected static final int XML_RES_GUI = 5;
+	protected static final int XML_PNML = 6;
 	protected static final int FILE_UNKNOWN = 255;
 
 	/**
@@ -85,13 +92,16 @@ public class ModelLoader {
 	protected static final String FAIL_UNKNOWN = "Unknown input file format";
 	protected static final String FAIL_CONVERSION = "Input file is recognized but cannot be converted "
 			+ "to work within this application. Please open it with ";
+	protected static final String FAIL_PNML_EXPORT = "The model cannot be exported to a PNML file: ";
 
 	// Better to move this element elsewhere...
 	protected static final String XML_MVA_ROOT = "model";
+	protected static final String XML_PNML_ROOT = "pnml";
 
 	protected JmtFileChooser dialog;
 
 	protected JmtFileFilter defaultFilter;
+	protected JmtFileFilter defaultSaveFilter;
 
 	// Motivation of last failure
 	protected String failureMotivation;
@@ -104,14 +114,15 @@ public class ModelLoader {
 	protected XMLUtils xmlutils = new XMLUtils();
 
 	/**
-	 * Initialize a new ModelLoader with specified default file filter (chosen between
-	 * constrants in this class)
-	 * @param defaultFilter default file filter for current application (used to detect application type)
+	 * Initializes a new model loader with specified default file filters
+	 * @param defaultFilter default file filter for current application
+	 * @param defaultSaveFilter default file save filter for current application
 	 */
-	public ModelLoader(JmtFileFilter defaultFilter) {
+	public ModelLoader(JmtFileFilter defaultFilter, JmtFileFilter defaultSaveFilter) {
 		this.defaultFilter = defaultFilter;
+		this.defaultSaveFilter = defaultSaveFilter;
 		// Initialize filechooser dialog
-		dialog = new JmtFileChooser(defaultFilter);
+		dialog = new JmtFileChooser(defaultSaveFilter);
 	}
 
 	/**
@@ -168,102 +179,106 @@ public class ModelLoader {
 				StoredResultsModel srm;
 				// Handles loading of JSIM/JMODEL models
 				switch (getXmlFileType(file.getAbsolutePath())) {
-					case XML_SIM:
-						XMLReader.loadModel(file, (CommonModel) modelData);
-						fileFormat = CommonConstants.SIMENGINE;
-						break;
-					case XML_ARCHIVE:
-						XMLArchiver.loadModel((CommonModel) modelData, file);
-						fileFormat = CommonConstants.JSIM;
-						break;
-					case XML_MVA:
-						ExactModel tmp = new ExactModel();
-						tmp.loadDocument(xmlutils.loadXML(file));
-						warnings.addAll(ModelConverter.convertJMVAtoJSIM(tmp, (CommonModel) modelData));
-						fileFormat = CommonConstants.JMVA;
-						break;
-					case XML_JABA:
-						//TODO implement bridge JABA --> JSIM
-						failureMotivation = FAIL_CONVERSION + "JABA.";
-						fileFormat = CommonConstants.JABA;
-						return FAILURE;
-					case XML_RES_SIM:
-						srm = new StoredResultsModel();
-						XMLResultsReader.loadModel(srm, file);
-						((CommonModel) modelData).setSimulationResults(srm);
-						warnings.add("Loaded file contained simulation results only. Associated queuing network model is not available. "
-								+ "Results can be shown by selecting \"Show Results\" icon.");
-						fileFormat = CommonConstants.SIMENGINE;
-						break;
-					case XML_RES_GUI:
-						srm = new StoredResultsModel();
-						XMLResultsReader.loadGuiModel(srm, file);
-						((CommonModel) modelData).setSimulationResults(srm);
-						warnings.add("Loaded file contained simulation results only. Associated queuing network model is not available. "
-								+ "Results can be shown by selecting \"Show Results\" icon.");
-						fileFormat = CommonConstants.SIMENGINE;
-						break;
-					default:
-						failureMotivation = FAIL_UNKNOWN;
-						return FAILURE;
+				case XML_SIM:
+					XMLReader.loadModel(file, (CommonModel) modelData);
+					fileFormat = CommonConstants.SIMENGINE;
+					break;
+				case XML_ARCHIVE:
+					XMLArchiver.loadModel(file, (CommonModel) modelData);
+					fileFormat = CommonConstants.JSIM;
+					break;
+				case XML_MVA:
+					ExactModel tmp = new ExactModel();
+					tmp.loadDocument(xmlutils.loadXML(file));
+					warnings.addAll(ModelConverter.convertJMVAtoJSIM(tmp, (CommonModel) modelData));
+					fileFormat = CommonConstants.JMVA;
+					break;
+				case XML_JABA:
+					//TODO implement bridge JABA --> JSIM
+					failureMotivation = FAIL_CONVERSION + "JABA.";
+					fileFormat = CommonConstants.JABA;
+					return FAILURE;
+				case XML_RES_SIM:
+					srm = new StoredResultsModel();
+					XMLResultsReader.loadModel(srm, file);
+					((CommonModel) modelData).setSimulationResults(srm);
+					warnings.add("Loaded file contained simulation results only. Associated queuing network model is not available. "
+							+ "Results can be shown by selecting \"Show Results\" icon.");
+					fileFormat = CommonConstants.SIMENGINE;
+					break;
+				case XML_RES_GUI:
+					srm = new StoredResultsModel();
+					XMLResultsReader.loadGuiModel(srm, file);
+					((CommonModel) modelData).setSimulationResults(srm);
+					warnings.add("Loaded file contained simulation results only. Associated queuing network model is not available. "
+							+ "Results can be shown by selecting \"Show Results\" icon.");
+					fileFormat = CommonConstants.SIMENGINE;
+					break;
+				case XML_PNML:
+					PNMLReader.importModel(file, (CommonModel) modelData);
+					fileFormat = CommonConstants.JSIM;
+					break;
+				default:
+					failureMotivation = FAIL_UNKNOWN;
+					return FAILURE;
 				}
 			} else if (defaultFilter == JMVA) {
 				// Handles loading of JMVA models
 				CommonModel tmp = new CommonModel();
 				switch (getXmlFileType(file.getAbsolutePath())) {
-					case XML_SIM:
-						XMLReader.loadModel(file, tmp);
-						warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
-						fileFormat = CommonConstants.SIMENGINE;
-						break;
-					case XML_ARCHIVE:
-						XMLArchiver.loadModel(tmp, file);
-						warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
-						fileFormat = CommonConstants.JSIM;
-						break;
-					case XML_JABA:
-						//TODO implement bridge JABA --> JMVA
-						failureMotivation = FAIL_CONVERSION + "JABA.";
-						fileFormat = CommonConstants.JABA;
-						return FAILURE;
-					case XML_MVA:
-						((ExactModel) modelData).loadDocument(xmlutils.loadXML(file));
-						fileFormat = CommonConstants.JMVA;
-						break;
-					case XML_RES_SIM:
-					case XML_RES_GUI:
-						// This is silly to be opened in JMVA...
-						failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
-						fileFormat = CommonConstants.SIMENGINE;
-						return FAILURE;
-					default:
-						failureMotivation = FAIL_UNKNOWN;
-						return FAILURE;
+				case XML_SIM:
+					XMLReader.loadModel(file, tmp);
+					warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
+					fileFormat = CommonConstants.SIMENGINE;
+					break;
+				case XML_ARCHIVE:
+					XMLArchiver.loadModel(file, tmp);
+					warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
+					fileFormat = CommonConstants.JSIM;
+					break;
+				case XML_JABA:
+					//TODO implement bridge JABA --> JMVA
+					failureMotivation = FAIL_CONVERSION + "JABA.";
+					fileFormat = CommonConstants.JABA;
+					return FAILURE;
+				case XML_MVA:
+					((ExactModel) modelData).loadDocument(xmlutils.loadXML(file));
+					fileFormat = CommonConstants.JMVA;
+					break;
+				case XML_RES_SIM:
+				case XML_RES_GUI:
+					// This is silly to be opened in JMVA...
+					failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
+					fileFormat = CommonConstants.SIMENGINE;
+					return FAILURE;
+				default:
+					failureMotivation = FAIL_UNKNOWN;
+					return FAILURE;
 				}
 			} else if (defaultFilter == JABA) {
 				// Handles loading of JABA models
 				switch (getXmlFileType(file.getAbsolutePath())) {
-					case XML_SIM:
-						//TODO implement bridge JSIM --> JABA
-					case XML_ARCHIVE:
-						//TODO implement bridge JSIM --> JABA
-						failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
-						return FAILURE;
-					case XML_MVA:
-						//TODO implement bridge JMVA --> JABA
-						failureMotivation = FAIL_CONVERSION + "JMVA.";
-						return FAILURE;
-					case XML_JABA:
-						((JabaModel) modelData).loadDocument(xmlutils.loadXML(file));
-						break;
-					case XML_RES_SIM:
-					case XML_RES_GUI:
-						// This is silly to be opened in JABA...
-						failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
-						return FAILURE;
-					default:
-						failureMotivation = FAIL_UNKNOWN;
-						return FAILURE;
+				case XML_SIM:
+					//TODO implement bridge JSIM --> JABA
+				case XML_ARCHIVE:
+					//TODO implement bridge JSIM --> JABA
+					failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
+					return FAILURE;
+				case XML_MVA:
+					//TODO implement bridge JMVA --> JABA
+					failureMotivation = FAIL_CONVERSION + "JMVA.";
+					return FAILURE;
+				case XML_JABA:
+					((JabaModel) modelData).loadDocument(xmlutils.loadXML(file));
+					break;
+				case XML_RES_SIM:
+				case XML_RES_GUI:
+					// This is silly to be opened in JABA...
+					failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
+					return FAILURE;
+				default:
+					failureMotivation = FAIL_UNKNOWN;
+					return FAILURE;
 				}
 			}
 		} catch (Exception e) {
@@ -286,11 +301,9 @@ public class ModelLoader {
 	public File getSelectedFile() {
 		return dialog.getSelectedFile();
 	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// --- Methods used to save models ------------------------------------------------------------
-
 	/**
 	 * Saves specified model into specified file or shows save as window if file is null
 	 * @param modelData data file where information should be stored. Note that <b>its type
@@ -315,33 +328,58 @@ public class ModelLoader {
 				return FAILURE;
 			}
 			file = dialog.getSelectedFile();
-		} else
-		// Check extension to avoid saving over a converted file
-		if (!file.getName().endsWith(defaultFilter.getFirstExtension())) {
-			int resultValue = JOptionPane.showConfirmDialog(parent, "<html>File <font color=#0000ff>" + file.getName() + "</font> does not have \""
-					+ defaultFilter.getFirstExtension() + "\" extension.<br>Do you want to replace it anyway?</html>", "JMT - Warning",
-					JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-			if (resultValue != JOptionPane.OK_OPTION) {
-				return CANCELLED;
+		} else {
+			// Check extension to avoid saving over a converted file
+			boolean hasValidExtension = false;
+			String[] extensions = defaultSaveFilter.getExtensions();
+			for (String e : extensions) {
+				if (file.getName().toLowerCase().endsWith(e)) {
+					hasValidExtension = true;
+					break;
+				}
+			}
+			if (!hasValidExtension) {
+				int resultValue = JOptionPane.showConfirmDialog(parent, "<html>File <font color=#0000ff>" + file.getName()
+				+ "</font> does not have valid extension.<br>Do you want to replace it anyway?</html>", "JMT - Warning",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+				if (resultValue != JOptionPane.OK_OPTION) {
+					return CANCELLED;
+				}
 			}
 		}
 
 		// Now checks to save correct type of model
 		try {
-			if (defaultFilter == JMODEL || defaultFilter == JSIM) {
-				XMLArchiver.saveModel(file, (CommonModel) modelData);
-			} else if (defaultFilter == JMVA) {
+			if (defaultSaveFilter == JMODEL_SAVE || defaultSaveFilter == JSIM_SAVE) {
+				if (file.getName().toLowerCase().endsWith(".pnml")) {
+					int result = PNMLWriter.checkModel((CommonModel) modelData);
+					if (result == PNMLWriter.MULTIPLE_CLOSED_CLASSES) {
+						failureMotivation = FAIL_PNML_EXPORT + "multiple closed classes detected.";
+						return FAILURE;
+					} else if (result == PNMLWriter.OPEN_CLASSES) {
+						failureMotivation = FAIL_PNML_EXPORT + "open classes detected.";
+						return FAILURE;
+					} else if (result == PNMLWriter.NON_PETRI_NET_STATIONS) {
+						failureMotivation = FAIL_PNML_EXPORT + "non Petri net stations detected.";
+						return FAILURE;
+					} else {
+						PNMLWriter.exportModel(file, (CommonModel) modelData);
+					}
+				} else {
+					XMLArchiver.saveModel(file, (CommonModel) modelData);
+				}
+			} else if (defaultSaveFilter == JMVA) {
 				xmlutils.saveXML(((ExactModel) modelData).createDocument(), file);
-			} else if (defaultFilter == JABA) {
+			} else if (defaultSaveFilter == JABA) {
 				xmlutils.saveXML(((JabaModel) modelData).createDocument(), file);
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			failureMotivation = e.getClass().getName() + ": " + e.getMessage();
 			return FAILURE;
 		}
 		return SUCCESS;
 	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// --- Methods to open and parse files --------------------------------------------------------
@@ -367,6 +405,8 @@ public class ModelLoader {
 				return XML_RES_SIM;
 			} else if (root.equals(XMLResultsConstants.XML_DOCUMENT_ROOT)) {
 				return XML_RES_GUI;
+			} else if (root.equals(ModelLoader.XML_PNML_ROOT)) {
+				return XML_PNML;
 			} else {
 				return FILE_UNKNOWN;
 			}
@@ -375,30 +415,13 @@ public class ModelLoader {
 			return FILE_UNKNOWN;
 		}
 	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// --- Methods to show dialogs ----------------------------------------------------------------
 	/**
-	 * Adds all filters to current dialog
-	 */
-	protected void addAllFilters() {
-		dialog.setAcceptAllFileFilterUsed(true);
-		dialog.addChoosableFileFilter(ALL);
-		dialog.addChoosableFileFilter(JMODEL);
-		dialog.addChoosableFileFilter(JSIM);
-		dialog.addChoosableFileFilter(JMVA);
-		dialog.addChoosableFileFilter(JABA);
-		dialog.addChoosableFileFilter(XML);
-		//dialog.setFileFilter(defaultFilter);
-		dialog.setFileFilter(ALL);
-	}
-
-	/**
 	 * Adds only compatible filters to current dialog
 	 */
 	protected void addCompatibleFilters() {
-		dialog.setAcceptAllFileFilterUsed(true);
 		dialog.addChoosableFileFilter(ALL);
 		if (defaultFilter == JABA) {
 			dialog.addChoosableFileFilter(JABA);
@@ -426,6 +449,7 @@ public class ModelLoader {
 	 * returns true.
 	 */
 	protected int showOpenDialog(Component parent) {
+		dialog.resetChoosableFileFilters();
 		addCompatibleFilters();
 		return dialog.showOpenDialog(parent);
 	}
@@ -448,11 +472,10 @@ public class ModelLoader {
 	 */
 	protected int showSaveDialog(Component parent) {
 		dialog.resetChoosableFileFilters();
-		dialog.addChoosableFileFilter(defaultFilter);
-		dialog.setFileFilter(defaultFilter);
+		dialog.addChoosableFileFilter(defaultSaveFilter);
+		dialog.setFileFilter(defaultSaveFilter);
 		return dialog.showSaveDialog(parent);
 	}
-
 	// --------------------------------------------------------------------------------------------
 
 	// --- Inner classes --------------------------------------------------------------------------
@@ -460,19 +483,18 @@ public class ModelLoader {
 	 * Custom file chooser class
 	 */
 	protected static class JmtFileChooser extends JFileChooser {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
-		protected JmtFileFilter defaultFilter;
+
+		protected JmtFileFilter defaultSaveFilter;
 
 		/**
-		 * Creates a File chooser in the appropriate directory user default.
-		 * @param defaultFilter default file filter
+		 * Creates a File chooser in the appropriate directory user default
+		 * @param defaultSaveFilter default file save filter
 		 */
-		public JmtFileChooser(JmtFileFilter defaultFilter) {
+		public JmtFileChooser(JmtFileFilter defaultSaveFilter) {
 			super(Defaults.getWorkingPath());
-			this.defaultFilter = defaultFilter;
+			this.defaultSaveFilter = defaultSaveFilter;
 		}
 
 		/**
@@ -487,8 +509,16 @@ public class ModelLoader {
 				super.approveSelection();
 			}
 			if (getDialogType() == SAVE_DIALOG) {
-				if (!name.toLowerCase().endsWith(defaultFilter.getFirstExtension())) {
-					name = name + defaultFilter.getFirstExtension();
+				boolean hasValidExtension = false;
+				String[] extensions = defaultSaveFilter.getExtensions();
+				for (String e : extensions) {
+					if (name.toLowerCase().endsWith(e)) {
+						hasValidExtension = true;
+						break;
+					}
+				}
+				if (!hasValidExtension) {
+					name += extensions[0];
 					setSelectedFile(new File(parent, name));
 				}
 				if (getSelectedFile().exists()) {
@@ -504,26 +534,29 @@ public class ModelLoader {
 				}
 			}
 		}
+
 	}
 
 	/**
 	 * Inner class used to create simple file filters with only extension check
 	 */
 	protected static class JmtFileFilter extends FileFilter {
+
 		public static final String SEP = ";";
-		private String description;
+
 		private String[] extensions;
+		private String description;
 
 		/**
-		 * Creates a new filefilter with specified dot and comma separated list of 
+		 * Creates a new file filter with specified semicolon separated list of 
 		 * extensions and specified description
-		 * @param extensionList comma separated list of extensions 
-		 * of this filter (for example ".jmt;.jmodel")
-		 * @param description description of this filter
+		 * @param extensionList semicolon separated list of extensions of this
+		 * filter (for example ".jsimg;.jmodel")
+		 * @param text text description of this filter
 		 */
-		public JmtFileFilter(String extensionList, String description) {
+		public JmtFileFilter(String extensionList, String text) {
 			this.extensions = extensionList.split(SEP);
-			this.description = createDescription(description, extensions);
+			this.description = createDescription(text);
 		}
 
 		/**
@@ -535,8 +568,8 @@ public class ModelLoader {
 			if (f.isDirectory()) {
 				return true;
 			}
-			for (String extension : extensions) {
-				if (name.endsWith(extension)) {
+			for (String e : extensions) {
+				if (name.endsWith(e)) {
 					return true;
 				}
 			}
@@ -544,12 +577,11 @@ public class ModelLoader {
 		}
 
 		/**
-		 * Creates a suitable description for this filter
+		 * Creates the description for this filter
 		 * @param text text description of the filter
-		 * @param extensions extensions to be matched
 		 * @return created description
 		 */
-		private String createDescription(String text, String[] extensions) {
+		private String createDescription(String text) {
 			StringBuffer sb = new StringBuffer();
 			sb.append(text);
 			sb.append(" (*");
@@ -563,21 +595,22 @@ public class ModelLoader {
 		}
 
 		/**
-		 * The description of this filter
-		 * @see javax.swing.filechooser.FileView#getName
+		 * Gets the extensions of this filter
+		 * @return extensions of this filter
+		 */
+		public String[] getExtensions() {
+			return extensions;
+		}
+
+		/**
+		 * The description of this filter.
 		 */
 		@Override
 		public String getDescription() {
 			return description;
 		}
 
-		/**
-		 * Gets the first extension of this filter
-		 * @return extension of this filter
-		 */
-		public String getFirstExtension() {
-			return extensions[0];
-		}
 	}
 	// --------------------------------------------------------------------------------------------
+
 }

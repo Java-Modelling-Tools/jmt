@@ -51,8 +51,11 @@ import jmt.gui.exact.table.ExactCellEditor;
 public class RoutingProbabilitiesEditor extends JSplitPane implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
+
 	private Map<Object, Double> routingProbs;
+	private Vector<Object> validOutputs;
 	private StationDefinition stations;
+	private ClassDefinition classes;
 	private Object stationKey;
 	private Object classKey;
 
@@ -64,11 +67,10 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);
 
 	public RoutingProbabilitiesEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
-		super();
-		super.setOrientation(JSplitPane.VERTICAL_SPLIT);
-		super.setDividerSize(3);
-		super.setBorder(new EmptyBorder(0, 0, 0, 0));
-		this.setResizeWeight(0.5);
+		setOrientation(JSplitPane.VERTICAL_SPLIT);
+		setDividerSize(3);
+		setBorder(new EmptyBorder(0, 0, 0, 0));
+		setResizeWeight(0.5);
 		initComponents();
 		setData(sd, cs, stationKey, classKey);
 	}
@@ -98,11 +100,11 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		} else {
 			descrTextPane.setText(rs.getDescription());
 			if (rs instanceof ProbabilityRouting) {
-				createDetails(rs, sd, stationKey, classKey);
+				createDetails(rs, sd, cs, stationKey, classKey);
 			} else if (rs instanceof LoadDependentRouting) {
 				JComponent LDRoutingPanel = new JPanel();
 				LDRoutingPanel.setBorder(new TitledBorder(new EtchedBorder(), "LD Routing Options"));
-				if (sd.getForwardConnections(stationKey) != null && sd.getForwardConnections(stationKey).size() != 0) {
+				if (sd.getForwardConnections(stationKey).size() > 0) {
 					JButton editLoadDependentRoutingButton = new JButton("Edit LD Routing..");
 					HashMap<String, Object> ldParameters = new HashMap<String, Object>();
 					ldParameters.put("ClassDefinition", cs);
@@ -130,9 +132,11 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		routingProbs = null;
 	}
 
-	private void createDetails(RoutingStrategy rs, StationDefinition sd, Object stationKey, Object classKey) {
+	private void createDetails(RoutingStrategy rs, StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
 		routingProbs = rs.getValues();
+		validOutputs = new Vector<Object>(0);
 		stations = sd;
+		classes = cs;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
 		setupRouting();
@@ -146,17 +150,23 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			return;
 		}
 		//fetching output-connected stations list
-		Vector<Object> output = stations.getForwardConnections(stationKey);
+		Vector<Object> outputs = stations.getForwardConnections(stationKey);
 		//saving all entries of routing strategy in a temporary data structure
 		HashMap<Object, Double> temp = new HashMap<Object, Double>(routingProbs);
 		routingProbs.clear();
-		for (int i = 0; i < output.size(); i++) {
+		for (int i = 0; i < outputs.size(); i++) {
 			//add old entries to map only if they are still in the current connection set
-			Object currentKey = output.get(i);
+			Object currentKey = outputs.get(i);
 			if (temp.containsKey(currentKey)) {
 				routingProbs.put(currentKey, temp.get(currentKey));
 			} else {
 				//if connection set contains new entries, set them to 0 by default
+				routingProbs.put(currentKey, new Double(0.0));
+			}
+			if (classes.getClassType(classKey) != CLASS_TYPE_CLOSED
+					|| !stations.getStationType(currentKey).equals(STATION_TYPE_SINK)) {
+				validOutputs.add(currentKey);
+			} else {
 				routingProbs.put(currentKey, new Double(0.0));
 			}
 		}
@@ -179,7 +189,6 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		private static final long serialVersionUID = 1L;
 
 		public RoutingTable() {
-			super();
 			setModel(new RoutingTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
@@ -204,7 +213,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 		public int getRowCount() {
 			if (stationKey != null) {
-				return stations.getForwardConnections(stationKey).size();
+				return validOutputs.size();
 			} else {
 				return 0;
 			}
@@ -260,7 +269,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			if (stationKey == null) {
 				return null;
 			}
-			return stations.getForwardConnections(stationKey).get(index);
+			return validOutputs.get(index);
 		}
 
 	}
@@ -269,12 +278,12 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 		HashMap<String, Object> properties = null;
 
-		public EditLoadDependentRoutingListener (HashMap<String, Object> properties) {
+		public EditLoadDependentRoutingListener(HashMap<String, Object> properties) {
 			this.properties = properties;
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			Container parent = (Container)RoutingProbabilitiesEditor.this;
+			Container parent = (Container) RoutingProbabilitiesEditor.this;
 			RoutingSectionPanel.openLoadDependentRoutingEditor(parent,properties);
 		}
 

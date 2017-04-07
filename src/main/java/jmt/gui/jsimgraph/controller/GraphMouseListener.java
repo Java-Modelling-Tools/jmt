@@ -184,17 +184,14 @@ public class GraphMouseListener implements MouseInputListener {
 		if (parentView == null || childView == null) {
 			return false;
 		}
-
 		Object parent = parentView.getCell();
 		Object child = childView.getCell();
 		Object ancestor = child;
-
 		do {
 			if (ancestor == parent) {
 				return true;
 			}
 		} while ((ancestor = mediator.getParent(ancestor)) != null);
-
 		return false;
 	}
 

@@ -45,9 +45,8 @@ public class newGraham {
 	}
 
 	void addPt() {
-		boolean ptin = false;
 		PPoint pt = new PPoint();
-                // Replaced Math.random
+		// Replaced Math.random
 		pt.x = (int) (engine.raw2() * (width - 2) + 1);
 		pt.y = (int) (engine.raw2() * (height - 2) + 1);
 

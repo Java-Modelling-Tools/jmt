@@ -38,6 +38,7 @@ import jmt.gui.common.joinStrategies.PartialJoin;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -69,11 +70,17 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
 /**
- * Created by IntelliJ IDEA. User: orsotronIII Date: 15-lug-2005 Time: 10.56.01
- * Modified by Bertoli Marco
+ * <p>Title: XML Writer</p>
+ * <p>Description: Writes model information to an XML file. This class provides
+ * methods for model save.</p>
+ * 
+ * @author Bertoli Marco
+ *         Date: 15-lug-2005
+ *         Time: 10.56.01
  */
 public class XMLWriter implements CommonConstants, XMLConstantNames {
-	/*
+
+	/**
 	 * defines matching between gui representation and engine names for queue
 	 * strategies, e.g. FCFS = TailStrategy.
 	 */
@@ -132,8 +139,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		try {
 			Transformer transformer = TransformerFactory.newInstance()
 					.newTransformer();
-			transformer.setOutputProperty("indent", "yes");
-			transformer.setOutputProperty("encoding", ENCODING);
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.transform(new DOMSource(doc), new StreamResult(
 					new File(fileName)));
 		} catch (TransformerConfigurationException e) {
@@ -159,7 +166,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		return modelDoc;
 	}
 
-	private static void writeToResult(Result res, CommonModel model,
+	private static void writeToResult(Result result, CommonModel model,
 			String modelName) {
 		Document modelDoc = getDocument(model, modelName);
 		if (modelDoc == null) {
@@ -168,9 +175,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		try {
 			Transformer transformer = TransformerFactory.newInstance()
 					.newTransformer();
-			transformer.setOutputProperty("indent", "yes");
-			transformer.setOutputProperty("encoding", ENCODING);
-			transformer.transform(new DOMSource(modelDoc), res);
+			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
+			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+			transformer.transform(new DOMSource(modelDoc), result);
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
 		} catch (TransformerFactoryConfigurationError e) {
@@ -831,11 +838,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	}
 
 	/**
-	 * Adds to @doc the tags to store a class
-	 * switch section of a node.
-	 * @param doc the xml where you want to add clas_switch section
+	 * Adds to @doc the tags to store a class switch section.
+	 * @param doc the xml where you want to add class switch section
 	 * @param node the node owner of the class switch section
-	 * @param model 
+	 * @param model the data structure of the model
 	 * @param stationKey the station implementing class switching
 	 */
 	static protected void writeClassSwitchSection(Document doc, Node node,
@@ -1212,11 +1218,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			CommonModel model) {
 		Vector<Object> stations = model.getStationKeys();
 		String[] stationNames = new String[stations.size()];
-		for (int i = 0; i < stationNames.length; i++) {
+		for (int i = 0; i < stations.size(); i++) {
 			stationNames[i] = model.getStationName(stations.get(i));
 		}
-		for (int i = 0; i < stationNames.length; i++) {
-			for (int j = 0; j < stationNames.length; j++) {
+		for (int i = 0; i < stations.size(); i++) {
+			for (int j = 0; j < stations.size(); j++) {
 				if (model.areConnected(stations.get(i), stations.get(j))) {
 					Element elem = doc.createElement(XML_E_CONNECTION);
 					elem.setAttribute(XML_A_CONNECTION_SOURCE, stationNames[i]);
@@ -1539,7 +1545,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 *         its parameter object Author: Bertoli Marco
 		 */
 		static XMLParameter[] getDistributionParameter(Distribution distr) {
-
 			// a list of direct parameter -> parameter which must be passed
 			// directly to the distribution object
 			List<XMLParameter> directParams = new Vector<XMLParameter>();
@@ -1595,10 +1600,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 */
 		static XMLParameter getParameter(Distribution.Parameter distrPar) {
 			Object valueObj = distrPar.getValue();
-
 			if (valueObj != null) {
 				if (distrPar.getValue() instanceof Distribution) {
-
 					XMLParameter[] distribution = getDistributionParameter((Distribution) valueObj);
 					XMLParameter returnValue = new XMLParameter(
 							distrPar.getName(), distributionContainerClasspath,
@@ -1617,7 +1620,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 							.getValueClass().getName(), null, value, true);
 				}
 			}
-
 			return null;
 		}
 
@@ -1634,12 +1636,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				Object classKey, Object stationKey) {
 			// parameter containing array of empirical entries
 			XMLParameter[] innerRoutingPar = null;
-			if (routingStrat.getValues() != null && routingStrat instanceof ProbabilityRouting) {
-				XMLParameter probRoutingPar = null;
+			if (routingStrat instanceof ProbabilityRouting) {
 				Vector<Object> outputs = model.getForwardConnections(stationKey);
 				Map<Object, Double> values = routingStrat.getValues();
-				XMLParameter[] empiricalEntries = new XMLParameter[outputs
-				                                                   .size()];
+				XMLParameter probRoutingPar = null;
+				XMLParameter[] empiricalEntries = new XMLParameter[outputs.size()];
 				for (int i = 0; i < empiricalEntries.length; i++) {
 					XMLParameter stationDest = new XMLParameter("stationName",
 							String.class.getName(), null,
@@ -1657,23 +1658,21 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 						true);
 				innerRoutingPar = new XMLParameter[] { probRoutingPar };
 			} else if (routingStrat instanceof LoadDependentRouting) {
-				LoadDependentRouting routing = (LoadDependentRouting)routingStrat;
-
+				Vector<Object> outputs = model.getForwardConnections(stationKey);
+				LoadDependentRouting routing = (LoadDependentRouting) routingStrat;
 				XMLParameter ldRoutingPar = null;
-				XMLParameter[] ranges = new XMLParameter[routing.getEmpiricalEntries().size()];
-
-				Iterator<Integer> froms = routing.getEmpiricalEntries().keySet().iterator();
-				int countersRange =0;
-				while (froms.hasNext()) {
-					Integer fromKey = froms.next();
-					String from = fromKey.toString();
-					XMLParameter fromEntry = new XMLParameter("from", Integer.class.getName(), null, from , true);
+				XMLParameter[] ranges = new XMLParameter[routing.getAllEmpiricalEntries().size()];
+				List<Integer> fromAsList = new ArrayList<Integer>(routing.getAllEmpiricalEntries().keySet());
+				Collections.sort(fromAsList);
+				int countersRange = 0;
+				for (Integer from : fromAsList) {
+					XMLParameter fromEntry = new XMLParameter("from", Integer.class.getName(), null, from.toString(), true);
 					XMLParameter probLDRoutingPar = null;
-					XMLParameter[] empiricalEntries = new XMLParameter[routing.getEmpiricalEntries().get(fromKey).length];
+					XMLParameter[] empiricalEntries = new XMLParameter[routing.getAllEmpiricalEntries().get(from).size()];
 					for (int i = 0; i < empiricalEntries.length; i++) {
-						String station = routing.getEmpiricalEntries().get(fromKey)[i].getStationName();
+						String station = model.getStationName(outputs.get(i));
 						XMLParameter stationDest = new XMLParameter("stationName", String.class.getName(), null, station, true);
-						Double probability = routing.getEmpiricalEntries().get(fromKey)[i].getProbability();
+						Double probability = routing.getAllEmpiricalEntries().get(from).get(outputs.get(i));
 						XMLParameter routProb = new XMLParameter("probability", Double.class.getName(), null, probability.toString(), true);
 						empiricalEntries[i] = new XMLParameter("EmpiricalEntry", EmpiricalEntry.class.getName(),null, new XMLParameter[] { stationDest,routProb }, true);
 						empiricalEntries[i].parameterArray = "false";
@@ -1684,7 +1683,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					ranges[countersRange].parameterArray = "false";
 					countersRange = countersRange + 1;
 				}
-
 				ldRoutingPar = new XMLParameter("LoadDependentRoutingParameter", strategiesClasspathBase + routingStrategiesSuffix + "LoadDependentRoutingParameter", null, ranges, true);
 				innerRoutingPar = new XMLParameter[] { ldRoutingPar } ;
 			}
@@ -1699,6 +1697,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 	}
 
+	/**
+	 * This class creates an xml parameter node given a
+	 * jmt.gui.common.ForkStrategy object.
+	 */
 	protected static class ForkStrategyWriter {
 
 		static XMLParameter getForkStrategyParameter(
@@ -1874,6 +1876,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 	}
 
+	/**
+	 * This class creates an xml parameter node given a
+	 * jmt.gui.common.JoinStrategy object.
+	 */
 	protected static class JoinStrategyWriter {
 
 		static XMLParameter getJoinStrategyParameter(JoinStrategy joinStrat,
@@ -1933,6 +1939,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 	}
 
+	/**
+	 * This class creates an xml parameter node given a
+	 * jmt.gui.common.SemaphoreStrategy object.
+	 */
 	protected static class SemaphoreStrategyWriter {
 
 		static XMLParameter getSemaphoreStrategyParameter(SemaphoreStrategy semaphoreStrat,

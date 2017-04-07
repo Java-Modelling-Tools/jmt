@@ -40,13 +40,14 @@ import jmt.gui.common.distributions.Distribution;
  *         Time: 12.25.52
  */
 public class LDStrategy implements ServiceStrategy {
+
 	protected static final String VAR = "n"; // Dependent variable
 	protected static DecimalFormat formatter = new DecimalFormat("#.####");
 	protected TreeMap<Object, Range> ranges;
 
 	/**
-	 * Return engine classpacth for LoadDependent strategy
-	 * @return
+	 * Returns engine classpath for Load Dependent strategy
+	 * @return engine classpath for Load Dependent strategy
 	 */
 	public static String getEngineClassPath() {
 		return "jmt.engine.NetStrategies.ServiceStrategies.LoadDependentStrategy";
@@ -345,6 +346,7 @@ public class LDStrategy implements ServiceStrategy {
 	 * Inner class used to store definition of a Range
 	 */
 	protected class Range implements Comparable {
+
 		public int from;
 		public Distribution distribution;
 		public String meanExpression;
@@ -374,5 +376,7 @@ public class LDStrategy implements ServiceStrategy {
 			Range tmp = (Range) o;
 			return from - tmp.from;
 		}
+
 	}
+
 }

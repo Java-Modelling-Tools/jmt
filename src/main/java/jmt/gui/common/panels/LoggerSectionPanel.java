@@ -107,7 +107,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 	/** Constructor for Logger Panel */
 	public LoggerSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
 		setData(sd, cd, stationKey);
-		loggerStationName = stationData.getStationName(this.stationKey);
+		loggerStationName = stationData.getStationName(stationKey);
 		loggerOutputFilenameDropdown = new String[] { LoggerParameters.GLOBALLOGNAME, loggerStationName + ".csv" };
 		loggerOutputDelimiterDropdown = new String[] { ";", ",", "Tab", "Space" };
 		loggerOutputDecimalSeparatorDropdown = new String[] { ".", "," };
@@ -115,7 +115,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		loggerAutoAppendDropdown[LoggerParameters.LOGGER_AR_ASK] = NAME_loggerAutoAppendDropdownAsk;
 		loggerAutoAppendDropdown[LoggerParameters.LOGGER_AR_REPLACE] = NAME_loggerAutoAppendDropdownReplace;
 		loggerAutoAppendDropdown[LoggerParameters.LOGGER_AR_APPEND] = NAME_loggerAutoAppendDropdownAppend;
-		loggerParameters = (LoggerParameters) stationData.getLoggingParameters(this.stationKey);
+		loggerParameters = stationData.getLoggingParameters(stationKey);
 		loggerUniversalLogPath = MacroReplacer.replace(sd.getLoggingGlbParameter("path"));
 		loggerParameters.path = loggerUniversalLogPath;
 		logFile = new File(new File(loggerUniversalLogPath), loggerParameters.name);
@@ -124,7 +124,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey) {
 		stationData = sd;
-		//    classData = cd;
+		//classData = cd;
 		this.stationKey = stationKey;
 	}
 
@@ -178,7 +178,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		labelFileStatus = new JLabel();
 		gbc.fill = GridBagConstraints.REMAINDER; gbc.gridx = 1; gbc.gridy = 0; gbc.gridwidth=3;
 		loggerPanelTop.add(labelFileStatus,gbc);
-		*/
+		 */
 		// layout of north: checkbox fields
 		final JCheckBox checkLoggername = new JCheckBox();
 		checkLoggername.setText("Logger Name  ");
@@ -302,16 +302,16 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 				    fc.setDialogTitle("Choose File Name of Log...");
 				    fc.setCurrentDirectory(new java.io.File(loggerUniversalLogPath));
 				    int ret = fc.showSaveDialog(LoggerSectionPanel.this);
-				    
+
 				    if (ret == JFileChooser.APPROVE_OPTION) {
 				        java.io.File thefile = fc.getSelectedFile();
 				        tmpFileName = thefile.getName();
 				        //stationData.setLoggingGlbParameter("path", loggerUniversalLogPath);
 				    }
-				    
+
 					loggerParameters.name = tmpFileName;
 				}
-				*/
+				 */
 				loggerChooserLoadValues();
 			}
 		});
@@ -519,27 +519,27 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 			autoAppendPolicy = new Integer(LoggerParameters.LOGGER_AR_ASK);
 		}
 		tmp = null;
-		
+
 		//Checks if decimal separator and delimiter are same. If yes, changes decimal to default
-				String temp = new String(loggerOutputDecimalSeparatorDropdown[decimalSeparatorChooser.getSelectedIndex()]);
-				if (temp.equals(delim.toString()))
-				{
-					
-					JOptionPane.showMessageDialog(this,
-						    "Delimiter and Decimal separator cannot be the same. Please make sure that they are different.",
-						    "Error", JOptionPane.ERROR_MESSAGE);
-					decimalSeparatorChooser.setSelectedIndex(0);
-					
-				}
+		String temp = new String(loggerOutputDecimalSeparatorDropdown[decimalSeparatorChooser.getSelectedIndex()]);
+		if (temp.equals(delim.toString()))
+		{
+
+			JOptionPane.showMessageDialog(this,
+					"Delimiter and Decimal separator cannot be the same. Please make sure that they are different.",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			decimalSeparatorChooser.setSelectedIndex(0);
+
+		}
 
 		/* MF (Bertoli suggests): global append should be the only mode for 0.7.4 
 		if (isGlobal == false)
 		{
-		
+
 			// If not logging to global.csv, set the delimiter and append policy per logger
 			loggerParameters.delimiter = delim;
 			loggerParameters.intAutoAppend = autoAppendPolicy;
-			*/
+		 */
 
 		// Finally, set the globally effective 'delimiter' and 'append' mode for logs
 		stationData.setLoggingGlbParameter("delim", delim.toString());
@@ -583,4 +583,5 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 		return tmpStatus;
 	}
+
 }

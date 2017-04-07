@@ -122,7 +122,6 @@ public class BlockingStationPanel extends WizardPanel implements CommonConstants
 		if (editor != null) {
 			editor.stopCellEditing();
 		}
-
 	}
 
 	/**

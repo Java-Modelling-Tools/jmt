@@ -33,15 +33,8 @@ import jmt.gui.jsimgraph.controller.Mediator;
  * Time: 11.58.15
 
  */
-
-/**
- * Action calls the <code>ExactWizard</code> and disposes the current application.
- */
 public class SwitchToExactSolver extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -60,7 +53,7 @@ public class SwitchToExactSolver extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		//if (mediator.checkForSave("<html>Save changes before switching?</html>")) return;
 		mediator.toJMVA();
 	}
+
 }

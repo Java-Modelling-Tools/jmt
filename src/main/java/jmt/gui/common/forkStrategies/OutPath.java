@@ -30,6 +30,16 @@ public class OutPath {
 		outParameters = new HashMap<Object, Object>();
 	}
 
+	@Override
+	public Object clone() {
+		OutPath op = new OutPath();
+		op.probability = probability;
+		for (Object key : outParameters.keySet()) {
+			op.outParameters.put(key, outParameters.get(key));
+		}
+		return op;
+	}
+
 	public Double getProbability() {
 		return probability;
 	}
@@ -38,8 +48,8 @@ public class OutPath {
 		this.probability = probability;
 	}
 
-	public void putEntry(Object o, Object d) {
-		this.outParameters.put(o, d);
+	public void putEntry(Object key, Object value) {
+		this.outParameters.put(key, value);
 	}
 
 	public HashMap<Object, Object> getOutParameters() {

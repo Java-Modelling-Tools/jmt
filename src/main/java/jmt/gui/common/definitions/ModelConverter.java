@@ -99,9 +99,9 @@ public class ModelConverter {
 				key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, new Integer(0), new Integer((int) data), null);
 			} else {
 				// Open class
-				Exponential ex = new Exponential();
-				ex.setMean(1 / data);
-				key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, new Integer(0), null, ex);
+				Exponential exp = new Exponential();
+				exp.setMean(1 / data);
+				key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, new Integer(0), null, exp);
 			}
 			classKeys[i] = key;
 		}
@@ -141,9 +141,9 @@ public class ModelConverter {
 					key = output.addStation(name, CommonConstants.STATION_TYPE_DELAY);
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
-						Exponential ex = new Exponential();
-						ex.setMean(serviceTimes[j][0]);
-						output.setServiceTimeDistribution(key, classKeys[j], ex);
+						Exponential exp = new Exponential();
+						exp.setMean(serviceTimes[j][0]);
+						output.setServiceTimeDistribution(key, classKeys[j], exp);
 					}
 					break;
 				case ExactConstants.STATION_LI:
@@ -153,9 +153,9 @@ public class ModelConverter {
 					output.setStationQueueStrategy(key, CommonConstants.QUEUE_STRATEGY_STATION_PS);
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
-						Exponential ex = new Exponential();
-						ex.setMean(serviceTimes[j][0]);
-						output.setServiceTimeDistribution(key, classKeys[j], ex);
+						Exponential exp = new Exponential();
+						exp.setMean(serviceTimes[j][0]);
+						output.setServiceTimeDistribution(key, classKeys[j], exp);
 					}
 					break;
 				case ExactConstants.STATION_LD:
@@ -173,9 +173,9 @@ public class ModelConverter {
 							if (range > 0) {
 								rangeKey = lds.addRange();
 							}
-							Exponential ex = new Exponential();
-							ex.setMean(serviceTimes[j][range]);
-							lds.setRangeDistribution(rangeKey, ex);
+							Exponential exp = new Exponential();
+							exp.setMean(serviceTimes[j][range]);
+							lds.setRangeDistribution(rangeKey, exp);
 							lds.setRangeDistributionMean(rangeKey, Double.toString(serviceTimes[j][range]));
 						}
 						output.setServiceTimeDistribution(key, classKeys[j], lds);

@@ -50,7 +50,11 @@ import jmt.gui.jsimgraph.definitions.JMTPoint;
 import jmt.gui.jsimgraph.mainGui.MainWindow;
 import jmt.gui.jsimgraph.template.ITemplate;
 
-public class Template extends WizardPanel implements ITemplate, CommonConstants{
+/**
+ * @author S Jiang
+ * 
+ */
+public class Template extends WizardPanel implements ITemplate, CommonConstants {
 
 	private static final long serialVersionUID = 1L;
 
@@ -183,64 +187,6 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants{
 			mediator.connect(fork, sub);
 			mediator.connect(sub, join);
 		}
-
-		//CellFactory cf = new CellFactory(mediator);
-		//JmtCell server1 = cf.createCell("ServerCell");
-		//JmtCell server2 = cf.createCell("ServerCell");
-		//JmtCell server3 = cf.createCell("ServerCell");
-		//JmtCell server4 = cf.createCell("ServerCell");
-		//
-		//JmtCell server5 = cf.createCell("ServerCell");
-		//
-		//mediator.InsertCell(new JMTPoint(50, YBound + 500, false), server1);
-		//mediator.InsertCell(new JMTPoint(200, YBound + 700, false), server2);
-		//mediator.InsertCell(new JMTPoint(200, YBound + 500, false), server3);
-		//mediator.InsertCell(new JMTPoint(200, YBound + 700, false), server4);
-		//
-		//mediator.InsertCell(new JMTPoint(200, YBound + 900, false), server5);
-		//
-		//mediator.connect(server1, server3);
-		//mediator.connect(server1, server4);
-		//
-		//mediator.connect(server1, server5);
-		//
-		//mediator.connect(server2, server3);
-		//mediator.connect(server2, server4);
-		//
-		//mediator.startEditingAtAbstractCell(server1);
-		//Object key = ((CellComponent) server1.getUserObject()).getKey();
-		//Object clkey = mediator.getModel().getClassKeys().get(0);
-		//RoutingStrategy rs = ((RoutingStrategy) mediator.getModel().getRoutingStrategy(key, clkey)).clone();
-		//Object key2 = ((CellComponent) server2.getUserObject()).getKey();
-		//mediator.getModel().setRoutingStrategy(key2, clkey, rs);
-		//
-		//RoutingStrategy ros = new ProbabilityRouting();
-		//Vector<Object> output = new Vector<Object>();
-		//Object test = new Long(-1);
-		//output.add(test);
-		//ros.getValues().put(output.get(0), 1.0);
-		//mediator.getModel().getBackwardConnections(key).get(0); 
-		//ros.getValues().put(output.get(1), 0.9);
-		//
-		//mediator.getModel().setRoutingStrategy(key, clkey, ros);
-		//
-		//mediator.deleteCells(new Object[] {server3});
-		//
-		//mediator.connect(server1, server5);
-		//
-		//ros.getValues().put(((CellComponent) server5.getUserObject()).getKey(), ros.getValues().remove(output.get(0)));
-		//
-		//mediator.getModel().setFakeForwordConnections(key, output);
-		//
-		//mediator.startEditingAtAbstractCell(server1);
-		//		
-		//mediator.connect(server1, server2);
-		//RoutingStrategy rs = ((RoutingStrategy) mediator.getModel().getRoutingStrategy(key, clkey));
-		//Object key2 = ((CellComponent) server2.getUserObject()).getKey();
-		//rs.getValues().put(key2, rs.getValues().remove(test));
-		//mediator.getModel().setRoutingStrategy(key2, clkey, rs);
-
-		//--------------------------END---------------------------------//
 
 		CommonModel cm = mediator.getModel();
 		return cm;

@@ -140,7 +140,6 @@ public class TemplateFileOperation {
 		root.add(siteNode);
 
 		for (int j = 0; j < cates.getLength(); j++) {
-
 			Element cate = (Element) cates.item(j);
 			String category = cate.getAttribute("name");
 			TreeTableNode cateNode = new ChildNode(new Object[] { category });
@@ -149,7 +148,6 @@ public class TemplateFileOperation {
 
 			// extract the template info
 			for (int i = 0; i < temps.getLength(); i++) {
-
 				Element temp = (Element) temps.item(i);
 				TemplateData tData = new TemplateData();
 
@@ -227,7 +225,6 @@ public class TemplateFileOperation {
 		NodeList temps = doc.getElementsByTagName("template");
 
 		for (int i = 0; i < temps.getLength(); i++) {
-
 			Element temp = (Element) temps.item(i);
 			if ("true".equals(temp
 					.getElementsByTagName(TemplateConstants.MF_DEFAULT).item(0)
@@ -299,7 +296,6 @@ public class TemplateFileOperation {
 		NodeList temps = doc.getElementsByTagName("template");
 
 		for (int i = 0; i < temps.getLength(); i++) {
-
 			Element temp = (Element) temps.item(i);
 			TemplateData tData = new TemplateData();
 
@@ -352,7 +348,6 @@ public class TemplateFileOperation {
 
 	public static void parseSiteXML(AddingPanelData data)
 			throws SAXException, IOException {
-
 		File XMLFile = new File(SITE_FILE);
 		if (XMLFile.exists()) {
 			DOMParser parser = new DOMParser();
@@ -386,7 +381,6 @@ public class TemplateFileOperation {
 	public static void writeSiteXML(String siteName, String siteAddress)
 			throws ParserConfigurationException, FileNotFoundException, SAXException,
 			IOException, TransformerFactoryConfigurationError, TransformerException {
-
 		File XMLFile = new File(SITE_FILE);
 		if (!XMLFile.exists()) {
 			Files.copy(TemplateAddingPanel.class.getResourceAsStream(

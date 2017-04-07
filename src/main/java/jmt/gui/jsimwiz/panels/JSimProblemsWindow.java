@@ -34,8 +34,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Vector;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -493,15 +491,6 @@ public class JSimProblemsWindow extends JFrame {
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Response Time per Sink and Throughput per Sink "
 								+ "should not be used for closed class.</div></html>", null, null));
 			}
-			if (mc.isThereSinkProbabilityUpdateWarning()) {
-				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.SINK_PROBABILITY_UPDATE_WARNING,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Sink Probability of the Closed Class(s) "
-								+ mc.getClassModel().getSinkProbabilityUpdateClasses() + " of Station(s) "
-								+ mc.getStationModel().getSinkProbabilityUpdateStations() + " has been updated to 0.0.</div></html>", null, null));
-				//Reset after displaying the offending Station and Class names.
-				mc.getClassModel().resetSinkProbabilityUpdateClasses();
-				mc.getStationModel().resetSinkProbabilityUpdateStations();
-			}
 			if (mc.isThereCsMatrixRowSumError()) {
 				Vector<Object> temp = mc.getCsWithWrongMatrix();
 				for (int i = 0; i < temp.size(); i++) {
@@ -521,21 +510,6 @@ public class JSimProblemsWindow extends JFrame {
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
 							+ " is followed by a queue with BAS strategy scheduling.</div></html>", stationKey, null));
 				}				
-			}
-			if (mc.isThereLoadDependentRoutingError()) {
-				Map<Object, HashMap<Object, Object>> temp = mc.getInvalidLoadDependentRoutingStations();
-				for (Iterator<Object> it = temp.keySet().iterator(); it.hasNext();) {
-					Object key = it.next();
-					HashMap<Object, Object> val = (HashMap<Object, Object>)temp.get(key);
-					Map.Entry<Object, Object> m = val.entrySet().iterator().next();
-					Object stationKey = m.getKey();
-					Object classKey = m.getValue();
-					String className = mc.getClassModel().getClassName(classKey);
-					String sourceName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.LOAD_DEPENDENT_ROUTING_INVALID,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Station: " + sourceName + " for class: "
-									+ className	+ " with invalid LoadDependentRouting.</div></html>", stationKey, classKey));
-				}
 			}
 			if (mc.isThereCsBetweenForkJoin()) {
 				Vector<Object> temp = mc.getCsBetweenForkJoin();

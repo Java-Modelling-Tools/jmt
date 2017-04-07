@@ -33,6 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 import jmt.gui.common.JMTImageLoader;
 
@@ -149,13 +150,16 @@ public class WarningScrollTable extends JRootPane {
 		innerPanel.add(icon, BorderLayout.NORTH);
 		// Adds Text Area
 		JTextArea text = new JTextArea();
+		text.setOpaque(false);
 		text.setEditable(false);
 		text.setWrapStyleWord(true);
 		text.setLineWrap(true);
 		text.setText(msg);
 		text.setBorder(BorderFactory.createEmptyBorder(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE));
 		text.setBackground(icon.getBackground());
-		innerPanel.add(text, BorderLayout.CENTER);
+		JScrollPane textPane = new JScrollPane(text);
+		textPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+		innerPanel.add(textPane, BorderLayout.CENTER);
 		innerPanel.setBorder(BorderFactory.createEtchedBorder());
 		innerPanel.setPreferredSize(warningBoxSize);
 		warning.add(innerPanel);

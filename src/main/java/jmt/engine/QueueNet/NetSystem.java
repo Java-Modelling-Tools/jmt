@@ -217,11 +217,16 @@ public class NetSystem {
 		return netController.getSimulationTime();
 	}
 
+	/** Gets a node from its id. Searches the id between all the networks
+	 *
+	 * @param id the id of the node
+	 * @return searched node
+	 */
 	public static final NetNode getNode(int Id) {
 		return (NetNode) SimSystem.getEntity(Id);
 	}
 
-	/**Gets a node from its name. Searches the name between all the networks
+	/** Gets a node from its name. Searches the name between all the networks
 	 *
 	 * @param name the name of the node
 	 * @return searched node
@@ -329,7 +334,6 @@ public class NetSystem {
 				//count finished measures
 				if (measure.hasFinished()) {
 					count++;
-				} else {
 				}
 			}
 		}
@@ -347,10 +351,8 @@ public class NetSystem {
 			num = network.getMeasures().size();
 			if (num > 0) {
 				measures = network.getMeasures().listIterator();
-
 				while (measures.hasNext()) {
 					measure = measures.next();
-
 					if (!measure.hasFinished()) {
 						measure.testDeadMeasure();
 					}

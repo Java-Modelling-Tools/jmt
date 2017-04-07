@@ -51,8 +51,8 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
  * Description: Added new Performance index for the capturing the 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
- *              each sink per class. 
- *              
+ *              each sink per class.
+ * 
  * Modified by Sturari Nicola (Nov 2014)
  * Desc: Added a parameter representing the maximum simulated time (not real time) before the simulation is stopped
  *  

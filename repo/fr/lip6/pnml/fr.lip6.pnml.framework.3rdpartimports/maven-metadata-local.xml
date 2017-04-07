@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>fr.lip6.pnml</groupId>
+  <artifactId>fr.lip6.pnml.framework.3rdpartimports</artifactId>
+  <versioning>
+    <release>2.2.12</release>
+    <versions>
+      <version>2.2.12</version>
+    </versions>
+    <lastUpdated>20170127141244</lastUpdated>
+  </versioning>
+</metadata>

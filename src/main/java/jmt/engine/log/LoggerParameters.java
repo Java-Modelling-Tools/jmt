@@ -21,7 +21,10 @@ package jmt.engine.log;
 import java.io.File;
 
 public class LoggerParameters {
+
 	public volatile boolean isEnabled; // the variable is left public for fast external read access - do not write to it.
+	public String name;
+	public String path;
 	public Boolean boolExecTimestamp;
 	public Boolean boolLoggername;
 	public Boolean boolTimeStamp;
@@ -29,8 +32,6 @@ public class LoggerParameters {
 	public Boolean boolJobClass;
 	public Boolean boolTimeSameClass;
 	public Boolean boolTimeAnyClass;
-	public String name;
-	public String path;
 
 	/* Constants for name passing */
 	public static final int LOGGER_AR_ASK = 0;
@@ -42,6 +43,8 @@ public class LoggerParameters {
 	 * Creates a logger with default parameters.
 	 */
 	public LoggerParameters() {
+		name = new String(GLOBALLOGNAME);
+		path = new String("./");
 		boolExecTimestamp = new Boolean(false);
 		boolLoggername = new Boolean(true);
 		boolTimeStamp = new Boolean(true);
@@ -49,8 +52,6 @@ public class LoggerParameters {
 		boolJobClass = new Boolean(false);
 		boolTimeSameClass = new Boolean(false);
 		boolTimeAnyClass = new Boolean(false);
-		name = new String(GLOBALLOGNAME);
-		path = new String("./");
 		enable();
 	}
 
@@ -58,7 +59,9 @@ public class LoggerParameters {
 	 * Creates a logger with most parameters specified as a string.
 	 * Used by jmt.engine.NodeSections.LogTunnel class.
 	 */
-	public LoggerParameters(Boolean ET, String FN, String FP, Boolean LN, Boolean TS, Boolean JID, Boolean JC, Boolean TSC, Boolean TAC) {
+	public LoggerParameters(String FN, String FP, Boolean ET, Boolean LN, Boolean TS, Boolean JID, Boolean JC, Boolean TSC, Boolean TAC) {
+		name = FN;
+		path = FP;
 		boolExecTimestamp = ET;
 		boolLoggername = LN;
 		boolTimeStamp = TS;
@@ -66,9 +69,18 @@ public class LoggerParameters {
 		boolJobClass = JC;
 		boolTimeSameClass = TSC;
 		boolTimeAnyClass = TAC;
-		name = FN;
-		path = FP;
 		enable();
+	}
+
+	/**
+	 * Returns a deep copy of this object.
+	 * @return A deep copy of this object.
+	 */
+	@Override
+	public Object clone() {
+		LoggerParameters lp = new LoggerParameters(name, path, boolExecTimestamp, boolLoggername, boolTimeStamp, boolJobID, boolJobClass, boolTimeSameClass, boolTimeAnyClass);
+		lp.isEnabled = isEnabled;
+		return lp;
 	}
 
 	/**
@@ -166,4 +178,5 @@ public class LoggerParameters {
 			return false;
 		}
 	}
+
 }

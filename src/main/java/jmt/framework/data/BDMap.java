@@ -40,7 +40,7 @@ public interface BDMap {
 
 	/**returns keyset along a single dimension.
 	 * @param coordName name of dimension.
-	 * @return set containig search keys for specified dimension.*/
+	 * @return set containing search keys for specified dimension.*/
 	Set<Object> keySet(int coordName);
 
 	/**tells whether a key mapping is present in this BDMap along a specified coord

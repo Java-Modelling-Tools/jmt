@@ -344,8 +344,6 @@ public class Calc {
 		OneDominator od = new OneDominator();
 		od.setVertices(vertices);
 		if (od.IsOneDominator()) {
-			Vertex dom = od.getDominator();
-			//System.out.println(dom);
 			sett1staz = b3d.OneDominator(od.getDominator());
 
 			out.addElement(faces);
@@ -577,8 +575,6 @@ public class Calc {
 		OneDominator od = new OneDominator();
 		od.setVertices(vertices);
 		if (od.IsOneDominator()) {
-			Vertex dom = od.getDominator();
-			//System.out.println(dom);
 			sett1staz = b3d.OneDominator(od.getDominator());
 
 			//out.addElement(faces);

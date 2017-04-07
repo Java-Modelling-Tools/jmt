@@ -54,9 +54,6 @@ import jmt.gui.common.serviceStrategies.LDStrategy;
  * not be selected with a closed class as for a closed model till now in JMT no
  * jobs are routed to the sink and apparently sink is allowed to choose only
  * when a open class is present.
- *
- * Modified by Ashanka (June 2010): Added Sink Probability for Closed class
- * update to 0.0 warning message.
  */
 public class ModelChecker implements CommonConstants {
 
@@ -129,8 +126,6 @@ public class ModelChecker implements CommonConstants {
 	private Vector<Object> csSystemThroughputClass;
 	//Vector containing the closed classes of zero population
 	private Vector<Object> closedZeroPopulation;
-
-	private Map<Object, HashMap<Object, Object>> invalidLoadDependentRouting;
 	//HashMap containing the vector of keys of the classes for
 	//which Guard strategies has zero tasks at this join. The
 	//key of the HashMap is the key of the join considered
@@ -197,22 +192,20 @@ public class ModelChecker implements CommonConstants {
 	public static final int CS_MATRIX_HAS_ROWS_LESS_THAN_ONE = 20;
 	//Checks if exist some cs followed by a queue with bas drop strategy.
 	public static final int CS_FOLLOWED_BY_A_BAS = 21;
-
-	public static final int LOAD_DEPENDENT_ROUTING_INVALID = 22;
 	//Checks the different reference station of closed class if there exists class switch.
-	public static final int CS_REFERENCE_STATION = 23;
+	public static final int CS_REFERENCE_STATION = 22;
 	//Checks existence of the system throughput per class with class switch.
-	public static final int CS_SYSTEM_THROUGHPUT_CLASS = 24;
+	public static final int CS_SYSTEM_THROUGHPUT_CLASS = 23;
 	//Checks if all the closed classes population is zero with class switch.
-	public static final int CS_ALL_CLOSED_ZERO_POPULATION = 25;
+	public static final int CS_ALL_CLOSED_ZERO_POPULATION = 24;
 	//Checks if there are any joins that have Guard strategies with zero tasks.
-	public static final int GUARD_STRATEGY_ZERO_TASKS = 26;
+	public static final int GUARD_STRATEGY_ZERO_TASKS = 25;
 	//Checks if there are any semaphores not between a fork and a join.
-	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN = 27;
+	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN = 26;
 	//Checks if there are any scalers not between a fork and a join.
-	public static final int SCALER_NOT_BETWEEN_FORK_JOIN = 28;
+	public static final int SCALER_NOT_BETWEEN_FORK_JOIN = 27;
 	//Checks if any transitions have invalid conditions for some modes.
-	public static final int TRANSITION_WITH_INVALID_CONDITIONS = 29;
+	public static final int TRANSITION_WITH_INVALID_CONDITIONS = 28;
 
 	//it occurs when more than one sink have been defined
 	public static final int MORE_THAN_ONE_SINK_WARNING = 0;
@@ -265,26 +258,24 @@ public class ModelChecker implements CommonConstants {
 	//are used
 	// (only when trying to convert to JMVA)
 	public static final int BCMP_NON_SYMMETRIC_SCHEDULING = 13;
-
-	public static final int SINK_PROBABILITY_UPDATE_WARNING = 14;
 	//Checks if the closed classes population is zero.
-	public static final int CLOSED_ZERO_POPULATION = 15;
+	public static final int CLOSED_ZERO_POPULATION = 14;
 	//Checks if exist some cs between a fork and a join.
-	public static final int CS_BETWEEN_FORK_JOIN = 16;
+	public static final int CS_BETWEEN_FORK_JOIN = 15;
 	//Checks if exist some cs and fork/join section.
-	public static final int CS_WITH_FORK_JOIN = 17;
+	public static final int CS_WITH_FORK_JOIN = 16;
 	//Checks if priority scheduling is used but all the classes have the same priorities.
-	public static final int SCHEDULING_SAME_PRIORITIES = 18;
+	public static final int SCHEDULING_SAME_PRIORITIES = 17;
 	//Checks if there are any transitions between a fork and a join.
-	public static final int TRANSITION_BETWEEN_FORK_JOIN = 19;
+	public static final int TRANSITION_BETWEEN_FORK_JOIN = 18;
 	//Checks if there are any transitions without forward links.
-	public static final int TRANSITION_WITHOUT_FORWARD_LINKS = 20;
+	public static final int TRANSITION_WITHOUT_FORWARD_LINKS = 19;
 	//Checks if any transitions have invalid outcomes for some modes.
-	public static final int TRANSITION_WITH_INVALID_OUTCOMES = 21;
+	public static final int TRANSITION_WITH_INVALID_OUTCOMES = 20;
 
-	private static final int NUMBER_OF_ERROR_TYPES = 30;
-	private static final int NUMBER_OF_NORMAL_ERROR_TYPES = 30;
-	private static final int NUMBER_OF_WARNING_TYPES = 22;
+	private static final int NUMBER_OF_ERROR_TYPES = 29;
+	private static final int NUMBER_OF_NORMAL_ERROR_TYPES = 29;
+	private static final int NUMBER_OF_WARNING_TYPES = 21;
 	private static final int NUMBER_OF_NORMAL_WARNING_TYPES = 5;
 
 	/**
@@ -326,7 +317,6 @@ public class ModelChecker implements CommonConstants {
 		csSystemThroughputClass = new Vector<Object>(0, 1);
 		closedZeroPopulation = new Vector<Object>(0, 1);
 		emptyBlockingRegions = new Vector<Object>(0, 1);
-		invalidLoadDependentRouting = new HashMap<Object, HashMap<Object, Object>>(0);
 		guardStrategyZeroTasks = new HashMap<Object, Vector<Object>>(0, 1);
 		semaphoreNotBetweenForkJoin = new Vector<Object>(0, 1);
 		scalerNotBetweenForkJoin = new Vector<Object>(0, 1);
@@ -362,7 +352,6 @@ public class ModelChecker implements CommonConstants {
 		csSystemThroughputClass.removeAllElements();
 		closedZeroPopulation.removeAllElements();
 		emptyBlockingRegions.removeAllElements();
-		invalidLoadDependentRouting.clear();
 		guardStrategyZeroTasks.clear();
 		semaphoreNotBetweenForkJoin.removeAllElements();
 		scalerNotBetweenForkJoin.removeAllElements();
@@ -411,7 +400,6 @@ public class ModelChecker implements CommonConstants {
 			checkForAllForwardStationsAreSinkError();
 			checkForMeasureError();
 			checkForInconsistentMeasureError();
-			checkForLoadDependentRoutingError();
 			//checkForMoreThanOneSinkWarning();
 			checkForNoBackwardLinkWarning();
 			checkForParametricAnalysisModelModifiedWarning();
@@ -422,7 +410,6 @@ public class ModelChecker implements CommonConstants {
 			checkForPreloadsInBlockingRegions();
 			checkForSinkPerfIndicesWithNoSink();
 			checkForSinkPerfIndicesWithClosedClass();
-			checkForSinkProbabilityUpdateWarning();
 			checkForCsMatrixProbabilities();
 			checkForCsFollowedByBAS();
 			checkForCsBetweenForkJoin();
@@ -491,8 +478,8 @@ public class ModelChecker implements CommonConstants {
 			}
 		}
 		//Added warnings here separately otherwise we had to redo the numbering
-		if (warnings[SINK_PROBABILITY_UPDATE_WARNING] || warnings[CLOSED_ZERO_POPULATION] || warnings[CS_BETWEEN_FORK_JOIN]
-				|| warnings[CS_WITH_FORK_JOIN] || warnings[SCHEDULING_SAME_PRIORITIES] || warnings[TRANSITION_BETWEEN_FORK_JOIN]
+		if (warnings[CLOSED_ZERO_POPULATION] || warnings[CS_BETWEEN_FORK_JOIN] || warnings[CS_WITH_FORK_JOIN]
+				|| warnings[SCHEDULING_SAME_PRIORITIES] || warnings[TRANSITION_BETWEEN_FORK_JOIN]
 				|| warnings[TRANSITION_WITHOUT_FORWARD_LINKS] || warnings[TRANSITION_WITH_INVALID_OUTCOMES]) {
 			ok = false;
 		}
@@ -501,7 +488,8 @@ public class ModelChecker implements CommonConstants {
 
 	public boolean isErrorFreeToJMVA() {
 		boolean ok = true;
-		if (errors[NO_CLASS_ERROR] || errors[NO_STATION_ERROR] || errors[OPEN_CLASS_BUT_NO_SOURCE_ERROR] || errors[REFERENCE_STATION_ERROR]) {
+		if (errors[NO_CLASS_ERROR] || errors[NO_STATION_ERROR] || errors[OPEN_CLASS_BUT_NO_SOURCE_ERROR]
+				|| errors[REFERENCE_STATION_ERROR]) {
 			ok = false;
 		}
 		return ok;
@@ -707,10 +695,6 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public boolean isThereCsFollowedByBasError() {
 		return errors[CS_FOLLOWED_BY_A_BAS];
-	}
-
-	public boolean isThereLoadDependentRoutingError() {
-		return errors[LOAD_DEPENDENT_ROUTING_INVALID];
 	}
 
 	/**
@@ -1214,10 +1198,6 @@ public class ModelChecker implements CommonConstants {
 		return closedZeroPopulation;
 	}
 
-	public Map<Object, HashMap<Object, Object>> getInvalidLoadDependentRoutingStations() {
-		return invalidLoadDependentRouting;
-	}
-
 	/**
 	 * Returns a HashMap where the key is the key of a join. For each join that
 	 * has Guard strategies with zero tasks it contains a Vector<Object> with the
@@ -1676,23 +1656,6 @@ public class ModelChecker implements CommonConstants {
 		}
 	}
 
-	private void checkForLoadDependentRoutingError() {
-		for (Object stationKey : station_def.getStationKeys()) {
-			for (Object classKey : class_def.getClassKeys()) {
-				RoutingStrategy strategy = (RoutingStrategy) station_def.getRoutingStrategy(stationKey, classKey);
-				if (strategy instanceof LoadDependentRouting) {
-					List<String> errorMsgs = ((LoadDependentRouting) strategy).validate();
-					if (errorMsgs != null && errorMsgs.size() > 0) {
-						HashMap<Object, Object> innerVal = new HashMap<Object, Object>();
-						innerVal.put(stationKey, classKey);
-						invalidLoadDependentRouting.put(strategy, innerVal);
-						errors[LOAD_DEPENDENT_ROUTING_INVALID] = true;
-					}
-				}
-			}
-		}
-	}
-
 	/**
 	 * Explores the model, searching for routing problems for the specified
 	 * close class
@@ -1821,23 +1784,15 @@ public class ModelChecker implements CommonConstants {
 								temp = exploreForAllForwardStationAreSink(classKey, thisForwardStation, alreadyVisited);
 							}
 						} else if (strategy instanceof LoadDependentRouting) {
-							String stationName = station_def.getStationName(thisForwardStation);
 							LoadDependentRouting loadDependentRouting = (LoadDependentRouting) strategy;
-							Map<Integer, LoadDependentRouting.EmpiricalEntry[]> empiricalEntries = loadDependentRouting.getEmpiricalEntries();
-							Iterator<LoadDependentRouting.EmpiricalEntry[]> rows = empiricalEntries.values().iterator();
-							Collection<LoadDependentRouting.EmpiricalEntry> allEntries = new ArrayList<LoadDependentRouting.EmpiricalEntry>(5);
-							while (rows.hasNext()) {
-								LoadDependentRouting.EmpiricalEntry[] entries = rows.next();
-								allEntries.addAll(Arrays.asList(entries));
-							}
-							for (Iterator<LoadDependentRouting.EmpiricalEntry> itEntries = allEntries.iterator(); itEntries.hasNext();) {
-								LoadDependentRouting.EmpiricalEntry entry = itEntries.next();
-								if (entry.getStationName().equals(stationName)) {
-									double p = entry.getProbability();
-									if (p != 0) {
-										//... start exploring from thisForwardStation
-										temp = exploreForAllForwardStationAreSink(classKey, thisForwardStation, alreadyVisited);
-									}
+							for (Map<Object, Double> probabilities : loadDependentRouting.getAllEmpiricalEntries().values()) {
+								// ... get the routing probability toward thisForwardStation ...
+								double p = probabilities.get(thisForwardStation).doubleValue();
+								// ... if p != 0 start exploring from thisForwardStation and collect
+								// the returned vector into temp ...
+								if (p != 0) {
+									//... start exploring from thisForwardStation
+									temp = exploreForAllForwardStationAreSink(classKey, thisForwardStation, alreadyVisited);
 								}
 							}
 						} else {
@@ -2227,17 +2182,6 @@ public class ModelChecker implements CommonConstants {
 				errors[SINK_PERF_WITH_CLOSED_CLASS_ERROR] = true;
 				break;
 			}
-		}
-	}
-
-	public boolean isThereSinkProbabilityUpdateWarning() {
-		return warnings[SINK_PROBABILITY_UPDATE_WARNING];
-	}
-
-	private void checkForSinkProbabilityUpdateWarning() {
-		if (station_def.isSinkProbabilityUpdated()) {
-			station_def.setSinkProbabilityUpdatedVar(false);
-			warnings[SINK_PROBABILITY_UPDATE_WARNING] = true;
 		}
 	}
 

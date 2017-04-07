@@ -232,33 +232,34 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 		s.setPreferredSize(new Dimension(120, 90));
 		listVars.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting()) {
-					if (listVars.getSelectedIndex() >= 0) {
-						if (tableVars != null && listVars != null) {
-							double[] p = new double[numClust];
-							for (int i = 0; i < numClust; i++) {
-								p[i] = info.infoCluster[i].percVar[listVars.getSelectedIndex()];
-							}
-
-							((varsDetModel) tableVars.getModel()).setNewPerc(p);
-							tableVars.tableChanged(new TableModelEvent(tableVars.getModel()));
-
-							int[] angle = new int[numClust];
-							int i;
-							angle[0] = 0;
-							for (i = 1; i < numClust; i++) {
-								angle[i] = angle[i - 1] + (int) ((360) * p[i - 1]);
-							}
-							for (; i < angle.length; i++) {
-								angle[i] = 360;
-							}
-
-							pieChartVars.setAngle(angle);
-							chartVars.repaint();
+				if (e.getValueIsAdjusting()) {
+					return;
+				}
+				if (listVars.getSelectedIndex() >= 0) {
+					if (tableVars != null && listVars != null) {
+						double[] p = new double[numClust];
+						for (int i = 0; i < numClust; i++) {
+							p[i] = info.infoCluster[i].percVar[listVars.getSelectedIndex()];
 						}
-					} else {
-						listVars.setSelectedIndex(0);
+
+						((varsDetModel) tableVars.getModel()).setNewPerc(p);
+						tableVars.tableChanged(new TableModelEvent(tableVars.getModel()));
+
+						int[] angle = new int[numClust];
+						int i;
+						angle[0] = 0;
+						for (i = 1; i < numClust; i++) {
+							angle[i] = angle[i - 1] + (int) ((360) * p[i - 1]);
+						}
+						for (; i < angle.length; i++) {
+							angle[i] = 360;
+						}
+
+						pieChartVars.setAngle(angle);
+						chartVars.repaint();
 					}
+				} else {
+					listVars.setSelectedIndex(0);
 				}
 			}
 		});

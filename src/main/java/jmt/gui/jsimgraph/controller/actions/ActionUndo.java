@@ -41,9 +41,6 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class ActionUndo extends AbstractUndoRedoAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	protected UndoManager um;
 

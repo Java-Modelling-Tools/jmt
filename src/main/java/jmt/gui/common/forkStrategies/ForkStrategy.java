@@ -79,10 +79,10 @@ public abstract class ForkStrategy {
 		return all;
 	}
 
-	public abstract void removeStation(Object stationKey);
-
-	public abstract void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys);
-
 	public abstract boolean isModelStateDependent();
+
+	public abstract void addStation(Object stationKey, Object classKey, Vector<Object> classKeys);
+
+	public abstract void removeStation(Object stationKey);
 
 }

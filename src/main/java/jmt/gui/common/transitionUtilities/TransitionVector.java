@@ -36,6 +36,15 @@ public class TransitionVector {
 		vector = new HashMap<Object, Integer>();
 	}
 
+	@Override
+	public Object clone() {
+		TransitionVector tv = new TransitionVector();
+		for (Object key : vector.keySet()) {
+			tv.vector.put(key, vector.get(key));
+		}
+		return tv;
+	}
+
 	public Integer getEntry(Object key) {
 		if (!vector.containsKey(key)) {
 			return Integer.valueOf(0);

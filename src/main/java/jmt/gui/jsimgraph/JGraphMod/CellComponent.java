@@ -31,6 +31,7 @@ import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
  *         Time: 10.48.11
  */
 public class CellComponent {
+
 	protected Object key;
 	protected JmodelStationDefinition sd;
 
@@ -60,4 +61,5 @@ public class CellComponent {
 	public Object getKey() {
 		return key;
 	}
+
 }

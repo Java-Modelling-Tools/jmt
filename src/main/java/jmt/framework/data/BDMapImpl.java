@@ -41,12 +41,11 @@ public class BDMapImpl implements BDMap {
 
 	/**returns keyset along a single dimension.
 	 * @param coordName name of dimension.
-	 * @return set containig search keys for specified dimension.*/
+	 * @return set containing search keys for specified dimension.*/
 	public Set<Object> keySet(int coordName) {
 		if (coordName == X) {
 			return getSetFromArray(xKeys);
-		}
-		if (coordName == Y) {
+		} else if (coordName == Y) {
 			return getSetFromArray(yKeys);
 		} else {
 			return null;
@@ -69,8 +68,7 @@ public class BDMapImpl implements BDMap {
 	public boolean containsKey(Object key, int coordName) {
 		if (coordName == X) {
 			return -1 != getIndex(xKeys, key);
-		}
-		if (coordName == Y) {
+		} else if (coordName == Y) {
 			return -1 != getIndex(yKeys, key);
 		} else {
 			return false;
@@ -271,11 +269,11 @@ public class BDMapImpl implements BDMap {
 	public int size(int coordName) {
 		if (coordName == X) {
 			return xKeys.length;
-		}
-		if (coordName == Y) {
+		} else if (coordName == Y) {
 			return yKeys.length;
+		} else {
+			return 0;
 		}
-		return 0;
 	}
 
 	//adds a row to bidimensional array
@@ -364,6 +362,7 @@ public class BDMapImpl implements BDMap {
 			for (int i = 0; i < contents.length; i++) {
 				contents[i][0] = column[i];
 			}
+			return;
 		}
 		//index out of bounds, do nothing
 		if (index > contents[0].length || index < 0) {

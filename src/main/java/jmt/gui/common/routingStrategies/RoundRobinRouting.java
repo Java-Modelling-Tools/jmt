@@ -66,4 +66,14 @@ public class RoundRobinRouting extends RoutingStrategy {
 		return false;
 	}
 
+	@Override
+	public void addStation(Object stationKey) {
+		return;
+	}
+
+	@Override
+	public void removeStation(Object stationKey) {
+		return;
+	}
+
 }

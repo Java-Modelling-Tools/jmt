@@ -151,7 +151,7 @@ public class Dispatcher_jSIMschema {
 		//try {
 		SimLoader simLoader = new SimLoader(simModelDefinitionPath);
 		sim = simLoader.getSim();
-		sim.setIsTerminalSimulation(isTerminalSimulation);
+		sim.setTerminalSimulation(isTerminalSimulation);
 
 		//sets in the Simulation object the path of the
 		//xml model definition
@@ -167,7 +167,6 @@ public class Dispatcher_jSIMschema {
 
 		sim.setRandomEngineSeed(simulationSeed);
 		sim.initialize();
-
 		logger.debug("jSIM correctly initialized with simulation seed = " + simulationSeed);
 
 		//find QueueNetwork reference
@@ -492,7 +491,7 @@ public class Dispatcher_jSIMschema {
 		}
 	}
 
-	public void setIsTerminalSimulation(boolean isTerminalSimulation) {
+	public void setTerminalSimulation(boolean isTerminalSimulation) {
 		this.isTerminalSimulation = isTerminalSimulation;
 	}
 

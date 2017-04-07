@@ -58,57 +58,46 @@ public class TransitionMatrix {
 		return matrix.keySet();
 	}
 
+	public int getEntry(String key, int index) {
+		return matrix.get(key).getEntry(index);
+	}
+
+	public void setEntry(String key, int index, int value) {
+		matrix.get(key).setEntry(index, value);
+		total = -1;
+		totals[index] = -1;
+	}
+
 	public TransitionVector getVector(String key) {
 		return matrix.get(key);
 	}
 
 	public void setVector(TransitionVector vector) {
-		String key = vector.getKey();
-		if (matrix.containsKey(key)) {
-			total -= matrix.get(key).getTotal();
-			for (int i = 0; i < matrix.get(key).size(); i++) {
-				totals[i] -= matrix.get(key).getEntry(i);
-			}
-		}
-		matrix.put(key, vector);
-		total += vector.getTotal();
-		for (int i = 0; i < vector.size(); i++) {
-			totals[i] += vector.getEntry(i);
-		}
-	}
-
-	public int getEntry(String key, int index) {
-		if (!matrix.containsKey(key)) {
-			return -1;
-		}
-		return matrix.get(key).getEntry(index);
-	}
-
-	public void setEntry(String key, int index, int value) {
-		if (!matrix.containsKey(key)) {
-			return;
-		}
-		total -= matrix.get(key).getEntry(index);
-		totals[index] -= matrix.get(key).getEntry(index);
-		matrix.get(key).setEntry(index, value);
-		total += matrix.get(key).getEntry(index);
-		totals[index] += matrix.get(key).getEntry(index);
+		matrix.put(vector.getKey(), vector);
+		total = -1;
+		Arrays.fill(totals, -1);
 	}
 
 	public int getTotal() {
+		if (total < 0) {
+			total = 0;
+			for (TransitionVector vector : matrix.values()) {
+				total += vector.getTotal();
+			}
+		}
 		return total;
 	}
 
 	public int getTotal(String key) {
-		if (!matrix.containsKey(key)) {
-			return -1;
-		}
 		return matrix.get(key).getTotal();
 	}
 
 	public int getTotal(int index) {
-		if (index < 0 || index >= totals.length) {
-			return -1;
+		if (totals[index] < 0) {
+			totals[index] = 0;
+			for (TransitionVector vector : matrix.values()) {
+				totals[index] += vector.getEntry(index);
+			}
 		}
 		return totals[index];
 	}

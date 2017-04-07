@@ -24,7 +24,10 @@ import java.util.List;
 import jmt.gui.common.RootNode;
 import jmt.gui.common.TreeTableNode;
 
-
+/**
+ * @author S Jiang
+ * 
+ */
 public class AddingPanelData {
 
 	private List<String> MD5s;

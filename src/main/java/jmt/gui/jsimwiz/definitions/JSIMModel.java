@@ -107,8 +107,8 @@ public class JSIMModel extends CommonModel {
 	@Override
 	public void setStationType(Object key, String type) {
 		String oldType = getStationType(key);
-		if (oldType == type || (oldType.equals(STATION_TYPE_SOURCE) || oldType.equals(STATION_TYPE_SINK))
-				|| (type.equals(STATION_TYPE_SOURCE) || type.equals(STATION_TYPE_SINK))) {
+		if (oldType.equals(STATION_TYPE_SOURCE) || oldType.equals(STATION_TYPE_SINK)
+				|| type.equals(STATION_TYPE_SOURCE) || type.equals(STATION_TYPE_SINK)) {
 			return;
 		}
 		super.setStationType(key, type);

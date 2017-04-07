@@ -64,10 +64,10 @@ public class Jmt {
 	public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Transformer transformer = tf.newTransformer();
-		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+		transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
 		transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
 		transformer.transform(new DOMSource(doc), 
@@ -81,7 +81,7 @@ public class Jmt {
 		System.err.println("sim options:");
 		System.err.println("  -seed 1234 : sets the simulation seed to 1234");
 		System.err.println("  -maxtime 60 : sets the maximum simulation time to 60 seconds");
-		System.exit(2);
+		System.exit(0);
 	}
 
 	public static void copyFile(File sourceFile, File destFile) throws IOException {
@@ -98,11 +98,10 @@ public class Jmt {
 			//previous code: destination.transferFrom(source, 0, source.size());
 			//should be to avoid infinite loops.
 
-			long count =0;
+			long count = 0;
 			long size = source.size();                
-			while ((count += destination.transferFrom(source, 0, size-count))<size);
-		}
-		finally {
+			while ((count += destination.transferFrom(source, 0, size - count)) < size);
+		} finally {
 			if (source != null) {
 				source.close();
 			}
@@ -118,20 +117,17 @@ public class Jmt {
 		}
 		if (args[0].equals("mva")) {
 			File model = new File(args[1]);
-			File result = new File(args[1]+"-result.jmva");
-			mva(model, result);			
-
+			File result = new File(args[1] + "-result.jmva");
+			mva(model, result);
 		} else if (args[0].equals("sim")) {
 			File model = new File(args[1]);
-			File result = new File(args[1]+"-result.jsim");
+			File result = new File(args[1] + "-result.jsim");
 			if (!model.isFile()) {
 				System.err.print("Model file not found: " + model.getAbsolutePath());
 				System.exit(1);
 			}
-			System.out.println(model.getName());
 			Map<String,String> options = parseParameters(args, 2);
 			sim(model, result, options);
-
 		} else {
 			help();
 		}
@@ -156,7 +152,7 @@ public class Jmt {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 
-		File temp = File.createTempFile("tempfileSim",".jsim");
+		File temp = File.createTempFile("tempfileSim", ".jsim");
 		temp.deleteOnExit();
 
 		Document doc = db.parse(model);
@@ -171,21 +167,20 @@ public class Jmt {
 		/*
 		 * save to a temp file
 		 */
-		TransformerFactory tranFactory = TransformerFactory.newInstance();  
-		Transformer aTransformer = tranFactory.newTransformer();  
-		Source src = new DOMSource(doc2);  
-		Result dest = new StreamResult(temp);  
-		aTransformer.transform(src, dest);  
+		TransformerFactory tranFactory = TransformerFactory.newInstance();
+		Transformer aTransformer = tranFactory.newTransformer();
+		Source src = new DOMSource(doc2);
+		Result dest = new StreamResult(temp);
+		aTransformer.transform(src, dest);
 
 		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(temp);
+		dispatcher.setTerminalSimulation(true);
 
 		// Starts the simulation
 		boolean success = dispatcher.solveModel();
-
 		File output = dispatcher.getOutputFile();
 		copyFile(output, result);
 		output.delete();
-
 		return success;
 	}
 
@@ -195,7 +190,7 @@ public class Jmt {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 
-		File temp = File.createTempFile("tempfileSim",".jsim");
+		File temp = File.createTempFile("tempfileSim", ".jsim");
 		temp.deleteOnExit();
 
 		Document doc = db.parse(model);
@@ -210,14 +205,14 @@ public class Jmt {
 		/*
 		 * save to a temp file
 		 */
-		TransformerFactory tranFactory = TransformerFactory.newInstance();  
-		Transformer aTransformer = tranFactory.newTransformer();  
-		Source src = new DOMSource(doc2);  
-		Result dest = new StreamResult(temp);  
-		aTransformer.transform(src, dest);  
+		TransformerFactory tranFactory = TransformerFactory.newInstance();
+		Transformer aTransformer = tranFactory.newTransformer();
+		Source src = new DOMSource(doc2);
+		Result dest = new StreamResult(temp);
+		aTransformer.transform(src, dest);
 
 		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(temp);
-		dispatcher.setIsTerminalSimulation(true);
+		dispatcher.setTerminalSimulation(true);
 		// Sets simulation seed if required
 		if (options.containsKey(OPTION_SEED)) {
 			try {
@@ -239,11 +234,9 @@ public class Jmt {
 
 		// Starts the simulation
 		boolean success = dispatcher.solveModel();
-
 		File output = dispatcher.getOutputFile();
 		copyFile(output, result);
 		output.delete();
-
 		return success;
 	}
 

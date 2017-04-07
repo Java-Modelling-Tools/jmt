@@ -91,10 +91,10 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 	private WarningScrollTable leftPanel;
 	private TitledBorder enablingBorder;
 	private ConditionTable enablingTable;
-	private JScrollPane enablingPanel;
+	private JScrollPane enablingPane;
 	private TitledBorder inhibitingBorder;
 	private ConditionTable inhibitingTable;
-	private JScrollPane inhibitingPanel;
+	private JScrollPane inhibitingPane;
 	private JButton addModeButton;
 	private ModeTable modeTable;
 	private JTextArea noticeText;
@@ -129,19 +129,19 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		String modeName = stationData.getTransitionModeName(stationKey, 0);
 		enablingBorder = new TitledBorder(new EtchedBorder(), "Enabling Condition for " + modeName);
 		enablingTable = new ConditionTable(true);
-		enablingPanel = new JScrollPane(enablingTable);
-		enablingPanel.setBorder(enablingBorder);
-		enablingPanel.setMinimumSize(new Dimension(300, 120));
+		enablingPane = new JScrollPane(enablingTable);
+		enablingPane.setBorder(enablingBorder);
+		enablingPane.setMinimumSize(new Dimension(300, 120));
 
 		inhibitingBorder = new TitledBorder(new EtchedBorder(), "Inhibiting Condition for " + modeName);
 		inhibitingTable = new ConditionTable(false);
-		inhibitingPanel = new JScrollPane(inhibitingTable);
-		inhibitingPanel.setBorder(inhibitingBorder);
-		inhibitingPanel.setMinimumSize(new Dimension(300, 120));
+		inhibitingPane = new JScrollPane(inhibitingTable);
+		inhibitingPane.setBorder(inhibitingBorder);
+		inhibitingPane.setMinimumSize(new Dimension(300, 120));
 
 		JPanel conditionPanel = new JPanel(new GridLayout(2, 1, 3, 3));
-		conditionPanel.add(enablingPanel);
-		conditionPanel.add(inhibitingPanel);
+		conditionPanel.add(enablingPane);
+		conditionPanel.add(inhibitingPane);
 
 		leftPanel = new WarningScrollTable(conditionPanel, WARNING_CLASS_INCOMING_ROUTING);
 		leftPanel.addCheckVector(stationInKeys);
@@ -161,16 +161,16 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		noticeText.setEditable(false);
 		noticeText.setLineWrap(true);
 		noticeText.setWrapStyleWord(true);
-		JScrollPane noticePanel = new JScrollPane(noticeText);
-		noticePanel.setBorder(new TitledBorder(new EtchedBorder(), "Notice"));
-		noticePanel.setMinimumSize(new Dimension(200, 120));
+		JScrollPane noticePane = new JScrollPane(noticeText);
+		noticePane.setBorder(new TitledBorder(new EtchedBorder(), "Notice"));
+		noticePane.setMinimumSize(new Dimension(200, 120));
 
 		JSplitPane rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		rightPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
 		rightPanel.setDividerSize(4);
 		rightPanel.setResizeWeight(1.0);
 		rightPanel.setLeftComponent(modePanel);
-		rightPanel.setRightComponent(noticePanel);
+		rightPanel.setRightComponent(noticePane);
 
 		JSplitPane mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -196,6 +196,9 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		modeTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
+				if (e.getValueIsAdjusting()) {
+					return;
+				}
 				int index = modeTable.getSelectedRow();
 				if (index >= 0) {
 					stopAllCellEditing();
@@ -203,8 +206,8 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 					enablingBorder.setTitle("Enabling Condition for " + modeName);
 					inhibitingBorder.setTitle("Inhibiting Condition for " + modeName);
 					currentModeIndex = index;
-					enablingPanel.repaint();
-					inhibitingPanel.repaint();
+					enablingPane.repaint();
+					inhibitingPane.repaint();
 					updateNotice();
 				} else {
 					if (currentModeIndex >= stationData.getTransitionModeListSize(stationKey)) {
@@ -565,8 +568,8 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 				stationData.setTransitionModeName(stationKey, rowIndex, modeName);
 				enablingBorder.setTitle("Enabling Condition for " + modeName);
 				inhibitingBorder.setTitle("Inhibiting Condition for " + modeName);
-				enablingPanel.repaint();
-				inhibitingPanel.repaint();
+				enablingPane.repaint();
+				inhibitingPane.repaint();
 			}
 		}
 

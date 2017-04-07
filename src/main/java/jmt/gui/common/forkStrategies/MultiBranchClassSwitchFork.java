@@ -46,9 +46,11 @@ public class MultiBranchClassSwitchFork extends ForkStrategy {
 
 	@Override
 	public ForkStrategy clone() {
-		MultiBranchClassSwitchFork csf = new MultiBranchClassSwitchFork();
-		csf.outPaths = new HashMap<Object, OutPath>(outPaths);
-		return csf;
+		MultiBranchClassSwitchFork mbcsf = new MultiBranchClassSwitchFork();
+		for (Object stationKey : outPaths.keySet()) {
+			mbcsf.outPaths.put(stationKey, (OutPath) (outPaths.get(stationKey)).clone());
+		}
+		return mbcsf;
 	}
 
 	@Override
@@ -62,12 +64,7 @@ public class MultiBranchClassSwitchFork extends ForkStrategy {
 	}
 
 	@Override
-	public void removeStation(Object stationKey) {
-		outPaths.remove(stationKey);
-	}
-
-	@Override
-	public void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys) {
+	public void addStation(Object stationKey, Object classKey, Vector<Object> classKeys) {
 		OutPath tempPath = new OutPath();
 		for (Object o : classKeys) {
 			if (o == classKey) {
@@ -77,6 +74,11 @@ public class MultiBranchClassSwitchFork extends ForkStrategy {
 			}                                
 		}
 		outPaths.put(stationKey, tempPath);
+	}
+
+	@Override
+	public void removeStation(Object stationKey) {
+		outPaths.remove(stationKey);
 	}
 
 }

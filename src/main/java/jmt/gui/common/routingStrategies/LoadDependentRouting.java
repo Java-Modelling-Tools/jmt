@@ -29,11 +29,13 @@ import java.util.*;
  */
 public class LoadDependentRouting extends RoutingStrategy {
 
-	Map<Integer, EmpiricalEntry[]> values = null; //Contains a Array of EmpiricalEntry where the Integer represents the From
+	Map<Integer, Map<Object, Double>> values = new HashMap<Integer, Map<Object, Double>>();
+
 	public LoadDependentRouting() {
 		description = "Customers of each class are routed depending on their number on the selected station. "
 				+ "The outgoing paths must have associated probabilities that should sum to 1 for each range.";
 	}
+
 	@Override
 	public String getName() {
 		return "Load Dependent Routing";
@@ -45,23 +47,16 @@ public class LoadDependentRouting extends RoutingStrategy {
 		return null;
 	}
 
-	public Map<Integer, EmpiricalEntry[]> getEmpiricalEntries() {
-		return values;
-	}
-
 	@Override
 	public RoutingStrategy clone() {
-		LoadDependentRouting newLd = new LoadDependentRouting();
-		if (values != null && values.keySet() != null) {
-			for (Integer from : values.keySet()) {
-				for (EmpiricalEntry entry : this.getEmpiricalEntryForFrom(from)) {
-					newLd.addEmricalEntryForFrom(from, entry.getStationName(), entry.getProbability());
-				}
+		LoadDependentRouting ldr = new LoadDependentRouting();
+		for (Integer from : values.keySet()) {
+			Map<Object, Double> entries = values.get(from);
+			for (Object stationKey : entries.keySet()) {
+				ldr.addEmpiricalEntry(from, stationKey, entries.get(stationKey));
 			}
-		} else {
-			newLd.values = null;
 		}
-		return newLd;
+		return ldr;
 	}
 
 	@Override
@@ -69,43 +64,25 @@ public class LoadDependentRouting extends RoutingStrategy {
 		return "jmt.engine.NetStrategies.RoutingStrategies.LoadDependentRoutingStrategy";
 	}
 
-	public EmpiricalEntry[] getEmpiricalEntryForFrom(Integer i) {
-		EmpiricalEntry[] out = null;
-		if (values != null) {
-			out = values.get(i);
-		}
-		return out;
+	public Map<Integer, Map<Object, Double>> getAllEmpiricalEntries() {
+		return values;
 	}
 
-	public void addEmricalEntryForFrom(Integer from, String stationName, Double prob) {
-		EmpiricalEntry newEntry = new EmpiricalEntry();
-		newEntry.setStationName(stationName);
-		newEntry.setProbability(prob);
-		if (values != null) {
-			EmpiricalEntry[] existingEntries = values.get(from);
-			if (existingEntries!= null && existingEntries.length>0) {
-				List<EmpiricalEntry> a = Arrays.asList(existingEntries);
-				List<EmpiricalEntry> newlist = new ArrayList<EmpiricalEntry>(a);
-				newlist.add(newEntry);
-				EmpiricalEntry[] newEntries = new EmpiricalEntry[newlist.size()];
-				newEntries = newlist.toArray(newEntries);
-				values.put(from,newEntries);
-			} else {
-				values.put(from, new EmpiricalEntry[]{newEntry});
-			}
-		} else {
-			values = new HashMap<Integer, EmpiricalEntry[]>();
-			values.put(from, new EmpiricalEntry[]{newEntry});
-		}
+	public Map<Object, Double> getEmpiricalEntriesForFrom(Integer from) {
+		return values.get(from);
 	}
 
-	public boolean deleteEmpricalEntryForFrom(Integer from) {
-		if (values != null) {
-			values.remove(from);
-		} else {
-			return false;
+	public void removeEmpiricalEntriesForFrom(Integer from) {
+		values.remove(from);
+	}
+
+	public void addEmpiricalEntry(Integer from, Object stationKey, Double probability) {
+		Map<Object, Double> entries = values.get(from);
+		if (entries == null) {
+			entries = new HashMap<Object, Double>();
+			values.put(from, entries);
 		}
-		return !values.containsKey(from);
+		entries.put(stationKey, probability);
 	}
 
 	/**
@@ -114,92 +91,49 @@ public class LoadDependentRouting extends RoutingStrategy {
 	 * @return
 	 */
 	public List<String> validate() {
-		List<String> errors = new ArrayList<String>(0);
-		List<String> warnings = new ArrayList<String>(0);
-
-		if (this.getEmpiricalEntries() == null || this.getEmpiricalEntries().size() == 0) {
+		List<String> errors = new ArrayList<String>();
+		if (values.size() == 0) {
 			errors.add("No routing defined");
-		}
-		if (errors.size() == 0) {
-			List<Integer> fromAsList = new ArrayList<Integer>();
-			fromAsList.addAll(this.getEmpiricalEntries().keySet());
+		} else {
+			List<Integer> fromAsList = new ArrayList<Integer>(values.keySet());
 			Collections.sort(fromAsList);
-			for (Iterator<Integer> it = fromAsList.iterator(); it.hasNext(); ) {
-				Integer from = it.next();
+			for (Integer from : fromAsList) {
+				Map<Object, Double> entries = values.get(from);
 				double sum = 0.0;
-				for (int counter =0; counter < this.getEmpiricalEntries().get(from).length; counter++) {
-					sum = sum + this.getEmpiricalEntries().get(from)[counter].getProbability();
+				for (Double value : entries.values()) {
+					sum = sum + value.doubleValue();
 				}
-				if (sum < 1) {
+				if (sum < 1.0) {
 					if (errors.isEmpty()) {
-						errors.add("Sum of probabilities < 1.0 for following range(s):\n\"From\" : \"" + from + "\"");
+						errors.add("Normalize sum of probabilities to 1.0 for range(s):\n\"From\" : \"" + from + "\"");
 					} else {
 						errors.add("\"From\" : \"" + from + "\"");
 					}
-				} else if (sum > 1) {
-					for (int counter =0; counter < this.getEmpiricalEntries().get(from).length; counter++) {
-						double newProb =  this.getEmpiricalEntries().get(from)[counter].getProbability()/sum;
-						this.getEmpiricalEntries().get(from)[counter].setProbability(newProb);
-					}
-					if (warnings.isEmpty()) {
-						warnings.add("Probabilities > 1.0, normalised = 1.0 for range(s):\n\"From\" : \"" + from + "\"");
+				} else if (sum > 1.0) {
+					if (errors.isEmpty()) {
+						errors.add("Normalize sum of probabilities to 1.0 for range(s):\n\"From\" : \"" + from + "\"");
 					} else {
-						warnings.add("\"From\" : \"" + from + "\"");
+						errors.add("\"From\" : \"" + from + "\"");
 					}
 				}
 			}
 		}
-		errors.addAll(warnings);
 		return errors;
 	}
 
-	/**
-	 * Removes the parameter station name from the entry list.
-	 * @param stationName
-	 */
-	public void refreshRoutingOnStationDeletion(String stationName) {
-		if (this.values != null && this.values.size() > 0) {
-			LoadDependentRouting cloneRouting = (LoadDependentRouting) this.clone();
-			this.values.clear();
-			Iterator<Integer> itEntries = cloneRouting.values.keySet().iterator();
-			while (itEntries.hasNext()) {
-				Integer from = itEntries.next();
-				EmpiricalEntry[] entries = cloneRouting.getEmpiricalEntryForFrom(from);
-				for (EmpiricalEntry entry : entries) {
-					if (!entry.getStationName().equalsIgnoreCase(stationName)) {
-						this.addEmricalEntryForFrom(from, entry.getStationName(), entry.getProbability());
-					}
+	public void refreshRouting(Vector<Object> stationKeys, Vector<Object> validStationKeys) {
+		for (Integer from : values.keySet()) {
+			Map<Object, Double> entries = values.get(from);
+			Map<Object, Double> temp = new HashMap<Object, Double>(entries);
+			entries.clear();
+			for (Object stationKey : stationKeys) {
+				if (temp.containsKey(stationKey)) {
+					entries.put(stationKey, temp.get(stationKey));
+				} else {
+					entries.put(stationKey, new Double(0.0));
 				}
-			}
-		}
-	}
-
-	public void refreshRouting(Set<String> fstationNames) {
-		if (this.values != null && this.values.size() > 0) {
-			Integer[] froms = new Integer[this.values.keySet().size()];
-			this.values.keySet().toArray(froms);
-			for (Integer from : froms) {
-				List<EmpiricalEntry> newEntries = new ArrayList<EmpiricalEntry>(0);
-				Set<String> oldFStationNames = new HashSet<String>(0);
-				EmpiricalEntry[] entries = this.getEmpiricalEntryForFrom(from);
-				for (EmpiricalEntry entry : entries) {
-					if (fstationNames.contains(entry.stationName)) {
-						newEntries.add(entry);
-					}
-					oldFStationNames.add(entry.getStationName());
-				}
-				for (String fstationName : fstationNames) {
-					if (!oldFStationNames.contains(fstationName)) {
-						EmpiricalEntry newEntry = new EmpiricalEntry();
-						newEntry.setStationName(fstationName);
-						newEntry.setProbability(0);
-						newEntries.add(newEntry);
-					}
-				}
-				if (this.deleteEmpricalEntryForFrom(from)) {
-					for (EmpiricalEntry newEntry : newEntries) {
-						this.addEmricalEntryForFrom(from, newEntry.getStationName(), newEntry.getProbability());
-					}
+				if (!validStationKeys.contains(stationKey)) {
+					entries.put(stationKey, new Double(0.0));
 				}
 			}
 		}
@@ -219,28 +153,18 @@ public class LoadDependentRouting extends RoutingStrategy {
 		return false;
 	}
 
-	public class EmpiricalEntry{
-
-		private String stationName;
-		private double probability;
-
-		public void setProbability(double probability) {
-			this.probability = probability;
+	@Override
+	public void addStation(Object stationKey) {
+		for (Integer from : values.keySet()) {
+			values.get(from).put(stationKey, new Double(0.0));
 		}
+	}
 
-		public double getProbability() {
-			return probability;
+	@Override
+	public void removeStation(Object stationKey) {
+		for (Integer from : values.keySet()) {
+			values.get(from).remove(stationKey);
 		}
-
-
-		public String getStationName() {
-			return stationName;
-		}
-
-		public void setStationName(String stationName) {
-			this.stationName = stationName;
-		}
-
 	}
 
 }

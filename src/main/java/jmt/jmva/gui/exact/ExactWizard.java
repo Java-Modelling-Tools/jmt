@@ -113,7 +113,7 @@ public class ExactWizard extends Wizard {
 	private SolverClient solver;
 
 	// New Bertoli Marco
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMVA);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE);
 	// End
 
 	//NEW Dall'Orso

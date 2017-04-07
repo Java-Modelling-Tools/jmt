@@ -42,10 +42,9 @@ import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
  *         Time: 11.31.20
  */
 public class StationNamePanel extends JPanel {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
+
 	private JmodelStationDefinition sd;
 	private Object key;
 	private JTextField name = new JTextField();
@@ -81,6 +80,7 @@ public class StationNamePanel extends JPanel {
 	 * Parameters are set when JTextField loses focus or ENTER key is pressed.
 	 */
 	protected class inputListener implements KeyListener, FocusListener {
+
 		/**
 		 * Update station's name
 		 */
@@ -108,5 +108,7 @@ public class StationNamePanel extends JPanel {
 
 		public void keyTyped(KeyEvent e) {
 		}
+
 	}
+
 }

@@ -553,8 +553,8 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			samplingList.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));
 			samplingList.setBorder(BorderFactory.createLoweredBevelBorder());
 			samplingList.addListSelectionListener(new ListSelectionListener() {
-				public void valueChanged(ListSelectionEvent e) {
 
+				public void valueChanged(ListSelectionEvent e) {
 					if (!e.getValueIsAdjusting() && model.getMatrix() != null) {
 						int index = ((JList) e.getSource()).getSelectedIndex();
 						switch (index) {
@@ -837,6 +837,9 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			variableTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
 				public void valueChanged(ListSelectionEvent e) {
+					if (e.getValueIsAdjusting()) {
+						return;
+					}
 					if (variableTable.getSelectedRow() >= 0) {
 						mainTransf.removeAll();
 						switch (model.getMatrix().getVariables()[variableTable.getSelectedRow()].getType()) {

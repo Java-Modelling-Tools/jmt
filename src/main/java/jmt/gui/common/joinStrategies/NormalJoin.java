@@ -33,7 +33,7 @@ public class NormalJoin extends JoinStrategy {
 
 	@Override
 	public int getRequiredNum() {
-		return this.requiredNum;
+		return requiredNum;
 	}
 
 	@Override
@@ -44,7 +44,7 @@ public class NormalJoin extends JoinStrategy {
 	@Override
 	public JoinStrategy clone() {
 		NormalJoin nj = new NormalJoin();
-		nj.requiredNum = this.requiredNum;
+		nj.requiredNum = requiredNum;
 		return nj;
 	}
 

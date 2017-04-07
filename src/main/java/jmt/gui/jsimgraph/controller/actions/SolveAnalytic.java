@@ -31,9 +31,6 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class SolveAnalytic extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -43,7 +40,7 @@ public class SolveAnalytic extends AbstractJmodelAction {
 	public SolveAnalytic(Mediator mediator) {
 		super("Approx", mediator);
 		putValue(SHORT_DESCRIPTION, "Solve model with analytic tecniques");
-		//		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
+		//putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
 		setEnabled(false);
 	}
 
@@ -52,4 +49,5 @@ public class SolveAnalytic extends AbstractJmodelAction {
 	 */
 	public void actionPerformed(ActionEvent e) {
 	}
+
 }

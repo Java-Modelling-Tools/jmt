@@ -389,7 +389,7 @@ public class SimSystem {
 
 		// Update the system's clock
 		if (e.eventTime() < clock) {
-			throw new jmt.common.exception.NetException("SimSystem: Error - past event detected! \n" + "Time: " + clock + ", event time: "
+			throw new jmt.common.exception.NetException("SimSystem: Error - past event detected!\n" + "Time: " + clock + ", event time: "
 					+ e.eventTime() + ", event type: " + e.getType() + future);
 		}
 		clock = e.eventTime();

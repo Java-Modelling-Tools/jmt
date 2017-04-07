@@ -21,6 +21,7 @@ package jmt.gui.jsimgraph.controller.actions;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import jmt.gui.jsimgraph.controller.Mediator;
@@ -34,9 +35,6 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class ActionDelete extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	public ActionDelete(Mediator mediator) {
@@ -51,7 +49,12 @@ public class ActionDelete extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		mediator.deleteSelected();
+		int resultValue = JOptionPane.showConfirmDialog(mediator.getMainWindow(),
+				"Delete all the selected stations, connections and finite capacity regions?",
+				"JSIMgraph - Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		if (resultValue == JOptionPane.YES_OPTION) {
+			mediator.deleteSelection();
+		}
 	}
 
 }

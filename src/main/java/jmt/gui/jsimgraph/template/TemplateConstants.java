@@ -20,6 +20,10 @@ package jmt.gui.jsimgraph.template;
 
 import jmt.gui.common.Defaults;
 
+/**
+ * @author S Jiang
+ * 
+ */
 public interface TemplateConstants {
 
 	public static final String TEMPLATE_FOLDER = Defaults.getWorkingPath().getAbsolutePath() + "/templates/";

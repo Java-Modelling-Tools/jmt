@@ -66,7 +66,7 @@ import jmt.engine.random.engine.RandomEngine;
  * Description: Added new Performance index for the capturing the 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
- *              each sink per class. 
+ *              each sink per class.
  */
 public class Simulation {
 
@@ -288,6 +288,7 @@ public class Simulation {
 
 		// creates network
 		network = new QueueNetwork("jSIM simulation: " + name);
+		network.setTerminalSimulation(isTerminalSimulation);
 		// adds network to NetSystem
 		NetSystem.addNetwork(network);
 
@@ -753,23 +754,16 @@ public class Simulation {
 	public void setPreload_initialPopulations(int[][] preload_initialPopulations) {
 		this.preload_initialPopulations = preload_initialPopulations;
 	}
-	//end NEW
 
 	public void addDistrNetNode(NetNode netNode) {
 		distrNetNodes.add(netNode);
 	}
 
-	/**
-	 * @return the isTerminalSimulation
-	 */
-	public boolean isIsTerminalSimulation() {
+	public boolean isTerminalSimulation() {
 		return isTerminalSimulation;
 	}
 
-	/**
-	 * @param isTerminalSimulation the isTerminalSimulation to set
-	 */
-	public void setIsTerminalSimulation(boolean isTerminalSimulation) {
+	public void setTerminalSimulation(boolean isTerminalSimulation) {
 		this.isTerminalSimulation = isTerminalSimulation;
 	}
 

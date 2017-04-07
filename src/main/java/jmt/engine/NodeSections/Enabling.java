@@ -247,20 +247,28 @@ public class Enabling extends InputSection {
 		return consumedJobsPerClass[jobClass];
 	}
 
-	public void showForkJobInfoWarning() {
+	/**
+	 * Shows the fork job information warning
+	 */
+	private void showForkJobInfoWarning() {
 		if (!isForkJobInfoWarningShown) {
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(800);
-					} catch (InterruptedException e) {
+			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
+				System.out.println("JMT - Warning: " + getOwnerNode().getName()
+						+ " failed to maintain the dependency between input tasks and their parent job.");
+			} else {
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(800);
+						} catch (InterruptedException e) {
+						}
+						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
+								+ " failed to maintain the dependency between input tasks and their parent job.",
+								"JMT - Warning", JOptionPane.WARNING_MESSAGE);
 					}
-					JOptionPane.showMessageDialog(null, getOwnerNode().getName()
-							+ " failed to maintain the dependency between the input tasks and their parent job.",
-							"JMT - Warning", JOptionPane.WARNING_MESSAGE);
-				}
-			}).start();
+				}).start();
+			}
 			isForkJobInfoWarningShown = true;
 		}
 	}

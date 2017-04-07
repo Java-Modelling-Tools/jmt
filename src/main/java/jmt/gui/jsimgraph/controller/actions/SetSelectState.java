@@ -31,11 +31,12 @@ import jmt.gui.jsimgraph.controller.Mediator;
  */
 public class SetSelectState extends AbstractJmodelAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Defines an <code>Action</code> object with a default
+	 * description string and default icon.
+	 */
 	public SetSelectState(Mediator mediator) {
 		super("Select", "Select", mediator);
 		putValue(SHORT_DESCRIPTION, "Select");

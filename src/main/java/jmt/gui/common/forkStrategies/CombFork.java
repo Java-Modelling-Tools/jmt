@@ -46,7 +46,9 @@ public class CombFork extends ForkStrategy {
 	@Override
 	public ForkStrategy clone() {
 		CombFork cf = new CombFork();
-		cf.outProbabilities = new HashMap<Object, Double>(outProbabilities);
+		for (Object numberOfBranches : outProbabilities.keySet()) {
+			cf.outProbabilities.put(numberOfBranches, outProbabilities.get(numberOfBranches));
+		}
 		return cf;
 	}
 
@@ -61,13 +63,13 @@ public class CombFork extends ForkStrategy {
 	}
 
 	@Override
-	public void removeStation(Object stationKey) {
-		outProbabilities.remove(Integer.toString(outProbabilities.size()));
+	public void addStation(Object stationKey, Object classKey, Vector<Object> classKeys) {
+		outProbabilities.put(Integer.toString(outProbabilities.size() + 1), new Double(0.0));
 	}
 
 	@Override
-	public void addStation(String stationName, Object stationKey, Object classKey, Vector<Object> classKeys) {
-		outProbabilities.put(Integer.toString(outProbabilities.size() + 1), new Double(0.0));
+	public void removeStation(Object stationKey) {
+		outProbabilities.remove(Integer.toString(outProbabilities.size()));
 	}
 
 }

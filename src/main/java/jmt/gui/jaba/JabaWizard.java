@@ -85,7 +85,7 @@ public class JabaWizard extends Wizard {
 	private JLabel helpLabel;
 	private HoverHelp help;
 
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JABA);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JABA, ModelLoader.JABA_SAVE);
 
 	private SolverDispatcher jsolver;
 

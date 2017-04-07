@@ -82,7 +82,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 	private JSpinner regionsNumSpinner;
 	private JButton addRegion;
 	private JTable regions;
-	private int counter = 1; // Used for name generation
+	private int counter; // Used for name generation
 	private BlockingStationPanel blockingPanel;
 	private JPanel emptyPanel = new JPanel();
 
@@ -147,7 +147,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 		this.cd = cd;
 		this.sd = sd;
 		this.bd = bd;
-		counter = 1;
+		counter = bd.getRegionKeys().size();
 		// Updates number of regions shown
 		update();
 	}
@@ -254,7 +254,6 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 				// Retrieves blocking region key
 				Object key = regions.getValueAt(regions.getSelectedRow(), 0);
 				// If no elements are selected, removes old blocking panel
-
 				if (key == null) {
 					if (blockingPanel != null) {
 						blockingPanel.lostFocus();
@@ -293,8 +292,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 	 */
 	private void addRegion() {
 		if (bd.getRegionKeys().size() < MAX_NUMBER_OF_REGIONS) {
-			bd.addBlockingRegion(Defaults.get("blockingRegionName") + counter, Defaults.get("blockingRegionType"));
-			counter++;
+			bd.addBlockingRegion(Defaults.get("blockingRegionName") + (++counter), Defaults.get("blockingRegionType"));
 		}
 	}
 
@@ -507,7 +505,7 @@ public class AllBlockingRegionsPanel extends WizardPanel implements CommonConsta
 				case 5:
 					return "Groups";
 				case 6:
-					return "ON";
+					return "EN";
 				case 7:
 					return "";
 				default:

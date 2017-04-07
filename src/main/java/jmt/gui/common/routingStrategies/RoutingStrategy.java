@@ -132,4 +132,8 @@ public abstract class RoutingStrategy {
 	 */
 	public abstract boolean isModelStateDependent();
 
+	public abstract void addStation(Object stationKey);
+
+	public abstract void removeStation(Object stationKey);
+
 }

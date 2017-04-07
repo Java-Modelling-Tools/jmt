@@ -39,12 +39,8 @@ import jmt.gui.jsimgraph.controller.Mediator;
  * A class representing a "redo" action.
  * @see jmt.gui.jsimgraph.controller.actions.AbstractUndoRedoAction
  */
-
 public class ActionRedo extends AbstractUndoRedoAction {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	protected UndoManager um;
 
@@ -56,6 +52,11 @@ public class ActionRedo extends AbstractUndoRedoAction {
 		update();
 	}
 
+	public void actionPerformed(ActionEvent e) {
+		mediator.redo();
+		updateAll();
+	}
+
 	/**
 	 * Update the state (name & enabled) of this instance
 	 */
@@ -65,8 +66,4 @@ public class ActionRedo extends AbstractUndoRedoAction {
 		putValue(SHORT_DESCRIPTION, um.getRedoPresentationName());
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		mediator.redo();
-		updateAll();
-	}
 }
