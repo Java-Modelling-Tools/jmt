@@ -75,7 +75,7 @@ public class Enabling extends InputSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		jobClasses = getJobClasses();
 		storageSituation = new TransitionMatrix(jobClasses.size());
 		for (String nodeName : enablingConditions[0].keySet()) {

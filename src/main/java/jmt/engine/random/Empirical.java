@@ -186,7 +186,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			// binary search in cumulative distribution function:
 			int nBins = cdf.length - 1;
 			int nbelow = 0; // biggest k such that I[k] is known to be <= rand
-			int nabove = nBins; // biggest k such that I[k] is known to be >  rand
+			int nabove = nBins; // biggest k such that I[k] is known to be > rand
 			while (nabove > nbelow + 1) {
 				int middle = (nabove + nbelow + 1) >> 1; // division by 2 obtained as a bit shifting
 				if (rand >= cdf[middle]) {

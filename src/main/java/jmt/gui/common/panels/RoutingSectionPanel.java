@@ -90,6 +90,9 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 	}
 
 	public void setSelectedClass(Object classKey) {
+		if (classKey == null) {
+			return;
+		}
 		Vector<Object> temp = classData.getClassKeys();
 		int i;
 		for (i = 0; i < temp.size(); i++) {

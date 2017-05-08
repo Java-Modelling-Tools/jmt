@@ -395,7 +395,7 @@ public class PSServer extends ServiceSection {
 	 * @see jmt.engine.QueueNet.NodeSection#nodeLinked(jmt.engine.QueueNet.NetNode)
 	 */
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		jobsList = serviceList = new PSJobInfoList(getJobClasses().size(), true);
 		jobsList.setServerNumber(numberOfServers);
 	}

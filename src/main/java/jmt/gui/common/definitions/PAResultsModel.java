@@ -36,7 +36,7 @@ import jmt.gui.common.xml.XMLConstantNames;
  * 
  * 
  * Modified by Ashanka: In PAResultsModel(CommonModel model) for including the label change from "Customer Number" to "Number of Customers" 
- * 		                and "System Customer Number" to "System Number of Customers".
+ * 		                and from "System Customer Number" to "System Number of Customers".
  * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 

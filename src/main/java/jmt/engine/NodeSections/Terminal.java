@@ -73,7 +73,7 @@ public class Terminal extends InputSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
 		waitingRequests = new LinkedJobInfoList(getJobClasses().size(), true);
 	}

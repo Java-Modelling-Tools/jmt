@@ -33,7 +33,7 @@ public interface PNMLConstants {
 	public static final String PNML_JSIM_E_NODE_GRAPHICS = "graphics";
 	public static final String PNML_JSIM_E_NODE_GRAPHICS_ROTATE = "rotate";
 	public static final String PNML_JSIM_E_NET_TOKENS = "tokens";
-	public static final String PNML_JSIM_E_NET_TOKENS_NAME = "name";
+	public static final String PNML_JSIM_E_NET_TOKENS_CLASS_NAME = "className";
 	public static final String PNML_JSIM_E_NET_TOKENS_REFERENCE_NODE = "referenceNode";
 	public static final String PNML_JSIM_E_NET_TOKENS_GRAPHICS = "graphics";
 	public static final String PNML_JSIM_E_NET_TOKENS_GRAPHICS_COLOR = "color";

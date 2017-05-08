@@ -141,7 +141,7 @@ public class Storage extends InputSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		jobClasses = getJobClasses();
 		nodeJobsList = node.getJobInfoList();
 		storageVector = new TransitionVector(node.getName(), jobClasses.size());

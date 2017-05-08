@@ -29,7 +29,7 @@ import jmt.gui.common.definitions.StationDefinition;
 /**
  * <p>Title: NumberOfCustomerParametricAnalysis</p>
  * <p>Description: this class is used to describe a parametric analysis where the
- * varied parameter is the global number of close class jobs. It adds the
+ * varied parameter is the global number of closed class jobs. It adds the
  * <code >classKey</code> field used to keep the key of the Job-Class whose
  * number of jobs will be varied, and a boolean value <code >singleClass</code>
  * used to choose the type of service time growth (single or all class).</p>
@@ -313,7 +313,7 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 			int totalPop = classDef.getTotalClosedClassPopulation();
 			//if is single class...
 			if (isSingleClass()) {
-				// ... and the selected close class is no more available
+				// ... and the selected closed class is no more available
 				if (!closeClasses.contains(classKey)) {
 					code = 1;
 					if (autocorrect) {

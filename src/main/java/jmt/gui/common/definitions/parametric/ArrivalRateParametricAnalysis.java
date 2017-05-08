@@ -298,7 +298,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 		} else {
 			//if is single class...
 			if (isSingleClass()) {
-				// ... and the selected close class is no more available
+				// ... and the selected closed class is no more available
 				if (!availableClasses.contains(classKey)) {
 					code = 1;
 					if (autocorrect) {

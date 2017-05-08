@@ -232,7 +232,6 @@ public class UpdatePanel extends WizardPanel implements TemplateConstants {
 			for (int i = 0; i < data.size(); i++) {
 				String file = data.get(i).getUpdateAddress();
 				String fileName = data.get(i).getFileName();
-
 				try {
 					if (fileName != null) {
 						fileName = TEMPLATE_FOLDER + fileName;

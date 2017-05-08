@@ -75,9 +75,9 @@
 							<compilerVersion>1.7</compilerVersion>
 							<source>1.7</source>
 							<target>1.7</target>
-							<!-- <excludes>
-								<exclude>**/templates/**</exclude>
-							</excludes> -->
+							<excludes>
+								<exclude>**/plugin/**</exclude>
+							</excludes>
 						</configuration>
 					</plugin>
 					<plugin>
@@ -355,7 +355,7 @@
 		<dependency>
 			<groupId>org.swinglabs</groupId>
 			<artifactId>pdf-renderer</artifactId>
-			<version>0.9.0</version>
+			<version>0.9.1</version>
 		</dependency>
 		<dependency>
 			<groupId>ptolemy</groupId>

@@ -95,8 +95,9 @@ public class LoadDependentRouting extends RoutingStrategy {
 		if (values.size() == 0) {
 			errors.add("No routing defined");
 		} else {
-			List<Integer> fromAsList = new ArrayList<Integer>(values.keySet());
-			Collections.sort(fromAsList);
+			List<Integer> fromAsList = new ArrayList<Integer>();
+			fromAsList.addAll(values.keySet());
+			fromAsList.sort(null);
 			for (Integer from : fromAsList) {
 				Map<Object, Double> entries = values.get(from);
 				double sum = 0.0;
@@ -140,13 +141,12 @@ public class LoadDependentRouting extends RoutingStrategy {
 	}
 
 	/**
-	 * Returns true if the routing strategy is dependent from the state of
+	 * Returns true if the routing strategy is dependent on the state of
+	 * the model
+	 * @return true if the routing strategy is dependent on the state of
 	 * the model
 	 *
-	 * @return true if the routing strategy is dependent from the state of
-	 *         the model
-	 *         <p/>
-	 *         Author: Francesco D'Aquino
+	 * Author: Francesco D'Aquino
 	 */
 	@Override
 	public boolean isModelStateDependent() {

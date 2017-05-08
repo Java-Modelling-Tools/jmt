@@ -170,9 +170,7 @@ public class Server extends ServiceSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
-		//if (numberOfVisitsPerClass != null)
-		//	tempJobsList = new JobInfoList(getJobClasses().size(), true);
+	protected void nodeLinked(NetNode node) throws NetException {
 		jobsList.setServerNumber(numberOfServers);
 	}
 

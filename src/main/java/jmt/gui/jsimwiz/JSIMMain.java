@@ -57,6 +57,7 @@ import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.MeasurePanel;
 import jmt.gui.common.panels.ResultsWindow;
 import jmt.gui.common.panels.SimulationPanel;
+import jmt.gui.common.panels.StationParameterPanel;
 import jmt.gui.common.panels.WarningWindow;
 import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
@@ -84,13 +85,6 @@ import jmt.manual.PDFViewerBuffer;
  * Modified by Bertoli Marco
  *
  * Modified by Francesco D'Aquino
- * Modified by Ashanka (May 2010): 
- * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
- * 				1. global response time (ResponseTime per Sink)
- *              2. global throughput (Throughput per Sink)
- *              each sink per class.
- * Model validation of the perf indices.
  */
 public class JSIMMain extends Wizard implements GuiInterface {
 
@@ -750,163 +744,230 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	 * Shows the panel to solve a problem
 	 */
 	public void showRelatedPanel(int problemType, int problemSubType, Object relatedStation, Object relatedClass) {
-		//if it is a no class error show the class panel
 		if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_CLASS_ERROR)) {
 			tabbedPane.setSelectedIndex(0);
 		}
-		//if it is a no station error show the station panel
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_STATION_ERROR)) {
-			tabbedPane.setSelectedIndex(1);
-		}
-		//if it is a no measure error show the measure panel
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_MEASURE_ERROR)) {
-			tabbedPane.setSelectedIndex(4);
-		}
-		//if it is a link error show the link panel
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.STATION_LINK_ERROR)) {
-			tabbedPane.setSelectedIndex(2);
-		}
-		//if it is an all forward sink error show the link panel
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ALL_FORWARD_STATION_ARE_SINK_ERROR)) {
-			tabbedPane.setSelectedIndex(2);
-		}
-		//if it is a routing error show the link panel
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ROUTING_ERROR)) {
-			tabbedPane.setSelectedIndex(3);
-			AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
-			//set temp to show routing section panel
-			temp.showStationParameterPanel(relatedStation, relatedClass, 2);
-		}
-		//if a measure is inconsistent (i.e have one or more 'null' field) show performance indices panel
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INCONSISTENT_MEASURE_ERROR)) {
-			tabbedPane.setSelectedIndex(4);
-		}
-		//if a measure was defined more than once ask to remove all redundant measures
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.DUPLICATE_MEASURE_ERROR)) {
-			int k = JOptionPane.showConfirmDialog(null, "Delete all redundant performance indices?\n",
-					"Redundant performance indices found", JOptionPane.ERROR_MESSAGE);
-			if (k == 0) {
-				mc.deleteRedundantMeasure();
-			}
-		}
-		//if it is a reference station error show the reference station panel
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.REFERENCE_STATION_ERROR)) {
-			tabbedPane.setSelectedIndex(5);
-		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
-			JOptionPane.showMessageDialog(this, "A join was found but no fork. Please remove all joins or add a fork.",
+			JOptionPane.showMessageDialog(null, "Please add at least one station other than a source or sink.\n",
 					"Error", JOptionPane.ERROR_MESSAGE);
 			tabbedPane.setSelectedIndex(1);
 		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_MEASURE_ERROR)) {
+			tabbedPane.setSelectedIndex(4);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_REFERENCE_STATION_ERROR)) {
+			tabbedPane.setSelectedIndex(5);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.NO_ESSENTIAL_LINK_ERROR)) {
+			String stationType = model.getStationType(relatedStation);
+			String stationName = model.getStationName(relatedStation);
+			String message = null;
+			if (stationType.equals(CommonConstants.STATION_TYPE_SINK)
+					|| stationType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+				message = stationName + " is not backward linked. Please add a backward link.\n";
+			} else {
+				message = stationName + " is not forward linked. Please add a forward link.\n";
+			}
+			JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+			tabbedPane.setSelectedIndex(2);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLOSED_CLASS_ROUTING_ERROR)) {
+			String stationName = model.getStationName(relatedStation);
+			String className = model.getClassName(relatedClass);
+			JOptionPane.showMessageDialog(null, className + " may be routed to " + stationName
+					+ " of which the forward stations are all sinks.\n", "Error", JOptionPane.ERROR_MESSAGE);
+			tabbedPane.setSelectedIndex(2);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INVALID_MEASURE_ERROR)) {
+			tabbedPane.setSelectedIndex(4);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.DUPLICATE_MEASURE_ERROR)) {
+			int k = JOptionPane.showConfirmDialog(null, "Delete all redundant performance indices?\n",
+					"Redundant performance indices found", JOptionPane.ERROR_MESSAGE);
+			if (k == JOptionPane.YES_OPTION) {
+				mc.deleteRedundantMeasures();
+			}
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INCONSISTENT_QUEUE_STRATEGY_ERROR)) {
+			tabbedPane.setSelectedIndex(3);
+			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
+			JOptionPane.showMessageDialog(null, "A join is found but no forks. Please remove all joins or add a fork.\n",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			tabbedPane.setSelectedIndex(1);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.EMPTY_BLOCKING_REGION_ERROR)) {
+			int k = JOptionPane.showConfirmDialog(null, "Delete all empty finite capacity regions?\n",
+					"Empty finite capacity regions found", JOptionPane.ERROR_MESSAGE);
+			if (k == JOptionPane.YES_OPTION) {
+				mc.deleteEmptyBlockingRegions();
+			}
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.BLOCKING_REGION_CAPACITY_OVERLOAD_ERROR)) {
+			tabbedPane.setSelectedIndex(7);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.BLOCKING_REGION_MEMORY_OVERLOAD_ERROR)) {
+			tabbedPane.setSelectedIndex(7);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_INVALID_MATRIX_ERROR)) {
+			tabbedPane.setSelectedIndex(3);
+			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_BAS_STRATEGY_ERROR)) {
+			String stationName = model.getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, stationName + " is followed by a queue with the BAS strategy. This topology is not allowed.\n",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			tabbedPane.setSelectedIndex(2);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_REFERENCE_STATION_ERROR)) {
+			tabbedPane.setSelectedIndex(5);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_SYSTEM_THROUGHPUT_ERROR)) {
+			tabbedPane.setSelectedIndex(4);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_ZERO_POPULATION_ERROR)) {
+			tabbedPane.setSelectedIndex(0);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ZERO_GUARD_STRATEGY_ERROR)) {
+			tabbedPane.setSelectedIndex(3);
+			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, relatedClass);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN_ERROR)) {
+			String stationName = model.getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, stationName + " is not located between fork/join. This topology is not allowed.\n",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			tabbedPane.setSelectedIndex(2);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SCALER_NOT_BETWEEN_FORK_JOIN_ERROR)) {
+			String stationName = model.getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, stationName + " is not located between fork/join. This topology is not allowed.\n",
+					"Error", JOptionPane.ERROR_MESSAGE);
+			tabbedPane.setSelectedIndex(2);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INVALID_CONDITION_ERROR)) {
+			tabbedPane.setSelectedIndex(3);
+			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+		}
 		//used only in JMVA conversion
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_DIFFERENT_QUEUEING_STRATEGIES_WARNING)) {
-			String name = getModel().getStationName(relatedStation);
-			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis each station must have the same queue\nstrategy "
-					+ "for each class, but different per class queue strategy were found at " + name + ".\nDo you want to edit " + name
-					+ " queue strategy?\n\n", "Mixed queue strategy found", JOptionPane.WARNING_MESSAGE);
-			if (k == 0) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_DIFFERENT_QUEUE_STRATEGIES_WARNING)) {
+			String stationName = model.getStationName(relatedStation);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, each server must have the same queue strategy\n"
+					+ "for each class, but mixed queue strategies are found at " + stationName + ".\nDo you want to edit the queue strategies of "
+					+ stationName + "?\n\n", "Mixed queue strategies found", JOptionPane.WARNING_MESSAGE);
+			if (k == JOptionPane.OK_OPTION) {
 				tabbedPane.setSelectedIndex(3);
-				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
-				//set the station parameter panel to show the queue section
-				temp.showStationParameterPanel(relatedStation, null, 0);
+				AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 			}
 		}
 		//used only in JMVA conversion
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TYPES_WARNING)) {
-			String name = getModel().getStationName(relatedStation);
-			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, a FCFS server must have the same service times "
-					+ "for each class,\nbut at " + name + " the service strategy is mixed, i.e. both load dependent and independent were found.\n"
-					+ "Do you want to edit " + name + " service parameters?\n\n", "Mixed service strategies found", JOptionPane.WARNING_MESSAGE);
-			if (k == 0) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_STRATEGIES_WARNING)) {
+			String stationName = model.getStationName(relatedStation);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, each FCFS server must have the same service\n"
+					+ "strategy for each class, but mixed service strategies (i.e. both the load dependent and\nindependent) are found at "
+					+ stationName + ".\nDo you want to edit the service strategies of " + stationName + "?\n\n", "Mixed service strategies found",
+					JOptionPane.WARNING_MESSAGE);
+			if (k == JOptionPane.OK_OPTION) {
 				tabbedPane.setSelectedIndex(3);
-				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
-				//set the station parameter panel to show the service section
-				temp.showStationParameterPanel(relatedStation, null, 1);
+				AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
 			}
 		}
 		//used only in JMVA conversion
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_EXPONENTIAL_WARNING)) {
-			String name = getModel().getStationName(relatedStation);
-			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, in a FCFS server all the service time distribution\n"
-					+ "must be exponential, but at " + name + " at least one non exponential distribution was found.\nDo you want to edit " + name
-					+ " service parameters?\n\n", "Non exponential distribution in FCFS server", JOptionPane.WARNING_MESSAGE);
-			if (k == 0) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_NON_EXPONENTIAL_DISTRIBUTION_WARNING)) {
+			String stationName = model.getStationName(relatedStation);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, the service time distributions of each FCFS\n"
+					+ "server must be exponential, but a non exponential distribution is found at " + stationName + ".\nDo you want to edit "
+					+ " the service time distributions of " + stationName + "?\n\n", "Non exponential distribution found", JOptionPane.WARNING_MESSAGE);
+			if (k == JOptionPane.OK_OPTION) {
 				tabbedPane.setSelectedIndex(3);
-				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
-				//set the station parameter panel to show the service section
-				temp.showStationParameterPanel(relatedStation, null, 1);
+				AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
 			}
 		}
 		//used only in JMVA conversion
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING)) {
-			String name = getModel().getStationName(relatedStation);
-			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, in a FCFS server all the per class service time mean "
-					+ "values\nmust be the same. If the service strategies are load dependent the mean value in each range\nhas to be the same for "
-					+ "each class.\nDo you want to edit " + name + " service parameters?\n\n", "Non exponential distribution in FCFS server",
+			String stationName = model.getStationName(relatedStation);
+			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, each FCFS server must have the same mean service\n"
+					+ "time for each class. If the service strategies are load dependent, the mean service time in each\nrange has to be the same "
+					+ "for each class.\nDo you want to edit the mean service times of " + stationName + "?\n\n", "Mixed mean service times found",
 					JOptionPane.WARNING_MESSAGE);
-			if (k == 0) {
+			if (k == JOptionPane.OK_OPTION) {
 				tabbedPane.setSelectedIndex(3);
-				AllStationsParametersPanel temp = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
-				//set the station parameter panel to show the queue section
-				temp.showStationParameterPanel(relatedStation, null, 1);
+				AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
 			}
 		}
-		//used only in JMVA conversion
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_NON_STATE_INDEPENDENT_ROUTING_WARNING)) {
-			int k = JOptionPane.showConfirmDialog(null, "Convert all non state independent routing strategies to Random Routing?\n\nAccording to the "
-					+ "BCMP theorem the routing probabilities must be independent from the state of the model.\nChoosing ok all non state independent "
-					+ "routing strategies inside a station will be converted to Random Routing.\nDo you want to convert all non state independent "
-					+ "routing strategies to Random Routing?\n\n", "BCMP hypothesis not verified", JOptionPane.ERROR_MESSAGE);
-			if (k == 0) {
-				mc.setAllStateDependentRoutingStrategyToRandomRouting();
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.NO_OPTIONAL_LINK_WARNING)) {
+			String stationType = model.getStationType(relatedStation);
+			String stationName = model.getStationName(relatedStation);
+			String message = null;
+			if (stationType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+				message = stationName + " is not forward linked. Please check the topology.\n";
+			} else {
+				message = stationName + " is not backward linked. Please check the topology.\n";
 			}
-		}
-		//if it is a no backward link warning show the link panel
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.NO_BACKWARD_LINK_WARNING)) {
+			JOptionPane.showMessageDialog(null, message, "Warning", JOptionPane.WARNING_MESSAGE);
 			tabbedPane.setSelectedIndex(2);
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)) {
-			JOptionPane.showMessageDialog(this, "A fork was found but no join. Please check the topology.", "Warning",
+			JOptionPane.showMessageDialog(null, "A fork is found but no joins. Please check the topology.\n", "Warning",
 					JOptionPane.WARNING_MESSAGE);
 			tabbedPane.setSelectedIndex(1);
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_MODEL_MODIFIED_WARNING)) {
-			String message = "Check parametric analysis model?\n\nThe parametric analysis model previously defined had become inconsistent with the\n"
-					+ "simulation model. It will be automatically modified when simulation will be started.\nDo you want to autocorrect and check "
-					+ "parametric analysis panel?\n\n";
-			int k = JOptionPane.showConfirmDialog(null, message, "Inconsistent parametric analysis model", JOptionPane.WARNING_MESSAGE);
-			if (k == 0) {
+			int k = JOptionPane.showConfirmDialog(null, "The parametric analysis model previously defined becomes inconsistent with the simulation\n"
+					+ "model. It will be automatically modified when simulation is started.\nDo you want to autocorrect and check the parametric "
+					+ "analysis model?\n\n", "Inconsistent parametric analysis model", JOptionPane.WARNING_MESSAGE);
+			if (k == JOptionPane.OK_OPTION) {
 				model.getParametricAnalysisModel().checkCorrectness(true);
 				tabbedPane.setSelectedIndex(8);
 			}
 		}
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_NO_MORE_AVAILABLE_WARNING)) {
-			String message = "Parametric analysis was set, but no parametric analysis is now available,\nsince the simulation model was changed. "
-					+ "It is only possible to execute normal simulation.\nDo you wish to continue anyway?\n\n";
-			int k = JOptionPane.showConfirmDialog(null, message, "Parametric analysis not available", JOptionPane.WARNING_MESSAGE);
-			if (k == 0) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_NOT_AVAILABLE_WARNING)) {
+			int k = JOptionPane.showConfirmDialog(null, "A parametric analysis model was defined, but no parametric analysis is currently available\n"
+					+ "since the simulation model is changed. It is only possible to execute normal simulation.\nDo you want to continue anyway?\n\n",
+					"Parametric analysis not available", JOptionPane.WARNING_MESSAGE);
+			if (k == JOptionPane.OK_OPTION) {
 				model.setParametricAnalysisEnabled(false);
 				model.setParametricAnalysisModel(null);
 			}
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.EMPTY_BLOCKING_REGION)) {
-			int k = JOptionPane.showConfirmDialog(null, "Delete empty finite capacity regions?\n",
-					"Empty finite capacity regions found", JOptionPane.ERROR_MESSAGE);
-			if (k == 0) {
-				mc.deleteEmptyBlockingRegions();
-			}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.ZERO_POPULATION_WARNING)) {
+			tabbedPane.setSelectedIndex(0);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOAD_BEYOND_CAPACITY)) {
-			tabbedPane.setSelectedIndex(7);
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_BETWEEN_FORK_JOIN_WARNING)) {
+			String stationName = model.getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, stationName + " seems to be located between fork/join. The switched tasks may fail to merge\n"
+					+ "at the join with a Guard strategy.\n", "Warning", JOptionPane.WARNING_MESSAGE);
+			tabbedPane.setSelectedIndex(2);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.PRELOAD_BEYOND_MEMORY)) {
-			tabbedPane.setSelectedIndex(7);
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_FORK_JOIN_WARNING)) {
+			JOptionPane.showMessageDialog(null, "A class switch and a fork/join section are in the same model. Depending on the topology,\n"
+					+ "some performance indices may not be computed exactly (e.g., the system response time).\n", "Warning", JOptionPane.WARNING_MESSAGE);
+			tabbedPane.setSelectedIndex(1);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_PERF_IND_WITH_NO_SINK_ERROR)) {
-			tabbedPane.setSelectedIndex(4);
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.SCHEDULING_SAME_PRIORITY_WARNING)) {
+			tabbedPane.setSelectedIndex(3);
+			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SINK_PERF_WITH_CLOSED_CLASS_ERROR)) {
-			tabbedPane.setSelectedIndex(4);
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN_WARNING)) {
+			String stationName = model.getStationName(relatedStation);
+			JOptionPane.showMessageDialog(null, stationName + " seems to be located between fork/join. On any firing of a transition between\n"
+					+ "fork/join, the input tasks for each class must be split from the same parent job, and the\nnumber of output tasks for "
+					+ "each class must be equal to the number of input tasks for that\nclass.\n", "Warning", JOptionPane.WARNING_MESSAGE);
+			tabbedPane.setSelectedIndex(2);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INVALID_OUTCOME_WARNING)) {
+			tabbedPane.setSelectedIndex(3);
+			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.OUTPUT_SECTION, null);
 		}
 	}
 

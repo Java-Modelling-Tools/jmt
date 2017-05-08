@@ -67,7 +67,7 @@ public class JWatMainPanel extends WizardPanel {
 		private static final long serialVersionUID = 1L;
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Fitting");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_FITTING_ICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
+			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_FITTING_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 
 		public void actionPerformed(ActionEvent e) {

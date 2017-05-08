@@ -360,6 +360,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				cd.distribution = Defaults.getAsNewInstance("classDistribution");
 				cd.refStation = null;
 				openClassesKeyset.add(key);
+				openClassesKeyset.sort(null);
 				closedClassesKeyset.remove(key);
 			} else {
 				cd.population = Defaults.getAsInteger("classPopulation");
@@ -367,9 +368,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				cd.refStation = null;
 				openClassesKeyset.remove(key);
 				closedClassesKeyset.add(key);
+				closedClassesKeyset.sort(null);
 			}
 			deleteStationDetailsForClass(key);
 			deleteBlockingDetailsForClass(key);
+			deleteClassMeasures(key);
 			addStationDetailsForClass(key);
 			addBlockingDetailsForClass(key);
 			save = true;
@@ -826,77 +829,92 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			addStationConnections(key);
 			if (type.equals(STATION_TYPE_SOURCE)) {
 				sourcesKeyset.add(key);
+				sourcesKeyset.sort(null);
 			} else {
 				sourcesKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_SINK)) {
 				sinksKeyset.add(key);
+				sinksKeyset.sort(null);
 			} else {
 				sinksKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_TERMINAL)) {
 				terminalsKeyset.add(key);
+				terminalsKeyset.sort(null);
 			} else {
 				terminalsKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_ROUTER)) {
 				routersKeyset.add(key);
+				routersKeyset.sort(null);
 			} else {
 				routersKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_DELAY)) {
 				delaysKeyset.add(key);
+				delaysKeyset.sort(null);
 			} else {
 				delaysKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_SERVER)) {
 				serversKeyset.add(key);
+				serversKeyset.sort(null);
 			} else {
 				serversKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_FORK)) {
 				forksKeyset.add(key);
+				forksKeyset.sort(null);
 			} else {
 				forksKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_JOIN)) {
 				joinsKeyset.add(key);
+				joinsKeyset.sort(null);
 			} else {
 				joinsKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_LOGGER)) {
 				loggersKeyset.add(key);
+				loggersKeyset.sort(null);
 			} else {
 				loggersKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_CLASSSWITCH)) {
 				classSwitchesKeyset.add(key);
+				classSwitchesKeyset.sort(null);
 			} else {
 				classSwitchesKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_SEMAPHORE)) {
 				semaphoresKeyset.add(key);
+				semaphoresKeyset.sort(null);
 			} else {
 				semaphoresKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_SCALER)) {
 				scalersKeyset.add(key);
+				scalersKeyset.sort(null);
 			} else {
 				scalersKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_PLACE)) {
 				placesKeyset.add(key);
+				placesKeyset.sort(null);
 			} else {
 				placesKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_TRANSITION)) {
 				transitionsKeyset.add(key);
+				transitionsKeyset.sort(null);
 			} else {
 				transitionsKeyset.remove(key);
 			}
 			if (isStationTypePreloadable(type)) {
 				if (!preloadableKeyset.contains(key)) {
 					preloadableKeyset.add(key);
+					preloadableKeyset.sort(null);
 				}
 			} else {
 				preloadableKeyset.remove(key);
@@ -904,6 +922,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			if (canStationTypeBeBlocked(type)) {
 				if (!blockableKeyset.contains(key)) {
 					blockableKeyset.add(key);
+					blockableKeyset.sort(null);
 				}
 			} else {
 				blockableKeyset.remove(key);
@@ -1195,7 +1214,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			queueStrategy = Defaults.get("stationStationQueueStrategy");
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			queueStrategy = Defaults.get("stationStationQueueStrategy");
-			if (queueStrategy.equals(QUEUE_STRATEGY_STATION_PS) || queueStrategy.equals(QUEUE_STRATEGY_STATION_SRPT)) {
+			if (queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)
+					|| queueStrategy.equals(QUEUE_STRATEGY_STATION_SRPT)) {
 				queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
 			}
 		}
@@ -1234,7 +1254,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_SCALER)) {
-			sd.forkBlock = Defaults.getAsInteger("forkBlock");
+			sd.forkBlock = Integer.valueOf(-1);
 			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
 			sd.numberOfServers = Defaults.getAsInteger("forkJobsPerLink");
 		} else if (sd.type.equals(STATION_TYPE_PLACE)) {

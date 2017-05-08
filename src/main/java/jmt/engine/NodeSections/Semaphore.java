@@ -35,9 +35,9 @@ import jmt.engine.QueueNet.NetNode;
 
 /**
  * <p>Title: Semaphore</p>
- * <p>Description: This class is a Semaphore input section, used to stop a
- * percentage of forked tasks. Tasks are kept until they reach the threshold. If
- * a non-fragmented job is received, it is simply routed to service section.</p>
+ * <p>Description: This class is a Semaphore input section, used to gather previously
+ *  forked tasks. Tasks are kept until the threshold is reached. If a non-fragmented
+ *  job is received, it is simply routed to service section.</p>
  *
  * @author Vitor S. Lopes
  *         Date: 25-jul-2016
@@ -77,7 +77,7 @@ public class Semaphore extends InputSection {
 	// ----------------------------------------------------------------------------------------------
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		nodeJobsList = node.getJobInfoList();
 	};
 

@@ -99,8 +99,7 @@ public class AllStationsParametersPanel extends WizardPanel implements CommonCon
 	}
 
 	private void updateParsPane() {
-		Object stationKey = null;
-		stationKey = stationsList.getSelectedValue();
+		Object stationKey = stationsList.getSelectedValue();
 		if (stationParsPane != null) {
 			stationParsPane.setData(stationKey);
 		} else {
@@ -111,30 +110,9 @@ public class AllStationsParametersPanel extends WizardPanel implements CommonCon
 
 	//----------------------------------- Francesco D'Aquino ----------------------------
 
-	/**
-	 * Shows a section panel
-	 * @param stationKey the station you are interested to edit
-	 * @param classKey the class you are interested to edit, use null if this parameter is not needed
-	 * @param index of the panel to show:
-	 *          <br> 0 - queue section</br>
-	 *          <br> 1 - service section</br>
-	 *          <br> 2 - routing section</br>;
-	 */
-	public void showStationParameterPanel(Object stationKey, Object classKey, int index) {
-		if (stationParsPane != null) {
-			stationParsPane.setData(stationKey);
-		} else {
-			stationParsPane = new StationParameterPanel(stationData, classData, stationKey);
-			add(stationParsPane, BorderLayout.CENTER);
-		}
-		if (index == 0) {
-			stationParsPane.showQueueSectionPanel();
-		} else if (index == 1) {
-			stationParsPane.showServiceSectionPanel();
-		} else if (index == 2) {
-			stationParsPane.showRoutingSectionPanel(classKey);
-		}
-
+	public void showStationParameterPanel(Object stationKey, int section, Object classKey) {
+		stationsList.setSelectedValue(stationKey, true);
+		stationParsPane.selectSectionPanel(section, classKey);
 	}
 
 	// --------------------- end Francesco D'Aquino --------------------------------------

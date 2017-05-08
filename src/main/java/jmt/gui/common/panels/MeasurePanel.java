@@ -316,8 +316,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	 */
 	@Override
 	public void gotFocus() {
-		stationsCombos.clearCache();
 		classesCombos.clearCache();
+		stationsCombos.clearCache();
 		FJsCombos.clearCache();
 		modesCombos.clearCache();
 		refreshComponents();
@@ -396,23 +396,25 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			Object key = simData.getMeasureKeys().get(row);
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
-			} else if (column == 2 && simData.isSinkMeasure(key)) {
-				return stationsCombos.getEditor(stationData.getStationKeysSink());
 			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_X)) {
 				Vector<Object> vector = new Vector<Object>();
-				vector.addAll(stationData.getStationRegionKeysNoSourceSink());
 				vector.addAll(stationData.getStationKeysSource());
+				vector.addAll(stationData.getStationRegionKeysNoSourceSink());
 				return stationsCombos.getEditor(vector);
+			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_U)) {
+				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
+			} else if (column == 2 && simData.isSinkMeasure(key)) {
+				return stationsCombos.getEditor(stationData.getStationKeysSink());
 			} else if (column == 2 && simData.isFCRMeasure(key)) {
 				return stationsCombos.getEditor(stationData.getFCRegionKeys());
 			} else if (column == 2 && simData.isFJMeasure(key)) {
 				return FJsCombos.getEditor(stationData.getFJKeys());
-			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_U)) {
-				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
 			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
 				return stationsCombos.getEditor(stationData.getStationKeysTransition());
 			} else if (column == 2) {
 				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
+			} else if (column == 1 && simData.isSinkMeasure(key)) {
+				return classesCombos.getEditor(classData.getOpenClassKeys());
 			} else if (column == 1 && simData.isFCRMeasure(key)) {
 				return classesCombos.getEditor(new ArrayList<Object>());
 			} else if (column == 1 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {

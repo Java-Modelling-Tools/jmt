@@ -103,7 +103,7 @@ public class BlockingQueue extends InputSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
 		jobsList_node = node.getJobInfoList();
 

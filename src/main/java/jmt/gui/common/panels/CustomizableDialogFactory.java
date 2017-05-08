@@ -19,7 +19,6 @@
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Frame;
 
 import javax.swing.JComponent;
@@ -43,11 +42,10 @@ public class CustomizableDialogFactory {
 	}
 
 	private void createDialog(int width, int height) {
-		// Creates dialog
+		// Creates modal dialog
 		dialogFrame = new JMTDialog(mainWindow, true);
 		dialogFrame.centerWindow(width, height);
 		dialogFrame.setResizable(true);
-		dialogFrame.setMinimumSize(new Dimension(width, height));
 		dialogFrame.getContentPane().setLayout(new BorderLayout());
 	}
 

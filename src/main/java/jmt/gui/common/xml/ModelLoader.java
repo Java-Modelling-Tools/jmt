@@ -353,10 +353,7 @@ public class ModelLoader {
 			if (defaultSaveFilter == JMODEL_SAVE || defaultSaveFilter == JSIM_SAVE) {
 				if (file.getName().toLowerCase().endsWith(".pnml")) {
 					int result = PNMLWriter.checkModel((CommonModel) modelData);
-					if (result == PNMLWriter.MULTIPLE_CLOSED_CLASSES) {
-						failureMotivation = FAIL_PNML_EXPORT + "multiple closed classes detected.";
-						return FAILURE;
-					} else if (result == PNMLWriter.OPEN_CLASSES) {
+					if (result == PNMLWriter.OPEN_CLASSES) {
 						failureMotivation = FAIL_PNML_EXPORT + "open classes detected.";
 						return FAILURE;
 					} else if (result == PNMLWriter.NON_PETRI_NET_STATIONS) {

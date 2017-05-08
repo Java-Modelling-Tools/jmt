@@ -76,7 +76,7 @@
 		<panel classname="HTMLInfoPanel"/>
 		<panel classname="LicencePanel"/>
 		<panel classname="TargetPanel"/>
-	<!--	<panel classname="PacksPanel"/>	-->
+		<!-- <panel classname="PacksPanel"/> -->
 		<panel classname="ShortcutPanel"/>
 		<panel classname="InstallPanel"/>
 		<panel classname="SimpleFinishPanel"/>
@@ -96,7 +96,7 @@
 				<include name="ReadMe.html"/>
 				<include name="*.ico"/>
 				<include name="*.png"/>
-			<!--	<include name="lib/**/*"/> -->
+				<!-- <include name="lib/**/*"/> -->
 				<include name="manuals/**/*"/>
 				<include name="license/**/*"/>
 				<include name="JMT.jar"/>

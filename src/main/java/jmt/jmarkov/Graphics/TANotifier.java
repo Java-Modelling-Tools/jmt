@@ -37,15 +37,15 @@ import jmt.jmarkov.utils.Formatter;
 // this is using for showing log
 public class TANotifier extends JTable implements Notifier {
 	/**
-		 * 
-		 */
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
 
-	//	private static final String newline = System.getProperty("line.separator");
+	//private static final String newline = System.getProperty("line.separator");
 	DefaultTableModel model;
-	//	private int MAXIMUM_LOG = 1000000;
+	//private int MAXIMUM_LOG = 1000000;
 
-	// for using avg jobs in Q + Server
+	//for using avg jobs in Q + Server
 	private double totNumberOfJobsInSystem;
 
 	private double lastUpdateTimeNumJobs;
@@ -201,14 +201,14 @@ public class TANotifier extends JTable implements Notifier {
 
 	private void updateResponseTime(double enterQueueTime, double exitSystemTime) {
 		totalResponseTime += exitSystemTime - enterQueueTime;
-		// average response time = totalResponseTime / totalcustomerexit
+		//average response time = totalResponseTime / totalcustomerexit
 		setCell(3, 1, totalResponseTime / totalCustomerExit);
 	}
 
 	private void updateCustomerArrived(double now) {
 		totalCustomerArrived++;
 		//total customer arrived : totalCustomerArrived
-		// arrival rate : totalcustomerarrived / now
+		//arrival rate : totalcustomerarrived / now
 		setCell(4, 1, totalCustomerArrived / now);
 		setCell(7, 1, totalCustomerArrived);
 	}
@@ -227,13 +227,13 @@ public class TANotifier extends JTable implements Notifier {
 	}
 
 	public void enterProcessor(int jobId, int processorId, double time, double executionTime) {
-		//		setCell(jobId, 2, time / 1000);
-		//		setCell(jobId, 3, processorId);
+		//setCell(jobId, 2, time / 1000);
+		//setCell(jobId, 3, processorId);
 	}
 
 	public void enterQueue(int jobId, double time) {
-		//		setCell(jobId, 0, jobId);
-		//		setCell(jobId, 1, time / 1000);
+		//setCell(jobId, 0, jobId);
+		//setCell(jobId, 1, time / 1000);
 		updateJobsInSystem(time / 1000);
 		numberOfJobsInTheSystem++;
 		updateCustomerArrived(time / 1000);
@@ -241,7 +241,7 @@ public class TANotifier extends JTable implements Notifier {
 	}
 
 	public void exitProcessor(int jobId, int processorId, double time) {
-		//		setCell(jobId, 4, time / 1000);
+		//setCell(jobId, 4, time / 1000);
 		updateJobsInSystem(time / 1000);
 		numberOfJobsInTheSystem--;
 		updateThroughput(time / 1000);
@@ -258,20 +258,20 @@ public class TANotifier extends JTable implements Notifier {
 	}
 
 	public void jobLost(int jobId, double time) {
-		//		setCell(jobId, 0, jobId);
-		//		setCell(jobId, 1, time / 1000);
-		//		setCell(jobId, 2, "Dropped");
-		//		setCell(jobId, 3, "Dropped");
-		//		setCell(jobId, 4, "Dropped");
+		//setCell(jobId, 0, jobId);
+		//setCell(jobId, 1, time / 1000);
+		//setCell(jobId, 2, "Dropped");
+		//setCell(jobId, 3, "Dropped");
+		//setCell(jobId, 4, "Dropped");
 		updateCustomerArrived(time / 1000);
 		updateJobLost();
 		currentTime(time / 1000);
 	}
 
 	public void reset() {
-		// setText("");
-		//		model.setRowCount(0);
-		// model.getDataVector().removeAllElements();
+		//setText("");
+		//model.setRowCount(0);
+		//model.getDataVector().clear();
 		totNumberOfJobsInSystem = 0;
 		lastUpdateTimeNumJobs = 0;
 		numberOfJobsInTheSystem = 0;

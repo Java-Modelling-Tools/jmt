@@ -55,9 +55,9 @@ public class RandomRouting extends RoutingStrategy {
 	}
 
 	/**
-	 * Returns true if the routing strategy is dependent from the state of
+	 * Returns true if the routing strategy is dependent on the state of
 	 * the model
-	 * @return  true if the routing strategy is dependent from the state of
+	 * @return true if the routing strategy is dependent on the state of
 	 * the model
 	 *
 	 * Author: Francesco D'Aquino

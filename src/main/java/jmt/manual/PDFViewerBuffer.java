@@ -163,7 +163,7 @@ TreeSelectionListener {
 
 		try {
 			outline = pdfFile.getOutline();
-		} catch (IOException ioe) {
+		} catch (IOException e) {
 		}
 
 		/**
@@ -264,7 +264,6 @@ TreeSelectionListener {
 	 * To avoid problems of memory used is a buffer memory
 	 **/
 	private void loadPage(int num) {
-
 		for (int i = 0; i < BUFFER_SIZE; i++) {
 			int page = pageStart + num - (BUFFER_SIZE / 2) + i;
 			if (page < pageStart || page >= pageEnd) {
@@ -325,7 +324,6 @@ TreeSelectionListener {
 			}
 		};
 		EventQueue.invokeLater(r);
-
 	}
 
 	@Override
@@ -343,11 +341,9 @@ TreeSelectionListener {
 	 */
 	@Override
 	public void valueChanged(TreeSelectionEvent e) {
-
 		TreePath path = e.getNewLeadSelectionPath();
 		OutlineNode selectedNode = (OutlineNode) path.getLastPathComponent();
 		GoToAction act = (GoToAction) selectedNode.getAction();
-
 		try {
 			int pageNode = pdfFile
 					.getPageNumber(act.getDestination().getPage());
@@ -355,9 +351,7 @@ TreeSelectionListener {
 			loadPage(pageNode - pageStart);
 			updateCanvas();
 		} catch (IOException e1) {
-
 		}
-
 	}
 	
 	/** Close PDF file when help window is closed */

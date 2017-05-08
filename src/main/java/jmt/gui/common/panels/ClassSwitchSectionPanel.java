@@ -45,16 +45,17 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 	private static final long serialVersionUID = 1L;
 
 	private static final String DESCRIPTION = HTML_START
-			+ "The value (i, j) is the probability that a job of class i "
-			+ "switches to class j. The values may be either probabilities or number of visits. "
-			+ "If the sum of each row is greater than one, the values will be normalized "
-			+ "in order to sum to one. A sum less than one will raise a simulation error."
+			+ "The value (i, j) is the probability that a job of class i switches to "
+			+ "class j. The values may be either probabilities or number of visits. "
+			+ "If the sum of a row is greater than one, the values will be normalized "
+			+ "in order to sum to one. A sum less than one will raise an error."
 			+ HTML_END;
 	private static final String NORMALIZATION_ERROR = HTML_START
-			+ "<font color=\"red\"> Error: some rows sum to a value less than one.</font>"
+			+ "<font color=\"red\"> Error: some rows sum to less than one.</font>"
 			+ HTML_END;
 	private static final String NORMALIZATION_WARNING = HTML_START
-			+ "<font color=\"blue\"> Warning: some rows sum to a value greater than one, values will be normalized.</font>"
+			+ "<font color=\"blue\"> Warning: some rows sum to greater than one. "
+			+ "The values will be normalized.</font>"
 			+ HTML_END;
 
 	/** Used to display classes with icon */

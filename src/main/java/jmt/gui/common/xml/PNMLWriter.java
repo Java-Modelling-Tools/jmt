@@ -64,9 +64,8 @@ import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 public class PNMLWriter implements PNMLConstants, CommonConstants {
 
 	public static final int ALL_RIGHT = 0;
-	public static final int MULTIPLE_CLOSED_CLASSES = 1;
-	public static final int OPEN_CLASSES = 2;
-	public static final int NON_PETRI_NET_STATIONS = 3;
+	public static final int OPEN_CLASSES = 1;
+	public static final int NON_PETRI_NET_STATIONS = 2;
 
 	private static DocumentBuilder docBuilder;
 	private static Document elemCreator;
@@ -78,15 +77,12 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 	 * @return integer indicating the result of the check
 	 */
 	public static int checkModel(CommonModel model) {
-		if (model.getClosedClassKeys().size() > 1) {
-			return MULTIPLE_CLOSED_CLASSES;
-		}
 		if (model.getOpenClassKeys().size() > 0) {
 			return OPEN_CLASSES;
 		}
 		Vector<Object> stationKeys = model.getStationKeys();
 		Vector<Object> placeKeys = model.getStationKeysPlace();
-		Vector<Object> transitionKeys = model.getStationKeysPlace();
+		Vector<Object> transitionKeys = model.getStationKeysTransition();
 		if (stationKeys.size() > placeKeys.size() + transitionKeys.size()) {
 			return NON_PETRI_NET_STATIONS;
 		}
@@ -118,8 +114,8 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 			transformer.setOutputProperty(OutputKeys.INDENT, "no");
 			HLAPIRootClass docApi = null;
 			String modelName = file.getName().substring(0, file.getName().lastIndexOf(".pnml"));
-			int size = model.getClosedClassKeys().size();
-			switch (size) {
+			int numberOfClasses = model.getClosedClassKeys().size();
+			switch (numberOfClasses) {
 			case 0:
 			{
 				docApi = new fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetDocHLAPI();
@@ -413,7 +409,7 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 			throws TransformerException {
 		Element tokens = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS);
 		Object classKey = model.getClosedClassKeys().get(0);
-		Element name = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_NAME);
+		Element name = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_CLASS_NAME);
 		String text = model.getClassName(classKey);
 		name.setTextContent(text);
 		tokens.appendChild(name);

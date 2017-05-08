@@ -114,9 +114,8 @@ public class DialogFactory {
 		if (panel instanceof WizardPanel) {
 			((WizardPanel) panel).gotFocus();
 		}
-
 		// Shows dialog
-		dialogFrame.show();
+		dialogFrame.setVisible(true);
 		if (saveSize) {
 			Dimension d = dialogFrame.getSize();
 			Defaults.set(defaultWidthProp, String.valueOf(d.width));

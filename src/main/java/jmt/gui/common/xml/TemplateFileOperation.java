@@ -35,7 +35,6 @@ import jmt.gui.common.TreeTableNode;
 import jmt.gui.jsimgraph.panels.TemplateAddingPanel;
 import jmt.gui.jsimgraph.template.AddingPanelData;
 import jmt.gui.jsimgraph.template.TemplateConstants;
-import static jmt.gui.jsimgraph.template.TemplateConstants.SITE_FILE;
 import jmt.gui.jsimgraph.template.TemplateData;
 
 import org.apache.xerces.parsers.DOMParser;
@@ -58,16 +57,14 @@ public class TemplateFileOperation {
 		URL link = new URL(myURL);
 		URLConnection conn = link.openConnection();
 		conn.setConnectTimeout(ctime);
-		Map< String, List< String >> header = conn.getHeaderFields();
-		while ( isRedirected( header )) {
-			String link2 = header.get( "Location" ).get( 0 );
-			link    = new URL( link2 );
+		Map<String, List<String>> header = conn.getHeaderFields();
+		while (isRedirected(header)) {
+			link = new URL(header.get("Location").get(0));
 			conn = (URLConnection) link.openConnection();
 			conn.setConnectTimeout(ctime);
 			header = conn.getHeaderFields();
 		}
 		conn.setReadTimeout(rtime);
-		// InputStream in = new BufferedInputStream(link.openStream());
 		InputStream in = new BufferedInputStream(conn.getInputStream());
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		byte[] buf = new byte[1024];
@@ -348,10 +345,10 @@ public class TemplateFileOperation {
 
 	public static void parseSiteXML(AddingPanelData data)
 			throws SAXException, IOException {
-		File XMLFile = new File(SITE_FILE);
+		File XMLFile = new File(TemplateConstants.SITE_FILE);
 		if (XMLFile.exists()) {
 			DOMParser parser = new DOMParser();
-			InputSource in_source = new InputSource(SITE_FILE);
+			InputSource in_source = new InputSource(TemplateConstants.SITE_FILE);
 			//TODO: the parser must be created first
 			parser.parse(in_source);
 			Document doc = parser.getDocument();
@@ -381,7 +378,7 @@ public class TemplateFileOperation {
 	public static void writeSiteXML(String siteName, String siteAddress)
 			throws ParserConfigurationException, FileNotFoundException, SAXException,
 			IOException, TransformerFactoryConfigurationError, TransformerException {
-		File XMLFile = new File(SITE_FILE);
+		File XMLFile = new File(TemplateConstants.SITE_FILE);
 		if (!XMLFile.exists()) {
 			Files.copy(TemplateAddingPanel.class.getResourceAsStream(
 					TemplateConstants.F_NAME_SITES), XMLFile.toPath());

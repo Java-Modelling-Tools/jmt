@@ -93,6 +93,9 @@ public class TransitionMatrix {
 	}
 
 	public int getTotal(int index) {
+		if (totals.length == 0) {
+			return 0;
+		}
 		if (totals[index] < 0) {
 			totals[index] = 0;
 			for (TransitionVector vector : matrix.values()) {

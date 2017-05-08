@@ -104,9 +104,9 @@ public class SimulationStateChecker {
 		singleServerContentQueues = null;
 		singleServerContentUtilizations.clear();
 		singleServerContentUtilizations = null;
-		servers.removeAllElements();
+		servers.clear();
 		servers = null;
-		classes.removeAllElements();
+		classes.clear();
 		classes = null;
 		serversContent.reset();
 		serversContent = null;

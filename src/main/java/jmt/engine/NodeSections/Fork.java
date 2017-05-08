@@ -19,6 +19,7 @@
 package jmt.engine.NodeSections;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import jmt.common.exception.NetException;
@@ -56,17 +57,11 @@ public class Fork extends OutputSection {
 	/** Maximum number of jobs allowed in a fork-join region (-1 or 0 is infinity) */
 	private int block;
 
-	/** Counts received ACK by following nodes */
-	private int ackCount;
-
 	/** Number of jobs to be routed on each link */
 	private int jobsPerLink;
 
-	/** Number of output nodes */
-	private int numOut;
-
-	/** Current number of jobs inside a fork-join region */
-	private int jobNum;
+	/** Current jobs inside a fork-join region */
+	private HashSet<Job> jobs;
 
 	private Boolean isSimplifiedFork;
 
@@ -108,9 +103,9 @@ public class Fork extends OutputSection {
 	public Fork(int jobsPerLink, int block) {
 		// Disables automatic handling of jobinfolist
 		super(false);
-		jobNum = 0;
 		this.block = block;
 		this.jobsPerLink = jobsPerLink;
+		jobs = new HashSet<Job>();
 	}
 
 	//extend the fork section with fork strategies
@@ -124,7 +119,7 @@ public class Fork extends OutputSection {
 	// ----------------------------------------------------------------------------------------------
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		droppedJobs = 0;
 		droppedJobsPerClass = new int[getJobClasses().size()];
 		Arrays.fill(droppedJobsPerClass, 0);
@@ -157,6 +152,7 @@ public class Fork extends OutputSection {
 			job = message.getJob();
 			JobClass jobClass = job.getJobClass();
 			NodeList output = null;
+			int numOut = 0;
 			NodeListWithJobNum outputInfo = forkStrategies[jobClass.getId()].getOutNodes(this, jobClass);
 			if (isSimplifiedFork) {
 				output = getOwnerNode().getOutputNodes();
@@ -165,7 +161,6 @@ public class Fork extends OutputSection {
 				output = outputInfo.getNodeList();
 				numOut = outputInfo.getTotalNum();
 			}
-			ackCount = 0;
 
 			if (numOut > 0) {
 				//removes job from node jobInfoList
@@ -226,26 +221,26 @@ public class Fork extends OutputSection {
 					}
 				}
 			}
-			jobNum++;
+			jobs.add(job);
+			// If this fork does not block, sends ack back
+			if (block < 0 || jobs.size() < block) {
+				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
+			}
 			break;
 
 		case NetEvent.EVENT_ACK:
-			ackCount++;
-			// If this fork does not block, sends ack back when all messages are delivered to unlock this fork
-			job = ((ForkJob) message.getJob()).getForkedJob();
-			if ((jobNum < block || block <= 0) && ackCount == numOut) {
-				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
-			}
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			// If this fork blocks, finally sends ack back and unlocks this
 			job = (Job) message.getData();
-			send(NetEvent.EVENT_JOIN, job, 0.0, NodeSection.INPUT, getOwnerNode());
-			if (jobNum == block) {
-				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
+			if (jobs.contains(job)) {
+				// If this fork blocks, finally sends ack back and unlocks it
+				if (block >= 0 && jobs.size() >= block) {
+					sendBackward(NetEvent.EVENT_ACK, job, 0.0);
+				}
+				jobs.remove(job);
+				send(NetEvent.EVENT_JOIN, job, 0.0, NodeSection.INPUT, getOwnerNode());
 			}
-			jobNum--;
 			break;
 
 		case NetEvent.EVENT_STOP:

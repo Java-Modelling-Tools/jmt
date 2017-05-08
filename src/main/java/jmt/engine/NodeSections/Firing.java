@@ -66,7 +66,7 @@ public class Firing extends OutputSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		jobClasses = getJobClasses();
 		nodeJobsList = node.getJobInfoList();
 		isForkJobNumWarningShown = false;

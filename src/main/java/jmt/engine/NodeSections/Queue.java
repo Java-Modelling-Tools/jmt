@@ -329,7 +329,7 @@ public class Queue extends InputSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
 		jobClasses = getJobClasses();
 		waitingRequests = new LinkedJobInfoList(jobClasses.size(), true);
@@ -341,19 +341,15 @@ public class Queue extends InputSection {
 		}
 
 		// TODO the following line is not clean. The correct behaviour should be implemented without this hack.
-		try {
-			if (node.getSection(NodeSection.SERVICE) instanceof PSServer) {
-				jobsList = new PSJobInfoList(jobClasses.size(), true);
-				queueJobInfoList = ((PSJobInfoList) jobsList).getInternalList();
-			}
-		} catch (NetException ex) {
-			logger.error(ex);
-		}
-		if (jobsList == null) {
+		if (node.getSection(NodeSection.SERVICE) instanceof PSServer) {
+			jobsList = new PSJobInfoList(jobClasses.size(), true);
+			queueJobInfoList = ((PSJobInfoList) jobsList).getInternalList();
+		} else {
 			jobsList = new LinkedJobInfoList(jobClasses.size(), true);
-		}
-		if (queueJobInfoList == null) {
 			queueJobInfoList = jobsList;
+		}
+		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
+			FJList = new LinkedJobInfoList(jobClasses.size(), true);
 		}
 
 		droppedJobs = 0;
@@ -452,9 +448,7 @@ public class Queue extends InputSection {
 
 				// If parent node is a fork node adds job to FJ info list
 				if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-					if (FJList != null) {
-						FJList.add(new JobInfo(job));
-					}
+					FJList.add(new JobInfo(job));
 				}
 
 				// If coolStart is true, this is the first job received or the
@@ -560,14 +554,13 @@ public class Queue extends InputSection {
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			job = (Job) message.getData();
-			JobInfo jobData = null;
-			if (FJList != null) {
-				jobData = FJList.lookFor(job);
-			}
-			if (jobData != null && FJList != null) {
-				FJList.remove(jobData);
-				netJobsList.updateResponseSum(jobData);
+			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+				job = (Job) message.getData();
+				JobInfo data = FJList.lookFor(job);
+				if (data != null) {
+					FJList.remove(data);
+					netJobsList.updateResponseSum(data);
+				}
 			}
 			break;
 
@@ -641,9 +634,7 @@ public class Queue extends InputSection {
 			JobInfo jobInfo = new JobInfo(job);
 			putStrategy[job.getJobClass().getId()].put(job, jobsList, this);
 			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-				if (FJList != null) {
-					FJList.add(jobInfo);
-				}
+				FJList.add(jobInfo);
 			}
 			nodeJobsList.add(jobInfo);
 			netJobsList.addJob(job);
@@ -655,9 +646,6 @@ public class Queue extends InputSection {
 
 	@Override
 	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
-		if (FJList == null) {
-			FJList = new LinkedJobInfoList(jobClasses.size(), true);
-		}
 		switch (name) {
 		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
 			FJList.analyzeQueueLength(jobClass, measurement);

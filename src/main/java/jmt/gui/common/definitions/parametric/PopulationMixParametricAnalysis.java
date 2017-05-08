@@ -29,10 +29,10 @@ import jmt.gui.common.definitions.StationDefinition;
 /**
  * <p>Title: PopulationMixParametricAnalysis</p>
  * <p>Description: this class is used to describe a parametric analysis where
- * the varied parameter is the population mix between two close classes.It
+ * the varied parameter is the population mix between two closed classes.It
  * adds the <code >classKey</code> field used to keep the key of
  * the Job-Class whose service time will be varied. This type of parametric
- * simulation is available only when there are exactly two close classes.</p>
+ * simulation is available only when there are exactly two closed classes.</p>
  *
  * @author Francesco D'Aquino
  *         Date: 14-dic-2005

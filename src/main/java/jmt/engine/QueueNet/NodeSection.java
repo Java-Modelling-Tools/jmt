@@ -145,8 +145,9 @@ public abstract class NodeSection {
 	 * This method should be used to set node section properties depending on
 	 * the owner node ones.
 	 * @param node Owner node.
+	 * @throws jmt.common.exception.NetException
 	 */
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws jmt.common.exception.NetException {
 	};
 
 	/** Gets the id of the node section.
@@ -236,7 +237,7 @@ public abstract class NodeSection {
 	 * @param id Property identifier (see properties constants).
 	 * @param jobClass jobClass.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException  if the requested property is not available.
+	 * @throws jmt.common.exception.NetException if the requested property is not available.
 	 */
 	public int getIntSectionProperty(int id, JobClass jobClass) throws jmt.common.exception.NetException {
 		try {
@@ -282,7 +283,7 @@ public abstract class NodeSection {
 	 * @param id Property identifier (see properties constants).
 	 * @param jobClass jobClass.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException  if the requested property is not available.
+	 * @throws jmt.common.exception.NetException if the requested property is not available.
 	 */
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws jmt.common.exception.NetException {
 		try {
@@ -536,7 +537,7 @@ public abstract class NodeSection {
 		}
 	}
 
-	void setOwnerNode(NetNode ownerNode) {
+	void setOwnerNode(NetNode ownerNode) throws jmt.common.exception.NetException {
 		this.ownerNode = ownerNode;
 		//if (auto)
 		jobsList = new LinkedJobInfoList(getJobClasses().size(), true);

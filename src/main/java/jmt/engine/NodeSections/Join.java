@@ -60,6 +60,7 @@ public class Join extends InputSection {
 	private HashMap<Job, Integer> required;
 	private HashMap<Job, Integer[]> requiredPerClass;
 	private HashMap<Job, Boolean> hasFired;
+	private HashMap<Job, NetNode> forkNode;
 
 	private JoinStrategy[] joinStrategies;
 
@@ -90,9 +91,13 @@ public class Join extends InputSection {
 	// ----------------------------------------------------------------------------------------------
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		jobClasses = getJobClasses();
 		nodeJobsList = node.getJobInfoList();
+		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
+			FJList = new LinkedJobInfoList(jobClasses.size(), true);
+			forkNode = new HashMap<Job, NetNode>();
+		}
 	};
 
 	/**
@@ -182,13 +187,13 @@ public class Join extends InputSection {
 						// Sends job forward
 						sendForward(fJob.getForkedJob(), 0.0);
 						hasFired.put(fJob.getForkedJob(), true);
-						// Notifies fork that job has been fired
-						send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0, NodeSection.OUTPUT, fJob.getForkNode());
 
 						if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-							if (FJList != null) {
-								FJList.add(new JobInfo(fJob.getForkedJob()));
-							}
+							FJList.add(new JobInfo(fJob.getForkedJob()));
+							forkNode.put(fJob.getForkedJob(), fJob.getForkNode());
+						} else {
+							// Notifies fork that job has been fired
+							send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0, NodeSection.OUTPUT, fJob.getForkNode());
 						}
 					}
 				}
@@ -206,9 +211,7 @@ public class Join extends InputSection {
 				// If this is not a fork job, sends it forward
 				sendForward(job, 0.0);
 				if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-					if (FJList != null) {
-						FJList.add(new JobInfo(job));
-					}
+					FJList.add(new JobInfo(job));
 				}
 			}
 			break;
@@ -217,14 +220,18 @@ public class Join extends InputSection {
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			job = (Job) message.getData();
-			JobInfo jobData = null;
-			if (FJList != null) {
-				jobData = FJList.lookFor(job);
-			}
-			if (jobData != null && FJList != null) {
-				FJList.remove(jobData);
-				netJobsList.updateResponseSum(jobData);
+			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+				job = (Job) message.getData();
+				JobInfo data = FJList.lookFor(job);
+				if (data != null) {
+					FJList.remove(data);
+					netJobsList.updateResponseSum(data);
+				}
+				NetNode fork = forkNode.get(job);
+				if (fork != null) {
+					forkNode.remove(job);
+					send(NetEvent.EVENT_JOIN, job, 0.0, NodeSection.OUTPUT, fork);
+				}
 			}
 			break;
 
@@ -257,9 +264,6 @@ public class Join extends InputSection {
 
 	@Override
 	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
-		if (FJList == null) {
-			FJList = new LinkedJobInfoList(jobClasses.size(), true);
-		}
 		switch (name) {
 		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
 			FJList.analyzeQueueLength(jobClass, measurement);

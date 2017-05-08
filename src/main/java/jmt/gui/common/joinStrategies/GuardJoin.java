@@ -30,7 +30,8 @@ public class GuardJoin extends JoinStrategy {
 	private Map<Object, Integer> guard = new HashMap<Object, Integer>();
 
 	public GuardJoin() {
-		description = "Fires the join upon arrival of a subset of forked tasks in each class.";
+		description = "Fires the join upon arrival of a subset of forked tasks in each class. "
+				+ "Exceeding tasks will be ignored at this station.";
 	}
 
 	@Override

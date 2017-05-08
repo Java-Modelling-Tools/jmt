@@ -96,7 +96,7 @@ public class GraphicalQueueState {
 		double height = QUEUE_HEIGHT - 2 * V_MARGIN;
 
 		int H_FREE_SPACE = 2;
-		int V_FREE_SPACE = 1;
+		int V_FREE_SPACE = 0;
 
 		Graphics2D g = mediator.getGraphGraphics();
 
@@ -216,7 +216,7 @@ public class GraphicalQueueState {
 			double xStart;
 			double yStart;
 			offset = (int) ((mediator.getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT) / 2);
-			V_FREE_SPACE += (int) ((QUEUE_HEIGHT - (((int) (height / nClasses)) * nClasses)) / 2);
+			V_FREE_SPACE = (int) ((QUEUE_HEIGHT - (((int) (height / nClasses)) * nClasses)) / 2) + 1;
 			yStart = p.getY() + V_FREE_SPACE;
 
 			//First draw the queues ....
@@ -245,7 +245,7 @@ public class GraphicalQueueState {
 			// else draw only the first MAX_NUMBER_OF_CLASSES_QUEUE with the greatest
 			// number of job inside thisStation
 			else {
-				V_FREE_SPACE += (int) ((QUEUE_HEIGHT - (((int) (height / MAX_NUMBER_OF_CLASSES_QUEUE)) * (double) MAX_NUMBER_OF_CLASSES_QUEUE)) / 2);
+				V_FREE_SPACE = (int) ((QUEUE_HEIGHT - (((int) (height / MAX_NUMBER_OF_CLASSES_QUEUE)) * (double) MAX_NUMBER_OF_CLASSES_QUEUE)) / 2) + 1;
 				yStart = p.getY() + V_FREE_SPACE;
 
 				Vector<Object> classesReplication = new Vector<Object>(classes);

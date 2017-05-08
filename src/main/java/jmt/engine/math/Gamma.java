@@ -70,7 +70,6 @@ public class Gamma extends Constants {
 		//double LOGPI  = 1.14472988584940017414;
 
 		double p, z;
-		int i;
 
 		double q = Math.abs(x);
 
@@ -80,7 +79,6 @@ public class Gamma extends Constants {
 				if (p == q) {
 					throw new ArithmeticException("gamma: overflow");
 				}
-				i = (int) p;
 				z = q - p;
 				if (z > 0.5) {
 					p += 1.0;
@@ -203,7 +201,7 @@ public class Gamma extends Constants {
 
 		/* Multiply w by the factor
 		   a      b   _             _     _
-		  x  (1-x)   | (a+b) / ( a | (a) | (b) ) .   */
+		  x  (1-x)   | (a+b) / ( a | (a) | (b) ). */
 
 		y = a * Math.log(x);
 		t = b * Math.log(xc);
@@ -222,7 +220,7 @@ public class Gamma extends Constants {
 			}
 			return t;
 		}
-		/* Resort to logarithms.  */
+		/* Resort to logarithms. */
 		y += t + logGamma(a + b) - logGamma(a) - logGamma(b);
 		y += Math.log(w / a);
 		if (y < MINLOG) {
@@ -575,7 +573,6 @@ public class Gamma extends Constants {
 		}
 
 		q = (x - 0.5) * Math.log(x) - x + 0.91893853320467274178;
-		//if ( x > 1.0e8 ) return( q );
 		if (x > 1.0e8) {
 			return (q);
 		}

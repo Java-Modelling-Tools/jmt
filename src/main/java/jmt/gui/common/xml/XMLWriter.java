@@ -1662,8 +1662,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				LoadDependentRouting routing = (LoadDependentRouting) routingStrat;
 				XMLParameter ldRoutingPar = null;
 				XMLParameter[] ranges = new XMLParameter[routing.getAllEmpiricalEntries().size()];
-				List<Integer> fromAsList = new ArrayList<Integer>(routing.getAllEmpiricalEntries().keySet());
-				Collections.sort(fromAsList);
+				List<Integer> fromAsList = new ArrayList<Integer>();
+				fromAsList.addAll(routing.getAllEmpiricalEntries().keySet());
+				fromAsList.sort(null);
 				int countersRange = 0;
 				for (Integer from : fromAsList) {
 					XMLParameter fromEntry = new XMLParameter("from", Integer.class.getName(), null, from.toString(), true);
@@ -1785,7 +1786,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				for (int i = 0; i < probs.size(); i++) {
 					XMLParameter stationDest = new XMLParameter(
 							"Number of Branches", String.class.getName(), null,
-							new Integer(i + 1).toString(), true);
+							Integer.toString(i + 1), true);
 					String outProb = probs.get(Integer.toString(i + 1)).toString();
 					XMLParameter routProb = new XMLParameter("probability",
 							Double.class.getName(), null, outProb, true);

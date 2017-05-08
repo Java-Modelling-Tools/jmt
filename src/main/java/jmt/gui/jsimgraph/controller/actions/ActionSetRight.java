@@ -37,8 +37,8 @@ public class ActionSetRight extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public ActionSetRight(Mediator mediator) {
-		super("Adjust the graph", "Order", mediator);
-		putValue(SHORT_DESCRIPTION, "Optimize the graph");
+		super("Optimize", "Optimize", mediator);
+		putValue(SHORT_DESCRIPTION, "Optimize the layout");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_Q));
 		setEnabled(false);
 	}
@@ -47,7 +47,7 @@ public class ActionSetRight extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		mediator.adjustGraph();
+		mediator.tryAdjustGraph();
 	}
 
 }

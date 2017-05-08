@@ -30,7 +30,7 @@ import jmt.jmarkov.Queues.Exceptions.NonErgodicException;
 /**
  * Contains the algorithm of the queue M/M/1  where lambda represent the arrival of the job
  * in second and s as service time of the job in the processor.
- * M/M/1 is the poisson process of arrival and service time.   
+ * M/M/1 is the poisson process of arrival and service time.
  *
  */
 public class MM1Logic implements QueueLogic {
@@ -48,7 +48,6 @@ public class MM1Logic implements QueueLogic {
 	/**
 	 * random number generator
 	 */
-
 	protected Random rnd;
 
 	/**
@@ -91,7 +90,6 @@ public class MM1Logic implements QueueLogic {
 	 */
 	private double getTime(double media) {
 		return ((-media * Math.log(rnd.nextDouble())));
-
 	}
 
 	/**
@@ -177,4 +175,5 @@ public class MM1Logic implements QueueLogic {
 	public int getNumberServer() {
 		return 1;
 	}
+
 }

@@ -358,7 +358,7 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 		Element tokens = getFirstChildElementByTagName(elem, PNML_JSIM_E_NET_TOKENS);
 		if (tokens != null) {
 			Object classKey = model.getClassKeys().get(0);
-			Element name = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_NAME);
+			Element name = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_CLASS_NAME);
 			if (name != null) {
 				model.setClassName(classKey, name.getTextContent());
 			}

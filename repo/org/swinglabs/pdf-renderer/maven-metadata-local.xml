@@ -3,10 +3,10 @@
   <groupId>org.swinglabs</groupId>
   <artifactId>pdf-renderer</artifactId>
   <versioning>
-    <release>0.9.0</release>
+    <release>0.9.1</release>
     <versions>
-      <version>0.9.0</version>
+      <version>0.9.1</version>
     </versions>
-    <lastUpdated>20150409155415</lastUpdated>
+    <lastUpdated>20170502163833</lastUpdated>
   </versioning>
 </metadata>

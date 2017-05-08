@@ -394,7 +394,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 			Vector<Object> availableClasses = checker.checkForServiceTimesParametricSimulationAvailableClasses(stationKey);
 			//if is single class...
 			if (isSingleClass()) {
-				// ... and the selected close class is no more available
+				// ... and the selected closed class is no more available
 				if (!availableClasses.contains(classKey)) {
 					code = 1;
 					if (autocorrect) {

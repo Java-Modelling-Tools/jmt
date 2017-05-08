@@ -21,7 +21,6 @@ package jmt.engine.NodeSections;
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
-import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
 
 /**
@@ -42,9 +41,6 @@ public class ServiceTunnel extends ServiceSection {
 	 */
 	public ServiceTunnel(boolean auto) {
 		super(auto);
-	}
-
-	public void tunnelNodeLinked(NetNode node) {
 	}
 
 	@Override

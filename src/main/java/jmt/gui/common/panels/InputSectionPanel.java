@@ -179,7 +179,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			public void actionPerformed(ActionEvent e) {
 				String queuePolicy = (String) queuePolicyCombo.getSelectedItem();
 				data.setStationQueueStrategy(stationKey, queuePolicy);
-				if (queuePolicy.equals(QUEUE_STRATEGY_STATION_PS) || queuePolicy.equals(QUEUE_STRATEGY_STATION_PS)) {
+				if (queuePolicy.equals(QUEUE_STRATEGY_STATION_PS)
+						|| queuePolicy.equals(QUEUE_STRATEGY_STATION_SRPT)) {
 					Vector<Object> classKeys = classData.getClassKeys();
 					for (Object classKey : classKeys) {
 						data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_FCFS);

@@ -98,12 +98,12 @@ public class JmtClipboard {
 			classes.put(classKey, cd.serializeClass(classKey));
 		}
 		// Saves the stations, connections and blocking regions into data structure
-		mediator.updateStationPositions();
 		for (Object cell : cells) {
 			if (cell instanceof JmtCell) {
 				Object stationKey = ((CellComponent) ((JmtCell) cell).getUserObject()).getKey();
 				stations.put(stationKey, sd.serializeStation(stationKey));
-				JMTPoint position = sd.getStationPosition(stationKey);
+				JMTPoint position = new JMTPoint(mediator.getCellCoordinates((JmtCell) cell),
+						!((JmtCell) cell).isLeftInputCell());
 				stationPositions.put(stationKey, position);
 				if (zero == null) {
 					zero = new Point2D.Double(position.getX(), position.getY());

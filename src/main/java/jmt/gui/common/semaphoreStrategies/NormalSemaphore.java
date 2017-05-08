@@ -27,10 +27,8 @@ public class NormalSemaphore extends SemaphoreStrategy {
 	private int threshold = 1;
 
 	public NormalSemaphore() {
-		description = "The semaphore stops a percentage of forked tasks in each class "
-				+ "until they all reach the semaphore. Then it lets them pass through "
-				+ "altogether. Tasks originated from the same job that arrive later are "
-				+ "not blocked.";
+		description = "Holds the semaphore until arrival of a subset of forked tasks. "
+				+ "Exceeding tasks will pass through without delay.";
 	}
 
 	@Override

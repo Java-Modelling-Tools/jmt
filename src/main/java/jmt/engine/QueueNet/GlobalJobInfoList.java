@@ -33,9 +33,9 @@ import jmt.engine.dataAnalysis.Measure;
  *  Modified by Ashanka (Feb 2010)
  *  Desc: Modified the logic of System Power calculation. Earlier the logic was to capture the 
  *  	  response time (rn) of each job when it was entering the sink and to capture the time 
- *  	  of throughput (xn) for each job. Then x1/r1 ... x2/r2 .... x3/r3...
- *        was sent for System Power Simulation Engine. This logic was modified into :
- *        x1/r1 .. [x1/r1 + (x1+x2)/(r1+r2)]..[x1/r1 + (x1+x2)/(r1+r2) + (x1+x2+x3)/(r1+r2+r3)]..           
+ *  	  of throughput (xn) for each job. Then x1/r1 ... x2/r2 ... x3/r3 ...
+ *        was sent for System Power Simulation Engine. This logic was modified into:
+ *        x1/r1 .. [x1/r1 + (x1+x2)/(r1+r2)] .. [x1/r1 + (x1+x2)/(r1+r2) + (x1+x2+x3)/(r1+r2+r3)] ..
  */
 public class GlobalJobInfoList {
 

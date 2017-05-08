@@ -46,7 +46,7 @@ public class JobSink extends InputSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		jobsList_node = node.getJobInfoList();
 		isForkJobExitWarningShown = false;
 	}

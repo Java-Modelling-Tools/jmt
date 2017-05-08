@@ -857,8 +857,9 @@ public class NetNode extends SimEntity {
 
 	/**
 	 * This method is called after all the sections are added
+	 * @throws jmt.common.exception.NetException Exception
 	 */
-	public void initializeSections() {
+	public void initializeSections() throws jmt.common.exception.NetException {
 		if (inputSection != null) {
 			inputSection.setOwnerNode(this);
 		}

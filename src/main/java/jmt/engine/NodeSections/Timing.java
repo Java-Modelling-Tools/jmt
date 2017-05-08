@@ -83,7 +83,7 @@ public class Timing extends ServiceSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		timingTokenLists = new LinkedList[modeNames.length];
 		for (int i = 0; i < timingTokenLists.length; i++) {
 			timingTokenLists[i] = new LinkedList<RemoveToken>();

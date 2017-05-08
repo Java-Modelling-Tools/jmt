@@ -118,7 +118,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 	public void initialize() {
 		JPanel radioButtonsPanel = new JPanel(new GridLayout(2, 1));
 		allClass = new JRadioButton("Increase number of jobs of all closed classes");
-		allClass.setToolTipText("Increase population of all close classes");
+		allClass.setToolTipText("Increase population of all closed classes");
 		singleClass = new JRadioButton("Increase number of jobs of one closed class");
 		singleClass.setToolTipText("Increase only population of one class");
 		ButtonGroup group = new ButtonGroup();

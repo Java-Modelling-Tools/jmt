@@ -83,7 +83,7 @@ public class Linkage extends OutputSection {
 	}
 
 	@Override
-	protected void nodeLinked(NetNode node) {
+	protected void nodeLinked(NetNode node) throws NetException {
 		outputNodes = node.getOutputNodes();
 		requestSource = null;
 	}

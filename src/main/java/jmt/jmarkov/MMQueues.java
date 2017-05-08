@@ -943,8 +943,8 @@ public class MMQueues extends JMTFrame {
 		boolean goOn = true;
 
 		if (nonErgodic) {
-			if (JOptionPane.NO_OPTION == JOptionPane.showConfirmDialog(this, "The process is not ergodico.\nDo you want to continue?", "Warning",
-					JOptionPane.YES_NO_OPTION)) {
+			if (JOptionPane.showConfirmDialog(this, "The process is not ergodico.\nDo you want to continue?", "Warning", JOptionPane.YES_NO_OPTION)
+					== JOptionPane.NO_OPTION) {
 				goOn = false;
 			}
 		}
@@ -1104,7 +1104,7 @@ public class MMQueues extends JMTFrame {
 		//sMultiplier = ql.getMaxErgodicS();
 		Dictionary<Integer, JLabel> d = sS.getLabelTable();
 		//for (int i = 0; i < 6; i++) {
-		//	d.put(new Integer(i * 25), new JLabel("" + Formatter.formatNumber(i * sMultiplier ), 2));
+		//	d.put(new Integer(i * 25), new JLabel("" + Formatter.formatNumber(i * sMultiplier), 2));
 		//}
 		for (int i = sS.getMinimum(); i <= sS.getMaximum(); i += sS.getMajorTickSpacing()) {
 			d.put(new Integer(i), new JLabel("" + Formatter.formatNumber(i * sMultiplier, 2)));
