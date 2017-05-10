@@ -1874,10 +1874,10 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < forks.size(); i++) {
 			Object thisFork = forks.get(i);
 			Vector<Object> result = searchForStationBetweenForkJoin(STATION_TYPE_SEMAPHORE, thisFork);
-			if (result != null) {
-				semaphoresNotBetweenForkJoin.removeAll(result);
-				errors[SEMAPHORE_NOT_BETWEEN_FORK_JOIN_ERROR] = true;
-			}
+			semaphoresNotBetweenForkJoin.removeAll(result);
+		}
+		if (!semaphoresNotBetweenForkJoin.isEmpty()) {
+			errors[SEMAPHORE_NOT_BETWEEN_FORK_JOIN_ERROR] = true;
 		}
 	}
 
@@ -1891,10 +1891,10 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < forks.size(); i++) {
 			Object thisFork = forks.get(i);
 			Vector<Object> result = searchForStationBetweenForkJoin(STATION_TYPE_SCALER, thisFork);
-			if (result != null) {
-				scalersNotBetweenForkJoin.removeAll(result);
-				errors[SCALER_NOT_BETWEEN_FORK_JOIN_ERROR] = true;
-			}
+			scalersNotBetweenForkJoin.removeAll(result);
+		}
+		if (!scalersNotBetweenForkJoin.isEmpty()) {
+			errors[SCALER_NOT_BETWEEN_FORK_JOIN_ERROR] = true;
 		}
 	}
 
@@ -1908,7 +1908,7 @@ public class ModelChecker implements CommonConstants {
 			Object thisTransition = transitions.get(i);
 			Vector<Object> classKeys = class_def.getClassKeys();
 			Vector<Object> stationInKeys = station_def.getBackwardConnections(thisTransition);
-			if (classKeys.isEmpty() || stationInKeys.isEmpty()) {
+			if (stationInKeys.isEmpty() || classKeys.isEmpty()) {
 				continue;
 			}
 
@@ -2292,11 +2292,11 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < forks.size(); i++) {
 			Object thisFork = forks.get(i);
 			Vector<Object> result = searchForStationBetweenForkJoin(STATION_TYPE_CLASSSWITCH, thisFork);
-			if (result != null) {
-				classSwitchesBetweenForkJoin.removeAll(result);
-				classSwitchesBetweenForkJoin.addAll(result);
-				warnings[CLASS_SWITCH_BETWEEN_FORK_JOIN_WARNING] = true;
-			}
+			classSwitchesBetweenForkJoin.removeAll(result);
+			classSwitchesBetweenForkJoin.addAll(result);
+		}
+		if (!classSwitchesBetweenForkJoin.isEmpty()) {
+			warnings[CLASS_SWITCH_BETWEEN_FORK_JOIN_WARNING] = true;
 		}
 	}
 
@@ -2347,11 +2347,11 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < forks.size(); i++) {
 			Object thisFork = forks.get(i);
 			Vector<Object> result = searchForStationBetweenForkJoin(STATION_TYPE_TRANSITION, thisFork);
-			if (result != null) {
-				transitionsBetweenForkJoin.removeAll(result);
-				transitionsBetweenForkJoin.addAll(result);
-				warnings[TRANSITION_BETWEEN_FORK_JOIN_WARNING] = true;
-			}
+			transitionsBetweenForkJoin.removeAll(result);
+			transitionsBetweenForkJoin.addAll(result);
+		}
+		if (!transitionsBetweenForkJoin.isEmpty()) {
+			warnings[TRANSITION_BETWEEN_FORK_JOIN_WARNING] = true;
 		}
 	}
 
@@ -2364,7 +2364,7 @@ public class ModelChecker implements CommonConstants {
 			Object thisTransition = transitions.get(i);
 			Vector<Object> classKeys = class_def.getClassKeys();
 			Vector<Object> stationOutKeys = station_def.getForwardConnections(thisTransition);
-			if (classKeys.isEmpty() || stationOutKeys.isEmpty()) {
+			if (stationOutKeys.isEmpty() || classKeys.isEmpty()) {
 				continue;
 			}
 
