@@ -83,16 +83,6 @@ import org.xml.sax.SAXException;
  * @author Bertoli Marco
  *         Date: 27-lug-2005
  *         Time: 13.59.48
- *         
- * Modified by Ashanka (Aug 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Queue Length to Customer Number 
- *       2. Number of Customers to System Customer Number 
- * 
- * Modified by Ashanka (Sep 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Customer Number to Number of Customers
- *       2. System Customer Number to System Number of Customers.
  */
 public class XMLReader implements XMLConstantNames, CommonConstants {
 
@@ -1834,39 +1824,16 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				stationKey = null;
 			}
 			type = measure.getAttribute(XML_A_MEASURE_TYPE);
-			//Begins all backward compatibility conditions
-			if ("Customer Number".equalsIgnoreCase(type) && "".equalsIgnoreCase(stationName)) {
-				type = SimulationDefinition.MEASURE_S_CN;
-			}
-			if ("System Customer Number".equalsIgnoreCase(type)) {
-				type = SimulationDefinition.MEASURE_S_CN;
-			}
-			if ("Number of Customers".equalsIgnoreCase(type) && "".equalsIgnoreCase(stationName)) {
-				type = SimulationDefinition.MEASURE_S_CN;
-			}
-			if ("Queue Length".equalsIgnoreCase(type)) {
-				type = SimulationDefinition.MEASURE_QL;
-			}
-			if ("Customer Number".equalsIgnoreCase(type) && !"".equalsIgnoreCase(stationName)) {
-				type = SimulationDefinition.MEASURE_QL;
-			}
-			//Ends the backward compatibility conditions
-			classKey = null;
 			String className = measure.getAttribute(XML_A_MEASURE_CLASS);
 			if (className != null && !className.equals("")) {
 				if (type.equals(SimulationDefinition.MEASURE_FX)) {
 					List<String> modeNameList = modeNameLists.get(stationKey);
-					if (modeNameList != null) {
-						for (String modeName : modeNameList) {
-							if (modeName.equals(className)) {
-								classKey = modeName;
-								break;
-							}
-						}
-					}
+					classKey = modeNameList.get(modeNameList.indexOf(className));
 				} else {
 					classKey = classes.get(className);
 				}
+			} else {
+				classKey = null;
 			}
 			//Inverts alpha
 			alpha = new Double(1 - Double.parseDouble(measure.getAttribute(XML_A_MEASURE_ALPHA)));

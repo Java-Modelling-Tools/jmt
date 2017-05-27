@@ -55,16 +55,6 @@ import org.w3c.dom.Element;
  * @version 13-dic-2004 17.34.35
  * Modified by Bertoli Marco 01-jan-2006 --> BugFixed for linux
  * 8-mar-2006 Added support for global measures
- * 
- * Modified by Ashanka (Aug 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Queue Length to Customer Number 
- *       2. Number of Customers to System Customer Number 
- * 
- * Modified by Ashanka (Sep 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Customer Number to Number of Customers
- *       2. System Customer Number to System Number of Customers.
  *       
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
@@ -172,13 +162,15 @@ public class XMLSimulationOutput extends SimulationOutput {
 		if (measure.getNodeName() == null || measure.getNodeName().equals("")) {
 			// aggregate measure
 			elem.setAttribute("station", "");
+			elem.setAttribute("nodeType", "");
 		} else {
 			NetNode node = measure.getNetwork().getNode(measure.getNodeName());
 			if (node.isBlockingRegionInputStation()) {
+				// region measure
 				elem.setAttribute("station", node.getBlockingRegionInputStation().getName());
 				elem.setAttribute("nodeType", SimConstants.NODE_TYPE_REGION);
 			} else {
-				// class measure
+				// station measure
 				elem.setAttribute("station", measure.getNodeName());
 				elem.setAttribute("nodeType", SimConstants.NODE_TYPE_STATION);
 			}
@@ -484,7 +476,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 				if (simModelPath != null) {
 					//sim model file exist
 					simModelFile = new File(simModelPath);
-					xmlResultsName = simModelFile.getParent() + SEPARATOR + "res_sim_" + sim.getName() + ".xml";
+					xmlResultsName = simModelFile.getParent() + SEPARATOR + "res_sim_" + sim.getName();
 				} else {
 					//get the user dir
 					String curDir = System.getProperty("user.dir");
@@ -494,7 +486,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 					} else {
 						name = "_" + sim.getName();
 					}
-					xmlResultsName = curDir + SEPARATOR + "res_sim_JMT" + name + ".xml";
+					xmlResultsName = curDir + SEPARATOR + "res_sim_JMT" + name;
 				}
 			}
 
@@ -547,9 +539,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 			for (int m = 0; m < measureNumber; m++) {
 				currentMeasure = (Element) measureList.item(m);
 
-				if (!currentMeasure.getAttribute("measureType").equalsIgnoreCase("Queue Length")//backward compatibility condition
-						&& !currentMeasure.getAttribute("measureType").equalsIgnoreCase("Customer Number")//backward compatibility condition
-						&& !currentMeasure.getAttribute("measureType").equalsIgnoreCase("Number of Customers")) {//Present condition
+				if (!currentMeasure.getAttribute("measureType").equalsIgnoreCase("Number of Customers")) {
 					continue;
 				}
 

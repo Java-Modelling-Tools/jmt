@@ -35,16 +35,6 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
  * Modified by Francesco D'Aquino
  * 
  * @author Bertoli Marco (new measures)
- * 
- * Modified by Ashanka (Aug 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Queue Length to Customer Number 
- *       2. Number of Customers to System Customer Number 
- * 
- * Modified by Ashanka (Sep 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Customer Number to Number of Customers
- *       2. System Customer Number to System Number of Customers.
  *       
  * Modified by Ashanka (May 2010): 
  * Project: Multi-Sink Perf. Index 

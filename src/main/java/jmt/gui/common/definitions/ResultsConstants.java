@@ -27,16 +27,6 @@ package jmt.gui.common.definitions;
  *         Date: 26-set-2005
  *         Time: 11.06.50
  *
- * Modified by Ashanka (Aug 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Queue Length to Customer Number 
- *       2. Number of Customers to System Customer Number 
- * 
- * Modified by Ashanka (Sep 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Customer Number to Number of Customers
- *       2. System Customer Number to System Number of Customers.
- *
  * Modified by Ashanka (Nov 09):
  * Desc: Added the description of the Drop Rate
  * 

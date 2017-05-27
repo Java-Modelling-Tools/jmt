@@ -31,13 +31,6 @@ import jmt.gui.common.xml.XMLConstantNames;
  * Time: 12.17.58
  * To change this template use File | Settings | File Templates.
  * 
- * Modified by Ashanka: In PAResultsModel(CommonModel model) for including the label change from "Queue Length" to "Customer Number"
- *                      and from "Customer Number" to "System Customer Number". The later is a System Level Perf Index.
- * 
- * 
- * Modified by Ashanka: In PAResultsModel(CommonModel model) for including the label change from "Customer Number" to "Number of Customers" 
- * 		                and from "System Customer Number" to "System Number of Customers".
- * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
  * Description: Added new Performance index for the capturing the 
@@ -89,90 +82,94 @@ public class PAResultsModel implements MeasureDefinition {
 
 		for (int i = 0; i < measureKeys.size(); i++) {
 			Object thisMeasure = measureKeys.get(i);
-			String stationName = model.getStationName(model.getMeasureStation(thisMeasure));
-			String nodeType = XMLConstantNames.NODETYPE_STATION;
-			// This can be a network or blocking region measure
-			if (stationName == null) {
-				stationName = model.getRegionName(model.getMeasureStation(thisMeasure));
-				if (stationName == null) {
+			Object stationKey = model.getMeasureStation(thisMeasure);
+			String stationName = null;
+			String nodeType = null;
+			if (stationKey == null) {
+				if (model.isGlobalMeasure(thisMeasure)) {
 					stationName = "Network";
 				} else {
+					stationName = "";
+				}
+				nodeType = "";
+			} else {
+				if (model.getRegionKeys().contains(stationKey)) {
+					stationName = model.getRegionName(stationKey);
 					nodeType = XMLConstantNames.NODETYPE_REGION;
+				} else {
+					stationName = model.getStationName(stationKey);
+					nodeType = XMLConstantNames.NODETYPE_STATION;
 				}
 			}
 			String type = model.getMeasureType(thisMeasure);
-			String className;
-			String lowerType = type.toLowerCase();
-			Object thisClass = model.getMeasureClass(thisMeasure);
-			if (lowerType.startsWith("firing") && lowerType.endsWith("throughput")) {
-				className = (thisClass == null) ? "All modes" : (String) thisClass;
+			String lowType = type.toLowerCase();
+			Object classKey = model.getMeasureClass(thisMeasure);
+			String className = null;
+			if (lowType.startsWith("firing") && lowType.endsWith("throughput")) {
+				className = (classKey == null) ? "All modes" : (String) classKey;
 			} else {
-				className = (thisClass == null) ? "All classes" : model.getClassName(thisClass);
+				className = (classKey == null) ? "All classes" : model.getClassName(classKey);
 			}
 			String measureName = stationName + "_" + className + "_" + type;
 			double thisAlpha = model.getMeasureAlpha(thisMeasure).doubleValue();
 			double thisPrecision = model.getMeasurePrecision(thisMeasure).doubleValue();
 			// Decodes measure type
 			int numType = 0;
-			if ((lowerType.startsWith("number") && lowerType.endsWith("customers"))
-					|| (lowerType.startsWith("queue") && lowerType.endsWith("length"))
-					|| (lowerType.startsWith("customer") && lowerType.endsWith("number") && !"".equalsIgnoreCase(stationName))) {
+			if (lowType.startsWith("number") && lowType.endsWith("customers")) {
 				numType = SimConstants.QUEUE_LENGTH;
 				queueLength.add(new Integer(i));
-			} else if (lowerType.startsWith("queue") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("queue") && lowType.endsWith("time")) {
 				numType = SimConstants.QUEUE_TIME;
 				queueTime.add(new Integer(i));
-			} else if (lowerType.startsWith("response") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("response") && lowType.endsWith("time")) {
 				numType = SimConstants.RESPONSE_TIME;
 				responseTime.add(new Integer(i));
-			} else if (lowerType.startsWith("residence") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("residence") && lowType.endsWith("time")) {
 				numType = SimConstants.RESIDENCE_TIME;
 				residenceTime.add(new Integer(i));
-			} else if (lowerType.startsWith("utilization") && lowerType.endsWith("utilization")) {
+			} else if (lowType.startsWith("utilization") && lowType.endsWith("utilization")) {
 				numType = SimConstants.UTILIZATION;
 				utilization.add(new Integer(i));
-			} else if (lowerType.startsWith("throughput") && lowerType.endsWith("throughput")) {
+			} else if (lowType.startsWith("throughput") && lowType.endsWith("throughput")) {
 				numType = SimConstants.THROUGHPUT;
 				throughput.add(new Integer(i));
-			} else if (lowerType.startsWith("drop") && lowerType.endsWith("rate")) {
+			} else if (lowType.startsWith("drop") && lowType.endsWith("rate")) {
 				numType = SimConstants.DROP_RATE;
 				dropRate.add(new Integer(i));
-			} else if (lowerType.startsWith("system") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("time")) {
 				numType = SimConstants.SYSTEM_RESPONSE_TIME;
 				systemResponseTime.add(new Integer(i));
-			} else if (lowerType.startsWith("system") && lowerType.endsWith("throughput")) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("throughput")) {
 				numType = SimConstants.SYSTEM_THROUGHPUT;
 				systemThroughput.add(new Integer(i));
-			} else if ((lowerType.startsWith("system") && lowerType.endsWith("customers"))
-					|| (lowerType.startsWith("system") && lowerType.endsWith("number"))
-					|| (lowerType.startsWith("customer") && lowerType.endsWith("number") && "".equalsIgnoreCase(stationName))) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("customers")) {
 				numType = SimConstants.SYSTEM_NUMBER_OF_JOBS;
 				systemCustomerNumber.add(new Integer(i));
-			} else if (lowerType.startsWith("system") && lowerType.endsWith("rate")) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("rate")) {
 				numType = SimConstants.SYSTEM_DROP_RATE;
 				systemDropRate.add(new Integer(i));
-			} else if (lowerType.startsWith("system") && lowerType.endsWith("power")) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("power")) {
 				numType = SimConstants.SYSTEM_POWER;
 				systemPower.add(new Integer(i));
-			} else if (lowerType.startsWith("response") && lowerType.endsWith("sink")) {
+			} else if (lowType.startsWith("response") && lowType.endsWith("sink")) {
 				numType = SimConstants.RESPONSE_TIME_PER_SINK;
 				responseTimePerSink.add(new Integer(i));
-			} else if (lowerType.startsWith("throughput") && lowerType.endsWith("sink")) {
+			} else if (lowType.startsWith("throughput") && lowType.endsWith("sink")) {
 				numType = SimConstants.THROUGHPUT_PER_SINK;
 				throughputTimePerSink.add(new Integer(i));
-			} else if (lowerType.startsWith("fcr") && lowerType.endsWith("weight")) {
+			} else if (lowType.startsWith("fcr") && lowType.endsWith("weight")) {
 				numType = SimConstants.FCR_TOTAL_WEIGHT;
 				FCRTotalWeight.add(new Integer(i));
-			} else if (lowerType.startsWith("fcr") && lowerType.endsWith("occupation")) {
+			} else if (lowType.startsWith("fcr") && lowType.endsWith("occupation")) {
 				numType = SimConstants.FCR_MEMORY_OCCUPATION;
 				FCRMemoryOccupation.add(new Integer(i));
-			} else if (lowerType.startsWith("fork") && lowerType.endsWith("customers")) {
+			} else if (lowType.startsWith("fork") && lowType.endsWith("customers")) {
 				numType = SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
 				FJCustomerNumber.add(new Integer(i));
-			} else if (lowerType.startsWith("fork") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("fork") && lowType.endsWith("time")) {
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
 				FJResponseTime.add(new Integer(i));
-			} else if (lowerType.startsWith("firing") && lowerType.endsWith("throughput")) {
+			} else if (lowType.startsWith("firing") && lowType.endsWith("throughput")) {
 				numType = SimConstants.FIRING_THROUGHPUT;
 				firingThroughput.add(new Integer(i));
 			}

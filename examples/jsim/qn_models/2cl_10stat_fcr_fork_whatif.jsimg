@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Peer2whatif.jsimg" timestamp="Sat Nov 08 15:55:15 CET 2008" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" maxSamples="500000" name="Peer2whatif.jsimg" polling="1.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="2cl_10stat_fcr_fork_whatif.jsimg" timestamp="Fri May 12 02:42:41 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="500000" name="2cl_10stat_fcr_fork_whatif.jsimg" polling="1.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Requests" type="open"/>
 <userClass name="Class1" priority="0" referenceSource="Requests" type="open"/>
 <node name="Requests">
@@ -225,9 +225,9 @@
 <section className="Router">
 <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
 <refClass>Class0</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.ShortestQueueLengthRoutingStrategy" name="Shortest Q Length"/>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.ShortestQueueLengthRoutingStrategy" name="Join the Shortest Queue (JSQ)"/>
 <refClass>Class1</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.ShortestResponseTimeRoutingStrategy" name="Shortest R Time"/>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.ShortestResponseTimeRoutingStrategy" name="Shortest Response Time"/>
 </parameter>
 </section>
 </node>
@@ -463,10 +463,160 @@
 <parameter classPath="java.lang.Integer" name="block">
 <value>-1</value>
 </parameter>
+<parameter classPath="java.lang.Boolean" name="isSimplifiedFork">
+<value>true</value>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategy" name="ForkStrategy">
+<refClass>Class0</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>Disk 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="numbers">
+<value>1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>Disk 2</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="numbers">
+<value>1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>Disk 3</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="numbers">
+<value>1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>Disk 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="numbers">
+<value>1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>Disk 2</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="numbers">
+<value>1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>Disk 3</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="numbers">
+<value>1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
 </section>
 </node>
 <node name="Join0">
-<section className="Join"/>
+<section className="Join">
+<parameter array="true" classPath="jmt.engine.NetStrategies.JoinStrategy" name="JoinStrategy">
+<refClass>Class0</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
+<subParameter classPath="java.lang.Integer" name="numRequired">
+<value>-1</value>
+</subParameter>
+</subParameter>
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
+<subParameter classPath="java.lang.Integer" name="numRequired">
+<value>-1</value>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
 <section className="ServiceTunnel"/>
 <section className="Router">
 <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
@@ -477,8 +627,8 @@
 </parameter>
 </section>
 </node>
-<measure alpha="0.01" name="Class0_System Response Time" nodeType="station" precision="0.05" referenceNode="" referenceUserClass="Class0" type="System Response Time" verbose="false"/>
-<measure alpha="0.01" name="Class1_System Response Time" nodeType="station" precision="0.05" referenceNode="" referenceUserClass="Class1" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="Class0_System Response Time" nodeType="" precision="0.05" referenceNode="" referenceUserClass="Class0" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="Class1_System Response Time" nodeType="" precision="0.05" referenceNode="" referenceUserClass="Class1" type="System Response Time" verbose="false"/>
 <connection source="Requests" target="LoadBalancer"/>
 <connection source="Requests" target="RAID0"/>
 <connection source="Web Server 1" target="Reply"/>
@@ -497,10 +647,17 @@
 <regionNode nodeName="Web Server 2"/>
 <regionNode nodeName="LoadBalancer"/>
 <globalConstraint maxJobs="100"/>
+<globalMemoryConstraint maxMemory="-1"/>
 <classConstraint jobClass="Class0" maxJobsPerClass="-1"/>
 <classConstraint jobClass="Class1" maxJobsPerClass="-1"/>
+<classMemoryConstraint jobClass="Class0" maxMemoryPerClass="-1"/>
+<classMemoryConstraint jobClass="Class1" maxMemoryPerClass="-1"/>
 <dropRules dropThisClass="false" jobClass="Class0"/>
 <dropRules dropThisClass="false" jobClass="Class1"/>
+<classWeight jobClass="Class0" weight="1"/>
+<classWeight jobClass="Class1" weight="1"/>
+<classSize jobClass="Class0" size="1"/>
+<classSize jobClass="Class1" size="1"/>
 </blockingRegion>
 </sim>
 <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
@@ -543,30 +700,30 @@
 <field name="Type" value="Arrival rates"/>
 </parametric>
 </jmodel>
-<results pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.99" analyzedSamples="10" name="Network_Class0_System Response Time" nodeType="station" precision="0.05" referenceClass="Class0" referenceStation="Network" type="8">
-<sample lowerBound="1.018314095917947" meanValue="1.0598370985215697" upperBound="1.1013601011251923" validity="true"/>
-<sample lowerBound="1.0370431035047365" meanValue="1.0904540024919294" upperBound="1.1438649014791222" validity="true"/>
-<sample lowerBound="1.0538749969010492" meanValue="1.097331051179223" upperBound="1.1407871054573966" validity="true"/>
-<sample lowerBound="1.0731719579806012" meanValue="1.1184754711813043" upperBound="1.1637789843820074" validity="true"/>
-<sample lowerBound="1.0593438177226895" meanValue="1.0988932243182246" upperBound="1.1384426309137596" validity="true"/>
-<sample lowerBound="1.0710488004403749" meanValue="1.1156495315202146" upperBound="1.1602502626000544" validity="true"/>
-<sample lowerBound="1.102962595434532" meanValue="1.1535066014252082" upperBound="1.2040506074158845" validity="true"/>
-<sample lowerBound="1.1070401459259809" meanValue="1.1328654586070874" upperBound="1.158690771288194" validity="true"/>
-<sample lowerBound="1.1091765635863027" meanValue="1.1628742137463137" upperBound="1.2165718639063248" validity="true"/>
-<sample lowerBound="1.1159369196183693" meanValue="1.1557745903433847" upperBound="1.1956122610684001" validity="true"/>
+<results logDecimalSeparator="." logDelimiter="," pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="10" name="Network_Class0_System Response Time" nodeType="" precision="0.05" referenceClass="Class0" referenceStation="Network" type="7">
+<sample lowerBound="1.0537748149558823" meanValue="1.073112538279565" upperBound="1.0924502616032477" validity="true"/>
+<sample lowerBound="1.072716019329891" meanValue="1.095094834918105" upperBound="1.1174736505063192" validity="true"/>
+<sample lowerBound="1.064825382760537" meanValue="1.0839685463500168" upperBound="1.1031117099394967" validity="true"/>
+<sample lowerBound="1.0861434871814164" meanValue="1.1069917938821052" upperBound="1.127840100582794" validity="true"/>
+<sample lowerBound="1.1019757343109506" meanValue="1.122484384024446" upperBound="1.1429930337379415" validity="true"/>
+<sample lowerBound="1.0939819802825375" meanValue="1.1191321034883437" upperBound="1.14428222669415" validity="true"/>
+<sample lowerBound="1.1216872934372022" meanValue="1.152697102081483" upperBound="1.1837069107257636" validity="true"/>
+<sample lowerBound="1.1202754337307024" meanValue="1.1420343568877818" upperBound="1.1637932800448612" validity="true"/>
+<sample lowerBound="1.138528786575892" meanValue="1.1597616787408296" upperBound="1.1809945709057672" validity="true"/>
+<sample lowerBound="1.1443248546585534" meanValue="1.1673267542523211" upperBound="1.1903286538460889" validity="true"/>
 </measure>
-<measure alpha="0.99" analyzedSamples="10" name="Network_Class1_System Response Time" nodeType="station" precision="0.05" referenceClass="Class1" referenceStation="Network" type="8">
-<sample lowerBound="1.6936827004795298" meanValue="1.7489682296739644" upperBound="1.804253758868399" validity="true"/>
-<sample lowerBound="1.7201704952528354" meanValue="1.7876168658748994" upperBound="1.8550632364969635" validity="true"/>
-<sample lowerBound="1.70727072443632" meanValue="1.7801461635284952" upperBound="1.8530216026206703" validity="true"/>
-<sample lowerBound="1.7344149855324478" meanValue="1.7990463155660745" upperBound="1.8636776455997013" validity="true"/>
-<sample lowerBound="1.7183267293647095" meanValue="1.7999392833901668" upperBound="1.8815518374156242" validity="true"/>
-<sample lowerBound="1.740159688790851" meanValue="1.7983817780250233" upperBound="1.8566038672591956" validity="true"/>
-<sample lowerBound="1.7698999067945502" meanValue="1.8335499746319157" upperBound="1.8972000424692812" validity="true"/>
-<sample lowerBound="1.764167080860291" meanValue="1.8334797509313627" upperBound="1.9027924210024345" validity="true"/>
-<sample lowerBound="1.786040108358948" meanValue="1.848186704605799" upperBound="1.9103333008526497" validity="true"/>
-<sample lowerBound="1.7866704267152849" meanValue="1.8757151930875111" upperBound="1.9647599594597374" validity="true"/>
+<measure alpha="0.99" analyzedSamples="10" name="Network_Class1_System Response Time" nodeType="" precision="0.05" referenceClass="Class1" referenceStation="Network" type="7">
+<sample lowerBound="1.7193383036027743" meanValue="1.7464687488093051" upperBound="1.773599194015836" validity="true"/>
+<sample lowerBound="1.739052989683998" meanValue="1.7667597843308245" upperBound="1.794466578977651" validity="true"/>
+<sample lowerBound="1.7449637948563224" meanValue="1.7720463336665002" upperBound="1.799128872476678" validity="true"/>
+<sample lowerBound="1.7599704887516285" meanValue="1.784003122512266" upperBound="1.8080357562729032" validity="true"/>
+<sample lowerBound="1.7748524175432199" meanValue="1.7989529755697176" upperBound="1.8230535335962152" validity="true"/>
+<sample lowerBound="1.76467872139058" meanValue="1.8004856210766105" upperBound="1.836292520762641" validity="true"/>
+<sample lowerBound="1.7905164244684735" meanValue="1.8205390741012366" upperBound="1.8505617237339997" validity="true"/>
+<sample lowerBound="1.8130810735020182" meanValue="1.8391258894815035" upperBound="1.8651707054609887" validity="true"/>
+<sample lowerBound="1.8056587763036833" meanValue="1.8395856663106183" upperBound="1.8735125563175532" validity="true"/>
+<sample lowerBound="1.8350299586020449" meanValue="1.866031031932378" upperBound="1.8970321052627113" validity="true"/>
 </measure>
 </results>
 </archive>

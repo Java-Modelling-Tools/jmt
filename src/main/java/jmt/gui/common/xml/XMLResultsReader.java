@@ -39,16 +39,6 @@ import org.w3c.dom.NodeList;
  * @author Bertoli Marco
  *         Date: 3-ott-2005
  *         Time: 12.27.00
- * 
- * Modified by Ashanka (Aug 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Queue Length to Customer Number 
- *       2. Number of Customers to System Customer Number 
- * 
- * Modified by Ashanka (Sep 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Customer Number to Number of Customers
- *       2. System Customer Number to System Number of Customers.
  */
 public class XMLResultsReader implements XMLResultsConstants {
 
@@ -239,12 +229,22 @@ public class XMLResultsReader implements XMLResultsConstants {
 			if (fileName != null && fileName.length() == 0) {
 				fileName = null;
 			}
+
+			String stationName = null;
+			if (current.getAttribute(XML_AO_MEASURE_STATION).isEmpty()) {
+				stationName = "Network";
+			} else {
+				stationName = current.getAttribute(XML_AO_MEASURE_STATION);
+			}
 			String type = current.getAttribute(XML_AO_MEASURE_TYPE);
-			String stationName = current.getAttribute(XML_AO_MEASURE_STATION).isEmpty() ? "Network" : current.getAttribute(XML_AO_MEASURE_STATION);
-			String className;
-			String lowerType = type.toLowerCase();
+			String lowType = type.toLowerCase();
+			String className = null;
 			if (current.getAttribute(XML_AO_MEASURE_CLASS).isEmpty()) {
-				className = (lowerType.startsWith("firing") && lowerType.endsWith("throughput")) ? "All modes" : "All classes";
+				if (lowType.startsWith("firing") && lowType.endsWith("throughput")) {
+					className = "All modes";
+				} else {
+					className = "All classes";
+				}
 			} else {
 				className = current.getAttribute(XML_AO_MEASURE_CLASS);
 			}
@@ -314,47 +314,43 @@ public class XMLResultsReader implements XMLResultsConstants {
 
 			// Decodes measure type
 			int numType = 0;
-			if ((lowerType.startsWith("number") && lowerType.endsWith("customers"))
-					|| (lowerType.startsWith("queue") && lowerType.endsWith("length"))
-					|| (lowerType.startsWith("customer") && lowerType.endsWith("number") && !"".equalsIgnoreCase(stationName))) {
+			if (lowType.startsWith("number") && lowType.endsWith("customers")) {
 				numType = SimConstants.QUEUE_LENGTH;
-			} else if (lowerType.startsWith("queue") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("queue") && lowType.endsWith("time")) {
 				numType = SimConstants.QUEUE_TIME;
-			} else if (lowerType.startsWith("response") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("response") && lowType.endsWith("time")) {
 				numType = SimConstants.RESPONSE_TIME;
-			} else if (lowerType.startsWith("residence") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("residence") && lowType.endsWith("time")) {
 				numType = SimConstants.RESIDENCE_TIME;
-			} else if (lowerType.startsWith("utilization") && type.endsWith("utilization")) {
+			} else if (lowType.startsWith("utilization") && type.endsWith("utilization")) {
 				numType = SimConstants.UTILIZATION;
-			} else if (lowerType.startsWith("throughput") && type.endsWith("throughput")) {
+			} else if (lowType.startsWith("throughput") && type.endsWith("throughput")) {
 				numType = SimConstants.THROUGHPUT;
-			} else if (lowerType.startsWith("drop") && lowerType.endsWith("rate")) {
+			} else if (lowType.startsWith("drop") && lowType.endsWith("rate")) {
 				numType = SimConstants.DROP_RATE;
-			} else if (lowerType.startsWith("system") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("time")) {
 				numType = SimConstants.SYSTEM_RESPONSE_TIME;
-			} else if (lowerType.startsWith("system") && lowerType.endsWith("throughput")) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("throughput")) {
 				numType = SimConstants.SYSTEM_THROUGHPUT;
-			} else if ((lowerType.startsWith("system") && lowerType.endsWith("customers"))
-					|| (lowerType.startsWith("system") && lowerType.endsWith("number"))
-					|| (lowerType.startsWith("customer") && lowerType.endsWith("number") && "".equalsIgnoreCase(stationName))) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("customers")) {
 				numType = SimConstants.SYSTEM_NUMBER_OF_JOBS;
-			} else if (lowerType.startsWith("system") && lowerType.endsWith("rate")) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("rate")) {
 				numType = SimConstants.SYSTEM_DROP_RATE;
-			} else if (lowerType.startsWith("system") && lowerType.endsWith("power")) {
+			} else if (lowType.startsWith("system") && lowType.endsWith("power")) {
 				numType = SimConstants.SYSTEM_POWER;
-			} else if (lowerType.startsWith("response") && lowerType.endsWith("sink")) {
+			} else if (lowType.startsWith("response") && lowType.endsWith("sink")) {
 				numType = SimConstants.RESPONSE_TIME_PER_SINK;
-			} else if (lowerType.startsWith("throughput") && lowerType.endsWith("sink")) {
+			} else if (lowType.startsWith("throughput") && lowType.endsWith("sink")) {
 				numType = SimConstants.THROUGHPUT_PER_SINK;
-			} else if (lowerType.startsWith("fcr") && lowerType.endsWith("weight")) {
+			} else if (lowType.startsWith("fcr") && lowType.endsWith("weight")) {
 				numType = SimConstants.FCR_TOTAL_WEIGHT;
-			} else if (lowerType.startsWith("fcr") && lowerType.endsWith("occupation")) {
+			} else if (lowType.startsWith("fcr") && lowType.endsWith("occupation")) {
 				numType = SimConstants.FCR_MEMORY_OCCUPATION;
-			} else if (lowerType.startsWith("fork") && lowerType.endsWith("customers")) {
+			} else if (lowType.startsWith("fork") && lowType.endsWith("customers")) {
 				numType = SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
-			} else if (lowerType.startsWith("fork") && lowerType.endsWith("time")) {
+			} else if (lowType.startsWith("fork") && lowType.endsWith("time")) {
 				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
-			} else if (lowerType.startsWith("firing") && lowerType.endsWith("throughput")) {
+			} else if (lowType.startsWith("firing") && lowType.endsWith("throughput")) {
 				numType = SimConstants.FIRING_THROUGHPUT;
 			}
 			// Adds loaded informations into model data structure

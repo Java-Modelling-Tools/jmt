@@ -1502,9 +1502,9 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < measures.size(); i++) {
 			Object thisMeasure = measures.get(i);
 			String thisMeasureType = simulation_def.getMeasureType(thisMeasure);
-			Object thisMeasureStationKey = simulation_def.getMeasureStation(thisMeasure);
+			Object thisMeasureStation = simulation_def.getMeasureStation(thisMeasure);
 			if (thisMeasureType == null
-					|| (!simulation_def.isGlobalMeasure(thisMeasure) && thisMeasureStationKey == null)) {
+					|| (!simulation_def.isGlobalMeasure(thisMeasure) && thisMeasureStation == null)) {
 				errors[INVALID_MEASURE_ERROR] = true;
 			}
 		}
@@ -1519,21 +1519,33 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < measures.size(); i++) {
 			Object thisMeasure = measures.get(i);
 			String thisMeasureType = simulation_def.getMeasureType(thisMeasure);
-			String thisMeasureClass;
-			if (simulation_def.getMeasureClass(thisMeasure) == null) {
-				thisMeasureClass = "ALL";
+			Object thisMeasureClass = simulation_def.getMeasureClass(thisMeasure);
+			String thisMeasureClassName = null;
+			if (thisMeasureClass == null) {
+				thisMeasureClassName = "ALL";
 			} else {
-				thisMeasureClass = (thisMeasureType.equals(SimulationDefinition.MEASURE_FX))
-						? (String) simulation_def.getMeasureClass(thisMeasure)
-						: class_def.getClassName(simulation_def.getMeasureClass(thisMeasure));
+				if (thisMeasureType.equals(SimulationDefinition.MEASURE_FX)) {
+					thisMeasureClassName = (String) thisMeasureClass;
+				} else {
+					thisMeasureClassName = class_def.getClassName(thisMeasureClass);
+				}
 			}
-			String thisMeasureStation;
-			if (simulation_def.getMeasureStation(thisMeasure) == null) {
-				thisMeasureStation = "ALL";
+			Object thisMeasureStation = simulation_def.getMeasureStation(thisMeasure);
+			String thisMeasureStationName = null;
+			if (thisMeasureStation == null) {
+				if (simulation_def.isGlobalMeasure(thisMeasure)) {
+					thisMeasureStationName = "ALL";
+				} else {
+					thisMeasureStationName = "";
+				}
 			} else {
-				thisMeasureStation = station_def.getStationName(simulation_def.getMeasureStation(thisMeasure));
+				if (blocking_def.getRegionKeys().contains(thisMeasureStation)) {
+					thisMeasureStationName = blocking_def.getRegionName(thisMeasureStation);
+				} else {
+					thisMeasureStationName = station_def.getStationName(thisMeasureStation);
+				}
 			}
-			String thisMeasureDescription = thisMeasureType + thisMeasureClass + thisMeasureStation;
+			String thisMeasureDescription = thisMeasureType + "_" + thisMeasureClassName + "_" + thisMeasureStationName;
 			if (!measuresAlreadyChecked.contains(thisMeasureDescription)) {
 				measuresAlreadyChecked.add(thisMeasureDescription);
 			} else {

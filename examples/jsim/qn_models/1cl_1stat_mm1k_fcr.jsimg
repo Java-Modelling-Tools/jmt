@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="1cl_1stat_mm1k_fcr.jsimg" timestamp="Thu Nov 13 20:28:50 EST 2008" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="true" maxSamples="1000000" name="1cl_1stat_mm1k_fcr.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="1cl_1stat_mm1k_fcr.jsimg" timestamp="Fri May 12 02:42:02 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="1000000" name="1cl_1stat_mm1k_fcr.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Source 0" type="open"/>
 <node name="M/M/1">
 <section className="Queue">
@@ -73,14 +73,18 @@
 </parameter>
 </section>
 </node>
-<measure alpha="0.05" name="M/M/1_Queue Length" nodeType="station" precision="0.05" referenceNode="M/M/1" referenceUserClass="" type="Queue Length" verbose="false"/>
+<measure alpha="0.05" name="M/M/1_Number of Customers" nodeType="station" precision="0.05" referenceNode="M/M/1" referenceUserClass="" type="Number of Customers" verbose="false"/>
 <connection source="M/M/1" target="Sink 0"/>
 <connection source="Source 0" target="M/M/1"/>
 <blockingRegion name="FCR - max 11 cust." type="default">
 <regionNode nodeName="M/M/1"/>
 <globalConstraint maxJobs="-1"/>
+<globalMemoryConstraint maxMemory="-1"/>
 <classConstraint jobClass="Class0" maxJobsPerClass="11"/>
+<classMemoryConstraint jobClass="Class0" maxMemoryPerClass="-1"/>
 <dropRules dropThisClass="true" jobClass="Class0"/>
+<classWeight jobClass="Class0" weight="1"/>
+<classSize jobClass="Class0" size="1"/>
 </blockingRegion>
 </sim>
 <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
@@ -95,16 +99,10 @@
 <position rotate="false" x="160.0" y="194.0"/>
 </station>
 </jmodel>
-<results pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.95" analyzedSamples="1000001" finalValue="4.29735345950521" name="M/M/1_Queue Length" nodeType="station" precision="0.05" referenceClass="" referenceStation="M/M/1" state="1" type="0">
-<sample lowerBound="3.921078529502822" meanValue="4.477383795768122" upperBound="5.033689062033423"/>
-<sample lowerBound="4.100438841639301" meanValue="4.218506502032579" upperBound="4.3365741624258565"/>
-<sample lowerBound="4.165051304509639" meanValue="4.2486253204008895" upperBound="4.33219933629214"/>
-<sample lowerBound="4.165051304509639" meanValue="4.2486253204008895" upperBound="4.33219933629214"/>
-<sample lowerBound="4.211177874017361" meanValue="4.274744214304364" upperBound="4.3383105545913665"/>
-<sample lowerBound="4.211177874017361" meanValue="4.274744214304364" upperBound="4.3383105545913665"/>
-<sample lowerBound="4.211177874017361" meanValue="4.274744214304364" upperBound="4.3383105545913665"/>
-<sample lowerBound="4.253419672045288" meanValue="4.29735345950521" upperBound="4.341287246965132"/>
+<results logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.95" analyzedSamples="1000000" discardedSamples="1455" finalValue="4.276072271666644" name="M/M/1_Number of Customers" nodeType="station" precision="0.05" referenceClass="" referenceStation="M/M/1" state="1" type="0">
+<sample lastIntervalAvgValue="4.217489627363565" lowerBound="4.053181359673261" meanValue="4.265679619724278" simulationTime="7895.899503806563" upperBound="4.478177879775294"/>
+<sample lastIntervalAvgValue="4.28910592484407" lowerBound="4.214335577033998" meanValue="4.276072271666644" simulationTime="56844.53965815204" upperBound="4.33780896629929"/>
 </measure>
 </results>
 </archive>

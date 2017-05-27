@@ -66,16 +66,6 @@ import org.xml.sax.SAXNotSupportedException;
  *
  * @author Federico Granata, Stefano Omini, Bertoli Marco
  * @version 26-ago-2003 14.23.27
- * 
- * Modified by Ashanka (Aug 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Queue Length to Customer Number 
- *       2. Number of Customers to System Customer Number 
- * 
- * Modified by Ashanka (Sep 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Customer Number to Number of Customers
- *       2. System Customer Number to System Number of Customers.
  *       
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
@@ -397,26 +387,22 @@ public class SimLoader {
 			for (int i = 0; i < measureList.getLength(); i++) {
 				Element e = (Element) measureList.item(i);
 
-				String type = e.getAttribute("type");
-				//Added variable referenceNode as a step to control backward compatibility in obtainMeasureType to differentiate between
-				//new Number of Customers (orig. Queue Length) and old Number of Customers (presently System Number of Customers)
-				//because we know that Queue Length is a node level perf index where other one is system and hence has blank node.
-				String referenceNode = e.getAttribute("referenceNode");
-				int measureType = obtainMeasureType(type, referenceNode);
-				String nodeType = e.getAttribute("nodeType"); // Node is a station or a region
+				int measureType = obtainMeasureType(e.getAttribute("type"));
 				//throughput measure requires an InverseMeasure object!!
 				if (EngineUtils.isInverseMeasure(measureType)) {
 					//throughput measure
-					InverseMeasure invMeasure = new InverseMeasure(e.getAttribute("name"), Double.parseDouble(e.getAttribute("alpha")), Double
-							.parseDouble(e.getAttribute("precision")), maxSamples, e.getAttribute("verbose").equalsIgnoreCase("true"));
+					InverseMeasure invMeasure = new InverseMeasure(e.getAttribute("name"), Double.parseDouble(e.getAttribute("alpha")),
+							Double.parseDouble(e.getAttribute("precision")), maxSamples, e.getAttribute("verbose").equalsIgnoreCase("true"));
 
-					sim.addMeasure(measureType, e.getAttribute("referenceNode"), invMeasure, e.getAttribute("referenceUserClass"), nodeType);
+					sim.addMeasure(measureType, e.getAttribute("referenceNode"), invMeasure, e.getAttribute("referenceUserClass"),
+							e.getAttribute("nodeType"));
 				} else {
 					//other measures
-					Measure measure = new Measure(e.getAttribute("name"), Double.parseDouble(e.getAttribute("alpha")), Double.parseDouble(e
-							.getAttribute("precision")), maxSamples, e.getAttribute("verbose").equalsIgnoreCase("true"), null);
+					Measure measure = new Measure(e.getAttribute("name"), Double.parseDouble(e.getAttribute("alpha")),
+							Double.parseDouble(e.getAttribute("precision")), maxSamples, e.getAttribute("verbose").equalsIgnoreCase("true"), null);
 
-					sim.addMeasure(measureType, e.getAttribute("referenceNode"), measure, e.getAttribute("referenceUserClass"), nodeType);
+					sim.addMeasure(measureType, e.getAttribute("referenceNode"), measure, e.getAttribute("referenceUserClass"),
+							e.getAttribute("nodeType"));
 				}
 
 				if (DEBUG) {
@@ -959,10 +945,8 @@ public class SimLoader {
 	 * @param measure the String type of measure
 	 * @return the int type of measure
 	 */
-	private int obtainMeasureType(String measure, String referenceNode) {
-		if (measure.equalsIgnoreCase("Queue Length")
-				|| measure.equalsIgnoreCase("Customer Number")
-				|| (measure.equalsIgnoreCase("Number of Customers") && !"".equalsIgnoreCase(referenceNode))) {
+	private int obtainMeasureType(String measure) {
+		if (measure.equalsIgnoreCase("Number of Customers")) {
 			return SimConstants.QUEUE_LENGTH;
 		} else if (measure.equalsIgnoreCase("Queue Time")) {
 			return SimConstants.QUEUE_TIME;
@@ -980,9 +964,7 @@ public class SimLoader {
 			return SimConstants.SYSTEM_RESPONSE_TIME;
 		} else if (measure.equalsIgnoreCase("System Throughput")) {
 			return SimConstants.SYSTEM_THROUGHPUT;
-		} else if (measure.equalsIgnoreCase("System Number of Customers")
-				|| measure.equalsIgnoreCase("System Customer Number")
-				|| (measure.equalsIgnoreCase("Number of Customers") && "".equalsIgnoreCase(referenceNode))) {
+		} else if (measure.equalsIgnoreCase("System Number of Customers")) {
 			return SimConstants.SYSTEM_NUMBER_OF_JOBS;
 		} else if (measure.equalsIgnoreCase("System Drop Rate")) {
 			return SimConstants.SYSTEM_DROP_RATE;

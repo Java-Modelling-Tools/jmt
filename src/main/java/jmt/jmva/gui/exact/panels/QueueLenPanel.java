@@ -29,14 +29,6 @@ import jmt.jmva.gui.exact.ExactWizard;
  * Date: 11-set-2003
  * Time: 23.48.19
  * 
- * @author Ashanka 
- * Added modifications regarding the renaming of QueueLength to Customer Number
- * @version Date: Aug-2009
- * 
- * @author Ashanka 
- * Added modifications regarding the renaming of Customer Number to Number of Customers
- * @version Date: Sep-2009
- * 
  * @author Ashanka
  * Cleaned code by removing unnecessary comments of old code.
  * @version Date: Sep-2009

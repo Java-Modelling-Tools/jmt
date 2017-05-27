@@ -18,6 +18,7 @@
 
 package jmt.engine.dataAnalysis;
 
+import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.SimConstants;
 
 /**
@@ -84,16 +85,24 @@ public class TempMeasure {
 		//when created, reads these data from Measure object
 		//later only dynamic values will be refreshed
 		name = measure.getName();
-		// This is a blocking region measure
-		if (measure.getNodeName() != null && !measure.getNodeName().equals("")
-				&& measure.getNetwork().getNode(measure.getNodeName()).isBlockingRegionInputStation()) {
-			nodeName = measure.getNetwork().getNode(measure.getNodeName()).getBlockingRegionInputStation().getName();
-			nodeType = SimConstants.NODE_TYPE_REGION;
+		if (measure.getNodeName() == null || measure.getNodeName().equals("")) {
+			nodeName = "";
+			nodeType = "";
 		} else {
-			nodeName = measure.getNodeName();
-			nodeType = SimConstants.NODE_TYPE_STATION;
+			NetNode node = measure.getNetwork().getNode(measure.getNodeName());
+			if (node.isBlockingRegionInputStation()) {
+				nodeName = node.getBlockingRegionInputStation().getName();
+				nodeType = SimConstants.NODE_TYPE_REGION;
+			} else {
+				nodeName = measure.getNodeName();
+				nodeType = SimConstants.NODE_TYPE_STATION;
+			}
 		}
-		jobClass = measure.getJobClassName();
+		if (measure.getJobClassName() == null || measure.getJobClassName().equals("")) {
+			jobClass = "";
+		} else {
+			jobClass = measure.getJobClassName();
+		}
 		measureType = measure.getMeasureType();
 		alpha = measure.getAnalyzer().getAlfa();
 		precision = measure.getAnalyzer().getPrecision();

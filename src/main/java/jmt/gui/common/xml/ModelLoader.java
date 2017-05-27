@@ -365,9 +365,9 @@ public class ModelLoader {
 				} else {
 					XMLArchiver.saveModel(file, (CommonModel) modelData);
 				}
-			} else if (defaultSaveFilter == JMVA) {
+			} else if (defaultSaveFilter == JMVA_SAVE) {
 				xmlutils.saveXML(((ExactModel) modelData).createDocument(), file);
-			} else if (defaultSaveFilter == JABA) {
+			} else if (defaultSaveFilter == JABA_SAVE) {
 				xmlutils.saveXML(((JabaModel) modelData).createDocument(), file);
 			}
 		} catch (Exception e) {

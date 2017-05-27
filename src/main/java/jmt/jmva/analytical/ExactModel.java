@@ -47,18 +47,8 @@ import org.w3c.dom.NodeList;
  *
  * @author alyf (Andrea Conti), Stefano Omini, Bertoli Marco
  * 
- * @author Ashanka 
- * Added modifications regarding the renaming of QueueLength to Customer Number
- * @version Date: Aug-2009
- * 
  * @author Ashanka
  * Cleaned code by removing unnecessary comments of old code.
- * @version Date: Sep-2009
- * 
- * @author Ashanka
- * Added a backward compatible clause in loadResultsMatrix to open existing JMVA models correctly.
- * If we are looking to open measures of Number of Customers from existing JMVA files then we should look for 
- * Queue length as this was the previous name of the label. 
  * @version Date: Sep-2009
  * 
  * @author Kourosh
@@ -2119,8 +2109,8 @@ public class ExactModel implements ExactConstants  {
 					measure = (Element) measure_list.item(m);
 					//Below IF clause is added for backward compatibility of the Perf Index : Number of customers
 					//as previously it was known as Queue Length.
-					if (res.equalsIgnoreCase("Number of Customers")) {//This is the present name of Label
-						if (measure.getAttribute("measureType").equalsIgnoreCase("Queue length")) {//Previously known as "Queue length" in old JMVA files.
+					if (res.equalsIgnoreCase("Number of Customers")) {
+						if (measure.getAttribute("measureType").equalsIgnoreCase("Queue length")) {
 							res = "Queue length";
 						}
 					}

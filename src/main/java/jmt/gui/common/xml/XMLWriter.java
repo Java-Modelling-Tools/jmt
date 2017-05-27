@@ -1170,34 +1170,40 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			Element elem = doc.createElement(XML_E_MEASURE);
 			Object key = v.get(i);
 			String type = model.getMeasureType(key);
-			String station = model.getStationName(model.getMeasureStation(key));
-			String userClass = (type.equals(SimulationDefinition.MEASURE_FX))
-					? (String) model.getMeasureClass(key)
-					: model.getClassName(model.getMeasureClass(key));
 			elem.setAttribute(XML_A_MEASURE_TYPE, type);
+
 			String name = "";
-			// This is a region measure
-			if (model.getRegionKeys().contains(model.getMeasureStation(key))) {
-				station = model.getRegionName(model.getMeasureStation(key));
-				elem.setAttribute(XML_A_MEASURE_NODETYPE, NODETYPE_REGION);
-			} else {
-				elem.setAttribute(XML_A_MEASURE_NODETYPE, NODETYPE_STATION);
-			}
-
-			if (station != null) {
-				elem.setAttribute(XML_A_MEASURE_STATION, station);
-				name += station + "_";
-			} else {
+			Object stationKey = model.getMeasureStation(key);
+			String stationName = null;
+			String nodeType = null;
+			if (stationKey == null) {
 				elem.setAttribute(XML_A_MEASURE_STATION, "");
-			}
-
-			if (userClass != null) {
-				elem.setAttribute(XML_A_MEASURE_CLASS, userClass);
-				name += userClass + "_";
+				elem.setAttribute(XML_A_MEASURE_NODETYPE, "");
 			} else {
-				elem.setAttribute(XML_A_MEASURE_CLASS, "");
+				if (model.getRegionKeys().contains(stationKey)) {
+					stationName = model.getRegionName(stationKey);
+					nodeType = NODETYPE_REGION;
+				} else {
+					stationName = model.getStationName(stationKey);
+					nodeType = NODETYPE_STATION;
+				}
+				elem.setAttribute(XML_A_MEASURE_STATION, stationName);
+				elem.setAttribute(XML_A_MEASURE_NODETYPE, nodeType);
+				name += stationName + "_";
 			}
-
+			Object classKey = model.getMeasureClass(key);
+			String className = null;
+			if (classKey == null) {
+				elem.setAttribute(XML_A_MEASURE_CLASS, "");
+			} else {
+				if (type.equals(SimulationDefinition.MEASURE_FX)) {
+					className = (String) classKey;
+				} else {
+					className = model.getClassName(classKey);
+				}
+				elem.setAttribute(XML_A_MEASURE_CLASS, className);
+				name += className + "_";
+			}
 			name += type;
 
 			// Inverts alpha and keeps only 10 decimal cifres

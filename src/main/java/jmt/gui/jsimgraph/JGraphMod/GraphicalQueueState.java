@@ -19,8 +19,8 @@
 package jmt.gui.jsimgraph.JGraphMod;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
@@ -46,6 +46,7 @@ import jmt.gui.jsimgraph.controller.ModelSnapshot;
 
  */
 public class GraphicalQueueState {
+
 	private Mediator mediator;
 	private HashMap<Object, JmtCell> tm; // Used to map station keys to their cells
 
@@ -95,8 +96,8 @@ public class GraphicalQueueState {
 		double width = QUEUE_WIDTH - 2 * H_MARGIN;
 		double height = QUEUE_HEIGHT - 2 * V_MARGIN;
 
-		int H_FREE_SPACE = 2;
-		int V_FREE_SPACE = 0;
+		double H_FREE_SPACE = 2;
+		double V_FREE_SPACE = 2;
 
 		Graphics2D g = mediator.getGraphGraphics();
 
@@ -111,8 +112,8 @@ public class GraphicalQueueState {
 				continue;
 			}
 			int classCount = 0;
-			for (int k = 0; k < openClasses.size(); k++) {
-				Object thisClass = openClasses.get(k);
+			for (int j = 0; j < openClasses.size(); j++) {
+				Object thisClass = openClasses.get(j);
 				if (mediator.getClassDefinition().getClassRefStation(thisClass) == thisSource) {
 					refClasses.add(thisClass);
 					classCount++;
@@ -120,44 +121,37 @@ public class GraphicalQueueState {
 			}
 			Point2D p = mediator.getCellCoordinates(cell);
 
-			//int xStart = (int) (p.x + SOURCE_MARGIN) + 8;
-			double xStart = p.getX() + ((mediator.getCellDimension(cell).getWidth() - SOURCE_SIZE + 2 * SOURCE_MARGIN) / 2);
-			double yStart = (int) (p.getY() + SOURCE_MARGIN) + 1;
+			double xStart = p.getX() + (mediator.getCellDimension(cell).getWidth() - SOURCE_SIZE + 2 * SOURCE_MARGIN) / 2;
+			double yStart = p.getY() + SOURCE_MARGIN;
 			//if the number of class is less than the maximum representable
 			if (classCount < MAX_NUMBER_OF_CLASSES_QUEUE) {
-				int classSpace;
-				for (int k = 0; k < classCount; k++) {
-					classSpace = (int) (source_usable_space / classCount);
-					if ((((source_usable_space / classCount) - classSpace) * k) > 1) {
-						classSpace++;
-					}
-					Object thisClass = refClasses.get(k);
+				double classSpace = source_usable_space / classCount;
+				for (int j = 0; j < classCount; j++) {
+					Object thisClass = refClasses.get(j);
 					g.setColor(mediator.getClassDefinition().getClassColor(thisClass));
-					g.fillRect((int) xStart, (int) yStart, classSpace, (int) source_usable_space);
+					g.fill(new Rectangle2D.Double(xStart, yStart, classSpace, source_usable_space));
 					xStart += classSpace;
 				}
 			}
 			//else..
 			else {
-				int classSpace;
 				Vector<Object> classesReplication = new Vector<Object>(refClasses);
 				Vector<Object> classesToBeDrawn = new Vector<Object>(0, 1);
-				double min;
-				double mean;
 				//... find the first MAX_NUMBER_OF_CLASSES_QUEUE with the smallest mean value
-				for (int k = 0; k < MAX_NUMBER_OF_CLASSES_QUEUE; k++) {
-					min = Double.MAX_VALUE;
+				for (int j = 0; j < MAX_NUMBER_OF_CLASSES_QUEUE; j++) {
+					double min = Double.MAX_VALUE;
+					double mean;
 					int index = 0;
 
-					for (int j = 0; j < classesReplication.size(); j++) {
-						Object thisClass = classesReplication.get(j);
+					for (int k = 0; k < classesReplication.size(); k++) {
+						Object thisClass = classesReplication.get(k);
 						Object temp = mediator.getClassDefinition().getClassDistribution(thisClass);
 						if (temp instanceof Distribution) {
 							if (((Distribution) temp).hasMean()) {
 								mean = ((Distribution) temp).getMean();
 								if (mean < min) {
-									index = j;
 									min = mean;
+									index = k;
 								}
 							}
 						}
@@ -171,9 +165,10 @@ public class GraphicalQueueState {
 				if (classesToBeDrawn.size() < MAX_NUMBER_OF_CLASSES_QUEUE) {
 					int left = MAX_NUMBER_OF_CLASSES_QUEUE - classesToBeDrawn.size();
 					for (int j = 0; j < left; j++) {
-						int max = -1;
+						int max = Integer.MIN_VALUE;
 						int priority;
 						int index = 0;
+
 						for (int k = 0; k < classesReplication.size(); k++) {
 							Object thisClass = classesReplication.get(k);
 							priority = mediator.getClassDefinition().getClassPriority(thisClass).intValue();
@@ -187,14 +182,11 @@ public class GraphicalQueueState {
 					}
 				}
 				//draw the classes inside the source
-				for (int k = 0; k < MAX_NUMBER_OF_CLASSES_QUEUE; k++) {
-					classSpace = (int) (source_usable_space / MAX_NUMBER_OF_CLASSES_QUEUE);
-					if ((((source_usable_space / MAX_NUMBER_OF_CLASSES_QUEUE) - classSpace) * k) > 1) {
-						classSpace++;
-					}
-					Object thisClass = classesToBeDrawn.get(k);
+				double classSpace = source_usable_space / MAX_NUMBER_OF_CLASSES_QUEUE;
+				for (int j = 0; j < MAX_NUMBER_OF_CLASSES_QUEUE; j++) {
+					Object thisClass = classesToBeDrawn.get(j);
 					g.setColor(mediator.getClassDefinition().getClassColor(thisClass));
-					g.fill(new Rectangle2D.Double(xStart, yStart, classSpace, (int) source_usable_space));
+					g.fill(new Rectangle2D.Double(xStart, yStart, classSpace, source_usable_space));
 					xStart += classSpace;
 				}
 			}
@@ -215,8 +207,14 @@ public class GraphicalQueueState {
 			double offset;
 			double xStart;
 			double yStart;
-			offset = (int) ((mediator.getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT) / 2);
-			V_FREE_SPACE = (int) ((QUEUE_HEIGHT - (((int) (height / nClasses)) * nClasses)) / 2) + 1;
+			g.setColor(Color.LIGHT_GRAY);
+			offset = (mediator.getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT) / 2;
+			if (cell.isLeftInputCell()) {
+				g.fill(new Rectangle2D.Double(p.getX()  + offset, p.getY() + V_FREE_SPACE, width , height));
+			}
+			else {
+				g.fill(new Rectangle2D.Double(p.getX() + QUEUE_HEIGHT + offset, p.getY() + V_FREE_SPACE, width, height));
+			}
 			yStart = p.getY() + V_FREE_SPACE;
 
 			//First draw the queues ....
@@ -224,66 +222,59 @@ public class GraphicalQueueState {
 			if (nClasses <= MAX_NUMBER_OF_CLASSES_QUEUE) {
 				for (int j = 0; j < nClasses; j++) {
 					double nJobs = queueState.getValue(servers.get(i), classes.get(j));
-
-					int thisWidth = (int) ((nJobs / maxNJobs) * width);
-					int thisHeight = (int) (height / nClasses);
+					double thisWidth = (nJobs / maxNJobs) * width;
+					double thisHeight = height / nClasses;
 
 					Color color = mediator.getClassDefinition().getClassColor(classes.get(j));
 					g.setColor(color);
 					if (cell.isLeftInputCell()) {
-						xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
+						xStart = p.getX() + offset + (width - thisWidth) + H_FREE_SPACE;
 						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 					}
 					else {
-						xStart = p.getX() + offset + H_FREE_SPACE + QUEUE_HEIGHT;
+						xStart = p.getX() + offset + QUEUE_HEIGHT + H_FREE_SPACE;
 						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 					}
 					yStart += thisHeight;
 				}
 			}
-
 			// else draw only the first MAX_NUMBER_OF_CLASSES_QUEUE with the greatest
 			// number of job inside thisStation
 			else {
-				V_FREE_SPACE = (int) ((QUEUE_HEIGHT - (((int) (height / MAX_NUMBER_OF_CLASSES_QUEUE)) * (double) MAX_NUMBER_OF_CLASSES_QUEUE)) / 2) + 1;
-				yStart = p.getY() + V_FREE_SPACE;
-
 				Vector<Object> classesReplication = new Vector<Object>(classes);
 				Vector<Object> classesToBeDrawn = new Vector<Object>(0, 1);
-				double max;
-				double nJobs;
-				for (int k = 0; k < MAX_NUMBER_OF_CLASSES_QUEUE; k++) {
-					max = -1;
+				for (int j = 0; j < MAX_NUMBER_OF_CLASSES_QUEUE; j++) {
+					double max = Double.MIN_VALUE;
+					double nJobs;
 					int index = 0;
 
-					for (int j = 0; j < classesReplication.size(); j++) {
-						Object thisClass = classesReplication.get(j);
+					for (int k = 0; k < classesReplication.size(); k++) {
+						Object thisClass = classesReplication.get(k);
 						nJobs = queueState.getValue(servers.get(i), thisClass);
 						if (nJobs > max) {
-							index = j;
 							max = nJobs;
+							index = k;
 						}
 					}
 					classesToBeDrawn.add(classesReplication.get(index));
 					classesReplication.remove(classesReplication.get(index));
 				}
 
-				for (int k = 0; k < nClasses; k++) {
-					Object thisStation = classes.get(k);
+				for (int j = 0; j < nClasses; j++) {
+					Object thisStation = classes.get(j);
 					if (classesToBeDrawn.contains(thisStation)) {
-						nJobs = queueState.getValue(servers.get(i), thisStation);
-
-						int thisWidth = (int) ((nJobs / maxNJobs) * width);
-						int thisHeight = (int) (height / MAX_NUMBER_OF_CLASSES_QUEUE);
+						double nJobs = queueState.getValue(servers.get(i), thisStation);
+						double thisWidth = (nJobs / maxNJobs) * width;
+						double thisHeight = height / MAX_NUMBER_OF_CLASSES_QUEUE;
 
 						Color color = mediator.getClassDefinition().getClassColor(thisStation);
 						g.setColor(color);
 						if (cell.isLeftInputCell()) {
-							xStart = p.getX() + offset + (int) (width - thisWidth) + H_FREE_SPACE;
+							xStart = p.getX() + offset + (width - thisWidth) + H_FREE_SPACE;
 							g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 						}
 						else {
-							xStart = p.getX() + offset + H_FREE_SPACE + QUEUE_HEIGHT;
+							xStart = p.getX() + offset + QUEUE_HEIGHT + H_FREE_SPACE;
 							g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
 						}
 						yStart += thisHeight;
@@ -293,74 +284,31 @@ public class GraphicalQueueState {
 
 			//then draw the utilization
 			//if the number of classes is less then MAX_NUMBER_OF_CLASSES_QUEUE
-			//offset = (int) ((getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT)/2 + QUEUE_HEIGHT);
-			int startAngle = 0;
-			int arcDiameter = (int) (QUEUE_HEIGHT) - 2;
+			double startAngle = 0;
+			double arcDiameter = QUEUE_HEIGHT - 2;
 			if (cell.isLeftInputCell()) {
-				xStart = p.getX() + offset + (int) QUEUE_WIDTH + 1;
+				xStart = p.getX() + offset + QUEUE_WIDTH + 1;
 			}
 			else {
 				xStart = p.getX() + offset + 1;
 			}
 			yStart = p.getY() + 1;
+			g.setColor(Color.LIGHT_GRAY);
+			g.fill(new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, 0, 360, Arc2D.PIE));
 
 			for (int j = 0; j < nClasses; j++) {
 				double utilization = utilizationState.getValue(servers.get(i), classes.get(j));
 				if (mediator.getStationDefinition().getStationNumberOfServers(servers.get(i)).intValue() > 1) {
 					utilization = utilization / (mediator.getStationDefinition().getStationNumberOfServers(servers.get(i))).doubleValue();
 				}
-				int thisAngle = (int) (utilization * 360);
+				double thisAngle = utilization * 360;
 
 				Color color = mediator.getClassDefinition().getClassColor(classes.get(j));
 				g.setColor(color);
-
-				myFillArc(g, (int) xStart, (int) yStart, arcDiameter, startAngle, thisAngle);
+				g.fill(new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, startAngle, thisAngle, Arc2D.PIE));
 				startAngle += thisAngle;
 			}
 		}
 	}
 
-	/**
-	 * It acts like Graphics.fillArc(...), I have written this method
-	 * since the predifined Java function presented strange behavior with
-	 * very small angles
-	 *
-	 * @param g  the Graphics reference
-	 * @param x  see Graphics.fillArc(...)
-	 * @param y  see Graphics.fillArc(...)
-	 * @param diameter  the diameter of the arc
-	 * @param startAngle  the starting angle in degrees (0° is interpreted as 3 o'clock)
-	 * @param angle  the angle width
-	 */
-	private void myFillArc(Graphics g, int x, int y, int diameter, int startAngle, int angle) {
-		double c = 2 * Math.PI / 360;
-		int radius = diameter / 2;
-		double MIN_ANGLE = 1 * c;
-		double nPoints = Math.round(angle * c / (float) MIN_ANGLE);
-		double xStart = x + radius;
-		double yStart = y + radius;
-		double reachedAngle = startAngle * c;
-		for (int i = 0; i < nPoints; i++) {
-			double x1;
-			double y1;
-			double x2;
-			double y2;
-			x1 = radius * Math.cos(reachedAngle);
-			y1 = radius * Math.sin(reachedAngle);
-			x2 = radius * Math.cos(reachedAngle + MIN_ANGLE);
-			y2 = radius * Math.sin(reachedAngle + MIN_ANGLE);
-			x1 = xStart + x1;
-			y1 = yStart - y1;
-			x2 = xStart + x2;
-			y2 = yStart - y2;
-			x1 = Math.round(x1);
-			y1 = Math.round(y1);
-			x2 = Math.round(x2);
-			y2 = Math.round(y2);
-			int[] xValues = { (int) xStart, (int) x1, (int) x2 };
-			int[] yValues = { (int) yStart, (int) y1, (int) y2 };
-			g.fillPolygon(xValues, yValues, 3);
-			reachedAngle += MIN_ANGLE;
-		}
-	}
 }

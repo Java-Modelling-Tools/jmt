@@ -27,19 +27,6 @@ import java.util.Set;
  * @author alyf (Andrea Conti), Bertoli Marco
  * @version Date: 11-set-2003 Time: 16.40.25
  * 
- * @author Ashanka 
- * Added modifications regarding the renaming of QueueLength to Customer Number
- * @version Date: Aug-2009
- * 
- * @author Ashanka 
- * Added modifications regarding the renaming of Customer Number to Number of Customers which is station based
- * Added modifications regarding the renaming of Number of Customers to System Customer Number which is for global
- * @version Date: Sep-2009
- * 
- * @author Ashanka 
- * Added modifications regarding the renaming of System Customer Number to System Number of Customers
- * @version Date: Sep-2009
- * 
  * @author Kourosh Sheykhvand
  *  Added modifications regarding ReferenceStation and throughput
  *  Nov 2013

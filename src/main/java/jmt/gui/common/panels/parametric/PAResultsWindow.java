@@ -100,16 +100,6 @@ import jmt.gui.exact.table.ExactTableModel;
  * @author Francesco D'Aquino
  *         Date: 28-gen-2006
  *         Time: 10.48.11
- *         
- * Modified by Ashanka (Aug 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Queue Length to Customer Number 
- *       2. Number of Customers to System Customer Number 
- * 
- * Modified by Ashanka (Sep 09):
- * Desc: The code to include the changes for label changes from 
- *       1. Customer Number to Number of Customers
- *       2. System Customer Number to System Number of Customers.
  *       
  * Modified by Ashanka (Nov 09):
  * Desc: Added the description of the Drop Rate
@@ -332,9 +322,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			graph.setXRange(XMIN, XMAX);
 			graph.setYRange(YMIN, YMAX);
 			// Station name
-			label = new JLabel("Station Name: ");
+			label = new JLabel();
 			if (rm.getNodeType(measureIndex).equalsIgnoreCase(XMLConstantNames.NODETYPE_REGION)) {
 				label.setText("Region Name: ");
+			} else {
+				label.setText("Station Name: ");
 			}
 			field = new JTextField();
 			field.setEditable(false);
@@ -350,9 +342,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(label);
 			mainPanel.add(field);
 			// Class name
-			label = new JLabel("Class Name: ");
+			label = new JLabel();
 			if (rm.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
 				label.setText("Mode Name: ");
+			} else {
+				label.setText("Class Name: ");
 			}
 			field = new JTextField();
 			field.setEditable(false);
@@ -816,9 +810,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			graph.setXRange(XMIN, XMAX);
 			graph.setYRange(YMIN, YMAX);
 			// Station name
-			label = new JLabel("Station Name: ");
+			label = new JLabel();
 			if (md.getNodeType(measureIndex).equalsIgnoreCase(XMLConstantNames.NODETYPE_REGION)) {
 				label.setText("Region Name: ");
+			} else {
+				label.setText("Station Name: ");
 			}
 			field = new JTextField();
 			field.setEditable(false);
@@ -834,9 +830,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(label);
 			mainPanel.add(field);
 			// Class name
-			label = new JLabel("Class Name: ");
+			label = new JLabel();
 			if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
 				label.setText("Mode Name: ");
+			} else {
+				label.setText("Class Name: ");
 			}
 			field = new JTextField();
 			field.setEditable(false);
