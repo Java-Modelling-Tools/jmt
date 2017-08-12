@@ -20,7 +20,6 @@ package jmt.gui.common.definitions;
 
 import java.util.Vector;
 
-import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.dataAnalysis.TempMeasure;
 import jmt.framework.gui.graph.MeasureValue;
 
@@ -37,7 +36,7 @@ import jmt.framework.gui.graph.MeasureValue;
  *         
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -52,13 +51,13 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector<Integer> utilization = new Vector<Integer>();
 	private Vector<Integer> throughput = new Vector<Integer>();
 	private Vector<Integer> dropRate = new Vector<Integer>();
+	private Vector<Integer> systemCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> systemResponseTime = new Vector<Integer>();
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
-	private Vector<Integer> systemCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
 	private Vector<Integer> systemPower = new Vector<Integer>();
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
-	private Vector<Integer> throughputTimePerSink = new Vector<Integer>();
+	private Vector<Integer> throughputPerSink = new Vector<Integer>();
 	private Vector<Integer> FCRTotalWeight = new Vector<Integer>();
 	private Vector<Integer> FCRMemoryOccupation = new Vector<Integer>();
 	private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
@@ -76,22 +75,6 @@ public class ResultsModel implements MeasureDefinition {
 
 	private String logDecimalSeparator;
 	private String logCsvDelimiter;
-
-	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogDecimalSeparator()
-	 */
-	@Override
-	public String getLogDecimalSeparator() {
-		return logDecimalSeparator;
-	}
-
-	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogCsvDelimiter()
-	 */
-	@Override
-	public String getLogCsvDelimiter() {
-		return logCsvDelimiter;
-	}
 
 	/**
 	 * Constructs a new ResultsModel
@@ -114,66 +97,48 @@ public class ResultsModel implements MeasureDefinition {
 		measuresVector = new Vector[measures.length];
 		finished = new boolean[measures.length];
 		listeners = new MeasureListener[measures.length];
-		// Now parses measure type and puts each TempMeasure in right vector
 		for (int i = 0; i < measures.length; i++) {
-			switch (measures[i].getMeasureType()) {
-			case SimConstants.QUEUE_LENGTH:
+			String type = measures[i].getMeasureType();
+			if (type.equals(SimulationDefinition.MEASURE_QL)) {
 				queueLength.add(new Integer(i));
-				break;
-			case SimConstants.QUEUE_TIME:
+			} else if (type.equals(SimulationDefinition.MEASURE_QT)) {
 				queueTime.add(new Integer(i));
-				break;
-			case SimConstants.RESPONSE_TIME:
+			} else if (type.equals(SimulationDefinition.MEASURE_RP)) {
 				responseTime.add(new Integer(i));
-				break;
-			case SimConstants.RESIDENCE_TIME:
+			} else if (type.equals(SimulationDefinition.MEASURE_RD)) {
 				residenceTime.add(new Integer(i));
-				break;
-			case SimConstants.UTILIZATION:
+			} else if (type.equals(SimulationDefinition.MEASURE_U)) {
 				utilization.add(new Integer(i));
-				break;
-			case SimConstants.THROUGHPUT:
+			} else if (type.equals(SimulationDefinition.MEASURE_X)) {
 				throughput.add(new Integer(i));
-				break;
-			case SimConstants.DROP_RATE:
+			} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
 				dropRate.add(new Integer(i));
-				break;
-			case SimConstants.SYSTEM_RESPONSE_TIME:
-				systemResponseTime.add(new Integer(i));
-				break;
-			case SimConstants.SYSTEM_THROUGHPUT:
-				systemThroughput.add(new Integer(i));
-				break;
-			case SimConstants.SYSTEM_NUMBER_OF_JOBS:
+			} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
 				systemCustomerNumber.add(new Integer(i));
-				break;
-			case SimConstants.SYSTEM_DROP_RATE:
+			} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {
+				systemResponseTime.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_S_X)) {
+				systemThroughput.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_S_DR)) {
 				systemDropRate.add(new Integer(i));
-				break;
-			case SimConstants.SYSTEM_POWER:
+			} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 				systemPower.add(new Integer(i));
-				break;
-			case SimConstants.RESPONSE_TIME_PER_SINK:
+			} else if (type.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {
 				responseTimePerSink.add(new Integer(i));
-				break;
-			case SimConstants.THROUGHPUT_PER_SINK:
-				throughputTimePerSink.add(new Integer(i));
-				break;
-			case SimConstants.FCR_TOTAL_WEIGHT:
+			} else if (type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
+				throughputPerSink.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_FCR_TW)) {
 				FCRTotalWeight.add(new Integer(i));
-				break;
-			case SimConstants.FCR_MEMORY_OCCUPATION:
+			} else if (type.equals(SimulationDefinition.MEASURE_FCR_MO)) {
 				FCRMemoryOccupation.add(new Integer(i));
-				break;
-			case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+			} else if (type.equals(SimulationDefinition.MEASURE_FJ_CN)) {
 				FJCustomerNumber.add(new Integer(i));
-				break;
-			case SimConstants.FORK_JOIN_RESPONSE_TIME:
+			} else if (type.equals(SimulationDefinition.MEASURE_FJ_RP)) {
 				FJResponseTime.add(new Integer(i));
-				break;
-			case SimConstants.FIRING_THROUGHPUT:
+			} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
 				firingThroughput.add(new Integer(i));
-				break;
+			} else {
+				queueLength.add(new Integer(i));
 			}
 			// Adds to allMeasures HashMap a vector to collect all values of this measure
 			Vector<MeasureValueImpl> temp_mean = new Vector<MeasureValueImpl>();
@@ -233,7 +198,7 @@ public class ResultsModel implements MeasureDefinition {
 	 * Each measure can have ONLY one MeasureListener to avoid unnecessary computational
 	 * efforts to manage a pool of listeners.
 	 * @param measureIndex index of the measure that this listener should listen
-	 * @param listener listener to add or null to remove old one.
+	 * @param listener listener to add or null to remove old one
 	 */
 	public synchronized void addMeasureListener(int measureIndex, MeasureListener listener) {
 		// Sanity check on parameters
@@ -244,11 +209,20 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns total number of measures
-	 * @return number of measures
+	 * Returns the total number of measures
+	 * @return total number of measures
 	 */
 	public synchronized int getMeasureNumber() {
 		return measures.length;
+	}
+
+	/**
+	 * Returns the name of a given measure
+	 * @param measureIndex index of the measure
+	 * @return name of the measure
+	 */
+	public synchronized String getName(int measureIndex) {
+		return measures[measureIndex].getName();
 	}
 
 	/**
@@ -288,25 +262,7 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns the name of a given measure
-	 * @param measureIndex index of the measure
-	 * @return name of the measure
-	 */
-	public synchronized String getName(int measureIndex) {
-		return measures[measureIndex].getName();
-	}
-
-	/**
-	 * Returns the node type of a given measure
-	 * @param measureIndex index of the measure
-	 * @return name of the measure
-	 */
-	public synchronized String getNodeType(int measureIndex) {
-		return measures[measureIndex].getNodeType();
-	}
-
-	/**
-	 * Returns number of analyzed samples for a given measure
+	 * Returns the number of analyzed samples for a given measure
 	 * @param measureIndex index of the measure
 	 * @return number of analyzed samples
 	 */
@@ -314,27 +270,17 @@ public class ResultsModel implements MeasureDefinition {
 		return measures[measureIndex].getNsamples();
 	}
 
-	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.MeasureDefinition#getDiscardedSamples(int)
+	/**
+	 * Returns the number of discarded samples for a given measure
+	 * @param measureIndex the measure index
+	 * @return number of discarded samples
 	 */
-	@Override
 	public synchronized int getDiscardedSamples(int measureIndex) {
 		return measures[measureIndex].getDiscarded();
 	}
 
 	/**
-	 * Returns the vector of Temporary values of a given measure. Each element of the vector
-	 * is an instance of <code>Value</code> interface.
-	 * @param measureIndex index of the measure
-	 * @return vector of temporary values until now
-	 */
-	public synchronized Vector<MeasureValue> getValues(int measureIndex) {
-		return measuresVector[measureIndex];
-	}
-
-	/**
-	 * Returns the state of a measure, that can be MEASURE_IN_PROGRESS, MEASURE_NO_SAMPLES,
-	 * MEASURE_FAILED, MEASURE_SUCCESS
+	 * Returns the state of a given measure
 	 * @param measureIndex index of the measure
 	 * @return measure state
 	 */
@@ -351,21 +297,40 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns the type of a measure
+	 * Returns the type of a given measure
 	 * @param measureIndex index of the measure
 	 * @return measure type
 	 */
-	public int getMeasureType(int measureIndex) {
+	public synchronized String getMeasureType(int measureIndex) {
 		return measures[measureIndex].getMeasureType();
 	}
 
 	/**
-	 * Returns Filename corresponding to a Measure
+	 * Returns the node type of a given measure
 	 * @param measureIndex index of the measure
-	 * @return Filename of the measure
+	 * @return node type
 	 */
-	public String getLogFileName(int measureIndex) {
+	public synchronized String getNodeType(int measureIndex) {
+		return measures[measureIndex].getNodeType();
+	}
+
+	/**
+	 * Returns the log file name where a verbose measure was stored
+	 * @param measureIndex corresponding to a measure
+	 * @return full path of the log file including the measure
+	 */
+	public synchronized String getLogFileName(int measureIndex) {
 		return measures[measureIndex].getLogFileName();
+	}
+
+	/**
+	 * Returns the vector of Temporary values of a given measure. Each element of the vector
+	 * is an instance of <code>Value</code> interface.
+	 * @param measureIndex index of the measure
+	 * @return vector of temporary values until now
+	 */
+	public synchronized Vector<MeasureValue> getValues(int measureIndex) {
+		return measuresVector[measureIndex];
 	}
 
 	/**
@@ -453,6 +418,18 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
+	 * Returns an array with the measureIndex of every system customer number measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemCustomerNumberMeasures() {
+		int[] tmp = new int[systemCustomerNumber.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemCustomerNumber.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
 	 * Returns an array with the measureIndex of every system response time measure
 	 * @return an array with measures' index
 	 */
@@ -472,18 +449,6 @@ public class ResultsModel implements MeasureDefinition {
 		int[] tmp = new int[systemThroughput.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = systemThroughput.get(i).intValue();
-		}
-		return tmp;
-	}
-
-	/**
-	 * Returns an array with the measureIndex of every system customer number measure
-	 * @return an array with measures' index
-	 */
-	public int[] getSystemCustomerNumberMeasures() {
-		int[] tmp = new int[systemCustomerNumber.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = systemCustomerNumber.get(i).intValue();
 		}
 		return tmp;
 	}
@@ -529,9 +494,9 @@ public class ResultsModel implements MeasureDefinition {
 	 * @return an array with measures' index
 	 */
 	public int[] getThroughputPerSinkMeasures() {
-		int[] tmp = new int[throughputTimePerSink.size()];
+		int[] tmp = new int[throughputPerSink.size()];
 		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = throughputTimePerSink.get(i).intValue();
+			tmp[i] = throughputPerSink.get(i).intValue();
 		}
 		return tmp;
 	}
@@ -612,10 +577,6 @@ public class ResultsModel implements MeasureDefinition {
 		ptlistener = listener;
 	}
 
-	/**
-	 * Sets a ProgressTimeListener to listen to detected malformed replayer file. This is unique.
-	 * @param listener listener to be set or null to reset previous one
-	 */
 	public synchronized void setMalformedReplayerFileListener(MalformedReplayerFileListener listener) {
 		mrfListener = listener;
 	}
@@ -682,6 +643,22 @@ public class ResultsModel implements MeasureDefinition {
 			return value;
 		}
 
+	}
+
+	/**
+	 * Returns the decimal separator used in log files
+	 * @return the decimal separator used in log files
+	 */
+	public String getLogDecimalSeparator() {
+		return logDecimalSeparator;
+	}
+
+	/**
+	 * Returns the CSV delimiter used in log files
+	 * @return the CSV delimiter used in log files
+	 */
+	public String getLogCsvDelimiter() {
+		return logCsvDelimiter;
 	}
 
 }

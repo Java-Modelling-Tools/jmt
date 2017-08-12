@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="fcr-01-input.jsimg" timestamp="Mon Sep 19 21:05:18 BST 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="fcr-01-input.jsimg" polling="2.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="fcr-01-input.xml" timestamp="Sat Aug 12 17:16:43 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="fcr-01-input.xml" polling="2.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class1" priority="0" referenceSource="Source 1" type="open"/>
 <node name="Queue 1">
 <section className="Queue">
@@ -145,9 +145,10 @@
 <globalConstraint maxJobs="-1"/>
 <globalMemoryConstraint maxMemory="-1"/>
 <classConstraint jobClass="Class1" maxJobsPerClass="11"/>
-<classWeight jobClass="Class1" weight="1"/>
-<classMemorySize jobClass="Class1" size="1"/>
+<classMemoryConstraint jobClass="Class1" maxMemoryPerClass="-1"/>
 <dropRules dropThisClass="true" jobClass="Class1"/>
+<classWeight jobClass="Class1" weight="1"/>
+<classSize jobClass="Class1" size="1"/>
 </blockingRegion>
 </sim>
 <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">

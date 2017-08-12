@@ -268,21 +268,21 @@ public class NetSystem {
 				}
 
 				switch (network.getBehaviour()) {
-				case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP:
-					if (count == num) {
-						stop(network);
-					}
+				case QueueNetwork.BEHAVIOUR_ABORT:
+					abort();
+					break;
+				case QueueNetwork.BEHAVIOUR_STOP:
+					stop();
 					break;
 				case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_ABORT:
 					if (count == num) {
 						abort(network);
 					}
 					break;
-				case QueueNetwork.BEHAVIOUR_ABORT:
-					abort();
-					break;
-				case QueueNetwork.BEHAVIOUR_STOP:
-					stop();
+				case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP:
+					if (count == num) {
+						stop(network);
+					}
 					break;
 				}
 			}

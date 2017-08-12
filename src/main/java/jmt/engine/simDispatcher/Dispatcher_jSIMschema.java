@@ -196,7 +196,7 @@ public class Dispatcher_jSIMschema {
 		//run simulation
 		sim.run();
 
-		// /stop time
+		//Stop time
 		stop = System.currentTimeMillis();
 		elapsed = (stop - start) / 1000;
 

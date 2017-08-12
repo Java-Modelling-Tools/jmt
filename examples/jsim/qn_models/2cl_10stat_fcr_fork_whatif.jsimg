@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="2cl_10stat_fcr_fork_whatif.jsimg" timestamp="Fri May 12 02:42:41 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="2cl_10stat_fcr_fork_whatif.jsimg" timestamp="Sat Aug 12 15:52:32 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="500000" name="2cl_10stat_fcr_fork_whatif.jsimg" polling="1.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Requests" type="open"/>
 <userClass name="Class1" priority="0" referenceSource="Requests" type="open"/>
@@ -701,29 +701,29 @@
 </parametric>
 </jmodel>
 <results logDecimalSeparator="." logDelimiter="," pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.99" analyzedSamples="10" name="Network_Class0_System Response Time" nodeType="" precision="0.05" referenceClass="Class0" referenceStation="Network" type="7">
-<sample lowerBound="1.0537748149558823" meanValue="1.073112538279565" upperBound="1.0924502616032477" validity="true"/>
-<sample lowerBound="1.072716019329891" meanValue="1.095094834918105" upperBound="1.1174736505063192" validity="true"/>
-<sample lowerBound="1.064825382760537" meanValue="1.0839685463500168" upperBound="1.1031117099394967" validity="true"/>
-<sample lowerBound="1.0861434871814164" meanValue="1.1069917938821052" upperBound="1.127840100582794" validity="true"/>
-<sample lowerBound="1.1019757343109506" meanValue="1.122484384024446" upperBound="1.1429930337379415" validity="true"/>
-<sample lowerBound="1.0939819802825375" meanValue="1.1191321034883437" upperBound="1.14428222669415" validity="true"/>
-<sample lowerBound="1.1216872934372022" meanValue="1.152697102081483" upperBound="1.1837069107257636" validity="true"/>
-<sample lowerBound="1.1202754337307024" meanValue="1.1420343568877818" upperBound="1.1637932800448612" validity="true"/>
-<sample lowerBound="1.138528786575892" meanValue="1.1597616787408296" upperBound="1.1809945709057672" validity="true"/>
-<sample lowerBound="1.1443248546585534" meanValue="1.1673267542523211" upperBound="1.1903286538460889" validity="true"/>
+<measure alpha="0.99" analyzedSamples="10" name="Network_Class0_System Response Time" nodeType="" precision="0.05" referenceClass="Class0" referenceStation="Network" type="System Response Time">
+<sample lowerBound="1.0300453611596647" meanValue="1.07760177916705" upperBound="1.1251581971744353" validity="true"/>
+<sample lowerBound="1.0385047830065426" meanValue="1.0909553483578582" upperBound="1.1434059137091739" validity="true"/>
+<sample lowerBound="1.04549413093935" meanValue="1.0880281214422807" upperBound="1.1305621119452114" validity="true"/>
+<sample lowerBound="1.0595169628378247" meanValue="1.1026148194252872" upperBound="1.1457126760127496" validity="true"/>
+<sample lowerBound="1.0887239395472297" meanValue="1.1406416916568989" upperBound="1.192559443766568" validity="true"/>
+<sample lowerBound="1.101992413659458" meanValue="1.1340862289979905" upperBound="1.166180044336523" validity="true"/>
+<sample lowerBound="1.108991427648779" meanValue="1.1487279281226144" upperBound="1.1884644285964499" validity="true"/>
+<sample lowerBound="1.107804723541779" meanValue="1.1397521167360787" upperBound="1.1716995099303784" validity="true"/>
+<sample lowerBound="1.1251116750745804" meanValue="1.153987754851007" upperBound="1.1828638346274334" validity="true"/>
+<sample lowerBound="1.121319689654022" meanValue="1.178172877673565" upperBound="1.2350260656931078" validity="true"/>
 </measure>
-<measure alpha="0.99" analyzedSamples="10" name="Network_Class1_System Response Time" nodeType="" precision="0.05" referenceClass="Class1" referenceStation="Network" type="7">
-<sample lowerBound="1.7193383036027743" meanValue="1.7464687488093051" upperBound="1.773599194015836" validity="true"/>
-<sample lowerBound="1.739052989683998" meanValue="1.7667597843308245" upperBound="1.794466578977651" validity="true"/>
-<sample lowerBound="1.7449637948563224" meanValue="1.7720463336665002" upperBound="1.799128872476678" validity="true"/>
-<sample lowerBound="1.7599704887516285" meanValue="1.784003122512266" upperBound="1.8080357562729032" validity="true"/>
-<sample lowerBound="1.7748524175432199" meanValue="1.7989529755697176" upperBound="1.8230535335962152" validity="true"/>
-<sample lowerBound="1.76467872139058" meanValue="1.8004856210766105" upperBound="1.836292520762641" validity="true"/>
-<sample lowerBound="1.7905164244684735" meanValue="1.8205390741012366" upperBound="1.8505617237339997" validity="true"/>
-<sample lowerBound="1.8130810735020182" meanValue="1.8391258894815035" upperBound="1.8651707054609887" validity="true"/>
-<sample lowerBound="1.8056587763036833" meanValue="1.8395856663106183" upperBound="1.8735125563175532" validity="true"/>
-<sample lowerBound="1.8350299586020449" meanValue="1.866031031932378" upperBound="1.8970321052627113" validity="true"/>
+<measure alpha="0.99" analyzedSamples="10" name="Network_Class1_System Response Time" nodeType="" precision="0.05" referenceClass="Class1" referenceStation="Network" type="System Response Time">
+<sample lowerBound="1.7018319921543739" meanValue="1.7619309301470092" upperBound="1.8220298681396445" validity="true"/>
+<sample lowerBound="1.688928691398508" meanValue="1.7643588505574423" upperBound="1.8397890097163767" validity="true"/>
+<sample lowerBound="1.7346387314215903" meanValue="1.7929417789187185" upperBound="1.8512448264158468" validity="true"/>
+<sample lowerBound="1.7270862085764984" meanValue="1.7920843749098905" upperBound="1.8570825412432825" validity="true"/>
+<sample lowerBound="1.7390585414595554" meanValue="1.7975453886821748" upperBound="1.8560322359047943" validity="true"/>
+<sample lowerBound="1.7358629384335391" meanValue="1.8040496129404606" upperBound="1.8722362874473821" validity="true"/>
+<sample lowerBound="1.7824072823333452" meanValue="1.8388028047018254" upperBound="1.8951983270703057" validity="true"/>
+<sample lowerBound="1.7741181190583024" meanValue="1.83015852484693" upperBound="1.8861989306355578" validity="true"/>
+<sample lowerBound="1.7731660490164156" meanValue="1.861254490738177" upperBound="1.9493429324599383" validity="true"/>
+<sample lowerBound="1.8114938262089704" meanValue="1.9052716673512695" upperBound="1.9990495084935687" validity="true"/>
 </measure>
 </results>
 </archive>

@@ -181,8 +181,6 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 				int measureState = results.getMeasureState(i);
 				Object value = thisResult.get(0);
 				boolean valid = (measureState == MeasureDefinition.MEASURE_SUCCESS);
-				//valueSet[i].add(value);
-				//validityMap[i].add(Boolean.valueOf(valid));
 				MeasureValue tempValue = (MeasureValue) value;
 				parametricAnalysisResultsModel.addSample(results.getName(i), tempValue.getLowerBound(), tempValue.getMeanValue(), tempValue.getUpperBound(), valid);
 			}
@@ -194,7 +192,6 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 		pad.restoreOriginalValues();
 		if (!stopped) {
 			progressWindow.finished();
-			//PAResultsWindow resWin = new PAResultsWindow(simd.getParametricAnalysisModel(),results,valueSet,validityMap);
 			//progressWindow.hide();
 			progressWindow.stopAnimation();
 		} else {
@@ -202,7 +199,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 		}
 		//set the parametric analysis model results
 		simd.setSimulationResults(parametricAnalysisResultsModel);
-		PAResultsWindow resWin = new PAResultsWindow(simd.getParametricAnalysisModel(), parametricAnalysisResultsModel, gui.getFileName());
+		PAResultsWindow resWin = new PAResultsWindow(simd, gui.getFileName());
 		gui.setResultsWindow(resWin);
 		gui.showResultsWindow();
 		gui.changeSimActionsState(true, false, false);

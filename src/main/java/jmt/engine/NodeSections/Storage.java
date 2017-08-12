@@ -166,7 +166,7 @@ public class Storage extends InputSection {
 		int index = 0;
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			for (int j = 0; j < jobsPerClass[i]; j++) {
-				jobPermutation[index] = new Job(jobClasses.get(i));
+				jobPermutation[index] = new Job(jobClasses.get(i), jobClasses.size());
 				index++;
 			}
 		}

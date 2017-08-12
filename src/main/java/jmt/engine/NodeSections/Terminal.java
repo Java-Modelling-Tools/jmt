@@ -23,6 +23,7 @@ import java.util.ListIterator;
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.LinkedJobInfoList;
 import jmt.engine.QueueNet.NetEvent;
@@ -45,6 +46,8 @@ public class Terminal extends InputSection {
 	private JobInfoList waitingRequests;
 
 	private int jobsPerClass[]; //number of jobs per class
+
+	private JobClassList jobClasses;
 
 	/**
 	 * Creates a terminal
@@ -75,7 +78,8 @@ public class Terminal extends InputSection {
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
-		waitingRequests = new LinkedJobInfoList(getJobClasses().size(), true);
+		jobClasses = getJobClasses();
+		waitingRequests = new LinkedJobInfoList(jobClasses.size(), true);
 	}
 
 	@Override
@@ -91,7 +95,7 @@ public class Terminal extends InputSection {
 			//the terminal creates all the jobs requested by each class.
 			//for each job created, it sends to itself a message with delay 0
 
-			ListIterator<JobClass> jobClasses = getJobClasses().listIterator();
+			ListIterator<JobClass> it = jobClasses.listIterator();
 			JobClass jobClass;
 
 			//generator of random numbers (uses the same engine of
@@ -103,8 +107,8 @@ public class Terminal extends InputSection {
 			//delay used to mix leaving order
 			double mixRandomDelay = 0.0;
 
-			while (jobClasses.hasNext()) {
-				jobClass = jobClasses.next();
+			while (it.hasNext()) {
+				jobClass = it.next();
 
 				if (jobClass.getType() == JobClass.OPEN_CLASS) {
 					//open class: no jobs to be generated
@@ -121,7 +125,7 @@ public class Terminal extends InputSection {
 						//of this for are not performed
 
 						//each job is created and sent to the terminal itself
-						job = new Job(jobClass);
+						job = new Job(jobClass, jobClasses.size());
 
 						//sets a random (very small) delay to mix the jobs
 						mixRandomDelay = (randomEng.raw()) * 0.00001;

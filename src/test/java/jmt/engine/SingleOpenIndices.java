@@ -31,6 +31,7 @@ public class SingleOpenIndices {
 			String line = scanner.nextLine();
 			coll.add(line);
 		}
+		coll.remove(coll.size() - 1);
 		scanner.close();
 
 		FileWriter writer = new FileWriter(result);

@@ -39,11 +39,10 @@ import Jama.Matrix;
  *         Time: 12.02.04
  */
 public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
+
 	private double alpha;
 	private double precision;
 	private int maxData;
-	// Minimum number of samples for an OK measure.
-	private int minData;
 
 	// end tells if computation is ended
 	private boolean end;
@@ -55,7 +54,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	private int nsamples = 0;
 
 	// Tells if transient has been deleted
-	private boolean delet = false;
+	private boolean deleted = false;
 
 	// ---- Variables for Fishman Means Rule -------------------------------------------------------
 	// Number of crosses to be checked by Fishman Rule
@@ -211,11 +210,10 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		if (weight == 0.0) {
 			return end;
 		}
-		
-		lastSampleWeight= lastSampleWeight+(newSample*weight);
-		lastWeight= lastWeight+weight;
-		
-		
+
+		lastSampleWeight = lastSampleWeight + (newSample * weight);
+		lastWeight = lastWeight + weight;
+
 		// Abort simulation when maxData is reached
 		if (nsamples >= maxData && !confIntervalOk) {
 			success = false;
@@ -267,7 +265,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			}
 		}
 
-		if (!delet) {
+		if (!deleted) {
 			//transient not deleted
 			batches.add(newSample, weight);
 		}
@@ -297,7 +295,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		// At this point Fisherman Rule was passed and biased data truncated. New samples will
 		// be analyzed with spectral analysis method to find confidence interval
 
-		if (!delet) {
+		if (!deleted) {
 			//transient detected but not deleted yet
 
 			if (nsamples >= minSamples) {
@@ -349,27 +347,26 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		}
 		return end;
 	}
+
 	public double getLastIntervalAvg() {
-		
-		if (lastWeight==0) {
-			lastWeight=0;
-			lastSampleWeight=0;
+		if (lastWeight == 0.0) {
+			lastWeight = 0.0;
+			lastSampleWeight = 0.0;
 			return lastIntervalAvg;
-			}
-		else {
-			lastIntervalAvg=(lastSampleWeight/lastWeight);
-			lastWeight=0;
-			lastSampleWeight=0;
+		} else {
+			lastIntervalAvg = lastSampleWeight / lastWeight;
+			lastWeight = 0.0;
+			lastSampleWeight = 0.0;
 			return lastIntervalAvg;
-			}
-			
+		}
 	}
+
 	/**
 	 * Checks minimum constraints to determine if data analysis can end
 	 * @return true if the data analysis can end
 	 */
 	private boolean canEnd() {
-		return !disableStatisticStop && nsamples > minData;
+		return !disableStatisticStop;
 	}
 
 	/**
@@ -712,7 +709,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		if (d - 1 <= nsamples / (batches.getBatchSize() * batches.getBatchSize())) {
 			//the initial warm up period is short
 			//cannot apply the algorithm to a sequence too polarized...
-			delet = true;
+			deleted = true;
 			batches.deleteFirstBatches(d);
 
 			nsamples = batches.getNumBatches() * batches.getBatchSize();
@@ -739,16 +736,12 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			batch = k;
 
 			batches.clean();
-			return delet;
+			return deleted;
 		} else {
 			//transient cannot be deleted
-			delet = false;
+			deleted = false;
 			minSamples += batches.getDiscarded();
-			if (minSamples < maxData) {
-				end = true;
-				success = false;
-			}
-			return delet;
+			return deleted;
 		}
 	}
 
@@ -839,7 +832,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 * @return the estimated mean
 	 */
 	public double estimatedMean() {
-		if (!heuristicPassed || !delet) {
+		if (!heuristicPassed || !deleted) {
 			return batches.getMeanValue();
 		} else if (extMean < hEpsilon && batches.getMeanValue() >= hEpsilon) {
 			return batches.getMeanValue();
@@ -949,12 +942,6 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		this.nullTestAlfa = parameters.getNullTestAlfa();
 		this.nullTestRate = parameters.getNullTestRate();
 		this.disableStatisticStop = parameters.isDisableStatisticStop();
-		this.minData = parameters.getMinSamples();
 	}
 
-	
-
-	
-
-	
 }

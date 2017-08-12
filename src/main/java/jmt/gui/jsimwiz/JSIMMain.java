@@ -50,7 +50,6 @@ import jmt.gui.common.controller.PADispatcherThread;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.ModelConverter;
-import jmt.gui.common.definitions.PAResultsModel;
 import jmt.gui.common.definitions.ResultsModel;
 import jmt.gui.common.editors.DefaultsEditor;
 import jmt.gui.common.panels.AboutDialogFactory;
@@ -383,10 +382,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			// If simulation results are present, adds a Result Window
 			if (model.containsSimulationResults()) {
 				if (model.isParametricAnalysisEnabled()) {
-					this.setResultsWindow(new PAResultsWindow(model.getParametricAnalysisModel(), (PAResultsModel) model.getSimulationResults(), currentFile.getName()));
+					this.setResultsWindow(new PAResultsWindow(model, currentFile.getName()));
 					SHOW_RESULTS.setEnabled(true);
 				} else {
-					this.setResultsWindow(new ResultsWindow(model.getSimulationResults(), currentFile.getName()));
+					this.setResultsWindow(new ResultsWindow(model, currentFile.getName()));
 					SHOW_RESULTS.setEnabled(true);
 				}
 			}
@@ -572,7 +571,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 				String logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
 				model.setSimulationResults(new ResultsModel(model.getPollingInterval().doubleValue(), logCSVDelimiter, logDecimalSeparator));
 				SHOW_RESULTS.setEnabled(true);
-				dispatcher = new DispatcherThread(this, model, (ResultsModel) model.getSimulationResults());
+				dispatcher = new DispatcherThread(this, model);
 				dispatcher.startSimulation(temp);
 			} catch (Exception e) {
 				handleException(e);

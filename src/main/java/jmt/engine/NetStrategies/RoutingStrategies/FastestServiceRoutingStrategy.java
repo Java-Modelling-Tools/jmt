@@ -33,10 +33,10 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class FastestServiceRoutingStrategy extends RoutingStrategy {
 
-	private byte serviceSection = NodeSection.SERVICE;
-	private int property = NodeSection.PROPERTY_ID_RESIDENCE_TIME;
 	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
 	private int infinity = Integer.MAX_VALUE;
+	private byte serviceSection = NodeSection.SERVICE;
+	private int property = NodeSection.PROPERTY_ID_RESIDENCE_TIME;
 	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)
 	private RandomEngine random = RandomEngine.makeDefault();
 

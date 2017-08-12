@@ -21,9 +21,9 @@ package jmt.gui.common.xml;
 import java.io.File;
 
 import jmt.common.xml.XSDSchemaLoader;
-import jmt.engine.QueueNet.SimConstants;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.PAResultsModel;
+import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StoredResultsModel;
 
 import org.w3c.dom.Document;
@@ -110,9 +110,12 @@ public class XMLResultsReader implements XMLResultsConstants {
 			String measureName = current.getAttribute(XML_A_MEASURE_NAME);
 			// Adds its samples
 			NodeList samples = current.getElementsByTagName(XML_E_SAMPLE);
-			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION), current.getAttribute(XML_A_MEASURE_CLASS), Double
-					.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)), Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
-					Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), current.getAttribute(XML_A_MEASURE_NODETYPE));
+			String type = measureName.substring(measureName.lastIndexOf('_') + 1);
+			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION),
+					current.getAttribute(XML_A_MEASURE_CLASS),
+					Double.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)),
+					Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
+					type, current.getAttribute(XML_A_MEASURE_NODETYPE));
 			for (int j = 0; j < samples.getLength(); j++) {
 				Element sample = (Element) samples.item(j);
 				double mean = 0;
@@ -170,15 +173,15 @@ public class XMLResultsReader implements XMLResultsConstants {
 			}
 			// Add measure
 			String discarded = current.getAttribute(XML_A_MEASURE_DISCARDEDSAMPLES);
-			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION), 
-					current.getAttribute(XML_A_MEASURE_CLASS), 
-					Double.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)), 
+			String type = measureName.substring(measureName.lastIndexOf('_') + 1);
+			model.addMeasure(measureName, current.getAttribute(XML_A_MEASURE_STATION),
+					current.getAttribute(XML_A_MEASURE_CLASS),
+					Double.parseDouble(current.getAttribute(XML_A_MEASURE_ALPHA)),
 					Double.parseDouble(current.getAttribute(XML_A_MEASURE_PRECISION)),
 					Integer.parseInt(current.getAttribute(XML_A_MEASURE_SAMPLES)),
 					discarded == null || discarded.length() == 0 ? 0 : Integer.parseInt(discarded),
 							Integer.parseInt(current.getAttribute(XML_A_MEASURE_STATE)),
-							Integer.parseInt(current.getAttribute(XML_A_MEASURE_TYPE)), 
-							current.getAttribute(XML_A_MEASURE_NODETYPE), fileName);
+							type, current.getAttribute(XML_A_MEASURE_NODETYPE), fileName);
 
 			// Adds its samples
 			NodeList samples = current.getElementsByTagName(XML_E_SAMPLE);
@@ -194,7 +197,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 				if (sample.getAttribute(XML_A_LAST_INTERVAL_AVG_VALUE) != null && sample.getAttribute(XML_A_LAST_INTERVAL_AVG_VALUE)!="") {
 					lastIntervalAvgValue= Double.parseDouble(sample.getAttribute(XML_A_LAST_INTERVAL_AVG_VALUE));
 				}
-				if (sample.getAttribute(XML_A_TIME) != null && sample.getAttribute(XML_A_TIME)!="") {
+				if (sample.getAttribute(XML_A_TIME) != null && sample.getAttribute(XML_A_TIME) != "") {
 					simulationTime= Double.parseDouble(sample.getAttribute(XML_A_TIME));
 				}
 				// Gets upperBound if specified
@@ -237,10 +240,9 @@ public class XMLResultsReader implements XMLResultsConstants {
 				stationName = current.getAttribute(XML_AO_MEASURE_STATION);
 			}
 			String type = current.getAttribute(XML_AO_MEASURE_TYPE);
-			String lowType = type.toLowerCase();
 			String className = null;
 			if (current.getAttribute(XML_AO_MEASURE_CLASS).isEmpty()) {
-				if (lowType.startsWith("firing") && lowType.endsWith("throughput")) {
+				if (type.equals(SimulationDefinition.MEASURE_FX)) {
 					className = "All modes";
 				} else {
 					className = "All classes";
@@ -312,49 +314,8 @@ public class XMLResultsReader implements XMLResultsConstants {
 			// Creates unique measure name
 			String Name = stationName + "_" + className + "_" + type;
 
-			// Decodes measure type
-			int numType = 0;
-			if (lowType.startsWith("number") && lowType.endsWith("customers")) {
-				numType = SimConstants.QUEUE_LENGTH;
-			} else if (lowType.startsWith("queue") && lowType.endsWith("time")) {
-				numType = SimConstants.QUEUE_TIME;
-			} else if (lowType.startsWith("response") && lowType.endsWith("time")) {
-				numType = SimConstants.RESPONSE_TIME;
-			} else if (lowType.startsWith("residence") && lowType.endsWith("time")) {
-				numType = SimConstants.RESIDENCE_TIME;
-			} else if (lowType.startsWith("utilization") && type.endsWith("utilization")) {
-				numType = SimConstants.UTILIZATION;
-			} else if (lowType.startsWith("throughput") && type.endsWith("throughput")) {
-				numType = SimConstants.THROUGHPUT;
-			} else if (lowType.startsWith("drop") && lowType.endsWith("rate")) {
-				numType = SimConstants.DROP_RATE;
-			} else if (lowType.startsWith("system") && lowType.endsWith("time")) {
-				numType = SimConstants.SYSTEM_RESPONSE_TIME;
-			} else if (lowType.startsWith("system") && lowType.endsWith("throughput")) {
-				numType = SimConstants.SYSTEM_THROUGHPUT;
-			} else if (lowType.startsWith("system") && lowType.endsWith("customers")) {
-				numType = SimConstants.SYSTEM_NUMBER_OF_JOBS;
-			} else if (lowType.startsWith("system") && lowType.endsWith("rate")) {
-				numType = SimConstants.SYSTEM_DROP_RATE;
-			} else if (lowType.startsWith("system") && lowType.endsWith("power")) {
-				numType = SimConstants.SYSTEM_POWER;
-			} else if (lowType.startsWith("response") && lowType.endsWith("sink")) {
-				numType = SimConstants.RESPONSE_TIME_PER_SINK;
-			} else if (lowType.startsWith("throughput") && lowType.endsWith("sink")) {
-				numType = SimConstants.THROUGHPUT_PER_SINK;
-			} else if (lowType.startsWith("fcr") && lowType.endsWith("weight")) {
-				numType = SimConstants.FCR_TOTAL_WEIGHT;
-			} else if (lowType.startsWith("fcr") && lowType.endsWith("occupation")) {
-				numType = SimConstants.FCR_MEMORY_OCCUPATION;
-			} else if (lowType.startsWith("fork") && lowType.endsWith("customers")) {
-				numType = SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
-			} else if (lowType.startsWith("fork") && lowType.endsWith("time")) {
-				numType = SimConstants.FORK_JOIN_RESPONSE_TIME;
-			} else if (lowType.startsWith("firing") && lowType.endsWith("throughput")) {
-				numType = SimConstants.FIRING_THROUGHPUT;
-			}
 			// Adds loaded informations into model data structure
-			model.addMeasure(Name, stationName, className, alpha, precision, samples, discarded, state, numType, nodeType, fileName);
+			model.addMeasure(Name, stationName, className, alpha, precision, samples, discarded, state, type, nodeType, fileName);
 			model.addMeasureSample(Name, mean, lastIntervalAvgValue, simulationTime, upper, lower);
 		}
 	}

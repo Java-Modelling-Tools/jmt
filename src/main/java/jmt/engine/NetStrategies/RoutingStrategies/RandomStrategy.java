@@ -33,8 +33,8 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class RandomStrategy extends RoutingStrategy {
 
-	private RandomEngine randomEngine;
 	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
+	private RandomEngine randomEngine;
 
 	public RandomStrategy() {
 		randomEngine = RandomEngine.makeDefault();

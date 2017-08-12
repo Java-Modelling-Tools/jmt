@@ -48,9 +48,12 @@ public class CommandLineSolver {
 	 * @return true if the model has been correctly solved
 	 */
 	public boolean solve(File file) {
-		if (!(file.getName().toLowerCase().endsWith(MODEL_EXTENSION))) {
-			//the passed file is not a xml file
-			System.out.println("error: only " + MODEL_EXTENSION + " files are allowed...");
+		if (!file.getName().toLowerCase().endsWith(MODEL_EXTENSION)) {
+			System.out.println("Error: only " + MODEL_EXTENSION + " files are allowed...");
+			return false;
+		}
+		if (!file.isFile()) {
+			System.out.println("Error: file not found...");
 			return false;
 		}
 		try {
@@ -80,6 +83,5 @@ public class CommandLineSolver {
 		}
 		return solve(file);
 	}
-
 
 }

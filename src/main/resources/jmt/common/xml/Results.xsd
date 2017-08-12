@@ -25,7 +25,7 @@
 						</xs:sequence>
 						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="referenceClass" type="xs:string" use="required"/>
-						<xs:attribute name="type" type="xs:integer" use="required"/>
+						<xs:attribute name="type" type="xs:string" use="required"/>
 						<xs:attribute name="referenceStation" type="xs:string" use="required"/>
 						<xs:attribute name="finalValue" type="jdouble" use="optional"/>
 						<xs:attribute name="state" type="xs:integer" use="optional"/>

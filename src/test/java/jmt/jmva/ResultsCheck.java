@@ -124,7 +124,6 @@ public class ResultsCheck {
 	 * confidence intervals contain the exact solution.
 	 *
 	 */
-
 	public boolean checkRes() {
 
 		//verifies if the passed file exists
@@ -188,7 +187,6 @@ public class ResultsCheck {
 	 * @param output_file2 the second copy
 	 * @return true if the copy files have been successfully created, false otherwise
 	 */
-
 	private boolean copyFile(File input, File output_file1, File output_file2) {
 
 		FileInputStream inputStream = null;
@@ -491,7 +489,6 @@ public class ResultsCheck {
 		}
 
 		//this point should never been reached!!!
-
 		return Double.NaN;
 	}
 

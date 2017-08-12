@@ -36,7 +36,7 @@ import jmt.framework.gui.graph.MeasureValue;
  *         
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -56,15 +56,22 @@ public interface MeasureDefinition {
 	 * Each measure can have ONLY one MeasureListener to avoid unnecessary computational
 	 * efforts to manage a pool of listeners.
 	 * @param measureIndex index of the measure that this listener should listen
-	 * @param listener listener to add or null to remove old one.
+	 * @param listener listener to add or null to remove old one
 	 */
 	public void addMeasureListener(int measureIndex, MeasureListener listener);
 
 	/**
-	 * Returns total number of measures
-	 * @return number of measures
+	 * Returns the total number of measures
+	 * @return total number of measures
 	 */
 	public int getMeasureNumber();
+
+	/**
+	 * Returns the name of a given measure
+	 * @param measureIndex index of the measure
+	 * @return name of the measure
+	 */
+	public String getName(int measureIndex);
 
 	/**
 	 * Returns the station name of a given measure
@@ -95,18 +102,46 @@ public interface MeasureDefinition {
 	public double getPrecision(int measureIndex);
 
 	/**
-	 * Returns number of analyzed samples for a given measure
+	 * Returns the number of analyzed samples for a given measure
 	 * @param measureIndex index of the measure
 	 * @return number of analyzed samples
 	 */
 	public int getAnalyzedSamples(int measureIndex);
 
 	/**
-	 * Returns the name of a given measure
-	 * @param measureIndex index of the measure
-	 * @return name of the measure
+	 * Returns the number of discarded samples for a given measure
+	 * @param measureIndex the measure index
+	 * @return number of discarded samples
 	 */
-	public String getName(int measureIndex);
+	public int getDiscardedSamples(int measureIndex);
+
+	/**
+	 * Returns the state of a given measure
+	 * @param measureIndex index of the measure
+	 * @return measure state
+	 */
+	public int getMeasureState(int measureIndex);
+
+	/**
+	 * Returns the type of a given measure
+	 * @param measureIndex index of the measure
+	 * @return measure type
+	 */
+	public String getMeasureType(int measureIndex);
+
+	/**
+	 * Returns the node type of a given measure
+	 * @param measureIndex index of the measure
+	 * @return node type
+	 */
+	public String getNodeType(int measureIndex);
+
+	/**
+	 * Returns the log file name where a verbose measure was stored
+	 * @param measureIndex corresponding to a measure
+	 * @return full path of the log file including the measure
+	 */
+	public String getLogFileName(int measureIndex);
 
 	/**
 	 * Returns the vector of Temporary values of a given measure. Each element of the vector
@@ -115,35 +150,6 @@ public interface MeasureDefinition {
 	 * @return vector of temporary values until now
 	 */
 	public Vector<MeasureValue> getValues(int measureIndex);
-
-	/**
-	 * Returns the state of a measure, that can be MEASURE_IN_PROGRESS, MEASURE_NO_SAMPLES,
-	 * MEASURE_FAILED, MEASURE_SUCCESS
-	 * @param measureIndex index of the measure
-	 * @return measure state
-	 */
-	public int getMeasureState(int measureIndex);
-
-	/**
-	 * Returns the type of a measure
-	 * @param measureIndex index of the measure
-	 * @return measure type
-	 */
-	public int getMeasureType(int measureIndex);
-
-	/**
-	 * Returns log file name where a verbose measure was stored
-	 * @param measureIndex corresponding to a measure
-	 * @return the full path of the log file including the measure.
-	 */
-	public String getLogFileName(int measureIndex);
-
-	/**
-	 * Returns the number of discarded samples for the measure
-	 * @param measureIndex the measure index
-	 * @return the number of discarded samples for the measure.
-	 */
-	public int getDiscardedSamples(int measureIndex);
 
 	/**
 	 * Returns an array with the measureIndex of every queue length measure
@@ -188,6 +194,12 @@ public interface MeasureDefinition {
 	public int[] getDropRateMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every system customer number measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemCustomerNumberMeasures();
+
+	/**
 	 * Returns an array with the measureIndex of every system response time measure
 	 * @return an array with measures' index
 	 */
@@ -198,12 +210,6 @@ public interface MeasureDefinition {
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemThroughputMeasures();
-
-	/**
-	 * Returns an array with the measureIndex of every system customer number measure
-	 * @return an array with measures' index
-	 */
-	public int[] getSystemCustomerNumberMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every system drop rate measure
@@ -260,19 +266,12 @@ public interface MeasureDefinition {
 	public int[] getFiringThroughputMeasures();
 
 	/**
-	 * Returns the node type of a given measure
-	 * @param measureIndex index of the measure
-	 * @return name of the measure
-	 */
-	public String getNodeType(int measureIndex);
-
-	/**
 	 * Sets a ProgressTimeListener to listen to progress time change events. This is unique.
 	 * @param listener listener to be set or null to reset previous one
 	 */
 	public void setProgressTimeListener(ProgressTimeListener listener);
 
-	public void setMalformedReplayerFileListener(MalformedReplayerFileListener listener) ;
+	public void setMalformedReplayerFileListener(MalformedReplayerFileListener listener);
 
 	public void detectedMalformedReplayerFile(String msg);
 
@@ -295,12 +294,14 @@ public interface MeasureDefinition {
 	public double getProgressTime();
 
 	/**
-	 * @return return the decimal separator used in log files
+	 * Returns the decimal separator used in log files
+	 * @return the decimal separator used in log files
 	 */
 	public String getLogDecimalSeparator();
 
 	/**
-	 * @return return the CSV delimiter used in log files
+	 * Returns the CSV delimiter used in log files
+	 * @return the CSV delimiter used in log files
 	 */
 	public String getLogCsvDelimiter();
 

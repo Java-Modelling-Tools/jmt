@@ -32,16 +32,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import jmt.common.exception.NetException;
-import jmt.engine.NodeSections.BlockingQueue;
-import jmt.engine.QueueNet.BlockingRegion;
-import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.QueueNet.SimulationOutput;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.math.SampleStatistics;
+import jmt.engine.simEngine.EngineUtils;
 import jmt.engine.simEngine.Simulation;
 import jmt.gui.common.definitions.StatisticalOutputsLoader;
 
@@ -58,7 +54,7 @@ import org.w3c.dom.Element;
  *       
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -185,70 +181,8 @@ public class XMLSimulationOutput extends SimulationOutput {
 		}
 
 		//finds and sets measure type
-		int type = measure.getMeasureType();
-		String typeName = "";
-
-		switch (type) {
-		case SimConstants.QUEUE_LENGTH:
-			typeName = "Number of Customers";
-			break;
-		case SimConstants.QUEUE_TIME:
-			typeName = "Queue Time";
-			break;
-		case SimConstants.RESPONSE_TIME:
-			typeName = "Response Time";
-			break;
-		case SimConstants.RESIDENCE_TIME:
-			typeName = "Residence Time";
-			break;
-		case SimConstants.UTILIZATION:
-			typeName = "Utilization";
-			break;
-		case SimConstants.THROUGHPUT:
-			typeName = "Throughput";
-			break;
-		case SimConstants.DROP_RATE:
-			typeName = "Drop Rate";
-			break;
-		case SimConstants.SYSTEM_RESPONSE_TIME:
-			typeName = "System Response Time";
-			break;
-		case SimConstants.SYSTEM_THROUGHPUT:
-			typeName = "System Throughput";
-			break;
-		case SimConstants.SYSTEM_NUMBER_OF_JOBS:
-			typeName = "System Number of Customers";
-			break;
-		case SimConstants.SYSTEM_DROP_RATE:
-			typeName = "System Drop Rate";
-			break;
-		case SimConstants.SYSTEM_POWER:
-			typeName = "System Power";
-			break;			
-		case SimConstants.RESPONSE_TIME_PER_SINK:
-			typeName = "Response Time per Sink";
-			break;
-		case SimConstants.THROUGHPUT_PER_SINK:
-			typeName = "Throughput per Sink";
-			break;	
-		case SimConstants.FCR_TOTAL_WEIGHT:
-			typeName = "FCR Total Weight";
-			break;
-		case SimConstants.FCR_MEMORY_OCCUPATION:
-			typeName = "FCR Memory Occupation";
-			break;
-		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-			typeName = "Fork Join Number of Customers";
-			break;
-		case SimConstants.FORK_JOIN_RESPONSE_TIME:
-			typeName = "Fork Join Response Time";
-			break;
-		case SimConstants.FIRING_THROUGHPUT:
-			typeName = "Firing Throughput";
-			break;
-		}
-
-		elem.setAttribute("measureType", typeName);
+		String type = EngineUtils.encodeMeasureType(measure.getMeasureType());
+		elem.setAttribute("measureType", type);
 
 		//analyzer confidence requirements
 		elem.setAttribute("maxSamples", Integer.toString(analyzer.getMaxData()));
@@ -296,149 +230,11 @@ public class XMLSimulationOutput extends SimulationOutput {
 		}
 	}
 
-	/**
-	 * Writes the output of the drop measures, when blocking regions have been defined.
-	 */
-	private void writeMeasures_regionDroppedJobs() {
-		BlockingRegion[] regions = sim.getAllRegions();
-		JobClass[] classes = sim.getClasses();
-		int classNumber = classes.length;
-
-		if (regions != null) {
-			//at least one region has been defined
-			for (BlockingRegion region : regions) {
-				try {
-					//retrieves the blocking queue of the input station
-					NodeSection ns = region.getInputStation().getSection(NodeSection.INPUT);
-
-					if (ns instanceof BlockingQueue) {
-						//For each class count dropped jobs
-						for (int c = 0; c < classNumber; c++) {
-							Element el = doc.createElement("measure");
-							root.appendChild(el);
-
-							String inputStation = region.getInputStation().getName();
-							String className = classes[c].getName();
-
-							el.setAttribute("station", inputStation);
-							el.setAttribute("class", className);
-
-							int arrivedJobs = ns.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS);
-							int droppedJobs = ((BlockingQueue) ns).getDroppedJobsPerClass(c);
-
-							double drop_percentage = (double) droppedJobs / arrivedJobs;
-
-							//System.out.println(drop_percentage);
-
-							el.setAttribute("meanValue", Double.toString(drop_percentage));
-
-							//always true: it is not a confidence interval but an exact value
-							boolean success = true;
-							el.setAttribute("successful", Boolean.toString(success));
-							el.setAttribute("measureType", "Dropped jobs");
-
-							//number of analyzed and discarded samples: in this case their meaning is
-							//received jobs and dropped jobs
-							el.setAttribute("analyzedSamples", Integer.toString(arrivedJobs));
-							el.setAttribute("discardedSamples", Integer.toString(droppedJobs));
-
-							//analyzer confidence requirements
-							//el.setAttribute("maxSamples", Integer.toString(0));
-							//el.setAttribute("precision", Double.toString(0));
-							//el.setAttribute("alfa", Double.toString(0));
-
-							logger.debug("Dropped jobs percentage region " + region.getName() + "-" + className + ": " + drop_percentage);
-						}
-					}
-				} catch (NetException ne) {
-					ne.printStackTrace();
-					return;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Writes the output of the drop measures, when blocking regions have been defined.
-	 */
-	private void writeMeasures_regionUtilization() {
-		BlockingRegion[] regions = sim.getAllRegions();
-		JobClass[] classes = sim.getClasses();
-		int classNumber = classes.length;
-
-		if (regions != null) {
-			//at least one region has been defined
-			for (BlockingRegion region : regions) {
-				BlockingRegion reg = region;
-
-				if (!reg.hasGlobalConstraint()) {
-					continue;
-				}
-				//max capacity
-				double maxCapacity = reg.getMaxCapacity();
-				String[] stations = reg.getRegionNodeNames();
-
-				double classTotalQueue, regUtilization;
-				double classWeight;
-				String className;
-
-				for (int c = 0; c < classNumber; c++) {
-					className = classes[c].getName();
-					//logger.debug("Computing region U for class " + className);
-
-					classWeight = reg.getClassWeights()[c];
-					classTotalQueue = 0.0;
-					boolean success = true;
-
-					if (classWeight == 0.0) {
-						regUtilization = 0.0;
-					} else {
-						for (String station : stations) {
-							double queue = findQueueMeasure(className, station);
-							if (queue == -1) {
-								success = false;
-								break;
-							}
-							//logger.debug("Queue at station " + stations[s] + ": " + Double.toString(queue));
-							classTotalQueue += queue;
-						}
-
-						if (success) {
-							//logger.debug("Total queue: " + Double.toString(classTotalQueue));
-							//logger.debug("Weight: " + Double.toString(classWeight));
-							regUtilization = (classTotalQueue * classWeight) / maxCapacity;
-							logger.debug("Region Utilization for " + reg.getName() + "-" + className + ": " + Double.toString(regUtilization));
-						} else {
-							//regUtilization = -1;
-							regUtilization = Double.NEGATIVE_INFINITY;
-							logger.debug("Region Utilization for " + reg.getName() + "-" + className + " not computed");
-						}
-					}
-
-					Element el = doc.createElement("measure");
-					root.appendChild(el);
-
-					String inputStation = reg.getInputStation().getName();
-					el.setAttribute("station", inputStation);
-					el.setAttribute("class", className);
-					el.setAttribute("meanValue", Double.toString(regUtilization));
-					el.setAttribute("successful", Boolean.toString(success));
-					el.setAttribute("measureType", "Region Utilization");
-				}
-			}
-		}
-	}
-
 	public File writeAllMeasures() {
 		for (Measure element : measureList) {
 			//writes all the measures in a Document
 			writeMeasure(element);
 		}
-
-		//writeMeasures_regionDroppedJobs();
-		//writeMeasures_regionUtilization();
-
-		//writeMeasures_queueDroppedJobs();
 
 		/////////////////
 		//Output the XML
@@ -528,50 +324,6 @@ public class XMLSimulationOutput extends SimulationOutput {
 			exc.printStackTrace();
 		}
 		return null;
-	}
-
-	private double findQueueMeasure(String className, String stationName) {
-		try {
-			org.w3c.dom.NodeList measureList = root.getElementsByTagName("measure");
-			int measureNumber = measureList.getLength();
-			Element currentMeasure;
-
-			for (int m = 0; m < measureNumber; m++) {
-				currentMeasure = (Element) measureList.item(m);
-
-				if (!currentMeasure.getAttribute("measureType").equalsIgnoreCase("Number of Customers")) {
-					continue;
-				}
-
-				if (!currentMeasure.getAttribute("station").equalsIgnoreCase(stationName)) {
-					continue;
-				}
-
-				if (!currentMeasure.getAttribute("class").equalsIgnoreCase(className)) {
-					continue;
-				}
-
-				String success = currentMeasure.getAttribute("successful");
-
-				if (success.equalsIgnoreCase("true")) {
-					String measureValue = currentMeasure.getAttribute("meanValue");
-					logger.debug("Q measure found for " + stationName + "-" + className + ": " + measureValue);
-					return Double.parseDouble(measureValue);
-				} else {
-					logger.debug("Q measure found for " + stationName + "-" + className + ": NOT SUCCESSFUL");
-					return -1;
-				}
-			}
-
-			//else measure not found
-			logger.debug("Q measure not found for " + stationName + "-" + className);
-			return -1;
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.debug("Q measure not found for " + stationName + "-" + className);
-			return -1;
-		}
-
 	}
 
 }

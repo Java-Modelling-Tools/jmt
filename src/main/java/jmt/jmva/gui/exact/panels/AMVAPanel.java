@@ -71,14 +71,14 @@ public final class AMVAPanel extends JPanel {
 		DISABLED_WHATIF(LABEL_ALGORITHM_WHATIF, false, false, false);
 		
 		private String algorithmLabel;
-		private boolean tolleranceVisible;
+		private boolean toleranceVisible;
 		private boolean selectorVisible;
         private boolean maxSamplesVisible;
 		
-		private PanelStatus(String algorithmLabel, boolean selectorVisible, boolean tolleranceVisible, boolean maxSamplesVisible) {
+		private PanelStatus(String algorithmLabel, boolean selectorVisible, boolean toleranceVisible, boolean maxSamplesVisible) {
 			this.algorithmLabel = algorithmLabel;
 			this.selectorVisible = selectorVisible;
-			this.tolleranceVisible = tolleranceVisible;
+			this.toleranceVisible = toleranceVisible;
             this.maxSamplesVisible = maxSamplesVisible;
 		}
 	
@@ -211,7 +211,7 @@ public final class AMVAPanel extends JPanel {
 		tolLabel = new JLabel("  Tolerance:");
 		tolLabel.setMaximumSize(d);
 		tolLabel.setFocusable(false);
-		tolLabel.setVisible(status.tolleranceVisible);
+		tolLabel.setVisible(status.toleranceVisible);
 		return tolLabel;
 	}
 
@@ -224,7 +224,7 @@ public final class AMVAPanel extends JPanel {
 		tolerance.setFocusable(true);
 		tolerance.addKeyListener(ACTION_CHANGE_TOLERANCE);
 		tolerance.addFocusListener(ACTION_CHANGE_TOLERANCE);
-		tolerance.setVisible(status.tolleranceVisible);
+		tolerance.setVisible(status.toleranceVisible);
 		return tolerance;
 	}
 
@@ -306,8 +306,8 @@ public final class AMVAPanel extends JPanel {
 		algLabel.setText(newStatus.algorithmLabel);
         algLabel.setEnabled(newStatus != PanelStatus.DISABLED_WHATIF);
         algorithmList.setVisible(newStatus.selectorVisible);
-		tolLabel.setVisible(newStatus.tolleranceVisible);
-		tolerance.setVisible(newStatus.tolleranceVisible);
+		tolLabel.setVisible(newStatus.toleranceVisible);
+		tolerance.setVisible(newStatus.toleranceVisible);
         maxSampleLabel.setVisible(newStatus.maxSamplesVisible);
         maxSamples.setVisible(newStatus.maxSamplesVisible);
 		status = newStatus;

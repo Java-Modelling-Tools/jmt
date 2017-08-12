@@ -107,7 +107,6 @@ public class CommandLineTest {
 				FileUtils.contentEquals(input, expected));			
 	}
 
-
 	@Test
 	public void fileNotXmlFailedJMVAtest() throws IOException, URISyntaxException {
 		CommandLineSolver solver = new CommandLineSolver();
@@ -178,7 +177,7 @@ public class CommandLineTest {
 		}
 		solver.solve();
 		System.out.println("solved");
-		System.out.print(solver);
+		System.out.println(solver);
 		if ((Math.abs(2.667 - solver.getThroughput(0, 0)) >= 0.001) || (Math.abs(1.794 - solver.getThroughput(0, 1)) >= 0.001)
 				|| (Math.abs(4.576 - solver.getThroughput(0, 2)) >= 0.001) || (Math.abs(0.320 - solver.getThroughput(1, 0)) >= 0.001)
 				|| (Math.abs(2.421 - solver.getThroughput(1, 1)) >= 0.001) || (Math.abs(0.558 - solver.getThroughput(1, 2)) >= 0.001)
@@ -241,7 +240,7 @@ public class CommandLineTest {
 		}
 		solver.solve();
 		System.out.println("solved");
-		System.out.print(solver);
+		System.out.println(solver);
 		if ((Math.abs(2.667 - solver.getThroughput(0, 0)) >= 0.001) || (Math.abs(1.794 - solver.getThroughput(0, 1)) >= 0.001)
 				|| (Math.abs(4.576 - solver.getThroughput(0, 2)) >= 0.001) || (Math.abs(0.320 - solver.getThroughput(1, 0)) >= 0.001)
 				|| (Math.abs(2.421 - solver.getThroughput(1, 1)) >= 0.001) || (Math.abs(0.558 - solver.getThroughput(1, 2)) >= 0.001)

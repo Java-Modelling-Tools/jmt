@@ -297,11 +297,10 @@ public interface CommonConstants {
 	public static final String PAR1 = "%PAR1%";
 	public static final String PAR2 = "%PAR2%";
 
-	//ARIF: number of maximum job can be 64 for JSIMgraph
-	public static final int MAX_NUMBER_OF_CLASSES = 64;
-	public static final int MAX_NUMBER_OF_STATIONS = 1000;
-	public static final int MAX_NUMBER_OF_REGIONS = 1000;
-	public static final int MAX_NUMBER_OF_GROUPS = 64;
+	public static final int MAX_NUMBER_OF_CLASSES = 1024;
+	public static final int MAX_NUMBER_OF_GROUPS = 1024;
+	public static final int MAX_NUMBER_OF_STATIONS = 1024;
+	public static final int MAX_NUMBER_OF_REGIONS = 1024;
 
 	public static final String ALL_CLASSES = "--- All Classes ---";
 	public static final String ALL_MODES = "--- All Modes ---";

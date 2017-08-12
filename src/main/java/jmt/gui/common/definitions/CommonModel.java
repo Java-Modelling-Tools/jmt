@@ -64,7 +64,7 @@ import jmt.gui.common.transitionUtilities.TransitionMatrix;
  * 
  * Modified by Ashanka (May 2010):
  * Patch: Multi-Sink Perf. Index
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -1723,16 +1723,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		Vector<Object> normalOutputs = new Vector<Object>();
 		normalOutputs.addAll(outputs);
 		if (getClassType(classKey) == CLASS_TYPE_CLOSED) {
-			boolean allSink = true;
 			for (int i = 0; i < outputs.size(); i++) {
 				if (getStationType(outputs.get(i)).equals(STATION_TYPE_SINK)) {
 					normalOutputs.remove(outputs.get(i));
-				} else {
-					allSink = false;
 				}
-			}
-			if (allSink) {
-				normalOutputs.addAll(outputs);
 			}
 		}
 
@@ -1783,9 +1777,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 		double totalSum = 0.0;
 		for (int i = 0; i < probabilities.length; i++) {
-			if (probabilities[i] != null) {
-				totalSum += probabilities[i].doubleValue();
-			}
+			totalSum += probabilities[i].doubleValue();
 		}
 		for (int i = 0; i < probabilities.length; i++) {
 			if (totalSum == 0.0) {
@@ -2151,11 +2143,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (source.type.equals(STATION_TYPE_SINK)) {
 			return false;
 		}
-		// No connection between a router, fork, join, logger, semaphore, scaler, place or transition and itself
+		// No connection between a router, fork, join, logger, class switch,
+		// semaphore, scaler, place or transition and itself
 		if (sourceKey == targetKey
 				&& (source.type.equals(STATION_TYPE_ROUTER) || source.type.equals(STATION_TYPE_FORK) || source.type.equals(STATION_TYPE_JOIN)
-						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_SEMAPHORE) || source.type.equals(STATION_TYPE_SCALER)
-						|| source.type.equals(STATION_TYPE_PLACE) || source.type.equals(STATION_TYPE_TRANSITION))) {
+						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_CLASSSWITCH) || source.type.equals(STATION_TYPE_SEMAPHORE)
+						|| source.type.equals(STATION_TYPE_SCALER) || source.type.equals(STATION_TYPE_PLACE) || source.type.equals(STATION_TYPE_TRANSITION))) {
 			return false;
 		}
 		//no direct connections from source to sink
@@ -2165,8 +2158,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				&& (target.type.equals(STATION_TYPE_SOURCE) || target.type.equals(STATION_TYPE_SINK) || target.type.equals(STATION_TYPE_TERMINAL))) {
 			return false;
 		}
-		// A place can only be connected to a transition.
-		// A transition can only be connected from a place.
+		// A place can only be connected to a transition
+		// A transition can only be connected from a place
 		if ((source.type.equals(STATION_TYPE_PLACE) && !target.type.equals(STATION_TYPE_TRANSITION))
 				|| (target.type.equals(STATION_TYPE_TRANSITION) && !source.type.equals(STATION_TYPE_PLACE))) {
 			return false;
@@ -2396,46 +2389,42 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Tells if a given measure is global
-	 * @param key search's key for given measure
+	 * @param type type of given measure
 	 * @return true if measure is global
 	 */
 	@Override
-	public boolean isGlobalMeasure(Object key) {
-		String type = getMeasureType(key);
+	public boolean isGlobalMeasure(String type) {
 		return type.equals(MEASURE_S_X) || type.equals(MEASURE_S_RP) || type.equals(MEASURE_S_CN)
 				|| type.equals(MEASURE_S_DR) || type.equals(MEASURE_S_P);
 	}
 
 	/**
 	 * Tells if a given measure is for sinks only
-	 * @param key search's key for given measure
+	 * @param type type of given measure
 	 * @return true if measure is for sinks only
 	 */
 	@Override
-	public boolean isSinkMeasure(Object key) {
-		String type = getMeasureType(key);
+	public boolean isSinkMeasure(String type) {
 		return type.equals(MEASURE_RP_PER_SINK) || type.equals(MEASURE_X_PER_SINK);
 	}
 
 	/**
 	 * Tells if a given measure is for blocking regions only
-	 * @param key search's key for given measure
+	 * @param type type of given measure
 	 * @return true if measure is for blocking regions only
 	 */
 	@Override
-	public boolean isFCRMeasure(Object key) {
-		String type = getMeasureType(key);
+	public boolean isFCRMeasure(String type) {
 		return type.equals(MEASURE_FCR_TW) || type.equals(MEASURE_FCR_MO);
 	}
 
 	/**
 	 * Tells if a given measure is for fork/join sections only
-	 * @param key search's key for given measure
+	 * @param type type of given measure
 	 * @return true if measure is for fork/join sections only
 	 */
 	@Override
-	public boolean isFJMeasure(Object key) {
-		String type = getMeasureType(key);
+	public boolean isFJMeasure(String type) {
 		return type.equals(MEASURE_FJ_CN) || type.equals(MEASURE_FJ_RP);
 	}
 

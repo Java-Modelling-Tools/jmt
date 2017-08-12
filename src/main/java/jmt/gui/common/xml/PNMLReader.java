@@ -43,6 +43,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.distributions.Distribution.Parameter;
+import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
@@ -355,9 +356,9 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 	 * @param model data structure of the model
 	 */
 	private static void parseSpecificNetParameters(Element elem, CommonModel model) {
+		Object classKey = model.getClassKeys().get(0);
 		Element tokens = getFirstChildElementByTagName(elem, PNML_JSIM_E_NET_TOKENS);
 		if (tokens != null) {
-			Object classKey = model.getClassKeys().get(0);
 			Element name = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_CLASS_NAME);
 			if (name != null) {
 				model.setClassName(classKey, name.getTextContent());
@@ -392,13 +393,13 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 	 * @param place search key for the place
 	 */
 	private static void parseSpecificPlaceParameters(Element elem, CommonModel model, Object place) {
+		Object classKey = model.getClassKeys().get(0);
 		Element capacity = getFirstChildElementByTagName(elem, PNML_JSIM_E_PLACE_CAPACITY);
 		if (capacity != null) {
-			Object classKey = model.getClassKeys().get(0);
 			model.setQueueCapacity(place, classKey, Integer.valueOf(capacity.getTextContent()));
-			if (model.getQueueCapacity(place, classKey).intValue() < 1) {
-				model.setQueueCapacity(place, classKey, Integer.valueOf(-1));
-			}
+		}
+		if (model.getQueueCapacity(place, classKey).intValue() < 1) {
+			model.setQueueCapacity(place, classKey, Integer.valueOf(-1));
 		}
 	}
 
@@ -425,11 +426,22 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 					Element distribution = getFirstChildElementByTagName(firingTimeDistribution, PNML_JSIM_E_DISTRIBUTION);
 					model.setFiringTimeDistribution(transition, 0, parseDistribution(distribution));
 				}
+				if (!(model.getFiringTimeDistribution(transition, 0) instanceof Distribution)) {
+					model.setFiringTimeDistribution(transition, 0, new Exponential());
+				}
+
+				if (numberOfServers == null) {
+					model.setNumberOfServers(transition, 0, Integer.valueOf(-1));
+				}
 
 				model.setFiringPriority(transition, 0, Integer.valueOf(-1));
 				model.setFiringWeight(transition, 0, Double.valueOf(1.0));
 			} else {
 				model.setFiringTimeDistribution(transition, 0, new ZeroStrategy());
+
+				if (numberOfServers == null) {
+					model.setNumberOfServers(transition, 0, Integer.valueOf(1));
+				}
 
 				Element firingPriority = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_PRIORITY);
 				if (firingPriority != null) {

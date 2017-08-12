@@ -42,11 +42,11 @@ import jmt.engine.NodeSections.ServiceSection;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
-import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.SimParameters;
 import jmt.engine.random.Distribution;
+
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -69,7 +69,7 @@ import org.xml.sax.SAXNotSupportedException;
  *       
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -99,8 +99,6 @@ public class SimLoader {
 	 */
 	public SimLoader(String xmlPath) throws IOException, LoadException {
 		simModelPath = xmlPath;
-		//xmlPath = "/home/js/Documents/~JModelSimulation3852173409779516183.xml";
-		//xmlPath = "/home/js/Documents/~JModelSimulation5554792256213153684.xml";
 		InputStream is = new BufferedInputStream(new FileInputStream(xmlPath));
 		//loads the model and creates a Simulation object
 		load(is);
@@ -249,7 +247,7 @@ public class SimLoader {
 
 			// NEW Bertoli Marco -- Disables confidence interval as stopping criteria
 			if (root.hasAttribute("disableStatisticStop")) {
-				simParam.setDisableStatisticStop(root.getAttribute("disableStatisticStop").equalsIgnoreCase(Boolean.TRUE.toString()));
+				simParam.setDisableStatisticStop(root.getAttribute("disableStatisticStop").equalsIgnoreCase("true"));
 			}
 			//END
 
@@ -387,7 +385,7 @@ public class SimLoader {
 			for (int i = 0; i < measureList.getLength(); i++) {
 				Element e = (Element) measureList.item(i);
 
-				int measureType = obtainMeasureType(e.getAttribute("type"));
+				int measureType = EngineUtils.decodeMeasureType(e.getAttribute("type"));
 				//throughput measure requires an InverseMeasure object!!
 				if (EngineUtils.isInverseMeasure(measureType)) {
 					//throughput measure
@@ -475,15 +473,9 @@ public class SimLoader {
 						String pop = ((Element) initialPops.item(c)).getAttribute("population");
 						String className = ((Element) initialPops.item(c)).getAttribute("refClass");
 
-						int jobClassPosition = getJobClassPosition(className);
-						if (jobClassPosition == -1) {
-							//the specified name does not correspond to any existing job class
-							//ignore this preload entry
-							continue;
-						} else {
-							//sets the value in the correct position (using the class ID)
-							initialP[s][jobClassPosition] = Integer.parseInt(pop);
-						}
+						int classPosition = findClassPosition(className);
+						//sets the value in the correct position (using the class ID)
+						initialP[s][classPosition] = Integer.parseInt(pop);
 					}
 				}
 
@@ -588,7 +580,7 @@ public class SimLoader {
 	}
 
 	/**
-	 * creates a parameter object given the corresponding description of the tag.
+	 * Creates a parameter object given the corresponding description of the tag.
 	 * @param param
 	 * @throws jmt.common.exception.LoadException
 	 */
@@ -880,25 +872,8 @@ public class SimLoader {
 		return null;
 	}
 
-	//finds the position of the classes from the giving names
-	private int findClassPosition(String name) {
-		for (int j = 0; j < jobClasses.length; j++) {
-			JobClass aClass = jobClasses[j];
-			if (aClass.getName().equals(name)) {
-				return j;
-			}
-		}
-		//class not found
-		return -1;
-	}
-
-	// An array of names for DOM node-types
-	// (Array indices = nodeType() values.)
-	static final String[] typeName = { "none", "Element", "Attr", "Text", "CDATA", "EntityRef", "Entity", "ProcInstr", "Comment", "Document",
-			"DocType", "DocFragment", "Notation", };
-
 	/**
-	 * gets an appropriate constructor for c given the paramClasses
+	 * Gets an appropriate constructor for c given the paramClasses
 	 * @param c
 	 * @param paramClasses
 	 * @return found constructor
@@ -939,62 +914,11 @@ public class SimLoader {
 	}
 
 	/**
-	 * Finds the <tt>int</tt> type of measure corresponding to the <tt>String</tt>
-	 * type of measure
-	 *
-	 * @param measure the String type of measure
-	 * @return the int type of measure
-	 */
-	private int obtainMeasureType(String measure) {
-		if (measure.equalsIgnoreCase("Number of Customers")) {
-			return SimConstants.QUEUE_LENGTH;
-		} else if (measure.equalsIgnoreCase("Queue Time")) {
-			return SimConstants.QUEUE_TIME;
-		} else if (measure.equalsIgnoreCase("Response Time")) {
-			return SimConstants.RESPONSE_TIME;
-		} else if (measure.equalsIgnoreCase("Residence Time")) {
-			return SimConstants.RESIDENCE_TIME;
-		} else if (measure.equalsIgnoreCase("Utilization")) {
-			return SimConstants.UTILIZATION;
-		} else if (measure.equalsIgnoreCase("Throughput")) {
-			return SimConstants.THROUGHPUT;
-		} else if (measure.equalsIgnoreCase("Drop Rate")) {
-			return SimConstants.DROP_RATE;
-		} else if (measure.equalsIgnoreCase("System Response Time")) {
-			return SimConstants.SYSTEM_RESPONSE_TIME;
-		} else if (measure.equalsIgnoreCase("System Throughput")) {
-			return SimConstants.SYSTEM_THROUGHPUT;
-		} else if (measure.equalsIgnoreCase("System Number of Customers")) {
-			return SimConstants.SYSTEM_NUMBER_OF_JOBS;
-		} else if (measure.equalsIgnoreCase("System Drop Rate")) {
-			return SimConstants.SYSTEM_DROP_RATE;
-		} else if (measure.equalsIgnoreCase("System Power")) {
-			return SimConstants.SYSTEM_POWER;
-		} else if (measure.equalsIgnoreCase("Response Time per Sink")) {
-			return SimConstants.RESPONSE_TIME_PER_SINK;
-		} else if (measure.equalsIgnoreCase("Throughput per Sink")) {
-			return SimConstants.THROUGHPUT_PER_SINK;
-		} else if (measure.equalsIgnoreCase("FCR Total Weight")) {
-			return SimConstants.FCR_TOTAL_WEIGHT;
-		} else if (measure.equalsIgnoreCase("FCR Memory Occupation")) {
-			return SimConstants.FCR_MEMORY_OCCUPATION;
-		} else if (measure.equalsIgnoreCase("Fork Join Number of Customers")) {
-			return SimConstants.FORK_JOIN_NUMBER_OF_JOBS;
-		} else if (measure.equalsIgnoreCase("Fork Join Response Time")) {
-			return SimConstants.FORK_JOIN_RESPONSE_TIME;
-		} else if (measure.equalsIgnoreCase("Firing Throughput")) {
-			return SimConstants.FIRING_THROUGHPUT;
-		} else {
-			return SimConstants.QUEUE_LENGTH;
-		}
-	}
-
-	/**
-	 * Find the position of the specified class
+	 * Finds the position of the specified class
 	 * @param className the name of the class
 	 * @return the position if such class exists, -1 otherwise
 	 */
-	private int getJobClassPosition(String className) {
+	private int findClassPosition(String className) {
 		if (jobClasses == null) {
 			//classes not loaded yet
 			return -1;
@@ -1004,7 +928,7 @@ public class SimLoader {
 		JobClass jobClass;
 		for (int c = 0; c < jobClasses.length; c++) {
 			jobClass = jobClasses[c];
-			if (jobClass.getName().equalsIgnoreCase(className)) {
+			if (jobClass.getName().equals(className)) {
 				//it is the class we are searching for
 				return c;
 			}
@@ -1014,7 +938,7 @@ public class SimLoader {
 	}
 
 	/**
-	 * Load blocking region from input XML file
+	 * Loads blocking region from input XML file
 	 * @param root root element of XML file
 	 * @param regionList a NodeList data structure with all blocking regions
 	 * @throws LoadException if some problems occurs during loading
@@ -1090,6 +1014,10 @@ public class SimLoader {
 			//init
 			if (dropRules.getLength() == 0) {
 				//no drop rules specified: use default drop values (drop open and keep closed)
+				if (DEBUG) {
+					System.out.println("Loading default drop rules...");
+				}
+
 				for (int c = 0; c < classNumber; c++) {
 					int classType = jobClasses[c].getType();
 					if (classType == JobClass.OPEN_CLASS) {
@@ -1100,9 +1028,6 @@ public class SimLoader {
 						dropThisClass[c] = false;
 					}
 				}
-				if (DEBUG) {
-					System.out.println("Loading default drop rules...");
-				}
 			} else {
 				//drop rules specified by user
 				if (DEBUG) {
@@ -1110,23 +1035,15 @@ public class SimLoader {
 				}
 
 				Element dropRule = null;
-				int classPosition;
 				String className;
+				int classPosition;
 
 				for (int dr = 0; dr < dropRules.getLength(); dr++) {
 					dropRule = (Element) dropRules.item(dr);
-
 					className = dropRule.getAttribute("jobClass");
-
 					//entries may be in a wrong order: find the right position
-					classPosition = getJobClassPosition(className);
-
-					if (classPosition == -1) {
-						//class not exists
-						throw new LoadException("The job class associated to this drop rule does not exist in model");
-					} else {
-						dropThisClass[classPosition] = dropRule.getAttribute("dropThisClass").equalsIgnoreCase("true");
-					}
+					classPosition = findClassPosition(className);
+					dropThisClass[classPosition] = dropRule.getAttribute("dropThisClass").equalsIgnoreCase("true");
 
 					if (DEBUG) {
 						System.out.println("   drop for class " + className + " = " + dropThisClass[classPosition]);
@@ -1144,24 +1061,15 @@ public class SimLoader {
 
 			if (classConstraints.getLength() > 0) {
 				Element clsConst = null;
-				int classPosition;
 				String className;
+				int classPosition;
 
 				for (int cc = 0; cc < classConstraints.getLength(); cc++) {
 					clsConst = (Element) classConstraints.item(cc);
-
 					className = clsConst.getAttribute("jobClass");
-
 					//entries may be in a wrong order: find the right position
-					classPosition = getJobClassPosition(className);
-
-					if (classPosition == -1) {
-						//class not exists
-						throw new LoadException("The job class associated to this constraint does not exist in model");
-					} else {
-						//set max capacity for this class
-						maxCapacityPerClass[classPosition] = Double.parseDouble(clsConst.getAttribute("maxJobsPerClass"));
-					}
+					classPosition = findClassPosition(className);
+					maxCapacityPerClass[classPosition] = Double.parseDouble(clsConst.getAttribute("maxJobsPerClass"));
 
 					if (DEBUG) {
 						System.out.println("   constraint for class " + className + " = " + Double.toString(maxCapacityPerClass[classPosition]));
@@ -1179,24 +1087,15 @@ public class SimLoader {
 
 			if (classMemoryConstraints.getLength() > 0) {
 				Element clsMemConst = null;
-				int classPosition;
 				String className;
+				int classPosition;
 
 				for (int cmc = 0; cmc < classMemoryConstraints.getLength(); cmc++) {
 					clsMemConst = (Element) classMemoryConstraints.item(cmc);
-
 					className = clsMemConst.getAttribute("jobClass");
-
 					//entries may be in a wrong order: find the right position
-					classPosition = getJobClassPosition(className);
-
-					if (classPosition == -1) {
-						//class not exists
-						throw new LoadException("The job class associated to this memory constraint does not exist in model");
-					} else {
-						//set max memory for this class
-						maxMemoryPerClass[classPosition] = Double.parseDouble(clsMemConst.getAttribute("maxMemoryPerClass"));
-					}
+					classPosition = findClassPosition(className);
+					maxMemoryPerClass[classPosition] = Double.parseDouble(clsMemConst.getAttribute("maxMemoryPerClass"));
 
 					if (DEBUG) {
 						System.out.println("   memory constraint for class " + className + " = " + Double.toString(maxMemoryPerClass[classPosition]));
@@ -1213,23 +1112,15 @@ public class SimLoader {
 
 			if (classWeights.getLength() > 0) {
 				Element clsWeight = null;
-				int classPosition;
 				String className;
+				int classPosition;
 
 				for (int cw = 0; cw < classWeights.getLength(); cw++) {
 					clsWeight = (Element) classWeights.item(cw);
-
 					className = clsWeight.getAttribute("jobClass");
-
 					//entries may be in a wrong order: find the right position
-					classPosition = getJobClassPosition(className);
-
-					if (classPosition == -1) {
-						//class not exists
-						throw new LoadException("The job class associated to this weight does not exist in model");
-					} else {
-						regionClassWeights[classPosition] = Double.parseDouble(clsWeight.getAttribute("weight"));
-					}
+					classPosition = findClassPosition(className);
+					regionClassWeights[classPosition] = Double.parseDouble(clsWeight.getAttribute("weight"));
 
 					if (DEBUG) {
 						System.out.println("   weight for class " + className + " = " + Double.toString(regionClassWeights[classPosition]));
@@ -1246,23 +1137,15 @@ public class SimLoader {
 
 			if (classSizes.getLength() > 0) {
 				Element clsSize = null;
-				int classPosition;
 				String className;
+				int classPosition;
 
 				for (int cs = 0; cs < classSizes.getLength(); cs++) {
 					clsSize = (Element) classSizes.item(cs);
-
 					className = clsSize.getAttribute("jobClass");
-
 					//entries may be in a wrong order: find the right position
-					classPosition = getJobClassPosition(className);
-
-					if (classPosition == -1) {
-						//class not exists
-						throw new LoadException("The job class associated to this memory size does not exist in model");
-					} else {
-						regionClassSizes[classPosition] = Double.parseDouble(clsSize.getAttribute("size"));
-					}
+					classPosition = findClassPosition(className);
+					regionClassSizes[classPosition] = Double.parseDouble(clsSize.getAttribute("size"));
 
 					if (DEBUG) {
 						System.out.println("   size for class " + className + " = " + Double.toString(regionClassSizes[classPosition]));
@@ -1298,7 +1181,7 @@ public class SimLoader {
 				groupClassIndexLists.add(new ArrayList<Integer>());
 				for (int k = 0; k < groupClasses.getLength(); k++) {
 					Element groupClass = (Element) groupClasses.item(k);
-					int classIndex = getJobClassPosition(groupClass.getAttribute("jobClass"));
+					int classIndex = findClassPosition(groupClass.getAttribute("jobClass"));
 					groupClassIndexLists.get(j).add(classIndex);
 				}
 			}

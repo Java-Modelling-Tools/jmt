@@ -29,6 +29,7 @@ import jmt.engine.QueueNet.ForkJobInfo;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
@@ -66,6 +67,8 @@ public class Fork extends OutputSection {
 	private Boolean isSimplifiedFork;
 
 	private ForkStrategy[] forkStrategies;
+
+	private JobClassList jobClasses;
 
 	private int droppedJobs;
 	private int[] droppedJobsPerClass;
@@ -120,11 +123,12 @@ public class Fork extends OutputSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
+		jobClasses = getJobClasses();
 		droppedJobs = 0;
-		droppedJobsPerClass = new int[getJobClasses().size()];
+		droppedJobsPerClass = new int[jobClasses.size()];
 		Arrays.fill(droppedJobsPerClass, 0);
 		switchedJobs = 0;
-		switchedJobsPerClass = new int[getJobClasses().size()];
+		switchedJobsPerClass = new int[jobClasses.size()];
 		Arrays.fill(switchedJobsPerClass, 0);
 		nodeJobsList = node.getJobInfoList();
 		randomEngine = RandomEngine.makeDefault();
@@ -187,7 +191,7 @@ public class Fork extends OutputSection {
 				NetNode outNode = it.next();
 				if (isSimplifiedFork) {
 					for (int n = 0; n < jobsPerLink; n++) {
-						ForkJob newJob = new ForkJob(jobClass, newJobInfo);
+						ForkJob newJob = new ForkJob(jobClass, jobClasses.size(), newJobInfo);
 						// Sends new job to the following station
 						send(newJob, 0.0, outNode);
 					}
@@ -197,7 +201,7 @@ public class Fork extends OutputSection {
 					int index = 0;
 					for (JobClass c : outputInfo.getClassesWithNum(outNode).keySet()) {
 						for (int n = 0; n < outputInfo.getClassesWithNum(outNode).get(c).intValue(); n++) {
-							newJobPermutation[index] = new ForkJob(c, newJobInfo);
+							newJobPermutation[index] = new ForkJob(c, jobClasses.size(), newJobInfo);
 							index++;
 						}
 						if (outputInfo.getClassesWithNum(outNode).get(c).intValue() > 0 && !hasBeenClass(c, job)) {

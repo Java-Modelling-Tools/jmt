@@ -158,7 +158,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		this.measureDefinition = measureDefinition;
 		this.measureIndex = measureIndex;
 		windowName = measureDefinition.getName(measureIndex);
-		inverseMeasure = EngineUtils.isInverseMeasure(measureDefinition.getMeasureType(measureIndex));
+		String measureType = measureDefinition.getMeasureType(measureIndex);
+		inverseMeasure = EngineUtils.isInverseMeasure(EngineUtils.decodeMeasureType(measureType));
 		try {
 			this.sop = new StatisticalOutputsLoader(measureDefinition, measureIndex);
 			initGUI();

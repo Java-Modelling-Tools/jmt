@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="hyperexp-01.jsimg" timestamp="Mon Apr 11 22:04:36 BST 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\gcasale/JMT/" logReplaceMode="0" maxSamples="1000000" name="hyperexp-01.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="hyperexp-01-input.xml" timestamp="Sat Aug 12 17:17:04 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="hyperexp-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class1" priority="0" referenceSource="Source 1" type="open"/>
 <node name="Source 1">
 <section className="RandomSource">
@@ -79,7 +79,7 @@
 <node name="Sink 1">
 <section className="JobSink"/>
 </node>
-<measure alpha="0.01" name="System Response Time" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
 <connection source="Source 1" target="Queue 1"/>
 <connection source="Queue 1" target="Sink 1"/>
 </sim>
@@ -95,5 +95,4 @@
 <position rotate="false" x="315.0" y="89.0"/>
 </station>
 </jmodel>
-
 </archive>

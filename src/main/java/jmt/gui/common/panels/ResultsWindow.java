@@ -52,7 +52,6 @@ import javax.swing.JToolBar;
 import javax.swing.SpringLayout;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
-import jmt.engine.QueueNet.SimConstants;
 
 import jmt.engine.log.JSimLogger;
 import jmt.framework.gui.components.JMTFrame;
@@ -66,7 +65,6 @@ import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.ResultsConstants;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.editors.StatisticalOutputsWindow;
-import jmt.gui.common.xml.XMLConstantNames;
 
 /**
  * <p>Title: Results Window</p>
@@ -84,7 +82,7 @@ import jmt.gui.common.xml.XMLConstantNames;
  * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -95,6 +93,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 
 	private final String TITLE = "Simulation Results";
 
+	private SimulationDefinition sd;
 	private MeasureDefinition results;
 	private AbortMeasure abort;
 	private JButton start;
@@ -109,22 +108,25 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 
 	/**
 	 * Creates a new ResultsWindow
-	 * @param results results data structure
+	 * @param sd simulation definition data structure
 	 * @param fileName name of simulation file
 	 */
-	public ResultsWindow(MeasureDefinition results, String fileName) {
-		this.results = results;
+	public ResultsWindow(SimulationDefinition sd, String fileName) {
+		this.sd = sd;
+		this.results = sd.getSimulationResults();
 		this.updateTitle(fileName);
 		initGUI();
 	}
 
 	/**
 	 * Creates a new ResultsWindow
-	 * @param results results data structure
+	 * @param sd simulation definition data structure
 	 * @param abort object used to implement abort button action
+	 * @param fileName name of simulation file
 	 */
-	public ResultsWindow(MeasureDefinition results, AbortMeasure abort, String fileName) {
-		this.results = results;
+	public ResultsWindow(SimulationDefinition sd, AbortMeasure abort, String fileName) {
+		this.sd = sd;
+		this.results = sd.getSimulationResults();
 		this.abort = abort;
 		this.updateTitle(fileName);
 		initGUI();
@@ -150,9 +152,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_U, DESCRIPTION_UTILIZATION, results.getUtilizationMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X, DESCRIPTION_THROUGHPUT, results.getThroughputMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_DR, DESCRIPTION_DROP_RATE, results.getDropRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RP, DESCRIPTION_SYSTEM_RESPONSE_TIME, results.getSystemResponseTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_X, DESCRIPTION_SYSTEM_THROUGHPUT, results.getSystemThroughputMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_DR, DESCRIPTION_SYSTEM_DROP_RATE, results.getSystemDropRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_P, DESCRIPTION_SYSTEM_POWER, results.getSystemPowerMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP_PER_SINK, DESCRIPTION_RESPONSE_TIME_PER_SINK, results.getResponsetimePerSinkMeasures());
@@ -370,7 +372,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			JPanel dataPanel = new JPanel(new SpringLayout());
 			// Station name
 			label = new JLabel();
-			if (md.getNodeType(measureIndex).equalsIgnoreCase(XMLConstantNames.NODETYPE_REGION)) {
+			if (sd.isFCRMeasure(md.getMeasureType(measureIndex))) {
 				label.setText("Region Name: ");
 			} else {
 				label.setText("Station Name: ");
@@ -382,7 +384,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			// If station name is undefined, disables its fields
 			String stationName = md.getStationName(measureIndex);
 			if (stationName != null && !stationName.equals("")) {
-				if (SimConstants.isFJMeasure(md.getMeasureType(measureIndex))) {
+				if (sd.isFJMeasure(md.getMeasureType(measureIndex))) {
 					field.setText(stationName + " (Fork Join)");
 				} else {
 					field.setText(stationName);
@@ -396,7 +398,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			dataPanel.add(field);
 			// Class name
 			label = new JLabel();
-			if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+			if (md.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {
 				label.setText("Mode Name: ");
 			} else {
 				label.setText("Class Name: ");
@@ -409,13 +411,13 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			String className = md.getClassName(measureIndex);
 			if (className != null && !className.equals("")) {
 				field.setText(className);
-				if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+				if (md.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {
 					field.setToolTipText("Name of the mode: " + field.getText());
 				} else {
 					field.setToolTipText("Name of the class: " + field.getText());
 				}
 			} else {
-				if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+				if (md.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {
 					field.setText(ResultsConstants.ALL_MODES);
 					field.setToolTipText("This measure is an aggregate of every mode");
 				} else {

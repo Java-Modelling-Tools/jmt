@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="indices-01.jsimg" timestamp="Sat Apr 23 14:42:08 BST 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\gcasale/JMT/" logReplaceMode="0" maxSamples="1000000" name="indices-01.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="indices-01-input.xml" timestamp="Sat Aug 12 17:17:17 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="indices-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class1" priority="0" referenceSource="Source 1" type="open"/>
 <node name="Source 1">
 <section className="RandomSource">
@@ -73,18 +73,18 @@
 <node name="Sink 1">
 <section className="JobSink"/>
 </node>
-<measure alpha="0.01" name="System Response Time" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
 <measure alpha="0.01" name="Queue 1_Utilization" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Utilization" verbose="false"/>
 <measure alpha="0.01" name="Queue 1_Throughput" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Throughput" verbose="false"/>
-<measure alpha="0.01" name="System Power" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Power" verbose="false"/>
-<measure alpha="0.01" name="System Number of Customers" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="System Power" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Power" verbose="false"/>
+<measure alpha="0.01" name="System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Number of Customers" verbose="false"/>
 <measure alpha="0.01" name="Queue 1_Response Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Response Time" verbose="false"/>
 <measure alpha="0.01" name="Queue 1_Residence Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Residence Time" verbose="false"/>
 <measure alpha="0.01" name="Queue 1_Queue Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Queue Time" verbose="false"/>
 <measure alpha="0.01" name="Queue 1_Number of Customers" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Number of Customers" verbose="false"/>
 <measure alpha="0.01" name="Sink 1_Response Time per Sink" nodeType="station" precision="0.03" referenceNode="Sink 1" referenceUserClass="" type="Response Time per Sink" verbose="false"/>
 <measure alpha="0.01" name="Sink 1_Throughput per Sink" nodeType="station" precision="0.03" referenceNode="Sink 1" referenceUserClass="" type="Throughput per Sink" verbose="false"/>
-<measure alpha="0.01" name="System Drop Rate" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Drop Rate" verbose="false"/>
+<measure alpha="0.01" name="System Drop Rate" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Drop Rate" verbose="false"/>
 <measure alpha="0.01" name="Queue 1_Drop Rate" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Drop Rate" verbose="false"/>
 <connection source="Source 1" target="Queue 1"/>
 <connection source="Queue 1" target="Sink 1"/>
@@ -101,5 +101,4 @@
 <position rotate="false" x="315.0" y="89.0"/>
 </station>
 </jmodel>
-
 </archive>

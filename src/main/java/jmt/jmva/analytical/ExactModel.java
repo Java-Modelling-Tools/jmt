@@ -70,7 +70,7 @@ public class ExactModel implements ExactConstants  {
 	private int maxSamples = SolverMultiClosedMonteCarlo.MAX_SAMPLES;
 	//Names of the algorithms to be compared
 	private Set<SolverAlgorithm> whatifAlgorithms;
-	private Map<SolverAlgorithm, Double> whatifAlgorithmsTollerance;
+	private Map<SolverAlgorithm, Double> whatifAlgorithmsTolerance;
 	/* END */
 
 	//true if the model is closed
@@ -234,7 +234,7 @@ public class ExactModel implements ExactConstants  {
 		tolerance = e.tolerance;
 		maxSamples = e.maxSamples;
 		whatifAlgorithms = EnumSet.copyOf(e.whatifAlgorithms);
-		whatifAlgorithmsTollerance = new EnumMap<SolverAlgorithm, Double>(e.whatifAlgorithmsTollerance);
+		whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(e.whatifAlgorithmsTolerance);
 
 		visits = ArrayUtils.copy2(e.visits);
 
@@ -321,7 +321,7 @@ public class ExactModel implements ExactConstants  {
 	 * @return the tolerance
 	 */
 	public double getWhatifAlgorithmTolerance(SolverAlgorithm algorithm) {
-		Double val = whatifAlgorithmsTollerance.get(algorithm);
+		Double val = whatifAlgorithmsTolerance.get(algorithm);
 		if (val != null) {
 			return val;
 		} else {
@@ -335,7 +335,7 @@ public class ExactModel implements ExactConstants  {
 	 * @param value the tolerance
 	 */
 	public void setWhatifAlgorithmTolerance(SolverAlgorithm algorithm, double value) {
-		whatifAlgorithmsTollerance.put(algorithm, value);
+		whatifAlgorithmsTolerance.put(algorithm, value);
 	}
 
 	/**
@@ -584,7 +584,7 @@ public class ExactModel implements ExactConstants  {
 		description = "";
 
 		whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);
-		whatifAlgorithmsTollerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
+		whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
 	}
 
 	/**
@@ -1755,7 +1755,7 @@ public class ExactModel implements ExactConstants  {
 			}
 		} else {
 			this.whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);
-			this.whatifAlgorithmsTollerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
+			this.whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
 		}
 		/* END */
 

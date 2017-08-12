@@ -39,7 +39,7 @@ import jmt.engine.simEngine.SimTypeP;
  * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -550,10 +550,7 @@ public class NetNode extends SimEntity {
 			if (sourceSection == NodeSection.OUTPUT && message.getEvent() == NetEvent.EVENT_JOB) {
 				if (message.getJob().getJobClass().getReferenceNodeName().equals(getName())) {
 					getQueueNet().getJobInfoList().recycleJob(message.getJob());
-				} else {
-					// Update job number since the job still exists
-					getQueueNet().getJobInfoList().existJob(message.getJob());
-				}			
+				}
 			}
 
 			if (inputSection != null) {

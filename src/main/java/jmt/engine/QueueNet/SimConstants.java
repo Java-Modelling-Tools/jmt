@@ -23,12 +23,12 @@ package jmt.engine.QueueNet;
  * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
  */
-public class SimConstants {
+public interface SimConstants {
 
 	//-------------------- SIMULATION MEASURE IDENTIFIERS ----------------------------//
 
@@ -53,14 +53,14 @@ public class SimConstants {
 	/** Measure identifier: drop rate of the node */
 	public static final int DROP_RATE = 6;
 
+	/** Measure identifier: number of jobs in the system */
+	public static final int SYSTEM_NUMBER_OF_JOBS = 7;
+
 	/** Measure identifier: response time of the system*/
-	public static final int SYSTEM_RESPONSE_TIME = 7;
+	public static final int SYSTEM_RESPONSE_TIME = 8;
 
 	/** Measure identifier: throughput of the system */
-	public static final int SYSTEM_THROUGHPUT = 8;
-
-	/** Measure identifier: number of jobs in the system */
-	public static final int SYSTEM_NUMBER_OF_JOBS = 9;
+	public static final int SYSTEM_THROUGHPUT = 9;
 
 	/** Measure identifier: drop rate of the system */
 	public static final int SYSTEM_DROP_RATE = 10;
@@ -73,6 +73,21 @@ public class SimConstants {
 
 	/** Measure identifier: throughput of the sink */
 	public static final int THROUGHPUT_PER_SINK = 13;
+
+	/** Measure identifier: total weight of the blocking region. */
+	public static final int FCR_TOTAL_WEIGHT = 14;
+
+	/** Measure identifier: memory occupation of the blocking region. */
+	public static final int FCR_MEMORY_OCCUPATION = 15;
+
+	/** Measure identifier: number of jobs in the fork/join section. */
+	public static final int FORK_JOIN_NUMBER_OF_JOBS = 16;
+
+	/** Measure identifier: response time of the fork/join section. */
+	public static final int FORK_JOIN_RESPONSE_TIME = 17;
+
+	/** Measure identifier: firing throughput of the transition. */
+	public static final int FIRING_THROUGHPUT = 18;
 
 	//-------------------- end SIMULATION MEASURE IDENTIFIERS -------------------------//
 
@@ -100,24 +115,5 @@ public class SimConstants {
 
 	/** To be used for a station measure */
 	public static final String NODE_TYPE_STATION = "station";
-
-	/** Measure identifier: total weight of a blocking region. */
-	public static final int FCR_TOTAL_WEIGHT = 27;
-
-	/** Measure identifier: memory occupation of a blocking region. */
-	public static final int FCR_MEMORY_OCCUPATION = 28;
-
-	/** Measure identifier: number of jobs in a fork/join section. */
-	public static final int FORK_JOIN_NUMBER_OF_JOBS = 29;
-
-	/** Measure identifier: response time of a fork/join section. */
-	public static final int FORK_JOIN_RESPONSE_TIME = 30;
-
-	/** Measure identifier: firing throughput of a transition. */
-	public static final int FIRING_THROUGHPUT = 31;
-
-	public static boolean isFJMeasure(int measure) {
-		return measure == FORK_JOIN_NUMBER_OF_JOBS || measure == FORK_JOIN_RESPONSE_TIME;
-	}
 
 }

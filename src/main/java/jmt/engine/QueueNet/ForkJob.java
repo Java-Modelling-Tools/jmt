@@ -36,8 +36,8 @@ public class ForkJob extends Job {
 	 * @param jobClass class of the fork job
 	 * @param forkJobInfo info of the fork job
 	 */
-	public ForkJob(JobClass jobClass, ForkJobInfo forkJobInfo) {
-		super(jobClass);
+	public ForkJob(JobClass jobClass, int jobClassNum, ForkJobInfo forkJobInfo) {
+		super(jobClass, jobClassNum);
 		systemEnteringTime = forkJobInfo.getForkedJob().systemEnteringTime;
 		this.forkJobInfo = forkJobInfo;
 	}

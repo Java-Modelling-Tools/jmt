@@ -1815,7 +1815,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			String stationName = measure.getAttribute(XML_A_MEASURE_STATION);
 			String nodeType = measure.getAttribute(XML_A_MEASURE_NODETYPE);
 			if (stationName != null && !stationName.equals("")) {
-				if (nodeType.equalsIgnoreCase(NODETYPE_REGION)) {
+				if (nodeType.equals(NODETYPE_REGION)) {
 					stationKey = regions.get(stationName);
 				} else {
 					stationKey = stations.get(stationName);

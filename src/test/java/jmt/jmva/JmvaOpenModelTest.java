@@ -13,7 +13,6 @@ import org.junit.Test;
 
 public class JmvaOpenModelTest {
 
-
 	@Test
 	public void randomModel_open_1() throws IOException, URISyntaxException {
 		CommandLineSolver solver = new CommandLineSolver();

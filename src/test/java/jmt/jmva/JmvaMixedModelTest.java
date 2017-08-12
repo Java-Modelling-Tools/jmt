@@ -13,7 +13,6 @@ import org.junit.Test;
 
 public class JmvaMixedModelTest {
 
-
 	@Test
 	public void randomModel_mixed_1() throws IOException, URISyntaxException {
 		CommandLineSolver solver = new CommandLineSolver();

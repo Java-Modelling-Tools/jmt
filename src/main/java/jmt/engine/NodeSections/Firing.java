@@ -120,9 +120,9 @@ public class Firing extends OutputSection {
 						for (int j = 0; j < releasedJobs; j++) {
 							Job job = null;
 							if (forkJobInfo[i] != null) {
-								job = new ForkJob(jobClasses.get(i), forkJobInfo[i]);
+								job = new ForkJob(jobClasses.get(i), jobClasses.size(), forkJobInfo[i]);
 							} else {
-								job = new Job(jobClasses.get(i));
+								job = new Job(jobClasses.get(i), jobClasses.size());
 							}
 							job.setSystemEnteringTime(avgEnteringTime[i]);
 							jobPermutation[index] = job;

@@ -24,7 +24,7 @@
 		<compareAlgs value="true">
 			<whatIfAlg name="MVA" tolerance="1.0E-7" />
 			<whatIfAlg name="RECAL" tolerance="1.0E-7" />
-			<whatIfAlg name="MoM" tolerance="1.0E-7" />
+			<!-- <whatIfAlg name="MoM" tolerance="1.0E-7" /> -->
 			<whatIfAlg name="CoMoM" tolerance="1.0E-7" />
 			<whatIfAlg name="Chow" tolerance="1.0E-7" />
 			<whatIfAlg name="Bard-Schweitzer" tolerance="1.0E-7" />

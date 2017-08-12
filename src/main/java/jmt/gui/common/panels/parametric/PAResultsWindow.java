@@ -61,7 +61,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import jmt.engine.QueueNet.SimConstants;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.MeasureValue;
 import jmt.framework.gui.graph.PAPlot;
@@ -80,7 +79,6 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.definitions.parametric.PopulationMixParametricAnalysis;
 import jmt.gui.common.definitions.parametric.SeedParametricAnalysis;
 import jmt.gui.common.definitions.parametric.ServiceTimesParametricAnalysis;
-import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 
@@ -109,7 +107,7 @@ import jmt.gui.exact.table.ExactTableModel;
  * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -123,17 +121,19 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	public static final double PLOT_ZOOM_FACTOR = 0.5;
 	public static final double SPINNER_PRECISION = 0.001;
 
+	private SimulationDefinition sd;
 	private ParametricAnalysisDefinition pad;
 	private PAResultsModel results;
 
 	/**
 	 * Creates a new PAResultsWindow
-	 * @param pad parametric analysis definition model
-	 * @param resModel parametric analysis results data structure
+	 * @param sd simulation definition data structure
+	 * @param fileName name of simulation file
 	 */
-	public PAResultsWindow(ParametricAnalysisDefinition pad, PAResultsModel resModel, String fileName) {
-		this.results = resModel;
-		this.pad = pad;
+	public PAResultsWindow(SimulationDefinition sd, String fileName) {
+		this.sd = sd;
+		this.pad = sd.getParametricAnalysisModel();
+		this.results = (PAResultsModel) sd.getSimulationResults();
 		this.updateTitle(fileName);
 		initGUI();
 	}
@@ -158,9 +158,9 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_U, DESCRIPTION_UTILIZATION, results.getUtilizationMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X, DESCRIPTION_THROUGHPUT, results.getThroughputMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_DR, DESCRIPTION_DROP_RATE, results.getDropRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RP, DESCRIPTION_SYSTEM_RESPONSE_TIME, results.getSystemResponseTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_X, DESCRIPTION_SYSTEM_THROUGHPUT, results.getSystemThroughputMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_DR, DESCRIPTION_SYSTEM_DROP_RATE, results.getSystemDropRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_P, DESCRIPTION_SYSTEM_POWER, results.getSystemPowerMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP_PER_SINK, DESCRIPTION_RESPONSE_TIME_PER_SINK, results.getResponsetimePerSinkMeasures());
@@ -199,19 +199,27 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	}
 
 	public String getYLabel(int measureIndex) {
-		int measureType = results.getMeasureType(measureIndex);
-		String subfix = "";
-		if ((measureType == SimConstants.QUEUE_LENGTH) || (measureType == SimConstants.SYSTEM_NUMBER_OF_JOBS)) {
-			subfix = " (j)";
-		} else if ((measureType == SimConstants.QUEUE_TIME) || (measureType == SimConstants.RESIDENCE_TIME)
-				|| (measureType == SimConstants.RESPONSE_TIME) || (measureType == SimConstants.SYSTEM_RESPONSE_TIME)) {
-			subfix = " (s)";
-		} else if ((measureType == SimConstants.SYSTEM_THROUGHPUT) || (measureType == SimConstants.THROUGHPUT)) {
-			subfix = " (j/s)";
-		} else if (measureType == SimConstants.UTILIZATION) {
-			subfix = " ";
+		String measureType = results.getMeasureType(measureIndex);
+		String suffix = null;
+		if (measureType.equals(SimulationDefinition.MEASURE_QL) || measureType.equals(SimulationDefinition.MEASURE_S_CN)
+				|| measureType.equals(SimulationDefinition.MEASURE_FJ_CN)) {
+			suffix = " (j)";
+		} else if (measureType.equals(SimulationDefinition.MEASURE_QT) || measureType.equals(SimulationDefinition.MEASURE_RP)
+				|| measureType.equals(SimulationDefinition.MEASURE_RD) || measureType.equals(SimulationDefinition.MEASURE_S_RP)
+				|| measureType.equals(SimulationDefinition.MEASURE_RP_PER_SINK) || measureType.equals(SimulationDefinition.MEASURE_FJ_RP)) {
+			suffix = " (s)";
+		} else if (measureType.equals(SimulationDefinition.MEASURE_X) || measureType.equals(SimulationDefinition.MEASURE_DR)
+				|| measureType.equals(SimulationDefinition.MEASURE_S_X) || measureType.equals(SimulationDefinition.MEASURE_S_DR)
+				|| measureType.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
+			suffix = " (j/s)";
+		} else if (measureType.equals(SimulationDefinition.MEASURE_S_P)) {
+			suffix = " (j/s^2)";
+		} else if (measureType.equals(SimulationDefinition.MEASURE_FX)) {
+			suffix = " (f/s)";
+		} else {
+			suffix = "";
 		}
-		String name = results.getName(measureIndex) + subfix;
+		String name = results.getName(measureIndex) + suffix;
 		name = name.replaceFirst("Network_", "");
 		name = name.replaceFirst("All classes_", "");
 		name = name.replaceFirst("All modes_", "");
@@ -323,7 +331,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			graph.setYRange(YMIN, YMAX);
 			// Station name
 			label = new JLabel();
-			if (rm.getNodeType(measureIndex).equalsIgnoreCase(XMLConstantNames.NODETYPE_REGION)) {
+			if (sd.isFCRMeasure(rm.getMeasureType(measureIndex))) {
 				label.setText("Region Name: ");
 			} else {
 				label.setText("Station Name: ");
@@ -333,7 +341,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
 			label.setLabelFor(field);
 			String stationName = rm.getStationName(measureIndex);
-			if (SimConstants.isFJMeasure(rm.getMeasureType(measureIndex))) {
+			if (sd.isFJMeasure(rm.getMeasureType(measureIndex))) {
 				field.setText(stationName + " (Fork Join)");
 			} else {
 				field.setText(stationName);
@@ -343,7 +351,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(field);
 			// Class name
 			label = new JLabel();
-			if (rm.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+			if (rm.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {
 				label.setText("Mode Name: ");
 			} else {
 				label.setText("Class Name: ");
@@ -353,7 +361,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
 			label.setLabelFor(field);
 			field.setText(rm.getClassName(measureIndex));
-			if (rm.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+			if (rm.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {
 				field.setToolTipText("Name of the mode: " + field.getText());
 			} else {
 				field.setToolTipText("Name of the class: " + field.getText());
@@ -811,7 +819,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			graph.setYRange(YMIN, YMAX);
 			// Station name
 			label = new JLabel();
-			if (md.getNodeType(measureIndex).equalsIgnoreCase(XMLConstantNames.NODETYPE_REGION)) {
+			if (sd.isFCRMeasure(md.getMeasureType(measureIndex))) {
 				label.setText("Region Name: ");
 			} else {
 				label.setText("Station Name: ");
@@ -821,7 +829,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
 			label.setLabelFor(field);
 			String stationName = md.getStationName(measureIndex);
-			if (SimConstants.isFJMeasure(md.getMeasureType(measureIndex))) {
+			if (sd.isFJMeasure(md.getMeasureType(measureIndex))) {
 				field.setText(stationName + " (Fork Join)");
 			} else {
 				field.setText(stationName);
@@ -831,7 +839,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(field);
 			// Class name
 			label = new JLabel();
-			if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+			if (md.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {
 				label.setText("Mode Name: ");
 			} else {
 				label.setText("Class Name: ");
@@ -841,7 +849,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
 			label.setLabelFor(field);
 			field.setText(md.getClassName(measureIndex));
-			if (md.getMeasureType(measureIndex) == SimConstants.FIRING_THROUGHPUT) {
+			if (md.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {
 				field.setToolTipText("Name of the mode: " + field.getText());
 			} else {
 				field.setToolTipText("Name of the class: " + field.getText());
@@ -1207,7 +1215,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		Vector values;
 		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
 
-		public ValuesTable(Vector values, int measureType) {
+		public ValuesTable(Vector values, String measureType) {
 			super(new ValuesTableModel(values, measureType));
 			this.values = values;
 			autoResizeMode = AUTO_RESIZE_OFF;
@@ -1216,7 +1224,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			setColumnSelectionAllowed(true);
 			setClipboardTransferEnabled(true);
 			setFillCellsEnabled(false);
-			this.setRowHeaderWidth(100);
+			this.setRowHeaderWidth(125);
 			this.setRowHeight(CommonConstants.ROW_HEIGHT);
 		}
 
@@ -1271,9 +1279,9 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		}
 
 		Vector values;
-		int measureType;
+		String measureType;
 
-		public ValuesTableModel(Vector values, int measureType) {
+		public ValuesTableModel(Vector values, String measureType) {
 			this.values = values;
 			this.measureType = measureType;
 			prototype = "XXXX.XXX XXX";
@@ -1344,23 +1352,31 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 * @return the header for row <code>rowIndex</code>
 		 */
 		protected Object getRowName(int rowIndex) {
-			String subfix = "";
-			if ((measureType == SimConstants.QUEUE_LENGTH) || (measureType == SimConstants.SYSTEM_NUMBER_OF_JOBS)) {
-				subfix = " (j)";
-			} else if ((measureType == SimConstants.QUEUE_TIME) || (measureType == SimConstants.RESIDENCE_TIME)
-					|| (measureType == SimConstants.RESPONSE_TIME) || (measureType == SimConstants.SYSTEM_RESPONSE_TIME)) {
-				subfix = " (s)";
-			} else if ((measureType == SimConstants.SYSTEM_THROUGHPUT) || (measureType == SimConstants.THROUGHPUT)) {
-				subfix = " (j/s)";
-			} else if (measureType == SimConstants.UTILIZATION) {
-				subfix = " ";
+			String suffix = null;
+			if (measureType.equals(SimulationDefinition.MEASURE_QL) || measureType.equals(SimulationDefinition.MEASURE_S_CN)
+					|| measureType.equals(SimulationDefinition.MEASURE_FJ_CN)) {
+				suffix = " (j)";
+			} else if (measureType.equals(SimulationDefinition.MEASURE_QT) || measureType.equals(SimulationDefinition.MEASURE_RP)
+					|| measureType.equals(SimulationDefinition.MEASURE_RD) || measureType.equals(SimulationDefinition.MEASURE_S_RP)
+					|| measureType.equals(SimulationDefinition.MEASURE_RP_PER_SINK) || measureType.equals(SimulationDefinition.MEASURE_FJ_RP)) {
+				suffix = " (s)";
+			} else if (measureType.equals(SimulationDefinition.MEASURE_X) || measureType.equals(SimulationDefinition.MEASURE_DR)
+					|| measureType.equals(SimulationDefinition.MEASURE_S_X) || measureType.equals(SimulationDefinition.MEASURE_S_DR)
+					|| measureType.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
+				suffix = " (j/s)";
+			} else if (measureType.equals(SimulationDefinition.MEASURE_S_P)) {
+				suffix = " (j/s^2)";
+			} else if (measureType.equals(SimulationDefinition.MEASURE_FX)) {
+				suffix = " (f/s)";
+			} else {
+				suffix = "";
 			}
 			if (rowIndex == 0) {
-				return ("Mean Value" + subfix);
+				return ("Mean Value" + suffix);
 			} else if (rowIndex == 1) {
-				return ("Max" + subfix + " (Conf.Int.)");
+				return ("Max" + suffix + " (Conf.Int.)");
 			} else {
-				return ("Min" + subfix + " (Conf.Int.)");
+				return ("Min" + suffix + " (Conf.Int.)");
 			}
 		}
 

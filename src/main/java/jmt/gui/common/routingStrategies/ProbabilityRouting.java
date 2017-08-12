@@ -33,7 +33,7 @@ public class ProbabilityRouting extends RoutingStrategy {
 	private Map<Object, Double> values = new HashMap<Object, Double>();
 
 	public ProbabilityRouting() {
-		description = "It is possible to define the routing probability for each connected station. "
+		description = "Jobs are routed to stations connected to the current one according to the specified probabilities. "
 				+ "If the sum of the probabilities is different from 1, all the values will be scaled to sum 1.";
 	}
 

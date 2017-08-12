@@ -213,10 +213,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		// Polling interval - Bertoli Marco
 		elem.setAttribute(XML_A_ROOT_POLLING, model
 				.getPollingInterval().toString());
-		// Max Samples - Bertoli Marco
+		// Max samples - Bertoli Marco
 		elem.setAttribute(XML_A_ROOT_MAXSAMPLES, model
 				.getMaxSimulationSamples().toString());
-		// Disable Statistic
+		// Disable statistic
 		elem.setAttribute(XML_A_ROOT_DISABLESTATISTIC, model
 				.getDisableStatistic().toString());
 		// Write attributes used by the logs - Michael Fercu
@@ -228,6 +228,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				model.getLoggingGlbParameter("delim"));
 		elem.setAttribute(XML_A_ROOT_LOGDECIMALSEPARATOR,
 				model.getLoggingGlbParameter("decimalSeparator"));
+		// Manage probabilities
+		model.manageProbabilities();
 		// Write all elements
 		writeClasses(modelDoc, elem, model);
 		writeStations(modelDoc, elem, model);

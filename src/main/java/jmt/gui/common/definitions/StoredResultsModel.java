@@ -21,7 +21,6 @@ package jmt.gui.common.definitions;
 import java.util.HashMap;
 import java.util.Vector;
 
-import jmt.engine.QueueNet.SimConstants;
 import jmt.framework.gui.graph.MeasureValue;
 
 /**
@@ -35,7 +34,7 @@ import jmt.framework.gui.graph.MeasureValue;
  *         
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -52,13 +51,13 @@ public class StoredResultsModel implements MeasureDefinition {
 	private Vector<Integer> utilization = new Vector<Integer>();
 	private Vector<Integer> throughput = new Vector<Integer>();
 	private Vector<Integer> dropRate = new Vector<Integer>();
+	private Vector<Integer> systemCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> systemResponseTime = new Vector<Integer>();
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
-	private Vector<Integer> systemCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
 	private Vector<Integer> systemPower = new Vector<Integer>();
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
-	private Vector<Integer> throughputTimePerSink = new Vector<Integer>();
+	private Vector<Integer> throughputPerSink = new Vector<Integer>();
 	private Vector<Integer> FCRTotalWeight = new Vector<Integer>();
 	private Vector<Integer> FCRMemoryOccupation = new Vector<Integer>();
 	private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
@@ -73,17 +72,24 @@ public class StoredResultsModel implements MeasureDefinition {
 	private String logCsvDelimiter;
 
 	/**
-	 * Returns total number of measures
-	 * 
-	 * @return number of measures
+	 * Returns the total number of measures
+	 * @return total number of measures
 	 */
 	public int getMeasureNumber() {
 		return measures.size();
 	}
 
 	/**
+	 * Returns the name of a given measure
+	 * @param measureIndex index of the measure
+	 * @return name of the measure
+	 */
+	public String getName(int measureIndex) {
+		return measures.get(measureIndex).name;
+	}
+
+	/**
 	 * Returns the station name of a given measure
-	 * 
 	 * @param measureIndex index of the measure
 	 * @return station name
 	 */
@@ -93,7 +99,6 @@ public class StoredResultsModel implements MeasureDefinition {
 
 	/**
 	 * Returns the class name of a given measure
-	 * 
 	 * @param measureIndex index of the measure
 	 * @return class name
 	 */
@@ -103,7 +108,6 @@ public class StoredResultsModel implements MeasureDefinition {
 
 	/**
 	 * Returns the alpha of a given measure
-	 * 
 	 * @param measureIndex index of the measure
 	 * @return alpha
 	 */
@@ -113,7 +117,6 @@ public class StoredResultsModel implements MeasureDefinition {
 
 	/**
 	 * Returns the precision of a given measure
-	 * 
 	 * @param measureIndex index of the measure
 	 * @return precision
 	 */
@@ -122,17 +125,7 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns filename corresponding to a measure
-	 * @param measureIndex index of the measure
-	 * @return null
-	 */
-	public String getLogFileName(int measureIndex) {
-		return measures.get(measureIndex).fileName;
-	}
-
-	/**
-	 * Returns number of analyzed samples for a given measure
-	 * 
+	 * Returns the number of analyzed samples for a given measure
 	 * @param measureIndex index of the measure
 	 * @return number of analyzed samples
 	 */
@@ -150,40 +143,7 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns the name of a given measure
-	 * 
-	 * @param measureIndex index of the measure
-	 * @return name of the measure
-	 */
-	public String getName(int measureIndex) {
-		return measures.get(measureIndex).name;
-	}
-
-	/**
-	 * Returns the node type of a given measure
-	 * 
-	 * @param measureIndex index of the measure
-	 * @return name of the measure
-	 */
-	public String getNodeType(int measureIndex) {
-		return measures.get(measureIndex).nodeType;
-	}
-
-	/**
-	 * Returns the vector of Temporary values of a given measure. Each element of the vector
-	 * is an instance of <code>Value</code> interface.
-	 * 
-	 * @param measureIndex index of the measure
-	 * @return vector of temporary values until now
-	 */
-	public Vector<MeasureValue> getValues(int measureIndex) {
-		return measures.get(measureIndex).values;
-	}
-
-	/**
-	 * Returns the state of a measure, that can be MEASURE_IN_PROGRESS, MEASURE_NO_SAMPLES,
-	 * MEASURE_FAILED, MEASURE_SUCCESS
-	 * 
+	 * Returns the state of a given measure
 	 * @param measureIndex index of the measure
 	 * @return measure state
 	 */
@@ -192,27 +152,40 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns the type of a measure
-	 * 
+	 * Returns the type of a given measure
 	 * @param measureIndex index of the measure
 	 * @return measure type
 	 */
-	public int getMeasureType(int measureIndex) {
+	public String getMeasureType(int measureIndex) {
 		return measures.get(measureIndex).type;
 	}
 
 	/**
-	 * Returns true if the measure is a Time Or Number
+	 * Returns the node type of a given measure
 	 * @param measureIndex index of the measure
-	 * @return true if the measure is a rate or number quantity
+	 * @return name of the measure
 	 */
-	public boolean isTimeOrNumber(int measureIndex) {
-		int  type = getMeasureType(measureIndex) ;
-		if (type ==0 || type == 4 || type == 5 || type == 6 || type == 8 || type ==10 || type ==14) {
-			return true;
-		} else {
-			return false;
-		}
+	public String getNodeType(int measureIndex) {
+		return measures.get(measureIndex).nodeType;
+	}
+
+	/**
+	 * Returns the log file name where a verbose measure was stored
+	 * @param measureIndex corresponding to a measure
+	 * @return full path of the log file including the measure
+	 */
+	public String getLogFileName(int measureIndex) {
+		return measures.get(measureIndex).fileName;
+	}
+
+	/**
+	 * Returns the vector of Temporary values of a given measure. Each element of the vector
+	 * is an instance of <code>Value</code> interface.
+	 * @param measureIndex index of the measure
+	 * @return vector of temporary values until now
+	 */
+	public Vector<MeasureValue> getValues(int measureIndex) {
+		return measures.get(measureIndex).values;
 	}
 
 	/**
@@ -300,6 +273,18 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
+	 * Returns an array with the measureIndex of every system customer number measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemCustomerNumberMeasures() {
+		int[] tmp = new int[systemCustomerNumber.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemCustomerNumber.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
 	 * Returns an array with the measureIndex of every system response time measure
 	 * @return an array with measures' index
 	 */
@@ -319,18 +304,6 @@ public class StoredResultsModel implements MeasureDefinition {
 		int[] tmp = new int[systemThroughput.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = systemThroughput.get(i).intValue();
-		}
-		return tmp;
-	}
-
-	/**
-	 * Returns an array with the measureIndex of every system customer number measure
-	 * @return an array with measures' index
-	 */
-	public int[] getSystemCustomerNumberMeasures() {
-		int[] tmp = new int[systemCustomerNumber.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = systemCustomerNumber.get(i).intValue();
 		}
 		return tmp;
 	}
@@ -376,9 +349,9 @@ public class StoredResultsModel implements MeasureDefinition {
 	 * @return an array with measures' index
 	 */
 	public int[] getThroughputPerSinkMeasures() {
-		int[] tmp = new int[throughputTimePerSink.size()];
+		int[] tmp = new int[throughputPerSink.size()];
 		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = throughputTimePerSink.get(i).intValue();
+			tmp[i] = throughputPerSink.get(i).intValue();
 		}
 		return tmp;
 	}
@@ -445,7 +418,6 @@ public class StoredResultsModel implements MeasureDefinition {
 
 	/**
 	 * Returns if simulation has finished, so results are fixed
-	 * 
 	 * @return true iff simulation has finished
 	 */
 	public boolean isSimulationFinished() {
@@ -454,7 +426,6 @@ public class StoredResultsModel implements MeasureDefinition {
 
 	/**
 	 * Returns simulation polling interval. This is the time elapsed between two temp values.
-	 * 
 	 * @return simulation polling interval in seconds
 	 */
 	public double getPollingInterval() {
@@ -481,72 +452,54 @@ public class StoredResultsModel implements MeasureDefinition {
 	 * @param discardedSamples number of discarded samples
 	 * @param state state of the measure
 	 * @param type type of the measure
+	 * @param nodeType node type of the measure
 	 * @param fileName the output file name for the verbose measure
 	 */
 	public void addMeasure(String name, String stationName, String className, double alpha, double precision, int analyzedSamples, int discardedSamples, int state,
-			int type, String nodeType,String fileName) {
+			String type, String nodeType,String fileName) {
 		Measure tmp = new Measure(name, stationName, className, alpha, precision, analyzedSamples, discardedSamples, state, type, nodeType, fileName);
 		measures.add(tmp);
 		names.put(name, tmp);
-		// Adds measure index to the right Vector
-		switch (type) {
-		case SimConstants.QUEUE_LENGTH:
+		if (type.equals(SimulationDefinition.MEASURE_QL)) {
 			queueLength.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.QUEUE_TIME:
+		} else if (type.equals(SimulationDefinition.MEASURE_QT)) {
 			queueTime.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.RESPONSE_TIME:
+		} else if (type.equals(SimulationDefinition.MEASURE_RP)) {
 			responseTime.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.RESIDENCE_TIME:
+		} else if (type.equals(SimulationDefinition.MEASURE_RD)) {
 			residenceTime.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.UTILIZATION:
+		} else if (type.equals(SimulationDefinition.MEASURE_U)) {
 			utilization.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.THROUGHPUT:
+		} else if (type.equals(SimulationDefinition.MEASURE_X)) {
 			throughput.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.DROP_RATE:
+		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
 			dropRate.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.SYSTEM_RESPONSE_TIME:
-			systemResponseTime.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.SYSTEM_THROUGHPUT:
-			systemThroughput.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.SYSTEM_NUMBER_OF_JOBS:
+		} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
 			systemCustomerNumber.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.SYSTEM_DROP_RATE:
+		} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {
+			systemResponseTime.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_X)) {
+			systemThroughput.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_DR)) {
 			systemDropRate.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.SYSTEM_POWER:
+		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 			systemPower.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.RESPONSE_TIME_PER_SINK:
+		} else if (type.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {
 			responseTimePerSink.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.THROUGHPUT_PER_SINK:
-			throughputTimePerSink.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.FCR_TOTAL_WEIGHT:
+		} else if (type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
+			throughputPerSink.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_FCR_TW)) {
 			FCRTotalWeight.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.FCR_MEMORY_OCCUPATION:
+		} else if (type.equals(SimulationDefinition.MEASURE_FCR_MO)) {
 			FCRMemoryOccupation.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+		} else if (type.equals(SimulationDefinition.MEASURE_FJ_CN)) {
 			FJCustomerNumber.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.FORK_JOIN_RESPONSE_TIME:
+		} else if (type.equals(SimulationDefinition.MEASURE_FJ_RP)) {
 			FJResponseTime.add(new Integer(measures.size() - 1));
-			break;
-		case SimConstants.FIRING_THROUGHPUT:
+		} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
 			firingThroughput.add(new Integer(measures.size() - 1));
-			break;
+		} else {
+			queueLength.add(new Integer(measures.size() - 1));
 		}
 	}
 
@@ -581,15 +534,15 @@ public class StoredResultsModel implements MeasureDefinition {
 		public String name;
 		public String stationName;
 		public String className;
-		public String nodeType;
-		public String fileName;
-		public Vector<MeasureValue> values;
 		public double alpha;
 		public double precision;
 		public int analyzedSamples;
-		public int state;
-		public int type;
 		public int discardedSamples;
+		public int state;
+		public String type;
+		public String nodeType;
+		public String fileName;
+		public Vector<MeasureValue> values;
 
 		/**
 		 * Construct a new Measure object
@@ -602,9 +555,10 @@ public class StoredResultsModel implements MeasureDefinition {
 		 * @param discardedSamples number of discarded samples
 		 * @param state state of the measure
 		 * @param type type of the measure
+		 * @param nodeType node type of the measure
 		 * @param fileName the output file name for the verbose measure
 		 */
-		public Measure(String name, String stationName, String className, double alpha, double precision, int analyzedSamples, int discardedSamples, int state, int type,
+		public Measure(String name, String stationName, String className, double alpha, double precision, int analyzedSamples, int discardedSamples, int state, String type,
 				String nodeType, String fileName) {
 			this.name = name;
 			this.stationName = stationName;
@@ -615,9 +569,9 @@ public class StoredResultsModel implements MeasureDefinition {
 			this.discardedSamples = discardedSamples;
 			this.state = state;
 			this.type = type;
-			values = new Vector<MeasureValue>();
 			this.nodeType = nodeType;
-			this.fileName=fileName ;
+			this.fileName = fileName;
+			values = new Vector<MeasureValue>();
 		}
 
 		/**
@@ -684,31 +638,33 @@ public class StoredResultsModel implements MeasureDefinition {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogDecimalSeparator()
+	/**
+	 * Returns the decimal separator used in log files
+	 * @return the decimal separator used in log files
 	 */
-	@Override
 	public String getLogDecimalSeparator() {
 		return logDecimalSeparator;
 	}
 
-	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.MeasureDefinition#getLogCsvDelimiter()
+	/**
+	 * Returns the CSV delimiter used in log files
+	 * @return the CSV delimiter used in log files
 	 */
-	@Override
 	public String getLogCsvDelimiter() {
 		return logCsvDelimiter;
 	}
 
 	/**
-	 * @param logDecimalSeparator the logDecimalSeparator to set
+	 * Sets the decimal separator used in log files
+	 * @param logDecimalSeparator the decimal separator to set
 	 */
 	public void setLogDecimalSeparator(String logDecimalSeparator) {
 		this.logDecimalSeparator = logDecimalSeparator;
 	}
 
 	/**
-	 * @param logCsvDelimiter the logCsvDelimiter to set
+	 * Sets the CSV delimiter used in log files
+	 * @param logCsvDelimiter the CSV delimiter to set
 	 */
 	public void setLogCsvDelimiter(String logCsvDelimiter) {
 		this.logCsvDelimiter = logCsvDelimiter;
@@ -717,6 +673,15 @@ public class StoredResultsModel implements MeasureDefinition {
 	// -------------------------------------------------------------------------------------------------------
 
 	// --- Useless methods -----------------------------------------------------------------------------------
+
+	/**
+	 * This feature is not required as loaded measures are static
+	 * @param measureIndex index of the measure that this listener should listen
+	 * @param listener listener to add or null to remove old one
+	 */
+	public void addMeasureListener(int measureIndex, MeasureDefinition.MeasureListener listener) {
+	}
+
 	/**
 	 * This feature is not required as loaded measures are static
 	 * @param listener listener to be set or null to reset previous one
@@ -724,23 +689,12 @@ public class StoredResultsModel implements MeasureDefinition {
 	public void setProgressTimeListener(MeasureDefinition.ProgressTimeListener listener) {
 	}
 
-	/**
-	 * Sets a ProgressTimeListener to listen to detected malformed replayer file. This is unique.
-	 * @param listener listener to be set or null to reset previous one
-	 */
 	public void setMalformedReplayerFileListener(MalformedReplayerFileListener listener) {
 	}
 
 	public void detectedMalformedReplayerFile(String msg) {
 	}
 
-	/**
-	 * This feature is not required as loaded measures are static
-	 * @param measureIndex index of the measure that this listener should listen
-	 * @param listener     listener to add or null to remove old one.
-	 */
-	public void addMeasureListener(int measureIndex, MeasureDefinition.MeasureListener listener) {
-	}
 	// -------------------------------------------------------------------------------------------------------
 
 }

@@ -32,6 +32,7 @@ import jmt.engine.math.SampleMeanVar;
 
  */
 public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
+
 	//TODO: does this class work also in the case of InverseMeasure????
 	DoubleArrayList data;
 
@@ -154,9 +155,7 @@ public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
 
 	protected void sort() {
 		double[] d = data.toArray(0, data.getSize() - 1);
-		//		long start = System.currentTimeMillis();
 		sorter.sort(d);
-		//		System.out.println("time = "+ (System.currentTimeMillis() - start));
 		data = new DoubleArrayList(d);
 
 	}
@@ -173,8 +172,6 @@ public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
 	protected boolean HWtest() {
 		sort();
 		ordered = true;
-		//		System.out.println("quantile " + getQuantileResults(0.75));
-		//		System.out.println("nSamples = " + nSamples);
 		return super.HWtest();
 	}
 
@@ -190,11 +187,7 @@ public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
 		C = calcConstants(K, polyOrder);
 		C1 = C[0];
 		C2 = (int) C[1];
-		//DEK (Federico Granata)
-		//si puo' fare array copy
 		System.arraycopy(batchMean, 0, tempBatch, 0, numBatch - 1);
-		//		for (int i = 0; i < numBatch; i++)
-		//			tempBatch[i] = batchMean[i];
 
 		extVar = calcVar(tempBatch, 0, batch, K, polyOrder);
 		if (Math.abs(extVar - sampleVar) > sampleVar * precision * 2) {

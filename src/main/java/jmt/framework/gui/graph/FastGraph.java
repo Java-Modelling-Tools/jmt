@@ -264,9 +264,7 @@ public class FastGraph extends JPanel {
 			// Draws last measured value
 			if (hideLastInterval == false) {
 				g.setColor(COLOR_LAST_INTERVAL);
-				g.drawLine(getX(xValue),
-						getY(0),
-						getX((xValue)), getY(currValue.getLastIntervalAvgValue()));
+				g.drawLine(getX(xValue), getY(0), getX((xValue)), getY(currValue.getLastIntervalAvgValue()));
 			}
 		}
 		
@@ -285,9 +283,7 @@ public class FastGraph extends JPanel {
 		
 		if (hideLastInterval == false) {
 			g.setColor(COLOR_LAST_INTERVAL);
-			g.drawLine(getX(lastXValue),
-					getY(0),
-					getX((lastXValue)), getY(lastValue.getLastIntervalAvgValue()));
+			g.drawLine(getX(lastXValue), getY(0), getX((lastXValue)), getY(lastValue.getLastIntervalAvgValue()));
 		}
 		
 		// Draws the selected value
@@ -323,9 +319,7 @@ public class FastGraph extends JPanel {
 		int textY = getY(maxy / 2) + (int)bounds.getHeight() / 2;
 		
 		g.setColor(COLOR_POPUP);
-		g.drawLine(selectedValueX,
-				getY(0),
-				selectedValueX, getY(selectedValue.getLastIntervalAvgValue()));
+		g.drawLine(selectedValueX, getY(0), selectedValueX, getY(selectedValue.getLastIntervalAvgValue()));
 		g.setColor(COLOR_POPUP_BG);
 		g.fillRoundRect(textX - POPUP_MARGIN, textY - (int)bounds.getHeight(), (int)bounds.getWidth() + POPUP_MARGIN * 2, (int)bounds.getHeight() + POPUP_MARGIN, 4, 4);	
 		g.setColor(COLOR_POPUP);

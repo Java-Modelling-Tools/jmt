@@ -92,7 +92,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	//-------------------------STATE OF COMPUTATION---------------------------------//
 
 	/**Transient period has been deleted or not*/
-	protected boolean delet = false;
+	protected boolean deleted = false;
 	/** initialized = true if the system is in steady state*/
 	protected boolean initialized;
 	/** end = true if the analysis has been completed (successfully or not)*/
@@ -230,8 +230,8 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		int index = nSamples / 5;
 
 		nSamples++;
-		lastSampleWeight= lastSampleWeight+(newSample*weight);
-		lastWeight= lastWeight+weight;
+		lastSampleWeight = lastSampleWeight + (newSample * weight);
+		lastWeight = lastWeight + weight;
 		//NEW
 		//@author Stefano Omini
 
@@ -259,7 +259,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		}
 		//end NEW
 
-		if (!delet) {
+		if (!deleted) {
 
 			//transient not deleted
 			double temp = newSample * weight;
@@ -326,7 +326,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 
 		} else {
 
-			if (!delet) {
+			if (!deleted) {
 				//transient detected but not deleted yet
 
 				if (nSamples >= minSamples) {
@@ -699,7 +699,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			//the initial warm up period is short
 			//cannot apply the algorithm to a sequence too polarized...
 			discarded = d * 5;
-			delet = true;
+			deleted = true;
 			miniB.delFirst(d);
 			miniW.delFirst(d);
 
@@ -727,21 +727,12 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			}
 			miniB.clear();
 			miniW.clear();
-			return delet;
+			return deleted;
 		} else {
 			//transient cannot be deleted
-			//TODO: how did we arrive here?
-			delet = false;
+			deleted = false;
 			minSamples += discarded;
-			//TODO: should it be minSamples > maxData????
-			if (minSamples < maxData) {
-				end = true;
-				if (DEBUG) {
-					System.out.println("end = " + end);
-				}
-				success = false;
-			}
-			return delet;
+			return deleted;
 		}
 	}
 
@@ -1037,7 +1028,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	 * @return discarded data
 	 */
 	public int getDiscarded() {
-		if (delet) {
+		if (deleted) {
 			return discarded;
 		} else {
 			return 0;
@@ -1210,19 +1201,16 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 
 	@Override
 	public double getLastIntervalAvg() {
-		if (lastWeight==0) {
-			lastWeight=0;
-			lastSampleWeight=0;
+		if (lastWeight == 0.0) {
+			lastWeight = 0.0;
+			lastSampleWeight = 0.0;
 			return lastIntervalAvg;
-			}
-		else {
-			lastIntervalAvg=(lastSampleWeight/lastWeight);
-			lastWeight=0;
-			lastSampleWeight=0;
+		} else {
+			lastIntervalAvg = lastSampleWeight / lastWeight;
+			lastWeight = 0.0;
+			lastSampleWeight = 0.0;
 			return lastIntervalAvg;
-			}
+		}
 	}
-
-	
 
 }

@@ -30,7 +30,7 @@ import java.util.Map;
 public class RoundRobinRouting extends RoutingStrategy {
 
 	public RoundRobinRouting() {
-		description = "Jobs are routed to the stations connected to the current one according to a cyclic algorithm.";
+		description = "Jobs are routed to stations connected to the current one according to a cyclic algorithm.";
 	}
 
 	@Override

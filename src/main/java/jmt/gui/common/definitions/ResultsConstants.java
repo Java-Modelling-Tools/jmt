@@ -32,7 +32,7 @@ package jmt.gui.common.definitions;
  * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -86,6 +86,9 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_DROP_RATE = HTML_START + HTML_FONT_TITLE + "Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average drop rate for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
 
+	public static final String DESCRIPTION_SYSTEM_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average number of customers in the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_SYSTEM_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "System Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average response time of the entire system for each chosen class."
 			+ "<br><b>WARNING:</b> With class switching, the system response time per class refers to the mean time that a job spends being of that class in the system."
@@ -93,9 +96,6 @@ public interface ResultsConstants {
 
 	public static final String DESCRIPTION_SYSTEM_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "System Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average throughput of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
-
-	public static final String DESCRIPTION_SYSTEM_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average number of customers in the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_DROP_RATE = HTML_START + HTML_FONT_TITLE + "System Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average drop rate of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;

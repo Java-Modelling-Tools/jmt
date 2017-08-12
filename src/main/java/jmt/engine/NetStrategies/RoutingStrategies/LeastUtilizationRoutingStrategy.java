@@ -33,12 +33,12 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
 
+	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
+	private double infinity = Double.POSITIVE_INFINITY;
 	private byte serviceSection = NodeSection.SERVICE;
 	private int property = NodeSection.PROPERTY_ID_UTILIZATION;
-	private double infinity = Double.POSITIVE_INFINITY;
-	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
-	private RandomEngine random = RandomEngine.makeDefault();
 	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)
+	private RandomEngine random = RandomEngine.makeDefault();
 
 	/** This strategy selects the resource with the least utilization
 	 * among the output nodes.

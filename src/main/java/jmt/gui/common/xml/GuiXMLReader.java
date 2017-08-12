@@ -143,7 +143,7 @@ public class GuiXMLReader implements GuiXMLConstants {
 			x = Double.parseDouble(position.getAttribute(XML_A_POSITION_X));
 			y = Double.parseDouble(position.getAttribute(XML_A_POSITION_Y));
 			if (position.hasAttribute(XML_A_POSITION_ROTATE)) {
-				rotate = Boolean.TRUE.toString().equalsIgnoreCase(position.getAttribute(XML_A_POSITION_ROTATE));
+				rotate = Boolean.valueOf(position.getAttribute(XML_A_POSITION_ROTATE)).booleanValue();
 			}
 			if (names.containsKey(name)) {
 				model.setStationPosition(names.get(name), new JMTPoint(x, y, rotate));

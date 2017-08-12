@@ -20,6 +20,7 @@ package jmt.engine.dataAnalysis;
 
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.SimConstants;
+import jmt.engine.simEngine.EngineUtils;
 
 /**
  * @author Stefano Omini
@@ -38,8 +39,8 @@ public class TempMeasure {
 	//the job class this measure refers to
 	private String jobClass;
 	//the measure type
-	private int measureType;
-	// type of node (station or region)
+	private String measureType;
+	//the node type (station or region)
 	private String nodeType;
 
 	//temp mean
@@ -103,7 +104,7 @@ public class TempMeasure {
 		} else {
 			jobClass = measure.getJobClassName();
 		}
-		measureType = measure.getMeasureType();
+		measureType = EngineUtils.encodeMeasureType(measure.getMeasureType());
 		alpha = measure.getAnalyzer().getAlfa();
 		precision = measure.getAnalyzer().getPrecision();
 
@@ -157,10 +158,6 @@ public class TempMeasure {
 		return jobClass;
 	}
 
-	public int getMeasureType() {
-		return measureType;
-	}
-
 	public double getTempMean() {
 		return tempMean;
 	}
@@ -211,6 +208,10 @@ public class TempMeasure {
 
 	public double getSimTime() {
 		return simulationTime;
+	}
+
+	public String getMeasureType() {
+		return measureType;
 	}
 
 	public String getNodeType() {

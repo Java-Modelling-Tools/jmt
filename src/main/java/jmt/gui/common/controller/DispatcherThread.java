@@ -44,24 +44,24 @@ import jmt.gui.jsimgraph.controller.SimulationStateChecker;
  * Modified by Francesco D'Aquino 9/11/2005
  */
 public class DispatcherThread extends Thread implements AbortMeasure {
+
 	private SimulationStateChecker simStateChecker;
 	private Dispatcher_jSIMschema simulator;
-	private SimulationDefinition sd;
 	private GuiInterface gui;
+	private SimulationDefinition sd;
 	private TimerThread timer = null;
 	private PollerThread poller = null;
-	ResultsModel results;
+	private ResultsModel results;
 
 	/**
 	 * Construct a new Dispatcher Thread
 	 * @param gui reference to current gui object (can be JSIMMain or Mediator)
 	 * @param sd Reference to Simulation Definition data structure
-	 * @param results data structure where simulation results should be saved
 	 */
-	public DispatcherThread(GuiInterface gui, SimulationDefinition sd, ResultsModel results) {
-		this.sd = sd;
+	public DispatcherThread(GuiInterface gui, SimulationDefinition sd) {
 		this.gui = gui;
-		this.results = results;
+		this.sd = sd;
+		this.results = (ResultsModel) sd.getSimulationResults();
 		poller = new PollerThread(sd.getPollingInterval().doubleValue(), this);
 		// Avoid hanging the system during execution
 		this.setPriority(Thread.MIN_PRIORITY);
@@ -212,7 +212,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 					dispatcher.results.setTempMeasures(dispatcher.simulator.getTempMeasures(), dispatcher.simulator.checkSimProgress());
 					initialized = true;
 					// Sets ResultsWindow
-					ResultsWindow rw = new ResultsWindow(results, dispatcher, gui.getFileName());
+					ResultsWindow rw = new ResultsWindow(sd, dispatcher, gui.getFileName());
 					gui.setResultsWindow(rw);
 					// Moves it to lower right corner if animation is enabled
 					if (sd.isAnimationEnabled()) {

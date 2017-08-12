@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="1cl_1stat_mm1k_fcr.jsimg" timestamp="Fri May 12 02:42:02 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="1cl_1stat_mm1k_fcr.jsimg" timestamp="Sat Aug 12 15:52:17 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="1000000" name="1cl_1stat_mm1k_fcr.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Source 0" type="open"/>
 <node name="M/M/1">
@@ -100,9 +100,10 @@
 </station>
 </jmodel>
 <results logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.95" analyzedSamples="1000000" discardedSamples="1455" finalValue="4.276072271666644" name="M/M/1_Number of Customers" nodeType="station" precision="0.05" referenceClass="" referenceStation="M/M/1" state="1" type="0">
-<sample lastIntervalAvgValue="4.217489627363565" lowerBound="4.053181359673261" meanValue="4.265679619724278" simulationTime="7895.899503806563" upperBound="4.478177879775294"/>
-<sample lastIntervalAvgValue="4.28910592484407" lowerBound="4.214335577033998" meanValue="4.276072271666644" simulationTime="56844.53965815204" upperBound="4.33780896629929"/>
+<measure alpha="0.95" analyzedSamples="1000000" discardedSamples="110" finalValue="4.307422794779033" name="M/M/1_Number of Customers" nodeType="station" precision="0.05" referenceClass="" referenceStation="M/M/1" state="1" type="Number of Customers">
+<sample lastIntervalAvgValue="4.249418460341494" lowerBound="4.125712249682184" meanValue="4.277595883672087" simulationTime="5620.283987664955" upperBound="4.42947951766199"/>
+<sample lastIntervalAvgValue="4.292594749376781" lowerBound="4.256695041828887" meanValue="4.307422794779033" simulationTime="56633.318324668915" upperBound="4.358150547729179"/>
+<sample lastIntervalAvgValue="5.709794712005489" lowerBound="4.256695041828887" meanValue="4.307422794779033" simulationTime="56653.76416874176" upperBound="4.358150547729179"/>
 </measure>
 </results>
 </archive>

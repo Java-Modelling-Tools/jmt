@@ -32,9 +32,10 @@ import jmt.engine.random.engine.RandomEngine;
  * @author Bertoli Marco
  */
 public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
-	private int property = NetNode.PROPERTY_ID_RESIDENCE_TIME;
+
 	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
 	private double infinity = Double.POSITIVE_INFINITY;
+	private int property = NetNode.PROPERTY_ID_RESIDENCE_TIME;
 	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)
 	private RandomEngine random = RandomEngine.makeDefault();
 

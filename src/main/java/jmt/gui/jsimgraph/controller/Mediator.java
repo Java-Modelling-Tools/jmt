@@ -47,6 +47,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import jmt.engine.log.LoggerParameters;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.image.ImageLoader;
@@ -59,7 +60,6 @@ import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.controller.PADispatcherThread;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.ModelConverter;
-import jmt.gui.common.definitions.PAResultsModel;
 import jmt.gui.common.definitions.ResultsModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.editors.DefaultsEditor;
@@ -723,10 +723,10 @@ public class Mediator implements GuiInterface {
 			// If model contains results, enable Results Window
 			if (model.containsSimulationResults()) {
 				if (model.isParametricAnalysisEnabled()) {
-					this.setResultsWindow(new PAResultsWindow(model.getParametricAnalysisModel(), (PAResultsModel) model.getSimulationResults(), openedArchive.getName()));
+					this.setResultsWindow(new PAResultsWindow(model, openedArchive.getName()));
 					showResults.setEnabled(true);
 				} else {
-					this.setResultsWindow(new ResultsWindow(model.getSimulationResults(), openedArchive.getName()));
+					this.setResultsWindow(new ResultsWindow(model, openedArchive.getName()));
 					showResults.setEnabled(true);
 				}
 			}
@@ -1972,8 +1972,7 @@ public class Mediator implements GuiInterface {
 			String[] ln = model.getLoggerNameList();
 			String ln2 = "";
 			if (ln != null) {
-				if (model.getLoggingGlbParameter("autoAppend")
-						.equalsIgnoreCase(new Integer(jmt.engine.log.LoggerParameters.LOGGER_AR_ASK).toString())) {
+				if (model.getLoggingGlbParameter("autoAppend").equalsIgnoreCase(new Integer(LoggerParameters.LOGGER_AR_ASK).toString())) {
 					if (ln.length > 0) {
 						// Cache the absolute log-path
 						String logabspath;
@@ -2051,7 +2050,7 @@ public class Mediator implements GuiInterface {
 						String logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
 						model.setSimulationResults(new ResultsModel(model.getPollingInterval().doubleValue(), logCSVDelimiter, logDecimalSeparator));
 						showResults.setEnabled(true);
-						dispatcher = new DispatcherThread(this, model, (ResultsModel) model.getSimulationResults());
+						dispatcher = new DispatcherThread(this, model);
 						dispatcher.startSimulation(temp);
 					} catch (Exception e) {
 						handleException(e);

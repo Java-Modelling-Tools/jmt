@@ -38,7 +38,7 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
  *       
  * Modified by Ashanka (May 2010): 
  * Project: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -63,12 +63,12 @@ public interface SimulationDefinition {
 	public static final String MEASURE_X = "Throughput";
 	/**Code for drop rate measure*/
 	public static final String MEASURE_DR = "Drop Rate";
+	/**Code for system customer number measure*/
+	public static final String MEASURE_S_CN = "System Number of Customers";
 	/**Code for system response time measure*/
 	public static final String MEASURE_S_RP = "System Response Time";
 	/**Code for system throughput measure*/
 	public static final String MEASURE_S_X = "System Throughput";
-	/**Code for system customer number measure*/
-	public static final String MEASURE_S_CN = "System Number of Customers";
 	/**Code for system drop rate measure*/
 	public static final String MEASURE_S_DR = "System Drop Rate";
 	/**Code for system power measure*/
@@ -211,31 +211,31 @@ public interface SimulationDefinition {
 
 	/**
 	 * Tells if a given measure is global
-	 * @param key search's key for given measure
+	 * @param type type of given measure
 	 * @return true if measure is global
 	 */
-	public boolean isGlobalMeasure(Object key);
+	public boolean isGlobalMeasure(String type);
 
 	/**
 	 * Tells if a given measure is for sinks only
-	 * @param key search's key for given measure
+	 * @param type type of given measure
 	 * @return true if measure is for sinks only
 	 */
-	public boolean isSinkMeasure(Object key);
+	public boolean isSinkMeasure(String type);
 
 	/**
 	 * Tells if a given measure is for blocking regions only
-	 * @param key search's key for given measure
+	 * @param type type of given measure
 	 * @return true if measure is for blocking regions only
 	 */
-	public boolean isFCRMeasure(Object key);
+	public boolean isFCRMeasure(String type);
 
 	/**
 	 * Tells if a given measure is for fork/join sections only
-	 * @param key search's key for given measure
+	 * @param type type of given measure
 	 * @return true if measure is for fork/join sections only
 	 */
-	public boolean isFJMeasure(Object key);
+	public boolean isFJMeasure(String type);
 
 	/*------------------------------------------------------------------------------------------
 	------------------------------ Methods for preloading definition ---------------------------

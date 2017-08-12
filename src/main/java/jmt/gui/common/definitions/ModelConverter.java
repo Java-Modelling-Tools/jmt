@@ -255,7 +255,7 @@ public class ModelConverter {
 	 * @return a vector that enumerates all conversion warnings and how they have been fixed
 	 */
 	public static List<String> convertJSIMtoJMVA(CommonModel input, ExactModel output) {
-		// Normalize probability routing
+		// Manage probabilities
 		input.manageProbabilities();
 
 		// Used to store warnings

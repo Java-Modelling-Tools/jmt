@@ -236,7 +236,7 @@ public class Dispatcher_jMVAschema {
 
 			sim.run();
 
-			//stop time
+			//Stop time
 			stop = System.currentTimeMillis();
 			elapsed = ((stop - start)) / 1000.0;
 
@@ -513,7 +513,7 @@ public class Dispatcher_jMVAschema {
 
 			sim.run();
 
-			//stop time
+			//Stop time
 			stop = System.currentTimeMillis();
 			elapsed = ((stop - start)) / 1000.0;
 

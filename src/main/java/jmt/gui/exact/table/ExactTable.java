@@ -255,8 +255,7 @@ public class ExactTable extends JTable {
 			if (hasPrototypes) {
 				//comp = getDefaultRenderer(dataModel.getColumnClass(i)).getTableCellRendererComponent(this, ptm.getPrototype(i), false, false, 0, i);
 				comp = getDefaultRenderer(Object.class).getTableCellRendererComponent(this, ptm.getPrototype(i), false, false, 0, i);
-
-				 autoWidth = Math.max(autoWidth, comp.getPreferredSize().width);
+				autoWidth = Math.max(autoWidth, comp.getPreferredSize().width);
 			}
 
 			col.setPreferredWidth(autoWidth);

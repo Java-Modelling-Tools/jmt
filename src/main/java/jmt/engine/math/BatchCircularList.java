@@ -194,7 +194,7 @@ public class BatchCircularList {
 
 	/**
 	 * Gets the number of discarded samples (not batches)
-	 * @return number of discareded samples
+	 * @return number of discarded samples
 	 */
 	public int getDiscarded() {
 		return discarded;

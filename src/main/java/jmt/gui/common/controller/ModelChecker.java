@@ -1504,7 +1504,7 @@ public class ModelChecker implements CommonConstants {
 			String thisMeasureType = simulation_def.getMeasureType(thisMeasure);
 			Object thisMeasureStation = simulation_def.getMeasureStation(thisMeasure);
 			if (thisMeasureType == null
-					|| (!simulation_def.isGlobalMeasure(thisMeasure) && thisMeasureStation == null)) {
+					|| (!simulation_def.isGlobalMeasure(thisMeasureType) && thisMeasureStation == null)) {
 				errors[INVALID_MEASURE_ERROR] = true;
 			}
 		}
@@ -1533,7 +1533,7 @@ public class ModelChecker implements CommonConstants {
 			Object thisMeasureStation = simulation_def.getMeasureStation(thisMeasure);
 			String thisMeasureStationName = null;
 			if (thisMeasureStation == null) {
-				if (simulation_def.isGlobalMeasure(thisMeasure)) {
+				if (simulation_def.isGlobalMeasure(thisMeasureType)) {
 					thisMeasureStationName = "ALL";
 				} else {
 					thisMeasureStationName = "";
@@ -2228,7 +2228,7 @@ public class ModelChecker implements CommonConstants {
 				Vector<Object> forwardStations = station_def.getForwardConnections(thisStation);
 				if (forwardStations.isEmpty()) {
 					stationsWithoutOptionalLink.add(thisStation);
-					errors[NO_OPTIONAL_LINK_WARNING] = true;
+					warnings[NO_OPTIONAL_LINK_WARNING] = true;
 				}
 			} else {
 				Vector<Object> backwardStations = station_def.getBackwardConnections(thisStation);

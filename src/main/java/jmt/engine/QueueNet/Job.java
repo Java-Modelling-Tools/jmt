@@ -18,22 +18,23 @@
 
 package jmt.engine.QueueNet;
 
+import java.util.Arrays;
+
 /**
  *	This class implements a generic job of a queue network.
  * 	@author Francesco Radaelli, Marco Bertoli
  */
 public class Job implements Cloneable {
 
-	// bitwise data, if the job have ever been as job class
-	private long classesBitwise;
-
 	//counter used to generate id
 	private static int counter;
 	//job ID
 	private int Id;
 
-	//Class of this job
+	//class of this job
 	private JobClass jobClass;
+	//bitwise data, if the job have ever been as job class
+	private boolean[] classesBitwise;
 	//used to compute system response time
 	protected double systemEnteringTime;
 
@@ -56,8 +57,9 @@ public class Job implements Cloneable {
 	/** Creates a new instance of Job.
 	 *  @param jobClass Reference to the class of the job.
 	 */
-	public Job(JobClass jobClass) {
+	public Job(JobClass jobClass, int jobClassNum) {
 		this.jobClass = jobClass;
+		this.classesBitwise = new boolean[jobClassNum];
 		// Job Id is used only for logging
 		this.Id = counter++;
 		resetSystemEnteringTime();
@@ -137,21 +139,22 @@ public class Job implements Cloneable {
 	 */
 	public void setClass(JobClass newClass) {
 		jobClass = newClass;
-		classesBitwise |= newClass.getIdBitwise();
+		classesBitwise[newClass.getId()] = true;
 	}
 
 	/** Adds a class to job history
 	 * @param newClass the JobClass to add
 	 */
 	public void addClass(JobClass newClass) {
-		classesBitwise |= newClass.getIdBitwise();
+		classesBitwise[newClass.getId()] = true;
 	}
 
 	/**
 	 * Reset bitwise 
 	 */
 	private void resetClass() {
-		classesBitwise = jobClass.getIdBitwise();
+		Arrays.fill(classesBitwise, false);
+		classesBitwise[jobClass.getId()] = true;
 	}
 
 	/** 
@@ -160,7 +163,7 @@ public class Job implements Cloneable {
 	 * @return true if the job currently of given class or previously in this class
 	 */
 	public boolean hasBeenClass(JobClass jobClass) {
-		return hasBeenClass(jobClass.getIdBitwise());
+		return classesBitwise[jobClass.getId()];
 	}
 
 	/** 
@@ -169,17 +172,7 @@ public class Job implements Cloneable {
 	 * @return true if the job currently of given class or previously in this class
 	 */
 	public boolean hasBeenClass(int jobClassId) {
-		long idBitwise = JobClass.getIdBitwise(jobClassId);
-		return hasBeenClass(idBitwise);
-	}
-
-	/** 
-	 * If the job have ever been as jobClass as idBitwise
-	 * @param jobClassId the class of the job if the job has ever been the class
-	 * @return true if the job currently of given class or previously in this class
-	 */
-	private boolean hasBeenClass(long idBitwise) {
-		return  (classesBitwise & idBitwise) > 0 ;
+		return classesBitwise[jobClassId];
 	}
 
 	public double getServiceTime() {

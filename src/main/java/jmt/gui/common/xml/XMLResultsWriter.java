@@ -153,7 +153,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 			for (int i = 0; i < measure.getMeasureNumber(); i++) {
 				Element elem = doc.createElement(XML_E_MEASURE);
 				elem.setAttribute(XML_A_MEASURE_NAME, measure.getName(i));
-				elem.setAttribute(XML_A_MEASURE_TYPE, Integer.toString(measure.getMeasureType(i)));
+				elem.setAttribute(XML_A_MEASURE_TYPE, measure.getMeasureType(i));
 				elem.setAttribute(XML_A_MEASURE_CLASS, measure.getClassName(i));
 				elem.setAttribute(XML_A_MEASURE_STATION, measure.getStationName(i));
 				elem.setAttribute(XML_A_MEASURE_SAMPLES, Integer.toString(measure.getAnalyzedSamples(i)));
@@ -171,7 +171,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 			for (int i = 0; i < measure.getMeasureNumber(); i++) {
 				Element elem = doc.createElement(XML_E_MEASURE);
 				elem.setAttribute(XML_A_MEASURE_NAME, measure.getName(i));
-				elem.setAttribute(XML_A_MEASURE_TYPE, Integer.toString(measure.getMeasureType(i)));
+				elem.setAttribute(XML_A_MEASURE_TYPE, measure.getMeasureType(i));
 				elem.setAttribute(XML_A_MEASURE_CLASS, measure.getClassName(i));
 				elem.setAttribute(XML_A_MEASURE_STATION, measure.getStationName(i));
 				elem.setAttribute(XML_A_MEASURE_FINALVALUE, Double.toString((measure.getValues(i).lastElement()).getMeanValue()));

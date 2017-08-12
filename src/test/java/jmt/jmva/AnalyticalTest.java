@@ -219,7 +219,6 @@ public class AnalyticalTest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Tempo trascorso: " + (stop - start));
 			System.out.println();
-
 		} else {
 			tempFile.println("Wrong input!!");
 		}
@@ -270,7 +269,6 @@ public class AnalyticalTest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Tempo trascorso: " + (stop - start));
 			System.out.println();
-
 		} else {
 			tempFile.println("Wrong input!!");
 		}
@@ -331,7 +329,6 @@ public class AnalyticalTest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Tempo trascorso: " + (stop - start));
 			System.out.println();
-
 		} else {
 			tempFile.println("Wrong input!!");
 		}
@@ -380,7 +377,6 @@ public class AnalyticalTest {
 		visits[1][1] = 3;
 
 		if (multiMixed.input(name, type, servt, visits, classData, classTypes)) {
-
 			multiMixed.solve();
 			tempFile.println(multiMixed);
 			tempFile.println("End Multi mixed");
@@ -390,7 +386,6 @@ public class AnalyticalTest {
 			System.out.print("Tempo trascorso: ");
 			System.out.print(totTime);
 			System.out.println();
-
 		} else {
 			tempFile.println("Wrong input!!");
 		}
@@ -439,7 +434,6 @@ public class AnalyticalTest {
 		visits[1][1] = 3;
 
 		if (multiMixed.input(name, type, servt, visits, classData, classTypes)) {
-
 			multiMixed.solve();
 			tempFile.println(multiMixed);
 			tempFile.println("End Multi mixed");
@@ -449,7 +443,6 @@ public class AnalyticalTest {
 			System.out.print("Tempo trascorso: ");
 			System.out.print(totTime);
 			System.out.println();
-
 		} else {
 			tempFile.println("Wrong input!!");
 		}
@@ -498,7 +491,6 @@ public class AnalyticalTest {
 		visits[1][1] = 1;
 
 		if (multiMixed.input(name, type, servt, visits, classData, classTypes)) {
-
 			multiMixed.solve();
 			tempFile.println(multiMixed);
 			tempFile.println("End Multi mixed");
@@ -508,7 +500,6 @@ public class AnalyticalTest {
 			System.out.print("Tempo trascorso: ");
 			System.out.print(totTime);
 			System.out.println();
-
 		} else {
 			tempFile.println("Wrong input!!");
 		}
@@ -569,7 +560,6 @@ public class AnalyticalTest {
 		visits[1][3] = 1;
 
 		if (multiMixed.input(name, type, servt, visits, classData, classTypes)) {
-
 			multiMixed.solve();
 			tempFile.println(multiMixed);
 			tempFile.println("End Multi mixed");
@@ -579,7 +569,6 @@ public class AnalyticalTest {
 			System.out.print("Tempo trascorso: ");
 			System.out.print(totTime);
 			System.out.println();
-
 		} else {
 			tempFile.println("Wrong input!!");
 		}
@@ -614,7 +603,7 @@ public class AnalyticalTest {
 		tempFile.println("End LI");
 		long stop = System.currentTimeMillis();
 		System.out.print("Tempo trascorso: " + (stop - start));
-
+		System.out.println();
 		assertCorrectOutput(tempFile);
 	}
 
@@ -642,7 +631,7 @@ public class AnalyticalTest {
 		tempFile.println(mva);
 		tempFile.println("End LI");
 		System.out.print("Tempo trascorso: " + (System.currentTimeMillis() - start) / 1000);
-
+		System.out.println();
 		assertCorrectOutput(tempFile);
 	}
 
@@ -670,10 +659,8 @@ public class AnalyticalTest {
 		}
 		tempFile.println(mva);
 		tempFile.println("End LI");
-		System.out.print("Tempo trascorso: ");
-		long elapsed = (System.currentTimeMillis() - start);
-		System.out.println(elapsed);
-
+		System.out.print("Tempo trascorso: " + (System.currentTimeMillis() - start) / 1000);
+		System.out.println();
 		assertCorrectOutput(tempFile);
 	}
 
@@ -706,7 +693,7 @@ public class AnalyticalTest {
 		tempFile.println("End LI");
 		long stop = System.currentTimeMillis();
 		System.out.print("Tempo trascorso: " + (stop - start));
-
+		System.out.println();
 		assertCorrectOutput(tempFile);
 	}
 
@@ -1016,7 +1003,7 @@ public class AnalyticalTest {
 		tempFile.println("End LI");
 		long stop = System.currentTimeMillis();
 		System.out.print("Tempo trascorso: " + (stop - start));
-
+		System.out.println();
 		assertCorrectOutput(tempFile);
 	}
 
@@ -1049,7 +1036,7 @@ public class AnalyticalTest {
 		tempFile.println("End LI");
 		long stop = System.currentTimeMillis();
 		System.out.print("Tempo trascorso: " + (stop - start));
-
+		System.out.println();
 		assertCorrectOutput(tempFile);
 	}
 
@@ -1110,7 +1097,6 @@ public class AnalyticalTest {
 			long toc = System.currentTimeMillis();
 			System.out.print("Tempo trascorso: " + (toc - tic) + "ms");
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}

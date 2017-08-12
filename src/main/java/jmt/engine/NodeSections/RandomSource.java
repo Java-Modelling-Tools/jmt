@@ -25,9 +25,11 @@ import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
 import jmt.engine.random.Parameter;
 
 /**
@@ -52,6 +54,8 @@ public class RandomSource extends InputSection {
 
 	private ServiceStrategy[] strategy;
 
+	private JobClassList jobClasses;
+
 	/**
 	 * Creates a new instance of inputSection.
 	 * strategy[i] = null, if the i-th class is closed.
@@ -61,6 +65,12 @@ public class RandomSource extends InputSection {
 		this.strategy = strategy;
 		waitingJobs = new LinkedList<Job>();
 		coolStart = true;
+	}
+
+	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+		// Sets netnode dependent properties
+		jobClasses = getJobClasses();
 	}
 
 	@Override
@@ -78,10 +88,10 @@ public class RandomSource extends InputSection {
 			//for each job created, it sends to itself a message whose delay is the time of
 			//departure of the job, calculated using the strategy of the corresponding class
 
-			ListIterator<JobClass> jobClasses = getJobClasses().listIterator();
+			ListIterator<JobClass> it = jobClasses.listIterator();
 			JobClass jobClass;
-			while (jobClasses.hasNext()) {
-				jobClass = jobClasses.next();
+			while (it.hasNext()) {
+				jobClass = it.next();
 				if (jobClass.getType() == JobClass.CLOSED_CLASS) {
 					//closed class: no arrivals
 					continue;
@@ -90,7 +100,7 @@ public class RandomSource extends InputSection {
 				c = jobClass.getId();
 				// Calculates the delay of departure (1/lambda)
 				if (strategy[c] != null) {
-					job = new Job(jobClass);
+					job = new Job(jobClass, jobClasses.size());
 					delay = strategy[c].wait(this);
 					sendMe(job, delay);
 				}
@@ -130,7 +140,7 @@ public class RandomSource extends InputSection {
 				sendForward(job, 0.0);
 
 				// Create a new job and send it to me delayed
-				job = new Job(job.getJobClass());
+				job = new Job(job.getJobClass(), jobClasses.size());
 				delay = strategy[c].wait(this);
 				sendMe(job, delay);
 
@@ -170,7 +180,7 @@ public class RandomSource extends InputSection {
 				sendForward(job, 0.0);
 
 				// Create a new job and send it to me delayed
-				job = new Job(getJobClasses().get(c));
+				job = new Job(jobClasses.get(c), jobClasses.size());
 				delay = strategy[c].wait(this);
 				sendMe(job, delay);
 			} else {

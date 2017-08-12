@@ -63,7 +63,7 @@ import jmt.engine.random.engine.RandomEngine;
  * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -242,7 +242,7 @@ public class Simulation {
 	 * @param nodeName name of the node to be measured.
 	 * @param measure
 	 * @param jClass
-	 * @param nodeType type of node. This can be "station" or null for normal measures and "region" for blocking region related ones
+	 * @param nodeType type of the node to be measured.
 	 * @throws LoadException
 	 */
 	public void addMeasure(int measureType, String nodeName, Measure measure, String jClass, String nodeType) throws LoadException {
@@ -251,7 +251,7 @@ public class Simulation {
 		if (simParameters != null) {
 			measure.setSimParameters(simParameters);
 		}
-		if (SimConstants.NODE_TYPE_REGION.equalsIgnoreCase(nodeType)) {
+		if (SimConstants.NODE_TYPE_REGION.equals(nodeType)) {
 			// Region measures
 			regionMeasures.add(new SimMeasure(measureType, nodeName, measure, jClass));
 		} else {
@@ -523,14 +523,14 @@ public class Simulation {
 				// Global measures (new by Bertoli Marco)
 				else {
 					switch (ms.getMeasureType()) {
+					case SimConstants.SYSTEM_NUMBER_OF_JOBS:
+						network.getJobInfoList().analyzeJobNumber(jClass, ms.getMeasure());
+						break;
 					case SimConstants.SYSTEM_RESPONSE_TIME:
 						network.getJobInfoList().analyzeResponseTime(jClass, ms.getMeasure());
 						break;
 					case SimConstants.SYSTEM_THROUGHPUT:
 						network.getJobInfoList().analyzeThroughput(jClass, ms.getMeasure());
-						break;
-					case SimConstants.SYSTEM_NUMBER_OF_JOBS:
-						network.getJobInfoList().analyzeJobNumber(jClass, ms.getMeasure());
 						break;
 					case SimConstants.SYSTEM_DROP_RATE:
 						network.getJobInfoList().analyzeDropRate(jClass, ms.getMeasure());

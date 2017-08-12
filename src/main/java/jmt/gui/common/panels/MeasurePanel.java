@@ -76,7 +76,7 @@ import jmt.gui.exact.table.ExactCellEditor;
  * 
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for the capturing the 
+ * Description: Added new Performance index for capturing 
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -121,6 +121,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			SimulationDefinition.MEASURE_DR,
 			SimulationDefinition.MEASURE_FCR_TW,
 			SimulationDefinition.MEASURE_FCR_MO,
+			SimulationDefinition.MEASURE_FX,
 			SimulationDefinition.MEASURE_FJ_CN,
 			SimulationDefinition.MEASURE_FJ_RP,
 			SimulationDefinition.MEASURE_QL,
@@ -135,8 +136,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			SimulationDefinition.MEASURE_S_X,
 			SimulationDefinition.MEASURE_X,
 			SimulationDefinition.MEASURE_X_PER_SINK,
-			SimulationDefinition.MEASURE_U,
-			SimulationDefinition.MEASURE_FX
+			SimulationDefinition.MEASURE_U
 	};
 
 	// Measure selection ComboBox
@@ -394,30 +394,31 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			Object key = simData.getMeasureKeys().get(row);
+			String type = simData.getMeasureType(key);
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
-			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_X)) {
+			} else if (column == 2 && type.equals(SimulationDefinition.MEASURE_U)) {
+				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
+			} else if (column == 2 && type.equals(SimulationDefinition.MEASURE_X)) {
 				Vector<Object> vector = new Vector<Object>();
 				vector.addAll(stationData.getStationKeysSource());
 				vector.addAll(stationData.getStationRegionKeysNoSourceSink());
 				return stationsCombos.getEditor(vector);
-			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_U)) {
-				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
-			} else if (column == 2 && simData.isSinkMeasure(key)) {
+			} else if (column == 2 && simData.isSinkMeasure(type)) {
 				return stationsCombos.getEditor(stationData.getStationKeysSink());
-			} else if (column == 2 && simData.isFCRMeasure(key)) {
+			} else if (column == 2 && simData.isFCRMeasure(type)) {
 				return stationsCombos.getEditor(stationData.getFCRegionKeys());
-			} else if (column == 2 && simData.isFJMeasure(key)) {
+			} else if (column == 2 && simData.isFJMeasure(type)) {
 				return FJsCombos.getEditor(stationData.getFJKeys());
-			} else if (column == 2 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
+			} else if (column == 2 && type.equals(SimulationDefinition.MEASURE_FX)) {
 				return stationsCombos.getEditor(stationData.getStationKeysTransition());
 			} else if (column == 2) {
 				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
-			} else if (column == 1 && simData.isSinkMeasure(key)) {
+			} else if (column == 1 && simData.isSinkMeasure(type)) {
 				return classesCombos.getEditor(classData.getOpenClassKeys());
-			} else if (column == 1 && simData.isFCRMeasure(key)) {
+			} else if (column == 1 && simData.isFCRMeasure(type)) {
 				return classesCombos.getEditor(new ArrayList<Object>());
-			} else if (column == 1 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
+			} else if (column == 1 && type.equals(SimulationDefinition.MEASURE_FX)) {
 				Object station = simData.getMeasureStation(key);
 				if (station == null) {
 					return modesCombos.getEditor(new ArrayList<String>());
@@ -434,18 +435,19 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			Object key = simData.getMeasureKeys().get(row);
+			String type = simData.getMeasureType(key);
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
 			} else if (column == 3) {
 				return new BooleanCellRenderer();
-			} else if (column == 2 && !simData.isGlobalMeasure(key)) {
-				if (simData.isFJMeasure(key)) {
+			} else if (column == 2 && !simData.isGlobalMeasure(type)) {
+				if (simData.isFJMeasure(type)) {
 					return FJsCombos.getRenderer();
 				} else {
 					return stationsCombos.getRenderer();
 				}
 			} else if (column == 1) {
-				if (simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
+				if (type.equals(SimulationDefinition.MEASURE_FX)) {
 					return modesCombos.getRenderer();
 				} else {
 					return classesCombos.getRenderer();
@@ -485,12 +487,14 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			Object key = simData.getMeasureKeys().get(rowIndex);
+			String type = simData.getMeasureType(key);
 			// Avoid editing of Measure type
 			if (columnIndex == 0) {
 				return false;
 			}
 			// Avoid set reference station for global measures
-			if (columnIndex == 2 && simData.isGlobalMeasure(simData.getMeasureKeys().get(rowIndex))) {
+			if (columnIndex == 2 && simData.isGlobalMeasure(type)) {
 				return false;
 			}
 			return true;
@@ -518,6 +522,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object key = simData.getMeasureKeys().get(rowIndex);
+			String type = simData.getMeasureType(key);
 			switch (columnIndex) {
 			case 0: 
 				simData.setMeasureType((String) aValue, key);
@@ -527,7 +532,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				break;
 			case 2: 
 				simData.setMeasureStation(aValue, key);
-				if (simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_FX)) {
+				if (type.equals(SimulationDefinition.MEASURE_FX)) {
 					simData.setMeasureClass(null, key);
 					repaint();
 					measureTable.setRowSelectionInterval(rowIndex, rowIndex);

@@ -179,7 +179,7 @@ public class Jmt {
 		LinkedHashMap<String,String> options = new LinkedHashMap<String, String>();
 		// Parses command line options
 		String option = "";
-		for (int i=startIndex; i<args.length; i++) {
+		for (int i = startIndex; i < args.length; i++) {
 			String str = args[i];
 			if (str.startsWith("-")) {
 				option = str.toLowerCase();

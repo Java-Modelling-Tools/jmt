@@ -57,14 +57,14 @@ public class GlobalJobInfoList {
 	private int jobs;
 	private int[] jobsPerClass;
 
+	private Measure jobNum;
+	private Measure[] jobNumPerClass;
+
 	private Measure responseTimeWOCS;
 	private Measure[] responseTimePerClassWOCS;
 
 	private Measure responseTimeWithCS;
 	private Measure[] responseTimePerClassWithCS;
-
-	private Measure jobNum;
-	private Measure[] jobNumPerClass;
 
 	private InverseMeasure dropRate;
 	private InverseMeasure[] dropRatePerClass;
@@ -109,12 +109,12 @@ public class GlobalJobInfoList {
 		jobs = 0;
 		jobsPerClass = new int[classNum];
 
+		jobNum = null;
+		jobNumPerClass = null;
 		responseTimeWOCS = null;
 		responseTimePerClassWOCS = null;
 		responseTimeWithCS = null;
 		responseTimePerClassWithCS = null;
-		jobNum = null;
-		jobNumPerClass = null;
 		dropRate = null;
 		dropRatePerClass = null;
 		throughput = null;
@@ -149,9 +149,9 @@ public class GlobalJobInfoList {
 	 * @param job identifier of removed job
 	 */
 	public void removeJob(Job job) {
+		updateJobNumber(job);
 		updateResponseTime(job);
 		updateThroughput(job);
-		updateJobNumber(job);
 		updateSystemPower(job);
 
 		// Updates jobs number and throughput data structures
@@ -172,9 +172,9 @@ public class GlobalJobInfoList {
 	 * @param job identifier of cycling job
 	 */
 	public void recycleJob(Job job) {
+		updateJobNumber(job);
 		updateResponseTime(job);
 		updateThroughput(job);
-		updateJobNumber(job);
 		updateSystemPower(job);
 
 		// Updates jobs number and throughput data structures
@@ -191,22 +191,12 @@ public class GlobalJobInfoList {
 	}
 
 	/**
-	 * This method COULD be called to notify that a JOB exists
-	 * @param job identifier of existing job
-	 */
-	public void existJob(Job job) {
-		updateJobNumber(job);
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-	}
-
-	/**
 	 * This method must be called each time a job is dropped by a queue, a place or
 	 * a blocking region
 	 * @param job identifier of dropped job
 	 */
 	public void dropJob(Job job) {
 		updateJobNumber(job);
-		// Updates dropped jobs and drop percentage measure
 		updateDropRate(job);
 
 		// Updates jobs number and drop rate data structures
@@ -246,6 +236,22 @@ public class GlobalJobInfoList {
 	// --- Methods to specify measures to be analyzed -------------------------------------
 
 	/**
+	 * Analyzes System Number of Jobs for a specific job class or for every class
+	 * @param jobClass specified job class. If null measure will be job independent
+	 * @param Measure reference to a Measure object
+	 */
+	public void analyzeJobNumber(JobClass jobClass, Measure Measure) {
+		if (jobClass != null) {
+			if (jobNumPerClass == null) {
+				jobNumPerClass = new Measure[classNum];
+			}
+			jobNumPerClass[jobClass.getId()] = Measure;
+		} else {
+			jobNum = Measure;
+		}
+	}
+
+	/**
 	 * Analyzes System Response Time for a specific job class or for every class
 	 * @param jobClass specified job class. If null measure will be job independent
 	 * @param measure reference to a Measure object
@@ -269,22 +275,6 @@ public class GlobalJobInfoList {
 			} else {
 				responseTimeWOCS = measure;
 			}
-		}
-	}
-
-	/**
-	 * Analyzes System Number of Jobs for a specific job class or for every class
-	 * @param jobClass specified job class. If null measure will be job independent
-	 * @param Measure reference to a Measure object
-	 */
-	public void analyzeJobNumber(JobClass jobClass, Measure Measure) {
-		if (jobClass != null) {
-			if (jobNumPerClass == null) {
-				jobNumPerClass = new Measure[classNum];
-			}
-			jobNumPerClass[jobClass.getId()] = Measure;
-		} else {
-			jobNum = Measure;
 		}
 	}
 
@@ -323,6 +313,23 @@ public class GlobalJobInfoList {
 	// ------------------------------------------------------------------------------------
 
 	// --- Methods to update measures -----------------------------------------------------
+
+	/**
+	 * Updates System Job Number measures.
+	 * @param job current job
+	 */
+	private void updateJobNumber(Job job) {
+		if (jobNumPerClass != null) {
+			int index = job.getJobClass().getId();
+			Measure m = jobNumPerClass[index];
+			if (m != null) {
+				m.update(jobsPerClass[index], NetSystem.getTime() - lastModifyNumberPerClass[index]);
+			}
+		}
+		if (jobNum != null) {
+			jobNum.update(jobs, NetSystem.getTime() - lastModifyNumber);
+		}
+	}
 
 	/**
 	 * Updates System Response Time measures.
@@ -366,29 +373,13 @@ public class GlobalJobInfoList {
 	public void updateResponseSum(JobInfo jobInfo) {
 		if (hasClassSwitch) {
 			// skip forked job
-			if (jobInfo.getJob() instanceof ForkJob)
+			if (jobInfo.getJob() instanceof ForkJob) {
 				return;
+			}
 			int jobClassId = jobInfo.getJob().getJobClass().getId();
 			double time = NetSystem.getTime() - jobInfo.getTime();
 			responseSumWithCS += time;
 			responseSumPerClassWithCS[jobClassId] += time;
-		}
-	}
-
-	/**
-	 * Updates System Job Number measures.
-	 * @param job current job
-	 */
-	private void updateJobNumber(Job job) {
-		if (jobNumPerClass != null) {
-			int index = job.getJobClass().getId();
-			Measure m = jobNumPerClass[index];
-			if (m != null) {
-				m.update(jobsPerClass[index], NetSystem.getTime() - lastModifyNumberPerClass[index]);
-			}
-		}
-		if (jobNum != null) {
-			jobNum.update(jobs, NetSystem.getTime() - lastModifyNumber);
 		}
 	}
 

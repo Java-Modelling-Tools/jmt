@@ -87,20 +87,6 @@ public class JobClass {
 	public int getId() {
 		return id;
 	}
-	
-	/** Gets the id of this class as bitwise long.
-	 * @return Value of property Id.
-	 */
-	public long getIdBitwise() {
-		return getIdBitwise(id);
-	}
-	
-	/** Gets the id of this class as bitwise long.
-	 * @return Value of property Id.
-	 */
-	public static long getIdBitwise(int id) {
-		return 1 << id;
-	}
 
 	/** Gets the name of this class.
 	 * @return Value of property Name.
