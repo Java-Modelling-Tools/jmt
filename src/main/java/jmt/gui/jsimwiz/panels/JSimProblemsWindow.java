@@ -393,7 +393,7 @@ public class JSimProblemsWindow extends JFrame {
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.INCONSISTENT_QUEUE_STRATEGY_ERROR,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " uses different queue strategies for classes with the same priority.</div></html>", stationKey, null));
+							+ " uses different queue strategies for classes within the same priority group.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereJoinWithoutForkError()) {

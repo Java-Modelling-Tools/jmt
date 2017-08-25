@@ -21,6 +21,8 @@
 
 package jmt.engine.simEngine;
 
+import jmt.common.exception.NetException;
+
 /**
  * This class represents entities, or processes, running in the system.
  * To create a new type of entity, it should be <tt>extended</tt> and
@@ -79,9 +81,9 @@ public abstract class SimEntity {
 	/**
 	 * check that the body of Entity is closed correctly
 	 */
-	private void exit() throws jmt.common.exception.NetException {
+	private void exit() throws NetException {
 		if (state == SimEntity.RUNNABLE) {
-			throw new jmt.common.exception.NetException("body of entity " + getName() + " ended incorrectly the status at the end of the body "
+			throw new NetException("body of entity " + getName() + " ended incorrectly the status at the end of the body "
 					+ "must be waiting or holding");
 		}
 	}
@@ -317,19 +319,16 @@ public abstract class SimEntity {
 	 * Returns the Predicate which this entity is waiting for
 	 * @return
 	 */
-
 	public final SimPredicate getWaitingPred() {
 		return waitingPred;
 	}
 
 	/**
-	 *
-	 * /TODO: cosa significa??
 	 * runs the activity of this SimEntiy remember that at the end of the action
 	 * the SimEntiy must be waiting holding or not exiting. otherwise the
 	 * simulation will be interrupted (read aborted).
 	 */
-	final void execute() throws jmt.common.exception.NetException {
+	final void execute() throws NetException {
 		body();
 		exit();
 	}

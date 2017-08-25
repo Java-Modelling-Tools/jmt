@@ -31,17 +31,12 @@ import jmt.engine.random.engine.RandomEngine;
  * are put at random positions of the queue.
  * @author Lulai Zhu
  */
-public class RandStrategy implements QueuePutStrategy {
+public class RandStrategy extends QueuePutStrategy {
 
 	private RandomEngine randomEngine = RandomEngine.makeDefault();
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
-		job.setServiceTime(0.0);
 		queue.add((int) (randomEngine.raw() * (queue.size() + 1)), new JobInfo(job));
-	}
-
-	public boolean check() {
-		return true;
 	}
 
 }

@@ -30,15 +30,10 @@ import jmt.engine.QueueNet.NodeSection;
  * are put at the tail of the queue.
  * @author Francesco Radaelli
  */
-public class TailStrategy implements QueuePutStrategy {
+public class TailStrategy extends QueuePutStrategy {
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
-		job.setServiceTime(0.0);
 		queue.addLast(new JobInfo(job));
-	}
-
-	public boolean check() {
-		return true;
 	}
 
 }

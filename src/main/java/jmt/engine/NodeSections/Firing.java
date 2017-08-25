@@ -166,21 +166,7 @@ public class Firing extends OutputSection {
 	}
 
 	/**
-	 * Gets the total number of produced jobs
-	 */
-	public int getProducedJobs() {
-		return producedJobs;
-	}
-
-	/**
-	 * Gets the number of produced jobs for the specified class
-	 */
-	public int getProducedJobsPerClass(int jobClass) {
-		return producedJobsPerClass[jobClass];
-	}
-
-	/**
-	 * Shows the fork job number warning
+	 * Shows the fork job number warning.
 	 */
 	private void showForkJobNumWarning() {
 		if (!isForkJobNumWarningShown) {
@@ -203,6 +189,23 @@ public class Firing extends OutputSection {
 			}
 			isForkJobNumWarningShown = true;
 		}
+	}
+
+	/**
+	 * Gets the total number of produced jobs.
+	 * @return the total number of produced jobs.
+	 */
+	public int getProducedJobs() {
+		return producedJobs;
+	}
+
+	/**
+	 * Gets the number of produced jobs for the specified class.
+	 * @param classIndex the index of the job class.
+	 * @return the number of produced jobs for the specified class.
+	 */
+	public int getProducedJobsPerClass(int jobClass) {
+		return producedJobsPerClass[jobClass];
 	}
 
 }

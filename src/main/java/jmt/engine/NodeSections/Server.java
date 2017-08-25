@@ -36,149 +36,64 @@ import jmt.engine.QueueNet.NetSystem;
  */
 public class Server extends ServiceSection {
 
-	public static final boolean DEBUG = false;
-
-	/** Property Identifier:  Busy counter. */
-	public static final int PROPERTY_ID_BUSY_COUNTER = 0x0101;
-	/** Property Identifier:  Max jobs (number of servers). */
-	public static final int PROPERTY_ID_MAX_JOBS = 0x0102;
-	/** Property Identifier:  Visits per class. */
-	public static final int PROPERTY_ID_VISITS_PER_CLASS = 0x0103;
-	/** Property Identifier:  Service strategy. */
-	public static final int PROPERTY_ID_SERVICE_STRATEGY = 0x0104;
-
+	private int numberOfServers;
 	//TODO: use this to correct residence times (R=r*v) or remove them!!
-	private int numberOfVisitsPerClass[];
+	private int[] numberOfVisitsPerClass;
+	private ServiceStrategy[] serviceStrategies;
 
 	private int busyCounter;
 
-	private int numberOfServers;
-
-	private ServiceStrategy serviceStrategy[];
-
-	/** Creates a new instance of Server.
+	/**
+	 * Creates a new instance of Server.
+	 * @param numberOfServers Number of jobs which can be served simultaneously.
 	 * @param numberOfVisitsPerClass Number of job visits per class: if null
 	 * the server will be single visit.
-	 * @param serverNumber Number of jobs which can be served simultaneously.
-	 * @param serviceStrategy Array of service strategies, one per class.
-	 * @throws NetException
+	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
-	public Server(Integer serverNumber, Integer numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[]) throws NetException {
-		//numberOfVisitsPerClass is null
+	public Server(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
 		if (numberOfVisitsPerClass == null) {
-			this.serviceStrategy = serviceStrategy;
+			this.numberOfServers = numberOfServers.intValue();
 			this.numberOfVisitsPerClass = null;
+			this.serviceStrategies = serviceStrategies;
 			busyCounter = 0;
-			this.numberOfServers = serverNumber.intValue();
 		} else {
-			//else creates an array of int & then use the same constructor
-			int[] nVisits = new int[numberOfVisitsPerClass.length];
+			this.numberOfServers = numberOfServers.intValue();
+			this.numberOfVisitsPerClass = new int[numberOfVisitsPerClass.length];
 			for (int i = 0; i < numberOfVisitsPerClass.length; i++) {
-				nVisits[i] = numberOfVisitsPerClass[i].intValue();
+				this.numberOfVisitsPerClass[i] = numberOfVisitsPerClass[i].intValue();
 			}
-			this.serviceStrategy = serviceStrategy;
-			this.numberOfVisitsPerClass = nVisits;
+			this.serviceStrategies = serviceStrategies;
 			busyCounter = 0;
-			this.numberOfServers = serverNumber.intValue();
 		}
 	}
 
-	/** Creates a new instance of Server.
-	 * @param serverNumber Number of jobs which can be served simultaneously.
-	 * @param numberOfVisitsPerClass Number of job visits per class: if null
-	 * the server will be single visit.
-	 * @param serviceStrategy Array of service strategies, one per class.
-	 * @throws NetException
-	 */
-	public Server(int serverNumber, int numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[]) throws NetException {
-		this.serviceStrategy = serviceStrategy;
-		this.numberOfVisitsPerClass = numberOfVisitsPerClass;
-		busyCounter = 0;
-		this.numberOfServers = serverNumber;
-	}
-
-	@Override
-	public int getIntSectionProperty(int id) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_BUSY_COUNTER:
-			return busyCounter;
-		case PROPERTY_ID_MAX_JOBS:
-			return numberOfServers;
-		default:
-			return super.getIntSectionProperty(id);
-		}
-	}
-
-	@Override
-	public int getIntSectionProperty(int id, JobClass jobClass) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_VISITS_PER_CLASS:
-			return numberOfVisitsPerClass[jobClass.getId()];
-		default:
-			return super.getIntSectionProperty(id, jobClass);
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.NodeSection#getDoubleSectionProperty(int, jmt.engine.QueueNet.JobClass)
-	 */
-	@Override
-	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
-		if (id == PROPERTY_ID_UTILIZATION) {
-			double divisor = numberOfServers;
-			return jobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime() / divisor;
-		} else {
-			return super.getDoubleSectionProperty(id, jobClass);
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.NodeSection#getDoubleSectionProperty(int)
-	 */
 	@Override
 	public double getDoubleSectionProperty(int id) throws NetException {
-		if (id == PROPERTY_ID_UTILIZATION) {
-			double divisor = numberOfServers;
-			return jobsList.getBusyTime() / NetSystem.getTime() / divisor;
-		} else {
+		switch (id) {
+		case PROPERTY_ID_UTILIZATION:
+			return jobsList.getBusyTime() / NetSystem.getTime() / numberOfServers;
+		default:
 			return super.getDoubleSectionProperty(id);
 		}
 	}
 
 	@Override
-	public Object getObject(int id, JobClass jobClass) throws NetException {
+	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-		case PROPERTY_ID_SERVICE_STRATEGY:
-			return serviceStrategy[jobClass.getId()];
+		case PROPERTY_ID_UTILIZATION:
+			return jobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
 		default:
-			return super.getObject(id);
+			return super.getDoubleSectionProperty(id, jobClass);
 		}
-	}
-
-	@Override
-	public Object getObject(int id) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_SERVICE_STRATEGY:
-			return serviceStrategy;
-		default:
-			return super.getObject(id);
-		}
-	}
-
-	public ServiceStrategy[] getServiceStrategy() {
-		return serviceStrategy;
 	}
 
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
-		jobsList.setServerNumber(numberOfServers);
+		jobsList.setNumberOfServers(numberOfServers);
 	}
 
 	@Override
 	protected int process(NetMessage message) throws NetException {
-		int c;
-		Job job;
-
 		switch (message.getEvent()) {
 
 		case NetEvent.EVENT_START:
@@ -198,7 +113,7 @@ public class Server extends ServiceSection {
 			//capacity is left, an ack is sent to the input section.
 
 			// Gets the job from the message
-			job = message.getJob();
+			Job job = message.getJob();
 
 			if (isMine(message)) {
 				// this job has been just served (the message has been sent by the server itself)
@@ -208,14 +123,12 @@ public class Server extends ServiceSection {
 				//message received from another node section: if the server is not completely busy,
 				//it sends itself a message with this job
 				if (busyCounter < numberOfServers) {
-					// Gets the class of the job
-					c = job.getJobClass().getId();
 					// Auto-sends the job with delay equal to "serviceTime"
-					double serviceTime = 0.0;
-					if (job.getServiceTime() != 0.0) {
-						serviceTime = job.getServiceTime();
+					double serviceTime = job.getServiceTime();
+					if (serviceTime < 0.0) {
+						serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this);
 					} else {
-						serviceTime = serviceStrategy[c].wait(this);
+						job.setServiceTime(-1.0);
 					}
 					// Calculates the service time of job
 					sendMe(job, serviceTime);
@@ -261,6 +174,14 @@ public class Server extends ServiceSection {
 		}
 
 		return MSG_PROCESSED;
+	}
+
+	/**
+	 * Gets the service strategy for each class.
+	 * @return the service strategy for each class.
+	 */
+	public ServiceStrategy[] getServiceStrategies() {
+		return serviceStrategies;
 	}
 
 }

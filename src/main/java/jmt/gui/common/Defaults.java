@@ -84,6 +84,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("stationSemaphoreStrategy","jmt.gui.common.semaphoreStrategies.NormalSemaphore");
 
 		def.setProperty("dropRule", FINITE_DROP);
+		def.setProperty("serviceWeight", "1");
 		def.setProperty("forkBlock", "-1");
 		def.setProperty("isSimplifiedFork", "true");
 		def.setProperty("forkJobsPerLink", "1");

@@ -34,13 +34,12 @@ import jmt.engine.QueueNet.NodeSection;
  * priority, the one that comes last is put at the head.
  * @author Stefano Omini
  */
-public class HeadStrategyPriority implements QueuePutStrategy {
+public class HeadStrategyPriority extends QueuePutStrategy {
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
-		job.setServiceTime(0.0);
 
-		List<JobInfo> list = queue.getJobList();
+		List<JobInfo> list = queue.getInternalJobInfoList();
 		if (list.size() == 0) {
 			queue.addFirst(new JobInfo(job));
 			return;
@@ -58,10 +57,6 @@ public class HeadStrategyPriority implements QueuePutStrategy {
 			}
 		}
 		queue.addLast(new JobInfo(job));
-	}
-
-	public boolean check() {
-		return true;
 	}
 
 }

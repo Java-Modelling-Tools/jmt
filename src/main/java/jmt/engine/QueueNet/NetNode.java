@@ -63,19 +63,19 @@ public class NetNode extends SimEntity {
 
 	//ID of properties
 
-	/** Property ID: number of jobs which arrived to this node */
-	public static final int PROPERTY_ID_ARRIVED_JOBS = 0x0001;
-	/** Property ID: number of jobs which left this node */
-	public static final int PROPERTY_ID_LEFT_JOBS = 0x0002;
-	/** Property ID: number of events */
-	public static final int PROPERTY_ID_EVENTS = 0x0003;
-	/** Property ID: number of jobs inside the node*/
-	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0004;
+	/** Property ID: number of jobs arriving at this node */
+	public static final int PROPERTY_ID_ARRIVING_JOBS = 0x0001;
+	/** Property ID: number of jobs departing from this node */
+	public static final int PROPERTY_ID_DEPARTING_JOBS = 0x0002;
+	/** Property ID: number of jobs inside this node */
+	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0003;
 	/** Property ID: residence time */
-	public static final int PROPERTY_ID_RESIDENCE_TIME = 0x0005;
+	public static final int PROPERTY_ID_RESIDENCE_TIME = 0x0004;
 	/** Property ID: throughput */
-	public static final int PROPERTY_ID_THROUGHPUT = 0x0006;
+	public static final int PROPERTY_ID_THROUGHPUT = 0x0005;
+
 	private BlockingRegion region; // This is set only if this station is input station of a blocking region
+
 	/** A logger */
 	protected JSimLogger logger = JSimLogger.getLogger(this.getClass());
 
@@ -86,22 +86,20 @@ public class NetNode extends SimEntity {
 
 	private JobInfoList jobsList;
 
-	/** Input section of the NetNode.
-	 *
+	/**
+	 * Input section of the NetNode.
 	 */
 	protected NodeSection inputSection;
 
-	/** Service section of the NetNode.
-	 *
+	/**
+	 * Service section of the NetNode.
 	 */
 	protected NodeSection serviceSection;
 
-	/** Output section of the NetNode.
-	 *
+	/**
+	 * Output section of the NetNode.
 	 */
 	protected NodeSection outputSection;
-
-	private int eventsCounter;
 
 	private SimEvent receiveBuffer;
 
@@ -117,7 +115,8 @@ public class NetNode extends SimEntity {
 
 	private SimParameters simParameters;
 
-	/** Creates a new instance of NetNode.
+	/**
+	 * Creates a new instance of NetNode.
 	 * @param name Name of the NetNode.
 	 */
 	public NetNode(String name) {
@@ -129,17 +128,18 @@ public class NetNode extends SimEntity {
 		stopped = false;
 	}
 
-	/** Adds a section to the node.
-	 * @param  section Reference to the section to be added.
-	 * @throws jmt.common.exception.NetException if trying to add a section which has already been defined
+	/**
+	 * Adds a section to the node.
+	 * @param section Reference to the section to be added.
+	 * @throws NetException if the section has already been defined.
 	 */
-	public void addSection(NodeSection section) throws jmt.common.exception.NetException {
+	public void addSection(NodeSection section) throws NetException {
 		switch (section.getSectionID()) {
 		case NodeSection.INPUT:
 			if (inputSection == null) {
 				this.inputSection = section;
 			} else {
-				throw new jmt.common.exception.NetException(this, EXCEPTION_INPUT_SECTION_ALREADY_DEFINED,
+				throw new NetException(this, EXCEPTION_INPUT_SECTION_ALREADY_DEFINED,
 						"input section has been already defined");
 			}
 			break;
@@ -147,7 +147,7 @@ public class NetNode extends SimEntity {
 			if (serviceSection == null) {
 				this.serviceSection = section;
 			} else {
-				throw new jmt.common.exception.NetException(this, EXCEPTION_SERVICE_SECTION_ALREADY_DEFINED,
+				throw new NetException(this, EXCEPTION_SERVICE_SECTION_ALREADY_DEFINED,
 						"service section has been already defined");
 			}
 			break;
@@ -155,160 +155,157 @@ public class NetNode extends SimEntity {
 			if (outputSection == null) {
 				this.outputSection = section;
 			} else {
-				throw new jmt.common.exception.NetException(this, EXCEPTION_OUTPUT_SECTION_ALREADY_DEFINED,
+				throw new NetException(this, EXCEPTION_OUTPUT_SECTION_ALREADY_DEFINED,
 						"output section has been already defined");
 			}
 			break;
 		}
 	}
 
-	/** Connects the output of this netNode to the input of an another
-	 *  netNode.
-	 *  @param netNode netNode to be linked.
+	/**
+	 * Connects the output of this netNode to the input of an another
+	 * netNode.
+	 * @param netNode netNode to be linked.
 	 */
-	public void connect(NetNode netNode) throws jmt.common.exception.NetException {
+	public void connect(NetNode netNode) {
 		OutputNodes.add(netNode);
 		netNode.InputNodes.add(this);
 	}
 
-	/** Gets the JobInfoList of this node.
+	/**
+	 * Gets the JobInfoList of this node.
 	 */
 	public JobInfoList getJobInfoList() {
 		return jobsList;
 	}
 
-	/** Gets input nodes.
+	/**
+	 * Gets input nodes.
 	 * @return Input nodes linked to this node.
 	 */
 	public NodeList getInputNodes() {
 		return InputNodes;
 	}
 
-	/** Gets output nodes.
+	/**
+	 * Gets output nodes.
 	 * @return Output nodes linked to this node.
 	 */
 	public NodeList getOutputNodes() {
 		return OutputNodes;
 	}
 
-	/** Gets an integer type property related to this node.
+	/**
+	 * Gets an integer type property related to this node.
 	 * @param Id Property identifier.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the property is not available.
+	 * @throws NetException if the property is not available.
 	 */
-	public int getIntNodeProperty(int Id) throws jmt.common.exception.NetException {
-		try {
-			switch (Id) {
-			case PROPERTY_ID_ARRIVED_JOBS:
-				return jobsList.getJobsIn();
-			case PROPERTY_ID_LEFT_JOBS:
-				return jobsList.getJobsOut();
-			case PROPERTY_ID_EVENTS:
-				return eventsCounter;
-			case PROPERTY_ID_RESIDENT_JOBS:
-				return jobsList.size();
-			}
-		} catch (jmt.common.exception.NetException exc) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
+	public int getIntNodeProperty(int Id) throws NetException {
+		switch (Id) {
+		case PROPERTY_ID_ARRIVING_JOBS:
+			return jobsList.getJobsIn();
+		case PROPERTY_ID_DEPARTING_JOBS:
+			return jobsList.getJobsOut();
+		case PROPERTY_ID_RESIDENT_JOBS:
+			return jobsList.size();
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
-		throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 	}
 
-	/** Gets an integer type property of this node related to a specified
+	/**
+	 * Gets an integer type property of this node related to a specified
 	 * job class.
 	 * @param Id Property identifier.
 	 * @param JobClass JobClass.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the property is not available.
+	 * @throws NetException if the property is not available.
 	 */
-	public int getIntNodeProperty(int Id, JobClass JobClass) throws jmt.common.exception.NetException {
-		try {
-			switch (Id) {
-			case PROPERTY_ID_ARRIVED_JOBS:
-				return jobsList.getJobsInPerClass(JobClass);
-			case PROPERTY_ID_LEFT_JOBS:
-				return jobsList.getJobsOutPerClass(JobClass);
-			case PROPERTY_ID_RESIDENT_JOBS:
-				return jobsList.size(JobClass);
-			}
-		} catch (jmt.common.exception.NetException exc) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
+	public int getIntNodeProperty(int Id, JobClass JobClass) throws NetException {
+		switch (Id) {
+		case PROPERTY_ID_ARRIVING_JOBS:
+			return jobsList.getJobsInPerClass(JobClass);
+		case PROPERTY_ID_DEPARTING_JOBS:
+			return jobsList.getJobsOutPerClass(JobClass);
+		case PROPERTY_ID_RESIDENT_JOBS:
+			return jobsList.size(JobClass);
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
-		throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 	}
 
-	/** Gets a double type property of this node.
+	/**
+	 * Gets a double type property of this node.
 	 * @param Id Property identifier.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the property is not available.
+	 * @throws NetException if the property is not available.
 	 */
-	public double getDoubleNodeProperty(int Id) throws jmt.common.exception.NetException {
-		try {
-			switch (Id) {
-			case PROPERTY_ID_RESIDENCE_TIME:
-				return jobsList.getBusyTime() / jobsList.getJobsOut();
-			case PROPERTY_ID_THROUGHPUT:
-				return jobsList.getJobsOut() / NetSystem.getTime();
-			}
-		} catch (jmt.common.exception.NetException exc) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
+	public double getDoubleNodeProperty(int Id) throws NetException {
+		switch (Id) {
+		case PROPERTY_ID_RESIDENCE_TIME:
+			return jobsList.getBusyTime() / jobsList.getJobsOut();
+		case PROPERTY_ID_THROUGHPUT:
+			return jobsList.getJobsOut() / NetSystem.getTime();
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
-		throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 	}
 
-	/** Gets a double type property of this node related to a specified
+	/**
+	 * Gets a double type property of this node related to a specified
 	 * job class.
 	 * @param Id Property identifier.
 	 * @param JobClass JobClass.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the property is not available.
+	 * @throws NetException if the property is not available.
 	 */
-	public double getDoubleNodeProperty(int Id, JobClass JobClass) throws jmt.common.exception.NetException {
-		try {
-			switch (Id) {
-			case PROPERTY_ID_RESIDENCE_TIME:
-				return jobsList.getBusyTimePerClass(JobClass) / jobsList.getJobsOutPerClass(JobClass);
-			case PROPERTY_ID_THROUGHPUT:
-				return jobsList.getJobsOutPerClass(JobClass) / NetSystem.getTime();
-			}
-		} catch (jmt.common.exception.NetException exc) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
+	public double getDoubleNodeProperty(int Id, JobClass JobClass) throws NetException {
+		switch (Id) {
+		case PROPERTY_ID_RESIDENCE_TIME:
+			return jobsList.getBusyTimePerClass(JobClass) / jobsList.getJobsOutPerClass(JobClass);
+		case PROPERTY_ID_THROUGHPUT:
+			return jobsList.getJobsOutPerClass(JobClass) / NetSystem.getTime();
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
-		throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 	}
 
-	/** Gets a generic object type property of this node.
+	/**
+	 * Gets a generic object type property of this node.
 	 * @param Id Property identifier.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the property is not available.
+	 * @throws NetException if the property is not available.
 	 */
-	public Object getObjectNodeProperty(int Id) throws jmt.common.exception.NetException {
+	public Object getObjectNodeProperty(int Id) throws NetException {
 		switch (Id) {
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
-	/** Gets a generic object type property of this node related to a
+	/**
+	 * Gets a generic object type property of this node related to a
 	 * specified job class.
 	 * @param Id Property identifier.
 	 * @param JobClass JobClass.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the property is not available.
+	 * @throws NetException if the property is not available.
 	 */
-	public Object getObjectNodeProperty(int Id, JobClass JobClass) throws jmt.common.exception.NetException {
+	public Object getObjectNodeProperty(int Id, JobClass JobClass) throws NetException {
 		switch (Id) {
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
-	/** Gets a section of the node.
+	/**
+	 * Gets a section of the node.
 	 * @param Id Section identifier (constants defined in NodeSection).
 	 * @return Node section.
-	 * @throws jmt.common.exception.NetException EXCEPTION
+	 * @throws NetException
 	 */
-	public NodeSection getSection(int Id) throws jmt.common.exception.NetException {
+	public NodeSection getSection(int Id) throws NetException {
 		switch (Id) {
 		case NodeSection.INPUT:
 			return inputSection;
@@ -317,24 +314,26 @@ public class NetNode extends SimEntity {
 		case NodeSection.OUTPUT:
 			return outputSection;
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required section is not available.");
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required section is not available.");
 		}
 	}
 
-	/** Gets the Network owner of this node.
+	/**
+	 * Gets the Network owner of this node.
 	 * @return Value of property Network.
 	 */
 	public QueueNetwork getQueueNet() {
 		return Network;
 	}
 
-	/** Analyzes a measure in the node.
+	/**
+	 * Analyzes a measure in the node.
 	 * @param measureName name of the measure to be activated.
 	 * @param jobClass Job class to be analyzed.
 	 * @param measurement measure to be activated.
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
-	public void analyze(int measureName, JobClass jobClass, Measure measurement) throws jmt.common.exception.NetException {
+	public void analyze(int measureName, JobClass jobClass, Measure measurement) throws NetException {
 		switch (measureName) {
 		case SimConstants.LIST_NUMBER_OF_JOBS:
 			jobsList.analyzeQueueLength(jobClass, measurement);
@@ -355,7 +354,7 @@ public class NetNode extends SimEntity {
 			jobsList.analyzeThroughputPerSink(jobClass, (InverseMeasure) measurement);
 			break;
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
 	}
 
@@ -363,20 +362,21 @@ public class NetNode extends SimEntity {
 		return (state != SimEntity.FINISHED);
 	}
 
-	/** Gets the list of the job classes of the owner queue network.
+	/**
+	 * Gets the list of the job classes of the owner queue network.
 	 * @return Queue network job classes.
 	 */
 	public JobClassList getJobClasses() {
 		return Network.getJobClasses();
 	}
 
-	/** Gets the first NetMessage in the queue which validates a specific
+	/**
+	 * Gets the first NetMessage in the queue which validates a specific
 	 * predicate.
 	 * @param message Reference to a NetMessage buffer to be filled with
-	 * the message information
-	 * @throws jmt.common.exception.NetException
+	 * the message information.
 	 */
-	protected void receive(NetMessage message) throws jmt.common.exception.NetException {
+	protected void receive(NetMessage message) {
 		//We want to set some properties of NetMessage parameter using the
 		//information contained in a tag of the received SimEvent
 		//Remember that:
@@ -442,22 +442,21 @@ public class NetNode extends SimEntity {
 		}
 	}
 
-	/** This method implements the body of a NetNode.
-	 **/
+	/**
+	 * This method implements the body of a NetNode.
+	 */
 	@Override
 	public final void body() {
 		message = new NetMessage();
 		try {
 			receiveBuffer = getEvbuf();
 
-			//receive a new messege
+			//receive a new message
 			receive(message);
-			eventsCounter++;
 			eventType = message.getEvent();
 
 			//if the deferred queue (where we put messages when the node is busy)
 			//contains an abort event then poison the node.
-			//TODO: da togliere e' meglio mettere qualcosa che faccia lo stesso sul sistema quando viene lanciato un evento di questo genere
 			if (simWaiting(new SimTypeP(NetEvent.EVENT_ABORT)) > 0) {
 				poison();
 			}
@@ -483,8 +482,8 @@ public class NetNode extends SimEntity {
 			}
 
 			simGetNext(SimSystem.SIM_ANY);
-		} catch (jmt.common.exception.NetException Exc) {
-			Exc.printStackTrace();
+		} catch (NetException ex) {
+			ex.printStackTrace();
 		}
 	}
 
@@ -508,13 +507,14 @@ public class NetNode extends SimEntity {
 		}
 	}
 
-	/** This method should be overridden to implement a own dispatch.
-	 *  This method implements the events dispacther of the NetNode; it
-	 *  <b><u>should never</u></b> remains busy for a long time.
-	 *  Remember to call the superclass dispatch method if you want to inherit
-	 *  all the superclass handled events.
+	/**
+	 * This method should be overridden to implement an own dispatch.
+	 * This method implements the events dispacther of the NetNode; it
+	 * <b><u>should never</u></b> remains busy for a long time.
+	 * Remember to call the superclass dispatch method if you want to
+	 * inherit all the superclass handled events.
 	 */
-	protected void dispatch(NetMessage message) throws jmt.common.exception.NetException {
+	protected void dispatch(NetMessage message) throws NetException {
 		int processed = NodeSection.MSG_NOT_PROCESSED;
 		NetNode source = message.getSource();
 		byte sourceSection = message.getSourceSection();
@@ -597,18 +597,17 @@ public class NetNode extends SimEntity {
 		}
 	}
 
-	/** Sends a message to a NetNode.
+	/**
+	 * Sends a message to a NetNode.
 	 * @param event Event tag.
 	 * @param data  Data to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param sourceSection The source section.
 	 * @param destinationSection The destination section.
 	 * @param destination The destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException Exception
+	 * @return a token to remove sent event.
 	 */
-	RemoveToken send(int event, Object data, double delay, byte sourceSection, byte destinationSection, NetNode destination)
-			throws jmt.common.exception.NetException {
+	RemoveToken send(int event, Object data, double delay, byte sourceSection, byte destinationSection, NetNode destination) {
 		//Look if message is a job message and if job is leaving this node
 		if (outputSection != null && outputSection.automaticUpdateNodeJobinfolist()
 				&& (event == NetEvent.EVENT_JOB)
@@ -639,8 +638,8 @@ public class NetNode extends SimEntity {
 	}
 
 	/**
-	 * Unschedules a message given a remove token
-	 * @param token the token to remove the message
+	 * Unschedules a message given a remove token.
+	 * @param token the token to remove the message.
 	 * @return true if unschedule was successful, false otherwise.
 	 */
 	boolean removeMessage(RemoveToken token) {
@@ -648,21 +647,22 @@ public class NetNode extends SimEntity {
 	}
 
 	//TODO: not used
-	/** Sends a message to a section of all the NetNodes of the QueueNetwork.
+	/**
+	 * Sends a message to a section of all the NetNodes of the QueueNetwork.
 	 * @param Event Event tag.
 	 * @param Data  Data to be attached to the message.
 	 * @param Delay Scheduling delay.
 	 * @param SourceSection The source section.
 	 * @param DestinationSection The destination section.
 	 * @param NodeType Type of the node (reference or not: see constants in QueueNetwork).
-	 * @throws jmt.common.exception.NetException Exception
+	 * @throws NetException
 	 */
 	void sendBroadcast(int Event, Object Data, double Delay, byte SourceSection, byte DestinationSection, int NodeType)
-			throws jmt.common.exception.NetException {
+			throws NetException {
 		int Tag;
 		ListIterator<NetNode> iterator;
 		if ((Event == NetEvent.EVENT_JOB) || (Event == NetEvent.EVENT_ACK)) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_UNABLE_TO_BROADCAST, "message could not be broadcasted.");
+			throw new NetException(this, EXCEPTION_UNABLE_TO_BROADCAST, "message could not be broadcasted.");
 		}
 		Tag = Event & NetEvent.EVENT_MASK;
 		Tag += SourceSection << NodeSection.SOURCE_SHIFT;
@@ -692,7 +692,7 @@ public class NetNode extends SimEntity {
 		this.Network = Network;
 		// When a node is linked to a network, connections between nodes must
 		// have been already done!!!
-		jobsList = new LinkedJobInfoList(getJobClasses().size(), true);
+		jobsList = new LinkedJobInfoList(getJobClasses().size());
 	}
 
 	@Override
@@ -706,7 +706,7 @@ public class NetNode extends SimEntity {
 	 */
 	@Override
 	public void restart() {
-		//TODO: os it correct that this method does nothing?
+		//TODO: it correct that this method does nothing?
 	}
 
 	@Override
@@ -722,17 +722,16 @@ public class NetNode extends SimEntity {
 
 	/**
 	 * Redirects a job to a NetNode without updating measures.
-	 *
 	 * @param job job to be attached to the message.
 	 * @param Delay Scheduling delay.
 	 * @param SourceSection The source section.
 	 * @param DestinationSection The destination section.
 	 * @param Destination The destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException Exception
+	 * @return a token to remove sent event.
+	 * @throws NetException
 	 */
 	RemoveToken redirect(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
-			throws jmt.common.exception.NetException {
+			throws NetException {
 		NodeSection section = getSection(SourceSection);
 		if (section != null && section.automaticUpdateNodeJobinfolist()
 				&& (Destination != this) || ((Destination == this) && (SourceSection == NodeSection.OUTPUT) && (DestinationSection == NodeSection.INPUT))) {
@@ -751,17 +750,16 @@ public class NetNode extends SimEntity {
 	/**
 	 * Sends an "ack" message to a NetNode to inform it that
 	 * the job previously sent has been dropped.
-	 *
 	 * @param job job to be attached to the message.
 	 * @param Delay Scheduling delay.
 	 * @param SourceSection The source section.
 	 * @param DestinationSection The destination section.
 	 * @param Destination The destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException Exception
+	 * @return a token to remove sent event.
+	 * @throws NetException
 	 */
 	RemoveToken sendAckAfterDrop(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
-			throws jmt.common.exception.NetException {
+			throws NetException {
 		NodeSection section = getSection(SourceSection);
 		if (section != null && section.automaticUpdateNodeJobinfolist()) {
 			JobInfo JobInfo = jobsList.lookFor(job);
@@ -779,17 +777,16 @@ public class NetNode extends SimEntity {
 	/**
 	 * Sends an "ack" message to a NetNode to inform it that
 	 * the job previously sent has been consumed.
-	 *
 	 * @param job job to be attached to the message.
 	 * @param Delay Scheduling delay.
 	 * @param SourceSection The source section.
 	 * @param DestinationSection The destination section.
 	 * @param Destination The destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException Exception
+	 * @return a token to remove sent event.
+	 * @throws NetException
 	 */
 	RemoveToken sendAckAfterConsume(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
-			throws jmt.common.exception.NetException {
+			throws NetException {
 		NodeSection section = getSection(SourceSection);
 		if (section != null && section.automaticUpdateNodeJobinfolist()) {
 			JobInfo JobInfo = jobsList.lookFor(job);
@@ -809,7 +806,7 @@ public class NetNode extends SimEntity {
 	 * service section and output section, causing a lot of null pointer exception in routing
 	 * strategies if not treated correctly.
 	 * Author: Bertoli Marco
-	 * @return true if this node does not have service section and output section
+	 * @return true if this node does not have service section and output section.
 	 */
 	public boolean isSink() {
 		// WARNING: to avoid circular dependency and to speed up this method,
@@ -818,45 +815,45 @@ public class NetNode extends SimEntity {
 	}
 
 	/**
-	 * @return true if this is a blocking region input station
+	 * @return true if this is a blocking region input station.
 	 */
 	public boolean isBlockingRegionInputStation() {
 		return region != null;
 	}
 
 	/**
-	 * @param true if this is a blocking region input station
+	 * @param true if this is a blocking region input station.
 	 */
 	public void setBlockingRegionInputStation(BlockingRegion region) {
 		this.region = region;
 	}
 
 	/**
-	 * @return blocking region, only if this is a region input station
+	 * @return blocking region, only if this is a region input station.
 	 */
 	public BlockingRegion getBlockingRegionInputStation() {
 		return region;
 	}
 
 	/**
-	 * @return the simulation parameters
+	 * @return the simulation parameters.
 	 */
 	public SimParameters getSimParameters() {
 		return simParameters;
 	}
 
 	/**
-	 * @param simParameters reads the simulation parameters
+	 * @param simParameters reads the simulation parameters.
 	 */
 	public void setSimParameters(SimParameters simParameters) {
 		this.simParameters = simParameters;
 	}
 
 	/**
-	 * This method is called after all the sections are added
-	 * @throws jmt.common.exception.NetException Exception
+	 * This method is called after all the sections are added.
+	 * @throws NetException
 	 */
-	public void initializeSections() throws jmt.common.exception.NetException {
+	public void initializeSections() throws NetException {
 		if (inputSection != null) {
 			inputSection.setOwnerNode(this);
 		}

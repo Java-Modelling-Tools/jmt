@@ -69,7 +69,7 @@ public class ModelConverter {
 		String defaultRouting = Defaults.get("stationRoutingStrategy");
 		String defaultQueue = Defaults.get("stationQueueStrategy");
 		Defaults.set("stationRoutingStrategy", RandomRouting.class.getName());
-		Defaults.set("stationQueueStrategy", CommonConstants.QUEUE_STRATEGY_FCFS);
+		Defaults.set("stationQueueStrategy", CommonConstants.QUEUE_STRATEGY_EPS);
 
 		ArrayList<String> res = new ArrayList<String>();
 		// Keys for unique items
@@ -409,7 +409,7 @@ public class ModelConverter {
 					p0 = getRoutingProbability(refStat, classKeys.get(cl), input, stations, res);
 				} else {
 					p0 = new double[stations.size()];
-					p0[0] = 1; // Assumes that all jobs enters in first station
+					p0[0] = 1; // Assumes that all jobs enter first station
 				}
 				try {
 					Matrix b = new Matrix(p0, 1);

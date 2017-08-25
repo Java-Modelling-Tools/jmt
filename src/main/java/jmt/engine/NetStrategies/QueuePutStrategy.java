@@ -25,18 +25,23 @@ import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NodeSection;
 
 /**
- * Use this interface to implement a specific queue put strategy.
- * A queue put strategy is a rule which adds a job to a queue.
+ * Use this class to implement a specific queue put strategy. A queue put
+ * strategy is a rule which adds a job to a queue.
  * @author Francesco Radaelli
  */
-public abstract interface QueuePutStrategy extends AutoCheck {
+public abstract class QueuePutStrategy implements AutoCheck {
 
-	/** This method should be overridden to implement a specific job strategy.
+	/**
+	 * This method should be overridden to implement a specific job strategy.
 	 * @param job Job to be added to the queue.
 	 * @param queue Job queue.
 	 * @param callingSection The section which calls this strategy.
 	 * @throws NetException
 	 */
 	public abstract void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException;
+
+	public boolean check() {
+		return true;
+	}
 
 }

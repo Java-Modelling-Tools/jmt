@@ -30,6 +30,7 @@ package jmt.engine.simEngine;
  * @version 1.0
  */
 public class RemoveToken {
+
 	private SimEvent event;
 	private boolean deferred;
 
@@ -43,7 +44,7 @@ public class RemoveToken {
 	}
 
 	/**
-	 *  Builds a new remove token for given event.
+	 * Builds a new remove token for given event.
 	 * @param event the event
 	 * @param deferred true if event is deferred, false otherwise
 	 */
@@ -67,10 +68,6 @@ public class RemoveToken {
 	// Please do not change visibility
 	boolean isDeferred() {
 		return deferred;
-	}
-
-	public SimEvent getSimEvent() {
-		return event;
 	}
 
 }

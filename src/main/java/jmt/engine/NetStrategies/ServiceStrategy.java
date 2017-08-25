@@ -19,20 +19,31 @@
 package jmt.engine.NetStrategies;
 
 import jmt.common.AutoCheck;
+import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NodeSection;
 
 /**
- * Use this class to implement a specific server strategy. A server
+ * Use this class to implement a specific service strategy. A service
  * strategy is a rule which calculates the service time for a job.
  * @author Francesco Radaelli
  */
 public abstract class ServiceStrategy implements AutoCheck {
 
-	/** This method should be overridden to implement a specific strategy.
+	/**
+	 * This method should be overridden to implement a specific strategy.
 	 * @param callingSection The section which calls this strategy.
 	 * @return Service time.
+	 * @throws NetException
 	 */
-	public abstract double wait(NodeSection callingSection) throws jmt.common.exception.NetException;
+	public abstract double wait(NodeSection callingSection) throws NetException;
+
+	/**
+	 * This method should be overridden to implement a specific strategy.
+	 * @param callingSection The section which calls this strategy.
+	 * @return Service mean.
+	 * @throws NetException
+	 */
+	public abstract double expect(NodeSection callingSection) throws NetException;
 
 	public boolean check() {
 		return true;

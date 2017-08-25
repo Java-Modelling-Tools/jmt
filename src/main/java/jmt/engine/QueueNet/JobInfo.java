@@ -26,46 +26,31 @@ package jmt.engine.QueueNet;
 public class JobInfo {
 
 	private Job job;
+	private double enteringTime;
 
-	private double time;
-
-	/** Creates a new instance of JobInfo object.
-	 * @param Job Reference to the job to be described.
+	/**
+	 * Creates a new instance of JobInfo object.
+	 * @param job Job referenced by this JobInfo.
 	 */
-	public JobInfo(Job Job) {
-		this.job = Job;
-		time = NetSystem.getTime();
+	public JobInfo(Job job) {
+		this.job = job;
+		this.enteringTime = NetSystem.getTime();
 	}
 
-	/** Creates a new instance of JobInfo object.
-	 * Set time for the forked job, set the forked time.
-	 * @param Job Reference to the job to be described.
-	 * @param time time of the forked job.
-	 */
-	/*public JobInfo(Job Job, double time) {
-		this.job = Job;
-		this.time = time;
-	}*/
-
-	/** Gets the job referenced by this JobInfo
-	 * @return Referenced job.
+	/**
+	 * Gets the job referenced by this JobInfo.
+	 * @return Job referenced by this JobInfo.
 	 */
 	public Job getJob() {
 		return job;
 	}
 
-	/** Gets Time property value.
-	 * @return Time property value.
+	/**
+	 * Gets the time that the job entered the JobInfoList.
+	 * @return Time that the job entered the JobInfoList.
 	 */
-	public double getTime() {
-		return time;
-	}
-
-	/** Sets Time property value.
-	 * @param time Time property value.
-	 */
-	protected void setTime(double time) {
-		this.time = time;
+	public double getEnteringTime() {
+		return enteringTime;
 	}
 
 }

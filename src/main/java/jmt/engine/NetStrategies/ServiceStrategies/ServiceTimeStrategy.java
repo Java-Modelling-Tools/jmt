@@ -19,6 +19,7 @@
 package jmt.engine.NetStrategies.ServiceStrategies;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.random.Distribution;
@@ -28,7 +29,6 @@ import jmt.engine.random.Parameter;
  * This strategy calculates the time of service of a job, using the specified
  * distribution and parameters.
  */
-
 public class ServiceTimeStrategy extends ServiceStrategy {
 
 	/** Service time distribution. */
@@ -74,15 +74,32 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 	 * Calculates the service time using the specified distribution.
 	 * @param callingSection The node section which is calling this method.
 	 * @return the value of service time.
+	 * @throws NetException
 	 */
 	@Override
-	public double wait(NodeSection callingSection) {
+	public double wait(NodeSection callingSection) throws NetException {
 		try {
 			return distribution.nextRand(parameter);
 		} catch (IncorrectDistributionParameterException e) {
 			e.printStackTrace();
 		}
-		return 0;
+		return 0.0;
+	}
+
+	/**
+	 * Calculates the service mean using the specified distribution.
+	 * @param callingSection The node section which is calling this method.
+	 * @return the value of service mean.
+	 * @throws NetException
+	 */
+	@Override
+	public double expect(NodeSection callingSection) throws NetException {
+		try {
+			return distribution.theorMean(parameter);
+		} catch (IncorrectDistributionParameterException e) {
+			e.printStackTrace();
+		}
+		return 0.0;
 	}
 
 }

@@ -505,7 +505,7 @@ public class Measure {
 					NetNode referenceNode = network.getNode(referenceNodeName);
 					//visits to the reference node
 					NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
-					visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobClass);
+					visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobClass);
 				}
 				visitsReferenceNode += network.getSwitchedJobs(jobClass);
 				visitsReferenceNode -= network.getConsumedJobs(jobClass);
@@ -513,7 +513,7 @@ public class Measure {
 
 				//visits to this node
 				NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
-				visitsThisNode = thisNodeInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobClass);
+				visitsThisNode = thisNodeInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobClass);
 
 				// the reference source generates a certain number of jobs
 				// - some of them have reached this station
@@ -555,7 +555,7 @@ public class Measure {
 						NetNode referenceNode = network.getNode(referenceNodeName);
 						//visits to the reference node
 						NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
-						visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobC);
+						visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobC);
 					}
 					//visitsReferenceNode += network.getSwitchedJobs(jobC);
 					visitsReferenceNode -= network.getConsumedJobs(jobC);
@@ -563,7 +563,7 @@ public class Measure {
 
 					//visits to this node
 					NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
-					visitsThisNode = thisNodeInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVED_JOBS, jobC);
+					visitsThisNode = thisNodeInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobC);
 
 					// the reference source generates a certain number of jobs
 					// - some of them have reached this station

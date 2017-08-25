@@ -36,8 +36,8 @@ import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.ParseException;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -252,7 +252,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Sets default title, close operation and dimensions
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle("Editing Default Parameters...");
-		int width = 800, height = 600;
+		int width = 840, height = 600;
 
 		// Centers this dialog on the screen
 		Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -310,18 +310,18 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		classpanelnum++;
 
 		// Type
-		tmpMap = new TreeMap<String, String>();
+		tmpMap = new LinkedHashMap<String, String>();
 		tmpMap.put("" + CommonConstants.CLASS_TYPE_OPEN, "Open");
 		tmpMap.put("" + CommonConstants.CLASS_TYPE_CLOSED, "Closed");
 		addInputCombo("Type", "classType", class_panel, tmpMap);
 		classpanelnum++;
 
 		// Priority
-		addInputSpinner("Priority", "classPriority", class_panel, 0, null);
+		addInputSpinner("Priority", "classPriority", class_panel, 0);
 		classpanelnum++;
 
 		// Population
-		addInputSpinner("Population (closed classes)", "classPopulation", class_panel, 1, null);
+		addInputSpinner("Population (closed classes)", "classPopulation", class_panel, 1);
 		classpanelnum++;
 
 		// Distribution
@@ -346,7 +346,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 
 		// Station type (JSIM only)
 		if (target == JSIM) {
-			tmpMap = new TreeMap<String, String>();
+			tmpMap = new LinkedHashMap<String, String>();
 			tmpMap.put(STATION_TYPE_ROUTER, STATION_NAMES.get(STATION_TYPE_ROUTER));
 			tmpMap.put(STATION_TYPE_DELAY, STATION_NAMES.get(STATION_TYPE_DELAY));
 			tmpMap.put(STATION_TYPE_SERVER, STATION_NAMES.get(STATION_TYPE_SERVER));
@@ -367,11 +367,19 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		stationpanelnum++;
 
 		// Number of Servers
-		addInputSpinner("Number of Servers", "stationServers", station_panel, 1, null);
+		addInputSpinner("Number of Servers", "stationServers", station_panel, 1);
+		stationpanelnum++;
+
+		// Station Queue Strategy
+		addInputStationQueueStrategy("Station Queue Strategy", "stationStationQueueStrategy", station_panel);
 		stationpanelnum++;
 
 		// Queue Strategy
 		addInputQueueStrategy("Queue Strategy", "stationQueueStrategy", station_panel);
+		stationpanelnum++;
+
+		// Drop rule
+		addInputDropRule("Drop Rule", "dropRule", station_panel);
 		stationpanelnum++;
 
 		// Service strategy
@@ -383,19 +391,15 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		stationpanelnum++;
 
 		// Routing strategy
-		addInputRouting("Routing Strategy", "stationRoutingStrategy", station_panel);
+		addInputRoutingStrategy("Routing Strategy", "stationRoutingStrategy", station_panel);
 		stationpanelnum++;
 
 		// Fork Blocking
 		addInputInfSpinner("Fork Capacity", "forkBlock", station_panel, 1, -1);
 		stationpanelnum++;
 
-		// Drop rule
-		addInputDropRule("Drop Rule", "dropRule", station_panel);
-		stationpanelnum++;
-
 		// Number of jobs created for each fork link
-		addInputSpinner("Fork Degree", "forkJobsPerLink", station_panel, 1, null);
+		addInputSpinner("Fork Degree", "forkJobsPerLink", station_panel, 1);
 		stationpanelnum++;
 
 		SpringUtilities.makeCompactGrid(station_panel, stationpanelnum, 2, //rows, cols
@@ -417,7 +421,6 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		simpanelnum++;
 
 		// Simulation Seed
-		//addInputSpinner("Simulation seed", "simulationSeed", sim_panel, 1);
 		addInputRandomSpinner("Simulation seed", "isSimulationSeedRandom", "simulationSeed", sim_panel, 1);
 		simpanelnum++;
 
@@ -430,12 +433,12 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		simpanelnum++;
 
 		// Maximum number of samples
-		addInputSpinner("Maximum number of samples", "maxSimulationSamples", sim_panel, 100000, "The term samples stands for observations");
+		addInputSpinner("Maximum number of samples", "maxSimulationSamples", sim_panel, 100000);
 		simpanelnum++;
 
 		//Polling interval
 		simpanelnum++;
-		addInputSpinner("Animation update interval (sec)", "simulationPolling", sim_panel, 1, null);
+		addInputSpinner("Animation update interval (sec)", "simulationPolling", sim_panel, 1);
 
 		// Francesco D'Aquino
 		// Animation enabled/disabled
@@ -462,8 +465,16 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		addInputInfSpinner("Global Region Capacity", "blockingMaxJobs", block_panel, 1, -1);
 		blockpanelnum++;
 
+		// Region Memory
+		addInputInfSpinner("Global Region Memory Size", "blockingMaxMemory", block_panel, 1, -1);
+		blockpanelnum++;
+
 		// Region Capacity per Class
 		addInputInfSpinner("Region Capacity per Class", "blockingMaxJobsPerClass", block_panel, 1, -1);
+		blockpanelnum++;
+
+		// Region Memory per Class
+		addInputInfSpinner("Region Memory Size per Class", "blockingMaxMemoryPerClass", block_panel, 1, -1);
 		blockpanelnum++;
 
 		// Drop rule
@@ -534,17 +545,13 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
 	 * @param minvalue minimum value allowed for this property
-	 * @param tooltip the content of tooltip
 	 */
-	protected void addInputSpinner(String text, final String property, Container cont, final int minvalue, String tooltip) {
+	protected void addInputSpinner(String text, final String property, Container cont, final int minvalue) {
 		JLabel label;
 		label = new JLabel(text + ":");
 		final JSpinner spinner = new JSpinner();
 		label.setLabelFor(spinner);
 		spinner.setValue(Defaults.getAsInteger(property));
-		if (tooltip != null) {
-			spinner.setToolTipText(tooltip);
-		}
 		// Sets maximum size to minimal one, otherwise springLayout will stretch this
 		spinner.setMaximumSize(new Dimension(spinner.getMaximumSize().width, spinner.getMinimumSize().height));
 		spinner.addChangeListener(new ChangeListener() {
@@ -630,9 +637,9 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	 * @param cont container where input field must be added
 	 */
 	protected void addInputDistribution(String text, final String property, Container cont) {
-		// Creates a Map with Distributions Names, then delegates addInputCombo to create graphical
-		// components
-		Map<String, String> distributions = new TreeMap<String, String>();
+		// Creates a Map with distribution names, then delegates addInputCombo to create
+		// graphical components
+		Map<String, String> distributions = new LinkedHashMap<String, String>();
 		Distribution[] all = Distribution.findAll();
 		for (Distribution element : all) {
 			distributions.put(element.getClass().getName(), element.getName());
@@ -641,26 +648,23 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	}
 
 	/**
-	 * Adds an input field to choose a Routing strategy. Uses reflection to find all
-	 * available strategies
+	 * Adds an input field to choose a station Queue strategy.
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
 	 */
-	protected void addInputRouting(String text, final String property, Container cont) {
-		// Creates a Map with Routing strategy names, then delegates addInputCombo to create
+	protected void addInputStationQueueStrategy(String text, final String property, Container cont) {
+		// Creates a Map with station Queue strategy names, then delegates addInputCombo to create
 		// graphical components
-		Map<String, String> distributions = new TreeMap<String, String>();
-		RoutingStrategy[] all = RoutingStrategy.findAll();
-		for (RoutingStrategy element : all) {
-			distributions.put(element.getClass().getName(), element.toString());
-		}
-		addInputCombo(text, property, cont, distributions);
+		Map<String, String> stationQueueStrategies = new LinkedHashMap<String, String>();
+		stationQueueStrategies.put(CommonConstants.QUEUE_STRATEGY_STATION_PS, CommonConstants.QUEUE_STRATEGY_STATION_PS);
+		stationQueueStrategies.put(CommonConstants.QUEUE_STRATEGY_STATION_QUEUE, CommonConstants.QUEUE_STRATEGY_STATION_QUEUE);
+		stationQueueStrategies.put(CommonConstants.QUEUE_STRATEGY_STATION_QUEUE_PRIORITY, CommonConstants.QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+		addInputCombo(text, property, cont, stationQueueStrategies);
 	}
 
 	/**
-	 * Adds an input field to choose a Queue strategy. Uses reflection to find all
-	 * available strategies
+	 * Adds an input field to choose a Queue strategy.
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
@@ -668,18 +672,22 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	protected void addInputQueueStrategy(String text, final String property, Container cont) {
 		// Creates a Map with Queue strategy names, then delegates addInputCombo to create
 		// graphical components
-		Map<String, String> distributions = new TreeMap<String, String>();
-		distributions.put(CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.QUEUE_STRATEGY_FCFS);
-		distributions.put(CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.QUEUE_STRATEGY_LCFS);
-		distributions.put(CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.QUEUE_STRATEGY_RAND);
-		distributions.put(CommonConstants.QUEUE_STRATEGY_SJF, CommonConstants.QUEUE_STRATEGY_SJF);
-		distributions.put(CommonConstants.QUEUE_STRATEGY_LJF, CommonConstants.QUEUE_STRATEGY_LJF);
-		addInputCombo(text, property, cont, distributions);
+		Map<String, String> queueStrategies = new LinkedHashMap<String, String>();
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_EPS, CommonConstants.QUEUE_STRATEGY_EPS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_GPS, CommonConstants.QUEUE_STRATEGY_GPS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_DPS, CommonConstants.QUEUE_STRATEGY_DPS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.QUEUE_STRATEGY_FCFS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.QUEUE_STRATEGY_LCFS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.QUEUE_STRATEGY_RAND);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SJF, CommonConstants.QUEUE_STRATEGY_SJF);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LJF, CommonConstants.QUEUE_STRATEGY_LJF);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SEPT, CommonConstants.QUEUE_STRATEGY_SEPT);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LEPT, CommonConstants.QUEUE_STRATEGY_LEPT);
+		addInputCombo(text, property, cont, queueStrategies);
 	}
 
 	/**
-	 * Adds an input field to choose a Drop rule. Uses reflection to find all
-	 * available strategies
+	 * Adds an input field to choose a Drop rule.
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
@@ -687,11 +695,28 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	protected void addInputDropRule(String text, final String property, Container cont) {
 		// Creates a Map with Drop rule names, then delegates addInputCombo to create
 		// graphical components
-		Map<String, String> distributions = new TreeMap<String, String>();
-		distributions.put(CommonConstants.FINITE_DROP, CommonConstants.FINITE_DROP);
-		distributions.put(CommonConstants.FINITE_BLOCK, CommonConstants.FINITE_BLOCK);
-		distributions.put(CommonConstants.FINITE_WAITING, CommonConstants.FINITE_WAITING);
-		addInputCombo(text, property, cont, distributions);
+		Map<String, String> dropRules = new LinkedHashMap<String, String>();
+		dropRules.put(CommonConstants.FINITE_DROP, CommonConstants.FINITE_DROP);
+		dropRules.put(CommonConstants.FINITE_BLOCK, CommonConstants.FINITE_BLOCK);
+		dropRules.put(CommonConstants.FINITE_WAITING, CommonConstants.FINITE_WAITING);
+		addInputCombo(text, property, cont, dropRules);
+	}
+
+	/**
+	 * Adds an input field to choose a Routing strategy.
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addInputRoutingStrategy(String text, final String property, Container cont) {
+		// Creates a Map with Routing strategy names, then delegates addInputCombo to create
+		// graphical components
+		Map<String, String> routingStrategies = new LinkedHashMap<String, String>();
+		RoutingStrategy[] all = RoutingStrategy.findAll();
+		for (RoutingStrategy element : all) {
+			routingStrategies.put(element.getClass().getName(), element.toString());
+		}
+		addInputCombo(text, property, cont, routingStrategies);
 	}
 
 	/**

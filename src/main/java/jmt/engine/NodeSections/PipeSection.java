@@ -26,17 +26,19 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public abstract class PipeSection extends NodeSection {
 
-	/** Creates a new instance of this PipeSection.
-	 *  @param id    NodeSection identifier.
+	/**
+	 * Creates a new instance of this PipeSection.
+	 * @param id NodeSection identifier.
 	 */
 	public PipeSection(byte id) {
 		super(id);
 	}
 
-	/** Creates a new instance of PipeSection
-	 *  @param id    NodeSection identifier.
-	 *  @param auto  auto refresh of the jobsList attribute.
-	 *  @param nodeAuto auto refresh the jobsList attribute at node level
+	/**
+	 * Creates a new instance of PipeSection.
+	 * @param id NodeSection identifier.
+	 * @param auto Auto refresh of the jobsList attribute.
+	 * @param nodeAuto Auto refresh the jobsList attribute at node level.
 	 */
 	public PipeSection(byte id, boolean auto, boolean nodeAuto) {
 		super(id, auto, nodeAuto);

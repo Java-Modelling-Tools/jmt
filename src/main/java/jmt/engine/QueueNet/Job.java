@@ -52,7 +52,7 @@ public class Job implements Cloneable {
 	// the original destination of the job message
 	private NetNode originalDestinationNode = null;
 
-	private double serviceTime = 0.0;
+	private double serviceTime = -1.0;
 
 	/** Creates a new instance of Job.
 	 *  @param jobClass Reference to the class of the job.

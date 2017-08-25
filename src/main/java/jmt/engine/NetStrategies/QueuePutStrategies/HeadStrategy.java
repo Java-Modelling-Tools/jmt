@@ -30,15 +30,10 @@ import jmt.engine.QueueNet.NodeSection;
  * are put at the head of the queue.
  * @author Francesco Radaelli
  */
-public class HeadStrategy implements QueuePutStrategy {
+public class HeadStrategy extends QueuePutStrategy {
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
-		job.setServiceTime(0.0);
 		queue.addFirst(new JobInfo(job));
-	}
-
-	public boolean check() {
-		return true;
 	}
 
 }

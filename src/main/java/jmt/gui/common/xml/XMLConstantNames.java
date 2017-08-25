@@ -141,7 +141,6 @@ public interface XMLConstantNames {
 	public static final String CLASSNAME_SINK = "JobSink";
 	public static final String CLASSNAME_SERVER = "Server";
 	public static final String CLASSNAME_PSSERVER = "PSServer";
-	public static final String CLASSNAME_SRPT = "SRPT";
 	public static final String CLASSNAME_DELAY = "Delay";
 	public static final String CLASSNAME_TUNNEL = "ServiceTunnel";
 	public static final String CLASSNAME_LOGGER = "LogTunnel"; /* MF08 0.7.4 - extends ServiceTunnel */

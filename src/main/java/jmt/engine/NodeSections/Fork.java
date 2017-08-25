@@ -81,27 +81,27 @@ public class Fork extends OutputSection {
 
 	// --- Constructors -----------------------------------------------------------------------------
 	/**
-	 * Constructs a new Fork without blocking and with 1 job per link
+	 * Constructs a new Fork without blocking and with 1 job per link.
 	 */
 	public Fork() {
 		this(1, -1);
 	}
 
 	/**
-	 * Construct a new Fork node
-	 * @param jobsPerLink number of jobs to be routed on each link
+	 * Construct a new Fork node.
+	 * @param jobsPerLink number of jobs to be routed on each link.
 	 * @param block maximum number of jobs allowed in a fork-join
-	 * region (-1 or 0 is infinity)
+	 * region (-1 or 0 is infinity).
 	 */
 	public Fork(Integer jobsPerLink, Integer block) {
 		this(jobsPerLink.intValue(), block.intValue());
 	}
 
 	/**
-	 * Construct a new Fork node
-	 * @param jobsPerLink number of jobs to be routed on each link
+	 * Construct a new Fork node.
+	 * @param jobsPerLink number of jobs to be routed on each link.
 	 * @param block maximum number of jobs allowed in a fork-join
-	 * region (-1 or 0 is infinity)
+	 * region (-1 or 0 is infinity).
 	 */
 	public Fork(int jobsPerLink, int block) {
 		// Disables automatic handling of jobinfolist
@@ -139,7 +139,7 @@ public class Fork extends OutputSection {
 	 * not joined if and only if block is enabled.
 	 *
 	 * @param message message to be processed.
-	 * @throws NetException if something goes wrong
+	 * @throws NetException if something goes wrong.
 	 * @return message processing result.
 	 */
 	@Override
@@ -265,34 +265,34 @@ public class Fork extends OutputSection {
 	}
 
 	/**
-	 * Gets the total number of dropped jobs
-	 * @return the total number of dropped jobs
+	 * Gets the total number of dropped jobs.
+	 * @return the total number of dropped jobs.
 	 */
 	public int getDroppedJobs() {
 		return droppedJobs;
 	}
 
 	/**
-	 * Gets the number of dropped jobs for the specified class
-	 * @param classIndex the index of the job class
-	 * @return the number of dropped jobs for the specified class
+	 * Gets the number of dropped jobs for the specified class.
+	 * @param classIndex the index of the job class.
+	 * @return the number of dropped jobs for the specified class.
 	 */
 	public int getDroppedJobsPerClass(int classIndex) {
 		return droppedJobsPerClass[classIndex];
 	}
 
 	/**
-	 * Gets the total number of switched jobs
-	 * @return the total number of switched jobs
+	 * Gets the total number of switched jobs.
+	 * @return the total number of switched jobs.
 	 */
 	public int getSwitchedJobs() {
 		return switchedJobs;
 	}
 
 	/**
-	 * Gets the number of switched jobs for the specified class
-	 * @param classIndex the index of the job class
-	 * @return the number of switched jobs for the specified class
+	 * Gets the number of switched jobs for the specified class.
+	 * @param classIndex the index of the job class.
+	 * @return the number of switched jobs for the specified class.
 	 */
 	public int getSwitchedJobsPerClass(int classIndex) {
 		return switchedJobsPerClass[classIndex];

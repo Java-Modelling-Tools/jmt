@@ -21,8 +21,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import jmt.common.exception.LoadException;
-import jmt.common.exception.NetException;
 import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
 import jmt.gui.common.xml.XMLArchiver;
 import jmt.jmva.analytical.SolverDispatcher;
@@ -85,7 +83,7 @@ public class Jmt {
 		}
 	}
 
-	public static void main(String[] args) throws LoadException, NetException, Exception {
+	public static void main(String[] args) throws Exception {
 		if (args.length < 2) {
 			help();
 		}

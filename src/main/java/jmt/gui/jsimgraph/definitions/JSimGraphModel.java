@@ -357,6 +357,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			setQueueCapacity(key, oldClassKey, scd.queueCapacity);
 			setQueueStrategy(key, oldClassKey, scd.queueStrategy);
 			setDropRule(key, oldClassKey, scd.dropRule);
+			setServiceWeight(key, oldClassKey, scd.serviceWeight);
 			if (scd.serviceDistribution != null) {
 				setServiceTimeDistribution(key, oldClassKey, ((ServiceStrategy) scd.serviceDistribution).clone());
 			}

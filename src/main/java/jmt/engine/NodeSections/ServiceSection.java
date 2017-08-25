@@ -18,7 +18,6 @@
 
 package jmt.engine.NodeSections;
 
-import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.simEngine.RemoveToken;
@@ -29,64 +28,67 @@ import jmt.engine.simEngine.RemoveToken;
  */
 public abstract class ServiceSection extends PipeSection {
 
-	/** Creates a new instance of serviceSection
+	/**
+	 * Creates a new instance of serviceSection.
 	 */
 	public ServiceSection() {
 		super(NodeSection.SERVICE);
 	}
 
-	/** Creates a new instance of serviceSection
-	 *  @param auto  auto refresh of the jobsList attribute.
+	/**
+	 * Creates a new instance of serviceSection.
+	 * @param auto Auto refresh of the jobsList attribute.
 	 */
 	public ServiceSection(boolean auto) {
 		super(NodeSection.SERVICE, auto, true);
 	}
 
-	/** Creates a new instance of serviceSection
-	 *  @param auto  auto refresh of the jobsList attribute.
-	 *  @param nodeAuto auto refresh the jobsList attribute at node level
+	/**
+	 * Creates a new instance of serviceSection.
+	 * @param auto Auto refresh of the jobsList attribute.
+	 * @param nodeAuto Auto refresh the jobsList attribute at node level.
 	 */
 	public ServiceSection(boolean auto, boolean nodeAuto) {
 		super(NodeSection.SERVICE, auto, nodeAuto);
 	}
 
-	/** Sends a job to the output section.
+	/**
+	 * Sends a job to the output section.
 	 * @param job job to be sent.
 	 * @param delay Scheduling delay.
-	 * @return a token to remove sent event
-	 * @throws NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken sendForward(Job job, double delay) throws NetException {
+	protected RemoveToken sendForward(Job job, double delay) {
 		return send(job, delay, NodeSection.OUTPUT);
 	}
 
-	/** Sends a message to the output section.
+	/**
+	 * Sends a message to the output section.
 	 * @param event Message tag.
 	 * @param delay Scheduling delay.
-	 * @return a token to remove sent event
-	 * @throws NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken sendForward(int event, Object data, double delay) throws NetException {
+	protected RemoveToken sendForward(int event, Object data, double delay) {
 		return send(event, data, delay, NodeSection.OUTPUT);
 	}
 
-	/** Sends a job to the input section.
+	/**
+	 * Sends a job to the input section.
 	 * @param job job to be sent.
 	 * @param delay Scheduling delay.
-	 * @return a token to remove sent event
-	 * @throws NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken sendBackward(Job job, double delay) throws NetException {
+	protected RemoveToken sendBackward(Job job, double delay) {
 		return send(job, delay, NodeSection.INPUT);
 	}
 
-	/** Sends a message to the input section.
+	/**
+	 * Sends a message to the input section.
 	 * @param event Message tag.
 	 * @param delay Scheduling delay.
-	 * @return a token to remove sent event
-	 * @throws NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken sendBackward(int event, Object data, double delay) throws NetException {
+	protected RemoveToken sendBackward(int event, Object data, double delay) {
 		return send(event, data, delay, NodeSection.INPUT);
 	}
 

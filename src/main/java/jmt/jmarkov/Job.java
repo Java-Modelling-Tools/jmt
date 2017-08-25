@@ -23,7 +23,7 @@ import jmt.jmarkov.Queues.Processor;
 public class Job implements Cloneable {
 
 	private int jobId;
-	//creationTime: when this object is created(when the previous one is entered in the queue
+	//creationTime: when this object is created (when the previous one enters the queue)
 	private double creationTime;
 	//in the creation of the job it is assigned
 	private double enteringQueueTime;

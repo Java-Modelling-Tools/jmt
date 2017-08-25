@@ -18,15 +18,14 @@
 
 package jmt.engine.NetStrategies.ServiceStrategies;
 
+import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.NodeSection;
 
 /**
  * This service strategy always returns a service time equal to 0.0.
- *
  * @author Stefano Omini
  */
-
 public class ZeroServiceTimeStrategy extends ServiceStrategy {
 
 	/** Creates a new instance of ServiceTime.*/
@@ -37,10 +36,22 @@ public class ZeroServiceTimeStrategy extends ServiceStrategy {
 	 * The returned service time is always equal to 0.0.
 	 * @param callingSection The node section which is calling this method.
 	 * @return the value of service time, which is always 0.0.
+	 * @throws NetException
 	 */
 	@Override
-	public double wait(NodeSection callingSection) {
-		return 0;
+	public double wait(NodeSection callingSection) throws NetException {
+		return 0.0;
+	}
+
+	/**
+	 * The returned service mean is always equal to 0.0.
+	 * @param callingSection The node section which is calling this method.
+	 * @return the value of service mean, which is always 0.0.
+	 * @throws NetException
+	 */
+	@Override
+	public double expect(NodeSection callingSection) throws NetException {
+		return 0.0;
 	}
 
 }

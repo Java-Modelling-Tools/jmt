@@ -19,31 +19,34 @@
 package jmt.engine.NetStrategies;
 
 import jmt.common.AutoCheck;
-import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfoList;
 
 /**
- * Use this interface to implement a specific queue get strategy.
- * A queue get strategy is a rule which removes a job from a queue.
+ * Use this class to implement a specific queue get strategy. A queue get
+ * strategy is a rule which removes a job from a queue.
  * @author Francesco Radaelli
  */
-public interface QueueGetStrategy extends AutoCheck {
+public abstract class QueueGetStrategy implements AutoCheck {
 
-	/** This method should be overridden to implement a specific job strategy.
+	/**
+	 * This method should be overridden to implement a specific job strategy.
 	 * @param queue Job queue.
 	 * @return Job selected and removed from the queue.
-	 * @throws NetException
 	 */
-	public abstract Job get(JobInfoList queue) throws NetException;
+	public abstract Job get(JobInfoList queue);
 
-	/** This method should be overridden to implement a specific job strategy.
+	/**
+	 * This method should be overridden to implement a specific job strategy.
 	 * @param queue Job queue.
 	 * @param jobClass Job class.
 	 * @return Job selected and removed from the queue.
-	 * @throws NetException
 	 */
-	public abstract Job get(JobInfoList queue, JobClass jobClass) throws NetException;
+	public abstract Job get(JobInfoList queue, JobClass jobClass);
+
+	public boolean check() {
+		return true;
+	}
 
 }

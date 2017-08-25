@@ -36,7 +36,7 @@ public abstract class RoutingStrategy implements AutoCheck {
 	/**
 	 * This method should be overridden to implement a specific strategy.
 	 * @param nodes List of nodes.
-	 * @param jobClass class of current job to be routed
+	 * @param jobClass class of current job to be routed.
 	 * @return Selected node.
 	 */
 	public abstract NetNode getOutNode(NodeList nodes, JobClass jobClass);
@@ -47,8 +47,8 @@ public abstract class RoutingStrategy implements AutoCheck {
 	 * @param jobClass
 	 * @return
 	 *
-	 * Made it normal func instead of Abstract as I do not want
-	 * other Strategies to forcefully override this method.
+	 * Made it normal function instead of abstract as I do not
+	 * want other Strategies to forcefully override this method.
 	 * Currently only LoadDependentRoutingStrategy overrides it.
 	 */
 	public NetNode getOutNode(NodeSection callingSection, JobClass jobClass) {

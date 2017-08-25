@@ -35,15 +35,14 @@ import jmt.engine.random.engine.RandomEngine;
  * priority are put at random positions.
  * @author Lulai Zhu
  */
-public class RandStrategyPriority implements QueuePutStrategy {
+public class RandStrategyPriority extends QueuePutStrategy {
 
 	private RandomEngine randomEngine = RandomEngine.makeDefault();
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
-		job.setServiceTime(0.0);
 
-		List<JobInfo> list = queue.getJobList();
+		List<JobInfo> list = queue.getInternalJobInfoList();
 		if (list.size() == 0) {
 			queue.addFirst(new JobInfo(job));
 			return;
@@ -76,10 +75,6 @@ public class RandStrategyPriority implements QueuePutStrategy {
 			size++;
 		}
 		queue.add(index + (int) (randomEngine.raw() * (size + 1)), new JobInfo(job));
-	}
-
-	public boolean check() {
-		return true;
 	}
 
 }

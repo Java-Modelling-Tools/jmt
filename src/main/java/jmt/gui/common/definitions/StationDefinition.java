@@ -309,6 +309,26 @@ public interface StationDefinition {
 	public void setDropRule(Object stationKey, Object classKey, String dropRule);
 
 	/**
+	 * Returns service weight for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return weight for specified class and station.
+	 */
+	public Double getServiceWeight(Object stationKey, Object classKey);
+
+	/**
+	 * Sets service weight for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param weight: weight to be set for specified class and station.
+	 */
+	public void setServiceWeight(Object stationKey, Object classKey, Double weight);
+
+	/**
 	 * Returns service time distribution for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, null value is
 	 * returned.

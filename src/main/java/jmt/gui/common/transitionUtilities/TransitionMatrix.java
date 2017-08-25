@@ -63,7 +63,7 @@ public class TransitionMatrix {
 		matrix.remove(rowKey);
 	}
 
-	public void removeCol(Object colKey) {
+	public void removeColumn(Object colKey) {
 		for (Object rowKey : matrix.keySet()) {
 			matrix.get(rowKey).setEntry(colKey, Integer.valueOf(0));
 		}

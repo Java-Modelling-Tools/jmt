@@ -38,15 +38,15 @@ public class Delay extends ServiceSection {
 
 	private boolean coolStart;
 
-	private ServiceStrategy serviceStrategy[];
+	private ServiceStrategy[] serviceStrategies;
 
-	/** Creates a new instance of Delay. Use this constructor to create a delay
+	/**
+	 * Creates a new instance of Delay. Use this constructor to create a delay
 	 * service for a open/closed network.
-	 * @param serviceStrategy Array of service strategies, one per class.
-	 * @throws NetException
+	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
-	public Delay(ServiceStrategy serviceStrategy[]) throws NetException {
-		this.serviceStrategy = serviceStrategy;
+	public Delay(ServiceStrategy[] serviceStrategies) {
+		this.serviceStrategies = serviceStrategies;
 		waitingJobs = new LinkedList<Job>();
 		coolStart = true;
 	}
@@ -92,7 +92,7 @@ public class Delay extends ServiceSection {
 				// Gets the class of the job
 				c = job.getJobClass().getId();
 				// Calculates the service time of job
-				serviceTime = serviceStrategy[c].wait(this);
+				serviceTime = serviceStrategies[c].wait(this);
 				// Sends to itself the job with delay equal to "serviceTime"
 				sendMe(job, serviceTime);
 				// Sends backward the job ack

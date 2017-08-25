@@ -58,7 +58,7 @@ public class Timing extends ServiceSection {
 	private InverseMeasure firingThroughput;
 	private InverseMeasure[] firingThroughputs;
 	private double lastFiringTime;
-	private double lastFiringTimes[];
+	private double[] lastFiringTimes;
 
 	/**
 	 * Creates a new instance of the timing section.
@@ -175,7 +175,8 @@ public class Timing extends ServiceSection {
 			int modeIndex = ((FiringPacket) data).getModeIndex();
 			sendForward(NetEvent.EVENT_FIRING, data, 0.0);
 			updateFiringThroughput(modeIndex);
-			lastFiringTimes[modeIndex] = lastFiringTime = NetSystem.getTime();
+			lastFiringTime = NetSystem.getTime();
+			lastFiringTimes[modeIndex] = NetSystem.getTime();
 			break;
 		}
 
@@ -201,7 +202,7 @@ public class Timing extends ServiceSection {
 		}
 	}
 
-	private boolean analyzeFiringThroughput(String modeName, InverseMeasure measurement) throws NetException {
+	private boolean analyzeFiringThroughput(String modeName, InverseMeasure measurement) {
 		if (modeName != "") {
 			int modeIndex = getModeIndexByName(modeName);
 			if (modeIndex < 0) {

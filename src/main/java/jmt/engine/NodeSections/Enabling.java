@@ -234,21 +234,7 @@ public class Enabling extends InputSection {
 	}
 
 	/**
-	 * Gets the total number of consumed jobs
-	 */
-	public int getConsumedJobs() {
-		return consumedJobs;
-	}
-
-	/**
-	 * Gets the number of consumed jobs for the specified class
-	 */
-	public int getConsumedJobsPerClass(int jobClass) {
-		return consumedJobsPerClass[jobClass];
-	}
-
-	/**
-	 * Shows the fork job information warning
+	 * Shows the fork job information warning.
 	 */
 	private void showForkJobInfoWarning() {
 		if (!isForkJobInfoWarningShown) {
@@ -271,6 +257,23 @@ public class Enabling extends InputSection {
 			}
 			isForkJobInfoWarningShown = true;
 		}
+	}
+
+	/**
+	 * Gets the total number of consumed jobs.
+	 * @return the total number of consumed jobs.
+	 */
+	public int getConsumedJobs() {
+		return consumedJobs;
+	}
+
+	/**
+	 * Gets the number of consumed jobs for the specified class.
+	 * @param classIndex the index of the job class.
+	 * @return the number of consumed jobs for the specified class.
+	 */
+	public int getConsumedJobsPerClass(int jobClass) {
+		return consumedJobsPerClass[jobClass];
 	}
 
 }

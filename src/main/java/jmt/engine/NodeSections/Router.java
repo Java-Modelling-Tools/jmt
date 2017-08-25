@@ -50,11 +50,9 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class Router extends OutputSection {
 
-	/** Property Identifier: Routing strategy.*/
-	public static final int PROPERTY_ID_ROUTING_STRATEGY = 0x0101;
 	private RoutingStrategy routingStrategies[];
 
-	/*------------------BLOCKING REGION PROPERTIES------------------*/
+	/*-------------------BLOCKING REGION PROPERTIES-------------------*/
 
 	/*
 	these properties are used if this router is the border router of
@@ -65,16 +63,17 @@ public class Router extends OutputSection {
 	number of jobs inside the region
 	 */
 
-	/**true if this router is the border router of a blocking region*/
+	/** true if this router is the border router of a blocking region */
 	private boolean borderRouterON;
 	/** the blocking region this router belongs to */
 	private BlockingRegion myRegion;
 	/** the region input station of the blocking region */
 	private NetNode regionInputStation;
 
-	/*--------------------------------------------------------------*/
+	/*----------------------------------------------------------------*/
 
-	/** Creates a new instance of Router.
+	/**
+	 * Creates a new instance of Router.
 	 * @param routingStrategies Routing strategies, one for each class.
 	 */
 	public Router(RoutingStrategy routingStrategies[]) {
@@ -86,7 +85,8 @@ public class Router extends OutputSection {
 		regionInputStation = null;
 	}
 
-	/** Creates a new instance of blocking region border Router.
+	/**
+	 * Creates a new instance of blocking region border Router.
 	 * @param routingStrategies Routing strategies, one for each class.
 	 * @param myReg the blocking region to which the owner node of this router
 	 * belongs.
@@ -128,16 +128,6 @@ public class Router extends OutputSection {
 		borderRouterON = false;
 		myRegion = null;
 		regionInputStation = null;
-	}
-
-	@Override
-	public Object getObject(int id, JobClass jobClass) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_ROUTING_STRATEGY:
-			return routingStrategies[jobClass.getId()];
-		default:
-			return super.getObject(id);
-		}
 	}
 
 	@Override

@@ -54,17 +54,18 @@ public class LoadDependentRoutingStrategy extends RoutingStrategy {
 
 	@Override
 	public NetNode getOutNode(NodeSection section, JobClass jobClass) {
-		NetNode outNode = null;
 		try {
 			int jobs = section.getOwnerNode().getIntNodeProperty(NetNode.PROPERTY_ID_RESIDENT_JOBS, jobClass);
 			int index = Arrays.binarySearch(parameters, new Integer(jobs));
 			if (index < 0) {
 				index = -index - 2;
 			}
-			outNode = parameters[index].getOutNode();
-		} catch (NetException ne) {
+			return parameters[index].getOutNode();
+		} catch (NetException e) {
+			System.out.println("Load Dependent Routing Error: Cannot read queue length from output node");
+			e.printStackTrace();
+			return null;
 		}
-		return outNode;
 	}
 
 }

@@ -41,16 +41,16 @@ public class GrayCellRenderer extends DisabledCellRenderer {
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-		Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+		super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 		if (value instanceof String && ("\u221e".equals(value) || "--".equals(value))) {
-			super.setHorizontalAlignment(SwingConstants.RIGHT);
+			setHorizontalAlignment(SwingConstants.RIGHT);
 		}
 		if (!table.isCellEditable(row, col)) {
-			renderer.setEnabled(false);
+			setEnabled(false);
 		} else {
-			renderer.setEnabled(true);
+			setEnabled(true);
 		}
-		return renderer;
+		return this;
 	}
 
 }

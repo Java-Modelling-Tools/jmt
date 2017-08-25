@@ -106,11 +106,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static final Map<String,String> DROP_RULES_MAPPING;
 
 	static {
-		HashMap<String, String> d = new HashMap<String, String>();
-		d.put("drop", FINITE_DROP);
-		d.put("BAS blocking", FINITE_BLOCK);
-		d.put("waiting queue", FINITE_WAITING);
-		DROP_RULES_MAPPING = Collections.unmodifiableMap(d);
+		HashMap<String, String> temp = new HashMap<String, String>();
+		temp.put("drop", FINITE_DROP);
+		temp.put("BAS blocking", FINITE_BLOCK);
+		temp.put("waiting queue", FINITE_WAITING);
+		DROP_RULES_MAPPING = Collections.unmodifiableMap(temp);
 	}
 
 	// Variables used with caching purpose to improve reading speed
@@ -121,10 +121,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static Map<String, JoinStrategy> engineToGuiJoin = null;
 	protected static Map<String, SemaphoreStrategy> engineToGuiSemaphore = null;
 
-	protected static final String queueGetFCFS = "jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy";
-	protected static final String queueGetLCFS = "jmt.engine.NetStrategies.QueueGetStrategies.LCFSstrategy";
-	protected static final String queueGetPS = "jmt.engine.NetStrategies.QueueGetStrategies.PSSstrategy";
-	protected static final String queueGetSRPT = "jmt.engine.NetStrategies.QueueGetStrategies.SRPT";
+	protected static final String psStrategy = "jmt.engine.NetStrategies.PSStrategy";
 	protected static final String queuePut = "jmt.engine.NetStrategies.QueuePutStrategy";
 	protected static final String serviceStrategy = "jmt.engine.NetStrategies.ServiceStrategy";
 	protected static final String distributionContainer = "jmt.engine.random.DistributionContainer";
@@ -526,76 +523,40 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
 		Element curr;
 		String name, classpath;
-		boolean fcfs = true;
-		boolean ps = false;
-		boolean srpt = false;
 		Map<String, Node> putStrategy = null;
 		Map<String, Node> dropRules = null;
 		for (int i = 0; i < parameters.getLength(); i++) {
 			curr = (Element) parameters.item(i);
 			name = curr.getAttribute(XML_A_PARAMETER_NAME);
 			classpath = curr.getAttribute(XML_A_PARAMETER_CLASSPATH);
-			if (classpath.equals(queueGetFCFS)) {
-				fcfs = true;
-			} else if (classpath.equals(queueGetLCFS)) {
-				fcfs = false;
-			} else if (classpath.equals(queueGetPS)) {
-				fcfs = false;
-				ps = true;
-			} else if (classpath.equals(queueGetSRPT)) {
-				fcfs = false;
-				srpt = true;
-			} else if (classpath.equals(queuePut)) {
+			if (classpath.equals(queuePut)) {
 				putStrategy = parseParameterRefclassArray(curr);
 			} else if (name.equals("size")) {
-				Integer size = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
-				model.setStationQueueCapacity(key, size);
+				Integer capacity = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+				model.setStationQueueCapacity(key, capacity);
 			} else if (name.equals("dropStrategies")) {
 				dropRules = parseParameterRefclassArray(curr);
 			}
 		}
 		if (putStrategy != null) {
 			Object[] classNames = putStrategy.keySet().toArray();
-			String strategy;
 			for (Object className : classNames) {
-				strategy = ((Element) putStrategy.get(className)).getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+				String strategy = ((Element) putStrategy.get(className)).getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
 				// Takes away classpath from put strategy name
 				strategy = strategy.substring(strategy.lastIndexOf(".") + 1, strategy.length());
-				// Now sets correct queue strategy, given combination of queueget and queueput policies
-				if (ps) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_PS);
-					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
-				} else if (srpt) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_SRPT);
-					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
-				} else if (strategy.equals("TailStrategy")) {
+				// Now sets correct queue strategy, given queueput policies
+				if (strategy.equals("TailStrategy")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
-					if (fcfs) {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
-					} else {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
-					}
+					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
 				} else if (strategy.equals("TailStrategyPriority")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
-					if (fcfs) {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
-					} else {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
-					}
+					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
 				} else if (strategy.equals("HeadStrategy")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
-					if (fcfs) {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
-					} else {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
-					}
+					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
 				} else if (strategy.equals("HeadStrategyPriority")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
-					if (fcfs) {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
-					} else {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
-					}
+					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
 				} else if (strategy.equals("RandStrategy")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_RAND);
@@ -614,16 +575,27 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				} else if (strategy.equals("LJFStrategyPriority")) {
 					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_LJF);
+				} else if (strategy.equals("SEPTStrategy")) {
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_SEPT);
+				} else if (strategy.equals("SEPTStrategyPriority")) {
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_SEPT);
+				} else if (strategy.equals("LEPTStrategy")) {
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_LEPT);
+				} else if (strategy.equals("LEPTStrategyPriority")) {
+					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_LEPT);
 				}
 			}
 		}
 		// Decodes drop rules
 		if (dropRules != null) {
 			Object[] classNames = dropRules.keySet().toArray();
-			String strategy;
 			for (Object className : classNames) {
-				strategy = findText(((Element) dropRules.get(className)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-				model.setDropRule(key, classes.get(className), DROP_RULES_MAPPING.get(strategy));
+				String rule = findText(((Element) dropRules.get(className)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.setDropRule(key, classes.get(className), DROP_RULES_MAPPING.get(rule));
 			}
 		}
 	}
@@ -652,12 +624,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * @param key key of search for this queue station into data structure
 	 */
 	protected static void parseServerSection(Element section, CommonModel model, Object key) {
-		String className = section.getAttribute(XML_A_STATION_SECTION_CLASSNAME);
-		if (CLASSNAME_PSSERVER.equals(className)) {
+		String sectionName = section.getAttribute(XML_A_STATION_SECTION_CLASSNAME);
+		if (CLASSNAME_PSSERVER.equals(sectionName)) {
 			model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_PS);
-		}
-		if (CLASSNAME_SRPT.equals(className)) {
-			model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_SRPT);
+			for (Object classKey : classes.values()) {
+				model.setQueueStrategy(key, classKey, QUEUE_STRATEGY_EPS);
+			}
 		}
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
 		Element curr;
@@ -666,18 +638,43 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			curr = (Element) parameters.item(i);
 			name = curr.getAttribute(XML_A_PARAMETER_NAME);
 			classpath = curr.getAttribute(XML_A_PARAMETER_CLASSPATH);
-			if (classpath.equals(serviceStrategy)) {
+			if (name.equals("maxJobs")) {
+				// Sets number of servers
+				Integer number = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+				model.setStationNumberOfServers(key, number);
+			} else if (classpath.equals(serviceStrategy)) {
 				// Retrieves all distributions subParameters
 				Map<String, Node> distributions = parseParameterRefclassArray((Element) parameters.item(i));
 				Object[] classNames = distributions.keySet().toArray();
 				// Sets service time distributions
-				for (Object className2 : classNames) {
-					model.setServiceTimeDistribution(key, classes.get(className2), parseServiceStrategy((Element) distributions.get(className2)));
+				for (Object className : classNames) {
+					model.setServiceTimeDistribution(key, classes.get(className), parseServiceStrategy((Element) distributions.get(className)));
 				}
-			} else if (name.equals("maxJobs")) {
-				// Sets number of servers
-				Integer jobs = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
-				model.setStationNumberOfServers(key, jobs);
+			} else if (classpath.equals(psStrategy)) {
+				// Retrieves all PS strategies subParameters
+				Map<String, Node> psStrategies = parseParameterRefclassArray((Element) parameters.item(i));
+				Object[] classNames = psStrategies.keySet().toArray();
+				// Sets all PS strategies
+				for (Object className : classNames) {
+					String strategy = ((Element) psStrategies.get(className)).getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+					strategy = strategy.substring(strategy.lastIndexOf(".") + 1, strategy.length());
+					if (strategy.equals("EPSStrategy")) {
+						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_EPS);
+					} else if (strategy.equals("GPSStrategy")) {
+						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_GPS);
+					} else if (strategy.equals("DPSStrategy")) {
+						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_DPS);
+					}
+				}
+			} else if (name.equals("serviceWeights")) {
+				// Retrieves all service weights subParameters
+				Map<String, Node> serviceWeights = parseParameterRefclassArray((Element) parameters.item(i));
+				Object[] classNames = serviceWeights.keySet().toArray();
+				// Sets all service weights
+				for (Object className : classNames) {
+					Double weight = Double.valueOf(findText(((Element) serviceWeights.get(className)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+					model.setServiceWeight(key, classes.get(className), weight);
+				}
 			}
 		}
 	}
@@ -1412,8 +1409,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Element parameter = (Element) parameters.item(i);
 			String name = parameter.getAttribute(XML_A_PARAMETER_NAME);
 			if (name.equals("totalCapacity")) {
-				String totalCap = findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-				model.setStationQueueCapacity(key, Integer.valueOf(totalCap));
+				String totalCapacity = findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.setStationQueueCapacity(key, Integer.valueOf(totalCapacity));
 			} else if (name.equals("capacities")) {
 				capacities = parseParameterRefclassArray(parameter);
 			} else if (name.equals("dropRules")) {
@@ -1424,9 +1421,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		}
 
 		if (capacities != null) {
-			for (Entry<String, Node> capacity : capacities.entrySet()) {
-				String cap = findText(((Element) capacity.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-				model.setQueueCapacity(key, classes.get(capacity.getKey()), Integer.valueOf(cap));
+			for (Entry<String, Node> cap : capacities.entrySet()) {
+				String capacity = findText(((Element) cap.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+				model.setQueueCapacity(key, classes.get(cap.getKey()), Integer.valueOf(capacity));
 			}
 		}
 
@@ -1757,8 +1754,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			return STATION_TYPE_DELAY;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
 				&& (sectionNames[1].equals(CLASSNAME_SERVER)
-						|| sectionNames[1].equals(CLASSNAME_PSSERVER)
-						|| sectionNames[1].equals(CLASSNAME_SRPT))
+						|| sectionNames[1].equals(CLASSNAME_PSSERVER))
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
 			return STATION_TYPE_SERVER;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)

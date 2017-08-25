@@ -498,8 +498,6 @@ public class SimLoader {
 			x.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (jmt.common.exception.NetException e) {
-			e.printStackTrace();
 		}
 	}
 

@@ -172,16 +172,22 @@ public interface CommonConstants {
 	static final Dimension DIM_BUTTON_M = new Dimension(110, 20);
 	static final Dimension DIM_BUTTON_L = new Dimension(140, 20);
 
+	/**Constants for selection of station queueing strategy*/
+	public static final String QUEUE_STRATEGY_STATION_PS = "Processor Sharing";
+	public static final String QUEUE_STRATEGY_STATION_QUEUE = "Non-preemptive Scheduling";
+	public static final String QUEUE_STRATEGY_STATION_QUEUE_PRIORITY = "Non-preemptive Scheduling (Priority)";
+
 	/**Constants for selection of queueing strategy*/
+	public static final String QUEUE_STRATEGY_EPS = "EPS";
+	public static final String QUEUE_STRATEGY_GPS = "GPS";
+	public static final String QUEUE_STRATEGY_DPS = "DPS";
 	public static final String QUEUE_STRATEGY_FCFS = "FCFS";
 	public static final String QUEUE_STRATEGY_LCFS = "LCFS";
 	public static final String QUEUE_STRATEGY_RAND = "Random";
 	public static final String QUEUE_STRATEGY_SJF = "SJF";
 	public static final String QUEUE_STRATEGY_LJF = "LJF";
-	public static final String QUEUE_STRATEGY_STATION_PS = "Processor Sharing";
-	public static final String QUEUE_STRATEGY_STATION_SRPT = "Shortest Remaining Processing Time";
-	public static final String QUEUE_STRATEGY_STATION_QUEUE = "Non-preemptive Scheduling";
-	public static final String QUEUE_STRATEGY_STATION_QUEUE_PRIORITY = "Non-preemptive Scheduling (Priority)";
+	public static final String QUEUE_STRATEGY_SEPT = "SEPT";
+	public static final String QUEUE_STRATEGY_LEPT = "LEPT";
 
 	/**Constants for service time distributions*/
 	public static final String SERVICE_LOAD_INDEPENDENT = "Load Independent";

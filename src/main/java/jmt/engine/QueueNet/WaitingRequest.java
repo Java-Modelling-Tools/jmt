@@ -22,38 +22,40 @@ package jmt.engine.QueueNet;
  * This class implements a waiting request of a job to be processed by a
  * section: it contains information about the job and the node/the section which
  * sent the job. This class should be used to build a list of jobs sent by other
- * nodes/sections which could not be processed immediately: a section can use this
- * class to retrieve node/section to be acked when job could be processed.
+ * nodes/sections which could not be processed immediately: a section can use
+ * this class to retrieve node/section to be acked when job could be processed.
  */
 public class WaitingRequest extends JobInfo {
 
-	private NetNode Node;
-	private byte Section;
+	private byte sourceSection;
+	private NetNode source;
 
 	/**
-	 * Creates a new WaitingRequest object.
-	 * @param Node Reference to the node which sent the job.
-	 * @param Section Reference to the section which sent the job.
-	 * @param Job Reference to the job sent.
+	 * Creates a new instance of WaitingRequest object.
+	 * @param job Job referenced by this WaitingRequest.
+	 * @param sourceSection Source section of the job.
+	 * @param sourceNode Source node of the job.
 	 */
-	public WaitingRequest(NetNode Node, byte Section, Job Job) {
-		super(Job);
-		this.Node = Node;
-		this.Section = Section;
+	public WaitingRequest(Job job, byte sourceSection, NetNode source) {
+		super(job);
+		this.sourceSection = sourceSection;
+		this.source = source;
 	}
 
-	/** Gets referenced node.
-	 * @return Node property value.
+	/**
+	 * Gets the source section of the job.
+	 * @return Source section of the job.
 	 */
-	public NetNode getNode() {
-		return Node;
+	public byte getSourceSection() {
+		return sourceSection;
 	}
 
-	/** Gets referenced section.
-	 * @return Section property value.
+	/**
+	 * Gets the source node of the job.
+	 * @return Source node of the job.
 	 */
-	public byte getSection() {
-		return Section;
+	public NetNode getSource() {
+		return source;
 	}
 
 }

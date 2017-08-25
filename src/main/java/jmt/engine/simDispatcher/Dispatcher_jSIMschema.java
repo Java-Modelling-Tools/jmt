@@ -19,13 +19,11 @@
 package jmt.engine.simDispatcher;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import jmt.common.exception.LoadException;
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.QueueNetwork;
@@ -135,7 +133,7 @@ public class Dispatcher_jSIMschema {
 		maxDuration = durationMillis;
 	}
 
-	public boolean solveModel() throws IOException, LoadException, NetException, Exception {
+	public boolean solveModel() throws Exception {
 		/*********************SIM DEFINITION MODEL*********************/
 		// does model file exist??
 		if (!simModelDefinition.exists()) {
@@ -351,11 +349,7 @@ public class Dispatcher_jSIMschema {
 		if (!simStarted) {
 			return false;
 		}
-		try {
-			NetSystem.terminate();
-		} catch (NetException nex) {
-			nex.printStackTrace();
-		}
+		NetSystem.terminate();
 		return true;
 	}
 

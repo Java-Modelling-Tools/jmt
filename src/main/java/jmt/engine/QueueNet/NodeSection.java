@@ -44,10 +44,10 @@ public abstract class NodeSection {
 
 	/*-----------------------NODE SECTION RETURNED VALUES---------------------*/
 
-	/** Message passed has not been processed (general event).*/
+	/** Message passed has not been processed (general event). */
 	public static final int MSG_NOT_PROCESSED = 0x0000;
 
-	/** Message passed has been processed (all events).*/
+	/** Message passed has been processed (all events). */
 	public static final int MSG_PROCESSED = 0x0001;
 
 	/*------------------------------BIT MASK----------------------------------*/
@@ -69,20 +69,18 @@ public abstract class NodeSection {
 
 	//TODO: warning, not all properties make sense for all section types
 
-	/** Property ID: number of jobs inside */
-	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0001;
-	/** Property ID: number of jobs which arrived to this NodeSection  */
-	public static final int PROPERTY_ID_ARRIVED_JOBS = 0x0002;
-	/** Property ID: number of jobs which left this NodeSection  */
-	public static final int PROPERTY_ID_LEAVING_JOBS = 0x0003;
-	/** Property ID: residence time  */
+	/** Property ID: number of jobs arriving at this section */
+	public static final int PROPERTY_ID_ARRIVING_JOBS = 0x0001;
+	/** Property ID: number of jobs departing from this section */
+	public static final int PROPERTY_ID_DEPARTING_JOBS = 0x0002;
+	/** Property ID: number of jobs inside this section */
+	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0003;
+	/** Property ID: residence time */
 	public static final int PROPERTY_ID_RESIDENCE_TIME = 0x0004;
-	/** Property ID: throughput  */
+	/** Property ID: throughput */
 	public static final int PROPERTY_ID_THROUGHPUT = 0x0005;
-	/** Property ID: utilization  */
+	/** Property ID: utilization */
 	public static final int PROPERTY_ID_UTILIZATION = 0x0006;
-	/** Property Identifier: JobInfoList.*/
-	public static final int PROPERTY_ID_JOBINFOLIST = 0x0007;
 
 	//TODO: make more efficient the mechanism to determine the ownerNode (to avoid too many getNode)
 	/** Owner of this NodeSection. */
@@ -98,12 +96,12 @@ public abstract class NodeSection {
 	private boolean auto; //auto refresh of the jobsList attribute.
 	private boolean nodeAuto; // auto refresh the joblist attribute at node level.
 
-	/** Creates a new instance of this NodeSection.
-	 * Note that, while building a
-	 * new node section, node owner informations are not available. To
-	 * set node section properties depending on the owner node ones, the
-	 * "nodeLiked(...)" protected method should be used.
-	 *  @param id    NodeSection identifier.
+	/**
+	 * Creates a new instance of this NodeSection.
+	 * Note that, while building a new node section, node owner informations are
+	 * not available. To set node section properties depending on the owner node
+	 * ones, the "nodeLiked(...)" protected method should be used.
+	 * @param id NodeSection identifier.
 	 */
 	public NodeSection(byte id) {
 		this.sectionID = id;
@@ -111,13 +109,13 @@ public abstract class NodeSection {
 		nodeAuto = true;
 	}
 
-	/** Creates a new instance of this NodeSection.
-	 * Note that, while building a
-	 * new node section, node owner informations are not available. To
-	 * set node section properties depending on the owner node ones, the
-	 * "nodeLiked(...)" protected method should be used.
-	 *  @param id    NodeSection identifier.
-	 *  @param auto  auto refresh of the jobsList attribute.
+	/**
+	 * Creates a new instance of this NodeSection.
+	 * Note that, while building a new node section, node owner informations are
+	 * not available. To set node section properties depending on the owner node
+	 * ones, the "nodeLiked(...)" protected method should be used.
+	 * @param id NodeSection identifier.
+	 * @param auto Auto refresh of the jobsList attribute.
 	 */
 	public NodeSection(byte id, boolean auto) {
 		this.sectionID = id;
@@ -125,14 +123,14 @@ public abstract class NodeSection {
 		nodeAuto = true;
 	}
 
-	/** Creates a new instance of this NodeSection.
-	 * Note that, while building a
-	 * new node section, node owner informations are not available. To
-	 * set node section properties depending on the owner node ones, the
-	 * "nodeLiked(...)" protected method should be used.
-	 *  @param id    NodeSection identifier.
-	 *  @param auto  auto refresh of the jobsList attribute.
-	 *  @param nodeAuto auto refresh the jobsList attribute at node level
+	/**
+	 * Creates a new instance of this NodeSection.
+	 * Note that, while building a new node section, node owner informations are
+	 * not available. To set node section properties depending on the owner node
+	 * ones, the "nodeLiked(...)" protected method should be used.
+	 * @param id NodeSection identifier.
+	 * @param auto Auto refresh of the jobsList attribute.
+	 * @param nodeAuto Auto refresh the jobsList attribute at node level
 	 */
 	public NodeSection(byte id, boolean auto, boolean nodeAuto) {
 		this.sectionID = id;
@@ -140,17 +138,19 @@ public abstract class NodeSection {
 		this.nodeAuto = nodeAuto;
 	}
 
-	/** This method should be overridden to implement a specific behaviour of the
+	/**
+	 * This method should be overridden to implement a specific behaviour of the
 	 * node section when the node section itself is linked to the owner node.
 	 * This method should be used to set node section properties depending on
 	 * the owner node ones.
 	 * @param node Owner node.
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
-	protected void nodeLinked(NetNode node) throws jmt.common.exception.NetException {
+	protected void nodeLinked(NetNode node) throws NetException {
 	};
 
-	/** Gets the id of the node section.
+	/**
+	 * Gets the id of the node section.
 	 * @return node section identifier.
 	 */
 	public byte getSectionID() {
@@ -158,15 +158,16 @@ public abstract class NodeSection {
 	}
 
 	//TODO: alternatively one can override particular components (terminal,..)
-	/** Analyzes a measure in the node section. Override this method to
-	 * analyze a measure depending on the node section implementation. Note that
-	 * the first 256 identifiers are reserved by NodeSection class.
+	/**
+	 * Analyzes a measure in the node section. Override this method to analyze a
+	 * measure depending on the node section implementation. Note that the first
+	 * 256 identifiers are reserved by NodeSection class.
 	 * @param name name of the measure to be activated (see measures constants).
 	 * @param jobClass Job class to be analyzed.
 	 * @param measurement Set of measure to be activated.
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
-	public void analyze(int name, JobClass jobClass, Measure measurement) throws jmt.common.exception.NetException {
+	public void analyze(int name, JobClass jobClass, Measure measurement) throws NetException {
 		switch (name) {
 		case SimConstants.LIST_NUMBER_OF_JOBS:
 			jobsList.analyzeUtilization(jobClass, measurement);
@@ -181,13 +182,14 @@ public abstract class NodeSection {
 			jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
 			break;
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
 	}
 
-	/** Checks if the specified node is the owner node of this section. Note that this method
-	 * could be called <b>only after</b> that the owner node has been linked to this
-	 * section.
+	/**
+	 * Checks if the specified node is the owner node of this section. Note that
+	 * this method could be called <b>only after</b> that the owner node has
+	 * been linked to this section.
 	 * @param node node to be checked.
 	 * @return True if the node is the owner node, false otherwise.
 	 */
@@ -195,203 +197,215 @@ public abstract class NodeSection {
 		return node == this.ownerNode;
 	}
 
-	/** Gets owner node of this section.
+	/**
+	 * Gets owner node of this section.
 	 * @return Owner node.
 	 */
 	public NetNode getOwnerNode() {
 		return ownerNode;
 	}
 
-	/** Gets the list of the job classes of the owner queue network.
+	/**
+	 * Gets the list of the job classes of the owner queue network.
 	 * @return Queue network job classes.
 	 */
 	public JobClassList getJobClasses() {
 		return ownerNode.getJobClasses();
 	}
 
-	/** Gets an integer type property of this node. Note that the first 256
+	/**
+	 * Gets an integer type property of this node. Note that the first 256
 	 * identifiers are reserved by NodeSection class.
 	 * @param id Property identifier (see properties constants).
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
+	 * @throws NetException if the requested property is not available.
 	 */
-	public int getIntSectionProperty(int id) throws jmt.common.exception.NetException {
-		try {
-			switch (id) {
-			case PROPERTY_ID_ARRIVED_JOBS:
-				return jobsList.getJobsIn();
-			case PROPERTY_ID_LEAVING_JOBS:
-				return jobsList.getJobsOut();
-			case PROPERTY_ID_RESIDENT_JOBS:
-				return jobsList.size();
-			}
-		} catch (jmt.common.exception.NetException exc) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
+	public int getIntSectionProperty(int id) throws NetException {
+		switch (id) {
+		case PROPERTY_ID_ARRIVING_JOBS:
+			return jobsList.getJobsIn();
+		case PROPERTY_ID_DEPARTING_JOBS:
+			return jobsList.getJobsOut();
+		case PROPERTY_ID_RESIDENT_JOBS:
+			return jobsList.size();
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
-		throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 	}
 
-	/** Gets an integer type property of this node depending on a specified
-	 * job class. Note that the first 256 identifiers are reserved by
-	 * NodeSection class.
-	 * @param id Property identifier (see properties constants).
-	 * @param jobClass jobClass.
-	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
-	 */
-	public int getIntSectionProperty(int id, JobClass jobClass) throws jmt.common.exception.NetException {
-		try {
-			switch (id) {
-			case PROPERTY_ID_ARRIVED_JOBS:
-				return jobsList.getJobsInPerClass(jobClass);
-			case PROPERTY_ID_LEAVING_JOBS:
-				return jobsList.getJobsOutPerClass(jobClass);
-			case PROPERTY_ID_RESIDENT_JOBS:
-				return jobsList.size(jobClass);
-			}
-		} catch (jmt.common.exception.NetException exc) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
-		}
-		throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
-	}
-
-	/** Gets a double type property of this node. Note that the first 256
-	 * identifiers are reserved by NodeSection class.
-	 * @param id Property identifier (see properties constants).
-	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
-	 */
-	public double getDoubleSectionProperty(int id) throws jmt.common.exception.NetException {
-		try {
-			switch (id) {
-			case PROPERTY_ID_RESIDENCE_TIME:
-				return jobsList.getBusyTime() / jobsList.getJobsOut();
-			case PROPERTY_ID_THROUGHPUT:
-				return jobsList.getJobsOut() / NetSystem.getTime();
-			case PROPERTY_ID_UTILIZATION:
-				return jobsList.getBusyTime() / NetSystem.getTime();
-			}
-		} catch (jmt.common.exception.NetException exc) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
-		}
-		throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
-	}
-
-	/** Gets a double type property of this node depending on a specified
-	 * job class. Note that the first 256 identifiers are reserved by NodeSection
+	/**
+	 * Gets an integer type property of this node depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
 	 * class.
 	 * @param id Property identifier (see properties constants).
 	 * @param jobClass jobClass.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
+	 * @throws NetException if the requested property is not available.
 	 */
-	public double getDoubleSectionProperty(int id, JobClass jobClass) throws jmt.common.exception.NetException {
-		try {
-			switch (id) {
-			case PROPERTY_ID_RESIDENCE_TIME:
-				return jobsList.getBusyTimePerClass(jobClass) / jobsList.getJobsOutPerClass(jobClass);
-			case PROPERTY_ID_THROUGHPUT:
-				return jobsList.getJobsOutPerClass(jobClass) / NetSystem.getTime();
-			case PROPERTY_ID_UTILIZATION:
-				return jobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime();
-			}
-		} catch (jmt.common.exception.NetException exc) {
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.", exc);
+	public int getIntSectionProperty(int id, JobClass jobClass) throws NetException {
+		switch (id) {
+		case PROPERTY_ID_ARRIVING_JOBS:
+			return jobsList.getJobsInPerClass(jobClass);
+		case PROPERTY_ID_DEPARTING_JOBS:
+			return jobsList.getJobsOutPerClass(jobClass);
+		case PROPERTY_ID_RESIDENT_JOBS:
+			return jobsList.size(jobClass);
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
-		throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 	}
 
-	/** Gets a parameter type property of this node depending on a
-	 * specified job class. Note that the first 256 identifiers are reserved by
-	 * NodeSection class.
+	/**
+	 * Gets a double type property of this node. Note that the first 256
+	 * identifiers are reserved by NodeSection class.
+	 * @param id Property identifier (see properties constants).
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public double getDoubleSectionProperty(int id) throws NetException {
+		switch (id) {
+		case PROPERTY_ID_RESIDENCE_TIME:
+			return jobsList.getBusyTime() / jobsList.getJobsOut();
+		case PROPERTY_ID_THROUGHPUT:
+			return jobsList.getJobsOut() / NetSystem.getTime();
+		case PROPERTY_ID_UTILIZATION:
+			return jobsList.getBusyTime() / NetSystem.getTime();
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+		}
+	}
+
+	/**
+	 * Gets a double type property of this node depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
+	 * class.
+	 * @param id Property identifier (see properties constants).
+	 * @param jobClass jobClass.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
+		switch (id) {
+		case PROPERTY_ID_RESIDENCE_TIME:
+			return jobsList.getBusyTimePerClass(jobClass) / jobsList.getJobsOutPerClass(jobClass);
+		case PROPERTY_ID_THROUGHPUT:
+			return jobsList.getJobsOutPerClass(jobClass) / NetSystem.getTime();
+		case PROPERTY_ID_UTILIZATION:
+			return jobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime();
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+		}
+	}
+
+	/**
+	 * Gets a parameter type property of this node. Note that the first 256
+	 * identifiers are reserved by NodeSection class.
 	 * @param id Property identifier.
 	 * @param jobClass jobClass.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
+	 * @throws NetException if the requested property is not available.
 	 */
-	public Parameter getParameter(int id, JobClass jobClass) throws jmt.common.exception.NetException {
+	public Parameter getParameter(int id) throws NetException {
 		switch (id) {
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
-	/** Gets a generic object type property of this node. Note that the first
-	 * 256 identifiers are reserved by NodeSection class.
+	/**
+	 * Gets a parameter type property of this node depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
+	 * class.
+	 * @param id Property identifier.
+	 * @param jobClass jobClass.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public Parameter getParameter(int id, JobClass jobClass) throws NetException {
+		switch (id) {
+		default:
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+		}
+	}
+
+	/**
+	 * Gets an object type property of this node. Note that the first 256
+	 * identifiers are reserved by NodeSection class.
 	 * @param id Property identifier.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
+	 * @throws NetException if the requested property is not available.
 	 */
-	public Object getObject(int id) throws jmt.common.exception.NetException {
+	public Object getObject(int id) throws NetException {
 		switch (id) {
-		case PROPERTY_ID_JOBINFOLIST:
-			return jobsList;
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
-	/** Gets a generic object type property of this node depending on a
-	 * specified job class. Note that the first 256 identifiers are reserved by
-	 * NodeSection class.
+	/**
+	 * Gets an object type property of this node depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
+	 * class.
 	 * @param id Property identifier.
 	 * @param jobClass the jobClass which property refers to.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
+	 * @throws NetException if the requested property is not available.
 	 */
-	public Object getObject(int id, JobClass jobClass) throws jmt.common.exception.NetException {
+	public Object getObject(int id, JobClass jobClass) throws NetException {
 		switch (id) {
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
-	/** Checks if a property is enabled. Note that the first 256
+	/**
+	 * Checks if a property of this node is enabled. Note that the first 256
 	 * identifiers are reserved by NodeSection class.
 	 * @param id Property identifier.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
+	 * @throws NetException if the requested property is not available.
 	 */
-	public boolean isEnabled(int id) throws jmt.common.exception.NetException {
+	public boolean isEnabled(int id) throws NetException {
 		switch (id) {
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
-	/** Checks if a property depending on a specified job class is enable.
-	 * Note that the first 256 identifiers are reserved by NodeSection
+	/**
+	 * Checks if a property of this node is enabled depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
 	 * class.
 	 * @param id Property identifier.
 	 * @param jobClass jobClass.
 	 * @return Property value.
-	 * @throws jmt.common.exception.NetException if the requested property is not available.
+	 * @throws NetException if the requested property is not available.
 	 */
-	public boolean isEnabled(int id, JobClass jobClass) throws jmt.common.exception.NetException {
+	public boolean isEnabled(int id, JobClass jobClass) throws NetException {
 		switch (id) {
 		default:
-			throw new jmt.common.exception.NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
-	/** This method should be overridden to implement a specific NetMessage
+	/**
+	 * This method should be overridden to implement a specific NetMessage
 	 * processor.
 	 * @param message message to be processed.
 	 * @return message processing result.
 	 */
-	protected abstract int process(NetMessage message) throws jmt.common.exception.NetException;
+	protected abstract int process(NetMessage message) throws NetException;
 
-	/** Sends an event to a section of a node.
+	/**
+	 * Sends an event to a section of a node.
 	 * @param event event to be sent.
 	 * @param data  data to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destinationSection destination section.
 	 * @param destination destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken send(int event, Object data, double delay, byte destinationSection, NetNode destination)
-			throws jmt.common.exception.NetException {
+	protected RemoveToken send(int event, Object data, double delay, byte destinationSection, NetNode destination) {
 		if (auto && (event == NetEvent.EVENT_JOB) && ((destination != ownerNode) || ((destination == ownerNode) && (destinationSection != sectionID)))) {
 			//it is a JOB event and the destination is not the owner node or it is the owner
 			//node but the dest section is not this section
@@ -400,151 +414,150 @@ public abstract class NodeSection {
 		return ownerNode.send(event, data, delay, sectionID, destinationSection, destination);
 	}
 
-	/** Sends an event to the <b>input</b> section of a node.
+	/**
+	 * Sends an event to the <b>input</b> section of a node.
 	 * @param event event to be sent.
 	 * @param data  data to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destination destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken send(int event, Object data, double delay, NetNode destination) throws jmt.common.exception.NetException {
+	protected RemoveToken send(int event, Object data, double delay, NetNode destination) {
 		if (auto && (event == NetEvent.EVENT_JOB)) {
 			updateJobsList((Job) data);
 		}
 		return ownerNode.send(event, data, delay, sectionID, NodeSection.INPUT, destination);
 	}
 
-	/** Sends an event to a section of this node.
+	/**
+	 * Sends an event to a section of this node.
 	 * @param event event to be sent.
 	 * @param data  data to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destinationSection Destination section.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken send(int event, Object data, double delay, byte destinationSection) throws jmt.common.exception.NetException {
+	protected RemoveToken send(int event, Object data, double delay, byte destinationSection) {
 		if (auto && (event == NetEvent.EVENT_JOB) && (destinationSection != sectionID)) {
 			updateJobsList((Job) data);
 		}
 		return ownerNode.send(event, data, delay, sectionID, destinationSection, ownerNode);
 	}
 
-	//TODO: NOT USED
-	/** Sends an event to this section.
+	/**
+	 * Sends an event to this section.
 	 * @param event event to be sent.
 	 * @param data  data to be attached to the message.
 	 * @param delay Scheduling delay.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken sendMe(int event, Object data, double delay) throws jmt.common.exception.NetException {
+	protected RemoveToken sendMe(int event, Object data, double delay) {
 		return ownerNode.send(event, data, delay, sectionID, sectionID, ownerNode);
 	}
 
-	//TODO: NOT USED
-	/** Sends a job to a section of a node.
+	/**
+	 * Sends a job to a section of a node.
 	 * @param job job to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destinationSection destination section.
 	 * @param destination destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken send(Job job, double delay, byte destinationSection, NetNode destination) throws jmt.common.exception.NetException {
+	protected RemoveToken send(Job job, double delay, byte destinationSection, NetNode destination) {
 		if (auto && (destinationSection != sectionID)) {
 			updateJobsList(job);
 		}
 		return ownerNode.send(NetEvent.EVENT_JOB, job, delay, sectionID, destinationSection, destination);
 	}
 
-	/** Sends a job to the <b>input</b> section of a node.
+	/**
+	 * Sends a job to the <b>input</b> section of a node.
 	 * @param job job to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destination destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken send(Job job, double delay, NetNode destination) throws jmt.common.exception.NetException {
+	protected RemoveToken send(Job job, double delay, NetNode destination) {
 		if (auto) {
 			updateJobsList(job);
 		}
 		return ownerNode.send(NetEvent.EVENT_JOB, job, delay, sectionID, NodeSection.INPUT, destination);
 	}
 
-	/** Sends a job to a section of this node.
+	/**
+	 * Sends a job to a section of this node.
 	 * @param job job to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destinationSection Destination section.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken send(Job job, double delay, byte destinationSection) throws jmt.common.exception.NetException {
+	protected RemoveToken send(Job job, double delay, byte destinationSection) {
 		if (auto && (destinationSection != sectionID)) {
 			updateJobsList(job);
 		}
 		return ownerNode.send(NetEvent.EVENT_JOB, job, delay, sectionID, destinationSection, ownerNode);
 	}
 
-	/** Sends a job to this section.
+	/**
+	 * Sends a job to this section.
 	 * @param job job to be attached to the message.
 	 * @param delay Scheduling delay.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken sendMe(Job job, double delay) throws jmt.common.exception.NetException {
+	protected RemoveToken sendMe(Job job, double delay) {
 		return ownerNode.send(NetEvent.EVENT_JOB, job, delay, sectionID, sectionID, ownerNode);
 	}
 
 	/**
-	 * Removes a message previously sent
-	 * @param token the token to remove the message
-	 * @return true if message was removed, false otherwise
+	 * Removes a message previously sent.
+	 * @param token the token to remove the message.
+	 * @return true if message was removed, false otherwise.
 	 */
 	protected boolean removeMessage(RemoveToken token) {
 		return ownerNode.removeMessage(token);
 	}
 
-	/** Sends a message to a section of all the NetNodes of the QueueNetwork.
+	//TODO: not used
+	/**
+	 * Sends a message to a section of all the NetNodes of the QueueNetwork.
 	 * @param event event tag.
 	 * @param data  data to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destinationSection The destination section.
 	 * @param nodeType Type of the node.
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
-	//TODO: not used
 	protected void sendBroadcast(int event, Object data, double delay, byte destinationSection, int nodeType)
-			throws jmt.common.exception.NetException {
+			throws NetException {
 		ownerNode.sendBroadcast(event, data, delay, sectionID, destinationSection, nodeType);
 	}
 
-	/** Checks if a message has been sent by this section. Note that this method
+	/**
+	 * Checks if a message has been sent by this section. Note that this method
 	 * could be called only after that the owner node has been linked to this
 	 * section.
 	 * @param message message to be checked.
-	 * @return True if the message has been sent by this section,
-	 * false otherwise.
+	 * @return True if the message has been sent by this section, false
+	 * otherwise.
 	 */
 	protected boolean isMine(NetMessage message) {
 		return message.sentBy(sectionID, ownerNode);
 	}
 
-	private void updateJobsList(Job job) throws jmt.common.exception.NetException {
+	private void updateJobsList(Job job) {
 		JobInfo jobInfo = jobsList.lookFor(job);
 		if (jobInfo != null) {
 			jobsList.remove(jobInfo);
 		}
 	}
 
-	void setOwnerNode(NetNode ownerNode) throws jmt.common.exception.NetException {
+	void setOwnerNode(NetNode ownerNode) throws NetException {
 		this.ownerNode = ownerNode;
-		//if (auto)
-		jobsList = new LinkedJobInfoList(getJobClasses().size(), true);
+		jobsList = new LinkedJobInfoList(getJobClasses().size());
 		nodeLinked(ownerNode);
 	}
 
-	int receive(NetMessage message) throws jmt.common.exception.NetException {
+	int receive(NetMessage message) throws NetException {
 		if (auto && (message.getEvent() == NetEvent.EVENT_JOB) && (message.getSourceSection() != sectionID)) {
 			Job job = message.getJob();
 			jobsList.add(new JobInfo(job));
@@ -557,16 +570,15 @@ public abstract class NodeSection {
 
 	/**
 	 * Redirects a job to a section of a node without updating measures.
-	 *
 	 * @param job job to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destinationSection destination section.
 	 * @param destination destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
+	 * @throws NetException
 	 */
 	protected RemoveToken redirect(Job job, double delay, byte destinationSection, NetNode destination)
-			throws jmt.common.exception.NetException {
+			throws NetException {
 		if (auto && (destination != ownerNode) || ((destination == ownerNode) && (destinationSection != sectionID))) {
 			updateJobsListAfterRedirect(job);
 		}
@@ -575,11 +587,9 @@ public abstract class NodeSection {
 
 	/**
 	 * Updates the JobInfoList after redirecting this job.
-	 *
 	 * @param job job to be redirected.
-	 * @throws jmt.common.exception.NetException
 	 */
-	private void updateJobsListAfterRedirect(Job job) throws jmt.common.exception.NetException {
+	private void updateJobsListAfterRedirect(Job job) {
 		JobInfo jobInfo = jobsList.lookFor(job);
 		if (jobInfo != null) {
 			jobsList.redirectJob(jobInfo);
@@ -587,18 +597,17 @@ public abstract class NodeSection {
 	}
 
 	/**
-	 * Sends an "ack" event to a section of a node to inform it that
-	 * the job previously sent has been dropped.
-	 *
+	 * Sends an "ack" event to a section of a node to inform it that the job
+	 * previously sent has been dropped.
 	 * @param job job to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destinationSection destination section.
 	 * @param destination destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
+	 * @throws NetException
 	 */
 	protected RemoveToken sendAckAfterDrop(Job job, double delay, byte destinationSection, NetNode destination)
-			throws jmt.common.exception.NetException {
+			throws NetException {
 		if (auto) {
 			updateJobsListAfterDrop(job);
 		}
@@ -607,11 +616,9 @@ public abstract class NodeSection {
 
 	/**
 	 * Updates the JobInfoList after dropping this job.
-	 *
 	 * @param job job to be dropped.
-	 * @throws jmt.common.exception.NetException
 	 */
-	private void updateJobsListAfterDrop(Job job) throws jmt.common.exception.NetException {
+	private void updateJobsListAfterDrop(Job job) {
 		JobInfo jobInfo = jobsList.lookFor(job);
 		if (jobInfo != null) {
 			jobsList.dropJob(jobInfo);
@@ -619,18 +626,17 @@ public abstract class NodeSection {
 	}
 
 	/**
-	 * Sends an "ack" event to a section of a node to inform it that
-	 * the job previously sent has been consumed.
-	 *
+	 * Sends an "ack" event to a section of a node to inform it that the job
+	 * previously sent has been consumed.
 	 * @param job job to be attached to the message.
 	 * @param delay Scheduling delay.
 	 * @param destinationSection destination section.
 	 * @param destination destination node.
-	 * @return a token to remove sent event
-	 * @throws jmt.common.exception.NetException
+	 * @return a token to remove sent event.
+	 * @throws NetException
 	 */
 	protected RemoveToken sendAckAfterConsume(Job job, double delay, byte destinationSection, NetNode destination)
-			throws jmt.common.exception.NetException {
+			throws NetException {
 		if (auto) {
 			updateJobsListAfterConsume(job);
 		}
@@ -639,11 +645,9 @@ public abstract class NodeSection {
 
 	/**
 	 * Updates the JobInfoList after consuming this job.
-	 *
 	 * @param job job to be consumed.
-	 * @throws jmt.common.exception.NetException
 	 */
-	private void updateJobsListAfterConsume(Job job) throws jmt.common.exception.NetException {
+	private void updateJobsListAfterConsume(Job job) {
 		JobInfo jobInfo = jobsList.lookFor(job);
 		if (jobInfo != null) {
 			jobsList.consumeJob(jobInfo);
@@ -651,8 +655,8 @@ public abstract class NodeSection {
 	}
 
 	/**
-	 * Tells if jobinfolist at node section should be updated automatically
-	 * @return true if it should be handled automatically, false otherwise
+	 * Tells if jobinfolist at node section should be updated automatically.
+	 * @return true if it should be handled automatically, false otherwise.
 	 */
 	boolean automaticUpdateNodeJobinfolist() {
 		return nodeAuto;

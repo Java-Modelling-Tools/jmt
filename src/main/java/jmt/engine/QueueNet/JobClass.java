@@ -45,9 +45,8 @@ public class JobClass {
 
 	/** Creates a new instance of JobClass
 	 * @param Name Symbolic name of the job class.
-	 * @throws jmt.common.exception.NetException
 	 */
-	public JobClass(String Name) throws jmt.common.exception.NetException {
+	public JobClass(String Name) {
 		this.name = Name;
 		this.priority = 0;
 		this.referenceNodeName = null;
@@ -58,13 +57,11 @@ public class JobClass {
 	 * @param priority Priority of this job class. Must be greater than 0.
 	 * @param type Class type. See constants.
 	 * @param refNode the reference node of this JobClass
-	 * @throws jmt.common.exception.NetException
 	 */
-	public JobClass(String Name, int priority, int type, String refNode) throws jmt.common.exception.NetException {
+	public JobClass(String Name, int priority, int type, String refNode) {
 		this.name = Name;
 		this.type = type;
 		this.referenceNodeName = refNode;
-
 		if (priority < 0) {
 			this.priority = 0;
 		} else {
@@ -118,4 +115,5 @@ public class JobClass {
 	public void setReferenceNodeName(String referenceNodeName) {
 		this.referenceNodeName = referenceNodeName;
 	}
+
 }

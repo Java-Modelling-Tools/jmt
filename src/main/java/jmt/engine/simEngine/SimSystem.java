@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetEvent;
 
 /**
@@ -206,7 +207,7 @@ public class SimSystem {
 	 * Runs one tick of the simulation: the system looks for events in the future queue.
 	 * @return <tt>false</tt> if there are no more future events to be processed
 	 */
-	static public boolean runTick() throws jmt.common.exception.NetException {
+	static public boolean runTick() throws NetException {
 		double now = 0.0;
 		if (future.size() > 0 && timing.size() > 0) {
 			now = Math.min(future.peek().eventTime(), timing.peek().eventTime());
@@ -383,13 +384,13 @@ public class SimSystem {
 	// Private internal methods
 	//
 
-	static private void processEvent(SimEvent e) throws jmt.common.exception.NetException {
+	static private void processEvent(SimEvent e) throws NetException {
 		int dest, src;
 		SimEntity destEnt;
 
 		// Update the system's clock
 		if (e.eventTime() < clock) {
-			throw new jmt.common.exception.NetException("SimSystem: Error - past event detected!\n" + "Time: " + clock + ", event time: "
+			throw new NetException("SimSystem: Error - past event detected!\n" + "Time: " + clock + ", event time: "
 					+ e.eventTime() + ", event type: " + e.getType() + future);
 		}
 		clock = e.eventTime();
@@ -401,7 +402,7 @@ public class SimSystem {
 			// Checks for matching wait
 			dest = e.getDest();
 		if (dest < 0) {
-			throw new jmt.common.exception.NetException("SimSystem: Error - attempt to send to a null entity");
+			throw new NetException("SimSystem: Error - attempt to send to a null entity");
 		} else {
 			destEnt = entities.get(dest);
 			if (destEnt.getState() == SimEntity.WAITING) {
@@ -413,7 +414,7 @@ public class SimSystem {
 					destEnt.setState(SimEntity.RUNNABLE);
 					try {
 						destEnt.execute();
-					} catch (jmt.common.exception.NetException e1) {
+					} catch (NetException e1) {
 						abort();
 						throw e1;
 					}
@@ -426,7 +427,7 @@ public class SimSystem {
 						destEnt.setState(SimEntity.RUNNABLE);
 						try {
 							destEnt.execute();
-						} catch (jmt.common.exception.NetException e1) {
+						} catch (NetException e1) {
 							abort();
 							throw e1;
 						}
@@ -443,7 +444,7 @@ public class SimSystem {
 		break;
 
 		case (SimEvent.ENULL):
-			throw new jmt.common.exception.NetException("SimSystem: Error - event has a null type");
+			throw new NetException("SimSystem: Error - event has a null type");
 
 		case (SimEvent.CREATE):
 			SimEntity newe = (SimEntity) e.getData();
@@ -453,7 +454,7 @@ public class SimSystem {
 		case (SimEvent.HOLD_DONE):
 			src = e.getSrc();
 		if (src < 0) {
-			throw new jmt.common.exception.NetException("SimSystem: Error - NULL entity holding");
+			throw new NetException("SimSystem: Error - NULL entity holding");
 		} else {
 			entities.get(src).setState(SimEntity.RUNNABLE);
 			entities.get(src).restart();

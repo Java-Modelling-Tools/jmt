@@ -24,7 +24,6 @@
 
 package jmt.engine.NodeSections;
 
-import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.simEngine.RemoveToken;
@@ -35,46 +34,49 @@ import jmt.engine.simEngine.RemoveToken;
  */
 public abstract class InputSection extends PipeSection {
 
-	/** Creates a new instance of inputSection.
+	/**
+	 * Creates a new instance of inputSection.
 	 */
 	public InputSection() {
 		super(NodeSection.INPUT);
 	}
 
-	/** Creates a new instance of inputSection
-	 *  @param auto  Auto refresh of the jobsList attribute.
+	/**
+	 * Creates a new instance of inputSection.
+	 * @param auto Auto refresh of the jobsList attribute.
 	 */
 	public InputSection(boolean auto) {
 		super(NodeSection.INPUT, auto, true);
 	}
 
-	/** Creates a new instance of inputSection
-	 *  @param auto  Auto refresh of the jobsList attribute.
-	 *  @param nodeAuto auto refresh the jobsList attribute at node level
+	/**
+	 * Creates a new instance of inputSection
+	 * @param auto Auto refresh of the jobsList attribute.
+	 * @param nodeAuto Auto refresh the jobsList attribute at node level.
 	 */
 	public InputSection(boolean auto, boolean nodeAuto) {
 		super(NodeSection.INPUT, auto, nodeAuto);
 	}
 
-	/** Sends a job to the service section.
-	 * @param Job Job to be sent.
-	 * @param Delay Scheduling delay.
-	 * @return a token to remove sent event
-	 * @throws NetException
+	/**
+	 * Sends a job to the service section.
+	 * @param job Job to be sent.
+	 * @param delay Scheduling delay.
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken sendForward(Job Job, double Delay) throws NetException {
-		return send(Job, Delay, NodeSection.SERVICE);
+	protected RemoveToken sendForward(Job job, double delay) {
+		return send(job, delay, NodeSection.SERVICE);
 	}
 
-	/** Sends a message to the service section.
-	 * @param Event Message tag.
-	 * @param Data Data to be sent.
-	 * @param Delay Scheduling delay.
-	 * @return a token to remove sent event
-	 * @throws NetException
+	/**
+	 * Sends a message to the service section.
+	 * @param event Message tag.
+	 * @param data Data to be sent.
+	 * @param delay Scheduling delay.
+	 * @return a token to remove sent event.
 	 */
-	protected RemoveToken sendForward(int Event, Object Data, double Delay) throws NetException {
-		return send(Event, Data, Delay, NodeSection.SERVICE);
+	protected RemoveToken sendForward(int event, Object data, double delay) {
+		return send(event, data, delay, NodeSection.SERVICE);
 	}
 
 }

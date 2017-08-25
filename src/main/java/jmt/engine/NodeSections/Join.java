@@ -71,7 +71,7 @@ public class Join extends InputSection {
 
 	// --- Constructors -----------------------------------------------------------------------------
 	/**
-	 * Constructs a new Join
+	 * Constructs a new Join.
 	 */
 	public Join() {
 		// Disables automatic handling of jobinfolists
@@ -95,16 +95,16 @@ public class Join extends InputSection {
 		jobClasses = getJobClasses();
 		nodeJobsList = node.getJobInfoList();
 		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
-			FJList = new LinkedJobInfoList(jobClasses.size(), true);
+			FJList = new LinkedJobInfoList(jobClasses.size());
 			forkNode = new HashMap<Job, NetNode>();
 		}
 	};
 
 	/**
-	 * Assembles split tasks and sends an EVENT_JOIN to reference fork when done
+	 * Assembles split tasks and sends an EVENT_JOIN to reference fork when done.
 	 *
 	 * @param message message to be processed.
-	 * @throws NetException if something goes wrong
+	 * @throws NetException if something goes wrong.
 	 * @return message processing result.
 	 */
 	@Override

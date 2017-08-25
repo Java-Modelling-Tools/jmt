@@ -36,8 +36,9 @@ public class BlockingRouter extends OutputSection {
 	/** The number of ACKs we are waiting */
 	private int waitingAcks = 0;
 
-	/** Creates a new instance of Router which limits the number of
-	 * jobs entering in the region with constraints.
+	/**
+	 * Creates a new instance of Router which limits the number of jobs entering
+	 * in the region with constraints.
 	 * No routing strategy is required: the destination node is already known
 	 * when the job arrives to the input station.
 	 */

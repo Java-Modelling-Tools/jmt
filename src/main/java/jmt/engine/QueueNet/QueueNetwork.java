@@ -110,7 +110,7 @@ public class QueueNetwork {
 	 * is set as reference node.
 	 * @param node node to be added.
 	 */
-	public void addNode(NetNode node) throws jmt.common.exception.NetException {
+	public void addNode(NetNode node) {
 		nodes.add(node);
 		if (node.getInputNodes().size() == 0) {
 			//if no input nodes are present, it is presumed that this node
@@ -123,7 +123,7 @@ public class QueueNetwork {
 	/** Adds a node to the network and forces it to be a reference node.
 	 * @param node node to be added.
 	 */
-	public void addReferenceNode(NetNode node) throws jmt.common.exception.NetException {
+	public void addReferenceNode(NetNode node) {
 		nodes.add(node);
 		referenceNodes.add(node);
 		node.setNetwork(this);
@@ -170,9 +170,9 @@ public class QueueNetwork {
 	 * @param nodeName name of the node
 	 * @param measureID the measure id (chosen from QUEUE_LENGTH, RESIDENCE_TIME, SERVICE_TIME)
 	 * @return the measure
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
-	public double getMeasure(String nodeName, int measureID) throws jmt.common.exception.NetException {
+	public double getMeasure(String nodeName, int measureID) throws NetException {
 		double measure = 0;
 		boolean found = false;
 		switch (measureID) {
@@ -192,7 +192,7 @@ public class QueueNetwork {
 		if (found) {
 			return measure;
 		} else {
-			throw new jmt.common.exception.NetException(this, 0, "measure not available");
+			throw new NetException(this, 0, "measure not available");
 		}
 	}
 
@@ -241,9 +241,9 @@ public class QueueNetwork {
 			NodeSection serviceSection = null;
 			try {
 				serviceSection = node.getSection(NodeSection.SERVICE);
-			} catch (NetException e) {
+			} catch (NetException ne) {
 				// NEVER ENTERS
-				e.printStackTrace();
+				ne.printStackTrace();
 			}
 			if (serviceSection != null && serviceSection instanceof ClassSwitch) {
 				csExists = true;

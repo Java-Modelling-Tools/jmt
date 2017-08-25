@@ -23,7 +23,6 @@ import java.util.Arrays;
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
-import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.math.DirectCircularList;
 import jmt.engine.math.parser.Parser;
@@ -41,6 +40,7 @@ import jmt.engine.random.Parameter;
  *         Time: 16.37.36
  */
 public class LoadDependentStrategy extends ServiceStrategy {
+
 	private static final String VARIABLE = "n";
 	private static final int CACHESIZE = 1024;
 
@@ -62,14 +62,15 @@ public class LoadDependentStrategy extends ServiceStrategy {
 	 * Returns service time that current job will wait inside current station
 	 * @param callingSection reference to calling service section
 	 * @return time to wait into this service section
+	 * @throws NetException
 	 */
 	@Override
-	public double wait(NodeSection callingSection) throws jmt.common.exception.NetException {
+	public double wait(NodeSection callingSection) throws NetException {
 		// Gets number of jobs in the station as the sum of job in queue and job under service
 		try {
 			// Number of jobs into service section
-			int jobs = callingSection.getOwnerNode().getIntNodeProperty(NetNode.PROPERTY_ID_RESIDENT_JOBS)
-			 - callingSection.getOwnerNode().getSection(NodeSection.OUTPUT).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
+			int jobs = callingSection.getOwnerNode().getSection(NodeSection.INPUT).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS)
+					+ callingSection.getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
 
 			// Search in cache for corresponding item
 			MeanCache item = cache.get(jobs);
@@ -85,7 +86,7 @@ public class LoadDependentStrategy extends ServiceStrategy {
 			}
 			// At this point item is retrieved from cache or parsed.
 			if (item.meanValid) {
-				item.parameter.setMean(item.mean); // Note: this is needed as parameter is shared amongs all items of the same LDParameter
+				item.parameter.setMean(item.mean); // Note: this is needed as parameter is shared among all items of the same LDParameter
 			}
 
 			return item.distribution.nextRand(item.parameter);
@@ -95,6 +96,17 @@ public class LoadDependentStrategy extends ServiceStrategy {
 		} catch (IncorrectDistributionParameterException ex) {
 			throw new NetException(ex.getMessage());
 		}
+	}
+
+	/**
+	 * Returns service mean that current job will wait inside current station
+	 * @param callingSection reference to calling service section
+	 * @return mean to wait into this service section
+	 * @throws NetException
+	 */
+	@Override
+	public double expect(NodeSection callingSection) throws NetException {
+		return 0.0;
 	}
 
 	/**
@@ -144,4 +156,5 @@ public class LoadDependentStrategy extends ServiceStrategy {
 			}
 		}
 	}
+
 }

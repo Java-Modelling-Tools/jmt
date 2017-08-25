@@ -36,16 +36,16 @@ import jmt.engine.QueueNet.NodeSection;
  * are put in a Shortest-Job-First manner.
  * @author Lulai Zhu
  */
-public class SJFStrategyPriority implements QueuePutStrategy {
+public class SJFStrategyPriority extends QueuePutStrategy {
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
 		Server server = (Server) callingSection.getOwnerNode().getSection(NodeSection.SERVICE);
-		ServiceStrategy[] strategy = server.getServiceStrategy();
-		double serviceTime = strategy[job.getJobClass().getId()].wait(server);
+		ServiceStrategy[] strategies = (ServiceStrategy[]) server.getServiceStrategies();
+		double serviceTime = strategies[job.getJobClass().getId()].wait(server);
 		job.setServiceTime(serviceTime);
 
-		List<JobInfo> list = queue.getJobList();
+		List<JobInfo> list = queue.getInternalJobInfoList();
 		if (list.size() == 0) {
 			queue.addFirst(new JobInfo(job));
 			return;
@@ -87,10 +87,6 @@ public class SJFStrategyPriority implements QueuePutStrategy {
 			}
 		}
 		queue.addLast(new JobInfo(job));
-	}
-
-	public boolean check() {
-		return true;
 	}
 
 }

@@ -38,7 +38,6 @@ import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
-import jmt.engine.QueueNet.PSJobInfoList;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.QueueNet.WaitingRequest;
 import jmt.engine.dataAnalysis.Measure;
@@ -81,21 +80,6 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class Queue extends InputSection {
 
-	/** Property Identifier: infinite.*/
-	public static final int PROPERTY_ID_INFINITE = 0x0101;
-	/** Property Identifier: drop.*/
-	public static final int PROPERTY_ID_DROP = 0x0102;
-	/** Property Identifier: size.*/
-	public static final int PROPERTY_ID_SIZE = 0x0103;
-	/** Property Identifier: Waiting request.*/
-	public static final int PROPERTY_ID_WAITING_REQUESTS = 0x0104;
-	/** Property Identifier: Queue get strategy.*/
-	public static final int PROPERTY_ID_GET_STRATEGY = 0x0105;
-	/** Property Identifier: Queue put strategy.*/
-	public static final int PROPERTY_ID_PUT_STRATEGY = 0x0106;
-	/** Property Identifier: Dropped jobs.*/
-	public static final int PROPERTY_ID_DROPPED_JOBS = 0x0107;
-
 	public static final String FINITE_DROP = "drop";
 	public static final String FINITE_BLOCK = "BAS blocking";
 	public static final String FINITE_WAITING = "waiting queue";
@@ -118,9 +102,6 @@ public class Queue extends InputSection {
 	//the JobInfoList used for Fork nodes
 	private JobInfoList FJList;
 
-	/** This JobInfoList should be used instead of jobsList to support Processor Sharing */
-	private JobInfoList queueJobInfoList;
-
 	//number of dropped jobs
 	private int droppedJobs;
 	private int[] droppedJobsPerClass;
@@ -129,7 +110,7 @@ public class Queue extends InputSection {
 
 	private QueueGetStrategy getStrategy;
 
-	private QueuePutStrategy putStrategy[];
+	private QueuePutStrategy[] putStrategies;
 
 	//--------------------BLOCKING REGION PROPERTIES--------------------//
 	//true if the redirection behaviour is turned on
@@ -143,12 +124,12 @@ public class Queue extends InputSection {
 	/**
 	 * Creates a new instance of finite Queue.
 	 * @param size Queue size (-1 = infinite queue).
-	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
-	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
 	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
+	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
+	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 */
-	public Queue(int size, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[]) {
+	public Queue(int size, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
 		//auto = false, otherwise when a JOB message is received,
 		//the corresponding Job object is automatically added to
 		//JobInfoList
@@ -166,11 +147,11 @@ public class Queue extends InputSection {
 		} else {
 			this.getStrategy = getStrategy;
 		}
-		this.putStrategy = putStrategy;
-		// Uses putstrategy.length to estimate number of classes. It is a bit
+		this.putStrategies = putStrategies;
+		// Uses putstrategies.length to estimate number of classes. It is a bit
 		// unclean but we are forced for compatibility.
-		this.drop = new boolean[putStrategy.length];
-		this.block = new boolean[putStrategy.length];
+		this.drop = new boolean[putStrategies.length];
+		this.block = new boolean[putStrategies.length];
 		Arrays.fill(this.drop, drop);
 		Arrays.fill(this.block, false);
 		coolStart = true;
@@ -184,27 +165,28 @@ public class Queue extends InputSection {
 	/**
 	 * Creates a new instance of finite Queue.
 	 * @param size Queue size (-1 = infinite queue).
-	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
-	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
 	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
+	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
+	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 */
-	public Queue(Integer size, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[]) {
-		this(size.intValue(), drop.booleanValue(), getStrategy, putStrategy);
+	public Queue(Integer size, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+		this(size.intValue(), drop.booleanValue(), getStrategy, putStrategies);
 	}
 
-	/** Creates a new instance of finite redirecting Queue.
+	/**
+	 * Creates a new instance of finite redirecting Queue.
 	 * @param size Queue size (-1 = infinite queue).
-	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
-	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
 	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
+	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
+	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 * @param myReg the blocking region to which the owner node of this queue
 	 * belongs.
 	 */
-	public Queue(int size, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[], BlockingRegion myReg) {
+	public Queue(int size, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, BlockingRegion myReg) {
 		//uses constructor for generic queue
-		this(size, drop, getStrategy, putStrategy);
+		this(size, drop, getStrategy, putStrategies);
 
 		//sets blocking region properties
 		redirectionON = true;
@@ -212,29 +194,31 @@ public class Queue extends InputSection {
 		regionInputStation = myRegion.getInputStation();
 	}
 
-	/** Creates a new instance of finite redirecting Queue.
+	/**
+	 * Creates a new instance of finite redirecting Queue.
 	 * @param size Queue size (-1 = infinite queue).
-	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
-	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
 	 * @param drop True if the queue should rejects new jobs when it is full,
 	 * false otherwise.
+	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
+	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 * @param myReg the blocking region to which the owner node of this queue
 	 * belongs.
 	 */
-	public Queue(Integer size, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[], BlockingRegion myReg) {
-		this(size.intValue(), drop.booleanValue(), getStrategy, putStrategy, myReg);
+	public Queue(Integer size, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, BlockingRegion myReg) {
+		this(size.intValue(), drop.booleanValue(), getStrategy, putStrategies, myReg);
 	}
 
 	/**
 	 * Creates a new instance of finite Queue. This is the newest constructor that supports
 	 * different drop strategies. Other constructors are left for compatibility.
 	 * @param size Queue size (-1 = infinite queue).
+	 * @param dropStrategies Drop strategy per class: FINITE_DROP || FINITE_BLOCK
+	 * || FINITE_WAITING.
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
-	 * @param putStrategy Queue put strategy: if null Tail strategy is used.
-	 * @param dropStrategies Drop strategy: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
+	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 */
-	public Queue(Integer size, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy putStrategy[]) {
-		this(size.intValue(), false, getStrategy, putStrategy);
+	public Queue(Integer size, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+		this(size.intValue(), false, getStrategy, putStrategies);
 		// Decodes drop strategies
 		for (int i = 0; i < dropStrategies.length; i++) {
 			if (dropStrategies[i].equals(FINITE_DROP)) {
@@ -281,86 +265,71 @@ public class Queue extends InputSection {
 	}
 
 	@Override
-	public boolean isEnabled(int id) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_INFINITE:
-			return infinite;
-		default:
-			return super.isEnabled(id);
-		}
-	}
-
-	@Override
-	public int getIntSectionProperty(int id) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_SIZE:
-			return size;
-		case PROPERTY_ID_WAITING_REQUESTS:
-			return waitingRequests.size();
-		case PROPERTY_ID_DROPPED_JOBS:
-			return droppedJobs;
-		default:
-			return super.getIntSectionProperty(id);
-		}
-	}
-
-	@Override
-	public int getIntSectionProperty(int id, JobClass jobClass) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_WAITING_REQUESTS:
-			return waitingRequests.size(jobClass);
-		case PROPERTY_ID_DROPPED_JOBS:
-			return droppedJobsPerClass[jobClass.getId()];
-		default:
-			return super.getIntSectionProperty(id, jobClass);
-		}
-	}
-
-	@Override
-	public Object getObject(int id) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_GET_STRATEGY:
-			return getStrategy;
-		case PROPERTY_ID_PUT_STRATEGY:
-			return putStrategy;
-		default:
-			return super.getObject(id);
-		}
-	}
-
-	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
 		jobClasses = getJobClasses();
-		waitingRequests = new LinkedJobInfoList(jobClasses.size(), true);
-		if (putStrategy == null) {
-			putStrategy = new QueuePutStrategy[jobClasses.size()];
-			for (int i = 0; i < putStrategy.length; i++) {
-				putStrategy[i] = new TailStrategy();
+		waitingRequests = new LinkedJobInfoList(jobClasses.size());
+		if (putStrategies == null) {
+			putStrategies = new QueuePutStrategy[jobClasses.size()];
+			for (int i = 0; i < putStrategies.length; i++) {
+				putStrategies[i] = new TailStrategy();
 			}
 		}
-
-		// TODO the following line is not clean. The correct behaviour should be implemented without this hack.
-		if (node.getSection(NodeSection.SERVICE) instanceof PSServer) {
-			jobsList = new PSJobInfoList(jobClasses.size(), true);
-			queueJobInfoList = ((PSJobInfoList) jobsList).getInternalList();
-		} else {
-			jobsList = new LinkedJobInfoList(jobClasses.size(), true);
-			queueJobInfoList = jobsList;
-		}
-		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
-			FJList = new LinkedJobInfoList(jobClasses.size(), true);
-		}
-
 		droppedJobs = 0;
 		droppedJobsPerClass = new int[jobClasses.size()];
 		Arrays.fill(droppedJobsPerClass, 0);
-
 		//retrieves the job info list of the owner node
 		nodeJobsList = node.getJobInfoList();
+		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
+			FJList = new LinkedJobInfoList(jobClasses.size());
+		}
 	}
 
-	/** This method implements a generic finite/infinite queue
+	/**
+	 * Preloads the specified numbers of jobs for each class.
+	 * @param jobsPerClass the specified numbers of jobs for each class.
+	 * @throws NetException
+	 */
+	public void preloadJobs(int[] jobsPerClass) throws NetException {
+		int totalJobs = 0;
+		for (int i = 0; i < jobsPerClass.length; i++) {
+			totalJobs += jobsPerClass[i];
+		}
+		Job[] jobPermutation = new Job[totalJobs];
+		int index = 0;
+		for (int i = 0; i < jobsPerClass.length; i++) {
+			for (int j = 0; j < jobsPerClass[i]; j++) {
+				jobPermutation[index] = new Job(jobClasses.get(i), jobClasses.size());
+				index++;
+			}
+		}
+
+		RandomEngine randomEngine = RandomEngine.makeDefault();
+		for (int i = jobPermutation.length - 1; i > 0; i--) {
+			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+			Job job = jobPermutation[i];
+			jobPermutation[i] = jobPermutation[j];
+			jobPermutation[j] = job;
+		}
+
+		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
+		for (int i = 0; i < jobPermutation.length; i++) {
+			Job job = jobPermutation[i];
+			JobInfo jobInfo = new JobInfo(job);
+			putStrategies[job.getJobClass().getId()].put(job, jobsList, this);
+			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+				FJList.add(jobInfo);
+			}
+			nodeJobsList.add(jobInfo);
+			netJobsList.addJob(job);
+			if (redirectionON) {
+				myRegion.increaseOccupation(job.getJobClass());
+			}
+		}
+	}
+
+	/**
+	 * This method implements a generic finite/infinite queue.
 	 * @param message message to be processed.
 	 * @throws NetException
 	 */
@@ -377,9 +346,9 @@ public class Queue extends InputSection {
 			//get strategy) is forwarded and coolStart becomes false.
 
 			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
-			if (queueJobInfoList.size() > 0) {
+			if (jobsList.size() > 0) {
 				//the first job is forwarded to service section
-				forward(getStrategy.get(queueJobInfoList));
+				sendForward(getStrategy.get(jobsList), 0.0);
 				coolStart = false;
 			}
 			break;
@@ -456,13 +425,13 @@ public class Queue extends InputSection {
 				// section and coolStart set to false.
 				if (coolStart) {
 					// No jobs in queue: Refresh jobsList and sends job (do not use put strategy, because queue is empty)
-					queueJobInfoList.add(new JobInfo(job));
+					jobsList.add(new JobInfo(job));
 					// forward without any delay
-					forward(queueJobInfoList.removeFirst().getJob());
+					sendForward(jobsList.removeFirst().getJob(), 0.0);
 
 					coolStart = false;
 				} else {
-					putStrategy[job.getJobClass().getId()].put(job, queueJobInfoList, this);
+					putStrategies[job.getJobClass().getId()].put(job, jobsList, this);
 				}
 				// sends an ACK backward
 				send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
@@ -473,12 +442,12 @@ public class Queue extends InputSection {
 				if (isMyOwnerNode(message.getSource())) {
 					send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 
-					waitingRequests.add(new WaitingRequest(message.getSource(), message.getSourceSection(), job));
+					waitingRequests.add(new WaitingRequest(job, message.getSourceSection(), message.getSource()));
 				}
 				// otherwise if job has been sent by another node
 				else if (!drop[job.getJobClass().getId()]) {
 					// if drop is true reject the job, else add the job to waitingRequests
-					waitingRequests.add(new WaitingRequest(message.getSource(), message.getSourceSection(), job));
+					waitingRequests.add(new WaitingRequest(job, message.getSourceSection(), message.getSource()));
 					// if blocking is disabled, sends ack otherwise router of the previous node remains busy
 					if (!block[job.getJobClass().getId()]) {
 						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
@@ -532,21 +501,21 @@ public class Queue extends InputSection {
 
 				// If the source is not the owner node sends ack if blocking is enabled. Otherwise 
 				// ack was already sent.
-				if (!isMyOwnerNode(wr.getNode()) && block[wr.getJob().getJobClass().getId()]) {
-					send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSection(), wr.getNode());
+				if (!isMyOwnerNode(wr.getSource()) && block[wr.getJob().getJobClass().getId()]) {
+					send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSourceSection(), wr.getSource());
 				}
 
 				//the class ID of this job
 				int c = wr.getJob().getJobClass().getId();
 				//the job is put into the queue according to its own class put strategy
-				putStrategy[c].put(wr.getJob(), queueJobInfoList, this);
+				putStrategies[c].put(wr.getJob(), jobsList, this);
 			}
 
 			// if there is at least one job, sends it
-			if (queueJobInfoList.size() > 0) {
+			if (jobsList.size() > 0) {
 				// Gets job using a specific strategy and sends job
-				Job jobSent = getStrategy.get(queueJobInfoList);
-				forward(jobSent);
+				Job jobSent = getStrategy.get(jobsList);
+				sendForward(jobSent, 0.0);
 			} else {
 				// else set coolStart to true
 				coolStart = true;
@@ -580,68 +549,21 @@ public class Queue extends InputSection {
 		return MSG_PROCESSED;
 	}
 
-	private void forward(Job job) throws NetException {
-		sendForward(job, 0.0);
-	}
-
 	/**
-	 * Gets the total number of dropped jobs
-	 * @return the total number of dropped jobs
+	 * Gets the total number of dropped jobs.
+	 * @return the total number of dropped jobs.
 	 */
 	public int getDroppedJobs() {
 		return droppedJobs;
 	}
 
 	/**
-	 * Gets the number of dropped jobs for the specified class
-	 * @param classIndex the index of the job class
-	 * @return the number of dropped jobs for the specified class
+	 * Gets the number of dropped jobs for the specified class.
+	 * @param classIndex the index of the job class.
+	 * @return the number of dropped jobs for the specified class.
 	 */
 	public int getDroppedJobsPerClass(int classIndex) {
 		return droppedJobsPerClass[classIndex];
-	}
-
-	/**
-	 * Preloads the specified numbers of jobs for each class
-	 * @param jobsPerClass the specified numbers of jobs for each class
-	 * @throws NetException
-	 */
-	public void preloadJobs(int[] jobsPerClass) throws NetException {
-		int totalJobs = 0;
-		for (int i = 0; i < jobsPerClass.length; i++) {
-			totalJobs += jobsPerClass[i];
-		}
-		Job[] jobPermutation = new Job[totalJobs];
-		int index = 0;
-		for (int i = 0; i < jobsPerClass.length; i++) {
-			for (int j = 0; j < jobsPerClass[i]; j++) {
-				jobPermutation[index] = new Job(jobClasses.get(i), jobClasses.size());
-				index++;
-			}
-		}
-
-		RandomEngine randomEngine = RandomEngine.makeDefault();
-		for (int i = jobPermutation.length - 1; i > 0; i--) {
-			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
-			Job job = jobPermutation[i];
-			jobPermutation[i] = jobPermutation[j];
-			jobPermutation[j] = job;
-		}
-
-		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
-		for (int i = 0; i < jobPermutation.length; i++) {
-			Job job = jobPermutation[i];
-			JobInfo jobInfo = new JobInfo(job);
-			putStrategy[job.getJobClass().getId()].put(job, jobsList, this);
-			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-				FJList.add(jobInfo);
-			}
-			nodeJobsList.add(jobInfo);
-			netJobsList.addJob(job);
-			if (redirectionON) {
-				myRegion.increaseOccupation(job.getJobClass());
-			}
-		}
 	}
 
 	@Override

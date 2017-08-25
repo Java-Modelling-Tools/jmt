@@ -60,7 +60,7 @@ public class Storage extends InputSection {
 	private boolean[] drop;
 	private boolean[] block;
 	private QueueGetStrategy getStrategy;
-	private QueuePutStrategy putStrategies[];
+	private QueuePutStrategy[] putStrategies;
 
 	private JobClassList jobClasses;
 	private JobInfoList nodeJobsList;
@@ -86,7 +86,7 @@ public class Storage extends InputSection {
 	 * Creates a new instance of the storage section.
 	 */
 	public Storage(Integer totalCapacity, Integer[] capacities, String[] dropRules, QueueGetStrategy getStrategy,
-			QueuePutStrategy putStrategies[]) {
+			QueuePutStrategy[] putStrategies) {
 		super(false);
 		this.totalCapacity = totalCapacity.intValue();
 		this.capacities = new int[capacities.length];
@@ -156,6 +156,8 @@ public class Storage extends InputSection {
 
 	/**
 	 * Preloads the specified numbers of jobs for each class.
+	 * @param jobsPerClass the specified numbers of jobs for each class.
+	 * @throws NetException
 	 */
 	public void preloadJobs(int[] jobsPerClass) throws NetException {
 		int totalJobs = 0;
@@ -247,9 +249,9 @@ public class Storage extends InputSection {
 					send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);
 				}
 			} else if (block[jobClass.getId()]) {
-				waitingRequests.add(new WaitingRequest(source, sourceSection, job));
+				waitingRequests.add(new WaitingRequest(job, sourceSection, source));
 			} else {
-				waitingRequests.add(new WaitingRequest(source, sourceSection, job));
+				waitingRequests.add(new WaitingRequest(job, sourceSection, source));
 				send(NetEvent.EVENT_ACK, job, 0.0, sourceSection, source);
 			}
 			break;
@@ -292,7 +294,7 @@ public class Storage extends InputSection {
 					it.remove();
 					putStrategies[jobClass.getId()].put(job, jobsList, this);
 					if (block[jobClass.getId()]) {
-						send(NetEvent.EVENT_ACK, job, 0.0, request.getSection(), request.getNode());
+						send(NetEvent.EVENT_ACK, job, 0.0, request.getSourceSection(), request.getSource());
 					}
 					nextJobChange = true;
 					if (totalCapacity >= 0 && jobsList.size() >= totalCapacity) {
@@ -340,14 +342,17 @@ public class Storage extends InputSection {
 	}
 
 	/**
-	 * Gets the total number of dropped jobs
+	 * Gets the total number of dropped jobs.
+	 * @return the total number of dropped jobs.
 	 */
 	public int getDroppedJobs() {
 		return droppedJobs;
 	}
 
 	/**
-	 * Gets the number of dropped jobs for the specified class
+	 * Gets the number of dropped jobs for the specified class.
+	 * @param classIndex the index of the job class.
+	 * @return the number of dropped jobs for the specified class.
 	 */
 	public int getDroppedJobsPerClass(int classIndex) {
 		return droppedJobsPerClass[classIndex];

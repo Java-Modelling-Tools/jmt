@@ -31,13 +31,15 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class ServiceTunnel extends ServiceSection {
 
-	/** Creates a new instance of ServiceTunnel.
+	/**
+	 * Creates a new instance of ServiceTunnel.
 	 */
 	public ServiceTunnel() {
 		super();
 	}
 
-	/** Creates a new instance of ServiceTunnel.
+	/**
+	 * Creates a new instance of ServiceTunnel.
 	 */
 	public ServiceTunnel(boolean auto) {
 		super(auto);

@@ -25,8 +25,7 @@ import jmt.engine.dataAnalysis.Measure;
 /**
  * <p><b>Name:</b> JobInfoList</p> 
  * <p><b>Description:</b> 
- * A JobInfoList is a list used to update raw sampled performance counters of a node or node section
- * and optionally (depending on the implementation) to hold the list of all the jobs currently in the given section.
+ * A JobInfoList is a list used to update raw sampled performance counters of a node or section.
  * </p>
  * <p><b>Date:</b> 18/giu/2009
  * <b>Time:</b> 17:00:44</p>
@@ -42,302 +41,293 @@ import jmt.engine.dataAnalysis.Measure;
  */
 public interface JobInfoList {
 
-	/** Gets list size.
-	 * @return Number of job info object in the list.
-	 * @throws jmt.common.exception.NetException
+	/**
+	 * Gets the number of jobs.
+	 * @return Number of jobs.
 	 */
-	public abstract int size() throws jmt.common.exception.NetException;
+	public abstract int size();
 
 	/**
-	 * Returns the number of jobs of a specific job class in the list.
-	 * @param jobClass Job class to look for.
-	 * @return Number of jobs of a specified job class.
+	 * Gets the number of jobs of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Number of jobs of the specified job class.
 	 */
-	public abstract int size(JobClass jobClass) throws jmt.common.exception.NetException;
+	public abstract int size(JobClass jobClass);
 
-	/** Gets the number of jobs added to the list.
-	 * @return Arrived Jobs.
+	/**
+	 * Gets the number of added jobs.
+	 * @return Number of added jobs.
 	 */
 	public abstract int getJobsIn();
 
-	/** Gets the number of jobs of a specific job class added to the list.
-	 * @param jobClass Job class to look for.
-	 * @return Arrived jobs of a specific job class.
+	/**
+	 * Gets the number of added jobs of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Number of added jobs of the specified job class.
 	 */
 	public abstract int getJobsInPerClass(JobClass jobClass);
 
-	/** Gets the number of jobs removed from the list.
-	 * @return Departed Jobs.
+	/**
+	 * Gets the number of removed jobs.
+	 * @return Number of removed jobs.
 	 */
 	public abstract int getJobsOut();
 
-	/** Gets the number of jobs of a specific job class removed from the list.
-	 * @param jobClass Job class to look for.
-	 * @return Departed jobs of a specific job class.
+	/**
+	 * Gets the number of removed jobs of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Number of removed jobs of the specified job class.
 	 */
 	public abstract int getJobsOutPerClass(JobClass jobClass);
 
-	/** Gets busy time.
+	/**
+	 * Gets the busy time.
 	 * @return Busy time.
-	 * @throws jmt.common.exception.NetException
 	 */
-	public abstract double getBusyTime() throws jmt.common.exception.NetException;
+	public abstract double getBusyTime();
 
-	/** Gets busy time for job class.
-	 * @return Busy time for job class.
-	 * @throws jmt.common.exception.NetException
+	/**
+	 * Gets the busy time for the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Busy time for the specified job class.
 	 */
-	public abstract double getBusyTimePerClass(JobClass jobClass) throws jmt.common.exception.NetException;
+	public abstract double getBusyTimePerClass(JobClass jobClass);
 
-	/** Gets time of the last job arrived.
-	 * @return Time of last job arrived.
+	/**
+	 * Gets the time of the last added job.
+	 * @return Time of the last added job.
 	 */
 	public abstract double getLastJobInTime();
 
-	/** Gets time of the last job arrived of a specified job class.
-	 * @return Time of last job arrived of a specified job class.
+	/**
+	 * Gets the time of the last added job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last added job of the specified job class.
 	 */
 	public abstract double getLastJobInTimePerClass(JobClass jobClass);
 
-	/** Gets time of the last job was dropped.
-	 * @return Time of last job departed.
+	/**
+	 * Gets the time of the last removed job.
+	 * @return Time of the last removed job.
 	 */
 	public abstract double getLastJobOutTime();
 
-	/** Gets time of the last job was dropped.
-	 * @return Time of last job departed.
-	 */
-	public abstract double getLastJobDropTime();
-
-	/** Gets time of the last job departed of a specified job class.
-	 * @return Time of last job departed of a specified job class.
+	/**
+	 * Gets the time of the last removed job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last removed job of the specified job class.
 	 */
 	public abstract double getLastJobOutTimePerClass(JobClass jobClass);
 
-	/** Gets time of the last job dropped of a specified job class.
-	 * @return Time of last job dropped of a specified job class.
+	/**
+	 * Gets the time of the last dropped job.
+	 * @return Time of the last dropped job.
+	 */
+	public abstract double getLastJobDropTime();
+
+	/**
+	 * Gets the time of the last dropped job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last dropped job of the specified job class.
 	 */
 	public abstract double getLastJobDropTimePerClass(JobClass jobClass);
 
-	/** Gets time of the last modify of the list.
-	 * @return Time of last modify of the list.
+	/**
+	 * Gets the time of the last modify.
+	 * @return Time of the last modify.
 	 */
 	public abstract double getLastModifyTime();
 
-	/** Gets time of the last modify of the list for a specified job class.
-	 * @return Time of the last modify of the list for a specified job class.
+	/**
+	 * Gets the time of the last modify for the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last modify for the specified job class.
 	 */
 	public abstract double getLastModifyTimePerClass(JobClass jobClass);
 
-	/** Looks for an information job object which references to a specific job.
-	 * @param job The specified job.
-	 * @return JobInfo object which references to the specified job, null otherwise.
+	/**
+	 * Looks for the job info that references the specified job.
+	 * @param job Specified job.
+	 * @return Job info that references the specified job.
 	 */
-	public abstract JobInfo lookFor(Job job) throws jmt.common.exception.NetException;
+	public abstract JobInfo lookFor(Job job);
 
 	/**
-	 * Gets the job info list
+	 * Gets the internal job info list.
+	 * @return Internal job info list.
 	 */
-	public abstract List<JobInfo> getJobList();
+	public abstract List<JobInfo> getInternalJobInfoList();
 
-	/** Adds a new job info to the list.
+	/**
+	 * Gets the internal job info list of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Internal job info list of the specified job class.
+	 */
+	public abstract List<JobInfo> getInternalJobInfoList(JobClass jobClass);
+
+	/**
+	 * Adds a new job info to the list.
 	 * @param jobInfo Reference to the job info to be added.
-	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
 	 */
-	public abstract boolean add(JobInfo jobInfo);
-
-	/** Adds a new job info to the top of the list.
-	 * @param jobInfo reference to job info to be added.
-	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
-	 */
-	public abstract boolean addFirst(JobInfo jobInfo);
-
-	/** Adds a new job info to the bottom of the list.
-	 * @param jobInfo reference to job info to be added.
-	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
-	 */
-	public abstract boolean addLast(JobInfo jobInfo);
-
-	/** Adds a new job info at a specified position.
-	 * @param index the specified position
-	 * @param jobInfo reference to job info to be added.
-	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
-	 */
-	public abstract boolean add(int index, JobInfo jobInfo);
-
-	/** Adds a new job info at a specified position.
-	 * The jobs must be inserted in both general and class job lists. The
-	 * position is relative to general list. In its own class job list, a job
-	 * can be put at the start (head) or at the end (tail).
-	 *
-	 * @param index the specified position
-	 * @param jobInfo reference to job info to be added.
-	 * @param isClassHead if true, job will be put at the start of its own class job list (head
-	 * strategy); if false, it will be put at the end (tail strategy)
-	 * @return True if the job has been added (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
-	 */
-	public abstract boolean add(int index, JobInfo jobInfo, boolean isClassHead);
-
-	/** Removes a job info from the list and updates the measures related to
-	 * throughput, utilization and response time.
-	 * @param jobInfo reference to job info to be removed.
-	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
-	 */
-	public abstract boolean remove(JobInfo jobInfo) throws jmt.common.exception.NetException;
-
-	/** Removes a job info from the top of the list and updates the measures related to
-	 * throughput, utilization and response time.
-	 * @return A Job info object if it has been found, null otherwise (list
-	 * empty or Save property is false)
-	 */
-	public abstract JobInfo removeFirst() throws jmt.common.exception.NetException;
-
-	/** Removes a job info of a specified job class from the top of the list and updates the measures related to
-	 * throughput, utilization and response time.
-	 * @return A Job info object if it has been found, null otherwise (list
-	 * empty or Save property is false)
-	 */
-	public abstract JobInfo removeFirst(JobClass jobClass) throws jmt.common.exception.NetException;
-
-	/** Removes a job info from the bottom of the list and updates the measures related to
-	 * throughput, utilization and response time.
-	 * @return A Job info object if it has been found, null otherwise (list
-	 * empty or Save property is false)
-	 */
-	public abstract JobInfo removeLast() throws jmt.common.exception.NetException;
-
-	/** Removes a job info of a specified job class from the bottom of the list  and updates the measures related to
-	 * throughput, utilization and response time.
-	 * @return A Job info object if it has been found, null otherwise (list
-	 * empty or Save property is false)
-	 */
-	public abstract JobInfo removeLast(JobClass jobClass) throws jmt.common.exception.NetException;
-
-	/** Analyzes class utilization.
-	 * @param jobClass Job class to be analyzed. If null, measure will be
-	 * job class independent.
-	 * @param measurement Reference to a measure object.
-	 */
-	public abstract void analyzeUtilization(JobClass jobClass, Measure measurement);
-
-	/** Analyzes class utilization of a join
-	 * @param jobClass Job class to be analyzed. If null, measure will be
-	 * job class independent.
-	 * @param measurement Reference to a measure object.
-	 */
-	public void analyzeUtilizationJoin(JobClass jobClass, Measure measurement);
-
-	/** Analyzes class response time.
-	 * @param jobClass Job class to be analyzed. If null, measure will be
-	 * job class independent.
-	 * @param measurement Reference to a measure object.
-	 */
-	public abstract void analyzeResponseTime(JobClass jobClass, Measure measurement);
-
-	/** Analyzes class drop rate. Bertoli Marco
-	 * @param jobClass Job class to be analyzed. If null, measure will be
-	 * job class independent.
-	 * @param measurement Reference to a measure object.
-	 */
-	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure measurement);
+	public abstract void add(JobInfo jobInfo);
 
 	/**
-	 * Analyzes class throughput. <br>
-	 * WARNING: An InverseMeasure must be used.
-	 * The aim is to save computational time: in fact it is easier to analyze throughput
-	 * by passing samples which are equals to 1/X,
-	 * instead of doing one division for each sample (this would make simulation much slower).
-	 * At the end the correct value is passed.
-	 * @param jobClass Job class to be analyzed. If null, measure will be
-	 * job class independent.
-	 * @param measurement Reference to a InverseMeasure object.
+	 * Adds a new job info at the start of the list.
+	 * @param jobInfo Reference to the job info to be added.
 	 */
-	public abstract void analyzeThroughput(JobClass jobClass, InverseMeasure measurement);
+	public abstract void addFirst(JobInfo jobInfo);
 
-	/** Analyzes class residence time.
-	 * @param jobClass Job class to be analyzed. If null, measure will be
-	 * job class independent.
-	 * @param measurement Reference to a measure object.
+	/**
+	 * Adds a new job info at the end of the list.
+	 * @param jobInfo Reference to the job info to be added.
 	 */
-	public abstract void analyzeResidenceTime(JobClass jobClass, Measure measurement);
+	public abstract void addLast(JobInfo jobInfo);
 
-	/** Analyzes list residence time.
-	 * @param jobClass Job class to be analyzed. If null, measure will be
-	 * job class independent.
-	 * @param measurement Reference to a measure object.
+	/**
+	 * Adds a new job info at the specified index.
+	 * @param index Specified index.
+	 * @param jobInfo Reference to the job info to be added.
+	 */
+	public abstract void add(int index, JobInfo jobInfo);
+
+	/**
+	 * Adds a new job info at the specified index.
+	 * @param index Specified index.
+	 * @param jobInfo Reference to the job info to be added.
+	 * @param isPerClassHead If true, the job info will be put at the start of the
+	 * per-class list. Otherwise, it will be put at the end.
+	 */
+	public abstract void add(int index, JobInfo jobInfo, boolean isPerClassHead);
+
+	/**
+	 * Removes a job info from the list.
+	 * @param jobInfo Reference to the job info to be removed.
+	 */
+	public abstract void remove(JobInfo jobInfo);
+
+	/**
+	 * Removes a job info at the start of the list.
+	 * @return Job info at the start of the list.
+	 */
+	public abstract JobInfo removeFirst();
+
+	/**
+	 * Removes a job info of the specified job class at the start of the list.
+	 * @param jobClass Specified job class.
+	 * @return Job info of the specified job class at the start of the list.
+	 */
+	public abstract JobInfo removeFirst(JobClass jobClass);
+
+	/**
+	 * Removes a job info at the end of the list.
+	 * @return Job info at the end of the list.
+	 */
+	public abstract JobInfo removeLast();
+
+	/**
+	 * Removes a job info of the specified job class at the end of the list.
+	 * @param jobClass Specified job class.
+	 * @return Job info of the specified job class at the end of the list.
+	 */
+	public abstract JobInfo removeLast(JobClass jobClass);
+
+	/**
+	 * Analyzes the queue length for the specified job class.
+	 * jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
 	 */
 	public abstract void analyzeQueueLength(JobClass jobClass, Measure measurement);
 
 	/**
-	 * Analyzes : Calculates the Throughput at each sink of the Network. 
-	 * @param jobClass : Job class to be analyzed.
-	 * @param measurement : Reference to the measure object.
+	 * Analyzes the response time for the specified job class.
+	 * jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
 	 */
-	public abstract void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeResponseTime(JobClass jobClass, Measure measurement);
 
 	/**
-	 * Analyzes : Calculates the Response Time from the source to 
-	 * each sink of the job for each sink in the Queueing Network. 
-	 * @param jobClass : Job class to be analyzed.
-	 * @param measurement : Reference to the measure object.
+	 * Analyzes the residence time for the specified job class.
+	 * jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
+	 */
+	public abstract void analyzeResidenceTime(JobClass jobClass, Measure measurement);
+
+	/**
+	 * Analyzes the utilization for the specified job class.
+	 * jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
+	 */
+	public abstract void analyzeUtilization(JobClass jobClass, Measure measurement);
+
+	/**
+	 * Analyzes the utilization of a join for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
+	 */
+	public void analyzeUtilizationJoin(JobClass jobClass, Measure measurement);
+
+	/**
+	 * Analyzes the throughput for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeThroughput(JobClass jobClass, InverseMeasure measurement);
+
+	/**
+	 * Analyzes the drop rate for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure measurement);
+
+	/**
+	 * Analyzes the response time of a sink for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
 	 */
 	public abstract void analyzeResponseTimePerSink(JobClass jobClass, Measure measurement);
 
 	/**
-	 * Removes a job info from the list when a job is removed.
-	 *
-	 * @param jobInfo reference to the job info to be removed.
-	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
+	 * Analyzes the throughput of a sink for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
 	 */
-	public abstract boolean removeJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
+	public abstract void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure measurement);
 
 	/**
-	 * Removes a job info from the list when a job is redirected.
-	 *
-	 * @param jobInfo reference to the job info to be removed.
-	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
+	 * Removes a job info from the list when a job is removed.
+	 * @param jobInfo Reference to the job info to be removed.
 	 */
-	public abstract boolean redirectJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
+	public abstract void removeJob(JobInfo jobInfo);
+
+	/**
+	 * Redirected a job info from the list when a job is redirected.
+	 * @param jobInfo Reference to the job info to be removed.
+	 */
+	public abstract void redirectJob(JobInfo jobInfo);
 
 	/**
 	 * Removes a job info from the list when a job is dropped.
-	 *
-	 * @param jobInfo reference to the job info to be removed.
-	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
+	 * @param jobInfo Reference to the job info to be removed.
 	 */
-	public abstract boolean dropJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
+	public abstract void dropJob(JobInfo jobInfo);
 
 	/**
 	 * Adds a new job info to the list when a job is produced.
-	 *
-	 * @param jobInfo reference to the job info to be added.
-	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
+	 * @param jobInfo Reference to the job info to be added.
 	 */
-	public abstract boolean produceJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
+	public abstract void produceJob(JobInfo jobInfo);
 
 	/**
 	 * Removes a job info from the list when a job is consumed.
-	 *
-	 * @param jobInfo reference to the job info to be removed.
-	 * @return True if the job has been removed (True if <tt>Save</tt> property is true,
-	 * otherwise no list was created by the constructor)
+	 * @param jobInfo Reference to the job info to be removed.
 	 */
-	public abstract boolean consumeJob(JobInfo jobInfo) throws jmt.common.exception.NetException;
+	public abstract void consumeJob(JobInfo jobInfo);
 
 	/**
-	 * Sets the number of servers. This parameter is used to scale utilization
-	 * @param serverNumber the number of servers.
+	 * Sets the number of servers. This parameter is used to scale utilization.
+	 * @param numberOfServers Number of servers.
 	 */
-	public void setServerNumber(int serverNumber);
+	public void setNumberOfServers(int numberOfServers);
 
 }

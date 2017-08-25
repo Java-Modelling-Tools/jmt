@@ -35,15 +35,15 @@ import jmt.engine.QueueNet.NodeSection;
  * are put to the queue in a Longest-Job-First manner.
  * @author Lulai Zhu
  */
-public class LJFStrategy implements QueuePutStrategy {
+public class LJFStrategy extends QueuePutStrategy {
 
 	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
 		Server server = (Server) callingSection.getOwnerNode().getSection(NodeSection.SERVICE);
-		ServiceStrategy[] strategy = server.getServiceStrategy();
-		double serviceTime = strategy[job.getJobClass().getId()].wait(server);
+		ServiceStrategy[] strategies = (ServiceStrategy[]) server.getServiceStrategies();
+		double serviceTime = strategies[job.getJobClass().getId()].wait(server);
 		job.setServiceTime(serviceTime);
 
-		List<JobInfo> list = queue.getJobList();
+		List<JobInfo> list = queue.getInternalJobInfoList();
 		if (list.size() == 0) {
 			queue.addFirst(new JobInfo(job));
 			return;
@@ -61,10 +61,6 @@ public class LJFStrategy implements QueuePutStrategy {
 			}
 		}
 		queue.addLast(new JobInfo(job));
-	}
-
-	public boolean check() {
-		return true;
 	}
 
 }

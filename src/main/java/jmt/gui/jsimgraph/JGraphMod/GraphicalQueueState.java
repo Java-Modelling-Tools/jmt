@@ -297,12 +297,7 @@ public class GraphicalQueueState {
 			g.fill(new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, 0, 360, Arc2D.PIE));
 
 			for (int j = 0; j < nClasses; j++) {
-				double utilization = utilizationState.getValue(servers.get(i), classes.get(j));
-				if (mediator.getStationDefinition().getStationNumberOfServers(servers.get(i)).intValue() > 1) {
-					utilization = utilization / (mediator.getStationDefinition().getStationNumberOfServers(servers.get(i))).doubleValue();
-				}
-				double thisAngle = utilization * 360;
-
+				double thisAngle = utilizationState.getValue(servers.get(i), classes.get(j)) * 360;
 				Color color = mediator.getClassDefinition().getClassColor(classes.get(j));
 				g.setColor(color);
 				g.fill(new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, startAngle, thisAngle, Arc2D.PIE));

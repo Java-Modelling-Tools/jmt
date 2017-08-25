@@ -42,7 +42,7 @@ public class ClassSwitch extends ServiceSection {
 
 	private Float[][] matrix;
 
-	public ClassSwitch(Object matrix[]) {
+	public ClassSwitch(Object[] matrix) {
 		super();
 		this.matrix = new Float[matrix.length][matrix.length];
 		for (int i = 0; i < matrix.length; i++) {
@@ -107,7 +107,7 @@ public class ClassSwitch extends ServiceSection {
 
 	/**
 	 * It choose randomly a position of @row.
-	 * Let SUM the sum of all elements of @row
+	 * Let SUM the sum of all elements of @row.
 	 * The probability that this method chooses an
 	 * index i is row[i]/SUM.
 	 * @param row
@@ -133,17 +133,17 @@ public class ClassSwitch extends ServiceSection {
 	}
 
 	/**
-	 * Gets the total number of switched jobs
-	 * @return the total number of switched jobs
+	 * Gets the total number of switched jobs.
+	 * @return the total number of switched jobs.
 	 */
 	public int getSwitchedJobs() {
 		return switchedJobs;
 	}
 
 	/**
-	 * Gets the number of switched jobs for the specified class
-	 * @param classIndex the index of the job class
-	 * @return the number of switched jobs for the specified class
+	 * Gets the number of switched jobs for the specified class.
+	 * @param classIndex the index of the job class.
+	 * @return the number of switched jobs for the specified class.
 	 */
 	public int getSwitchedJobsPerClass(int classIndex) {
 		return switchedJobsPerClass[classIndex];

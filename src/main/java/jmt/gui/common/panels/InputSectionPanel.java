@@ -23,6 +23,8 @@ import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -35,6 +37,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -49,7 +52,9 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.exact.table.DisabledCellRenderer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -64,19 +69,20 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * Used to define station queue policies
+	 */
+	protected static final Object[] serverStationQueuePolicies = { QUEUE_STRATEGY_STATION_PS, QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
+	protected static final Object[] otherStationQueuePolicies = { QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
+	/**
 	 * Used to define queue policies
 	 */
-	protected static final Object[] serverQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND, QUEUE_STRATEGY_SJF, QUEUE_STRATEGY_LJF };
+	protected static final Object[] serverPSQueuePolicies = { QUEUE_STRATEGY_EPS, QUEUE_STRATEGY_GPS, QUEUE_STRATEGY_DPS };
+	protected static final Object[] serverQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND, QUEUE_STRATEGY_SJF, QUEUE_STRATEGY_LJF, QUEUE_STRATEGY_SEPT, QUEUE_STRATEGY_LEPT };
 	protected static final Object[] otherQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND };
 	/**
 	 * Used to define drop rules
 	 */
 	protected static final Object[] dropRules = { FINITE_DROP, FINITE_BLOCK, FINITE_WAITING };
-	/**
-	 * Used to define station queue policies
-	 */
-	protected static final Object[] serverStationQueuePolicies = { QUEUE_STRATEGY_STATION_PS, QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY }; // QUEUE_STRATEGY_STATION_SRPT };
-	protected static final Object[] otherStationQueuePolicies = { QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
 
 	private ButtonGroup queueLengthGroup;
 	private JRadioButton infiniteQueueSelector;
@@ -179,11 +185,20 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			public void actionPerformed(ActionEvent e) {
 				String queuePolicy = (String) queuePolicyCombo.getSelectedItem();
 				data.setStationQueueStrategy(stationKey, queuePolicy);
-				if (queuePolicy.equals(QUEUE_STRATEGY_STATION_PS)
-						|| queuePolicy.equals(QUEUE_STRATEGY_STATION_SRPT)) {
-					Vector<Object> classKeys = classData.getClassKeys();
+				Vector<Object> classKeys = classData.getClassKeys();
+				if (queuePolicy.equals(QUEUE_STRATEGY_STATION_PS)) {
+					List<Object> policyList = Arrays.asList(serverPSQueuePolicies);
 					for (Object classKey : classKeys) {
-						data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_FCFS);
+						if (!policyList.contains(data.getQueueStrategy(stationKey, classKey))) {
+							data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_EPS);
+						}
+					}
+				} else {
+					List<Object> policyList = Arrays.asList(serverQueuePolicies);
+					for (Object classKey : classKeys) {
+						if (!policyList.contains(data.getQueueStrategy(stationKey, classKey))) {
+							data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_FCFS);
+						}
 					}
 				}
 				TableCellEditor editor = queueTable.getCellEditor();
@@ -261,8 +276,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 
-		private DisabledColumnRenderer queuePolicyRenderer = new DisabledColumnRenderer("");
-		private DisabledColumnRenderer dropRuleRenderer = new DisabledColumnRenderer(INFINITE_CAPACITY);
+		private DisabledColumnRenderer dropRuleRenderer = new DisabledColumnRenderer();
+		private GrayCellRenderer serviceWeightRenderer = new GrayCellRenderer();
 
 		public QueueTable() {
 			super();
@@ -283,7 +298,11 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
 				if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
-					return ComboBoxCellEditor.getEditorInstance(serverQueuePolicies);
+					if (data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS)) {
+						return ComboBoxCellEditor.getEditorInstance(serverPSQueuePolicies);
+					} else {
+						return ComboBoxCellEditor.getEditorInstance(serverQueuePolicies);
+					}
 				} else {
 					return ComboBoxCellEditor.getEditorInstance(otherQueuePolicies);
 				}
@@ -299,9 +318,11 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			if (column == 0) {
 				return classEditor.getRenderer();
 			} else if (column == 1) {
-				return queuePolicyRenderer;
+				return ComboBoxCellEditor.getRendererInstance();
 			} else if (column == 2) {
 				return dropRuleRenderer;
+			} else if (column == 3) {
+				return serviceWeightRenderer;
 			} else {
 				return super.getCellRenderer(row, column);
 			}
@@ -312,9 +333,9 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 
-		private String[] columnNames = new String[] { "Class", "Queue Policy", "Drop Rule" };
-		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class };
-		public int[] columnSizes = new int[] { 100, 100, 100 };
+		private String[] columnNames = new String[] { "Class", "Queue Policy", "Drop Rule", "Service Weight" };
+		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, String.class };
+		public int[] columnSizes = new int[] { 100, 100, 100, 100 };
 
 		public int getRowCount() {
 			return classData.getClassKeys().size();
@@ -336,12 +357,13 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			Object classKey = indexToKey(rowIndex);
 			if (columnIndex == 0) {
 				return false;
-			} else if (columnIndex == 1 && (data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS)
-					|| data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_SRPT))) {
-				return false;
 			} else if (columnIndex == 2 && data.getStationQueueCapacity(stationKey).intValue() < 1) {
+				return false;
+			} else if (columnIndex == 3 && (!data.getQueueStrategy(stationKey, classKey).equals(QUEUE_STRATEGY_GPS)
+					&& !data.getQueueStrategy(stationKey, classKey).equals(QUEUE_STRATEGY_DPS))) {
 				return false;
 			} else {
 				return true;
@@ -355,8 +377,21 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				return classKey;
 			} else if (columnIndex == 1) {
 				return data.getQueueStrategy(stationKey, classKey);
+			} else if (columnIndex == 2) {
+				if (data.getStationQueueCapacity(stationKey).intValue() < 1) {
+					return INFINITE_CAPACITY;
+				} else {
+					return data.getDropRule(stationKey, classKey);
+				}
+			} else if (columnIndex == 3) {
+				if (!data.getQueueStrategy(stationKey, classKey).equals(QUEUE_STRATEGY_GPS)
+						&& !data.getQueueStrategy(stationKey, classKey).equals(QUEUE_STRATEGY_DPS)) {
+					return "--";
+				} else {
+					return data.getServiceWeight(stationKey, classKey);
+				}
 			} else {
-				return data.getDropRule(stationKey, classKey);
+				return null;
 			}
 		}
 
@@ -364,8 +399,19 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			Object classKey = indexToKey(rowIndex);
 			if (columnIndex == 1) {
 				data.setQueueStrategy(stationKey, classKey, (String) aValue);
+				repaint();
 			} else if (columnIndex == 2) {
 				data.setDropRule(stationKey, classKey, (String) aValue);
+			} else if (columnIndex == 3) {
+				try {
+					Double weight = Double.valueOf((String) aValue);
+					if (weight.doubleValue() <= 0.0) {
+						weight = Double.valueOf(1.0);
+					}
+					data.setServiceWeight(stationKey, classKey, weight);
+				} catch (NumberFormatException e) {
+					// Aborts modification if String is invalid
+				}
 			}
 		}
 
@@ -389,11 +435,11 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	private class DisabledColumnRenderer extends ComboBoxCellEditor {
 
 		private static final long serialVersionUID = 1L;
-		private JLabel label;
+		private DisabledCellRenderer disableRenderer;
 
-		public DisabledColumnRenderer(String text) {
-			label = new JLabel(text);
-			label.setEnabled(false);
+		public DisabledColumnRenderer() {
+			disableRenderer = new DisabledCellRenderer();
+			disableRenderer.setEnabled(false);
 		}
 
 		/* (non-Javadoc)
@@ -401,35 +447,13 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		 */
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			if (column == 1) {
-				if (data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS)) {
-					if (isSelected) {
-						label.setBackground(table.getSelectionBackground());
-					} else {
-						label.setBackground(table.getBackground());
-					}
-					label.setText(QUEUE_STRATEGY_STATION_PS);
-					return label;
-				} else if (data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_SRPT)) {
-					if (isSelected) {
-						label.setBackground(table.getSelectionBackground());
-					} else {
-						label.setBackground(table.getBackground());
-					}
-					label.setText(QUEUE_STRATEGY_STATION_SRPT);
-					return label;
-				}
-			} else if (column == 2) {
-				if (data.getStationQueueCapacity(stationKey).intValue() < 1) {
-					if (isSelected) {
-						label.setBackground(table.getSelectionBackground());
-					} else {
-						label.setBackground(table.getBackground());
-					}
-					return label;
-				}
+			if (!table.isCellEditable(row, column)) {
+				disableRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+				disableRenderer.setHorizontalAlignment(SwingConstants.LEFT);
+				return disableRenderer;
+			} else {
+				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 			}
-			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
 
 	}

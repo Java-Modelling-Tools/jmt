@@ -58,7 +58,7 @@ public class Semaphore extends InputSection {
 	// --- Constructors -----------------------------------------------------------------------------
 
 	/**
-	 * Constructs a new Semaphore
+	 * Constructs a new Semaphore.
 	 */
 	public Semaphore() {
 		// Disables automatic handling of jobinfolist
@@ -83,7 +83,7 @@ public class Semaphore extends InputSection {
 
 	/**
 	 * @param message message to be processed.
-	 * @throws NetException if something goes wrong
+	 * @throws NetException if something goes wrong.
 	 * @return message processing result.
 	 */
 	@Override

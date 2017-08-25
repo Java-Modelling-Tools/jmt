@@ -377,7 +377,7 @@ public class GlobalJobInfoList {
 				return;
 			}
 			int jobClassId = jobInfo.getJob().getJobClass().getId();
-			double time = NetSystem.getTime() - jobInfo.getTime();
+			double time = NetSystem.getTime() - jobInfo.getEnteringTime();
 			responseSumWithCS += time;
 			responseSumPerClassWithCS[jobClassId] += time;
 		}

@@ -113,7 +113,7 @@ public class ReplayerPar extends AbstractParameter implements Parameter {
 		try {
 			result = Double.parseDouble(buffer[bufferIndex]);
 			infiniteLoopRisk = false; // At least one good value exists,
-										// we will not cycle forever.
+									  // we will not cycle forever.
 			bufferIndex++;
 			if (result == 0)
 				result = EPSILON;
@@ -159,4 +159,5 @@ public class ReplayerPar extends AbstractParameter implements Parameter {
 		}
 		return false;
 	}
+
 }

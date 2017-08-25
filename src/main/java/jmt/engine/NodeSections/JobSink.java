@@ -39,7 +39,7 @@ public class JobSink extends InputSection {
 	private boolean isForkJobExitWarningShown;
 
 	/**
-	 * Default Constructor creates the JobSink that can be used only as Input Section
+	 * Default Constructor creates the JobSink that can be used only as Input Section.
 	 */
 	public JobSink() {
 		super();
@@ -51,8 +51,9 @@ public class JobSink extends InputSection {
 		isForkJobExitWarningShown = false;
 	}
 
-	/** This method implements a sink.
-	 *  It eats all incoming jobs.
+	/**
+	 * This method implements a sink.
+	 * It eats all incoming jobs.
 	 * @param message message to be processed.
 	 * @throws NetException
 	 */
@@ -115,7 +116,7 @@ public class JobSink extends InputSection {
 	}
 
 	/**
-	 * Shows the fork job exit warning
+	 * Shows the fork job exit warning.
 	 */
 	public void showForkJobExitWarning() {
 		if (!isForkJobExitWarningShown) {

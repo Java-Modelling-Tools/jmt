@@ -64,7 +64,7 @@ public class NetSystem {
 	 * all the network nodes and recall the <i>start</i> method in order to
 	 * launch a new simulation.
 	 */
-	public static void terminate() throws jmt.common.exception.NetException {
+	public static void terminate() {
 		abort();
 	}
 
@@ -132,9 +132,8 @@ public class NetSystem {
 
 	/** Stops the NetSystem Engine and terminates the simulation (stops all the
 	 * controlled QueueNetworks).
-	 * @throws jmt.common.exception.NetException
 	 */
-	public static void stop() throws jmt.common.exception.NetException {
+	public static void stop() {
 		ListIterator<QueueNetwork> nets = networkList.listIterator();
 		QueueNetwork network;
 		while (nets.hasNext()) {
@@ -145,9 +144,8 @@ public class NetSystem {
 
 	/** Stops the NetSystem Engine and terminates the simulation.
 	 * @param Network Reference to the network to be stopped.
-	 * @throws jmt.common.exception.NetException
 	 */
-	public static void stop(QueueNetwork Network) throws jmt.common.exception.NetException {
+	public static void stop(QueueNetwork Network) {
 		NetNode node;
 		if (Network.getState() == QueueNetwork.STATE_RUNNING) {
 			/* Informs ALL nodes of stop event and not only Reference nodes */
@@ -162,9 +160,8 @@ public class NetSystem {
 
 	/** Aborts the NetSystem Engine and terminates the simulation (aborts all
 	 * the controlled QueueNetworks).
-	 * @throws jmt.common.exception.NetException
 	 */
-	public static void abort() throws jmt.common.exception.NetException {
+	public static void abort() {
 		ListIterator<QueueNetwork> nets = networkList.listIterator();
 		QueueNetwork network;
 		while (nets.hasNext()) {
@@ -176,9 +173,8 @@ public class NetSystem {
 
 	/** Aborts the NetSystem Engine and terminates the simulation.
 	 * @param network Reference to the network to be stopped.
-	 * @throws jmt.common.exception.NetException
 	 */
-	public static void abort(QueueNetwork network) throws jmt.common.exception.NetException {
+	public static void abort(QueueNetwork network) {
 		NetNode node;
 		if (network.getState() == QueueNetwork.STATE_RUNNING) {
 			ListIterator<NetNode> nodes = network.getReferenceNodes().listIterator();
@@ -240,15 +236,15 @@ public class NetSystem {
 	 * @param name The name of the node which measure refers to.
 	 * @param measureID The type of measure requested.
 	 * @return
-	 * @throws jmt.common.exception.NetException
+	 * @throws NetException
 	 */
 	//TODO: not used
-	public static double getMeasure(String name, int measureID) throws jmt.common.exception.NetException {
+	public static double getMeasure(String name, int measureID) throws NetException {
 		QueueNetwork net = getNode(name).getQueueNet();
 		return net.getMeasure(name, measureID);
 	}
 
-	static void checkMeasures() throws jmt.common.exception.NetException {
+	static void checkMeasures(){
 		ListIterator<QueueNetwork> networks = networkList.listIterator();
 		QueueNetwork network;
 		ListIterator<Measure> measures;
@@ -294,9 +290,9 @@ public class NetSystem {
 	 * <br>Author: Bertoli Marco
 	 * @param network network to be checked for progress
 	 * @return estimated simulation progress
-	 * @throws jmt.common.exception.NetException if network is null
+	 * @throws NetException if network is null
 	 */
-	public static double checkProgress(QueueNetwork network) throws jmt.common.exception.NetException {
+	public static double checkProgress(QueueNetwork network) throws NetException {
 		if (network == null) {
 			throw new NetException("Cannot measure progress of a network which does not exist.");
 		}
@@ -318,7 +314,7 @@ public class NetSystem {
 		return slowest;
 	}
 
-	public static double getTempMeasures(QueueNetwork network) throws jmt.common.exception.NetException {
+	public static double getTempMeasures(QueueNetwork network) throws NetException {
 		if (network == null) {
 			throw new NetException("Cannot get measures of a network which does not exist.");
 		}

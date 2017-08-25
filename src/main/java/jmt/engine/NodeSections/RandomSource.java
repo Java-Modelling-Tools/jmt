@@ -30,7 +30,6 @@ import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.random.Parameter;
 
 /**
  * This class implements a job source (generator): a job is created every
@@ -41,28 +40,21 @@ import jmt.engine.random.Parameter;
  */
 public class RandomSource extends InputSection {
 
-	public static final int PARAMETERS_EXCEPTION = 0x0001;
+	private boolean coolStart;
 
-	/** Service distribution: one for each job class. */
-	//protected Distribution distributions[];
-	/** Distribution parameters: one for each job class. */
-	protected Parameter parameters[];
+	private LinkedList<Job> waitingJobs;
 
-	private boolean coolStart; //when is true the waitingjobs queue is void
-
-	private LinkedList<Job> waitingJobs; //TODO: se riusciamo a convertire in job info list è meglio
-
-	private ServiceStrategy[] strategy;
+	private ServiceStrategy[] strategies;
 
 	private JobClassList jobClasses;
 
 	/**
-	 * Creates a new instance of inputSection.
-	 * strategy[i] = null, if the i-th class is closed.
+	 * Creates a new instance of RandomSource.
+	 * strategies[i] = null, if the i-th class is closed.
 	 */
-	public RandomSource(ServiceStrategy[] strategy) {
+	public RandomSource(ServiceStrategy[] strategies) {
 		super();
-		this.strategy = strategy;
+		this.strategies = strategies;
 		waitingJobs = new LinkedList<Job>();
 		coolStart = true;
 	}
@@ -99,9 +91,9 @@ public class RandomSource extends InputSection {
 
 				c = jobClass.getId();
 				// Calculates the delay of departure (1/lambda)
-				if (strategy[c] != null) {
+				if (strategies[c] != null) {
 					job = new Job(jobClass, jobClasses.size());
-					delay = strategy[c].wait(this);
+					delay = strategies[c].wait(this);
 					sendMe(job, delay);
 				}
 			}
@@ -141,7 +133,7 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(job.getJobClass(), jobClasses.size());
-				delay = strategy[c].wait(this);
+				delay = strategies[c].wait(this);
 				sendMe(job, delay);
 
 				// Sets coolStart to false, next job should wait ack
@@ -181,7 +173,7 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(jobClasses.get(c), jobClasses.size());
-				delay = strategy[c].wait(this);
+				delay = strategies[c].wait(this);
 				sendMe(job, delay);
 			} else {
 				coolStart = true;

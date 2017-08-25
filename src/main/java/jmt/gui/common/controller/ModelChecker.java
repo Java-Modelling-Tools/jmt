@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.common.controller;
 
 import java.util.*;
@@ -71,7 +72,7 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of measures defined more than once
 	private Vector<Object> redundantMeasures;
 	//Vector containing the keys of stations using different queue strategies
-	//for classes with the same priority
+	//for classes within the same priority group
 	private Vector<Object> stationsWithInconsistentQueueStrategies;
 	//Vector containing the keys of blocking regions without a station
 	private Vector<Object> emptyBlockingRegions;
@@ -171,8 +172,8 @@ public class ModelChecker implements CommonConstants {
 	public static final int INVALID_MEASURE_ERROR = 10;
 	//it occurs when the same measure is defined more than once.
 	public static final int DUPLICATE_MEASURE_ERROR = 11;
-	//it occurs when a station uses different queue strategies for classes with
-	//the same priority.
+	//it occurs when a station uses different queue strategies for classes
+	//within the same priority group.
 	public static final int INCONSISTENT_QUEUE_STRATEGY_ERROR = 12;
 	//it occurs when there is a join but no forks.
 	public static final int JOIN_WITHOUT_FORK_ERROR = 13;
@@ -604,10 +605,10 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns true if a station uses different queue strategies for classes
-	 * with the same priority.
+	 * within the same priority group.
 	 *
 	 * @return true if a station uses different queue strategies for classes
-	 * with the same priority.
+	 * within the same priority group.
 	 */
 	public boolean isThereInconsistentQueueStrategyError() {
 		return errors[INCONSISTENT_QUEUE_STRATEGY_ERROR];
@@ -993,10 +994,10 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns a Vector<Object> containing the keys of stations using different
-	 * queue strategies for classes with the same priority.
+	 * queue strategies for classes within the same priority group.
 	 *
 	 * @return a Vector<Object> containing the keys of stations using different
-	 * queue strategies for classes with the same priority.
+	 * queue strategies for classes within the same priority group.
 	 */
 	public Vector<Object> getStationsWithInconsistentQueueStrategies() {
 		return stationsWithInconsistentQueueStrategies;
@@ -1566,8 +1567,8 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Checks if a station uses different queue strategies for classes with the
-	 * same priority.
+	 * Checks if a station uses different queue strategies for classes within
+	 * the same priority group.
 	 */
 	private void checkForInconsistentQueueStrategyError() {
 		Vector<Object> stations = station_def.getStationKeys();
@@ -1576,14 +1577,13 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < stations.size(); i++) {
 			Object thisServer = stations.get(i);
 			String stationStrategy = station_def.getStationQueueStrategy(thisServer);
-			if (stationStrategy == null
-					|| stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_PS)
-					|| stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_SRPT)) {
+			if (stationStrategy == null) {
 				continue;
 			}
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
-				Integer priority = class_def.getClassPriority(thisClass);
+				Integer priority = stationStrategy.equals(QUEUE_STRATEGY_STATION_QUEUE_PRIORITY)
+						? class_def.getClassPriority(thisClass) : Integer.valueOf(0);
 				String strategy = station_def.getQueueStrategy(thisServer, thisClass);
 				if (!strategies.containsKey(priority)) {
 					strategies.put(priority, strategy);
@@ -1963,11 +1963,6 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> classes = class_def.getClassKeys();
 		for (int i = 0; i < servers.size(); i++) {
 			Object thisServer = servers.get(i);
-			String stationStrategy = station_def.getStationQueueStrategy(thisServer);
-			if (stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_PS)
-					|| stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_SRPT)) {
-				continue;
-			}
 			for (int j = 1; j < classes.size(); j++) {
 				String lastStrategy = station_def.getQueueStrategy(thisServer, classes.get(j - 1));
 				String thisStrategy = station_def.getQueueStrategy(thisServer, classes.get(j));
@@ -2003,11 +1998,6 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> classes = class_def.getClassKeys();
 		for (int i = 0; i < servers.size(); i++) {
 			Object thisServer = servers.get(i);
-			String stationStrategy = station_def.getStationQueueStrategy(thisServer);
-			if (stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_PS)
-					|| stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_SRPT)) {
-				continue;
-			}
 			if (isAllFCFSQueueStrategy(thisServer) && isAllSameServiceStrategy(thisServer)) {
 				OUTER_LOOP:
 				for (int j = 0; j < classes.size(); j++) {
@@ -2046,11 +2036,6 @@ public class ModelChecker implements CommonConstants {
 		if (!servers.isEmpty() && !classes.isEmpty()) {
 			for (int i = 0; i < servers.size(); i++) {
 				Object thisServer = servers.get(i);
-				String stationStrategy = station_def.getStationQueueStrategy(thisServer);
-				if (stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_PS)
-						|| stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_SRPT)) {
-					continue;
-				}
 				if (isAllFCFSQueueStrategy(thisServer) && isAllSameServiceStrategy(thisServer)
 						&& !bcmpFcfsServersWithNonExponentialDistribution.contains(thisServer)) {
 					Object service = station_def.getServiceTimeDistribution(thisServer, classes.get(0));
@@ -2165,15 +2150,11 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> classes = class_def.getClassKeys();
 		for (int i = 0; i < servers.size(); i++) {
 			Object thisServer = servers.get(i);
-			String stationStrategy = station_def.getStationQueueStrategy(thisServer);
-			if (stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_PS)
-					|| stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_SRPT)) {
-				continue;
-			}
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
 				String strategy = station_def.getQueueStrategy(thisServer, thisClass);
-				if (strategy.equals(CommonConstants.QUEUE_STRATEGY_FCFS)
+				if (strategy.equals(CommonConstants.QUEUE_STRATEGY_EPS)
+						|| strategy.equals(CommonConstants.QUEUE_STRATEGY_FCFS)
 						|| strategy.equals(CommonConstants.QUEUE_STRATEGY_RAND)) {
 					continue;
 				}

@@ -30,22 +30,17 @@ import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import jmt.jmva.analytical.SolverDispatcher;
 import jmt.common.exception.InputDataException;
-import jmt.common.exception.LoadException;
-import jmt.common.exception.NetException;
 import jmt.common.exception.SolverException;
 import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
 import jmt.gui.common.xml.XMLArchiver;
@@ -54,7 +49,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
 
 public class Jmt {
 
@@ -111,7 +105,7 @@ public class Jmt {
 		}
 	}
 
-	public static void main(String[] args) throws LoadException, NetException, Exception {
+	public static void main(String[] args) throws Exception {
 		if (args.length < 2) {
 			help();
 		}
@@ -146,9 +140,7 @@ public class Jmt {
 		copyFile(model, result);
 	}
 
-	public static boolean sim(File model, File result)
-			throws ParserConfigurationException, IOException, SAXException, TransformerFactoryConfigurationError,
-			TransformerConfigurationException, TransformerException, LoadException, NetException, Exception {
+	public static boolean sim(File model, File result) throws Exception {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 
@@ -184,9 +176,7 @@ public class Jmt {
 		return success;
 	}
 
-	public static boolean sim(File model, File result, Map<String,String> options)
-			throws ParserConfigurationException, IOException, SAXException, TransformerFactoryConfigurationError,
-			TransformerConfigurationException, TransformerException, LoadException, NetException, Exception {
+	public static boolean sim(File model, File result, Map<String,String> options) throws Exception {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 

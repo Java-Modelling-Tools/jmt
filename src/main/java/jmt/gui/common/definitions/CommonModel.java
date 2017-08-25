@@ -1209,17 +1209,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Sets station parameters by default.
 	 */
 	private void setDefaultsForStation(StationData sd) {
-		String queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
-		if (sd.type.equals(STATION_TYPE_SERVER)) {
-			queueStrategy = Defaults.get("stationStationQueueStrategy");
-		} else if (sd.type.equals(STATION_TYPE_FORK)) {
-			queueStrategy = Defaults.get("stationStationQueueStrategy");
-			if (queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)
-					|| queueStrategy.equals(QUEUE_STRATEGY_STATION_SRPT)) {
-				queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
-			}
-		}
-
 		if (sd.type.equals(STATION_TYPE_SOURCE)) {
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_SINK)) {
@@ -1228,18 +1217,21 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.queueStrategy = queueStrategy;
+			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
 		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.queueStrategy = queueStrategy;
+			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
 			sd.numberOfServers = Integer.valueOf(-1);
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
-			sd.queueStrategy = queueStrategy;
+			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			sd.numberOfServers = Defaults.getAsInteger("stationServers");
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
-			sd.queueStrategy = queueStrategy;
+			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
+			if (sd.queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)) {
+				sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+			}
 			sd.forkBlock = Defaults.getAsInteger("forkBlock");
 			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
 			sd.numberOfServers = Defaults.getAsInteger("forkJobsPerLink");
@@ -1247,10 +1239,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.queueStrategy = queueStrategy;
+			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
 		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.queueStrategy = queueStrategy;
+			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
 		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_SCALER)) {
@@ -1259,7 +1251,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.numberOfServers = Defaults.getAsInteger("forkJobsPerLink");
 		} else if (sd.type.equals(STATION_TYPE_PLACE)) {
 			sd.queueCapacity = Defaults.getAsInteger("placeCapacity");
-			sd.queueStrategy = queueStrategy;
+			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
 		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
 			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
@@ -1373,6 +1365,43 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		if (scd.dropRule == null || !scd.dropRule.equals(dropRule)) {
 			scd.dropRule = dropRule;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns service weight for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return weight for specified class and station.
+	 */
+	@Override
+	public Double getServiceWeight(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.serviceWeight;
+	}
+
+	/**
+	 * Sets service weight for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param weight: weight to be set for specified class and station.
+	 */
+	@Override
+	public void setServiceWeight(Object stationKey, Object classKey, Double weight) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.serviceWeight == null || !scd.serviceWeight.equals(weight)) {
+			scd.serviceWeight = weight;
 			save = true;
 		}
 	}
@@ -1794,7 +1823,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	protected void addStationDetails(Object key) {
 		for (Object classKey : classesKeyset) {
-			StationClassData scd = getDefaultStationDetails(getStationType(key));
+			StationClassData scd = getDefaultStationDetails(key);
 			stationDetailsBDM.put(classKey, key, scd);
 		}
 	}
@@ -1813,7 +1842,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	protected void addStationDetailsForClass(Object key) {
 		for (Object stationKey : stationsKeyset) {
-			StationClassData scd = getDefaultStationDetails(getStationType(stationKey));
+			StationClassData scd = getDefaultStationDetails(stationKey);
 			stationDetailsBDM.put(key, stationKey, scd);
 		}
 
@@ -1861,9 +1890,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			StationData sd = (StationData) stationDataHM.get(stationKey);
 			if (sd.transitionModeList != null) {
 				for (TransitionModeData tmd : sd.transitionModeList) {
-					tmd.enablingCondition.removeCol(key);
-					tmd.inhibitingCondition.removeCol(key);
-					tmd.firingOutcome.removeCol(key);
+					tmd.enablingCondition.removeColumn(key);
+					tmd.inhibitingCondition.removeColumn(key);
+					tmd.firingOutcome.removeColumn(key);
 				}
 			}
 
@@ -1890,67 +1919,85 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Gets default station details, given the station type.
+	 * Gets default station details, given the search key.
 	 */
-	private StationClassData getDefaultStationDetails(String type) {
-		String queueStrategy = QUEUE_STRATEGY_FCFS;
-		if (type.equals(STATION_TYPE_SERVER)) {
-			queueStrategy = Defaults.get("stationQueueStrategy");
-		} else if (type.equals(STATION_TYPE_FORK)) {
-			queueStrategy = Defaults.get("stationQueueStrategy");
-			if (queueStrategy.equals(QUEUE_STRATEGY_SJF) || queueStrategy.equals(QUEUE_STRATEGY_LJF)) {
-				queueStrategy = QUEUE_STRATEGY_FCFS;
-			}
-		}
-
+	private StationClassData getDefaultStationDetails(Object key) {
+		StationData sd = (StationData) stationDataHM.get(key);
 		StationClassData scd = new StationClassData();
-		if (type.equals(STATION_TYPE_SOURCE)) {
+		if (sd.type.equals(STATION_TYPE_SOURCE)) {
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
-		} else if (type.equals(STATION_TYPE_SINK)) {
+		} else if (sd.type.equals(STATION_TYPE_SINK)) {
 			// Do nothing
-		} else if (type.equals(STATION_TYPE_TERMINAL)) {
+		} else if (sd.type.equals(STATION_TYPE_TERMINAL)) {
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
-		} else if (type.equals(STATION_TYPE_ROUTER)) {
-			scd.queueStrategy = queueStrategy;
-			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
+			scd.queueStrategy = QUEUE_STRATEGY_FCFS;
 			scd.dropRule = Defaults.get("dropRule");
-		} else if (type.equals(STATION_TYPE_DELAY)) {
-			scd.queueStrategy = queueStrategy;
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
+			scd.queueStrategy = QUEUE_STRATEGY_FCFS;
+			scd.dropRule = Defaults.get("dropRule");
 			scd.serviceDistribution = Defaults.getAsNewInstance("stationDelayServiceStrategy");
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
+			scd.queueStrategy = Defaults.get("stationQueueStrategy");
+			if (sd.queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)) {
+				if (scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_RAND)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SJF)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LJF)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SEPT)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)) {
+					scd.queueStrategy = QUEUE_STRATEGY_EPS;
+				}
+			} else {
+				if (scd.queueStrategy.equals(QUEUE_STRATEGY_EPS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)) {
+					scd.queueStrategy = QUEUE_STRATEGY_FCFS;
+				}
+			}
 			scd.dropRule = Defaults.get("dropRule");
-		} else if (type.equals(STATION_TYPE_SERVER)) {
-			scd.queueStrategy = queueStrategy;
+			scd.serviceWeight = Defaults.getAsDouble("serviceWeight");
 			scd.serviceDistribution = Defaults.getAsNewInstance("stationServiceStrategy");
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
-			scd.dropRule = Defaults.get("dropRule");
-		} else if (type.equals(STATION_TYPE_FORK)) {
-			scd.queueStrategy = queueStrategy;
+		} else if (sd.type.equals(STATION_TYPE_FORK)) {
+			scd.queueStrategy = Defaults.get("stationQueueStrategy");
+			if (scd.queueStrategy.equals(QUEUE_STRATEGY_EPS)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_SJF)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_LJF)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_SEPT)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)) {
+				scd.queueStrategy = QUEUE_STRATEGY_FCFS;
+			}
 			scd.dropRule = Defaults.get("dropRule");
 			scd.forkStrategy = Defaults.getAsNewInstance("stationForkStrategy");
-		} else if (type.equals(STATION_TYPE_JOIN)) {
+		} else if (sd.type.equals(STATION_TYPE_JOIN)) {
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 			scd.joinStrategy = Defaults.getAsNewInstance("stationJoinStrategy");
-		} else if (type.equals(STATION_TYPE_LOGGER)) {
-			scd.queueStrategy = queueStrategy;
-			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
+			scd.queueStrategy = QUEUE_STRATEGY_FCFS;
 			scd.dropRule = Defaults.get("dropRule");
-		} else if (type.equals(STATION_TYPE_CLASSSWITCH)) {
-			scd.queueStrategy = queueStrategy;
+			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
+			scd.queueStrategy = QUEUE_STRATEGY_FCFS;
+			scd.dropRule = Defaults.get("dropRule");
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 			scd.classSwitchProb = new ClassSwitchRow();
-			scd.dropRule = Defaults.get("dropRule");
-		} else if (type.equals(STATION_TYPE_SEMAPHORE)) {
+		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 			scd.semaphoreStrategy = Defaults.getAsNewInstance("stationSemaphoreStrategy");
-		} else if (type.equals(STATION_TYPE_SCALER)) {
+		} else if (sd.type.equals(STATION_TYPE_SCALER)) {
 			scd.forkStrategy = Defaults.getAsNewInstance("stationForkStrategy");
 			scd.joinStrategy = Defaults.getAsNewInstance("stationJoinStrategy");
-		} else if (type.equals(STATION_TYPE_PLACE)) {
+		} else if (sd.type.equals(STATION_TYPE_PLACE)) {
 			scd.queueCapacity = Defaults.getAsInteger("placeQueueCapacity");
 			scd.queueStrategy = Defaults.get("placeQueueStrategy");
 			scd.dropRule = Defaults.get("placeDropRule");
-		} else if (type.equals(STATION_TYPE_TRANSITION)) {
+		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
 			// Do nothing
 		}
 		return scd;
@@ -3627,6 +3674,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Integer queueCapacity;
 		public String queueStrategy;
 		public String dropRule;
+		public Double serviceWeight;
 		public Object serviceDistribution;
 		public Object routingStrategy;
 		public Object forkStrategy;
@@ -3645,6 +3693,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.queueCapacity = queueCapacity;
 			scd.queueStrategy = queueStrategy;
 			scd.dropRule = dropRule;
+			scd.serviceWeight = serviceWeight;
 			if (serviceDistribution != null) {
 				scd.serviceDistribution = ((ServiceStrategy) serviceDistribution).clone();
 			}

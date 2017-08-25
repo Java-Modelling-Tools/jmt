@@ -85,7 +85,7 @@ public class LogTunnel extends ServiceTunnel {
 	}
 
 	/**
-	 * Checks if the file is writable
+	 * Checks if the file is writable.
 	 */
 	private void initLoggerParameters() {
 		// Get global values (from the XML file) for the path, auto-replace, and delimiter 

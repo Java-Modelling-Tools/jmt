@@ -39,19 +39,17 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class Terminal extends InputSection {
 
-	public static final int PARAMETERS_EXCEPTION = 0x0001;
-
 	private boolean coolStart; //when is true the waitingjobs queue is void
 
 	private JobInfoList waitingRequests;
 
-	private int jobsPerClass[]; //number of jobs per class
+	private int[] jobsPerClass; //number of jobs per class
 
 	private JobClassList jobClasses;
 
 	/**
-	 * Creates a terminal
-	 * @param jobsPerClass number of jobs for each class
+	 * Creates a terminal.
+	 * @param jobsPerClass number of jobs for each class.
 	 */
 	public Terminal(int[] jobsPerClass) {
 		super();
@@ -63,8 +61,8 @@ public class Terminal extends InputSection {
 	}
 
 	/**
-	 * Creates a terminal
-	 * @param jobsPerClass number of jobs for each class
+	 * Creates a terminal.
+	 * @param jobsPerClass number of jobs for each class.
 	 */
 	public Terminal(Integer[] jobsPerClass) {
 		super();
@@ -79,7 +77,7 @@ public class Terminal extends InputSection {
 	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
 		jobClasses = getJobClasses();
-		waitingRequests = new LinkedJobInfoList(jobClasses.size(), true);
+		waitingRequests = new LinkedJobInfoList(jobClasses.size());
 	}
 
 	@Override
@@ -172,7 +170,7 @@ public class Terminal extends InputSection {
 				}
 			} else {
 				//coolStart is false: there are waiting jobs. Add the received job.
-				waitingRequests.add(new WaitingRequest(message.getSource(), message.getSourceSection(), job));
+				waitingRequests.add(new WaitingRequest(job, message.getSourceSection(), message.getSource()));
 			}
 			break;
 
@@ -189,8 +187,8 @@ public class Terminal extends InputSection {
 				WaitingRequest wr;
 				wr = (WaitingRequest) waitingRequests.removeFirst();
 
-				if (!isMyOwnerNode(wr.getNode())) {
-					send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSection(), wr.getNode());
+				if (!isMyOwnerNode(wr.getSource())) {
+					send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSourceSection(), wr.getSource());
 				}
 
 				Job jobSent = wr.getJob();

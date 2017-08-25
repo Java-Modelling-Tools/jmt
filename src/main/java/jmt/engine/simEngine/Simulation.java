@@ -33,6 +33,7 @@ import jmt.engine.NodeSections.InputSection;
 import jmt.engine.NodeSections.Join;
 import jmt.engine.NodeSections.Linkage;
 import jmt.engine.NodeSections.OutputSection;
+import jmt.engine.NodeSections.PSServer;
 import jmt.engine.NodeSections.Queue;
 import jmt.engine.NodeSections.RandomSource;
 import jmt.engine.NodeSections.Router;
@@ -279,7 +280,7 @@ public class Simulation {
 	 * This method assures that all the operations are
 	 * executed in the correct order.
 	 */
-	public void initialize() throws NetException {
+	public void initialize() {
 		// Sets the max simulated time for the system, when reached simulation is stopped
 		NetSystem.setMaxSimulatedTime(simParameters.getMaxSimulatedTime());
 
@@ -472,7 +473,11 @@ public class Simulation {
 						netNodes[nodePosition].analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
 						break;
 					case SimConstants.QUEUE_TIME:
-						netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
+						if (netNodes[nodePosition].getSection(NodeSection.SERVICE) instanceof PSServer) {
+							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
+						} else {
+							netNodes[nodePosition].getSection(NodeSection.INPUT).analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
+						}
 						break;
 					case SimConstants.RESPONSE_TIME:
 						netNodes[nodePosition].analyze(SimConstants.LIST_RESPONSE_TIME, jClass, ms.getMeasure());
@@ -550,7 +555,7 @@ public class Simulation {
 					preload_station(preload_stationNames[s], preload_initialPopulations[s]);
 				}
 			}
-		} catch (jmt.common.exception.NetException e) {
+		} catch (NetException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -588,9 +593,8 @@ public class Simulation {
 
 	/**
 	 * Aborts simulation.
-	 * @throws jmt.common.exception.NetException
 	 */
-	public void abort() throws jmt.common.exception.NetException {
+	public void abort() {
 		logger.info("Aborting simulation...");
 		NetSystem.terminate();
 	}

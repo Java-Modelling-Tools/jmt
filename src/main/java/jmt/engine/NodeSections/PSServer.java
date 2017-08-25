@@ -18,17 +18,22 @@
 
 package jmt.engine.NodeSections;
 
-import java.util.PriorityQueue;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.PSStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
+import jmt.engine.NetStrategies.PSStrategies.EPSStrategy;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
+import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.QueueNet.PSJobInfo;
 import jmt.engine.QueueNet.PSJobInfoList;
 import jmt.engine.simEngine.RemoveToken;
 
@@ -44,107 +49,100 @@ import jmt.engine.simEngine.RemoveToken;
  */
 public class PSServer extends ServiceSection {
 
-	/** Property Identifier:  Busy counter. */
-	public static final int PROPERTY_ID_BUSY_COUNTER = 0x0101;
-	/** Property Identifier:  Max jobs (number of servers). */
-	public static final int PROPERTY_ID_MAX_JOBS = 0x0102;
-	/** Property Identifier:  Service strategy. */
-	public static final int PROPERTY_ID_SERVICE_STRATEGY = 0x0104;
-
 	private int numberOfServers;
-	/** This variable is used to implement blocking.*/
-	private int waitingAcks;
-
-	private ServiceStrategy serviceStrategy[];
+	private ServiceStrategy[] serviceStrategies;
+	private PSStrategy[] psStrategies;
+	private double[] serviceWeights;
 
 	/** Tells which inner event we are processing */
 	private enum PSEvent {
 		JOB_IN, JOB_OUT
 	}
 
-	/** The data structure holdings all the jobs */
-	private PriorityQueue<JobData> jobs;
+	private JobClassList jobClasses;
+	private PSJobInfoList psJobsList;
+	private double[] serviceFractions;
 
-	private PSJobInfoList queueList;
-	private PSJobInfoList serviceList;
+	private RemoveToken messageToken;
+	private PSJobInfo messageJobInfo;
+	private double messageSendTime;
 
-	// A token to preempt the last message sent when a new job arrives
-	private RemoveToken lastMessageSent;
-	private double lastMessageSentTime;
-
-	/** Creates a new instance of Server.
-	 * @param serverNumber Number of jobs which can be served simultaneously.
-	 * @param serviceStrategy Array of service strategies, one per class.
-	 * @throws NetException
+	/**
+	 * Creates a new instance of PSServer.
+	 * @param numberOfServers Number of jobs which can be served simultaneously.
+	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
-	public PSServer(Integer serverNumber, ServiceStrategy serviceStrategy[]) throws NetException {
-		// Disable automatic section jobinfolist usage. We will update it manually.
+	public PSServer(Integer numberOfServers, ServiceStrategy[] serviceStrategies) {
 		super(false, true);
-		this.serviceStrategy = serviceStrategy;
-		this.numberOfServers = serverNumber.intValue();
-		jobs = new PriorityQueue<JobData>();
-	}
-
-	public PSServer(Integer serverNumber, Integer numberOfVisitsPerClass[], ServiceStrategy serviceStrategy[]) throws NetException {
-		this(serverNumber, serviceStrategy);
-	}
-
-	@Override
-	public int getIntSectionProperty(int id) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_BUSY_COUNTER:
-			return jobs.size();
-		case PROPERTY_ID_MAX_JOBS:
-			return numberOfServers;
-		default:
-			return super.getIntSectionProperty(id);
+		this.numberOfServers = numberOfServers.intValue();
+		this.serviceStrategies = serviceStrategies;
+		this.psStrategies = new PSStrategy[serviceStrategies.length];
+		for (int i = 0; i < serviceStrategies.length; i++) {
+			this.psStrategies[i] = new EPSStrategy();
+		}
+		this.serviceWeights = new double[serviceStrategies.length];
+		for (int i = 0; i < serviceStrategies.length; i++) {
+			this.serviceWeights[i] = 1.0;
 		}
 	}
 
-	@Override
-	public Object getObject(int id, JobClass jobClass) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_SERVICE_STRATEGY:
-			return serviceStrategy[jobClass.getId()];
-		default:
-			return super.getObject(id);
-		}
-	}
-
-	@Override
-	public Object getObject(int id) throws NetException {
-		switch (id) {
-		case PROPERTY_ID_SERVICE_STRATEGY:
-			return serviceStrategy;
-		default:
-			return super.getObject(id);
-		}
-	}
-
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.NodeSection#getDoubleSectionProperty(int, jmt.engine.QueueNet.JobClass)
+	/**
+	 * Creates a new instance of PSServer.
+	 * @param numberOfServers Number of jobs which can be served simultaneously.
+	 * @param numberOfVisitsPerClass Number of job visits per class: if null
+	 * the server will be single visit.
+	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
+	public PSServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
+		this(numberOfServers, serviceStrategies);
+	}
+
+	/**
+	 * Creates a new instance of PSServer.
+	 * @param numberOfServers Number of jobs which can be served simultaneously.
+	 * @param numberOfVisitsPerClass Number of job visits per class: if null
+	 * the server will be single visit.
+	 * @param serviceStrategies Array of service strategies, one per class.
+	 * @param psStrategies Array of PS strategies, one per class.
+	 * @param serviceWeights Array of service weights, one per class.
+	 */
+	public PSServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies,
+			PSStrategy[] psStrategies, Double[] serviceWeights) {
+		this(numberOfServers, numberOfVisitsPerClass, serviceStrategies);
+		this.psStrategies = psStrategies;
+		this.serviceWeights = new double[serviceWeights.length];
+		for (int i = 0; i < serviceWeights.length; i++) {
+			this.serviceWeights[i] = serviceWeights[i].doubleValue();
+		}
+	}
+
+	@Override
+	public double getDoubleSectionProperty(int id) throws NetException {
+		switch (id) {
+		case PROPERTY_ID_UTILIZATION:
+			return psJobsList.getBusyTime() / NetSystem.getTime() / numberOfServers;
+		default:
+			return super.getDoubleSectionProperty(id);
+		}
+	}
+
 	@Override
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
-		if (id == PROPERTY_ID_UTILIZATION) {
-			double divisor = numberOfServers;
-			return jobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime() / divisor;
-		} else {
+		switch (id) {
+		case PROPERTY_ID_UTILIZATION:
+			return psJobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
+		default:
 			return super.getDoubleSectionProperty(id, jobClass);
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.NodeSection#getDoubleSectionProperty(int)
-	 */
 	@Override
-	public double getDoubleSectionProperty(int id) throws NetException {
-		if (id == PROPERTY_ID_UTILIZATION) {
-			double divisor = numberOfServers;
-			return jobsList.getBusyTime() / NetSystem.getTime() / divisor;
-		} else {
-			return super.getDoubleSectionProperty(id);
-		}
+	protected void nodeLinked(NetNode node) throws NetException {
+		jobClasses = getJobClasses();
+		jobsList = psJobsList = new PSJobInfoList(jobClasses.size());
+		psJobsList.setNumberOfServers(numberOfServers);
+		serviceFractions = new double[jobClasses.size()];
+		Arrays.fill(serviceFractions, 0.0);
 	}
 
 	@Override
@@ -157,53 +155,25 @@ public class PSServer extends ServiceSection {
 		case NetEvent.EVENT_JOB:
 			Job job = message.getJob();
 			if (isMine(message)) {
-				// I sent the message, so it ended servicing
-				updateServiceTimes(lastMessageSentTime);
-				lastMessageSent = null;
-				// forwards the completed jobs to the output section
-				JobData data = jobs.peek();
-				handleJobInfoLists(data, PSEvent.JOB_OUT);
-				jobs.poll();
-				sendForward(data.getJob(), 0.0);
-				waitingAcks++;
+				performServiceTimes(messageSendTime);
+				handleJobInfoList(messageJobInfo, PSEvent.JOB_OUT);
+				messageToken = null;
+				sendForward(job, 0.0);
 			} else {
-				// Check if a job is running
-				if (lastMessageSent != null) {
-					// We need to preempt the last message
-					removeMessage(lastMessageSent);
-					updateServiceTimes(lastMessageSentTime);
-					lastMessageSent = null;
+				if (messageToken != null) {
+					removeMessage(messageToken);
+					performServiceTimes(messageSendTime);
+					messageToken = null;
 				}
-				// Estimate the job service time, puts it in the queue and sends a message to itself
-				// with the minimum service time of all the jobs to perform processing
-				double serviceTime = 0.0;
-				if (job.getServiceTime() != 0.0) {
-					serviceTime = job.getServiceTime();
-				} else {
-					serviceTime = serviceStrategy[job.getJobClass().getId()].wait(this);
-				}
-				//job.setServiceTime(serviceTime);
-				JobData data = new JobData(job, serviceTime);
-				handleJobInfoLists(data, PSEvent.JOB_IN);
-				jobs.add(data);
-
-				// Sends an ACK to the input section as we will always accept new jobs.
-				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
+				double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this);
+				handleJobInfoList(new PSJobInfo(job, serviceTime), PSEvent.JOB_IN);
+				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 			}
+			updateServiceFractions();
 			serviceJobs();
 			break;
 
 		case NetEvent.EVENT_ACK:
-			//EVENT_ACK
-			//If there are no jobs in the service section, message is not processed.
-			if (waitingAcks == 0) {
-				//it was not waiting for any job
-				return NodeSection.MSG_NOT_PROCESSED;
-			} else {
-				// Avoid ACK to the input section, as we already sent ack
-				waitingAcks--;
-			}
-			serviceJobs();
 			break;
 
 		case NetEvent.EVENT_STOP:
@@ -216,188 +186,85 @@ public class PSServer extends ServiceSection {
 		return MSG_PROCESSED;
 	}
 
-	/**
-	 * Service jobs (send a message to itself), if it is not blocked.
-	 */
-	private void serviceJobs() throws NetException {
-		// If all acks were received and there are jobs in internal queue, 
-		// send in service the one with the minimum residual service time
-		if (waitingAcks == 0 && jobs.size() > 0) {
-			// Estimate wait time for the minimum job
-			double waitTime;
-			if (jobs.size() <= numberOfServers) {
-				// No sharing in this case: each job is served by a processor
-				waitTime = jobs.peek().getResidualServiceTime();
-			} else {
-				// Processors are shared among the jobs, so service time will be slow.
-				waitTime = jobs.peek().getResidualServiceTime() * jobs.size() / numberOfServers;
-			}
-
-			lastMessageSent = sendMe(jobs.peek().getJob(), waitTime);
-			lastMessageSentTime = NetSystem.getTime();
+	private void performServiceTimes(double startTime) {
+		Iterator<JobInfo> it = psJobsList.getInternalJobInfoList().iterator();
+		while (it.hasNext()) {
+			PSJobInfo jobInfo = (PSJobInfo) it.next();
+			int jobClassID = jobInfo.getJob().getJobClass().getId();
+			double serviceTime = (NetSystem.getTime() - startTime) * numberOfServers * serviceFractions[jobClassID];
+			jobInfo.performServiceTime(serviceTime);
 		}
 	}
 
-	/**
-	 * Handles the manual update of measures for queue and service sections
-	 * @param jobData the jobData
-	 * @param event the type of event
-	 * @throws NetException
-	 */
-	private void handleJobInfoLists(JobData jobData, PSEvent event) throws NetException {
-		// Retrieve queue PSJobInfoList
-		if (queueList == null) {
-			queueList = (PSJobInfoList) getOwnerNode().getSection(NodeSection.INPUT).getObject(PROPERTY_ID_JOBINFOLIST);
-		}
-
-		// Computes the percentage of jobs in service and in queue
-		double serviceWeigth, queueWeight;
-		if (jobs.size() <= numberOfServers) {
-			// Everything is in service
-			serviceWeigth = 1.0;
+	private void handleJobInfoList(PSJobInfo jobInfo, PSEvent event) {
+		if (event == PSEvent.JOB_IN) {
+			psJobsList.psUpdateUtilization(serviceFractions);
+			psJobsList.add(jobInfo);
 		} else {
-			serviceWeigth = (double) numberOfServers / jobs.size();
-		}
-		queueWeight = 1.0 - serviceWeigth;
-
-		// Updates utilization measures
-		JobClass jobClass = jobData.getJob().getJobClass();
-		queueList.psUpdateUtilization(jobClass, queueWeight, NetSystem.getTime());
-		serviceList.psUpdateUtilization(jobClass, serviceWeigth, NetSystem.getTime());
-
-		// Update busy time measures and throughputs
-		if (event == PSEvent.JOB_OUT) {
-			double queueTime = NetSystem.getTime() - jobData.getEnteringTime() - jobData.getServiceTime();
-			// This can happen only because of machine epsilon problems
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			double queueTime = (NetSystem.getTime() - jobInfo.getEnteringTime()) - jobInfo.getServiceTime();
 			if (queueTime < 0.0) {
 				queueTime = 0.0;
 			}
-			queueList.psUpdateBusyTimes(jobClass, queueTime);
-			serviceList.psUpdateBusyTimes(jobClass, jobData.getServiceTime());
-			queueList.psUpdateThroughput(jobClass);
-			serviceList.psUpdateThroughput(jobClass);
-		}
-
-		// Finally updates jobIn / jobOut counters
-		if (event == PSEvent.JOB_IN) {
-			queueList.psJobIn(jobClass, NetSystem.getTime());
-			serviceList.psJobIn(jobClass, NetSystem.getTime());
-		} else if (event == PSEvent.JOB_OUT) {
-			queueList.psJobOut(jobClass, NetSystem.getTime());
-			serviceList.psJobOut(jobClass, NetSystem.getTime());
+			psJobsList.psUpdateBusyTime(jobClass, jobInfo.getServiceTime());
+			psJobsList.psUpdateQueueTime(jobClass, queueTime);
+			psJobsList.psUpdateUtilization(serviceFractions);
+			psJobsList.remove(jobInfo);
 		}
 	}
 
-	/**
-	 * Updates service times of all the jobs being served by the corresponding amount.
-	 * All completed jobs will be sent forward.
-	 * @param time the start time in which the job message was sent
-	 * @param endedJob the job that was ended. May be null
-	 * @throws NetException if something goes wrong.
-	 */
-	private void updateServiceTimes(double startTime) throws NetException {
-		double serviceTime;
-
-		if (jobs.size() <= numberOfServers) {
-			// No sharing in this case: each job is served by a processor
-			serviceTime = NetSystem.getTime() - startTime;
+	private void updateServiceFractions() {
+		if (psJobsList.size() <= numberOfServers) {
+			for (int i = 0; i < jobClasses.size(); i++) {
+				JobClass jobClass = jobClasses.get(i);
+				if (psJobsList.size(jobClass) == 0) {
+					serviceFractions[i] = 0.0;
+				} else {
+					serviceFractions[i] = 1.0 / numberOfServers;
+				}
+			}
 		} else {
-			// Processors are shared among the jobs
-			serviceTime = (NetSystem.getTime() - startTime) * numberOfServers / jobs.size();
-		}
-
-		for (JobData jd : jobs) {
-			jd.performService(serviceTime);
-		}
-	}
-
-	/**
-	 * An inner data structure used to keep job and service time data.
-	 * The data structure is ordered basing on service times.
-	 */
-	private static class JobData implements Comparable<JobData> {
-		private Job job;
-		private double serviceTime;
-		private double residualServiceTime;
-		private double enteringTime;
-
-		/**
-		 * Builds a new JobData data structure
-		 * @param job the job
-		 * @param serviceTime the residual service time
-		 */
-		public JobData(Job job, double serviceTime) {
-			this.job = job;
-			this.residualServiceTime = serviceTime;
-			this.serviceTime = serviceTime;
-			this.enteringTime = NetSystem.getTime();
-		}
-
-		/* (non-Javadoc)
-		 * @see java.lang.Comparable#compareTo(java.lang.Object)
-		 */
-		public int compareTo(JobData o) {
-			if (residualServiceTime < o.residualServiceTime) {
-				return -1;
-			} else if (residualServiceTime > o.residualServiceTime) {
-				return 1;
-			} else {
-				return 0;
+			boolean[] serviceSaturated = new boolean[jobClasses.size()];
+			Arrays.fill(serviceSaturated, false);
+			double residualCapacity = numberOfServers;
+			boolean allocationComplete = false;
+			while (!allocationComplete) {
+				for (int i = 0; i < jobClasses.size(); i++) {
+					if (!serviceSaturated[i]) {
+						JobClass jobClass = jobClasses.get(i);
+						serviceFractions[i] = psStrategies[i].slice(psJobsList, jobClasses, serviceWeights, serviceSaturated, jobClass)
+								* (residualCapacity / numberOfServers);
+					}
+				}
+				allocationComplete = true;
+				for (int i = 0; i < jobClasses.size(); i++) {
+					if (serviceFractions[i] > 1.0 / numberOfServers) {
+						serviceFractions[i] = 1.0 / numberOfServers;
+						residualCapacity -= 1.0;
+						serviceSaturated[i] = true;
+						allocationComplete = false;
+					}
+				}
 			}
 		}
-
-		/**
-		 * @return the job
-		 */
-		public Job getJob() {
-			return job;
-		}
-
-		/**
-		 * @return the residual service time
-		 */
-		public double getResidualServiceTime() {
-			return residualServiceTime;
-		}
-
-		/**
-		 * @return the total service time that the job must receive.
-		 */
-		public double getServiceTime() {
-			return serviceTime;
-		}
-
-		/**
-		 * @return the time in which the job entered the service section.
-		 */
-		public double getEnteringTime() {
-			return enteringTime;
-		}
-
-		/**
-		 * Performs service, scaling the residual service time
-		 * @param time the service time received
-		 */
-		public void performService(double time) {
-			residualServiceTime = residualServiceTime - time;
-		}
-
-		/* (non-Javadoc)
-		 * @see java.lang.Object#toString()
-		 */
-		@Override
-		public String toString() {
-			return "Job id: " + job.getId() + " class: " + job.getJobClass().getName() + " residual time: " + residualServiceTime;
-		}
 	}
 
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.NodeSection#nodeLinked(jmt.engine.QueueNet.NetNode)
-	 */
-	@Override
-	protected void nodeLinked(NetNode node) throws NetException {
-		jobsList = serviceList = new PSJobInfoList(getJobClasses().size(), true);
-		jobsList.setServerNumber(numberOfServers);
+	private void serviceJobs() {
+		if (psJobsList.size() > 0) {
+			double minWaitTime = Double.MAX_VALUE;
+			Iterator<JobInfo> it = psJobsList.getInternalJobInfoList().iterator();
+			while (it.hasNext()) {
+				PSJobInfo jobInfo = (PSJobInfo) it.next();
+				int jobClassID = jobInfo.getJob().getJobClass().getId();
+				double waitTime = jobInfo.getResidualServiceTime() / (numberOfServers * serviceFractions[jobClassID]);
+				if (waitTime < minWaitTime) {
+					messageJobInfo = jobInfo;
+					minWaitTime = waitTime;
+				}
+			}
+			messageToken = sendMe(messageJobInfo.getJob(), minWaitTime);
+			messageSendTime = NetSystem.getTime();
+		}
 	}
 
 }
