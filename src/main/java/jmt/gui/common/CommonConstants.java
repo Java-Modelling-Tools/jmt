@@ -203,6 +203,7 @@ public interface CommonConstants {
 	public static final String DISTRIBUTION_HYPEREXPONENTIAL = "Hyperexponential";
 	public static final String DISTRIBUTION_BURST = "Burst";
 	//public static final String DISTRIBUTION_MAP= "MAP";
+	public static final String DISTRIBUTION_COX2= "Cox2";
 	public static final String DISTRIBUTION_MMPP2 = "MMPP2";
 	public static final String DISTRIBUTION_GAMMA = "Gamma";
 	public static final String DISTRIBUTION_UNIFORM = "Uniform";

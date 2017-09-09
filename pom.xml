@@ -13,12 +13,13 @@
 	</properties>
 	<profiles>
 		<profile>
-			<id>full</id>
+				<id>full</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
-				<finalName>JMT-installer-${jmt.version}</finalName>
+			<finalName>JMT-installer-${jmt.version}</finalName>
+			<pluginManagement>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -184,6 +185,7 @@
 						</configuration>
 					</plugin>
 				</plugins>
+				</pluginManagement>
 			</build>
 		</profile>
 		<profile>
