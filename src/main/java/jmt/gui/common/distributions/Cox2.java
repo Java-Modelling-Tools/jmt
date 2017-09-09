@@ -153,7 +153,7 @@ public class Cox2 extends Distribution {
 	 */
 	protected void setCM(double mean, double c) {
 		double l1, l2, p;
-		if (c>=0.5 && c<1) {
+		if (c*c>=0.5 && c<1) {
 			p = 0.0;
 			l1 = 2/mean/(1+Math.sqrt(1+2*(c*c-1)));
 			l2 = 2/mean/(1-Math.sqrt(1+2*(c*c-1)));
