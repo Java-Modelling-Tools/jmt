@@ -25,8 +25,8 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * This is the parameter that should be passed to the Hyper Exponential
  * distribution.
  *
- * <br><br>Copyright (c) 2006
- * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * <br><br>Copyright (c) 2017
+ * <br>Imperial College London
  * @author Giuliano Casale
  *
  */
@@ -61,7 +61,7 @@ public class Cox2Par extends AbstractParameter implements Parameter {
 	 *
 	 */
 	private void testParameters() throws IncorrectDistributionParameterException {
-		if (phi0 <= 0) {
+		if (phi0 < 0) {
 			throw new IncorrectDistributionParameterException("Error: phi0 must be >= 0 ");
 		}
 		if (lambda1 < 0) {
