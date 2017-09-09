@@ -48,7 +48,7 @@ public class Cox2Par extends AbstractParameter implements Parameter {
 		this.lambda0 = lambda0.doubleValue();
 		testParameters();
 		this.mean = 1/lambda0 + (1-phi0)/lambda1;
-		this.var = 0;
+		this.var = ((2*lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (2*lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0))/(lambda0*lambda0*((lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0))) - (1/lambda0 - (phi0 - 1)/lambda1)*(1/lambda0 - (phi0 - 1)/lambda1) - (((phi0 - 1)/(lambda1*lambda1) + (phi0 - 1)/(lambda0*lambda1))*((2*lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (2*lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0)))/((lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0));
 		// creates 2 ExponentialPar objects
 		expParam1 = new ExponentialPar(this.lambda1);
 		expParam0 = new ExponentialPar(this.lambda0);
