@@ -74,8 +74,8 @@ public class Dispatcher_jSIMschema {
 	//used to store temp measures info
 	private TempMeasure[] tempMeasures = null;
 
-	// used to store progress time - Bertoli Marco
-	private double progressTime;
+	//used to store progress - Bertoli Marco
+	private double progress;
 	private Vector<Integer> measuresToAbort = new Vector<Integer>(); // Vector with measures to abort at refresh
 
 	private long maxDuration = -1;
@@ -258,7 +258,7 @@ public class Dispatcher_jSIMschema {
 			//already finished
 			return 1.0;
 		}
-		return progressTime;
+		return progress;
 	}
 
 	/**
@@ -301,11 +301,11 @@ public class Dispatcher_jSIMschema {
 					tempMeasure.refreshMeasure();
 				}
 			}
-			// Updates simulation progress time
+			// Updates simulation progress
 			try {
-				progressTime = NetSystem.checkProgress(net);
+				progress = NetSystem.checkProgress(net);
 			} catch (NetException e) {
-				progressTime = 0.0;
+				progress = 0.0;
 			}
 
 			//restart computation

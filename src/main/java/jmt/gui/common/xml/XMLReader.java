@@ -546,46 +546,46 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				strategy = strategy.substring(strategy.lastIndexOf(".") + 1, strategy.length());
 				// Now sets correct queue strategy, given queueput policies
 				if (strategy.equals("TailStrategy")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
 				} else if (strategy.equals("TailStrategyPriority")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
 				} else if (strategy.equals("HeadStrategy")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
 				} else if (strategy.equals("HeadStrategyPriority")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
 				} else if (strategy.equals("RandStrategy")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_RAND);
 				} else if (strategy.equals("RandStrategyPriority")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_RAND);
 				} else if (strategy.equals("SJFStrategy")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_SJF);
 				} else if (strategy.equals("SJFStrategyPriority")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_SJF);
 				} else if (strategy.equals("LJFStrategy")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_LJF);
 				} else if (strategy.equals("LJFStrategyPriority")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_LJF);
 				} else if (strategy.equals("SEPTStrategy")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_SEPT);
 				} else if (strategy.equals("SEPTStrategyPriority")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_SEPT);
 				} else if (strategy.equals("LEPTStrategy")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_LEPT);
 				} else if (strategy.equals("LEPTStrategyPriority")) {
-					model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_LEPT);
 				}
 			}
@@ -626,9 +626,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static void parseServerSection(Element section, CommonModel model, Object key) {
 		String sectionName = section.getAttribute(XML_A_STATION_SECTION_CLASSNAME);
 		if (CLASSNAME_PSSERVER.equals(sectionName)) {
-			model.setStationQueueStrategy(key, QUEUE_STRATEGY_STATION_PS);
+			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_PREEMPTIVE);
 			for (Object classKey : classes.values()) {
-				model.setQueueStrategy(key, classKey, QUEUE_STRATEGY_EPS);
+				model.setQueueStrategy(key, classKey, QUEUE_STRATEGY_PS);
 			}
 		}
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
@@ -659,7 +659,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					String strategy = ((Element) psStrategies.get(className)).getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
 					strategy = strategy.substring(strategy.lastIndexOf(".") + 1, strategy.length());
 					if (strategy.equals("EPSStrategy")) {
-						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_EPS);
+						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_PS);
 					} else if (strategy.equals("GPSStrategy")) {
 						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_GPS);
 					} else if (strategy.equals("DPSStrategy")) {

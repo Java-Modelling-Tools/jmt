@@ -631,11 +631,11 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			Measure m = utilizationPerClass[c];
 			if (m != null) {
-				m.update(listPerClass[c].size() / numberOfServers, NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
+				m.update((double) listPerClass[c].size() / numberOfServers, NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
 			}
 		}
 		if (utilization != null) {
-			utilization.update(list.size() / numberOfServers, NetSystem.getTime() - getLastModifyTime());
+			utilization.update((double) list.size() / numberOfServers, NetSystem.getTime() - getLastModifyTime());
 		}
 	}
 

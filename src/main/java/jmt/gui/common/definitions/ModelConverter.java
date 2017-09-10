@@ -69,7 +69,7 @@ public class ModelConverter {
 		String defaultRouting = Defaults.get("stationRoutingStrategy");
 		String defaultQueue = Defaults.get("stationQueueStrategy");
 		Defaults.set("stationRoutingStrategy", RandomRouting.class.getName());
-		Defaults.set("stationQueueStrategy", CommonConstants.QUEUE_STRATEGY_EPS);
+		Defaults.set("stationQueueStrategy", CommonConstants.QUEUE_STRATEGY_PS);
 
 		ArrayList<String> res = new ArrayList<String>();
 		// Keys for unique items
@@ -150,7 +150,7 @@ public class ModelConverter {
 					// Load independent
 					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER);
 					output.setStationNumberOfServers(key, new Integer(servers));
-					output.setStationQueueStrategy(key, CommonConstants.QUEUE_STRATEGY_STATION_PS);
+					output.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
 						Exponential exp = new Exponential();
@@ -163,7 +163,7 @@ public class ModelConverter {
 					// we support multiclass too (future extensions).
 					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER);
 					output.setStationNumberOfServers(key, new Integer(servers));
-					output.setStationQueueStrategy(key, CommonConstants.QUEUE_STRATEGY_STATION_PS);
+					output.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
 						LDStrategy lds = new LDStrategy();

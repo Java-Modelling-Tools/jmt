@@ -35,6 +35,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import jmt.engine.simEngine.EngineUtils;
 import jmt.framework.gui.graph.MeasureValue;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.PAResultsModel;
@@ -136,6 +137,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 		elem.setAttribute("xsi:noNamespaceSchemaLocation", XML_DOCUMENT_XSD);
 		elem.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		elem.setAttribute(XML_A_ROOT_POLLING, Double.toString(measure.getPollingInterval()));
+		elem.setAttribute(XML_A_ROOT_ELAPSED, Long.toString(measure.getElapsedTime()));
 		elem.setAttribute(XML_A_ROOT_LOG_DECIMAL_SEP, measure.getLogDecimalSeparator());
 		elem.setAttribute(XML_A_ROOT_LOG_DELIMITER, measure.getLogCsvDelimiter());
 		writeMeasures(resultsDoc, elem, measure);
@@ -153,7 +155,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 			for (int i = 0; i < measure.getMeasureNumber(); i++) {
 				Element elem = doc.createElement(XML_E_MEASURE);
 				elem.setAttribute(XML_A_MEASURE_NAME, measure.getName(i));
-				elem.setAttribute(XML_A_MEASURE_TYPE, measure.getMeasureType(i));
+				elem.setAttribute(XML_A_MEASURE_TYPE, Integer.toString(EngineUtils.decodeMeasureType(measure.getMeasureType(i))));
 				elem.setAttribute(XML_A_MEASURE_CLASS, measure.getClassName(i));
 				elem.setAttribute(XML_A_MEASURE_STATION, measure.getStationName(i));
 				elem.setAttribute(XML_A_MEASURE_SAMPLES, Integer.toString(measure.getAnalyzedSamples(i)));
@@ -171,7 +173,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 			for (int i = 0; i < measure.getMeasureNumber(); i++) {
 				Element elem = doc.createElement(XML_E_MEASURE);
 				elem.setAttribute(XML_A_MEASURE_NAME, measure.getName(i));
-				elem.setAttribute(XML_A_MEASURE_TYPE, measure.getMeasureType(i));
+				elem.setAttribute(XML_A_MEASURE_TYPE, Integer.toString(EngineUtils.decodeMeasureType(measure.getMeasureType(i))));
 				elem.setAttribute(XML_A_MEASURE_CLASS, measure.getClassName(i));
 				elem.setAttribute(XML_A_MEASURE_STATION, measure.getStationName(i));
 				elem.setAttribute(XML_A_MEASURE_FINALVALUE, Double.toString((measure.getValues(i).lastElement()).getMeanValue()));

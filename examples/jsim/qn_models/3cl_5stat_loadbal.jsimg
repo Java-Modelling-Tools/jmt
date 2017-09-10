@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="3cl_5stat_loadbal.jsimg" timestamp="Sat Aug 12 15:52:53 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="3cl_5stat_loadbal.jsimg" timestamp="Wed Sep 06 12:38:04 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="500000" name="3cl_5stat_loadbal.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Source" type="open"/>
 <userClass name="Class1" priority="0" referenceSource="Source" type="open"/>
@@ -95,7 +95,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -183,7 +183,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -271,7 +271,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -382,58 +382,58 @@
 <position rotate="false" x="474.0" y="143.0"/>
 </station>
 </jmodel>
-<results logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.9" analyzedSamples="7040" discardedSamples="1695" finalValue="0.7529615348388349" name="Server0_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server0" state="1" type="Response Time">
-<sample lastIntervalAvgValue="0.7592908480423954" meanValue="0.7592908480423954" simulationTime="14466.025845925918"/>
-<sample lastIntervalAvgValue="0.81393969610181" lowerBound="0.7064219729927372" meanValue="0.7529615348388349" simulationTime="21806.085518350228" upperBound="0.7995010966849325"/>
+<results elapsedTime="1968" logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.9" analyzedSamples="1600" discardedSamples="40" finalValue="0.8002374283657586" name="Server0_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server0" state="1" type="2">
+<sample lastIntervalAvgValue="1.0854691762222288" meanValue="1.0854691762222288" simulationTime="160.40191475142035"/>
+<sample lastIntervalAvgValue="0.7977210813074903" lowerBound="0.7338306774699743" meanValue="0.8002374283657586" simulationTime="4147.895695406906" upperBound="0.8666441792615429"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="1600" discardedSamples="215" finalValue="1.510883250548269" name="Server1_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server1" state="1" type="Response Time">
-<sample lastIntervalAvgValue="1.5074881687789297" lowerBound="1.3964634344545208" meanValue="1.510883250548269" simulationTime="5968.78870698283" upperBound="1.6253030666420172"/>
-<sample lastIntervalAvgValue="1.5074881687789297" lowerBound="1.3964634344545208" meanValue="1.510883250548269" simulationTime="5968.78870698283" upperBound="1.6253030666420172"/>
+<measure alpha="0.9" analyzedSamples="1600" discardedSamples="55" finalValue="1.4653469351100434" name="Server1_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server1" state="1" type="2">
+<sample lastIntervalAvgValue="1.8006781425213223" meanValue="1.8006781425213223" simulationTime="165.34770912721794"/>
+<sample lastIntervalAvgValue="1.4723233407085583" lowerBound="1.3693440138439725" meanValue="1.4653469351100434" simulationTime="5433.337449336353" upperBound="1.5613498563761143"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="2880" discardedSamples="710" finalValue="2.227676408327444" name="Server2_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server2" state="1" type="Response Time">
-<sample lastIntervalAvgValue="2.2278364510527604" lowerBound="2.0272224341882614" meanValue="2.227676408327444" simulationTime="11646.137986579633" upperBound="2.4281303824666267"/>
-<sample lastIntervalAvgValue="2.2278364510527604" lowerBound="2.0272224341882614" meanValue="2.227676408327444" simulationTime="11646.137986579633" upperBound="2.4281303824666267"/>
+<measure alpha="0.9" analyzedSamples="21760" discardedSamples="13240" finalValue="2.232006076462285" name="Server2_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server2" state="1" type="2">
+<sample lastIntervalAvgValue="1.9039274766466132" meanValue="1.9039274766466132" simulationTime="163.92561224573095"/>
+<sample lastIntervalAvgValue="2.25851856214942" lowerBound="2.1916996322705278" meanValue="2.232006076462285" simulationTime="116656.48001103262" upperBound="2.2723125206540424"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="10240" discardedSamples="270" finalValue="1.2190878077753544" name="Server0_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server0" state="1" type="Response Time">
-<sample lastIntervalAvgValue="1.21927841309695" lowerBound="1.0617898220958106" meanValue="1.2003609607496861" simulationTime="14461.522961437966" upperBound="1.3389320994035616"/>
-<sample lastIntervalAvgValue="1.2306962942327144" lowerBound="1.1707866073956288" meanValue="1.2190878077753544" simulationTime="27978.61061534923" upperBound="1.26738900815508"/>
+<measure alpha="0.9" analyzedSamples="2560" discardedSamples="80" finalValue="1.2421069299002554" name="Server0_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server0" state="1" type="2">
+<sample lastIntervalAvgValue="1.2647032967775462" meanValue="1.2647032967775462" simulationTime="165.2345153403699"/>
+<sample lastIntervalAvgValue="1.2273197789511885" lowerBound="1.1726535987121083" meanValue="1.2421069299002554" simulationTime="7007.838231957913" upperBound="1.3115602610884025"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="7680" discardedSamples="1905" finalValue="0.39989425699982195" name="Server1_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server1" state="1" type="Response Time">
-<sample lastIntervalAvgValue="0.4014424447008672" meanValue="0.4014424447008672" simulationTime="14462.163188255083"/>
-<sample lastIntervalAvgValue="0.4230612252879895" lowerBound="0.38038734885944503" meanValue="0.39989425699982195" simulationTime="21561.142665754087" upperBound="0.4194011651401989"/>
+<measure alpha="0.9" analyzedSamples="5120" discardedSamples="145" finalValue="0.4414856556627638" name="Server1_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server1" state="1" type="2">
+<sample lastIntervalAvgValue="0.43496954468290017" meanValue="0.43496954468290017" simulationTime="161.22059533646987"/>
+<sample lastIntervalAvgValue="0.4376836360703392" lowerBound="0.4148840369447797" meanValue="0.4414856556627638" simulationTime="11741.416438433507" upperBound="0.46808727438074793"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="2560" discardedSamples="45" finalValue="1.1751629389203866" name="Server2_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server2" state="1" type="Response Time">
-<sample lastIntervalAvgValue="1.183679487236269" meanValue="1.1774122208013384" simulationTime="14459.420629939837"/>
-<sample lastIntervalAvgValue="1.167611154495231" lowerBound="1.1108210847495075" meanValue="1.1751629389203866" simulationTime="15239.049662318037" upperBound="1.2395047930912657"/>
+<measure alpha="0.9" analyzedSamples="2240" discardedSamples="0" finalValue="1.1720982236738853" name="Server2_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server2" state="1" type="2">
+<sample lastIntervalAvgValue="1.3592707658352194" meanValue="1.3592707658352194" simulationTime="155.1863710852918"/>
+<sample lastIntervalAvgValue="1.1681739133095184" lowerBound="1.0730947835551128" meanValue="1.1720982236738853" simulationTime="13064.879421401187" upperBound="1.2711016637926578"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="2" discardedSamples="0" finalValue="0.0" name="Server0_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server0" state="3" type="Response Time">
-<sample lastIntervalAvgValue="1.9086203663747987" meanValue="1.9086203663747987" simulationTime="3.5670393118798884"/>
-<sample lastIntervalAvgValue="1.9086203663747987" meanValue="0.0" simulationTime="3.5670393118798884"/>
+<measure alpha="0.9" analyzedSamples="20" discardedSamples="0" finalValue="0.0" name="Server0_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server0" state="3" type="2">
+<sample lastIntervalAvgValue="3.4070737193809806" meanValue="3.4070737193809806" simulationTime="106.03193383996319"/>
+<sample lastIntervalAvgValue="3.4070737193809806" meanValue="0.0" simulationTime="106.03193383996319"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="6" discardedSamples="0" finalValue="0.0" name="Server1_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server1" state="3" type="Response Time">
-<sample lastIntervalAvgValue="3.1356102472659604" meanValue="3.1356102472659604" simulationTime="11.740997817588502"/>
-<sample lastIntervalAvgValue="3.1356102472659604" meanValue="0.0" simulationTime="11.740997817588502"/>
+<measure alpha="0.9" analyzedSamples="28" discardedSamples="0" finalValue="0.0" name="Server1_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server1" state="3" type="2">
+<sample lastIntervalAvgValue="2.4314728457514683" meanValue="2.4314728457514683" simulationTime="114.96923342945774"/>
+<sample lastIntervalAvgValue="2.4314728457514683" meanValue="0.0" simulationTime="114.96923342945774"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="11520" discardedSamples="200" finalValue="1.5342768102319755" name="Server2_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server2" state="1" type="Response Time">
-<sample lastIntervalAvgValue="1.527855371053106" lowerBound="1.4124808320114717" meanValue="1.5342768102319755" simulationTime="11564.519018144183" upperBound="1.6560727884524793"/>
-<sample lastIntervalAvgValue="1.527855371053106" lowerBound="1.4124808320114717" meanValue="1.5342768102319755" simulationTime="11564.519018144183" upperBound="1.6560727884524793"/>
+<measure alpha="0.9" analyzedSamples="3840" discardedSamples="890" finalValue="1.336462094359039" name="Server2_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server2" state="1" type="2">
+<sample lastIntervalAvgValue="1.3921765932484251" meanValue="1.3921765932484251" simulationTime="165.60022418914767"/>
+<sample lastIntervalAvgValue="1.359832579755572" lowerBound="1.2161560868508217" meanValue="1.336462094359039" simulationTime="4795.579741754659" upperBound="1.4567681018672565"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="11520" discardedSamples="475" finalValue="1.2812677751987176" name="System Response Time" nodeType="" precision="0.1" referenceClass="" referenceStation="" state="1" type="System Response Time">
-<sample lastIntervalAvgValue="1.2812377591695758" lowerBound="1.180535364117107" meanValue="1.2812677751987176" simulationTime="3983.7804192591184" upperBound="1.3820001862803282"/>
-<sample lastIntervalAvgValue="1.2812377591695758" lowerBound="1.180535364117107" meanValue="1.2812677751987176" simulationTime="3983.7804192591184" upperBound="1.3820001862803282"/>
+<measure alpha="0.9" analyzedSamples="10880" discardedSamples="2720" finalValue="1.195782011433457" name="System Response Time" nodeType="" precision="0.1" referenceClass="" referenceStation="" state="1" type="8">
+<sample lastIntervalAvgValue="1.4340726498362257" meanValue="1.4340726498362257" simulationTime="165.60022418914767"/>
+<sample lastIntervalAvgValue="1.1999000018269075" lowerBound="1.1450880521663473" meanValue="1.195782011433457" simulationTime="4572.244268170264" upperBound="1.2464759707005666"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="2880" discardedSamples="615" finalValue="0.4812325247876786" name="Server0_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server0" state="1" type="Utilization">
-<sample lastIntervalAvgValue="0.48290940397503984" lowerBound="0.44022958673123835" meanValue="0.4812325247876786" simulationTime="2732.9247223550947" upperBound="0.5222354628441188"/>
-<sample lastIntervalAvgValue="0.48290940397503984" lowerBound="0.44022958673123835" meanValue="0.4812325247876786" simulationTime="2732.9247223550947" upperBound="0.5222354628441188"/>
+<measure alpha="0.9" analyzedSamples="5120" discardedSamples="1050" finalValue="0.4916879180257634" name="Server0_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server0" state="1" type="4">
+<sample lastIntervalAvgValue="0.6203810477974924" meanValue="0.6203810477974924" simulationTime="165.2712746325432"/>
+<sample lastIntervalAvgValue="0.4839379074955833" lowerBound="0.476222007818498" meanValue="0.4916879180257634" simulationTime="4873.619386892549" upperBound="0.5071538282330288"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="21760" discardedSamples="9205" finalValue="0.4103457973453044" name="Server1_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server1" state="1" type="Utilization">
-<sample lastIntervalAvgValue="0.41443698142168317" meanValue="0.41443698142168317" simulationTime="14465.917930638716"/>
-<sample lastIntervalAvgValue="0.4129002274637989" lowerBound="0.39982407955571364" meanValue="0.4103457973453044" simulationTime="24024.083790431047" upperBound="0.4208675151348952"/>
+<measure alpha="0.9" analyzedSamples="5120" discardedSamples="300" finalValue="0.4073196257322979" name="Server1_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server1" state="1" type="4">
+<sample lastIntervalAvgValue="0.5840980554840847" meanValue="0.5840980554840847" simulationTime="165.61603580180798"/>
+<sample lastIntervalAvgValue="0.4062826410940752" lowerBound="0.3884808149789044" meanValue="0.4073196257322979" simulationTime="4262.312791357679" upperBound="0.4261584364856914"/>
 </measure>
-<measure alpha="0.9" analyzedSamples="2240" discardedSamples="0" finalValue="0.717124079711722" name="Server2_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server2" state="1" type="Utilization">
-<sample lastIntervalAvgValue="0.7171240797117219" lowerBound="0.6590868506355643" meanValue="0.717124079711722" simulationTime="1148.2153064715928" upperBound="0.7751613087878797"/>
-<sample lastIntervalAvgValue="0.7171240797117219" lowerBound="0.6590868506355643" meanValue="0.717124079711722" simulationTime="1148.2153064715928" upperBound="0.7751613087878797"/>
+<measure alpha="0.9" analyzedSamples="5120" discardedSamples="5" finalValue="0.7070844251210433" name="Server2_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server2" state="1" type="4">
+<sample lastIntervalAvgValue="0.7534953520128117" meanValue="0.7534953520128117" simulationTime="165.60022418914767"/>
+<sample lastIntervalAvgValue="0.7043826249554913" lowerBound="0.6838020963713168" meanValue="0.7070844251210433" simulationTime="2573.837132403839" upperBound="0.7303667538707698"/>
 </measure>
 </results>
 </archive>

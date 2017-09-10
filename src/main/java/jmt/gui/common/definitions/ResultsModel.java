@@ -67,10 +67,11 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector[] measuresVector; // For each TempMeasure holds a Vector with its value at every poll
 	private boolean[] finished;
 	private MeasureListener[] listeners; // Listener array to notify GUI of measure change events
-	private ProgressTimeListener ptlistener = null;
+	private ProgressListener plistener = null;
 	private boolean simulationFinished = false;
 	private double pollingInterval;
-	private double progressTime = 0.0;
+	private double progress = 0.0;
+	private long elapsedTime = 0;
 	private MalformedReplayerFileListener mrfListener;
 
 	private String logDecimalSeparator;
@@ -90,9 +91,10 @@ public class ResultsModel implements MeasureDefinition {
 	 * Sets this data structure, provided an array of TempMeasures
 	 * @param measures array of TempMeasures, as
 	 * returned by <code>Dispatcher_jSIMschema.getTempMeasures()</code>
-	 * @param progressTime Progress time of simulation
+	 * @param progress Progress of simulation
+	 * @param elapsedTime Elapsed time of simulation
 	 */
-	public synchronized void setTempMeasures(TempMeasure[] measures, double progressTime) {
+	public synchronized void setTempMeasures(TempMeasure[] measures, double progress, long elapsedTime) {
 		this.measures = measures;
 		measuresVector = new Vector[measures.length];
 		finished = new boolean[measures.length];
@@ -146,10 +148,11 @@ public class ResultsModel implements MeasureDefinition {
 			measuresVector[i] = temp_mean;
 			finished[i] = false;
 		}
-		this.progressTime = progressTime;
-		// Notifies progress time listener listener
-		if (ptlistener != null) {
-			ptlistener.timeChanged(progressTime);
+		this.progress = progress;
+		this.elapsedTime = elapsedTime;
+		// Notifies progress listener
+		if (plistener != null) {
+			plistener.progressChanged(progress, elapsedTime);
 		}
 	}
 
@@ -158,19 +161,22 @@ public class ResultsModel implements MeasureDefinition {
 	 * PRECONDITION: refresh method MUST HAVE BEEN called on every TempMeasure before calling
 	 * this method. So simply this method is designed to be called after every
 	 * <code>Dispatcher_jSIMschema.refreshTempMeasures()</code> call.
-	 * @param progressTime Progress time of simulation
+	 * @param progress Progress of simulation
+	 * @param elapsedTime Elapsed time of simulation
 	 */
-	public synchronized void refresh(double progressTime) {
+	public synchronized void refresh(double progress, long elapsedTime) {
 		if (measures == null) {
 			return;
 		}
+		this.progress = progress;
+		this.elapsedTime = elapsedTime;
 		// Simulation finished
-		if (progressTime >= 1.0) {
+		if (progress >= 1.0) {
 			simulationFinished = true;
 		}
-		// Notifies progress time listener listener
-		if (ptlistener != null) {
-			ptlistener.timeChanged(progressTime);
+		// Notifies progress listener
+		if (plistener != null) {
+			plistener.progressChanged(progress, elapsedTime);
 		}
 		for (int i = 0; i < measures.length; i++) {
 			// If measure is not finished, register new value for that measure
@@ -562,7 +568,7 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns simulation polling interval. This is the time elapsed between two temp values.
+	 * Returns simulation polling interval in seconds
 	 * @return simulation polling interval in seconds
 	 */
 	public double getPollingInterval() {
@@ -570,11 +576,11 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Sets a ProgressTimeListener to listen to progress time change events. This is unique.
+	 * Sets a ProgressListener to listen to progress change events. This is unique.
 	 * @param listener listener to be set or null to reset previous one
 	 */
-	public synchronized void setProgressTimeListener(ProgressTimeListener listener) {
-		ptlistener = listener;
+	public synchronized void setProgressListener(ProgressListener listener) {
+		plistener = listener;
 	}
 
 	public synchronized void setMalformedReplayerFileListener(MalformedReplayerFileListener listener) {
@@ -588,11 +594,19 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns current simulation progress time
-	 * @return current progress time
+	 * Returns current simulation progress
+	 * @return current simulation progress
 	 */
-	public double getProgressTime() {
-		return progressTime;
+	public double getProgress() {
+		return progress;
+	}
+
+	/**
+	 * Returns simulation elapsed time in milliseconds
+	 * @return simulation elapsed time in milliseconds
+	 */
+	public long getElapsedTime() {
+		return elapsedTime;
 	}
 
 	/**

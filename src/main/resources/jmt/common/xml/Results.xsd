@@ -25,7 +25,7 @@
 						</xs:sequence>
 						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="referenceClass" type="xs:string" use="required"/>
-						<xs:attribute name="type" type="xs:string" use="required"/>
+						<xs:attribute name="type" type="xs:integer" use="required"/>
 						<xs:attribute name="referenceStation" type="xs:string" use="required"/>
 						<xs:attribute name="finalValue" type="jdouble" use="optional"/>
 						<xs:attribute name="state" type="xs:integer" use="optional"/>
@@ -39,10 +39,10 @@
 				</xs:element>
 			</xs:sequence>
 			<xs:attribute name="pollingInterval" type="jdouble" use="required"/>
+			<xs:attribute name="elapsedTime" type="xs:long" use="optional"/>
 			<xs:attribute name="logDecimalSeparator" type="xs:string" use="optional"/>
 			<xs:attribute name="logDelimiter" type="xs:string" use="optional"/>
-			<xs:attribute name="logPath" type="xs:string" use="optional"/>
-			<xs:attribute name="lastRunTime" type="xs:string" use="optional"/>		
+			<xs:attribute name="logPath" type="xs:string" use="optional"/>	
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

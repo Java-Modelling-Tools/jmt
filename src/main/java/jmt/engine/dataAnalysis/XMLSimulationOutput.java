@@ -79,7 +79,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 	//the File containing the original model definition
 	File simModelDefinition;
 
-	private String decimalSeparator;
+	private String logDecimalSeparator;
 	private String logDelimiter;
 	private boolean isTerminalSimulation;
 
@@ -134,7 +134,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 			}
 
 			// Write CSV definition for verbose measures load.
-			decimalSeparator = simulation.getSimParameters().getLogDecimalSeparator();
+			logDecimalSeparator = simulation.getSimParameters().getLogDecimalSeparator();
 			logDelimiter = simulation.getSimParameters().getLogDelimiter();
 			root.setAttribute("logDecimalSeparator", simulation.getSimParameters().getLogDecimalSeparator());
 			root.setAttribute("logDelimiter", simulation.getSimParameters().getLogDelimiter());
@@ -207,7 +207,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 			elem.setAttribute("logFile", measure.getOutput().getOutputFile().getAbsolutePath());
 			if (isTerminalSimulation) {
 				try {
-					StatisticalOutputsLoader loader = new StatisticalOutputsLoader(measure, decimalSeparator, logDelimiter);
+					StatisticalOutputsLoader loader = new StatisticalOutputsLoader(measure, logDecimalSeparator, logDelimiter);
 					SampleStatistics stat = loader.getStatistics();
 					elem.setAttribute("mean", Double.toString(stat.getMean()));
 					elem.setAttribute("variance", Double.toString(stat.getVariance()));

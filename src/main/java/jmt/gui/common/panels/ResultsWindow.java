@@ -104,7 +104,6 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	private static DecimalFormat decimalFormatExp = new DecimalFormat("0.00E0");
 	private static DecimalFormat decimalFormatNorm = new DecimalFormat("#0.000");
 	private JSimLogger logger = JSimLogger.getLogger(ResultsWindow.class);
-	private double startTime = System.currentTimeMillis();
 
 	/**
 	 * Creates a new ResultsWindow
@@ -182,7 +181,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		progressBar.setStringPainted(true);
 		progressBar.setForeground(Color.BLUE);
 		UIManager.put("ProgressBar.selectionForeground", Color.WHITE);
-		setProgressBar(results.getProgressTime());
+		setProgressBar(results.getProgress(), results.getElapsedTime());
 		toolbar.add(progressBar);
 		// Add close window button
 		JButton close = new JButton();
@@ -206,24 +205,25 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		this.getContentPane().add(toolbar, BorderLayout.SOUTH);
 
 		// Adds listener for progressBar
-		results.setProgressTimeListener(new MeasureDefinition.ProgressTimeListener() {
-			public void timeChanged(double time) {
-				setProgressBar(time);
+		results.setProgressListener(new MeasureDefinition.ProgressListener() {
+			public void progressChanged(double progress, long elapsedTime) {
+				setProgressBar(progress, elapsedTime);
 			}
 		});
 	}
 
 	/**
 	 * Sets progress bar to specified value
-	 * @param percent value. Must be between 0 included and 1 included
+	 * @param progress progress of simulation
+	 * @param elapsedTime elapsed time of simulation
 	 */
-	private void setProgressBar(double percent) {
-		int progress = (int) Math.round(percent * 100);
-		progressBar.setValue(progress);
-		if (progress < 100) {
-			progressBar.setString(progress + "% of simulation performed...");
+	private void setProgressBar(double progress, long elapsedTime) {
+		int percent = (int) Math.round(progress * 100);
+		progressBar.setValue(percent);
+		if (percent < 100) {
+			progressBar.setString(percent + "% of simulation performed...");
 		} else {
-			progressBar.setString("Simulation Complete (Time Elapsed: " + Math.ceil((System.currentTimeMillis() - startTime)/100)/10 + "s)");
+			progressBar.setString("Simulation Complete (Time Elapsed: " + (double) (elapsedTime/100)/10 + "s)");
 		}
 	}
 

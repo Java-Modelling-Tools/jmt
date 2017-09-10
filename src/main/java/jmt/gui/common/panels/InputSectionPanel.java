@@ -71,14 +71,14 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	/**
 	 * Used to define station queue policies
 	 */
-	protected static final Object[] serverStationQueuePolicies = { QUEUE_STRATEGY_STATION_PS, QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
-	protected static final Object[] otherStationQueuePolicies = { QUEUE_STRATEGY_STATION_QUEUE, QUEUE_STRATEGY_STATION_QUEUE_PRIORITY };
+	protected static final Object[] serverStationQueuePolicies = { STATION_QUEUE_STRATEGY_PREEMPTIVE, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY };
+	protected static final Object[] otherStationQueuePolicies = { STATION_QUEUE_STRATEGY_NON_PREEMPTIVE, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY };
 	/**
 	 * Used to define queue policies
 	 */
-	protected static final Object[] serverPSQueuePolicies = { QUEUE_STRATEGY_EPS, QUEUE_STRATEGY_GPS, QUEUE_STRATEGY_DPS };
-	protected static final Object[] serverQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND, QUEUE_STRATEGY_SJF, QUEUE_STRATEGY_LJF, QUEUE_STRATEGY_SEPT, QUEUE_STRATEGY_LEPT };
-	protected static final Object[] otherQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND };
+	protected static final Object[] serverPreemptiveQueuePolicies = { QUEUE_STRATEGY_PS, QUEUE_STRATEGY_GPS, QUEUE_STRATEGY_DPS };
+	protected static final Object[] serverNonPreemptiveQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND, QUEUE_STRATEGY_SJF, QUEUE_STRATEGY_LJF, QUEUE_STRATEGY_SEPT, QUEUE_STRATEGY_LEPT };
+	protected static final Object[] otherNonPreemptiveQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND };
 	/**
 	 * Used to define drop rules
 	 */
@@ -186,15 +186,15 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				String queuePolicy = (String) queuePolicyCombo.getSelectedItem();
 				data.setStationQueueStrategy(stationKey, queuePolicy);
 				Vector<Object> classKeys = classData.getClassKeys();
-				if (queuePolicy.equals(QUEUE_STRATEGY_STATION_PS)) {
-					List<Object> policyList = Arrays.asList(serverPSQueuePolicies);
+				if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+					List<Object> policyList = Arrays.asList(serverPreemptiveQueuePolicies);
 					for (Object classKey : classKeys) {
 						if (!policyList.contains(data.getQueueStrategy(stationKey, classKey))) {
-							data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_EPS);
+							data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_PS);
 						}
 					}
 				} else {
-					List<Object> policyList = Arrays.asList(serverQueuePolicies);
+					List<Object> policyList = Arrays.asList(serverNonPreemptiveQueuePolicies);
 					for (Object classKey : classKeys) {
 						if (!policyList.contains(data.getQueueStrategy(stationKey, classKey))) {
 							data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_FCFS);
@@ -298,13 +298,13 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
 				if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
-					if (data.getStationQueueStrategy(stationKey).equals(QUEUE_STRATEGY_STATION_PS)) {
-						return ComboBoxCellEditor.getEditorInstance(serverPSQueuePolicies);
+					if (data.getStationQueueStrategy(stationKey).equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+						return ComboBoxCellEditor.getEditorInstance(serverPreemptiveQueuePolicies);
 					} else {
-						return ComboBoxCellEditor.getEditorInstance(serverQueuePolicies);
+						return ComboBoxCellEditor.getEditorInstance(serverNonPreemptiveQueuePolicies);
 					}
 				} else {
-					return ComboBoxCellEditor.getEditorInstance(otherQueuePolicies);
+					return ComboBoxCellEditor.getEditorInstance(otherNonPreemptiveQueuePolicies);
 				}
 			} else if (column == 2) {
 				return ComboBoxCellEditor.getEditorInstance(dropRules);

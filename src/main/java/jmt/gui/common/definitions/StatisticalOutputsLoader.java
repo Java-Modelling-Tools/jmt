@@ -55,13 +55,13 @@ public class StatisticalOutputsLoader {
 	private double distMin = Double.NaN;
 	private double distMax = Double.NaN;
 	private int distIntervals = -1;
-	private String decimalSeparator;
+	private String logDecimalSeparator;
 	private String logCsvDelimiter;
 
 	private CSVLoader currentLoader;
 
 	public StatisticalOutputsLoader(MeasureDefinition measureDefinition, int measureIndex) throws FileNotFoundException{
-		this.decimalSeparator = measureDefinition.getLogDecimalSeparator();
+		this.logDecimalSeparator = measureDefinition.getLogDecimalSeparator();
 		this.logCsvDelimiter = measureDefinition.getLogCsvDelimiter();
 		this.filename = measureDefinition.getLogFileName(measureIndex);
 		this.start = measureDefinition.getDiscardedSamples(measureIndex);
@@ -70,10 +70,10 @@ public class StatisticalOutputsLoader {
 		reloadData();
 	}
 
-	public StatisticalOutputsLoader(Measure measure, String decimalSeparator, String logCsvDelimiter) throws FileNotFoundException, IOException, ParseException {
+	public StatisticalOutputsLoader(Measure measure, String logDecimalSeparator, String logCsvDelimiter) throws FileNotFoundException, IOException, ParseException {
 		this.filename = measure.getOutput().getOutputFile().getAbsolutePath();
 		this.start = measure.getDiscardedSamples();
-		this.decimalSeparator = decimalSeparator;
+		this.logDecimalSeparator = logDecimalSeparator;
 		this.logCsvDelimiter = logCsvDelimiter;
 
 		// Starts loading of CSV file in a separate thread.
@@ -98,7 +98,7 @@ public class StatisticalOutputsLoader {
 	//reads file and generates graph. Code linked with code of CSVOutputReader.
 	private void loadCSV() throws IOException, ParseException {
 		File measureFile = new File(filename);
-		VerboseCSVMeasureOutputReader reader = new VerboseCSVMeasureOutputReader(measureFile, decimalSeparator, logCsvDelimiter);
+		VerboseCSVMeasureOutputReader reader = new VerboseCSVMeasureOutputReader(measureFile, logDecimalSeparator, logCsvDelimiter);
 		statistics = new SampleStatistics();
 
 		// Fill distribution if requested.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="2cl_10stat_fcr_fork_whatif.jsimg" timestamp="Sat Aug 12 15:52:32 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="2cl_10stat_fcr_fork_whatif.jsimg" timestamp="Wed Sep 06 12:37:49 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="500000" name="2cl_10stat_fcr_fork_whatif.jsimg" polling="1.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Requests" type="open"/>
 <userClass name="Class1" priority="0" referenceSource="Requests" type="open"/>
@@ -80,7 +80,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -147,7 +147,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -214,7 +214,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -247,7 +247,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -314,7 +314,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -381,7 +381,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -448,7 +448,7 @@
 </subParameter>
 </parameter>
 <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 <refClass>Class1</refClass>
@@ -700,8 +700,8 @@
 <field name="Type" value="Arrival rates"/>
 </parametric>
 </jmodel>
-<results logDecimalSeparator="." logDelimiter="," pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.99" analyzedSamples="10" name="Network_Class0_System Response Time" nodeType="" precision="0.05" referenceClass="Class0" referenceStation="Network" type="System Response Time">
+<results elapsedTime="0" logDecimalSeparator="." logDelimiter="," pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="10" name="Network_Class0_System Response Time" nodeType="" precision="0.05" referenceClass="Class0" referenceStation="Network" type="8">
 <sample lowerBound="1.0300453611596647" meanValue="1.07760177916705" upperBound="1.1251581971744353" validity="true"/>
 <sample lowerBound="1.0385047830065426" meanValue="1.0909553483578582" upperBound="1.1434059137091739" validity="true"/>
 <sample lowerBound="1.04549413093935" meanValue="1.0880281214422807" upperBound="1.1305621119452114" validity="true"/>
@@ -713,7 +713,7 @@
 <sample lowerBound="1.1251116750745804" meanValue="1.153987754851007" upperBound="1.1828638346274334" validity="true"/>
 <sample lowerBound="1.121319689654022" meanValue="1.178172877673565" upperBound="1.2350260656931078" validity="true"/>
 </measure>
-<measure alpha="0.99" analyzedSamples="10" name="Network_Class1_System Response Time" nodeType="" precision="0.05" referenceClass="Class1" referenceStation="Network" type="System Response Time">
+<measure alpha="0.99" analyzedSamples="10" name="Network_Class1_System Response Time" nodeType="" precision="0.05" referenceClass="Class1" referenceStation="Network" type="8">
 <sample lowerBound="1.7018319921543739" meanValue="1.7619309301470092" upperBound="1.8220298681396445" validity="true"/>
 <sample lowerBound="1.688928691398508" meanValue="1.7643588505574423" upperBound="1.8397890097163767" validity="true"/>
 <sample lowerBound="1.7346387314215903" meanValue="1.7929417789187185" upperBound="1.8512448264158468" validity="true"/>

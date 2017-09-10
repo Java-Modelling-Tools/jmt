@@ -43,7 +43,8 @@ public class StoredResultsModel implements MeasureDefinition {
 
 	protected Vector<Measure> measures = new Vector<Measure>();
 	protected HashMap<String, Measure> names = new HashMap<String, Measure>();
-	protected double pollingInterval = 1;
+	protected double pollingInterval = 1.0;
+	protected long elapsedTime = 0;
 	private Vector<Integer> queueLength = new Vector<Integer>();
 	private Vector<Integer> queueTime = new Vector<Integer>();
 	private Vector<Integer> responseTime = new Vector<Integer>();
@@ -425,7 +426,7 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns simulation polling interval. This is the time elapsed between two temp values.
+	 * Returns simulation polling interval in seconds
 	 * @return simulation polling interval in seconds
 	 */
 	public double getPollingInterval() {
@@ -433,11 +434,35 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Returns current simulation progress time
-	 * @return current progress time
+	 * Sets simulation polling interval in seconds
+	 * @param interval simulation polling interval in seconds
 	 */
-	public double getProgressTime() {
+	public void setPollingInterval(double interval) {
+		this.pollingInterval = interval;
+	}
+
+	/**
+	 * Returns current simulation progress
+	 * @return current simulation progress
+	 */
+	public double getProgress() {
 		return 1.0;
+	}
+
+	/**
+	 * Returns simulation elapsed time in milliseconds
+	 * @return simulation elapsed time in milliseconds
+	 */
+	public long getElapsedTime() {
+		return elapsedTime;
+	}
+
+	/**
+	 * Sets simulation elapsed time in milliseconds
+	 * @param time simulation elapsed time in milliseconds
+	 */
+	public void setElapsedTime(long time) {
+		elapsedTime = time;
 	}
 
 	// --- Methods to populate data structure ----------------------------------------------------------------
@@ -513,14 +538,6 @@ public class StoredResultsModel implements MeasureDefinition {
 	public void addMeasureSample(String measureName, double lastIntervalAvgValue, double simulationTime, double meanValue, double upperBound, double lowerBound) {
 		Measure tmp = names.get(measureName);
 		tmp.addSample(meanValue, lastIntervalAvgValue, simulationTime, upperBound, lowerBound);
-	}
-
-	/**
-	 * Sets measure polling interval
-	 * @param interval polling interval
-	 */
-	public void setPollingInterval(double interval) {
-		this.pollingInterval = interval;
 	}
 
 	// -------------------------------------------------------------------------------------------------------
@@ -679,14 +696,14 @@ public class StoredResultsModel implements MeasureDefinition {
 	 * @param measureIndex index of the measure that this listener should listen
 	 * @param listener listener to add or null to remove old one
 	 */
-	public void addMeasureListener(int measureIndex, MeasureDefinition.MeasureListener listener) {
+	public void addMeasureListener(int measureIndex, MeasureListener listener) {
 	}
 
 	/**
 	 * This feature is not required as loaded measures are static
 	 * @param listener listener to be set or null to reset previous one
 	 */
-	public void setProgressTimeListener(MeasureDefinition.ProgressTimeListener listener) {
+	public void setProgressListener(ProgressListener listener) {
 	}
 
 	public void setMalformedReplayerFileListener(MalformedReplayerFileListener listener) {

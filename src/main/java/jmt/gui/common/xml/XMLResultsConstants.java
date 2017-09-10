@@ -32,10 +32,10 @@ public interface XMLResultsConstants {
 	public static final String XML_DOCUMENT_XSD = "Results.xsd";
 	public static final String XML_DOCUMENT_ROOT = "results";
 	public static final String XML_A_ROOT_POLLING = "pollingInterval";
+	public static final String XML_A_ROOT_ELAPSED = "elapsedTime";
 	public static final String XML_A_ROOT_LOG_DECIMAL_SEP = "logDecimalSeparator";
 	public static final String XML_A_ROOT_LOG_DELIMITER = "logDelimiter";
 	public static final String XML_A_ROOT_LOG_PATH = "logPath";
-	public static final String XML_A_ROOT_LAST_RUN_TIME = "lastRunTime";
 
 	public static final String XML_E_MEASURE = "measure";
 	public static final String XML_A_MEASURE_NAME = "name";

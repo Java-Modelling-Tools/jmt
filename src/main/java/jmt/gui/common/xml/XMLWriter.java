@@ -93,7 +93,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		HashMap<String, String> temp = null;
 
 		temp = new HashMap<String, String>();
-		temp.put(QUEUE_STRATEGY_EPS, "EPSStrategy");
+		temp.put(QUEUE_STRATEGY_PS, "EPSStrategy");
 		temp.put(QUEUE_STRATEGY_GPS, "GPSStrategy");
 		temp.put(QUEUE_STRATEGY_DPS, "DPSStrategy");
 		PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(temp);
@@ -575,11 +575,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				queuePutStrategy, false);
 		String queueStrategy = model.getStationQueueStrategy(stationKey);
 		for (int i = 0; i < queuePutStrategy.length; i++) {
-			String strategy = queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)
+			String strategy = queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 					? QUEUE_STRATEGY_FCFS : model.getQueueStrategy(stationKey,
 							classes.get(i));
 			Map<String, String> strategyMapping = queueStrategy
-					.equals(QUEUE_STRATEGY_STATION_QUEUE_PRIORITY)
+					.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
 					? PRIORITY_QUEUE_PUT_MAPPING : QUEUE_PUT_MAPPING;
 			String strategyName = strategyMapping.get(strategy);
 			queuePutStrategy[i] = new XMLParameter(strategyName,
@@ -625,7 +625,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			CommonModel model, Object stationKey) {
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
 		String queueStrategy = model.getStationQueueStrategy(stationKey);
-		if (queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)) {
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER);
 		} else {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_SERVER);
@@ -650,7 +650,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		numbersOfVisits.appendParameterElement(doc, elem);
 		getServiceSection(model, stationKey).appendParameterElement(doc, elem);
 
-		if (queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)) {
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
 			// creating PS strategies node element
 			XMLParameter[] psStrategy = new XMLParameter[classes.size()];
 			for (int i = 0; i < psStrategy.length; i++) {

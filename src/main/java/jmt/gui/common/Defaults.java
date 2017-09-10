@@ -73,7 +73,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("stationName", "Station");
 		def.setProperty("stationType", STATION_TYPE_SERVER);
 		def.setProperty("stationCapacity", "-1");
-		def.setProperty("stationStationQueueStrategy", QUEUE_STRATEGY_STATION_QUEUE);
+		def.setProperty("stationStationQueueStrategy", STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 		def.setProperty("stationQueueStrategy", QUEUE_STRATEGY_FCFS);
 		def.setProperty("stationServers", "1");
 		def.setProperty("stationServiceStrategy", "jmt.gui.common.distributions.Exponential");

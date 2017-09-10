@@ -1582,7 +1582,7 @@ public class ModelChecker implements CommonConstants {
 			}
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
-				Integer priority = stationStrategy.equals(QUEUE_STRATEGY_STATION_QUEUE_PRIORITY)
+				Integer priority = stationStrategy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
 						? class_def.getClassPriority(thisClass) : Integer.valueOf(0);
 				String strategy = station_def.getQueueStrategy(thisServer, thisClass);
 				if (!strategies.containsKey(priority)) {
@@ -2153,7 +2153,7 @@ public class ModelChecker implements CommonConstants {
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
 				String strategy = station_def.getQueueStrategy(thisServer, thisClass);
-				if (strategy.equals(CommonConstants.QUEUE_STRATEGY_EPS)
+				if (strategy.equals(CommonConstants.QUEUE_STRATEGY_PS)
 						|| strategy.equals(CommonConstants.QUEUE_STRATEGY_FCFS)
 						|| strategy.equals(CommonConstants.QUEUE_STRATEGY_RAND)) {
 					continue;
@@ -2325,7 +2325,7 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < stations.size(); i++) {
 			Object thisStation = stations.get(i);
 			String stationStrategy = station_def.getStationQueueStrategy(thisStation);
-			if (stationStrategy != null && stationStrategy.equals(CommonConstants.QUEUE_STRATEGY_STATION_QUEUE_PRIORITY)) {
+			if (stationStrategy != null && stationStrategy.equals(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
 				stationsWithPriorityScheduling.add(thisStation);
 				warnings[SCHEDULING_SAME_PRIORITY_WARNING] = true;
 			}

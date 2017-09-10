@@ -1217,10 +1217,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			sd.numberOfServers = Integer.valueOf(-1);
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
@@ -1229,8 +1229,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
-			if (sd.queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)) {
-				sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+				sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			}
 			sd.forkBlock = Defaults.getAsInteger("forkBlock");
 			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
@@ -1239,10 +1239,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_SCALER)) {
@@ -1251,7 +1251,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.numberOfServers = Defaults.getAsInteger("forkJobsPerLink");
 		} else if (sd.type.equals(STATION_TYPE_PLACE)) {
 			sd.queueCapacity = Defaults.getAsInteger("placeCapacity");
-			sd.queueStrategy = QUEUE_STRATEGY_STATION_QUEUE;
+			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
 			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
@@ -1941,7 +1941,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			scd.queueStrategy = Defaults.get("stationQueueStrategy");
-			if (sd.queueStrategy.equals(QUEUE_STRATEGY_STATION_PS)) {
+			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
 				if (scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_RAND)
@@ -1949,10 +1949,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LJF)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SEPT)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)) {
-					scd.queueStrategy = QUEUE_STRATEGY_EPS;
+					scd.queueStrategy = QUEUE_STRATEGY_PS;
 				}
 			} else {
-				if (scd.queueStrategy.equals(QUEUE_STRATEGY_EPS)
+				if (scd.queueStrategy.equals(QUEUE_STRATEGY_PS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)) {
 					scd.queueStrategy = QUEUE_STRATEGY_FCFS;
@@ -1964,7 +1964,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			scd.queueStrategy = Defaults.get("stationQueueStrategy");
-			if (scd.queueStrategy.equals(QUEUE_STRATEGY_EPS)
+			if (scd.queueStrategy.equals(QUEUE_STRATEGY_PS)
 					|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)
 					|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)
 					|| scd.queueStrategy.equals(QUEUE_STRATEGY_SJF)

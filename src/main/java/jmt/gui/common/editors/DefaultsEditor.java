@@ -657,9 +657,9 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Creates a Map with station Queue strategy names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> stationQueueStrategies = new LinkedHashMap<String, String>();
-		stationQueueStrategies.put(CommonConstants.QUEUE_STRATEGY_STATION_PS, CommonConstants.QUEUE_STRATEGY_STATION_PS);
-		stationQueueStrategies.put(CommonConstants.QUEUE_STRATEGY_STATION_QUEUE, CommonConstants.QUEUE_STRATEGY_STATION_QUEUE);
-		stationQueueStrategies.put(CommonConstants.QUEUE_STRATEGY_STATION_QUEUE_PRIORITY, CommonConstants.QUEUE_STRATEGY_STATION_QUEUE_PRIORITY);
+		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
+		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 		addInputCombo(text, property, cont, stationQueueStrategies);
 	}
 
@@ -673,7 +673,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Creates a Map with Queue strategy names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> queueStrategies = new LinkedHashMap<String, String>();
-		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_EPS, CommonConstants.QUEUE_STRATEGY_EPS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_PS, CommonConstants.QUEUE_STRATEGY_PS);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_GPS, CommonConstants.QUEUE_STRATEGY_GPS);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_DPS, CommonConstants.QUEUE_STRATEGY_DPS);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.QUEUE_STRATEGY_FCFS);

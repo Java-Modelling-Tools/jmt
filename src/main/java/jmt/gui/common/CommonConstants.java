@@ -173,12 +173,12 @@ public interface CommonConstants {
 	static final Dimension DIM_BUTTON_L = new Dimension(140, 20);
 
 	/**Constants for selection of station queueing strategy*/
-	public static final String QUEUE_STRATEGY_STATION_PS = "Processor Sharing";
-	public static final String QUEUE_STRATEGY_STATION_QUEUE = "Non-preemptive Scheduling";
-	public static final String QUEUE_STRATEGY_STATION_QUEUE_PRIORITY = "Non-preemptive Scheduling (Priority)";
+	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE = "Preemptive Scheduling";
+	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE = "Non-preemptive Scheduling";
+	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY = "Non-preemptive Scheduling (Priority)";
 
 	/**Constants for selection of queueing strategy*/
-	public static final String QUEUE_STRATEGY_EPS = "EPS";
+	public static final String QUEUE_STRATEGY_PS = "PS";
 	public static final String QUEUE_STRATEGY_GPS = "GPS";
 	public static final String QUEUE_STRATEGY_DPS = "DPS";
 	public static final String QUEUE_STRATEGY_FCFS = "FCFS";

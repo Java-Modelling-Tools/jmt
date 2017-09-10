@@ -584,7 +584,7 @@ public class PAResultsModel implements MeasureDefinition {
 	 *
 	 * @param listener listener to be set or null to reset previous one
 	 */
-	public void setProgressTimeListener(ProgressTimeListener listener) {
+	public void setProgressListener(ProgressListener listener) {
 		//Not implemented
 	}
 
@@ -598,7 +598,7 @@ public class PAResultsModel implements MeasureDefinition {
 	}
 
 	/**
-	 * Not implemented, return always 0
+	 * Not implemented
 	 *
 	 * @return 0
 	 */
@@ -611,7 +611,16 @@ public class PAResultsModel implements MeasureDefinition {
 	 *
 	 * @return 0
 	 */
-	public double getProgressTime() {
+	public double getProgress() {
+		return 0;
+	}
+
+	/**
+	 * Not implemented
+	 *
+	 * @return 0
+	 */
+	public long getElapsedTime() {
 		return 0;
 	}
 

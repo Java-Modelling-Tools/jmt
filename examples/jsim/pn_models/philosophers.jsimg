@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="philosophers.jsimg" timestamp="Sat Aug 12 15:53:26 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="philosophers.jsimg" timestamp="Wed Sep 06 12:39:41 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="philosophers.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass customers="8" name="Class1" priority="0" referenceSource="thinking_1" type="closed"/>
 <node name="thinking_1">
@@ -1908,18 +1908,18 @@
 <position rotate="true" x="157.0" y="400.0"/>
 </station>
 </jmodel>
-<results logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.99" analyzedSamples="1" discardedSamples="0" finalValue="1.268696399847683" name="t3_1_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_1" state="0" type="Firing Throughput">
-<sample lastIntervalAvgValue="1.268696399847683" meanValue="1.268696399847683" simulationTime="0.7882106389834935"/>
+<results elapsedTime="78" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="2" discardedSamples="0" finalValue="0.15715696457167763" name="t3_1_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_1" state="0" type="18">
+<sample lastIntervalAvgValue="0.15715696457167763" meanValue="0.15715696457167763" simulationTime="12.726130244694446"/>
 </measure>
-<measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="t3_2_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_2" state="0" type="Firing Throughput">
-<sample lastIntervalAvgValue="Infinity" meanValue="0.0" simulationTime="0.0"/>
+<measure alpha="0.99" analyzedSamples="2" discardedSamples="0" finalValue="0.20877912106275845" name="t3_2_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_2" state="0" type="18">
+<sample lastIntervalAvgValue="0.20877912106275845" meanValue="0.20877912106275845" simulationTime="9.57950196274083"/>
 </measure>
-<measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="t3_3_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_3" state="0" type="Firing Throughput">
-<sample lastIntervalAvgValue="Infinity" meanValue="0.0" simulationTime="0.0"/>
+<measure alpha="0.99" analyzedSamples="4" discardedSamples="0" finalValue="0.2072722768317984" name="t3_3_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_3" state="0" type="18">
+<sample lastIntervalAvgValue="0.2072722768317984" meanValue="0.2072722768317984" simulationTime="19.298287552686087"/>
 </measure>
-<measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="t3_4_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_4" state="0" type="Firing Throughput">
-<sample lastIntervalAvgValue="Infinity" meanValue="0.0" simulationTime="0.0"/>
+<measure alpha="0.99" analyzedSamples="3" discardedSamples="0" finalValue="0.1934202491689805" name="t3_4_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_4" state="0" type="18">
+<sample lastIntervalAvgValue="0.1934202491689805" meanValue="0.1934202491689805" simulationTime="15.51026851061011"/>
 </measure>
 </results>
 </archive>

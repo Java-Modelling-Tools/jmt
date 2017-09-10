@@ -266,10 +266,10 @@ public interface MeasureDefinition {
 	public int[] getFiringThroughputMeasures();
 
 	/**
-	 * Sets a ProgressTimeListener to listen to progress time change events. This is unique.
+	 * Sets a ProgressListener to listen to progress change events. This is unique.
 	 * @param listener listener to be set or null to reset previous one
 	 */
-	public void setProgressTimeListener(ProgressTimeListener listener);
+	public void setProgressListener(ProgressListener listener);
 
 	public void setMalformedReplayerFileListener(MalformedReplayerFileListener listener);
 
@@ -282,16 +282,22 @@ public interface MeasureDefinition {
 	public boolean isSimulationFinished();
 
 	/**
-	 * Returns simulation polling interval. This is the time elapsed between two temp values.
+	 * Returns simulation polling interval in seconds
 	 * @return simulation polling interval in seconds
 	 */
 	public double getPollingInterval();
 
 	/**
-	 * Returns current simulation progress time
-	 * @return current progress time
+	 * Returns current simulation progress
+	 * @return current simulation progress
 	 */
-	public double getProgressTime();
+	public double getProgress();
+
+	/**
+	 * Returns simulation elapsed time in milliseconds
+	 * @return simulation elapsed time in milliseconds
+	 */
+	public long getElapsedTime();
 
 	/**
 	 * Returns the decimal separator used in log files
@@ -315,11 +321,11 @@ public interface MeasureDefinition {
 	}
 
 	/**
-	 * Interface used to specify a listener on progress time. This is useful to
+	 * Interface used to specify a listener on progress. This is useful to
 	 * implement a GUI with a reactive approach.
 	 */
-	public interface ProgressTimeListener {
-		public void timeChanged(double progressTime);
+	public interface ProgressListener {
+		public void progressChanged(double progress, long elapsedTime);
 	}
 
 	/**

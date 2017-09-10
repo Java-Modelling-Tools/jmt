@@ -59,6 +59,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 * @param sd Reference to Simulation Definition data structure
 	 */
 	public DispatcherThread(GuiInterface gui, SimulationDefinition sd) {
+		this.setName("DispatcherThread");
 		this.gui = gui;
 		this.sd = sd;
 		this.results = (ResultsModel) sd.getSimulationResults();
@@ -73,9 +74,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 */
 	@Override
 	public void run() {
-		if (timer != null) {
-			timer.start();
-		}
+		timer.start();
 		poller.start();
 		try {
 			simulator.solveModel();
@@ -88,11 +87,9 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 			simulator.killSimulation();
 			gui.handleException(ex);
 		}
-		if (timer != null) {
-			timer.kill();
-		}
+		timer.kill();
 		gui.changeSimActionsState(true, false, false);
-		results.refresh(1);
+		results.refresh(1.0, timer.getElapsedTime());
 
 		// Removes output file, if it was created.
 		if (simulator.getOutputFile() != null) {
@@ -109,8 +106,8 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	public void startSimulation(File simulationFile) {
 		simulator = new Dispatcher_jSIMschema(simulationFile);
 		// ----------- Francesco D'Aquino ---------------
+		// If animation is enabled creates a simStateChecker
 		if (sd.isAnimationEnabled()) {
-			//if it is the first time create a new simStateChecker
 			simStateChecker = new SimulationStateChecker((Mediator) gui, simulator);
 		}
 		// ----------- end Francesco D'Aquino -----------
@@ -118,10 +115,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		if (!sd.getUseRandomSeed().booleanValue()) {
 			simulator.setSimulationSeed(sd.getSimulationSeed().longValue());
 		}
-		// If a time maximum time is specified, initialize all stuff related
-		if (sd.getMaximumDuration().doubleValue() > 0) {
-			timer = new TimerThread(this, sd.getMaximumDuration().doubleValue());
-		}
+		timer = new TimerThread(this, sd.getMaximumDuration().doubleValue());
 		gui.changeSimActionsState(false, true, true);
 		start();
 	}
@@ -131,9 +125,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 */
 	public void pauseSimulation() {
 		if (simulator != null) {
-			if (timer != null) {
-				timer.pause();
-			}
+			timer.pause();
 			gui.changeSimActionsState(true, false, true);
 			simulator.pauseSim();
 		}
@@ -145,9 +137,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 */
 	public void stopSimulation() {
 		if (simulator != null) {
-			if (timer != null) {
-				timer.kill();
-			}
+			timer.kill();
 			//gui.changeSimActionsState(true, false, false);
 			simulator.abortAllMeasures();
 		}
@@ -159,9 +149,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 */
 	public void restartSimulation() {
 		if (simulator != null) {
-			if (timer != null) {
-				timer.restart();
-			}
+			timer.restart();
 			gui.changeSimActionsState(false, true, true);
 			simulator.restartSim();
 		}
@@ -184,6 +172,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		protected boolean initialized = false;
 
 		public PollerThread(double seconds, DispatcherThread dispatcher) {
+			this.setName("PollerThread");
 			interval = Math.round(seconds * 1000);
 			this.dispatcher = dispatcher;
 		}
@@ -209,7 +198,8 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 						((Mediator) gui).setGraphCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 					}
 					dispatcher.simulator.refreshTempMeasures();
-					dispatcher.results.setTempMeasures(dispatcher.simulator.getTempMeasures(), dispatcher.simulator.checkSimProgress());
+					dispatcher.results.setTempMeasures(dispatcher.simulator.getTempMeasures(),
+							dispatcher.simulator.checkSimProgress(), timer.getElapsedTime());
 					initialized = true;
 					// Sets ResultsWindow
 					ResultsWindow rw = new ResultsWindow(sd, dispatcher, gui.getFileName());
@@ -226,10 +216,10 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 					dispatcher.simulator.refreshTempMeasures();
 					double progress = dispatcher.simulator.checkSimProgress();
 					// Progress is the biggest between simulation progress and timer progress
-					if (timer != null && timer.getElapsedPercentage() > progress) {
+					if (timer.getElapsedPercentage() > progress) {
 						progress = timer.getElapsedPercentage();
 					}
-					dispatcher.results.refresh(progress);
+					dispatcher.results.refresh(progress, timer.getElapsedTime());
 					// ------------ Francesco D'Aquino -------------------
 					if (sd.isAnimationEnabled()) {
 						if (!simStateChecker.isInitialized()) {
@@ -269,53 +259,43 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 * An inner thread used to stop simulation after timeout elapsed
 	 */
 	protected class TimerThread extends Thread {
-		protected long residualTime;
-		protected long totalTime;
 		protected DispatcherThread dispatcher;
+		protected long totalTime;
+		protected long elapsedTime;
 		protected long initialTime;
-		// End means normal end of measures, kill forced one
-		protected boolean end = false;
-		protected boolean killed = false;
 		protected boolean paused = false;
-		protected final Object lock = new Object();
+		protected boolean killed = false;
+		protected boolean ended = false;
 
 		public TimerThread(DispatcherThread dispatcher, double maxDuration) {
+			this.setName("TimerThread");
 			this.dispatcher = dispatcher;
-			this.residualTime = this.totalTime = Math.round(maxDuration * 1000);
+			this.totalTime = Math.round(maxDuration * 1000);
+			this.elapsedTime = 0;
 		}
 
 		/**
 		 * Thread run's method. It will wait until maxDuration has elapsed, then stops
-		 * simulation.
+		 * simulation
 		 */
 		@Override
 		public void run() {
-			initialTime = System.currentTimeMillis();
-			// Wait for residual time. This is true unless pause button is pressed.
-			while (!end && !killed) {
-				initialTime = System.currentTimeMillis();
+			while (!killed && !ended) {
 				try {
 					synchronized (this) {
-						wait(residualTime);
+						if (!paused) {
+							initialTime = System.currentTimeMillis();
+							wait(100);
+							elapsedTime += System.currentTimeMillis() - initialTime;
+							if (totalTime > 0 && elapsedTime >= totalTime) {
+								ended = true;
+							}
+						} else {
+							wait();
+						}
 					}
 				} catch (InterruptedException e) {
 					System.out.println("Error: Timer thread interrupted unexpectedly...");
-				}
-
-				residualTime = residualTime - (System.currentTimeMillis() - initialTime);
-				if (residualTime <= 100) {
-					end = true;
-				}
-
-				synchronized (lock) {
-					try {
-						// If end=false we have to wait until restart or kill is told us
-						if (!end && !killed) {
-							lock.wait();
-						}
-					} catch (InterruptedException e) {
-						System.out.println("Error: Timer thread interrupted unexpectedly...");
-					}
 				}
 			}
 			while (!dispatcher.simulator.isFinished()) {
@@ -334,7 +314,6 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		 * This method have to be called when simulation is paused
 		 */
 		public synchronized void pause() {
-			// Unblocks first wait in run method, so residualTime is updated
 			paused = true;
 			notifyAll();
 		}
@@ -343,42 +322,40 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		 * This method have to be called when simulation is restarted after pause
 		 */
 		public synchronized void restart() {
-			// Unblocks second wait in run method, so it will restart from the beginning
-			synchronized (lock) {
-				lock.notifyAll();
-				paused = false;
-			}
-		}
-
-		/**
-		 * This method have to be called if simulation is stopped or if it ends before timeout has
-		 * elapsed.
-		 */
-		public synchronized void kill() {
-			end = true;
-			killed = true;
-			synchronized (lock) {
-				lock.notifyAll();
-			}
+			paused = false;
 			notifyAll();
 		}
 
 		/**
-		 * Returns elapsed time in percentage format
-		 * @return elapsed time / total time
+		 * This method have to be called when simulation is stopped before timeout
 		 */
-		public synchronized double getElapsedPercentage() {
-			double elapsed;
-			if (paused) {
-				elapsed = 1 - (double) residualTime / (double) totalTime;
-			} else {
-				elapsed = 1 - (double) (residualTime - (System.currentTimeMillis() - initialTime)) / (double) totalTime;
+		public synchronized void kill() {
+			killed = true;
+			notifyAll();
+		}
+
+		/**
+		 * Returns elapsed time
+		 * @return elapsed time
+		 */
+		public long getElapsedTime() {
+			return elapsedTime;
+		}
+
+		/**
+		 * Returns elapsed percentage
+		 * @return elapsed percentage
+		 */
+		public double getElapsedPercentage() {
+			if (totalTime < 0) {
+				return 0.0;
 			}
+			double percent = (double) elapsedTime / (double) totalTime;
 			// Fix possible problem when this function is called after simulation ends
-			if (elapsed > 1) {
-				elapsed = 1;
+			if (percent > 1.0) {
+				percent = 1.0;
 			}
-			return elapsed;
+			return percent;
 		}
 	}
 

@@ -136,13 +136,13 @@ public class XMLResultsReader implements XMLResultsConstants {
 					if (u.equals("Infinity")) {
 						upper = Double.POSITIVE_INFINITY;
 					} else {
-						upper = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_UPPERBOUND));
+						upper = Double.parseDouble(u);
 					}
 					String l = sample.getAttribute(XML_A_SAMPLE_LOWERBOUND);
 					if (l.equals("Infinity")) {
 						lower = Double.POSITIVE_INFINITY;
 					} else {
-						lower = Double.parseDouble(sample.getAttribute(XML_A_SAMPLE_LOWERBOUND));
+						lower = Double.parseDouble(l);
 					}
 				}
 				model.addSample(measureName, lower, mean, upper, valid);
@@ -157,12 +157,26 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 */
 	private static void setMeasures(Element root, StoredResultsModel model) {
 		double polling = Double.parseDouble(root.getAttribute(XML_A_ROOT_POLLING));
-		String logDecimalSeparator = root.getAttribute(XML_A_ROOT_LOG_DECIMAL_SEP);
-		model.setLogDecimalSeparator(logDecimalSeparator);
-		String logCsvDelimiter = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
-		model.setLogCsvDelimiter(logCsvDelimiter);
-
 		model.setPollingInterval(polling);
+		String elapsed = root.getAttribute(XML_A_ROOT_ELAPSED);
+		if (elapsed.equals("")) {
+			model.setElapsedTime(0);
+		} else {
+			model.setElapsedTime(Long.parseLong(elapsed));
+		}
+		String logDecimalSeparator = root.getAttribute(XML_A_ROOT_LOG_DECIMAL_SEP);
+		if (logDecimalSeparator.equals("")) {
+			model.setLogDecimalSeparator(".");
+		} else {
+			model.setLogDecimalSeparator(logDecimalSeparator);
+		}
+		String logCsvDelimiter = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
+		if (logCsvDelimiter.equals("")) {
+			model.setLogCsvDelimiter(";");
+		} else {
+			model.setLogCsvDelimiter(logCsvDelimiter);
+		}
+
 		NodeList measures = root.getElementsByTagName(XML_E_MEASURE);
 		for (int i = 0; i < measures.getLength(); i++) {
 			Element current = (Element) measures.item(i);
