@@ -45,7 +45,7 @@ public class Cox2 extends Distribution {
 	 */
 	public Cox2() {
 		super("Coxian", // name in GUI
-				"jmt.engine.random.Cox2Distr", "jmt.engine.random.Cox2Par", "cox");
+				"jmt.engine.random.Cox2Distr", "jmt.engine.random.Cox2Par", "Cox-2 distribution");
 		hasMean = true;
 		hasC = true;
 	}
@@ -123,7 +123,7 @@ public class Cox2 extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "Cox2((" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
+		return "cox((" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
 				+ FormatNumber(((Double) parameters[2].getValue()).doubleValue()) + "),("
 				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + ",1.0))";
 	}
