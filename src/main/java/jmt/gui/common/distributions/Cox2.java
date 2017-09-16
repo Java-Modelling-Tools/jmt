@@ -45,7 +45,7 @@ public class Cox2 extends Distribution {
 	 */
 	public Cox2() {
 		super("Coxian", // name in GUI
-				"jmt.engine.random.Cox2Distr", "jmt.engine.random.Cox2Par", "Cox2");
+				"jmt.engine.random.Cox2Distr", "jmt.engine.random.Cox2Par", "cox");
 		hasMean = true;
 		hasC = true;
 	}
