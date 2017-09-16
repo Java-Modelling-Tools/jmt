@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="1cl_1stat_mm1k_fcr.jsimg" timestamp="Wed Sep 06 12:37:33 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="1000000" name="1cl_1stat_mm1k_fcr.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="open_1class_1stat_mm1k_fcr.jsimg" timestamp="Sat Sep 16 09:09:39 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="1000000" name="open_1class_1stat_mm1k_fcr.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Source 0" type="open"/>
-<node name="M/M/1">
+<node name="-/M/1-FCFS">
 <section className="Queue">
 <parameter classPath="java.lang.Integer" name="size">
 <value>-1</value>
@@ -73,11 +73,11 @@
 </parameter>
 </section>
 </node>
-<measure alpha="0.05" name="M/M/1_Number of Customers" nodeType="station" precision="0.05" referenceNode="M/M/1" referenceUserClass="" type="Number of Customers" verbose="false"/>
-<connection source="M/M/1" target="Sink 0"/>
-<connection source="Source 0" target="M/M/1"/>
+<measure alpha="0.05" name="-/M/1-FCFS_Number of Customers" nodeType="station" precision="0.05" referenceNode="-/M/1-FCFS" referenceUserClass="" type="Number of Customers" verbose="false"/>
+<connection source="-/M/1-FCFS" target="Sink 0"/>
+<connection source="Source 0" target="-/M/1-FCFS"/>
 <blockingRegion name="FCR - max 11 cust." type="default">
-<regionNode nodeName="M/M/1"/>
+<regionNode nodeName="-/M/1-FCFS"/>
 <globalConstraint maxJobs="-1"/>
 <globalMemoryConstraint maxMemory="-1"/>
 <classConstraint jobClass="Class0" maxJobsPerClass="11"/>
@@ -89,7 +89,7 @@
 </sim>
 <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
 <userClass color="#FF0000FF" name="Class0"/>
-<station name="M/M/1">
+<station name="-/M/1-FCFS">
 <position rotate="false" x="314.0" y="191.0"/>
 </station>
 <station name="Sink 0">
@@ -99,8 +99,8 @@
 <position rotate="false" x="160.0" y="194.0"/>
 </station>
 </jmodel>
-<results elapsedTime="3235" logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.95" analyzedSamples="1000000" discardedSamples="9240" finalValue="4.271725690837899" name="M/M/1_Number of Customers" nodeType="station" precision="0.05" referenceClass="" referenceStation="M/M/1" state="1" type="0">
+<results logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.95" analyzedSamples="1000000" discardedSamples="9240" finalValue="4.271725690837899" name="M/M/1_Number of Customers" nodeType="station" precision="0.05" referenceClass="" referenceStation="M/M/1" state="1" type="Number of Customers">
 <sample lastIntervalAvgValue="4.47756218458238" meanValue="4.47756218458238" simulationTime="371.18028656012063"/>
 <sample lastIntervalAvgValue="4.243007175147397" lowerBound="4.163831598614527" meanValue="4.256360220274972" simulationTime="34194.726769679735" upperBound="4.348888841935418"/>
 <sample lastIntervalAvgValue="4.279305612420558" lowerBound="4.214515858265783" meanValue="4.271725690837899" simulationTime="57309.99684688447" upperBound="4.328935523410014"/>
