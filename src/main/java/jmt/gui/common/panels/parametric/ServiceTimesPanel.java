@@ -208,14 +208,14 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		edit.add(classChooserLabel);
 		edit.add(stationChooser);
 		edit.add(classChooser);
-		edit.setPreferredSize(new Dimension(130, 108));
+		edit.setPreferredSize(new Dimension(130, 128));
 		JPanel editLables = new JPanel(new GridLayout(5, 1, 0, 5));
 		editLables.add(fromLabel);
 		editLables.add(toLabel);
 		editLables.add(stepsLabel);
 		editLables.add(stationChooserLabel);
 		editLables.add(classChooserLabel);
-		editLables.setPreferredSize(new Dimension(100, 108));
+		editLables.setPreferredSize(new Dimension(100, 128));
 		JPanel editPanel = new JPanel();
 		editPanel.add(editLables);
 		editPanel.add(edit);

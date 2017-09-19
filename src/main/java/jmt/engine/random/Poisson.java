@@ -25,7 +25,7 @@ import jmt.engine.math.Probability;
 /**
  * 
  * This is the Poisson distribution (see the constructor description
- * for his pdf definition).
+ * for its pdf definition).
  * 
  * <br><br>Copyright (c) 2003 (thanks to CERN - European Organization
  * for Nuclear Research for the Patchwork Rejection/Inversion method).
@@ -85,7 +85,7 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * <pre>         (lambda^x)     (-lambda)
 	 * pdf(x) = ----------- * e
 	 *              x!</pre>
-	 * where lamda is the variance of the distribution and it is also the mean
+	 * where lambda is the variance of the distribution and it is also the mean
 	 * and x is an integer
 	 */
 
@@ -97,8 +97,7 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf. Even if it is defined as double, it is required to be an integer.
@@ -107,12 +106,8 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * @return double with the probability distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double pdf(double x, PoissonPar p)
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double mean = p.getMean();
 			double mean = ((PoissonPar) p).getMean();
 			if (Math.floor(x) != x) {
 				throw new IncorrectDistributionParameterException("Error: x must be integer.");
@@ -124,8 +119,7 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
@@ -134,12 +128,8 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double cdf(double x, PoissonPar p)
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double mean = p.getMean();
 			double mean = ((PoissonPar) p).getMean();
 			return Probability.poisson((int) x, mean);
 		} else {
@@ -148,8 +138,7 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
 	 * @param p parameter of the poisson distribution.
@@ -159,12 +148,8 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * the theoretic mean is simply the parameter mean supplied by the user.
 	 */
 
-	//OLD
-	//public double theorMean(PoissonPar p)
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//return p.getMean();
 			return ((PoissonPar) p).getMean();
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter mean must be gtz");
@@ -172,8 +157,7 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance.
 	 *
 	 * @param p parameter of the poisson distribution.
@@ -183,12 +167,8 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * the theoretic variance is simply the parameter mean
 	 */
 
-	//OLD
-	//public double theorVariance(PoissonPar p)
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//return p.getMean();
 			return ((PoissonPar) p).getMean();
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter mean must be gtz");
@@ -196,7 +176,6 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *

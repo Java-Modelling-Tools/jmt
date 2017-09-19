@@ -74,6 +74,9 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of stations using different queue strategies
 	//for classes within the same priority group
 	private Vector<Object> stationsWithInconsistentQueueStrategies;
+	//Vector containing the keys of servers using SJF, LJF, SEPT or LEPT along
+	//with the load dependent service strategy
+	private Vector<Object> serversWithUnpredictableService;
 	//Vector containing the keys of blocking regions without a station
 	private Vector<Object> emptyBlockingRegions;
 	//Vector containing the keys of blocking regions in which the total preload
@@ -134,7 +137,7 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of class switches located between fork/join
 	private Vector<Object> classSwitchesBetweenForkJoin;
 	//Vector containing the keys of stations using priority scheduling when all
-	//the classes have the same priority.
+	//the classes have the same priority
 	private Vector<Object> stationsWithPriorityScheduling;
 	//Vector containing the keys of transitions located between fork/join
 	private Vector<Object> transitionsBetweenForkJoin;
@@ -175,43 +178,46 @@ public class ModelChecker implements CommonConstants {
 	//it occurs when a station uses different queue strategies for classes
 	//within the same priority group.
 	public static final int INCONSISTENT_QUEUE_STRATEGY_ERROR = 12;
+	//it occurs when a server uses SJF, LJF, SEPT or LEPT along with the load
+	//dependent service strategy.
+	public static final int UNPREDICTABLE_SERVICE_ERROR = 13;
 	//it occurs when there is a join but no forks.
-	public static final int JOIN_WITHOUT_FORK_ERROR = 13;
+	public static final int JOIN_WITHOUT_FORK_ERROR = 14;
 	//it occurs when tasks split from a job may be routed to different joins.
-	public static final int FORK_JOIN_ROUTING_ERROR = 14;
+	public static final int FORK_JOIN_ROUTING_ERROR = 15;
 	//it occurs when a blocking region has no stations.
-	public static final int EMPTY_BLOCKING_REGION_ERROR = 15;
+	public static final int EMPTY_BLOCKING_REGION_ERROR = 16;
 	//it occurs when the total preload in a blocking region exceeds the
 	//capacity constraints.
-	public static final int BLOCKING_REGION_CAPACITY_OVERLOAD_ERROR = 16;
+	public static final int BLOCKING_REGION_CAPACITY_OVERLOAD_ERROR = 17;
 	//it occurs when the total preload in a blocking region exceeds the memory
 	//constraints.
-	public static final int BLOCKING_REGION_MEMORY_OVERLOAD_ERROR = 17;
+	public static final int BLOCKING_REGION_MEMORY_OVERLOAD_ERROR = 18;
 	//it occurs when a class switch has a matrix of which some rows sum to less
 	//than one.
-	public static final int CLASS_SWITCH_INVALID_MATRIX_ERROR = 18;
+	public static final int CLASS_SWITCH_INVALID_MATRIX_ERROR = 19;
 	//it occurs when a class switch is followed by a queue with the BAS
 	//strategy.
-	public static final int CLASS_SWITCH_BAS_STRATEGY_ERROR = 19;
+	public static final int CLASS_SWITCH_BAS_STRATEGY_ERROR = 20;
 	//it occurs when a class switch is in the model and closed classes have
 	//different reference stations.
-	public static final int CLASS_SWITCH_REFERENCE_STATION_ERROR = 20;
+	public static final int CLASS_SWITCH_REFERENCE_STATION_ERROR = 21;
 	//it occurs when a class switch is in the model and the system throughput
 	//for a class is defined.
-	public static final int CLASS_SWITCH_SYSTEM_THROUGHPUT_ERROR = 21;
+	public static final int CLASS_SWITCH_SYSTEM_THROUGHPUT_ERROR = 22;
 	//it occurs when a class switch is in the model and all the closed classes
 	//have zero population.
-	public static final int CLASS_SWITCH_ZERO_POPULATION_ERROR = 22;
+	public static final int CLASS_SWITCH_ZERO_POPULATION_ERROR = 23;
 	//it occurs when a station uses a Guard strategy with zero tasks for a
 	//class.
-	public static final int ZERO_GUARD_STRATEGY_ERROR = 23;
+	public static final int ZERO_GUARD_STRATEGY_ERROR = 24;
 	//it occurs when a semaphore is not located between fork/join.
-	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN_ERROR = 24;
+	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN_ERROR = 25;
 	//it occurs when a scaler is not located between fork/join.
-	public static final int SCALER_NOT_BETWEEN_FORK_JOIN_ERROR = 25;
+	public static final int SCALER_NOT_BETWEEN_FORK_JOIN_ERROR = 26;
 	//it occurs when a transition has invalid enabling or inhibiting condition
 	//for a mode.
-	public static final int TRANSITION_INVALID_CONDITION_ERROR = 26;
+	public static final int TRANSITION_INVALID_CONDITION_ERROR = 27;
 
 	//it occurs when a server has different queue strategies.
 	// (only when trying to convert to JMVA)
@@ -271,7 +277,7 @@ public class ModelChecker implements CommonConstants {
 	//it occurs when a transition has invalid firing outcome for a mode.
 	public static final int TRANSITION_INVALID_OUTCOME_WARNING = 18;
 
-	private static final int NUMBER_OF_ERROR_TYPES = 27;
+	private static final int NUMBER_OF_ERROR_TYPES = 28;
 	private static final int NUMBER_OF_WARNING_TYPES = 19;
 
 	/**
@@ -297,6 +303,7 @@ public class ModelChecker implements CommonConstants {
 		closedClassesWithRoutingError = new HashMap<Object, Vector<Object>>(0, 1);
 		redundantMeasures = new Vector<Object>(0, 1);
 		stationsWithInconsistentQueueStrategies = new Vector<Object>(0, 1);
+		serversWithUnpredictableService = new Vector<Object>(0, 1);
 		emptyBlockingRegions = new Vector<Object>(0, 1);
 		blockingRegionsWithCapacityOverload = new Vector<Object>(0, 1);
 		blockingRegionsWithMemoryOverload = new Vector<Object>(0, 1);
@@ -331,6 +338,7 @@ public class ModelChecker implements CommonConstants {
 		closedClassesWithRoutingError.clear();
 		redundantMeasures.clear();
 		stationsWithInconsistentQueueStrategies.clear();
+		serversWithUnpredictableService.clear();
 		emptyBlockingRegions.clear();
 		blockingRegionsWithCapacityOverload.clear();
 		blockingRegionsWithMemoryOverload.clear();
@@ -393,6 +401,7 @@ public class ModelChecker implements CommonConstants {
 			checkForInvalidMeasureError();
 			checkForRedundantMeasureError();
 			checkForInconsistentQueueStrategyError();
+			checkForUnpredictableServiceError();
 			checkForJoinWithoutForkError();
 			checkForForkJoinRoutingError();
 			checkForEmptyBlockingRegionError();
@@ -612,6 +621,17 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public boolean isThereInconsistentQueueStrategyError() {
 		return errors[INCONSISTENT_QUEUE_STRATEGY_ERROR];
+	}
+
+	/**
+	 * Returns true if a server uses SJF, LJF, SEPT or LEPT along with the load
+	 * dependent service strategy.
+	 *
+	 * @return true if a server uses SJF, LJF, SEPT or LEPT along with the load
+	 * dependent service strategy.
+	 */
+	public boolean isThereUnpredictableServiceError() {
+		return errors[UNPREDICTABLE_SERVICE_ERROR];
 	}
 
 	/**
@@ -1001,6 +1021,17 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public Vector<Object> getStationsWithInconsistentQueueStrategies() {
 		return stationsWithInconsistentQueueStrategies;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of servers using SJF, LJF,
+	 * SEPT or LEPT along with the load dependent service strategy.
+	 *
+	 * @return a Vector<Object> containing the keys of servers using SJF, LJF,
+	 * SEPT or LEPT along with the load dependent service strategy.
+	 */
+	public Vector<Object> getServersWithUnpredictableService() {
+		return serversWithUnpredictableService;
 	}
 
 	/**
@@ -1594,6 +1625,30 @@ public class ModelChecker implements CommonConstants {
 				}
 			}
 			strategies.clear();
+		}
+	}
+
+	/**
+	 * Checks if a server uses SJF, LJF, SEPT or LEPT along with the load
+	 * dependent service strategy.
+	 */
+	private void checkForUnpredictableServiceError() {
+		Vector<Object> servers = station_def.getStationKeysServer();
+		Vector<Object> classes = class_def.getClassKeys();
+		for (int i = 0; i < servers.size(); i++) {
+			Object thisServer = servers.get(i);
+			for (int j = 1; j < classes.size(); j++) {
+				Object thisClass = classes.get(j);
+				String queueStrategy = station_def.getQueueStrategy(thisServer, thisClass);
+				Object serviceStrategy = station_def.getServiceTimeDistribution(thisServer, thisClass);
+				if ((queueStrategy.equals(QUEUE_STRATEGY_SJF) || queueStrategy.equals(QUEUE_STRATEGY_LJF)
+						|| queueStrategy.equals(QUEUE_STRATEGY_SEPT) || queueStrategy.equals(QUEUE_STRATEGY_LEPT))
+						&& serviceStrategy instanceof LDStrategy) {
+					serversWithUnpredictableService.add(thisServer);
+					errors[UNPREDICTABLE_SERVICE_ERROR] = true;
+					break;
+				}
+			}
 		}
 	}
 

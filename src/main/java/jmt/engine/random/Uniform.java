@@ -27,7 +27,7 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * the Uniform distribution must be also used by external classes as an
  * interface with the real pseudo-random number generator (which return many
  * type of value distributed like a uniform too). (see the constructor
- * description for his pdf definition).
+ * description for its pdf definition).
  * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
@@ -48,8 +48,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	 */
 
 	/**
-	 * it returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
@@ -58,13 +57,8 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	 * @return double with the probability distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double pdf(double x, UniformPar p)
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double max = p.getMax();
-			//double min = p.getMin();
 			double max = ((UniformPar) p).getMax();
 			double min = ((UniformPar) p).getMin();
 			if (x <= min || x >= max) {
@@ -78,8 +72,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
@@ -88,13 +81,8 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double cdf(double x, UniformPar p)
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double max = p.getMax();
-			//double min = p.getMin();
 			double max = ((UniformPar) p).getMax();
 			double min = ((UniformPar) p).getMin();
 			if (x <= min) {
@@ -111,8 +99,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean. For the uniform distribution the theoretic mean is
 	 * calculated as (max+min)/2.
 	 *
@@ -121,13 +108,9 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	 * @return double with the theoretic mean of the distribution.
 	 *
 	 */
-	//OLD
-	//public double theorMean(UniformPar p)
+
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double max = p.getMax();
-			//double min = p.getMin();
 			double max = ((UniformPar) p).getMax();
 			double min = ((UniformPar) p).getMin();
 			return (max + min) / 2;
@@ -138,8 +121,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance. For the uniform distribution the theoretic variance is calculated
 	 * as ((max-min)^2)/12.
 	 *
@@ -149,13 +131,8 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	 *
 	 */
 
-	//OLD
-	//public double theorVariance(UniformPar p)
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double max = p.getMax();
-			//double min = p.getMin();
 			double max = ((UniformPar) p).getMax();
 			double min = ((UniformPar) p).getMin();
 			return Math.pow((max - min), 2) / 12;
@@ -166,7 +143,6 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random long integer.
 	 * This method is used to obtain from the distribution the next Long integer
 	 * number distributed according to the distribution parameter.
 	 *
@@ -238,7 +214,6 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random boolean.
 	 * This method is used to obtain from the distribution the next boolean distributed
 	 * according to the distribution parameter.
 	 *
@@ -250,7 +225,6 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random integer.
 	 * This method is used to obtain from the distribution the next integer number
 	 * distributed according to the distribution parameter.
 	 *
@@ -271,7 +245,6 @@ public class Uniform extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *

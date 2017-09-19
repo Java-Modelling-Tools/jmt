@@ -73,19 +73,25 @@ public class PSJobInfoList extends LinkedJobInfoList {
 		}
 	}
 
-	public void psUpdateUtilization(double[] serviceFractions) {
+	public void psUpdateUtilization(JobClass jobClass, double[] serviceFractions) {
 		if (utilizationPerClass != null) {
 			for (int c = 0; c < numberOfJobClasses; c++) {
 				Measure m = utilizationPerClass[c];
 				if (m != null) {
-					m.update(listPerClass[c].size() * serviceFractions[c], NetSystem.getTime() - getLastModifyTime());
+					if (jobsInPerClass[c] == 0) {
+						if (c == jobClass.getId()) {
+							m.update(0.0, NetSystem.getTime());
+						}
+					} else {
+						m.update(listPerClass[c].size() * serviceFractions[c], NetSystem.getTime() - getLastModifyTime());
+					}
 				}
 			}
 		}
 		if (utilization != null) {
 			double sum = 0.0;
 			for (int c = 0; c < numberOfJobClasses; c++) {
-				sum = listPerClass[c].size() * serviceFractions[c];
+				sum += listPerClass[c].size() * serviceFractions[c];
 			}
 			utilization.update(sum, NetSystem.getTime() - getLastModifyTime());
 		}

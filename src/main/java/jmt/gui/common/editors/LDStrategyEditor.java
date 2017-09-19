@@ -76,6 +76,12 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	protected static final int MAXRANGES = 1000;
 	public static final String HELPFILE = "ParserHelp.html";
 	protected static HashMap<String, Distribution> distributions;
+	protected static DecimalFormat df = new DecimalFormat();
+
+	static {
+		df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
+	}
+
 	protected LDStrategy strategy;
 	protected JTable rangesTable;
 
@@ -544,7 +550,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 			}
 			case (4): {
 				if (strategy.getRangeDistribution(key).hasC()) {
-					return FormatNumber(strategy.getRangeDistribution(key).getC());
+					return formatNumber(strategy.getRangeDistribution(key).getC());
 				} else {
 					return null;
 				}
@@ -595,19 +601,14 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 		 * @param d double to be converted
 		 * @return string representation of given number
 		 */
-		protected String FormatNumber(double d) {
-			DecimalFormat nf = new DecimalFormat();
-			nf.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
-			String ret = null;
-			// If module of number is greater than 1e-4 or lesser than 1e4 uses ordinary notation
-			if (Math.abs(d) > 1e-4 && Math.abs(d) < 1e4 || d == 0) {
-				nf.applyPattern("#.####");
-				ret = nf.format(d);
+		protected String formatNumber(double d) {
+			if (d == 0.0 || (Math.abs(d) >= 1e-4 && Math.abs(d) < 1e4)) {
+				df.applyPattern("#.####");
+				return df.format(d);
 			} else {
-				nf.applyPattern("0.00E00");
-				ret = nf.format(d);
+				df.applyPattern("0.00E00");
+				return df.format(d);
 			}
-			return ret;
 		}
 
 	}

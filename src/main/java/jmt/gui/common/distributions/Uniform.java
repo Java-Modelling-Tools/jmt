@@ -115,8 +115,8 @@ public class Uniform extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "U(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
-				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
+		return "U(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
 	}
 
 	/**

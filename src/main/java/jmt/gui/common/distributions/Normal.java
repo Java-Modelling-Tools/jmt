@@ -96,8 +96,8 @@ public class Normal extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "norm(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
-				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
+		return "norm(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
 	}
 
 	/**
@@ -145,6 +145,5 @@ public class Normal extends Distribution {
 	public void updateCM() {
 		mean = ((Double) getParameter("mean").getValue()).doubleValue();
 		c = ((Double) getParameter("standardDeviation").getValue()).doubleValue() / mean;
-		//c = Math.sqrt(((Double) getParameter("standardDeviation").getValue()).doubleValue()) / mean;
 	}
 }

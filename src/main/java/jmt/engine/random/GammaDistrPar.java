@@ -98,9 +98,8 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the value of alpha.
-	 * It allow the user to modify the value of the parameter alpha of the gamma
-	 * distribution. It verify if the new value is correct, that is if alpha is greater than zero.
+	 * It allows the user to modify the value of the parameter alpha of the gamma
+	 * distribution. It verifies if the new value is correct, that is if alpha is greater than zero.
 	 *
 	 * @param alpha double indicating the new value of the parameter alpha
 	 * @throws IncorrectDistributionParameterException if the value provided is not greater than zero.
@@ -116,9 +115,8 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the value of lambda.
-	 * It allow the user to modify the value of the parameter lambda of the gamma
-	 * distribution. It verify if the new value is correct, that is if lambda is greater than zero.
+	 * It allows the user to modify the value of the parameter lambda of the gamma
+	 * distribution. It verifies if the new value is correct, that is if lambda is greater than zero.
 	 *
 	 * @param lambda double indicating the new value of the parameter lambda
 	 * @throws IncorrectDistributionParameterException if the value provided is not greater than zero.

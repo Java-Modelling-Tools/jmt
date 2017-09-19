@@ -21,7 +21,7 @@ package jmt.engine.random;
 import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
- * Replays ciclically data, previously generated, reading them from a file.
+ * Replays cyclically data, previously generated, reading them from a file.
 
  * @author Federico Granata
  * @version Date: 23-lug-2003 Time: 17.28.35
@@ -30,11 +30,16 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  */
 public class Replayer extends AbstractDistribution implements Distribution {
 
+	private double valueSum;
+	private int valueCount;
+
 	/**
 	 *  Constructs a new distribution with standard random engine.
 	 */
 	public Replayer() {
 		engine = null;
+		valueSum = 0.0;
+		valueCount = 0;
 	}
 
 	/**
@@ -47,18 +52,16 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	 */
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p instanceof ReplayerPar) {
-			return ((ReplayerPar) p).getNext();
+			double value = ((ReplayerPar) p).getNext();
+			valueSum += value;
+			valueCount += 1;
+			return value;
 		}
 		throw new IncorrectDistributionParameterException("The class of the parameter is not correct");
 	}
 
-	//TODO: mancano pdf, cdf, media e varianza.
-
-	/////@author STEFANO OMINI
-
 	/**
-	 * Returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x a double indicating where to evaluate the pdf.
@@ -72,8 +75,7 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	};
 
 	/**
-	 * Returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x a double indicating where to evaluate the cdf.
@@ -87,8 +89,7 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	};
 
 	/**
-	  * returns the mean of the distribution.
-	  * This method is used to obtain from the distribution the value of his own
+	  * This method is used to obtain from the distribution the value of its own
 	  * theoretic mean.
 	  *
 	  * @param p parameter of the constant distribution.
@@ -97,23 +98,20 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	  */
 
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
-		throw new IncorrectDistributionParameterException("Method not implemented yet");
+		return valueSum / valueCount;
 	};
 
 	/**
-	  * returns the variance of the distribution.
-	  * This method is used to obtain from the distribution his own theoretical
+	  * This method is used to obtain from the distribution its own theoretical
 	  * variance.
 	  *
 	  * @param p parameter of the constant distribution.
 	  * @throws IncorrectDistributionParameterException
-	  * @return double with the theoretic varance of the distribution.
+	  * @return double with the theoretic variance of the distribution.
 	  */
 
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		throw new IncorrectDistributionParameterException("Method not implemented yet");
 	};
-
-	/////END @author STEFANO OMINI
 
 }

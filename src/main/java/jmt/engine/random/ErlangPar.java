@@ -37,7 +37,6 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	private long r;
 
 	/**
-	 * creates a new erlang parameter.
 	 * It creates a new erlang parameter with the information provided by the user.
 	 * @param alpha double containing the "scale" parameter (must be greater than zero).
 	 * @param r long containing the "shape" parameter (must be greater than zero).
@@ -67,7 +66,6 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * test the parameters.
 	 * Tests the parametrs of an erlang distribution, if alpha or r are
 	 * equal to zero, throw an exception. This is only a service method called by
 	 * every method used to modify the value of the parameter.
@@ -102,7 +100,6 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the value of alpha.
 	 * It returns the parameter alpha of the erlang parameter, also called the "scale" parameter.
 	 *
 	 * @return double with alpha which is the "scale" parameter.
@@ -114,7 +111,6 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the value of r.
 	 * It returns the parameter r of the erlang distribution, also called the "shape" parameter.
 	 *
 	 * @return long with r which is the "shape" parameter.
@@ -126,9 +122,8 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the value of alpha.
-	 * It allow the user to modify the value of the alpha parameter of the erlang distribution.
-	 * It verify that the new value is correct. Alpha must be greater than zero.
+	 * It allows the user to modify the value of the alpha parameter of the erlang distribution.
+	 * It verifies that the new value is correct. Alpha must be greater than zero.
 	 *
 	 * @param alpha double indicating the new value of the parameter alpha.
 	 * @throws IncorrectDistributionParameterException if the provided parameter is less or equal to zero.
@@ -145,9 +140,8 @@ public class ErlangPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the value of r.
-	 * It allow the user to modify the value of the r parameter of the erlang distribution.
-	 * It verify that the new value is correct. r must be greater than zero.
+	 * It allows the user to modify the value of the r parameter of the erlang distribution.
+	 * It verifies that the new value is correct. r must be greater than zero.
 	 *
 	 * @param r double indicating the new value of the parameter r
 	 * @throws IncorrectDistributionParameterException

@@ -81,7 +81,7 @@ public class Deterministic extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "det(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + ")";
+		return "det(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ")";
 	}
 
 	/**

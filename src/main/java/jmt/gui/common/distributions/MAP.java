@@ -1,10 +1,3 @@
-/*
- * Created on Oct 31, 2006
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
-
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
@@ -25,26 +18,23 @@
 
 package jmt.gui.common.distributions;
 
-//import jmt.gui.common.distributions.Distribution.Parameter;
-//import jmt.gui.common.distributions.Distribution.ValueChecker;
 import javax.swing.ImageIcon;
 
 import jmt.gui.common.JMTImageLoader;
 
 /**
-* <p>Title: Constant Distribution</p>
-* <p>Description: MAP distribution data structure</p>
-* 
-* @author Casale Giuliano
-*         Date: 16-Dc-2006
-*         Time: 20.02.30
-*/
+ * <p>Title: MAP Distribution</p>
+ * <p>Description: MAP distribution data structure</p>
+ * 
+ * @author Casale Giuliano
+ * @date   December 16, 2006
+ */
 public class MAP extends Distribution {
 	/**
 	 * Construct a new MAP distribution
 	 */
 	public MAP() {
-		super("MAP", "jmt.engine.random.MAP", "jmt.engine.random.MAPPar", "MAP");
+		super("MAP", "jmt.engine.random.MAPDistr", "jmt.engine.random.MAPPar", "MAP distribution");
 		hasMean = false;
 		isNestable = true;
 	}
@@ -84,7 +74,7 @@ public class MAP extends Distribution {
 	 */
 	@Override
 	protected ImageIcon setImage() {
-		return JMTImageLoader.loadImage("MMPP2");
+		return JMTImageLoader.loadImage("MAP");
 	}
 
 	/**
@@ -93,7 +83,7 @@ public class MAP extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "MAP(" + (String) parameters[0].getValue() + "," + (String) parameters[1].getValue() + ")";
+		return "map(" + (String) parameters[0].getValue() + "," + (String) parameters[1].getValue() + ")";
 	}
 
 }

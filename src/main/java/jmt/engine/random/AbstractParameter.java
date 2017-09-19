@@ -33,8 +33,8 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * 
  */
 public abstract class AbstractParameter {
+
 	/**
-	 * check method definition.
 	 * It provide a method for the user to verify if the parameter that he is using
 	 * is correct.
 	 *
@@ -55,4 +55,5 @@ public abstract class AbstractParameter {
 	public void setMean(double meanValue) throws IncorrectDistributionParameterException {
 		throw new IncorrectDistributionParameterException("Cannot set mean value for this distribution");
 	}
+
 }

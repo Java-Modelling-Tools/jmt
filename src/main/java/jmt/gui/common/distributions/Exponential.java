@@ -82,7 +82,7 @@ public class Exponential extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "exp(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + ")";
+		return "exp(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ")";
 	}
 
 	/**

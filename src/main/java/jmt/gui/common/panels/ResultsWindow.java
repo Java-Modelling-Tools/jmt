@@ -101,8 +101,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	private JButton pause;
 	private JProgressBar progressBar;
 	// Used to format numbers
+	private static DecimalFormat decimalFormatNorm = new DecimalFormat("0.000");
 	private static DecimalFormat decimalFormatExp = new DecimalFormat("0.00E0");
-	private static DecimalFormat decimalFormatNorm = new DecimalFormat("#0.000");
 	private JSimLogger logger = JSimLogger.getLogger(ResultsWindow.class);
 
 	/**
@@ -309,13 +309,12 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	 * @return string representation of input number
 	 */
 	protected static String doubleToString(double d) {
-		double abs = (d >= 0) ? d : -d;
-		if (abs == 0) {
+		if (d == 0.0) {
 			return "0.0";
-		} else if (abs > 1e4 || abs < 1e-2) {
-			return decimalFormatExp.format(d);
-		} else {
+		} else if (Math.abs(d) >= 1e-2 && Math.abs(d) < 1e4) {
 			return decimalFormatNorm.format(d);
+		} else {
+			return decimalFormatExp.format(d);
 		}
 	}
 

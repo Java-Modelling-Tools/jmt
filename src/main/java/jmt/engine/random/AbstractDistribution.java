@@ -23,7 +23,7 @@ public abstract class AbstractDistribution {
 	*/
 
 	/**
-	 * Represents the random generator of uniformal distributed 32 bits numbers
+	 * Represents the random generator of uniformly distributed 32 bits numbers
 	 *
 	 */
 	protected RandomEngine engine;

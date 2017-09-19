@@ -88,8 +88,8 @@ public class DeterministicDistrPar extends AbstractParameter implements Paramete
 	}
 
 	/**
-	 * It allow the user to change the value of the parameter of the constant distribution.
-	 * It verify that the new value is correct (must be greater than zero).
+	 * It allows the user to change the value of the parameter of the constant distribution.
+	 * It verifies that the new value is correct (must be greater than zero).
 	 *
 	 * @param t double indicating the new value of the parameter
 	 * @throws IncorrectDistributionParameterException when the provided parameter is not greater than zero.

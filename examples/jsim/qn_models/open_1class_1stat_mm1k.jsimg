@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="1cl_1stat_mm1k.jsimg" timestamp="Wed Sep 06 12:37:23 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="4000000" name="1cl_1stat_mm1k.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="open_1class_1stat_mm1k.jsimg" timestamp="Tue Sep 19 03:08:35 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="4000000" name="open_1class_1stat_mm1k.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Source 0" type="open"/>
 <node name="M/M/1/11">
 <section className="Queue">
@@ -73,7 +73,7 @@
 </parameter>
 </section>
 </node>
-<measure alpha="0.05" name="M/M/1/11_Number of Customers" nodeType="station" precision="0.05" referenceNode="M/M/1/11" referenceUserClass="" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="M/M/1/11_Number of Customers" nodeType="station" precision="0.03" referenceNode="M/M/1/11" referenceUserClass="" type="Number of Customers" verbose="false"/>
 <connection source="M/M/1/11" target="Sink 0"/>
 <connection source="Source 0" target="M/M/1/11"/>
 </sim>
@@ -89,12 +89,12 @@
 <position rotate="false" x="160.0" y="194.0"/>
 </station>
 </jmodel>
-<results elapsedTime="5231" logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.95" analyzedSamples="4000000" discardedSamples="865" finalValue="4.293244929292355" name="M/M/1/11_Number of Customers" nodeType="station" precision="0.05" referenceClass="" referenceStation="M/M/1/11" state="1" type="0">
-<sample lastIntervalAvgValue="4.200517481463679" lowerBound="4.048307422096858" meanValue="4.250528542325926" simulationTime="5657.742225602998" upperBound="4.452749662554993"/>
-<sample lastIntervalAvgValue="4.297560646907584" lowerBound="4.248138569662792" meanValue="4.296886466680977" simulationTime="104217.07361544463" upperBound="4.345634363699163"/>
-<sample lastIntervalAvgValue="4.265349373249242" lowerBound="4.257435162255075" meanValue="4.293244929292355" simulationTime="198367.1162436377" upperBound="4.329054696329634"/>
-<sample lastIntervalAvgValue="4.273315591118836" lowerBound="4.257435162255075" meanValue="4.293244929292355" simulationTime="227223.88174924176" upperBound="4.329054696329634"/>
+<results elapsedTime="6084" logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="4000000" discardedSamples="1675" finalValue="4.2899441115975465" name="M/M/1/11_Number of Customers" nodeType="station" precision="0.03" referenceClass="" referenceStation="M/M/1/11" state="1" type="0">
+<sample lastIntervalAvgValue="4.3443747356186915" lowerBound="4.213131879146273" meanValue="4.327707425473218" simulationTime="18194.726651587574" upperBound="4.442282971800163"/>
+<sample lastIntervalAvgValue="4.2934200989768225" lowerBound="4.2127492974753595" meanValue="4.275668218902787" simulationTime="93038.35651039328" upperBound="4.3385871403302145"/>
+<sample lastIntervalAvgValue="4.284069774881317" lowerBound="4.246545196257332" meanValue="4.2899441115975465" simulationTime="168891.28175427963" upperBound="4.333343026937761"/>
+<sample lastIntervalAvgValue="4.237211352437864" lowerBound="4.246545196257332" meanValue="4.2899441115975465" simulationTime="227221.0748790053" upperBound="4.333343026937761"/>
 </measure>
 </results>
 </archive>

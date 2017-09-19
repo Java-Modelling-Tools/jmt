@@ -42,6 +42,12 @@ public abstract class Distribution implements ServiceStrategy {
 	protected static Distribution[] all = null; // Used to store all distributions
 	protected static Distribution[] allWithMean = null; // Used to store all distributions with Mean value adjustable
 	protected static Distribution[] nestableDistributions = null; // Used to store nestable distributions
+	protected static DecimalFormat df = new DecimalFormat();
+
+	static {
+		df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
+	}
+
 	protected String classpath;
 	protected String name;
 	protected String parameterClasspath;
@@ -252,19 +258,14 @@ public abstract class Distribution implements ServiceStrategy {
 	 * @param d double to be converted
 	 * @return string representation of given number
 	 */
-	protected String FormatNumber(double d) {
-		DecimalFormat nf = new DecimalFormat();
-		nf.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
-		String ret = null;
-		// If module of number is greater than 1e-3 or lesser than 1e3 uses ordinary notation
-		if (Math.abs(d) > 1e-3 && Math.abs(d) < 1e3 || d == 0) {
-			nf.applyPattern("#.###");
-			ret = nf.format(d);
+	protected String formatNumber(double d) {
+		if (d == 0.0 || (Math.abs(d) >= 1e-3 && Math.abs(d) < 1e3)) {
+			df.applyPattern("#.###");
+			return df.format(d);
 		} else {
-			nf.applyPattern("0.00E00");
-			ret = nf.format(d);
+			df.applyPattern("0.00E00");
+			return df.format(d);
 		}
-		return ret;
 	}
 
 	/**

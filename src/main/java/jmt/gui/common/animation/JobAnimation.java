@@ -62,7 +62,7 @@ public class JobAnimation implements Animation {
 
 	/**Creates a new instance of JobAnimation initialized with specified default paths
 	 * to be followed by the job and specified speed.
-	 * @param speed: speed this job must keep following his paths. It is measured in
+	 * @param speed: speed this job must keep following its paths. It is measured in
 	 * pixels per second
 	 * @param jps: paths this Job can go through
 	 * @param bounds: default size for this job*/
@@ -78,7 +78,7 @@ public class JobAnimation implements Animation {
 
 	/**Creates a new instance of JobAnimation initialized with specified default paths
 	 * to be followed by the job and specified speed.
-	 * @param speed: speed this job must keep following his paths. It is measured in
+	 * @param speed: speed this job must keep following its paths. It is measured in
 	 * pixels per second
 	 * @param jps: paths this Job can go through
 	 * @param bounds: default size for this job

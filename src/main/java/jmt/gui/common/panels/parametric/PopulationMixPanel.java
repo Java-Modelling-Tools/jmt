@@ -126,13 +126,13 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 		edit.add(steps);
 		edit.add(classChooserLabel);
 		edit.add(classChooser);
-		edit.setPreferredSize(new Dimension(130, 88));
+		edit.setPreferredSize(new Dimension(130, 100));
 		JPanel editLables = new JPanel(new GridLayout(4, 1, 0, 5));
 		editLables.add(fromLabel);
 		editLables.add(toLabel);
 		editLables.add(stepsLabel);
 		editLables.add(classChooserLabel);
-		editLables.setPreferredSize(new Dimension(100, 88));
+		editLables.setPreferredSize(new Dimension(100, 100));
 		JPanel editPanel = new JPanel();
 		editPanel.add(editLables);
 		editPanel.add(edit);

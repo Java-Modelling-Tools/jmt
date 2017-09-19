@@ -97,8 +97,8 @@ public class Erlang extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "erl(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
-				+ FormatNumber(((Long) parameters[1].getValue()).longValue()) + ")";
+		return "erl(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+				+ formatNumber(((Long) parameters[1].getValue()).longValue()) + ")";
 	}
 
 	/**

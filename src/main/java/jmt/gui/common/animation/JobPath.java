@@ -31,6 +31,6 @@ public interface JobPath {
 	public JobContainer getNext();
 
 	/**Tests whether current element is the last of the list, e.g. job has come to the end of
-	 * his path. This can be useful if the job running on this path must run only once.*/
+	 * its path. This can be useful if the job running on this path must run only once.*/
 	public boolean isLast();
 }

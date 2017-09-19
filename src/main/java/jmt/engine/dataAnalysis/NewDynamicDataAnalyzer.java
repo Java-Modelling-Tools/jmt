@@ -251,7 +251,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			nullTestData.putNewSample(newSample, weight);
 
 			//nullTest must be repeated every nullTestPeriod samples
-			if ((nsamples % nullTestPeriod == 0)) {
+			if (nsamples % nullTestPeriod == 0) {
 				if (nullTest()) {
 					//null test is true (the measure is almost always equal to 0.0)
 					if (canEnd()) {

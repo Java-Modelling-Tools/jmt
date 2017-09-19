@@ -22,7 +22,7 @@ public class Burst extends Distribution {
 	 * Construct a new Burst distribution
 	 */
 	public Burst() {
-		super("Burst (General)", "jmt.engine.random.Burst", "jmt.engine.random.BurstPar", "Burst definition");
+		super("Burst (General)", "jmt.engine.random.Burst", "jmt.engine.random.BurstPar", "Burst distribution");
 		hasC = false;
 		hasMean = false;
 		isNestable = false;

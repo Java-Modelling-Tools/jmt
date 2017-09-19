@@ -51,18 +51,8 @@ public class Empirical extends AbstractDistribution implements Distribution {
 
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-
 			int k = (int) x;
 			double[] pdf = ((EmpiricalPar) p).getPDF();
-
-			//OLD
-			//return pdf[k];
-
-			//TODO: l'approssimazione del casting è per difetto o per eccesso??
-			//TODO: e se vado oltre??? return 0???
-			//NEW
-			//@author Stefano Omini
-			//
 			//if the given x exceeds the pdf array limits, there may be problems!!
 			if (k < 0 || k > pdf.length - 1) {
 				//pdf is defined only for K = 0, 1, 2 ... (length-1)
@@ -70,7 +60,6 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			} else {
 				return pdf[k];
 			}
-			//end NEW
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: all the probability value given must be gtz and the sum of all the value must be 1.0");
@@ -90,7 +79,6 @@ public class Empirical extends AbstractDistribution implements Distribution {
 
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//TODO: x è la posizione???
 			int k = (int) x;
 			double[] cdf = ((EmpiricalPar) p).getCDF();
 			if (k < 0) {
@@ -107,8 +95,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * It returns the mean value of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean, which is is calculated from the data provided by the user
 	 * (contained in the parameter p) as the sum of all the data value, divided by
 	 * the number of data.
@@ -136,15 +123,14 @@ public class Empirical extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance which is calculated from the data provided by the user (contained
 	 * in the parameter p) as the sum of all the squares of the differences between each
 	 * data value and the theoretic mean, divided by the number of data.
 	 *
 	 * @param p parameter of the empirical distribution.
 	 * @throws IncorrectDistributionParameterException
-	 * @return double with the theoretic varance of the distribution.
+	 * @return double with the theoretic variance of the distribution.
 	 *
 	 */
 
@@ -155,13 +141,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			double variance = 0;
 			mean = theorMean(p);
 			for (int ptn = 0; ptn < pdf.length; ptn++) {
-				// TODO: qual è la formula giusta??
-				//OLD
-				//variance += (((pdf[ptn] - mean) * (pdf[ptn] - mean)) * ptn);
-				//NEW
-				//@author Stefano Omini
 				variance += (((ptn - mean) * (ptn - mean)) * pdf[ptn]);
-				//end NEW
 			}
 			return variance;
 		} else {
@@ -171,7 +151,6 @@ public class Empirical extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *

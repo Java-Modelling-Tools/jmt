@@ -56,7 +56,7 @@ public class StudentTPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verify if the parameter is correct. For the student T distribution,
+	 * It verifies if the parameter is correct. For the student T distribution,
 	 * the value of the degrees of freedom must be an integer greater than zero.
 	 *
 	 * @return boolean, indicating whether the parameter is correct or not.
@@ -81,8 +81,8 @@ public class StudentTPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It allow the user to change the degrees of freedom of the student T distribution.
-	 * It verify that the new value is correct (freedom must be an integer
+	 * It allows the user to change the degrees of freedom of the student T distribution.
+	 * It verifies that the new value is correct (freedom must be an integer
 	 * greater than zero).
 	 *
 	 * @param freedom double indicating the new value of the parameter freedom.

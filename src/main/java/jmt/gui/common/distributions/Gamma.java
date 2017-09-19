@@ -96,8 +96,8 @@ public class Gamma extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "gam(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
-				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
+		return "gam(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
 	}
 
 	/**

@@ -1,21 +1,37 @@
-/*
- * Created on Oct 31, 2006
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.engine.random.engine.RandomEngine;
 
 /**
- * @author casale
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
+ * This is the MMPP2 distribution.
+ * 
+ * <br><br>Copyright (c) 2006
+ * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * @author Giuliano Casale
+ * 
  */
 public class MMPP2Distr extends AbstractDistribution implements Distribution {
+
 	private int curState;
 	protected Exponential expDistr;
 
@@ -47,11 +63,10 @@ public class MMPP2Distr extends AbstractDistribution implements Distribution {
 	}
 
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
-		return 0.0;//(2*q21*mu11^2*q12+mu11*q21^2*mu22-2*q12*mu22*q21*mu11+q12^2*mu22*mu11+q21*mu11*q12^2+mu11*q21^3+2*mu11*q21^2*q12+2*q12*mu22^2*q21+q12*mu22*q21^2+q12^3*mu22+2*q12^2*mu22*q21)/(mu11*q21+q12*mu22)^2/(q12*mu22+mu11*q21+mu11*mu22);
+		return 0.0;
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *
@@ -83,4 +98,4 @@ public class MMPP2Distr extends AbstractDistribution implements Distribution {
 		}
 	}
 
-}
+} // end MMPP2Distr

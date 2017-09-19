@@ -1,10 +1,3 @@
-/*
- * Created on Oct 31, 2006
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
-
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
@@ -25,27 +18,23 @@
 
 package jmt.gui.common.distributions;
 
-//import jmt.gui.common.distributions.Distribution.Parameter;
-//import jmt.gui.common.distributions.Distribution.ValueChecker;
 import javax.swing.ImageIcon;
 
 import jmt.gui.common.JMTImageLoader;
 
 /**
-* <p>Title: MMPP(2) Distribution</p>
-* <p>Description: MMPP(2) distribution data structure</p>
-* 
-* @author Casale Giuliano
-* @date   Octover 24, 2008
-*/
-
+ * <p>Title: MMPP2 Distribution</p>
+ * <p>Description: MMPP2 distribution data structure</p>
+ * 
+ * @author Casale Giuliano
+ * @date   October 24, 2008
+ */
 public class MMPP2 extends Distribution {
 	/**
 	 * Construct a new MMPP2 distribution
 	 */
 	public MMPP2() {
-		super("Burst (MMPP2)", // name in GUI
-				"jmt.engine.random.MMPP2Distr", "jmt.engine.random.MMPP2Par", "MMPP(2)");
+		super("Burst (MMPP2)", "jmt.engine.random.MMPP2Distr", "jmt.engine.random.MMPP2Par", "MMPP2 distribution");
 		hasMean = false;
 		hasC = false;
 	}
@@ -54,11 +43,10 @@ public class MMPP2 extends Distribution {
 	 * Used to set parameters of this distribution.
 	 * @return distribution parameters
 	 */
-
 	@Override
 	protected Parameter[] setParameters() {
 		// Creates parameter array
-		Parameter[] parameters = new Parameter[4]; //MMPP(2) is specified by four rates
+		Parameter[] parameters = new Parameter[4]; //MMPP2 is specified by four rates
 
 		/* arrival rate of jobs if MMPP is in state 0 */
 		parameters[0] = new Parameter("lambda0", "\u03BB0", //unicode character for lambda0
@@ -138,10 +126,10 @@ public class MMPP2 extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "mmpp2(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
-				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + ","
-				+ FormatNumber(((Double) parameters[2].getValue()).doubleValue()) + ","
-				+ FormatNumber(((Double) parameters[3].getValue()).doubleValue()) + ")";
+		return "mmpp2(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
+				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ","
+				+ formatNumber(((Double) parameters[2].getValue()).doubleValue()) + ","
+				+ formatNumber(((Double) parameters[3].getValue()).doubleValue()) + ")";
 	}
 
 }

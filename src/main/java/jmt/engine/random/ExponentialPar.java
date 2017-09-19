@@ -62,7 +62,7 @@ public class ExponentialPar extends AbstractParameter implements Parameter {
 	/**
 	 * It returns the value of the parameter lambda of the exponential distribution.
 	 *
-	 * @return double with lamda
+	 * @return double with lambda
 	 *
 	 */
 	public double getLambda() {
@@ -70,8 +70,7 @@ public class ExponentialPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the value of lambda.
-	 * It allow the user to modify the value of the parameter lamda of the
+	 * It allows the user to modify the value of the parameter lambda of the
 	 * exponential distribution and verify if the value is correct that is if it is
 	 * greater than zero.
 	 *

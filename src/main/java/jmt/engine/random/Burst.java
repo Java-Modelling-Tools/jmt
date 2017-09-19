@@ -1,3 +1,21 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
@@ -22,7 +40,7 @@ public class Burst extends NetNode implements Distribution {
 	/** static counter to ensure that two distribution will not have the same name */
 	private static int count = 0;
 	/** if <tt>true</tt> the next EVENT_DISTRIBUTION_CHANGE message will be discarded */
-	boolean discardNextMessage = false;
+	private boolean discardNextMessage = false;
 
 	/** 
 	 * Probability of having events of type A. The probability of having events
@@ -51,7 +69,7 @@ public class Burst extends NetNode implements Distribution {
 	/** the parameter of the distribution selected and active at this time */
 	private Parameter currentLengthPar;
 
-	/** Represents the random generator of uniformal distributed 32 bits numbers */
+	/** Represents the random generator of uniformly distributed 32 bits numbers */
 	private RandomEngine engine;
 
 	/**
@@ -187,12 +205,28 @@ public class Burst extends NetNode implements Distribution {
 	}
 
 	/**
-	 * @return always 0 because in this type of distribution it has no sense
-	 * to request the mean of the distribution.
-	 * 
-	 */
+	  * This method is used to obtain from the distribution the value of its own
+	  * theoretic mean.
+	  *
+	  * @param p parameter of the constant distribution.
+	  * @throws IncorrectDistributionParameterException
+	  * @return double with the theoretic mean of the distribution.
+	  */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
-		return 0.0;
+		double probA = 0.0;
+		double probB = 0.0;
+		if (isRoundRobin.booleanValue()) {
+			probA = 0.5;
+			probB = 0.5;
+		} else {
+			probA = probability.doubleValue();
+			probB = 1.0 - probA;
+		}
+		double lengthMeanA = lengthDistrA.theorMean(lengthParamA);
+		double lengthMeanB = lengthDistrB.theorMean(lengthParamB);
+		double valueMeanA = ((BurstPar) p).getValueDistributionA().theorMean(((BurstPar) p).getValueParameterA());
+		double valueMeanB = ((BurstPar) p).getValueDistributionB().theorMean(((BurstPar) p).getValueParameterB());
+		return (probA * lengthMeanA * valueMeanA + probB * lengthMeanB * valueMeanB) / (probA * lengthMeanA + probB * lengthMeanB);
 	}
 
 	/**
@@ -205,7 +239,6 @@ public class Burst extends NetNode implements Distribution {
 	}
 
 	/**
-	 * Returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter and the actual interval (A or B).
 	 *
@@ -226,9 +259,6 @@ public class Burst extends NetNode implements Distribution {
 		double value = getCurrentValueDistrNextRand(p);
 		// remaining time of the current interval
 		double remainingTime = intervalEnd - SimSystem.getClock();
-		if (remainingTime < 0) { // for debug purpose
-			throw new RuntimeException("remainingTime < 0");
-		}
 
 		/*
 		 * While the current value is larger than the remaining time of the current interval:
@@ -242,16 +272,14 @@ public class Burst extends NetNode implements Distribution {
 			// The interval is surpassed: we have to discard the next
 			// EVENT_DISTRIBUTION_CHANGE message
 			discardNextMessage = true;
-
 			offset += remainingTime;
 			remainingTime = changeInterval();
-			intervalEnd = remainingTime + offset + SimSystem.getClock();
-
 			value = getCurrentValueDistrNextRand(p);
 		}
 
 		if (discardNextMessage == true) {
 			// send the new EVENT_DISTRIBUTION_CHANGE message
+			intervalEnd = offset + remainingTime + SimSystem.getClock();
 			sendMe(offset + remainingTime, NetEvent.EVENT_DISTRIBUTION_CHANGE);
 		}
 
@@ -339,10 +367,6 @@ public class Burst extends NetNode implements Distribution {
 				double delay = changeInterval();
 				intervalEnd += delay;
 				sendMe(delay, NetEvent.EVENT_DISTRIBUTION_CHANGE);
-
-			} else if (eventType == NetEvent.EVENT_START) {
-				// do nothing, because the switch of distributions is activated
-				// in the constructor
 			}
 
 		} catch (IncorrectDistributionParameterException idpe) {

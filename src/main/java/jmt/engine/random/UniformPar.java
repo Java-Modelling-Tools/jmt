@@ -61,7 +61,7 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verify if the parameter is correct. For the uniform distribution the parameter
+	 * It verifies if the parameter is correct. For the uniform distribution the parameter
 	 * is right if the bound are right which means that max must be greater or equal to min.
 	 *
 	 * @return boolean, indicating whether the parameter is correct or not.
@@ -78,7 +78,7 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verify if the parameter is correct. For the uniform distribution the parameter
+	 * It verifies if the parameter is correct. For the uniform distribution the parameter
 	 * is right if the bound are right which means that max must be greater or equal to min.
 	 * It is the same of the method check() but it is a service method used only by the constructor.
 	 *
@@ -117,8 +117,7 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the min bound of the distribution.
-	 * It allow the user to change the minimum bound of the uniform distribution and
+	 * It allows the user to change the minimum bound of the uniform distribution and
 	 * it verifies that the new bound is correct (it is less or equal to the maximum bound).
 	 *
 	 * @param min double indicating the new value of the minimum bound.
@@ -136,8 +135,7 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the max bound of the distribution.
-	 * It allow the user to change the maximum bound of the uniform distribution and
+	 * It allows the user to change the maximum bound of the uniform distribution and
 	 * it verifies that the new bound is correct (it is greater or equal to the minimum bound).
 	 *
 	 * @param max double indicating the new value of the maximum bound.
@@ -171,4 +169,5 @@ public class UniformPar extends AbstractParameter implements Parameter {
 		max = meanValue + meanValue * c / Math.sqrt(3);
 		min = meanValue - meanValue * c / Math.sqrt(3);
 	}
+
 } // end UniformPar

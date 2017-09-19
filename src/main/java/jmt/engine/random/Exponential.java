@@ -22,8 +22,8 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
  * 
- * This is the Exponential distribution (see the pdf definition
- * in the constructor description).
+ * This is the Exponential distribution (see the constructor description
+ * for its pdf definition).
  * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
@@ -45,8 +45,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
@@ -55,12 +54,8 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 * @return double with the probability distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double pdf(double x, ExponentialPar p)
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double lambda = p.getLambda();
 			double lambda = ((ExponentialPar) p).getLambda();
 			if (x < 0.0) {
 				return 0.0;
@@ -72,8 +67,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
@@ -81,15 +75,12 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-	//OLD
-	//public double cdf(double x, ExponentialPar p)
+
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			if (x <= 0.0) {
 				return 0.0;
 			}
-			//OLD
-			//return 1.0 - Math.exp(-x * p.getLambda());
 			double lambda = ((ExponentialPar) p).getLambda();
 			return 1.0 - Math.exp(-x * lambda);
 		} else {
@@ -98,8 +89,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
 	 * @param p parameter of the exponential distribution.
@@ -108,12 +98,9 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 *
 	 * the mean of the exponential distribution is calculated as 1/lambda.
 	 */
-	//OLD
-	//public double theorMean(ExponentialPar p)
+
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//return 1 / p.getLambda();
 			return 1 / ((ExponentialPar) p).getLambda();
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
@@ -121,8 +108,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance.
 	 *
 	 * @param p parameter of the exponential distribution.
@@ -131,12 +117,9 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 *
 	 * the variance of an exponential is calculated as 1/(lambda^2).
 	 */
-	//OLD
-	//public double theorVariance(ExponentialPar p)
+
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double lambda = p.getLambda();
 			double lambda = ((ExponentialPar) p).getLambda();
 			return 1 / (lambda * lambda);
 		} else {
@@ -145,7 +128,6 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *

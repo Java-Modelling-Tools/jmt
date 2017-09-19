@@ -34,7 +34,6 @@ import jmt.jmva.analytical.solvers.SolverSingleClosedMVA;
 import jmt.util.TempTextFile;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -694,41 +693,6 @@ public class AnalyticalTest {
 		long stop = System.currentTimeMillis();
 		System.out.print("Tempo trascorso: " + (stop - start));
 		System.out.println();
-		assertCorrectOutput(tempFile);
-	}
-
-	@Ignore
-	@Test
-	/**
-	 * Method used for testing LI models with intermediate results of mva
-	 */
-	public void testSingleClosedLI_scalability() throws IOException, URISyntaxException {
-
-		TempTextFile tempFile = new TempTextFile(name.getMethodName());
-
-		for (int pop = 20000; pop < 100000; pop = pop + 10000) {
-			int n = pop;
-			tempFile.println("Sistema con: " + n + " customers");
-			long start = System.currentTimeMillis();
-
-			SolverSingleClosedMVA mva = new SolverSingleClosedMVA(n, 4);
-			String[] name = { "Delay", "CPU", "Disk1", "Disk2" };
-			int[] type = { Solver.DELAY, Solver.LI, Solver.LI, Solver.LI, };
-			double[][] servt = { { 15 }, { 0.005 }, { 0.03 }, { 0.027 } };
-			double[] visit = { 1, 121, 70, 50 };
-
-			if (mva.input(name, type, servt, visit)) {
-				//mva.solve();
-				mva.solve(true);
-			}
-			tempFile.println(mva);
-			//System.out.println(mva.intermediateToString());
-			tempFile.println("End LI");
-			long stop = System.currentTimeMillis();
-			System.out.print("Tempo trascorso: " + (stop - start));
-			System.out.println();
-		}
-
 		assertCorrectOutput(tempFile);
 	}
 

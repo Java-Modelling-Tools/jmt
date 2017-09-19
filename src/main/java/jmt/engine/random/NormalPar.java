@@ -39,7 +39,6 @@ public class NormalPar extends AbstractParameter implements Parameter {
 	private double mean;
 
 	/**
-	 * it creates a new normal parameter.
 	 * It creates a new normal parameter according to the data provided by the user:
 	 * the standard deviation and the mean of the new normal distribution. It
 	 * verify that these value are correct (the standard deviation, which is the square root of the variance, must be greater than zero).
@@ -64,7 +63,7 @@ public class NormalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verify that the parameter is correct. for the normal distribution the
+	 * It verifies that the parameter is correct. for the normal distribution the
 	 * parameter is right if the value of standard deviation is greater than zero.
 	 *
 	 * @return boolean, indicating whether the parameter is correct or not.
@@ -102,9 +101,8 @@ public class NormalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the std. deviation of the distribution.
-	 * It allow the user to change the value of the standard deviation for the
-	 * normal distribution. It verify that it is correct that is if it is greater than zero.
+	 * It allows the user to change the value of the standard deviation for the
+	 * normal distribution. It verifies that it is correct that is if it is greater than zero.
 	 *
 	 * @param standardDeviation double indicating the new value of the parameter standardDeviation
 	 * @throws IncorrectDistributionParameterException
@@ -120,7 +118,7 @@ public class NormalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It allow the user to change the value of the mean of the normal distribution.
+	 * It allows the user to change the value of the mean of the normal distribution.
 	 *
 	 * @param mean double indicating the new value of the parameter mean
 	 *

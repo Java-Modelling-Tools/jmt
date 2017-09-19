@@ -67,8 +67,10 @@ public class ModelConverter {
 	public static List<String> convertJMVAtoJSIM(ExactModel input, CommonModel output) {
 		// Changes default values, then restores default back at the end of method
 		String defaultRouting = Defaults.get("stationRoutingStrategy");
+		String defaultStationQueue = Defaults.get("stationStationQueueStrategy");
 		String defaultQueue = Defaults.get("stationQueueStrategy");
 		Defaults.set("stationRoutingStrategy", RandomRouting.class.getName());
+		Defaults.set("stationStationQueueStrategy", CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
 		Defaults.set("stationQueueStrategy", CommonConstants.QUEUE_STRATEGY_PS);
 
 		ArrayList<String> res = new ArrayList<String>();
@@ -150,7 +152,6 @@ public class ModelConverter {
 					// Load independent
 					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER);
 					output.setStationNumberOfServers(key, new Integer(servers));
-					output.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
 						Exponential exp = new Exponential();
@@ -163,7 +164,6 @@ public class ModelConverter {
 					// we support multiclass too (future extensions).
 					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER);
 					output.setStationNumberOfServers(key, new Integer(servers));
-					output.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
 						LDStrategy lds = new LDStrategy();
@@ -230,6 +230,7 @@ public class ModelConverter {
 		}
 		// Restores default values
 		Defaults.set("stationRoutingStrategy", defaultRouting);
+		Defaults.set("stationStationQueueStrategy", defaultStationQueue);
 		Defaults.set("stationQueueStrategy", defaultQueue);
 
 		// Manage preloading
@@ -301,12 +302,12 @@ public class ModelConverter {
 				// Open class parameters
 				classTypes[i] = ExactConstants.CLASS_OPEN;
 				Distribution d = (Distribution) input.getClassDistribution(key);
-				if (d.hasMean()) {
+				if (d != null && d.hasMean()) {
 					classData[i] = 1.0 / d.getMean();
 				} else {
-					classData[i] = 1;
+					classData[i] = 1.0;
 					res.add(input.getClassName(key) + " arrival distribution does not have a valid mean value."
-							+ " Arrival rate for that class was set to default value 1");
+							+ " Arrival rate for that class was set to default value 1.");
 				}
 			}
 		}
@@ -349,7 +350,7 @@ public class ModelConverter {
 					} else {
 						serviceTimes[st][cl][0] = 1;
 						res.add(output.getStationNames()[st] + " service time distribution for " + output.getClassNames()[cl]
-								+ " does not have a valid mean value. Service time was set to default value 1");
+								+ " does not have a valid mean value. Service time was set to default value 1.");
 					}
 				} else if (serv instanceof ZeroStrategy) {
 					serviceTimes[st][cl] = new double[1];
@@ -392,15 +393,16 @@ public class ModelConverter {
 				// Open class, must calculate routing from source
 				Object refStat = input.getClassRefStation(classKeys.get(cl));
 				double[] p0;
-				if (refStat == null) {
-					// Reference station for this class was not set
+				if (refStat == null || refStat.equals(CommonConstants.STATION_TYPE_FORK) || refStat.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
+						|| refStat.equals(CommonConstants.STATION_TYPE_SCALER) || refStat.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+					// Reference station for this class was not valid
 					Vector<Object> sources = input.getStationKeysSource();
 					if (sources.size() > 0) {
 						refStat = sources.get(0);
-						res.add("Reference station for " + output.getClassNames()[cl] + " was not set. " + input.getStationName(refStat)
+						res.add("Reference station for " + output.getClassNames()[cl] + " was not valid. " + input.getStationName(refStat)
 								+ " was chosen.");
 					} else {
-						res.add("Reference station for " + output.getClassNames()[cl] + " was not set. " + output.getStationNames()[0]
+						res.add("Reference station for " + output.getClassNames()[cl] + " was not valid. " + output.getStationNames()[0]
 								+ " was chosen.");
 					}
 				}
@@ -419,7 +421,7 @@ public class ModelConverter {
 					vis = V.getColumnPackedCopy();
 				} catch (Exception e) {
 					// Matrix is singular
-					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as network topology was badly specified");
+					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as network topology was badly specified.");
 				}
 			} else {
 				// Closed class, system is undefined, so sets visits to reference station to
@@ -427,7 +429,7 @@ public class ModelConverter {
 				Object refStat = input.getClassRefStation(classKeys.get(cl));
 				if (refStat == null) {
 					refStat = stations.get(0);
-					res.add("Reference station for " + output.getClassNames()[cl] + " was not set. " + input.getStationName(refStat)
+					res.add("Reference station for " + output.getClassNames()[cl] + " was not valid. " + input.getStationName(refStat)
 							+ " was chosen.");
 				}
 
@@ -447,7 +449,7 @@ public class ModelConverter {
 					vis = V.getColumnPackedCopy();
 				} catch (Exception e) {
 					// Matrix is singular
-					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as network topology was badly specified");
+					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as network topology was badly specified.");
 				}
 			}
 
@@ -491,7 +493,7 @@ public class ModelConverter {
 				warnings.add("Fork-Join are not supported in JMVA. They are considered as routers.");
 			} else if (!(strategy instanceof RandomRouting)) {
 				warnings.add("\"" + strategy.getName() + "\" routing strategy in " + model.getClassName(classKey) + " for "
-						+ model.getStationName(stationKey) + " is not allowed. This was considered as RandomRouting");
+						+ model.getStationName(stationKey) + " is not allowed. This was considered as RandomRouting.");
 			}
 
 			Vector<Object> links = model.getForwardConnections(stationKey);

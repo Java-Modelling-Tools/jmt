@@ -101,7 +101,7 @@ public class PAResultsModel implements MeasureDefinition {
 					nodeType = XMLConstantNames.NODETYPE_STATION;
 				}
 			}
-			
+
 			Object classKey = model.getMeasureClass(measureKey);
 			String className = null;
 			if (measureType.equals(SimulationDefinition.MEASURE_FX)) {

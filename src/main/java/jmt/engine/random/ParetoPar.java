@@ -104,9 +104,8 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the alpha of the distribution.
-	 * It allow the user to change the value of the parameter alpha of the pareto
-	 * distribution. It verify that the provided value is correct (alpha must be
+	 * It allows the user to change the value of the parameter alpha of the pareto
+	 * distribution. It verifies that the provided value is correct (alpha must be
 	 * greater than zero).
 	 *
 	 * @param alpha double indicating the new value of the parameter alpha
@@ -123,9 +122,8 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the k of the distribution.
-	 * It allow the user to change the value of the parameter k of the pareto
-	 * distribution. It verify that the provided value is correct (k must be
+	 * It allows the user to change the value of the parameter k of the pareto
+	 * distribution. It verifies that the provided value is correct (k must be
 	 * greater than zero).
 	 *
 	 * @param k double indicating the new value of the parameter k

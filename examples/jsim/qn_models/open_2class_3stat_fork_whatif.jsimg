@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="open_2class_3stat_fork_whatif.jsimg" timestamp="Sat Sep 16 09:21:18 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="500000" name="open_2class_3stat_fork_whatif.jsimg" polling="1.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="open_2class_3stat_fork_whatif.jsimg" timestamp="Tue Sep 19 03:12:26 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="1000000" name="open_2class_3stat_fork_whatif.jsimg" polling="1.0" seed="1" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class0" priority="0" referenceSource="Requests" type="open"/>
 <userClass name="Class1" priority="0" referenceSource="Requests" type="open"/>
 <node name="Requests">
@@ -452,8 +452,8 @@
 </parameter>
 </section>
 </node>
-<measure alpha="0.01" name="Class0_System Response Time" nodeType="" precision="0.05" referenceNode="" referenceUserClass="Class0" type="System Response Time" verbose="false"/>
-<measure alpha="0.01" name="Class1_System Response Time" nodeType="" precision="0.05" referenceNode="" referenceUserClass="Class1" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="Class0_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class0" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="Class1_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Response Time" verbose="false"/>
 <connection source="Requests" target="RAID0"/>
 <connection source="Disk 1" target="Join0"/>
 <connection source="Disk 2" target="Join0"/>
@@ -476,10 +476,10 @@
 <position rotate="false" x="301.0" y="86.0"/>
 </station>
 <station name="Disk 2">
-<position rotate="false" x="301.0" y="300.0"/>
+<position rotate="false" x="301.0" y="201.0"/>
 </station>
 <station name="Disk 3">
-<position rotate="false" x="301.0" y="201.0"/>
+<position rotate="false" x="301.0" y="300.0"/>
 </station>
 <station name="RAID0">
 <position rotate="false" x="176.0" y="89.0"/>
@@ -494,16 +494,16 @@
 <field name="Type" value="Arrival rates"/>
 </parametric>
 </jmodel>
-<results logDecimalSeparator="." logDelimiter="," pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.99" analyzedSamples="3" name="Network_Class0_System Response Time" nodeType="" precision="0.05" referenceClass="Class0" referenceStation="Network" type="System Response Time">
-<sample lowerBound="24.354963143084586" meanValue="25.302471759805538" upperBound="26.24998037652649" validity="true"/>
-<sample lowerBound="25.68421001700934" meanValue="26.739582251505766" upperBound="27.79495448600219" validity="true"/>
-<sample lowerBound="26.720066433524863" meanValue="27.629413519561606" upperBound="28.53876060559835" validity="true"/>
+<results elapsedTime="0" logDecimalSeparator="." logDelimiter="," pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="3" name="Network_Class0_System Response Time" nodeType="" precision="0.03" referenceClass="Class0" referenceStation="Network" type="8">
+<sample lowerBound="24.67651574606389" meanValue="25.328484582717095" upperBound="25.9804534193703" validity="true"/>
+<sample lowerBound="26.216899656106634" meanValue="26.63795915921816" upperBound="27.059018662329684" validity="true"/>
+<sample lowerBound="27.07225872878166" meanValue="27.587324585388203" upperBound="28.102390441994746" validity="true"/>
 </measure>
-<measure alpha="0.99" analyzedSamples="3" name="Network_Class1_System Response Time" nodeType="" precision="0.05" referenceClass="Class1" referenceStation="Network" type="System Response Time">
-<sample lowerBound="5.3069804698027605" meanValue="5.503389415577951" upperBound="5.6997983613531416" validity="true"/>
-<sample lowerBound="6.521727186670261" meanValue="6.815232348480151" upperBound="7.108737510290042" validity="true"/>
-<sample lowerBound="7.6221178722330025" meanValue="7.949202363606543" upperBound="8.276286854980082" validity="true"/>
+<measure alpha="0.99" analyzedSamples="3" name="Network_Class1_System Response Time" nodeType="" precision="0.03" referenceClass="Class1" referenceStation="Network" type="8">
+<sample lowerBound="5.508382266919697" meanValue="5.6239201076001155" upperBound="5.739457948280534" validity="true"/>
+<sample lowerBound="6.72203423844933" meanValue="6.922175385711385" upperBound="7.122316532973439" validity="true"/>
+<sample lowerBound="7.772738256657819" meanValue="7.913841742913762" upperBound="8.054945229169705" validity="true"/>
 </measure>
 </results>
 </archive>

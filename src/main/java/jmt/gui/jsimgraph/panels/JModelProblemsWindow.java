@@ -442,6 +442,16 @@ public class JModelProblemsWindow extends JDialog {
 							+ " uses different queue strategies for classes within the same priority group.</div></html>", stationKey, null));
 				}
 			}
+			if (mc.isThereUnpredictableServiceError()) {
+				Vector<Object> temp = mc.getServersWithUnpredictableService();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.UNPREDICTABLE_SERVICE_ERROR,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " uses SJF, LJF, SEPT or LEPT along with the load dependent service strategy.</div></html>", stationKey, null));
+				}
+			}
 			if (mc.isThereJoinWithoutForkError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.JOIN_WITHOUT_FORK_ERROR,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Join found but no forks.</div></html>", null, null));

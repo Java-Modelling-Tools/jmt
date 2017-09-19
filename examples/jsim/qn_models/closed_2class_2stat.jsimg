@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="closed_2class_2stat.jsimg" timestamp="Sat Sep 16 09:08:35 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\csg/JMT/" logReplaceMode="0" maxSamples="1000000" name="closed_2class_2stat.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="closed_2class_2stat.jsimg" timestamp="Tue Sep 19 03:05:28 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="closed_2class_2stat.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass customers="5" name="Class1" priority="0" referenceSource="Delay 1" type="closed"/>
 <userClass customers="10" name="Class2" priority="0" referenceSource="Delay 1" type="closed"/>
 <node name="Delay 1">
@@ -162,12 +162,9 @@
 <position rotate="false" x="25.0" y="86.0"/>
 </station>
 </jmodel>
-<results logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.99" analyzedSamples="60000" discardedSamples="34990" finalValue="1.0" name="Queue 1_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="Queue 1" state="1" type="Utilization">
-<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="9912.141446863554"/>
-<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="23250.321633635413"/>
-<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="39547.38063705629"/>
-<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="43810.03246109718"/>
+<results elapsedTime="47" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="10000" discardedSamples="230" finalValue="1.0" name="Queue 1_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="Queue 1" state="1" type="4">
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="7877.492282546474"/>
 </measure>
 </results>
 </archive>

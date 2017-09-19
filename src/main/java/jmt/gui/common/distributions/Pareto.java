@@ -96,8 +96,8 @@ public class Pareto extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "par(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
-				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
+		return "par(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
 	}
 
 	/**

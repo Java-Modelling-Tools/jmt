@@ -197,18 +197,18 @@ public class PSServer extends ServiceSection {
 	}
 
 	private void handleJobInfoList(PSJobInfo jobInfo, PSEvent event) {
+		JobClass jobClass = jobInfo.getJob().getJobClass();
 		if (event == PSEvent.JOB_IN) {
-			psJobsList.psUpdateUtilization(serviceFractions);
+			psJobsList.psUpdateUtilization(jobClass, serviceFractions);
 			psJobsList.add(jobInfo);
 		} else {
-			JobClass jobClass = jobInfo.getJob().getJobClass();
 			double queueTime = (NetSystem.getTime() - jobInfo.getEnteringTime()) - jobInfo.getServiceTime();
 			if (queueTime < 0.0) {
 				queueTime = 0.0;
 			}
 			psJobsList.psUpdateBusyTime(jobClass, jobInfo.getServiceTime());
 			psJobsList.psUpdateQueueTime(jobClass, queueTime);
-			psJobsList.psUpdateUtilization(serviceFractions);
+			psJobsList.psUpdateUtilization(jobClass, serviceFractions);
 			psJobsList.remove(jobInfo);
 		}
 	}

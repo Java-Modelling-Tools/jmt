@@ -23,7 +23,7 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 /**
  * 
  * This is the Pareto distribution (see the constructor description
- * for his pdf definition).
+ * for its pdf definition).
  * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
@@ -44,8 +44,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf. Must be > alpha
@@ -53,13 +52,9 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-	//OLD
-	//public double pdf(double x, ParetoPar p)
+
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double alfa = p.getAlpha();
-			//double k = p.getK();
 			double alfa = ((ParetoPar) p).getAlpha();
 			double k = ((ParetoPar) p).getK();
 			if (x <= alfa) {
@@ -72,8 +67,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
@@ -82,13 +76,8 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double cdf(double x, ParetoPar p)
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double alfa = p.getAlpha();
-			//double k = p.getK();
 			double alfa = ((ParetoPar) p).getAlpha();
 			double k = ((ParetoPar) p).getK();
 			if (x <= alfa) {
@@ -101,8 +90,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
 	 * @param p parameter of the pareto distribution.
@@ -112,13 +100,8 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	 * the mean is calculated as: (k*alpha)/(alpha-1)
 	 */
 
-	//OLD
-	//public double theorMean(ParetoPar p)
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double alfa = p.getAlpha();
-			//double k = p.getK();
 			double alfa = ((ParetoPar) p).getAlpha();
 			double k = ((ParetoPar) p).getK();
 			return (alfa * k / (alfa - 1));
@@ -128,8 +111,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance.
 	 *
 	 * @param p parameter of the pareto distribution.
@@ -139,13 +121,8 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	 * the variance is calculated as: ((alpha*(k^2))/(((alpha-1)^2)*(alpha-2)))
 	 */
 
-	//OLD
-	//public double theorVariance(ParetoPar p)
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double alfa = p.getAlpha();
-			//double k = p.getK();
 			double alfa = ((ParetoPar) p).getAlpha();
 			double k = ((ParetoPar) p).getK();
 			return (alfa * k * k / ((alfa - 1) * (alfa - 1) * (alfa - 2)));
@@ -155,7 +132,6 @@ public class Pareto extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *

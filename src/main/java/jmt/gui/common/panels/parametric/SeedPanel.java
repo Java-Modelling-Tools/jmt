@@ -90,10 +90,10 @@ public class SeedPanel extends ParameterOptionPanel {
 		steps.setToolTipText("Sets the number of performed simulations");
 		edit.add(stepsLabel);
 		edit.add(steps);
-		edit.setPreferredSize(new Dimension(130, 108));
+		edit.setPreferredSize(new Dimension(130, 101));
 		JPanel editLables = new JPanel(new GridLayout(4, 1, 0, 5));
 		editLables.add(stepsLabel);
-		editLables.setPreferredSize(new Dimension(100, 108));
+		editLables.setPreferredSize(new Dimension(100, 101));
 		JPanel editPanel = new JPanel();
 		editPanel.add(editLables);
 		editPanel.add(edit);

@@ -98,7 +98,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the pdf of the distribution.
 	 * It returns the value of the parameters for the empirical distribution, that is
 	 * the vector of double representing the probabilities provided by the user.
 	 *
@@ -109,7 +108,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It returns the cdf of the distribution.
 	 * It returns the value of the parameters for the empirical distribution, that is
 	 * the vector of double representing the cumulative distribution function tabulated.
 	 *
@@ -120,7 +118,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it changes the pdf of the distribution.
 	 * It allows the user to change the value of the parameter of the empirical distribution.
 	 * Takes an existent array of pdf and tries to convert it in a pdf for
 	 * an empirical distribution, checking the conditions which must be respected.
@@ -134,10 +131,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 		double sumProb = 0;
 		this.pdf = new double[pdf.length];
 		for (int i = 0; i < pdf.length; i++) {
-			//OLD
-			//if (pdf[i] > 0) {
-			//NEW
-			//TODO:debug!!!! Vedere se il valore zero crea problemi...
 			if (pdf[i] >= 0) {
 				this.pdf[i] = pdf[i];
 				sumProb += this.pdf[i];
@@ -157,7 +150,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * Generate the CDF from the PDF. This is only a service method for setPdf.
+	 * Generates the CDF from the PDF. This is only a service method for setPdf.
 	 * Each new cdf value is the sum of the previous cdf value and the current pdf value.
 	 *
 	 */
@@ -165,10 +158,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 		int nBins = pdf.length;
 		this.cdf = new double[nBins + 1];
 		this.cdf[0] = 0;
-		//TODO: cambia qualcosa per il ++ptn ??
-		//OLD
-		//for (int ptn = 0; ptn < nBins; ++ptn)
-		//NEW
 		for (int ptn = 0; ptn < nBins; ptn++) {
 			this.cdf[ptn + 1] = cdf[ptn] + pdf[ptn];
 		}
@@ -186,9 +175,6 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	public boolean check() {
 		return (!(cdf == null));
 	}
-
-	// 11/09/03 - Massimo Cattai //
-	//TODO: è permesso il valore 0 delle probabilità??
 
 	/**
 	 * Checks whether a parameter value is correct
@@ -232,6 +218,5 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	public Object[] getValues() {
 		return values;
 	}
-	// 11/09/03 - end /////////////////////////////////////////////////////
 
 } // end EmpiricalPar

@@ -2441,6 +2441,9 @@ public class Mediator implements GuiInterface {
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INCONSISTENT_QUEUE_STRATEGY_ERROR)) {
 			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.UNPREDICTABLE_SERVICE_ERROR)) {
+			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
 			JOptionPane.showMessageDialog(null, "A join is found but no forks. Please remove all joins or add a fork.\n",
 					"Error", JOptionPane.ERROR_MESSAGE);

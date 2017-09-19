@@ -24,8 +24,8 @@ import jmt.engine.math.Sfun;
 
 /**
  * 
- * This is the StudentT distribution (for his pdf definition please
- * see the constructor description).
+ * This is the StudentT distribution (see the constructor description
+ * for its pdf definition).
  * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
@@ -50,8 +50,7 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
@@ -60,12 +59,8 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 * @return double with the probability distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double pdf(double x, StudentTPar p)
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double freedom = p.getFreedom();
 			double freedom = ((StudentTPar) p).getFreedom();
 			double val = Sfun.logGamma((freedom + 1) / 2) - Sfun.logGamma(freedom / 2);
 			double TERM = Math.exp(val) / Math.sqrt(Math.PI * freedom);
@@ -76,8 +71,7 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
@@ -86,12 +80,8 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double cdf(double x, StudentTPar p)
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double freedom = p.getFreedom();
 			double freedom = ((StudentTPar) p).getFreedom();
 			return Probability.studentT(freedom, x);
 		} else {
@@ -100,8 +90,7 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
 	 * @param p parameter of the student T distribution.
@@ -109,11 +98,9 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 * @return double with the theoretic mean of the distribution.
 	 *
 	 */
+
 	// the mean of a student T distribution, however, is always 0.
-	//OLD
-	//public double theorMean(StudentTPar p)
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
-		//alternative implementation may use p.check()
 		if (p.check()) {
 			return 0;
 		} else {
@@ -122,8 +109,7 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance.
 	 *
 	 * @param p parameter of the student T distribution.
@@ -134,12 +120,8 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 *
 	 */
 
-	//OLD
-	//public double theorVariance(StudentTPar p)
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double freedom = p.getFreedom();
 			double freedom = ((StudentTPar) p).getFreedom();
 			if (freedom < 2) {
 				return 0;
@@ -152,7 +134,6 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *

@@ -34,7 +34,7 @@ public class ExactCellRenderer extends DefaultTableCellRenderer {
 
 	private static final long serialVersionUID = 1L;
 
-	private static DecimalFormat df = new DecimalFormat();
+	protected static DecimalFormat df = new DecimalFormat();
 
 	static {
 		df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
@@ -55,23 +55,20 @@ public class ExactCellRenderer extends DefaultTableCellRenderer {
 	@Override
 	public void setValue(Object o) {
 		if (o instanceof Double) {
-			setText(FormatNumber(((Double) o).doubleValue()));
+			setText(formatNumber(((Double) o).doubleValue()));
 		} else {
 			super.setValue(o);
 		}
 	}
 
-	protected String FormatNumber(double d) {
-		String ret = null;
-		// If module of number is greater than 1e-4 or lesser than 1e7 uses ordinary notation
-		if (Math.abs(d) > 1e-4 && Math.abs(d) < 1e7 || d == 0) {
+	protected String formatNumber(double d) {
+		if (d == 0.0 || (Math.abs(d) >= 1e-3 && Math.abs(d) < 1e7)) {
 			df.applyPattern("0.0000");
-			ret = df.format(d);
+			return df.format(d);
 		} else {
-			df.applyPattern("0.0000E00");
-			ret = df.format(d);
+			df.applyPattern("0.00E00");
+			return df.format(d);
 		}
-		return ret;
 	}
 
 }

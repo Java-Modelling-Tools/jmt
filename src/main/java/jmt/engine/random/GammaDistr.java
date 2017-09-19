@@ -24,8 +24,8 @@ import jmt.engine.math.Sfun;
 
 /**
  * 
- * This is the Gamma distribution (see the pdf definition in the
- * constructor description).
+ * This is the Gamma distribution (see the constructor description
+ * for its pdf definition).
  * 
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
@@ -47,8 +47,7 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
@@ -57,13 +56,8 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	 * @return double with the probability distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double pdf(double x, GammaDistrPar p)
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double lambda = p.getLambda();
-			//double alpha = p.getAlpha();
 			double lambda = ((GammaDistrPar) p).getLambda();
 			double alpha = ((GammaDistrPar) p).getAlpha();
 			if (x < 0) {
@@ -87,8 +81,7 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
@@ -96,13 +89,9 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-	//OLD
-	//public double cdf(double x, GammaDistrPar p)
+
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double lambda = p.getLambda();
-			//double alpha = p.getAlpha();
 			double lambda = ((GammaDistrPar) p).getLambda();
 			double alpha = ((GammaDistrPar) p).getAlpha();
 			return Probability.gamma(alpha, lambda, x);
@@ -112,23 +101,18 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
 	 * @param p parameter of the gamma distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic mean of the distribution.
 	 *
-	 * the theoretic mean of the gamma distribution is calculated as alpha/lamda.
+	 * the theoretic mean of the gamma distribution is calculated as alpha/lambda.
 	 */
-	//OLD
-	//public double theorMean(GammaDistrPar p)
+
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double lambda = p.getLambda();
-			//double alpha = p.getAlpha();
 			double lambda = ((GammaDistrPar) p).getLambda();
 			double alpha = ((GammaDistrPar) p).getAlpha();
 			return alpha / lambda;
@@ -138,8 +122,7 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance.
 	 *
 	 * @param p parameter of the gamma distribution.
@@ -149,13 +132,8 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	 * the variance of the gamma distribution is calculated as alpha/(lambda^2).
 	 */
 
-	//OLD
-	//public double theorVariance(GammaDistrPar p)
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double lambda = p.getLambda();
-			//double alpha = p.getAlpha();
 			double lambda = ((GammaDistrPar) p).getLambda();
 			double alpha = ((GammaDistrPar) p).getAlpha();
 			return alpha / (lambda * lambda);
@@ -165,7 +143,6 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *

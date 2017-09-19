@@ -1,10 +1,3 @@
-/*
- * Created on Oct 31, 2006
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
- */
-
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
@@ -25,27 +18,23 @@
 
 package jmt.gui.common.distributions;
 
-//import jmt.gui.common.distributions.Distribution.Parameter;
-//import jmt.gui.common.distributions.Distribution.ValueChecker;
 import javax.swing.ImageIcon;
 
 import jmt.gui.common.JMTImageLoader;
 
 /**
-* <p>Title: Cox-2 Distribution</p>
-* <p>Description: Cox-2 distribution data structure</p>
-* 
-* @author Casale Giuliano
-* @date   September 9, 2017
-*/
-
+ * <p>Title: Cox2 Distribution</p>
+ * <p>Description: Cox2 distribution data structure</p>
+ * 
+ * @author Casale Giuliano
+ * @date   September 9, 2017
+ */
 public class Cox2 extends Distribution {
 	/**
 	 * Construct a new Cox2 distribution
 	 */
 	public Cox2() {
-		super("Coxian", // name in GUI
-				"jmt.engine.random.Cox2Distr", "jmt.engine.random.Cox2Par", "Cox-2 distribution");
+		super("Coxian", "jmt.engine.random.Cox2Distr", "jmt.engine.random.Cox2Par", "Cox2 distribution");
 		hasMean = true;
 		hasC = true;
 	}
@@ -54,11 +43,10 @@ public class Cox2 extends Distribution {
 	 * Used to set parameters of this distribution.
 	 * @return distribution parameters
 	 */
-
 	@Override
 	protected Parameter[] setParameters() {
 		// Creates parameter array
-		Parameter[] parameters = new Parameter[3]; //Cox-2 is specified by two rates and one probability
+		Parameter[] parameters = new Parameter[3]; //Cox2 is specified by two rates and one probability
 
 		/* arrival rate of jobs if Coxian is in state 0 */
 		parameters[0] = new Parameter("lambda0", "\u03BB0", //unicode character for lambda0
@@ -123,9 +111,9 @@ public class Cox2 extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "cox((" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
-				+ FormatNumber(((Double) parameters[2].getValue()).doubleValue()) + "),("
-				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + ",1.0))";
+		return "cox((" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
+				+ formatNumber(((Double) parameters[2].getValue()).doubleValue()) + "),("
+				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ",1.0))";
 	}
 
 	/**
@@ -153,34 +141,32 @@ public class Cox2 extends Distribution {
 	 */
 	protected void setCM(double mean, double c) {
 		double l1, l2, p;
-		if (c*c>=0.5 && c<1) {
+		if (c*c >= 0.5 && c < 1.0) {
 			p = 0.0;
 			l1 = 2/mean/(1+Math.sqrt(1+2*(c*c-1)));
 			l2 = 2/mean/(1-Math.sqrt(1+2*(c*c-1)));
-		}
-		else if (c==1.0){
+		} else if (c == 1.0){
 			p = 1.0;
 			l1 = 1/mean;
 			l2 = 1/mean;			
-		}
-		else {
+		} else {
 		    l1 = 2/mean;
 		    l2 = l1/(2*c*c);
 		    p = 1 - l2/l1;
 		}
 	
-		l1 = (double)Math.round(l1 * 100000d) / 100000d;
-		l2 = (double)Math.round(l2 * 100000d) / 100000d;
-		p = (double)Math.round(p * 100000d) / 100000d;
+		l1 = (double) Math.round(l1 * 100000d) / 100000d;
+		l2 = (double) Math.round(l2 * 100000d) / 100000d;
+		p = (double) Math.round(p * 100000d) / 100000d;
 		
-		if (p >= 0.0 && p <= 1.0 && l1 > 0 && l2 > 0 && mean > 0 && c>=0.5) {
+		if (p >= 0.0 && p <= 1.0 && l1 > 0 && l2 > 0.0 && mean > 0.0 && c >= 0.5) {
 			getParameter(0).setValue(new Double(l1));
 			getParameter(1).setValue(new Double(l2));
 			getParameter(2).setValue(new Double(p));
-			c = (double)Math.round(c * 100000d) / 100000d;
-			mean = (double)Math.round(mean * 100000d) / 100000d;
-			this.c = c;
+			mean = (double) Math.round(mean * 100000d) / 100000d;
+			c = (double) Math.round(c * 100000d) / 100000d;
 			this.mean = mean;
+			this.c = c;
 		}
 	}
 
@@ -197,9 +183,8 @@ public class Cox2 extends Distribution {
 		mean = 1/lambda0 + (1-phi0)/lambda1;
 		var = ((2*lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (2*lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0))/(lambda0*lambda0*((lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0))) - (1/lambda0 - (phi0 - 1)/lambda1)*(1/lambda0 - (phi0 - 1)/lambda1) - (((phi0 - 1)/(lambda1*lambda1) + (phi0 - 1)/(lambda0*lambda1))*((2*lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (2*lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0)))/((lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0));
 		c = Math.sqrt(var) / mean;
-		
-		c = (double)Math.round(c * 100000d) / 100000d;
-		mean = (double)Math.round(mean * 100000d) / 100000d;
+		mean = (double) Math.round(mean * 100000d) / 100000d;
+		c = (double) Math.round(c * 100000d) / 100000d;
 	}
 
 }

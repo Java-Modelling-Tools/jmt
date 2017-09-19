@@ -1,21 +1,36 @@
-/*
- * Created on Oct 31, 2006
- *
- * TODO To change the template for this generated file go to
- * Window - Preferences - Java - Code Style - Code Templates
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 import Jama.Matrix;
 
 /**
- * @author casale
- *
- * TODO To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Style - Code Templates
+ * 
+ * This is the MAP distribution.
+ * 
+ * <br><br>Copyright (c) 2006
+ * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * @author Giuliano Casale
+ * 
  */
-public class MAP extends AbstractDistribution implements Distribution {
+public class MAPDistr extends AbstractDistribution implements Distribution {
 
 	private Matrix D[];
 	private Matrix iD0;
@@ -28,7 +43,7 @@ public class MAP extends AbstractDistribution implements Distribution {
 	private int nStates;
 	public int curState;
 
-	public MAP() {
+	public MAPDistr() {
 		curState = -1;
 		nBatches = 1;
 		nStates = 2;
@@ -228,11 +243,9 @@ public class MAP extends AbstractDistribution implements Distribution {
 		{
 			return true; // hidden transition?
 		}
-
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *
@@ -241,31 +254,29 @@ public class MAP extends AbstractDistribution implements Distribution {
 	 * @return double with the next random number of this distribution.
 	 */
 
-
-	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
-		{
-			if (p.check()) {
-				if( curState == -1 )
-				{
-					initState();
-				}
-				double sample = 0.0;
-
-				do
-				{
-					double r = engine.nextDouble();
-
-					sample = sample
-							+ ( -( getMeanHoldingTime( curState + 1 ) ) * Math.log( 1.0 - r ) );
-				}
-				while( nextState() );
-
-				return sample;
-			} else {
-				throw new IncorrectDistributionParameterException(
-						"Incorrect parameterization of MAP distribution.");
+	public double nextRand(Parameter p) throws IncorrectDistributionParameterException
+	{
+		if (p.check()) {
+			if( curState == -1 )
+			{
+				initState();
 			}
-		}
+			double sample = 0.0;
 
+			do
+			{
+				double r = engine.nextDouble();
+
+				sample = sample
+						+ ( -( getMeanHoldingTime( curState + 1 ) ) * Math.log( 1.0 - r ) );
+			}
+			while( nextState() );
+
+			return sample;
+		} else {
+			throw new IncorrectDistributionParameterException(
+					"Incorrect parameterization of MAP distribution.");
+		}
 	}
-}
+
+} // end MAPDistr

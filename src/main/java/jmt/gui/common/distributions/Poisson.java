@@ -81,7 +81,7 @@ public class Poisson extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "poisson(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + ")";
+		return "poisson(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ")";
 	}
 
 	/**

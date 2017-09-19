@@ -47,8 +47,7 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
@@ -57,13 +56,8 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 * @return double with the probability distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double pdf(double x, ErlangPar p)
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double r = p.getR();
-			//double alpha = p.getAlpha();
 			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
 			return (Math.pow(alpha, r) / Gamma.gamma(r)) * Math.pow(x, (r - 1)) * Math.exp(-alpha * x);
@@ -73,8 +67,7 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
@@ -83,13 +76,8 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
 
-	//OLD
-	//public double cdf(double x, ErlangPar p)
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double r = p.getR();
-			//double alpha = p.getAlpha();
 			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
 			double sum = 0;
@@ -105,8 +93,7 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
 	 * @param p parameter of the erlang distribution.
@@ -115,13 +102,9 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 *
 	 * The theoretic mean is calculated  as r/alpha.
 	 */
-	//OLD
-	//public double theorMean(ErlangPar p)
+
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double r = p.getR();
-			//double alpha = p.getAlpha();
 			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
 			return r / alpha;
@@ -131,8 +114,7 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance.
 	 *
 	 * @param p parameter of the erlang distribution.
@@ -142,13 +124,8 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 * The theoretic variance is calculated  as r/(alpha^2)
 	 */
 
-	//OLD
-	//public double theorVariance(ErlangPar p)
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			//OLD
-			//double r = p.getR();
-			//double alpha = p.getAlpha();
 			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
 			return r / (alpha * alpha);
@@ -158,7 +135,6 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *

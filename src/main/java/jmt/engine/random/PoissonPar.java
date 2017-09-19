@@ -56,7 +56,7 @@ public class PoissonPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verify that the parameter is correct. For the poisson distribution the
+	 * It verifies that the parameter is correct. For the poisson distribution the
 	 * parameter is correct if the mean is greater than zero.
 	 *
 	 * @return boolean, indicating whether the parameter is correct or not.
@@ -73,7 +73,6 @@ public class PoissonPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
 	 * It return the value of the mean of the poisson distribution (also calleda
 	 * lambda in the definition).
 	 *
@@ -86,8 +85,7 @@ public class PoissonPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the mean of the distribution.
-	 * It allow the user to change the mean of the poisson distribution and it
+	 * It allows the user to change the mean of the poisson distribution and it
 	 * verify that the new value is correct (the mean must be greater than zero).
 	 *
 	 * @param mean double indicating the new value of the parameter mean (or lambda).

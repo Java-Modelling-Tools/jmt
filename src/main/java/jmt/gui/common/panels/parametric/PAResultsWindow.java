@@ -310,20 +310,24 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			graph.drawPlot(true);
 			XMIN = graph.getPlotXMin();
 			XMAX = graph.getPlotXMax();
-			//If simulation was stopped and only one result was calculated the XMIN andX YMAX
+			//If simulation was stopped and only one result was calculated the XMIN and XMAX
 			//may equal, the same for YMIN and YMAX. In this case adjust the XMIN, XMAX, YMIN,
-			//and YMAX values
-			if (XMAX == XMIN) {
-				if (XMIN != 0) {
+			//and YMAX
+			if (XMIN == XMAX) {
+				if (XMIN >= SPINNER_PRECISION) {
 					XMIN -= SPINNER_PRECISION;
+				} else {
+					XMIN = 0;
 				}
 				XMAX += SPINNER_PRECISION;
 			}
 			YMIN = graph.getPlotYMin();
 			YMAX = graph.getPlotYMax();
-			if (YMAX == YMIN) {
-				if (YMIN != 0) {
+			if (YMIN == YMAX) {
+				if (YMIN >= SPINNER_PRECISION) {
 					YMIN -= SPINNER_PRECISION;
+				} else {
+					YMIN = 0;
 				}
 				YMAX += SPINNER_PRECISION;
 			}
@@ -390,8 +394,8 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(samples);
 			//xMin
 			label = new JLabel("X min:");
-			if (XMAX > SPINNER_PRECISION) {
-				xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX - SPINNER_PRECISION, SPINNER_PRECISION));
+			if (XMIN >= SPINNER_PRECISION) {
+				xMin = new JSpinner(new SpinnerNumberModel(XMIN, XMIN - SPINNER_PRECISION, XMAX, SPINNER_PRECISION));
 			} else {
 				xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX, SPINNER_PRECISION));
 			}
@@ -402,7 +406,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(xMin);
 			//xMax
 			label = new JLabel("X max:");
-			xMax = new JSpinner(new SpinnerNumberModel(XMAX, XMIN + SPINNER_PRECISION, XMAX, SPINNER_PRECISION));
+			xMax = new JSpinner(new SpinnerNumberModel(XMAX, XMIN, XMAX + SPINNER_PRECISION, SPINNER_PRECISION));
 			xMax.setToolTipText("Sets the largest x represented");
 			xMax.setMaximumSize(new Dimension(40, 18));
 			label.setLabelFor(xMax);
@@ -410,8 +414,8 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(xMax);
 			//yMin
 			label = new JLabel("Y min:");
-			if (YMAX - SPINNER_PRECISION > YMIN) {
-				yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX - SPINNER_PRECISION, SPINNER_PRECISION));
+			if (YMIN >= SPINNER_PRECISION) {
+				yMin = new JSpinner(new SpinnerNumberModel(YMIN, YMIN - SPINNER_PRECISION, YMAX, SPINNER_PRECISION));
 			} else {
 				yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX, SPINNER_PRECISION));
 			}
@@ -422,11 +426,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(yMin);
 			//yMax
 			label = new JLabel("Y max:");
-			if (YMIN + SPINNER_PRECISION < YMAX) {
-				yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN + SPINNER_PRECISION, YMAX, SPINNER_PRECISION));
-			} else {
-				yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN, YMAX, SPINNER_PRECISION));
-			}
+			yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN, YMAX + SPINNER_PRECISION, SPINNER_PRECISION));
 			yMax.setToolTipText("Sets the largest y represented");
 			yMax.setMaximumSize(new Dimension(40, 18));
 			label.setLabelFor(yMax);
@@ -662,13 +662,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (xMin.getValue() instanceof Double) {
 						double XMin = ((Double) xMin.getValue()).doubleValue();
-						//the xMax spinner now has a new minimum value, set it
-						SpinnerNumberModel snm = (SpinnerNumberModel) xMax.getModel();
-						snm.setMinimum(new Double(XMin + SPINNER_PRECISION));
 						double[] range = graph.getXRange();
-						//set the new range
-						graph.setXRange(XMin, range[1]);
-						graph.repaint();
+						if (XMin < range[1]) {
+							//set the new range
+							graph.setXRange(XMin, range[1]);
+							graph.repaint();
+						} else {
+							xMin.setValue(Double.valueOf(range[0]));
+						}
 					}
 				}
 			});
@@ -677,13 +678,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (xMax.getValue() instanceof Double) {
 						double XMax = ((Double) xMax.getValue()).doubleValue();
-						//the xMin spinner now has a new maximum value, set it
-						SpinnerNumberModel snm = (SpinnerNumberModel) xMin.getModel();
-						snm.setMaximum(new Double(XMax - SPINNER_PRECISION));
 						double[] range = graph.getXRange();
-						//set the new range
-						graph.setXRange(range[0], XMax);
-						graph.repaint();
+						if (XMax > range[0]) {
+							//set the new range
+							graph.setXRange(range[0], XMax);
+							graph.repaint();
+						} else {
+							xMax.setValue(Double.valueOf(range[1]));
+						}
 					}
 				}
 			});
@@ -692,13 +694,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (yMin.getValue() instanceof Double) {
 						double YMin = ((Double) yMin.getValue()).doubleValue();
-						//the yMax spinner now has a new minimum value, set it
-						SpinnerNumberModel snm = (SpinnerNumberModel) yMax.getModel();
-						snm.setMinimum(new Double(YMin + SPINNER_PRECISION));
 						double[] range = graph.getYRange();
-						//set the new range
-						graph.setYRange(YMin, range[1]);
-						graph.repaint();
+						if (YMin < range[1]) {
+							//set the new range
+							graph.setYRange(YMin, range[1]);
+							graph.repaint();
+						} else {
+							yMin.setValue(Double.valueOf(range[0]));
+						}
 					}
 				}
 			});
@@ -707,13 +710,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (yMax.getValue() instanceof Double) {
 						double YMax = ((Double) yMax.getValue()).doubleValue();
-						//the yMin spinner now has a new maximum value, set it
-						SpinnerNumberModel snm = (SpinnerNumberModel) yMin.getModel();
-						snm.setMaximum(new Double(YMax - SPINNER_PRECISION));
 						double[] range = graph.getYRange();
-						//set the new range
-						graph.setYRange(range[0], YMax);
-						graph.repaint();
+						if (YMax > range[0]) {
+							//set the new range
+							graph.setYRange(range[0], YMax);
+							graph.repaint();
+						} else {
+							yMax.setValue(Double.valueOf(range[1]));
+						}
 					}
 				}
 			});
@@ -798,20 +802,24 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			graph.drawPlot(true);
 			XMIN = graph.getPlotXMin();
 			XMAX = graph.getPlotXMax();
-			//If simulation was stopped and only one result was calculated the XMIN andX YMAX
+			//If simulation was stopped and only one result was calculated the XMIN and YMAX
 			//may equal, the same for YMIN and YMAX. In this case adjust the XMIN, XMAX, YMIN,
-			//and YMAX values
-			if (XMAX == XMIN) {
-				if (XMIN != 0) {
+			//and YMAX
+			if (XMIN == XMAX) {
+				if (XMIN >= SPINNER_PRECISION) {
 					XMIN -= SPINNER_PRECISION;
+				} else {
+					XMIN = 0;
 				}
 				XMAX += SPINNER_PRECISION;
 			}
 			YMIN = graph.getPlotYMin();
 			YMAX = graph.getPlotYMax();
-			if (YMAX == YMIN) {
-				if (YMIN != 0) {
+			if (YMIN == YMAX) {
+				if (YMIN >= SPINNER_PRECISION) {
 					YMIN -= SPINNER_PRECISION;
+				} else {
+					YMIN = 0;
 				}
 				YMAX += SPINNER_PRECISION;
 			}
@@ -878,8 +886,8 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(samples);
 			//xMin
 			label = new JLabel("X min:");
-			if (XMAX > SPINNER_PRECISION) {
-				xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX - SPINNER_PRECISION, SPINNER_PRECISION));
+			if (XMIN >= SPINNER_PRECISION) {
+				xMin = new JSpinner(new SpinnerNumberModel(XMIN, XMIN - SPINNER_PRECISION, XMAX, SPINNER_PRECISION));
 			} else {
 				xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX, SPINNER_PRECISION));
 			}
@@ -890,7 +898,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(xMin);
 			//xMax
 			label = new JLabel("X max:");
-			xMax = new JSpinner(new SpinnerNumberModel(XMAX, XMIN + SPINNER_PRECISION, XMAX, SPINNER_PRECISION));
+			xMax = new JSpinner(new SpinnerNumberModel(XMAX, XMIN, XMAX + SPINNER_PRECISION, SPINNER_PRECISION));
 			xMax.setToolTipText("Sets the largest x represented");
 			xMax.setMaximumSize(new Dimension(40, 18));
 			label.setLabelFor(xMax);
@@ -898,8 +906,8 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(xMax);
 			//yMin
 			label = new JLabel("Y min:");
-			if (YMAX - SPINNER_PRECISION > YMIN) {
-				yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX - SPINNER_PRECISION, SPINNER_PRECISION));
+			if (YMIN >= SPINNER_PRECISION) {
+				yMin = new JSpinner(new SpinnerNumberModel(YMIN, YMIN - SPINNER_PRECISION, YMAX, SPINNER_PRECISION));
 			} else {
 				yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX, SPINNER_PRECISION));
 			}
@@ -910,11 +918,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(yMin);
 			//yMax
 			label = new JLabel("Y max:");
-			if (YMIN + SPINNER_PRECISION < YMAX) {
-				yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN + SPINNER_PRECISION, YMAX, SPINNER_PRECISION));
-			} else {
-				yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN, YMAX, SPINNER_PRECISION));
-			}
+			yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN, YMAX + SPINNER_PRECISION, SPINNER_PRECISION));
 			yMax.setToolTipText("Sets the largest y represented");
 			yMax.setMaximumSize(new Dimension(40, 18));
 			label.setLabelFor(yMax);
@@ -1146,13 +1150,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (xMin.getValue() instanceof Double) {
 						double XMin = ((Double) xMin.getValue()).doubleValue();
-						//the xMax spinner now has a new minimum value, set it
-						SpinnerNumberModel snm = (SpinnerNumberModel) xMax.getModel();
-						snm.setMinimum(new Double(XMin + SPINNER_PRECISION));
 						double[] range = graph.getXRange();
-						//set the new range
-						graph.setXRange(XMin, range[1]);
-						graph.repaint();
+						if (XMin < range[1]) {
+							//set the new range
+							graph.setXRange(XMin, range[1]);
+							graph.repaint();
+						} else {
+							xMin.setValue(Double.valueOf(range[0]));
+						}
 					}
 				}
 			});
@@ -1161,13 +1166,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (xMax.getValue() instanceof Double) {
 						double XMax = ((Double) xMax.getValue()).doubleValue();
-						//the xMin spinner now has a new maximum value, set it
-						SpinnerNumberModel snm = (SpinnerNumberModel) xMin.getModel();
-						snm.setMaximum(new Double(XMax - SPINNER_PRECISION));
 						double[] range = graph.getXRange();
-						//set the new range
-						graph.setXRange(range[0], XMax);
-						graph.repaint();
+						if (XMax > range[0]) {
+							//set the new range
+							graph.setXRange(range[0], XMax);
+							graph.repaint();
+						} else {
+							xMax.setValue(Double.valueOf(range[1]));
+						}
 					}
 				}
 			});
@@ -1176,13 +1182,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (yMin.getValue() instanceof Double) {
 						double YMin = ((Double) yMin.getValue()).doubleValue();
-						//the yMax spinner now has a new minimum value, set it
-						SpinnerNumberModel snm = (SpinnerNumberModel) yMax.getModel();
-						snm.setMinimum(new Double(YMin + SPINNER_PRECISION));
 						double[] range = graph.getYRange();
-						//set the new range
-						graph.setYRange(YMin, range[1]);
-						graph.repaint();
+						if (YMin < range[1]) {
+							//set the new range
+							graph.setYRange(YMin, range[1]);
+							graph.repaint();
+						} else {
+							yMin.setValue(Double.valueOf(range[0]));
+						}
 					}
 				}
 			});
@@ -1191,13 +1198,14 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				public void stateChanged(ChangeEvent e) {
 					if (yMax.getValue() instanceof Double) {
 						double YMax = ((Double) yMax.getValue()).doubleValue();
-						//the yMin spinner now has a new maximum value, set it
-						SpinnerNumberModel snm = (SpinnerNumberModel) yMin.getModel();
-						snm.setMaximum(new Double(YMax - SPINNER_PRECISION));
 						double[] range = graph.getYRange();
-						//set the new range
-						graph.setYRange(range[0], YMax);
-						graph.repaint();
+						if (YMax > range[0]) {
+							//set the new range
+							graph.setYRange(range[0], YMax);
+							graph.repaint();
+						} else {
+							yMax.setValue(Double.valueOf(range[1]));
+						}
 					}
 				}
 			});
@@ -1266,15 +1274,17 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 
 		private static final long serialVersionUID = 1L;
 
-		private DecimalFormat hexFormat = new DecimalFormat("0.000E0");
 		private DecimalFormat threeDecFormat = new DecimalFormat("0.000");
 		private DecimalFormat twoDecFormat = new DecimalFormat("0.00");
+		private DecimalFormat hexFormat = new DecimalFormat("0.00E0");
 
 		private String getFormattedVal(double value) {
-			if ((value < 1E-3) || (value > 1E4 - 1)) {
-				return hexFormat.format(value);
-			} else {
+			if (value == 0.0) {
+				return "0.0";
+			} else if (Math.abs(value) >= 1e-2 && Math.abs(value) < 1e4) {
 				return threeDecFormat.format(value);
+			} else {
+				return hexFormat.format(value);
 			}
 		}
 

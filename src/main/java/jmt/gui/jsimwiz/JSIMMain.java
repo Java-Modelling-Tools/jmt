@@ -792,6 +792,11 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.UNPREDICTABLE_SERVICE_ERROR)) {
+			tabbedPane.setSelectedIndex(3);
+			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
 			JOptionPane.showMessageDialog(null, "A join is found but no forks. Please remove all joins or add a fork.\n",
 					"Error", JOptionPane.ERROR_MESSAGE);

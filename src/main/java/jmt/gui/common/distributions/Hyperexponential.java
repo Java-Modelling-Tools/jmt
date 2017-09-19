@@ -111,9 +111,9 @@ public class Hyperexponential extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "hyp(" + FormatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
-				+ FormatNumber(((Double) parameters[1].getValue()).doubleValue()) + "; "
-				+ FormatNumber(((Double) parameters[2].getValue()).doubleValue()) + ")";
+		return "hyp(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + "; "
+				+ formatNumber(((Double) parameters[2].getValue()).doubleValue()) + ")";
 	}
 
 	/**
@@ -150,8 +150,8 @@ public class Hyperexponential extends Distribution {
 			getParameter(0).setValue(new Double(p));
 			getParameter(1).setValue(new Double(l1));
 			getParameter(2).setValue(new Double(l2));
-			this.c = c;
 			this.mean = mean;
+			this.c = c;
 		}
 	}
 

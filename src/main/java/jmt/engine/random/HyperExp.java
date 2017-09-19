@@ -43,10 +43,9 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 		expDistr = new Exponential();
 	}
 
-        //TODO: why pdf and cdf are equal to zero? They need to be implement
+	//TODO: why pdf and cdf are equal to zero? They need to be implement
 	/**
-	 * it returns the pdf of the distribution.
-	 * This method is used to obtain from the distribution his probability distribution
+	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
@@ -59,8 +58,7 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the cdf of the distribution.
-	 * This method is used to obtain from the distribution his cumulative distribution
+	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
@@ -73,8 +71,7 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * This method is used to obtain from the distribution the value of his own
+	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
 	 * @param p parameter of the hyper exponential distribution.
@@ -87,30 +84,29 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 			return ((HyperExpPar) p).getMean();
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter mean, variance, lambda1 and lambda 2 must be gtz; p must be a number between 0 and 1");
+					"Remember: parameter mean, variance, lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
 		}
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * This method is used to obtain from the distribution his own theoretical
+	 * This method is used to obtain from the distribution its own theoretical
 	 * variance.
 	 *
 	 * @param p parameter of the hyper exponential distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic variance of the distribution.
 	 */
+
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			return ((HyperExpPar) p).getVar();
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter mean, variance, lambda1 and lambda 2 must be gtz; p must be a number between 0 and 1");
+					"Remember: parameter mean, variance, lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
 		}
 	}
 
 	/**
-	 * it returns the new random number.
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *
@@ -128,10 +124,8 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 			}
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter mean, variance, lambda1 and lambda 2 must be gtz; p must be a number between 0 and 1");
+					"Remember: parameter mean, variance, lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
 		}
 	}
 
-}
-
-// end HyperExp
+} // end HyperExp

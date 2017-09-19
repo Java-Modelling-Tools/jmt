@@ -42,9 +42,8 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	protected ExponentialPar expParam2;
 
 	/**
-	 * it creates a new hyper exponential parameter.
 	 * It creates a new hyper exponential parameter according to the value of mean
-	 * and variance provided by the user. It verify if these parameter are correct
+	 * and variance provided by the user. It verifies if these parameter are correct
 	 * that is if both of them are greater than zero.
 	 *
 	 * @param mean double containing the mean of the new hyper exponential distribution.
@@ -71,14 +70,13 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it creates a new hyper exponential parameter.
 	 * It construct a new hyper exponential parameter based on the value provided by
 	 * the user. This constructor takes three parameters and creates two instances of
 	 * exponential distribution which are selected with probability p provided.
 	 *
 	 * @param p double containing the probability to select one of the two exponential.
-	 * @param lambda1 double containing the value of lambda for the first exponential.
-	 * @param lambda2 double containing the value of lambda for the second exponential.
+	 * @param lambda1 double containing the value of lambda for the 1st exponential.
+	 * @param lambda2 double containing the value of lambda for the 2nd exponential.
 	 *
 	 * @throws IncorrectDistributionParameterException if p is not between zero and one and if lambda1 and lambda2 are not both greater than zero.
 	 *
@@ -100,9 +98,9 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verify the parameters for the constructor requiring Mean and Var.
+	 * It verifies the parameters for the constructor requiring Mean and Var.
 	 *
-	 * @throws IncorrectDistributionParameterException if mean or variance are not both greater than zero.
+	 * @throws IncorrectDistributionParameterException if mean or variance are not both gtz.
 	 */
 	private void testParameters() throws IncorrectDistributionParameterException {
 		if (mean <= 0) {
@@ -116,7 +114,7 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	/**
 	 * Tests the parameters for the constructor requiring p, lambda1 and lambda2.
 	 *
-	 * @throws IncorrectDistributionParameterException if p is not between zero and one or if lambda1 and labda2 are not both greater than zero.
+	 * @throws IncorrectDistributionParameterException if p is not between zero and one or if lambda1 and lambda2 are not both gtz.
 	 *
 	 */
 	private void testParameters1() throws IncorrectDistributionParameterException {
@@ -132,7 +130,7 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verify if the parameter is correct. For the hyper exponential
+	 * It verifies if the parameter is correct. For the hyper exponential
 	 * distribution, the parameter is right if the mean calculated is gtz,
 	 * the variance is gtz, p probability is between 0 and 1 and both the lambda value are gtz.
 	 *
@@ -150,21 +148,20 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the value of p.
 	 * It returns the value of the parameter p, the probability to select one of the
 	 * exponential distribution.
 	 *
 	 * @return double with p the probability to select one of the exponential distribution.
 	 *
 	 */
+
 	public double getP() {
 		return p;
 	}
 
 	/**
-	 * it returns the value of lambda1.
-	 * It returns the value of the parameter lambda1, the parameter lamda for the
-	 * first exponential distribution created by the hyper exponential parameter.
+	 * It returns the value of the parameter lambda1, the parameter lambda for the
+	 * 1st exponential distribution created by the hyper exponential parameter.
 	 *
 	 * @return double with lambda1 the value of lambda for the 1st exponential distribution.
 	 *
@@ -175,9 +172,8 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the value of lambda2.
-	 * It returns the value of the parameter lambda2, the parameter lamda for the
-	 * second exponential distribution created by the hyper exponential parameter.
+	 * It returns the value of the parameter lambda2, the parameter lambda for the
+	 * 2nd exponential distribution created by the hyper exponential parameter.
 	 *
 	 * @return double with lambda2 the value of lambda for the 2nd exponential distribution.
 	 *
@@ -188,19 +184,18 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
 	 * It returns the value of the mean of the hyper exponential distribution which
 	 * is provided by the user or evaluated according to other data.
 	 *
 	 * @return double with the mean of the hyper exponential distribution.
 	 *
 	 */
+
 	public double getMean() {
 		return mean;
 	}
 
 	/**
-	 * it returns the variance of the distribution.
 	 * It returns the value of the variance of the hyper exponential distribution which
 	 * is provided by the user or evaluated according to other data.
 	 *
@@ -213,8 +208,7 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the parameter of the 1st exponential.
-	 * It returns the parameter used to create the first of the exponential
+	 * It returns the parameter used to create the 1st exponential
 	 * distribution used by the hyper exponential distribution.
 	 *
 	 * @return exponentialPar with expParam1, the parameter of the 1st exponential distribution.
@@ -226,8 +220,7 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the parameter of the 2nd exponential.
-	 * It returns the parameter used to create the second of the exponential
+	 * It returns the parameter used to create the 2nd exponential
 	 * distribution used by the hyper exponential distribution.
 	 *
 	 * @return exponentialPar with expParam2, the parameter of the 2nd exponential distribution.
@@ -239,13 +232,12 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the value of mean.
-	 * It allow the user to change the value of the mean of the hyper
-	 * exponential distribution. It verify that the new value is correct and re-calculate
+	 * It allows the user to change the value of the mean of the hyper
+	 * exponential distribution. It verifies that the new value is correct and re-calculate
 	 * the value of lambda for both the exponential distribution used.
 	 *
 	 * @param mean double indicating the new value of the parameter mean
-	 * @throws IncorrectDistributionParameterException if the new value of mean is not greater than zero.
+	 * @throws IncorrectDistributionParameterException if the new value of mean is not gtz.
 	 *
 	 */
 
@@ -262,13 +254,12 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it change the value of variance.
-	 * It allow the user to change the value of the variance of the hyper
-	 * exponential distribution. It verify that the new value is correct and re-calculate
+	 * It allows the user to change the value of the variance of the hyper
+	 * exponential distribution. It verifies that the new value is correct and re-calculate
 	 * the value of p.
 	 *
 	 * @param var double indicating the new value of the parameter var
-	 * @throws IncorrectDistributionParameterException if the new value of var is not greater than zero.
+	 * @throws IncorrectDistributionParameterException if the new value of var is not gtz.
 	 *
 	 */
 
@@ -281,4 +272,5 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 		}
 		this.p = .5 * (1 - Math.sqrt((var - 1) / (var + 1)));
 	}
+
 } // end HyperExpPar

@@ -22,58 +22,56 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
  *
- * This is the parameter that should be passed to the Hyper Exponential
+ * This is the parameter that should be passed to the Cox2
  * distribution.
  *
  * <br><br>Copyright (c) 2017
- * <br>Imperial College London
+ * <br>Imperial College London - Department of Computing
  * @author Giuliano Casale
  *
  */
-
 public class Cox2Par extends AbstractParameter implements Parameter {
 
 	private double mean;
 	private double var;
 	private double phi0;
-
-	private double lambda1;
 	private double lambda0;
-	protected ExponentialPar expParam1;
+	private double lambda1;
 	protected ExponentialPar expParam0;
+	protected ExponentialPar expParam1;
 
 	public Cox2Par(Double lambda0, Double lambda1, Double phi0) throws IncorrectDistributionParameterException {
 		this.phi0 = phi0.doubleValue(); // completion probability
-		this.lambda1 = lambda1.doubleValue();
 		this.lambda0 = lambda0.doubleValue();
+		this.lambda1 = lambda1.doubleValue();
 		testParameters();
 		this.mean = 1/lambda0 + (1-phi0)/lambda1;
 		this.var = ((2*lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (2*lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0))/(lambda0*lambda0*((lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0))) - (1/lambda0 - (phi0 - 1)/lambda1)*(1/lambda0 - (phi0 - 1)/lambda1) - (((phi0 - 1)/(lambda1*lambda1) + (phi0 - 1)/(lambda0*lambda1))*((2*lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (2*lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0)))/((lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0));
 		// creates 2 ExponentialPar objects
-		expParam1 = new ExponentialPar(this.lambda1);
 		expParam0 = new ExponentialPar(this.lambda0);
+		expParam1 = new ExponentialPar(this.lambda1);
 	}
 
 	/**
 	 * Tests the parameters for the constructor requiring p, lambda1 and lambda0.
 	 *
-	 * @throws IncorrectDistributionParameterException if p is not between zero and one or if lambda1 and labda2 are not both greater than zero.
+	 * @throws IncorrectDistributionParameterException if p is not between zero and one or if lambda0 and lambda1 are not both gtz.
 	 *
 	 */
 	private void testParameters() throws IncorrectDistributionParameterException {
 		if (phi0 < 0) {
 			throw new IncorrectDistributionParameterException("Error: phi0 must be >= 0 ");
 		}
-		if (lambda1 < 0) {
-			throw new IncorrectDistributionParameterException("Error: lambda1 must be >= 0");
-		}
 		if (lambda0 < 0) {
 			throw new IncorrectDistributionParameterException("Error: lambda0 must be >= 0");
+		}
+		if (lambda1 < 0) {
+			throw new IncorrectDistributionParameterException("Error: lambda1 must be >= 0");
 		}
 	}
 
 	/**
-	 * It verify if the parameter is correct. For the hyper exponential
+	 * It verifies if the parameter is correct. For the Cox2
 	 * distribution, the parameter is right if the mean calculated is gtz,
 	 * the variance is gtz, p probability is between 0 and 1 and both the lambda value are gtz.
 	 *
@@ -83,7 +81,7 @@ public class Cox2Par extends AbstractParameter implements Parameter {
 
 	@Override
 	public boolean check() {
-		if ((phi0 < 0) || (phi0 > 1) || (lambda1 < 0) || (lambda0 < 0)) {
+		if ((phi0 < 0) || (phi0 > 1) || (lambda0 < 0) || (lambda1 < 0)) {
 			return false;
 		} else {
 			return true;
@@ -95,24 +93,10 @@ public class Cox2Par extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the value of lambda1.
-	 * It returns the value of the parameter lambda1, the parameter lamda for the
-	 * first exponential distribution created by the hyper exponential parameter.
+	 * It returns the value of the parameter lambda0, the parameter lambda for the
+	 * 1st exponential distribution created by the Cox2 parameter.
 	 *
-	 * @return double with lambda1 the value of lambda for the 1st exponential distribution.
-	 *
-	 */
-
-	public double getLambda1() {
-		return lambda1;
-	}
-
-	/**
-	 * it returns the value of lambda0.
-	 * It returns the value of the parameter lambda0, the parameter lamda for the
-	 * second exponential distribution created by the hyper exponential parameter.
-	 *
-	 * @return double with lambda0 the value of lambda for the 2nd exponential distribution.
+	 * @return double with lambda0 the value of lambda for the 1st exponential distribution.
 	 *
 	 */
 
@@ -121,23 +105,34 @@ public class Cox2Par extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the mean of the distribution.
-	 * It returns the value of the mean of the hyper exponential distribution which
-	 * is provided by the user or evaluated according to other data.
+	 * It returns the value of the parameter lambda1, the parameter lambda for the
+	 * 2nd exponential distribution created by the Cox2 parameter.
 	 *
-	 * @return double with the mean of the hyper exponential distribution.
+	 * @return double with lambda1 the value of lambda for the 2nd exponential distribution.
 	 *
 	 */
+
+	public double getLambda1() {
+		return lambda1;
+	}
+
+	/**
+	 * It returns the value of the mean of the Cox2 distribution which
+	 * is provided by the user or evaluated according to other data.
+	 *
+	 * @return double with the mean of the Cox2 distribution.
+	 *
+	 */
+
 	public double getMean() {
 		return mean;
 	}
 
 	/**
-	 * it returns the variance of the distribution.
-	 * It returns the value of the variance of the hyper exponential distribution which
+	 * It returns the value of the variance of the Cox2 distribution which
 	 * is provided by the user or evaluated according to other data.
 	 *
-	 * @return double with the variance of the hyper exponential distribution.
+	 * @return double with the variance of the Cox2 distribution.
 	 *
 	 */
 
@@ -146,29 +141,27 @@ public class Cox2Par extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * it returns the parameter of the 1st exponential.
-	 * It returns the parameter used to create the first of the exponential
-	 * distribution used by the hyper exponential distribution.
+	 * It returns the parameter used to create the 1st exponential
+	 * distribution used by the Cox2 distribution.
 	 *
-	 * @return exponentialPar with expParam1, the parameter of the 1st exponential distribution.
-	 *
-	 */
-
-	public ExponentialPar getExpParam1() {
-		return expParam1;
-	}
-
-	/**
-	 * it returns the parameter of the 2nd exponential.
-	 * It returns the parameter used to create the second of the exponential
-	 * distribution used by the hyper exponential distribution.
-	 *
-	 * @return exponentialPar with expParam0, the parameter of the 2nd exponential distribution.
+	 * @return exponentialPar with expParam0, the parameter of the 1st exponential distribution.
 	 *
 	 */
 
 	public ExponentialPar getExpParam0() {
 		return expParam0;
+	}
+
+	/**
+	 * It returns the parameter used to create the 2nd exponential
+	 * distribution used by the Cox2 distribution.
+	 *
+	 * @return exponentialPar with expParam1, the parameter of the 2nd exponential distribution.
+	 *
+	 */
+
+	public ExponentialPar getExpParam1() {
+		return expParam1;
 	}
 
 } // end Cox2Par
