@@ -741,6 +741,7 @@ public class Mediator implements GuiInterface {
 		}
 	}
 
+
 	public void closeModel() {
 		// Checks if there's an old graph to save
 		if (checkForSave("<html>Save changes before closing?</html>")) {

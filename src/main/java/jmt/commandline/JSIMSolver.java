@@ -21,6 +21,7 @@ package jmt.commandline;
 import java.io.File;
 
 import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.gui.common.startScreen.GraphStartScreen;
 
 /**
  * <p><b>Name:</b> JSIMSolver</p> 
@@ -52,7 +53,7 @@ public class JSIMSolver {
 			System.err.print("Invalid model file: " + model.getAbsolutePath());
 			System.exit(1);
 		}
-
+		
 		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(model);
 		dispatcher.setTerminalSimulation(true);
 		// Sets simulation seed if required

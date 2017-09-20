@@ -101,8 +101,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	private JButton pause;
 	private JProgressBar progressBar;
 	// Used to format numbers
-	private static DecimalFormat decimalFormatNorm = new DecimalFormat("0.000");
-	private static DecimalFormat decimalFormatExp = new DecimalFormat("0.00E0");
+	private static DecimalFormat decimalFormatNorm = new DecimalFormat("0.0000");
+	private static DecimalFormat decimalFormatExp = new DecimalFormat("0.000E0");
 	private JSimLogger logger = JSimLogger.getLogger(ResultsWindow.class);
 
 	/**

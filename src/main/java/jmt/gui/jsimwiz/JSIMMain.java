@@ -353,6 +353,56 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	}
 
 	/**
+	 * Open a stored model from a file path
+	 * <br>Author: Giuliano Casale
+	 */
+	private void openFilePath(File file) {
+		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
+			return;
+		}
+		JSIMModel tmpmodel = new JSIMModel();
+		int state = modelLoader.loadModelFromFile(tmpmodel, this, file);
+		if (state == ModelLoader.SUCCESS || state == ModelLoader.WARNING) {
+			currentFile = file;
+			// At this point loading was successful, so substitutes old model with loaded one
+			model = tmpmodel;
+			// Clears old resultsWindow
+			if (resultsWindow != null) {
+				resultsWindow.dispose();
+			}
+			// Clears parametric window too...
+			if (progressWindow != null) {
+				progressWindow.stopAnimation();
+				progressWindow.dispose();
+			}
+			SHOW_RESULTS.setSelected(false);
+			SHOW_RESULTS.setEnabled(false);
+			setPanelsData(model);
+			setTitle(WINDOW_TITLE + " - " + currentFile.getName());
+			// If simulation results are present, adds a Result Window
+			if (model.containsSimulationResults()) {
+				if (model.isParametricAnalysisEnabled()) {
+					this.setResultsWindow(new PAResultsWindow(model, currentFile.getName()));
+					SHOW_RESULTS.setEnabled(true);
+				} else {
+					this.setResultsWindow(new ResultsWindow(model, currentFile.getName()));
+					SHOW_RESULTS.setEnabled(true);
+				}
+			}
+			model.resetSaveState();
+			System.gc();
+		} else if (state == ModelLoader.FAILURE) {
+			showErrorMessage(modelLoader.getFailureMotivation());
+		}
+
+		// Shows warnings if any
+		if (state == ModelLoader.WARNING) {
+			new WarningWindow(modelLoader.getLastWarnings(), this, modelLoader.getInputFileFormat(), CommonConstants.JSIM).show();
+		}
+
+	}
+
+	/**
 	 * Open a stored model from a file
 	 * <br>Author: Bertoli Marco
 	 */
@@ -623,7 +673,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	public JSIMMain() {
 		this(null);
 	}
-
+	
 	public JSIMMain(CommonModel model) {
 		super();
 		Defaults.reload();
@@ -1023,7 +1073,9 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	}
 
 	public static void main(String[] args) {
-		new JSIMMain().setVisible(true);
+		JSIMMain J = new JSIMMain();
+		J.setVisible(true);
+		J.openFilePath(new File(args[1]));
 	}
 
 	/**

@@ -43,7 +43,10 @@ import jmt.jmva.analytical.SolverDispatcher;
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.gui.common.xml.XMLArchiver;
+import jmt.gui.jsimgraph.mainGui.MainWindow;
+import jmt.gui.jsimwiz.JSIMMain;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -69,12 +72,14 @@ public class Jmt {
 	}
 
 	public static void help() {
-		System.err.println("Usage: jmt.commandline.Jmt [sim|mva] [modelfilename] [options]");
+		System.err.println("Usage: jmt.commandline.Jmt [sim|mva|jsimw] [modelfilename] [options]");
 		System.err.println("mva options:");
 		System.err.println("  <none>");
 		System.err.println("sim options:");
 		System.err.println("  -seed 1234 : sets the simulation seed to 1234");
 		System.err.println("  -maxtime 60 : sets the maximum simulation time to 60 seconds");
+		System.err.println("jsimw options:");
+		System.err.println("  <none>");
 		System.exit(0);
 	}
 
@@ -121,7 +126,9 @@ public class Jmt {
 				System.exit(1);
 			}
 			Map<String,String> options = parseParameters(args, 2);
-			sim(model, result, options);
+			sim(model, result, options);		 
+		} else if (args[0].equals("jsimw")) {
+			JSIMMain.main(args);
 		} else {
 			help();
 		}
