@@ -1274,6 +1274,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 
 		private static final long serialVersionUID = 1L;
 
+		private DecimalFormat fourDecFormat = new DecimalFormat("0.0000");
 		private DecimalFormat threeDecFormat = new DecimalFormat("0.000");
 		private DecimalFormat twoDecFormat = new DecimalFormat("0.00");
 		private DecimalFormat hexFormat = new DecimalFormat("0.00E0");
@@ -1282,7 +1283,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			if (value == 0.0) {
 				return "0.0";
 			} else if (Math.abs(value) >= 1e-2 && Math.abs(value) < 1e4) {
-				return threeDecFormat.format(value);
+				return fourDecFormat.format(value);
 			} else {
 				return hexFormat.format(value);
 			}

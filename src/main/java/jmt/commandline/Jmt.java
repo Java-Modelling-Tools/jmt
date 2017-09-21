@@ -72,13 +72,15 @@ public class Jmt {
 	}
 
 	public static void help() {
-		System.err.println("Usage: jmt.commandline.Jmt [sim|mva|jsimw] [modelfilename] [options]");
+		System.err.println("Usage: jmt.commandline.Jmt [sim|mva|jsimw|jsimg] [modelfilename] [options]");
 		System.err.println("mva options:");
 		System.err.println("  <none>");
 		System.err.println("sim options:");
 		System.err.println("  -seed 1234 : sets the simulation seed to 1234");
 		System.err.println("  -maxtime 60 : sets the maximum simulation time to 60 seconds");
 		System.err.println("jsimw options:");
+		System.err.println("  <none>");
+		System.err.println("jsimg options:");
 		System.err.println("  <none>");
 		System.exit(0);
 	}
@@ -129,6 +131,8 @@ public class Jmt {
 			sim(model, result, options);		 
 		} else if (args[0].equals("jsimw")) {
 			JSIMMain.main(args);
+		} else if (args[0].equals("jsimg")) {
+			MainWindow.main(args);
 		} else {
 			help();
 		}
