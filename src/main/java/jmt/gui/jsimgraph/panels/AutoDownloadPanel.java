@@ -123,8 +123,6 @@ public class AutoDownloadPanel extends WizardPanel implements TemplateConstants 
 		retry.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				downloadIndex();
-				for (TemplateData t : data)
-					System.out.println(t.getName());
 				((DefaultPackageTableModel) defaultPackageTable.getModel()).fireDataChanged();
 				((DefaultPackageTableModel) defaultPackageTable.getModel()).setFlags(data.size());
 				createBottom();
@@ -198,7 +196,6 @@ public class AutoDownloadPanel extends WizardPanel implements TemplateConstants 
 		private static final long serialVersionUID = 1L;
 
 		public DefaultPackageTable() {
-			super();
 			setModel(new DefaultPackageTableModel());
 			sizeColumns();
 			setRowHeight(CELL_HEIGHT);

@@ -40,7 +40,7 @@ import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
 public abstract class Basis {
 
 	/**
-	 * The Queuing Network Model under study
+	 * The Queueing Network Model under study
 	 */
 	protected QNModel qnm;
 
@@ -89,7 +89,7 @@ public abstract class Basis {
 
 	/**
 	 * Constructor
-	 * @param qnm The Queuing Network Model under study
+	 * @param qnm The Queueing Network Model under study
 	 */
 	public Basis(QNModel qnm) {
 		this.qnm = qnm;

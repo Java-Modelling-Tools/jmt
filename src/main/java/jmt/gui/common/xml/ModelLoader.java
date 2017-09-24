@@ -150,166 +150,34 @@ public class ModelLoader {
 
 	// --- Methods used to load models ------------------------------------------------------------
 	/**
-	 * Shows a Load window and loads chosen model inside specified model data file
-	 * @param modelData data file where information should be stored. Note that <b>its type
+	 * Loads a model from a file into specified model data
+	 * @param modelData model data where information should be stored. Note that <b>its type
 	 * must be compatible with defaultFilter chosen in the constructor</b>, otherwise a
 	 * ClassCastException will be thrown
 	 * @param parent parent component of loading window
+	 * @param file model file where information should be loaded. If null, a Load window will
+	 * be shown for choosing the file
 	 * @return SUCCESS on success, CANCELLED if loading is cancelled,
 	 * FAILURE if an error occurs and WARNING is one or more warnings are generated due to
 	 * format conversion
 	 * @throws ClassCastException if modelData is not of instance of the correct class
 	 * @see #getFailureMotivation getFailureMotivation()
 	 */
-	public int loadModelFromFile(Object modelData, Component parent, File file) {
-		warnings.clear();
-
-		try {
-			if (defaultFilter == JMODEL || defaultFilter == JSIM) {
-				StoredResultsModel srm;
-				// Handles loading of JSIM/JMODEL models
-				switch (getXmlFileType(file.getAbsolutePath())) {
-				case XML_SIM:
-					XMLReader.loadModel(file, (CommonModel) modelData);
-					fileFormat = CommonConstants.SIMENGINE;
-					break;
-				case XML_ARCHIVE:
-					XMLArchiver.loadModel(file, (CommonModel) modelData);
-					fileFormat = CommonConstants.JSIM;
-					break;
-				case XML_MVA:
-					ExactModel tmp = new ExactModel();
-					tmp.loadDocument(xmlutils.loadXML(file));
-					warnings.addAll(ModelConverter.convertJMVAtoJSIM(tmp, (CommonModel) modelData));
-					fileFormat = CommonConstants.JMVA;
-					break;
-				case XML_JABA:
-					//TODO implement bridge JABA --> JSIM
-					failureMotivation = FAIL_CONVERSION + "JABA.";
-					fileFormat = CommonConstants.JABA;
-					return FAILURE;
-				case XML_RES_SIM:
-					srm = new StoredResultsModel();
-					XMLResultsReader.loadModel(srm, file);
-					((CommonModel) modelData).setSimulationResults(srm);
-					warnings.add("Loaded file contained simulation results only. Associated queuing network model is not available. "
-							+ "Results can be shown by selecting \"Show Results\" icon.");
-					fileFormat = CommonConstants.SIMENGINE;
-					break;
-				case XML_RES_GUI:
-					srm = new StoredResultsModel();
-					XMLResultsReader.loadGuiModel(srm, file);
-					((CommonModel) modelData).setSimulationResults(srm);
-					warnings.add("Loaded file contained simulation results only. Associated queuing network model is not available. "
-							+ "Results can be shown by selecting \"Show Results\" icon.");
-					fileFormat = CommonConstants.SIMENGINE;
-					break;
-				case XML_PNML:
-					PNMLReader.importModel(file, (CommonModel) modelData);
-					fileFormat = CommonConstants.JSIM;
-					break;
-				default:
-					failureMotivation = FAIL_UNKNOWN;
-					return FAILURE;
-				}
-			} else if (defaultFilter == JMVA) {
-				// Handles loading of JMVA models
-				CommonModel tmp = new CommonModel();
-				switch (getXmlFileType(file.getAbsolutePath())) {
-				case XML_SIM:
-					XMLReader.loadModel(file, tmp);
-					warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
-					fileFormat = CommonConstants.SIMENGINE;
-					break;
-				case XML_ARCHIVE:
-					XMLArchiver.loadModel(file, tmp);
-					warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
-					fileFormat = CommonConstants.JSIM;
-					break;
-				case XML_JABA:
-					//TODO implement bridge JABA --> JMVA
-					failureMotivation = FAIL_CONVERSION + "JABA.";
-					fileFormat = CommonConstants.JABA;
-					return FAILURE;
-				case XML_MVA:
-					((ExactModel) modelData).loadDocument(xmlutils.loadXML(file));
-					fileFormat = CommonConstants.JMVA;
-					break;
-				case XML_RES_SIM:
-				case XML_RES_GUI:
-					// This is silly to be opened in JMVA...
-					failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
-					fileFormat = CommonConstants.SIMENGINE;
-					return FAILURE;
-				default:
-					failureMotivation = FAIL_UNKNOWN;
-					return FAILURE;
-				}
-			} else if (defaultFilter == JABA) {
-				// Handles loading of JABA models
-				switch (getXmlFileType(file.getAbsolutePath())) {
-				case XML_SIM:
-					//TODO implement bridge JSIM --> JABA
-				case XML_ARCHIVE:
-					//TODO implement bridge JSIM --> JABA
-					failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
-					return FAILURE;
-				case XML_MVA:
-					//TODO implement bridge JMVA --> JABA
-					failureMotivation = FAIL_CONVERSION + "JMVA.";
-					return FAILURE;
-				case XML_JABA:
-					((JabaModel) modelData).loadDocument(xmlutils.loadXML(file));
-					break;
-				case XML_RES_SIM:
-				case XML_RES_GUI:
-					// This is silly to be opened in JABA...
-					failureMotivation = FAIL_CONVERSION + "JSIM or JMODEL.";
-					return FAILURE;
-				default:
-					failureMotivation = FAIL_UNKNOWN;
-					return FAILURE;
-				}
+	public int loadModel(Object modelData, Component parent, File file) {
+		if (file == null) {
+			int status = showOpenDialog(parent);
+			if (status == JFileChooser.CANCEL_OPTION) {
+				return CANCELLED;
+			} else if (status == JFileChooser.ERROR_OPTION) {
+				failureMotivation = "Error selecting input file";
+				return FAILURE;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			failureMotivation = e.getClass().getName() + ": " + e.getMessage();
-			return FAILURE;
-		}
-		// If no warnings were found, report success
-		if (warnings.size() > 0) {
-			return WARNING;
+			file = dialog.getSelectedFile();
 		} else {
-			return SUCCESS;
+			dialog.setSelectedFile(file);
 		}
-	}
 
-	// --- Methods used to load models ------------------------------------------------------------
-	/**
-	 * Shows a Load window and loads chosen model inside specified model data file
-	 * @param modelData data file where information should be stored. Note that <b>its type
-	 * must be compatible with defaultFilter chosen in the constructor</b>, otherwise a
-	 * ClassCastException will be thrown
-	 * @param parent parent component of loading window
-	 * @return SUCCESS on success, CANCELLED if loading is cancelled,
-	 * FAILURE if an error occurs and WARNING is one or more warnings are generated due to
-	 * format conversion
-	 * @throws ClassCastException if modelData is not of instance of the correct class
-	 * @see #getFailureMotivation getFailureMotivation()
-	 */
-	public int loadModel(Object modelData, Component parent) {
 		warnings.clear();
-		int status;
-		status = this.showOpenDialog(parent);
-		if (status == JFileChooser.CANCEL_OPTION) {
-			return CANCELLED;
-		} else if (status == JFileChooser.ERROR_OPTION) {
-			failureMotivation = "Error selecting input file";
-			return FAILURE;
-		}
-
-		File file = dialog.getSelectedFile();
-
 		try {
 			if (defaultFilter == JMODEL || defaultFilter == JSIM) {
 				StoredResultsModel srm;
@@ -338,7 +206,7 @@ public class ModelLoader {
 					srm = new StoredResultsModel();
 					XMLResultsReader.loadModel(srm, file);
 					((CommonModel) modelData).setSimulationResults(srm);
-					warnings.add("Loaded file contained simulation results only. Associated queuing network model is not available. "
+					warnings.add("Loaded file contained simulation results only. Associated queueing network model is not available. "
 							+ "Results can be shown by selecting \"Show Results\" icon.");
 					fileFormat = CommonConstants.SIMENGINE;
 					break;
@@ -346,7 +214,7 @@ public class ModelLoader {
 					srm = new StoredResultsModel();
 					XMLResultsReader.loadGuiModel(srm, file);
 					((CommonModel) modelData).setSimulationResults(srm);
-					warnings.add("Loaded file contained simulation results only. Associated queuing network model is not available. "
+					warnings.add("Loaded file contained simulation results only. Associated queueing network model is not available. "
 							+ "Results can be shown by selecting \"Show Results\" icon.");
 					fileFormat = CommonConstants.SIMENGINE;
 					break;

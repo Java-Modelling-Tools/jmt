@@ -19,13 +19,12 @@ package jmt.jmva.analytical.solvers;
 
 import javax.naming.OperationNotSupportedException;
 import jmt.engine.random.engine.RandomEngine;
-
-import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
-import jmt.jmva.analytical.solvers.QueuingNet.MoMSolver;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.QueueingNet.MoMSolver;
+import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 
 /**
  * This class implements the API to allow use by other applications. One can
@@ -43,7 +42,7 @@ public class SolverMultiClosedMoM extends SolverMulti {
 	private Integer scale = 1000000;
 
 	/**
-	 * Contains the queuing network model
+	 * Contains the queueing network model
 	 */
 	protected QNModel qnm;
 	/**
@@ -139,7 +138,7 @@ public class SolverMultiClosedMoM extends SolverMulti {
 				N[r] = population[r];
 			}
 
-			// Instantiate queuing network model
+			// Instantiate queueing network model
 			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
 			qnm.N.print();
 

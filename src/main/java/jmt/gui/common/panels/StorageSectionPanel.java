@@ -22,6 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -47,6 +48,7 @@ import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.BooleanCellRenderer;
+import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.exact.table.ExactCellRenderer;
 
 /**
@@ -121,16 +123,21 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 		infiniteCheckBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				TableCellEditor editor = optionTable.getCellEditor();
+				if (editor != null) {
+					editor.stopCellEditing();
+				}
 				if (infiniteCheckBox.isSelected()) {
 					capacitySpinner.setValue(Float.POSITIVE_INFINITY);
 					capacitySpinner.setEnabled(false);
-					TableCellEditor editor = optionTable.getCellEditor();
-					if (editor != null) {
-						editor.cancelCellEditing();
+					Vector<Object> classKeys = classData.getClassKeys();
+					for (Object classKey : classKeys) {
+						if (stationData.getQueueCapacity(stationKey, classKey).intValue() < 1) {
+							stationData.setDropRule(stationKey, classKey, Defaults.get("placeDropRule"));
+						}
 					}
 				} else {
-					Integer capacity = Defaults.getAsInteger("placeCapacity");
-					capacitySpinner.setValue(capacity);
+					capacitySpinner.setValue(Defaults.getAsInteger("placeCapacity"));
 					capacitySpinner.setEnabled(true);
 				}
 				optionTable.repaint();
@@ -206,10 +213,11 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 			capacityRenderer = new GrayCellRenderer();
 			dropRuleRenderer = new DisabledComboBoxCellRenderer(INFINITE_CAPACITY);
 			setModel(new StorageOptionTableModel());
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
-			sizeColumns();
 		}
 
 		private void sizeColumns() {
@@ -330,6 +338,9 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 			} else if (columnIndex == 2) {
 				if (((Boolean) aValue).booleanValue()) {
 					stationData.setQueueCapacity(stationKey, classKey, Integer.valueOf(-1));
+					if (stationData.getStationQueueCapacity(stationKey).intValue() < 1) {
+						stationData.setDropRule(stationKey, classKey, Defaults.get("placeDropRule"));
+					}
 				} else {
 					Integer capacity = Defaults.getAsInteger("placeQueueCapacity");
 					if (capacity.intValue() < 1) {

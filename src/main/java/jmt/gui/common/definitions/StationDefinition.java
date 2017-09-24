@@ -132,9 +132,9 @@ public interface StationDefinition {
 	public Vector<Object> getStationKeysNoSourceSink();
 
 	/**
-	 * This method returns reference source keys.
+	 * This method returns reference station keys.
 	 */
-	public Vector<Object> getStationKeysRefSource();
+	public Vector<Object> getStationKeysRefStation();
 
 	/**
 	 * This method returns fork/join section keys.

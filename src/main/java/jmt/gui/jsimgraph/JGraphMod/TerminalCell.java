@@ -18,8 +18,6 @@
 
 package jmt.gui.jsimgraph.JGraphMod;
 
-import jmt.gui.jsimgraph.controller.Mediator;
-
 import org.jgraph.graph.Port;
 
 /**
@@ -39,7 +37,7 @@ public class TerminalCell extends JmtCell {
 	public static final boolean canBePlaced = false;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
-	public static final String ICON = Mediator.advanced ? "bc" : "terminal";
+	public static final String ICON = "terminal";
 
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.

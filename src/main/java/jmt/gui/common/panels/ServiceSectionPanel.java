@@ -65,6 +65,7 @@ import jmt.gui.common.serviceStrategies.ZeroStrategy;
 public class ServiceSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
+
 	protected Object stationKey;
 	protected StationDefinition data;
 	protected ClassDefinition classData;

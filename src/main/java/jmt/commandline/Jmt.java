@@ -43,7 +43,6 @@ import jmt.jmva.analytical.SolverDispatcher;
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
-import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.gui.common.xml.XMLArchiver;
 import jmt.gui.jsimgraph.mainGui.MainWindow;
 import jmt.gui.jsimwiz.JSIMMain;
@@ -72,7 +71,7 @@ public class Jmt {
 	}
 
 	public static void help() {
-		System.err.println("Usage: jmt.commandline.Jmt [sim|mva|jsimw|jsimg] [modelfilename] [options]");
+		System.err.println("Usage: jmt.commandline.Jmt [mva|sim|jsimw|jsimg] [modelfilename] [options]");
 		System.err.println("mva options:");
 		System.err.println("  <none>");
 		System.err.println("sim options:");
@@ -116,36 +115,29 @@ public class Jmt {
 		if (args.length < 2) {
 			help();
 		}
+		File model = new File(args[1]);
+		if (!model.isFile()) {
+			System.err.print("Invalid model file: " + model.getAbsolutePath());
+			System.exit(1);
+		}
 		if (args[0].equals("mva")) {
-			File model = new File(args[1]);
 			File result = new File(args[1] + "-result.jmva");
 			mva(model, result);
 		} else if (args[0].equals("sim")) {
-			File model = new File(args[1]);
 			File result = new File(args[1] + "-result.jsim");
-			if (!model.isFile()) {
-				System.err.print("Model file not found: " + model.getAbsolutePath());
-				System.exit(1);
-			}
-			Map<String,String> options = parseParameters(args, 2);
-			sim(model, result, options);		 
+			Map<String, String> options = parseParameters(args, 2);
+			sim(model, result, options);
 		} else if (args[0].equals("jsimw")) {
-			JSIMMain.main(args);
+			JSIMMain.main(new String[] { args[1] });
 		} else if (args[0].equals("jsimg")) {
-			MainWindow.main(args);
+			MainWindow.main(new String[] { args[1] });
 		} else {
 			help();
 		}
 	}
 
 	public static void mva(File model, File result) throws SolverException, InputDataException, IOException {
-		if (!model.isFile()) {
-			System.err.print("Invalid model file: " + model.getAbsolutePath());
-			System.exit(1);
-		}
-
 		SolverDispatcher dispatcher = new SolverDispatcher();
-
 		// Starts the solution
 		dispatcher.solve(model);
 		copyFile(model, result);

@@ -51,6 +51,7 @@ import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
 import jmt.gui.exact.table.BooleanCellRenderer;
+import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.exact.table.ExactCellRenderer;
 
 /**
@@ -72,7 +73,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 	private Object stationKey;
 
 	private JButton addModeButton;
-	private TimingOptionTable OptionTable;
+	private TimingOptionTable optionTable;
 
 	public TimingSectionPanel(StationDefinition sd, ClassDefinition cd, Object sk) {
 		setData(sd, cd, sk);
@@ -93,8 +94,8 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 		addModeButton = new JButton("Add Mode");
 		addModeButton.setMinimumSize(DIM_BUTTON_M);
 
-		OptionTable = new TimingOptionTable();
-		JScrollPane OptionPane = new JScrollPane(OptionTable);
+		optionTable = new TimingOptionTable();
+		JScrollPane OptionPane = new JScrollPane(optionTable);
 		OptionPane.setBorder(new TitledBorder(new EtchedBorder(), "Timing Options"));
 
 		add(addModeButton, BorderLayout.NORTH);
@@ -108,7 +109,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 				stopAllCellEditing();
 				int index = stationData.getTransitionModeListSize(stationKey);
 				stationData.addTransitionMode(stationKey, Defaults.get("transitionModeName") + (index + 1));
-				OptionTable.tableChanged(new TableModelEvent(OptionTable.getModel()));
+				optionTable.tableChanged(new TableModelEvent(optionTable.getModel()));
 			}
 		});
 	}
@@ -134,13 +135,13 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 	 */
 	@Override
 	public void gotFocus() {
-		OptionTable.tableChanged(new TableModelEvent(OptionTable.getModel()));
+		optionTable.tableChanged(new TableModelEvent(optionTable.getModel()));
 	}
 
 	private void stopAllCellEditing() {
 		TableCellEditor editor = null;
-		editor = OptionTable.getCellEditor();
-		if (editor != null && editor != OptionTable.getCellEditor(0, 8)) {
+		editor = optionTable.getCellEditor();
+		if (editor != null && editor != optionTable.deleteEditor) {
 			editor.stopCellEditing();
 		}
 	}
@@ -166,13 +167,13 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 			}
 
 			public void actionPerformed(ActionEvent e) {
-				int index = OptionTable.getSelectedRow();
+				int index = optionTable.getSelectedRow();
 				Distribution distrbution = (Distribution) stationData.getFiringTimeDistribution(stationKey, index);
 				DistributionsEditor editor = DistributionsEditor.getInstance(TimingSectionPanel.this.getParent(), distrbution);
 				editor.setTitle("Editing " + stationData.getTransitionModeName(stationKey, index) + " Firing Time Distribution...");
 				editor.show();
 				stationData.setFiringTimeDistribution(stationKey, index, editor.getResult());
-				OptionTable.repaint();
+				optionTable.repaint();
 			}
 
 		};
@@ -182,15 +183,15 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 			private static final long serialVersionUID = 1L;
 
 			{
+				putValue(Action.SHORT_DESCRIPTION, "Delete");
 				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Delete"));
-				setFocusable(false);
 			}
 
 			public void actionPerformed(ActionEvent e) {
 				stopAllCellEditing();
-				int index = OptionTable.getSelectedRow();
+				int index = optionTable.getSelectedRow();
 				stationData.deleteTransitionMode(stationKey, index);
-				OptionTable.tableChanged(new TableModelEvent(OptionTable.getModel()));
+				optionTable.tableChanged(new TableModelEvent(optionTable.getModel()));
 			}
 
 		};
@@ -201,13 +202,16 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 			distributionRenderer = new DisabledButtonCellRenderer(new JButton(editDistribution));
 			priorityRenderer = new GrayCellRenderer();
 			weightRenderer = new GrayCellRenderer();
-			deleteEditor = new ButtonCellEditor(new JButton(deleteMode));
+			JButton deleteButton = new JButton(deleteMode);
+			deleteButton.setFocusable(false);
+			deleteEditor = new ButtonCellEditor(deleteButton);
 			deleteRenderer = new DisabledButtonCellRenderer(new JButton(deleteMode));
 			setModel(new TimingOptionTableModel());
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
-			sizeColumns();
 		}
 
 		private void sizeColumns() {
