@@ -4,10 +4,9 @@ import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueueingNet.CoMoMBTFSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.MonteCarloSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
-
+import jmt.jmva.analytical.solvers.QueuingNet.CoMoMBTFSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.MonteCarloSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
 import javax.naming.OperationNotSupportedException;
 import jmt.engine.random.engine.RandomEngine;
 
@@ -24,7 +23,7 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
     private int maxSamples = MAX_SAMPLES;
     private double tolerance = Math.pow(10, -7);
     /**
-     * Contains the queueing network model
+     * Contains the queuing network model
      */
     protected QNModel qnm;
     
@@ -116,7 +115,7 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
                 N[r] = population[r];
             }
 
-            // Instantiate queueing network model
+            // Instantiate queuing network model
             qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
             qnm.N.print();
 

@@ -40,15 +40,19 @@ import jmt.gui.common.definitions.StationDefinition;
  */
 public class RSPLPanel extends WizardPanel implements CommonConstants {
 
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
 
-	private RefSourcesPanel rsPanel;
+	private RefSourcePanel rsPanel;
 
 	private ClassDefinition classData;
 	private StationDefinition stationData;
 	private SimulationDefinition simData;
 
 	public RSPLPanel(ClassDefinition classes, StationDefinition stations, SimulationDefinition sim) {
+		super();
 		setData(classes, stations, sim);
 		initComponents();
 		refreshComponents();
@@ -70,7 +74,7 @@ public class RSPLPanel extends WizardPanel implements CommonConstants {
 		upperPanel.add(Box.createVerticalStrut(10), BorderLayout.SOUTH);
 		add(upperPanel, BorderLayout.NORTH);
 
-		rsPanel = new RefSourcesPanel(classData, stationData, simData);
+		rsPanel = new RefSourcePanel(classData, stationData, simData);
 		add(rsPanel, BorderLayout.CENTER);
 	}
 

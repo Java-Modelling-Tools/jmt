@@ -51,19 +51,6 @@ public class InverseMeasure extends jmt.engine.dataAnalysis.Measure {
 		}
 	}
 
-	/** Gets measure value: if the confidence requirements have not been
-	 * reached, it is returned the value estimated up to that moment.
-	 * @return measure value.
-	 */
-	@Override
-	public double getEstimatedMeanValue() {
-		if (analyzer.estimatedMean() > 0) {
-			return 1 / analyzer.estimatedMean();
-		} else {
-			return 0.0;
-		}
-	}
-
 	/** Gets lower limit of the inverse measure.
 	 * @return Lower limit.
 	 */
@@ -74,6 +61,19 @@ public class InverseMeasure extends jmt.engine.dataAnalysis.Measure {
 			return 0.0;
 		} else {
 			return 1 / (analyzer.getMean() + analyzer.getConfInt());
+		}
+	}
+
+	/** Gets lower limit of the inverse measure.
+	 * @return Lower limit.
+	 */
+	@Override
+	public double getLastIntervalAvgValue() {
+		if (receivedNoSamples()) {
+			//no samples have been collected -> throughput is zero
+			return 0.0;
+		} else {
+			return 1 / (analyzer.getLastIntervalAvg());
 		}
 	}
 	
@@ -90,17 +90,16 @@ public class InverseMeasure extends jmt.engine.dataAnalysis.Measure {
 		}
 	}
 
-	/** Gets last interval average value of the inverse measure.
-	 * @return Last interval average value.
+	/** Gets measure value: if the confidence requirements have not been
+	 * reached, it is returned the value estimated up to that moment.
+	 * @return measure value.
 	 */
 	@Override
-	public double getLastIntervalAvgValue() {
-		if (receivedNoSamples()) {
-			//no samples have been collected -> throughput is zero
-			return 0.0;
+	public double getEstimatedMeanValue() {
+		if (analyzer.estimatedMean() > 0) {
+			return 1 / analyzer.estimatedMean();
 		} else {
-			return 1 / (analyzer.getLastIntervalAvg());
+			return 0.0;
 		}
 	}
-
 }

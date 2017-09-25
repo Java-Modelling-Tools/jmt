@@ -147,6 +147,7 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants {
 		private static final long serialVersionUID = 1L;
 
 		public JoinSelectionTable() {
+			super();
 			setModel(new JoinSelectionTableModel());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);

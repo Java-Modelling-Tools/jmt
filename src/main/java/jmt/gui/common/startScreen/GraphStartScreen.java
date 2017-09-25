@@ -161,6 +161,7 @@ public class GraphStartScreen extends JMTFrame {
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMCH_SHORT_DESCRIPTION);
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(40,40)));
+			//putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -175,10 +176,12 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JWAT_SHORT_DESCRIPTION);
+			//putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(40,40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			//JWatStartScreen.main(args);
 			MainJwatWizard.main(args);
 		}
 
@@ -205,6 +208,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMODEL_SHORT_DESCRIPTION);
+			//putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(40,40)));
 		}
 
@@ -220,6 +224,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JABA_SHORT_DESCRIPTION);
+			//putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));
 			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(40,40)));
 		}
 

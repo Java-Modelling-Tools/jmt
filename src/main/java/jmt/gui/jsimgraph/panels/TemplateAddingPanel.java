@@ -678,8 +678,8 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 					availableTreeTable.revalidate();
 					availableTreeTable.repaint();
 				} else if (string.equals("Updating template list")) {
-					// update the template panel (local templates)
-					templatePanel.updateTemplates();
+					// refresh the template panel (local templates)
+					templatePanel.refresh();
 				} else if (string.equals(CONNECTION_ERROR)) {
 					enableAll();
 				} else if (string.equals("")) {

@@ -371,10 +371,10 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		public MeasureTable() {
 			setModel(new MeasureTableModel());
+			setRowHeight(ROW_HEIGHT);
+			sizeColumns();
 			setDefaultEditor(Double.class, new ExactCellEditor());
 			setDefaultRenderer(Object.class, new DisabledCellRenderer());
-			sizeColumns();
-			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
@@ -539,7 +539,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				}
 				break;
 			case 3: 
-				simData.setMeasureLog((Boolean) aValue, key);
+				simData.setMeasureLog((Boolean)aValue, key);
 				break;
 			case 4: {
 				try {

@@ -706,10 +706,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * This method returns reference station keys.
+	 * This method returns reference source keys.
 	 */
 	@Override
-	public Vector<Object> getStationKeysRefStation() {
+	public Vector<Object> getStationKeysRefSource() {
 		Vector<Object> keyset = new Vector<Object>();
 		keyset.addAll(sourcesKeyset);
 		if (!forksKeyset.isEmpty()) {
@@ -1680,7 +1680,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Used by the Mediator to get the <i>files that could be overwritten</i>,
+	 * Used by jmodel.controller.Mediator to get the <i>files that could be overwritten</i>,
 	 * in order to warn the user with a dialog box. 
 	 * @author MF08 0.7.4 - Michael Fercu for Logger (Marco Bertoli)
 	 * @return String[] of the filename of all log files that will be written to.
@@ -2007,7 +2007,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Manages reference station for every class.
 	 */
 	private void manageRefStations() {
-		Vector<Object> openRefCandidateKeys = getStationKeysRefStation();
+		Vector<Object> openRefCandidateKeys = getStationKeysRefSource();
 		Vector<Object> closedRefCandidateKeys = getStationKeysNoSourceSink();
 		for (Object classKey : classesKeyset) {
 			int classType = getClassType(classKey);

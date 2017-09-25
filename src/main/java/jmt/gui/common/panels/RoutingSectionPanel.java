@@ -25,6 +25,7 @@ import java.util.Vector;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -160,8 +161,9 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		private static final long serialVersionUID = 1L;
 
 		public RoutingSelectionTable() {
+			super();
 			setModel(new RoutingSelectionTableModel());
-			setDefaultRenderer(Object.class, new GrayCellRenderer());
+			setDefaultRenderer(Object.class, new RoutingSelectionTableRenderer());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -214,6 +216,24 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 					RoutingSectionPanel.this.repaint();
 				}
 			}
+		}
+
+	}
+
+	protected class RoutingSelectionTableRenderer extends GrayCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+			Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+			super.setHorizontalAlignment(SwingConstants.LEFT);
+			if (!table.isCellEditable(row, 1)) {
+				renderer.setEnabled(false);
+			} else {
+				renderer.setEnabled(true);
+			}
+			return renderer;
 		}
 
 	}

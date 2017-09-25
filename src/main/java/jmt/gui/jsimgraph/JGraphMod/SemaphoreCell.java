@@ -18,6 +18,8 @@
 
 package jmt.gui.jsimgraph.JGraphMod;
 
+import jmt.gui.jsimgraph.controller.Mediator;
+
 import org.jgraph.graph.Port;
 
 /**
@@ -36,7 +38,7 @@ public class SemaphoreCell extends JmtCell {
 	public static final boolean canBePlaced = true;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
-	public static final String ICON = "semaphore";
+	public static final String ICON = Mediator.advanced ? "bc" : "semaphore";
 
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.

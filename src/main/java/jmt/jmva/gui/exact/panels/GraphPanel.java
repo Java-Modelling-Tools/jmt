@@ -197,7 +197,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		}
 		stations = new int[graph.getColors().length];
 		Arrays.fill(stations, -10);
-
+		
 		algorithms = new SolverAlgorithm[graph.getColors().length];
 		Arrays.fill(algorithms, model.getAlgorithmType());
 		if (model.isWhatifAlgorithms()) {
@@ -205,13 +205,13 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		} else {
 			executedAlgorithms = Arrays.asList(model.getAlgorithmType());
 		}
-
+		
 		table = new LinesTable();
 		JScrollPane tableScrollPane = new JScrollPane(table);
 		tableScrollPane.setPreferredSize(new Dimension(160, tableScrollPane.getPreferredSize().height));
 		left.add(tableScrollPane, BorderLayout.CENTER);
 		graph.setLegendPanel(mainPanel);
-
+		
 		if (!model.isClosed()) {
 			table.hideColumn(LinesTableColumn.ALGORITHM);
 		}
@@ -336,7 +336,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				table.repaint();
 				paintAllIndices();
 			}
-
+			
 			// Updates graph
 			graph.setYLabel(current);
 			graph.repaint();
@@ -453,7 +453,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			}
 		}
 		/* END */
-
+		
 		//Added by ASHANKA STOP
 		// Resets view
 		autosizeGraph();
@@ -489,13 +489,13 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		STATION("Station"), 
 		ALGORITHM("Algorithm"),
 		HIDDEN("");
-
+		
 		private LinesTableColumn(String name) {
 			this.name = name;
 		}
-
+		
 		private String name;
-
+		
 		public String getName() {
 			return name;
 		}
@@ -512,7 +512,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		private ComboEditor stationsEditor;
 		/** ComboBoxes used as cell editors */
 		private ComboEditor uStationsEditor;
-
+		
 		/** Edited by Georgios Poullaides **/
 		private ComboAlgoEditor algorithmEditor;
 		/** End **/
@@ -547,7 +547,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				stationsCombo.addItem(model.getStationNames()[i]);
 				uStationsCombo.addItem(model.getStationNames()[i]);
 			}
-
+			
 			//Creates algorithm editor
 			JComboBox algorithmCombo = new JComboBox();
 			for (SolverAlgorithm algo : model.getWhatifAlgorithms()) {
@@ -560,27 +560,31 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			uStationsEditor = new ComboEditor(uStationsCombo);
 			stationsEditor = new ComboEditor(stationsCombo);
 		}
+		
+		
 
 		@Override
 		public void columnAdded(TableColumnModelEvent e) {
 			LinesTableColumn type = getColumnType(e.getToIndex());
 			TableColumn column = getColumnModel().getColumn(e.getToIndex());
 			switch (type) {
-			case COLOR:
-				column.setMaxWidth(25);
-				break;
-			case CLASS:
-				column.setPreferredWidth(90);
-				break;
-			case STATION:
-				column.setPreferredWidth(90);
-				break;
-			case ALGORITHM:
-				column.setPreferredWidth(100);
-				break;
+				case COLOR:
+					column.setMaxWidth(25);
+					break;
+				case CLASS:
+					column.setPreferredWidth(90);
+					break;
+				case STATION:
+					column.setPreferredWidth(90);
+					break;
+				case ALGORITHM:
+					column.setPreferredWidth(100);
+					break;
 			}
 			super.columnAdded(e);
 		}
+
+
 
 		/**
 		 * Returns an appropriate editor for the cell specified by
@@ -603,16 +607,16 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		public TableCellEditor getCellEditor(int row, int column) {
 			LinesTableColumn columnType = getColumnType(column);
 			switch (columnType) {
-			case CLASS:
-				return classEditor;
-			case STATION:
-				if (currentIndex.equals(ExactConstants.INDICES_TYPES[3])) {
-					return uStationsEditor;
-				} else {
-					return stationsEditor;
-				}
-			case ALGORITHM:
-				return algorithmEditor;
+				case CLASS:
+					return classEditor;
+				case STATION:
+					if (currentIndex.equals(ExactConstants.INDICES_TYPES[3])) {
+						return uStationsEditor;
+					} else {
+						return stationsEditor;
+					}
+				case ALGORITHM:
+					return algorithmEditor;
 			}
 			return null;
 		}
@@ -647,6 +651,8 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				return super.getDefaultRenderer(Object.class);
 			}
 		}
+		
+		
 
 		/* (non-Javadoc)
 		 * @see javax.swing.JTable#getModel()
@@ -655,7 +661,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		public LinesTableModel getModel() {
 			return (LinesTableModel) super.getModel();
 		}
-
+		
 		/**
 		 * Return the type of column
 		 * @param columnIndex the column index
@@ -664,7 +670,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		protected LinesTableColumn getColumnType(int columnIndex) {
 			return getModel().getColumn(columnIndex);
 		}
-
+		
 		/**
 		 * Shows the given column
 		 * @param column the column to show
@@ -672,7 +678,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		public void showColumn(LinesTableColumn column) {
 			getModel().showColumn(column);
 		}
-
+		
 		/**
 		 * Hides the given column
 		 * @param column the column to hide
@@ -737,23 +743,23 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				return combo.getSelectedItem();
 			}
 		}
-	}
+}
 
 	/**
 	 * Table model for LinesTable
 	 */
 	private class LinesTableModel extends AbstractTableModel {
 		private static final long serialVersionUID = 1L;
-
+		
 		private Set<LinesTableColumn> columns;
 		private List<LinesTableColumn> columnsList;
-
+		
 		public LinesTableModel() {
 			columns = EnumSet.allOf(LinesTableColumn.class);
 			columns.remove(LinesTableColumn.HIDDEN);
 			columnsList = new ArrayList<GraphPanel.LinesTableColumn>(columns);
 		}
-
+		
 		public LinesTableColumn getColumn(int index) {
 			if (columnsList.size() > index) {
 				return columnsList.get(index);
@@ -761,7 +767,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				return LinesTableColumn.HIDDEN;
 			}
 		}
-
+		
 		/**
 		 * Shows the given column
 		 * @param column the column to show
@@ -771,7 +777,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			columnsList = new ArrayList<GraphPanel.LinesTableColumn>(columns);
 			super.fireTableStructureChanged();
 		}
-
+		
 		/**
 		 * Hides the given column
 		 * @param column the column to hide
@@ -846,55 +852,55 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			if (model.isWhatifAlgorithms()) {
 				algoNum = model.getWhatifAlgorithms().size();
 			}
-
+			
 			LinesTableColumn column = getColumn(columnIndex);
 			boolean aggregate = AGGREGATE_TYPES_SET.contains(currentIndex);
-
+			
 			switch (column) {
-			case COLOR:
-				return graph.getColors()[rowIndex];
-			case CLASS:
-				if (aggregate) {
-					if (rowIndex < algoNum) {
+				case COLOR:
+					return graph.getColors()[rowIndex];
+				case CLASS:
+					if (aggregate) {
+						if (rowIndex < algoNum) {
+							return AGGREGATE;
+						} else {
+							return null;
+						}
+					} else if (classNum >= 0) {
+						return model.getClassNames()[classNum];
+					} else if (classNum == -1) {
 						return AGGREGATE;
 					} else {
 						return null;
 					}
-				} else if (classNum >= 0) {
-					return model.getClassNames()[classNum];
-				} else if (classNum == -1) {
-					return AGGREGATE;
-				} else {
-					return null;
-				}
-			case STATION:
-				if (aggregate) {
-					if (rowIndex < algoNum) {
+				case STATION:
+					if (aggregate) {
+						if (rowIndex < algoNum) {
+							return AGGREGATE;
+						} else {
+							return null;
+						}
+					} else if (stationNum >= 0) {
+						return model.getStationNames()[stationNum];
+					} else if (stationNum == -1) {
 						return AGGREGATE;
 					} else {
 						return null;
 					}
-				} else if (stationNum >= 0) {
-					return model.getStationNames()[stationNum];
-				} else if (stationNum == -1) {
-					return AGGREGATE;
-				} else {
-					return null;
-				}
-			case ALGORITHM:
-				if (aggregate) {
-					if (rowIndex < algoNum) {
-						return executedAlgorithms.get(rowIndex);
+				case ALGORITHM:
+					if (aggregate) {
+						if (rowIndex < algoNum) {
+							return executedAlgorithms.get(rowIndex);
+						} else {
+							return null;
+						}
 					} else {
-						return null;
+						return algorithms[rowIndex];
 					}
-				} else {
-					return algorithms[rowIndex];
-				}
 			}
 			return null;
 		}
-
+		
 		/**
 		 * This empty implementation is provided so users do not have to implement
 		 * this method if their data model is not editable.
@@ -906,7 +912,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			LinesTableColumn column = getColumn(columnIndex);
-
+			
 			switch (column) {
 			case CLASS:
 				classes[rowIndex] = ((Integer) aValue).intValue();
@@ -921,9 +927,9 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			case ALGORITHM:
 				algorithms[rowIndex] = (SolverAlgorithm)aValue;
 				break;
-
+			
 			}
-
+			
 			// Paints new index
 			paintIndexAtRow(rowIndex);
 		}
@@ -942,14 +948,14 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				return false;
 			}
 			LinesTableColumn column = getColumn(columnIndex);
-
+			
 			switch (column) {
-			case CLASS:
-				return model.isMultiClass();
-			case STATION:
-				return true;
-			case ALGORITHM:
-				return model.isWhatifAlgorithms();
+				case CLASS:
+					return model.isMultiClass();
+				case STATION:
+					return true;
+				case ALGORITHM:
+					return model.isWhatifAlgorithms();
 			}
 			return false;
 		}

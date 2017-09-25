@@ -711,7 +711,7 @@ public class PAResultsModel implements MeasureDefinition {
 		private double mean;
 		private double upper;
 		private double lower;
-		private boolean valid;
+		boolean valid;
 
 		/**
 		 * Creates a new MeasureValue object
@@ -727,16 +727,16 @@ public class PAResultsModel implements MeasureDefinition {
 			valid = isValid;
 		}
 
-		public double getMeanValue() {
-			return mean;
-		}
-
 		public double getUpperBound() {
 			return upper;
 		}
 
 		public double getLowerBound() {
 			return lower;
+		}
+
+		public double getMeanValue() {
+			return mean;
 		}
 
 		public boolean isValid() {

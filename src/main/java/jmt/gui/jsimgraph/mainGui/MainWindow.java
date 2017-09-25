@@ -20,7 +20,6 @@ package jmt.gui.jsimgraph.mainGui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.io.File;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -60,6 +59,8 @@ public class MainWindow extends JMTFrame {
 
 	protected JPanel mainPane;//panel that contains the "scroll"
 
+	public static boolean advanced = false;
+
 	/** Creates the new Main window of the application.
 	 *
 	 */
@@ -68,6 +69,7 @@ public class MainWindow extends JMTFrame {
 		this.setIconImage(JMTImageLoader.loadImage("JMODELIcon").getImage());
 		setTitle(TITLE);
 		mediator = new Mediator(null, this);
+		Mediator.advanced = advanced;
 
 		//menu = new Menu(mediator);
 		menu = mediator.createMenu();
@@ -146,15 +148,10 @@ public class MainWindow extends JMTFrame {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		MainWindow mw = new MainWindow();
-		if (args != null && args.length > 0) {
-			File file = new File(args[0]);
-			if (!file.isFile()) {
-				System.err.print("Invalid model file: " + file.getAbsolutePath());
-				System.exit(1);
-			}
-			mw.mediator.openModel(file);
+		if ((args != null && args.length > 0) && (args[0] != null) && (args[0].equals("trek"))) {
+			advanced = true;
 		}
+		new MainWindow();
 	}
 
 	/**

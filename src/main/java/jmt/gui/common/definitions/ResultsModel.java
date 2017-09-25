@@ -622,22 +622,27 @@ public class ResultsModel implements MeasureDefinition {
 	 */
 	public class MeasureValueImpl implements MeasureValue {
 
-		private double mean;
+		private double value;
 		private double upper;
 		private double lower;
 		private double lastIntervalAvgValue;
 		private double simulationTime;
 
 		public MeasureValueImpl(TempMeasure tm) {
-			mean = tm.getTempMean();
+			value = tm.getTempMean();
 			upper = tm.getUpperBound();
 			lower = tm.getLowerBound();
+
 			lastIntervalAvgValue = tm.getLastIntervalAvgValue();
 			simulationTime= tm.getSimTime();
 		}
 
-		public double getMeanValue() {
-			return mean;
+		public double getLastIntervalAvgValue() {
+			return lastIntervalAvgValue;
+		}
+
+		public double getSimTime() {
+			return simulationTime;
 		}
 
 		public double getUpperBound() {
@@ -648,12 +653,8 @@ public class ResultsModel implements MeasureDefinition {
 			return lower;
 		}
 
-		public double getLastIntervalAvgValue() {
-			return lastIntervalAvgValue;
-		}
-
-		public double getSimTime() {
-			return simulationTime;
+		public double getMeanValue() {
+			return value;
 		}
 
 	}

@@ -195,21 +195,21 @@ public interface CommonConstants {
 	public static final String SERVICE_ZERO = "Zero Service Time";
 
 	/**Constants for selection of distributions*/
-	public static final String DISTRIBUTION_BURST = "Burst";
-	public static final String DISTRIBUTION_MMPP2 = "MMPP2";
-	public static final String DISTRIBUTION_COXIAN= "Coxian";
 	public static final String DISTRIBUTION_DETERMINISTIC = "Deterministic";
-	public static final String DISTRIBUTION_ERLANG = "Erlang";
 	public static final String DISTRIBUTION_EXPONENTIAL = "Exponential";
-	public static final String DISTRIBUTION_GAMMA = "Gamma";
-	public static final String DISTRIBUTION_HYPEREXPONENTIAL = "Hyperexponential";
-	//public static final String DISTRIBUTION_MAP= "MAP";
 	public static final String DISTRIBUTION_NORMAL = "Normal";
 	public static final String DISTRIBUTION_PARETO = "Pareto";
+	public static final String DISTRIBUTION_ERLANG = "Erlang";
+	public static final String DISTRIBUTION_HYPEREXPONENTIAL = "Hyperexponential";
+	public static final String DISTRIBUTION_BURST = "Burst";
+	//public static final String DISTRIBUTION_MAP= "MAP";
+	public static final String DISTRIBUTION_COX2= "Cox2";
+	public static final String DISTRIBUTION_MMPP2 = "MMPP2";
+	public static final String DISTRIBUTION_GAMMA = "Gamma";
+	public static final String DISTRIBUTION_UNIFORM = "Uniform";
+	//public static final String DISTRIBUTION_STUDENTT = "StudentT";
 	//public static final String DISTRIBUTION_POISSON = "Poisson";
 	public static final String DISTRIBUTION_REPLAYER = "Replayer";
-	//public static final String DISTRIBUTION_STUDENTT = "StudentT";
-	public static final String DISTRIBUTION_UNIFORM = "Uniform";
 
 	/**Constants for selection of timing strategy*/
 	public static final String TIMING_STRATEGY_TIMED = "Timed";

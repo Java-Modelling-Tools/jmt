@@ -67,6 +67,14 @@ import jmt.gui.exact.table.ExactCellEditor;
  */
 public class ClassesPanel extends WizardPanel implements CommonConstants {
 
+	//Interface containing values of main parameters to be set by user
+	/*TODO: to enable this functionality, just put a constructor accepting a customized
+	*JSIMDefault class as parameter, and then put a form to allow user to generate instances
+	*of this class.*/
+	//protected Defaults defaults = new Defaults() {};
+	/**
+	 * 
+	 */
 	private static final long serialVersionUID = 1L;
 
 	//Table containing class-set data
@@ -80,7 +88,9 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	//Component responsible of setting global number of classes at once
 	protected JSpinner classNumSpinner = new JSpinner() {
-
+		/**
+		 * 
+		 */
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -110,7 +120,6 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 				}
 			});
 		}
-
 	};
 
 	//Interface linking to underlying implementation layer
@@ -121,7 +130,9 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	//deletion of classes after a multiple selection
 	protected AbstractAction deleteSelectedClasses = new AbstractAction("Delete selected classes") {
-
+		/**
+		* 
+		*/
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -132,12 +143,13 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		public void actionPerformed(ActionEvent e) {
 			deleteSelectedClasses();
 		}
-
 	};
 
 	//deletion of one class
 	protected AbstractAction deleteClass = new AbstractAction("") {
-
+		/**
+		* 
+		*/
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -151,12 +163,13 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 				deleteClass(index);
 			}
 		}
-
 	};
 
 	//addition of a class one by one
 	protected AbstractAction addNewClass = new AbstractAction("Add Class") {
-
+		/**
+		 * 
+		 */
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -167,12 +180,13 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		public void actionPerformed(ActionEvent e) {
 			addClass();
 		}
-
 	};
 
 	//editing of arrival time distribution
 	protected AbstractAction editDistribution = new AbstractAction("Edit") {
-
+		/**
+		* 
+		*/
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -199,11 +213,11 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 			}
 			// ---- end ----
 		}
-
 	};
 
 	/**Creates a new instance of <code>ClassesPanel</code> given a model definition.*/
 	public ClassesPanel(ClassDefinition cd) {
+		super();
 		classTable = new ClassTable();
 		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
 				ImagedComboBoxCellEditorFactory.OPTION_CLASS_TYPES);
@@ -213,6 +227,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	/**Default constructor, used to extend this panel for JModel*/
 	public ClassesPanel() {
+		super();
 		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
 				ImagedComboBoxCellEditorFactory.OPTION_CLASS_TYPES);
 	}
@@ -366,34 +381,39 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	protected class ClassTable extends JTable {
 
+		/**
+		 * 
+		 */
 		private static final long serialVersionUID = 1L;
 
 		/* for selection of class types. Must be inserted in ComboBoxCellEditor*/
 		protected Object[] classTypes = new Object[] { "Closed", "Open" };
 
-		/*This button activates the distribution editor. Returning value must be sent
-		to underlying model definition, and then diplayed in another column contained*/
-		protected JButton editDistributionButton = new JButton() {
-
-			private static final long serialVersionUID = 1L;
-
-			{
-				setText("Edit");
-			}
-
-		};
-
 		/*This button allow a single userclass to be deleted directly from the table.
 		Corresponding value contained into cell must be zero.*/
 		public JButton deleteButton = new JButton() {
-
+			/**
+			 * 
+			 */
 			private static final long serialVersionUID = 1L;
 
 			{
 				setAction(deleteClass);
 				setFocusable(false);
 			}
+		};
 
+		/*This button activates the distribution editor. Returning value must be sent
+		to underlying model definition, and then diplayed in another column contained*/
+		protected JButton editDistributionButton = new JButton() {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			{
+				setText("Edit");
+			}
 		};
 
 		/*Set of column dimensions*/
@@ -402,9 +422,9 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		//Sets a table model for visualization and editing of data
 		public void setModel(ClassTableModel tabMod) {
 			super.setModel(tabMod);
-			setDefaultEditor(Object.class, new ExactCellEditor());
-			setDefaultRenderer(String.class, new DisabledCellRenderer());
 			sizeColumnsAndRows();
+			setDefaultRenderer(String.class, new DisabledCellRenderer());
+			setDefaultEditor(Object.class, new ExactCellEditor());
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
@@ -419,7 +439,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 				if (getValueAt(row, 4) != null) {
 					return new ButtonCellEditor(editDistributionButton);
 				} else {
-					return new DisabledCellRenderer();
+					return getDefaultRenderer(String.class);
 				}
 			} else if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
@@ -434,7 +454,11 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 			if (column == 1) {
 				return comboEditor.getEditor(classTypes);
 			} else if (column == 5) {
-				return new ButtonCellEditor(new JButton(editDistribution));
+				if (getValueAt(row, 4) != null) {
+					return new ButtonCellEditor(new JButton(editDistribution));
+				} else {
+					return getDefaultEditor(String.class);
+				}
 			} else if (column == 6) {
 				return new ButtonCellEditor(new JButton(deleteClass));
 			} else {
@@ -460,6 +484,9 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	protected class ClassTableModel extends AbstractTableModel {
 
+		/**
+		 * 
+		 */
 		private static final long serialVersionUID = 1L;
 
 		//Names of columns contained in table. Columns containing buttons have empty names
@@ -467,6 +494,11 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 		//Class declarations for this table's columns.
 		protected Class<?>[] colClasses = new Class[] { String.class, JComboBox.class, String.class, String.class, String.class, Object.class, JButton.class };
+
+		/**Creates a new instance of class table model*/
+		public ClassTableModel() {
+			super();
+		}
 
 		/**returns number of rows to be displayed in the table. In this case, global
 		 * number of classes*/

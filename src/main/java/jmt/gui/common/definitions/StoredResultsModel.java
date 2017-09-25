@@ -614,8 +614,8 @@ public class StoredResultsModel implements MeasureDefinition {
 		private double mean;
 		private double upper;
 		private double lower;
-		private double lastAvg;
-		private double simTime;
+		private double lastS;
+		private double simulationT;
 
 		/**
 		 * Creates a new MeasureValue object
@@ -627,8 +627,8 @@ public class StoredResultsModel implements MeasureDefinition {
 			mean = meanValue;
 			upper = upperBound;
 			lower = lowerBound;
-			lastAvg = lastIntervalAvgValue;
-			simTime= simulationTime;
+			lastS =lastIntervalAvgValue;
+			simulationT= simulationTime;
 		}
 
 		public double getUpperBound() {
@@ -645,12 +645,12 @@ public class StoredResultsModel implements MeasureDefinition {
 
 		@Override
 		public double getLastIntervalAvgValue() {
-			return lastAvg;
+			return lastS;
 		}
 
 		@Override
 		public double getSimTime() {
-			return simTime;
+			return simulationT;
 		}
 
 	}

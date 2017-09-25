@@ -59,7 +59,7 @@ public class ShortestQueueLengthRoutingStrategy extends RoutingStrategy {
 
 		int shortestQueue;
 		try {
-			// Sets shortest queue to first node. Note that queue length is job queueing + job served
+			// Sets shortest queue to first node. Note that queue length is job queuing + job served
 			// Checks if output is a sink... If class is open, sinks are preferred as have 0 queue length.
 			// if class il closed, avoid it
 			if (next[0].isSink()) {

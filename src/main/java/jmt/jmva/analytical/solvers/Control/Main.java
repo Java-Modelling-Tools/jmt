@@ -27,15 +27,14 @@ import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueueingNet.CoMoMBTFSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.CoMoMSimpleSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.ConvolutionSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.MoMSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.RECALNonRecursiveSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.RECALSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.TMVA.TreeMVASolver;
-import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.TreeConvolution.TreeConvolutionSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.CoMoMBTFSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.CoMoMSimpleSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.ConvolutionSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.MoMSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.RECALNonRecursiveSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.RECALSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.TreeAlgorithms.TMVA.TreeMVASolver;
+import jmt.jmva.analytical.solvers.QueuingNet.TreeAlgorithms.TreeConvolution.TreeConvolutionSolver;
 import jmt.jmva.analytical.solvers.Utilities.MiscFunctions;
 import jmt.jmva.analytical.solvers.Utilities.RandomNetworkGenerator;
 import jmt.jmva.analytical.solvers.Utilities.Timer;
@@ -214,7 +213,7 @@ public class Main {
                 	}
                 }
                 
-                QNSolver c;
+                jmt.jmva.analytical.solvers.QueuingNet.QNSolver c;
                 if (algorithm == 5) {
                     int matrixSize = MoMMatrixSize(qnm);
                     if (matrixSize >= 120) {

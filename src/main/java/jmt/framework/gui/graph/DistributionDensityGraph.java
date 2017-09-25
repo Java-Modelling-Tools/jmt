@@ -130,7 +130,7 @@ public class DistributionDensityGraph extends JPanel {
 		//Get text bounds
 		FontMetrics metric = g.getFontMetrics();
 		Rectangle2D xtextBound = metric.getStringBounds("XXXX", g);
-		Rectangle2D ytextBound = metric.getStringBounds(formatNumber(maxy), g);
+		Rectangle2D ytextBound = metric.getStringBounds((formatNumber(maxy)), g);
 		Rectangle2D xLabelBound = metric.getStringBounds(xLabel, g);
 
 		// Find initial position
@@ -255,14 +255,19 @@ public class DistributionDensityGraph extends JPanel {
 	private String formatNumber(double value) {
 		if (value == 0) {
 			return "0.00";
-		} else if (value < 10) {
+		} 
+		else if (value < 10) {
 			return decimalFormat2.format(value);
-		} else if (value < 100) {
+		} 
+		else if (value < 100) {
 			return decimalFormat3.format(value);
-		} else {
+		}
+		else  {
 			return decimalFormat4.format(value);
 		} 
 	}
+
+
 
 	private void rightClick(MouseEvent ev) {
 		popup.show(this, ev.getX(), ev.getY());

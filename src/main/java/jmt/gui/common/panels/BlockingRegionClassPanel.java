@@ -37,7 +37,6 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.BooleanCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
 
 public class BlockingRegionClassPanel extends WizardPanel implements CommonConstants {
 
@@ -99,8 +98,8 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 		int[] columnSizes = new int[] { 150, 60, 30, 60, 30, 50, 40, 40 };		
 
 		public BlockingClassTable() {
+			super();
 			setModel(new BlockingClassTableModel());
-			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

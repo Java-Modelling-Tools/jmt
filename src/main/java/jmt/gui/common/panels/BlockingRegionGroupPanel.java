@@ -56,7 +56,6 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.BooleanCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.jsimgraph.DialogFactory;
 
 public class BlockingRegionGroupPanel extends WizardPanel implements CommonConstants {
@@ -186,8 +185,8 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 		};
 
 		public BlockingGroupTable() {
+			super();
 			setModel(new BlockingGroupTableModel());
-			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -432,6 +431,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			int[] columnSizes = new int[] { 320, 50 };
 
 			public GroupEditTable() {
+				super();
 				setModel(new GroupEditTableModel());
 				sizeColumns();
 				setRowHeight(ROW_HEIGHT);

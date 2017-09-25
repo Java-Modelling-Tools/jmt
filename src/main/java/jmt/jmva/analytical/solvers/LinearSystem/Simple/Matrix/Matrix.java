@@ -38,7 +38,7 @@ public abstract class Matrix {
 		
 	 /**
 	  * Constructor
-	  * @param qnm The Queueing Network Model under study
+	  * @param qnm The Queuing Network Model under study
 	  * @param size The size of the basis (will make a matrix of size:  size x size)
 	  */
 	 public Matrix(CoMoMBasis basis, int size) {	

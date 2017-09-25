@@ -50,13 +50,11 @@ import javax.swing.table.TableCellRenderer;
 import jmt.framework.gui.table.editors.ComboBoxCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
-import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.DisabledCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -86,8 +84,6 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	 */
 	protected static final Object[] dropRules = { FINITE_DROP, FINITE_BLOCK, FINITE_WAITING };
 
-	private boolean isInitComplete;
-
 	private ButtonGroup queueLengthGroup;
 	private JRadioButton infiniteQueueSelector;
 	private JRadioButton finiteQueueSelector;
@@ -103,13 +99,11 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected JComboBox queuePolicyCombo;
 
 	public InputSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
-		isInitComplete = false;
 		classEditor = new ImagedComboBoxCellEditorFactory(cd);
 		setData(sd, cd, stationKey);
 		initComponents();
 		addDataManagers();
-		updateQueueLength();
-		isInitComplete = true;
+		getQueueLength();
 	}
 
 	private void initComponents() {
@@ -121,6 +115,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		queueLengthGroup.add(infiniteQueueSelector);
 		queueLengthGroup.add(finiteQueueSelector);
 		queueLengthSpinner = new JSpinner();
+		queueLengthSpinner.setValue(new Integer(1));
 		queueLengthSpinner.setPreferredSize(DIM_BUTTON_XS);
 		queueTable = new QueueTable();
 
@@ -157,46 +152,29 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		classData = cd;
 		this.stationKey = stationKey;
 		classEditor.setData(cd);
-		if (isInitComplete) {
-			updateQueueLength();
+		if (queueLengthGroup != null) {
+			getQueueLength();
 		}
 	}
 
 	private void addDataManagers() {
 		queueLengthSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Object value = queueLengthSpinner.getValue();
-				if (value instanceof Integer) {
-					if (((Integer) value).intValue() < 1) {
-						value = Integer.valueOf(1);
-						queueLengthSpinner.setValue(value);
-						return;
+				if (queueLengthSpinner.isEnabled()) {
+					Integer queueLength = (Integer) queueLengthSpinner.getValue();
+					if (queueLength.intValue() < 1) {
+						queueLength = new Integer(1);
+						queueLengthSpinner.setValue(queueLength);
 					}
-					data.setStationQueueCapacity(stationKey, (Integer) value);
-				} else {
-					data.setStationQueueCapacity(stationKey, Integer.valueOf(-1));
+					data.setStationQueueCapacity(stationKey, queueLength);
+					queueTable.repaint();
 				}
 			}
 		});
 
 		ActionListener buttonListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				TableCellEditor editor = queueTable.getCellEditor();
-				if (editor != null) {
-					editor.stopCellEditing();
-				}
-				if (infiniteQueueSelector.isSelected()) {
-					queueLengthSpinner.setValue(Float.POSITIVE_INFINITY);
-					queueLengthSpinner.setEnabled(false);
-					Vector<Object> classKeys = classData.getClassKeys();
-					for (Object classKey : classKeys) {
-						data.setDropRule(stationKey, classKey, Defaults.get("dropRule"));
-					}
-				} else {
-					queueLengthSpinner.setValue(Defaults.getAsInteger("stationCapacity"));
-					queueLengthSpinner.setEnabled(true);
-				}
-				queueTable.repaint();
+				setQueueLength();
 			}
 		};
 
@@ -205,53 +183,58 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 
 		queuePolicyCombo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				TableCellEditor editor = queueTable.getCellEditor();
-				if (editor != null) {
-					editor.stopCellEditing();
-				}
 				String queuePolicy = (String) queuePolicyCombo.getSelectedItem();
 				data.setStationQueueStrategy(stationKey, queuePolicy);
+				Vector<Object> classKeys = classData.getClassKeys();
 				if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
 					List<Object> policyList = Arrays.asList(serverPreemptiveQueuePolicies);
-					Vector<Object> classKeys = classData.getClassKeys();
-					if (classKeys.size() > 0 && !policyList.contains(data.getQueueStrategy(stationKey, classKeys.get(0)))) {
-						String policy = Defaults.get("stationQueueStrategy");
-						if (!policyList.contains(policy)) {
-							policy = QUEUE_STRATEGY_PS;
-						}
-						for (Object classKey : classKeys) {
-							data.setQueueStrategy(stationKey, classKey, policy);
+					for (Object classKey : classKeys) {
+						if (!policyList.contains(data.getQueueStrategy(stationKey, classKey))) {
+							data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_PS);
 						}
 					}
 				} else {
 					List<Object> policyList = Arrays.asList(serverNonPreemptiveQueuePolicies);
-					Vector<Object> classKeys = classData.getClassKeys();
-					if (classKeys.size() > 0 && !policyList.contains(data.getQueueStrategy(stationKey, classKeys.get(0)))) {
-						String policy = Defaults.get("stationQueueStrategy");
-						if (!policyList.contains(policy)) {
-							policy = QUEUE_STRATEGY_FCFS;
-						}
-						for (Object classKey : classKeys) {
-							data.setQueueStrategy(stationKey, classKey, policy);
-							data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));
+					for (Object classKey : classKeys) {
+						if (!policyList.contains(data.getQueueStrategy(stationKey, classKey))) {
+							data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_FCFS);
 						}
 					}
+				}
+				TableCellEditor editor = queueTable.getCellEditor();
+				if (editor != null) {
+					editor.cancelCellEditing();
 				}
 				queueTable.repaint();
 			}
 		});
 	}
 
-	private void updateQueueLength() {
+	private void getQueueLength() {
 		Integer queueLength = data.getStationQueueCapacity(stationKey);
 		if (queueLength.intValue() < 1) {
 			queueLengthGroup.setSelected(infiniteQueueSelector.getModel(), true);
-			queueLengthSpinner.setValue(Float.POSITIVE_INFINITY);
 			queueLengthSpinner.setEnabled(false);
 		} else {
 			queueLengthGroup.setSelected(finiteQueueSelector.getModel(), true);
-			queueLengthSpinner.setValue(queueLength);
 			queueLengthSpinner.setEnabled(true);
+			queueLengthSpinner.setValue(queueLength);
+		}
+	}
+
+	private void setQueueLength() {
+		if (infiniteQueueSelector.isSelected()) {
+			queueLengthSpinner.setEnabled(false);
+			data.setStationQueueCapacity(stationKey, new Integer(-1));
+			TableCellEditor editor = queueTable.getCellEditor();
+			if (editor != null) {
+				editor.cancelCellEditing();
+			}
+			queueTable.repaint();
+		} else {
+			queueLengthSpinner.setEnabled(true);
+			data.setStationQueueCapacity(stationKey, (Integer) queueLengthSpinner.getValue());
+			queueTable.repaint();
 		}
 	}
 
@@ -297,8 +280,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		private GrayCellRenderer serviceWeightRenderer = new GrayCellRenderer();
 
 		public QueueTable() {
+			super();
 			setModel(new QueueTableModel());
-			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -415,11 +398,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object classKey = indexToKey(rowIndex);
 			if (columnIndex == 1) {
-				String policy = (String) aValue;
-				data.setQueueStrategy(stationKey, classKey, policy);
-				if (policy.equals(QUEUE_STRATEGY_PS)) {
-					data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));
-				}
+				data.setQueueStrategy(stationKey, classKey, (String) aValue);
 				repaint();
 			} else if (columnIndex == 2) {
 				data.setDropRule(stationKey, classKey, (String) aValue);
@@ -427,7 +406,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				try {
 					Double weight = Double.valueOf((String) aValue);
 					if (weight.doubleValue() <= 0.0) {
-						weight = Defaults.getAsDouble("serviceWeight");
+						weight = Double.valueOf(1.0);
 					}
 					data.setServiceWeight(stationKey, classKey, weight);
 				} catch (NumberFormatException e) {

@@ -18,13 +18,12 @@
 package jmt.jmva.analytical.solvers;
 
 import javax.naming.OperationNotSupportedException;
-
+import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
+import jmt.jmva.analytical.solvers.QueuingNet.RECALSolver;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.RECALSolver;
 
 /**
  * This class implements the API to allow use by other applications. One can
@@ -42,7 +41,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	private Integer scale = 100000;
 
         /**
-	 * Contains the queueing network model
+	 * Contains the queuing network model
 	 */
 	protected QNModel qnm;
 	/**
@@ -136,7 +135,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 				N[r] = population[r];
 			}
 
-			// Instantiate queueing network model
+			// Instantiate queuing network model
 			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
 			qnm.N.print();
 			for (int m = 0; m < qnm.M; m++) {

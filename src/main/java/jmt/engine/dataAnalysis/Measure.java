@@ -268,6 +268,20 @@ public class Measure {
 		}
 	}
 
+	public double getLastIntervalAvgValue() {
+		if (lastWeight == 0.0) {
+			lastWeight = 0.0;
+			lastSampleWeight = 0.0;
+			return lastIntervalAvgValue;
+		}
+		else {
+			lastIntervalAvgValue = lastSampleWeight / lastWeight;
+			lastWeight = 0.0;
+			lastSampleWeight = 0.0;
+			return lastIntervalAvgValue;
+		}
+	}
+
 	/** Gets upper limit.
 	 * @return Upper limit.
 	 */
@@ -282,20 +296,6 @@ public class Measure {
 		}
 
 		return upper * scaleFactor;
-	}
-
-	/** Gets last interval average value.
-	 * @return Last interval average value.
-	 */
-	public double getLastIntervalAvgValue() {
-		if (lastWeight == 0.0) {
-			lastIntervalAvgValue = 0.0;
-		} else {
-			lastIntervalAvgValue = (lastSampleWeight / lastWeight) * scaleFactor;
-		}
-		lastWeight = 0.0;
-		lastSampleWeight = 0.0;
-		return lastIntervalAvgValue;
 	}
 
 	/** Returns number of analyzed samples.

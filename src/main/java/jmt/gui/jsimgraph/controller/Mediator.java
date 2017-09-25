@@ -138,7 +138,7 @@ import jmt.gui.jsimgraph.panels.AutoDownloadPanel;
 import jmt.gui.jsimgraph.panels.JModelProblemsWindow;
 import jmt.gui.jsimgraph.panels.StationNamePanel;
 import jmt.gui.jsimgraph.panels.TemplatePanel;
-import jmt.gui.jsimgraph.panels.JModelClassesPanel;
+import jmt.gui.jsimgraph.panels.jmodelClassesPanel;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
@@ -235,6 +235,7 @@ public class Mediator implements GuiInterface {
 	protected Object[] cells;
 	protected Map cellsAttr;
 
+	public static boolean advanced;
 	private Cursor cursor;
 	private Cursor oldCursor;
 
@@ -630,6 +631,9 @@ public class Mediator implements GuiInterface {
 		graph.setCloneable(false);
 		graph.setGridSize(20);
 		graph.setGridVisible(true);
+		if (advanced) {
+			graph.setBackground(new Color(120, 120, 120));
+		}
 
 		graph.addMouseListener(mouseListener);
 		graph.addMouseMotionListener(mouseListener);
@@ -690,7 +694,7 @@ public class Mediator implements GuiInterface {
 	 * Opens a model from a data file.
 	 * <br> Author: Bertoli Marco
 	 */
-	public void openModel(File file) {
+	public void openModel() {
 		isReleased = true;
 		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
 			return;
@@ -699,7 +703,7 @@ public class Mediator implements GuiInterface {
 			animationHolder.stop();
 		}
 		JSimGraphModel tmpmodel = new JSimGraphModel();
-		int state = modelLoader.loadModel(tmpmodel, mainWindow, file);
+		int state = modelLoader.loadModel(tmpmodel, mainWindow);
 		if (state == ModelLoader.SUCCESS || state == ModelLoader.WARNING) {
 			resetMouseState();
 			// Avoid checkForSave again...
@@ -736,6 +740,7 @@ public class Mediator implements GuiInterface {
 			new WarningWindow(modelLoader.getLastWarnings(), mainWindow, modelLoader.getInputFileFormat(), CommonConstants.JSIM).show();
 		}
 	}
+
 
 	public void closeModel() {
 		// Checks if there's an old graph to save
@@ -1483,7 +1488,7 @@ public class Mediator implements GuiInterface {
 	 * Launches the <code>UserClass</code> editor.
 	 */
 	public void editUserClasses() {
-		dialogFactory.getDialog(new JModelClassesPanel(model, model), "Define customer classes",
+		dialogFactory.getDialog(new jmodelClassesPanel(model, model), "Define customer classes",
 				Defaults.getAsInteger("JSIMClassDefWindowWidth").intValue(),
 				Defaults.getAsInteger("JSIMClassDefWindowHeight").intValue(),
 				true, "JSIMClassDefWindowWidth", "JSIMClassDefWindowHeight");

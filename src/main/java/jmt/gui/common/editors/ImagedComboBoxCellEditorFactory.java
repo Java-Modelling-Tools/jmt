@@ -345,11 +345,10 @@ public class ImagedComboBoxCellEditorFactory {
 	 */
 	public TableCellRenderer getRenderer(boolean isGrayRenderer, int referenceColumn) {
 		if (renderer == null) {
-			if (isGrayRenderer) {
+			if (isGrayRenderer)
 				renderer = new ImagedComboGrayRenderer(referenceColumn);
-			} else {
+			else 
 				renderer = new ImagedComboRenderer();
-			}
 		}
 		return renderer;
 	}
@@ -389,11 +388,8 @@ public class ImagedComboBoxCellEditorFactory {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			Component renderer = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-			if (!table.isCellEditable(row, referenceColumn)) {
+			if (!table.isCellEditable(row, referenceColumn))
 				renderer.setEnabled(false);
-			} else {
-				renderer.setEnabled(true);
-			}
 			return renderer;
 
 		}

@@ -29,7 +29,6 @@ import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.table.editors.ColorCellEditor;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.jsimgraph.JSimGraphConstants;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
@@ -47,7 +46,7 @@ import jmt.gui.jsimwiz.panels.ClassesPanel;
  *         Date: 14-giu-2005
  *         Time: 9.42.15
  */
-public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstants {
+public class jmodelClassesPanel extends ClassesPanel implements JSimGraphConstants {
 
 	private static final long serialVersionUID = 1L;
 
@@ -56,14 +55,14 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 	protected ImagedComboBoxCellEditorFactory stations;
 
 	/**
-	 * Construct a new JModelClassesPanel
+	 * Construct a new jmodelClassesPanel
 	 * @param cd a reference to the underlying data structure
 	 */
-	public JModelClassesPanel(JmodelClassDefinition cd, JmodelStationDefinition sd) {
+	public jmodelClassesPanel(JmodelClassDefinition cd, JmodelStationDefinition sd) {
 		classdefinition = cd;
 		stationdefinition = sd;
 		stations = new ImagedComboBoxCellEditorFactory(sd);
-		classTable = new JModelClassTable();
+		classTable = new jmodelClassTable();
 		initComponents();
 		setData(cd);
 	}
@@ -74,7 +73,7 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 	@Override
 	public void setData(ClassDefinition cd) {
 		data = cd;
-		classTable.setModel(new JModelClassTableModel());
+		classTable.setModel(new jmodelClassTableModel());
 		classNumSpinner.setValue(new Integer(data.getClassKeys().size()));
 	}
 
@@ -91,11 +90,11 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 	 * Overrides ClassTable. It is a table containing class parameters.
 	 * Added support for "Color" column and reference station combobox
 	 */
-	protected class JModelClassTable extends ClassTable {
+	protected class jmodelClassTable extends ClassTable {
 
 		private static final long serialVersionUID = 1L;
 
-		public JModelClassTable() {
+		public jmodelClassTable() {
 			columnSizes = new int[] { 8, 100, 100, 28, 38, 140, 39, 200, 18 };
 		}
 
@@ -109,7 +108,7 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				if (getValueAt(row, 5) != null) {
 					return new ButtonCellEditor(editDistributionButton);
 				} else {
-					return new DisabledCellRenderer();
+					return getDefaultRenderer(String.class);
 				}
 			} else if (column == 7) {
 				return stations.getRenderer();
@@ -127,10 +126,14 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 			} else if (column == 2) {
 				return super.getCellEditor(row, 1);
 			} else if (column == 6) {
-				return new ButtonCellEditor(new JButton(editDistribution));
+				if (getValueAt(row, 5) != null) {
+					return new ButtonCellEditor(new JButton(editDistribution));
+				} else {
+					return getDefaultEditor(String.class);
+				}
 			} else if (column == 7) {
 				if (getValueAt(row, 2).equals("Open")) {
-					return stations.getEditor(stationdefinition.getStationKeysRefStation());
+					return stations.getEditor(stationdefinition.getStationKeysRefSource());
 				} else {
 					return stations.getEditor(stationdefinition.getStationKeysNoSourceSink());
 				}
@@ -145,11 +148,11 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 	/**
 	 * Define a custom table model. Overrides ClassTableModel to add support for "Color" column
 	 */
-	protected class JModelClassTableModel extends ClassTableModel {
+	protected class jmodelClassTableModel extends ClassTableModel {
 
 		private static final long serialVersionUID = 1L;
 
-		public JModelClassTableModel() {
+		public jmodelClassTableModel() {
 			columnNames = new String[] { "Color", "Name", "Type", "Priority", "Population", "Interarrival Time Distribution", "",
 					"Reference Station", "" };
 			colClasses = new Class[] { Color.class, String.class, JComboBox.class, String.class, String.class, String.class, Object.class,

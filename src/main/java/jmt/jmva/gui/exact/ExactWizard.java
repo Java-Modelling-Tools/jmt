@@ -486,7 +486,7 @@ public class ExactWizard extends Wizard {
 			return;
 		}
 		ExactModel newdata = new ExactModel();
-		int retval = modelLoader.loadModel(newdata, this, null);
+		int retval = modelLoader.loadModel(newdata, this);
 		switch (retval) {
 		case ModelLoader.SUCCESS:
 		case ModelLoader.WARNING:

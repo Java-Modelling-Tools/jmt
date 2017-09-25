@@ -151,6 +151,7 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		private static final long serialVersionUID = 1L;
 
 		public SemaphoreSelectionTable() {
+			super();
 			setModel(new SemaphoreSelectionTableModel());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
