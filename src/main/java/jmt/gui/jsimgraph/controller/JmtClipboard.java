@@ -36,7 +36,7 @@ import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
 /**
  * <p>Title: Jmt Clipboard</p>
  * <p>Description: This class provides clipboard facility to copy and paste selected sections
- * of current model. It will operate both on data structure (jmodelStationDefinition) end and
+ * of current model. It will operate both on data structure (JmodelStationDefinition) end and
  * on graphic representation (Jgraph through mediator calls).</p>
  * 
  * @author Bertoli Marco

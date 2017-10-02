@@ -120,8 +120,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 	private JTextField iterations;
 	private ClassTable classTable;
 	private JPanel tablePanel;
-	
-	
+
 	/** Edited by Abhimanyu Chugh **/
 	private JPanel algPanel;
 	private JCheckBox compMultiAlg;
@@ -167,7 +166,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		initComponents();
 		sync();
 	}
-	
+
 	/** Edited by Abhimanyu Chugh **/
 	private void enableOrDisableCompareAlgs(boolean enabled) {
 		compPanel.setEnabled(enabled);
@@ -282,11 +281,11 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			values = data.getWhatIfValues();
 		}
 		setFromToIterations();
-		
+
 		/** Edited by Abhimanyu Chugh **/
 		setAlgorithms();
 		/** End **/
-		
+
 		enableOrDisableCompareAlgs(data.isClosed() && !data.isLd());
 	}
 
@@ -317,7 +316,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			}
 		}
 	}
-	
+
 	/**
 	 * Sets values for from, to and iteration fields
 	 */
@@ -461,7 +460,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		tablePanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 		tablePanel.setVisible(false);
 		add(tablePanel, BorderLayout.SOUTH);
-		
+
 		/* EDITED BY Abhimanyu Chugh */
 		//Creates the Panel for comparing different algorithms
 		algPanel = new JPanel();
@@ -479,9 +478,9 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			}
 		});
 		help.addHelp(compMultiAlg, "Check to compare results from different algorithms");
-		
+
 		algPanel.setLayout(new GridLayout(0, 2, 0, 0));
-		
+
 		algCheckBoxes = new EnumMap<SolverAlgorithm, JCheckBox>(SolverAlgorithm.class);
 		algTolerances = new EnumMap<SolverAlgorithm, JTextField>(SolverAlgorithm.class);
 		algToleranceLabels = new EnumMap<SolverAlgorithm, JLabel>(SolverAlgorithm.class);
@@ -507,7 +506,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				placeholder.setFocusable(false);
 				algPanel.add(placeholder);
 			}
-			
+
 			JCheckBox checkBox = new JCheckBox (algo.toString());
 			checkBox.setName(algo.toString());
 
@@ -519,10 +518,10 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 					data.setWhatifAlgorithm(algorithm, selected);
 				}
 			});
-			
+
 			algPanel.add(checkBox);
 			algCheckBoxes.put(algo,checkBox);
-			
+
 			if (!algo.isExact()) {
 				Dimension d = new Dimension(70,30);
 				JLabel tolLabel = new JLabel("Tolerance: ");
@@ -546,7 +545,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 							JOptionPane.showMessageDialog(WhatIfPanel.this, "Error: Invalid tolerance value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
 						}
 					}
-					
+
 					@Override
 					public void focusGained(FocusEvent e) {
 					}
@@ -566,16 +565,16 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 							}
 						}
 					}
-					
+
 					@Override
 					public void keyTyped(KeyEvent e) {
 					}
-					
+
 					@Override
 					public void keyReleased(KeyEvent e) {
 					}
 				});
-				
+
 				JPanel algToleranceCell = new JPanel();
 				algToleranceCell.setLayout(new BoxLayout(algToleranceCell, BoxLayout.X_AXIS));
 				algToleranceCell.add(tolLabel);
@@ -590,7 +589,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				algPanel.add(placeholder);
 			}
 		}
-		
+
 		algPanel.setVisible(false);
 		algPanel.setBorder(BorderFactory.createEtchedBorder());
 		algPanel.setPreferredSize(new Dimension(275,22*(2+SolverAlgorithm.closedNames().length)));
@@ -625,7 +624,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		if (selected == null) {
 			return;
 		}
-		
+
 		String parameter = selected.getName();
 		if (currentType != null && currentType.equalsIgnoreCase(parameter)) {
 			return;
@@ -706,8 +705,8 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				// Shows correct help on item
 				help.removeHelp(classTable);
 				help
-						.addHelp(classTable,
-								"Initial number of customers and population mix values (\u03b2i = Ni / N). Values in red are currently selected for what-if analysis.");
+				.addHelp(classTable,
+						"Initial number of customers and population mix values (\u03b2i = Ni / N). Values in red are currently selected for what-if analysis.");
 			} else if (parameter.equals(WHAT_IF_MIX)) {
 				// Enables 'from' field
 				from.setEnabled(true);
@@ -722,8 +721,8 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				// Shows correct help on item
 				help.removeHelp(classTable);
 				help
-						.addHelp(classTable,
-								"Initial number of customers and population mix values (\u03b2i = Ni / N). Values in red are currently selected for what-if analysis.");
+				.addHelp(classTable,
+						"Initial number of customers and population mix values (\u03b2i = Ni / N). Values in red are currently selected for what-if analysis.");
 				help.removeHelp(from);
 				help.addHelp(from, "Initial value corresponding to an integer, not null, number of customers.");
 				help.removeHelp(to);
@@ -1099,51 +1098,50 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			// First column is header
 			if (columnIndex == 0) {
 				switch (rowIndex) {
-					case 0:
-						return "";
-					case 1:
-						if (parameter.equals(WHAT_IF_CUSTOMERS) || parameter.equals(WHAT_IF_MIX)) {
-							return "N.job";
-						} else if (parameter.equals(WHAT_IF_ARRIVAL)) {
-							return "\u03bbi";
-						} else {
-							return "Di";
-						}
-					case 2:
-						return "\u03b2i";
-
+				case 0:
+					return "";
+				case 1:
+					if (parameter.equals(WHAT_IF_CUSTOMERS) || parameter.equals(WHAT_IF_MIX)) {
+						return "N.job";
+					} else if (parameter.equals(WHAT_IF_ARRIVAL)) {
+						return "\u03bbi";
+					} else {
+						return "Di";
+					}
+				case 2:
+					return "\u03b2i";
 				}
 			}
 
 			switch (rowIndex) {
-				case 0: // first row is header
-					return getColumnName(columnIndex);
-				case 1: // customers or arrival rates
-					if (parameter.equals(WHAT_IF_CUSTOMERS) || parameter.equals(WHAT_IF_MIX)) {
-						index = closedClassNames.get(closedClasses.get(columnIndex - 1)).intValue();
-					} else if (parameter.equals(WHAT_IF_ARRIVAL)) {
-						index = openClassNames.get(openClasses.get(columnIndex - 1)).intValue();
-					} else {
-						index = columnIndex - 1;
-					}
-					// Retrieves class data
-					double num;
-					if (parameter.equals(WHAT_IF_DEMANDS)) {
-						int station = stationNames.get(stationName.getSelectedItem()).intValue();
-						num = data.getServiceTimes()[station][index][0] * data.getVisits()[station][index];
-					} else {
-						num = data.getClassData()[index];
-					}
-
-					if (parameter.equals(WHAT_IF_CUSTOMERS) || parameter.equals(WHAT_IF_MIX)) {
-						return intFormatter.format(num);
-					} else {
-						return doubleFormatter.format(num);
-					}
-				case 2: // betas
-					// This is available only for closed classes
+			case 0: // first row is header
+				return getColumnName(columnIndex);
+			case 1: // customers or arrival rates
+				if (parameter.equals(WHAT_IF_CUSTOMERS) || parameter.equals(WHAT_IF_MIX)) {
 					index = closedClassNames.get(closedClasses.get(columnIndex - 1)).intValue();
-					return doubleFormatter.format(data.getClassData()[index] / data.getMaxpop());
+				} else if (parameter.equals(WHAT_IF_ARRIVAL)) {
+					index = openClassNames.get(openClasses.get(columnIndex - 1)).intValue();
+				} else {
+					index = columnIndex - 1;
+				}
+				// Retrieves class data
+				double num;
+				if (parameter.equals(WHAT_IF_DEMANDS)) {
+					int station = stationNames.get(stationName.getSelectedItem()).intValue();
+					num = data.getServiceTimes()[station][index][0] * data.getVisits()[station][index];
+				} else {
+					num = data.getClassData()[index];
+				}
+
+				if (parameter.equals(WHAT_IF_CUSTOMERS) || parameter.equals(WHAT_IF_MIX)) {
+					return intFormatter.format(num);
+				} else {
+					return doubleFormatter.format(num);
+				}
+			case 2: // betas
+				// This is available only for closed classes
+				index = closedClassNames.get(closedClasses.get(columnIndex - 1)).intValue();
+				return doubleFormatter.format(data.getClassData()[index] / data.getMaxpop());
 			}
 			return null;
 		}
@@ -1165,7 +1163,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			}
 		}
 	}
-	
+
 	/** Defines a label for the whatif type */
 	private static class TypeLabel {
 		private String name;
@@ -1207,8 +1205,5 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		public boolean isValid() {
 			return valid;
 		}
-		
-		
-		
 	}
 }

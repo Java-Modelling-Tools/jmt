@@ -39,10 +39,10 @@ import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -105,9 +105,9 @@ public class DistributionsEditor extends JMTDialog {
 	 * This variable will be initialized only once. It will contains every
 	 * distribution that can be inserted
 	 */
-	protected static HashMap<String, Class<? extends Distribution>> distributions;
+	protected static Map<String, Class<? extends Distribution>> distributions;
 
-	protected static HashMap<String, Class<? extends Distribution>> allowedNestedDistributions;
+	protected static Map<String, Class<? extends Distribution>> nestedDistributions;
 
 	// Constants
 	protected static final int BORDERSIZE = 20;
@@ -182,9 +182,9 @@ public class DistributionsEditor extends JMTDialog {
 	 * 
 	 * @return found distributions
 	 */
-	protected static HashMap<String, Class<? extends Distribution>> findDistributions() {
+	protected static Map<String, Class<? extends Distribution>> findDistributions() {
 		Distribution[] all = Distribution.findAll();
-		HashMap<String, Class<? extends Distribution>> tmp = new HashMap<String, Class<? extends Distribution>>();
+		Map<String, Class<? extends Distribution>> tmp = new LinkedHashMap<String, Class<? extends Distribution>>();
 		for (Distribution element : all) {
 			tmp.put(element.getName(), element.getClass());
 		}
@@ -198,9 +198,9 @@ public class DistributionsEditor extends JMTDialog {
 	 * 
 	 * @return found nestable distributions
 	 */
-	protected static HashMap<String, Class<? extends Distribution>> findNestedDistributions() {
+	protected static Map<String, Class<? extends Distribution>> findNestedDistributions() {
 		Distribution[] all = Distribution.findNestableDistributions();
-		HashMap<String, Class<? extends Distribution>> tmp = new HashMap<String, Class<? extends Distribution>>();
+		Map<String, Class<? extends Distribution>> tmp = new LinkedHashMap<String, Class<? extends Distribution>>();
 		for (Distribution element : all) {
 			tmp.put(element.getName(), element.getClass());
 		}
@@ -364,8 +364,7 @@ public class DistributionsEditor extends JMTDialog {
 		public void itemStateChanged(ItemEvent e) {
 			try {
 				if (recursive) {
-					current = allowedNestedDistributions.get(e.getItem())
-							.newInstance();
+					current = nestedDistributions.get(e.getItem()).newInstance();
 				} else {
 					current = distributions.get(e.getItem()).newInstance();
 				}
@@ -503,8 +502,8 @@ public class DistributionsEditor extends JMTDialog {
 			distributions = findDistributions();
 		}
 
-		if (allowedNestedDistributions == null && recursive) {
-			allowedNestedDistributions = findNestedDistributions();
+		if (nestedDistributions == null && recursive) {
+			nestedDistributions = findNestedDistributions();
 		}
 	}
 
@@ -563,16 +562,13 @@ public class DistributionsEditor extends JMTDialog {
 		distr_panel.add(new JLabel("Selected Distribution: "),
 				BorderLayout.WEST);
 
-		Set<String> distributionNameSet;
+		Object[] distributionNames;
 		if (recursive) {
-			distributionNameSet = allowedNestedDistributions.keySet();
+			distributionNames = nestedDistributions.keySet().toArray();
 		} else {
-			distributionNameSet = distributions.keySet();
-
+			distributionNames = distributions.keySet().toArray();
 		}
 
-		Object[] distributionNames = distributionNameSet.toArray();
-		Arrays.sort(distributionNames); // Sorts alphabetically distribution
 		// names
 		chooser = new JComboBox(distributionNames);
 		//ARIF: show all elements in ComboBox

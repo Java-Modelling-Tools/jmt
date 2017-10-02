@@ -53,6 +53,7 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.DisabledCellRenderer;
+import jmt.gui.exact.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -64,9 +65,7 @@ import jmt.gui.exact.table.DisabledCellRenderer;
  * Modified by Bertoli Marco 11-oct-2005, 10-apr-2006
  */
 public class StationsPanel extends WizardPanel implements CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	//Table containing class-set data
@@ -84,9 +83,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	//Component responsible of setting global number of classes at once
 	private JSpinner stationNumSpinner = new JSpinner() {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -118,6 +115,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 				}
 			});
 		}
+
 	};
 
 	//Interface linking to underlying implementation layer
@@ -131,9 +129,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	//deletion of one class
 	private AbstractAction deleteStation = new AbstractAction("") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -147,13 +143,12 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 				deleteStation(index);
 			}
 		}
+
 	};
 
 	//addition of a class one by one
 	private AbstractAction addNewStation = new AbstractAction("Add Station") {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		{
@@ -164,11 +159,11 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public void actionPerformed(ActionEvent e) {
 			addStation();
 		}
+
 	};
 
 	/**Creates a new instance of <code>StationsPanel</code> given a model definition.*/
 	public StationsPanel(StationDefinition sd, ClassDefinition cd) {
-		super();
 		stationTable = new StationTable();
 		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
 				ImagedComboBoxCellEditorFactory.OPTION_STATION_TYPES);
@@ -348,6 +343,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 				setAction(deleteStation);
 				setFocusable(false);
 			}
+
 		};
 
 		/*Set of column dimensions*/
@@ -356,9 +352,10 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		//Sets a table model for visualization and editing of data
 		public void setModel(StationTableModel tabMod) {
 			super.setModel(tabMod);
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			setDefaultRenderer(String.class, new DisabledCellRenderer());
 			sizeColumnsAndRows();
 			setRowHeight(ROW_HEIGHT);
-			setDefaultRenderer(String.class, new DisabledCellRenderer());
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
@@ -368,7 +365,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			if (column == 1) {
 				return comboEditor.getRenderer();
-			} else if (column == getColumnCount() - 1) {
+			} else if (column == 2) {
 				if (isCellEditable(row, column)) {
 					return new ButtonCellEditor(deleteButton);
 				} else {
@@ -384,8 +381,8 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
 				return comboEditor.getEditor(stationTypes);
-			} else if (column == getColumnCount() - 1) {
-				return new ButtonCellEditor(deleteButton);
+			} else if (column == 2) {
+				return new ButtonCellEditor(new JButton(deleteStation));
 			} else {
 				return getDefaultEditor(getModel().getColumnClass(column));
 			}
@@ -407,7 +404,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public boolean isCellEditable(int row, int column) {
 			// Avoid deletion of sources and sinks
 			String stationType = data.getStationType(data.getStationKeys().get(row));
-			return !((column == getColumnCount() - 1 || column == 1) && (stationType.equals(STATION_TYPE_SOURCE) || stationType.equals(STATION_TYPE_SINK)));
+			return !((column == 1 || column == 2) && (stationType.equals(STATION_TYPE_SOURCE) || stationType.equals(STATION_TYPE_SINK)));
 		}
 	}
 
@@ -423,11 +420,6 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 		//Class declarations for this table's columns.
 		Class<?>[] colClasses = new Class[] { String.class, JComboBox.class, JButton.class };
-
-		/**Creates a new instance of class table model*/
-		public StationTableModel() {
-			super();
-		}
 
 		/**returns number of rows to be displayed in the table. In this case, global
 		 * number of classes*/

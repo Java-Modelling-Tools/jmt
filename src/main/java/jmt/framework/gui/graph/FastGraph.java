@@ -370,8 +370,6 @@ public class FastGraph extends JPanel {
 		}
 	}
 
-
-
 	/**
 	 * Called when a right click is done on the chart
 	 * @param ev the click event

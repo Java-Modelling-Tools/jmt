@@ -56,6 +56,7 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.exact.table.ExactCellRenderer;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
@@ -255,7 +256,7 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 			editor.stopCellEditing();
 		}
 		editor = modeTable.getCellEditor();
-		if (editor != null && editor != modeTable.getCellEditor(0, 1)) {
+		if (editor != null && editor != modeTable.deleteEditor) {
 			editor.stopCellEditing();
 		}
 	}
@@ -462,8 +463,8 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 			private static final long serialVersionUID = 1L;
 
 			{
+				putValue(Action.SHORT_DESCRIPTION, "Delete");
 				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Delete"));
-				setFocusable(false);
 			}
 
 			public void actionPerformed(ActionEvent e) {
@@ -476,13 +477,16 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		};
 
 		public ModeTable() {
-			deleteEditor = new ButtonCellEditor(new JButton(deleteMode));
+			JButton deleteButton = new JButton(deleteMode);
+			deleteButton.setFocusable(false);
+			deleteEditor = new ButtonCellEditor(deleteButton);
 			deleteRenderer = new DisabledButtonCellRenderer(new JButton(deleteMode));
 			setModel(new ModeTableModel());
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			sizeColumns();
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
-			sizeColumns();
 		}
 
 		private void sizeColumns() {

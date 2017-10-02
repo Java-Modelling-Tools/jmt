@@ -45,9 +45,9 @@ import jmt.engine.dataAnalysis.Measure;
  * Modified by Ashanka (Oct 2009):
  * Desc: FCR(Finite Capacity Region) is a blocking region and it was measuring wrong 
  * 		 values for the Performance Indices. This was because the Jobs in FCR were not
- * 		 considering the time spent in the Queuing Stations in the FCR and simply reporting
- *       time spent in Queuing in FCR. This behavior is incorrect as Performance Indices for 
- *       FCR should also contain the time spent in the FCR and not only the time spent queuing.
+ * 		 considering the time spent in the Queueing Stations in the FCR and simply reporting
+ *       time spent in Queueing in FCR. This behavior is incorrect as Performance Indices for 
+ *       FCR should also contain the time spent in the FCR and not only the time spent queueing.
  *       
  *       Approach taken presently to rectify is to delay the capture of the performance indices 
  *       until the job is out of the FCR. So the job dropping are manually handled for Blocking region
@@ -218,7 +218,7 @@ public class BlockingQueue extends InputSection {
 
 			//FCR Bug fix:
 			//The dropping of the job was postponed as the time 
-			//spent in the Queuing station was not taken in consideration.
+			//spent in the Queueing station was not taken in consideration.
 			//Secondly point to be noted is that I am 
 			//only dropping Jobs at Node level as the node section jobs 
 			//are automatically dropped but the node level jobs are

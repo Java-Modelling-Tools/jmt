@@ -51,6 +51,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
 import jmt.framework.gui.wizard.WizardPanel;
@@ -78,6 +79,7 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 	private JScrollPane tempPane;
 	private TemplatePanel parent;
 	private ITemplate myTemp;
+	private JButton remove;
 	private JButton update;
 
 	public TemplatePanel(Mediator mediator) {
@@ -100,7 +102,8 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 		this.setLayout(new BorderLayout());
 
 		JButton add = new JButton("Add/See all");
-		JButton remove = new JButton("Remove");
+		remove = new JButton("Remove");
+		remove.setEnabled(false);
 		JButton refresh = new JButton("Refresh");
 		update = new JButton("Update");
 		update.setEnabled(false);
@@ -125,20 +128,19 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 		remove.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				int selectedRow = templateTable.getSelectedRow();
-				if (selectedRow != -1 && templateTable.getRowCount() != 0) {
-					templates[selectedRow].getFile().delete();
-					// refresh the existing template list
-					refresh();
+				for (int i : templateTable.getSelectedRows()) {
+					templates[i].getFile().delete();
 				}
+				updateTemplates();
+				templateTable.tableChanged(new TableModelEvent(templateTable.getModel()));
 			}
 		});
 
-		// refresh the existing template list manually
+		// update the existing template list manually
 		refresh.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				refresh();
+				updateTemplates();
 			}
 		});
 
@@ -146,13 +148,12 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				List<TemplateData> updateList = new ArrayList<TemplateData>();
-				for (int i: templateTable.getSelectedRows()) {
-					TemplateData template = templates[i];
-					updateList.add(template);
+				for (int i : templateTable.getSelectedRows()) {
+					updateList.add(templates[i]);
 				}
 				if (updateList.size() > 0) {
-					customizableDialogFactory.getDialog(520, 200, new UpdatePanel(TemplatePanel.this, updateList), "Updating...");
-					refresh();
+					customizableDialogFactory.getDialog(520, 200, new TemplateUpdatePanel(TemplatePanel.this, updateList), "Updating...");
+					updateTemplates();
 				}
 			}
 		});
@@ -188,8 +189,10 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 					return;
 				}
 				if (templateTable.getSelectedRowCount() > 0) {
+					remove.setEnabled(true);
 					update.setEnabled(true);
 				} else {
+					remove.setEnabled(false);
 					update.setEnabled(false);
 				}
 			}
@@ -209,13 +212,6 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 		tempPane.getViewport().add(templateTable);
 		this.add(tempPane, BorderLayout.CENTER);
 		this.add(bottomPanel, BorderLayout.SOUTH);
-	}
-
-	// refresh the template list
-	public void refresh() {
-		templates = TemplateFileOperation.readTemplates(TEMPLATE_FOLDER);
-		tempPane.getViewport().revalidate();
-		tempPane.getViewport().repaint();
 	}
 
 	public void openTemplate() {
@@ -267,7 +263,6 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 		private static final long serialVersionUID = 1L;
 
 		public TemplateTable() {
-			super();
 			setModel(new TemplateTableModel());
 			sizeColumns();
 			setRowHeight(CELL_HEIGHT);

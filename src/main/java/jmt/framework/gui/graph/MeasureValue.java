@@ -28,6 +28,12 @@ package jmt.framework.gui.graph;
  * @version 1.0
  */
 public interface MeasureValue {
+
+	/**
+	 * @return the mean value
+	 */
+	public double getMeanValue();
+
 	/**
 	 * @return the upper bound of value. Infinity if not set
 	 */
@@ -39,10 +45,6 @@ public interface MeasureValue {
 	public double getLowerBound();
 
 	/**
-	 * @return the mean value
-	 */
-	public double getMeanValue();
-	/**
 	 * @return the last measured value
 	 */
 	public double getLastIntervalAvgValue();
@@ -50,5 +52,6 @@ public interface MeasureValue {
 	/**
 	 * @return the simulation time
 	 */
-	public double getSimTime();	
+	public double getSimTime();
+
 }

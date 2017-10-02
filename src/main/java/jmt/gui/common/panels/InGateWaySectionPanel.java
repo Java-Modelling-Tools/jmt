@@ -235,7 +235,6 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		private static final long serialVersionUID = 1L;
 
 		public ForkSelectionTable() {
-			super();
 			setModel(new ForkSelectionTableModel());
 			sizeColumns();
 			setRowHeight(ROW_HEIGHT);

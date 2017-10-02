@@ -64,7 +64,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	/**the estimated confidence intervals */
 	protected double confInt = 0;
 	/**the estimated instantaneous value */
-	private double lastIntervalAvg=0;
+	private double lastIntervalAvg = 0;
 
 	/**the sum of samples of the last batch */
 	protected double sumLastBatch;
@@ -153,8 +153,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	int batch;
 
 	//-----------------------NULL TEST HYPOTHESIS----------------------------------------//
-	//NEW
-	//@author Stefano Omini
 
 	//NULL TEST is used to identify and stop all measures that are
 	//very close to 0.0 (such measures cause troubles to the analyzer)
@@ -179,15 +177,13 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	//If measure is zero, this is the value of the upper limit of confidence interval
 	private double nullMeasure_upperLimit = 0.0;
 
-	//end NEW
-
 	//--------------------end NULL TEST HYPOTHESIS----------------------------------------//
 
 	//constant (instead of computing the same expression at each time)
 	private final double sqrt_45 = Math.sqrt(45);
 	private double lastSampleWeight;
 	private double lastWeight;
-	
+
 	/** Creates a new DynamicDataAnalyzer
 	 *  @param alfa the quantile required for the confidence interval
 	 *  @param precision maximum amplitude of confidence interval (precision = maxamplitude / mean )
@@ -232,8 +228,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		nSamples++;
 		lastSampleWeight = lastSampleWeight + (newSample * weight);
 		lastWeight = lastWeight + weight;
-		//NEW
-		//@author Stefano Omini
 
 		//Measures which are often equal to zero are problematic for the
 		//dynamic analyzer: in fact, in such cases, Schruben test for stationarity
@@ -257,7 +251,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 				}
 			}
 		}
-		//end NEW
 
 		if (!deleted) {
 
@@ -403,7 +396,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		//TODO: this may be changed (see Granata's master thesis)
 		// number of times that the time series initData should cross the initMean
 		// to determine the end of transient
-		int overTimes = 40; //OLD=40
+		int overTimes = 40;
 
 		// actual mean of the initial samples.
 		double mean = sumS / sumW;
@@ -452,10 +445,9 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			// (we need a part already steady of the sequence, because we need to
 			// compute its variance)
 
-			//  (an enormous number without any sense!!!!) (caused OutOfMemory too)
+			// (an enormous number without any sense!!!!) (caused OutOfMemory too)
 			initial = eurDisc * eurDisc / 10;
 
-			// New -- Bertoli Marco
 			if (initial > 5000) {
 				initial = 5000;
 			}
@@ -471,7 +463,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			// euristic R5 problems, but will also reject legittimate measures
 			if (delta > 200) {
 				delta = 200;
-				// END NEW
 			}
 
 			initData.ensureCapacity(initial);
@@ -487,7 +478,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 
 			//during test for stationarity, delta old observations will
 			//be replaced by new ones
-			//OLD
 			//delta = initSamples / 2;
 			arrayData = new double[delta];
 			initSamples = 0;
@@ -503,9 +493,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	 */
 	protected boolean schrubenTest(double newSample, double Weight) {
 
-		//NEW
-		//@author Stefano Omini
-
 		//
 		// test has been made stronger: on one hand, a stronger test requires more
 		// samples to delete the transient (therefore the transient deletion phase
@@ -514,15 +501,11 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		// confidence interval from a state nearer to the steady state: this makes
 		// faster the next phase, which is typically more critical.
 
-		//  The test is Two-sided
-
-		//OLD
-		//float alfaT = (float) 0.05;
+		// The test is Two-sided
 
 		//significance of the test for stationarity
+		//float alfaT = (float) 0.05;
 		float alfaT = (float) 0.001;
-
-		//end NEW
 
 		double var, mean, sum = 0, parSum = 0;
 		double sumWeigths = 0;
@@ -542,13 +525,11 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			arrayData = initData.toArray(0, delta);
 			mean = 0;
 
-			//OLD
 			//for (int i = 0; i < initData.getSize(); i++) {
-			//mean += initData.get(i) * initWeight.get(i);
+			//	mean += initData.get(i) * initWeight.get(i);
 			//	sumWeigths += initWeight.get(i);
 			//}
 
-			//NEW
 			int size = initData.getSize();
 			double tempWeight;
 			for (int i = 0; i < size; i++) {
@@ -556,7 +537,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 				mean += initData.get(i) * tempWeight;
 				sumWeigths += tempWeight;
 			}
-			//end NEW
 
 			mean /= sumWeigths;
 			int k = minSamples - numBatch * batchLen - 1;
@@ -587,9 +567,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 				sum += j * delta * (1 - ((double) j / (double) delta)) * (mean - (parSum / j));
 			}
 
-			//OLD
 			//double num = (Math.sqrt(45) * sum);
-			//NEW
 			double num = (sqrt_45 * sum);
 
 			double den = (Math.pow(delta, 1.5) * Math.sqrt(numBatch * var));
@@ -646,9 +624,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		double oldMean = 0;
 		double sumSquare = 0;
 		int data = miniB.getSize();
-		//OLD
 		//int index = miniB.getSize() / 2;
-		//NEW
 		int index = data / 2;
 
 		//coefficients for the last part of data.
@@ -693,7 +669,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			}
 		}
 
-		//OLD
 		// if (d - 1 <= nSamples / (5 * 5)) {
 		if (d - 1 <= nSamples / (25)) {
 			//the initial warm up period is short
@@ -869,9 +844,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	 * @return the mean
 	 */
 	public double getMean() {
-
-		//NEW
-		//@author Stefano Omini
 		if (isZero()) {
 			return 0;
 		} else if (initialized) {
@@ -879,14 +851,13 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		} else {
 			return 0;
 		}
-		//end NEW
 	}
 
 	/** gets the variance estimated of the monitored data stream
 	 * @return the variance
 	 */
 	public double getVar() {
-		if ((end) && (initialized)) {
+		if (end && initialized) {
 			return extVar;
 		} else {
 			return 0;
@@ -898,7 +869,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	 * @return the confidence interval requested
 	 */
 	public double getConfInt() {
-		if ((confInt != 0) && (initialized)) {
+		if (confInt != 0 && initialized) {
 			return confInt;
 		} else {
 			return 0;
@@ -946,10 +917,10 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		//polynomial fitting
 		polyCoeff = PolyFit.fit(K, fn, J, polyOrder);
 		/*this function could be eliminated if the fit it is calculated through
-		* the normal equation algorithm, because the (AA')^-1 it is created and
-		* calculated to fit. But if the calculation is done through other
-		* algorithms then you have to do with this function.
-		*/
+		 * the normal equation algorithm, because the (AA')^-1 it is created and
+		 * calculated to fit. But if the calculation is done through other
+		 * algorithms then you have to do with this function.
+		 */
 		C = calcConstants(K, polyOrder);
 		return C[0] * Math.exp(polyCoeff[0]);
 	}
@@ -1007,13 +978,13 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		return precision;
 	}
 
-	//NEW
-	//@author Stefano Omini
+	/**  gets the actual requested alpha of the analyzer
+	 *
+	 * @return  the alpha
+	 */
 	public double getAlfa() {
 		return alfa;
 	}
-
-	//end NEW
 
 	/** gets the maximum number of samples that can be analyzed.
 	 *
@@ -1059,9 +1030,6 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		}
 	}
 
-	//NEW
-	//@author Stefano Omini
-
 	/**
 	 * Verifies whether the measure is almost always equal to zero
 	 * @return true if the measure is almost always equal to zero
@@ -1083,7 +1051,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		    |T| > t
 		where t is the upper critical value of the t-distribution with (N - 1) degrees
 		of freedom and with confidence coefficient equal to (1 - nullTestAlfa)
-		*/
+		 */
 
 		//oneSided t-test  -->  t(2*alfa, N)
 		//twoSided t-test  -->  t(alfa, N)
@@ -1094,26 +1062,33 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		double T;
 		if (var != 0) {
 			T = mean / (Math.sqrt(var / nSamples));
+			if (Math.abs(T) < t) {
+				//the null hypothesis is true
+				measureIsZero = true;
+
+				//upper limit
+
+				// we found that T < t with confidence coefficient equal to (1 - nullTestAlfa)
+				// T = mean / sqrt(var / nSamples)
+				// then mean < t * sqrt(var / nSamples)
+				nullMeasure_upperLimit = t * (Math.sqrt(var / nSamples));
+			} else {
+				//the null hypothesis is false
+				measureIsZero = false;
+			}
 		} else {
 			//when var = 0, the upper formula cannot be applied
 			T = mean;
-		}
+			if (T == 0) {
+				//the null hypothesis is true
+				measureIsZero = true;
 
-		if (Math.abs(T) < t) {
-			//the null hypothesis is true
-			measureIsZero = true;
-
-			//upper limit
-
-			// we found that T < t with confidence coefficient equal to (1 - nullTestAlfa)
-			// T = mean / sqrt(var / nSamples)
-			// then mean < t * sqrt(var / nSamples)
-
-			nullMeasure_upperLimit = t * (Math.sqrt(var / nSamples));
-
-		} else {
-			//the null hypothesis is false
-			measureIsZero = false;
+				//upper limit
+				nullMeasure_upperLimit = 0.0;
+			} else {
+				//the null hypothesis is false
+				measureIsZero = false;
+			}
 		}
 
 		if (ZERODEBUG) {
@@ -1138,7 +1113,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 
 	/**
 	 * This method should be called only if mean is equal to zero (@see isZero()), that is
-	 * whne nullTest() returns true. 
+	 * when nullTest() returns true. 
 	 * @return the upper limit of confidence interval when mean is equal to 0.0
 	 */
 	public double getNullMeasure_upperLimit() {
@@ -1165,16 +1140,14 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		return 0.0;
 	}
 
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
+	/**
+	 * Stops the measuring process
+	 * @param success value to be reported by getSuccess()
+	 */
 	public synchronized void stopMeasure(boolean success) {
 		this.end = true;
 		this.success = success;
 	}
-
-	//end NEW
 
 	/**
 	 * Sets the reference to the class containing simulation

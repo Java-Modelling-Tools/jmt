@@ -64,8 +64,8 @@ import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
 import jmt.gui.common.xml.ModelLoader;
 import jmt.gui.common.xml.XMLWriter;
 import jmt.gui.jsimwiz.definitions.JSIMModel;
-import jmt.gui.jsimwiz.panels.AllBlockingRegionsPanel;
-import jmt.gui.jsimwiz.panels.AllStationsParametersPanel;
+import jmt.gui.jsimwiz.panels.BlockingRegionsPanel;
+import jmt.gui.jsimwiz.panels.StationParametersPanel;
 import jmt.gui.jsimwiz.panels.ClassesPanel;
 import jmt.gui.jsimwiz.panels.ConnectionsPanel;
 import jmt.gui.jsimwiz.panels.JSimProblemsWindow;
@@ -101,11 +101,11 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	private ClassesPanel classes;
 	private StationsPanel stations;
 	private ConnectionsPanel connections;
-	private AllStationsParametersPanel parameters;
+	private StationParametersPanel parameters;
 	private MeasurePanel measures;
 	private RSPLPanel rspl;
 	private SimulationPanel simulation;
-	private AllBlockingRegionsPanel blocking;
+	private BlockingRegionsPanel blocking;
 
 	private ModelChecker mc;
 	private JSimProblemsWindow pw;
@@ -141,7 +141,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			openFile();
+			openFile(null);
 		}
 
 	};
@@ -353,65 +353,15 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	}
 
 	/**
-	 * Open a stored model from a file path
-	 * <br>Author: Giuliano Casale
-	 */
-	private void openFilePath(File file) {
-		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
-			return;
-		}
-		JSIMModel tmpmodel = new JSIMModel();
-		int state = modelLoader.loadModelFromFile(tmpmodel, this, file);
-		if (state == ModelLoader.SUCCESS || state == ModelLoader.WARNING) {
-			currentFile = file;
-			// At this point loading was successful, so substitutes old model with loaded one
-			model = tmpmodel;
-			// Clears old resultsWindow
-			if (resultsWindow != null) {
-				resultsWindow.dispose();
-			}
-			// Clears parametric window too...
-			if (progressWindow != null) {
-				progressWindow.stopAnimation();
-				progressWindow.dispose();
-			}
-			SHOW_RESULTS.setSelected(false);
-			SHOW_RESULTS.setEnabled(false);
-			setPanelsData(model);
-			setTitle(WINDOW_TITLE + " - " + currentFile.getName());
-			// If simulation results are present, adds a Result Window
-			if (model.containsSimulationResults()) {
-				if (model.isParametricAnalysisEnabled()) {
-					this.setResultsWindow(new PAResultsWindow(model, currentFile.getName()));
-					SHOW_RESULTS.setEnabled(true);
-				} else {
-					this.setResultsWindow(new ResultsWindow(model, currentFile.getName()));
-					SHOW_RESULTS.setEnabled(true);
-				}
-			}
-			model.resetSaveState();
-			System.gc();
-		} else if (state == ModelLoader.FAILURE) {
-			showErrorMessage(modelLoader.getFailureMotivation());
-		}
-
-		// Shows warnings if any
-		if (state == ModelLoader.WARNING) {
-			new WarningWindow(modelLoader.getLastWarnings(), this, modelLoader.getInputFileFormat(), CommonConstants.JSIM).show();
-		}
-
-	}
-
-	/**
 	 * Open a stored model from a file
 	 * <br>Author: Bertoli Marco
 	 */
-	private void openFile() {
+	private void openFile(File file) {
 		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
 			return;
 		}
 		JSIMModel tmpmodel = new JSIMModel();
-		int state = modelLoader.loadModel(tmpmodel, this);
+		int state = modelLoader.loadModel(tmpmodel, this, file);
 		if (state == ModelLoader.SUCCESS || state == ModelLoader.WARNING) {
 			currentFile = modelLoader.getSelectedFile();
 			// At this point loading was successful, so substitutes old model with loaded one
@@ -449,7 +399,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		if (state == ModelLoader.WARNING) {
 			new WarningWindow(modelLoader.getLastWarnings(), this, modelLoader.getInputFileFormat(), CommonConstants.JSIM).show();
 		}
-
 	}
 
 	private void newFile() {
@@ -673,9 +622,8 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	public JSIMMain() {
 		this(null);
 	}
-	
+
 	public JSIMMain(CommonModel model) {
-		super();
 		Defaults.reload();
 		if (model == null) {
 			this.model = new JSIMModel();
@@ -690,12 +638,12 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		classes = new ClassesPanel(model);
 		stations = new StationsPanel(model, model);
 		connections = new ConnectionsPanel(model);
-		parameters = new AllStationsParametersPanel(model, model);
+		parameters = new StationParametersPanel(model, model);
 		measures = new MeasurePanel(model, model, model);
 		rspl = new RSPLPanel(model, model, model);
 		simulation = new SimulationPanel(model, model, model, this);
 		parametricAnalysis = new ParametricAnalysisPanel(model, model, model, this);
-		blocking = new AllBlockingRegionsPanel(model, model, model);
+		blocking = new BlockingRegionsPanel(model, model, model);
 		initComponents();
 		mc = new ModelChecker(model, model, model, model, false);
 		pw = new JSimProblemsWindow(mc, this);
@@ -839,12 +787,12 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INCONSISTENT_QUEUE_STRATEGY_ERROR)) {
 			tabbedPane.setSelectedIndex(3);
-			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.UNPREDICTABLE_SERVICE_ERROR)) {
 			tabbedPane.setSelectedIndex(3);
-			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.JOIN_WITHOUT_FORK_ERROR)) {
@@ -867,7 +815,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_INVALID_MATRIX_ERROR)) {
 			tabbedPane.setSelectedIndex(3);
-			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_BAS_STRATEGY_ERROR)) {
@@ -887,7 +835,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ZERO_GUARD_STRATEGY_ERROR)) {
 			tabbedPane.setSelectedIndex(3);
-			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, relatedClass);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SEMAPHORE_NOT_BETWEEN_FORK_JOIN_ERROR)) {
@@ -904,7 +852,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INVALID_CONDITION_ERROR)) {
 			tabbedPane.setSelectedIndex(3);
-			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
 		//used only in JMVA conversion
@@ -915,7 +863,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					+ stationName + "?\n\n", "Mixed queue strategies found", JOptionPane.WARNING_MESSAGE);
 			if (k == JOptionPane.OK_OPTION) {
 				tabbedPane.setSelectedIndex(3);
-				AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+				StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 			}
 		}
@@ -928,7 +876,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					JOptionPane.WARNING_MESSAGE);
 			if (k == JOptionPane.OK_OPTION) {
 				tabbedPane.setSelectedIndex(3);
-				AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+				StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
 			}
 		}
@@ -940,7 +888,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					+ " the service time distributions of " + stationName + "?\n\n", "Non exponential distribution found", JOptionPane.WARNING_MESSAGE);
 			if (k == JOptionPane.OK_OPTION) {
 				tabbedPane.setSelectedIndex(3);
-				AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+				StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
 			}
 		}
@@ -953,7 +901,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 					JOptionPane.WARNING_MESSAGE);
 			if (k == JOptionPane.OK_OPTION) {
 				tabbedPane.setSelectedIndex(3);
-				AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+				StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
 			}
 		}
@@ -1008,7 +956,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.SCHEDULING_SAME_PRIORITY_WARNING)) {
 			tabbedPane.setSelectedIndex(3);
-			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN_WARNING)) {
@@ -1020,7 +968,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INVALID_OUTCOME_WARNING)) {
 			tabbedPane.setSelectedIndex(3);
-			AllStationsParametersPanel parameterPanel = (AllStationsParametersPanel) tabbedPane.getComponentAt(3);
+			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.OUTPUT_SECTION, null);
 		}
 	}
@@ -1073,9 +1021,16 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	}
 
 	public static void main(String[] args) {
-		JSIMMain J = new JSIMMain();
-		J.setVisible(true);
-		J.openFilePath(new File(args[1]));
+		JSIMMain jsm = new JSIMMain();
+		jsm.setVisible(true);
+		if (args != null && args.length > 0) {
+			File file = new File(args[0]);
+			if (!file.isFile()) {
+				System.err.print("Invalid model file: " + file.getAbsolutePath());
+				System.exit(1);
+			}
+			jsm.openFile(file);
+		}
 	}
 
 	/**

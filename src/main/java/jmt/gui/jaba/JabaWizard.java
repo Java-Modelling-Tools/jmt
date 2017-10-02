@@ -473,7 +473,7 @@ public class JabaWizard extends Wizard {
 			return;
 		}
 		JabaModel newdata = new JabaModel();
-		int retval = modelLoader.loadModel(newdata, this);
+		int retval = modelLoader.loadModel(newdata, this, null);
 		switch (retval) {
 		case ModelLoader.SUCCESS:
 		case ModelLoader.WARNING:

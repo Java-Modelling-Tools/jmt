@@ -272,7 +272,8 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 
 		public LoadDependentRoutingStrategyTable() {
 			setModel(new LoadDependentRoutingStrategyTableModel());
-			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			setDefaultRenderer(String.class, new GrayCellRenderer());
 			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			columnSizes = new int[getModel().getColumnCount()];
 			columnSizes[0] = 20;
@@ -283,10 +284,8 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 					columnSizes[index] = 20;
 				}
 			}
-
 			sizeColumnsAndRows();
-			setDefaultRenderer(String.class, new GrayCellRenderer());
-			setDefaultEditor(Object.class, new ExactCellEditor());
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 

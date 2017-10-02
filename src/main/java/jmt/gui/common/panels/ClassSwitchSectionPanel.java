@@ -30,6 +30,7 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.TableCellEditor;
 
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
@@ -120,10 +121,9 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 	 */
 	@Override
 	public void lostFocus() {
-		if (csTable!=null) {
-			if (csTable.getCellEditor()!=null) {
-				csTable.getCellEditor().stopCellEditing();
-			}
+		TableCellEditor editor = csTable.getCellEditor();
+		if (editor != null) {
+			editor.stopCellEditing();
 		}
 	}
 

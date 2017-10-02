@@ -58,6 +58,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.exact.table.ExactCellEditor;
 
 /**
  * <p>Title: Load Dependent Service Time Strategy Editor</p>
@@ -397,14 +398,14 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 			}
 
 		};
+
 		/** Editor to select distribution type */
 		protected ComboBoxCellEditor distributionEditor = ComboBoxCellEditor.getEditorInstance(distributions.keySet().toArray());
 
 		public LDStrategyTable() {
-			super();
-			this.setModel(new LDStrategyTableModel());
-			this.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			this.setRowHeight(CommonConstants.ROW_HEIGHT);
+			setModel(new LDStrategyTableModel());
+			setRowHeight(CommonConstants.ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
 		}
 
@@ -414,9 +415,9 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 		//Sets a table model for visualization and editing of data
 		public void setModel(LDStrategyTableModel tabMod) {
 			super.setModel(tabMod);
-			sizeColumnsAndRows();
+			setDefaultEditor(Object.class, new ExactCellEditor());
 			setDefaultRenderer(String.class, new GrayCellRenderer());
-			setDefaultEditor(Object.class, new jmt.gui.exact.table.ExactCellEditor());
+			sizeColumnsAndRows();
 		}
 
 		//returns a component to be contained inside a table column(or cell)

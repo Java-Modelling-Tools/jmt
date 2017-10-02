@@ -69,7 +69,7 @@ public interface DynamicDataAnalyzer {
 	
 	/**
 	 * This method should be called only if mean is equal to zero (@see isZero()), that is
-	 * whne nullTest() returns true.
+	 * when nullTest() returns true.
 	 * @return the upper limit of confidence interval when mean is equal to 0.0
 	 */
 	public double getNullMeasure_upperLimit();

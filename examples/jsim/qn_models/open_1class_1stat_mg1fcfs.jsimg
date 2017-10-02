@@ -32,8 +32,8 @@
 <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
 <refClass>Class0</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.Cox2Distr" name="Coxian"/>
-<subParameter classPath="jmt.engine.random.Cox2Par" name="distrPar">
+<subParameter classPath="jmt.engine.random.CoxianDistr" name="Coxian"/>
+<subParameter classPath="jmt.engine.random.CoxianPar" name="distrPar">
 <subParameter classPath="java.lang.Double" name="lambda0">
 <value>4.0</value>
 </subParameter>

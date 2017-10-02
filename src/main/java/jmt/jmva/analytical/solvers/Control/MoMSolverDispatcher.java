@@ -24,8 +24,8 @@ import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueuingNet.MoMSolver;
-import jmt.jmva.analytical.solvers.QueuingNet.QNSolver;
+import jmt.jmva.analytical.solvers.QueueingNet.MoMSolver;
+import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 import jmt.jmva.analytical.solvers.Utilities.MiscFunctions;
 
 /**
@@ -46,7 +46,7 @@ public class MoMSolverDispatcher {
      */
     protected int[] population;
     /**
-     * Contains the queuing network model
+     * Contains the queueing network model
      */
     protected QNModel qnm;
     /**
@@ -141,7 +141,7 @@ public class MoMSolverDispatcher {
                 N[r] = population[r];
             }
 
-            // Instantiate queuing network model
+            // Instantiate queueing network model
             qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
         } catch (Exception ex) {
             ex.printStackTrace();

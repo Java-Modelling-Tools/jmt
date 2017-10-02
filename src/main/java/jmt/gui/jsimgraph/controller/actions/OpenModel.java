@@ -52,7 +52,7 @@ public class OpenModel extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		mediator.openModel();
+		mediator.openModel(null);
 	}
 
 }

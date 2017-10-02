@@ -51,7 +51,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	private boolean success = false;
 
 	// Number of analyzed samples
-	private int nsamples = 0;
+	private int nSamples = 0;
 
 	// Tells if transient has been deleted
 	private boolean deleted = false;
@@ -117,8 +117,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	/**the estimated confidence intervals */
 	protected double confInt = 0;
 	/**the estimated instantaneous value */
-	private double lastIntervalAvg=0;
-
+	private double lastIntervalAvg = 0;
 
 	/**constant chosen to reduce bias of variance estimator */
 	protected double C1;
@@ -166,9 +165,9 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	private int nullTestPeriod;
 	private double lastSampleWeight;
 	private double lastWeight;
-	
+
 	//If measure is zero, this is the value of the upper limit of confidence interval
-	private static double nullMeasure_upperLimit = 0.0;
+	private double nullMeasure_upperLimit = 0.0;
 
 	// ---------------------------------------------------------------------------------------------
 
@@ -215,7 +214,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		lastWeight = lastWeight + weight;
 
 		// Abort simulation when maxData is reached
-		if (nsamples >= maxData && !confIntervalOk) {
+		if (nSamples >= maxData && !confIntervalOk) {
 			success = false;
 			end = true;
 			// Free allocated memory
@@ -223,7 +222,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			return true;
 		}
 		// Max samples are reached and confidence interval too, but statistic stop was disabled
-		else if (nsamples >= maxData && confIntervalOk) {
+		else if (nSamples >= maxData && confIntervalOk) {
 			success = true;
 			end = true;
 			// Free allocated memory
@@ -236,7 +235,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			return true;
 		}
 
-		nsamples++;
+		nSamples++;
 
 		//@author Stefano Omini
 		//Measures which are often equal to zero are problematic for the
@@ -251,7 +250,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			nullTestData.putNewSample(newSample, weight);
 
 			//nullTest must be repeated every nullTestPeriod samples
-			if (nsamples % nullTestPeriod == 0) {
+			if (nSamples % nullTestPeriod == 0) {
 				if (nullTest()) {
 					//null test is true (the measure is almost always equal to 0.0)
 					if (canEnd()) {
@@ -298,7 +297,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		if (!deleted) {
 			//transient detected but not deleted yet
 
-			if (nsamples >= minSamples) {
+			if (nSamples >= minSamples) {
 				//min number of samples respected
 
 				//Apply the heuristic rule MSR5 to discard the most biased samples of the
@@ -306,7 +305,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 				if (deleteTransient()) {
 
 					//transient deleted
-					if ((batch == numBatch - 1) && (nsamples % batchLen == 0)) {
+					if ((batch == numBatch - 1) && (nSamples % batchLen == 0)) {
 
 						//Applies the spectral test to generate the Confidence Intervals.
 						//true if the precision has been reached
@@ -333,7 +332,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			batchMean[batch] += newSample * weight;
 			weightBatchMean[batch] += weight;
 
-			if (nsamples % batchLen == 0) {
+			if (nSamples % batchLen == 0) {
 				batchMean[batch] /= weightBatchMean[batch];
 
 				if (batch == (numBatch - 1)) {
@@ -498,7 +497,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			if (batch == (numBatch - 1)) {
 				//optimal number of batches
 				int log2;
-				log2 = 1 << ((int) Math.ceil((Math.log(Math.sqrt(nsamples))) / Math.log(2)));
+				log2 = 1 << ((int) Math.ceil((Math.log(Math.sqrt(nSamples))) / Math.log(2)));
 				if (log2 < 64) {
 					log2 = 64;
 				}
@@ -564,18 +563,18 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	}
 
 	/** calculates the variance through Heidelberger & Welch method, if the data
-	     *  are the means of batches of size batchLen, the variance must be multiplied
-	     *  by batchLen.
-	     *
-	     *  @param  data        array containing the sequence of data
-	     *  @param  start       the starting sample
-	     *  @param  n           number of data of the sequence to be estimated
-	     *  @param  K           number of points used in the polynomial fitting
-	     *                      must be <= n/4, typically is 25, 50
-	     *  @param  polyOrder   the order of the polynomial to be fitted to the getLog
-	     *                      of the spectrum of data typically is 2 or 3.
-	     *  @return the estimated variance
-	     */
+	 *  are the means of batches of size batchLen, the variance must be multiplied
+	 *  by batchLen.
+	 *
+	 *  @param  data        array containing the sequence of data
+	 *  @param  start       the starting sample
+	 *  @param  n           number of data of the sequence to be estimated
+	 *  @param  K           number of points used in the polynomial fitting
+	 *                      must be <= n/4, typically is 25, 50
+	 *  @param  polyOrder   the order of the polynomial to be fitted to the getLog
+	 *                      of the spectrum of data typically is 2 or 3.
+	 *  @return the estimated variance
+	 */
 	public double calcVar(double[] data, int start, int n, int K, int polyOrder) {
 
 		K = Math.min(K, n / 4);
@@ -597,10 +596,10 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		//polynomial fitting
 		polyCoeff = PolyFit.fit(K, fn, J, polyOrder);
 		/*this function could be eliminated if the fit it is calculated through
-		  * the normal equation algorithm, because the (AA')^-1 it is created and
-		  * calculated to fit. But if the calculation is done through other
-		  * algorithms then you have to do with this function.
-		  */
+		 * the normal equation algorithm, because the (AA')^-1 it is created and
+		 * calculated to fit. But if the calculation is done through other
+		 * algorithms then you have to do with this function.
+		 */
 		C = calcConstants(K, polyOrder);
 		return C[0] * Math.exp(polyCoeff[0]);
 	}
@@ -625,7 +624,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 
 	/**
 	 * computes the variance of the estimator of the variance
-	*/
+	 */
 	protected double calcEstimatorVar(int K, int polyOrder) {
 		Matrix X = new Matrix(K, polyOrder + 1);
 		Matrix Xt;
@@ -659,9 +658,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		double oldMean;
 		double sumSquare = 0;
 		int data = batches.getNumBatches();
-		//OLD
 		//int index = miniB.getSize() / 2;
-		//NEW
 		int index = data / 2;
 
 		//coefficients for the last part of data.
@@ -706,17 +703,17 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 			}
 		}
 
-		if (d - 1 <= nsamples / (batches.getBatchSize() * batches.getBatchSize())) {
+		if (d - 1 <= nSamples / (batches.getBatchSize() * batches.getBatchSize())) {
 			//the initial warm up period is short
 			//cannot apply the algorithm to a sequence too polarized...
 			deleted = true;
 			batches.deleteFirstBatches(d);
 
-			nsamples = batches.getNumBatches() * batches.getBatchSize();
+			nSamples = batches.getNumBatches() * batches.getBatchSize();
 
 			//heuristic to build the "optimal" number of batches.
-			//numBatches is nearest 2 power to sqrt(nsamples)
-			numBatch = 1 << ((int) Math.ceil((Math.log(Math.sqrt(nsamples))) / Math.log(2)));
+			//numBatches is nearest 2 power to sqrt(nSamples)
+			numBatch = 1 << ((int) Math.ceil((Math.log(Math.sqrt(nSamples))) / Math.log(2)));
 			if (numBatch < 64) {
 				numBatch = 64;
 			}
@@ -769,37 +766,44 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		    |T| > t
 		where t is the upper critical value of the t-distribution with (N - 1) degrees
 		of freedom and with confidence coefficient equal to (1 - nullTestAlfa)
-		*/
+		 */
 
 		//oneSided t-test  -->  t(2*alfa, N)
 		//twoSided t-test  -->  t(alfa, N)
 		//this method uses the two-sides test: make alfa * 2 because we want one-side test
-		double t = TStudent.ICDF((2 * nullTestAlfa), nsamples);
+		double t = TStudent.ICDF((2 * nullTestAlfa), nSamples);
 		double mean = nullTestData.getMean();
 		double var = nullTestData.getVar();
 		double T;
 		if (var != 0) {
-			T = mean / (Math.sqrt(var / nsamples));
+			T = mean / (Math.sqrt(var / nSamples));
+			if (Math.abs(T) < t) {
+				//the null hypothesis is true
+				measureIsZero = true;
+
+				//upper limit
+
+				// we found that T < t with confidence coefficient equal to (1 - nullTestAlfa)
+				// T = mean / sqrt(var / nSamples)
+				// then mean < t * sqrt(var / nSamples)
+				nullMeasure_upperLimit = t * (Math.sqrt(var / nSamples));
+			} else {
+				//the null hypothesis is false
+				measureIsZero = false;
+			}
 		} else {
 			//when var = 0, the upper formula cannot be applied
 			T = mean;
-		}
+			if (T == 0) {
+				//the null hypothesis is true
+				measureIsZero = true;
 
-		if (Math.abs(T) < t) {
-			//the null hypothesis is true
-			measureIsZero = true;
-
-			//upper limit
-
-			// we found that T < t with confidence coefficient equal to (1 - nullTestAlfa)
-			// T = mean / sqrt(var / nSamples)
-			// then mean < t * sqrt(var / nSamples)
-
-			nullMeasure_upperLimit = t * (Math.sqrt(var / nsamples));
-
-		} else {
-			//the null hypothesis is false
-			measureIsZero = false;
+				//upper limit
+				nullMeasure_upperLimit = 0.0;
+			} else {
+				//the null hypothesis is false
+				measureIsZero = false;
+			}
 		}
 
 		return measureIsZero;
@@ -857,7 +861,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 * @return the confidence interval requested
 	 */
 	public double getConfInt() {
-		if ((confInt != 0) && (heuristicPassed)) {
+		if (confInt != 0 && heuristicPassed) {
 			return confInt;
 		} else {
 			return 0;
@@ -866,7 +870,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 
 	/**
 	 * This method should be called only if mean is equal to zero (@see isZero()), that is
-	 * whne nullTest() returns true.
+	 * when nullTest() returns true.
 	 *
 	 * @return the upper limit of confidence interval when mean is equal to 0.0
 	 */
@@ -880,7 +884,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 * @return number of samples elaborated
 	 */
 	public int getSamples() {
-		return nsamples;
+		return nSamples;
 	}
 
 	/**
