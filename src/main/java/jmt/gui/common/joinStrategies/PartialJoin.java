@@ -25,8 +25,7 @@ public class PartialJoin extends JoinStrategy {
 	private int requiredNum = 1;
 
 	public PartialJoin() {
-		description = "Fires the join upon arrival of a subset of forked tasks. "
-				+ "Exceeding tasks will be ignored at this station.";
+		description = "Fires upon arrival of a subset of tasks of the same job. Pending tasks are discarded upon arrival.";
 	}
 
 	@Override
