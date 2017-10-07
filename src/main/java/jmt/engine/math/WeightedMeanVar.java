@@ -67,7 +67,6 @@ public class WeightedMeanVar {
 	 *  @param data the initial data sequence;
 	 */
 	public WeightedMeanVar(double[] data, double[] weight) {
-
 		mean = 0;
 		var = 0;
 		expectedValueX2 = 0;
@@ -146,7 +145,7 @@ public class WeightedMeanVar {
 		//new var[x] (computed in this way: var[x] = E[x^2] - E[x]^2
 
 		if (oldSumWeights != 0) {
-			var = expectedValueX2 - Math.pow(mean, 2);
+			var = Math.abs(expectedValueX2 - Math.pow(mean, 2));
 		} else {
 			//it is the first sample, var = 0
 			var = 0;

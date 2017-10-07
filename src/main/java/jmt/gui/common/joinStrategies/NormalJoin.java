@@ -23,7 +23,7 @@ public class NormalJoin extends JoinStrategy {
 	private int requiredNum = -1;
 
 	public NormalJoin() {
-		description = "Fires when all the tasks forked from the job arrive to the join.";
+		description = "Fires when all the tasks forked from the same job arrive at the join.";
 	}
 
 	@Override

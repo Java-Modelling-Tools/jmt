@@ -1059,10 +1059,16 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		double t = TStudent.ICDF((2 * nullTestAlfa), nSamples);
 		double mean = nullTestData.getMean();
 		double var = nullTestData.getVar();
-		double T;
-		if (var != 0) {
+		double T = 0.0;
+		if (mean == 0.0 || Math.sqrt(var) / mean < 1e-6) {
+			//the null hypothesis is true
+			measureIsZero = true;
+
+			//upper limit
+			nullMeasure_upperLimit = 0.0;
+		} else {
 			T = mean / (Math.sqrt(var / nSamples));
-			if (Math.abs(T) < t) {
+			if (T < t) {
 				//the null hypothesis is true
 				measureIsZero = true;
 
@@ -1075,19 +1081,9 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 			} else {
 				//the null hypothesis is false
 				measureIsZero = false;
-			}
-		} else {
-			//when var = 0, the upper formula cannot be applied
-			T = mean;
-			if (T == 0) {
-				//the null hypothesis is true
-				measureIsZero = true;
 
 				//upper limit
 				nullMeasure_upperLimit = 0.0;
-			} else {
-				//the null hypothesis is false
-				measureIsZero = false;
 			}
 		}
 

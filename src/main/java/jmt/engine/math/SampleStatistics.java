@@ -203,11 +203,20 @@ public class SampleStatistics {
 		moment3 = weigthedSum3/totalWeight;
 		moment4 = weigthedSum4/totalWeight;
 		
-		var = moment2 - Math.pow(moment1, 2);
+		var = Math.abs(moment2 - Math.pow(moment1, 2));
 		sd = Math.sqrt(var);
-		coefvar = sd/moment1;
-		skew = (moment3 - (3*moment1*Math.pow(sd, 2)) - Math.pow(moment1, 3))/Math.pow(sd, 3);
-		kurtosis = (moment4 - (4*moment3*moment1) + (6*moment2*Math.pow(moment1,2)) - (3*Math.pow(moment1, 4)))/(Math.pow(sd, 4)) - 3;
+		if (moment1 == 0.0) {
+			coefvar = 0.0;
+		} else {
+			coefvar = sd/moment1;
+		}
+		if (coefvar < 1e-6) {
+			skew = Double.NaN;
+			kurtosis = Double.NaN;
+		} else {
+			skew = (moment3 - (3*moment1*Math.pow(sd, 2)) - Math.pow(moment1, 3))/Math.pow(sd, 3);
+			kurtosis = (moment4 - (4*moment3*moment1) + (6*moment2*Math.pow(moment1,2)) - (3*Math.pow(moment1, 4)))/(Math.pow(sd, 4)) - 3;
+		}
 	}
 	
 	/** gets the sample mean

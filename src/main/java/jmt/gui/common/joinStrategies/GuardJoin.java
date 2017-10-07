@@ -30,7 +30,8 @@ public class GuardJoin extends JoinStrategy {
 	private Map<Object, Integer> guard = new HashMap<Object, Integer>();
 
 	public GuardJoin() {
-		description = "Fires upon arrival of a subset of tasks in each class forked from the same job. Pending tasks are discarded upon arrival.";
+		description = "Fires when a subset of class-specific tasks forked from the same job arrive at the join. "
+				+ "Pending tasks are discarded upon arrival.";
 	}
 
 	@Override
