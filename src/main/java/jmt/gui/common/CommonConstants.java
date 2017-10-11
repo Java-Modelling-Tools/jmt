@@ -183,7 +183,7 @@ public interface CommonConstants {
 	public static final String QUEUE_STRATEGY_DPS = "DPS";
 	public static final String QUEUE_STRATEGY_FCFS = "FCFS";
 	public static final String QUEUE_STRATEGY_LCFS = "LCFS";
-	public static final String QUEUE_STRATEGY_RAND = "Random";
+	public static final String QUEUE_STRATEGY_RAND = "RAND";
 	public static final String QUEUE_STRATEGY_SJF = "SJF";
 	public static final String QUEUE_STRATEGY_LJF = "LJF";
 	public static final String QUEUE_STRATEGY_SEPT = "SEPT";
