@@ -18,6 +18,8 @@
 
 package jmt.engine.NetStrategies.ServiceStrategies;
 
+import javax.swing.JOptionPane;
+
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.NodeSection;
@@ -28,8 +30,11 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class DisabledServiceTimeStrategy extends ServiceStrategy {
 
+	boolean showDisabledWarning;
+	
 	/** Creates a new instance of ServiceTime.*/
 	public DisabledServiceTimeStrategy() {
+		showDisabledWarning = false;
 	}
 
 	/**
@@ -40,8 +45,9 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 	 */
 	@Override
 	public double wait(NodeSection callingSection) throws NetException {
-		throw NetException("A job requested service at a station where its class is disabled.");
-		return NaN;
+		showDisabledWarning();
+//		throw new NetException("A job requested service at a station where its class is disabled.");
+		return Double.NaN;
 	}
 
 	/**
@@ -52,8 +58,33 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 	 */
 	@Override
 	public double expect(NodeSection callingSection) throws NetException {
-		throw NetException("A job requested service at a station where its class is disabled.");
-		return NaN;
+//		throw new NetException("A job requested service at a station where its class is disabled.");
+		return Double.NaN;
+	}
+
+	/**
+	 * Shows the fork job number warning.
+	 */
+	private void showDisabledWarning() {
+		if (!showDisabledWarning) {
+/*			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
+				System.out.println("JMT - Warning: " + getOwnerNode().getName()
+						+ " failed to maintain the equilibrium between input and output tasks.");
+			} else {
+			*/
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(800);
+						} catch (InterruptedException e) {
+						}
+						JOptionPane.showMessageDialog(null, "A job requested service at a station where its class is disabled.", "JMT - Warning", JOptionPane.WARNING_MESSAGE);
+					}
+				}).start();
+//			}
+			showDisabledWarning = true;
+		}
 	}
 
 }
