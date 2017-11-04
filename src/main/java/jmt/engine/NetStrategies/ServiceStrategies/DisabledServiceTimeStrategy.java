@@ -47,7 +47,7 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 	public double wait(NodeSection callingSection) throws NetException {
 		showDisabledWarning();
 //		throw new NetException("A job requested service at a station where its class is disabled.");
-		return Double.NaN;
+		return 0.0;
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 	@Override
 	public double expect(NodeSection callingSection) throws NetException {
 //		throw new NetException("A job requested service at a station where its class is disabled.");
-		return Double.NaN;
+		return 0.0;
 	}
 
 	/**

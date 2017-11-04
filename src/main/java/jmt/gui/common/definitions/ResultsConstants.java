@@ -63,16 +63,16 @@ public interface ResultsConstants {
 
 	// Tabbed panels description
 	public static final String DESCRIPTION_QUEUE_LENGTH = HTML_START + HTML_FONT_TITLE + "Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average number of customers for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average number of customers for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_QUEUE_TIME = HTML_START + HTML_FONT_TITLE + "Queue Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average queue time for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average queue time for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average response time for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average response time for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RESIDENCE_TIME = HTML_START + HTML_FONT_TITLE + "Residence Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average residence time for each chosen class at each chosen station. (Residence Time = Number of Visits * Response Time)"
+			+ "Average residence time for each selected class at each selected station. (Residence Time = Number of Visits * Response Time)"
 			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_UTILIZATION = HTML_START + HTML_FONT_TITLE + "Utilization" + HTML_FONT_TIT_END + HTML_FONT_NORM
@@ -81,48 +81,48 @@ public interface ResultsConstants {
 			+ "(it may be greater than 1)" + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average throughput for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average throughput for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_DROP_RATE = HTML_START + HTML_FONT_TITLE + "Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average drop rate for each chosen class at each chosen station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average drop rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average number of customers in the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average number of customers in the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "System Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average response time of the entire system for each chosen class."
+			+ "Average response time of the entire system for each selected class."
 			+ "<br><b>WARNING:</b> With class switching, the system response time per class refers to the mean time that a job spends being of that class in the system."
 			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "System Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average throughput of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average throughput of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_DROP_RATE = HTML_START + HTML_FONT_TITLE + "System Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average drop rate of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average drop rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_POWER = HTML_START + HTML_FONT_TITLE + "System Power" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average power of the entire system for each chosen class." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average power of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RESPONSE_TIME_PER_SINK = HTML_START + HTML_FONT_TITLE + "Response Time per Sink" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average response time for each chosen class at each chosen Sink station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average response time for each selected class at each selected Sink station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_THROUGHPUT_PER_SINK = HTML_START + HTML_FONT_TITLE + "Throughput per Sink" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average throughput for each chosen class at each chosen Sink station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average throughput for each selected class at each selected Sink station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_FCR_TOTAL_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR Total Weight" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Average total weight for each chosen finite capacity region." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average total weight for each selected finite capacity region." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_FCR_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Average memory occupation for each chosen finite capacity region." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average memory occupation for each selected finite capacity region." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_FJ_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "Fork Join Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Average number of customers for each chosen class in each chosen Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average number of customers for each selected class in each selected Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_FJ_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Fork Join Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Average response time for each chosen class in each chosen Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average response time for each selected class in each selected Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_FIRING_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Firing Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Average firing throughput for each chosen mode at each chosen transition station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average firing throughput for each selected mode at each selected transition station." + HTML_FONT_NOR_END + HTML_END;
 
 	// Temp measure mean label
 	public static final String TEMP_MEAN = HTML_START + HTML_FONT_NORM + "<b>Average value: </b>" + HTML_FONT_NOR_END + HTML_END;

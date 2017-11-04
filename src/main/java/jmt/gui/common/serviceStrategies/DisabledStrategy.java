@@ -53,7 +53,7 @@ public class DisabledStrategy implements ServiceStrategy {
 	 */
 	@Override
 	public String toString() {
-		return "NaN";
+		return "disabled";
 	}
 
 }
