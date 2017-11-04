@@ -193,6 +193,7 @@ public interface CommonConstants {
 	public static final String SERVICE_LOAD_INDEPENDENT = "Load Independent";
 	public static final String SERVICE_LOAD_DEPENDENT = "Load Dependent";
 	public static final String SERVICE_ZERO = "Zero Service Time";
+	public static final String SERVICE_DISABLED = "Disabled";
 
 	/**Constants for selection of distributions*/
 	public static final String DISTRIBUTION_BURST = "Burst";

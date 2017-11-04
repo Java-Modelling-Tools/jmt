@@ -66,6 +66,7 @@ import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -1630,6 +1631,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		if (serviceClassPath.equals(ZeroStrategy.getEngineClassPath())) {
 			// Zero Service Time Strategy
 			return new ZeroStrategy();
+		} else if (serviceClassPath.equals(DisabledStrategy.getEngineClassPath())) {
+			// Disabled Service Time Strategy
+			return new DisabledStrategy();
 		} else if (serviceClassPath.equals(LDStrategy.getEngineClassPath())) {
 			// Load Dependent Service Strategy
 			Element LDParameterArray = (Element) serviceTimeStrategy.getElementsByTagName(XML_E_SUBPARAMETER).item(0);

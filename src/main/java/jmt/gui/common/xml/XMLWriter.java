@@ -64,6 +64,7 @@ import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -711,6 +712,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				// Zero Service Time Strategy --- Bertoli Marco
 				distrParams[i] = new XMLParameter("ZeroTimeServiceStrategy",
 						ZeroStrategy.getEngineClassPath(),
+						model.getClassName(currentClass), (String) null, true);
+			} else if (serviceDistribution instanceof DisabledStrategy) {
+				// Disabled Service Time Strategy --- Giuliano Casale
+				distrParams[i] = new XMLParameter("DisabledServiceStrategy",
+						DisabledStrategy.getEngineClassPath(),
 						model.getClassName(currentClass), (String) null, true);
 			} else {
 				// Load Dependent Service Strategy --- Bertoli Marco
