@@ -119,7 +119,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	protected static final String[] measureTypes = new String[] {
 			"---Select an index---",
 			SimulationDefinition.MEASURE_DR,
-			SimulationDefinition.MEASURE_FCR_TW,
+			//SimulationDefinition.MEASURE_FCR_TW,
 			SimulationDefinition.MEASURE_FCR_MO,
 			SimulationDefinition.MEASURE_FX,
 			SimulationDefinition.MEASURE_FJ_CN,

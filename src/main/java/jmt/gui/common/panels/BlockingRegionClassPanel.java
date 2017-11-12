@@ -152,7 +152,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 		private Class<?>[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class, Boolean.class,
 				String.class, String.class, String.class };
 		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Memory Size", "\u221e",
-				"Drop", "Weight", "Size" };
+				"Drop", "Weight", "Job Size" };
 
 		public int getRowCount() {
 			return cd.getClassKeys().size();
