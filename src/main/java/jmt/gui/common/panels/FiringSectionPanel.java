@@ -182,7 +182,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 				if (index >= 0) {
 					stopAllCellEditing();
 					String modeName = stationData.getTransitionModeName(stationKey, index);
-					firingBorder.setTitle("Firing Condition for " + modeName);
+					firingBorder.setTitle("Firing Output for " + modeName);
 					currentModeIndex = index;
 					firingPane.repaint();
 					updateNotice();
