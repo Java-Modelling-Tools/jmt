@@ -73,7 +73,8 @@ Compiling instructions
 
 License
 -------
-Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano 
+Copyright (C) 2006-2018, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano, Italy
+Copyright (C) 2010-2018, Imperial College London, UK
 
 This program is free software; you can redistribute it and/or modify it under the terms 
 of the GNU General Public License as published by the Free Software Foundation; either 
