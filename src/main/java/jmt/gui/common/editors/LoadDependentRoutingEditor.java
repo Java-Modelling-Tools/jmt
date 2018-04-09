@@ -24,6 +24,7 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,7 +107,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 		int range = 0;
 		List<Integer> fromAsList = new ArrayList<Integer>();
 		fromAsList.addAll(routingStrategy.getAllEmpiricalEntries().keySet());
-		fromAsList.sort(null);
+		Collections.sort(fromAsList);
 		for (Integer from : fromAsList) {
 			mapRowIndexAndFrom.put(range, from);
 			range++;
@@ -477,7 +478,7 @@ public class LoadDependentRoutingEditor extends JMTDialog implements CommonConst
 				//repaint();
 				List<Integer> fromAsList = new ArrayList<Integer>();
 				fromAsList.addAll(mapRowIndexAndFrom.values());
-				fromAsList.sort(null);
+				Collections.sort(fromAsList);
 				mapRowIndexAndFrom.clear();
 				for (int row = 0; row < fromAsList.size(); row++) {
 					mapRowIndexAndFrom.put(row, fromAsList.get(row));

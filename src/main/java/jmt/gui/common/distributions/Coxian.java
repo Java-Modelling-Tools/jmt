@@ -30,13 +30,15 @@ import jmt.gui.common.JMTImageLoader;
  * @date   September 9, 2017
  */
 public class Coxian extends Distribution {
+
 	/**
-	 * Construct a new Coxian distribution
+	 * Constructs a new Coxian distribution
 	 */
 	public Coxian() {
 		super("Coxian", "jmt.engine.random.CoxianDistr", "jmt.engine.random.CoxianPar", "Coxian distribution");
 		hasMean = true;
 		hasC = true;
+		isNestable = true;
 	}
 
 	/**
@@ -46,16 +48,15 @@ public class Coxian extends Distribution {
 	@Override
 	protected Parameter[] setParameters() {
 		// Creates parameter array
-		Parameter[] parameters = new Parameter[3]; //Coxian is specified by two rates and one probability
+		Parameter[] parameters = new Parameter[3];
 
-		/* arrival rate of jobs if Coxian is in state 0 */
-		parameters[0] = new Parameter("lambda0", "\u03BB0", //unicode character for lambda0
-				Double.class, new Double(4.0));
-		// Checks value of k must be greater then 0
+		// Sets parameter lambda0
+		parameters[0] = new Parameter("lambda0", "\u03BB0", Double.class, new Double(2.0));
+		// Checks value of lambda0 must be greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -63,14 +64,13 @@ public class Coxian extends Distribution {
 			}
 		});
 
-		/* arrival rate of jobs if Coxian is in state 1 */
-		parameters[1] = new Parameter("lambda1", "\u03BB1", //unicode character for lambda1
-				Double.class, new Double(0.5));
-		// Checks value of k must be greater then 0
+		// Sets parameter lambda1
+		parameters[1] = new Parameter("lambda1", "\u03BB1", Double.class, new Double(0.25));
+		// Checks value of lambda1 must be greater than 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -78,14 +78,13 @@ public class Coxian extends Distribution {
 			}
 		});
 
-		/* rate of jump from state 0 to state 1 */
-		parameters[2] = new Parameter("phi0", "p0", //unicode character for sigma0 
-				Double.class, new Double(0.875));
-		// Checks value of alpha must greater or equal then 2
+		// Sets parameter phi0
+		parameters[2] = new Parameter("phi0", "p0", Double.class, new Double(0.875));
+		// Checks value of phi0 must be between 0 and 1
 		parameters[2].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 0.0) {
+				if (d.doubleValue() >= 0.0 && d.doubleValue() <= 1.0) {
 					return true;
 				} else {
 					return false;
@@ -97,7 +96,7 @@ public class Coxian extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -106,14 +105,14 @@ public class Coxian extends Distribution {
 	}
 
 	/**
-	 * Return distribution short description
-	 * @return distribution short description
+	 * Returns this distribution's short description
+	 * @return distribution's short description
 	 */
 	@Override
 	public String toString() {
-		return "cox((" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
-				+ formatNumber(((Double) parameters[2].getValue()).doubleValue()) + "),("
-				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ",1.0))";
+		return "cox(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
+				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ","
+				+ formatNumber(((Double) parameters[2].getValue()).doubleValue()) + ")";
 	}
 
 	/**
@@ -140,51 +139,44 @@ public class Coxian extends Distribution {
 	 * @param c c value
 	 */
 	protected void setCM(double mean, double c) {
-		double l1, l2, p;
-		if (c*c >= 0.5 && c < 1.0) {
-			p = 0.0;
-			l1 = 2/mean/(1+Math.sqrt(1+2*(c*c-1)));
-			l2 = 2/mean/(1-Math.sqrt(1+2*(c*c-1)));
-		} else if (c == 1.0){
-			p = 1.0;
-			l1 = 1/mean;
-			l2 = 1/mean;			
+		if (c * c < 0.5) {
+			return;
+		}
+
+		double l0, l1, p0;
+		if (c < 1) {
+			l0 = (2 / mean) / (1 + Math.sqrt(1 + 2 * (c * c - 1)));
+			l1 = (2 / mean) / (1 - Math.sqrt(1 + 2 * (c * c - 1)));
+			p0 = 0;
+		} else if (c == 1){
+			l0 = 1 / mean;
+			l1 = 1 / mean;			
+			p0 = 1;
 		} else {
-		    l1 = 2/mean;
-		    l2 = l1/(2*c*c);
-		    p = 1 - l2/l1;
+			l0 = 2 / mean;
+			l1 = 1 / (mean * c * c);
+			p0 = 1 - 1 / (2 * c * c);
 		}
-	
-		l1 = (double) Math.round(l1 * 100000d) / 100000d;
-		l2 = (double) Math.round(l2 * 100000d) / 100000d;
-		p = (double) Math.round(p * 100000d) / 100000d;
-		
-		if (p >= 0.0 && p <= 1.0 && l1 > 0 && l2 > 0.0 && mean > 0.0 && c >= 0.5) {
-			getParameter(0).setValue(new Double(l1));
-			getParameter(1).setValue(new Double(l2));
-			getParameter(2).setValue(new Double(p));
-			mean = (double) Math.round(mean * 100000d) / 100000d;
-			c = (double) Math.round(c * 100000d) / 100000d;
-			this.mean = mean;
-			this.c = c;
-		}
+
+		getParameter(0).setValue(new Double(l0));
+		getParameter(1).setValue(new Double(l1));
+		getParameter(2).setValue(new Double(p0));
+		this.mean = mean;
+		this.c = c;
 	}
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {
-		double phi0, lambda0, lambda1, var;
-		lambda0 = ((Double) getParameter(0).getValue()).doubleValue();
-		lambda1 = ((Double) getParameter(1).getValue()).doubleValue();
-		phi0 = ((Double) getParameter(2).getValue()).doubleValue();
-		mean = 1/lambda0 + (1-phi0)/lambda1;
-		var = ((2*lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (2*lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0))/(lambda0*lambda0*((lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0))) - (1/lambda0 - (phi0 - 1)/lambda1)*(1/lambda0 - (phi0 - 1)/lambda1) - (((phi0 - 1)/(lambda1*lambda1) + (phi0 - 1)/(lambda0*lambda1))*((2*lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (2*lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0)))/((lambda1*(lambda0 - lambda0*phi0))/(lambda0 + lambda1 - lambda0*phi0) + (lambda0*lambda1*phi0)/(lambda0 + lambda1 - lambda0*phi0));
-		c = Math.sqrt(var) / mean;
-		mean = (double) Math.round(mean * 100000d) / 100000d;
-		c = (double) Math.round(c * 100000d) / 100000d;
+		double l0, l1, p0;
+		l0 = ((Double) getParameter(0).getValue()).doubleValue();
+		l1 = ((Double) getParameter(1).getValue()).doubleValue();
+		p0 = ((Double) getParameter(2).getValue()).doubleValue();
+		mean = 1 / l0 + (1 - p0) / l1;
+		c = Math.sqrt(1 / (l0 * l0) + (1 - p0 * p0) / (l1 * l1)) / mean;
 	}
 
 }

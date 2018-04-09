@@ -19,7 +19,6 @@
 package jmt.engine.random;
 
 import jmt.common.AutoCheck;
-import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
  * 
@@ -29,7 +28,6 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Federico Granata (modified by Fabrizio Frontera - ffrontera@yahoo.it)
- * @author Bertoli Marco, 10-oct-2005
  * 
  */
 public interface Parameter extends AutoCheck {
@@ -42,14 +40,5 @@ public interface Parameter extends AutoCheck {
 	 *
 	 */
 	public boolean check();
-
-	/**
-	 * Sets mean for a given distribution parameter. This method is required to adjust distributions
-	 * mean values into Load Dependent Service Time Strategy
-	 * <br>Author: Bertoli Marco
-	 * @param meanValue new mean value for this distribution
-	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution
-	 */
-	public void setMean(double meanValue) throws IncorrectDistributionParameterException;
 
 } // end Parameter

@@ -36,9 +36,9 @@ public class CSVLogger {
 	 * @param columns the columns for the log file
 	 * @param append true to append to an existing file. False to create a new file
 	 * @param colSep the column separator
-	 * @param digitSep the decimal digits separator
+	 * @param digitSep the decimal digit separator
 	 */
-	public CSVLogger(File file, String[] columns, boolean append, String colSep, char digitSep) {
+	public CSVLogger(File file, String[] columns, boolean append, String colSep, String digitSep) {
 		this.file = file;
 		this.initialized = false;
 		this.append = append;
@@ -46,7 +46,7 @@ public class CSVLogger {
 		this.colSep = colSep;
 		
 		DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.US);
-		dfs.setDecimalSeparator(digitSep);
+		dfs.setDecimalSeparator(digitSep.charAt(0));
 		numberFormat = new DecimalFormat("#.#", dfs);
 		numberFormat.setMaximumFractionDigits(340);
 		numberFormat.setMaximumIntegerDigits(340);

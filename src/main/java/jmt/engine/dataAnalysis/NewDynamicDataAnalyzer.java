@@ -43,6 +43,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	private double alpha;
 	private double precision;
 	private int maxData;
+	private int minData;
 
 	// end tells if computation is ended
 	private boolean end;
@@ -179,7 +180,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 */
 	public NewDynamicDataAnalyzer(double alpha, double precision, int maxData) {
 		if (alpha <= 0 || alpha >= 1 || precision <= 0 || precision >= 1 || maxData < 5000) {
-			throw new IllegalArgumentException("Wrong  Dynamic analyzer parameter  " + alpha + "  " + precision + "  " + maxData);
+			throw new IllegalArgumentException("Wrong Dynamic analyzer parameter  " + alpha + "  " + precision + "  " + maxData);
 		}
 		this.alpha = alpha;
 		this.precision = precision;
@@ -365,7 +366,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 * @return true if the data analysis can end
 	 */
 	private boolean canEnd() {
-		return !disableStatisticStop;
+		return !disableStatisticStop && nSamples >= minData;
 	}
 
 	/**
@@ -937,6 +938,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 */
 	public void setParameters(SimParameters parameters) {
 		this.maxData = parameters.getMaxSamples();
+		this.minData = parameters.getMinSamples();
 		this.numBatch = parameters.getNumBatch();
 		this.batchLen = parameters.getBatchLen();
 		this.nullTestAlfa = parameters.getNullTestAlfa();

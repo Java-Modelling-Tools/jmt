@@ -22,7 +22,7 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
  * 
- * This is the Deterministic distribution, which returns always the same value,
+ * This is the Deterministic distribution, which returns always the same value
  * contained in the parameter.
  * 
  * <br><br>Copyright (c) 2003
@@ -37,12 +37,11 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
-	 * @param x a double indicating where to evaluate the pdf.
-	 * @param p parameter of the constant distribution.
+	 * @param x double indicating where to evaluate the pdf.
+	 * @param p parameter of the deterministic distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double constValue = ((DeterministicDistrPar) p).getParameterValue();
@@ -52,7 +51,7 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 				return 1.0;
 			}
 		} else {
-			throw new IncorrectDistributionParameterException("parameter t must be >0");
+			throw new IncorrectDistributionParameterException("parameter t must be > 0");
 		}
 	}
 
@@ -60,12 +59,11 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
-	 * @param x a double indicating where to evaluate the cdf.
-	 * @param p parameter of the constant distribution.
+	 * @param x double indicating where to evaluate the cdf.
+	 * @param p parameter of the deterministic distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double constValue = ((DeterministicDistrPar) p).getParameterValue();
@@ -75,7 +73,7 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 				return 1.0;
 			}
 		} else {
-			throw new IncorrectDistributionParameterException("parameter t must be >0");
+			throw new IncorrectDistributionParameterException("parameter t must be > 0");
 		}
 	}
 
@@ -83,7 +81,7 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
-	 * @param p parameter of the constant distribution.
+	 * @param p parameter of the deterministic distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic mean of the distribution.
 	 */
@@ -92,24 +90,23 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 		if (p.check()) {
 			return ((DeterministicDistrPar) p).getParameterValue();
 		} else {
-			throw new IncorrectDistributionParameterException("parameter t must be >0");
+			throw new IncorrectDistributionParameterException("parameter t must be > 0");
 		}
 	}
 
 	/**
-	 * This method is used to obtain from the distribution its own theoretical
-	 * variance.
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
 	 *
-	 * @param p parameter of the constant distribution.
+	 * @param p parameter of the deterministic distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic variance of the distribution.
 	 */
-
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			return 0;
 		} else {
-			throw new IncorrectDistributionParameterException("parameter t must be >0");
+			throw new IncorrectDistributionParameterException("parameter t must be > 0");
 		}
 	}
 
@@ -117,18 +114,17 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *
-	 * @param p parameter of the constant distribution.
+	 * @param p parameter of the deterministic distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double t = ((DeterministicDistrPar) p).getParameterValue();
 			return t;
 		} else {
-			throw new IncorrectDistributionParameterException("parameter t must be >0");
+			throw new IncorrectDistributionParameterException("parameter t must be > 0");
 		}
 	}
 
-} // end ConstantDistr
+} // end DeterministicDistr

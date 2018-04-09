@@ -36,6 +36,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
+import jmt.framework.gui.image.ImageLoader;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.parametric.PAProgressWindow;
@@ -101,12 +102,24 @@ public class ProgressWindow extends JDialog {
 		Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setBounds((scrDim.width - width) / 2, (scrDim.height - height) / 2, width, height);
 
-		// Creates bottom toolbar
+		// Creates bottom panel
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		
 		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable(false);
 		toolbar.setRollover(true);
 		final JButton stop = new JButton();
 		toolbar.add(stop);
+		bottomPanel.add(toolbar, BorderLayout.WEST);
+
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension iconSize = null;
+		if (screenSize.width <= CommonConstants.MAX_SMALL_ICON_SCREEN_WIDTH
+				&& screenSize.height <= CommonConstants.MAX_SMALL_ICON_SCREEN_HEIGHT) {
+			iconSize = CommonConstants.SMALL_ICON_SIZE_TOOL_BAR;
+		} else {
+			iconSize = CommonConstants.LARGE_ICON_SIZE_TOOL_BAR;
+		}
 
 		stop.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -114,25 +127,24 @@ public class ProgressWindow extends JDialog {
 			}
 		});
 		stop.setText("");
-		stop.setIcon(JMTImageLoader.loadImage("Stop"));
+		stop.setIcon(JMTImageLoader.loadImage("Stop", iconSize));
 		stop.setFocusPainted(false);
 		stop.setContentAreaFilled(false);
 		stop.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		stop.setRolloverIcon(JMTImageLoader.loadImage("StopRO"));
-		stop.setPressedIcon(JMTImageLoader.loadImage("StopP"));
+		stop.setRolloverIcon(JMTImageLoader.loadImage("Stop", ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		stop.setPressedIcon(JMTImageLoader.loadImage("Stop", ImageLoader.MODIFIER_PRESSED, iconSize));
 		stop.setVisible(true);
 		if (iterations == 1) {
 			stop.setEnabled(false);
 		}
 
-		// Adds a progress bar
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
 		progressBar.setForeground(Color.BLUE);
-		toolbar.add(progressBar);
+		bottomPanel.add(progressBar, BorderLayout.CENTER);
 
-		// Adds toolbar
-		this.getContentPane().add(toolbar, BorderLayout.SOUTH);
+		// Adds bottom panel
+		this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);
 
 		//Creates and adds the animation panel
 		animation = new SampleQNAnimation();

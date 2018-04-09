@@ -253,7 +253,7 @@ public abstract class SolverMulti {
 
 	/** Returns the queue length of the given class for the requested station
 	 *  @param  cent    the number of the service center
-	 *  @param  cls    the custumer class
+	 *  @param  cls    the customer class
 	 *  @return the queue length
 	 */
 	public double getQueueLen(int cent, int cls) {
@@ -262,7 +262,7 @@ public abstract class SolverMulti {
 
 	/**
 	 *  Returns the queue length of each class for each station
-	 *  @return the queue length [center][class] matrix for the system
+	 *  @return the queueLen[center][class] matrix for the system
 	 */
 	public double[][] getQueueLen() {
 		return queueLen;
@@ -279,7 +279,7 @@ public abstract class SolverMulti {
 
 	/**
 	 * Returns the residence time of each class for each station
-	 * @return the residence times[center][class] matrix for the system
+	 * @return the residenceTime[center][class] matrix for the system
 	 */
 	public double[][] getResTime() {
 		return residenceTime;

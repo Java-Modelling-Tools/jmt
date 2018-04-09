@@ -17,6 +17,8 @@
  */
 package jmt.framework.gui.components;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import javax.swing.JToolBar;
 import jmt.framework.gui.image.ImageLoader;
 import jmt.framework.gui.listeners.AbstractJMTAction;
 import jmt.framework.gui.listeners.SelectedActionButtonChangeListener;
+import jmt.gui.common.CommonConstants;
 
 /**
  * <p><b>Name:</b> JMTToolbar</p> 
@@ -96,14 +99,20 @@ public class JMTToolBar extends JToolBar {
 			iconName = (String) action.getValue(AbstractJMTAction.IMAGE_NAME);
 		}
 		if (iconName == null) {
-			// At this point uses name as text
-			button.setText((String) action.getValue(Action.NAME));
-		} else {
-			// Sets images
-			button.setIcon(imageLoader.loadIcon(iconName));
-			button.setRolloverIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_ROLLOVER));
-			button.setPressedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_PRESSED));
+			iconName = "Empty";
 		}
+		// Sets images
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension iconSize = null;
+		if (screenSize.width <= CommonConstants.MAX_SMALL_ICON_SCREEN_WIDTH
+				&& screenSize.height <= CommonConstants.MAX_SMALL_ICON_SCREEN_HEIGHT) {
+			iconSize = CommonConstants.SMALL_ICON_SIZE_TOOL_BAR;
+		} else {
+			iconSize = CommonConstants.LARGE_ICON_SIZE_TOOL_BAR;
+		}
+		button.setIcon(imageLoader.loadIcon(iconName, iconSize));
+		button.setRolloverIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		button.setPressedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_PRESSED, iconSize));
 		button.setFocusPainted(false);
 		button.setContentAreaFilled(false);
 		button.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
@@ -145,15 +154,21 @@ public class JMTToolBar extends JToolBar {
 			iconName = (String) action.getValue(AbstractJMTAction.IMAGE_NAME);
 		}
 		if (iconName == null) {
-			// At this point uses name as text
-			button.setText((String) action.getValue(Action.NAME));
-		} else {
-			// Sets images
-			button.setIcon(imageLoader.loadIcon(iconName));
-			button.setRolloverIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_ROLLOVER));
-			button.setPressedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_PRESSED));
-			button.setSelectedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_SELECTED));
+			iconName = "Empty";
 		}
+		// Sets images
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension iconSize = null;
+		if (screenSize.width <= CommonConstants.MAX_SMALL_ICON_SCREEN_WIDTH
+				&& screenSize.height <= CommonConstants.MAX_SMALL_ICON_SCREEN_HEIGHT) {
+			iconSize = CommonConstants.SMALL_ICON_SIZE_TOOL_BAR;
+		} else {
+			iconSize = CommonConstants.LARGE_ICON_SIZE_TOOL_BAR;
+		}
+		button.setIcon(imageLoader.loadIcon(iconName, iconSize));
+		button.setRolloverIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		button.setPressedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_PRESSED, iconSize));
+		button.setSelectedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_SELECTED, iconSize));
 		button.setFocusPainted(false);
 		button.setContentAreaFilled(false);
 		button.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));

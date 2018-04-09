@@ -40,7 +40,6 @@ import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 
-
 public class ClassSwitchSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
@@ -87,7 +86,6 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 			csTable = new ClassSwitchTable();
 			this.errorRows = new boolean[classData.getClassKeys().size()];
 			this.warningRows = new boolean[classData.getClassKeys().size()];
-			csTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		} else {
 			csTable = new JTable();
 		}
@@ -202,14 +200,11 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 
 		public ClassSwitchTable() {
 			super(new ClassSwitchTableModel());
-
-			setColumnSelectionAllowed(false);
 			setRowSelectionAllowed(true);
-			tableHeader.setToolTipText(null);
-			rowHeader.setToolTipText(null);
-			rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);
+			setColumnSelectionAllowed(true);
+			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			setRowHeight(CommonConstants.ROW_HEIGHT);
-			this.setDefaultRenderer(Object.class, new ClassSwitchTableRenderer());
+			setDefaultRenderer(Object.class, new ClassSwitchTableRenderer());
 			for (int i = 0; i < getColumnCount(); i++) {
 				getColumnModel().getColumn(i).setPreferredWidth(DEFAULT_COLUMN_WIDTH);
 			}
@@ -223,29 +218,17 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
-			if (value == null)
-				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-			if (value instanceof Number) {
-				super.setHorizontalAlignment(SwingConstants.RIGHT);
-			} else if (value instanceof Boolean) {
+			if (table.isRowSelected(row)) {
 				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 			} else {
-				super.setHorizontalAlignment(SwingConstants.CENTER);
-			}
-			if (isSelected) {
-				if (!hasFocus) {
-					isSelected = false;
+				JLabel label = new JLabel((String) value, SwingConstants.CENTER);
+				if (errorRows[row]) {
+					label.setForeground(Color.RED);
+				} else if (warningRows[row]) {
+					label.setForeground(Color.BLUE);
 				}
-				Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
-				return c;
+				return label;
 			}
-			JLabel res = new JLabel((String)value,  SwingConstants.CENTER);
-			if (errorRows[row]) {
-				res.setForeground(Color.RED);
-			} else if (warningRows[row]) {
-				res.setForeground(Color.BLUE);
-			}
-			return res;
 		}
 
 	}
@@ -270,13 +253,13 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 		}
 
 		@Override
-		public String getColumnName(int columnIndex) {
-			return classData.getClassName(classData.getClassKeys().get(columnIndex));
+		protected Object getRowName(int rowIndex) {
+			return classData.getClassName(classData.getClassKeys().get(rowIndex));
 		}
 
 		@Override
-		protected Object getRowName(int rowIndex) {
-			return classData.getClassName(classData.getClassKeys().get(rowIndex));
+		public String getColumnName(int columnIndex) {
+			return classData.getClassName(classData.getClassKeys().get(columnIndex));
 		}
 
 		@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -313,7 +296,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 			if (!isCellEditable(rowIndex, columnIndex))
 				return null;
 			Vector<Object> classes = classData.getClassKeys();
-			if (csTable.isCellSelected(rowIndex, columnIndex)) {
+			if (csTable.isRowSelected(rowIndex)) {
 				return stationData.getClassSwitchMatrix(stationKey,
 						classes.get(rowIndex), classes.get(columnIndex));
 			} else {

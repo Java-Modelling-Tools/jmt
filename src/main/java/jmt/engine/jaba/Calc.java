@@ -64,7 +64,7 @@ public class Calc {
 		//Elimino i punti ridondanti (ALTRIMENTI GRAHAMSCAN CRASHA!!!)
 		Vector<newPoint> verticesnew = new Vector<newPoint>();
 		for (int i = 0; i < vertices2D.size(); i++) {
-			if (util.VPresent(vertices2D.get(i), verticesnew) == false) {
+			if (!util.VPresent(vertices2D.get(i), verticesnew)) {
 				verticesnew.addElement(vertices2D.get(i));
 			}
 		}
@@ -188,7 +188,7 @@ public class Calc {
 		//Elimino i punti ridondanti (ALTRIMENTI GRAHAMSCAN CRASHA!!!)
 		Vector<newPoint> verticesnew = new Vector<newPoint>();
 		for (int i = 0; i < vertices2D.size(); i++) {
-			if (util.VPresent(vertices2D.get(i), verticesnew) == false) {
+			if (!util.VPresent(vertices2D.get(i), verticesnew)) {
 				verticesnew.addElement(vertices2D.get(i));
 			}
 		}

@@ -159,7 +159,7 @@ public class BlockingQueue extends InputSection {
 			if (blockingRegion.isBlocked(jobClass)) {
 				//the region is already blocked
 				//the job must be dropped?
-				if (classDrop[jobClass.getId()] == true) {
+				if (classDrop[jobClass.getId()]) {
 					//drop job
 					drop(job);
 				}

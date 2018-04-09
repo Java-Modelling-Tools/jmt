@@ -396,6 +396,9 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		type = new JComboBox(new Object[] {new TypeLabel(NO_ANALYSIS, NO_ANALYSIS)});
 		type.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				updateType();
 			}
 		});
@@ -407,6 +410,9 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		stationName = new JComboBox();
 		stationName.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				updateLabels(false);
 			}
 		});
@@ -418,6 +424,9 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		className = new JComboBox(new String[] { ALL_CLASSES });
 		className.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				updateLabels(false);
 			}
 		});

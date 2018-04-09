@@ -26,12 +26,11 @@ import java.util.Map;
  * Date: 13-lug-2005
  * Time: 15.58.37
  * To change this template use Options | File Templates.
- * Modified by Bertoli Marco
  */
 public class ShortestResponseTimeRouting extends RoutingStrategy {
 
 	public ShortestResponseTimeRouting() {
-		description = "Jobs are routed to the station with the smallest average response time, for this customer class.";
+		description = "Jobs are routed to the station with the smallest response time, for this customer class.";
 	}
 
 	@Override

@@ -72,8 +72,8 @@ public interface JabaConstants {
 			+ "You can add stations one by one or define total number at once.</font></body></html>";
 	public static final String DESCRIPTION_SERVICETIMES = "<html><body align=\"left\"><font size=\"4\"><b>Service Times</b>"
 			+ "</font><font size=\"3\"><br>Input service times of each station for each class.<br>"
-			+ "If station type is set to \"Load Dependent\", you can set values of service times"
-			+ " for each number of customers by double-clicking on any button in station's row."
+			+ "If station type is set to \"Load Dependent\", you can set values of service times "
+			+ "for each number of customers by double-clicking on any button in station's row. "
 			+ "If you whish to input service demands instead of service times and visits, press "
 			+ "\"Service Demands button.\"</font></body></html>";
 	public static final String DESCRIPTION_VISITS = "<html><body align=\"left\"><font size=\"4\"><b>Visits</b>"
@@ -81,30 +81,30 @@ public interface JabaConstants {
 			+ "station.</font></body></html>";
 	public static final String DESCRIPTION_SERVICEDEMANDS = "<html><body align=\"left\"><font size=\"4\"><b>Service Demands</b>"
 			+ "</font><font size=\"3\"><br>Input service demands of each station for each class.<br>"
-			+ "If station type is set to \"Load Dependent\", you can set values of service demands"
-			+ " for each number of customers by double-clicking on any button in station's row."
+			+ "If station type is set to \"Load Dependent\", you can set values of service demands "
+			+ "for each number of customers by double-clicking on any button in station's row. "
 			+ "If you whish to input service times and visits instead of service demands, press "
 			+ "\"Service Times and Visits button.\"</font></body></html>";
 	public static final String DESCRIPTION_COMMENT = "<html><body align=\"left\"><font size=\"4\"><b>Comment</b>"
 			+ "</font><font size=\"3\"><br>Input an optional short comment.<br></body></html>";
 	public static final String DESCRIPTION_QUEUELENGTHS = "<html><body align=\"left\"><font size=\"4\"><b>QueueLength</b>"
-			+ "</font><font size=\"3\"><br>Average number of customers in queue at each station for each class.<br></body></html>";
+			+ "</font><font size=\"3\"><br>Average number of customers for each class and each station.</font></body></html>";
 	public static final String DESCRIPTION_THROUGHPUTS = "<html><body align=\"left\"><font size=\"4\"><b>Throughput</b>"
-			+ "</font><font size=\"3\"><br>Throughput for each class and each station.<br></body></html>";
+			+ "</font><font size=\"3\"><br>Throughput for each class and each station.</font></body></html>";
 	public static final String DESCRIPTION_RESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>Residence Times</b>"
-			+ "</font><font size=\"3\"><br>Residence Time for each class and each station. The global aggregate is the response time of entire system.</body></html>";
+			+ "</font><font size=\"3\"><br>Residence Time for each class and each station. The global aggregate is the response time of entire system.</font></body></html>";
 	public static final String DESCRIPTION_UTILIZATIONS = "<html><body align=\"left\"><font size=\"4\"><b>Utilization</b>"
-			+ "</font><font size=\"3\"><br>Average Utilization for each class and each station.<br></body></html>";
+			+ "</font><font size=\"3\"><br>Average Utilization for each class and each station.</font></body></html>";
 	public static final String DESCRIPTION_EMPTY = "<html><body align=\"left\"><font size=\"4\"><b>Results</b>"
-			+ "</font><font size=\"3\"><br>Please solve the model to get results..<br></body></html>";
+			+ "</font><font size=\"3\"><br>Please solve the model to get results.</font></body></html>";
 	public static final String DESCRIPITION_GRAPH = "<html><body align=\"left\">Right-click on the graph to export or zoom it.</body></html>";
-	public static final String SELECT_WHICH_INDEX = "Select the index you want to plot: ";
-	public static final String DESCRIPITION_GRAPH_PERFORMANCE_INDEX = "<html><body align=\"left\">Right-click on the graph to export or zoom it.<br />"
+	public static final String SELECT_WHICH_INDEX = "<html><body align=\"left\">Select the index you want to plot: </body></html>";
+	public static final String DESCRIPITION_GRAPH_PERFORMANCE_INDEX = "<html><body align=\"left\">Right-click on the graph to export or zoom it.<br>"
 			+ "																					  Click on a station label to hide/show.</body></html>";
-	public static final String OPTION_SHOW_ONLY_BOTTLENECK = "Show only bottleneck stations";
-	public static final String DESCRIPITION_CONVEX_2D_GRAPH = "<html><body align=\"left\">Right-click on the graph to export or zoom it.<br />"
+	public static final String OPTION_SHOW_ONLY_BOTTLENECK = "<html><body align=\"left\">Show only bottleneck stations</body></html>";
+	public static final String DESCRIPITION_CONVEX_2D_GRAPH = "<html><body align=\"left\">Right-click on the graph to export or zoom it.<br>"
 			+ "																					  Select an area with the left(right) mouse button to hide(show) the label of the stations inside.</body></html>";
-	public static final String CONVEX_HULL_VERTEX_EXPLANATION = "<html><body align=\"left\">The stations on the vertices are<br />"
+	public static final String CONVEX_HULL_VERTEX_EXPLANATION = "<html><body align=\"left\">The stations on the vertices are<br>"
 			+ "																					  the potential system bottlenecks.</body></html>";
 			
 }

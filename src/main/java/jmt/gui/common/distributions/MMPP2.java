@@ -30,13 +30,15 @@ import jmt.gui.common.JMTImageLoader;
  * @date   October 24, 2008
  */
 public class MMPP2 extends Distribution {
+
 	/**
-	 * Construct a new MMPP2 distribution
+	 * Constructs a new MMPP2 distribution
 	 */
 	public MMPP2() {
 		super("Burst (MMPP2)", "jmt.engine.random.MMPP2Distr", "jmt.engine.random.MMPP2Par", "MMPP2 distribution");
 		hasMean = false;
 		hasC = false;
+		isNestable = false;
 	}
 
 	/**
@@ -46,16 +48,15 @@ public class MMPP2 extends Distribution {
 	@Override
 	protected Parameter[] setParameters() {
 		// Creates parameter array
-		Parameter[] parameters = new Parameter[4]; //MMPP2 is specified by four rates
+		Parameter[] parameters = new Parameter[4];
 
-		/* arrival rate of jobs if MMPP is in state 0 */
-		parameters[0] = new Parameter("lambda0", "\u03BB0", //unicode character for lambda0
-				Double.class, new Double(12.0));
-		// Checks value of k must be greater then 0
+		// Sets parameter lambda0
+		parameters[0] = new Parameter("lambda0", "\u03BB0", Double.class, new Double(12.0));
+		// Checks value of lambda0 must be greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -63,14 +64,13 @@ public class MMPP2 extends Distribution {
 			}
 		});
 
-		/* arrival rate of jobs if MMPP is in state 1 */
-		parameters[1] = new Parameter("lambda1", "\u03BB1", //unicode character for lambda1
-				Double.class, new Double(0.0872));
-		// Checks value of k must be greater then 0
+		// Sets parameter lambda1
+		parameters[1] = new Parameter("lambda1", "\u03BB1", Double.class, new Double(0.0872));
+		// Checks value of lambda1 must be greater than 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -78,10 +78,9 @@ public class MMPP2 extends Distribution {
 			}
 		});
 
-		/* rate of jump from state 0 to state 1 */
-		parameters[2] = new Parameter("sigma0", "\u03C30", //unicode character for sigma0 
-				Double.class, new Double(0.0098));
-		// Checks value of alpha must greater or equal then 2
+		// Sets parameter sigma0
+		parameters[2] = new Parameter("sigma0", "\u03C30", Double.class, new Double(0.0098));
+		// Checks value of sigma0 must greater than 0
 		parameters[2].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
@@ -93,10 +92,9 @@ public class MMPP2 extends Distribution {
 			}
 		});
 
-		/* rate of jump from state 1 to state 0 */
-		parameters[3] = new Parameter("sigma1", "\u03C31", //unicode character for sigma1
-				Double.class, new Double(0.0008));
-		// Checks value of k must be greater then 0
+		// Sets parameter sigma1
+		parameters[3] = new Parameter("sigma1", "\u03C31", Double.class, new Double(0.0008));
+		// Checks value of sigma1 must be greater than 0
 		parameters[3].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
@@ -112,7 +110,7 @@ public class MMPP2 extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -121,8 +119,8 @@ public class MMPP2 extends Distribution {
 	}
 
 	/**
-	 * Return distribution short description
-	 * @return distribution short description
+	 * Return this distribution's short description
+	 * @return distribution's short description
 	 */
 	@Override
 	public String toString() {

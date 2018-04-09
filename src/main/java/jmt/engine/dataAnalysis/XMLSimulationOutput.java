@@ -139,7 +139,6 @@ public class XMLSimulationOutput extends SimulationOutput {
 			root.setAttribute("logDecimalSeparator", simulation.getSimParameters().getLogDecimalSeparator());
 			root.setAttribute("logDelimiter", simulation.getSimParameters().getLogDelimiter());
 			root.setAttribute("logPath", simulation.getSimParameters().getLogPath());
-			root.setAttribute("lastRunTime", simulation.getSimParameters().getTimestampValue());
 		} catch (Exception e) {
 			logger.error("Error while writing simulator output XML", e);
 		}

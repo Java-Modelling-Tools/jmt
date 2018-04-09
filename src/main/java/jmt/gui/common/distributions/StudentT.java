@@ -31,11 +31,14 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 15.14.13
  */
 public class StudentT extends Distribution {
+
 	/**
-	 * Construct a new Student's t-distribution
+	 * Constructs a new Student's t-distribution
 	 */
 	public StudentT() {
 		super("StudentT", "jmt.engine.random.StudentT", "jmt.engine.random.StudentTPar", "Student's t-distribution");
+		hasMean = false;
+		hasC = false;
 		isNestable = true;
 	}
 
@@ -47,13 +50,14 @@ public class StudentT extends Distribution {
 	protected Parameter[] setParameters() {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[1];
-		// Sets parameter nu (freedom grades)
+
+		// Sets parameter freedom
 		parameters[0] = new Parameter("freedom", "\u03C5", Double.class, new Double(2));
-		// Checks value of freedom must be greater than 0 and integral
+		// Checks value of freedom must be an integer greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 1 && Math.floor(d.doubleValue()) == d.doubleValue()) {
+				if (d.doubleValue() >= 1.0 && Math.floor(d.doubleValue()) == d.doubleValue()) {
 					return true;
 				} else {
 					return false;
@@ -65,8 +69,7 @@ public class StudentT extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override

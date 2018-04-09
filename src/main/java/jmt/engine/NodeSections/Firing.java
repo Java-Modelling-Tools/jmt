@@ -171,7 +171,7 @@ public class Firing extends OutputSection {
 	private void showForkJobNumWarning() {
 		if (!isForkJobNumWarningShown) {
 			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
-				System.out.println("JMT - Warning: " + getOwnerNode().getName()
+				System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
 						+ " failed to maintain the equilibrium between input and output tasks.");
 			} else {
 				new Thread(new Runnable() {
@@ -183,7 +183,7 @@ public class Firing extends OutputSection {
 						}
 						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
 								+ " failed to maintain the equilibrium between input and output tasks.",
-								"JMT - Warning", JOptionPane.WARNING_MESSAGE);
+								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}
 				}).start();
 			}

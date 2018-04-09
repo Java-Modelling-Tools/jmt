@@ -119,7 +119,6 @@ public class ConnectionsPanel extends WizardPanel implements CommonConstants {
 
 			setRowSelectionAllowed(false);
 			setColumnSelectionAllowed(false);
-			setClipboardTransferEnabled(false);
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 		}
 

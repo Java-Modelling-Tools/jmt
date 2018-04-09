@@ -201,7 +201,7 @@ public class SimulationStateChecker {
 					}
 					if (thisServer != null) {
 						//get the utilization for this class
-						double utilization = thisServer.getDoubleSectionProperty(NodeSection.PROPERTY_ID_UTILIZATION, thisClass);
+						double utilization = thisServer.getDoubleSectionProperty(NodeSection.PROPERTY_ID_AVERAGE_UTILIZATION, thisClass);
 						//put the utilization this class inside the treemap
 						singleServerContentUtilizations.put(thisClassKey, new Double(utilization));
 					}

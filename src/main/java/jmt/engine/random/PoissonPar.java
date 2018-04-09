@@ -35,12 +35,11 @@ public class PoissonPar extends AbstractParameter implements Parameter {
 	private double mean;
 
 	/**
-	 * It creates a new poisson parameter with the mean required by the user. It also
-	 * verify that the required mean is correct (mean must be greater than zero).
+	 * It creates a new poisson parameter with the mean provided by the user.
 	 *
-	 * @param mean double containing the mean of the distribution (also called lambda).
-	 *
-	 * @throws IncorrectDistributionParameterException if mean is not greater than zero.
+	 * @param mean double containing the mean of the poisson distribution.
+	 * @throws IncorrectDistributionParameterException if the mean is not
+	 * greater than zero.
 	 *
 	 */
 	public PoissonPar(double mean) throws IncorrectDistributionParameterException {
@@ -56,13 +55,12 @@ public class PoissonPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verifies that the parameter is correct. For the poisson distribution the
-	 * parameter is correct if the mean is greater than zero.
+	 * It verifies that the parameter is correct. For the poisson distribution,
+	 * the parameter is correct if the mean is greater than zero.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
-
 	@Override
 	public boolean check() {
 		if (mean <= 0) {
@@ -73,27 +71,24 @@ public class PoissonPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It return the value of the mean of the poisson distribution (also calleda
-	 * lambda in the definition).
+	 * It return the value of the mean of the poisson distribution.
 	 *
 	 * @return double with the value of the mean of the poisson distribution.
 	 *
 	 */
-
 	public double getMean() {
 		return mean;
 	}
 
 	/**
-	 * It allows the user to change the mean of the poisson distribution and it
-	 * verify that the new value is correct (the mean must be greater than zero).
+	 * It allows the user to change the value of the mean of the poisson
+	 * distribution and verifies if it is greater than zero.
 	 *
-	 * @param mean double indicating the new value of the parameter mean (or lambda).
-	 * @throws IncorrectDistributionParameterException if the provided value is not greater than zero.
+	 * @param mean double indicating the mean of the poisson distribution.
+	 * @throws IncorrectDistributionParameterException if the mean is not
+	 * greater than zero.
 	 *
 	 */
-
-	@Override
 	public void setMean(double mean) throws IncorrectDistributionParameterException {
 		if (mean <= 0) {
 			throw new IncorrectDistributionParameterException("mean must be gtz");

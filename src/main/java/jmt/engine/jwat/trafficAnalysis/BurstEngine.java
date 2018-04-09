@@ -36,7 +36,6 @@ public class BurstEngine {
 	private double ArrPlusCount[];
 	private double lambdaplus[];
 	private double ArrMinusCount[];
-	private double lambda_k[];
 
 	/**
 	 * Set burstiness factor a
@@ -77,7 +76,6 @@ public class BurstEngine {
 		ArrPlusCount = new double[n];
 		ArrMinusCount = new double[n];
 		lambdaplus = new double[n];
-		lambda_k = new double[n];
 		this.v = v;
 		this.T = (long) v.getValue(v.Size() - 1) - (long) v.getValue(0);
 		lambda = v.Size() / (T / 1000);
@@ -125,7 +123,6 @@ public class BurstEngine {
 				Arr[i]++;
 			}
 			lambda_k[i] = (k * Arr[i]) / (T / 1000);
-			//setLambda_k(lambda_k[i],k);
 			if (lambda_k[i] > lambda) {
 				ArrPlus++;
 				ArrPlusCount += Arr[i];

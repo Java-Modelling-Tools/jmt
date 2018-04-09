@@ -28,7 +28,8 @@ import jmt.engine.random.engine.RandomEngine;
 
 /**
  * This strategy sends jobs to the resource with the least utilization.
- * Reimplemented by Bertoli Marco 12-nov-2005 (original was wrong)
+ *
+ * Date: 12-nov-2005
  * @author Bertoli Marco
  */
 public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
@@ -40,10 +41,11 @@ public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
 	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)
 	private RandomEngine random = RandomEngine.makeDefault();
 
-	/** This strategy selects the resource with the least utilization
+	/**
+	 * This strategy selects the resource with the least utilization
 	 * among the output nodes.
-	 * @param nodes List of nodes.
-	 * @param jobClass class of current job to be routed
+	 * @param nodes List of the output nodes.
+	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
@@ -51,50 +53,37 @@ public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
 		if (nodes.size() == 0) {
 			return null;
 		}
-		// next nodes candidates... Holds an array of them as on equality of utilization they
-		// will be chosen randomly
-		NetNode[] next = new NetNode[nodes.size()];
-		next[0] = nodes.get(0);
-		int nextLength = 1;
-		double leastUtilization;
 
+		// output node candidates... Holds an array of them as on equality of utilization they
+		// will be chosen randomly
+		NetNode[] output = new NetNode[nodes.size()];
+		int length = 0;
+		double leastUtilization = infinity;
 		try {
-			// Sets least utilization to first node
-			// Checks if output is a sink... If class is open, sinks are preferred as have 0 utilization.
-			// if class il closed, avoid it
-			if (next[0].isSink()) {
-				if (jobClass.getType() == CLOSED_CLASS) {
-					leastUtilization = infinity;
-				} else {
-					leastUtilization = 0;
-				}
-			} else {
-				leastUtilization = next[0].getSection(serviceSection).getDoubleSectionProperty(property);
-			}
-			double tmp;
-			for (int i = 1; i < nodes.size(); i++) {
-				// Stores new node in last free space
-				next[nextLength] = nodes.get(i);
-				// Checks if output is a sink... If class is open, sinks are preferred as have 0 utilization.
-				// if class il closed, avoid it
-				if (next[nextLength].isSink()) {
+			for (int i = 0; i < nodes.size(); i++) {
+				NetNode node = nodes.get(i);
+				double tmp = 0.0;
+				// Checks if output is a sink... If class is open, sinks are preferred as have
+				// 0 utilization. If class is closed, avoid it
+				if (node.isSink()) {
 					if (jobClass.getType() == CLOSED_CLASS) {
 						tmp = infinity;
 					} else {
-						tmp = 0;
+						tmp = 0.0;
 					}
 				} else {
-					tmp = next[nextLength].getSection(serviceSection).getDoubleSectionProperty(property);
+					tmp = node.getSection(serviceSection).getDoubleSectionProperty(property);
 				}
 
 				if (Math.abs(tmp - leastUtilization) < epsilon) {
-					// This is minimum too, so increase nextLength
-					nextLength++;
+					// This is minimum too, put it in output and increment length
+					output[length] = node;
+					length++;
 				} else if (tmp < leastUtilization) {
-					// New minimum value found, put it in position 0 and reset nextLength
+					// New minimum value found, put it in output and reset length
 					leastUtilization = tmp;
-					next[0] = next[nextLength];
-					nextLength = 1;
+					output[0] = node;
+					length = 1;
 				}
 			}
 		} catch (NetException e) {
@@ -104,10 +93,10 @@ public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
 		}
 		if (Double.isInfinite(leastUtilization)) {
 			return null;
-		} else if (nextLength > 1) {
-			return next[(int) Math.floor(random.raw() * nextLength)];
+		} else if (length == 1) {
+			return output[0];
 		} else {
-			return next[0];
+			return output[(int) Math.floor(random.raw() * length)];
 		}
 	}
 

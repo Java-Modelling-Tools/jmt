@@ -18,7 +18,7 @@
 
 package jmt.engine.log;
 
-import java.io.File;
+import jmt.framework.data.MacroReplacer;
 
 public class LoggerParameters {
 
@@ -44,7 +44,7 @@ public class LoggerParameters {
 	 */
 	public LoggerParameters() {
 		name = new String(GLOBALLOGNAME);
-		path = new String("./");
+		path = MacroReplacer.replace(MacroReplacer.MACRO_WORKDIR);
 		boolExecTimestamp = new Boolean(false);
 		boolLoggername = new Boolean(true);
 		boolTimeStamp = new Boolean(true);
@@ -84,36 +84,6 @@ public class LoggerParameters {
 	}
 
 	/**
-	 * @returns Returns the path, preferably in a relative format.
-	 */
-	public final String getpath() {
-		String syspath = System.getProperty("user.dir");
-
-		try {
-
-			if (path == null) {
-				return "./";
-			} else if (path.length() == 0 || path.startsWith(".")) {
-				return "./";
-			} else if (path.equalsIgnoreCase(syspath) || path.equalsIgnoreCase(syspath + File.separator)) {
-				return "./";
-			} else if ((System.getProperty("os.name").startsWith("Windows")) && (path.startsWith(syspath.substring(0, 2)) == false)) {
-				return path; // if not on the same drive.. return the absolute path
-			} else if ((path.startsWith(syspath))) {
-				String newpath = "";
-				newpath = "./" + path.substring(syspath.length() + 1);
-				newpath = newpath.replaceAll("\\\\", "/");
-				return newpath;
-			}
-
-			return path;
-
-		} catch (Exception e) {
-			return "./";
-		}
-	}
-
-	/**
 	 * @returns String representation of all variables of LoggerParameters instance.
 	 */
 	@Override
@@ -121,13 +91,13 @@ public class LoggerParameters {
 		String s = "";
 		s += isEnabled() ? "1" : "0";
 		s += "|";
-		s += (boolExecTimestamp.booleanValue() == true) ? "1" : "0";
-		s += (boolLoggername.booleanValue() == true) ? "1" : "0";
-		s += (boolTimeStamp.booleanValue() == true) ? "1" : "0";
-		s += (boolJobID.booleanValue() == true) ? "1" : "0";
-		s += (boolJobClass.booleanValue() == true) ? "1" : "0";
-		s += (boolTimeSameClass.booleanValue() == true) ? "1" : "0";
-		s += (boolTimeAnyClass.booleanValue() == true) ? "1" : "0";
+		s += boolExecTimestamp.booleanValue() ? "1" : "0";
+		s += boolLoggername.booleanValue() ? "1" : "0";
+		s += boolTimeStamp.booleanValue() ? "1" : "0";
+		s += boolJobID.booleanValue() ? "1" : "0";
+		s += boolJobClass.booleanValue() ? "1" : "0";
+		s += boolTimeSameClass.booleanValue() ? "1" : "0";
+		s += boolTimeAnyClass.booleanValue() ? "1" : "0";
 		s += "|";
 		s += name;
 		s += "|";
@@ -141,14 +111,13 @@ public class LoggerParameters {
 	 */
 	public boolean isEnabled() {
 		try {
-			if (isEnabled == false) {
+			if (!isEnabled) {
 				return isEnabled;
 			}
 
-			if ((boolExecTimestamp.booleanValue() == false) && (boolLoggername.booleanValue() == false) && (boolTimeStamp.booleanValue() == false)
-					&& (boolJobID.booleanValue() == false) && (boolJobClass.booleanValue() == false) && (boolTimeSameClass.booleanValue() == false)
-					&& (boolTimeAnyClass.booleanValue() == false)) // then..
-			{
+			if (!boolExecTimestamp.booleanValue() && !boolLoggername.booleanValue() && !boolTimeStamp.booleanValue()
+					&& !boolJobID.booleanValue() && !boolJobClass.booleanValue() && !boolTimeSameClass.booleanValue()
+					&& !boolTimeAnyClass.booleanValue()) {
 				this.disable();
 				return isEnabled;
 			}

@@ -33,11 +33,12 @@ import jmt.gui.common.JMTImageLoader;
 public class Exponential extends Distribution {
 
 	/**
-	 * Construct a new Exponential Distribution
+	 * Constructs a new Exponential Distribution
 	 */
 	public Exponential() {
 		super("Exponential", "jmt.engine.random.Exponential", "jmt.engine.random.ExponentialPar", "Exponential distribution");
 		hasMean = true;
+		hasC = false;
 		isNestable = true;
 	}
 
@@ -49,13 +50,14 @@ public class Exponential extends Distribution {
 	protected Parameter[] setParameters() {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[1];
+
 		// Sets parameter lambda
 		parameters[0] = new Parameter("lambda", "\u03BB", Double.class, new Double(1.0));
-		// Checks value of lambda must be greater than 0 and not infinity
+		// Checks value of lambda must be greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 0 && !d.isInfinite()) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -67,8 +69,7 @@ public class Exponential extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -99,7 +100,7 @@ public class Exponential extends Distribution {
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {

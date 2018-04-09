@@ -118,7 +118,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		loggerParameters = stationData.getLoggingParameters(stationKey);
 		loggerUniversalLogPath = MacroReplacer.replace(sd.getLoggingGlbParameter("path"));
 		loggerParameters.path = loggerUniversalLogPath;
-		logFile = new File(new File(loggerUniversalLogPath), loggerParameters.name);
+		logFile = new File(loggerUniversalLogPath, loggerParameters.name);
 		initComponents();
 	}
 
@@ -182,7 +182,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		// layout of north: checkbox fields
 		final JCheckBox checkLoggername = new JCheckBox();
 		checkLoggername.setText("Logger Name  ");
-		help.addHelp(checkLoggername, "Name of the logger class.  (e.g. " + "Logger0" + ")");
+		help.addHelp(checkLoggername, "Name of the logger class.  (e.g. " + "Logger 1" + ")");
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy = 1;
@@ -201,7 +201,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		loggerPanelTop.add(checkJobID, gbc);
 		final JCheckBox checkJobClass = new JCheckBox();
 		checkJobClass.setText("Class ID  ");
-		help.addHelp(checkJobClass, "Identifiation number of job class.  (e.g. Class0)");
+		help.addHelp(checkJobClass, "Identifiation number of job class.  (e.g. Class1)");
 		gbc.gridx = 0;
 		gbc.gridy = 2;
 		loggerPanelTop.add(checkJobClass, gbc);
@@ -300,11 +300,11 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 					JFileChooser fc = new JFileChooser();
 				    fc.setFileSelectionMode(JFileChooser.FILES_ONLY );
 				    fc.setDialogTitle("Choose File Name of Log...");
-				    fc.setCurrentDirectory(new java.io.File(loggerUniversalLogPath));
+				    fc.setCurrentDirectory(new File(loggerUniversalLogPath));
 				    int ret = fc.showSaveDialog(LoggerSectionPanel.this);
 
 				    if (ret == JFileChooser.APPROVE_OPTION) {
-				        java.io.File thefile = fc.getSelectedFile();
+				        File thefile = fc.getSelectedFile();
 				        tmpFileName = thefile.getName();
 				        //stationData.setLoggingGlbParameter("path", loggerUniversalLogPath);
 				    }
@@ -375,13 +375,14 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 				int ret = fc.showSaveDialog(LoggerSectionPanel.this);
 
 				if (ret == JFileChooser.APPROVE_OPTION) {
-					java.io.File directory = fc.getSelectedFile();
-					loggerUniversalLogPath = directory.getAbsolutePath();
-					loggerParameters.path = loggerUniversalLogPath;
-					stationData.setLoggingGlbParameter("path", loggerUniversalLogPath);
+					File directory = fc.getSelectedFile();
+					if (directory.isDirectory()) {
+						loggerUniversalLogPath = directory.getAbsolutePath();
+						loggerParameters.path = loggerUniversalLogPath;
+						stationData.setLoggingGlbParameter("path", loggerUniversalLogPath);
+						updateFileLabelStatus();
+					}
 				}
-
-				updateFileLabelStatus();
 			}
 		});
 
@@ -440,13 +441,12 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 	private void loggerChooserLoadValues() {
 		preventSaveReplacement = true; // keeps the other combo boxes (delim/append) from changing
-		//if (loggerParameters.isGlobal() == true) {
+		//if (loggerParameters.isGlobal()) {
 		delimiterChooser.setSelectedIndex(getDelimiterIndex(stationData.getLoggingGlbParameter("delim")));
 		decimalSeparatorChooser.setSelectedIndex(getDecimalSeparatorIndex(stationData.getLoggingGlbParameter("decimalSeparator")));
 		autoAppendChooser.setSelectedIndex(Integer.parseInt(stationData.getLoggingGlbParameter("autoAppend")));
 		/*// this code is now redundant; since all delimiters and appenders are global-only
-		} else
-		{
+		} else {
 			delimiterChooser.setSelectedIndex(getDelimiterIndex(loggerParameters.delimiter.toString()));
 		    autoAppendChooser.setSelectedIndex(loggerParameters.intAutoAppend.intValue());
 		} */
@@ -464,7 +464,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 			searchString = "Space";
 		} else if (s.startsWith("\\t") || c == '\t') {
 			searchString = "Tab";
-		} else if (s.startsWith("\\") == false) {
+		} else if (!s.startsWith("\\")) {
 			searchString = "" + c;
 		} else {
 			return 0;
@@ -472,7 +472,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 		// Case 1: string in drop-down box.
 		for (int i = 0; i < loggerOutputDelimiterDropdown.length; i++) {
-			if (loggerOutputDelimiterDropdown[i].equals(searchString) == true) {
+			if (loggerOutputDelimiterDropdown[i].equals(searchString)) {
 				return i;
 			}
 		}
@@ -494,7 +494,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		Integer autoAppendPolicy;
 
 		// Ignores mistaken change from loggerChooser (when out of focus)
-		if (preventSaveReplacement == true) {
+		if (preventSaveReplacement) {
 			return;
 		}
 
@@ -533,12 +533,14 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		}
 
 		/* MF (Bertoli suggests): global append should be the only mode for 0.7.4 
-		if (isGlobal == false)
+		if (!isGlobal)
 		{
 
 			// If not logging to global.csv, set the delimiter and append policy per logger
 			loggerParameters.delimiter = delim;
 			loggerParameters.intAutoAppend = autoAppendPolicy;
+
+		}
 		 */
 
 		// Finally, set the globally effective 'delimiter' and 'append' mode for logs
@@ -548,22 +550,12 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 	}
 
 	private String updateFileLabelStatus() {
-		String tmpStatus = "";
-		String path = loggerUniversalLogPath;
-
-		// Make pathname pretty: remove the leading period, it confuses java.io.File.exists() method.
-		if ((path.equals(".") == true) || (path.equals("." + File.separator) == true)) {
-			path = "";
-		}
-		// Add a trailing slash
-		if ((path.length() > 0) && (path.endsWith(File.separator) == false) && (path.endsWith("/") == false)) {
-			path = path + File.separator;
-		}
+		String tmpStatus = null;
 
 		try {
-			logFile = new File(new File(path), loggerParameters.name);
+			logFile = new File(loggerUniversalLogPath, loggerParameters.name);
 
-			if (logFile.exists() == true) {
+			if (logFile.exists()) {
 				if (logFile.length() == 0) {
 					tmpStatus = "  (empty file)";
 				} else {

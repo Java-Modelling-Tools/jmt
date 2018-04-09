@@ -39,7 +39,7 @@ public class TakeScreenShot extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public TakeScreenShot(Mediator mediator) {
-		super("Export as image...", "sshot", mediator);
+		super("Export as image...", "ScreenShot", mediator);
 		putValue(SHORT_DESCRIPTION, "Exports a screenshot in vectorial or raster format");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_E));
 		setEnabled(false);

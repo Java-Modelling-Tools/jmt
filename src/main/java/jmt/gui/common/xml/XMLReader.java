@@ -66,7 +66,6 @@ import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
-import jmt.gui.common.serviceStrategies.DisabledStrategy;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -218,12 +217,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		if (logPath != null && logPath != "") {
 			File dir = new File(logPath);
 			if (dir.isDirectory()) {
-				model.setLoggingGlbParameter("path", logPath);
+				model.setLoggingGlbParameter("path", dir.getAbsolutePath());
 			} else {
 				model.setLoggingGlbParameter("path", MacroReplacer.replace(MacroReplacer.MACRO_WORKDIR));
 			}
 		} else {
-			model.setLoggingGlbParameter("path", "");
+			model.setLoggingGlbParameter("path", MacroReplacer.replace(MacroReplacer.MACRO_WORKDIR));
 		}
 		String logReplaceMode = root.getAttribute(XML_A_ROOT_LOGREPLACE);
 		if (logReplaceMode != null && logReplaceMode != "") {
@@ -241,7 +240,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		if (logDecimalSeparator != null && logDecimalSeparator != "") {
 			model.setLoggingGlbParameter("decimalSeparator", logDecimalSeparator);
 		} else {
-			model.setLoggingGlbParameter("decimalSeparator", ".");
+			model.setLoggingGlbParameter("decimalSeparator", Defaults.get("loggerDecimalSeparator"));
 		}
 
 		parseClasses(root, model);
@@ -922,7 +921,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				if (parameterName.equals(XML_LOG_FILENAME)) {
 					logParams.name = new String(findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				} else if (parameterName.equals(XML_LOG_FILEPATH)) {
-					//logParams.path = new String(findText(parameter.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 					// temporary fix
 					logParams.path = MacroReplacer.replace(model.getLoggingGlbParameter("path"));
 				} else if (parameterName.equals(XML_LOG_B_EXECTIMESTAMP)) {
@@ -1631,9 +1629,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		if (serviceClassPath.equals(ZeroStrategy.getEngineClassPath())) {
 			// Zero Service Time Strategy
 			return new ZeroStrategy();
-		} else if (serviceClassPath.equals(DisabledStrategy.getEngineClassPath())) {
-			// Disabled Service Time Strategy
-			return new DisabledStrategy();
 		} else if (serviceClassPath.equals(LDStrategy.getEngineClassPath())) {
 			// Load Dependent Service Strategy
 			Element LDParameterArray = (Element) serviceTimeStrategy.getElementsByTagName(XML_E_SUBPARAMETER).item(0);
@@ -1704,15 +1699,35 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			if (currpar.getAttribute(XML_A_SUBPARAMETER_CLASSPATH).equals(distributionContainer)) {
 				//parse the currentparameter to get DIRECT subparameters
 				Vector<Node> nestedDistr = parseParameterArray(currpar);
-				// If distribution is not set, returns null
-				Object param_value = null;
+				// If distribution is not set, continue
 				if (nestedDistr.size() == 0) {
-					param_value = null;
-				} else {
-					//parse the nested distribution
-					param_value = parseDistribution((Element) nestedDistr.get(0), (Element) nestedDistr.get(1));
-					dist.getParameter(param_name).setValue(param_value);
+					continue;
 				}
+				//parse the nested distribution
+				Object param_value = parseDistribution((Element) nestedDistr.get(0), (Element) nestedDistr.get(1));
+				dist.getParameter(param_name).setValue(param_value);
+			} else if (Boolean.parseBoolean(currpar.getAttribute(XML_A_SUBPARAMETER_ARRAY))) {
+				Object[][] param_value = null;
+				Vector<Node> vectors = parseParameterArray(currpar);
+				for (int j = 0; j < vectors.size(); j++) {
+					if (j == 0) {
+						param_value = new Object[vectors.size()][];
+					}
+					Element vector = (Element) vectors.get(j);
+					Vector<Node> entries = parseParameterArray(vector);
+					for (int k = 0; k < entries.size(); k++) {
+						if (k == 0) {
+							param_value[j] = new Object[entries.size()];
+						}
+						Element entry = (Element) entries.get(k);
+						String value = findText(entry.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0));
+						param_value[j][k] = dist.getParameter(param_name).parseValue(value);
+						if (param_value[j][k] == null) {
+							param_value[j][k] = dist.getParameter(param_name).parseValue("0");
+						}
+					}
+				}
+				dist.getParameter(param_name).setValue(param_value);
 			} else {
 				String param_value = findText(currpar.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0));
 				dist.getParameter(param_name).setValue(param_value);

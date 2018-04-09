@@ -233,7 +233,7 @@ public class JabaWizard extends Wizard {
 		{
 			putValue(Action.SHORT_DESCRIPTION,
 					"Random generation of service demands in the interval [0, 100]");
-			setIcon("dice", JMTImageLoader.getImageLoader());
+			setIcon("Dice", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
 					KeyEvent.VK_R, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_R));
@@ -279,12 +279,6 @@ public class JabaWizard extends Wizard {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "About JABA");
-			/*
-			 * putValue(Action.SMALL_ICON, ImageLoader.loadImage("helpIcon"));
-			 * putValue(Action.ACCELERATOR_KEY,
-			 * KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.ALT_MASK));
-			 * putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
-			 */
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -350,7 +344,7 @@ public class JabaWizard extends Wizard {
 						FILE_OPEN, FILE_SAVE, null, FILE_EXIT }),
 				new MenuAction("Action", new AbstractJMTAction[] {
 						ACTION_SOLVE, ACTION_RANDOMIZE_MODEL, null,
-						null, ACTION_NEXT, ACTION_PREV }),
+						ACTION_NEXT, ACTION_PREV }),
 				new MenuAction("Help", new AbstractJMTAction[] { HELP, null,
 						ABOUT }), };
 		jmb.populateMenu(menuItems);
@@ -555,6 +549,7 @@ public class JabaWizard extends Wizard {
 		removePanel(visitsPanel);
 		((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
 		addPanel(serviceDemandsPanel, 2);
+		tabbedPane.setSelectedIndex(2);
 	}
 
 	/**
@@ -568,6 +563,7 @@ public class JabaWizard extends Wizard {
 		((ForceUpdatablePanel) visitsPanel).retrieveData();
 		addPanel(visitsPanel, 2);
 		addPanel(serviceTimesPanel, 2);
+		tabbedPane.setSelectedIndex(2);
 	}
 
 	public void solve() {

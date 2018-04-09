@@ -221,23 +221,33 @@ public class SimLoader {
 			//sets the reference in sim object
 			sim.setSimParameters(simParam);
 
-			//gets the default value of maxsamples
+			//gets the default value of maxSamples
 			//(max number of samples for each measure)
 			int maxSamples = simParam.getMaxSamples();
+			//gets the default value of minSamples
+			//(min number of samples for each measure)
+			int minSamples = simParam.getMinSamples();
 			//gets the default value of maxSimulatedTime
 			double maxSimulatedTime = simParam.getMaxSimulatedTime();
+			//gets the default value of disableStatisticStop
+			boolean disableStatisticStop = simParam.isDisableStatisticStop();
 
 			// Gets the timestamp value
 			simParam.setTimestampValue(Long.toString(System.currentTimeMillis()));
 
 			//-------------- end SIM PARAMETERS -------------------//
 
-			// NEW Bertoli Marco -- Read MAX Samples if specified
+			// Read MAX Samples if specified
 			if (root.getAttribute("maxSamples") != "") {
 				maxSamples = Integer.parseInt(root.getAttribute("maxSamples"));
 				simParam.setMaxSamples(maxSamples);
 			}
-			// END
+
+			// Read MIN Samples if specified
+			if (root.getAttribute("minSamples") != "") {
+				minSamples = Integer.parseInt(root.getAttribute("minSamples"));
+				simParam.setMinSamples(minSamples);
+			}
 
 			// Read maxSimulatedTime if specified
 			if (root.getAttribute("maxSimulated") != "") {
@@ -245,11 +255,11 @@ public class SimLoader {
 				simParam.setMaxSimulatedTime(maxSimulatedTime);
 			}
 
-			// NEW Bertoli Marco -- Disables confidence interval as stopping criteria
+			// Disables confidence interval as stopping criteria
 			if (root.hasAttribute("disableStatisticStop")) {
-				simParam.setDisableStatisticStop(root.getAttribute("disableStatisticStop").equalsIgnoreCase("true"));
+				disableStatisticStop = Boolean.parseBoolean(root.getAttribute("disableStatisticStop"));
+				simParam.setDisableStatisticStop(disableStatisticStop);
 			}
-			//END
 
 			// MF08 0.7.4  Michael Fercu (Bertoli Marco) -- re-defines global logger attributes
 			// for the purpose of passing them to the Logger constructor
@@ -268,10 +278,6 @@ public class SimLoader {
 			if (root.hasAttribute("logReplaceMode")) {
 				String temp_lr = root.getAttribute("logReplaceMode");
 				simParam.setLogReplaceMode(temp_lr);
-			}
-			if (root.hasAttribute("lastRunTime")) {
-				String temp_ltv = root.getAttribute("lastRunTime");
-				simParam.setTimestampValue(temp_ltv);
 			}
 			//END MF08
 
@@ -602,7 +608,7 @@ public class SimLoader {
 			}
 			Class<?> c = Class.forName(classPath);
 			if (DEBUG) {
-				System.out.println("        parameter  class found = " + classPath);
+				System.out.println("        parameter class found = " + classPath);
 			}
 			//parameter is an array;
 			if (param.getAttribute("array").equals("true")) {
@@ -767,13 +773,13 @@ public class SimLoader {
 			}
 			Class<?> c = Class.forName(subp.getAttribute("classPath"));
 			if (DEBUG) {
-				System.out.println("            found subparameter class = " + c.getName());
+				System.out.println("            subparameter class found = " + c.getName());
 			}
 			//check if the subparameter is an array
 			if (subp.getAttribute("array").equals("true")) {
 				//array subparameter
 				if (DEBUG) {
-					System.out.println("            the subParameter is an array");
+					System.out.println("            subparameter is an array");
 				}
 				//check if there are child nodes in the array
 				if (!subp.hasChildNodes()) {

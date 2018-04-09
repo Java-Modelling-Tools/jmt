@@ -80,7 +80,6 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 	static Color[] colors = {Color.GRAY};
 	private double[][] visits;
 
-		
 	public ReferenceStationPanel(ExactWizard ew) {		
 		this.ew = ew;
 		help = ew.getHelp();
@@ -88,9 +87,9 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		initComponents();		
 	}	
 	public static void infoBox(String infoMessage, String location)
-    {
-        JOptionPane.showMessageDialog(null, infoMessage, "InfoBox: " + location, JOptionPane.INFORMATION_MESSAGE);
-    }
+	{
+		JOptionPane.showMessageDialog(null, infoMessage, "InfoBox: " + location, JOptionPane.INFORMATION_MESSAGE);
+	}
 	public void sync() {		
 		ExactModel data = ew.getData();
 		synchronized (data) {	
@@ -114,9 +113,9 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 				}				
 			}						
 			ReferenceStation = ArrayUtils.copy(data.getReferenceStation());
-			
+
 			classTypes = ArrayUtils.copy(data.getClassTypes());
-			
+
 		}
 		for (int i=0;i<classes;i++) //if the class is open there is no RefStation
 		{
@@ -125,14 +124,14 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			else if (classTypes[i] == 0 && ReferenceStation[i] == stationNames.length-1)
 				ReferenceStation[i] = 0;
 		}
-	}		
+	}
 	/**
 	 * Set up the panel contents and layout
 	 */
 	private void initComponents() {
 		stTable = new STTable();
 		JPanel totalBox = new JPanel(new BorderLayout(10, 10));
-		JLabel descrLabel = new JLabel(jmt.jmva.analytical.ExactConstants.DESCRIPTION_ReferenceStation);
+		JLabel descrLabel = new JLabel(ExactConstants.DESCRIPTION_REFERENCESTATION);
 		JPanel descrBox = new JPanel(new BorderLayout());
 		descrBox.setPreferredSize(new Dimension(200, 1000));
 		descrBox.add(descrLabel, BorderLayout.NORTH);
@@ -149,24 +148,21 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		add(Box.createVerticalStrut(30), BorderLayout.NORTH);
 		add(Box.createVerticalStrut(30), BorderLayout.SOUTH);
 		add(Box.createHorizontalStrut(20), BorderLayout.EAST);
-		add(Box.createHorizontalStrut(20), BorderLayout.WEST);	
+		add(Box.createHorizontalStrut(20), BorderLayout.WEST);
 	}
 	@Override
 	public String getName() {
 		return "Reference Station";
 	}
 	private void commit() {
-
 		stTable.stopEditing();
-
 		ExactModel data = ew.getData();
 		synchronized (data) {			
 			data.setReferenceStation(ReferenceStation);
 		}
 	}
 	@Override
-	public void gotFocus() {				
-		
+	public void gotFocus() {
 		this.sync();			
 		this.refreshComponents();		
 		stTable.update();
@@ -176,94 +172,91 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		stationBox.setEditable(false);
 		ComboBoxRenderer renderer = new ComboBoxRenderer(stationBox);
 		renderer.setColors(colors);
-        renderer.setStrings(stationNames);
-        stationBox.setRenderer(renderer);
-        
+		renderer.setStrings(stationNames);
+		stationBox.setRenderer(renderer);
 		stationEditor = new DefaultCellEditor(stationBox);
-										
-	}	
+	}
 	/*These two following classes added to change the color of the Combo box cell when the value of the combobox is Arrival Process */
 	class ComboBoxRenderer extends JPanel implements ListCellRenderer
 	{
 
-	    private static final long serialVersionUID = -1L;
-	    private Color[] colors;
-	    private String[] strings;
+		private static final long serialVersionUID = -1L;
+		private Color[] colors;
+		private String[] strings;
 
-	    JPanel textPanel;
-	    JLabel text;
+		JPanel textPanel;
+		JLabel text;
 
-	    public ComboBoxRenderer(JComboBox combo) {
+		public ComboBoxRenderer(JComboBox combo) {
+			textPanel = new JPanel();
+			textPanel.add(this);
+			text = new JLabel();
+			text.setOpaque(true);
+			text.setFont(combo.getFont());
+			textPanel.add(text);
+		}
 
-	        textPanel = new JPanel();
-	        textPanel.add(this);
-	        text = new JLabel();
-	        text.setOpaque(true);
-	        text.setFont(combo.getFont());
-	        textPanel.add(text);
-	    }
+		public void setColors(Color[] col)
+		{
+			colors = col;
+		}
 
-	    public void setColors(Color[] col)
-	    {
-	        colors = col;
-	    }
+		public void setStrings(String[] str)
+		{
+			strings = str;
+		}
 
-	    public void setStrings(String[] str)
-	    {
-	        strings = str;
-	    }
+		public Color[] getColors()
+		{
+			return colors;
+		}
 
-	    public Color[] getColors()
-	    {
-	        return colors;
-	    }
+		public String[] getStrings()
+		{
+			return strings;
+		}
 
-	    public String[] getStrings()
-	    {
-	        return strings;
-	    }
+		public Component getListCellRendererComponent(JList list, Object value,
+				int index, boolean isSelected, boolean cellHasFocus)
+		{
+			if (isSelected)
+			{
+				setBackground(list.getSelectionBackground());
+			}
+			else
+			{
+				setBackground(Color.WHITE);
+			}
 
-	    public Component getListCellRendererComponent(JList list, Object value,
-	            int index, boolean isSelected, boolean cellHasFocus) {
+			if (colors.length != strings.length)
+			{
+				System.out.println("colors.length does not equal strings.length"+ colors.length);
+				return this;
+			}
+			else if (colors == null)
+			{
+				System.out.println("use setColors first.");
+				return this;
+			}
+			else if (strings == null)
+			{
+				System.out.println("use setStrings first.");
+				return this;
+			}
 
-	        if (isSelected)
-	        {
-	            setBackground(list.getSelectionBackground());
-	        }
-	        else
-	        {
-	            setBackground(Color.WHITE);
-	        }
+			text.setBackground(getBackground());
+			text.setText(value.toString());
+			if (index>-1) {
+				text.setForeground(colors[index]);
+			}
+			return text;
+		}
 
-	        if (colors.length != strings.length)
-	        {
-	            System.out.println("colors.length does not equal strings.length"+ colors.length);
-	            return this;
-	        }
-	        else if (colors == null)
-	        {
-	            System.out.println("use setColors first.");
-	            return this;
-	        }
-	        else if (strings == null)
-	        {
-	            System.out.println("use setStrings first.");
-	            return this;
-	        }
-
-	        text.setBackground(getBackground());
-
-	        text.setText(value.toString());
-	        if (index>-1) {
-	            text.setForeground(colors[index]);
-	        }
-	        return text;
-	    }
 	}
 	@Override
 	public void lostFocus() {
 		commit();
-		}
+	}
 	@Override
 	public boolean canFinish() {
 		return !stTable.isLDEditing();
@@ -287,36 +280,35 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 	public void commitData() {
 		this.commit();
 	}
-	private void refreshComponents() {	
+	private void refreshComponents() {
 		if (stTable != null) {
-			stTable.tableChanged(new TableModelEvent(stTable.getModel()));				
+			stTable.tableChanged(new TableModelEvent(stTable.getModel()));
 		}
-		}
-	protected class STTable extends ExactTable implements PropertyChangeListener, Runnable{
-				
+	}
+	protected class STTable extends ExactTable implements PropertyChangeListener, Runnable {
+
 		private static final long serialVersionUID = 1L;
 		private int row;
 		private int column;
 		private Object oldValue;
 		private Object newValue;
-		
+
 		public STTable() {
-			super(new STTableModel());			
+			super(new STTableModel());
 			this.row = -1;
 			this.column = -1;
 			this.oldValue = null;
 			this.newValue = null;
-			this.addPropertyChangeListener( this );
+			this.addPropertyChangeListener(this);
 			autoResizeMode = AUTO_RESIZE_SUBSEQUENT_COLUMNS;
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 
-			setDisplaysScrollLabels(true);			
+			setDisplaysScrollLabels(true);
 			setRowSelectionAllowed(true);
-			setColumnSelectionAllowed(true);
-			setClipboardTransferEnabled(true);
+			setColumnSelectionAllowed(false);
 
 			help.addHelp(this,
-					"Click or drag to select cells; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select cells; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreColumnsLabel, "There are more classes: scroll right to see them");
 			help.addHelp(moreRowsLabel, "There are more stations: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all cells");
@@ -325,7 +317,6 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			rowHeader.setToolTipText(null);
 			help.addHelp(rowHeader, "Click, SHIFT-click or drag to select rows");
 		}
-
 		/**
 		 * @return true if the LDEditor window is currently open
 		 */
@@ -335,22 +326,20 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) { //stations type, select the right editor
-				return stationEditor;				
+				return stationEditor;
 			} else {
 				return super.getCellEditor(row, column);
 			}
 		}
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
-			//if this is type column, I must render it as a combo box instead of a jtextfield
-			if (column == 1 && classTypes[row] == CLASS_CLOSED) {				
+			//if this is type column, I must render it as a combobox instead of a jtextfield
+			if (column == 1 && classTypes[row] == CLASS_CLOSED) {
 				return StationCombo;
-			}			
-			else {
+			} else {
 				return new DefaultTableCellRenderer();
 			}
-		}	
-		
+		}
 		@Override
 		public void propertyChange(PropertyChangeEvent e)
 		{
@@ -364,8 +353,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 					processEditingStopped();
 			}
 		}
-
-		/*
+		/**
 		 *  Save information of the cell about to be edited
 		 */
 		private void processEditingStarted()
@@ -375,28 +363,26 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			//  PropertyChangeEvent is fired.
 			//  This results in the "run" method being invoked
 
-			SwingUtilities.invokeLater( this );
+			SwingUtilities.invokeLater(this);
 		}
-		/*
+		/**
 		 *  See above.
 		 */
 		@Override
 		public void run()
 		{
-			row = this.convertRowIndexToModel( this.getEditingRow() );
-			column = this.convertColumnIndexToModel( this.getEditingColumn() );
+			row = this.convertRowIndexToModel(this.getEditingRow());
+			column = this.convertColumnIndexToModel(this.getEditingColumn());
 			oldValue = this.getModel().getValueAt(row, column);
 			newValue = null;
 		}
-
-		/*
+		/**
 		 *	Update the Cell history when necessary
 		 */
 		private void processEditingStopped()
 		{
 			newValue = this.getModel().getValueAt(row, column);
-			
-			
+
 			if (! newValue.equals(oldValue))
 			{
 				//  Make a copy of the data in case another cell starts editing
@@ -405,30 +391,31 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 					if (classTypes[i] == 0)
 						setValueAt(newValue, i, 1);
 				this.update();
-
 			}
-			
 		}
-		
-		
+
+	}
 	/**
 	 * the model backing the service times table.
 	 * Rows represent stations, columns classes.
 	 */
-	}
 	private class STTableModel extends ExactTableModel {
 
-		private static final long serialVersionUID = 1L;		
+		private static final long serialVersionUID = 1L;
+
 		public int getRowCount() {
 			return classNames.length;
 		}
 		public int getColumnCount() {
 			return 2;
 		}
-		
+		@Override
+		protected Object getRowName(int rowIndex) {
+			return null;
+		}
 		@Override
 		public String getColumnName(int index) {
-			if (index == 0) {				
+			if (index == 0) {
 				return "Class";
 			} else if (index == 1) {
 				return "Station";
@@ -437,21 +424,16 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			}
 		}
 		@Override
-		protected Object getRowName(int rowIndex) {
-			return null;
-		}
-
-		@Override
-		public void setValueAt(Object value, int rowIndex, int columnIndex) {											
-			for (int i=0 ; i< stationNames.length ; i++)
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {			
+			for (int i=0; i < stationNames.length; i++)
 			{
 				if (classTypes[rowIndex] == 0 && value.toString().equals("Arrival Process"))
-				{									
+				{
 					ReferenceStation[rowIndex] = 0;
-					break;															
+					break;
 				}
 				else if (value.toString().equals(stationNames[i]))
-				{					
+				{
 					if (visits[i][rowIndex] != 0)
 					{
 						ReferenceStation[rowIndex] = i;
@@ -459,21 +441,20 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 					}
 					else
 					{
-						infoBox("you can not choose a station which has Zero visits. please check the visit panel","Warning!");
-						for (int j=0 ; j < stationNames.length-1; j++)					 	
+						infoBox("You cannot choose a station which has Zero visits. Please check the visit panel.", "Warning!");
+						for (int j=0; j < stationNames.length-1; j++)
 							for (int k=0; k < classNames.length; k++)
 								if (visits[j][k] != 0)
-									ReferenceStation[rowIndex] = j;					 				
-						break;					 	
+									ReferenceStation[rowIndex] = j;
+						break;
 					}
-				}				
-				else if (classTypes[rowIndex] == 1)					
+				}
+				else if (classTypes[rowIndex] == 1)
 					ReferenceStation[rowIndex] = stationNames.length-1;
-				else 
+				else
 					ReferenceStation[rowIndex] = 0;
 			}
-		}		
-					
+		}
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
@@ -491,18 +472,15 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-			case 0://name				
-						
+			case 0://name
 				return classNames[rowIndex];
-			case 1://type						
+			case 1://type
 				return stationNames[(int) ReferenceStation[rowIndex]];
 			default:
 				return null;
+			}
 		}
-		}
+
 	}
 
-	}
-
-
-
+}

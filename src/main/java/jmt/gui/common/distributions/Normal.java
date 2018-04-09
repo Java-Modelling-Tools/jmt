@@ -31,8 +31,9 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 17.46.19
  */
 public class Normal extends Distribution {
+
 	/**
-	 * Construct a new Normal Distribution
+	 * Constructs a new Normal Distribution
 	 */
 	public Normal() {
 		super("Normal", "jmt.engine.random.Normal", "jmt.engine.random.NormalPar", "Normal distribution");
@@ -46,16 +47,17 @@ public class Normal extends Distribution {
 	 * @return distribution parameters
 	 */
 	@Override
-	protected Distribution.Parameter[] setParameters() {
+	protected Parameter[] setParameters() {
 		// Creates parameter array
-		Distribution.Parameter[] parameters = new Distribution.Parameter[2];
-		// Sets parameter mean
-		parameters[0] = new Distribution.Parameter("mean", "\u03BC", Double.class, new Double(2));
-		// Checks value of mean must be equal greater then 0
+		Parameter[] parameters = new Parameter[2];
+
+		// Sets parameter mu
+		parameters[0] = new Parameter("mean", "\u03BC", Double.class, new Double(2));
+		// Checks value of mu must be greater than or equal to 0
 		parameters[0].setValueChecker(new Distribution.ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 0) {
+				if (d.doubleValue() >= 0.0) {
 					return true;
 				} else {
 					return false;
@@ -63,13 +65,13 @@ public class Normal extends Distribution {
 			}
 		});
 
-		// Sets parameter standardDeviation
-		parameters[1] = new Distribution.Parameter("standardDeviation", "\u03C3", Double.class, new Double(1));
-		// Checks value of standardDeviation must be greater then 0
+		// Sets parameter sigma
+		parameters[1] = new Parameter("standardDeviation", "\u03C3", Double.class, new Double(1));
+		// Checks value of sigma must be greater than 0
 		parameters[1].setValueChecker(new Distribution.ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -81,8 +83,7 @@ public class Normal extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -96,7 +97,7 @@ public class Normal extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "norm(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+		return "norm(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
 				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
 	}
 
@@ -124,11 +125,12 @@ public class Normal extends Distribution {
 	 * @param c c value
 	 */
 	protected void setCM(double mean, double c) {
-		// sigma = c*mean
+		// mu = mean && sigma = mean*c
 		// Backups old parameters to restore them upon a false result
 		Object oldm = getParameter("mean").getValue();
 		Object olds = getParameter("standardDeviation").getValue();
-		if (getParameter("mean").setValue(new Double(mean)) && getParameter("standardDeviation").setValue(new Double(c * mean ))) {
+		if (getParameter("mean").setValue(new Double(mean))
+				&& getParameter("standardDeviation").setValue(new Double(mean * c))) {
 			this.mean = mean;
 			this.c = c;
 		} else {
@@ -139,11 +141,12 @@ public class Normal extends Distribution {
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {
 		mean = ((Double) getParameter("mean").getValue()).doubleValue();
 		c = ((Double) getParameter("standardDeviation").getValue()).doubleValue() / mean;
 	}
+
 }

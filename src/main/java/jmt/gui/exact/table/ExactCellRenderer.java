@@ -44,8 +44,9 @@ public class ExactCellRenderer extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 		if (value instanceof Number) {
 			super.setHorizontalAlignment(SwingConstants.RIGHT);
-		} else if (value instanceof Boolean) {
-			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+			if (value != null && (value.equals(Float.POSITIVE_INFINITY) || value.equals(Double.POSITIVE_INFINITY))) {
+				value = "\u221e";
+			}
 		} else {
 			super.setHorizontalAlignment(SwingConstants.CENTER);
 		}

@@ -28,7 +28,6 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
- * @author Bertoli Marco 10-oct-2005
  * 
  */
 public class DeterministicDistrPar extends AbstractParameter implements Parameter {
@@ -36,24 +35,24 @@ public class DeterministicDistrPar extends AbstractParameter implements Paramete
 	private double t;
 
 	/**
-	 * It creates a new constant parameter. It accepts a double greater
+	 * It creates a new deterministic parameter. It accepts a double greater
 	 * than zero and uses this number as the constant value that will be returned.
 	 *
-	 * @param t Parameter of the constant distribution. It is the value which is always returned. It must be greater than zero.
+	 * @param t Parameter of the deterministic distribution. It is the value which is always returned.
 	 * @throws IncorrectDistributionParameterException if the provided parameter is not greater than zero.
 	 */
 	public DeterministicDistrPar(double t) throws IncorrectDistributionParameterException {
 		this.t = t;
 		if (!check()) {
-			throw new IncorrectDistributionParameterException("t < 0");
+			throw new IncorrectDistributionParameterException("t <= 0");
 		}
 	}
 
 	/**
-	 * It creates a new constant parameter. It accepts a Double greater
+	 * It creates a new deterministic parameter. It accepts a Double greater
 	 * than zero and uses this number as the constant value that will be returned.
 	 *
-	 * @param t Parameter of the constant distribution. It is the value which is always returned. It must be greater than zero.
+	 * @param t Parameter of the deterministic distribution. It is the value which is always returned.
 	 * @throws IncorrectDistributionParameterException if the provided parameter is not greater than zero.
 	 */
 	public DeterministicDistrPar(Double t) throws IncorrectDistributionParameterException {
@@ -61,15 +60,15 @@ public class DeterministicDistrPar extends AbstractParameter implements Paramete
 	}
 
 	/**
-	 * It controls whether the parameter is correct or not.
-	 * For the constant distribution, the parameter is correct if it is >= than zero.
+	 * It controls if the parameter is correct or not. For the deterministic distribution,
+	 * the parameter is correct if it is greater than zero.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
 	@Override
 	public boolean check() {
-		if (t < 0) {
+		if (t <= 0) {
 			return false;
 		} else {
 			return true;
@@ -77,7 +76,7 @@ public class DeterministicDistrPar extends AbstractParameter implements Paramete
 	}
 
 	/**
-	 * It returns the value of the parameter for the constant distribution, that is
+	 * It returns the value of the parameter of the deterministic distribution, that is
 	 * the constant value provided by the user.
 	 *
 	 * @return the value always returned by the distribution.
@@ -88,34 +87,18 @@ public class DeterministicDistrPar extends AbstractParameter implements Paramete
 	}
 
 	/**
-	 * It allows the user to change the value of the parameter of the constant distribution.
-	 * It verifies that the new value is correct (must be greater than zero).
+	 * It allows the user to change the value of the parameter of the deterministic distribution.
+	 * It verifies if the new value is correct (must be greater than zero).
 	 *
-	 * @param t double indicating the new value of the parameter
-	 * @throws IncorrectDistributionParameterException when the provided parameter is not greater than zero.
+	 * @param t double indicating the new value of the parameter.
+	 * @throws IncorrectDistributionParameterException if the provided parameter is not greater than zero.
 	 *
 	 */
 	public void setParameterValue(double t) throws IncorrectDistributionParameterException {
-		if (!(t < 0)) {
-			this.t = t;
-		} else {
-			throw new IncorrectDistributionParameterException("t < 0");
+		this.t = t;
+		if (!check()) {
+			throw new IncorrectDistributionParameterException("t <= 0");
 		}
 	}
 
-	/**
-	 * Sets mean for a given distribution parameter. This method is required to adjust distributions
-	 * mean values into Load Dependent Service Time Strategy
-	 * @param meanValue new mean value for this distribution
-	 * Author: Bertoli Marco
-	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution
-	 */
-	@Override
-	public void setMean(double meanValue) throws IncorrectDistributionParameterException {
-		if (meanValue < 0 || Double.isInfinite(meanValue)) {
-			throw new IncorrectDistributionParameterException("Mean value must be finite and greater than zero");
-		}
-		t = meanValue;
-	}
-
-} // end ConstantDistrPar
+} // end DeterministicDistrPar

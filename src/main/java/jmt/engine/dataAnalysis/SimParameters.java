@@ -46,15 +46,10 @@ public class SimParameters {
 
 	//-----------------------end NULL TEST HYPOTHESIS--------------------------------//
 
-	// --- Dead Measures Test - Bertoli Marco ---------------------------------------//
-
-	// Number of checks after with a measure is marked as dead
-	private int maxDeadState = 2;
-
-	// ------------------------------------------------------------------------------//
-
 	//max samples which can be collected for each measure
 	private int maxSamples = 1000000;
+	//min samples which must be collected for each measure
+	private int minSamples = 0;
 	//max simulated time after which simulation will be stopped
 	private double maxSimulatedTime = -1;
 
@@ -144,11 +139,27 @@ public class SimParameters {
 	}
 
 	/**
-	 * Sets the max number of samples which can be collected for each measur
+	 * Sets the max number of samples which can be collected for each measure
 	 * @param maxSamples the max number of samples which can be collected for each measure
 	 */
 	public void setMaxSamples(int maxSamples) {
 		this.maxSamples = maxSamples;
+	}
+
+	/**
+	 * Gets the min number of samples which must be collected for each measure
+	 * @return the min number of samples which must be collected for each measure
+	 */
+	public int getMinSamples() {
+		return minSamples;
+	}
+
+	/**
+	 * Sets the min number of samples which must be collected for each measure
+	 * @param minSamples the min number of samples which must be collected for each measure
+	 */
+	public void setMinSamples(int minSamples) {
+		this.minSamples = minSamples;
 	}
 
 	/**
@@ -165,22 +176,6 @@ public class SimParameters {
 	 */
 	public void setMaxSimulatedTime(double maxSimulatedTime) {
 		this.maxSimulatedTime =  maxSimulatedTime;
-	}
-	
-	/**
-	 * Sets maximum number of checks before a measure is marked as dead
-	 * @param value integer value
-	 */
-	public void setDeadMeasureMaxChecks(int value) {
-		maxDeadState = value;
-	}
-
-	/**
-	 * Gets maximum number of checks before a measure is marked as dead
-	 * @return maximum number of checks before a measure is marked as dead
-	 */
-	public int getDeadMeasureMaxChecks() {
-		return maxDeadState;
 	}
 
 	/**
@@ -199,7 +194,6 @@ public class SimParameters {
 		this.disableStatisticStop = disableStatisticStop;
 	}
 
-	/* TODO: Comment these */
 	public void setLogPath(String logfilepath) {
 		this.logfilepath = logfilepath;
 	}

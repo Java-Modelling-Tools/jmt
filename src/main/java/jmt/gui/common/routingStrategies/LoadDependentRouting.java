@@ -97,20 +97,20 @@ public class LoadDependentRouting extends RoutingStrategy {
 		} else {
 			List<Integer> fromAsList = new ArrayList<Integer>();
 			fromAsList.addAll(values.keySet());
-			fromAsList.sort(null);
+			Collections.sort(fromAsList);
 			for (Integer from : fromAsList) {
 				Map<Object, Double> entries = values.get(from);
 				double sum = 0.0;
 				for (Double value : entries.values()) {
 					sum = sum + value.doubleValue();
 				}
-				if (sum < 1.0) {
+				if (sum - 1.0 < -1e-6) {
 					if (errors.isEmpty()) {
 						errors.add("Normalize sum of probabilities to 1.0 for range(s):\n\"From\" : \"" + from + "\"");
 					} else {
 						errors.add("\"From\" : \"" + from + "\"");
 					}
-				} else if (sum > 1.0) {
+				} else if (sum - 1.0 > 1e-6) {
 					if (errors.isEmpty()) {
 						errors.add("Normalize sum of probabilities to 1.0 for range(s):\n\"From\" : \"" + from + "\"");
 					} else {

@@ -23,25 +23,13 @@ import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
-/**
-
- * @author alyf (Andrea Conti)
- * Date: 11-set-2003
- * Time: 23.48.19
- * Modified by Kourosh Sheykhvand Nov 2013
- * the modification: for this panel since we do not need to have big calculation and the result to show can be easily driven by the result of the
- * pervious algorithm, we decide not to touch the algorithm and by playing with the recieved information show the result. most of the changes are in GetValue
- * fucntion.
- * 
- * 6th panel: throughput
- */
 public final class ThroughputPanel extends SolutionPanel {
+
 	private static final long serialVersionUID = 1L;
 	private double[][][] throughput;
-	private double[][] classAggr;
-	private double[][] stationAggr;
-	private double[] globalAggr;
-
+	private double[][] classAggs;
+	private double[][] stationAggs;
+	private double[] globalAgg;
 
 	/* EDITED by Abhimanyu Chugh */
 	public ThroughputPanel(ExactWizard ew, SolverAlgorithm alg) {
@@ -59,9 +47,9 @@ public final class ThroughputPanel extends SolutionPanel {
 		super.sync();
 		/* EDITED by Abhimanyu Chugh */
 		throughput = data.getThroughput(algorithm);
-		classAggr = data.getPerClassX(algorithm);
-		stationAggr = data.getPerStationX(algorithm);
-		globalAggr = data.getGlobalX(algorithm);
+		classAggs = data.getPerClassX(algorithm);
+		stationAggs = data.getPerStationX(algorithm);
+		globalAgg = data.getGlobalX(algorithm);
 		/* END */
 	}
 
@@ -75,11 +63,12 @@ public final class ThroughputPanel extends SolutionPanel {
 		return ExactConstants.DESCRIPTION_THROUGHPUTS;
 	}
 
+	/**
+	 * the model backing the visit table.
+	 * Rows represent stations, columns classes.
+	 */
 	private class TPTableModel extends ExactTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		TPTableModel() {
@@ -123,21 +112,25 @@ public final class ThroughputPanel extends SolutionPanel {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			double d;
+			double d = -1.0;
+
 			if (rowIndex == 0 && columnIndex == 0) {
-				d = globalAggr[iteration];
+				d = globalAgg[iteration];
 			} else if (rowIndex == 0 && columnIndex > 0) {
-				d = classAggr[columnIndex - 1][iteration];
+				d = classAggs[columnIndex - 1][iteration];
 			} else if (rowIndex > 0 && columnIndex == 0) {
-				d = stationAggr[rowIndex - 1][iteration];
-			} else {
+				d = stationAggs[rowIndex - 1][iteration];
+			} else if (rowIndex > 0 && columnIndex > 0) {
 				d = throughput[rowIndex - 1][columnIndex - 1][iteration];
 			}
-			if (d < 0) {
-				return null; //causes the renderer to display a gray cell
+
+			if (d < 0.0) {
+				return new String("--");
+			} else {
+				return new Double(d);
 			}
-			return new Double(d);
 		}
 
 	}
+
 }

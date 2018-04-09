@@ -2,7 +2,6 @@ package jmt.engine.jwat.input;
 
 import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
@@ -16,7 +15,6 @@ import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import jmt.engine.jwat.workloadAnalysis.utils.WorkloadResultLoader;
 import jmt.gui.jwat.JWATConstants;
-import jmt.gui.jwat.JWatModel;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -65,7 +63,6 @@ public class SessionLoader extends TimeConsumingWorker {
 
 		//Extracting zipped files in temp dir
 		updateInfos(1, "Reading XML file", false);
-		//System.out.println("Entry " + file+JwatSession.XMLext);
 
 		//load xml file
 		domP = new DOMParser();
@@ -89,18 +86,14 @@ public class SessionLoader extends TimeConsumingWorker {
 		selType = new int[numVar];
 
 		tmpNodeLst = tmpNode.getChildNodes();
-		//System.out.println(tmpNodeLst.getLength());
 		j = 0;
 		updateInfos(2, "Reading Variables", false);
 		for (i = 0; i < tmpNodeLst.getLength(); i++) {
 			tmpNode = tmpNodeLst.item(i);
-			//System.out.println("VARIABLES:");
 			if (tmpNode.getNodeType() == Node.ELEMENT_NODE) {
 				tmpVal = tmpNode.getAttributes().getNamedItem("name").getNodeValue();
-				//System.out.println("NOME " + tmpVal);
 				selName[j] = tmpVal;
 				tmpVal = tmpNode.getAttributes().getNamedItem("type").getNodeValue();
-				//System.out.println("TIPO " + tmpVal);
 				selType[j] = Integer.parseInt(tmpVal);
 				j++;
 			}
@@ -120,7 +113,6 @@ public class SessionLoader extends TimeConsumingWorker {
 		map = new VariableMapping[numVar];
 		valLst = new double[numVar];
 
-		//System.out.println("Reading varaibles mapping");
 		updateInfos(3, "Reading Mapping", false);
 		for (j = 0; j < numVar; j++) {
 			if (selType[j] == JWATConstants.DATE) {
@@ -131,13 +123,11 @@ public class SessionLoader extends TimeConsumingWorker {
 			}
 			if (selType[j] == JWATConstants.STRING) {
 				map[j] = loadVarMapping(zf, selName[j]);
-				//System.out.println(selName[j] + " " + selType[j]);
 			}
 		}
 
 		//load data file
 		zis = zf.getInputStream(new ZipEntry(file));
-		//System.out.println("Entry " + file);
 		dis = new DataInputStream(zis);
 
 		for (i = 0; i < numObs; i++) {
@@ -147,7 +137,6 @@ public class SessionLoader extends TimeConsumingWorker {
 			}
 			valori[i] = new Observation(valLst, id);
 		}
-		//System.out.println("Create matrix");
 		updateInfos(5, "Create matrix", false);
 		m = new MatrixObservations(valori, selName, selType, map);
 		session.getDataModel().setMatrix(m);
@@ -157,14 +146,11 @@ public class SessionLoader extends TimeConsumingWorker {
 
 	protected int loadDataResult(NodeList resultNodeList, JwatSession session) throws IOException {
 		updateInfos(6, "Load Results", false);
-		//System.out.println("Loading results");
 		return res.loadResult(zf, resultNodeList, session);
 	}
 
 	private StringMapping loadVarMapping(ZipFile zf, String varName) throws IOException {
-
 		InputStream zis = zf.getInputStream(new ZipEntry(varName + "_Map" + JwatSession.BINext));
-		//System.out.println("Entry " + varName+"_Map"+JwatSession.BINext);
 		DataInputStream dis = new DataInputStream(zis);
 
 		StringMapping map = new StringMapping();
@@ -183,25 +169,18 @@ public class SessionLoader extends TimeConsumingWorker {
 
 	@Override
 	public Object construct() {
-		int i, j, numClustLoaded;
 		JwatSession session = null;
-		JWatModel model;
 		String fullName = zf.getName();
-		//System.out.println(fullName+" "+File.separator);
 		String path = fullName.substring(0, fullName.lastIndexOf(File.separator));
-		//System.out.println(path);
 		String fname = fullName.substring(fullName.lastIndexOf(File.separator) + 1);
-		//System.out.println(fname);
 
-		FileWriter w = null;
-		//System.out.println("Start loading");
 		try {
 			initShow(7);
 			session = new WorkloadAnalysisSession(new ModelWorkloadAnalysis(), path, fname);
 			NodeList resultNodeList = loadDataModel(session);
 
 			if (resultNodeList != null) {
-				numClustLoaded = loadDataResult(resultNodeList, session);
+				loadDataResult(resultNodeList, session);
 			} else {
 				System.out.println("no results");
 			}

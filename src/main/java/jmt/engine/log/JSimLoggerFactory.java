@@ -42,10 +42,10 @@ public class JSimLoggerFactory {
 	 * @param columns the columns for the log file
 	 * @param append true to append to an existing file. False to create a new file
 	 * @param colSep the column separator
-	 * @param digitSep the decimal digits separator
+	 * @param digitSep the decimal digit separator
 	 * @return the logger instance
 	 */
-	public static CSVLogger getCSVLogger(File file, String[] columns, boolean append, String colSep, char digitSep) {
+	public static CSVLogger getCSVLogger(File file, String[] columns, boolean append, String colSep, String digitSep) {
 		CSVLogger ret = csvLoggerCache.get(file);
 		if (ret == null) {
 			synchronized (JSimLoggerFactory.class) {

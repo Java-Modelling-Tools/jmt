@@ -257,6 +257,7 @@ public class PerformanceIndices2DGraph extends JabaGraph implements
 		}
 		g.dispose();
 		this.revalidate();
+		this.repaint();
 	}
 
 	private void drawSummary(Graphics g, ArrayList<Color> stationColors) {

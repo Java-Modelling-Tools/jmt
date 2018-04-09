@@ -38,7 +38,7 @@ public class SinkCell extends JmtCell {
 	public static final boolean canBePlaced = true;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
-	public static final String ICON = "sink";
+	public static final String ICON = "Sink";
 
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.

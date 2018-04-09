@@ -75,7 +75,7 @@ public class AboutDialogFactory {
 				logo.setIcon(JMTImageLoader.loadImage("logo", new Dimension(70, 70)));
 				return logo;
 			case ICL:
-				return new JLabel(JMTImageLoader.loadImage("logo_icl", new Dimension(-1,40)));
+				return new JLabel(JMTImageLoader.loadImage("logo_icl", new Dimension(-1, 40)));
 			default:
 				return null;
 			}

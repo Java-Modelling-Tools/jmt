@@ -55,6 +55,7 @@ public abstract class Distribution implements ServiceStrategy {
 	protected String description;
 	protected ImageIcon image;
 	protected ValueChecker checker;
+	protected String precondition;
 	protected boolean hasMean; // Used to provide input parameters with the tuple (mean, C)
 	protected boolean hasC;
 	protected double c;
@@ -65,8 +66,8 @@ public abstract class Distribution implements ServiceStrategy {
 	 * Constructs a new Distribution object. Initialize all internal objects calling abstract
 	 * methods setParameterNames(), setParameterClasses(), setParameterValues().
 	 * @param name Name of the distribution
-	 * @param classpath engine classpath for this distribution
-	 * @param parameterClasspath ngine's classpath for this distribution's parameters
+	 * @param classpath engine's classpath for this distribution
+	 * @param parameterClasspath engine's classpath for this distribution's parameters
 	 * @param description description of this distribution
 	 */
 	public Distribution(String name, String classpath, String parameterClasspath, String description) {
@@ -88,7 +89,7 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Get engine's classpath for this distribution's parameters (This is needed as each
+	 * Gets engine's classpath for this distribution's parameters (This is needed as each
 	 * distribution in the engine has a Distribution object and a Parameter object which
 	 * are distinct classes)
 	 * @return parameter's classpath
@@ -106,7 +107,7 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Get's this distribution description
+	 * Gets this distribution description
 	 * @return distribution's description
 	 */
 	public String getDescription() {
@@ -122,7 +123,7 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Get a parameter data structure of this distribution, given its index
+	 * Gets a parameter data structure of this distribution, given its index
 	 * @param num index of requested parameter
 	 * @return requested parameter
 	 * @throws java.lang.ArrayIndexOutOfBoundsException if num is not inside bounds
@@ -172,7 +173,7 @@ public abstract class Distribution implements ServiceStrategy {
 	 * @return Message describing distribution's preconditions
 	 */
 	public String getPrecondition() {
-		return "none";
+		return precondition;
 	}
 
 	/**
@@ -246,7 +247,7 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * returns whether a distribution can be used as nested distribution inside another distribution
+	 * Returns whether a distribution can be used as nested distribution inside another distribution
 	 * @return true if it can be nested. false otherwise
 	 */
 	public boolean isNestable() {
@@ -254,11 +255,11 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Helper method used to formats given number into string according to default rules.
+	 * Helper method used to format given number into string according to default rules.
 	 * @param d double to be converted
 	 * @return string representation of given number
 	 */
-	protected String formatNumber(double d) {
+	public String formatNumber(double d) {
 		if (d == 0.0 || (Math.abs(d) >= 1e-3 && Math.abs(d) < 1e3)) {
 			df.applyPattern("#.###");
 			return df.format(d);
@@ -269,7 +270,7 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Return an array with an instance of every allowed Distribution. Uses internal
+	 * Returns an array with an instance of every allowed Distribution. Uses internal
 	 * caching to search for distributions only the first time that this method is called.
 	 * @return an array with an instance of every allowed Distribution
 	 */
@@ -304,7 +305,7 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Return an array with an instance of every Distribution that allows mean setting. Uses internal
+	 * Returns an array with an instance of every Distribution that allows mean setting. Uses internal
 	 * caching to search for distributions only the first time that this method is called.
 	 * @return an array with an instance of every Distribution in which mean value can be specified
 	 */
@@ -329,7 +330,7 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Return an array with an instance of every nestable Distribution. Uses internal
+	 * Returns an array with an instance of every nestable Distribution. Uses internal
 	 * caching to search for distributions only the first time that this method is called.
 	 * @return an array with an instance of every nestable Distribution
 	 */
@@ -354,7 +355,89 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Tells if this distribution is equivalent to an other one
+	 * Checks if the entries of an probability vector sum up to one.
+	 * @param v vector to be checked
+	 * @return true if the vector satisfies the condition, false otherwise
+	 */
+	public boolean checkProbabilityVector(Object[][] v) {
+		double sum = 0.0;
+		for (int i = 0; i < v[0].length; i++) {
+			Double d = (Double) v[0][i];
+			sum += d.doubleValue();
+		}
+		if (Math.abs(sum - 1.0) > 1e-6) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Normalizes the entries of a probability vector to sum up to one.
+	 * @param v vector to be normalized
+	 */
+	public void normalizeProbabilityVector(Object[][] v) {
+		double sum = 0.0;
+		for (int i = 0; i < v[0].length; i++) {
+			Double d = (Double) v[0][i];
+			sum += d.doubleValue();
+		}
+		for (int i = 0; i < v[0].length; i++) {
+			Double d = (Double) v[0][i];
+			if (sum == 0.0) {
+				v[0][i] = Double.valueOf(1.0 / v[0].length);
+			} else {
+				v[0][i] = Double.valueOf(d.doubleValue() / sum);
+			}
+		}
+	}
+
+	/**
+	 * Checks if the diagonal of a transition rate matrix only contains negative entries
+	 * and if the entries in each row of the matrix sum up to a non-positive value.
+	 * @param m matrix to be checked
+	 * @return true if the matrix satisfies the condition, false otherwise
+	 */
+	public boolean checkTransitionRateMatrix(Object[][] m) {
+		for (int i = 0; i < m.length; i++) {
+			double sum = 0.0;
+			for (int j = 0; j < m[i].length; j++) {
+				Double d = (Double) m[i][j];
+				if (i == j && d.doubleValue() >= 0.0) {
+					return false;
+				}
+				sum += d.doubleValue();
+			}
+			if (sum > 1e-6) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Checks if the entries in each row of an infinitesimal generator matrix sum up to
+	 * zero.
+	 * @param m0 hidden matrix to be checked
+	 * @param m1 observable matrix to be checked
+	 * @return true if the matrix satisfies the condition, false otherwise
+	 */
+	public boolean checkInfinitesimalGeneratorMatrix(Object[][] m0, Object[][] m1) {
+		for (int i = 0; i < m0.length; i++) {
+			double sum = 0.0;
+			for (int j = 0; j < m0[i].length; j++) {
+				Double d0 = (Double) m0[i][j];
+				Double d1 = (Double) m1[i][j];
+				sum += (d0.doubleValue() + d1.doubleValue());
+			}
+			if (Math.abs(sum) > 1e-6) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Tells if this distribution is equivalent to another one.
 	 * @param o other distribution
 	 * @return true if equals, false otherwise
 	 */
@@ -370,7 +453,8 @@ public abstract class Distribution implements ServiceStrategy {
 		}
 		// Check if all parameters are equals
 		for (int i = 0; i < getNumberOfParameters(); i++) {
-			if (!getParameter(i).getValue().equals(d.getParameter(i).getValue())) {
+			if (getParameter(i).getValue() == null ? d.getParameter(i).getValue() != null
+					: !getParameter(i).getValue().equals(d.getParameter(i).getValue())) {
 				return false;
 			}
 		}
@@ -419,7 +503,7 @@ public abstract class Distribution implements ServiceStrategy {
 
 	/**
 	 * This method has to be called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	public void updateCM() {
 	}
@@ -440,7 +524,7 @@ public abstract class Distribution implements ServiceStrategy {
 		protected boolean directParameter;
 
 		/**
-		 * Construct a new Parameter object. If a custom check on input values is needed, a call
+		 * Constructs a new Parameter object. If a custom check on input values is needed, a call
 		 * to <code>setValueChecker(ValueChecker checker)</code> method must be performed.
 		 * @param name name of this parameter
 		 * @param description brief description of this parameter usage
@@ -454,7 +538,7 @@ public abstract class Distribution implements ServiceStrategy {
 
 		/**
 		 * 
-		 * Construct a new Parameter object. If a custom check on input values is needed, a call
+		 * Constructs a new Parameter object. If a custom check on input values is needed, a call
 		 * to <code>setValueChecker(ValueChecker checker)</code> method must be performed.
 		 * @param name name of this parameter
 		 * @param description brief description of this parameter usage
@@ -484,19 +568,48 @@ public abstract class Distribution implements ServiceStrategy {
 		}
 
 		/**
+		 * Gets a ValueChecker to check if a parameter's value is in the correct
+		 * range. If no checks are required do not call this method
+		 * 
+		 * @return checker
+		 *             Instance of ValueChecker Interface
+		 */
+		public ValueChecker getValueChecker() {
+			return checker;
+		}
+
+		/**
 		 * Sets value for this parameter. Returns if parameter could be assigned correctly
 		 * @param value value to be assigned to this parameter
-		 * @return If value.class is different from valueClass, or parameter value is invalid,
-		 * returns false, otherwise true
+		 * @return If value.class is different from valueClass, or parameter value is not
+		 * valid, returns false, otherwise true
 		 */
 		public boolean setValue(Object value) {
 			// if instance is not correct returns false
 			if (valueClass.isInstance(value)) {
 				// If checker exists and its check is not satisfied returns false
-				if (checker != null) {
-					if (!checker.checkValue(value)) {
-						return false;
-					}
+				if (checker != null && !checker.checkValue(value)) {
+					return false;
+				}
+				// Otherwise sets value and returns true
+				this.value = value;
+				return true;
+			}
+			return false;
+		}
+
+		/**
+		 * Sets value for this parameter. Returns if parameter could be assigned correctly
+		 * @param value value to be assigned to this parameter
+		 * @return If value.class is different from valueClass, or parameter value is not
+		 * valid, returns false, otherwise true
+		 */
+		public boolean setValue(Object[][] value) {
+			// if instance is not correct returns false
+			if (valueClass.isInstance(value[0][0])) {
+				// If checker exists and its check is not satisfied returns false
+				if (checker != null && !checker.checkValue(value)) {
+					return false;
 				}
 				// Otherwise sets value and returns true
 				this.value = value;
@@ -507,19 +620,32 @@ public abstract class Distribution implements ServiceStrategy {
 
 		/**
 		 * Sets value for this parameter. If parameter class is String sets it, otherwise
-		 * try to parse string if parameter is of a known numeric value. Returns if parameter
+		 * try to parse string if parameter is of a known numeric type. Returns if parameter
 		 * could be assigned correctly.
 		 * @param value to be assigned to this parameter or to be parsed
-		 * @return If value.class is different from valueClass, or parameter value is invalid,
-		 * or is not parsable, returns false, otherwise true
+		 * @return If value.class is different from valueClass, or parameter value is not
+		 * parsable or valid, returns false, otherwise true
 		 */
 		public boolean setValue(String value) {
 			// If parameter is of the correct type, sets it and return
 			if (setValue((Object) value)) {
 				return true;
 			}
+			// Otherwise if it is of a known numeric type, try to decode it
+			Object objval = parseValue(value);
+			if (objval == null) {
+				return false;
+			}
+			return setValue(objval);
+		}
 
-			// Otherwise if it is a known number, try to decode it
+		/**
+		 * Parses string if parameter is of a known numeric type.
+		 * @param value value to be parsed
+		 * @return If value.class is different from valueClass, or parameter value is not
+		 * parsable, returns null, otherwise number
+		 */
+		public Object parseValue(String value) {
 			Object objval = null;
 			try {
 				if (valueClass.equals(Integer.class)) {
@@ -531,18 +657,15 @@ public abstract class Distribution implements ServiceStrategy {
 				} else if (valueClass.equals(Byte.class)) {
 					objval = Byte.decode(value);
 				} else if (valueClass.equals(Float.class)) {
-					objval = new Float(Float.parseFloat(value));
+					objval = Float.valueOf(value);
 				} else if (valueClass.equals(Double.class)) {
-					objval = new Double(Double.parseDouble(value));
+					objval = Double.valueOf(value);
 				} else if (valueClass.equals(Boolean.class)) {
-					objval = new Boolean(value);
-				} else {
-					return false;
+					objval = Boolean.valueOf(value);
 				}
-				return setValue(objval);
 			} catch (NumberFormatException e) {
-				return false;
 			}
+			return objval;
 		}
 
 		/**
@@ -586,14 +709,25 @@ public abstract class Distribution implements ServiceStrategy {
 		}
 
 		/**
-		 * Returns a shallow copy of this Parameter. Note that as nothing can be infered about
-		 * all values clonability, that parameters are only referenced and not cloned. This should
+		 * Returns a shallow copy of this Parameter. Note that as nothing can be inferred about
+		 * all values clonability, so parameters are only referenced and not cloned. This should
 		 * not be a problem as every value should be an immutable type.
 		 * @return a copy of this parameter
 		 */
 		@Override
 		public Object clone() {
 			Parameter tmp = new Parameter(this.name, this.description, this.valueClass, this.value, this.directParameter);
+			if (this.value instanceof Object[][]) {
+				Object[][] om = (Object[][]) this.value;
+				Object[][] cm = new Object[om.length][];
+				for (int i = 0; i < om.length; i++) {
+					cm[i] = new Object[om[i].length];
+					for (int j = 0; j < om[i].length; j++) {
+						cm[i][j] = om[i][j];
+					}
+				}
+				tmp.value = cm;
+			}
 			tmp.setValueChecker(this.checker);
 			return tmp;
 		}
@@ -604,7 +738,7 @@ public abstract class Distribution implements ServiceStrategy {
 	 * This interface is used to specify a custom check method on parameter's value (for example
 	 * value's range).
 	 */
-	protected interface ValueChecker {
+	public interface ValueChecker {
 
 		/**
 		 * Checks if value of this object is correct. Note that when this method is called,

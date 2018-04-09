@@ -17,7 +17,7 @@ import jmt.engine.random.engine.RandomEngine;
 
 public class FFT {
         
-        private static RandomEngine engine = RandomEngine.makeDefault();
+	private static RandomEngine engine = RandomEngine.makeDefault();
 
 	public static final double num_flops(int N) {
 		double Nd = N;
@@ -67,7 +67,7 @@ public class FFT {
 		int nd = 2 * n;
 		double data[] = new double[nd];
 		for (int i = 0; i < nd; i++) {
-                        // Replaced Math.random
+			// Replaced Math.random
 			data[i] = engine.raw2();
 		}
 		return data;

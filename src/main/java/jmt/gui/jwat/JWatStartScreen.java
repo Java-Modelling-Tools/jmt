@@ -83,7 +83,7 @@ public class JWatStartScreen extends JFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Worload analyzer");
+			putValue(Action.SHORT_DESCRIPTION, "Workload analyzer");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_WL_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 
@@ -99,7 +99,7 @@ public class JWatStartScreen extends JFrame {
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Traffic Analysis  - Burstiness");
+			putValue(Action.SHORT_DESCRIPTION, "Traffic Analysis - Burstiness");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_TRAFFIC_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 

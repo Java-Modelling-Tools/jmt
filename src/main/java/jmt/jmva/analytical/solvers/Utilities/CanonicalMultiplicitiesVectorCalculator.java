@@ -99,7 +99,7 @@ public class CanonicalMultiplicitiesVectorCalculator {
 
     /**
      * This returns an ordered set containing the MultiplicitiesVectors the
-     * elements of which have sum less or equal to a specific number (level).
+     * elements of which have sum less than or equal to a specific number (level).
      * @param level The level is equal to the sum of the elements of each MultiplicitiesVector
      * @return The set of the corresponding vectors
      */

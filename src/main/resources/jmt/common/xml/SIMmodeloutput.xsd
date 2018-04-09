@@ -43,7 +43,7 @@
 			<xs:attribute name="modelDefinitionPath" type="xs:string" use="required"/>
 			<xs:attribute name="logDecimalSeparator" type="xs:string" use="optional"/>
 			<xs:attribute name="logDelimiter" type="xs:string" use="optional"/>
-			<xs:attribute name="logPath" type="xs:string" use="optional"/>	
+			<xs:attribute name="logPath" type="xs:string" use="optional"/>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>

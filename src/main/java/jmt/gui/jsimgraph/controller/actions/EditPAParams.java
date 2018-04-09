@@ -38,7 +38,7 @@ public class EditPAParams extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public EditPAParams(Mediator mediator) {
-		super("What-if Analysis...", "whatif", mediator);
+		super("What-if Analysis...", "Whatif", mediator);
 		putValue(SHORT_DESCRIPTION, "Define What-if analysis parameters");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
 		setEnabled(false);

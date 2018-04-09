@@ -280,62 +280,67 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 		});
 		allClass.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					ARPA.setSingleClass(false);
-					fromLabel.setText("From (%):");
-					toLabel.setText("To (%): ");
-					ARPA.setDefaultInitialValue();
-					ARPA.setDefaultFinalValue();
-					from.setText(Double.toString(ARPA.getInitialValue()));
-					to.setModel(new SpinnerNumberModel(ARPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
-					to.setValue(new Double(ARPA.getFinalValue()));
-					to.setToolTipText("Sets the final proportion of arrival rate with respect to the initial");
-					classChooser.removeAllItems();
-					classChooser.addItem("All open classes");
-					classChooser.setEnabled(false);
-					description.setText(DESCRIPTION);
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
 				}
+				ARPA.setSingleClass(false);
+				fromLabel.setText("From (%):");
+				toLabel.setText("To (%): ");
+				ARPA.setDefaultInitialValue();
+				ARPA.setDefaultFinalValue();
+				from.setText(Double.toString(ARPA.getInitialValue()));
+				to.setModel(new SpinnerNumberModel(ARPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
+				to.setValue(new Double(ARPA.getFinalValue()));
+				to.setToolTipText("Sets the final proportion of arrival rate with respect to the initial");
+				classChooser.removeAllItems();
+				classChooser.addItem("All open classes");
+				classChooser.setEnabled(false);
+				description.setText(DESCRIPTION);
 			}
 		});
 		singleClass.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					ARPA.setSingleClass(true);
-					classChooser.setEnabled(true);
-					//get the vector containing the keys of the valid classes. A class is valid if its service
-					//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
-					Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvailableClasses();
-					String[] classNames = new String[validC.size()];
-					for (int i = 0; i < validC.size(); i++) {
-						classNames[i] = cd.getClassName(validC.get(i));
-					}
-					ItemListener listener = classChooser.getItemListeners()[0];
-					classChooser.removeItemListener(listener);
-					classChooser.removeAllItems();
-					for (String className : classNames) {
-						classChooser.addItem(className);
-					}
-					classChooser.addItemListener(listener);
-					//if no classes where previously associated, associate
-					//the first one
-					if (!validC.contains(ARPA.getReferenceClass())) {
-						ARPA.setReferenceClass(validC.get(0));
-					}
-					classChooser.setSelectedItem(cd.getClassName(ARPA.getReferenceClass()));
-					fromLabel.setText("From (j/s):");
-					toLabel.setText("To (j/s): ");
-					ARPA.setDefaultInitialValue();
-					ARPA.setDefaultFinalValue();
-					from.setText(Double.toString(ARPA.getInitialValue()));
-					to.setModel(new SpinnerNumberModel(ARPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
-					to.setValue(new Double(ARPA.getFinalValue()));
-					to.setToolTipText("Sets the final arrival rate in job/sec");
-					description.setText(DESCRIPTION_SINGLE);
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
 				}
+				ARPA.setSingleClass(true);
+				classChooser.setEnabled(true);
+				//get the vector containing the keys of the valid classes. A class is valid if its service
+				//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
+				Vector<Object> validC = checker.checkForArrivalRatesParametricSimulationAvailableClasses();
+				String[] classNames = new String[validC.size()];
+				for (int i = 0; i < validC.size(); i++) {
+					classNames[i] = cd.getClassName(validC.get(i));
+				}
+				ItemListener listener = classChooser.getItemListeners()[0];
+				classChooser.removeItemListener(listener);
+				classChooser.removeAllItems();
+				for (String className : classNames) {
+					classChooser.addItem(className);
+				}
+				classChooser.addItemListener(listener);
+				//if no classes where previously associated, associate
+				//the first one
+				if (!validC.contains(ARPA.getReferenceClass())) {
+					ARPA.setReferenceClass(validC.get(0));
+				}
+				classChooser.setSelectedItem(cd.getClassName(ARPA.getReferenceClass()));
+				fromLabel.setText("From (j/s):");
+				toLabel.setText("To (j/s): ");
+				ARPA.setDefaultInitialValue();
+				ARPA.setDefaultFinalValue();
+				from.setText(Double.toString(ARPA.getInitialValue()));
+				to.setModel(new SpinnerNumberModel(ARPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
+				to.setValue(new Double(ARPA.getFinalValue()));
+				to.setToolTipText("Sets the final arrival rate in job/sec");
+				description.setText(DESCRIPTION_SINGLE);
 			}
 		});
 		classChooser.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				String className = (String) classChooser.getSelectedItem();
 				Object classKey = null;
 				Vector<Object> classes = cd.getClassKeys();

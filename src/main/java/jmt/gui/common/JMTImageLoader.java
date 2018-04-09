@@ -37,63 +37,80 @@ import jmt.framework.gui.image.ImageLoader;
  * @version 1.2
  */
 public class JMTImageLoader {
+
 	protected static ImageLoader imageLoader = new ImageLoaderImpl();
 
-	/**  Loads the image from this directory, please put all images in the class
+	/**
+	 * Loads the image from this directory. Please put all images in the class
 	 * package.
 	 *
 	 * @param imageName string containing the image name
-	 * @return the icon  of the image
-	 *
+	 * @return the icon of the image
 	 */
 	public static ImageIcon loadImage(String imageName) {
 		return imageLoader.loadIcon(imageName);
 	}
 
-	/**  Loads the image from this directory, please put all images in the class
-	 * package.
+	/**
+	 * Loads the image from this directory, and applies a specified size. Please
+	 * put all images in the class package.
 	 *
 	 * @param imageName string containing the image name
 	 * @param size specific size for the image to be returned
-	 * @return the icon  of the image
-	 *
+	 * @return the icon of the image
 	 */
 	public static ImageIcon loadImage(String imageName, Dimension size) {
 		return imageLoader.loadIcon(imageName, size);
 	}
 
-	/**  Loads the image from this directory, please put all images in the class
+	/**
+	 * Loads the image from this directory. Please put all images in the class
 	 * package.
 	 *
 	 * @param imageName string containing the image name
 	 * @return the image
 	 */
 	public static Image loadImageAwt(String imageName) {
-		ImageIcon img = imageLoader.loadIcon(imageName);
-		if (img != null) {
-			return img.getImage();
+		ImageIcon icon = imageLoader.loadIcon(imageName);
+		if (icon != null) {
+			return icon.getImage();
 		} else {
 			return null;
 		}
 	}
 
 	/**
-	 * @return incapsulated ImageLoader object
+	 * @return encapsulated ImageLoader object
 	 */
 	public static ImageLoader getImageLoader() {
 		return imageLoader;
 	}
 
-	/** Loads the image from this directory, and apply a known modifier.
-	 * Please put all images in the class
-	 * package.
+	/**
+	 * Loads the image from this directory, and applies a known modifier. Please
+	 * put all images in the class package.
 	 *
 	 * @param imageName string containing the image name
 	 * @param modifier known modifier method
-	 * @return the icon image
+	 * @return the icon of the image
 	 * @see ImageLoader#loadIcon(String, String)
 	 */
 	public static ImageIcon loadImage(String imageName, String modifier) {
 		return imageLoader.loadIcon(imageName, modifier);
 	}
+
+	/**
+	 * Loads the image from this directory, and applies a known modifier and
+	 * specified size. Please put all images in the class package.
+	 *
+	 * @param imageName string containing the image name
+	 * @param modifier known modifier method
+	 * @param size specific size for the image to be returned
+	 * @return the icon of the image
+	 * @see ImageLoader#loadIcon(String, String, Dimension)
+	 */
+	public static ImageIcon loadImage(String imageName, String modifier, Dimension size) {
+		return imageLoader.loadIcon(imageName, modifier, size);
+	}
+
 }

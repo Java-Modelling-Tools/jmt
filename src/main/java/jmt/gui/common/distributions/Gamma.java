@@ -31,8 +31,9 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 15.01.39
  */
 public class Gamma extends Distribution {
+
 	/**
-	 * Construct a new Gamma Distribution
+	 * Constructs a new Gamma Distribution
 	 */
 	public Gamma() {
 		super("Gamma", "jmt.engine.random.GammaDistr", "jmt.engine.random.GammaDistrPar", "Gamma distribution");
@@ -46,16 +47,17 @@ public class Gamma extends Distribution {
 	 * @return distribution parameters
 	 */
 	@Override
-	protected Distribution.Parameter[] setParameters() {
+	protected Parameter[] setParameters() {
 		// Creates parameter array
-		Distribution.Parameter[] parameters = new Distribution.Parameter[2];
+		Parameter[] parameters = new Parameter[2];
+
 		// Sets parameter alpha
-		parameters[0] = new Distribution.Parameter("alpha", "\u03B1", Double.class, new Double(4));
-		// Checks value of alpha must greater then 0
+		parameters[0] = new Parameter("alpha", "\u03B1", Double.class, new Double(4));
+		// Checks value of alpha must greater than 0
 		parameters[0].setValueChecker(new Distribution.ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -63,13 +65,13 @@ public class Gamma extends Distribution {
 			}
 		});
 
-		// Sets parameter lambda
-		parameters[1] = new Distribution.Parameter("beta", "\u03B8", Double.class, new Double(0.5));
-		// Checks value of k must be greater then 0
+		// Sets parameter beta
+		parameters[1] = new Parameter("beta", "\u03B8", Double.class, new Double(0.5));
+		// Checks value of beta must be greater than 0
 		parameters[1].setValueChecker(new Distribution.ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -81,8 +83,7 @@ public class Gamma extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -96,7 +97,7 @@ public class Gamma extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "gam(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+		return "gam(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
 				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
 	}
 
@@ -124,26 +125,28 @@ public class Gamma extends Distribution {
 	 * @param c c value
 	 */
 	protected void setCM(double mean, double c) {
-		// lambda = mean * c^2 && alpha = 1 / (c*c)
+		// beta = mean*c*c && alpha = 1 / (c*c)
 		// Backups old parameters to restore them upon a false result
-		Object oldl = getParameter("beta").getValue();
+		Object oldb = getParameter("beta").getValue();
 		Object olda = getParameter("alpha").getValue();
-		if (getParameter("beta").setValue(new Double(mean * c * c)) && getParameter("alpha").setValue(new Double(1 / (c * c)))) {
+		if (getParameter("beta").setValue(new Double(mean * c * c))
+				&& getParameter("alpha").setValue(new Double(1 / (c * c)))) {
 			this.mean = mean;
 			this.c = c;
 		} else {
-			getParameter("beta").setValue(oldl);
+			getParameter("beta").setValue(oldb);
 			getParameter("alpha").setValue(olda);
 		}
 	}
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {
-		mean = ((Double) getParameter("alpha").getValue()).doubleValue() * ((Double) getParameter("beta").getValue()).doubleValue();
+		mean = ((Double) getParameter("alpha").getValue()).doubleValue()
+				* ((Double) getParameter("beta").getValue()).doubleValue();
 		c = 1 / Math.sqrt(((Double) getParameter("alpha").getValue()).doubleValue());
 	}
 

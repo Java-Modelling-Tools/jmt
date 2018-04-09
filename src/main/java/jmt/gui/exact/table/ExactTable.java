@@ -25,12 +25,10 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.StringTokenizer;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -76,13 +74,10 @@ import jmt.gui.common.JMTImageLoader;
  * <li>"more rows" and "more columns" warning icons
  * <li>clipboard transfer of cell values (support depends on the underlying data model) - CTRL+C, CTRL+X, CTRL+V
  * <li>can clear selected cells - DELETE
- * <li>can fill cells with the value from a cell (if using an ExactTableModel) - CTRL+F
  */
 public class ExactTable extends JTable {
 
 	private static final long serialVersionUID = 1L;
-
-	private static final boolean DEBUG = false;
 
 	protected RowHeader rowHeader;
 	protected int rowHeaderWidth = 80;
@@ -92,15 +87,12 @@ public class ExactTable extends JTable {
 	protected JLabel moreRowsLabel;
 	protected boolean displaysScrollLabels = true;
 	protected boolean selectAllEnabled = true;
-	protected boolean clipboardTransferEnabled = false;
-	protected boolean fillCellsEnabled = true;
+	protected boolean batchEditingEnabled = false;
 	protected TableSelectionListener selectionListener;
 	protected MouseHandler mouseHandler;
 	protected boolean mouseMenuEnabled = true;
 
-	protected Clipboard clip;
-	StringSelection stsel;
-	boolean canPaste = false;
+	protected Clipboard clipboard;
 
 	protected String selectAllTooltip;//"Click to select the whole table";
 	protected String moreColumnsTooltip;//"Scroll right to see more columns...";
@@ -160,11 +152,7 @@ public class ExactTable extends JTable {
 
 		setColumnSelectionAllowed(true);
 		setRowSelectionAllowed(true);
-
-		//Dall'Orso 20/12/2004
-		//BEGIN
 		setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-		//END
 
 		installKeyboard();
 		installMouse();
@@ -177,16 +165,15 @@ public class ExactTable extends JTable {
 		};
 		selectionListener.install(this);
 
-		clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 	}
 
 	protected void installKeyboard() {
 		InputMap im = getInputMap();
 		ActionMap am = getActionMap();
-		installKeyboardAction(im, am, COPY_ACTION);
 		installKeyboardAction(im, am, CUT_ACTION);
+		installKeyboardAction(im, am, COPY_ACTION);
 		installKeyboardAction(im, am, PASTE_ACTION);
-		installKeyboardAction(im, am, FILL_ACTION);
 		installKeyboardAction(im, am, CLEAR_ACTION);
 	}
 
@@ -208,11 +195,10 @@ public class ExactTable extends JTable {
 
 	protected JPopupMenu makeMouseMenu() {
 		JPopupMenu menu = new JPopupMenu();
-		menu.add(COPY_ACTION);
 		menu.add(CUT_ACTION);
+		menu.add(COPY_ACTION);
 		menu.add(PASTE_ACTION);
 		menu.add(CLEAR_ACTION);
-		menu.add(FILL_ACTION);
 		return menu;
 	}
 
@@ -263,16 +249,6 @@ public class ExactTable extends JTable {
 	}
 
 	@Override
-	public void setColumnSelectionAllowed(boolean allowed) {
-		super.setColumnSelectionAllowed(allowed);
-		allowed = getColumnSelectionAllowed();
-		if (tableHeader instanceof ClickableTableHeader) {
-			((ClickableTableHeader) tableHeader).setAllowsClickColumnSelection(allowed);
-		}
-		setSelectAllStatus(allowed || getRowSelectionAllowed());
-	}
-
-	@Override
 	public void setRowSelectionAllowed(boolean allowed) {
 		super.setRowSelectionAllowed(allowed);
 		allowed = getRowSelectionAllowed();
@@ -280,6 +256,16 @@ public class ExactTable extends JTable {
 			rowHeader.setAllowsClickRowSelection(allowed);
 		}
 		setSelectAllStatus(allowed || getColumnSelectionAllowed());
+	}
+
+	@Override
+	public void setColumnSelectionAllowed(boolean allowed) {
+		super.setColumnSelectionAllowed(allowed);
+		allowed = getColumnSelectionAllowed();
+		if (tableHeader instanceof ClickableTableHeader) {
+			((ClickableTableHeader) tableHeader).setAllowsClickColumnSelection(allowed);
+		}
+		setSelectAllStatus(allowed || getRowSelectionAllowed());
 	}
 
 	public void setSelectAllStatus(boolean allowed) {
@@ -330,7 +316,7 @@ public class ExactTable extends JTable {
 				if (border == null || border instanceof UIResource) {
 					scrollPane.setBorder(UIManager.getBorder("Table.scrollPaneBorder"));
 				}
-				//rowHeader=new RowHeader(dataModel);
+				//rowHeader = new RowHeader(dataModel);
 				rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);
 				rowHeader.install(this, scrollPane);
 				installLabels(scrollPane);
@@ -424,12 +410,10 @@ public class ExactTable extends JTable {
 		int cols = getSelectedColumnCount();
 		int rows = getSelectedRowCount();
 		boolean somethingSelected = (rows > 0 || cols > 0);
-		boolean moreSelected = (rows > 1 || cols > 1);
-		COPY_ACTION.setEnabled(clipboardTransferEnabled && somethingSelected);
-		CUT_ACTION.setEnabled(clipboardTransferEnabled && somethingSelected);
-		CLEAR_ACTION.setEnabled(somethingSelected);
-		PASTE_ACTION.setEnabled(somethingSelected && clipboardTransferEnabled && canPaste());
-		FILL_ACTION.setEnabled(fillCellsEnabled && moreSelected);
+		CUT_ACTION.setEnabled(batchEditingEnabled && somethingSelected);
+		COPY_ACTION.setEnabled(somethingSelected);
+		PASTE_ACTION.setEnabled(batchEditingEnabled && somethingSelected && canPaste());
+		CLEAR_ACTION.setEnabled(batchEditingEnabled && somethingSelected);
 	}
 
 	private void updateScrollLabels() {
@@ -441,7 +425,7 @@ public class ExactTable extends JTable {
 	public void updateStructure() {
 		tableChanged(new TableModelEvent(dataModel, TableModelEvent.HEADER_ROW));
 		if (rowHeader != null) {
-			rowHeader.update();
+			rowHeader.updateStructure();
 		}
 	}
 
@@ -539,20 +523,12 @@ public class ExactTable extends JTable {
 		return super.getScrollableBlockIncrement(visibleRect, orientation, direction);
 	}
 
-	public boolean isClipboardTransferEnabled() {
-		return clipboardTransferEnabled;
+	public boolean isBatchEditingEnabled() {
+		return batchEditingEnabled;
 	}
 
-	public void setClipboardTransferEnabled(boolean clipboardTransferEnabled) {
-		this.clipboardTransferEnabled = clipboardTransferEnabled;
-	}
-
-	public boolean isFillCellsEnabled() {
-		return fillCellsEnabled;
-	}
-
-	public void setFillCellsEnabled(boolean fillCellsEnabled) {
-		this.fillCellsEnabled = fillCellsEnabled;
+	public void setBatchEditingEnabled(boolean batchEditingEnabled) {
+		this.batchEditingEnabled = batchEditingEnabled;
 	}
 
 	public boolean isMouseMenuEnabled() {
@@ -563,35 +539,11 @@ public class ExactTable extends JTable {
 		this.mouseMenuEnabled = mouseMenuEnabled;
 	}
 
-	/* copy/cut/paste/delete stuff -------------------------------------*/
-
-	public void copyAnchorToSelection() {
-		if ((getSelectedRowCount() == 0) && (getSelectedColumnCount() == 0)) {
-			return;
-		}
-		if (dataModel instanceof ExactTableModel) {
-			stopEditing();
-			int rowFrom = selectionModel.getMinSelectionIndex();
-			int rowTo = selectionModel.getMaxSelectionIndex();
-			ListSelectionModel csm = columnModel.getSelectionModel();
-			int colFrom = csm.getMinSelectionIndex();
-			int colTo = csm.getMaxSelectionIndex();
-
-			int anchorRow = selectionModel.getAnchorSelectionIndex();
-			int anchorCol = csm.getAnchorSelectionIndex();
-
-			((ExactTableModel) dataModel).copyCellToArea(anchorRow, anchorCol, rowFrom, rowTo, colFrom, colTo);
-			updateRows(rowFrom, rowTo);
-			requestFocus();
-		}
-	}
+	/* cut/copy/paste/clear stuff -------------------------------------*/
 
 	public void copyCells() {
-		StringBuffer sbf = new StringBuffer();
-		// Check to ensure we have selected only a contiguous block of
-		// cells
-		int numcols = getSelectedColumnCount();
 		int numrows = getSelectedRowCount();
+		int numcols = getSelectedColumnCount();
 		int[] rowsselected = getSelectedRows();
 		int[] colsselected = getSelectedColumns();
 		if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] && numrows == rowsselected.length) && (numcols - 1 == colsselected[colsselected.length - 1]
@@ -599,6 +551,8 @@ public class ExactTable extends JTable {
 			JOptionPane.showMessageDialog(null, "Invalid Copy Selection", "Invalid Copy Selection", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
+
+		StringBuffer sbf = new StringBuffer();
 		for (int i = 0; i < numrows; i++) {
 			for (int j = 0; j < numcols; j++) {
 				sbf.append(getValueAt(rowsselected[i], colsselected[j]));
@@ -608,35 +562,26 @@ public class ExactTable extends JTable {
 			}
 			sbf.append("\n");
 		}
-		stsel = new StringSelection(sbf.toString()) {
-			@Override
-			public void lostOwnership(Clipboard clipboard, Transferable contents) {
-				canPaste = false;
-			}
-		};
-		clip.setContents(stsel, stsel);
-		canPaste = true;
+		StringSelection ssel = new StringSelection(sbf.toString());
+		clipboard.setContents(ssel, ssel);
 	}
 
 	public void clearCells() {
-		if (DEBUG) {
-			System.out.println("clearCells");
-		}
-		boolean hasClear = false;
-		ExactTableModel etm = null;
-		if (dataModel instanceof ExactTableModel) {
-			hasClear = true;
-			etm = (ExactTableModel) dataModel;
-		}
-
-		int numcols = getSelectedColumnCount();
 		int numrows = getSelectedRowCount();
+		int numcols = getSelectedColumnCount();
 		int[] rowsselected = getSelectedRows();
 		int[] colsselected = getSelectedColumns();
 		if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] && numrows == rowsselected.length) && (numcols - 1 == colsselected[colsselected.length - 1]
 				- colsselected[0] && numcols == colsselected.length))) {
 			JOptionPane.showMessageDialog(null, "Invalid Clear Selection", "Invalid Clear Selection", JOptionPane.ERROR_MESSAGE);
 			return;
+		}
+
+		boolean hasClear = false;
+		ExactTableModel etm = null;
+		if (dataModel instanceof ExactTableModel) {
+			hasClear = true;
+			etm = (ExactTableModel) dataModel;
 		}
 		for (int i = 0; i < numrows; i++) {
 			for (int j = 0; j < numcols; j++) {
@@ -647,72 +592,41 @@ public class ExactTable extends JTable {
 				}
 			}
 		}
-		updateRows(rowsselected[0], rowsselected[rowsselected.length - 1]);
+		updateRows(rowsselected[0], rowsselected[numrows - 1]);
 	}
 
 	public void pasteCells() {
-		pasteCellsAt(selectionModel.getAnchorSelectionIndex(), columnModel.getSelectionModel().getAnchorSelectionIndex());
-	}
-
-	public void pasteCellsAt(int startRow, int startCol) {
 		if (!canPaste()) {
 			return;
 		}
-		String rowstring, value;
-
-		int i = 0, j = 0;
-		if (DEBUG) {
-			System.out.println("Trying to Paste");
+		int numrows = getSelectedRowCount();
+		int numcols = getSelectedColumnCount();
+		int[] rowsselected = getSelectedRows();
+		int[] colsselected = getSelectedColumns();
+		if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] && numrows == rowsselected.length) && (numcols - 1 == colsselected[colsselected.length - 1]
+				- colsselected[0] && numcols == colsselected.length))) {
+			JOptionPane.showMessageDialog(null, "Invalid Paste Selection", "Invalid Paste Selection", JOptionPane.ERROR_MESSAGE);
+			return;
 		}
-		try {
-			String trstring = (String) (clip.getContents(this).getTransferData(DataFlavor.stringFlavor));
-			if (DEBUG) {
-				System.out.println("String is:" + trstring);
-			}
-			StringTokenizer st1 = new StringTokenizer(trstring, "\n");
-			for (i = 0; st1.hasMoreTokens(); i++) {
-				rowstring = st1.nextToken();
-				StringTokenizer st2 = new StringTokenizer(rowstring, "\t");
-				for (j = 0; st2.hasMoreTokens(); j++) {
-					value = st2.nextToken();
-					if (startRow + i < getRowCount() && startCol + j < getColumnCount()) {
-						setValueAt(value, startRow + i, startCol + j);
-					}
-					if (DEBUG) {
-						System.out.println("Putting " + value + "at row=" + startRow + i + "column=" + startCol + j);
-					}
 
+		try {
+			String s = (String) (clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor));
+			String[] rows = s.trim().split("\\n");
+			for (int i = 0; i < numrows; i++) {
+				String[] cells = rows[i % rows.length].trim().split("\\s+");
+				for (int j = 0; j < numcols; j++) {
+					setValueAt(cells[j % cells.length], rowsselected[i], colsselected[j]);
 				}
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			e.printStackTrace();
 		}
-		update();
-		setRowSelectionInterval(startRow, Math.min(getRowCount(), startRow + i - 1));
-		setColumnSelectionInterval(startCol, Math.min(getColumnCount(), startCol + j - 1));
+		updateRows(rowsselected[0], rowsselected[numrows - 1]);
 	}
 
-	/**
-	 * As of now does not allow importing data that has not been copied by us. Ideas are welcome...
-	 */
 	public boolean canPaste() {
-		return canPaste;
+		return clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor);
 	}
-
-	public AbstractAction COPY_ACTION = new AbstractAction("Copy") {
-
-		private static final long serialVersionUID = 1L;
-
-		{
-			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK, false));
-			putValue(Action.SHORT_DESCRIPTION, "Copies selected cells to the system clipboard");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			copyCells();
-		}
-
-	};
 
 	public AbstractAction CUT_ACTION = new AbstractAction("Cut") {
 
@@ -726,6 +640,21 @@ public class ExactTable extends JTable {
 		public void actionPerformed(ActionEvent e) {
 			copyCells();
 			clearCells();
+		}
+
+	};
+
+	public AbstractAction COPY_ACTION = new AbstractAction("Copy") {
+
+		private static final long serialVersionUID = 1L;
+
+		{
+			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK, false));
+			putValue(Action.SHORT_DESCRIPTION, "Copies selected cells to the system clipboard");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			copyCells();
 		}
 
 	};
@@ -756,21 +685,6 @@ public class ExactTable extends JTable {
 
 		public void actionPerformed(ActionEvent e) {
 			clearCells();
-		}
-
-	};
-
-	public AbstractAction FILL_ACTION = new AbstractAction("Fill") {
-
-		private static final long serialVersionUID = 1L;
-
-		{
-			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK, false));
-			putValue(Action.SHORT_DESCRIPTION, "Fills selected cells with the value of the focused cell");
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			copyAnchorToSelection();
 		}
 
 	};

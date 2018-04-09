@@ -28,7 +28,6 @@ import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.log.CSVLogger;
-import jmt.engine.log.JSimLogger;
 import jmt.engine.log.JSimLoggerFactory;
 import jmt.engine.log.LoggerParameters;
 
@@ -65,12 +64,11 @@ public class LogTunnel extends ServiceTunnel {
 	public static final String[] COLUMNS = {COLUMN_LOGGERNAME, COLUMN_TIMESTAMP, COLUMN_JOBID, COLUMN_CLASSID, 
 			COLUMN_INTERARRIVAL_SAMECLASS, COLUMN_INTERARRIVAL_ANYCLASS, COLUMN_START_TIME};
 
-	private char chDelimiter;
-	private char decimalSeparator;
+	private String chDelimiter;
+	private String decimalSeparator;
 	private int intReplacePolicy;
 	private String strTimestampValue;
 	private LoggerParameters lp;
-	private final JSimLogger debugLog = JSimLogger.getLogger(JSimLogger.STD_LOGGER);
 
 	private CSVLogger logger;
 	private Map<String, String> defaultValues;
@@ -91,24 +89,9 @@ public class LogTunnel extends ServiceTunnel {
 		// Get global values (from the XML file) for the path, auto-replace, and delimiter 
 		lp.path = getOwnerNode().getSimParameters().getLogPath();
 		intReplacePolicy = new Integer(getOwnerNode().getSimParameters().getLogReplaceMode()).intValue();
-		chDelimiter = (getOwnerNode().getSimParameters().getLogDelimiter().charAt(0));
-		try {
-			String ds = getOwnerNode().getSimParameters().getLogDecimalSeparator();
-			if (ds.length() > 0) {
-				decimalSeparator = ds.charAt(0);
-			} else {
-				decimalSeparator = '.';
-			}
-		} catch (Exception e) {
-			debugLog.debug(e.toString());
-		}
-
+		chDelimiter = getOwnerNode().getSimParameters().getLogDelimiter();
+		decimalSeparator = getOwnerNode().getSimParameters().getLogDecimalSeparator();
 		strTimestampValue = getOwnerNode().getSimParameters().getTimestampValue();
-
-		// Add an initial file-separator if none exists
-		if (lp.path == null || lp.path.length() == 0) {
-			lp.path = ".";
-		}
 	}
 
 	@Override
@@ -128,37 +111,37 @@ public class LogTunnel extends ServiceTunnel {
 							new File(lp.path, lp.name), 
 							COLUMNS, 
 							intReplacePolicy == LoggerParameters.LOGGER_AR_APPEND, 
-							String.valueOf(chDelimiter), 
+							chDelimiter, 
 							decimalSeparator
 							);
 					defaultValues = new HashMap<String, String>();
-					if (lp.boolLoggername) {
-						defaultValues.put(COLUMN_LOGGERNAME, message.getSource().getName());
-					}
-					if (lp.boolExecTimestamp) {
+					if (lp.boolExecTimestamp.booleanValue()) {
 						defaultValues.put(COLUMN_START_TIME, strTimestampValue);
+					}
+					if (lp.boolLoggername.booleanValue()) {
+						defaultValues.put(COLUMN_LOGGERNAME, message.getSource().getName());
 					}
 				}
 				// Fills the values for the log column
 				Map<String, Object> values = new HashMap<String, Object>();
-				if (lp.boolTimeStamp) {
+				if (lp.boolTimeStamp.booleanValue()) {
 					values.put(COLUMN_TIMESTAMP, message.getTime());
 				}
 
-				if (lp.boolJobID) {
+				if (lp.boolJobID.booleanValue()) {
 					values.put(COLUMN_JOBID, job.getId());
 				}
 
-				if (lp.boolJobClass) {
+				if (lp.boolJobClass.booleanValue()) {
 					values.put(COLUMN_CLASSID, job.getJobClass().getName());
 				}
 
-				if (lp.boolTimeSameClass.booleanValue() == true) {
+				if (lp.boolTimeSameClass.booleanValue()) {
 					double interarrivalSame = message.getTime() - jobsList.getLastJobOutTimePerClass(job.getJobClass());
 					values.put(COLUMN_INTERARRIVAL_SAMECLASS, interarrivalSame);
 				}
 
-				if (lp.boolTimeAnyClass.booleanValue() == true) {
+				if (lp.boolTimeAnyClass.booleanValue()) {
 					double interarrivalAny = message.getTime() - jobsList.getLastJobOutTime();
 					values.put(COLUMN_INTERARRIVAL_ANYCLASS, interarrivalAny);
 				}

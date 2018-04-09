@@ -333,7 +333,6 @@ public class ArrayUtils {
 	}
 
 	public static void copy3(double[][][] from, double[][][] to) {
-
 		int len1, len2, len3;
 		len1 = from.length;
 		System.arraycopy(from, 0, to, 0, len1);

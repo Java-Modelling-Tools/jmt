@@ -28,7 +28,6 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
- * @author Bertoli Marco 10-oct-2005
  * 
  */
 public class GammaDistrPar extends AbstractParameter implements Parameter {
@@ -39,15 +38,15 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	/**
 	 * It creates a new gamma parameter according to the value provided by the user.
 	 *
-	 * @param alpha double containing the alpha parameter of the gamma distribution (must be greater than zero).
-	 * @param lambda double containing the lambda parameter of the gamma distribution (must be greater than zero).
-	 *
-	 * @throws IncorrectDistributionParameterException if alpha or lambda are not greater than zero.
+	 * @param alpha double containing the parameter alpha of the gamma distribution.
+	 * @param lambda double containing the parameter lambda of the gamma distribution.
+	 * @throws IncorrectDistributionParameterException if alpha or lambda is not
+	 * greater than zero.
 	 *
 	 */
 	public GammaDistrPar(double alpha, double lambda) throws IncorrectDistributionParameterException {
 		if ((alpha <= 0.0) || (lambda <= 0.0)) {
-			throw new IncorrectDistributionParameterException("alpha and lambda must be >0.");
+			throw new IncorrectDistributionParameterException("alpha and lambda must be > 0");
 		} else {
 			this.alpha = alpha;
 			this.lambda = lambda;
@@ -59,14 +58,12 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It controls if the parameter is correct or not.
-	 * For the gamma distribution, the parameter are right if they are both greater
-	 * than zero.
+	 * It controls if the parameters are correct or not. For the gamma distribution,
+	 * the parameters are right if they are both greater than zero.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameters are correct or not.
 	 *
 	 */
-
 	@Override
 	public boolean check() {
 		if ((alpha <= 0.0) || (lambda <= 0.0)) {
@@ -87,28 +84,28 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It returns the value of the lambda parameter of the gamma distribution.
+	 * It returns the value of the parameter lambda of the gamma distribution.
 	 *
 	 * @return double with lambda.
 	 *
 	 */
-
 	public double getLambda() {
 		return lambda;
 	}
 
 	/**
 	 * It allows the user to modify the value of the parameter alpha of the gamma
-	 * distribution. It verifies if the new value is correct, that is if alpha is greater than zero.
+	 * distribution. It verifies if the new value is correct, that is if alpha is
+	 * greater than zero.
 	 *
-	 * @param alpha double indicating the new value of the parameter alpha
-	 * @throws IncorrectDistributionParameterException if the value provided is not greater than zero.
+	 * @param alpha double indicating the new value of the parameter alpha.
+	 * @throws IncorrectDistributionParameterException if the value provided is not
+	 * greater than zero.
 	 *
 	 */
-
 	public void setAlpha(double alpha) throws IncorrectDistributionParameterException {
 		if (alpha <= 0.0) {
-			throw new IncorrectDistributionParameterException("alpha must be >0.");
+			throw new IncorrectDistributionParameterException("alpha must be > 0");
 		} else {
 			this.alpha = alpha;
 		}
@@ -116,34 +113,20 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It allows the user to modify the value of the parameter lambda of the gamma
-	 * distribution. It verifies if the new value is correct, that is if lambda is greater than zero.
+	 * distribution. It verifies if the new value is correct, that is if lambda is
+	 * greater than zero.
 	 *
-	 * @param lambda double indicating the new value of the parameter lambda
-	 * @throws IncorrectDistributionParameterException if the value provided is not greater than zero.
+	 * @param lambda double indicating the new value of the parameter lambda.
+	 * @throws IncorrectDistributionParameterException if the value provided is not
+	 * greater than zero.
 	 *
 	 */
-
 	public void setLambda(double lambda) throws IncorrectDistributionParameterException {
 		if (lambda <= 0.0) {
-			throw new IncorrectDistributionParameterException("lambda must be >0.");
+			throw new IncorrectDistributionParameterException("lambda must be > 0");
 		} else {
 			this.lambda = lambda;
 		}
-	}
-
-	/**
-	 * Sets mean for a given distribution parameter. This method is required to adjust distributions
-	 * mean values into Load Dependent Service Time Strategy
-	 * @param meanValue new mean value for this distribution
-	 * Author: Bertoli Marco
-	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution
-	 */
-	@Override
-	public void setMean(double meanValue) throws IncorrectDistributionParameterException {
-		if (meanValue <= 0 || Double.isInfinite(meanValue)) {
-			throw new IncorrectDistributionParameterException("Mean value must be finite and greater than zero");
-		}
-		lambda = meanValue / alpha;
 	}
 
 } // end GammaDistrPar

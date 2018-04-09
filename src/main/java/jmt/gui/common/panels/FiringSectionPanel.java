@@ -108,7 +108,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 			leftPanel.clearCheckVectors();
 			leftPanel.addCheckVector(stationOutKeys);
 			leftPanel.addCheckVector(classKeys);
-			firingTable.tableChanged(new TableModelEvent(firingTable.getModel(), TableModelEvent.HEADER_ROW));
+			firingTable.updateStructure();
 		}
 	}
 
@@ -182,7 +182,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 				if (index >= 0) {
 					stopAllCellEditing();
 					String modeName = stationData.getTransitionModeName(stationKey, index);
-					firingBorder.setTitle("Firing Output for " + modeName);
+					firingBorder.setTitle("Firing Outcome for " + modeName);
 					currentModeIndex = index;
 					firingPane.repaint();
 					updateNotice();
@@ -268,8 +268,9 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 			super(new FiringOutcomeTableModel());
 			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			setRowHeight(ROW_HEIGHT);
-			setRowSelectionAllowed(false);
-			setColumnSelectionAllowed(false);
+			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(true);
+			setBatchEditingEnabled(true);
 		}
 
 	}

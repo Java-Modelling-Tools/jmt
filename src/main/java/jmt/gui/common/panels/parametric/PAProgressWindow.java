@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagLayout;
+import java.awt.Toolkit;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -35,6 +36,7 @@ import javax.swing.JToolBar;
 import javax.swing.border.EmptyBorder;
 
 import jmt.framework.gui.components.JMTDialog;
+import jmt.framework.gui.image.ImageLoader;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
@@ -61,7 +63,6 @@ public class PAProgressWindow extends JMTDialog {
 	private JButton start;
 	private JButton stop;
 	private JButton pause;
-	private JToolBar toolbar;
 	private JProgressBar progressBar;
 	private SampleQNAnimation animation;
 	private JLabel mainLabel;
@@ -107,8 +108,10 @@ public class PAProgressWindow extends JMTDialog {
 
 		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_WHATIF_PROGRESS, CommonConstants.MAX_GUI_HEIGHT_WHATIF_PROGRESS);
 
-		// Creates bottom toolbar
-		toolbar = new JToolBar();
+		// Creates bottom panel
+		JPanel bottomPanel = new JPanel(new BorderLayout());
+		
+		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable(false);
 		toolbar.setRollover(true);
 		start = new JButton();
@@ -117,45 +120,54 @@ public class PAProgressWindow extends JMTDialog {
 		toolbar.add(pause);
 		stop = new JButton();
 		toolbar.add(stop);
+		bottomPanel.add(toolbar, BorderLayout.WEST);
+
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension iconSize = null;
+		if (screenSize.width <= CommonConstants.MAX_SMALL_ICON_SCREEN_WIDTH
+				&& screenSize.height <= CommonConstants.MAX_SMALL_ICON_SCREEN_HEIGHT) {
+			iconSize = CommonConstants.SMALL_ICON_SIZE_TOOL_BAR;
+		} else {
+			iconSize = CommonConstants.LARGE_ICON_SIZE_TOOL_BAR;
+		}
 
 		start.setAction(startAction);
 		start.setText("");
-		start.setIcon(JMTImageLoader.loadImage("Sim"));
+		start.setIcon(JMTImageLoader.loadImage("Sim", iconSize));
 		start.setFocusPainted(false);
 		start.setContentAreaFilled(false);
 		start.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		start.setRolloverIcon(JMTImageLoader.loadImage("SimRO"));
-		start.setPressedIcon(JMTImageLoader.loadImage("SimP"));
+		start.setRolloverIcon(JMTImageLoader.loadImage("Sim", ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		start.setPressedIcon(JMTImageLoader.loadImage("Sim", ImageLoader.MODIFIER_PRESSED, iconSize));
 		start.setVisible(true);
 
 		pause.setAction(pauseAction);
 		pause.setText("");
-		pause.setIcon(JMTImageLoader.loadImage("Pause"));
+		pause.setIcon(JMTImageLoader.loadImage("Pause", iconSize));
 		pause.setFocusPainted(false);
 		pause.setContentAreaFilled(false);
 		pause.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		pause.setRolloverIcon(JMTImageLoader.loadImage("PauseRO"));
-		pause.setPressedIcon(JMTImageLoader.loadImage("PauseP"));
+		pause.setRolloverIcon(JMTImageLoader.loadImage("Pause", ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		pause.setPressedIcon(JMTImageLoader.loadImage("Pause", ImageLoader.MODIFIER_PRESSED, iconSize));
 		pause.setVisible(true);
 
 		stop.setAction(stopAction);
 		stop.setText("");
-		stop.setIcon(JMTImageLoader.loadImage("Stop"));
+		stop.setIcon(JMTImageLoader.loadImage("Stop", iconSize));
 		stop.setFocusPainted(false);
 		stop.setContentAreaFilled(false);
 		stop.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		stop.setRolloverIcon(JMTImageLoader.loadImage("StopRO"));
-		stop.setPressedIcon(JMTImageLoader.loadImage("StopP"));
+		stop.setRolloverIcon(JMTImageLoader.loadImage("Stop", ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		stop.setPressedIcon(JMTImageLoader.loadImage("Stop", ImageLoader.MODIFIER_PRESSED, iconSize));
 		stop.setVisible(true);
 
-		// Adds a progress bar
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
 		progressBar.setForeground(Color.BLUE);
-		toolbar.add(progressBar);
+		bottomPanel.add(progressBar, BorderLayout.CENTER);
 
-		// Adds toolbar
-		this.getContentPane().add(toolbar, BorderLayout.SOUTH);
+		// Adds bottom panel
+		this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);
 
 		//Creates and adds the animation panel
 		//animation = new SampleQNAnimation();

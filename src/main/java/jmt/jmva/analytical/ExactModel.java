@@ -147,7 +147,7 @@ public class ExactModel implements ExactConstants  {
 	private Map<SolverAlgorithm, int[]> algIterations;
 
 	/**
-	 * queue lengths
+	 * queue length
 	 * dim: queueLen<Algorithm, [stations][classes][iterations]>
 	 */
 	private Map<SolverAlgorithm, double[][][]> queueLen;
@@ -160,7 +160,7 @@ public class ExactModel implements ExactConstants  {
 
 	/**
 	 * residence times
-	 * dim: resTime<Algorithm, [stations][classes][iterations]>
+	 * dim: resTimes<Algorithm, [stations][classes][iterations]>
 	 */
 	private Map<SolverAlgorithm, double[][][]> resTimes;
 
@@ -672,8 +672,6 @@ public class ExactModel implements ExactConstants  {
 		return ReferenceStation;
 	}
 
-
-
 	/**
 	 * @return total population
 	 */
@@ -973,7 +971,7 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public boolean resize(int stations, int classes, boolean forceResize) {
 		if (stations <= 0 || classes <= 0) {
-			throw new IllegalArgumentException("stations and classes must be >0");
+			throw new IllegalArgumentException("stations and classes must be > 0");
 		}
 		if (forceResize || this.stations != stations || this.classes != classes) {
 			//other cases already handled in setXXX methods
@@ -1072,16 +1070,16 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public double[][][] getResTimes(SolverAlgorithm alg) {
 		if (alg != null) {
-			// Added by Cerotti					
+			// Added by Cerotti
 			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));
 
-			for (int s=0; s < stations; s++)
-				for (int c=0; c< classes; c++)
-					for (int i=0; i < iterations; i++)
-						if (classTypes[c]==CLASS_CLOSED)
-							if (visits[ReferenceStation[c]][c]!=0)
-								res[s][c][i] /=  (visits[ReferenceStation[c]][c]);																	
-			// End here									
+			for (int s = 0; s < stations; s++)
+				for (int c = 0; c < classes; c++)
+					for (int i = 0; i < iterations; i++)
+						if (classTypes[c] == CLASS_CLOSED)
+							if (visits[ReferenceStation[c]][c] != 0)
+								res[s][c][i] /= (visits[ReferenceStation[c]][c]);
+			// End here
 			return res;
 		}
 		return null;
@@ -1308,7 +1306,7 @@ public class ExactModel implements ExactConstants  {
 
 		//Delete the selected station in ReferenceStation (Kourosh OCT 2013)		
 		for (int j=0; j< classes; j++)
-			if (ReferenceStation[j] == i )
+			if (ReferenceStation[j] == i)
 				ReferenceStation[j] = 0;
 	}
 
@@ -1969,7 +1967,6 @@ public class ExactModel implements ExactConstants  {
 				serviceTimes[stationNum] = new double[classes][1];
 				visits[stationNum] = new double[classes];
 				for (int k = 0; k < classes; k++) {
-
 					Node node = sTimes.item(k).getFirstChild();
 					String nodeValue = (node).getNodeValue();
 					serviceTimes[stationNum][k][0] = Double.parseDouble(nodeValue);
@@ -1984,7 +1981,7 @@ public class ExactModel implements ExactConstants  {
 	public boolean loadReferenceStation(Node ReferenceStationNode) {
 		classes = Integer.parseInt(((Element) ReferenceStationNode).getAttribute("number"));
 		ReferenceStation = new int[classes];
-		NodeList classList = ReferenceStationNode.getChildNodes();				
+		NodeList classList = ReferenceStationNode.getChildNodes();
 		int classNum = 0;
 		Node n;
 		Element current;
@@ -1993,28 +1990,25 @@ public class ExactModel implements ExactConstants  {
 			if (!(n instanceof Element)) {
 				continue;
 			}
-			current = (Element) n;			
-			for (int j=0; j<stations ; j++)			
-				if (stationNames[j].equals(current.getAttribute("refStation")))
-				{												
+			current = (Element) n;
+			for (int j = 0; j < stations; j++) {
+				if (stationNames[j].equals(current.getAttribute("refStation"))) {
 					ReferenceStation[classNum] = j;
 					break;
-				}	
-				else if (current.getAttribute("refStation").equals("Arrival Process")) {						
+				} else if (current.getAttribute("refStation").equals("Arrival Process")) {						
 					ReferenceStation[classNum] = stationNames.length;
-				}					
-				else {						
+				} else {
 					ReferenceStation[classNum] = 0;
 				}
+			}
 			classNum++;
 		}
 		return true;
 	}
 
 	public boolean loadReferenceStationDefault(Node classNode) {
-		classes  = Integer.parseInt(((Element) classNode).getAttribute("number"));		
-		for (int i=0;i<classes;i++)
-		{						
+		classes = Integer.parseInt(((Element) classNode).getAttribute("number"));
+		for (int i = 0; i < classes; i++) {
 			ReferenceStation[i] = 0;
 		}
 		return true;
@@ -2134,7 +2128,6 @@ public class ExactModel implements ExactConstants  {
 		}
 		return arr;
 	}
-
 	//end NEW
 
 	//methods for aggregate results retrieval
@@ -2144,68 +2137,62 @@ public class ExactModel implements ExactConstants  {
 	public double[][] getPerClassX(SolverAlgorithm alg) {
 		if (throughput == null) {
 			return null;
-		} else {
-			double[][] retVal = new double[classes][iterations];
-			double[][][] throughput = this.throughput.get(alg);
-			// Scans for every iteration (what if analysis)
-			for (int k = 0; k < iterations; k++) {
-				//scan columns to get one value per column
-				for (int i = 0; i < retVal.length; i++) {
-					//throughput is ratio of specific throughput on specific num of visits
-					if (classTypes[i] == CLASS_OPEN) {
-						retVal[i][k] = throughput[0][i][k] / visits[0][i];
-					} else {
-						// Added by Cerotti
-						retVal[i][k] = throughput[ReferenceStation[i]][i][k];
-					}
-				}
-			}
-			return retVal;
 		}
-	}
-
-	/**Returns per-station aggregate for throughput*/
-	public double[][] getPerStationX(SolverAlgorithm alg) {
-		if (throughput == null) {
-			return null;
-		} else {
-			double[][] retVal = new double[stations][iterations];
-			double[][][] throughput = this.throughput.get(alg);
-			for (int i = 0; i < retVal.length; i++) {
-				// Scans for every iteration (what if analysis)
-				for (int k = 0; k < iterations; k++) {
-					retVal[i][k] = 0;
-					for (int j = 0; j < throughput[i].length; j++) {
-						retVal[i][k] += throughput[i][j][k];
-					}
-				}
-			}
-			return retVal;
-		}
-	}
-
-	/**Returns global aggregate for throughput*/
-	public double[] getGlobalX(SolverAlgorithm alg) {
-		double[] retVal = new double[iterations];
-		double[][] aggs = getPerClassX(alg);
+		double[][] retVal = new double[classes][iterations];
+		double[][][] throughput = this.throughput.get(alg);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
-			if (throughput == null) {
-				retVal[k] = Double.NaN;
-			} else {
-				if (aggs != null) {
-					for (double[] agg : aggs) {
-						retVal[k] += agg[k];
-					}
+			//scan columns to get one value per column
+			for (int i = 0; i < classes; i++) {
+				//throughput is ratio of specific throughput on specific num of visits
+				if (classTypes[i] == CLASS_OPEN) {
+					retVal[i][k] = throughput[0][i][k] / visits[0][i];
 				} else {
-					retVal[k] = Double.NaN;
+					// Added by Cerotti
+					retVal[i][k] = throughput[ReferenceStation[i]][i][k];
 				}
 			}
 		}
 		return retVal;
 	}
 
-	/**Returns per-class aggregate for queue lengths*/
+	/**Returns per-station aggregate for throughput*/
+	public double[][] getPerStationX(SolverAlgorithm alg) {
+		if (throughput == null) {
+			return null;
+		}
+		double[][] retVal = new double[stations][iterations];
+		double[][][] throughput = this.throughput.get(alg);
+		// Scans for every iteration (what if analysis)
+		for (int k = 0; k < iterations; k++) {
+			for (int i = 0; i < stations; i++) {
+				retVal[i][k] = 0;
+				for (int j = 0; j < classes; j++) {
+					retVal[i][k] += throughput[i][j][k];
+				}
+			}
+		}
+		return retVal;
+	}
+
+	/**Returns global aggregate for throughput*/
+	public double[] getGlobalX(SolverAlgorithm alg) {
+		if (throughput == null) {
+			return null;
+		}
+		double[] retVal = new double[iterations];
+		double[][] xClassAggs = getPerClassX(alg);
+		// Scans for every iteration (what if analysis)
+		for (int k = 0; k < iterations; k++) {
+			retVal[k] = 0;
+			for (int i = 0; i < classes; i++) {
+				retVal[k] += xClassAggs[i][k];
+			}
+		}
+		return retVal;
+	}
+
+	/**Returns per-class aggregate for queue length*/
 	public double[][] getPerClassQ(SolverAlgorithm alg) {
 		if (queueLen == null) {
 			return null;
@@ -2214,19 +2201,17 @@ public class ExactModel implements ExactConstants  {
 		double[][][] queueLen = this.queueLen.get(alg);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
-			//first scan columns
-			for (int i = 0; i < retVal.length; i++) {
+			for (int i = 0; i < classes; i++) {
 				retVal[i][k] = 0;
-				//then rows
-				for (double[][] element : queueLen) {
-					retVal[i][k] += element[i][k];
+				for (int j = 0; j < stations; j++) {
+					retVal[i][k] += queueLen[j][i][k];
 				}
 			}
 		}
 		return retVal;
 	}
 
-	/**Returns per-station aggregate for queue lengths*/
+	/**Returns per-station aggregate for queue length*/
 	public double[][] getPerStationQ(SolverAlgorithm alg) {
 		if (queueLen == null) {
 			return null;
@@ -2235,9 +2220,9 @@ public class ExactModel implements ExactConstants  {
 		double[][][] queueLen = this.queueLen.get(alg);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
-			for (int i = 0; i < queueLen.length; i++) {
+			for (int i = 0; i < stations; i++) {
 				retVal[i][k] = 0;
-				for (int j = 0; j < queueLen[i].length; j++) {
+				for (int j = 0; j < classes; j++) {
 					retVal[i][k] += queueLen[i][j][k];
 				}
 			}
@@ -2245,66 +2230,39 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-	/**Returns global aggregate for queue lengths*/
+	/**Returns global aggregate for queue length*/
 	public double[] getGlobalQ(SolverAlgorithm alg) {
 		if (queueLen == null) {
 			return null;
 		}
 		double[] retVal = new double[iterations];
-		double[][] aggs = getPerClassQ(alg);
+		double[][] qClassAggs = getPerClassQ(alg);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
-			if (aggs != null) {
-				for (double[] agg : aggs) {
-					retVal[k] += agg[k];
-				}
-			} else {
-				retVal[k] = Double.NaN;
+			retVal[k] = 0;
+			for (int i = 0; i < classes; i++) {
+				retVal[k] += qClassAggs[i][k];
 			}
 		}
 		return retVal;
 	}
 
 	/**Returns per-class aggregate for residence times*/
-	/*public double[][] getPerClassR(SolverAlgorithm alg) {
-		if (resTimes == null) {
-			return null;
-		}
-
-		double[][] retVal = new double[classes][iterations];
-		double[][][] resTimes = this.getResTimes(alg);
-		//double[][][] resTimes = this.resTimes.get(alg);
-
-		// Scans for every iteration (what if analysis)
-		for (int k = 0; k < iterations; k++) {
-			for (int i = 0; i < retVal.length; i++) {
-				retVal[i][k] = 0;
-				for (double[][] resTime : resTimes) {
-					retVal[i][k] += resTime[i][k];
-				}
-			}
-		}
-		return retVal;
-	}*/
-
-	// Added by Cerotti
-	/**Returns per-class aggregate for residence times according to reference station including its residence time or not (boolean with)*/
 	public double[][] getPerClassR(SolverAlgorithm alg, boolean with) {
 		if (resTimes == null) {
 			return null;
 		}
-
 		double[][] retVal = new double[classes][iterations];
 		double[][][] resTimes = this.getResTimes(alg);
-
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
-			for (int i = 0; i < retVal.length; i++) {
+			for (int i = 0; i < classes; i++) {
 				retVal[i][k] = 0;
-				for (int j = 0; j < stations; j++) 
-					if (with || j!=ReferenceStation[i]) {
+				for (int j = 0; j < stations; j++) {
+					if (with || classTypes[i] == CLASS_OPEN || j != ReferenceStation[i]) {
 						retVal[i][k] += resTimes[j][i][k];
 					}
+				}
 			}
 		}
 		return retVal;
@@ -2312,29 +2270,25 @@ public class ExactModel implements ExactConstants  {
 
 	/**Returns per-station aggregate for residence times*/
 	public double[][] getPerStationR(SolverAlgorithm alg) {
+		if (throughput == null) {
+			return null;
+		}
 		if (resTimes == null) {
 			return null;
 		}
-
 		double[][] retVal = new double[stations][iterations];
-		//double[][] xClassAggs = getPerClassX(alg);
-		double[][][] throughput = this.throughput.get(alg);
+		double[][] xClassAggs = getPerClassX(alg);
 		double[][][] resTimes = this.getResTimes(alg);
-
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < stations; i++) {
 				retVal[i][k] = 0;
 				double dividend = 0;
 				for (int j = 0; j < classes; j++) {
-					if (throughput != null) {
-						retVal[i][k] += throughput[i][j][k] * resTimes[i][j][k];
-						dividend += throughput[i][j][k];
-					} else {
-						return null;
-					}
+					retVal[i][k] += xClassAggs[j][k] * resTimes[i][j][k];
+					dividend += xClassAggs[j][k];
 				}
-				if (dividend != 0) {
+				if (dividend > 0) {
 					retVal[i][k] /= dividend;
 				} else {
 					retVal[i][k] = 0;
@@ -2345,84 +2299,31 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**Returns system response time*/
-	/*public double[] getGlobalR(SolverAlgorithm alg) {
-		if (resTimes == null) {
+	public double[] getGlobalR(SolverAlgorithm alg, boolean with) {
+		if (throughput == null) {
 			return null;
 		}
-		double[] retVal = new double[iterations];
-		double[][] xClassAggs = getPerClassX(alg);
-		double[][] aggs = getPerClassR(alg);
-		// Scans for every iteration (what if analysis)
-		for (int k = 0; k < iterations; k++) {
-			double dividend = 0;
-			if (aggs != null) {
-				for (int i = 0; i < aggs.length; i++) {
-					retVal[k] += xClassAggs[i][k] * aggs[i][k];
-					dividend += xClassAggs[i][k];
-				}
-				if (dividend > 0) {
-					retVal[k] /= dividend;
-				} else {
-					retVal[k] = 0;
-				}
-			} else {
-				retVal[k] = Double.NaN;
-			}
-		}
-		return retVal;
-	}*/
-
-	// Added by Cerotti
-	/**Returns system response time according to reference station including its residence time or not (boolean with)*/
-	public double[] getGlobalR(SolverAlgorithm alg, boolean with) {
 		if (resTimes == null) {
 			return null;
 		}
 		double[] retVal = new double[iterations];
 		double[][] xClassAggs = getPerClassX(alg);		
-		double[][] aggs = getPerClassR(alg, with);
-
+		double[][] rClassAggs = getPerClassR(alg, with);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
+			retVal[k] = 0;
 			double dividend = 0;
-			if (aggs != null) {
-				for (int i = 0; i < aggs.length; i++) {
-					retVal[k] += xClassAggs[i][k] * aggs[i][k];
-					dividend += xClassAggs[i][k];
-				}
-				if (dividend > 0) {
-					retVal[k] /= dividend;
-				} else {
-					retVal[k] = 0;
-				}
+			for (int i = 0; i < classes; i++) {
+				retVal[k] += xClassAggs[i][k] * rClassAggs[i][k];
+				dividend += xClassAggs[i][k];
+			}
+			if (dividend > 0) {
+				retVal[k] /= dividend;
 			} else {
-				retVal[k] = Double.NaN;
+				retVal[k] = 0;
 			}
 		}
 		return retVal;
-	}
-
-	/**Returns per-class aggregate for utilization*/
-	public double[][] getPerClassU(SolverAlgorithm alg) {
-		if (util == null) {
-			return null;
-		} else {
-			/*Disabled as this measure is unsensed... Returns an array with negatives instead
-			double[] retVal = new double[classes];
-			for (int i=0; i<retVal.length; i++) {
-			    retVal[i] = 0;
-			    for (int j=0; j<util.length; j++) {
-			        retVal[i] += util[j][i];
-			    }
-			}
-			return retVal;*/
-
-			double[][] neg = new double[classes][iterations];
-			for (int k = 0; k < classes; k++) {
-				Arrays.fill(neg[k], -1.0);
-			}
-			return neg;
-		}
 	}
 
 	public double[][] getPerStationU(SolverAlgorithm alg) {
@@ -2433,9 +2334,9 @@ public class ExactModel implements ExactConstants  {
 		double[][][] util = this.util.get(alg);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
-			for (int i = 0; i < retVal.length; i++) {
+			for (int i = 0; i < stations; i++) {
 				retVal[i][k] = 0;
-				for (int j = 0; j < util[i].length; j++) {
+				for (int j = 0; j < classes; j++) {
 					retVal[i][k] += util[i][j][k];
 				}
 			}
@@ -2443,96 +2344,50 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-	public double[] getGlobalU(SolverAlgorithm alg) {
-		if (util == null) {
+	//Per-class System Power
+	public double[][] getPerClassSP(SolverAlgorithm alg, boolean with) {
+		if (throughput == null) {
 			return null;
-		} else {
-			/* Disabled as this measure is unsensed... Returns an array with negatives instead
-			double retVal = 0;
-			double[] aggs = getPerStationU();
-			if (aggs!=null) {
-			    for (int i=0; i<aggs.length; i++) retVal += aggs[i];
-			    return retVal;
-			} else return Double.NaN;
-			 */
-			double[] neg = new double[iterations];
-			Arrays.fill(neg, -1.0);
-			return neg;
 		}
-	}
-
-	//Added by ASHANKA START
-	//System Power
-	//Unlike other performance indices we do not have station level
-	//aggregate and individual 
-	/*public double[][] getPerClassSP(SolverAlgorithm alg) {
 		if (resTimes == null) {
 			return null;
 		}
 		double[][] retVal = new double[classes][iterations];
+		double[][] xClassAggs = getPerClassX(alg);
+		double[][] rClassAggs = getPerClassR(alg, with);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
-			for (int i = 0; i < retVal.length; i++) {
-				try {
-					retVal[i][k] = getPerClassX(alg)[i][k] / getPerClassR(alg)[i][k];
-				} catch (ArithmeticException ae) {
+			for (int i = 0; i < classes; i++) {
+				if (rClassAggs[i][k] > 0) {
+					retVal[i][k] = xClassAggs[i][k] / rClassAggs[i][k];
+				} else {
 					retVal[i][k] = 0;
 				}
 			}
 		}
 		return retVal;
-	}*/
-
-	//Added by Davide Cerotti
-	//Per-class System Power
-	//according to reference station including its residence time or not (boolean with)*/  
-	public double[][] getPerClassSP(SolverAlgorithm alg, boolean with) {
-		if (resTimes == null) {
-			return null;
-		}
-		double[][] retVal = new double[classes][iterations];
-		// Scans for every iteration (what if analysis)
-		for (int k = 0; k < iterations; k++) {
-			for (int i = 0; i < retVal.length; i++) {
-				retVal[i][k] = getPerClassX(alg)[i][k] / getPerClassR(alg, with)[i][k];
-			}
-		}
-		return retVal;
 	}
 
-	/*public double[] getGlobalSP(SolverAlgorithm alg) {
-		if (resTimes == null) {
-			return null;
-		}
-		double[] retVal = new double[iterations];
-		for (int k = 0; k < iterations; k++) {
-			try {
-				retVal[k] = getGlobalX(alg)[k] / getGlobalR(alg)[k];
-			} catch (ArithmeticException e) {
-				retVal[k] = 0;
-			}
-		}
-		return retVal;
-	}*/
-
-	//Added by Davide Cerotti
 	//System Power
-	//according to reference station including its residence time or not (boolean with)*/  
 	public double[] getGlobalSP(SolverAlgorithm alg, boolean with) {
+		if (throughput == null) {
+			return null;
+		}
 		if (resTimes == null) {
 			return null;
 		}
 		double[] retVal = new double[iterations];
+		double[] xGlobalAggs = getGlobalX(alg);
+		double[] rGlobalAggs = getGlobalR(alg, with);
 		for (int k = 0; k < iterations; k++) {
-			try {
-				retVal[k] = getGlobalX(alg)[k] / getGlobalR(alg, with)[k];
-			} catch (ArithmeticException e) {
+			if (rGlobalAggs[k] > 0) {
+				retVal[k] = xGlobalAggs[k] / rGlobalAggs[k];
+			} else {
 				retVal[k] = 0;
 			}
 		}
 		return retVal;
 	}
-	/* END */
 
 	//Added by ASHANKA STOP
 	/**

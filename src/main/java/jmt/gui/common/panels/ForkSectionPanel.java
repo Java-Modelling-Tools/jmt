@@ -109,7 +109,7 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 		// Initial values
 		if (sd.getForkBlock(stationKey).intValue() < 0) {
 			check.setSelected(false);
-			blockSpinner.setValue(Float.POSITIVE_INFINITY);
+			blockSpinner.setValue(Double.POSITIVE_INFINITY);
 			blockSpinner.setEnabled(false);
 		} else {
 			check.setSelected(true);
@@ -133,7 +133,7 @@ public class ForkSectionPanel extends WizardPanel implements CommonConstants {
 					blockSpinner.setEnabled(true);
 				} else {
 					sd.setForkBlock(stationKey, new Integer(-1));
-					blockSpinner.setValue(Float.POSITIVE_INFINITY);
+					blockSpinner.setValue(Double.POSITIVE_INFINITY);
 					blockSpinner.setEnabled(false);
 				}
 			}

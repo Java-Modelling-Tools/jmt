@@ -36,7 +36,7 @@ public class Erlang extends AbstractDistribution implements Distribution {
 
 	/**
 	 * This is the constructor. It creates a new erlang distribution which
-	 * is defined from is pdf:
+	 * is defined from pdf:
 	 * <pre>           (alpha^r)       (r-1)     (-alpha*x)
 	 * pdf(x) = -------------  * x       * e
 	 *           gammaFun(r)</pre>
@@ -55,7 +55,6 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double r = ((ErlangPar) p).getR();
@@ -75,7 +74,6 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double r = ((ErlangPar) p).getR();
@@ -100,9 +98,8 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic mean of the distribution.
 	 *
-	 * The theoretic mean is calculated  as r/alpha.
+	 * The theoretic mean is calculated as r/alpha.
 	 */
-
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double r = ((ErlangPar) p).getR();
@@ -114,16 +111,15 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * This method is used to obtain from the distribution its own theoretical
-	 * variance.
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
 	 *
 	 * @param p parameter of the erlang distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic variance of the distribution.
 	 *
-	 * The theoretic variance is calculated  as r/(alpha^2)
+	 * The theoretic variance is calculated as r/(alpha^2).
 	 */
-
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double r = ((ErlangPar) p).getR();
@@ -142,7 +138,6 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double alpha = ((ErlangPar) p).getAlpha();

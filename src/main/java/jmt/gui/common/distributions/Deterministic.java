@@ -33,11 +33,12 @@ import jmt.gui.common.JMTImageLoader;
 public class Deterministic extends Distribution {
 
 	/**
-	 * Construct a new Deterministic Distribution
+	 * Constructs a new Deterministic Distribution
 	 */
 	public Deterministic() {
 		super("Deterministic", "jmt.engine.random.DeterministicDistr", "jmt.engine.random.DeterministicDistrPar", "Deterministic distribution");
 		hasMean = true;
+		hasC = false;
 		isNestable = true;
 	}
 
@@ -49,25 +50,26 @@ public class Deterministic extends Distribution {
 	protected Parameter[] setParameters() {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[1];
-		// Sets parameter lambda
-		parameters[0] = new Parameter("t", "k", Double.class, new Double(1));
+
+		// Sets parameter t
+		parameters[0] = new Parameter("t", "k", Double.class, new Double(1.0));
 		// Checks value of t must be greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
 				}
 			}
 		});
+
 		return parameters;
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -97,7 +99,7 @@ public class Deterministic extends Distribution {
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {

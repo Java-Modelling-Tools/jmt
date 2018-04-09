@@ -76,7 +76,7 @@ public interface ResultsConstants {
 			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_UTILIZATION = HTML_START + HTML_FONT_TITLE + "Utilization" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Utilization of a customer class at the selected station. The utilization of a queueing station with more than one server is the "
+			+ "Average utilization for each selected class at each selected station. The utilization of a queueing station with more than one server is the "
 			+ "average utilization of each server. The utilization of a delay station is the average number of customers in the station. "
 			+ "(it may be greater than 1)" + HTML_FONT_NOR_END + HTML_END;
 

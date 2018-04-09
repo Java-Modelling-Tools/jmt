@@ -53,7 +53,6 @@ import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.common.editors.LDStrategyEditor;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
-import jmt.gui.common.serviceStrategies.DisabledStrategy;
 
 /**
  * Created by IntelliJ IDEA.
@@ -72,7 +71,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 	protected ClassDefinition classData;
 
 	private ServiceTable serviceTable;
-	private JSpinner serversNumSpinner;
+	private JSpinner serverNumSpinner;
 
 	/** Used to display classes with icon */
 	protected ImagedComboBoxCellEditorFactory classEditor;
@@ -130,11 +129,11 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		this.setLayout(new BorderLayout(5, 5));
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		//layout of main panel
-		JPanel serversNumPanel = new JPanel();
-		serversNumPanel.setBorder(new TitledBorder(new EtchedBorder(), "Number of Servers"));
-		serversNumPanel.add(new JLabel("Number:"));
-		serversNumPanel.add(serversNumSpinner);
-		this.add(serversNumPanel, BorderLayout.NORTH);
+		JPanel serverNumPanel = new JPanel();
+		serverNumPanel.setBorder(new TitledBorder(new EtchedBorder(), "Number of Servers"));
+		serverNumPanel.add(new JLabel("Number:"));
+		serverNumPanel.add(serverNumSpinner);
+		this.add(serverNumPanel, BorderLayout.NORTH);
 		WarningScrollTable ServiceSectionTable = new WarningScrollTable(serviceTable, WARNING_CLASS);
 		ServiceSectionTable.setBorder(new TitledBorder(new EtchedBorder(), "Service Time Distributions"));
 		this.add(ServiceSectionTable, BorderLayout.CENTER);
@@ -146,32 +145,32 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		data = sd;
 		classData = cd;
 		serviceTable = new ServiceTable();
-		serversNumSpinner = new JSpinner();
-		serversNumSpinner.setPreferredSize(DIM_BUTTON_XS);
+		serverNumSpinner = new JSpinner();
+		serverNumSpinner.setPreferredSize(DIM_BUTTON_XS);
 		classEditor.setData(cd);
 		initComponents();
-		updateSpinner();
-		addManagers();
+		updateServerNum();
+		addDataManagers();
 	}
 
-	private void updateSpinner() {
-		serversNumSpinner.setValue(data.getStationNumberOfServers(stationKey));
+	private void updateServerNum() {
+		serverNumSpinner.setValue(data.getStationNumberOfServers(stationKey));
 		if (STATION_TYPE_DELAY.equals(data.getStationType(stationKey))) {
-			serversNumSpinner.setValue(Float.POSITIVE_INFINITY);
-			serversNumSpinner.setEnabled(false);
+			serverNumSpinner.setValue(Double.POSITIVE_INFINITY);
+			serverNumSpinner.setEnabled(false);
 		} else {
-			serversNumSpinner.setEnabled(true);
+			serverNumSpinner.setEnabled(true);
 		}
 	}
 
-	private void addManagers() {
-		serversNumSpinner.addChangeListener(new ChangeListener() {
+	private void addDataManagers() {
+		serverNumSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				if (serversNumSpinner.getValue() instanceof Integer) {
-					Integer serverNum = (Integer) serversNumSpinner.getValue();
-					if (serverNum.intValue() < 1 && serversNumSpinner.isEnabled()) {
+				if (serverNumSpinner.getValue() instanceof Integer) {
+					Integer serverNum = (Integer) serverNumSpinner.getValue();
+					if (serverNum.intValue() < 1 && serverNumSpinner.isEnabled()) {
 						serverNum = new Integer(1);
-						serversNumSpinner.setValue(serverNum);
+						serverNumSpinner.setValue(serverNum);
 					}
 					data.setStationNumberOfServers(stationKey, serverNum);
 				}
@@ -222,7 +221,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		/**
 		 * This field is used to initialize elements shown on Service type selection - Bertoli Marco
 		 */
-		protected Object[] serviceType = new Object[] { SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT, SERVICE_ZERO, SERVICE_DISABLED };
+		protected Object[] serviceType = new Object[] { SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT, SERVICE_ZERO };
 
 		JButton editButton = new JButton() {
 
@@ -307,8 +306,6 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				return false;
 			} else if (columnIndex == 3 && data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
 				return false;
-			} else if (columnIndex == 3 && data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy) {
-				return false;
 			} else {
 				return true;
 			}
@@ -325,8 +322,6 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 					return SERVICE_LOAD_DEPENDENT;
 				} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
 					return SERVICE_ZERO;
-				} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy) {
-					return SERVICE_DISABLED;
 				} else {
 					return SERVICE_LOAD_INDEPENDENT;
 				}
@@ -352,11 +347,6 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 					// Puts a Zero Service Time Strategy only if previously it was different
 					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy)) {
 						data.setServiceTimeDistribution(stationKey, classKey, new ZeroStrategy());
-					}
-				} else if (((String) aValue).equals(SERVICE_DISABLED)) {
-					// Puts a Disabled Service Time Strategy only if previously it was different
-					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy)) {
-						data.setServiceTimeDistribution(stationKey, classKey, new DisabledStrategy());
 					}
 				} else {
 					// Puts the default service strategy only if previously it was different

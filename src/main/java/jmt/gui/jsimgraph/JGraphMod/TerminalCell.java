@@ -37,7 +37,7 @@ public class TerminalCell extends JmtCell {
 	public static final boolean canBePlaced = false;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
-	public static final String ICON = "terminal";
+	public static final String ICON = "Terminal";
 
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.

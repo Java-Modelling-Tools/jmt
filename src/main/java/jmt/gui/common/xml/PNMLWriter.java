@@ -515,19 +515,34 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 
 		for (int i = 0; i < d.getNumberOfParameters(); i++) {
 			Parameter p = d.getParameter(i);
-			Element parameter = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER);
-			Element name = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER_NAME);
-			name.setTextContent(p.getName());
-			parameter.appendChild(name);
-			Element value = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER_VALUE);
 			Object v = p.getValue();
-			if (v instanceof Distribution) {
-				value.appendChild(createDistribution((Distribution) v));
-			} else {
-				value.setTextContent(v.toString());
+			if (v != null) {
+				Element parameter = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER);
+				Element name = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER_NAME);
+				name.setTextContent(p.getName());
+				parameter.appendChild(name);
+				Element value = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER_VALUE);
+				if (v instanceof Distribution) {
+					value.appendChild(createDistribution((Distribution) v));
+				} else if (v instanceof Object[][]) {
+					Object[][] m = (Object[][]) v;
+					Element matrix = elemCreator.createElement(PNML_JSIM_E_MATRIX);
+					for (int j = 0; j < m.length; j++) {
+						Element vector = elemCreator.createElement(PNML_JSIM_E_MATRIX_VECTOR);
+						for (int k = 0; k < m[j].length; k++) {
+							Element entry = elemCreator.createElement(PNML_JSIM_E_MATRIX_VECTOR_ENTRY);
+							entry.setTextContent(m[j][k].toString());
+							vector.appendChild(entry);
+						}
+						matrix.appendChild(vector);
+					}
+					value.appendChild(matrix);
+				} else {
+					value.setTextContent(v.toString());
+				}
+				parameter.appendChild(value);
+				distribution.appendChild(parameter);
 			}
-			parameter.appendChild(value);
-			distribution.appendChild(parameter);
 		}
 		return distribution;
 	}

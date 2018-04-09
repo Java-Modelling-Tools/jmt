@@ -231,19 +231,6 @@ public class NetSystem {
 		return (NetNode) SimSystem.getEntity(name);
 	}
 
-	/**
-	 * Gets a <tt>double</tt> type measure
-	 * @param name The name of the node which measure refers to.
-	 * @param measureID The type of measure requested.
-	 * @return
-	 * @throws NetException
-	 */
-	//TODO: not used
-	public static double getMeasure(String name, int measureID) throws NetException {
-		QueueNetwork net = getNode(name).getQueueNet();
-		return net.getMeasure(name, measureID);
-	}
-
 	static void checkMeasures(){
 		ListIterator<QueueNetwork> networks = networkList.listIterator();
 		QueueNetwork network;

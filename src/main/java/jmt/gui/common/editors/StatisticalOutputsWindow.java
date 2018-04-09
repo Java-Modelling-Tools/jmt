@@ -887,7 +887,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	 */
 	private void saveChartData(File targetFile, DistributionType type) throws IOException {
 		CSVLogger logger = new CSVLogger(targetFile, new String[] {CSV_COLUMN_INDEX, CSV_COLUMN_START, CSV_COLUMN_END, CSV_COLUMN_VALUE}, false, 
-				Defaults.get("loggerDelimiter"), Defaults.get("loggerDecimalSeparator").charAt(0));
+				Defaults.get("loggerDelimiter"), Defaults.get("loggerDecimalSeparator"));
 		try {
 			HashMap<String, Number> value = new HashMap<>();
 			Map<String,Number> defaults = Collections.emptyMap();

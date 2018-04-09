@@ -58,11 +58,17 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.image.ImagePanel;
@@ -72,8 +78,15 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.distributions.Burst;
 import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Distribution.Parameter;
+import jmt.gui.common.distributions.Distribution.ValueChecker;
 import jmt.gui.common.distributions.Exponential;
+import jmt.gui.common.distributions.MAP;
+import jmt.gui.common.distributions.PhaseType;
 import jmt.gui.common.distributions.Replayer;
+import jmt.gui.exact.table.ExactCellRenderer;
+import jmt.gui.exact.table.ExactTable;
+import jmt.gui.exact.table.ExactTableModel;
 
 /**
  * <p>
@@ -118,7 +131,7 @@ public class DistributionsEditor extends JMTDialog {
 	protected JPanel param_panel = new JPanel(new SpringLayout());
 	protected JPanel mean_c_panel = new JPanel(new SpringLayout());
 
-	protected JPanel scrolledPanel;
+	protected JPanel scrollPanel;
 
 	// Names and display keys for labels
 	protected static final String PROBABILITY = "Probability:";
@@ -131,6 +144,9 @@ public class DistributionsEditor extends JMTDialog {
 	protected static final String ROUND_ROBIN = "Round-Robin";
 
 	protected JPanel[] intervalPanels;
+
+	protected JSpinner phaseNumSpinner;
+	protected ParameterTable[] parameterTables;
 
 	// --- Static methods ------------------------------------------------------------------------------
 	/**
@@ -164,7 +180,7 @@ public class DistributionsEditor extends JMTDialog {
 	 */
 	public static DistributionsEditor getInstance(Container parent,
 			Distribution initial, boolean recursive) {
-		// Finds top level Dialog or Frame to invoke correct costructor
+		// Finds top level Dialog or Frame to invoke correct constructor
 		while (!(parent instanceof Frame || parent instanceof Dialog)) {
 			parent = parent.getParent();
 		}
@@ -177,7 +193,7 @@ public class DistributionsEditor extends JMTDialog {
 	}
 
 	/**
-	 * Uses reflection to return an HashMap of distributions. Search's key is
+	 * Uses reflection to return a Map of distributions. Search's key is
 	 * distribution name and value is the Class of found distribution
 	 * 
 	 * @return found distributions
@@ -192,11 +208,11 @@ public class DistributionsEditor extends JMTDialog {
 	}
 
 	/**
-	 * Uses reflection to return an HashMap of distributions which are allowed
+	 * Uses reflection to return a Map of distributions which are allowed
 	 * to be nested. Search's key is distribution name and value is the Class of
 	 * found distribution
 	 * 
-	 * @return found nestable distributions
+	 * @return found nested distributions
 	 */
 	protected static Map<String, Class<? extends Distribution>> findNestedDistributions() {
 		Distribution[] all = Distribution.findNestableDistributions();
@@ -280,9 +296,9 @@ public class DistributionsEditor extends JMTDialog {
 			} else {
 				JOptionPane.showMessageDialog(
 						DistributionsEditor.this,
-						"Error in distribution parameters: "
-								+ current.getPrecondition(),
-								"Wrong parameters error", JOptionPane.ERROR_MESSAGE);
+						current.getPrecondition(),
+						"Parameter Error", JOptionPane.ERROR_MESSAGE);
+				DistributionsEditor.this.repaint();
 			}
 		}
 
@@ -363,6 +379,9 @@ public class DistributionsEditor extends JMTDialog {
 	protected ItemListener change_listener = new ItemListener() {
 		public void itemStateChanged(ItemEvent e) {
 			try {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				if (recursive) {
 					current = nestedDistributions.get(e.getItem()).newInstance();
 				} else {
@@ -418,16 +437,15 @@ public class DistributionsEditor extends JMTDialog {
 				// Get the probability entered in the textfield
 				Double probability = new Double(Double.parseDouble(sourcefield
 						.getText()));
-				// Probability has to be smaller or equal than 1 (otherwise
-				// do not update value)
-				if (probability.doubleValue() <= 1.0) {
+				// Probability has to be between 0 and 1 (otherwise do not
+				// update value)
+				if (probability.doubleValue() >= 0.0 && probability.doubleValue() <= 1.0) {
 					// If the probability was entered into the probability field
 					// of interval B
 					// then the probability parameter in the distribution has to
 					// be set to 1-enteredProbability
 					if (sourcefield.getName().equals(PROBABILITY_INTERVAL_B)) {
 						probability = new Double(1 - probability.doubleValue());
-
 					}
 					// set the parameter
 					current.getParameter(0).setValue(probability);
@@ -531,20 +549,16 @@ public class DistributionsEditor extends JMTDialog {
 		mainpanel.add(Box.createHorizontalStrut(BORDERSIZE), BorderLayout.EAST);
 		this.getContentPane().add(mainpanel, BorderLayout.CENTER);
 
-		// Creates a subpanel that holds scrolledpanel and distr_panel and adds
+		// Creates a subpanel that holds scrollpanel and distr_panel and adds
 		// it to mainpanel
 		JPanel subpanel = new JPanel(new BorderLayout());
 		mainpanel.add(subpanel, BorderLayout.CENTER);
 		JPanel distr_panel = new JPanel(new BorderLayout());
 		subpanel.add(distr_panel, BorderLayout.NORTH);
 
-		// Creates scrolledpanel that holds param_panel and mean_c_panel
-		scrolledPanel = new JPanel(new GridLayout(2, 1));
-		subpanel.add(new JScrollPane(scrolledPanel), BorderLayout.CENTER);
-		scrolledPanel.add(param_panel);
-		scrolledPanel.add(mean_c_panel);
-		mean_c_panel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0,
-				Color.GRAY));
+		// Creates scrollpanel that holds param_panel and mean_c_panel
+		scrollPanel = new JPanel(new GridLayout(2, 1));
+		subpanel.add(scrollPanel, BorderLayout.CENTER);
 
 		// Adds bottom_panel to contentpane
 		JPanel bottom_panel = new JPanel(new FlowLayout());
@@ -600,22 +614,13 @@ public class DistributionsEditor extends JMTDialog {
 			// Flushes param_panel
 			param_panel.removeAll();
 			mean_c_panel.removeAll();
-			scrolledPanel.removeAll();
+			scrollPanel.removeAll();
 			intervalPanels = null;
 			// Shows image
-			iconpanel.removeAll();
 			iconpanel.setImage(current.getImage());
 
 			if (current instanceof Burst) {
-				// Sets the layout of only one row instead of two: the Burst
-				// distribution
-				// will be shown into a panel with a different layout, to avoid
-				// the same
-				// row height for every added component (that is GridLayout's
-				// behavior)
-				GridLayout layoutManager = (GridLayout) scrolledPanel
-						.getLayout();
-				layoutManager.setRows(1);
+				((GridLayout) scrollPanel.getLayout()).setRows(1);
 
 				// Flushes param_panel
 				intervalPanels = new JPanel[3];
@@ -639,13 +644,62 @@ public class DistributionsEditor extends JMTDialog {
 				rend.addDistribution(INTERVAL_LENGTH_DISTRIBUTION, 3,
 						intervalPanels[2]);
 				rend.addDistribution(VALUE_DISTRIBUTION, 4, intervalPanels[2]);
+			} else if (current instanceof PhaseType || current instanceof MAP) {
+				((GridLayout) scrollPanel.getLayout()).setRows(1);
+
+				int phaseNum = ((Object[][]) current.getParameter(0).getValue())[0].length;
+				phaseNumSpinner = new JSpinner();
+				phaseNumSpinner.setPreferredSize(CommonConstants.DIM_BUTTON_XS);
+				phaseNumSpinner.setModel(new SpinnerNumberModel(phaseNum, 2,
+						CommonConstants.MAX_NUMBER_OF_PHASES, 1));
+				phaseNumSpinner.addChangeListener(new ChangeListener() {
+					public void stateChanged(ChangeEvent e) {
+						int phaseNum = ((Integer) phaseNumSpinner.getValue()).intValue();
+						for (int i = 0; i < current.getNumberOfParameters(); i++) {
+							Object[][] oldMatrix = (Object[][]) current.getParameter(i).getValue();
+							Object[][] newMatrix = null;
+							if (oldMatrix.length <= 1) {
+								newMatrix = new Object[1][phaseNum];
+							} else {
+								newMatrix = new Object[phaseNum][phaseNum];
+							}
+							for (int j = 0; j < newMatrix.length; j++) {
+								for (int k = 0; k < newMatrix[j].length; k++) {
+									if (j < oldMatrix.length && k < oldMatrix[j].length) {
+										newMatrix[j][k] = oldMatrix[j][k];
+									} else {
+										newMatrix[j][k] = current.getParameter(i).parseValue("0");
+									}
+								}
+							}
+							current.getParameter(i).setValue(newMatrix);
+							parameterTables[i].updateStructure();
+						}
+					}
+				});
+				JPanel phaseNumPanel = new JPanel();
+				phaseNumPanel.setBorder(new TitledBorder(new EtchedBorder(), "Number of Phases"));
+				phaseNumPanel.add(new JLabel("Number: "));
+				phaseNumPanel.add(phaseNumSpinner);
+
+				int parameterNum = current.getNumberOfParameters();
+				parameterTables = new ParameterTable[parameterNum];
+				JPanel parametersPanel = new JPanel(new GridLayout(parameterNum, 1));
+				for (int i = 0; i < parameterNum; i++) {
+					parameterTables[i] = new ParameterTable(current.getParameter(i));
+					JScrollPane parameterPane = new JScrollPane(parameterTables[i]);
+					parameterPane.setBorder(new TitledBorder(new EtchedBorder(),
+							current.getParameter(i).getDescription()));
+					parametersPanel.add(parameterPane);
+				}
+
+				JPanel compositePanel = new JPanel();
+				compositePanel.setLayout(new BorderLayout());
+				compositePanel.add(phaseNumPanel, BorderLayout.NORTH);
+				compositePanel.add(parametersPanel, BorderLayout.CENTER);
+				scrollPanel.add(compositePanel);
 			} else {
-				// resets the layout manager's rows number to two, since
-				// non-Burst
-				// distributions need two rows instead of one
-				GridLayout layoutManager = (GridLayout) scrolledPanel
-						.getLayout();
-				layoutManager.setRows(2);
+				((GridLayout) scrollPanel.getLayout()).setRows(1);
 
 				// Maximum width (used to line up elements of both panels)
 				int maxwidth = new JLabel("mean:", SwingConstants.TRAILING)
@@ -654,7 +708,7 @@ public class DistributionsEditor extends JMTDialog {
 				// Shows this distribution's parameters on param_panel
 				JLabel label;
 				JTextField textfield;
-				scrolledPanel.add(param_panel);
+				scrollPanel.add(new JScrollPane(param_panel));
 				for (int i = 0; i < current.getNumberOfParameters(); i++) {
 					// Creates the label
 					label = new JLabel(current.getParameter(i).getDescription()
@@ -690,12 +744,9 @@ public class DistributionsEditor extends JMTDialog {
 									return;
 								}
 								replayerTextField.setText(replayerFileDialog.getSelectedFile().getAbsolutePath());
-								JTextField sourcefield = replayerTextField;
-								int num = Integer.parseInt(sourcefield.getName());
-								current.getParameter(num).setValue(sourcefield.getText());
-								current.updateCM();
+								int num = Integer.parseInt(replayerTextField.getName());
+								current.getParameter(num).setValue(replayerTextField.getText());
 								refreshValues();
-
 							}
 						});
 						param_panel.add(replayerTextField);
@@ -718,8 +769,9 @@ public class DistributionsEditor extends JMTDialog {
 
 				// Now shows mean and c (if applicable) on mean_c_panel
 				if (current.hasC() || current.hasMean()) {
+					((GridLayout) scrollPanel.getLayout()).setRows(2);
 
-					scrolledPanel.add(mean_c_panel);
+					scrollPanel.add(new JScrollPane(mean_c_panel));
 					int rows = 0;
 					mean_c_panel.setVisible(true);
 					// Builds mean section
@@ -774,13 +826,12 @@ public class DistributionsEditor extends JMTDialog {
 					SpringUtilities.makeCompactGrid(mean_c_panel, rows, 2, // rows, cols
 							6, 6, // initX, initY
 							6, 6); // xPad, yPad
-				} else {
-					mean_c_panel.setVisible(false);
 				}
 			}
 
 			refreshValues();
-			scrolledPanel.repaint();
+			scrollPanel.revalidate();
+			scrollPanel.repaint();
 		}
 	}
 
@@ -882,7 +933,7 @@ public class DistributionsEditor extends JMTDialog {
 						if (probComp instanceof JTextField) {
 							// reset the probability value only if the component
 							// is disabled
-							if (enableComponent == false) {
+							if (!enableComponent) {
 								current.getParameter(0).setValue(
 										new Double(0.5));
 							}
@@ -908,13 +959,13 @@ public class DistributionsEditor extends JMTDialog {
 			}
 		}
 
-		scrolledPanel.repaint();
+		scrollPanel.repaint();
 	}
 
 	/**
 	 * Class encapsulation methods to render Burst parameters
 	 * 
-	 * @author Peter Parapatics Date: 12-dec-2007
+	 * @author Peter Parapatics
 	 * @author Federico Dal Castello
 	 * 
 	 */
@@ -927,7 +978,7 @@ public class DistributionsEditor extends JMTDialog {
 			BoxLayout verticalBoxLayout = new BoxLayout(burstContentPanel,
 					BoxLayout.Y_AXIS);
 			burstContentPanel.setLayout(verticalBoxLayout);
-			scrolledPanel.add(burstContentPanel);
+			scrollPanel.add(new JScrollPane(burstContentPanel));
 		}
 
 		/**
@@ -1090,6 +1141,110 @@ public class DistributionsEditor extends JMTDialog {
 		}
 
 	}
-	// -------------------------------------------------------------------------------------------------
+
+	/**
+	 * Table for showing and editing a matrix parameter
+	 */
+	private class ParameterTable extends ExactTable {
+
+		private static final long serialVersionUID = 1L;
+
+		public ParameterTable(Parameter parameter) {
+			super(new ParameterTableModel(parameter));
+			setDefaultRenderer(Object.class, new ParameterCellRenderer());
+			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+			setRowHeight(CommonConstants.ROW_HEIGHT);
+			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(true);
+			setBatchEditingEnabled(true);
+		}
+
+	}
+
+	/**
+	 * Model backing the parameter table
+	 */
+	private class ParameterTableModel extends ExactTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+		private Parameter parameter;
+
+		public ParameterTableModel(Parameter parameter) {
+			rowHeaderPrototype = "0000.0000";
+			prototype = "0000.0000";
+			this.parameter = parameter;
+		}
+
+		@Override
+		public int getRowCount() {
+			return ((Object[][]) parameter.getValue()).length;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return ((Object[][]) parameter.getValue())[0].length;
+		}
+
+		@Override
+		protected Object getRowName(int rowIndex) {
+			if (((Object[][]) parameter.getValue()).length <= 1) {
+				return "--";
+			} else {
+				return String.valueOf(rowIndex + 1);
+			}
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			return String.valueOf(columnIndex + 1);
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			return true;
+		}
+
+		@Override
+		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+			return ((Object[][]) parameter.getValue())[rowIndex][columnIndex];
+		}
+
+		@Override
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {
+			Object newVal = parameter.parseValue((String) value);
+			if (newVal == null) {
+				return;
+			}
+			Object[][] matrix = (Object[][]) parameter.getValue();
+			ValueChecker checker = parameter.getValueChecker();
+			Object oldVal = matrix[rowIndex][columnIndex];
+			matrix[rowIndex][columnIndex] = newVal;
+			if (checker != null && !checker.checkValue(matrix)) {
+				matrix[rowIndex][columnIndex] = oldVal;
+			}
+		}
+
+		@Override
+		public void clear(int row, int col) {
+			Object[][] matrix = (Object[][]) parameter.getValue();
+			matrix[row][col] = parameter.parseValue("0");
+		}
+
+	}
+
+	/**
+	 * Renderer displaying cells of the parameter table
+	 */
+	private class ParameterCellRenderer extends ExactCellRenderer {
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected String formatNumber(double d) {
+			return current.formatNumber(d);
+		}
+
+	}
 
 }

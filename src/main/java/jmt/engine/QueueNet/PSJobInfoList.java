@@ -54,10 +54,12 @@ public class PSJobInfoList extends LinkedJobInfoList {
 		lastJobOutTimePerClass[c] = NetSystem.getTime();
 	}
 
-	public void psUpdateBusyTime(JobClass jobClass, double serviceTime) {
+	public void psUpdateSojournTime(JobClass jobClass, double serviceTime) {
 		int c = jobClass.getId();
-		busyTime += serviceTime;
-		busyTimePerClass[c] += serviceTime;
+		totalSojournTime += serviceTime;
+		totalSojournTimePerClass[c] += serviceTime;
+		lastJobSojournTime = serviceTime;
+		lastJobSojournTimePerClass[c] = serviceTime;
 	}
 
 	public void psUpdateQueueTime(JobClass jobClass, double queueTime) {

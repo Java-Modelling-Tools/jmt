@@ -92,7 +92,7 @@ public class CSVMeasureOutput extends MeasureOutput {
 	@Override
 	public void finalizeMeasure() {
 		try {
-			if (measure.getSuccess() == true) {
+			if (measure.getSuccess()) {
 				outputWriter.write("\nMeasure name; " + measure.getName() + ";\n" + "Measure value; " + measure.getMeanValue() + ";\n" + "Lower limit; "
 						+ measure.getLowerLimit() + ";\n" + "Upper Limit; " + measure.getUpperLimit() + ";\n" + "Discarded samples; "
 						+ measure.getDiscardedSamples() + ";\n" + "Analyzed samples; " + measure.getAnalyzedSamples() + ";\n" + "Max samples; "

@@ -71,8 +71,6 @@ public class NetNode extends SimEntity {
 	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0003;
 	/** Property ID: residence time */
 	public static final int PROPERTY_ID_RESIDENCE_TIME = 0x0004;
-	/** Property ID: throughput */
-	public static final int PROPERTY_ID_THROUGHPUT = 0x0005;
 
 	private BlockingRegion region; // This is set only if this station is input station of a blocking region
 
@@ -244,9 +242,7 @@ public class NetNode extends SimEntity {
 	public double getDoubleNodeProperty(int Id) throws NetException {
 		switch (Id) {
 		case PROPERTY_ID_RESIDENCE_TIME:
-			return jobsList.getBusyTime() / jobsList.getJobsOut();
-		case PROPERTY_ID_THROUGHPUT:
-			return jobsList.getJobsOut() / NetSystem.getTime();
+			return jobsList.getLastJobSojournTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
@@ -263,9 +259,7 @@ public class NetNode extends SimEntity {
 	public double getDoubleNodeProperty(int Id, JobClass JobClass) throws NetException {
 		switch (Id) {
 		case PROPERTY_ID_RESIDENCE_TIME:
-			return jobsList.getBusyTimePerClass(JobClass) / jobsList.getJobsOutPerClass(JobClass);
-		case PROPERTY_ID_THROUGHPUT:
-			return jobsList.getJobsOutPerClass(JobClass) / NetSystem.getTime();
+			return jobsList.getLastJobSojournTimePerClass(JobClass);
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}

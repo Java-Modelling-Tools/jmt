@@ -25,7 +25,6 @@ import jmt.engine.jwat.input.ProgressMonitorShow;
 import jmt.engine.jwat.workloadAnalysis.utils.ChangeVariableListener;
 import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
-import jmt.gui.jwat.workloadAnalysis.chart.DispKMeanMatrix.DispersionPanel;
 
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
@@ -179,7 +178,6 @@ public class DispQQPlotMatrix extends JScrollPane {
 
 								initShow((Elenco.length * Elenco.length));
 
-								int l = 0;
 								// Disegno dei grafici
 								for (int row = 0; row < Elenco.length; row++) {
 									for (int col = 0; col < Elenco.length; col++) {

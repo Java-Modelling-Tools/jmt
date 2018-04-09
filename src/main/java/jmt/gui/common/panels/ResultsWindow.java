@@ -28,7 +28,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -57,6 +56,7 @@ import jmt.engine.log.JSimLogger;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.graph.FastGraph;
 import jmt.framework.gui.graph.MeasureValue;
+import jmt.framework.gui.image.ImageLoader;
 import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
@@ -163,7 +163,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CUSTOMER_NUMBER, results.getFJCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RP, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FX, DESCRIPTION_FIRING_THROUGHPUT, results.getFiringThroughputMeasures());
-		// Creates bottom toolbar
+		// Creates bottom panel
+		JPanel bottomPanel = new JPanel(new BorderLayout());
 		JToolBar toolbar = new JToolBar();
 		toolbar.setFloatable(false);
 		toolbar.setRollover(true);
@@ -176,33 +177,15 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		stop = new JButton();
 		toolbar.add(stop);
 		stop.setVisible(false);
-		// Adds a progress bar
+		bottomPanel.add(toolbar, BorderLayout.WEST);
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
 		progressBar.setForeground(Color.BLUE);
 		UIManager.put("ProgressBar.selectionForeground", Color.WHITE);
 		setProgressBar(results.getProgress(), results.getElapsedTime());
-		toolbar.add(progressBar);
-		// Add close window button
-		JButton close = new JButton();
-		close.setIcon(JMTImageLoader.loadImage("Close"));
-		close.setFocusPainted(false);
-		close.setContentAreaFilled(false);
-		close.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		close.setRolloverIcon(JMTImageLoader.loadImage("CloseRO"));
-		close.setPressedIcon(JMTImageLoader.loadImage("CloseP"));
-		close.setVisible(true);
-		close.setToolTipText("Closes this window");
-		close.addActionListener(new ActionListener() {
-			// Fires a window closing event
-			public void actionPerformed(ActionEvent e) {
-				ResultsWindow.this.dispatchEvent(new WindowEvent(ResultsWindow.this, WindowEvent.WINDOW_CLOSING));
-			}
-		});
-
-		toolbar.add(close);
-		// Adds toolbar
-		this.getContentPane().add(toolbar, BorderLayout.SOUTH);
+		bottomPanel.add(progressBar, BorderLayout.CENTER);
+		// Adds bottom panel
+		this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);
 
 		// Adds listener for progressBar
 		results.setProgressListener(new MeasureDefinition.ProgressListener() {
@@ -234,34 +217,43 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 	 * @param stopAction action associated with stop simulation button
 	 */
 	public void addButtonActions(AbstractAction startAction, AbstractAction pauseAction, AbstractAction stopAction) {
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		Dimension iconSize = null;
+		if (screenSize.width <= CommonConstants.MAX_SMALL_ICON_SCREEN_WIDTH
+				&& screenSize.height <= CommonConstants.MAX_SMALL_ICON_SCREEN_HEIGHT) {
+			iconSize = CommonConstants.SMALL_ICON_SIZE_TOOL_BAR;
+		} else {
+			iconSize = CommonConstants.LARGE_ICON_SIZE_TOOL_BAR;
+		}
+
 		start.setAction(startAction);
 		start.setText("");
-		start.setIcon(JMTImageLoader.loadImage("Sim"));
+		start.setIcon(JMTImageLoader.loadImage("Sim", iconSize));
 		start.setFocusPainted(false);
 		start.setContentAreaFilled(false);
 		start.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		start.setRolloverIcon(JMTImageLoader.loadImage("SimRO"));
-		start.setPressedIcon(JMTImageLoader.loadImage("SimP"));
+		start.setRolloverIcon(JMTImageLoader.loadImage("Sim", ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		start.setPressedIcon(JMTImageLoader.loadImage("Sim", ImageLoader.MODIFIER_PRESSED, iconSize));
 		start.setVisible(true);
 
 		pause.setAction(pauseAction);
 		pause.setText("");
-		pause.setIcon(JMTImageLoader.loadImage("Pause"));
+		pause.setIcon(JMTImageLoader.loadImage("Pause", iconSize));
 		pause.setFocusPainted(false);
 		pause.setContentAreaFilled(false);
 		pause.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		pause.setRolloverIcon(JMTImageLoader.loadImage("PauseRO"));
-		pause.setPressedIcon(JMTImageLoader.loadImage("PauseP"));
+		pause.setRolloverIcon(JMTImageLoader.loadImage("Pause", ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		pause.setPressedIcon(JMTImageLoader.loadImage("Pause", ImageLoader.MODIFIER_PRESSED, iconSize));
 		pause.setVisible(true);
 
 		stop.setAction(stopAction);
 		stop.setText("");
-		stop.setIcon(JMTImageLoader.loadImage("Stop"));
+		stop.setIcon(JMTImageLoader.loadImage("Stop", iconSize));
 		stop.setFocusPainted(false);
 		stop.setContentAreaFilled(false);
 		stop.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		stop.setRolloverIcon(JMTImageLoader.loadImage("StopRO"));
-		stop.setPressedIcon(JMTImageLoader.loadImage("StopP"));
+		stop.setRolloverIcon(JMTImageLoader.loadImage("Stop", ImageLoader.MODIFIER_ROLLOVER, iconSize));
+		stop.setPressedIcon(JMTImageLoader.loadImage("Stop", ImageLoader.MODIFIER_PRESSED, iconSize));
 		stop.setVisible(true);
 	}
 

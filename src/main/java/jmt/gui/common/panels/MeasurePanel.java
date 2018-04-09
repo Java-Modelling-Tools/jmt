@@ -19,8 +19,7 @@
 package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
-import java.awt.Button;
-import java.awt.FlowLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -30,6 +29,8 @@ import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -91,6 +92,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	//Interfaces for model data exchange
 	protected ClassDefinition classData;
 
+	protected String filePath;
+
 	/**
 	 * called by the Wizard before when switching to another panel
 	 */
@@ -109,8 +112,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	protected WarningScrollTable warningPanel;
 
 	//label containing description of this panel's purpose
-	private JLabel descrLabel = new JLabel(MEASURES_DESCRIPTION);
-	private JLabel logPath;
+	protected JLabel descrLabel = new JLabel(MEASURES_DESCRIPTION);
+	protected JLabel logPath;
 
 	//table containing measure data
 	protected MeasureTable measureTable;
@@ -119,7 +122,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	protected static final String[] measureTypes = new String[] {
 			"---Select an index---",
 			SimulationDefinition.MEASURE_DR,
-			//SimulationDefinition.MEASURE_FCR_TW,
+			SimulationDefinition.MEASURE_FCR_TW,
 			SimulationDefinition.MEASURE_FCR_MO,
 			SimulationDefinition.MEASURE_FX,
 			SimulationDefinition.MEASURE_FJ_CN,
@@ -227,7 +230,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		this.add(warningPanel, BorderLayout.CENTER);
 
 		// Log definition panel
-		JPanel logPanel = new JPanel(new BorderLayout());
+		JPanel logPanel = new JPanel(new BorderLayout(0, 5));
 		this.add(logPanel, BorderLayout.SOUTH);
 		logPanel.add(new JLabel(MEASURE_LOG_DESCRIPTION), BorderLayout.NORTH);
 		JPanel logSettings = new JPanel(new SpringLayout());
@@ -274,12 +277,15 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		SpringUtilities.makeCompactGrid(logSettings, 2, 2, 0, 0, 5, 2);
 		logPanel.add(logSettings, BorderLayout.EAST);
 
-		final String filePath = new File(MacroReplacer.replace(stationData.getLoggingGlbParameter("path"))).getAbsolutePath();
-		JPanel logPathPanel = new JPanel(new FlowLayout(10));
+		filePath = MacroReplacer.replace(stationData.getLoggingGlbParameter("path"));
+		JPanel logPathPanel = new JPanel();
+		logPathPanel.setLayout(new BoxLayout(logPathPanel, BoxLayout.Y_AXIS));
 		logPanel.add(logPathPanel, BorderLayout.WEST);
 		logPath = new JLabel("CSV files path: " +  filePath);
+		logPathPanel.add(Box.createRigidArea(new Dimension(0, 3)));
 		logPathPanel.add(logPath);
-		final Button filepathButton = new Button("Browse");
+		final JButton filepathButton = new JButton("Browse");
+		logPathPanel.add(Box.createRigidArea(new Dimension(0, 6)));
 		logPathPanel.add(filepathButton);
 		filepathButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -292,8 +298,11 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 				if (ret == JFileChooser.APPROVE_OPTION) {
 					File directory = fc.getSelectedFile();
-					stationData.setLoggingGlbParameter("path", directory.getAbsolutePath());
-					logPath.setText("CSV files path: " +  directory.getAbsolutePath());
+					if (directory.isDirectory()) {
+						filePath = directory.getAbsolutePath();
+						stationData.setLoggingGlbParameter("path", filePath);
+						logPath.setText("CSV files path: " + filePath);
+					}
 				}
 			}
 		});

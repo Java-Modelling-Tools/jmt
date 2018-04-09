@@ -186,7 +186,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 					editor.stopCellEditing();
 				}
 				if (infiniteQueueSelector.isSelected()) {
-					queueLengthSpinner.setValue(Float.POSITIVE_INFINITY);
+					queueLengthSpinner.setValue(Double.POSITIVE_INFINITY);
 					queueLengthSpinner.setEnabled(false);
 					Vector<Object> classKeys = classData.getClassKeys();
 					for (Object classKey : classKeys) {
@@ -246,7 +246,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		Integer queueLength = data.getStationQueueCapacity(stationKey);
 		if (queueLength.intValue() < 1) {
 			queueLengthGroup.setSelected(infiniteQueueSelector.getModel(), true);
-			queueLengthSpinner.setValue(Float.POSITIVE_INFINITY);
+			queueLengthSpinner.setValue(Double.POSITIVE_INFINITY);
 			queueLengthSpinner.setEnabled(false);
 		} else {
 			queueLengthGroup.setSelected(finiteQueueSelector.getModel(), true);

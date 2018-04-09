@@ -46,7 +46,6 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 		classDef = cd;
 		stationDef = sd;
 		simDef = simd;
-		values = new Vector<Number>();
 	}
 
 	/**
@@ -65,6 +64,7 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 	@Override
 	public void changeModel(int step) {
 		Long nextSeed = (Long) values.get(step);
+		simDef.setUseRandomSeed(false);
 		simDef.setSimulationSeed(nextSeed);
 	}
 
@@ -86,11 +86,16 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 	@Override
 	public void createValuesSet() {
 		MersenneTwister generator = new MersenneTwister();
-		generator.setNewSeed(simDef.getSimulationSeed().longValue());
-		for (int i = 0; i < numberOfSteps; i++) {
-			values.add(new Long(generator.nextLong()));
+		if (!simDef.getUseRandomSeed().booleanValue()) {
+			generator.setNewSeed(simDef.getSimulationSeed().longValue());
 		}
-		originalValues = simDef.getSimulationSeed();
+		values = new Vector<Number>(numberOfSteps, 0);
+		for (int i = 0; i < numberOfSteps; i++) {
+			values.add(i, new Long(generator.nextLong()));
+		}
+		originalValues = new Vector<Object>(2, 0);
+		((Vector<Object>) originalValues).add(0, simDef.getUseRandomSeed());
+		((Vector<Object>) originalValues).add(1, simDef.getSimulationSeed());
 	}
 
 	/**
@@ -98,7 +103,8 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 	 */
 	@Override
 	public void restoreOriginalValues() {
-		simDef.setSimulationSeed((Long) originalValues);
+		simDef.setUseRandomSeed((Boolean) ((Vector<Object>) originalValues).get(0));
+		simDef.setSimulationSeed((Long) ((Vector<Object>) originalValues).get(1));
 	}
 
 	/**

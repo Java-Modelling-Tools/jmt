@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.framework.gui.image;
 
 import java.awt.Dimension;
@@ -40,6 +41,7 @@ import javax.swing.ImageIcon;
  * @version 1.0
  */
 public abstract class ImageLoader {
+
 	/** Modifier to be used for mirror images (rotated on y axis) */
 	public static final String MODIFIER_MIRROR = "MIRROR";
 	/** Modifier to be used for pressed button images */
@@ -66,8 +68,8 @@ public abstract class ImageLoader {
 	protected abstract URL getImageURL(String resourceName);
 
 	/**
-	 * Loads an icon with specified name and caches it.
-	 * @param iconName name of the icon to be loaded. Extensions are automatically added, if needed.
+	 * Loads an icon with specified name, and caches it.
+	 * @param iconName name of the icon to be loaded
 	 * @return icon if found, null otherwise
 	 */
 	public ImageIcon loadIcon(String iconName) {
@@ -75,9 +77,9 @@ public abstract class ImageLoader {
 	}
 
 	/**
-	 * Loads an icon with specified name and specified modifier and caches it.
+	 * Loads an icon with specified name and modifier, and caches it.
 	 * @param iconName name of the icon to be loaded
-	 * @param modifier modifier to be applied (can be null)
+	 * @param modifier modifier to be applied
 	 * @return icon if found, null otherwise
 	 */
 	public ImageIcon loadIcon(String iconName, String modifier) {
@@ -85,7 +87,7 @@ public abstract class ImageLoader {
 			return null;
 		}
 		String derivedName = iconName;
-		// Apply modifier to icon name if needed
+		// Applies modifier to icon name if needed
 		if (modifier != null) {
 			derivedName = deriveIconName(iconName, modifier);
 		}
@@ -95,20 +97,20 @@ public abstract class ImageLoader {
 		}
 
 		URL url = getImageURL(derivedName);
-		// If image is not found, try to add extensions
+		// If image is not found, tries to add extensions
 		for (int i = 0; i < EXTENSIONS.length && url == null; i++) {
 			url = getImageURL(derivedName + EXTENSIONS[i]);
 		}
 
-		ImageIcon tmp = null;
+		ImageIcon icon = null;
 		if (url != null) {
-			tmp = new ImageIcon(url);
+			icon = new ImageIcon(url);
 		} else if (modifier != null) {
 			// Loads base icon without modifiers
 			ImageIcon base = loadIcon(iconName);
 			if (base != null) {
-				// Apply known modifiers
-				tmp = applyModifier(base, modifier);
+				// Applies known modifiers
+				icon = applyModifier(base, modifier);
 			}
 		}
 
@@ -117,24 +119,35 @@ public abstract class ImageLoader {
 			iconCache.clear();
 		}
 
-		iconCache.put(derivedName, tmp);
-		return tmp;
+		iconCache.put(derivedName, icon);
+		return icon;
 	}
 
 	/**
-	 * Loads an icon with specified name and caches it, then resizes it.
-	 * @param iconName name of the icon to be loaded. Extensions are automatically added, if needed.
-	 * @param size target dimension of image. a negative number means to maintain aspect ratio on that dimension
+	 * Loads an icon with specified name and size, caches it and then resizes it.
+	 * @param iconName name of the icon to be loaded
+	 * @param size target dimension of image
 	 * @return icon if found, null otherwise
 	 */
 	public ImageIcon loadIcon(String iconName, Dimension size) {
-		ImageIcon im = loadIcon(iconName);
-		if (im != null) {
-			Image scaled = im.getImage();
-			scaled = scaled.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
-			return new ImageIcon(scaled);
+		return this.loadIcon(iconName, (String) null, size);
+	}
+
+	/**
+	 * Loads an icon with specified name, modifier and size, caches it and then resizes it.
+	 * @param iconName name of the icon to be loaded
+	 * @param modifier modifier to be applied
+	 * @param size target dimension of image
+	 * @return icon if found, null otherwise
+	 */
+	public ImageIcon loadIcon(String iconName, String modifier, Dimension size) {
+		ImageIcon icon = loadIcon(iconName, modifier);
+		if (icon != null) {
+			Image image = icon.getImage();
+			image = image.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
+			return new ImageIcon(image);
 		} else {
-			return im;
+			return icon;
 		}
 	}
 
@@ -166,14 +179,14 @@ public abstract class ImageLoader {
 		} else if (modifier.equals(MODIFIER_ROLLOVER) || modifier.equals(MODIFIER_SELECTED)) {
 			ImageIcon background = loadIcon(deriveIconName(TEMPLATE_IMAGE_NAME, modifier));
 			if (background != null) {
-				return mergeIcons(background, base, new Point(1, 1), new Point(background.getIconWidth() - 1, background.getIconHeight() - 1),
-						new Point(1, 1));
+				return mergeIcons(background, base, new Point(0, 0), new Point(background.getIconWidth(), background.getIconHeight()),
+						new Point(0, 0));
 			}
 		} else if (modifier.equals(MODIFIER_PRESSED)) {
 			ImageIcon background = loadIcon(deriveIconName(TEMPLATE_IMAGE_NAME, modifier));
 			if (background != null) {
-				return mergeIcons(background, base, new Point(1, 1), new Point(background.getIconWidth() - 2, background.getIconHeight() - 2),
-						new Point(2, 2));
+				return mergeIcons(background, base, new Point(0, 0), new Point(background.getIconWidth(), background.getIconHeight()),
+						new Point(4, 4));
 			}
 		}
 		// Modifier unsupported or template images not found.
@@ -210,4 +223,5 @@ public abstract class ImageLoader {
 		return new ImageIcon(out);
 	}
 	// --------------------------------------------------------------------------------------------------
+
 }

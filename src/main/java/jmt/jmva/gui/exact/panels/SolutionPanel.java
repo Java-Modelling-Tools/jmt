@@ -116,8 +116,6 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 		classTypes = data.getClassTypes();
 		visits = data.getVisits();
 		serviceTimes = data.getServiceTimes();
-		
-	
 
 		isSingle = (classes == 1);
 		statusLabel.setVisible(!resultsOK);
@@ -128,7 +126,7 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 	 */
 	protected void initComponents() {
 		table = new ResultsTable(getTableModel(), help);
-                table.setRowHeight(CommonConstants.ROW_HEIGHT);
+		table.setRowHeight(CommonConstants.ROW_HEIGHT);
 		statusLabel.setForeground(Color.RED);
 		statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
 		statusLabel.setText("WARNING: parameters have been changed since this solution was computed!");
@@ -146,7 +144,6 @@ public abstract class SolutionPanel extends AlgorithmPanel {
 		setLayout(new BorderLayout());
 		add(intPanel, BorderLayout.CENTER);
 		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
 	}
 
 	@Override

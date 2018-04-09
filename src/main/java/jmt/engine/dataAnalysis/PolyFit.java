@@ -36,7 +36,7 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class PolyFit {
         
-        private static RandomEngine engine = RandomEngine.makeDefault();
+	private static RandomEngine engine = RandomEngine.makeDefault();
 
 	/**
 	 * fit:

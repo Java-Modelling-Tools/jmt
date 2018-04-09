@@ -303,62 +303,67 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		});
 		allClass.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					STPA.setSingleClass(false);
-					fromLabel.setText("From (%):");
-					toLabel.setText("To (%): ");
-					STPA.setDefaultInitialValue();
-					STPA.setDefaultFinalValue();
-					from.setText(Double.toString(STPA.getInitialValue()));
-					to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
-					to.setValue(new Double(STPA.getFinalValue()));
-					to.setToolTipText("Sets the final proportion of service time with respect to the initial");
-					classChooser.removeAllItems();
-					classChooser.addItem("All classes");
-					classChooser.setEnabled(false);
-					description.setText(DESCRIPTION);
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
 				}
+				STPA.setSingleClass(false);
+				fromLabel.setText("From (%):");
+				toLabel.setText("To (%): ");
+				STPA.setDefaultInitialValue();
+				STPA.setDefaultFinalValue();
+				from.setText(Double.toString(STPA.getInitialValue()));
+				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
+				to.setValue(new Double(STPA.getFinalValue()));
+				to.setToolTipText("Sets the final proportion of service time with respect to the initial");
+				classChooser.removeAllItems();
+				classChooser.addItem("All classes");
+				classChooser.setEnabled(false);
+				description.setText(DESCRIPTION);
 			}
 		});
 		singleClass.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					STPA.setSingleClass(true);
-					//get the vector containing the keys of the valid classes. A class is valid if its service
-					//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
-					Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());
-					String[] classNames = new String[validC.size()];
-					for (int i = 0; i < validC.size(); i++) {
-						classNames[i] = cd.getClassName(validC.get(i));
-					}
-					classChooser.setEnabled(true);
-					ItemListener listener = classChooser.getItemListeners()[0];
-					classChooser.removeItemListener(listener);
-					classChooser.removeAllItems();
-					for (String className : classNames) {
-						classChooser.addItem(className);
-					}
-					classChooser.addItemListener(listener);
-					//if no classes where previously associated, associate
-					//the first one
-					if (!validC.contains(STPA.getReferenceClass())) {
-						STPA.setReferenceClass(validC.get(0));
-					}
-					classChooser.setSelectedItem(cd.getClassName(STPA.getReferenceClass()));
-					fromLabel.setText("From (s):");
-					toLabel.setText("To (s):");
-					STPA.setDefaultInitialValue();
-					STPA.setDefaultFinalValue();
-					from.setText(Double.toString(STPA.getInitialValue()));
-					to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
-					to.setValue(new Double(STPA.getFinalValue()));
-					to.setToolTipText("Sets the final arrival rate in job/sec");
-					description.setText(DESCRIPTION_SINGLE);
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
 				}
+				STPA.setSingleClass(true);
+				//get the vector containing the keys of the valid classes. A class is valid if its service
+				//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
+				Vector<Object> validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());
+				String[] classNames = new String[validC.size()];
+				for (int i = 0; i < validC.size(); i++) {
+					classNames[i] = cd.getClassName(validC.get(i));
+				}
+				classChooser.setEnabled(true);
+				ItemListener listener = classChooser.getItemListeners()[0];
+				classChooser.removeItemListener(listener);
+				classChooser.removeAllItems();
+				for (String className : classNames) {
+					classChooser.addItem(className);
+				}
+				classChooser.addItemListener(listener);
+				//if no classes where previously associated, associate
+				//the first one
+				if (!validC.contains(STPA.getReferenceClass())) {
+					STPA.setReferenceClass(validC.get(0));
+				}
+				classChooser.setSelectedItem(cd.getClassName(STPA.getReferenceClass()));
+				fromLabel.setText("From (s):");
+				toLabel.setText("To (s):");
+				STPA.setDefaultInitialValue();
+				STPA.setDefaultFinalValue();
+				from.setText(Double.toString(STPA.getInitialValue()));
+				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
+				to.setValue(new Double(STPA.getFinalValue()));
+				to.setToolTipText("Sets the final arrival rate in job/sec");
+				description.setText(DESCRIPTION_SINGLE);
 			}
 		});
 		classChooser.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				String className = (String) classChooser.getSelectedItem();
 				Object classKey = null;
 				Vector<Object> classes = cd.getClassKeys();
@@ -378,6 +383,9 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		});
 		stationChooser.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				String stationName = (String) stationChooser.getSelectedItem();
 				STPA.setReferenceStation(getStationKey(stationName));
 				//get the vector containing the keys of the valid classes. A class is valid if its service

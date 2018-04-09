@@ -23,17 +23,16 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
+import jmt.framework.gui.components.JMTMenuBar;
+import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.listeners.AbstractJMTAction;
+import jmt.framework.gui.listeners.MenuAction;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
@@ -60,32 +59,32 @@ public class JWatMainPanel extends WizardPanel {
 	private HoverHelp help;
 	private MainJwatWizard parent = null;
 
-	protected AbstractAction startFitting = new AbstractAction("") {
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-		{
-			putValue(Action.SHORT_DESCRIPTION, "Fitting");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_FITTING_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			parent.setFittingEnv("load");
-		}
-	};
 	protected AbstractAction startWLA = new AbstractAction("") {
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Worload analyzer");
+			putValue(Action.SHORT_DESCRIPTION, "Workload Analysis");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_WL_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			parent.setWorkloadEnv("load");
+		}
+	};
+	protected AbstractAction startFitting = new AbstractAction("") {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		{
+			putValue(Action.SHORT_DESCRIPTION, "Fitting Workload");
+			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_FITTING_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			parent.setFittingEnv("load");
 		}
 	};
 	protected AbstractAction startTraffic = new AbstractAction("") {
@@ -94,7 +93,7 @@ public class JWatMainPanel extends WizardPanel {
 		 */
 		private static final long serialVersionUID = 1L;
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Traffic Analysis  - Burstiness");
+			putValue(Action.SHORT_DESCRIPTION, "Traffic Analysis - Burstiness");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_TRAFFIC_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 
@@ -108,7 +107,7 @@ public class JWatMainPanel extends WizardPanel {
 		 */
 		private static final long serialVersionUID = 1L;
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Open a demo file for Workload Analysis");
+			putValue(Action.SHORT_DESCRIPTION, "Open a demo file for workload analysis");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_SAVE_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 
@@ -122,7 +121,7 @@ public class JWatMainPanel extends WizardPanel {
 		 */
 		private static final long serialVersionUID = 1L;
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Open a demo file for fitting");
+			putValue(Action.SHORT_DESCRIPTION, "Open a demo file for fitting workload");
 			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_SAVE_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));
 		}
 
@@ -227,45 +226,7 @@ public class JWatMainPanel extends WizardPanel {
 
 	@Override
 	public String getName() {
-		return "Main panel";
-	}
-
-	private JToolBar workloadToolbar = null;
-
-	/**
-	 * @return the toolbar for the exact wizard. Shamelessly uses icon from the main jmt frame
-	 */
-	public void makeToolbar() {
-		workloadToolbar = new JToolBar();
-		workloadToolbar.setRollover(true);
-		workloadToolbar.setOrientation(SwingConstants.HORIZONTAL);
-		workloadToolbar.setFloatable(false);
-		//null values add a gap between toolbar icons
-		Action[] actions = { HELP };
-		String[] icons = { "Help" };
-		String[] htext = { "Show JWAT help" };
-		JButton button;
-		workloadToolbar.setBorderPainted(true);
-		//i index scans actions' array which includes null values, while j scans other arrays.
-		//so j must be decremented when a null value is found in action array.
-		for (int i = 0, j = 0; i < actions.length; i++, j++) {
-			if (actions[i] == null) {
-				j--;
-				workloadToolbar.addSeparator(new Dimension(20, 2));
-			} else {
-				button = new JButton(actions[i]);
-				button.setText("");
-				button.setIcon(JMTImageLoader.loadImage(icons[j]));
-				button.setRolloverIcon(JMTImageLoader.loadImage(icons[j] + "RO"));
-				button.setPressedIcon(JMTImageLoader.loadImage(icons[j] + "P"));
-				button.setFocusPainted(false);
-				button.setContentAreaFilled(false);
-				button.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-				workloadToolbar.add(button);
-				help.addHelp(button, htext[j]);
-			}
-		}
-		parent.setToolBar(workloadToolbar);
+		return "Main Panel";
 	}
 
 	private AbstractJMTAction HELP = new AbstractJMTAction("JWAT Help") {
@@ -295,7 +256,7 @@ public class JWatMainPanel extends WizardPanel {
 		}
 	};
 
-	private AbstractAction HELP_CREDITS = new AbstractAction("About JWAT") {
+	private AbstractJMTAction HELP_CREDITS = new AbstractJMTAction("About JWAT") {
 		/**
 		 * 
 		 */
@@ -308,30 +269,28 @@ public class JWatMainPanel extends WizardPanel {
 			AboutDialogFactory.showJWAT(parent);
 		}
 	};
-	private JMenuBar workloadMenubar = null;
 
 	/**
-	 * Creates workload analysis menu
-	 * @return menu
+	 * Creates JWAT toolbar
+	 */
+	public void makeToolbar() {
+		JMTToolBar toolbar = new JMTToolBar(JMTImageLoader.getImageLoader());
+		AbstractJMTAction[] items = new AbstractJMTAction[] { HELP };
+		toolbar.populateToolbar(items);
+		toolbar.setFloatable(false);
+		parent.setToolBar(toolbar);
+	}
+
+	/**
+	 * Creates JWAT menubar
 	 */
 	public void makeMenubar() {
-		workloadMenubar = new JMenuBar();
-		JMenuItem[][] menuItems = { { new JMenuItem(HELP),null,new JMenuItem(HELP_CREDITS) } };
-		String[] menuTitles = { "Help" };
-		char[] chars = { 'e' };
-		for (int i = 0; i < menuItems.length; i++) {
-			JMenu menu = new JMenu(menuTitles[i]);
-			menu.setMnemonic(chars[i]);
-			for (int j = 0; j < menuItems[i].length; j++) {
-				if (menuItems[i][j] == null) {
-					menu.addSeparator();
-				} else {
-					menu.add(menuItems[i][j]);
-				}
-			}
-			workloadMenubar.add(menu);
-		}
-		parent.setMenuBar(workloadMenubar);
+		JMTMenuBar menuBar = new JMTMenuBar(JMTImageLoader.getImageLoader());
+		AbstractJMTAction[] menus = new AbstractJMTAction[] {
+				//Help menu
+				new MenuAction("Help", new AbstractJMTAction[] { HELP, null, HELP_CREDITS }) };
+		menuBar.populateMenu(menus);
+		parent.setMenuBar(menuBar);
 	}
 
 	@Override

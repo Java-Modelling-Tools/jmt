@@ -130,21 +130,19 @@ class CustomDialog extends JDialog implements ActionListener, PropertyChangeList
 				if (logCheckBox.isSelected()) {
 					logButton.setEnabled(true);
 					logTextField.setEnabled(true);
-					//					logTextField.setBackground(Color.WHITE);
+					//logTextField.setBackground(Color.WHITE);
 					logButton.setVisible(true);
 					logTextField.setVisible(true);
 					jp.setVisible(true);
 					pack();
-
 				} else {
 					logButton.setEnabled(false);
 					logTextField.setEnabled(false);
-					// 					logTextField.setBackground(Color.LIGHT_GRAY);
+					//logTextField.setBackground(Color.LIGHT_GRAY);
 					logButton.setVisible(false);
 					logTextField.setVisible(false);
 					jp.setVisible(false);
 					pack();
-
 				}
 			}
 		});
@@ -346,7 +344,7 @@ class CustomDialog extends JDialog implements ActionListener, PropertyChangeList
 	}
 
 	public File getLogFile() {
-		if (isLogging() == false) {
+		if (!isLogging()) {
 			return null;
 		}
 		return file;

@@ -165,37 +165,6 @@ public class QueueNetwork {
 		return jobClasses.get(name);
 	}
 
-	/**Gets the specified measure from the node with the specified name.
-	 *
-	 * @param nodeName name of the node
-	 * @param measureID the measure id (chosen from QUEUE_LENGTH, RESIDENCE_TIME, SERVICE_TIME)
-	 * @return the measure
-	 * @throws NetException
-	 */
-	public double getMeasure(String nodeName, int measureID) throws NetException {
-		double measure = 0;
-		boolean found = false;
-		switch (measureID) {
-		case QUEUE_LENGTH:
-			measure = nodes.get(nodeName).getDoubleNodeProperty(NetNode.PROPERTY_ID_RESIDENT_JOBS);
-			found = true;
-			break;
-		case RESIDENCE_TIME:
-			measure = nodes.get(nodeName).getDoubleNodeProperty(NetNode.PROPERTY_ID_RESIDENCE_TIME);
-			found = true;
-			break;
-		case SERVICE_TIME:
-			measure = nodes.get(nodeName).getSection(NodeSection.SERVICE).getDoubleSectionProperty(NodeSection.PROPERTY_ID_RESIDENCE_TIME);
-			found = true;
-			break;
-		}
-		if (found) {
-			return measure;
-		} else {
-			throw new NetException(this, 0, "measure not available");
-		}
-	}
-
 	/** Gets the list of the queue network reference nodes.
 	 * @return Queue network reference nodes.
 	 */

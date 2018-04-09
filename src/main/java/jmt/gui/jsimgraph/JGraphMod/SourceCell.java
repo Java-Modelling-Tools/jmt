@@ -38,7 +38,7 @@ public class SourceCell extends JmtCell {
 	public static final boolean canBePlaced = true;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
-	public static final String ICON = "source";
+	public static final String ICON = "Source";
 
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.

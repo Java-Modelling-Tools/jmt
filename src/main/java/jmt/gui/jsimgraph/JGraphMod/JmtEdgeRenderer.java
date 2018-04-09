@@ -151,7 +151,7 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 											view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j).getX() + 5),
 													(float) cell.intersectionEdgePoint.get(j).getY());
 										}
-									} else if ((passato == false || (passato == true && tmp1.size() > 0 && !tmp1.contains(cell.intersectionEdgePoint.get(j))))
+									} else if ((!passato || (passato && tmp1.size() > 0 && !tmp1.contains(cell.intersectionEdgePoint.get(j))))
 											&& (int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
 											&& (int) p[i].getX() > (int) p[i + 1].getX()
 											&& (int) p[i + 1].getY() == (int) cell.intersectionEdgePoint.get(j).getY()

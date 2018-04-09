@@ -69,7 +69,7 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 	private JabaWizard ew;
 	private HoverHelp help;
 	private static final String HELP_TEXT = "<html>In this panel you can edit the service times of LI and delay stations for each class.<br><br>"
-			+ " To enter values, single-click on the desired cell"
+			+ " To enter values, double-click on the desired cell"
 			+ " and start typing.<br> To select multiple cells drag the mouse on them; click or drag on"
 			+ " row/column headers to select whole rows/columns.<br> <b>For a list of the available operations right-click"
 			+ " on the table</b>; all operations except pasting affect selected cells.<br>"
@@ -251,10 +251,10 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 			setDisplaysScrollLabels(true);
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
-			setClipboardTransferEnabled(true);
+			setBatchEditingEnabled(true);
 
 			help.addHelp(this,
-					"Click or drag to select cells; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select cells; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreColumnsLabel, "There are more classes: scroll right to see them");
 			help.addHelp(moreRowsLabel, "There are more stations: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all cells");
@@ -342,8 +342,8 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			switch (stationTypes[rowIndex]) {
-				case STATION_LI:
 				case STATION_DELAY:
+				case STATION_LI:
 					return FORMATTER.format(serviceTimes[rowIndex][columnIndex][0]);
 				case STATION_LD:
 					return "LD";
@@ -360,7 +360,6 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 		@Override
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			if (value instanceof String) { //coming from the defaultEditor
-				//if ("LD".equals((String)value)) return;
 				try {
 					double newVal = Double.parseDouble((String) value);
 					if (newVal <= 0.01) {
@@ -386,28 +385,6 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 				return;
 			}
 			serviceTimes[row][col][0] = 0.01;
-		}
-
-		/**
-		 * Copy the contents of a cell to an area. Works directly on the data set.<br>
-		 * Does nothing if the source cell is in an LD row; LD rows are skipped
-		 */
-		@Override
-		public void copyCellToArea(int sourceRow, int sourceCol, int rowFrom, int rowTo, int colFrom, int colTo) {
-
-			if (stationTypes[sourceRow] == STATION_LD) {
-				return;
-			}
-
-			double source = serviceTimes[sourceRow][sourceCol][0];
-
-			for (int row = rowFrom; row <= rowTo; row++) {
-				if (!(stationTypes[row] == STATION_LD)) {
-					for (int col = colFrom; col <= colTo; col++) {
-						serviceTimes[row][col][0] = source;
-					}
-				}
-			}
 		}
 
 	}

@@ -257,12 +257,7 @@ public class SimSystem {
 		return running;
 	}
 
-	// Entity service methods
-
-	// Called by an entity just before it becomes non-RUNNABLE
-	//	static void paused() {
-	//		onestopped.v();
-	//	}
+	// Entity helper methods
 
 	static synchronized RemoveToken hold(int src, double delay) {
 		SimEvent e = new SimEvent(SimEvent.HOLD_DONE, clock + delay, src);
@@ -303,32 +298,17 @@ public class SimSystem {
 	}
 
 	static synchronized int waiting(int d, SimPredicate p) {
+		SimEvent ev = null;
 		int w = 0;
-		SimEvent event;
-		//DEK (Federico Granata) 25-11-2003
 		for (Object element : deferred) {
-			event = (SimEvent) element;
-			if (event.getDest() == d) {
-				if (p.match(event)) {
+			ev = (SimEvent) element;
+			if (ev.getDest() == d) {
+				if (p.match(ev)) {
 					w++;
 				}
 			}
 		}
 		return w;
-
-		/* old
-		for (e = deferred.elements(); e.hasMoreElements();) {
-			ev = (SimEvent) e.nextElement();
-			if (ev.getDest() == d) {
-				//	trcout.println("t: in waiting, - event from "+ev.getSrc()+" to "+
-				//	       ev.getDest() + " type:"+ev.type()+" time:"+ev.eventTime());
-
-				if (p.match(ev))
-					w++;
-			}
-		}
-		return w;*/
-		//end DEK (Federico Granata) 25-11-2003
 	}
 
 	static synchronized void select(int src, SimPredicate p) {

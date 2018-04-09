@@ -31,12 +31,14 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 15.27.13
  */
 public class Poisson extends Distribution {
+
 	/**
-	 * Construct a new Poisson Distribution
+	 * Constructs a new Poisson Distribution
 	 */
 	public Poisson() {
 		super("Poisson", "jmt.engine.random.Poisson", "jmt.engine.random.PoissonPar", "Poisson distribution");
 		hasMean = true;
+		hasC = false;
 		isNestable = true;
 	}
 
@@ -48,13 +50,14 @@ public class Poisson extends Distribution {
 	protected Parameter[] setParameters() {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[1];
+
 		// Sets parameter lambda
 		parameters[0] = new Parameter("mean", "\u03BB", Double.class, new Double(0.5));
 		// Checks value of lambda must be greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -66,8 +69,7 @@ public class Poisson extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -98,10 +100,11 @@ public class Poisson extends Distribution {
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {
 		mean = ((Double) getParameter(0).getValue()).doubleValue();
 	}
+
 }

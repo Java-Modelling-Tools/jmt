@@ -30,15 +30,12 @@ import java.util.Vector;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -119,8 +116,8 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 			leftPanel.clearCheckVectors();
 			leftPanel.addCheckVector(stationInKeys);
 			leftPanel.addCheckVector(classKeys);
-			enablingTable.tableChanged(new TableModelEvent(enablingTable.getModel(), TableModelEvent.HEADER_ROW));
-			inhibitingTable.tableChanged(new TableModelEvent(inhibitingTable.getModel(), TableModelEvent.HEADER_ROW));
+			enablingTable.updateStructure();
+			inhibitingTable.updateStructure();
 		}
 	}
 
@@ -310,8 +307,9 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 			inhibitingRenderer = isEnabling ? null : new InfiniteExactCellRenderer();
 			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 			setRowHeight(ROW_HEIGHT);
-			setRowSelectionAllowed(false);
-			setColumnSelectionAllowed(false);
+			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(true);
+			setBatchEditingEnabled(true);
 		}
 
 		@Override
@@ -429,22 +427,10 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 
 		private static final long serialVersionUID = 1L;
 
-		private JLabel label;
-
-		public InfiniteExactCellRenderer() {
-			label = new JLabel("\u221e");
-			label.setHorizontalAlignment(SwingConstants.RIGHT);
-		}
-
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 			if (value != null && ((Integer) value).intValue() <= 0) {
-				if (hasFocus) {
-					label.setBorder(UIManager.getBorder("Table.focusCellHighlightBorder"));
-				} else {
-					label.setBorder(noFocusBorder);
-				}
-				return label;
+				value = Double.POSITIVE_INFINITY;
 			}
 			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}

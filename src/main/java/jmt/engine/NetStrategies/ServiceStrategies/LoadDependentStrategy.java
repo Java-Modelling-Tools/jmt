@@ -25,7 +25,6 @@ import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.math.DirectCircularList;
-import jmt.engine.math.parser.Parser;
 import jmt.engine.random.Distribution;
 import jmt.engine.random.Parameter;
 
@@ -41,7 +40,6 @@ import jmt.engine.random.Parameter;
  */
 public class LoadDependentStrategy extends ServiceStrategy {
 
-	private static final String VARIABLE = "n";
 	private static final int CACHESIZE = 1024;
 
 	private LDParameter[] parameters;
@@ -84,10 +82,6 @@ public class LoadDependentStrategy extends ServiceStrategy {
 				item = new MeanCache(parameter, jobs);
 				cache.set(jobs, item);
 			}
-			// At this point item is retrieved from cache or parsed.
-			if (item.meanValid) {
-				item.parameter.setMean(item.mean); // Note: this is needed as parameter is shared among all items of the same LDParameter
-			}
 
 			return item.distribution.nextRand(item.parameter);
 
@@ -110,30 +104,10 @@ public class LoadDependentStrategy extends ServiceStrategy {
 	}
 
 	/**
-	 * Helper method used to evaluate specified function to return a distribution's mean value
-	 * @param parser to be evaluated
-	 * @param n current value of queue length to be used to evaluate specified function
-	 * @return evaluated function
-	 */
-	private double evaluateFunction(Parser parser, int n) throws IncorrectDistributionParameterException {
-		try {
-			parser.setVariable(VARIABLE, n);
-			return parser.getValue();
-		} catch (RuntimeException e1) {
-			throw new IncorrectDistributionParameterException("Error: invalid function to be parsed for load dependent service section --> "
-					+ e1.getMessage());
-		}
-	}
-
-	/**
 	 * Inner class used to cache mean values and distributions to avoid parsing a function
 	 * at each call of this strategy
 	 */
 	private class MeanCache {
-		/** mean value */
-		public double mean;
-		/** tells if mean field is valid */
-		public boolean meanValid;
 		/** distribution used to evaluate service times */
 		public Distribution distribution;
 		/** parameter of distribution used to evaluate service times */
@@ -148,12 +122,6 @@ public class LoadDependentStrategy extends ServiceStrategy {
 		public MeanCache(LDParameter ldp, int n) throws IncorrectDistributionParameterException {
 			distribution = ldp.getDistribution();
 			parameter = ldp.getDistrParameter();
-			if (ldp.getFunction() == null) {
-				meanValid = false;
-			} else {
-				mean = evaluateFunction(ldp.getParser(), n);
-				meanValid = true;
-			}
 		}
 	}
 

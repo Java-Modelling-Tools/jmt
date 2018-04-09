@@ -277,7 +277,7 @@ public class Burst extends NetNode implements Distribution {
 			value = getCurrentValueDistrNextRand(p);
 		}
 
-		if (discardNextMessage == true) {
+		if (discardNextMessage) {
 			// send the new EVENT_DISTRIBUTION_CHANGE message
 			intervalEnd = offset + remainingTime + SimSystem.getClock();
 			sendMe(offset + remainingTime, NetEvent.EVENT_DISTRIBUTION_CHANGE);
@@ -350,7 +350,7 @@ public class Burst extends NetNode implements Distribution {
 		 * We want to discard messages only if they are not arrived at instant 0.
 		 * 
 		 */
-		if (discardNextMessage == true && Double.compare(SimSystem.getClock(), 0.0) != 0) {
+		if (discardNextMessage && SimSystem.getClock() > 0.0) {
 			discardNextMessage = false;
 			return;
 		}

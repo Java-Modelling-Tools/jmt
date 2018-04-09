@@ -1,6 +1,6 @@
 package jmt.engine.jwat.input;
 
-public class Mapping implements Comparable {
+public class Mapping implements Comparable<Object> {
 	private double conversion;
 	private Object value;
 

@@ -216,7 +216,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 	}
 
 	/**
-	 * Adds acrion listeners to gui elements
+	 * Adds action listeners to gui elements
 	 */
 	private void addActions() {
 		// Add button

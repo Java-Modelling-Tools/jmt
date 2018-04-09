@@ -1,8 +1,22 @@
-package jmt.gui.common.distributions;
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.distributions;
 
 import javax.swing.ImageIcon;
 
@@ -14,40 +28,27 @@ import jmt.gui.common.JMTImageLoader;
  * 
  * @author Peter Parapatics
  *         Date: 12-dic-2007
- *         
  */
 public class Burst extends Distribution {
 
 	/**
-	 * Construct a new Burst distribution
+	 * Constructs a new Burst distribution
 	 */
 	public Burst() {
 		super("Burst (General)", "jmt.engine.random.Burst", "jmt.engine.random.BurstPar", "Burst distribution");
 		hasC = false;
 		hasMean = false;
 		isNestable = false;
-		//Add a value checker to check if every distribution has been specified
-		this.setValueChecker(new ValueChecker() {
+		setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
-				Burst b = (Burst) value;
-				for (int i = 0; i < 6; i++) {
-					if (b.getParameter(i).getValue() == null) {
-						return false;
-					}
+				if (parameters[1].getValue() == null || parameters[2].getValue() == null
+						|| parameters[3].getValue() == null || parameters[4].getValue() == null) {
+					precondition = "All interval-length and value distributions have to be defined.";
+					return false;
 				}
 				return true;
 			}
 		});
-	}
-
-	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
-	 * @return illustrating figure
-	 */
-	@Override
-	protected ImageIcon setImage() {
-		return JMTImageLoader.loadImage("Burst");
 	}
 
 	/**
@@ -63,14 +64,14 @@ public class Burst extends Distribution {
 		//This parameter has to be added directly to the Distribution in the XML
 		parameters[0] = new Parameter("Probability", "Probability", Double.class, new Double(0.5), true);
 
-		//set the interval length distribution of interval A
+		//Set the interval length distribution of interval A
 		//This parameter has to be added directly to the Distribution in the XML
 		parameters[1] = new Parameter("Length-Distribution_IntervalA", "Interval A - Length Distribution", Distribution.class, null, true);
 
 		//Set the value distribution of interval A
 		parameters[2] = new Parameter("Value-Distribution_IntervalA", "Interval A - Value Distribution", Distribution.class, null);
 
-		//set the interval length distribution of interval B
+		//Set the interval length distribution of interval B
 		//This parameter has to be added directly to the Distribution in the XML
 		parameters[3] = new Parameter("Length-Distribution_IntervalB", "Interval B - Length Distribution", Distribution.class, null, true);
 
@@ -85,17 +86,12 @@ public class Burst extends Distribution {
 	}
 
 	/**
-	 * Returns precondition that parameters' values must satisfy for this distribution to be valid
-	 * @return Message describing distribution's preconditions
+	 * Sets illustrating figure in distribution panel
+	 * @return illustrating figure
 	 */
 	@Override
-	public String getPrecondition() {
-		return "All values and interval-length distributions have to be defined";
-	}
-
-	@Override
-	public boolean isNestable() {
-		return isNestable;
+	protected ImageIcon setImage() {
+		return JMTImageLoader.loadImage("Burst");
 	}
 
 	/**
@@ -104,10 +100,8 @@ public class Burst extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		DecimalFormat df = new DecimalFormat("#.############");
-		df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));
-		Double probability = (Double) parameters[0].getValue();
-		return "burst" + "(" + df.format(probability) + "," + parameters[2].getValue() + "," + parameters[4].getValue() + ")";
+		return "burst(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
+				+ parameters[2].getValue() + "," + parameters[4].getValue() + ")";
 	}
 
 }

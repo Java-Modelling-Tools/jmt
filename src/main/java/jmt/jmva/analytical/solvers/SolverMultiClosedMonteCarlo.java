@@ -27,9 +27,8 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
      * Contains the queueing network model
      */
     protected QNModel qnm;
-    
-    private RandomEngine engine = RandomEngine.makeDefault();
 
+    private RandomEngine engine = RandomEngine.makeDefault();
 
     /** Creates new SolverMultiClosedMonteCarlo
      *  @param  stations    number of service centers

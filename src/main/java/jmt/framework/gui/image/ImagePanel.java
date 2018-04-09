@@ -73,6 +73,10 @@ public class ImagePanel extends JLabel {
 	 */
 	public void setImage(ImageIcon image) {
 		this.image = image;
+		if (image == null) {
+			this.setIcon(null);
+			return;
+		}
 		resizeImage();
 	}
 

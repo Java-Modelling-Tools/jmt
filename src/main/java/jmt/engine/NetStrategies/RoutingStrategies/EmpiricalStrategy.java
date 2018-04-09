@@ -38,10 +38,6 @@ import jmt.engine.random.EmpiricalPar;
  */
 public class EmpiricalStrategy extends RoutingStrategy {
 
-	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
-	// Used to terminate the loop to avoid to send a job of closed class into a sink
-	// By the way a check is implemented at gui level, so this condition will never apply.
-	private final int maxSinkTry = 4096;
 	//the empirical distribution
 	private Empirical distribution;
 	//the parameter of the empirical distribution
@@ -65,30 +61,11 @@ public class EmpiricalStrategy extends RoutingStrategy {
 		//gets the values contained in the empirical parameter (in this case these
 		//objects are the names of the output nodes)
 		Object[] names = param.getValues();
-
 		nodeNames = new String[names.length];
-
-		//OLD
-		//nodes = new NetNode[names.length];
-
-		//NEW
-		//@author Stefano Omini
 		for (int i = 0; i < names.length; i++) {
 			if (names[i] instanceof String) {
 				//sets the name of the i-th output node
 				nodeNames[i] = (String) names[i];
-
-				//OLD
-				//this reserach of the NetNode gives an error if the owner node of this
-				//strategy is inserted before the output nodes referred to in the strategy
-				//For this reason, at this point only nodeNames information are stored.
-				//The NetNode objects will be found later by the findNodes() method.
-
-				//sets the NetNode reference to the i-th output node (found
-				//using its name)
-				//nodes[i] = NetSystem.getNode(nodeNames[i]);
-				//end OLD
-
 			} else {
 				throw new LoadException("Name of the node is not a String");
 			}
@@ -104,27 +81,16 @@ public class EmpiricalStrategy extends RoutingStrategy {
 	 * @throws IncorrectDistributionParameterException
 	 */
 	public EmpiricalStrategy(EmpiricalEntry[] entries) throws LoadException, IncorrectDistributionParameterException {
-
 		probabilities = new double[entries.length];
-
-		//OLD
-		//nodes = new NetNode[entries.length];
-
-		//NEW
-		//@author Stefano Omini
 		nodeNames = new String[entries.length];
-		//end NEW
-
 		for (int i = 0; i < entries.length; i++) {
 			EmpiricalEntry entry = entries[i];
 			if (entry.getValue() instanceof String) {
 				//gets the value contained in the empirical entry (in this case this
 				//object is the name of the output node)
 				String nodeName = (String) entry.getValue();
-
 				//sets the name of the node; the corresponding NetNode object will be found later
 				nodeNames[i] = nodeName;
-
 				//sets the corresponding routing probability
 				probabilities[i] = entry.getProbability();
 			} else {
@@ -151,9 +117,9 @@ public class EmpiricalStrategy extends RoutingStrategy {
 	/**
 	 * Gets the output node, into which the job must be routed, using an
 	 * empirical strategy.
-	 * @param nodeList the list of output nodes
-	 * @param jobClass class of current job to be routed
-	 * @return The selected node.
+	 * @param nodeList List of the output nodes.
+	 * @param jobClass Class of current job to be routed.
+	 * @return Selected node.
 	 */
 	@Override
 	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
@@ -164,24 +130,8 @@ public class EmpiricalStrategy extends RoutingStrategy {
 				findNodes();
 			}
 			//the empirical distribution returns the position of the chosen output node
-			int nodePos = (int) distribution.nextRand(param);
-
+			int nodePos = (int) Math.round(distribution.nextRand(param));
 			NetNode node = this.nodes[nodePos];
-
-			// Controls if a closed class job is put into a sink - Bertoli Marco
-			if (jobClass.getType() == CLOSED_CLASS) {
-				// when reaches maxSinkTry, aborts this strategy returning null
-				int tries = 0;
-				while (node.isSink()) {
-					if (tries++ >= maxSinkTry) {
-						return null;
-					}
-					// Try to find a node different from a sink
-					nodePos = (int) distribution.nextRand(param);
-					node = this.nodes[nodePos];
-				}
-			}
-
 			if (nodeList.contains(node)) {
 				//the chosen node must be contained in the list of the output nodes
 				return node;
@@ -192,15 +142,12 @@ public class EmpiricalStrategy extends RoutingStrategy {
 		return null;
 	}
 
-	//NEW
-	//@author Stefano Omini
 	/**
 	 * Finds the NetNode objects corresponding to the node names received by constructor.
 	 * @return true if all names actually correspond to nodes of the model, false otherwise;
 	 */
 	private boolean findNodes() {
 		nodes = new NetNode[nodeNames.length];
-
 		for (int i = 0; i < nodeNames.length; i++) {
 			nodes[i] = NetSystem.getNode(nodeNames[i]);
 			if (nodes[i] == null) {
@@ -210,6 +157,5 @@ public class EmpiricalStrategy extends RoutingStrategy {
 		}
 		return true;
 	}
-	//end NEW
 
 }

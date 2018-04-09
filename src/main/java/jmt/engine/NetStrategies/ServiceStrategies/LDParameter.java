@@ -54,7 +54,6 @@ public class LDParameter implements Comparable<Object> {
 			this.function = function.toLowerCase();
 			parser = new Parser(function, true);
 		}
-
 	}
 
 	/**

@@ -205,7 +205,7 @@ public class Dispatcher_jMVAschema {
 			sim.setXmlModelDefPath(modelDefinitionPath);
 
 			if (!automaticSeed) {
-				//if automaticSeed == false, then a user defined seed is present
+				//if !automaticSeed, then a user defined seed is present
 				sim.setRandomEngineSeed(simulationSeed);
 				sim.initialize();
 				logger.debug("jSIM correctly initialized with simulation seed = " + simulationSeed);
@@ -482,7 +482,7 @@ public class Dispatcher_jMVAschema {
 			sim.setXmlModelDefPath(modelDefinitionPath);
 
 			if (!automaticSeed) {
-				//if automaticSeed == false, then a user defined seed is present
+				//if !automaticSeed, then a user defined seed is present
 				sim.setRandomEngineSeed(simulationSeed);
 				sim.initialize();
 				logger.debug("jSIM correctly initialized with simulation seed = " + simulationSeed);

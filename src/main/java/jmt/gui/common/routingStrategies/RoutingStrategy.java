@@ -29,8 +29,6 @@ import java.util.Map;
  * Time: 16.29.02
  * To change this template use Options | File Templates.
  * Modified by Bertoli Marco
- *
- *
  * Modified by Francesco D'Aquino
  */
 public abstract class RoutingStrategy {

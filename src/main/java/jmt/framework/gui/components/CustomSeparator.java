@@ -69,6 +69,7 @@ public class CustomSeparator extends JComponent {
 					setMaximumSize(Horizontal);
 					orientation = SwingConstants.HORIZONTAL;
 					parent.revalidate();
+					parent.repaint();
 				}
 				g.drawLine(d.width / 2, 0, d.width / 2, d.height);
 			} else {
@@ -76,6 +77,7 @@ public class CustomSeparator extends JComponent {
 					setMaximumSize(Vertical);
 					orientation = SwingConstants.VERTICAL;
 					parent.revalidate();
+					parent.repaint();
 				}
 				g.drawLine(0, d.height / 2, d.width, d.height / 2);
 			}

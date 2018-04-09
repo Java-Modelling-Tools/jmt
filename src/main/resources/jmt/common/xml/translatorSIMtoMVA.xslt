@@ -106,7 +106,7 @@
 	</xsl:template>
 	
 	<!--adds a servicetime child to the current node. Its name is 'servicetime' if the station is load independent or a delay station, otherwise 
-	its name is servicetimes, according with the exactmodel.xsd definition. Input parameters are:
+	its name is servicetimes, according to the exactmodel.xsd definition. Input parameters are:
 	- Index: index of the refClass child which this servicetime refers to.
 	- stationType: type of this station, li or ld as explained above.
 	- userClassName: name of the userclass this service time refers to.-->

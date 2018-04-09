@@ -151,7 +151,8 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			singleClass.setSelected(true);
 			allClass.setSelected(false);
 			//set the minimum final value
-			minTo = cd.getTotalClosedClassPopulation() + 1;
+			int totalPop = cd.getTotalClosedClassPopulation();
+			minTo = totalPop + 1;
 		} else {
 			classChooser.removeAllItems();
 			classChooser.addItem("All closed classes");
@@ -159,11 +160,14 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			singleClass.setSelected(false);
 			allClass.setSelected(true);
 			// set the minimum final value.
-			if (cd.getClosedClassKeys().size() > 1) {
-				minTo = cd.getTotalClosedClassPopulation() * 2 + 1;
-			} else {
-				minTo = cd.getTotalClosedClassPopulation() + 1;
+			Vector<Object> classes = cd.getClosedClassKeys();
+			int popGCD = cd.getClassPopulation(classes.get(0));
+			for (int i = 1; i < classes.size(); i++) {
+				int classPop = cd.getClassPopulation(classes.get(i));
+				popGCD = findGCD(popGCD, classPop);
 			}
+			int totalPop = cd.getTotalClosedClassPopulation();
+			minTo = totalPop + totalPop / popGCD;
 		}
 		fromLabel = new JLabel("From N: ");
 		from = new JTextField();
@@ -282,84 +286,87 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 	private void setListeners() {
 		singleClass.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					NCPA.setSingleClass(true);
-					classChooser.setEnabled(true);
-					ItemListener listener = classChooser.getItemListeners()[0];
-					classChooser.removeItemListener(listener);
-					classChooser.removeAllItems();
-					Vector<Object> classes = cd.getClosedClassKeys();
-					String[] classNames = new String[classes.size()];
-					for (int i = 0; i < classes.size(); i++) {
-						classNames[i] = cd.getClassName(classes.get(i));
-					}
-					for (String className : classNames) {
-						classChooser.addItem(className);
-					}
-					classChooser.addItemListener(listener);
-					if (!classes.contains(NCPA.getReferenceClass())) {
-						NCPA.setReferenceClass(classes.get(0));
-					}
-					classChooser.setSelectedItem(cd.getClassName(NCPA.getReferenceClass()));
-					int classPop = cd.getTotalClosedClassPopulation();
-					int minTo = classPop + 1;
-					ChangeListener cl = to.getChangeListeners()[0];
-					to.removeChangeListener(cl);
-					SpinnerNumberModel toModel = (SpinnerNumberModel) to.getModel();
-					toModel.setMinimum(new Integer(minTo));
-					to.addChangeListener(cl);
-					int oldStep = ((Integer) steps.getValue()).intValue();
-					int newMaximumStep = NCPA.searchForAvailableSteps();
-					if (newMaximumStep > ParametricAnalysis.MAX_STEP_NUMBER) {
-						newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;
-					}
-					SpinnerNumberModel stepModel = (SpinnerNumberModel) steps.getModel();
-					if (oldStep > newMaximumStep) {
-						NCPA.setNumberOfSteps(newMaximumStep);
-						steps.setValue(new Integer(newMaximumStep));
-					}
-					stepModel.setMaximum(new Integer(newMaximumStep));
-					description.setText(DESCRIPTION_SINGLE);
-					tablePanel.repaint();
-					tablePanel.setSelectedClass(NCPA.getReferenceClass());
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
 				}
+				NCPA.setSingleClass(true);
+				classChooser.setEnabled(true);
+				ItemListener listener = classChooser.getItemListeners()[0];
+				classChooser.removeItemListener(listener);
+				classChooser.removeAllItems();
+				Vector<Object> classes = cd.getClosedClassKeys();
+				String[] classNames = new String[classes.size()];
+				for (int i = 0; i < classes.size(); i++) {
+					classNames[i] = cd.getClassName(classes.get(i));
+				}
+				for (String className : classNames) {
+					classChooser.addItem(className);
+				}
+				classChooser.addItemListener(listener);
+				if (!classes.contains(NCPA.getReferenceClass())) {
+					NCPA.setReferenceClass(classes.get(0));
+				}
+				classChooser.setSelectedItem(cd.getClassName(NCPA.getReferenceClass()));
+				int totalPop = cd.getTotalClosedClassPopulation();
+				int minTo = totalPop + 1;
+				ChangeListener cl = to.getChangeListeners()[0];
+				to.removeChangeListener(cl);
+				SpinnerNumberModel toModel = (SpinnerNumberModel) to.getModel();
+				toModel.setMinimum(new Integer(minTo));
+				to.addChangeListener(cl);
+				int oldStep = ((Integer) steps.getValue()).intValue();
+				int newMaximumStep = NCPA.searchForAvailableSteps();
+				if (newMaximumStep > ParametricAnalysis.MAX_STEP_NUMBER) {
+					newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;
+				}
+				SpinnerNumberModel stepModel = (SpinnerNumberModel) steps.getModel();
+				if (oldStep > newMaximumStep) {
+					NCPA.setNumberOfSteps(newMaximumStep);
+					steps.setValue(new Integer(newMaximumStep));
+				}
+				stepModel.setMaximum(new Integer(newMaximumStep));
+				description.setText(DESCRIPTION_SINGLE);
+				tablePanel.repaint();
+				tablePanel.setSelectedClass(NCPA.getReferenceClass());
 			}
 		});
 		allClass.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED) {
-					NCPA.setSingleClass(false);
-					int classPop = cd.getTotalClosedClassPopulation();
-					int minTo;
-					if (cd.getClosedClassKeys().size() > 1) {
-						minTo = classPop * 2 + 1;
-					} else {
-						minTo = classPop + 1;
-					}
-					if (NCPA.getFinalValue() < minTo) {
-						NCPA.setFinalValue(minTo);
-					}
-					SpinnerNumberModel toModel = (SpinnerNumberModel) to.getModel();
-					toModel.setValue(new Integer((int) NCPA.getFinalValue()));
-					toModel.setMinimum(new Integer(minTo));
-					classChooser.removeAllItems();
-					classChooser.addItem("All closed classes");
-					classChooser.setEnabled(false);
-					int newMaximumStep = NCPA.searchForAvailableSteps();
-					if (newMaximumStep > ParametricAnalysis.MAX_STEP_NUMBER) {
-						newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;
-					}
-					int oldStep = ((Integer) steps.getValue()).intValue();
-					SpinnerNumberModel stepModel = (SpinnerNumberModel) steps.getModel();
-					if (oldStep > newMaximumStep) {
-						NCPA.setNumberOfSteps(newMaximumStep);
-						steps.setValue(new Integer(newMaximumStep));
-					}
-					stepModel.setMaximum(new Integer(newMaximumStep));
-					description.setText(DESCRIPTION);
-					tablePanel.repaint();
-					tablePanel.setSelectedClass(null);
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
 				}
+				NCPA.setSingleClass(false);
+				Vector<Object> classes = cd.getClosedClassKeys();
+				int popGCD = cd.getClassPopulation(classes.get(0));
+				for (int i = 1; i < classes.size(); i++) {
+					int classPop = cd.getClassPopulation(classes.get(i));
+					popGCD = findGCD(popGCD, classPop);
+				}
+				int totalPop = cd.getTotalClosedClassPopulation();
+				int minTo = totalPop + totalPop / popGCD;
+				if (NCPA.getFinalValue() < minTo) {
+					NCPA.setFinalValue(minTo);
+				}
+				SpinnerNumberModel toModel = (SpinnerNumberModel) to.getModel();
+				toModel.setValue(new Integer((int) NCPA.getFinalValue()));
+				toModel.setMinimum(new Integer(minTo));
+				classChooser.removeAllItems();
+				classChooser.addItem("All closed classes");
+				classChooser.setEnabled(false);
+				int newMaximumStep = NCPA.searchForAvailableSteps();
+				if (newMaximumStep > ParametricAnalysis.MAX_STEP_NUMBER) {
+					newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;
+				}
+				int oldStep = ((Integer) steps.getValue()).intValue();
+				SpinnerNumberModel stepModel = (SpinnerNumberModel) steps.getModel();
+				if (oldStep > newMaximumStep) {
+					NCPA.setNumberOfSteps(newMaximumStep);
+					steps.setValue(new Integer(newMaximumStep));
+				}
+				stepModel.setMaximum(new Integer(newMaximumStep));
+				description.setText(DESCRIPTION);
+				tablePanel.repaint();
+				tablePanel.setSelectedClass(null);
 			}
 		});
 		to.addChangeListener(new ChangeListener() {
@@ -404,6 +411,9 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		});
 		classChooser.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				String className = (String) classChooser.getSelectedItem();
 				Object classKey = null;
 				Vector<Object> classes = cd.getClassKeys();
@@ -430,6 +440,13 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 				tablePanel.setSelectedClass(NCPA.getReferenceClass());
 			}
 		});
+	}
+
+	private int findGCD(int a, int b) {
+		if (b == 0) {
+			return a;
+		}
+		return findGCD(b, a % b);
 	}
 
 	protected class TablePanel extends JPanel {
@@ -489,9 +506,8 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		public PopulationVectorTable() {
 			super(new PopulationVectorTableModel());
 			autoResizeMode = AUTO_RESIZE_OFF;
-			setRowSelectionAllowed(false);
-			setColumnSelectionAllowed(false);
-			setClipboardTransferEnabled(false);
+			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(true);
 			setRowHeaderWidth(40);
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 		}
@@ -566,10 +582,6 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			}
 		}
 
-		public int getRowCount() {
-			return 2;
-		}
-
 		/**
 		 * @return the object at (rowIndex, columnIndex)
 		 */
@@ -590,6 +602,10 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 				toReturn = twoDec.format(beta);
 			}
 			return toReturn;
+		}
+
+		public int getRowCount() {
+			return 2;
 		}
 
 		public int getColumnCount() {

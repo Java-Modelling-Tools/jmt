@@ -27,8 +27,9 @@ import java.awt.event.ActionEvent;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -76,7 +77,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	protected static final int BORDERSIZE = 20;
 	protected static final int MAXRANGES = 1000;
 	public static final String HELPFILE = "ParserHelp.html";
-	protected static HashMap<String, Distribution> distributions;
+	protected static Map<String, Distribution> distributions;
 	protected static DecimalFormat df = new DecimalFormat();
 
 	static {
@@ -95,7 +96,7 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	 * @return new instance of LDStrategyEditor
 	 */
 	public static LDStrategyEditor getInstance(Container parent, LDStrategy strategy) {
-		// Finds top level Dialog or Frame to invoke correct costructor
+		// Finds top level Dialog or Frame to invoke correct constructor
 		while (!(parent instanceof Frame || parent instanceof Dialog)) {
 			parent = parent.getParent();
 		}
@@ -108,14 +109,14 @@ public class LDStrategyEditor extends JMTDialog implements CommonConstants {
 	}
 
 	/**
-	 * Uses reflection to return an HashMap of distributions suitable for LDStrategy.
+	 * Uses reflection to return a Map of distributions suitable for LDStrategy.
 	 * (With mean value specifiable) Search's key is distribution name and value is the
 	 * Class of found distribution
 	 * @return found distributions
 	 */
-	protected static HashMap<String, Distribution> findDistributions() {
+	protected static Map<String, Distribution> findDistributions() {
 		Distribution[] all = Distribution.findAllWithMean();
-		HashMap<String, Distribution> tmp = new HashMap<String, Distribution>();
+		Map<String, Distribution> tmp = new LinkedHashMap<String, Distribution>();
 		for (Distribution element : all) {
 			tmp.put(element.getName(), element);
 		}

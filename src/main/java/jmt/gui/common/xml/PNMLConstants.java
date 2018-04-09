@@ -53,5 +53,8 @@ public interface PNMLConstants {
 	public static final String PNML_JSIM_E_DISTRIBUTION_PARAMETER = "parameter";
 	public static final String PNML_JSIM_E_DISTRIBUTION_PARAMETER_NAME = "name";
 	public static final String PNML_JSIM_E_DISTRIBUTION_PARAMETER_VALUE = "value";
+	public static final String PNML_JSIM_E_MATRIX = "matrix";
+	public static final String PNML_JSIM_E_MATRIX_VECTOR = "vector";
+	public static final String PNML_JSIM_E_MATRIX_VECTOR_ENTRY = "entry";
 
 }

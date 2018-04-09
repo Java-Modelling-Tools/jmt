@@ -39,16 +39,14 @@ public class Empirical extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 *
-	 * This method is used to evaluate the probability
-	 * distribution function (pdf) where required by the user.
+	 * This method is used to obtain from the distribution its probability distribution
+	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
 	 * @param p parameter of the empirical distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			int k = (int) x;
@@ -62,21 +60,19 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			}
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: all the probability value given must be gtz and the sum of all the value must be 1.0");
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the value must be one");
 		}
 	}
 
 	/**
-	 *
-	 * This method is used to evaluate the cumulative distribution
-	 * function (cdf) where required by the user.
+	 * This method is used to obtain from the distribution its cumulative distribution
+	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
 	 * @param p parameter of the empirical distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			int k = (int) x;
@@ -89,8 +85,8 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			}
 			return cdf[k];
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: all the probability"
-					+ " value given must be greater than zero and the sum of all the values must be 1.0");
+			throw new IncorrectDistributionParameterException(
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one");
 		}
 	}
 
@@ -105,7 +101,6 @@ public class Empirical extends AbstractDistribution implements Distribution {
 	 * @return double with the theoretic mean of the distribution.
 	 *
 	 */
-
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double[] pdf = ((EmpiricalPar) p).getPDF();
@@ -118,22 +113,22 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			return mean;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: all the probability value given must be gtz and the sum of all the value must be 1.0");
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the value must be one");
 		}
 	}
 
 	/**
-	 * This method is used to obtain from the distribution its own theoretical
-	 * variance which is calculated from the data provided by the user (contained
-	 * in the parameter p) as the sum of all the squares of the differences between each
-	 * data value and the theoretic mean, divided by the number of data.
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance which is calculated from the data provided by the user
+	 * (contained in the parameter p) as the sum of all the squares of the
+	 * differences between each data value and the theoretic mean, divided by
+	 * the number of data.
 	 *
 	 * @param p parameter of the empirical distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic variance of the distribution.
 	 *
 	 */
-
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double[] pdf = ((EmpiricalPar) p).getPDF();
@@ -145,8 +140,8 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			}
 			return variance;
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: "
-					+ "all the probability value given must be greater than zero and the sum of all the values must be 1.0");
+			throw new IncorrectDistributionParameterException(
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one");
 		}
 	}
 
@@ -162,31 +157,30 @@ public class Empirical extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double rand = engine.raw();
 			double[] cdf = ((EmpiricalPar) p).getCDF();
-			// binary search in cumulative distribution function:
-			int nBins = cdf.length - 1;
-			int nbelow = 0; // biggest k such that I[k] is known to be <= rand
-			int nabove = nBins; // biggest k such that I[k] is known to be > rand
-			while (nabove > nbelow + 1) {
-				int middle = (nabove + nbelow + 1) >> 1; // division by 2 obtained as a bit shifting
-				if (rand >= cdf[middle]) {
-					nbelow = middle;
-				} else {
-					nabove = middle;
+			for (int ptn = 0; ptn < cdf.length - 1; ptn++) {
+				if (cdf[ptn + 1] >= rand) {
+					return ptn;
 				}
 			}
-			// after this binary search, nabove is always nbelow+1 and they straddle rand:
-			return nbelow;
+			double[] pdf = ((EmpiricalPar) p).getPDF();
+			for (int ptn = pdf.length - 1; ptn > 0; ptn--) {
+				if (pdf[ptn] > 0) {
+					return ptn;
+				}
+			}
+			return -1;
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: "
-					+ "all the probability value given must be greater than zero and the sum of all the values must be 1.0");
+			throw new IncorrectDistributionParameterException(
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one");
 		}
 	}
 
 	/**
-	 * Computes the next random value and returns the corresponding object
-	 * @param p the parameter of the empirical distribution
-	 * @return the object corresponding to the computed random value
+	 * Computes the next random value and returns the corresponding object.
+	 *
+	 * @param p parameter of the empirical distribution.
 	 * @throws IncorrectDistributionParameterException
+	 * @return object corresponding to the computed random value.
 	 */
 	public Object nextRandObject(Parameter p) throws IncorrectDistributionParameterException {
 		int random = (int) nextRand(p);

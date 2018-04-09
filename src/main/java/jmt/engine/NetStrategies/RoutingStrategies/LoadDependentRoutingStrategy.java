@@ -42,9 +42,8 @@ public class LoadDependentRoutingStrategy extends RoutingStrategy {
 
 	/**
 	 * This method should be overridden to implement a specific strategy.
-	 *
-	 * @param nodes    List of nodes.
-	 * @param jobClass class of current job to be routed
+	 * @param nodes List of the output nodes.
+	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override

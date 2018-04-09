@@ -115,7 +115,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		if (!sd.getUseRandomSeed().booleanValue()) {
 			simulator.setSimulationSeed(sd.getSimulationSeed().longValue());
 		}
-		timer = new TimerThread(this, sd.getMaximumDuration().doubleValue());
+		timer = new TimerThread(simulator, sd.getMaximumDuration().doubleValue());
 		gui.changeSimActionsState(false, true, true);
 		start();
 	}
@@ -252,110 +252,6 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 				}
 			}
 			// Simulation is finished
-		}
-	}
-
-	/**
-	 * An inner thread used to stop simulation after timeout elapsed
-	 */
-	protected class TimerThread extends Thread {
-		protected DispatcherThread dispatcher;
-		protected long totalTime;
-		protected long elapsedTime;
-		protected long initialTime;
-		protected boolean paused = false;
-		protected boolean killed = false;
-		protected boolean ended = false;
-
-		public TimerThread(DispatcherThread dispatcher, double maxDuration) {
-			this.setName("TimerThread");
-			this.dispatcher = dispatcher;
-			this.totalTime = Math.round(maxDuration * 1000);
-			this.elapsedTime = 0;
-		}
-
-		/**
-		 * Thread run's method. It will wait until maxDuration has elapsed, then stops
-		 * simulation
-		 */
-		@Override
-		public void run() {
-			while (!killed && !ended) {
-				try {
-					synchronized (this) {
-						if (!paused) {
-							initialTime = System.currentTimeMillis();
-							wait(100);
-							elapsedTime += System.currentTimeMillis() - initialTime;
-							if (totalTime > 0 && elapsedTime >= totalTime) {
-								ended = true;
-							}
-						} else {
-							wait();
-						}
-					}
-				} catch (InterruptedException e) {
-					System.out.println("Error: Timer thread interrupted unexpectedly...");
-				}
-			}
-			while (!dispatcher.simulator.isFinished()) {
-				dispatcher.stopSimulation();
-				// Try to terminate simulation more than once if required.
-				try {
-					sleep(500);
-				} catch (InterruptedException e) {
-					// Never thrown
-					e.printStackTrace();
-				}
-			}
-		}
-
-		/**
-		 * This method have to be called when simulation is paused
-		 */
-		public synchronized void pause() {
-			paused = true;
-			notifyAll();
-		}
-
-		/**
-		 * This method have to be called when simulation is restarted after pause
-		 */
-		public synchronized void restart() {
-			paused = false;
-			notifyAll();
-		}
-
-		/**
-		 * This method have to be called when simulation is stopped before timeout
-		 */
-		public synchronized void kill() {
-			killed = true;
-			notifyAll();
-		}
-
-		/**
-		 * Returns elapsed time
-		 * @return elapsed time
-		 */
-		public long getElapsedTime() {
-			return elapsedTime;
-		}
-
-		/**
-		 * Returns elapsed percentage
-		 * @return elapsed percentage
-		 */
-		public double getElapsedPercentage() {
-			if (totalTime < 0) {
-				return 0.0;
-			}
-			double percent = (double) elapsedTime / (double) totalTime;
-			// Fix possible problem when this function is called after simulation ends
-			if (percent > 1.0) {
-				percent = 1.0;
-			}
-			return percent;
 		}
 	}
 

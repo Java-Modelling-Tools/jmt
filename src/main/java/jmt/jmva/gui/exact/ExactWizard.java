@@ -41,6 +41,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
@@ -79,7 +80,7 @@ import jmt.jmva.gui.exact.panels.ServiceDemandsPanel;
 import jmt.jmva.gui.exact.panels.ServiceTimesPanel;
 import jmt.jmva.gui.exact.panels.StationsPanel;
 import jmt.jmva.gui.exact.panels.SynopsisPanel;
-import jmt.jmva.gui.exact.panels.SysPowerPanel;
+import jmt.jmva.gui.exact.panels.SystemPowerPanel;
 import jmt.jmva.gui.exact.panels.SystemRespTimePanel;
 import jmt.jmva.gui.exact.panels.ThroughputPanel;
 import jmt.jmva.gui.exact.panels.UtilizationPanel;
@@ -219,7 +220,7 @@ public class ExactWizard extends Wizard {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Random generation of service demands");
-			setIcon("dice", JMTImageLoader.getImageLoader());
+			setIcon("Dice", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_R));
 		}
@@ -242,7 +243,6 @@ public class ExactWizard extends Wizard {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			//showHelp(e);
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
@@ -263,13 +263,6 @@ public class ExactWizard extends Wizard {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "About JMVA");
-			/*
-			putValue(Action.SMALL_ICON, ImageLoader.loadImage("helpIcon"));
-			putValue(Action.ACCELERATOR_KEY,
-			        KeyStroke.getKeyStroke(KeyEvent.VK_H,
-			                ActionEvent.ALT_MASK));
-			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
-			 */
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -319,12 +312,10 @@ public class ExactWizard extends Wizard {
 
 		serviceDemandsPanel = new ServiceDemandsPanel(this);
 		if (data.areVisitsSet()) {
-
 			addPanel(serviceDemandsPanel);
 		} else {
 			addPanel(serviceTimesPanel);
 			addPanel(visitsPanel);
-
 		}
 
 		ReferenceStationPanel = new ReferenceStationPanel(this);
@@ -347,7 +338,7 @@ public class ExactWizard extends Wizard {
 		tb.setFloatable(false);
 
 		//null values add a gap between toolbar icons
-		AbstractJMTAction[] actions = { FILE_NEW, FILE_OPEN, FILE_SAVE, null, ACTION_SOLVE, SWITCH_TO_SIMULATOR, ACTION_RANDOMIZE_MODEL, null, HELP,null };
+		AbstractJMTAction[] actions = { FILE_NEW, FILE_OPEN, FILE_SAVE, null, ACTION_SOLVE, SWITCH_TO_SIMULATOR, ACTION_RANDOMIZE_MODEL, null, HELP, null };
 		String[] htext = { "Creates a new model", "Opens a saved model", "Saves the current model", "Solves the current model",
 				"Import current model to JSIMwiz to solve it with the simulator", "Randomize model data", "Show help"};
 		ArrayList<AbstractButton> buttons = new ArrayList<AbstractButton>();
@@ -426,7 +417,7 @@ public class ExactWizard extends Wizard {
 		}
 		Rectangle bounds = this.getBounds();
 		ExactWizard ew = new ExactWizard();
-		updateTile(null);
+		updateTitle(null);
 		ew.setBounds(bounds);
 		ew.setVisible(true);
 		this.setVisible(false);
@@ -468,7 +459,7 @@ public class ExactWizard extends Wizard {
 		switch (retval) {
 		case ModelLoader.SUCCESS:
 			data.resetChanged();
-			updateTile(modelLoader.getSelectedFile().getName());
+			updateTitle(modelLoader.getSelectedFile().getName());
 			break;
 		case ModelLoader.FAILURE:
 			JOptionPane.showMessageDialog(this, modelLoader.getFailureMotivation(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -492,7 +483,7 @@ public class ExactWizard extends Wizard {
 		case ModelLoader.WARNING:
 			data = newdata;
 			currentPanel.gotFocus();
-			// Shows right panels  //Edited by Kourosh, because we need to show Visits and Service Demands as Defaults.
+			// Shows right panels
 			if (data.areVisitsSet()) {
 				removePanel(visitsPanel);
 				removePanel(serviceTimesPanel);
@@ -505,7 +496,7 @@ public class ExactWizard extends Wizard {
 				addPanel(visitsPanel, 2);
 				addPanel(serviceTimesPanel, 2);									
 			}
-			updateTile(modelLoader.getSelectedFile().getName());
+			updateTitle(modelLoader.getSelectedFile().getName());
 			tabbedPane.setSelectedIndex(0);
 			break;
 		case ModelLoader.FAILURE:
@@ -514,7 +505,7 @@ public class ExactWizard extends Wizard {
 		}
 		tempFile = modelLoader.getSelectedFile();
 		if (data.hasResults()) {
-			this.createSolutionWindow();
+			createSolutionWindow();
 		}
 		updatePanels();
 
@@ -554,7 +545,6 @@ public class ExactWizard extends Wizard {
 		if (res.size() > 0) {
 			new WarningWindow(res, jsim, CommonConstants.JMVA, CommonConstants.JSIM).show();
 		}
-
 	}
 
 	public HoverHelp getHelp() {
@@ -575,6 +565,7 @@ public class ExactWizard extends Wizard {
 			removePanel(visitsPanel);
 			((ForceUpdatablePanel) serviceDemandsPanel).retrieveData();
 			addPanel(serviceDemandsPanel, 2);
+			tabbedPane.setSelectedIndex(2);
 		}
 	}
 
@@ -587,6 +578,7 @@ public class ExactWizard extends Wizard {
 		((ForceUpdatablePanel) visitsPanel).retrieveData();
 		addPanel(visitsPanel, 2);
 		addPanel(serviceTimesPanel, 2);
+		tabbedPane.setSelectedIndex(2);
 	}
 
 	private void solve() {
@@ -641,9 +633,14 @@ public class ExactWizard extends Wizard {
 					"Out of Memory", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		this.data = newdata;
+		data = newdata;
 		if (data.hasResults()) {
-			createSolutionWindow();
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					createSolutionWindow();
+				}
+			});
 		}
 		updatePanels();
 		currentPanel.gotFocus();
@@ -680,10 +677,7 @@ public class ExactWizard extends Wizard {
 				algPanel.addSolutionPanel(new ResTimePanel(this, algorithm));
 				algPanel.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 				algPanel.addSolutionPanel(new UtilizationPanel(this, algorithm));
-				//Added by ASHANKA START
-				// for System Power
-				algPanel.addSolutionPanel(new SysPowerPanel(this, algorithm));
-				//Added by ASHANKA STOP
+				algPanel.addSolutionPanel(new SystemPowerPanel(this, algorithm));
 				selector.addSolutionPanel(algPanel);
 			}
 			jtp.add(selector);
@@ -695,21 +689,8 @@ public class ExactWizard extends Wizard {
 			algPanel.addSolutionPanel(new ResTimePanel(this, algorithm));
 			algPanel.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 			algPanel.addSolutionPanel(new UtilizationPanel(this, algorithm));
-			//Added by ASHANKA START
-			// for System Power
-			algPanel.addSolutionPanel(new SysPowerPanel(this, algorithm));
-			//Added by ASHANKA STOP
+			algPanel.addSolutionPanel(new SystemPowerPanel(this, algorithm));
 			selector.addSolutionPanel(algPanel);
-			/*
-			selector.addSolutionPanel(throughput);
-			selector.addSolutionPanel(queuelength);
-			selector.addSolutionPanel(restimes);
-			selector.addSolutionPanel(utilizations);
-			//Added by ASHANKA START
-			// for System Power
-			selector.addSolutionPanel(systemPower);
-			 */
-			//Added by ASHANKA STOP
 			jtp.add(selector);
 		} else if (selector != null) {
 			SolverAlgorithm algorithm = data.getAlgorithmType();
@@ -718,32 +699,16 @@ public class ExactWizard extends Wizard {
 			selector.addSolutionPanel(new ResTimePanel(this, algorithm));
 			selector.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 			selector.addSolutionPanel(new UtilizationPanel(this, algorithm));
-			//Added by ASHANKA START
-			// for System Power
-			selector.addSolutionPanel(new SysPowerPanel(this, algorithm));
-			//Added by ASHANKA STOP
+			selector.addSolutionPanel(new SystemPowerPanel(this, algorithm));
 			jtp.add(selector);
 		} else {
-			SolverAlgorithm alg = data.getAlgorithmType();
-			ThroughputPanel throughput = new ThroughputPanel(this, alg);
-			QueueLenPanel queuelength = new QueueLenPanel(this, alg);
-			ResTimePanel restimes = new ResTimePanel(this, alg);
-			SystemRespTimePanel systemreptime = new SystemRespTimePanel(this,alg);
-			UtilizationPanel utilizations = new UtilizationPanel(this, alg);
-			//Added by ASHANKA START
-			//Introducing the new System Power Panel as a Tabbed Pane
-			SysPowerPanel systemPower = new SysPowerPanel(this, alg);
-			//Added by ASHANKA STOP
-
-			jtp.add(throughput);
-			jtp.add(queuelength);
-			jtp.add(restimes);
-			jtp.add(systemreptime);
-			jtp.add(utilizations);
-			//Added by ASHANKA START
-			//for System Power
-			jtp.add(systemPower);
-			//Added by ASHANKA STOP
+			SolverAlgorithm algorithm = data.getAlgorithmType();
+			jtp.add(new ThroughputPanel(this, algorithm));
+			jtp.add(new QueueLenPanel(this, algorithm));
+			jtp.add(new ResTimePanel(this, algorithm));
+			jtp.add(new SystemRespTimePanel(this,algorithm));
+			jtp.add(new UtilizationPanel(this, algorithm));
+			jtp.add(new SystemPowerPanel(this, algorithm));
 		}
 		/* END */
 		//NEW Dall'Orso 5-5-2005
@@ -793,7 +758,7 @@ public class ExactWizard extends Wizard {
 
 		for (int i = 0; i < panelCount; i++) {
 			if (panels.get(i) instanceof WizardPanel) {
-				(panels.get(i)).gotFocus();
+				panels.get(i).gotFocus();
 			}
 		}
 		amvaPanel.update(null, null, null, null);
@@ -834,7 +799,7 @@ public class ExactWizard extends Wizard {
 	 * Sets the file name to be shown in the title
 	 * @param filename the file name or null to remove it
 	 */
-	public void updateTile(String filename) {
+	public void updateTitle(String filename) {
 		if (filename != null) {
 			setTitle(TITLE + " - " + filename);
 		} else {

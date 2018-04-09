@@ -393,7 +393,7 @@
 	<!--these three templates create routing strategy parameters for each class. The first creates random routing strategy in case there is only
 	     one successor node or probability for each successor node may be not specified. The second sets routing strategy when successor nodes 
 	     are terminal and sink: open classes must be routed to the sink, the closed ones to the terminal. The third finally routes jobs to each server 
-	     assigning different probabilities according with the number of visits defined for each server in the mva model.-->
+	     assigning different probabilities according to the number of visits defined for each server in the mva model.-->
 	<xsl:template match="classes/*" mode="ignoreValueRouting">
 			<refClass>
 				<xsl:value-of select="@name"/>

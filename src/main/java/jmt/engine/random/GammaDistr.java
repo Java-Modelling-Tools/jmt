@@ -37,10 +37,10 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 
 	/**
 	 * This is the constructor. It creates a new gamma distribution which
-	 * is defined from is pdf:
+	 * is defined from pdf:
 	 * <pre>              (alpha-1)    (-x/beta)
 	 * pdf(x) = k * x          * e</pre>
-	 * with k = 1/(g(alpha) * b^a where g() is the "eulero" function
+	 * with k = 1/(g(alpha) * b^a where g() is the "Eulero" function.
 	 *
 	 */
 	public GammaDistr() {
@@ -55,13 +55,12 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double lambda = ((GammaDistrPar) p).getLambda();
 			double alpha = ((GammaDistrPar) p).getAlpha();
+			double lambda = ((GammaDistrPar) p).getLambda();
 			if (x < 0) {
-				throw new IncorrectDistributionParameterException("x must be >= 0.0");
+				return 0.0;
 			}
 			if (x == 0) {
 				if (alpha == 1.0) {
@@ -73,7 +72,6 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 			if (alpha == 1.0) {
 				return Math.exp(-x / lambda) / lambda;
 			}
-
 			return Math.exp((alpha - 1.0) * Math.log(x / lambda) - x / lambda - Sfun.logGamma(alpha)) / lambda;
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter alpha and lambda must be gtz");
@@ -89,11 +87,10 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double lambda = ((GammaDistrPar) p).getLambda();
 			double alpha = ((GammaDistrPar) p).getAlpha();
+			double lambda = ((GammaDistrPar) p).getLambda();
 			return Probability.gamma(alpha, lambda, x);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter alpha and lambda must be gtz");
@@ -110,11 +107,10 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	 *
 	 * the theoretic mean of the gamma distribution is calculated as alpha/lambda.
 	 */
-
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double lambda = ((GammaDistrPar) p).getLambda();
 			double alpha = ((GammaDistrPar) p).getAlpha();
+			double lambda = ((GammaDistrPar) p).getLambda();
 			return alpha / lambda;
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter alpha and lambda must be gtz");
@@ -122,8 +118,8 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	}
 
 	/**
-	 * This method is used to obtain from the distribution its own theoretical
-	 * variance.
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
 	 *
 	 * @param p parameter of the gamma distribution.
 	 * @throws IncorrectDistributionParameterException
@@ -131,11 +127,10 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	 *
 	 * the variance of the gamma distribution is calculated as alpha/(lambda^2).
 	 */
-
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double lambda = ((GammaDistrPar) p).getLambda();
 			double alpha = ((GammaDistrPar) p).getAlpha();
+			double lambda = ((GammaDistrPar) p).getLambda();
 			return alpha / (lambda * lambda);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter alpha and lambda must be gtz");
@@ -150,7 +145,6 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double alpha = ((GammaDistrPar) p).getAlpha();

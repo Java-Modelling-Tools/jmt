@@ -162,22 +162,6 @@ import org.jgraph.plaf.basic.BasicGraphUI;
  * every object know only about of himself & the mediator.
  * Other actions are made through the mediator without knowing who will actually
  * do it.
- *
-
- * @author Federico Granata
- * Date: 3-giu-2003
- * Time: 16.54.45
-
- * Heavily modified by Bertoli Marco 2-giu-2005
-
- * Modified by Francesco D'Aquino
-
- * Modified by Bertoli Marco to support JGraph 5.8 - 21/mar/2006
-
- * Modified by Giuseppe De Cicco & Fabio Granara
- * 
- * @author Ashanka Date: 11March 2010
- * Description: Added a logic to remove the duplicate name of the files from displaying.
  */
 public class Mediator implements GuiInterface {
 
@@ -2964,7 +2948,7 @@ public class Mediator implements GuiInterface {
 		GraphModel graphmodel = graph.getModel();
 		List<Object> next = new ArrayList<Object>();
 
-		if (flag1 == false && prev.seen == false) {
+		if (!flag1 && !prev.seen) {
 			if (!flag2) {
 				boundspadre.setLocation(x, y + ((e + 1) * (42 + heightMax)) - (int) (boundspadre.getHeight() / 2) + 30);
 			} else {
@@ -2998,9 +2982,9 @@ public class Mediator implements GuiInterface {
 		}
 
 		int j = 1;
-		if (inRepositionSons == false && ((JmtCell) next.get(0)).seen == false) {
+		if (!inRepositionSons && !((JmtCell) next.get(0)).seen) {
 			j = searchNext((JmtCell) next.get(0));
-		} else if (inRepositionSons == true && ((JmtCell) next.get(0)).seen == false) {
+		} else if (inRepositionSons && !((JmtCell) next.get(0)).seen) {
 			Rectangle bounds = GraphConstants.getBounds(((JmtCell) next.get(0)).getAttributes()).getBounds();
 			bounds.setLocation((int) (boundspadre.getCenterX()) + widthMax + 50 - (int) (bounds.getWidth() / 2),
 					(int) boundspadre.getCenterY() - (int) (bounds.getHeight() / 2));
@@ -3039,7 +3023,7 @@ public class Mediator implements GuiInterface {
 		int w = boundspadre.y + ((heightMax + 35) * (numero + 1)) - 38;
 
 		for (int i = cont; i < sons.size(); i++) {
-			if (((JmtCell) sons.get(i)).seen == false) {
+			if (!((JmtCell) sons.get(i)).seen) {
 				Rectangle bounds = GraphConstants.getBounds(((JmtCell) sons.get(i)).getAttributes()).getBounds();
 				bounds.setLocation((int) (boundspadre.getCenterX()) + widthMax + 50 - (int) (bounds.getWidth() / 2),
 						w - (int) (bounds.getHeight() / 2) + 80);

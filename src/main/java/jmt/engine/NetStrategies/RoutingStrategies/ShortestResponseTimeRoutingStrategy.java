@@ -23,10 +23,11 @@ import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeList;
+import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.random.engine.RandomEngine;
 
 /**
- * This strategy sends jobs to the resource with the smallest response time.
+ * This strategy sends jobs to the resource with the shortest response time.
  *
  * Date: 13-nov-2005
  * @author Bertoli Marco
@@ -34,16 +35,20 @@ import jmt.engine.random.engine.RandomEngine;
 public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 
 	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
-	private double infinity = Double.POSITIVE_INFINITY;
-	private int property = NetNode.PROPERTY_ID_RESIDENCE_TIME;
+	private int infinityQ = Integer.MAX_VALUE;
+	private double infinityR = Double.POSITIVE_INFINITY;
+	private byte inputSection = NodeSection.INPUT;
+	private byte serviceSection = NodeSection.SERVICE;
+	private int propertyQ = NodeSection.PROPERTY_ID_RESIDENT_JOBS;
+	private int propertyR = NetNode.PROPERTY_ID_RESIDENCE_TIME;
 	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)
 	private RandomEngine random = RandomEngine.makeDefault();
 
 	/**
-	 * This strategy selects the resource with the least Queue Time for this jobClass
+	 * This strategy selects the resource with the shortest response time for this jobClass
 	 * among the output nodes.
 	 * @param nodes List of the output nodes.
-	 * @param jobClass class of current job to be routed
+	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
@@ -51,70 +56,64 @@ public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 		if (nodes.size() == 0) {
 			return null;
 		}
-		// next node candidates... Holds an array of them as on equality of response time they
+
+		// output node candidates... Holds an array of them as on equality of response time they
 		// will be chosen randomly
-		NetNode[] next = new NetNode[nodes.size()];
-		next[0] = nodes.get(0);
-		int nextLength = 1;
-		double leastRTime;
-
+		NetNode[] output = new NetNode[nodes.size()];
+		int length = 0;
+		boolean foundZeroQueue = false;
+		double leastRTime = infinityR;
 		try {
-			// Sets least queue time to first node
-			// Checks if output is a sink... If class is open, sinks are preferred as have 0 response time.
-			// if class il closed, avoid it
-			if (next[0].isSink()) {
-				if (jobClass.getType() == CLOSED_CLASS) {
-					leastRTime = infinity;
-				} else {
-					leastRTime = 0.0;
-				}
-			} else {
-				leastRTime = next[0].getDoubleNodeProperty(property, jobClass);
-				if (Double.isNaN(leastRTime)) {
-					leastRTime = 0.0;
-				}
-			}
-
-			double tmp;
-			for (int i = 1; i < nodes.size(); i++) {
-				// Stores new node in last free space
-				next[nextLength] = nodes.get(i);
-				// Checks if output is a sink... If class is open, sinks are preferred as have 0 response time.
-				// if class il closed, avoid it
-				if (next[nextLength].isSink()) {
+			for (int i = 0; i < nodes.size(); i++) {
+				NetNode node = nodes.get(i);
+				int tmpQ = 0;
+				double tmpR = 0.0;
+				// Checks if output is a sink... If class is open, sinks are preferred as have
+				// 0 queue length and response time. If class is closed, avoid it
+				if (node.isSink()) {
 					if (jobClass.getType() == CLOSED_CLASS) {
-						tmp = infinity;
+						tmpQ = infinityQ;
+						tmpR = infinityR;
 					} else {
-						tmp = 0.0;
+						tmpQ = 0;
+						tmpR = 0.0;
 					}
 				} else {
-					tmp = next[nextLength].getDoubleNodeProperty(property, jobClass);
-					if (Double.isNaN(tmp)) {
-						tmp = 0.0;
-					}
+					tmpQ = node.getSection(inputSection).getIntSectionProperty(propertyQ)
+							+ node.getSection(serviceSection).getIntSectionProperty(propertyQ);
+					tmpR = node.getDoubleNodeProperty(propertyR, jobClass);
 				}
 
-				if (Math.abs(tmp - leastRTime) < epsilon) {
-					// This is minimum too, so increase nextLength
-					nextLength++;
-				} else if (tmp < leastRTime) {
-					// New minimum value found, put it in position 0 and reset nextLength
-					leastRTime = tmp;
-					next[0] = next[nextLength];
-					nextLength = 1;
+				if (tmpQ == 0 && !foundZeroQueue) {
+					// Zero queue found, put it in output and reset length
+					foundZeroQueue = true;
+					leastRTime = tmpR;
+					output[0] = node;
+					length = 1;
+				} else if ((tmpQ == 0 && foundZeroQueue) || (tmpQ != 0 && !foundZeroQueue)) {
+					if (Math.abs(tmpR - leastRTime) < epsilon) {
+						// This is minimum too, put it in output and increment length
+						output[length] = node;
+						length++;
+					} else if (tmpR < leastRTime) {
+						// New minimum value found, put it in output and reset length
+						leastRTime = tmpR;
+						output[0] = node;
+						length = 1;
+					}
 				}
 			}
 		} catch (NetException e) {
-			System.out.println("Shortest Response Time Routing Error: Cannot read utilization from output node");
+			System.out.println("Shortest Response Time Routing Error: Cannot read queue length or response time from output node");
 			e.printStackTrace();
 			return null;
 		}
 		if (Double.isInfinite(leastRTime)) {
 			return null;
-		} else if (nextLength > 1) {
-			return next[(int) Math.floor(random.raw() * nextLength)];
+		} else if (length == 1) {
+			return output[0];
 		} else {
-			return next[0];
+			return output[(int) Math.floor(random.raw() * length)];
 		}
 	}
 

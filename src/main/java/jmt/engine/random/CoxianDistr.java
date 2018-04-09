@@ -19,7 +19,6 @@
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
-import jmt.engine.random.engine.RandomEngine;
 
 /**
  * 
@@ -32,70 +31,95 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class CoxianDistr extends AbstractDistribution implements Distribution {
 
-	private int curState;
-	protected Exponential expDistr;
+	private Exponential expDistr;
 
+	/**
+	 * This is the constructor. It creates a new coxian distribution which
+	 * is constituted by two serial exponential phases.
+	 *
+	 */
 	public CoxianDistr() {
-		curState = 0;
-		engine = RandomEngine.makeDefault();
 		expDistr = new Exponential();
 	}
 
-	public int getCurState() {
-		return curState;
-	}
-
-	public void setCurState(int newState) {
-		curState = newState;
-	}
-
-	public double pdf(double x, Parameter p) { //other implementation may use p.check()
+	/**
+	 * This method is used to obtain from the distribution its probability distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the pdf.
+	 * @param p parameter of the coxian distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the probability distribution function evaluated in x.
+	 */
+	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;
 	}
 
-	public double cdf(double x, Parameter p) { //other implementation may use p.check()
+	/**
+	 * This method is used to obtain from the distribution its cumulative distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the cdf.
+	 * @param p parameter of the coxian distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the cumulative distribution function evaluated in x.
+	 */
+	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;
 	}
 
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic mean.
+	 *
+	 * @param p parameter of the coxian distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic mean of the distribution.
+	 */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
-		double l0 = ((CoxianPar) p).getLambda0();
-		double l1 = ((CoxianPar) p).getLambda1();
-		double phi = ((CoxianPar) p).getPhi0();
-		
-		return 2/l1 - 1/l0 - phi/l1;
+		if (p.check()) {
+			return ((CoxianPar) p).getMean();
+		} else {
+			throw new IncorrectDistributionParameterException(
+					"Remember: parameter lambda0 and lambda1 must be gtz; phi0 must be a number between 0 and 1");
+		}
 	}
 
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
+	 *
+	 * @param p parameter of the coxian distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic variance of the distribution.
+	 */
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
-		return 0.0;
+		if (p.check()) {
+			return ((CoxianPar) p).getVar();
+		} else {
+			throw new IncorrectDistributionParameterException(
+					"Remember: parameter lambda0 and lambda1 must be gtz; phi0 must be a number between 0 and 1");
+		}	
 	}
 
 	/**
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *
-	 * @param p parameter of the hyper exponential distribution.
+	 * @param p parameter of the coxian distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
-		double r = 0.0;
-		if (p.check()) 
-		{
-			if (this.getCurState() == 0) {
-				r = r + expDistr.nextRand(((CoxianPar) p).getExpParam0());
-				if (engine.nextDouble() > ((CoxianPar) p).getPhi0()) {
-					this.setCurState(1);
-					r = r + nextRand(p);
-				}
-				return r;
-			} else {
-				r = r + expDistr.nextRand(((CoxianPar) p).getExpParam1());
-				this.setCurState(0);
-				return r;
+		if (p.check()) {
+			double sample = expDistr.nextRand(((CoxianPar) p).getExpParam0());
+			if (engine.nextDouble() > ((CoxianPar) p).getPhi0()) {
+				sample += expDistr.nextRand(((CoxianPar) p).getExpParam1());
 			}
+			return sample;
 		} else {
-			throw new IncorrectDistributionParameterException("Exception in generation of Coxian random numbers");
+			throw new IncorrectDistributionParameterException(
+					"Remember: parameter lambda0 and lambda1 must be gtz; phi0 must be a number between 0 and 1");
 		}
 	}
 

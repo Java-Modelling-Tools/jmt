@@ -28,7 +28,6 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
- * @author Bertoli Marco 10-oct-2005
  * 
  */
 public class ParetoPar extends AbstractParameter implements Parameter {
@@ -37,26 +36,23 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	private double k;
 
 	/**
-	 * It creates a new pareto parameter according with the data provided by the user.
-	 * The user provides the value of the parameter k and alpha of the new pareto
-	 * distribution. These value are verified by the constructor.
+	 * It creates a new pareto parameter according to the data provided by the user:
+	 * the parameter alpha and k of the pareto distribution.
 	 *
-	 * @param alpha double containing the alpha parameter of the distribution (must be greater than zero).
-	 * @param k double containing the k parameter of the distribution (must be greater than zero).
-	 *
-	 * @throws IncorrectDistributionParameterException if k or alpha are not both greater than zero.
+	 * @param alpha double containing the parameter alpha of the pareto distribution.
+	 * @param k double containing the parameter k of the pareto distribution.
+	 * @throws IncorrectDistributionParameterException if alpha is not greater than two
+	 * or k is not greater than zero.
 	 *
 	 */
 	public ParetoPar(double alpha, double k) throws IncorrectDistributionParameterException {
 		this.alpha = alpha;
 		this.k = k;
-		if (!check()) {
-			if (k <= 0) {
-				throw new IncorrectDistributionParameterException("k must be gtz");
-			}
-			if (alpha <= 0) {
-				throw new IncorrectDistributionParameterException("alpha must be gtz");
-			}
+		if (alpha <= 2) {
+			throw new IncorrectDistributionParameterException("alpha must be > 2");
+		}
+		if (k <= 0) {
+			throw new IncorrectDistributionParameterException("k must be > 0");
 		}
 	}
 
@@ -65,16 +61,16 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It controls if the parameter is correct. For the pareto distribution, the
-	 * parameter is right if both alpha and k are greater than zero.
+	 * It controls if the parameter is correct. For the pareto distribution,
+	 * the parameter is right if alpha is greater than two and k is greater
+	 * than zero.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
-
 	@Override
 	public boolean check() {
-		if ((alpha <= 0) || (k <= 0)) {
+		if ((alpha <= 2) || (k <= 0)) {
 			return false;
 		} else {
 			return true;
@@ -84,10 +80,9 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	/**
 	 * It returns the value of the parameter alpha of the pareto distribution.
 	 *
-	 * @return double with the alpha parameter of the pareto distribution.
+	 * @return double with the parameter alpha of the pareto distribution.
 	 *
 	 */
-
 	public double getAlpha() {
 		return alpha;
 	}
@@ -95,27 +90,25 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	/**
 	 * It returns the value of the parameter k of the pareto distribution.
 	 *
-	 * @return double with the k parameter of the pareto distribution.
+	 * @return double with the parameter k of the pareto distribution.
 	 *
 	 */
-
 	public double getK() {
 		return k;
 	}
 
 	/**
 	 * It allows the user to change the value of the parameter alpha of the pareto
-	 * distribution. It verifies that the provided value is correct (alpha must be
-	 * greater than zero).
+	 * distribution and verifies if alpha is greater than two.
 	 *
-	 * @param alpha double indicating the new value of the parameter alpha
-	 * @throws IncorrectDistributionParameterException if alpha is not greater than zero.
+	 * @param alpha double indicating the parameter alpha of the pareto distribution.
+	 * @throws IncorrectDistributionParameterException if alpha is not greater than
+	 * two.
 	 *
 	 */
-
 	public void setAlpha(double alpha) throws IncorrectDistributionParameterException {
-		if (alpha <= 0) {
-			throw new IncorrectDistributionParameterException("alpha must be gtz");
+		if (alpha <= 2) {
+			throw new IncorrectDistributionParameterException("alpha must be > 2");
 		} else {
 			this.alpha = alpha;
 		}
@@ -123,35 +116,19 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It allows the user to change the value of the parameter k of the pareto
-	 * distribution. It verifies that the provided value is correct (k must be
-	 * greater than zero).
+	 * distribution. It verifies if k is greater than zero.
 	 *
-	 * @param k double indicating the new value of the parameter k
-	 * @throws IncorrectDistributionParameterException
+	 * @param k double indicating the parameter k of the pareto distribution.
+	 * @throws IncorrectDistributionParameterException if k is not greater than
+	 * zero.
 	 *
 	 */
-
 	public void setK(double k) throws IncorrectDistributionParameterException {
 		if (k <= 0) {
-			throw new IncorrectDistributionParameterException("k must be gtz");
+			throw new IncorrectDistributionParameterException("k must be > 0");
 		} else {
 			this.k = k;
 		}
-	}
-
-	/**
-	 * Sets mean for a given distribution parameter. This method is required to adjust distributions
-	 * mean values into Load Dependent Service Time Strategy
-	 * @param meanValue new mean value for this distribution
-	 * Author: Bertoli Marco
-	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution
-	 */
-	@Override
-	public void setMean(double meanValue) throws IncorrectDistributionParameterException {
-		if (meanValue <= 0 || Double.isInfinite(meanValue)) {
-			throw new IncorrectDistributionParameterException("Mean value must be finite and greater than zero");
-		}
-		k = meanValue * (alpha - 1) / alpha;
 	}
 
 } // end ParetoPar

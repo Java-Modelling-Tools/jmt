@@ -131,7 +131,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	 * @return new instance of DefaultsEditor
 	 */
 	public static DefaultsEditor getInstance(Container parent, int target) {
-		// Finds top level Dialog or Frame to invoke correct costructor
+		// Finds top level Dialog or Frame to invoke correct constructor
 		while (!(parent instanceof Frame || parent instanceof Dialog)) {
 			parent = parent.getParent();
 		}
@@ -525,6 +525,9 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		combo.setMaximumSize(new Dimension(combo.getMaximumSize().width, combo.getMinimumSize().height));
 		combo.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				// As Map does not allows reverse mapping, scans the entire keyset to
 				// find the key corresponding to a given object
 				Object[] keys = values.keySet().toArray();
@@ -808,6 +811,9 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		combo.setMaximumSize(new Dimension(combo.getMaximumSize().width, combo.getMinimumSize().height));
 		combo.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				Defaults.set(property, (String) e.getItem());
 			}
 		});

@@ -38,7 +38,7 @@ public class TransitionCell extends JmtCell {
 	public static final boolean canBePlaced = true;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
-	public static final String ICON = "transition";
+	public static final String ICON = "Transition";
 
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.

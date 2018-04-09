@@ -30,7 +30,7 @@ import java.util.Map;
 public class FastestServiceRouting extends RoutingStrategy {
 
 	public FastestServiceRouting() {
-		description = "Jobs are routed to the station with the shortest average service time (for the jobs of the same class).";
+		description = "Jobs are routed to the station with the smallest service time, for this customer class.";
 	}
 
 	@Override

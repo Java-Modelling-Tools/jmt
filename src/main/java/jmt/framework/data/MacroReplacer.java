@@ -35,7 +35,7 @@ public class MacroReplacer {
 	public static final String MACRO_WORKDIR = "${jmt.work.dir}";
 	
 	private static final String SYS_PROP_WORKDIR = "jmt.work.dir";
-	private static final String DEFAULT_WORKDIR = "${user.home}/JMT/";
+	private static final String DEFAULT_WORKDIR = "${user.home}" + File.separator + "JMT" + File.separator;
 	
 	private static final String TOKEN = "${"; 
 	private static final Pattern MACRO_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");

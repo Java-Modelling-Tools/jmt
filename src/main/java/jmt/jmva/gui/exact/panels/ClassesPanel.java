@@ -86,7 +86,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 	private static final long serialVersionUID = 1L;
 	private HoverHelp help;
 	private static final String helpText = "<html>In this panel you can define the number of stations in the system and their properties.<br><br>"
-			+ " To edit values, single-click on the desired cell"
+			+ " To edit values, double-click on the desired cell"
 			+ " and start typing.<br> To select classes click or drag on the row headers.<br> <b>For a list of the available operations right-click"
 			+ " on the table</b>.<br>" + " Pressing DELETE removes all selected classes from the system.</html>";
 
@@ -96,10 +96,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 	private String[] classNames;
 	private int[] classTypes;
 	private double[] classData;
-	private int nameCounter = 1;
-	/** Edited by Georgios Poullaides **/
-	private int algIndex = 0;
-	/** End **/
+	private int nameCounter;
 
 	private List<ListOp> classOps;
 	private boolean hasDeletes;
@@ -141,7 +138,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Delete This Class");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Close"));
+			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Delete"));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -173,11 +170,9 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 		initComponents();
 		makeNames();
-
 	}
 
 	private void sync() {
-
 		hasDeletes = false;
 		classOps.clear();
 
@@ -186,6 +181,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 		ExactModel data = ew.getData();
 		synchronized (data) {
 			classes = data.getClasses();
+			nameCounter = classes;
 			isLd = data.isLd();
 			classNames = ArrayUtils.copy(data.getClassNames());
 			classTypes = ArrayUtils.copy(data.getClassTypes());
@@ -199,10 +195,10 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 				//remove all load dependent stations
 				if (!(data.isClosed() && !data.isMultiClass())) {
 					JOptionPane
-							.showMessageDialog(
-									this,
-									"<html><center>jMVA allows Load Dependent stations only for single class closed model. <br> Load Dependent stations will be replaced with Load Independent stations.</center></html>",
-									"Warning", JOptionPane.WARNING_MESSAGE);
+					.showMessageDialog(
+							this,
+							"<html><center>jMVA allows Load Dependent stations only for single class closed model. <br> Load Dependent stations will be replaced with Load Independent stations.</center></html>",
+							"Warning", JOptionPane.WARNING_MESSAGE);
 					data.removeLD();
 					isLd = false;
 				}
@@ -278,7 +274,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 		//OLD
 		/*
 		classSpinnerBox.add(Box.createGlue());
-		*/
+		 */
 		//NEW
 		classSpinnerBox.add(Box.createHorizontalStrut(10));
 		Box numberBox = Box.createVerticalBox();
@@ -314,7 +310,6 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
-
 	}
 
 	/**
@@ -332,7 +327,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 	/**
 	 * Checks if a class was not initialized
-	 * @return false if a class was not inizialized, true otherwise
+	 * @return false if a class was not initialized, true otherwise
 	 */
 	private boolean checkData() {
 		for (int i = 0; i < classes; i++) {
@@ -383,10 +378,10 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 		if (!checkData()) {
 			JOptionPane
-					.showMessageDialog(
-							this,
-							"<html><center>Please provide correct, not null, values for<br>'No. of Customers' and 'Arrival Rate' for each class.</center></html>",
-							"Warning", JOptionPane.WARNING_MESSAGE);
+			.showMessageDialog(
+					this,
+					"<html><center>Please provide correct, not null, values for<br>'No. of Customers' and 'Arrival Rate' for each class.</center></html>",
+					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}
 
@@ -398,10 +393,10 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 		classTable.stopEditing();
 		if (isLd && sumPop() < 1) {
 			JOptionPane
-					.showMessageDialog(
-							this,
-							"<html><center>A system with load dependent stations cannot have zero customers.<br>Increase the number of customers or remove all load dependent stations.</center></html>",
-							"Warning", JOptionPane.WARNING_MESSAGE);
+			.showMessageDialog(
+					this,
+					"<html><center>A system with load dependent stations cannot have zero customers.<br>Increase the number of customers or remove all load dependent stations.</center></html>",
+					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}
 		return true;
@@ -464,7 +459,6 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 	private void deleteSelectedClasses() {
 		int[] selectedRows = classTable.getSelectedRows();
-		//System.out.println("deleteSelectedRows(): "+ArrayUtils.toString(selectedRows));
 		int nrows = selectedRows.length;
 		int left = classTable.getRowCount() - nrows;
 		if (left < 1) {
@@ -487,7 +481,6 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 	}
 
 	private void deleteClass(int i) {
-
 		classes--;
 		classSpinner.setValue(new Integer(classes));
 
@@ -497,7 +490,6 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 		classOps.add(ListOp.createDeleteOp(i));
 		hasDeletes = true;
-
 	}
 
 	private void playbackClassOps(ExactModel data) {
@@ -509,14 +501,12 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 			if (lo.isResizeOp()) {
 				data.resize(data.getStations(), lo.getData());
 			}
-
 		}
 	}
 
 	@Override
 	public void help() {
 		JOptionPane.showMessageDialog(this, helpText, "Help", JOptionPane.INFORMATION_MESSAGE);
-
 	}
 
 	//NEW Federico Dall'Orso
@@ -528,7 +518,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 	public void commitData() {
 		commit();
 	}
-	
+
 	/**
 	 * Updates the algorithm panel based on the current classes.
 	 */
@@ -553,7 +543,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 	   However, it is very specialized and it needs access to the data structures of the ClassesPanel,
 	   so having it as an inner class is *much* more practical
 	   ------------------------------------------------------------------
-	   */
+	 */
 
 	/**
 	 * Her Majesty, the class table herself
@@ -581,7 +571,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 			//BEGIN Federico Dall'Orso 8/3/2005
 			//NEW
 			classTypeComboBoxCell = new ComboBoxCell(CLASS_TYPENAMES);
-			
+
 			deleteButton = new JButton(deleteOneClass);
 			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);
 			enableDeletes();
@@ -589,12 +579,12 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 			//END Federico Dall'Orso 8/3/2005
 
-			JComboBox classTypeBox = new JComboBox(CLASS_TYPENAMES);
+			JComboBox<String> classTypeBox = new JComboBox<String>(CLASS_TYPENAMES);
 			classTypeCellEditor = new DefaultCellEditor(classTypeBox);
 			classTypeBox.setEditable(false);
 
-			setColumnSelectionAllowed(false);
 			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(false);
 
 			// not beautiful, but effective. See ClassTableModel.getColumnClass()
 			setDefaultRenderer(DisabledCellRenderer.class, disabledCellRenderer);
@@ -607,7 +597,7 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 			mouseHandler.install();
 
 			help.addHelp(this,
-					"Click or drag to select classes; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select classes; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreRowsLabel, "There are more classes: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all classes");
 			tableHeader.setToolTipText(null);
@@ -722,15 +712,16 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 		}
 
 		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		public Class getColumnClass(int col) {
 			switch (col) {
-				case 1:
-					return String.class;
-				case 2:
-				case 3:
-					return DisabledCellRenderer.class;
-				default:
-					return Object.class;
+			case 1:
+				return String.class;
+			case 2:
+			case 3:
+				return DisabledCellRenderer.class;
+			default:
+				return Object.class;
 			}
 		}
 
@@ -741,40 +732,40 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 		@Override
 		public String getColumnName(int index) {
 			switch (index) {
-				case 0:
-					return "Name";
-				case 1:
-					return "Type";
-				case 2:
-					return "No. of Customers";
-				case 3:
-					return "Arrival Rate (\u03BB)";
-				default:
-					return null;
+			case 0:
+				return "Name";
+			case 1:
+				return "Type";
+			case 2:
+				return "No. of Customers";
+			case 3:
+				return "Arrival Rate (\u03BB)";
+			default:
+				return null;
 			}
 		}
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-				case 0://name
-					return classNames[rowIndex];
-				case 1://type
-					return CLASS_TYPENAMES[classTypes[rowIndex]];
-				case 2://customers
-					if (classTypes[rowIndex] == CLASS_CLOSED) {
-						return new Integer((int) classData[rowIndex]);
-					} else {
-						return null;
-					}
-				case 3://arrival rate
-					if (classTypes[rowIndex] == CLASS_OPEN) {
-						return new Double(classData[rowIndex]);
-					} else {
-						return null;
-					}
-				default:
+			case 0://name
+				return classNames[rowIndex];
+			case 1://type
+				return CLASS_TYPENAMES[classTypes[rowIndex]];
+			case 2://customers
+				if (classTypes[rowIndex] == CLASS_CLOSED) {
+					return new Integer((int) classData[rowIndex]);
+				} else {
 					return null;
+				}
+			case 3://arrival rate
+				if (classTypes[rowIndex] == CLASS_OPEN) {
+					return new Double(classData[rowIndex]);
+				} else {
+					return null;
+				}
+			default:
+				return null;
 			}
 		}
 
@@ -786,57 +777,55 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 		@Override
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-				case 0: //name
-					classNames[rowIndex] = (String) value;
-					break;
-				case 1: //type
-					for (int i = 0; i < CLASS_TYPENAMES.length; i++) {
-						if (value == CLASS_TYPENAMES[i]) { //literal strings are canonicalized, hence == is ok
-							classTypes[rowIndex] = i;
-							break;
-						}
+			case 0: //name
+				classNames[rowIndex] = (String) value;
+				break;
+			case 1: //type
+				for (int i = 0; i < CLASS_TYPENAMES.length; i++) {
+					if (value == CLASS_TYPENAMES[i]) { //literal strings are canonicalized, hence == is ok
+						classTypes[rowIndex] = i;
+						break;
 					}
-					// Updates the algorithm panel
-					updateAlgoPanel();
-
-					
-					break;
-				case 2: {//customers
-					try {
-						int newval = (int) Double.parseDouble((String) value);
-						if (newval >= 0) {
-							classData[rowIndex] = newval;
-						}
-					} catch (NumberFormatException e) {
-					}
-					break;
 				}
-				case 3: { //arrival rate
-					try {
-						double newval = Double.parseDouble((String) value);
-						if (newval >= 0.0) {
-							classData[rowIndex] = newval;
-						}
-					} catch (NumberFormatException e) {
+				// Updates the algorithm panel
+				updateAlgoPanel();
+				break;
+			case 2: {//customers
+				try {
+					int newval = (int) Double.parseDouble((String) value);
+					if (newval >= 0) {
+						classData[rowIndex] = newval;
 					}
-					break;
+				} catch (NumberFormatException e) {
 				}
-				default:
+				break;
+			}
+			case 3: { //arrival rate
+				try {
+					double newval = Double.parseDouble((String) value);
+					if (newval >= 0.0) {
+						classData[rowIndex] = newval;
+					}
+				} catch (NumberFormatException e) {
+				}
+				break;
+			}
+			default:
 			}
 		}
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-				case 0:
-				case 1:
-					return true;
-				case 2:
-					return (classTypes[rowIndex] == CLASS_CLOSED);
-				case 3:
-					return (classTypes[rowIndex] == CLASS_OPEN);
-				default:
-					return false;
+			case 0:
+			case 1:
+				return true;
+			case 2:
+				return (classTypes[rowIndex] == CLASS_CLOSED);
+			case 3:
+				return (classTypes[rowIndex] == CLASS_OPEN);
+			default:
+				return false;
 			}
 		}
 	}

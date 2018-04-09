@@ -24,7 +24,7 @@ package jmt.engine.jwat;
  * @author Brambilla Davide matr 667986, Fumagalli Claudio 667971
  *
  */
-public class Observation implements Comparable {
+public class Observation implements Comparable<Object> {
 	/* List of values belong to a single observation */
 	private double[] observation = null;
 	/* Identify the element of the observation used to accomplish the compareTo method */

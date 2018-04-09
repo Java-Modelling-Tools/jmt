@@ -96,7 +96,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 
 		protected String[] dropRules = new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() };
 		protected TableCellRenderer grayRenderer = new GrayCellRenderer();
-		int[] columnSizes = new int[] { 150, 60, 30, 60, 30, 50, 40, 40 };		
+		int[] columnSizes = new int[] { 130, 60, 30, 60, 30, 50, 50, 50 };		
 
 		public BlockingClassTable() {
 			setModel(new BlockingClassTableModel());
@@ -152,7 +152,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 		private Class<?>[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class, Boolean.class,
 				String.class, String.class, String.class };
 		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Memory Size", "\u221e",
-				"Drop", "Weight", "Job Size" };
+				"Drop", "Job Weight", "Job Size" };
 
 		public int getRowCount() {
 			return cd.getClassKeys().size();

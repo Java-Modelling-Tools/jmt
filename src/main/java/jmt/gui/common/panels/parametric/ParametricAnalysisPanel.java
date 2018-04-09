@@ -186,6 +186,9 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 		});
 		chooser.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				String param = (String) chooser.getSelectedItem();
 				if (parameterOptionPanel != null) {
 					remove(parameterOptionPanel);

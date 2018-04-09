@@ -175,7 +175,7 @@ public class Dispatcher_jSIMschema {
 		// Sets simulation max duration (if specified)
 		ExecutorService es = Executors.newSingleThreadExecutor();
 		if (maxDuration > 0) {
-			es.submit(new Runnable() {	
+			es.submit(new Runnable() {
 				public void run() {
 					try {
 						Thread.sleep(maxDuration);

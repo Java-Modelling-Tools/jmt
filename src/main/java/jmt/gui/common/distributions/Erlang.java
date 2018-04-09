@@ -31,8 +31,9 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 14.40.47
  */
 public class Erlang extends Distribution {
+
 	/**
-	 * Construct a new Erlang Distribution
+	 * Constructs a new Erlang Distribution
 	 */
 	public Erlang() {
 		super("Erlang", "jmt.engine.random.Erlang", "jmt.engine.random.ErlangPar", "Erlang distribution");
@@ -49,14 +50,15 @@ public class Erlang extends Distribution {
 	protected Parameter[] setParameters() {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[2];
+
 		// Sets parameter lambda
 		//ARIF: Left parameters name as alpha and r in order to have back-compatibility of the XML files.
 		parameters[0] = new Parameter("alpha", "\u03BB", Double.class, new Double(0.8));
-		// Checks value of lambda must greater then 0
+		// Checks value of lambda must greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -67,7 +69,7 @@ public class Erlang extends Distribution {
 		// Sets parameter k
 		//ARIF: Left parameters name as alpha and r in order to have back-compatibility of the XML files.
 		parameters[1] = new Parameter("r", "k", Long.class, new Long(4));
-		// Checks value of k must be greater then 0
+		// Checks value of k must be greater than 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Long d = (Long) value;
@@ -83,7 +85,7 @@ public class Erlang extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -97,7 +99,7 @@ public class Erlang extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "erl(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+		return "erl(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
 				+ formatNumber(((Long) parameters[1].getValue()).longValue()) + ")";
 	}
 
@@ -125,16 +127,15 @@ public class Erlang extends Distribution {
 	 * @param c c value
 	 */
 	protected void setCM(double mean, double c) {
-		// lambda = 1 / (c*c*mean) && k = 1 / (c*c)
+		// k = 1 / (c*c) && lambda = 1 / (mean*c*c)
 		// Backups old parameters to restore them upon a false result
 		Object oldr = getParameter("r").getValue();
 		Object olda = getParameter("alpha").getValue();
-		
+
 		Long k = new Long(Math.round(new Double(1 / (c * c))));
 		c = 1 / Math.sqrt((k).doubleValue());
-		Double lambda = new Double(k/mean);
-		
-		
+		Double lambda = new Double(1 / (mean * c * c));
+
 		if (getParameter("r").setValue(k) && getParameter("alpha").setValue(lambda)) {
 			this.mean = mean;
 			this.c = c;
@@ -146,11 +147,13 @@ public class Erlang extends Distribution {
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {
-		mean = ((Long) getParameter("r").getValue()).longValue() / ((Double) getParameter("alpha").getValue()).doubleValue();
+		mean = ((Long) getParameter("r").getValue()).longValue()
+				/ ((Double) getParameter("alpha").getValue()).doubleValue();
 		c = 1 / Math.sqrt(((Long) getParameter("r").getValue()).doubleValue());
 	}
+
 }

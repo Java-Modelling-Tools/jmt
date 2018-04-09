@@ -232,7 +232,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		inf.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (inf.isSelected()) {
-					number.setValue(Float.POSITIVE_INFINITY);
+					number.setValue(Double.POSITIVE_INFINITY);
 					number.setEnabled(false);
 					brd.setRegionCustomerConstraint(key, Integer.valueOf(-1));
 				} else {
@@ -250,7 +250,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		mInf.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (mInf.isSelected()) {
-					memory.setValue(Float.POSITIVE_INFINITY);
+					memory.setValue(Double.POSITIVE_INFINITY);
 					memory.setEnabled(false);
 					brd.setRegionMemorySize(key, Integer.valueOf(-1));
 				} else {
@@ -348,7 +348,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 			number.setEnabled(true);
 			inf.setSelected(false);
 		} else {
-			number.setValue(Float.POSITIVE_INFINITY);
+			number.setValue(Double.POSITIVE_INFINITY);
 			number.setEnabled(false);
 			inf.setSelected(true);
 		}
@@ -359,7 +359,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 			memory.setEnabled(true);
 			mInf.setSelected(false);
 		} else {
-			memory.setValue(Float.POSITIVE_INFINITY);
+			memory.setValue(Double.POSITIVE_INFINITY);
 			memory.setEnabled(false);
 			mInf.setSelected(true);
 		}

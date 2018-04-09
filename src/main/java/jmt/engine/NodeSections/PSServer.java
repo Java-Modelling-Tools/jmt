@@ -120,7 +120,14 @@ public class PSServer extends ServiceSection {
 	public double getDoubleSectionProperty(int id) throws NetException {
 		switch (id) {
 		case PROPERTY_ID_UTILIZATION:
-			return psJobsList.getBusyTime() / NetSystem.getTime() / numberOfServers;
+			double sum = 0.0;
+			for (int i = 0; i < jobClasses.size(); i++) {
+				JobClass jobClass = jobClasses.get(i);
+				sum += psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
+			}
+			return sum;
+		case PROPERTY_ID_AVERAGE_UTILIZATION:
+			return psJobsList.getTotalSojournTime() / NetSystem.getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id);
 		}
@@ -130,7 +137,9 @@ public class PSServer extends ServiceSection {
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
 		switch (id) {
 		case PROPERTY_ID_UTILIZATION:
-			return psJobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
+			return psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
+		case PROPERTY_ID_AVERAGE_UTILIZATION:
+			return psJobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id, jobClass);
 		}
@@ -206,7 +215,7 @@ public class PSServer extends ServiceSection {
 			if (queueTime < 0.0) {
 				queueTime = 0.0;
 			}
-			psJobsList.psUpdateBusyTime(jobClass, jobInfo.getServiceTime());
+			psJobsList.psUpdateSojournTime(jobClass, jobInfo.getServiceTime());
 			psJobsList.psUpdateQueueTime(jobClass, queueTime);
 			psJobsList.psUpdateUtilization(jobClass, serviceFractions);
 			psJobsList.remove(jobInfo);
@@ -239,8 +248,9 @@ public class PSServer extends ServiceSection {
 				allocationComplete = true;
 				for (int i = 0; i < jobClasses.size(); i++) {
 					if (serviceFractions[i] > 1.0 / numberOfServers) {
+						JobClass jobClass = jobClasses.get(i);
 						serviceFractions[i] = 1.0 / numberOfServers;
-						residualCapacity -= 1.0;
+						residualCapacity -= psJobsList.size(jobClass);
 						serviceSaturated[i] = true;
 						allocationComplete = false;
 					}

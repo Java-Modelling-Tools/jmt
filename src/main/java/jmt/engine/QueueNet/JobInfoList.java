@@ -81,19 +81,6 @@ public interface JobInfoList {
 	public abstract int getJobsOutPerClass(JobClass jobClass);
 
 	/**
-	 * Gets the busy time.
-	 * @return Busy time.
-	 */
-	public abstract double getBusyTime();
-
-	/**
-	 * Gets the busy time for the specified job class.
-	 * @param jobClass Specified job class.
-	 * @return Busy time for the specified job class.
-	 */
-	public abstract double getBusyTimePerClass(JobClass jobClass);
-
-	/**
 	 * Gets the time of the last added job.
 	 * @return Time of the last added job.
 	 */
@@ -139,11 +126,37 @@ public interface JobInfoList {
 	public abstract double getLastModifyTime();
 
 	/**
-	 * Gets the time of the last modify for the specified job class.
+	 * Gets the time of the last modify of the specified job class.
 	 * @param jobClass Specified job class.
-	 * @return Time of the last modify for the specified job class.
+	 * @return Time of the last modify of the specified job class.
 	 */
 	public abstract double getLastModifyTimePerClass(JobClass jobClass);
+
+	/**
+	 * Gets the total sojourn time.
+	 * @return Total sojourn time.
+	 */
+	public abstract double getTotalSojournTime();
+
+	/**
+	 * Gets the total sojourn time of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Total sojourn time of the specified job class.
+	 */
+	public abstract double getTotalSojournTimePerClass(JobClass jobClass);
+
+	/**
+	 * Gets the sojourn time of the last removed job.
+	 * @return Sojourn time of the last removed job.
+	 */
+	public abstract double getLastJobSojournTime();
+
+	/**
+	 * Gets the sojourn time of the last removed job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Sojourn time of the last removed job of the specified job class.
+	 */
+	public abstract double getLastJobSojournTimePerClass(JobClass jobClass);
 
 	/**
 	 * Looks for the job info that references the specified job.

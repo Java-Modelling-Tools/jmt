@@ -41,6 +41,7 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 
@@ -442,12 +443,12 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		public PreloadingTable() {
 			super(new PreloadTableModel());
-			setDefaultEditor(Integer.class, new jmt.gui.exact.table.ExactCellEditor());
+			setDefaultEditor(Integer.class, new ExactCellEditor());
 			autoResizeMode = AUTO_RESIZE_OFF;
 			setDisplaysScrollLabels(true);
-			setRowSelectionAllowed(false);
-			setColumnSelectionAllowed(false);
-			setClipboardTransferEnabled(false);
+			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(true);
+			setBatchEditingEnabled(true);
 		}
 	}
 

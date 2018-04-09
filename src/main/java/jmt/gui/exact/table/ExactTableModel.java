@@ -71,10 +71,4 @@ public abstract class ExactTableModel extends AbstractTableModel implements Mode
 		setValueAt(null, row, col);
 	}
 
-	/**
-	 * Copies the value cell to all selected cells. Default implementation does absolutely nothing.
-	 */
-	public void copyCellToArea(int sourceRow, int sourceCol, int rowFrom, int rowTo, int colFrom, int colTo) {
-	}
-
 }

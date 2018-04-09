@@ -26,6 +26,7 @@ import java.util.Map;
 
 import jmt.engine.NodeSections.LogTunnel;
 import jmt.engine.QueueNet.NetSystem;
+import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.MeasureOutput;
 import jmt.engine.dataAnalysis.SimParameters;
 import jmt.engine.log.CSVLogger;
@@ -60,20 +61,10 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 	 * it is useful only if a file is used)
 	 * @throws java.io.IOException
 	 */
-	public VerboseCSVMeasureOutput(jmt.engine.dataAnalysis.Measure Measure, SimParameters simParameters) throws IOException {
+	public VerboseCSVMeasureOutput(Measure Measure, SimParameters simParameters) throws IOException {
 		super(Measure);
 		file = new File(simParameters.getLogPath(), measure.getName() + ".csv");
-
-		char decimalSeparator;
-
-		String ds = simParameters.getLogDecimalSeparator();
-		if (ds != null && ds.length() > 0) {
-			decimalSeparator = ds.charAt(0);
-		} else {
-			decimalSeparator = '.';
-		}
-
-		logger = JSimLoggerFactory.getCSVLogger(file, COLUMNS, false, simParameters.getLogDelimiter(), decimalSeparator);
+		logger = JSimLoggerFactory.getCSVLogger(file, COLUMNS, false, simParameters.getLogDelimiter(), simParameters.getLogDecimalSeparator());
 	}
 
 	@Override
@@ -105,7 +96,7 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 		close();
 //FIXME fix this...
 //		try {
-//			if (measure.getSuccess() == true) {
+//			if (measure.getSuccess()) {
 //				writer.write("\nMeasure name; " + measure.getName() + ";\n" + "Mean; " + statistics.getMean() + ";\n" + "2nd Moment; "
 //						+ statistics.getMoment2() + ";\n" + "3rd Moment; " + statistics.getMoment3() + ";\n" + "4th Moment; "
 //						+ statistics.getMoment4() + ";\n" + "Variance; " + statistics.getVar() + ";\n" + "Standard Deviation; " 

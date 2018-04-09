@@ -19,6 +19,8 @@
 package jmt.gui.common.definitions;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,20 +60,6 @@ import jmt.gui.common.transitionUtilities.TransitionMatrix;
  * User: OrsotronIII
  * Date: 24-mag-2005
  * Time: 9.46.43
- * Modified by Bertoli Marco
- * 
- * Modified by Francesco D'Aquino
- * 
- * Modified by Ashanka (May 2010):
- * Patch: Multi-Sink Perf. Index
- * Description: Added new Performance index for capturing 
- * 				1. global response time (ResponseTime per Sink)
- *              2. global throughput (Throughput per Sink)
- *              each sink per class.
- * Hence added a code to fetch the sink keys and if a measure is sink perf measure. 
- * 
- * Modified by Ashanka (July 2010)
- * Desc: Added new defaults control of a Random CheckBox.
  */
 public class CommonModel implements CommonConstants, ClassDefinition, StationDefinition, SimulationDefinition, BlockingRegionDefinition {
 
@@ -88,7 +76,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected LoggerGlobalParameters loggerGlbParams;
 	// Used to tell if model have to be saved
 	protected boolean save = false;
-	private static JSimLogger debugLog = JSimLogger.getRootLogger();
+
+	protected static Comparator<Object> keyComparator = new KeyComparator();
+	protected static JSimLogger debugLog = JSimLogger.getRootLogger();
 
 	/**
 	 * search key set of all classes
@@ -359,16 +349,16 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				cd.population = null;
 				cd.distribution = Defaults.getAsNewInstance("classDistribution");
 				cd.refStation = null;
-				openClassesKeyset.add(key);
-				openClassesKeyset.sort(null);
 				closedClassesKeyset.remove(key);
+				openClassesKeyset.add(key);
+				Collections.sort(openClassesKeyset, keyComparator);
 			} else {
 				cd.population = Defaults.getAsInteger("classPopulation");
 				cd.distribution = null;
 				cd.refStation = null;
 				openClassesKeyset.remove(key);
 				closedClassesKeyset.add(key);
-				closedClassesKeyset.sort(null);
+				Collections.sort(closedClassesKeyset, keyComparator);
 			}
 			deleteStationDetailsForClass(key);
 			deleteBlockingDetailsForClass(key);
@@ -829,92 +819,92 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			addStationConnections(key);
 			if (type.equals(STATION_TYPE_SOURCE)) {
 				sourcesKeyset.add(key);
-				sourcesKeyset.sort(null);
+				Collections.sort(sourcesKeyset, keyComparator);
 			} else {
 				sourcesKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_SINK)) {
 				sinksKeyset.add(key);
-				sinksKeyset.sort(null);
+				Collections.sort(sinksKeyset, keyComparator);
 			} else {
 				sinksKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_TERMINAL)) {
 				terminalsKeyset.add(key);
-				terminalsKeyset.sort(null);
+				Collections.sort(terminalsKeyset, keyComparator);
 			} else {
 				terminalsKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_ROUTER)) {
 				routersKeyset.add(key);
-				routersKeyset.sort(null);
+				Collections.sort(routersKeyset, keyComparator);
 			} else {
 				routersKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_DELAY)) {
 				delaysKeyset.add(key);
-				delaysKeyset.sort(null);
+				Collections.sort(delaysKeyset, keyComparator);
 			} else {
 				delaysKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_SERVER)) {
 				serversKeyset.add(key);
-				serversKeyset.sort(null);
+				Collections.sort(serversKeyset, keyComparator);
 			} else {
 				serversKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_FORK)) {
 				forksKeyset.add(key);
-				forksKeyset.sort(null);
+				Collections.sort(forksKeyset, keyComparator);
 			} else {
 				forksKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_JOIN)) {
 				joinsKeyset.add(key);
-				joinsKeyset.sort(null);
+				Collections.sort(joinsKeyset, keyComparator);
 			} else {
 				joinsKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_LOGGER)) {
 				loggersKeyset.add(key);
-				loggersKeyset.sort(null);
+				Collections.sort(loggersKeyset, keyComparator);
 			} else {
 				loggersKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_CLASSSWITCH)) {
 				classSwitchesKeyset.add(key);
-				classSwitchesKeyset.sort(null);
+				Collections.sort(classSwitchesKeyset, keyComparator);
 			} else {
 				classSwitchesKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_SEMAPHORE)) {
 				semaphoresKeyset.add(key);
-				semaphoresKeyset.sort(null);
+				Collections.sort(semaphoresKeyset, keyComparator);
 			} else {
 				semaphoresKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_SCALER)) {
 				scalersKeyset.add(key);
-				scalersKeyset.sort(null);
+				Collections.sort(scalersKeyset, keyComparator);
 			} else {
 				scalersKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_PLACE)) {
 				placesKeyset.add(key);
-				placesKeyset.sort(null);
+				Collections.sort(placesKeyset, keyComparator);
 			} else {
 				placesKeyset.remove(key);
 			}
 			if (type.equals(STATION_TYPE_TRANSITION)) {
 				transitionsKeyset.add(key);
-				transitionsKeyset.sort(null);
+				Collections.sort(transitionsKeyset, keyComparator);
 			} else {
 				transitionsKeyset.remove(key);
 			}
 			if (isStationTypePreloadable(type)) {
 				if (!preloadableKeyset.contains(key)) {
 					preloadableKeyset.add(key);
-					preloadableKeyset.sort(null);
+					Collections.sort(preloadableKeyset, keyComparator);
 				}
 			} else {
 				preloadableKeyset.remove(key);
@@ -922,7 +912,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			if (canStationTypeBeBlocked(type)) {
 				if (!blockableKeyset.contains(key)) {
 					blockableKeyset.add(key);
-					blockableKeyset.sort(null);
+					Collections.sort(blockableKeyset, keyComparator);
 				}
 			} else {
 				blockableKeyset.remove(key);
@@ -1636,13 +1626,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			loggerGlbParams = new LoggerGlobalParameters();
 		}
 
-		if (selector.equalsIgnoreCase("path") == true) {
+		if (selector.equalsIgnoreCase("path")) {
 			return loggerGlbParams.path;
-		} else if (selector.equalsIgnoreCase("delim") == true) {
+		} else if (selector.equalsIgnoreCase("delim")) {
 			return loggerGlbParams.delimiter;
-		} else if (selector.equalsIgnoreCase("decimalSeparator") == true) {
+		} else if (selector.equalsIgnoreCase("decimalSeparator")) {
 			return loggerGlbParams.decimalSeparator;
-		} else if (selector.equalsIgnoreCase("autoAppend") == true) {
+		} else if (selector.equalsIgnoreCase("autoAppend")) {
 			return loggerGlbParams.autoAppendMode.toString();
 		} else {
 			debugLog.error("No such selector " + selector + " for " + new Exception().getStackTrace()[0] + "\n" + new Exception().getStackTrace()[1]);
@@ -1664,13 +1654,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 		debugLog.debug("glbParameter <" + selector + "=" + value + ">");
 
-		if (selector.equalsIgnoreCase("path") == true) {
+		if (selector.equalsIgnoreCase("path")) {
 			loggerGlbParams.path = value;
-		} else if (selector.equalsIgnoreCase("decimalSeparator") == true) {
+		} else if (selector.equalsIgnoreCase("decimalSeparator")) {
 			loggerGlbParams.decimalSeparator = value;
-		} else if (selector.equalsIgnoreCase("delim") == true) {
+		} else if (selector.equalsIgnoreCase("delim")) {
 			loggerGlbParams.delimiter = value;
-		} else if (selector.equalsIgnoreCase("autoAppend") == true) {
+		} else if (selector.equalsIgnoreCase("autoAppend")) {
 			loggerGlbParams.autoAppendMode = new Integer(value);
 		} else {
 			debugLog.error("No such selector " + selector + " for " + new Exception().getStackTrace()[0] + "\n" + new Exception().getStackTrace()[1]);
@@ -1693,9 +1683,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		// get the list of all filenames from their keys
 		for (Object loggerKey : loggersKeyset) {
 			LoggerParameters lp = getLoggingParameters(loggerKey);
-			if (lp.name.equalsIgnoreCase("global") == false) {
+			if (!lp.name.equalsIgnoreCase("global")) {
 				lknames[size++] = lp.name;
-			} else if ((lp.name.equalsIgnoreCase("global") == true) && (globalWasProcessed == false)) {
+			} else if (lp.name.equalsIgnoreCase("global") && !globalWasProcessed) {
 				globalWasProcessed = true;
 				lknames[size++] = lp.name;
 			}
@@ -3593,6 +3583,14 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	// --- end Blocking Region Definition ------------------------------------------------------------
+
+	/**This class implements the comparator for search keys. This can be useful for
+	 * sorting a specific search key set.*/
+	protected static class KeyComparator implements Comparator<Object> {
+		public int compare(Object o1, Object o2) {
+			return Long.compare((Long) o1, (Long) o2);
+		}
+	}
 
 	/**This class packs altogether customer class parameters. This can be useful for
 	 * storing them inside an hash map or other data structures.*/

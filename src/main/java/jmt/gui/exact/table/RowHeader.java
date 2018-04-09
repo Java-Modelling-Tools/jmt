@@ -118,8 +118,11 @@ public class RowHeader extends JTable {
 		return cellRenderer;
 	}
 
+	public void updateStructure() {
+		tableChanged(new TableModelEvent(dataModel, TableModelEvent.HEADER_ROW));
+	}
+
 	public void update() {
-		/* mimic a "table changed" event from the model */
 		tableChanged(new TableModelEvent(dataModel));
 	}
 

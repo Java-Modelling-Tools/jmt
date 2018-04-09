@@ -35,19 +35,18 @@ import jmt.engine.math.Probability;
  */
 public class Normal extends AbstractDistribution implements Distribution {
 
-	protected double cache; // cache for Box-Mueller algorithm
-	protected boolean cacheFilled; // Box-Mueller
+	private double cache; // cache for Box-Mueller algorithm
+	private boolean cacheFilled; // Box-Mueller
 
 	/**
 	 * This is the constructor. It creates a new normal distribution which is
-	 * defined  from is pdf:
+	 * defined from pdf:
 	 * <pre>               1                   (x-m)^2
 	 * pdf(x) = -------------- * exp (- ----------- )
 	 *           sqrt(2*pi)*v              2v^2</pre>
 	 * where v^2 is the variance and m is the mean of the distribution
 	 * pi is the pi-greco constant.
 	 */
-
 	public Normal() {
 	}
 
@@ -60,7 +59,6 @@ public class Normal extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double variance = ((NormalPar) p).getStandardDeviation() * ((NormalPar) p).getStandardDeviation();
@@ -82,7 +80,6 @@ public class Normal extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double mean = ((NormalPar) p).getMean();
@@ -101,29 +98,25 @@ public class Normal extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic mean of the distribution.
 	 */
-
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double mean = ((NormalPar) p).getMean();
-			return mean;
+			return ((NormalPar) p).getMean();
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: standardDeviation must be gtz");
 		}
 	}
 
 	/**
-	 * This method is used to obtain from the distribution its own theoretical
-	 * variance.
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
 	 *
 	 * @param p parameter of the normal distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic variance of the distribution.
 	 */
-
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double variance = ((NormalPar) p).getStandardDeviation() * ((NormalPar) p).getStandardDeviation();
-			return variance;
+			return ((NormalPar) p).getStandardDeviation() * ((NormalPar) p).getStandardDeviation();
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: standardDeviation must be gtz");
 		}
@@ -137,7 +130,6 @@ public class Normal extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double mean = ((NormalPar) p).getMean();

@@ -82,13 +82,13 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 	private JSplitPane jsp = new JSplitPane();
 	private JPanel buttons;
 
-	public ForkEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
+	public ForkEditor(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		setOrientation(JSplitPane.VERTICAL_SPLIT);
 		setDividerSize(3);
 		setBorder(new EmptyBorder(0, 0, 0, 0));
 		setResizeWeight(0.5);
 		initComponents();
-		setData(sd, cs, stationKey, classKey);
+		setData(sd, cd, stationKey, classKey);
 	}
 
 	private void initComponents() {
@@ -201,7 +201,7 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		jsp.setRightComponent(buttons);
 	}
 
-	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
+	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		ForkStrategy fs = (ForkStrategy) sd.getForkStrategy(stationKey, classKey);
 		forkTable.clearSelection();
 		outTable.clearSelection();
@@ -218,9 +218,9 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 			} else if (fs instanceof CombFork) {
 				createCombDetails(fs, sd, stationKey, classKey);
 			} else if (fs instanceof ClassSwitchFork) {
-				createClassSwitchDetails(fs, sd, cs, stationKey, classKey);
+				createClassSwitchDetails(fs, sd, cd, stationKey, classKey);
 			} else if (fs instanceof MultiBranchClassSwitchFork) {
-				createMultiBranchClassSwitchDetails(fs, sd, cs, stationKey, classKey);
+				createMultiBranchClassSwitchDetails(fs, sd, cd, stationKey, classKey);
 			} else {
 				emptyPane();
 			}
@@ -269,10 +269,10 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		setRightComponent(new JPanel());
 	}
 
-	private void createClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
+	private void createClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		outPaths = (Map<Object, OutPath>) fs.getOutDetails();
 		stations = sd;
-		classes = cs;
+		classes = cd;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
 		combProbs = null;
@@ -288,10 +288,10 @@ public class ForkEditor extends JSplitPane implements CommonConstants {
 		setRightComponent(new JPanel());
 	}
 
-	private void createMultiBranchClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
+	private void createMultiBranchClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		outPaths = (Map<Object, OutPath>) fs.getOutDetails();
 		stations = sd;
-		classes = cs;
+		classes = cd;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
 		combProbs = null;

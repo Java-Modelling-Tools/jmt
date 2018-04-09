@@ -43,40 +43,38 @@ public class RandomStrategy extends RoutingStrategy {
 	/**
 	 * Gets the output node, into which the job must be routed, using a random
 	 * strategy.
-	 * @param nodes the list of output nodes
-	 * @param jobClass class of current job to be routed
-	 * @return The selected node.
+	 * @param nodes List of the output nodes.
+	 * @param jobClass Class of current job to be routed.
+	 * @return Selected node.
 	 */
 	@Override
 	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
-		int outNodes = nodes.size();
-		// Find output node
-		NetNode output;
-		if (outNodes > 1) {
-			output = nodes.get((int) Math.floor(randomEngine.raw() * outNodes));
-		} else {
-			output = nodes.getFirst();
+		if (nodes.size() == 0) {
+			return null;
 		}
 
-		// Check to avoid discarding closed classes into a sink
-		if (jobClass.getType() == CLOSED_CLASS && output.isSink()) {
-			NetNode[] validOutputs = new NetNode[outNodes];
-			outNodes = 0; // Here outNodes is used as a counter to valid elements into valisOutputs array
+		// Skips sinks for closed classes
+		if (jobClass.getType() == CLOSED_CLASS) {
+			NetNode[] valid = new NetNode[nodes.size()];
+			int length = 0; // Here length is used as a counter for valid
 			for (int i = 0; i < nodes.size(); i++) {
 				if (!nodes.get(i).isSink()) {
-					validOutputs[outNodes++] = nodes.get(i);
+					valid[length++] = nodes.get(i);
 				}
 			}
-
-			if (outNodes == 0) {
-				output = null;
-			} else if (outNodes == 1) {
-				output = validOutputs[0];
+			if (length == 1) {
+				return valid[0];
 			} else {
-				output = validOutputs[(int) Math.floor(randomEngine.raw() * outNodes)];
+				return valid[(int) Math.floor(randomEngine.raw() * length)];
+			}
+		} else {
+			int length = nodes.size();
+			if (length == 1) {
+				return nodes.getFirst();
+			} else {
+				return nodes.get((int) Math.floor(randomEngine.raw() * length));
 			}
 		}
-		return output;
 	}
 
 }

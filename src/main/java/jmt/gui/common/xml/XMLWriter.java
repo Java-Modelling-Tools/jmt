@@ -55,6 +55,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Distribution.Parameter;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
@@ -64,7 +65,6 @@ import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
-import jmt.gui.common.serviceStrategies.DisabledStrategy;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -558,6 +558,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					DROP_RULES_MAPPING.get(strategy), true);
 		}
 		dropStrategies.appendParameterElement(doc, queue);
+
 		/*
 		 * queue get strategy, which is fixed to FCFS, as difference between
 		 * strategies can be resolved by queue put strategies
@@ -566,6 +567,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				strategiesClasspathBase + queueGetStrategiesSuffix
 				+ "FCFSstrategy", null, (String) null, false);
 		queueGetStrategy.appendParameterElement(doc, queue);
+
 		/*
 		 * At last, queue put parameter, which can be defined differently for
 		 * each customer class, so a more complex parameter structure is required
@@ -713,11 +715,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				distrParams[i] = new XMLParameter("ZeroTimeServiceStrategy",
 						ZeroStrategy.getEngineClassPath(),
 						model.getClassName(currentClass), (String) null, true);
-			} else if (serviceDistribution instanceof DisabledStrategy) {
-				// Disabled Service Time Strategy --- Giuliano Casale
-				distrParams[i] = new XMLParameter("DisabledServiceStrategy",
-						DisabledStrategy.getEngineClassPath(),
-						model.getClassName(currentClass), (String) null, true);
 			} else {
 				// Load Dependent Service Strategy --- Bertoli Marco
 				LDStrategy strategy = (LDStrategy) serviceDistribution;
@@ -811,7 +808,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		loggerParameters.path = MacroReplacer.replace(model.getLoggingGlbParameter("path"));
 		XMLParameter path = new XMLParameter(XML_LOG_FILEPATH,
 				"java.lang.String", null,
-				loggerParameters.getpath().toString(), false);
+				loggerParameters.path, false);
 		path.appendParameterElement(doc, elem);
 		XMLParameter logExecTimestamp = new XMLParameter(
 				XML_LOG_B_EXECTIMESTAMP, "java.lang.Boolean", null,
@@ -1598,7 +1595,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			// parameter
 			List<XMLParameter> nonDirectParams = new Vector<XMLParameter>();
 
-			Distribution.Parameter distrPar;
+			Parameter distrPar;
 			// Object valueObj;
 
 			// parse over all parameters and add them to the appropriate list
@@ -1644,14 +1641,16 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 *            the distribution parameter
 		 * @return the created XML Parameter
 		 */
-		static XMLParameter getParameter(Distribution.Parameter distrPar) {
+		static XMLParameter getParameter(Parameter distrPar) {
 			Object valueObj = distrPar.getValue();
 			if (valueObj != null) {
-				if (distrPar.getValue() instanceof Distribution) {
-					XMLParameter[] distribution = getDistributionParameter((Distribution) valueObj);
+				if (valueObj instanceof Distribution) {
+					XMLParameter[] distribution = getDistributionParameter(
+							(Distribution) valueObj);
 					XMLParameter returnValue = new XMLParameter(
-							distrPar.getName(), distributionContainerClasspath,
-							null, new XMLParameter[] { distribution[0],
+							distrPar.getName(),
+							distributionContainerClasspath, null,
+							new XMLParameter[] { distribution[0],
 									distribution[1] }, true);
 					/*
 					 * although this parameter contains several others, array
@@ -1660,10 +1659,27 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					 */
 					returnValue.parameterArray = "false";
 					return returnValue;
+				} else if (valueObj instanceof Object[][]) {
+					Object[][] value = (Object[][]) valueObj;
+					XMLParameter[] vector = new XMLParameter[value.length];
+					for (int i = 0; i < vector.length; i++) {
+						XMLParameter[] entry = new XMLParameter[value[i].length];
+						for (int j = 0; j < entry.length; j++) {
+							entry[j] = new XMLParameter("entry",
+									distrPar.getValueClass().getName(),
+									null, value[i][j].toString(), true);
+						}
+						vector[i] = new XMLParameter("vector",
+								Object.class.getName(),
+								null, entry, true);
+					}
+					return new XMLParameter(distrPar.getName(),
+							Object.class.getName(),
+							null, vector, true);
 				} else {
-					String value = valueObj.toString();
-					return new XMLParameter(distrPar.getName(), distrPar
-							.getValueClass().getName(), null, value, true);
+					return new XMLParameter(distrPar.getName(),
+							distrPar.getValueClass().getName(),
+							null, valueObj.toString(), true);
 				}
 			}
 			return null;
@@ -1710,7 +1726,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				XMLParameter[] ranges = new XMLParameter[routing.getAllEmpiricalEntries().size()];
 				List<Integer> fromAsList = new ArrayList<Integer>();
 				fromAsList.addAll(routing.getAllEmpiricalEntries().keySet());
-				fromAsList.sort(null);
+				Collections.sort(fromAsList);
 				int countersRange = 0;
 				for (Integer from : fromAsList) {
 					XMLParameter fromEntry = new XMLParameter("from", Integer.class.getName(), null, from.toString(), true);

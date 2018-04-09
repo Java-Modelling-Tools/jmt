@@ -59,7 +59,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 	//private CommonModel model;
 	private GuiInterface gui;
 	private Dispatcher_jSIMschema simulator;
-	private PATimerThread timer = null;
+	private TimerThread timer = null;
 	private PAProgressWindow progressWindow;
 	private boolean stopped;
 	private int currentStep;
@@ -149,11 +149,14 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, "File exception", "Error", JOptionPane.ERROR_MESSAGE);
 			}
-			simulationFile.deleteOnExit();
 			XMLWriter.writeXML(simulationFile, (CommonModel) simd);
 			simulator = new Dispatcher_jSIMschema(simulationFile);
+			// If needed sets simulation seed
+			if (!simd.getUseRandomSeed().booleanValue()) {
+				simulator.setSimulationSeed(simd.getSimulationSeed().longValue());
+			}
 			if (simd.getMaximumDuration().doubleValue() > 0) {
-				timer = new PATimerThread(simulator, simd.getMaximumDuration().doubleValue());
+				timer = new TimerThread(simulator, simd.getMaximumDuration().doubleValue());
 				timer.start();
 			}
 			try {

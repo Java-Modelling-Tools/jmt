@@ -19,13 +19,12 @@
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
-import jmt.engine.random.engine.RandomEngine;
 
 /**
  * 
  * This is the MMPP2 distribution.
  * 
- * <br><br>Copyright (c) 2006
+ * <br><br>Copyright (c) 2008
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Giuliano Casale
  * 
@@ -33,68 +32,106 @@ import jmt.engine.random.engine.RandomEngine;
 public class MMPP2Distr extends AbstractDistribution implements Distribution {
 
 	private int curState;
-	protected Exponential expDistr;
+	private Exponential expDistr;
 
+	/**
+	 * This is the constructor. It creates a new MMPP2 distribution which
+	 * is constituted by two interactive exponential phases.
+	 *
+	 */
 	public MMPP2Distr() {
 		curState = 0;
-		engine = RandomEngine.makeDefault();
 		expDistr = new Exponential();
 	}
 
-	public int getCurState() {
-		return curState;
-	}
-
-	public void setCurState(int newState) {
-		curState = newState;
-	}
-
-	public double pdf(double x, Parameter p) { //other implementation may use p.check()
+	/**
+	 * This method is used to obtain from the distribution its probability distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the pdf.
+	 * @param p parameter of the MMPP2 distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the probability distribution function evaluated in x.
+	 */
+	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;
 	}
 
-	public double cdf(double x, Parameter p) { //other implementation may use p.check()
+	/**
+	 * This method is used to obtain from the distribution its cumulative distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the cdf.
+	 * @param p parameter of the MMPP2 distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the cumulative distribution function evaluated in x.
+	 */
+	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;
 	}
 
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic mean.
+	 *
+	 * @param p parameter of the MMPP2 distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic mean of the distribution.
+	 */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
-		return (((MMPP2Par) p).getSigma0() + ((MMPP2Par) p).getSigma1())
-				/ (((MMPP2Par) p).getLambda0() * ((MMPP2Par) p).getSigma1() + ((MMPP2Par) p).getLambda1() * ((MMPP2Par) p).getSigma0());
+		if (p.check()) {
+			return ((MMPP2Par) p).getMean();
+		} else {
+			throw new IncorrectDistributionParameterException(
+					"Remember: parameter sigma0, sigma1, lambda0 and lambda1 must be gtz");
+		}
 	}
 
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
+	 *
+	 * @param p parameter of the MMPP2 distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic variance of the distribution.
+	 */
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
-		return 0.0;
+		if (p.check()) {
+			return ((MMPP2Par) p).getVar();
+		} else {
+			throw new IncorrectDistributionParameterException(
+					"Remember: parameter sigma0, sigma1, lambda0 and lambda1 must be gtz");
+		}
 	}
 
 	/**
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *
-	 * @param p parameter of the hyper exponential distribution.
+	 * @param p parameter of the MMPP2 distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
-		double r = 0.0;
 		if (p.check()) {
-			if (this.getCurState() == 0) {
-				r = r + expDistr.nextRand(((MMPP2Par) p).getExpParam0());
+			if (curState == 0) {
+				double sample = expDistr.nextRand(((MMPP2Par) p).getExpParam0());
 				if (engine.nextDouble() <= ((MMPP2Par) p).getSigma0() / (((MMPP2Par) p).getSigma0() + ((MMPP2Par) p).getLambda0())) {
-					this.setCurState(1);
-					r = r + nextRand(p);
+					curState = 1;
+					sample += nextRand(p);
 				}
-				return r;
+				return sample;
 			} else {
-				r = r + expDistr.nextRand(((MMPP2Par) p).getExpParam1());
+				double sample = expDistr.nextRand(((MMPP2Par) p).getExpParam1());
 				if (engine.nextDouble() <= ((MMPP2Par) p).getSigma1() / (((MMPP2Par) p).getSigma1() + ((MMPP2Par) p).getLambda1())) {
-					this.setCurState(0);
-					r = r + nextRand(p);
+					curState = 0;
+					sample += nextRand(p);
 				}
-				return r;
+				return sample;
 			}
 		} else {
-			throw new IncorrectDistributionParameterException("Expection in generation of MMPP2 random numbers");
+			throw new IncorrectDistributionParameterException(
+					"Remember: parameter sigma0, sigma1, lambda0 and lambda1 must be gtz");
 		}
 	}
 

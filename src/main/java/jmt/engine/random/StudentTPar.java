@@ -36,16 +36,16 @@ public class StudentTPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It creates a new student T parameter with the provided degrees of freedom.
+	 *
 	 * @param freedom double containing the degrees of freedom of the new student T
 	 * distribution. It is defined as double but must be an integer greater than zero.
-	 *
 	 * @throws IncorrectDistributionParameterException if the degrees of freedom is
 	 * not an integer greater than zero.
 	 *
 	 */
 	public StudentTPar(double freedom) throws IncorrectDistributionParameterException {
-		if (freedom <= 0 || Math.floor(freedom) != freedom) {
-			throw new IncorrectDistributionParameterException("The number of degrees of freedom must be an integer gtz");
+		if (freedom < 1 || Math.floor(freedom) != freedom) {
+			throw new IncorrectDistributionParameterException("freedom must be an integer gtz");
 		} else {
 			this.freedom = freedom;
 		}
@@ -59,43 +59,37 @@ public class StudentTPar extends AbstractParameter implements Parameter {
 	 * It verifies if the parameter is correct. For the student T distribution,
 	 * the value of the degrees of freedom must be an integer greater than zero.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
-
 	@Override
 	public boolean check() {
-		return (!(freedom <= 0 || Math.floor(freedom) != freedom));
+		return !(freedom < 1 || Math.floor(freedom) != freedom);
 	}
 
 	/**
-	 * It returns the value of the freedom parameter of the student T distribution.
-	 * It returns a double but the value is actually an integer.
+	 * It returns the degrees of freedom of the student T distribution.
 	 *
-	 * @return double with the freedom parameter of the student T distribution.
+	 * @return double with the degrees of freedom of the student T distribution.
 	 *
 	 */
-
 	public double getFreedom() {
 		return freedom;
 	}
 
 	/**
-	 * It allows the user to change the degrees of freedom of the student T distribution.
-	 * It verifies that the new value is correct (freedom must be an integer
-	 * greater than zero).
+	 * It allows the user to change the degrees of freedom of the student T
+	 * distribution and verifies if it is an integer greater than zero.
 	 *
-	 * @param freedom double indicating the new value of the parameter freedom.
-	 *
-	 * @throws IncorrectDistributionParameterException if freedom is not an integer
-	 * greater than zero.
+	 * @param freedom double indicating the degrees of freedom.
+	 * @throws IncorrectDistributionParameterException if the degrees of freedom is
+	 * not an integer greater than zero.
 	 *
 	 */
-
 	public void setFreedom(double freedom) throws IncorrectDistributionParameterException {
 		this.freedom = freedom;
 		if (!check()) {
-			throw new IncorrectDistributionParameterException("The number of degrees of freedom must be an integer >0");
+			throw new IncorrectDistributionParameterException("freedom must be an integer gtz");
 		}
 	}
 

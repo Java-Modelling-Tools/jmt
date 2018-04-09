@@ -71,7 +71,9 @@ public class Server extends ServiceSection {
 	public double getDoubleSectionProperty(int id) throws NetException {
 		switch (id) {
 		case PROPERTY_ID_UTILIZATION:
-			return jobsList.getBusyTime() / NetSystem.getTime() / numberOfServers;
+			return jobsList.size() / numberOfServers;
+		case PROPERTY_ID_AVERAGE_UTILIZATION:
+			return jobsList.getTotalSojournTime() / NetSystem.getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id);
 		}
@@ -81,7 +83,9 @@ public class Server extends ServiceSection {
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
 		switch (id) {
 		case PROPERTY_ID_UTILIZATION:
-			return jobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
+			return jobsList.size(jobClass) / numberOfServers;
+		case PROPERTY_ID_AVERAGE_UTILIZATION:
+			return jobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id, jobClass);
 		}

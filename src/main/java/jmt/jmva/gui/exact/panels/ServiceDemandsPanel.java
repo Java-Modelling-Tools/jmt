@@ -68,7 +68,7 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 	private ExactWizard ew;
 	private HoverHelp help;
 	private static final String helpText = "<html>In this panel you can edit service demands of LI and delay stations for each class.<br><br>"
-			+ " To enter values, single-click on desired cell"
+			+ " To enter values, double-click on desired cell"
 			+ " and start typing.<br> To select multiple cells drag mouse on them; click or drag on"
 			+ " row/column headers to select the whole of rows/columns.<br> <b>For a list of available operations right-click"
 			+ " on the table</b>; all operations except pasting affect selected cells.<br>"
@@ -268,10 +268,10 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 			setDisplaysScrollLabels(true);
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
-			setClipboardTransferEnabled(true);
+			setBatchEditingEnabled(true);
 
 			help.addHelp(this,
-					"Click or drag to select cells; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select cells; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreColumnsLabel, "There are more classes: scroll right to see them");
 			help.addHelp(moreRowsLabel, "There are more stations: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all cells");
@@ -329,7 +329,6 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 		 */
 		@Override
 		public Component prepareEditor(TableCellEditor editor, int row, int column) {
-
 			if (editor instanceof LDEditor) {
 				LDEditor lde = ((LDEditor) editor);
 				lde.setStatus("Editing Service Demands for " + stationNames[row], stationNames[row], classNames, serviceDemands[row]);
@@ -401,8 +400,8 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			switch (stationTypes[rowIndex]) {
-				case STATION_LI:
 				case STATION_DELAY:
+				case STATION_LI:
 					return new Double(serviceDemands[rowIndex][columnIndex][0]);
 				case STATION_LD:
 					return "LD";
@@ -419,7 +418,6 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 		@Override
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			if (value instanceof String) { //coming from the defaultEditor
-				//if ("LD".equals((String)value)) return;
 				try {
 					double newVal = Double.parseDouble((String) value);
 					if (newVal >= 0) {
@@ -443,28 +441,6 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 				return;
 			}
 			serviceDemands[row][col][0] = 0;
-		}
-
-		/**
-		 * Copy the contents of a cell to an area. Works directly on the data set.<br>
-		 * Does nothing if the source cell is in an LD row; LD rows are skipped
-		 */
-		@Override
-		public void copyCellToArea(int sourceRow, int sourceCol, int rowFrom, int rowTo, int colFrom, int colTo) {
-
-			if (stationTypes[sourceRow] == STATION_LD) {
-				return;
-			}
-
-			double source = serviceDemands[sourceRow][sourceCol][0];
-
-			for (int row = rowFrom; row <= rowTo; row++) {
-				if (!(stationTypes[row] == STATION_LD)) {
-					for (int col = colFrom; col <= colTo; col++) {
-						serviceDemands[row][col][0] = source;
-					}
-				}
-			}
 		}
 
 	}

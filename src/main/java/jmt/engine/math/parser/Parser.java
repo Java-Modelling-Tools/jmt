@@ -20,7 +20,7 @@ import java.util.HashSet;
 /**
  * <p><b>Name:</b> Parser</p> 
  * <p><b>Description:</b> 
- * Simple Java arithmetic expression parser and ELL(1) grammar syntactical analizer and evaluator.
+ * Simple Java arithmetic expression parser and ELL(1) grammar syntactical analyzer and evaluator.
  * Parser supports detection of implicit multiplication when a constant is followed by a variable or function.
  * </p>
  * <p><b>Grammar:</b><br>

@@ -93,7 +93,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 
 	private HoverHelp help;
 	private static final String helpText = "<html>In this panel you can define the number of stations in the system and their properties.<br><br>"
-			+ " To edit values, single-click on the desired cell"
+			+ " To edit values, double-click on the desired cell"
 			+ " and start typing.<br> To select classes click or drag on the row headers.<br> <b>For a list of the available operations right-click"
 			+ " on the table</b>.<br>" + " Pressing DELETE removes all selected classes from the system.</html>";
 
@@ -103,7 +103,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 	private String[] classNames;
 	private int[] classTypes;
 	private double[] classData;
-	private int nameCounter = 1;
+	private int nameCounter;
 
 	private List<ListOp> classOps;
 	private boolean hasDeletes;
@@ -145,7 +145,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Delete This Class");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Close"));
+			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Delete"));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -190,6 +190,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 		JabaModel data = ew.getData();
 		synchronized (data) {
 			classes = data.getClasses();
+			nameCounter = classes;
 			isLd = data.isLd();
 			classNames = ArrayUtils.copy(data.getClassNames());
 			classTypes = ArrayUtils.copy(data.getClassTypes());
@@ -221,11 +222,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 	private void makeNames() {
 		for (int i = 0; i < classNames.length; i++) {
 			if (classNames[i] == null) {
-				//classNames[i] = "Class" + (++nameCounter);
-				//NEW Zanzottera
-				// ++nameCounter+1 per avere subito class3; la soluzione precedente immetteva class2 che è già presente
-				classNames[i] = "Class" + (++nameCounter + 1);
-				//END NEW
+				classNames[i] = "Class" + (++nameCounter);
 			}
 		}
 	}
@@ -464,7 +461,6 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 
 	private void deleteSelectedClasses() {
 		int[] selectedRows = classTable.getSelectedRows();
-		//System.out.println("deleteSelectedRows(): "+ArrayUtils.toString(selectedRows));
 		int nrows = selectedRows.length;
 		int left = classTable.getRowCount() - nrows;
 		if (left < 1) {
@@ -573,15 +569,15 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 			//END Federico Dall'Orso 8/3/2005
 
-			JComboBox classTypeBox = new JComboBox(CLASS_TYPENAMES);
+			JComboBox<String> classTypeBox = new JComboBox<String>(CLASS_TYPENAMES);
 			//todo sostituire quando saranno inserite le classi aperte
 			classTypeBox.setEnabled(false);
 
 			classTypeCellEditor = new DefaultCellEditor(classTypeBox);
 			classTypeBox.setEditable(false);
 
-			setColumnSelectionAllowed(false);
 			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(false);
 
 			// not beautiful, but effective. See ClassTableModel.getColumnClass()
 			setDefaultRenderer(DisabledCellRenderer.class, disabledCellRenderer);
@@ -594,13 +590,12 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 			mouseHandler.install();
 
 			help.addHelp(this,
-					"Click or drag to select classes; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select classes; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreRowsLabel, "There are more classes: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all classes");
 			tableHeader.setToolTipText(null);
 			rowHeader.setToolTipText(null);
 			help.addHelp(rowHeader, "Click, SHIFT-click or drag to select classes");
-
 		}
 
 		//BEGIN Federico Dall'Orso 14/3/2005

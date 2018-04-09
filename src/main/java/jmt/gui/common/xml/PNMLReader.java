@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.slf4j.LoggerFactory;
@@ -77,7 +78,7 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 				parser = new DOMParser();
 			}
 			if (distributionMap == null) {
-				distributionMap = new HashMap<String, Distribution>();
+				distributionMap = new TreeMap<String, Distribution>();
 				Distribution[] all = Distribution.findAll();
 				for (Distribution d : all) {
 					distributionMap.put(d.getName(), d);
@@ -488,8 +489,30 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 			Parameter p = d.getParameter(name.getTextContent());
 			Element value = getFirstChildElementByTagName(parameter, PNML_JSIM_E_DISTRIBUTION_PARAMETER_VALUE);
 			Element nestedDistribution = getFirstChildElementByTagName(value, PNML_JSIM_E_DISTRIBUTION);
+			Element matrix = getFirstChildElementByTagName(value, PNML_JSIM_E_MATRIX);
 			if (nestedDistribution != null) {
 				p.setValue(parseDistribution(nestedDistribution));
+			} else if (matrix != null) {
+				Object[][] m = null;
+				List<Element> vectors = getChildElementsByTagName(matrix, PNML_JSIM_E_MATRIX_VECTOR);
+				for (int j = 0; j < vectors.size(); j++) {
+					if (j == 0) {
+						m = new Object[vectors.size()][];
+					}
+					Element vector = vectors.get(j);
+					List<Element> entries = getChildElementsByTagName(vector, PNML_JSIM_E_MATRIX_VECTOR_ENTRY);
+					for (int k = 0; k < entries.size(); k++) {
+						if (k == 0) {
+							m[j] = new Object[entries.size()];
+						}
+						Element entry = entries.get(k);
+						m[j][k] = p.parseValue(entry.getTextContent());
+						if (m[j][k] == null) {
+							m[j][k] = p.parseValue("0");
+						}
+					}
+				}
+				p.setValue(m);
 			} else {
 				p.setValue(value.getTextContent());
 			}

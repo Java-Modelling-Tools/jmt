@@ -31,33 +31,24 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 15.35.17
  */
 public class Uniform extends Distribution {
+
 	/**
-	 * Construct a new Uniform Distribution
+	 * Constructs a new Uniform Distribution
 	 */
 	public Uniform() {
 		super("Uniform", "jmt.engine.random.Uniform", "jmt.engine.random.UniformPar", "Uniform distribution");
-		hasC = true;
 		hasMean = true;
+		hasC = true;
 		isNestable = true;
-		this.setValueChecker(new ValueChecker() {
+		setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
-				Distribution d = (Distribution) value;
-				if (((Double) d.getParameter("min").getValue()).doubleValue() < ((Double) d.getParameter("max").getValue()).doubleValue()) {
-					return true;
-				} else {
+				if (((Double) parameters[1].getValue()).doubleValue() <= ((Double) parameters[0].getValue()).doubleValue()) {
+					precondition = "Value of 'max' must be greater than value of 'min'.";
 					return false;
 				}
+				return true;
 			}
 		});
-	}
-
-	/**
-	 * Returns precondition that parameters' values must satisfy for this distribution to be valid
-	 * @return Message describing distribution's preconditions
-	 */
-	@Override
-	public String getPrecondition() {
-		return "value of 'max' must be greater than value of 'min'";
 	}
 
 	/**
@@ -65,16 +56,17 @@ public class Uniform extends Distribution {
 	 * @return distribution parameters
 	 */
 	@Override
-	protected Distribution.Parameter[] setParameters() {
+	protected Parameter[] setParameters() {
 		// Creates parameter array
-		Distribution.Parameter[] parameters = new Distribution.Parameter[2];
+		Parameter[] parameters = new Parameter[2];
+
 		// Sets parameter min
-		parameters[0] = new Distribution.Parameter("min", "min", Double.class, new Double(0));
-		// Checks value of min must be greater or equal to 0
+		parameters[0] = new Parameter("min", "min", Double.class, new Double(0));
+		// Checks value of min must be greater than or equal to 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 0) {
+				if (d.doubleValue() >= 0.0) {
 					return true;
 				} else {
 					return false;
@@ -83,12 +75,12 @@ public class Uniform extends Distribution {
 		});
 
 		// Sets parameter max
-		parameters[1] = new Distribution.Parameter("max", "max", Double.class, new Double(1));
-		// Checks value of max must be greater or equal to 0
+		parameters[1] = new Parameter("max", "max", Double.class, new Double(1));
+		// Checks value of max must be greater than or equal to 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 0) {
+				if (d.doubleValue() >= 0.0) {
 					return true;
 				} else {
 					return false;
@@ -100,8 +92,7 @@ public class Uniform extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -115,7 +106,7 @@ public class Uniform extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "U(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+		return "U(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
 				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
 	}
 
@@ -143,11 +134,11 @@ public class Uniform extends Distribution {
 	 * @param c c value
 	 */
 	protected void setCM(double mean, double c) {
-		double max = mean + mean * c * Math.sqrt(3);
-		double min = mean - mean * c * Math.sqrt(3);
 		// Backups old parameters to restore them upon a false result
 		Object oldmax = getParameter("max").getValue();
 		Object oldmin = getParameter("min").getValue();
+		double max = mean + mean * c * Math.sqrt(3);
+		double min = mean - mean * c * Math.sqrt(3);
 		if (getParameter("max").setValue(new Double(max)) && getParameter("min").setValue(new Double(min))) {
 			this.mean = mean;
 			this.c = c;
@@ -159,7 +150,7 @@ public class Uniform extends Distribution {
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {

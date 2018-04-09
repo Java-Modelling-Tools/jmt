@@ -85,7 +85,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	private ExactWizard ew;
 	private HoverHelp help;
 	private static final String helpText = "<html>In this panel you can define the number of stations in the system and their properties.<br><br>"
-			+ " To edit values, single-click on the desired cell"
+			+ " To edit values, double-click on the desired cell"
 			+ " and start typing.<br> To select stations click or drag on the row headers.<br> <b>For a list of the available operations right-click"
 			+ " on the table</b>.<br>" + " Pressing DELETE removes all selected stations from the system.</html>";
 
@@ -94,7 +94,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 	private String[] stationNames;
 	private int[] stationTypes;
-	private int nameCounter = 1;
+	private int nameCounter;
 
 	private List<ListOp> stationOps;
 	private boolean hasDeletes;
@@ -136,7 +136,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Deletes this station");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Close"));
+			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Delete"));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -169,7 +169,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	}
 
 	private void sync() {
-
 		hasDeletes = false;
 		stationOps.clear();
 
@@ -178,6 +177,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		ExactModel data = ew.getData();
 		synchronized (data) {
 			stations = data.getStations();
+			nameCounter = stations;
 			pop = data.getMaxpop();
 			stationNames = ArrayUtils.copy(data.getStationNames());
 			stationTypes = ArrayUtils.copy(data.getStationTypes());
@@ -185,7 +185,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 		stationSpinner.setValue(new Integer(stations));
 	}
-	
+
 	/**
 	 * if true, load dependent stations are allowed
 	 * (at the moment, only single class closed models allow LD stations)
@@ -239,7 +239,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 		stationTypes = ArrayUtils.resize(stationTypes, stations, STATION_LI);
 
-		stationTable.update();
+		stationTable.updateStructure();
 		if (!deleting) {
 			stationOps.add(ListOp.createResizeOp(stations));
 		}
@@ -302,7 +302,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
-
 	}
 
 	@Override
@@ -337,7 +336,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			sync();
 			//end NEW
 		}
-
 	}
 
 	@Override
@@ -379,7 +377,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 		stationOps.add(ListOp.createDeleteOp(i));
 		hasDeletes = true;
-
 	}
 
 	private void playbackStationOps(ExactModel data) {
@@ -391,7 +388,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			if (lo.isResizeOp()) {
 				data.resize(lo.getData(), data.getClasses());
 			}
-
 		}
 	}
 
@@ -430,10 +426,10 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		stationTable.stopEditing();
 		if (pop < 1 && isLD()) {
 			JOptionPane
-					.showMessageDialog(
-							this,
-							"<html><center>A system with zero customers cannot have load dependent stations.<br>Increase the number of customers or remove all load dependent stations.</center></html>",
-							"Warning", JOptionPane.WARNING_MESSAGE);
+			.showMessageDialog(
+					this,
+					"<html><center>A system with zero customers cannot have load dependent stations.<br>Increase the number of customers or remove all load dependent stations.</center></html>",
+					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}
 		return true;
@@ -441,7 +437,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 	//checks for presence of classes with same name
 	private boolean areThereDuplicates() {
-
 		boolean thereAreDupl = false;
 		for (int i = 0; i < stationNames.length; i++) {
 			for (int j = i + 1; j < stationNames.length; j++) {
@@ -461,7 +456,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	@Override
 	public void help() {
 		JOptionPane.showMessageDialog(this, helpText, "Help", JOptionPane.INFORMATION_MESSAGE);
-
 	}
 
 	//NEW Federico Dall'Orso
@@ -481,7 +475,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	   However, it is very specialized and it needs access to the data structures of the StationsPanel,
 	   so having it as an inner class is *much* more practical
 	   ------------------------------------------------------------------
-	   */
+	 */
 
 	/**
 	 * the nifty station table
@@ -530,8 +524,8 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			LD_enabled_StationTypeBox.setEditable(false);
 			LD_enabled_StationTypeEditor = new DefaultCellEditor(LD_enabled_StationTypeBox);
 
-			setColumnSelectionAllowed(false);
 			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(false);
 
 			setDisplaysScrollLabels(true);
 
@@ -540,7 +534,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			mouseHandler.install();
 
 			help.addHelp(this,
-					"Click or drag to select stations; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select stations; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreRowsLabel, "There are more stations: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all stations");
 			tableHeader.setToolTipText(null);
@@ -590,7 +584,6 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) { //station type
 				/* select the right editor */
-
 				if (isLdEnabled()) {
 					return LD_enabled_StationTypeEditor;
 				} else {
@@ -669,12 +662,12 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		@Override
 		public String getColumnName(int index) {
 			switch (index) {
-				case 0:
-					return "Name";
-				case 1:
-					return "Type";
-				default:
-					return null;
+			case 0:
+				return "Name";
+			case 1:
+				return "Type";
+			default:
+				return null;
 			}
 		}
 
@@ -686,46 +679,46 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-				case 0://name
-					return stationNames[rowIndex];
-				case 1://type
-					return STATION_TYPENAMES_LD_ENABLED[stationTypes[rowIndex]];
-				default:
-					return null;
+			case 0://name
+				return stationNames[rowIndex];
+			case 1://type
+				return STATION_TYPENAMES_LD_ENABLED[stationTypes[rowIndex]];
+			default:
+				return null;
 			}
 		}
 
 		@Override
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-				case 0: //name
-					stationNames[rowIndex] = (String) value;
-					break;
-				case 1: //type
-					for (int i = 0; i < STATION_TYPENAMES_LD_ENABLED.length; i++) {
-						if (value == STATION_TYPENAMES_LD_ENABLED[i]) { //literal strings are canonical objects, hence == is ok
-							stationTypes[rowIndex] = i;
-							break;
-						}
+			case 0: //name
+				stationNames[rowIndex] = (String) value;
+				break;
+			case 1: //type
+				for (int i = 0; i < STATION_TYPENAMES_LD_ENABLED.length; i++) {
+					if (value == STATION_TYPENAMES_LD_ENABLED[i]) { //literal strings are canonical objects, hence == is ok
+						stationTypes[rowIndex] = i;
+						break;
 					}
-					boolean isLd = isLD();
-					ew.updateAlgoPanel(null, null, null, isLd);
-					if (isLd) {
-						ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
-					}
-					break;
-				default:
+				}
+				boolean isLd = isLD();
+				ew.updateAlgoPanel(null, null, null, isLd);
+				if (isLd) {
+					ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
+				}
+				break;
+			default:
 			}
 		}
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-				case 0:
-				case 1:
-					return true;
-				default:
-					return false;
+			case 0:
+			case 1:
+				return true;
+			default:
+				return false;
 			}
 		}
 	}

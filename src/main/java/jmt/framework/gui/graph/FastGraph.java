@@ -223,7 +223,7 @@ public class FastGraph extends JPanel {
 		
 		num = (int) Math.floor((getX(maxx) - x0) / (xtextBound.getWidth() + 4));
 		// Draws caption for x axis
-		for (int i=0; i<=xTicNum;i++) {
+		for (int i = 0; i <= xTicNum; i++) {
 			double axisValue = xTicSize * i;
 			double unscaledAxisValue = axisValue * xMeasureUnit;
 			String label;
@@ -262,7 +262,7 @@ public class FastGraph extends JPanel {
 			g.drawLine(getX(xValue),getY(currValue.getMeanValue()),getX(nextXValue),getY(nextValue.getMeanValue()));
 
 			// Draws last measured value
-			if (hideLastInterval == false) {
+			if (!hideLastInterval) {
 				g.setColor(COLOR_LAST_INTERVAL);
 				g.drawLine(getX(xValue), getY(0), getX((xValue)), getY(currValue.getLastIntervalAvgValue()));
 			}
@@ -281,7 +281,7 @@ public class FastGraph extends JPanel {
 			g.fillOval(getX(lastXValue),getY(lastValue.getMeanValue()), 2, 1);
 		}
 		
-		if (hideLastInterval == false) {
+		if (!hideLastInterval) {
 			g.setColor(COLOR_LAST_INTERVAL);
 			g.drawLine(getX(lastXValue), getY(0), getX((lastXValue)), getY(lastValue.getLastIntervalAvgValue()));
 		}

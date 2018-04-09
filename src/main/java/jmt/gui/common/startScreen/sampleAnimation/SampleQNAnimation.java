@@ -114,7 +114,7 @@ class ColoredStationAnimation extends StationAnimation {
 	private Image overlayedShading = null;
 
 	public ColoredStationAnimation(Point location, long residenceTime) {
-		super("server", new Rectangle(location.x - 20, location.y - 10, 40, 20), residenceTime);
+		super("Server", new Rectangle(location.x - 20, location.y - 10, 40, 20), residenceTime);
 		createOverlayImage();
 	}
 

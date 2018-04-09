@@ -104,17 +104,14 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	public GraphPanel(MainJwatWizard ew) {
 		this.ew = ew;
 		((TrafficAnalysisSession) ew.getSession()).addSetParamsListener(new OnSetParametersListener() {
-
 			public void ParamsSet() {
 				engine = ((TrafficAnalysisSession) GraphPanel.this.ew.getSession()).getEngine();
 				GraphPanel.this.removeAll();
 				initGraphics();
 				setTable();
 			}
-
 		});
 		((ModelTrafficAnalysis) ew.getModel()).addResetModelListener(new OnResetModel() {
-
 			public void modelReset() {
 				GraphPanel.this.removeAll();
 			}
@@ -313,14 +310,12 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 	private void addActions() {
 		// Listener used for bounds spinners
 		ChangeListener boundsListener = new ChangeListener() {
-
 			public void stateChanged(ChangeEvent e) {
 				if (!forcedUpdate) {
 					setBounds();
 					updateSpinners();
 				}
 			}
-
 		};
 		Xmin.addChangeListener(boundsListener);
 		Xmax.addChangeListener(boundsListener);
@@ -328,15 +323,15 @@ public class GraphPanel extends WizardPanel implements JWATConstants {
 		Ymax.addChangeListener(boundsListener);
 		// Listener for index selection comboBox
 		index.addItemListener(new ItemListener() {
-
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				updateIndex();
 			}
-
 		});
 		// Adds a listener to the graph to detect zoom events
 		graph.addRescaleListener(new NewPlot.RescaleListener() {
-
 			public void Rescaled() {
 				forcedUpdate = true;
 				updateSpinners();

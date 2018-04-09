@@ -94,7 +94,7 @@ public class Util2d {
 					break;
 				}
 			}
-			if (t == true) {
+			if (t) {
 				vertices.removeElementAt(i);
 				// necessario x non saltare il punto successivo dato il ridimens. del vettore
 				i--;

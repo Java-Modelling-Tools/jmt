@@ -287,18 +287,14 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			}
 
 			currentIndex = current;
-			//Added by ASHANKA START
 			if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
-				//If the System Power is selected then Need to remove the Stations Column if present
-				//If column count is less than 3 then do nothing as Stations Column is already removed.
+				// If System Power is selected, removes the station column
 				table.showColumn(LinesTableColumn.CLASS);
 				table.hideColumn(LinesTableColumn.STATION);
 			} else if (AGGREGATE_TYPES_SET.contains(currentIndex)) {
 				table.hideColumn(LinesTableColumn.STATION);
 				table.hideColumn(LinesTableColumn.CLASS);
 			} else  {
-				//If any thing other than System Power is clicked then 
-				//restore the Stations Column only if it is not present.
 				table.showColumn(LinesTableColumn.CLASS);
 				table.showColumn(LinesTableColumn.STATION);
 			}
@@ -318,10 +314,6 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 					// Number of customers
 					else if (currentIndex.equals(AGGREGATE_TYPES[2])) {
 						graph.draw(i++, model.getGlobalQ(algo));
-					}
-					//For single Class TableScroll Pane is removed. 
-					else if (currentIndex.equals(ExactConstants.INDICES_TYPES[4]) && !model.isMultiClass()) {
-						graph.draw(i++, model.getGlobalSP(algo, true));
 					}
 				}
 				autosizeGraph();
@@ -363,6 +355,9 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		// Listener for index selection comboBox
 		index.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				updateIndex();
 			}
 		});
@@ -388,10 +383,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		int statNum = stations[rowNum];
 		SolverAlgorithm alg = algorithms[rowNum];
 
-		//Modified the below condition by ASHANKA for 
-		//System Power there is no Station Panel
-		//in fact the station panel is removed 
-		//System Power is Indices type 4
+		// There is no station column for System Power
 		//if (classNum < -1 || statNum < -1) {
 		if (classNum < -1 || (statNum < -1 && !currentIndex.equals(ExactConstants.INDICES_TYPES[4]))) {
 			// Resets view
@@ -423,7 +415,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				graph.draw(rowNum, model.getGlobalQ(alg));
 			}
 		}
-		// Residence times
+		// Residence time
 		if (currentIndex.equals(ExactConstants.INDICES_TYPES[2])) {
 			if (classNum >= 0 && statNum >= 0) {
 				graph.draw(rowNum, model.getResTimes(alg)[statNum][classNum]);
@@ -443,18 +435,15 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				graph.draw(rowNum, model.getPerStationU(alg)[statNum]);
 			}
 		}
-		//Added by ASHANKA START
-		//System Power
-		else if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
+		// System power
+		if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
 			if (classNum >= 0) {
 				graph.draw(rowNum, model.getPerClassSP(alg, true)[classNum]);
 			} else if (classNum == -1) {
 				graph.draw(rowNum, model.getGlobalSP(alg, true));
 			}
 		}
-		/* END */
 
-		//Added by ASHANKA STOP
 		// Resets view
 		autosizeGraph();
 	}

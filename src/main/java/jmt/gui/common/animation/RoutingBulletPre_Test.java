@@ -57,10 +57,10 @@ public class RoutingBulletPre_Test extends JFrame {
 		Point[] link05ps = { new Point(260, 115), new Point(280, 115), new Point(280, 140), new Point(10, 140), new Point(10, 115),
 				new Point(30, 115) };
 		Point[] link06ps = { new Point(90, 115), new Point(200, 115) };
-		StationAnimation station1 = new StationAnimation("source", new Rectangle(20, 20, 70, 30), 50);
-		StationAnimation station2 = new StationAnimation("sink", new Rectangle(200, 20, 70, 30), 0);
-		StationAnimation station3 = new StationAnimation("server", new Rectangle(200, 100, 70, 30), 500);
-		StationAnimation station4 = new StationAnimation("server", new Rectangle(30, 100, 70, 30), 500);
+		StationAnimation station1 = new StationAnimation("Source", new Rectangle(20, 20, 70, 30), 50);
+		StationAnimation station2 = new StationAnimation("Sink", new Rectangle(200, 20, 70, 30), 0);
+		StationAnimation station3 = new StationAnimation("Server", new Rectangle(200, 100, 70, 30), 500);
+		StationAnimation station4 = new StationAnimation("Server", new Rectangle(30, 100, 70, 30), 500);
 		EdgeAnimation link1 = new EdgeAnimation(link01ps, 20);
 		EdgeAnimation link2 = new EdgeAnimation(link02ps, 20);
 		EdgeAnimation link3 = new EdgeAnimation(link03ps, 20);

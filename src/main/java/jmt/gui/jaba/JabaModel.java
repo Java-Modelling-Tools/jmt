@@ -106,7 +106,7 @@ public class JabaModel implements JabaConstants {
 	/*********************** RESULTS ******************************/
 
 	/**
-	 * queue lengths dim: queueLen[stations][classes+1]
+	 * queue length dim: queueLen[stations][classes+1]
 	 */
 	private double[][] queueLen;
 
@@ -116,7 +116,7 @@ public class JabaModel implements JabaConstants {
 	private double[][] throughput;
 
 	/**
-	 * residence times dim: resTime[stations+1][classes+1]
+	 * residence times dim: resTimes[stations+1][classes+1]
 	 */
 	private double[][] resTimes;
 
@@ -609,7 +609,7 @@ public class JabaModel implements JabaConstants {
 	public void resize(int stations, int classes) {
 		if (stations <= 0 || classes <= 0) {
 			throw new IllegalArgumentException(
-					"stations and classes must be >0");
+					"stations and classes must be > 0");
 		}
 		if (this.stations != stations || this.classes != classes) {
 			// other cases already handled in setXXX methods
@@ -1552,7 +1552,7 @@ public class JabaModel implements JabaConstants {
 		}
 	}
 
-	/** Returns per-class aggregate for queue lengths */
+	/** Returns per-class aggregate for queue length */
 	public double[] getPerClassQ() {
 		if (queueLen == null) {
 			return null;
@@ -1570,7 +1570,7 @@ public class JabaModel implements JabaConstants {
 		}
 	}
 
-	/** Returns per-station aggregate for queue lengths */
+	/** Returns per-station aggregate for queue length */
 	public double[] getPerStationQ() {
 		if (queueLen == null) {
 			return null;
@@ -1586,7 +1586,7 @@ public class JabaModel implements JabaConstants {
 		}
 	}
 
-	/** Returns global aggregate for queue lengths */
+	/** Returns global aggregate for queue length */
 	public double getGlobalQ() {
 		if (queueLen == null) {
 			return Double.NaN;
@@ -1681,6 +1681,7 @@ public class JabaModel implements JabaConstants {
 		}
 	}
 
+	/** Returns per-station aggregate for utilization */
 	public double[] getPerStationU() {
 		if (util == null) {
 			return null;
@@ -1696,6 +1697,7 @@ public class JabaModel implements JabaConstants {
 		}
 	}
 
+	/** Returns global aggregate for utilization */
 	public double getGlobalU() {
 		if (util == null) {
 			return Double.NaN;

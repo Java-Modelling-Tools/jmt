@@ -117,8 +117,8 @@ public class JSIMMain extends Wizard implements GuiInterface {
 
 		private static final long serialVersionUID = 1L;
 		{
-			setIcon("New", JMTImageLoader.getImageLoader());
 			putValue(Action.SHORT_DESCRIPTION, "Create a new model");
+			setIcon("New", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
 		}
@@ -134,8 +134,8 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		private static final long serialVersionUID = 1L;
 
 		{
-			setIcon("Open", JMTImageLoader.getImageLoader());
 			putValue(Action.SHORT_DESCRIPTION, "Open a saved model");
+			setIcon("Open", JMTImageLoader.getImageLoader());
 			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
 			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_O));
 		}
@@ -168,10 +168,10 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		private static final long serialVersionUID = 1L;
 
 		{
-			setMnemonicKey(KeyEvent.VK_A);
-			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
-			setIcon("Save", JMTImageLoader.getImageLoader());
 			putValue(Action.SHORT_DESCRIPTION, "Save this model as...");
+			setIcon("Save", JMTImageLoader.getImageLoader());
+			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
+			putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_A));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -297,7 +297,6 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			//showHelp(e);
 			Runnable r = new Runnable() {
 				public void run() {
 					try {

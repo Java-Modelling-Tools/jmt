@@ -126,7 +126,7 @@ public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
 
 	/**
 	 * returns the probability that a number extracted from the empirical
-	 * distribution analyzed is greater then the quantile.
+	 * distribution analyzed is greater than the quantile.
 	 * @param quantile the requested quantile
 	 * @return estimated probability
 	 */

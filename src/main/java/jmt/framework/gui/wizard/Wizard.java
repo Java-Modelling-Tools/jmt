@@ -330,9 +330,6 @@ public class Wizard extends JMTFrame {
 		panelCount = tabbedPane.getTabCount();
 		if (panelCount == 1) {
 			tabbedPane.setSelectedIndex(0);
-		} else {
-			tabbedPane.setSelectedIndex(index - 1);
-			tabbedPane.setSelectedIndex(index);
 		}
 		updateActions();
 	}

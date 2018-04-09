@@ -28,31 +28,26 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * <br><br>Copyright (c) 2003
  * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
  * @author Fabrizio Frontera - ffrontera@yahoo.it
- * @author Bertoli Marco 10-oct-2005
- * 
- * Edited by Bertoli Marco 2005: Inverted max and min to have classical position
  * 
  */
 public class UniformPar extends AbstractParameter implements Parameter {
 
-	private double max;
 	private double min;
+	private double max;
 
 	/**
-	 * It creates a new uniform parameter using the bound provided by the user.
+	 * It creates a new uniform parameter using the bounds provided by the user.
 	 *
-	 * @param max double containing the higher bound for the distribution.
-	 * @param min double containing the lower bound for the distribution.
-	 *
-	 * @throws IncorrectDistributionParameterException if the bound are incorrect.
+	 * @param min double containing the minimum bound of the uniform distribution.
+	 * @param max double containing the maximum bound of the uniform distribution.
+	 * @throws IncorrectDistributionParameterException if the bounds are incorrect.
 	 *
 	 */
-
 	public UniformPar(double min, double max) throws IncorrectDistributionParameterException {
-		this.max = max;
 		this.min = min;
+		this.max = max;
 		if (!check()) {
-			throw new IncorrectDistributionParameterException("Error: the *max* parameter must be > of the *min* one");
+			throw new IncorrectDistributionParameterException("Error: the *max* parameter must be greater than the *min* one");
 		}
 	}
 
@@ -62,12 +57,11 @@ public class UniformPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It verifies if the parameter is correct. For the uniform distribution the parameter
-	 * is right if the bound are right which means that max must be greater or equal to min.
+	 * is right if the bounds are right which means that max must be greater than min.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
-
 	@Override
 	public boolean check() {
 		if (max <= min) {
@@ -79,14 +73,13 @@ public class UniformPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It verifies if the parameter is correct. For the uniform distribution the parameter
-	 * is right if the bound are right which means that max must be greater or equal to min.
-	 * It is the same of the method check() but it is a service method used only by the constructor.
+	 * is right if the bounds are right which means that max must be greater than min. This
+	 * is the same as the method check() but a helper method called only by the constructor.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
-
-	private boolean check(double max, double min) {
+	private boolean check(double min, double max) {
 		if (max <= min) {
 			return false;
 		} else {
@@ -97,10 +90,9 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	/**
 	 * It returns the value of the minimum bound of the uniform distribution.
 	 *
-	 * @return double with the min parameter of the distribution.
+	 * @return double with the minimum bound of the distribution.
 	 *
 	 */
-
 	public double getMin() {
 		return min;
 	}
@@ -108,66 +100,45 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	/**
 	 * It returns the value of the maximum bound of the uniform distribution.
 	 *
-	 * @return double with the max parameter of the distribution.
+	 * @return double with the maximum bound of the distribution.
 	 *
 	 */
-
 	public double getMax() {
 		return max;
 	}
 
 	/**
-	 * It allows the user to change the minimum bound of the uniform distribution and
-	 * it verifies that the new bound is correct (it is less or equal to the maximum bound).
+	 * It allows the user to change the minimum bound of the uniform distribution
+	 * and verifies if it is correct.
 	 *
 	 * @param min double indicating the new value of the minimum bound.
 	 * @throws IncorrectDistributionParameterException if the provided value is not
-	 * less or equal to the maximum bound value.
+	 * less than the maximum bound value.
 	 *
 	 */
-
 	public void setMin(double min) throws IncorrectDistributionParameterException {
-		if (check(max, min)) {
+		if (check(min, max)) {
 			this.min = min;
 		} else {
-			throw new IncorrectDistributionParameterException("Error: the *max* parameter must be > of the *min* one");
+			throw new IncorrectDistributionParameterException("Error: the *max* parameter must be greater than the *min* one");
 		}
 	}
 
 	/**
-	 * It allows the user to change the maximum bound of the uniform distribution and
-	 * it verifies that the new bound is correct (it is greater or equal to the minimum bound).
+	 * It allows the user to change the maximum bound of the uniform distribution
+	 * and verifies if it is correct.
 	 *
 	 * @param max double indicating the new value of the maximum bound.
 	 * @throws IncorrectDistributionParameterException if the provided value is not
-	 * greater or equal to the minimum bound value.
+	 * greater than the minimum bound value.
 	 *
 	 */
-
 	public void setMax(double max) throws IncorrectDistributionParameterException {
-		if (check(max, min)) {
+		if (check(min, max)) {
 			this.max = max;
 		} else {
-			throw new IncorrectDistributionParameterException("Error: the *max* parameter must be > of the *min* one");
+			throw new IncorrectDistributionParameterException("Error: the *max* parameter must be greater than the *min* one");
 		}
-	}
-
-	/**
-	 * Sets mean for a given distribution parameter. This method is required to adjust distributions
-	 * mean values into Load Dependent Service Time Strategy
-	 * @param meanValue new mean value for this distribution
-	 * Author: Bertoli Marco
-	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution
-	 */
-	@Override
-	public void setMean(double meanValue) throws IncorrectDistributionParameterException {
-		if (meanValue < 0 || Double.isInfinite(meanValue)) {
-			throw new IncorrectDistributionParameterException("Mean value must be finite and greater than zero");
-		}
-		// Keeps variation coefficient c constant
-		double c = (max - min) / (max + min) * Math.sqrt(3);
-		max = meanValue + meanValue * c / Math.sqrt(3);
-		min = meanValue - meanValue * c / Math.sqrt(3);
 	}
 
 } // end UniformPar

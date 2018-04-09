@@ -108,7 +108,7 @@ public class LDEditingWindow extends JMTDialog {
 
 	};
 
-	public AbstractAction COPYDOWN_ACTION = new AbstractAction("Copy down") {
+	public AbstractAction COPYDOWN_ACTION = new AbstractAction("Copy Down") {
 
 		private static final long serialVersionUID = 1L;
 
@@ -392,13 +392,13 @@ public class LDEditingWindow extends JMTDialog {
 			setMoreRowsTooltip("Scroll down to see more stations");
 			setColumnSelectionAllowed(true);
 			setRowSelectionAllowed(true);
-			setClipboardTransferEnabled(true);
+			setBatchEditingEnabled(true);
 
 			installKeyboardAction(COPYDOWN_ACTION);
 			mouseHandler.getMenu().add(COPYDOWN_ACTION);
 
 			help.addHelp(this,
-					"Click or drag to select cells; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select cells; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreColumnsLabel, "There are more classes: scroll right to see them");
 			help.addHelp(moreRowsLabel, "There are more rows: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all cells");
@@ -406,7 +406,6 @@ public class LDEditingWindow extends JMTDialog {
 			help.addHelp(tableHeader, "Click, SHIFT-click or drag to select columns");
 			rowHeader.setToolTipText(null);
 			help.addHelp(rowHeader, "Click, SHIFT-click or drag to select rows");
-
 		}
 
 		@Override
@@ -418,7 +417,7 @@ public class LDEditingWindow extends JMTDialog {
 		/**
 		 * Copies the value of the anchor (focused) down to the end of its column
 		 */
-		void copyCellDown() {
+		protected void copyCellDown() {
 			stopEditing();
 			int anchorRow = selectionModel.getAnchorSelectionIndex();
 			ListSelectionModel csm = columnModel.getSelectionModel();
@@ -436,7 +435,7 @@ public class LDEditingWindow extends JMTDialog {
 		 * Fills in selected cells with values obtained evaluating <code>expr</code>
 		 * @throws jmt.common.exception.ExpressionParseException if there were errors parsing expr
 		 */
-		void fillCells(String expr) throws ExpressionParseException {
+		protected void fillCells(String expr) throws ExpressionParseException {
 			stopEditing();
 			int rowFrom = selectionModel.getMinSelectionIndex();
 			int rowTo = selectionModel.getMaxSelectionIndex();
@@ -445,7 +444,6 @@ public class LDEditingWindow extends JMTDialog {
 			int colTo = csm.getMaxSelectionIndex();
 
 			((LDTableModel) dataModel).fillCells(expr, rowFrom, rowTo, colFrom, colTo);
-
 		}
 
 	}
@@ -504,21 +502,6 @@ public class LDEditingWindow extends JMTDialog {
 		@Override
 		public void clear(int row, int col) {
 			serviceTimes[col][row] = 0;
-		}
-
-		/**
-		 * Copy the contents of a cell to an area. Works directly on the data set.
-		 */
-		@Override
-		public void copyCellToArea(int sourceRow, int sourceCol, int rowFrom, int rowTo, int colFrom, int colTo) {
-
-			double source = serviceTimes[sourceCol][sourceRow];
-
-			for (int row = rowFrom; row <= rowTo; row++) {
-				for (int col = colFrom; col <= colTo; col++) {
-					serviceTimes[col][row] = source;
-				}
-			}
 		}
 
 		/**

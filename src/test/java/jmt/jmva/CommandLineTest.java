@@ -59,7 +59,7 @@ public class CommandLineTest {
 		assertTrue(": Real output differs from expected!\n"
 				+ "Expected: \n" + FileUtils.readFileToString(expected)
 				+ "\nActual: \n" + FileUtils.readFileToString(input), 
-				FileUtils.contentEquals(input, expected));	
+				FileUtils.contentEquals(input, expected));
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class CommandLineTest {
 		assertTrue(": Real output differs from expected!\n"
 				+ "Expected: \n" + FileUtils.readFileToString(expected)
 				+ "\nActual: \n" + FileUtils.readFileToString(input), 
-				FileUtils.contentEquals(input, expected));			
+				FileUtils.contentEquals(input, expected));
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class CommandLineTest {
 		assertTrue(": Real output differs from expected!\n"
 				+ "Expected: \n" + FileUtils.readFileToString(expected)
 				+ "\nActual: \n" + FileUtils.readFileToString(input), 
-				FileUtils.contentEquals(input, expected));			
+				FileUtils.contentEquals(input, expected));
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public class CommandLineTest {
 		assertTrue(": Real output differs from expected!\n"
 				+ "Expected: \n" + FileUtils.readFileToString(expected)
 				+ "\nActual: \n" + FileUtils.readFileToString(input), 
-				FileUtils.contentEquals(input, expected));			
+				FileUtils.contentEquals(input, expected));
 	}
 
 	@Test

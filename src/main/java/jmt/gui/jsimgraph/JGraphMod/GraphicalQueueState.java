@@ -83,10 +83,10 @@ public class GraphicalQueueState {
 			maxNJobs = 10;
 		}
 
-		double QUEUE_HEIGHT = (JMTImageLoader.loadImage("queue")).getIconHeight();
-		double QUEUE_WIDTH = (JMTImageLoader.loadImage("queue")).getIconWidth() - QUEUE_HEIGHT;
+		double QUEUE_HEIGHT = (JMTImageLoader.loadImage("Queue")).getIconHeight();
+		double QUEUE_WIDTH = (JMTImageLoader.loadImage("Queue")).getIconWidth() - QUEUE_HEIGHT;
 
-		double SOURCE_SIZE = (JMTImageLoader.loadImage("source")).getIconWidth();
+		double SOURCE_SIZE = (JMTImageLoader.loadImage("Source")).getIconWidth();
 		double SOURCE_MARGIN = 9;
 		double source_usable_space = SOURCE_SIZE - SOURCE_MARGIN * 2;
 
@@ -218,7 +218,7 @@ public class GraphicalQueueState {
 			yStart = p.getY() + V_FREE_SPACE;
 
 			//First draw the queues ....
-			//if the number of classes is less then MAX_NUMBER_OF_CLASSES_QUEUE
+			//if the number of classes is less than MAX_NUMBER_OF_CLASSES_QUEUE
 			if (nClasses <= MAX_NUMBER_OF_CLASSES_QUEUE) {
 				for (int j = 0; j < nClasses; j++) {
 					double nJobs = queueState.getValue(servers.get(i), classes.get(j));
@@ -283,7 +283,7 @@ public class GraphicalQueueState {
 			}
 
 			//then draw the utilization
-			//if the number of classes is less then MAX_NUMBER_OF_CLASSES_QUEUE
+			//if the number of classes is less than MAX_NUMBER_OF_CLASSES_QUEUE
 			double startAngle = 0;
 			double arcDiameter = QUEUE_HEIGHT - 2;
 			if (cell.isLeftInputCell()) {

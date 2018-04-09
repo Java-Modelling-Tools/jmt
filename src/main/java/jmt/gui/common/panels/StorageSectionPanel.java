@@ -128,7 +128,7 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 					editor.stopCellEditing();
 				}
 				if (infiniteCheckBox.isSelected()) {
-					capacitySpinner.setValue(Float.POSITIVE_INFINITY);
+					capacitySpinner.setValue(Double.POSITIVE_INFINITY);
 					capacitySpinner.setEnabled(false);
 					Vector<Object> classKeys = classData.getClassKeys();
 					for (Object classKey : classKeys) {
@@ -166,7 +166,7 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 		Integer capacity = stationData.getStationQueueCapacity(stationKey);
 		if (capacity.intValue() < 1) {
 			infiniteCheckBox.setSelected(true);
-			capacitySpinner.setValue(Float.POSITIVE_INFINITY);
+			capacitySpinner.setValue(Double.POSITIVE_INFINITY);
 			capacitySpinner.setEnabled(false);
 		} else {
 			infiniteCheckBox.setSelected(false);

@@ -23,34 +23,16 @@ import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
-/**
-
- * @author alyf (Andrea Conti)
- * Date: 11-set-2003
- * Time: 23.48.19
-
- */
-
-/**
- * 7th panel: residence times
- */
 public final class ResTimePanel extends SolutionPanel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private double[][][] resTimes;
-	//NEW Dall'Orso
 	private double[][] stationAggs;
-	private boolean mixedModel;
-
-	//END
 
 	/* EDITED by Abhimanyu Chugh */
 	public ResTimePanel(ExactWizard ew, SolverAlgorithm alg) {
 		super(ew, alg);
-		helpText = "<html>Residence times</html>";
+		helpText = "<html>Residence Times</html>";
 		name = "Residence Times";
 	}
 	/* END */
@@ -63,14 +45,7 @@ public final class ResTimePanel extends SolutionPanel {
 		super.sync();
 		/* EDITED by Abhimanyu Chugh */
 		resTimes = data.getResTimes(algorithm);
-		//NEW Cerotti
-		mixedModel =!(data.isClosed() || data.isOpen());
-		if (!mixedModel) {
-			stationAggs = data.getPerStationR(algorithm);
-		} else {
-			stationAggs = null;
-		}
-		//END
+		stationAggs = data.getPerStationR(algorithm);
 		/* END */
 	}
 
@@ -81,7 +56,7 @@ public final class ResTimePanel extends SolutionPanel {
 
 	@Override
 	protected String getDescriptionMessage() {
-		return ExactConstants.DESCRIPTION_RESIDENCETIME;
+		return ExactConstants.DESCRIPTION_RESIDENCETIMES;
 	}
 
 	/**
@@ -90,9 +65,6 @@ public final class ResTimePanel extends SolutionPanel {
 	 */
 	private class RTTableModel extends ExactTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		RTTableModel() {
@@ -131,18 +103,21 @@ public final class ResTimePanel extends SolutionPanel {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			double d=-1.0;
+			double d = -1.0;
 
-			if (columnIndex > 0) {
-				d = resTimes[rowIndex][columnIndex - 1][iteration];
-			} else if (!mixedModel) {
+			if (columnIndex == 0 && !data.isMixed()) {
 				d = stationAggs[rowIndex][iteration];
+			} else if (columnIndex > 0) {
+				d = resTimes[rowIndex][columnIndex - 1][iteration];
 			}
+
 			if (d < 0.0) {
 				return new String("--");
 			} else {
 				return new Double(d);
 			}
 		}
+
 	}
+
 }

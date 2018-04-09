@@ -54,10 +54,6 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected int jobsOutPerClass[];
 
-	protected double busyTime;
-
-	protected double busyTimePerClass[];
-
 	protected double lastJobOutTime;
 
 	protected double lastJobOutTimePerClass[];
@@ -69,6 +65,14 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected double lastJobDropTime;
 
 	protected double lastJobDropTimePerClass[];
+
+	protected double totalSojournTime;
+
+	protected double totalSojournTimePerClass[];
+
+	protected double lastJobSojournTime;
+
+	protected double lastJobSojournTimePerClass[];
 
 	protected Measure queueLength;
 
@@ -123,10 +127,11 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 		jobsInPerClass = new int[numberOfJobClasses];
 		jobsOutPerClass = new int[numberOfJobClasses];
-		busyTimePerClass = new double[numberOfJobClasses];
 		lastJobInTimePerClass = new double[numberOfJobClasses];
 		lastJobOutTimePerClass = new double[numberOfJobClasses];
 		lastJobDropTimePerClass = new double[numberOfJobClasses];
+		totalSojournTimePerClass = new double[numberOfJobClasses];
+		lastJobSojournTimePerClass = new double[numberOfJobClasses];
 	}
 
 	/**---------------------------------------------------------------------
@@ -173,20 +178,6 @@ public class LinkedJobInfoList implements JobInfoList {
 	 */
 	public int getJobsOutPerClass(JobClass jobClass) {
 		return jobsOutPerClass[jobClass.getId()];
-	}
-
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#getBusyTime()
-	 */
-	public double getBusyTime() {
-		return busyTime;
-	}
-
-	/* (non-Javadoc)
-	 * @see jmt.engine.QueueNet.JobInfoList#getBusyTimePerClass(jmt.engine.QueueNet.JobClass)
-	 */
-	public double getBusyTimePerClass(JobClass jobClass) {
-		return busyTimePerClass[jobClass.getId()];
 	}
 
 	/* (non-Javadoc)
@@ -257,6 +248,34 @@ public class LinkedJobInfoList implements JobInfoList {
 		} else {
 			return lastJobDropTimePerClass[jobClass.getId()];
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getTotalSojournTime()
+	 */
+	public double getTotalSojournTime() {
+		return totalSojournTime;
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getTotalSojournTimePerClass(jmt.engine.QueueNet.JobClass)
+	 */
+	public double getTotalSojournTimePerClass(JobClass jobClass) {
+		return totalSojournTimePerClass[jobClass.getId()];
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobSojournTime()
+	 */
+	public double getLastJobSojournTime() {
+		return lastJobSojournTime;
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobSojournTimePerClass(jmt.engine.QueueNet.JobClass)
+	 */
+	public double getLastJobSojournTimePerClass(JobClass jobClass) {
+		return lastJobSojournTimePerClass[jobClass.getId()];
 	}
 
 	/* (non-Javadoc)
@@ -435,8 +454,10 @@ public class LinkedJobInfoList implements JobInfoList {
 		jobsOutPerClass[c]++;
 		lastJobOutTime = NetSystem.getTime();
 		lastJobOutTimePerClass[c] = NetSystem.getTime();
-		busyTime += NetSystem.getTime() - jobInfo.getEnteringTime();
-		busyTimePerClass[c] += NetSystem.getTime() - jobInfo.getEnteringTime();
+		totalSojournTime += NetSystem.getTime() - jobInfo.getEnteringTime();
+		totalSojournTimePerClass[c] += NetSystem.getTime() - jobInfo.getEnteringTime();
+		lastJobSojournTime = NetSystem.getTime() - jobInfo.getEnteringTime();
+		lastJobSojournTimePerClass[c] = NetSystem.getTime() - jobInfo.getEnteringTime();
 	}
 
 	protected void finalRemove(JobInfo what, LinkedList<JobInfo> list, int position) {

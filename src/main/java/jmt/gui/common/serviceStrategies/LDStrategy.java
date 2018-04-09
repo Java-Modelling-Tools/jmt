@@ -345,7 +345,7 @@ public class LDStrategy implements ServiceStrategy {
 	/**
 	 * Inner class used to store definition of a Range
 	 */
-	protected class Range implements Comparable {
+	protected class Range implements Comparable<Object> {
 
 		public int from;
 		public Distribution distribution;

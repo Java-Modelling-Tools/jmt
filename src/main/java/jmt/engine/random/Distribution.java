@@ -16,7 +16,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/* Distribution abstract class */
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
@@ -35,59 +34,54 @@ public interface Distribution {
 
 	/**
 	 * This method is used to ask all the distribution to return a new random number
-	 * distributed according with the distribution name.
+	 * distributed according to the distribution name.
 	 *
 	 * @param p parameter of the distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number from the sequence.
 	 */
-
 	public abstract double nextRand(Parameter p) throws IncorrectDistributionParameterException;
 
 	/**
 	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
-	 * @param x a double indicating where to evaluate the pdf.
-	 * @param p parameter of the constant distribution.
+	 * @param x double indicating where to evaluate the pdf.
+	 * @param p parameter of the distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
 	public abstract double pdf(double x, Parameter p) throws IncorrectDistributionParameterException;
 
 	/**
 	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
-	 * @param x a double indicating where to evaluate the cdf.
-	 * @param p parameter of the constant distribution.
+	 * @param x double indicating where to evaluate the cdf.
+	 * @param p parameter of the distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
 	public abstract double cdf(double x, Parameter p) throws IncorrectDistributionParameterException;
 
 	/**
 	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
-	 * @param p parameter of the constant distribution.
+	 * @param p parameter of the distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic mean of the distribution.
 	 */
-
 	public abstract double theorMean(Parameter p) throws IncorrectDistributionParameterException;
 
 	/**
-	 * This method is used to obtain from the distribution its own theoretical
-	 * variance.
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
 	 *
-	 * @param p parameter of the constant distribution.
+	 * @param p parameter of the distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic variance of the distribution.
 	 */
-
 	public abstract double theorVariance(Parameter p) throws IncorrectDistributionParameterException;
 
 } // end Distribution

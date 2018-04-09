@@ -239,7 +239,7 @@ public class Enabling extends InputSection {
 	private void showForkJobInfoWarning() {
 		if (!isForkJobInfoWarningShown) {
 			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
-				System.out.println("JMT - Warning: " + getOwnerNode().getName()
+				System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
 						+ " failed to maintain the dependency between input tasks and their parent job.");
 			} else {
 				new Thread(new Runnable() {
@@ -251,7 +251,7 @@ public class Enabling extends InputSection {
 						}
 						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
 								+ " failed to maintain the dependency between input tasks and their parent job.",
-								"JMT - Warning", JOptionPane.WARNING_MESSAGE);
+								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}
 				}).start();
 			}

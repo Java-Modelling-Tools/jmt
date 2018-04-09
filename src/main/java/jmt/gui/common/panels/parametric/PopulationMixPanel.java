@@ -253,6 +253,9 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 		});
 		classChooser.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
+				if (e.getStateChange() == ItemEvent.DESELECTED) {
+					return;
+				}
 				String className = (String) classChooser.getSelectedItem();
 				Object classKey = null;
 				Vector<Object> classes = cd.getClassKeys();
@@ -266,13 +269,6 @@ public class PopulationMixPanel extends ParameterOptionPanel {
 				PMPA.setReferenceClass(classKey);
 				PMPA.setDefaultInitialValue();
 				from.setValue(new Double(PMPA.getInitialValue()));
-				//SpinnerNumberModel snm = (SpinnerNumberModel) steps.getModel();
-				//int oldMax = ((Integer)snm.getMaximum()).intValue();
-				//int currentSteps = ((Integer)snm.getValue()).intValue();
-				//int newMaximumSteps = PMPA.searchForAvailableSteps();
-				//if (newMaximumSteps > ParametricAnalysis.MAX_STEP_NUMBER) newMaximumSteps = ParametricAnalysis.MAX_STEP_NUMBER;
-				//if (newMaximumSteps < oldMax) steps.setModel(new SpinnerNumberModel(newMaximumSteps,2,newMaximumSteps,0.001));
-				//else steps.setModel(new SpinnerNumberModel(currentSteps,2,newMaximumSteps,0.001));
 			}
 		});
 	}

@@ -124,12 +124,12 @@ public class Defaults implements CommonConstants {
 		// Logger Parameters (for global log)
 		Locale locale = JMTFrame.getPlatformDefaultLocale();
 		DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);
-		def.setProperty("loggerDecimalSeparator", String.valueOf(symbols.getDecimalSeparator()));
 		if (String.valueOf(symbols.getDecimalSeparator()).equals(",")) {
 			def.setProperty("loggerDelimiter", ";");
 		} else {
 			def.setProperty("loggerDelimiter", ",");
 		}
+		def.setProperty("loggerDecimalSeparator", String.valueOf(symbols.getDecimalSeparator()));
 		def.setProperty("loggerAutoAppend", "" + jmt.engine.log.LoggerParameters.LOGGER_AR_ASK);
 		def.setProperty("loggerFilePath", "");
 

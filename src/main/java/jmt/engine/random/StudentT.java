@@ -38,14 +38,13 @@ public class StudentT extends AbstractDistribution implements Distribution {
 
 	/**
 	 * This is the constructor. It creates a new student T distribution which
-	 * is defined from is pdf:
+	 * is defined from pdf:
 	 * <pre>             G((f+1)/2)                    1
 	 * pdf(x)= -------------------- *  -------------------------
 	 *          (sqrt(pi*f)*G(f/2)      (1+((x^2)/f))^((f+1)/2)</pre>
 	 * where G(a) is the gamma (also called "Eulero") function.
 	 * f is called degrees of "freedom".
 	 */
-
 	public StudentT() {
 	}
 
@@ -58,7 +57,6 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double freedom = ((StudentTPar) p).getFreedom();
@@ -66,7 +64,7 @@ public class StudentT extends AbstractDistribution implements Distribution {
 			double TERM = Math.exp(val) / Math.sqrt(Math.PI * freedom);
 			return TERM * Math.pow((1 + x * x / freedom), -(freedom + 1) * 0.5);
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: the number of degrees of freedom must be an integer gtz");
+			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
 		}
 	}
 
@@ -79,13 +77,12 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double freedom = ((StudentTPar) p).getFreedom();
 			return Probability.studentT(freedom, x);
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: the number of degrees of freedom must be an integer gtz");
+			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
 		}
 	}
 
@@ -96,30 +93,23 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 * @param p parameter of the student T distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic mean of the distribution.
-	 *
 	 */
-
-	// the mean of a student T distribution, however, is always 0.
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			return 0;
 		} else {
-			throw new IncorrectDistributionParameterException("");
+			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
 		}
 	}
 
 	/**
-	 * This method is used to obtain from the distribution its own theoretical
-	 * variance.
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
 	 *
 	 * @param p parameter of the student T distribution.
 	 * @throws IncorrectDistributionParameterException
-	 * @return double with the theoretic variance of the distribution which
-	 * is calculated as n/(n-2) which mean that it makes sense only if n>2; else,
-	 * the variance will be assumed to be 0.
-	 *
+	 * @return double with the theoretic variance of the distribution.
 	 */
-
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double freedom = ((StudentTPar) p).getFreedom();
@@ -129,7 +119,7 @@ public class StudentT extends AbstractDistribution implements Distribution {
 				return freedom / (freedom - 2);
 			}
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: the number of degrees of freedom must be an integer gtz");
+			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
 		}
 	}
 
@@ -141,7 +131,6 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double freedom = ((StudentTPar) p).getFreedom();
@@ -149,12 +138,13 @@ public class StudentT extends AbstractDistribution implements Distribution {
 			do {
 				u = 2.0 * engine.raw() - 1.0;
 				v = 2.0 * engine.raw() - 1.0;
-			} while ((w = u * u + v * v) > 1.0);
+				w = u * u + v * v;
+			} while (w > 1.0);
 			// If generated number is in the past, reruns this method
 			double ret = (u * Math.sqrt(freedom * (Math.exp(-2.0 / freedom * Math.log(w)) - 1.0) / w));
 			return (ret > 0) ? ret : nextRand(p);
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: the number of degrees of freedom must be an integer gtz");
+			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
 		}
 	}
 

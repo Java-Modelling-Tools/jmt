@@ -29,8 +29,8 @@ public class SolverMultiClosedRGF extends SolverMulti {
 	 * Number of threads that the MoMSolver should use
 	 */
 	protected int nThreads;
-        
-        private RandomEngine engine = RandomEngine.makeDefault();
+
+	private RandomEngine engine = RandomEngine.makeDefault();
 
 	/** Creates new SolverMultiClosedRGF
 	 *  @param  stations    number of service centers
@@ -218,7 +218,7 @@ public class SolverMultiClosedRGF extends SolverMulti {
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 
-		//		for (c = 0; c < classes; c++) {
+		//for (c = 0; c < classes; c++) {
 		//	for (m = 0; m < stations; m++) {
 		//		clsRespTime[c] += residenceTime[m][c];
 		//		sysNumJobs += queueLen[m][c];

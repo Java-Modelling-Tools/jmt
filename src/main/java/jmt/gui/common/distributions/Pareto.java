@@ -31,8 +31,9 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 10.47.42
  */
 public class Pareto extends Distribution {
+
 	/**
-	 * Construct a new Pareto Distribution
+	 * Constructs a new Pareto Distribution
 	 */
 	public Pareto() {
 		super("Pareto", "jmt.engine.random.Pareto", "jmt.engine.random.ParetoPar", "Pareto distribution");
@@ -49,13 +50,14 @@ public class Pareto extends Distribution {
 	protected Parameter[] setParameters() {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[2];
+
 		// Sets parameter alpha
 		parameters[0] = new Parameter("alpha", "\u03B1", Double.class, new Double(3));
-		// Checks value of alpha must greater or equal then 2
+		// Checks value of alpha must greater than 2
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() >= 2) {
+				if (d.doubleValue() > 2.0) {
 					return true;
 				} else {
 					return false;
@@ -65,11 +67,11 @@ public class Pareto extends Distribution {
 
 		// Sets parameter k
 		parameters[1] = new Parameter("k", "k", Double.class, new Double(1));
-		// Checks value of k must be greater then 0
+		// Checks value of k must be greater than 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;
@@ -81,8 +83,7 @@ public class Pareto extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -96,7 +97,7 @@ public class Pareto extends Distribution {
 	 */
 	@Override
 	public String toString() {
-		return "par(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + "; "
+		return "par(" + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + ","
 				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + ")";
 	}
 
@@ -124,7 +125,7 @@ public class Pareto extends Distribution {
 	 * @param c c value
 	 */
 	protected void setCM(double mean, double c) {
-		// k = mean - mean /  (1+sqrt(1+1/c^2)) && alpha = 1 + sqrt(1 + 1 / c^2)
+		// k = mean - mean/(1+sqrt(1+1/(c*c))) && alpha = 1 + sqrt(1+1/c*c)
 		// Backups old parameters to restore them upon a false result
 		Object oldk = getParameter("k").getValue();
 		Object olda = getParameter("alpha").getValue();
@@ -140,7 +141,7 @@ public class Pareto extends Distribution {
 
 	/**
 	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> are true
+	 * <code>hasMean</code> is true
 	 */
 	@Override
 	public void updateCM() {
@@ -150,4 +151,5 @@ public class Pareto extends Distribution {
 		mean = a * k / (a - 1);
 		c = 1 / Math.sqrt(a * a - 2 * a);
 	}
+
 }

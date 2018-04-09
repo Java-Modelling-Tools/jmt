@@ -48,7 +48,7 @@ public class GlobalSettings implements Serializable {
 			// A security manager blocked the property get
 			value = null;
 		}
-		// If system property is null, searches  on configuration properties.
+		// If system property is null, searches on configuration properties.
 		if (value == null) {
 			value = props.getProperty(name);
 		}

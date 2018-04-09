@@ -67,12 +67,12 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 	private MixTable mixTable = new MixTable();
 	private WarningScrollTable mixPane;
 
-	public SemaphoreEditor(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
+	public SemaphoreEditor(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		setOrientation(JSplitPane.VERTICAL_SPLIT);
 		setDividerSize(3);
 		setBorder(new EmptyBorder(0, 0, 0, 0));
 		setResizeWeight(0.5);
-		setData(sd, cs, stationKey, classKey);
+		setData(sd, cd, stationKey, classKey);
 		initComponents();
 	}
 
@@ -93,13 +93,25 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 		semaphorePane.setLayout(new FlowLayout());
 		JLabel text = new JLabel("Number of Required Tasks:");
 		jNumField.setPreferredSize(DIM_BUTTON_XS);
+		jNumField.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				Integer i = (Integer) jNumField.getValue();
+				if (i.intValue() < 1) {
+					i = new Integer(1);
+					jNumField.setValue(i);
+				}
+				SemaphoreStrategy ss = (SemaphoreStrategy) stations.getSemaphoreStrategy(stationKey, classKey);
+				ss.setThreshold(i);
+			}
+		});
 		semaphorePane.add(text);
 		semaphorePane.add(jNumField);
 		semaphorePane.setBorder(new TitledBorder(new EtchedBorder(), "Semaphore Options"));
 		setLeftComponent(descrPane);
 	}
 
-	public void setData(StationDefinition sd, ClassDefinition cs, Object stationKey, Object classKey) {
+	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		SemaphoreStrategy ss = (SemaphoreStrategy) sd.getSemaphoreStrategy(stationKey, classKey);
 		if (ss == null) {
 			descrTextPane.setText("");
@@ -117,33 +129,18 @@ public class SemaphoreEditor extends JSplitPane implements CommonConstants {
 
 	private void emptyPane() {
 		setRightComponent(noOptLabelPanel);
+		threshold = 0;
 		firingMix = null;
 	}
 
 	private void createDetails(SemaphoreStrategy ss, StationDefinition sd, Object stationKey, Object classKey) {
 		threshold = ss.getThreshold();
+		firingMix = null;
 		stations = sd;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
-		firingMix = null;
-		setRightComponent(semaphorePane);
-		updateSpinner();
-	}
-
-	private void updateSpinner() {
 		jNumField.setValue(threshold);
-		jNumField.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				Integer i = (Integer) jNumField.getValue();
-				if (i.intValue() < 1) {
-					i = new Integer(1);
-					jNumField.setValue(i);
-				}
-				SemaphoreStrategy ss = (SemaphoreStrategy) stations.getSemaphoreStrategy(stationKey, classKey);
-				ss.setThreshold(i);
-			}
-		});
+		setRightComponent(semaphorePane);
 	}
 
 	public void stopEditing() {

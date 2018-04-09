@@ -49,8 +49,8 @@ public class SolverMultiClosedMoM extends SolverMulti {
 	 * Number of threads that the MoMSolver should use
 	 */
 	protected int nThreads;
-        
-        private RandomEngine engine = RandomEngine.makeDefault();
+
+	private RandomEngine engine = RandomEngine.makeDefault();
 
 	/** Creates new MoMSolverDispatcher
 	 *  @param  stations    number of service centers

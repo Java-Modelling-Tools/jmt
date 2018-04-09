@@ -29,6 +29,7 @@ package jmt.engine.random;
 
  */
 public class EmpiricalEntry {
+
 	/** The <code>EmpiricalEntry</code> value. */
 	protected Object value;
 	/** The <code>EmpiricalEntry</code> probability. */
@@ -50,7 +51,8 @@ public class EmpiricalEntry {
 	 * Creates a new instance of an <code>EmpiricalEntry</code> object with
 	 * specified value and probability.
 	 * @param value A given <code>String</code> representing a node value.
-	 * @param probability A given <code>double</code> probability linked to the <i>value</i>.
+	 * @param probability A given <code>double</code> probability linked to
+	 * the <i>value</i>.
 	 */
 	public EmpiricalEntry(String value, double probability) {
 		this.value = value;
@@ -61,7 +63,8 @@ public class EmpiricalEntry {
 	 * Creates a new instance of an <code>EmpiricalEntry</code> object with
 	 * specified value and probability.
 	 * @param value A given <code>String</code> representing a node value.
-	 * @param probability A given <code>Double</code> probability linked to the <i>value</i>.
+	 * @param probability A given <code>Double</code> probability linked to
+	 * the <i>value</i>.
 	 */
 	public EmpiricalEntry(String value, Double probability) {
 		this.value = value;
@@ -108,4 +111,5 @@ public class EmpiricalEntry {
 	public void setValue(Object value) {
 		this.value = value;
 	}
+
 }

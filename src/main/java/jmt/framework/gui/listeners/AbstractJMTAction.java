@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.framework.gui.listeners;
 
 import java.awt.event.KeyEvent;
@@ -27,6 +28,7 @@ import javax.swing.KeyStroke;
 import jmt.framework.gui.image.ImageLoader;
 
 public abstract class AbstractJMTAction extends AbstractAction {
+
 	private static final long serialVersionUID = 1L;
 	/** Name of the icon to be shown in the button */
 	public static final String IMAGE_NAME = "AbstractJMTAction.image.name";
@@ -121,7 +123,8 @@ public abstract class AbstractJMTAction extends AbstractAction {
 
 	/**
 	 * Sets the group associated to this action if it is selectable
-	 * @param group identifier of group. Must be greater or equal to zero.
+	 * @param group identifier of group. Must be greater than or equal
+	 * to zero.
 	 */
 	protected void setGroup(int group) {
 		putValue(GROUP, new Integer(group));

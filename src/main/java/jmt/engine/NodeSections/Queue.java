@@ -401,7 +401,7 @@ public class Queue extends InputSection {
 
 			//
 			//two possible cases:
-			//1 - the queue is a generic queue (redirectionOn == false)
+			//1 - the queue is a generic queue (!redirectionOn)
 			//2 - the queue is a redirecting queue, but the message has arrived
 			//from the inside of the region or from the inputStation:
 			//in this case the redirecting queue acts as a normal queue

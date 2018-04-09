@@ -34,34 +34,26 @@ import jmt.gui.common.JMTImageLoader;
  *         Time: 11.29.26
  */
 public class Replayer extends Distribution {
+
 	public static final String FILE_NAME_PARAMETER = "fileName";
 
 	/**
-	 * Construct a new Replayer Distribution
+	 * Constructs a new Replayer Distribution
 	 */
 	public Replayer() {
 		super("Replayer", "jmt.engine.random.Replayer", "jmt.engine.random.ReplayerPar", "Replayer distribution");
-		this.setValueChecker(new ValueChecker() {
+		hasMean = false;
+		hasC = false;
+		isNestable = true;
+		setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
-				Distribution d = (Distribution) value;
-				if ((new File((String) d.getParameter(0).getValue())).exists()) {
-					return true;
-				} else {
+				if (!(new File((String) parameters[0].getValue())).exists()) {
+					precondition = "Specified 'fileName' does not exist. Try to provide a correct path.";
 					return false;
 				}
+				return true;
 			}
 		});
-
-		isNestable = true;
-	}
-
-	/**
-	 * Returns precondition that parameters' values must satisfy for this distribution to be valid
-	 * @return Message describing distribution's preconditions
-	 */
-	@Override
-	public String getPrecondition() {
-		return "specified 'fileName' does not exists. Try to provide a correct path.";
 	}
 
 	/**
@@ -69,7 +61,7 @@ public class Replayer extends Distribution {
 	 * @return distribution parameters
 	 */
 	@Override
-	protected Distribution.Parameter[] setParameters() {
+	protected Parameter[] setParameters() {
 		// Creates parameter array
 		Parameter[] parameters = new Parameter[1];
 		// Sets parameter fileName
@@ -78,8 +70,7 @@ public class Replayer extends Distribution {
 	}
 
 	/**
-	 * Set illustrating figure in distribution panel
-	 * user to understand meaning of parameters.
+	 * Sets illustrating figure in distribution panel
 	 * @return illustrating figure
 	 */
 	@Override
@@ -95,4 +86,5 @@ public class Replayer extends Distribution {
 	public String toString() {
 		return "Replayer";
 	}
+
 }

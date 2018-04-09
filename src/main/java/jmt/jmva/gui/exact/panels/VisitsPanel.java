@@ -58,7 +58,7 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 	private ExactWizard ew;
 	private HoverHelp help;
 	private static final String helpText = "<html>In this panel you can edit the station visits for each class.<br><br>"
-			+ " To enter values, single-click on the desired cell"
+			+ " To enter values, double-click on the desired cell"
 			+ " and start typing.<br> To select multiple cells drag the mouse on them; click or drag on"
 			+ " row/column headers to select whole rows/columns.<br> <b>For a list of the available operations right-click"
 			+ " on the table</b>; all operations except pasting affect selected cells.<br>"
@@ -196,7 +196,7 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 
 			setDisplaysScrollLabels(true);
 			help.addHelp(this,
-					"Click or drag to select cells; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select cells; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreColumnsLabel, "There are more classes: scroll right to see them");
 			help.addHelp(moreRowsLabel, "There are more stations: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all cells");
@@ -207,7 +207,7 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
-			setClipboardTransferEnabled(true);
+			setBatchEditingEnabled(true);
 		}
 
 	}
@@ -275,20 +275,6 @@ public final class VisitsPanel extends WizardPanel implements ExactConstants, Fo
 		@Override
 		public void clear(int row, int col) {
 			visits[row][col] = 0;
-		}
-
-		/**
-		 * Copy the contents of a cell to an area. Works directly on the data set.
-		 */
-		@Override
-		public void copyCellToArea(int sourceRow, int sourceCol, int rowFrom, int rowTo, int colFrom, int colTo) {
-			double source = visits[sourceRow][sourceCol];
-
-			for (int row = rowFrom; row <= rowTo; row++) {
-				for (int col = colFrom; col <= colTo; col++) {
-					visits[row][col] = source;
-				}
-			}
 		}
 
 	}

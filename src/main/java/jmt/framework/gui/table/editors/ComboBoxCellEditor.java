@@ -136,7 +136,6 @@ public class ComboBoxCellEditor extends AbstractCellEditor implements TableCellE
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 		comboBox.setSelectedItem(value);
 		comboBox.addItemListener(new ItemListener() {
-
 			/**
 			 * Invoked when an item has been selected or deselected by the user.
 			 * Makes the renderer to reappear after editing finishes

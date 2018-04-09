@@ -94,7 +94,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 	private static String COMBO_FILTER_INPUT = "Select workload sampling method";
 	private static String COMBO_FORMAT_INPUT = "Select format for input file";
 	private static String PANEL_INFORMATION = "Name and observations of selected file";
-	private static String INPUT_TABLE = "Click or drag to select classes; to edit data single-click and start typing. Right-click for a list of available operations";
+	private static String INPUT_TABLE = "Click or drag to select classes; to edit data double-click and start typing. Right-click for a list of available operations";
 	/** JComboBox filter section texts **/
 	private String FILTER_TEXT_COMPLETE = "Complete file";
 	private String FILTER_TEXT_RANDOM = "Random Sampling";
@@ -955,8 +955,8 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			fromPanel.add(fromLabel);
 			intervalFromObs = new JSpinner(new SpinnerNumberModel(0, 0, 0, 1));
 			intervalFromObs.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
 
+				public void stateChanged(ChangeEvent e) {
 					if (((SpinnerNumberModel) intervalFromObs.getModel()).getNumber().longValue() >= ((SpinnerNumberModel) intervalToObs.getModel())
 							.getNumber().longValue()) {
 						((SpinnerNumberModel) intervalToObs.getModel()).setValue(new Integer(((SpinnerNumberModel) intervalFromObs.getModel())

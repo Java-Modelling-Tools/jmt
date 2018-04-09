@@ -85,7 +85,7 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 	private JabaWizard ew;
 	private HoverHelp help;
 	private static final String HELP_TEXT = "<html>In this panel you can define the number of stations in the system and their properties.<br><br>"
-			+ " To edit values, single-click on the desired cell"
+			+ " To edit values, double-click on the desired cell"
 			+ " and start typing.<br> To select stations click or drag on the row headers.<br> <b>For a list of the available operations right-click"
 			+ " on the table</b>.<br>" + " Pressing DELETE removes all selected stations from the system.</html>";
 
@@ -97,7 +97,7 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 
 	private String[] stationNames;
 	private int[] stationTypes;
-	private int nameCounter = 1;
+	private int nameCounter;
 
 	private List<ListOp> stationOps;
 	private boolean hasDeletes;
@@ -139,7 +139,7 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, "Deletes this station");
-			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Close"));
+			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Delete"));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -181,6 +181,7 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 		JabaModel data = ew.getData();
 		synchronized (data) {
 			stations = data.getStations();
+			nameCounter = stations;
 			pop = data.getMaxpop();
 
 			//OLD
@@ -244,7 +245,7 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 
 		stationTypes = ArrayUtils.resize(stationTypes, stations, STATION_LI);
 
-		stationTable.update();
+		stationTable.updateStructure();
 		if (!deleting) {
 			stationOps.add(ListOp.createResizeOp(stations));
 		}
@@ -530,21 +531,21 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 			//END Federico Dall'Orso
 
 			/* a station type cell editor for open/mixed systems */
-			JComboBox stationTypeBox = new JComboBox(STATION_TYPENAMES);
+			JComboBox<String> stationTypeBox = new JComboBox<String>(STATION_TYPENAMES);
 			stationTypeBox.setEditable(false);
 			stationTypeBox.setEnabled(false);
 			LD_disabled_StationTypeEditor = new DefaultCellEditor(stationTypeBox);
 			stationTypeBox.setEnabled(false);
 
 			/* a station type cell editor for closed systems */
-			JComboBox LD_enabled_StationTypeBox = new JComboBox(STATION_TYPENAMES_LD_ENABLED);
+			JComboBox<String> LD_enabled_StationTypeBox = new JComboBox<String>(STATION_TYPENAMES_LD_ENABLED);
 			LD_enabled_StationTypeBox.setEditable(false);
 			LD_enabled_StationTypeBox.setEnabled(false);
 			LD_enabled_StationTypeEditor = new DefaultCellEditor(LD_enabled_StationTypeBox);
 			LD_enabled_StationTypeBox.setEnabled(false);
 
-			setColumnSelectionAllowed(false);
 			setRowSelectionAllowed(true);
+			setColumnSelectionAllowed(false);
 
 			setDisplaysScrollLabels(true);
 
@@ -553,7 +554,7 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 			mouseHandler.install();
 
 			help.addHelp(this,
-					"Click or drag to select stations; to edit data single-click and start typing. Right-click for a list of available operations");
+					"Click or drag to select stations; to edit data double-click and start typing. Right-click for a list of available operations");
 			help.addHelp(moreRowsLabel, "There are more stations: scroll down to see them");
 			help.addHelp(selectAllButton, "Click to select all stations");
 			tableHeader.setToolTipText(null);

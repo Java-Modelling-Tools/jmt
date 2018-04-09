@@ -23,30 +23,11 @@ import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
-/**
-
- * @author alyf (Andrea Conti)
- * Date: 11-set-2003
- * Time: 23.48.19
-
- */
-
-/**
- * 8th panel: utilization
- */
 public final class UtilizationPanel extends SolutionPanel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private double[][][] util;
-	//NEW Federico Dall'Orso
 	private double[][] stationAggs;
-	private double[][] classAggs;
-	private double[] globalAgg;
-
-	//END
 
 	/* EDITED by Abhimanyu Chugh */
 	public UtilizationPanel(ExactWizard ew, SolverAlgorithm alg) {
@@ -64,11 +45,7 @@ public final class UtilizationPanel extends SolutionPanel {
 		super.sync();
 		/* EDITED by Abhimanyu Chugh */
 		util = data.getUtilization(algorithm);
-		//NEW Federico Dall'Orso
 		stationAggs = data.getPerStationU(algorithm);
-		classAggs = data.getPerClassU(algorithm);
-		globalAgg = data.getGlobalU(algorithm);
-		//END
 		/* END */
 	}
 
@@ -88,9 +65,6 @@ public final class UtilizationPanel extends SolutionPanel {
 	 */
 	private class UTableModel extends ExactTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		UTableModel() {
@@ -102,36 +76,19 @@ public final class UtilizationPanel extends SolutionPanel {
 			if (util == null) {
 				return 0;
 			}
-			//OLD
-			/*
 			return stations;
-			*/
-			//NEW Federico Dall'Orso
-			return stations + 1;
-			//END
 		}
 
 		public int getColumnCount() {
 			if (util == null) {
 				return 0;
 			}
-			//OLD
-			/*
-			if (isSingle) return 1;
-			return classes;
-			*/
-			//NEW
-			//@author Dall'Orso
 			return classes + 1;
-			//end NEW
 		}
 
 		@Override
 		protected Object getRowName(int rowIndex) {
-			if (rowIndex == 0) {
-				return "<html>-</html>";
-			}
-			return stationNames[rowIndex - 1];
+			return stationNames[rowIndex];
 		}
 
 		@Override
@@ -144,27 +101,21 @@ public final class UtilizationPanel extends SolutionPanel {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			double d = 0;
-			//OLD
-			/*
-			d = util[rowIndex][columnIndex];
-			*/
-			//NEW Dall'Orso
-			if (columnIndex > 0 && rowIndex > 0) {
-				d = util[rowIndex - 1][columnIndex - 1][iteration];
-			} else if (columnIndex == 0 && rowIndex > 0) {
-				d = stationAggs[rowIndex - 1][iteration];
-			} else if (columnIndex > 0 && rowIndex == 0) {
-				d = classAggs[columnIndex - 1][iteration];
+			double d = -1.0;
+
+			if (columnIndex == 0) {
+				d = stationAggs[rowIndex][iteration];
+			} else if (columnIndex > 0) {
+				d = util[rowIndex][columnIndex - 1][iteration];
+			}
+
+			if (d < 0.0) {
+				return new String("--");
 			} else {
-				d = globalAgg[iteration];
+				return new Double(d);
 			}
-			//END
-			if (d < 0) {
-				return "-"; //causes the renderer to display a gray cell
-			}
-			return new Double(d);
 		}
 
 	}
+
 }

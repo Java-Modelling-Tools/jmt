@@ -23,33 +23,13 @@ import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
-/**
-
- * @author alyf (Andrea Conti)
- * Date: 11-set-2003
- * Time: 23.48.19
- * 
- * @author Ashanka
- * Cleaned code by removing unnecessary comments of old code.
- * @version Date: Sep-2009
- */
-
-/**
- * 5th panel: queue length
- */
 public final class QueueLenPanel extends SolutionPanel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private double[][][] queueLen;
-	//NEW Dall'Orso
 	double[][] classAggs;
 	double[][] stationAggs;
 	double[] globalAgg;
-
-	//END
 
 	/* EDITED by Abhimanyu Chugh */
 	public QueueLenPanel(ExactWizard ew, SolverAlgorithm alg) {
@@ -67,11 +47,9 @@ public final class QueueLenPanel extends SolutionPanel {
 		super.sync();
 		/* EDITED by Abhimanyu Chugh */
 		queueLen = data.getQueueLen(algorithm);
-		//NEW Federico Dall'Orso
 		classAggs = data.getPerClassQ(algorithm);
 		stationAggs = data.getPerStationQ(algorithm);
 		globalAgg = data.getGlobalQ(algorithm);
-		//END
 		/* END */
 	}
 
@@ -91,9 +69,6 @@ public final class QueueLenPanel extends SolutionPanel {
 	 */
 	private class QLTableModel extends ExactTableModel {
 
-		/**
-		 * 
-		 */
 		private static final long serialVersionUID = 1L;
 
 		QLTableModel() {
@@ -105,28 +80,14 @@ public final class QueueLenPanel extends SolutionPanel {
 			if (queueLen == null) {
 				return 0;
 			}
-			//OLD
-			/*
-			return stations;
-			*/
-			//NEW Federico Dall'Orso
 			return stations + 1;
-			//END
 		}
 
 		public int getColumnCount() {
 			if (queueLen == null) {
 				return 0;
 			}
-			//OLD
-			/*
-			if (isSingle) return 1;
-			return classes;
-			*/
-			//NEW
-			//@author Dall'Orso
 			return classes + 1;
-			//end NEW
 		}
 
 		@Override
@@ -149,27 +110,25 @@ public final class QueueLenPanel extends SolutionPanel {
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			double d = 0;
-			//OLD
-			/*
-			d = queueLen[rowIndex][columnIndex];
-			*/
-			//NEW Federico Dall'Orso
-			if (rowIndex > 0 && columnIndex > 0) {
-				d = queueLen[rowIndex - 1][columnIndex - 1][iteration];
+			double d = -1.0;
+
+			if (rowIndex == 0 && columnIndex == 0) {
+				d = globalAgg[iteration];
 			} else if (rowIndex == 0 && columnIndex > 0) {
 				d = classAggs[columnIndex - 1][iteration];
 			} else if (rowIndex > 0 && columnIndex == 0) {
 				d = stationAggs[rowIndex - 1][iteration];
+			} else if (rowIndex > 0 && columnIndex > 0) {
+				d = queueLen[rowIndex - 1][columnIndex - 1][iteration];
+			}
+
+			if (d < 0.0) {
+				return new String("--");
 			} else {
-				d = globalAgg[iteration];
+				return new Double(d);
 			}
-			//END
-			if (d < 0) {
-				return null; //causes the renderer to display a gray cell
-			}
-			return new Double(d);
 		}
 
 	}
+
 }

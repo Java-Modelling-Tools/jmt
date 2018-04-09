@@ -22,7 +22,7 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
  * 
- * This is the Hyper Exponential distribution (see the constructor
+ * This is the Hyperexponential distribution (see the constructor
  * description for details).
  * 
  * <br><br>Copyright (c) 2003
@@ -32,28 +32,27 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  */
 public class HyperExp extends AbstractDistribution implements Distribution {
 
-	protected Exponential expDistr;
+	private Exponential expDistr;
 
 	/**
-	 * This is the constructor. It creates a new hyper exponential distribution which
-	 * is constituted by N exponential "servers" chosen with probability alpha_i.
+	 * This is the constructor. It creates a new hyperexponential distribution which
+	 * is constituted by two parallel exponential phases.
 	 *
 	 */
 	public HyperExp() {
 		expDistr = new Exponential();
 	}
 
-	//TODO: why pdf and cdf are equal to zero? They need to be implement
 	/**
 	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
-	 * @param p parameter of the hyper exponential distribution.
+	 * @param p parameter of the hyperexponential distribution.
+	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
-	public double pdf(double x, Parameter p) { //other implementation may use p.check()
+	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;
 	}
 
@@ -62,11 +61,11 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
-	 * @param p parameter of the hyper exponential distribution.
+	 * @param p parameter of the hyperexponential distribution.
+	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
-	public double cdf(double x, Parameter p) { //other implementation may use p.check()
+	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;
 	}
 
@@ -74,35 +73,33 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
-	 * @param p parameter of the hyper exponential distribution.
+	 * @param p parameter of the hyperexponential distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic mean of the distribution.
 	 */
-
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			return ((HyperExpPar) p).getMean();
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter mean, variance, lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
+					"Remember: parameter lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
 		}
 	}
 
 	/**
-	 * This method is used to obtain from the distribution its own theoretical
-	 * variance.
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
 	 *
-	 * @param p parameter of the hyper exponential distribution.
+	 * @param p parameter of the hyperexponential distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic variance of the distribution.
 	 */
-
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			return ((HyperExpPar) p).getVar();
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter mean, variance, lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
+					"Remember: parameter lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
 		}
 	}
 
@@ -110,11 +107,10 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *
-	 * @param p parameter of the hyper exponential distribution.
+	 * @param p parameter of the hyperexponential distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
-
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			if (engine.nextDouble() <= ((HyperExpPar) p).getP()) {
@@ -124,7 +120,7 @@ public class HyperExp extends AbstractDistribution implements Distribution {
 			}
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter mean, variance, lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
+					"Remember: parameter lambda1 and lambda2 must be gtz; p must be a number between 0 and 1");
 		}
 	}
 

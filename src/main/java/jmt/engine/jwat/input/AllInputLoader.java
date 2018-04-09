@@ -69,9 +69,9 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 					updateInfos(totalRaw, "<HTML># observations read: " + totalRaw + "<p># errors: " + (totalRaw - countObs) + "</HTML>", false);
 				}
 				//Read strings and check format
-                                for (i = 0; i < param.getNumVar(); i++) {
+				for (i = 0; i < param.getNumVar(); i++) {
 					//Read tokens with separators (if defined) regardless of what's inside
-                                    	if (separator[i] != null) {
+					if (separator[i] != null) {
 						parseToken = separator[i];
 					} else {
 						parseToken = regExp[i];
@@ -83,9 +83,9 @@ public class AllInputLoader extends InputLoader implements JWATConstants {
 							lineToken[i] = myMatch.getMatch().toString();
 							if (separator[i] != null) {
 								// If the token has separators remove them
-                                                            	lineToken[i] = lineToken[i].substring(1, lineToken[i].length() - 1);
+								lineToken[i] = lineToken[i].substring(1, lineToken[i].length() - 1);
 								//Take what I need from what's left
-                                                                if (myMatch.contains(lineToken[i], myComp.compile(regExp[i]))) {
+								if (myMatch.contains(lineToken[i], myComp.compile(regExp[i]))) {
 									lineToken[i] = myMatch.getMatch().toString();
 								} else {
 									//Wrong row, token dose not contains required data

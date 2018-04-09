@@ -69,12 +69,10 @@ public class ResultsTable extends ExactTable {
 
 		setRowSelectionAllowed(true);
 		setColumnSelectionAllowed(true);
-		setClipboardTransferEnabled(true);
 
 		setDefaultRenderer(Object.class, new DisabledCellRenderer());
 	}
 
-	//NEW Federico Dall'Orso
 	@Override
 	public TableCellRenderer getCellRenderer(int row, int column) {
 		final TableCellRenderer cellRenderer = super.getCellRenderer(row, column);
@@ -92,8 +90,6 @@ public class ResultsTable extends ExactTable {
 			}
 		};
 	}
-
-	//END
 
 	@Override
 	protected void installKeyboard() {

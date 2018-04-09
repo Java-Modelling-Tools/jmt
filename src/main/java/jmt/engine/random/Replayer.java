@@ -31,13 +31,12 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 public class Replayer extends AbstractDistribution implements Distribution {
 
 	private double valueSum;
-	private int valueCount;
+	private long valueCount;
 
 	/**
 	 *  Constructs a new distribution with standard random engine.
 	 */
 	public Replayer() {
-		engine = null;
 		valueSum = 0.0;
 		valueCount = 0;
 	}
@@ -64,12 +63,11 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.
 	 *
-	 * @param x a double indicating where to evaluate the pdf.
+	 * @param x double indicating where to evaluate the pdf.
 	 * @param p parameter of the constant distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
-
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		throw new IncorrectDistributionParameterException("Method not implemented yet");
 	};
@@ -78,12 +76,11 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	 * This method is used to obtain from the distribution its cumulative distribution
 	 * function evaluated where required by the user.
 	 *
-	 * @param x a double indicating where to evaluate the cdf.
+	 * @param x double indicating where to evaluate the cdf.
 	 * @param p parameter of the constant distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
-
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		throw new IncorrectDistributionParameterException("Method not implemented yet");
 	};
@@ -96,20 +93,18 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	  * @throws IncorrectDistributionParameterException
 	  * @return double with the theoretic mean of the distribution.
 	  */
-
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		return valueSum / valueCount;
 	};
 
 	/**
-	  * This method is used to obtain from the distribution its own theoretical
-	  * variance.
+	  * This method is used to obtain from the distribution the value of its own
+	  * theoretic variance.
 	  *
 	  * @param p parameter of the constant distribution.
 	  * @throws IncorrectDistributionParameterException
 	  * @return double with the theoretic variance of the distribution.
 	  */
-
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		throw new IncorrectDistributionParameterException("Method not implemented yet");
 	};

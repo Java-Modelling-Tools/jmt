@@ -44,9 +44,9 @@ public class TreePlanter {
 	
 	/** The complexity evaluator. */
 	private ComplexityEvaluator ce;
-        
-        private RandomEngine engine = RandomEngine.makeDefault();
-
+	
+	private RandomEngine engine = RandomEngine.makeDefault();
+	
 	/** Constructor.
 	 * @param qnm The queueing network model to solve.
 	 * @param ccu The class coverage utilities helper.

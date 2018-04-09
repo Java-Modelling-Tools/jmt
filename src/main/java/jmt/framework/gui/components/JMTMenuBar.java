@@ -17,6 +17,8 @@
  */
 package jmt.framework.gui.components;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.Collection;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -27,6 +29,7 @@ import javax.swing.JMenuItem;
 import jmt.framework.gui.image.ImageLoader;
 import jmt.framework.gui.listeners.AbstractJMTAction;
 import jmt.framework.gui.listeners.SelectedActionButtonChangeListener;
+import jmt.gui.common.CommonConstants;
 
 /**
  * <p><b>Name:</b> JMTMenuBar</p> 
@@ -121,15 +124,40 @@ public class JMTMenuBar extends JMenuBar {
 			if (selectable != null && selectable.booleanValue()) {
 				// item is selectable
 				item = new JCheckBoxMenuItem(action);
-				// Sets selected icon
+				// Sets default and selected icon
 				String iconName = (String) action.getValue(AbstractJMTAction.IMAGE_NAME);
-				if (iconName != null) {
-					item.setSelectedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_SELECTED));
+				if (iconName == null) {
+					iconName = "Empty";
 				}
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				Dimension iconSize = null;
+				if (screenSize.width <= CommonConstants.MAX_SMALL_ICON_SCREEN_WIDTH
+						&& screenSize.height <= CommonConstants.MAX_SMALL_ICON_SCREEN_HEIGHT) {
+					iconSize = CommonConstants.SMALL_ICON_SIZE_MENU_BAR;
+				} else {
+					iconSize = CommonConstants.LARGE_ICON_SIZE_MENU_BAR;
+				}
+				item.setIcon(imageLoader.loadIcon(iconName, iconSize));
+				item.setSelectedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_SELECTED, iconSize));
 				// Adds a listener to both item and action to synchronize their selected state
 				new SelectedActionButtonChangeListener(action, item);
 			} else {
+				// item is not selectable
 				item = new JMenuItem(action);
+				// Sets default icon
+				String iconName = (String) action.getValue(AbstractJMTAction.IMAGE_NAME);
+				if (iconName == null) {
+					iconName = "Empty";
+				}
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				Dimension iconSize = null;
+				if (screenSize.width <= CommonConstants.MAX_SMALL_ICON_SCREEN_WIDTH
+						&& screenSize.height <= CommonConstants.MAX_SMALL_ICON_SCREEN_HEIGHT) {
+					iconSize = CommonConstants.SMALL_ICON_SIZE_MENU_BAR;
+				} else {
+					iconSize = CommonConstants.LARGE_ICON_SIZE_MENU_BAR;
+				}
+				item.setIcon(imageLoader.loadIcon(iconName, iconSize));
 			}
 		}
 		return item;

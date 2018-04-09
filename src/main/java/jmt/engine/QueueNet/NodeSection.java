@@ -77,10 +77,10 @@ public abstract class NodeSection {
 	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0003;
 	/** Property ID: residence time */
 	public static final int PROPERTY_ID_RESIDENCE_TIME = 0x0004;
-	/** Property ID: throughput */
-	public static final int PROPERTY_ID_THROUGHPUT = 0x0005;
 	/** Property ID: utilization */
-	public static final int PROPERTY_ID_UTILIZATION = 0x0006;
+	public static final int PROPERTY_ID_UTILIZATION = 0x0005;
+	/** Property ID: average utilization */
+	public static final int PROPERTY_ID_AVERAGE_UTILIZATION = 0x0006;
 
 	//TODO: make more efficient the mechanism to determine the ownerNode (to avoid too many getNode)
 	/** Owner of this NodeSection. */
@@ -265,11 +265,11 @@ public abstract class NodeSection {
 	public double getDoubleSectionProperty(int id) throws NetException {
 		switch (id) {
 		case PROPERTY_ID_RESIDENCE_TIME:
-			return jobsList.getBusyTime() / jobsList.getJobsOut();
-		case PROPERTY_ID_THROUGHPUT:
-			return jobsList.getJobsOut() / NetSystem.getTime();
+			return jobsList.getLastJobSojournTime();
 		case PROPERTY_ID_UTILIZATION:
-			return jobsList.getBusyTime() / NetSystem.getTime();
+			return jobsList.size();
+		case PROPERTY_ID_AVERAGE_UTILIZATION:
+			return jobsList.getTotalSojournTime() / NetSystem.getTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
@@ -287,11 +287,11 @@ public abstract class NodeSection {
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
 		switch (id) {
 		case PROPERTY_ID_RESIDENCE_TIME:
-			return jobsList.getBusyTimePerClass(jobClass) / jobsList.getJobsOutPerClass(jobClass);
-		case PROPERTY_ID_THROUGHPUT:
-			return jobsList.getJobsOutPerClass(jobClass) / NetSystem.getTime();
+			return jobsList.getLastJobSojournTimePerClass(jobClass);
 		case PROPERTY_ID_UTILIZATION:
-			return jobsList.getBusyTimePerClass(jobClass) / NetSystem.getTime();
+			return jobsList.size(jobClass);
+		case PROPERTY_ID_AVERAGE_UTILIZATION:
+			return jobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}

@@ -75,9 +75,9 @@ public class CircularEventQueue implements EventQueue {
 	/**
 	 * Inserts the specified object as a component in this vector at the
 	 * specified <code>index</code>. Each component in this vector with
-	 * an index greater or equal to the specified <code>index</code> is
-	 * shifted upward to have an index one greater than the value it had
-	 * previously. <p>
+	 * an index greater than or equal to the specified <code>index</code>
+	 * is shifted upward to have an index one greater than the value it
+	 * had previously.<p>
 	 *
 	 * The index must be a value greater than or equal to <code>0</code>
 	 * and less than or equal to the current size of the vector. (If the

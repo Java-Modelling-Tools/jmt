@@ -54,7 +54,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 *
 	 * @param pdf array of <code>double</code> for the new empirical distribution.
 	 * @throws IncorrectDistributionParameterException when any of the provided data
-	 *  is less than zero or the sum of all of them is not one.
+	 * is less than zero or the sum of all of them is not one.
 	 *
 	 */
 	public EmpiricalPar(double[] pdf) throws IncorrectDistributionParameterException {
@@ -79,11 +79,11 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * Creates an empirical parameter with these entries (each entry contains
-	 * a value and a probability).
-	 * The Empirical can return not only an integer, but also directly
-	 * an object, given the right probability table.
-	 * @param entries Empirical entries
+	 * Creates an empirical parameter with these entries (each entry contains a value
+	 * and a probability). The Empirical can return not only an integer, but also
+	 * directly an object, given the right probability table.
+	 *
+	 * @param entries Empirical entries.
 	 * @throws IncorrectDistributionParameterException
 	 */
 	public EmpiricalPar(EmpiricalEntry[] entries) throws IncorrectDistributionParameterException {
@@ -101,7 +101,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 * It returns the value of the parameters for the empirical distribution, that is
 	 * the vector of double representing the probabilities provided by the user.
 	 *
-	 * @return  array of double with the probability distribution function tabulated.
+	 * @return array of double with the probability distribution function tabulated.
 	 */
 	public double[] getPDF() {
 		return pdf;
@@ -111,7 +111,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 * It returns the value of the parameters for the empirical distribution, that is
 	 * the vector of double representing the cumulative distribution function tabulated.
 	 *
-	 * @return  array of double with the cumulative distribution function tabulated.
+	 * @return array of double with the cumulative distribution function tabulated.
 	 */
 	public double[] getCDF() {
 		return cdf;
@@ -119,12 +119,12 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It allows the user to change the value of the parameter of the empirical distribution.
-	 * Takes an existent array of pdf and tries to convert it in a pdf for
-	 * an empirical distribution, checking the conditions which must be respected.
+	 * Takes an existent array of pdf and tries to convert it in a pdf for an empirical
+	 * distribution, checking the conditions which must be respected.
 	 *
 	 * @param pdf array of double containing an existent pdf.
 	 * @throws IncorrectDistributionParameterException if, among the provided data, there is
-	 * a value less than zero or the sum of all of them is not 1.
+	 * a value less than zero or the sum of all of them is not one.
 	 *
 	 */
 	public void setPDF(double[] pdf) throws IncorrectDistributionParameterException {
@@ -136,13 +136,13 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 				sumProb += this.pdf[i];
 			} else {
 				//negative probability not allowed
-				throw new IncorrectDistributionParameterException("Found a probability less than zero. Only value gtz allowed.");
+				throw new IncorrectDistributionParameterException("Found a probability less than zero. Only values equal to or greater than zero are allowed.");
 			}
 		}
 
-		if (Math.abs(sumProb - 1.0) > 1E-3) {
-			//total probability must be near 1 (10exp(-3) error allowed)
-			throw new IncorrectDistributionParameterException("The sum of the probability mass must be 1.0, input mass is " + sumProb);
+		if (Math.abs(sumProb - 1.0) > 1e-6) {
+			//total probability must be near 1 (1e-6 error allowed)
+			throw new IncorrectDistributionParameterException("The sum of the probabilities must be one, but the input values sum up to " + sumProb);
 		}
 
 		//sets the cdf with the new probabilities
@@ -150,7 +150,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * Generates the CDF from the PDF. This is only a service method for setPdf.
+	 * Generates the CDF from the PDF. This is only a helper method called by setPdf.
 	 * Each new cdf value is the sum of the previous cdf value and the current pdf value.
 	 *
 	 */
@@ -164,11 +164,11 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It controls whether the parameter is correct or not.
-	 * For the empirical distribution, the parameter is correct if the
-	 * values in the pdf array are greater than zero and they sum to 1.0.
+	 * It controls if the parameter is correct or not. For the empirical distribution,
+	 * the parameter is correct if the values in the pdf array are greater than zero
+	 * and they sum to one.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
 	@Override
@@ -177,7 +177,8 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * Checks whether a parameter value is correct
+	 * Checks whether a parameter value is correct.
+	 *
 	 * @param parameterName
 	 * @param value
 	 */
@@ -206,7 +207,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 * number then ask for the corresponding value).
 	 *
 	 * @param position
-	 * @return the value
+	 * @return value
 	 */
 	Object getValue(int position) {
 		return values[position];
@@ -214,6 +215,8 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * Returns all the values.
+	 *
+	 * @return values
 	 */
 	public Object[] getValues() {
 		return values;

@@ -10,13 +10,13 @@
 <subParameter classPath="jmt.engine.random.HyperExp" name="Hyperexponential"/>
 <subParameter classPath="jmt.engine.random.HyperExpPar" name="distrPar">
 <subParameter classPath="java.lang.Double" name="p">
-<value>0.01961553858473858</value>
+<value>0.25</value>
 </subParameter>
 <subParameter classPath="java.lang.Double" name="lambda1">
-<value>0.03923107716947716</value>
+<value>0.5</value>
 </subParameter>
 <subParameter classPath="java.lang.Double" name="lambda2">
-<value>1.960768922830523</value>
+<value>1.5</value>
 </subParameter>
 </subParameter>
 </subParameter>

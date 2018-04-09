@@ -26,12 +26,11 @@ import java.util.Map;
  * Date: 13-lug-2005
  * Time: 10.16.38
  * To change this template use Options | File Templates.
- * Modified by Bertoli Marco
  */
 public class ShortestQueueLengthRouting extends RoutingStrategy {
 
 	public ShortestQueueLengthRouting() {
-		description = "Jobs are routed to the station with the smallest queue length (number of jobs, current value).";
+		description = "Jobs are routed to the station with the smallest queue length.";
 	}
 
 	@Override

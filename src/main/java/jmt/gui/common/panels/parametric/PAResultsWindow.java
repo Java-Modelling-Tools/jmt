@@ -1230,8 +1230,6 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 
 			setRowSelectionAllowed(true);
 			setColumnSelectionAllowed(true);
-			setClipboardTransferEnabled(true);
-			setFillCellsEnabled(false);
 			this.setRowHeaderWidth(125);
 			this.setRowHeight(CommonConstants.ROW_HEIGHT);
 		}

@@ -17,66 +17,47 @@
  */
 
 package jmt.jmva.gui.exact.panels;
+
 import jmt.gui.exact.table.ExactTableModel;
 import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
 
-/**
- * @author Kourosh Sheykhvand
- * Date: Nov 2013
- * in this panel we are going to show the new performance indices which is SystemResponseTime the calculation has not finished yet.
- *  but the value are the same as the residence time panel but I just need to divide some of them. the formula has not be calculated but again
- *  we do not need to touch the algorithm we can have the information of the residence time and then use them here.
- */
+public final class SystemRespTimePanel extends SolutionPanel implements ExactConstants {
 
-public final class SystemRespTimePanel extends SolutionPanel implements ExactConstants{
 	private static final long serialVersionUID = 1L;
 	private double[][][] resTimes;
-	//	private double[][] classAggs, stationAggs;
+	private double[][] classAggs;
+	private double[][] classAggsWO;
 	private double[] globalAgg;
-	private double[] globalAggW;
-	//	private double[][][] throughput;
-	private double[][] classAggr;
-	private double[][] classAggrW;
-	private boolean mixedModel;
+	private double[] globalAggWO;
 
+	/* EDITED by Abhimanyu Chugh */
 	public SystemRespTimePanel(ExactWizard ew, SolverAlgorithm alg) {
 		super(ew, alg);
-
 		helpText = "<html>System Response Time</html>";
 		name = "System Response Time";
 	}
 	/* END */
+
 	/**
 	 * gets status from data object
 	 */
 	@Override
 	protected void sync() {
 		super.sync();
-
+		/* EDITED by Abhimanyu Chugh */
 		resTimes = data.getResTimes(algorithm);
-
-		classAggr = data.getPerClassR(algorithm, true);
-
-		classAggrW = data.getPerClassR(algorithm, false);
-		mixedModel =!(data.isClosed() || data.isOpen());
-		if (!mixedModel) {
-			globalAgg = data.getGlobalR(algorithm, true);
-			globalAggW = data.getGlobalR(algorithm, false);
-		} else {
-			globalAgg = globalAggW = null;
-		}
-
-
+		classAggs = data.getPerClassR(algorithm, true);
+		classAggsWO = data.getPerClassR(algorithm, false);
+		globalAgg = data.getGlobalR(algorithm, true);
+		globalAggWO = data.getGlobalR(algorithm, false);
+		/* END */
 	}
+
 	@Override
 	protected ExactTableModel getTableModel() {
-
-
 		return new RTTableModel();
-
-
 	}
 
 	@Override
@@ -84,20 +65,17 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 		return ExactConstants.DESCRIPTION_RESPONSETIMES;
 	}
 
+	/**
+	 * the model backing the visit table.
+	 * Rows represent stations, columns classes.
+	 */
 	private class RTTableModel extends ExactTableModel {
-
-		/**
-		 * 
-		 */
 
 		private static final long serialVersionUID = 1L;
 
 		public RTTableModel() {
-
 			prototype = new Double(1000);
 			rowHeaderPrototype = "Station1000";
-
-
 		}
 
 		@Override
@@ -107,6 +85,7 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 			}
 			return 2;
 		}
+
 		@Override
 		public int getColumnCount() {
 			if (resTimes == null) {
@@ -114,17 +93,18 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 			}
 			return classes + 1;
 		}
+
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
 				return "<html><body><p><b>A</b></p></body></html>";
-			}
-			else if (rowIndex == 1) {
+			} else if (rowIndex == 1) {
 				return "<html><body><p><b>B</b></p></body></html>";
 			} else {
 				return null;
 			}
 		}
+
 		@Override
 		public String getColumnName(int index) {
 			if (index == 0) {
@@ -132,27 +112,28 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 			}
 			return classNames[index - 1];
 		}
+
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			double d=-1.0;
+			double d = -1.0;
 
-			if (rowIndex == 0 && columnIndex > 0) {
-				d = classAggr[columnIndex - 1][iteration];
-			} else if (rowIndex ==0 && columnIndex == 0 && !mixedModel)
-			{
+			if (rowIndex == 0 && columnIndex == 0 && !data.isMixed()) {
 				d = globalAgg[iteration];
-			} else if (rowIndex == 1 && columnIndex > 0) {
-				d = classAggrW[columnIndex - 1][iteration];
-			} else if (!mixedModel) {
-				d = globalAggW[iteration];
+			} else if (rowIndex == 0 && columnIndex > 0) {
+				d = classAggs[columnIndex - 1][iteration];
+			} else if (rowIndex == 1 && columnIndex == 0 && data.isClosed()) {
+				d = globalAggWO[iteration];
+			} else if (rowIndex == 1 && columnIndex > 0 && data.getClassTypes()[columnIndex - 1] == CLASS_CLOSED) {
+				d = classAggsWO[columnIndex - 1][iteration];
 			}
 
-			// NOTE: for open classes do not compute row B
-			if ( (rowIndex == 1 && columnIndex > 0 && classTypes[columnIndex-1] == CLASS_OPEN) || d < 0.0) {
+			if (d < 0.0) {
 				return new String("--");
 			} else {
 				return new Double(d);
 			}
 		}
+
 	}
+
 }

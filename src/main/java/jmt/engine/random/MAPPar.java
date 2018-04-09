@@ -18,121 +18,200 @@
 
 package jmt.engine.random;
 
+import Jama.Matrix;
 import jmt.common.exception.IncorrectDistributionParameterException;
 
 /**
- *
+ * 
  * This is the parameter that should be passed to the MAP
  * distribution.
- *
- * <br><br>Copyright (c) 2006
- * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
- * @author Giuliano Casale
- *
+ * 
+ * <br><br>Copyright (c) 2017
+ * <br>Imperial College London - Department of Computing
+ * @author Lulai Zhu
+ * 
  */
 public class MAPPar extends AbstractParameter implements Parameter {
 
+	private double[][] D0;
+	private double[][] D1;
 	private double mean;
 	private double var;
-	private double sigma0;
-	private double sigma1;
-	private double lambda0;
-	private double lambda1;
-	protected ExponentialPar expParam0;
-	protected ExponentialPar expParam1;
+	private double[] pi;
+	private double[] lambda;
+	private double[][] P0;
+	private double[][] P1;
 
-	public MAPPar(Double lambda0, Double lambda1, Double sigma0, Double sigma1) throws IncorrectDistributionParameterException {
-		this.sigma0 = sigma0.doubleValue();
-		this.sigma1 = sigma1.doubleValue();
-		this.lambda0 = lambda0.doubleValue();
-		this.lambda1 = lambda1.doubleValue();
+	/**
+	 * It creates a new phase-type parameter based on the data provided by the user.
+	 *
+	 * @param D0 2D array of Object containing the hidden transition rate matrix.
+	 * @param D1 2D array of Object containing the observable transition rate matrix.
+	 * @throws IncorrectDistributionParameterException if D0 or D1 is incorrect
+	 * or if D0 and D1 are inconsistent or if D0 + D1 is incorrect.
+	 *
+	 */
+	public MAPPar(Object[] D0, Object[] D1) throws IncorrectDistributionParameterException {
+		this.D0 = new double[D0.length][];
+		for (int i = 0; i < D0.length; i++) {
+			this.D0[i] = new double[((Object[]) D0[i]).length];
+			for (int j = 0; j < ((Object[]) D0[i]).length; j++) {
+				Double d = (Double) ((Object[]) D0[i])[j];
+				this.D0[i][j] = d.doubleValue();
+			}
+		}
+		this.D1 = new double[D1.length][];
+		for (int i = 0; i < D1.length; i++) {
+			this.D1[i] = new double[((Object[]) D1[i]).length];
+			for (int j = 0; j < ((Object[]) D1[i]).length; j++) {
+				Double d = (Double) ((Object[]) D1[i])[j];
+				this.D1[i][j] = d.doubleValue();
+			}
+		}
 		testParameters();
-		this.mean = (this.sigma0 + this.sigma1) / (this.sigma1 * this.lambda0 + this.sigma0 * this.lambda1);
-		this.var = 0;
-		// creates 2 ExponentialPar objects
-		expParam0 = new ExponentialPar(this.lambda0 + this.sigma0);
-		expParam1 = new ExponentialPar(this.lambda1 + this.sigma1);
+
+		int order = this.D0.length;
+		Matrix M = new Matrix(this.D0).inverse().uminus();
+		Matrix P = M.times(new Matrix(this.D1));
+		Matrix L = P.minus(Matrix.identity(order, order));
+		for (int i = 0; i < order; i++) {
+			L.set(i, order - 1, 1.0);
+		}
+		Matrix r = new Matrix(1, order, 0.0);
+		r.set(0, order - 1, 1.0);
+		Matrix pi = L.solveTranspose(r).transpose();
+		Matrix one = new Matrix(order, 1, 1.0);
+		double moment1 = pi.times(M).times(one).get(0, 0);
+		double moment2 = 2 * pi.times(M).times(M).times(one).get(0, 0);
+		mean = moment1;
+		var = moment2 - moment1 * moment1;
+
+		this.pi = pi.getArrayCopy()[0];
+		lambda = new double[order];
+		for (int i = 0; i < order; i++) {
+			lambda[i] = -this.D0[i][i];
+		}
+		P0 = new double[order][order];
+		for (int i = 0; i < order; i++) {
+			for (int j = 0; j < order; j++) {
+				if (i == j) {
+					P0[i][j] = 0.0;
+				} else {
+					P0[i][j] = this.D0[i][j] / lambda[i];
+				}
+			}
+		}
+		P1 = new double[order][order];
+		for (int i = 0; i < order; i++) {
+			for (int j = 0; j < order; j++) {
+				P1[i][j] = this.D1[i][j] / lambda[i];
+			}
+		}
 	}
 
 	/**
-	 * Tests the parameters for the constructor requiring p, lambda1 and lambda0.
+	 * Tests the parameters for the constructor requiring D0 and D1.
 	 *
-	 * @throws IncorrectDistributionParameterException if p is not between zero and one or if lambda0 and lambda1 are not both greater than zero.
+	 * @throws IncorrectDistributionParameterException if D0 or D1 is incorrect
+	 * or if D0 and D1 are inconsistent or if D0 + D1 is incorrect.
 	 *
 	 */
 	private void testParameters() throws IncorrectDistributionParameterException {
-		if (sigma0 <= 0) {
-			throw new IncorrectDistributionParameterException("Error: sigma0 must be >= 0 ");
+		if (!checkD0()) {
+			throw new IncorrectDistributionParameterException("Error: D0 is incorrect");
 		}
-		if (sigma1 <= 0) {
-			throw new IncorrectDistributionParameterException("Error: sigma1 must be >= 0 ");
+		if (!checkD1()) {
+			throw new IncorrectDistributionParameterException("Error: D1 is incorrect");
 		}
-		if (lambda0 < 0) {
-			throw new IncorrectDistributionParameterException("Error: lambda0 must be >= 0");
+		if (D0.length != D1.length) {
+			throw new IncorrectDistributionParameterException("Error: D0 and D1 are inconsistent");
 		}
-		if (lambda1 < 0) {
-			throw new IncorrectDistributionParameterException("Error: lambda1 must be >= 0");
+		if (!checkD0D1()) {
+			throw new IncorrectDistributionParameterException("Error: D0 + D1 is incorrect");
 		}
 	}
 
 	/**
-	 * It verifies if the parameter is correct. For the MAP
-	 * distribution, the parameter is right if the mean calculated is gtz,
-	 * the variance is gtz, p probability is between 0 and 1 and both the lambda value are gtz.
+	 * It verifies if the parameter is correct. For the MAP distribution,
+	 * the parameter is right if D0 is a square matrix such that the diagonal
+	 * entries are less than zero, the non-diagonal entries are greater than or
+	 * equal to zero and the entries in each row sum up to a non-positive value.
 	 *
-	 * @return boolean, indicating whether the parameter is correct or not.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
-
-	@Override
-	public boolean check() {
-		if ((sigma0 <= 0) || (sigma1 <= 0) || (lambda0 < 0) || (lambda1 < 0)) {
-			return false;
-		} else {
-			return true;
+	private boolean checkD0() {
+		for (int i = 0; i < D0.length; i++) {
+			if (D0.length != D0[i].length) {
+				return false;
+			}
+			double sum = 0.0;
+			for (int j = 0; j < D0[i].length; j++) {
+				if (i == j && D0[i][j] >= 0.0) {
+					return false;
+				}
+				if (i != j && D0[i][j] < 0.0) {
+					return false;
+				}
+				sum += D0[i][j];
+			}
+			if (sum > 1e-6) {
+				return false;
+			}
 		}
-	}
-
-	public double getSigma0() {
-		return sigma0;
-	}
-
-	public double getSigma1() {
-		return sigma1;
+		return true;
 	}
 
 	/**
-	 * It returns the value of the parameter lambda0, the parameter lambda for the
-	 * 1st exponential distribution created by the MAP parameter.
+	 * It verifies if the parameter is correct. For the MAP distribution,
+	 * the parameter is right if D1 is a square matrix such that the entries
+	 * are greater than or equal to zero.
 	 *
-	 * @return double with lambda0 the value of lambda for the 1st exponential distribution.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
-
-	public double getLambda0() {
-		return lambda0;
+	private boolean checkD1() {
+		for (int i = 0; i < D1.length; i++) {
+			if (D1.length != D1[i].length) {
+				return false;
+			}
+			for (int j = 0; j < D1[i].length; j++) {
+				if (D1[i][j] < 0.0) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	/**
-	 * It returns the value of the parameter lambda1, the parameter lambda for the
-	 * 2nd exponential distribution created by the MAP parameter.
+	 * It verifies if the parameter is correct. For the MAP distribution,
+	 * the parameter is right if the entries in each row of D0 + D1 sum up to
+	 * zero.
 	 *
-	 * @return double with lambda1 the value of lambda for the 2nd exponential distribution.
+	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
-
-	public double getLambda1() {
-		return lambda1;
+	private boolean checkD0D1() {
+		for (int i = 0; i < D0.length; i++) {
+			double sum = 0.0;
+			for (int j = 0; j < D0[i].length; j++) {
+				sum += (D0[i][j] + D1[i][j]);
+			}
+			if (Math.abs(sum) > 1e-6) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
 	 * It returns the value of the mean of the MAP distribution which
 	 * is provided by the user or evaluated according to other data.
 	 *
-	 * @return double with the mean of the MAP distribution.
+	 * @return double with the mean of the phase-type distribution.
 	 *
 	 */
-
 	public double getMean() {
 		return mean;
 	}
@@ -141,36 +220,59 @@ public class MAPPar extends AbstractParameter implements Parameter {
 	 * It returns the value of the variance of the MAP distribution which
 	 * is provided by the user or evaluated according to other data.
 	 *
-	 * @return double with the variance of the MAP distribution.
+	 * @return double with the variance of the phase-type distribution.
 	 *
 	 */
-
 	public double getVar() {
 		return var;
 	}
 
 	/**
-	 * It returns the parameter used to create the 1st exponential
-	 * distribution used by the MAP distribution.
+	 * It returns the value of the parameter pi, the stationary probability vector
+	 * of the MAP distribution.
 	 *
-	 * @return exponentialPar with expParam0, the parameter of the 1st exponential distribution.
+	 * @return array of double with pi the stationary probability vector of the
+	 * MAP distribution.
 	 *
 	 */
-
-	public ExponentialPar getExpParam0() {
-		return expParam0;
+	public double[] getPi() {
+		return pi;
 	}
 
 	/**
-	 * It returns the parameter used to create the 2nd the exponential
-	 * distribution used by the MAP distribution.
+	 * It returns the value of the parameter lambda, the completion rate vector
+	 * of the MAP distribution.
 	 *
-	 * @return exponentialPar with expParam1, the parameter of the 2nd exponential distribution.
+	 * @return array of double with lambda the completion rate vector of the
+	 * MAP distribution.
 	 *
 	 */
+	public double[] getLambda() {
+		return lambda;
+	}
 
-	public ExponentialPar getExpParam1() {
-		return expParam1;
+	/**
+	 * It returns the value of the parameter P0, the hidden transition probability matrix
+	 * of the MAP distribution.
+	 *
+	 * @return 2D array of double with P0 the hidden transition probability matrix of the
+	 * phase-type distribution.
+	 *
+	 */
+	public double[][] getP0() {
+		return P0;
+	}
+
+	/**
+	 * It returns the value of the parameter P1, the observable transition probability matrix
+	 * of the MAP distribution.
+	 *
+	 * @return 2D array of double with P1 the observable transition probability matrix of the
+	 * MAP distribution.
+	 *
+	 */
+	public double[][] getP1() {
+		return P1;
 	}
 
 } // end MAPPar

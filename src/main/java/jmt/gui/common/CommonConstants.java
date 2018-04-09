@@ -47,20 +47,6 @@ import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
  * User: OrsotronIII
  * Date: 17-mag-2005
  * Time: 11.15.51
- * Modified by Bertoli Marco
- *
- * Modified by Ashanka (May 2010):
- * Desc: Renamed the default of Queueing Station to Queue Stat.
- *       in the inner class : ConstMap function: fill
- *
- * Modified by Ashanka (Nov 2012)
- * Desc: Added new LoadDependent Routing
- *
- * Modified by Vitor S. Lopes (Jul 2016)
- * Desc: Added Semaphore and Scaler
- *
- * Modified by Lulai Zhu (Jul 2016)
- * Desc: Added Place and Transition
  */
 public interface CommonConstants {
 
@@ -116,61 +102,69 @@ public interface CommonConstants {
 	};
 
 	/**Constants for GUI scaling*/
-	public static final int MAX_GUI_WIDTH_STARTSCREEN =  800;
+	public static final int MAX_GUI_WIDTH_STARTSCREEN = 800;
 	public static final int MAX_GUI_HEIGHT_STARTSCREEN = 600;
-	public static final int MAX_GUI_WIDTH_ABOUT =  800;
+	public static final int MAX_GUI_WIDTH_ABOUT = 800;
 	public static final int MAX_GUI_HEIGHT_ABOUT = 600;
-	public static final int MAX_GUI_WIDTH_QUICKHTML =  800;
+	public static final int MAX_GUI_WIDTH_QUICKHTML = 800;
 	public static final int MAX_GUI_HEIGHT_QUICKHTML = 600;
 
-	public static final int MAX_GUI_WIDTH_DIALOG_DEFAULT =  780;
+	public static final int MAX_GUI_WIDTH_DIALOG_DEFAULT = 780;
 	public static final int MAX_GUI_HEIGHT_DIALOG_DEFAULT = 520;
-	public static final int MAX_GUI_WIDTH_COMMON =  1024;
+	public static final int MAX_GUI_WIDTH_COMMON = 1024;
 	public static final int MAX_GUI_HEIGHT_COMMON = 768;
 
-	public static final int MAX_GUI_WIDTH_JSIM_DISTRIB =  480;
+	public static final int MAX_GUI_WIDTH_JSIM_DISTRIB = 480;
 	public static final int MAX_GUI_HEIGHT_JSIM_DISTRIB = 600;
-	public static final int MAX_GUI_WIDTH_JSIM_PROBLEMS =  450;
+	public static final int MAX_GUI_WIDTH_JSIM_PROBLEMS = 450;
 	public static final int MAX_GUI_HEIGHT_JSIM_PROBLEMS = 435;
-	public static final int MAX_GUI_WIDTH_JSIM_RESULTS =  1024;
+	public static final int MAX_GUI_WIDTH_JSIM_RESULTS = 1024;
 	public static final int MAX_GUI_HEIGHT_JSIM_RESULTS = 768;
-	public static final int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT =  1152;
+	public static final int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT = 1152;
 	public static final int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = 864;
 
-	public static final int MAX_GUI_WIDTH_JMVA =  1024;
+	public static final int MAX_GUI_WIDTH_JMVA = 1024;
 	public static final int MAX_GUI_HEIGHT_JMVA = 768;
 
-	public static final int MAX_GUI_WIDTH_JMCH =  800;
+	public static final int MAX_GUI_WIDTH_JMCH = 800;
 	public static final int MAX_GUI_HEIGHT_JMCH = 600;
 
-	public static final int MAX_GUI_WIDTH_JABA =  1024;
+	public static final int MAX_GUI_WIDTH_JABA = 1024;
 	public static final int MAX_GUI_HEIGHT_JABA = 768;
 
-	public static final int MAX_GUI_WIDTH_JWAT =  1024;
+	public static final int MAX_GUI_WIDTH_JWAT = 1024;
 	public static final int MAX_GUI_HEIGHT_JWAT = 768;
-	public static final int MAX_GUI_WIDTH_JWAT_STARTSCREEN =  520;
+	public static final int MAX_GUI_WIDTH_JWAT_STARTSCREEN = 520;
 	public static final int MAX_GUI_HEIGHT_JWAT_STARTSCREEN = 400;
-	public static final int MAX_GUI_WIDTH_JWAT_COLOR =  1024;
+	public static final int MAX_GUI_WIDTH_JWAT_COLOR = 1024;
 	public static final int MAX_GUI_HEIGHT_JWAT_COLOR = 768;
 
-	public static final int MAX_GUI_WIDTH_LDSTRATEGY =  800;
+	public static final int MAX_GUI_WIDTH_LDSTRATEGY = 800;
 	public static final int MAX_GUI_HEIGHT_LDSTRATEGY = 600;
-	public static final int MAX_GUI_WIDTH_LDHELP =  600;
+	public static final int MAX_GUI_WIDTH_LDHELP = 600;
 	public static final int MAX_GUI_HEIGHT_LDHELP = 400;
-	public static final int MAX_GUI_WIDTH_LDROUTING =  800;
+	public static final int MAX_GUI_WIDTH_LDROUTING = 800;
 	public static final int MAX_GUI_HEIGHT_LDROUTING = 600;
-	public static final int MAX_GUI_WIDTH_LDEDITING =  400;
+	public static final int MAX_GUI_WIDTH_LDEDITING = 400;
 	public static final int MAX_GUI_HEIGHT_LDEDITING = 400;
 
-	public static final int MAX_GUI_WIDTH_WHATIF_PROGRESS =  640;
+	public static final int MAX_GUI_WIDTH_WHATIF_PROGRESS = 640;
 	public static final int MAX_GUI_HEIGHT_WHATIF_PROGRESS = 480;
-	public static final int MAX_GUI_WIDTH_WHATIF_RESULTS =  1024;
+	public static final int MAX_GUI_WIDTH_WHATIF_RESULTS = 1024;
 	public static final int MAX_GUI_HEIGHT_WHATIF_RESULTS = 768;
 
-	static final Dimension DIM_BUTTON_XS = new Dimension(60, 20);
-	static final Dimension DIM_BUTTON_S = new Dimension(80, 20);
-	static final Dimension DIM_BUTTON_M = new Dimension(110, 20);
-	static final Dimension DIM_BUTTON_L = new Dimension(140, 20);
+	public static final Dimension DIM_BUTTON_XS = new Dimension(60, 20);
+	public static final Dimension DIM_BUTTON_S = new Dimension(80, 20);
+	public static final Dimension DIM_BUTTON_M = new Dimension(110, 20);
+	public static final Dimension DIM_BUTTON_L = new Dimension(140, 20);
+
+	public static final int MAX_SMALL_ICON_SCREEN_WIDTH = 1366;
+	public static final int MAX_SMALL_ICON_SCREEN_HEIGHT = 768;
+
+	public static final Dimension SMALL_ICON_SIZE_MENU_BAR = new Dimension(25, 25);
+	public static final Dimension LARGE_ICON_SIZE_MENU_BAR = new Dimension(35, 35);
+	public static final Dimension SMALL_ICON_SIZE_TOOL_BAR = new Dimension(25, 25);
+	public static final Dimension LARGE_ICON_SIZE_TOOL_BAR = new Dimension(35, 35);
 
 	/**Constants for selection of station queueing strategy*/
 	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE = "Preemptive Scheduling";
@@ -193,20 +187,20 @@ public interface CommonConstants {
 	public static final String SERVICE_LOAD_INDEPENDENT = "Load Independent";
 	public static final String SERVICE_LOAD_DEPENDENT = "Load Dependent";
 	public static final String SERVICE_ZERO = "Zero Service Time";
-	public static final String SERVICE_DISABLED = "Disabled";
 
 	/**Constants for selection of distributions*/
 	public static final String DISTRIBUTION_BURST = "Burst";
+	public static final String DISTRIBUTION_MAP = "MAP";
 	public static final String DISTRIBUTION_MMPP2 = "MMPP2";
-	public static final String DISTRIBUTION_COXIAN= "Coxian";
+	public static final String DISTRIBUTION_COXIAN = "Coxian";
 	public static final String DISTRIBUTION_DETERMINISTIC = "Deterministic";
 	public static final String DISTRIBUTION_ERLANG = "Erlang";
 	public static final String DISTRIBUTION_EXPONENTIAL = "Exponential";
 	public static final String DISTRIBUTION_GAMMA = "Gamma";
 	public static final String DISTRIBUTION_HYPEREXPONENTIAL = "Hyperexponential";
-	//public static final String DISTRIBUTION_MAP= "MAP";
 	public static final String DISTRIBUTION_NORMAL = "Normal";
 	public static final String DISTRIBUTION_PARETO = "Pareto";
+	public static final String DISTRIBUTION_PHASETYPE = "PhaseType";
 	//public static final String DISTRIBUTION_POISSON = "Poisson";
 	public static final String DISTRIBUTION_REPLAYER = "Replayer";
 	//public static final String DISTRIBUTION_STUDENTT = "StudentT";
@@ -305,6 +299,7 @@ public interface CommonConstants {
 	public static final String PAR1 = "%PAR1%";
 	public static final String PAR2 = "%PAR2%";
 
+	public static final int MAX_NUMBER_OF_PHASES = 64;
 	public static final int MAX_NUMBER_OF_CLASSES = 1024;
 	public static final int MAX_NUMBER_OF_GROUPS = 1024;
 	public static final int MAX_NUMBER_OF_STATIONS = 1024;

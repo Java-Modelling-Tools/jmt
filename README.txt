@@ -68,13 +68,13 @@ Compiling instructions
 - To create an installer you need IzPack that can be downloaded at  http://www.izforge.com/izpack/ and
    configure the appropriate path in "build.properties" file.
 
-- Simply open "build.xml" with ANT and select desidered target to build JMT from sources
+- Simply open "build.xml" with ANT and select desired target to build JMT from sources
 
 
 License
 -------
 Copyright (C) 2006-2018, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano, Italy
-Copyright (C) 2010-2018, Imperial College London, UK
+Copyright (C) 2010-2018, Department of Computing - Imperial College London, UK
 
 This program is free software; you can redistribute it and/or modify it under the terms 
 of the GNU General Public License as published by the Free Software Foundation; either 

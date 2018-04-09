@@ -54,7 +54,7 @@ public class LDHelpDialog extends JMTDialog {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String generalHelp = "<html>To enter values, single-click on the desired cell"
+	private static final String generalHelp = "<html>To enter values, double-click on the desired cell"
 			+ " and start typing.<br> To select multiple cells drag the mouse on them; click or drag on"
 			+ " row/column headers to select whole rows/columns.<br> <b>For a list of the available operations right-click"
 			+ " on the table</b>; all operations except pasting affect selected cells.<br>"

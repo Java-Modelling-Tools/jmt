@@ -33,45 +33,46 @@ import jmt.engine.QueueNet.NodeList;
 public class RoundRobinStrategy extends RoutingStrategy {
 
 	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
-	private int Counter;
+	private int closedCounter;
+	private int openCounter;
 
 	public RoundRobinStrategy() {
-		Counter = 0;
+		closedCounter = 0;
+		openCounter = 0;
 	}
 
 	/**
 	 * Gets the output node, into which the job must be routed, using a round
 	 * robin strategy.
-	 * @param nodes the list of output nodes
-	 * @param jobClass class of current job to be routed
+	 * @param nodes List of the output nodes.
+	 * @param jobClass Class of current job to be routed.
 	 * @return The selected node.
 	 */
 	@Override
 	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
-		NetNode out;
 		if (nodes.size() == 0) {
 			return null;
-		} else {
-			if (Counter == nodes.size()) {
-				Counter = 0;
-			}
-			out = nodes.get(Counter++);
+		}
 
-			// Skips sinks for closed classes
-			if (jobClass.getType() == CLOSED_CLASS) {
-				int totalLoops = 0; // Counts whenever a full loop has been performed
-				while (out.isSink()) {
-					if (Counter == nodes.size()) {
-						Counter = 0;
-						if (totalLoops++ > 0) {
-							return null;
-						}
-					}
-					out = nodes.get(Counter++);
+		NetNode output = null;
+		// Skips sinks for closed classes
+		if (jobClass.getType() == CLOSED_CLASS) {
+			for (int i = 0; i < nodes.size(); i++) {
+				if (closedCounter == nodes.size()) {
+					closedCounter = 0;
+				}
+				output = nodes.get(closedCounter++);
+				if (!output.isSink()) {
+					break;
 				}
 			}
-			return out;
+		} else {
+			if (openCounter == nodes.size()) {
+				openCounter = 0;
+			}
+			output = nodes.get(openCounter++);
 		}
+		return output;
 	}
 
 }

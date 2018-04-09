@@ -33,7 +33,6 @@ import jmt.gui.common.routingStrategies.RandomRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
-import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.ExactModel;
 import Jama.Matrix;
@@ -354,9 +353,6 @@ public class ModelConverter {
 								+ " does not have a valid mean value. Service time was set to default value 1.");
 					}
 				} else if (serv instanceof ZeroStrategy) {
-					serviceTimes[st][cl] = new double[1];
-					serviceTimes[st][cl][0] = 0;
-				} else if (serv instanceof DisabledStrategy) {
 					serviceTimes[st][cl] = new double[1];
 					serviceTimes[st][cl][0] = 0;
 				} else if (serv instanceof LDStrategy) {

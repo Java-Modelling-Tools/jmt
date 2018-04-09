@@ -96,7 +96,7 @@ public class Measure {
 	 * any more samples). A measure is marked as dead when it reaches maxDeadState.
 	 */
 	private int deadState = 0;
-	private int maxDeadState = 3;
+	private int maxDeadState = 2;
 
 	//-------SCALE FACTOR FOR RESIDENCE TIME MEASURES------------//
 
@@ -681,7 +681,6 @@ public class Measure {
 	 */
 	public void setSimParameters(SimParameters param) {
 		analyzer.setParameters(param);
-		maxDeadState = param.getDeadMeasureMaxChecks();
 	}
 
 	public double getSimTime() {
