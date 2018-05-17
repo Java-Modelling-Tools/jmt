@@ -39,12 +39,6 @@ public class newFace {
 	private Vertex vert3;
 
 	public newFace(Vertex v1, Vertex v2, Vertex v3, int colore) {
-		/*
-		vert[0]=v1;
-		vert[1]=v2;
-		vert[2]=v3;
-		*/
-
 		vert1 = v1;
 		vert2 = v2;
 		vert3 = v3;
@@ -113,15 +107,6 @@ public class newFace {
 	 * @return      true se sono confinanti
 	 */
 	public boolean confSect(newFace s1, newFace s2) {
-		/* Fatta con array: non adottata
-		int j,k,t=0;
-		for (j=0;j<2;j++)
-		{for (k=0;k<3;k++)
-		{if (s1.vert[j]==s2.vert[j]) t++;};};
-		if (t==2) return true;
-		else return false;
-		*/
-
 		// Considero due settori confinanti se hanno due vertici su 3 in comune
 		int t = 0;
 		if (s1.vert1 == s2.vert1) {

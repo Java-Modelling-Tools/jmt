@@ -218,7 +218,6 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		//build spinner panel
 		JPanel spinnerPanel = new JPanel();
 		JLabel spinnerDescrLabel = new JLabel("Stations:");
-		//stationNumSpinner = new JSpinner();
 		stationNumSpinner.setPreferredSize(DIM_BUTTON_XS);
 		spinnerPanel.add(spinnerDescrLabel);
 		spinnerPanel.add(stationNumSpinner);

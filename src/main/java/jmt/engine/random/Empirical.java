@@ -104,9 +104,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double[] pdf = ((EmpiricalPar) p).getPDF();
-			double mean = 0;
-			//it is a simple weighted mean: the weight of each value is the pdf of the value
-			//itself
+			double mean = 0.0;
 			for (int ptn = 0; ptn < pdf.length; ptn++) {
 				mean += pdf[ptn] * ptn;
 			}
@@ -132,9 +130,8 @@ public class Empirical extends AbstractDistribution implements Distribution {
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double[] pdf = ((EmpiricalPar) p).getPDF();
-			double mean = 0;
-			double variance = 0;
-			mean = theorMean(p);
+			double mean = theorMean(p);
+			double variance = 0.0;
 			for (int ptn = 0; ptn < pdf.length; ptn++) {
 				variance += (((ptn - mean) * (ptn - mean)) * pdf[ptn]);
 			}
@@ -164,11 +161,11 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			}
 			double[] pdf = ((EmpiricalPar) p).getPDF();
 			for (int ptn = pdf.length - 1; ptn > 0; ptn--) {
-				if (pdf[ptn] > 0) {
+				if (pdf[ptn] > 0.0) {
 					return ptn;
 				}
 			}
-			return -1;
+			return -1.0;
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one");

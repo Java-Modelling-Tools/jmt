@@ -59,7 +59,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 			if (x <= alfa) {
 				return 0.0;
 			}
-			return (alfa * Math.pow(k, alfa) / Math.pow(x, (alfa + 1)));
+			return (alfa * Math.pow(k, alfa) / Math.pow(x, (alfa + 1.0)));
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: parameter alpha must be > 2; parameter k must be > 0");
@@ -103,7 +103,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double alfa = ((ParetoPar) p).getAlpha();
 			double k = ((ParetoPar) p).getK();
-			return (alfa * k / (alfa - 1));
+			return (alfa * k / (alfa - 1.0));
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: parameter alpha must be > 2; parameter k must be > 0");
@@ -124,7 +124,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double alfa = ((ParetoPar) p).getAlpha();
 			double k = ((ParetoPar) p).getK();
-			return (alfa * k * k / ((alfa - 1) * (alfa - 1) * (alfa - 2)));
+			return (alfa * k * k / ((alfa - 1.0) * (alfa - 1.0) * (alfa - 2.0)));
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: parameter alpha must be > 2; parameter k must be > 0");
@@ -143,7 +143,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double alpha = ((ParetoPar) p).getAlpha();
 			double k = ((ParetoPar) p).getK();
-			return Math.pow((1 - engine.raw()), (-1 / alpha)) * k;
+			return Math.pow((1.0 - engine.raw()), (-1.0 / alpha)) * k;
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: parameter alpha must be > 2; parameter k must be > 0");

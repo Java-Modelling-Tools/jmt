@@ -93,7 +93,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 		tb = new TitledBorder("Parameter selection for the control of repeated executions");
 		chooserPanel.setBorder(tb);
 		chooser = new JComboBox(parameters);
-		chooser.setPreferredSize(DIM_BUTTON_L);
+		chooser.setPreferredSize(DIM_BUTTON_XL);
 		chooser.setToolTipText("Choose the what-if analysis to be performed");
 		chooserPanel.add(chooser, BorderLayout.NORTH);
 		JLabel description = new JLabel(PARAMETRIC_ANALYSIS_DESCRIPTION);

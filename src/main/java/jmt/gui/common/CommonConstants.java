@@ -153,10 +153,11 @@ public interface CommonConstants {
 	public static final int MAX_GUI_WIDTH_WHATIF_RESULTS = 1024;
 	public static final int MAX_GUI_HEIGHT_WHATIF_RESULTS = 768;
 
-	public static final Dimension DIM_BUTTON_XS = new Dimension(60, 20);
-	public static final Dimension DIM_BUTTON_S = new Dimension(80, 20);
-	public static final Dimension DIM_BUTTON_M = new Dimension(110, 20);
-	public static final Dimension DIM_BUTTON_L = new Dimension(140, 20);
+	public static final Dimension DIM_BUTTON_XS = new Dimension(60, 25);
+	public static final Dimension DIM_BUTTON_S = new Dimension(80, 25);
+	public static final Dimension DIM_BUTTON_M = new Dimension(100, 25);
+	public static final Dimension DIM_BUTTON_L = new Dimension(120, 25);
+	public static final Dimension DIM_BUTTON_XL = new Dimension(140, 25);
 
 	public static final int MAX_SMALL_ICON_SCREEN_WIDTH = 1366;
 	public static final int MAX_SMALL_ICON_SCREEN_HEIGHT = 768;
@@ -299,7 +300,7 @@ public interface CommonConstants {
 	public static final String PAR1 = "%PAR1%";
 	public static final String PAR2 = "%PAR2%";
 
-	public static final int MAX_NUMBER_OF_PHASES = 64;
+	public static final int MAX_NUMBER_OF_PHASES = 1024;
 	public static final int MAX_NUMBER_OF_CLASSES = 1024;
 	public static final int MAX_NUMBER_OF_GROUPS = 1024;
 	public static final int MAX_NUMBER_OF_STATIONS = 1024;

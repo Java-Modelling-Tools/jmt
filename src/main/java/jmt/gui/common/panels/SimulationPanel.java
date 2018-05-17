@@ -232,7 +232,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		label = new JLabel("Maximum number of samples: ");
 		label.setToolTipText("The term samples stands for observations");
 		simPanel.add(label);
-		maxSamples = new JSpinner(new SpinnerNumberModel(100000, 100000, Integer.MAX_VALUE, 50000));
+		maxSamples = new JSpinner(new SpinnerNumberModel(1000000, 100000, Integer.MAX_VALUE, 50000));
 		maxSamples.setValue(simd.getMaxSimulationSamples());
 		maxSamples.setToolTipText("The term sample stands for observation.");
 		label.setLabelFor(maxSamples);

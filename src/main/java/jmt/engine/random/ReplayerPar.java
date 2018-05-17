@@ -87,15 +87,14 @@ public class ReplayerPar extends AbstractParameter implements Parameter {
 				if (str == null) {
 					if (infiniteLoopRisk) {
 						// We have completed one loop and we have not found a
-						// good
-						// value, so we will use the default value.
+						// good value, so we will use the default value.
 						useDefaultValue = true;
 						notifyError(BAD_FILE_MSG);
 						return getNext();
 					}
 					// if the EOF is not reached it continues to read from the
 					// file else it restarts from the beginning of the file,
-					// it is cyclical
+					// it is cyclic
 					fr.close();
 					fr = new FileReader(fileName);
 					in = new BufferedReader(fr);

@@ -266,13 +266,11 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 		JPanel upRightPanel = new JPanel(new BorderLayout());
 		addClass = new JButton(addNewClass);
 		addClass.setMinimumSize(DIM_BUTTON_S);
-		addClass.setMaximumSize(DIM_BUTTON_S);
 		upRightPanel.add(addClass, BorderLayout.NORTH);
 
 		//build spinner panel
 		JPanel spinnerPanel = new JPanel();
 		JLabel spinnerDescrLabel = new JLabel("Classes:");
-		//rangesNumSpinner = new JSpinner();
 		classNumSpinner.setPreferredSize(DIM_BUTTON_XS);
 		spinnerPanel.add(spinnerDescrLabel);
 		spinnerPanel.add(classNumSpinner);

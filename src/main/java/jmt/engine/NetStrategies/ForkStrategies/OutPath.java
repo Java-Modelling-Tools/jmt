@@ -48,12 +48,12 @@ public class OutPath {
 
 	public void setProbabilityOfChosen(EmpiricalEntry probabilityOfChosen) 
 			throws IncorrectDistributionParameterException {
-		if (probabilityOfChosen.getProbability() <= 1 
-				&& probabilityOfChosen.getProbability() >= 0) {
+		if (probabilityOfChosen.getProbability() <= 1.0 
+				&& probabilityOfChosen.getProbability() >= 0.0) {
 			this.probabilityOfChosen = probabilityOfChosen;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"the sum of probabilities should between 0~1");
+					"the sum of probabilities should between 0 and 1");
 		}
 	}
 
@@ -72,15 +72,14 @@ public class OutPath {
 	}
 
 	public boolean checkProb(EmpiricalEntry[] ee) {
-		boolean flag = false;
-		double sum = 0;
+		double sum = 0.0;
 		for (int i = 0; i < ee.length; i++) {
 			sum += ee[i].getProbability();
 		}
-		if (sum == 1) {
-			flag = true;
+		if (Math.abs(sum - 1.0) > 1e-6) {
+			return false;
 		}
-		return flag;
+		return true;
 	}
 
 }

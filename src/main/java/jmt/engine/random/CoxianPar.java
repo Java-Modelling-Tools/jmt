@@ -181,4 +181,37 @@ public class CoxianPar extends AbstractParameter implements Parameter {
 		return expParam1;
 	}
 
+	/**
+	 * Sets mean for a given distribution parameter. This method is required to adjust the mean value
+	 * of a distribution into Load Dependent Service Time Strategy.
+	 * <br>Author: Bertoli Marco
+	 * @param value New mean value for this distribution.
+	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution.
+	 */
+	@Override
+	public void setMean(double value) throws IncorrectDistributionParameterException {
+		if (value <= 0) {
+			throw new IncorrectDistributionParameterException("Mean value must be greater than zero");
+		}
+		// Keeps variation coefficient c constant
+		double c = Math.sqrt(var) / mean;
+		if (c < 1) {
+			lambda0 = (2 / value) / (1 + Math.sqrt(1 + 2 * (c * c - 1)));
+			lambda1 = (2 / value) / (1 - Math.sqrt(1 + 2 * (c * c - 1)));
+			phi0 = 0;
+		} else if (c == 1) {
+			lambda0 = 1 / value;
+			lambda1 = 1 / value;
+			phi0 = 1;
+		} else {
+			lambda0 = 2 / value;
+			lambda1 = 1 / (value * c * c);
+			phi0 = 1 - 1 / (2 * c * c);
+		}
+		mean = value;
+		var = value * value * c * c;
+		expParam0.setLambda(lambda0);
+		expParam1.setLambda(lambda1);
+	}
+
 } // end CoxianPar

@@ -269,7 +269,8 @@ public abstract class NodeSection {
 		case PROPERTY_ID_UTILIZATION:
 			return jobsList.size();
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return jobsList.getTotalSojournTime() / NetSystem.getTime();
+			return (NetSystem.getTime() <= 0.0) ? 0.0
+					: jobsList.getTotalSojournTime() / NetSystem.getTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
@@ -291,7 +292,8 @@ public abstract class NodeSection {
 		case PROPERTY_ID_UTILIZATION:
 			return jobsList.size(jobClass);
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return jobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime();
+			return (NetSystem.getTime() <= 0.0) ? 0.0
+					: jobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}

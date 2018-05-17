@@ -57,9 +57,9 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 */
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
-			return (Math.pow(alpha, r) / Gamma.gamma(r)) * Math.pow(x, (r - 1)) * Math.exp(-alpha * x);
+			long r = ((ErlangPar) p).getR();
+			return (Math.pow(alpha, r) / Gamma.gamma(r)) * Math.pow(x, r - 1) * Math.exp(-alpha * x);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: alpha and r must be gtz");
 		}
@@ -76,15 +76,15 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 */
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
-			double sum = 0;
+			long r = ((ErlangPar) p).getR();
+			double sum = 0.0;
 			double a; // service variable to calculate sum
 			for (int i = 0; i < r - 1; i++) {
 				a = Math.pow((alpha * x), i) / Arithmetic.factorial(i);
 				sum = sum + a;
-			};
-			return 1 - Math.exp(-alpha * x) * sum;
+			}
+			return 1.0 - Math.exp(-alpha * x) * sum;
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: alpha and r must be gtz");
 		}
@@ -102,8 +102,8 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
+			long r = ((ErlangPar) p).getR();
 			return r / alpha;
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: alpha and r must be gtz");
@@ -122,8 +122,8 @@ public class Erlang extends AbstractDistribution implements Distribution {
 	 */
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double r = ((ErlangPar) p).getR();
 			double alpha = ((ErlangPar) p).getAlpha();
+			long r = ((ErlangPar) p).getR();
 			return r / (alpha * alpha);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: alpha and r must be gtz");
@@ -144,9 +144,9 @@ public class Erlang extends AbstractDistribution implements Distribution {
 			long r = ((ErlangPar) p).getR(); 
 			double par = 1.0;
 			for (int i = 0; i < r; i++) {
-				par = par * engine.raw();
+				par *= engine.raw();
 			}
-			return (-1 / alpha) * (Math.log(par));
+			return (-1.0 / alpha) * (Math.log(par));
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: alpha and r must be gtz");
 		}

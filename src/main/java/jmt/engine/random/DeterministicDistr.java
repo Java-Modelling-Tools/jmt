@@ -104,7 +104,7 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 	 */
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			return 0;
+			return 0.0;
 		} else {
 			throw new IncorrectDistributionParameterException("parameter t must be > 0");
 		}
@@ -120,8 +120,7 @@ public class DeterministicDistr extends AbstractDistribution implements Distribu
 	 */
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double t = ((DeterministicDistrPar) p).getParameterValue();
-			return t;
+			return ((DeterministicDistrPar) p).getParameterValue();
 		} else {
 			throw new IncorrectDistributionParameterException("parameter t must be > 0");
 		}

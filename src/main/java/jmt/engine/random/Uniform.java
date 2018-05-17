@@ -113,7 +113,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double max = ((UniformPar) p).getMax();
 			double min = ((UniformPar) p).getMin();
-			return (max + min) / 2;
+			return (max + min) / 2.0;
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: the *max* parameter must be greater than the *min* one because min and max represent the bounds of the distribution");
@@ -134,7 +134,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double max = ((UniformPar) p).getMax();
 			double min = ((UniformPar) p).getMin();
-			return Math.pow((max - min), 2) / 12;
+			return Math.pow((max - min), 2.0) / 12.0;
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: the *max* parameter must be greater than the *min* one because min and max represent the bounds of the distribution");
@@ -162,12 +162,12 @@ public class Uniform extends AbstractDistribution implements Distribution {
 			double max = ((UniformPar) p).getMax();
 			long random = 0;
 			try {
-				UniformPar param = new UniformPar(0, 0);
+				UniformPar param = new UniformPar(0.0, 0.0);
 				//double param[] = new double[2];
 
 				// first the most likely and also the fastest case.
 				if (min >= 0 && max < Long.MAX_VALUE) {
-					//    return (long)min + (long) (nextRand(((UniformPar) p)));
+					//return (long) min + (long) (nextRand(((UniformPar) p)));
 					return 0;
 				}
 				// would we get a numeric overflow?
@@ -189,13 +189,13 @@ public class Uniform extends AbstractDistribution implements Distribution {
 						return ((i1 & 0xFFFFFFFFL) << 32) | (i2 & 0xFFFFFFFFL);
 					}
 					param.setMin(min);
-					param.setMax(max + 1);
+					param.setMax(max + 1.0);
 					random = Math.round(nextRand(param));
 					if (random > max) {
 						random = (long) min;
 					}
 				} else {
-					param.setMin(min - 1);
+					param.setMin(min - 1.0);
 					param.setMax(max);
 					random = Math.round(nextRand(param));
 					if (random < min) {
@@ -233,7 +233,7 @@ public class Uniform extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double min = ((UniformPar) p).getMin();
 			double max = ((UniformPar) p).getMax();
-			return (int) ((long) min + (long) ((1L + (long) max - (long) min) * engine.raw()));
+			return (int) ((long) min + (long) ((1 + (long) max - (long) min) * engine.raw()));
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: the *max* parameter must be greater than the *min* one because min and max represent the bounds of the distribution");

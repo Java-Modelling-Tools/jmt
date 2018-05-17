@@ -138,7 +138,7 @@ public class Normal extends AbstractDistribution implements Distribution {
 			if (cacheFilled) {
 				cacheFilled = false;
 				// If generated number is in the past, reruns this method
-				return (cache > 0) ? cache : nextRand(p);
+				return (cache > 0.0) ? cache : nextRand(p);
 			};
 			double x, y, r, z;
 			do {
@@ -151,7 +151,7 @@ public class Normal extends AbstractDistribution implements Distribution {
 			cacheFilled = true;
 			// If generated number is in the past, reruns this method
 			double ret = mean + standardDeviation * y * z;
-			return (ret > 0) ? ret : nextRand(p);
+			return (ret > 0.0) ? ret : nextRand(p);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: standardDeviation must be gtz");
 		}

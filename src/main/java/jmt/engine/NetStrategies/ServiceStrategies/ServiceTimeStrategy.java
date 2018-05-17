@@ -37,7 +37,7 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 	/** Distribution parameters. */
 	protected Parameter parameter;
 
-	/** Creates a new instance of ServiceTime.*/
+	/** Creates a new instance of ServiceTime. */
 	public ServiceTimeStrategy() {
 	}
 
@@ -51,7 +51,7 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 	}
 
 	/**
-	 * Sets the distribution
+	 * Sets the distribution.
 	 * @param distribution the distribution to be used by this strategy.
 	 * @return true, if distribution has been set.
 	 */
@@ -61,8 +61,8 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 	}
 
 	/**
-	 * Sets the parameters of the distribution
-	 * @param parameter the parameter object
+	 * Sets the parameters of the distribution.
+	 * @param parameter the parameter object.
 	 * @return true, if parameters have been set.
 	 */
 	public boolean setParameter(Parameter parameter) {
@@ -81,9 +81,8 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 		try {
 			return distribution.nextRand(parameter);
 		} catch (IncorrectDistributionParameterException e) {
-			e.printStackTrace();
+			throw new NetException("Error in ServiceTimeStrategy: " + e.getMessage());
 		}
-		return 0.0;
 	}
 
 	/**
@@ -97,9 +96,8 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 		try {
 			return distribution.theorMean(parameter);
 		} catch (IncorrectDistributionParameterException e) {
-			e.printStackTrace();
+			throw new NetException("Error in ServiceTimeStrategy: " + e.getMessage());
 		}
-		return 0.0;
 	}
 
 }

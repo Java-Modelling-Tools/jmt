@@ -58,8 +58,8 @@ public abstract class Distribution implements ServiceStrategy {
 	protected String precondition;
 	protected boolean hasMean; // Used to provide input parameters with the tuple (mean, C)
 	protected boolean hasC;
-	protected double c;
 	protected double mean;
+	protected double c;
 	protected boolean isNestable;
 
 	/**
@@ -207,14 +207,6 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Returns if this distribution can be initialized providing variation coefficient C
-	 * @return true iff this distribution can be initialized using variation coefficient C
-	 */
-	public boolean hasC() {
-		return hasC;
-	}
-
-	/**
 	 * Returns if this distribution can be initialized providing its mean value
 	 * @return true iff this distribution can be initialized using its mean value
 	 */
@@ -223,11 +215,11 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * Returns distribution variation coefficient C only if <code>hasC()</code> is true
-	 * @return variation coefficient C
+	 * Returns if this distribution can be initialized providing variation coefficient C
+	 * @return true iff this distribution can be initialized using variation coefficient C
 	 */
-	public double getC() {
-		return c;
+	public boolean hasC() {
+		return hasC;
 	}
 
 	/**
@@ -236,6 +228,14 @@ public abstract class Distribution implements ServiceStrategy {
 	 */
 	public double getMean() {
 		return mean;
+	}
+
+	/**
+	 * Returns distribution variation coefficient C only if <code>hasC()</code> is true
+	 * @return variation coefficient C
+	 */
+	public double getC() {
+		return c;
 	}
 
 	/**
@@ -483,15 +483,7 @@ public abstract class Distribution implements ServiceStrategy {
 	@Override
 	public abstract String toString();
 
-	// ----- Methods that must be implemented ONLY if hasC or hasMean are true ----------------------------
-
-	/**
-	 * Sets the variation coefficient C for this distribution
-	 * @param value variation coefficient C value
-	 */
-	public void setC(double value) {
-		c = value;
-	}
+	// ----- Methods that must be implemented ONLY if hasMean or hasC are true ----------------------------
 
 	/**
 	 * Sets the mean for this distribution
@@ -502,8 +494,16 @@ public abstract class Distribution implements ServiceStrategy {
 	}
 
 	/**
-	 * This method has to be called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> is true
+	 * Sets the variation coefficient C for this distribution
+	 * @param value variation coefficient C value
+	 */
+	public void setC(double value) {
+		c = value;
+	}
+
+	/**
+	 * This method has to be called whenever a parameter changes and <code>hasMean</code> or
+	 * <code>hasC</code> is true
 	 */
 	public void updateCM() {
 	}

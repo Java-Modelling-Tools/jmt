@@ -22,8 +22,6 @@ import java.text.DecimalFormat;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
-import jmt.engine.math.parser.EvaluationException;
-import jmt.engine.math.parser.ParseError;
 import jmt.engine.math.parser.Parser;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.distributions.Distribution;
@@ -148,9 +146,7 @@ public class LDStrategy implements ServiceStrategy {
 			if (tmp.distribution.getMean() - parser.getValue() < 1e-5) {
 				tmp.meanExpression = parser.getExpression();
 			}
-		} catch (ParseError e) {
-			// Do nothing
-		} catch (EvaluationException e) {
+		} catch (RuntimeException e) {
 			// Do nothing
 		}
 	}
@@ -282,7 +278,7 @@ public class LDStrategy implements ServiceStrategy {
 	/**
 	 * Returns mean value of service time distribution for given number of jobs.
 	 * @param jobs queue length of the station
-	 * @return  mean value of service time distribution. On unsuccess returns -1
+	 * @return mean value of service time distribution. On failure returns -1
 	 */
 	public double getMeanValue(int jobs) {
 		// Finds key of right range
@@ -294,9 +290,7 @@ public class LDStrategy implements ServiceStrategy {
 		try {
 			parser.setVariable(VAR, jobs);
 			return parser.getValue();
-		} catch (ParseError e) {
-			// Do nothing
-		} catch (EvaluationException e) {
+		} catch (RuntimeException e) {
 			// Do nothing
 		}
 		return -1;

@@ -98,7 +98,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			return 1 / ((ExponentialPar) p).getLambda();
+			return 1.0 / ((ExponentialPar) p).getLambda();
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}
@@ -117,7 +117,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double lambda = ((ExponentialPar) p).getLambda();
-			return 1 / (lambda * lambda);
+			return 1.0 / (lambda * lambda);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}

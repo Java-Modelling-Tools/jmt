@@ -181,4 +181,27 @@ public class HyperExpPar extends AbstractParameter implements Parameter {
 		return expParam2;
 	}
 
+	/**
+	 * Sets mean for a given distribution parameter. This method is required to adjust the mean value
+	 * of a distribution into Load Dependent Service Time Strategy.
+	 * <br>Author: Bertoli Marco
+	 * @param value New mean value for this distribution.
+	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution.
+	 */
+	@Override
+	public void setMean(double value) throws IncorrectDistributionParameterException {
+		if (value <= 0) {
+			throw new IncorrectDistributionParameterException("Mean value must be greater than zero");
+		}
+		// Keeps variation coefficient c constant
+		double c = Math.sqrt(var) / mean;
+		p = 0.5 * (1 - Math.sqrt((c * c - 1) / (c * c + 1)));
+		lambda1 = 2 * p / value;
+		lambda2 = 2 * (1 - p) / value;
+		mean = value;
+		var = value * value * c * c;
+		expParam1.setLambda(lambda1);
+		expParam2.setLambda(lambda2);
+	}
+
 } // end HyperExpPar

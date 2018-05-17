@@ -222,7 +222,7 @@ public class Jmt {
 			} catch (NumberFormatException ex) {
 				System.err.println("Invalid maximum simulation time. Should be a number.");
 				System.exit(1);
-			}	
+			}
 		}
 
 		// Starts the simulation

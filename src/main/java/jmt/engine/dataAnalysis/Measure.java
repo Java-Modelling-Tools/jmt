@@ -504,8 +504,8 @@ public class Measure {
 				} else {
 					NetNode referenceNode = network.getNode(referenceNodeName);
 					//visits to the reference node
-					NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
-					visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobClass);
+					NodeSection refInputSection = referenceNode.getSection(NodeSection.INPUT);
+					visitsReferenceNode = refInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobClass);
 				}
 				visitsReferenceNode += network.getSwitchedJobs(jobClass);
 				visitsReferenceNode -= network.getConsumedJobs(jobClass);
@@ -554,8 +554,8 @@ public class Measure {
 					} else {
 						NetNode referenceNode = network.getNode(referenceNodeName);
 						//visits to the reference node
-						NodeSection refOutputSection = referenceNode.getSection(NodeSection.OUTPUT);
-						visitsReferenceNode = refOutputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobC);
+						NodeSection refInputSection = referenceNode.getSection(NodeSection.INPUT);
+						visitsReferenceNode = refInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobC);
 					}
 					//visitsReferenceNode += network.getSwitchedJobs(jobC);
 					visitsReferenceNode -= network.getConsumedJobs(jobC);

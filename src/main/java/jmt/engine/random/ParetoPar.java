@@ -131,4 +131,19 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 		}
 	}
 
+	/**
+	 * Sets mean for a given distribution parameter. This method is required to adjust the mean value
+	 * of a distribution into Load Dependent Service Time Strategy.
+	 * <br>Author: Bertoli Marco
+	 * @param value New mean value for this distribution.
+	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution.
+	 */
+	@Override
+	public void setMean(double value) throws IncorrectDistributionParameterException {
+		if (value <= 0) {
+			throw new IncorrectDistributionParameterException("Mean value must be greater than zero");
+		}
+		k = value - value / alpha;
+	}
+
 } // end ParetoPar

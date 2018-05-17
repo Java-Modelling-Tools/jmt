@@ -135,27 +135,27 @@ public class Uniform extends Distribution {
 	 */
 	protected void setCM(double mean, double c) {
 		// Backups old parameters to restore them upon a false result
-		Object oldmax = getParameter("max").getValue();
 		Object oldmin = getParameter("min").getValue();
-		double max = mean + mean * c * Math.sqrt(3);
+		Object oldmax = getParameter("max").getValue();
 		double min = mean - mean * c * Math.sqrt(3);
-		if (getParameter("max").setValue(new Double(max)) && getParameter("min").setValue(new Double(min))) {
+		double max = mean + mean * c * Math.sqrt(3);
+		if (getParameter("min").setValue(new Double(min)) && getParameter("max").setValue(new Double(max))) {
 			this.mean = mean;
 			this.c = c;
 		} else {
-			getParameter("max").setValue(oldmax);
 			getParameter("min").setValue(oldmin);
+			getParameter("max").setValue(oldmax);
 		}
 	}
 
 	/**
-	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> is true
+	 * This method is called whenever a parameter changes and <code>hasMean</code> or
+	 * <code>hasC</code> is true
 	 */
 	@Override
 	public void updateCM() {
-		double max = ((Double) getParameter("max").getValue()).doubleValue();
 		double min = ((Double) getParameter("min").getValue()).doubleValue();
+		double max = ((Double) getParameter("max").getValue()).doubleValue();
 		mean = (max + min) / 2;
 		c = (max - min) / (max + min) / Math.sqrt(3);
 	}

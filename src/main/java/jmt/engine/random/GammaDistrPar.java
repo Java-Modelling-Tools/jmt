@@ -45,7 +45,7 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	 *
 	 */
 	public GammaDistrPar(double alpha, double lambda) throws IncorrectDistributionParameterException {
-		if ((alpha <= 0.0) || (lambda <= 0.0)) {
+		if ((alpha <= 0) || (lambda <= 0)) {
 			throw new IncorrectDistributionParameterException("alpha and lambda must be > 0");
 		} else {
 			this.alpha = alpha;
@@ -66,7 +66,7 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	 */
 	@Override
 	public boolean check() {
-		if ((alpha <= 0.0) || (lambda <= 0.0)) {
+		if ((alpha <= 0) || (lambda <= 0)) {
 			return false;
 		} else {
 			return true;
@@ -104,7 +104,7 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	 *
 	 */
 	public void setAlpha(double alpha) throws IncorrectDistributionParameterException {
-		if (alpha <= 0.0) {
+		if (alpha <= 0) {
 			throw new IncorrectDistributionParameterException("alpha must be > 0");
 		} else {
 			this.alpha = alpha;
@@ -122,11 +122,26 @@ public class GammaDistrPar extends AbstractParameter implements Parameter {
 	 *
 	 */
 	public void setLambda(double lambda) throws IncorrectDistributionParameterException {
-		if (lambda <= 0.0) {
+		if (lambda <= 0) {
 			throw new IncorrectDistributionParameterException("lambda must be > 0");
 		} else {
 			this.lambda = lambda;
 		}
+	}
+
+	/**
+	 * Sets mean for a given distribution parameter. This method is required to adjust the mean value
+	 * of a distribution into Load Dependent Service Time Strategy.
+	 * <br>Author: Bertoli Marco
+	 * @param value New mean value for this distribution.
+	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution.
+	 */
+	@Override
+	public void setMean(double value) throws IncorrectDistributionParameterException {
+		if (value <= 0) {
+			throw new IncorrectDistributionParameterException("Mean value must be greater than zero");
+		}
+		lambda = value / alpha;
 	}
 
 } // end GammaDistrPar

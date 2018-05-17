@@ -31,7 +31,7 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 public class Replayer extends AbstractDistribution implements Distribution {
 
 	private double valueSum;
-	private long valueCount;
+	private int valueCount;
 
 	/**
 	 *  Constructs a new distribution with standard random engine.
@@ -70,7 +70,7 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	 */
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		throw new IncorrectDistributionParameterException("Method not implemented yet");
-	};
+	}
 
 	/**
 	 * This method is used to obtain from the distribution its cumulative distribution
@@ -83,7 +83,7 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	 */
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		throw new IncorrectDistributionParameterException("Method not implemented yet");
-	};
+	}
 
 	/**
 	  * This method is used to obtain from the distribution the value of its own
@@ -95,7 +95,7 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	  */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		return valueSum / valueCount;
-	};
+	}
 
 	/**
 	  * This method is used to obtain from the distribution the value of its own
@@ -107,6 +107,6 @@ public class Replayer extends AbstractDistribution implements Distribution {
 	  */
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		throw new IncorrectDistributionParameterException("Method not implemented yet");
-	};
+	}
 
 }

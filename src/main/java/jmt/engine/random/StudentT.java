@@ -60,9 +60,9 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double freedom = ((StudentTPar) p).getFreedom();
-			double val = Sfun.logGamma((freedom + 1) / 2) - Sfun.logGamma(freedom / 2);
-			double TERM = Math.exp(val) / Math.sqrt(Math.PI * freedom);
-			return TERM * Math.pow((1 + x * x / freedom), -(freedom + 1) * 0.5);
+			double value = Sfun.logGamma((freedom + 1.0) / 2.0) - Sfun.logGamma(freedom / 2.0);
+			double TERM = Math.exp(value) / Math.sqrt(Math.PI * freedom);
+			return TERM * Math.pow((1.0 + x * x / freedom), -(freedom + 1.0) * 0.5);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
 		}
@@ -96,7 +96,7 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	 */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			return 0;
+			return 0.0;
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
 		}
@@ -113,10 +113,10 @@ public class StudentT extends AbstractDistribution implements Distribution {
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double freedom = ((StudentTPar) p).getFreedom();
-			if (freedom < 2) {
-				return 0;
+			if (freedom < 2.0) {
+				return 0.0;
 			} else {
-				return freedom / (freedom - 2);
+				return freedom / (freedom - 2.0);
 			}
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
@@ -142,7 +142,7 @@ public class StudentT extends AbstractDistribution implements Distribution {
 			} while (w > 1.0);
 			// If generated number is in the past, reruns this method
 			double ret = (u * Math.sqrt(freedom * (Math.exp(-2.0 / freedom * Math.log(w)) - 1.0) / w));
-			return (ret > 0) ? ret : nextRand(p);
+			return (ret > 0.0) ? ret : nextRand(p);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: freedom must be an integer gtz");
 		}

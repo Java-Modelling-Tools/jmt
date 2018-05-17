@@ -10,10 +10,10 @@ package jmt.engine.random.engine;
 /** This is a Java version of the Mersenne Twister.
  * Coded by Takuji Nishimura and Makoto Matsu.
  * <br>
- *<br>Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+ * <br>Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
  *  All rights reserved.
  * <br><br>
- * Redistribution and use in source and binary forms, with or without
+ *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions
  *  are met:
  *  <br>
@@ -46,7 +46,7 @@ package jmt.engine.random.engine;
  * email: matumoto@math.keio.ac.jp<br>
  * <br>
  *
- * @author  (translated  in java by) Federico Granata
+ * @author (translated in java by) Federico Granata
  */
 public class MersenneTwister extends RandomEngine {
 

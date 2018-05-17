@@ -226,7 +226,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 							simStateChecker.initialize();
 						}
 						ModelSnapshot tmpServersContent = (ModelSnapshot) simStateChecker.getServersContent().clone();
-						ModelSnapshot tmpServersUtilization = (ModelSnapshot) simStateChecker.getServersContent().clone();
+						ModelSnapshot tmpServersUtilization = (ModelSnapshot) simStateChecker.getServersUtilization().clone();
 						if (!dispatcher.simulator.isFinished()) {//SPIC
 							simStateChecker.getModelState();
 						}//SPIC

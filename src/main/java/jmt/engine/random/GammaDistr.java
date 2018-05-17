@@ -59,10 +59,10 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double alpha = ((GammaDistrPar) p).getAlpha();
 			double lambda = ((GammaDistrPar) p).getLambda();
-			if (x < 0) {
+			if (x < 0.0) {
 				return 0.0;
 			}
-			if (x == 0) {
+			if (x == 0.0) {
 				if (alpha == 1.0) {
 					return 1.0 / lambda;
 				} else {
@@ -148,12 +148,12 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
 			double alpha = ((GammaDistrPar) p).getAlpha();
-			double lambda = 1/((GammaDistrPar) p).getLambda();
-			double a = alpha;
-			double aa = -1.0, aaa = -1.0,
-
-			b = 0.0, c = 0.0, d = 0.0, e, r, s = 0.0, si = 0.0, ss = 0.0, q0 = 0.0, q1 = 0.0416666664, q2 = 0.0208333723, q3 = 0.0079849875, q4 = 0.0015746717, q5 = -0.0003349403, q6 = 0.0003340332, q7 = 0.0006053049, q8 = -0.0004701849, q9 = 0.0001710320, a1 = 0.333333333, a2 = -0.249999949, a3 = 0.199999867, a4 = -0.166677482, a5 = 0.142873973, a6 = -0.124385581, a7 = 0.110368310, a8 = -0.112750886, a9 = 0.104089866, e1 = 1.000000000, e2 = 0.499999994, e3 = 0.166666848, e4 = 0.041664508, e5 = 0.008345522, e6 = 0.001353826, e7 = 0.000247453;
-
+			double lambda = 1.0 / ((GammaDistrPar) p).getLambda();
+			double a = alpha, aa = -1.0, aaa = -1.0;
+			double b = 0.0, c = 0.0, d = 0.0, e = 0.0, r = 0.0, s = 0.0, si = 0.0, ss = 0.0, q0 = 0.0;
+			double q1 = 0.0416666664, q2 = 0.0208333723, q3 = 0.0079849875, q4 = 0.0015746717, q5 = -0.0003349403, q6 = 0.0003340332, q7 = 0.0006053049, q8 = -0.0004701849, q9 = 0.0001710320;
+			double a1 = 0.333333333, a2 = -0.249999949, a3 = 0.199999867, a4 = -0.166677482, a5 = 0.142873973, a6 = -0.124385581, a7 = 0.110368310, a8 = -0.112750886, a9 = 0.104089866;
+			double e1 = 1.000000000, e2 = 0.499999994, e3 = 0.166666848, e4 = 0.041664508, e5 = 0.008345522, e6 = 0.001353826, e7 = 0.000247453;
 			double gds, par, q, t, sign_u, u, v, w, x;
 			double v1, v2, v12;
 

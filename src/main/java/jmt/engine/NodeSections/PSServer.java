@@ -127,7 +127,8 @@ public class PSServer extends ServiceSection {
 			}
 			return sum;
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return psJobsList.getTotalSojournTime() / NetSystem.getTime() / numberOfServers;
+			return (NetSystem.getTime() <= 0.0) ? 0.0
+					: psJobsList.getTotalSojournTime() / NetSystem.getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id);
 		}
@@ -139,7 +140,8 @@ public class PSServer extends ServiceSection {
 		case PROPERTY_ID_UTILIZATION:
 			return psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return psJobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
+			return (NetSystem.getTime() <= 0.0) ? 0.0
+					: psJobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id, jobClass);
 		}
@@ -174,8 +176,12 @@ public class PSServer extends ServiceSection {
 					performServiceTimes(messageSendTime);
 					messageToken = null;
 				}
+				// To support LD strategy, update jobInfoList before obtaining serviceTime
+				PSJobInfo jobInfo = new PSJobInfo(job);
+				handleJobInfoList(jobInfo, PSEvent.JOB_IN);
 				double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this);
-				handleJobInfoList(new PSJobInfo(job, serviceTime), PSEvent.JOB_IN);
+				jobInfo.setServiceTime(serviceTime);
+				jobInfo.setResidualServiceTime(serviceTime);
 				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 			}
 			updateServiceFractions();

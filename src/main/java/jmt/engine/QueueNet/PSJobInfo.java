@@ -32,12 +32,9 @@ public class PSJobInfo extends JobInfo {
 	/**
 	 * Creates a new instance of JobInfo object.
 	 * @param job Job referenced by this JobInfo.
-	 * @param serviceTime Service time that the job must receive.
 	 */
-	public PSJobInfo(Job job, double serviceTime) {
+	public PSJobInfo(Job job) {
 		super(job);
-		this.serviceTime = serviceTime;
-		this.residualServiceTime = serviceTime;
 	}
 
 	/**
@@ -49,6 +46,14 @@ public class PSJobInfo extends JobInfo {
 	}
 
 	/**
+	 * Sets the service time that the job must receive.
+	 * @param serviceTime Service time that the job must receive.
+	 */
+	public void setServiceTime(double serviceTime) {
+		this.serviceTime = serviceTime;
+	}
+
+	/**
 	 * Gets the residual service time that the job must receive.
 	 * @return Residual service time that the job must receive.
 	 */
@@ -57,8 +62,16 @@ public class PSJobInfo extends JobInfo {
 	}
 
 	/**
-	 * Performs the service time that the job received.
-	 * @return serviceTime Service time that the job received.
+	 * Sets the residual service time that the job must receive.
+	 * @param residualServiceTime Residual service time that the job must receive.
+	 */
+	public void setResidualServiceTime(double residualServiceTime) {
+		this.residualServiceTime = residualServiceTime;
+	}
+
+	/**
+	 * Performs the service time that the job has received.
+	 * @param serviceTime Service time that the job has received.
 	 */
 	public void performServiceTime(double serviceTime) {
 		residualServiceTime -= serviceTime;

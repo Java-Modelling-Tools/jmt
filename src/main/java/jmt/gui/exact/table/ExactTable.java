@@ -610,18 +610,33 @@ public class ExactTable extends JTable {
 		}
 
 		try {
-			String s = (String) (clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor));
-			String[] rows = s.trim().split("\\n");
-			for (int i = 0; i < numrows; i++) {
-				String[] cells = rows[i % rows.length].trim().split("\\s+");
-				for (int j = 0; j < numcols; j++) {
-					setValueAt(cells[j % cells.length], rowsselected[i], colsselected[j]);
+			String s = ((String) (clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor))).trim();
+			String[] rows = s.contains(";") ? s.split("\\s*;\\s*") : s.split("\\s*\\n\\s*");
+			if (numrows == 1 && numcols == 1) {
+				numrows = Math.min(rows.length, getRowCount() - rowsselected[0]);
+				for (int i = 0; i < numrows; i++) {
+					String row = rows[i];
+					String[] cells = row.contains(",") ? row.split("\\s*,\\s*") : row.split("\\s+");
+					numcols = Math.min(cells.length, getColumnCount() - colsselected[0]);
+					for (int j = 0; j < numcols; j++) {
+						setValueAt(cells[j], rowsselected[0] + i, colsselected[0] + j);
+					}
+				}
+				setRowSelectionInterval(rowsselected[0], rowsselected[0] + numrows - 1);
+				setColumnSelectionInterval(colsselected[0], colsselected[0] + numcols - 1);
+			} else {
+				for (int i = 0; i < numrows; i++) {
+					String row = rows[i % rows.length];
+					String[] cells = row.contains(",") ? row.split("\\s*,\\s*") : row.split("\\s+");
+					for (int j = 0; j < numcols; j++) {
+						setValueAt(cells[j % cells.length], rowsselected[0] + i, colsselected[0] + j);
+					}
 				}
 			}
+			updateRows(rowsselected[0], rowsselected[0] + numrows - 1);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		updateRows(rowsselected[0], rowsselected[numrows - 1]);
 	}
 
 	public boolean canPaste() {

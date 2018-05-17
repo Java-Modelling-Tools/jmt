@@ -128,10 +128,10 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 *
 	 */
 	public void setPDF(double[] pdf) throws IncorrectDistributionParameterException {
-		double sumProb = 0;
+		double sumProb = 0.0;
 		this.pdf = new double[pdf.length];
 		for (int i = 0; i < pdf.length; i++) {
-			if (pdf[i] >= 0) {
+			if (pdf[i] >= 0.0) {
 				this.pdf[i] = pdf[i];
 				sumProb += this.pdf[i];
 			} else {
@@ -157,7 +157,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	private void setCDF() {
 		int nBins = pdf.length;
 		this.cdf = new double[nBins + 1];
-		this.cdf[0] = 0;
+		this.cdf[0] = 0.0;
 		for (int ptn = 0; ptn < nBins; ptn++) {
 			this.cdf[ptn + 1] = cdf[ptn] + pdf[ptn];
 		}
@@ -185,7 +185,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	public static boolean guiCheck(String parameterName, Double value) {
 		if (parameterName.compareTo("pdf") == 0) {
 			//the string parameterName is equal to "pdf"
-			if ((value.doubleValue() >= 0) && (value.doubleValue() <= 1)) {
+			if ((value.doubleValue() >= 0.0) && (value.doubleValue() <= 1.0)) {
 				return true;
 			}
 		}

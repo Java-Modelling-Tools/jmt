@@ -166,8 +166,8 @@ public class Coxian extends Distribution {
 	}
 
 	/**
-	 * This method is called whenever a parameter changes and <code>hasC</code> or
-	 * <code>hasMean</code> is true
+	 * This method is called whenever a parameter changes and <code>hasMean</code> or
+	 * <code>hasC</code> is true
 	 */
 	@Override
 	public void updateCM() {

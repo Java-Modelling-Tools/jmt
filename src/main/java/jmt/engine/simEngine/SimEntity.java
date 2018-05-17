@@ -83,8 +83,8 @@ public abstract class SimEntity {
 	 */
 	private void exit() throws NetException {
 		if (state == SimEntity.RUNNABLE) {
-			throw new NetException("body of entity " + getName() + " ended incorrectly the status at the end of the body "
-					+ "must be waiting or holding");
+			throw new NetException("The Body of entity " + getName() + " ended incorrectly. "
+					+ "The status at the end of the body must be waiting or holding.");
 		}
 	}
 

@@ -20,11 +20,13 @@ package jmt.engine.NetStrategies.ServiceStrategies;
 
 import java.util.Arrays;
 
+import jmt.common.exception.ExpressionParseException;
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.math.DirectCircularList;
+import jmt.engine.math.parser.Parser;
 import jmt.engine.random.Distribution;
 import jmt.engine.random.Parameter;
 
@@ -40,6 +42,7 @@ import jmt.engine.random.Parameter;
  */
 public class LoadDependentStrategy extends ServiceStrategy {
 
+	private static final String VAR = "n";
 	private static final int CACHESIZE = 1024;
 
 	private LDParameter[] parameters;
@@ -82,13 +85,19 @@ public class LoadDependentStrategy extends ServiceStrategy {
 				item = new MeanCache(parameter, jobs);
 				cache.set(jobs, item);
 			}
+			// At this point item is retrieved from cache or parsed.
+			if (item.valid) {
+				// Note: this is needed as parameter is shared among all items of the same LDParameter
+				item.parameter.setMean(item.mean);
+			}
 
 			return item.distribution.nextRand(item.parameter);
-
 		} catch (NetException e) {
-			throw new NetException("Error in LoadDependentStrategy: Cannot get number of jobs into current station");
-		} catch (IncorrectDistributionParameterException ex) {
-			throw new NetException(ex.getMessage());
+			throw new NetException("Error in LoadDependentStrategy: " + e.getMessage());
+		} catch (ExpressionParseException e) {
+			throw new NetException("Error in LoadDependentStrategy: " + e.getMessage());
+		} catch (IncorrectDistributionParameterException e) {
+			throw new NetException("Error in LoadDependentStrategy: " + e.getMessage());
 		}
 	}
 
@@ -112,16 +121,30 @@ public class LoadDependentStrategy extends ServiceStrategy {
 		public Distribution distribution;
 		/** parameter of distribution used to evaluate service times */
 		public Parameter parameter;
+		/** mean value */
+		public double mean;
+		/** tells if mean field is valid */
+		public boolean valid;
 
 		/**
 		 * Creates a new MeanCache object by parsing mean value in given LDParameter
 		 * @param ldp LDParameter of right range
 		 * @param n current queue length value
-		 * @throws IncorrectDistributionParameterException if function cannot be parsed correctly
+		 * @throws ExpressionParseException if function cannot be parsed correctly
 		 */
-		public MeanCache(LDParameter ldp, int n) throws IncorrectDistributionParameterException {
+		public MeanCache(LDParameter ldp, int n) throws ExpressionParseException {
 			distribution = ldp.getDistribution();
 			parameter = ldp.getDistrParameter();
+			if (ldp.getFunction() != null) {
+				try {
+					Parser p = ldp.getParser();
+					p.setVariable(VAR, n);
+					mean = p.getValue();
+					valid = true;
+				} catch (RuntimeException e) {
+					throw new ExpressionParseException(e.getMessage());
+				}
+			}
 		}
 	}
 
