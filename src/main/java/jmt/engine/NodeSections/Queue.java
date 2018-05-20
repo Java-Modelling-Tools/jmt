@@ -304,13 +304,16 @@ public class Queue extends InputSection {
 			}
 		}
 
+		/* //Commented to ensure a determinstic initialization
 		RandomEngine randomEngine = RandomEngine.makeDefault();
 		for (int i = jobPermutation.length - 1; i > 0; i--) {
-			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+			//int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+			int j = 1;
 			Job job = jobPermutation[i];
 			jobPermutation[i] = jobPermutation[j];
 			jobPermutation[j] = job;
 		}
+		*/
 
 		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 		for (int i = 0; i < jobPermutation.length; i++) {
