@@ -35,7 +35,7 @@ public class RandStrategy extends QueuePutStrategy {
 
 	private RandomEngine randomEngine = RandomEngine.makeDefault();
 
-	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
 		queue.add((int) (randomEngine.raw() * (queue.size() + 1)), new JobInfo(job));
 	}
 

@@ -38,11 +38,11 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class SEPTStrategyPriority extends QueuePutStrategy {
 
-	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
-		Server server = (Server) callingSection.getOwnerNode().getSection(NodeSection.SERVICE);
+		Server server = (Server) nodeSection.getOwnerNode().getSection(NodeSection.SERVICE);
 		ServiceStrategy[] strategies = (ServiceStrategy[]) server.getServiceStrategies();
-		double serviceMean = strategies[job.getJobClass().getId()].expect(server);
+		double serviceMean = strategies[job.getJobClass().getId()].expect(server, job.getJobClass());
 
 		List<JobInfo> list = queue.getInternalJobInfoList();
 		if (list.size() == 0) {
@@ -70,7 +70,7 @@ public class SEPTStrategyPriority extends QueuePutStrategy {
 			return;
 		}
 
-		double currentServiceMean = strategies[current.getJobClass().getId()].expect(server);
+		double currentServiceMean = strategies[current.getJobClass().getId()].expect(server, current.getJobClass());
 		if (currentServiceMean > serviceMean) {
 			queue.add(index, new JobInfo(job));
 			return;
@@ -79,7 +79,7 @@ public class SEPTStrategyPriority extends QueuePutStrategy {
 			current = it.next().getJob();
 			index++;
 			currentPriority = current.getJobClass().getPriority();
-			currentServiceMean = strategies[current.getJobClass().getId()].expect(server);
+			currentServiceMean = strategies[current.getJobClass().getId()].expect(server, current.getJobClass());
 			if (currentPriority < priority || currentServiceMean > serviceMean) {
 				queue.add(index, new JobInfo(job));
 				return;

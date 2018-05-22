@@ -24,6 +24,7 @@ import jmt.common.exception.ExpressionParseException;
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
+import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.math.DirectCircularList;
 import jmt.engine.math.parser.Parser;
@@ -60,18 +61,19 @@ public class LoadDependentStrategy extends ServiceStrategy {
 	}
 
 	/**
-	 * Returns service time that current job will wait inside current station
-	 * @param callingSection reference to calling service section
-	 * @return time to wait into this service section
+	 * Calculates the service time using the specified parameters
+	 * @param nodeSection the node section which applies this strategy
+	 * @param jobClass the job class which follows this strategy
+	 * @return the value of service time
 	 * @throws NetException
 	 */
 	@Override
-	public double wait(NodeSection callingSection) throws NetException {
+	public double wait(final NodeSection nodeSection, final JobClass jobClass) throws NetException {
 		// Gets number of jobs in the station as the sum of job in queue and job under service
 		try {
 			// Number of jobs into service section
-			int jobs = callingSection.getOwnerNode().getSection(NodeSection.INPUT).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS)
-					+ callingSection.getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
+			int jobs = nodeSection.getOwnerNode().getSection(NodeSection.INPUT).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS)
+					+ nodeSection.getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
 
 			// Search in cache for corresponding item
 			MeanCache item = cache.get(jobs);
@@ -102,13 +104,14 @@ public class LoadDependentStrategy extends ServiceStrategy {
 	}
 
 	/**
-	 * Returns service mean that current job will wait inside current station
-	 * @param callingSection reference to calling service section
-	 * @return mean to wait into this service section
+	 * Calculates the service mean using the specified parameters
+	 * @param nodeSection the node section which applies this strategy
+	 * @param jobClass the job class which follows this strategy
+	 * @return the value of service mean
 	 * @throws NetException
 	 */
 	@Override
-	public double expect(NodeSection callingSection) throws NetException {
+	public double expect(final NodeSection nodeSection, final JobClass jobClass) throws NetException {
 		return 0.0;
 	}
 

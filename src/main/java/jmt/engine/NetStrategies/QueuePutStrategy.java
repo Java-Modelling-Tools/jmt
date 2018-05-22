@@ -35,10 +35,10 @@ public abstract class QueuePutStrategy implements AutoCheck {
 	 * This method should be overridden to implement a specific job strategy.
 	 * @param job Job to be added to the queue.
 	 * @param queue Job queue.
-	 * @param callingSection The section which calls this strategy.
+	 * @param nodeSection Node section which applies this strategy.
 	 * @throws NetException
 	 */
-	public abstract void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException;
+	public abstract void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException;
 
 	public boolean check() {
 		return true;

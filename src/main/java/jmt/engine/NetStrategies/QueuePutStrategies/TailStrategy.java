@@ -32,7 +32,7 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class TailStrategy extends QueuePutStrategy {
 
-	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
 		queue.addLast(new JobInfo(job));
 	}
 

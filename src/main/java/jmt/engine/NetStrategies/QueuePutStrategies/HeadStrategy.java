@@ -32,7 +32,7 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class HeadStrategy extends QueuePutStrategy {
 
-	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
 		queue.addFirst(new JobInfo(job));
 	}
 

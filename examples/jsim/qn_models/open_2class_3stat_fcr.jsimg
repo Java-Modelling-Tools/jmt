@@ -369,7 +369,7 @@
 <connection source="LoadBalancer" target="Web Server 1"/>
 <connection source="LoadBalancer" target="Web Server 2"/>
 <connection source="Delay 1" target="LoadBalancer"/>
-<blockingRegion name="" type="default">
+<blockingRegion name="FCR" type="default">
 <regionNode nodeName="Web Server 1"/>
 <regionNode nodeName="Web Server 2"/>
 <regionNode nodeName="LoadBalancer"/>

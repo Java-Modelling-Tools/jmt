@@ -51,6 +51,7 @@ import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.common.editors.LDStrategyEditor;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
 
@@ -221,7 +222,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		/**
 		 * This field is used to initialize elements shown on Service type selection - Bertoli Marco
 		 */
-		protected Object[] serviceType = new Object[] { SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT, SERVICE_ZERO };
+		protected Object[] serviceType = new Object[] { SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT, SERVICE_ZERO, SERVICE_DISABLED };
 
 		JButton editButton = new JButton() {
 
@@ -306,6 +307,8 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				return false;
 			} else if (columnIndex == 3 && data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
 				return false;
+			} else if (columnIndex == 3 && data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy) {
+				return false;
 			} else {
 				return true;
 			}
@@ -322,6 +325,8 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 					return SERVICE_LOAD_DEPENDENT;
 				} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
 					return SERVICE_ZERO;
+				} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy) {
+					return SERVICE_DISABLED;
 				} else {
 					return SERVICE_LOAD_INDEPENDENT;
 				}
@@ -347,6 +352,11 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 					// Puts a Zero Service Time Strategy only if previously it was different
 					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy)) {
 						data.setServiceTimeDistribution(stationKey, classKey, new ZeroStrategy());
+					}
+				} else if (((String) aValue).equals(SERVICE_DISABLED)) {
+					// Puts a Disabled Service Time Strategy only if previously it was different
+					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy)) {
+						data.setServiceTimeDistribution(stationKey, classKey, new DisabledStrategy());
 					}
 				} else {
 					// Puts the default service strategy only if previously it was different

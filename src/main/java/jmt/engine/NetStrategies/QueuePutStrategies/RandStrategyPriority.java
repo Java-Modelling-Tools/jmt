@@ -39,7 +39,7 @@ public class RandStrategyPriority extends QueuePutStrategy {
 
 	private RandomEngine randomEngine = RandomEngine.makeDefault();
 
-	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
 
 		List<JobInfo> list = queue.getInternalJobInfoList();

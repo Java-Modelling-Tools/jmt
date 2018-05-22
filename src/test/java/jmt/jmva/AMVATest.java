@@ -370,6 +370,7 @@ public class AMVATest {
 		}
 
 	}
+
 	@Ignore
 	@Test
 	public void runTests3() {

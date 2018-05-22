@@ -179,7 +179,7 @@ public class PSServer extends ServiceSection {
 				// To support LD strategy, update jobInfoList before obtaining serviceTime
 				PSJobInfo jobInfo = new PSJobInfo(job);
 				handleJobInfoList(jobInfo, PSEvent.JOB_IN);
-				double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this);
+				double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
 				jobInfo.setServiceTime(serviceTime);
 				jobInfo.setResidualServiceTime(serviceTime);
 				sendBackward(NetEvent.EVENT_ACK, job, 0.0);

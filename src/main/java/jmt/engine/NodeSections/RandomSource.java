@@ -93,7 +93,7 @@ public class RandomSource extends InputSection {
 				// Calculates the delay of departure (1/lambda)
 				if (strategies[c] != null) {
 					job = new Job(jobClass, jobClasses.size());
-					delay = strategies[c].wait(this);
+					delay = strategies[c].wait(this, jobClass);
 					sendMe(job, delay);
 				}
 			}
@@ -124,6 +124,8 @@ public class RandomSource extends InputSection {
 				// reset (otherwise it will correspond to the creation time and not to the
 				// leaving time, which is "delay" seconds after)
 
+				// Signals to section jobInfoList new added job
+				jobsList.add(new JobInfo(job));
 				// Signals to node jobInfoList new added job
 				getOwnerNode().getJobInfoList().add(new JobInfo(job));
 				// Signals to global jobInfoList new added job
@@ -133,7 +135,7 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(job.getJobClass(), jobClasses.size());
-				delay = strategies[c].wait(this);
+				delay = strategies[c].wait(this, job.getJobClass());
 				sendMe(job, delay);
 
 				// Sets coolStart to false, next job should wait ack
@@ -164,6 +166,8 @@ public class RandomSource extends InputSection {
 				// reset (otherwise it will correspond to the creation time and not to the
 				// leaving time, which is "delay" seconds after)
 
+				// Signals to section jobInfoList new added job
+				jobsList.add(new JobInfo(job));
 				// Signals to node jobInfoList new added job
 				getOwnerNode().getJobInfoList().add(new JobInfo(job));
 				// Signals to global jobInfoList new added job
@@ -173,7 +177,7 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(jobClasses.get(c), jobClasses.size());
-				delay = strategies[c].wait(this);
+				delay = strategies[c].wait(this, jobClasses.get(c));
 				sendMe(job, delay);
 			} else {
 				coolStart = true;

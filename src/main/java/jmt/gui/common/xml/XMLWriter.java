@@ -63,6 +63,7 @@ import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
 
@@ -711,12 +712,17 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 								(Distribution) serviceDistribution, model,
 								currentClass);
 			} else if (serviceDistribution instanceof ZeroStrategy) {
-				// Zero Service Time Strategy --- Bertoli Marco
-				distrParams[i] = new XMLParameter("ZeroTimeServiceStrategy",
+				// Zero Service Time Strategy
+				distrParams[i] = new XMLParameter("ZeroServiceTimeStrategy",
 						ZeroStrategy.getEngineClassPath(),
 						model.getClassName(currentClass), (String) null, true);
+			} else if (serviceDistribution instanceof DisabledStrategy) {
+				// Disabled Service Time Strategy
+				distrParams[i] = new XMLParameter("DisabledServiceTimeStrategy",
+						DisabledStrategy.getEngineClassPath(),
+						model.getClassName(currentClass), (String) null, true);
 			} else {
-				// Load Dependent Service Strategy --- Bertoli Marco
+				// Load Dependent Service Strategy
 				LDStrategy strategy = (LDStrategy) serviceDistribution;
 				XMLParameter[] ranges = new XMLParameter[strategy
 				                                         .getRangeNumber()];

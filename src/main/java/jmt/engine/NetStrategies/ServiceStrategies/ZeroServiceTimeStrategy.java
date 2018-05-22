@@ -20,6 +20,7 @@ package jmt.engine.NetStrategies.ServiceStrategies;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
+import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NodeSection;
 
 /**
@@ -33,24 +34,26 @@ public class ZeroServiceTimeStrategy extends ServiceStrategy {
 	}
 
 	/**
-	 * The returned service time is always equal to 0.0.
-	 * @param callingSection The node section which is calling this method.
-	 * @return the value of service time, which is always 0.0.
+	 * Returns the service time, which is always equal to 0.0.
+	 * @param nodeSection the node section which applies this strategy.
+	 * @param jobClass the job class which follows this strategy.
+	 * @return the value of service time.
 	 * @throws NetException
 	 */
 	@Override
-	public double wait(NodeSection callingSection) throws NetException {
+	public double wait(final NodeSection nodeSection, final JobClass jobClass) throws NetException {
 		return 0.0;
 	}
 
 	/**
-	 * The returned service mean is always equal to 0.0.
-	 * @param callingSection The node section which is calling this method.
-	 * @return the value of service mean, which is always 0.0.
+	 * Returns the service mean, which is always equal to 0.0.
+	 * @param nodeSection the node section which applies this strategy.
+	 * @param jobClass the job class which follows this strategy.
+	 * @return the value of service mean.
 	 * @throws NetException
 	 */
 	@Override
-	public double expect(NodeSection callingSection) throws NetException {
+	public double expect(final NodeSection nodeSection, final JobClass jobClass) throws NetException {
 		return 0.0;
 	}
 

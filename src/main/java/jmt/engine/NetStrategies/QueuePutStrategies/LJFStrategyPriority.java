@@ -38,11 +38,11 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class LJFStrategyPriority extends QueuePutStrategy {
 
-	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
-		Server server = (Server) callingSection.getOwnerNode().getSection(NodeSection.SERVICE);
+		Server server = (Server) nodeSection.getOwnerNode().getSection(NodeSection.SERVICE);
 		ServiceStrategy[] strategies = (ServiceStrategy[]) server.getServiceStrategies();
-		double serviceTime = strategies[job.getJobClass().getId()].wait(server);
+		double serviceTime = strategies[job.getJobClass().getId()].wait(server, job.getJobClass());
 		job.setServiceTime(serviceTime);
 
 		List<JobInfo> list = queue.getInternalJobInfoList();

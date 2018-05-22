@@ -20,6 +20,7 @@ package jmt.engine.NetStrategies;
 
 import jmt.common.AutoCheck;
 import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NodeSection;
 
 /**
@@ -31,19 +32,21 @@ public abstract class ServiceStrategy implements AutoCheck {
 
 	/**
 	 * This method should be overridden to implement a specific strategy.
-	 * @param callingSection The section which calls this strategy.
-	 * @return Service time.
+	 * @param nodeSection the node section which applies this strategy.
+	 * @param jobClass the job class which follows this strategy.
+	 * @return the value of service time.
 	 * @throws NetException
 	 */
-	public abstract double wait(NodeSection callingSection) throws NetException;
+	public abstract double wait(final NodeSection nodeSection, final JobClass jobClass) throws NetException;
 
 	/**
 	 * This method should be overridden to implement a specific strategy.
-	 * @param callingSection The section which calls this strategy.
-	 * @return Service mean.
+	 * @param nodeSection the node section which applies this strategy.
+	 * @param jobClass the job class which follows this strategy.
+	 * @return the value of service mean.
 	 * @throws NetException
 	 */
-	public abstract double expect(NodeSection callingSection) throws NetException;
+	public abstract double expect(final NodeSection nodeSection, final JobClass jobClass) throws NetException;
 
 	public boolean check() {
 		return true;

@@ -133,7 +133,7 @@ public class Timing extends ServiceSection {
 
 			if (deltaTimingEvents >= 0) {
 				for (int i = 0; i < deltaTimingEvents; i++) {
-					double firingDelay = timingStrategies[modeIndex].wait(this);
+					double firingDelay = timingStrategies[modeIndex].wait(this, null);
 					TimingPacket packet = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],
 							firingWeights[modeIndex]);
 					RemoveToken token = sendMe(NetEvent.EVENT_TIMING, packet, firingDelay);
@@ -158,7 +158,7 @@ public class Timing extends ServiceSection {
 			sendBackward(NetEvent.EVENT_FIRING, Integer.valueOf(modeIndex), 0.0);
 
 			if (extraEnablingDegrees[modeIndex] > 0) {
-				double firingDelay = timingStrategies[modeIndex].wait(this);
+				double firingDelay = timingStrategies[modeIndex].wait(this, null);
 				TimingPacket packet = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],
 						firingWeights[modeIndex]);
 				token = sendMe(NetEvent.EVENT_TIMING, packet, firingDelay);

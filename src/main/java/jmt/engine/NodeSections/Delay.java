@@ -92,7 +92,7 @@ public class Delay extends ServiceSection {
 				// Gets the class of the job
 				c = job.getJobClass().getId();
 				// Calculates the service time of job
-				serviceTime = serviceStrategies[c].wait(this);
+				serviceTime = serviceStrategies[c].wait(this, job.getJobClass());
 				// Sends to itself the job with delay equal to "serviceTime"
 				sendMe(job, serviceTime);
 				// Sends backward the job ack

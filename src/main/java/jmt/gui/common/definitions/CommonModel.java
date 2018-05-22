@@ -311,7 +311,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else {
 			return;
 		}
-		if (cd.name == null || !cd.name.equals(name)) {
+		if ((cd.name == null || !cd.name.equals(name)) && !name.equals("")) {
 			cd.name = getUniqueClassName(name);
 			save = true;
 		}
@@ -774,7 +774,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else {
 			return;
 		}
-		if (sd.name == null || !sd.name.equals(name)) {
+		if ((sd.name == null || !sd.name.equals(name)) && !name.equals("")) {
 			sd.name = getUniqueStationName(name);
 			save = true;
 		}
@@ -2933,7 +2933,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (!blockingRegionsKeyset.contains(regionKey)) {
 			return;
 		}
-		if (((BlockingRegionData) blockingDataHM.get(regionKey)).name.equals(name)) {
+		if (((BlockingRegionData) blockingDataHM.get(regionKey)).name.equals(name) || name.equals("")) {
 			return;
 		}
 		((BlockingRegionData) blockingDataHM.get(regionKey)).name = getUniqueRegionName(name);
@@ -4000,7 +4000,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	public void setTransitionModeName(Object stationKey, int modeIndex, String name) {
 		StationData sd = (StationData) stationDataHM.get(stationKey);
 		TransitionModeData tmd = sd.transitionModeList.get(modeIndex);
-		if (!tmd.name.equals(name)) {
+		if (!tmd.name.equals(name) && !name.equals("")) {
 			name = getUniqueTransitionModeName(stationKey, name);
 			for (Object measureKey : measuresKeyset) {
 				if (getMeasureClass(measureKey) == tmd.name) {

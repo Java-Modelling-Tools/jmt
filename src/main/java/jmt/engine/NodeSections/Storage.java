@@ -173,15 +173,14 @@ public class Storage extends InputSection {
 			}
 		}
 
-		/* //Commented to ensure a deterministic initialization
+		/* Commented to ensure a deterministic initialization
 		RandomEngine randomEngine = RandomEngine.makeDefault();
 		for (int i = jobPermutation.length - 1; i > 0; i--) {
 			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
 			Job job = jobPermutation[i];
 			jobPermutation[i] = jobPermutation[j];
 			jobPermutation[j] = job;
-		}
-		*/
+		}*/
 
 		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 		for (int i = 0; i < jobPermutation.length; i++) {

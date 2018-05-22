@@ -37,10 +37,10 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class LEPTStrategy extends QueuePutStrategy {
 
-	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
-		Server server = (Server) callingSection.getOwnerNode().getSection(NodeSection.SERVICE);
+	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
+		Server server = (Server) nodeSection.getOwnerNode().getSection(NodeSection.SERVICE);
 		ServiceStrategy[] strategies = (ServiceStrategy[]) server.getServiceStrategies();
-		double serviceMean = strategies[job.getJobClass().getId()].expect(server);
+		double serviceMean = strategies[job.getJobClass().getId()].expect(server, job.getJobClass());
 
 		List<JobInfo> list = queue.getInternalJobInfoList();
 		if (list.size() == 0) {
@@ -54,7 +54,7 @@ public class LEPTStrategy extends QueuePutStrategy {
 		int index = -1;
 		while (it.hasNext()) {
 			current = it.next().getJob();
-			currentServiceMean = strategies[current.getJobClass().getId()].expect(server);
+			currentServiceMean = strategies[current.getJobClass().getId()].expect(server, current.getJobClass());
 			index++;
 			if (currentServiceMean < serviceMean) {
 				queue.add(index, new JobInfo(job));

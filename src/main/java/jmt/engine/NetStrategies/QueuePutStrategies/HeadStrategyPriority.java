@@ -36,7 +36,7 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class HeadStrategyPriority extends QueuePutStrategy {
 
-	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
 
 		List<JobInfo> list = queue.getInternalJobInfoList();

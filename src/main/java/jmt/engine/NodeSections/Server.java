@@ -132,7 +132,7 @@ public class Server extends ServiceSection {
 					// Auto-sends the job with delay equal to "serviceTime"
 					double serviceTime = job.getServiceTime();
 					if (serviceTime < 0.0) {
-						serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this);
+						serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
 					} else {
 						job.setServiceTime(-1.0);
 					}
