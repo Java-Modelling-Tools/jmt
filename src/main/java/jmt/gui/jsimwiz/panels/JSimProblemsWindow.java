@@ -442,7 +442,7 @@ public class JSimProblemsWindow extends JFrame {
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLASS_SWITCH_INVALID_MATRIX_ERROR,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " has a matrix of which some rows sum to less than one.</div></html>", stationKey, null));
+							+ " has a matrix in which some rows sum to less than one.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereClassSwitchBasStrategyError()) {
