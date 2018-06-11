@@ -193,7 +193,7 @@ public class ModelChecker implements CommonConstants {
 	//it occurs when the total preload in a blocking region exceeds the memory
 	//constraints.
 	public static final int BLOCKING_REGION_MEMORY_OVERLOAD_ERROR = 18;
-	//it occurs when a class switch has a matrix of which some rows sum to less
+	//it occurs when a class switch has a matrix in which some rows sum to less
 	//than one.
 	public static final int CLASS_SWITCH_INVALID_MATRIX_ERROR = 19;
 	//it occurs when a class switch is followed by a queue with the BAS
@@ -684,10 +684,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns true if a class switch has a matrix of which some rows sum to
+	 * Returns true if a class switch has a matrix in which some rows sum to
 	 * less than one.
 	 *
-	 * @return true if a class switch has a matrix of which some rows sum to
+	 * @return true if a class switch has a matrix in which some rows sum to
 	 * less than one.
 	 */
 	public boolean isThereClassSwitchInvalidMatrixError() {
@@ -1801,7 +1801,7 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Checks if a class switch has a matrix of which some rows sum to less
+	 * Checks if a class switch has a matrix in which some rows sum to less
 	 * than one.
 	 */
 	private void checkForClassSwitchInvalidMatrixError() {
