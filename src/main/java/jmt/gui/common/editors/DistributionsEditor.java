@@ -650,7 +650,7 @@ public class DistributionsEditor extends JMTDialog {
 				int phaseNum = ((Object[][]) current.getParameter(0).getValue())[0].length;
 				phaseNumSpinner = new JSpinner();
 				phaseNumSpinner.setPreferredSize(CommonConstants.DIM_BUTTON_XS);
-				phaseNumSpinner.setModel(new SpinnerNumberModel(phaseNum, 2,
+				phaseNumSpinner.setModel(new SpinnerNumberModel(phaseNum, 1,
 						CommonConstants.MAX_NUMBER_OF_PHASES, 1));
 				phaseNumSpinner.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
@@ -658,7 +658,7 @@ public class DistributionsEditor extends JMTDialog {
 						for (int i = 0; i < current.getNumberOfParameters(); i++) {
 							Object[][] oldMatrix = (Object[][]) current.getParameter(i).getValue();
 							Object[][] newMatrix = null;
-							if (oldMatrix.length <= 1) {
+							if (current instanceof PhaseType && i == 0) {
 								newMatrix = new Object[1][phaseNum];
 							} else {
 								newMatrix = new Object[phaseNum][phaseNum];
@@ -678,7 +678,8 @@ public class DistributionsEditor extends JMTDialog {
 					}
 				});
 				JPanel phaseNumPanel = new JPanel();
-				phaseNumPanel.setBorder(new TitledBorder(new EtchedBorder(), "Number of Phases"));
+				phaseNumPanel.setBorder(new TitledBorder(new EtchedBorder(),
+						(current instanceof PhaseType) ? "Number of Phases" : "Number of States"));
 				phaseNumPanel.add(new JLabel("Number: "));
 				phaseNumPanel.add(phaseNumSpinner);
 

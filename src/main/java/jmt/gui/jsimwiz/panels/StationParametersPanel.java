@@ -154,13 +154,17 @@ public class StationParametersPanel extends WizardPanel implements CommonConstan
 	private class StationElementRenderer implements ListCellRenderer {
 
 		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-			JLabel label = new JLabel(stationData.getStationName(value), JMTImageLoader.loadImage(stationData.getStationType(value) + "Combo"),
-					SwingConstants.LEFT);
+			JLabel label = new JLabel();
 			label.setOpaque(true);
 			label.setBorder(new LineBorder(cellHasFocus ? Color.BLUE : Color.WHITE));
 			label.setBackground(isSelected ? list.getSelectionBackground() : Color.WHITE);
 			label.setForeground(isSelected ? list.getSelectionForeground() : Color.BLACK);
 			label.setFont(isSelected ? label.getFont().deriveFont(Font.BOLD) : label.getFont().deriveFont(Font.ROMAN_BASELINE));
+			int fontSize = label.getFont().getSize();
+			Dimension iconSize = new Dimension(fontSize, fontSize);
+			label.setText(stationData.getStationName(value));
+			label.setIcon(JMTImageLoader.loadImage(stationData.getStationType(value) + "Cell", iconSize));
+			label.setHorizontalAlignment(SwingConstants.LEFT);
 			return label;
 		}
 

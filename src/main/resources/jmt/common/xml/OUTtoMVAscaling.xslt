@@ -8,7 +8,6 @@
 	<xsl:key name="sumOfVisits" match="/model/parameters/stations/*/visits/visit" use="@customerclass"/> 
 	<!-- end NEW Stefano Omini -->
 	
-	
 	<xsl:template match="/">
 		<xsl:processing-instruction name="xml-stylesheet">"type="text/xsl" href="NepTranslatorMVAtoSIM.xslt"</xsl:processing-instruction>
 		<model>
@@ -26,6 +25,7 @@
 			</solutions>
 		</model>
 	</xsl:template>
+	
 	<xsl:template match="stations/*" mode="printSolutions">
 		<stationresults station="{@name}">
 			<xsl:apply-templates select="../../classes/*" mode="printSolutions">
@@ -35,6 +35,7 @@
 			</xsl:apply-templates>
 		</stationresults>
 	</xsl:template>
+	
 	<xsl:template match="classes/*" mode="printSolutions">
 		<xsl:param name="station"/>
 		<classresults customerclass="{@name}">
@@ -48,9 +49,6 @@
 			</xsl:call-template>
 		</classresults>
 	</xsl:template>
-
-	
-		
 	
 	<xsl:template name="printSolution">
 		<xsl:param name="station"/>
@@ -84,6 +82,7 @@
 			</xsl:choose>
 		</xsl:for-each>
 	</xsl:template>
+	
 	<xsl:template match="blockingRegion" mode="printSolutions_blocking">
 		<regionresults region="{@name}">
 			<xsl:apply-templates select="../parameters/classes/*" mode="printSolutions_blocking">
@@ -93,6 +92,7 @@
 			</xsl:apply-templates>
 		</regionresults>
 	</xsl:template>
+	
 	<xsl:template match="classes/*" mode="printSolutions_blocking">
 		<xsl:param name="station"/>
 		<classresults customerclass="{@name}">
@@ -106,6 +106,7 @@
 			</xsl:call-template>
 		</classresults>
 	</xsl:template>
+	
 	<xsl:template name="printSolution_blocking">
 		<xsl:param name="station"/>
 		<xsl:param name="class"/>

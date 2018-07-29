@@ -686,12 +686,17 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 		* @param    column     the column index of the cell being drawn
 		*/
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-			JLabel label = new JLabel(bd.getRegionName(value), JMTImageLoader.loadImage("BlockingCombo"), SwingConstants.LEFT);
+			JLabel label = new JLabel();
 			label.setOpaque(true);
 			label.setBorder(new LineBorder(hasFocus ? Color.BLUE : Color.WHITE));
 			label.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
 			label.setForeground(isSelected ? table.getSelectionForeground() : Color.BLACK);
 			label.setFont(isSelected ? label.getFont().deriveFont(Font.BOLD) : label.getFont().deriveFont(Font.ROMAN_BASELINE));
+			int fontSize = label.getFont().getSize();
+			Dimension iconSize = new Dimension(fontSize, fontSize);
+			label.setText(bd.getRegionName(value));
+			label.setIcon(JMTImageLoader.loadImage("BlockingRegion", iconSize));
+			label.setHorizontalAlignment(SwingConstants.LEFT);
 			return label;
 		}
 

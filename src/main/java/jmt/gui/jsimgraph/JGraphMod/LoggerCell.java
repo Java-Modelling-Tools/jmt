@@ -42,7 +42,7 @@ public class LoggerCell extends JmtCell {
 	 */
 	public LoggerCell(Object userObject) {
 		super(LoggerCell.ICON, userObject);
-		type = TERMINAL;
+		type = LOGGER;
 	}
 
 	/**

@@ -85,7 +85,7 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of blocking regions in which the total preload
 	//exceeds the memory constraints
 	private Vector<Object> blockingRegionsWithMemoryOverload;
-	//Vector containing the keys of class switches with a matrix of which some
+	//Vector containing the keys of class switches with a matrix in which some
 	//rows sum to less than one
 	private Vector<Object> classSwitchesWithInvalidMatrix;
 	//Vector containing the keys of class switches followed by a queue with the
@@ -1058,10 +1058,10 @@ public class ModelChecker implements CommonConstants {
 
 	/**
 	 * Returns a Vector<Object> containing the keys of class switches with a
-	 * matrix of which some rows sum to less than one.
+	 * matrix in which some rows sum to less than one.
 	 *
 	 * @return a Vector<Object> containing the keys of class switches with a
-	 * matrix of which some rows sum to less than one.
+	 * matrix in which some rows sum to less than one.
 	 */
 	public Vector<Object> getClassSwitchesWithInvalidMatrix() {
 		return classSwitchesWithInvalidMatrix;

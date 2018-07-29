@@ -59,7 +59,7 @@ public interface CommonConstants {
 	public static final String STATION_TYPE_SOURCE = "Source";
 	public static final String STATION_TYPE_SINK = "Sink";
 	public static final String STATION_TYPE_TERMINAL = "Terminal";
-	public static final String STATION_TYPE_ROUTER = "RoutingStation";
+	public static final String STATION_TYPE_ROUTER = "Router";
 	public static final String STATION_TYPE_DELAY = "Delay";
 	public static final String STATION_TYPE_SERVER = "Server";
 	public static final String STATION_TYPE_FORK = "Fork";
@@ -83,7 +83,7 @@ public interface CommonConstants {
 			putConst(STATION_TYPE_SOURCE, STATION_TYPE_SOURCE);
 			putConst(STATION_TYPE_SINK, STATION_TYPE_SINK);
 			putConst(STATION_TYPE_TERMINAL, STATION_TYPE_TERMINAL);
-			putConst(STATION_TYPE_ROUTER, "Router");
+			putConst(STATION_TYPE_ROUTER, STATION_TYPE_ROUTER);
 			putConst(STATION_TYPE_DELAY, STATION_TYPE_DELAY);
 			putConst(STATION_TYPE_SERVER, "Queue");
 			putConst(STATION_TYPE_FORK, STATION_TYPE_FORK);
@@ -242,7 +242,7 @@ public interface CommonConstants {
 
 	public static final String FINITE_DROP = "Drop";
 	public static final String FINITE_BLOCK = "BAS Blocking";
-	public static final String FINITE_WAITING = "Waiting Queue (no drop)";
+	public static final String FINITE_WAITING = "Waiting Queue";
 
 	public static final String CLASSES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Classes Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define type (Open or Closed), name and parameters for each customer class."

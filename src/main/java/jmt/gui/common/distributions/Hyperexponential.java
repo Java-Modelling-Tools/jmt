@@ -52,7 +52,7 @@ public class Hyperexponential extends Distribution {
 		Parameter[] parameters = new Parameter[3];
 
 		// Sets parameter p
-		parameters[0] = new Parameter("p", "p", Double.class, new Double(0.25));
+		parameters[0] = new Parameter("p", "p", Double.class, new Double(0.2));
 		// Checks value of p must be between 0 and 1
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
@@ -66,7 +66,7 @@ public class Hyperexponential extends Distribution {
 		});
 
 		// Sets parameter lambda1
-		parameters[1] = new Parameter("lambda1", "\u03BB1", Double.class, new Double(0.5));
+		parameters[1] = new Parameter("lambda1", "\u03BB1", Double.class, new Double(0.1));
 		// Checks value of lambda1 must be greater than 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
@@ -80,7 +80,7 @@ public class Hyperexponential extends Distribution {
 		});
 
 		// Sets parameter lambda2
-		parameters[2] = new Parameter("lambda2", "\u03BB2", Double.class, new Double(1.5));
+		parameters[2] = new Parameter("lambda2", "\u03BB2", Double.class, new Double(0.4));
 		// Checks value of lambda2 must be greater than 0
 		parameters[2].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {

@@ -51,7 +51,7 @@ public class Coxian extends Distribution {
 		Parameter[] parameters = new Parameter[3];
 
 		// Sets parameter lambda0
-		parameters[0] = new Parameter("lambda0", "\u03BB0", Double.class, new Double(2.0));
+		parameters[0] = new Parameter("lambda0", "\u03BB0", Double.class, new Double(1.0));
 		// Checks value of lambda0 must be greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
@@ -65,7 +65,7 @@ public class Coxian extends Distribution {
 		});
 
 		// Sets parameter lambda1
-		parameters[1] = new Parameter("lambda1", "\u03BB1", Double.class, new Double(0.25));
+		parameters[1] = new Parameter("lambda1", "\u03BB1", Double.class, new Double(0.125));
 		// Checks value of lambda1 must be greater than 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {

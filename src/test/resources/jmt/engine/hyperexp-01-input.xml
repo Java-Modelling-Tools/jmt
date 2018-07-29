@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="hyperexp-01-input.xml" timestamp="Sat Aug 12 17:17:04 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="hyperexp-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="" logReplaceMode="0" maxSamples="1000000" name="hyperexp-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class1" priority="0" referenceSource="Source 1" type="open"/>
 <node name="Source 1">
 <section className="RandomSource">
@@ -10,13 +10,13 @@
 <subParameter classPath="jmt.engine.random.HyperExp" name="Hyperexponential"/>
 <subParameter classPath="jmt.engine.random.HyperExpPar" name="distrPar">
 <subParameter classPath="java.lang.Double" name="p">
-<value>0.25</value>
+<value>0.2</value>
 </subParameter>
 <subParameter classPath="java.lang.Double" name="lambda1">
-<value>0.5</value>
+<value>0.2</value>
 </subParameter>
 <subParameter classPath="java.lang.Double" name="lambda2">
-<value>1.5</value>
+<value>0.8</value>
 </subParameter>
 </subParameter>
 </subParameter>

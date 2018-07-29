@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="pareto-01-input.xml" timestamp="Sat Aug 12 17:17:47 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="pareto-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="" logReplaceMode="0" maxSamples="1000000" name="pareto-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class1" priority="0" referenceSource="Source 1" type="open"/>
 <node name="Source 1">
 <section className="RandomSource">
@@ -10,10 +10,10 @@
 <subParameter classPath="jmt.engine.random.Pareto" name="Pareto"/>
 <subParameter classPath="jmt.engine.random.ParetoPar" name="distrPar">
 <subParameter classPath="java.lang.Double" name="alpha">
-<value>2.9999999999990274</value>
+<value>3.0</value>
 </subParameter>
 <subParameter classPath="java.lang.Double" name="k">
-<value>0.6666666666665586</value>
+<value>0.6666666666666667</value>
 </subParameter>
 </subParameter>
 </subParameter>

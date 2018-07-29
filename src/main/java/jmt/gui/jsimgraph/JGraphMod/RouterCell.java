@@ -29,7 +29,7 @@ import org.jgraph.graph.Port;
  *         Date: 20-feb-2006
  *         Time: 17.53.21
  */
-public class RoutingStationCell extends JmtCell {
+public class RouterCell extends JmtCell {
 
 	private static final long serialVersionUID = 1L;
 
@@ -48,9 +48,9 @@ public class RoutingStationCell extends JmtCell {
 	 * @param userObject an Object provided by the user that constitutes
 	 *                   the cell's data
 	 */
-	public RoutingStationCell(Object userObject) {
-		super(RoutingStationCell.ICON, userObject);
-		type = TERMINAL;
+	public RouterCell(Object userObject) {
+		super(RouterCell.ICON, userObject);
+		type = ROUTER;
 	}
 
 	/**

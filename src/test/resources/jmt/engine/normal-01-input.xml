@@ -1,22 +1,19 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="normal-01-input.xml" timestamp="Sat Aug 12 17:17:38 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Administrator/JMT/" logReplaceMode="0" maxSamples="1000000" name="normal-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="" logReplaceMode="0" maxSamples="1000000" name="normal-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass name="Class1" priority="0" referenceSource="Source 1" type="open"/>
 <node name="Source 1">
 <section className="RandomSource">
 <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
 <refClass>Class1</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.HyperExp" name="Hyperexponential"/>
-<subParameter classPath="jmt.engine.random.HyperExpPar" name="distrPar">
-<subParameter classPath="java.lang.Double" name="p">
-<value>0.01961553858473858</value>
+<subParameter classPath="jmt.engine.random.Normal" name="Normal"/>
+<subParameter classPath="jmt.engine.random.NormalPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="mean">
+<value>1.0</value>
 </subParameter>
-<subParameter classPath="java.lang.Double" name="lambda1">
-<value>0.03923107716947716</value>
-</subParameter>
-<subParameter classPath="java.lang.Double" name="lambda2">
-<value>1.960768922830523</value>
+<subParameter classPath="java.lang.Double" name="standardDeviation">
+<value>1.0</value>
 </subParameter>
 </subParameter>
 </subParameter>
@@ -60,13 +57,10 @@
 <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
 <refClass>Class1</refClass>
 <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.Normal" name="Normal"/>
-<subParameter classPath="jmt.engine.random.NormalPar" name="distrPar">
-<subParameter classPath="java.lang.Double" name="mean">
-<value>0.1</value>
-</subParameter>
-<subParameter classPath="java.lang.Double" name="standardDeviation">
-<value>0.05</value>
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>2.0</value>
 </subParameter>
 </subParameter>
 </subParameter>

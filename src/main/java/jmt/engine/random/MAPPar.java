@@ -43,7 +43,7 @@ public class MAPPar extends AbstractParameter implements Parameter {
 	private double[][] P1;
 
 	/**
-	 * It creates a new phase-type parameter based on the data provided by the user.
+	 * It creates a new MAP parameter based on the data provided by the user.
 	 *
 	 * @param D0 2D array of Object containing the hidden transition rate matrix.
 	 * @param D1 2D array of Object containing the observable transition rate matrix.

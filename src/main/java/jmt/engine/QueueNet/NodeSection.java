@@ -157,7 +157,7 @@ public abstract class NodeSection {
 		return sectionID;
 	}
 
-	//TODO: alternatively one can override particular components (terminal,..)
+	//TODO: alternatively one can override particular components
 	/**
 	 * Analyzes a measure in the node section. Override this method to analyze a
 	 * measure depending on the node section implementation. Note that the first

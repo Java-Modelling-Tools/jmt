@@ -2176,27 +2176,25 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (target.type.equals(STATION_TYPE_SOURCE)) {
 			return false;
 		}
-		//no outgoing connections from sink
+		//no outgoing connection from sink
 		if (source.type.equals(STATION_TYPE_SINK)) {
 			return false;
 		}
-		// No connection between a router, fork, join, logger, class switch,
-		// semaphore, scaler, place or transition and itself
+		//no connection between a router, fork, join, logger, class switch,
+		//semaphore, scaler, place or transition and itself
 		if (sourceKey == targetKey
 				&& (source.type.equals(STATION_TYPE_ROUTER) || source.type.equals(STATION_TYPE_FORK) || source.type.equals(STATION_TYPE_JOIN)
 						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_CLASSSWITCH) || source.type.equals(STATION_TYPE_SEMAPHORE)
 						|| source.type.equals(STATION_TYPE_SCALER) || source.type.equals(STATION_TYPE_PLACE) || source.type.equals(STATION_TYPE_TRANSITION))) {
 			return false;
 		}
-		//no direct connections from source to sink
-		//no loops on terminal
-		//no direct connections between terminal and source or sink
+		//no connection among sources, sinks or terminals
 		if ((source.type.equals(STATION_TYPE_SOURCE) || source.type.equals(STATION_TYPE_SINK) || source.type.equals(STATION_TYPE_TERMINAL))
 				&& (target.type.equals(STATION_TYPE_SOURCE) || target.type.equals(STATION_TYPE_SINK) || target.type.equals(STATION_TYPE_TERMINAL))) {
 			return false;
 		}
-		// A place can only be connected to a transition
-		// A transition can only be connected from a place
+		//a place can only be connected to a transition
+		//a transition can only be connected from a place
 		if ((source.type.equals(STATION_TYPE_PLACE) && !target.type.equals(STATION_TYPE_TRANSITION))
 				|| (target.type.equals(STATION_TYPE_TRANSITION) && !source.type.equals(STATION_TYPE_PLACE))) {
 			return false;

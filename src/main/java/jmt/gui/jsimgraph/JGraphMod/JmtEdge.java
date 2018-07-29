@@ -212,7 +212,7 @@ public class JmtEdge extends DefaultEdge {
 		for (int i = 0; i < cells.length; i++) {
 			if (cells[i] instanceof JmtEdge && !(cells[i].equals(cell))) {
 				JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(cells[i], false);
-				if (!(viewtmp == null)) {
+				if (viewtmp != null) {
 					if (cell.intersectsEdge(viewtmp)) {
 						intersecato = true;
 					}

@@ -173,7 +173,7 @@ public class Dispatcher_jMVAschema {
 		ModelTransformer md = new ModelTransformer();
 		md.setValidate(validate);
 
-		//save the file in the same directory of model file, with the same name preceeded by "sim_"
+		//save the file in the same directory of model file, with the same name preceded by "sim_"
 
 		String modelDefinitionParent = modelDefinition.getParent();
 
@@ -263,7 +263,7 @@ public class Dispatcher_jMVAschema {
 		/*********************COPYING SIMULATION RESULTS*********************/
 
 		//the results file has been obtained
-		//the file has been saved in the same directory of model file, with the same name preceeded by "res_sim_"
+		//the file has been saved in the same directory of model file, with the same name preceded by "res_sim_"
 
 		if (modelDefinitionParent.endsWith(SEPARATOR)) {
 			simResultsPath = modelDefinition.getParent() + "res_" + simModelDefinition.getName();
@@ -455,7 +455,7 @@ public class Dispatcher_jMVAschema {
 	 */
 	public boolean solveModelNewTransform() {
 		boolean transfSuccess = false;
-		//get file name: same directory of model file, with the same name preceeded by "sim_"
+		//get file name: same directory of model file, with the same name preceded by "sim_"
 		String modelDefinitionParent = modelDefinition.getParent();
 
 		if (modelDefinitionParent.endsWith(SEPARATOR)) {
@@ -540,7 +540,7 @@ public class Dispatcher_jMVAschema {
 		/*********************COPYING SIMULATION RESULTS*********************/
 
 		//the results file has been obtained
-		//the file has been saved in the same directory of model file, with the same name preceeded by "res_sim_"
+		//the file has been saved in the same directory of model file, with the same name preceded by "res_sim_"
 
 		if (modelDefinitionParent.endsWith(SEPARATOR)) {
 			simResultsPath = modelDefinition.getParent() + "res_" + simModelDefinition.getName();

@@ -44,9 +44,6 @@
 			</xsl:call-template>
 		</classresults>
 	</xsl:template>
-
-	
-		
 	
 	<xsl:template name="printSolution">
 		<xsl:param name="station"/>
@@ -61,7 +58,7 @@
 			<xsl:apply-templates select="../parameters/classes/*" mode="printSolutions_blocking">
 				<xsl:with-param name="station">
 					<xsl:value-of select="@name"/>
-<!--					<xsl:value-of select="concat(@name, '_inputStation')"/> -->
+					<!-- <xsl:value-of select="concat(@name, '_inputStation')"/> -->
 				</xsl:with-param>
 			</xsl:apply-templates>
 		</regionresults>

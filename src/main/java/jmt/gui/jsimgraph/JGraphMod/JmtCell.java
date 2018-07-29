@@ -62,18 +62,19 @@ public abstract class JmtCell extends DefaultGraphCell {
 	 * Different kind of nodes.
 	 */
 	public static final int SOURCE = 0;
-	public static final int TERMINAL = 1;
-	public static final int DELAY = 2;
-	public static final int SERVER = 3;
-	public static final int SINK = 4;
-	public static final int FORK = 5;
-	public static final int JOIN = 6;
-	public static final int LDSERVER = 7;
-	public static final int CLASSSWITCH = 8;
-	public static final int SEMAPHORE = 9;
-	public static final int SCALER = 10;
-	public static final int PLACE = 11;
-	public static final int TRANSITION = 12;
+	public static final int SINK = 1;
+	public static final int TERMINAL = 2;
+	public static final int ROUTER = 3;
+	public static final int DELAY = 4;
+	public static final int SERVER = 5;
+	public static final int FORK = 6;
+	public static final int JOIN = 7;
+	public static final int LOGGER = 8;
+	public static final int CLASSSWITCH = 9;
+	public static final int SEMAPHORE = 10;
+	public static final int SCALER = 11;
+	public static final int PLACE = 12;
+	public static final int TRANSITION = 13;
 
 	private Port[] ports;
 

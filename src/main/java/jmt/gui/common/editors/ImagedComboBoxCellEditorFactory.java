@@ -18,6 +18,7 @@
 package jmt.gui.common.editors;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.List;
 
@@ -255,14 +256,16 @@ public class ImagedComboBoxCellEditorFactory {
 			setOpaque(true);
 			setBorder(BorderFactory.createEmptyBorder(0, 2, 0, 2));
 			this.key = key;
+			int fontSize = this.getFont().getSize();
+			Dimension iconSize = new Dimension(fontSize, fontSize);
 			switch (option) {
 			case OPTION_CLASS_TYPES:
 				setText((String) key);
-				setIcon(JMTImageLoader.loadImage(key + "Combo"));
+				setIcon(JMTImageLoader.loadImage((String) key + "Class", iconSize));
 				break;
 			case OPTION_STATION_TYPES:
 				setText(CommonConstants.STATION_NAMES.get(key));
-				setIcon(JMTImageLoader.loadImage(key + "Combo"));
+				setIcon(JMTImageLoader.loadImage((String) key + "Cell", iconSize));
 				break;
 			case OPTION_CLASS_NAMES:
 				if (key == null) {
@@ -272,22 +275,22 @@ public class ImagedComboBoxCellEditorFactory {
 				if (cd.getClassName(key) != null && !cd.getClassName(key).equals("")) {
 					setText(cd.getClassName(key));
 					if (cd.getClassType(key) == CommonConstants.CLASS_TYPE_OPEN) {
-						setIcon(JMTImageLoader.loadImage("OpenCombo"));
+						setIcon(JMTImageLoader.loadImage("OpenClass", iconSize));
 					} else {
-						setIcon(JMTImageLoader.loadImage("ClosedCombo"));
+						setIcon(JMTImageLoader.loadImage("ClosedClass", iconSize));
 					}
 				}
 				break;
 			case OPTION_STATION_NAMES:
 				if (sd.getStationName(key) != null && !sd.getStationName(key).equals("")) {
 					setText(sd.getStationName(key));
-					setIcon(JMTImageLoader.loadImage(sd.getStationType(key) + "Combo"));
+					setIcon(JMTImageLoader.loadImage(sd.getStationType(key) + "Cell", iconSize));
 				}
 				if (sd instanceof BlockingRegionDefinition) {
 					BlockingRegionDefinition bd = (BlockingRegionDefinition) sd;
 					if (bd.getRegionName(key) != null && !bd.getRegionName(key).equals("")) {
 						setText(bd.getRegionName(key));
-						setIcon(JMTImageLoader.loadImage("BlockingCombo"));
+						setIcon(JMTImageLoader.loadImage("BlockingRegion", iconSize));
 					}
 				}
 				if (CommonConstants.STATION_TYPE_FORK.equals(key)
@@ -295,13 +298,13 @@ public class ImagedComboBoxCellEditorFactory {
 						|| CommonConstants.STATION_TYPE_SCALER.equals(key)
 						|| CommonConstants.STATION_TYPE_TRANSITION.equals(key)) {
 					setText((String) key);
-					setIcon(JMTImageLoader.loadImage((String) key + "Combo"));
+					setIcon(JMTImageLoader.loadImage((String) key + "Cell", iconSize));
 				}
 				break;
 			case OPTION_FJ_STATION_NAMES:
 				if (sd.getStationName(key) != null && !sd.getStationName(key).equals("")) {
 					setText(sd.getStationName(key) + " (Fork Join)");
-					setIcon(JMTImageLoader.loadImage(sd.getStationType(key) + "Combo"));
+					setIcon(JMTImageLoader.loadImage("ForkCell", iconSize));
 				}
 				break;
 			case OPTION_TRANSITION_MODES:
