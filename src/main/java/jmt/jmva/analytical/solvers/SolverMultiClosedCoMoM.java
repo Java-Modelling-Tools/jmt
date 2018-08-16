@@ -102,13 +102,14 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 				if (t[i] == LI) {
 					M++;
 				} else if (t[i] == LD) {
+					return false;
+				} else {
 					for (int r = 0; r < classes; r++) {
 						Z[r] += (int) (servTime[i][r][0] * visits[i][r]);
 					}
-				} else {
-					return false;
 				}
 			}
+
 			// Now Z contains the delay times
 
 			// Discover service demands

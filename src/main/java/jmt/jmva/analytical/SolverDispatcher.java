@@ -353,14 +353,14 @@ public class SolverDispatcher {
 					if (SolverAlgorithm.EXACT.equals(algorithmType)) {
 						SolverMultiClosedMVA closedsolver = new SolverMultiClosedMVA(classes, stations);
 						if (!closedsolver.input(stationNames, stationTypes, serviceTimes, visits, classPop)) {
-							fail("Error initializing MVAMultiSolver", null);
+							fail("Error initializing MVA", null);
 						}
 						solver = closedsolver;
 					} else if (SolverAlgorithm.RECAL.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedRECAL closedSolver = new SolverMultiClosedRECAL(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
-								fail("Error initializing RECALMultiSolver", null);
+								fail("Error initializing RECAL", null);
 						}
 						solver = closedSolver;
 					}/* else if (SolverAlgorithm.MOM.equals(algorithmType)) {
@@ -370,13 +370,28 @@ public class SolverDispatcher {
 								fail("Error initializing MoMMultiSolver", null);
 						}
 						solver = closedSolver;
-					}*/ else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
+					}*/ 
+					else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedCoMoM closedSolver = new SolverMultiClosedCoMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
-								fail("Error initializing CoMoMMultiSolver", null);
+								fail("Error initializing CoMoM", null);
 						}
 						solver = closedSolver;
+					} 
+//					else if (SolverAlgorithm.TREE_CONV.equals(algorithmType)) {
+//						SolverMultiClosedTreeConvolution closedSolver = new SolverMultiClosedTreeConvolution(classes, stations, classPop);
+//						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
+//							fail("Error initializing TreeConvolution", null);
+//						}
+//						solver = closedSolver;
+//					}
+					else if (SolverAlgorithm.TREE_MVA.equals(algorithmType)) {
+					SolverMultiClosedTreeMVA closedSolver = new SolverMultiClosedTreeMVA(classes, stations, classPop);
+					if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
+						fail("Error initializing TreeMVA", null);
+					}
+					solver = closedSolver;
 					}
 					/*
 					else if (SolverAlgorithm.RGF.equals(algorithmType)) {
@@ -396,23 +411,23 @@ public class SolverDispatcher {
 						solver = closedSolver;
 					}*/ else {
 						double tolerance = model.getTolerance();
-						SolverMultiClosedAMVA closerSolver = null;
+						SolverMultiClosedAMVA closedSolver = null;						
 						if (SolverAlgorithm.CHOW.equals(algorithmType)) {
-							closerSolver = new SolverMultiClosedChow(classes, stations, classPop);
+							closedSolver = new SolverMultiClosedChow(classes, stations, classPop);
 						} else if (SolverAlgorithm.BARD_SCHWEITZER.equals(algorithmType)) {
-							closerSolver = new SolverMultiClosedBardSchweitzer(classes, stations, classPop);
+							closedSolver = new SolverMultiClosedBardSchweitzer(classes, stations, classPop);
 						} else if (SolverAlgorithm.AQL.equals(algorithmType)) {
-							closerSolver = new SolverMultiClosedAQL(classes, stations, classPop);
+							closedSolver = new SolverMultiClosedAQL(classes, stations, classPop);
 						} else {
-							closerSolver = new SolverMultiClosedLinearizer(classes, stations, classPop, SolverAlgorithm.DESOUZA_MUNTZ_LINEARIZER.equals(algorithmType));
+							closedSolver = new SolverMultiClosedLinearizer(classes, stations, classPop, SolverAlgorithm.DESOUZA_MUNTZ_LINEARIZER.equals(algorithmType));
 						}
-						((SolverMultiClosedAMVA)closerSolver).setTolerance(tolerance);
+						((SolverMultiClosedAMVA)closedSolver).setTolerance(tolerance);
 						
-						if (!closerSolver.input(stationNames, stationTypes, serviceTimes, visits)) {
+						if (!closedSolver.input(stationNames, stationTypes, serviceTimes, visits)) {
 							String algName = algorithmType.toString().replace(" ", "").replace("-", "");
 							fail("Error initializing " + algName + "MultiSolver", null);
 						}
-						solver = closerSolver;
+						solver = closedSolver;
 					}
 					/** End **/
 			

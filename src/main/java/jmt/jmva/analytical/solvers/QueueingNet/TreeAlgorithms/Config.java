@@ -11,7 +11,7 @@ import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.TreePlanter.PlantM
 public class Config {
 
 	/** Each step of the algorithm is printed to the console if true. */
-	public static final boolean VERBOSE = false;
+	public static final boolean VERBOSE = true;
 	
 	/** All verbose outputs are written to log file if true. */
 	public static final boolean LOG = false;
@@ -23,7 +23,7 @@ public class Config {
 	
 	/** If true the tree planter tries several heuristics in the tree planting stage
 	 * to find a tree with the best complexity characteristics. */
-	public static boolean COMPARE_ALL_HEURISTICS = true;
+	public static boolean COMPARE_ALL_HEURISTICS = false;
 	
 	/** Determines which complexities are checked when comparing heuristics,
 	 * when COMPARE_ALL_HEURISTICS is true, as follows:

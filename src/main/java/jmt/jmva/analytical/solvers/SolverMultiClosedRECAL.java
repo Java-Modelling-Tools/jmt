@@ -20,6 +20,7 @@ package jmt.jmva.analytical.solvers;
 import javax.naming.OperationNotSupportedException;
 
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
+import jmt.jmva.analytical.solvers.DataStructures.QNModel.QueueType;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
@@ -100,13 +101,14 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 				if (t[i] == LI) {
 					M++;
 				} else if (t[i] == LD) {
+					return false;
+				} else {
 					for (int r = 0; r < classes; r++) {
 						Z[r] += (int) (servTime[i][r][0] * visits[i][r]);
 					}
-				} else {
-					return false;
 				}
 			}
+
 			// Now Z contains the delay times
 
 			// Discover service demands
@@ -193,15 +195,23 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		scUtilization = new double[stations];
 		scResidTime = new double[stations];
 		scQueueLen = new double[stations];
+		int shift = 0;
 		for (int m = 0; m < qnm.M; m++) {
 			for (int r = 0; r < qnm.R; r++) {
-				throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
-				utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-				residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] / scale;
-				scThroughput[m] += throughput[m][r];
+				if (qnm.getQueueType(m) == QueueType.LI) { 
+						throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
+						utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
+						residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] / scale; 
+				} else {
+					shift = shift + 1;
+					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
+					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
+					residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] / scale;
+				}
+			    scThroughput[m] += throughput[m][r];
 				scUtilization[m] += utilization[m][r];
 				scResidTime[m] += residenceTime[m][r];
-				scQueueLen[m] += queueLen[m][r];
+				scQueueLen[m] += queueLen[m][r]; 				
 			}
 		}
 
