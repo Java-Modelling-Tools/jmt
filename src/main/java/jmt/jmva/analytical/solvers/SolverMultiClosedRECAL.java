@@ -100,12 +100,12 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 			for (int i = 0; i < stations; i++) {
 				if (t[i] == LI) {
 					M++;
-				} else if (t[i] == LD) {
-					return false;
-				} else {
+				} else if (t[i] == DELAY) {
 					for (int r = 0; r < classes; r++) {
 						Z[r] += (int) (servTime[i][r][0] * visits[i][r]);
 					}
+				} else {
+					return false;
 				}
 			}
 
@@ -195,26 +195,34 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		scUtilization = new double[stations];
 		scResidTime = new double[stations];
 		scQueueLen = new double[stations];
+		double[][] classQueueLen = new double[stations][classes];
 		int shift = 0;
-		for (int m = 0; m < qnm.M; m++) {
-			for (int r = 0; r < qnm.R; r++) {
-				if (qnm.getQueueType(m) == QueueType.LI) { 
+		for (int m = 0; m < this.stations; m++) {
+				if (qnm.getQueueType(m) == QueueType.LI) {					
+					for (int r = 0; r < this.classes; r++) {
 						throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
 						utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-						residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] / scale; 
-				} else {
+						residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
+						classQueueLen[m][r] = queueLen[m-shift][r];
+					}
+				} else if (qnm.getQueueType(m) == QueueType.DELAY) {
 					shift = shift + 1;
+					for (int r = 0; r < this.classes; r++) {
 					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
 					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-					residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] / scale;
+					classQueueLen[m][r] = utilization[m][r]; 
+					residenceTime[m][r] = servTime[m][r][0] / scale;
+					}
 				}
+				for (int r = 0; r < this.classes; r++) {				
 			    scThroughput[m] += throughput[m][r];
 				scUtilization[m] += utilization[m][r];
 				scResidTime[m] += residenceTime[m][r];
-				scQueueLen[m] += queueLen[m][r]; 				
-			}
+				scQueueLen[m] += classQueueLen[m][r]; 	
+				}
+			
 		}
-
+		queueLen = classQueueLen;
 
 		//NEW
 		//@author Stefano Omini

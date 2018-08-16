@@ -1,6 +1,7 @@
 package jmt.jmva.analytical.solvers;
 
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
+import jmt.jmva.analytical.solvers.DataStructures.QNModel.QueueType;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
@@ -68,19 +69,18 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
                 Z[r] = 0;
             }
 
-            // Discover delay times (think times)
-            for (int i = 0; i < stations; i++) {
-                if (t[i] == LI) {
-                    M++;
-                } else if (t[i] == LD) {
-                    for (int r = 0; r < classes; r++) {
-                        Z[r] += (int) (servTime[i][r][0] * visits[i][r]);
-                    }
-                } else {
-                    return false;
-                }
-            }
-            // Now Z contains the delay times
+			// Discover delay times (think times)
+			for (int i = 0; i < stations; i++) {
+				if (t[i] == LI) {
+					M++;
+				} else if (t[i] == DELAY) {
+					for (int r = 0; r < classes; r++) {
+						Z[r] += (int) (servTime[i][r][0] * visits[i][r]);
+					}
+				} else {
+					return false;
+				}
+			}
 
             // Discover service demands
             double[][] D = new double[M][R];
@@ -142,43 +142,60 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
         }
 
         clsThroughput = qnm.getMeanThroughputsAsDoubles();
-        queueLen = qnm.getMeanQueueLengthsAsDoubles();
+		queueLen = qnm.getMeanQueueLengthsAsDoubles();
+		
+		double scale = 1.0;
+		throughput = new double[stations][classes];
+		utilization = new double[stations][classes];
+		scThroughput = new double[stations];
+		scUtilization = new double[stations];
+		scResidTime = new double[stations];
+		scQueueLen = new double[stations];
+		double[][] classQueueLen = new double[stations][classes];
+		int shift = 0;
+		for (int m = 0; m < this.stations; m++) {
+				if (qnm.getQueueType(m) == QueueType.LI) {					
+					for (int r = 0; r < this.classes; r++) {
+						throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
+						utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
+						residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
+						classQueueLen[m][r] = queueLen[m-shift][r];
+					}
+				} else if (qnm.getQueueType(m) == QueueType.DELAY) {
+					shift = shift + 1;
+					for (int r = 0; r < this.classes; r++) {
+					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
+					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
+					classQueueLen[m][r] = utilization[m][r]; 
+					residenceTime[m][r] = servTime[m][r][0] / scale;
+					}
+				}
+				for (int r = 0; r < this.classes; r++) {				
+			    scThroughput[m] += throughput[m][r];
+				scUtilization[m] += utilization[m][r];
+				scResidTime[m] += residenceTime[m][r];
+				scQueueLen[m] += classQueueLen[m][r]; 	
+				}
+			
+		}
+		queueLen = classQueueLen;
 
-        throughput = new double[stations][classes];
-        utilization = new double[stations][classes];
-        scThroughput = new double[stations];
-        scUtilization = new double[stations];
-        scResidTime = new double[stations];
-        scQueueLen = new double[stations];
-        for (int m = 0; m < qnm.M; m++) {
-            for (int r = 0; r < qnm.R; r++) {
-                throughput[m][r] = clsThroughput[r] * visits[m][r];
-                utilization[m][r] = throughput[m][r] * servTime[m][r][0]; // Umc=Xmc*Smc
-                residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] ;
-                scThroughput[m] += throughput[m][r];
-                scUtilization[m] += utilization[m][r];
-                scResidTime[m] += residenceTime[m][r];
-                scQueueLen[m] += queueLen[m][r];
-            }
-        }
+		//NEW
+		//@author Stefano Omini
+		//compute system parameters
+		sysResponseTime = 0;
+		sysNumJobs = 0;
 
+		//		for (c = 0; c < classes; c++) {
+		//	for (m = 0; m < stations; m++) {
+		//		clsRespTime[c] += residenceTime[m][c];
+		//		sysNumJobs += queueLen[m][c];
+		//	}
+		//	sysResponseTime += clsRespTime[c];
+		//}
 
-        //NEW
-        //@author Stefano Omini
-        //compute system parameters
-        sysResponseTime = 0;
-        sysNumJobs = 0;
-
-        //		for (c = 0; c < classes; c++) {
-        //	for (m = 0; m < stations; m++) {
-        //		clsRespTime[c] += residenceTime[m][c];
-        //		sysNumJobs += queueLen[m][c];
-        //	}
-        //	sysResponseTime += clsRespTime[c];
-        //}
-
-        sysThroughput = sysNumJobs / sysResponseTime;
-        //end NEW
+		sysThroughput = sysNumJobs / sysResponseTime;
+		//end NEW
 
     }
 

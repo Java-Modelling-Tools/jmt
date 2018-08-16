@@ -54,7 +54,7 @@
 						<artifactId>properties-maven-plugin</artifactId>
 						<version>1.0-alpha-2</version>
 						<executions>
-							<execution>
+						<execution>
 								<phase>initialize</phase>
 								<goals>
 									<goal>read-project-properties</goal>
@@ -64,7 +64,7 @@
 										<file>${basedir}/src/main/resources/jmt/common/globalsettings.conf</file>
 									</files>
 								</configuration>
-							</execution>
+							</execution> 
 						</executions>
 					</plugin>
 					<!-- we want JDK 1.7 source and binary compatibility -->

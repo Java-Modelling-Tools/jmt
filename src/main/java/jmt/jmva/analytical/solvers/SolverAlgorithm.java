@@ -30,13 +30,15 @@ import java.util.Map;
  *
  */
 public enum SolverAlgorithm {
+	// EXACT
 	EXACT("MVA", true, true, true),
 	RECAL("RECAL", true, true, false),
-    //RGF("RGF", true, true, false),
-	TREE_MVA("TreeMVA", true, true, false),
-	//TREE_CONV("TreeConvolution", true, true, false),
 	//MOM("MoM", true, true, false),
 	COMOM("CoMoM", true, true, false),
+    //RGF("RGF", true, true, false), /* Looks buggy */
+	//TREE_MVA("TreeMVA", true, true, false), /* Looks buggy with delays */
+	//TREE_CONV("TreeConvolution", true, true, false), /* Looks buggy with delays */
+	// APPROXIMATE
 	CHOW("Chow", true, false, false),
 	BARD_SCHWEITZER("Bard-Schweitzer", true, false, false),
 	AQL("AQL", true, false, false),

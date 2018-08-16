@@ -363,14 +363,17 @@ public class SolverDispatcher {
 								fail("Error initializing RECAL", null);
 						}
 						solver = closedSolver;
-					}/* else if (SolverAlgorithm.MOM.equals(algorithmType)) {
+					}
+					/*
+					else if (SolverAlgorithm.MOM.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedMoM closedSolver = new SolverMultiClosedMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
-								fail("Error initializing MoMMultiSolver", null);
+								fail("Error initializing MoM", null);
 						}
 						solver = closedSolver;
-					}*/ 
+					} 
+					*/
 					else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedCoMoM closedSolver = new SolverMultiClosedCoMoM(classes, stations, classPop);
@@ -379,13 +382,16 @@ public class SolverDispatcher {
 						}
 						solver = closedSolver;
 					} 
-//					else if (SolverAlgorithm.TREE_CONV.equals(algorithmType)) {
-//						SolverMultiClosedTreeConvolution closedSolver = new SolverMultiClosedTreeConvolution(classes, stations, classPop);
-//						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
-//							fail("Error initializing TreeConvolution", null);
-//						}
-//						solver = closedSolver;
-//					}
+					/*
+					else if (SolverAlgorithm.TREE_CONV.equals(algorithmType)) {
+						SolverMultiClosedTreeConvolution closedSolver = new SolverMultiClosedTreeConvolution(classes, stations, classPop);
+						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
+							fail("Error initializing TreeConvolution", null);
+						}
+						solver = closedSolver;
+					}
+					*/
+					/*
 					else if (SolverAlgorithm.TREE_MVA.equals(algorithmType)) {
 					SolverMultiClosedTreeMVA closedSolver = new SolverMultiClosedTreeMVA(classes, stations, classPop);
 					if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
@@ -393,6 +399,7 @@ public class SolverDispatcher {
 					}
 					solver = closedSolver;
 					}
+					*/
 					/*
 					else if (SolverAlgorithm.RGF.equals(algorithmType)) {
 						int nThreads = 1;
@@ -401,7 +408,9 @@ public class SolverDispatcher {
 							fail("Error initializing RGFMultiSolver", null);
 						}
 						solver = closedSolver;
-					} else if (SolverAlgorithm.MONTECARLO.equals(algorithmType)) {
+					} 
+					*/
+					/*else if (SolverAlgorithm.MONTECARLO.equals(algorithmType)) {
 						SolverMultiClosedMonteCarlo closedSolver = new SolverMultiClosedMonteCarlo(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
 							fail("Error initializing MonteCarloMultiSolver", null);
