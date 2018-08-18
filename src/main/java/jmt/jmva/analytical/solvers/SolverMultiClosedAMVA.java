@@ -8,7 +8,7 @@ package jmt.jmva.analytical.solvers;
  */
 public abstract class SolverMultiClosedAMVA extends SolverMulti {
 	public static final double DEFAULT_TOLERANCE = Math.pow(10, -7);
-    protected double tolerance = DEFAULT_TOLERANCE;
+	protected double tolerance = DEFAULT_TOLERANCE;
 	protected int MAX_ITERATIONS = Integer.MAX_VALUE;
 	protected int[] clsPopulation;
 	protected int iterations = 0; // algorithm iterations
@@ -35,15 +35,15 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 	public void setTolerance(double tolerance) {
 		this.tolerance = tolerance;
 	}
-	
+
 	public void setMaxIterations(int maxIterations) {
 		MAX_ITERATIONS = maxIterations;
 	}
-	
+
 	public int getIterations() {
 		return iterations;
 	}
-	
+
 	/** Returns the number of jobs in the system
 	 *  @return the total number of jobs
 	 */
@@ -67,15 +67,15 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 			solveLD();
 		}
 	}
-	
+
 	private void solveLD() {
 		// TODO Auto-generated method stub
 		// still needs to be implemented
 	}
-	
+
 	public void solveLI() {
 		double[][] scQueueLensWithOneLessCustomer = new double[stations][classes];
-		
+
 		for (int c = 0; c < classes; c++) {
 			for (int k = 0; k < stations; k++) {
 				if (stations == 0) {
@@ -85,10 +85,10 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 				}
 			}
 		}
-		
+
 		int iterations = 0;
 		double[][] oldQueueLen = new double[stations][classes];
-		
+
 		while (true) {
 			iterations++;
 			for (int k = 0; k < stations; k++) {
@@ -96,9 +96,9 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 					oldQueueLen[k][c] = queueLen[k][c];
 				}
 			}
-			
+
 			scQueueLensWithOneLessCustomer = getQueueLensWithOneLessCustomer();
-			
+
 			for (int c = 0; c < classes; c++) {
 				clsRespTime[c] = 0;
 				for (int k = 0; k < stations; k++) {
@@ -126,12 +126,12 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 				break;
 			}
 		}
-		
+
 		this.iterations = iterations;
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 		sysThroughput = 0;
-		
+
 		// calculate aggregate measures
 		for (int c = 0; c < classes; c++) {
 			clsNumJobs[c] = 0;

@@ -9,7 +9,7 @@ package jmt.jmva.analytical.solvers;
 public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 	// boolean to decide which version of Linearizer to use
 	private boolean useDeSouzaMuntz;
-	
+
 	public SolverMultiClosedLinearizer(int classes, int stations, int[] classPopulation, boolean useDeSouzaMuntz) {
 		super(classes, stations, classPopulation);
 		this.useDeSouzaMuntz = useDeSouzaMuntz;
@@ -20,7 +20,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 	public void solveLI() {
 		double[][][] queueLengths = new double[classes+1][stations][classes];
 		double[][][] custFracDiffs = new double[stations][classes][classes];
-		
+
 		// Step 1: Initialisation
 		for (int k = 0; k < stations; k++) {
 			for (int c = 0; c < classes; c++) {
@@ -39,7 +39,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 				}
 			}
 		}
-		
+
 		int iterations = 1;
 		LinearizerCoreAlgorithm coreResult = null;
 		LinearizerCoreAlgorithm[] coreResults = new LinearizerCoreAlgorithm[classes+1];
@@ -68,18 +68,18 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 					}
 				}
 			}
-			
+
 			// Step 2
 			coreResults[0].solve(clsPopulation, queueLengths[0], custFracDiffs);
-			
+
 			// Step 3: termination criteria
 			if (iterations >= MAX_ITERATIONS || maxDiff(queueLengths[0], coreResults[0].getQueueLengths()) < tolerance) {
 				coreResult = coreResults[0];
 				break;
 			}
-			
+
 			queueLengths[0] = coreResults[0].getQueueLengths();
-			
+
 			// Step 4
 			for (int j = 1; j < classes+1; j++) {
 				int[] newClsPopulation = new int[classes];
@@ -92,7 +92,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 				coreResults[j].solve(newClsPopulation, queueLengths[j], custFracDiffs);
 				queueLengths[j] = coreResults[j].getQueueLengths();
 			}
-			
+
 			// Step 5
 			double[][][] fractions = new double[classes+1][stations][classes];
 			for (int k = 0; k < stations; k++) {
@@ -108,7 +108,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 					}
 				}
 			}
-			
+
 			for (int k = 0; k < stations; k++) {
 				for (int c = 0; c < classes; c++) {
 					for (int j = 0; j < classes; j++) {
@@ -116,20 +116,20 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 					}
 				}
 			}
-			
+
 			// Step 6
 			iterations++;
 		}
-		
+
 		this.iterations = iterations;
-		
+
 		residenceTime = coreResult.getResidenceTimes();
 		queueLen = coreResult.getQueueLengths();
 
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 		sysThroughput = 0;
-		
+
 		// calculate aggregate measures
 		for (int c = 0; c < classes; c++) {
 			clsRespTime[c] = 0;
@@ -168,7 +168,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 			sysThroughput = sysNumJobs/sysResponseTime;
 		}
 	}
-	
+
 	/**
 	 * The original Linearizer Core algorithm
 	 * 
@@ -179,23 +179,23 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 		private double[][] resTimes = new double[stations][classes];
 		protected double[][][] queueLengths;
 		protected double[] scQueueLengthsWithWholePop = new double[stations];
-		
+
 		public LinearizerCoreAlgorithm() {
 			queueLengths = new double[classes+1][stations][classes];
 		}
-		
+
 		public double[][] getResidenceTimes() {
 			return resTimes;
 		}
-		
+
 		public double[][] getQueueLengths() {
 			return queueLengths[0];
 		}
-		
+
 		public void solve(int[] clsPopulation, double[][] inputQueueLengths, double[][][] inputCustFracDiffs) {
 			double[] clsThroughputs = new double[classes];
 			double[][] oldQueueLengths = new double[stations][classes];
-			
+
 			for (int k = 0; k < stations; k++) {
 				scQueueLengthsWithWholePop[k] = 0;
 				for (int c = 0; c < classes; c++) {
@@ -203,19 +203,19 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 					scQueueLengthsWithWholePop[k] += inputQueueLengths[k][c];
 				}
 			}
-			
+
 			while (true) {
-				
+
 				for (int k = 0; k < stations; k++) {
 					for (int c = 0; c < classes; c++) {
 						oldQueueLengths[k][c] = queueLengths[0][k][c];
 					}
 				}
-				
+
 				// Step 2
 				double[][] scQueueLengths = new double[classes][stations];
 				scQueueLengths = getSCQueueLengths(clsPopulation, inputCustFracDiffs);
-				
+
 				for (int c = 0; c < classes; c++) {
 					double clsRespTime = 0;
 					for (int k = 0; k < stations; k++) {
@@ -233,7 +233,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 						clsThroughputs[c] = clsPopulation[c]/clsRespTime;
 					}
 				}
-				
+
 				for (int k = 0; k < stations; k++) {
 					scQueueLengthsWithWholePop[k] = 0;
 					for (int c = 0; c < classes; c++) {
@@ -241,7 +241,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 						scQueueLengthsWithWholePop[k] += queueLengths[0][k][c];
 					}
 				}
-				
+
 				// Step 4: termination criteria
 				if (maxDiff(oldQueueLengths, queueLengths[0]) < tolerance) {
 					break;
@@ -266,7 +266,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 					}
 				}
 			}
-			
+
 			for (int k = 0; k < stations; k++) {
 				for (int j = 0; j < classes; j++) {
 					scQueueLengths[j][k] = 0;
@@ -288,22 +288,22 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 	private class DeSouzaMuntzLinearizerCoreAlgorithm extends LinearizerCoreAlgorithm {
 		private int classIndexWithOneLessCustomer;
 		double[][] scCustFracDiffs = null;
-		
+
 		public DeSouzaMuntzLinearizerCoreAlgorithm(int classIndexWithOneLessCustomer) {
 			super();
 			queueLengths = new double[1][stations][classes];
 			this.classIndexWithOneLessCustomer = classIndexWithOneLessCustomer;
 		}
-		
+
 		public void setScCustFracDiffs(double[][] scCustFracDiffs) {
 			this.scCustFracDiffs = scCustFracDiffs;
 		}
-		
+
 		@Override
 		protected double[][] getSCQueueLengths(int[] clsPopulation,
 				double[][][] inputCustFracDiffs) {
 			double[][] scQueueLengths = new double[classes][stations];
-			
+
 			if (scCustFracDiffs == null) {
 				System.out.println("service centre cust frac diffs are NULL");
 				scCustFracDiffs = new double[stations][classes];
@@ -316,7 +316,7 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 					}
 				}
 			}
-			
+
 			for (int j = 0; j < classes; j++) {
 				for (int k = 0; k < stations; k++) {
 					double scQueueLength = scQueueLengthsWithWholePop[k] + scCustFracDiffs[k][j] - inputCustFracDiffs[k][j][j];
@@ -329,15 +329,15 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 					scQueueLengths[j][k] = scQueueLength;
 				}
 			}
-			
+
 			return scQueueLengths;
 		}
 	}
-	
+
 	@Override
 	protected double[][] getQueueLensWithOneLessCustomer() {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 }

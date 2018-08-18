@@ -34,7 +34,7 @@ import jmt.gui.common.CommonConstants;
 /**
  * <p><b>Name:</b> JMTMenuBar</p> 
  * <p><b>Description:</b> 
- * A generic menu bar with many enhanchments to be used by JMT.
+ * A generic menu bar with many enhancements to be used by JMT.
  * TODO Support for button groups and item add/remove is not implemented yet.
  * </p>
  * <p><b>Date:</b> 31/gen/07

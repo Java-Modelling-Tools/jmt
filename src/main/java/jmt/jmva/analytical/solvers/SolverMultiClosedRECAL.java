@@ -17,8 +17,6 @@
 
 package jmt.jmva.analytical.solvers;
 
-import javax.naming.OperationNotSupportedException;
-
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel.QueueType;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
@@ -42,7 +40,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	protected int[] population;
 	private Integer scale = 100000;
 
-        /**
+	/**
 	 * Contains the queueing network model
 	 */
 	protected QNModel qnm;
@@ -68,15 +66,15 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	 *  @param  t   array of the types (LD or LI) of service centers
 	 *  @param  s   matrix of service times of the service centers
 	 *  @param  v   array of visits to the service centers
-	 *  @param  nThreads The number of threads the solver should use. If nThreads > 2 then the parallel algorithm is used.
+	 *  @param  nThr The number of threads the solver should use
 	 *  @return True if the operation is completed with success
 	 */
-	public boolean input(int[] t, double[][][] s, double[][] v, int nThreads) {
+	public boolean input(int[] t, double[][][] s, double[][] v, int nThr) {
 		if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
 			// wrong input.
 			return false;
 		}
-
+		nThreads = nThr;
 		visits = new double[stations][classes];
 		for (int i = 0; i < stations; i++) {
 			System.arraycopy(v[i], 0, visits[i], 0, classes);
@@ -108,7 +106,6 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 					return false;
 				}
 			}
-
 			// Now Z contains the delay times
 
 			// Discover service demands
@@ -141,14 +138,6 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 			// Instantiate queueing network model
 			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
 			qnm.N.print();
-			for (int m = 0; m < qnm.M; m++) {
-				for (int r = 0; r < qnm.R; r++) {
-					System.out.println("Z["+r+"]=" + qnm.getDelay(r));
-					System.out.println("D["+m+","+r+"]=" + qnm.getDemand(m, r));
-//					System.out.println("Q["+m+","+r+"]=" + queueLen[m][r]);
-//					System.out.println("X["+r+"]=" + clsThroughput[r]);
-				}
-			}
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -188,41 +177,40 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 
 		clsThroughput = qnm.getMeanThroughputsAsDoubles();
 		queueLen = qnm.getMeanQueueLengthsAsDoubles();
-		
+
 		throughput = new double[stations][classes];
 		utilization = new double[stations][classes];
 		scThroughput = new double[stations];
 		scUtilization = new double[stations];
 		scResidTime = new double[stations];
 		scQueueLen = new double[stations];
-		double[][] classQueueLen = new double[stations][classes];
+		double[][] clsQueueLen = new double[stations][classes];
 		int shift = 0;
-		for (int m = 0; m < this.stations; m++) {
-				if (qnm.getQueueType(m) == QueueType.LI) {					
-					for (int r = 0; r < this.classes; r++) {
-						throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
-						utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-						residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
-						classQueueLen[m][r] = queueLen[m-shift][r];
-					}
-				} else if (qnm.getQueueType(m) == QueueType.DELAY) {
-					shift = shift + 1;
-					for (int r = 0; r < this.classes; r++) {
+		for (int m = 0; m < stations; m++) {
+			if (qnm.getQueueType(m) == QueueType.LI) {
+				for (int r = 0; r < classes; r++) {
 					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
 					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-					classQueueLen[m][r] = utilization[m][r]; 
-					residenceTime[m][r] = servTime[m][r][0] / scale;
-					}
+					residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
+					clsQueueLen[m][r] = queueLen[m-shift][r];
 				}
-				for (int r = 0; r < this.classes; r++) {				
-			    scThroughput[m] += throughput[m][r];
+			} else if (qnm.getQueueType(m) == QueueType.DELAY) {
+				shift = shift + 1;
+				for (int r = 0; r < classes; r++) {
+					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
+					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
+					clsQueueLen[m][r] = utilization[m][r];
+					residenceTime[m][r] = servTime[m][r][0] / scale;
+				}
+			}
+			for (int r = 0; r < classes; r++) {
+				scThroughput[m] += throughput[m][r];
 				scUtilization[m] += utilization[m][r];
 				scResidTime[m] += residenceTime[m][r];
-				scQueueLen[m] += classQueueLen[m][r]; 	
-				}
-			
+				scQueueLen[m] += clsQueueLen[m][r];
+			}
 		}
-		queueLen = classQueueLen;
+		queueLen = clsQueueLen;
 
 		//NEW
 		//@author Stefano Omini
@@ -230,7 +218,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 
-		//		for (c = 0; c < classes; c++) {
+		//for (c = 0; c < classes; c++) {
 		//	for (m = 0; m < stations; m++) {
 		//		clsRespTime[c] += residenceTime[m][c];
 		//		sysNumJobs += queueLen[m][c];

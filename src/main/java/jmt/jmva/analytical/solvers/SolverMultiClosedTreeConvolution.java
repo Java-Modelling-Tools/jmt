@@ -6,68 +6,64 @@ import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.TreeConvolution.*;
-
-import javax.naming.OperationNotSupportedException;
-
-import jmt.engine.random.engine.RandomEngine;
+import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.TreeConvolution.TreeConvolutionSolver;
 
 /**
  * Created by gcasale on 15 Aug 2018.
  */
 public class SolverMultiClosedTreeConvolution extends SolverMulti {
 
-    //Array containing population for each class
-    protected int[] population;
+	//Array containing population for each class
+	protected int[] population;
 
-    /**
-     * Contains the queueing network model
-     */
-    protected QNModel qnm;
-    
-    /** Creates new SolverMultiClosedMonteCarlo
-     *  @param  stations    number of service centers
-     *  @param  classes     number o classes of classes
-     *  @param  population     array of population classes
-     */
-    public SolverMultiClosedTreeConvolution(int classes, int stations, int[] population) {
-        super(classes, stations);
-        this.classes = classes;
-        this.stations = stations;
-        this.population = population;
-    }
+	/**
+	 * Contains the queueing network model
+	 */
+	protected QNModel qnm;
 
-    /** Initializes the solver with the system parameters.
-     * It must be called before trying to solve the model.
-     *  @param  t   array of the types (LD or LI) of service centers
-     *  @param  s   matrix of service times of the service centers
-     *  @param  v   array of visits to the service centers
-     *  @return True if the operation is completed with success
-     */
-    public boolean input(int[] t, double[][][] s, double[][] v) {
-        if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
-            // wrong input.
-            return false;
-        }
+	/** Creates new SolverMultiClosedMonteCarlo
+	 *  @param  stations    number of service centers
+	 *  @param  classes     number o classes of classes
+	 *  @param  population     array of population classes
+	 */
+	public SolverMultiClosedTreeConvolution(int classes, int stations, int[] population) {
+		super(classes, stations);
+		this.classes = classes;
+		this.stations = stations;
+		this.population = population;
+	}
 
-        visits = new double[stations][classes];
-        for (int i = 0; i < stations; i++) {
-            System.arraycopy(v[i], 0, visits[i], 0, classes);
-        }
+	/** Initializes the solver with the system parameters.
+	 * It must be called before trying to solve the model.
+	 *  @param  t   array of the types (LD or LI) of service centers
+	 *  @param  s   matrix of service times of the service centers
+	 *  @param  v   array of visits to the service centers
+	 *  @return True if the operation is completed with success
+	 */
+	public boolean input(int[] t, double[][][] s, double[][] v) {
+		if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
+			// wrong input.
+			return false;
+		}
 
-        servTime = new double[stations][classes][1];
-        for (int i = 0; i < stations; i++) {
-            for (int r = 0; r < classes; r++) {
-                servTime[i][r][0]=s[i][r][0];
-            }
-        }
+		visits = new double[stations][classes];
+		for (int i = 0; i < stations; i++) {
+			System.arraycopy(v[i], 0, visits[i], 0, classes);
+		}
 
-        try {
-            int M = 0, R = this.classes;
-            double[] Z = new double[classes];
-            for (int r = 0; r < R; r++) {
-                Z[r] = 0;
-            }
+		servTime = new double[stations][classes][1];
+		for (int i = 0; i < stations; i++) {
+			for (int r = 0; r < classes; r++) {
+				servTime[i][r][0]=s[i][r][0];
+			}
+		}
+
+		try {
+			int M = 0, R = this.classes;
+			double[] Z = new double[classes];
+			for (int r = 0; r < R; r++) {
+				Z[r] = 0;
+			}
 
 			// Discover delay times (think times)
 			for (int i = 0; i < stations; i++) {
@@ -82,103 +78,102 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 				}
 			}
 
-            // Discover service demands
-            double[][] D = new double[M][R];
-            int mIndex = 0; // current queue
-            for (int i = 0; i < stations; i++) {
-                if (t[i] == LI) {
-                    for (int r = 0; r < classes; r++) {
-                        D[mIndex][r] = (int) (servTime[i][r][0] * visits[i][r]);
-                    }
-                    mIndex++;
-                }
-            }
-            // Now D contains service demands
+			// Discover service demands
+			double[][] D = new double[M][R];
+			int mIndex = 0; // current queue
+			for (int i = 0; i < stations; i++) {
+				if (t[i] == LI) {
+					for (int r = 0; r < classes; r++) {
+						D[mIndex][r] = (int) (servTime[i][r][0] * visits[i][r]);
+					}
+					mIndex++;
+				}
+			}
+			// Now D contains service demands
 
-            // Create queue multiplicities array
-            // All multiplicities are set to 1, as JMT does not seem to use queue multiplicities
+			// Create queue multiplicities array
+			// All multiplicities are set to 1, as JMT does not seem to use queue multiplicities
 
-            Integer[] multiplicities = new Integer[M];
-            for (int m = 0; m < M; m++) {
-                multiplicities[m] = 1;
-            }
+			Integer[] multiplicities = new Integer[M];
+			for (int m = 0; m < M; m++) {
+				multiplicities[m] = 1;
+			}
 
-            // Transform population from int[] to Integer[]
-            Integer[] N = new Integer[R];
-            for (int r = 0; r < R; r++) {
-                N[r] = population[r];
-            }
+			// Transform population from int[] to Integer[]
+			Integer[] N = new Integer[R];
+			for (int r = 0; r < R; r++) {
+				N[r] = population[r];
+			}
 
-            // Instantiate queueing network model
-            qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
-            qnm.N.print();
+			// Instantiate queueing network model
+			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
+			qnm.N.print();
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            // Return false if initialisation fails for any reason.
-            return false;
-        }
-        return true;
-    }
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			// Return false if initialisation fails for any reason.
+			return false;
+		}
+		return true;
+	}
 
-    /**
-     * Solves the system through the TreeMVA algorithm.
-     * input(...) must have been called first.
-     *
-     * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
-     * @throws BTFMatrixErrorException
-     * @throws InconsistentLinearSystemException
-     * @throws OperationNotSupportedException
-     */
-    @Override
-    public void solve() {
-        QNSolver c = null;
-        try{
-        	int numThreads = 1;
-        	 qnm.N.print();
-            c = new TreeConvolutionSolver(qnm, numThreads);
-            c.computePerformanceMeasures();
-        } catch (InternalErrorException e) {
-        }
+	/**
+	 * Solves the system through the TreeMVA algorithm.
+	 * input(...) must have been called first.
+	 *
+	 * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
+	 * @throws BTFMatrixErrorException
+	 * @throws InconsistentLinearSystemException
+	 * @throws OperationNotSupportedException
+	 */
+	@Override
+	public void solve() {
+		QNSolver c = null;
+		try{
+			int numThreads = 1;
+			qnm.N.print();
+			c = new TreeConvolutionSolver(qnm, numThreads);
+			c.computePerformanceMeasures();
+		} catch (InternalErrorException e) {
+		}
 
-        clsThroughput = qnm.getMeanThroughputsAsDoubles();
+		clsThroughput = qnm.getMeanThroughputsAsDoubles();
 		queueLen = qnm.getMeanQueueLengthsAsDoubles();
-		
-		double scale = 1.0;
+
 		throughput = new double[stations][classes];
 		utilization = new double[stations][classes];
 		scThroughput = new double[stations];
 		scUtilization = new double[stations];
 		scResidTime = new double[stations];
 		scQueueLen = new double[stations];
-		double[][] classQueueLen = new double[stations][classes];
+		double scale = 1.0;
+		double[][] clsQueueLen = new double[stations][classes];
 		int shift = 0;
-		for (int m = 0; m < this.stations; m++) {
-				if (qnm.getQueueType(m) == QueueType.LI) {					
-					for (int r = 0; r < this.classes; r++) {
-						throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
-						utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-						residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
-						classQueueLen[m][r] = queueLen[m-shift][r];
-					}
-				} else if (qnm.getQueueType(m) == QueueType.DELAY) {
-					shift = shift + 1;
-					for (int r = 0; r < this.classes; r++) {
+		for (int m = 0; m < stations; m++) {
+			if (qnm.getQueueType(m) == QueueType.LI) {
+				for (int r = 0; r < classes; r++) {
 					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
 					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-					classQueueLen[m][r] = utilization[m][r]; 
-					residenceTime[m][r] = servTime[m][r][0] / scale;
-					}
+					residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
+					clsQueueLen[m][r] = queueLen[m-shift][r];
 				}
-				for (int r = 0; r < this.classes; r++) {				
-			    scThroughput[m] += throughput[m][r];
+			} else if (qnm.getQueueType(m) == QueueType.DELAY) {
+				shift = shift + 1;
+				for (int r = 0; r < classes; r++) {
+					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
+					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
+					clsQueueLen[m][r] = utilization[m][r];
+					residenceTime[m][r] = servTime[m][r][0] / scale;
+				}
+			}
+			for (int r = 0; r < classes; r++) {
+				scThroughput[m] += throughput[m][r];
 				scUtilization[m] += utilization[m][r];
 				scResidTime[m] += residenceTime[m][r];
-				scQueueLen[m] += classQueueLen[m][r]; 	
-				}
-			
+				scQueueLen[m] += clsQueueLen[m][r];
+			}
 		}
-		queueLen = classQueueLen;
+		queueLen = clsQueueLen;
 
 		//NEW
 		//@author Stefano Omini
@@ -186,7 +181,7 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 
-		//		for (c = 0; c < classes; c++) {
+		//for (c = 0; c < classes; c++) {
 		//	for (m = 0; m < stations; m++) {
 		//		clsRespTime[c] += residenceTime[m][c];
 		//		sysNumJobs += queueLen[m][c];
@@ -197,12 +192,12 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 		sysThroughput = sysNumJobs / sysResponseTime;
 		//end NEW
 
-    }
+	}
 
 
-    @Override
-    public boolean hasSufficientProcessingCapacity() {
-        // only closed class - no saturation problem
-        return true;
-    }
+	@Override
+	public boolean hasSufficientProcessingCapacity() {
+		// only closed class - no saturation problem
+		return true;
+	}
 }

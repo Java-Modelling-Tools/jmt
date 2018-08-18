@@ -23,7 +23,7 @@ public class Config {
 	
 	/** If true the tree planter tries several heuristics in the tree planting stage
 	 * to find a tree with the best complexity characteristics. */
-	public static boolean COMPARE_ALL_HEURISTICS = false;
+	public static final boolean COMPARE_ALL_HEURISTICS = false;
 	
 	/** Determines which complexities are checked when comparing heuristics,
 	 * when COMPARE_ALL_HEURISTICS is true, as follows:
@@ -32,10 +32,10 @@ public class Config {
 	 * 2 = best overall/combined complexity (space and time)
 	 * 3 = based on number of partially covered classes in whole tree.
 	 */
-	public static int COMPLEXITY_CHECK_LEVEL = 3;
+	public static final int COMPLEXITY_CHECK_LEVEL = 3;
 	
 	/** The tree planting mode to use if COMPARE_ALL_HEURISTICS is false. */
-	public static PlantMode TREE_PLANT_MODE = PlantMode.SIMPLE;
+	public static final PlantMode TREE_PLANT_MODE = PlantMode.SIMPLE;
 	
 	/** The max number of tree plant attempts allowed before the
 	 * algorithm terminates in a failed state. */
@@ -44,16 +44,16 @@ public class Config {
 	/** Specifies whether the algorithm should terminate if the complexity manager
 	 *  repeatedly decides that the tree algorithm is not the best approach, given
 	 *  the tree planted in the 'tree planting' stage of the algorithm. */
-	public static boolean TERMINATE_IF_HIGH_COMPLEXITY = false;
+	public static final boolean TERMINATE_IF_HIGH_COMPLEXITY = false;
 	
 	/** GENERAL CONSTRAINTS **/
 	
 	/** Specifies the number of threads to be used when running the tree algorithms.
 	 *  N.B. only used from JMVA options panel. */
-	public static int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+	public static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
 	
 	/** Indicates whether a recursive or iterative approach is used to traverse the tree. */
-	public static boolean RECURSIVE = false;
+	public static final boolean RECURSIVE = false;
 
 	/** TREE CONVOLUTION - CORE ALGORITHM CONSTANTS **/
 	

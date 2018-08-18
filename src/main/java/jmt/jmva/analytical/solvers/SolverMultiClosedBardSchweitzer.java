@@ -35,5 +35,5 @@ public class SolverMultiClosedBardSchweitzer extends SolverMultiClosedAMVA {
 		}
 		return scQueueLens;
 	}
-	
+
 }

@@ -30,7 +30,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.net.URL;
 
 import javax.swing.AbstractAction;
@@ -61,8 +60,8 @@ import jmt.gui.jsimwiz.JSIMMain;
 import jmt.gui.jwat.MainJwatWizard;
 import jmt.jmarkov.MMQueues;
 import jmt.jmva.gui.exact.ExactWizard;
-import jmt.manual.ManualBookmarkers;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 /**
  * <p>Title: Graph StartScreen</p>
@@ -338,8 +337,8 @@ public class GraphStartScreen extends JMTFrame {
 				Runnable r = new Runnable() {
 					public void run() {
 						try {
-							new PDFViewerBuffer("Introduction to JMT", ManualBookmarkers.INTRO);
-						} catch (IOException e) {
+							new PDFViewer("Introduction to JMT", ChapterIdentifier.INTRO);
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}

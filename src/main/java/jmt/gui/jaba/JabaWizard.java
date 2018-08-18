@@ -23,7 +23,6 @@ import java.awt.EventQueue;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.AbstractButton;
@@ -64,8 +63,8 @@ import jmt.gui.jaba.panels.ServiceTimesPanel;
 import jmt.gui.jaba.panels.StationsPanel;
 import jmt.gui.jaba.panels.VisitsPanel;
 import jmt.jmva.gui.exact.panels.ForceUpdatablePanel;
-import jmt.manual.ManualBookmarkers;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 /**
  * This is the object you use to define your system structure and parameters
@@ -262,8 +261,8 @@ public class JabaWizard extends Wizard {
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						new PDFViewerBuffer("JABA manual", ManualBookmarkers.JABA);
-					} catch (IOException e) {
+						new PDFViewer("JABA Manual", ChapterIdentifier.JABA);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}

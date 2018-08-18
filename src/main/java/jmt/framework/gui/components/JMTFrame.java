@@ -33,7 +33,7 @@ import jmt.framework.gui.controller.Manager;
 /**
  * <p><b>Name:</b> JMTFrame</p> 
  * <p><b>Description:</b> 
- * A generic frame with some enhanchments to be used by JMT.
+ * A generic frame with some enhancements to be used by JMT.
  * </p>
  * <p><b>Date:</b> 23/gen/07
  * <b>Time:</b> 16:32:34</p>
@@ -164,7 +164,7 @@ public class JMTFrame extends JFrame {
 	}
 
 	/**
-	 * Sets size of this window and centers it on the page
+	 * Sets size of this window and centers it on the screen
 	 * @param width width of the window
 	 * @param height height of the window
 	 */
@@ -172,12 +172,12 @@ public class JMTFrame extends JFrame {
 		//size of the screen
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-		//reads insets given by task bars
+		//reads insets given by taskbar
 		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());
 		int availableWidth = screenSize.width - insets.left - insets.right;
 		int availableHeight = screenSize.height - insets.top - insets.bottom;
 		
-		// Avoid to draw screens that are not visible and above taskbar
+		//avoids to draw above taskbar
 		if (width > availableWidth) {
 			width = availableWidth;
 		}
@@ -186,7 +186,7 @@ public class JMTFrame extends JFrame {
 			height = availableHeight;
 		}
 
-		//gets dimensions of the screen to center window.
+		//gets dimensions of the screen to center window
 		int xOffset = insets.left + (availableWidth - width) / 2;
 		int yOffset = insets.top + (availableHeight - height) / 2;
 
@@ -229,8 +229,8 @@ public class JMTFrame extends JFrame {
 			super.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 			this.addWindowListener(adapter);
 		} else {
-			this.removeWindowListener(adapter);
 			super.setDefaultCloseOperation(operation);
+			this.removeWindowListener(adapter);
 		}
 	}
 

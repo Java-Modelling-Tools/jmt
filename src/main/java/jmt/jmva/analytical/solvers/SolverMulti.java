@@ -447,7 +447,7 @@ public abstract class SolverMulti {
 	    buf.append("\nSystem users            : " + sysNumJobs);
 		return buf.toString();
 	}
-	*/
+	 */
 
 	//NEW
 	//@author Stefano Omini

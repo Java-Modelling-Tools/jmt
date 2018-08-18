@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 import jmt.framework.gui.components.JMTDialog;
 import jmt.gui.common.startScreen.GraphStartScreen;
 import jmt.jmva.gui.exact.ExactWizard;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.PDFViewer;
 import jmt.util.ShortDescriptionButtonMatcher;
 import jmt.util.TextButtonMatcher;
 import jmt.util.TextLabelMatcher;
@@ -66,7 +66,7 @@ public class JmvaGuiTest {
 	@Test
 	public void JMVAhelpWindowDisplaysCorrectly() {
 		jmva.menuItem(new TextMenuItemMatcher("JMVA Help")).click();
-		FrameFixture helpWindow = WindowFinder.findFrame(PDFViewerBuffer.class).using(jmva.robot);
+		FrameFixture helpWindow = WindowFinder.findFrame(PDFViewer.class).using(jmva.robot);
 		helpWindow.close();
 	}
 	

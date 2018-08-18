@@ -5,49 +5,43 @@ import jmt.jmva.analytical.solvers.DataStructures.QNModel.QueueType;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueueingNet.CoMoMBTFSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.MonteCarloSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.TMVA.TreeMVASolver;
-
-import javax.naming.OperationNotSupportedException;
-
-import jmt.engine.random.engine.RandomEngine;
 
 /**
  * Created by gcasale on 15 Aug 2018.
  */
 public class SolverMultiClosedTreeMVA extends SolverMulti {
 
-    //Array containing population for each class
-    protected int[] population;
+	//Array containing population for each class
+	protected int[] population;
 
-    /**
-     * Contains the queueing network model
-     */
-    protected QNModel qnm;
-    
-    /** Creates new SolverMultiClosedMonteCarlo
-     *  @param  stations    number of service centers
-     *  @param  classes     number o classes of classes
-     *  @param  population     array of population classes
-     */
-    public SolverMultiClosedTreeMVA(int classes, int stations, int[] population) {
-        super(classes, stations);
-        this.classes = classes;
-        this.stations = stations;
-        this.population = population;
-    }
+	/**
+	 * Contains the queueing network model
+	 */
+	protected QNModel qnm;
 
-    /** Initializes the solver with the system parameters.
-     * It must be called before trying to solve the model.
-     *  @param  t   array of the types (LD or LI) of service centers
-     *  @param  s   matrix of service times of the service centers
-     *  @param  v   array of visits to the service centers
-     *  @return True if the operation is completed with success
-     */
-    public boolean input(int[] t, double[][][] s, double[][] v) {
-    	if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
+	/** Creates new SolverMultiClosedMonteCarlo
+	 *  @param  stations    number of service centers
+	 *  @param  classes     number o classes of classes
+	 *  @param  population     array of population classes
+	 */
+	public SolverMultiClosedTreeMVA(int classes, int stations, int[] population) {
+		super(classes, stations);
+		this.classes = classes;
+		this.stations = stations;
+		this.population = population;
+	}
+
+	/** Initializes the solver with the system parameters.
+	 * It must be called before trying to solve the model.
+	 *  @param  t   array of the types (LD or LI) of service centers
+	 *  @param  s   matrix of service times of the service centers
+	 *  @param  v   array of visits to the service centers
+	 *  @return True if the operation is completed with success
+	 */
+	public boolean input(int[] t, double[][][] s, double[][] v) {
+		if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
 			// wrong input.
 			return false;
 		}
@@ -114,14 +108,6 @@ public class SolverMultiClosedTreeMVA extends SolverMulti {
 			// Instantiate queueing network model
 			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
 			qnm.N.print();
-			for (int m = 0; m < qnm.M; m++) {
-				for (int r = 0; r < qnm.R; r++) {
-					System.out.println("Z["+r+"]=" + qnm.getDelay(r));
-					System.out.println("D["+m+","+r+"]=" + qnm.getDemand(m, r));
-//					System.out.println("Q["+m+","+r+"]=" + queueLen[m][r]);
-//					System.out.println("X["+r+"]=" + clsThroughput[r]);
-				}
-			}
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -129,66 +115,65 @@ public class SolverMultiClosedTreeMVA extends SolverMulti {
 			return false;
 		}
 		return true;
-    }
+	}
 
-    /**
-     * Solves the system through the TreeMVA algorithm.
-     * input(...) must have been called first.
-     *
-     * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
-     * @throws BTFMatrixErrorException
-     * @throws InconsistentLinearSystemException
-     * @throws OperationNotSupportedException
-     */
-    @Override
-    public void solve() {
-        QNSolver c = null;
-        try{
-        	int numThreads = 1;
-        	 qnm.N.print();
-            c = new TreeMVASolver(qnm, numThreads, false);
-            c.computePerformanceMeasures();
-        } catch (InternalErrorException e) {
-        }
+	/**
+	 * Solves the system through the TreeMVA algorithm.
+	 * input(...) must have been called first.
+	 *
+	 * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
+	 * @throws BTFMatrixErrorException
+	 * @throws InconsistentLinearSystemException
+	 * @throws OperationNotSupportedException
+	 */
+	@Override
+	public void solve() {
+		QNSolver c = null;
+		try{
+			int numThreads = 1;
+			qnm.N.print();
+			c = new TreeMVASolver(qnm, numThreads, false);
+			c.computePerformanceMeasures();
+		} catch (InternalErrorException e) {
+		}
 
-        clsThroughput = qnm.getMeanThroughputsAsDoubles();
+		clsThroughput = qnm.getMeanThroughputsAsDoubles();
 		queueLen = qnm.getMeanQueueLengthsAsDoubles();
-		
-		double scale = 1.0;
+
 		throughput = new double[stations][classes];
 		utilization = new double[stations][classes];
 		scThroughput = new double[stations];
 		scUtilization = new double[stations];
 		scResidTime = new double[stations];
 		scQueueLen = new double[stations];
-		double[][] classQueueLen = new double[stations][classes];
+		double scale = 1.0;
+		double[][] clsQueueLen = new double[stations][classes];
 		int shift = 0;
-		for (int m = 0; m < this.stations; m++) {
-				if (qnm.getQueueType(m) == QueueType.LI) {					
-					for (int r = 0; r < this.classes; r++) {
-						throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
-						utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-						residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
-						classQueueLen[m][r] = queueLen[m-shift][r];
-					}
-				} else if (qnm.getQueueType(m) == QueueType.DELAY) {
-					shift = shift + 1;
-					for (int r = 0; r < this.classes; r++) {
+		for (int m = 0; m < stations; m++) {
+			if (qnm.getQueueType(m) == QueueType.LI) {
+				for (int r = 0; r < classes; r++) {
 					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
 					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-					classQueueLen[m][r] = utilization[m][r]; 
-					residenceTime[m][r] = servTime[m][r][0] / scale;
-					}
+					residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
+					clsQueueLen[m][r] = queueLen[m-shift][r];
 				}
-				for (int r = 0; r < this.classes; r++) {				
-			    scThroughput[m] += throughput[m][r];
+			} else if (qnm.getQueueType(m) == QueueType.DELAY) {
+				shift = shift + 1;
+				for (int r = 0; r < classes; r++) {
+					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
+					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
+					clsQueueLen[m][r] = utilization[m][r];
+					residenceTime[m][r] = servTime[m][r][0] / scale;
+				}
+			}
+			for (int r = 0; r < classes; r++) {
+				scThroughput[m] += throughput[m][r];
 				scUtilization[m] += utilization[m][r];
 				scResidTime[m] += residenceTime[m][r];
-				scQueueLen[m] += classQueueLen[m][r]; 	
-				}
-			
+				scQueueLen[m] += clsQueueLen[m][r];
+			}
 		}
-		queueLen = classQueueLen;
+		queueLen = clsQueueLen;
 
 		//NEW
 		//@author Stefano Omini
@@ -196,7 +181,7 @@ public class SolverMultiClosedTreeMVA extends SolverMulti {
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 
-		//		for (c = 0; c < classes; c++) {
+		//for (c = 0; c < classes; c++) {
 		//	for (m = 0; m < stations; m++) {
 		//		clsRespTime[c] += residenceTime[m][c];
 		//		sysNumJobs += queueLen[m][c];
@@ -207,12 +192,12 @@ public class SolverMultiClosedTreeMVA extends SolverMulti {
 		sysThroughput = sysNumJobs / sysResponseTime;
 		//end NEW
 
-    }
+	}
 
 
-    @Override
-    public boolean hasSufficientProcessingCapacity() {
-        // only closed class - no saturation problem
-        return true;
-    }
+	@Override
+	public boolean hasSufficientProcessingCapacity() {
+		// only closed class - no saturation problem
+		return true;
+	}
 }

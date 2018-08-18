@@ -18,7 +18,6 @@
 
 package jmt.gui.common.panels;
 
-import java.awt.Button;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -30,6 +29,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -225,7 +225,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		JLabel cpLabel = new JLabel("Change Path: ");
 		loggerPanelTR.add(cpLabel);
 		help.addHelp(cpLabel, "Choose path of the log file");
-		final Button filepathButton = new Button("Browse");
+		final JButton filepathButton = new JButton("Browse");
 		loggerPanelTR.add(filepathButton, gbc);
 		autoAppendChooser = new JComboBox(loggerAutoAppendDropdown);
 		JLabel owLabel = new JLabel("Overwrite: ");

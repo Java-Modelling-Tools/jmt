@@ -58,8 +58,8 @@ public class SolverMultiOpen extends SolverMulti {
 	}
 
 	/**
-	* Solves the model, using an appropriate technique (LI or LD model).
-	*/
+	 * Solves the model, using an appropriate technique (LI or LD model).
+	 */
 	@Override
 	public void solve() {
 		//tests if all the resources, stations, are load independent
@@ -105,15 +105,16 @@ public class SolverMultiOpen extends SolverMulti {
 				if (type[j] == Solver.DELAY) {
 					//residence time of class i in station j
 					residenceTime[j][i] = visits[j][i] * servTime[j][i][0];
-				} else
-				//residence time of class i in station j
-				if (servers[j] == 1) {
-					// Single server (distiontion is done for speed purposes only)
-					residenceTime[j][i] = visits[j][i] * servTime[j][i][0] / (1 - scUtilization[j]);
 				} else {
-					// Multiple server (uses Erlang-C)
-					residenceTime[j][i] = visits[j][i] * servTime[j][i][0]
-							* (1 + (Erlang.erlangC(scUtilization[j], servers[j]) / (servers[j] - scUtilization[j])));
+					//residence time of class i in station j
+					if (servers[j] == 1) {
+						// Single server (distiontion is done for speed purposes only)
+						residenceTime[j][i] = visits[j][i] * servTime[j][i][0] / (1 - scUtilization[j]);
+					} else {
+						// Multiple server (uses Erlang-C)
+						residenceTime[j][i] = visits[j][i] * servTime[j][i][0]
+								* (1 + (Erlang.erlangC(scUtilization[j], servers[j]) / (servers[j] - scUtilization[j])));
+					}
 				}
 				//queue length of class i for station j
 				queueLen[j][i] = residenceTime[j][i] * lambda[i];
@@ -144,7 +145,6 @@ public class SolverMultiOpen extends SolverMulti {
 	 * Solves a model with load dependent stations too.
 	 */
 	private void solveLD() {
-
 		//TODO: still to be implemented.
 		return;
 	}

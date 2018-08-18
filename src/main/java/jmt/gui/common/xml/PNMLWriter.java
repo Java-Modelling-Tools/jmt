@@ -142,15 +142,12 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 			transformer.transform(new DOMSource(pnmlDoc), new StreamResult(file));
 			ModelRepository.getInstance().destroyCurrentWorkspace();
 			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
+			return true;
 		} catch (Exception e) {
-			try {
-				ModelRepository.getInstance().destroyCurrentWorkspace();
-				((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
-			} catch (VoidRepositoryException e1) {
-			}
-			throw new Exception(e);
+			ModelRepository.getInstance().destroyCurrentWorkspace();
+			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
+			throw e;
 		}
-		return true;
 	}
 
 	/**

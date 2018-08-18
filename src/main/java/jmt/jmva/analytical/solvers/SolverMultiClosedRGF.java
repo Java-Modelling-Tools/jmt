@@ -1,16 +1,12 @@
 package jmt.jmva.analytical.solvers;
 
+import jmt.engine.random.engine.RandomEngine;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueueingNet.CoMoMBTFSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.ConvolutionSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.RGFSolver;
-
-import javax.naming.OperationNotSupportedException;
-import jmt.engine.random.engine.RandomEngine;
 
 /**
  * Solves a multiclass closed model, using RGF algorithm
@@ -49,7 +45,7 @@ public class SolverMultiClosedRGF extends SolverMulti {
 	 *  @param  t   array of the types (LD or LI) of service centers
 	 *  @param  s   matrix of service times of the service centers
 	 *  @param  v   array of visits to the service centers
-	 *  @param  nThr The number of threads the solver should use. Added for future parallel support.
+	 *  @param  nThr The number of threads the solver should use
 	 *  @return True if the operation is completed with success
 	 */
 	public boolean input(int[] t, double[][][] s, double[][] v, int nThr) {
@@ -160,7 +156,7 @@ public class SolverMultiClosedRGF extends SolverMulti {
 				for (int i=0; i<qnm.M; i++) {
 					T[i] = qnm.getQueueType(i).ordinal();
 					mi[i] = qnm.getMultiplicitiesVector().get(i);
-                                        // Replaced Math.random
+					// Replaced Math.random
 					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*engine.raw2())); // i is a perturbation of 10^-6 magnitude
 				}
 			}

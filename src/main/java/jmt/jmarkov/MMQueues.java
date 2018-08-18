@@ -33,7 +33,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import java.util.Dictionary;
 
 import javax.swing.AbstractAction;
@@ -80,8 +79,8 @@ import jmt.jmarkov.Queues.MMNdLogic;
 import jmt.jmarkov.Queues.Processor;
 import jmt.jmarkov.Queues.Exceptions.NonErgodicException;
 import jmt.jmarkov.utils.Formatter;
-import jmt.manual.ManualBookmarkers;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 /**
  * @author Arif Canakoglu
@@ -773,8 +772,8 @@ public class MMQueues extends JMTFrame {
 					Runnable r = new Runnable() {
 						public void run() {
 							try {
-								new PDFViewerBuffer("JMCH manual", ManualBookmarkers.JMCH);
-							} catch (IOException e) {
+								new PDFViewer("JMCH Manual", ChapterIdentifier.JMCH);
+							} catch (Exception e) {
 								e.printStackTrace();
 							}
 						}

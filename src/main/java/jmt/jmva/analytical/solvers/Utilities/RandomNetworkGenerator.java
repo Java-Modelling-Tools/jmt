@@ -65,9 +65,9 @@ public class RandomNetworkGenerator {
 		}
 		
 		// TODO: come back to this.
-//		DoubleMatrix2D D = this.createSparseMatrix(M, R, sparcityPercentage);
-//		this.calculateEigenvalues(D);
-//		double actualSparcityPercentage = (D.size() - D.cardinality())/D.size();
+		//DoubleMatrix2D D = this.createSparseMatrix(M, R, sparcityPercentage);
+		//this.calculateEigenvalues(D);
+		//double actualSparcityPercentage = (D.size() - D.cardinality())/D.size();
 		
 		// TODO: add varying scale factor.
 		double[][] Dd = DoubleFactory2D.sparse.random(M, R).toArray();

@@ -27,7 +27,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
 import javax.swing.Action;
@@ -73,8 +72,8 @@ import jmt.gui.jsimwiz.panels.RSPLPanel;
 import jmt.gui.jsimwiz.panels.StationsPanel;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
-import jmt.manual.ManualBookmarkers;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 /**
  * Created by IntelliJ IDEA.
@@ -300,8 +299,8 @@ public class JSIMMain extends Wizard implements GuiInterface {
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						new PDFViewerBuffer("JSIMwiz manual", ManualBookmarkers.JSIMwiz);
-					} catch (IOException e) {
+						new PDFViewer("JSIMwiz Manual", ChapterIdentifier.JSIMwiz);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}

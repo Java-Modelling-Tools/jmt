@@ -21,11 +21,10 @@ package jmt.gui.jsimgraph.controller.actions;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 
 import jmt.gui.jsimgraph.controller.Mediator;
-import jmt.manual.ManualBookmarkers;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 /**
 
@@ -55,8 +54,8 @@ public class OpenHelp extends AbstractJmodelAction {
 		Runnable r = new Runnable() {
 			public void run() {
 				try {
-					new PDFViewerBuffer("JSIMgraph manual", ManualBookmarkers.JSIMgraph);
-				} catch (IOException e) {
+					new PDFViewer("JSIMgraph Manual", ChapterIdentifier.JSIMgraph);
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

@@ -165,7 +165,7 @@ public class SolverDispatcher {
 			// set boolean to notify results have been computed
 			model.setResultsBooleans(true);
 			/** End **/
-			
+
 			// Notify termination of current model solution
 			if (listener != null) {
 				listener.computationTerminated(iteration);
@@ -221,18 +221,18 @@ public class SolverDispatcher {
 					//error: population is not greater than 0.0
 					throw new InputDataException("Population must be greater than zero");
 				}
-				
+
 				/** Edited by Abhimanyu Chugh **/
 				if (SolverAlgorithm.EXACT.equals(algorithmType)) {
 					solver = new SolverSingleClosedMVA(pop, stations);
-				/*} else if (SolverAlgorithm.MoM.equals(algorithmType)) {
+				}/* else if (SolverAlgorithm.MoM.equals(algorithmType)) {
 					solver = new SolverSingleClosedMoM(pop, stations);
-				*/} else {
+				}*/ else {
 					SolverAlgorithm algType = model.getAlgorithmType();
 					solver = new SolverSingleClosedAMVA(pop, stations, algType, model.getTolerance());
 				}
 				/** End **/
-				
+
 				if (!solver.input(names, types, servicetimes, visits)) {
 					/** Edited by Abhimanyu Chugh **/
 					String algName = algorithmType.toString().replace(" ", "").replace("-", "");
@@ -269,7 +269,7 @@ public class SolverDispatcher {
 
 		/* solve */
 		solver.solve();
-		
+
 		/** Edited by Abhimanyu Chugh **/
 		if (solver instanceof SolverSingleClosedAMVA) {
 			algIterations = ((SolverSingleClosedAMVA) solver).getIterations();
@@ -308,7 +308,7 @@ public class SolverDispatcher {
 		double[][][] serviceTimes = model.getServiceTimes();
 		double[][] visits = model.getVisits();
 		int[] classPop = ArrayUtils.toInt(classData);
-		
+
 		/** Edited by Abhimanyu Chugh **/
 		SolverAlgorithm algorithmType = model.getAlgorithmType();
 		int algIterations = 0;
@@ -353,64 +353,50 @@ public class SolverDispatcher {
 					if (SolverAlgorithm.EXACT.equals(algorithmType)) {
 						SolverMultiClosedMVA closedsolver = new SolverMultiClosedMVA(classes, stations);
 						if (!closedsolver.input(stationNames, stationTypes, serviceTimes, visits, classPop)) {
-							fail("Error initializing MVA", null);
+							fail("Error initializing MVAMultiSolver", null);
 						}
 						solver = closedsolver;
 					} else if (SolverAlgorithm.RECAL.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedRECAL closedSolver = new SolverMultiClosedRECAL(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
-								fail("Error initializing RECAL", null);
+							fail("Error initializing RECALMultiSolver", null);
 						}
 						solver = closedSolver;
-					}
-					/*
-					else if (SolverAlgorithm.MOM.equals(algorithmType)) {
+					}/* else if (SolverAlgorithm.MOM.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedMoM closedSolver = new SolverMultiClosedMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
-								fail("Error initializing MoM", null);
+								fail("Error initializing MoMMultiSolver", null);
 						}
 						solver = closedSolver;
-					} 
-					*/
-					else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
+					}*/ else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedCoMoM closedSolver = new SolverMultiClosedCoMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
-								fail("Error initializing CoMoM", null);
+							fail("Error initializing CoMoMMultiSolver", null);
 						}
 						solver = closedSolver;
-					} 
-					/*
-					else if (SolverAlgorithm.TREE_CONV.equals(algorithmType)) {
-						SolverMultiClosedTreeConvolution closedSolver = new SolverMultiClosedTreeConvolution(classes, stations, classPop);
-						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
-							fail("Error initializing TreeConvolution", null);
-						}
-						solver = closedSolver;
-					}
-					*/
-					/*
-					else if (SolverAlgorithm.TREE_MVA.equals(algorithmType)) {
-					SolverMultiClosedTreeMVA closedSolver = new SolverMultiClosedTreeMVA(classes, stations, classPop);
-					if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
-						fail("Error initializing TreeMVA", null);
-					}
-					solver = closedSolver;
-					}
-					*/
-					/*
-					else if (SolverAlgorithm.RGF.equals(algorithmType)) {
+					}/* else if (SolverAlgorithm.RGF.equals(algorithmType)) {
 						int nThreads = 1;
 						SolverMultiClosedRGF closedSolver = new SolverMultiClosedRGF(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 							fail("Error initializing RGFMultiSolver", null);
 						}
 						solver = closedSolver;
-					} 
-					*/
-					/*else if (SolverAlgorithm.MONTECARLO.equals(algorithmType)) {
+					} else if (SolverAlgorithm.TREE_MVA.equals(algorithmType)) {
+						SolverMultiClosedTreeMVA closedSolver = new SolverMultiClosedTreeMVA(classes, stations, classPop);
+						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
+							fail("Error initializing TreeMVAMultiSolver", null);
+						}
+						solver = closedSolver;
+					} else if (SolverAlgorithm.TREE_CONV.equals(algorithmType)) {
+						SolverMultiClosedTreeConvolution closedSolver = new SolverMultiClosedTreeConvolution(classes, stations, classPop);
+						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
+							fail("Error initializing TreeConvolutionMultiSolver", null);
+						}
+						solver = closedSolver;
+					} else if (SolverAlgorithm.MONTE_CARLO.equals(algorithmType)) {
 						SolverMultiClosedMonteCarlo closedSolver = new SolverMultiClosedMonteCarlo(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
 							fail("Error initializing MonteCarloMultiSolver", null);
@@ -420,7 +406,7 @@ public class SolverDispatcher {
 						solver = closedSolver;
 					}*/ else {
 						double tolerance = model.getTolerance();
-						SolverMultiClosedAMVA closedSolver = null;						
+						SolverMultiClosedAMVA closedSolver = null;
 						if (SolverAlgorithm.CHOW.equals(algorithmType)) {
 							closedSolver = new SolverMultiClosedChow(classes, stations, classPop);
 						} else if (SolverAlgorithm.BARD_SCHWEITZER.equals(algorithmType)) {
@@ -430,8 +416,8 @@ public class SolverDispatcher {
 						} else {
 							closedSolver = new SolverMultiClosedLinearizer(classes, stations, classPop, SolverAlgorithm.DESOUZA_MUNTZ_LINEARIZER.equals(algorithmType));
 						}
-						((SolverMultiClosedAMVA)closedSolver).setTolerance(tolerance);
-						
+						closedSolver.setTolerance(tolerance);
+
 						if (!closedSolver.input(stationNames, stationTypes, serviceTimes, visits)) {
 							String algName = algorithmType.toString().replace(" ", "").replace("-", "");
 							fail("Error initializing " + algName + "MultiSolver", null);
@@ -439,7 +425,7 @@ public class SolverDispatcher {
 						solver = closedSolver;
 					}
 					/** End **/
-			
+
 				} else {
 					//model is multiclass mixed
 					/** Edited by Abhimanyu Chugh **/
@@ -460,12 +446,10 @@ public class SolverDispatcher {
 		if (!solver.hasSufficientProcessingCapacity()) {
 			throw new InputDataException("One or more resources are in saturation. Decrease arrival rates or service demands.");
 		}
-		
-		long start = System.currentTimeMillis();
-		
+
 		/* solution */
 		solver.solve();
-		
+
 		/** Edited by Abhimanyu Chugh **/
 		if (solver instanceof SolverMultiClosedAMVA) {
 			algIterations = ((SolverMultiClosedAMVA) solver).getIterations();
@@ -493,17 +477,17 @@ public class SolverDispatcher {
 		int[] res = new int[len];
 		for (int i = 0; i < len; i++) {
 			switch (stationTypes[i]) {
-				case ExactConstants.STATION_LD:
-					res[i] = Solver.LD;
-					break;
-				case ExactConstants.STATION_LI:
-					res[i] = Solver.LI;
-					break;
-				case ExactConstants.STATION_DELAY:
-					res[i] = Solver.DELAY;
-					break;
-				default:
-					res[i] = -1;
+			case ExactConstants.STATION_LD:
+				res[i] = Solver.LD;
+				break;
+			case ExactConstants.STATION_LI:
+				res[i] = Solver.LI;
+				break;
+			case ExactConstants.STATION_DELAY:
+				res[i] = Solver.DELAY;
+				break;
+			default:
+				res[i] = -1;
 			}
 		}
 		return res;
@@ -517,14 +501,14 @@ public class SolverDispatcher {
 		int[] res = new int[len];
 		for (int i = 0; i < len; i++) {
 			switch (classTypes[i]) {
-				case ExactConstants.CLASS_OPEN:
-					res[i] = SolverMulti.OPEN_CLASS;
-					break;
-				case ExactConstants.CLASS_CLOSED:
-					res[i] = SolverMulti.CLOSED_CLASS;
-					break;
-				default:
-					res[i] = -1;
+			case ExactConstants.CLASS_OPEN:
+				res[i] = SolverMulti.OPEN_CLASS;
+				break;
+			case ExactConstants.CLASS_CLOSED:
+				res[i] = SolverMulti.CLOSED_CLASS;
+				break;
+			default:
+				res[i] = -1;
 			}
 		}
 		return res;
@@ -547,9 +531,9 @@ public class SolverDispatcher {
 	}
 
 	/*
-		 * To conserve memory, service times arrays for LI stations are "compressed" to a single value. This
-		 * method expands them back to full length (multiclass version)
-		 */
+	 * To conserve memory, service times arrays for LI stations are "compressed" to a single value. This
+	 * method expands them back to full length (multiclass version)
+	 */
 	private void expand(double[][][] st, int pop) {
 		if (pop == 1) {
 			return;

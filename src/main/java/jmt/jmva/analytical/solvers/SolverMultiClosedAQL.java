@@ -20,7 +20,7 @@ public class SolverMultiClosedAQL extends SolverMultiClosedAMVA {
 		double[][][] residenceTimes = new double[classes+1][stations][classes];
 		double[][] scQueueLens = new double[classes+1][stations];
 		double[][] clsThroughputs = new double[classes+1][classes];
-		
+
 		// initialisation
 		int totalPopulation = 0;
 		for (int c = 0; c < classes; c++) {
@@ -40,16 +40,16 @@ public class SolverMultiClosedAQL extends SolverMultiClosedAMVA {
 				}
 			}
 		}
-		
+
 		int iterations = 0;
 		double[] scOldQueueLens = new double[stations];
-		
+
 		while (true) {
 			iterations++;
 			for (int k = 0; k < stations; k++) {
 				scOldQueueLens[k] = scQueueLens[0][k];
 			}
-			
+
 			for (int t = 0; t < classes+1; t++) {
 				double[] tempClsRespTimes = new double[classes];
 				for (int k = 0; k < stations; k++) {
@@ -66,7 +66,7 @@ public class SolverMultiClosedAQL extends SolverMultiClosedAMVA {
 						} else {
 							residenceTimes[t][k][c] = demand*(1 + ((pop-1)*((scQueueLens[t][k]/(double)pop)-gamma[k][c])));
 						}
-						
+
 						tempClsRespTimes[c] += residenceTimes[t][k][c];
 					}
 				}
@@ -87,7 +87,7 @@ public class SolverMultiClosedAQL extends SolverMultiClosedAMVA {
 					scQueueLens[t][k] = sum;
 				}
 			}
-			
+
 			// compute new values of gamma
 			for (int k = 0; k < stations; k++) {
 				for (int c = 0; c < classes; c++) {
@@ -102,18 +102,18 @@ public class SolverMultiClosedAQL extends SolverMultiClosedAMVA {
 					}
 				}
 			}
-			
+
 			// Check convergence criteria
 			if (iterations >= MAX_ITERATIONS || maxDiff(scOldQueueLens, scQueueLens[0]) < tolerance) {
 				break;
 			}
 		}
-		
+
 		this.iterations = iterations;
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 		sysThroughput = 0;
-		
+
 		// calculate aggregate measures
 		for (int c = 0; c < classes; c++) {
 			clsRespTime[c] = 0;

@@ -40,7 +40,7 @@ import jmt.gui.common.CommonConstants;
 /**
  * <p><b>Name:</b> JMTToolbar</p> 
  * <p><b>Description:</b> 
- * A generic toolbar with many enhanchments to be used by JMT.
+ * A generic toolbar with many enhancements to be used by JMT.
  * Image name can be stored inside Action or explicitly inserted. Pressed, rollover and selected (toggled)
  * buttons requires images with the appropriate suffixes.
  * </p>

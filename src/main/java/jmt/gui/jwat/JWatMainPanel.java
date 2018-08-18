@@ -12,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.net.URL;
 
 import javax.swing.AbstractAction;
@@ -36,8 +35,8 @@ import jmt.framework.gui.listeners.MenuAction;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
-import jmt.manual.ManualBookmarkers;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 public class JWatMainPanel extends WizardPanel {
 	/**
@@ -246,8 +245,8 @@ public class JWatMainPanel extends WizardPanel {
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						new PDFViewerBuffer("JWAT manual", ManualBookmarkers.JWAT);
-					} catch (IOException e) {
+						new PDFViewer("JWAT Manual", ChapterIdentifier.JWAT);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}

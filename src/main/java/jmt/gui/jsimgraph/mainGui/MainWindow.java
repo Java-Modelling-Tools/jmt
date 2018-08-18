@@ -65,7 +65,7 @@ public class MainWindow extends JMTFrame {
 	 */
 	public MainWindow() {
 		super(true);
-		this.setIconImage(JMTImageLoader.loadImage("JMODELIcon").getImage());
+		setIconImage(JMTImageLoader.loadImage("JMODELIcon").getImage());
 		setTitle(TITLE);
 		mediator = new Mediator(null, this);
 

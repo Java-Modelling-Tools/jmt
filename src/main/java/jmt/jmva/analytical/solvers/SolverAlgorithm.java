@@ -35,16 +35,16 @@ public enum SolverAlgorithm {
 	RECAL("RECAL", true, true, false),
 	//MOM("MoM", true, true, false),
 	COMOM("CoMoM", true, true, false),
-    //RGF("RGF", true, true, false), /* Looks buggy */
-	//TREE_MVA("TreeMVA", true, true, false), /* Looks buggy with delays */
-	//TREE_CONV("TreeConvolution", true, true, false), /* Looks buggy with delays */
+	//RGF("RGF", true, true, false), /* Looks buggy */
+	//TREE_MVA("TreeMVA", true, true, false), /* Looks buggy */
+	//TREE_CONV("TreeConvolution", true, true, false), /* Looks buggy */
 	// APPROXIMATE
 	CHOW("Chow", true, false, false),
 	BARD_SCHWEITZER("Bard-Schweitzer", true, false, false),
 	AQL("AQL", true, false, false),
 	LINEARIZER("Linearizer", true, false, false),
 	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, false, false);
-	//MONTECARLO("Monte Carlo", true, false, false);
+	//MONTE_CARLO("Monte Carlo", true, false, false); /* Looks buggy */
 	
 	// string representation of the algorithm
 	private String algorithmName;

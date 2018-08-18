@@ -30,7 +30,7 @@ import javax.swing.WindowConstants;
 /**
  * <p><b>Name:</b> JMTDialog</p> 
  * <p><b>Description:</b> 
- * A generic dialog with some enhanchments to be used by JMT
+ * A generic dialog with some enhancements to be used by JMT
  * </p>
  * <p><b>Date:</b> 24/gen/07
  * <b>Time:</b> 17:45:51</p>

@@ -24,7 +24,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.Action;
@@ -66,8 +65,8 @@ import jmt.gui.jwat.workloadAnalysis.panels.ClusteringInfoPanel;
 import jmt.gui.jwat.workloadAnalysis.panels.InputPanel;
 import jmt.gui.jwat.workloadAnalysis.panels.LoadDemoPanel;
 import jmt.gui.jwat.workloadAnalysis.panels.StatsPanel;
-import jmt.manual.ManualBookmarkers;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 public class MainJwatWizard extends JWatWizard {
 
@@ -421,8 +420,8 @@ public class MainJwatWizard extends JWatWizard {
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						new PDFViewerBuffer("JWAT manual", ManualBookmarkers.JWAT);
-					} catch (IOException e) {
+						new PDFViewer("JWAT Manual", ChapterIdentifier.JWAT);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -655,8 +654,8 @@ public class MainJwatWizard extends JWatWizard {
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						new PDFViewerBuffer("JWAT manual", ManualBookmarkers.JWAT);
-					} catch (IOException e) {
+						new PDFViewer("JWAT Manual", ChapterIdentifier.JWAT);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -735,8 +734,8 @@ public class MainJwatWizard extends JWatWizard {
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						new PDFViewerBuffer("JWAT manual", ManualBookmarkers.JWAT);
-					} catch (IOException e) {
+						new PDFViewer("JWAT Manual", ChapterIdentifier.JWAT);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}

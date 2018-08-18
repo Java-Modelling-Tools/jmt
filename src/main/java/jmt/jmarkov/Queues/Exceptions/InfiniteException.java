@@ -41,7 +41,6 @@ public class InfiniteException extends Exception {
 	 */
 	public InfiniteException() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -49,7 +48,6 @@ public class InfiniteException extends Exception {
 	 */
 	public InfiniteException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -57,7 +55,6 @@ public class InfiniteException extends Exception {
 	 */
 	public InfiniteException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -66,7 +63,6 @@ public class InfiniteException extends Exception {
 	 */
 	public InfiniteException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
 }

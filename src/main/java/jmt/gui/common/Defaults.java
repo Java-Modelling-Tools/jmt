@@ -147,6 +147,8 @@ public class Defaults implements CommonConstants {
 		def.setProperty("representableClasses", "10");
 		// end Francesco D'Aquino
 		// GUI default parameters.
+		def.setProperty("JMTManualWidth", "1024");
+		def.setProperty("JMTManualHeight", "520");
 		def.setProperty("JSIMWindowWidth", "1024");
 		def.setProperty("JSIMWindowHeight", "768");
 		def.setProperty("JSIMClassDefWindowWidth", "1024");

@@ -99,11 +99,11 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 				return false;
 			}
 			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
+			return true;
 		} catch (Exception e) {
 			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
-			throw new Exception(e);
+			throw e;
 		}
-		return true;
 	}
 
 	/**

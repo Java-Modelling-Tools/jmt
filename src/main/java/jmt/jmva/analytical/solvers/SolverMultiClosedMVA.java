@@ -16,11 +16,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/*
- * SolverMultiClosedMVA.java
- * Created on 11 dicembre 2002, 9.37
- */
-
 package jmt.jmva.analytical.solvers;
 
 /**
@@ -136,8 +131,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		popMult = new int[classes];
 		status = new int[classes];
 
-		//	    intZeros = new int[cls];
-
 		//NEW
 		//@author Stefano Omini
 
@@ -199,8 +192,8 @@ public class SolverMultiClosedMVA extends SolverMulti {
 
 		for (int i = 0; i < stations; i++) {
 			//DEK (Federico Granata) 26-09-2003
-			/*			for (int j = 0; j < classes; j++)
-							servTime[i][j] = new double[totPop];*/
+			//for (int j = 0; j < classes; j++)
+			//	servTime[i][j] = new double[totPop];
 			if (t[i] == LD) {
 				for (int j = 0; j < classes; j++) {
 					servTime[i][j] = new double[totPop];
@@ -225,7 +218,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		}
 
 		//moves in the last position the class with maximum population
-                //TODO: why? (to optimize the memory consumption moving intelligently on the state space)
+		//TODO: why? (to optimize the memory consumption moving intelligently on the state space)
 		population[lastClass] = pop[maxIndex];
 		population[maxIndex] = pop[lastClass];
 
@@ -246,7 +239,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 			}
 			System.arraycopy(s[i][maxIndex], 0, servTime[i][lastClass], 0, s[i][maxIndex].length);
 			System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 0, s[i][lastClass].length);
-
 		}
 
 		popMult[0] = 1;
@@ -498,7 +490,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		intermediate_results = true;
 
 		//TODO: do we need intermediate results also for multiclass??
-                
+
 		int m = 0;//index of service center
 		int c = 0;//index of class
 		int lastClass = classes - 1;
@@ -752,7 +744,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 
 		}
 
-		*/
+		 */
 
 		return buf.toString();
 	}
@@ -770,7 +762,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		}
 	}
 
-	/**
+	/*
 
 	 OLD
 
@@ -827,7 +819,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	    }
 	    return buf.toString();
 	}
-	*/
+	 */
 
 	/*
 	OLD
@@ -881,7 +873,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	    }
 	    return buf.toString();
 	}
-	*/
+	 */
 
 	/**
 	 *
@@ -924,15 +916,9 @@ public class SolverMultiClosedMVA extends SolverMulti {
 			return;
 		}
 		model.solve();
-		/*System.out.print(N1+","+N2+",");
-		  */
+		//System.out.print(N1+","+N2+",");
 		for (int i = nCent - 1; i < nCent; i++) {
-			/* System.out.print(model.getClsThroughput(0)+","+model.getClsThroughput(1)+","+model.getUtilization(0,0)+","+model.getUtilization(0,1)+","+(model.getUtilization(0,1)+model.getUtilization(0,0))+","+model.getUtilization(1,0)+","+
-			         model.getUtilization(1,1)+","+(model.getUtilization(1,1)+model.getUtilization(1,0))+","+model.getQueueLen(0,0)+","+model.getQueueLen(0,1)+","+model.getAggrQueueLen(0)+","+
-			         model.getQueueLen(1,0)+","+model.getQueueLen(1,1)+","+model.getAggrQueueLen(1));
-			         */
 			System.out.println(model.getClsThroughput(0) + " " + model.getClsThroughput(1));
-
 		}
 	}
 

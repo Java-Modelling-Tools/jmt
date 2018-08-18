@@ -24,7 +24,7 @@ package jmt.jmva.analytical.solvers;
  */
 public class SolverMultiMixed extends SolverMulti {
 	//TODO add check on saturation
-    
+
 	//TODO: add calculation of response time at each station
 
 	/** array with class types */
@@ -147,7 +147,7 @@ public class SolverMultiMixed extends SolverMulti {
 		oCounter = 0;
 		cCounter = 0;
 
-                //demands for open classes do not change
+		//demands for open classes do not change
 		double[][][] closedServTime = new double[stations][closedClasses.length][1];
 		double[][] closedVisits = new double[stations][closedClasses.length];
 
@@ -169,7 +169,7 @@ public class SolverMultiMixed extends SolverMulti {
 					percentage of time that the processor is not in use by the open classes.
 					This technique allows to reduce model complexity by eliminating
 					open classes while still incorporating their effects on performance.
-					*/
+					 */
 
 					//these are the S* and V* of the inflated service demands
 					//OLD
@@ -282,7 +282,7 @@ public class SolverMultiMixed extends SolverMulti {
 				percentage of time that the processor is not in use by the open classes.
 				This technique allows to reduce model complexity by eliminating
 				open classes while still incorporating their effects on performance.
-				*/
+				 */
 
 				//these are the S* and V* of the inflated service demands
 				tempVisits[i] = closedVisits[i][0];

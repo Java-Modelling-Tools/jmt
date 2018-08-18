@@ -2,7 +2,7 @@ package jmt.gui;
 
 import jmt.framework.gui.components.JMTDialog;
 import jmt.gui.common.startScreen.GraphStartScreen;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.PDFViewer;
 import jmt.util.TextButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
@@ -45,7 +45,7 @@ public class MainGuiTest {
 	public void introWindowDisplaysCorrectly() {
 		window.show();
 		window.button(new TextButtonMatcher("Introduction to JMT")).click();
-		FrameFixture intro = WindowFinder.findFrame(PDFViewerBuffer.class).using(window.robot);
+		FrameFixture intro = WindowFinder.findFrame(PDFViewer.class).using(window.robot);
 		intro.close();		
 	}
 

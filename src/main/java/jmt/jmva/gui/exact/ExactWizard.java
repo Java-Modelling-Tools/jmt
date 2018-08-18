@@ -24,7 +24,6 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -86,8 +85,8 @@ import jmt.jmva.gui.exact.panels.ThroughputPanel;
 import jmt.jmva.gui.exact.panels.UtilizationPanel;
 import jmt.jmva.gui.exact.panels.VisitsPanel;
 import jmt.jmva.gui.exact.panels.WhatIfPanel;
-import jmt.manual.ManualBookmarkers;
-import jmt.manual.PDFViewerBuffer;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 /**
  * This is the object you use to define your system structure and parameters
@@ -246,8 +245,8 @@ public class ExactWizard extends Wizard {
 			Runnable r = new Runnable() {
 				public void run() {
 					try {
-						new PDFViewerBuffer("JMVA manual", ManualBookmarkers.JMVA);
-					} catch (IOException e) {
+						new PDFViewer("JMVA Manual", ChapterIdentifier.JMVA);
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
