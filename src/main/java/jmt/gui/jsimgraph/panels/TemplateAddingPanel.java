@@ -439,10 +439,10 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 					case 5:
 						Path temPath = Paths.get(TEMPLATE_FOLDER + ((TemplateData) ((TreeTableNode) parent).getData()[0]).getFileName());
 						try {
-							BasicFileAttributes view = Files.getFileAttributeView(temPath,BasicFileAttributeView.class).readAttributes();
-							FileTime creationTime = view.creationTime();
+							BasicFileAttributes view = Files.getFileAttributeView(temPath, BasicFileAttributeView.class).readAttributes();
+							FileTime modifiedTime = view.lastModifiedTime();
 							DateFormat df = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
-							String cTime = df.format(creationTime.toMillis());
+							String cTime = df.format(modifiedTime.toMillis());
 							return cTime;
 						} catch (Exception e) {
 							return "--";

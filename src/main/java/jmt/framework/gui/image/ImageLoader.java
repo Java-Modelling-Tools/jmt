@@ -96,7 +96,7 @@ public abstract class ImageLoader {
 			return iconCache.get(derivedName);
 		}
 
-		URL url = getImageURL(derivedName);
+		URL url = null;
 		// If image is not found, tries to add extensions
 		for (int i = 0; i < EXTENSIONS.length && url == null; i++) {
 			url = getImageURL(derivedName + EXTENSIONS[i]);

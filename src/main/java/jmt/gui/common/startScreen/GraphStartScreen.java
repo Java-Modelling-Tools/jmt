@@ -25,7 +25,6 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -36,7 +35,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JComponent;
@@ -75,10 +73,8 @@ import jmt.manual.PDFViewer;
 public class GraphStartScreen extends JMTFrame {
 
 	private static final long serialVersionUID = 1L;
-	private static final String IMAGE = "StartScreen.png";
 	private static final int BORDERSIZE = 20;
 	private static final int BUTTONSIZE = 25;
-	private static URL imageURL = GraphStartScreen.class.getResource(IMAGE);
 	private static final int FONT_SIZE = 4;
 	private static String[] args;
 	private JButton onlineDoc;
@@ -89,8 +85,7 @@ public class GraphStartScreen extends JMTFrame {
 	public static SampleQNAnimation sampleQNAni;
 
 	// Images
-	public static final String IMG_LOGOPOLI = "logo";
-	public static final String IMG_LOGO_ICL = "logo_icl";
+	public static final String IMG_STARTSCREEN = "StartScreen";
 	public static final String IMG_JMODELICON = "JMODELIcon";
 	public static final String IMG_JMVAICON = "JMVAIcon";
 	public static final String IMG_JSIMICON = "JSIMIcon";
@@ -144,7 +139,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMVA_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMVAICON, new Dimension(40,40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMVAICON, new Dimension(40, 40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -159,7 +154,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMCH_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(40,40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(40, 40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -174,7 +169,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JWAT_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(40,40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(40, 40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -189,7 +184,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JSIM_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JSIMICON, new Dimension(40,40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JSIMICON, new Dimension(40, 40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -204,7 +199,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMODEL_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(40,40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(40, 40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -219,7 +214,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JABA_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(40,40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(40, 40)));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -258,12 +253,10 @@ public class GraphStartScreen extends JMTFrame {
 		title.setBorder(BorderFactory.createEmptyBorder(8,8,0,0));
 		this.getContentPane().add(title, BorderLayout.NORTH);
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE));
-		// Adjusts image
-		Image image = new ImageIcon(imageURL).getImage();
-		image = image.getScaledInstance(440, 400, Image.SCALE_SMOOTH);
+		// Adds start screen image
 		JLabel imageLabel = new JLabel();
 		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
-		imageLabel.setIcon(new ImageIcon(image));
+		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(440, 400)));
 		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 		mainPanel.add(imageLabel, BorderLayout.CENTER);

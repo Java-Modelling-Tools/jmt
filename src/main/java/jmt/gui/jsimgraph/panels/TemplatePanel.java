@@ -91,8 +91,7 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 
 	public void updateTemplates() {
 		templates = TemplateFileOperation.readTemplates(TEMPLATE_FOLDER);
-		templateTable.invalidate();
-		templateTable.repaint();
+		templateTable.tableChanged(new TableModelEvent(templateTable.getModel()));
 	}
 
 	public void initComponents() {
@@ -104,7 +103,6 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 		JButton add = new JButton("Add/See all");
 		remove = new JButton("Remove");
 		remove.setEnabled(false);
-		JButton refresh = new JButton("Refresh");
 		update = new JButton("Update");
 		update.setEnabled(false);
 		JButton create = new JButton("Instantiate");
@@ -112,7 +110,6 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 
 		add.setPreferredSize(new Dimension(160, 25));
 		remove.setPreferredSize(new Dimension(160, 25));
-		refresh.setPreferredSize(new Dimension(140, 25));
 		update.setPreferredSize(new Dimension(160, 25));
 		create.setPreferredSize(new Dimension(120, 25));
 		close.setPreferredSize(new Dimension(120, 25));
@@ -124,22 +121,13 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 			}
 		});
 
-		// remove a existing template
+		// remove an existing template
 		remove.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				for (int i : templateTable.getSelectedRows()) {
 					templates[i].getFile().delete();
 				}
-				updateTemplates();
-				templateTable.tableChanged(new TableModelEvent(templateTable.getModel()));
-			}
-		});
-
-		// update the existing template list manually
-		refresh.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
 				updateTemplates();
 			}
 		});
@@ -324,9 +312,9 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 				Path temPath = Paths.get(templates[rowIndex].getFile().getAbsolutePath());
 				try {
 					BasicFileAttributes view = Files.getFileAttributeView(temPath, BasicFileAttributeView.class).readAttributes();
-					FileTime creationTime = view.creationTime();
+					FileTime modifiedTime = view.lastModifiedTime();
 					DateFormat df = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
-					String cTime = df.format(creationTime.toMillis());
+					String cTime = df.format(modifiedTime.toMillis());
 					return cTime;
 				} catch (IOException e) {
 					return "--";

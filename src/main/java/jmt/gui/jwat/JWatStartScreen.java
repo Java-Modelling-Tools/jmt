@@ -23,19 +23,16 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.net.URL;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -52,13 +49,13 @@ public class JWatStartScreen extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	//Start screen image
-	private static URL imageURL = JWatStartScreen.class.getResource("StartScreenJWat.png");
+	private static final String IMG_STARTSCREEN = "StartScreenJWat";
 	//JWAT tool icons
-	private String IMG_JWATICON = "JWATIcon";
-	private String IMG_TRAFFIC_ICON = "TrafficIcon";
-	private String IMG_SAVE_ICON = "Open";
-	private String IMG_PATH_ICON = "PathIcon";
-	private String IMG_WL_ICON = "WorkLoadIcon";
+	private static final String IMG_JWATICON = "JWATIcon";
+	private static final String IMG_TRAFFIC_ICON = "TrafficIcon";
+	private static final String IMG_SAVE_ICON = "Open";
+	private static final String IMG_PATH_ICON = "PathIcon";
+	private static final String IMG_WL_ICON = "WorkLoadIcon";
 	//Tool buttons size
 	private static final int BUTTONSIZE = 25;
 	//Rollover help
@@ -168,8 +165,7 @@ public class JWatStartScreen extends JFrame {
 		}
 		JLabel imageLabel = new JLabel();
 		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
-		//imageLabel.setIcon(new ImageIcon(image));
-		imageLabel.setIcon(new ImageIcon(new ImageIcon(imageURL).getImage().getScaledInstance(400, 315, Image.SCALE_SMOOTH)));
+		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(400, 315)));
 		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 		this.getContentPane().add(imageLabel, BorderLayout.CENTER);
