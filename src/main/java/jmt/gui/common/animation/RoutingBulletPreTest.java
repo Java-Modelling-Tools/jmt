@@ -30,7 +30,7 @@ import javax.swing.JFrame;
  * Time: 11.00.19
  * To change this template use Options | File Templates.
  */
-public class RoutingBulletPre_Test extends JFrame {
+public class RoutingBulletPreTest extends JFrame {
 
 	/**
 	 * 
@@ -39,7 +39,7 @@ public class RoutingBulletPre_Test extends JFrame {
 	private Animator anim = null;
 	private QueueNetAnimation qnAni = null;
 
-	public RoutingBulletPre_Test() {
+	public RoutingBulletPreTest() {
 		super();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		prepareQueueNet();
@@ -85,7 +85,7 @@ public class RoutingBulletPre_Test extends JFrame {
 
 	/*
 	public static void main(String[] args) {
-	    new RoutingBulletPre_Test();
+	    new RoutingBulletPreTest();
 	}
 	*/
 }

@@ -52,7 +52,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
- * <p><b>Name:</b> Dispatcher_jMVAschema</p> 
+ * <p><b>Name:</b> DispatcherJMVAschema</p> 
  * <p><b>Description:</b> Receives the absolute path of a xml file which describes the model using the
  * JMTmodel.xsd schema.
  * This file is converted into another xml file in order to be passed to the
@@ -64,7 +64,7 @@ import org.xml.sax.SAXException;
  * @author Stefano Omini, Bertoli Marco
  * @version 2.0
  */
-public class Dispatcher_jMVAschema {
+public class DispatcherJMVAschema {
 	private static final String SEPARATOR = System.getProperty("file.separator");
 
 	//xml files containing model definition, simmodel definition and sim results
@@ -77,7 +77,7 @@ public class Dispatcher_jMVAschema {
 	String simModelDefinitionPath;
 	String simResultsPath;
 
-	//if true, deletes the intermediate temp files created to solve the model with jSIM.
+	//if true, deletes the intermediate temp files created to solve the model with JSIM.
 	//Only the initial passed file (containing the results)
 	boolean deleteIntermediateFiles = false;
 
@@ -110,7 +110,7 @@ public class Dispatcher_jMVAschema {
 	 * @param absolutePath absolute path of the xml file containing the
 	 * model to be solved
 	 */
-	public Dispatcher_jMVAschema(String absolutePath) {
+	public DispatcherJMVAschema(String absolutePath) {
 		modelDefinitionPath = absolutePath;
 		modelDefinition = new File(absolutePath);
 	}
@@ -123,7 +123,7 @@ public class Dispatcher_jMVAschema {
 	 * @param model the xml file containing the
 	 * model to be solved
 	 */
-	public Dispatcher_jMVAschema(File model) {
+	public DispatcherJMVAschema(File model) {
 		modelDefinition = model;
 		modelDefinitionPath = model.getAbsolutePath();
 
@@ -189,7 +189,7 @@ public class Dispatcher_jMVAschema {
 			logger.error("MVA to SIM transformation failed for model file " + modelDefinitionPath);
 			return false;
 		} else {
-			logger.debug("jSIM model definiton path: " + simModelDefinitionPath);
+			logger.debug("JSIM model definiton path: " + simModelDefinitionPath);
 		}
 
 		/*********************SIMULATION LOADING AND RUNNING*********************/
@@ -208,10 +208,10 @@ public class Dispatcher_jMVAschema {
 				//if !automaticSeed, then a user defined seed is present
 				sim.setRandomEngineSeed(simulationSeed);
 				sim.initialize();
-				logger.debug("jSIM correctly initialized with simulation seed = " + simulationSeed);
+				logger.debug("JSIM correctly initialized with simulation seed = " + simulationSeed);
 			} else {
 				sim.initialize();
-				logger.debug("jSIM correctly initialized");
+				logger.debug("JSIM correctly initialized");
 			}
 
 			//Avoid saturation
@@ -242,7 +242,7 @@ public class Dispatcher_jMVAschema {
 
 			simFinished = true;
 
-			logger.info("Model " + modelDefinitionPath + " solved by jSIM in " + Double.toString(elapsed) + " seconds");
+			logger.info("Model " + modelDefinitionPath + " solved by JSIM in " + Double.toString(elapsed) + " seconds");
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -273,7 +273,7 @@ public class Dispatcher_jMVAschema {
 
 		simResults = new File(simResultsPath);
 
-		logger.debug("jSIM results path: " + simResultsPath);
+		logger.debug("JSIM results path: " + simResultsPath);
 
 		//transforms the SIMmodeloutput into JMTmodel
 
@@ -312,7 +312,7 @@ public class Dispatcher_jMVAschema {
 				logger.error("could not copy results into model " + modelDefinitionPath);
 			} else {
 				resultsObtained = true;
-				logger.debug("jSIM results copied into model " + modelDefinitionPath);
+				logger.debug("JSIM results copied into model " + modelDefinitionPath);
 			}
 
 			//delete temp file
@@ -485,10 +485,10 @@ public class Dispatcher_jMVAschema {
 				//if !automaticSeed, then a user defined seed is present
 				sim.setRandomEngineSeed(simulationSeed);
 				sim.initialize();
-				logger.debug("jSIM correctly initialized with simulation seed = " + simulationSeed);
+				logger.debug("JSIM correctly initialized with simulation seed = " + simulationSeed);
 			} else {
 				sim.initialize();
-				logger.debug("jSIM correctly initialized");
+				logger.debug("JSIM correctly initialized");
 			}
 
 			//Avoid saturation
@@ -519,7 +519,7 @@ public class Dispatcher_jMVAschema {
 
 			simFinished = true;
 
-			logger.info("Model " + modelDefinitionPath + " solved by jSIM in " + Double.toString(elapsed) + " seconds");
+			logger.info("Model " + modelDefinitionPath + " solved by JSIM in " + Double.toString(elapsed) + " seconds");
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -550,7 +550,7 @@ public class Dispatcher_jMVAschema {
 
 		simResults = new File(simResultsPath);
 
-		logger.debug("jSIM results path: " + simResultsPath);
+		logger.debug("JSIM results path: " + simResultsPath);
 
 		//transforms the SIMmodeloutput into JMTmodel
 
@@ -606,7 +606,7 @@ public class Dispatcher_jMVAschema {
 			}
 
 			resultsObtained = true;
-			logger.debug("jSIM results copied into model " + modelDefinitionPath);
+			logger.debug("JSIM results copied into model " + modelDefinitionPath);
 
 			//delete temp file
 			if (!temp.delete()) {

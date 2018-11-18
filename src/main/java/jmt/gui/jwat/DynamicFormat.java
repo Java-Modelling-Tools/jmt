@@ -16,13 +16,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-package jmt.engine.jwat;
+package jmt.gui.jwat;
 
 import java.text.DecimalFormat;
 
-public class DinamicFormat {
-	public DinamicFormat(String pattern, int limit) {
-		formato = new DecimalFormat(pattern);
+public class DynamicFormat {
+
+	public DynamicFormat(String pattern, int limit) {
+		format = new DecimalFormat(pattern);
 		maxValVis = limit;
 	}
 
@@ -30,7 +31,7 @@ public class DinamicFormat {
 		String ret = String.valueOf(Val);
 
 		if (ret.length() > maxValVis) {
-			ret = formato.format(Val);
+			ret = format.format(Val);
 		}
 
 		return ret;
@@ -40,7 +41,7 @@ public class DinamicFormat {
 		String ret = String.valueOf(Val);
 
 		if (ret.length() > maxValVis) {
-			ret = formato.format(Val);
+			ret = format.format(Val);
 		}
 
 		return ret;
@@ -51,5 +52,6 @@ public class DinamicFormat {
 	}
 
 	private int maxValVis;
-	private DecimalFormat formato;
+	private DecimalFormat format;
+
 }

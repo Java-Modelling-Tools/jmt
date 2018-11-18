@@ -45,7 +45,7 @@ import jmt.engine.simEngine.Simulation;
  *
  * Modified by Francesco D'Aquino
  */
-public class Dispatcher_jSIMschema {
+public class DispatcherJSIMschema {
 
 	//xml files containing model definition, simmodel definition and sim results
 	File simModelDefinition;
@@ -91,7 +91,7 @@ public class Dispatcher_jSIMschema {
 	 * @param absolutePath absolute path of the xml file containing the
 	 * model to be solved
 	 */
-	public Dispatcher_jSIMschema(String absolutePath) {
+	public DispatcherJSIMschema(String absolutePath) {
 		simModelDefinitionPath = absolutePath;
 		simModelDefinition = new File(absolutePath);
 	}
@@ -104,7 +104,7 @@ public class Dispatcher_jSIMschema {
 	 * @param model the xml file containing the
 	 * model to be solved
 	 */
-	public Dispatcher_jSIMschema(File model) {
+	public DispatcherJSIMschema(File model) {
 		simModelDefinition = model;
 		simModelDefinitionPath = model.getAbsolutePath();
 	}
@@ -165,7 +165,7 @@ public class Dispatcher_jSIMschema {
 
 		sim.setRandomEngineSeed(simulationSeed);
 		sim.initialize();
-		logger.debug("jSIM correctly initialized with simulation seed = " + simulationSeed);
+		logger.debug("JSIM correctly initialized with simulation seed = " + simulationSeed);
 
 		//find QueueNetwork reference
 		net = sim.getNetwork();
@@ -180,7 +180,7 @@ public class Dispatcher_jSIMschema {
 					try {
 						Thread.sleep(maxDuration);
 						abortAllMeasures();	
-					} catch(InterruptedException ex) {
+					} catch (InterruptedException ex) {
 						// Nothing to do.
 					}
 				}
@@ -204,7 +204,7 @@ public class Dispatcher_jSIMschema {
 		// Shutdown the simulation timer, if any.
 		es.shutdownNow();
 
-		logger.info("Model " + simModelDefinitionPath + " solved by jSIM in " + Double.toString(elapsed) + " seconds");
+		logger.info("Model " + simModelDefinitionPath + " solved by JSIM in " + Double.toString(elapsed) + " seconds");
 
 		return true;
 	}
@@ -428,7 +428,7 @@ public class Dispatcher_jSIMschema {
 		for (int i = 0; i < N; i++) {
 			String path = "D:\\JMTtest\\prova" + i + ".xml";
 
-			Dispatcher_jSIMschema disp = new Dispatcher_jSIMschema(path);
+			DispatcherJSIMschema disp = new DispatcherJSIMschema(path);
 			long start, stop, elapsed;
 
 			start = System.currentTimeMillis();
@@ -461,7 +461,7 @@ public class Dispatcher_jSIMschema {
 
 	public static void testSolution() {
 		//Dispatcher disp = new Dispatcher("D:\\test_2open.xml");
-		Dispatcher_jSIMschema disp = new Dispatcher_jSIMschema("D:\\JMTtest\\solverstep0.xml");
+		DispatcherJSIMschema disp = new DispatcherJSIMschema("D:\\JMTtest\\solverstep0.xml");
 		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\solverstep10.xml");
 		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\prova.xml");
 		//Dispatcher disp = new Dispatcher("D:\\JMTtest\\test_base.xml");
