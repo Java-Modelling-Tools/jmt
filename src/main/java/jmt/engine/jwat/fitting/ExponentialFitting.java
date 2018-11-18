@@ -1,7 +1,5 @@
 package jmt.engine.jwat.fitting;
 
-import java.util.Arrays;
-
 public class ExponentialFitting implements FittingAlgorithm {
 	private static final double [][] crit_values = 
 	   {{0.25892,0.99811},

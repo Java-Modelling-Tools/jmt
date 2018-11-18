@@ -84,8 +84,8 @@ public class LDEditor extends AbstractCellEditor implements TableCellEditor {
 	/**
 	 *  sets the data for the editor window
 	 */
-	public void setStatus(String title, String stationName, String[] classNames, double[][] serviceTimes) {
-		ldWindow.setStatus(title, stationName, classNames, serviceTimes);
+	public void setStatus(String title, String[] classNames, double[][] serviceTimes) {
+		ldWindow.setStatus(title, classNames, serviceTimes);
 	}
 
 	/**

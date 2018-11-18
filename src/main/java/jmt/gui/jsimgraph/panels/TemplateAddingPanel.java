@@ -129,7 +129,7 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 			TemplateFileOperation.parseSiteXML(data);
 			File index = File.createTempFile("F_NAME_INDEX", "");
 			indexFile = index.getAbsolutePath();
-			TemplateFileOperation.download(DEFAULT_SITE + "/" + F_NAME_INDEX , index.getAbsolutePath(), CONN_TIMEOUT, READ_TIMEOUT);
+			TemplateFileOperation.download(DEFAULT_SITE + "/" + F_NAME_INDEX, index.getAbsolutePath(), CONN_TIMEOUT, READ_TIMEOUT);
 			TemplateFileOperation.parseIndexXML(indexFile, data);
 			pagePane.setPage(TemplateAddingPanel.class.getResource(MAIN_PAGE));
 		} catch (Exception e) {
@@ -328,12 +328,12 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 			indexURL = data.getSiteURLs().get(siteList.getSelectedIndex()) + "/" + F_NAME_INDEX;
 		} else {
 			// not in the list
-			String raw = (String)siteList.getEditor().getItem();
+			String raw = (String) siteList.getEditor().getItem();
 			String find = "http.*";
 			Pattern pattern = Pattern.compile(find);
 			Matcher matcher = pattern.matcher(raw);
 			if (matcher.find()) {
-				indexURL = matcher.group()  + "/" + F_NAME_INDEX;
+				indexURL = matcher.group() + "/" + F_NAME_INDEX;
 			}
 		}
 

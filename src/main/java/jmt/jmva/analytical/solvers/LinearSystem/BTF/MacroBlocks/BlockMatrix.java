@@ -123,7 +123,7 @@ public class BlockMatrix {
 	
 	public void multiply(BigRational[] result) throws BTFMatrixErrorException {
 		
-		if (cols + position.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when multiplying");;		
+		if (cols + position.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when multiplying");	
 		
 		int block_starting_col = 0;
 		int block_starting_row = 0;
@@ -132,7 +132,7 @@ public class BlockMatrix {
 			block_starting_row = i * rows_in_blocks;
             for (int j = 0; j < block_cols; j++) {
             	block_starting_col = j * cols_in_blocks;
-                block_multiply(matrix[i][j], result, position.row + block_starting_row, position.col + block_starting_col);                
+                block_multiply(matrix[i][j], result, position.row + block_starting_row, position.col + block_starting_col);
             }
 		}		
 	}		
@@ -149,7 +149,7 @@ public class BlockMatrix {
                 result[starting_row + i] = result[starting_row + i].add(multiplyBlockRow(array, i, starting_col));
     		} catch (UndefinedMultiplyException e) {
     			result[starting_row + i] = new BigRational(-1);
-            	result[starting_row + i].makeUndefined();    		
+            	result[starting_row + i].makeUndefined();
             }
 		}		
 	}
@@ -164,7 +164,7 @@ public class BlockMatrix {
 				if (basis.getNewValue(j + starting_col).isPositive()) {
 					result = result.add((array[index][j].multiply(basis.getNewValue(j + starting_col))));						
 				} else if (basis.getNewValue(j + starting_col).isUndefined()) { 
-					throw new UndefinedMultiplyException();               	                 
+					throw new UndefinedMultiplyException();
 				}   
 			}
 		}
@@ -181,7 +181,7 @@ public class BlockMatrix {
 			block_starting_row = i * rows_in_blocks;
             for (int j = 0; j < block_cols; j++) {
             	block_starting_col = j * cols_in_blocks;
-                block_solve(matrix[i][j], rhs, position.row + block_starting_row, position.col + block_starting_col);                
+                block_solve(matrix[i][j], rhs, position.row + block_starting_row, position.col + block_starting_col);
             }
 		}			
 	}

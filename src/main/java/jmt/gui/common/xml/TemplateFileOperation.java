@@ -107,7 +107,7 @@ public class TemplateFileOperation {
 
 		// extract the site info
 
-		Element site = (Element)sites.item(0);
+		Element site = (Element) sites.item(0);
 
 		String siteName = site.getElementsByTagName("name").item(0).getTextContent();
 		String siteURL = site.getElementsByTagName("URI").item(0).getTextContent();
@@ -118,7 +118,7 @@ public class TemplateFileOperation {
 		String tsiteURL = null;
 
 		for (int i = 0; i < trustedsites.getLength(); i++) {
-			Element trustedsite = (Element)trustedsites.item(i);
+			Element trustedsite = (Element) trustedsites.item(i);
 
 			tsiteName = trustedsite.getElementsByTagName("name").item(0).getTextContent();
 			tsiteURL = trustedsite.getElementsByTagName("URI").item(0).getTextContent();

@@ -298,7 +298,7 @@ public class Vector4 {
 	
 
 	public String toString3D() {
-		int prop = JabaConstants.SERVICE_DEMANDS_PROP;;
+		int prop = JabaConstants.SERVICE_DEMANDS_PROP;
 		return "[ " + x()/prop + ", " + y()/prop + ", " + z()/prop + " ]";
 	}
 	

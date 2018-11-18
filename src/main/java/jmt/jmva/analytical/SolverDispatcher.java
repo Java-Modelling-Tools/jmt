@@ -133,7 +133,6 @@ public class SolverDispatcher {
 	}
 
 	public void finalDispatch(ExactModel model, int iteration) throws SolverException, InputDataException {
-
 		/* disable all change-checking */
 		model.discardChanges();
 		model.setChanged();
@@ -144,9 +143,11 @@ public class SolverDispatcher {
 			if (model.isClosed() && model.isWhatIf() && model.isWhatifAlgorithms()) {
 				SolverAlgorithm origAlgType = model.getAlgorithmType();
 				double origAlgTolerance = model.getTolerance();
+				int origAlgMaxSamples = model.getMaxSamples();
 				for (SolverAlgorithm algo : model.getWhatifAlgorithms()) {
 					model.setAlgorithmType(algo);
 					model.setTolerance(model.getWhatifAlgorithmTolerance(algo));
+					model.setMaxSamples(model.getWhatifAlgorithmMaxSamples(algo));
 					if (model.isMultiClass()) {
 						solveMulti(fesc.getModelToBeSolved(), iteration);
 					} else {
@@ -155,8 +156,9 @@ public class SolverDispatcher {
 				}
 				model.setAlgorithmType(origAlgType);
 				model.setTolerance(origAlgTolerance);
+				model.setMaxSamples(origAlgMaxSamples);
 			} else {
-				if (model.isMultiClass() || model.isOpen()) {
+				if (model.isOpen() || model.isMultiClass()) {
 					solveMulti(fesc.getModelToBeSolved(), iteration);
 				} else {
 					solveSingle(fesc.getModelToBeSolved(), iteration);
@@ -194,7 +196,6 @@ public class SolverDispatcher {
 	}
 
 	private void solveSingle(ExactModel model, int iteration) throws Exception, InputDataException {
-
 		int stations = model.getStations();
 		Solver solver = null;
 		/** Edited by Abhimanyu Chugh **/
@@ -204,17 +205,19 @@ public class SolverDispatcher {
 
 		//init
 		String[] names = model.getStationNames();
-		int[] types = mapStationTypes(model.getStationTypes());
-		double[][] servicetimes = (ArrayUtils.extract13(model.getServiceTimes(), 0));
-
+		int[] types = mapStationTypes(model.getStationTypes(), false);
+		double[][] serviceTimes = ArrayUtils.extract13(model.getServiceTimes(), 0);
 		//no supplemental copy here since extract13 already copies the first level of the array
-		adjustLD(servicetimes, types);
+		adjustLD(serviceTimes, types);
 		double[] visits = ArrayUtils.extract1(model.getVisits(), 0);
+
+		double tolerance = model.getTolerance();
+		int maxSamples = model.getMaxSamples();
 
 		try {
 			if (model.isClosed()) {
 				//single closed
-				int pop = model.getMaxpop();
+				int pop = (int) model.getClassData()[0];
 				//First of all controls that the closed class has population greater than 0.
 				//Otherwise throws a InputDataException
 				if (pop <= 0) {
@@ -225,15 +228,15 @@ public class SolverDispatcher {
 				/** Edited by Abhimanyu Chugh **/
 				if (SolverAlgorithm.EXACT.equals(algorithmType)) {
 					solver = new SolverSingleClosedMVA(pop, stations);
-				}/* else if (SolverAlgorithm.MoM.equals(algorithmType)) {
-					solver = new SolverSingleClosedMoM(pop, stations);
-				}*/ else {
-					SolverAlgorithm algType = model.getAlgorithmType();
-					solver = new SolverSingleClosedAMVA(pop, stations, algType, model.getTolerance());
+				} else if (SolverAlgorithm.MONTE_CARLO_LOGISTIC.equals(algorithmType)) {
+					solver = new SolverSingleClosedMonteCarloLogistic(pop, stations,
+							maxSamples, SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION);
+				} else {
+					solver = new SolverSingleClosedAMVA(pop, stations, algorithmType, tolerance);
 				}
 				/** End **/
 
-				if (!solver.input(names, types, servicetimes, visits)) {
+				if (!solver.input(names, types, serviceTimes, visits)) {
 					/** Edited by Abhimanyu Chugh **/
 					String algName = algorithmType.toString().replace(" ", "").replace("-", "");
 					fail("Error initializing " + algName + "SingleSolver", null);
@@ -244,18 +247,18 @@ public class SolverDispatcher {
 				/** Edited by Abhimanyu Chugh **/
 				algorithmType = SolverAlgorithm.EXACT;
 				/** End **/
+
 				//TODO this is not used any more (multi solver is used instead)
 				/* single open */
-				double lambda = (model.getClassData())[0];
+				double lambda = model.getClassData()[0];
 				//First of all controls that the open class has rate greater than 0.
 				//Otherwise throws a InputDataException
 				if (lambda <= 0) {
 					//error: rate is not greater than 0.0
 					throw new InputDataException("Arrival rate must be greater than zero");
-
 				}
-				solver = new SolverSingleOpen(model.getClassData()[0], stations);
-				if (!solver.input(names, types, servicetimes, visits)) {
+				solver = new SolverSingleOpen(lambda, stations);
+				if (!solver.input(names, types, serviceTimes, visits)) {
 					fail("Error initializing OpenSolver", null);
 				}
 			}
@@ -295,19 +298,19 @@ public class SolverDispatcher {
 	}
 
 	private void solveMulti(ExactModel model, int iteration) throws SolverException, InputDataException {
-		if (model.isLd()) {
-			throw new SolverException("Multiclass solver does not support LD stations");
-		}
-
 		int classes = model.getClasses();
 		int stations = model.getStations();
 
 		String[] stationNames = model.getStationNames();
-		int[] stationTypes = mapStationTypes(model.getStationTypes());
+		int[] classTypes = mapClassTypes(model.getClassTypes());
+		int[] stationTypes = mapStationTypes(model.getStationTypes(), true);
 		double[] classData = model.getClassData();
 		double[][][] serviceTimes = model.getServiceTimes();
 		double[][] visits = model.getVisits();
-		int[] classPop = ArrayUtils.toInt(classData);
+
+		int nThreads = 1;
+		double tolerance = model.getTolerance();
+		int maxSamples = model.getMaxSamples();
 
 		/** Edited by Abhimanyu Chugh **/
 		SolverAlgorithm algorithmType = model.getAlgorithmType();
@@ -322,7 +325,6 @@ public class SolverDispatcher {
 			if (element <= 0) {
 				//error: population or rate not greater than 0.0
 				//prepare message according to model type (mixed, open or closed)
-
 				if (model.isMixed()) {
 					//mixed model -> populations or rates
 					throw new InputDataException("Populations and arrival rates must be greater than zero");
@@ -333,7 +335,6 @@ public class SolverDispatcher {
 					//closed model -> populations
 					throw new InputDataException("Populations must be greater than zero");
 				}
-
 			}
 		}
 
@@ -348,6 +349,7 @@ public class SolverDispatcher {
 					fail("Error initializing SolverMultiOpen", null);
 				}
 			} else {
+				int[] classPop = ArrayUtils.toInt(classData);
 				if (model.isClosed()) {
 					/** Edited by Abhimanyu Chugh **/
 					if (SolverAlgorithm.EXACT.equals(algorithmType)) {
@@ -357,28 +359,24 @@ public class SolverDispatcher {
 						}
 						solver = closedsolver;
 					} else if (SolverAlgorithm.RECAL.equals(algorithmType)) {
-						int nThreads = 1;
 						SolverMultiClosedRECAL closedSolver = new SolverMultiClosedRECAL(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 							fail("Error initializing RECALMultiSolver", null);
 						}
 						solver = closedSolver;
 					}/* else if (SolverAlgorithm.MOM.equals(algorithmType)) {
-						int nThreads = 1;
 						SolverMultiClosedMoM closedSolver = new SolverMultiClosedMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 								fail("Error initializing MoMMultiSolver", null);
 						}
 						solver = closedSolver;
 					}*/ else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
-						int nThreads = 1;
 						SolverMultiClosedCoMoM closedSolver = new SolverMultiClosedCoMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 							fail("Error initializing CoMoMMultiSolver", null);
 						}
 						solver = closedSolver;
 					}/* else if (SolverAlgorithm.RGF.equals(algorithmType)) {
-						int nThreads = 1;
 						SolverMultiClosedRGF closedSolver = new SolverMultiClosedRGF(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 							fail("Error initializing RGFMultiSolver", null);
@@ -401,11 +399,17 @@ public class SolverDispatcher {
 						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
 							fail("Error initializing MonteCarloMultiSolver", null);
 						}
-						closedSolver.setTolerance(model.getTolerance());
-						closedSolver.setMaxSamples(model.getMaxSamples());
+						closedSolver.setTolerance(tolerance);
+						closedSolver.setMaxSamples(maxSamples);
 						solver = closedSolver;
-					}*/ else {
-						double tolerance = model.getTolerance();
+					}*/ else if (SolverAlgorithm.MONTE_CARLO_LOGISTIC.equals(algorithmType)) {
+						SolverMultiClosedMonteCarloLogistic closedSolver = new SolverMultiClosedMonteCarloLogistic(classes, stations, classPop,
+								maxSamples, SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION);
+						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
+							fail("Error initializing MonteCarloLogisticMultiSolver", null);
+						}
+						solver = closedSolver;
+					} else {
 						SolverMultiClosedAMVA closedSolver = null;
 						if (SolverAlgorithm.CHOW.equals(algorithmType)) {
 							closedSolver = new SolverMultiClosedChow(classes, stations, classPop);
@@ -425,13 +429,11 @@ public class SolverDispatcher {
 						solver = closedSolver;
 					}
 					/** End **/
-
 				} else {
 					//model is multiclass mixed
 					/** Edited by Abhimanyu Chugh **/
 					algorithmType = SolverAlgorithm.EXACT;
 					/** End **/
-					int[] classTypes = mapClassTypes(model.getClassTypes());
 
 					SolverMultiMixed mixedsolver = new SolverMultiMixed(classes, stations);
 					if (!mixedsolver.input(stationNames, stationTypes, serviceTimes, visits, classData, classTypes)) {
@@ -470,30 +472,6 @@ public class SolverDispatcher {
 	}
 
 	/**
-	 * Map station types from model constants to solver constants
-	 */
-	private int[] mapStationTypes(int[] stationTypes) {
-		int len = stationTypes.length;
-		int[] res = new int[len];
-		for (int i = 0; i < len; i++) {
-			switch (stationTypes[i]) {
-			case ExactConstants.STATION_LD:
-				res[i] = Solver.LD;
-				break;
-			case ExactConstants.STATION_LI:
-				res[i] = Solver.LI;
-				break;
-			case ExactConstants.STATION_DELAY:
-				res[i] = Solver.DELAY;
-				break;
-			default:
-				res[i] = -1;
-			}
-		}
-		return res;
-	}
-
-	/**
 	 * Map class types from model constants to solver constants
 	 */
 	private int[] mapClassTypes(int[] classTypes) {
@@ -514,52 +492,35 @@ public class SolverDispatcher {
 		return res;
 	}
 
-	/*
-	 * To conserve memory, service times arrays for LI stations are "compressed" to a single value. This
-	 * method expands them back to full length (single class version)
+	/**
+	 * Map station types from model constants to solver constants
 	 */
-	private void expand(double[][] st, int pop) {
-		if (pop == 1) {
-			return;
-		}
-		int len1 = st.length;
-		for (int i = 0; i < len1; i++) {
-			if (st[i].length < pop) {
-				st[i] = ArrayUtils.resize(st[i], pop, st[i][0]);
+	private int[] mapStationTypes(int[] stationTypes, boolean multiClass) {
+		int len = stationTypes.length;
+		int[] res = new int[len];
+		for (int i = 0; i < len; i++) {
+			switch (stationTypes[i]) {
+			case ExactConstants.STATION_LD:
+				res[i] = multiClass ? SolverMulti.LD : Solver.LD;
+				break;
+			case ExactConstants.STATION_LI:
+				res[i] = multiClass ? SolverMulti.LI : Solver.LI;
+				break;
+			case ExactConstants.STATION_DELAY:
+				res[i] = multiClass ? SolverMulti.DELAY : Solver.DELAY;
+				break;
+			default:
+				res[i] = -1;
 			}
 		}
+		return res;
 	}
 
-	/*
-	 * To conserve memory, service times arrays for LI stations are "compressed" to a single value. This
-	 * method expands them back to full length (multiclass version)
-	 */
-	private void expand(double[][][] st, int pop) {
-		if (pop == 1) {
-			return;
-		}
-		int len1 = st.length;
-		for (int i = 0; i < len1; i++) {
-			expand(st[i], pop);
-		}
-	}
-
-	/** HACK: adds an itial zero to all LD stations */
+	/** HACK: adds an initial zero to all LD stations */
 	private void adjustLD(double[][] st, int[] types) {
 		for (int i = 0; i < st.length; i++) {
 			if (types[i] == Solver.LD) {
 				st[i] = ArrayUtils.prepend0(st[i]);
-			}
-		}
-	}
-
-	/** HACK: adds an initial zero to all LD stations */
-	private void adjustLD(double[][][] st, int[] types) {
-		for (int i = 0; i < st.length; i++) {
-			if (types[i] == Solver.LD) {
-				for (int j = 0; j < st[i].length; j++) {
-					st[i][j] = ArrayUtils.prepend0(st[i][j]);
-				}
 			}
 		}
 	}

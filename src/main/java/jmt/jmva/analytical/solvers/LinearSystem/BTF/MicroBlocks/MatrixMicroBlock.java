@@ -59,7 +59,7 @@ public abstract class MatrixMicroBlock extends MicroBlock {
 				if (basis.getNewValue(j + position.col).isPositive()) {
 					result = result.add((array[index][j].multiply(basis.getNewValue(j + position.col))));						
 				} else if (basis.getNewValue(j + position.col).isUndefined()) { 
-					throw new UndefinedMultiplyException();               	                 
+					throw new UndefinedMultiplyException();
                 }
             }
 		}

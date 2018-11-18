@@ -585,7 +585,7 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	}
 
 	/**
-	 * Is the method invoked to calculate the best graph to show at the beginning and to calculte the suitable granularity of time 
+	 * Is the method invoked to calculate the best graph to show at the beginning and to calculate the suitable granularity of time 
 	 * @param v is the variable object
 	 */
 

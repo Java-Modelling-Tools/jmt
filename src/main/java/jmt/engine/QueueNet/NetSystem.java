@@ -231,7 +231,7 @@ public class NetSystem {
 		return (NetNode) SimSystem.getEntity(name);
 	}
 
-	static void checkMeasures(){
+	static void checkMeasures() {
 		ListIterator<QueueNetwork> networks = networkList.listIterator();
 		QueueNetwork network;
 		ListIterator<Measure> measures;

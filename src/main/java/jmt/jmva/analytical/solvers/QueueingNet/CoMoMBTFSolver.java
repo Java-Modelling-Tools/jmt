@@ -15,16 +15,16 @@ public class CoMoMBTFSolver extends CoMoMSolver {
 
 	public CoMoMBTFSolver(QNModel qnm) throws InternalErrorException, BTFMatrixErrorException, InconsistentLinearSystemException {
 		super(qnm);
-		
 		basis =  new BTFCoMoMBasis(qnm);		
 		system = new BTFLinearSystem(qnm, basis);
 	}
 
-	 /**
-     * Prints a short welcome message that says which solver is being used.
-     */
-    @Override
-    public void printWelcome() {
-        System.out.println("Using BTF CoMoM");
-    }
+	/**
+	 * Prints a short welcome message that says which solver is being used.
+	 */
+	@Override
+	public void printWelcome() {
+		System.out.println("Using BTF CoMoM");
+	}
+
 }

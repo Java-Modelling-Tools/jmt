@@ -183,7 +183,7 @@ public class SimLoader {
 				Date today = new Date();
 				String todayString = formatter.format(today);
 
-				simName = "jSIM_" + todayString;
+				simName = "JSIM_" + todayString;
 
 				//OLD
 				//sim = new Simulation(seed, null, debug);

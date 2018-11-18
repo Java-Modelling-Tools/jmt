@@ -57,7 +57,7 @@ public class MMNLogic extends MM1Logic {
 		return result;
 	}
 
-	private double v() throws NonErgodicException {// ((mp)to the m) / factorial(m) /(1-p) 
+	private double v() throws NonErgodicException {// ((mp) to the m) / factorial(m) / (1-p)
 		return (Math.pow(utilization(), numberOfServer)) / factorial(numberOfServer) / (1 - (utilization() / numberOfServer));
 
 	}

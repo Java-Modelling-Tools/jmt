@@ -62,17 +62,17 @@ import jmt.jmva.gui.exact.ExactWizard;
  * for the reference station is ReferenceStation has n rows which refers to the the all the classes. 
  * 
  */
-public final class ReferenceStationPanel extends WizardPanel implements ForceUpdatablePanel, ExactConstants{
+public final class ReferenceStationPanel extends WizardPanel implements ForceUpdatablePanel, ExactConstants {
 
 	private static final long serialVersionUID = 1L;
 	private ExactWizard ew;
 	private HoverHelp help;
-	private static final String helpText = "<html>In this panel you can choose stations for each class.</html>";	
+	private static final String helpText = "<html>In this panel you can choose stations for each class.</html>";
 	private int classes;
 	private String[] classNames;
 	private String[] stationNames;
 	private TableCellEditor stationEditor;
-	private ComboBoxCell StationCombo;	
+	private ComboBoxCell StationCombo;
 	private STTable stTable;
 	//private double[][] ReferenceStation;
 	private int[] ReferenceStation;
@@ -80,28 +80,28 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 	static Color[] colors = {Color.GRAY};
 	private double[][] visits;
 
-	public ReferenceStationPanel(ExactWizard ew) {		
+	public ReferenceStationPanel(ExactWizard ew) {
 		this.ew = ew;
 		help = ew.getHelp();
 		sync();
-		initComponents();		
-	}	
+		initComponents();
+	}
 	public static void infoBox(String infoMessage, String location)
 	{
 		JOptionPane.showMessageDialog(null, infoMessage, "InfoBox: " + location, JOptionPane.INFORMATION_MESSAGE);
 	}
-	public void sync() {		
+	public void sync() {
 		ExactModel data = ew.getData();
-		synchronized (data) {	
-			classes = data.getClasses();						
-			classNames = ArrayUtils.copy(data.getClassNames());			 
+		synchronized (data) {
+			classes = data.getClasses();
+			classNames = ArrayUtils.copy(data.getClassNames());
 			stationNames = ArrayUtils.copy(data.getStationNames());
 			stationNames = ArrayUtils.resize(stationNames, stationNames.length+1, null);
 			stationNames[stationNames.length-1] = "Arrival Process";
 			visits = ArrayUtils.copy2(data.getVisits());
 			// To set the Gray color for the Arrival Process (just for the UI)
 			colors = ArrayUtils.resize(colors, stationNames.length);
-			for (int i=0 ; i< stationNames.length; i++)
+			for (int i=0; i< stationNames.length; i++)
 			{
 				if (stationNames[i].equals("Arrival Process"))
 				{
@@ -109,13 +109,11 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 				}
 				else
 				{
-					colors[i] = null;					
-				}				
-			}						
+					colors[i] = null;
+				}
+			}
 			ReferenceStation = ArrayUtils.copy(data.getReferenceStation());
-
 			classTypes = ArrayUtils.copy(data.getClassTypes());
-
 		}
 		for (int i=0;i<classes;i++) //if the class is open there is no RefStation
 		{
@@ -157,18 +155,18 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 	private void commit() {
 		stTable.stopEditing();
 		ExactModel data = ew.getData();
-		synchronized (data) {			
+		synchronized (data) {
 			data.setReferenceStation(ReferenceStation);
 		}
 	}
 	@Override
 	public void gotFocus() {
-		this.sync();			
-		this.refreshComponents();		
+		this.sync();
+		this.refreshComponents();
 		stTable.update();
 		stTable.updateStructure();
-		StationCombo = new ComboBoxCell(stationNames);			
-		JComboBox stationBox = new JComboBox(stationNames);	
+		StationCombo = new ComboBoxCell(stationNames);
+		JComboBox<String> stationBox = new JComboBox<String>(stationNames);	
 		stationBox.setEditable(false);
 		ComboBoxRenderer renderer = new ComboBoxRenderer(stationBox);
 		renderer.setColors(colors);
@@ -177,17 +175,17 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		stationEditor = new DefaultCellEditor(stationBox);
 	}
 	/*These two following classes added to change the color of the Combo box cell when the value of the combobox is Arrival Process */
-	class ComboBoxRenderer extends JPanel implements ListCellRenderer
+	class ComboBoxRenderer extends JPanel implements ListCellRenderer<String>
 	{
 
-		private static final long serialVersionUID = -1L;
+		private static final long serialVersionUID = 1L;
 		private Color[] colors;
 		private String[] strings;
 
 		JPanel textPanel;
 		JLabel text;
 
-		public ComboBoxRenderer(JComboBox combo) {
+		public ComboBoxRenderer(JComboBox<String> combo) {
 			textPanel = new JPanel();
 			textPanel.add(this);
 			text = new JLabel();
@@ -216,8 +214,8 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			return strings;
 		}
 
-		public Component getListCellRendererComponent(JList list, Object value,
-				int index, boolean isSelected, boolean cellHasFocus)
+		public Component getListCellRendererComponent(JList<? extends String> list,
+				String value, int index, boolean isSelected, boolean cellHasFocus)
 		{
 			if (isSelected)
 			{
@@ -230,7 +228,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 
 			if (colors.length != strings.length)
 			{
-				System.out.println("colors.length does not equal strings.length"+ colors.length);
+				System.out.println("colors.length does not equal strings.length.");
 				return this;
 			}
 			else if (colors == null)
@@ -245,8 +243,8 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			}
 
 			text.setBackground(getBackground());
-			text.setText(value.toString());
-			if (index>-1) {
+			text.setText(value);
+			if (index > -1) {
 				text.setForeground(colors[index]);
 			}
 			return text;

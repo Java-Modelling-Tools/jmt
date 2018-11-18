@@ -62,7 +62,7 @@ public class MMNdLogic extends MM1Logic {
 		return result;
 	}
 
-	private double v() throws NonErgodicException {// m to m / m! * ((p)to the m) * (1- (p to the k+1)) /(1-p) 
+	private double v() throws NonErgodicException {// m to m / m! * (p to the m) * (1 - (p to the k+1)) / (1-p)
 		double p = p();
 		if (p==1) {
 			double sum = 0;
@@ -78,13 +78,13 @@ public class MMNdLogic extends MM1Logic {
 
 	}
 
-	//	private double Pq() throws NonErgodicException{//The probability Pq that upon an arrival all servers are busy and the customer has to wait is
+	//	private double Pq() throws NonErgodicException {//The probability Pq that upon an arrival all servers are busy and the customer has to wait is
 	//		return v()/(u()+v()); //??
 	//	}
 
 	@Override
 	public double mediaJobs() throws NonErgodicException { //sum from j=0 to m+k : j*pi(j)
-		//in another words: pi0 * ( (sum j=1 to m-1 : j * (mp)to the j / j! ) +  ( m to the m / m! * (sum j=m to m+k : j * p to the j) ) )  
+		//in another words: pi0 * ( (sum j=1 to m-1 : j * (mp) to the j / j! ) +  ( m to the m / m! * (sum j=m to m+k : j * p to the j) ) )
 		double result1 = 0;
 		double result2 = 0;
 		double p = p();

@@ -53,7 +53,6 @@ import jmt.engine.jwat.VariableNumber;
 import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
 import jmt.engine.jwat.workloadAnalysis.clustering.kMean.KMean;
 import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
-import jmt.engine.jwat.workloadAnalysis.utils.JavaWatColor;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.jwat.workloadAnalysis.chart.KMeanSingleClusterScatter;
@@ -68,8 +67,8 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 	private ModelWorkloadAnalysis model;
 	private WorkloadAnalysisSession session;
 
-	private JComboBox xVar;
-	private JComboBox yVar;
+	private JComboBox<String> xVar;
+	private JComboBox<String> yVar;
 	private SingleScatter panel;
 	private int cluster = -1;
 	private int match = 0;
@@ -126,8 +125,8 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 		saveInfo = new JButton("Save Info");
 
 		JPanel combos = new JPanel(new GridLayout(2, 1));
-		xVar = new JComboBox(model.getMatrix().getVariableNames());
-		yVar = new JComboBox(model.getMatrix().getVariableNames());
+		xVar = new JComboBox<String>(model.getMatrix().getVariableNames());
+		yVar = new JComboBox<String>(model.getMatrix().getVariableNames());
 		xVar.setSelectedIndex(0);
 		if (model.getMatrix().getVariableNames().length > 1) {
 			yVar.setSelectedIndex(1);
@@ -169,7 +168,6 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 		loadInfo.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-
 			}
 
 		});
@@ -180,7 +178,6 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 		saveInfo.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-
 			}
 
 		});
@@ -290,6 +287,7 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 			}
 			g1.drawImage(graph, 1, 1, null);
 		}
+
 	}
 
 }

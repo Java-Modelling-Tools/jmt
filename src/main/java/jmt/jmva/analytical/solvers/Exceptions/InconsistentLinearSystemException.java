@@ -27,12 +27,15 @@ package jmt.jmva.analytical.solvers.Exceptions;
  */
 public class InconsistentLinearSystemException extends Exception {
 
-    /**
-     * Creates an InconsistentLinearSystemException with an exception message.
-     *
-     * @param string The exception message
-     */
-    public InconsistentLinearSystemException(String string) {
-        super(string);
-    }
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Creates an InconsistentLinearSystemException with an exception message.
+	 *
+	 * @param string The exception message
+	 */
+	public InconsistentLinearSystemException(String string) {
+		super(string);
+	}
+
 }

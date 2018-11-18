@@ -4,7 +4,6 @@ import java.math.BigInteger;
 
 import javax.naming.OperationNotSupportedException;
 
-import jmt.jmva.analytical.solvers.Basis.BTFCoMoMBasis;
 import jmt.jmva.analytical.solvers.Basis.CoMoMBasis;
 import jmt.jmva.analytical.solvers.Control.Main;
 import jmt.jmva.analytical.solvers.DataStructures.BigRational;
@@ -109,7 +108,7 @@ private static StandardMatrix A, B;
 		   	int row = -1;
 		   	int col = 0;
 		   	PopulationChangeVector n;
-		   	for (int i = 0; i < MiscFunctions.binomialCoefficient(M + R - 1 , M); i++)  { //loop over all possible population changes n
+		   	for (int i = 0; i < MiscFunctions.binomialCoefficient(M + R - 1, M); i++) { //loop over all possible population changes n
 		   		n  = basis.getPopulationChangeVector(i).copy(); // To improve bug safety
 		   		if (n.sumTail(current_class-1) > 0) {  //potential negative population
 		   			for (int k = 0; k <= M; k++) {
@@ -128,7 +127,7 @@ private static StandardMatrix A, B;
 		   				} else {
 		   					//System.out.println("2");
 		   					A.write(row, col, BigRational.ONE);
-		   					n.minusOne(current_class);    					
+		   					n.minusOne(current_class);
 		   					col = basis.indexOf(n, k);
 		   					//System.out.println("col: " + col);
 		   					B.write(row, col,BigRational.ONE);
@@ -178,7 +177,7 @@ private static StandardMatrix A, B;
 		   			}    			    			
 		   		}
 		   	}
-		   	for (int i = 0; i < MiscFunctions.binomialCoefficient(M + R - 1 , M); i++)  { //loop over all possible population changes n
+		   	for (int i = 0; i < MiscFunctions.binomialCoefficient(M + R - 1, M); i++) { //loop over all possible population changes n
 		   		//add PC of class 'current_class'
 		   		n  = basis.getPopulationChangeVector(i).copy(); // To improve bug safety
 		   		if (n.sumTail(current_class-1) <= 0) {  // TODO remove <

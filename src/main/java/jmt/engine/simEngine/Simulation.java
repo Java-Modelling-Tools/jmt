@@ -288,7 +288,7 @@ public class Simulation {
 		Job.resetCounter();
 
 		// creates network
-		network = new QueueNetwork("jSIM simulation: " + name);
+		network = new QueueNetwork("JSIM simulation: " + name);
 		network.setTerminalSimulation(isTerminalSimulation);
 		// adds network to NetSystem
 		NetSystem.addNetwork(network);

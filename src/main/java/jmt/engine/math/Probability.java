@@ -73,7 +73,7 @@ public class Probability extends Constants {
 	 *
 	 * The complemented function is
 	 *
-	 * <tt>1 - P(1-x)  =  Gamma.incompleteBeta( b, a, x )</tt>;
+	 * <tt>1 - P(1-x) =  Gamma.incompleteBeta( b, a, x )</tt>;
 	 *
 	 */
 	static public double beta(double a, double b, double x) {
@@ -97,7 +97,7 @@ public class Probability extends Constants {
 	 * <pre>
 	 *   k
 	 *   --  ( n )   j      n-j
-	 *   >   (   )  p  (1-p)
+	 *   >   (   )   p     (1-p)
 	 *   --  ( j )
 	 *  j=0
 	 * </pre>
@@ -135,7 +135,7 @@ public class Probability extends Constants {
 	 * <pre>
 	 *   n
 	 *   --  ( n )   j      n-j
-	 *   >   (   )  p  (1-p)
+	 *   >   (   )   p     (1-p)
 	 *   --  ( j )
 	 *  j=k+1
 	 * </pre>
@@ -412,7 +412,7 @@ public class Probability extends Constants {
 	 * <pre>
 	 *   k
 	 *   --  ( n+j-1 )   n      j
-	 *   >   (       )  p  (1-p)
+	 *   >   (       )   p     (1-p)
 	 *   --  (   j   )
 	 *  j=0
 	 * </pre>
@@ -446,7 +446,7 @@ public class Probability extends Constants {
 	 * <pre>
 	 *   inf
 	 *   --  ( n+j-1 )   n      j
-	 *   >   (       )  p  (1-p)
+	 *   >   (       )   p     (1-p)
 	 *   --  (   j   )
 	 *  j=k+1
 	 * </pre>

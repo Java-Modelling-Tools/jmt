@@ -324,7 +324,7 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		if (parent instanceof Frame) {
 			editor = new LoadDependentRoutingEditor((Frame) parent,params);
 		} else {
-			editor = new LoadDependentRoutingEditor((Dialog)parent,params);
+			editor = new LoadDependentRoutingEditor((Dialog) parent,params);
 		}
 		editor.setVisible(true);
 	}

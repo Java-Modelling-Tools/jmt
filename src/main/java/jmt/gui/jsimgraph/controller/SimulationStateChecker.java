@@ -32,7 +32,7 @@ import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.QueueNetwork;
-import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
 import jmt.gui.jsimgraph.JGraphMod.GraphicalQueueState;
 
 /**
@@ -51,7 +51,7 @@ public class SimulationStateChecker {
 	private Vector<Object> servers;
 	private Vector<Object> classes;
 	private Mediator mediator;
-	private Dispatcher_jSIMschema dispatcher;
+	private DispatcherJSIMschema dispatcher;
 	//It implements a mapping between the graphical representation (the CommonModel Key) and the
 	//representation at simulation engine level. The key of the HashMap is the Key of
 	//graphical representation
@@ -75,7 +75,7 @@ public class SimulationStateChecker {
 
 	int iteration;
 
-	public SimulationStateChecker(Mediator mediator, Dispatcher_jSIMschema dispatcher) {
+	public SimulationStateChecker(Mediator mediator, DispatcherJSIMschema dispatcher) {
 		maxJobCount = Double.MIN_VALUE;
 		initialized = false;
 		this.mediator = mediator;

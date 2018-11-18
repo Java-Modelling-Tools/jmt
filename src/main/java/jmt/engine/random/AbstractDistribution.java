@@ -29,10 +29,10 @@ public abstract class AbstractDistribution {
 	SOLUZIONI POSSIBILI:
 
 	1. ANCHE NELLE SOTTOCLASSI METTO PARAMETER E POI INTRODUCO UN CONTROLLO DEL TIPO
-	{if par istanceof(ExponentialPar) ...}
+	{if par instanceof(ExponentialPar) ...}
 
 	2. FISSO IL PARAMETRO DI CIASCUNA DISTRIBUZ UNA VOLTA PER TUTTE QUANDO USO IL COSTRUTTORE
-	(es. Parameter exp_par = new ExponentialPar(...);   )
+	{es. Parameter exp_par = new ExponentialPar(...);}
 
 	3. ??
 

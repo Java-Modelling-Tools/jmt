@@ -123,7 +123,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 
 	/** Creates new SolverMultiClosedMVA
 	 *  @param  stations    number of service centers
-	 *  @param  classes     number of classes of customers
+	 *  @param  classes     number of classes
 	 */
 	public SolverMultiClosedMVA(int classes, int stations) {
 		super(classes, stations);
@@ -150,7 +150,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		interm_sysNumJobs = null;
 
 		//end NEW
-
 	}
 
 	//TODO: warning, it cannot handle classes with zero jobs
@@ -287,9 +286,10 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	public void solve() {
 		//tests if all the resources, stations, are load independent
 		boolean loadIndep = true;
-		for (int i = 0; i < stations && loadIndep; i++) {
+		for (int i = 0; i < stations; i++) {
 			if (type[i] == LD) {
 				loadIndep = false;
+				break;
 			}
 		}
 
@@ -297,7 +297,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 			solveLI();
 			//System.out.println(this);
 		} else {
-			//TODO: non funziona
+			//TODO: still needs to be implemented
 			//solveLD();
 		}
 	}
@@ -315,9 +315,10 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	public void solve(boolean intermediate) {
 		//tests if all the resources, stations, are load independent
 		boolean loadIndep = true;
-		for (int i = 0; i < stations && loadIndep; i++) {
+		for (int i = 0; i < stations; i++) {
 			if (type[i] == LD) {
 				loadIndep = false;
+				break;
 			}
 		}
 
@@ -325,7 +326,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 			solveLI(intermediate);
 			//System.out.println(this);
 		} else {
-			//TODO: still to implement
+			//TODO: still needs to be implemented
 			//solveLD(intermediate);
 		}
 	}
@@ -478,7 +479,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	 * Solves a model with only load independent stations
 	 */
 	private void solveLI(boolean intermediate) {
-
 		if (!intermediate) {
 			//intermediate results must not be saved, then use
 			//the base method
@@ -646,7 +646,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		status = new int[classes];
 		status[classes - 1] = 1;
 		do {
-
 			for (c = 0; c < classes; c++) {
 				if (status[c] == 0) {
 					for (int s = 0; s < stations; s++) {
@@ -658,8 +657,8 @@ public class SolverMultiClosedMVA extends SolverMulti {
 							residenceTime[s + 1][c + 1] = servTime[s][c][0];
 						} else if (type[s] == Solver.LI) {
 							/* ix[c]--;
-							x = linear( NC - 1 , ix , N ) ;
-							residenceTime[s+1][c+1] = servTime[s][c][0] * ( 1 + n[s + 1][x]);
+							x = linear(NC - 1, ix, N);
+							residenceTime[s+1][c+1] = servTime[s][c][0] * (1 + n[s + 1][x]);
 							ix[c]++;*/
 						}
 					}
@@ -680,18 +679,13 @@ public class SolverMultiClosedMVA extends SolverMulti {
 					flag = false;
 				}
 			} while (c < classes && !flag);
-			//            printStatus();
+			//printStatus();
 		} while (c < classes);
-
 	}
-
-	//NEW
-	//@author Stefano Omini
 
 	/** generates a string with all the calculated indices.
 	 * @return the string
 	 */
-
 	@Override
 	public String toString() {
 		if (!intermediate_results) {
@@ -702,54 +696,8 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		buf.append("\n------------------------------------");
 		buf.append("\nAnalysis with MVA Multiclass: intermediate results");
 		buf.append("\n\n");
-
-		/*
-
-		for (int n = 0; n <= customers; n++) {
-		    buf.append("\n\nPopulation = " + n + " customers\n\n");
-		    buf.append("Queue Length (Q)");
-		    buf.append("\n------------------------------------\n");
-		    for (int m = 0; m < stations; m++) {
-		        buf.append("[   ");
-		        buf.append(Printer.print(interm_queueLen[n][m], 6));
-		        buf.append("   ]\n");
-		    }
-
-		    buf.append("\n\n");
-		    buf.append("Residence Time (R)");
-		    buf.append("\n------------------------------------\n");
-		    for (int m = 0; m < stations; m++) {
-		        buf.append("[   ");
-		        buf.append(Printer.print(interm_residenceTime[n][m], 6));
-		        buf.append("   ]\n");
-		    }
-
-		    buf.append("\n\n");
-		    buf.append("Throughput (X)");
-		    buf.append("\n------------------------------------\n");
-		    for (int m = 0; m < stations; m++) {
-		        buf.append("[   ");
-		        buf.append(Printer.print(interm_throughput[n][m], 6));
-		        buf.append("   ]\n");
-		    }
-
-		    buf.append("\n\n");
-		    buf.append("Utilization (U)");
-		    buf.append("\n------------------------------------\n");
-		    for (int m = 0; m < stations; m++) {
-		        buf.append("[   ");
-		        buf.append(Printer.print(interm_utilization[n][m], 6));
-		        buf.append("   ]\n");
-		    }
-
-		}
-
-		 */
-
 		return buf.toString();
 	}
-
-	//end NEW
 
 	/** print the actual status of the system (a debug function)
 	 */
@@ -762,123 +710,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 		}
 	}
 
-	/*
-
-	 OLD
-
-	public String toString() {
-	    StringBuffer buf = new StringBuffer();
-	    buf.append("\n------------------------------------");
-	    buf.append("\nAnalysis with MVA Multiclass");
-	    buf.append("\n");
-	    buf.append("Throughput  ");
-	    for (int c = 0; c < classes; c++)
-	        buf.append("class " + (c + 1) + "    ");
-	    buf.append("\n------------------------------------\n");
-	    for (int m = 0; m < stations; m++) {
-	        buf.append("Resource " + m + "  ");
-	        for (int c = 0; c < classes; c++)
-	            buf.append(Printer.print(throughput[m][c], 6) + "   ");
-	        buf.append("\n");
-	    }
-
-	    buf.append("\n\n");
-	    buf.append("Queue Length  ");
-	    for (int c = 0; c < classes; c++)
-	        buf.append("class " + (c + 1) + "    ");
-	    buf.append("\n------------------------------------\n");
-	    for (int m = 0; m < stations; m++) {
-	        buf.append("Resource " + m + "  ");
-	        for (int c = 0; c < classes; c++)
-	            buf.append(Printer.print(queueLen[m][c], 6) + "   ");
-	        buf.append("\n");
-	    }
-
-	    buf.append("\n\n");
-	    buf.append("Res  Time  ");
-	    for (int c = 0; c < classes; c++)
-	        buf.append("class " + (c + 1) + "    ");
-	    buf.append("\n------------------------------------\n");
-	    for (int m = 0; m < stations; m++) {
-	        buf.append("Resource " + m + "  ");
-	        for (int c = 0; c < classes; c++)
-	            buf.append(Printer.print(residenceTime[m][c], 6) + "   ");
-	        buf.append("\n");
-	    }
-
-	    buf.append("\n\n");
-	    buf.append("Utilization ");
-	    for (int c = 0; c < classes; c++)
-	        buf.append("class " + (c + 1) + "    ");
-	    buf.append("\n------------------------------------\n");
-	    for (int m = 0; m < stations; m++) {
-	        buf.append("Resource " + m + "  ");
-	        for (int c = 0; c < classes; c++)
-	            buf.append(Printer.print(utilization[m][c], 6) + "   ");
-	        buf.append("\n");
-	    }
-	    return buf.toString();
-	}
-	 */
-
-	/*
-	OLD
-
-	NEW: Use MultiSolver toString
-
-
-	public String toString() {
-	    StringBuffer buf = new StringBuffer();
-	    buf.append("\n------------------------------------");
-	    buf.append("\nAnalysis with MVA Multiclass");
-
-	    buf.append("\n\n");
-	    buf.append("Throughput (X)");
-	    buf.append("\n------------------------------------\n");
-	    for (int m = 0; m < stations; m++) {
-	        buf.append("[   ");
-	        for (int c = 0; c < classes; c++)
-	            buf.append(Printer.print(throughput[m][c], 6) + "   ");
-	        buf.append("]\n");
-	    }
-
-	    buf.append("\n\n");
-	    buf.append("Queue Length (Q)");
-	    buf.append("\n------------------------------------\n");
-	    for (int m = 0; m < stations; m++) {
-	        buf.append("[   ");
-	        for (int c = 0; c < classes; c++)
-	            buf.append(Printer.print(queueLen[m][c], 6) + "   ");
-	        buf.append("]\n");
-	    }
-
-	    buf.append("\n\n");
-	    buf.append("Residence Time (R)");
-	    buf.append("\n------------------------------------\n");
-	    for (int m = 0; m < stations; m++) {
-	        buf.append("[   ");
-	        for (int c = 0; c < classes; c++)
-	            buf.append(Printer.print(residenceTime[m][c], 6) + "   ");
-	        buf.append("]\n");
-	    }
-
-	    buf.append("\n\n");
-	    buf.append("Utilization (U)");
-	    buf.append("\n------------------------------------\n");
-	    for (int m = 0; m < stations; m++) {
-	        buf.append("[   ");
-	        for (int c = 0; c < classes; c++)
-	            buf.append(Printer.print(utilization[m][c], 6) + "   ");
-	        buf.append("]\n");
-	    }
-	    return buf.toString();
-	}
-	 */
-
-	/**
-	 *
-	 *
-	 */
 	private static void miotest(int N1, int N2) {
 		int nCust = 2;
 		int nCent = 3;

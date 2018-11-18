@@ -142,7 +142,7 @@ public class TMVACore {
 				}
 				
 				rx = ccu.convertIndex(ri, commonPcs, ab_cs);
-				resAB.X[rx] = this.subnetThroughput6(rx, n_ab, wa, wb);; 
+				resAB.X[rx] = this.subnetThroughput6(rx, n_ab, wa, wb);
 				ri++;
 			}
 			
@@ -266,7 +266,7 @@ public class TMVACore {
 	 *
 	 * N.B. Must be called with right-hand child (i.e. b) so that pStore optimisation works.
 	 */
-	private double pFunc(Node b, PopulationVector k_ab, PopulationVector n_ab, HashMap<PTuple, Double> pStore)  {
+	private double pFunc(Node b, PopulationVector k_ab, PopulationVector n_ab, HashMap<PTuple, Double> pStore) {
 		int r = 0;
 		if (k_ab.isZeroVector() && n_ab.isZeroVector()) {
 			return 1;
@@ -414,7 +414,7 @@ public class TMVACore {
 		PopulationVector n_full = ccu.expand(n_ab, commonPcs, qnm.N, ab_cs);
 		MVAResults res = this.getRes(ab, n_full);
 		double qs[] = res.Q[m_ab];
-		double q = 0 ;
+		double q = 0;
 		for (int c = 0; c < qs.length; c++) {
 			q += qs[c];
 		}

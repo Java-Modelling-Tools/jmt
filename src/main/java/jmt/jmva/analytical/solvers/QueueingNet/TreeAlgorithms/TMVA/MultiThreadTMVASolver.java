@@ -30,7 +30,7 @@ public class MultiThreadTMVASolver extends TreeTraverserMulti implements IThread
 	 */
 	@Override
 	public MVAResults solve(Node node, PopulationVector N) {
-		Printer.out.println("\n--- STARTING MULTI-CORE TREE-MVA ---");
+		Printer.out.println("\n--- STARTING MULTI-CORE TREE MVA ---");
 		this.traverse(node, N);
 		MVAResults res = node.getMVARes(N);
 		return res;

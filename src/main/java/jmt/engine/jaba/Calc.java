@@ -592,12 +592,12 @@ public class Calc {
 			for (int i = 0; i < sett1staz.size(); i++) {
 				allres.addElement(sett1staz.get(i));
 			}/*
-				           for (int i = 0; i<sett2staz.size();i++) {
-				               allres.addElement((Sector3D)sett2staz.get(i));
-				           }
-				           for (int i = 0; i<triangles.size();i++) {
-				               allres.addElement((Sector3D)triangles.get(i));
-				           }*/
+			for (int i = 0; i<sett2staz.size();i++) {
+				allres.addElement((Sector3D) sett2staz.get(i));
+			}
+			for (int i = 0; i<triangles.size();i++) {
+				allres.addElement((Sector3D) triangles.get(i));
+			}*/
 
 			//System.out.println("allres.size() = "+allres.size());
 			for (int i = 0; i < allres.size(); i++) {

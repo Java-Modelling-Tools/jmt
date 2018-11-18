@@ -2,11 +2,9 @@ package jmt.jmva.analytical.solvers.LinearSystem.Simple.Matrix;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import jmt.jmva.analytical.solvers.Basis.CoMoMBasis;
 import jmt.jmva.analytical.solvers.DataStructures.BigRational;
-import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.DataStructures.Tuple;
 
 /**

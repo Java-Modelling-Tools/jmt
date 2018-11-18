@@ -44,7 +44,6 @@ public class SolverSingleOpen extends Solver {
 	 * @param stations the number of stations
 	 *
 	 */
-
 	public SolverSingleOpen(double lambda, int stations) {
 		this.lambda = lambda;
 		this.stations = stations;
@@ -61,7 +60,7 @@ public class SolverSingleOpen extends Solver {
 		residenceTime = new double[stations];
 	}
 
-        //TODO: we should return a boolean in the case where a solution is not possible (LD)
+	//TODO: we should return a boolean in the case where a solution is not possible (LD)
 
 	//NEW
 	//the old method "solve" has been renamed "solveLI", since LD stations were not
@@ -78,7 +77,6 @@ public class SolverSingleOpen extends Solver {
 	 */
 	@Override
 	public void solve() {
-
 		for (int i = 0; i < stations; i++) {
 			//checks if LD stations are present in the system
 			if (type[i] == Solver.LD) {
@@ -140,10 +138,8 @@ public class SolverSingleOpen extends Solver {
 	 */
 	@Override
 	public boolean hasSufficientProcessingCapacity() {
-
 		//load lambda must be < 1/Dmax (that is Uj < 1 for all stations)
 		//otherwise the system has no sufficient processing capacity
-
 		for (int j = 0; j < stations; j++) {
 			//utilization for station j
 			//Uj = lambda * Vj * Sj = lambda * Dj
@@ -155,7 +151,6 @@ public class SolverSingleOpen extends Solver {
 		//there are no stations with utilization >= 1
 		return true;
 	}
-
 	//end NEW
 
 }

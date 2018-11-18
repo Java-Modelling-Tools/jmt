@@ -39,7 +39,6 @@ import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.WaitingRequest;
-import jmt.engine.random.engine.RandomEngine;
 
 /**
  * <p>Title: Storage</p>

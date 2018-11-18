@@ -34,7 +34,6 @@ public class WorkloadResultLoader implements ResultLoader {
 		int varSelLst[];
 		waSession = (WorkloadAnalysisSession) session;
 
-		ArrayList resultList = new ArrayList();
 		tmpNode = resultNodeList.item(0);
 		numSave = Integer.parseInt(tmpNode.getAttributes().getNamedItem("num").getNodeValue());
 		resultNodeList = tmpNode.getChildNodes();
@@ -175,10 +174,8 @@ public class WorkloadResultLoader implements ResultLoader {
 					}
 				}
 			}
-			int nel;
 			asseg = new double[curNumCluster][numoss];
 			for (k = 0; k < curNumCluster; k++) {
-				//nel=dis.readInt();
 				for (j = 0; j < numoss; j++) {
 					asseg[k][j] = dis.readDouble();
 				}

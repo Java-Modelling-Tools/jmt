@@ -3,7 +3,6 @@ package jmt.jmva.analytical.solvers.LinearSystem.BTF.MacroBlocks;
 import jmt.jmva.analytical.solvers.Basis.CoMoMBasis;
 import jmt.jmva.analytical.solvers.DataStructures.BigRational;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
-import jmt.jmva.analytical.solvers.Exceptions.UndefinedMultiplyException;
 import jmt.jmva.analytical.solvers.LinearSystem.BTF.Position;
 
 /**
@@ -131,11 +130,11 @@ public class SparseBlockMatrix {
 	
 	public void multiply(BigRational[] result) throws BTFMatrixErrorException {
 		
-		if (cols + position.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when multiplying");;		
+		if (cols + position.col > basis.getSize()) throw new BTFMatrixErrorException("Matrix exceeds end of vector when multiplying");		
 		
 		for (int i = 0; i < block_rows; i++) {  		
             for (int j = 0; j < block_cols; j++) {
-                matrix[i][j].multiply(result);                
+                matrix[i][j].multiply(result);
             }
 		}		
 	}		
@@ -145,7 +144,7 @@ public class SparseBlockMatrix {
 		
 		for (int i = 0; i < block_rows; i++) {  		
             for (int j = 0; j < block_cols; j++) {
-            	matrix[i][j].solve(rhs);                   
+            	matrix[i][j].solve(rhs);
             }
 		}			
 	}

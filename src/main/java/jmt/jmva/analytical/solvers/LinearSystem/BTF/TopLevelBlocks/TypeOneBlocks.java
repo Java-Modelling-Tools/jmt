@@ -8,7 +8,7 @@ import jmt.jmva.analytical.solvers.LinearSystem.BTF.MacroBlocks.MacroBlock;
  * 
  * @author Jack Bradshaw
  */
-public class TypeOneBlocks extends MacroBlockSelectionPolicy{
+public class TypeOneBlocks extends MacroBlockSelectionPolicy {
 
 	protected TypeOneBlocks(QNModel qnm, TopLevelBlock full_block, int currnet_class) {
 		super(qnm, full_block);		
@@ -17,7 +17,7 @@ public class TypeOneBlocks extends MacroBlockSelectionPolicy{
 	@Override
 	protected MacroBlock[] selectMacroBlocks(int current_class) {
 		int number_of_macro_blocks = (current_class - 1 < qnm.M ? current_class - 1: qnm.M) + 1;
-		
+
 		//Take required macro blocks
 		MacroBlock[] macro_blocks = new MacroBlock[number_of_macro_blocks];
 		for (int i = 0; i < macro_blocks.length; i++) {

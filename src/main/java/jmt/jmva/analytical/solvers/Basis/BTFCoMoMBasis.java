@@ -45,7 +45,7 @@ public class BTFCoMoMBasis extends CoMoMBasis {
 
 		//No queues added, constant is in Lambda_Y
 		if (queue_added == 0) {
-			return MiscFunctions.binomialCoefficient(M + R - 1 , M)*M + population_position;
+			return MiscFunctions.binomialCoefficient(M + R - 1, M)*M + population_position;
 		} 
 
 		//Queue added, constant is in Lambda_X

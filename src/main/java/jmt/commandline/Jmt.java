@@ -42,7 +42,7 @@ import javax.xml.transform.stream.StreamResult;
 import jmt.jmva.analytical.SolverDispatcher;
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
-import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
 import jmt.gui.common.xml.XMLArchiver;
 import jmt.gui.jsimgraph.mainGui.MainWindow;
 import jmt.gui.jsimwiz.JSIMMain;
@@ -99,7 +99,7 @@ public class Jmt {
 			//should be to avoid infinite loops.
 
 			long count = 0;
-			long size = source.size();                
+			long size = source.size();
 			while ((count += destination.transferFrom(source, 0, size - count)) < size);
 		} finally {
 			if (source != null) {
@@ -168,7 +168,7 @@ public class Jmt {
 		Result dest = new StreamResult(temp);
 		aTransformer.transform(src, dest);
 
-		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(temp);
+		DispatcherJSIMschema dispatcher = new DispatcherJSIMschema(temp);
 		dispatcher.setTerminalSimulation(true);
 
 		// Starts the simulation
@@ -204,7 +204,7 @@ public class Jmt {
 		Result dest = new StreamResult(temp);
 		aTransformer.transform(src, dest);
 
-		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(temp);
+		DispatcherJSIMschema dispatcher = new DispatcherJSIMschema(temp);
 		dispatcher.setTerminalSimulation(true);
 		// Sets simulation seed if required
 		if (options.containsKey(OPTION_SEED)) {

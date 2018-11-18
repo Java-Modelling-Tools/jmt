@@ -205,7 +205,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 	/**Creates a new instance of <code>ClassesPanel</code> given a model definition.*/
 	public ClassesPanel(ClassDefinition cd) {
 		classTable = new ClassTable();
-		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
+		comboEditor = new ImagedComboBoxCellEditorFactory(null,
 				ImagedComboBoxCellEditorFactory.OPTION_CLASS_TYPES);
 		initComponents();
 		setData(cd);
@@ -213,7 +213,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 
 	/**Default constructor, used to extend this panel for JModel*/
 	public ClassesPanel() {
-		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
+		comboEditor = new ImagedComboBoxCellEditorFactory(null,
 				ImagedComboBoxCellEditorFactory.OPTION_CLASS_TYPES);
 	}
 

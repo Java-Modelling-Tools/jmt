@@ -172,7 +172,6 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 	}
 
 	private void sync() {
-
 		hasDeletes = false;
 		stationOps.clear();
 
@@ -182,7 +181,7 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 		synchronized (data) {
 			stations = data.getStations();
 			nameCounter = stations;
-			pop = data.getMaxpop();
+			pop = data.getTotalPop();
 
 			//OLD
 			// closedSystem = data.isClosed();
@@ -191,7 +190,7 @@ public final class StationsPanel extends WizardPanel implements JabaConstants, F
 			//@author Stefano Omini
 			//if true, load dependent stations are allowed
 			//(at the moment, only single class closed models allow LD stations)
-			LD_enabled_system = data.isClosed() && !data.isMultiClass();
+			LD_enabled_system = data.isClosed() && data.isSingleClass();
 			//end NEW
 
 			//TODO: sostituire LD??

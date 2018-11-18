@@ -28,7 +28,7 @@ import java.util.concurrent.Callable;
  *
  * @author Michail Makaronidis, 2010
  */
-public class ModuloSelectionTask implements Callable<BigInteger>{
+public class ModuloSelectionTask implements Callable<BigInteger> {
 
     private int bitLength;
 

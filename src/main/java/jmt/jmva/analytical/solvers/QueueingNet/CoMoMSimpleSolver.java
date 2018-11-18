@@ -1,7 +1,5 @@
 package jmt.jmva.analytical.solvers.QueueingNet;
 
-import javax.naming.OperationNotSupportedException;
-
 import jmt.jmva.analytical.solvers.Basis.BTFCoMoMBasis;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
@@ -15,16 +13,16 @@ public class CoMoMSimpleSolver extends CoMoMSolver {
 
 	public CoMoMSimpleSolver(QNModel qnm, int num_threads) throws InternalErrorException {
 		super(qnm);
-		
 		basis =  new BTFCoMoMBasis(qnm);		
 		system = new SimpleLinearSystem(qnm, basis, num_threads);
 	}
 
-	 /**
-     * Prints a short welcome message that says which solver is being used.
-     */
-    @Override
-    public void printWelcome() {
-        System.out.println("Using Simple CoMoM");
-    }
+	/**
+	 * Prints a short welcome message that says which solver is being used.
+	 */
+	@Override
+	public void printWelcome() {
+		System.out.println("Using Simple CoMoM");
+	}
+
 }

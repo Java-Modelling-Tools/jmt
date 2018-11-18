@@ -159,7 +159,7 @@ public class AutoDownloadPanel extends WizardPanel implements TemplateConstants 
 			File index = File.createTempFile(F_NAME_INDEX, "");
 			index.deleteOnExit();
 			indexFile = index.getAbsolutePath();
-			TemplateFileOperation.download(DEFAULT_SITE + "/" + F_NAME_INDEX , indexFile, CONN_TIMEOUT, READ_TIMEOUT);
+			TemplateFileOperation.download(DEFAULT_SITE + "/" + F_NAME_INDEX, indexFile, CONN_TIMEOUT, READ_TIMEOUT);
 			data = TemplateFileOperation.getDefaultTemplatesFromIndex(indexFile);
 			error = false;
 		} catch (Exception e) {

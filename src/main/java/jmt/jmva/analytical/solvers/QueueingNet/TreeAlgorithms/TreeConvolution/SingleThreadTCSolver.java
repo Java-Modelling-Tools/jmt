@@ -163,7 +163,7 @@ public class SingleThreadTCSolver extends TreeTraverser implements IThreadedTCSo
 				break;
 				
 			default:
-				throw new IllegalStateException("Unsupported station type.");
+				throw new UnsupportedOperationException("Unsupported station type.");
 			}
 		}
 		

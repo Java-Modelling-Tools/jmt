@@ -31,7 +31,7 @@ public class SingleThreadTMVASolver extends TreeTraverser implements IThreadedTM
 	 */
 	@Override
 	public MVAResults solve(Node node, PopulationVector N) {
-		Printer.out.println("\n--- STARTING TREE-MVA ---");
+		Printer.out.println("\n--- STARTING TREE MVA ---");
 		if (Config.RECURSIVE) {
 			this.recursiveTraverse(node, N);
 		} else {

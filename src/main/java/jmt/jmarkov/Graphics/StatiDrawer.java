@@ -377,7 +377,7 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	//			if (bold)
 	//				g2d.setStroke(strokeB);
 	//			if (from > to) {
-	//				x2 = to * (4 * STATUS_RAD + 2* ELEMS_GAP) + START_GAP + STATUS_RAD * 2 ;//+ ELEMS_GAP;
+	//				x2 = to * (4 * STATUS_RAD + 2* ELEMS_GAP) + START_GAP + STATUS_RAD * 2;//+ ELEMS_GAP;
 	//				x1 = from * (4 * STATUS_RAD + 2 * ELEMS_GAP) + START_GAP;// - ELEMS_GAP;				
 	//			
 	//				y = (panelH)/ 2.0 + STATUS_RAD;
@@ -386,7 +386,7 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	//				
 	//			}
 	//			else {
-	//				x1 = from * (4 * STATUS_RAD + 2* ELEMS_GAP) + START_GAP + STATUS_RAD * 2 ;//+ ELEMS_GAP;
+	//				x1 = from * (4 * STATUS_RAD + 2* ELEMS_GAP) + START_GAP + STATUS_RAD * 2;//+ ELEMS_GAP;
 	//				x2 = to * (4 * STATUS_RAD + 2 * ELEMS_GAP) + START_GAP;// - ELEMS_GAP;
 	//		
 	//				y = (panelH)/ 2.0 - STATUS_RAD;
@@ -394,7 +394,7 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	//				gap = 2*ELEMS_GAP;
 	//			}
 	//			ctrlx = (x1 + x2)/2;
-	//			//x = (2.0 * STATUS_RAD + ELEMS_GAP) * (double) (from + to)  + START_GAP + (STATUS_RAD / 2.0);
+	//			//x = (2.0 * STATUS_RAD + ELEMS_GAP) * (double) (from + to) + START_GAP + (STATUS_RAD / 2.0);
 	//			
 	//			QuadCurve2D prova = new QuadCurve2D.Double(x1, y, ctrlx, ctrly, x2, y);
 	//			prova.subdivide(prova,null);
@@ -471,7 +471,7 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 	//			Color oldc = g2d.getColor();
 	//			g2d.setColor(c);
 	//			double x, y, diameter;
-	//			x = (2.0 * STATUS_RAD + ELEMS_GAP) * (double) (from + to)  + START_GAP + (STATUS_RAD / 2.0);
+	//			x = (2.0 * STATUS_RAD + ELEMS_GAP) * (double) (from + to) + START_GAP + (STATUS_RAD / 2.0);
 	//			y = panelH / 2 - STATUS_RAD / 2.0;
 	//			diameter = ELEMS_GAP * 2;
 	//			transitionE = new Ellipse2D.Double(x, y, STATUS_RAD, STATUS_RAD);

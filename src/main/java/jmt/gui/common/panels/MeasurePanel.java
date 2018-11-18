@@ -121,36 +121,32 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	//types of measures selectable
 	protected static final String[] measureTypes = new String[] {
 			"---Select an index---",
-			SimulationDefinition.MEASURE_DR,
-			SimulationDefinition.MEASURE_FCR_TW,
-			SimulationDefinition.MEASURE_FCR_MO,
-			SimulationDefinition.MEASURE_FX,
-			SimulationDefinition.MEASURE_FJ_CN,
-			SimulationDefinition.MEASURE_FJ_RP,
 			SimulationDefinition.MEASURE_QL,
 			SimulationDefinition.MEASURE_QT,
-			SimulationDefinition.MEASURE_RD,
 			SimulationDefinition.MEASURE_RP,
-			SimulationDefinition.MEASURE_RP_PER_SINK,
-			SimulationDefinition.MEASURE_S_DR,
-			SimulationDefinition.MEASURE_S_CN,
-			SimulationDefinition.MEASURE_S_P,
-			SimulationDefinition.MEASURE_S_RP,
-			SimulationDefinition.MEASURE_S_X,
+			SimulationDefinition.MEASURE_RD,
+			SimulationDefinition.MEASURE_U,
 			SimulationDefinition.MEASURE_X,
+			SimulationDefinition.MEASURE_DR,
+			SimulationDefinition.MEASURE_P,
+			SimulationDefinition.MEASURE_RP_PER_SINK,
 			SimulationDefinition.MEASURE_X_PER_SINK,
-			SimulationDefinition.MEASURE_U
+			SimulationDefinition.MEASURE_FCR_TW,
+			SimulationDefinition.MEASURE_FCR_MO,
+			SimulationDefinition.MEASURE_FJ_CN,
+			SimulationDefinition.MEASURE_FJ_RP,
+			SimulationDefinition.MEASURE_FX
 	};
 
 	// Measure selection ComboBox
-	protected JComboBox measureSelection = new JComboBox(measureTypes);
+	protected JComboBox<String> measureSelection = new JComboBox<String>(measureTypes);
 
 	/** Editors and renderers for table */
 	protected ImagedComboBoxCellEditorFactory classesCombos;
 	/** Editors and renderers for table */
 	protected ImagedComboBoxCellEditorFactory stationsCombos;
 	/** Editors and renderers for table */
-	protected ImagedComboBoxCellEditorFactory FJsCombos;
+	protected ImagedComboBoxCellEditorFactory FJstationsCombos;
 	/** Editors and renderers for table */
 	protected ImagedComboBoxCellEditorFactory modesCombos;
 
@@ -192,9 +188,9 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	public MeasurePanel(ClassDefinition classes, StationDefinition stations, SimulationDefinition simParams) {
 		classesCombos = new ImagedComboBoxCellEditorFactory(classes);
 		stationsCombos = new ImagedComboBoxCellEditorFactory(stations);
-		FJsCombos = new ImagedComboBoxCellEditorFactory(null, stations,
+		FJstationsCombos = new ImagedComboBoxCellEditorFactory(stations,
 				ImagedComboBoxCellEditorFactory.OPTION_FJ_STATION_NAMES);
-		modesCombos = new ImagedComboBoxCellEditorFactory(null, null,
+		modesCombos = new ImagedComboBoxCellEditorFactory(null,
 				ImagedComboBoxCellEditorFactory.OPTION_TRANSITION_MODES);
 		setData(classes, stations, simParams);
 		initComponents();
@@ -210,9 +206,9 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		measureSelection.addActionListener(addMeasure);
 		//ARIF: show all elements in ComboBox
 		measureSelection.setMaximumRowCount(measureTypes.length);
-		Object popup = measureSelection.getUI().getAccessibleChild(measureSelection, 0);  
-		if (popup instanceof ComboPopup) {  
-			JList jlist = ((ComboPopup)popup).getList();  
+		Object popup = measureSelection.getUI().getAccessibleChild(measureSelection, 0);
+		if (popup instanceof ComboPopup) {
+			JList<?> jlist = ((ComboPopup) popup).getList();
 			jlist.setVisibleRowCount(measureTypes.length);
 		}
 		// GC: Ensures that keyboard arrows can be used to select metric
@@ -235,7 +231,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		logPanel.add(new JLabel(MEASURE_LOG_DESCRIPTION), BorderLayout.NORTH);
 		JPanel logSettings = new JPanel(new SpringLayout());
 		JLabel label = new JLabel("Delimiter:");
-		final JComboBox delimiters = new JComboBox(DELIMITERS);
+		final JComboBox<LabelValue> delimiters = new JComboBox<LabelValue>(DELIMITERS);
 		delimiters.setSelectedItem(LabelValue.getElement(DELIMITERS, stationData.getLoggingGlbParameter("delim")));
 		delimiters.addActionListener(new ActionListener() {
 			@Override
@@ -255,9 +251,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		logSettings.add(label);
 		logSettings.add(delimiters);
 		label = new JLabel("Decimal separator:");
-		final JComboBox decimals = new JComboBox(DECIMAL);
+		final JComboBox<LabelValue> decimals = new JComboBox<LabelValue>(DECIMAL);
 		decimals.setSelectedItem(LabelValue.getElement(DECIMAL, stationData.getLoggingGlbParameter("decimalSeparator")));
-		label.setLabelFor(decimals);
 		decimals.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -272,6 +267,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				}
 			}
 		});
+		label.setLabelFor(decimals);
 		logSettings.add(label);
 		logSettings.add(decimals);
 		SpringUtilities.makeCompactGrid(logSettings, 2, 2, 0, 0, 5, 2);
@@ -315,7 +311,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		simData = simParams;
 		classesCombos.setData(classes);
 		stationsCombos.setData(stations);
-		FJsCombos.setData(stations);
+		FJstationsCombos.setData(stations);
 		modesCombos.clearCache();
 		refreshComponents();
 	}
@@ -327,7 +323,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	public void gotFocus() {
 		classesCombos.clearCache();
 		stationsCombos.clearCache();
-		FJsCombos.clearCache();
+		FJstationsCombos.clearCache();
 		modesCombos.clearCache();
 		refreshComponents();
 	}
@@ -357,7 +353,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			measureSelection.setSelectedIndex(0);
 			return;
 		}
-		simData.addMeasure((String) measureSelection.getSelectedItem(), null, null);
+		Measure measure = getImplicitMeasure(null, (String) measureSelection.getSelectedItem(), null, null);
+		simData.addMeasure(measure.type, measure.stationKey, measure.classKey);
 		measureTable.tableChanged(new TableModelEvent(measureTable.getModel()));
 		measureSelection.setSelectedIndex(0);
 	}
@@ -403,39 +400,57 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			Object key = simData.getMeasureKeys().get(row);
-			String type = simData.getMeasureType(key);
+			Measure measure = getExplicitMeasure(simData.getMeasureType(key),
+					simData.getMeasureStation(key), simData.getMeasureClass(key));
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
-			} else if (column == 2 && type.equals(SimulationDefinition.MEASURE_U)) {
-				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
-			} else if (column == 2 && type.equals(SimulationDefinition.MEASURE_X)) {
-				Vector<Object> vector = new Vector<Object>();
-				vector.addAll(stationData.getStationKeysSource());
-				vector.addAll(stationData.getStationRegionKeysNoSourceSink());
-				return stationsCombos.getEditor(vector);
-			} else if (column == 2 && simData.isSinkMeasure(type)) {
-				return stationsCombos.getEditor(stationData.getStationKeysSink());
-			} else if (column == 2 && simData.isFCRMeasure(type)) {
-				return stationsCombos.getEditor(stationData.getFCRegionKeys());
-			} else if (column == 2 && simData.isFJMeasure(type)) {
-				return FJsCombos.getEditor(stationData.getFJKeys());
-			} else if (column == 2 && type.equals(SimulationDefinition.MEASURE_FX)) {
-				return stationsCombos.getEditor(stationData.getStationKeysTransition());
 			} else if (column == 2) {
-				return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
-			} else if (column == 1 && simData.isSinkMeasure(type)) {
-				return classesCombos.getEditor(classData.getOpenClassKeys());
-			} else if (column == 1 && simData.isFCRMeasure(type)) {
-				return classesCombos.getEditor(new ArrayList<Object>());
-			} else if (column == 1 && type.equals(SimulationDefinition.MEASURE_FX)) {
-				Object station = simData.getMeasureStation(key);
-				if (station == null) {
-					return modesCombos.getEditor(new ArrayList<String>());
+				if (measure.type.equals(SimulationDefinition.MEASURE_QL)
+						|| measure.type.equals(SimulationDefinition.MEASURE_RP)
+						|| measure.type.equals(SimulationDefinition.MEASURE_DR)) {
+					Vector<Object> vector = new Vector<Object>();
+					vector.add("");
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					return stationsCombos.getEditor(vector);
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_QT)
+						|| measure.type.equals(SimulationDefinition.MEASURE_RD)
+						|| measure.type.equals(SimulationDefinition.MEASURE_U)) {
+					return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_X)) {
+					Vector<Object> vector = new Vector<Object>();
+					vector.add("");
+					vector.addAll(stationData.getStationKeysSource());
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					return stationsCombos.getEditor(vector);
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_P)) {
+					Vector<Object> vector = new Vector<Object>();
+					vector.add("");
+					return stationsCombos.getEditor(vector);
+				} else if (simData.isSinkMeasure(measure.type)) {
+					return stationsCombos.getEditor(stationData.getStationKeysSink());
+				} else if (simData.isFCRMeasure(measure.type)) {
+					return stationsCombos.getEditor(stationData.getFCRegionKeys());
+				} else if (simData.isFJMeasure(measure.type)) {
+					return FJstationsCombos.getEditor(stationData.getFJKeys());
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_FX)) {
+					return stationsCombos.getEditor(stationData.getStationKeysTransition());
 				} else {
-					return modesCombos.getEditor(stationData.getAllTransitionModeNames(station));
+					return stationsCombos.getEditor(new Vector<Object>());
 				}
 			} else if (column == 1) {
-				return classesCombos.getEditor(classData.getClassKeys());
+				if (simData.isSinkMeasure(measure.type)) {
+					return classesCombos.getEditor(classData.getOpenClassKeys());
+				} else if (simData.isFCRMeasure(measure.type)) {
+					return classesCombos.getEditor(new Vector<Object>());
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_FX)) {
+					if (measure.stationKey == null) {
+						return modesCombos.getEditor(new ArrayList<String>());
+					} else {
+						return modesCombos.getEditor(stationData.getAllTransitionModeNames(measure.stationKey));
+					}
+				} else {
+					return classesCombos.getEditor(classData.getClassKeys());
+				}
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -444,19 +459,20 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			Object key = simData.getMeasureKeys().get(row);
-			String type = simData.getMeasureType(key);
+			Measure measure = getExplicitMeasure(simData.getMeasureType(key),
+					simData.getMeasureStation(key), simData.getMeasureClass(key));
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
 			} else if (column == 3) {
 				return new BooleanCellRenderer();
-			} else if (column == 2 && !simData.isGlobalMeasure(type)) {
-				if (simData.isFJMeasure(type)) {
-					return FJsCombos.getRenderer();
+			} else if (column == 2) {
+				if (simData.isFJMeasure(measure.type)) {
+					return FJstationsCombos.getRenderer();
 				} else {
 					return stationsCombos.getRenderer();
 				}
 			} else if (column == 1) {
-				if (type.equals(SimulationDefinition.MEASURE_FX)) {
+				if (measure.type.equals(SimulationDefinition.MEASURE_FX)) {
 					return modesCombos.getRenderer();
 				} else {
 					return classesCombos.getRenderer();
@@ -472,7 +488,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 
-		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region", "Stat.Res.", "Conf.Int.", "Max Rel.Err.", "" };
+		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region/Network", "Stat.Res.", "Conf.Int.", "Max Rel.Err.", "" };
 		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Boolean.class, Double.class, Double.class, Object.class };
 		public int[] columnWidths = new int[] { 120, 80, 120, 30, 60, 60, 20 };
 
@@ -496,14 +512,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			Object key = simData.getMeasureKeys().get(rowIndex);
-			String type = simData.getMeasureType(key);
 			// Avoid editing of Measure type
 			if (columnIndex == 0) {
-				return false;
-			}
-			// Avoid set reference station for global measures
-			if (columnIndex == 2 && simData.isGlobalMeasure(type)) {
 				return false;
 			}
 			return true;
@@ -511,13 +521,15 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object key = simData.getMeasureKeys().get(rowIndex);
+			Measure measure = getExplicitMeasure(simData.getMeasureType(key),
+					simData.getMeasureStation(key), simData.getMeasureClass(key));
 			switch (columnIndex) {
 			case 0: 
-				return simData.getMeasureType(key);
+				return measure.type;
 			case 1: 
-				return simData.getMeasureClass(key);
+				return measure.classKey;
 			case 2: 
-				return simData.getMeasureStation(key);
+				return measure.stationKey;
 			case 3: 
 				return simData.getMeasureLog(key);
 			case 4: 
@@ -531,21 +543,28 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object key = simData.getMeasureKeys().get(rowIndex);
-			String type = simData.getMeasureType(key);
+			Measure measure = null;
 			switch (columnIndex) {
 			case 0: 
-				simData.setMeasureType((String) aValue, key);
+				measure = getImplicitMeasure(key, (String) aValue, getValueAt(rowIndex, 2), getValueAt(rowIndex, 1));
+				simData.setMeasureType(measure.type, key);
+				simData.setMeasureStation(measure.stationKey, key);
+				simData.setMeasureClass(measure.classKey, key);
+				fireTableRowsUpdated(rowIndex, rowIndex);
 				break;
 			case 1: 
-				simData.setMeasureClass(aValue, key);
+				measure = getImplicitMeasure(key, (String) getValueAt(rowIndex, 0), getValueAt(rowIndex, 2), aValue);
+				simData.setMeasureType(measure.type, key);
+				simData.setMeasureStation(measure.stationKey, key);
+				simData.setMeasureClass(measure.classKey, key);
+				fireTableRowsUpdated(rowIndex, rowIndex);
 				break;
 			case 2: 
-				simData.setMeasureStation(aValue, key);
-				if (type.equals(SimulationDefinition.MEASURE_FX)) {
-					simData.setMeasureClass(null, key);
-					repaint();
-					measureTable.setRowSelectionInterval(rowIndex, rowIndex);
-				}
+				measure = getImplicitMeasure(key, (String) getValueAt(rowIndex, 0), aValue, getValueAt(rowIndex, 1));
+				simData.setMeasureType(measure.type, key);
+				simData.setMeasureStation(measure.stationKey, key);
+				simData.setMeasureClass(measure.classKey, key);
+				fireTableRowsUpdated(rowIndex, rowIndex);
 				break;
 			case 3: 
 				simData.setMeasureLog((Boolean) aValue, key);
@@ -570,5 +589,97 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		}
 
 	}
-	
+
+	private Measure getImplicitMeasure(Object key, String type, Object stationKey, Object classKey) {
+		if (key == null) {
+			if (type.equals(SimulationDefinition.MEASURE_QL)
+					|| type.equals(SimulationDefinition.MEASURE_RP)
+					|| type.equals(SimulationDefinition.MEASURE_X)
+					|| type.equals(SimulationDefinition.MEASURE_DR)
+					|| type.equals(SimulationDefinition.MEASURE_P)) {
+				return new Measure(getSystemMeasureType(type), null, null);
+			} else {
+				return new Measure(type, null, null);
+			}
+		} else {
+			if (type.equals(SimulationDefinition.MEASURE_QL)
+					|| type.equals(SimulationDefinition.MEASURE_RP)
+					|| type.equals(SimulationDefinition.MEASURE_X)
+					|| type.equals(SimulationDefinition.MEASURE_DR)
+					|| type.equals(SimulationDefinition.MEASURE_P)) {
+				if (stationKey != null && stationKey.equals("")) {
+					return new Measure(getSystemMeasureType(type), null, classKey);
+				} else {
+					return new Measure(type, stationKey, classKey);
+				}
+			} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
+				if (stationKey != simData.getMeasureStation(key)) {
+					return new Measure(type, stationKey, null);
+				} else {
+					return new Measure(type, stationKey, classKey);
+				}
+			} else {
+				return new Measure(type, stationKey, classKey);
+			}
+		}
+	}
+
+	private Measure getExplicitMeasure(String type, Object stationKey, Object classKey) {
+		if (type.equals(SimulationDefinition.MEASURE_S_CN)
+				|| type.equals(SimulationDefinition.MEASURE_S_RP)
+				|| type.equals(SimulationDefinition.MEASURE_S_X)
+				|| type.equals(SimulationDefinition.MEASURE_S_DR)
+				|| type.equals(SimulationDefinition.MEASURE_S_P)) {
+			return new Measure(getStationMeasureType(type), "", classKey);
+		} else {
+			return new Measure(type, stationKey, classKey);
+		}
+	}
+
+	private String getSystemMeasureType(String type) {
+		if (type.equals(SimulationDefinition.MEASURE_QL)) {
+			return SimulationDefinition.MEASURE_S_CN;
+		} else if (type.equals(SimulationDefinition.MEASURE_RP)) {
+			return SimulationDefinition.MEASURE_S_RP;
+		} else if (type.equals(SimulationDefinition.MEASURE_X)) {
+			return SimulationDefinition.MEASURE_S_X;
+		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
+			return SimulationDefinition.MEASURE_S_DR;
+		} else if (type.equals(SimulationDefinition.MEASURE_P)) {
+			return SimulationDefinition.MEASURE_S_P;
+		} else {
+			return null;
+		}
+	}
+
+	private String getStationMeasureType(String type) {
+		if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
+			return SimulationDefinition.MEASURE_QL;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {
+			return SimulationDefinition.MEASURE_RP;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_X)) {
+			return SimulationDefinition.MEASURE_X;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_DR)) {
+			return SimulationDefinition.MEASURE_DR;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
+			return SimulationDefinition.MEASURE_P;
+		} else {
+			return null;
+		}
+	}
+
+	protected class Measure {
+
+		public String type;
+		public Object stationKey; 
+		public Object classKey;
+
+		public Measure(String type, Object stationKey, Object classKey) {
+			this.type = type;
+			this.stationKey = stationKey;
+			this.classKey = classKey;
+		}
+
+	}
+
 }

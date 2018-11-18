@@ -25,6 +25,8 @@ package jmt.jmva.analytical.solvers.DataStructures;
  */
 public class PopulationVector extends EnhancedVector {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Creates an empty PopulationVector object.
      */

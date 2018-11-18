@@ -76,7 +76,7 @@ public class CoMoMBasis extends Basis {
 					v.restore();
 				}
 			}
-			current_list_end += MiscFunctions.binomialCoefficient(R - 1 + i - 1 , i );
+			current_list_end += MiscFunctions.binomialCoefficient(R - 1 + i - 1, i );
 		}
 	}
 
@@ -138,7 +138,7 @@ public class CoMoMBasis extends Basis {
 		System.out.println("Intialising Basis");
 
 		// Negative populations have normalising constant equal to ZERO
-		for ( int i = 0 ; i < size; i++) {
+		for ( int i = 0; i < size; i++) {
 			basis[i] = BigRational.ZERO;
 			previous_basis[i] = BigRational.ZERO;
 		}
@@ -156,7 +156,7 @@ public class CoMoMBasis extends Basis {
 	 */
 	@Override
 	public void setSize() {
-		size  = (M + 1)*MiscFunctions.binomialCoefficient(M + R - 1 , M);
+		size  = (M + 1)*MiscFunctions.binomialCoefficient(M + R - 1, M);
 	}	
 
 	/**
@@ -213,11 +213,11 @@ public class CoMoMBasis extends Basis {
 
 	//TODO currently just for debugging purposes
 	public void print_values() {
-		for (int col = 0; col < size*2; col++ ) {
+		for (int col = 0; col < size*2; col++) {
 			System.out.print("-");
 		}
 		System.out.println("\nBasis Values: \n");
-		for (int col = 0; col < size; col++ ) {
+		for (int col = 0; col < size; col++) {
 			if (basis[col].isUndefined()) {
 				System.out.print("*" + "\n");
 			} else {
@@ -225,7 +225,7 @@ public class CoMoMBasis extends Basis {
 			}
 		}
 		System.out.print("\n");
-		for (int col = 0; col < size*2; col++ ) {
+		for (int col = 0; col < size*2; col++) {
 			System.out.print("-");
 		}
 		System.out.print("\n\n");

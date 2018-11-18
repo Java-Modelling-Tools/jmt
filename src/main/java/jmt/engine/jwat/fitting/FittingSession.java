@@ -8,7 +8,6 @@ import org.w3c.dom.Element;
 
 import jmt.engine.jwat.JwatSession;
 import jmt.engine.jwat.fitting.utils.ModelFitting;
-import jmt.engine.jwat.trafficAnalysis.ModelTrafficAnalysis;
 import jmt.gui.jwat.JWatModel;
 
 public class FittingSession extends JwatSession {

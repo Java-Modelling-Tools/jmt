@@ -63,12 +63,13 @@ import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
+import jmt.jmva.analytical.solvers.SolverMultiClosedMonteCarloLogistic;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**
  * <p>Title: What-If Analysis Panel</p>
  * <p>Description: This panel is used to show and parametrize what if analysis
- * for jMVA. This is really complex as I have to cope with horrible JMVA data structure
+ * for JMVA. This is really complex as I have to cope with horrible JMVA data structure
  * and many controls must be performed to correctly parametrize analysis.</p>
  *
  * @author Bertoli Marco
@@ -76,6 +77,7 @@ import jmt.jmva.gui.exact.ExactWizard;
  *         Time: 13.48.45
  */
 public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpdatablePanel {
+
 	private static final long serialVersionUID = 1L;
 	private ExactWizard wizard;
 	private HoverHelp help;
@@ -112,9 +114,9 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 	private static final String TO_DEMANDS = "To (s) : ";
 	private static final String TO_MIX = "To (\u03b2i) : ";
 
-	private JComboBox type;
-	private JComboBox stationName;
-	private JComboBox className;
+	private JComboBox<TypeLabel> type;
+	private JComboBox<String> stationName;
+	private JComboBox<String> className;
 	private JTextField from;
 	private JTextField to;
 	private JTextField iterations;
@@ -125,8 +127,8 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 	private JPanel algPanel;
 	private JCheckBox compMultiAlg;
 	private Map<SolverAlgorithm, JCheckBox> algCheckBoxes;
-	private Map<SolverAlgorithm, JTextField> algTolerances;
-	private Map<SolverAlgorithm, JLabel> algToleranceLabels;
+	private Map<SolverAlgorithm, JTextField> algParams;
+	private Map<SolverAlgorithm, JLabel> algParamLabels;
 	private JPanel compPanel;
 	/** End **/
 
@@ -174,11 +176,11 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		for (JCheckBox checkBox : algCheckBoxes.values()) {
 			checkBox.setEnabled(enabled);
 		}
-		for (JTextField tolerance : algTolerances.values()) {
-			tolerance.setEnabled(enabled);
+		for (JTextField algParam : algParams.values()) {
+			algParam.setEnabled(enabled);
 		}
-		for (JLabel algTolLabel : algToleranceLabels.values()) {
-			algTolLabel.setEnabled(enabled);
+		for (JLabel algParamLabel : algParamLabels.values()) {
+			algParamLabel.setEnabled(enabled);
 		}
 	}
 	/** End **/
@@ -294,24 +296,20 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			algPanel.setVisible(true);
 			compMultiAlg.setSelected(true);
 		}
-		if (!data.isClosed()) {
-			compMultiAlg.setEnabled(false);
-		}
-		for (Entry<SolverAlgorithm, JCheckBox> e : this.algCheckBoxes.entrySet()) {
+		for (Entry<SolverAlgorithm, JCheckBox> e : algCheckBoxes.entrySet()) {
 			SolverAlgorithm algo = e.getKey();
-			boolean selected = (data.getWhatifAlgorithms().contains(algo));
+			boolean selected = data.getWhatifAlgorithms().contains(algo);
 			JCheckBox checkbox = e.getValue();
 			if ((selected && !checkbox.isSelected()) || (!selected && checkbox.isSelected())) {
 				checkbox.doClick();
 			}
-			if (!data.isClosed()) {
-				checkbox.setEnabled(false);
-			}
 			if (!algo.isExact()) {
-				algTolerances.get(algo).setText(numFormat.format(data.getWhatifAlgorithmTolerance(algo)));
-				if (!data.isClosed()) {
-					algToleranceLabels.get(algo).setEnabled(false);
-					algTolerances.get(algo).setEnabled(false);
+				//boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO);
+				boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC);
+				if (isMonteCarloAlgo) {
+					algParams.get(algo).setText(numFormat.format(data.getWhatifAlgorithmMaxSamples(algo)));
+				} else {
+					algParams.get(algo).setText(numFormat.format(data.getWhatifAlgorithmTolerance(algo)));
 				}
 			}
 		}
@@ -393,7 +391,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		JPanel paramPanel = new JPanel(new GridLayout(6, 2, 5, 5));
 		// Control parameter
 		paramPanel.add(new JLabel("Control Parameter :", SwingConstants.RIGHT));
-		type = new JComboBox(new Object[] {new TypeLabel(NO_ANALYSIS, NO_ANALYSIS)});
+		type = new JComboBox<TypeLabel>(new TypeLabel[] { new TypeLabel(NO_ANALYSIS, NO_ANALYSIS) });
 		type.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.DESELECTED) {
@@ -407,7 +405,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		// Station name
 		stationLabel = new JLabel("Station :", SwingConstants.RIGHT);
 		paramPanel.add(stationLabel);
-		stationName = new JComboBox();
+		stationName = new JComboBox<String>();
 		stationName.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.DESELECTED) {
@@ -421,7 +419,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		// Class Name
 		classLabel = new JLabel("Class :", SwingConstants.RIGHT);
 		paramPanel.add(classLabel);
-		className = new JComboBox(new String[] { ALL_CLASSES });
+		className = new JComboBox<String>(new String[] { ALL_CLASSES });
 		className.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.DESELECTED) {
@@ -491,8 +489,8 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		algPanel.setLayout(new GridLayout(0, 2, 0, 0));
 
 		algCheckBoxes = new EnumMap<SolverAlgorithm, JCheckBox>(SolverAlgorithm.class);
-		algTolerances = new EnumMap<SolverAlgorithm, JTextField>(SolverAlgorithm.class);
-		algToleranceLabels = new EnumMap<SolverAlgorithm, JLabel>(SolverAlgorithm.class);
+		algParams = new EnumMap<SolverAlgorithm, JTextField>(SolverAlgorithm.class);
+		algParamLabels = new EnumMap<SolverAlgorithm, JLabel>(SolverAlgorithm.class);
 		int noOfExactAlgs = SolverAlgorithm.noOfExactAlgs();
 		for (int i = 0; i < SolverAlgorithm.closedValues().length; i++) {
 			SolverAlgorithm algo = SolverAlgorithm.closedValues()[i];
@@ -502,21 +500,21 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				algPanel.add(label, BorderLayout.CENTER);
 				label.setForeground(Color.DARK_GRAY);
 				label.setFocusable(false);
-				JPanel placeholder = new JPanel();
-				placeholder.setFocusable(false);
-				algPanel.add(placeholder);
+				JPanel placeHolder = new JPanel();
+				placeHolder.setFocusable(false);
+				algPanel.add(placeHolder);
 			} else if (i == noOfExactAlgs) {
 				JLabel label = new JLabel("----- Approximate -----");
 				label.setMinimumSize(new Dimension(250, 0));
 				algPanel.add(label, BorderLayout.CENTER);
 				label.setForeground(Color.DARK_GRAY);
 				label.setFocusable(false);
-				JPanel placeholder = new JPanel();
-				placeholder.setFocusable(false);
-				algPanel.add(placeholder);
+				JPanel placeHolder = new JPanel();
+				placeHolder.setFocusable(false);
+				algPanel.add(placeHolder);
 			}
 
-			JCheckBox checkBox = new JCheckBox (algo.toString());
+			JCheckBox checkBox = new JCheckBox(algo.toString());
 			checkBox.setName(algo.toString());
 
 			checkBox.addActionListener(new ActionListener() {
@@ -532,26 +530,45 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			algCheckBoxes.put(algo,checkBox);
 
 			if (!algo.isExact()) {
-				Dimension d = new Dimension(70,30);
-				JLabel tolLabel = new JLabel("Tolerance: ");
-				tolLabel.setMaximumSize(d);
-				tolLabel.setFocusable(false);
-				d = new Dimension(90,30);
-				JTextField tolerance = new JTextField(30);
-				tolerance.setText(numFormat.format(SolverMultiClosedAMVA.DEFAULT_TOLERANCE));
-				tolerance.setMaximumSize(d);
-				tolerance.setName(algo.toString());
-				tolerance.addFocusListener(new FocusListener() {
+				//boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO);
+				boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC);
+				Dimension d = new Dimension(90, 30);
+				JLabel paramLabel = new JLabel(isMonteCarloAlgo ? "Max Samples:" : "Tolerance:");
+				paramLabel.setMaximumSize(d);
+				paramLabel.setFocusable(false);
+				JTextField param = new JTextField(30);
+				if (isMonteCarloAlgo) {
+					//param.setText(numFormat.format(SolverMultiClosedMonteCarlo.DEFAULT_MAX_SAMPLES));
+					param.setText(numFormat.format(SolverMultiClosedMonteCarloLogistic.DEFAULT_MAX_SAMPLES));
+				} else {
+					param.setText(numFormat.format(SolverMultiClosedAMVA.DEFAULT_TOLERANCE));
+				}
+				param.setMaximumSize(d);
+				param.setName(algo.toString());
+				param.addFocusListener(new FocusListener() {
 					@Override
 					public void focusLost(FocusEvent e) {
 						JTextField textField = (JTextField) e.getSource();
-						Double tol = SolverMultiClosedAMVA.validateTolerance(textField.getText());
 						SolverAlgorithm algorithm = SolverAlgorithm.fromString(textField.getName());
-						if (tol != null) {
-							data.setWhatifAlgorithmTolerance(algorithm, tol);
-						}
-						else {
-							JOptionPane.showMessageDialog(WhatIfPanel.this, "Error: Invalid tolerance value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
+						//boolean isMonteCarloAlgorithm = algorithm.equals(SolverAlgorithm.MONTE_CARLO);
+						boolean isMonteCarloAlgorithm = algorithm.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC);
+						if (isMonteCarloAlgorithm) {
+							//Integer maxSamples = SolverMultiClosedMonteCarlo.validateMaxSamples(textField.getText());
+							Integer maxSamples = SolverMultiClosedMonteCarloLogistic.validateMaxSamples(textField.getText());
+							if (maxSamples != null) {
+								data.setWhatifAlgorithmMaxSamples(algorithm, maxSamples);
+							} else {
+								textField.setText(numFormat.format(data.getWhatifAlgorithmMaxSamples(algorithm)));
+								JOptionPane.showMessageDialog(WhatIfPanel.this, "Error: Invalid max samples value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
+							}
+						} else {
+							Double tolerance = SolverMultiClosedAMVA.validateTolerance(textField.getText());
+							if (tolerance != null) {
+								data.setWhatifAlgorithmTolerance(algorithm, tolerance);
+							} else {
+								textField.setText(numFormat.format(data.getWhatifAlgorithmTolerance(algorithm)));
+								JOptionPane.showMessageDialog(WhatIfPanel.this, "Error: Invalid tolerance value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
+							}
 						}
 					}
 
@@ -559,18 +576,31 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 					public void focusGained(FocusEvent e) {
 					}
 				});
-				tolerance.addKeyListener(new KeyListener() {
+				param.addKeyListener(new KeyListener() {
 					@Override
 					public void keyPressed(KeyEvent e) {
 						if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 							JTextField textField = (JTextField) e.getSource();
 							SolverAlgorithm algorithm = SolverAlgorithm.fromString(textField.getName());
-							Double tol = SolverMultiClosedAMVA.validateTolerance(textField.getText());
-							if (tol != null) {
-								data.setWhatifAlgorithmTolerance(algorithm, tol);
-							}
-							else {
-								JOptionPane.showMessageDialog(WhatIfPanel.this, "Error: Invalid tolerance value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
+							//boolean isMonteCarloAlgorithm = algorithm.equals(SolverAlgorithm.MONTE_CARLO);
+							boolean isMonteCarloAlgorithm = algorithm.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC);
+							if (isMonteCarloAlgorithm) {
+								//Integer maxSamples = SolverMultiClosedMonteCarlo.validateMaxSamples(textField.getText());
+								Integer maxSamples = SolverMultiClosedMonteCarloLogistic.validateMaxSamples(textField.getText());
+								if (maxSamples != null) {
+									data.setWhatifAlgorithmMaxSamples(algorithm, maxSamples);
+								} else {
+									textField.setText(numFormat.format(data.getWhatifAlgorithmMaxSamples(algorithm)));
+									JOptionPane.showMessageDialog(WhatIfPanel.this, "Error: Invalid max samples value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
+								}
+							} else {
+								Double tolerance = SolverMultiClosedAMVA.validateTolerance(textField.getText());
+								if (tolerance != null) {
+									data.setWhatifAlgorithmTolerance(algorithm, tolerance);
+								} else {
+									textField.setText(numFormat.format(data.getWhatifAlgorithmTolerance(algorithm)));
+									JOptionPane.showMessageDialog(WhatIfPanel.this, "Error: Invalid tolerance value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
+								}
 							}
 						}
 					}
@@ -584,33 +614,32 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 					}
 				});
 
-				JPanel algToleranceCell = new JPanel();
-				algToleranceCell.setLayout(new BoxLayout(algToleranceCell, BoxLayout.X_AXIS));
-				algToleranceCell.add(tolLabel);
-				algToleranceCell.add(tolerance);
-				algPanel.add(algToleranceCell);
-				algTolerances.put(algo,tolerance);
-				algToleranceLabels.put(algo,tolLabel);
-			}
-			else {
-				JPanel placeholder = new JPanel();
-				placeholder.setFocusable(false);
-				algPanel.add(placeholder);
+				JPanel algParamCell = new JPanel();
+				algParamCell.setLayout(new GridLayout(0, 2, 0, 0));
+				algParamCell.add(paramLabel);
+				algParamCell.add(param);
+				algPanel.add(algParamCell);
+				algParams.put(algo, param);
+				algParamLabels.put(algo, paramLabel);
+			} else {
+				JPanel placeHolder = new JPanel();
+				placeHolder.setFocusable(false);
+				algPanel.add(placeHolder);
 			}
 		}
 
 		algPanel.setVisible(false);
 		algPanel.setBorder(BorderFactory.createEtchedBorder());
-		algPanel.setPreferredSize(new Dimension(275,22*(2+SolverAlgorithm.closedNames().length)));
+		algPanel.setPreferredSize(new Dimension(275, 22*(2+SolverAlgorithm.closedNames().length)));
 		JPanel panel = new JPanel();
-		//panel.setPreferredSize(new Dimension(200,20));
+		//panel.setPreferredSize(new Dimension(200, 20));
 		panel.setLayout(new BorderLayout());
 		//panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		compPanel = new JPanel();
-		//compPanel.setMinimumSize(new Dimension(100,100));
+		//compPanel.setMinimumSize(new Dimension(100, 100));
 		compPanel.setBorder(BorderFactory.createEtchedBorder());
 		compPanel.setLayout(new BoxLayout(compPanel, BoxLayout.Y_AXIS));
-		compPanel.setMinimumSize(new Dimension(250,0));
+		compPanel.setMinimumSize(new Dimension(250, 0));
 		JPanel compMultiAlgPanel = new JPanel();
 		compMultiAlgPanel.setLayout(new BorderLayout());
 		compMultiAlg.setFont(compMultiAlg.getFont().deriveFont(Font.BOLD));
@@ -700,7 +729,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				help.removeHelp(classTable);
 				help.addHelp(classTable, "Initial arrival rates. Values in red are currently selected for what-if analysis.");
 			} else if (parameter.equals(WHAT_IF_CUSTOMERS)) {
-				// Sets closed class for selection
+				// Sets closed classes for selection
 				className.removeAllItems();
 				it = closedClassNames.keySet().iterator();
 				while (it.hasNext()) {
@@ -719,7 +748,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			} else if (parameter.equals(WHAT_IF_MIX)) {
 				// Enables 'from' field
 				from.setEnabled(true);
-				// Sets the two closed class for selection
+				// Sets the two closed classes for selection
 				className.removeAllItems();
 				it = closedClassNames.keySet().iterator();
 				while (it.hasNext()) {
@@ -791,9 +820,9 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				// Finds selected values
 				int selClass = classNames.get(className.getSelectedItem()).intValue();
 				int selStation;
-				Object st = stationName.getSelectedItem();
-				if (st != null) {
-					selStation = stationNames.get(st).intValue();
+				String selStationName = (String) stationName.getSelectedItem();
+				if (selStationName != null) {
+					selStation = stationNames.get(selStationName).intValue();
 				} else {
 					selStation = 0;
 				}
@@ -898,7 +927,6 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		} catch (NumberFormatException e) {
 			// Number format is wrong, skips this update.
 		} catch (ArithmeticException ex) {
-			JOptionPane.showMessageDialog(this, "Closed class with 0 customers found. They will be set to 1.", "Error", JOptionPane.ERROR_MESSAGE);
 			double[] classData = data.getClassData().clone();
 			for (int i = 0; i < classData.length; i++) {
 				if (data.getClassTypes()[i] == ExactConstants.CLASS_CLOSED && classData[i] < 1) {
@@ -907,6 +935,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			}
 			data.setClassData(classData);
 			updateFields();
+			JOptionPane.showMessageDialog(this, "Closed classes with 0 customers found. Their populations are set to 1.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		setFromToIterations();
 	}
@@ -1150,7 +1179,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			case 2: // betas
 				// This is available only for closed classes
 				index = closedClassNames.get(closedClasses.get(columnIndex - 1)).intValue();
-				return doubleFormatter.format(data.getClassData()[index] / data.getMaxpop());
+				return doubleFormatter.format(data.getClassData()[index] / data.getTotalPop());
 			}
 			return null;
 		}
@@ -1215,4 +1244,5 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			return valid;
 		}
 	}
+	
 }

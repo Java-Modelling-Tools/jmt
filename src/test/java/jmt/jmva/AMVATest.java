@@ -128,7 +128,7 @@ public class AMVATest {
 		if (classes < 5) {
 			solver = new SolverMultiClosedMVA(classes, stations);
 			algorithm = "MVA";
-			if (((SolverMultiClosedMVA)solver).input(name, type, servt, visits, pop)) {
+			if (((SolverMultiClosedMVA) solver).input(name, type, servt, visits, pop)) {
 				long start = System.currentTimeMillis();
 				solver.solve();
 				System.out.print(algorithm+",");
@@ -335,7 +335,7 @@ public class AMVATest {
 		if (classes > 4) {
 			solver = new SolverMultiClosedMVA(classes, stations);
 			algorithm = "MVA";
-			if (((SolverMultiClosedMVA)solver).input(name, type, servt, visits, pop)) {
+			if (((SolverMultiClosedMVA) solver).input(name, type, servt, visits, pop)) {
 				long start = System.currentTimeMillis();
 				solver.solve();
 				System.out.print(algorithm+",");
@@ -791,7 +791,7 @@ public class AMVATest {
 
 		SolverMulti solver = new SolverMultiClosedMVA(classes, stations);
 		String algorithm = "MVA";
-		if (((SolverMultiClosedMVA)solver).input(name, type, servt, visits, pop)) {
+		if (((SolverMultiClosedMVA) solver).input(name, type, servt, visits, pop)) {
 			long start = System.currentTimeMillis();
 			solver.solve();
 			System.out.print(algorithm+",");
@@ -1291,7 +1291,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1306,7 +1305,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1321,7 +1319,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1456,7 +1453,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1471,7 +1467,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1486,7 +1481,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1631,7 +1625,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1646,7 +1639,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1661,7 +1653,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1796,7 +1787,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1811,7 +1801,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1826,7 +1815,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -1985,7 +1973,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}
@@ -2000,7 +1987,6 @@ public class AMVATest {
 			long stop = System.currentTimeMillis();
 			System.out.print("Elapsed time (s): " + ((stop - start)/(double)1000));
 			System.out.println();
-
 		} else {
 			System.out.println("Wrong input!!");
 		}

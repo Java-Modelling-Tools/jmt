@@ -210,7 +210,7 @@ public class GraphicalQueueState {
 			g.setColor(Color.LIGHT_GRAY);
 			offset = (mediator.getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT) / 2;
 			if (cell.isLeftInputCell()) {
-				g.fill(new Rectangle2D.Double(p.getX()  + offset, p.getY() + V_FREE_SPACE, width , height));
+				g.fill(new Rectangle2D.Double(p.getX() + offset, p.getY() + V_FREE_SPACE, width, height));
 			}
 			else {
 				g.fill(new Rectangle2D.Double(p.getX() + QUEUE_HEIGHT + offset, p.getY() + V_FREE_SPACE, width, height));

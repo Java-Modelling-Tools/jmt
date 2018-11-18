@@ -172,7 +172,7 @@ public class DistributionDensityGraph extends JPanel {
 
 		switch (type) {
 		case StatisticalOutputsWindow.TYPE_DENSITY_LINE:
-			for (int i = 0; i < values.length -1 ; i++) {
+			for (int i = 0; i < values.length -1; i++) {
 				double yValue = values[i];
 				double nextYValue = values[i+1];
 				double xValue = getXValue(i);
@@ -184,7 +184,7 @@ public class DistributionDensityGraph extends JPanel {
 			break;
 
 		case StatisticalOutputsWindow.TYPE_HISTOGRAM:
-			for (int i = 0; i < values.length ; i++) {
+			for (int i = 0; i < values.length; i++) {
 				double yValue = values[i];
 				double xValue = getXValue(i);
 				// draw
@@ -195,7 +195,7 @@ public class DistributionDensityGraph extends JPanel {
 			}
 			break;
 		case StatisticalOutputsWindow.TYPE_DISTRIBUTION:
-			for (int i = 0; i < values.length -1 ; i++) {
+			for (int i = 0; i < values.length -1; i++) {
 				double yValue = values[i];
 				double nextYValue = values[i+1];
 				double xValue = getXValue(i);

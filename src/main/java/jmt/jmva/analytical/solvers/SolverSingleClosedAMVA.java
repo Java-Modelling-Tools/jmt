@@ -21,8 +21,8 @@ public class SolverSingleClosedAMVA extends Solver {
 	protected int customers = 0;
 
 	protected double tolerance;
-	private double[][][] serviceTimes;
-	private double[][] custVisits;
+	protected double[][][] serviceTimes;
+	protected double[][] custVisits;
 
 	public SolverSingleClosedAMVA(int customers, int stations, SolverAlgorithm alg, double tol) {
 		this.customers = customers;
@@ -30,7 +30,7 @@ public class SolverSingleClosedAMVA extends Solver {
 		this.algorithm = alg;
 		this.tolerance = tol;
 		initialiseSolver();
-		
+
 		name = new String[stations];
 		type = new int[stations];
 		// one service time for each possible population (from 1 to customers)
@@ -43,11 +43,11 @@ public class SolverSingleClosedAMVA extends Solver {
 		utilization = new double[stations];
 		residenceTime = new double[stations];
 	}
-	
+
 	private void initialiseSolver() {
 		int[] classPop = new int[1];
 		classPop[0] = customers;
-		
+
 		// initialise the solver to the algorithm selected by user
 		if (SolverAlgorithm.CHOW.equals(algorithm)) {
 			solver = new SolverMultiClosedChow(1, stations, classPop);
@@ -64,7 +64,7 @@ public class SolverSingleClosedAMVA extends Solver {
 	public void setMaxIterations(int maxIterations) {
 		solver.setMaxIterations(maxIterations);
 	}
-	
+
 	public boolean hasSufficientProcessingCapacity() {
 		// closed class: no saturation problem
 		return true;
@@ -85,20 +85,20 @@ public class SolverSingleClosedAMVA extends Solver {
 		}
 		return solver.input(n, t, serviceTimes, custVisits);
 	}
-	
+
 	public void solve() {
 		solver.solve();
-		
+
 		totUser = customers;
 		totRespTime = solver.sysResponseTime;
 		totThroughput = solver.sysThroughput;
-		
+
 		queueLen = ArrayUtils.extract1(solver.queueLen, 0);
 		throughput = ArrayUtils.extract1(solver.throughput, 0);
 		residenceTime = ArrayUtils.extract1(solver.residenceTime, 0);
 		utilization = ArrayUtils.extract1(solver.utilization, 0);
 	}
-	
+
 	// get algorithm iterations
 	public int getIterations() {
 		return solver.getIterations();

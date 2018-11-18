@@ -12,8 +12,6 @@ import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.LinearSystem.BTF.ComponentBlock;
 import jmt.jmva.analytical.solvers.LinearSystem.BTF.Position;
 import jmt.jmva.analytical.solvers.LinearSystem.BTF.MicroBlocks.MicroBlock;
-import jmt.jmva.analytical.solvers.LinearSystem.BTF.TopLevelBlocks.TopLevelBlock;
-import jmt.jmva.analytical.solvers.LinearSystem.BTF.TopLevelBlocks.TypeOneBlocks;
 import jmt.jmva.analytical.solvers.Utilities.MiscFunctions;
 
 /**
@@ -230,7 +228,7 @@ public abstract class MacroBlock extends ComponentBlock{
 	@Override
 	public void solve(BigRational[] rhs) throws BTFMatrixErrorException, OperationNotSupportedException, InconsistentLinearSystemException, InternalErrorException {		
 		//solve all micro blocks
-		for (int i = 0; i <  micro_blocks.length ; i++) {
+		for (int i = 0; i <  micro_blocks.length; i++) {
 			micro_blocks[i].solve(rhs);
 		}
 	}

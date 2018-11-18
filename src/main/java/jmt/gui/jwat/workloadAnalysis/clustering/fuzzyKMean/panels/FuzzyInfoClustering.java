@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels;
 
 import java.awt.BorderLayout;
@@ -37,17 +38,15 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.AbstractTableModel;
 
-import jmt.engine.jwat.DinamicFormat;
 import jmt.engine.jwat.MatrixObservations;
 import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.ClusteringInfosFuzzy;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.jwat.DynamicFormat;
 import jmt.gui.jwat.JWATConstants;
 import jmt.gui.jwat.workloadAnalysis.chart.DispFuzzyMatrix;
 
 public class FuzzyInfoClustering extends JPanel implements CommonConstants, JWATConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private ClusteringInfosFuzzy infos = null;
 	private DispFuzzyMatrix matrix;
@@ -123,11 +122,9 @@ public class FuzzyInfoClustering extends JPanel implements CommonConstants, JWAT
 		upperP.add(fuzzyErrorP, BorderLayout.SOUTH);
 		/** Table results **/
 		centralMainP.add(getUpperTable(), BorderLayout.CENTER);
-		centralMainP
-				.add(
-						new JLabel(
-								"<HTML><b><font size = 4>WARNING</font></b><br><font size=3>The sum can be greater than 100% due to multiple observations assignement<br></font>"),
-						BorderLayout.SOUTH);
+		centralMainP.add(
+				new JLabel("<HTML><b><font size = 4>WARNING</font></b><br><font size=3>The sum can be greater than 100% due to multiple observations assignement<br></font>"),
+				BorderLayout.SOUTH);
 		centralMainP.add(upperP, BorderLayout.NORTH);
 		mainPanel.add(centralMainP);
 		mainPanel.add(Box.createHorizontalStrut(5));
@@ -144,14 +141,12 @@ public class FuzzyInfoClustering extends JPanel implements CommonConstants, JWAT
 	}
 
 	private class clustDetModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 		private String[] colHeader = { "Cluster", "Num. observations", "Percentage" };
 		private int[] Elem = null;
 		private double[] Perc = null;
-		DinamicFormat f = new DinamicFormat("###.###%", 0); //????? CONTROLLARE A COSA E SE SERVE 
+		DynamicFormat f = new DynamicFormat("###.###%", 0);
 
 		public clustDetModel(int[] el, double perc[]) {
 			Elem = el;
@@ -213,5 +208,7 @@ public class FuzzyInfoClustering extends JPanel implements CommonConstants, JWAT
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			return false;
 		}
+
 	}
+
 }

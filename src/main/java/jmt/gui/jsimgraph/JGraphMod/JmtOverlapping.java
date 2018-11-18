@@ -286,7 +286,7 @@ public class JmtOverlapping {
 		//Begin if to move the vertex up
 		else if (!down && up && !right && !left) {
 			int daScalare = (int) vertexMaxY - (int) tmp.getY();
-			int pointYToMove = (int) vertexMinY - daScalare;;
+			int pointYToMove = (int) vertexMinY - daScalare;
 			Rectangle newRett = new Rectangle((int) vertexMinX, pointYToMove, (int) vertexWidth, (int) vertexHeight);
 			Object[] celletmp = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRett));
 			Vector<Object> celle = new Vector<Object>();

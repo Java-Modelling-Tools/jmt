@@ -7,13 +7,13 @@ package jmt.jmva.analytical.solvers;
  *
  */
 public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
+
 	// boolean to decide which version of Linearizer to use
 	private boolean useDeSouzaMuntz;
 
 	public SolverMultiClosedLinearizer(int classes, int stations, int[] classPopulation, boolean useDeSouzaMuntz) {
 		super(classes, stations, classPopulation);
 		this.useDeSouzaMuntz = useDeSouzaMuntz;
-		//MAX_ITERATIONS = 3;
 	}
 
 	@Override
@@ -205,7 +205,6 @@ public class SolverMultiClosedLinearizer extends SolverMultiClosedAMVA {
 			}
 
 			while (true) {
-
 				for (int k = 0; k < stations; k++) {
 					for (int c = 0; c < classes; c++) {
 						oldQueueLengths[k][c] = queueLengths[0][k][c];

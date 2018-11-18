@@ -1,12 +1,13 @@
 package jmt.jmva.analytical.solvers;
 
 /**
- * This class implements the abstract superclass for approximate MVA algorithms for solving multi-closed models
+ * This class implements the abstract superclass of approximate MVA algorithms for solving multi-closed models
  * 
  * @author Abhimanyu Chugh
  *
  */
 public abstract class SolverMultiClosedAMVA extends SolverMulti {
+
 	public static final double DEFAULT_TOLERANCE = Math.pow(10, -7);
 	protected double tolerance = DEFAULT_TOLERANCE;
 	protected int MAX_ITERATIONS = Integer.MAX_VALUE;
@@ -26,7 +27,8 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 	 */
 	public static Double validateTolerance(String tolerance) {
 		try {
-			return Double.parseDouble(tolerance);
+			Double value = Double.parseDouble(tolerance);
+			return (value <= 0) ? null : value;
 		} catch (Exception ex) {
 			return null;
 		}
@@ -55,9 +57,10 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 	public void solve() {
 		//tests if all the resources, stations, are load independent
 		boolean loadIndep = true;
-		for (int i = 0; i < stations && loadIndep; i++) {
+		for (int i = 0; i < stations; i++) {
 			if (type[i] == LD) {
 				loadIndep = false;
+				break;
 			}
 		}
 

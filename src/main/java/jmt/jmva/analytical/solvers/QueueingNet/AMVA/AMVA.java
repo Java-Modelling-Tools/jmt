@@ -55,9 +55,10 @@ public abstract class AMVA extends SolverMulti {
 	public void solve() {
 		//tests if all the resources, stations, are load independent
 		boolean loadIndep = true;
-		for (int i = 0; i < stations && loadIndep; i++) {
+		for (int i = 0; i < stations; i++) {
 			if (type[i] == LD) {
 				loadIndep = false;
+				break;
 			}
 		}
 

@@ -312,7 +312,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 			Vector<Object> classes = classData.getClassKeys();
 			try {
 				value = Float.parseFloat((String) input);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				value = 0;
 			}
 			stationData.setClassSwitchMatrix(stationKey,

@@ -166,7 +166,7 @@ public class FFT {
 			//int jj = 2*j;
 			int jj = j << 1;
 
-			//int k = n / 2 ;
+			//int k = n / 2;
 			int k = n >> 1;
 
 			if (i < j) {
@@ -179,10 +179,10 @@ public class FFT {
 			}
 
 			while (k <= j) {
-				//j = j - k ;
+				//j = j - k;
 				j -= k;
 
-				//k = k / 2 ;
+				//k = k / 2;
 				k >>= 1;
 			}
 			j += k;

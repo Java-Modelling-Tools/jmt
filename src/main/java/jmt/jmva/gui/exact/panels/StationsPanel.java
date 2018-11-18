@@ -178,7 +178,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		synchronized (data) {
 			stations = data.getStations();
 			nameCounter = stations;
-			pop = data.getMaxpop();
+			pop = data.getTotalPop();
 			stationNames = ArrayUtils.copy(data.getStationNames());
 			stationTypes = ArrayUtils.copy(data.getStationTypes());
 		}
@@ -193,7 +193,8 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	 */
 	private boolean isLdEnabled() {
 		ExactModel data = ew.getData();
-		return data.isClosed() && !data.isMultiClass() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
+		//return data.isClosed() && data.isSingleClass() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
+		return data.isClosed() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
 	}
 
 	@Override
@@ -703,9 +704,9 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 				}
 				boolean isLd = isLD();
 				ew.updateAlgoPanel(null, null, null, isLd);
-				if (isLd) {
+				//if (isLd) {
 					ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
-				}
+				//}
 				break;
 			default:
 			}

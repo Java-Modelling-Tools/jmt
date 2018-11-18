@@ -80,7 +80,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants 
 		initCells();
 		JPanel picPane = new JPanel();
 		picPane.setBorder(new TitledBorder(new EtchedBorder(), "Illustration"));
-		try{
+		try {
 			BufferedImage img = ImageIO.read(new File("/home/js/JMT-Refactory/template-sample-code/pictures/TemplateIllustration.png"));
 			Image resizedImage = 
 					img.getScaledInstance(300, 200, Image.SCALE_SMOOTH);
@@ -88,7 +88,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants 
 
 			JLabel pLabel = new JLabel(icon);
 			picPane.add(pLabel);
-		}catch(Exception e) {
+		} catch (Exception e) {
 
 		}
 		JLabel label = new JLabel("Number of service center: ");

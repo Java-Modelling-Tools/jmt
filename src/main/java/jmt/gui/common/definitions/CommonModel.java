@@ -2117,7 +2117,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**Returns a set of station keys specified station is connected to as a source.
-	 * @param stationKey: source station for which (target)connected stations must be
+	 * @param stationKey: source station for which (target) connected stations must be
 	 * returned.
 	 * @return Vector containing keys for connected stations.
 	 */
@@ -2129,7 +2129,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**Returns a set of station keys specified station is connected to as a target.
-	 * @param stationKey: source station for which (source)connected stations must be
+	 * @param stationKey: source station for which (source) connected stations must be
 	 * returned.
 	 * @return Vector containing keys for connected stations.
 	 */
@@ -2256,7 +2256,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	public Object addMeasure(String type, Object stationKey, Object classKey, Double alpha, Double precision, boolean log) {
 		Object key = new Long(++incrementalKey);
 		measuresKeyset.add(key);
-		MeasureData md = new MeasureData(stationKey, classKey, type, alpha, precision, log);
+		MeasureData md = new MeasureData(type, stationKey, classKey, alpha, precision, log);
 		measureDataHM.put(key, md);
 		save = true;
 		return key;
@@ -2315,26 +2315,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	@Override
-	public Object getMeasureClass(Object measureKey) {
-		if (!measuresKeyset.contains(measureKey)) {
-			return null;
-		} else {
-			return measureDataHM.get(measureKey).classKey;
-		}
-	}
-
-	@Override
-	public void setMeasureClass(Object classKey, Object measureKey) {
-		if (measuresKeyset.contains(measureKey)) {
-			Object oldKey = measureDataHM.get(measureKey).classKey;
-			measureDataHM.get(measureKey).classKey = classKey;
-			if (oldKey != classKey) {
-				save = true;
-			}
-		}
-	}
-
-	@Override
 	public Object getMeasureStation(Object measureKey) {
 		if (!measuresKeyset.contains(measureKey)) {
 			return null;
@@ -2349,6 +2329,26 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			Object oldKey = measureDataHM.get(measureKey).stationKey;
 			measureDataHM.get(measureKey).stationKey = stationKey;
 			if (oldKey != stationKey) {
+				save = true;
+			}
+		}
+	}
+
+	@Override
+	public Object getMeasureClass(Object measureKey) {
+		if (!measuresKeyset.contains(measureKey)) {
+			return null;
+		} else {
+			return measureDataHM.get(measureKey).classKey;
+		}
+	}
+
+	@Override
+	public void setMeasureClass(Object classKey, Object measureKey) {
+		if (measuresKeyset.contains(measureKey)) {
+			Object oldKey = measureDataHM.get(measureKey).classKey;
+			measureDataHM.get(measureKey).classKey = classKey;
+			if (oldKey != classKey) {
 				save = true;
 			}
 		}
@@ -2399,18 +2399,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/* (non-Javadoc)
-	 * @see jmt.gui.common.definitions.SimulationDefinition#setMeasureLog(boolean, java.lang.Object)
-	 */
-	@Override
-	public void setMeasureLog(boolean log, Object measureKey) {
-		MeasureData data = measureDataHM.get(measureKey);
-		if (data != null && data.log != log) {
-			data.log = log;
-			save = true;
-		}
-	}
-
-	/* (non-Javadoc)
 	 * @see jmt.gui.common.definitions.SimulationDefinition#getMeasureLog(java.lang.Object)
 	 */
 	@Override
@@ -2419,6 +2407,18 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			return false;
 		} else {
 			return measureDataHM.get(measureKey).log;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.gui.common.definitions.SimulationDefinition#setMeasureLog(boolean, java.lang.Object)
+	 */
+	@Override
+	public void setMeasureLog(boolean log, Object measureKey) {
+		MeasureData data = measureDataHM.get(measureKey);
+		if (data != null && data.log != log) {
+			data.log = log;
+			save = true;
 		}
 	}
 
@@ -3810,23 +3810,23 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**This class contains all of the parameters to define a simulation measure, e.g.
-	 * reference station, reference class, type (Throughput, Residence Time, etc.)
-	 * precision, confidence interval */
+	 * type (Throughput, Residence Time, etc.), reference station, reference class,
+	 * precision, confidence interval, logging flag */
 	protected class MeasureData {
+		public String type;
 		public Object stationKey;
 		public Object classKey;
-		public String type;
 		public Double precision;
 		public Double alpha;
-		public boolean log; 
+		public boolean log;
 
-		public MeasureData(Object stationKey, Object classKey, String type, Double alpha, Double precision, boolean log) {
+		public MeasureData(String type, Object stationKey, Object classKey, Double alpha, Double precision, boolean log) {
+			this.type = type;
 			this.stationKey = stationKey;
 			this.classKey = classKey;
-			this.type = type;
 			this.precision = precision;
 			this.alpha = alpha;
-			this.log = log ; 
+			this.log = log;
 		}
 	}
 

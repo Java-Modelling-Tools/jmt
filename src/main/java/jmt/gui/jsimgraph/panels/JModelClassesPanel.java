@@ -51,18 +51,18 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 
 	private static final long serialVersionUID = 1L;
 
-	protected JmodelClassDefinition classdefinition;
-	protected JmodelStationDefinition stationdefinition;
-	protected ImagedComboBoxCellEditorFactory stations;
+	protected JmodelClassDefinition cd;
+	protected JmodelStationDefinition sd;
+	protected ImagedComboBoxCellEditorFactory combos;
 
 	/**
 	 * Construct a new JModelClassesPanel
 	 * @param cd a reference to the underlying data structure
 	 */
 	public JModelClassesPanel(JmodelClassDefinition cd, JmodelStationDefinition sd) {
-		classdefinition = cd;
-		stationdefinition = sd;
-		stations = new ImagedComboBoxCellEditorFactory(sd);
+		this.cd = cd;
+		this.sd = sd;
+		combos = new ImagedComboBoxCellEditorFactory(sd);
 		classTable = new JModelClassTable();
 		initComponents();
 		setData(cd);
@@ -83,7 +83,7 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 	 */
 	@Override
 	protected void addClass() {
-		classdefinition.addClass();
+		cd.addClass();
 		refreshComponents();
 	}
 
@@ -112,7 +112,7 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 					return new DisabledCellRenderer();
 				}
 			} else if (column == 7) {
-				return stations.getRenderer();
+				return combos.getRenderer();
 			} else if (column == 8) {
 				return new ButtonCellEditor(deleteButton);
 			} else {
@@ -130,9 +130,9 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				return new ButtonCellEditor(new JButton(editDistribution));
 			} else if (column == 7) {
 				if (getValueAt(row, 2).equals("Open")) {
-					return stations.getEditor(stationdefinition.getStationKeysRefStation());
+					return combos.getEditor(sd.getStationKeysRefStation());
 				} else {
-					return stations.getEditor(stationdefinition.getStationKeysNoSourceSink());
+					return combos.getEditor(sd.getStationKeysNoSourceSink());
 				}
 			} else if (column == 8) {
 				return new ButtonCellEditor(new JButton(deleteClass));
@@ -177,9 +177,9 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			if (columnIndex == 0) {
-				return classdefinition.getClassColor(classdefinition.getClassKeys().get(rowIndex));
+				return cd.getClassColor(cd.getClassKeys().get(rowIndex));
 			} else if (columnIndex == 7) {
-				return classdefinition.getClassRefStation(classdefinition.getClassKeys().get(rowIndex));
+				return cd.getClassRefStation(cd.getClassKeys().get(rowIndex));
 			} else {
 				return super.getValueAt(rowIndex, columnIndex - 1);
 			}
@@ -188,9 +188,9 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			if (columnIndex == 0) {
-				classdefinition.setClassColor(classdefinition.getClassKeys().get(rowIndex), (Color) aValue);
+				cd.setClassColor(cd.getClassKeys().get(rowIndex), (Color) aValue);
 			} else if (columnIndex == 7) {
-				classdefinition.setClassRefStation(classdefinition.getClassKeys().get(rowIndex), aValue);
+				cd.setClassRefStation(cd.getClassKeys().get(rowIndex), aValue);
 				refreshComponents();
 			} else {
 				super.setValueAt(aValue, rowIndex, columnIndex - 1);

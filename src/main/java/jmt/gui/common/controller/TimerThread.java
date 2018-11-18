@@ -18,7 +18,7 @@
 
 package jmt.gui.common.controller;
 
-import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
 
 /**
  * <p>Title:</p>
@@ -32,7 +32,7 @@ import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
  */
 public class TimerThread extends Thread {
 
-	protected Dispatcher_jSIMschema sim;
+	protected DispatcherJSIMschema sim;
 	protected long totalTime;
 	protected long elapsedTime;
 	protected long initialTime;
@@ -40,7 +40,7 @@ public class TimerThread extends Thread {
 	protected boolean killed = false;
 	protected boolean ended = false;
 
-	public TimerThread(Dispatcher_jSIMschema simulator, double maxDuration) {
+	public TimerThread(DispatcherJSIMschema simulator, double maxDuration) {
 		this.setName("TimerThread");
 		this.sim = simulator;
 		this.totalTime = Math.round(maxDuration * 1000);

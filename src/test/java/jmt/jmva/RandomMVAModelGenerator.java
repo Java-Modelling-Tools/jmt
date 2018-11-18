@@ -84,7 +84,7 @@ public class RandomMVAModelGenerator {
 	private long seed;
 
 	//if only FCFS service strategy is available, to have a BCMP model
-	//jSIM must have, for each station, the same exp distribution
+	//JSIM must have, for each station, the same exp distribution
 
 	//private static final boolean onlyFCFS = true;
 	private static final boolean onlyFCFS = true;
@@ -96,7 +96,7 @@ public class RandomMVAModelGenerator {
 	//number of classes
 	private int classes;
 	//total population (computed as the sum of all closed class populations)
-	private int maxpop;
+	private int totalPop;
 
 	//class data is class population for closed classes, class arrival rate for open classes
 	//dim: classData[classes]
@@ -136,7 +136,7 @@ public class RandomMVAModelGenerator {
 	/**
 	 * service times of the service centers
 	 * dim: serviceTimes[stations][classes][p]
-	 * p=maxpop     if stationTypes[s]==STATION_LD
+	 * p=totalPop   if stationTypes[s]==STATION_LD
 	 * p=1          otherwise
 	 */
 	private double[][][] serviceTimes;
@@ -426,7 +426,7 @@ public class RandomMVAModelGenerator {
 				}
 			}
 
-			//chooses the wanted Umax*, included in [U_min_bottleneck , U_max_bottleneck] (example: [0.1 , 0.7])
+			//chooses the wanted Umax*, included in [U_min_bottleneck, U_max_bottleneck] (example: [0.1, 0.7])
 			double Umax_desired = U_min_bottleneck + randomGenerator.nextDouble() * (U_max_bottleneck - U_min_bottleneck);
 
 			//then scales all the service times of LI stations in order to obtain that U*
@@ -484,7 +484,7 @@ public class RandomMVAModelGenerator {
 			//if Umax2 > 0 rescale service times 
 			if (Umax2 > 0) {
 
-				//chooses the wanted Umax*, included in [U_min_bottleneck , U_max_bottleneck] (example: [0.1 , 0.7])
+				//chooses the wanted Umax*, included in [U_min_bottleneck, U_max_bottleneck] (example: [0.1, 0.7])
 				double Umax_desired2 = U_min_bottleneck + randomGenerator.nextDouble() * (U_max_bottleneck - U_min_bottleneck);
 
 				//then scales all the service times in order to obtain that U*
@@ -631,7 +631,7 @@ public class RandomMVAModelGenerator {
 				String class_name = this.classNames[j];
 				/* set service time */
 				Element st_element = root.createElement("servicetime");
-				st_element.setAttribute("customerclass", class_name);;
+				st_element.setAttribute("customerclass", class_name);
 				st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
 				servicetimes_element.appendChild(st_element);
 				/* set visit */
@@ -661,7 +661,7 @@ public class RandomMVAModelGenerator {
 				String class_name = this.classNames[j];
 				/* set service time */
 				Element st_element = root.createElement("servicetime");
-				st_element.setAttribute("customerclass", class_name);;
+				st_element.setAttribute("customerclass", class_name);
 				st_element.appendChild(root.createTextNode(Double.toString(this.serviceTimes[stationNum][j][0])));
 				servicetimes_element.appendChild(st_element);
 				/* set visit */
@@ -691,7 +691,7 @@ public class RandomMVAModelGenerator {
 				String class_name = this.classNames[j];
 				/* set service times, one for each population (values are CSV formatted) */
 				Element st_element = root.createElement("servicetimes");
-				st_element.setAttribute("customerclass", class_name);;
+				st_element.setAttribute("customerclass", class_name);
 				//TODO: questa parte va cambiata, devo avere una stringa csv con tutti i serv times (tranne l'elem 0 che è nullo)
 
 				String serv_t = ArrayUtils.toCSV(serviceTimes[stationNum][j]);

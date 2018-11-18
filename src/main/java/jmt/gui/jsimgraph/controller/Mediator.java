@@ -2784,7 +2784,7 @@ public class Mediator implements GuiInterface {
 				"Optimize the layout", JOptionPane.YES_NO_OPTION);
 		if (resultValue == JOptionPane.NO_OPTION) {
 			for (int i = 0; i < cells.length; i++) {
-				if(cells[i] instanceof JmtCell) {
+				if (cells[i] instanceof JmtCell) {
 					JmtCell cell = (JmtCell) cells[i];
 					GraphConstants.setBounds(cell.getAttributes(), cellsBounds[i]);
 					if (cellsRotate[i]) {

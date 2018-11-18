@@ -28,7 +28,7 @@ import jmt.framework.gui.graph.MeasureValue;
  * <p>Description: This class will collect temporary results from simulation at
  * specified time intervals, and final results. It will not read simulator's generated XML
  * as it provides only final results but will rely on TempMeasure data structures provided
- * by <code>Dispatcher_jSIMschema</code>.</p>
+ * by <code>DispatcherJSIMschema</code>.</p>
  * 
  * @author Bertoli Marco
  *         Date: 23-set-2005
@@ -90,7 +90,7 @@ public class ResultsModel implements MeasureDefinition {
 	/**
 	 * Sets this data structure, provided an array of TempMeasures
 	 * @param measures array of TempMeasures, as
-	 * returned by <code>Dispatcher_jSIMschema.getTempMeasures()</code>
+	 * returned by <code>DispatcherJSIMschema.getTempMeasures()</code>
 	 * @param progress Progress of simulation
 	 * @param elapsedTime Elapsed time of simulation
 	 */
@@ -160,7 +160,7 @@ public class ResultsModel implements MeasureDefinition {
 	 * Refresh stored tempMeasures.
 	 * PRECONDITION: refresh method MUST HAVE BEEN called on every TempMeasure before calling
 	 * this method. So simply this method is designed to be called after every
-	 * <code>Dispatcher_jSIMschema.refreshTempMeasures()</code> call.
+	 * <code>DispatcherJSIMschema.refreshTempMeasures()</code> call.
 	 * @param progress Progress of simulation
 	 * @param elapsedTime Elapsed time of simulation
 	 */

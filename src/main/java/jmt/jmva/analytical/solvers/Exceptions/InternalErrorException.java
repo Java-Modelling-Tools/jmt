@@ -25,13 +25,15 @@ package jmt.jmva.analytical.solvers.Exceptions;
  */
 public class InternalErrorException extends Exception {
 
-    /**
-     * Creates an InternalErrorException with an exception message.
-     *
-     * @param string The exception message
-     */
-    public InternalErrorException(String string) {
-        super(string);
-    }
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Creates an InternalErrorException with an exception message.
+	 *
+	 * @param string The exception message
+	 */
+	public InternalErrorException(String string) {
+		super(string);
+	}
 
 }

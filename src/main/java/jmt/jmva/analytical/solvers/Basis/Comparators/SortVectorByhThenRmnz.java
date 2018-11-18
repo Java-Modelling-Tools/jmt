@@ -26,7 +26,7 @@ import jmt.jmva.analytical.solvers.DataStructures.EnhancedVector;
  * A comparator to sort an array of Enhanced Vectors, to be used by Basis objects.
  * @author Jack Bradshaw
  */
-public class SortVectorByhThenRmnz implements Comparator<EnhancedVector>{
+public class SortVectorByhThenRmnz implements Comparator<EnhancedVector> {
 
 	/**
 	 * Compares two PopulationChangeVector objects.* for the fine grain Block Triangular Form.
@@ -54,8 +54,8 @@ public class SortVectorByhThenRmnz implements Comparator<EnhancedVector>{
 			} else {
 				// Vectors have the same number of non zero elements
 				// Check 2: vector with rightmost non-zero value is greater
-				for (int j = v1.size() - 1 ; j >= 0; j--) {
-					if (v1.get(j) == 0 && v2.get(j) > 0 ) {
+				for (int j = v1.size() - 1; j >= 0; j--) {
+					if (v1.get(j) == 0 && v2.get(j) > 0) {
 						return -1; // v2 has the right-most non zero
 					}
 					if (v1.get(j) > 0 && v2.get(j) == 0) {
@@ -65,8 +65,8 @@ public class SortVectorByhThenRmnz implements Comparator<EnhancedVector>{
 				// Vectors have non zero elements in same position
 				// Check 3: Compare values of non zero elements, left to right
 				for ( int j = 0; j < v1.size() - 1; j++) { //sum over first R - 1 positions
-					if (v1.get(j) < v2.get(j) ) return -1;
-					if (v1.get(j) > v2.get(j) ) return 1;
+					if (v1.get(j) < v2.get(j)) return -1;
+					if (v1.get(j) > v2.get(j)) return 1;
 				}
 				return 0;
 			}

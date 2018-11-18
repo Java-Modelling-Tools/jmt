@@ -77,7 +77,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 	//ComboBox editor for station type
 	protected ImagedComboBoxCellEditorFactory comboEditor;
 
-	//Enabled types of station for station editing
+	//Enabled types of stations for station editing
 	Object[] stationTypes = new Object[] { STATION_TYPE_DELAY, STATION_TYPE_SERVER, STATION_TYPE_FORK, STATION_TYPE_JOIN, STATION_TYPE_ROUTER,
 			STATION_TYPE_LOGGER, STATION_TYPE_CLASSSWITCH, STATION_TYPE_SEMAPHORE, STATION_TYPE_SCALER, STATION_TYPE_PLACE, STATION_TYPE_TRANSITION };
 
@@ -165,7 +165,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 	/**Creates a new instance of <code>StationsPanel</code> given a model definition.*/
 	public StationsPanel(StationDefinition sd, ClassDefinition cd) {
 		stationTable = new StationTable();
-		comboEditor = new ImagedComboBoxCellEditorFactory(null, null,
+		comboEditor = new ImagedComboBoxCellEditorFactory(null,
 				ImagedComboBoxCellEditorFactory.OPTION_STATION_TYPES);
 		initComponents();
 		setData(sd, cd);

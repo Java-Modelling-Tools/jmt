@@ -23,20 +23,20 @@ package jmt.jmva.analytical.solvers;
  * @author Federico Granata, Stefano Omini
  */
 public class SolverMultiMixed extends SolverMulti {
-	//TODO add check on saturation
 
+	//TODO add check on saturation
 	//TODO: add calculation of response time at each station
 
 	/** array with class types */
-	int[] classType;
+	protected int[] classType;
 
 	/** matrix with service demands */
-	double[][] demands;
+	protected double[][] demands;
 
 	/** array describing the classes: each element can be either an
 	 *  arrival rate (for open classes) or a population (for closed ones),
 	 *  according to the class type  */
-	double[] popPar;
+	protected double[] popPar;
 
 	/**
 	 * Constructor
@@ -72,9 +72,10 @@ public class SolverMultiMixed extends SolverMulti {
 	public void solve() {
 		//tests if all the resources, stations, are load independent
 		boolean loadIndep = true;
-		for (int i = 0; i < stations && loadIndep; i++) {
+		for (int i = 0; i < stations; i++) {
 			if (type[i] == LD) {
 				loadIndep = false;
+				break;
 			}
 		}
 
@@ -218,7 +219,6 @@ public class SolverMultiMixed extends SolverMulti {
 						//utilization must be computed (using the utilization law) with
 						//the original service demand
 						utilization[i][j] = throughput[i][j] * servTime[i][j][0];
-
 						//end NEW
 
 						clsRespTime[j] += residenceTime[i][j];
@@ -235,7 +235,6 @@ public class SolverMultiMixed extends SolverMulti {
 						throughput[i][j] = popPar[j] * visits[i][j];
 						//end NEW
 						clsRespTime[j] += residenceTime[i][j];
-
 					}
 					scThroughput[i] += throughput[i][j];
 					clsNumJobs[j] += queueLen[i][j];
@@ -253,7 +252,6 @@ public class SolverMultiMixed extends SolverMulti {
 				scResidTime[i] = 0;
 				scUtilization[i] = 0;
 				for (int j = 0; j < classes; j++) {
-
 					scUtilization[i] += utilization[i][j];
 					if (classType[j] != CLOSED_CLASS) {
 						//queue length of closed classes has been alredy considered
@@ -265,7 +263,6 @@ public class SolverMultiMixed extends SolverMulti {
 
 			}
 			sysThroughput = sysNumJobs / sysResponseTime;
-
 		} else {
 			//only 1 closed class
 			SolverSingleClosedMVA clSolver = new SolverSingleClosedMVA(closedClasses[0], stations);
@@ -335,7 +332,6 @@ public class SolverMultiMixed extends SolverMulti {
 						throughput[i][j] = popPar[j] * visits[i][j];
 						//end NEW
 						clsRespTime[j] += residenceTime[i][j];
-
 					}
 					scThroughput[i] += throughput[i][j];
 					clsNumJobs[j] += queueLen[i][j];
@@ -361,7 +357,6 @@ public class SolverMultiMixed extends SolverMulti {
 				}
 				scResidTime[i] = scQueueLen[i] / scThroughput[i];
 				sysResponseTime += scResidTime[i];
-
 			}
 			sysThroughput = sysNumJobs / sysResponseTime;
 		}
@@ -380,11 +375,9 @@ public class SolverMultiMixed extends SolverMulti {
 	 */
 	@Override
 	public boolean hasSufficientProcessingCapacity() {
-
 		//the maximum aggregate utilization between all the stations must be < 1
 		//otherwise the system has no sufficient processing capacity
 		for (int i = 0; i < stations; i++) {
-
 			if (type[i] == SolverMulti.DELAY) {
 				//delay station: do not check saturation
 				continue;
@@ -405,7 +398,6 @@ public class SolverMultiMixed extends SolverMulti {
 		//there are no stations with aggregate utilization >= 1
 		return true;
 	}
-
 	//end NEW
 
 }

@@ -27,7 +27,7 @@ import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.jmva.BatchTest;
-import jmt.jmva.engine.simDispatcher.Dispatcher_jMVAschema;
+import jmt.jmva.engine.simDispatcher.DispatcherJMVAschema;
 
 import org.junit.Test;
 
@@ -49,7 +49,7 @@ public class PauseThreadTest {
 	@Test
 	public void testPausing1SecondSleepAndCheckSimProgress() throws InterruptedException, URISyntaxException {
 
-		Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema(new File(getClass().getResource("randomModel_open_1.xml").toURI()));
+		DispatcherJMVAschema disp = new DispatcherJMVAschema(new File(getClass().getResource("randomModel_open_1.xml").toURI()));
 
 		Thread3 t3 = new Thread3(disp);
 		Thread4 t4 = new Thread4(disp);
@@ -65,7 +65,7 @@ public class PauseThreadTest {
 	@Test
 	public void testPausing5SecondsSleepAndAbortAllMeasures() throws InterruptedException, URISyntaxException {
 
-		Dispatcher_jMVAschema disp = new Dispatcher_jMVAschema(new File(getClass().getResource("randomModel_open_1.xml").toURI()));
+		DispatcherJMVAschema disp = new DispatcherJMVAschema(new File(getClass().getResource("randomModel_open_1.xml").toURI()));
 
 		Thread3 t3 = new Thread3(disp);
 		Thread5 t5 = new Thread5(disp);
@@ -157,9 +157,9 @@ class Thread2 extends Thread {
 
 class Thread3 extends Thread {
 
-	private Dispatcher_jMVAschema disp;
+	private DispatcherJMVAschema disp;
 
-	public Thread3(Dispatcher_jMVAschema disp) {
+	public Thread3(DispatcherJMVAschema disp) {
 		this.disp = disp;
 	}
 
@@ -174,10 +174,10 @@ class Thread3 extends Thread {
 
 class Thread4 extends Thread {
 
-	private Dispatcher_jMVAschema disp;
+	private DispatcherJMVAschema disp;
 	boolean finished = false;
 
-	public Thread4(Dispatcher_jMVAschema disp) {
+	public Thread4(DispatcherJMVAschema disp) {
 		this.disp = disp;
 	}
 
@@ -214,10 +214,10 @@ class Thread4 extends Thread {
 
 class Thread5 extends Thread {
 
-	private Dispatcher_jMVAschema disp;
+	private DispatcherJMVAschema disp;
 	boolean finished = false;
 
-	public Thread5(Dispatcher_jMVAschema disp) {
+	public Thread5(DispatcherJMVAschema disp) {
 		this.disp = disp;
 	}
 

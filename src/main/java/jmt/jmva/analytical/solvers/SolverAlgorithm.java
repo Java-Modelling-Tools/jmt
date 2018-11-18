@@ -30,28 +30,30 @@ import java.util.Map;
  *
  */
 public enum SolverAlgorithm {
+
 	// EXACT
 	EXACT("MVA", true, true, true),
 	RECAL("RECAL", true, true, false),
 	//MOM("MoM", true, true, false),
 	COMOM("CoMoM", true, true, false),
 	//RGF("RGF", true, true, false), /* Looks buggy */
-	//TREE_MVA("TreeMVA", true, true, false), /* Looks buggy */
-	//TREE_CONV("TreeConvolution", true, true, false), /* Looks buggy */
+	//TREE_MVA("Tree MVA", true, true, false), /* Looks buggy */
+	//TREE_CONV("Tree Convolution", true, true, false), /* Looks buggy */
 	// APPROXIMATE
 	CHOW("Chow", true, false, false),
 	BARD_SCHWEITZER("Bard-Schweitzer", true, false, false),
 	AQL("AQL", true, false, false),
 	LINEARIZER("Linearizer", true, false, false),
-	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, false, false);
-	//MONTE_CARLO("Monte Carlo", true, false, false); /* Looks buggy */
-	
+	DESOUZA_MUNTZ_LINEARIZER("De Souza-Muntz Linearizer", true, false, false),
+	//MONTE_CARLO("Monte Carlo", true, false, false), /* Looks buggy */
+	MONTE_CARLO_LOGISTIC("Logistic Sampling", true, false, true);
+
 	// string representation of the algorithm
 	private String algorithmName;
 	private boolean closed;
 	private boolean exact;
 	private boolean loadDependent;
-	
+
 	private static final String[] NAMES;
 	private static final String[] CLOSED_NAMES;
 	private static final SolverAlgorithm[] CLOSED_VALUES;
@@ -74,76 +76,76 @@ public enum SolverAlgorithm {
 		CLOSED_VALUES = closedValues.toArray(new SolverAlgorithm[closedValues.size()]);
 		REVERSE_MAP = Collections.unmodifiableMap(revMap);
 	}
-	
+
 	private SolverAlgorithm(String algorithmName, boolean closed, boolean exact, boolean loadDependent) {
 		this.algorithmName = algorithmName;
 		this.closed = closed;
 		this.exact = exact;
 		this.loadDependent = loadDependent;
 	}
-	
+
 	@Override
 	public String toString() {
 		return algorithmName;
 	}
-	
+
 	/**
 	 * @return true if this algorithm is closed
 	 */
 	public boolean isClosed() {
 		return closed;
 	}
-	
+
 	/**
 	 * @return true if this algorithm is exact
 	 */
 	public boolean isExact() {
 		return exact;
 	}
-	
+
 	/**
 	 * @return true if the algorithm supports load dependent, false otherwise.
 	 */
 	public boolean supportLoadDependent() {
 		return loadDependent;
 	}
-	
+
 	/**
 	 * Find the enum value that corresponds to the given string
 	 */
 	public static SolverAlgorithm fromString(String algName) {
 		return REVERSE_MAP.get(algName);
 	}
-	
+
 	/**
 	 * Returns an array of string representations of all potential SolverAlgorithm values
 	 */
 	public static String[] names() {
 		return NAMES;
 	}
-	
-	
+
 	/**
 	 * Returns an array of string representations of all closed SolverAlgorithm values
 	 */
 	public static String[] closedNames() {
 		return CLOSED_NAMES;
 	}
-	
+
 	/**
 	 * Returns an array of all closed SolverAlgorithm values
 	 */
 	public static SolverAlgorithm[] closedValues() {
 		return CLOSED_VALUES;
 	}
-	
+
 	public static int noOfExactAlgs() {
-        int exact = 0;
-        for (SolverAlgorithm algo : SolverAlgorithm.values()) {
-            if (algo.isExact()) {
-                exact++;
-            }
-        }
+		int exact = 0;
+		for (SolverAlgorithm algo : SolverAlgorithm.values()) {
+			if (algo.isExact()) {
+				exact++;
+			}
+		}
 		return exact;
 	}
+
 }

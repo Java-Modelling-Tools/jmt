@@ -26,7 +26,6 @@ public class FormatFileWriter {
 			}
 			writer.close();
 		} catch (IOException e) {
-			System.err.println("Errore nella creazione del file di salvataggio del formato");
 			e.printStackTrace();
 		}
 	}

@@ -71,7 +71,7 @@ public class JabaModel implements JabaConstants {
 	// number of classes
 	private int classes;
 	// total population (computed as the sum of all closed class populations)
-	private int maxpop;
+	private int totalPop;
 
 	// class data is class population for closed classes, class arrival rate for
 	// open classes
@@ -93,13 +93,15 @@ public class JabaModel implements JabaConstants {
 	/*********************** SERVICE PARAMETERS **************************/
 
 	/**
-	 * visits to the service centers dim: visits[stations][classes]
+	 * visits to the service centers
+	 * dim: visits[stations][classes]
 	 */
 	private double[][] visits;
 	/**
-	 * service times of the service centers dim:
-	 * serviceTimes[stations][classes][p] p=maxpop if
-	 * stationTypes[s]==STATION_LD p=1 otherwise
+	 * service times of the service centers
+	 * dim: serviceTimes[stations][classes][p]
+	 * p=totalPop   if stationTypes[s]==STATION_LD
+	 * p=1          otherwise
 	 */
 	private double[][][] serviceTimes;
 
@@ -152,7 +154,7 @@ public class JabaModel implements JabaConstants {
 
 		stations = e.stations;
 		classes = e.classes;
-		maxpop = e.maxpop;
+		totalPop = e.totalPop;
 
 		description = e.description;
 		unitaryVisits = e.unitaryVisits;
@@ -216,7 +218,7 @@ public class JabaModel implements JabaConstants {
 		classes = 2;
 
 		// TODO: perchè è 1 se non ci sono customers?? Lasciare così
-		maxpop = 1;
+		totalPop = 1;
 		changed = true;
 
 		classData = new double[2];
@@ -284,6 +286,13 @@ public class JabaModel implements JabaConstants {
 	}
 
 	/**
+	 * @return true if this object describes a single class system
+	 */
+	public boolean isSingleClass() {
+		return (classes == 1);
+	}
+
+	/**
 	 * @return true if this object describes a multiclass system
 	 */
 	public boolean isMultiClass() {
@@ -336,8 +345,8 @@ public class JabaModel implements JabaConstants {
 	/**
 	 * @return total population
 	 */
-	public int getMaxpop() {
-		return maxpop;
+	public int getTotalPop() {
+		return totalPop;
 	}
 
 	/**
@@ -583,8 +592,8 @@ public class JabaModel implements JabaConstants {
 
 		// validate sizes
 		for (int s = 0; s < stations; s++) {
-			currSize = (stationTypes[s] == STATION_LD ? maxpop : 1);
-			// TODO: if the station is LD but there are no jobs, max pop = 0
+			currSize = (stationTypes[s] == STATION_LD ? totalPop : 1);
+			// if the station is LD but there are no jobs, totalPop = 0
 			if (currSize == 0) {
 				currSize = 1;
 			}
@@ -630,7 +639,7 @@ public class JabaModel implements JabaConstants {
 
 		classData = ArrayUtils.resize(classData, classes, 0.0);
 
-		maxpop = calcMaxpop();
+		totalPop = calcTotalPop();
 
 		serviceTimes = ArrayUtils.resize3var(serviceTimes, stations, classes,
 				calcSizes(), 1.0);
@@ -729,23 +738,23 @@ public class JabaModel implements JabaConstants {
 	/**
 	 * @return the total population (sum of the customers of all closed class)
 	 */
-	private int calcMaxpop() {
+	private int calcTotalPop() {
 		/* sum all the closed classes' customers */
-		int maxpop = 0;
+		int totalPop = 0;
 		for (int i = 0; i < classes; i++) {
 			if (classTypes[i] == CLASS_CLOSED) {
-				maxpop += classData[i];
+				totalPop += (int) classData[i];
 			}
 		}
-		return maxpop;
+		return totalPop;
 	}
 
 	/**
-	 * @return the sizes of service times for each station (max pop for LD
+	 * @return the sizes of service times for each station (total pop for LD
 	 *         stations, 1 for LI stations)
 	 */
 	private int[] calcSizes() {
-		int mp = (maxpop > 0 ? maxpop : 1);
+		int mp = (totalPop > 0 ? totalPop : 1);
 		int[] sizes = new int[stations];
 		for (int s = 0; s < stations; s++) {
 			sizes[s] = (stationTypes[s] == STATION_LD ? mp : 1);
@@ -762,7 +771,7 @@ public class JabaModel implements JabaConstants {
 	public String toString() {
 		StringBuffer s = new StringBuffer();
 		s.append("stations=").append(stations).append(" classes=")
-				.append(classes).append(" pop=").append(maxpop)
+				.append(classes).append(" pop=").append(totalPop)
 				.append(" changed=").append(changed).append(" ld=").append(ld)
 				.append(" open=").append(open).append(" closed=")
 				.append(closed).append(" hasResults=").append(hasResults)
@@ -1252,7 +1261,7 @@ public class JabaModel implements JabaConstants {
 
 		int classNum = 0;
 
-		maxpop = 0;
+		totalPop = 0;
 		Node n;
 		Element current;
 		closed = true;
@@ -1270,7 +1279,7 @@ public class JabaModel implements JabaConstants {
 				classTypes[classNum] = CLASS_CLOSED;
 				classData[classNum] = Double.parseDouble(current
 						.getAttribute("population"));
-				maxpop += (int) classData[classNum];
+				totalPop += (int) classData[classNum];
 				open = false;
 			} else {
 				classTypes[classNum] = CLASS_OPEN;
@@ -1330,7 +1339,7 @@ public class JabaModel implements JabaConstants {
 			if (statType.equals("ldstation")) {
 				// LD
 				ld = true;
-				if (maxpop == 0) {
+				if (totalPop == 0) {
 					System.err.println("LD station with zero customers");
 					return false;
 				}
@@ -1338,10 +1347,9 @@ public class JabaModel implements JabaConstants {
 
 				/* create arrays */
 				for (int k = 0; k < classes; k++) {
-					// TODO: maxpop o maxpop+1 ??????
-					// serviceTimes[stationNum] = new double[classes][maxpop +
+					// serviceTimes[stationNum] = new double[classes][totalPop +
 					// 1];
-					serviceTimes[stationNum] = new double[classes][maxpop];
+					serviceTimes[stationNum] = new double[classes][totalPop];
 				}
 
 				// Element sTimesElem = (Element)
@@ -1372,10 +1380,10 @@ public class JabaModel implements JabaConstants {
 					Element class_st = (Element) sTimes.item(k);
 					String stimes = class_st.getFirstChild().getNodeValue();
 
-					double[] servt_arr = new double[maxpop];
+					double[] servt_arr = new double[totalPop];
 					ArrayUtils.fromCSV(servt_arr, stimes);
 
-					for (int p = 0; p < maxpop; p++) {
+					for (int p = 0; p < totalPop; p++) {
 						serviceTimes[stationNum][k][p] = servt_arr[p];
 					}
 				}

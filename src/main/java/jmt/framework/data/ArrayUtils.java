@@ -448,11 +448,9 @@ public class ArrayUtils {
 	public static double[][] extract13(double[][][] array, int index2) {
 		int len1 = array.length;
 		double[][] res = new double[len1][];
-
 		for (int i = 0; i < len1; i++) {
 			res[i] = array[i][index2];
 		}
-
 		return res;
 	}
 
@@ -460,7 +458,6 @@ public class ArrayUtils {
 	public static double[] extract1(double[][] array, int index2) {
 		int len = array.length;
 		double[] res = new double[len];
-
 		for (int i = 0; i < len; i++) {
 			res[i] = array[i][index2];
 		}

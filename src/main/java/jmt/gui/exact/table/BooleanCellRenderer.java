@@ -97,7 +97,7 @@ public class BooleanCellRenderer extends JCheckBox implements TableCellRenderer 
 				g.setColor(new Color(250, 250, 250));
 
 				int controlSize = getControlSize();
-				g.fillRect(x , y, controlSize, controlSize);
+				g.fillRect(x, y, controlSize, controlSize);
 				g.setColor(old);
 			}
 			super.paintIcon(c, g, x, y);

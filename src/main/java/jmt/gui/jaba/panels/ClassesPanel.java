@@ -177,11 +177,9 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 
 		initComponents();
 		makeNames();
-
 	}
 
 	private void sync() {
-
 		hasDeletes = false;
 		classOps.clear();
 
@@ -201,11 +199,11 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 			if (isLd) {
 				//if load dependent is no more supported after class changes
 				//remove all load dependent stations
-				if (!(data.isClosed() && !data.isMultiClass())) {
+				if (!(data.isClosed() && data.isSingleClass())) {
 					JOptionPane
 							.showMessageDialog(
 									this,
-									"<html><center>jMVA allows Load Dependent stations only for single class closed model. <br> Load Dependent stations will be replaced with Load Independent stations.</center></html>",
+									"<html><center>JMVA allows Load Dependent stations only for single class closed model. <br> Load Dependent stations will be replaced with Load Independent stations.</center></html>",
 									"Warning", JOptionPane.WARNING_MESSAGE);
 					data.removeLD();
 					isLd = false;

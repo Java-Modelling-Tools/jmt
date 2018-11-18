@@ -31,7 +31,7 @@ public class Polynomial extends Constants {
 	 *
 	 * Coefficients are stored in reverse order:
 	 *
-	 * coef[0] = C  , ..., coef[N-1] = C  .
+	 * coef[0] =  C  , ..., coef[N-1] = C  .
 	 *            N-1                   0
 	 *
 	 * Calling arguments are otherwise the same as polevl().
@@ -63,7 +63,7 @@ public class Polynomial extends Constants {
 	 *
 	 * Coefficients are stored in reverse order:
 	 *
-	 * coef[0] = C  , ..., coef[N] = C  .
+	 * coef[0] =  C  , ..., coef[N] = C  .
 	 *            N                   0
 	 * </pre>
 	 * In the interest of speed, there are no checks for out of bounds arithmetic.

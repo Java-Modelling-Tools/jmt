@@ -2,7 +2,6 @@ package jmt.jmva.analytical.solvers.LinearSystem.Simple.Matrix;
 
 import jmt.jmva.analytical.solvers.Basis.CoMoMBasis;
 import jmt.jmva.analytical.solvers.DataStructures.BigRational;
-import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Utilities.MiscFunctions;
 
 /**

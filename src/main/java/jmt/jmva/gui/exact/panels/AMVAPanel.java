@@ -44,7 +44,7 @@ import jmt.framework.gui.help.HoverHelp;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
-import jmt.jmva.analytical.solvers.SolverMultiClosedMonteCarlo;
+import jmt.jmva.analytical.solvers.SolverMultiClosedMonteCarloLogistic;
 import jmt.jmva.gui.exact.ExactWizard;
 
 /**
@@ -54,60 +54,57 @@ import jmt.jmva.gui.exact.ExactWizard;
  *
  */
 public final class AMVAPanel extends JPanel {
+
 	private static final long serialVersionUID = 1L;
 	private static final String LABEL_ALGORITHM = "Algorithm:";
 	private static final String LABEL_ALGORITHM_MIXED = LABEL_ALGORITHM + " MVA";
 	private static final String LABEL_ALGORITHM_OPEN = LABEL_ALGORITHM + " QN";
 	private static final String LABEL_ALGORITHM_WHATIF = LABEL_ALGORITHM + " (what-if)";
 
-    private static final String MONTE_CARLO = "Monte Carlo";
-	
 	private static enum PanelStatus {
 		ENABLED(LABEL_ALGORITHM, true, false, false),
 		ENABLED_TOL(LABEL_ALGORITHM, true, true, false),
-        ENABLED_MAX_SAMPLE(LABEL_ALGORITHM, true, true, true),
+		//ENABLED_MAX_SAMPLES(LABEL_ALGORITHM, true, true, true),
+		ENABLED_MAX_SAMPLES(LABEL_ALGORITHM, true, false, true),
 		DISABLED_OPEN(LABEL_ALGORITHM_OPEN, false, false, false),
 		DISABLED_MIXED(LABEL_ALGORITHM_MIXED, false, false, false),
 		DISABLED_WHATIF(LABEL_ALGORITHM_WHATIF, false, false, false);
-		
+
 		private String algorithmLabel;
 		private boolean toleranceVisible;
 		private boolean selectorVisible;
-        private boolean maxSamplesVisible;
-		
+		private boolean maxSamplesVisible;
+
 		private PanelStatus(String algorithmLabel, boolean selectorVisible, boolean toleranceVisible, boolean maxSamplesVisible) {
 			this.algorithmLabel = algorithmLabel;
 			this.selectorVisible = selectorVisible;
 			this.toleranceVisible = toleranceVisible;
-            this.maxSamplesVisible = maxSamplesVisible;
+			this.maxSamplesVisible = maxSamplesVisible;
 		}
-	
-		
 	};
-	
+
 	private HoverHelp help;
 	private NumberFormat numFormat = new DecimalFormat("#.###############");
 
 	private ExactWizard ew;
-	
+
 	private JLabel tolLabel;
 	private JLabel algLabel;
 	private JTextField tolerance;
-    private JLabel maxSampleLabel;
-    private JTextField maxSamples;
-	private JComboBox algorithmList;
+	private JLabel maxSamplesLabel;
+	private JTextField maxSamples;
+	private JComboBox<String> algorithmList;
 	private String [] modelName;
 	private PanelStatus status = PanelStatus.ENABLED;
-	
-	
+
 	private ActionListener ACTION_CHANGE_ALGORITHM = new ActionListener() {
 		// initial value
 		int currentItem = 1;
-		
+
 		public void actionPerformed(ActionEvent e) {
-			JComboBox algorithmList = (JComboBox)e.getSource();
-			String algorithm = (String)algorithmList.getSelectedItem();
-			
+			JComboBox<?> algorithmList = (JComboBox<?>) e.getSource();
+			String algorithm = (String) algorithmList.getSelectedItem();
+
 			// check if algorithm or not
 			SolverAlgorithm algo = SolverAlgorithm.fromString(algorithm);
 			if (algo == null) {
@@ -116,21 +113,22 @@ public final class AMVAPanel extends JPanel {
 				currentItem = algorithmList.getSelectedIndex();
 				ew.getData().setAlgorithmType(algo);
 				if (algo.isExact()) {
-                    updateStatus(PanelStatus.ENABLED);
+					updateStatus(PanelStatus.ENABLED);
 				} else {
-                    if (algorithm.equals(MONTE_CARLO)) {
-                        updateStatus(PanelStatus.ENABLED_MAX_SAMPLE);
-                    } else {
-                        updateStatus(PanelStatus.ENABLED_TOL);
-                    }
+					//if (algo.equals(SolverAlgorithm.MONTE_CARLO)) {
+					if (algo.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC)) {
+						updateStatus(PanelStatus.ENABLED_MAX_SAMPLES);
+					} else {
+						updateStatus(PanelStatus.ENABLED_TOL);
+					}
 				}
 			}
 		}
 	};
 
-    private MaxSampleInputListener ACTION_CHANGE_MAX_SAMPLE = new MaxSampleInputListener();
-
 	private ToleranceInputListener ACTION_CHANGE_TOLERANCE = new ToleranceInputListener();
+
+	private MaxSampleInputListener ACTION_CHANGE_MAX_SAMPLES = new MaxSampleInputListener();
 
 	public AMVAPanel(ExactWizard ew) {
 		super(new BorderLayout());
@@ -165,43 +163,42 @@ public final class AMVAPanel extends JPanel {
 		mainPanel.add(algorithmList());
 		mainPanel.add(tolLabel());
 		mainPanel.add(tolerance());
-        mainPanel.add(maxSampleLabel());
-        mainPanel.add(maxSamples());
+		mainPanel.add(maxSampleLabel());
+		mainPanel.add(maxSamples());
 		this.add(mainPanel, BorderLayout.WEST);
 	}
 
 	private JComponent algorithmList() {
 		Dimension d = new Dimension(160,30);
-		algorithmList = new JComboBox(modelName);
+		algorithmList = new JComboBox<String>(modelName);
 		algorithmList.setMaximumSize(d);
 		algorithmList.setSelectedIndex(1);
 		algorithmList.addActionListener(ACTION_CHANGE_ALGORITHM);
 		algorithmList.setVisible(status.selectorVisible);
 		algorithmList.setRenderer(new DefaultListCellRenderer() {
-            /**
-             *
-             */
-            private static final long serialVersionUID = -6074991824391523738L;
 
-            @Override
-            public Component getListCellRendererComponent(JList list,
-                                                          Object value, int index, boolean isSelected,
-                                                          boolean cellHasFocus) {
-                Component comp = super.getListCellRendererComponent(list, value, index, isSelected,
-                        cellHasFocus);
-                String str = (value == null) ? "" : value.toString();
-                if (SolverAlgorithm.fromString(str) == null) {
-                    comp.setEnabled(false);
-                    comp.setFocusable(false);
-                    setBackground(list.getBackground());
-                    setForeground(list.getForeground());
-                } else {
-                    comp.setEnabled(true);
-                    comp.setFocusable(true);
-                }
-                return comp;
-            }
-        });
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Component getListCellRendererComponent(JList<?> list,
+					Object value, int index, boolean isSelected,
+					boolean cellHasFocus) {
+				Component comp = super.getListCellRendererComponent(list, value, index, isSelected,
+						cellHasFocus);
+				String str = (value == null) ? "" : value.toString();
+				if (SolverAlgorithm.fromString(str) == null) {
+					comp.setEnabled(false);
+					comp.setFocusable(false);
+					setBackground(list.getBackground());
+					setForeground(list.getForeground());
+				} else {
+					comp.setEnabled(true);
+					comp.setFocusable(true);
+				}
+				return comp;
+			}
+
+		});
 		help.addHelp(algorithmList, "Algorithm for solving model");
 		return algorithmList;
 	}
@@ -228,27 +225,27 @@ public final class AMVAPanel extends JPanel {
 		return tolerance;
 	}
 
-    private JComponent maxSampleLabel() {
-        Dimension d = new Dimension(70,30);
-        maxSampleLabel = new JLabel("  Max number of samples:");
-        maxSampleLabel.setMaximumSize(d);
-        maxSampleLabel.setFocusable(false);
-        maxSampleLabel.setVisible(status.maxSamplesVisible);
-        return maxSampleLabel;
-    }
+	private JComponent maxSampleLabel() {
+		Dimension d = new Dimension(70,30);
+		maxSamplesLabel = new JLabel("  Max Samples:");
+		maxSamplesLabel.setMaximumSize(d);
+		maxSamplesLabel.setFocusable(false);
+		maxSamplesLabel.setVisible(status.maxSamplesVisible);
+		return maxSamplesLabel;
+	}
 
 	private JComponent maxSamples() {
-        Dimension d = new Dimension(80,30);
-        maxSamples = new JTextField(10);
-        maxSamples.setText(numFormat.format(ew.getData().getMaxSamples()));
-        maxSamples.setMaximumSize(d);
-        help.addHelp(maxSamples, "Max samples needed for Monte Carlo Algorithm");
-        maxSamples.setFocusable(true);
-        maxSamples.addKeyListener(ACTION_CHANGE_MAX_SAMPLE);
-        maxSamples.addFocusListener(ACTION_CHANGE_MAX_SAMPLE);
-        maxSamples.setVisible(status.maxSamplesVisible);
-        return maxSamples;
-    }
+		Dimension d = new Dimension(80,30);
+		maxSamples = new JTextField(10);
+		maxSamples.setText(numFormat.format(ew.getData().getMaxSamples()));
+		maxSamples.setMaximumSize(d);
+		help.addHelp(maxSamples, "Input max samples for Monte Carlo Algorithm");
+		maxSamples.setFocusable(true);
+		maxSamples.addKeyListener(ACTION_CHANGE_MAX_SAMPLES);
+		maxSamples.addFocusListener(ACTION_CHANGE_MAX_SAMPLES);
+		maxSamples.setVisible(status.maxSamplesVisible);
+		return maxSamples;
+	}
 
 	/**
 	 * Updates the algo panel
@@ -261,7 +258,7 @@ public final class AMVAPanel extends JPanel {
 		ExactModel data = ew.getData();
 		SolverAlgorithm algorithm = data.getAlgorithmType();
 		tolerance.setText(numFormat.format(data.getTolerance()));
-        maxSamples.setText(numFormat.format(data.getMaxSamples()));
+		maxSamples.setText(numFormat.format(data.getMaxSamples()));
 		algorithmList.setSelectedItem(algorithm.toString());
 		if (isClosed == null) {
 			isClosed = ew.getData().isClosed();
@@ -277,7 +274,7 @@ public final class AMVAPanel extends JPanel {
 		}
 
 		if (isLoadDependent) {
-			updateStatus(PanelStatus.DISABLED_MIXED);
+			//updateStatus(PanelStatus.DISABLED_MIXED);
 		} else if (isAlgowhatif) {
 			updateStatus(PanelStatus.DISABLED_WHATIF);
 		} else if (isOpen) {
@@ -285,11 +282,12 @@ public final class AMVAPanel extends JPanel {
 		} else if (!isClosed) {
 			updateStatus(PanelStatus.DISABLED_MIXED);
 		} else if (!algorithm.isExact()) {
-            if (algorithm.toString().equals(MONTE_CARLO)) {
-                updateStatus(PanelStatus.ENABLED_MAX_SAMPLE);
-            } else {
-                updateStatus(PanelStatus.ENABLED_TOL);
-            }
+			//if (algorithm.equals(SolverAlgorithm.MONTE_CARLO)) {
+			if (algorithm.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC)) {
+				updateStatus(PanelStatus.ENABLED_MAX_SAMPLES);
+			} else {
+				updateStatus(PanelStatus.ENABLED_TOL);
+			}
 		} else {
 			updateStatus(PanelStatus.ENABLED);
 		}
@@ -304,12 +302,12 @@ public final class AMVAPanel extends JPanel {
 			return;
 		}
 		algLabel.setText(newStatus.algorithmLabel);
-        algLabel.setEnabled(newStatus != PanelStatus.DISABLED_WHATIF);
-        algorithmList.setVisible(newStatus.selectorVisible);
+		algLabel.setEnabled(newStatus != PanelStatus.DISABLED_WHATIF);
+		algorithmList.setVisible(newStatus.selectorVisible);
 		tolLabel.setVisible(newStatus.toleranceVisible);
 		tolerance.setVisible(newStatus.toleranceVisible);
-        maxSampleLabel.setVisible(newStatus.maxSamplesVisible);
-        maxSamples.setVisible(newStatus.maxSamplesVisible);
+		maxSamplesLabel.setVisible(newStatus.maxSamplesVisible);
+		maxSamples.setVisible(newStatus.maxSamplesVisible);
 		status = newStatus;
 	}
 
@@ -323,51 +321,27 @@ public final class AMVAPanel extends JPanel {
 	}
 
 	private void updateTolerance() {
+		ExactModel model = ew.getData();
 		Double tol = SolverMultiClosedAMVA.validateTolerance(tolerance.getText());
 		if (tol != null) {
-			ew.getData().setTolerance(tol);
-		}
-		else {
+			model.setTolerance(tol);
+		} else {
+			tolerance.setText(numFormat.format(model.getTolerance()));
 			JOptionPane.showMessageDialog(ew, "Error: Invalid tolerance value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
-    private void updateMaxSamples() {
-        ExactModel model = ew.getData();
-        Integer mSamples = SolverMultiClosedMonteCarlo.validateMaxSamples(maxSamples.getText());
-        if (mSamples != null) {
-            model.setMaxSamples(mSamples);
-        } else {
-            JOptionPane.showMessageDialog(ew, "Error: Invalid max samples value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private class MaxSampleInputListener implements KeyListener, FocusListener {
-        @Override
-        public void focusLost(FocusEvent e) {
-            updateMaxSamples();
-        }
-
-        @Override
-        public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                updateMaxSamples();
-            }
-        }
-
-        @Override
-        public void focusGained(FocusEvent e) {
-        }
-
-        @Override
-        public void keyTyped(KeyEvent e) {
-        }
-
-
-        @Override
-        public void keyReleased(KeyEvent e) {
-        }
-    }
+	private void updateMaxSamples() {
+		ExactModel model = ew.getData();
+		//Integer mSamples = SolverMultiClosedMonteCarlo.validateMaxSamples(maxSamples.getText());
+		Integer mSamples = SolverMultiClosedMonteCarloLogistic.validateMaxSamples(maxSamples.getText());
+		if (mSamples != null) {
+			model.setMaxSamples(mSamples);
+		} else {
+			maxSamples.setText(numFormat.format(model.getMaxSamples()));
+			JOptionPane.showMessageDialog(ew, "Error: Invalid max samples value. Using last valid value.", "Input data error", JOptionPane.ERROR_MESSAGE);
+		}
+	}
 
 	private class ToleranceInputListener implements KeyListener, FocusListener {
 		@Override
@@ -390,9 +364,35 @@ public final class AMVAPanel extends JPanel {
 		public void keyTyped(KeyEvent e) {
 		}
 
+		@Override
+		public void keyReleased(KeyEvent e) {
+		}
+	}
+
+	private class MaxSampleInputListener implements KeyListener, FocusListener {
+		@Override
+		public void focusLost(FocusEvent e) {
+			updateMaxSamples();
+		}
+
+		@Override
+		public void keyPressed(KeyEvent e) {
+			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+				updateMaxSamples();
+			}
+		}
+
+		@Override
+		public void focusGained(FocusEvent e) {
+		}
+
+		@Override
+		public void keyTyped(KeyEvent e) {
+		}
 
 		@Override
 		public void keyReleased(KeyEvent e) {
 		}
 	}
+
 }

@@ -78,7 +78,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 	// Plot
 	private WhatIfPlot graph;
 	// Performance index selector
-	private JComboBox index;
+	private JComboBox<String> index;
 	// Bounds for graph
 	private JSpinner Xmin;
 	private JSpinner Xmax;
@@ -130,7 +130,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		// Adds performance index selection
 		JPanel indexPanel = new JPanel();
 		JLabel pIndex = new JLabel("Performance index: ");
-		index = new JComboBox(ExactConstants.INDICES_TYPES);
+		index = new JComboBox<String>(ExactConstants.INDICES_TYPES);
 		// Adds aggregate types
 		for (String element : AGGREGATE_TYPES) {
 			index.addItem(element);
@@ -199,10 +199,11 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		Arrays.fill(stations, -10);
 
 		algorithms = new SolverAlgorithm[graph.getColors().length];
-		Arrays.fill(algorithms, model.getAlgorithmType());
 		if (model.isWhatifAlgorithms()) {
+			Arrays.fill(algorithms, model.getWhatifAlgorithms().iterator().next());
 			executedAlgorithms = new ArrayList<SolverAlgorithm>(model.getWhatifAlgorithms());
 		} else {
+			Arrays.fill(algorithms, model.getAlgorithmType());
 			executedAlgorithms = Arrays.asList(model.getAlgorithmType());
 		}
 
@@ -516,7 +517,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			setRowHeight(CommonConstants.ROW_HEIGHT);
 
 			// Creates class editors (one is for utilizations)
-			JComboBox classCombo = new JComboBox();
+			JComboBox<String> classCombo = new JComboBox<String>();
 			// Null elements
 			classCombo.addItem("");
 			// Aggregate measures
@@ -526,8 +527,8 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			}
 
 			// Creates station editor
-			JComboBox stationsCombo = new JComboBox();
-			JComboBox uStationsCombo = new JComboBox();
+			JComboBox<String> stationsCombo = new JComboBox<String>();
+			JComboBox<String> uStationsCombo = new JComboBox<String>();
 			stationsCombo.addItem("");
 			uStationsCombo.addItem("");
 			stationsCombo.addItem(AGGREGATE);
@@ -538,7 +539,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			}
 
 			//Creates algorithm editor
-			JComboBox algorithmCombo = new JComboBox();
+			JComboBox<SolverAlgorithm> algorithmCombo = new JComboBox<SolverAlgorithm>();
 			for (SolverAlgorithm algo : model.getWhatifAlgorithms()) {
 				algorithmCombo.addItem(algo);
 			}
@@ -566,6 +567,8 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				break;
 			case ALGORITHM:
 				column.setPreferredWidth(100);
+				break;
+			default:
 				break;
 			}
 			super.columnAdded(e);
@@ -602,8 +605,9 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				}
 			case ALGORITHM:
 				return algorithmEditor;
+			default:
+				return null;
 			}
-			return null;
 		}
 
 		/**
@@ -678,7 +682,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			 * 
 			 */
 			private static final long serialVersionUID = 1L;
-			protected JComboBox combo;
+			protected JComboBox<?> combo;
 
 			/**
 			 * Constructs a <code>DefaultCellEditor</code> object that uses a
@@ -686,7 +690,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			 *
 			 * @param comboBox a <code>JComboBox</code> object
 			 */
-			public ComboEditor(JComboBox comboBox) {
+			public ComboEditor(JComboBox<?> comboBox) {
 				super(comboBox);
 				combo = comboBox;
 			}
@@ -714,7 +718,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			 *
 			 * @param comboBox a <code>JComboBox</code> object
 			 */
-			public ComboAlgoEditor(JComboBox comboBox) {
+			public ComboAlgoEditor(JComboBox<?> comboBox) {
 				super(comboBox);
 			}
 
@@ -880,8 +884,9 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				} else {
 					return algorithms[rowIndex];
 				}
+			default:
+				return null;
 			}
-			return null;
 		}
 
 		/**
@@ -908,9 +913,10 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				}
 				break;
 			case ALGORITHM:
-				algorithms[rowIndex] = (SolverAlgorithm)aValue;
+				algorithms[rowIndex] = (SolverAlgorithm) aValue;
 				break;
-
+			default:
+				break;
 			}
 
 			// Paints new index
@@ -939,8 +945,9 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				return true;
 			case ALGORITHM:
 				return model.isWhatifAlgorithms();
+			default:
+				return false;
 			}
-			return false;
 		}
 	}
 }

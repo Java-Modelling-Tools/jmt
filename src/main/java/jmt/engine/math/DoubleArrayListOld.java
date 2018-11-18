@@ -24,11 +24,13 @@
 
 package jmt.engine.math;
 
+import java.util.ArrayList;
+
 /** this class creates a dynamic list of double.
  *
  * @author  Federico Granata
  */
-public class DoubleArrayListOld extends java.util.ArrayList {
+public class DoubleArrayListOld extends ArrayList {
 
 	private static final long serialVersionUID = 1L;
 

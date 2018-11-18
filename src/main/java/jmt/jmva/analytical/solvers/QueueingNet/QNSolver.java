@@ -35,94 +35,95 @@ import jmt.jmva.analytical.solvers.Utilities.Timer;
  */
 public class QNSolver implements QNSolverInterface {
 
-    /**
-     * The Timer object responsible for keeping the total time needed by this
-     * QNSolver to evaluate the network.
-     */
-    public Timer totalTimer = new Timer();
-    /**
-     * The QNModel object that we are working on.
-     */
-    protected QNModel qnm;
-    /**
-     * The normalising constant is stored here after it has been computed.
-     */
-    protected BigRational G;
-    /**
-     * Contains a human-readable string representation of the QNSolver's memory usage.
-     */
-    protected String memUsage;
+	/**
+	 * The Timer object responsible for keeping the total time needed by this
+	 * QNSolver to evaluate the network.
+	 */
+	public Timer totalTimer = new Timer();
+	/**
+	 * The QNModel object that we are working on.
+	 */
+	protected QNModel qnm;
+	/**
+	 * The normalising constant is stored here after it has been computed.
+	 */
+	protected BigRational G;
+	/**
+	 * Contains a human-readable string representation of the QNSolver's memory usage.
+	 */
+	protected String memUsage;
 
-    /**
-     * Creates and initialises a QNSolver object.
-     *
-     * @param qnm The QNModel object that we are working on
-     */
-    public QNSolver(QNModel qnm) {
-        super();
-        this.qnm = qnm;
-    }
+	/**
+	 * Creates and initialises a QNSolver object.
+	 *
+	 * @param qnm The QNModel object that we are working on
+	 */
+	public QNSolver(QNModel qnm) {
+		super();
+		this.qnm = qnm;
+	}
 
-    /**
-     * Computes the normalising constant for the specified QNModel.
-     *
-     * @throws InternalErrorException * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
-     * @throws BTFMatrixErrorException 
-     * @throws InconsistentLinearSystemException 
-     * @throws OperationNotSupportedException 
-     */
-    @Override
-    public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
+	/**
+	 * Computes the normalising constant for the specified QNModel.
+	 *
+	 * @throws InternalErrorException * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
+	 * @throws BTFMatrixErrorException 
+	 * @throws InconsistentLinearSystemException 
+	 * @throws OperationNotSupportedException 
+	 */
+	@Override
+	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
+		throw new UnsupportedOperationException("Not supported.");
+	}
 
-    /**
-     * Returns a string represnting the normalising constant.
-     *
-     * @return String representing the normalising constant
-     */
-    @Override
-    public String getNormalisingConstant() {
-        if (G.isBigDecimal()) {
-            return G.asBigDecimal().toString();
-        } else {
-            return G.toString();
-        }
-    }
+	/**
+	 * Returns a string representing the normalising constant.
+	 *
+	 * @return String representing the normalising constant
+	 */
+	@Override
+	public String getNormalisingConstant() {
+		if (G.isBigDecimal()) {
+			return G.asBigDecimal().toString();
+		} else {
+			return G.toString();
+		}
+	}
 
-    /**
-     * Prints a short welcome message that says which solver is used.
-     */
-    @Override
-    public void printWelcome() {
-        throw new UnsupportedOperationException("Not supported.");
-    }
+	/**
+	 * Prints a short welcome message that says which solver is used.
+	 */
+	@Override
+	public void printWelcome() {
+		throw new UnsupportedOperationException("Not supported.");
+	}
 
-    /**
-     * Computes and stores the performance measures (mean throughputs and mean
-     * queue lengths for the current model.
-     *
-     * @throws InternalErrorException Thrown when any computation fails
-     */
-    @Override
-    public void computePerformanceMeasures() throws InternalErrorException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
+	/**
+	 * Computes and stores the performance measures (mean throughputs and mean
+	 * queue lengths for the current model.
+	 *
+	 * @throws InternalErrorException Thrown when any computation fails
+	 */
+	@Override
+	public void computePerformanceMeasures() throws InternalErrorException {
+		throw new UnsupportedOperationException("Not supported.");
+	}
 
-    /**
-     * Prints the time needed for the solver object to evaluate the network.
-     *
-     */
-    @Override
-    public void printTimeStatistics() {
-        System.out.println("Total time: " + totalTimer.getPrettyInterval());
-    }
+	/**
+	 * Prints the time needed for the solver object to evaluate the network.
+	 *
+	 */
+	@Override
+	public void printTimeStatistics() {
+		System.out.println("Total time: " + totalTimer.getPrettyInterval());
+	}
 
-    /**
-     * Prints the highest actual memory usage during the network's evaluation.
-     */
-    @Override
-    public void printMemUsage() {
-        System.out.println("Memory Usage: " + memUsage);
-    }
+	/**
+	 * Prints the highest actual memory usage during the network's evaluation.
+	 */
+	@Override
+	public void printMemUsage() {
+		System.out.println("Memory Usage: " + memUsage);
+	}
+
 }

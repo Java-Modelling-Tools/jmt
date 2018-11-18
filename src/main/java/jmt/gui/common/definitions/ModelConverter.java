@@ -361,7 +361,7 @@ public class ModelConverter {
 					serviceTimes[st][cl][0] = 0;
 				} else if (serv instanceof LDStrategy) {
 					LDStrategy lds = (LDStrategy) serv;
-					if (output.isClosed() && !output.isMultiClass()) {
+					if (output.isClosed() && output.isSingleClass()) {
 						int pop = input.getClassPopulation(classKeys.get(cl)).intValue();
 						serviceTimes[st][cl] = new double[pop]; // This is load dependent
 						stationTypes[st] = ExactConstants.STATION_LD;

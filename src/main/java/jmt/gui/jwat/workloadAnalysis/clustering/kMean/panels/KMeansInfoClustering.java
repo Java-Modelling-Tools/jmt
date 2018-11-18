@@ -30,18 +30,16 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 
-import jmt.engine.jwat.DinamicFormat;
 import jmt.engine.jwat.workloadAnalysis.clustering.kMean.ClusteringInfosKMean;
 import jmt.engine.jwat.workloadAnalysis.utils.JavaWatColor;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
+import jmt.gui.jwat.DynamicFormat;
 import jmt.gui.jwat.JWATConstants;
 
 public class KMeansInfoClustering extends JPanel implements JWATConstants, CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private ClusteringInfosKMean info;
 	private int numClust;
@@ -51,8 +49,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 	private final String RATIO_START_TEXT = HTML_START + HTML_FONT_TITLE + "Ratio value: " + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM;
 	private JTable tableClusters = null;
 	private JTable tableVars = null;
-	//private JComboBox comboVars = null;
-	private JList listVars = null;
+	private JList<String> listVars = null;
 	private pieChartIcon pieChartVars = null;
 	private JLabel chartVars = null;
 
@@ -134,9 +131,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 
 	private JTable getClustDetTable() {
 		tableClusters = new JTable(new clustDetModel(info.numElem, info.percent)) {
-			/**
-			 * 
-			 */
+
 			private static final long serialVersionUID = 1L;
 			{
 				setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -153,6 +148,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 				}
 				return getDefaultRenderer(String.class);
 			}
+
 		};
 		tableClusters.setSelectionBackground(new Color(83, 126, 126));
 		tableClusters.setSelectionForeground(Color.BLACK);
@@ -168,9 +164,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 			p[i] = info.infoCluster[i].percVar[listVars.getSelectedIndex()];
 		}
 		tableVars = new JTable(new varsDetModel(p)) {
-			/**
-			 * 
-			 */
+
 			private static final long serialVersionUID = 1L;
 			{
 				setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -186,6 +180,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 				}
 				return getDefaultRenderer(String.class);
 			}
+
 		};
 		tableVars.setSelectionBackground(new Color(83, 126, 126));
 		tableVars.setSelectionForeground(Color.BLACK);
@@ -196,33 +191,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 	}
 
 	private JPanel getListVars() {
-		/* Versione con combo box
-		comboVars = new JComboBox(model.getMatrix().getVariableNames());
-		comboVars.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (tableVars != null && comboVars != null) {
-					System.err.println("Selezione cluster");	
-					double[] p = new double[numClust];
-					for (int i = 0; i < numClust;i++)
-						p[i] = info.infoCluster[i].percVar[comboVars.getSelectedIndex()];
-					
-					((varsDetModel)tableVars.getModel()).setNewPerc(p);
-					tableVars.tableChanged(new TableModelEvent(tableVars.getModel()));
-					
-					int[] angle=new int[numClust];
-			        int i;
-			        angle[0]=0;
-			        for (i=1;i<numClust;i++) angle[i]=angle[i-1]+(int)((360) * p[i-1]);
-			        for (;i<angle.length;i++) angle[i]=360;
-			        
-					pieChartVars.setAngle(angle); 
-					chartVars.repaint();
-				}	
-			}
-		});
-		comboVars.setSelectedIndex(0);
-		*/
-		listVars = new JList(model.getMatrix().getVariableNames());
+		listVars = new JList<String>(model.getMatrix().getVariableNames());
 
 		listVars.setSelectionBackground(new Color(83, 126, 126));
 		listVars.setSelectionForeground(Color.BLACK);
@@ -231,6 +200,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		s.setPreferredSize(new Dimension(120, 90));
 		listVars.addListSelectionListener(new ListSelectionListener() {
+
 			public void valueChanged(ListSelectionEvent e) {
 				if (e.getValueIsAdjusting()) {
 					return;
@@ -262,6 +232,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 					listVars.setSelectedIndex(0);
 				}
 			}
+
 		});
 		listVars.setSelectedIndex(0);
 		JPanel p = new JPanel();
@@ -284,6 +255,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 		final JLabel l = new JLabel();
 		final pieChartIcon p = new pieChartIcon(numClust);
 		l.addMouseMotionListener(new MouseMotionAdapter() {
+
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				int pos;
@@ -296,6 +268,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 					l.setToolTipText("");
 				}
 			}
+
 		});
 		p.setAngle(angle);
 		l.setIcon(p);
@@ -317,6 +290,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 		final JLabel l = new JLabel();
 		pieChartVars = new pieChartIcon(numClust);
 		l.addMouseMotionListener(new MouseMotionAdapter() {
+
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				int pos;
@@ -329,6 +303,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 					l.setToolTipText("");
 				}
 			}
+
 		});
 		pieChartVars.setAngle(angle);
 		l.setIcon(pieChartVars);
@@ -336,6 +311,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 	}
 
 	private class pieChartIcon implements Icon {
+
 		private final int DIAMETRO = 100;
 		private int[] angle;
 		private double centreX;
@@ -384,7 +360,6 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 			if (Math.sqrt(Math.pow((x - centreX), 2) + Math.pow((y - centreY), 2)) > DIAMETRO / 2) {
 				return -1;
 			}
-			//if (x-centreX==0) return 0;
 			angl = Math.toDegrees(Math.atan((centreY - y) / (x - centreX)));
 			if (x < centreX) {
 				angl = 180 + angl;
@@ -392,7 +367,6 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 			if (angl < 0) {
 				angl = 360 + angl;
 			}
-			//System.out.println("ANGOLO= " + angl);
 			for (; ret < angle.length; ret++) {
 				if (angl < angle[ret]) {
 					break;
@@ -401,18 +375,17 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 
 			return (ret - 1);
 		}
+
 	}
 
 	/** MODEL PER TABELLA CLUSTER DETAILS **/
 	private class clustDetModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 		private String[] colHeader = { "Cluster", "Num. observations", "Percentage", "" };
 		private int[] Elem = null;
 		private double[] Perc = null;
-		DinamicFormat f = new DinamicFormat("###.###%", 0); //????? CONTROLLARE A COSA E SE SERVE 
+		DynamicFormat f = new DynamicFormat("###.###%", 0);
 
 		public clustDetModel(int[] el, double perc[]) {
 			Elem = el;
@@ -467,17 +440,16 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			return false;
 		}
+
 	}
 
 	/** MODEL PER TABELLA VARIABLES DETAILS **/
 	private class varsDetModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 		private String[] colHeader = { "Cluster", "Perc", "" };
 		private double[] Perc = null;
-		DinamicFormat f = new DinamicFormat("###.###%", 0); //????? CONTROLLARE A COSA E SE SERVE 
+		DynamicFormat f = new DynamicFormat("###.###%", 0);
 
 		public varsDetModel(double perc[]) {
 			Perc = perc;
@@ -501,7 +473,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 					return "Cluster " + (rowIndex + 1);
 				}
 				if (columnIndex == 1) {
-					return f.format(Perc[rowIndex]); //HA dato errore 35° cluster
+					return f.format(Perc[rowIndex]);
 				}
 				if (columnIndex == 2) {
 					return JavaWatColor.getColor(rowIndex);
@@ -532,12 +504,11 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			return false;
 		}
+
 	}
 
 	private class ColorRenderer extends JLabel implements TableCellRenderer {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 
 		public ColorRenderer() {
@@ -551,4 +522,5 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 		}
 
 	}
+
 }

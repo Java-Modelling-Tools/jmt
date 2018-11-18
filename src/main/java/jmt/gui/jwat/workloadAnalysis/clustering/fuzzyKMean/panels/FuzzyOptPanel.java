@@ -33,9 +33,6 @@ import jmt.gui.jwat.workloadAnalysis.panels.ClusterPanel;
 
 public class FuzzyOptPanel extends JPanel implements CommonConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private ClusterPanel parent;

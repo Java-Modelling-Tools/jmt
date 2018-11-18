@@ -21,7 +21,7 @@ package jmt.gui.common.controller;
 import java.awt.Cursor;
 import java.io.File;
 
-import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
 import jmt.gui.common.definitions.AbortMeasure;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.ResultsModel;
@@ -46,7 +46,7 @@ import jmt.gui.jsimgraph.controller.SimulationStateChecker;
 public class DispatcherThread extends Thread implements AbortMeasure {
 
 	private SimulationStateChecker simStateChecker;
-	private Dispatcher_jSIMschema simulator;
+	private DispatcherJSIMschema simulator;
 	private GuiInterface gui;
 	private SimulationDefinition sd;
 	private TimerThread timer = null;
@@ -104,7 +104,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	 * @param simulationFile file where simulation model is stored
 	 */
 	public void startSimulation(File simulationFile) {
-		simulator = new Dispatcher_jSIMschema(simulationFile);
+		simulator = new DispatcherJSIMschema(simulationFile);
 		// ----------- Francesco D'Aquino ---------------
 		// If animation is enabled creates a simStateChecker
 		if (sd.isAnimationEnabled()) {

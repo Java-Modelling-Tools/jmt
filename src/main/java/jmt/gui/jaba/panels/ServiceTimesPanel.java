@@ -120,7 +120,7 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 		/* arrays are copied to ensure data object consistency is preserved */
 		JabaModel data = ew.getData();
 		synchronized (data) {
-			zeroLD = (data.isLd() && (data.getMaxpop() == 0));
+			zeroLD = (data.isLd() && (data.getTotalPop() == 0));
 			classes = data.getClasses();
 			stations = data.getStations();
 
@@ -136,7 +136,6 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 	 * Set up the panel contents and layout
 	 */
 	private void initComponents() {
-
 		stTable = new STTable();
 
 		Box hBox = Box.createHorizontalBox();
@@ -165,7 +164,6 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
-
 	}
 
 	@Override
@@ -174,7 +172,6 @@ public final class ServiceTimesPanel extends WizardPanel implements JabaConstant
 	}
 
 	private void commit() {
-
 		stTable.stopEditing();
 
 		JabaModel data = ew.getData();

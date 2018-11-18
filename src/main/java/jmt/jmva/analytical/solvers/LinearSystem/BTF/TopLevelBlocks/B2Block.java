@@ -24,7 +24,7 @@ public class B2Block extends TopLevelBlock {
 
 	public B2Block(QNModel qnm, CoMoMBasis basis)
 			throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException {
-		super(qnm, basis, new Position(MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M, 0));	
+		super(qnm, basis, new Position(MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M, 0));	
 		selection_policy = new TypeOneBlocks(qnm, this, current_class);
 	}
 	

@@ -34,11 +34,12 @@ import jmt.jmva.analytical.solvers.QueueingNet.RECALSolver;
  */
 
 public class SolverMultiClosedRECAL extends SolverMulti {
+
 	/**
 	 * Array containing population for each class
 	 */
 	protected int[] population;
-	private Integer scale = 100000;
+	protected Integer scale = 100000;
 
 	/**
 	 * Contains the queueing network model
@@ -51,8 +52,8 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 
 	/** Creates new MoMSolverDispatcher
 	 *  @param  stations    number of service centers
-	 *  @param  classes     number o classes of classes
-	 *  @param  population     array of population classes
+	 *  @param  classes     number of classes
+	 *  @param  population  array of class populations
 	 */
 	public SolverMultiClosedRECAL(int classes, int stations, int[] population) {
 		super(classes, stations);
@@ -83,7 +84,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		servTime = new double[stations][classes][1];
 		for (int i = 0; i < stations; i++) {
 			for (int r = 0; r < classes; r++) {
-				servTime[i][r][0]=s[i][r][0] * scale;
+				servTime[i][r][0] = s[i][r][0] * scale;
 			}
 		}
 
@@ -137,8 +138,6 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 
 			// Instantiate queueing network model
 			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
-			qnm.N.print();
-
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			// Return false if initialisation fails for any reason.
@@ -160,7 +159,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	public void solve() {
 		QNSolver c = null;
 
-		try{
+		try {
 			c = new RECALSolver(qnm);
 		} catch (InternalErrorException e1) {
 			// TODO Auto-generated catch block
@@ -228,7 +227,6 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 
 		sysThroughput = sysNumJobs / sysResponseTime;
 		//end NEW
-
 	}
 
 	@Override
@@ -236,4 +234,5 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		// only closed class - no saturation problem
 		return true;
 	}
+
 }

@@ -31,13 +31,8 @@ import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jwat.MainJwatWizard;
 import jmt.gui.jwat.workloadAnalysis.panels.ClusterPanel;
 
-//UPDATE 29/10/2006: + aggiunto pannello per selezione trasformazione da applicare alle variabili durange K-Means
-
 public class KMeansOptPanel extends JPanel implements CommonConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	private ClusterPanel parent;
@@ -173,4 +168,5 @@ public class KMeansOptPanel extends JPanel implements CommonConstants {
 
 		((MainJwatWizard) parent.getParentWizard()).setEnableButton("Solve", true);
 	}
+
 }

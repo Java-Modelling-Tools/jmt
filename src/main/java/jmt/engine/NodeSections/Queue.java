@@ -41,7 +41,6 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.QueueNet.WaitingRequest;
 import jmt.engine.dataAnalysis.Measure;
-import jmt.engine.random.engine.RandomEngine;
 
 /**
  * This class implements a generic finite/infinite queue. In finite queue, if

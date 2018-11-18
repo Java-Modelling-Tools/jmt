@@ -100,7 +100,7 @@ public class Measure {
 
 	//-------SCALE FACTOR FOR RESIDENCE TIME MEASURES------------//
 
-	// due to its architecture, jSIM correctly computes the
+	// due to its architecture, JSIM correctly computes the
 	// residence time for a single visit,
 	// not the total residence time for all visits
 	// to correct this measure is therefore needed a scale factor
@@ -476,7 +476,7 @@ public class Measure {
 	}
 
 	/**
-	 * jSIM architecture does not allow to correctly compute residence time for
+	 * JSIM architecture does not allow to correctly compute residence time for
 	 * all visits.
 	 * for this reason a scaling operation is needed.
 	 * the scale factor is the mean number of accesses to the resource (i.e.

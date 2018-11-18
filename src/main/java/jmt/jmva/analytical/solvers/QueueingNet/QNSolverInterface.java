@@ -32,44 +32,45 @@ import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
  */
 public interface QNSolverInterface {
 
-    /**
-     * Computes and stores the normalising constant.
-     *
-     * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
-     * @throws BTFMatrixErrorException 
-     * @throws InconsistentLinearSystemException 
-     * @throws OperationNotSupportedException 
-     */
-    public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException;
+	/**
+	 * Computes and stores the normalising constant.
+	 *
+	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
+	 * @throws BTFMatrixErrorException 
+	 * @throws InconsistentLinearSystemException 
+	 * @throws OperationNotSupportedException 
+	 */
+	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException;
 
-    /**
-     * Returns a string represnting the normalising constant.
-     *
-     * @return String representing the normalising constant
-     */
-    public String getNormalisingConstant();
+	/**
+	 * Returns a string representing the normalising constant.
+	 *
+	 * @return String representing the normalising constant
+	 */
+	public String getNormalisingConstant();
 
-    /**
-     * Prints a short welcome message that says which solver is used.
-     */
-    public void printWelcome();
+	/**
+	 * Prints a short welcome message that says which solver is used.
+	 */
+	public void printWelcome();
 
-    /**
-     * Computes and stores the performance measures (mean throughputs and mean
-     * queue lengths for the current model.
-     *
-     * @throws InternalErrorException Thrown when any computation fails
-     */
-    public void computePerformanceMeasures() throws InternalErrorException;
+	/**
+	 * Computes and stores the performance measures (mean throughputs and mean
+	 * queue lengths for the current model.
+	 *
+	 * @throws InternalErrorException Thrown when any computation fails
+	 */
+	public void computePerformanceMeasures() throws InternalErrorException;
 
-    /**
-     * Prints the time needed for the solver object to evaluate the network.
-     * May print a more detailed time break-down.
-     */
-    public void printTimeStatistics();
+	/**
+	 * Prints the time needed for the solver object to evaluate the network.
+	 * May print a more detailed time break-down.
+	 */
+	public void printTimeStatistics();
 
-    /**
-     * Prints the highest actual memory usage during the network's evaluation.
-     */
-    public void printMemUsage();
+	/**
+	 * Prints the highest actual memory usage during the network's evaluation.
+	 */
+	public void printMemUsage();
+
 }

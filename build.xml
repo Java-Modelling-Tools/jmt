@@ -88,7 +88,7 @@
 			<fileset dir="${out}/lib" includes="*.jar" />
 		</unjar>
 
-		<!-- Copy JMT classes into singlejar_jMVA dir -->
+		<!-- Copy JMT classes into singlejar_JMT dir -->
 		<copy todir="${dist}/singlejar_JMT">
 			<fileset dir="${class}">
 				<include name="**/*" />

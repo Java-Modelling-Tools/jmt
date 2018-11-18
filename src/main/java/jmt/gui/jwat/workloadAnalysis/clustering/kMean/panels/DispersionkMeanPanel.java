@@ -17,9 +17,7 @@ import jmt.engine.jwat.workloadAnalysis.utils.JavaWatColor;
 import jmt.gui.jwat.workloadAnalysis.chart.DispKMeanMatrix;
 
 public class DispersionkMeanPanel extends JPanel {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	private int clusters;
 	private DispKMeanMatrix matrix;
@@ -41,9 +39,7 @@ public class DispersionkMeanPanel extends JPanel {
 	}
 
 	private class myPanel extends JPanel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 		private int START_SQUARE_H = 5;
 		private int START_SQUARE_W = 5;
@@ -73,5 +69,7 @@ public class DispersionkMeanPanel extends JPanel {
 			}
 			g1.drawImage(legenda, 0, 0, null);
 		}
+
 	}
+
 }

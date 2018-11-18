@@ -59,12 +59,12 @@ public class PopulationChangeVector extends EnhancedVector   {
     
     //index inclusive
     public int sumTail(int index) {
-    	return sum(index, size());    
+    	return sum(index, size());
     }
     
     //index inclusive
     public int sumHead(int index) {
-    	return sum(0, index +1);    
+    	return sum(0, index +1);
     }
        
     /**
@@ -72,7 +72,7 @@ public class PopulationChangeVector extends EnhancedVector   {
      * indices start from 0
      */
     public int RightMostNonZero() {
-    	for (int i = size() - 1; i >= 0; i-- ) {
+    	for (int i = size() - 1; i >= 0; i--) {
     		if (get(i) != 0) return i;
     	}
     	return -1;

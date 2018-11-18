@@ -68,7 +68,7 @@ public class B2MicroBlock extends MicroBlock {
 	@Override
 	public void printRow2(int row) {
 		
-		int number_of_queue_constants = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M;
+		int number_of_queue_constants = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M;
 		
 		int row_to_print = row - position.row;		
 		if (row_to_print >= 0 && row_to_print < size.row) {
@@ -101,7 +101,7 @@ public class B2MicroBlock extends MicroBlock {
 	
 	private BigRational multiplyRow(int index) {
 		
-		int number_of_queue_constants = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M;
+		int number_of_queue_constants = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M;
 		
 		BigRational result = BigRational.ZERO;
 		

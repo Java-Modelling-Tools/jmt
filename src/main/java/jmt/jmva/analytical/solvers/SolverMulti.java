@@ -43,7 +43,6 @@ public abstract class SolverMulti {
 
 	/** constant for delay center*/
 	public static final int DELAY = 2;
-
 	//end NEW
 
 	/** constant for Open Class */
@@ -171,7 +170,6 @@ public abstract class SolverMulti {
 	 *  @return true if the operation is completed with success
 	 */
 	public boolean input(String[] n, int[] t, double[][][] s, double[][] v) {
-
 		if ((n.length != stations) || (t.length != stations) || (s.length != stations) || (v.length != stations)) {
 			return false; // wrong input.
 		}
@@ -200,7 +198,6 @@ public abstract class SolverMulti {
 
 	//NEW
 	//@author Stefano Omini
-
 	/**
 	 * A system is said to have sufficient capacity to process a given load
 	 * <tt>lambda</tt> if no service center is saturated as a result of the combined loads
@@ -214,7 +211,6 @@ public abstract class SolverMulti {
 	 *
 	 */
 	public abstract boolean hasSufficientProcessingCapacity();
-
 	//end NEW
 
 	/** Returns the throughput of the given class for the requested station
@@ -524,7 +520,6 @@ public abstract class SolverMulti {
 
 		return buf.toString();
 	}
-
 	//end NEW
 
 }

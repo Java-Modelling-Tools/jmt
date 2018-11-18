@@ -47,15 +47,15 @@ public class CMicroBlock extends MicroBlock {
 		
 		int vector_index = position.row / (qnm.M + 1);
 		
-		PopulationChangeVector n = basis.getPopulationChangeVector(vector_index) ; 
+		PopulationChangeVector n = basis.getPopulationChangeVector(vector_index); 
 		
 		_class = n.RightMostNonZero() + 1;
 		
-		int number_of_ns = MiscFunctions.binomialCoefficient(qnm.M, h) ;
+		int number_of_ns = MiscFunctions.binomialCoefficient(qnm.M, h);
 		
 		
 		//Loop over all n's contained in this microblock
-		for (int i = 0; i < number_of_ns ; i++) {
+		for (int i = 0; i < number_of_ns; i++) {
 			n = basis.getPopulationChangeVector(vector_index++); 
 			
 			//Loop over all queues (including no queue)

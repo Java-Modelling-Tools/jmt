@@ -56,7 +56,7 @@ public class XSecondaryMacroBlock extends SecondaryMacroBlock {
 			
 			//Column is in this block
 			if (col >= 0 && col < size.col) {							
-				matrix.write( row_of_block , col, qnm.getDemandAsBigRational(queue - 1, s - 1).negate());
+				matrix.write(row_of_block, col, qnm.getDemandAsBigRational(queue - 1, s - 1).negate());
 			}					
 		}
 		return row;		

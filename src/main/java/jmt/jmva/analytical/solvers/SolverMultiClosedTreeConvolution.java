@@ -23,8 +23,8 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 
 	/** Creates new SolverMultiClosedMonteCarlo
 	 *  @param  stations    number of service centers
-	 *  @param  classes     number o classes of classes
-	 *  @param  population     array of population classes
+	 *  @param  classes     number of classes
+	 *  @param  population  array of class populations
 	 */
 	public SolverMultiClosedTreeConvolution(int classes, int stations, int[] population) {
 		super(classes, stations);
@@ -54,7 +54,7 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 		servTime = new double[stations][classes][1];
 		for (int i = 0; i < stations; i++) {
 			for (int r = 0; r < classes; r++) {
-				servTime[i][r][0]=s[i][r][0];
+				servTime[i][r][0] = s[i][r][0];
 			}
 		}
 
@@ -107,8 +107,6 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 
 			// Instantiate queueing network model
 			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
-			qnm.N.print();
-
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			// Return false if initialisation fails for any reason.
@@ -129,9 +127,8 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 	@Override
 	public void solve() {
 		QNSolver c = null;
-		try{
+		try {
 			int numThreads = 1;
-			qnm.N.print();
 			c = new TreeConvolutionSolver(qnm, numThreads);
 			c.computePerformanceMeasures();
 		} catch (InternalErrorException e) {
@@ -191,13 +188,12 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 
 		sysThroughput = sysNumJobs / sysResponseTime;
 		//end NEW
-
 	}
-
 
 	@Override
 	public boolean hasSufficientProcessingCapacity() {
 		// only closed class - no saturation problem
 		return true;
 	}
+
 }

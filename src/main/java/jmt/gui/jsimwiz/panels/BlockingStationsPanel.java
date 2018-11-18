@@ -73,7 +73,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 	/** Station definition data structure */
 	protected StationDefinition sd;
 	/** Blocking region definition data structure */
-	protected BlockingRegionDefinition bd;
+	protected BlockingRegionDefinition brd;
 	/** Current region key */
 	protected Object regionKey;
 
@@ -100,7 +100,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 	protected Vector<Object> stations;
 
 	/** Used for station selection renderers */
-	protected ImagedComboBoxCellEditorFactory comboFactory;
+	protected ImagedComboBoxCellEditorFactory combos;
 
 	/**
 	 * @return the panel's name
@@ -138,8 +138,8 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 			warningPanel.addCheckVector(sd.getStationKeysNoSourceSink());
 		}
 		stations.clear();
-		stations.addAll(bd.getBlockingRegionStations(regionKey));
-		comboFactory.clearCache();
+		stations.addAll(brd.getBlockingRegionStations(regionKey));
+		combos.clearCache();
 		update();
 	}
 
@@ -148,13 +148,13 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 	 * @param brd blocking region definition data structure
 	 * @param key search's key for given blocking region
 	 */
-	public BlockingStationsPanel(ClassDefinition cd, StationDefinition sd, BlockingRegionDefinition bd, Object key) {
+	public BlockingStationsPanel(ClassDefinition cd, StationDefinition sd, BlockingRegionDefinition brd, Object key) {
 		this.cd = cd;
 		this.sd = sd;
-		this.bd = bd;
+		this.brd = brd;
 		regionKey = key;
 		stations = new Vector<Object>();
-		comboFactory = new ImagedComboBoxCellEditorFactory(sd);
+		combos = new ImagedComboBoxCellEditorFactory(sd);
 		initComponent();
 		addActions();
 	}
@@ -165,14 +165,14 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 	 * @param brd blocking region definition data structure
 	 * @param key search's key for given blocking region
 	 */
-	public void setData(ClassDefinition cd, StationDefinition sd, BlockingRegionDefinition bd, Object key) {
+	public void setData(ClassDefinition cd, StationDefinition sd, BlockingRegionDefinition brd, Object key) {
 		this.cd = cd;
 		this.sd = sd;
-		this.bd = bd;
+		this.brd = brd;
 		regionKey = key;
-		comboFactory.setData(sd);
-		parameterPanel.setData(cd, bd, key);
-		stationPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Stations in " + bd.getRegionName(key)));
+		combos.setData(sd);
+		parameterPanel.setData(cd, brd, key);
+		stationPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Stations in " + brd.getRegionName(key)));
 	}
 
 	/**
@@ -181,7 +181,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 	private void initComponent() {
 		setLayout(new GridLayout(2, 1));
 		stationPanel = new JPanel(new BorderLayout(5, 5));
-		stationPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Stations in " + bd.getRegionName(regionKey)));
+		stationPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Stations in " + brd.getRegionName(regionKey)));
 
 		// Creates panel with add station button and spinner
 		JPanel addPanel = new JPanel(new BorderLayout());
@@ -209,7 +209,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 		add(stationPanel);
 
 		// Creates the inner parameter panel
-		parameterPanel = new BlockingRegionParameterPanel(cd, bd, regionKey);
+		parameterPanel = new BlockingRegionParameterPanel(cd, brd, regionKey);
 		// Hides unneeded global properties (specified by table)
 		parameterPanel.setGlobalVisible(false);
 		add(parameterPanel);
@@ -237,15 +237,15 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 					}
 
 					// Limit to maximum number of insertable stations
-					if (i - stations.size() > bd.getBlockableStationKeys().size()) {
-						i = bd.getBlockableStationKeys().size() + stations.size();
+					if (i - stations.size() > brd.getBlockableStationKeys().size()) {
+						i = brd.getBlockableStationKeys().size() + stations.size();
 					}
 
 					if (i < stations.size() && i >= 0) {
 						while (i < stations.size()) {
 							// Removes last element.
 							Object o = stations.remove(stations.size() - 1);
-							bd.removeRegionStation(regionKey, o);
+							brd.removeRegionStation(regionKey, o);
 						}
 					} else if (i > stations.size()) {
 						while (i > stations.size()) {
@@ -273,16 +273,16 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 		// Updates spinner value
 		stationNumSpinner.setValue(new Integer(stations.size()));
 		// Check if stations can be added
-		addStation.setEnabled(bd.getBlockableStationKeys().size() > 0);
+		addStation.setEnabled(brd.getBlockableStationKeys().size() > 0);
 	}
 
 	/**
 	 * Adds a new station to current blocking region. Takes the first available station
 	 */
 	protected void add() {
-		if (bd.getBlockableStationKeys().size() > 0) {
-			Object key = bd.getBlockableStationKeys().get(0);
-			bd.addRegionStation(regionKey, key);
+		if (brd.getBlockableStationKeys().size() > 0) {
+			Object key = brd.getBlockableStationKeys().get(0);
+			brd.addRegionStation(regionKey, key);
 			stations.add(key);
 		} else {
 			addStation.setEnabled(false);
@@ -330,7 +330,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 				int index = stationTable.getSelectedRow();
 				Object key = stations.get(index);
 				stations.remove(key);
-				bd.removeRegionStation(regionKey, key);
+				brd.removeRegionStation(regionKey, key);
 				BlockingStationsPanel.this.update();
 			}
 
@@ -377,9 +377,9 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 				return new ButtonCellEditor(new JButton(deleteStation));
 			} else {
 				// Builds an ordered array with station keys that can be added and current one
-				SortedSet<Object> tmp = new TreeSet<Object>(bd.getBlockableStationKeys());
+				SortedSet<Object> tmp = new TreeSet<Object>(brd.getBlockableStationKeys());
 				tmp.add(stations.get(row));
-				return comboFactory.getEditor(tmp.toArray());
+				return combos.getEditor(tmp.toArray());
 			}
 		}
 
@@ -410,7 +410,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 			if (column == 1) {
 				return deleteRenderer;
 			} else {
-				return comboFactory.getRenderer();
+				return combos.getRenderer();
 			}
 		}
 
@@ -461,7 +461,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 		 */
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return columnIndex == 1 || bd.getBlockableStationKeys().size() > 0;
+			return columnIndex == 1 || brd.getBlockableStationKeys().size() > 0;
 		}
 
 		/**
@@ -493,9 +493,9 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 			if (columnIndex == 0) {
 				// If value changed
 				if (stations.get(rowIndex) != aValue) {
-					bd.removeRegionStation(regionKey, stations.get(rowIndex));
+					brd.removeRegionStation(regionKey, stations.get(rowIndex));
 					stations.set(rowIndex, aValue);
-					bd.addRegionStation(regionKey, aValue);
+					brd.addRegionStation(regionKey, aValue);
 				}
 			}
 		}

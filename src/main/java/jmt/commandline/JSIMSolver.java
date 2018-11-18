@@ -20,7 +20,7 @@ package jmt.commandline;
 
 import java.io.File;
 
-import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
 
 /**
  * <p><b>Name:</b> JSIMSolver</p> 
@@ -53,7 +53,7 @@ public class JSIMSolver {
 			System.exit(1);
 		}
 
-		Dispatcher_jSIMschema dispatcher = new Dispatcher_jSIMschema(model);
+		DispatcherJSIMschema dispatcher = new DispatcherJSIMschema(model);
 		dispatcher.setTerminalSimulation(true);
 		// Sets simulation seed if required
 		if (args.length > 1) {

@@ -63,6 +63,8 @@ public interface SimulationDefinition {
 	public static final String MEASURE_X = "Throughput";
 	/**Code for drop rate measure*/
 	public static final String MEASURE_DR = "Drop Rate";
+	/**Code for power measure*/
+	public static final String MEASURE_P = "Power";
 	/**Code for system customer number measure*/
 	public static final String MEASURE_S_CN = "System Number of Customers";
 	/**Code for system response time measure*/
@@ -140,20 +142,6 @@ public interface SimulationDefinition {
 	public void setMeasureType(String newType, Object measureKey);
 
 	/**
-	 * Returns search key for class this measure refers to.
-	 * @param measureKey search key for measure
-	 * @return search key for class
-	 */
-	public Object getMeasureClass(Object measureKey);
-
-	/**
-	 * Changes reference class for specified measure, given its search key
-	 * @param classKey new class search key
-	 * @param measureKey measure search key
-	 */
-	public void setMeasureClass(Object classKey, Object measureKey);
-
-	/**
 	 * Returns search key for station a certain measure refers to.
 	 * @param measureKey search key for measure
 	 * @return search key for station.
@@ -166,6 +154,20 @@ public interface SimulationDefinition {
 	 * @param measureKey: search key for measure.
 	 */
 	public void setMeasureStation(Object stationKey, Object measureKey);
+
+	/**
+	 * Returns search key for class this measure refers to.
+	 * @param measureKey search key for measure
+	 * @return search key for class
+	 */
+	public Object getMeasureClass(Object measureKey);
+
+	/**
+	 * Changes reference class for specified measure, given its search key
+	 * @param classKey new class search key
+	 * @param measureKey measure search key
+	 */
+	public void setMeasureClass(Object classKey, Object measureKey);
 
 	/**
 	 * Returns value for alpha parameter of a specific measure, given its search key.

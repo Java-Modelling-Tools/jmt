@@ -201,7 +201,7 @@ public class Gamma extends Constants {
 
 		/* Multiply w by the factor
 		   a      b   _             _     _
-		  x  (1-x)   | (a+b) / ( a | (a) | (b) ). */
+		   x  (1-x)   | (a+b) / ( a | (a) | (b) ). */
 
 		y = a * Math.log(x);
 		t = b * Math.log(xc);
@@ -337,7 +337,7 @@ public class Gamma extends Constants {
 		k4 = a + 1.0;
 		k5 = 1.0;
 		k6 = a + b;
-		k7 = a + 1.0;;
+		k7 = a + 1.0;
 		k8 = a + 2.0;
 
 		pkm2 = 0.0;
@@ -423,7 +423,7 @@ public class Gamma extends Constants {
 			return 1.0 - incompleteGammaComplement(a, x);
 		}
 
-		/* Compute  x**a * exp(-x) / gamma(a)  */
+		/* Compute  x**a * exp(-x) / gamma(a) */
 		ax = a * Math.log(x) - x - logGamma(a);
 		if (ax < -MAXLOG) {
 			return (0.0);

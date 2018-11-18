@@ -25,13 +25,15 @@ package jmt.jmva.analytical.solvers.Exceptions;
  */
 public class InputFileParserException extends Exception {
 
-    /**
-     * Creates an InputFileParserException with an exception message.
-     *
-     * @param string The exception message
-     */
-    public InputFileParserException(String string) {
-        super(string);
-    }
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Creates an InputFileParserException with an exception message.
+	 *
+	 * @param string The exception message
+	 */
+	public InputFileParserException(String string) {
+		super(string);
+	}
 
 }

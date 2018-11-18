@@ -361,10 +361,10 @@ public class QueueDrawer extends JComponent implements Notifier {
 		g2d.setPaint(border);
 		g2d.draw(queue[i]);
 
-                // Check if the state corresponds to the mean number of jobs
+		// Check if the state corresponds to the mean number of jobs
 		if (i == queueLength() - queueMedia) {
 			// draw a triangle above that represents the average
-                    	GeneralPath gp = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
+			GeneralPath gp = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
 			gp.moveTo((float) x, (float) (y - ELEM_HEIGHT / 2));
 			gp.lineTo((float) (x + ELEM_WIDTH), (float) (y - ELEM_HEIGHT / 2));
 			gp.lineTo((float) (x + ELEM_WIDTH / 2.0), (float) (y - ELEMS_GAP));
@@ -391,7 +391,6 @@ public class QueueDrawer extends JComponent implements Notifier {
 	// } else {
 	// lj = lostJobs;
 	// lostJobsStr = "" + (int) lj;
-	//
 	// }
 	// g2d.setColor(txtColor);
 	// g2d.drawString("lost jobs:" + lostJobsStr, (float) (START_GAP), (float)
@@ -402,25 +401,24 @@ public class QueueDrawer extends JComponent implements Notifier {
 	private void drawJobs(Graphics2D g2d) {
 		double x = getProcessorXY().x + 2 * PROC_RAD, y = getProcessorXY().y + PROC_RAD * 2 + 4 * ELEMS_GAP;
 		Color tmp = g2d.getColor();
-		//		System.out.println(nCpu);
+		//System.out.println(nCpu);
 		if (nCpu == 1) {
 			txtBounds = drawCenteredText("executing cust.:" + donejobs + ", residual time:" + remainingTime[0] + "ms", Color.BLACK, Color.WHITE, x,
 					y, g2d, true, false);
 			drawCenteredText("executing cust.:" + donejobs + ", residual time:" + remainingTime[0] + "ms", Color.BLACK, Color.WHITE, x
 					- txtBounds.getWidth() / 2.0, y, g2d, true, true);
 		}
-		//		else if (nCpu==2) {
-		//			txtBounds = drawCenteredText("executing cust.:" + 
-		//					donejobs + ", residual time(1):" + remainingTime[0] + "ms"+ ", residual time(2):" + remainingTime[1] + "ms", Color.BLACK, Color.WHITE, x, y, g2d, true, false);
-		//			drawCenteredText("executing cust.:" + 
-		//					donejobs + ", residual time(1):" + remainingTime[0] + "ms"+ ", residual time(2):" + remainingTime[1] + "ms", Color.BLACK, Color.WHITE, x - txtBounds.getWidth() / 2.0, y, g2d, true, true);
-		//
-		//		}
-		//		else
-		//		{
-		//			txtBounds = drawCenteredText("executing cust.:" + donejobs , Color.BLACK, Color.WHITE, x, y, g2d, true, false);
-		//			drawCenteredText("executing cust.:" + donejobs , Color.BLACK, Color.WHITE, x - txtBounds.getWidth() / 2.0, y, g2d, true, true);
-		//		}
+		//	else if (nCpu==2) {
+		//		txtBounds = drawCenteredText("executing cust.:" + 
+		//				donejobs + ", residual time(1):" + remainingTime[0] + "ms"+ ", residual time(2):" + remainingTime[1] + "ms", Color.BLACK, Color.WHITE, x, y, g2d, true, false);
+		//		drawCenteredText("executing cust.:" + 
+		//				donejobs + ", residual time(1):" + remainingTime[0] + "ms"+ ", residual time(2):" + remainingTime[1] + "ms", Color.BLACK, Color.WHITE, x - txtBounds.getWidth() / 2.0, y, g2d, true, true);
+		//	}
+		//	else
+		//	{
+		//		txtBounds = drawCenteredText("executing cust.:" + donejobs, Color.BLACK, Color.WHITE, x, y, g2d, true, false);
+		//		drawCenteredText("executing cust.:" + donejobs, Color.BLACK, Color.WHITE, x - txtBounds.getWidth() / 2.0, y, g2d, true, true);
+		//	}
 		// draw box around text
 		g2d.setColor(tmp);
 	}
@@ -701,9 +699,9 @@ public class QueueDrawer extends JComponent implements Notifier {
 	}
 
 	private void drawOccupiedPercentage2(Color startC, Color border, boolean gradientFill, Graphics2D g2d, int cpu) {
-		//processor.setFrame(x+PROC_RAD/2 , y + cpu*PROC_RAD, 2 * PROC_RAD /2, 2 * PROC_RAD /2);
+		//processor.setFrame(x+PROC_RAD/2, y + cpu*PROC_RAD, 2 * PROC_RAD /2, 2 * PROC_RAD /2);
 
-		//		if (remainingTime[cpu] != 0) {
+		//if (remainingTime[cpu] != 0) {
 		double x = getProcessorXY().x, y = getProcessorXY().y;
 		occupiedRect = new Rectangle2D.Double(x + PROC_RAD / 2, y + cpu * PROC_RAD + ELEMS_GAP * cpu - ELEMS_GAP / 2, 2 * PROC_RAD / 2, 2 * PROC_RAD
 				* (1 - (double) remainingTime[cpu] / (double) totTime[cpu]) / 2);
@@ -723,9 +721,9 @@ public class QueueDrawer extends JComponent implements Notifier {
 
 		// draw orizontal line parallel to occupation
 		Line2D.Double l = new Line2D.Double(x + PROC_RAD * 2 + ELEMS_GAP, y + cpu * PROC_RAD + ELEMS_GAP * cpu - ELEMS_GAP / 2 + 2 * PROC_RAD
-				* (1 - (double) remainingTime[cpu] / (double) totTime[cpu]) / 2,//y + PROC_RAD * 2 * (1 - (double) remainingTime / (double) totTime) /2 + ELEMS_GAP * cpu -  ELEMS_GAP /2  , 
+				* (1 - (double) remainingTime[cpu] / (double) totTime[cpu]) / 2,//y + PROC_RAD * 2 * (1 - (double) remainingTime / (double) totTime) /2 + ELEMS_GAP * cpu -  ELEMS_GAP /2,
 				x + PROC_RAD * 2 + 2 * ELEMS_GAP, y + cpu * PROC_RAD + ELEMS_GAP * cpu - ELEMS_GAP / 2 + 2 * PROC_RAD
-						* (1 - (double) remainingTime[cpu] / (double) totTime[cpu]) / 2);//y + PROC_RAD * 2 * (1 - (double) remainingTime / (double) totTime) /2 + ELEMS_GAP * cpu -  ELEMS_GAP /2 );
+						* (1 - (double) remainingTime[cpu] / (double) totTime[cpu]) / 2);//y + PROC_RAD * 2 * (1 - (double) remainingTime / (double) totTime) /2 + ELEMS_GAP * cpu -  ELEMS_GAP /2);
 		g2d.draw(l);
 
 		// draw vertical line

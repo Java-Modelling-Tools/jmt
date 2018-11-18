@@ -32,8 +32,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import jmt.framework.data.ArrayUtils;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
+import jmt.jmva.analytical.solvers.SolverMultiClosedMonteCarloLogistic;
 
-import jmt.jmva.analytical.solvers.SolverMultiClosedMonteCarlo;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -61,17 +61,17 @@ import org.w3c.dom.NodeList;
 
 public class ExactModel implements ExactConstants  {
 
-	/* EDITED by Abhimanyu Chugh */
 	//Set by default to the Exact MVA algorithm
 	public SolverAlgorithm algorithmType = SolverAlgorithm.EXACT;
 	//Set by default if user does not enter a tolerance value
 	public double tolerance = SolverMultiClosedAMVA.DEFAULT_TOLERANCE;
-	//Set by default if user does not enter a max sample value - used for Monte Carlo.
-	private int maxSamples = SolverMultiClosedMonteCarlo.MAX_SAMPLES;
+	//Set by default if user does not enter a max samples value
+	//private int maxSamples = SolverMultiClosedMonteCarlo.DEFAULT_MAX_SAMPLES;
+	private int maxSamples = SolverMultiClosedMonteCarloLogistic.DEFAULT_MAX_SAMPLES;
 	//Names of the algorithms to be compared
 	private Set<SolverAlgorithm> whatifAlgorithms;
 	private Map<SolverAlgorithm, Double> whatifAlgorithmsTolerance;
-	/* END */
+	private Map<SolverAlgorithm, Integer> whatifAlgorithmsMaxSamples;
 
 	//true if the model is closed
 	private boolean closed;
@@ -98,7 +98,7 @@ public class ExactModel implements ExactConstants  {
 	//number of classes
 	private int classes;
 	//total population (computed as the sum of all closed class populations)
-	private int maxpop;
+	private int totalPop;
 
 	//class data is class population for closed classes, class arrival rate for open classes
 	//dim: classData[classes]
@@ -132,7 +132,7 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * service times of the service centers
 	 * dim: serviceTimes[stations][classes][p]
-	 * p=maxpop     if stationTypes[s]==STATION_LD
+	 * p=totalPop   if stationTypes[s]==STATION_LD
 	 * p=1          otherwise
 	 */
 	private double[][][] serviceTimes;
@@ -200,9 +200,6 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public ExactModel() {
 		setDefaults();
-
-		/* EDITED by Abhimanyu Chugh */
-		/* END */
 	}
 
 	/**
@@ -218,7 +215,7 @@ public class ExactModel implements ExactConstants  {
 
 		stations = e.stations;
 		classes = e.classes;
-		maxpop = e.maxpop;
+		totalPop = e.totalPop;
 
 		description = e.description;
 
@@ -235,6 +232,7 @@ public class ExactModel implements ExactConstants  {
 		maxSamples = e.maxSamples;
 		whatifAlgorithms = EnumSet.copyOf(e.whatifAlgorithms);
 		whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(e.whatifAlgorithmsTolerance);
+		whatifAlgorithmsMaxSamples = new EnumMap<SolverAlgorithm, Integer>(e.whatifAlgorithmsMaxSamples);
 
 		visits = ArrayUtils.copy2(e.visits);
 
@@ -263,20 +261,18 @@ public class ExactModel implements ExactConstants  {
 				throughput.put(alg, ArrayUtils.copy3(e.throughput.get(alg)));
 				resTimes.put(alg, ArrayUtils.copy3(e.resTimes.get(alg)));
 				util.put(alg, ArrayUtils.copy3(e.util.get(alg)));
-				if (!alg.isExact()) {
-					algIterations.put(alg, ArrayUtils.copy(e.algIterations.get(alg)));
-				}
-			}
+				algIterations.put(alg, ArrayUtils.copy(e.algIterations.get(alg)));
 			/* END */
+			}
 		}
-	}
-
-	public void setAlgorithmType(SolverAlgorithm algorithm) {
-		algorithmType = algorithm;
 	}
 
 	public SolverAlgorithm getAlgorithmType() {
 		return algorithmType;
+	}
+
+	public void setAlgorithmType(SolverAlgorithm algType) {
+		algorithmType = algType;
 	}
 
 	public double getTolerance() {
@@ -291,8 +287,8 @@ public class ExactModel implements ExactConstants  {
 		return maxSamples;
 	}
 
-	public void setMaxSamples(int maxSample) {
-		maxSamples = maxSample;
+	public void setMaxSamples(int mSamples) {
+		maxSamples = mSamples;
 	}
 
 	/**
@@ -336,6 +332,30 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public void setWhatifAlgorithmTolerance(SolverAlgorithm algorithm, double value) {
 		whatifAlgorithmsTolerance.put(algorithm, value);
+	}
+
+	/**
+	 * Returns the max samples for a whatif algorithm
+	 * @param algorithm the algorithm
+	 * @return the max samples
+	 */
+	public int getWhatifAlgorithmMaxSamples(SolverAlgorithm algorithm) {
+		Integer val = whatifAlgorithmsMaxSamples.get(algorithm);
+		if (val != null) {
+			return val;
+		} else {
+			//return SolverMultiClosedMonteCarlo.DEFAULT_MAX_SAMPLES;
+			return SolverMultiClosedMonteCarloLogistic.DEFAULT_MAX_SAMPLES;
+		}
+	}
+
+	/**
+	 * Sets the max samples for a whatif algorithm
+	 * @param algorithm the algorithm
+	 * @param value the max samples
+	 */
+	public void setWhatifAlgorithmMaxSamples(SolverAlgorithm algorithm, int value) {
+		whatifAlgorithmsMaxSamples.put(algorithm, value);
 	}
 
 	/**
@@ -395,9 +415,7 @@ public class ExactModel implements ExactConstants  {
 		this.throughput.put(alg, ArrayUtils.copy3(throughput));
 		this.resTimes.put(alg, ArrayUtils.copy3(resTimes));
 		this.util.put(alg, ArrayUtils.copy3(util));
-		if (!alg.isExact()) {
-			this.algIterations.put(alg, ArrayUtils.copy(algIterations));
-		}
+		this.algIterations.put(alg, ArrayUtils.copy(algIterations));
 
 		iterations = queueLen[0][0].length;
 
@@ -448,24 +466,19 @@ public class ExactModel implements ExactConstants  {
 		if (iteration >= iterations) {
 			throw new IllegalArgumentException("iteration is greater than expected number of iterations");
 		}
-		boolean isApprox = !alg.isExact();
 		if (this.queueLen.get(alg) == null) {
 			this.queueLen.put(alg, new double[stations][classes][iterations]);
 			this.throughput.put(alg, new double[stations][classes][iterations]);
 			this.resTimes.put(alg, new double[stations][classes][iterations]);
 			this.util.put(alg, new double[stations][classes][iterations]);
-			if (isApprox) {
-				this.algIterations.put(alg, new int[iterations]);
-			}
+			this.algIterations.put(alg, new int[iterations]);
 		}
 
 		ArrayUtils.copy2to3(queueLen, this.queueLen.get(alg), iteration);
 		ArrayUtils.copy2to3(throughput, this.throughput.get(alg), iteration);
 		ArrayUtils.copy2to3(resTimes, this.resTimes.get(alg), iteration);
 		ArrayUtils.copy2to3(util, this.util.get(alg), iteration);
-		if (isApprox) {
-			this.algIterations.get(alg)[iteration] = algIterations;
-		}
+		this.algIterations.get(alg)[iteration] = algIterations;
 
 		/*TODO: achugh
 		hasResults = true;
@@ -488,9 +501,7 @@ public class ExactModel implements ExactConstants  {
 			throughput.put(alg, new double[stations][classes][iterations]);			
 			resTimes.put(alg, new double[stations][classes][iterations]);
 			util.put(alg, new double[stations][classes][iterations]);
-			if (!alg.isExact()) {
-				algIterations.put(alg, new int[iterations]);
-			}
+			algIterations.put(alg, new int[iterations]);
 		}
 
 		hasResults = false;
@@ -506,9 +517,7 @@ public class ExactModel implements ExactConstants  {
 			throughput.put(alg, new double[stations][classes][iterations]);
 			resTimes.put(alg, new double[stations][classes][iterations]);
 			util.put(alg, new double[stations][classes][iterations]);
-			if (!alg.isExact()) {
-				algIterations.put(alg, new int[iterations]);
-			}
+			algIterations.put(alg, new int[iterations]);
 		}
 
 		hasResults = false;
@@ -541,7 +550,7 @@ public class ExactModel implements ExactConstants  {
 		stations = 1;
 		classes = 1;
 
-		maxpop = 1;
+		totalPop = 1;
 		changed = true;
 
 		classData = new double[1];
@@ -585,6 +594,7 @@ public class ExactModel implements ExactConstants  {
 
 		whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);
 		whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
+		whatifAlgorithmsMaxSamples = new EnumMap<SolverAlgorithm, Integer>(SolverAlgorithm.class);
 	}
 
 	/**
@@ -607,6 +617,13 @@ public class ExactModel implements ExactConstants  {
 		this.description = description;
 		changed = true;
 		return true;
+	}
+
+	/**
+	 * @return true if this object describes a single class system
+	 */
+	public boolean isSingleClass() {
+		return (classes == 1);
 	}
 
 	/**
@@ -675,8 +692,8 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * @return total population
 	 */
-	public int getMaxpop() {
-		return maxpop;
+	public int getTotalPop() {
+		return totalPop;
 	}
 
 	/**
@@ -914,8 +931,8 @@ public class ExactModel implements ExactConstants  {
 
 		//validate sizes
 		for (int s = 0; s < stations; s++) {
-			currSize = (stationTypes[s] == STATION_LD ? maxpop : 1);
-			// if a station is LD but customer number is 0, maxpop = 0
+			currSize = (stationTypes[s] == STATION_LD ? totalPop : 1);
+			// if a station is LD but there are no jobs, totalPop = 0
 			if (currSize == 0) {
 				currSize = 1;
 			}
@@ -940,7 +957,7 @@ public class ExactModel implements ExactConstants  {
 	 * @return true if data was changed, false otherwise
 	 */
 	/*public boolean setReferenceStation(double[][] ReferenceStation) {
-		if (ReferenceStation.length != classes ) {
+		if (ReferenceStation.length != classes) {
 			throw new IllegalArgumentException("incorrect array dimension");
 		}
 		this.ReferenceStation = ReferenceStation;
@@ -956,7 +973,7 @@ public class ExactModel implements ExactConstants  {
 	 * @return true if data was changed, false otherwise
 	 */
 	public boolean setReferenceStation(int[] ReferenceStation) {
-		if (ReferenceStation.length != classes ) {
+		if (ReferenceStation.length != classes) {
 			throw new IllegalArgumentException("incorrect array dimension");
 		}
 		this.ReferenceStation = ReferenceStation;
@@ -974,7 +991,7 @@ public class ExactModel implements ExactConstants  {
 			throw new IllegalArgumentException("stations and classes must be > 0");
 		}
 		if (forceResize || this.stations != stations || this.classes != classes) {
-			//other cases already handled in setXXX methods
+			// Other cases already handled in setXXX methods
 			discardResults();
 
 			this.stations = stations;
@@ -993,7 +1010,7 @@ public class ExactModel implements ExactConstants  {
 
 			classData = ArrayUtils.resize(classData, classes, 0.0);
 
-			maxpop = calcMaxpop();
+			totalPop = calcTotalPop();
 
 			serviceTimes = ArrayUtils.resize3var(serviceTimes, stations, classes, calcSizes(), 0.0);
 			// Checks if visits are all one
@@ -1004,10 +1021,10 @@ public class ExactModel implements ExactConstants  {
 
 			return true;
 		} else {
-			// Check if population was changed.
-			int newMaxpop = calcMaxpop();
-			if (newMaxpop != maxpop) {
-				maxpop = newMaxpop;
+			// Checks if total population was changed.
+			int newTotalPop = calcTotalPop();
+			if (newTotalPop != totalPop) {
+				totalPop = newTotalPop;
 				serviceTimes = ArrayUtils.resize3var(serviceTimes, stations, classes, calcSizes(), 0.0);
 				return true;
 			}
@@ -1202,22 +1219,22 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * @return the total population (sum of the customers of all closed class)
 	 */
-	private int calcMaxpop() {
+	private int calcTotalPop() {
 		/* sum all the closed classes' customers */
-		int maxpop = 0;
+		int totalPop = 0;
 		for (int i = 0; i < classes; i++) {
 			if (classTypes[i] == CLASS_CLOSED) {
-				maxpop += classData[i];
+				totalPop += (int) classData[i];
 			}
 		}
-		return maxpop;
+		return totalPop;
 	}
 
 	/**
-	 * @return the sizes of service times for each station (max pop for LD stations, 1 for LI stations)
+	 * @return the sizes of service times for each station (total pop for LD stations, 1 for LI stations)
 	 */
 	private int[] calcSizes() {
-		int mp = (maxpop > 0 ? maxpop : 1);
+		int mp = (totalPop > 0 ? totalPop : 1);
 		int[] sizes = new int[stations];
 		for (int s = 0; s < stations; s++) {
 			sizes[s] = (stationTypes[s] == STATION_LD ? mp : 1);
@@ -1231,7 +1248,7 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public String toString() {
 		StringBuffer s = new StringBuffer();
-		s.append("stations=").append(stations).append(" classes=").append(classes).append(" pop=").append(maxpop).append(" changed=").append(changed)
+		s.append("stations=").append(stations).append(" classes=").append(classes).append(" pop=").append(totalPop).append(" changed=").append(changed)
 		.append(" ld=").append(ld).append(" open=").append(open).append(" closed=").append(closed).append(" hasResults=").append(hasResults)
 		.append(" resultsOK=").append(resultsOK).append("\n").append("stationNames=").append(ArrayUtils.toString(stationNames)).append("\n")
 		.append("stationTypes=").append(ArrayUtils.toString(stationTypes)).append("\n").append("classNames=").append(
@@ -1418,6 +1435,7 @@ public class ExactModel implements ExactConstants  {
 				compareAlgs_element.appendChild(alg_element);
 				alg_element.setAttribute("name", algo.toString());
 				alg_element.setAttribute("tolerance", Double.toString(getWhatifAlgorithmTolerance(algo)));
+				alg_element.setAttribute("maxSamples", Integer.toString(getWhatifAlgorithmMaxSamples(algo)));
 			}
 		}
 		/* END */
@@ -1619,9 +1637,7 @@ public class ExactModel implements ExactConstants  {
 			for (SolverAlgorithm alg : queueLen.keySet()) {
 				Element algorithm_element = (Element) result_element.appendChild(root.createElement("algorithm"));
 				algorithm_element.setAttribute("name", alg.toString());
-				if (!alg.isExact()) {
-					algorithm_element.setAttribute("iterations", Integer.toString(algIterations.get(alg)[k]));
-				}
+				algorithm_element.setAttribute("iterations", Integer.toString(algIterations.get(alg)[k]));
 
 				for (int i = 0; i < stations; i++) {
 					Element stationresults_element = (Element) algorithm_element.appendChild(root.createElement("stationresults"));
@@ -1721,9 +1737,7 @@ public class ExactModel implements ExactConstants  {
 				//ReferenceStation loading failed!
 				return false;
 			}
-		}
-		else
-		{
+		} else {
 			loadReferenceStationDefault(classNode);
 		}
 
@@ -1750,10 +1764,14 @@ public class ExactModel implements ExactConstants  {
 				SolverAlgorithm algo = SolverAlgorithm.fromString(name);
 				this.setWhatifAlgorithm(algo, true);
 				this.setWhatifAlgorithmTolerance(algo, Double.parseDouble(alg.getAttribute("tolerance")));
+				if (!alg.getAttribute("maxSamples").isEmpty()) {
+					this.setWhatifAlgorithmMaxSamples(algo, Integer.parseInt(alg.getAttribute("maxSamples")));
+				}
 			}
 		} else {
 			this.whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);
 			this.whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
+			this.whatifAlgorithmsMaxSamples = new EnumMap<SolverAlgorithm, Integer>(SolverAlgorithm.class);
 		}
 		/* END */
 
@@ -1827,7 +1845,7 @@ public class ExactModel implements ExactConstants  {
 		NodeList classList = classNode.getChildNodes();				
 		int classNum = 0;
 
-		maxpop = 0;
+		totalPop = 0;
 		Node n;
 		Element current;
 		closed = true;
@@ -1845,16 +1863,16 @@ public class ExactModel implements ExactConstants  {
 				classTypes[classNum] = CLASS_CLOSED;
 				classData[classNum] = Double.parseDouble(current.getAttribute("population"));
 				//ReferenceStation[classNum][2] = 0;
-				//for (int j=0; j<stations ; j++)
+				//for (int j=0; j<stations; j++)
 				//	if (stationNames[j] == current.getAttribute("refStation"))
 				//ReferenceStation[classNum][2] = j;
-				maxpop += (int) classData[classNum];
+				totalPop += (int) classData[classNum];
 				open = false;
 			} else {
 				classTypes[classNum] = CLASS_OPEN;
 				classData[classNum] = Double.parseDouble(current.getAttribute("rate"));
 				//ReferenceStation[classNum][2] = 0;
-				//for (int j=0; j<stations ; j++)
+				//for (int j=0; j<stations; j++)
 				//	if (stationNames[j] == current.getAttribute("refStation"))
 				//ReferenceStation[classNum][2] = j;
 				closed = false;
@@ -1915,7 +1933,7 @@ public class ExactModel implements ExactConstants  {
 			if (statType.equals("ldstation")) {
 				//LD
 				ld = true;
-				if (maxpop == 0) {
+				if (totalPop == 0) {
 					System.err.println("LD station with zero customers");
 					return false;
 				}
@@ -1923,8 +1941,8 @@ public class ExactModel implements ExactConstants  {
 
 				/* create arrays */
 				for (int k = 0; k < classes; k++) {
-					//serviceTimes[stationNum] = new double[classes][maxpop + 1];
-					serviceTimes[stationNum] = new double[classes][maxpop];
+					//serviceTimes[stationNum] = new double[classes][totalPop + 1];
+					serviceTimes[stationNum] = new double[classes][totalPop];
 				}
 
 				//Element sTimesElem = (Element) current.getElementsByTagName("servicetimes").item(0);
@@ -1947,10 +1965,10 @@ public class ExactModel implements ExactConstants  {
 					Element class_st = (Element) sTimes.item(k);
 					String stimes = class_st.getFirstChild().getNodeValue();
 
-					double[] servt_arr = new double[maxpop];
+					double[] servt_arr = new double[totalPop];
 					ArrayUtils.fromCSV(servt_arr, stimes);
 
-					System.arraycopy(servt_arr, 0, serviceTimes[stationNum][k], 0, maxpop);
+					System.arraycopy(servt_arr, 0, serviceTimes[stationNum][k], 0, totalPop);
 				}
 			} else { //LI or delay
 				if (statType.equals("delaystation")) {
@@ -2040,25 +2058,19 @@ public class ExactModel implements ExactConstants  {
 					if (alg == null) {
 						continue;
 					}
-					boolean isApprox = !alg.isExact();
 					if (i == 0) {
 						queueLen.put(alg, new double[stations][classes][iterations]);
 						throughput.put(alg, new double[stations][classes][iterations]);
 						resTimes.put(alg, new double[stations][classes][iterations]);
 						util.put(alg, new double[stations][classes][iterations]);
-						if (isApprox) {
-							algIterations.put(alg, new int[iterations]);
-						}
+						algIterations.put(alg, new int[iterations]);
 					}
 
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Number of Customers"), queueLen.get(alg), i);
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Throughput"), throughput.get(alg), i);
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Residence time"), resTimes.get(alg), i);
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Utilization"), util.get(alg), i);
-					if (isApprox) {
-						int algIters = Integer.parseInt(a_alg.getAttribute("iterations"));
-						algIterations.get(alg)[i] = algIters;
-					}
+					algIterations.get(alg)[i] = Integer.parseInt(a_alg.getAttribute("iterations"));
 				}
 				/* END */
 			} else {

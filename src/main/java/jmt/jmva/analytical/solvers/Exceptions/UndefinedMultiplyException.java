@@ -7,7 +7,10 @@ package jmt.jmva.analytical.solvers.Exceptions;
  */
 public class UndefinedMultiplyException extends Exception {
 
-    public UndefinedMultiplyException() {
-        super();
-    }
+	private static final long serialVersionUID = 1L;
+
+	public UndefinedMultiplyException() {
+		super();
+	}
+
 }

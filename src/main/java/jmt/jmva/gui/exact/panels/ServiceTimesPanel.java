@@ -117,7 +117,7 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		/* arrays are copied to ensure data object consistency is preserved */
 		ExactModel data = ew.getData();
 		synchronized (data) {
-			zeroLD = (data.isLd() && (data.getMaxpop() == 0));
+			zeroLD = (data.isLd() && (data.getTotalPop() == 0));
 			classes = data.getClasses();
 			stations = data.getStations();
 
@@ -133,7 +133,6 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 	 * Set up the panel contents and layout
 	 */
 	private void initComponents() {
-
 		stTable = new STTable();
 
 		Box hBox = Box.createHorizontalBox();
@@ -162,7 +161,6 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 
 		setLayout(new BorderLayout());
 		add(totalBox, BorderLayout.CENTER);
-
 	}
 
 	@Override
@@ -171,7 +169,6 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 	}
 
 	private void commit() {
-
 		stTable.stopEditing();
 
 		ExactModel data = ew.getData();
@@ -241,7 +238,6 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		 */
 		private static final long serialVersionUID = 1L;
 		private LDEditor ldEditor;
-		private ButtonCellEditor ldRenderer = new ButtonCellEditor(new JButton("LD Settings..."));
 
 		STTable() {
 			super(new STTableModel());
@@ -288,7 +284,7 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			if (stationTypes[row] == STATION_LD) {
-				return ldRenderer;
+				return new ButtonCellEditor(new JButton("LD Settings..."));
 			} else {
 				return super.getCellRenderer(row, column);
 			}
@@ -314,7 +310,7 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		public Component prepareEditor(TableCellEditor editor, int row, int column) {
 			if (editor instanceof LDEditor) {
 				LDEditor lde = ((LDEditor) editor);
-				lde.setStatus("Editing Service Times for " + stationNames[row], stationNames[row], classNames, serviceTimes[row]);
+				lde.setStatus("Editing Service Times of " + stationNames[row], classNames, serviceTimes[row]);
 				lde.startEditing(this, row);
 
 				return getCellRenderer(row, column).getTableCellRendererComponent(this, "LD Settings...", true, true, row, column);

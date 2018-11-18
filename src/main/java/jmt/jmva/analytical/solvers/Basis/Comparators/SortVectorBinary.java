@@ -58,8 +58,8 @@ public class SortVectorBinary implements Comparator<EnhancedVector> {
 				int value1 = 0, value2 = 0;
 				int size = v1.size();
 				for ( int i = 0; i < size - 1; i++) { //sum over first R - 1 positions
-					if (v1.get( size - 2 - i) > 0 ) value1 += (int) Math.pow(2,i);
-					if (v2.get( size - 2 - i) > 0 ) value2 += (int) Math.pow(2,i);
+					if (v1.get( size - 2 - i) > 0) value1 += (int) Math.pow(2,i);
+					if (v2.get( size - 2 - i) > 0) value2 += (int) Math.pow(2,i);
 				}
 				if (value1 < value2) {
 					return -1;
@@ -69,8 +69,8 @@ public class SortVectorBinary implements Comparator<EnhancedVector> {
 					// Vectors have non zero elements in same position
 					// Check 3: Compare values of non zero elements, left to right
 					for ( int j = 0; j < v1.size() - 1; j++) { //sum over first R - 1 positions
-						if (v1.get(j) < v2.get(j) ) return -1;
-						if (v1.get(j) > v2.get(j) ) return 1;
+						if (v1.get(j) < v2.get(j)) return -1;
+						if (v1.get(j) > v2.get(j)) return 1;
 					}
 					return 0;
 				}

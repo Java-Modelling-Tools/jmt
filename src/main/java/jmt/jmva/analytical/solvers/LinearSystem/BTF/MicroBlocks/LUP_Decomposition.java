@@ -101,7 +101,7 @@ public class LUP_Decomposition {
 					k_prime = i;
 				}
 			}
-			if ( p.isZero()) {
+			if (p.isZero()) {
 				throw new InconsistentLinearSystemException("LUP Decomposition failed: Singular Matrix");
 			}
 			P_exchange(k, k_prime);

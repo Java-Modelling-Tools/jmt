@@ -126,11 +126,9 @@ public class Moment {
 		for (int i = 0; i < stationTypes.length; i++) {
 			if (model.stationTypes[i] == ExactModel.STATION_DELAY) {
 				stationTypes[i] = Solver.DELAY;
-			}
-			else if (model.stationTypes[i] == ExactModel.STATION_LD) {
+			} else if (model.stationTypes[i] == ExactModel.STATION_LD) {
 				stationTypes[i] = Solver.LD;
-			}
-			else {
+			} else {
 				stationTypes[i] = Solver.LI;
 			}
 		}
@@ -148,13 +146,11 @@ public class Moment {
 		int[] stationTypes = new int[model.stationTypes.length];
 		for (int i = 0; i < stationTypes.length; i++) {
 			if (model.stationTypes[i] == ExactModel.STATION_DELAY) {
-				stationTypes[i] = Solver.DELAY;
-			}
-			else if (model.stationTypes[i] == ExactModel.STATION_LD) {
-				stationTypes[i] = Solver.LD;
-			}
-			else {
-				stationTypes[i] = Solver.LI;
+				stationTypes[i] = SolverMulti.DELAY;
+			} else if (model.stationTypes[i] == ExactModel.STATION_LD) {
+				stationTypes[i] = SolverMulti.LD;
+			} else {
+				stationTypes[i] = SolverMulti.LI;
 			}
 		}
 		
@@ -251,6 +247,7 @@ public class Moment {
 		double[][][] serviceTimes;
 		double[][] visits;
 		double tolerance;
+		int maxSamples;
 		
 		public MomentModel(ExactModel model) {
 			this.classes = model.getClasses();
@@ -261,6 +258,7 @@ public class Moment {
 			this.serviceTimes = ArrayUtils.copy3(model.getServiceTimes());
 			this.visits = ArrayUtils.copy2(model.getVisits());
 			this.tolerance = model.getTolerance();
+			this.maxSamples = model.getMaxSamples();
 		}
 		
 		public MomentModel(MomentModel model) {
@@ -272,6 +270,7 @@ public class Moment {
 			this.serviceTimes = ArrayUtils.copy3(model.serviceTimes);
 			this.visits = ArrayUtils.copy2(model.visits);
 			this.tolerance = model.tolerance;
+			this.maxSamples = model.maxSamples;
 		}
 		
 		public void addStationReplica(int index) {

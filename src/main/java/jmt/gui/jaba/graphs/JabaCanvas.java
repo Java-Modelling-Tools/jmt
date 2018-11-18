@@ -57,7 +57,7 @@ public class JabaCanvas extends JPanel implements AdjustmentListener{
 	private void updateBars() {
 		int deltaWidth = (graphWidth - this.getWidth());
 		int deltaHeight = (graphHeight-this.getHeight());
-		if ( deltaWidth > 0) {
+		if (deltaWidth > 0) {
 			hBar.setMinimum(0);
 			hBar.setMaximum(deltaWidth);
 			if (!hBar.isVisible())

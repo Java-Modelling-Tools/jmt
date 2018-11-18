@@ -37,6 +37,7 @@ public class EnhancedVector extends ArrayList<Integer> implements Comparable<Enh
 
     //TODO: More efficient implementation of several functions here. Special properties (i.e. zeroVector, containsMinusOne, etc) can be produced during every access, and not be the result of element-by-element search.
 
+    private static final long serialVersionUID = 1L;
     // This stack holds the "positions" of the elenents that have been altered.
     private Stack<Integer> positions = new Stack<Integer>();
     // This stack holds the "deltas" of alterations corresponding to each position.
@@ -392,7 +393,7 @@ public class EnhancedVector extends ArrayList<Integer> implements Comparable<Enh
     	String newLine = System.getProperty("line.separator");
     	System.out.print("[");
     	for (int i = 0; i < this.size(); i++) {
-    		System.out.print(this.get(i) + " ");    	 	
+    		System.out.print(this.get(i) + " ");
     	}
     	System.out.print("]" + newLine);
     }

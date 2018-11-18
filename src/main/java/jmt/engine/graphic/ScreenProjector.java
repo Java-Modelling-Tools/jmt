@@ -241,8 +241,8 @@ public class ScreenProjector {
 	 * @return The clipped condition.
 	 */
 	public boolean isClipped( Vector4 projectedPoint ) {
-		int x = (int)projectedPoint.x();
-		int y = (int)projectedPoint.y();
+		int x = (int) projectedPoint.x();
+		int y = (int) projectedPoint.y();
 		return x < screenW && x < screenH && (x + 1) >= 0 && (y + 1) >= 0; // TODO: Z-tests
 	}
 }

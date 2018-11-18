@@ -92,7 +92,6 @@ public abstract class Solver {
 	 *  @return true if the operation is completed with success
 	 */
 	public boolean input(String[] n, int[] t, double[][] s, double[] v) {
-
 		//OLD
 		//if ((n.length > stations) || (t.length > stations) || (s.length > stations) || (v.length > stations))
 		//NEW
@@ -133,30 +132,9 @@ public abstract class Solver {
 		}
 	}
 
-	/*
-	OLD
-
-	public String toString() {
-		StringBuffer buf = new StringBuffer();
-		buf.append(getClass().getName());
-		buf.append("\n-------------------------");
-		for (int i = 0; i < stations; i++) {
-			buf.append("\nIndices " + name[i]);
-			buf.append("\nthroughput          : " + throughput[i]);
-			buf.append("\nutilization         : " + utilization[i]);
-			buf.append("\nmean queue length   : " + queueLen[i]);
-			buf.append("\nmean residence time : " + residenceTime[i]);
-		}
-		buf.append("\n\nsystem throughput    : " + totThroughput);
-		buf.append("\nsystem response time : " + totRespTime);
-		buf.append("\nsystem users : " + totUser);
-		return buf.toString();
-	}
-	*/
 	/** generates a string with all the calculated indices.
 	 * @return the string
 	 */
-
 	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
@@ -292,9 +270,7 @@ public abstract class Solver {
 	 * WARNING: This method should be called before solving the system.
 	 * @return true if sufficient capacity exists for the given workload, false otherwise
 	 */
-
 	public abstract boolean hasSufficientProcessingCapacity();
-
 	//end NEW
 
 	/**

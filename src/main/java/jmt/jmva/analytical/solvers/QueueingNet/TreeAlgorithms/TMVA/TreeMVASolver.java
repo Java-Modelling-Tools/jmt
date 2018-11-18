@@ -13,7 +13,7 @@ import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.TreePlanter;
 import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.TreePrinter;
 
 /**
- * Tree-MVA implementation based on Hoyme and Tucci papers from 1985.
+ * Tree MVA implementation based on Hoyme and Tucci papers from 1985.
  * @author Ben Homer, 2014.
  */
 public class TreeMVASolver extends QNSolver {
@@ -63,7 +63,7 @@ public class TreeMVASolver extends QNSolver {
      */
     @Override
     public void printWelcome() {
-        System.out.println("Using Tree-MVA. Multi-core=" + (numThreads > 1));
+        System.out.println("Using Tree MVA. Multi-core=" + (numThreads > 1));
     }
 	
     /**

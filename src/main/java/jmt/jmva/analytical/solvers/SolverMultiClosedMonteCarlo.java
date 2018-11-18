@@ -10,17 +10,17 @@ import jmt.jmva.analytical.solvers.QueueingNet.MonteCarloSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 
 /**
- * Created by ellasu on 25/06/2015.
+ * Created by ellasu on 25 Jun 2016.
  */
 public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
-	public static final int MAX_SAMPLES = 10000;
+	public static final int DEFAULT_MAX_SAMPLES = 1000;
 	//Array containing population for each class
 	protected int[] population;
-	private Integer scale = 1000000;
+	protected Integer scale = 1000000;
 
-	private int maxSamples = MAX_SAMPLES;
-	private double tolerance = Math.pow(10, -7);
+	protected int maxSamples = DEFAULT_MAX_SAMPLES;
+	protected double tolerance = Math.pow(10, -7);
 	/**
 	 * Contains the queueing network model
 	 */
@@ -30,8 +30,8 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
 	/** Creates new SolverMultiClosedMonteCarlo
 	 *  @param  stations    number of service centers
-	 *  @param  classes     number o classes of classes
-	 *  @param  population     array of population classes
+	 *  @param  classes     number of classes
+	 *  @param  population  array of class populations
 	 */
 	public SolverMultiClosedMonteCarlo(int classes, int stations, int[] population) {
 		super(classes, stations);
@@ -61,7 +61,7 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 		servTime = new double[stations][classes][1];
 		for (int i = 0; i < stations; i++) {
 			for (int r = 0; r < classes; r++) {
-				servTime[i][r][0]=s[i][r][0] * scale;
+				servTime[i][r][0] = s[i][r][0] * scale;
 			}
 		}
 
@@ -115,8 +115,6 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
 			// Instantiate queueing network model
 			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
-			qnm.N.print();
-
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			// Return false if initialisation fails for any reason.
@@ -137,7 +135,7 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 	@Override
 	public void solve() {
 		QNSolver c = null;
-		try{
+		try {
 			c = new MonteCarloSolver(qnm, tolerance, maxSamples);
 			c.computeNormalisingConstant();
 		} catch (Exception e) {
@@ -199,7 +197,6 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 			}
 		}
 
-
 		//NEW
 		//@author Stefano Omini
 		//compute system parameters
@@ -216,7 +213,6 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
 		sysThroughput = sysNumJobs / sysResponseTime;
 		//end NEW
-
 	}
 
 	public void setMaxSamples(int maxSamples) {
@@ -229,7 +225,8 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
 	public static Integer validateMaxSamples(String maxSamples) {
 		try {
-			return Integer.parseInt(maxSamples);
+			Integer value = Integer.parseInt(maxSamples);
+			return (value < 20) ? null : value;
 		} catch (Exception e) {
 			return null;
 		}
@@ -240,4 +237,5 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 		// only closed class - no saturation problem
 		return true;
 	}
+
 }

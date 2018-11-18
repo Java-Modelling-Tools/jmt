@@ -286,15 +286,15 @@ public class ModelChecker implements CommonConstants {
 	 * @param class_def reference to class definition data structure
 	 * @param station_def reference to station definition data structure
 	 * @param simulation_def reference to simulation definition data structure
-	 * @param bd reference to blocking region definition data structure
+	 * @param brd reference to blocking region definition data structure
 	 * @param isToJMVA true if model must be converted to jmva, false otherwise
 	 */
-	public ModelChecker(ClassDefinition class_def, StationDefinition station_def, SimulationDefinition simulation_def, BlockingRegionDefinition bd,
+	public ModelChecker(ClassDefinition class_def, StationDefinition station_def, SimulationDefinition simulation_def, BlockingRegionDefinition brd,
 			boolean isToJMVA) {
 		this.class_def = class_def;
 		this.station_def = station_def;
 		this.simulation_def = simulation_def;
-		this.blocking_def = bd;
+		this.blocking_def = brd;
 		errors = new boolean[NUMBER_OF_ERROR_TYPES];
 		warnings = new boolean[NUMBER_OF_WARNING_TYPES];
 		sourcesWithoutOpenClass = new Vector<Object>(0, 1);
@@ -1836,6 +1836,10 @@ public class ModelChecker implements CommonConstants {
 			OUTER_LOOP:
 			for (int j = 0; j < forwardStations.size(); j++) {
 				Object thisForwardStation = forwardStations.get(j);
+				int stationCapacity = station_def.getStationQueueCapacity(thisForwardStation);
+				if (stationCapacity < 1) {
+					continue;
+				}
 				Vector<Object> classes = class_def.getClassKeys();
 				for (int k = 0; k < classes.size(); k++) {
 					Object thisClass = classes.get(k);

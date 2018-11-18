@@ -130,12 +130,12 @@ public class BTFLinearSystem extends LinearSystem {
 	private void generate() throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException {
 		PopulationChangeVector n;
 		int row_added;
-	   	for (int i = 0; i < MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M); i++)  { //loop over all possible population changes n
+	   	for (int i = 0; i < MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M); i++) { //loop over all possible population changes n
 	   		n  = basis.getPopulationChangeVector(i).copy(); // To improve bug safety
 	   		
 	   		if (n.sumHead(qnm.R - 1) < qnm.M) {
 	   			for (int k = 1; k <= qnm.M; k++) {
-	   				row_added = x_block.addCE(basis.indexOf(n,k), n, k);   				
+	   				row_added = x_block.addCE(basis.indexOf(n,k), n, k);
 	   				y_block.addCE(row_added, n, k);
 	   				b1_block.addCE(row_added, n, k);	   				
 	  			}
@@ -155,11 +155,11 @@ public class BTFLinearSystem extends LinearSystem {
 	public void initialiseMatricesForClass(PopulationVector current_N, int current_class) throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException {		
 		
 		//create sub-blocks for the current class
-		x  = (XBlock)   x_block.subBlock(current_class);
-		y  = (YBlock)   y_block.subBlock(current_class);
+		x  = (XBlock)  x_block.subBlock(current_class);
+		y  = (YBlock)  y_block.subBlock(current_class);
 		b1 = (B1Block) b1_block.subBlock(current_class);
 		b2 = (B2Block) b2_block.subBlock(current_class);
-		c  = (CBlock)   c_block.subBlock(current_class);
+		c  = (CBlock)  c_block.subBlock(current_class);
 		
 		System.out.print("Matrices for class " + current_class + "\n\n\n");
 		
@@ -191,7 +191,7 @@ public class BTFLinearSystem extends LinearSystem {
 	}
 	
 	@Override
-	public void update(int current_class_population ) {
+	public void update(int current_class_population) {
 		b2.update(current_class_population);
 	}
 	
@@ -211,7 +211,7 @@ public class BTFLinearSystem extends LinearSystem {
 		c.multiply(lhs_result);			
 		
 		//achieves identity rows in A
-		for (int i = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M; i < basis.getSize(); i++) {
+		for (int i = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M; i < basis.getSize(); i++) {
 			lhs_result[i] = basis.getNewValue(i).copy();
 		}
 	}
@@ -242,7 +242,7 @@ public class BTFLinearSystem extends LinearSystem {
 		
 		//print A
 		//calculate the number of rows in the top blocks of the matrices
-		int top_half_rows = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M;
+		int top_half_rows = MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M;
 		
 		for (int row = 0; row < top_half_rows; row++) {
 			x_block.printRow2(row);			

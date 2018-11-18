@@ -27,6 +27,8 @@ import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
  */
 public class MultiplicitiesVector extends EnhancedVector {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Creates an empty MultiplicitiesVector object.
      */
@@ -82,7 +84,7 @@ public class MultiplicitiesVector extends EnhancedVector {
     public int whichSingleQueueAdded() throws InternalErrorException {
     	int queue_added = 0;
     	for (int i = 0; i < size(); i++) {
-    		if (get(i)  != 0 ) {
+    		if (get(i) != 0) {
     			if (queue_added > 0 || get(i) != 1) {
     				throw new InternalErrorException("Internal Error: Called whichSingleQueueAdded() on a vector with more than one non-zero element");
     			} else {

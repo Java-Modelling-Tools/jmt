@@ -1,9 +1,5 @@
 package jmt.engine.jwat.fitting;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
 public class ParetoFitting implements FittingAlgorithm {
 	private double sigmaML;
 	private double alphaML;

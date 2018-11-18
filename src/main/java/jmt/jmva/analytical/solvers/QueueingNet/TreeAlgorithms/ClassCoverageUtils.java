@@ -12,7 +12,7 @@ import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 public class ClassCoverageUtils {
 	
 	/**
-	 * Enum to represent the 3 types of class coverage: fully-covered, partially-covered and non-covered,
+	 * Enum to represent the 3 types of class coverages: fully-covered, partially-covered and non-covered,
 	 * as defined in the LamLien83 paper.
 	 */
 	public enum Covered { FULLY, PARTIALLY, NON };

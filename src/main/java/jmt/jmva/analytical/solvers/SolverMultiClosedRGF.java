@@ -9,13 +9,13 @@ import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.RGFSolver;
 
 /**
- * Solves a multiclass closed model, using RGF algorithm
+ * Solves a multiclass closed model, using RGF algorithm.
  */
 public class SolverMultiClosedRGF extends SolverMulti {
 
 	//Array containing population for each class
 	protected int[] population;
-	private Integer scale = 1000000;
+	protected Integer scale = 1000000;
 
 	/**
 	 * Contains the queueing network model
@@ -30,8 +30,8 @@ public class SolverMultiClosedRGF extends SolverMulti {
 
 	/** Creates new SolverMultiClosedRGF
 	 *  @param  stations    number of service centers
-	 *  @param  classes     number o classes of classes
-	 *  @param  population     array of population classes
+	 *  @param  classes     number of classes
+	 *  @param  population  array of class populations
 	 */
 	public SolverMultiClosedRGF(int classes, int stations, int[] population) {
 		super(classes, stations);
@@ -62,7 +62,7 @@ public class SolverMultiClosedRGF extends SolverMulti {
 		servTime = new double[stations][classes][1];
 		for (int i = 0; i < stations; i++) {
 			for (int r = 0; r < classes; r++) {
-				servTime[i][r][0]=s[i][r][0] * scale;
+				servTime[i][r][0] = s[i][r][0] * scale;
 			}
 		}
 
@@ -116,8 +116,6 @@ public class SolverMultiClosedRGF extends SolverMulti {
 
 			// Instantiate queueing network model
 			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);
-			qnm.N.print();
-
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			// Return false if initialisation fails for any reason.
@@ -138,7 +136,7 @@ public class SolverMultiClosedRGF extends SolverMulti {
 	@Override
 	public void solve() {
 		QNSolver c = null;
-		try{
+		try {
 			c = new RGFSolver(qnm);
 			c.computeNormalisingConstant();
 		} catch (Exception e) {
@@ -207,7 +205,6 @@ public class SolverMultiClosedRGF extends SolverMulti {
 			}
 		}
 
-
 		//NEW
 		//@author Stefano Omini
 		//compute system parameters
@@ -224,7 +221,6 @@ public class SolverMultiClosedRGF extends SolverMulti {
 
 		sysThroughput = sysNumJobs / sysResponseTime;
 		//end NEW
-
 	}
 
 	@Override
@@ -232,4 +228,5 @@ public class SolverMultiClosedRGF extends SolverMulti {
 		// only closed class - no saturation problem
 		return true;
 	}
+
 }

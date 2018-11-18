@@ -16,9 +16,8 @@ public class TypeOneBlocks extends MicroBlockSelectionPolicy {
 
 	@Override
 	protected MicroBlock[] selectMicroBlocks(int current_class) {
-		
 		int number_of_micro_blocks = MiscFunctions.binomialCoefficient(current_class - 1, full_block.h);
-		
+
 		//Take required macro blocks
 		MicroBlock[] micro_blocks = new MicroBlock[number_of_micro_blocks];
 		for (int i = 0; i < micro_blocks.length; i++) {

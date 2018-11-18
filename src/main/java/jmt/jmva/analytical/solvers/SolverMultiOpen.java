@@ -64,9 +64,10 @@ public class SolverMultiOpen extends SolverMulti {
 	public void solve() {
 		//tests if all the resources, stations, are load independent
 		boolean loadIndep = true;
-		for (int i = 0; i < stations && loadIndep; i++) {
+		for (int i = 0; i < stations; i++) {
 			if (type[i] == LD) {
 				loadIndep = false;
+				break;
 			}
 		}
 
@@ -120,7 +121,6 @@ public class SolverMultiOpen extends SolverMulti {
 				queueLen[j][i] = residenceTime[j][i] * lambda[i];
 				//aggregate response time for class i
 				clsRespTime[i] += residenceTime[j][i];
-
 			}
 		}
 
@@ -181,4 +181,5 @@ public class SolverMultiOpen extends SolverMulti {
 		//there are no stations with aggregate utilization >= number of servers
 		return true;
 	}
+
 }

@@ -78,7 +78,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 
 	private ClassDefinition cd;
 	private StationDefinition sd;
-	private BlockingRegionDefinition bd;
+	private BlockingRegionDefinition brd;
 	// Global components
 	private JButton addRegion;
 	private JSpinner regionsNumSpinner;
@@ -128,12 +128,12 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 	 * Creates a new BlockingRegionsPanel with given data structures
 	 * @param cd class definition data structure
 	 * @param sd station definition data structure
-	 * @param bd blocking region definition data structure
+	 * @param brd blocking region definition data structure
 	 */
-	public BlockingRegionsPanel(ClassDefinition cd, StationDefinition sd, BlockingRegionDefinition bd) {
+	public BlockingRegionsPanel(ClassDefinition cd, StationDefinition sd, BlockingRegionDefinition brd) {
 		this.cd = cd;
 		this.sd = sd;
-		this.bd = bd;
+		this.brd = brd;
 		initComponents();
 		initActions();
 	}
@@ -142,13 +142,13 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 	 * Changes data structure references of this panel
 	 * @param cd
 	 * @param sd
-	 * @param bd
+	 * @param brd
 	 */
-	public void setData(ClassDefinition cd, StationDefinition sd, BlockingRegionDefinition bd) {
+	public void setData(ClassDefinition cd, StationDefinition sd, BlockingRegionDefinition brd) {
 		this.cd = cd;
 		this.sd = sd;
-		this.bd = bd;
-		counter = bd.getRegionKeys().size();
+		this.brd = brd;
+		counter = brd.getRegionKeys().size();
 		regions.getSelectionModel().clearSelection();
 		update();
 	}
@@ -222,7 +222,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 					}
 					// If value is valid
 					if (val >= 0) {
-						int diff = val - bd.getRegionKeys().size();
+						int diff = val - brd.getRegionKeys().size();
 						// Avoid cyclic updates whenever no differences are inserted
 						if (diff == 0) {
 							return;
@@ -235,7 +235,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 						}
 						while (diff < 0) {
 							// Delete last region
-							bd.deleteBlockingRegion(bd.getRegionKeys().lastElement());
+							brd.deleteBlockingRegion(brd.getRegionKeys().lastElement());
 							diff++;
 						}
 					}
@@ -271,7 +271,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 				// A new blocking panel has to be created
 				if (blockingPanel == null) {
 					BlockingRegionsPanel.this.remove(emptyPanel);
-					blockingPanel = new BlockingStationsPanel(cd, sd, bd, key);
+					blockingPanel = new BlockingStationsPanel(cd, sd, brd, key);
 					BlockingRegionsPanel.this.add(blockingPanel, BorderLayout.CENTER);
 					blockingPanel.gotFocus();
 					BlockingRegionsPanel.this.validate();
@@ -280,7 +280,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 				else {
 					// Lose focus on old data
 					blockingPanel.lostFocus();
-					blockingPanel.setData(cd, sd, bd, key);
+					blockingPanel.setData(cd, sd, brd, key);
 					// Got focus for new data
 					blockingPanel.gotFocus();
 				}
@@ -292,8 +292,8 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 	 * Adds a new blocking region to current model
 	 */
 	private void addRegion() {
-		if (bd.getRegionKeys().size() < MAX_NUMBER_OF_REGIONS) {
-			bd.addBlockingRegion(Defaults.get("blockingRegionName") + (++counter), Defaults.get("blockingRegionType"));
+		if (brd.getRegionKeys().size() < MAX_NUMBER_OF_REGIONS) {
+			brd.addBlockingRegion(Defaults.get("blockingRegionName") + (++counter), Defaults.get("blockingRegionType"));
 		}
 	}
 
@@ -301,12 +301,12 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 	 * Updates region spinner and region list to reflect current blocking regions
 	 */
 	private void update() {
-		if (bd.getRegionKeys().size() >= MAX_NUMBER_OF_REGIONS) {
+		if (brd.getRegionKeys().size() >= MAX_NUMBER_OF_REGIONS) {
 			addRegion.setEnabled(false);
 		} else {
 			addRegion.setEnabled(true);
 		}
-		regionsNumSpinner.setValue(Integer.valueOf(bd.getRegionKeys().size()));
+		regionsNumSpinner.setValue(Integer.valueOf(brd.getRegionKeys().size()));
 		int index = regions.getSelectedRow();
 		int count = regions.getRowCount();
 		regions.tableChanged(new TableModelEvent(regions.getModel()));
@@ -346,7 +346,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 			public void actionPerformed(ActionEvent e) {
 				int index = regions.getSelectedRow();
 				Object key = regions.getValueAt(index, 0);
-				bd.deleteBlockingRegion(key);
+				brd.deleteBlockingRegion(key);
 				BlockingRegionsPanel.this.update();
 			}
 
@@ -516,7 +516,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 		 * @see #getColumnCount
 		 */
 		public int getRowCount() {
-			return bd.getRegionKeys().size();
+			return brd.getRegionKeys().size();
 		}
 
 		/**
@@ -530,28 +530,28 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			// Try catch for concurrency problems when deleting regions
 			try {
-				Object key = bd.getRegionKeys().get(rowIndex);
+				Object key = brd.getRegionKeys().get(rowIndex);
 				Integer value = null;
 				switch (columnIndex) {
 				case 0:
 					return key;
 				case 1:
-					value = bd.getRegionCustomerConstraint(key);
+					value = brd.getRegionCustomerConstraint(key);
 					return (value.intValue() > 0) ? value : "\u221e";
 				case 2:
-					value = bd.getRegionCustomerConstraint(key);
+					value = brd.getRegionCustomerConstraint(key);
 					return Boolean.valueOf(value.intValue() < 1);
 				case 3:
-					value = bd.getRegionMemorySize(key);
+					value = brd.getRegionMemorySize(key);
 					return (value.intValue() > 0) ? value : "\u221e";
 				case 4:
-					value = bd.getRegionMemorySize(key);
+					value = brd.getRegionMemorySize(key);
 					return Boolean.valueOf(value.intValue() < 1);
 				case 5:
-					value = bd.getRegionGroupList(key).size();
+					value = brd.getRegionGroupList(key).size();
 					return (value.intValue() > 0) ? value : "--";
 				case 6:
-					value = bd.getRegionGroupList(key).size();
+					value = brd.getRegionGroupList(key).size();
 					return Boolean.valueOf(value.intValue() > 0);
 				default:
 					return null;
@@ -571,14 +571,14 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 		 */
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			Object key = bd.getRegionKeys().get(rowIndex);
+			Object key = brd.getRegionKeys().get(rowIndex);
 			Integer value = null;
 			switch (columnIndex) {
 				case 1:
 					try {
 						value = Integer.decode((String) aValue);
 						if (value.intValue() > 0) {
-							bd.setRegionCustomerConstraint(key, value);
+							brd.setRegionCustomerConstraint(key, value);
 						}
 					} catch (NumberFormatException e) {
 						// Do nothing
@@ -586,20 +586,20 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 					break;
 				case 2:
 					if (((Boolean) aValue).booleanValue()) {
-						bd.setRegionCustomerConstraint(key, Integer.valueOf(-1));
+						brd.setRegionCustomerConstraint(key, Integer.valueOf(-1));
 					} else {
 						value = Defaults.getAsInteger("blockingMaxJobs");
 						if (value.intValue() < 1) {
 							value = Integer.valueOf(1);
 						}
-						bd.setRegionCustomerConstraint(key, value);
+						brd.setRegionCustomerConstraint(key, value);
 					}
 					break;
 				case 3:
 					try {
 						value = Integer.decode((String) aValue);
 						if (value.intValue() > 0) {
-							bd.setRegionMemorySize(key, value);
+							brd.setRegionMemorySize(key, value);
 						}
 					} catch (NumberFormatException e) {
 						// Do nothing
@@ -607,13 +607,13 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 					break;
 				case 4:
 					if (((Boolean) aValue).booleanValue()) {
-						bd.setRegionMemorySize(key, Integer.valueOf(-1));
+						brd.setRegionMemorySize(key, Integer.valueOf(-1));
 					} else {
 						value = Defaults.getAsInteger("blockingMaxMemory");
 						if (value.intValue() < 1) {
 							value = Integer.valueOf(1);
 						}
-						bd.setRegionMemorySize(key, value);
+						brd.setRegionMemorySize(key, value);
 					}
 					break;
 				case 5:
@@ -694,7 +694,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 			label.setFont(isSelected ? label.getFont().deriveFont(Font.BOLD) : label.getFont().deriveFont(Font.ROMAN_BASELINE));
 			int fontSize = label.getFont().getSize();
 			Dimension iconSize = new Dimension(fontSize, fontSize);
-			label.setText(bd.getRegionName(value));
+			label.setText(brd.getRegionName(value));
 			label.setIcon(JMTImageLoader.loadImage("BlockingRegion", iconSize));
 			label.setHorizontalAlignment(SwingConstants.LEFT);
 			return label;
@@ -749,7 +749,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 		public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 			field = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, column);
 			key = value;
-			field.setText(bd.getRegionName(key));
+			field.setText(brd.getRegionName(key));
 			return field;
 		}
 
@@ -761,7 +761,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 		@Override
 		public Object getCellEditorValue() {
 			if (!field.getText().equals("")) {
-				bd.setRegionName(key, field.getText());
+				brd.setRegionName(key, field.getText());
 			}
 			return key;
 		}

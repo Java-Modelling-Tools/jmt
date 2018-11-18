@@ -25,7 +25,7 @@ import jmt.jmva.analytical.solvers.Utilities.MiscFunctions;
 public class YBlock extends ATopLevelBlock {
 	
 	public YBlock(QNModel qnm, CoMoMBasis basis) throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException {
-		super(qnm, basis, new Position(0, MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1 , qnm.M) * qnm.M));	
+		super(qnm, basis, new Position(0, MiscFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M));	
 		selection_policy = new TypeOneBlocks(qnm, this, current_class);	
 	}
 

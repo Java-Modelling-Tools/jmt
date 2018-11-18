@@ -108,11 +108,11 @@ public class XMicroBlock extends MatrixMicroBlock {
 		col -= position.col;		
 		
 		if (col < 0 || col >= array.length) throw new BTFMatrixErrorException("Column not in micro block, when considering n:" + n +" class: " + _class);
-		if ( col + qnm.M - 1 >= array.length) throw new BTFMatrixErrorException("PC will not fit, when considering:" + n +" class: " + _class);
+		if (col + qnm.M - 1 >= array.length) throw new BTFMatrixErrorException("PC will not fit, when considering:" + n +" class: " + _class);
 		
 		for (int k = 1; k <= qnm.M; k++) {			
 			
-			array[row][col] = qnm.getDemandAsBigRational( k - 1, _class -1).negate();  
+			array[row][col] = qnm.getDemandAsBigRational(k - 1, _class -1).negate();
 			col++;  //NOTE: Specific to this order
 		}
 		

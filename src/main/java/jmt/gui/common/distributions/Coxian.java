@@ -148,7 +148,7 @@ public class Coxian extends Distribution {
 			l0 = (2 / mean) / (1 + Math.sqrt(1 + 2 * (c * c - 1)));
 			l1 = (2 / mean) / (1 - Math.sqrt(1 + 2 * (c * c - 1)));
 			p0 = 0;
-		} else if (c == 1){
+		} else if (c == 1) {
 			l0 = 1 / mean;
 			l1 = 1 / mean;			
 			p0 = 1;

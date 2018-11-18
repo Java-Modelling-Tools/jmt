@@ -11,7 +11,7 @@ import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.Node;
 import jmt.jmva.analytical.solvers.QueueingNet.TreeAlgorithms.Printer;
 
 /**
- * Layer inbetween the single and multi-threaded solvers and the convolution core.
+ * Layer in between the single and multi-threaded solvers and the convolution core.
  * @author Ben Homer, 2014.
  */
 public class ConvolutionLayer {
@@ -230,39 +230,39 @@ public class ConvolutionLayer {
 		PopulationVector p = new PopulationVector(ps);
 		PopulationVector orig = p.copy();
 
-//		int sumNk = 0;
-//		int sumik = 0;
-//		for (int cls : fc) {
-//			int Nk = popVec.get(cls); // qnm.getPopulationVector().get(k);
-//			sumNk += Nk;
-//		}
+		//int sumNk = 0;
+		//int sumik = 0;
+		//for (int cls : fc) {
+		//	int Nk = popVec.get(cls); // qnm.getPopulationVector().get(k);
+		//	sumNk += Nk;
+		//}
 		
 		System.out.println("Computing leaf g array for m = " + m);
-//		for (PopulationVector p : pvectors) {
+		//for (PopulationVector p : pvectors) {
 		while (p != null) {
 			BigRational res;
 
 			int sumik = 0;
 			int sumNk = 0;
 
-//			for (int c : fc) {
-//				int Nk = popVec.get(k); // qnm.getPopulationVector().get(k);
+			//for (int c : fc) {
+			//int Nk = popVec.get(k); // qnm.getPopulationVector().get(k);
 				sumNk += popVec.get(k);
-//			}
+			//}
 
-//			int idx = 0;
-//			for (int c : pc) {
+			//int idx = 0;
+			//for (int c : pc) {
 				int ik = p.get(0);
-//				idx++;
+			//idx++;
 				sumik += ik;
-//			}
+			//}
 
-//			int nm = sumik + sumNk;
+			//int nm = sumik + sumNk;
 
-			BigRational nm = new BigRational(sumNk + sumik) ;//sumik + sumNk);
-//			int k = popVec.size()-1;
+			BigRational nm = new BigRational(sumNk + sumik);//sumik + sumNk);
+			//int k = popVec.size()-1;
 			BigRational Nk = new BigRational(popVec.get(k));
-//			BigRational nm = new BigRational(popVec.get(m));
+			//BigRational nm = new BigRational(popVec.get(m));
 			BigRational pmk = qnm.getDemandAsBigRational(m, k);
 			res = Nk.divide(nm.multiply(pmk));
 			

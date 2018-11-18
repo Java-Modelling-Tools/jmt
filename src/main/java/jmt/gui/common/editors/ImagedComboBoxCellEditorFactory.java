@@ -59,10 +59,10 @@ public class ImagedComboBoxCellEditorFactory {
 	public static final int OPTION_FJ_STATION_NAMES = 5;
 	public static final int OPTION_TRANSITION_MODES = 6;
 
-	/** Station Definition data structure */
-	protected StationDefinition sd;
 	/** Class Definition data structure */
 	protected ClassDefinition cd;
+	/** Station Definition data structure */
+	protected StationDefinition sd;
 	/** Instance Option **/
 	protected int option;
 	/** Cache for components */
@@ -111,7 +111,7 @@ public class ImagedComboBoxCellEditorFactory {
 	 * Creates a new ImagedComboBoxCellEditorFactory used to display
 	 * texts with images according to the specified option.
 	 */
-	public ImagedComboBoxCellEditorFactory(ClassDefinition cd, StationDefinition sd, int option) {
+	public ImagedComboBoxCellEditorFactory(Object md, int option) {
 		this.option = option;
 		switch (option) {
 		case OPTION_CLASS_TYPES:
@@ -120,12 +120,12 @@ public class ImagedComboBoxCellEditorFactory {
 			break;
 		case OPTION_CLASS_NAMES:
 			allowsNull = true;
-			setData(cd);
+			setData((ClassDefinition) md);
 			break;
 		case OPTION_STATION_NAMES:
 		case OPTION_FJ_STATION_NAMES:
 			allowsNull = false;
-			setData(sd);
+			setData((StationDefinition) md);
 			break;
 		case OPTION_TRANSITION_MODES:
 			allowsNull = true;
@@ -220,20 +220,21 @@ public class ImagedComboBoxCellEditorFactory {
 	 * @return created component
 	 */
 	protected LabelRenderer getDrawComponent(Object key) {
-		LabelRenderer label;
 		if (key == null) {
 			if (nullRenderer == null) {
 				nullRenderer = new LabelRenderer(null);
 			}
 			return nullRenderer;
-		}
-		if (cache.containsKey(key)) {
-			label = cache.get(key);
 		} else {
-			label = new LabelRenderer(key);
-			cache.put(key, label);
+			LabelRenderer label;
+			if (cache.containsKey(key)) {
+				label = cache.get(key);
+			} else {
+				label = new LabelRenderer(key);
+				cache.put(key, label);
+			}
+			return label;
 		}
-		return label;
 	}
 
 	/**
@@ -282,14 +283,18 @@ public class ImagedComboBoxCellEditorFactory {
 				}
 				break;
 			case OPTION_STATION_NAMES:
+				if (key != null && key.equals("")) {
+					setText(CommonConstants.ALL_STATIONS);
+					break;
+				}
 				if (sd.getStationName(key) != null && !sd.getStationName(key).equals("")) {
 					setText(sd.getStationName(key));
 					setIcon(JMTImageLoader.loadImage(sd.getStationType(key) + "Cell", iconSize));
 				}
 				if (sd instanceof BlockingRegionDefinition) {
-					BlockingRegionDefinition bd = (BlockingRegionDefinition) sd;
-					if (bd.getRegionName(key) != null && !bd.getRegionName(key).equals("")) {
-						setText(bd.getRegionName(key));
+					BlockingRegionDefinition brd = (BlockingRegionDefinition) sd;
+					if (brd.getRegionName(key) != null && !brd.getRegionName(key).equals("")) {
+						setText(brd.getRegionName(key));
 						setIcon(JMTImageLoader.loadImage("BlockingRegion", iconSize));
 					}
 				}

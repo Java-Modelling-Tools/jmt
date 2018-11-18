@@ -889,7 +889,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					h++;
 				}
 				String value = subParamChild.item(h).getChildNodes().item(0).getNodeValue();
-				Object classOutKey = model.getClassByName(classOut);    			
+				Object classOutKey = model.getClassByName(classOut);
 				model.setClassSwitchMatrix(stationKey, classInKey, classOutKey, Float.parseFloat(value));
 			}
 		}

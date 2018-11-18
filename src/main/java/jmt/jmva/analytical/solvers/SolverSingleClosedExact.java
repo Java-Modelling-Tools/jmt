@@ -50,15 +50,14 @@ public class SolverSingleClosedExact extends Solver {
 	 */
 	protected double[] auxFun;
 
-	/* used in dinamic Scaling, now disabled */
+	/* used in dynamic Scaling, now disabled */
 	//	private ArrayList scaleFact = new ArrayList();
 	/**
 	 * Creates a new SolverSingleClosedExact
-	 *  @param  stations number of service centers (stations)
-	 *  @param  customers number of customers
+	 *  @param  stations    number of service centers
+	 *  @param  customers   number of customers
 	 */
 	public SolverSingleClosedExact(int customers, int stations) {
-
 		this.customers = customers;
 		this.stations = stations;
 
@@ -106,7 +105,6 @@ public class SolverSingleClosedExact extends Solver {
 			for (int j = 1; j <= customers; j++) {
 				queueLen[stations - 1] = (servTime[stations - 1][0] * visits[stations - 1] * G[j - 1] / G[j]) * (1 + queueLen[stations - 1]);
 			}
-
 		} else {//LD station
 			utilization[stations - 1] = 1 - (auxFun[customers] / G[customers]);
 			queueLen[stations - 1] = queueLen[stations - 1] / G[customers];
@@ -190,7 +188,6 @@ public class SolverSingleClosedExact extends Solver {
 		//closed class: no saturation problem
 		return true;
 	}
-
 	//end NEW
 
 	/**
@@ -210,8 +207,8 @@ public class SolverSingleClosedExact extends Solver {
 		double[] FM = new double[customers + 1];
 		double temp;
 		double sum = 0;
-		//		double MAX = Double.parseDouble("1.0e100");
-		//		double MIN = Double.parseDouble("1.0e-100");
+		//double MAX = Double.parseDouble("1.0e100");
+		//double MIN = Double.parseDouble("1.0e-100");
 		long start; // used in time elapsed calculating
 		long end; // used in time elapsed calculating
 		int center = 0; // center index
@@ -237,7 +234,6 @@ public class SolverSingleClosedExact extends Solver {
 		if (type[0] == Solver.LD) {
 			for (int n = 1; n < G.length; n++) {
 				G[n] = visits[0] * G[n - 1] * servTime[0][n];
-
 			}
 			//pw.println("G of center 0 : " + G[customers]);
 		}
@@ -289,9 +285,9 @@ public class SolverSingleClosedExact extends Solver {
 	}
 
 	/**
-	* Static scaling to control magnitude of G. it is not optimal, and in
-	* some situations it does not overcome overflow problem, but generally
-	* it is enough */
+	 * Static scaling to control magnitude of G. it is not optimal, and in
+	 * some situations it does not overcome overflow problem, but generally
+	 * it is enough */
 	private void staticScale() {
 		int center = 0;
 		int cust = 0;
@@ -336,7 +332,7 @@ public class SolverSingleClosedExact extends Solver {
 		type[0] = type[max];
 		type[max] = t;
 
-		//		double v = visits[0];
+		//double v = visits[0];
 		visits[0] = visits[max];
 		visits[max] = visits[0];
 	}

@@ -3,7 +3,6 @@ package jmt.jmva.analytical.solvers.LinearSystem;
 import javax.naming.OperationNotSupportedException;
 
 import jmt.jmva.analytical.solvers.Basis.CoMoMBasis;
-import jmt.jmva.analytical.solvers.DataStructures.BigRational;
 import jmt.jmva.analytical.solvers.DataStructures.PopulationVector;
 import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
@@ -20,12 +19,12 @@ public abstract class LinearSystem {
 	 * Basis for the model
 	 */
 	protected  CoMoMBasis basis;
-	
+
 	/**
 	 * The model under consideration.
 	 */
 	protected QNModel qnm;
-	
+
 	/**
 	 * Constructor
 	 * @param qnm The model under consideration.
@@ -41,13 +40,13 @@ public abstract class LinearSystem {
 	public void computePerformanceMeasures() throws InternalErrorException {
 		basis.computePerformanceMeasures();		
 	}
-	
+
 	/**
 	 * Updates the N_l values in the linear system
 	 * @param current_class_population The population in the current class under consideration
 	 */
 	public abstract void update(int current_class_population ); 
-	
+
 	/**
 	 * Solve the linear system in its current configuration
 	 * @throws OperationNotSupportedException
@@ -56,7 +55,7 @@ public abstract class LinearSystem {
 	 * @throws BTFMatrixErrorException
 	 */
 	public abstract void solve() throws OperationNotSupportedException, InconsistentLinearSystemException, InternalErrorException, BTFMatrixErrorException;
-	
+
 	/**
 	 * Initialises the linear system ready for iteration on current_class at the specified population
 	 * @param current_N The current population vector
@@ -71,7 +70,7 @@ public abstract class LinearSystem {
 		basis.initialiseForClass(current_class);
 		initialiseMatricesForClass(current_N, current_class);
 	}
-	
+
 	/**
 	 * Initialises the matrices of the linear system ready for iteration on current_class at the specified population
 	 * @param current_N The current population vector

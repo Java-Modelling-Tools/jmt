@@ -1753,7 +1753,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					countersRange = countersRange + 1;
 				}
 				ldRoutingPar = new XMLParameter("LoadDependentRoutingParameter", strategiesClasspathBase + routingStrategiesSuffix + "LoadDependentRoutingParameter", null, ranges, true);
-				innerRoutingPar = new XMLParameter[] { ldRoutingPar } ;
+				innerRoutingPar = new XMLParameter[] { ldRoutingPar };
 			}
 			// creating parameter for empirical strategy: must be null if
 			// routing is empirical

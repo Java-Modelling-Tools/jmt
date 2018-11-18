@@ -52,9 +52,6 @@ import jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels.SingleKMeanClu
 
 public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private ClusteringInfosKMean infos = null;
 	private int numClusters = 0;
@@ -65,7 +62,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 			+ "This panel shows information of variables (center and statistics) within a single cluster" + HTML_FONT_NOR_END + HTML_END;
 	private static final String DESCR_LABEL = HTML_START + HTML_FONT_NORM + "Cluster X/Y has Z observations" + HTML_FONT_NOR_END + HTML_END;
 
-	private JList clustList = null;
+	private JList<String> clustList = null;
 	private JTable clustInfo = null;
 
 	private SingleKMeanClusterInfo clustDet;
@@ -131,9 +128,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 	private JScrollPane getTable() {
 		if (clustInfo == null) {
 			clustInfo = new JTable(new clustTableModel(infos.infoCluster[clustList.getSelectedIndex()].statClust)) {
-				/**
-				 * 
-				 */
+
 				private static final long serialVersionUID = 1L;
 				{
 					setAutoResizeMode(AUTO_RESIZE_OFF);
@@ -155,6 +150,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 					}
 					return getDefaultRenderer(String.class);
 				}
+
 			};
 			//clustInfo.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 			clustInfo.setSelectionBackground(new Color(83, 126, 126));
@@ -167,7 +163,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 
 	private JScrollPane getClusterList() {
 		if (clustList == null) {
-			clustList = new JList();
+			clustList = new JList<String>();
 
 			clustList.setSelectionBackground(new Color(83, 126, 126));
 			clustList.setSelectionForeground(Color.BLACK);
@@ -182,6 +178,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 			clustList.setListData(clustStr);
 
 			clustList.addListSelectionListener(new ListSelectionListener() {
+
 				public void valueChanged(ListSelectionEvent e) {
 					if (e.getValueIsAdjusting()) {
 						return;
@@ -195,6 +192,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 						desctText.setText(cur.replaceFirst("Z", Integer.toString(infos.numElem[clustList.getSelectedIndex()])));
 					}
 				}
+
 			});
 		}
 		clustList.setSelectedIndex(0);
@@ -206,9 +204,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 	}
 
 	private class clustTableModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 		private String[] header = { "Sel.", "Name", "Center", "Std. Dev.", "Kurt.", "Skew." };
 		private SCluStat[] data = null;
@@ -274,12 +270,14 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 		}
 
 		@Override
-		public Class getColumnClass(int index) {
+		public Class<?> getColumnClass(int index) {
 			return String.class;
 		}
 
 		public void setData(SCluStat[] data) {
 			this.data = data;
 		}
+
 	}
+
 }

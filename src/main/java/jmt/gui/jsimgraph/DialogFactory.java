@@ -120,7 +120,7 @@ public class DialogFactory {
 			Dimension d = dialogFrame.getSize();
 			Defaults.set(defaultWidthProp, String.valueOf(d.width));
 			Defaults.set(defaultHeightProp, String.valueOf(d.height));
-			Defaults.save();                        
+			Defaults.save();
 		}
 	}
 

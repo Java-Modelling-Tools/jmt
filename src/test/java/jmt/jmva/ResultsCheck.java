@@ -30,7 +30,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import jmt.common.exception.LoadException;
 import jmt.common.xml.XSDSchemaLoader;
 import jmt.jmva.analytical.CommandLineSolver;
-import jmt.jmva.engine.simDispatcher.Dispatcher_jMVAschema;
+import jmt.jmva.engine.simDispatcher.DispatcherJMVAschema;
 
 import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;
@@ -120,7 +120,7 @@ public class ResultsCheck {
 	}
 
 	/**
-	 * Solves the model with jMVA and jSIM, then checks if all simulation
+	 * Solves the model with JMVA and JSIM, then checks if all simulation
 	 * confidence intervals contain the exact solution.
 	 *
 	 */
@@ -149,17 +149,17 @@ public class ResultsCheck {
 		};
 
 		if (!solve_jmva(jmva_model_file)) {
-			logger.error("The model " + jmva_model_path + " could not be solved using jMVA.");
+			logger.error("The model " + jmva_model_path + " could not be solved using JMVA.");
 			return false;
 		} else {
-			logger.debug(jmva_model_path + ": jMVA solution has been completed.");
+			logger.debug(jmva_model_path + ": JMVA solution has been completed.");
 		}
 
 		if (!solve_jsim(jsim_model_file)) {
-			logger.error("The model " + jsim_model_path + " could not be solved using jSIM.");
+			logger.error("The model " + jsim_model_path + " could not be solved using JSIM.");
 			return false;
 		} else {
-			logger.debug(jsim_model_path + ": jSIM solution has been completed.");
+			logger.debug(jsim_model_path + ": JSIM solution has been completed.");
 		}
 
 		//both solutions are available
@@ -284,7 +284,7 @@ public class ResultsCheck {
 	 */
 	private boolean solve_jsim(File model) {
 
-		Dispatcher_jMVAschema solver = new Dispatcher_jMVAschema(model);
+		DispatcherJMVAschema solver = new DispatcherJMVAschema(model);
 		solver.setDeleteIntermediateFiles(deleteIntermediateSimFiles);
 		if (!automaticSeed) {
 			solver.setSimulationSeed(userDefinedSeed);
@@ -294,7 +294,7 @@ public class ResultsCheck {
 	}
 
 	/**
-	 * Compares the solutions of jMVA and jSIM and writes on log.
+	 * Compares the solutions of JMVA and JSIM and writes on log.
 	 * The wealth of information depends on the value of the "extendedInfo" property.
 	 * This method can be called only after solving the model in both ways
 	 * @return an XML file containing the report of solutions check
@@ -306,7 +306,7 @@ public class ResultsCheck {
 		//computes the number of measures
 		int measuresNumber = jsim_doc.getElementsByTagName("measure").getLength();
 
-		logger.debug(measuresNumber + " found in jSIM results.");
+		logger.debug(measuresNumber + " found in JSIM results.");
 
 		//list of all station results object
 		NodeList statRes = jsim_doc.getElementsByTagName("stationresults");

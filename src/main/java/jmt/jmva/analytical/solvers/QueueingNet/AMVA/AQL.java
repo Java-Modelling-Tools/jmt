@@ -64,7 +64,7 @@ public class AQL extends AMVA {
 						} else if (pop <= 0) {
 							residenceTimes[t][k][c] = 0;
 						} else {
-							residenceTimes[t][k][c] = demand*(1 + ((pop-1)*((scQueueLens[t][k]/(double)pop)-gamma[k][c])));
+							residenceTimes[t][k][c] = demand*(1+((pop-1)*((scQueueLens[t][k]/(double)pop)-gamma[k][c])));
 						}
 						
 						tempClsRespTimes[c] += residenceTimes[t][k][c];

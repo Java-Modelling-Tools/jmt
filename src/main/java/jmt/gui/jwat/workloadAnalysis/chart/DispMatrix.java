@@ -162,10 +162,9 @@ public class DispMatrix extends JScrollPane {
 						if (inputValue != null)
 						{
 							File file = new File(inputValue + ".png");
-							try{
+							try {
 								ImageIO.write(chart,"PNG",file);
-							}catch(Exception ex)
-							{
+							} catch (Exception ex) {
 								System.out.println("Saving error, please try again");
 							}
 						}*/

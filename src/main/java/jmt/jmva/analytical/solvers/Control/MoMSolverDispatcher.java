@@ -71,8 +71,8 @@ public class MoMSolverDispatcher {
 
     /** Creates new MoMSolverDispatcher
      *  @param  stations    number of service centers
-     *  @param  classes     number o classes of classes
-     *  @param  population     array of population classes
+     *  @param  classes     number of classes
+     *  @param  population  array of class populations
      */
     public MoMSolverDispatcher(int classes, int stations, int[] population) {
         this.classes = classes;

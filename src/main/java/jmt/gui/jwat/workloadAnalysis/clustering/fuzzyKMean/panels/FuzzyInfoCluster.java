@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels;
 
 import java.awt.BorderLayout;
@@ -51,9 +52,6 @@ import jmt.gui.jwat.JWATConstants;
 
 public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATConstants {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private ClusteringInfosFuzzy infos = null;
 	private int numClusters = 0;
@@ -64,7 +62,7 @@ public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATCon
 			+ "This panel shows information of variables (center and statistics) within a single cluster" + HTML_FONT_NOR_END + HTML_END;
 	private static final String DESCR_LABEL = HTML_START + HTML_FONT_NORM + "Cluster X/Y has Z observations" + HTML_FONT_NOR_END + HTML_END;
 
-	private JList clustList = null;
+	private JList<String> clustList = null;
 	private JTable clustInfo = null;
 
 	private JLabel desctText = null;
@@ -130,9 +128,7 @@ public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATCon
 	private JScrollPane getTable() {
 		if (clustInfo == null) {
 			clustInfo = new JTable(new clustTableModel(infos.infoCluster[clustList.getSelectedIndex()].statClust)) {
-				/**
-				 * 
-				 */
+
 				private static final long serialVersionUID = 1L;
 				{
 					setAutoResizeMode(AUTO_RESIZE_OFF);
@@ -154,7 +150,8 @@ public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATCon
 					}
 					return getDefaultRenderer(String.class);
 				}
-			};;
+
+			};
 			clustInfo.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 			clustInfo.setSelectionBackground(new Color(83, 126, 126));
 			clustInfo.setSelectionForeground(Color.BLACK);
@@ -166,7 +163,7 @@ public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATCon
 
 	private JScrollPane getClusterList() {
 		if (clustList == null) {
-			clustList = new JList();
+			clustList = new JList<String>();
 
 			clustList.setSelectionBackground(new Color(83, 126, 126));
 			clustList.setSelectionForeground(Color.BLACK);
@@ -181,6 +178,7 @@ public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATCon
 			clustList.setListData(clustStr);
 
 			clustList.addListSelectionListener(new ListSelectionListener() {
+
 				public void valueChanged(ListSelectionEvent e) {
 					if (e.getValueIsAdjusting()) {
 						return;
@@ -194,6 +192,7 @@ public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATCon
 						desctText.setText(cur.replaceFirst("Z", Integer.toString(infos.numElem[clustList.getSelectedIndex()])));
 					}
 				}
+
 			});
 		}
 		clustList.setSelectedIndex(0);
@@ -210,9 +209,7 @@ public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATCon
 	}
 
 	private class clustTableModel extends AbstractTableModel {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = 1L;
 		private String[] header = { "Sel.", "Name", "Center", "Std. Dev.", "Kurt.", "Skew." };
 		private SFCluStat[] data = null;
@@ -278,12 +275,14 @@ public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATCon
 		}
 
 		@Override
-		public Class getColumnClass(int index) {
+		public Class<?> getColumnClass(int index) {
 			return String.class;
 		}
 
 		public void setData(SFCluStat[] data) {
 			this.data = data;
 		}
+
 	}
+
 }

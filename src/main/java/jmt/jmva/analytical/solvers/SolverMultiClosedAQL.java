@@ -7,6 +7,7 @@ package jmt.jmva.analytical.solvers;
  *
  */
 public class SolverMultiClosedAQL extends SolverMultiClosedAMVA {
+
 	private double[][] gamma;
 
 	public SolverMultiClosedAQL(int classes, int stations, int[] classPopulation) {
@@ -64,7 +65,7 @@ public class SolverMultiClosedAQL extends SolverMultiClosedAMVA {
 						} else if (pop <= 0) {
 							residenceTimes[t][k][c] = 0;
 						} else {
-							residenceTimes[t][k][c] = demand*(1 + ((pop-1)*((scQueueLens[t][k]/(double)pop)-gamma[k][c])));
+							residenceTimes[t][k][c] = demand*(1+((pop-1)*((scQueueLens[t][k]/(double)pop)-gamma[k][c])));
 						}
 
 						tempClsRespTimes[c] += residenceTimes[t][k][c];

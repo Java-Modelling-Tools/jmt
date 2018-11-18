@@ -43,7 +43,7 @@ public class CoMoMBasisMLorder extends BTFCoMoMBasis {
 		if (population_position == -1) throw new InternalErrorException("Invalid PopulationChangeVector");
 
 		if (queue_added == 0) {
-			return MiscFunctions.binomialCoefficient(M + R - 1 , M)*M + population_position;
+			return MiscFunctions.binomialCoefficient(M + R - 1, M) * M + population_position;
 		}
 		return population_position * M + queue_added - 1;
 	}

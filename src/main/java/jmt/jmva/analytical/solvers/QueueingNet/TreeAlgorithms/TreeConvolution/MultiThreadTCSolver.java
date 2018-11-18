@@ -216,7 +216,7 @@ public class MultiThreadTCSolver extends TreeTraverserMulti implements IThreaded
 				}
 				
 			default:
-				throw new IllegalStateException("Unsupported station type.");
+				throw new UnsupportedOperationException("Unsupported station type.");
 			}
 		}
 	}

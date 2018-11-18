@@ -333,7 +333,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		protected JFrame popupFrame;
 		protected JTextArea textState;
 		private JButton hideLastIntervalAvgValueButton;
-		private JButton statisticalOutputsButton ;
+		private JButton statisticalOutputsButton;
 		protected boolean lastIntervalAvgValueFlag;
 		private JTextArea textState2;
 

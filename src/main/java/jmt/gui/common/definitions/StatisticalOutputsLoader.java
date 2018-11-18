@@ -44,8 +44,8 @@ public class StatisticalOutputsLoader {
 	private SampleStatistics statistics;
 	//private MeasureDefinition measureDefinition;
 	private String filename;
-	private double progress = 0.0 ;
-	private ProgressTimeListener ptlistener = null ;
+	private double progress = 0.0;
+	private ProgressTimeListener ptlistener = null;
 	private int start = -1;
 	private int end = -1;
 	private int totalLines = 0;
@@ -60,7 +60,7 @@ public class StatisticalOutputsLoader {
 
 	private CSVLoader currentLoader;
 
-	public StatisticalOutputsLoader(MeasureDefinition measureDefinition, int measureIndex) throws FileNotFoundException{
+	public StatisticalOutputsLoader(MeasureDefinition measureDefinition, int measureIndex) throws FileNotFoundException {
 		this.logDecimalSeparator = measureDefinition.getLogDecimalSeparator();
 		this.logCsvDelimiter = measureDefinition.getLogCsvDelimiter();
 		this.filename = measureDefinition.getLogFileName(measureIndex);
@@ -81,7 +81,7 @@ public class StatisticalOutputsLoader {
 	}
 
 	public SampleStatistics getStatistics() {
-		return statistics ;
+		return statistics;
 	}
 
 	public void setDistribution(double min, double max, int intervals) {
@@ -91,7 +91,7 @@ public class StatisticalOutputsLoader {
 	}
 
 	public double getPercentage(double linesRead, double totalLines) {
-		double percent = linesRead / totalLines ;
+		double percent = linesRead / totalLines;
 		return percent;
 	}
 

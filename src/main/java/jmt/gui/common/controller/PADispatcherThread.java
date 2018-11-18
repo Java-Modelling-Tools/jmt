@@ -23,7 +23,7 @@ import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
-import jmt.engine.simDispatcher.Dispatcher_jSIMschema;
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
 import jmt.framework.gui.graph.MeasureValue;
 import jmt.gui.common.definitions.AbortMeasure;
 import jmt.gui.common.definitions.CommonModel;
@@ -42,7 +42,7 @@ import jmt.gui.common.xml.XMLWriter;
 import org.w3c.dom.Document;
 
 /**
- * <p>Title: PADispatcherThread </p>
+ * <p>Title: PADispatcherThread</p>
  * <p>Description: This thread is responsible for dispatching several simulations. If a simulation max
  * time has been specified, an inner thread will be used to stop simulation after that time. We do not rely
  * on engine method as it does not appear to work properly.</p>
@@ -58,7 +58,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 	private SimulationDefinition simd;
 	//private CommonModel model;
 	private GuiInterface gui;
-	private Dispatcher_jSIMschema simulator;
+	private DispatcherJSIMschema simulator;
 	private TimerThread timer = null;
 	private PAProgressWindow progressWindow;
 	private boolean stopped;
@@ -150,7 +150,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 				JOptionPane.showMessageDialog(null, "File exception", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 			XMLWriter.writeXML(simulationFile, (CommonModel) simd);
-			simulator = new Dispatcher_jSIMschema(simulationFile);
+			simulator = new DispatcherJSIMschema(simulationFile);
 			// If needed sets simulation seed
 			if (!simd.getUseRandomSeed().booleanValue()) {
 				simulator.setSimulationSeed(simd.getSimulationSeed().longValue());

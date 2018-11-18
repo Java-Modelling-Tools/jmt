@@ -115,7 +115,7 @@ public class SolverSingleClosedMVA extends Solver {
 		//@author Stefano Omini
 
 		//OLD
-	        //Not useful anymore: no longer extends SolverSingleClosedExact
+		//Not useful anymore: no longer extends SolverSingleClosedExact
 		//super(cust, stat);
 
 		stations = stat;
@@ -148,7 +148,6 @@ public class SolverSingleClosedMVA extends Solver {
 		interm_totUser = null;
 
 		//end NEW
-
 	}
 
 	/* ------------------------
@@ -223,7 +222,6 @@ public class SolverSingleClosedMVA extends Solver {
 				}
 			}
 		} else {
-
 			//there are both LI and LD stations: change the order
 			//LI stations are put first (i.e. from position 0 to position countLI-1)
 			//LD stations are put after all LI stations (i.e. from position count to the end)
@@ -262,7 +260,6 @@ public class SolverSingleClosedMVA extends Solver {
 					countLD++;
 				}
 			}
-
 		}
 		return true;
 	}
@@ -285,7 +282,6 @@ public class SolverSingleClosedMVA extends Solver {
 		//closed class: no saturation problem
 		return true;
 	}
-
 	//end NEW
 
 	/*
@@ -293,7 +289,7 @@ public class SolverSingleClosedMVA extends Solver {
 	        //TODO: not implemented!!!!
 		}
 	    //overrides indices() of SolverSingleClosedExact
-	*/
+	 */
 
 	/**
 	 *  Solves a single class closed model using MVA algorithm.<br>
@@ -308,9 +304,10 @@ public class SolverSingleClosedMVA extends Solver {
 	public void solve() {
 		//tests if all the resources, stations, are load independent
 		boolean loadIndep = true;
-		for (int i = 0; i < stations && loadIndep; i++) {
+		for (int i = 0; i < stations; i++) {
 			if (type[i] == Solver.LD) {
 				loadIndep = false;
+				break;
 			}
 		}
 
@@ -318,7 +315,6 @@ public class SolverSingleClosedMVA extends Solver {
 			solveSingleLI();
 			//solveSingleLI_approx();
 		} else {
-
 			solveSingleLD();
 			//solveSingleLDErrCtr();
 			//solveSingleLDErrCtrFast();
@@ -329,7 +325,6 @@ public class SolverSingleClosedMVA extends Solver {
 		//"input" method has changed the order of the stations.
 		//this method has to be called to restore the original order.
 		reorder();
-
 	}
 
 	/**
@@ -352,9 +347,10 @@ public class SolverSingleClosedMVA extends Solver {
 	public void solve(boolean intermediate) {
 		//tests if all the stations are load independent
 		boolean loadIndep = true;
-		for (int i = 0; i < stations && loadIndep; i++) {
+		for (int i = 0; i < stations; i++) {
 			if (type[i] == Solver.LD) {
 				loadIndep = false;
+				break;
 			}
 		}
 
@@ -365,15 +361,13 @@ public class SolverSingleClosedMVA extends Solver {
 		if (loadIndep) {
 			solveSingleLI(intermediate);
 		} else {
-			//TODO: add case intermediate=true for LD 
-
+			//TODO: add case intermediate=true for LD
 			//TODO: debug
 			solveSingleLD(intermediate);
 			//solveSingleLDErrCtrFaster(intermediate);
 		}
 
 		reorder();
-
 	}
 
 	/** Solves a single class closed model with only LI stations */
@@ -398,15 +392,15 @@ public class SolverSingleClosedMVA extends Solver {
 
 			for (k = 0; k < stations; k++) {
 				switch (type[k]) {
-					case Solver.DELAY:
-						residenceTime[k] = D[k];
-						break;
-					case Solver.LI:
-						//recursion uses the queue length of the model with n-1 customers
-						residenceTime[k] = D[k] * (1 + queueLen[k]);
-						break;
-					case Solver.LD://not supported use another method
-						throw new IllegalArgumentException("error in solveSingleLI, type of service centers must be delay or load Independent");
+				case Solver.DELAY:
+					residenceTime[k] = D[k];
+					break;
+				case Solver.LI:
+					//recursion uses the queue length of the model with n-1 customers
+					residenceTime[k] = D[k] * (1 + queueLen[k]);
+					break;
+				case Solver.LD://not supported use another method
+					throw new IllegalArgumentException("error in solveSingleLI, type of service centers must be delay or load Independent");
 				}//end case
 
 				sum += residenceTime[k];
@@ -422,14 +416,11 @@ public class SolverSingleClosedMVA extends Solver {
 			} else {
 				totThroughput = n / sum;
 			}
-
 			//end NEW
 
 			for (k = 0; k < stations; k++) {
 				queueLen[k] = totThroughput * residenceTime[k];
-				//end loop through stations
-			}
-
+			}//end loop through stations
 		}//end loop through customers
 
 		//the other indices dependent on totThroughput
@@ -438,7 +429,6 @@ public class SolverSingleClosedMVA extends Solver {
 			totRespTime = customers / totThroughput;
 			utilization[k] = totThroughput * D[k];
 		}//end loop through stations
-
 	}//end of solveSingleLI
 
 	//NEW
@@ -453,7 +443,6 @@ public class SolverSingleClosedMVA extends Solver {
 	 *
 	 */
 	private void solveSingleLI(boolean intermediate) {
-
 		if (!intermediate) {
 			//intermediate results must not be saved, then use
 			//the base method
@@ -503,15 +492,15 @@ public class SolverSingleClosedMVA extends Solver {
 
 			for (k = 0; k < stations; k++) {
 				switch (type[k]) {
-					case Solver.DELAY:
-						interm_residenceTime[n][k] = D[k];
-						break;
-					case Solver.LI:
-						//recursion uses the queue length of the model with n-1 customers
-						interm_residenceTime[n][k] = D[k] * (1 + interm_queueLen[n - 1][k]);
-						break;
-					case Solver.LD://not supported use another method
-						throw new IllegalArgumentException("error in solveSingleLI, type of service centers must be delay or load Independent");
+				case Solver.DELAY:
+					interm_residenceTime[n][k] = D[k];
+					break;
+				case Solver.LI:
+					//recursion uses the queue length of the model with n-1 customers
+					interm_residenceTime[n][k] = D[k] * (1 + interm_queueLen[n - 1][k]);
+					break;
+				case Solver.LD://not supported use another method
+					throw new IllegalArgumentException("error in solveSingleLI, type of service centers must be delay or load Independent");
 				}//end case
 
 				sum += interm_residenceTime[n][k];
@@ -528,9 +517,7 @@ public class SolverSingleClosedMVA extends Solver {
 
 				interm_totRespTime[n] = customers / interm_totThroughput[n];
 				interm_totUser[n] += interm_queueLen[n][k]; //of course must be equals to n
-			}
-			//end loop through stations
-
+			}//end loop through stations
 		}//end loop through customers
 
 		//copy final results from last intermediate results (n=customers)
@@ -545,7 +532,6 @@ public class SolverSingleClosedMVA extends Solver {
 		totThroughput = interm_totThroughput[customers];
 		totRespTime = interm_totRespTime[customers];
 		totUser = interm_totUser[customers];
-
 	}//end of solveSingleLI
 
 	//end NEW
@@ -558,7 +544,7 @@ public class SolverSingleClosedMVA extends Solver {
 		int stat;//index of station
 		int cust;//index of customer
 		int k;//index of customers, in marginal probability
-		//		int sum;//internal variable for summations
+		//int sum;//internal variable for summations
 		double[] X = new double[customers + 1];//throughput of subsystem
 
 		//queue length vectors of precedent subsystem
@@ -578,7 +564,7 @@ public class SolverSingleClosedMVA extends Solver {
 		double[] Y = new double[customers + 1];// 1/throughput of composite system
 		double ws;//waiting time
 		double wcomp;//composite waiting time
-		//		double prod;//internal variable
+		//double prod;//internal variable
 
 		//NEW
 		//@author Stefano Omini
@@ -693,7 +679,6 @@ public class SolverSingleClosedMVA extends Solver {
 				residenceTime[stat] = queueLen[stat] / totThroughput;
 			}
 		}//end loop over all stations
-
 	}//end solveSingleLD
 
 	/**
@@ -701,7 +686,6 @@ public class SolverSingleClosedMVA extends Solver {
 	 *
 	 */
 	private void solveSingleLD(boolean intermediate) {
-
 		//TODO: still to fix!!!
 		if (!intermediate) {
 			//intermediate results must not be saved, then use
@@ -724,7 +708,7 @@ public class SolverSingleClosedMVA extends Solver {
 		int stat;//index of station
 		int n;//index of customer
 		int k;//index of customers, in marginal probability
-		//		int sum;//internal variable for summations
+		//int sum;//internal variable for summations
 		double[] X = new double[customers + 1];//throughput of subsystem
 
 		//queue length vectors of precedent subsystem
@@ -856,7 +840,6 @@ public class SolverSingleClosedMVA extends Solver {
 				residenceTime[stat] = queueLen[stat] / totThroughput;
 			}
 		}//end loop over all stations
-
 	}//end solveSingleLD
 
 	/**
@@ -911,20 +894,20 @@ public class SolverSingleClosedMVA extends Solver {
 		}//end loop through stations
 
 		//calculation of throughput for all LI subnetwork, and queue length
-		//recoursively starting from 0 customer in network to max customers
+		//recursively starting from 0 customer in network to max customers
 		if (!noLI) {
 			for (n = 1; n <= customers; n++) {
 				sum = 0;
 				for (k = 0; k < LICount; k++) {
 					switch (type[k]) {
-						case Solver.DELAY:
-							residenceTime[k] = D[k];
-							break;
-						case Solver.LI:
-							residenceTime[k] = D[k] * (1 + queueLen[k]);
-							break;
-						case Solver.LD://not supported use another method
-							throw new IllegalArgumentException("error in solveSingleLI, type of service centers must be delay or load Independent");
+					case Solver.DELAY:
+						residenceTime[k] = D[k];
+						break;
+					case Solver.LI:
+						residenceTime[k] = D[k] * (1 + queueLen[k]);
+						break;
+					case Solver.LD://not supported use another method
+						throw new IllegalArgumentException("error in solveSingleLI, type of service centers must be delay or load Independent");
 					}//end case
 
 					sum += residenceTime[k];
@@ -933,9 +916,7 @@ public class SolverSingleClosedMVA extends Solver {
 				X[n] = totThroughput;
 				for (k = 0; k < stations; k++) {
 					queueLen[k] = totThroughput * residenceTime[k];
-					//end loop through stations
-				}
-
+				}//end loop through stations
 			}//end loop through customers
 		}
 
@@ -950,7 +931,6 @@ public class SolverSingleClosedMVA extends Solver {
 				nsPrec[0][n] = n;
 				usPrec[0][n] = 1;
 			}
-
 		}//end initialization
 
 		//loop over all LD stations
@@ -1003,7 +983,6 @@ public class SolverSingleClosedMVA extends Solver {
 				sum += pCorr[0];
 
 				if (Math.abs(sum - 1) >= 0.01 && (n % 500 == 0 || n == customers)) {
-					;
 					//System.out.println(n+" ERROR   Sum of prob : "+sum+" zeros "+zeroCount);
 				}
 
@@ -1074,7 +1053,6 @@ public class SolverSingleClosedMVA extends Solver {
 				residenceTime[m] = queueLen[m] / totThroughput;
 			}
 		}
-		//System.out.println("used LD2");
 	}
 
 	/**
@@ -1120,7 +1098,6 @@ public class SolverSingleClosedMVA extends Solver {
 		for (m = 0; m < stations; m++) {
 			if (type[m] != Solver.LD) {
 				LICount++;
-
 			} else if (firstLD == -1) {
 				firstLD = m;
 			}
@@ -1130,10 +1107,10 @@ public class SolverSingleClosedMVA extends Solver {
 		}
 		D = new double[LICount];
 		//DEK (Federico Granata) 23-09-2003
-		//		nsPrec = new double[stations][customers + 1];
-		//		nsCorr = new double[stations][customers + 1];
-		//		usPrec = new double[stations][customers + 1];
-		//		usCorr = new double[stations][customers + 1];
+		//nsPrec = new double[stations][customers + 1];
+		//nsCorr = new double[stations][customers + 1];
+		//usPrec = new double[stations][customers + 1];
+		//usCorr = new double[stations][customers + 1];
 		nsPrec = new double[stations - LICount + 1][customers + 1];
 		nsCorr = new double[stations - LICount + 1][customers + 1];
 		usPrec = new double[stations - LICount + 1][customers + 1];
@@ -1156,7 +1133,7 @@ public class SolverSingleClosedMVA extends Solver {
 		}//end loop through stations*/
 
 		//calculation of throughput for all LI subnetwork, and queue length
-		//recoursively starting from 0 customer in network to max customers
+		//recursively starting from 0 customer in network to max customers
 		if (!noLI) {
 			for (n = 1; n <= customers; n++) {
 				sum = 0;
@@ -1178,29 +1155,27 @@ public class SolverSingleClosedMVA extends Solver {
 				counter = 0;
 				for (k = 0; k < stations; k++) {
 					switch (type[k]) {
-						case Solver.DELAY:
-							residenceTime[k] = D[counter];
-							sum += residenceTime[k];
-							counter++;
-							break;
-						case Solver.LI:
-							residenceTime[k] = D[counter] * (1 + queueLen[k]);
-							sum += residenceTime[k];
-							counter++;
-							break;
-						case Solver.LD://not supported use another method
-							break;
+					case Solver.DELAY:
+						residenceTime[k] = D[counter];
+						sum += residenceTime[k];
+						counter++;
+						break;
+					case Solver.LI:
+						residenceTime[k] = D[counter] * (1 + queueLen[k]);
+						sum += residenceTime[k];
+						counter++;
+						break;
+					case Solver.LD://not supported use another method
+						break;
 					}//end case
-
 				}
 				totThroughput = n / sum;
 				X[n] = totThroughput;
 				for (k = 0; k < stations; k++) {
 					if (type[k] != Solver.LD) {
 						queueLen[k] = totThroughput * residenceTime[k];
-						//end loop through stations
 					}
-				}
+				}//end loop through stations
 
 				//DEBUG
 				/*System.out.println("n = " + n);
@@ -1213,7 +1188,6 @@ public class SolverSingleClosedMVA extends Solver {
 				}
 				System.out.println();
 				System.out.println();*/
-
 			}//end loop through customers
 		}
 
@@ -1221,52 +1195,48 @@ public class SolverSingleClosedMVA extends Solver {
 		for (n = 1; n <= customers; n++) {
 			if (!noLI) {
 				//DEK (Federico Granata) 23-9-2003
-				//				Y[n] = 1 / (X[n] * visits[LICount]);
+				//Y[n] = 1 / (X[n] * visits[LICount]);
 				Y[n] = 1 / (X[n] * visits[firstLD]);
-				//				nsPrec[LICount - 1][n] = n;
-				//				usPrec[LICount - 1][n] = 1;
+				//nsPrec[LICount - 1][n] = n;
+				//usPrec[LICount - 1][n] = 1;
 				nsPrec[0][n] = n;
 				usPrec[0][n] = 1;
-
 			} else {
 				X[n] = 1 / servTime[0][n];
-				//				nsPrec[0][n] = n;
-				//				usPrec[0][n] = 1;
+				//nsPrec[0][n] = n;
+				//usPrec[0][n] = 1;
 				nsPrec[1][n] = n;
 				usPrec[1][n] = 1;
 			}
 
 			//DEBUG
-			//			System.out.println("n = " + n);
-			//			System.out.print("Y = ");
-			//			for (int i = 0; i < Y.length; i++) {
-			//				System.out.print(Y[i]+" ");
-			//
-			//			}
-			//			System.out.println();
-			//			System.out.println();
-			//			System.out.print("X = ");
-			//			for (int i = 0; i < X.length; i++) {
-			//				System.out.print(X[i]+" ");
-			//
-			//			}
-			//			System.out.println();
-			//			System.out.println();
-			//			for (int i = 0; i < nsPrec.length; i++) {
-			//				for (int j = 0; j < nsPrec[i].length; j++) {
-			//				System.out.print(nsPrec[i][j]+" ");
-			//				}
-			//				System.out.println();
-			//			}
-			//			System.out.println();
-			//			for (int i = 0; i < usPrec.length; i++) {
-			//				for (int j = 0; j < usPrec[i].length; j++) {
-			//				System.out.print(usPrec[i][j]+" ");
-			//				}
-			//				System.out.println();
-			//			}
-			//			System.out.println();
-			//
+			//System.out.println("n = " + n);
+			//System.out.print("Y = ");
+			//for (int i = 0; i < Y.length; i++) {
+			//	System.out.print(Y[i]+" ");
+			//}
+			//System.out.println();
+			//System.out.println();
+			//System.out.print("X = ");
+			//for (int i = 0; i < X.length; i++) {
+			//	System.out.print(X[i]+" ");
+			//}
+			//System.out.println();
+			//System.out.println();
+			//for (int i = 0; i < nsPrec.length; i++) {
+			//	for (int j = 0; j < nsPrec[i].length; j++) {
+			//		System.out.print(nsPrec[i][j]+" ");
+			//	}
+			//	System.out.println();
+			//}
+			//System.out.println();
+			//for (int i = 0; i < usPrec.length; i++) {
+			//	for (int j = 0; j < usPrec[i].length; j++) {
+			//	System.out.print(usPrec[i][j]+" ");
+			//	}
+			//	System.out.println();
+			//}
+			//System.out.println();
 		}//end initialization
 
 		//loop over all LD stations
@@ -1274,7 +1244,7 @@ public class SolverSingleClosedMVA extends Solver {
 		//1 to loop over all stations, 1 to loop over the arrays that
 		//are available only for load dependent stations.
 
-		//		for (m = noLI ? 1 : LICount; m < stations; m++) {
+		//for (m = noLI ? 1 : LICount; m < stations; m++) {
 		counter = 1;
 		int lastLD = firstLD;
 		for (m = 1; m < stations; m++) {
@@ -1283,7 +1253,7 @@ public class SolverSingleClosedMVA extends Solver {
 				expMultPrec[0] = 0;
 				for (n = 1; n <= customers; n++) {
 					//DEK (Federico Granata) 23-09-2003
-					//					if (m != LICount)
+					//if (m != LICount)
 					if (m != firstLD) {
 						Y[n] = visits[lastLD] / (X[n] * visits[m]);
 						/*System.out.println("m = " + m);
@@ -1291,7 +1261,6 @@ public class SolverSingleClosedMVA extends Solver {
 						System.out.print("Y = ");
 						for (int i = 0; i < Y.length; i++) {
 							System.out.print(Y[i] + " ");
-
 						}
 						System.out.println();
 						System.out.println();*/
@@ -1339,9 +1308,9 @@ public class SolverSingleClosedMVA extends Solver {
 
 					X[n] = n / (ws + wcomp);
 
-					//					nsPrec[m][n] = X[n] * ws;
-					//					System.out.println("counter = " + counter);
-					//					System.out.println("m = " + m);
+					//nsPrec[m][n] = X[n] * ws;
+					//System.out.println("counter = " + counter);
+					//System.out.println("m = " + m);
 					nsPrec[counter][n] = X[n] * ws;
 					//calculation of marginal probabilities
 					for (k = 1; k <= n; k++) {
@@ -1374,25 +1343,25 @@ public class SolverSingleClosedMVA extends Solver {
 					}
 
 					//DEK (Federico Granata)
-					//				usPrec[m][n] = 0;
+					//usPrec[m][n] = 0;
 					usPrec[counter][n] = 0;
 					for (int c = min; c < 0; c++) {
 						for (k = 1; k <= n; k++) {
 							if (expMultCorr[k] == c) {
 								//DEK (Federico Granata)
-								//							usPrec[m][n] += pCorr[k];
+								//usPrec[m][n] += pCorr[k];
 								usPrec[counter][n] += pCorr[k];
 							}
 						}
 						//DEK (Federico Granata)
-						//					usPrec[m][n] *= MIN;
+						//usPrec[m][n] *= MIN;
 						usPrec[counter][n] *= MIN;
 					}
 
 					for (k = 1; k <= n; k++) {
 						if (expMultCorr[k] == 0) {
 							//DEK (Federico Granata)
-							//						usPrec[m][n] += pCorr[k];
+							//usPrec[m][n] += pCorr[k];
 							usPrec[counter][n] += pCorr[k];
 						}
 					}
@@ -1404,10 +1373,9 @@ public class SolverSingleClosedMVA extends Solver {
 					//    +" zeros "+zeroCount);
 
 					//DEK (Federico Granata)
-					//				for (int i = noLI ? 0 : LICount; i < m; i++) {
+					//for (int i = noLI ? 0 : LICount; i < m; i++) {
 					int cStat = 1;
 					for (int i = 0; i < m; i++) {
-
 						if (type[i] == Solver.LD) {
 							nsCorr[cStat][n] = 0;
 							usCorr[cStat][n] = 0;
@@ -1418,7 +1386,6 @@ public class SolverSingleClosedMVA extends Solver {
 										usCorr[cStat][n] += pCorr[n - k] * usPrec[cStat][k];
 									}
 								}
-
 								nsCorr[cStat][n] *= MIN;
 								usCorr[cStat][n] *= MIN;
 							}
@@ -1428,11 +1395,9 @@ public class SolverSingleClosedMVA extends Solver {
 									nsCorr[cStat][n] += pCorr[n - k] * nsPrec[cStat][k];
 									usCorr[cStat][n] += pCorr[n - k] * usPrec[cStat][k];
 								}
-
 							}
 							cStat++;
 						}
-
 					}
 
 					System.arraycopy(pCorr, 0, pPrec, 0, n + 1);
@@ -1443,68 +1408,63 @@ public class SolverSingleClosedMVA extends Solver {
 					System.out.println("n = " + n);
 					System.out.print("Y = ");
 					for (int i = 0; i < Y.length; i++) {
-					System.out.print(Y[i]+" ");
-
+						System.out.print(Y[i]+" ");
 					}
 					System.out.println();
 					System.out.println();
 					System.out.print("X = ");
 					for (int i = 0; i < X.length; i++) {
-					System.out.print(X[i]+" ");
-
+						System.out.print(X[i]+" ");
 					}
 					System.out.println();
 					System.out.println();
 					for (int i = 0; i < nsCorr.length; i++) {
-					for (int j = 0; j < nsCorr[i].length; j++) {
-					System.out.print(nsCorr[i][j]+" ");
-					}
-					System.out.println();
+						for (int j = 0; j < nsCorr[i].length; j++) {
+							System.out.print(nsCorr[i][j]+" ");
+						}
+						System.out.println();
 					}
 					System.out.println();
 					for (int i = 0; i < usCorr.length; i++) {
-					for (int j = 0; j < usCorr[i].length; j++) {
-					System.out.print(usCorr[i][j]+" ");
-					}
-					System.out.println();
+						for (int j = 0; j < usCorr[i].length; j++) {
+						System.out.print(usCorr[i][j]+" ");
+						}
+						System.out.println();
 					}
 					System.out.println();*/
-
 				}//end of loop over all customers
 				//DEBUG
-				//					System.out.println("m = " + m);
-				//			System.out.println("n = " + n);
-				//			System.out.print("Y = ");
-				//			for (int i = 0; i < Y.length; i++) {
-				//				System.out.print(Y[i]+" ");
-				//
-				//			}
-				//			System.out.println();
-				//			System.out.println();
-				//			System.out.print("X = ");
-				//			for (int i = 0; i < X.length; i++) {
-				//				System.out.print(X[i]+" ");
-				//
-				//			}
-				//			System.out.println();
-				//			System.out.println();
-				//			for (int i = 0; i < nsCorr.length; i++) {
-				//				for (int j = 0; j < nsCorr[i].length; j++) {
-				//				System.out.print(nsCorr[i][j]+" ");
-				//				}
-				//				System.out.println();
-				//			}
-				//			System.out.println();
-				//			for (int i = 0; i < usCorr.length; i++) {
-				//				for (int j = 0; j < usCorr[i].length; j++) {
-				//				System.out.print(usCorr[i][j]+" ");
-				//				}
-				//				System.out.println();
-				//			}
-				//			System.out.println();
+				//System.out.println("m = " + m);
+				//System.out.println("n = " + n);
+				//System.out.print("Y = ");
+				//for (int i = 0; i < Y.length; i++) {
+				//	System.out.print(Y[i]+" ");
+				//}
+				//System.out.println();
+				//System.out.println();
+				//System.out.print("X = ");
+				//for (int i = 0; i < X.length; i++) {
+				//	System.out.print(X[i]+" ");
+				//}
+				//System.out.println();
+				//System.out.println();
+				//for (int i = 0; i < nsCorr.length; i++) {
+				//	for (int j = 0; j < nsCorr[i].length; j++) {
+				//		System.out.print(nsCorr[i][j]+" ");
+				//	}
+				//	System.out.println();
+				//}
+				//System.out.println();
+				//for (int i = 0; i < usCorr.length; i++) {
+				//	for (int j = 0; j < usCorr[i].length; j++) {
+				//		System.out.print(usCorr[i][j]+" ");
+				//	}
+				//	System.out.println();
+				//}
+				//System.out.println();
 
 				//DEK (Federico Granata) 23-09-2003
-				//				for (int c = LICount; c < m; c++) {
+				//for (int c = LICount; c < m; c++) {
 
 				int cStat = 1;
 				for (int c = 0; c < m; c++) {
@@ -1519,20 +1479,18 @@ public class SolverSingleClosedMVA extends Solver {
 			}
 		}//end loop over all stations
 
-		//		DEBUG
+		//DEBUG
 		/*System.out.println("m = " + m);
 			System.out.println("n = " + n);
 			System.out.print("Y = ");
 			for (int i = 0; i < Y.length; i++) {
 				System.out.print(Y[i]+" ");
-
 			}
 			System.out.println();
 			System.out.println();
 			System.out.print("X = ");
 			for (int i = 0; i < X.length; i++) {
 				System.out.print(X[i]+" ");
-
 			}
 			System.out.println();
 			System.out.println();
@@ -1557,17 +1515,17 @@ public class SolverSingleClosedMVA extends Solver {
 
 		//DEK (Federico Granata)
 		//LD stations
-		//		for (m = noLI ? 0 : LICount; m < stations; m++) {
+		//for (m = noLI ? 0 : LICount; m < stations; m++) {
 		counter = 1;
 		for (m = 0; m < stations; m++) {
 			if (type[m] == Solver.LD) {
 				throughput[m] = totThroughput * visits[m];
-				//				if (type[m] == Solver.DELAY)
-				//					utilization[m] = visits[m] * servTime[m][0];
-				//				else
-				//					utilization[m] = usPrec[m][customers];
+				//if (type[m] == Solver.DELAY)
+				//	utilization[m] = visits[m] * servTime[m][0];
+				//else
+				//	utilization[m] = usPrec[m][customers];
 				utilization[m] = usPrec[counter][customers];
-				//				queueLen[m] = nsPrec[m][customers];
+				//queueLen[m] = nsPrec[m][customers];
 				queueLen[m] = nsPrec[counter][customers];
 				residenceTime[m] = queueLen[m] / totThroughput;
 				counter++;
@@ -1578,7 +1536,7 @@ public class SolverSingleClosedMVA extends Solver {
 		counter = 0;
 		if (!noLI) {
 			//DEK (Federico Granata)
-			//			for (m = 0; m < LICount; m++) {
+			//for (m = 0; m < LICount; m++) {
 			for (m = 0; m < stations; m++) {
 				if (type[m] != Solver.LD) {
 					throughput[m] = totThroughput * visits[m];
@@ -1597,9 +1555,7 @@ public class SolverSingleClosedMVA extends Solver {
 				}
 			}
 		}
-		//System.out.println("used LDErrCtr");
 	}
-
 
 	/**
 	 * Solves a model with LI and LD stations
@@ -1656,7 +1612,7 @@ public class SolverSingleClosedMVA extends Solver {
 		}//end loop through stations
 
 		//now computes throughput and queue length for all LI subnetwork,
-		//recoursively starting from 0 customer in network to max customers
+		//recursively starting from 0 customer in network to max customers
 		//later all the LI subnetworks will be transformed into a single LD station: service time for n customers
 		//is equal to response time of the whole LI subnetwork with n customers
 		//then the LD stations will be merged one at each time
@@ -1666,12 +1622,12 @@ public class SolverSingleClosedMVA extends Solver {
 				sum = 0.0;
 				for (k = 0; k < LICount; k++) {
 					switch (type[k]) {
-						case Solver.DELAY:
-							residenceTime[k] = D[k];
-							break;
-						case Solver.LI:
-							residenceTime[k] = D[k] * (1 + queueLen[k]);
-							break;
+					case Solver.DELAY:
+						residenceTime[k] = D[k];
+						break;
+					case Solver.LI:
+						residenceTime[k] = D[k] * (1 + queueLen[k]);
+						break;
 					}//end case
 
 					sum += residenceTime[k];
@@ -1680,9 +1636,7 @@ public class SolverSingleClosedMVA extends Solver {
 				X[n] = totThroughput;
 				for (k = 0; k < stations; k++) {
 					queueLen[k] = totThroughput * residenceTime[k];
-					//end loop through stations
-				}
-
+				}//end loop through stations
 			}//end loop through customers
 		}
 
@@ -1690,7 +1644,6 @@ public class SolverSingleClosedMVA extends Solver {
 		for (n = 1; n <= customers; n++) {
 			if (!noLI) {
 				Y[n] = 1 / (X[n] * visits[LICount]);
-
 				nsPrec[LICount - 1][n] = n;
 				usPrec[LICount - 1][n] = 1;
 			} else {
@@ -1817,7 +1770,6 @@ public class SolverSingleClosedMVA extends Solver {
 						nsCorr[i][n] += pCorr[puntProb[k]] * nsPrec[i][n - puntProb[k]];
 						usCorr[i][n] += pCorr[puntProb[k]] * usPrec[i][n - puntProb[k]];
 					}
-
 				}
 
 				//add p(n,n)
@@ -1879,8 +1831,6 @@ public class SolverSingleClosedMVA extends Solver {
 		}
 
 		//end NEW
-
-		//System.out.println("used LDErrCtrFaster");
 	}
 
 	/**
@@ -1892,7 +1842,7 @@ public class SolverSingleClosedMVA extends Solver {
 	 *
 	 */
 	private void solveSingleLDErrCtrFaster(boolean intermediate) {
-            //TODO: still to fix, it does not yet give intermediate results
+		//TODO: still to fix, it does not yet give intermediate results
 		if (!intermediate) {
 			//intermediate results must not be saved, then use
 			//the base method
@@ -1973,7 +1923,7 @@ public class SolverSingleClosedMVA extends Solver {
 		}//end loop through stations
 
 		//calculation of throughput for all LI subnetwork, and queue length
-		//recoursively starting from 0 customer in network to max customers
+		//recursively starting from 0 customer in network to max customers
 
 		if (!noLI) {
 			//there are also LI stations
@@ -1981,12 +1931,12 @@ public class SolverSingleClosedMVA extends Solver {
 				sum = 0.0;
 				for (k = 0; k < LICount; k++) {
 					switch (type[k]) {
-						case Solver.DELAY:
-							residenceTime[k] = interm_residenceTime[n][k] = D[k];
-							break;
-						case Solver.LI:
-							residenceTime[k] = interm_residenceTime[n][k] = D[k] * (1 + interm_queueLen[n - 1][k]);
-							break;
+					case Solver.DELAY:
+						residenceTime[k] = interm_residenceTime[n][k] = D[k];
+						break;
+					case Solver.LI:
+						residenceTime[k] = interm_residenceTime[n][k] = D[k] * (1 + interm_queueLen[n - 1][k]);
+						break;
 					}//end case
 
 					sum += interm_residenceTime[n][k];
@@ -1995,9 +1945,7 @@ public class SolverSingleClosedMVA extends Solver {
 				X[n] = interm_totThroughput[n];
 				for (k = 0; k < stations; k++) {
 					queueLen[k] = interm_queueLen[n][k] = interm_totThroughput[n] * interm_residenceTime[n][k];
-				}
-				//end loop through stations
-
+				}//end loop through stations
 			}//end loop through customers
 		}
 
@@ -2015,7 +1963,6 @@ public class SolverSingleClosedMVA extends Solver {
 				nsPrec[0][n] = n;
 				usPrec[0][n] = 1;
 			}
-
 		}//end initialization
 
 		//loop over all LD stations
@@ -2127,7 +2074,6 @@ public class SolverSingleClosedMVA extends Solver {
 						nsCorr[i][n] = interm_queueLen[n][i] += pCorr[puntProb[k]] * nsPrec[i][n - puntProb[k]];
 						usCorr[i][n] = interm_utilization[n][i] += pCorr[puntProb[k]] * usPrec[i][n - puntProb[k]];
 					}
-
 				}
 
 				//add p(n,n)
@@ -2152,15 +2098,15 @@ public class SolverSingleClosedMVA extends Solver {
 		//calculation of other parameters
 		totThroughput = interm_totThroughput[customers] = X[customers] / visits[stations - 1];
 		for (m = noLI ? 0 : LICount; m < stations; m++) {
-		throughput[m] = totThroughput * visits[m];
-		if (type[m] == Solver.DELAY)
-		utilization[m] = visits[m] * servTime[m][0];
-		else
-		utilization[m] = usPrec[m][customers];
-		queueLen[m] = nsPrec[m][customers];
-		residenceTime[m] = queueLen[m] / totThroughput;
+			throughput[m] = totThroughput * visits[m];
+			if (type[m] == Solver.DELAY)
+			utilization[m] = visits[m] * servTime[m][0];
+			else
+			utilization[m] = usPrec[m][customers];
+			queueLen[m] = nsPrec[m][customers];
+			residenceTime[m] = queueLen[m] / totThroughput;
 		}
-		*/
+		 */
 
 		//calculation of other parameters
 		totThroughput = interm_totThroughput[customers] = X[customers] / visits[stations - 1];
@@ -2203,8 +2149,6 @@ public class SolverSingleClosedMVA extends Solver {
 		}
 
 		//end NEW
-
-		//System.out.println("used LDErrCtrFaster");
 	}
 
 	/**
@@ -2240,7 +2184,6 @@ public class SolverSingleClosedMVA extends Solver {
 			utilization[i] = tempDouble;
 
 			if (intermediate_results) {
-
 				for (int n = 0; n <= customers; n++) {
 					//also intermediate results have to be reordered
 					tempDouble = interm_queueLen[n][position[i]];
@@ -2258,9 +2201,7 @@ public class SolverSingleClosedMVA extends Solver {
 					tempDouble = interm_utilization[n][position[i]];
 					interm_utilization[n][position[i]] = interm_utilization[n][i];
 					interm_utilization[n][i] = tempDouble;
-
 				}
-
 			}
 			//at the end "resets" the position array
 			tempInt = position[position[i]];
@@ -2269,13 +2210,9 @@ public class SolverSingleClosedMVA extends Solver {
 		}
 	}
 
-	//NEW
-	//@author Stefano Omini
-
 	/** generates a string with all the calculated indices.
 	 * @return the string
 	 */
-
 	@Override
 	public String toString() {
 		if (!intermediate_results) {
@@ -2323,12 +2260,9 @@ public class SolverSingleClosedMVA extends Solver {
 				buf.append(Printer.print(interm_utilization[n][m], 6));
 				buf.append("   ]\n");
 			}
-
 		}
 
 		return buf.toString();
 	}
-
-	//end NEW
 
 }

@@ -198,7 +198,7 @@ public class PerformanceIndices2DGraph extends JabaGraph implements
 					valuesOnLeftY.add(util[j].get(i));
 				}
 				//If the station j is saturated
-				if ( Math.abs(util[j].get(i).getY() - util[j].get(i + 1).getY()) < EPSILON &&
+				if (Math.abs(util[j].get(i).getY() - util[j].get(i + 1).getY()) < EPSILON &&
 						Math.abs(util[j].get(i).getY() - 1) < EPSILON) {
 					if (numOfSaturatedStationPerSector[i/2]>=1)
 						g2.setStroke(DOTTED_LINES2);

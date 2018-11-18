@@ -68,8 +68,8 @@ public class LDEditingWindow extends JMTDialog {
 	private static final long serialVersionUID = 1L;
 
 	/* dummy arrays to keep the tablemodel happy during initialization */
-	private double[][] serviceTimes = new double[1][1];
 	private String[] classNames = new String[1];
+	private double[][] serviceTimes = new double[1][1];
 
 	private HoverHelp help;
 	private Frame owner;
@@ -318,7 +318,7 @@ public class LDEditingWindow extends JMTDialog {
 	/**
 	 * Sets all the data for the editing window. The matrix of service times is copied in order to have a "cancel" feature.
 	 */
-	public void setStatus(String title, String stationName, String[] classNames, double[][] serviceTimes) {
+	public void setStatus(String title, String[] classNames, double[][] serviceTimes) {
 		this.classNames = classNames;
 		this.serviceTimes = ArrayUtils.copy2(serviceTimes);
 		//ldTitle.setText("Service times for "+stationName);

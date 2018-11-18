@@ -95,7 +95,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 	private static final String DEFAULT_INTERVALS = "10";
 
-	private static final String[] GRAPH_TYPES = {"-- Select a type of graph --", "Histogram" , "Density Line", "Distribution"};
+	private static final String[] GRAPH_TYPES = {"-- Select a type of graph --", "Histogram", "Density Line", "Distribution"};
 
 	private static final String FILTER_TYPE_SAMPLE = "SAMPLE";
 	private static final String FILTER_TYPE_TIME = "TIME";
@@ -111,15 +111,15 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	public static final String CSV_COLUMN_END = "INTERVAL_END";
 	public static final String CSV_COLUMN_VALUE = "VALUE";
 
-	private JButton closeButton ;
+	private JButton closeButton;
 	private JButton reDrawButton;
 	private JButton saveButton;
-	private JProgressBar progressBar ;
+	private JProgressBar progressBar;
 	private StatisticalOutputsLoader sop;
 	public DistributionDensityGraph graph = null;
 	private SampleStatistics statGraph;
 	private JPanel graphHolder = new JPanel(new BorderLayout());
-	private JLabel icon = new JLabel() ;
+	private JLabel icon = new JLabel();
 	private JPanel rightPanel;
 	private JToolBar toolbar;
 	public String windowName;
@@ -174,7 +174,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_STAT_OUTPUT, CommonConstants.MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT);
 
 		//makes LeftSidePanel
-		JPanel pivotPanel = new JPanel() ;
+		JPanel pivotPanel = new JPanel();
 		pivotPanel.setLayout(new BoxLayout(pivotPanel, BoxLayout.PAGE_AXIS));
 
 		//makes BottomPanel
@@ -321,7 +321,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		// COEFFICIENT OF VARIATION
 		label = new JLabel("Coefficient of Variation:");
-		fieldCoefVar = new JTextField() ;
+		fieldCoefVar = new JTextField();
 		fieldCoefVar.setEditable(false);
 		fieldCoefVar.setToolTipText("Displays coefficient of variation of the data.");
 		fieldCoefVar.setMaximumSize(new Dimension(fieldCoefVar.getMaximumSize().width, fieldCoefVar.getMinimumSize().height));
@@ -331,7 +331,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		// SKEWNESS
 		label = new JLabel("Skewness:");
-		fieldSkew = new JTextField() ;
+		fieldSkew = new JTextField();
 		fieldSkew.setEditable(false);
 		fieldSkew.setToolTipText("Displays skewness of the data.");
 		fieldSkew.setMaximumSize(new Dimension(fieldSkew.getMaximumSize().width, fieldSkew.getMinimumSize().height));
@@ -341,7 +341,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		// KURTOSIS
 		label = new JLabel("Kurtosis:");
-		fieldKur = new JTextField() ;
+		fieldKur = new JTextField();
 		fieldKur.setEditable(false);
 		fieldKur.setToolTipText("Displays kurtosis of the data.");
 		fieldKur.setMaximumSize(new Dimension(fieldKur.getMaximumSize().width, fieldKur.getMinimumSize().height));
@@ -355,7 +355,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		// FIRST MOMENT
 		label = new JLabel("First Moment:");
-		fieldMoment1 = new JTextField() ;
+		fieldMoment1 = new JTextField();
 		fieldMoment1.setEditable(false);
 		fieldMoment1.setToolTipText("Displays first moment(mean) of the data.");
 		fieldMoment1.setMaximumSize(new Dimension(fieldMoment1.getMaximumSize().width, fieldMoment1.getMinimumSize().height));
@@ -365,7 +365,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		// SECOND MOMENT
 		label = new JLabel("Second Moment:");
-		fieldMoment2 = new JTextField() ;
+		fieldMoment2 = new JTextField();
 		fieldMoment2.setEditable(false);
 		fieldMoment2.setToolTipText("Displays second moment of the data.");
 		fieldMoment2.setMaximumSize(new Dimension(fieldMoment2.getMaximumSize().width, fieldMoment2.getMinimumSize().height));
@@ -375,7 +375,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		// THIRD MOMENT
 		label = new JLabel("Third Moment:");
-		fieldMoment3 = new JTextField() ;
+		fieldMoment3 = new JTextField();
 		fieldMoment3.setEditable(false);
 		fieldMoment3.setToolTipText("Displays third moment of the data.");
 		fieldMoment3.setMaximumSize(new Dimension(fieldMoment3.getMaximumSize().width, fieldMoment3.getMinimumSize().height));
@@ -385,7 +385,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		// FOURTH MOMENT
 		label = new JLabel("Fourth Moment:");
-		fieldMoment4 = new JTextField() ;
+		fieldMoment4 = new JTextField();
 		fieldMoment4.setEditable(false);
 		fieldMoment4.setToolTipText("Displays fourth moment of the data.");
 		fieldMoment4.setMaximumSize(new Dimension(fieldMoment4.getMaximumSize().width, fieldMoment4.getMinimumSize().height));
@@ -399,7 +399,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		//Displays Min Value amongst samples
 		label = new JLabel("Min Value:");
-		fieldMin = new JTextField() ;
+		fieldMin = new JTextField();
 		fieldMin.setEditable(false);
 		fieldMin.setToolTipText("Displays minimun value amongst the samples.");
 		fieldMin.setMaximumSize(new Dimension(fieldMin.getMaximumSize().width, fieldMin.getMinimumSize().height));
@@ -409,7 +409,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		//Displays Max Value amongst samples
 		label = new JLabel("Max Value:");
-		fieldMax = new JTextField() ;
+		fieldMax = new JTextField();
 		fieldMax.setEditable(false);
 		fieldMax.setToolTipText("Displays maximum value amongst the samples.");
 		fieldMax.setMaximumSize(new Dimension(fieldMax.getMaximumSize().width, fieldMax.getMinimumSize().height));
@@ -419,7 +419,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		//Displays Min Simulation time amongst samples
 		label = new JLabel("Min Simulation Time:");
-		fieldMinTime = new JTextField() ;
+		fieldMinTime = new JTextField();
 		fieldMinTime.setEditable(false);
 		fieldMinTime.setToolTipText("Displays the simulation time of the first collected sample.");
 		fieldMinTime.setMaximumSize(new Dimension(fieldMinTime.getMaximumSize().width, fieldMinTime.getMinimumSize().height));
@@ -429,7 +429,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 		//Displays Max Simulation time amongst samples
 		label = new JLabel("Max Simulation Time:");
-		fieldMaxTime = new JTextField() ;
+		fieldMaxTime = new JTextField();
 		fieldMaxTime.setEditable(false);
 		fieldMaxTime.setToolTipText("Displays the simulation time of the last collected sample.");
 		fieldMaxTime.setMaximumSize(new Dimension(fieldMaxTime.getMaximumSize().width, fieldMaxTime.getMinimumSize().height));
@@ -438,7 +438,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		boundsPanel.add(fieldMaxTime);
 
 		label = new JLabel("No. of Discarded Samples:");
-		discardedSamples = new JTextField() ;
+		discardedSamples = new JTextField();
 		discardedSamples.setEditable(false);
 		discardedSamples.setToolTipText("Displays the number of discarded samples (transients).");
 		discardedSamples.setMaximumSize(new Dimension(discardedSamples.getMaximumSize().width, discardedSamples.getMinimumSize().height));
@@ -544,7 +544,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		}
 
 		// main RightPanel
-		rightPanel = new JPanel(new BorderLayout()) ;
+		rightPanel = new JPanel(new BorderLayout());
 		//graph panel
 		rightPanel.add(graphHolder, BorderLayout.CENTER);
 
@@ -590,11 +590,11 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		if (progress < 100) {
 			progressBar.setString("Loaded " + progress + "% of performance index samples...");
 			icon.setIcon(JMTImageLoader.loadImage(jmt.gui.common.definitions.ResultsConstants.IN_PROGRESS_IMAGE));
-			updateStatistics(false) ;
+			updateStatistics(false);
 		} else {
 			progressBar.setString("Load complete");
 			icon.setIcon(JMTImageLoader.loadImage(jmt.gui.common.definitions.ResultsConstants.SUCCESS_IMAGE));
-			updateStatistics(true) ;
+			updateStatistics(true);
 			setFieldsEnabled(true);
 			statGraph = sop.getStatistics();
 			updateGraph();
@@ -708,9 +708,9 @@ public class StatisticalOutputsWindow extends JMTFrame {
 					graph.addMouseListener(new MouseAdapter() {
 						@Override
 						public void mouseClicked(MouseEvent e) {
-							try{
+							try {
 								graph.mouseClicked(e);
-							}catch(NullPointerException ek) {
+							} catch (NullPointerException ek) {
 							}
 						}
 					});

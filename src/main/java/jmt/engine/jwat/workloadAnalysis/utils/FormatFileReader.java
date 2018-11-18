@@ -23,10 +23,10 @@ public class FormatFileReader {
 	public FormatFileReader(String fileN) {
 		fileName = new File(fileN);
 		// Load data from file format
-                try {
-			BufferedReader file = new BufferedReader(new FileReader(fileName));
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(fileName));
 			// Retrieve number of variables
-			numeroVariabili = Integer.parseInt(file.readLine());
+			numeroVariabili = Integer.parseInt(reader.readLine());
 			types = new int[numeroVariabili];
 			selected = new boolean[numeroVariabili];
 			names = new ArrayList<String>();
@@ -37,16 +37,17 @@ public class FormatFileReader {
 			replaces = new ArrayList<String>();
 			// Retrieve single variable information
 			for (int i = 0; i < numeroVariabili; i++) {
-				names.add(file.readLine());
-				types[i] = Integer.parseInt(file.readLine());
-				selected[i] = (Integer.parseInt(file.readLine()) == 0 ? false : true);
-				comments.add(file.readLine());
-				delimiters.add(file.readLine());
-				regExpr.add(file.readLine());
-				defaults.add(file.readLine());
-				replaces.add(file.readLine());
+				names.add(reader.readLine());
+				types[i] = Integer.parseInt(reader.readLine());
+				selected[i] = (Integer.parseInt(reader.readLine()) == 0 ? false : true);
+				comments.add(reader.readLine());
+				delimiters.add(reader.readLine());
+				regExpr.add(reader.readLine());
+				defaults.add(reader.readLine());
+				replaces.add(reader.readLine());
 			}
 			current = 0;
+			reader.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e1) {

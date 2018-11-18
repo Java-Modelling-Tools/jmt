@@ -80,7 +80,7 @@ public class TreeConvolutionSolver extends QNSolver {
      */
     @Override
     public void printWelcome() {
-        System.out.println("Using Tree-Convolution. Multi-core=" + (numThreads > 1));
+        System.out.println("Using Tree Convolution. Multi-core=" + (numThreads > 1));
     }
 
 	/**

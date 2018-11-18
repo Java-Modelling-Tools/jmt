@@ -1036,7 +1036,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	 */
 	protected boolean nullTest() {
 		/*
-		To test whether the population mean has a specific value, 0 , against
+		To test whether the population mean has a specific value, 0, against
 		the one-sided alternative that it is > 0, the confidence
 		interval is converted to hypothesis-test form.
 

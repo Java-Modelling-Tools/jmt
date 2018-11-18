@@ -497,14 +497,14 @@ public interface StationDefinition {
 	public boolean areConnectable(Object sourceKey, Object targetKey);
 
 	/**Returns a set of station keys specified station is connected to as a source.
-	 * @param stationKey: source station for which (target)connected stations must be
+	 * @param stationKey: source station for which (target) connected stations must be
 	 * returned.
 	 * @return Vector containing keys for connected stations.
 	 */
 	public Vector<Object> getForwardConnections(Object stationKey);
 
 	/**Returns a set of station keys specified station is connected to as a target.
-	 * @param stationKey: source station for which (source)connected stations must be
+	 * @param stationKey: source station for which (source) connected stations must be
 	 * returned.
 	 * @return Vector containing keys for connected stations.
 	 */

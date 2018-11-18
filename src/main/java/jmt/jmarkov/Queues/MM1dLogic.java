@@ -76,29 +76,28 @@ public class MM1dLogic extends MM1Logic {
 	}
 
 	private double pb() {//status probability of the last status
-	//        double p = lambda * s;
-	//        return ((1-p) * Math.pow(p, max+1)) / (1 - Math.pow(p, max+2));
+		//double p = lambda * s;
+		//return ((1-p) * Math.pow(p, max+1)) / (1 - Math.pow(p, max+2));
 		return getStatusProbability(max + 1);
-
 	}
 
 	@Override
 	public double responseTime() {
-		//        return  mediaJobs()/lambda/  (1 - pb()) ;
+		//return mediaJobs() / lambda / (1 - pb());
 		return mediaJobs() / throughput();
 	}
 
 	@Override
 	public double throughput() {
-		//        double p = lambda * s;
-		//        return lambda * (1 - Math.pow(p, max+1)) / (1 - Math.pow(p, max+2));
+		//double p = lambda * s;
+		//return lambda * (1 - Math.pow(p, max+1)) / (1 - Math.pow(p, max+2));
 		return lambda * (1.0 - pb());
 	}
 
 	@Override
 	public double utilization() {
-		//        double p = lambda * s;
-		//        return p * (1 - Math.pow(p, max+1)) / (1 - Math.pow(p, max+2));
+		//double p = lambda * s;
+		//return p * (1 - Math.pow(p, max+1)) / (1 - Math.pow(p, max+2));
 		return lambda * (1 - pb()) * s;
 	}
 
