@@ -232,6 +232,11 @@ public class SolverDispatcher {
 				} else if (SolverAlgorithm.MONTE_CARLO_LOGISTIC.equals(algorithmType)) {
 					solver = new SolverSingleClosedMonteCarloLogistic(pop, stations,
 							maxSamples, SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION);
+				} else if (SolverAlgorithm.RECAL.equals(algorithmType)) {
+					solver = new SolverSingleClosedRECAL(pop, stations);
+				} else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
+//					solver = new SolverSingleClosedCoMoM(pop, stations); // throws exception
+					solver = new SolverSingleClosedExact(pop, stations); // Convolution
 				} else {
 					solver = new SolverSingleClosedAMVA(pop, stations, algorithmType, tolerance);
 				}
@@ -278,6 +283,12 @@ public class SolverDispatcher {
 		/** Edited by Abhimanyu Chugh **/
 		if (solver instanceof SolverSingleClosedAMVA) {
 			algIterations = ((SolverSingleClosedAMVA) solver).getIterations();
+		} else if (solver instanceof SolverSingleClosedRECAL) {
+			BigRational G = ((SolverSingleClosedRECAL)solver).solver.qnm.getNormalisingConstant();
+			logNC = G.log();
+		} else if (solver instanceof SolverSingleClosedCoMoM) {
+			BigRational G = ((SolverSingleClosedCoMoM)solver).solver.qnm.getNormalisingConstant();
+			logNC = G.log();
 		} else if (solver instanceof SolverSingleClosedMonteCarloLogistic) {
 			BigRational G = ((SolverSingleClosedMonteCarloLogistic)solver).solver.qnm.getNormalisingConstant();
 			logNC = G.log();
