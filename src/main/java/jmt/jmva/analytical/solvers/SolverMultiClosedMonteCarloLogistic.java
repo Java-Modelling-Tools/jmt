@@ -21,7 +21,7 @@ public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 	protected int maxSamples = DEFAULT_MAX_SAMPLES;
 	protected int precision = DEFAULT_PRECISION;
 	protected boolean isLD;
-	protected QNModel qnm;
+	public QNModel qnm;
 	protected int[] population;
 	protected int[] servNum;
 

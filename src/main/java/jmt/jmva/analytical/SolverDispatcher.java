@@ -20,6 +20,7 @@ package jmt.jmva.analytical;
 
 import java.io.File;
 
+import jmt.jmva.analytical.solvers.DataStructures.BigRational;
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.framework.data.ArrayUtils;
@@ -273,9 +274,13 @@ public class SolverDispatcher {
 		/* solve */
 		solver.solve();
 
+		double logNC = Double.NaN;
 		/** Edited by Abhimanyu Chugh **/
 		if (solver instanceof SolverSingleClosedAMVA) {
 			algIterations = ((SolverSingleClosedAMVA) solver).getIterations();
+		} else if (solver instanceof SolverSingleClosedMonteCarloLogistic) {
+			BigRational G = ((SolverSingleClosedMonteCarloLogistic)solver).solver.qnm.getNormalisingConstant();
+			logNC = G.log();
 		}
 		/** End **/
 
@@ -293,7 +298,7 @@ public class SolverDispatcher {
 		ArrayUtils.insert1(util, solver.getUtilization(), 0);
 
 		/** Edited by Abhimanyu Chugh **/
-		model.setResults(algorithmType, algIterations, ql, tp, rt, util, iteration);
+		model.setResults(algorithmType, algIterations, ql, tp, rt, util, logNC, iteration);
 		/** End **/
 	}
 
@@ -452,10 +457,21 @@ public class SolverDispatcher {
 		/* solution */
 		solver.solve();
 
+		double logNC = Double.NaN;
 		/** Edited by Abhimanyu Chugh **/
 		if (solver instanceof SolverMultiClosedAMVA) {
 			algIterations = ((SolverMultiClosedAMVA) solver).getIterations();
+		} else if (solver instanceof SolverMultiClosedRECAL) {
+			BigRational G = ((SolverMultiClosedRECAL)solver).qnm.getNormalisingConstant();
+			logNC = G.log();
+		} else if (solver instanceof SolverMultiClosedMonteCarloLogistic) {
+			BigRational G = ((SolverMultiClosedMonteCarloLogistic)solver).qnm.getNormalisingConstant();
+			logNC = G.log();
+		} else if (solver instanceof SolverMultiClosedCoMoM) {
+			BigRational G = ((SolverMultiClosedCoMoM)solver).qnm.getNormalisingConstant();
+			logNC = G.log();
 		}
+		
 		/** End **/
 
 		double[][] ql = ArrayUtils.resize2(solver.getQueueLen(), stations, classes, 0);
@@ -467,7 +483,7 @@ public class SolverDispatcher {
 		double[][] util = ArrayUtils.resize2(solver.getUtilization(), stations, classes, 0);
 
 		/** Edited by Abhimanyu Chugh **/
-		model.setResults(algorithmType, algIterations, ql, tp, rt, util, iteration);
+		model.setResults(algorithmType, algIterations, ql, tp, rt, util, logNC, iteration);
 		/** End **/
 	}
 

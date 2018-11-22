@@ -9,7 +9,7 @@ import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
  */
 public class SolverSingleClosedMonteCarloLogistic extends Solver {
 
-	private SolverMultiClosedMonteCarloLogistic solver;
+	public SolverMultiClosedMonteCarloLogistic solver;
 
 	public static final boolean DEBUG = false;
 

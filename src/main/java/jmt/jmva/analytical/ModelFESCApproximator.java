@@ -145,7 +145,7 @@ public class ModelFESCApproximator {
 					}
 				}
 				int algIterations = outputModel.getAlgIterations(alg)[iteration];
-				inputModel.setResults(alg, algIterations, q, x, r, u, iteration);
+				inputModel.setResults(alg, algIterations, q, x, r, u, Double.NaN, iteration);
 			}
 			inputModel.setResultsBooleans(true);
 			/** End **/

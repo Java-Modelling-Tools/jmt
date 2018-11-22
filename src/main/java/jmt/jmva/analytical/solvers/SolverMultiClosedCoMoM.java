@@ -44,7 +44,7 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 	/**
 	 * Contains the queueing network model
 	 */
-	protected QNModel qnm;
+	public QNModel qnm;
 	/**
 	 * Number of threads that the MoMSolver should use
 	 */

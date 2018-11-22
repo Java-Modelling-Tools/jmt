@@ -17,6 +17,7 @@
 
 package jmt.jmva.analytical.solvers.DataStructures;
 
+import java.lang.Double;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -217,7 +218,7 @@ public class BigRational implements Comparable<BigRational> {
      * This method ensures that the denominator of the fraction is positive. It
      * is used for easy comparison.
      */
-    private void ensureDenoimatorPositive() {
+    private void ensureDenominatorPositive() {
         // to ensure invariant that denominator is positive
         if (den.signum() == -1) {
             den = den.negate();
@@ -251,7 +252,7 @@ public class BigRational implements Comparable<BigRational> {
             return -1;
         } else {
             BigRational a = this;
-            a.ensureDenoimatorPositive();
+            a.ensureDenominatorPositive();
             return a.num.multiply(b.den).compareTo(a.den.multiply(b.num));
         }
     }
@@ -340,7 +341,7 @@ public class BigRational implements Comparable<BigRational> {
      * @return True if positive, false otherwise
      */
     public boolean isPositive() {
-        this.ensureDenoimatorPositive();
+        this.ensureDenominatorPositive();
         return num.signum() == 1;
     }
 
@@ -350,7 +351,7 @@ public class BigRational implements Comparable<BigRational> {
      * @return True if negative, false otherwise
      */
     public boolean isNegative() {
-        this.ensureDenoimatorPositive();
+        this.ensureDenominatorPositive();
         return num.signum() == -1;
     }
 
@@ -385,8 +386,8 @@ public class BigRational implements Comparable<BigRational> {
             return false;
         }
         BigRational b = (BigRational) y;
-        b.ensureDenoimatorPositive();
-        this.ensureDenoimatorPositive();
+        b.ensureDenominatorPositive();
+        this.ensureDenominatorPositive();
         return compareTo(b) == 0;
     }
 
@@ -465,7 +466,7 @@ public class BigRational implements Comparable<BigRational> {
      */
     public BigRational negate() {
         BigRational toReturn = new BigRational(num.negate(), den, true);
-        toReturn.ensureDenoimatorPositive();
+        toReturn.ensureDenominatorPositive();
         return toReturn;
     }
 
@@ -524,7 +525,7 @@ public class BigRational implements Comparable<BigRational> {
             return b.reciprocal().negate();
             } *///else {
             BigRational toRet = this.multiply(b.reciprocal());
-            toRet.ensureDenoimatorPositive();
+            toRet.ensureDenominatorPositive();
             return toRet;
             //}
         } else {
@@ -536,7 +537,7 @@ public class BigRational implements Comparable<BigRational> {
         if (b.compareTo(BigInteger.ZERO) != 0) {
             BigInteger newDen = den.multiply(b);
             BigRational toRet = new BigRational(num, newDen);
-            toRet.ensureDenoimatorPositive();
+            toRet.ensureDenominatorPositive();
             return toRet;
         } else {
             throw new ArithmeticException("Division by zero!");
@@ -669,5 +670,33 @@ public class BigRational implements Comparable<BigRational> {
             return toReturn;
         }
     }
+
+    /**
+     * Returns the logarithm of the BigRational number
+     * @return The logarithm of this
+     */
+    public double log() {
+		BigInteger num = this.num;
+		BigInteger den = this.den;
+		double numRes, denRes;
+        if (num.signum() < 1){
+            numRes = num.signum() < 0 ? Double.NaN : Double.NEGATIVE_INFINITY;
+		} else { 
+			int blex = num.bitLength() - 977; // any value in 60..1023 works ok here
+			if (blex > 0) {	num = num.shiftRight(blex); }
+			double res = Math.log(num.doubleValue());
+			numRes = blex > 0 ? res + blex * Math.log(2.0) : res;
+		}
+        if (den.signum() < 1){
+            denRes = den.signum() < 0 ? Double.NaN : Double.NEGATIVE_INFINITY;
+		} else { 
+			int blex = den.bitLength() - 977; // any value in 60..1023 works ok here
+			if (blex > 0) {	den = den.shiftRight(blex); }
+			double res = Math.log(den.doubleValue());
+			denRes = blex > 0 ? res + blex * Math.log(2.0) : res;
+		}
+		return numRes - denRes;
+    }
+
 
 }

@@ -170,6 +170,8 @@ public class ExactModel implements ExactConstants  {
 	 */
 	private Map<SolverAlgorithm, double[][][]> util;
 	/* END */
+	
+	private double logNormConst;
 
 	/*****************************************************************/
 	//parameters for randomization
@@ -179,7 +181,7 @@ public class ExactModel implements ExactConstants  {
 	/*****************************************************************/
 
 	/********************** WHAT-IF ANALYSIS *** Bertoli Marco *******/
-	/** Number of iterations (1 for normal usage, >1 for what-if analysis) */
+	/** Number of iterations (1 for normal use, >1 for what-if analysis) */
 	private int iterations = 1;
 	/** Index of class selected for what-if analysis. -1 means all classes */
 	private int whatIfClass = -1;
@@ -397,7 +399,7 @@ public class ExactModel implements ExactConstants  {
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
 	 */
 	/* EDITED by Abhimanyu Chugh */
-	public void setResults(SolverAlgorithm alg, int[] algIterations, double[][][] queueLen, double[][][] throughput, double[][][] resTimes, double[][][] util) {
+	public void setResults(SolverAlgorithm alg, int[] algIterations, double[][][] queueLen, double[][][] throughput, double[][][] resTimes, double[][][] util, double logNormConst) {
 		if (queueLen == null || queueLen.length != stations || queueLen[0].length != classes) {
 			throw new IllegalArgumentException("queueLen must be non null and of size [stations][classes][iterations]");
 		}
@@ -416,6 +418,7 @@ public class ExactModel implements ExactConstants  {
 		this.resTimes.put(alg, ArrayUtils.copy3(resTimes));
 		this.util.put(alg, ArrayUtils.copy3(util));
 		this.algIterations.put(alg, ArrayUtils.copy(algIterations));
+		this.logNormConst = logNormConst;
 
 		iterations = queueLen[0][0].length;
 
@@ -431,9 +434,9 @@ public class ExactModel implements ExactConstants  {
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
 	 */
 	/* EDITED by Abhimanyu Chugh */
-	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util) {
+	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, double logNormConst) {
 		resetResults();
-		setResults(alg, algIterations, queueLen, throughput, resTimes, util, 0);
+		setResults(alg, algIterations, queueLen, throughput, resTimes, util, logNormConst, 0);
 	}
 	/* END */
 
@@ -450,7 +453,7 @@ public class ExactModel implements ExactConstants  {
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
 	 */
 	/* EDITED by Abhimanyu Chugh */
-	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, int iteration) {
+	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, double logNormConst, int iteration) {
 		if (queueLen == null || queueLen.length != stations || queueLen[0].length != classes) {
 			throw new IllegalArgumentException("queueLen must be non null and of size [stations][classes]");
 		}
@@ -479,6 +482,7 @@ public class ExactModel implements ExactConstants  {
 		ArrayUtils.copy2to3(resTimes, this.resTimes.get(alg), iteration);
 		ArrayUtils.copy2to3(util, this.util.get(alg), iteration);
 		this.algIterations.get(alg)[iteration] = algIterations;
+		this.logNormConst = logNormConst;
 
 		/*TODO: achugh
 		hasResults = true;
@@ -591,6 +595,8 @@ public class ExactModel implements ExactConstants  {
 		//end NEW
 
 		description = "";
+		
+		logNormConst = Double.NaN;
 
 		whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);
 		whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
@@ -1638,6 +1644,8 @@ public class ExactModel implements ExactConstants  {
 				Element algorithm_element = (Element) result_element.appendChild(root.createElement("algorithm"));
 				algorithm_element.setAttribute("name", alg.toString());
 				algorithm_element.setAttribute("iterations", Integer.toString(algIterations.get(alg)[k]));
+				Element nc_element = (Element) algorithm_element.appendChild(root.createElement("normconst"));
+				nc_element.setAttribute("logValue", Double.toString(this.logNormConst));
 
 				for (int i = 0; i < stations; i++) {
 					Element stationresults_element = (Element) algorithm_element.appendChild(root.createElement("stationresults"));
