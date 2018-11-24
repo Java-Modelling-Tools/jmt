@@ -176,8 +176,13 @@ public class SolverMultiMixed extends SolverMulti {
 					//OLD
 					//closedVisits[i][cCounter] = visits[i][j] / (1 - scUtilization[i]);
 					//closedServTime[i][cCounter] = servTime[i][j];
+					
 					closedVisits[i][cCounter] = visits[i][j];
-					closedServTime[i][cCounter][0] = servTime[i][j][0] / (1 - scUtilization[i]);
+					if (type[i] == SolverMulti.DELAY) {
+						closedServTime[i][cCounter][0] = servTime[i][j][0];
+					} else {
+						closedServTime[i][cCounter][0] = servTime[i][j][0] / (1 - scUtilization[i]);
+					}
 				}
 				cCounter++;
 			}
@@ -226,7 +231,12 @@ public class SolverMultiMixed extends SolverMulti {
 					} else {
 						//open class
 						//utilizations have been already computed
-						residenceTime[i][j] = demands[i][j] * (1 + scQueueLen[i]) / (1 - scUtilization[i]);
+						if (type[i] == SolverMulti.DELAY) {
+							residenceTime[i][j] = demands[i][j];
+						} else {
+							residenceTime[i][j] = demands[i][j] * (1 + scQueueLen[i]) / (1 - scUtilization[i]);
+						}
+
 						queueLen[i][j] = popPar[j] * residenceTime[i][j];
 						//OLD
 						//throughput[i][j] = queueLen[i][j] / residenceTime[i][j];
@@ -323,7 +333,11 @@ public class SolverMultiMixed extends SolverMulti {
 						cCounter++;
 					} else {
 						//open class
-						residenceTime[i][j] = demands[i][j] * (1 + scQueueLen[i]) / (1 - scUtilization[i]);
+						if (type[i] == SolverMulti.DELAY) {
+							residenceTime[i][j] = demands[i][j];
+						} else {
+							residenceTime[i][j] = demands[i][j] * (1 + scQueueLen[i]) / (1 - scUtilization[i]);
+						}						
 						queueLen[i][j] = popPar[j] * residenceTime[i][j];
 						//OLD
 						//throughput[i][j] = queueLen[i][j] / residenceTime[i][j];
