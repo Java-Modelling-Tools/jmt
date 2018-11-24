@@ -23,6 +23,7 @@ import java.io.File;
 import jmt.jmva.analytical.solvers.DataStructures.BigRational;
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
+import jmt.common.exception.UnsupportedModelException;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.xml.XMLUtils;
 import jmt.jmva.analytical.solvers.*;
@@ -31,8 +32,10 @@ import org.xml.sax.SAXException;
 
 /**
  * Server side of the solver interface.<br>
- * This object takes a model, instantiates the correct solver, and solves it.<br>
- * Should probably be rewritten using a different data structure to hold model information
+ * This object takes a model, instantiates the correct solver, and solves
+ * it.<br>
+ * Should probably be rewritten using a different data structure to hold model
+ * information
  *
  * @author unknown, Bertoli Marco (what-if analysis)
  */
@@ -53,7 +56,9 @@ public class SolverDispatcher {
 
 	/**
 	 * Solves the model in file.
-	 * @throws jmt.common.exception.SolverException if there were errors operation was not successful
+	 * 
+	 * @throws jmt.common.exception.SolverException if there were errors operation
+	 *         was not successful
 	 */
 	public void solve(File file) throws SolverException, InputDataException {
 		ExactModel model = new ExactModel();
@@ -98,11 +103,11 @@ public class SolverDispatcher {
 
 	/**
 	 * Solves input model. This method will look for what-if analysis data and
-	 * perform a what-if analysis if requested.
-	 * <br>
+	 * perform a what-if analysis if requested. <br>
 	 * Author: Bertoli Marco
+	 * 
 	 * @param model model to be solved
-	 * @throws SolverException if something goes wrong during solution
+	 * @throws SolverException    if something goes wrong during solution
 	 * @throws InputDataException if some input data are malformed
 	 */
 	public void solve(ExactModel model) throws SolverException, InputDataException {
@@ -196,7 +201,7 @@ public class SolverDispatcher {
 		throw new SolverException(s.toString(), t);
 	}
 
-	private void solveSingle(ExactModel model, int iteration) throws Exception, InputDataException {
+	private void solveSingle(ExactModel model, int iteration) throws Exception, InputDataException, UnsupportedModelException {
 		int stations = model.getStations();
 		Solver solver = null;
 		/** Edited by Abhimanyu Chugh **/
@@ -204,11 +209,12 @@ public class SolverDispatcher {
 		int algIterations = 0;
 		/** End **/
 
-		//init
+		// init
 		String[] names = model.getStationNames();
 		int[] types = mapStationTypes(model.getStationTypes(), false);
 		double[][] serviceTimes = ArrayUtils.extract13(model.getServiceTimes(), 0);
-		//no supplemental copy here since extract13 already copies the first level of the array
+		// no supplemental copy here since extract13 already copies the first level of
+		// the array
 		adjustLD(serviceTimes, types);
 		double[] visits = ArrayUtils.extract1(model.getVisits(), 0);
 
@@ -217,12 +223,12 @@ public class SolverDispatcher {
 
 		try {
 			if (model.isClosed()) {
-				//single closed
+				// single closed
 				int pop = (int) model.getClassData()[0];
-				//First of all controls that the closed class has population greater than 0.
-				//Otherwise throws a InputDataException
+				// First of all controls that the closed class has population greater than 0.
+				// Otherwise throws a InputDataException
 				if (pop <= 0) {
-					//error: population is not greater than 0.0
+					// error: population is not greater than 0.0
 					throw new InputDataException("Population must be greater than zero");
 				}
 
@@ -230,14 +236,24 @@ public class SolverDispatcher {
 				if (SolverAlgorithm.EXACT.equals(algorithmType)) {
 					solver = new SolverSingleClosedMVA(pop, stations);
 				} else if (SolverAlgorithm.MONTE_CARLO_LOGISTIC.equals(algorithmType)) {
-					solver = new SolverSingleClosedMonteCarloLogistic(pop, stations,
-							maxSamples, SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION);
+					solver = new SolverSingleClosedMonteCarloLogistic(pop, stations, maxSamples,
+							SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION);
 				} else if (SolverAlgorithm.RECAL.equals(algorithmType)) {
+					if (model.isLd()) {
+						throw new UnsupportedModelException("The selected solver cannot handle load-dependent stations, please choose another.");							
+					}
 					solver = new SolverSingleClosedRECAL(pop, stations);
 				} else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
-					// in single-class we run RECAL as COMOM initialization, since it is meant for models with few stations
-					solver = new SolverSingleClosedRECAL(pop, stations); 
+					// in single-class we run RECAL as COMOM initialization, since it is meant for
+					// models with few stations
+					if (model.isLd()) {
+						throw new UnsupportedModelException("The selected solver cannot handle load-dependent stations, please choose another.");							
+					}
+					solver = new SolverSingleClosedRECAL(pop, stations);
 				} else {
+					if (model.isLd()) {
+						throw new UnsupportedModelException("The selected solver cannot handle load-dependent stations, please choose another.");							
+					}
 					solver = new SolverSingleClosedAMVA(pop, stations, algorithmType, tolerance);
 				}
 				/** End **/
@@ -246,7 +262,7 @@ public class SolverDispatcher {
 					/** Edited by Abhimanyu Chugh **/
 					String algName = algorithmType.toString().replace(" ", "").replace("-", "");
 					fail("Error initializing " + algName + "SingleSolver", null);
-					//fail("Error initializing MVASolver", null);
+					// fail("Error initializing MVASolver", null);
 					/** End **/
 				}
 			} else {
@@ -254,13 +270,13 @@ public class SolverDispatcher {
 				algorithmType = SolverAlgorithm.EXACT;
 				/** End **/
 
-				//TODO this is not used any more (multi solver is used instead)
+				// TODO this is not used any more (multi solver is used instead)
 				/* single open */
 				double lambda = model.getClassData()[0];
-				//First of all controls that the open class has rate greater than 0.
-				//Otherwise throws a InputDataException
+				// First of all controls that the open class has rate greater than 0.
+				// Otherwise throws a InputDataException
 				if (lambda <= 0) {
-					//error: rate is not greater than 0.0
+					// error: rate is not greater than 0.0
 					throw new InputDataException("Arrival rate must be greater than zero");
 				}
 				solver = new SolverSingleOpen(lambda, stations);
@@ -271,9 +287,10 @@ public class SolverDispatcher {
 		} catch (Exception e) {
 			fail("Error initializing SingleClass solver", e);
 		}
-		//controls processing capacity
+		// controls processing capacity
 		if (!solver.hasSufficientProcessingCapacity()) {
-			throw new InputDataException("One or more resources are in saturation. Decrease arrival rates or service demands.");
+			throw new InputDataException(
+					"One or more resources are in saturation. Decrease arrival rates or service demands.");
 		}
 
 		/* solve */
@@ -284,13 +301,13 @@ public class SolverDispatcher {
 		if (solver instanceof SolverSingleClosedAMVA) {
 			algIterations = ((SolverSingleClosedAMVA) solver).getIterations();
 		} else if (solver instanceof SolverSingleClosedRECAL) {
-			BigRational G = ((SolverSingleClosedRECAL)solver).solver.qnm.getNormalisingConstant();
-			logNC = G.log() - 5*Math.log(10)*((SolverSingleClosedRECAL)solver).solver.qnm.N.sum();
+			BigRational G = ((SolverSingleClosedRECAL) solver).solver.qnm.getNormalisingConstant();
+			logNC = G.log() - 5 * Math.log(10) * ((SolverSingleClosedRECAL) solver).solver.qnm.N.sum();
 		} else if (solver instanceof SolverSingleClosedCoMoM) {
-			BigRational G = ((SolverSingleClosedCoMoM)solver).solver.qnm.getNormalisingConstant();
-			logNC = G.log() - 5*Math.log(10)*((SolverSingleClosedCoMoM)solver).solver.qnm.N.sum();
+			BigRational G = ((SolverSingleClosedCoMoM) solver).solver.qnm.getNormalisingConstant();
+			logNC = G.log() - 5 * Math.log(10) * ((SolverSingleClosedCoMoM) solver).solver.qnm.N.sum();
 		} else if (solver instanceof SolverSingleClosedMonteCarloLogistic) {
-			BigRational G = ((SolverSingleClosedMonteCarloLogistic)solver).solver.qnm.getNormalisingConstant();
+			BigRational G = ((SolverSingleClosedMonteCarloLogistic) solver).solver.qnm.getNormalisingConstant();
 			logNC = G.log();
 		}
 		/** End **/
@@ -313,7 +330,7 @@ public class SolverDispatcher {
 		/** End **/
 	}
 
-	private void solveMulti(ExactModel model, int iteration) throws SolverException, InputDataException {
+	private void solveMulti(ExactModel model, int iteration) throws SolverException, InputDataException, UnsupportedModelException {
 		int classes = model.getClasses();
 		int stations = model.getStations();
 
@@ -335,20 +352,21 @@ public class SolverDispatcher {
 
 		SolverMulti solver = null;
 
-		//First of all controls that all classes have population or rate greater than 0.
-		//Otherwise throws a InputDataException
+		// First of all controls that all classes have population or rate greater than
+		// 0.
+		// Otherwise throws a InputDataException
 		for (double element : classData) {
 			if (element <= 0) {
-				//error: population or rate not greater than 0.0
-				//prepare message according to model type (mixed, open or closed)
+				// error: population or rate not greater than 0.0
+				// prepare message according to model type (mixed, open or closed)
 				if (model.isMixed()) {
-					//mixed model -> populations or rates
+					// mixed model -> populations or rates
 					throw new InputDataException("Populations and arrival rates must be greater than zero");
 				} else if (model.isOpen()) {
-					//open model -> rates
+					// open model -> rates
 					throw new InputDataException("Arrival rates must be greater than zero");
 				} else {
-					//closed model -> populations
+					// closed model -> populations
 					throw new InputDataException("Populations must be greater than zero");
 				}
 			}
@@ -367,6 +385,7 @@ public class SolverDispatcher {
 			} else {
 				int[] classPop = ArrayUtils.toInt(classData);
 				if (model.isClosed()) {
+
 					/** Edited by Abhimanyu Chugh **/
 					if (SolverAlgorithm.EXACT.equals(algorithmType)) {
 						SolverMultiClosedMVA closedsolver = new SolverMultiClosedMVA(classes, stations);
@@ -375,57 +394,64 @@ public class SolverDispatcher {
 						}
 						solver = closedsolver;
 					} else if (SolverAlgorithm.RECAL.equals(algorithmType)) {
+						if (model.isLd()) {
+							throw new UnsupportedModelException(
+									"The selected solver cannot handle load-dependent stations, please choose another.");
+						}
 						SolverMultiClosedRECAL closedSolver = new SolverMultiClosedRECAL(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 							fail("Error initializing RECALMultiSolver", null);
 						}
 						solver = closedSolver;
-					}/* else if (SolverAlgorithm.MOM.equals(algorithmType)) {
-						SolverMultiClosedMoM closedSolver = new SolverMultiClosedMoM(classes, stations, classPop);
-						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
-								fail("Error initializing MoMMultiSolver", null);
+					} /*
+						 * else if (SolverAlgorithm.MOM.equals(algorithmType)) { SolverMultiClosedMoM
+						 * closedSolver = new SolverMultiClosedMoM(classes, stations, classPop); if
+						 * (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
+						 * fail("Error initializing MoMMultiSolver", null); } solver = closedSolver; }
+						 */ else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
+						if (model.isLd()) {
+							throw new UnsupportedModelException(
+									"The selected solver cannot handle load-dependent stations, please choose another.");
 						}
-						solver = closedSolver;
-					}*/ else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
 						SolverMultiClosedCoMoM closedSolver = new SolverMultiClosedCoMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 							fail("Error initializing CoMoMMultiSolver", null);
 						}
 						solver = closedSolver;
-					}/* else if (SolverAlgorithm.RGF.equals(algorithmType)) {
-						SolverMultiClosedRGF closedSolver = new SolverMultiClosedRGF(classes, stations, classPop);
-						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
-							fail("Error initializing RGFMultiSolver", null);
-						}
-						solver = closedSolver;
-					} else if (SolverAlgorithm.TREE_MVA.equals(algorithmType)) {
-						SolverMultiClosedTreeMVA closedSolver = new SolverMultiClosedTreeMVA(classes, stations, classPop);
-						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
-							fail("Error initializing TreeMVAMultiSolver", null);
-						}
-						solver = closedSolver;
-					} else if (SolverAlgorithm.TREE_CONV.equals(algorithmType)) {
-						SolverMultiClosedTreeConvolution closedSolver = new SolverMultiClosedTreeConvolution(classes, stations, classPop);
-						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
-							fail("Error initializing TreeConvolutionMultiSolver", null);
-						}
-						solver = closedSolver;
-					} else if (SolverAlgorithm.MONTE_CARLO.equals(algorithmType)) {
-						SolverMultiClosedMonteCarlo closedSolver = new SolverMultiClosedMonteCarlo(classes, stations, classPop);
-						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
-							fail("Error initializing MonteCarloMultiSolver", null);
-						}
-						closedSolver.setTolerance(tolerance);
-						closedSolver.setMaxSamples(maxSamples);
-						solver = closedSolver;
-					}*/ else if (SolverAlgorithm.MONTE_CARLO_LOGISTIC.equals(algorithmType)) {
-						SolverMultiClosedMonteCarloLogistic closedSolver = new SolverMultiClosedMonteCarloLogistic(classes, stations, classPop,
-								maxSamples, SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION);
+					} /*
+						 * else if (SolverAlgorithm.RGF.equals(algorithmType)) { SolverMultiClosedRGF
+						 * closedSolver = new SolverMultiClosedRGF(classes, stations, classPop); if
+						 * (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
+						 * fail("Error initializing RGFMultiSolver", null); } solver = closedSolver; }
+						 * else if (SolverAlgorithm.TREE_MVA.equals(algorithmType)) {
+						 * SolverMultiClosedTreeMVA closedSolver = new SolverMultiClosedTreeMVA(classes,
+						 * stations, classPop); if (!closedSolver.input(stationTypes, serviceTimes,
+						 * visits)) { fail("Error initializing TreeMVAMultiSolver", null); } solver =
+						 * closedSolver; } else if (SolverAlgorithm.TREE_CONV.equals(algorithmType)) {
+						 * SolverMultiClosedTreeConvolution closedSolver = new
+						 * SolverMultiClosedTreeConvolution(classes, stations, classPop); if
+						 * (!closedSolver.input(stationTypes, serviceTimes, visits)) {
+						 * fail("Error initializing TreeConvolutionMultiSolver", null); } solver =
+						 * closedSolver; } else if (SolverAlgorithm.MONTE_CARLO.equals(algorithmType)) {
+						 * SolverMultiClosedMonteCarlo closedSolver = new
+						 * SolverMultiClosedMonteCarlo(classes, stations, classPop); if
+						 * (!closedSolver.input(stationTypes, serviceTimes, visits)) {
+						 * fail("Error initializing MonteCarloMultiSolver", null); }
+						 * closedSolver.setTolerance(tolerance); closedSolver.setMaxSamples(maxSamples);
+						 * solver = closedSolver; }
+						 */ else if (SolverAlgorithm.MONTE_CARLO_LOGISTIC.equals(algorithmType)) {
+						SolverMultiClosedMonteCarloLogistic closedSolver = new SolverMultiClosedMonteCarloLogistic(
+								classes, stations, classPop, maxSamples,
+								SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
 							fail("Error initializing MonteCarloLogisticMultiSolver", null);
 						}
 						solver = closedSolver;
 					} else {
+						if (model.isLd()) {
+							throw new InputDataException(
+									"The selected solver cannot handle load-dependent stations, please choose another.");
+						}
 						SolverMultiClosedAMVA closedSolver = null;
 						if (SolverAlgorithm.CHOW.equals(algorithmType)) {
 							closedSolver = new SolverMultiClosedChow(classes, stations, classPop);
@@ -434,7 +460,8 @@ public class SolverDispatcher {
 						} else if (SolverAlgorithm.AQL.equals(algorithmType)) {
 							closedSolver = new SolverMultiClosedAQL(classes, stations, classPop);
 						} else {
-							closedSolver = new SolverMultiClosedLinearizer(classes, stations, classPop, SolverAlgorithm.DESOUZA_MUNTZ_LINEARIZER.equals(algorithmType));
+							closedSolver = new SolverMultiClosedLinearizer(classes, stations, classPop,
+									SolverAlgorithm.DESOUZA_MUNTZ_LINEARIZER.equals(algorithmType));
 						}
 						closedSolver.setTolerance(tolerance);
 
@@ -446,7 +473,7 @@ public class SolverDispatcher {
 					}
 					/** End **/
 				} else {
-					//model is multiclass mixed
+					// model is multiclass mixed
 					/** Edited by Abhimanyu Chugh **/
 					algorithmType = SolverAlgorithm.EXACT;
 					/** End **/
@@ -462,7 +489,8 @@ public class SolverDispatcher {
 			fail("Error initializing Multiclass solver", e);
 		}
 		if (!solver.hasSufficientProcessingCapacity()) {
-			throw new InputDataException("One or more resources are in saturation. Decrease arrival rates or service demands.");
+			throw new InputDataException(
+					"One or more resources are in saturation. Decrease arrival rates or service demands.");
 		}
 
 		/* solution */
@@ -473,16 +501,16 @@ public class SolverDispatcher {
 		if (solver instanceof SolverMultiClosedAMVA) {
 			algIterations = ((SolverMultiClosedAMVA) solver).getIterations();
 		} else if (solver instanceof SolverMultiClosedRECAL) {
-			BigRational G = ((SolverMultiClosedRECAL)solver).qnm.getNormalisingConstant();
-			logNC = G.log() - 5*Math.log(10)*((SolverMultiClosedRECAL)solver).qnm.N.sum();
+			BigRational G = ((SolverMultiClosedRECAL) solver).qnm.getNormalisingConstant();
+			logNC = G.log() - 5 * Math.log(10) * ((SolverMultiClosedRECAL) solver).qnm.N.sum();
 		} else if (solver instanceof SolverMultiClosedMonteCarloLogistic) {
-			BigRational G = ((SolverMultiClosedMonteCarloLogistic)solver).qnm.getNormalisingConstant();
+			BigRational G = ((SolverMultiClosedMonteCarloLogistic) solver).qnm.getNormalisingConstant();
 			logNC = G.log();
 		} else if (solver instanceof SolverMultiClosedCoMoM) {
-			BigRational G = ((SolverMultiClosedCoMoM)solver).qnm.getNormalisingConstant();
-			logNC = G.log() - 5*Math.log(10)*((SolverMultiClosedCoMoM)solver).qnm.N.sum();
+			BigRational G = ((SolverMultiClosedCoMoM) solver).qnm.getNormalisingConstant();
+			logNC = G.log() - 5 * Math.log(10) * ((SolverMultiClosedCoMoM) solver).qnm.N.sum();
 		}
-		
+
 		/** End **/
 
 		double[][] ql = ArrayUtils.resize2(solver.getQueueLen(), stations, classes, 0);
@@ -552,9 +580,11 @@ public class SolverDispatcher {
 		}
 	}
 
-	// --- What-if Analysis methods --- Bertoli Marco -------------------------------------
+	// --- What-if Analysis methods --- Bertoli Marco
+	// -------------------------------------
 	/**
 	 * Performs a what-if analysis by changing arrival rates
+	 * 
 	 * @param model input model
 	 */
 	private void whatIfArrival(ExactModel model) throws SolverException, InputDataException {
@@ -594,7 +624,8 @@ public class SolverDispatcher {
 				break;
 			}
 
-			// Now solves current model - we cannot interrupt this as it is not designed to be done.
+			// Now solves current model - we cannot interrupt this as it is not designed to
+			// be done.
 			finalDispatch(model, i);
 		}
 		// Resets initial model
@@ -605,11 +636,13 @@ public class SolverDispatcher {
 
 	/**
 	 * Performs a what-if analysis by changing number of customers
+	 * 
 	 * @param model input model
 	 */
 	private void whatIfCustomers(ExactModel model) throws SolverException, InputDataException {
 		// Sanity checks on input model.
-		if (model.getWhatIfClass() >= 0 && model.getClassTypes()[model.getWhatIfClass()] != ExactConstants.CLASS_CLOSED) {
+		if (model.getWhatIfClass() >= 0
+				&& model.getClassTypes()[model.getWhatIfClass()] != ExactConstants.CLASS_CLOSED) {
 			throw new InputDataException("Cannot change number of customers of an open class.");
 		}
 		if (model.isOpen()) {
@@ -645,8 +678,8 @@ public class SolverDispatcher {
 						current[j] = initials[j] * values[i];
 						// Check for not integer values
 						if (Math.abs(current[j] - Math.rint(current[j])) > 1e-8) {
-							throw new InputDataException("A fractional population value was assigned to class " + model.getClassNames()[j]
-									+ " during step " + i);
+							throw new InputDataException("A fractional population value was assigned to class "
+									+ model.getClassNames()[j] + " during step " + i);
 						}
 						// Rounds number to avoid truncation problems
 						current[j] = Math.round(current[j]);
@@ -660,7 +693,8 @@ public class SolverDispatcher {
 				break;
 			}
 
-			// Now solves current model - we cannot interrupt this as it is not designed to be done.
+			// Now solves current model - we cannot interrupt this as it is not designed to
+			// be done.
 			finalDispatch(model, i);
 		}
 		// Resets initial model
@@ -671,6 +705,7 @@ public class SolverDispatcher {
 
 	/**
 	 * Performs a what-if analysis by changing service demands of a given station.
+	 * 
 	 * @param model input model
 	 */
 	private void whatIfDemands(ExactModel model) throws SolverException, InputDataException {
@@ -685,7 +720,8 @@ public class SolverDispatcher {
 		// Values for what-if
 		double[] values = model.getWhatIfValues();
 
-		// Backup service times data (note: we multiply only service times as it is the same of multiply service demands)
+		// Backup service times data (note: we multiply only service times as it is the
+		// same of multiply service demands)
 		double[][][] initials = ArrayUtils.copy3(model.getServiceTimes());
 
 		// Saves what-if class and station indices
@@ -717,7 +753,8 @@ public class SolverDispatcher {
 				break;
 			}
 
-			// Now solves current model - we cannot interrupt this as it is not designed to be done.
+			// Now solves current model - we cannot interrupt this as it is not designed to
+			// be done.
 			finalDispatch(model, i);
 		}
 		// Resets initial model
@@ -728,6 +765,7 @@ public class SolverDispatcher {
 
 	/**
 	 * Performs a what-if analysis by changing population mix
+	 * 
 	 * @param model input model
 	 */
 	private void whatIfMix(ExactModel model) throws SolverException, InputDataException {
@@ -743,12 +781,14 @@ public class SolverDispatcher {
 				if (class2 < 0) {
 					class2 = i;
 				} else {
-					throw new InputDataException("Only models with two closed classes are supported. More than two classes detected.");
+					throw new InputDataException(
+							"Only models with two closed classes are supported. More than two classes detected.");
 				}
 			}
 		}
 		if (class2 < 0) {
-			throw new InputDataException("Only models with two closed classes are supported. Only one classes detected.");
+			throw new InputDataException(
+					"Only models with two closed classes are supported. Only one classes detected.");
 		}
 
 		// Values for what-if
@@ -768,11 +808,11 @@ public class SolverDispatcher {
 			current[class2] = (1 - values[i]) * N;
 			// Check for not integer values
 			if (Math.abs(current[class1] - Math.rint(current[class1])) > 1e-8) {
-				throw new InputDataException("A fractional population value was assigned to class " + model.getClassNames()[class1] + " during step "
-						+ i);
+				throw new InputDataException("A fractional population value was assigned to class "
+						+ model.getClassNames()[class1] + " during step " + i);
 			} else if (Math.abs(current[class2] - Math.rint(current[class2])) > 1e-8) {
-				throw new InputDataException("A fractional population value was assigned to class " + model.getClassNames()[class2] + " during step "
-						+ i);
+				throw new InputDataException("A fractional population value was assigned to class "
+						+ model.getClassNames()[class2] + " during step " + i);
 			}
 			// Rounds number to avoid truncation problems
 			current[class1] = Math.round(current[class1]);
@@ -785,7 +825,8 @@ public class SolverDispatcher {
 				break;
 			}
 
-			// Now solves current model - we cannot interrupt this as it is not designed to be done.
+			// Now solves current model - we cannot interrupt this as it is not designed to
+			// be done.
 			finalDispatch(model, i);
 		}
 		// Resets initial model
@@ -796,10 +837,13 @@ public class SolverDispatcher {
 
 	// ------------------------------------------------------------------------------------
 
-	// ---- Callbacks ---------------------------------------------------------------------
+	// ---- Callbacks
+	// ---------------------------------------------------------------------
 	/**
-	 * Adds a solver listener to be notified when computation of an iteration terminates.
-	 * This is useful for notification of a progress window. Only one listener is allowed.
+	 * Adds a solver listener to be notified when computation of an iteration
+	 * terminates. This is useful for notification of a progress window. Only one
+	 * listener is allowed.
+	 * 
 	 * @param listener listener to be added or null to remove previous one.
 	 */
 	public void addSolverListener(SolverListener listener) {
@@ -812,6 +856,7 @@ public class SolverDispatcher {
 	public interface SolverListener {
 		/**
 		 * This method is called each time the computation of a model is terminated
+		 * 
 		 * @param num number of computed model (used for iterated solutions)
 		 */
 		public void computationTerminated(int num);

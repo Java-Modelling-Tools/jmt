@@ -23,6 +23,7 @@ import java.io.File;
 
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
+import jmt.common.exception.UnsupportedModelException;
 import jmt.engine.log.JSimLogger;
 import jmt.framework.xml.XMLUtils;
 import jmt.jmva.analytical.ExactModel;
@@ -62,7 +63,7 @@ public class SolverClient {
 		this.owner = owner;
 	}
 	
-	public File solve(ExactModel model) throws SolverException, InputDataException {
+	public File solve(ExactModel model) throws SolverException, InputDataException, UnsupportedModelException {
 		File temp = null;
 
 		try {

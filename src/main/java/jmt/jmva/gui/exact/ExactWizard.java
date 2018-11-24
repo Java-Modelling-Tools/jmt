@@ -47,6 +47,7 @@ import javax.swing.WindowConstants;
 
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
+import jmt.common.exception.UnsupportedModelException;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.help.HoverHelp;
@@ -621,6 +622,9 @@ public class ExactWizard extends Wizard {
 
 		try {
 			tempFile = solver.solve(newdata);
+		} catch (UnsupportedModelException e) {			
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Unsupported model", JOptionPane.WARNING_MESSAGE);
+			return;
 		} catch (InputDataException rse) {
 			JOptionPane.showMessageDialog(this, rse.getMessage(), "Input data error", JOptionPane.ERROR_MESSAGE);
 			return;
