@@ -235,8 +235,8 @@ public class SolverDispatcher {
 				} else if (SolverAlgorithm.RECAL.equals(algorithmType)) {
 					solver = new SolverSingleClosedRECAL(pop, stations);
 				} else if (SolverAlgorithm.COMOM.equals(algorithmType)) {
-//					solver = new SolverSingleClosedCoMoM(pop, stations); // throws exception
-					solver = new SolverSingleClosedExact(pop, stations); // Convolution
+					// in single-class we run RECAL as COMOM initialization, since it is meant for models with few stations
+					solver = new SolverSingleClosedRECAL(pop, stations); 
 				} else {
 					solver = new SolverSingleClosedAMVA(pop, stations, algorithmType, tolerance);
 				}
@@ -285,10 +285,10 @@ public class SolverDispatcher {
 			algIterations = ((SolverSingleClosedAMVA) solver).getIterations();
 		} else if (solver instanceof SolverSingleClosedRECAL) {
 			BigRational G = ((SolverSingleClosedRECAL)solver).solver.qnm.getNormalisingConstant();
-			logNC = G.log();
+			logNC = G.log() - 5*Math.log(10)*((SolverSingleClosedRECAL)solver).solver.qnm.N.sum();
 		} else if (solver instanceof SolverSingleClosedCoMoM) {
 			BigRational G = ((SolverSingleClosedCoMoM)solver).solver.qnm.getNormalisingConstant();
-			logNC = G.log();
+			logNC = G.log() - 5*Math.log(10)*((SolverSingleClosedCoMoM)solver).solver.qnm.N.sum();
 		} else if (solver instanceof SolverSingleClosedMonteCarloLogistic) {
 			BigRational G = ((SolverSingleClosedMonteCarloLogistic)solver).solver.qnm.getNormalisingConstant();
 			logNC = G.log();
@@ -474,13 +474,13 @@ public class SolverDispatcher {
 			algIterations = ((SolverMultiClosedAMVA) solver).getIterations();
 		} else if (solver instanceof SolverMultiClosedRECAL) {
 			BigRational G = ((SolverMultiClosedRECAL)solver).qnm.getNormalisingConstant();
-			logNC = G.log();
+			logNC = G.log() - 5*Math.log(10)*((SolverMultiClosedRECAL)solver).qnm.N.sum();
 		} else if (solver instanceof SolverMultiClosedMonteCarloLogistic) {
 			BigRational G = ((SolverMultiClosedMonteCarloLogistic)solver).qnm.getNormalisingConstant();
 			logNC = G.log();
 		} else if (solver instanceof SolverMultiClosedCoMoM) {
 			BigRational G = ((SolverMultiClosedCoMoM)solver).qnm.getNormalisingConstant();
-			logNC = G.log();
+			logNC = G.log() - 5*Math.log(10)*((SolverMultiClosedCoMoM)solver).qnm.N.sum();
 		}
 		
 		/** End **/

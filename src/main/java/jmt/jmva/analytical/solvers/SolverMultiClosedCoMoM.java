@@ -24,6 +24,8 @@ import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.QueueingNet.CoMoMBTFSolver;
+import jmt.jmva.analytical.solvers.QueueingNet.CoMoMSimpleSolver;
+import jmt.jmva.analytical.solvers.QueueingNet.CoMoMSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 
 /**
@@ -161,7 +163,6 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 	public void solve() {
 		QNSolver c = null;
 		try {
-			//c = new CoMoMSimpleSolver(qnm, nThreads);
 			c = new CoMoMBTFSolver(qnm);
 			c.computeNormalisingConstant();
 		} catch (Exception e) {
@@ -200,6 +201,7 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 		try {
 			c.computePerformanceMeasures();
 		} catch (InternalErrorException e) {
+			e.printStackTrace();
 		}
 
 		clsThroughput = qnm.getMeanThroughputsAsDoubles();

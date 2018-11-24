@@ -35,9 +35,9 @@ public class CoMoMSolver extends QNSolver {
 		R = qnm.R;	
 		target_N = qnm.N;
 
-		System.out.println("Model under study:\n");
-		qnm.printModel();
-		System.out.println("\n");		
+		//System.out.println("Model under study:\n");
+		//qnm.printModel();
+		//System.out.println("\n");		
 	}
 
 	@Override
@@ -45,8 +45,8 @@ public class CoMoMSolver extends QNSolver {
 		current_N = new PopulationVector(0,R);		
 
 		for (int _class = 1; _class <= R; _class++) {
-			System.out.println("Working on class " + _class);
-			System.out.println("Current Population: " + current_N);
+			//System.out.println("Working on class " + _class);
+			//System.out.println("Current Population: " + current_N);
 
 			current_N.plusOne(_class);
 			system.initialiseForClass(current_N, _class);
@@ -63,8 +63,8 @@ public class CoMoMSolver extends QNSolver {
 		for (int class_population = current_N.get(_class - 1); 
 				class_population <= target_N.get(_class - 1); 
 				class_population++) {
-			System.out.println("Solving for population: " + current_N);
-			System.out.println(class_population);
+			//System.out.println("Solving for population: " + current_N);
+			//System.out.println(class_population);
 
 			system.update(class_population);
 			system.solve();
