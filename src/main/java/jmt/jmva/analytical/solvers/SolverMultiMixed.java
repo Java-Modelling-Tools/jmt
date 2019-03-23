@@ -99,7 +99,6 @@ public class SolverMultiMixed extends SolverMulti {
 	 * </em>
 	 */
 	public void solveLI() {
-		//TODO: are the problems with delay stations???!!!
 		//class parameters: population (for closed classes), arrival rate (for open classes)
 		int[] closedClasses;
 		double[] openClasses;
