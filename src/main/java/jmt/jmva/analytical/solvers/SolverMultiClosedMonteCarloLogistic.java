@@ -16,7 +16,7 @@ import static jmt.jmva.analytical.solvers.QueueingNet.MonteCarloLogistic.Utils.a
  */
 public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 
-	public static final int DEFAULT_MAX_SAMPLES = 1000;
+	public static final int DEFAULT_MAX_SAMPLES = 10000;
 	public static final int DEFAULT_PRECISION = 32;
 	protected int maxSamples = DEFAULT_MAX_SAMPLES;
 	protected int precision = DEFAULT_PRECISION;

@@ -30,8 +30,8 @@ import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 
 /**
  * This class implements the API to allow use by other applications. One can
- * define the queueing network model details, call the solvers transparently and,
- * afterwards, read the results.
+ * define the queueing network model details, call the solvers transparently
+ * and, afterwards, read the results.
  *
  * @author Michail Makaronidis, 2010
  */
@@ -54,10 +54,12 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 
 	private RandomEngine engine = RandomEngine.makeDefault();
 
-	/** Creates new MoMSolverDispatcher
-	 *  @param  stations    number of service centers
-	 *  @param  classes     number of classes
-	 *  @param  population  array of class populations
+	/**
+	 * Creates new MoMSolverDispatcher
+	 * 
+	 * @param stations   number of service centers
+	 * @param classes    number of classes
+	 * @param population array of class populations
 	 */
 	public SolverMultiClosedCoMoM(int classes, int stations, int[] population) {
 		super(classes, stations);
@@ -66,13 +68,15 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 		this.population = population;
 	}
 
-	/** Initializes the solver with the system parameters.
-	 * It must be called before trying to solve the model.
-	 *  @param  t   array of the types (LD or LI) of service centers
-	 *  @param  s   matrix of service times of the service centers
-	 *  @param  v   array of visits to the service centers
-	 *  @param  nThr The number of threads the solver should use
-	 *  @return True if the operation is completed with success
+	/**
+	 * Initializes the solver with the system parameters. It must be called before
+	 * trying to solve the model.
+	 * 
+	 * @param t    array of the types (LD or LI) of service centers
+	 * @param s    matrix of service times of the service centers
+	 * @param v    array of visits to the service centers
+	 * @param nThr The number of threads the solver should use
+	 * @return True if the operation is completed with success
 	 */
 	public boolean input(int[] t, double[][][] s, double[][] v, int nThr) {
 		if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
@@ -127,8 +131,10 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 			// Now D contains service demands
 
 			// Create queue multiplicities array
-			// All multiplicities are set to 1, as JMT does not seem to use queue multiplicities
-			// If this array is instantiated properly, the rest of the MoMSolver can support them
+			// All multiplicities are set to 1, as JMT does not seem to use queue
+			// multiplicities
+			// If this array is instantiated properly, the rest of the MoMSolver can support
+			// them
 			Integer[] multiplicities = new Integer[M];
 			for (int m = 0; m < M; m++) {
 				multiplicities[m] = 1;
@@ -151,13 +157,16 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 	}
 
 	/**
-	 * Solves the system through the MoM algorithm.
-	 * input(...) must have been called first.
+	 * Solves the system through the MoM algorithm. input(...) must have been called
+	 * first.
 	 *
-	 * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
-	 * @throws BTFMatrixErrorException 
-	 * @throws InconsistentLinearSystemException 
-	 * @throws OperationNotSupportedException 
+	 * @throws InternalErrorException            Thrown when any error is
+	 *                                           encountered during computations,
+	 *                                           i.e. due to linear system
+	 *                                           singularities
+	 * @throws BTFMatrixErrorException
+	 * @throws InconsistentLinearSystemException
+	 * @throws OperationNotSupportedException
 	 */
 	@Override
 	public void solve() {
@@ -166,21 +175,26 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 			c = new CoMoMBTFSolver(qnm);
 			c.computeNormalisingConstant();
 		} catch (Exception e) {
-			double D[][]=new double[qnm.M][qnm.R];
-			int T[]=new int[qnm.M];
-			double Z[]=new double[qnm.R];
-			Integer mi[]=new Integer[qnm.M];
-			Integer N[]=new Integer[qnm.R];
+			double D[][] = new double[qnm.M][qnm.R];
+			int T[] = new int[stations];
+			double Z[] = new double[qnm.R];
+			Integer mi[] = new Integer[qnm.M];
+			Integer N[] = new Integer[qnm.R];
 			Integer pert = 1;
-			Integer newscale = scale  * pert;
-			for (int r=0; r<qnm.R; r++) {
+			Integer newscale = scale * pert;
+			for (int r = 0; r < qnm.R; r++) {
 				Z[r] = qnm.getDelay(r) * pert;
 				N[r] = qnm.getPopulationVector().get(r);
-				for (int i=0; i<qnm.M; i++) {
+				for (int i = 0; i < stations; i++) {
 					T[i] = qnm.getQueueType(i).ordinal();
+				}
+				for (int i = 0; i < qnm.M; i++) {
+
 					mi[i] = qnm.getMultiplicitiesVector().get(i);
 					// Replaced Math.random
-					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*engine.raw2())); // i is a perturbation of 10^-6 magnitude
+					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1)
+							+ (Integer) (int) Math.round((int) 100 * engine.raw2())); // i is a perturbation of 10^-6
+																						// magnitude
 				}
 			}
 			scale = newscale;
@@ -216,47 +230,47 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 		double[][] clsQueueLen = new double[stations][classes];
 		int shift = 0;
 		for (int m = 0; m < stations; m++) {
-			if (qnm.getQueueType(m) == QueueType.LI) {					
+			if (qnm.getQueueType(m) == QueueType.LI) {
 				for (int r = 0; r < classes; r++) {
 					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
 					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-					residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
-					clsQueueLen[m][r] = queueLen[m-shift][r];
+					residenceTime[m][r] = queueLen[m - shift][r] / clsThroughput[r] / scale;
+					clsQueueLen[m][r] = queueLen[m - shift][r];
 				}
 			} else if (qnm.getQueueType(m) == QueueType.DELAY) {
 				shift = shift + 1;
 				for (int r = 0; r < classes; r++) {
 					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
 					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-					clsQueueLen[m][r] = utilization[m][r]; 
+					clsQueueLen[m][r] = utilization[m][r];
 					residenceTime[m][r] = servTime[m][r][0] / scale;
 				}
 			}
-			for (int r = 0; r < classes; r++) {				
+			for (int r = 0; r < classes; r++) {
 				scThroughput[m] += throughput[m][r];
 				scUtilization[m] += utilization[m][r];
 				scResidTime[m] += residenceTime[m][r];
-				scQueueLen[m] += clsQueueLen[m][r]; 	
+				scQueueLen[m] += clsQueueLen[m][r];
 			}
 		}
 		queueLen = clsQueueLen;
 
-		//NEW
-		//@author Stefano Omini
-		//compute system parameters
+		// NEW
+		// @author Stefano Omini
+		// compute system parameters
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 
-		//for (c = 0; c < classes; c++) {
-		//	for (m = 0; m < stations; m++) {
-		//		clsRespTime[c] += residenceTime[m][c];
-		//		sysNumJobs += queueLen[m][c];
-		//	}
-		//	sysResponseTime += clsRespTime[c];
-		//}
+		// for (c = 0; c < classes; c++) {
+		// for (m = 0; m < stations; m++) {
+		// clsRespTime[c] += residenceTime[m][c];
+		// sysNumJobs += queueLen[m][c];
+		// }
+		// sysResponseTime += clsRespTime[c];
+		// }
 
 		sysThroughput = sysNumJobs / sysResponseTime;
-		//end NEW
+		// end NEW
 	}
 
 	@Override

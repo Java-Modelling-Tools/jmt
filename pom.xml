@@ -19,7 +19,7 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<build>
-				<finalName>JMT-installer-${jmt.version}</finalName>
+				<finalName>JMT-${jmt.version}</finalName>
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -91,7 +91,8 @@
 								<goals>
 									<goal>shade</goal>
 								</goals>
-								<configuration>
+								<configuration>				
+									<finalName>JMT-singlejar-${jmt.version}</finalName>
 									<transformers>
 										<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 											<mainClass>jmt.gui.common.startScreen.GraphStartScreen</mainClass>
@@ -138,7 +139,7 @@
 										<copy todir="${izpack.staging}/license">
 											<fileset dir="${basedir}/license"/>
 										</copy>
-										<copy file="${project.build.directory}/JMT-installer-${jmt.version}.jar" tofile="${izpack.staging}/JMT.jar"/>
+										<copy file="${project.build.directory}/JMT-singlejar-${jmt.version}.jar" tofile="${izpack.staging}/JMT.jar"/>
 										<copy file="${basedir}/license/LICENSE_JMT.txt" tofile="${izpack.staging}/LICENSE_JMT.txt"/>
 									</tasks>
 								</configuration>
@@ -164,6 +165,7 @@
 							<descriptorEncoding>UTF-8</descriptorEncoding>
 							<izpackBasedir>${izpack.staging}</izpackBasedir>
 							<customPanelDirectory>${izpack.staging}</customPanelDirectory>
+							<finalName>JMT-installer-${jmt.version}</finalName>
 						</configuration>
 						<executions>
 							<execution>
