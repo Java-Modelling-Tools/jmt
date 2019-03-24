@@ -528,7 +528,7 @@ public class JabaWizard extends Wizard {
 
 	protected void switchToSimulator() {
 		cancel();
-		new jmt.gui.jsimgraph.mainGui.MainWindow();
+		new jmt.gui.jsimgraph.mainGui.JSIMGraphMain();
 		dispose();
 	}
 

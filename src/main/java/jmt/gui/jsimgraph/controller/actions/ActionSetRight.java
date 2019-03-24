@@ -47,7 +47,7 @@ public class ActionSetRight extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		mediator.tryAdjustGraph();
+		mediator.tryAdjustGraph(true);
 	}
 
 }

@@ -1,7 +1,7 @@
 package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
-import jmt.gui.jsimwiz.JSIMMain;
+import jmt.gui.jsimwiz.JSIMWizMain;
 import jmt.util.ShortDescriptionButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
@@ -40,7 +40,7 @@ public class JSIMwizGuiTest {
 	@Test
 	public void mainJSIMwizWindowDisplaysCorrectly() {
 		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JSIM_SHORT_DESCRIPTION)).click();
-		FrameFixture jsimWiz = WindowFinder.findFrame(JSIMMain.class).using(window.robot);
+		FrameFixture jsimWiz = WindowFinder.findFrame(JSIMWizMain.class).using(window.robot);
 		jsimWiz.show();
 	}
 	

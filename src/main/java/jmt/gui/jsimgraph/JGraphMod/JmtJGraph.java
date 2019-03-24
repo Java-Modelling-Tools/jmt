@@ -229,7 +229,6 @@ public class JmtJGraph extends JGraph {
 		if (g == null) {
 			return;
 		}
-
 		VectorGraphics vg = VectorGraphics.create(g);
 		super.paintComponent(vg);
 	}

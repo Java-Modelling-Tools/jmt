@@ -37,7 +37,7 @@ import jmt.gui.jsimgraph.controller.Mediator;
 import org.jgraph.JGraph;
 
 /**
- * MainWindow contains the main window of the jmodel project, it implements the
+ * JSIMGraphMain contains the main window of the jmodel project, it implements the
  * Singleton pattern. no need to create more then 1 main window!
  *
 
@@ -46,7 +46,7 @@ import org.jgraph.JGraph;
  * Time: 14.09.14
 
  */
-public class MainWindow extends JMTFrame {
+public class JSIMGraphMain extends JMTFrame {
 
 	private static final long serialVersionUID = 1L;
 
@@ -63,7 +63,7 @@ public class MainWindow extends JMTFrame {
 	/** Creates the new Main window of the application.
 	 *
 	 */
-	public MainWindow() {
+	public JSIMGraphMain() {
 		super(true);
 		setIconImage(JMTImageLoader.loadImage("JMODELIcon").getImage());
 		setTitle(TITLE);
@@ -76,6 +76,8 @@ public class MainWindow extends JMTFrame {
 		toolbar = mediator.createToolbar();
 		getContentPane().setLayout(new MultiBorderLayout());
 		getContentPane().add(toolbar, BorderLayout.NORTH);
+		// Uncomment to set vertical orientation for the component bar in jSIMGraph
+		// getContentPane().add(mediator.getComponentBar(), BorderLayout.WEST);
 		getContentPane().add(mediator.getComponentBar(), BorderLayout.NORTH);
 		mainPane = new JPanel(new BorderLayout());
 		getContentPane().add(mainPane, BorderLayout.CENTER);
@@ -146,14 +148,15 @@ public class MainWindow extends JMTFrame {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		MainWindow mw = new MainWindow();
+		JSIMGraphMain mw = new JSIMGraphMain();
 		if (args != null && args.length > 0) {
 			File file = new File(args[0]);
 			if (!file.isFile()) {
 				System.err.print("Invalid model file: " + file.getAbsolutePath());
 				System.exit(1);
 			}
-			mw.mediator.openModel(file);
+			mw.mediator.openModel(file, false);
+			mw.mediator.tryAdjustGraph(false);
 		}
 	}
 

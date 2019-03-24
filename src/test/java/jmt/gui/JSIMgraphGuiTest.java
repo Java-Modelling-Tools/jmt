@@ -1,7 +1,7 @@
 package jmt.gui;
 
 import jmt.gui.common.startScreen.GraphStartScreen;
-import jmt.gui.jsimgraph.mainGui.MainWindow;
+import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 import jmt.util.ShortDescriptionButtonMatcher;
 
 import org.fest.swing.edt.GuiActionRunner;
@@ -32,13 +32,13 @@ public class JSIMgraphGuiTest {
 
 	/**
 	 * Checks that, on the main JMT window, the user can press the "JSIMgraph"
-	 * button, and that this will open a new window of type @MainWindow
+	 * button, and that this will open a new window of type @JSIMGraphMain
 	 * (which is the JSIMgraph frame).
 	 */
 	@Test
 	public void mainJSIMgraphWindowDisplaysCorrectly() {
 		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JMODEL_SHORT_DESCRIPTION)).click();
-		FrameFixture jsimGraph = WindowFinder.findFrame(MainWindow.class).using(window.robot);
+		FrameFixture jsimGraph = WindowFinder.findFrame(JSIMGraphMain.class).using(window.robot);
 		jsimGraph.show();
 	}
 	

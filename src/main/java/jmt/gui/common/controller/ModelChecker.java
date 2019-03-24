@@ -1836,10 +1836,12 @@ public class ModelChecker implements CommonConstants {
 			OUTER_LOOP:
 			for (int j = 0; j < forwardStations.size(); j++) {
 				Object thisForwardStation = forwardStations.get(j);
+				/*
 				int stationCapacity = station_def.getStationQueueCapacity(thisForwardStation);
 				if (stationCapacity < 1) {
 					continue;
 				}
+				*/
 				Vector<Object> classes = class_def.getClassKeys();
 				for (int k = 0; k < classes.size(); k++) {
 					Object thisClass = classes.get(k);

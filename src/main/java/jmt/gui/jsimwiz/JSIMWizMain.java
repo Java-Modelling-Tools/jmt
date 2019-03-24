@@ -84,7 +84,7 @@ import jmt.manual.PDFViewer;
  *
  * Modified by Francesco D'Aquino
  */
-public class JSIMMain extends Wizard implements GuiInterface {
+public class JSIMWizMain extends Wizard implements GuiInterface {
 
 	private static final long serialVersionUID = 1L;
 
@@ -617,11 +617,11 @@ public class JSIMMain extends Wizard implements GuiInterface {
 		AboutDialogFactory.showJSIM(this);
 	}
 
-	public JSIMMain() {
+	public JSIMWizMain() {
 		this(null);
 	}
 
-	public JSIMMain(CommonModel model) {
+	public JSIMWizMain(CommonModel model) {
 		Defaults.reload();
 		if (model == null) {
 			this.model = new JSIMModel();
@@ -1019,7 +1019,7 @@ public class JSIMMain extends Wizard implements GuiInterface {
 	}
 
 	public static void main(String[] args) {
-		JSIMMain jsm = new JSIMMain();
+		JSIMWizMain jsm = new JSIMWizMain();
 		jsm.setVisible(true);
 		if (args != null && args.length > 0) {
 			File file = new File(args[0]);

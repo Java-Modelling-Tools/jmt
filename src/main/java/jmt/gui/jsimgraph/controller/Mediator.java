@@ -133,7 +133,7 @@ import jmt.gui.jsimgraph.definitions.JmodelBlockingRegionDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
 import jmt.gui.jsimgraph.mainGui.ComponentBar;
-import jmt.gui.jsimgraph.mainGui.MainWindow;
+import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 import jmt.gui.jsimgraph.panels.AutoDownloadPanel;
 import jmt.gui.jsimgraph.panels.JModelProblemsWindow;
 import jmt.gui.jsimgraph.panels.StationNamePanel;
@@ -214,7 +214,7 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction downloadDefaultTemplates;
 
 	private JmtJGraph graph;
-	private MainWindow mainWindow;
+	private JSIMGraphMain mainWindow;
 
 	protected Object[] cells;
 	protected Map cellsAttr;
@@ -237,7 +237,7 @@ public class Mediator implements GuiInterface {
 
 	private JmtOverlapping overlapping;
 
-	public Mediator(final JmtJGraph graph, MainWindow mainWindow) {
+	public Mediator(final JmtJGraph graph, JSIMGraphMain mainWindow) {
 		this.mainWindow = mainWindow;
 		dialogFactory = new DialogFactory(mainWindow);
 		cellFactory = new CellFactory(this);
@@ -675,6 +675,10 @@ public class Mediator implements GuiInterface {
 	 * <br> Author: Bertoli Marco
 	 */
 	public void openModel(File file) {
+			openModel(file,true);
+	}
+	
+	public void openModel(File file, boolean wantRepaint) {
 		isReleased = true;
 		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
 			return;
@@ -693,7 +697,7 @@ public class Mediator implements GuiInterface {
 			newModel();
 			// At this point loading was successful, so substitutes old model with loaded one
 			model = tmpmodel;
-			this.populateGraph();
+			this.populateGraph(wantRepaint);
 			setSelect.setEnabled(true);
 			componentBar.clickButton(setSelect);
 			openedArchive = modelLoader.getSelectedFile();
@@ -1394,6 +1398,10 @@ public class Mediator implements GuiInterface {
 	 * <br>Author: Bertoli Marco
 	 */
 	public void populateGraph() {
+		populateGraph(true);
+	}
+	
+	public void populateGraph(boolean wantRepaint) {
 		Object[] stations = model.getStationKeys().toArray();
 		HashMap<Object, JmtCell> cells = new HashMap<Object, JmtCell>();
 		JmtCell cell;
@@ -1432,6 +1440,7 @@ public class Mediator implements GuiInterface {
 			forwardConnections = model.getForwardConnections(station);
 			for (int j = 0; j < forwardConnections.size(); j++) {
 				// Forces connection as it is already present into data structure
+//				connect(cells.get(station), cells.get(forwardConnections.get(j)), false);
 				connect(cells.get(station), cells.get(forwardConnections.get(j)), true);
 			}
 		}
@@ -1452,7 +1461,7 @@ public class Mediator implements GuiInterface {
 		if (!containPosition) {
 			adjustGraph();
 		}
-		graphRepaint();
+		graphRepaint();		
 		graph.getGraphLayoutCache().reload();
 	}
 
@@ -2766,7 +2775,7 @@ public class Mediator implements GuiInterface {
 		graph.getGraphLayoutCache().reload();
 	}
 
-	public void tryAdjustGraph() {
+	public void tryAdjustGraph(boolean wantConfirmDialog) {
 		Object[] cells = graph.getDescendants(graph.getRoots());
 		Rectangle[] cellsBounds = new Rectangle[cells.length];
 		boolean[] cellsRotate = new boolean[cells.length];
@@ -2780,7 +2789,9 @@ public class Mediator implements GuiInterface {
 
 		adjustGraph();
 
-		int resultValue = JOptionPane.showConfirmDialog(mainWindow, "Keep the resulting layout?",
+		if (wantConfirmDialog) 
+		{
+		int resultValue = JOptionPane.showConfirmDialog(mainWindow, "Keep the new layout?",
 				"Optimize the layout", JOptionPane.YES_NO_OPTION);
 		if (resultValue == JOptionPane.NO_OPTION) {
 			for (int i = 0; i < cells.length; i++) {
@@ -2795,6 +2806,7 @@ public class Mediator implements GuiInterface {
 			graphRepaint();
 			graph.getGraphLayoutCache().reload();
 			avoidOverlappingCell(cells);
+		}
 		}
 	}
 
@@ -3077,7 +3089,7 @@ public class Mediator implements GuiInterface {
 		return model;
 	}
 
-	public MainWindow getMainWindow() {
+	public JSIMGraphMain getMainWindow() {
 		return this.mainWindow;
 	}
 

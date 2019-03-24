@@ -41,7 +41,7 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 	@Override
 	protected Shape createShape() {
 		ArrayList tmp1 = new ArrayList();
-		boolean passato = false;
+		boolean passed = false;
 		int n = view.getPointCount();
 		if (n > 1) {
 			JmtEdgeView tmp = (JmtEdgeView) view;
@@ -151,12 +151,12 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 											view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j).getX() + 5),
 													(float) cell.intersectionEdgePoint.get(j).getY());
 										}
-									} else if ((!passato || (passato && tmp1.size() > 0 && !tmp1.contains(cell.intersectionEdgePoint.get(j))))
+									} else if ((!passed || (passed && tmp1.size() > 0 && !tmp1.contains(cell.intersectionEdgePoint.get(j))))
 											&& (int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
 											&& (int) p[i].getX() > (int) p[i + 1].getX()
 											&& (int) p[i + 1].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
 											&& (int) p[i + 1].getX() < (int) cell.intersectionEdgePoint.get(j).getX()) {
-										passato = true;
+										passed = true;
 										for (int q = 0; q < cell.intersectionEdgePoint.size(); q++) {
 											if (cell.intersectionEdgePoint.get(q).getY() == cell.intersectionEdgePoint.get(j).getY()) {
 												tmp1.add(cell.intersectionEdgePoint.get(q).clone());
@@ -212,7 +212,7 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 							}
 						}
 					} else {
-						boolean fatto = false;
+						boolean done = false;
 						if (i == 0) {
 							Vector pointOnFirstPoints = new Vector();
 							for (int q = 0; q < cell.intersectionEdgePoint.size(); q++) {
@@ -244,7 +244,7 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 												view.sharedPath.moveTo((float) (((Point2D) pointOnFirstPoints.get(j + 1)).getX() + 5),
 														(float) ((Point2D) pointOnFirstPoints.get(j)).getY());
 												j++;
-												fatto = true;
+												done = true;
 											} else {
 												view.sharedPath.lineTo((float) (((Point2D) pointOnFirstPoints.get(j)).getX() - 5),
 														(float) ((Point2D) pointOnFirstPoints.get(j)).getY());
@@ -258,7 +258,7 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 														(float) ((Point2D) pointOnFirstPoints.get(j)).getY());
 												view.sharedPath.moveTo((float) (((Point2D) pointOnFirstPoints.get(j)).getX() + 5),
 														(float) ((Point2D) pointOnFirstPoints.get(j)).getY());
-												fatto = true;
+												done = true;
 											}
 										}
 									}
@@ -269,7 +269,7 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 									}
 									pointOnFirstPoints = temp;
 
-									boolean arcogrande = false;
+									boolean largearc = false;
 									if ((int) p[0].getY() == (int) ((Point2D) pointOnFirstPoints.get(j)).getY()
 											&& (int) p[0].getX() > (int) ((Point2D) pointOnFirstPoints.get(j)).getX()
 											&& (int) ((Point2D) pointOnFirstPoints.get(j)).getX() > (int) p[1].getX()) {
@@ -284,10 +284,10 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 													(float) (((Point2D) pointOnFirstPoints.get(j + 1)).getX() - 5), (float) p[0].getY());
 											view.sharedPath.moveTo((float) (((Point2D) pointOnFirstPoints.get(j + 1)).getX() - 5), (float) p[0].getY());
 											j = j + 1;
-											arcogrande = true;
-											fatto = true;
+											largearc = true;
+											done = true;
 										} else {
-											if (!arcogrande) {
+											if (!largearc) {
 												view.sharedPath.lineTo((float) (((Point2D) pointOnFirstPoints.get(j)).getX() + 5),
 														(float) ((Point2D) pointOnFirstPoints.get(j)).getY());
 												view.sharedPath.moveTo((float) (((Point2D) pointOnFirstPoints.get(j)).getX() + 5),
@@ -300,7 +300,7 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 														(float) ((Point2D) pointOnFirstPoints.get(j)).getY());
 												view.sharedPath.moveTo((float) (((Point2D) pointOnFirstPoints.get(j)).getX() - 5),
 														(float) ((Point2D) pointOnFirstPoints.get(j)).getY());
-												fatto = true;
+												done = true;
 											}
 										}
 									}
@@ -314,10 +314,11 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 							}
 							view.sharedPath.lineTo((float) p[1].getX(), (float) p[1].getY());
 							view.sharedPath.moveTo((float) p[1].getX(), (float) p[1].getY());
-							fatto = true;
-						} else if (i == 1 && fatto) {
-							fatto = false;
-						} else if (i == 1 && !fatto) {
+
+							done = true;
+						} else if (i == 1 && done) {
+							done = false;
+						} else if (i == 1 && !done) {
 							view.sharedPath.lineTo((float) p[i].getX(), (float) p[i].getY());
 							view.sharedPath.moveTo((float) p[i].getX(), (float) p[i].getY());
 						} else {
@@ -327,8 +328,8 @@ public class JmtEdgeRenderer extends EdgeRenderer {
 					}
 				}
 
-				view.sharedPath.lineTo((float) p[n - 1].getX(), (float) p[n - 1].getY());
-				view.sharedPath.moveTo((float) p[n - 1].getX(), (float) p[n - 1].getY());
+					view.sharedPath.lineTo((float) p[n - 1].getX(), (float) p[n - 1].getY());
+					view.sharedPath.moveTo((float) p[n - 1].getX(), (float) p[n - 1].getY());
 
 				view.lineShape = (GeneralPath) view.sharedPath.clone();
 				if (view.endShape != null) {

@@ -47,7 +47,7 @@ import jmt.gui.jsimgraph.JGraphMod.JmtCell;
 import jmt.gui.jsimgraph.controller.JmtClipboard;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
-import jmt.gui.jsimgraph.mainGui.MainWindow;
+import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 import jmt.gui.jsimgraph.template.ITemplate;
 
 /**
@@ -193,7 +193,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants 
 	}
 
 	@Override
-	public void showDialog(MainWindow mainWindow) {
+	public void showDialog(JSIMGraphMain mainWindow) {
 		CustomizableDialogFactory templateDialogFactory = new CustomizableDialogFactory(mainWindow);
 		//change size/name of your template dialog here
 		//width, height, ..., title

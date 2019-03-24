@@ -19,7 +19,7 @@
 package jmt.gui.jsimgraph.template;
 
 import jmt.gui.common.definitions.CommonModel;
-import jmt.gui.jsimgraph.mainGui.MainWindow;
+import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 
 /**
  * @author S Jiang
@@ -31,6 +31,6 @@ public interface ITemplate {
 
 	public abstract CommonModel createModel();
 
-	public abstract void showDialog(MainWindow mainWindow);
+	public abstract void showDialog(JSIMGraphMain mainWindow);
 
 }

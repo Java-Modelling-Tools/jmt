@@ -20,6 +20,7 @@ package jmt.gui.jsimgraph.mainGui;
 
 import java.lang.reflect.Field;
 
+import javax.swing.JToolBar;
 import jmt.framework.gui.components.JMTToolBar;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jsimgraph.controller.Mediator;
@@ -44,6 +45,10 @@ public class ComponentBar extends JMTToolBar {
 
 	public ComponentBar(Mediator m) {
 		super(JMTImageLoader.getImageLoader());
+		
+		// Uncomment to set vertical orientation for the component bar in jSIMGraph
+		//setOrientation(JToolBar.VERTICAL);
+		
 		// Adds Select button
 		addGenericButton(m.getSetSelect());
 		addSeparator();

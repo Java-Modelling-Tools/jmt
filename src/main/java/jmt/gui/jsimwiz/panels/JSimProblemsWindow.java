@@ -57,7 +57,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.definitions.GuiInterface;
-import jmt.gui.jsimwiz.JSIMMain;
+import jmt.gui.jsimwiz.JSIMWizMain;
 
 /**
  * <p>Title:</p>
@@ -725,9 +725,9 @@ public class JSimProblemsWindow extends JFrame {
 			} else if (e.getSource() == continueButton) {
 				setVisible(false);
 				if (isToJMVAConversion) {
-					((JSIMMain) gi).launchToJMVA();
+					((JSIMWizMain) gi).launchToJMVA();
 				} else {
-					((JSIMMain) gi).launchSimulation();
+					((JSIMWizMain) gi).launchSimulation();
 				}
 			}
 		}

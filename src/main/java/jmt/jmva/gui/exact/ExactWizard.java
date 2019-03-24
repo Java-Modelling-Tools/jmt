@@ -61,7 +61,7 @@ import jmt.gui.common.definitions.ModelConverter;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.WarningWindow;
 import jmt.gui.common.xml.ModelLoader;
-import jmt.gui.jsimwiz.JSIMMain;
+import jmt.gui.jsimwiz.JSIMWizMain;
 import jmt.gui.jsimwiz.definitions.JSIMModel;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
@@ -539,7 +539,7 @@ public class ExactWizard extends Wizard {
 		JSIMModel output = new JSIMModel();
 		// New Converter by Bertoli Marco
 		List<String> res = ModelConverter.convertJMVAtoJSIM(data, output);
-		JSIMMain jsim = new JSIMMain(output);
+		JSIMWizMain jsim = new JSIMWizMain(output);
 		jsim.setVisible(true);
 		// If problems are found, shows warnings
 		if (res.size() > 0) {

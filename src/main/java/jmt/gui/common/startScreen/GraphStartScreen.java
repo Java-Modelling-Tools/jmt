@@ -53,8 +53,8 @@ import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.AboutDialogFactory.Company;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
 import jmt.gui.jaba.JabaWizard;
-import jmt.gui.jsimgraph.mainGui.MainWindow;
-import jmt.gui.jsimwiz.JSIMMain;
+import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
+import jmt.gui.jsimwiz.JSIMWizMain;
 import jmt.gui.jwat.MainJwatWizard;
 import jmt.jmarkov.MMQueues;
 import jmt.jmva.gui.exact.ExactWizard;
@@ -188,7 +188,7 @@ public class GraphStartScreen extends JMTFrame {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			JSIMMain.main(args);
+			JSIMWizMain.main(args);
 		}
 
 	};
@@ -203,7 +203,7 @@ public class GraphStartScreen extends JMTFrame {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			MainWindow.main(args);
+			JSIMGraphMain.main(args);
 		}
 
 	};

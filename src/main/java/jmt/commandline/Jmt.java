@@ -44,8 +44,8 @@ import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.engine.simDispatcher.DispatcherJSIMschema;
 import jmt.gui.common.xml.XMLArchiver;
-import jmt.gui.jsimgraph.mainGui.MainWindow;
-import jmt.gui.jsimwiz.JSIMMain;
+import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
+import jmt.gui.jsimwiz.JSIMWizMain;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -128,9 +128,9 @@ public class Jmt {
 			Map<String, String> options = parseParameters(args, 2);
 			sim(model, result, options);
 		} else if (args[0].equals("jsimw")) {
-			JSIMMain.main(new String[] { args[1] });
+			JSIMWizMain.main(new String[] { args[1] });
 		} else if (args[0].equals("jsimg")) {
-			MainWindow.main(new String[] { args[1] });
+			JSIMGraphMain.main(new String[] { args[1] });
 		} else {
 			help();
 		}
