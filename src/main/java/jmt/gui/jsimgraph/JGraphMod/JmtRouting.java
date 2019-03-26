@@ -28,6 +28,7 @@ import org.jgraph.graph.DefaultPort;
 import org.jgraph.graph.Edge;
 import org.jgraph.graph.EdgeView;
 import org.jgraph.graph.GraphConstants;
+import org.jgraph.graph.GraphLayoutCache;
 import org.jgraph.graph.PortView;
 
 /**
@@ -45,7 +46,7 @@ public class JmtRouting implements Edge.Routing {
 	private int offset = 15;
 	private int offsetTo2 = -15;
 
-	public List<Point2D> route(EdgeView edgeView) {
+	public List<Point2D> route(GraphLayoutCache cache, EdgeView edgeView) {
 		List<Point2D> list = new ArrayList<Point2D>();
 		int n = edgeView.getPointCount();
 		Point2D from = edgeView.getPoint(0);
