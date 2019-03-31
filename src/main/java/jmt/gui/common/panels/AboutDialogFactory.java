@@ -86,7 +86,7 @@ public class AboutDialogFactory {
 	/** JMVA main contributors */
 	private static final Contributors[] JMVA = {
 			new Contributors(Company.POLIMI, "Bertoli Marco", "Cerotti Davide", "Conti Andrea", "Dall'Orso Federico", "Omini Stefano", "Granata Federico", "Gribaudo Marco", "Sheikhvand Kourosh"),
-			new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Tokaj Piotr", "Su Haixiao")
+			new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Tokaj Piotr", "Su Haixiao", "Wai Ong")
 	};
 
 	/** JSIMwiz main contributors */
