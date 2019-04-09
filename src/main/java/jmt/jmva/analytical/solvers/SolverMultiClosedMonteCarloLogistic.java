@@ -177,6 +177,7 @@ public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 			BigDecimal G = (((MonteCarloLogisticSolver) c).getNormalisingConstantAsBigDecimal());
 			System.out.println("<Logistic Sampling> Normalizing constant:"); System.out.println(G);
 			c.computePerformanceMeasures();
+			c.printTimeStatistics();
 		} catch (InternalErrorException e) {
 			System.err.println(e.getMessage());
 			return;

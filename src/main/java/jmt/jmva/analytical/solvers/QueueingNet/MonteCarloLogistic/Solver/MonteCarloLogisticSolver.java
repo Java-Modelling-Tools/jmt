@@ -194,10 +194,10 @@ public class MonteCarloLogisticSolver extends QNSolver {
 		// Get the population vector for all classes other than r
 		int[] Popnotr = new int[qnm.R-1];
 		for (int i=0, j=0; i<qnm.R; i++) {
-			if (i==r)
-				continue;
-			Popnotr[j] = pop[i];
-			j++;
+			if (i!=r) {
+				Popnotr[j] = pop[i];
+				j++;
+			}
 		}
 
 		// Enumerate all possible states of server k, with specified population of
