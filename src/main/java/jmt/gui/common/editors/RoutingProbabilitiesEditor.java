@@ -99,8 +99,8 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	private void initComponents() {
 		rtPane = new WarningScrollTable(routingTable, WARNING_OUTGOING_ROUTING);
-	  weightsTablePane = new WarningScrollTable(weightsTable, WARNING_OUTGOING_ROUTING);
-    powerOfKWarningPanel = new WarningScrollTable(powerOfKPanel, WARNING_OUTGOING_ROUTING);
+		weightsTablePane = new WarningScrollTable(weightsTable, WARNING_OUTGOING_ROUTING);
+		powerOfKWarningPanel = new WarningScrollTable(powerOfKPanel, WARNING_OUTGOING_ROUTING);
 		Border routingOptionsBorder = new TitledBorder(new EtchedBorder(), "Routing Options");
 		noOptLabelPanel.setBorder(routingOptionsBorder);
 		noOptLabel.setOpaque(false);
@@ -133,6 +133,13 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		powerOfKPanel.add(memoryPanel);
 		setLeftComponent(descrPane);
 	}
+	
+	public void createCommonDetails(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
+		stations = sd;
+		classes = cd;
+		this.stationKey = stationKey;
+		this.classKey = classKey;
+	}
 
 	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		RoutingStrategy rs = (RoutingStrategy) sd.getRoutingStrategy(stationKey, classKey);
@@ -142,7 +149,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		} else {
 			descrTextPane.setText(rs.getDescription());
 			if (rs instanceof ProbabilityRouting || rs instanceof PowerOfKRouting || rs instanceof WeightedRoundRobinRouting) {
-				self.createCommonDetails(sd, cs, stationKey, classKey);
+				createCommonDetails(sd, cd, stationKey, classKey);
 				createDetails(rs);
 			} else if (rs instanceof LoadDependentRouting) {
 				JComponent LDRoutingPanel = new JPanel();
@@ -173,13 +180,6 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	private void emptyPane() {
 		setRightComponent(noOptLabelPanel);
 		routingProbs = null;
-	}
-
-	private void createCommonDetails(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
-		stations = sd;
-		classes = cd;
-		this.stationKey = stationKey;
-		this.classKey = classKey;
 	}
 
 	private void createDetails(RoutingStrategy rs) {
