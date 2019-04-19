@@ -53,7 +53,7 @@ public class DisabledStrategy implements ServiceStrategy {
 	 */
 	@Override
 	public String toString() {
-		return "NA";
+		return "Left unspecified - class cannot route here";
 	}
 
 }

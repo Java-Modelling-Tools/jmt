@@ -76,6 +76,16 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static java.lang.Boolean.*;
 /**
  * <p>Title: XML Reader</p>
  * <p>Description: Reads model information from an XML file. This class provides
@@ -278,6 +288,17 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			RoutingStrategy rs = (RoutingStrategy) model.getRoutingStrategy(dualkey[0], dualkey[1]);
 			Map<Object, Double> routing = rs.getValues();
 			Map<String, Double> values = empiricalRouting.get(key);
+			Object[] names = values.keySet().toArray();
+			for (Object name : names) {
+				routing.put(stations.get(name), values.get(name));
+			}
+		}
+		keys = wrrRouting.keySet().toArray();
+		for (Object key : keys) {
+			Object[] dualkey = (Object[]) key;
+			WeightedRoundRobinRouting rs = (WeightedRoundRobinRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
+			Map<Object, Integer> routing = rs.getWeights();
+			Map<String, Integer> values = wrrRouting.get(key);
 			Object[] names = values.keySet().toArray();
 			for (Object name : names) {
 				routing.put(stations.get(name), values.get(name));
@@ -852,6 +873,46 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						empiricalLDRouting.put(new Object[] { key, classes.get(className2), Integer.valueOf(fromValue) }, tmp);
 					}
 				}
+			} else if (rs instanceof PowerOfKRouting) {
+			    PowerOfKRouting strategy = (PowerOfKRouting) rs;
+				Node child = routing.get(className2).getFirstChild();
+				while (child.getNodeType() != Node.ELEMENT_NODE || !child.getNodeName().equals(XML_E_SUBPARAMETER)) {
+					child = child.getNextSibling();
+				}
+				NodeList values = ((Element) child).getElementsByTagName(XML_E_PARAMETER_VALUE);
+				Integer k = Integer.valueOf(findText(values.item(0)));
+				strategy.setK(k);
+				child = child.getNextSibling();
+				while (child.getNodeType() != Node.ELEMENT_NODE || !child.getNodeName().equals(XML_E_SUBPARAMETER)) {
+					child = child.getNextSibling();
+				}
+				values = ((Element) child).getElementsByTagName(XML_E_PARAMETER_VALUE);
+				Boolean withMemory = valueOf(findText(values.item(0)));
+				strategy.setWithMemory(withMemory);
+			} else if (rs instanceof WeightedRoundRobinRouting) {
+				Vector<Node> entries = new Vector<>();
+				Node entryArray = routing.get(className2).getFirstChild();
+				while (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER)) {
+					entryArray = entryArray.getNextSibling();
+				}
+				Node child = entryArray.getFirstChild();
+				while (child != null) {
+					while (child != null && (child.getNodeType() != Node.ELEMENT_NODE || !child.getNodeName().equals(XML_E_SUBPARAMETER))) {
+						child = child.getNextSibling();
+					}
+					if (child != null) {
+						entries.add(child);
+						child = child.getNextSibling();
+					}
+				}
+				Map<String, Integer> tmp = new TreeMap<>();
+				for (Node entry : entries) {
+					NodeList values = ((Element) entry).getElementsByTagName(XML_E_SUBPARAMETER);
+					String stationName = findText(((Element) values.item(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+					Integer weight = Integer.valueOf(findText(((Element) values.item(1)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+					tmp.put(stationName, weight);
+				}
+				wrrRouting.put(new Object[] { key, classes.get(className2) }, tmp);
 			}
 		}
 	}

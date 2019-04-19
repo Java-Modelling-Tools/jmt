@@ -31,6 +31,7 @@ import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RandomRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.DisabledRouting;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;

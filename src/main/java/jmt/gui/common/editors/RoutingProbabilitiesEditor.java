@@ -77,18 +77,37 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	private void initComponents() {
 		rtPane = new WarningScrollTable(routingTable, WARNING_OUTGOING_ROUTING);
-		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Routing Options"));
+	  weightsTablePane = new WarningScrollTable(weightsTable, WARNING_OUTGOING_ROUTING);
+    powerOfKWarningPanel = new WarningScrollTable(powerOfKPanel, WARNING_OUTGOING_ROUTING);
+    noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Routing Options"));
 		noOptLabel.setOpaque(false);
 		noOptLabel.setEditable(false);
 		noOptLabel.setLineWrap(true);
 		noOptLabel.setWrapStyleWord(true);
-		rtPane.setBorder(new TitledBorder(new EtchedBorder(), "Routing Options"));
+		rtPane.setBorder(routingOptionsBorder);
+		weightsTablePane.setBorder(routingOptionsBorder);
+        powerOfKWarningPanel.setBorder(routingOptionsBorder);
 		descrTextPane.setOpaque(false);
 		descrTextPane.setEditable(false);
 		descrTextPane.setLineWrap(true);
 		descrTextPane.setWrapStyleWord(true);
 		descrPane.setBorder(new TitledBorder(new EtchedBorder(), "Description"));
 		descrPane.setViewportView(descrTextPane);
+		powerOfKPanel.setBorder(routingOptionsBorder);
+		powerOfKPanel.setLayout(new FlowLayout());
+
+		JPanel valueOfKPanel = new JPanel();
+		valueOfKPanel.add(new JLabel("Number of choices, k:"));
+		jNumField.setPreferredSize(DIM_BUTTON_XS);
+		jNumField.addChangeListener(new EditValueOfKListener());
+		valueOfKPanel.add(jNumField);
+		powerOfKPanel.add(valueOfKPanel);
+
+		JPanel memoryPanel = new JPanel();
+		memoryPanel.add(memoryCheckbox);
+		memoryPanel.add(new JLabel("Enable memory"));
+		memoryCheckbox.addChangeListener(new EnableMemoryListener());
+		powerOfKPanel.add(memoryPanel);
 		setLeftComponent(descrPane);
 	}
 
@@ -99,8 +118,10 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			emptyPane();
 		} else {
 			descrTextPane.setText(rs.getDescription());
-			if (rs instanceof ProbabilityRouting) {
-				createDetails(rs, sd, cd, stationKey, classKey);
+			if (rs instanceof ProbabilityRouting || rs instanceof PowerOfKRouting
+							|| rs instanceof WeightedRoundRobinRouting) {
+				createCommonDetails(sd, cs, stationKey, classKey);
+				createDetails(rs);
 			} else if (rs instanceof LoadDependentRouting) {
 				JComponent LDRoutingPanel = new JPanel();
 				LDRoutingPanel.setBorder(new TitledBorder(new EtchedBorder(), "LD Routing Options"));
@@ -139,6 +160,12 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		classes = cd;
 		this.stationKey = stationKey;
 		this.classKey = classKey;
+	}
+
+	private void createDetails(RoutingStrategy rs) {
+		if (rs instanceof ProbabilityRouting) {
+			routingProbs = rs.getValues();
+			validOutputs = new Vector<>(0);
 		setupRouting();
 		setRightComponent(rtPane);
 	}
@@ -175,6 +202,9 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	public void stopEditing() {
 		if (routingTable.getCellEditor() != null) {
 			routingTable.getCellEditor().stopCellEditing();
+		}
+		if (weightsTable.getCellEditor() != null) {
+			weightsTable.getCellEditor().stopCellEditing();
 		}
 		if (stations != null) {
 			RoutingStrategy rs = (RoutingStrategy) stations.getRoutingStrategy(stationKey, classKey);
@@ -260,6 +290,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 						routingProbs.put(indexToKey(rowIndex), value);
 					}
 				} catch (NumberFormatException e) {
+					System.err.println(e.getMessage());
 				}
 			}
 		}
@@ -274,6 +305,104 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	}
 
+	private class WeightsTable extends JTable {
+		private static final long serialVersionUID = 1L;
+
+		WeightsTable() {
+			setModel(new WeightsTableModel());
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			sizeColumns();
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			getTableHeader().setReorderingAllowed(false);
+		}
+
+		private void sizeColumns() {
+			for (int i = 0; i < getColumnCount(); i++) {
+				getColumnModel().getColumn(i).setMinWidth(((WeightsTableModel) getModel()).columnSizes[i]);
+			}
+		}
+	}
+
+	protected class WeightsTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+		private String[] columnNames = new String[] { "Destination", "Weights" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
+		public int[] columnSizes = new int[] { 80, 80 };
+
+		public int getRowCount() {
+			if (stationKey != null) {
+				return validOutputs.size();
+			} else {
+				return 0;
+			}
+		}
+
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return columnClasses[columnIndex];
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			return columnIndex == 1;
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			if (wrrWeights == null) {
+				return null;
+			}
+			if (columnIndex == 0) {
+				return stations.getStationName(indexToKey(rowIndex));
+			} else if (columnIndex == 1) {
+				return wrrWeights.get(indexToKey(rowIndex));
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if (columnIndex == 1) {
+				try {
+					Integer value = Integer.valueOf((String) aValue);
+					if (value >= 0) {
+						wrrWeights.put(indexToKey(rowIndex), value);
+						checkMaxNotZero();
+					}
+				} catch (NumberFormatException e) {
+					System.err.println("Unable to read Integer from Weights Table");
+				}
+			}
+		}
+
+		private void checkMaxNotZero() {
+			if (Collections.max(wrrWeights.values()) == 0) {
+				System.err.println("Maximum weight cannot be zero, resetting to " +
+								"default");
+				for (Object station : wrrWeights.keySet()){
+					wrrWeights.put(station, 1);
+				}
+			}
+		}
+
+		private Object indexToKey(int index) {
+			if (stationKey == null) {
+				return null;
+			}
+			return validOutputs.get(index);
+		}
+
+	}
 	private class EditLoadDependentRoutingListener implements ActionListener {
 
 		HashMap<String, Object> properties = null;
@@ -289,4 +418,33 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	}
 
+	private class EditValueOfKListener implements ChangeListener {
+		private final Integer MIN_VALUE_K = 1;
+
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			Integer k = (Integer) jNumField.getValue();
+			Integer maxValueOfK = stations.getForwardConnections(stationKey).size();
+
+			// k must be between 1 and the number of outgoing connections
+			if (k < MIN_VALUE_K) {
+				jNumField.setValue(MIN_VALUE_K);
+			} else if (k > maxValueOfK) {
+				jNumField.setValue(maxValueOfK);
+			} else {
+				PowerOfKRouting rs = (PowerOfKRouting) stations.getRoutingStrategy(stationKey, classKey);
+				rs.setK(k);
+			}
+		}
+	}
+
+	private class EnableMemoryListener implements ChangeListener {
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			Boolean withMemory = memoryCheckbox.isSelected();
+			PowerOfKRouting rs = ((PowerOfKRouting) stations.getRoutingStrategy(stationKey, classKey));
+			rs.setWithMemory(withMemory);
+			descrTextPane.setText(rs.getDescription());
+		}
+	}
 }
