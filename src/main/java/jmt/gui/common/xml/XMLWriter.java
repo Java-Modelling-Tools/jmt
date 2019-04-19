@@ -1696,7 +1696,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			}
 			return null;
 		}
-
 	}
 
 	/**

@@ -156,5 +156,9 @@ public class PhaseType extends Distribution {
 		buff.append("])");
 		return buff.toString();
 	}
-
+	
+	@Override
+	protected ImageIcon setImage() {
+		return JMTImageLoader.loadImage("PhaseType");
+	}
 }

@@ -315,6 +315,7 @@ public class ImagedComboBoxCellEditorFactory {
 			case OPTION_TRANSITION_MODES:
 				if (key == null) {
 					setText(CommonConstants.ALL_MODES);
+					setIcon(JMTImageLoader.loadImage("System", iconSize));
 					break;
 				}
 				setText((String) key);
