@@ -60,13 +60,9 @@ import jmt.gui.common.distributions.Distribution.Parameter;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.*;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
-import jmt.gui.common.serviceStrategies.DisabledStrategy;
-import jmt.gui.common.serviceStrategies.LDStrategy;
-import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.common.serviceStrategies.*;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

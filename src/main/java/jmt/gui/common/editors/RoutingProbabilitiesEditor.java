@@ -18,9 +18,26 @@
 
 package jmt.gui.common.editors;
 
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.panels.RoutingSectionPanel;
+import jmt.gui.common.panels.WarningScrollTable;
+import jmt.gui.common.routingStrategies.*;
+import jmt.gui.exact.table.ExactCellEditor;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
@@ -36,9 +53,7 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.panels.RoutingSectionPanel;
 import jmt.gui.common.panels.WarningScrollTable;
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.*;
 import jmt.gui.exact.table.ExactCellEditor;
 
 /**
@@ -53,6 +68,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	private static final long serialVersionUID = 1L;
 
 	private Map<Object, Double> routingProbs;
+	private Map<Object, Integer> wrrWeights;
 	private Vector<Object> validOutputs;
 	private StationDefinition stations;
 	private ClassDefinition classes;
@@ -60,11 +76,17 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	private Object classKey;
 
 	private WarningScrollTable rtPane;
+	private WarningScrollTable weightsTablePane;
+    private WarningScrollTable powerOfKWarningPanel;
 	private JTextArea descrTextPane = new JTextArea("");
 	private JScrollPane descrPane = new JScrollPane();
 	private RoutingTable routingTable = new RoutingTable();
+	private WeightsTable weightsTable = new WeightsTable();
 	private JTextArea noOptLabel = new JTextArea("No options available for this routing strategy");
 	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);
+	private JComponent powerOfKPanel = new JPanel();
+	private JSpinner jNumField = new JSpinner();
+	private JCheckBox memoryCheckbox = new JCheckBox();
 
 	public RoutingProbabilitiesEditor(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		setOrientation(JSplitPane.VERTICAL_SPLIT);
@@ -79,7 +101,8 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		rtPane = new WarningScrollTable(routingTable, WARNING_OUTGOING_ROUTING);
 	  weightsTablePane = new WarningScrollTable(weightsTable, WARNING_OUTGOING_ROUTING);
     powerOfKWarningPanel = new WarningScrollTable(powerOfKPanel, WARNING_OUTGOING_ROUTING);
-    noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), "Routing Options"));
+		Border routingOptionsBorder = new TitledBorder(new EtchedBorder(), "Routing Options");
+		noOptLabelPanel.setBorder(routingOptionsBorder);
 		noOptLabel.setOpaque(false);
 		noOptLabel.setEditable(false);
 		noOptLabel.setLineWrap(true);
@@ -118,9 +141,8 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			emptyPane();
 		} else {
 			descrTextPane.setText(rs.getDescription());
-			if (rs instanceof ProbabilityRouting || rs instanceof PowerOfKRouting
-							|| rs instanceof WeightedRoundRobinRouting) {
-				createCommonDetails(sd, cs, stationKey, classKey);
+			if (rs instanceof ProbabilityRouting || rs instanceof PowerOfKRouting || rs instanceof WeightedRoundRobinRouting) {
+				self.createCommonDetails(sd, cs, stationKey, classKey);
 				createDetails(rs);
 			} else if (rs instanceof LoadDependentRouting) {
 				JComponent LDRoutingPanel = new JPanel();
@@ -153,9 +175,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		routingProbs = null;
 	}
 
-	private void createDetails(RoutingStrategy rs, StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
-		routingProbs = rs.getValues();
-		validOutputs = new Vector<Object>(0);
+	private void createCommonDetails(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		stations = sd;
 		classes = cd;
 		this.stationKey = stationKey;
@@ -168,6 +188,43 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			validOutputs = new Vector<>(0);
 		setupRouting();
 		setRightComponent(rtPane);
+		} else if (rs instanceof PowerOfKRouting) {
+			PowerOfKRouting routing = (PowerOfKRouting) rs;
+			if (stations.getForwardConnections(stationKey).isEmpty()) {
+				setRightComponent(powerOfKWarningPanel);
+			} else {
+				jNumField.setValue(routing.getK());
+				memoryCheckbox.setSelected(routing.isWithMemory());
+				setRightComponent(powerOfKPanel);
+			}
+		} else if (rs instanceof WeightedRoundRobinRouting) {
+			wrrWeights = ((WeightedRoundRobinRouting) rs).getWeights();
+			validOutputs = new Vector<>(0);
+			setupWeights();
+			setRightComponent(weightsTablePane);
+		}
+	}
+
+	private void setupWeights() {
+		if (stationKey == null || classKey == null || stations == null || wrrWeights == null) {
+			return;
+		}
+		Vector<Object> outputs = stations.getForwardConnections(stationKey);
+		HashMap<Object, Integer> temp = new HashMap<>(wrrWeights);
+		wrrWeights.clear();
+		for (Object currentKey : outputs) {
+			if (temp.containsKey(currentKey)) {
+				wrrWeights.put(currentKey, temp.get(currentKey));
+			} else {
+				wrrWeights.put(currentKey, 1);
+			}
+			if (classes.getClassType(classKey) != CLASS_TYPE_CLOSED
+					|| !stations.getStationType(currentKey).equals(STATION_TYPE_SINK)) {
+				validOutputs.add(currentKey);
+			} else {
+				wrrWeights.put(currentKey, 1);
+			}
+		}
 	}
 
 	/**sets up all of the entries in routing table from output connections for specified

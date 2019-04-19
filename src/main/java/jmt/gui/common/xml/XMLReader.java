@@ -59,9 +59,7 @@ import jmt.gui.common.forkStrategies.ProbabilitiesFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.PartialJoin;
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.*;
 import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
@@ -103,7 +101,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static HashMap<Object, String> refStations; // Data structure used to hold classes' reference stations
 	protected static HashMap<Object, List<String>> modeNameLists; // Data structure used to hold transitions' mode name lists
 	protected static HashMap<Object[], Map<String, Double>> empiricalRouting;
-	protected static HashMap<Object[], Map<String, Double>> empiricalLDRouting;
+	protected static HashMap<Object[], Map<String, Integer>> wrrRouting;
+  protected static HashMap<Object[], Map<String, Double>> empiricalLDRouting;
 	protected static HashMap<Object[], Map<String, OutPath>> empiricalFork;
 	protected static HashMap<Object[], Map<String, Double>> combFork;
 	protected static HashMap<Object[], Integer> enablingConditionMap;
@@ -262,6 +261,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		enablingConditionMap = new HashMap<Object[], Integer>();
 		inhibitingConditionMap = new HashMap<Object[], Integer>();
 		firingOutcomeMap = new HashMap<Object[], Integer>();
+		wrrRouting = new HashMap<Object[], Map<String, Integer>>();
 		parseStations(root, model);
 		parseConnections(root, model);
 		parseBlockingRegions(root, model);
