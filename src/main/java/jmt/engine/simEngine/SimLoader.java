@@ -229,6 +229,8 @@ public class SimLoader {
 			int minSamples = simParam.getMinSamples();
 			//gets the default value of maxSimulatedTime
 			double maxSimulatedTime = simParam.getMaxSimulatedTime();
+			//gets the default value of maxSimulationEvents
+			long maxSimulationEvents = simParam.getMaxSimulationEvents();
 			//gets the default value of disableStatisticStop
 			boolean disableStatisticStop = simParam.isDisableStatisticStop();
 
@@ -253,6 +255,12 @@ public class SimLoader {
 			if (root.getAttribute("maxSimulated") != "") {
 				maxSimulatedTime = Double.parseDouble(root.getAttribute("maxSimulated"));
 				simParam.setMaxSimulatedTime(maxSimulatedTime);
+			}
+
+			// Read maxSimulationEvents if specified
+			if (root.getAttribute("maxEvents") != "") {
+				maxSimulationEvents = Long.parseLong(root.getAttribute("maxEvents"));
+				simParam.setMaxSimulationEvents(maxSimulationEvents);
 			}
 
 			// Disables confidence interval as stopping criteria

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="closed_2class_3stat_switch.jsimg" timestamp="Sat Sep 23 21:30:40 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="true" logDecimalSeparator="," logDelimiter=";" logPath="" logReplaceMode="0" maxSamples="1000000" name="closed_2class_3stat_switch.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<sim disableStatisticStop="true" logDecimalSeparator="," logDelimiter=";" logPath="" logReplaceMode="0" maxSamples="1000000" maxEvents="-1" name="closed_2class_3stat_switch.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
 <userClass customers="3" name="Class1" priority="0" referenceSource="CPU 1" type="closed"/>
 <userClass customers="0" name="Class2" priority="0" referenceSource="CPU 1" type="closed"/>
 <node name="CPU 1">

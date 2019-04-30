@@ -70,6 +70,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected Double maxDuration;
 	protected Double maxSimulatedTime;
 	protected Integer maxSamples;
+	protected Long maxEvents;
 	protected Boolean disableStatistic;
 	protected Double pollingInterval;
 	protected MeasureDefinition results;
@@ -255,6 +256,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		maxDuration = Defaults.getAsDouble("simulationMaxDuration");
 		maxSimulatedTime = Defaults.getAsDouble("maxSimulatedTime");
 		maxSamples = Defaults.getAsInteger("maxSimulationSamples");
+		maxEvents = Defaults.getAsLong("maxSimulationEvents");
 		disableStatistic = Boolean.FALSE;
 		pollingInterval = Defaults.getAsDouble("simulationPolling");
 		//TODO: eventually load the parametricAnalysisEnabled state from default
@@ -2668,6 +2670,28 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		this.maxSimulatedTime = duration;
 	}
+
+	/**
+	 * Returns maximum number of simulation events.
+	 * @return maximum number of simulation events.
+	 */
+	@Override
+	public Long getMaxSimulationEvents() {
+		return maxEvents;
+	}
+
+	/**
+	 * Sets maximum number of simulation events.
+	 * @param maxSamples maximum number of simulation events.
+	 */
+	@Override
+	public void setMaxSimulationEvents(Long maxEvents) {
+		if (!this.maxEvents.equals(maxEvents)) {
+			save = true;
+		}
+		this.maxEvents = maxEvents;
+	}
+
 
 	/**
 	 * Returns maximum number of simulation samples.

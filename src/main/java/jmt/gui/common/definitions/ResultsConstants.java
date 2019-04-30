@@ -50,7 +50,7 @@ public interface ResultsConstants {
 	public static final String NO_SAMPLES_TEXT = "Simulator cannot compute this measure as no samples were received";
 	public static final String ALL_CLASSES = "-- All --";
 	public static final String ALL_MODES = "-- All --";
-	public static final String ALL_STATIONS = "-- System --";
+	public static final String ALL_STATIONS = "System";
 	public static final String FOR_GREEN_GRAPH = "Double click on this graph to open it in a new windows.\nRight-click to save it.\nClick on green bars to see the simulation time, "
 			+ "the sample average (blue), and the sample values (green).\n";
 	/**HTML formats for panels descriptions*/

@@ -13,6 +13,7 @@ import java.util.List;
 
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetEvent;
+import static java.lang.System.out;
 
 /**
  * This is the system class which manages the simulation. All
@@ -364,7 +365,7 @@ public class SimSystem {
 	// Private internal methods
 	//
 
-	static private void processEvent(SimEvent e) throws NetException {
+		static private void processEvent(SimEvent e) throws NetException {
 		int dest, src;
 		SimEntity destEnt;
 
@@ -428,7 +429,7 @@ public class SimSystem {
 
 		case (SimEvent.CREATE):
 			SimEntity newe = (SimEntity) e.getData();
-		addEntityDynamically(newe);
+			addEntityDynamically(newe);
 		break;
 
 		case (SimEvent.HOLD_DONE):

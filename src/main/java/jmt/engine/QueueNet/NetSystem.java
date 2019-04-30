@@ -345,7 +345,7 @@ public class NetSystem {
 	}
 
 	/**
-	 * Sets the maximum simulated time for the simulation in the netController
+	 * Sets the maximum simulated time for the simulation
 	 * @param network network to be checked for progress
 	 */
 	public static void setMaxSimulatedTime(double maxSimulatedTime) {
@@ -354,4 +354,13 @@ public class NetSystem {
 		}
 	}
 
+	/**
+	 * Sets the maximum simulated events for the simulation
+	 * @param network network to be checked for progress
+	 */
+	public static void setMaxSimulationEvents(long maxEvents) {
+		if (netController != null) {
+			netController.setMaxSimulationEvents(maxEvents);
+		}
+	}
 }

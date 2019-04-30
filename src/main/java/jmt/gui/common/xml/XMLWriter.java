@@ -232,12 +232,15 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			elem.setAttribute(XML_A_ROOT_SIMULATED, model.getMaxSimulatedTime()
 					.toString());
 		}
-		// Polling interval - Bertoli Marco
+		// Polling interval
 		elem.setAttribute(XML_A_ROOT_POLLING, model
 				.getPollingInterval().toString());
-		// Max samples - Bertoli Marco
+		// Max samples
 		elem.setAttribute(XML_A_ROOT_MAXSAMPLES, model
 				.getMaxSimulationSamples().toString());
+		// Max events
+		elem.setAttribute(XML_A_ROOT_MAXEVENTS, model
+				.getMaxSimulationEvents().toString());
 		// Disable statistic
 		elem.setAttribute(XML_A_ROOT_DISABLESTATISTIC, model
 				.getDisableStatistic().toString());

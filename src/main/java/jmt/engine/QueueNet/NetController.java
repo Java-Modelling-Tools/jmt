@@ -55,6 +55,9 @@ class NetController {
 	//the maximum simulated time a simulation is allowed to reach before it is stopped, negative value means infinite
 	private double maxSimulatedTime = -1;
 
+	//the maximum number of simulation events
+	private long maxEvents = Long.MAX_VALUE;
+
 	NetController() {
 		running = false;
 		//initializes tick counter
@@ -73,7 +76,6 @@ class NetController {
 					wait();
 				}
 				n++;
-
 				if (n % refreshPeriod == 0) {
 					//User may have defined measures that will not receive any sample
 					if (n % reachabilityTest == 0) {
@@ -84,7 +86,7 @@ class NetController {
 					NetSystem.checkMeasures();
 				}
 				//check if a positive max simulated time is set and has been reached for the first time
-				if (maxSimulatedTime > 0 && SimSystem.getClock() > maxSimulatedTime && !aborting) {
+				if (((maxSimulatedTime > 0 && SimSystem.getClock() > maxSimulatedTime) || (maxEvents > 0 && n > maxEvents)) && !aborting) {
 					ListIterator<QueueNetwork> nets = NetSystem.getNetworkList().listIterator();
 					QueueNetwork network;
 					while (nets.hasNext()) {
@@ -141,6 +143,14 @@ class NetController {
 	 */
 	public void setMaxSimulatedTime(double maxSimulatedTime) {
 		this.maxSimulatedTime = maxSimulatedTime;
+	}
+
+	/**
+	 * Sets the value of the max number of events, when this value is reached in a simulation the run is stopped
+	 * @param maxEvents the value to be set for the max events
+	 */
+	public void setMaxSimulationEvents(long maxEvents) {
+		this.maxEvents = maxEvents;
 	}
 
 }

@@ -436,6 +436,10 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		addInputSpinner("Maximum number of samples", "maxSimulationSamples", sim_panel, 100000);
 		simpanelnum++;
 
+		// Maximum number of events 
+		addInputSpinner("Maximum number of events", "maxSimulationEvents", sim_panel, -1);
+		simpanelnum++;
+
 		//Polling interval
 		simpanelnum++;
 		addInputSpinner("Animation update interval (sec)", "simulationPolling", sim_panel, 1);

@@ -48,6 +48,8 @@ public class SimParameters {
 
 	//max samples which can be collected for each measure
 	private int maxSamples = 1000000;
+	//max events which can be processed in the simulation
+	private long maxEvents = -1;
 	//min samples which must be collected for each measure
 	private int minSamples = 0;
 	//max simulated time after which simulation will be stopped
@@ -144,6 +146,22 @@ public class SimParameters {
 	 */
 	public void setMaxSamples(int maxSamples) {
 		this.maxSamples = maxSamples;
+	}
+
+	/**
+	 * Gets the max number of samples which can be collected for each measure
+	 * @return the max number of samples which can be collected for each measure
+	 */
+	public long getMaxSimulationEvents() {
+		return maxEvents;
+	}
+
+	/**
+	 * Sets the max number of samples which can be collected for each measure
+	 * @param maxSamples the max number of samples which can be collected for each measure
+	 */
+	public void setMaxSimulationEvents(long maxEvents) {
+		this.maxEvents = maxEvents;
 	}
 
 	/**

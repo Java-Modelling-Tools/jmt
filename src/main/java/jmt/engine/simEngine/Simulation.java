@@ -284,6 +284,9 @@ public class Simulation {
 		// Sets the max simulated time for the system, when reached simulation is stopped
 		NetSystem.setMaxSimulatedTime(simParameters.getMaxSimulatedTime());
 
+		// Sets the max simulated number of events for the system, when reached simulation is stopped
+		NetSystem.setMaxSimulationEvents(simParameters.getMaxSimulationEvents());
+
 		// Resets the job counter
 		Job.resetCounter();
 

@@ -315,7 +315,7 @@ public interface CommonConstants {
 	public static final int MAX_NUMBER_OF_REGIONS = 1024;
 
 	public static final String ALL_CLASSES = "--- All Classes ---";
-	public static final String ALL_STATIONS = "--- System ---";	
+	public static final String ALL_STATIONS = "System";	
 	public static final String ALL_MODES = "--- All Modes ---";
 	public static final String INFINITE_CAPACITY = "Infinite Capacity";
 

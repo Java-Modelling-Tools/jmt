@@ -20,6 +20,8 @@ package jmt.gui.common.distributions;
 
 import javax.swing.ImageIcon;
 
+import jmt.gui.common.JMTImageLoader;
+
 /**
  * <p>Title: Phase-Type Distribution</p>
  * <p>Description: Phase-Type distribution data structure</p>
@@ -114,13 +116,9 @@ public class PhaseType extends Distribution {
 		return parameters;
 	}
 
-	/**
-	 * Sets illustrating figure in distribution panel
-	 * @return illustrating figure
-	 */
 	@Override
 	protected ImageIcon setImage() {
-		return null;
+		return JMTImageLoader.loadImage("PhaseType");
 	}
 
 	/**
@@ -157,8 +155,4 @@ public class PhaseType extends Distribution {
 		return buff.toString();
 	}
 	
-	@Override
-	protected ImageIcon setImage() {
-		return JMTImageLoader.loadImage("PhaseType");
-	}
 }

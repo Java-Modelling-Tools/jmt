@@ -70,11 +70,13 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	protected JCheckBox infDuration;
 	protected JCheckBox noStatistic;
 	protected JCheckBox infSimulated;
+	protected JCheckBox infEvents;
 	protected JCheckBox animationEnabler;
 	protected JSpinner seed;
 	protected JSpinner duration;
 	protected JSpinner polling;
 	protected JSpinner maxSamples;
+	protected JSpinner maxEvents;
 	protected JSpinner simulated;
 	protected JTable preloadTable;
 
@@ -230,18 +232,37 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		// Maximum number of samples
 		label = new JLabel("Maximum number of samples: ");
-		label.setToolTipText("The term samples stands for observations");
+		label.setToolTipText("Maximum number of simulation observations used to determine a performance index");
 		simPanel.add(label);
 		maxSamples = new JSpinner(new SpinnerNumberModel(1000000, 100000, Integer.MAX_VALUE, 50000));
 		maxSamples.setValue(simd.getMaxSimulationSamples());
-		maxSamples.setToolTipText("The term sample stands for observation.");
+		maxSamples.setToolTipText("Maximum number of simulation observations used to determine a performance index");
 		label.setLabelFor(maxSamples);
 		simPanel.add(maxSamples);
+
 		// Adds disable statistic checkbox
 		noStatistic = new JCheckBox("no automatic stop");
 		noStatistic.setToolTipText("Disable confidence interval/maximum relative error as simulation stopping criteria");
 		noStatistic.setSelected(simd.getDisableStatistic().booleanValue());
 		simPanel.add(noStatistic);
+
+		// Maximum number of events
+		label = new JLabel("Maximum number of events: ");
+		label.setToolTipText("Maximum number of events processed by the simulation engine");
+//		simPanel.add(label);
+		maxEvents = new JSpinner(new SpinnerNumberModel(10000000, 100000, Long.MAX_VALUE, 50000));
+		maxEvents.setValue((Long)simd.getMaxSimulationEvents());
+		label.setLabelFor(maxEvents);
+		infEvents = new JCheckBox("infinite");
+		infEvents.setToolTipText("Disables the bound on the number of events");
+		if (simd.getMaxSimulationEvents().longValue() < 0) {
+			infEvents.setSelected(true);
+//			maxEvents.setValue(new Long(10000000));
+			maxEvents.setEnabled(false);
+		}
+//		simPanel.add(maxEvents);
+//		simPanel.add(infEvents);
+
 
 		if (gui.isAnimationDisplayable()) {
 			animationEnabler = new JCheckBox("animation");
@@ -324,6 +345,25 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 			}
 		});
 
+		// Infinite simulated events
+		infEvents.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (infEvents.isSelected()) {
+					simd.setMaxSimulationEvents(new Long(-1));
+					maxEvents.setEnabled(false);
+				} else {
+					Object value = maxEvents.getValue();
+					if (value instanceof Long) {
+						simd.setMaxSimulationEvents((Long) value);
+					} else if (value instanceof Integer) {
+						simd.setMaxSimulationEvents(new Long(((Integer) value).intValue()));
+					}
+					maxEvents.setEnabled(true);
+				}
+			}
+		});
+
+
 		// Disable statistic
 		noStatistic.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -397,6 +437,26 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 					}
 				}
 				simulated.setValue(simd.getMaxSimulatedTime());
+			}
+		});
+
+		// Simulated events
+		
+		maxEvents.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Object value = maxEvents.getValue();
+				if (value instanceof Long) {
+					Long l = (Long) value;
+					if (l.longValue() >= -1) {
+//						simd.setMaxSimulationEvents(10000L);//(l);
+					}
+				} else if (value instanceof Integer) {
+					Integer i = (Integer) value;
+					if (i.intValue() >= -1) {
+//						simd.setMaxSimulationEvents(10000L);//new Long(i.intValue()));
+					}
+				}
+//			maxEvents.setValue(10000L);//new Long(simd.getMaxSimulationEvents()));
 			}
 		});
 
