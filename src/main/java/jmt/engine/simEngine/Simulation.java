@@ -281,10 +281,10 @@ public class Simulation {
 	 * executed in the correct order.
 	 */
 	public void initialize() {
-		// Sets the max simulated time for the system, when reached simulation is stopped
+		// Sets the max simulated time for the system, when reached the simulation is stopped
 		NetSystem.setMaxSimulatedTime(simParameters.getMaxSimulatedTime());
 
-		// Sets the max simulated number of events for the system, when reached simulation is stopped
+		// Sets the max simulated number of events for the system, when reached the simulation is stopped
 		NetSystem.setMaxSimulationEvents(simParameters.getMaxSimulationEvents());
 
 		// Resets the job counter

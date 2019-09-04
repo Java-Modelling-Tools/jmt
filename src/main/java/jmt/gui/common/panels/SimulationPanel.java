@@ -20,7 +20,7 @@ package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
 import java.util.HashMap;
-
+import static java.lang.System.*;
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -232,7 +232,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		// Maximum number of samples
 		label = new JLabel("Maximum number of samples: ");
-		label.setToolTipText("Maximum number of simulation observations used to determine a performance index");
+		label.setToolTipText("Maximum number of samples used to estimate a performance index");
 		simPanel.add(label);
 		maxSamples = new JSpinner(new SpinnerNumberModel(1000000, 100000, Integer.MAX_VALUE, 50000));
 		maxSamples.setValue(simd.getMaxSimulationSamples());
@@ -249,19 +249,19 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		// Maximum number of events
 		label = new JLabel("Maximum number of events: ");
 		label.setToolTipText("Maximum number of events processed by the simulation engine");
-//		simPanel.add(label);
-		maxEvents = new JSpinner(new SpinnerNumberModel(10000000, 100000, Long.MAX_VALUE, 50000));
-		maxEvents.setValue((Long)simd.getMaxSimulationEvents());
+		simPanel.add(label);
+		maxEvents = new JSpinner(new SpinnerNumberModel(10000000L, 100000L, Long.MAX_VALUE, 50000L));
+		maxEvents.setValue(simd.getMaxSimulationEvents().longValue());
 		label.setLabelFor(maxEvents);
 		infEvents = new JCheckBox("infinite");
 		infEvents.setToolTipText("Disables the bound on the number of events");
 		if (simd.getMaxSimulationEvents().longValue() < 0) {
 			infEvents.setSelected(true);
-//			maxEvents.setValue(new Long(10000000));
+			maxEvents.setValue(10000000L);
 			maxEvents.setEnabled(false);
 		}
-//		simPanel.add(maxEvents);
-//		simPanel.add(infEvents);
+		simPanel.add(maxEvents);
+		simPanel.add(infEvents);
 
 
 		if (gui.isAnimationDisplayable()) {
@@ -286,7 +286,7 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 			simPanel.add(new JPanel());
 		}
 
-		SpringUtilities.makeCompactGrid(simPanel, 5, 3, //rows, cols
+		SpringUtilities.makeCompactGrid(simPanel, 6, 3, //rows, cols
 				16, 6, //initX, initY
 				6, 6); //xPad, yPad
 		upperPanel.add(simPanel, BorderLayout.CENTER);
@@ -448,15 +448,23 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 				if (value instanceof Long) {
 					Long l = (Long) value;
 					if (l.longValue() >= -1) {
-//						simd.setMaxSimulationEvents(10000L);//(l);
+						simd.setMaxSimulationEvents(l);
+						maxEvents.setValue(l.longValue());
 					}
 				} else if (value instanceof Integer) {
 					Integer i = (Integer) value;
 					if (i.intValue() >= -1) {
-//						simd.setMaxSimulationEvents(10000L);//new Long(i.intValue()));
+						simd.setMaxSimulationEvents(new Long(i.intValue()));
+						maxEvents.setValue(i.intValue());
+					}
+				} else if (value instanceof Double) {
+					Double d = (Double) value;
+					if (d.doubleValue() >= -1) {
+						long l = (new Double(Math.round(d.doubleValue()))).longValue();
+						simd.setMaxSimulationEvents(l);
+						maxEvents.setValue(d);
 					}
 				}
-//			maxEvents.setValue(10000L);//new Long(simd.getMaxSimulationEvents()));
 			}
 		});
 

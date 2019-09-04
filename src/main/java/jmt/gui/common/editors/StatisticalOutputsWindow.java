@@ -535,7 +535,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		JPanel leftPanel = new JPanel(new BorderLayout());
 		leftPanel.add(pivotPanel, BorderLayout.CENTER);
 		if (inverseMeasure) {
-			JLabel warningLabel = new JLabel("<html>Please note that inter-departure times are displayed for Throughput, Drop Rate and System Power indices.</html>");
+			JLabel warningLabel = new JLabel("<html>Please note that statistics for Throughput, Drop Rate and System Power indices are based on inter-arrival times.</html>");
 			warningLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
 			warningLabel.setIcon(JMTImageLoader.loadImage("lightbulb"));
 			warningLabel.setIconTextGap(5);
