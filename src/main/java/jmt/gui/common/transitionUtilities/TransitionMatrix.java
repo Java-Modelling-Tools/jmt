@@ -19,6 +19,7 @@
 package jmt.gui.common.transitionUtilities;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>Title: Transition Matrix</p>
@@ -30,7 +31,7 @@ import java.util.HashMap;
  */
 public class TransitionMatrix {
 
-	private HashMap<Object, TransitionVector> matrix;
+	private Map<Object, TransitionVector> matrix;
 
 	public TransitionMatrix() {
 		matrix = new HashMap<Object, TransitionVector>();

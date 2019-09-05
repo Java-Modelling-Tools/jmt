@@ -32,43 +32,53 @@ public class ForkJob extends Job {
 	private ForkJobInfo forkJobInfo;
 
 	/**
-	 * Creates a new ForkJob, given job class and shared information
-	 * @param jobClass class of the fork job
-	 * @param forkJobInfo info of the fork job
+	 * Creates a new ForkJob, given job class and shared information.
+	 * @param jobClass class of the fork job.
+	 * @param forkJobInfo info of the fork job.
 	 */
-	public ForkJob(JobClass jobClass, int jobClassNum, ForkJobInfo forkJobInfo) {
-		super(jobClass, jobClassNum);
+	public ForkJob(JobClass jobClass, ForkJobInfo forkJobInfo) {
+		super(jobClass, null);
 		systemEnteringTime = forkJobInfo.getForkedJob().systemEnteringTime;
+		globalJobInfoList = forkJobInfo.getForkedJob().globalJobInfoList;
+		lastVisitedPair = forkJobInfo.getForkedJob().lastVisitedPair;
 		this.forkJobInfo = forkJobInfo;
 	}
 
 	/**
-	 * Gets original job that was forked
-	 * @return original job that was forked
+	 * Gets parent job that was forked.
+	 * @return parent job that was forked.
 	 */
 	public Job getForkedJob() {
 		return forkJobInfo.getForkedJob();
 	}
 
 	/**
-	 * Gets number of child jobs forked from the original job
-	 * @return number of child jobs forked from the original job
+	 * Gets number of child jobs forked from the parent job.
+	 * @return number of child jobs forked from the parent job.
 	 */
 	public int getForkedNum() {
 		return forkJobInfo.getForkedNum();
 	}
 
 	/**
-	 * Gets fork node that forked the original job
-	 * @return fork node that forked the original job
+	 * Gets fork node that forked the parent job.
+	 * @return fork node that forked the parent job.
 	 */
 	public NetNode getForkNode() {
 		return forkJobInfo.getForkNode();
 	}
 
 	/**
-	 * Gets info of the fork job
-	 * @return info of the fork job
+	 * Gets original job that was forked.
+	 * @return original job that was forked.
+	 */
+	public Job getOriginalJob() {
+		return forkJobInfo.getOriginalJob();
+	}
+
+	/**
+	 * Gets information of this fork job.
+	 * @return information of this fork job.
 	 */
 	public ForkJobInfo getForkJobInfo() {
 		return forkJobInfo;

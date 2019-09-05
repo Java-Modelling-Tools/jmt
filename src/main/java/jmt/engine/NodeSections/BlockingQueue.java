@@ -18,7 +18,6 @@
 
 package jmt.engine.NodeSections;
 
-import java.util.Arrays;
 import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
@@ -55,9 +54,6 @@ import jmt.engine.dataAnalysis.Measure;
  */
 public class BlockingQueue extends InputSection {
 
-	//coolStart is true if there are no waiting jobs when the queue is started
-	private boolean coolStart;
-
 	private BlockingRegion blockingRegion;
 
 	/** For each class, true if jobs in excess must be dropped */
@@ -66,18 +62,14 @@ public class BlockingQueue extends InputSection {
 	/** For each class, true if jobs in excess must be dropped */
 	protected double[] classWeights;
 
-	private int droppedJobs;
-	private int[] droppedJobsPerClass;
-
-	//job info list of the owner node: used to remove job after drop
+	/** job info list of the owner node: used to remove job after drop */
 	private JobInfoList jobsList_node;
 
 	/**
 	 * Creates a new instance of infinite BlockingQueue.
 	 */
 	public BlockingQueue(BlockingRegion myRegion) {
-		super(true);
-		coolStart = true;
+		super(false);
 		//sets the blocking region owner of this blocking queue
 		this.blockingRegion = myRegion;
 	}
@@ -93,9 +85,6 @@ public class BlockingQueue extends InputSection {
 		for (int i = 0; i < classDrop.length; i++) {
 			classDrop[i] = blockingRegion.getClassDrop(i);
 		}
-		droppedJobs = 0;
-		droppedJobsPerClass = new int[getJobClasses().size()];
-		Arrays.fill(droppedJobsPerClass, 0);
 	}
 
 	/**
@@ -106,36 +95,11 @@ public class BlockingQueue extends InputSection {
 	@Override
 	protected int process(NetMessage message) throws NetException {
 		Job job;
-		Job notBlockedJob;
 		JobClass jobClass;
 
 		switch (message.getEvent()) {
 
 		case NetEvent.EVENT_START:
-
-			//the input station receives the "start" event because it has no nodes in input
-			//then it is marked as reference node
-
-			//checks whether there are jobs in queue
-			if (jobsList.size() == 0) {
-				//no jobs in queue
-				coolStart = true;
-				break;
-			}
-
-			//get the first job which is not blocked (if exists)
-			notBlockedJob = getNextNotBlockedJob();
-
-			if (notBlockedJob == null) {
-				//all jobs in queue are class blocked
-				//nothing else to do
-			} else {
-				//get class
-				jobClass = notBlockedJob.getJobClass();
-				//forward job and increase occupation
-				sendForward(notBlockedJob, 0.0);
-				blockingRegion.increaseOccupation(jobClass);
-			}
 			break;
 
 		case NetEvent.EVENT_JOB:
@@ -153,7 +117,6 @@ public class BlockingQueue extends InputSection {
 
 			//adds a JobInfo object after modifying the job with redirection informations
 			job.setOriginalDestinationNode(realDestination);
-			jobsList.add(new JobInfo(job));
 
 			//checks whether the region is blocked for this class
 			if (blockingRegion.isBlocked(jobClass)) {
@@ -162,56 +125,22 @@ public class BlockingQueue extends InputSection {
 				if (classDrop[jobClass.getId()]) {
 					//drop job
 					drop(job);
+				} else {
+					//otherwise the job remains blocked in queue
+					jobsList.add(new JobInfo(job));
 				}
-				//otherwise the job remains blocked in queue
 				break;
 			}
 
 			//the region is not blocked for this class
-			//checks whether the queue is empty (coolstart = true) or not
-
-			if (coolStart) {
-				// If coolStart is true, this job is sent immediately to the next
-				// section and coolStart set to false.
-				sendForward(job, 0.0);
-				blockingRegion.increaseOccupation(jobClass);
-
-				coolStart = false;
-			} else {
-				//coolStart is false: this means that the jobs in queue are class blocked,
-				//otherwise they would have been already sent to the region till it would
-				//become globally or class blocked
-
-				//the job is sent to service section
-				sendForward(job, 0.0);
-				blockingRegion.increaseOccupation(jobClass);
-			}
+			//adds the job to update the job info list
+			jobsList.add(new JobInfo(job));
+			//the job is sent to service section
+			send(job);
+			blockingRegion.increaseOccupation(jobClass);
 			break;
 
-			//the BlockingQueue has almost the same behaviour with the events
-			//EVENT_ACK and EVENT_JOB_OUT_OF_REGION
-
 		case NetEvent.EVENT_ACK:
-
-			//checks whether there are jobs in queue
-			if (jobsList.size() == 0) {
-				//no jobs in queue
-				coolStart = true;
-				break;
-			}
-
-			//search for the first job which is not blocked (if exists)
-			//and forward it
-			notBlockedJob = getNextNotBlockedJob();
-
-			if (notBlockedJob != null) {
-				jobClass = notBlockedJob.getJobClass();
-				sendForward(notBlockedJob, 0.0);
-				blockingRegion.increaseOccupation(jobClass);
-			} else {
-				//all jobs in queue are blocked
-				//nothing else to do
-			}
 			break;
 
 		case NetEvent.EVENT_JOB_OUT_OF_REGION:
@@ -223,28 +152,25 @@ public class BlockingQueue extends InputSection {
 			//only dropping Jobs at Node level as the node section jobs 
 			//are automatically dropped but the node level jobs are
 			//dropped manually.
-			Job localJob = (Job) message.getData();
-			JobInfo jobInfo = jobsList_node.lookFor(localJob);
-
-			//remove only when you find a job in the list.
-			if (jobInfo != null) {
-				jobsList_node.remove(jobInfo);
+			job = (Job) message.getData();
+			JobInfo jobInfo_node = jobsList_node.lookFor(job);
+			if (jobInfo_node != null) {
+				jobsList_node.remove(jobInfo_node);
 			}
 
 			//checks whether there are jobs in queue
-			if (jobsList.size() == 0) {
+			if (jobsList.size() <= 0) {
 				//no jobs in queue
-				coolStart = true;
 				break;
 			}
 
-			//search for the first job which is not blocked (if exists)
+			//search for the next job which is not blocked (if exists)
 			//and forward it
-			notBlockedJob = getNextNotBlockedJob();
+			job = getNextNotBlockedJob();
 
-			if (notBlockedJob != null) {
-				jobClass = notBlockedJob.getJobClass();
-				sendForward(notBlockedJob, 0.0);
+			if (job != null) {
+				jobClass = job.getJobClass();
+				send(job);
 				blockingRegion.increaseOccupation(jobClass);
 			} else {
 				//all jobs in queue are blocked
@@ -263,13 +189,10 @@ public class BlockingQueue extends InputSection {
 	}
 
 	/**
-	 * Gets, if exists, the first job in queue that is not class blocked and has an higher priority.
-	 * @return the first job in queue that is not class blocked; null otherwise.
+	 * Gets, if exists, the next job in queue that is not class blocked and has an higher priority.
+	 * @return the next job in queue that is not class blocked; null otherwise.
 	 */
 	private Job getNextNotBlockedJob() {
-		if (jobsList == null) {
-			return null;
-		}
 		ListIterator<JobInfo> it = jobsList.getInternalJobInfoList().listIterator();
 		Job nextJob = null;
 		int nextJobPriority = 0;
@@ -287,49 +210,33 @@ public class BlockingQueue extends InputSection {
 	}
 
 	/**
-	 * Drop the specified job, removing it from the job info lists and increases
-	 * the counters of dropped jobs.
+	 * Send the specified job, removing it from the job info lists.
+	 * @param job the job to be sent.
+	 */
+	private void send(Job job) {
+		JobInfo jobInfo = jobsList.lookFor(job);
+		if (jobInfo != null) {
+			//removes job from the section jobInfoList
+			jobsList.remove(jobInfo);
+		}
+		sendForward(job, 0.0);
+	}
+
+	/**
+	 * Drop the specified job, removing it from the job info lists.
 	 * @param job the job to be dropped.
 	 */
 	private void drop(Job job) {
-		int c = job.getJobClass().getId();
-		JobInfo jobInfo = jobsList.lookFor(job);
-		if (jobInfo != null) {
-			//drops job from the section jobInfoList
-			jobsList.dropJob(jobInfo);
-		}
-
-		if (jobsList_node == null) {
-			jobsList_node = getOwnerNode().getJobInfoList();
-		}
 		JobInfo jobInfo_node = jobsList_node.lookFor(job);
 		if (jobInfo_node != null) {
 			//drops job from the node jobInfoList
 			jobsList_node.dropJob(jobInfo_node);
 		}
+
 		if (!(job instanceof ForkJob)) {
 			//drops job from the global jobInfoList
 			getOwnerNode().getQueueNet().getJobInfoList().dropJob(job);
-			droppedJobs++;
-			droppedJobsPerClass[c]++;
 		}
-	}
-
-	/**
-	 * Gets the total number of dropped jobs.
-	 * @return the total number of dropped jobs.
-	 */
-	public int getDroppedJobs() {
-		return droppedJobs;
-	}
-
-	/**
-	 * Gets the number of dropped jobs for the specified class.
-	 * @param classIndex the index of the job class.
-	 * @return the number of dropped jobs for the specified class.
-	 */
-	public int getDroppedJobsPerClass(int classIndex) {
-		return droppedJobsPerClass[classIndex];
 	}
 
 	@Override

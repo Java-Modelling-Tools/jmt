@@ -55,8 +55,8 @@ class NetController {
 	//the maximum simulated time a simulation is allowed to reach before it is stopped, negative value means infinite
 	private double maxSimulatedTime = -1;
 
-	//the maximum number of simulation events
-	private long maxEvents = Long.MAX_VALUE;
+	//the maximum processed events a simulation is allowed to reach before it is stopped, negative value means infinite
+	private int maxProcessedEvents = -1;
 
 	NetController() {
 		running = false;
@@ -64,8 +64,11 @@ class NetController {
 		n = 0;
 	}
 
-	/** This is the run method of the NetController (thread). */
-	public void run() throws InterruptedException, NetException {
+	/** This is the run method of the NetController (thread).
+	 * @throws NetException
+	 * @throws InterruptedException
+	 */
+	public void run() throws NetException, InterruptedException {
 		SimSystem.runStart();
 		startTime = NetSystem.getElapsedTime();
 
@@ -76,6 +79,7 @@ class NetController {
 					wait();
 				}
 				n++;
+
 				if (n % refreshPeriod == 0) {
 					//User may have defined measures that will not receive any sample
 					if (n % reachabilityTest == 0) {
@@ -85,8 +89,8 @@ class NetController {
 					//refresh measures
 					NetSystem.checkMeasures();
 				}
-				//check if a positive max simulated time is set and has been reached for the first time
-				if (((maxSimulatedTime > 0 && SimSystem.getClock() > maxSimulatedTime) || (maxEvents > 0 && n > maxEvents)) && !aborting) {
+				//check if positive stop criterion is set and have been reached for the first time
+				if (((maxSimulatedTime > 0 && SimSystem.getClock() > maxSimulatedTime) || (maxProcessedEvents > 0 && n > maxProcessedEvents)) && !aborting) {
 					ListIterator<QueueNetwork> nets = NetSystem.getNetworkList().listIterator();
 					QueueNetwork network;
 					while (nets.hasNext()) {
@@ -146,11 +150,11 @@ class NetController {
 	}
 
 	/**
-	 * Sets the value of the max number of events, when this value is reached in a simulation the run is stopped
-	 * @param maxEvents the value to be set for the max events
+	 * Sets the value of the max processed events, when this value is reached in a simulation the run is stopped
+	 * @param maxProcessedEvents the value to be set for the max processed events
 	 */
-	public void setMaxSimulationEvents(long maxEvents) {
-		this.maxEvents = maxEvents;
+	public void setMaxProcessedEvents(int maxProcessedEvents) {
+		this.maxProcessedEvents = maxProcessedEvents;
 	}
 
 }

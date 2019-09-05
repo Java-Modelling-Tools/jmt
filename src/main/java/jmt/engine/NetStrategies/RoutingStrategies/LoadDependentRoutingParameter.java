@@ -35,38 +35,42 @@ import jmt.engine.random.EmpiricalPar;
 public class LoadDependentRoutingParameter implements Comparable<Object> {
 
 	private int from;
+	private String[] nodeNames;
 	private Empirical distribution;
 	private EmpiricalPar param;
-	private double[] probabilities;
-	private String[] stationName;
 	private NetNode[] nodes;
 
-	public LoadDependentRoutingParameter(Integer from, EmpiricalEntry empiricals[]) throws IncorrectDistributionParameterException {
+	public LoadDependentRoutingParameter(Integer from, EmpiricalEntry entires[]) throws IncorrectDistributionParameterException {
 		this.from = from.intValue();
-		probabilities = new double[empiricals.length];
-		stationName = new String[empiricals.length];
-		for (int e = 0; e < empiricals.length; e++) {
-			probabilities[e] = empiricals[e].getProbability();
-			stationName[e] = (String) empiricals[e].getValue();
+		nodeNames = new String[entires.length];
+		double[] probabilities = new double[entires.length];
+		for (int i = 0; i < entires.length; i++) {
+			nodeNames[i] = (String) entires[i].getValue();
+			probabilities[i] = entires[i].getProbability();
 		}
 		distribution = new Empirical();
 		param = new EmpiricalPar(probabilities);
 	}
 
 	public NetNode getOutNode() {
-		NetNode node = null;
-		if (nodes == null || nodes.length == 0) {
-			nodes = new NetNode[stationName.length];
-			for (int n = 0; (stationName != null && n < stationName.length); n++) {
-				nodes[n] = NetSystem.getNode(stationName[n]);
+		if (nodes == null) {
+			//it is the first execution of this method: find the NetNode objects
+			nodes = new NetNode[nodeNames.length];
+			for (int i = 0; i < nodeNames.length; i++) {
+				nodes[i] = NetSystem.getNode(nodeNames[i]);
 			}
 		}
+
 		try {
-			int nodePos = (int) distribution.nextRand(param);
-			node = nodes[nodePos];
-		} catch (IncorrectDistributionParameterException id) {
+			//the empirical distribution returns the position of the chosen output node
+			int nodePos = (int) Math.round(distribution.nextRand(param));
+			if (nodePos >= 0) {
+				return nodes[nodePos];
+			}
+		} catch (IncorrectDistributionParameterException e) {
+			e.printStackTrace();
 		}
-		return node;
+		return null;
 	}
 
 	/**

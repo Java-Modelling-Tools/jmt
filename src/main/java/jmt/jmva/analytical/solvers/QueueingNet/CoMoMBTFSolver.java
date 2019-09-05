@@ -15,7 +15,7 @@ public class CoMoMBTFSolver extends CoMoMSolver {
 
 	public CoMoMBTFSolver(QNModel qnm) throws InternalErrorException, BTFMatrixErrorException, InconsistentLinearSystemException {
 		super(qnm);
-		basis =  new BTFCoMoMBasis(qnm);		
+		basis =  new BTFCoMoMBasis(qnm);
 		system = new BTFLinearSystem(qnm, basis);
 	}
 

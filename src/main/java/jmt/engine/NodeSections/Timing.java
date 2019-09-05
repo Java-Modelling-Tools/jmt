@@ -20,6 +20,7 @@ package jmt.engine.NodeSections;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
@@ -52,7 +53,7 @@ public class Timing extends ServiceSection {
 	private int[] firingPriorities;
 	private double[] firingWeights;
 
-	private LinkedList[] timingTokenLists;
+	private List<RemoveToken>[] timingTokenLists;
 	private int[] extraEnablingDegrees;
 	private RandomEngine randomEngine;
 	private InverseMeasure firingThroughput;
@@ -84,7 +85,7 @@ public class Timing extends ServiceSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
-		timingTokenLists = new LinkedList[modeNames.length];
+		timingTokenLists = new List[modeNames.length];
 		for (int i = 0; i < timingTokenLists.length; i++) {
 			timingTokenLists[i] = new LinkedList<RemoveToken>();
 		}
@@ -103,15 +104,13 @@ public class Timing extends ServiceSection {
 		switch (message.getEvent()) {
 
 		case NetEvent.EVENT_START:
-		{
 			break;
-		}
 
 		case NetEvent.EVENT_JOB:
 			return MSG_NOT_PROCESSED;
 
 		case NetEvent.EVENT_ACK:
-			break;
+			return MSG_NOT_PROCESSED;
 
 		case NetEvent.EVENT_ENABLING:
 		{
@@ -119,15 +118,24 @@ public class Timing extends ServiceSection {
 			int enablingDegree = ((EnablingPacket) data).getEnablingDegree();
 			int timingEvents = timingTokenLists[modeIndex].size();
 			int deltaTimingEvents = 0;
-			if (numbersOfServers[modeIndex] < 0) {
-				deltaTimingEvents = enablingDegree - timingEvents;
-			} else {
-				if (enablingDegree <= numbersOfServers[modeIndex]) {
-					deltaTimingEvents = enablingDegree - timingEvents;
-					extraEnablingDegrees[modeIndex] = 0;
+			if (enablingDegree < 0) {
+				if (numbersOfServers[modeIndex] < 0) {
+					return MSG_NOT_PROCESSED;
 				} else {
 					deltaTimingEvents = numbersOfServers[modeIndex] - timingEvents;
-					extraEnablingDegrees[modeIndex] = enablingDegree - numbersOfServers[modeIndex];
+					extraEnablingDegrees[modeIndex] = -1;
+				}
+			} else {
+				if (numbersOfServers[modeIndex] < 0) {
+					deltaTimingEvents = enablingDegree - timingEvents;
+				} else {
+					if (enablingDegree <= numbersOfServers[modeIndex]) {
+						deltaTimingEvents = enablingDegree - timingEvents;
+						extraEnablingDegrees[modeIndex] = 0;
+					} else {
+						deltaTimingEvents = numbersOfServers[modeIndex] - timingEvents;
+						extraEnablingDegrees[modeIndex] = enablingDegree - numbersOfServers[modeIndex];
+					}
 				}
 			}
 
@@ -143,7 +151,7 @@ public class Timing extends ServiceSection {
 				}
 			} else {
 				for (int i = 0; i > deltaTimingEvents; i--) {
-					RemoveToken token = (RemoveToken) timingTokenLists[modeIndex].remove();
+					RemoveToken token = timingTokenLists[modeIndex].remove(0);
 					removeMessage(token);
 				}
 			}
@@ -155,17 +163,20 @@ public class Timing extends ServiceSection {
 			int modeIndex = ((TimingPacket) data).getModeIndex();
 			RemoveToken token = ((TimingPacket) data).getTimingToken();
 			timingTokenLists[modeIndex].remove(token);
-			sendBackward(NetEvent.EVENT_FIRING, Integer.valueOf(modeIndex), 0.0);
+			FiringPacket firingPacket = new FiringPacket(modeIndex, modeNames[modeIndex], null, null);
+			sendBackward(NetEvent.EVENT_FIRING, firingPacket, 0.0);
 
-			if (extraEnablingDegrees[modeIndex] > 0) {
+			if (extraEnablingDegrees[modeIndex] != 0) {
 				double firingDelay = timingStrategies[modeIndex].wait(this, null);
-				TimingPacket packet = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],
+				TimingPacket timingPacket = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],
 						firingWeights[modeIndex]);
-				token = sendMe(NetEvent.EVENT_TIMING, packet, firingDelay);
-				packet.setTimingToken(token);
+				token = sendMe(NetEvent.EVENT_TIMING, timingPacket, firingDelay);
+				timingPacket.setTimingToken(token);
 				int index = (int) (randomEngine.raw() * (timingTokenLists[modeIndex].size() + 1));
 				timingTokenLists[modeIndex].add(index, token);
-				extraEnablingDegrees[modeIndex]--;
+				if (extraEnablingDegrees[modeIndex] > 0) {
+					extraEnablingDegrees[modeIndex]--;
+				}
 			}
 			break;
 		}

@@ -24,7 +24,7 @@ import java.util.Vector;
 
 public class ProbabilitiesFork extends ForkStrategy {
 
-	private HashMap<Object, OutPath> outPaths = new HashMap<Object, OutPath>();
+	private Map<Object, OutPath> outPaths = new HashMap<Object, OutPath>();
 
 	public ProbabilitiesFork() {
 		description = "Each output link has a probability p of generating tasks. "

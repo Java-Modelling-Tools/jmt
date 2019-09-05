@@ -107,7 +107,7 @@ public class ParametricAnalysisChecker {
 	 */
 	public Vector<Object> checkForServiceTimesParametricAnalysisAvailableStations() {
 		Vector<Object> availableStations = new Vector<Object>(0, 1);
-		Vector<Object> stations = sd.getStationKeysNoSourceSink();
+		Vector<Object> stations = sd.getStationKeys();
 		Vector<Object> classes = cd.getClassKeys();
 		for (int i = 0; i < stations.size(); i++) {
 			Object thisStation = stations.get(i);

@@ -119,7 +119,7 @@ public class SolverMultiClosedTreeMVA extends SolverMulti {
 	 * Solves the system through the TreeMVA algorithm.
 	 * input(...) must have been called first.
 	 *
-	 * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
+	 * @throws InternalErrorException
 	 * @throws BTFMatrixErrorException
 	 * @throws InconsistentLinearSystemException
 	 * @throws OperationNotSupportedException
@@ -132,6 +132,7 @@ public class SolverMultiClosedTreeMVA extends SolverMulti {
 			c = new TreeMVASolver(qnm, numThreads, false);
 			c.computePerformanceMeasures();
 		} catch (InternalErrorException e) {
+			e.printStackTrace();
 		}
 
 		clsThroughput = qnm.getMeanThroughputsAsDoubles();

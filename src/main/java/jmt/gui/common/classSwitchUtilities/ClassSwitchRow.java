@@ -19,11 +19,12 @@
 package jmt.gui.common.classSwitchUtilities;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class ClassSwitchRow {
 
 	private Object classInKey;
-	private HashMap<Object, Float> rowValues;
+	private Map<Object, Float> rowValues;
 
 	public ClassSwitchRow() {
 		this.classInKey = null;

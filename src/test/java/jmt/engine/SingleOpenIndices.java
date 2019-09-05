@@ -19,7 +19,7 @@ public class SingleOpenIndices {
 		FileUtils.copyFile(new File(getClass().getResource("indices-01-input.xml").toURI()), input);
 
 		String[] args = {"","","-maxtime","60","-seed","1"};
-		Map<String,String> options = Jmt.parseParameters(args, 2);
+		Map<String, String> options = Jmt.parseParameters(args, 2);
 		assertTrue("Solver was not able to solve file!", Jmt.sim(input, result, options)); 
 
 		/* This part of the code removes the first row from the result file */

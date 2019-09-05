@@ -20,6 +20,7 @@ package jmt.engine.NetStrategies.TransitionUtilities;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,7 +33,7 @@ import java.util.Set;
  */
 public class TransitionMatrix {
 
-	private HashMap<String, TransitionVector> matrix;
+	private Map<String, TransitionVector> matrix;
 	private int total;
 	private int[] totals;
 

@@ -284,8 +284,8 @@ public class Simulation {
 		// Sets the max simulated time for the system, when reached the simulation is stopped
 		NetSystem.setMaxSimulatedTime(simParameters.getMaxSimulatedTime());
 
-		// Sets the max simulated number of events for the system, when reached the simulation is stopped
-		NetSystem.setMaxSimulationEvents(simParameters.getMaxSimulationEvents());
+		// Sets the max processed events for the system, when reached the simulation is stopped
+		NetSystem.setMaxProcessedEvents(simParameters.getMaxProcessedEvents());
 
 		// Resets the job counter
 		Job.resetCounter();
@@ -558,10 +558,6 @@ public class Simulation {
 					preload_station(preload_stationNames[s], preload_initialPopulations[s]);
 				}
 			}
-		} catch (NetException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			e.printStackTrace();
 			return;
@@ -575,9 +571,10 @@ public class Simulation {
 	/**
 	 * Runs this simulation. If it has not been initialized, then throws an Exception.
 	 * Controls the timer for max simulation time (if it has been defined).
-	 * @throws Exception Simulation not initialized
+	 * @throws NetException
+	 * @throws InterruptedException
 	 */
-	public void run() throws Exception {
+	public void run() throws NetException, InterruptedException {
 		if (initialized) {
 			//runs the simulation
 			NetSystem.start();

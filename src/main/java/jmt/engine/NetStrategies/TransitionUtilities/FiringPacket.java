@@ -18,6 +18,8 @@
 
 package jmt.engine.NetStrategies.TransitionUtilities;
 
+import java.util.List;
+
 import jmt.engine.QueueNet.ForkJobInfo;
 
 /**
@@ -31,31 +33,31 @@ import jmt.engine.QueueNet.ForkJobInfo;
 public class FiringPacket {
 
 	private int modeIndex;
-	private double[] totalLifetime;
-	private ForkJobInfo[] forkJobInfo;
-	private int[] forkJobNum;
+	private String modeName;
+	private double[] totalLifetimes;
+	private List<ForkJobInfo>[] forkJobInfoLists;
 
-	public FiringPacket(int modeIndex, double[] totalLifetime, ForkJobInfo[] forkJobInfo, int[] forkJobNum) {
+	public FiringPacket(int modeIndex, String modeName, double[] totalLifetimes, List<ForkJobInfo>[] forkJobInfoLists) {
 		this.modeIndex = modeIndex;
-		this.totalLifetime = totalLifetime;
-		this.forkJobInfo = forkJobInfo;
-		this.forkJobNum = forkJobNum;
+		this.modeName = modeName;
+		this.totalLifetimes = totalLifetimes;
+		this.forkJobInfoLists = forkJobInfoLists;
 	}
 
 	public int getModeIndex() {
 		return modeIndex;
 	}
 
-	public double[] getTotalLifetime() {
-		return totalLifetime;
+	public String getModeName() {
+		return modeName;
 	}
 
-	public ForkJobInfo[] getForkJobInfo() {
-		return forkJobInfo;
+	public double[] getTotalLifetimes() {
+		return totalLifetimes;
 	}
 
-	public int[] getForkJobNum() {
-		return forkJobNum;
+	public List<ForkJobInfo>[] getForkJobInfoLists() {
+		return forkJobInfoLists;
 	}
 
 }

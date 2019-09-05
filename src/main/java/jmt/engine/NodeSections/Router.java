@@ -18,15 +18,23 @@
 
 package jmt.engine.NodeSections;
 
+import java.util.Arrays;
+
+import javax.swing.JOptionPane;
+
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
+import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * This class implements a router, which routes the jobs according to the specified
@@ -50,7 +58,11 @@ import jmt.engine.QueueNet.NodeSection;
  */
 public class Router extends OutputSection {
 
-	private RoutingStrategy routingStrategies[];
+	private RoutingStrategy[] routingStrategies;
+
+	private NodeList outNodeList;
+	private RandomEngine randomEngine;
+	private boolean[] isClosedJobRoutingErrorShown;
 
 	/*-------------------BLOCKING REGION PROPERTIES-------------------*/
 
@@ -76,8 +88,7 @@ public class Router extends OutputSection {
 	 * Creates a new instance of Router.
 	 * @param routingStrategies Routing strategies, one for each class.
 	 */
-	public Router(RoutingStrategy routingStrategies[]) {
-		super();
+	public Router(RoutingStrategy[] routingStrategies) {
 		this.routingStrategies = routingStrategies;
 
 		borderRouterON = false;
@@ -91,8 +102,7 @@ public class Router extends OutputSection {
 	 * @param myReg the blocking region to which the owner node of this router
 	 * belongs.
 	 */
-	public Router(RoutingStrategy routingStrategies[], BlockingRegion myReg) {
-		super();
+	public Router(RoutingStrategy[] routingStrategies, BlockingRegion myReg) {
 		this.routingStrategies = routingStrategies;
 
 		borderRouterON = true;
@@ -131,6 +141,15 @@ public class Router extends OutputSection {
 	}
 
 	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+		outNodeList = node.getOutputNodes();
+		randomEngine = RandomEngine.makeDefault();
+		JobClassList jobClasses = getJobClasses();
+		isClosedJobRoutingErrorShown = new boolean[jobClasses.size()];
+		Arrays.fill(isClosedJobRoutingErrorShown, false);
+	}
+
+	@Override
 	protected int process(NetMessage message) throws NetException {
 		switch (message.getEvent()) {
 
@@ -153,7 +172,12 @@ public class Router extends OutputSection {
 			// routing strategies
 
 			if (outNode == null) {
-				return MSG_NOT_PROCESSED;
+				if (job instanceof ForkJob) {
+					outNode = outNodeList.get((int) Math.floor(randomEngine.raw() * outNodeList.size()));
+				} else {
+					showClosedJobRoutingError(jobClass);
+					break;
+				}
 			}
 
 			//send the job to all nodes identified by the strategy
@@ -189,6 +213,39 @@ public class Router extends OutputSection {
 		}
 
 		return MSG_PROCESSED;
+	}
+
+	/**
+	 * Shows the closed job routing error.
+	 */
+	private void showClosedJobRoutingError(JobClass jobClass) {
+		if (!isClosedJobRoutingErrorShown[jobClass.getId()]) {
+			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
+				System.out.println("JSIMengine - Error: " + getOwnerNode().getName()
+						+ " failed to send a " + jobClass.getName()
+						+ " job forward as its output stations are all sinks.");
+			} else {
+				class OneShotTask implements Runnable {
+					JobClass jobClass;
+					public OneShotTask(JobClass jobClass) {
+						this.jobClass = jobClass;
+					}
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(800);
+						} catch (InterruptedException e) {
+						}
+						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
+								+ " failed to send a " + jobClass.getName()
+								+ " job forward as its output stations are all sinks.",
+								"JSIMengine - Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+				(new Thread(new OneShotTask(jobClass))).start();
+			}
+			isClosedJobRoutingErrorShown[jobClass.getId()] = true;
+		}
 	}
 
 }

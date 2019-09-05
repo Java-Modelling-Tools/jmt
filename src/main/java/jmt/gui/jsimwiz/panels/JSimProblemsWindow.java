@@ -348,34 +348,18 @@ public class JSimProblemsWindow extends JFrame {
 					String staitonType = mc.getStationModel().getStationType(stationKey);
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					String description = null;
-					if (staitonType.equals(CommonConstants.STATION_TYPE_SINK)
-							|| staitonType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
-						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-								+ " is not backward linked.</div></html>");
+					if (staitonType.equals(CommonConstants.STATION_TYPE_SINK)) {
+						description = "<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+								+ " is not backward linked.</div></html>";
+					} else if (staitonType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+							description = "<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+									+ " is not forward or backward linked.</div></html>";
 					} else {
-						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-								+ " is not forward linked.</div></html>");
+						description = "<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+								+ " is not forward linked.</div></html>";
 					}
 					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_ESSENTIAL_LINK_ERROR,
 							description, stationKey, null));
-				}
-			}
-			if (mc.isThereClosedClassRoutingError()) {
-				HashMap<Object, Vector<Object>> temp = mc.getClosedClassesWithRoutingError();
-				Vector<Object> classKeys = mc.getClassModel().getClassKeys();
-				for (int i = 0; i < classKeys.size(); i++) {
-					Object classKey = classKeys.get(i);
-					String className = mc.getClassModel().getClassName(classKey);
-					Vector<Object> stationKeys = temp.get(classKey);
-					if (stationKeys != null) {
-						for (int j = 0; j < stationKeys.size(); j++) {
-							Object stationKey = stationKeys.get(j);
-							String stationName = mc.getStationModel().getStationName(stationKey);
-							problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLOSED_CLASS_ROUTING_ERROR,
-									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + className + " routed to "
-											+ stationName + " linked only to sinks.</div></html>", stationKey, classKey));
-						}
-					}
 				}
 			}
 			if (mc.isThereInvalidMeasureError()) {
@@ -445,30 +429,10 @@ public class JSimProblemsWindow extends JFrame {
 							+ " has a matrix in which some rows sum to less than one.</div></html>", stationKey, null));
 				}
 			}
-			if (mc.isThereClassSwitchBasStrategyError()) {
-				Vector<Object> temp = mc.getClassSwitchesFollowedByBasStrategy();
-				for (int i = 0; i < temp.size(); i++) {
-					Object stationKey = temp.get(i);
-					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLASS_SWITCH_BAS_STRATEGY_ERROR,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " is followed by a queue with the BAS strategy.</div></html>", stationKey, null));
-				}
-			}
 			if (mc.isThereClassSwitchReferenceStationError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLASS_SWITCH_REFERENCE_STATION_ERROR,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a class switch is in the model, "
 								+ "all the closed classes must have the same reference station.</div></html>", null, null));
-			}
-			if (mc.isThereClassSwitchSystemThroughputError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLASS_SWITCH_SYSTEM_THROUGHPUT_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a class switch is in the model, "
-								+ "the system throughput per class cannot be computed.</div></html>", null, null));
-			}
-			if (mc.isThereClassSwitchZeroPopulationError()) {
-				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLASS_SWITCH_ZERO_POPULATION_ERROR,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a class switch is in the model,"
-								+ "at least one closed class should have non-zero population.</div></html>", null, null));
 			}
 			if (mc.isThereZeroGuardStrategyError()) {
 				HashMap<Object, Vector<Object>> temp = mc.getStationsWithZeroGuardStrategy();
@@ -508,32 +472,24 @@ public class JSimProblemsWindow extends JFrame {
 							+ " is not located between fork/join.</div></html>", stationKey, null));
 				}
 			}
-			if (mc.isThereTransitionInvalidConditionError()) {
-				Vector<Object> temp = mc.getTransitionsWithInvalidCondition();
+			if (mc.isThereTransitionInfiniteEnablingDegreeError()) {
+				Vector<Object> temp = mc.getTransitionsWithInfiniteEnablingDegree();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_INVALID_CONDITION_ERROR,
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.TRANSITION_INFINITE_ENABLING_DEGREE_ERROR,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " has invalid enabling or inhibiting condition for a mode.</div></html>", stationKey, null));
+							+ " has an infinite enabling degree for a mode.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereNoOptionalLinkWarning()) {
 				Vector<Object> temp = mc.getStationsWithoutOptionalLink();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
-					String staitonType = mc.getStationModel().getStationType(stationKey);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					String description = null;
-					if (staitonType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
-						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-								+ " is not forward linked.</div></html>");
-					} else {
-						description = ("<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-								+ " is not backward linked.</div></html>");
-					}
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.NO_OPTIONAL_LINK_WARNING,
-							description, stationKey, null));
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " is not backward linked.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereForkWithoutJoinWarning()) {
@@ -556,6 +512,10 @@ public class JSimProblemsWindow extends JFrame {
 							+ " is zero.</div></html>", null, classKey));
 				}
 			}
+			if (mc.isThereZeroTotalPopulationWarning()) {
+				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.ZERO_TOTAL_POPULATION_WARNING,
+						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">The total population of closed classes is zero.</div></html>", null, null));
+			}
 			if (mc.isThereClassSwitchBetweenForkJoinWarning()) {
 				Vector<Object> temp = mc.getClassSwitchesBetweenForkJoin();
 				for (int i = 0; i < temp.size(); i++) {
@@ -565,11 +525,6 @@ public class JSimProblemsWindow extends JFrame {
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
 							+ " seems to be located between fork/join.</div></html>", stationKey, null));
 				}
-			}
-			if (mc.isThereClassSwitchForkJoinWarning()) {
-				problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CLASS_SWITCH_FORK_JOIN_WARNING,
-						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">A class switch and a fork/join section are "
-								+ "in the same model.</div></html>", null, null));
 			}
 			if (mc.isThereSchedulingSamePriorityWarning()) {
 				if (mc.isThereSchedulingSamePriorityWarning()) {
@@ -593,14 +548,34 @@ public class JSimProblemsWindow extends JFrame {
 							+ " seems to be located between fork/join.</div></html>", stationKey, null));
 				}
 			}
-			if (mc.isThereTransitionInvalidOutcomeWarning()) {
-				Vector<Object> temp = mc.getTransitionsWithInvalidOutcome();
+			if (mc.isThereTransitionConstantEnablingDegreeWarning()) {
+				Vector<Object> temp = mc.getTransitionsWithConstantEnablingDegree();
 				for (int i = 0; i < temp.size(); i++) {
 					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_INVALID_OUTCOME_WARNING,
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_CONSTANT_ENABLING_DEGREE_WARNING,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " has invalid firing outcome for a mode.</div></html>", stationKey, null));
+							+ " has a constant enabling degree for a mode.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereTransitionInvalidInputConditionWarning()) {
+				Vector<Object> temp = mc.getTransitionsWithInvalidInputCondition();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_INVALID_INPUT_CONDITION_WARNING,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " has invalid input condition for a mode.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereTransitionNoFiringOutcomeWarning()) {
+				Vector<Object> temp = mc.getTransitionsWithoutFiringOutcome();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_NO_FIRING_OUTCOME_WARNING,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " has no firing outcome for a mode.</div></html>", stationKey, null));
 				}
 			}
 		}

@@ -35,14 +35,6 @@ public class ServiceTunnel extends ServiceSection {
 	 * Creates a new instance of ServiceTunnel.
 	 */
 	public ServiceTunnel() {
-		super();
-	}
-
-	/**
-	 * Creates a new instance of ServiceTunnel.
-	 */
-	public ServiceTunnel(boolean auto) {
-		super(auto);
 	}
 
 	@Override
@@ -56,9 +48,6 @@ public class ServiceTunnel extends ServiceSection {
 			break;
 
 		default:
-			if (!isMyOwnerNode(message.getSource())) {
-				return MSG_NOT_PROCESSED;
-			}
 			if (message.getSourceSection() == NodeSection.INPUT) {
 				sendForward(message.getEvent(), message.getData(), 0.0);
 			}

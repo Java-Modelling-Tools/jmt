@@ -15,7 +15,7 @@
 					</xs:complexType>
 				</xs:element>
 				<xs:element ref="node" maxOccurs="unbounded"/>
-				<xs:element name="measure" maxOccurs="unbounded" minOccurs="0">
+				<xs:element name="measure" maxOccurs="unbounded">
 					<xs:complexType>
 						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="alpha" use="required">
@@ -179,7 +179,7 @@
 			<xs:attribute name="maxSimulated" type="jdouble" use="optional"/>
 			<xs:attribute name="polling" type="jdouble" use="optional"/>
 			<xs:attribute name="maxSamples" type="xs:int" use="optional"/>
-			<xs:attribute name="maxEvents" type="xs:long" use="optional"/>
+			<xs:attribute name="maxEvents" type="xs:int" use="optional"/>
 			<xs:attribute name="logPath" type="xs:string" use="optional"/>
 			<xs:attribute name="logDelimiter" type="xs:string" use="optional"/>
 			<xs:attribute name="logReplaceMode" type="xs:int" use="optional"/>

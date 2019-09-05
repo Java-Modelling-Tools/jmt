@@ -31,9 +31,9 @@ public class NetMessage implements Cloneable {
 
 	private byte destinationSection;
 
-	private NetNode Source;
+	private NetNode source;
 
-	private NetNode Destination;
+	private NetNode destination;
 
 	private Object data;
 
@@ -47,8 +47,8 @@ public class NetMessage implements Cloneable {
 		sourceSection = NodeSection.NO_ADDRESS;
 		destinationSection = NodeSection.NO_ADDRESS;
 		time = 0.0;
-		Source = null;
-		Destination = null;
+		source = null;
+		destination = null;
 	}
 
 	/** Sets the event field of the NetMessage.
@@ -112,7 +112,7 @@ public class NetMessage implements Cloneable {
 	 * @return The job of the NetMessage.
 	 */
 	public Job getJob() {
-		if ((event == NetEvent.EVENT_JOB) || (event == NetEvent.EVENT_ACK)) {
+		if (event == NetEvent.EVENT_JOB || event == NetEvent.EVENT_ACK) {
 			return (Job) data;
 		} else {
 			return null;
@@ -137,32 +137,32 @@ public class NetMessage implements Cloneable {
 	 * @param source Value of property source.
 	 */
 	public void setSource(NetNode source) {
-		this.Source = source;
+		this.source = source;
 	}
 
 	/** Gets the Source field of the NetMessage.
 	 * @return Value of property Source.
 	 */
 	public NetNode getSource() {
-		return Source;
+		return source;
 	}
 
 	/** Sets the destination field of the NetMessage.
 	 * @param destination Value of property destination .
 	 */
 	public void setDestination(NetNode destination) {
-		this.Destination = destination;
+		this.destination = destination;
 	}
 
 	/** Gets the Destination field of the NetMessage.
 	 * @return Value of property Destination .
 	 */
 	public NetNode getDestination() {
-		return Destination;
+		return destination;
 	}
 
 	public boolean sentBy(byte section, NetNode node) {
-		return ((sourceSection == section) && (Source == node));
+		return (source == node && sourceSection == section);
 	}
 
 	@Override

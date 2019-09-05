@@ -50,11 +50,11 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It creates a new empirical parameter. It accepts an array of double greater or
-	 * equal to zero and verifies that the sum of all these data is one.
+	 * equal to zero and verifies that the sum of all these data is one or zero.
 	 *
 	 * @param pdf array of <code>double</code> for the new empirical distribution.
 	 * @throws IncorrectDistributionParameterException when any of the provided data
-	 * is less than zero or the sum of all of them is not one.
+	 * is less than zero or the sum of all of them is not one or zero.
 	 *
 	 */
 	public EmpiricalPar(double[] pdf) throws IncorrectDistributionParameterException {
@@ -63,11 +63,11 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It creates a new empirical parameter. It accepts an array of Double greater or
-	 * equal to zero and verifies that the sum of all these data is one.
+	 * equal to zero and verifies that the sum of all these data is one or zero.
 	 *
 	 * @param wpdf array of <code>Double</code> for the new empirical distribution.
 	 * @throws IncorrectDistributionParameterException when any of the provided data
-	 * is less than zero or the sum of all of them is not one.
+	 * is less than zero or the sum of all of them is not one or zero.
 	 *
 	 */
 	public EmpiricalPar(Double[] wpdf) throws IncorrectDistributionParameterException {
@@ -124,7 +124,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 *
 	 * @param pdf array of double containing an existent pdf.
 	 * @throws IncorrectDistributionParameterException if, among the provided data, there is
-	 * a value less than zero or the sum of all of them is not one.
+	 * a value less than zero or the sum of all of them is not one or zero.
 	 *
 	 */
 	public void setPDF(double[] pdf) throws IncorrectDistributionParameterException {
@@ -140,9 +140,9 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 			}
 		}
 
-		if (Math.abs(sumProb - 1.0) > 1e-6) {
-			//total probability must be near 1 (1e-6 error allowed)
-			throw new IncorrectDistributionParameterException("The sum of the probabilities must be one, but the input values sum up to " + sumProb);
+		if (Math.abs(sumProb - 1.0) > 1e-6 && Math.abs(sumProb - 0.0) > 1e-6) {
+			//total probability must be near 1 or 0 (1e-6 error allowed)
+			throw new IncorrectDistributionParameterException("The sum of the probabilities must be one or zero, but the input values sum up to " + sumProb);
 		}
 
 		//sets the cdf with the new probabilities
@@ -165,8 +165,8 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 
 	/**
 	 * It controls if the parameter is correct or not. For the empirical distribution,
-	 * the parameter is correct if the values in the pdf array are greater than zero
-	 * and they sum to one.
+	 * the parameter is correct if the values in the pdf array are equal to or greater
+	 * than zero and they sum up to one or zero.
 	 *
 	 * @return boolean indicating if the parameter is correct or not.
 	 *
@@ -209,7 +209,7 @@ public class EmpiricalPar extends AbstractParameter implements Parameter {
 	 * @param position
 	 * @return value
 	 */
-	Object getValue(int position) {
+	public Object getValue(int position) {
 		return values[position];
 	}
 

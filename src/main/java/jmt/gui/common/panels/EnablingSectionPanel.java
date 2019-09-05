@@ -70,12 +70,21 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String NO_NONZERO_VALUES_NOTICE =
-			"Error: The enabling table contains no non-zero values. The transition will not be "
-			+ "enabled for this mode.";
-	private static final String INVALID_VALUES_NOTICE =
-			"Error: The enabling table contains values no less than those corresponding in the "
-			+ "inhibiting table. The transition will not be enabled for this mode.";
+	private static final String NO_INPUT_PLACES_ERROR =
+			"Error: No input places are defined, but the number of servers is infinite. "
+			+ "The transition will have an infinite enabling degree for this mode.";
+	private static final String NO_INPUT_PLACES_WARNING =
+			"Warning: No input places are defined, and the number of servers is finite. "
+			+ "The transition will have a constant enabling degree for this mode.";
+	private static final String NO_INPUT_CONDITION_ERROR =
+			"Error: No enabling or inhibiting condition is specified, but the number of servers is infinite. "
+			+ "The transition will have an infinite enabling degree for this mode.";
+	private static final String NO_INPUT_CONDITION_WARNING =
+			"Warning: No enabling or inhibiting condition is specified, and the number of servers is finite. "
+			+ "The transition will have a constant enabling degree for this mode.";
+	private static final String INVALID_INPUT_CONDITION_WARNING =
+			"Warning: The enabling condition is invalidated by the inhibiting condition. "
+			+ "The transition will never be enabled for this mode.";
 
 	private boolean isInitComplete;
 
@@ -240,6 +249,7 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 	public void gotFocus() {
 		modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
 		modeTable.setRowSelectionInterval(0, 0);
+		updateNotice();
 	}
 
 	private void stopAllCellEditing() {
@@ -259,38 +269,57 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 	}
 
 	private void updateNotice() {
-		if (stationInKeys.isEmpty() || classKeys.isEmpty()) {
+		if (classKeys.isEmpty()) {
 			noticeText.setText("");
 			noticeText.setForeground(Color.BLACK);
 			return;
 		}
 
-		boolean hasNonzeroValues = false;
-		boolean hasInvalidValues = false;
-		for (Object stationInKey : stationInKeys) {
-			for (Object classKey : classKeys) {
-				int enablingValue = stationData.getEnablingCondition(stationKey, currentModeIndex,
-						stationInKey, classKey).intValue();
-				int inhibitingValue = stationData.getInhibitingCondition(stationKey, currentModeIndex,
-						stationInKey, classKey).intValue();
-				if (enablingValue > 0) {
-					hasNonzeroValues = true;
-				}
-				if (inhibitingValue > 0 && enablingValue >= inhibitingValue) {
-					hasInvalidValues = true;
+		if (stationInKeys.isEmpty()) {
+			int numberOfServers = stationData.getNumberOfServers(stationKey, currentModeIndex).intValue();
+			if (numberOfServers < 1) {
+				noticeText.setText(NO_INPUT_PLACES_ERROR);
+				noticeText.setForeground(Color.RED);
+			} else {
+				noticeText.setText(NO_INPUT_PLACES_WARNING);
+				noticeText.setForeground(Color.BLUE);
+			}
+		} else {
+			boolean hasSpecifiedValues = false;
+			boolean hasInvalidValues = false;
+			for (Object stationInKey : stationInKeys) {
+				for (Object classKey : classKeys) {
+					int enablingValue = stationData.getEnablingCondition(stationKey, currentModeIndex,
+							stationInKey, classKey).intValue();
+					int inhibitingValue = stationData.getInhibitingCondition(stationKey, currentModeIndex,
+							stationInKey, classKey).intValue();
+					if (enablingValue > 0 || inhibitingValue > 0) {
+						hasSpecifiedValues = true;
+					}
+					if (inhibitingValue > 0 && enablingValue >= inhibitingValue) {
+						hasInvalidValues = true;
+					}
 				}
 			}
-		}
 
-		if (!hasNonzeroValues) {
-			noticeText.setText(NO_NONZERO_VALUES_NOTICE);
-			noticeText.setForeground(Color.RED);
-		} else if (hasInvalidValues) {
-			noticeText.setText(INVALID_VALUES_NOTICE);
-			noticeText.setForeground(Color.RED);
-		} else {
-			noticeText.setText("");
-			noticeText.setForeground(Color.BLACK);
+			if (!hasSpecifiedValues) {
+				int numberOfServers = stationData.getNumberOfServers(stationKey, currentModeIndex).intValue();
+				if (numberOfServers < 1) {
+					noticeText.setText(NO_INPUT_CONDITION_ERROR);
+					noticeText.setForeground(Color.RED);
+				} else {
+					noticeText.setText(NO_INPUT_CONDITION_WARNING);
+					noticeText.setForeground(Color.BLUE);
+				}
+			} else {
+				if (hasInvalidValues) {
+					noticeText.setText(INVALID_INPUT_CONDITION_WARNING);
+					noticeText.setForeground(Color.BLUE);
+				} else {
+					noticeText.setText("");
+					noticeText.setForeground(Color.BLACK);
+				}
+			}
 		}
 	}
 

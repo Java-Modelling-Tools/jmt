@@ -47,25 +47,25 @@ public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 	/**
 	 * This strategy selects the resource with the shortest response time for this jobClass
 	 * among the output nodes.
-	 * @param nodes List of the output nodes.
+	 * @param nodeList List of the output nodes.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
-		if (nodes.size() == 0) {
+	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
+		if (nodeList.size() == 0) {
 			return null;
 		}
 
 		// output node candidates... Holds an array of them as on equality of response time they
 		// will be chosen randomly
-		NetNode[] output = new NetNode[nodes.size()];
+		NetNode[] output = new NetNode[nodeList.size()];
 		int length = 0;
 		boolean foundZeroQueue = false;
 		double leastRTime = infinityR;
 		try {
-			for (int i = 0; i < nodes.size(); i++) {
-				NetNode node = nodes.get(i);
+			for (int i = 0; i < nodeList.size(); i++) {
+				NetNode node = nodeList.get(i);
 				int tmpQ = 0;
 				double tmpR = 0.0;
 				// Checks if output is a sink... If class is open, sinks are preferred as have
@@ -108,7 +108,7 @@ public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 			e.printStackTrace();
 			return null;
 		}
-		if (Double.isInfinite(leastRTime)) {
+		if (leastRTime == infinityR) {
 			return null;
 		} else if (length == 1) {
 			return output[0];

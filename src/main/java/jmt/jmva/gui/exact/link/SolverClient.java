@@ -63,7 +63,7 @@ public class SolverClient {
 		this.owner = owner;
 	}
 	
-	public File solve(ExactModel model) throws SolverException, InputDataException, UnsupportedModelException {
+	public File solve(ExactModel model) throws UnsupportedModelException, InputDataException, SolverException {
 		File temp = null;
 
 		try {
@@ -167,8 +167,8 @@ public class SolverClient {
 	protected class SolverThread extends Thread {
 		private SolverDispatcher solver;
 		private File model;
-		private SolverException solverException;
 		private InputDataException inputDataException;
+		private SolverException solverException;
 		private OutOfMemoryError outOfMemoryError;
 
 		/**
@@ -190,11 +190,11 @@ public class SolverClient {
 		public void run() {
 			try {
 				solver.solve(model);
-			} catch (SolverException e) {
-				solverException = e;
-				progress.kill();
 			} catch (InputDataException e) {
 				inputDataException = e;
+				progress.kill();
+			} catch (SolverException e) {
+				solverException = e;
 				progress.kill();
 			} catch (OutOfMemoryError e) {
 				solver = null;
@@ -204,19 +204,19 @@ public class SolverClient {
 		}
 
 		/**
-		 * Tells if a SolverException was thrown
-		 * @return thrown SolverException or null if none was raised
-		 */
-		public SolverException getSolverException() {
-			return solverException;
-		}
-
-		/**
 		 * Tells if an InputDataException was thrown
 		 * @return thrown InputDataException or null if none was raised
 		 */
 		public InputDataException getInputException() {
 			return inputDataException;
+		}
+
+		/**
+		 * Tells if a SolverException was thrown
+		 * @return thrown SolverException or null if none was raised
+		 */
+		public SolverException getSolverException() {
+			return solverException;
 		}
 
 		/**

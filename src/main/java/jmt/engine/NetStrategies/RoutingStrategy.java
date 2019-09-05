@@ -19,12 +19,10 @@
 package jmt.engine.NetStrategies;
 
 import jmt.common.AutoCheck;
-import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeSection;
-import jmt.engine.random.engine.RandomEngine;
 
 /**
  * Use this class to implement a specific routing strategy. A routing
@@ -35,45 +33,26 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public abstract class RoutingStrategy implements AutoCheck {
 
-	private static final int INFINITY = Integer.MAX_VALUE;
-	private RandomEngine random = RandomEngine.makeDefault();
 	/**
 	 * This method should be overridden to implement a specific strategy.
-	 * @param nodes List of the output nodes.
+	 * @param nodeList List of the output nodes.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
-	public abstract NetNode getOutNode(NodeList nodes, JobClass jobClass);
+	public abstract NetNode getOutNode(NodeList nodeList, JobClass jobClass);
 
 	/**
 	 * @author Ashanka
-	 * @param callingSection
-	 * @param jobClass
-	 * @return
-	 *
 	 * Made it normal function instead of abstract as I do not
 	 * want other Strategies to forcefully override this method.
 	 * Currently only LoadDependentRoutingStrategy overrides it.
 	 */
-	public NetNode getOutNode(NodeSection callingSection, JobClass jobClass) {
-		return getOutNode(callingSection.getOwnerNode().getOutputNodes(), jobClass);
+	public NetNode getOutNode(NodeSection section, JobClass jobClass) {
+		return getOutNode(section.getOwnerNode().getOutputNodes(), jobClass);
 	}
 
 	public boolean check() {
 		return true;
 	}
 
-	protected final int getRandomIndexBelow(int max) {
-		return (int) Math.floor(random.raw() * max);
-	}
-
-	protected final int calculateQueueLength(NetNode node, boolean isClosedClass) throws NetException {
-		if (node.isSink()) {
-			return isClosedClass ? INFINITY : 0;
-		} else {
-			int property = NodeSection.PROPERTY_ID_RESIDENT_JOBS;
-			return node.getSection(NodeSection.INPUT).getIntSectionProperty(property)
-					+ node.getSection(NodeSection.SERVICE).getIntSectionProperty(property);
-		}
-	}
 }

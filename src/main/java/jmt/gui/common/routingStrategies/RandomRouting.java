@@ -30,8 +30,7 @@ import java.util.Map;
 public class RandomRouting extends RoutingStrategy {
 
 	public RandomRouting() {
-		description = "Jobs are routed randomly to stations connected to the current one. " 
-				+ "Jobs in closed classes will not be routed to sinks. "
+		description = "Jobs are routed randomly to stations connected to the current one. "
 				+ "All routes have the same probability to be selected.";
 	}
 

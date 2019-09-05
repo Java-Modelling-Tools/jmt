@@ -18,15 +18,16 @@
 
 package jmt.engine.NodeSections;
 
-import java.util.Arrays;
-
 import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
 import jmt.engine.random.engine.RandomEngine;
 
 /**
@@ -36,14 +37,12 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class ClassSwitch extends ServiceSection {
 
-	private int switchedJobs;
-	private int[] switchedJobsPerClass;
-	private RandomEngine engine;
-
 	private Float[][] matrix;
 
+	private JobInfoList nodeJobsList;
+	private RandomEngine randomEngine;
+
 	public ClassSwitch(Object[] matrix) {
-		super();
 		this.matrix = new Float[matrix.length][matrix.length];
 		for (int i = 0; i < matrix.length; i++) {
 			Float[] row = (Float[]) matrix[i];
@@ -51,48 +50,43 @@ public class ClassSwitch extends ServiceSection {
 				this.matrix[i][j] = row[j];
 			}
 		}
-		switchedJobs = 0;
-		switchedJobsPerClass = new int[matrix.length];
-		Arrays.fill(switchedJobsPerClass, 0);
-		engine = RandomEngine.makeDefault();
+	}
+
+	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+		nodeJobsList = node.getJobInfoList();
+		randomEngine = RandomEngine.makeDefault();
 	}
 
 	@Override
 	protected int process(NetMessage message) throws NetException {
-		Job job;
-		job = message.getJob();
-
 		switch (message.getEvent()) {
 
 		case NetEvent.EVENT_START:
 			break;
 
-		case NetEvent.EVENT_ACK:
-			sendBackward(message.getEvent(), message.getData(), 0.0);
+		case NetEvent.EVENT_JOB:
+			Job job = message.getJob();
+			JobClass inClass = job.getJobClass();
+			int jobClassIn = inClass.getId();
+			int jobClassOut = chooseOutClass(matrix[jobClassIn]);
+			JobClass outClass = getJobClasses().get(jobClassOut);
+			job.setJobClass(outClass);
+			JobInfo jobInfo = jobsList.lookFor(job);
+			jobsList.getInternalJobInfoList(inClass).remove(jobInfo);
+			jobsList.getInternalJobInfoList(outClass).add(jobInfo);
+			JobInfo nodeJobInfo = nodeJobsList.lookFor(job);
+			nodeJobsList.getInternalJobInfoList(inClass).remove(nodeJobInfo);
+			nodeJobsList.getInternalJobInfoList(outClass).add(nodeJobInfo);
+			if (!(job instanceof ForkJob)) {
+				GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
+				global.performJobClassSwitch(inClass, outClass);
+			}
+			sendForward(NetEvent.EVENT_JOB, job, 0.0);
+			sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 			break;
 
-		case NetEvent.EVENT_JOB:
-			int jobClassIn = message.getJob().getJobClass().getId();
-			int jobClassOut = chooseOutClass(matrix[jobClassIn]);
-			//Find out class by using the matrix
-			JobClass outClass = getJobClasses().get(jobClassOut);
-
-			//Update counters
-			if (!job.hasBeenClass(outClass)) {
-				switchedJobs++;
-				switchedJobsPerClass[jobClassOut]++;
-			}
-
-			sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
-
-			//remove job from node list
-			JobInfoList local = getOwnerNode().getJobInfoList();
-
-			GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
-			global.performJobClassSwitch(job, outClass);
-			sendForward(message.getEvent(), job, 0.0);
-
-			local.remove(local.lookFor(job));
+		case NetEvent.EVENT_ACK:
 			break;
 
 		case NetEvent.EVENT_STOP:
@@ -123,30 +117,13 @@ public class ClassSwitch extends ServiceSection {
 			sum += row[i];
 		}
 
-		random = (float) (engine.raw() * sum);
+		random = (float) (randomEngine.raw() * sum);
 		for (i = 0; i < row.length; i++) {
 			random -= row[i];
 			if (random <= 0)
 				return i;
 		}
 		return i-1;
-	}
-
-	/**
-	 * Gets the total number of switched jobs.
-	 * @return the total number of switched jobs.
-	 */
-	public int getSwitchedJobs() {
-		return switchedJobs;
-	}
-
-	/**
-	 * Gets the number of switched jobs for the specified class.
-	 * @param classIndex the index of the job class.
-	 * @return the number of switched jobs for the specified class.
-	 */
-	public int getSwitchedJobsPerClass(int classIndex) {
-		return switchedJobsPerClass[classIndex];
 	}
 
 }

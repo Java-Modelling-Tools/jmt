@@ -34,7 +34,7 @@ public class JSIMwizGuiTest {
 
 	/**
 	 * Checks that, on the main JMT window, the user can press the "JSIMwiz"
-	 * button, and that this will open a new window of type @JSIMMain
+	 * button, and that this will open a new window of type @JSIMWizMain
 	 * (which is the JSIMwiz frame).
 	 */
 	@Test

@@ -227,27 +227,26 @@ public class Utils {
 		return state;
 	}
 
-	public static boolean pprod(int[] n, int[] N){
-        int L = N.length;
-        int sum = 0;
+	public static boolean pprod(int[] n, int[] N) {
+		int L = N.length;
 
-        for(int i=0; i<L; i++){
-            if(n[i]==N[i])
-                sum++;
-        }
-        if(sum==L)
-            return false;
+		int sum = 0;
+		for(int i=0; i<L; i++)
+			if(n[i]==N[i])
+				sum++;
+		if (sum==L)
+			return false;
 
-        int s = L-1;
-        while( s>-1 && n[s]==N[s] ){
-            n[s] = 0;
-            s--;
-        }
-        if(s==-1)
-            return false;
-        n[s]++;
-        return true;
-    }
+		int s = L-1;
+		while (s>-1 && n[s]==N[s]) {
+			n[s] = 0;
+			s--;
+		}
+		if(s==-1)
+			return false;
+		n[s]++;
+		return true;
+	}
 
 	/*===================== static tensor operator functions ===================== */
 	// See report (Ong 2018) for definitions

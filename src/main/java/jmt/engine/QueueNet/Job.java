@@ -18,7 +18,7 @@
 
 package jmt.engine.QueueNet;
 
-import java.util.Arrays;
+import org.apache.commons.math3.util.Pair;
 
 /**
  *	This class implements a generic job of a queue network.
@@ -33,13 +33,11 @@ public class Job implements Cloneable {
 
 	//class of this job
 	private JobClass jobClass;
-	//bitwise data, if the job have ever been as job class
-	private boolean[] classesBitwise;
 	//used to compute system response time
 	protected double systemEnteringTime;
 
 	/*
-	This fields are used with blocking region.
+	This field is used with blocking region.
 	The presence of an input station, in fact, modifies the route of some jobs:
 	instead of being processed directly by the destination node, they are first
 	redirected to the region input station (which check the capability of the
@@ -47,140 +45,135 @@ public class Job implements Cloneable {
 	informations contained in this object.
 	 */
 
-	//true if this job has been redirected
-	private boolean redirected = false;
-	// the original destination of the job message
+	//the original destination of the job message
 	private NetNode originalDestinationNode = null;
 
 	private double serviceTime = -1.0;
 
-	/** Creates a new instance of Job.
-	 *  @param jobClass Reference to the class of the job.
+	protected GlobalJobInfoList globalJobInfoList = null;
+	protected Pair<NetNode, JobClass> lastVisitedPair = null;
+
+	/**
+	 * Creates a new instance of Job.
+	 * @param jobClass Reference to the class of the job.
+	 * @param netJobsList Reference to the global jobInfoList.
 	 */
-	public Job(JobClass jobClass, int jobClassNum) {
-		this.jobClass = jobClass;
-		this.classesBitwise = new boolean[jobClassNum];
-		// Job Id is used only for logging
+	public Job(JobClass jobClass, GlobalJobInfoList globalJobInfoList) {
 		this.Id = counter++;
-		resetSystemEnteringTime();
-	}
-
-	/** Gets the class of this job.
-	 * @return Value of property Class.
-	 */
-	public JobClass getJobClass() {
-		return jobClass;
-	}
-
-	/** Gets job id: job id is used mainly for logging.
-	 * @return Job Id.
-	 */
-	public int getId() {
-		return Id;
-	}
-
-	public void resetSystemEnteringTime() {
-		systemEnteringTime = NetSystem.getTime();
-		resetClass();
-	}
-
-	public double getSystemEnteringTime() {
-		return systemEnteringTime;
-	}
-
-	public void setSystemEnteringTime(double time) {
-		systemEnteringTime = time;
+		this.jobClass = jobClass;
+		this.globalJobInfoList = globalJobInfoList;
+		reset();
 	}
 
 	/**
-	 * Tells whether this job has been redirected (used for blocking regions)
-	 * @return true if the job has been redirected
+	 * Resets the counter of Job.
 	 */
-	public boolean isRedirected() {
-		return redirected;
-	}
-
-	/**
-	 * Sets <tt>redirected</tt> attribute
-	 * @param redirected true to mark the job as redirected
-	 */
-	public void setRedirected(boolean redirected) {
-		this.redirected = redirected;
-	}
-
-	/**
-	 * Gets the destination node of this redirected job
-	 * @return the destination node, if this job has been redirected, null otherwise
-	 */
-	public NetNode getOriginalDestinationNode() {
-		if (redirected) {
-			return originalDestinationNode;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Sets the destination node of a redirected job and sets <tt>redirected</tt> to true
-	 * @param originalDestinationNode the destination node
-	 */
-	public void setOriginalDestinationNode(NetNode originalDestinationNode) {
-		this.originalDestinationNode = originalDestinationNode;
-		redirected = true;
-	}
-
 	public static void resetCounter() {
 		counter = 0;
 	}
 
 	/**
-	 * Setter for field JobClass
-	 * @param newClass the new value of JobClass
+	 * Gets the ID of this job.
+	 * @return the ID of this job.
 	 */
-	public void setClass(JobClass newClass) {
-		jobClass = newClass;
-		classesBitwise[newClass.getId()] = true;
-	}
-
-	/** Adds a class to job history
-	 * @param newClass the JobClass to add
-	 */
-	public void addClass(JobClass newClass) {
-		classesBitwise[newClass.getId()] = true;
+	public int getId() {
+		return Id;
 	}
 
 	/**
-	 * Reset bitwise 
+	 * Gets the class of this job.
+	 * @return the class of this job.
 	 */
-	private void resetClass() {
-		Arrays.fill(classesBitwise, false);
-		classesBitwise[jobClass.getId()] = true;
+	public JobClass getJobClass() {
+		return jobClass;
 	}
 
-	/** 
-	 * If the job have ever been as jobClass
-	 * @param jobClass the class of the job if the job has ever been the class
-	 * @return true if the job currently of given class or previously in this class
+	/**
+	 * Sets the class of this job.
+	 * @param jobClass the class of this job.
 	 */
-	public boolean hasBeenClass(JobClass jobClass) {
-		return classesBitwise[jobClass.getId()];
+	public void setJobClass(JobClass jobClass) {
+		this.jobClass = jobClass;
 	}
 
-	/** 
-	 * If the job have ever been as jobClass id
-	 * @param jobClassId the class of the job if the job has ever been the class
-	 * @return true if the job currently of given class or previously in this class
+	/**
+	 * Resets this job.
 	 */
-	public boolean hasBeenClass(int jobClassId) {
-		return classesBitwise[jobClassId];
+	public void reset() {
+		systemEnteringTime = NetSystem.getTime();
 	}
 
+	/**
+	 * Gets the system entering time of this job.
+	 * @return the system entering time of this job.
+	 */
+	public double getSystemEnteringTime() {
+		return systemEnteringTime;
+	}
+
+	/**
+	 * Sets the system entering time of this job.
+	 * @param time the system entering time of this job.
+	 */
+	public void setSystemEnteringTime(double time) {
+		this.systemEnteringTime = time;
+	}
+
+	/**
+	 * Gets the destination node of this redirected job.
+	 * @return the destination node of this redirected job.
+	 */
+	public NetNode getOriginalDestinationNode() {
+		return originalDestinationNode;
+	}
+
+	/**
+	 * Sets the destination node of this redirected job.
+	 * @param originalDestinationNode the destination node of this redirected job.
+	 */
+	public void setOriginalDestinationNode(NetNode originalDestinationNode) {
+		this.originalDestinationNode = originalDestinationNode;
+	}
+
+	/**
+	 * Gets the service time of this job.
+	 * @return the service time of this job.
+	 */
 	public double getServiceTime() {
 		return serviceTime;
 	}
 
+	/**
+	 * Sets the service time of this job.
+	 * @param time the service time of this job.
+	 */
 	public void setServiceTime(double time) {
-		serviceTime = time;
+		this.serviceTime = time;
+	}
+
+	/**
+	 * Gets the last pair visited by this job.
+	 * @return the last pair visited by this job.
+	 */
+	public Pair<NetNode, JobClass> getLastVisitedPair() {
+		return lastVisitedPair;
+	}
+
+	/**
+	 * Sets the last pair visited by this job.
+	 * @param pair the last pair visited by this job.
+	 */
+	public void setLastVisitedPair(Pair<NetNode, JobClass> pair) {
+		this.lastVisitedPair = pair;
+	}
+
+	/**
+	 * Adds a pair to the visit path of this job.
+	 * @param pair the pair to be added to the visit path.
+	 */
+	public void AddToVisitPath(Pair<NetNode, JobClass> pair) {
+		globalJobInfoList.updateChainGraph(lastVisitedPair, pair);
+		lastVisitedPair = pair;
 	}
 
 }

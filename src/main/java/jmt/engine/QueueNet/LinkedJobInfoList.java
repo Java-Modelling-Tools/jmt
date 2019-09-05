@@ -443,8 +443,8 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected void doRemove(JobInfo jobInfo, int position, int perClassPosition) {
 		int c = jobInfo.getJob().getJobClass().getId();
 		updateQueueLength(jobInfo);
-		updateResidenceTime(jobInfo);
 		updateResponseTime(jobInfo);
+		updateResidenceTime(jobInfo);
 		updateUtilization(jobInfo);
 		updateUtilizationJoin(jobInfo);
 		updateThroughput(jobInfo);
@@ -638,10 +638,12 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			Measure m = residenceTimePerClass[c];
 			if (m != null) {
+				m.updateSampleJob(jobInfo.getJob());
 				m.update(NetSystem.getTime() - jobInfo.getEnteringTime(), 1.0);
 			}
 		}
 		if (residenceTime != null) {
+			residenceTime.updateSampleJob(jobInfo.getJob());
 			residenceTime.update(NetSystem.getTime() - jobInfo.getEnteringTime(), 1.0);
 		}
 	}
@@ -710,7 +712,7 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	public void updateResponseTimePerSink(JobInfo jobInfo) {
+	protected void updateResponseTimePerSink(JobInfo jobInfo) {
 		if (responseTimePerSinkPerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -724,7 +726,7 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
-	public void updateThroughputPerSink(JobInfo jobInfo) {
+	protected void updateThroughputPerSink(JobInfo jobInfo) {
 		if (throughputPerSinkPerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();

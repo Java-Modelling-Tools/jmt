@@ -21,14 +21,6 @@ package jmt.engine.QueueNet;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-import jmt.common.exception.NetException;
-import jmt.engine.NodeSections.BlockingQueue;
-import jmt.engine.NodeSections.ClassSwitch;
-import jmt.engine.NodeSections.Enabling;
-import jmt.engine.NodeSections.Firing;
-import jmt.engine.NodeSections.Fork;
-import jmt.engine.NodeSections.Queue;
-import jmt.engine.NodeSections.Storage;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
 
@@ -192,34 +184,13 @@ public class QueueNetwork {
 	public void addMeasure(Measure measure) {
 		// If GlobalJobInfoList is not set, creates it
 		// (at this point all classes should be declared)
-		csExists();
 		if (jobInfoList == null) {
-			jobInfoList = new GlobalJobInfoList(jobClasses.size(), csExists());
+			jobInfoList = new GlobalJobInfoList(jobClasses.size());
 		}
 
 		//sets the reference to network
 		measure.setNetwork(this);
 		measures.add(measure);
-	}
-
-	private boolean csExists() {
-		boolean csExists = false;
-		ListIterator<NetNode> it = nodes.listIterator();
-		while (it.hasNext()) {
-			NetNode node = it.next();
-			NodeSection serviceSection = null;
-			try {
-				serviceSection = node.getSection(NodeSection.SERVICE);
-			} catch (NetException ne) {
-				// NEVER ENTERS
-				ne.printStackTrace();
-			}
-			if (serviceSection != null && serviceSection instanceof ClassSwitch) {
-				csExists = true;
-				break;
-			}
-		}
-		return csExists;
 	}
 
 	/**
@@ -282,218 +253,6 @@ public class QueueNetwork {
 			state = STATE_FINAL;
 			return STATE_FINAL;
 		}
-	}
-
-	/**
-	 * Get the total number of dropped jobs in the whole network
-	 * @return the total number of dropped jobs in the whole network
-	 */
-	public int getDroppedJobs() {
-		//dropped jobs
-		int dropped = 0;
-		for (int i = 0; i < nodes.size(); i++) {
-			NetNode node = nodes.get(i);
-			NodeSection section;
-			try {
-				section = node.getSection(NodeSection.INPUT);
-				if (section instanceof Queue) {
-					dropped += ((Queue) section).getDroppedJobs();
-				} else if (section instanceof Storage) {
-					dropped += ((Storage) section).getDroppedJobs();
-				} else if (section instanceof BlockingQueue) {
-					dropped += ((BlockingQueue) section).getDroppedJobs();
-				}
-
-				section = node.getSection(NodeSection.OUTPUT);
-				if (section instanceof Fork) {
-					dropped += ((Fork) section).getDroppedJobs();
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-		return dropped;
-	}
-
-	/**
-	 * Get the total number of dropped jobs in the whole network for the specified class
-	 * @param jobClass the job class
-	 * @return the total number of dropped jobs in the whole network for the specified class
-	 */
-	public int getDroppedJobs(JobClass jobClass) {
-		//dropped jobs
-		int dropped = 0;
-		int classIndex = jobClass.getId();
-		for (int i = 0; i < nodes.size(); i++) {
-			NetNode node = nodes.get(i);
-			NodeSection section;
-			try {
-				section = node.getSection(NodeSection.INPUT);
-				if (section instanceof Queue) {
-					dropped += ((Queue) section).getDroppedJobsPerClass(classIndex);
-				} else if (section instanceof Storage) {
-					dropped += ((Storage) section).getDroppedJobsPerClass(classIndex);
-				} else if (section instanceof BlockingQueue) {
-					dropped += ((BlockingQueue) section).getDroppedJobsPerClass(classIndex);
-				}
-
-				section = node.getSection(NodeSection.OUTPUT);
-				if (section instanceof Fork) {
-					dropped += ((Fork) section).getDroppedJobsPerClass(classIndex);
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-		return dropped;
-	}
-
-	/**
-	 * Gets the total number of switched jobs in the whole network
-	 * @param jobClass the job class
-	 * @return the total number of switched jobs in the whole network
-	 */
-	public int getSwitchedJobs() {
-		//switched jobs
-		int switched = 0;
-		for (int i = 0; i < nodes.size(); i++) {
-			NetNode node = nodes.get(i);
-			NodeSection section;
-			try {
-				section = node.getSection(NodeSection.SERVICE);
-				if (section instanceof ClassSwitch) {
-					switched += ((ClassSwitch) section).getSwitchedJobs();
-				}
-
-				section = node.getSection(NodeSection.OUTPUT);
-				if (section instanceof Fork) {
-					switched += ((Fork) section).getSwitchedJobs();
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-		return switched;
-	}
-
-	/**
-	 * Gets the total number of switched jobs in the whole network for the specified class
-	 * @param jobClass the job class
-	 * @return the total number of switched jobs in the whole network for the specified class
-	 */
-	public int getSwitchedJobs(JobClass jobClass) {
-		//switched jobs
-		int switched = 0;
-		for (int i = 0; i < nodes.size(); i++) {
-			NetNode node = nodes.get(i);
-			NodeSection section;
-			try {
-				section = node.getSection(NodeSection.SERVICE);
-				if (section instanceof ClassSwitch) {
-					switched += ((ClassSwitch) section).getSwitchedJobsPerClass(jobClass.getId());
-				}
-
-				section = node.getSection(NodeSection.OUTPUT);
-				if (section instanceof Fork) {
-					switched += ((Fork) section).getSwitchedJobsPerClass(jobClass.getId());
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-		return switched;
-	}
-
-	/**
-	 * Gets the total number of consumed jobs in the whole network
-	 * @param jobClass the job class
-	 * @return the total number of consumed jobs in the whole network
-	 */
-	public int getConsumedJobs() {
-		//consumed jobs
-		int consumed = 0;
-		for (int i = 0; i < nodes.size(); i++) {
-			NetNode node = nodes.get(i);
-			NodeSection section;
-			try {
-				section = node.getSection(NodeSection.INPUT);
-				if (section instanceof Enabling) {
-					consumed += ((Enabling) section).getConsumedJobs();
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-		return consumed;
-	}
-
-	/**
-	 * Gets the total number of consumed jobs in the whole network for the specified class
-	 * @param jobClass the job class
-	 * @return the total number of consumed jobs in the whole network for the specified class
-	 */
-	public int getConsumedJobs(JobClass jobClass) {
-		//consumed jobs
-		int consumed = 0;
-		for (int i = 0; i < nodes.size(); i++) {
-			NetNode node = nodes.get(i);
-			NodeSection section;
-			try {
-				section = node.getSection(NodeSection.INPUT);
-				if (section instanceof Enabling) {
-					consumed += ((Enabling) section).getConsumedJobsPerClass(jobClass.getId());
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-		return consumed;
-	}
-
-	/**
-	 * Gets the total number of produced jobs in the whole network
-	 * @param jobClass the job class
-	 * @return the total number of produced jobs in the whole network
-	 */
-	public int getProducedJobs() {
-		//produced jobs
-		int produced = 0;
-		for (int i = 0; i < nodes.size(); i++) {
-			NetNode node = nodes.get(i);
-			NodeSection section;
-			try {
-				section = node.getSection(NodeSection.OUTPUT);
-				if (section instanceof Firing) {
-					produced += ((Firing) section).getProducedJobs();
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-		return produced;
-	}
-
-	/**
-	 * Gets the total number of produced jobs in the whole network for the specified class
-	 * @param jobClass the job class
-	 * @return the total number of produced jobs in the whole network for the specified class
-	 */
-	public int getProducedJobs(JobClass jobClass) {
-		//produced jobs
-		int produced = 0;
-		for (int i = 0; i < nodes.size(); i++) {
-			NetNode node = nodes.get(i);
-			NodeSection section;
-			try {
-				section = node.getSection(NodeSection.OUTPUT);
-				if (section instanceof Firing) {
-					produced += ((Firing) section).getProducedJobsPerClass(jobClass.getId());
-				}
-			} catch (NetException ne) {
-				continue;
-			}
-		}
-		return produced;
 	}
 
 	/**

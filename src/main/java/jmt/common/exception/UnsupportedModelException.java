@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2018, Imperial College London
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ package jmt.common.exception;
  * - a model has not enough processing capacity (saturation
  * may be due to the arrival rates of open classes).
  * <br>
- * - one or more popolations are equal to 0
+ * - the population of one or more closed classes is equal to 0.
  */
 public class UnsupportedModelException extends Exception {
 

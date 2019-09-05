@@ -50,7 +50,7 @@ public interface ResultsConstants {
 	public static final String NO_SAMPLES_TEXT = "Simulator cannot compute this measure as no samples were received";
 	public static final String ALL_CLASSES = "-- All --";
 	public static final String ALL_MODES = "-- All --";
-	public static final String ALL_STATIONS = "System";
+	public static final String ALL_STATIONS = "Network";
 	public static final String FOR_GREEN_GRAPH = "Double click on this graph to open it in a new windows.\nRight-click to save it.\nClick on green bars to see the simulation time, "
 			+ "the sample average (blue), and the sample values (green).\n";
 	/**HTML formats for panels descriptions*/
@@ -77,8 +77,8 @@ public interface ResultsConstants {
 
 	public static final String DESCRIPTION_UTILIZATION = HTML_START + HTML_FONT_TITLE + "Utilization" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average utilization for each selected class at each selected station. The utilization of a queueing station with more than one server is the "
-			+ "average utilization of each server. The utilization of a delay station is the average number of customers in the station. "
-			+ "(it may be greater than 1)" + HTML_FONT_NOR_END + HTML_END;
+			+ "average utilization of each server. The utilization of a delay station is the average number of customers in the station. (both may be greater than 1)"
+			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average throughput for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
@@ -90,9 +90,7 @@ public interface ResultsConstants {
 			+ "Average number of customers in the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "System Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average response time of the entire system for each selected class."
-			+ "<br><b>WARNING:</b> With class switching, the system response time per class refers to the mean time that a job spends being of that class in the system."
-			+ HTML_FONT_NOR_END + HTML_END;
+			+ "Average response time of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "System Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average throughput of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;

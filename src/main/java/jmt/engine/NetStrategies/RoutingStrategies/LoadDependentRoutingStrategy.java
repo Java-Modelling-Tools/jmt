@@ -42,13 +42,14 @@ public class LoadDependentRoutingStrategy extends RoutingStrategy {
 
 	/**
 	 * This method should be overridden to implement a specific strategy.
-	 * @param nodes List of the output nodes.
+	 * @param nodeList List of the output nodes.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
-		return nodes.get(1);
+	@Deprecated
+	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
+		return null;
 	}
 
 	@Override

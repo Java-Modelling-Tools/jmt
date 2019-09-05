@@ -31,7 +31,6 @@ import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RandomRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
-import jmt.gui.common.routingStrategies.DisabledRouting;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
@@ -100,12 +99,12 @@ public class ModelConverter {
 
 			if (type == ExactConstants.CLASS_CLOSED) {
 				// Closed class
-				key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, new Integer(0), new Integer((int) data), null);
+				key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, Defaults.getAsInteger("classPriority"), new Integer((int) data), null);
 			} else {
 				// Open class
 				Exponential exp = new Exponential();
 				exp.setMean(1 / data);
-				key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, new Integer(0), null, exp);
+				key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, Defaults.getAsInteger("classPriority"), null, exp);
 			}
 			classKeys[i] = key;
 		}
@@ -119,8 +118,8 @@ public class ModelConverter {
 			output.setConnected(refRouterKey, routerKey, true);
 			output.setConnected(routerKey, refRouterKey, true);
 			// Gives warning on refStation
-			res.add("A special node, called \"RefStation\" was added in order to compute correctly the System Response Time and System Throughput of closed classes."
-					+ " Its presence is fundamental to compute correctly number of visits at each station for closed classes.");
+			res.add("A special node, called RefStation, is added to compute the system response times and throughputs of closed classes. "
+					+ "Its presence is fundamental to compute the number of visits at each station for closed classes.");
 		}
 
 		if (input.isOpen() || input.isMixed()) {
@@ -282,7 +281,6 @@ public class ModelConverter {
 				stationNum++;
 				stationKeys.add(key);
 			}
-			// Show here warning if a station type is discarded (fork and join)
 		}
 
 		// Resizes output data structure
@@ -308,8 +306,8 @@ public class ModelConverter {
 					classData[i] = 1.0 / d.getMean();
 				} else {
 					classData[i] = 1.0;
-					res.add(input.getClassName(key) + " arrival distribution does not have a valid mean value."
-							+ " Arrival rate for that class was set to default value 1.");
+					res.add("Interarrival time distribution for " + input.getClassName(key) + " does not have a valid mean value. "
+							+ "Arrival rate is set to default value 1.");
 				}
 			}
 		}
@@ -351,8 +349,8 @@ public class ModelConverter {
 						serviceTimes[st][cl][0] = d.getMean();
 					} else {
 						serviceTimes[st][cl][0] = 1;
-						res.add(output.getStationNames()[st] + " service time distribution for " + output.getClassNames()[cl]
-								+ " does not have a valid mean value. Service time was set to default value 1.");
+						res.add("Service time distribution for " + output.getClassNames()[cl] + " at " + output.getStationNames()[st]
+								+ " does not have a valid mean value. Service time is set to default value 1.");
 					}
 				} else if (serv instanceof ZeroStrategy) {
 					serviceTimes[st][cl] = new double[1];
@@ -372,8 +370,8 @@ public class ModelConverter {
 					} else {
 						serviceTimes[st][cl] = new double[1]; // This is not load dependent
 						serviceTimes[st][cl][0] = lds.getMeanValue(1);
-						res.add("LD stations are supported only if model is closed and single class. " + stationNames[st]
-								+ " was converted to a LI station.");
+						res.add("LD stations are supported only if the model has a single closed class. "
+								+ stationNames[st] + " is converted to a LI station.");
 					}
 				}
 			}
@@ -404,11 +402,11 @@ public class ModelConverter {
 					Vector<Object> sources = input.getStationKeysSource();
 					if (sources.size() > 0) {
 						refStat = sources.get(0);
-						res.add("Reference station for " + output.getClassNames()[cl] + " was not valid. " + input.getStationName(refStat)
-								+ " was chosen.");
+						res.add("Reference station for " + output.getClassNames()[cl] + " is not valid. "
+								+ input.getStationName(refStat) + " is chosen instead.");
 					} else {
-						res.add("Reference station for " + output.getClassNames()[cl] + " was not valid. " + output.getStationNames()[0]
-								+ " was chosen.");
+						res.add("Reference station for " + output.getClassNames()[cl] + " is not valid. "
+								+ output.getStationNames()[0] + " is chosen instead.");
 					}
 				}
 
@@ -426,7 +424,8 @@ public class ModelConverter {
 					vis = V.getColumnPackedCopy();
 				} catch (Exception e) {
 					// Matrix is singular
-					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as network topology was badly specified.");
+					res.add("Cannot compute the number of visits for " + output.getClassNames()[cl]
+							+ " as the topology of the model is badly specified.");
 				}
 			} else {
 				// Closed class, system is undefined, so sets visits to reference station to
@@ -434,8 +433,8 @@ public class ModelConverter {
 				Object refStat = input.getClassRefStation(classKeys.get(cl));
 				if (refStat == null) {
 					refStat = stations.get(0);
-					res.add("Reference station for " + output.getClassNames()[cl] + " was not valid. " + input.getStationName(refStat)
-							+ " was chosen.");
+					res.add("Reference station for " + output.getClassNames()[cl] + " is not valid. "
+							+ input.getStationName(refStat) + " is chosen instead.");
 				}
 
 				// Sets visits to reference station (if allowed) to 1
@@ -454,7 +453,8 @@ public class ModelConverter {
 					vis = V.getColumnPackedCopy();
 				} catch (Exception e) {
 					// Matrix is singular
-					res.add("Cannot compute correctly visits for " + output.getClassNames()[cl] + " as network topology was badly specified.");
+					res.add("Cannot compute the number of visits for " + output.getClassNames()[cl]
+							+ " as the topology of the model is badly specified.");
 				}
 			}
 
@@ -484,7 +484,19 @@ public class ModelConverter {
 	private static double[] getRoutingProbability(Object stationKey, Object classKey, CommonModel model, List<Object> stations, List<String> warnings) {
 		double[] p = new double[stations.size()];
 		RoutingStrategy strategy = (RoutingStrategy) model.getRoutingStrategy(stationKey, classKey);
-		if (strategy instanceof ProbabilityRouting && !model.getStationType(stationKey).equals(CommonConstants.STATION_TYPE_FORK)) {
+		String type = model.getStationType(stationKey);
+		if (type.equals(CommonConstants.STATION_TYPE_FORK)
+				|| type.equals(CommonConstants.STATION_TYPE_JOIN)
+				|| type.equals(CommonConstants.STATION_TYPE_LOGGER)
+				|| type.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
+				|| type.equals(CommonConstants.STATION_TYPE_SEMAPHORE)
+				|| type.equals(CommonConstants.STATION_TYPE_SCALER)
+				|| type.equals(CommonConstants.STATION_TYPE_PLACE)
+				|| type.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+			warnings.add("Station type of " + model.getStationName(stationKey) + " is " + type
+					+ ", which is considered as Router in JMVA.");
+		}
+		if (strategy instanceof ProbabilityRouting) {
 			Map<Object, Double> routingMap = strategy.getValues();
 			Iterator<Object> it = routingMap.keySet().iterator();
 			while (it.hasNext()) {
@@ -494,11 +506,15 @@ public class ModelConverter {
 				}
 			}
 		} else {
-			if (model.getStationType(stationKey).equals(CommonConstants.STATION_TYPE_FORK)) {
-				warnings.add("Fork-Join are not supported in JMVA. They are considered as routers.");
-			} else if (!(strategy instanceof RandomRouting)) {
-				warnings.add("\"" + strategy.getName() + "\" routing strategy in " + model.getClassName(classKey) + " for "
-						+ model.getStationName(stationKey) + " is not allowed. This was considered as RandomRouting.");
+			if (type.equals(CommonConstants.STATION_TYPE_FORK)
+					|| type.equals(CommonConstants.STATION_TYPE_SCALER)
+					|| type.equals(CommonConstants.STATION_TYPE_PLACE)
+					|| type.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+				strategy = new RandomRouting();
+			}
+			if (!(strategy instanceof RandomRouting)) {
+				warnings.add("Routing strategy for " + model.getClassName(classKey) + " at " + model.getStationName(stationKey) + " is " + strategy.getName()
+						+ ", which is considered as Random in JMVA.");
 			}
 
 			Vector<Object> links = model.getForwardConnections(stationKey);

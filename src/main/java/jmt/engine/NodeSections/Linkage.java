@@ -53,7 +53,6 @@ public class Linkage extends OutputSection {
 	 * Creates a new instance of the linkage section.
 	 */
 	public Linkage() {
-		super(true);
 		borderRouterTurnOFF();
 	}
 
@@ -100,7 +99,7 @@ public class Linkage extends OutputSection {
 
 		case NetEvent.EVENT_JOB:
 		{
-			Job job = message.getJob();
+			Job job = (Job) data;
 			send(job, 0.0, requestSource);
 			if (borderRouterON && !myRegion.belongsToRegion(requestSource)) {
 				myRegion.decreaseOccupation(job.getJobClass());
@@ -110,7 +109,7 @@ public class Linkage extends OutputSection {
 		}
 
 		case NetEvent.EVENT_ACK:
-			break;
+			return MSG_NOT_PROCESSED;
 
 		case NetEvent.EVENT_JOB_CHANGE:
 		{

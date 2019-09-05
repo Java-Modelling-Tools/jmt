@@ -1,4 +1,4 @@
-package jmt.engine.random;
+package jmt.engine.NetStrategies.RoutingStrategies;
 
 public class WeightEntry {
 

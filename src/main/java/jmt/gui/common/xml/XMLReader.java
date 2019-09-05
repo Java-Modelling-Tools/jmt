@@ -59,7 +59,11 @@ import jmt.gui.common.forkStrategies.ProbabilitiesFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.PartialJoin;
-import jmt.gui.common.routingStrategies.*;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.PowerOfKRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
 import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
@@ -74,16 +78,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.*;
-import java.util.Map.Entry;
-
-import static java.lang.Boolean.*;
 /**
  * <p>Title: XML Reader</p>
  * <p>Description: Reads model information from an XML file. This class provides
@@ -101,8 +95,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static HashMap<Object, String> refStations; // Data structure used to hold classes' reference stations
 	protected static HashMap<Object, List<String>> modeNameLists; // Data structure used to hold transitions' mode name lists
 	protected static HashMap<Object[], Map<String, Double>> empiricalRouting;
+	protected static HashMap<Object[], Map<String, Double>> empiricalLDRouting;
 	protected static HashMap<Object[], Map<String, Integer>> wrrRouting;
-  protected static HashMap<Object[], Map<String, Double>> empiricalLDRouting;
 	protected static HashMap<Object[], Map<String, OutPath>> empiricalFork;
 	protected static HashMap<Object[], Map<String, Double>> combFork;
 	protected static HashMap<Object[], Integer> enablingConditionMap;
@@ -113,7 +107,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	private static final jmt.engine.log.JSimLogger debugLog = jmt.engine.log.JSimLogger.getLogger(JSimLogger.STD_LOGGER);
 
 	/**defines matching between engine representation and gui names for drop rules.*/
-	protected static final Map<String,String> DROP_RULES_MAPPING;
+	protected static final Map<String, String> DROP_RULES_MAPPING;
 
 	static {
 		HashMap<String, String> temp = new HashMap<String, String>();
@@ -203,15 +197,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			model.setMaxSimulatedTime(Double.valueOf(-1));
 		}
 
-		// Gets optional parameter maximum number of events
-		String maxEvents = root.getAttribute(XML_A_ROOT_MAXEVENTS);
-		if (maxEvents != null && maxEvents != "") {
-			model.setMaxSimulationEvents(Long.valueOf(maxEvents));
-		} else {
-			model.setMaxSimulationEvents(Long.valueOf(-1));
-		}
-
-
 		// Gets optional parameter polling interval
 		String polling = root.getAttribute(XML_A_ROOT_POLLING);
 		if (polling != null && polling != "") {
@@ -228,6 +213,14 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String disableStatistic = root.getAttribute(XML_A_ROOT_DISABLESTATISTIC);
 		if (disableStatistic != null && disableStatistic != "") {
 			model.setDisableStatistic(Boolean.valueOf(disableStatistic));
+		}
+
+		// Gets optional parameter maximum events
+		String maxEvents = root.getAttribute(XML_A_ROOT_MAXEVENTS);
+		if (maxEvents != null && maxEvents != "") {
+			model.setMaxSimulationEvents(Integer.valueOf(maxEvents));
+		} else {
+			model.setMaxSimulationEvents(Integer.valueOf(-1));
 		}
 
 		/* Gets optional parameters log path, replace policy, and delimiter
@@ -265,12 +258,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		parseClasses(root, model);
 		empiricalRouting = new HashMap<Object[], Map<String, Double>>();
 		empiricalLDRouting = new HashMap<Object[], Map<String, Double>>();
+		wrrRouting = new HashMap<Object[], Map<String, Integer>>();
 		empiricalFork = new HashMap<Object[], Map<String, OutPath>>();
 		combFork = new HashMap<Object[], Map<String, Double>>();
 		enablingConditionMap = new HashMap<Object[], Integer>();
 		inhibitingConditionMap = new HashMap<Object[], Integer>();
 		firingOutcomeMap = new HashMap<Object[], Integer>();
-		wrrRouting = new HashMap<Object[], Map<String, Integer>>();
 		parseStations(root, model);
 		parseConnections(root, model);
 		parseBlockingRegions(root, model);
@@ -302,6 +295,16 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				routing.put(stations.get(name), values.get(name));
 			}
 		}
+		keys = empiricalLDRouting.keySet().toArray();
+		for (Object key : keys) {
+			Object[] triplekey = (Object[]) key;
+			LoadDependentRouting ldr = (LoadDependentRouting) model.getRoutingStrategy(triplekey[0], triplekey[1]);
+			Map<String, Double> values = empiricalLDRouting.get(key);
+			Object[] names = values.keySet().toArray();
+			for (Object name : names) {
+				ldr.addEmpiricalEntry((Integer) triplekey[2], stations.get(name), values.get(name));
+			}
+		}
 		keys = wrrRouting.keySet().toArray();
 		for (Object key : keys) {
 			Object[] dualkey = (Object[]) key;
@@ -311,16 +314,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Object[] names = values.keySet().toArray();
 			for (Object name : names) {
 				routing.put(stations.get(name), values.get(name));
-			}
-		}
-		keys = empiricalLDRouting.keySet().toArray();
-		for (Object key : keys) {
-			Object[] triplekey = (Object[]) key;
-			LoadDependentRouting ldr = (LoadDependentRouting) model.getRoutingStrategy(triplekey[0], triplekey[1]);
-			Map<String, Double> values = empiricalLDRouting.get(key);
-			Object[] names = values.keySet().toArray();
-			for (Object name : names) {
-				ldr.addEmpiricalEntry((Integer) triplekey[2], stations.get(name), values.get(name));
 			}
 		}
 		keys = empiricalFork.keySet().toArray();
@@ -896,7 +889,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					child = child.getNextSibling();
 				}
 				values = ((Element) child).getElementsByTagName(XML_E_PARAMETER_VALUE);
-				Boolean withMemory = valueOf(findText(values.item(0)));
+				Boolean withMemory = Boolean.valueOf(findText(values.item(0)));
 				strategy.setWithMemory(withMemory);
 			} else if (rs instanceof WeightedRoundRobinRouting) {
 				Vector<Node> entries = new Vector<>();
@@ -1143,7 +1136,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 									temp2 = temp2.getNextSibling();
 								}
 							}
-							HashMap<Object, Object> tempMap = new HashMap<Object, Object>();
+							Map<Object, Object> tempMap = new HashMap<Object, Object>();
 							for (int k = 0; k < probs.size(); k++) {
 								Node temp3 = probs.get(k);
 								NodeList results = ((Element) temp3)

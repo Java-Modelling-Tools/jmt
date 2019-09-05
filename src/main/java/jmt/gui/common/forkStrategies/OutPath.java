@@ -19,11 +19,12 @@
 package jmt.gui.common.forkStrategies;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class OutPath {
 
 	private Double probability;
-	private HashMap<Object, Object> outParameters;
+	private Map<Object, Object> outParameters;
 
 	public OutPath() {
 		probability = 0.0;
@@ -48,16 +49,16 @@ public class OutPath {
 		this.probability = probability;
 	}
 
-	public void putEntry(Object key, Object value) {
-		this.outParameters.put(key, value);
-	}
-
-	public HashMap<Object, Object> getOutParameters() {
+	public Map<Object, Object> getOutParameters() {
 		return outParameters;
 	}
 
-	public void setOutParameters(HashMap<Object, Object> outParameters) {
+	public void setOutParameters(Map<Object, Object> outParameters) {
 		this.outParameters = outParameters;
+	}
+
+	public void putEntry(Object key, Object value) {
+		outParameters.put(key, value);
 	}
 
 }

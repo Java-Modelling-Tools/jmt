@@ -32,7 +32,7 @@ import jmt.engine.QueueNet.JobInfoList;
 public class DPSStrategy extends PSStrategy {
 
 	public double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass) {
-		if (list.size(jobClass) == 0) {
+		if (list.size(jobClass) <= 0) {
 			return 0.0;
 		}
 		double total = 0.0;

@@ -20,59 +20,49 @@ import jmt.jmva.analytical.solvers.LinearSystem.LinearSystem;
  */
 public class CoMoMSolver extends QNSolver {
 
-	private  int M,R;	
+	private  int M,R;
 
 	private PopulationVector current_N;
 	private PopulationVector target_N;
 
-	protected LinearSystem system; 
+	protected LinearSystem system;
 
 	protected CoMoMBasis basis;
 
 	public CoMoMSolver(QNModel qnm) throws InternalErrorException {
 		super(qnm);
 		M = qnm.M;
-		R = qnm.R;	
+		R = qnm.R;
 		target_N = qnm.N;
-
-		//System.out.println("Model under study:\n");
-		//qnm.printModel();
-		//System.out.println("\n");		
 	}
 
 	@Override
 	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
-		current_N = new PopulationVector(0,R);		
+		current_N = new PopulationVector(0,R);
 
 		for (int _class = 1; _class <= R; _class++) {
-			//System.out.println("Working on class " + _class);
-			//System.out.println("Current Population: " + current_N);
-
 			current_N.plusOne(_class);
 			system.initialiseForClass(current_N, _class);
 
-			solveForClass(_class);			
-		}						
+			solveForClass(_class);
+		}
 
-		//Store the computed normalsing constant
+		//Store the computed normalising constant
 		BigRational G = basis.getNormalisingConstant();
 		qnm.setNormalisingConstant(G);
 	}
 
 	private  void solveForClass(int _class) throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
-		for (int class_population = current_N.get(_class - 1); 
-				class_population <= target_N.get(_class - 1); 
+		for (int class_population = current_N.get(_class - 1);
+				class_population <= target_N.get(_class - 1);
 				class_population++) {
-			//System.out.println("Solving for population: " + current_N);
-			//System.out.println(class_population);
-
 			system.update(class_population);
 			system.solve();
 
 			if (class_population < target_N.get(_class - 1)) {
 				current_N.plusOne(_class);
 			}
-		}		
+		}
 	}
 
 	@Override

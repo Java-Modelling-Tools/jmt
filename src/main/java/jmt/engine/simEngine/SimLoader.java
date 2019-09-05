@@ -229,8 +229,8 @@ public class SimLoader {
 			int minSamples = simParam.getMinSamples();
 			//gets the default value of maxSimulatedTime
 			double maxSimulatedTime = simParam.getMaxSimulatedTime();
-			//gets the default value of maxSimulationEvents
-			long maxSimulationEvents = simParam.getMaxSimulationEvents();
+			//gets the default value of maxProcessedEvents
+			int maxProcessedEvents = simParam.getMaxProcessedEvents();
 			//gets the default value of disableStatisticStop
 			boolean disableStatisticStop = simParam.isDisableStatisticStop();
 
@@ -239,13 +239,13 @@ public class SimLoader {
 
 			//-------------- end SIM PARAMETERS -------------------//
 
-			// Read MAX Samples if specified
+			// Read maxSamples if specified
 			if (root.getAttribute("maxSamples") != "") {
 				maxSamples = Integer.parseInt(root.getAttribute("maxSamples"));
 				simParam.setMaxSamples(maxSamples);
 			}
 
-			// Read MIN Samples if specified
+			// Read minSamples if specified
 			if (root.getAttribute("minSamples") != "") {
 				minSamples = Integer.parseInt(root.getAttribute("minSamples"));
 				simParam.setMinSamples(minSamples);
@@ -257,10 +257,10 @@ public class SimLoader {
 				simParam.setMaxSimulatedTime(maxSimulatedTime);
 			}
 
-			// Read maxSimulationEvents if specified
+			// Read maxProcessedEvents if specified
 			if (root.getAttribute("maxEvents") != "") {
-				maxSimulationEvents = Long.parseLong(root.getAttribute("maxEvents"));
-				simParam.setMaxSimulationEvents(maxSimulationEvents);
+				maxProcessedEvents = Integer.parseInt(root.getAttribute("maxEvents"));
+				simParam.setMaxProcessedEvents(maxProcessedEvents);
 			}
 
 			// Disables confidence interval as stopping criteria
@@ -318,9 +318,6 @@ public class SimLoader {
 
 				if (currentClassType.equalsIgnoreCase("closed")) {
 					type = JobClass.CLOSED_CLASS;
-					//TODO: al momento non viene letto l'attributo opzionale "customers"
-					//(che comunque non ï¿½ necessario: i job vengono creati dal terminal o precaricati
-					//nelle code)
 				} else {
 					type = JobClass.OPEN_CLASS;
 				}

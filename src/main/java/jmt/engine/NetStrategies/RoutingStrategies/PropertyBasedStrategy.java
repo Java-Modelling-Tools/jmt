@@ -5,6 +5,8 @@ import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeList;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.List;
 public abstract class PropertyBasedStrategy extends RoutingStrategy {
 
     private static final double EPSILON = 1e-14; // Used to make equality checks (100 times machine precision)
+	private static final int INFINITY = Integer.MAX_VALUE;
+	private RandomEngine random = RandomEngine.makeDefault();
 
     @Override
     public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
@@ -59,5 +63,19 @@ public abstract class PropertyBasedStrategy extends RoutingStrategy {
     }
 
     protected abstract double calculateProperty(NetNode node, JobClass jobClass) throws NetException;
+
+	protected final int getRandomIndexBelow(int max) {
+		return (int) Math.floor(random.raw() * max);
+	}
+
+	protected final int calculateQueueLength(NetNode node, boolean isClosedClass) throws NetException {
+		if (node.isSink()) {
+			return isClosedClass ? INFINITY : 0;
+		} else {
+			int property = NodeSection.PROPERTY_ID_RESIDENT_JOBS;
+			return node.getSection(NodeSection.INPUT).getIntSectionProperty(property)
+					+ node.getSection(NodeSection.SERVICE).getIntSectionProperty(property);
+		}
+	}
 
 }

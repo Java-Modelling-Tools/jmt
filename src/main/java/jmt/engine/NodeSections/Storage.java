@@ -18,9 +18,9 @@
 
 package jmt.engine.NodeSections;
 
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.QueueGetStrategy;
@@ -68,9 +68,7 @@ public class Storage extends InputSection {
 	private TransitionVector nextStorageVector;
 	private boolean waitingRelease;
 	private boolean acceptedRelease;
-	private int droppedJobs;
-	private int[] droppedJobsPerClass;
-	private LinkedList<WaitingRequest> waitingRequests;
+	private List<WaitingRequest> waitingRequests;
 
 	//--------------------BLOCKING REGION PROPERTIES--------------------//
 	//true if the redirection behaviour is turned on
@@ -147,9 +145,6 @@ public class Storage extends InputSection {
 		nextStorageVector = new TransitionVector(node.getName(), jobClasses.size());
 		waitingRelease = false;
 		acceptedRelease = false;
-		droppedJobs = 0;
-		droppedJobsPerClass = new int[jobClasses.size()];
-		Arrays.fill(droppedJobsPerClass, 0);
 		waitingRequests = new LinkedList<WaitingRequest>();
 	}
 
@@ -159,6 +154,7 @@ public class Storage extends InputSection {
 	 * @throws NetException
 	 */
 	public void preloadJobs(int[] jobsPerClass) throws NetException {
+		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 		int totalJobs = 0;
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			totalJobs += jobsPerClass[i];
@@ -167,12 +163,15 @@ public class Storage extends InputSection {
 		int index = 0;
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			for (int j = 0; j < jobsPerClass[i]; j++) {
-				jobPermutation[index] = new Job(jobClasses.get(i), jobClasses.size());
+				Job job = new Job(jobClasses.get(i), netJobsList);
+				updateVisitPath(job);
+				jobPermutation[index] = job;
 				index++;
 			}
 		}
 
 		/* Commented to ensure a deterministic initialization
+		// Durstenfeld Shuffle
 		RandomEngine randomEngine = RandomEngine.makeDefault();
 		for (int i = jobPermutation.length - 1; i > 0; i--) {
 			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
@@ -181,7 +180,6 @@ public class Storage extends InputSection {
 			jobPermutation[j] = job;
 		}*/
 
-		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 		for (int i = 0; i < jobPermutation.length; i++) {
 			Job job = jobPermutation[i];
 			JobInfo jobInfo = new JobInfo(job);
@@ -216,9 +214,9 @@ public class Storage extends InputSection {
 
 		case NetEvent.EVENT_JOB:
 		{
-			Job job = message.getJob();
+			Job job = (Job) data;
 			JobClass jobClass = job.getJobClass();
-			if (redirectionON && source != regionInputStation && !myRegion.belongsToRegion(source)) {
+			if (redirectionON && !myRegion.belongsToRegion(source) && source != regionInputStation) {
 				redirect(job, 0.0, NodeSection.INPUT, regionInputStation);
 				send(NetEvent.EVENT_ACK, job, 0.0, sourceSection, source);
 				break;
@@ -240,8 +238,6 @@ public class Storage extends InputSection {
 			} else if (drop[jobClass.getId()]) {
 				if (!(job instanceof ForkJob)) {
 					netJobsList.dropJob(job);
-					droppedJobs++;
-					droppedJobsPerClass[jobClass.getId()]++;
 				}
 				sendAckAfterDrop(job, 0.0, sourceSection, source);
 				if (redirectionON) {
@@ -258,20 +254,20 @@ public class Storage extends InputSection {
 		}
 
 		case NetEvent.EVENT_ACK:
-			break;
+			return MSG_NOT_PROCESSED;
 
 		case NetEvent.EVENT_JOB_REQUEST:
 		{
 			TransitionVector enablingVector = (TransitionVector) data;
 			for (int i = 0; i < jobClasses.size(); i++) {
-				int requestedJobs = enablingVector.getEntry(i);
-				if (requestedJobs > jobsList.size(jobClasses.get(i))) {
+				int requestedJobNumber = enablingVector.getEntry(i);
+				if (requestedJobNumber > jobsList.size(jobClasses.get(i))) {
 					return MSG_NOT_PROCESSED;
 				}
 			}
 			for (int i = 0; i < jobClasses.size(); i++) {
-				int requestedJobs = enablingVector.getEntry(i);
-				for (int j = 0; j < requestedJobs; j++) {
+				int requestedJobNumber = enablingVector.getEntry(i);
+				for (int j = 0; j < requestedJobNumber; j++) {
 					sendForward(getStrategy.get(jobsList, jobClasses.get(i)), 0.0);
 				}
 			}
@@ -339,23 +335,6 @@ public class Storage extends InputSection {
 		}
 
 		return MSG_PROCESSED;
-	}
-
-	/**
-	 * Gets the total number of dropped jobs.
-	 * @return the total number of dropped jobs.
-	 */
-	public int getDroppedJobs() {
-		return droppedJobs;
-	}
-
-	/**
-	 * Gets the number of dropped jobs for the specified class.
-	 * @param classIndex the index of the job class.
-	 * @return the number of dropped jobs for the specified class.
-	 */
-	public int getDroppedJobsPerClass(int classIndex) {
-		return droppedJobsPerClass[classIndex];
 	}
 
 }

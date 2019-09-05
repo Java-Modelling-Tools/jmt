@@ -44,9 +44,9 @@ import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.common.editors.LoadDependentRoutingEditor;
 import jmt.gui.common.editors.RoutingProbabilitiesEditor;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.PowerOfKRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
-import jmt.gui.common.routingStrategies.PowerOfKRouting;
 
 /**
  * Created by IntelliJ IDEA.

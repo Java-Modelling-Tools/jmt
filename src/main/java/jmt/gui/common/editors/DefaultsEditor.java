@@ -433,11 +433,11 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		simpanelnum++;
 
 		// Maximum number of samples
-		addInputSpinner("Maximum number of samples", "maxSimulationSamples", sim_panel, 100000);
+		addInputNoAutoSpinner("Maximum number of samples", "isStatisticDisabled", "maxSimulationSamples", sim_panel, 100000);
 		simpanelnum++;
 
-		// Maximum number of events 
-		addInputSpinner("Maximum number of events", "maxSimulationEvents", sim_panel, -1);
+		// Maximum number of events
+		addInputInfSpinner("Maximum number of events", "maxSimulationEvents", sim_panel, 100000, -1);
 		simpanelnum++;
 
 		//Polling interval
@@ -905,7 +905,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		internal.add(random_button, BorderLayout.EAST);
 		internal.add(spinner, BorderLayout.CENTER);
 		label.setLabelFor(internal);
-		// If current default is !animation hides spinner and deselects animation_button
+		// If current default is !random hides spinner and deselects random_button
 		if (Defaults.getAsBoolean(booleanProperty).booleanValue()) {
 			spinner.setEnabled(false);
 			random_button.setSelected(true);
@@ -915,14 +915,78 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		}
 		spinner.setValue(Defaults.getAsInteger(valueProperty));
 
-		// Adds a listener to support animation_button change events
+		// Adds a listener to support random_button change events
 		random_button.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				if (random_button.isSelected()) {
 					spinner.setEnabled(false);
 					Defaults.set(booleanProperty, "true");
-				} else {					
+				} else {
 					spinner.setEnabled(true);
+					Defaults.set(booleanProperty, "false");
+				}
+
+			}
+		});
+
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+		internal.setMaximumSize(new Dimension(internal.getMaximumSize().width, internal.getMinimumSize().height));
+
+		spinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				//stop editing text inside spinner
+				try {
+					spinner.commitEdit();
+				} catch (ParseException pe) {
+					//if string does not represent a number, return
+					return;
+				}
+				//new number of classes
+				int x = 0;
+				try {
+					x = ((Integer) spinner.getValue()).intValue();
+				} catch (NumberFormatException nfe) {
+					//null
+				} catch (ClassCastException cce) {
+					//null
+				}
+				if (x < minvalue) {
+					x = minvalue;
+				}
+				spinner.setValue(new Integer(x));
+				Defaults.set(valueProperty, Integer.toString(x));
+			}
+		});
+		cont.add(label);
+		cont.add(internal);
+	}
+
+	//Added the No Auto Checkbox and a spinner.
+	protected void addInputNoAutoSpinner(String text, final String booleanProperty, final String valueProperty, Container cont,
+			final int minvalue) {
+		JLabel label;
+		label = new JLabel(text + ":");
+		final JSpinner spinner = new JSpinner();
+		final JCheckBox no_auto_button = new JCheckBox();
+		no_auto_button.setText("No Auto");
+		JPanel internal = new JPanel(new BorderLayout(5, 0));
+		internal.add(no_auto_button, BorderLayout.EAST);
+		internal.add(spinner, BorderLayout.CENTER);
+		label.setLabelFor(internal);
+		// If current default is auto deselects no_auto_button
+		if (Defaults.getAsBoolean(booleanProperty).booleanValue()) {
+			no_auto_button.setSelected(true);
+		} else {
+			no_auto_button.setSelected(false);
+		}
+		spinner.setValue(Defaults.getAsInteger(valueProperty));
+
+		// Adds a listener to support no_auto_button change events
+		no_auto_button.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (no_auto_button.isSelected()) {
+					Defaults.set(booleanProperty, "true");
+				} else {
 					Defaults.set(booleanProperty, "false");
 				}
 

@@ -178,7 +178,6 @@ public class LogFile implements Notifier {
 				output.close();
 				output = null;
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}

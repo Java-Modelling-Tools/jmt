@@ -18,6 +18,8 @@
 
 package jmt.engine.QueueNet;
 
+import org.apache.commons.math3.util.Pair;
+
 import jmt.common.exception.NetException;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
@@ -105,8 +107,8 @@ public abstract class NodeSection {
 	 */
 	public NodeSection(byte id) {
 		this.sectionID = id;
-		auto = true;
-		nodeAuto = true;
+		this.auto = true;
+		this.nodeAuto = true;
 	}
 
 	/**
@@ -120,7 +122,7 @@ public abstract class NodeSection {
 	public NodeSection(byte id, boolean auto) {
 		this.sectionID = id;
 		this.auto = auto;
-		nodeAuto = true;
+		this.nodeAuto = true;
 	}
 
 	/**
@@ -147,7 +149,7 @@ public abstract class NodeSection {
 	 * @throws NetException
 	 */
 	protected void nodeLinked(NetNode node) throws NetException {
-	};
+	}
 
 	/**
 	 * Gets the id of the node section.
@@ -408,10 +410,14 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken send(int event, Object data, double delay, byte destinationSection, NetNode destination) {
-		if (auto && (event == NetEvent.EVENT_JOB) && ((destination != ownerNode) || ((destination == ownerNode) && (destinationSection != sectionID)))) {
-			//it is a JOB event and the destination is not the owner node or it is the owner
-			//node but the dest section is not this section
-			updateJobsList((Job) data);
+		if (event == NetEvent.EVENT_JOB) {
+			if ((destination != ownerNode) || (destination == ownerNode && destinationSection != sectionID)) {
+				//it is a JOB event and the destination is not the owner node or it is the owner
+				//node but the dest section is not this section
+				if (auto) {
+					updateJobsListAfterSend((Job) data);
+				}
+			}
 		}
 		return ownerNode.send(event, data, delay, sectionID, destinationSection, destination);
 	}
@@ -425,10 +431,7 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken send(int event, Object data, double delay, NetNode destination) {
-		if (auto && (event == NetEvent.EVENT_JOB)) {
-			updateJobsList((Job) data);
-		}
-		return ownerNode.send(event, data, delay, sectionID, NodeSection.INPUT, destination);
+		return send(event, data, delay, NodeSection.INPUT, destination);
 	}
 
 	/**
@@ -440,10 +443,7 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken send(int event, Object data, double delay, byte destinationSection) {
-		if (auto && (event == NetEvent.EVENT_JOB) && (destinationSection != sectionID)) {
-			updateJobsList((Job) data);
-		}
-		return ownerNode.send(event, data, delay, sectionID, destinationSection, ownerNode);
+		return send(event, data, delay, destinationSection, ownerNode);
 	}
 
 	/**
@@ -454,7 +454,7 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken sendMe(int event, Object data, double delay) {
-		return ownerNode.send(event, data, delay, sectionID, sectionID, ownerNode);
+		return send(event, data, delay, sectionID, ownerNode);
 	}
 
 	/**
@@ -466,10 +466,7 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken send(Job job, double delay, byte destinationSection, NetNode destination) {
-		if (auto && (destinationSection != sectionID)) {
-			updateJobsList(job);
-		}
-		return ownerNode.send(NetEvent.EVENT_JOB, job, delay, sectionID, destinationSection, destination);
+		return send(NetEvent.EVENT_JOB, job, delay, destinationSection, destination);
 	}
 
 	/**
@@ -480,10 +477,7 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken send(Job job, double delay, NetNode destination) {
-		if (auto) {
-			updateJobsList(job);
-		}
-		return ownerNode.send(NetEvent.EVENT_JOB, job, delay, sectionID, NodeSection.INPUT, destination);
+		return send(NetEvent.EVENT_JOB, job, delay, NodeSection.INPUT, destination);
 	}
 
 	/**
@@ -494,10 +488,7 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken send(Job job, double delay, byte destinationSection) {
-		if (auto && (destinationSection != sectionID)) {
-			updateJobsList(job);
-		}
-		return ownerNode.send(NetEvent.EVENT_JOB, job, delay, sectionID, destinationSection, ownerNode);
+		return send(NetEvent.EVENT_JOB, job, delay, destinationSection, ownerNode);
 	}
 
 	/**
@@ -507,7 +498,7 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken sendMe(Job job, double delay) {
-		return ownerNode.send(NetEvent.EVENT_JOB, job, delay, sectionID, sectionID, ownerNode);
+		return send(NetEvent.EVENT_JOB, job, delay, sectionID, ownerNode);
 	}
 
 	/**
@@ -546,11 +537,23 @@ public abstract class NodeSection {
 		return message.sentBy(sectionID, ownerNode);
 	}
 
-	private void updateJobsList(Job job) {
+	/**
+	 * Updates the JobInfoList after sending this job.
+	 * @param job job to be sent.
+	 */
+	private void updateJobsListAfterSend(Job job) {
 		JobInfo jobInfo = jobsList.lookFor(job);
 		if (jobInfo != null) {
 			jobsList.remove(jobInfo);
 		}
+	}
+
+	/**
+	 * Updates the JobInfoList after receiving this job.
+	 * @param job job to be received.
+	 */
+	private void updateJobsListAfterReceive(Job job) {
+		jobsList.add(new JobInfo(job));
 	}
 
 	void setOwnerNode(NetNode ownerNode) throws NetException {
@@ -560,14 +563,14 @@ public abstract class NodeSection {
 	}
 
 	int receive(NetMessage message) throws NetException {
-		if (auto && (message.getEvent() == NetEvent.EVENT_JOB) && (message.getSourceSection() != sectionID)) {
-			Job job = message.getJob();
-			jobsList.add(new JobInfo(job));
+		if (message.getEvent() == NetEvent.EVENT_JOB) {
+			if ((message.getSource() != ownerNode) || (message.getSource() == ownerNode && message.getSourceSection() != sectionID)) {
+				if (auto) {
+					updateJobsListAfterReceive(message.getJob());
+				}
+			}
 		}
-		switch (message.getEvent()) {
-		default:
-			return process(message);
-		}
+		return process(message);
 	}
 
 	/**
@@ -581,7 +584,7 @@ public abstract class NodeSection {
 	 */
 	protected RemoveToken redirect(Job job, double delay, byte destinationSection, NetNode destination)
 			throws NetException {
-		if (auto && (destination != ownerNode) || ((destination == ownerNode) && (destinationSection != sectionID))) {
+		if (auto) {
 			updateJobsListAfterRedirect(job);
 		}
 		return ownerNode.redirect(job, delay, sectionID, destinationSection, destination);
@@ -628,32 +631,17 @@ public abstract class NodeSection {
 	}
 
 	/**
-	 * Sends an "ack" event to a section of a node to inform it that the job
-	 * previously sent has been consumed.
-	 * @param job job to be attached to the message.
-	 * @param delay Scheduling delay.
-	 * @param destinationSection destination section.
-	 * @param destination destination node.
-	 * @return a token to remove sent event.
-	 * @throws NetException
+	 * Updates the visit path of this job.
+	 * @param job job whose visit path is to be updated.
 	 */
-	protected RemoveToken sendAckAfterConsume(Job job, double delay, byte destinationSection, NetNode destination)
-			throws NetException {
-		if (auto) {
-			updateJobsListAfterConsume(job);
+	protected void updateVisitPath(Job job) {
+		Pair<NetNode, JobClass> pair = null;
+		if (job instanceof ForkJob) {
+			pair = new Pair<NetNode, JobClass>(ownerNode, ((ForkJob) job).getOriginalJob().getJobClass());
+		} else {
+			pair = new Pair<NetNode, JobClass>(ownerNode, job.getJobClass());
 		}
-		return ownerNode.sendAckAfterConsume(job, delay, sectionID, destinationSection, destination);
-	}
-
-	/**
-	 * Updates the JobInfoList after consuming this job.
-	 * @param job job to be consumed.
-	 */
-	private void updateJobsListAfterConsume(Job job) {
-		JobInfo jobInfo = jobsList.lookFor(job);
-		if (jobInfo != null) {
-			jobsList.consumeJob(jobInfo);
-		}
+		job.AddToVisitPath(pair);
 	}
 
 	/**

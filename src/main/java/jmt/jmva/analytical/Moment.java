@@ -233,7 +233,6 @@ public class Moment {
 				System.out.println("Variance of queue length at " + moment.model.getStationNames()[k] + ": " + variance);
 			}
 		} catch (SolverException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

@@ -48,12 +48,12 @@ public class SimParameters {
 
 	//max samples which can be collected for each measure
 	private int maxSamples = 1000000;
-	//max events which can be processed in the simulation
-	private long maxEvents = -1;
 	//min samples which must be collected for each measure
 	private int minSamples = 0;
 	//max simulated time after which simulation will be stopped
 	private double maxSimulatedTime = -1;
+	//max processed events after which simulation will be stopped
+	private int maxProcessedEvents = -1;
 
 	private boolean disableStatisticStop = false;
 
@@ -149,22 +149,6 @@ public class SimParameters {
 	}
 
 	/**
-	 * Gets the max number of samples which can be collected for each measure
-	 * @return the max number of samples which can be collected for each measure
-	 */
-	public long getMaxSimulationEvents() {
-		return maxEvents;
-	}
-
-	/**
-	 * Sets the max number of samples which can be collected for each measure
-	 * @param maxSamples the max number of samples which can be collected for each measure
-	 */
-	public void setMaxSimulationEvents(long maxEvents) {
-		this.maxEvents = maxEvents;
-	}
-
-	/**
 	 * Gets the min number of samples which must be collected for each measure
 	 * @return the min number of samples which must be collected for each measure
 	 */
@@ -185,7 +169,7 @@ public class SimParameters {
 	 * @return the max simulated time after which simulation will be stopped
 	 */
 	public double getMaxSimulatedTime() {
-		return  maxSimulatedTime;
+		return maxSimulatedTime;
 	}
 
 	/**
@@ -193,7 +177,23 @@ public class SimParameters {
 	 * @param maxSimulatedTime max simulated time after which simulation will be stopped
 	 */
 	public void setMaxSimulatedTime(double maxSimulatedTime) {
-		this.maxSimulatedTime =  maxSimulatedTime;
+		this.maxSimulatedTime = maxSimulatedTime;
+	}
+
+	/**
+	 * Gets the max processed events after which simulation will be stopped
+	 * @return the max processed events after which simulation will be stopped
+	 */
+	public int getMaxProcessedEvents() {
+		return maxProcessedEvents;
+	}
+
+	/**
+	 * Sets the max processed events after which simulation will be stopped
+	 * @param maxProcessedEvents max processed events after which simulation will be stopped
+	 */
+	public void setMaxProcessedEvents(int maxProcessedEvents) {
+		this.maxProcessedEvents = maxProcessedEvents;
 	}
 
 	/**

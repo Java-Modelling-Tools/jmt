@@ -18,121 +18,109 @@
 
 package jmt.engine.QueueNet;
 
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.ListIterator;
-import jmt.engine.random.engine.RandomEngine;
+import java.util.Map;
 
-/** This class implements a node list. Note that only classes of QueueNet
+/** This class implements a list of nodes. Note that only classes of QueueNet
  * package can add or remove objects to/from the list.
  * @author Francesco Radaelli
  */
 public class NodeList {
 
-	private LinkedList<NetNode> nodes;
-	private RandomEngine engine = RandomEngine.makeDefault();
+	private List<NetNode> nodes;
+	private Map<String, NetNode> nodeMap;
 
 	/** Creates a new instance of NodeList class.
 	 */
 	public NodeList() {
-		nodes = new LinkedList<NetNode>();
+		nodes = new ArrayList<NetNode>();
+		nodeMap = new HashMap<String, NetNode>();
 	}
 
-	/** Adds a new node to the list
-	 * @param node Reference to the node to be added.
+	/** Adds a new node to the list.
+	 * @param node Reference to the node.
 	 */
 	public void add(NetNode node) {
 		nodes.add(node);
+		nodeMap.put(node.getName(), node);
 	}
 
-	/** Removes a node from the list
-	 * @param node Reference to the node to be removed.
+	/** Removes a node from the list.
+	 * @param node Reference to the node.
 	 */
-	void remove(NetNode node) {
+	public void remove(NetNode node) {
 		nodes.remove(node);
+		nodeMap.remove(node.getName());
 	}
 
 	/** Gets the first node in the list.
 	 * @return Reference to the first node.
 	 */
 	public NetNode getFirst() {
-		return nodes.getFirst();
+		return nodes.get(0);
 	}
 
 	/** Gets the last node in the list.
 	 * @return Reference to the last node.
 	 */
 	public NetNode getLast() {
-		return nodes.getLast();
-	}
-
-	/** Gets the node with a specific name in the list.
-	 * @return Reference to the node .
-	 */
-	public NetNode get(String name) {
-		ListIterator<NetNode> iterator = nodes.listIterator();
-		NetNode node;
-		while (iterator.hasNext()) {
-			node = iterator.next();
-			if (node.getName().compareTo(name) == 0) {
-				return node;
-			}
-		}
-		return null;
+		return nodes.get(nodes.size() - 1);
 	}
 
 	/** Gets the i-th node in the list.
-	 * @param index index.
+	 * @param index Index of the node.
 	 * @return Reference to the i-th node.
 	 */
 	public NetNode get(int index) {
 		return nodes.get(index);
 	}
 
-	/** Gets list size.
-	 * @return Number of nodes in the list.
+	/** Gets the node with a specific name in the list.
+	 * @param name Name of the node.
+	 * @return Reference to the node.
+	 */
+	public NetNode get(String name) {
+		return nodeMap.get(name);
+	}
+
+	/** Gets the size of the list.
+	 * @return Size of the list.
 	 */
 	public int size() {
 		return nodes.size();
 	}
 
-	/** Gets a list iterator.
-	 * @return List iterator.
+	/** Gets an iterator of the list.
+	 * @return Iterator of the list.
 	 */
 	public ListIterator<NetNode> listIterator() {
 		return nodes.listIterator();
 	}
 
-	/**
-	 * Converts the NodeList into an array of NetNode objects.
+	/** Converts the list into an array of nodes.
+	 * @return Array of nodes in the list.
 	 */
 	public NetNode[] toArray() {
 		return nodes.toArray(new NetNode[nodes.size()]);
 	}
 
-	/**
-	 * Used to know whether a node is contained or not in the NodeList
-	 * @param node Node to search
-	 * @return true if the specified node is contained in the list
+	/** Gets the index of a node.
+	 * @param node Reference to the node.
+	 * @return Index of the node.
+	 */
+	public int indexOf(NetNode node) {
+		return nodes.indexOf(node);
+	}
+
+	/** Used to know if a node is in the list.
+	 * @param node Reference to the node.
+	 * @return true if the node is in the list.
 	 */
 	public boolean contains(NetNode node) {
 		return nodes.contains(node);
-	}
-
-	public LinkedList<NetNode> randomNodes() {
-		HashSet<Integer> hs = new HashSet<Integer>();
-		LinkedList<NetNode> temp = new LinkedList<NetNode>();
-		int size = nodes.size();
-		while (hs.size() < size) {
-			//replaced Math.random() code
-			int index = (int)(engine.raw2() * size);
-			int s = hs.size();
-			hs.add(index);
-			if (s < hs.size()) {
-				temp.add(nodes.get(index));
-			}
-		}
-		return temp;
 	}
 
 }

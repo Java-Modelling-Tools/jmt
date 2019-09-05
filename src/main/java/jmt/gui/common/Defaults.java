@@ -96,7 +96,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("transitionModeName", "Mode");
 		def.setProperty("transitionNumberOfServers", "-1");
 		def.setProperty("transitionFiringTimeDistribution", "jmt.gui.common.distributions.Exponential");
-		def.setProperty("transitionFiringPriority", "-1");
+		def.setProperty("transitionFiringPriority", "0");
 		def.setProperty("transitionFiringWeight", "1.0");
 
 		// Classes parameters defaults
@@ -141,6 +141,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("simulationMaxDuration", "-1");
 		def.setProperty("maxSimulatedTime", "-1");
 		def.setProperty("maxSimulationSamples", "1000000");
+		def.setProperty("isStatisticDisabled", "false");
 		def.setProperty("maxSimulationEvents", "-1");
 		def.setProperty("simulationPolling", "1");
 		// Francesco D'Aquino

@@ -27,6 +27,7 @@ import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.log.CSVLogger;
 import jmt.engine.log.JSimLoggerFactory;
 import jmt.engine.log.LoggerParameters;
@@ -102,6 +103,12 @@ public class LogTunnel extends ServiceTunnel {
 			case NetEvent.EVENT_START:
 				break;
 
+			case NetEvent.EVENT_STOP:
+				if (logger != null) {
+					logger.close();
+				}
+				break;
+
 			case NetEvent.EVENT_JOB:
 				Job job = message.getJob();
 				// Build logger and default values if needed
@@ -147,27 +154,19 @@ public class LogTunnel extends ServiceTunnel {
 				}
 				// Finally logs the line
 				logger.log(values, defaultValues);
-				// Send forwards the JOB
-				sendForward(message.getEvent(), message.getData(), 0.0);
-				break;
-
-			case NetEvent.EVENT_ACK:
-				// Send backward the ACK
-				sendBackward(message.getEvent(), message.getData(), 0.0);
-				break;
-
-			case NetEvent.EVENT_STOP:
-				if (logger != null) {
-					logger.close();
-				}
-				break;
+				// Do not break here
 
 			default:
-				return MSG_NOT_PROCESSED;
+				if (message.getSourceSection() == NodeSection.INPUT) {
+					sendForward(message.getEvent(), message.getData(), 0.0);
+				}
+				if (message.getSourceSection() == NodeSection.OUTPUT) {
+					sendBackward(message.getEvent(), message.getData(), 0.0);
+				}
+				break;
 			}
 
 			return MSG_PROCESSED;
-
 		} catch (IOException ex) {
 			throw new NetException("Error while writing to the log file: " + ex.getMessage());
 		}

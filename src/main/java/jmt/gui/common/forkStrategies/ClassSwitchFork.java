@@ -28,7 +28,7 @@ import java.util.Vector;
  */
 public class ClassSwitchFork extends ForkStrategy {
 
-	private HashMap<Object, OutPath> outPaths = new HashMap<Object, OutPath>();
+	private Map<Object, OutPath> outPaths = new HashMap<Object, OutPath>();
 
 	public ClassSwitchFork() {
 		description = "Generates tasks of multiple classes (the same number on each output link).";

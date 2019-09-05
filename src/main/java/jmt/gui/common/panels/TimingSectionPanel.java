@@ -46,7 +46,6 @@ import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.distributions.Distribution;
-import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
@@ -362,23 +361,28 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 				if (((Boolean) aValue).booleanValue()) {
 					stationData.setNumberOfServers(stationKey, rowIndex, Integer.valueOf(-1));
 				} else {
-					stationData.setNumberOfServers(stationKey, rowIndex, Integer.valueOf(1));
+					Integer number = Defaults.getAsInteger("transitionNumberOfServers");
+					if (number.intValue() < 1) {
+						number = Integer.valueOf(1);
+					}
+					stationData.setNumberOfServers(stationKey, rowIndex, number);
 				}
 				repaint();
 			} else if (columnIndex == 3) {
 				if (((String) aValue).equals(TIMING_STRATEGY_TIMED)) {
 					if (!(stationData.getFiringTimeDistribution(stationKey, rowIndex) instanceof Distribution)) {
-						stationData.setFiringTimeDistribution(stationKey, rowIndex, new Exponential());
-						stationData.setNumberOfServers(stationKey, rowIndex, Integer.valueOf(-1));
+						Object distribution = Defaults.getAsNewInstance("transitionFiringTimeDistribution");
+						stationData.setFiringTimeDistribution(stationKey, rowIndex, distribution);
 						stationData.setFiringPriority(stationKey, rowIndex, Integer.valueOf(-1));
 						stationData.setFiringWeight(stationKey, rowIndex, Double.valueOf(1.0));
 					}
 				} else {
 					if (!(stationData.getFiringTimeDistribution(stationKey, rowIndex) instanceof ZeroStrategy)) {
+						Integer prioirty = Defaults.getAsInteger("transitionFiringPriority");
+						Double weight = Defaults.getAsDouble("transitionFiringWeight");
 						stationData.setFiringTimeDistribution(stationKey, rowIndex, new ZeroStrategy());
-						stationData.setNumberOfServers(stationKey, rowIndex, Integer.valueOf(1));
-						stationData.setFiringPriority(stationKey, rowIndex, Integer.valueOf(0));
-						stationData.setFiringWeight(stationKey, rowIndex, Double.valueOf(1.0));
+						stationData.setFiringPriority(stationKey, rowIndex, prioirty);
+						stationData.setFiringWeight(stationKey, rowIndex, weight);
 					}
 				}
 				repaint();

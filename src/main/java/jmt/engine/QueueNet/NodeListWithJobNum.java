@@ -23,43 +23,49 @@ import java.util.Map;
 
 public class NodeListWithJobNum {
 
-	private Map<NetNode, Map<JobClass, Integer>> nodesWithJobs;
-	private NodeList nodes;
-	private int total;
-	private Map<NetNode, Integer> nodesWithTotals;
+	private NodeList nodeList;
+	private Map<NetNode, Map<JobClass, Integer>> jobNumPerNode;
+	private int totalNum;
+	private Map<NetNode, Integer> totalNumPerNode;
 
 	public NodeListWithJobNum() {
-		nodesWithJobs= new HashMap<NetNode, Map<JobClass, Integer>>();
-		nodes = new NodeList();
-		total = 0;
-		nodesWithTotals = new HashMap<NetNode, Integer>();
+		nodeList = new NodeList();
+		jobNumPerNode= new HashMap<NetNode, Map<JobClass, Integer>>();
+		totalNum = 0;
+		totalNumPerNode = new HashMap<NetNode, Integer>();
 	}
 
-	public void add(NetNode netNode, Map<JobClass, Integer> num) {
-		nodesWithJobs.put(netNode, num);
-		nodes.add(netNode);
+	public void add(NetNode node, Map<JobClass, Integer> map) {
+		nodeList.add(node);
+		jobNumPerNode.put(node, map);
 		int sum = 0;
-		for (Integer i : num.values()) {
-			sum += i.intValue();
+		for (Integer num : map.values()) {
+			sum += num.intValue();
 		}
-		total += sum;
-		nodesWithTotals.put(netNode, Integer.valueOf(sum));
+		totalNum += sum;
+		totalNumPerNode.put(node, Integer.valueOf(sum));
 	}
 
 	public NodeList getNodeList() {
-		return this.nodes;
+		return nodeList;
 	}
 
-	public Map<JobClass, Integer> getClassesWithNum(NetNode netNode) {
-		return nodesWithJobs.get(netNode);
+	public Map<JobClass, Integer> getJobNumPerClass(NetNode node) {
+		if (!jobNumPerNode.containsKey(node)) {
+			return new HashMap<JobClass, Integer>();
+		}
+		return jobNumPerNode.get(node);
 	}
 
 	public int getTotalNum() {
-		return total;
+		return totalNum;
 	}
 
-	public int getTotalNum(NetNode netNode) {
-		return nodesWithTotals.get(netNode).intValue();
+	public int getTotalNum(NetNode node) {
+		if (!totalNumPerNode.containsKey(node)) {
+			return 0;
+		}
+		return totalNumPerNode.get(node).intValue();
 	}
 
 }

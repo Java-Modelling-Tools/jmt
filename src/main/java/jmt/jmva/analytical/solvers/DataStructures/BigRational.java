@@ -17,7 +17,6 @@
 
 package jmt.jmva.analytical.solvers.DataStructures;
 
-import java.lang.Double;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -672,8 +671,8 @@ public class BigRational implements Comparable<BigRational> {
     }
 
     /**
-     * Returns the logarithm of the BigRational number
-     * @return The logarithm of this
+     * Returns the logarithm of this BigRational number
+     * @return The logarithm of this BigRational number
      */
     public double log() {
 		BigInteger num = this.num;
@@ -697,6 +696,5 @@ public class BigRational implements Comparable<BigRational> {
 		}
 		return numRes - denRes;
     }
-
 
 }

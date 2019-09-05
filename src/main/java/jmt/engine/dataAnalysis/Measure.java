@@ -18,7 +18,9 @@
 
 package jmt.engine.dataAnalysis;
 
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,7 +28,11 @@ import javax.xml.parsers.FactoryConfigurationError;
 import javax.xml.parsers.ParserConfigurationException;
 
 import jmt.common.exception.NetException;
-import jmt.engine.NodeSections.BlockingQueue;
+import jmt.engine.NodeSections.Enabling;
+import jmt.engine.NodeSections.Firing;
+import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.GlobalJobInfoList;
+import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NetSystem;
@@ -34,8 +40,8 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.log.JSimLogger;
-import jmt.gui.common.CommonConstants;
 
+import org.apache.commons.math3.util.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -109,8 +115,9 @@ public class Measure {
 	// the other types of measures do not need any scaling, so
 	// the scale factor remains equal to 1
 
-	//the scale factor
 	double scaleFactor = 1.0;
+
+	Set<Pair<NetNode, JobClass>> collectedPairs = null;
 
 	protected double lastIntervalAvgValue;
 
@@ -152,7 +159,7 @@ public class Measure {
 	 * Sets the station, the class, the type of this Measure
 	 * @param node the node on which the measure is computed
 	 * @param jClass the job class this measure refers to
-	 * @param mType the type of measure (see constants defined in clas Simulation)
+	 * @param mType the type of measure (see constants defined in class Simulation)
 	 */
 	public void measureTarget(String node, String jClass, int mType) {
 		nodeName = node;
@@ -161,14 +168,14 @@ public class Measure {
 	}
 
 	/**
-	 *  Gets the node this measure refers to
+	 *  Gets the name of the node this measure refers to
 	 */
 	public String getNodeName() {
 		return nodeName;
 	}
 
 	/**
-	 *  Gets the job class this measure refers to
+	 *  Gets the name of the job class this measure refers to
 	 */
 	public String getJobClassName() {
 		return jobClassName;
@@ -197,6 +204,10 @@ public class Measure {
 		this.network = network;
 	}
 
+	/**
+	 * Returns true if the analysis measure is verbose
+	 * @return true if the analysis measure outputs all the samples
+	 */
 	public boolean getVerbose() {
 		return verbose;
 	}
@@ -211,10 +222,10 @@ public class Measure {
 
 	/**
 	 * Sets output object.
-	 * @param Output output object.
+	 * @param output output object.
 	 */
-	void setOutput(MeasureOutput Output) {
-		this.output = Output;
+	void setOutput(MeasureOutput output) {
+		this.output = output;
 	}
 
 	/**
@@ -476,6 +487,25 @@ public class Measure {
 	}
 
 	/**
+	 * Updates the sample job.
+	 * @param sampleJob sample job.
+	 */
+	public void updateSampleJob(Job sampleJob) {
+		if (collectedPairs == null) {
+			collectedPairs = new HashSet<Pair<NetNode, JobClass>>();
+		}
+		NetNode node = network.getNode(nodeName);
+		JobClass jobClass = network.getJobClass(jobClassName);
+		Pair<NetNode, JobClass> pair = null;
+		if (sampleJob instanceof ForkJob) {
+			pair = new Pair<NetNode, JobClass>(node, ((ForkJob) sampleJob).getOriginalJob().getJobClass());
+		} else {
+			pair = new Pair<NetNode, JobClass>(node, jobClass);
+		}
+		collectedPairs.add(pair);
+	}
+
+	/**
 	 * JSIM architecture does not allow to correctly compute residence time for
 	 * all visits.
 	 * for this reason a scaling operation is needed.
@@ -484,115 +514,57 @@ public class Measure {
 	 * accesses to the reference station)
 	 */
 	private void scaleMeasureWithVisitRatio() {
-		double visitRatio = 1.0;
-		//retrieves JobClass object using its name
-		JobClass jobClass = network.getJobClass(jobClassName);
-		//current measure node
-		NetNode thisNode = network.getNode(nodeName);
+		scaleFactor = 1.0;
+		try {
+			NetNode node = network.getNode(nodeName);
+			NodeSection inputSection = node.getSection(NodeSection.INPUT);
+			NodeSection outputSection = node.getSection(NodeSection.OUTPUT);
+			JobClass jobClass = network.getJobClass(jobClassName);
+			GlobalJobInfoList netJobsList = network.getJobInfoList();
 
-		// If measure is class specific
-		if (jobClass != null) {
-			//reference node for this job class
-			String referenceNodeName = jobClass.getReferenceNodeName();
-			int visitsReferenceNode, visitsThisNode;
-			try {
-				if (referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
-						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
-						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_SCALER)
-						|| referenceNodeName.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
-					visitsReferenceNode = 0;
+			if (jobClass != null) {
+				int localVisits = 0;
+				if (inputSection instanceof Enabling && outputSection instanceof Firing) {
+					localVisits = Math.max(
+							inputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobClass),
+							outputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_DEPARTING_JOBS, jobClass));
 				} else {
-					NetNode referenceNode = network.getNode(referenceNodeName);
-					//visits to the reference node
-					NodeSection refInputSection = referenceNode.getSection(NodeSection.INPUT);
-					visitsReferenceNode = refInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobClass);
-				}
-				visitsReferenceNode += network.getSwitchedJobs(jobClass);
-				visitsReferenceNode -= network.getConsumedJobs(jobClass);
-				visitsReferenceNode += network.getProducedJobs(jobClass);
-
-				//visits to this node
-				NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
-				visitsThisNode = thisNodeInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobClass);
-
-				// the reference source generates a certain number of jobs
-				// - some of them have reached this station
-				// - other have been dropped before entering this station or
-				// elsewhere in the network
-				int droppedJobs = network.getDroppedJobs(jobClass);
-
-				if (thisNodeInputSection instanceof BlockingQueue) {
-					// if the input section is a BlockingQueue,
-					// remove (from the total number of visits)
-					// the jobs dropped by the BlockingQueue itself,
-					// because they have been counted
-					// in arrived jobs
-					visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobsPerClass(jobClass.getId());
+					localVisits = inputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobClass);
 				}
 
-				visitRatio = (double) (visitsThisNode) / (visitsReferenceNode - droppedJobs);
-			} catch (NetException ne) {
-				visitRatio = 1;
-				logger.error("Error in computing visit ratio.");
-				ne.printStackTrace();
+				int globalVisits = 0;
+				Map<Set<Pair<NetNode, JobClass>>, Integer> visitCountPerChain = netJobsList.getVisitCountPerChain();
+				Map<Pair<NetNode, JobClass>, Set<Pair<NetNode, JobClass>>> pairChainMap = netJobsList.getPairChainMap();
+				for (Pair<NetNode, JobClass> pair : collectedPairs) {
+					Set<Pair<NetNode, JobClass>> chain = pairChainMap.get(pair);
+					globalVisits += visitCountPerChain.get(chain).intValue();
+				}
+
+				if (globalVisits > 0) {
+					scaleFactor = (double) localVisits / globalVisits;
+				}
+			} else {
+				int localVisitsSum = 0;
+				if (inputSection instanceof Enabling && outputSection instanceof Firing) {
+					localVisitsSum = Math.max(
+							inputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS),
+							outputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_DEPARTING_JOBS));
+				} else {
+					localVisitsSum = inputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS);
+				}
+
+				int globalVisitsSum = 0;
+				Integer totalVisitCount = netJobsList.getTotalVisitCount();
+				globalVisitsSum = totalVisitCount.intValue();
+
+				if (globalVisitsSum > 0) {
+					scaleFactor = (double) localVisitsSum / globalVisitsSum;
+				}
 			}
+		} catch (NetException ne) {
+			logger.error("Error in computing visit ratio.");
+			logger.error(ne);
 		}
-		// Measure is class-independent --> Bertoli Marco
-		else {
-			try {
-				Iterator<JobClass> it = network.getJobClasses().listIterator();
-				int visitsThisNodeSum = 0, visitsReferenceNodeSum = 0, droppedJobsSum = 0;
-				while (it.hasNext()) {
-					JobClass jobC = it.next();
-					//reference node for this job class
-					String referenceNodeName = jobC.getReferenceNodeName();
-					int visitsReferenceNode, visitsThisNode;
-					if (referenceNodeName.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)
-							|| referenceNodeName.equals(CommonConstants.STATION_TYPE_FORK)
-							|| referenceNodeName.equals(CommonConstants.STATION_TYPE_SCALER)) {
-						visitsReferenceNode = 0;
-					} else {
-						NetNode referenceNode = network.getNode(referenceNodeName);
-						//visits to the reference node
-						NodeSection refInputSection = referenceNode.getSection(NodeSection.INPUT);
-						visitsReferenceNode = refInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobC);
-					}
-					//visitsReferenceNode += network.getSwitchedJobs(jobC);
-					visitsReferenceNode -= network.getConsumedJobs(jobC);
-					visitsReferenceNode += network.getProducedJobs(jobC);
-
-					//visits to this node
-					NodeSection thisNodeInputSection = thisNode.getSection(NodeSection.INPUT);
-					visitsThisNode = thisNodeInputSection.getIntSectionProperty(NodeSection.PROPERTY_ID_ARRIVING_JOBS, jobC);
-
-					// the reference source generates a certain number of jobs
-					// - some of them have reached this station
-					// - other have been dropped before entering this station or
-					// elsewhere in the network
-					int droppedJobs = network.getDroppedJobs(jobC);
-
-					if (thisNodeInputSection instanceof BlockingQueue) {
-						// if the input section is a BlockingQueue,
-						// remove (from the total number of visits)
-						// the jobs dropped by the BlockingQueue itself,
-						// because they have been counted
-						// in arrived jobs
-						visitsThisNode -= ((BlockingQueue) thisNode.getSection(NodeSection.INPUT)).getDroppedJobsPerClass(jobC.getId());
-					}
-
-					visitsReferenceNodeSum += visitsReferenceNode;
-					visitsThisNodeSum += visitsThisNode;
-					droppedJobsSum += droppedJobs;
-				}
-
-				visitRatio = (double) (visitsThisNodeSum) / (visitsReferenceNodeSum - droppedJobsSum);
-			} catch (NetException ne) {
-				visitRatio = 1;
-				logger.error("Error in computing visit ratio.");
-				logger.error(ne);
-			}
-		}
-		scaleFactor = visitRatio;
 	}
 
 	//******************ABORT**********************//

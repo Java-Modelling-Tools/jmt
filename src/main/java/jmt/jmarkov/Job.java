@@ -53,7 +53,6 @@ public class Job implements Cloneable {
 		try {
 			clone = super.clone();
 		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return clone;

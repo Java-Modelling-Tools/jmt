@@ -340,19 +340,6 @@ public interface SimulationDefinition {
 	public void setMaxSimulationSamples(Integer maxSamples);
 
 	/**
-	 * Returns maximum number of simulation events.
-	 * @return maximum number of simulation events.
-	 */
-	public Long getMaxSimulationEvents();
-
-	/**
-	 * Sets maximum number of simulation events.
-	 * @param maxSamples maximum number of simulation events.
-	 */
-	public void setMaxSimulationEvents(Long maxEvents);
-
-
-	/**
 	 * Tells if statistic check is disabled.
 	 * @return true if statistic check is disabled, false otherwise.
 	 */
@@ -363,6 +350,18 @@ public interface SimulationDefinition {
 	 * @param disableStatistic true if statistic check is disabled, false otherwise.
 	 */
 	public void setDisableStatistic(Boolean disableStatistic);
+
+	/**
+	 * Returns maximum number of simulation events.
+	 * @return maximum number of simulation events.
+	 */
+	public Integer getMaxSimulationEvents();
+
+	/**
+	 * Sets maximum number of simulation events.
+	 * @param maxEvents maximum number of simulation events.
+	 */
+	public void setMaxSimulationEvents(Integer maxEvents);
 
 	/**
 	 * Returns polling interval for temporary measures.

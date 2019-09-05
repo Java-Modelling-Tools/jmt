@@ -170,7 +170,7 @@ public class ExactModel implements ExactConstants  {
 	 */
 	private Map<SolverAlgorithm, double[][][]> util;
 	/* END */
-	
+
 	private double logNormConst;
 
 	/*****************************************************************/
@@ -489,6 +489,7 @@ public class ExactModel implements ExactConstants  {
 		resultsOK = true;
 		changed = true;*/
 	}
+	/* END */
 
 	public void setResultsBooleans(boolean value) {
 		hasResults = value;
@@ -595,7 +596,7 @@ public class ExactModel implements ExactConstants  {
 		//end NEW
 
 		description = "";
-		
+
 		logNormConst = Double.NaN;
 
 		whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);
@@ -1645,7 +1646,7 @@ public class ExactModel implements ExactConstants  {
 				algorithm_element.setAttribute("name", alg.toString());
 				algorithm_element.setAttribute("iterations", Integer.toString(algIterations.get(alg)[k]));
 				Element nc_element = (Element) algorithm_element.appendChild(root.createElement("normconst"));
-				nc_element.setAttribute("logValue", Double.toString(this.logNormConst));
+				nc_element.setAttribute("logValue", Double.toString(logNormConst));
 
 				for (int i = 0; i < stations; i++) {
 					Element stationresults_element = (Element) algorithm_element.appendChild(root.createElement("stationresults"));

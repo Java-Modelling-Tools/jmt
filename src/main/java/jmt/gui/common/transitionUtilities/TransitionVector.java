@@ -19,6 +19,7 @@
 package jmt.gui.common.transitionUtilities;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>Title: Transition Vector</p>
@@ -30,7 +31,7 @@ import java.util.HashMap;
  */
 public class TransitionVector {
 
-	private HashMap<Object, Integer> vector;
+	private Map<Object, Integer> vector;
 
 	public TransitionVector() {
 		vector = new HashMap<Object, Integer>();

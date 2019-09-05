@@ -587,8 +587,8 @@ public class JabaWizard extends Wizard {
 			// end NEW
 
 			// @author Stefano Omini
-		} catch (InputDataException rse) {
-			JOptionPane.showMessageDialog(this, rse.getMessage(),
+		} catch (InputDataException e) {
+			JOptionPane.showMessageDialog(this, e.getMessage(),
 					"Input data error", JOptionPane.ERROR_MESSAGE);
 			return;
 			// end NEW

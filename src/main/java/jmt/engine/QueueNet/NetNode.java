@@ -80,7 +80,7 @@ public class NetNode extends SimEntity {
 	/**
 	 * The QueueNetwork which this NetNode belong to.
 	 */
-	protected QueueNetwork Network;
+	protected QueueNetwork network;
 
 	private JobInfoList jobsList;
 
@@ -317,7 +317,7 @@ public class NetNode extends SimEntity {
 	 * @return Value of property Network.
 	 */
 	public QueueNetwork getQueueNet() {
-		return Network;
+		return network;
 	}
 
 	/**
@@ -361,7 +361,7 @@ public class NetNode extends SimEntity {
 	 * @return Queue network job classes.
 	 */
 	public JobClassList getJobClasses() {
-		return Network.getJobClasses();
+		return network.getJobClasses();
 	}
 
 	/**
@@ -421,15 +421,11 @@ public class NetNode extends SimEntity {
 		//Look if message is a job message and if job is arriving at this node (from the node
 		//itself or from another node)
 		if (message.getEvent() == NetEvent.EVENT_JOB) {
-			if (inputSection == null || inputSection.automaticUpdateNodeJobinfolist()) {
-				//event job
-				if (message.getSource() != this) {
-					//external source
-					Job job = message.getJob();
-					jobsList.add(new JobInfo(job));
-				} else if ((message.getSourceSection() == NodeSection.OUTPUT) && (message.getDestinationSection() == NodeSection.INPUT)) {
-					//internal source
-					Job job = message.getJob();
+			if ((message.getSource() != this) || ((message.getSource() == this)
+					&& (message.getSourceSection() == NodeSection.OUTPUT && message.getDestinationSection() == NodeSection.INPUT))) {
+				Job job = message.getJob();
+				inputSection.updateVisitPath(job);
+				if (inputSection.automaticUpdateNodeJobinfolist()) {
 					jobsList.add(new JobInfo(job));
 				}
 			}
@@ -542,13 +538,16 @@ public class NetNode extends SimEntity {
 			// If this message is JOB and we are reference node for that job, signals it
 			// This is needed for global measures - Bertoli Marco
 			if (sourceSection == NodeSection.OUTPUT && message.getEvent() == NetEvent.EVENT_JOB) {
-				if (message.getJob().getJobClass().getReferenceNodeName().equals(getName())) {
-					getQueueNet().getJobInfoList().recycleJob(message.getJob());
+				Job job = message.getJob();
+				if (job.getJobClass().getReferenceNodeName().equals(getName()) && !(job instanceof ForkJob)) {
+					getQueueNet().getJobInfoList().recycleJob(job);
 				}
 			}
 
 			if (inputSection != null) {
 				processed = inputSection.receive(message);
+			} else if (sourceSection == NodeSection.NO_ADDRESS) {
+				processed = NodeSection.MSG_PROCESSED;
 			}
 			break;
 
@@ -561,6 +560,8 @@ public class NetNode extends SimEntity {
 			}
 			if (serviceSection != null) {
 				processed = serviceSection.receive(message);
+			} else if (sourceSection == NodeSection.NO_ADDRESS) {
+				processed = NodeSection.MSG_PROCESSED;
 			}
 			break;
 
@@ -575,6 +576,8 @@ public class NetNode extends SimEntity {
 			}
 			if (outputSection != null) {
 				processed = outputSection.receive(message);
+			} else if (sourceSection == NodeSection.NO_ADDRESS) {
+				processed = NodeSection.MSG_PROCESSED;
 			}
 			break;
 		}
@@ -603,14 +606,16 @@ public class NetNode extends SimEntity {
 	 */
 	RemoveToken send(int event, Object data, double delay, byte sourceSection, byte destinationSection, NetNode destination) {
 		//Look if message is a job message and if job is leaving this node
-		if (outputSection != null && outputSection.automaticUpdateNodeJobinfolist()
-				&& (event == NetEvent.EVENT_JOB)
-				&& ((destination != this) || ((destination == this) && (sourceSection == NodeSection.OUTPUT) && (destinationSection == NodeSection.INPUT)))) {
-			Job job = (Job) data;
-			JobInfo jobInfo = jobsList.lookFor(job);
-			if (jobInfo != null) {
-				jobsList.remove(jobInfo);
-				getQueueNet().getJobInfoList().updateResponseSum(jobInfo);
+		if (event == NetEvent.EVENT_JOB) {
+			if ((destination != this) || ((destination == this)
+					&& (sourceSection == NodeSection.OUTPUT && destinationSection == NodeSection.INPUT))) {
+				if (outputSection.automaticUpdateNodeJobinfolist()) {
+					Job job = (Job) data;
+					JobInfo jobInfo = jobsList.lookFor(job);
+					if (jobInfo != null) {
+						jobsList.remove(jobInfo);
+					}
+				}
 			}
 		}
 
@@ -643,47 +648,44 @@ public class NetNode extends SimEntity {
 	//TODO: not used
 	/**
 	 * Sends a message to a section of all the NetNodes of the QueueNetwork.
-	 * @param Event Event tag.
-	 * @param Data  Data to be attached to the message.
-	 * @param Delay Scheduling delay.
-	 * @param SourceSection The source section.
-	 * @param DestinationSection The destination section.
-	 * @param NodeType Type of the node (reference or not: see constants in QueueNetwork).
+	 * @param event Event tag.
+	 * @param data  Data to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param sourceSection The source section.
+	 * @param destinationSection The destination section.
+	 * @param nodeType Type of the node (reference or not: see constants in QueueNetwork).
 	 * @throws NetException
 	 */
-	void sendBroadcast(int Event, Object Data, double Delay, byte SourceSection, byte DestinationSection, int NodeType)
+	void sendBroadcast(int event, Object data, double delay, byte sourceSection, byte destinationSection, int nodeType)
 			throws NetException {
-		int Tag;
+		int tag;
 		ListIterator<NetNode> iterator;
-		if ((Event == NetEvent.EVENT_JOB) || (Event == NetEvent.EVENT_ACK)) {
+		if (event == NetEvent.EVENT_JOB || event == NetEvent.EVENT_ACK) {
 			throw new NetException(this, EXCEPTION_UNABLE_TO_BROADCAST, "message could not be broadcasted.");
 		}
-		Tag = Event & NetEvent.EVENT_MASK;
-		Tag += SourceSection << NodeSection.SOURCE_SHIFT;
-		Tag += DestinationSection << NodeSection.DESTINATION_SHIFT;
+		tag = event & NetEvent.EVENT_MASK;
+		tag += sourceSection << NodeSection.SOURCE_SHIFT;
+		tag += destinationSection << NodeSection.DESTINATION_SHIFT;
 
-		switch (NodeType) {
+		switch (nodeType) {
 		case QueueNetwork.REFERENCE_NODE:
-			iterator = Network.getReferenceNodes().listIterator();
+			iterator = network.getReferenceNodes().listIterator();
 			while (iterator.hasNext()) {
-				//Entity.sim_schedule(((NetNode) Iterator.next()).Entity.get_id(), Delay, Tag, Data);
-				simSchedule(iterator.next().getId(), Delay, Tag, Data);
+				simSchedule(iterator.next().getId(), delay, tag, data);
 			}
 			break;
 		case QueueNetwork.NODE:
-			//Iterator = Network.getReferenceNodes().listIterator();
-			iterator = Network.getNodes().listIterator();
+			iterator = network.getNodes().listIterator();
 			while (iterator.hasNext()) {
-				//Entity.sim_schedule(((NetNode) Iterator.next()).Entity.get_id(), Delay, Tag, Data);
-				simSchedule(iterator.next().getId(), Delay, Tag, Data);
+				simSchedule(iterator.next().getId(), delay, tag, data);
 			}
 			break;
 		}
 	}
 
-	void setNetwork(QueueNetwork Network) {
+	void setNetwork(QueueNetwork network) {
 		// Sets in this method queue network dependent properties
-		this.Network = Network;
+		this.network = network;
 		// When a node is linked to a network, connections between nodes must
 		// have been already done!!!
 		jobsList = new LinkedJobInfoList(getJobClasses().size());
@@ -717,82 +719,54 @@ public class NetNode extends SimEntity {
 	/**
 	 * Redirects a job to a NetNode without updating measures.
 	 * @param job job to be attached to the message.
-	 * @param Delay Scheduling delay.
-	 * @param SourceSection The source section.
-	 * @param DestinationSection The destination section.
-	 * @param Destination The destination node.
+	 * @param delay Scheduling delay.
+	 * @param sourceSection The source section.
+	 * @param destinationSection The destination section.
+	 * @param destination The destination node.
 	 * @return a token to remove sent event.
 	 * @throws NetException
 	 */
-	RemoveToken redirect(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
+	RemoveToken redirect(Job job, double delay, byte sourceSection, byte destinationSection, NetNode destination)
 			throws NetException {
-		NodeSection section = getSection(SourceSection);
-		if (section != null && section.automaticUpdateNodeJobinfolist()
-				&& (Destination != this) || ((Destination == this) && (SourceSection == NodeSection.OUTPUT) && (DestinationSection == NodeSection.INPUT))) {
+		NodeSection section = getSection(sourceSection);
+		if (section.automaticUpdateNodeJobinfolist()) {
 			JobInfo JobInfo = jobsList.lookFor(job);
 			if (JobInfo != null) {
 				jobsList.redirectJob(JobInfo);
 			}
 		}
 
-		int Tag = NetEvent.EVENT_JOB & NetEvent.EVENT_MASK;
-		Tag += SourceSection << NodeSection.SOURCE_SHIFT;
-		Tag += DestinationSection << NodeSection.DESTINATION_SHIFT;
-		return simSchedule(Destination.getId(), Delay, Tag, job);
+		int tag = NetEvent.EVENT_JOB & NetEvent.EVENT_MASK;
+		tag += sourceSection << NodeSection.SOURCE_SHIFT;
+		tag += destinationSection << NodeSection.DESTINATION_SHIFT;
+		return simSchedule(destination.getId(), delay, tag, job);
 	}
 
 	/**
 	 * Sends an "ack" message to a NetNode to inform it that
 	 * the job previously sent has been dropped.
 	 * @param job job to be attached to the message.
-	 * @param Delay Scheduling delay.
-	 * @param SourceSection The source section.
-	 * @param DestinationSection The destination section.
-	 * @param Destination The destination node.
+	 * @param delay Scheduling delay.
+	 * @param sourceSection The source section.
+	 * @param destinationSection The destination section.
+	 * @param destination The destination node.
 	 * @return a token to remove sent event.
 	 * @throws NetException
 	 */
-	RemoveToken sendAckAfterDrop(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
+	RemoveToken sendAckAfterDrop(Job job, double delay, byte sourceSection, byte destinationSection, NetNode destination)
 			throws NetException {
-		NodeSection section = getSection(SourceSection);
-		if (section != null && section.automaticUpdateNodeJobinfolist()) {
+		NodeSection section = getSection(sourceSection);
+		if (section.automaticUpdateNodeJobinfolist()) {
 			JobInfo JobInfo = jobsList.lookFor(job);
 			if (JobInfo != null) {
 				jobsList.dropJob(JobInfo);
 			}
 		}
 
-		int Tag = NetEvent.EVENT_ACK & NetEvent.EVENT_MASK;
-		Tag += SourceSection << NodeSection.SOURCE_SHIFT;
-		Tag += DestinationSection << NodeSection.DESTINATION_SHIFT;
-		return simSchedule(Destination.getId(), Delay, Tag, job);
-	}
-
-	/**
-	 * Sends an "ack" message to a NetNode to inform it that
-	 * the job previously sent has been consumed.
-	 * @param job job to be attached to the message.
-	 * @param Delay Scheduling delay.
-	 * @param SourceSection The source section.
-	 * @param DestinationSection The destination section.
-	 * @param Destination The destination node.
-	 * @return a token to remove sent event.
-	 * @throws NetException
-	 */
-	RemoveToken sendAckAfterConsume(Job job, double Delay, byte SourceSection, byte DestinationSection, NetNode Destination)
-			throws NetException {
-		NodeSection section = getSection(SourceSection);
-		if (section != null && section.automaticUpdateNodeJobinfolist()) {
-			JobInfo JobInfo = jobsList.lookFor(job);
-			if (JobInfo != null) {
-				jobsList.consumeJob(JobInfo);
-			}
-		}
-
-		int Tag = NetEvent.EVENT_ACK & NetEvent.EVENT_MASK;
-		Tag += SourceSection << NodeSection.SOURCE_SHIFT;
-		Tag += DestinationSection << NodeSection.DESTINATION_SHIFT;
-		return simSchedule(Destination.getId(), Delay, Tag, job);
+		int tag = NetEvent.EVENT_ACK & NetEvent.EVENT_MASK;
+		tag += sourceSection << NodeSection.SOURCE_SHIFT;
+		tag += destinationSection << NodeSection.DESTINATION_SHIFT;
+		return simSchedule(destination.getId(), delay, tag, job);
 	}
 
 	/**

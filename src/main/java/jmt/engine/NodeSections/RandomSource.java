@@ -23,10 +23,12 @@ import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
+import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
@@ -48,12 +50,15 @@ public class RandomSource extends InputSection {
 
 	private JobClassList jobClasses;
 
+	private JobInfoList nodeJobsList;
+
+	private GlobalJobInfoList netJobsList;
+
 	/**
 	 * Creates a new instance of RandomSource.
 	 * strategies[i] = null, if the i-th class is closed.
 	 */
 	public RandomSource(ServiceStrategy[] strategies) {
-		super();
 		this.strategies = strategies;
 		waitingJobs = new LinkedList<Job>();
 		coolStart = true;
@@ -63,13 +68,14 @@ public class RandomSource extends InputSection {
 	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
 		jobClasses = getJobClasses();
+		nodeJobsList = node.getJobInfoList();
 	}
 
 	@Override
 	protected int process(NetMessage message) throws NetException {
 		Job job;
-		double delay;
 		int c;
+		double delay;
 
 		switch (message.getEvent()) {
 
@@ -80,10 +86,10 @@ public class RandomSource extends InputSection {
 			//for each job created, it sends to itself a message whose delay is the time of
 			//departure of the job, calculated using the strategy of the corresponding class
 
+			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 			ListIterator<JobClass> it = jobClasses.listIterator();
-			JobClass jobClass;
 			while (it.hasNext()) {
-				jobClass = it.next();
+				JobClass jobClass = it.next();
 				if (jobClass.getType() == JobClass.CLOSED_CLASS) {
 					//closed class: no arrivals
 					continue;
@@ -92,7 +98,8 @@ public class RandomSource extends InputSection {
 				c = jobClass.getId();
 				// Calculates the delay of departure (1/lambda)
 				if (strategies[c] != null) {
-					job = new Job(jobClass, jobClasses.size());
+					job = new Job(jobClass, netJobsList);
+					updateVisitPath(job);
 					delay = strategies[c].wait(this, jobClass);
 					sendMe(job, delay);
 				}
@@ -127,14 +134,15 @@ public class RandomSource extends InputSection {
 				// Signals to section jobInfoList new added job
 				jobsList.add(new JobInfo(job));
 				// Signals to node jobInfoList new added job
-				getOwnerNode().getJobInfoList().add(new JobInfo(job));
+				nodeJobsList.add(new JobInfo(job));
 				// Signals to global jobInfoList new added job
-				getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
+				netJobsList.addJob(job);
 
 				sendForward(job, 0.0);
 
 				// Create a new job and send it to me delayed
-				job = new Job(job.getJobClass(), jobClasses.size());
+				job = new Job(job.getJobClass(), netJobsList);
+				updateVisitPath(job);
 				delay = strategies[c].wait(this, job.getJobClass());
 				sendMe(job, delay);
 
@@ -169,14 +177,15 @@ public class RandomSource extends InputSection {
 				// Signals to section jobInfoList new added job
 				jobsList.add(new JobInfo(job));
 				// Signals to node jobInfoList new added job
-				getOwnerNode().getJobInfoList().add(new JobInfo(job));
+				nodeJobsList.add(new JobInfo(job));
 				// Signals to global jobInfoList new added job
-				getOwnerNode().getQueueNet().getJobInfoList().addJob(job);
+				netJobsList.addJob(job);
 
 				sendForward(job, 0.0);
 
 				// Create a new job and send it to me delayed
-				job = new Job(jobClasses.get(c), jobClasses.size());
+				job = new Job(jobClasses.get(c), netJobsList);
+				updateVisitPath(job);
 				delay = strategies[c].wait(this, jobClasses.get(c));
 				sendMe(job, delay);
 			} else {

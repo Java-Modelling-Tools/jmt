@@ -28,8 +28,8 @@ import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 
 /**
  * This class implements the API to allow use by other applications. One can
- * define the queueing network model details, call the solvers transparently and,
- * afterwards, read the results.
+ * define the queueing network model details, call the solvers transparently
+ * and, afterwards, read the results.
  *
  * @author Michail Makaronidis, 2010
  */
@@ -152,7 +152,7 @@ public class SolverMultiClosedMoM extends SolverMulti {
 	 * Solves the system through the MoM algorithm.
 	 * input(...) must have been called first.
 	 *
-	 * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
+	 * @throws InternalErrorException
 	 * @throws BTFMatrixErrorException 
 	 * @throws InconsistentLinearSystemException 
 	 * @throws OperationNotSupportedException 
@@ -185,13 +185,15 @@ public class SolverMultiClosedMoM extends SolverMulti {
 			QNModel qnm2 = null;
 			try {
 				qnm2 = new QNModel(qnm.R, qnm.M, T, N, Z, mi, D);
-			} catch (Exception e3) {
+			} catch (Exception e1) {
+				e.printStackTrace();
 			}
 			qnm = qnm2;
 			try {
 				c = new MoMSolver(qnm, nThreads);
 				c.computeNormalisingConstant();
-			} catch (Exception e1) {
+			} catch (Exception e2) {
+				e.printStackTrace();
 			}
 		}
 
@@ -199,7 +201,6 @@ public class SolverMultiClosedMoM extends SolverMulti {
 			c.computePerformanceMeasures();
 		} catch (InternalErrorException e) {
 			e.printStackTrace();
-			System.out.println(e.getMessage());
 		}
 
 		clsThroughput = qnm.getMeanThroughputsAsDoubles();

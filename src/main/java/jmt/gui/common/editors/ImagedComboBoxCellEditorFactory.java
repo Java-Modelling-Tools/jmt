@@ -285,7 +285,7 @@ public class ImagedComboBoxCellEditorFactory {
 			case OPTION_STATION_NAMES:
 				if (key != null && key.equals("")) {
 					setText(CommonConstants.ALL_STATIONS);
-					setIcon(JMTImageLoader.loadImage("System", iconSize));
+					setIcon(JMTImageLoader.loadImage("Network", iconSize));
 					break;
 				}
 				if (sd.getStationName(key) != null && !sd.getStationName(key).equals("")) {

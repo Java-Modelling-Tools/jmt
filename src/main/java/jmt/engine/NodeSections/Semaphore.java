@@ -28,10 +28,8 @@ import jmt.engine.NetStrategies.SemaphoreStrategies.NormalSemaphore;
 import jmt.engine.QueueNet.ForkJob;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobInfo;
-import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
-import jmt.engine.QueueNet.NetNode;
 
 /**
  * <p>Title: Semaphore</p>
@@ -52,8 +50,6 @@ public class Semaphore extends InputSection {
 	private HashMap<Job, Boolean> hasFired;
 
 	private SemaphoreStrategy[] semaphoreStrategies;
-
-	private JobInfoList nodeJobsList;
 
 	// --- Constructors -----------------------------------------------------------------------------
 
@@ -76,11 +72,6 @@ public class Semaphore extends InputSection {
 
 	// ----------------------------------------------------------------------------------------------
 
-	@Override
-	protected void nodeLinked(NetNode node) throws NetException {
-		nodeJobsList = node.getJobInfoList();
-	};
-
 	/**
 	 * @param message message to be processed.
 	 * @throws NetException if something goes wrong.
@@ -97,8 +88,6 @@ public class Semaphore extends InputSection {
 
 		case NetEvent.EVENT_JOB:
 			job = message.getJob();
-			send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-
 			if (job instanceof ForkJob) {
 				ForkJob fJob = (ForkJob) job;
 				List<ForkJob> fJobs = forkJobs.get(fJob.getForkedJob());
@@ -106,7 +95,7 @@ public class Semaphore extends InputSection {
 				if (fJobs == null) {
 					fJobs = new ArrayList<ForkJob>();
 					forkJobs.put(fJob.getForkedJob(), fJobs);
-					JobInfo temp = new JobInfo(job);
+					JobInfo temp = new JobInfo(fJob);
 					jobsList.add(temp);
 					jobsList.remove(temp);
 					isFirst = true;
@@ -130,21 +119,13 @@ public class Semaphore extends InputSection {
 				}
 
 				if (isFired) {
-					JobInfo i = nodeJobsList.lookFor(fJob);
-					if (i != null) {
-						nodeJobsList.remove(i);
-					}
-					sendForward(job, 0.0);
+					sendForward(fJob, 0.0);
 				} else {
 					needed--;
 					required.put(fJob.getForkedJob(), needed);
 
 					if (needed == 0) {
 						for (ForkJob j : forkJobs.get(fJob.getForkedJob())) {
-							JobInfo i = nodeJobsList.lookFor(j);
-							if (i != null) {
-								nodeJobsList.remove(i);
-							}
 							sendForward(j, 0.0);
 						}
 						hasFired.put(fJob.getForkedJob(), true);
@@ -162,6 +143,7 @@ public class Semaphore extends InputSection {
 			} else {
 				sendForward(job, 0.0);
 			}
+			send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 			break;
 
 		case NetEvent.EVENT_ACK:
@@ -180,7 +162,7 @@ public class Semaphore extends InputSection {
 			return MSG_NOT_PROCESSED;
 		}
 
-		// Everything was okay
+		// Everything is okay
 		return MSG_PROCESSED;
 	}
 

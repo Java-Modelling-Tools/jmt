@@ -18,14 +18,15 @@
 
 package jmt.engine.NodeSections;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobClassList;
-import jmt.engine.QueueNet.JobInfoList;
-import jmt.engine.QueueNet.LinkedJobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
@@ -41,7 +42,7 @@ public class Terminal extends InputSection {
 
 	private boolean coolStart; //when is true the waitingjobs queue is void
 
-	private JobInfoList waitingRequests;
+	private List<WaitingRequest> waitingRequests;
 
 	private int[] jobsPerClass; //number of jobs per class
 
@@ -52,7 +53,6 @@ public class Terminal extends InputSection {
 	 * @param jobsPerClass number of jobs for each class.
 	 */
 	public Terminal(int[] jobsPerClass) {
-		super();
 		coolStart = true;
 		this.jobsPerClass = new int[jobsPerClass.length];
 		for (int c = 0; c < this.jobsPerClass.length; c++) {
@@ -65,7 +65,6 @@ public class Terminal extends InputSection {
 	 * @param jobsPerClass number of jobs for each class.
 	 */
 	public Terminal(Integer[] jobsPerClass) {
-		super();
 		coolStart = true;
 		this.jobsPerClass = new int[jobsPerClass.length];
 		for (int c = 0; c < this.jobsPerClass.length; c++) {
@@ -77,13 +76,12 @@ public class Terminal extends InputSection {
 	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
 		jobClasses = getJobClasses();
-		waitingRequests = new LinkedJobInfoList(jobClasses.size());
+		waitingRequests = new LinkedList<WaitingRequest>();
 	}
 
 	@Override
 	protected int process(NetMessage message) throws NetException {
 		Job job;
-		int c;
 
 		switch (message.getEvent()) {
 
@@ -94,39 +92,42 @@ public class Terminal extends InputSection {
 			//for each job created, it sends to itself a message with delay 0
 
 			ListIterator<JobClass> it = jobClasses.listIterator();
-			JobClass jobClass;
 
 			//generator of random numbers (uses the same engine of
 			//distributions and strategies) used to mix the order of
 			//leaving jobs, otherwise they leave in order of class
 			//(i.e. c1, c1, c1, ...c2, c2, c2, ... c3....)
-			RandomEngine randomEng = RandomEngine.makeDefault();
+			RandomEngine randomEngine = RandomEngine.makeDefault();
 
 			//delay used to mix leaving order
 			double mixRandomDelay = 0.0;
 
+			//global jobInfoList used to create jobs
+			GlobalJobInfoList netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 			while (it.hasNext()) {
-				jobClass = it.next();
+				JobClass jobClass = it.next();
 
 				if (jobClass.getType() == JobClass.OPEN_CLASS) {
-					//open class: no jobs to be generated
+					//open class: no jobs to be created
 					continue;
 				}
 
-				c = jobClass.getId();
+				int c = jobClass.getId();
 
 				if (jobsPerClass != null) {
 					//terminal of a closed system
-					//generates all the jobs
+					//creates all the jobs
 					for (int i = 0; i < jobsPerClass[c]; i++) {
 						//note that if jobsPerClass[c] = -1 (open class) the instructions
 						//of this for are not performed
 
 						//each job is created and sent to the terminal itself
-						job = new Job(jobClass, jobClasses.size());
+						job = new Job(jobClass, netJobsList);
+						updateVisitPath(job);
+						netJobsList.addJob(job);
 
 						//sets a random (very small) delay to mix the jobs
-						mixRandomDelay = (randomEng.raw()) * 0.00001;
+						mixRandomDelay = (randomEngine.raw()) * 0.00001;
 
 						sendMe(job, mixRandomDelay);
 					}
@@ -152,7 +153,7 @@ public class Terminal extends InputSection {
 			if (coolStart) {
 				//the queue of waiting jobs is empty
 
-				if (message.getSource() == this.getOwnerNode() && message.getSourceSection() == this.getSectionID()) {
+				if (message.getSource() == getOwnerNode() && message.getSourceSection() == getSectionID()) {
 					//message sent by the terminal itself
 					sendForward(job, 0.0);
 
@@ -183,9 +184,8 @@ public class Terminal extends InputSection {
 			//departure of that job.
 			//otherwise, if there are no waiting jobs, sets coolstart=true
 
-			if (waitingRequests.size() != 0) {
-				WaitingRequest wr;
-				wr = (WaitingRequest) waitingRequests.removeFirst();
+			if (waitingRequests.size() > 0) {
+				WaitingRequest wr = waitingRequests.remove(0);
 
 				if (!isMyOwnerNode(wr.getSource())) {
 					send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSourceSection(), wr.getSource());

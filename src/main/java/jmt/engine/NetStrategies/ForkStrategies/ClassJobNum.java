@@ -30,16 +30,16 @@ public class ClassJobNum {
 
 	public ClassJobNum(String name, String[] classes, Integer[] numbers) {
 		this.name = name;
-		this.numbers = numbers;
 		this.classes = classes;
+		this.numbers = numbers;
 	}
 
 	public ClassJobNum(String name, String[] classes, String[] numbers) {
 		this.name = name;
+		this.classes = classes;
 		this.numbers = new Integer[numbers.length];
 		for (int i = 0; i < numbers.length; i++)
 			this.numbers[i] = Integer.parseInt(numbers[i]);
-		this.classes = classes;
 	}
 
 	/**
@@ -50,24 +50,17 @@ public class ClassJobNum {
 	}
 
 	/**
-	 * @param name the name to set
+	 * @return the classes
 	 */
-	public void setName(String name) {
-		this.name = name;
+	public String[] getClasses() {
+		return classes;
 	}
 
 	/**
 	 * @return the numbers
 	 */
 	public Integer[] getNumbers() {
-		return numbers.clone();
-	}
-
-	/**
-	 * @return the classes
-	 */
-	public String[] getClasses() {
-		return classes.clone();
+		return numbers;
 	}
 
 }

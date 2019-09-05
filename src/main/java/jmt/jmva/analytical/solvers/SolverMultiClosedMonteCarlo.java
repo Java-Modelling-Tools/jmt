@@ -5,7 +5,6 @@ import jmt.jmva.analytical.solvers.DataStructures.QNModel;
 import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueueingNet.CoMoMBTFSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.MonteCarloSolver;
 import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
 
@@ -127,7 +126,7 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 	 * Solves the system through the MonteCarlo algorithm.
 	 * input(...) must have been called first.
 	 *
-	 * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
+	 * @throws InternalErrorException
 	 * @throws BTFMatrixErrorException
 	 * @throws InconsistentLinearSystemException
 	 * @throws OperationNotSupportedException
@@ -161,19 +160,22 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 			QNModel qnm2 = null;
 			try {
 				qnm2 = new QNModel(qnm.R, qnm.M, T, N, Z, mi, D);
-			} catch (Exception e3) {
+			} catch (Exception e1) {
+				e.printStackTrace();
 			}
 			qnm = qnm2;
 			try {
-				c = new CoMoMBTFSolver(qnm);
+				c = new MonteCarloSolver(qnm, tolerance, maxSamples);
 				c.computeNormalisingConstant();
-			} catch (Exception e1) {
+			} catch (Exception e2) {
+				e.printStackTrace();
 			}
 		}
 
 		try {
 			c.computePerformanceMeasures();
 		} catch (InternalErrorException e) {
+			e.printStackTrace();
 		}
 
 		clsThroughput = qnm.getMeanThroughputsAsDoubles();

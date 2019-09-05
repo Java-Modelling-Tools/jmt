@@ -20,7 +20,7 @@ package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
 import java.util.HashMap;
-import static java.lang.System.*;
+
 import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -68,16 +68,16 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 	// Simulation parameters
 	protected JCheckBox randomSeed;
 	protected JCheckBox infDuration;
-	protected JCheckBox noStatistic;
 	protected JCheckBox infSimulated;
+	protected JCheckBox noStatistic;
 	protected JCheckBox infEvents;
 	protected JCheckBox animationEnabler;
 	protected JSpinner seed;
 	protected JSpinner duration;
-	protected JSpinner polling;
+	protected JSpinner simulated;
 	protected JSpinner maxSamples;
 	protected JSpinner maxEvents;
-	protected JSpinner simulated;
+	protected JSpinner polling;
 	protected JTable preloadTable;
 
 	private GuiInterface gui;
@@ -192,10 +192,10 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		label.setLabelFor(seed);
 		simPanel.add(seed);
 		randomSeed = new JCheckBox("random");
+		randomSeed.setToolTipText("Uses a random seed to initialize the random number generator");
 		if (simd.getUseRandomSeed().booleanValue()) {
 			randomSeed.setSelected(true);
 			seed.setEnabled(false);
-			randomSeed.setToolTipText("Uses a random seed to initialize the random number generator");
 		}
 		simPanel.add(randomSeed);
 		// Maximum duration
@@ -232,17 +232,16 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 
 		// Maximum number of samples
 		label = new JLabel("Maximum number of samples: ");
-		label.setToolTipText("Maximum number of samples used to estimate a performance index");
+		label.setToolTipText("Maximum number of samples collected for each performance index");
 		simPanel.add(label);
 		maxSamples = new JSpinner(new SpinnerNumberModel(1000000, 100000, Integer.MAX_VALUE, 50000));
 		maxSamples.setValue(simd.getMaxSimulationSamples());
-		maxSamples.setToolTipText("Maximum number of simulation observations used to determine a performance index");
+		maxSamples.setToolTipText("Maximum number of samples collected for each performance index");
 		label.setLabelFor(maxSamples);
 		simPanel.add(maxSamples);
-
 		// Adds disable statistic checkbox
 		noStatistic = new JCheckBox("no automatic stop");
-		noStatistic.setToolTipText("Disable confidence interval/maximum relative error as simulation stopping criteria");
+		noStatistic.setToolTipText("Disables confidence interval/maximum relative error as simulation stopping criteria");
 		noStatistic.setSelected(simd.getDisableStatistic().booleanValue());
 		simPanel.add(noStatistic);
 
@@ -250,19 +249,19 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		label = new JLabel("Maximum number of events: ");
 		label.setToolTipText("Maximum number of events processed by the simulation engine");
 		simPanel.add(label);
-		maxEvents = new JSpinner(new SpinnerNumberModel(10000000L, 100000L, Long.MAX_VALUE, 50000L));
-		maxEvents.setValue(simd.getMaxSimulationEvents().longValue());
+		maxEvents = new JSpinner(new SpinnerNumberModel(1000000, 100000, Integer.MAX_VALUE, 50000));
+		maxEvents.setValue(simd.getMaxSimulationEvents());
+		maxEvents.setToolTipText("Maximum number of events processed by the simulation engine");
 		label.setLabelFor(maxEvents);
+		simPanel.add(maxEvents);
 		infEvents = new JCheckBox("infinite");
 		infEvents.setToolTipText("Disables the bound on the number of events");
-		if (simd.getMaxSimulationEvents().longValue() < 0) {
+		if (simd.getMaxSimulationEvents().intValue() < 0) {
 			infEvents.setSelected(true);
-			maxEvents.setValue(10000000L);
+			maxEvents.setValue(new Integer(1000000));
 			maxEvents.setEnabled(false);
 		}
-		simPanel.add(maxEvents);
 		simPanel.add(infEvents);
-
 
 		if (gui.isAnimationDisplayable()) {
 			animationEnabler = new JCheckBox("animation");
@@ -316,12 +315,8 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 					simd.setMaximumDuration(new Double(-1));
 					duration.setEnabled(false);
 				} else {
-					Object value = duration.getValue();
-					if (value instanceof Double) {
-						simd.setMaximumDuration((Double) value);
-					} else if (value instanceof Integer) {
-						simd.setMaximumDuration(new Double(((Integer) value).intValue()));
-					}
+					Double value = (Double) duration.getValue();
+					simd.setMaximumDuration(value);
 					duration.setEnabled(true);
 				}
 			}
@@ -334,35 +329,12 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 					simd.setMaxSimulatedTime(new Double(-1));
 					simulated.setEnabled(false);
 				} else {
-					Object value = simulated.getValue();
-					if (value instanceof Double) {
-						simd.setMaxSimulatedTime((Double) value);
-					} else if (value instanceof Integer) {
-						simd.setMaxSimulatedTime(new Double(((Integer) value).intValue()));
-					}
+					Double value = (Double) simulated.getValue();
+					simd.setMaxSimulatedTime(value);
 					simulated.setEnabled(true);
 				}
 			}
 		});
-
-		// Infinite simulated events
-		infEvents.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				if (infEvents.isSelected()) {
-					simd.setMaxSimulationEvents(new Long(-1));
-					maxEvents.setEnabled(false);
-				} else {
-					Object value = maxEvents.getValue();
-					if (value instanceof Long) {
-						simd.setMaxSimulationEvents((Long) value);
-					} else if (value instanceof Integer) {
-						simd.setMaxSimulationEvents(new Long(((Integer) value).intValue()));
-					}
-					maxEvents.setEnabled(true);
-				}
-			}
-		});
-
 
 		// Disable statistic
 		noStatistic.addChangeListener(new ChangeListener() {
@@ -371,6 +343,21 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 			}
 		});
 
+		// Infinite number of events
+		infEvents.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if (infEvents.isSelected()) {
+					simd.setMaxSimulationEvents(new Integer(-1));
+					maxEvents.setEnabled(false);
+				} else {
+					Integer value = (Integer) maxEvents.getValue();
+					simd.setMaxSimulationEvents(value);
+					maxEvents.setEnabled(true);
+				}
+			}
+		});
+
+		// Enable Animation
 		if (animationEnabler != null) {
 			animationEnabler.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
@@ -398,72 +385,25 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 						simd.setSimulationSeed(new Long(i.intValue()));
 					}
 				}
-				seed.setValue(simd.getSimulationSeed());
 			}
 		});
 
 		// Duration
 		duration.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Object value = duration.getValue();
-				if (value instanceof Double) {
-					Double d = (Double) value;
-					if (d.doubleValue() >= MINIMUM_TIME) {
-						simd.setMaximumDuration(d);
-					}
-				} else if (value instanceof Integer) {
-					Integer i = (Integer) value;
-					if (i.intValue() >= MINIMUM_TIME) {
-						simd.setMaximumDuration(new Double(i.intValue()));
-					}
+				Double value = (Double) duration.getValue();
+				if (value.doubleValue() >= MINIMUM_TIME) {
+					simd.setMaximumDuration(value);
 				}
-				duration.setValue(simd.getMaximumDuration());
 			}
 		});
 
 		// Simulated Time
 		simulated.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Object value = simulated.getValue();
-				if (value instanceof Double) {
-					Double d = (Double) value;
-					if (d.doubleValue() >= MINIMUM_TIME) {
-						simd.setMaxSimulatedTime(d);
-					}
-				} else if (value instanceof Integer) {
-					Integer i = (Integer) value;
-					if (i.intValue() >= MINIMUM_TIME) {
-						simd.setMaxSimulatedTime(new Double(i.intValue()));
-					}
-				}
-				simulated.setValue(simd.getMaxSimulatedTime());
-			}
-		});
-
-		// Simulated events
-		
-		maxEvents.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				Object value = maxEvents.getValue();
-				if (value instanceof Long) {
-					Long l = (Long) value;
-					if (l.longValue() >= -1) {
-						simd.setMaxSimulationEvents(l);
-						maxEvents.setValue(l.longValue());
-					}
-				} else if (value instanceof Integer) {
-					Integer i = (Integer) value;
-					if (i.intValue() >= -1) {
-						simd.setMaxSimulationEvents(new Long(i.intValue()));
-						maxEvents.setValue(i.intValue());
-					}
-				} else if (value instanceof Double) {
-					Double d = (Double) value;
-					if (d.doubleValue() >= -1) {
-						long l = (new Double(Math.round(d.doubleValue()))).longValue();
-						simd.setMaxSimulationEvents(l);
-						maxEvents.setValue(d);
-					}
+				Double value = (Double) simulated.getValue();
+				if (value.doubleValue() >= MINIMUM_TIME) {
+					simd.setMaxSimulatedTime(value);
 				}
 			}
 		});
@@ -471,33 +411,30 @@ public class SimulationPanel extends WizardPanel implements CommonConstants {
 		// Maximum number of samples
 		maxSamples.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Object value = maxSamples.getValue();
-				if (value instanceof Integer) {
-					Integer i = (Integer) value;
-					if (i.intValue() >= 100000) {
-						simd.setMaxSimulationSamples(i);
-					}
+				Integer value = (Integer) maxSamples.getValue();
+				if (value.intValue() >= 100000) {
+					simd.setMaxSimulationSamples(value);
 				}
-				maxSamples.setValue(simd.getMaxSimulationSamples());
 			}
 		});
 
-		//Polling interval
+		// Maximum number of events
+		maxEvents.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Integer value = (Integer) maxEvents.getValue();
+				if (value.intValue() >= 100000) {
+					simd.setMaxSimulationEvents(value);
+				}
+			}
+		});
+
+		// Polling interval
 		polling.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Object value = polling.getValue();
-				if (value instanceof Double) {
-					Double d = (Double) value;
-					if (d.doubleValue() > 0) {
-						simd.setPollingInterval(d);
-					}
-				} else if (value instanceof Integer) {
-					Integer i = (Integer) value;
-					if (i.intValue() > 0) {
-						simd.setPollingInterval(new Double(i.intValue()));
-					}
+				Double value = (Double) polling.getValue();
+				if (value.doubleValue() > 0) {
+					simd.setPollingInterval(value);
 				}
-				polling.setValue(simd.getPollingInterval());
 			}
 		});
 	}

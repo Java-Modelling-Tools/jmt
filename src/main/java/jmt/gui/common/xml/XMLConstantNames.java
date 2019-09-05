@@ -39,8 +39,8 @@ public interface XMLConstantNames {
 	public static final String XML_A_ROOT_LOGREPLACE = "logReplaceMode"; /* MF08 0.7.4 - replacement mode */
 	public static final String XML_A_ROOT_POLLING = "polling";
 	public static final String XML_A_ROOT_MAXSAMPLES = "maxSamples";
-	public static final String XML_A_ROOT_MAXEVENTS = "maxEvents";
 	public static final String XML_A_ROOT_DISABLESTATISTIC = "disableStatisticStop";
+	public static final String XML_A_ROOT_MAXEVENTS = "maxEvents";
 
 	public static final String XML_E_CLASS = "userClass";
 	public static final String XML_A_CLASS_NAME = "name";

@@ -19,6 +19,8 @@
 package jmt.engine.NodeSections;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.QueueGetStrategy;
@@ -101,11 +103,7 @@ public class Queue extends InputSection {
 	//the JobInfoList used for Fork nodes
 	private JobInfoList FJList;
 
-	//number of dropped jobs
-	private int droppedJobs;
-	private int[] droppedJobsPerClass;
-
-	private JobInfoList waitingRequests;
+	private List<WaitingRequest> waitingRequests;
 
 	private QueueGetStrategy getStrategy;
 
@@ -267,16 +265,13 @@ public class Queue extends InputSection {
 	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
 		jobClasses = getJobClasses();
-		waitingRequests = new LinkedJobInfoList(jobClasses.size());
+		waitingRequests = new LinkedList<WaitingRequest>();
 		if (putStrategies == null) {
 			putStrategies = new QueuePutStrategy[jobClasses.size()];
 			for (int i = 0; i < putStrategies.length; i++) {
 				putStrategies[i] = new TailStrategy();
 			}
 		}
-		droppedJobs = 0;
-		droppedJobsPerClass = new int[jobClasses.size()];
-		Arrays.fill(droppedJobsPerClass, 0);
 		//retrieves the job info list of the owner node
 		nodeJobsList = node.getJobInfoList();
 		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
@@ -290,6 +285,7 @@ public class Queue extends InputSection {
 	 * @throws NetException
 	 */
 	public void preloadJobs(int[] jobsPerClass) throws NetException {
+		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 		int totalJobs = 0;
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			totalJobs += jobsPerClass[i];
@@ -298,12 +294,15 @@ public class Queue extends InputSection {
 		int index = 0;
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			for (int j = 0; j < jobsPerClass[i]; j++) {
-				jobPermutation[index] = new Job(jobClasses.get(i), jobClasses.size());
+				Job job = new Job(jobClasses.get(i), netJobsList);
+				updateVisitPath(job);
+				jobPermutation[index] = job;
 				index++;
 			}
 		}
 
 		/* Commented to ensure a deterministic initialization
+		// Durstenfeld Shuffle
 		RandomEngine randomEngine = RandomEngine.makeDefault();
 		for (int i = jobPermutation.length - 1; i > 0; i--) {
 			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
@@ -312,7 +311,6 @@ public class Queue extends InputSection {
 			jobPermutation[j] = job;
 		}*/
 
-		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 		for (int i = 0; i < jobPermutation.length; i++) {
 			Job job = jobPermutation[i];
 			JobInfo jobInfo = new JobInfo(job);
@@ -380,9 +378,7 @@ public class Queue extends InputSection {
 			//----REDIRECTION BEHAVIOUR----------//
 			if (redirectionON) {
 				NetNode source = message.getSource();
-				boolean fromTheInside = myRegion.belongsToRegion(source);
-
-				if (!fromTheInside) {
+				if (!myRegion.belongsToRegion(source)) {
 					//this message has arrived from the outside of the blocking region
 					if ((source != regionInputStation)) {
 						//the external source is not the input station
@@ -391,7 +387,7 @@ public class Queue extends InputSection {
 
 						//redirects the message to the inputStation
 						redirect(job, 0.0, NodeSection.INPUT, regionInputStation);
-						//send a ack to the source
+						//send an ack to the source
 						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 						break;
 					}
@@ -463,8 +459,6 @@ public class Queue extends InputSection {
 					if (!(job instanceof ForkJob)) {
 						//drops job from global jobInfoList
 						netJobsList.dropJob(job);
-						droppedJobs++;
-						droppedJobsPerClass[job.getJobClass().getId()]++;
 					}
 					//drops job from node jobInfoList and then sends ack back
 					sendAckAfterDrop(job, 0.0, message.getSourceSection(), message.getSource());
@@ -496,8 +490,8 @@ public class Queue extends InputSection {
 
 			// if there is a waiting request send ack to the first node
 			//(note that with infinite queue there are no waiting requests)
-			if (waitingRequests.size() != 0) {
-				WaitingRequest wr = (WaitingRequest) waitingRequests.removeFirst();
+			if (waitingRequests.size() > 0) {
+				WaitingRequest wr = waitingRequests.remove(0);
 
 				// If the source is not the owner node sends ack if blocking is enabled. Otherwise 
 				// ack was already sent.
@@ -523,13 +517,13 @@ public class Queue extends InputSection {
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-				job = (Job) message.getData();
-				JobInfo data = FJList.lookFor(job);
-				if (data != null) {
-					FJList.remove(data);
-					netJobsList.updateResponseSum(data);
-				}
+			if (!(getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork)) {
+				return MSG_NOT_PROCESSED;
+			}
+			job = (Job) message.getData();
+			JobInfo jobInfo = FJList.lookFor(job);
+			if (jobInfo != null) {
+				FJList.remove(jobInfo);
 			}
 			break;
 
@@ -547,23 +541,6 @@ public class Queue extends InputSection {
 		}
 
 		return MSG_PROCESSED;
-	}
-
-	/**
-	 * Gets the total number of dropped jobs.
-	 * @return the total number of dropped jobs.
-	 */
-	public int getDroppedJobs() {
-		return droppedJobs;
-	}
-
-	/**
-	 * Gets the number of dropped jobs for the specified class.
-	 * @param classIndex the index of the job class.
-	 * @return the number of dropped jobs for the specified class.
-	 */
-	public int getDroppedJobsPerClass(int classIndex) {
-		return droppedJobsPerClass[classIndex];
 	}
 
 	@Override

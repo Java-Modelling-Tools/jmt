@@ -76,7 +76,7 @@ public class JSIMGraphMain extends JMTFrame {
 		toolbar = mediator.createToolbar();
 		getContentPane().setLayout(new MultiBorderLayout());
 		getContentPane().add(toolbar, BorderLayout.NORTH);
-		// Uncomment to set vertical orientation for the component bar in jSIMGraph
+		// Uncomment to set vertical orientation for the component bar in JSIMGraph
 		// getContentPane().add(mediator.getComponentBar(), BorderLayout.WEST);
 		getContentPane().add(mediator.getComponentBar(), BorderLayout.NORTH);
 		mainPane = new JPanel(new BorderLayout());
@@ -155,7 +155,7 @@ public class JSIMGraphMain extends JMTFrame {
 				System.err.print("Invalid model file: " + file.getAbsolutePath());
 				System.exit(1);
 			}
-			mw.mediator.openModel(file, false);
+			mw.mediator.openModel(file);
 			mw.mediator.tryAdjustGraph(false);
 		}
 	}

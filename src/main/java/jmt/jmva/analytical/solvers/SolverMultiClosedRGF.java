@@ -128,7 +128,7 @@ public class SolverMultiClosedRGF extends SolverMulti {
 	 * Solves the system through the RGF algorithm.
 	 * input(...) must have been called first.
 	 *
-	 * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
+	 * @throws InternalErrorException
 	 * @throws BTFMatrixErrorException
 	 * @throws InconsistentLinearSystemException
 	 * @throws OperationNotSupportedException
@@ -161,20 +161,17 @@ public class SolverMultiClosedRGF extends SolverMulti {
 			scale = newscale;
 
 			QNModel qnm2 = null;
-
 			try {
 				qnm2 = new QNModel(qnm.R, qnm.M, T, N, Z, mi, D);
-			} catch (Exception e2) {
-				// TODO Auto-generated catch block
-				e2.printStackTrace();
+			} catch (Exception e1) {
+				e1.printStackTrace();
 			}
-
 			qnm = qnm2;
 			try {
 				c = new RGFSolver(qnm);
 				c.computeNormalisingConstant();
-			} catch (Exception e1) {
-				e1.printStackTrace();
+			} catch (Exception e2) {
+				e2.printStackTrace();
 			}
 		}
 

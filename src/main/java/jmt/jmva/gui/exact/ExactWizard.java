@@ -622,11 +622,11 @@ public class ExactWizard extends Wizard {
 
 		try {
 			tempFile = solver.solve(newdata);
-		} catch (UnsupportedModelException e) {			
+		} catch (UnsupportedModelException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage(), "Unsupported model", JOptionPane.WARNING_MESSAGE);
 			return;
-		} catch (InputDataException rse) {
-			JOptionPane.showMessageDialog(this, rse.getMessage(), "Input data error", JOptionPane.ERROR_MESSAGE);
+		} catch (InputDataException e) {
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Input data error", JOptionPane.ERROR_MESSAGE);
 			return;
 		} catch (SolverException e) {
 			JOptionPane.showMessageDialog(this, e.getMessage(), "Solver error", JOptionPane.ERROR_MESSAGE);

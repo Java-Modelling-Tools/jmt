@@ -60,7 +60,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			}
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the value must be one");
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one or zero");
 		}
 	}
 
@@ -86,7 +86,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			return cdf[k];
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one");
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one or zero");
 		}
 	}
 
@@ -111,7 +111,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			return mean;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the value must be one");
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one or zero");
 		}
 	}
 
@@ -138,7 +138,7 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			return variance;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one");
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one or zero");
 		}
 	}
 
@@ -168,24 +168,8 @@ public class Empirical extends AbstractDistribution implements Distribution {
 			return -1.0;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one");
+					"Remember: all the probability values given must be equal to or greater than zero and the sum of all the values must be one or zero");
 		}
-	}
-
-	/**
-	 * Computes the next random value and returns the corresponding object.
-	 *
-	 * @param p parameter of the empirical distribution.
-	 * @throws IncorrectDistributionParameterException
-	 * @return object corresponding to the computed random value.
-	 */
-	public Object nextRandObject(Parameter p) throws IncorrectDistributionParameterException {
-		int random = (int) nextRand(p);
-		if (p instanceof EmpiricalPar) {
-			EmpiricalPar empiricalPar = (EmpiricalPar) p;
-			return empiricalPar.getValue(random);
-		}
-		return null;
 	}
 
 } // end Empirical

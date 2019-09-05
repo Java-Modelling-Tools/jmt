@@ -126,7 +126,6 @@ public class IntervalInputLoader extends InputLoader implements JWATConstants {
 						try {
 							w.write("Error in row " + (totalRaw + minInd) + " : Line does not match format (element " + i + " not found)\n");
 						} catch (IOException e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						break;

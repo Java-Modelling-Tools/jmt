@@ -13,7 +13,7 @@ public class CoMoMSimpleSolver extends CoMoMSolver {
 
 	public CoMoMSimpleSolver(QNModel qnm, int num_threads) throws InternalErrorException {
 		super(qnm);
-		basis =  new BTFCoMoMBasis(qnm);		
+		basis =  new BTFCoMoMBasis(qnm);
 		system = new SimpleLinearSystem(qnm, basis, num_threads);
 	}
 

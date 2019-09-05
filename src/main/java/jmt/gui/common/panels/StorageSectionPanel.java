@@ -120,6 +120,23 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 	}
 
 	private void addDataManagers() {
+		capacitySpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				Object value = capacitySpinner.getValue();
+				if (value instanceof Integer) {
+					if (((Integer) value).intValue() < 1) {
+						value = Integer.valueOf(1);
+						capacitySpinner.setValue(value);
+						return;
+					}
+					stationData.setStationQueueCapacity(stationKey, (Integer) value);
+				} else {
+					stationData.setStationQueueCapacity(stationKey, Integer.valueOf(-1));
+				}
+			}
+		});
+
 		infiniteCheckBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -141,23 +158,6 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 					capacitySpinner.setEnabled(true);
 				}
 				optionTable.repaint();
-			}
-		});
-
-		capacitySpinner.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				Object value = capacitySpinner.getValue();
-				if (value instanceof Integer) {
-					if (((Integer) value).intValue() < 1) {
-						value = Integer.valueOf(1);
-						capacitySpinner.setValue(value);
-						return;
-					}
-					stationData.setStationQueueCapacity(stationKey, (Integer) value);
-				} else {
-					stationData.setStationQueueCapacity(stationKey, Integer.valueOf(-1));
-				}
 			}
 		});
 	}

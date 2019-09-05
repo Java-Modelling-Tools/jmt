@@ -116,6 +116,10 @@ public class PhaseType extends Distribution {
 		return parameters;
 	}
 
+	/**
+	 * Sets illustrating figure in distribution panel
+	 * @return illustrating figure
+	 */
 	@Override
 	protected ImageIcon setImage() {
 		return JMTImageLoader.loadImage("PhaseType");
@@ -154,5 +158,5 @@ public class PhaseType extends Distribution {
 		buff.append("])");
 		return buff.toString();
 	}
-	
+
 }

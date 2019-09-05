@@ -64,7 +64,7 @@ import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 public class PNMLWriter implements PNMLConstants, CommonConstants {
 
 	public static final int ALL_RIGHT = 0;
-	public static final int OPEN_CLASSES = 1;
+	public static final int MULTIPLE_CLASSES = 1;
 	public static final int NON_PETRI_NET_STATIONS = 2;
 
 	private static DocumentBuilder docBuilder;
@@ -77,8 +77,8 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 	 * @return integer indicating the result of the check
 	 */
 	public static int checkModel(CommonModel model) {
-		if (model.getOpenClassKeys().size() > 0) {
-			return OPEN_CLASSES;
+		if (model.getClassKeys().size() > 1) {
+			return MULTIPLE_CLASSES;
 		}
 		Vector<Object> stationKeys = model.getStationKeys();
 		Vector<Object> placeKeys = model.getStationKeysPlace();
@@ -114,7 +114,7 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 			transformer.setOutputProperty(OutputKeys.INDENT, "no");
 			HLAPIRootClass docApi = null;
 			String modelName = file.getName().substring(0, file.getName().lastIndexOf(".pnml"));
-			int numberOfClasses = model.getClosedClassKeys().size();
+			int numberOfClasses = model.getClassKeys().size();
 			switch (numberOfClasses) {
 			case 0:
 			{
@@ -267,7 +267,7 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 						"g-" + UUID.randomUUID().toString(), net);
 		new fr.lip6.move.pnml.ptnet.hlapi.NameHLAPI("top-level", page);
 
-		Object classKey = model.getClosedClassKeys().get(0);
+		Object classKey = model.getClassKeys().get(0);
 		Map<String, fr.lip6.move.pnml.ptnet.hlapi.NodeHLAPI> nodeMap =
 				new HashMap<String, fr.lip6.move.pnml.ptnet.hlapi.NodeHLAPI>();
 
@@ -405,16 +405,29 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 	private static void appendSpecificNetParameters(StringWriter writer, CommonModel model)
 			throws TransformerException {
 		Element tokens = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS);
-		Object classKey = model.getClosedClassKeys().get(0);
+		Object classKey = model.getClassKeys().get(0);
 		Element name = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_CLASS_NAME);
 		String text = model.getClassName(classKey);
 		name.setTextContent(text);
 		tokens.appendChild(name);
 
+		Element type = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_CLASS_TYPE);
+		if (model.getClassType(classKey) == CLASS_TYPE_OPEN) {
+			text = PNML_JSIM_V_NET_TOKENS_CLASS_TYPE_OPEN;
+		} else {
+			text = PNML_JSIM_V_NET_TOKENS_CLASS_TYPE_CLOSED;
+		}
+		type.setTextContent(text);
+		tokens.appendChild(type);
+
 		Object nodeKey = model.getClassRefStation(classKey);
 		if (nodeKey != null) {
 			Element referenceNode = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_REFERENCE_NODE);
-			text = model.getStationName(nodeKey);
+			if (STATION_TYPE_TRANSITION.equals(nodeKey)) {
+				text = STATION_TYPE_TRANSITION;
+			} else {
+				text = model.getStationName(nodeKey);
+			}
 			referenceNode.setTextContent(text);
 			tokens.appendChild(referenceNode);
 		}
@@ -439,7 +452,7 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 	private static void appendSpecificPlaceParameters(StringWriter writer, CommonModel model, Object place)
 			throws TransformerException {
 		Element capacity = elemCreator.createElement(PNML_JSIM_E_PLACE_CAPACITY);
-		Object classKey = model.getClosedClassKeys().get(0);
+		Object classKey = model.getClassKeys().get(0);
 		String text = String.valueOf(model.getQueueCapacity(place, classKey));
 		capacity.setTextContent(text);
 		transformer.transform(new DOMSource(capacity), new StreamResult(writer));

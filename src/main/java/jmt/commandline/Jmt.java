@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.channels.FileChannel;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -136,7 +136,7 @@ public class Jmt {
 		}
 	}
 
-	public static void mva(File model, File result) throws SolverException, InputDataException, IOException {
+	public static void mva(File model, File result) throws InputDataException, SolverException, IOException {
 		SolverDispatcher dispatcher = new SolverDispatcher();
 		// Starts the solution
 		dispatcher.solve(model);
@@ -179,7 +179,7 @@ public class Jmt {
 		return success;
 	}
 
-	public static boolean sim(File model, File result, Map<String,String> options) throws Exception {
+	public static boolean sim(File model, File result, Map<String, String> options) throws Exception {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		DocumentBuilder db = dbf.newDocumentBuilder();
 
@@ -239,8 +239,8 @@ public class Jmt {
 	 * @param startIndex the first index to consider in params
 	 * @return a map with option as key and 
 	 */
-	public static Map<String,String> parseParameters(String[] args, int startIndex) {
-		LinkedHashMap<String,String> options = new LinkedHashMap<String, String>();
+	public static Map<String, String> parseParameters(String[] args, int startIndex) {
+		Map<String, String> options = new HashMap<String, String>();
 		// Parses command line options
 		String option = "";
 		for (int i = startIndex; i < args.length; i++) {

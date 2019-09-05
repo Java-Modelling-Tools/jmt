@@ -18,9 +18,8 @@
 
 package jmt.engine.NodeSections;
 
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Map.Entry;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ForkStrategy;
@@ -29,7 +28,6 @@ import jmt.engine.QueueNet.ForkJobInfo;
 import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
@@ -67,13 +65,6 @@ public class Fork extends OutputSection {
 	private Boolean isSimplifiedFork;
 
 	private ForkStrategy[] forkStrategies;
-
-	private JobClassList jobClasses;
-
-	private int droppedJobs;
-	private int[] droppedJobsPerClass;
-	private int switchedJobs;
-	private int[] switchedJobsPerClass; 
 
 	private JobInfoList nodeJobsList;
 	private GlobalJobInfoList netJobsList;
@@ -123,16 +114,9 @@ public class Fork extends OutputSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
-		jobClasses = getJobClasses();
-		droppedJobs = 0;
-		droppedJobsPerClass = new int[jobClasses.size()];
-		Arrays.fill(droppedJobsPerClass, 0);
-		switchedJobs = 0;
-		switchedJobsPerClass = new int[jobClasses.size()];
-		Arrays.fill(switchedJobsPerClass, 0);
 		nodeJobsList = node.getJobInfoList();
 		randomEngine = RandomEngine.makeDefault();
-	};
+	}
 
 	/**
 	 * Splits input job on every output link and waits if 'block' job number are
@@ -155,18 +139,18 @@ public class Fork extends OutputSection {
 		case NetEvent.EVENT_JOB:
 			job = message.getJob();
 			JobClass jobClass = job.getJobClass();
-			NodeList output = null;
-			int numOut = 0;
+			NodeList outNodeList = null;
+			int totalOutNum = 0;
 			NodeListWithJobNum outputInfo = forkStrategies[jobClass.getId()].getOutNodes(this, jobClass);
 			if (isSimplifiedFork) {
-				output = getOwnerNode().getOutputNodes();
-				numOut = jobsPerLink * output.size();
+				outNodeList = getOwnerNode().getOutputNodes();
+				totalOutNum = jobsPerLink * outNodeList.size();
 			} else {
-				output = outputInfo.getNodeList();
-				numOut = outputInfo.getTotalNum();
+				outNodeList = outputInfo.getNodeList();
+				totalOutNum = outputInfo.getTotalNum();
 			}
 
-			if (numOut > 0) {
+			if (totalOutNum > 0) {
 				//removes job from node jobInfoList
 				JobInfo jobData = nodeJobsList.lookFor(job);
 				if (jobData != null) {
@@ -176,22 +160,27 @@ public class Fork extends OutputSection {
 				if (!(job instanceof ForkJob)) {
 					//drops job from global jobInfoList
 					netJobsList.dropJob(job);
-					droppedJobs++;
-					droppedJobsPerClass[jobClass.getId()]++;
 				}
 				//drops job from node jobInfoList and then sends ack back
 				sendAckAfterDrop(job, 0.0, NodeSection.SERVICE, getOwnerNode());
 				break;
 			}
 
-			ForkJobInfo newJobInfo = new ForkJobInfo(job, numOut, getOwnerNode());
+			ForkJobInfo newJobInfo = new ForkJobInfo(job, totalOutNum, getOwnerNode());
+			// Durstenfeld Shuffle
+			NetNode[] outNodePermutation = outNodeList.toArray();
+			for (int i = outNodePermutation.length - 1; i > 0; i--) {
+				int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+				NetNode outNode = outNodePermutation[i];
+				outNodePermutation[i] = outNodePermutation[j];
+				outNodePermutation[j] = outNode;
+			}
 			// Sends "jobsPerLink" jobs on each output link
-			Iterator<NetNode> it = output.randomNodes().iterator();
-			while (it.hasNext()) {
-				NetNode outNode = it.next();
+			for (NetNode outNode : outNodePermutation) {
 				if (isSimplifiedFork) {
 					for (int n = 0; n < jobsPerLink; n++) {
-						ForkJob newJob = new ForkJob(jobClass, jobClasses.size(), newJobInfo);
+						ForkJob newJob = new ForkJob(jobClass, newJobInfo);
+						
 						// Sends new job to the following station
 						send(newJob, 0.0, outNode);
 					}
@@ -199,18 +188,17 @@ public class Fork extends OutputSection {
 					// Releases new jobs in the random order
 					ForkJob[] newJobPermutation = new ForkJob[outputInfo.getTotalNum(outNode)];
 					int index = 0;
-					for (JobClass c : outputInfo.getClassesWithNum(outNode).keySet()) {
-						for (int n = 0; n < outputInfo.getClassesWithNum(outNode).get(c).intValue(); n++) {
-							newJobPermutation[index] = new ForkJob(c, jobClasses.size(), newJobInfo);
+					for (Entry<JobClass, Integer> entry : outputInfo.getJobNumPerClass(outNode).entrySet()) {
+						JobClass newJobClass = entry.getKey();
+						int newJobNum = entry.getValue().intValue();
+						for (int n = 0; n < newJobNum; n++) {
+							ForkJob newJob =  new ForkJob(newJobClass, newJobInfo);
+							newJobPermutation[index] = newJob;
 							index++;
-						}
-						if (outputInfo.getClassesWithNum(outNode).get(c).intValue() > 0 && !hasBeenClass(c, job)) {
-							switchedJobs++;
-							switchedJobsPerClass[c.getId()]++;
-							job.addClass(c);
 						}
 					}
 
+					// Durstenfeld Shuffle
 					for (int i = newJobPermutation.length - 1; i > 0; i--) {
 						int j = (int) Math.floor(randomEngine.raw() * (i + 1));
 						ForkJob newJob = newJobPermutation[i];
@@ -254,48 +242,8 @@ public class Fork extends OutputSection {
 			return MSG_NOT_PROCESSED;
 		}
 
-		// Everything was okay
+		// Everything is okay
 		return MSG_PROCESSED;
-	}
-
-	private boolean hasBeenClass(JobClass jobClass, Job job) {
-		if (job instanceof ForkJob)
-			return hasBeenClass(jobClass, ((ForkJob) job).getForkedJob());
-		return job.hasBeenClass(jobClass);
-	}
-
-	/**
-	 * Gets the total number of dropped jobs.
-	 * @return the total number of dropped jobs.
-	 */
-	public int getDroppedJobs() {
-		return droppedJobs;
-	}
-
-	/**
-	 * Gets the number of dropped jobs for the specified class.
-	 * @param classIndex the index of the job class.
-	 * @return the number of dropped jobs for the specified class.
-	 */
-	public int getDroppedJobsPerClass(int classIndex) {
-		return droppedJobsPerClass[classIndex];
-	}
-
-	/**
-	 * Gets the total number of switched jobs.
-	 * @return the total number of switched jobs.
-	 */
-	public int getSwitchedJobs() {
-		return switchedJobs;
-	}
-
-	/**
-	 * Gets the number of switched jobs for the specified class.
-	 * @param classIndex the index of the job class.
-	 * @return the number of switched jobs for the specified class.
-	 */
-	public int getSwitchedJobsPerClass(int classIndex) {
-		return switchedJobsPerClass[classIndex];
 	}
 
 }

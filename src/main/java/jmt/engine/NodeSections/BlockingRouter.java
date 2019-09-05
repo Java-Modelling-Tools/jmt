@@ -43,7 +43,7 @@ public class BlockingRouter extends OutputSection {
 	 * when the job arrives to the input station.
 	 */
 	public BlockingRouter() {
-		//FCR bug fix: Constructor modified from super() to spuer(true,false) which will enable
+		//FCR bug fix: Constructor modified from super() to super(true,false) which will enable
 		//Jobs in Joblist at NodeSection to be automatically dropped where as for Node to be manually handled.
 		super(true, false);
 	}
@@ -66,13 +66,13 @@ public class BlockingRouter extends OutputSection {
 			break;
 
 		case NetEvent.EVENT_ACK:
-			//this ack has been received from one of the output nodes (router was waiting for this ack)
+			//this ack has been received from one of the output nodes (router is waiting for this ack)
 			//sends an ack back to the service section to request another job to be routed
 			if (waitingAcks > 0) {
 				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
 				waitingAcks--;
 			} else {
-				// Nobody was waiting this ACK.
+				// Nobody is waiting for this ACK.
 				return MSG_NOT_PROCESSED;
 			}
 			break;

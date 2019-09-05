@@ -42,6 +42,7 @@ public class ConvolutionSolver extends RecursiveSolver {
 		super(qnm);
 	}
 
+	//TODO change back to private
 	/**
 	 * Computes any normalising constant using a simple recursion and taking
 	 * advantage of any already computed and stored value.
@@ -52,10 +53,10 @@ public class ConvolutionSolver extends RecursiveSolver {
 	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
 	 */
 	@Override
-	public BigRational compute(MultiplicitiesVector m, PopulationVector p) throws InternalErrorException { //TODO change back to private
+	public BigRational compute(MultiplicitiesVector m, PopulationVector p) throws InternalErrorException {
 		// First we try to find if this value of G has been already computed and stored previously
 		BigRational toRet = recallG(m, p);
-		if (toRet == null) { 
+		if (toRet == null) {
 			// This is the first time we computeNormalisingConstant this value
 			if (m.isZeroVector()) {
 				toRet = initialConditionFor(p);
@@ -63,10 +64,10 @@ public class ConvolutionSolver extends RecursiveSolver {
 				// computeNormalisingConstant this G
 				int k = m.findFirstNonZeroElement();
 
-				//Create
+				// Create
 				m.minusOne(k + 1);
 				toRet = compute(m, p);
-				// restore 
+				// Restore
 				m.restore();
 
 				for (int r = 0; r < qnm.R; r++) {
@@ -74,7 +75,7 @@ public class ConvolutionSolver extends RecursiveSolver {
 						// Create
 						p.minusOne(r + 1);
 						BigRational toAdd = compute(m, p);
-						// restore
+						// Restore
 						p.restore();
 						toAdd = toAdd.multiply(qnm.getDemandAsBigRational(k, r));
 						toRet = toRet.add(toAdd);

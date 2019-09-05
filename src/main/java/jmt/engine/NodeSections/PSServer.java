@@ -73,7 +73,7 @@ public class PSServer extends ServiceSection {
 	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
 	public PSServer(Integer numberOfServers, ServiceStrategy[] serviceStrategies) {
-		super(false, true);
+		super(false);
 		this.numberOfServers = numberOfServers.intValue();
 		this.serviceStrategies = serviceStrategies;
 		this.psStrategies = new PSStrategy[serviceStrategies.length];
@@ -232,7 +232,7 @@ public class PSServer extends ServiceSection {
 		if (psJobsList.size() <= numberOfServers) {
 			for (int i = 0; i < jobClasses.size(); i++) {
 				JobClass jobClass = jobClasses.get(i);
-				if (psJobsList.size(jobClass) == 0) {
+				if (psJobsList.size(jobClass) <= 0) {
 					serviceFractions[i] = 0.0;
 				} else {
 					serviceFractions[i] = 1.0 / numberOfServers;

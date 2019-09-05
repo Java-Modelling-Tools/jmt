@@ -19,7 +19,7 @@ public class SingleOpenScheduling {
 		FileUtils.copyFile(new File(getClass().getResource("fcfs-01-input.xml").toURI()), input);
 
 		String[] args = {"","","-maxtime","60","-seed","1"};
-		Map<String,String> options = Jmt.parseParameters(args, 2);
+		Map<String, String> options = Jmt.parseParameters(args, 2);
 		assertTrue("Solver was not able to solve file!", Jmt.sim(input, result, options)); 
 
 		/* This part of the code removes the first row from the result file */
@@ -56,7 +56,7 @@ public class SingleOpenScheduling {
 		FileUtils.copyFile(new File(getClass().getResource("lcfs-01-input.xml").toURI()), input);
 
 		String[] args = {"","","-maxtime","60","-seed","1"};
-		Map<String,String> options = Jmt.parseParameters(args, 2);
+		Map<String, String> options = Jmt.parseParameters(args, 2);
 		assertTrue("Solver was not able to solve file!", Jmt.sim(input, result, options)); 
 
 		/* This part of the code removes the first row from the result file */
@@ -93,7 +93,7 @@ public class SingleOpenScheduling {
 		FileUtils.copyFile(new File(getClass().getResource("ps-01-input.xml").toURI()), input);
 
 		String[] args = {"","","-maxtime","60","-seed","1"};
-		Map<String,String> options = Jmt.parseParameters(args, 2);
+		Map<String, String> options = Jmt.parseParameters(args, 2);
 		assertTrue("Solver was not able to solve file!", Jmt.sim(input, result, options)); 
 
 		/* This part of the code removes the first row from the result file */

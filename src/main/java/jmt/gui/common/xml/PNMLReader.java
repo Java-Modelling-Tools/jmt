@@ -41,10 +41,10 @@ import fr.lip6.move.pnml.framework.general.PNType;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
 import fr.lip6.move.pnml.framework.utils.PNMLUtils;
 import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.distributions.Distribution.Parameter;
-import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
@@ -196,7 +196,9 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 		List<fr.lip6.move.pnml.ptnet.hlapi.TransitionHLAPI> transitions = page.getObjects_TransitionHLAPI();
 		List<fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI> arcs = page.getObjects_ArcHLAPI();
 
-		Object classKey = model.addClass("Token", CLASS_TYPE_CLOSED, Integer.valueOf(0), Integer.valueOf(0), null);
+		Object classKey = model.addClass("Token", Defaults.getAsInteger("classType").intValue(),
+				Defaults.getAsInteger("classPriority"), Defaults.getAsInteger("classPopulation"),
+				Defaults.getAsNewInstance("classDistribution"));
 		referenceNodeName = null;
 		List<fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI> specifics = net.getToolspecificsHLAPI();
 		for (fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI s : specifics) {
@@ -205,11 +207,13 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 				parseSpecificNetParameters(elem, model);
 			}
 		}
-		int population = 0;
-		for (fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI p : places) {
-			population += (p.getInitialMarking() != null) ? p.getInitialMarking().getText().intValue() : 0;
+		if (model.getClassType(classKey) == CLASS_TYPE_CLOSED) {
+			int population = 0;
+			for (fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI p : places) {
+				population += (p.getInitialMarking() != null) ? p.getInitialMarking().getText().intValue() : 0;
+			}
+			model.setClassPopulation(classKey, Integer.valueOf(population));
 		}
-		model.setClassPopulation(classKey, Integer.valueOf(population));
 
 		Map<String, Object> nodeMap = new HashMap<String, Object>();
 		for (fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI p : places) {
@@ -275,7 +279,11 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 			}
 		}
 
-		model.setClassRefStation(classKey, model.getStationByName(referenceNodeName));
+		if (STATION_TYPE_TRANSITION.equals(referenceNodeName)) {
+			model.setClassRefStation(classKey, STATION_TYPE_TRANSITION);
+		} else {
+			model.setClassRefStation(classKey, model.getStationByName(referenceNodeName));
+		}
 
 		for (fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI a : arcs) {
 			Object sourceKey = nodeMap.get(a.getSourceHLAPI().getId());
@@ -365,6 +373,15 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 				model.setClassName(classKey, name.getTextContent());
 			}
 
+			Element type = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_CLASS_TYPE);
+			if (type != null) {
+				if (PNML_JSIM_V_NET_TOKENS_CLASS_TYPE_OPEN.equals(type.getTextContent())) {
+					model.setClassType(classKey, CLASS_TYPE_OPEN);
+				} else {
+					model.setClassType(classKey, CLASS_TYPE_CLOSED);
+				}
+			}
+
 			Element referenceNode = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_REFERENCE_NODE);
 			if (referenceNode != null) {
 				referenceNodeName = referenceNode.getTextContent();
@@ -399,9 +416,6 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 		if (capacity != null) {
 			model.setQueueCapacity(place, classKey, Integer.valueOf(capacity.getTextContent()));
 		}
-		if (model.getQueueCapacity(place, classKey).intValue() < 1) {
-			model.setQueueCapacity(place, classKey, Integer.valueOf(-1));
-		}
 	}
 
 	/**
@@ -415,9 +429,6 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 		if (numberOfServers != null) {
 			model.setNumberOfServers(transition, 0, Integer.valueOf(numberOfServers.getTextContent()));
 		}
-		if (model.getNumberOfServers(transition, 0).intValue() < 1) {
-			model.setNumberOfServers(transition, 0, Integer.valueOf(-1));
-		}
 
 		Element timingStrategy = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_TIMING_STRATEGY);
 		if (timingStrategy != null) {
@@ -427,37 +438,24 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 					Element distribution = getFirstChildElementByTagName(firingTimeDistribution, PNML_JSIM_E_DISTRIBUTION);
 					model.setFiringTimeDistribution(transition, 0, parseDistribution(distribution));
 				}
-				if (!(model.getFiringTimeDistribution(transition, 0) instanceof Distribution)) {
-					model.setFiringTimeDistribution(transition, 0, new Exponential());
-				}
-
-				if (numberOfServers == null) {
-					model.setNumberOfServers(transition, 0, Integer.valueOf(-1));
-				}
 
 				model.setFiringPriority(transition, 0, Integer.valueOf(-1));
 				model.setFiringWeight(transition, 0, Double.valueOf(1.0));
 			} else {
 				model.setFiringTimeDistribution(transition, 0, new ZeroStrategy());
 
-				if (numberOfServers == null) {
-					model.setNumberOfServers(transition, 0, Integer.valueOf(1));
-				}
-
 				Element firingPriority = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_PRIORITY);
 				if (firingPriority != null) {
 					model.setFiringPriority(transition, 0, Integer.valueOf(firingPriority.getTextContent()));
-				}
-				if (model.getFiringPriority(transition, 0).intValue() < 0) {
-					model.setFiringPriority(transition, 0, Integer.valueOf(0));
+				} else {
+					model.setFiringPriority(transition, 0, Defaults.getAsInteger("transitionFiringPriority"));
 				}
 
 				Element firingWeight = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_WEIGHT);
 				if (firingWeight != null) {
 					model.setFiringWeight(transition, 0, Double.valueOf(firingWeight.getTextContent()));
-				}
-				if (model.getFiringWeight(transition, 0).doubleValue() <= 0.0) {
-					model.setFiringWeight(transition, 0, Double.valueOf(1.0));
+				} else {
+					model.setFiringWeight(transition, 0, Defaults.getAsDouble("transitionFiringWeight"));
 				}
 			}
 		}

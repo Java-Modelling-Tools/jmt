@@ -18,6 +18,11 @@
 
 package jmt.engine.NodeSections;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.swing.JOptionPane;
 
 import jmt.common.exception.NetException;
@@ -48,31 +53,40 @@ import jmt.engine.random.engine.RandomEngine;
 public class Firing extends OutputSection {
 
 	private TransitionMatrix[] firingOutcomes;
+	private TransitionMatrix[] enablingConditions;
 
 	private JobClassList jobClasses;
 	private JobInfoList nodeJobsList;
 	private GlobalJobInfoList netJobsList;
-	private boolean isForkJobNumWarningShown;
+	private List<Job>[] newJobLists;
+	private Iterator<Job>[] newJobIterators;
+	private String[] nodeNamePermutation;
 	private RandomEngine randomEngine;
-	private int producedJobs;
-	private int[] producedJobsPerClass;
+
+	private boolean[] isForkJobNumWarningShown;
 
 	/**
 	 * Creates a new instance of the firing section.
 	 */
 	public Firing(TransitionMatrix[] firingOutcomes) {
-		super(true);
 		this.firingOutcomes = firingOutcomes;
 	}
 
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
+		enablingConditions = ((Enabling) node.getSection(NodeSection.INPUT)).getEnablingConditions();
 		jobClasses = getJobClasses();
 		nodeJobsList = node.getJobInfoList();
-		isForkJobNumWarningShown = false;
+		newJobLists = new List[jobClasses.size()];
+		for (int i = 0; i < newJobLists.length; i++) {
+			newJobLists[i] = new ArrayList<Job>();
+		}
+		newJobIterators = new Iterator[jobClasses.size()];
+		Arrays.fill(newJobIterators, null);
+		nodeNamePermutation = firingOutcomes[0].keySet().toArray(new String[0]);
 		randomEngine = RandomEngine.makeDefault();
-		producedJobs = 0;
-		producedJobsPerClass = new int[jobClasses.size()];
+		isForkJobNumWarningShown = new boolean[firingOutcomes.length];
+		Arrays.fill(isForkJobNumWarningShown, false);
 	}
 
 	@Override
@@ -96,62 +110,116 @@ public class Firing extends OutputSection {
 		case NetEvent.EVENT_FIRING:
 		{
 			int modeIndex = ((FiringPacket) data).getModeIndex();
-			double[] totalLifetime = ((FiringPacket) data).getTotalLifetime();
-			ForkJobInfo[] forkJobInfo = ((FiringPacket) data).getForkJobInfo();
-			int[] forkJobNum = ((FiringPacket) data).getForkJobNum();
-			double[] avgEnteringTime = new double[jobClasses.size()];
+			String modeName = ((FiringPacket) data).getModeName();
+			double[] totalLifetimes = ((FiringPacket) data).getTotalLifetimes();
+			List<ForkJobInfo>[] forkJobInfoLists = ((FiringPacket) data).getForkJobInfoLists();
 			for (int i = 0; i < jobClasses.size(); i++) {
-				int releasedJobs = firingOutcomes[modeIndex].getTotal(i);
-				avgEnteringTime[i] = NetSystem.getTime() - (totalLifetime[i] / releasedJobs);
-				if (forkJobNum[i] > 0 && releasedJobs != forkJobNum[i]) {
-					showForkJobNumWarning();
-				}
-			}
-
-			for (String nodeName : firingOutcomes[modeIndex].keySet()) {
-				int releasedJobsToNode = firingOutcomes[modeIndex].getTotal(nodeName);
-				if (releasedJobsToNode > 0) {
-					send(NetEvent.EVENT_JOB_RELEASE, null, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
-					// Releases jobs in the random order
-					Job[] jobPermutation = new Job[releasedJobsToNode];
-					int index = 0;
-					for (int i = 0; i < jobClasses.size(); i++) {
-						int releasedJobs = firingOutcomes[modeIndex].getEntry(nodeName, i);
-						for (int j = 0; j < releasedJobs; j++) {
-							Job job = null;
-							if (forkJobInfo[i] != null) {
-								job = new ForkJob(jobClasses.get(i), jobClasses.size(), forkJobInfo[i]);
-							} else {
-								job = new Job(jobClasses.get(i), jobClasses.size());
-							}
-							job.setSystemEnteringTime(avgEnteringTime[i]);
-							jobPermutation[index] = job;
-							index++;
+				int releasedJobNumberForClass = firingOutcomes[modeIndex].getTotal(i);
+				if (releasedJobNumberForClass < forkJobInfoLists[i].size()) {
+					// Reservoir Sampling
+					ForkJobInfo[] pickedForkJobInfos = new ForkJobInfo[releasedJobNumberForClass];
+					for (int j = 0; j < releasedJobNumberForClass; j++) {
+						pickedForkJobInfos[j] = forkJobInfoLists[i].get(j);
+					}
+					for (int j = releasedJobNumberForClass; j < forkJobInfoLists[i].size(); j++) {
+						int k = (int) Math.floor(randomEngine.raw() * (j + 1));
+						if (k < releasedJobNumberForClass) {
+							pickedForkJobInfos[k] = forkJobInfoLists[i].get(j);
 						}
 					}
 
-					for (int i = jobPermutation.length - 1; i > 0; i--) {
-						int j = (int) Math.floor(randomEngine.raw() * (i + 1));
-						Job job = jobPermutation[i];
-						jobPermutation[i] = jobPermutation[j];
-						jobPermutation[j] = job;
+					for (int j = 0; j < releasedJobNumberForClass; j++) {
+						ForkJob newForkJob = new ForkJob(jobClasses.get(i), pickedForkJobInfos[j]);
+						newJobLists[i].add(newForkJob);
+					}
+					showForkJobNumWarning(modeIndex, modeName);
+				} else if (releasedJobNumberForClass == forkJobInfoLists[i].size()) {
+					for (int j = 0; j < releasedJobNumberForClass; j++) {
+						ForkJob newForkJob = new ForkJob(jobClasses.get(i), forkJobInfoLists[i].get(j));
+						newJobLists[i].add(newForkJob);
+					}
+				} else {
+					for (int j = 0; j < forkJobInfoLists[i].size(); j++) {
+						ForkJob newForkJob = new ForkJob(jobClasses.get(i), forkJobInfoLists[i].get(j));
+						newJobLists[i].add(newForkJob);
 					}
 
-					for (int i = 0; i < jobPermutation.length; i++) {
-						Job job = jobPermutation[i];
-						JobInfo jobInfo = new JobInfo(job);
-						jobsList.produceJob(jobInfo);
-						nodeJobsList.produceJob(jobInfo);
-						if (!(job instanceof ForkJob)) {
+					double averageEnteringTime = NetSystem.getTime()
+							- (totalLifetimes[i] / (releasedJobNumberForClass - forkJobInfoLists[i].size()));
+					for (int j = forkJobInfoLists[i].size(); j < releasedJobNumberForClass; j++) {
+						Job newJob = new Job(jobClasses.get(i), netJobsList);
+						updateVisitPath(newJob);
+						newJob.setSystemEnteringTime(averageEnteringTime);
+						newJobLists[i].add(newJob);
+					}
+				}
+
+				if (forkJobInfoLists[i].size() > 0) {
+					// Durstenfeld Shuffle
+					for (int j = newJobLists[i].size() - 1; j > 0; j--) {
+						int k = (int) Math.floor(randomEngine.raw() * (j + 1));
+						Job newJob = (Job) newJobLists[i].get(j);
+						newJobLists[i].set(j, newJobLists[i].get(k));
+						newJobLists[i].set(k, newJob);
+					}
+				}
+				newJobIterators[i] = newJobLists[i].iterator();
+			}
+
+			// Durstenfeld Shuffle
+			for (int i = nodeNamePermutation.length - 1; i > 0; i--) {
+				int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+				String nodeName = nodeNamePermutation[i];
+				nodeNamePermutation[i] = nodeNamePermutation[j];
+				nodeNamePermutation[j] = nodeName;
+			}
+			for (String nodeName : nodeNamePermutation) {
+				int releasedJobNumberToNode = firingOutcomes[modeIndex].getTotal(nodeName);
+				if (releasedJobNumberToNode <= 0) {
+					continue;
+				}
+				send(NetEvent.EVENT_JOB_RELEASE, null, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
+				Job[] jobPermutation = new Job[releasedJobNumberToNode];
+				int index = 0;
+				for (int i = 0; i < jobClasses.size(); i++) {
+					int releasedJobNumber = firingOutcomes[modeIndex].getEntry(nodeName, i);
+					for (int j = 0; j < releasedJobNumber; j++) {
+						Job job = newJobIterators[i].next();
+						jobPermutation[index] = job;
+						index++;
+					}
+				}
+
+				// Durstenfeld Shuffle
+				for (int i = jobPermutation.length - 1; i > 0; i--) {
+					int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+					Job job = jobPermutation[i];
+					jobPermutation[i] = jobPermutation[j];
+					jobPermutation[j] = job;
+				}
+
+				for (int i = 0; i < jobPermutation.length; i++) {
+					Job job = jobPermutation[i];
+					JobInfo jobInfo = new JobInfo(job);
+					jobsList.produceJob(jobInfo);
+					nodeJobsList.produceJob(jobInfo);
+					if (!(job instanceof ForkJob)) {
+						int jobClassId = job.getJobClass().getId();
+						if (enablingConditions[modeIndex].getTotal(jobClassId) <= forkJobInfoLists[jobClassId].size()) {
+							netJobsList.addJob(job);
+						} else {
 							netJobsList.produceJob(job);
-							producedJobs++;
-							producedJobsPerClass[job.getJobClass().getId()]++;
 						}
-						send(job, 0.0, NetSystem.getNode(nodeName));
 					}
-					send(NetEvent.EVENT_JOB_FINISH, null, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
+					send(job, 0.0, NetSystem.getNode(nodeName));
 				}
+				send(NetEvent.EVENT_JOB_FINISH, null, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
 			}
+
+			for (int i = 0; i < newJobLists.length; i++) {
+				newJobLists[i].clear();
+			}
+			Arrays.fill(newJobIterators, null);
 			break;
 		}
 
@@ -168,13 +236,18 @@ public class Firing extends OutputSection {
 	/**
 	 * Shows the fork job number warning.
 	 */
-	private void showForkJobNumWarning() {
-		if (!isForkJobNumWarningShown) {
+	private void showForkJobNumWarning(int modeIndex, String modeName) {
+		if (!isForkJobNumWarningShown[modeIndex]) {
 			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
 				System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
-						+ " failed to maintain the equilibrium between input and output tasks.");
+						+ " failed to maintain the equilibrium between input and output tasks in "
+						+ modeName + ".");
 			} else {
-				new Thread(new Runnable() {
+				class OneShotTask implements Runnable {
+					String modeName;
+					public OneShotTask(String modeName) {
+						this.modeName = modeName;
+					}
 					@Override
 					public void run() {
 						try {
@@ -182,30 +255,22 @@ public class Firing extends OutputSection {
 						} catch (InterruptedException e) {
 						}
 						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
-								+ " failed to maintain the equilibrium between input and output tasks.",
-								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
+								+ " failed to maintain the equilibrium between input and output tasks in "
+								+ modeName + ".", "JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}
-				}).start();
+				}
+				(new Thread(new OneShotTask(modeName))).start();
 			}
-			isForkJobNumWarningShown = true;
+			isForkJobNumWarningShown[modeIndex] = true;
 		}
 	}
 
 	/**
-	 * Gets the total number of produced jobs.
-	 * @return the total number of produced jobs.
+	 * Gets the firing outcomes of this section.
+	 * @return the firing outcomes of this section.
 	 */
-	public int getProducedJobs() {
-		return producedJobs;
-	}
-
-	/**
-	 * Gets the number of produced jobs for the specified class.
-	 * @param classIndex the index of the job class.
-	 * @return the number of produced jobs for the specified class.
-	 */
-	public int getProducedJobsPerClass(int jobClass) {
-		return producedJobsPerClass[jobClass];
+	public TransitionMatrix[] getFiringOutcomes() {
+		return firingOutcomes;
 	}
 
 }

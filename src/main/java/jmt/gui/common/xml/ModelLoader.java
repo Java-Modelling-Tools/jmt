@@ -357,8 +357,8 @@ public class ModelLoader {
 			if (defaultSaveFilter == JMODEL_SAVE || defaultSaveFilter == JSIM_SAVE) {
 				if (file.getName().toLowerCase().endsWith(".pnml")) {
 					int result = PNMLWriter.checkModel((CommonModel) modelData);
-					if (result == PNMLWriter.OPEN_CLASSES) {
-						failureMotivation = FAIL_PNML_EXPORT + "open classes detected.";
+					if (result == PNMLWriter.MULTIPLE_CLASSES) {
+						failureMotivation = FAIL_PNML_EXPORT + "multiple classes detected.";
 						return FAILURE;
 					} else if (result == PNMLWriter.NON_PETRI_NET_STATIONS) {
 						failureMotivation = FAIL_PNML_EXPORT + "non Petri net stations detected.";

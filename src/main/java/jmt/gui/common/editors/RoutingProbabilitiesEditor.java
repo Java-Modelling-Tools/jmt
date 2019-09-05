@@ -18,22 +18,6 @@
 
 package jmt.gui.common.editors;
 
-import jmt.gui.common.CommonConstants;
-import jmt.gui.common.definitions.ClassDefinition;
-import jmt.gui.common.definitions.StationDefinition;
-import jmt.gui.common.panels.RoutingSectionPanel;
-import jmt.gui.common.panels.WarningScrollTable;
-import jmt.gui.common.routingStrategies.*;
-import jmt.gui.exact.table.ExactCellEditor;
-
-import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -43,9 +27,12 @@ import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.AbstractTableModel;
 
 import jmt.gui.common.CommonConstants;
@@ -53,7 +40,11 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.panels.RoutingSectionPanel;
 import jmt.gui.common.panels.WarningScrollTable;
-import jmt.gui.common.routingStrategies.*;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.PowerOfKRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
 import jmt.gui.exact.table.ExactCellEditor;
 
 /**
@@ -77,7 +68,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	private WarningScrollTable rtPane;
 	private WarningScrollTable weightsTablePane;
-    private WarningScrollTable powerOfKWarningPanel;
+	private WarningScrollTable powerOfKWarningPanel;
 	private JTextArea descrTextPane = new JTextArea("");
 	private JScrollPane descrPane = new JScrollPane();
 	private RoutingTable routingTable = new RoutingTable();
@@ -109,7 +100,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		noOptLabel.setWrapStyleWord(true);
 		rtPane.setBorder(routingOptionsBorder);
 		weightsTablePane.setBorder(routingOptionsBorder);
-        powerOfKWarningPanel.setBorder(routingOptionsBorder);
+		powerOfKWarningPanel.setBorder(routingOptionsBorder);
 		descrTextPane.setOpaque(false);
 		descrTextPane.setEditable(false);
 		descrTextPane.setLineWrap(true);
@@ -133,7 +124,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		powerOfKPanel.add(memoryPanel);
 		setLeftComponent(descrPane);
 	}
-	
+
 	public void createCommonDetails(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		stations = sd;
 		classes = cd;
@@ -186,8 +177,8 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		if (rs instanceof ProbabilityRouting) {
 			routingProbs = rs.getValues();
 			validOutputs = new Vector<>(0);
-		setupRouting();
-		setRightComponent(rtPane);
+			setupRouting();
+			setRightComponent(rtPane);
 		} else if (rs instanceof PowerOfKRouting) {
 			PowerOfKRouting routing = (PowerOfKRouting) rs;
 			if (stations.getForwardConnections(stationKey).isEmpty()) {
@@ -347,7 +338,6 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 						routingProbs.put(indexToKey(rowIndex), value);
 					}
 				} catch (NumberFormatException e) {
-					System.err.println(e.getMessage());
 				}
 			}
 		}
@@ -363,6 +353,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	}
 
 	private class WeightsTable extends JTable {
+
 		private static final long serialVersionUID = 1L;
 
 		WeightsTable() {
@@ -437,15 +428,12 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 						checkMaxNotZero();
 					}
 				} catch (NumberFormatException e) {
-					System.err.println("Unable to read Integer from Weights Table");
 				}
 			}
 		}
 
 		private void checkMaxNotZero() {
 			if (Collections.max(wrrWeights.values()) == 0) {
-				System.err.println("Maximum weight cannot be zero, resetting to " +
-								"default");
 				for (Object station : wrrWeights.keySet()){
 					wrrWeights.put(station, 1);
 				}
@@ -460,6 +448,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		}
 
 	}
+
 	private class EditLoadDependentRoutingListener implements ActionListener {
 
 		HashMap<String, Object> properties = null;
@@ -476,6 +465,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	}
 
 	private class EditValueOfKListener implements ChangeListener {
+
 		private final Integer MIN_VALUE_K = 1;
 
 		@Override
@@ -493,9 +483,11 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 				rs.setK(k);
 			}
 		}
+
 	}
 
 	private class EnableMemoryListener implements ChangeListener {
+
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			Boolean withMemory = memoryCheckbox.isSelected();
@@ -503,5 +495,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			rs.setWithMemory(withMemory);
 			descrTextPane.setText(rs.getDescription());
 		}
+
 	}
+
 }

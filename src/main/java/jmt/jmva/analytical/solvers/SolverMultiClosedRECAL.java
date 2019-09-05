@@ -150,7 +150,7 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	 * Solves the system through the MoM algorithm.
 	 * input(...) must have been called first.
 	 *
-	 * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
+	 * @throws InternalErrorException
 	 * @throws BTFMatrixErrorException 
 	 * @throws InconsistentLinearSystemException 
 	 * @throws OperationNotSupportedException 
@@ -161,16 +161,14 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 
 		try {
 			c = new RECALSolver(qnm);
-		} catch (InternalErrorException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+		} catch (InternalErrorException e) {
+			e.printStackTrace();
 		}
 
 		try {
 			c.computeNormalisingConstant();
 			c.computePerformanceMeasures();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -234,5 +232,5 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		// only closed class - no saturation problem
 		return true;
 	}
-	
+
 }

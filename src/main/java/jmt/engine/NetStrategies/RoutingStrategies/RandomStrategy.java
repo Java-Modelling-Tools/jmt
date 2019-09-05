@@ -43,36 +43,40 @@ public class RandomStrategy extends RoutingStrategy {
 	/**
 	 * Gets the output node, into which the job must be routed, using a random
 	 * strategy.
-	 * @param nodes List of the output nodes.
+	 * @param nodeList List of the output nodes.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
-		if (nodes.size() == 0) {
+	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
+		if (nodeList.size() == 0) {
 			return null;
 		}
 
 		// Skips sinks for closed classes
 		if (jobClass.getType() == CLOSED_CLASS) {
-			NetNode[] valid = new NetNode[nodes.size()];
+			NetNode[] valid = new NetNode[nodeList.size()];
 			int length = 0; // Here length is used as a counter for valid
-			for (int i = 0; i < nodes.size(); i++) {
-				if (!nodes.get(i).isSink()) {
-					valid[length++] = nodes.get(i);
+			for (int i = 0; i < nodeList.size(); i++) {
+				if (!nodeList.get(i).isSink()) {
+					valid[length++] = nodeList.get(i);
 				}
 			}
-			if (length == 1) {
+			if (length == 0) {
+				return null;
+			} else if (length == 1) {
 				return valid[0];
 			} else {
 				return valid[(int) Math.floor(randomEngine.raw() * length)];
 			}
 		} else {
-			int length = nodes.size();
-			if (length == 1) {
-				return nodes.getFirst();
+			int length = nodeList.size();
+			if (length == 0) {
+				return null;
+			} else if (length == 1) {
+				return nodeList.getFirst();
 			} else {
-				return nodes.get((int) Math.floor(randomEngine.raw() * length));
+				return nodeList.get((int) Math.floor(randomEngine.raw() * length));
 			}
 		}
 	}

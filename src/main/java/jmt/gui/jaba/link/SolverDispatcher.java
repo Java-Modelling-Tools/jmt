@@ -55,7 +55,7 @@ public class SolverDispatcher {
 	public SolverDispatcher() {
 	}
 
-	public JabaResults solve(JabaModel model) throws SolverException, InputDataException {
+	public JabaResults solve(JabaModel model) throws InputDataException, SolverException {
 
 		/* disable all change-checking */
 		model.discardResults();
@@ -69,10 +69,10 @@ public class SolverDispatcher {
 			} else if (model.getClasses() == 3) {
 				res = solve3classes(model);
 			}
-		} catch (InputDataException rse) {
-			throw rse;
-		} catch (SolverException se) {
-			throw se;
+		} catch (InputDataException e) {
+			throw e;
+		} catch (SolverException e) {
+			throw e;
 		} catch (Exception e) {
 			fail("Unhandled exception", e);
 		}

@@ -48,8 +48,8 @@ public class OutPath {
 
 	public void setProbabilityOfChosen(EmpiricalEntry probabilityOfChosen) 
 			throws IncorrectDistributionParameterException {
-		if (probabilityOfChosen.getProbability() <= 1.0 
-				&& probabilityOfChosen.getProbability() >= 0.0) {
+		if (probabilityOfChosen.getProbability() >= 0.0 
+				&& probabilityOfChosen.getProbability() <= 1.0) {
 			this.probabilityOfChosen = probabilityOfChosen;
 		} else {
 			throw new IncorrectDistributionParameterException(

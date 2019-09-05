@@ -13,7 +13,6 @@ import java.util.List;
 
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetEvent;
-import static java.lang.System.out;
 
 /**
  * This is the system class which manages the simulation. All
@@ -38,7 +37,9 @@ public class SimSystem {
 	static private NumberFormat nf;
 
 	// cache for the entity IDs
-	static private Hashtable<Integer,SimEntity> entityHash = new Hashtable<Integer,SimEntity>();
+	static private Hashtable<Integer,SimEntity> entityIdHash = new Hashtable<Integer,SimEntity>();
+	// cache for the entity Names
+	static private Hashtable<String,SimEntity> entityNameHash = new Hashtable<String,SimEntity>();
 
 	//
 	// Public library interface
@@ -115,7 +116,7 @@ public class SimSystem {
 	 * @return A reference to the entity, or null if it could not be found
 	 */
 	static final public SimEntity getEntity(int id) {
-		SimEntity found = entityHash.get(id);
+		SimEntity found = entityIdHash.get(id);
 		if (found == null) {
 			System.out.println("SimSystem: could not find entity " + id);
 		}
@@ -127,25 +128,11 @@ public class SimSystem {
 	 * @return A reference to the entity, or null if it could not be found
 	 */
 	static public SimEntity getEntity(String name) {
-		SimEntity ent, found = null;
-		for (Iterator<SimEntity> it = entities.iterator(); it.hasNext();) {
-			ent = it.next();
-			if (name.compareTo(ent.getName()) == 0) {
-				found = ent;
-			}
-		}
+		SimEntity found = entityNameHash.get(name);
 		if (found == null) {
 			System.out.println("SimSystem: could not find entity " + name);
 		}
 		return found;
-	}
-
-	/** Finds out an entity unique id number from its name.
-	 * @param name The entity's name
-	 * @return The entity's unique id number, or -1 if it could not be found
-	 */
-	static public int getEntityId(String name) {
-		return entities.indexOf(getEntity(name));
 	}
 
 	/** Adds a new entity to the simulation.
@@ -159,18 +146,11 @@ public class SimSystem {
 			/* Post an event to make this entity */
 			evt = new SimEvent(SimEvent.CREATE, clock, e.getId(), 0, 0, e);
 			future.add(evt);
-			/* add entity id to the entity cache to accelerate getEntity(int id) */
-			entityHash.put(e.getId(), e);
 		} else {
-			if (e.getId() == -1) {
-				//-1 is the default value written by the constructor.
-				// Now a new ID is set
-
-				// Only add once!
-				e.setId(entities.size());
-				entities.add(e);
-				entityHash.put(e.getId(), e);
-			}
+			e.setId(entities.size());
+			entities.add(e);
+			entityIdHash.put(e.getId(), e);
+			entityNameHash.put(e.getName(), e);
 		}
 	}
 
@@ -183,6 +163,8 @@ public class SimSystem {
 	static synchronized void addEntityDynamically(SimEntity e) {
 		e.setId(entities.size());
 		entities.add(e);
+		entityIdHash.put(e.getId(), e);
+		entityNameHash.put(e.getName(), e);
 		e.start();
 	}
 
@@ -365,7 +347,7 @@ public class SimSystem {
 	// Private internal methods
 	//
 
-		static private void processEvent(SimEvent e) throws NetException {
+	static private void processEvent(SimEvent e) throws NetException {
 		int dest, src;
 		SimEntity destEnt;
 
@@ -382,28 +364,15 @@ public class SimSystem {
 		case (SimEvent.SEND):
 			// Checks for matching wait
 			dest = e.getDest();
-		if (dest < 0) {
-			throw new NetException("SimSystem: Error - attempt to send to a null entity");
-		} else {
-			destEnt = entities.get(dest);
-			if (destEnt.getState() == SimEntity.WAITING) {
-				SimPredicate p = destEnt.getWaitingPred();
-
-				if (p == null) {
-					//the entity was waiting for a generic predicate
-					destEnt.setEvbuf((SimEvent) e.clone());
-					destEnt.setState(SimEntity.RUNNABLE);
-					try {
-						destEnt.execute();
-					} catch (NetException e1) {
-						abort();
-						throw e1;
-					}
-				} else {
-					//the entity was waiting for events with a specified predicate
-					//this event matches with such predicate??
-					if (destEnt.getWaitingPred().match(e)) {
-						p = null;
+			if (dest < 0) {
+				throw new NetException("SimSystem: Error - attempt to send to a null entity");
+			} else {
+				destEnt = entities.get(dest);
+				if (destEnt.getState() == SimEntity.WAITING) {
+					SimPredicate p = destEnt.getWaitingPred();
+	
+					if (p == null) {
+						//the entity was waiting for a generic predicate
 						destEnt.setEvbuf((SimEvent) e.clone());
 						destEnt.setState(SimEntity.RUNNABLE);
 						try {
@@ -413,16 +382,29 @@ public class SimSystem {
 							throw e1;
 						}
 					} else {
-						//the event does not match with the predicate, so it is put in the deferred queue
-						destEnt.simPutback(e);
+						//the entity was waiting for events with a specified predicate
+						//this event matches with such predicate??
+						if (destEnt.getWaitingPred().match(e)) {
+							p = null;
+							destEnt.setEvbuf((SimEvent) e.clone());
+							destEnt.setState(SimEntity.RUNNABLE);
+							try {
+								destEnt.execute();
+							} catch (NetException e1) {
+								abort();
+								throw e1;
+							}
+						} else {
+							//the event does not match with the predicate, so it is put in the deferred queue
+							destEnt.simPutback(e);
+						}
 					}
+				} else {
+					//if the entity is not WAITING the event is put in the deferred queue
+					deferred.add(e);
 				}
-			} else {
-				//if the entity is not WAITING the event is put in the deferred queue
-				deferred.add(e);
 			}
-		}
-		break;
+			break;
 
 		case (SimEvent.ENULL):
 			throw new NetException("SimSystem: Error - event has a null type");
@@ -430,17 +412,17 @@ public class SimSystem {
 		case (SimEvent.CREATE):
 			SimEntity newe = (SimEntity) e.getData();
 			addEntityDynamically(newe);
-		break;
+			break;
 
 		case (SimEvent.HOLD_DONE):
 			src = e.getSrc();
-		if (src < 0) {
-			throw new NetException("SimSystem: Error - NULL entity holding");
-		} else {
-			entities.get(src).setState(SimEntity.RUNNABLE);
-			entities.get(src).restart();
-		}
-		break;
+			if (src < 0) {
+				throw new NetException("SimSystem: Error - NULL entity holding");
+			} else {
+				entities.get(src).setState(SimEntity.RUNNABLE);
+				entities.get(src).restart();
+			}
+			break;
 		}
 	}
 

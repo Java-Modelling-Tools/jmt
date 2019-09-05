@@ -72,8 +72,6 @@ public class Delay extends ServiceSection {
 			//itself a message with the job and with a delay calculated using the
 			//service strategy; then an ack is sent to the message source.
 
-			double serviceTime;
-			int c;
 			// Gets the job from the message
 			job = message.getJob();
 			// If the message source is this section, the job has been
@@ -90,9 +88,9 @@ public class Delay extends ServiceSection {
 			// else delays the job
 			else {
 				// Gets the class of the job
-				c = job.getJobClass().getId();
+				int c = job.getJobClass().getId();
 				// Calculates the service time of job
-				serviceTime = serviceStrategies[c].wait(this, job.getJobClass());
+				double serviceTime = serviceStrategies[c].wait(this, job.getJobClass());
 				// Sends to itself the job with delay equal to "serviceTime"
 				sendMe(job, serviceTime);
 				// Sends backward the job ack

@@ -32,6 +32,9 @@ import jmt.engine.QueueNet.JobInfoList;
 public class EPSStrategy extends PSStrategy {
 
 	public double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass) {
+		if (list.size() <= 0) {
+			return 0.0;
+		}
 		return 1.0 / list.size();
 	}
 

@@ -48,7 +48,7 @@ public class NetSystem {
 	private static NetworkList networkList;
 
 	private NetSystem() {
-	};
+	}
 
 	/**
 	 * Initializes the simulation system
@@ -85,9 +85,10 @@ public class NetSystem {
 	/** Starts the NetSystem Engine and executes the simulation.
 	 * This method should be called when <b>all</b> NetNode of <b>all</b>
 	 * QueueNetworks are ready to start.
-	 * @throws Exception
+	 * @throws NetException
+	 * @throws InterruptedException
 	 */
-	public static void start() throws Exception {
+	public static void start() throws NetException, InterruptedException {
 		NetNode Node;
 		ListIterator<QueueNetwork> nets = networkList.listIterator();
 		ListIterator<NetNode> nodes;
@@ -345,8 +346,8 @@ public class NetSystem {
 	}
 
 	/**
-	 * Sets the maximum simulated time for the simulation
-	 * @param network network to be checked for progress
+	 * Sets the maximum simulated time for the simulation in the netController
+	 * @param maxSimulatedTime the maximum simulated time for the simulation
 	 */
 	public static void setMaxSimulatedTime(double maxSimulatedTime) {
 		if (netController != null) {
@@ -355,12 +356,13 @@ public class NetSystem {
 	}
 
 	/**
-	 * Sets the maximum simulated events for the simulation
-	 * @param network network to be checked for progress
+	 * Sets the maximum processed events for the simulation in the netController
+	 * @param maxProcessedEvents the maximum processed events for the simulation
 	 */
-	public static void setMaxSimulationEvents(long maxEvents) {
+	public static void setMaxProcessedEvents(int maxProcessedEvents) {
 		if (netController != null) {
-			netController.setMaxSimulationEvents(maxEvents);
+			netController.setMaxProcessedEvents(maxProcessedEvents);
 		}
 	}
+
 }

@@ -68,9 +68,12 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String NO_NONZERO_VALUES_NOTICE =
-			"Warning: The firing table contains no non-zero values. When the transition fires, it "
-			+ "will not release any jobs for this mode.";
+	private static final String NO_OUTPUT_STATIONS_WARNING =
+			"Warning: No output stations are defined. "
+			+ "The transition will not release any jobs for this mode.";
+	private static final String NO_FIRING_OUTCOME_WARNING =
+			"Warning: No firing outcome is specified. "
+			+ "The transition will not release any jobs for this mode.";
 
 	private boolean isInitComplete;
 
@@ -219,6 +222,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 	public void gotFocus() {
 		modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
 		modeTable.setRowSelectionInterval(0, 0);
+		updateNotice();
 	}
 
 	private void stopAllCellEditing() {
@@ -234,29 +238,34 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 	}
 
 	private void updateNotice() {
-		if (stationOutKeys.isEmpty() || classKeys.isEmpty()) {
+		if (classKeys.isEmpty()) {
 			noticeText.setText("");
 			noticeText.setForeground(Color.BLACK);
 			return;
 		}
 
-		boolean hasNonzeroValues = false;
-		for (Object stationInKey : stationOutKeys) {
-			for (Object classKey : classKeys) {
-				int firingValue = stationData.getFiringOutcome(stationKey, currentModeIndex,
-						stationInKey, classKey).intValue();
-				if (firingValue > 0) {
-					hasNonzeroValues = true;
-				}
-			}
-		}
-
-		if (!hasNonzeroValues) {
-			noticeText.setText(NO_NONZERO_VALUES_NOTICE);
+		if (stationOutKeys.isEmpty()) {
+			noticeText.setText(NO_OUTPUT_STATIONS_WARNING);
 			noticeText.setForeground(Color.BLUE);
 		} else {
-			noticeText.setText("");
-			noticeText.setForeground(Color.BLACK);
+			boolean hasSpecifiedValues = false;
+			for (Object stationInKey : stationOutKeys) {
+				for (Object classKey : classKeys) {
+					int firingValue = stationData.getFiringOutcome(stationKey, currentModeIndex,
+							stationInKey, classKey).intValue();
+					if (firingValue > 0) {
+						hasSpecifiedValues = true;
+					}
+				}
+			}
+
+			if (!hasSpecifiedValues) {
+				noticeText.setText(NO_FIRING_OUTCOME_WARNING);
+				noticeText.setForeground(Color.BLUE);
+			} else {
+				noticeText.setText("");
+				noticeText.setForeground(Color.BLACK);
+			}
 		}
 	}
 

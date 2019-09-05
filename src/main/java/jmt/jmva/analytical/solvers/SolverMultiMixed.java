@@ -103,7 +103,7 @@ public class SolverMultiMixed extends SolverMulti {
 		int[] closedClasses;
 		double[] openClasses;
 
-		//take in consideraton the presence of the open classes only.
+		//take in consideration the presence of the open classes only.
 		//we solve easily the problem as an open system.
 		//the new utilization will reduce the power of the system
 		//considering the effect of the open classes.
@@ -165,17 +165,13 @@ public class SolverMultiMixed extends SolverMulti {
 					represented by "inflating" the service demands of the closed class
 					at all devices.
 					        (D*)c,k = (D)c,k / ( 1 - (U)open,k )
-					The inflaction factor used is ( 1 - (U)open,k ) which is the
+					The inflation factor used is ( 1 - (U)open,k ) which is the
 					percentage of time that the processor is not in use by the open classes.
 					This technique allows to reduce model complexity by eliminating
 					open classes while still incorporating their effects on performance.
 					 */
 
 					//these are the S* and V* of the inflated service demands
-					//OLD
-					//closedVisits[i][cCounter] = visits[i][j] / (1 - scUtilization[i]);
-					//closedServTime[i][cCounter] = servTime[i][j];
-					
 					closedVisits[i][cCounter] = visits[i][j];
 					if (type[i] == SolverMulti.DELAY) {
 						closedServTime[i][cCounter][0] = servTime[i][j][0];
@@ -211,20 +207,10 @@ public class SolverMultiMixed extends SolverMulti {
 						//closed class
 						queueLen[i][j] = clSolver.getQueueLen(i, cCounter);
 						residenceTime[i][j] = clSolver.getResTime(i, cCounter);
-
-						//OLD
-						//throughput[i][j] = queueLen[i][j] / residenceTime[i][j];
-						//utilization[i][j] = throughput[i][j] * closedServTime[i][cCounter][0];
-
-						//NEW
-						//@author Stefano Omini
 						throughput[i][j] = clSolver.getThroughput(i, cCounter);
-
 						//utilization must be computed (using the utilization law) with
 						//the original service demand
 						utilization[i][j] = throughput[i][j] * servTime[i][j][0];
-						//end NEW
-
 						clsRespTime[j] += residenceTime[i][j];
 						cCounter++;
 					} else {
@@ -235,14 +221,8 @@ public class SolverMultiMixed extends SolverMulti {
 						} else {
 							residenceTime[i][j] = demands[i][j] * (1 + scQueueLen[i]) / (1 - scUtilization[i]);
 						}
-
 						queueLen[i][j] = popPar[j] * residenceTime[i][j];
-						//OLD
-						//throughput[i][j] = queueLen[i][j] / residenceTime[i][j];
-						//NEW
-						//@author Stefano Omini
 						throughput[i][j] = popPar[j] * visits[i][j];
-						//end NEW
 						clsRespTime[j] += residenceTime[i][j];
 					}
 					scThroughput[i] += throughput[i][j];
@@ -263,7 +243,7 @@ public class SolverMultiMixed extends SolverMulti {
 				for (int j = 0; j < classes; j++) {
 					scUtilization[i] += utilization[i][j];
 					if (classType[j] != CLOSED_CLASS) {
-						//queue length of closed classes has been alredy considered
+						//queue length of closed classes has been already considered
 						scQueueLen[i] += queueLen[i][j];
 					}
 				}
@@ -284,7 +264,7 @@ public class SolverMultiMixed extends SolverMulti {
 				represented by "inflating" the service demands of the closed class
 				at all devices.
 				(D*)c,k = (D)c,k / ( 1 - (U)open,k )
-				The inflaction factor used is ( 1 - (U)open,k ) which is the
+				The inflation factor used is ( 1 - (U)open,k ) which is the
 				percentage of time that the processor is not in use by the open classes.
 				This technique allows to reduce model complexity by eliminating
 				open classes while still incorporating their effects on performance.
@@ -312,22 +292,10 @@ public class SolverMultiMixed extends SolverMulti {
 						//closed class
 						queueLen[i][j] = clSolver.getQueueLen(i);
 						residenceTime[i][j] = clSolver.getResTime(i);
-						//OLD
-						//throughput[i][j] = queueLen[i][j] / residenceTime[i][j];
-						//utilization[i][j] = throughput[i][j] * closedServTime[i][cCounter][0];
-						//must be multiplicated for visits number!!
-
-						//OLD
-						//throughput[i][j] = queueLen[i][j] * closedVisits[i][cCounter] / residenceTime[i][j];
-						//NEW
-						//@author Stefano Omini
-						//TODO: verify correctness
 						throughput[i][j] = clSolver.getThroughput(i);
-						//utilization must be computed (using the utilization law) with the original
-						//service demand
+						//utilization must be computed (using the utilization law) with
+						//the original service demand
 						utilization[i][j] = throughput[i][j] * servTime[i][j][0];
-						//end NEW
-
 						clsRespTime[j] += residenceTime[i][j];
 						cCounter++;
 					} else {
@@ -336,14 +304,9 @@ public class SolverMultiMixed extends SolverMulti {
 							residenceTime[i][j] = demands[i][j];
 						} else {
 							residenceTime[i][j] = demands[i][j] * (1 + scQueueLen[i]) / (1 - scUtilization[i]);
-						}						
+						}
 						queueLen[i][j] = popPar[j] * residenceTime[i][j];
-						//OLD
-						//throughput[i][j] = queueLen[i][j] / residenceTime[i][j];
-						//NEW
-						//@author Stefano Omini
 						throughput[i][j] = popPar[j] * visits[i][j];
-						//end NEW
 						clsRespTime[j] += residenceTime[i][j];
 					}
 					scThroughput[i] += throughput[i][j];

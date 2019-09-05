@@ -28,7 +28,7 @@ import java.util.Vector;
  */
 public class MultiBranchClassSwitchFork extends ForkStrategy {
 
-	private HashMap<Object, OutPath> outPaths = new HashMap<Object, OutPath>();
+	private Map<Object, OutPath> outPaths = new HashMap<Object, OutPath>();
 
 	public MultiBranchClassSwitchFork() {
 		description = "Generates tasks of multiple classes.";

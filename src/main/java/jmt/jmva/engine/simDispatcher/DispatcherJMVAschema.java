@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import jmt.common.exception.LoadException;
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.QueueNetwork;
@@ -244,14 +243,6 @@ public class DispatcherJMVAschema {
 
 			logger.info("Model " + modelDefinitionPath + " solved by JSIM in " + Double.toString(elapsed) + " seconds");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error(e.getMessage());
-			return false;
-		} catch (LoadException e) {
-			e.printStackTrace();
-			logger.error(e.getMessage());
-			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error(e.getMessage());
@@ -521,14 +512,6 @@ public class DispatcherJMVAschema {
 
 			logger.info("Model " + modelDefinitionPath + " solved by JSIM in " + Double.toString(elapsed) + " seconds");
 
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error(e.getMessage());
-			return false;
-		} catch (LoadException e) {
-			e.printStackTrace();
-			logger.error(e.getMessage());
-			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
 			logger.error(e.getMessage());
@@ -589,11 +572,11 @@ public class DispatcherJMVAschema {
 			try {
 				outDocument = xmlUtils.loadXML(temp);
 				addNullMeasuresCorrectThroughputs(inputModel, outDocument);
-			} catch (SAXException e2) {
-				logger.error("Cannot parse correctly output JMVA model: " + e2.getMessage());
+			} catch (SAXException e1) {
+				logger.error("Cannot parse correctly output JMVA model: " + e1.getMessage());
 				return false;
-			} catch (IOException e1) {
-				logger.error("I/O error opening output JMVA model: " + e1.getMessage());
+			} catch (IOException e2) {
+				logger.error("I/O error opening output JMVA model: " + e2.getMessage());
 				return false;
 			}
 			logger.debug("Added null measures to final results");
@@ -667,11 +650,11 @@ public class DispatcherJMVAschema {
 			//compute progress
 
 			if (pauseSim()) {
-				double progr = NetSystem.checkProgress(net);
+				double progress = NetSystem.checkProgress(net);
 				restartSim();
-				return progr;
+				return progress;
 			} else {
-				return 0;
+				return 0.0;
 			}
 
 		} catch (NetException e) {

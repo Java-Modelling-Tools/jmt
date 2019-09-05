@@ -87,7 +87,6 @@ public final class Arrivals {
 				notifyGraphics("lostJob", job.getJobId(), time);
 			}
 		} catch (InfiniteBufferException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

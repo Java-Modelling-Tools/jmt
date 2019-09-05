@@ -72,14 +72,6 @@ public class EmpiricalEntry {
 	}
 
 	/**
-	 * Returns the probability linked to the internal value.
-	 * @return A <code>double</code> representing the probability.
-	 */
-	public double getProbability() {
-		return probability;
-	}
-
-	/**
 	 * Returns the internal value.
 	 * @return An object representing the internal value.
 	 */
@@ -88,28 +80,27 @@ public class EmpiricalEntry {
 	}
 
 	/**
-	 * Sets the internal probability linked to the <i>value</i>.
-	 * @param probability A given <code>Double</code> probability.
-	 */
-	public void setProbability(double probability) {
-		this.probability = probability;
-	}
-
-	/**
-	 * Sets the internal probability linked to the <i>value</i>.
-	 * @param probability A given <code>String</code> representing a
-	 * probability.
-	 */
-	public void setProbability(String probability) {
-		this.probability = Double.parseDouble(probability);
-	}
-
-	/**
 	 * Sets the internal <i>value</i> with the given <code>Object</code>.
 	 * @param value A given <code>Object</code>.
 	 */
 	public void setValue(Object value) {
 		this.value = value;
+	}
+
+	/**
+	 * Returns the probability linked to the internal value.
+	 * @return A <code>double</code> representing the probability.
+	 */
+	public double getProbability() {
+		return probability;
+	}
+
+	/**
+	 * Sets the internal probability linked to the <i>value</i>.
+	 * @param probability A given <code>Double</code> probability.
+	 */
+	public void setProbability(double probability) {
+		this.probability = probability;
 	}
 
 }

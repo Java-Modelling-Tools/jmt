@@ -38,16 +38,42 @@ import jmt.engine.random.EmpiricalPar;
  */
 public class EmpiricalStrategy extends RoutingStrategy {
 
+	//the names of the output nodes
+	private String[] nodeNames;
 	//the empirical distribution
 	private Empirical distribution;
 	//the parameter of the empirical distribution
 	private EmpiricalPar param;
-	//the array with the routing probabilities (one for each output node)
-	private double probabilities[];
 	//the NetNode objects corresponding to the output nodes
 	private NetNode[] nodes;
-	//the names of the output nodes
-	private String[] nodeNames;
+
+	/**
+	 * Creates an empirical strategy using the passed data.
+	 * @param entries Entries used to construct the empirical distribution (each entry
+	 * contains a node name and the corresponding routing probability).
+	 * @throws LoadException
+	 * @throws IncorrectDistributionParameterException
+	 */
+	public EmpiricalStrategy(EmpiricalEntry[] entries) throws LoadException, IncorrectDistributionParameterException {
+		nodeNames = new String[entries.length];
+		double[] probabilities = new double[entries.length];
+		for (int i = 0; i < entries.length; i++) {
+			EmpiricalEntry entry = entries[i];
+			if (entry.getValue() instanceof String) {
+				//sets the name of the node; the corresponding NetNode object will be found later
+				nodeNames[i] = (String) entry.getValue();
+				//sets the corresponding routing probability
+				probabilities[i] = entry.getProbability();
+			} else {
+				throw new LoadException("Name of the node is not a String");
+			}
+		}
+
+		//uses the obtained probabilities to create the empirical distribution
+		//and its parameter
+		distribution = new Empirical();
+		param = new EmpiricalPar(probabilities);
+	}
 
 	/**
 	 * Creates an empirical strategy by adding nodes and naming them with the specified names.
@@ -60,48 +86,16 @@ public class EmpiricalStrategy extends RoutingStrategy {
 		this.param = param;
 		//gets the values contained in the empirical parameter (in this case these
 		//objects are the names of the output nodes)
-		Object[] names = param.getValues();
-		nodeNames = new String[names.length];
-		for (int i = 0; i < names.length; i++) {
-			if (names[i] instanceof String) {
+		Object[] values = param.getValues();
+		nodeNames = new String[values.length];
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] instanceof String) {
 				//sets the name of the i-th output node
-				nodeNames[i] = (String) names[i];
+				nodeNames[i] = (String) values[i];
 			} else {
 				throw new LoadException("Name of the node is not a String");
 			}
 		}
-
-	}
-
-	/**
-	 * Creates an empirical strategy using the passed data.
-	 * @param entries Entries used to construct the empirical distribution (each entry
-	 * contains a node name and the corresponding routing probability).
-	 * @throws LoadException
-	 * @throws IncorrectDistributionParameterException
-	 */
-	public EmpiricalStrategy(EmpiricalEntry[] entries) throws LoadException, IncorrectDistributionParameterException {
-		probabilities = new double[entries.length];
-		nodeNames = new String[entries.length];
-		for (int i = 0; i < entries.length; i++) {
-			EmpiricalEntry entry = entries[i];
-			if (entry.getValue() instanceof String) {
-				//gets the value contained in the empirical entry (in this case this
-				//object is the name of the output node)
-				String nodeName = (String) entry.getValue();
-				//sets the name of the node; the corresponding NetNode object will be found later
-				nodeNames[i] = nodeName;
-				//sets the corresponding routing probability
-				probabilities[i] = entry.getProbability();
-			} else {
-				throw new LoadException("Name of the node is not a String");
-			}
-		}
-
-		//uses the obtained probabilities to create the empirical distribution
-		//and its parameter
-		distribution = new Empirical();
-		param = new EmpiricalPar(probabilities);
 	}
 
 	/**
@@ -123,39 +117,24 @@ public class EmpiricalStrategy extends RoutingStrategy {
 	 */
 	@Override
 	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
-		try {
-			if (nodes == null) {
-				//it is the first execution of this method: find the NetNode objects
-				//corresponding to the nodeNames
-				findNodes();
+		if (nodes == null) {
+			//it is the first execution of this method: find the NetNode objects
+			nodes = new NetNode[nodeNames.length];
+			for (int i = 0; i < nodeNames.length; i++) {
+				nodes[i] = NetSystem.getNode(nodeNames[i]);
 			}
+		}
+
+		try {
 			//the empirical distribution returns the position of the chosen output node
 			int nodePos = (int) Math.round(distribution.nextRand(param));
-			NetNode node = this.nodes[nodePos];
-			if (nodeList.contains(node)) {
-				//the chosen node must be contained in the list of the output nodes
-				return node;
+			if (nodePos >= 0) {
+				return nodes[nodePos];
 			}
 		} catch (IncorrectDistributionParameterException e) {
 			e.printStackTrace();
 		}
 		return null;
-	}
-
-	/**
-	 * Finds the NetNode objects corresponding to the node names received by constructor.
-	 * @return true if all names actually correspond to nodes of the model, false otherwise;
-	 */
-	private boolean findNodes() {
-		nodes = new NetNode[nodeNames.length];
-		for (int i = 0; i < nodeNames.length; i++) {
-			nodes[i] = NetSystem.getNode(nodeNames[i]);
-			if (nodes[i] == null) {
-				//the passed name does not correspond to a node of the model
-				return false;
-			}
-		}
-		return true;
 	}
 
 }

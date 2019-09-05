@@ -353,8 +353,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			measureSelection.setSelectedIndex(0);
 			return;
 		}
-		Measure measure = getImplicitMeasure(null, (String) measureSelection.getSelectedItem(), null, null);
-		simData.addMeasure(measure.type, measure.stationKey, measure.classKey);
+		simData.addMeasure((String) measureSelection.getSelectedItem(), null, null);
 		measureTable.tableChanged(new TableModelEvent(measureTable.getModel()));
 		measureSelection.setSelectedIndex(0);
 	}
@@ -488,7 +487,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 
-		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region/System", "Stat.Res.", "Conf.Int.", "Max Rel.Err.", "" };
+		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region/Network", "Stat.Res.", "Conf.Int.", "Max Rel.Err.", "" };
 		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Boolean.class, Double.class, Double.class, Object.class };
 		public int[] columnWidths = new int[] { 120, 80, 120, 30, 60, 60, 20 };
 
@@ -569,59 +568,23 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			case 3: 
 				simData.setMeasureLog((Boolean) aValue, key);
 				break;
-			case 4: {
+			case 4: 
 				try {
 					String doubleVal = (String) aValue;
 					simData.setMeasureAlpha(Double.valueOf(doubleVal), key);
-					break;
 				} catch (NumberFormatException e) {
 				}
-			}
-			case 5: {
+				break;
+			case 5: 
 				try {
 					String doubleVal = (String) aValue;
 					simData.setMeasurePrecision(Double.valueOf(doubleVal), key);
-					break;
 				} catch (NumberFormatException e) {
 				}
-			}
+				break;
 			}
 		}
 
-	}
-
-	private Measure getImplicitMeasure(Object key, String type, Object stationKey, Object classKey) {
-		if (key == null) {
-			if (type.equals(SimulationDefinition.MEASURE_QL)
-					|| type.equals(SimulationDefinition.MEASURE_RP)
-					|| type.equals(SimulationDefinition.MEASURE_X)
-					|| type.equals(SimulationDefinition.MEASURE_DR)
-					|| type.equals(SimulationDefinition.MEASURE_P)) {
-				return new Measure(getSystemMeasureType(type), null, null);
-			} else {
-				return new Measure(type, null, null);
-			}
-		} else {
-			if (type.equals(SimulationDefinition.MEASURE_QL)
-					|| type.equals(SimulationDefinition.MEASURE_RP)
-					|| type.equals(SimulationDefinition.MEASURE_X)
-					|| type.equals(SimulationDefinition.MEASURE_DR)
-					|| type.equals(SimulationDefinition.MEASURE_P)) {
-				if (stationKey != null && stationKey.equals("")) {
-					return new Measure(getSystemMeasureType(type), null, classKey);
-				} else {
-					return new Measure(type, stationKey, classKey);
-				}
-			} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
-				if (stationKey != simData.getMeasureStation(key)) {
-					return new Measure(type, stationKey, null);
-				} else {
-					return new Measure(type, stationKey, classKey);
-				}
-			} else {
-				return new Measure(type, stationKey, classKey);
-			}
-		}
 	}
 
 	private Measure getExplicitMeasure(String type, Object stationKey, Object classKey) {
@@ -636,19 +599,25 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		}
 	}
 
-	private String getSystemMeasureType(String type) {
-		if (type.equals(SimulationDefinition.MEASURE_QL)) {
-			return SimulationDefinition.MEASURE_S_CN;
-		} else if (type.equals(SimulationDefinition.MEASURE_RP)) {
-			return SimulationDefinition.MEASURE_S_RP;
-		} else if (type.equals(SimulationDefinition.MEASURE_X)) {
-			return SimulationDefinition.MEASURE_S_X;
-		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
-			return SimulationDefinition.MEASURE_S_DR;
-		} else if (type.equals(SimulationDefinition.MEASURE_P)) {
-			return SimulationDefinition.MEASURE_S_P;
+	private Measure getImplicitMeasure(Object key, String type, Object stationKey, Object classKey) {
+		if (type.equals(SimulationDefinition.MEASURE_QL)
+				|| type.equals(SimulationDefinition.MEASURE_RP)
+				|| type.equals(SimulationDefinition.MEASURE_X)
+				|| type.equals(SimulationDefinition.MEASURE_DR)
+				|| type.equals(SimulationDefinition.MEASURE_P)) {
+			if (stationKey != null && stationKey.equals("")) {
+				return new Measure(getSystemMeasureType(type), null, classKey);
+			} else {
+				return new Measure(type, stationKey, classKey);
+			}
+		} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
+			if (stationKey != simData.getMeasureStation(key)) {
+				return new Measure(type, stationKey, null);
+			} else {
+				return new Measure(type, stationKey, classKey);
+			}
 		} else {
-			return null;
+			return new Measure(type, stationKey, classKey);
 		}
 	}
 
@@ -663,6 +632,22 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			return SimulationDefinition.MEASURE_DR;
 		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 			return SimulationDefinition.MEASURE_P;
+		} else {
+			return null;
+		}
+	}
+
+	private String getSystemMeasureType(String type) {
+		if (type.equals(SimulationDefinition.MEASURE_QL)) {
+			return SimulationDefinition.MEASURE_S_CN;
+		} else if (type.equals(SimulationDefinition.MEASURE_RP)) {
+			return SimulationDefinition.MEASURE_S_RP;
+		} else if (type.equals(SimulationDefinition.MEASURE_X)) {
+			return SimulationDefinition.MEASURE_S_X;
+		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
+			return SimulationDefinition.MEASURE_S_DR;
+		} else if (type.equals(SimulationDefinition.MEASURE_P)) {
+			return SimulationDefinition.MEASURE_S_P;
 		} else {
 			return null;
 		}

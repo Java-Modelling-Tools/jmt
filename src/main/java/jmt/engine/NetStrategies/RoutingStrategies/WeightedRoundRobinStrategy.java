@@ -4,7 +4,6 @@ import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeList;
-import jmt.engine.random.WeightEntry;
 
 import java.math.BigInteger;
 import java.util.Collections;

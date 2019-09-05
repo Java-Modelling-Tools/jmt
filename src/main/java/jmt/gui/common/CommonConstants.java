@@ -30,19 +30,18 @@ import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.NormalJoin;
 import jmt.gui.common.joinStrategies.PartialJoin;
+import jmt.gui.common.routingStrategies.DisabledRouting;
 import jmt.gui.common.routingStrategies.FastestServiceRouting;
 import jmt.gui.common.routingStrategies.LeastUtilizationRouting;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.PowerOfKRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RandomRouting;
 import jmt.gui.common.routingStrategies.RoundRobinRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.routingStrategies.ShortestQueueLengthRouting;
 import jmt.gui.common.routingStrategies.ShortestResponseTimeRouting;
-import jmt.gui.common.routingStrategies.DisabledRouting;
-import jmt.gui.common.routingStrategies.PowerOfKRouting;
 import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
-import jmt.gui.common.routingStrategies.DisabledRouting;
 import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 
@@ -226,7 +225,7 @@ public interface CommonConstants {
 	public static final RoutingStrategy ROUTING_LOADDEPENDENT = new LoadDependentRouting();
 	public static final RoutingStrategy ROUTING_POWER_OF_K = new PowerOfKRouting();
 	public static final RoutingStrategy ROUTING_WEIGHTED_ROUNDROBIN = new WeightedRoundRobinRouting();
-    public static final RoutingStrategy ROUTING_DISABLED = new DisabledRouting();
+	public static final RoutingStrategy ROUTING_DISABLED = new DisabledRouting();
 
 	public static final ForkStrategy FORK_PROBABILITIES = new ProbabilitiesFork();
 	public static final ForkStrategy FORK_COMBINATION = new CombFork();
@@ -315,7 +314,7 @@ public interface CommonConstants {
 	public static final int MAX_NUMBER_OF_REGIONS = 1024;
 
 	public static final String ALL_CLASSES = "--- All Classes ---";
-	public static final String ALL_STATIONS = "System";	
+	public static final String ALL_STATIONS = "Network";
 	public static final String ALL_MODES = "--- All Modes ---";
 	public static final String INFINITE_CAPACITY = "Infinite Capacity";
 

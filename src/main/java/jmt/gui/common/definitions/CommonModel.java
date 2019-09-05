@@ -70,8 +70,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected Double maxDuration;
 	protected Double maxSimulatedTime;
 	protected Integer maxSamples;
-	protected Long maxEvents;
 	protected Boolean disableStatistic;
+	protected Integer maxEvents;
 	protected Double pollingInterval;
 	protected MeasureDefinition results;
 	protected LoggerGlobalParameters loggerGlbParams;
@@ -256,8 +256,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		maxDuration = Defaults.getAsDouble("simulationMaxDuration");
 		maxSimulatedTime = Defaults.getAsDouble("maxSimulatedTime");
 		maxSamples = Defaults.getAsInteger("maxSimulationSamples");
-		maxEvents = Defaults.getAsLong("maxSimulationEvents");
-		disableStatistic = Boolean.FALSE;
+		disableStatistic = Defaults.getAsBoolean("isStatisticDisabled");
+		maxEvents = Defaults.getAsInteger("maxSimulationEvents");
 		pollingInterval = Defaults.getAsDouble("simulationPolling");
 		//TODO: eventually load the parametricAnalysisEnabled state from default
 		parametricAnalysisEnabled = false;
@@ -2672,28 +2672,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Returns maximum number of simulation events.
-	 * @return maximum number of simulation events.
-	 */
-	@Override
-	public Long getMaxSimulationEvents() {
-		return maxEvents;
-	}
-
-	/**
-	 * Sets maximum number of simulation events.
-	 * @param maxSamples maximum number of simulation events.
-	 */
-	@Override
-	public void setMaxSimulationEvents(Long maxEvents) {
-		if (!this.maxEvents.equals(maxEvents)) {
-			save = true;
-		}
-		this.maxEvents = maxEvents;
-	}
-
-
-	/**
 	 * Returns maximum number of simulation samples.
 	 * @return maximum number of simulation samples.
 	 */
@@ -2733,6 +2711,27 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			save = true;
 		}
 		this.disableStatistic = disableStatistic;
+	}
+
+	/**
+	 * Returns maximum number of simulation events.
+	 * @return maximum number of simulation events.
+	 */
+	@Override
+	public Integer getMaxSimulationEvents() {
+		return maxEvents;
+	}
+
+	/**
+	 * Sets maximum number of simulation events.
+	 * @param maxEvents maximum number of simulation events.
+	 */
+	@Override
+	public void setMaxSimulationEvents(Integer maxEvents) {
+		if (!this.maxEvents.equals(maxEvents)) {
+			save = true;
+		}
+		this.maxEvents = maxEvents;
 	}
 
 	/**
@@ -3884,8 +3883,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			this.inhibitingCondition = new TransitionMatrix();
 			this.numberOfServers = Defaults.getAsInteger("transitionNumberOfServers");
 			this.firingTimeDistribution = Defaults.getAsNewInstance("transitionFiringTimeDistribution");
-			this.firingPriority = Defaults.getAsInteger("transitionFiringPriority");
-			this.firingWeight = Defaults.getAsDouble("transitionFiringWeight");
+			this.firingPriority = Integer.valueOf(-1);
+			this.firingWeight = Double.valueOf(1.0);
 			this.firingOutcome = new TransitionMatrix();
 		}
 

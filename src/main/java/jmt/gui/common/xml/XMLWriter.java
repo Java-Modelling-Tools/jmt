@@ -50,7 +50,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import jmt.engine.log.LoggerParameters;
 import jmt.engine.random.EmpiricalEntry;
-import jmt.engine.random.WeightEntry;
 import jmt.framework.data.MacroReplacer;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
@@ -60,23 +59,20 @@ import jmt.gui.common.distributions.Distribution.Parameter;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
-import jmt.gui.common.routingStrategies.*;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.PowerOfKRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
-import jmt.gui.common.serviceStrategies.*;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import java.io.File;
-import java.io.OutputStream;
-import java.util.*;
 /**
  * <p>Title: XML Writer</p>
  * <p>Description: Writes model information to an XML file. This class provides
@@ -217,12 +213,12 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		elem.setAttribute("xsi:noNamespaceSchemaLocation", XML_DOCUMENT_XSD);
 		elem.setAttribute("xmlns:xsi",
 				"http://www.w3.org/2001/XMLSchema-instance");
-		// Simulation seed - Bertoli Marco
+		// Simulation seed
 		if (!model.getUseRandomSeed().booleanValue()) {
 			elem.setAttribute(XML_A_ROOT_SEED, model.getSimulationSeed()
 					.toString());
 		}
-		// Max simulation time - Bertoli Marco
+		// Max simulation time
 		if (model.getMaximumDuration().doubleValue() > 0) {
 			elem.setAttribute(XML_A_ROOT_DURATION, model.getMaximumDuration()
 					.toString());
@@ -238,12 +234,12 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		// Max samples
 		elem.setAttribute(XML_A_ROOT_MAXSAMPLES, model
 				.getMaxSimulationSamples().toString());
-		// Max events
-		elem.setAttribute(XML_A_ROOT_MAXEVENTS, model
-				.getMaxSimulationEvents().toString());
 		// Disable statistic
 		elem.setAttribute(XML_A_ROOT_DISABLESTATISTIC, model
 				.getDisableStatistic().toString());
+		// Max events
+		elem.setAttribute(XML_A_ROOT_MAXEVENTS, model
+				.getMaxSimulationEvents().toString());
 		// Write attributes used by the logs - Michael Fercu
 		elem.setAttribute(XML_A_ROOT_LOGPATH,
 				MacroReplacer.replace(model.getLoggingGlbParameter("path")));
@@ -1551,6 +1547,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			}
 			scope.appendChild(parameter);
 		}
+
 	}
 
 	/**
@@ -1699,6 +1696,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			}
 			return null;
 		}
+
 	}
 
 	/**
@@ -1781,13 +1779,13 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					XMLParameter weight = new XMLParameter("weight",
 							Integer.class.getName(), null, w, true);
 					weights[i] = new XMLParameter("WeightEntry",
-							WeightEntry.class.getName(), null,
-							new XMLParameter[] { stationDest, weight }, true);
+							strategiesClasspathBase + routingStrategiesSuffix + "WeightEntry",
+							 null, new XMLParameter[] { stationDest, weight }, true);
 					weights[i].parameterArray = "false";
 				}
 				XMLParameter weightsParam = new XMLParameter("WeightEntryArray",
-						WeightEntry.class.getName(), null, weights,
-						true);
+						strategiesClasspathBase + routingStrategiesSuffix + "WeightEntry",
+						 null, weights, true);
 				innerRoutingPar = new XMLParameter[] { weightsParam };
 			}
 			// creating parameter for empirical strategy: must be null if

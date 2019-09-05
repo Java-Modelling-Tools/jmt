@@ -19,7 +19,10 @@
 package jmt.engine.QueueNet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 /** This class implements a list of job classes. Note that only classes of QueueNet
  * package can add or remove objects to/from the list.
@@ -27,64 +30,97 @@ import java.util.ListIterator;
  */
 public class JobClassList {
 
-	private ArrayList<JobClass> jobClasses;
+	private List<JobClass> jobClasses;
+	private Map<String, JobClass> jobClassMap;
 
-	/** Creates a new instance of JobClassList object
+	/** Creates a new instance of JobClassList class.
 	 */
 	JobClassList() {
 		jobClasses = new ArrayList<JobClass>();
+		jobClassMap = new HashMap<String, JobClass>();
 	}
 
 	/** Adds a new job class to the list.
-	 * @param JobClass Reference to the JobClass to be added.
+	 * @param jobClass Reference to the job class.
 	 */
-	void add(JobClass JobClass) {
-		jobClasses.add(JobClass);
+	void add(JobClass jobClass) {
+		jobClasses.add(jobClass);
+		jobClassMap.put(jobClass.getName(), jobClass);
 	}
 
 	/** Removes a job class from the list.
-	 * @param JobClass Reference to the JobClass to be removed.
+	 * @param jobClass Reference to the job class.
 	 */
-	void remove(JobClass JobClass) {
-		jobClasses.remove(JobClass);
+	void remove(JobClass jobClass) {
+		jobClasses.remove(jobClass);
+		jobClassMap.remove(jobClass.getName());
+	}
+
+	/** Gets the first job class in the list.
+	 * @return Reference to the first job class.
+	 */
+	public JobClass getFirst() {
+		return jobClasses.get(0);
+	}
+
+	/** Gets the last job class in the list.
+	 * @return Reference to the last job class.
+	 */
+	public JobClass getLast() {
+		return jobClasses.get(jobClasses.size() - 1);
 	}
 
 	/** Gets i-th job class in the list.
-	 * @return Index-th job class in the list.
+	 * @param index Index of the job class.
+	 * @return Reference to the i-th job class.
 	 */
-	public JobClass get(int Index) {
-		return jobClasses.get(Index);
+	public JobClass get(int index) {
+		return jobClasses.get(index);
 	}
 
-	/**Gets, if it exists, the job class with the specified name.
-	 *
-	 * @param Name The name of the job class
-	 * @return the job class. Null if it does not exist.
+	/** Gets the job class with a specific name in the list.
+	 * @param name Name of the job class.
+	 * @return Reference to the job class.
 	 */
-	public JobClass get(String Name) {
-		ListIterator<JobClass> iterator = jobClasses.listIterator();
-		JobClass jc;
-		while (iterator.hasNext()) {
-			jc = iterator.next();
-			if (jc.getName().compareTo(Name) == 0) {
-				return jc;
-			}
-		}
-		return null;
+	public JobClass get(String name) {
+		return jobClassMap.get(name);
 	}
 
-	/** Gets list size.
-	 * @return Number of job classes in the list.
+	/** Gets the size of the list.
+	 * @return Size of the list.
 	 */
 	public int size() {
 		return jobClasses.size();
 	}
 
+	/** Gets an iterator of the list.
+	 * @return Iterator of the list.
+	 */
 	public ListIterator<JobClass> listIterator() {
 		return jobClasses.listIterator();
 	}
 
-	int indexOf(JobClass JobClass) {
-		return jobClasses.indexOf(JobClass);
+	/** Converts the list into an array of job classes.
+	 * @return Array of job classes in the list.
+	 */
+	public JobClass[] toArray() {
+		return jobClasses.toArray(new JobClass[jobClasses.size()]);
 	}
+
+	/** Gets the index of a job class.
+	 * @param jobClass Reference to the job class.
+	 * @return Index of the job class.
+	 */
+	public int indexOf(JobClass jobClass) {
+		return jobClasses.indexOf(jobClass);
+	}
+
+	/** Used to know if a job class is in the list.
+	 * @param jobClass Reference to the job class.
+	 * @return true if the job class is in the list.
+	 */
+	public boolean contains(JobClass jobClass) {
+		return jobClasses.contains(jobClass);
+	}
+
 }

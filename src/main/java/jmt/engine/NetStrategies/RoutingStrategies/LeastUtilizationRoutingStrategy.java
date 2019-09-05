@@ -44,24 +44,24 @@ public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
 	/**
 	 * This strategy selects the resource with the least utilization
 	 * among the output nodes.
-	 * @param nodes List of the output nodes.
+	 * @param nodeList List of the output nodes.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
-		if (nodes.size() == 0) {
+	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
+		if (nodeList.size() == 0) {
 			return null;
 		}
 
 		// output node candidates... Holds an array of them as on equality of utilization they
 		// will be chosen randomly
-		NetNode[] output = new NetNode[nodes.size()];
+		NetNode[] output = new NetNode[nodeList.size()];
 		int length = 0;
 		double leastUtilization = infinity;
 		try {
-			for (int i = 0; i < nodes.size(); i++) {
-				NetNode node = nodes.get(i);
+			for (int i = 0; i < nodeList.size(); i++) {
+				NetNode node = nodeList.get(i);
 				double tmp = 0.0;
 				// Checks if output is a sink... If class is open, sinks are preferred as have
 				// 0 utilization. If class is closed, avoid it
@@ -91,7 +91,7 @@ public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
 			e.printStackTrace();
 			return null;
 		}
-		if (Double.isInfinite(leastUtilization)) {
+		if (leastUtilization == infinity) {
 			return null;
 		} else if (length == 1) {
 			return output[0];

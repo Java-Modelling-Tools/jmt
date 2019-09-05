@@ -155,7 +155,7 @@ public class MoMSolverDispatcher {
      * Solves the system through the MoM algorithm.
      * input(...) must have been called first.
      *
-     * @throws InternalErrorException Thrown when any error is encountered during computations, i.e. due to linear system singularities
+     * @throws InternalErrorException
      * @throws BTFMatrixErrorException 
      * @throws InconsistentLinearSystemException 
      * @throws OperationNotSupportedException 

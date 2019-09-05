@@ -675,10 +675,6 @@ public class Mediator implements GuiInterface {
 	 * <br> Author: Bertoli Marco
 	 */
 	public void openModel(File file) {
-			openModel(file,true);
-	}
-	
-	public void openModel(File file, boolean wantRepaint) {
 		isReleased = true;
 		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
 			return;
@@ -697,7 +693,7 @@ public class Mediator implements GuiInterface {
 			newModel();
 			// At this point loading was successful, so substitutes old model with loaded one
 			model = tmpmodel;
-			this.populateGraph(wantRepaint);
+			this.populateGraph();
 			setSelect.setEnabled(true);
 			componentBar.clickButton(setSelect);
 			openedArchive = modelLoader.getSelectedFile();
@@ -1398,10 +1394,6 @@ public class Mediator implements GuiInterface {
 	 * <br>Author: Bertoli Marco
 	 */
 	public void populateGraph() {
-		populateGraph(true);
-	}
-	
-	public void populateGraph(boolean wantRepaint) {
 		Object[] stations = model.getStationKeys().toArray();
 		HashMap<Object, JmtCell> cells = new HashMap<Object, JmtCell>();
 		JmtCell cell;
@@ -1440,7 +1432,6 @@ public class Mediator implements GuiInterface {
 			forwardConnections = model.getForwardConnections(station);
 			for (int j = 0; j < forwardConnections.size(); j++) {
 				// Forces connection as it is already present into data structure
-//				connect(cells.get(station), cells.get(forwardConnections.get(j)), false);
 				connect(cells.get(station), cells.get(forwardConnections.get(j)), true);
 			}
 		}
@@ -1461,7 +1452,7 @@ public class Mediator implements GuiInterface {
 		if (!containPosition) {
 			adjustGraph();
 		}
-		graphRepaint();		
+		graphRepaint();
 		graph.getGraphLayoutCache().reload();
 	}
 
@@ -2383,11 +2374,11 @@ public class Mediator implements GuiInterface {
 			editMeasures();
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR)) {
-			JOptionPane.showMessageDialog(null, "An open class is defined but no sources. Please add a source.\n",
+			JOptionPane.showMessageDialog(null, "An open class is defined but no sources or transitions. Please add a source or transition.\n",
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.OPEN_CLASS_BUT_NO_SINK_ERROR)) {
-			JOptionPane.showMessageDialog(null, "An open class is defined but no sinks. Please add a sink.\n",
+			JOptionPane.showMessageDialog(null, "An open class is defined but no sinks or transitions. Please add a sink or transition.\n",
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.SOURCE_WITHOUT_OPEN_CLASS_ERROR)) {
@@ -2403,19 +2394,14 @@ public class Mediator implements GuiInterface {
 			String stationType = model.getStationType(relatedStation);
 			String stationName = model.getStationName(relatedStation);
 			String message = null;
-			if (stationType.equals(CommonConstants.STATION_TYPE_SINK)
-					|| stationType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+			if (stationType.equals(CommonConstants.STATION_TYPE_SINK)) {
 				message = stationName + " is not backward linked. Please add a backward link.\n";
+			} else if (stationType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
+				message = stationName + " is not forward or backward linked. Please add a forward or backward link.\n";
 			} else {
 				message = stationName + " is not forward linked. Please add a forward link.\n";
 			}
 			JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
-		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLOSED_CLASS_ROUTING_ERROR)) {
-			String stationName = model.getStationName(relatedStation);
-			String className = model.getClassName(relatedClass);
-			JOptionPane.showMessageDialog(null, className + " may be routed to " + stationName
-					+ " of which the forward stations are all sinks.\n", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.INVALID_MEASURE_ERROR)) {
 			editMeasures();
@@ -2446,18 +2432,7 @@ public class Mediator implements GuiInterface {
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_INVALID_MATRIX_ERROR)) {
 			showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_BAS_STRATEGY_ERROR)) {
-			String stationName = model.getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, stationName + " is followed by a queue with the BAS strategy. This topology is not allowed.\n",
-					"Error", JOptionPane.ERROR_MESSAGE);
-		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_REFERENCE_STATION_ERROR)) {
-			editUserClasses();
-		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_SYSTEM_THROUGHPUT_ERROR)) {
-			editMeasures();
-		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_ZERO_POPULATION_ERROR)) {
 			editUserClasses();
 		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.ZERO_GUARD_STRATEGY_ERROR)) {
@@ -2473,7 +2448,7 @@ public class Mediator implements GuiInterface {
 			JOptionPane.showMessageDialog(null, stationName + " is not located between fork/join. This topology is not allowed.\n",
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INVALID_CONDITION_ERROR)) {
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INFINITE_ENABLING_DEGREE_ERROR)) {
 			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
 		// used only in JMVA conversion
@@ -2519,15 +2494,9 @@ public class Mediator implements GuiInterface {
 			}
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.NO_OPTIONAL_LINK_WARNING)) {
-			String stationType = model.getStationType(relatedStation);
 			String stationName = model.getStationName(relatedStation);
-			String message = null;
-			if (stationType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
-				message = stationName + " is not forward linked. Please check the topology.\n";
-			} else {
-				message = stationName + " is not backward linked. Please check the topology.\n";
-			}
-			JOptionPane.showMessageDialog(null, message, "Warning", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(null, stationName + " is not backward linked. Please check the topology.\n", "Warning",
+					JOptionPane.WARNING_MESSAGE);
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.FORK_WITHOUT_JOIN_WARNING)) {
 			JOptionPane.showMessageDialog(null, "A fork is found but no joins. Please check the topology.\n", "Warning",
@@ -2554,14 +2523,13 @@ public class Mediator implements GuiInterface {
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.ZERO_POPULATION_WARNING)) {
 			editUserClasses();
 		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.ZERO_TOTAL_POPULATION_WARNING)) {
+			editUserClasses();
+		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_BETWEEN_FORK_JOIN_WARNING)) {
 			String stationName = model.getStationName(relatedStation);
 			JOptionPane.showMessageDialog(null, stationName + " seems to be located between fork/join. The switched tasks may fail to merge\n"
 					+ "at the join with a Guard strategy.\n", "Warning", JOptionPane.WARNING_MESSAGE);
-		}
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_FORK_JOIN_WARNING)) {
-			JOptionPane.showMessageDialog(null, "A class switch and a fork/join section are in the same model. Depending on the topology,\n"
-					+ "some performance indices may not be computed exactly (e.g., the system response time).\n", "Warning", JOptionPane.WARNING_MESSAGE);
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.SCHEDULING_SAME_PRIORITY_WARNING)) {
 			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
@@ -2569,10 +2537,16 @@ public class Mediator implements GuiInterface {
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN_WARNING)) {
 			String stationName = model.getStationName(relatedStation);
 			JOptionPane.showMessageDialog(null, stationName + " seems to be located between fork/join. On any firing of a transition between\n"
-					+ "fork/join, the input tasks for each class must be split from the same parent job, and the\nnumber of output tasks for "
-					+ "each class must be equal to the number of input tasks for that\nclass.\n", "Warning", JOptionPane.WARNING_MESSAGE);
+					+ "fork/join, the number of output tasks for each class should be equal to the number of input\ntasks for that class.\n",
+					"Warning", JOptionPane.WARNING_MESSAGE);
 		}
-		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INVALID_OUTCOME_WARNING)) {
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_CONSTANT_ENABLING_DEGREE_WARNING)) {
+			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INVALID_INPUT_CONDITION_WARNING)) {
+			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_NO_FIRING_OUTCOME_WARNING)) {
 			showStationParameterPanel(relatedStation, StationParameterPanel.OUTPUT_SECTION, null);
 		}
 	}
@@ -2775,7 +2749,7 @@ public class Mediator implements GuiInterface {
 		graph.getGraphLayoutCache().reload();
 	}
 
-	public void tryAdjustGraph(boolean wantConfirmDialog) {
+	public void tryAdjustGraph(boolean needConfirm) {
 		Object[] cells = graph.getDescendants(graph.getRoots());
 		Rectangle[] cellsBounds = new Rectangle[cells.length];
 		boolean[] cellsRotate = new boolean[cells.length];
@@ -2789,24 +2763,23 @@ public class Mediator implements GuiInterface {
 
 		adjustGraph();
 
-		if (wantConfirmDialog) 
-		{
-		int resultValue = JOptionPane.showConfirmDialog(mainWindow, "Keep the new layout?",
-				"Optimize the layout", JOptionPane.YES_NO_OPTION);
-		if (resultValue == JOptionPane.NO_OPTION) {
-			for (int i = 0; i < cells.length; i++) {
-				if (cells[i] instanceof JmtCell) {
-					JmtCell cell = (JmtCell) cells[i];
-					GraphConstants.setBounds(cell.getAttributes(), cellsBounds[i]);
-					if (cellsRotate[i]) {
-						rotateComponent(new Object[] { cell });
+		if (needConfirm) {
+			int resultValue = JOptionPane.showConfirmDialog(mainWindow, "Keep the new layout?",
+					"Optimize the layout", JOptionPane.YES_NO_OPTION);
+			if (resultValue == JOptionPane.NO_OPTION) {
+				for (int i = 0; i < cells.length; i++) {
+					if (cells[i] instanceof JmtCell) {
+						JmtCell cell = (JmtCell) cells[i];
+						GraphConstants.setBounds(cell.getAttributes(), cellsBounds[i]);
+						if (cellsRotate[i]) {
+							rotateComponent(new Object[] { cell });
+						}
 					}
 				}
+				graphRepaint();
+				graph.getGraphLayoutCache().reload();
+				avoidOverlappingCell(cells);
 			}
-			graphRepaint();
-			graph.getGraphLayoutCache().reload();
-			avoidOverlappingCell(cells);
-		}
 		}
 	}
 
