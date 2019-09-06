@@ -64,8 +64,8 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 	private ClassDefinition classData;
 	private Object stationKey;
 	private JLabel descriptionLabel;
-	private JLabel normalizzationErrorLabel;
-	private JLabel normalizzationWarningLabel;
+	private JLabel normalizationErrorLabel;
+	private JLabel normalizationWarningLabel;
 	private boolean errorRows[];
 	private boolean warningRows[];
 
@@ -100,14 +100,14 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 		setBorder(new TitledBorder(new EtchedBorder(), "CS Strategies"));
 		setMinimumSize(new Dimension(180, 100));
 		descriptionLabel = new JLabel(DESCRIPTION);
-		normalizzationErrorLabel = new JLabel(NORMALIZATION_ERROR);
-		normalizzationWarningLabel = new JLabel(NORMALIZATION_WARNING);
+		normalizationErrorLabel = new JLabel(NORMALIZATION_ERROR);
+		normalizationWarningLabel = new JLabel(NORMALIZATION_WARNING);
 		checkRowLessThanOne();
 		add(wST, BorderLayout.CENTER);
 		add(descriptionLabel, BorderLayout.SOUTH);
 		JPanel msgPanel = new JPanel(new BorderLayout());
-		msgPanel.add(normalizzationErrorLabel, BorderLayout.NORTH);
-		msgPanel.add(normalizzationWarningLabel, BorderLayout.SOUTH);
+		msgPanel.add(normalizationErrorLabel, BorderLayout.NORTH);
+		msgPanel.add(normalizationWarningLabel, BorderLayout.SOUTH);
 		add(msgPanel, BorderLayout.NORTH);
 		if (descriptionLabel != null) {
 			descriptionLabel.setVisible(classData.getClassKeys().size() != 0);
@@ -158,22 +158,22 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 				allIsOk = false;
 				errorRows[i] = true;
 				warningRows[i] = false;
-				normalizzationErrorLabel.setVisible(true);				
+				normalizationErrorLabel.setVisible(true);				
 			} else if (row > 1) {
 				noWarning  = false;
 				warningRows[i] = true;
 				errorRows[i] = false;
-				normalizzationWarningLabel.setVisible(true);				
+				normalizationWarningLabel.setVisible(true);				
 			} else {
 				warningRows[i] = false;
 				errorRows[i] = false;
 			}
 		}
 		if (allIsOk) {
-			normalizzationErrorLabel.setVisible(false);				
+			normalizationErrorLabel.setVisible(false);				
 		}
 		if (noWarning) {
-			normalizzationWarningLabel.setVisible(false);				
+			normalizationWarningLabel.setVisible(false);				
 		}
 	}
 

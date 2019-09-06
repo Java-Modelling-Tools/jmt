@@ -50,7 +50,7 @@ public class ConvolutionLayer {
 		cc.computeSubnetNodeGArray(node, popVec, false);
 	}
 	
-	/** Computes the normalization constant G(N - 1_k) for the specified class k,
+	/** Computes the normalisation constant G(N - 1_k) for the specified class k,
 	 * required to calculate the chain throughputs.
 	 * Method 1 outlined in sec. 4.3 in Lam/Lien paper.
 	 * @param k The class k.
@@ -67,7 +67,7 @@ public class ConvolutionLayer {
 	
 	/**
 	 * Calculates Gm+(n-1_k) using first method from section 4.2 in Lam/Lien paper. This is
-	 * a required normalization constant when computing mean queue lengths and is carried out
+	 * a required normalisation constant when computing mean queue lengths and is carried out
 	 * on a tree in which station m has been cloned.
 	 * @param cloneParent The node which is the parent of the two cloned children.
 	 * @param p The population vector to use during the computation.

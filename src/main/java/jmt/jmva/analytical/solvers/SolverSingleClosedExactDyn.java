@@ -27,7 +27,7 @@ package jmt.jmva.analytical.solvers;
 import java.io.PrintWriter;
 
 /**
- * Solves a single class closed model, using Normalization Constant algorithm.
+ * Solves a single class closed model, using Normalisation Constant algorithm.
  * <br>
  * NOT USED
  * @author  Federico Granata

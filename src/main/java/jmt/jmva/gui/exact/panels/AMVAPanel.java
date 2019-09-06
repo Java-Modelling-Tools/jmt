@@ -57,8 +57,8 @@ public final class AMVAPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private static final String LABEL_ALGORITHM = "Algorithm:";
-	private static final String LABEL_ALGORITHM_MIXED = LABEL_ALGORITHM + " MVA";
 	private static final String LABEL_ALGORITHM_OPEN = LABEL_ALGORITHM + " QN";
+	private static final String LABEL_ALGORITHM_MIXED = LABEL_ALGORITHM + " MVA";
 	private static final String LABEL_ALGORITHM_WHATIF = LABEL_ALGORITHM + " (what-if)";
 
 	private static enum PanelStatus {

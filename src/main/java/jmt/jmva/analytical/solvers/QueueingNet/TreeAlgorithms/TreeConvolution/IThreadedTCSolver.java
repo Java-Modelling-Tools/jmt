@@ -21,7 +21,7 @@ public interface IThreadedTCSolver {
 	Timer queueLengthTimer = new Timer();
 	
 	/** Compute G using postorder tree traversal. 
-	 * @param node The current node to compute the normalization constant G for.
+	 * @param node The current node to compute the normalisation constant G for.
 	 * @param pv The population vector to be used during the computation.
 	 * @returns The normalisation constant G at the given node, calculated using the
 	 * specified population vector.

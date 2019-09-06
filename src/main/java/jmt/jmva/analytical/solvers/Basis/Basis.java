@@ -33,7 +33,7 @@ import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
 /**
  * A class to encapsulate the basis of CoMoM (or MoM).
  * 
- * Storage and access to the normalizing constants is provided
+ * Storage and access to the normalising constants is provided
  * 
  * @author Jack Bradshaw
  */

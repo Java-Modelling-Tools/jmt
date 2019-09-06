@@ -491,7 +491,7 @@ public class QNModel {
 		if (arePerformanceMeasuresComputed) {
 			System.out.println("\n --- Computed Performance Measures ---");
 
-			System.out.println("Normalization Constant G:");
+			System.out.println("Normalisation Constant G:");
 			System.out.println(G);
 			System.out.println();
 

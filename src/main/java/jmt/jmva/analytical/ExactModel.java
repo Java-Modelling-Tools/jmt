@@ -139,7 +139,6 @@ public class ExactModel implements ExactConstants  {
 
 	/***********************RESULTS******************************/
 
-	/* EDITED by Abhimanyu Chugh */
 	/**
 	 * number of iterations algorithm performed for each (what-if) iteration/execution
 	 * dim: algIterations<Algorithm, [iterations]>
@@ -169,9 +168,12 @@ public class ExactModel implements ExactConstants  {
 	 * dim: util<Algorithm, [stations][classes][iterations]>
 	 */
 	private Map<SolverAlgorithm, double[][][]> util;
-	/* END */
 
-	private double logNormConst;
+	/**
+	 * logarithm of normalising constants
+	 * dim: logNormConst<Algorithm, 1>
+	 */
+	private Map<SolverAlgorithm, Double> logNormConst;
 
 	/*****************************************************************/
 	//parameters for randomization
@@ -251,11 +253,11 @@ public class ExactModel implements ExactConstants  {
 		whatIfValues = e.whatIfValues;
 
 		if (hasResults) {
-			/* EDITED by Abhimanyu Chugh */
 			queueLen = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 			throughput = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 			resTimes = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 			util = new LinkedHashMap<SolverAlgorithm, double[][][]>();
+			logNormConst = new LinkedHashMap<SolverAlgorithm, Double>();
 			algIterations = new LinkedHashMap<SolverAlgorithm, int[]>();
 
 			for (SolverAlgorithm alg : e.queueLen.keySet()) {
@@ -263,8 +265,8 @@ public class ExactModel implements ExactConstants  {
 				throughput.put(alg, ArrayUtils.copy3(e.throughput.get(alg)));
 				resTimes.put(alg, ArrayUtils.copy3(e.resTimes.get(alg)));
 				util.put(alg, ArrayUtils.copy3(e.util.get(alg)));
+				logNormConst.put(alg, e.logNormConst.get(alg));
 				algIterations.put(alg, ArrayUtils.copy(e.algIterations.get(alg)));
-			/* END */
 			}
 		}
 	}
@@ -382,6 +384,7 @@ public class ExactModel implements ExactConstants  {
 		throughput = null;
 		resTimes = null;
 		util = null;
+		logNormConst = null;
 		discardChanges();
 	}
 
@@ -398,7 +401,6 @@ public class ExactModel implements ExactConstants  {
 	 * sets all the result data for this model.
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
 	 */
-	/* EDITED by Abhimanyu Chugh */
 	public void setResults(SolverAlgorithm alg, int[] algIterations, double[][][] queueLen, double[][][] throughput, double[][][] resTimes, double[][][] util, double logNormConst) {
 		if (queueLen == null || queueLen.length != stations || queueLen[0].length != classes) {
 			throw new IllegalArgumentException("queueLen must be non null and of size [stations][classes][iterations]");
@@ -417,28 +419,20 @@ public class ExactModel implements ExactConstants  {
 		this.throughput.put(alg, ArrayUtils.copy3(throughput));
 		this.resTimes.put(alg, ArrayUtils.copy3(resTimes));
 		this.util.put(alg, ArrayUtils.copy3(util));
+		this.logNormConst.put(alg, new Double(logNormConst));
 		this.algIterations.put(alg, ArrayUtils.copy(algIterations));
-		this.logNormConst = logNormConst;
 
 		iterations = queueLen[0][0].length;
-
-		/*TODO: achugh
-		hasResults = true;
-		resultsOK = true;
-		changed = true;*/
 	}
-	/* END */
 
 	/**
 	 * sets all the result data for this model. This is called when only one iteration is performed.
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
 	 */
-	/* EDITED by Abhimanyu Chugh */
 	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, double logNormConst) {
 		resetResults();
 		setResults(alg, algIterations, queueLen, throughput, resTimes, util, logNormConst, 0);
 	}
-	/* END */
 
 	/**
 	 * Sets ResultsOK flag
@@ -452,7 +446,6 @@ public class ExactModel implements ExactConstants  {
 	 * sets all the result data for this model. This is called on multiple iterations (what-if analysis)
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
 	 */
-	/* EDITED by Abhimanyu Chugh */
 	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, double logNormConst, int iteration) {
 		if (queueLen == null || queueLen.length != stations || queueLen[0].length != classes) {
 			throw new IllegalArgumentException("queueLen must be non null and of size [stations][classes]");
@@ -474,6 +467,7 @@ public class ExactModel implements ExactConstants  {
 			this.throughput.put(alg, new double[stations][classes][iterations]);
 			this.resTimes.put(alg, new double[stations][classes][iterations]);
 			this.util.put(alg, new double[stations][classes][iterations]);
+			this.logNormConst.put(alg, new Double(Double.NaN));
 			this.algIterations.put(alg, new int[iterations]);
 		}
 
@@ -481,15 +475,9 @@ public class ExactModel implements ExactConstants  {
 		ArrayUtils.copy2to3(throughput, this.throughput.get(alg), iteration);
 		ArrayUtils.copy2to3(resTimes, this.resTimes.get(alg), iteration);
 		ArrayUtils.copy2to3(util, this.util.get(alg), iteration);
+		this.logNormConst.put(alg, new Double(logNormConst));
 		this.algIterations.get(alg)[iteration] = algIterations;
-		this.logNormConst = logNormConst;
-
-		/*TODO: achugh
-		hasResults = true;
-		resultsOK = true;
-		changed = true;*/
 	}
-	/* END */
 
 	public void setResultsBooleans(boolean value) {
 		hasResults = value;
@@ -506,6 +494,7 @@ public class ExactModel implements ExactConstants  {
 			throughput.put(alg, new double[stations][classes][iterations]);			
 			resTimes.put(alg, new double[stations][classes][iterations]);
 			util.put(alg, new double[stations][classes][iterations]);
+			logNormConst.put(alg, new Double(Double.NaN));
 			algIterations.put(alg, new int[iterations]);
 		}
 
@@ -522,6 +511,7 @@ public class ExactModel implements ExactConstants  {
 			throughput.put(alg, new double[stations][classes][iterations]);
 			resTimes.put(alg, new double[stations][classes][iterations]);
 			util.put(alg, new double[stations][classes][iterations]);
+			logNormConst.put(alg, new Double(Double.NaN));
 			algIterations.put(alg, new int[iterations]);
 		}
 
@@ -537,12 +527,12 @@ public class ExactModel implements ExactConstants  {
 		throughput = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 		resTimes = new LinkedHashMap<SolverAlgorithm, double[][][]>();
 		util = new LinkedHashMap<SolverAlgorithm, double[][][]>();
+		logNormConst = new LinkedHashMap<SolverAlgorithm, Double>();
 		algIterations = new LinkedHashMap<SolverAlgorithm, int[]>();
 
 		hasResults = false;
 		changed = true;
 	}
-	/* END */
 
 	/**
 	 * Initialize the object with defaults:
@@ -559,10 +549,7 @@ public class ExactModel implements ExactConstants  {
 		changed = true;
 
 		classData = new double[1];
-		//NEW
-		//@author Stefano Omini
 		classData[0] = 1;
-		//end NEW
 
 		stationNames = new String[1];
 		stationNames[0] = "Station1";
@@ -590,14 +577,9 @@ public class ExactModel implements ExactConstants  {
 		ReferenceStation[0]= 0;		
 
 		serviceTimes = new double[1][1][1];
-		//NEW
-		//@author Stefano Omini
 		serviceTimes[0][0][0] = 0.0;
-		//end NEW
 
 		description = "";
-
-		logNormConst = Double.NaN;
 
 		whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);
 		whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
@@ -1047,7 +1029,6 @@ public class ExactModel implements ExactConstants  {
 		return resize(stations, classes, false);
 	}
 
-	/* EDITED by Abhimanyu Chugh */
 	/**
 	 * @return algorithm iterations
 	 */
@@ -1094,16 +1075,13 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public double[][][] getResTimes(SolverAlgorithm alg) {
 		if (alg != null) {
-			// Added by Cerotti
 			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));
-
 			for (int s = 0; s < stations; s++)
 				for (int c = 0; c < classes; c++)
 					for (int i = 0; i < iterations; i++)
 						if (classTypes[c] == CLASS_CLOSED)
 							if (visits[ReferenceStation[c]][c] != 0)
 								res[s][c][i] /= (visits[ReferenceStation[c]][c]);
-			// End here
 			return res;
 		}
 		return null;
@@ -1142,7 +1120,23 @@ public class ExactModel implements ExactConstants  {
 		}
 		return null;
 	}
-	/* END */
+
+	/**
+	 * @return logarithms of normalising constants
+	 */
+	public Map<SolverAlgorithm, Double> getLogNormConst() {
+		return logNormConst;
+	}
+
+	/**
+	 * @return logarithm of normalising constant for the given algorithm
+	 */
+	public double setLogNormConst(SolverAlgorithm alg) {
+		if (alg != null) {
+			return logNormConst.get(alg).doubleValue();
+		}
+		return Double.NaN;
+	}
 
 	/**
 	 * Removes all LD stations, converting them into LI stations
@@ -1152,14 +1146,11 @@ public class ExactModel implements ExactConstants  {
 			if (stationTypes[i] == STATION_LD) {
 				stationTypes[i] = STATION_LI;
 
-				//NEW
-				//@author Stefano Omini
 				//clear old LD service times
 				serviceTimes[i] = new double[classes][1];
 				for (int c = 0; c < classes; c++) {
 					serviceTimes[i][c][0] = 0.0;
 				}
-				//end NEW
 			}
 		}
 		ld = false;
@@ -1263,18 +1254,18 @@ public class ExactModel implements ExactConstants  {
 		.append("classData=").append(ArrayUtils.toString(classData)).append("\n").append("visits=").append(ArrayUtils.toString2(visits))
 		.append("\n").append("serviceTimes=").append(ArrayUtils.toString3(serviceTimes)).append("\n");
 		if (hasResults) {
-			/* EDITED by Abhimanyu Chugh */
 			for (SolverAlgorithm alg : queueLen.keySet()) {
 				double[][][] queueLens = queueLen.get(alg);
 				double[][][] throughputs = throughput.get(alg);
 				double[][][] resTime = resTimes.get(alg);
 				double[][][] utils = util.get(alg);
+				double logNC = logNormConst.get(alg).doubleValue();
 
 				s.append("algorithm=").append(alg).append("\n").append("number of customers=").append(ArrayUtils.toString3(queueLens))
 				.append("\n").append("throughput=").append(ArrayUtils.toString3(throughputs)).append("\n").append("resTimes=")
-				.append(ArrayUtils.toString3(resTime)).append("\n").append("utilization=").append(ArrayUtils.toString3(utils)).append("\n");
+				.append(ArrayUtils.toString3(resTime)).append("\n").append("utilization=").append(ArrayUtils.toString3(utils)).append("\n")
+				.append("logarithm of normalising constant=").append(Double.toString(logNC)).append("\n");
 			}
-			/* END */
 		}
 
 		return s.toString();
@@ -1420,7 +1411,6 @@ public class ExactModel implements ExactConstants  {
 			stationsElement.appendChild(makeStationElement(root, i));
 		}
 
-		/* EDITED by Abhimanyu Chugh */
 		/* algorithm parameters */
 		Element algParamsElement = root.createElement("algParams");
 		modelElement.appendChild(algParamsElement);
@@ -1445,7 +1435,6 @@ public class ExactModel implements ExactConstants  {
 				alg_element.setAttribute("maxSamples", Integer.toString(getWhatifAlgorithmMaxSamples(algo)));
 			}
 		}
-		/* END */
 
 		/* What-if Analysis - Bertoli Marco */
 		if (isWhatIf()) {
@@ -1471,14 +1460,8 @@ public class ExactModel implements ExactConstants  {
 			ReferenceStation_element.appendChild(makeReferenceStationElement(root, i));
 		}
 
-		//OLD
-		//if (hasResults) modelElement.appendChild(appendSolutionElement(root));
-
-		//NEW
-		//@author Stefano Omini
 		if (hasResults && resultsOK) {
 			appendSolutionElement(root, modelElement);
-			//end NEW
 		}
 
 		return root;
@@ -1638,15 +1621,12 @@ public class ExactModel implements ExactConstants  {
 				result_element.setAttribute("iteration", Integer.toString(k));
 				result_element.setAttribute("iterationValue", Double.toString(whatIfValues[k]));
 			}
-			/* EDITED by Abhimanyu Chugh */
 			result_element.setAttribute("algCount", Integer.toString(queueLen.size()));
 
 			for (SolverAlgorithm alg : queueLen.keySet()) {
 				Element algorithm_element = (Element) result_element.appendChild(root.createElement("algorithm"));
 				algorithm_element.setAttribute("name", alg.toString());
 				algorithm_element.setAttribute("iterations", Integer.toString(algIterations.get(alg)[k]));
-				Element nc_element = (Element) algorithm_element.appendChild(root.createElement("normconst"));
-				nc_element.setAttribute("logValue", Double.toString(logNormConst));
 
 				for (int i = 0; i < stations; i++) {
 					Element stationresults_element = (Element) algorithm_element.appendChild(root.createElement("stationresults"));
@@ -1676,8 +1656,10 @@ public class ExactModel implements ExactConstants  {
 						U_element.setAttribute("meanValue", Double.toString(this.util.get(alg)[i][j][k]));
 					}
 				}
+
+				Element nc_element = (Element) algorithm_element.appendChild(root.createElement("normconst"));
+				nc_element.setAttribute("logValue", Double.toString(logNormConst.get(alg).doubleValue()));
 			}
-			/* END */
 
 			parentElement.appendChild(result_element);
 		}
@@ -1721,9 +1703,6 @@ public class ExactModel implements ExactConstants  {
 			description = "";
 		}
 
-		//NEW
-		//@author Stefano Omini
-
 		//load classes
 		if (classNode != null) {
 			if (!loadClasses(classNode)) {
@@ -1750,9 +1729,6 @@ public class ExactModel implements ExactConstants  {
 			loadReferenceStationDefault(classNode);
 		}
 
-		//end NEW
-
-		/* EDITED by Abhimanyu Chugh */
 		/* Algorithm parameters */
 		NodeList algParams = doc.getElementsByTagName("algParams");
 		if (algParams.getLength() > 0) {
@@ -1782,7 +1758,6 @@ public class ExactModel implements ExactConstants  {
 			this.whatifAlgorithmsTolerance = new EnumMap<SolverAlgorithm, Double>(SolverAlgorithm.class);
 			this.whatifAlgorithmsMaxSamples = new EnumMap<SolverAlgorithm, Integer>(SolverAlgorithm.class);
 		}
-		/* END */
 
 		/* What-if Analysis - Bertoli Marco */
 		NodeList whatIfs = doc.getElementsByTagName("whatIf");
@@ -1841,8 +1816,6 @@ public class ExactModel implements ExactConstants  {
 		return true;
 	}
 
-	//NEW
-	//@author Stefano Omini
 	public boolean loadClasses(Node classNode) {
 		classes = Integer.parseInt(((Element) classNode).getAttribute("number"));
 
@@ -1892,10 +1865,6 @@ public class ExactModel implements ExactConstants  {
 		return true;
 	}
 
-	//end NEW
-
-	//NEW
-	//@author Stefano Omini
 	public boolean loadStations(Node stationNode) {
 		stations = Integer.parseInt(((Element) stationNode).getAttribute("number"));
 
@@ -2048,17 +2017,14 @@ public class ExactModel implements ExactConstants  {
 	 */
 	public boolean loadSolution(NodeList sol) {
 		resultsOK = true;
-		/* EDITED by Abhimanyu Chugh */
 		if (queueLen == null) {
 			resetResults();
 		}
-		/* END */
 		for (int i = 0; i < sol.getLength(); i++) {
 			Element solution = (Element) sol.item(i);
 			String status = solution.getAttribute("ok");
 			resultsOK = resultsOK && (status.equals("true"));
 			if (solution.hasAttribute("algCount")) {
-				/* EDITED by Abhimanyu Chugh */
 				int algCount = Integer.parseInt(solution.getAttribute("algCount"));
 				for (int a = 0; a < algCount; a++) {
 					Element a_alg = (Element) solution.getElementsByTagName("algorithm").item(a);
@@ -2072,6 +2038,7 @@ public class ExactModel implements ExactConstants  {
 						throughput.put(alg, new double[stations][classes][iterations]);
 						resTimes.put(alg, new double[stations][classes][iterations]);
 						util.put(alg, new double[stations][classes][iterations]);
+						logNormConst.put(alg, new Double(Double.NaN));
 						algIterations.put(alg, new int[iterations]);
 					}
 
@@ -2079,9 +2046,18 @@ public class ExactModel implements ExactConstants  {
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Throughput"), throughput.get(alg), i);
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Residence time"), resTimes.get(alg), i);
 					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, "Utilization"), util.get(alg), i);
-					algIterations.get(alg)[i] = Integer.parseInt(a_alg.getAttribute("iterations"));
+					if (a_alg.getElementsByTagName("normconst").getLength() > 0) {
+						Element nc = (Element) a_alg.getElementsByTagName("normconst").item(0);
+						logNormConst.put(alg, new Double(Double.parseDouble(nc.getAttribute("logValue"))));
+					} else {
+						logNormConst.put(alg, new Double(Double.NaN));
+					}
+					if (a_alg.hasAttribute("iterations")) {
+						algIterations.get(alg)[i] = Integer.parseInt(a_alg.getAttribute("iterations"));
+					} else {
+						algIterations.get(alg)[i] = 0;
+					}
 				}
-				/* END */
 			} else {
 				SolverAlgorithm alg = SolverAlgorithm.EXACT;
 
@@ -2090,19 +2066,21 @@ public class ExactModel implements ExactConstants  {
 					throughput.put(alg, new double[stations][classes][iterations]);
 					resTimes.put(alg, new double[stations][classes][iterations]);
 					util.put(alg, new double[stations][classes][iterations]);
+					logNormConst.put(alg, new Double(Double.NaN));
+					algIterations.put(alg, new int[iterations]);
 				}
 
 				ArrayUtils.copy2to3(loadResultsMatrix(solution, stations, classes, "Number of Customers"), queueLen.get(alg), i);
 				ArrayUtils.copy2to3(loadResultsMatrix(solution, stations, classes, "Throughput"), throughput.get(alg), i);
 				ArrayUtils.copy2to3(loadResultsMatrix(solution, stations, classes, "Residence time"), resTimes.get(alg), i);
 				ArrayUtils.copy2to3(loadResultsMatrix(solution, stations, classes, "Utilization"), util.get(alg), i);
+				logNormConst.put(alg, new Double(Double.NaN));
+				algIterations.get(alg)[i] = 0;
 			}
 		}
 		return true;
 	}
 
-	//NEW
-	//@author Stefano Omini
 	public double[][] loadResultsMatrix(Element base, int len1, int len2, String res) {
 		//matrix of results
 		double[][] arr = new double[len1][len2];
@@ -2149,11 +2127,9 @@ public class ExactModel implements ExactConstants  {
 		}
 		return arr;
 	}
-	//end NEW
 
 	//methods for aggregate results retrieval
 
-	/* EDITED by Abhimanyu Chugh */
 	/**Returns per-class aggregate for throughput*/
 	public double[][] getPerClassX(SolverAlgorithm alg) {
 		if (throughput == null) {

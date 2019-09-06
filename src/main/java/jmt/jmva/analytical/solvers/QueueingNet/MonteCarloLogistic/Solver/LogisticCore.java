@@ -193,7 +193,7 @@ public abstract class LogisticCore {
 
 	/**
 	 * Calculate the NC, and multiply by the appropriate coefficients. Details see Casale 2017 and Ong 2018
-	 * @return The Normalizing constant in BigDecimal form
+	 * @return The Normalising constant in BigDecimal form
 	 * @throws InternalErrorException
 	 */
 	public BigDecimal calculateNC() throws InternalErrorException {

@@ -128,7 +128,7 @@ public class TreeConvolutionSolver extends QNSolver {
 			System.out.println("Plant mode: " + treePlanter.getPlantModeUsed());
 			System.out.println("No. threads: " + numThreads);
 			System.out.println("Tree Planting: " + treePlanter.treePlantTimer.getPrettyInterval());
-			System.out.println("Normalization Constant: " + IThreadedTCSolver.normalisationConstantTimer.getPrettyInterval());
+			System.out.println("Normalisation Constant: " + IThreadedTCSolver.normalisationConstantTimer.getPrettyInterval());
 			System.out.println("Performance Measures: X: " + IThreadedTCSolver.throughputTimer.getPrettyInterval()
 					+ " Q: " + IThreadedTCSolver.queueLengthTimer.getPrettyInterval() + " Tot: " + totalTimer.getPrettyInterval());
 			long total = 

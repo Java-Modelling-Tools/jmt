@@ -143,7 +143,6 @@ public class SolverDispatcher {
 
 		ModelFESCApproximator fesc = new ModelFESCApproximator(model, iteration);
 		try {
-			/** Edited by Abhimanyu Chugh **/
 			if (model.isClosed() && model.isWhatIf() && model.isWhatifAlgorithms()) {
 				SolverAlgorithm origAlgType = model.getAlgorithmType();
 				double origAlgTolerance = model.getTolerance();
@@ -170,7 +169,6 @@ public class SolverDispatcher {
 			}
 			// set boolean to notify results have been computed
 			model.setResultsBooleans(true);
-			/** End **/
 
 			// Notify termination of current model solution
 			if (listener != null) {
@@ -202,10 +200,8 @@ public class SolverDispatcher {
 	private void solveSingle(ExactModel model, int iteration) throws UnsupportedModelException, InputDataException, SolverException {
 		int stations = model.getStations();
 		Solver solver = null;
-		/** Edited by Abhimanyu Chugh **/
 		SolverAlgorithm algorithmType = model.getAlgorithmType();
 		int algIterations = 0;
-		/** End **/
 
 		// init
 		String[] names = model.getStationNames();
@@ -230,7 +226,6 @@ public class SolverDispatcher {
 					throw new InputDataException("Population must be greater than zero");
 				}
 
-				/** Edited by Abhimanyu Chugh **/
 				if (SolverAlgorithm.EXACT.equals(algorithmType)) {
 					solver = new SolverSingleClosedMVA(pop, stations);
 				} else if (SolverAlgorithm.MONTE_CARLO_LOGISTIC.equals(algorithmType)) {
@@ -254,20 +249,14 @@ public class SolverDispatcher {
 					}
 					solver = new SolverSingleClosedAMVA(pop, stations, algorithmType, tolerance);
 				}
-				/** End **/
 
 				if (!solver.input(names, types, serviceTimes, visits)) {
-					/** Edited by Abhimanyu Chugh **/
 					String algName = algorithmType.toString().replace(" ", "").replace("-", "");
 					fail("Error initializing " + algName + "SingleSolver", null);
 					// fail("Error initializing MVASolver", null);
-					/** End **/
 				}
 			} else {
-				/** Edited by Abhimanyu Chugh **/
 				algorithmType = SolverAlgorithm.EXACT;
-				/** End **/
-
 				// TODO this is not used any more (multi solver is used instead)
 				/* single open */
 				double lambda = model.getClassData()[0];
@@ -294,7 +283,6 @@ public class SolverDispatcher {
 		solver.solve();
 
 		double logNC = Double.NaN;
-		/** Edited by Abhimanyu Chugh **/
 		if (solver instanceof SolverSingleClosedAMVA) {
 			algIterations = ((SolverSingleClosedAMVA) solver).getIterations();
 		} else if (solver instanceof SolverSingleClosedRECAL) {
@@ -307,7 +295,6 @@ public class SolverDispatcher {
 			BigRational G = ((SolverSingleClosedMonteCarloLogistic) solver).solver.qnm.getNormalisingConstant();
 			logNC = G.log();
 		}
-		/** End **/
 
 		/* solution */
 		double[][] ql = ArrayUtils.makeFilled(stations, 1, -1);
@@ -322,9 +309,7 @@ public class SolverDispatcher {
 		double[][] util = ArrayUtils.makeFilled(stations, 1, -1);
 		ArrayUtils.insert1(util, solver.getUtilization(), 0);
 
-		/** Edited by Abhimanyu Chugh **/
 		model.setResults(algorithmType, algIterations, ql, tp, rt, util, logNC, iteration);
-		/** End **/
 	}
 
 	private void solveMulti(ExactModel model, int iteration) throws UnsupportedModelException, InputDataException, SolverException {
@@ -342,10 +327,8 @@ public class SolverDispatcher {
 		double tolerance = model.getTolerance();
 		int maxSamples = model.getMaxSamples();
 
-		/** Edited by Abhimanyu Chugh **/
 		SolverAlgorithm algorithmType = model.getAlgorithmType();
 		int algIterations = 0;
-		/** End **/
 
 		SolverMulti solver = null;
 
@@ -371,9 +354,7 @@ public class SolverDispatcher {
 		/* init */
 		try {
 			if (model.isOpen()) {
-				/** Edited by Abhimanyu Chugh **/
 				algorithmType = SolverAlgorithm.EXACT;
-				/** End **/
 				solver = new SolverMultiOpen(classes, stations, model.getClassData(), model.getStationServers());
 				if (!solver.input(stationNames, stationTypes, serviceTimes, visits)) {
 					fail("Error initializing SolverMultiOpen", null);
@@ -381,7 +362,6 @@ public class SolverDispatcher {
 			} else {
 				int[] classPop = ArrayUtils.toInt(classData);
 				if (model.isClosed()) {
-					/** Edited by Abhimanyu Chugh **/
 					if (SolverAlgorithm.EXACT.equals(algorithmType)) {
 						SolverMultiClosedMVA closedsolver = new SolverMultiClosedMVA(classes, stations);
 						if (!closedsolver.input(stationNames, stationTypes, serviceTimes, visits, classPop)) {
@@ -398,6 +378,9 @@ public class SolverDispatcher {
 						}
 						solver = closedSolver;
 					}/* else if (SolverAlgorithm.MOM.equals(algorithmType)) {
+						if (model.isLd()) {
+							throw new UnsupportedModelException("The selected solver cannot handle load-dependent stations, please choose another.");
+						}
 						SolverMultiClosedMoM closedSolver = new SolverMultiClosedMoM(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 								fail("Error initializing MoMMultiSolver", null);
@@ -413,24 +396,36 @@ public class SolverDispatcher {
 						}
 						solver = closedSolver;
 					}/* else if (SolverAlgorithm.RGF.equals(algorithmType)) {
+						if (model.isLd()) {
+							throw new UnsupportedModelException("The selected solver cannot handle load-dependent stations, please choose another.");
+						}
 						SolverMultiClosedRGF closedSolver = new SolverMultiClosedRGF(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits, nThreads)) {
 							fail("Error initializing RGFMultiSolver", null);
 						}
 						solver = closedSolver;
 					} else if (SolverAlgorithm.TREE_MVA.equals(algorithmType)) {
+						if (model.isLd()) {
+							throw new UnsupportedModelException("The selected solver cannot handle load-dependent stations, please choose another.");
+						}
 						SolverMultiClosedTreeMVA closedSolver = new SolverMultiClosedTreeMVA(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
 							fail("Error initializing TreeMVAMultiSolver", null);
 						}
 						solver = closedSolver;
 					} else if (SolverAlgorithm.TREE_CONV.equals(algorithmType)) {
+						if (model.isLd()) {
+							throw new UnsupportedModelException("The selected solver cannot handle load-dependent stations, please choose another.");
+						}
 						SolverMultiClosedTreeConvolution closedSolver = new SolverMultiClosedTreeConvolution(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
 							fail("Error initializing TreeConvolutionMultiSolver", null);
 						}
 						solver = closedSolver;
 					} else if (SolverAlgorithm.MONTE_CARLO.equals(algorithmType)) {
+						if (model.isLd()) {
+							throw new UnsupportedModelException("The selected solver cannot handle load-dependent stations, please choose another.");
+						}
 						SolverMultiClosedMonteCarlo closedSolver = new SolverMultiClosedMonteCarlo(classes, stations, classPop);
 						if (!closedSolver.input(stationTypes, serviceTimes, visits)) {
 							fail("Error initializing MonteCarloMultiSolver", null);
@@ -468,13 +463,9 @@ public class SolverDispatcher {
 						}
 						solver = closedSolver;
 					}
-					/** End **/
 				} else {
 					// model is multiclass mixed
-					/** Edited by Abhimanyu Chugh **/
 					algorithmType = SolverAlgorithm.EXACT;
-					/** End **/
-
 					SolverMultiMixed mixedsolver = new SolverMultiMixed(classes, stations);
 					if (!mixedsolver.input(stationNames, stationTypes, serviceTimes, visits, classData, classTypes)) {
 						fail("Error initializing SolverMultiMixed", null);
@@ -493,7 +484,6 @@ public class SolverDispatcher {
 		solver.solve();
 
 		double logNC = Double.NaN;
-		/** Edited by Abhimanyu Chugh **/
 		if (solver instanceof SolverMultiClosedAMVA) {
 			algIterations = ((SolverMultiClosedAMVA) solver).getIterations();
 		} else if (solver instanceof SolverMultiClosedRECAL) {
@@ -506,7 +496,6 @@ public class SolverDispatcher {
 			BigRational G = ((SolverMultiClosedMonteCarloLogistic) solver).qnm.getNormalisingConstant();
 			logNC = G.log();
 		}
-		/** End **/
 
 		double[][] ql = ArrayUtils.resize2(solver.getQueueLen(), stations, classes, 0);
 
@@ -516,9 +505,7 @@ public class SolverDispatcher {
 
 		double[][] util = ArrayUtils.resize2(solver.getUtilization(), stations, classes, 0);
 
-		/** Edited by Abhimanyu Chugh **/
 		model.setResults(algorithmType, algIterations, ql, tp, rt, util, logNC, iteration);
-		/** End **/
 	}
 
 	/**

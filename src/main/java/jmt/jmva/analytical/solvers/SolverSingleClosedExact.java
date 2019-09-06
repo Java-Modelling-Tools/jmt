@@ -27,7 +27,7 @@ package jmt.jmva.analytical.solvers;
 import java.io.PrintWriter;
 
 /**
- *  Solves a single class closed model, using the normalization constant
+ *  Solves a single class closed model, using the normalisation constant
  *  algorithm. It also use a preordering algorithm to obtain a stable network.
  *
  * @author  Federico Granata
@@ -41,7 +41,7 @@ public class SolverSingleClosedExact extends Solver {
 	protected int customers = 0;
 
 	/**
-	 * normalization constant
+	 * normalisation constant
 	 */
 	protected double[] G;
 
@@ -191,7 +191,7 @@ public class SolverSingleClosedExact extends Solver {
 	//end NEW
 
 	/**
-	 * Solves the system through the normalization constant algorithm.
+	 * Solves the system through the normalisation constant algorithm.
 	 *  For a description of the algorithm see:
 	 *  <em>
 	 *  S.C. Bruell, G. Balbo,<br>

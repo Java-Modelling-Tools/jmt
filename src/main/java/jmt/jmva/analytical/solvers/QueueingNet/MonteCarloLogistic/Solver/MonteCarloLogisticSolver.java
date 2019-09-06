@@ -99,7 +99,7 @@ public class MonteCarloLogisticSolver extends QNSolver {
 		if (lcore.is_invalid_model())
 			throw new InternalErrorException("Invalid model!");
 		if (!is_nc_computed)
-			throw new InternalErrorException("Normalizing constant not yet computed!");
+			throw new InternalErrorException("Normalising constant not yet computed!");
 		return this.G.asBigDecimal();
 	}
 
