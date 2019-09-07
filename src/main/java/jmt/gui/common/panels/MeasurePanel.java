@@ -487,7 +487,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 
-		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region/Network", "Stat.Res.", "Conf.Int.", "Max Rel.Err.", "" };
+		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region/System", "Stat.Res.", "Conf.Int.", "Max Rel.Err.", "" };
 		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Boolean.class, Double.class, Double.class, Object.class };
 		public int[] columnWidths = new int[] { 120, 80, 120, 30, 60, 60, 20 };
 
