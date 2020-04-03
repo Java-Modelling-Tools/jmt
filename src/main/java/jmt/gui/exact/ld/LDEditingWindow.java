@@ -68,8 +68,8 @@ public class LDEditingWindow extends JMTDialog {
 	private static final long serialVersionUID = 1L;
 
 	/* dummy arrays to keep the tablemodel happy during initialization */
-	private String[] classNames = new String[1];
-	private double[][] serviceTimes = new double[1][1];
+	private String className;
+	private double[] serviceTimes = new double[1];
 
 	private HoverHelp help;
 	private Frame owner;
@@ -318,9 +318,9 @@ public class LDEditingWindow extends JMTDialog {
 	/**
 	 * Sets all the data for the editing window. The matrix of service times is copied in order to have a "cancel" feature.
 	 */
-	public void setStatus(String title, String[] classNames, double[][] serviceTimes) {
-		this.classNames = classNames;
-		this.serviceTimes = ArrayUtils.copy2(serviceTimes);
+	public void setStatus(String title, String className, double[] serviceTimes) {
+		this.className = className;
+		this.serviceTimes = ArrayUtils.copy(serviceTimes);
 		//ldTitle.setText("Service times for "+stationName);
 		setTitle(title);
 		ldTable.updateStructure();
@@ -329,7 +329,7 @@ public class LDEditingWindow extends JMTDialog {
 	/**
 	 * @return the edited matrix of service times
 	 */
-	public double[][] getServiceTimes() {
+	public double[] getServiceTimes() {
 		return serviceTimes;
 	}
 
@@ -421,13 +421,11 @@ public class LDEditingWindow extends JMTDialog {
 			stopEditing();
 			int anchorRow = selectionModel.getAnchorSelectionIndex();
 			ListSelectionModel csm = columnModel.getSelectionModel();
-			int colFrom = csm.getMinSelectionIndex();
-			int colTo = csm.getMaxSelectionIndex();
+
 			LDTableModel dm = (LDTableModel) dataModel;
 
-			for (int i = colFrom; i <= colTo; i++) {
-				dm.copyCellDown(anchorRow, i);
-			}
+			dm.copyCellDown(anchorRow, 0);
+
 			updateRows(anchorRow + 1, getRowCount());
 		}
 
@@ -461,21 +459,21 @@ public class LDEditingWindow extends JMTDialog {
 		}
 
 		public int getRowCount() {
-			return serviceTimes[0].length;
+			return serviceTimes.length;
 		}
 
 		public int getColumnCount() {
-			return serviceTimes.length;
+			return 1;
 		}
 
 		@Override
 		public String getColumnName(int index) {
-			return classNames[index];
+			return className;
 		}
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
-			return new Double(serviceTimes[columnIndex][rowIndex]);
+			return new Double(serviceTimes[rowIndex]);
 		}
 
 		@Override
@@ -488,7 +486,7 @@ public class LDEditingWindow extends JMTDialog {
 			try {
 				double newVal = Double.parseDouble((String) value);
 				if (newVal >= 0) {
-					serviceTimes[columnIndex][rowIndex] = newVal;
+					serviceTimes[rowIndex] = newVal;
 				}
 			} catch (NumberFormatException e) {
 			}
@@ -501,18 +499,18 @@ public class LDEditingWindow extends JMTDialog {
 
 		@Override
 		public void clear(int row, int col) {
-			serviceTimes[col][row] = 0;
+			serviceTimes[row] = 0;
 		}
 
 		/**
 		 * Copy the contents of a cell down to the end of the column
 		 */
 		public void copyCellDown(int row, int col) {
-			double source = serviceTimes[col][row];
+			double source = serviceTimes[row];
 
-			int maxRow = serviceTimes[col].length;
+			int maxRow = serviceTimes.length;
 			for (int r = row + 1; r < maxRow; r++) {
-				serviceTimes[col][r] = source;
+				serviceTimes[r] = source;
 			}
 		}
 
@@ -532,9 +530,7 @@ public class LDEditingWindow extends JMTDialog {
 			double[] y = eval.evaluate(expr, x);
 
 			for (r = rowFrom, i = 0; r <= rowTo; r++, i++) {
-				for (c = colFrom; c <= colTo; c++) {
-					serviceTimes[c][r] = y[i];
-				}
+				serviceTimes[r] = y[i];
 			}
 
 			fireTableRowsUpdated(rowFrom, rowTo);

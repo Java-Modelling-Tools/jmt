@@ -188,13 +188,12 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 
 	/**
 	 * if true, load dependent stations are allowed
-	 * (at the moment, only single class closed models allow LD stations)
 	 * @return true if the model allows load dependent. False otherwise.
 	 */
 	private boolean isLdEnabled() {
 		ExactModel data = ew.getData();
 		//return data.isClosed() && data.isSingleClass() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
-		return data.isClosed() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
+		return data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
 	}
 
 	@Override
@@ -705,7 +704,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 				boolean isLd = isLD();
 				ew.updateAlgoPanel(null, null, null, isLd);
 				//if (isLd) {
-					ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
+				ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
 				//}
 				break;
 			default:

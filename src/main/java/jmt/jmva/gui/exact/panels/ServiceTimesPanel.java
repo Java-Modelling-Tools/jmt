@@ -310,7 +310,7 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		public Component prepareEditor(TableCellEditor editor, int row, int column) {
 			if (editor instanceof LDEditor) {
 				LDEditor lde = ((LDEditor) editor);
-				lde.setStatus("Editing Service Times of " + stationNames[row], classNames, serviceTimes[row]);
+				lde.setStatus("Editing Service Times of " + stationNames[row], classNames[column], serviceTimes[row][column]);
 				lde.startEditing(this, row);
 
 				return getCellRenderer(row, column).getTableCellRendererComponent(this, "LD Settings...", true, true, row, column);
@@ -404,8 +404,8 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 					}
 				} catch (NumberFormatException e) {
 				}
-			} else if (value instanceof double[][]) { // coming from the LDEditor
-				serviceTimes[rowIndex] = (double[][]) value;
+			} else if (value instanceof double[]) { // coming from the LDEditor
+				serviceTimes[rowIndex][columnIndex] = (double[]) value;
 			}
 		}
 

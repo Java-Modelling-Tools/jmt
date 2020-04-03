@@ -77,6 +77,7 @@ public class LDEditor extends AbstractCellEditor implements TableCellEditor {
 	/**
 	 * @return the edited matrix of service times
 	 */
+	@Override
 	public Object getCellEditorValue() {
 		return ldWindow.getServiceTimes();
 	}
@@ -84,8 +85,8 @@ public class LDEditor extends AbstractCellEditor implements TableCellEditor {
 	/**
 	 *  sets the data for the editor window
 	 */
-	public void setStatus(String title, String[] classNames, double[][] serviceTimes) {
-		ldWindow.setStatus(title, classNames, serviceTimes);
+	public void setStatus(String title, String className, double[] serviceTimes) {
+		ldWindow.setStatus(title, className, serviceTimes);
 	}
 
 	/**

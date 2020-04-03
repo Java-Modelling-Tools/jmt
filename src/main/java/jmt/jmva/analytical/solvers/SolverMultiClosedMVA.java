@@ -18,6 +18,13 @@
 
 package jmt.jmva.analytical.solvers;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import static jmt.jmva.analytical.solvers.Util.generatePopulations;
+import static jmt.jmva.analytical.solvers.Util.popHashCode;
+
 /**
  * Solves a multiclass closed model, using MVA algorithm.
  * @author  Federico Granata, Stefano Omini
@@ -29,97 +36,31 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	//array of population for every class
 	private int[] population;
 
-	//an array used to reduce the computation every time
-	//needed the product of n class population
-	private int[] popMult;
-
-	//status of the computation
-	private int[] status;
-
 	//sum af all populations
 	private int totPop = 0;
-
-	//queuelength vector
-	private double[][] n;
-
-	//private double sysResponseTime = 0;
-
-	//private double sysThroughput = 0;
 
 	private int maxIndex = -1;
 
 	//number of states
 	private int memory = 1;
 
-	//NEW
-	//@author Stefano Omini
+	// all populations required for MVA algorithm
+	private int[][] populations;
 
-	//---INTERMEDIATE RESULTS (0,1,2 ...N customers)------------//
+	// demands vector
+	private double[][] demand;
 
-	/** Intermediate results: throughput for each service station, class<br>
-	 * [customers] [station] [class] */
-	protected double[][][] interm_throughput;
+	// Map of population vector to queue length vector
+	private Map<Integer, double[][]> Q;
+	// TODO: maybe use array instead of a map
 
-	/** Intermediate results: utilization for each service station, class<br>
-	 * [customers] [station] [class] */
-	protected double[][][] interm_utilization;
+	// Maximum population
+	private int maxPop;
 
-	/** Intermediate results: queue length for each service station, class<br>
-	 * [customers] [station] [class] */
-	protected double[][][] interm_queueLen;
-
-	/** Intermediate results: residence time for each service station, class<br>
-	 * [customers] [station] [class] */
-	protected double[][][] interm_residenceTime;
-
-	/** Intermediate results: throughputs of the service centers<br>
-	 *  [customers] [station] */
-	protected double[][] interm_scThroughput;
-
-	/** Intermediate results: utilization of the service centers<br>
-	 *  [customers] [station] */
-	protected double[][] interm_scUtilization;
-
-	/** Intermediate results: queue length of the service centers<br>
-	 *  [customers] [station] */
-	protected double[][] interm_scQueueLen;
-
-	/** Intermediate results: residence time of the service centers<br>
-	 *  [customers] [station] */
-	protected double[][] interm_scResidTime;
-
-	/** Intermediate results: response time for each class<br>
-	 * [customers] [class] */
-	protected double[][] interm_clsRespTime;
-
-	/** Intermediate results: throughput for each class<br>
-	 * [customers] [class] */
-	protected double[][] interm_clsThroughput;
-
-	/** Intermediate results: average number of users for each class<br>
-	 * [customers] [class] */
-	protected double[][] interm_clsNumJobs;
-
-	/** Intermediate results: System response time
-	 * [customers]   */
-	protected double[] interm_sysResponseTime;
-
-	/** Intermediate results: System throughput
-	 * [customers]  */
-	protected double[] interm_sysThroughput;
-
-	/** Intermediate results: Number of jobs in the system
-	 * [customers]  */
-	protected double[] interm_sysNumJobs;
-
-	/**
-	 * Tells whether intermediate results have been computed or not
-	 */
-	protected boolean intermediate_results = false;
-
-	//---------------------------------------------------//
-
-	//end NEW
+	// queue length time proportions
+	// for the final population with lastClass-1
+	// needed for calculating utilisations of last closed class
+	private double[][] lastClassPc;
 
 	/** Creates new SolverMultiClosedMVA
 	 *  @param  stations    number of service centers
@@ -128,28 +69,6 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	public SolverMultiClosedMVA(int classes, int stations) {
 		super(classes, stations);
 		population = new int[classes];
-		popMult = new int[classes];
-		status = new int[classes];
-
-		//NEW
-		//@author Stefano Omini
-
-		interm_throughput = null;
-		interm_utilization = null;
-		interm_queueLen = null;
-		interm_residenceTime = null;
-		interm_scThroughput = null;
-		interm_scUtilization = null;
-		interm_scQueueLen = null;
-		interm_scResidTime = null;
-		interm_clsRespTime = null;
-		interm_clsThroughput = null;
-		interm_clsNumJobs = null;
-		interm_sysResponseTime = null;
-		interm_sysThroughput = null;
-		interm_sysNumJobs = null;
-
-		//end NEW
 	}
 
 	//TODO: warning, it cannot handle classes with zero jobs
@@ -162,7 +81,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	 * @return true if the operation is completed with success
 	 */
 	public boolean input(String[] n, int[] t, double[][][] s, double[][] v, int[] pop) {
-		int maxPop = 0;
+		maxPop = 0;
 		int lastClass = classes - 1;
 
 		if ((n.length != stations) || (t.length != stations) || (s.length != stations) || (v.length != stations)) {
@@ -195,7 +114,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 			//	servTime[i][j] = new double[totPop];
 			if (t[i] == LD) {
 				for (int j = 0; j < classes; j++) {
-					servTime[i][j] = new double[totPop];
+					servTime[i][j] = new double[totPop+1];
 				}
 			} else {
 				for (int j = 0; j < classes; j++) {
@@ -232,24 +151,29 @@ public class SolverMultiClosedMVA extends SolverMulti {
 			System.arraycopy(v[i], 0, visits[i], 0, lastClass);
 			visits[i][lastClass] = v[i][maxIndex];
 			visits[i][maxIndex] = v[i][lastClass];
+			if (type[i] == LD) {
+				for (int j = 0; j < lastClass; j++) {
+					System.arraycopy(s[i][j], 0, servTime[i][j], 1, s[i][j].length);
+				}
+				System.arraycopy(s[i][maxIndex], 0, servTime[i][lastClass], 1, s[i][maxIndex].length);
+				System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 1, s[i][lastClass].length);
 
-			for (int j = 0; j < lastClass; j++) {
-				System.arraycopy(s[i][j], 0, servTime[i][j], 0, s[i][j].length);
 			}
-			System.arraycopy(s[i][maxIndex], 0, servTime[i][lastClass], 0, s[i][maxIndex].length);
-			System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 0, s[i][lastClass].length);
-		}
+			else {
+				for (int j = 0; j < lastClass; j++) {
+					System.arraycopy(s[i][j], 0, servTime[i][j], 0, s[i][j].length);
+				}
+				System.arraycopy(s[i][maxIndex], 0, servTime[i][lastClass], 0, s[i][maxIndex].length);
+				System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 0, s[i][lastClass].length);
+			}
 
-		popMult[0] = 1;
-		if (DEBUG) {
-			System.out.println("Pop mult, elemento " + 0 + " pari a: " + 1);
+
 		}
-		for (int i = 1; i < popMult.length; i++) {
-			popMult[i] = popMult[i - 1] * (population[i - 1] + 1);
-			if (DEBUG) {
-				System.out.println("Pop mult, elemento " + i + " pari a: " + popMult[i]);
-			}
-		}
+		lastClassPc = new double[stations][totPop+1];
+
+		populations = generatePopulations(population);
+		computeDemands();
+		initialiseQueueMap();
 		return true;
 	}
 
@@ -277,480 +201,329 @@ public class SolverMultiClosedMVA extends SolverMulti {
 	//end NEW
 
 	/**
-	 * Solves the model, using an appropriate technique (LI or LD model).
+	 * Solves the model
 	 * <br>
 	 * "input(...)" method must have been called before solving the model!!<br><br>
-	 *
 	 */
 	@Override
 	public void solve() {
-		//tests if all the resources, stations, are load independent
-		boolean loadIndep = true;
-		for (int i = 0; i < stations; i++) {
-			if (type[i] == LD) {
-				loadIndep = false;
-				break;
-			}
+		long startTime = System.currentTimeMillis();
+		for (int i = 1; i < populations.length; i++) {
+			computeResidenceTime(populations[i]);
+			computeThroughput(populations[i]);
+			computeMeanQueueLengths(populations[i]);
 		}
+		computeFinalThroughputAndQueueLen();
+		computeUtilisation();
+		computeStationParams();
+		restoreClassOrder();
+		computeSystemParams();
+		long endTime = System.currentTimeMillis();
+		System.out.println((double)(endTime - startTime)/1000);
+	}
 
-		if (loadIndep) {
-			solveLI();
-			//System.out.println(this);
-		} else {
-			//TODO: still needs to be implemented
-			//solveLD();
+
+	/**
+	 * Initialises a map of population to an array of queue lengths, Qk, for load independent stations
+	 * and an array of proportion of times, pk(j|n), for load dependent stations
+	 */
+	private void initialiseQueueMap() {
+		Q = new HashMap<>();
+		for (int[] pop : populations) {
+			Q.put(popHashCode(pop, maxPop), new double[stations][totPop+1]);
+		}
+		for (int m = 0; m < stations; m++) {
+			if (type[m] == LD) {
+				Q.get(popHashCode(populations[0], maxPop))[m][0] = 1;
+			}
 		}
 	}
 
 	/**
-	 * Solves the model, using an appropriate technique (LI or LD model).
-	 * <br>
-	 * To solve a closed model with N customers, all the models with
-	 * 0, 1, 2, ... N-1 customers must be solved before.
-	 * This method allows to save the results for these intermediate models.
-	 *
-	 * @param intermediate true to save intermediate results
-	 *
+	 * Computes demands for each station and customer class for load independent stations
 	 */
-	public void solve(boolean intermediate) {
-		//tests if all the resources, stations, are load independent
-		boolean loadIndep = true;
-		for (int i = 0; i < stations; i++) {
-			if (type[i] == LD) {
-				loadIndep = false;
-				break;
+	private void computeDemands() {
+		demand = new double[stations][classes];
+		for (int m = 0; m < stations; m++) {
+			for (int c = 0; c < classes; c++) {
+				if (type[m] == LD) {
+					demand[m][c] = visits[m][c] * servTime[m][c][1];
+				} else {
+					demand[m][c] = visits[m][c] * servTime[m][c][0];
+				}
 			}
-		}
-
-		if (loadIndep) {
-			solveLI(intermediate);
-			//System.out.println(this);
-		} else {
-			//TODO: still needs to be implemented
-			//solveLD(intermediate);
 		}
 	}
 
 	/**
-	 * Solves a model with only load independent stations
+	 * Computes the total number of customers for a particular population
+	 * @param pop - population array, number of customers in each customer class
+	 * @return the total number of customers
 	 */
-	private void solveLI() {
-		int m = 0;//index of service center
-		int c = 0;//index of class
-		int lastClass = classes - 1;
-		int index = 0;
-		boolean flag;
-		double sum;
-		status[0] = 1;
-		index = 1;
-		//service demands
-		double[][] demand = new double[stations][classes];
-		//queue length\\TODO: memory????
-		n = new double[stations][memory];
+	private int numberOfCustomers(int[] pop) {
+		int nCust = 0;
+		for (int i = 0; i < classes; i++) {
+			nCust += pop[i];
+		}
+		return nCust;
+	}
 
-		//compute demands vector
-		for (m = 0; m < stations; m++) {
-			for (c = 0; c < classes; c++) {
-				demand[m][c] = visits[m][c] * servTime[m][c][0];
+	/**
+	 * Computes the residence time for Load Independent stations
+	 * @param c - customer class
+	 * @param m - service station
+	 * @param pop - population array
+	 */
+	private void computeResidenceTimeLI(int c, int m, int[] pop) {
+		pop[c]--;
+		residenceTime[m][c] = demand[m][c] * (1.0 + Q.get(popHashCode(pop, maxPop))[m][0]);
+		pop[c]++;
+	}
+
+	/**
+	 * Computes the residence time for Load Dependent stations
+	 * @param c - customer class
+	 * @param m - service station
+	 * @param pop - population array
+	 * @param nCust - total number of customers in pop
+	 */
+	private void computeResidenceTimeLD(int c, int m, int[] pop, int nCust) {
+		double residTimeSum;
+		pop[c]--;
+		residTimeSum = 0;
+		for (int i = 1; i <= nCust; i++) {
+			residTimeSum += (i * servTime[m][c][i]) * Q.get(popHashCode(pop, maxPop))[m][i-1];
+		}
+		residenceTime[m][c] = visits[m][c] * residTimeSum;
+		pop[c]++;
+	}
+
+	/**
+	 * Computes the residence times for all stations and classes
+	 * @param pop - population array
+	 */
+	private void computeResidenceTime(int[] pop) {
+		int nCust = numberOfCustomers(pop);
+		for (int c = 0; c < classes; c++) {
+			for (int m = 0; m < stations; m++) {
+				if (pop[c] > 0) {
+					if (type[m] == LI) computeResidenceTimeLI(c, m, pop);
+					else if (type[m] == LD) computeResidenceTimeLD(c, m, pop, nCust);
+					else residenceTime[m][c] = demand[m][c];
+				}
+				else residenceTime[m][c] = 0;
 			}
 		}
+	}
 
-		do {
-			//compute residence time
-			for (m = 0; m < stations; m++) {
-				for (c = 0; c < lastClass; c++) {
-					if (status[c] > 0) {
-						if (type[m] == LI) {
-							residenceTime[m][c] = demand[m][c] * (1.0 + n[m][index - popMult[c]]);
-						} else {
-							residenceTime[m][c] = demand[m][c];
-						}
-					} else {
-						residenceTime[m][c] = 0;
-					}
-				}
-				if (status[lastClass] > 0) {
-					if (type[m] == LI) {
-						residenceTime[m][lastClass] = demand[m][lastClass] * (1.0 + n[m][index]);
-					} else {
-						residenceTime[m][lastClass] = demand[m][lastClass];
-					}
-				} else {
-					residenceTime[m][lastClass] = 0;
-				}
+	/**
+	 * Computes throughput of each class
+	 * @param pop - population array
+	 */
+	private void computeThroughput(int[] pop) {
+		double residenceTimeSum;
+		for (int c = 0; c < classes; c++) {
+			residenceTimeSum = 0;
+			for (int m = 0; m < stations; m++) {
+				residenceTimeSum += residenceTime[m][c];
+			}
+			if (residenceTimeSum != 0 && pop[c] > 0) {
+				clsThroughput[c] = pop[c] / residenceTimeSum;
+			} else {
+				clsThroughput[c] = 0;
 			}
 
-			//compute throughput
-			for (c = 0; c < classes; c++) {
-				sum = 0;
-				for (m = 0; m < stations; m++) {
-					sum += residenceTime[m][c];
-				}
-				if (status[c] > 0) {
-					//OLD
-					//clsThroughput[c] = status[c] / sum;
-					//NEW
-					//@author Stefano Omini
-					if (sum == 0) {
-						//all D=0 for this class
-						clsThroughput[c] = 0;
-					} else {
-						clsThroughput[c] = status[c] / sum;
-					}
-					//end NEW
-				} else {
-					clsThroughput[c] = 0;
+		}
+	}
+
+	/**
+	 * Computes proportion of time the centre m has i customers present
+	 * given there are nCust customers in total. (Load Dependent stations)
+	 * @param m - service station
+	 * @param pop - population array
+	 * @param nCust - total number of customers
+	 */
+	private void computeTimeProportions(int m, int[] pop, int nCust) {
+		double pSum = 0;
+		double cSum;
+		double[] tempQ = new double[totPop+1];
+		for (int i = 1; i <= nCust; i++) {
+			cSum = 0;
+			for (int c = 0; c < classes; c++) {
+				if (pop[c] > 0) {
+					pop[c]--;
+					cSum += (clsThroughput[c] * servTime[m][c][i]) * Q.get(popHashCode(pop, maxPop))[m][i-1];
+					pop[c]++;
 				}
 			}
+			tempQ[i] = cSum;
+			pSum += cSum;
+		}
+		tempQ[0] = 1 - pSum;
+		if (Arrays.equals(population, pop)) {
+			lastClassPc[m] = Q.get(popHashCode(pop, maxPop))[m];
+		}
+		Q.get(popHashCode(pop, maxPop))[m] = tempQ;
+	}
 
-			//compute queue length
-			for (m = 0; m < stations; m++) {
-				n[m][index] = 0;
-				for (c = 0; c < classes; c++) {
-					n[m][index] += clsThroughput[c] * residenceTime[m][c];
-				}
-			}
+	/**
+	 * Computes mean queue length of a station. (Load Independent Stations)
+	 * @param m - service station
+	 * @param pop - population array
+	 */
+	private void computeMeanQueueLength(int m, int[] pop) {
+		double queueLengthSum = 0;
+		for (int c = 0; c < classes; c++) {
+			queueLengthSum += clsThroughput[c] * residenceTime[m][c];
+		}
+		Q.get(popHashCode(pop, maxPop))[m][0] = queueLengthSum;
+	}
 
-			index++;
-			c = 0;
-			do {
-				status[c] += 1;
-				if (c == lastClass) {
-					index = 0;
-				}
-				flag = true;
-				if (status[c] > population[c]) {
-					status[c] = 0;
-					c++;
-					flag = false;
-				}
-			} while (c < classes && !flag);
-		} while (c < classes);
+	/**
+	 * Computes mean queue length of each station
+	 * @param pop - population array
+	 */
+	private void computeMeanQueueLengths(int[] pop) {
+		int nCust = numberOfCustomers(pop);
+		for (int m = 0; m < stations; m++) {
+			if (type[m] == LD) computeTimeProportions(m, pop, nCust);
+			else computeMeanQueueLength(m, pop);
+		}
+	}
 
-		for (m = 0; m < stations; m++) {
-			for (c = 0; c < classes; c++) {
-				throughput[m][c] = clsThroughput[c] * visits[m][c];
-				utilization[m][c] = throughput[m][c] * servTime[m][c][0]; // Umc=Xmc*Smc
-				queueLen[m][c] = clsThroughput[c] * residenceTime[m][c];
+	/**
+	 * Computes stations specific parameters after MVA has terminated
+	 */
+	private void computeStationParams() {
+		for (int c = 0; c < classes; c++) {
+			for (int m = 0; m < stations; m++) {
 				scThroughput[m] += throughput[m][c];
 				scUtilization[m] += utilization[m][c];
 				scResidTime[m] += residenceTime[m][c];
 				scQueueLen[m] += queueLen[m][c];
 			}
-			//scQueueLen[m] = n[m][n.length - 1];
 		}
-
-		//adjusting the correct order of classes....
-		double temp;
-		for (m = 0; m < stations; m++) {
-			temp = throughput[m][maxIndex];
-			throughput[m][maxIndex] = throughput[m][lastClass];
-			throughput[m][lastClass] = temp;
-			temp = utilization[m][maxIndex];
-			utilization[m][maxIndex] = utilization[m][lastClass];
-			utilization[m][lastClass] = temp;
-			temp = queueLen[m][maxIndex];
-			queueLen[m][maxIndex] = queueLen[m][lastClass];
-			queueLen[m][lastClass] = temp;
-			temp = residenceTime[m][maxIndex];
-			residenceTime[m][maxIndex] = residenceTime[m][lastClass];
-			residenceTime[m][lastClass] = temp;
-		}
-
-		//NEW
-		//@author Stefano Omini
-		//compute system parameters
-		sysResponseTime = 0;
-		sysNumJobs = 0;
-
-		for (c = 0; c < classes; c++) {
-			for (m = 0; m < stations; m++) {
-				clsRespTime[c] += residenceTime[m][c];
-				sysNumJobs += queueLen[m][c];
-			}
-			sysResponseTime += clsRespTime[c];
-		}
-
-		sysThroughput = sysNumJobs / sysResponseTime;
-		//end NEW
 	}
 
-	/**
-	 * Solves a model with only load independent stations
-	 */
-	private void solveLI(boolean intermediate) {
-		if (!intermediate) {
-			//intermediate results must not be saved, then use
-			//the base method
-			solveLI();
-			return;
-		}
-
-		//intermediate results must be saved
-		intermediate_results = true;
-
-		//TODO: do we need intermediate results also for multiclass??
-
-		int m = 0;//index of service center
-		int c = 0;//index of class
-		int lastClass = classes - 1;
-		int index = 0;
-		boolean flag;
-		double sum;
-		status[0] = 1;
-		index = 1;
-		//service demands
-		double[][] demand = new double[stations][classes];
-		//queue length
-		n = new double[stations][memory];
-
-		//compute demands vector
-		for (m = 0; m < stations; m++) {
-			for (c = 0; c < classes; c++) {
-				demand[m][c] = visits[m][c] * servTime[m][c][0];
-			}
-		}
-
-		do {
-			//compute residence time
-			for (m = 0; m < stations; m++) {
-				for (c = 0; c < lastClass; c++) {
-					if (status[c] > 0) {
-						if (type[m] == LI) {
-							residenceTime[m][c] = demand[m][c] * (1.0 + n[m][index - popMult[c]]);
-						} else {
-							residenceTime[m][c] = demand[m][c];
-						}
-					} else {
-						residenceTime[m][c] = 0;
-					}
-				}
-				if (status[lastClass] > 0) {
-					if (type[m] == LI) {
-						residenceTime[m][lastClass] = demand[m][lastClass] * (1.0 + n[m][index]);
-					} else {
-						residenceTime[m][lastClass] = demand[m][lastClass];
-					}
-				} else {
-					residenceTime[m][lastClass] = 0;
-				}
-			}
-
-			//compute throughput
-			for (c = 0; c < classes; c++) {
-				sum = 0;
-				for (m = 0; m < stations; m++) {
-					sum += residenceTime[m][c];
-				}
-				if (status[c] > 0) {
-					clsThroughput[c] = status[c] / sum;
-				} else {
-					clsThroughput[c] = 0;
-				}
-			}
-
-			//compute queue length
-			for (m = 0; m < stations; m++) {
-				n[m][index] = 0;
-				for (c = 0; c < classes; c++) {
-					n[m][index] += clsThroughput[c] * residenceTime[m][c];
-				}
-			}
-
-			index++;
-			c = 0;
-			do {
-				status[c] += 1;
-				if (c == lastClass) {
-					index = 0;
-				}
-				flag = true;
-				if (status[c] > population[c]) {
-					status[c] = 0;
-					c++;
-					flag = false;
-				}
-			} while (c < classes && !flag);
-		} while (c < classes);
-
-		for (m = 0; m < stations; m++) {
-			for (c = 0; c < classes; c++) {
+	private void computeFinalThroughputAndQueueLen() {
+		for (int c = 0; c < classes; c++) {
+			for (int m = 0; m < stations; m++) {
 				throughput[m][c] = clsThroughput[c] * visits[m][c];
-				utilization[m][c] = throughput[m][c] * servTime[m][c][0]; // Umc=Xmc*Smc
 				queueLen[m][c] = clsThroughput[c] * residenceTime[m][c];
-				scThroughput[m] += throughput[m][c];
-				scUtilization[m] += utilization[m][c];
-				scResidTime[m] += residenceTime[m][c];
-				scQueueLen[m] += queueLen[m][c];
 			}
-			//scQueueLen[m] = n[m][n.length - 1];
 		}
-
-		//adjusting the correct order of classes....
-		double temp;
-		for (m = 0; m < stations; m++) {
-			temp = throughput[m][maxIndex];
-			throughput[m][maxIndex] = throughput[m][lastClass];
-			throughput[m][lastClass] = temp;
-			temp = utilization[m][maxIndex];
-			utilization[m][maxIndex] = utilization[m][lastClass];
-			utilization[m][lastClass] = temp;
-			temp = queueLen[m][maxIndex];
-			queueLen[m][maxIndex] = queueLen[m][lastClass];
-			queueLen[m][lastClass] = temp;
-			temp = residenceTime[m][maxIndex];
-			residenceTime[m][maxIndex] = residenceTime[m][lastClass];
-			residenceTime[m][lastClass] = temp;
-		}
-
-		//NEW
-		//@author Stefano Omini
-		//compute system parameters
-		sysResponseTime = 0;
-		sysNumJobs = 0;
-
-		for (c = 0; c < classes; c++) {
-			for (m = 0; m < stations; m++) {
-				clsRespTime[c] += residenceTime[m][c];
-				sysNumJobs += queueLen[m][c];
-			}
-			sysResponseTime += clsRespTime[c];
-		}
-
-		sysThroughput = sysNumJobs / sysResponseTime;
-		//end NEW
 	}
 
-	/**
-	 * See:
-	 * <br>
-	 * G.Balbo, S.C.Bruell, L.Cerchio, D.Chiaberto, L.Molinatti
-	 * "Mean Value Analysis of Closed Load Dependent Networks".
-	 */
-	private void solveLD() {
-		//TODO da fare tutto.....
-		n = new double[stations][memory];
-		int sum = 0;
+	private void computeUtilisation() {
 		int c;
-		int index = 0;
-		boolean flag;
-		int last = classes - 1;
-
-		for (c = 0; c < classes; c++) {
-			sum += population[c];
-		}
-		double[][][] P = new double[stations + 1][sum + 1][memory];
-		for (int s = 0; s < stations; s++) {
-			P[s][0][0] = 1.0;
-		}
-		status = new int[classes];
-		status[classes - 1] = 1;
-		do {
-			for (c = 0; c < classes; c++) {
-				if (status[c] == 0) {
-					for (int s = 0; s < stations; s++) {
-						residenceTime[s + 1][c + 1] = 0.0;
+		for (c = 0; c < classes-1; c++) {
+			population[c]--;
+			for (int m = 0; m < stations; m++) {
+				utilization[m][c] = throughput[m][c] * servTime[m][c][0]; // Umc=Xmc*Smc
+				if (type[m] == LD) {
+					for (int n = 1; n <= totPop; n++) {
+						utilization[m][c] += demand[m][c] * clsThroughput[c] * Q.get(popHashCode(population,maxPop))[m][n-1];
 					}
-				} else {
-					for (int s = 0; s < stations; s++) {
-						if (type[s] == Solver.DELAY) {
-							residenceTime[s + 1][c + 1] = servTime[s][c][0];
-						} else if (type[s] == Solver.LI) {
-							/* ix[c]--;
-							x = linear(NC - 1, ix, N);
-							residenceTime[s+1][c+1] = servTime[s][c][0] * (1 + n[s + 1][x]);
-							ix[c]++;*/
-						}
-					}
+					population[c]++;
 				}
 			}
+			population[c]++;
+		}
+		for (int m = 0; m < stations; m++) {
+			utilization[m][c] = throughput[m][c] * servTime[m][c][0]; // Umc=Xmc*Smc
+			if (type[m] == LD) {
+				for (int n = 1; n <= totPop; n++) {
+					utilization[m][c] += demand[m][c] * clsThroughput[c] * lastClassPc[m][n-1];
+				}
+			}
+		}
 
-			index++;
-			c = 0;
-			do {
-				status[c] += 1;
-				if (c == last) {
-					index = 0;
-				}
-				flag = true;
-				if (status[c] > population[c]) {
-					status[c] = 0;
-					c++;
-					flag = false;
-				}
-			} while (c < classes && !flag);
-			//printStatus();
-		} while (c < classes);
 	}
+
+	/**
+	 * Restores class order for correct output of computed parameters
+	 */
+	private void restoreClassOrder() {
+		double temp;
+		int lastClass = classes - 1;
+		for (int m = 0; m < stations; m++) {
+			temp = throughput[m][maxIndex];
+			throughput[m][maxIndex] = throughput[m][lastClass];
+			throughput[m][lastClass] = temp;
+			temp = utilization[m][maxIndex];
+			utilization[m][maxIndex] = utilization[m][lastClass];
+			utilization[m][lastClass] = temp;
+			temp = queueLen[m][maxIndex];
+			queueLen[m][maxIndex] = queueLen[m][lastClass];
+			queueLen[m][lastClass] = temp;
+			temp = residenceTime[m][maxIndex];
+			residenceTime[m][maxIndex] = residenceTime[m][lastClass];
+			residenceTime[m][lastClass] = temp;
+		}
+	}
+
+	/**
+	 * Computes system parameters after MVA has terminated
+	 */
+	private void computeSystemParams() {
+		sysResponseTime = 0;
+		sysNumJobs = 0;
+
+		for (int c = 0; c < classes; c++) {
+			for (int m = 0; m < stations; m++) {
+				clsRespTime[c] += residenceTime[m][c];
+				sysNumJobs += queueLen[m][c];
+			}
+			sysResponseTime += clsRespTime[c];
+		}
+
+		sysThroughput = sysNumJobs / sysResponseTime;
+	}
+
 
 	/** generates a string with all the calculated indices.
 	 * @return the string
 	 */
 	@Override
 	public String toString() {
-		if (!intermediate_results) {
-			//if intermediate results have not been saved, do not write them!
-			return super.toString();
-		}
-		StringBuffer buf = new StringBuffer();
-		buf.append("\n------------------------------------");
-		buf.append("\nAnalysis with MVA Multiclass: intermediate results");
-		buf.append("\n\n");
-		return buf.toString();
+		return super.toString();
+//		if (!intermediate_results) {
+//			//if intermediate results have not been saved, do not write them!
+//			return super.toString();
+//		}
+//		StringBuffer buf = new StringBuffer();
+//		buf.append("\n------------------------------------");
+//		buf.append("\nAnalysis with MVA Multiclass: intermediate results");
+//		buf.append("\n\n");
+//		return buf.toString();
 	}
 
-	/** print the actual status of the system (a debug function)
-	 */
-	private void printStatus() {
-		if (status[1] % 3 == 0 && status[1] > 0 && ((status[0] / status[1]) == 1 / 3)) {
-			for (int i = 0; i < classes; i++) {
-				System.out.print(status[i] + " ");
+
+	public static int[] pprod(int[] N) {
+		int[] state = new int[N.length];
+		Arrays.fill(state, 0);
+		return state;
+	}
+
+	public static boolean pprod(int[] n, int[] N) {
+		int L = N.length;
+		for (int i=0; i<L; i++) {
+			if (n[i]!=N[i]) {
+				n[i]++;
+				return true;
 			}
-			System.out.print(getClsThroughput(0) + " " + getClsThroughput(1) + "\n");
 		}
+		return false;
 	}
 
-	private static void miotest(int N1, int N2) {
-		int nCust = 2;
-		int nCent = 3;
-		String[] name = new String[nCent];
-		int[] type = new int[nCent];
-		double[][][] timeMulti = new double[nCent][nCust][1];
-		double[][] visitMulti = new double[nCent][nCust];
-		int[] popVect = new int[nCust];
-
-		for (int i = 0; i < nCent; i++) {
-			name[i] = "Service Center " + i;
-			type[i] = LI;
-		}
-
-		popVect[0] = N1;
-		popVect[1] = N2;
-
-		timeMulti[0][0][0] = 100;
-		timeMulti[0][1][0] = 50;
-		timeMulti[1][0][0] = 50;
-		timeMulti[1][1][0] = 90;
-		//timeMulti[2][0][0] = 90;
-		//timeMulti[2][1][0] = 70;
-
-		visitMulti[0][0] = 1;
-		visitMulti[0][1] = 1;
-		visitMulti[1][0] = 1;
-		visitMulti[1][1] = 1;
-		visitMulti[2][0] = 1;
-		visitMulti[2][1] = 1;
-
-		SolverMultiClosedMVA model = new SolverMultiClosedMVA(nCust, nCent);
-		if (!model.input(name, type, timeMulti, visitMulti, popVect)) {
-			System.out.println("Vector Lengths not exact");
-			return;
-		}
-		model.solve();
-		//System.out.print(N1+","+N2+",");
-		for (int i = nCent - 1; i < nCent; i++) {
-			System.out.println(model.getClsThroughput(0) + " " + model.getClsThroughput(1));
-		}
+	public static void main(String[] args) {
+		int[] N = new int[]{2,4, 3};
+		int[] s = pprod(N);
+		System.out.println("(" + s[0] + ", " + s[1] + ", " + s[2] + ")");
+		do {
+			pprod(s, N);
+			System.out.println("(" + s[0] + ", " + s[1] + ", " + s[2] + ")");
+		} while (!Arrays.equals(s, N));
 	}
 
 }

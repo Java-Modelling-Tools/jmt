@@ -1182,7 +1182,7 @@ public class ExactModel implements ExactConstants  {
 		for (int i = 0; i < classes; i++) {
 			if (classTypes[i] != CLASS_CLOSED) {
 				//make sure we stay in a consistent state
-				removeLD();
+				//removeLD();
 				//Removes LD as multiclass LD is not supported
 				return false;
 			}

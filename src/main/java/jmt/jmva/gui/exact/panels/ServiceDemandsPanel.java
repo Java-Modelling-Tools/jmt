@@ -326,7 +326,7 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 		public Component prepareEditor(TableCellEditor editor, int row, int column) {
 			if (editor instanceof LDEditor) {
 				LDEditor lde = ((LDEditor) editor);
-				lde.setStatus("Editing Service Demands of " + stationNames[row], classNames, serviceDemands[row]);
+				lde.setStatus("Editing Service Demands of " + stationNames[row], classNames[column], serviceDemands[row][column]);
 				lde.startEditing(this, row);
 
 				return getCellRenderer(row, column).getTableCellRendererComponent(this, "LD Settings...", true, true, row, column);
@@ -420,8 +420,8 @@ public final class ServiceDemandsPanel extends WizardPanel implements ExactConst
 					}
 				} catch (NumberFormatException e) {
 				}
-			} else if (value instanceof double[][]) { // coming from the LDEditor
-				serviceDemands[rowIndex] = (double[][]) value;
+			} else if (value instanceof double[]) { // coming from the LDEditor
+				serviceDemands[rowIndex][columnIndex] = (double[]) value;
 			}
 		}
 

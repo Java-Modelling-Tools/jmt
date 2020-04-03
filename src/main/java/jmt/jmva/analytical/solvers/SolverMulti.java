@@ -182,8 +182,10 @@ public abstract class SolverMulti {
 			System.arraycopy(v[i], 0, visits[i], 0, classes);
 
 			for (int j = 0; j < classes; j++) {
-				if (t[i] != LD) {
+				if (t[i] == LI) {
 					servTime[i][j] = new double[1];
+				} else {
+					servTime[i][j] = new double[s[i][j].length];
 				}
 				System.arraycopy(s[i][j], 0, servTime[i][j], 0, s[i][j].length);
 			}
