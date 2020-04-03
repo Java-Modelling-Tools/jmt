@@ -219,7 +219,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		for (int i = 0; i < data.getStations(); i++) {
 			if (data.getStationTypes()[i] != ExactConstants.STATION_LD) {
 				stationNames.put(data.getStationNames()[i], new Integer(i));
-			}
+			} 
 		}
 
 		// Finds available analysis types

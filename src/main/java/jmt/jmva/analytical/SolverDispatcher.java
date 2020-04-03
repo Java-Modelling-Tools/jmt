@@ -575,7 +575,6 @@ public class SolverDispatcher {
 		if (model.isClosed()) {
 			throw new InputDataException("Cannot change arrival rates in a closed model.");
 		}
-
 		// Values for what-if
 		double[] values = model.getWhatIfValues();
 
@@ -615,16 +614,19 @@ public class SolverDispatcher {
 	}
 
 	/**
-	 * Performs a what-if analysis by changing number of customers.
+	 * Performs a what-if analysis by changing the number of customers.
 	 * @param model input model
 	 */
 	private void whatIfCustomers(ExactModel model) throws InputDataException, SolverException {
 		// Sanity checks on input model.
 		if (model.getWhatIfClass() >= 0 && model.getClassTypes()[model.getWhatIfClass()] != ExactConstants.CLASS_CLOSED) {
-			throw new InputDataException("Cannot change number of customers of an open class.");
+			throw new InputDataException("Cannot change the number of customers of an open class.");
 		}
 		if (model.isOpen()) {
-			throw new InputDataException("Cannot change number of customers in an open model.");
+			throw new InputDataException("Cannot change the number of customers in an open model.");
+		}
+		if (model.isLd()) {
+			throw new InputDataException("Cannot change the number of customers in a load-dependent model.");
 		}
 
 		// Values for what-if
