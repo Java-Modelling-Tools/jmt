@@ -56,8 +56,8 @@ public class PAProgressWindow extends JMTDialog {
 
 	public static final String RUNNING_MESSAGE = "What-if analysis running, please wait...";
 	public static final String ENUMERATION_MESSAGE = "Running simulation";
-	public static final String PAUSE_MESSAGE = "Parametric analysis paused...";
-	public static final String STOP_MESSAGE = "Parametric analysis stopped";
+	public static final String PAUSE_MESSAGE = "What-if analysis paused...";
+	public static final String STOP_MESSAGE = "What-if analysis stopped";
 	//private final double SIMULATION_DURATION_INITIALIZATION = 0;
 	private static final double HISTOGRAM_INTERVALS = 10;
 	private JButton start;
@@ -248,12 +248,12 @@ public class PAProgressWindow extends JMTDialog {
 	 * Sets the running number of step
 	 * @param step the step to be run
 	 */
-	public void setStepNumber(int step) {
-		stepNumber = step;
+	public void incrementStepNumber() {
+		stepNumber++;
 		stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + ENUMERATION_MESSAGE + " " + stepNumber + " of "
 				+ this.numberOfSimulations + "..." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
-		progressBar.setValue(step - 1);
-		updateStatistics(step - 1);
+		progressBar.setValue(stepNumber - 1);
+		//updateStatistics(stepNumber - 1);
 	}
 
 	/**
@@ -394,6 +394,7 @@ public class PAProgressWindow extends JMTDialog {
 	 * Called to start the progress window
 	 */
 	public void start() {
+		stepNumber = 1;
 		globalStartTime = ((double) System.currentTimeMillis()) / 1000;
 		lastSimulationFinishTime = 0;
 		elapsedTime = 0;
@@ -403,6 +404,10 @@ public class PAProgressWindow extends JMTDialog {
 		timer.start();
 		mainLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_TITLE + RUNNING_MESSAGE + CommonConstants.HTML_FONT_TIT_END
 				+ CommonConstants.HTML_END);
+		stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + ENUMERATION_MESSAGE + " " + stepNumber + " of "
+				+ this.numberOfSimulations + "..." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+		progressBar.setValue(stepNumber - 1);
+
 		restoreAnimation();
 	}
 
@@ -453,14 +458,17 @@ public class PAProgressWindow extends JMTDialog {
 		stopped = true;
 		mainLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_TITLE + STOP_MESSAGE + CommonConstants.HTML_FONT_TIT_END
 				+ CommonConstants.HTML_END);
-		if (stepNumber > 1) {
-			stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "Only " + (stepNumber - 1) + " simulations of "
+		if (stepNumber == 1) {
+			stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "No simulation out of "
+					+ numberOfSimulations + " was completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+		} else if (stepNumber -1 == 1) {
+			stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "Only " + (stepNumber - 1) + " simulation out of "
 					+ numberOfSimulations + " were completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
-		} else {
-			stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "No simulation was completed "
-					+ CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
-		}
-
+    	} else {
+		stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "Only " + (stepNumber - 1) + " simulations out of "
+				+ numberOfSimulations + " were completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+		} 
+		
 		stopAnimation();
 		removeAnimation();
 		progressBar.setValue(0);
@@ -483,8 +491,22 @@ public class PAProgressWindow extends JMTDialog {
 		paused = false;
 		mainLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_TITLE + "Simulation complete" + CommonConstants.HTML_FONT_TIT_END
 				+ CommonConstants.HTML_END);
+		if (stepNumber - 1 == this.numberOfSimulations) {
 		stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "All of the " + this.numberOfSimulations
 				+ " simulations were completed" + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+		} else {
+			if (stepNumber == 1) {
+				stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "No simulation out of "
+						+ numberOfSimulations + " was completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+			} else if (stepNumber -1 == 1) {
+				stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "Only " + (stepNumber - 1) + " simulation out of "
+						+ numberOfSimulations + " were completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+	    	} else {
+			stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "Only " + (stepNumber - 1) + " simulations out of "
+					+ numberOfSimulations + " were completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+			} 
+		}
+		
 
 		progressBar.setValue(numberOfSimulations);
 		remainingTimeString = "Residual time: -- : --";

@@ -73,8 +73,8 @@ public class Server extends ServiceSection {
 		case PROPERTY_ID_UTILIZATION:
 			return jobsList.size() / numberOfServers;
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (NetSystem.getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTime() / NetSystem.getTime() / numberOfServers;
+			return (getTime() <= 0.0) ? 0.0
+					: jobsList.getTotalSojournTime() / getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id);
 		}
@@ -86,8 +86,8 @@ public class Server extends ServiceSection {
 		case PROPERTY_ID_UTILIZATION:
 			return jobsList.size(jobClass) / numberOfServers;
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (NetSystem.getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
+			return (getTime() <= 0.0) ? 0.0
+					: jobsList.getTotalSojournTimePerClass(jobClass) / getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id, jobClass);
 		}
@@ -188,6 +188,10 @@ public class Server extends ServiceSection {
 	 */
 	public ServiceStrategy[] getServiceStrategies() {
 		return serviceStrategies;
+	}
+	
+	private double getTime(){
+		return this.getOwnerNode().getNetSystem().getTime();
 	}
 
 }

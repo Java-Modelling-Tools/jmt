@@ -86,6 +86,8 @@ public class QueueNetwork {
 	private GlobalJobInfoList jobInfoList;
 
 	private boolean isTerminalSimulation;
+	
+	private NetSystem netSystem;
 
 	/** Creates a new instance of QueueNetwork. */
 	public QueueNetwork(String name) {
@@ -186,6 +188,7 @@ public class QueueNetwork {
 		// (at this point all classes should be declared)
 		if (jobInfoList == null) {
 			jobInfoList = new GlobalJobInfoList(jobClasses.size());
+            jobInfoList.setNetSystem(netSystem);
 		}
 
 		//sets the reference to network
@@ -274,6 +277,16 @@ public class QueueNetwork {
 
 	public void setTerminalSimulation(boolean isTerminalSimulation) {
 		this.isTerminalSimulation = isTerminalSimulation;
+	}
+
+	public NetSystem getNetSystem(){
+		return netSystem;
+	}
+
+	public void setNetSystem(NetSystem netSystem) {
+		// TODO Auto-generated method stub
+		this.netSystem = netSystem;
+		
 	}
 
 }

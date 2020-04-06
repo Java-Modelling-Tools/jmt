@@ -41,8 +41,7 @@ public class FastestServiceRoutingStrategy extends RoutingStrategy {
 	private byte serviceSection = NodeSection.SERVICE;
 	private int propertyQ = NodeSection.PROPERTY_ID_RESIDENT_JOBS;
 	private int propertyS = NodeSection.PROPERTY_ID_RESIDENCE_TIME;
-	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)
-	private RandomEngine random = RandomEngine.makeDefault();
+	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)	
 
 	/**
 	 * This strategy selects the resource with the fastest service for this jobClass
@@ -52,7 +51,10 @@ public class FastestServiceRoutingStrategy extends RoutingStrategy {
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {	
+		RandomEngine random = ownerNode.getNetSystem().getEngine();
+
+		NodeList nodeList = ownerNode.getOutputNodes();
 		if (nodeList.size() == 0) {
 			return null;
 		}

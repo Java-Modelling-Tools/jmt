@@ -17,8 +17,6 @@ import jmt.engine.random.engine.RandomEngine;
 
 public class FFT {
         
-	private static RandomEngine engine = RandomEngine.makeDefault();
-
 	public static final double num_flops(int N) {
 		double Nd = N;
 		double logN = log2(N);
@@ -60,17 +58,6 @@ public class FFT {
 			diff += d * d;
 		}
 		return Math.sqrt(diff / nd);
-	}
-
-	/** Make a random array of n (complex) elements. */
-	public static double[] makeRandom(int n) {
-		int nd = 2 * n;
-		double data[] = new double[nd];
-		for (int i = 0; i < nd; i++) {
-			// Replaced Math.random
-			data[i] = engine.raw2();
-		}
-		return data;
 	}
 
 	/* ______________________________________________________________________ */

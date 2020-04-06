@@ -20,15 +20,30 @@ package jmt.engine.NetStrategies;
 
 import jmt.common.AutoCheck;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeListWithJobNum;
 import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
 
 public abstract class ForkStrategy implements AutoCheck {
+	private RandomEngine randomEngine;
 
-	public abstract NodeListWithJobNum getOutNodes(NodeSection section, JobClass jobClass);
+	public abstract NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass);
+
+	public NodeListWithJobNum getOutNodes(NodeSection section, JobClass jobClass) {
+		return getOutNodes(section.getOwnerNode(), jobClass);
+	}
 
 	public boolean check() {
 		return true;
+	}
+	
+	public void setRandomEngine(RandomEngine randomEngine){
+		this.randomEngine = randomEngine;
+	}
+	
+	public RandomEngine getRandomEngine(){
+		return randomEngine;
 	}
 
 }

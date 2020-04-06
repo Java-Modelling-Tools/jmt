@@ -266,6 +266,7 @@ public class Queue extends InputSection {
 		// Sets netnode dependent properties
 		jobClasses = getJobClasses();
 		waitingRequests = new LinkedList<WaitingRequest>();
+        //waitingRequests.setNetSystem(node.getNetSystem());
 		if (putStrategies == null) {
 			putStrategies = new QueuePutStrategy[jobClasses.size()];
 			for (int i = 0; i < putStrategies.length; i++) {
@@ -276,6 +277,7 @@ public class Queue extends InputSection {
 		nodeJobsList = node.getJobInfoList();
 		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
 			FJList = new LinkedJobInfoList(jobClasses.size());
+            FJList.setNetSystem(node.getNetSystem()); 
 		}
 	}
 
@@ -295,6 +297,7 @@ public class Queue extends InputSection {
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			for (int j = 0; j < jobsPerClass[i]; j++) {
 				Job job = new Job(jobClasses.get(i), netJobsList);
+                job.initialize(this.getOwnerNode().getNetSystem());
 				updateVisitPath(job);
 				jobPermutation[index] = job;
 				index++;

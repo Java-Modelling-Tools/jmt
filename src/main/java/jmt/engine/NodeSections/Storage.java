@@ -37,6 +37,7 @@ import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.QueueNet.WaitingRequest;
 
@@ -164,6 +165,7 @@ public class Storage extends InputSection {
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			for (int j = 0; j < jobsPerClass[i]; j++) {
 				Job job = new Job(jobClasses.get(i), netJobsList);
+                job.initialize(getNetSystem()); 
 				updateVisitPath(job);
 				jobPermutation[index] = job;
 				index++;
@@ -336,5 +338,10 @@ public class Storage extends InputSection {
 
 		return MSG_PROCESSED;
 	}
+	
+	private NetSystem getNetSystem() {
+		return this.getOwnerNode().getNetSystem();
+	}
+
 
 }

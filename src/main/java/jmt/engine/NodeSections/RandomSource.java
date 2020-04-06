@@ -32,6 +32,7 @@ import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
 
 /**
  * This class implements a job source (generator): a job is created every
@@ -99,6 +100,7 @@ public class RandomSource extends InputSection {
 				// Calculates the delay of departure (1/lambda)
 				if (strategies[c] != null) {
 					job = new Job(jobClass, netJobsList);
+                    job.initialize(getNetSystem());
 					updateVisitPath(job);
 					delay = strategies[c].wait(this, jobClass);
 					sendMe(job, delay);
@@ -142,6 +144,7 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(job.getJobClass(), netJobsList);
+                job.initialize(getNetSystem());
 				updateVisitPath(job);
 				delay = strategies[c].wait(this, job.getJobClass());
 				sendMe(job, delay);
@@ -185,6 +188,7 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(jobClasses.get(c), netJobsList);
+                job.initialize(getNetSystem()); 
 				updateVisitPath(job);
 				delay = strategies[c].wait(this, jobClasses.get(c));
 				sendMe(job, delay);
@@ -201,6 +205,10 @@ public class RandomSource extends InputSection {
 		}
 
 		return MSG_PROCESSED;
+	}
+	
+	private NetSystem getNetSystem(){
+		return this.getOwnerNode().getNetSystem();
 	}
 
 }

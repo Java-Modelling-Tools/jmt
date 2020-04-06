@@ -17,6 +17,8 @@ package jmt.engine.math.parser;
 
 import java.util.HashSet;
 
+import jmt.engine.random.engine.RandomEngine;
+
 /**
  * <p><b>Name:</b> Parser</p> 
  * <p><b>Description:</b> 
@@ -54,6 +56,9 @@ public class Parser {
 
 	private HashSet<String> functions; // Used functions
 	private HashSet<String> variables; // Used variables
+	
+	// if not in a simulation, the default engine used
+	private RandomEngine engine = RandomEngine.makeDefault(); 
 
 	/**
 	 * Class constructor
@@ -325,7 +330,9 @@ public class Parser {
 	private ExpressionNode T() {
 		if (cc.getToken() == '-') {
 			cc = parse();
-			return new FunctionNode(F(), "-");
+			FunctionNode fn = new FunctionNode(F(), "-");
+			fn.setParser(this); 
+			return fn;
 		}
 		return F();
 	}
@@ -387,7 +394,9 @@ public class Parser {
 				} else {
 					throw new ParseError("Semantic Error, expected '" + CL_BRACKET + "'", inp_cur);
 				}
-				return new FunctionNode(tmp2, function);
+				FunctionNode fn = new FunctionNode(tmp2, function);
+				fn.setParser(this); 
+				return fn;
 		}
 		throw new ParseError("Semantic Error, expected function or variable or constant or '('", inp_cur);
 	}
@@ -493,5 +502,13 @@ public class Parser {
 			output.append(input[i]);
 		}
 		return output.toString();
+	}
+
+	public RandomEngine getEngine() {
+		return engine;
+	}
+	
+	public void setEngine(RandomEngine engine) {
+		this.engine = engine;
 	}
 }

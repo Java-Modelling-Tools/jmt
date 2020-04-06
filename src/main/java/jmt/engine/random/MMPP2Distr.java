@@ -19,6 +19,7 @@
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * 
@@ -42,6 +43,12 @@ public class MMPP2Distr extends AbstractDistribution implements Distribution {
 	public MMPP2Distr() {
 		curState = 0;
 		expDistr = new Exponential();
+	}
+	
+	@Override
+	public void setRandomEngine(RandomEngine engine){
+		this.engine = engine;
+		this.expDistr.setRandomEngine(engine);
 	}
 
 	/**

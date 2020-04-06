@@ -30,6 +30,7 @@ import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.WaitingRequest;
 import jmt.engine.random.engine.RandomEngine;
 
@@ -77,6 +78,7 @@ public class Terminal extends InputSection {
 		// Sets netnode dependent properties
 		jobClasses = getJobClasses();
 		waitingRequests = new LinkedList<WaitingRequest>();
+        //waitingRequests.setNetSystem(node.getNetSystem()); 
 	}
 
 	@Override
@@ -97,7 +99,7 @@ public class Terminal extends InputSection {
 			//distributions and strategies) used to mix the order of
 			//leaving jobs, otherwise they leave in order of class
 			//(i.e. c1, c1, c1, ...c2, c2, c2, ... c3....)
-			RandomEngine randomEngine = RandomEngine.makeDefault();
+			RandomEngine randomEng = this.getNetSystem().getEngine();
 
 			//delay used to mix leaving order
 			double mixRandomDelay = 0.0;
@@ -123,11 +125,12 @@ public class Terminal extends InputSection {
 
 						//each job is created and sent to the terminal itself
 						job = new Job(jobClass, netJobsList);
+                        job.initialize(getNetSystem()); 
 						updateVisitPath(job);
 						netJobsList.addJob(job);
 
 						//sets a random (very small) delay to mix the jobs
-						mixRandomDelay = (randomEngine.raw()) * 0.00001;
+						mixRandomDelay = (randomEng.raw()) * 0.00001;
 
 						sendMe(job, mixRandomDelay);
 					}
@@ -213,5 +216,10 @@ public class Terminal extends InputSection {
 
 		return MSG_PROCESSED;
 	}
+	
+	private NetSystem getNetSystem() {
+		return this.getOwnerNode().getNetSystem();
+	}
+
 
 }

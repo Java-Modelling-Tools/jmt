@@ -449,6 +449,10 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		simpanelnum++;
 		addInputAnimationSpinner("Number of classes in queue animation", "isWithAnimation", "representableClasses", sim_panel, 1, 10);
 		// end Francesco D'Aquino
+		
+		//What if parallelism
+		simpanelnum++;		
+		addInputSpinner("What-if Analysis parallel threads", "whatIfParallelism", sim_panel, 1);
 
 		SpringUtilities.makeCompactGrid(sim_panel, simpanelnum, 2, //rows, cols
 				6, 6, //initX, initY

@@ -40,7 +40,6 @@ public class ClassSwitch extends ServiceSection {
 	private Float[][] matrix;
 
 	private JobInfoList nodeJobsList;
-	private RandomEngine randomEngine;
 
 	public ClassSwitch(Object[] matrix) {
 		this.matrix = new Float[matrix.length][matrix.length];
@@ -55,7 +54,6 @@ public class ClassSwitch extends ServiceSection {
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
 		nodeJobsList = node.getJobInfoList();
-		randomEngine = RandomEngine.makeDefault();
 	}
 
 	@Override
@@ -117,7 +115,8 @@ public class ClassSwitch extends ServiceSection {
 			sum += row[i];
 		}
 
-		random = (float) (randomEngine.raw() * sum);
+        RandomEngine engine = this.getNetSytem().getEngine();
+		random = (float) (engine.raw() * sum);
 		for (i = 0; i < row.length; i++) {
 			random -= row[i];
 			if (random <= 0)

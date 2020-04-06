@@ -31,11 +31,6 @@ package jmt.engine.random.engine;
  */
 public abstract class RandomEngine {
 
-	private static RandomEngine defaultEngine = new MersenneTwister();
-
-	//should be set by the class Simulation to initialize the default RandomEngine
-	private long simulationSeed;
-
 	/**
 	 * Makes this class non instantiable, but still lets others inherit from it.
 	 */
@@ -48,7 +43,7 @@ public abstract class RandomEngine {
 	 * Currently this engine is {@link jmt.engine.random.engine.MersenneTwister}.
 	 */
 	public static RandomEngine makeDefault() {
-		return defaultEngine;
+		return new MersenneTwister();
 	}
 
 	/**
@@ -58,13 +53,7 @@ public abstract class RandomEngine {
 	 * current time.
 	 *
 	 */
-	public void setSeed(long seed) {
-		simulationSeed = seed;
-		//set the new seed
-		setNewSeed(seed);
-	}
-
-	protected abstract void setNewSeed(long seed);
+	public abstract void setNewSeed(long seed);
 
 	/**
 	 * Returns a 64 bit uniformly distributed random number in the open unit

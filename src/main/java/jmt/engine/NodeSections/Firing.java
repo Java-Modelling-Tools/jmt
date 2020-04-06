@@ -60,8 +60,7 @@ public class Firing extends OutputSection {
 	private GlobalJobInfoList netJobsList;
 	private List<Job>[] newJobLists;
 	private Iterator<Job>[] newJobIterators;
-	private String[] nodeNamePermutation;
-	private RandomEngine randomEngine;
+	private String[] nodeNamePermutation;	
 
 	private boolean[] isForkJobNumWarningShown;
 
@@ -83,8 +82,7 @@ public class Firing extends OutputSection {
 		}
 		newJobIterators = new Iterator[jobClasses.size()];
 		Arrays.fill(newJobIterators, null);
-		nodeNamePermutation = firingOutcomes[0].keySet().toArray(new String[0]);
-		randomEngine = RandomEngine.makeDefault();
+		nodeNamePermutation = firingOutcomes[0].keySet().toArray(new String[0]);		
 		isForkJobNumWarningShown = new boolean[firingOutcomes.length];
 		Arrays.fill(isForkJobNumWarningShown, false);
 	}
@@ -92,6 +90,7 @@ public class Firing extends OutputSection {
 	@Override
 	protected int process(NetMessage message) throws NetException {
 		Object data = message.getData();
+        NetSystem netSystem = message.getDestination().getNetSystem();
 
 		switch (message.getEvent()) {
 
@@ -121,6 +120,7 @@ public class Firing extends OutputSection {
 					for (int j = 0; j < releasedJobNumberForClass; j++) {
 						pickedForkJobInfos[j] = forkJobInfoLists[i].get(j);
 					}
+					RandomEngine randomEngine = this.getNetSytem().getEngine();
 					for (int j = releasedJobNumberForClass; j < forkJobInfoLists[i].size(); j++) {
 						int k = (int) Math.floor(randomEngine.raw() * (j + 1));
 						if (k < releasedJobNumberForClass) {
@@ -130,24 +130,28 @@ public class Firing extends OutputSection {
 
 					for (int j = 0; j < releasedJobNumberForClass; j++) {
 						ForkJob newForkJob = new ForkJob(jobClasses.get(i), pickedForkJobInfos[j]);
+                        newForkJob.initialize(netSystem); 
 						newJobLists[i].add(newForkJob);
 					}
 					showForkJobNumWarning(modeIndex, modeName);
 				} else if (releasedJobNumberForClass == forkJobInfoLists[i].size()) {
 					for (int j = 0; j < releasedJobNumberForClass; j++) {
 						ForkJob newForkJob = new ForkJob(jobClasses.get(i), forkJobInfoLists[i].get(j));
+                        newForkJob.initialize(netSystem); 
 						newJobLists[i].add(newForkJob);
 					}
 				} else {
 					for (int j = 0; j < forkJobInfoLists[i].size(); j++) {
 						ForkJob newForkJob = new ForkJob(jobClasses.get(i), forkJobInfoLists[i].get(j));
+                        newForkJob.initialize(netSystem); 
 						newJobLists[i].add(newForkJob);
 					}
 
-					double averageEnteringTime = NetSystem.getTime()
+					double averageEnteringTime = netSystem.getTime()
 							- (totalLifetimes[i] / (releasedJobNumberForClass - forkJobInfoLists[i].size()));
 					for (int j = forkJobInfoLists[i].size(); j < releasedJobNumberForClass; j++) {
 						Job newJob = new Job(jobClasses.get(i), netJobsList);
+                        newJob.initialize(netSystem); 
 						updateVisitPath(newJob);
 						newJob.setSystemEnteringTime(averageEnteringTime);
 						newJobLists[i].add(newJob);
@@ -155,6 +159,7 @@ public class Firing extends OutputSection {
 				}
 
 				if (forkJobInfoLists[i].size() > 0) {
+					RandomEngine randomEngine = this.getNetSytem().getEngine();
 					// Durstenfeld Shuffle
 					for (int j = newJobLists[i].size() - 1; j > 0; j--) {
 						int k = (int) Math.floor(randomEngine.raw() * (j + 1));
@@ -166,6 +171,7 @@ public class Firing extends OutputSection {
 				newJobIterators[i] = newJobLists[i].iterator();
 			}
 
+			RandomEngine randomEngine = this.getNetSytem().getEngine();
 			// Durstenfeld Shuffle
 			for (int i = nodeNamePermutation.length - 1; i > 0; i--) {
 				int j = (int) Math.floor(randomEngine.raw() * (i + 1));
@@ -178,18 +184,19 @@ public class Firing extends OutputSection {
 				if (releasedJobNumberToNode <= 0) {
 					continue;
 				}
-				send(NetEvent.EVENT_JOB_RELEASE, null, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
-				Job[] jobPermutation = new Job[releasedJobNumberToNode];
+				send(NetEvent.EVENT_JOB_RELEASE, null, 0.0, NodeSection.INPUT, netSystem.getNode(nodeName));
+				Job[] jobPermutation = new Job[releasedJobNumberToNode];                
 				int index = 0;
 				for (int i = 0; i < jobClasses.size(); i++) {
 					int releasedJobNumber = firingOutcomes[modeIndex].getEntry(nodeName, i);
 					for (int j = 0; j < releasedJobNumber; j++) {
 						Job job = newJobIterators[i].next();
+                        job.initialize(netSystem); 
 						jobPermutation[index] = job;
 						index++;
 					}
 				}
-
+                
 				// Durstenfeld Shuffle
 				for (int i = jobPermutation.length - 1; i > 0; i--) {
 					int j = (int) Math.floor(randomEngine.raw() * (i + 1));
@@ -211,9 +218,9 @@ public class Firing extends OutputSection {
 							netJobsList.produceJob(job);
 						}
 					}
-					send(job, 0.0, NetSystem.getNode(nodeName));
+					send(job, 0.0, netSystem.getNode(nodeName));
 				}
-				send(NetEvent.EVENT_JOB_FINISH, null, 0.0, NodeSection.INPUT, NetSystem.getNode(nodeName));
+				send(NetEvent.EVENT_JOB_FINISH, null, 0.0, NodeSection.INPUT, netSystem.getNode(nodeName));
 			}
 
 			for (int i = 0; i < newJobLists.length; i++) {

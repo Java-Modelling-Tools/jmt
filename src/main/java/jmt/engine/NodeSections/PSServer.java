@@ -127,8 +127,8 @@ public class PSServer extends ServiceSection {
 			}
 			return sum;
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (NetSystem.getTime() <= 0.0) ? 0.0
-					: psJobsList.getTotalSojournTime() / NetSystem.getTime() / numberOfServers;
+			return (getTime() <= 0.0) ? 0.0
+					: psJobsList.getTotalSojournTime() / getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id);
 		}
@@ -140,8 +140,8 @@ public class PSServer extends ServiceSection {
 		case PROPERTY_ID_UTILIZATION:
 			return psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (NetSystem.getTime() <= 0.0) ? 0.0
-					: psJobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime() / numberOfServers;
+			return (getTime() <= 0.0) ? 0.0
+					: psJobsList.getTotalSojournTimePerClass(jobClass) / getTime() / numberOfServers;
 		default:
 			return super.getDoubleSectionProperty(id, jobClass);
 		}
@@ -151,6 +151,8 @@ public class PSServer extends ServiceSection {
 	protected void nodeLinked(NetNode node) throws NetException {
 		jobClasses = getJobClasses();
 		jobsList = psJobsList = new PSJobInfoList(jobClasses.size());
+		jobsList.setNetSystem(node.getNetSystem());
+		psJobsList.setNetSystem(node.getNetSystem());
 		psJobsList.setNumberOfServers(numberOfServers);
 		serviceFractions = new double[jobClasses.size()];
 		Arrays.fill(serviceFractions, 0.0);
@@ -206,7 +208,7 @@ public class PSServer extends ServiceSection {
 		while (it.hasNext()) {
 			PSJobInfo jobInfo = (PSJobInfo) it.next();
 			int jobClassID = jobInfo.getJob().getJobClass().getId();
-			double serviceTime = (NetSystem.getTime() - startTime) * numberOfServers * serviceFractions[jobClassID];
+			double serviceTime = (getTime() - startTime) * numberOfServers * serviceFractions[jobClassID];
 			jobInfo.performServiceTime(serviceTime);
 		}
 	}
@@ -217,7 +219,7 @@ public class PSServer extends ServiceSection {
 			psJobsList.psUpdateUtilization(jobClass, serviceFractions);
 			psJobsList.add(jobInfo);
 		} else {
-			double queueTime = (NetSystem.getTime() - jobInfo.getEnteringTime()) - jobInfo.getServiceTime();
+			double queueTime = (getTime() - jobInfo.getEnteringTime()) - jobInfo.getServiceTime();
 			if (queueTime < 0.0) {
 				queueTime = 0.0;
 			}
@@ -279,8 +281,12 @@ public class PSServer extends ServiceSection {
 				}
 			}
 			messageToken = sendMe(messageJobInfo.getJob(), minWaitTime);
-			messageSendTime = NetSystem.getTime();
+			messageSendTime = getTime();
 		}
+	}
+	
+	private double getTime(){
+		return this.getOwnerNode().getNetSystem().getTime();
 	}
 
 }

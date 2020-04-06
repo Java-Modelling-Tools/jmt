@@ -51,7 +51,10 @@ public abstract class AbstractDistribution {
 	 *
 	 */
 	public AbstractDistribution() {
-		engine = RandomEngine.makeDefault();
+	}
+
+	public void setRandomEngine(RandomEngine engine) {
+		this.engine = engine;
 	}
 
 }

@@ -36,10 +36,10 @@ import jmt.engine.random.engine.RandomEngine;
  * @author Lulai Zhu
  */
 public class RandStrategyPriority extends QueuePutStrategy {
+	
+	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+		RandomEngine randomEngine = job.getNetSystem().getEngine();
 
-	private RandomEngine randomEngine = RandomEngine.makeDefault();
-
-	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
 		int priority = job.getJobClass().getPriority();
 
 		List<JobInfo> list = queue.getInternalJobInfoList();

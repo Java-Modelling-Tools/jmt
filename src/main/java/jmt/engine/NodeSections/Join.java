@@ -94,6 +94,7 @@ public class Join extends InputSection {
 		nodeJobsList = node.getJobInfoList();
 		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
 			FJList = new LinkedJobInfoList(jobClasses.size());
+            FJList.setNetSystem(node.getNetSystem());
 			forkNode = new HashMap<Job, NetNode>();
 		}
 	}

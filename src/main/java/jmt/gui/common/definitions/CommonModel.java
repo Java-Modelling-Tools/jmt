@@ -4373,4 +4373,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return name + "_" + num;
 	}
 
+	@Override
+	public Integer getWhatIfParallelism() {
+		return Defaults.getAsInteger("whatIfParallelism");
+	}
+
 }

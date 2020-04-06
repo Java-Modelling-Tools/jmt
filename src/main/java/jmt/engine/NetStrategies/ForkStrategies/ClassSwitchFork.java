@@ -25,6 +25,7 @@ import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NetSystem;
+import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeListWithJobNum;
 import jmt.engine.QueueNet.NodeSection;
 
@@ -48,17 +49,18 @@ public class ClassSwitchFork extends ForkStrategy {
 	}
 
 	@Override
-	public NodeListWithJobNum getOutNodes(NodeSection section, JobClass jobClass) {
+		public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
+		//NodeList nodes = ownerNode.getOutputNodes();
 		if (nodes == null) {
 			//it is the first execution of this method: find the NetNode objects
 			nodes = new NetNode[nodeNames.length];
 			for (int i = 0; i < nodeNames.length; i++) {
-				nodes[i] = NetSystem.getNode(nodeNames[i]);
+				nodes[i] = ownerNode.getNetSystem().getNode(nodeNames[i]);
 			}
 		}
 		if (classList == null) {
 			//it is the first execution of this method: find the JobClassList object
-			classList = section.getJobClasses();
+			classList = ownerNode.getJobClasses();
 		}
 
 		NodeListWithJobNum nl = new NodeListWithJobNum();

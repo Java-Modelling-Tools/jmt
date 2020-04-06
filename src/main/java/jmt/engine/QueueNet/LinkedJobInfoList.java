@@ -113,6 +113,7 @@ public class LinkedJobInfoList implements JobInfoList {
 	/** The number of servers to estimate Utilization measure on multiserver environments */
 	protected int numberOfServers = 1;
 
+    private NetSystem netSystem; 
 	/**
 	 * Creates a new JobInfoList instance.
 	 * @param numberOfJobClasses number of job classes.
@@ -375,8 +376,12 @@ public class LinkedJobInfoList implements JobInfoList {
 		updateUtilizationJoin(jobInfo);
 		jobsIn++;
 		jobsInPerClass[c]++;
-		lastJobInTime = NetSystem.getTime();
-		lastJobInTimePerClass[c] = NetSystem.getTime();
+		lastJobInTime = getTime();
+		lastJobInTimePerClass[c] = getTime();
+	}
+
+	public double getTime() {
+		return netSystem.getTime();
 	}
 
 	/* (non-Javadoc)
@@ -452,12 +457,12 @@ public class LinkedJobInfoList implements JobInfoList {
 		finalRemove(jobInfo, listPerClass[c], perClassPosition);
 		jobsOut++;
 		jobsOutPerClass[c]++;
-		lastJobOutTime = NetSystem.getTime();
-		lastJobOutTimePerClass[c] = NetSystem.getTime();
-		totalSojournTime += NetSystem.getTime() - jobInfo.getEnteringTime();
-		totalSojournTimePerClass[c] += NetSystem.getTime() - jobInfo.getEnteringTime();
-		lastJobSojournTime = NetSystem.getTime() - jobInfo.getEnteringTime();
-		lastJobSojournTimePerClass[c] = NetSystem.getTime() - jobInfo.getEnteringTime();
+		lastJobOutTime = getTime();
+		lastJobOutTimePerClass[c] = getTime();
+		totalSojournTime += getTime() - jobInfo.getEnteringTime();
+		totalSojournTimePerClass[c] += getTime() - jobInfo.getEnteringTime();
+		lastJobSojournTime = getTime() - jobInfo.getEnteringTime();
+		lastJobSojournTimePerClass[c] = getTime() - jobInfo.getEnteringTime();
 	}
 
 	protected void finalRemove(JobInfo what, LinkedList<JobInfo> list, int position) {
@@ -610,11 +615,11 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			Measure m = queueLengthPerClass[c];
 			if (m != null) {
-				m.update(listPerClass[c].size(), NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
+				m.update(listPerClass[c].size(), getTime() - getLastModifyTimePerClass(jobClass));
 			}
 		}
 		if (queueLength != null) {
-			queueLength.update(list.size(), NetSystem.getTime() - getLastModifyTime());
+			queueLength.update(list.size(), getTime() - getLastModifyTime());
 		}
 	}
 
@@ -624,11 +629,11 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			Measure m = responseTimePerClass[c];
 			if (m != null) {
-				m.update(NetSystem.getTime() - jobInfo.getEnteringTime(), 1.0);
+				m.update(getTime() - jobInfo.getEnteringTime(), 1.0);
 			}
 		}
 		if (responseTime != null) {
-			responseTime.update(NetSystem.getTime() - jobInfo.getEnteringTime(), 1.0);
+			responseTime.update(getTime() - jobInfo.getEnteringTime(), 1.0);
 		}
 	}
 
@@ -639,12 +644,12 @@ public class LinkedJobInfoList implements JobInfoList {
 			Measure m = residenceTimePerClass[c];
 			if (m != null) {
 				m.updateSampleJob(jobInfo.getJob());
-				m.update(NetSystem.getTime() - jobInfo.getEnteringTime(), 1.0);
+				m.update(getTime() - jobInfo.getEnteringTime(), 1.0);
 			}
 		}
 		if (residenceTime != null) {
 			residenceTime.updateSampleJob(jobInfo.getJob());
-			residenceTime.update(NetSystem.getTime() - jobInfo.getEnteringTime(), 1.0);
+			residenceTime.update(getTime() - jobInfo.getEnteringTime(), 1.0);
 		}
 	}
 
@@ -654,11 +659,11 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			Measure m = utilizationPerClass[c];
 			if (m != null) {
-				m.update((double) listPerClass[c].size() / numberOfServers, NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
+				m.update((double) listPerClass[c].size() / numberOfServers, getTime() - getLastModifyTimePerClass(jobClass));
 			}
 		}
 		if (utilization != null) {
-			utilization.update((double) list.size() / numberOfServers, NetSystem.getTime() - getLastModifyTime());
+			utilization.update((double) list.size() / numberOfServers, getTime() - getLastModifyTime());
 		}
 	}
 
@@ -669,17 +674,17 @@ public class LinkedJobInfoList implements JobInfoList {
 			Measure m = utilizationPerClassJoin[c];
 			if (m != null) {
 				if (listPerClass[c].size() > 0) {
-					m.update(1.0, NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
+					m.update(1.0, getTime() - getLastModifyTimePerClass(jobClass));
 				} else {
-					m.update(0.0, NetSystem.getTime() - getLastModifyTimePerClass(jobClass));
+					m.update(0.0, getTime() - getLastModifyTimePerClass(jobClass));
 				}
 			}
 		}
 		if (utilizationJoin != null) {
 			if (list.size() > 0) {
-				utilizationJoin.update(1.0, NetSystem.getTime() - getLastModifyTime());
+				utilizationJoin.update(1.0, getTime() - getLastModifyTime());
 			} else {
-				utilizationJoin.update(0.0, NetSystem.getTime() - getLastModifyTime());
+				utilizationJoin.update(0.0, getTime() - getLastModifyTime());
 			}
 		}
 	}
@@ -690,11 +695,11 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			Measure m = throughputPerClass[c];
 			if (m != null) {
-				m.update(NetSystem.getTime() - getLastJobOutTimePerClass(jobClass), 1.0);
+				m.update(getTime() - getLastJobOutTimePerClass(jobClass), 1.0);
 			}
 		}
 		if (throughput != null) {
-			throughput.update(NetSystem.getTime() - getLastJobOutTime(), 1.0);
+			throughput.update(getTime() - getLastJobOutTime(), 1.0);
 		}
 	}
 
@@ -704,11 +709,11 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			Measure m = dropRatePerClass[c];
 			if (m != null) {
-				m.update(NetSystem.getTime() - getLastJobDropTimePerClass(jobClass), 1.0);
+				m.update(getTime() - getLastJobDropTimePerClass(jobClass), 1.0);
 			}
 		}
 		if (dropRate != null) {
-			dropRate.update(NetSystem.getTime() - getLastJobDropTime(), 1.0);
+			dropRate.update(getTime() - getLastJobDropTime(), 1.0);
 		}
 	}
 
@@ -718,11 +723,11 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			Measure m = responseTimePerSinkPerClass[c];
 			if (m != null) {
-				m.update(NetSystem.getTime() - jobInfo.getJob().getSystemEnteringTime(), 1.0);
+				m.update(getTime() - jobInfo.getJob().getSystemEnteringTime(), 1.0);
 			}
 		}
 		if (responseTimePerSink != null) {
-			responseTimePerSink.update(NetSystem.getTime() - jobInfo.getJob().getSystemEnteringTime(), 1.0);
+			responseTimePerSink.update(getTime() - jobInfo.getJob().getSystemEnteringTime(), 1.0);
 		}
 	}
 
@@ -732,11 +737,11 @@ public class LinkedJobInfoList implements JobInfoList {
 			int c = jobClass.getId();
 			InverseMeasure m = throughputPerSinkPerClass[c];
 			if (m != null) {
-				m.update(NetSystem.getTime() - getLastJobOutTimePerClass(jobClass), 1.0);
+				m.update(getTime() - getLastJobOutTimePerClass(jobClass), 1.0);
 			}
 		}
 		if (throughputPerSink != null) {
-			throughputPerSink.update(NetSystem.getTime() - getLastJobOutTime(), 1.0);
+			throughputPerSink.update(getTime() - getLastJobOutTime(), 1.0);
 		}
 	}
 
@@ -753,8 +758,8 @@ public class LinkedJobInfoList implements JobInfoList {
 		updateThroughputPerSink(jobInfo);
 		list.remove(jobInfo);
 		listPerClass[c].remove(jobInfo);
-		lastJobOutTime = NetSystem.getTime();
-		lastJobOutTimePerClass[c] = NetSystem.getTime();
+		lastJobOutTime = getTime();
+		lastJobOutTimePerClass[c] = getTime();
 	}
 
 	/* (non-Javadoc)
@@ -777,8 +782,8 @@ public class LinkedJobInfoList implements JobInfoList {
 		updateDropRate(jobInfo);
 		list.remove(jobInfo);
 		listPerClass[c].remove(jobInfo);
-		lastJobDropTime = NetSystem.getTime();
-		lastJobDropTimePerClass[c] = NetSystem.getTime();
+		lastJobDropTime = getTime();
+		lastJobDropTimePerClass[c] = getTime();
 	}
 
 	/* (non-Javadoc)
@@ -806,4 +811,10 @@ public class LinkedJobInfoList implements JobInfoList {
 		this.numberOfServers = numberOfServers;
 	}
 
+	@Override
+	public void setNetSystem(NetSystem netSystem) {
+		this.netSystem = netSystem;
+		
+	}
+	
 }

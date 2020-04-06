@@ -8,22 +8,19 @@
 	<h1>Installation notes</h1>
 	It is recommended to UNINSTALL any previous version of Java Modelling Tools present on your PC before installing this new release.
 
-	<h2>What's new in version 1.0.4</h2>
+	<h2>What's new in version 1.0.5</h2>
 	<h3>JSIM</h3>
 	<ul>
-		<li>New routing policies: weighted round robin, power of k choices.</li>
-		<li>Updated all distribution images</li>
-		<li>Reimplemented PDF viewer</li>
-		<li>Ability to stop the simulation in XML after a maximum number of events from start (maxEvent property).</li>
-		<li>Improved graphical engine via jgraph 5.10.2.0</li>
-		<li>Miscellaneous bug fixing</li>
+		<li>Service release: major round of major and minor bug fixing, several code quality improvements.</li>
+		<li>Enhanced the behaviour of the transition in routing closed classes.</li>
+		<li>Re-engineered residence time and system response time implementations in the case of class switching to better align with theory.</li>
 	</ul>
 	<h3>JMVA</h3>
 	<ul>
-		<li>New solution algorithm: logistic sampling.</li>
-		<li>Updated algorithms: MVA for mixed models, single-class CoMoM.</li>
-		<li>Normalising constant value saved in XML.</li>
-		<li>Miscellaneous bug fixing</li>
+		<li>New solution algorithms: load-dependent MVA for multiclass closed and mixed models.</li>
+		<li>Fixed a compatibility issue when loading MVA results in the old XML format.</li>
+		<li>Improved code for storing the logarithm of normalising constant</li>
+		<li>Disabled customer what-if analysis if load-dependent nodes are in the model as the service rate may be unspecified.<li>
 	</ul>
 
 	<h2>Working folder</h2>

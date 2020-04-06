@@ -365,7 +365,8 @@ public class Measure {
 		deadState = 0;
 		lastSampleWeight = lastSampleWeight + (sample * weight);
 		lastWeight = lastWeight + weight;
-		simulationTime = NetSystem.getTime();
+		NetSystem netSystem = getNetSystem();
+		simulationTime = netSystem.getTime();
 
 		if (analyzer.addSample(sample, weight)) {
 			//data analysis finished
@@ -401,6 +402,10 @@ public class Measure {
 		}
 
 		return false;
+	}
+
+	public NetSystem getNetSystem() {
+		return network.getNetSystem();
 	}
 
 	/**Gets the name of the measure.

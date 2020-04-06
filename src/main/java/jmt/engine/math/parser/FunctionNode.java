@@ -38,6 +38,9 @@ public class FunctionNode implements ExpressionNode {
 	protected int function;
 	/** An array with children */
 	protected ExpressionNode[] children;
+	
+	private Parser parser;
+	
 
 	/**
 	 * Creates a function node.
@@ -138,7 +141,7 @@ public class FunctionNode implements ExpressionNode {
 			case 15:
 				return Math.abs(child.getValue());
 			case 16:
-				return RandomEngine.makeDefault().raw() * child.getValue();
+				return parser.getEngine().raw() * child.getValue();
 			case 17:
 				return Math.sqrt(child.getValue());
 			case 18:
@@ -178,7 +181,9 @@ public class FunctionNode implements ExpressionNode {
 	@Override
 	public Object clone() {
 		ExpressionNode n_child = (ExpressionNode) child.clone();
-		return new FunctionNode(n_child, function);
+		FunctionNode fn = new FunctionNode(n_child, function);
+		fn.setParser(parser);
+		return fn;
 	}
 
 	/* (non-Javadoc)
@@ -197,6 +202,10 @@ public class FunctionNode implements ExpressionNode {
 				return FUNCTIONS[0] + "(" + child.toString() + ")";
 			}
 		}
+	}
+	
+	public void setParser(Parser parser){
+		this.parser = parser;
 	}
 
 }

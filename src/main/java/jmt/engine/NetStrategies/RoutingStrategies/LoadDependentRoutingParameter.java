@@ -24,7 +24,7 @@ import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.random.Empirical;
 import jmt.engine.random.EmpiricalEntry;
 import jmt.engine.random.EmpiricalPar;
-
+import jmt.engine.random.engine.RandomEngine;
 /**
  * Created by IntelliJ IDEA.
  * User: Ashanka
@@ -49,15 +49,16 @@ public class LoadDependentRoutingParameter implements Comparable<Object> {
 			probabilities[i] = entires[i].getProbability();
 		}
 		distribution = new Empirical();
+
 		param = new EmpiricalPar(probabilities);
 	}
 
-	public NetNode getOutNode() {
+		public NetNode getOutNode(NetNode ownerNode) {
 		if (nodes == null) {
 			//it is the first execution of this method: find the NetNode objects
 			nodes = new NetNode[nodeNames.length];
 			for (int i = 0; i < nodeNames.length; i++) {
-				nodes[i] = NetSystem.getNode(nodeNames[i]);
+				nodes[i] = ownerNode.getNetSystem().getNode(nodeNames[i]);
 			}
 		}
 
@@ -118,6 +119,9 @@ public class LoadDependentRoutingParameter implements Comparable<Object> {
 		} else {
 			throw new ClassCastException("Incorrect Class to compare");
 		}
+	}
+	public void setRandomEngine(RandomEngine engine) {
+		distribution.setRandomEngine(engine); 		
 	}
 
 }

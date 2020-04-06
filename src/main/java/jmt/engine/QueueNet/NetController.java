@@ -57,7 +57,8 @@ class NetController {
 
 	//the maximum processed events a simulation is allowed to reach before it is stopped, negative value means infinite
 	private int maxProcessedEvents = -1;
-
+	
+	private NetSystem netSystem;
 	NetController() {
 		running = false;
 		//initializes tick counter
@@ -68,11 +69,12 @@ class NetController {
 	 * @throws NetException
 	 * @throws InterruptedException
 	 */
-	public void run() throws NetException, InterruptedException {
-		SimSystem.runStart();
-		startTime = NetSystem.getElapsedTime();
+	public void run() throws InterruptedException, NetException {
+		SimSystem simSystem = netSystem.getSimSystem();
+		simSystem.runStart();
+		startTime = netSystem.getElapsedTime();
 
-		while (SimSystem.runTick()) {
+		while (simSystem.runTick()) {
 			synchronized (this) {
 				//the presence of this "if" allows pause control
 				if (blocked) {
@@ -84,27 +86,27 @@ class NetController {
 					//User may have defined measures that will not receive any sample
 					if (n % reachabilityTest == 0) {
 						//stop measures which have not collected samples yet
-						NetSystem.stopNoSamplesMeasures();
+						netSystem.stopNoSamplesMeasures();
 					}
 					//refresh measures
-					NetSystem.checkMeasures();
+					netSystem.checkMeasures();
 				}
-				//check if positive stop criterion is set and have been reached for the first time
-				if (((maxSimulatedTime > 0 && SimSystem.getClock() > maxSimulatedTime) || (maxProcessedEvents > 0 && n > maxProcessedEvents)) && !aborting) {
-					ListIterator<QueueNetwork> nets = NetSystem.getNetworkList().listIterator();
+				//check if a positive max simulated time is set and has been reached for the first time
+				if (maxSimulatedTime > 0 && simSystem.getClock() > maxSimulatedTime && !aborting) {
+					ListIterator<QueueNetwork> nets = netSystem.getNetworkList().listIterator();
 					QueueNetwork network;
 					while (nets.hasNext()) {
 						network = nets.next();
 						network.abortAllMeasures();
 						aborting = true;
 					}
-					NetSystem.checkMeasures(); //refresh measures, this triggers a simulation stop because all measures have been aborted
+					netSystem.checkMeasures(); //refresh measures, this triggers a simulation stop because all measures have been aborted
 				}
 			}
 		}
 		//sim is finished: get stop time
-		stopTime = NetSystem.getElapsedTime();
-		SimSystem.runStop();
+		stopTime = netSystem.getElapsedTime();
+		simSystem.runStop();
 		running = false;
 	}
 
@@ -156,5 +158,7 @@ class NetController {
 	public void setMaxProcessedEvents(int maxProcessedEvents) {
 		this.maxProcessedEvents = maxProcessedEvents;
 	}
-
+	public void setNetSystem(NetSystem netSystem){
+		this.netSystem = netSystem;
+	}
 }

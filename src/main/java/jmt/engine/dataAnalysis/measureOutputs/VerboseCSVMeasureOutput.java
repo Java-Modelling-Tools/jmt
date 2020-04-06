@@ -71,7 +71,7 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 	public void write(double sample, double weight) {
 		try {
 			Map<String, Object> values = new HashMap<String, Object>();
-			values.put(COLUMN_TS, NetSystem.getTime());
+			values.put(COLUMN_TS, measure.getNetSystem().getTime());
 			values.put(COLUMN_SAMPLEVALUE, sample);
 			values.put(COLUMN_WEIGHTVALUE, weight);
 			logger.log(values, defaults);

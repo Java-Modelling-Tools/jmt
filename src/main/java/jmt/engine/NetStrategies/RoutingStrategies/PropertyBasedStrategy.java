@@ -18,7 +18,8 @@ public abstract class PropertyBasedStrategy extends RoutingStrategy {
 	private RandomEngine random = RandomEngine.makeDefault();
 
     @Override
-    public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+		NodeList nodes = ownerNode.getOutputNodes();
         if (nodes.size() == 0) {
             return null;
         }

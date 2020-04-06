@@ -124,13 +124,13 @@ class Thread2 extends Thread {
 				e.printStackTrace();
 			}
 
-			if (NetSystem.pause()) {
-				if (NetSystem.getNetworkList().size() > 0) {
+			/*if (NetSystem.pause()) {
+				if (NetSystem.getNetworkList().size() != 0) {
 					QueueNetwork net = NetSystem.getNetworkList().get(0);
 					try {
-						progress = NetSystem.checkProgress(net);
-						System.out.println("PROGRESS: " + Double.toString(progress));
-						if (progress >= 1.0) {
+						progr = NetSystem.checkProgress(net);
+						System.out.println("PROGRESS: " + Double.toString(progr));
+						if (progr == 1) {
 							//finished = true;
 							models--;
 
@@ -143,11 +143,11 @@ class Thread2 extends Thread {
 
 				NetSystem.restartFromPause();
 			} else {
-				if (progress > 0.0) {
+				if (progr > 0) {
 					System.out.println("PROGRESS: finished");
 					break;
 				}
-			}
+			} */
 
 		} while (models > 0);
 

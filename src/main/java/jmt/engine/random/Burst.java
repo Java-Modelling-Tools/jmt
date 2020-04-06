@@ -110,9 +110,19 @@ public class Burst extends NetNode implements Distribution {
 		this.isRoundRobin = isRoundRobin;
 
 		// sets the starting distribution and the starting interval end
+		// move these two lines to servicestrategy
+		
+	}
+	
+	public void setRandomEngine(RandomEngine engine){
+		this.engine = engine;
+	}
+	
+	public void initialize() throws IncorrectDistributionParameterException{
 		intervalEnd = changeInterval();
 		sendMe(intervalEnd, NetEvent.EVENT_DISTRIBUTION_CHANGE);
 	}
+	
 
 	/**
 	 * Creates a new non-Round-Robin Burst distribution with the specified probability
@@ -258,7 +268,7 @@ public class Burst extends NetNode implements Distribution {
 		// value returned by the current value distribution
 		double value = getCurrentValueDistrNextRand(p);
 		// remaining time of the current interval
-		double remainingTime = intervalEnd - SimSystem.getClock();
+		double remainingTime = intervalEnd - simSystem.getClock();
 
 		/*
 		 * While the current value is larger than the remaining time of the current interval:
@@ -277,9 +287,9 @@ public class Burst extends NetNode implements Distribution {
 			value = getCurrentValueDistrNextRand(p);
 		}
 
-		if (discardNextMessage) {
+		if (discardNextMessage == true) {
 			// send the new EVENT_DISTRIBUTION_CHANGE message
-			intervalEnd = offset + remainingTime + SimSystem.getClock();
+			intervalEnd = offset + remainingTime + simSystem.getClock();
 			sendMe(offset + remainingTime, NetEvent.EVENT_DISTRIBUTION_CHANGE);
 		}
 
@@ -350,7 +360,7 @@ public class Burst extends NetNode implements Distribution {
 		 * We want to discard messages only if they are not arrived at instant 0.
 		 * 
 		 */
-		if (discardNextMessage && SimSystem.getClock() > 0.0) {
+		if (discardNextMessage == true && Double.compare(simSystem.getClock(), 0.0) != 0) {
 			discardNextMessage = false;
 			return;
 		}

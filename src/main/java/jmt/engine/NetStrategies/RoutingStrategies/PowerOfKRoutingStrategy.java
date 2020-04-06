@@ -56,7 +56,8 @@ public class PowerOfKRoutingStrategy extends PropertyBasedStrategy {
      * @return Selected node.
      */
     @Override
-    public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+		NodeList nodes = ownerNode.getOutputNodes();
         if (nodes.size() == 0) {
             return null;
         }
@@ -77,7 +78,7 @@ public class PowerOfKRoutingStrategy extends PropertyBasedStrategy {
             return out;
         }
 
-        return super.getOutNode(selectedNodes, jobClass);
+        return super.getOutNode(ownerNode, jobClass);
 
     }
 

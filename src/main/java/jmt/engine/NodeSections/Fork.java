@@ -68,7 +68,6 @@ public class Fork extends OutputSection {
 
 	private JobInfoList nodeJobsList;
 	private GlobalJobInfoList netJobsList;
-	private RandomEngine randomEngine;
 
 	// --- Constructors -----------------------------------------------------------------------------
 	/**
@@ -114,8 +113,7 @@ public class Fork extends OutputSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
-		nodeJobsList = node.getJobInfoList();
-		randomEngine = RandomEngine.makeDefault();
+		nodeJobsList = node.getJobInfoList();	
 	}
 
 	/**
@@ -167,6 +165,7 @@ public class Fork extends OutputSection {
 			}
 
 			ForkJobInfo newJobInfo = new ForkJobInfo(job, totalOutNum, getOwnerNode());
+			RandomEngine randomEngine = this.getNetSytem().getEngine();
 			// Durstenfeld Shuffle
 			NetNode[] outNodePermutation = outNodeList.toArray();
 			for (int i = outNodePermutation.length - 1; i > 0; i--) {
@@ -180,7 +179,7 @@ public class Fork extends OutputSection {
 				if (isSimplifiedFork) {
 					for (int n = 0; n < jobsPerLink; n++) {
 						ForkJob newJob = new ForkJob(jobClass, newJobInfo);
-						
+							newJob.initialize(outNode.getNetSystem()); 
 						// Sends new job to the following station
 						send(newJob, 0.0, outNode);
 					}
@@ -193,12 +192,13 @@ public class Fork extends OutputSection {
 						int newJobNum = entry.getValue().intValue();
 						for (int n = 0; n < newJobNum; n++) {
 							ForkJob newJob =  new ForkJob(newJobClass, newJobInfo);
+                            newJob.initialize(outNode.getNetSystem()); 
 							newJobPermutation[index] = newJob;
 							index++;
 						}
 					}
 
-					// Durstenfeld Shuffle
+					// Durstenfeld Shuffle                    
 					for (int i = newJobPermutation.length - 1; i > 0; i--) {
 						int j = (int) Math.floor(randomEngine.raw() * (i + 1));
 						ForkJob newJob = newJobPermutation[i];

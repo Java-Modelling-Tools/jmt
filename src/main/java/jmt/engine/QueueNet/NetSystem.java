@@ -22,6 +22,8 @@ import java.util.ListIterator;
 
 import jmt.common.exception.NetException;
 import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.random.engine.MersenneTwister;
+import jmt.engine.random.engine.RandomEngine;
 import jmt.engine.simEngine.SimSystem;
 
 /**
@@ -41,22 +43,33 @@ import jmt.engine.simEngine.SimSystem;
  */
 public class NetSystem {
 
-	private static NetController netController;
+	private NetController netController;
 
-	private static long startTime;
+	private long startTime;
 
-	private static NetworkList networkList;
+	private NetworkList networkList;
 
-	private NetSystem() {
-	}
+	private SimSystem simSystem;
+	
+	private int jobCounter;
+	
+	private RandomEngine engine;
+
+	public NetSystem() {
+		simSystem = new SimSystem();
+		engine = new MersenneTwister(); 
+		jobCounter = 0;
+	};
 
 	/**
 	 * Initializes the simulation system
 	 *
 	 */
-	public static void initialize() {
+	public void initialize() {
 		netController = new NetController();
-		SimSystem.initialize();
+		netController.setNetSystem(this);
+		simSystem.setNetSystem(this);
+		simSystem.initialize();
 		networkList = new NetworkList();
 	}
 
@@ -64,21 +77,21 @@ public class NetSystem {
 	 * all the network nodes and recall the <i>start</i> method in order to
 	 * launch a new simulation.
 	 */
-	public static void terminate() {
+	public void terminate() {
 		abort();
 	}
 
 	/** Gets the current simulation time.
 	 *	@return Current simulation time.
 	 */
-	public static double getTime() {
-		return SimSystem.getClock();
+	public double getTime() {
+		return simSystem.getClock();
 	}
 
 	/** Gets the current "real" elapsed time.
 	 *	@return Current simulation time.
 	 */
-	public static double getElapsedTime() {
+	public double getElapsedTime() {
 		return (System.currentTimeMillis() - startTime) / 1000.0;
 	}
 
@@ -88,7 +101,7 @@ public class NetSystem {
 	 * @throws NetException
 	 * @throws InterruptedException
 	 */
-	public static void start() throws NetException, InterruptedException {
+	public void start() throws NetException, InterruptedException {
 		NetNode Node;
 		ListIterator<QueueNetwork> nets = networkList.listIterator();
 		ListIterator<NetNode> nodes;
@@ -113,7 +126,7 @@ public class NetSystem {
 		netController.run();
 	}
 
-	public static boolean pause() {
+	public boolean pause() {
 		//if (netController != null && netController.isRunning()) {
 		if (netController != null) {
 			netController.block();
@@ -122,7 +135,7 @@ public class NetSystem {
 		return false;
 	}
 
-	public static boolean restartFromPause() {
+	public boolean restartFromPause() {
 		//if (netController != null && netController.isRunning()) {
 		if (netController != null) {
 			netController.unblock();
@@ -134,7 +147,7 @@ public class NetSystem {
 	/** Stops the NetSystem Engine and terminates the simulation (stops all the
 	 * controlled QueueNetworks).
 	 */
-	public static void stop() {
+	public void stop() {
 		ListIterator<QueueNetwork> nets = networkList.listIterator();
 		QueueNetwork network;
 		while (nets.hasNext()) {
@@ -146,7 +159,7 @@ public class NetSystem {
 	/** Stops the NetSystem Engine and terminates the simulation.
 	 * @param Network Reference to the network to be stopped.
 	 */
-	public static void stop(QueueNetwork Network) {
+	public void stop(QueueNetwork Network) {
 		NetNode node;
 		if (Network.getState() == QueueNetwork.STATE_RUNNING) {
 			/* Informs ALL nodes of stop event and not only Reference nodes */
@@ -162,20 +175,20 @@ public class NetSystem {
 	/** Aborts the NetSystem Engine and terminates the simulation (aborts all
 	 * the controlled QueueNetworks).
 	 */
-	public static void abort() {
+	public void abort() {
 		ListIterator<QueueNetwork> nets = networkList.listIterator();
 		QueueNetwork network;
 		while (nets.hasNext()) {
 			network = nets.next();
 			abort(network);
 		}
-		SimSystem.abort();
+		simSystem.abort();
 	}
 
 	/** Aborts the NetSystem Engine and terminates the simulation.
 	 * @param network Reference to the network to be stopped.
 	 */
-	public static void abort(QueueNetwork network) {
+	public void abort(QueueNetwork network) {
 		NetNode node;
 		if (network.getState() == QueueNetwork.STATE_RUNNING) {
 			ListIterator<NetNode> nodes = network.getReferenceNodes().listIterator();
@@ -190,27 +203,27 @@ public class NetSystem {
 
 	/** Adds a new network to the NetSystem.
 	 * @param Network Reference to the network to be added.*/
-	public static void addNetwork(QueueNetwork Network) {
+	public void addNetwork(QueueNetwork Network) {
 		networkList.add(Network);
 	}
 
 	/** Gets networks list.
 	 * @return Reference to a network list.*/
-	public static NetworkList getNetworkList() {
+	public NetworkList getNetworkList() {
 		return networkList;
 	}
 
 	/** Checks if the NetSystem Engine is running.
 	 * @return True if NetSystem Engine is running.
 	 */
-	public static boolean isRunning() {
+	public boolean isRunning() {
 		return netController.isRunning();
 	}
 
 	/** Gets total simulation time.
 	 * @return Simulation time.
 	 */
-	public static double getSimulationTime() {
+	public double getSimulationTime() {
 		return netController.getSimulationTime();
 	}
 
@@ -219,8 +232,8 @@ public class NetSystem {
 	 * @param id the id of the node
 	 * @return searched node
 	 */
-	public static final NetNode getNode(int Id) {
-		return (NetNode) SimSystem.getEntity(Id);
+	public final NetNode getNode(int Id) {
+		return (NetNode) simSystem.getEntity(Id);
 	}
 
 	/** Gets a node from its name. Searches the name between all the networks
@@ -228,11 +241,11 @@ public class NetSystem {
 	 * @param name the name of the node
 	 * @return searched node
 	 */
-	public static NetNode getNode(String name) {
-		return (NetNode) SimSystem.getEntity(name);
+	public NetNode getNode(String name) {
+		return (NetNode) simSystem.getEntity(name);
 	}
 
-	static void checkMeasures() {
+	void checkMeasures() {
 		ListIterator<QueueNetwork> networks = networkList.listIterator();
 		QueueNetwork network;
 		ListIterator<Measure> measures;
@@ -280,7 +293,7 @@ public class NetSystem {
 	 * @return estimated simulation progress
 	 * @throws NetException if network is null
 	 */
-	public static double checkProgress(QueueNetwork network) throws NetException {
+	public double checkProgress(QueueNetwork network) throws NetException {
 		if (network == null) {
 			throw new NetException("Cannot measure progress of a network which does not exist.");
 		}
@@ -302,7 +315,7 @@ public class NetSystem {
 		return slowest;
 	}
 
-	public static double getTempMeasures(QueueNetwork network) throws NetException {
+	public double getTempMeasures(QueueNetwork network) throws NetException {
 		if (network == null) {
 			throw new NetException("Cannot get measures of a network which does not exist.");
 		}
@@ -324,7 +337,7 @@ public class NetSystem {
 		return (double) count / (double) num;
 	}
 
-	static void stopNoSamplesMeasures() {
+	void stopNoSamplesMeasures() {
 		ListIterator<QueueNetwork> networks = networkList.listIterator();
 		QueueNetwork network;
 		ListIterator<Measure> measures;
@@ -349,7 +362,7 @@ public class NetSystem {
 	 * Sets the maximum simulated time for the simulation in the netController
 	 * @param maxSimulatedTime the maximum simulated time for the simulation
 	 */
-	public static void setMaxSimulatedTime(double maxSimulatedTime) {
+	public void setMaxSimulatedTime(double maxSimulatedTime) {
 		if (netController != null) {
 			netController.setMaxSimulatedTime(maxSimulatedTime);
 		}
@@ -359,10 +372,21 @@ public class NetSystem {
 	 * Sets the maximum processed events for the simulation in the netController
 	 * @param maxProcessedEvents the maximum processed events for the simulation
 	 */
-	public static void setMaxProcessedEvents(int maxProcessedEvents) {
+	public void setMaxProcessedEvents(int maxProcessedEvents) {
 		if (netController != null) {
 			netController.setMaxProcessedEvents(maxProcessedEvents);
 		}
 	}
 
+	public SimSystem getSimSystem() {
+		return simSystem;
+	}
+	
+	public int nextjobNumber(){
+		return jobCounter++;
+	}
+
+	public RandomEngine getEngine() {
+		return engine;
+	}
 }

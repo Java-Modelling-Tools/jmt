@@ -27,7 +27,7 @@ import org.apache.commons.math3.util.Pair;
 public class Job implements Cloneable {
 
 	//counter used to generate id
-	private static int counter;
+	//private int counter;
 	//job ID
 	private int Id;
 
@@ -49,6 +49,8 @@ public class Job implements Cloneable {
 	private NetNode originalDestinationNode = null;
 
 	private double serviceTime = -1.0;
+	
+    private NetSystem netSystem;
 
 	protected GlobalJobInfoList globalJobInfoList = null;
 	protected Pair<NetNode, JobClass> lastVisitedPair = null;
@@ -59,18 +61,18 @@ public class Job implements Cloneable {
 	 * @param netJobsList Reference to the global jobInfoList.
 	 */
 	public Job(JobClass jobClass, GlobalJobInfoList globalJobInfoList) {
-		this.Id = counter++;
+		//this.Id = counter++;
 		this.jobClass = jobClass;
 		this.globalJobInfoList = globalJobInfoList;
-		reset();
+		//reset();
 	}
 
 	/**
 	 * Resets the counter of Job.
 	 */
-	public static void resetCounter() {
-		counter = 0;
-	}
+	//public static void resetCounter() {
+	//	counter = 0;
+	//}
 
 	/**
 	 * Gets the ID of this job.
@@ -100,7 +102,7 @@ public class Job implements Cloneable {
 	 * Resets this job.
 	 */
 	public void reset() {
-		systemEnteringTime = NetSystem.getTime();
+		systemEnteringTime = netSystem.getTime();
 	}
 
 	/**
@@ -174,6 +176,22 @@ public class Job implements Cloneable {
 	public void AddToVisitPath(Pair<NetNode, JobClass> pair) {
 		globalJobInfoList.updateChainGraph(lastVisitedPair, pair);
 		lastVisitedPair = pair;
+	}
+
+	public NetSystem getNetSystem(){
+		return netSystem;
+	}
+	
+	public void initialize(NetSystem netSystem){
+		this.netSystem = netSystem;
+		// Job Id is used only for logging
+		this.Id = netSystem.nextjobNumber();
+		resetSystemEnteringTime();
+	}
+	
+	public void resetSystemEnteringTime() {
+		this.systemEnteringTime = netSystem.getTime();
+		//resetClass();
 	}
 
 }

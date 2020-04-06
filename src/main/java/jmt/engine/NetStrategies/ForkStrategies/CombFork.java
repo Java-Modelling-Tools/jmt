@@ -26,6 +26,7 @@ import jmt.common.exception.LoadException;
 import jmt.engine.NetStrategies.ForkStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.NodeListWithJobNum;
 import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.random.Empirical;
@@ -38,7 +39,6 @@ public class CombFork extends ForkStrategy {
 	private String[] nodeNums;
 	private Empirical distribution;
 	private EmpiricalPar param;
-	private RandomEngine engine;
 	private NetNode[] nodes;
 
 	public CombFork(EmpiricalEntry[] entries) throws LoadException, IncorrectDistributionParameterException {
@@ -55,14 +55,20 @@ public class CombFork extends ForkStrategy {
 		}
 		distribution = new Empirical();
 		param = new EmpiricalPar(probabilities);
-		engine = RandomEngine.makeDefault();
 	}
-
 	@Override
-	public NodeListWithJobNum getOutNodes(NodeSection section, JobClass jobClass) {
+	public void setRandomEngine(RandomEngine randomEngine){
+		distribution.setRandomEngine(randomEngine); 
+	}
+	@Override
+	public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
+		NetSystem netSystem = ownerNode.getNetSystem();
+		RandomEngine engine = netSystem.getEngine();
+		NodeListWithJobNum nl = new NodeListWithJobNum();
+
 		if (nodes == null) {
 			//it is the first execution of this method: find the NetNode objects
-			nodes = section.getOwnerNode().getOutputNodes().toArray();
+			nodes = ownerNode.getOutputNodes().toArray();
 		}
 
 		try {
@@ -80,8 +86,7 @@ public class CombFork extends ForkStrategy {
 					indices[j] = i;
 				}
 			}
-
-			NodeListWithJobNum nl = new NodeListWithJobNum();
+			
 			for (int i = 0; i < indices.length; i++) {
 				Map<JobClass, Integer> map = new HashMap<JobClass, Integer>();
 				map.put(jobClass, Integer.valueOf(1));

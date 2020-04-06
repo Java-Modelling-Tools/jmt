@@ -82,17 +82,19 @@ public class GlobalJobInfoList {
 	double sampling_SystemResponseSum;
 	double sampling_SystemThroughputSum;
 	double samplingClass_SystemThroughputSum[];
-
+	
 	private Set<Pair<NetNode, JobClass>> pairSet;
 	private Set<Pair<Pair<NetNode, JobClass>, Pair<NetNode, JobClass>>> linkSet;
 	private Set<Set<Pair<NetNode, JobClass>>> chainSet; 
 	private Map<Pair<NetNode, JobClass>, Set<Pair<NetNode, JobClass>>> pairChainMap;
 	private Map<Set<Pair<NetNode, JobClass>>, Integer> visitCountPerChain;
 	private Integer totalVisitCount;
+	
+	private NetSystem netSystem;
 
 	/**
-	 * Creates a new GlobalJobInfoList.
-	 * @param classNum number of classes in current network model.
+	 * Creates a new GlobalJobInfoList
+	 * @param classNum number of classes in current network model
 	 */
 	public GlobalJobInfoList(int classNum) {
 		initialize(classNum);
@@ -148,7 +150,7 @@ public class GlobalJobInfoList {
 		job.reset();
 		updateJobNumber(job);
 		// Updates job number data structures
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = netSystem.getTime();
 		jobs++;
 		jobsPerClass[job.getJobClass().getId()]++;
 	}
@@ -167,8 +169,8 @@ public class GlobalJobInfoList {
 		// Updates jobs number and throughput data structures
 		jobs--;
 		jobsPerClass[job.getJobClass().getId()]--;
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = NetSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = netSystem.getTime();
+		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = netSystem.getTime();
 	}
 
 	/**
@@ -183,8 +185,8 @@ public class GlobalJobInfoList {
 		updateVisitCountPerChain(job);
 
 		// Updates jobs number and throughput data structures
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = NetSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = netSystem.getTime();
+		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = netSystem.getTime();
 
 		job.reset();
 	}
@@ -201,8 +203,8 @@ public class GlobalJobInfoList {
 		// Updates jobs number and drop rate data structures
 		jobs--;
 		jobsPerClass[job.getJobClass().getId()]--;
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
-		lastJobDropTimePerClass[job.getJobClass().getId()] = lastJobDropTime = NetSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
+		lastJobDropTimePerClass[job.getJobClass().getId()] = lastJobDropTime = getTime();
 	}
 
 	/**
@@ -212,7 +214,7 @@ public class GlobalJobInfoList {
 	public void produceJob(Job job) {
 		updateJobNumber(job);
 		// Updates job number data structure only
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
 		jobs++;
 		jobsPerClass[job.getJobClass().getId()]++;
 	}
@@ -226,7 +228,7 @@ public class GlobalJobInfoList {
 		// Updates job number data structure only
 		jobs--;
 		jobsPerClass[job.getJobClass().getId()]--;
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = NetSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
 	}
 
 	// ------------------------------------------------------------------------------------
@@ -326,11 +328,11 @@ public class GlobalJobInfoList {
 			int index = job.getJobClass().getId();
 			Measure m = jobNumPerClass[index];
 			if (m != null) {
-				m.update(jobsPerClass[index], NetSystem.getTime() - lastModifyNumberPerClass[index]);
+				m.update(jobsPerClass[index], getTime() - lastModifyNumberPerClass[index]);
 			}
 		}
 		if (jobNum != null) {
-			jobNum.update(jobs, NetSystem.getTime() - lastModifyNumber);
+			jobNum.update(jobs, getTime() - lastModifyNumber);
 		}
 	}
 
@@ -343,11 +345,11 @@ public class GlobalJobInfoList {
 			int index = job.getJobClass().getId();
 			Measure m = responseTimePerClass[index];
 			if (m != null) {
-				m.update(NetSystem.getTime() - job.getSystemEnteringTime(), 1.0);
+				m.update(netSystem.getTime() - job.getSystemEnteringTime(), 1.0);
 			}
 		}
 		if (responseTime != null) {
-			responseTime.update(NetSystem.getTime() - job.getSystemEnteringTime(), 1.0);
+			responseTime.update(getTime() - job.getSystemEnteringTime(), 1.0);
 		}
 	}
 
@@ -360,11 +362,11 @@ public class GlobalJobInfoList {
 			int index = job.getJobClass().getId();
 			InverseMeasure m = throughputPerClass[index];
 			if (m != null) {
-				m.update(NetSystem.getTime() - lastJobOutTimePerClass[index], 1.0);
+				m.update(getTime() - lastJobOutTimePerClass[index], 1.0);
 			}
 		}
 		if (throughput != null) {
-			throughput.update(NetSystem.getTime() - lastJobOutTime, 1.0);
+			throughput.update(getTime() - lastJobOutTime, 1.0);
 		}
 	}
 
@@ -377,11 +379,11 @@ public class GlobalJobInfoList {
 			int index = job.getJobClass().getId();
 			Measure m = dropRatePerClass[index];
 			if (m != null) {
-				m.update(NetSystem.getTime() - lastJobDropTimePerClass[index], 1.0);
+				m.update(getTime() - lastJobDropTimePerClass[index], 1.0);
 			}
 		}
 		if (dropRate != null) {
-			dropRate.update(NetSystem.getTime() - lastJobDropTime, 1.0);
+			dropRate.update(getTime() - lastJobDropTime, 1.0);
 		}
 	}
 
@@ -390,13 +392,13 @@ public class GlobalJobInfoList {
 	 * @param job current job.
 	 */
 	private void updateSystemPower(Job job) {
-		sampling_SystemThroughputSum = sampling_SystemThroughputSum + (NetSystem.getTime() - lastJobOutTime);
-		sampling_SystemResponseSum   = sampling_SystemResponseSum + (NetSystem.getTime() - job.getSystemEnteringTime());
+		sampling_SystemThroughputSum = sampling_SystemThroughputSum + (getTime() - lastJobOutTime);
+		sampling_SystemResponseSum   = sampling_SystemResponseSum + (getTime() - job.getSystemEnteringTime());
 		systemPowerSamples = systemPowerSamples + 1;
 		if (systemPowerPerClass != null) {
 			int index = job.getJobClass().getId();
 			InverseMeasure m = systemPowerPerClass[index];
-			samplingClass_SystemThroughputSum[index] = samplingClass_SystemThroughputSum[index] + NetSystem.getTime() - lastJobOutTimePerClass[index];
+			samplingClass_SystemThroughputSum[index] = samplingClass_SystemThroughputSum[index] + getTime() - lastJobOutTimePerClass[index];
 			systemPowerSamplesClass[index] = systemPowerSamplesClass[index] + 1;
 			if (m != null) {
 				double temp = (sampling_SystemResponseSum/systemPowerSamples) * (samplingClass_SystemThroughputSum[index] / systemPowerSamplesClass[index]);
@@ -490,19 +492,28 @@ public class GlobalJobInfoList {
 
 		// Updates old class measure (if not null)
 		if (jobNumPerClass != null && jobNumPerClass[oldClassId] != null) {
-			jobNumPerClass[oldClassId].update(jobsPerClass[oldClassId], NetSystem.getTime() - lastModifyNumberPerClass[oldClassId]);
+			jobNumPerClass[oldClassId].update(jobsPerClass[oldClassId], getTime() - lastModifyNumberPerClass[oldClassId]);
 		}
-		lastModifyNumberPerClass[oldClassId] = NetSystem.getTime();
+		lastModifyNumberPerClass[oldClassId] = getTime();
 
 		// Updates new class measure (if not null)
 		if (jobNumPerClass != null && jobNumPerClass[newClassId] != null) {
-			jobNumPerClass[newClassId].update(jobsPerClass[newClassId], NetSystem.getTime() - lastModifyNumberPerClass[newClassId]);
+			jobNumPerClass[newClassId].update(jobsPerClass[newClassId], getTime() - lastModifyNumberPerClass[newClassId]);
 		}
-		lastModifyNumberPerClass[newClassId] = NetSystem.getTime();
+		lastModifyNumberPerClass[newClassId] = getTime();
 
 		// Updates jobs per class
 		jobsPerClass[oldClassId]--;
 		jobsPerClass[newClassId]++;
+	}
+
+	
+	private double getTime(){
+		return netSystem.getTime();
+	}
+	
+	public void setNetSystem(NetSystem netSystem){
+		this.netSystem = netSystem;
 	}
 
 	/**

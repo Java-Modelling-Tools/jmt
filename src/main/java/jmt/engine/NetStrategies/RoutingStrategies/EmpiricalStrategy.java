@@ -28,6 +28,7 @@ import jmt.engine.QueueNet.NodeList;
 import jmt.engine.random.Empirical;
 import jmt.engine.random.EmpiricalEntry;
 import jmt.engine.random.EmpiricalPar;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * The node, into which job must be routed, is chosen using an empirical strategy.
@@ -116,12 +117,13 @@ public class EmpiricalStrategy extends RoutingStrategy {
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
+		public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+		NodeList nodeList = ownerNode.getOutputNodes();
 		if (nodes == null) {
 			//it is the first execution of this method: find the NetNode objects
 			nodes = new NetNode[nodeNames.length];
 			for (int i = 0; i < nodeNames.length; i++) {
-				nodes[i] = NetSystem.getNode(nodeNames[i]);
+				nodes[i] = ownerNode.getNetSystem().getNode(nodeNames[i]);
 			}
 		}
 
@@ -135,6 +137,10 @@ public class EmpiricalStrategy extends RoutingStrategy {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void setRandomEngine(RandomEngine randomEngine) {
+		distribution.setRandomEngine(randomEngine); 
 	}
 
 }

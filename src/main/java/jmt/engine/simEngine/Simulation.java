@@ -140,6 +140,8 @@ public class Simulation {
 	private boolean isTerminalSimulation;
 
 	//-------------------------CONSTRUCTORS-------------------------------//
+	
+	private NetSystem netSystem;
 
 	/**
 	 * Creates a new Simulation object.
@@ -154,7 +156,8 @@ public class Simulation {
 		name = simName;
 
 		//Initializes NetSystem
-		NetSystem.initialize();
+		netSystem = new NetSystem();
+		netSystem.initialize();
 
 		//sets seed (if -1 --> automatic seed)
 		if (seed != -1) {
@@ -174,7 +177,8 @@ public class Simulation {
 		name = simName;
 
 		//Initializes NetSystem
-		NetSystem.initialize();
+		netSystem = new NetSystem();
+		netSystem.initialize();
 
 		//sets seed (if -1 --> automatic seed)
 		if (seed != -1) {
@@ -282,19 +286,20 @@ public class Simulation {
 	 */
 	public void initialize() {
 		// Sets the max simulated time for the system, when reached the simulation is stopped
-		NetSystem.setMaxSimulatedTime(simParameters.getMaxSimulatedTime());
+		netSystem.setMaxSimulatedTime(simParameters.getMaxSimulatedTime());
 
 		// Sets the max processed events for the system, when reached the simulation is stopped
-		NetSystem.setMaxProcessedEvents(simParameters.getMaxProcessedEvents());
+		netSystem.setMaxProcessedEvents(simParameters.getMaxProcessedEvents());
 
 		// Resets the job counter
-		Job.resetCounter();
+		//Job.resetCounter();
 
 		// creates network
 		network = new QueueNetwork("JSIM simulation: " + name);
+        network.setNetSystem(netSystem);
 		network.setTerminalSimulation(isTerminalSimulation);
 		// adds network to NetSystem
-		NetSystem.addNetwork(network);
+		netSystem.addNetwork(network);
 
 		//add all job classes to QueueNetwork
 		for (JobClass classe : classes) {
@@ -577,7 +582,7 @@ public class Simulation {
 	public void run() throws NetException, InterruptedException {
 		if (initialized) {
 			//runs the simulation
-			NetSystem.start();
+			netSystem.start();
 			finished = true;
 
 			//simulation has finished
@@ -585,7 +590,7 @@ public class Simulation {
 			XMLSimulationOutput output = new XMLSimulationOutput(this);
 			outputFile = output.writeAllMeasures();
 
-			NetSystem.terminate();
+			netSystem.terminate();
 		} else {
 			throw new NetException("Simulation has not been initialized");
 		}
@@ -596,7 +601,7 @@ public class Simulation {
 	 */
 	public void abort() {
 		logger.info("Aborting simulation...");
-		NetSystem.terminate();
+		netSystem.terminate();
 	}
 
 	/**
@@ -652,7 +657,7 @@ public class Simulation {
 	 */
 	public void preload_station(String stationName, int[] jobs) {
 		//find the node
-		NetNode node = NetSystem.getNode(stationName);
+		NetNode node = netSystem.getNode(stationName);
 
 		if (node != null) {
 			try {
@@ -700,7 +705,7 @@ public class Simulation {
 	}
 
 	public void setRandomEngineSeed(long seed) {
-		RandomEngine.makeDefault().setSeed(seed);
+		netSystem.getEngine().setNewSeed(seed);
 	}
 
 	/**
@@ -769,6 +774,14 @@ public class Simulation {
 
 	public void setTerminalSimulation(boolean isTerminalSimulation) {
 		this.isTerminalSimulation = isTerminalSimulation;
+	}
+	
+	public SimSystem getSimSystem(){
+		return netSystem.getSimSystem();
+	}
+	
+	public NetSystem getNetSystem(){
+		return netSystem;
 	}
 
 	//------------------- end GETTER AND SETTER ----------------------------------//
@@ -880,6 +893,11 @@ public class Simulation {
 		 */
 		public SimNode(String name, InputSection inSec, ServiceSection serSec, OutputSection outSec) {
 			this.node = new NetNode(name);
+			//////
+			SimSystem simSystem = netSystem.getSimSystem();
+			simSystem.add(this.node);
+			node.setSimSystem(simSystem);
+			
 			this.input = inSec;
 			this.service = serSec;
 			this.output = outSec;
@@ -933,6 +951,10 @@ public class Simulation {
 			return reference;
 		}
 
+	}
+
+	public RandomEngine getEngine() {
+		return netSystem.getEngine();
 	}
 
 }

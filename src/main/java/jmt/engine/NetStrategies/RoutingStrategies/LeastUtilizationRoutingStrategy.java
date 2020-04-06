@@ -38,8 +38,7 @@ public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
 	private double infinity = Double.POSITIVE_INFINITY;
 	private byte serviceSection = NodeSection.SERVICE;
 	private int property = NodeSection.PROPERTY_ID_UTILIZATION;
-	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)
-	private RandomEngine random = RandomEngine.makeDefault();
+	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)	
 
 	/**
 	 * This strategy selects the resource with the least utilization
@@ -49,7 +48,9 @@ public class LeastUtilizationRoutingStrategy extends RoutingStrategy {
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+		RandomEngine random = ownerNode.getNetSystem().getEngine();
+		NodeList nodeList = ownerNode.getOutputNodes();
 		if (nodeList.size() == 0) {
 			return null;
 		}

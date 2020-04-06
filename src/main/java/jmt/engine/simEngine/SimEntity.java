@@ -40,6 +40,7 @@ public abstract class SimEntity {
 	public SimEvent evbuf; // For incoming events
 	protected int state; // Our current state from list below
 	private SimPredicate waitingPred; //the predicate that the SimWaitFor is waiting
+	protected SimSystem simSystem;
 
 	//
 	// Public library interface
@@ -53,8 +54,13 @@ public abstract class SimEntity {
 		this.name = name;
 		me = -1;
 		state = RUNNABLE;
+		//this.simSystem = simSystem;
 		// Adding this to SimSystem automatically
-		SimSystem.add(this);
+		//simSystem.add(this);
+	}
+	
+	public void setSimSystem(SimSystem simSystem){
+		this.simSystem = simSystem;
 	}
 
 	// Public access methods
@@ -94,7 +100,7 @@ public abstract class SimEntity {
 	 */
 	public final void simHold(double delay) {
 		setState(HOLDING);
-		SimSystem.hold(me, delay);
+		simSystem.hold(me, delay);
 	}
 
 	//TODO: to fix
@@ -106,7 +112,7 @@ public abstract class SimEntity {
 	 */
 	//
 	public final double simHoldFor(double delay) {
-		double start_t = SimSystem.getClock();
+		double start_t = simSystem.getClock();
 		simSchedule(me, delay, 9999); // Send self 'hold done' msg
 		// SimEvent ev2 = new SimEvent();
 		simWaitFor(SimSystem.SIM_ANY);
@@ -130,7 +136,7 @@ public abstract class SimEntity {
 	 * @return a token to remove scheduled message
 	 */
 	public final RemoveToken simSchedule(int dest, double delay, int tag, Object data) {
-		return SimSystem.send(me, dest, delay, tag, data);
+		return simSystem.send(me, dest, delay, tag, data);
 	}
 
 	/** Send an event to another entity, by id number and with <b>no</b> data.
@@ -141,7 +147,7 @@ public abstract class SimEntity {
 	 * @return a token to remove scheduled message
 	 */
 	public final RemoveToken simSchedule(int dest, double delay, int tag) {
-		return SimSystem.send(me, dest, delay, tag, null);
+		return simSystem.send(me, dest, delay, tag, null);
 	}
 
 	/**
@@ -150,7 +156,7 @@ public abstract class SimEntity {
 	 * @return true if event was found and removed, false if it was not found
 	 */
 	public final boolean simUnschedule(RemoveToken token) {
-		return SimSystem.remove(token);
+		return simSystem.remove(token);
 	}
 
 	/**
@@ -158,7 +164,7 @@ public abstract class SimEntity {
 	 */
 	public final void simWait() {
 		setState(SimEntity.WAITING);
-		SimSystem.wait(me);
+		simSystem.wait(me);
 	}
 
 	/** Count how many events matching a predicate are waiting
@@ -167,14 +173,14 @@ public abstract class SimEntity {
 	 * @return The count of matching events
 	 */
 	public final int simWaiting(SimPredicate p) {
-		return SimSystem.waiting(me, p);
+		return simSystem.waiting(me, p);
 	}
 
 	/** Count how many events are waiting for this entity on the deferred queue
 	 * @return The count of events
 	 */
 	public final int simWaiting() {
-		return SimSystem.waiting(me, SimSystem.SIM_ANY);
+		return simSystem.waiting(me, SimSystem.SIM_ANY);
 	}
 
 	/** Extract the first event waiting for this entity on the deferred
@@ -182,7 +188,7 @@ public abstract class SimEntity {
 	 * @param p An event selection predicate
 	 */
 	public final void simSelect(SimPredicate p) {
-		SimSystem.select(me, p);
+		simSystem.select(me, p);
 	}
 
 	/** Cancel the first event waiting for this entity on the future
@@ -194,7 +200,7 @@ public abstract class SimEntity {
 	 *             <tt>null</tt>
 	 */
 	public final int simCancel(SimPredicate p, SimEvent ev) {
-		SimSystem.cancel(me, p);
+		simSystem.cancel(me, p);
 		if ((ev != null) && (evbuf != null)) {
 			ev.copy(evbuf);
 		}
@@ -220,7 +226,7 @@ public abstract class SimEntity {
 	 * @return a token to remove scheduled message
 	 */
 	public final RemoveToken simPutback(SimEvent ev) {
-		return SimSystem.putback((SimEvent) ev.clone());
+		return simSystem.putback((SimEvent) ev.clone());
 	}
 
 	/** Gets the first event matching a predicate from the deferred queue,

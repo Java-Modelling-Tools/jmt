@@ -33,9 +33,9 @@ import jmt.engine.random.engine.RandomEngine;
  */
 public class RandStrategy extends QueuePutStrategy {
 
-	private RandomEngine randomEngine = RandomEngine.makeDefault();
 
-	public void put(Job job, JobInfoList queue, NodeSection nodeSection) throws NetException {
+	public void put(Job job, JobInfoList queue, NodeSection callingSection) throws NetException {
+		RandomEngine randomEngine = job.getNetSystem().getEngine();
 		queue.add((int) (randomEngine.raw() * (queue.size() + 1)), new JobInfo(job));
 	}
 

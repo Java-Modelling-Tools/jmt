@@ -252,7 +252,7 @@ public class BlockingRegion {
 			}
 		}
 
-		double currentTime = NetSystem.getTime();
+		double currentTime = network.getNetSystem().getTime();
 		if (weightMeasure != null) {
 			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
 			lastWeightOccupation = actualOccupation;
@@ -280,7 +280,7 @@ public class BlockingRegion {
 			}
 		}
 
-		double currentTime = NetSystem.getTime();
+		double currentTime = network.getNetSystem().getTime();
 		if (weightMeasure != null) {
 			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);
 			lastWeightOccupation = actualOccupation;

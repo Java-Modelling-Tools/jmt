@@ -271,8 +271,8 @@ public abstract class NodeSection {
 		case PROPERTY_ID_UTILIZATION:
 			return jobsList.size();
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (NetSystem.getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTime() / NetSystem.getTime();
+			return (getNetSytem().getTime() <= 0.0) ? 0.0
+					: jobsList.getTotalSojournTime() / ownerNode.getNetSystem().getTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
@@ -294,8 +294,8 @@ public abstract class NodeSection {
 		case PROPERTY_ID_UTILIZATION:
 			return jobsList.size(jobClass);
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (NetSystem.getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTimePerClass(jobClass) / NetSystem.getTime();
+			return (getNetSytem().getTime() <= 0.0) ? 0.0
+					: jobsList.getTotalSojournTimePerClass(jobClass) / ownerNode.getNetSystem().getTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
@@ -559,6 +559,7 @@ public abstract class NodeSection {
 	void setOwnerNode(NetNode ownerNode) throws NetException {
 		this.ownerNode = ownerNode;
 		jobsList = new LinkedJobInfoList(getJobClasses().size());
+        jobsList.setNetSystem(ownerNode.getNetSystem()); 
 		nodeLinked(ownerNode);
 	}
 
@@ -666,6 +667,10 @@ public abstract class NodeSection {
 
 	public void analyzeTransition(int name, String modeName, Measure measurement) throws NetException {
 		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+	}
+
+	public NetSystem getNetSytem() {
+		return ownerNode.getNetSystem();
 	}
 
 }

@@ -39,8 +39,8 @@ public class PSJobInfoList extends LinkedJobInfoList {
 		int c = jobInfo.getJob().getJobClass().getId();
 		jobsIn++;
 		jobsInPerClass[c]++;
-		lastJobInTime = NetSystem.getTime();
-		lastJobInTimePerClass[c] = NetSystem.getTime();
+		lastJobInTime = getTime();
+		lastJobInTimePerClass[c] = getTime();
 	}
 
 	@Override
@@ -50,8 +50,8 @@ public class PSJobInfoList extends LinkedJobInfoList {
 		finalRemove(jobInfo, listPerClass[c], perClassPosition);
 		jobsOut++;
 		jobsOutPerClass[c]++;
-		lastJobOutTime = NetSystem.getTime();
-		lastJobOutTimePerClass[c] = NetSystem.getTime();
+		lastJobOutTime = getTime();
+		lastJobOutTimePerClass[c] = getTime();
 	}
 
 	public void psUpdateSojournTime(JobClass jobClass, double serviceTime) {
@@ -82,10 +82,10 @@ public class PSJobInfoList extends LinkedJobInfoList {
 				if (m != null) {
 					if (jobsInPerClass[c] == 0) {
 						if (c == jobClass.getId()) {
-							m.update(0.0, NetSystem.getTime());
+							m.update(0.0, getTime());
 						}
 					} else {
-						m.update(listPerClass[c].size() * serviceFractions[c], NetSystem.getTime() - getLastModifyTime());
+						m.update(listPerClass[c].size() * serviceFractions[c], getTime() - getLastModifyTime());
 					}
 				}
 			}
@@ -95,7 +95,7 @@ public class PSJobInfoList extends LinkedJobInfoList {
 			for (int c = 0; c < numberOfJobClasses; c++) {
 				sum += listPerClass[c].size() * serviceFractions[c];
 			}
-			utilization.update(sum, NetSystem.getTime() - getLastModifyTime());
+			utilization.update(sum, getTime() - getLastModifyTime());
 		}
 	}
 

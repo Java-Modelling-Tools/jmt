@@ -13,6 +13,7 @@ import java.util.List;
 
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetSystem;
 
 /**
  * This is the system class which manages the simulation. All
@@ -24,23 +25,24 @@ public class SimSystem {
 	private static final boolean DEBUG = false;
 
 	// Private data members
-	static private List<SimEntity> entities; // The current entity list
+	private List<SimEntity> entities; // The current entity list
 
-	static private EventQueue future; // The future event queue
+	private EventQueue future; // The future event queue
 
-	static private EventQueue deferred; // The deferred event queue
+	private EventQueue deferred; // The deferred event queue
 
-	static private EventQueue timing; // The timing event queue
+	private EventQueue timing; // The timing event queue
 
-	static private double clock; // Holds the current global simulation time
-	static private boolean running; // Tells whether the run() member been called yet
-	static private NumberFormat nf;
+	private double clock; // Holds the current global simulation time
+	private boolean running; // Tells whether the run() member been called yet
+	private NumberFormat nf;
 
 	// cache for the entity IDs
-	static private Hashtable<Integer,SimEntity> entityIdHash = new Hashtable<Integer,SimEntity>();
+	private Hashtable<Integer,SimEntity> entityIdHash = new Hashtable<Integer,SimEntity>();
 	// cache for the entity Names
-	static private Hashtable<String,SimEntity> entityNameHash = new Hashtable<String,SimEntity>();
+	private Hashtable<String,SimEntity> entityNameHash = new Hashtable<String,SimEntity>();
 
+	private NetSystem netSystem;
 	//
 	// Public library interface
 	//
@@ -54,7 +56,7 @@ public class SimSystem {
 	 * It sets up trace output to a file in the current directory called
 	 * `tracefile'
 	 */
-	static public void initialize() {
+	public void initialize() {
 		entities = new ArrayList<SimEntity>();
 
 		// future = new ListEventQueue();
@@ -65,6 +67,7 @@ public class SimSystem {
 		deferred = new ListEventQueue();
 
 		timing = new TimingEventQueue();
+		((TimingEventQueue) timing).setEngine(netSystem.getEngine());
 
 		clock = 0.0;
 		running = false;
@@ -78,7 +81,7 @@ public class SimSystem {
 	/** Returns the number format used for generating
 	 * times in trace lines
 	 */
-	static public NumberFormat getNumberFormat() {
+	public NumberFormat getNumberFormat() {
 		return nf;
 	}
 
@@ -93,21 +96,21 @@ public class SimSystem {
 	/** Get the current simulation time.
 	 * @return The simulation time
 	 */
-	static public double clock() {
+	public double clock() {
 		return clock;
 	}
 
 	/** A different name for <tt>SimSystem.clock()</tt>.
 	 * @return The current simulation time
 	 */
-	static public double getClock() {
+	public double getClock() {
 		return clock;
 	}
 
 	/** Gets the current number of entities in the simulation
 	 * @return A count of entities
 	 */
-	static public int getNumEntities() {
+	public int getNumEntities() {
 		return entities.size();
 	}
 
@@ -115,7 +118,7 @@ public class SimSystem {
 	 * @param id The entity's unique id number
 	 * @return A reference to the entity, or null if it could not be found
 	 */
-	static final public SimEntity getEntity(int id) {
+	final public SimEntity getEntity(int id) {
 		SimEntity found = entityIdHash.get(id);
 		if (found == null) {
 			System.out.println("SimSystem: could not find entity " + id);
@@ -127,7 +130,7 @@ public class SimSystem {
 	 * @param name The entity's name
 	 * @return A reference to the entity, or null if it could not be found
 	 */
-	static public SimEntity getEntity(String name) {
+	public SimEntity getEntity(String name) {
 		SimEntity found = entityNameHash.get(name);
 		if (found == null) {
 			System.out.println("SimSystem: could not find entity " + name);
@@ -140,7 +143,7 @@ public class SimSystem {
 	 * so there is no need to call this explicitly.
 	 * @param e A reference to the new entity
 	 */
-	static public void add(SimEntity e) {
+	public void add(SimEntity e) {
 		SimEvent evt;
 		if (running()) {
 			/* Post an event to make this entity */
@@ -160,7 +163,7 @@ public class SimSystem {
 	 * on the fly.
 	 * @param e A reference to the new entity
 	 */
-	static synchronized void addEntityDynamically(SimEntity e) {
+	synchronized void addEntityDynamically(SimEntity e) {
 		e.setId(entities.size());
 		entities.add(e);
 		entityIdHash.put(e.getId(), e);
@@ -173,7 +176,7 @@ public class SimSystem {
 	 * Of course this should be called after all the entities have been setup and added,
 	 * and their ports linked.
 	 */
-	static public void runStart() {
+	public void runStart() {
 		SimEntity ent;
 		running = true;
 		// Start all the entities' threads
@@ -190,7 +193,7 @@ public class SimSystem {
 	 * Runs one tick of the simulation: the system looks for events in the future queue.
 	 * @return <tt>false</tt> if there are no more future events to be processed
 	 */
-	static public boolean runTick() throws NetException {
+	public boolean runTick() throws NetException {
 		double now = 0.0;
 		if (future.size() > 0 && timing.size() > 0) {
 			now = Math.min(future.peek().eventTime(), timing.peek().eventTime());
@@ -220,7 +223,7 @@ public class SimSystem {
 
 	/** Stops the simulation, by calling the poison() method of each SimEntity.
 	 */
-	static public void runStop() {
+	public void runStop() {
 		SimEntity ent;
 		// Attempt to kill all the entity threads
 		for (Iterator<SimEntity> it = entities.iterator(); it.hasNext();) {
@@ -236,19 +239,19 @@ public class SimSystem {
 	// Package level methods
 	//
 
-	static boolean running() {
+	boolean running() {
 		return running;
 	}
 
 	// Entity helper methods
 
-	static synchronized RemoveToken hold(int src, double delay) {
+	synchronized RemoveToken hold(int src, double delay) {
 		SimEvent e = new SimEvent(SimEvent.HOLD_DONE, clock + delay, src);
 		future.add(e);
 		return new RemoveToken(e);
 	}
 
-	static synchronized RemoveToken send(int src, int dest, double delay, int tag, Object data) {
+	synchronized RemoveToken send(int src, int dest, double delay, int tag, Object data) {
 		SimEvent e = new SimEvent(SimEvent.SEND, clock + delay, src, dest, tag, data);
 		if ((tag & NetEvent.EVENT_MASK) == NetEvent.EVENT_TIMING) {
 			timing.add(e);
@@ -263,7 +266,7 @@ public class SimSystem {
 	 * @param token the remove token
 	 * @return true if the event was found and removed, false otherwise.
 	 */
-	static synchronized boolean remove(RemoveToken token) {
+	synchronized boolean remove(RemoveToken token) {
 		SimEvent e = token.getEvent();
 		if (token.isDeferred()) {
 			return deferred.remove(e);
@@ -276,11 +279,11 @@ public class SimSystem {
 		}
 	}
 
-	static synchronized void wait(int src) {
+	synchronized void wait(int src) {
 
 	}
 
-	static synchronized int waiting(int d, SimPredicate p) {
+	synchronized int waiting(int d, SimPredicate p) {
 		SimEvent ev = null;
 		int w = 0;
 		for (Object element : deferred) {
@@ -294,7 +297,7 @@ public class SimSystem {
 		return w;
 	}
 
-	static synchronized void select(int src, SimPredicate p) {
+	synchronized void select(int src, SimPredicate p) {
 		SimEvent ev = null;
 		boolean found = false;
 
@@ -316,7 +319,7 @@ public class SimSystem {
 		}
 	}
 
-	static synchronized void cancel(int src, SimPredicate p) {
+	synchronized void cancel(int src, SimPredicate p) {
 		SimEvent ev = null;
 		boolean found = false;
 
@@ -338,7 +341,7 @@ public class SimSystem {
 		}
 	}
 
-	static RemoveToken putback(SimEvent ev) {
+	RemoveToken putback(SimEvent ev) {
 		deferred.add(ev);
 		return new RemoveToken(ev, true);
 	}
@@ -347,7 +350,7 @@ public class SimSystem {
 	// Private internal methods
 	//
 
-	static private void processEvent(SimEvent e) throws NetException {
+	private void processEvent(SimEvent e) throws NetException {
 		int dest, src;
 		SimEntity destEnt;
 
@@ -430,11 +433,15 @@ public class SimSystem {
 	 * Aborts the simulation!
 	 *
 	 */
-	static public void abort() {
+	public void abort() {
 		running = false;
 		if (DEBUG) {
 			System.out.println("Simulation Aborted");
 		}
+	}
+
+	public void setNetSystem(NetSystem netSystem) {
+		this.netSystem = netSystem;
 	}
 
 }

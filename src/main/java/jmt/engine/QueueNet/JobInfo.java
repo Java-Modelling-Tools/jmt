@@ -34,7 +34,7 @@ public class JobInfo {
 	 */
 	public JobInfo(Job job) {
 		this.job = job;
-		this.enteringTime = NetSystem.getTime();
+		this.enteringTime = job.getNetSystem().getTime();
 	}
 
 	/**
@@ -51,6 +51,9 @@ public class JobInfo {
 	 */
 	public double getEnteringTime() {
 		return enteringTime;
+	}
+	public NetSystem getNetSystem(){
+		return job.getNetSystem();
 	}
 
 }

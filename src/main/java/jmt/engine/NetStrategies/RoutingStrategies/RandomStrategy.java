@@ -34,10 +34,8 @@ import jmt.engine.random.engine.RandomEngine;
 public class RandomStrategy extends RoutingStrategy {
 
 	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;
-	private RandomEngine randomEngine;
 
 	public RandomStrategy() {
-		randomEngine = RandomEngine.makeDefault();
 	}
 
 	/**
@@ -48,7 +46,9 @@ public class RandomStrategy extends RoutingStrategy {
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodeList, JobClass jobClass) {
+		public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+		RandomEngine randomEngine = ownerNode.getNetSystem().getEngine();
+		NodeList nodeList = ownerNode.getOutputNodes();
 		if (nodeList.size() == 0) {
 			return null;
 		}

@@ -157,7 +157,7 @@ public class DispatcherJSIMschema {
 
 		if (automaticSeed) {
 			// Generate only positive integers (to facilitate replay in the gui)
-			simulationSeed = RandomEngine.makeDefault().nextInt();
+			simulationSeed = sim.getEngine().nextInt();
 			if (simulationSeed < 0) {
 				simulationSeed = -simulationSeed;
 			}
@@ -303,7 +303,7 @@ public class DispatcherJSIMschema {
 			}
 			// Updates simulation progress
 			try {
-				progress = NetSystem.checkProgress(net);
+				progress = net.getNetSystem().checkProgress(net);
 			} catch (NetException e) {
 				progress = 0.0;
 			}
@@ -349,7 +349,7 @@ public class DispatcherJSIMschema {
 		if (!simStarted) {
 			return false;
 		}
-		NetSystem.terminate();
+		net.getNetSystem().terminate();
 		return true;
 	}
 
@@ -400,7 +400,7 @@ public class DispatcherJSIMschema {
 	 */
 	public synchronized boolean pauseSim() {
 		simPaused = true;
-		return NetSystem.pause();
+		return net.getNetSystem().pause();
 	}
 
 	/**
@@ -410,7 +410,7 @@ public class DispatcherJSIMschema {
 	 */
 	public synchronized boolean restartSim() {
 		simPaused = false;
-		return NetSystem.restartFromPause();
+		return net.getNetSystem().restartFromPause();
 	}
 
 	//Francesco D'Aquino

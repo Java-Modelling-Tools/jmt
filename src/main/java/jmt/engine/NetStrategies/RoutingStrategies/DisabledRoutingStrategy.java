@@ -44,7 +44,7 @@ public class DisabledRoutingStrategy extends RoutingStrategy {
 	 * @return Selected node.
 	 */
 	@Override
-	public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
 			return null;
 		}
 

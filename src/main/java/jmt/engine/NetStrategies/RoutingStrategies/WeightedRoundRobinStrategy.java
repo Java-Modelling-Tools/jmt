@@ -38,7 +38,8 @@ public class WeightedRoundRobinStrategy extends RoutingStrategy {
     }
 
     @Override
-    public NetNode getOutNode(NodeList nodes, JobClass jobClass) {
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+		NodeList nodes = ownerNode.getOutputNodes();
         int n = nodes.size();
         if (n == 0 || n != weights.size() || max == 0) {
             return null;

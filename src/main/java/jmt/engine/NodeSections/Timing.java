@@ -55,7 +55,6 @@ public class Timing extends ServiceSection {
 
 	private List<RemoveToken>[] timingTokenLists;
 	private int[] extraEnablingDegrees;
-	private RandomEngine randomEngine;
 	private InverseMeasure firingThroughput;
 	private InverseMeasure[] firingThroughputs;
 	private double lastFiringTime;
@@ -91,7 +90,6 @@ public class Timing extends ServiceSection {
 		}
 		extraEnablingDegrees = new int[modeNames.length];
 		Arrays.fill(extraEnablingDegrees, 0);
-		randomEngine = RandomEngine.makeDefault();
 		lastFiringTime = 0.0;
 		lastFiringTimes = new double[modeNames.length];
 		Arrays.fill(lastFiringTimes, 0.0);
@@ -138,7 +136,7 @@ public class Timing extends ServiceSection {
 					}
 				}
 			}
-
+			RandomEngine randomEngine = this.getNetSytem().getEngine();
 			if (deltaTimingEvents >= 0) {
 				for (int i = 0; i < deltaTimingEvents; i++) {
 					double firingDelay = timingStrategies[modeIndex].wait(this, null);
@@ -151,7 +149,7 @@ public class Timing extends ServiceSection {
 				}
 			} else {
 				for (int i = 0; i > deltaTimingEvents; i--) {
-					RemoveToken token = timingTokenLists[modeIndex].remove(0);
+					RemoveToken token = (RemoveToken) timingTokenLists[modeIndex].remove(0);
 					removeMessage(token);
 				}
 			}
@@ -165,7 +163,7 @@ public class Timing extends ServiceSection {
 			timingTokenLists[modeIndex].remove(token);
 			FiringPacket firingPacket = new FiringPacket(modeIndex, modeNames[modeIndex], null, null);
 			sendBackward(NetEvent.EVENT_FIRING, firingPacket, 0.0);
-
+	        RandomEngine randomEngine = this.getNetSytem().getEngine();
 			if (extraEnablingDegrees[modeIndex] != 0) {
 				double firingDelay = timingStrategies[modeIndex].wait(this, null);
 				TimingPacket timingPacket = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],
@@ -186,8 +184,8 @@ public class Timing extends ServiceSection {
 			int modeIndex = ((FiringPacket) data).getModeIndex();
 			sendForward(NetEvent.EVENT_FIRING, data, 0.0);
 			updateFiringThroughput(modeIndex);
-			lastFiringTime = NetSystem.getTime();
-			lastFiringTimes[modeIndex] = NetSystem.getTime();
+			lastFiringTime = getTime();
+			lastFiringTimes[modeIndex] = getTime();
 			break;
 		}
 
@@ -233,11 +231,11 @@ public class Timing extends ServiceSection {
 		if (firingThroughputs != null) {
 			Measure m = firingThroughputs[modeIndex];
 			if (m != null) {
-				m.update(NetSystem.getTime() - lastFiringTimes[modeIndex], 1.0);
+				m.update(getTime() - lastFiringTimes[modeIndex], 1.0);
 			}
 		}
 		if (firingThroughput != null) {
-			firingThroughput.update(NetSystem.getTime() - lastFiringTime, 1.0);
+			firingThroughput.update(getTime() - lastFiringTime, 1.0);
 		}
 	}
 
@@ -248,6 +246,10 @@ public class Timing extends ServiceSection {
 			}
 		}
 		return -1;
+	}
+	
+	private double getTime(){
+		return this.getOwnerNode().getNetSystem().getTime();
 	}
 
 }

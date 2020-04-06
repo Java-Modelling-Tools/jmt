@@ -415,8 +415,8 @@ public class NetNode extends SimEntity {
 		//set other properties
 		message.setData(receiveBuffer.getData());
 		message.setTime(receiveBuffer.eventTime());
-		message.setSource(NetSystem.getNode(receiveBuffer.getSrc()));
-		message.setDestination(NetSystem.getNode(receiveBuffer.getDest()));
+		message.setSource(getNetSystem().getNode(receiveBuffer.getSrc()));
+		message.setDestination(getNetSystem().getNode(receiveBuffer.getDest()));
 
 		//Look if message is a job message and if job is arriving at this node (from the node
 		//itself or from another node)
@@ -485,7 +485,7 @@ public class NetNode extends SimEntity {
 			msg.setDestination(this);
 			msg.setSource(this);
 			msg.setSourceSection(NodeSection.NO_ADDRESS);
-			msg.setTime(NetSystem.getTime());
+			msg.setTime(getNetSystem().getTime());
 			msg.setDestinationSection(NodeSection.INPUT);
 			dispatch(msg);
 			msg = (NetMessage) message.clone();
@@ -590,7 +590,7 @@ public class NetNode extends SimEntity {
 			if (message.getJob() != null) {
 				job = " Attached job with id: " + message.getJob().getId() + " class: " + message.getJob().getJobClass().getName();
 			}
-			logger.warn(NetSystem.getTime() + " - Message " + message.getEvent() + " from " + src + " to " + dst + " not processed." + job);
+			logger.warn(getNetSystem().getTime() + " - Message " + message.getEvent() + " from " + src + " to " + dst + " not processed." + job);
 		}
 	}
 
@@ -689,6 +689,7 @@ public class NetNode extends SimEntity {
 		// When a node is linked to a network, connections between nodes must
 		// have been already done!!!
 		jobsList = new LinkedJobInfoList(getJobClasses().size());
+        jobsList.setNetSystem(network.getNetSystem()); 
 	}
 
 	@Override
@@ -833,4 +834,7 @@ public class NetNode extends SimEntity {
 		}
 	}
 
+	public NetSystem getNetSystem(){
+		return network.getNetSystem();
+	}
 }

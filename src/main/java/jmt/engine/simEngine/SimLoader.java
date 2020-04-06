@@ -34,8 +34,14 @@ import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.common.exception.LoadException;
 import jmt.common.xml.XSDSchemaLoader;
+import jmt.engine.NetStrategies.ForkStrategy;
+import jmt.engine.NetStrategies.RoutingStrategy;
+import jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy;
+import jmt.engine.NetStrategies.RoutingStrategies.LoadDependentRoutingParameter;
+import jmt.engine.NetStrategies.ServiceStrategies.LDParameter;
 import jmt.engine.NodeSections.InputSection;
 import jmt.engine.NodeSections.OutputSection;
 import jmt.engine.NodeSections.ServiceSection;
@@ -45,7 +51,11 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.SimParameters;
+import jmt.engine.random.AbstractDistribution;
+import jmt.engine.random.Burst;
 import jmt.engine.random.Distribution;
+import jmt.engine.random.Empirical;
+import jmt.engine.random.Exponential;
 
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -542,7 +552,8 @@ public class SimLoader {
 				if (DEBUG) {
 					System.out.println("    using default constructor");
 				}
-				return (NodeSection) c.newInstance();
+				NodeSection ns = (NodeSection) c.newInstance();
+				return ns;
 			} else {
 				//creates the array with all parameters & the array with all their classes
 				Object[] initargs = new Object[parameterList.getLength()];
@@ -573,7 +584,8 @@ public class SimLoader {
 					System.out.println("    constructor found");
 				}
 				//creates the Section with the constructor
-				return (NodeSection) constr.newInstance(initargs);
+				NodeSection ns = (NodeSection) constr.newInstance(initargs);
+				return ns;
 			}
 		} catch (ClassNotFoundException e) {
 			throw new LoadException("Class of Section Not found", e);
@@ -822,7 +834,11 @@ public class SimLoader {
 				if (DEBUG) {
 					System.out.println("            created with default constructor");
 				}
-				return c.newInstance();
+				Object o = c.newInstance();
+				if(o instanceof AbstractDistribution){
+					((AbstractDistribution) o).setRandomEngine(sim.getEngine());
+				}
+				return o;
 			}
 
 			//check if it is a leaf node (it has a value & not subparameters)
@@ -838,7 +854,9 @@ public class SimLoader {
 				if (DEBUG) {
 					System.out.println("            created subParameter");
 				}
-				return constr.newInstance(initargs);
+				Object o = constr.newInstance(initargs);
+				
+				return o;
 			} else {
 				//leaf node but has subparameters
 				NodeList childList = XMLParser.getElementsByTagName(subp, "subParameter");
@@ -859,9 +877,33 @@ public class SimLoader {
 				//gets the right constructor
 				Constructor<?> constr = getConstructor(c, paramClasses);
 				Object o = constr.newInstance(initargs);
-				if (o instanceof NetNode && o instanceof Distribution) {
+				if (o instanceof NetNode && o instanceof Distribution) { //chnage to burst then add a method to burst ot do those two ines
+					//add to simsystem
+					//call the initialize method
+					NetNode n = (NetNode) o;
+					SimSystem simSystem = sim.getSimSystem();
+					simSystem.add(n);
+					n.setSimSystem(simSystem);
+					
+					Burst b = (Burst) o;
+					b.setRandomEngine(sim.getNetSystem().getEngine());
+					b.initialize();
+					
 					sim.addDistrNetNode((NetNode) o);
 				}
+				if(o instanceof ForkStrategy){
+					((ForkStrategy)o).setRandomEngine(sim.getEngine());
+				}
+				if(o instanceof EmpiricalStrategy){
+					((EmpiricalStrategy)o).setRandomEngine(sim.getEngine());	
+				}
+				if(o instanceof LoadDependentRoutingParameter){
+					((LoadDependentRoutingParameter)o).setRandomEngine(sim.getEngine());				
+				}
+				if(o instanceof LDParameter){
+					((LDParameter)o).setRandomEngine(sim.getEngine());
+				}
+				
 				return o;
 			}
 		} catch (ClassNotFoundException e) {
@@ -873,6 +915,9 @@ public class SimLoader {
 		} catch (NoSuchMethodException e) {
 			throw new LoadException("class of subparameter not found", e);
 		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (IncorrectDistributionParameterException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if (DEBUG) {

@@ -374,6 +374,12 @@ public interface SimulationDefinition {
 	 * @param pollingInterval polling interval for temporary measures.
 	 */
 	public void setPollingInterval(Double pollingInterval);
+	
+	/**
+	 * Returns the number of simulations to be run in parallel during what if analysis.
+	 * @return the number of simulations to be run in parallel during what if analysis.
+	 */
+	public Integer getWhatIfParallelism();
 
 	// --- Methods to manage simulation results -- Bertoli Marco --------------------------------------------
 	/**

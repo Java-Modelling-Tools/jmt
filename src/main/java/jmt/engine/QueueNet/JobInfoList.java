@@ -343,4 +343,6 @@ public interface JobInfoList {
 	 */
 	public void setNumberOfServers(int numberOfServers);
 
+	public abstract void setNetSystem(NetSystem netSystem); 
+
 }

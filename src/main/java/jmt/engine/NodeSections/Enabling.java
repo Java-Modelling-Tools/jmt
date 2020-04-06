@@ -98,6 +98,8 @@ public class Enabling extends InputSection {
 	@Override
 	protected int process(NetMessage message) throws NetException {
 		Object data = message.getData();
+		NetNode source = message.getSource();		
+        NetSystem netSystem = source.getNetSystem();
 
 		switch (message.getEvent()) {
 
@@ -192,7 +194,7 @@ public class Enabling extends InputSection {
 					int requiredJobNumberFromNode = enablingConditions[modeIndex].getTotal(nodeName);
 					if (requiredJobNumberFromNode > 0) {
 						send(NetEvent.EVENT_JOB_REQUEST, enablingConditions[modeIndex].getVector(nodeName), 0.0,
-									NodeSection.OUTPUT, NetSystem.getNode(nodeName));
+									NodeSection.OUTPUT, netSystem.getNode(nodeName));
 						unfinishedRequestNumber++;
 					}
 				}
@@ -225,7 +227,7 @@ public class Enabling extends InputSection {
 						if (firingOutcomes[currentModeIndex].getTotal(jobClassId) <= forkJobInfoLists[jobClassId].size()) {
 							netJobsList.removeJob(job);
 						} else {
-							totalLifetimes[jobClassId] += NetSystem.getTime() - job.getSystemEnteringTime();
+							totalLifetimes[jobClassId] += netSystem.getTime() - job.getSystemEnteringTime();
 							netJobsList.consumeJob(job);
 						}
 					}

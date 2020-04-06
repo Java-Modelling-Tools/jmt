@@ -21,6 +21,7 @@ package jmt.engine.NetStrategies.ServiceStrategies;
 import jmt.engine.math.parser.Parser;
 import jmt.engine.random.Distribution;
 import jmt.engine.random.Parameter;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * <p>Title: Load Dependent Service Time Strategy Parameter</p>
@@ -38,7 +39,9 @@ public class LDParameter implements Comparable<Object> {
 	private Parameter parameter;
 	private String function;
 	private Parser parser;
+	private RandomEngine randomEngine;
 
+	
 	/**
 	 * Construct a new Load Dependent Service Strategy parameter
 	 * @param from minimum number of jobs for this strategy to apply
@@ -54,6 +57,7 @@ public class LDParameter implements Comparable<Object> {
 			this.function = function.toLowerCase();
 			parser = new Parser(function, true);
 		}
+
 	}
 
 	/**
@@ -127,4 +131,9 @@ public class LDParameter implements Comparable<Object> {
 			throw new ClassCastException("Unsupported object type");
 		}
 	}
+	
+	public void setRandomEngine(RandomEngine randomEngine) {
+		parser.setEngine(this.randomEngine);
+	}
+
 }

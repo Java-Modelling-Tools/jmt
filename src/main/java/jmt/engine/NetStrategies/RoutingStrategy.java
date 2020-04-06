@@ -21,6 +21,7 @@ package jmt.engine.NetStrategies;
 import jmt.common.AutoCheck;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeSection;
 
@@ -39,7 +40,7 @@ public abstract class RoutingStrategy implements AutoCheck {
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
-	public abstract NetNode getOutNode(NodeList nodeList, JobClass jobClass);
+	public abstract NetNode getOutNode(NetNode ownerNode, JobClass jobClass);
 
 	/**
 	 * @author Ashanka
@@ -48,7 +49,7 @@ public abstract class RoutingStrategy implements AutoCheck {
 	 * Currently only LoadDependentRoutingStrategy overrides it.
 	 */
 	public NetNode getOutNode(NodeSection section, JobClass jobClass) {
-		return getOutNode(section.getOwnerNode().getOutputNodes(), jobClass);
+		return getOutNode(section.getOwnerNode(), jobClass);
 	}
 
 	public boolean check() {

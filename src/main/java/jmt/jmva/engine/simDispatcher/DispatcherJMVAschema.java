@@ -650,7 +650,7 @@ public class DispatcherJMVAschema {
 			//compute progress
 
 			if (pauseSim()) {
-				double progress = NetSystem.checkProgress(net);
+				double progress = net.getNetSystem().checkProgress(net);
 				restartSim();
 				return progress;
 			} else {
@@ -783,7 +783,7 @@ public class DispatcherJMVAschema {
 	 * simulation not started or already finished)
 	 */
 	private boolean pauseSim() {
-		return NetSystem.pause();
+		return net.getNetSystem().pause();
 	}
 
 	/**
@@ -792,7 +792,7 @@ public class DispatcherJMVAschema {
 	 * simulation not started or already finished)
 	 */
 	private boolean restartSim() {
-		return NetSystem.restartFromPause();
+		return net.getNetSystem().restartFromPause();
 	}
 
 	private boolean copyFile(File input, File output_file) {

@@ -47,7 +47,6 @@ public class TimingEventQueue implements EventQueue {
 		comparator = new TimingEventComparator();
 		current = new CircularList<SimEvent>();
 		future = new PriorityQueue<SimEvent>(DEFAULT_INITIAL_CAPACITY, comparator);
-		randomEngine = RandomEngine.makeDefault();
 	}
 
 	@Override
@@ -215,5 +214,9 @@ public class TimingEventQueue implements EventQueue {
 		}
 
 	}
+	public void setEngine(RandomEngine engine){
+		this.randomEngine = engine;
+	}
+
 
 }

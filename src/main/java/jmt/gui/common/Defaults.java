@@ -144,10 +144,11 @@ public class Defaults implements CommonConstants {
 		def.setProperty("isStatisticDisabled", "false");
 		def.setProperty("maxSimulationEvents", "-1");
 		def.setProperty("simulationPolling", "1");
-		// Francesco D'Aquino
 		def.setProperty("isWithAnimation", "true");
 		def.setProperty("representableClasses", "10");
-		// end Francesco D'Aquino
+		
+		int logicalCores = Runtime.getRuntime().availableProcessors(); // hyper-threading doubles this
+		def.setProperty("whatIfParallelism", String.valueOf(logicalCores));
 		// GUI default parameters.
 		def.setProperty("JMTManualWidth", "1024");
 		def.setProperty("JMTManualHeight", "520");
