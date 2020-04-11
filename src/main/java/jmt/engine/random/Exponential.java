@@ -133,7 +133,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 */
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			return -Math.log(engine.raw()) / ((ExponentialPar) p).getLambda();
+				return -Math.log(engine.raw()) / ((ExponentialPar) p).getLambda();
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}

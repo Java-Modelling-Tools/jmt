@@ -877,7 +877,7 @@ public class SimLoader {
 				//gets the right constructor
 				Constructor<?> constr = getConstructor(c, paramClasses);
 				Object o = constr.newInstance(initargs);
-				if (o instanceof NetNode && o instanceof Distribution) { //chnage to burst then add a method to burst ot do those two ines
+				if (o instanceof NetNode && o instanceof Distribution) { //change to burst then add a method to burst to do those two lines
 					//add to simsystem
 					//call the initialize method
 					NetNode n = (NetNode) o;
@@ -885,7 +885,7 @@ public class SimLoader {
 					simSystem.add(n);
 					n.setSimSystem(simSystem);
 					
-					Burst b = (Burst) o;
+					Burst b = (Burst) o; //any distribution will do?
 					b.setRandomEngine(sim.getNetSystem().getEngine());
 					b.initialize();
 					

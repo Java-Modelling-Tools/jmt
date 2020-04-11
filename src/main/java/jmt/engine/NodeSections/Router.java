@@ -223,7 +223,7 @@ public class Router extends OutputSection {
 			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
 				System.out.println("JSIMengine - Error: " + getOwnerNode().getName()
 						+ " failed to send a " + jobClass.getName()
-						+ " job forward as its output stations are all sinks.");
+						+ " job forward as its output stations are all sinks or routing is disabled.");
 			} else {
 				class OneShotTask implements Runnable {
 					JobClass jobClass;
@@ -238,7 +238,7 @@ public class Router extends OutputSection {
 						}
 						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
 								+ " failed to send a " + jobClass.getName()
-								+ " job forward as its output stations are all sinks.",
+								+ " job forward as its output stations are all sinks or routing is disabled.",
 								"JSIMengine - Error", JOptionPane.ERROR_MESSAGE);
 					}
 				}

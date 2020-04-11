@@ -120,6 +120,10 @@ public class PhaseTypeDistr extends AbstractDistribution implements Distribution
 			}
 		}
 
+		if (expDistr.engine == null) {
+			expDistr.setRandomEngine(engine);
+		}
+		
 		OUTER_LOOP:
 		while (true) {
 			expPar.setLambda(lambda[curState]);

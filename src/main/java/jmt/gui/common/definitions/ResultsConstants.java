@@ -69,15 +69,15 @@ public interface ResultsConstants {
 			+ "Average queue time for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average response time for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average response time for each selected class at each selected station. In a Fork/Join section this index refers to tasks and not to customers." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RESIDENCE_TIME = HTML_START + HTML_FONT_TITLE + "Residence Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average residence time for each selected class at each selected station. (Residence Time = Number of Visits * Response Time)"
+			+ "Average residence time for each selected class at each selected station. (Residence Time = Number of Visits * Response Time).  In a Fork/Join section this index refers to tasks and not to customers."
 			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_UTILIZATION = HTML_START + HTML_FONT_TITLE + "Utilization" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average utilization for each selected class at each selected station. The utilization of a queueing station with more than one server is the "
-			+ "average utilization of each server. The utilization of a delay station is the average number of customers in the station. (both may be greater than 1)"
+			+ "Average utilization for each selected class at each selected station. For multi-server queueing stations this is the "
+			+ "average utilization of each server. The utilization of a delay station is the average number of customers in the station (may be greater than 1)."
 			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
@@ -117,7 +117,7 @@ public interface ResultsConstants {
 			+ "Average number of customers for each selected class in each selected Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_FJ_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Fork Join Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM 
-			+ "Average response time for each selected class in each selected Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average response time of a customer for each selected class in each selected Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_FIRING_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Firing Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM 
 			+ "Average firing throughput for each selected mode at each selected transition station." + HTML_FONT_NOR_END + HTML_END;
