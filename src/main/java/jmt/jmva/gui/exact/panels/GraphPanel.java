@@ -308,12 +308,16 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 					if (currentIndex.equals(AGGREGATE_TYPES[0])) {
 						graph.draw(i++, model.getGlobalR(algo, true));
 					}
+					// System response time
+					if (currentIndex.equals(AGGREGATE_TYPES[1])) {
+						graph.draw(i++, model.getGlobalR(algo, false));
+					}
 					// System throughput
-					else if (currentIndex.equals(AGGREGATE_TYPES[1])) {
+					else if (currentIndex.equals(AGGREGATE_TYPES[2])) {
 						graph.draw(i++, model.getGlobalX(algo));
 					}
 					// Number of customers
-					else if (currentIndex.equals(AGGREGATE_TYPES[2])) {
+					else if (currentIndex.equals(AGGREGATE_TYPES[3])) {
 						graph.draw(i++, model.getGlobalQ(algo));
 					}
 				}

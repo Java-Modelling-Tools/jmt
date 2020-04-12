@@ -61,7 +61,7 @@ public interface ExactConstants {
 	// Performance indices
 	public static final String[] INDICES_TYPES = { "Throughput", "Number of Customers", "Residence Times", "Utilization", "System Power" };
 	// Aggregate performance indices
-	public static final String[] AGGREGATE_TYPES = { "System Response Time", "System Throughput", "System Number of Customers" };
+	public static final String[] AGGREGATE_TYPES = { "System Response Time", "System Response Time (No Ref. Stat.)", "System Throughput", "System Number of Customers" };
 	public static final Set<String> AGGREGATE_TYPES_SET = new HashSet<String>(Arrays.asList(AGGREGATE_TYPES));
 
 	public static final String DESCRIPTION_CLASSES = "<html><body align=\"left\"><font size=\"4\"><b>Classes characteristics</b></font>"

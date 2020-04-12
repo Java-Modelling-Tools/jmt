@@ -62,7 +62,7 @@ public class Router extends OutputSection {
 
 	private NodeList outNodeList;
 	private RandomEngine randomEngine;
-	private boolean[] isClosedJobRoutingErrorShown;
+	private boolean[] isClosedJobRoutingWarningShown;
 
 	/*-------------------BLOCKING REGION PROPERTIES-------------------*/
 
@@ -145,8 +145,8 @@ public class Router extends OutputSection {
 		outNodeList = node.getOutputNodes();
 		randomEngine = RandomEngine.makeDefault();
 		JobClassList jobClasses = getJobClasses();
-		isClosedJobRoutingErrorShown = new boolean[jobClasses.size()];
-		Arrays.fill(isClosedJobRoutingErrorShown, false);
+		isClosedJobRoutingWarningShown = new boolean[jobClasses.size()];
+		Arrays.fill(isClosedJobRoutingWarningShown, false);
 	}
 
 	@Override
@@ -175,7 +175,7 @@ public class Router extends OutputSection {
 				if (job instanceof ForkJob) {
 					outNode = outNodeList.get((int) Math.floor(randomEngine.raw() * outNodeList.size()));
 				} else {
-					showClosedJobRoutingError(jobClass);
+					showClosedJobRoutingWarning(jobClass);
 					break;
 				}
 			}
@@ -218,12 +218,12 @@ public class Router extends OutputSection {
 	/**
 	 * Shows the closed job routing error.
 	 */
-	private void showClosedJobRoutingError(JobClass jobClass) {
-		if (!isClosedJobRoutingErrorShown[jobClass.getId()]) {
+	private void showClosedJobRoutingWarning(JobClass jobClass) {
+		if (!isClosedJobRoutingWarningShown[jobClass.getId()]) {
 			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
-				System.out.println("JSIMengine - Error: " + getOwnerNode().getName()
-						+ " failed to send a " + jobClass.getName()
-						+ " job forward as its output stations are all sinks or routing is disabled.");
+				System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
+						+ " count not route one or more " + jobClass.getName()
+						+ " jobs forward as its output stations are all sinks or routing is disabled.");
 			} else {
 				class OneShotTask implements Runnable {
 					JobClass jobClass;
@@ -237,14 +237,14 @@ public class Router extends OutputSection {
 						} catch (InterruptedException e) {
 						}
 						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
-								+ " failed to send a " + jobClass.getName()
-								+ " job forward as its output stations are all sinks or routing is disabled.",
-								"JSIMengine - Error", JOptionPane.ERROR_MESSAGE);
+								+ " count not route one or more " + jobClass.getName()
+								+ " jobs forward as its output stations are all sinks or routing is disabled.",
+								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}
 				}
 				(new Thread(new OneShotTask(jobClass))).start();
 			}
-			isClosedJobRoutingErrorShown[jobClass.getId()] = true;
+			isClosedJobRoutingWarningShown[jobClass.getId()] = true;
 		}
 	}
 
