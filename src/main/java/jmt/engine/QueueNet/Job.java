@@ -18,6 +18,7 @@
 
 package jmt.engine.QueueNet;
 
+import jmt.engine.simEngine.RemoveToken;
 import org.apache.commons.math3.util.Pair;
 
 /**
@@ -30,6 +31,11 @@ public class Job implements Cloneable {
 	//private int counter;
 	//job ID
 	private int Id;
+
+	private double serviceArrivalTime;
+	private boolean jobIsInService;
+	private boolean isPreemptedJob;
+	private RemoveToken servingMessage;
 
 	//class of this job
 	private JobClass jobClass;
@@ -65,6 +71,9 @@ public class Job implements Cloneable {
 		this.jobClass = jobClass;
 		this.globalJobInfoList = globalJobInfoList;
 		//reset();
+        serviceArrivalTime = 0;
+		isPreemptedJob = false;
+		jobIsInService = false;
 	}
 
 	/**
@@ -169,6 +178,10 @@ public class Job implements Cloneable {
 		this.lastVisitedPair = pair;
 	}
 
+	public NetSystem getNetSystem(){
+		return netSystem;
+	}	
+	
 	/**
 	 * Adds a pair to the visit path of this job.
 	 * @param pair the pair to be added to the visit path.
@@ -178,8 +191,35 @@ public class Job implements Cloneable {
 		lastVisitedPair = pair;
 	}
 
-	public NetSystem getNetSystem(){
-		return netSystem;
+	public double getServiceArrivalTime() {
+		return serviceArrivalTime;
+	}
+
+	public void setServiceArrivalTime(double serviceArrivalTime) {
+		this.serviceArrivalTime = serviceArrivalTime;
+	}
+
+	public boolean getIsPreemptedJob() {
+		return isPreemptedJob;
+	}
+
+	public void setIsPreemptedJob(boolean isPreemptedJob) {
+		this.isPreemptedJob = isPreemptedJob;
+	}
+
+	public boolean getIsJobInService() {
+		return jobIsInService;
+	}
+
+	public void setIsJobInService(boolean jobIsInService) {
+		this.jobIsInService = jobIsInService;
+	}
+	public RemoveToken getServingMessage() {
+		return servingMessage;
+	}
+
+	public void setServingMessage(RemoveToken servingMessage) {
+		this.servingMessage = servingMessage;
 	}
 	
 	public void initialize(NetSystem netSystem){

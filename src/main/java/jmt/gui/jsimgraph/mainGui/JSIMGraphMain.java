@@ -22,8 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
 
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.JMTMenuBar;
@@ -31,6 +30,7 @@ import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.layouts.MultiBorderLayout;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.panels.BezierConnectionHelperBar;
 import jmt.gui.jsimgraph.controller.GraphMouseListener;
 import jmt.gui.jsimgraph.controller.Mediator;
 
@@ -60,6 +60,8 @@ public class JSIMGraphMain extends JMTFrame {
 
 	protected JPanel mainPane;//panel that contains the "scroll"
 
+
+
 	/** Creates the new Main window of the application.
 	 *
 	 */
@@ -79,14 +81,20 @@ public class JSIMGraphMain extends JMTFrame {
 		// Uncomment to set vertical orientation for the component bar in JSIMGraph
 		// getContentPane().add(mediator.getComponentBar(), BorderLayout.WEST);
 		getContentPane().add(mediator.getComponentBar(), BorderLayout.NORTH);
+
+
 		mainPane = new JPanel(new BorderLayout());
 		getContentPane().add(mainPane, BorderLayout.CENTER);
+
+		BezierConnectionHelperBar bezierConnectionHelperBar = mediator.getBezierConnectionHelperBar();
+		mainPane.add(bezierConnectionHelperBar, BorderLayout.SOUTH);
 
 		ml = new GraphMouseListener(mediator);
 		mediator.setMouseListener(ml);
 
 		scroll = new JScrollPane();
 		mainPane.add(scroll, BorderLayout.CENTER);
+
 		centerWindow(Defaults.getAsInteger("JSIMWindowWidth").intValue(), Defaults.getAsInteger("JSIMWindowHeight").intValue());
 		setVisible(true);
 	}

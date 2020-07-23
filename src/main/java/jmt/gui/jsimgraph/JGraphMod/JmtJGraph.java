@@ -19,6 +19,7 @@
 package jmt.gui.jsimgraph.JGraphMod;
 
 import java.awt.Graphics;
+import java.awt.geom.Point2D;
 
 import jmt.common.GlobalSettings;
 import jmt.gui.common.Defaults;

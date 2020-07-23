@@ -19,9 +19,8 @@
 package jmt.gui.jsimgraph.definitions;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.awt.geom.Point2D;
+import java.util.*;
 
 import jmt.engine.log.LoggerParameters;
 import jmt.gui.common.Defaults;
@@ -62,6 +61,8 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	protected HashMap<String, Integer> objectNumber = new HashMap<String, Integer>(); // Used to generate progressive unique default names
 	protected HashMap<Object, Color> classColor = new HashMap<Object, Color>(); // Used to store classes color
 	protected HashMap<Object, JMTPoint> stationPositions = new HashMap<Object, JMTPoint>(); // Used to store station positions
+	protected HashMap<Object, HashMap<Object,JMTPath>> connectionShapes = new HashMap<Object, HashMap<Object,JMTPath>>(); // Used to store connection shapes
+	protected HashMap<Object, HashMap<Object, ArrayList<Point2D>>> absoluteControlPoints = new HashMap<Object, HashMap<Object,ArrayList<Point2D>>>(); // Used to store absolute values of displayed bezier shapes
 	protected Color[] defaultColor = new Color[] { Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.YELLOW }; // Defaults color prompted when inserting new class (next ones are generated random)
 
 	protected boolean animationEnabled = Defaults.getAsBoolean("isWithAnimation").booleanValue();
@@ -283,6 +284,77 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		return stationPositions.get(key);
 	}
 
+	/**
+	 * Sets shape of a connection, given the search key.
+	 */
+	public void setConnectionShape(Object sourceKey,Object targetKey, JMTPath path) {
+		if(connectionShapes.containsKey(sourceKey)){
+			connectionShapes.get(sourceKey).put(targetKey, path);
+		}
+		else {
+			connectionShapes.put(sourceKey, new HashMap<Object, JMTPath>());
+			connectionShapes.get(sourceKey).put(targetKey, path);
+		}
+	}
+
+	/**
+	 * Delete shape of a connection, given the search key.
+	 */
+	public void deleteConnectionShape(Object sourceKey,Object targetKey) {
+		if(connectionShapes.containsKey(sourceKey)){
+			connectionShapes.get(sourceKey).remove(targetKey);
+		}
+	}
+
+	/**
+	 * Returns shape of a connection, given the search key.
+	 */
+	public JMTPath getConnectionShape(Object sourceKey,Object targetKey) {
+		return connectionShapes.get(sourceKey).get(targetKey);
+	}
+
+	/**
+	 * Returns shape of a connection, given the search key.
+	 */
+	public HashMap<Object, JMTPath> getConnectionShapesFromSource(Object sourceKey) {
+		return connectionShapes.get(sourceKey);
+	}
+
+	/**
+	 * Returns shape of a connection, given the search key.
+	 */
+	public HashMap<Object, JMTPath> getConnectionShapesFromTarget(Object targetKey) {
+		HashMap<Object, JMTPath> res = new HashMap<>();
+		for (Object key : connectionShapes.keySet()) {
+			if(connectionShapes.get(key).containsKey(targetKey)){
+				res.put(targetKey, connectionShapes.get(key).get(targetKey));
+			}
+		}
+		return res;
+	}
+
+	/**
+	 * Returns true if a connection shape exists, given the search key.
+	 */
+	public boolean hasConnectionShape(Object sourceKey,Object targetKey) {
+		if(connectionShapes.containsKey(sourceKey)){
+			return connectionShapes.get(sourceKey).containsKey(targetKey);
+		}
+		else{
+			return false;
+		}
+	}
+
+	/**
+	 * Returns true if a connection shape is defined in the model
+	 */
+	public boolean hasConnectionShape() {
+		boolean res =false;
+		for (Object key : connectionShapes.keySet()) {
+			res=!(connectionShapes.get(key).isEmpty());
+		}
+		return res;
+	}
 	/**
 	 * Returns serialized form of a station.
 	 * @param key search key for the station.
@@ -600,6 +672,36 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	@Override
 	public void setAnimationEnabled(boolean enabled) {
 		animationEnabled = enabled;
+	}
+
+
+	/**
+	 * Sets absolute value of a connection, given the search key.
+	 */
+	public void setAbsoluteControlPoints(Object sourceKey,Object targetKey, ArrayList<Point2D> points) {
+		if(absoluteControlPoints.containsKey(sourceKey)){
+			absoluteControlPoints.get(sourceKey).put(targetKey, points);
+		}
+		else {
+			absoluteControlPoints.put(sourceKey, new HashMap<Object, ArrayList<Point2D>>());
+			absoluteControlPoints.get(sourceKey).put(targetKey, points);
+		}
+	}
+
+	/**
+	 * Delete  absolute value of a connection, given the search key.
+	 */
+	public void deleteAbsoluteControlPoints(Object sourceKey,Object targetKey) {
+		if(absoluteControlPoints.containsKey(sourceKey)){
+			absoluteControlPoints.get(sourceKey).remove(targetKey);
+		}
+	}
+
+	/**
+	 * Returns shape of a connection, given the search key.
+	 */
+	public List getAbsoluteControlPoints(Object sourceKey,Object targetKey) {
+		return absoluteControlPoints.get(sourceKey).get(targetKey);
 	}
 
 }

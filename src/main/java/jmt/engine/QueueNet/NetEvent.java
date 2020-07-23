@@ -40,6 +40,10 @@ public class NetEvent {
 	public static final int EVENT_JOB = 0x0004;
 	/** Event ID: Job ack event.*/
 	public static final int EVENT_ACK = 0x0008;
+	/** Event ID: Job finished in service event.*/
+	public static final int EVENT_JOB_COMPLETED = 0x0009;
+	/** Event ID: Job was preempted in service event.*/
+	public static final int EVENT_PREEMPTED_JOB = 0x0011;
 	/** Event ID: Keeps node awake.*/
 	public static final int EVENT_KEEP_AWAKE = 0x0010;
 	//todo: eventualmente chiamarlo fork-join?? Oppure dividere in due eventi distinti

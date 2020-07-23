@@ -410,7 +410,7 @@ public abstract class NodeSection {
 	 * @return a token to remove sent event.
 	 */
 	protected RemoveToken send(int event, Object data, double delay, byte destinationSection, NetNode destination) {
-		if (event == NetEvent.EVENT_JOB) {
+		if (event == NetEvent.EVENT_JOB || event == NetEvent.EVENT_PREEMPTED_JOB) {
 			if ((destination != ownerNode) || (destination == ownerNode && destinationSection != sectionID)) {
 				//it is a JOB event and the destination is not the owner node or it is the owner
 				//node but the dest section is not this section

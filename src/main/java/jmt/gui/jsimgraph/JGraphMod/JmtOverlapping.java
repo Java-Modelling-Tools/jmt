@@ -79,7 +79,6 @@ public class JmtOverlapping {
 						listEdges2.add(listEdgesOut[j]);
 					}
 				}
-
 			}
 		}
 
@@ -103,63 +102,67 @@ public class JmtOverlapping {
 				Rectangle2D cellBound = GraphConstants.getBounds(((JmtCell) element).getAttributes());
 				EdgeView viewtmp = (EdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(listEdge, false);
 				if (((JmtEdge) listEdge).intersects(viewtmp, cellBound)) {
-					double vertexMinX = (int) cellBound.getMinX();
-					double vertexMinY = (int) cellBound.getMinY();
-					double vertexMaxX = (int) cellBound.getMaxX();
-					double vertexMaxY = (int) cellBound.getMaxY();
-					double vertexHeight = (int) cellBound.getHeight();
-					double vertexWidth = (int) cellBound.getWidth();
-					Rectangle cellBounds = cellBound.getBounds();
-					ArrayList<Point2D> intersectionPoints = ((JmtEdge) listEdge).getIntersectionVertexPoint();
-					boolean upperSideIntersaction = ((JmtEdge) listEdge).getUpperSideIntersaction();
-					boolean lowerSideIntersaction = ((JmtEdge) listEdge).getLowerSideIntersaction();
-					boolean leftSideIntersaction = ((JmtEdge) listEdge).getLeftSideIntersaction();
-					boolean rightSideIntersaction = ((JmtEdge) listEdge).getRightSideIntersaction();
+					System.out.println("JmtOverlapping -> fct avoidOverlappingCell -> IS BEZIER :"+(((JmtEdge) listEdge).getIsBezier()));
+					if  (!(((JmtEdge) listEdge).getIsBezier())) {
+						System.out.println("JmtOverlapping -> fct avoidOverlappingCell -> if intersects");
+						double vertexMinX = (int) cellBound.getMinX();
+						double vertexMinY = (int) cellBound.getMinY();
+						double vertexMaxX = (int) cellBound.getMaxX();
+						double vertexMaxY = (int) cellBound.getMaxY();
+						double vertexHeight = (int) cellBound.getHeight();
+						double vertexWidth = (int) cellBound.getWidth();
+						Rectangle cellBounds = cellBound.getBounds();
+						ArrayList<Point2D> intersectionPoints = ((JmtEdge) listEdge).getIntersectionVertexPoint();
+						boolean upperSideIntersaction = ((JmtEdge) listEdge).getUpperSideIntersaction();
+						boolean lowerSideIntersaction = ((JmtEdge) listEdge).getLowerSideIntersaction();
+						boolean leftSideIntersaction = ((JmtEdge) listEdge).getLeftSideIntersaction();
+						boolean rightSideIntersaction = ((JmtEdge) listEdge).getRightSideIntersaction();
 
-					if (upperSideIntersaction && lowerSideIntersaction) {
-						Point2D tmp = (intersectionPoints.get(0));
-						int valoreIntermedio = ((int) vertexMaxX - (int) (vertexWidth / 2));
-						if ((int) tmp.getX() < valoreIntermedio) {
-							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);
-							cellBounds.setLocation(newPosition);
-							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
-						} else {
+						if (upperSideIntersaction && lowerSideIntersaction) {
+							Point2D tmp = (intersectionPoints.get(0));
+							int valoreIntermedio = ((int) vertexMaxX - (int) (vertexWidth / 2));
+							if ((int) tmp.getX() < valoreIntermedio) {
+								Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);
+								cellBounds.setLocation(newPosition);
+								GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
+							} else {
+								Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, false, true);
+								cellBounds.setLocation(newPosition);
+								GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
+							}
+						} else if (leftSideIntersaction && rightSideIntersaction) {
+							Point2D tmp = (intersectionPoints.get(0));
+							int valoreIntermedio = ((int) vertexMaxY - (int) (vertexHeight / 2));
+							if ((int) tmp.getY() < valoreIntermedio) {
+								Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, true, false, false);
+								cellBounds.setLocation(newPosition);
+								GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
+							} else {
+								Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, true, false, false, false);
+								cellBounds.setLocation(newPosition);
+								GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
+							}
+						} else if (upperSideIntersaction && rightSideIntersaction) {
+							Point2D tmp = (intersectionPoints.get(0));
 							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, false, true);
 							cellBounds.setLocation(newPosition);
 							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
-						}
-					} else if (leftSideIntersaction && rightSideIntersaction) {
-						Point2D tmp = (intersectionPoints.get(0));
-						int valoreIntermedio = ((int) vertexMaxY - (int) (vertexHeight / 2));
-						if ((int) tmp.getY() < valoreIntermedio) {
-							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, true, false, false);
+						} else if (upperSideIntersaction && leftSideIntersaction) {
+							Point2D tmp = (intersectionPoints.get(0));
+							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);
 							cellBounds.setLocation(newPosition);
 							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
-						} else {
-							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, true, false, false, false);
+						} else if (lowerSideIntersaction && rightSideIntersaction) {
+							Point2D tmp = (intersectionPoints.get(1));
+							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, false, true);
+							cellBounds.setLocation(newPosition);
+							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
+						} else if (lowerSideIntersaction && leftSideIntersaction) {
+							Point2D tmp = (intersectionPoints.get(0));
+							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);
 							cellBounds.setLocation(newPosition);
 							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
 						}
-					} else if (upperSideIntersaction && rightSideIntersaction) {
-						Point2D tmp = (intersectionPoints.get(0));
-						Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, false, true);
-						cellBounds.setLocation(newPosition);
-						GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
-					} else if (upperSideIntersaction && leftSideIntersaction) {
-						Point2D tmp = (intersectionPoints.get(0));
-						Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);
-						cellBounds.setLocation(newPosition);
-						GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
-					} else if (lowerSideIntersaction && rightSideIntersaction) {
-						Point2D tmp = (intersectionPoints.get(1));
-						Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, false, true);
-						cellBounds.setLocation(newPosition);
-						GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
-					} else if (lowerSideIntersaction && leftSideIntersaction) {
-						Point2D tmp = (intersectionPoints.get(0));
-						Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);
-						cellBounds.setLocation(newPosition);
-						GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);
 					}
 				}
 			}
@@ -208,12 +211,17 @@ public class JmtOverlapping {
 
 		//Begin if to move the vertex down
 		if (down && !up && !right && !left) {
+            //System.out.println("JmtOverlapping findFreePosition Begin if to move the vertex down");
+
 			int pointYToMove = (int) (tmp.getY() + 3);
 			Rectangle newRett = new Rectangle((int) vertexMinX, pointYToMove, (int) vertexWidth, (int) vertexHeight);
+            //System.out.println("JmtOverlapping findFreePosition center newRett y:"+newRett.getMinY());
 			Object[] celletmp = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRett));
 			Vector<Object> celle = new Vector<Object>();
+            //System.out.println("JmtOverlapping findFreePosition celletmp.length"+celletmp.length);
 			for (int x = 0; x < celletmp.length; x++) {
 				if (!(celletmp[x] == vertex) && !((vertex.getChildren()).contains(celletmp[x])) && !(celletmp[x] == edge)) {
+                   // System.out.println("JmtOverlapping findFreePosition ->>> !(celletmp[x] == vertex) && !((vertex.getChildren()).contains(celletmp[x])) && !(celletmp[x] == edge)");
 					if (celletmp[x] instanceof JmtEdge) {
 						JmtCell source = (JmtCell) ((DefaultPort) ((JmtEdge) celletmp[x]).getSource()).getParent();
 						JmtCell target = (JmtCell) ((DefaultPort) ((JmtEdge) celletmp[x]).getTarget()).getParent();
@@ -230,14 +238,19 @@ public class JmtOverlapping {
 
 			Object[] celletmp3 = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRettUp));
 			Vector<Object> celle2 = new Vector<Object>();
+          //  System.out.println("JmtOverlapping findFreePosition celletmp3.length"+celletmp3.length);
 			for (int x = 0; x < celletmp3.length; x++) {
 				if (!(celletmp3[x] == vertex) && !((vertex.getChildren()).contains(celletmp3[x])) && !(celletmp3[x] == edge)) {
+                  //  System.out.println("JmtOverlapping findFreePosition ->>> !(celletmp3[x] == vertex) && !((vertex.getChildren()).contains(celletmp3[x])) && !(celletmp3[x] == edge)");
 					if (celletmp3[x] instanceof JmtEdge) {
-						JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp3[x])), false);
-						if (((handledEdges.size() == 0) || (handledEdges.size() > 0 && !handledEdges.contains(celletmp3[x])))
-								&& ((JmtEdge) celletmp3[x]).intersects(viewtmp, newRettUp)) {
-							celle2.add(celletmp3[x]);
-						}
+                      //  System.out.println("JmtOverlapping findFreePosition instanceof JmtEdge isbezier"+ ((JmtEdge) celletmp3[x]).getIsBezier());
+                        if (!((JmtEdge) celletmp3[x]).getIsBezier()){
+                            JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp3[x])), false);
+                            if (((handledEdges.size() == 0) || (handledEdges.size() > 0 && !handledEdges.contains(celletmp3[x])))
+                                    && ((JmtEdge) celletmp3[x]).intersects(viewtmp, newRettUp)) {
+                                celle2.add(celletmp3[x]);
+                            }
+                        }
 					} else {
 						celle2.add(celletmp3[x]);
 					}
@@ -245,22 +258,35 @@ public class JmtOverlapping {
 			}
 
 			if (celle.size() > 0 && celle2.size() == 0) {
+               // System.out.println("JmtOverlapping findFreePosition (celle.size() > 0 && celle2.size() == 0)");
 				if (((int) newRettUp.getMinX() < 20) || ((int) newRettUp.getMinY() < 0)) {
+                    System.out.println("JmtOverlapping findFreePosition (int) cellBound.getMinY() : "+(int) cellBound.getMinY());
 					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 				}
+               // System.out.println("JmtOverlapping findFreePosition newRettUp.getMinY() : "+(int) newRettUp.getMinY());
 				return new Point((int) newRettUp.getMinX(), (int) newRettUp.getMinY());
+
+
+
 			} else if (celle.size() == 0) {
+                //System.out.println("JmtOverlapping findFreePosition (celle.size() == 0)");
+                //System.out.println("JmtOverlapping findFreePosition ("+celle.size()+" == 0 && celle2: "+celle2.size());
 				if (((int) newRettDown.getMinX() < 20) || ((int) newRettDown.getMinY() < 0)) {
+                    //System.out.println("JmtOverlapping findFreePosition (int) cellBound.getMinY() : "+(int) cellBound.getMinY());
 					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 				}
+               // System.out.println("JmtOverlapping findFreePosition newRettDown.getMinY() : "+(int) newRettDown.getMinY());
 				return new Point((int) newRettDown.getMinX(), (int) newRettDown.getMinY());
+
+
 			} else if (celle.size() > 0 && celle2.size() > 0) {
-				if (((int) cellBound.getMinX() < 20) || ((int) cellBound.getMinY() < 0)) {
-					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
-				}
-				return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
+                //System.out.println("JmtOverlapping findFreePosition (celle.size() > 0 && celle2.size() > 0)");
+                //System.out.println("JmtOverlapping findFreePosition ("+celle.size()+" > 0 && "+celle2.size()+" > 0)");
+               // System.out.println("JmtOverlapping findFreePosition (celle.size() > 0 && celle2.size() > 0)");
+                return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 			}
 
+            //System.out.println("JmtOverlapping findFreePosition celle.size() : "+celle.size());
 			while (celle.size() > 0) {
 				pointYToMove = pointYToMove + 59;
 				Rectangle new2rett = new Rectangle((int) vertexMinX, pointYToMove, (int) vertexWidth, (int) vertexHeight);
@@ -279,7 +305,9 @@ public class JmtOverlapping {
 					}
 				}
 			}
+            //System.out.println("JmtOverlapping findFreePosition pointYToMove : "+ pointYToMove);
 			pointBack = new Point((int) vertexMinX, pointYToMove);
+            //System.out.println("JmtOverlapping findFreePosition PointBack y : "+pointBack.getY());
 
 		} //End if to move the vertex down
 
@@ -327,11 +355,13 @@ public class JmtOverlapping {
 			for (int x = 0; x < celletmp3.length; x++) {
 				if (!(celletmp3[x] == vertex) && !((vertex.getChildren()).contains(celletmp3[x])) && !(celletmp3[x] == edge)) {
 					if (celletmp3[x] instanceof JmtEdge) {
-						JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp3[x])), false);
-						if (((handledEdges.size() == 0) || (handledEdges.size() > 0 && !handledEdges.contains(celletmp3[x])))
-								&& ((JmtEdge) celletmp3[x]).intersects(viewtmp, newRettDown)) {
-							celle2.add(celletmp3[x]);
-						}
+                        if (!((JmtEdge) celletmp3[x]).getIsBezier()) {
+                            JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp3[x])), false);
+                            if (((handledEdges.size() == 0) || (handledEdges.size() > 0 && !handledEdges.contains(celletmp3[x])))
+                                    && ((JmtEdge) celletmp3[x]).intersects(viewtmp, newRettDown)) {
+                                celle2.add(celletmp3[x]);
+                            }
+                        }
 					} else {
 						celle2.add(celletmp3[x]);
 					}
@@ -343,13 +373,17 @@ public class JmtOverlapping {
 					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 				}
 				return new Point((int) newRettDown.getMinX(), (int) newRettDown.getMinY());
+
+
 			} else if (celle.size() == 0) {
 				if (((int) newRettUp.getMinX() < 20) || ((int) newRettUp.getMinY() < 0)) {
 					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 				}
 				return new Point((int) newRettUp.getMinX(), (int) newRettUp.getMinY());
+
+
 			} else if (celle.size() > 0 && celle2.size() > 0) {
-				return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
+                return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 			}
 			pointBack = new Point((int) vertexMinX, pointYToMove);
 
@@ -386,10 +420,12 @@ public class JmtOverlapping {
 					if ((listEdgesIn.length == 0 && listEdgesOut.length == 0) || (!edgeIn && !edgeOut)) {
 						if (!(celletmp[x] == vertex) && !((vertex.getChildren()).contains(celletmp[x])) && !(celletmp[x] == edge)) {
 							if (celletmp[x] instanceof JmtEdge) {
-								JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp[x])), false);
-								if (((handledEdges.size() == 0) || (handledEdges.size() > 0 && !handledEdges.contains(celletmp[x])))
-										&& ((JmtEdge) celletmp[x]).intersects(viewtmp, newRett)) {
-									celle.add(celletmp[x]);
+								if (!(((JmtEdge) celletmp[x]).getIsBezier())) {
+									JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp[x])), false);
+									if (((handledEdges.size() == 0) || (handledEdges.size() > 0 && !handledEdges.contains(celletmp[x])))
+											&& ((JmtEdge) celletmp[x]).intersects(viewtmp, newRett)) {
+										celle.add(celletmp[x]);
+									}
 								}
 							} else {
 								celle.add(celletmp[x]);
@@ -420,14 +456,17 @@ public class JmtOverlapping {
 					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 				}
 				return new Point((int) newRettLeft.getMinX(), (int) newRettLeft.getMinY());
+
+
 			} else if (celle.size() == 0) {
 				if (((int) cellBound.getMinX() < 20) || ((int) cellBound.getMinY() < 0)) {
 					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 				}
 				return new Point((int) newRett.getMinX(), (int) newRett.getMinY());
-			} else if (celle.size() > 0 && celle3.size() > 0) {
 
-				return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
+
+			} else if (celle.size() > 0 && celle3.size() > 0) {
+                return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 			}
 			pointBack = new Point(pointXToMove, (int) vertexMinY);
 		} //End if to move the vertex right
@@ -467,10 +506,12 @@ public class JmtOverlapping {
 					if ((listEdgesIn.length == 0 && listEdgesOut.length == 0) || (!edgeIn && !edgeOut)) {
 						if (!(celletmp[x] == vertex) && !((vertex.getChildren()).contains(celletmp[x])) && !(celletmp[x] == edge)) {
 							if (celletmp[x] instanceof JmtEdge) {
-								JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp[x])), false);
-								if (((handledEdges.size() == 0) || (handledEdges.size() > 0 && !handledEdges.contains(celletmp[x])))
-										&& ((JmtEdge) celletmp[x]).intersects(viewtmp, newRett)) {
-									celle.add(celletmp[x]);
+                                if ( !(((JmtEdge) celletmp[x]).getIsBezier()) ) {
+									JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp[x])), false);
+									if (((handledEdges.size() == 0) || (handledEdges.size() > 0 && !handledEdges.contains(celletmp[x])))
+											&& ((JmtEdge) celletmp[x]).intersects(viewtmp, newRett)) {
+										celle.add(celletmp[x]);
+									}
 								}
 							} else {
 								celle.add(celletmp[x]);
@@ -507,13 +548,14 @@ public class JmtOverlapping {
 				}
 				return new Point((int) newRett.getMinX(), (int) newRett.getMinY());
 			} else if (celle.size() > 0 && celle4.size() > 0) {
-				return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
+                return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());
 			}
 
 			pointBack = new Point(point2XToMove, (int) vertexMinY);
-		} //End if to move the vertex right
+		} //End if to move the vertex left
 
 		return pointBack;
+
 	}
 
 }

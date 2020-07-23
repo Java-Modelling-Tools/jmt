@@ -18,14 +18,15 @@
 
 package jmt.gui.jsimgraph.JGraphMod;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.Vector;
 
+import jmt.engine.jaba.DPoint;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.distributions.Distribution;
@@ -69,12 +70,12 @@ public class GraphicalQueueState {
 	 * Draws the queues and the utilizations over the graph
 	 * @param queueState a <code> SimulationSnapshot </code> containing information about the queues
 	 * @param utilizationState a <code> SimulationSnapshot </code> containing information about the utilizations
-	 * @param detectChanges 
-	 * @throws Exception 
+	 * @throws Exception
+	 *
+	 * Modified in 2020 by Emma Bortone to include free rotation
 	 */
 	public void draw(ModelSnapshot queueState, ModelSnapshot utilizationState) throws Exception {
 		int MAX_NUMBER_OF_CLASSES_QUEUE = Defaults.getAsInteger("representableClasses").intValue();
-
 		double nClasses = mediator.getClassDefinition().getClassKeys().size();
 		double maxNJobs = queueState.getMaxValue();
 
@@ -83,21 +84,22 @@ public class GraphicalQueueState {
 			maxNJobs = 10;
 		}
 
-		double QUEUE_HEIGHT = (JMTImageLoader.loadImage("Queue")).getIconHeight();
-		double QUEUE_WIDTH = (JMTImageLoader.loadImage("Queue")).getIconWidth() - QUEUE_HEIGHT;
 
+		//FOR THE SOURCES ***********************************************
 		double SOURCE_SIZE = (JMTImageLoader.loadImage("Source")).getIconWidth();
 		double SOURCE_MARGIN = 9;
 		double source_usable_space = SOURCE_SIZE - SOURCE_MARGIN * 2;
+		// *************************************************************
 
-		double H_MARGIN = 2;
-		double V_MARGIN = 2;
+		//FOR THE QUEUES ***********************************************
+		double QUEUE_STATION_LENGTH =  (JMTImageLoader.loadImage("Queue")).getIconWidth(); //length of the whole station
+		double QUEUE_STATION_HEIGHT =  (JMTImageLoader.loadImage("Queue")).getIconHeight(); //height of the whole station
 
-		double width = QUEUE_WIDTH - 2 * H_MARGIN;
-		double height = QUEUE_HEIGHT - 2 * V_MARGIN;
+		double QUEUE_BORDER = 1; // border of the queue station (looks like a shadow on the image)
 
-		double H_FREE_SPACE = 2;
-		double V_FREE_SPACE = 2;
+		double QUEUE_LENGTH = (QUEUE_STATION_LENGTH-QUEUE_STATION_HEIGHT)-2*QUEUE_BORDER;  //length of only the queue (without the shadow borders)
+		double QUEUE_HEIGHT =QUEUE_STATION_HEIGHT-2*QUEUE_BORDER;  //height of only the queue (without the shadow borders)
+		// *************************************************************
 
 		Graphics2D g = mediator.getGraphGraphics();
 
@@ -119,17 +121,21 @@ public class GraphicalQueueState {
 					classCount++;
 				}
 			}
-			Point2D p = mediator.getCellCoordinates(cell);
 
-			double xStart = p.getX() + (mediator.getCellDimension(cell).getWidth() - SOURCE_SIZE + 2 * SOURCE_MARGIN) / 2;
-			double yStart = p.getY() + SOURCE_MARGIN;
+			Point2D center = getCenter(cell);
+			double xStart = center.getX() - source_usable_space/2;
+			double yStart = center.getY() - source_usable_space/2;
+
+			//draw whole source in grey
+			drawClassRectangle( cell, g, Color.lightGray,   center,  xStart,   yStart, source_usable_space, source_usable_space);
+
 			//if the number of class is less than the maximum representable
 			if (classCount < MAX_NUMBER_OF_CLASSES_QUEUE) {
 				double classSpace = source_usable_space / classCount;
 				for (int j = 0; j < classCount; j++) {
 					Object thisClass = refClasses.get(j);
-					g.setColor(mediator.getClassDefinition().getClassColor(thisClass));
-					g.fill(new Rectangle2D.Double(xStart, yStart, classSpace, source_usable_space));
+
+					drawClassRectangle( cell, g, mediator.getClassDefinition().getClassColor(thisClass),   center,  xStart,   yStart, classSpace, source_usable_space);
 					xStart += classSpace;
 				}
 			}
@@ -185,9 +191,10 @@ public class GraphicalQueueState {
 				double classSpace = source_usable_space / MAX_NUMBER_OF_CLASSES_QUEUE;
 				for (int j = 0; j < MAX_NUMBER_OF_CLASSES_QUEUE; j++) {
 					Object thisClass = classesToBeDrawn.get(j);
-					g.setColor(mediator.getClassDefinition().getClassColor(thisClass));
-					g.fill(new Rectangle2D.Double(xStart, yStart, classSpace, source_usable_space));
+
+					drawClassRectangle( cell, g, mediator.getClassDefinition().getClassColor(thisClass),   center,  xStart,   yStart, classSpace, source_usable_space);
 					xStart += classSpace;
+
 				}
 			}
 		}
@@ -203,39 +210,34 @@ public class GraphicalQueueState {
 			if (cell == null) {
 				continue;
 			}
-			Point2D p = mediator.getCellCoordinates(cell);
-			double offset;
-			double xStart;
 			double yStart;
-			g.setColor(Color.LIGHT_GRAY);
-			offset = (mediator.getCellDimension(cell).getWidth() - QUEUE_WIDTH - QUEUE_HEIGHT) / 2;
-			if (cell.isLeftInputCell()) {
-				g.fill(new Rectangle2D.Double(p.getX() + offset, p.getY() + V_FREE_SPACE, width, height));
-			}
-			else {
-				g.fill(new Rectangle2D.Double(p.getX() + QUEUE_HEIGHT + offset, p.getY() + V_FREE_SPACE, width, height));
-			}
-			yStart = p.getY() + V_FREE_SPACE;
+			double xStart;
+
+			Point2D center =getCenter(cell);
+
+
+			xStart = center.getX()-QUEUE_STATION_LENGTH/2;
+			yStart= center.getY()-QUEUE_STATION_HEIGHT/2;
+
+			//draw whole queue in  grey
+			drawClassRectangle(cell, g, Color.lightGray, center, xStart, yStart, QUEUE_LENGTH, QUEUE_HEIGHT);
 
 			//First draw the queues ....
 			//if the number of classes is less than MAX_NUMBER_OF_CLASSES_QUEUE
 			if (nClasses <= MAX_NUMBER_OF_CLASSES_QUEUE) {
+
 				for (int j = 0; j < nClasses; j++) {
+
 					double nJobs = queueState.getValue(servers.get(i), classes.get(j));
-					double thisWidth = (nJobs / maxNJobs) * width;
-					double thisHeight = height / nClasses;
+					double thisWidth = (nJobs / maxNJobs) * QUEUE_LENGTH;
+					double thisHeight = (QUEUE_STATION_HEIGHT) / nClasses;
+
+					xStart = center.getX()-QUEUE_STATION_LENGTH/2+(QUEUE_LENGTH-thisWidth);
 
 					Color color = mediator.getClassDefinition().getClassColor(classes.get(j));
-					g.setColor(color);
-					if (cell.isLeftInputCell()) {
-						xStart = p.getX() + offset + (width - thisWidth) + H_FREE_SPACE;
-						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
-					}
-					else {
-						xStart = p.getX() + offset + QUEUE_HEIGHT + H_FREE_SPACE;
-						g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
-					}
-					yStart += thisHeight;
+					drawClassRectangle(cell, g, color, center, xStart, yStart, thisWidth, thisHeight);
+					yStart+=thisHeight;
+
 				}
 			}
 			// else draw only the first MAX_NUMBER_OF_CLASSES_QUEUE with the greatest
@@ -263,47 +265,129 @@ public class GraphicalQueueState {
 				for (int j = 0; j < nClasses; j++) {
 					Object thisStation = classes.get(j);
 					if (classesToBeDrawn.contains(thisStation)) {
+
 						double nJobs = queueState.getValue(servers.get(i), thisStation);
-						double thisWidth = (nJobs / maxNJobs) * width;
-						double thisHeight = height / MAX_NUMBER_OF_CLASSES_QUEUE;
+						double thisWidth = (nJobs / maxNJobs) * QUEUE_LENGTH;
+						double thisHeight = QUEUE_STATION_HEIGHT / MAX_NUMBER_OF_CLASSES_QUEUE;
+
+						xStart = center.getX()-QUEUE_STATION_LENGTH/2+(QUEUE_LENGTH-thisWidth);
 
 						Color color = mediator.getClassDefinition().getClassColor(thisStation);
-						g.setColor(color);
-						if (cell.isLeftInputCell()) {
-							xStart = p.getX() + offset + (width - thisWidth) + H_FREE_SPACE;
-							g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
-						}
-						else {
-							xStart = p.getX() + offset + QUEUE_HEIGHT + H_FREE_SPACE;
-							g.fill(new Rectangle2D.Double(xStart, yStart, thisWidth, thisHeight));
-						}
-						yStart += thisHeight;
+
+						drawClassRectangle(cell, g, color, center, xStart, yStart, thisWidth, thisHeight);
+						yStart+=thisHeight;
 					}
 				}
 			}
 
 			//then draw the utilization
 			//if the number of classes is less than MAX_NUMBER_OF_CLASSES_QUEUE
-			double startAngle = 0;
-			double arcDiameter = QUEUE_HEIGHT - 2;
-			if (cell.isLeftInputCell()) {
-				xStart = p.getX() + offset + QUEUE_WIDTH + 1;
-			}
-			else {
-				xStart = p.getX() + offset + 1;
-			}
-			yStart = p.getY() + 1;
-			g.setColor(Color.LIGHT_GRAY);
-			g.fill(new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, 0, 360, Arc2D.PIE));
+			double startAngle=0.0;
+			xStart= center.getX()+QUEUE_STATION_LENGTH/2-QUEUE_STATION_HEIGHT+QUEUE_BORDER;
+			yStart = center.getY()-QUEUE_STATION_HEIGHT/2+0.0;
+			drawUtilization(cell, g, Color.lightGray, center,xStart, yStart,  QUEUE_HEIGHT,startAngle,360);
 
 			for (int j = 0; j < nClasses; j++) {
 				double thisAngle = utilizationState.getValue(servers.get(i), classes.get(j)) * 360;
 				Color color = mediator.getClassDefinition().getClassColor(classes.get(j));
-				g.setColor(color);
-				g.fill(new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, startAngle, thisAngle, Arc2D.PIE));
-				startAngle += thisAngle;
+
+				drawUtilization(cell, g,color, center, xStart, yStart,  QUEUE_HEIGHT,startAngle,thisAngle);
+				startAngle+=thisAngle;
 			}
 		}
+	}
+
+	/**
+	 * This function is used to find the center of a given station
+	 * @param station station for which we want the center
+	 * @return Point at the center of the station's icon
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	private Point2D getCenter(JmtCell station){
+		Dimension stationIconDimension =station.getIconDimension(); // full icon of the station
+		Dimension stationDimension =station.getSize(mediator.getGraph()); // dimension of the station (includes title)
+		Point2D stationPosition =  mediator.getCellCoordinates(station); // position of the station
+		//rectangle including the full icon of the station (includes blank spaces if station is rotated)
+		Rectangle2D wideStationIconRectangle = new Rectangle2D.Double(stationPosition.getX()+(stationDimension.getWidth()-stationIconDimension.getWidth())/2, stationPosition.getY(),stationIconDimension.getWidth(), stationIconDimension.getHeight());
+		Point2D centerStationRegion = new Point2D.Double(wideStationIconRectangle.getCenterX(),wideStationIconRectangle.getCenterY());
+		return (centerStationRegion);
+	}
+
+	/**
+	 * this function draws a rectangle representing the occupation of a queue station or of a Source station
+	 * @param station station for which we draw the queue/source
+	 * @param g graphics
+	 * @param color color in which to draw
+	 * @param rotationCenter center of rotation
+	 * @param xStart x-axis of the top left point of the rectangle
+	 * @param yStart y-axis of the top left point of the rectangle
+	 * @param length width of the rectangle
+	 * @param height height of the rectangle
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	private void drawClassRectangle( JmtCell station, Graphics2D g, Color color,   Point2D rotationCenter, double xStart,  double yStart, double length, double height){
+
+		//rectangle including only the standard icon of the station  (if rotation angle =0 then stationIconRegion and stationRegion are equal)
+		Rectangle2D QueueRectangle 	= new Rectangle2D.Double(xStart, yStart,length, height);
+
+		//Rotate rectangle by angle
+		Shape rotatedQueueRectangle= rotateShape( station.isLeftInputCell(), station.getRotationAngle(), rotationCenter, QueueRectangle);
+
+		//draw rectangle
+		g.setColor(color);
+		g.fill(rotatedQueueRectangle);
+	}
+
+	/**
+	 * this function draws the utilization of a queue station
+	 * @param station station for which we draw the utilization
+	 * @param g graphics
+	 * @param color  color of in which the utilization will be drawn
+	 * @param rotationCenter center of rotation
+	 * @param xStart x-axis of the starting point of the arc representing the utilization
+	 * @param yStart y-axis of the starting point of the arc representing the utilization
+	 * @param arcDiameter diameter of the arc representing the utilization
+	 * @param startAngle initial angle of the arc representing the utilization
+	 * @param endAngle final angle of the arc representing the utilization
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	private void drawUtilization( JmtCell station, Graphics2D g, Color color, Point2D rotationCenter,double xStart,  double yStart, double arcDiameter, double startAngle, double endAngle){
+		Arc2D utilizationCircle = new Arc2D.Double(xStart, yStart, arcDiameter, arcDiameter, startAngle, endAngle, Arc2D.PIE);
+		Shape rotatedUtilisationCircle= rotateShape( station.isLeftInputCell(), station.getRotationAngle(), rotationCenter, utilizationCircle);
+
+		g.setColor(color);
+		g.fill(rotatedUtilisationCircle);
+
+	}
+
+	/**
+	 * Rotate a given shape by a given angle around a given anchor point
+	 * @param isLeftInputCell true if the cell has been mirrored, false otherwise
+	 * @param angle angle of rotation
+	 * @param center center of rotation
+	 * @param shape shape to be rotated
+	 * @return rotated shape
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	private Shape rotateShape(boolean isLeftInputCell, double angle, Point2D center, Shape shape){
+		AffineTransform tx2 = new AffineTransform();
+		if (isLeftInputCell) {
+			tx2.rotate(Math.toRadians(angle),center.getX(), center.getY());
+		}
+		else {
+			tx2.rotate(Math.toRadians(angle)+Math.PI,center.getX(), center.getY());
+		}
+
+		Shape rotatedQueueRectangle = tx2.createTransformedShape(shape);
+		return rotatedQueueRectangle;
 	}
 
 }

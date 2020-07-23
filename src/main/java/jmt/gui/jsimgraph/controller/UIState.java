@@ -19,6 +19,7 @@
 package jmt.gui.jsimgraph.controller;
 
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 
 /**
  * This interface defines the states of the user interface in particular of the
@@ -76,5 +77,4 @@ interface UIState {
 	 * @param e
 	 */
 	void handleDrag(MouseEvent e);
-
 }

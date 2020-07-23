@@ -956,6 +956,60 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
+	 * Returns queue capacity of the station, given the search key.
+	 */
+	@Override
+	public Integer getStationInServiceCapacity(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.inServiceCapacity;
+	}
+
+	/**
+	 * Sets in service capacity of the station, given the search key.
+	 */
+	@Override
+	public void setStationInServiceCapacity(Object key, Integer inServiceCapacity) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.inServiceCapacity == null || !sd.inServiceCapacity.equals(inServiceCapacity)) {
+			sd.inServiceCapacity = inServiceCapacity;
+			save = true;
+		}
+	}
+
+	@Override
+	public void setStationServerPreemptive(Object key, Boolean serverPreemptive) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (!sd.serverPreemptive == serverPreemptive) {
+			sd.serverPreemptive = serverPreemptive;
+			save = true;
+		}
+	}
+	@Override
+	public Boolean getStationServerPreemptive(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return false;
+		}
+		return sd.serverPreemptive;
+	}
+	/**
 	 * Returns queue strategy of the station, given the search key.
 	 */
 	@Override
@@ -1209,21 +1263,29 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
+			sd.inServiceCapacity = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
+			sd.serverPreemptive = false;
 		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
 			sd.queueCapacity = Integer.valueOf(-1);
+			sd.inServiceCapacity = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			sd.numberOfServers = Integer.valueOf(-1);
+			sd.serverPreemptive = false;
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
+			sd.inServiceCapacity = Integer.valueOf(-1);
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			sd.numberOfServers = Defaults.getAsInteger("stationServers");
+			sd.serverPreemptive = false;
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
+			sd.inServiceCapacity = Integer.valueOf(-1);
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
 				sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			}
+			sd.serverPreemptive = false;
 			sd.forkBlock = Defaults.getAsInteger("forkBlock");
 			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
 			sd.numberOfServers = Defaults.getAsInteger("forkJobsPerLink");
@@ -1231,18 +1293,25 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
+			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.serverPreemptive = false;
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
 			sd.queueCapacity = Integer.valueOf(-1);
+			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.serverPreemptive = false;
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_SCALER)) {
 			sd.forkBlock = Integer.valueOf(-1);
+			sd.serverPreemptive = false;
 			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
 			sd.numberOfServers = Defaults.getAsInteger("forkJobsPerLink");
 		} else if (sd.type.equals(STATION_TYPE_PLACE)) {
 			sd.queueCapacity = Defaults.getAsInteger("placeCapacity");
+			sd.serverPreemptive = false;
+			sd.inServiceCapacity = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
@@ -3649,6 +3718,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String name;
 		public String type;
 		public Integer queueCapacity;
+		public Integer inServiceCapacity;
+		public Boolean serverPreemptive;
 		public String queueStrategy;
 		public Integer numberOfServers;
 		public Integer forkBlock;
@@ -3668,6 +3739,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			StationData sd = new StationData(name, type);
 			sd.queueCapacity = queueCapacity;
 			sd.queueStrategy = queueStrategy;
+			sd.inServiceCapacity = inServiceCapacity;
+			sd.serverPreemptive = serverPreemptive;
 			sd.numberOfServers = numberOfServers;
 			sd.forkBlock = forkBlock;
 			sd.isSimplifiedFork = isSimplifiedFork;

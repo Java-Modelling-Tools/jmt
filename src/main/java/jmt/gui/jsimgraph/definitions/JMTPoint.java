@@ -34,6 +34,7 @@ public class JMTPoint extends Point2D {
 	private double x;
 	private double y;
 	private boolean rotate;
+	private double angle;
 
 	/**
 	 * Builds a new JMTPoint at position (0,0) and no rotation.
@@ -42,6 +43,7 @@ public class JMTPoint extends Point2D {
 		x = 0;
 		y = 0;
 		rotate = false;
+		angle = 0;
 	}
 
 	/**
@@ -54,6 +56,21 @@ public class JMTPoint extends Point2D {
 		this.x = x;
 		this.y = y;
 		this.rotate = rotate;
+		this.angle = 0;
+	}
+
+	/**
+	 * Builds a new JMTPoint from a given point
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @param rotate true if station is rotated
+	 * @param angle value of the rotation angle
+	 */
+	public JMTPoint(double x, double y, boolean rotate, double angle) {
+		this.x = x;
+		this.y = y;
+		this.rotate = rotate;
+		this.angle = angle;
 	}
 
 	/**
@@ -65,6 +82,20 @@ public class JMTPoint extends Point2D {
 		this.x = point.getX();
 		this.y = point.getY();
 		this.rotate = rotate;
+		this.angle = 0;
+	}
+
+	/**
+	 * Builds a new JMTPoint from a given point
+	 * @param point point for coordinates
+	 * @param rotate true if station is rotated
+	 * @param angle value of the rotation angle
+	 */
+	public JMTPoint(Point2D point, boolean rotate, double angle) {
+		this.x = point.getX();
+		this.y = point.getY();
+		this.rotate = rotate;
+		this.angle = angle;
 	}
 
 	/* (non-Javadoc)
@@ -105,6 +136,20 @@ public class JMTPoint extends Point2D {
 	 */
 	public boolean isRotate() {
 		return rotate;
+	}
+
+	/**
+	 * @return the value of the rotation angle
+	 */
+	public double getAngle() {
+		return angle;
+	}
+
+	/**
+	 * @param angle = value of the rotation angle
+	 */
+	public void setAngle(double angle) {
+		this.angle= angle;
 	}
 
 	/**

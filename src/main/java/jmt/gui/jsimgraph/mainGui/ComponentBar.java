@@ -59,14 +59,24 @@ public class ComponentBar extends JMTToolBar {
 		addSeparator();
 		// Adds link button
 		addGenericButton(m.getSetConnect());
+		// Adds Bezier link button
+		addGenericButton(m.getSetBezierConnect());
 		// Blocking region button
 		addGenericButton(m.getAddBlockingRegion());
 
 		addSeparator();
 		// Rotate button 
 		addGenericButton(m.getRotate());
+		// RotateLeft button
+		addGenericButton(m.getRotateLeft());
+		// RotateRight button
+		addGenericButton(m.getRotateRight());
 		// Set right button
 		addGenericButton(m.getSetRight());
+
+		addSeparator();
+		//add Grid Button
+		addGenericButton(m.getSnapToGrid());
 
 		// Disables all components button
 		enableButtons(false);

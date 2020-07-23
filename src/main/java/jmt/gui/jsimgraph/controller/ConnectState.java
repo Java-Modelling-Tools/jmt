@@ -58,6 +58,7 @@ public class ConnectState extends UIStateDefault {
 	public ConnectState(Mediator mediator, GraphMouseListener ml) {
 		super(mediator);
 		this.ml = ml;
+		System.out.println("ConnectState -> I am in  connect State");
 	}
 
 	@Override

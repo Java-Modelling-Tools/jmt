@@ -18,11 +18,12 @@
 
 package jmt.gui.jsimgraph.controller;
 
-import java.awt.Cursor;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 
 import javax.swing.event.MouseInputListener;
 
+import jmt.gui.jsimgraph.JGraphMod.JmtEdge;
 import org.jgraph.graph.BasicMarqueeHandler;
 import org.jgraph.graph.CellHandle;
 import org.jgraph.graph.CellView;
@@ -42,6 +43,8 @@ public class GraphMouseListener implements MouseInputListener {
 
 	protected UIState connect;
 
+	protected UIState bezierconnect;
+
 	protected UIState delete;
 
 	protected UIState insert;
@@ -49,6 +52,8 @@ public class GraphMouseListener implements MouseInputListener {
 	protected UIState paste;
 
 	protected UIState select;
+
+	protected  UIState bezierSelect;
 
 	protected UIState nothing;
 
@@ -74,7 +79,9 @@ public class GraphMouseListener implements MouseInputListener {
 		this.mediator = mediator;
 		currentState = nothing = new UIStateDefault(mediator);
 		select = new SelectState(mediator, this);
+		bezierSelect = new BezierEdgeModificationState(mediator, this);
 		connect = new ConnectState(mediator, this);
+		bezierconnect = new BezierConnectState(mediator, this);
 		marquee = new BasicMarqueeHandler();
 	}
 
@@ -138,7 +145,23 @@ public class GraphMouseListener implements MouseInputListener {
 	}
 
 	public void setConnectState() {
+		// Deselect selected cells
+		mediator.getGraph().clearSelection();
+		((BezierConnectState) bezierconnect).initializeState();
+		mediator.BezierConnecthideHelperBar();
+		mediator.hideBezierEditingPanel();
 		currentState = connect;
+	}
+
+	public void setBezierConnectState() {
+		// Deselect selected cells
+		mediator.getGraph().clearSelection();
+		mediator.getCancelEdgeDrawing().setEnabled(true);
+		mediator.hideBezierEditingPanel();
+		currentState = bezierconnect;
+		mediator.BezierConnectshowHelperBar();
+		((BezierConnectState) currentState).initializeState();
+		System.out.println("GraphMouseListener -> Going in Bezier Connect State");
 	}
 
 	public void setDeleteState() {
@@ -150,6 +173,9 @@ public class GraphMouseListener implements MouseInputListener {
 	}
 
 	public void setInsertState(String className) {
+		((BezierConnectState) bezierconnect).initializeState();
+		mediator.BezierConnecthideHelperBar();
+		mediator.hideBezierEditingPanel();
 		currentState = insert;
 		((InsertState) insert).setInsertClass(className);
 	}
@@ -159,7 +185,15 @@ public class GraphMouseListener implements MouseInputListener {
 	}
 
 	public void setSelectState() {
+		((BezierConnectState) bezierconnect).initializeState();
+		mediator.BezierConnecthideHelperBar();
 		currentState = select;
+	}
+
+	public void setBezierEdgeModificationState(JmtEdge edge) {
+		currentState = bezierSelect;
+		mediator.showBezierEditingPanel();
+		((BezierEdgeModificationState) currentState).setEdge(edge);
 	}
 
 	/**
@@ -245,6 +279,15 @@ public class GraphMouseListener implements MouseInputListener {
 
 	public void setPreviousCursor(Cursor cursor) {
 		previousCursor = cursor;
+	}
+
+	/**
+	 * Modify graphMouseListener when a cell has been deleted
+	 **/
+	public void cellDeleted() {
+		if(this.currentState == this.bezierSelect){
+			this.setSelectState();
+		}
 	}
 
 }

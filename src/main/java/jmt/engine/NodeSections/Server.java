@@ -20,12 +20,8 @@ package jmt.engine.NodeSections;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ServiceStrategy;
-import jmt.engine.QueueNet.Job;
-import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.NetEvent;
-import jmt.engine.QueueNet.NetMessage;
-import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NetSystem;
+import jmt.engine.QueueNet.*;
+import jmt.engine.simEngine.RemoveToken;
 
 /**
  * This class implements a multi-class, single/multi server service.
@@ -41,6 +37,9 @@ public class Server extends ServiceSection {
 	private int[] numberOfVisitsPerClass;
 	private ServiceStrategy[] serviceStrategies;
 
+	private boolean preemption;
+	private Job jobInService = new Job(null, null);
+
 	private int busyCounter;
 
 	/**
@@ -50,7 +49,7 @@ public class Server extends ServiceSection {
 	 * the server will be single visit.
 	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
-	public Server(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
+	public Server(Integer numberOfServers, Boolean serverPreemptive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
 		if (numberOfVisitsPerClass == null) {
 			this.numberOfServers = numberOfServers.intValue();
 			this.numberOfVisitsPerClass = null;
@@ -65,6 +64,7 @@ public class Server extends ServiceSection {
 			this.serviceStrategies = serviceStrategies;
 			busyCounter = 0;
 		}
+		this.preemption = serverPreemptive.booleanValue();
 	}
 
 	@Override
@@ -124,20 +124,48 @@ public class Server extends ServiceSection {
 			if (isMine(message)) {
 				// this job has been just served (the message has been sent by the server itself)
 				// forwards the job to the output section
+				job.setIsJobInService(false);
+				job.setServiceTime(-1);
 				sendForward(job, 0.0);
 			} else {
 				//message received from another node section: if the server is not completely busy,
 				//it sends itself a message with this job
+				if (preemption) {
+					if (jobInService.getIsJobInService()) {
+						double timeElapsed = this.getTime() - jobInService.getServiceArrivalTime();
+						jobInService.setServiceTime(jobInService.getServiceTime() - timeElapsed);
+						jobInService.setIsPreemptedJob(true);
+						removeMessage(jobInService.getServingMessage());
+						jobInService.setIsJobInService(false);
+						sendBackward(NetEvent.EVENT_PREEMPTED_JOB, jobInService, 0.0);
+						busyCounter--;
+					}
+				}
 				if (busyCounter < numberOfServers) {
 					// Auto-sends the job with delay equal to "serviceTime"
-					double serviceTime = job.getServiceTime();
-					if (serviceTime < 0.0) {
-						serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
+					//message received from another node section: if the server is not completely busy,
+					//it sends itself a message with this job
+					RemoveToken jobInServiceMessage;
+					if (!job.getIsPreemptedJob()) {
+						double serviceTime = job.getServiceTime();
+						if (serviceTime < 0.0) {
+							serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
+							job.setServiceTime(serviceTime);
+						} else {
+							job.setServiceTime(-1.0);
+						}
+						job.setServiceArrivalTime(this.getTime());
+						jobInServiceMessage = sendMe(job, serviceTime);
 					} else {
-						job.setServiceTime(-1.0);
+						job.setIsPreemptedJob(false);
+						job.setServiceArrivalTime(this.getTime());
+						jobInServiceMessage = sendMe(job, job.getServiceTime());
 					}
-					// Calculates the service time of job
-					sendMe(job, serviceTime);
+					if (preemption) {
+						jobInService = job;
+						jobInService.setServingMessage(jobInServiceMessage);
+						jobInService.setIsJobInService(true);
+					}
 
 					busyCounter++;
 					if (busyCounter < numberOfServers) {

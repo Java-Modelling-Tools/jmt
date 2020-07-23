@@ -65,6 +65,8 @@ public class JmtEdge extends DefaultEdge {
 	private Mediator mediator;
 	public ArrayList<Point2D> intersectionEdgePoint = new ArrayList<Point2D>();
 
+	private boolean isBezier = false;
+
 
 	public JmtEdge() {
 		super("");
@@ -89,6 +91,22 @@ public class JmtEdge extends DefaultEdge {
 	}
 
 	/**
+	 * Creates a new JmtEdge connecting source to target
+	 * @param sourceKey key of source station
+	 * @param targetKey key of target station
+	 * @param isBezier
+	 * @param mediator
+	 */
+	public JmtEdge(Object sourceKey, Object targetKey, Boolean isBezier, Mediator mediator) {
+
+		this();
+		this.sourceKey = sourceKey;
+		this.targetKey = targetKey;
+		this.mediator = mediator;
+		this.isBezier = isBezier;
+	}
+
+	/**
 	 * Gets source station search key
 	 * @return source key
 	 */
@@ -102,6 +120,13 @@ public class JmtEdge extends DefaultEdge {
 	 */
 	public Object getTargetKey() {
 		return targetKey;
+	}
+
+	/**
+	 * Set the attribute isBezier
+	 */
+	public  Boolean getIsBezier() {
+		return isBezier;
 	}
 
 	// Giuseppe De Cicco & Fabio Granara
@@ -210,11 +235,13 @@ public class JmtEdge extends DefaultEdge {
 		boolean intersecato = false;
 		this.intersectionEdgePoint = new ArrayList<Point2D>();
 		for (int i = 0; i < cells.length; i++) {
-			if (cells[i] instanceof JmtEdge && !(cells[i].equals(cell))) {
-				JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(cells[i], false);
-				if (viewtmp != null) {
-					if (cell.intersectsEdge(viewtmp)) {
-						intersecato = true;
+			if (cells[i] instanceof JmtEdge && !(cells[i].equals(cell)) ) {
+				if (!(((JmtEdge) cells[i]).getIsBezier())) {
+					JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(cells[i], false);
+					if (viewtmp != null) {
+						if (cell.intersectsEdge(viewtmp)) {
+							intersecato = true;
+						}
 					}
 				}
 			}
@@ -421,6 +448,7 @@ public class JmtEdge extends DefaultEdge {
 
 		return intersecato;
 	}
+
 
 	// Giuseppe De Cicco & Fabio Granara
 	public boolean getLeftSideIntersaction() {

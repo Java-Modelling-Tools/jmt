@@ -182,6 +182,26 @@ public interface StationDefinition {
 	public void setStationQueueCapacity(Object key, Integer queueCapacity);
 
 	/**
+	 * Returns in service capacity of the station, given the search key.
+	 */
+	public Integer getStationInServiceCapacity(Object key);
+
+	/**
+	 * Sets in service capacity of the station, given the search key.
+	 */
+	public void setStationInServiceCapacity(Object key, Integer inServiceCapacity);
+
+	/**
+	 * Gets whether server will use preemption
+	 */
+	public Boolean getStationServerPreemptive(Object key);
+
+	/**
+	 * Sets whether server will use preemption.
+	 */
+	public void setStationServerPreemptive(Object key, Boolean serverPreemption);
+
+	/**
 	 * Returns queue strategy of the station, given the search key.
 	 */
 	public String getStationQueueStrategy(Object key);

@@ -112,7 +112,7 @@ public class NetMessage implements Cloneable {
 	 * @return The job of the NetMessage.
 	 */
 	public Job getJob() {
-		if (event == NetEvent.EVENT_JOB || event == NetEvent.EVENT_ACK) {
+		if (event == NetEvent.EVENT_JOB || event == NetEvent.EVENT_ACK || event == NetEvent.EVENT_PREEMPTED_JOB) {
 			return (Job) data;
 		} else {
 			return null;

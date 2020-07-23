@@ -53,6 +53,7 @@ import org.jgraph.graph.Port;
 public abstract class JmtCell extends DefaultGraphCell {
 
 	private static final long serialVersionUID = 1L;
+
 	private Dimension imageDimension;
 	// Used to determine if parent of this cell has changed (to detect enter and exit from
 	// blocking regions)
@@ -87,12 +88,17 @@ public abstract class JmtCell extends DefaultGraphCell {
 	public int sons = 1;
 	public int type;
 	private boolean leftInputCell = true;
+	private int standardIconWidth;
+	private int standardIconHeight;
 
 	/**
 	 * Tells if this component can be placed on JGraph or has been disabled. This is
 	 * useful to load old models with disabled components (like terminals)
 	 */
 	public static final boolean canBePlaced = true;
+
+	private boolean isFreeRotationAllowed =true;
+	private double rotationAngle =0;
 
 	/**
 	 * Creates a graph cell and initializes it with the specified user object.
@@ -107,6 +113,8 @@ public abstract class JmtCell extends DefaultGraphCell {
 		super(userObject);
 		ImageIcon ico = JMTImageLoader.loadImage(icon);
 		GraphConstants.setIcon(attributes, ico);
+		standardIconHeight = ico.getIconHeight();
+        standardIconWidth = ico.getIconWidth();
 		imageDimension = new Dimension(ico.getIconWidth(), ico.getIconHeight());
 		GraphConstants.setSizeable(attributes, false);
 		GraphConstants.setSize(attributes, imageDimension);
@@ -197,25 +205,74 @@ public abstract class JmtCell extends DefaultGraphCell {
 			if (port instanceof InputPort && isLeftInputCell() || port instanceof OutputPort && !isLeftInputCell()) {
 				GraphConstants.setOffset(attr, getInPortOffset(icon, cellDimension));
 			} else {
-				GraphConstants.setOffset(attr, getOutPortoffset(icon, cellDimension));
+				GraphConstants.setOffset(attr, getOutPortOffset(icon, cellDimension));
 			}
 			nest.put(port, attr);
 		}
 	}
 
-	protected Point getInPortOffset(Icon icon, Dimension cellDimension) {
+	/**
+	 * Changes the bounds of the cell
+	 *
+	 * @param icon icon of the cell
+	 * @param graph
+	 */
+	public void updateCellSize(Icon icon, JGraph graph) {
+		imageDimension = new Dimension(icon.getIconWidth(), icon.getIconHeight());
+		Map attr = this.getAttributes();
+
+		//Get old size
+		Rectangle2D oldBounds = GraphConstants.getBounds(attr);
+
+		//Get new cell dimension (icon + name)
+		Dimension newCellDimension = this.getSize(graph);
+		//set new bounds
+		GraphConstants.setBounds(attr, new Rectangle2D.Double(oldBounds.getX(), oldBounds.getY(), newCellDimension.getWidth(), newCellDimension.getHeight()));
+	}
+
+    /**
+     * Returns the offset of the input port
+     *
+     * @param icon icon of the cell
+     * @param cellDimension dimension of the cell
+     *
+     * Modified by Emma Bortone to update the port offset in the case of free rotation
+     */
+	private Point getInPortOffset(Icon icon, Dimension cellDimension) {
 		int iconHeight = icon.getIconHeight();
 		int iconWidth = icon.getIconWidth();
-		int xOff = (cellDimension.width - iconWidth) / 2 * 1000 / cellDimension.width;
-		int yOff = iconHeight / 2 * 1000 / cellDimension.height;
+		double radianRotationAngle = Math.toRadians(rotationAngle);
+		int xOff, yOff;
+
+		double x=(int) ((standardIconWidth/2)*Math.cos(radianRotationAngle+Math.PI)+iconWidth/2);
+		double y=(int) ((standardIconWidth/2)*Math.sin(radianRotationAngle+Math.PI)+iconHeight/2);
+
+		xOff =(int)  ((cellDimension.width - iconWidth) / 2 + x )* 1000 / cellDimension.width;
+		yOff =(int) y * 1000 / cellDimension.height;
+
 		return new Point(xOff, yOff);
 	}
 
-	protected Point getOutPortoffset(Icon icon, Dimension cellDimension) {
+    /**
+     * Returns the offset of the output port
+     *
+     * @param icon icon of the cell
+     * @param cellDimension dimension of the cell
+     *
+     * Modified by Emma Bortone to update the port offset in the case of free rotation
+     */
+	private Point getOutPortOffset(Icon icon, Dimension cellDimension) {
 		int iconHeight = icon.getIconHeight();
 		int iconWidth = icon.getIconWidth();
-		int xOff = (cellDimension.width - iconWidth) / 2 * 1000 / cellDimension.width + iconWidth * 1000 / cellDimension.width;
-		int yOff = iconHeight / 2 * 1000 / cellDimension.height;
+        double radianRotationAngle = Math.toRadians(rotationAngle);
+		int xOff, yOff;
+
+		double x=(int) ((standardIconWidth/2)*Math.cos(radianRotationAngle)+iconWidth/2);
+		double y=(int) ((standardIconWidth/2)*Math.sin(radianRotationAngle)+iconHeight/2);
+
+		xOff =(int)  ((cellDimension.width - iconWidth) / 2 + x )* 1000 / cellDimension.width;
+		yOff =(int) y * 1000 / cellDimension.height;
+
 		return new Point(xOff, yOff);
 	}
 
@@ -227,6 +284,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 	public boolean isLeftInputCell() {
 		return leftInputCell;
 	}
+
 
 	// Giuseppe De Cicco & Fabio Granara
 	public void setLeftInputCell(boolean state) {
@@ -284,4 +342,66 @@ public abstract class JmtCell extends DefaultGraphCell {
 	 */
 	public abstract String getIcon();
 
+	/**
+	 * Sets the value of the attribute isFreeRotationAllowed
+	 * @param value : tells if the free rotation is allowed
+	 */
+	public void setFreeRotationAllowed(boolean value){
+		isFreeRotationAllowed=value;
+		if (!isFreeRotationAllowed){
+			this.setRotationAngle(0);
+		}
+	}
+
+	/**
+	 * Tells if the free rotation is allowed for this cell
+	 * @return true if the cell is only linked to bezier curves
+	 */
+	public boolean isFreeRotationAllowed(){
+		return isFreeRotationAllowed;
+	}
+
+	/**
+	 * Sets the angle of rotation of the cell
+	 * @param value : value of the rotation angle.
+	 */
+	public void setRotationAngle(double value){
+		rotationAngle=value;
+	}
+
+	/**
+	 * @return the angle of rotation of the cell (in degrees)
+	 */
+	public double getRotationAngle(){
+		return rotationAngle;
+	}
+
+	/**
+	 * Sets the attributes that have an impact on the rendering of the cell Image :
+	 *
+	 * @param isMirrored :  tells if the InputPort of this cell is on the left side
+	 * @param isFreeRotationAllowed : tells if the free rotation is allowed
+	 * @param angle : value of the rotation angle.
+	 */
+	public void setIconModifiers(boolean isMirrored, boolean isFreeRotationAllowed, double angle){
+		this.setLeftInputCell(!isMirrored);
+		this.setFreeRotationAllowed(isFreeRotationAllowed);
+		this.setRotationAngle(angle);
+	}
+
+	/**
+	 * return the dimension of the icon
+	 * @return Dimension of the icon
+	 */
+	public Dimension getIconDimension() {
+		return imageDimension;
+	}
+
+	/**
+	 * return the dimension of the icon
+	 * @return Dimension of the icon
+	 */
+	public Dimension getStandardIconDimension(){
+		return new Dimension(standardIconWidth, standardIconHeight) ;
+	}
 }

@@ -558,6 +558,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (name.equals("size")) {
 				Integer capacity = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationQueueCapacity(key, capacity);
+			} else if (name.equals("inServiceCapacity")) {
+				Integer inServiceCapacity = Integer.valueOf(findText((curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
+				model.setStationInServiceCapacity(key, inServiceCapacity);
+			} else if (name.equals("serverPreemptive")) {
+				Boolean serverPreemptive = Boolean.valueOf(findText((curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
+				model.setStationServerPreemptive(key, serverPreemptive);
 			} else if (name.equals("dropStrategies")) {
 				dropRules = parseParameterRefclassArray(curr);
 			}
@@ -666,6 +672,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				// Sets number of servers
 				Integer number = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationNumberOfServers(key, number);
+			} else if (name.equals("serverPreemptive")) {
+				Boolean serverPreemptive = Boolean.valueOf(findText((curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
+				model.setStationServerPreemptive(key, serverPreemptive);
 			} else if (classpath.equals(serviceStrategy)) {
 				// Retrieves all distributions subParameters
 				Map<String, Node> distributions = parseParameterRefclassArray((Element) parameters.item(i));

@@ -18,19 +18,21 @@
 
 package jmt.gui.jsimgraph.controller;
 
-import java.awt.Cursor;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import jmt.gui.jsimgraph.JGraphMod.BlockingRegion;
-import jmt.gui.jsimgraph.JGraphMod.JmtCell;
-import jmt.gui.jsimgraph.JGraphMod.JmtJGraph;
+import jmt.gui.jsimgraph.JGraphMod.*;
 
-import org.jgraph.graph.CellView;
-import org.jgraph.graph.GraphConstants;
+import jmt.gui.jsimgraph.UtilPoint;
+import jmt.gui.jsimgraph.definitions.JMTPath;
+import org.jgraph.graph.*;
 
 /**
  * Handles all the events when the user is in the select mode
@@ -51,11 +53,15 @@ public class SelectState extends UIStateDefault {
 	//private Integer[] Ymax = null;
 
 	private boolean moved = false;
-	private JmtJGraph graphtmp = null;
 
 	protected GraphMouseListener ml;//reference to mouse listener
 
-	/** Creates the select state
+
+	protected HashMap<Object,Point2D> initialCellPositions;
+	protected HashMap<Object,Point2D> finalCellPositions;
+
+
+    /** Creates the select state
 	 *
 	 * @param mediator
 	 * @param ml
@@ -63,6 +69,8 @@ public class SelectState extends UIStateDefault {
 	public SelectState(Mediator mediator, GraphMouseListener ml) {
 		super(mediator);
 		this.ml = ml;
+		initialCellPositions = new HashMap<Object, Point2D>();
+		finalCellPositions = new HashMap<Object, Point2D>();
 	}
 
 	/**
@@ -82,7 +90,8 @@ public class SelectState extends UIStateDefault {
 			Point2D point = mediator.fromScreen(new Point(e.getPoint()));
 			if (ml.getFocus() != null && (!mediator.containsCell(ml.getFocus().getCell())
 					|| !ml.getFocus().intersects(mediator.getGraph(), r))) {
-				ml.setFocus(null);
+						ml.setFocus(null);
+
 			}
 			// Avoid toggling of selection between inner components and blocking region
 			CellView next = mediator.getNextViewAt(ml.getFocus(), point.getX(), point.getY());
@@ -106,22 +115,42 @@ public class SelectState extends UIStateDefault {
 						e.consume();
 						ml.setCell(null);
 					} // Otherwise do nothing - BERTOLI MARCO
+
 					else {
 						e.consume();
 					}
 				} else if (!mediator.isToggleSelectionEvent(e)) {
+
 					if (ml.getHandle() != null) {
 						ml.setHandler(ml.getHandle());
 						ml.getHandle().mousePressed(e);
 					}
+					//If a Bezier edge is selected, then switch state to go in BezierEdgeModificationState
+					if (ml.getCell() != null) {
+						if (ml.getCell().getCell() instanceof JmtEdge) {
+							if (mediator.getModel().hasConnectionShape(((JmtEdge) ml.getCell().getCell()).getSourceKey(),
+									((JmtEdge) ml.getCell().getCell()).getTargetKey())) {
+								mediator.selectCellForEvent(ml.getCell().getCell(), e);
+
+								ml.setBezierEdgeModificationState(((JmtEdge) ml.getCell().getCell()));
+								e.consume();
+								ml.setCell(null);
+							}
+						}
+					}
+
 					// Immediate Selection
 					if (!e.isConsumed() && ml.getCell() != null && !mediator.isCellSelected(ml.getCell())) {
 						mediator.selectCellForEvent(ml.getCell().getCell(), e);
+
 						ml.setFocus(ml.getCell());
+
 						if (ml.getHandle() != null) {
 							ml.getHandle().mousePressed(e);
 							ml.setHandler(ml.getHandle());
 						}
+
+
 						e.consume();
 						ml.setCell(null);
 					}
@@ -136,7 +165,13 @@ public class SelectState extends UIStateDefault {
 				}
 			}
 		}
+		JmtJGraph graphtmp = (JmtJGraph)mediator.getGraph();
+		initialCellPositions = new HashMap<Object, Point2D>();
+		finalCellPositions = new HashMap<Object, Point2D>();
+		updateInitialPosition(graphtmp.getSelectionCells());
 	}
+
+
 
 	@Override
 	public void handleMove(MouseEvent e) {
@@ -164,7 +199,8 @@ public class SelectState extends UIStateDefault {
 		mediator.autoscroll(e.getPoint());
 		if (ml.getHandler() != null && ml.getHandler() == ml.getMarquee()) {
 			ml.getMarquee().mouseDragged(e);
-		} else if (ml.getHandler() == null && !mediator.isGraphEditing() && ml.getFocus() != null) {
+		}
+		else if (ml.getHandler() == null && !mediator.isGraphEditing() && ml.getFocus() != null) {
 			if (!mediator.isCellSelected(ml.getFocus().getCell())) {
 				mediator.selectCellForEvent(ml.getFocus().getCell(), e);
 				ml.setCell(null);
@@ -175,18 +211,29 @@ public class SelectState extends UIStateDefault {
 			ml.setHandler(ml.getHandle());
 		}
 		if (ml.getHandle() != null && ml.getHandler() == ml.getHandle()) {
+			Point2D current = mediator.snap(e.getPoint());
 			// BERTOLI MARCO - Added to avoid dragging of unselected elements (caused bugs)
-			if (mediator.getGraph().getSelectionCells().length > 0) {
-				ml.getHandle().mouseDragged(e);
-				graphtmp = (JmtJGraph) mediator.getGraph();
-				cells = graphtmp.getSelectionCells();
+			JmtJGraph graphtmp = (JmtJGraph) mediator.getGraph();
+			cells = graphtmp.getSelectionCells();
+			if (cells.length > 0) {
+				boolean wereOnGrid = true;
 				Xmin = new Integer[cells.length];
 				Ymin = new Integer[cells.length];
-				//Xmax = new Integer[cells.length];
-				//Ymax = new Integer[cells.length];
-				if (cells.length > 0) {
+
+				for (int i = 0; i < cells.length; i++) {
+					if ((cells[i] instanceof JmtCell )&& !(cells[i] instanceof JmtEdge)) {
+						if (mediator.snapCellByPort((JmtCell) cells[i])){//returns true if the cell was snapped to the grid
+							wereOnGrid = false;
+						}
+					}
+				}
+				if(wereOnGrid){
+					ml.getHandle().mouseDragged(e);
+					//Xmax = new Integer[cells.length];
+					//Ymax = new Integer[cells.length];
 					for (int i = 0; i < cells.length; i++) {
 						if (cells[i] instanceof JmtCell) {
+                            Object key = ((CellComponent) ((JmtCell)cells[i]).getUserObject()).getKey();
 							Rectangle2D rett = GraphConstants.getBounds(((JmtCell) cells[i]).getAttributes());
 							Xmin[i] = new Integer((int) rett.getMinX());
 							Ymin[i] = new Integer((int) rett.getMinY());
@@ -205,6 +252,27 @@ public class SelectState extends UIStateDefault {
 								moved = true;
 							}
 						}
+
+					}
+
+				}
+				else {
+					mediator.setIsReleased(true);
+					try {
+						if (e != null && !e.isConsumed()) {
+							if (ml.getHandler() == ml.getMarquee() && ml.getMarquee() != null) {
+								ml.getMarquee().mouseReleased(e);
+							} else if (ml.getHandler() == ml.getHandle() && ml.getHandle() != null) {
+								ml.getHandle().mouseReleased(e);
+							}
+							if (ml.isDescendant(ml.getCell(), ml.getFocus()) && e.getModifiers() != 0) {
+								ml.setCell(ml.getFocus());
+							}
+							mediator.handlesBlockingRegionDrag();
+						}
+					} finally {
+						ml.setHandler(null);
+						ml.setCell(null);
 					}
 				}
 			}
@@ -232,6 +300,8 @@ public class SelectState extends UIStateDefault {
 					mediator.putSelectedCellsInGoodPlace(cells, Xmin, Ymin);
 					mediator.avoidOverlappingCell(cells);
 					moved = false;
+
+
 				}
 
 				if (!e.isConsumed() && ml.getCell() != null) {
@@ -241,6 +311,15 @@ public class SelectState extends UIStateDefault {
 					ml.setFocus(ml.getCell());
 					ml.postProcessSelection(e, tmp, wasSelected);
 				}
+
+
+				// Update final position
+				JmtJGraph graphtmp = (JmtJGraph)mediator.getGraph();
+				updateFinalPosition(graphtmp.getSelectionCells());
+				mediator.updateBezierPath(computeOffsetByCell());
+
+				mediator.updateLabelAfterMovingCell(cells);
+
 				// Notify mediator that object can have been placed inside or
 				// outside a blocking region
 				mediator.handlesBlockingRegionDrag();
@@ -252,9 +331,72 @@ public class SelectState extends UIStateDefault {
 
 	}
 
+	private HashMap<Object, Point2D> computeOffsetByCell() {
+		HashMap<Object, Point2D> offsetByCell = new HashMap<Object,Point2D>();
+		Set correctKeys = new HashSet<>(finalCellPositions.keySet());
+		correctKeys.retainAll(initialCellPositions.keySet());
+		for (Object key : correctKeys) {
+			offsetByCell.put(key,UtilPoint.subtractPoints(finalCellPositions.get(key),initialCellPositions.get(key)));
+		}
+		return offsetByCell;
+	}
+
 	@Override
 	public void handleEnter(MouseEvent e) {
 		mediator.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	}
+
+	private void updateInitialPosition(Object[] selectionCells) {
+		for(Object cell : selectionCells){
+			if(cell instanceof JmtCell){
+				Object key = ((CellComponent) ((JmtCell)cell).getUserObject()).getKey();
+				//Point2D pos = mediator.getModel().getStationPosition(key);
+				Rectangle2D rett = GraphConstants.getBounds(((JmtCell) cell).getAttributes());
+				Integer x = new Integer((int) rett.getMinX());
+				Integer y = new Integer((int) rett.getMinY());
+				initialCellPositions.put(key,new Point2D.Double(x,y));
+			}
+			if(cell instanceof BlockingRegion) {
+				for (Object c : ((BlockingRegion) cell).getChildren()) {
+					if (c instanceof JmtCell) {
+						Object key = ((CellComponent) ((JmtCell) c).getUserObject()).getKey();
+						Rectangle2D rett = GraphConstants.getBounds(((JmtCell) c).getAttributes());
+						Integer x = new Integer((int) rett.getMinX());
+						Integer y = new Integer((int) rett.getMinY());
+						initialCellPositions.put(key,new Point2D.Double(x,y));
+					}
+				}
+			}
+		}
+	}
+
+	private void updateFinalPosition(Object[] selectionCells) {
+		for(Object cell : selectionCells){
+			if(cell instanceof JmtCell){
+				Object key = ((CellComponent) ((JmtCell)cell).getUserObject()).getKey();
+				Rectangle2D rett = GraphConstants.getBounds(((JmtCell) cell).getAttributes());
+				Integer x = new Integer((int) rett.getMinX());
+				Integer y = new Integer((int) rett.getMinY());
+				finalCellPositions.put(key,new Point2D.Double(x,y));
+			}
+			if(cell instanceof BlockingRegion) {
+				for (Object c : ((BlockingRegion) cell).getChildren()) {
+					if (c instanceof JmtCell) {
+						Object key = ((CellComponent) ((JmtCell) c).getUserObject()).getKey();
+						Rectangle2D rett = GraphConstants.getBounds(((JmtCell) c).getAttributes());
+						Integer x = new Integer((int) rett.getMinX());
+						Integer y = new Integer((int) rett.getMinY());
+						finalCellPositions.put(key,new Point2D.Double(x,y));
+					}
+				}
+			}
+		}
+	}
+
+
+
+
+
+
 
 }

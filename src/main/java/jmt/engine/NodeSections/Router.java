@@ -222,7 +222,7 @@ public class Router extends OutputSection {
 		if (!isClosedJobRoutingWarningShown[jobClass.getId()]) {
 			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
 				System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
-						+ " count not route one or more " + jobClass.getName()
+						+ " could not route one or more " + jobClass.getName()
 						+ " jobs forward as its output stations are all sinks or routing is disabled.");
 			} else {
 				class OneShotTask implements Runnable {
@@ -237,7 +237,7 @@ public class Router extends OutputSection {
 						} catch (InterruptedException e) {
 						}
 						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
-								+ " count not route one or more " + jobClass.getName()
+								+ " could not route one or more " + jobClass.getName()
 								+ " jobs forward as its output stations are all sinks or routing is disabled.",
 								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}

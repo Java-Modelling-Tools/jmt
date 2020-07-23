@@ -86,7 +86,7 @@ public class AboutDialogFactory {
 	/** JMVA main contributors */
 	private static final Contributors[] JMVA = {
 			new Contributors(Company.POLIMI, "Bertoli Marco", "Cerotti Davide", "Conti Andrea", "Dall'Orso Federico", "Omini Stefano", "Granata Federico", "Gribaudo Marco", "Sheikhvand Kourosh"),
-			new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Tokaj Piotr", "Su Haixiao", "Ong Wai Hong", "Alexander Zakon")
+			new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Tokaj Piotr", "Su Haixiao", "Wai Hong Ong", "Zakon Alexander")
 	};
 
 	/** JSIMwiz main contributors */
@@ -96,8 +96,8 @@ public class AboutDialogFactory {
 
 	/** JSIMgraph main contributors */
 	private static final Contributors[] JMODEL = {
-			new Contributors(Company.POLIMI, "Bertoli Marco", "Cazzoli Mattia", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
-			new Contributors(Company.ICL, "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phumin Phuangjaisri", "Murali Srikrishna", "Vaibhav Krishnakumar")
+			new Contributors(Company.POLIMI, "Bertoli Marco", "Bortone Emma", "Cazzoli Mattia", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
+			new Contributors(Company.ICL, "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phumin Phuangjaisri", "Murali Srikrishna", "Vaibhav Krishnakumar")
 	};
 
 	/** JABA main contributors */

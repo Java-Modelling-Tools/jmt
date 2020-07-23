@@ -96,7 +96,21 @@ public class JMTImageLoader {
 	 * @see ImageLoader#loadIcon(String, String)
 	 */
 	public static ImageIcon loadImage(String imageName, String modifier) {
-		return imageLoader.loadIcon(imageName, modifier);
+		return loadImage(imageName, modifier,0.0);
+	}
+
+	/**
+	 * Loads the image from this directory, and applies a known modifier. Please
+	 * put all images in the class package.
+	 *
+	 * @param imageName string containing the image name
+	 * @param modifier known modifier method
+	 * @param angle the rotation angle in degrees
+	 * @return the icon of the image
+	 * @see ImageLoader#loadIcon(String, String)
+	 */
+	public static ImageIcon loadImage(String imageName, String modifier, Double angle) {
+			return imageLoader.loadIcon(imageName, modifier, angle);
 	}
 
 	/**

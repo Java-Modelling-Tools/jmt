@@ -393,7 +393,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			mainPanel.add(label);
 			mainPanel.add(samples);
 			//xMin
-			label = new JLabel("X min:");			
+			label = new JLabel("X min:");
 			if (XMIN >= SPINNER_PRECISION) {
 				xMin = new JSpinner(new SpinnerNumberModel(XMIN, XMIN - SPINNER_PRECISION, XMAX, SPINNER_PRECISION));
 			} else {

@@ -100,7 +100,7 @@ public class RandomSource extends InputSection {
 				// Calculates the delay of departure (1/lambda)
 				if (strategies[c] != null) {
 					job = new Job(jobClass, netJobsList);
-                    job.initialize(getNetSystem());
+                    			job.initialize(this.getNetSystem());
 					updateVisitPath(job);
 					delay = strategies[c].wait(this, jobClass);
 					sendMe(job, delay);
@@ -144,7 +144,7 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(job.getJobClass(), netJobsList);
-                job.initialize(getNetSystem());
+                job.initialize(this.getNetSystem());
 				updateVisitPath(job);
 				delay = strategies[c].wait(this, job.getJobClass());
 				sendMe(job, delay);
@@ -188,7 +188,7 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(jobClasses.get(c), netJobsList);
-                job.initialize(getNetSystem()); 
+                job.initialize(this.getNetSystem()); 
 				updateVisitPath(job);
 				delay = strategies[c].wait(this, jobClasses.get(c));
 				sendMe(job, delay);

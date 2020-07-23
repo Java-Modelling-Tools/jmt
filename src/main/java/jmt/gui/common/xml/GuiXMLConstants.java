@@ -42,6 +42,7 @@ public interface GuiXMLConstants {
 	public static final String XML_A_POSITION_X = "x";
 	public static final String XML_A_POSITION_Y = "y";
 	public static final String XML_A_POSITION_ROTATE = "rotate";
+	public static final String XML_A_POSITION_ANGLE = "angle";
 
 	public static final String XML_E_PARAMETRIC = "parametric";
 	public static final String XML_A_PARAMETRIC_CLASSPATH = "classPath";
@@ -55,5 +56,24 @@ public interface GuiXMLConstants {
 
 	public static final String XML_ARCHIVE_A_NAME = "name";
 	public static final String XML_ARCHIVE_A_TIMESTAMP = "timestamp";
+
+	public static final String XML_E_CONNECTION_SHAPE = "connectionShape";
+	public static final String XML_A_CONNECTION_SOURCE = "source";
+	public static final String XML_A_CONNECTION_TARGET = "target";
+
+	public static final String XML_E_ARC= "arc";
+
+	public static final String XML_E_POINT= "point";
+	public static final String XML_A_POINT_X = "x";
+	public static final String XML_A_POINT_Y = "y";
+
+	public static final String XML_E_SOURCE= "source";
+	public static final String XML_A_SOURCE_X = "x";
+	public static final String XML_A_SOURCE_Y = "y";
+
+	public static final String XML_E_TARGET= "target";
+	public static final String XML_A_TARGET_X = "x";
+	public static final String XML_A_TARGET_Y = "y";
+
 
 }

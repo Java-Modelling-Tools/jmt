@@ -72,7 +72,7 @@ public class PSServer extends ServiceSection {
 	 * @param numberOfServers Number of jobs which can be served simultaneously.
 	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
-	public PSServer(Integer numberOfServers, ServiceStrategy[] serviceStrategies) {
+	public PSServer(Integer numberOfServers, Boolean serverPreemtive, ServiceStrategy[] serviceStrategies) {
 		super(false);
 		this.numberOfServers = numberOfServers.intValue();
 		this.serviceStrategies = serviceStrategies;
@@ -93,8 +93,8 @@ public class PSServer extends ServiceSection {
 	 * the server will be single visit.
 	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
-	public PSServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
-		this(numberOfServers, serviceStrategies);
+	public PSServer(Integer numberOfServers, Boolean serverPreemtive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
+		this(numberOfServers, false, serviceStrategies);
 	}
 
 	/**
@@ -106,9 +106,9 @@ public class PSServer extends ServiceSection {
 	 * @param psStrategies Array of PS strategies, one per class.
 	 * @param serviceWeights Array of service weights, one per class.
 	 */
-	public PSServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies,
+	public PSServer(Integer numberOfServers, Boolean serverPreemtive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies,
 			PSStrategy[] psStrategies, Double[] serviceWeights) {
-		this(numberOfServers, numberOfVisitsPerClass, serviceStrategies);
+		this(numberOfServers, false, numberOfVisitsPerClass, serviceStrategies);
 		this.psStrategies = psStrategies;
 		this.serviceWeights = new double[serviceWeights.length];
 		for (int i = 0; i < serviceWeights.length; i++) {
@@ -172,6 +172,7 @@ public class PSServer extends ServiceSection {
 				handleJobInfoList(messageJobInfo, PSEvent.JOB_OUT);
 				messageToken = null;
 				sendForward(job, 0.0);
+				sendBackward(NetEvent.EVENT_JOB_COMPLETED, job, 0.0);
 			} else {
 				if (messageToken != null) {
 					removeMessage(messageToken);

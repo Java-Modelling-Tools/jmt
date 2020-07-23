@@ -18,17 +18,11 @@
 
 package jmt.gui.jsimgraph.controller;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -43,10 +37,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
+import jmt.commandline.Jmt;
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
@@ -58,80 +51,19 @@ import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.DispatcherThread;
 import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.controller.PADispatcherThread;
-import jmt.gui.common.definitions.GuiInterface;
-import jmt.gui.common.definitions.ModelConverter;
-import jmt.gui.common.definitions.ResultsModel;
-import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.*;
 import jmt.gui.common.editors.DefaultsEditor;
-import jmt.gui.common.panels.AboutDialogFactory;
-import jmt.gui.common.panels.BlockingRegionParameterPanel;
-import jmt.gui.common.panels.CustomizableDialogFactory;
-import jmt.gui.common.panels.MeasurePanel;
-import jmt.gui.common.panels.ResultsWindow;
-import jmt.gui.common.panels.SimulationPanel;
-import jmt.gui.common.panels.StationParameterPanel;
-import jmt.gui.common.panels.WarningWindow;
+import jmt.gui.common.panels.*;
 import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
 import jmt.gui.common.xml.ModelLoader;
 import jmt.gui.common.xml.XMLWriter;
 import jmt.gui.jsimgraph.DialogFactory;
-import jmt.gui.jsimgraph.JGraphMod.BlockingRegion;
-import jmt.gui.jsimgraph.JGraphMod.CellComponent;
-import jmt.gui.jsimgraph.JGraphMod.CellFactory;
-import jmt.gui.jsimgraph.JGraphMod.InputPort;
-import jmt.gui.jsimgraph.JGraphMod.JmtCell;
-import jmt.gui.jsimgraph.JGraphMod.JmtDefaultCellViewFactory;
-import jmt.gui.jsimgraph.JGraphMod.JmtEdge;
-import jmt.gui.jsimgraph.JGraphMod.JmtEdgeView;
-import jmt.gui.jsimgraph.JGraphMod.JmtGraphConstants;
-import jmt.gui.jsimgraph.JGraphMod.JmtJGraph;
-import jmt.gui.jsimgraph.JGraphMod.JmtOverlapping;
-import jmt.gui.jsimgraph.JGraphMod.OutputPort;
-import jmt.gui.jsimgraph.JGraphMod.SinkCell;
-import jmt.gui.jsimgraph.JGraphMod.SourceCell;
-import jmt.gui.jsimgraph.controller.actions.About;
-import jmt.gui.jsimgraph.controller.actions.AbstractJmodelAction;
-import jmt.gui.jsimgraph.controller.actions.ActionCopy;
-import jmt.gui.jsimgraph.controller.actions.ActionCut;
-import jmt.gui.jsimgraph.controller.actions.ActionDelete;
-import jmt.gui.jsimgraph.controller.actions.ActionPaste;
-import jmt.gui.jsimgraph.controller.actions.ActionRedo;
-import jmt.gui.jsimgraph.controller.actions.ActionRotate;
-import jmt.gui.jsimgraph.controller.actions.ActionSetRight;
-import jmt.gui.jsimgraph.controller.actions.ActionUndo;
-import jmt.gui.jsimgraph.controller.actions.AddBlockingRegion;
-import jmt.gui.jsimgraph.controller.actions.CloseModel;
-import jmt.gui.jsimgraph.controller.actions.DownloadDefaultTemplates;
-import jmt.gui.jsimgraph.controller.actions.EditDefaults;
-import jmt.gui.jsimgraph.controller.actions.EditMeasures;
-import jmt.gui.jsimgraph.controller.actions.EditPAParams;
-import jmt.gui.jsimgraph.controller.actions.EditSimParams;
-import jmt.gui.jsimgraph.controller.actions.EditUserClasses;
-import jmt.gui.jsimgraph.controller.actions.Exit;
-import jmt.gui.jsimgraph.controller.actions.NewModel;
-import jmt.gui.jsimgraph.controller.actions.OpenHelp;
-import jmt.gui.jsimgraph.controller.actions.OpenModel;
-import jmt.gui.jsimgraph.controller.actions.PauseSimulation;
-import jmt.gui.jsimgraph.controller.actions.SaveModel;
-import jmt.gui.jsimgraph.controller.actions.SaveModelAs;
-import jmt.gui.jsimgraph.controller.actions.SetConnectState;
-import jmt.gui.jsimgraph.controller.actions.SetOptions;
-import jmt.gui.jsimgraph.controller.actions.SetSelectState;
-import jmt.gui.jsimgraph.controller.actions.ShowResults;
-import jmt.gui.jsimgraph.controller.actions.Simulate;
-import jmt.gui.jsimgraph.controller.actions.SolveAnalytic;
-import jmt.gui.jsimgraph.controller.actions.SolveApprox;
-import jmt.gui.jsimgraph.controller.actions.StopSimulation;
-import jmt.gui.jsimgraph.controller.actions.SwitchToExactSolver;
-import jmt.gui.jsimgraph.controller.actions.TakeScreenShot;
-import jmt.gui.jsimgraph.controller.actions.UseTemplate;
-import jmt.gui.jsimgraph.definitions.JMTPoint;
-import jmt.gui.jsimgraph.definitions.JSimGraphModel;
-import jmt.gui.jsimgraph.definitions.JmodelBlockingRegionDefinition;
-import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
-import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
+import jmt.gui.jsimgraph.JGraphMod.*;
+import jmt.gui.jsimgraph.UtilPoint;
+import jmt.gui.jsimgraph.controller.actions.*;
+import jmt.gui.jsimgraph.definitions.*;
 import jmt.gui.jsimgraph.mainGui.ComponentBar;
 import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 import jmt.gui.jsimgraph.panels.AutoDownloadPanel;
@@ -143,17 +75,7 @@ import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.exact.ExactWizard;
 
 import org.jgraph.JGraph;
-import org.jgraph.graph.CellHandle;
-import org.jgraph.graph.CellView;
-import org.jgraph.graph.ConnectionSet;
-import org.jgraph.graph.DefaultGraphModel;
-import org.jgraph.graph.DefaultPort;
-import org.jgraph.graph.Edge;
-import org.jgraph.graph.EdgeView;
-import org.jgraph.graph.GraphConstants;
-import org.jgraph.graph.GraphModel;
-import org.jgraph.graph.GraphUndoManager;
-import org.jgraph.graph.PortView;
+import org.jgraph.graph.*;
 import org.jgraph.plaf.basic.BasicGraphUI;
 
 /**
@@ -181,10 +103,13 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction openModel;
 	private AbstractJmodelAction saveModel;
 	private AbstractJmodelAction setConnect;
+	private AbstractJmodelAction setBezierConnect;
+	private AbstractJmodelAction actionSnapToGrid;
 	private AbstractJmodelAction actionCut;
 	private AbstractJmodelAction actionCopy;
 	private AbstractJmodelAction actionPaste;
 	private AbstractJmodelAction actionDelete;
+	private AbstractJmodelAction actionCancelEdgeDrawing;
 	private AbstractJmodelAction setOptions;
 	private AbstractJmodelAction setSelect;
 	private AbstractJmodelAction simulate;
@@ -207,9 +132,18 @@ public class Mediator implements GuiInterface {
 	private AbstractJmodelAction addBlockingRegion;
 	private AbstractJmodelAction takeScreenShot;
 	private AbstractJmodelAction actionRotate;
+    private AbstractJmodelAction actionRotateLeft;
+    private AbstractJmodelAction actionRotateRight;
 	private AbstractJmodelAction actionSetRight;
 	private AbstractJmodelAction editUndo;
 	private AbstractJmodelAction editRedo;
+
+	private AbstractJmodelAction actionBezierEdgeAddControlPoint;
+	private AbstractJmodelAction actionBezierEdgeAddTangents;
+	private AbstractJmodelAction actionBezierEdgeBreakEdge;
+	private AbstractJmodelAction actionBezierEdgeRemoveControlPoint;
+	private AbstractJmodelAction actionBezierEdgeSelectControlPoint;
+	private AbstractJmodelAction actionBezierEdgeUnlockTangents;
 
 	private AbstractJmodelAction downloadDefaultTemplates;
 
@@ -237,6 +171,11 @@ public class Mediator implements GuiInterface {
 
 	private JmtOverlapping overlapping;
 
+	private BezierModificationToolsPanel bezierEditingToolBox;
+	private BezierConnectionHelperBar BezierConnectionHelperBar;
+
+	private JmtEdgeBreakagesIterator edgeBreakagesIterator;
+
 	public Mediator(final JmtJGraph graph, JSIMGraphMain mainWindow) {
 		this.mainWindow = mainWindow;
 		dialogFactory = new DialogFactory(mainWindow);
@@ -261,10 +200,12 @@ public class Mediator implements GuiInterface {
 		openModel = new OpenModel(this);
 		saveModel = new SaveModel(this);
 		setConnect = new SetConnectState(this);
+		setBezierConnect = new SetBezierConnectState(this);
 		actionCut = new ActionCut(this);
 		actionCopy = new ActionCopy(this);
 		actionPaste = new ActionPaste(this);
 		actionDelete = new ActionDelete(this);
+		actionCancelEdgeDrawing = new ActionCancelEdgeDrawing(this);
 		setOptions = new SetOptions(this);
 		setSelect = new SetSelectState(this);
 		simulate = new Simulate(this);
@@ -297,14 +238,34 @@ public class Mediator implements GuiInterface {
 		takeScreenShot = new TakeScreenShot(this);
 
 		actionRotate = new ActionRotate(this);
+        actionRotateLeft = new ActionRotateLeft(this);
+        actionRotateRight = new ActionRotateRight(this);
 		overlapping = new JmtOverlapping(this);
+
+		actionSnapToGrid = new ActionSnapToGrid(this);
 
 		editUserClasses = new EditUserClasses(this);
 		editMeasures = new EditMeasures(this);
 		switchToExactSolver = new SwitchToExactSolver(this);
 		// Initialize new Component bar
 		componentBar = new ComponentBar(this);
+
+
+		actionBezierEdgeAddControlPoint = new ActionBezierEdgeAddControlPoint(this);
+		actionBezierEdgeAddTangents = new ActionBezierEdgeAddTangents(this);
+		actionBezierEdgeBreakEdge = new ActionBezierEdgeBreakEdge(this);
+		actionBezierEdgeRemoveControlPoint = new ActionBezierEdgeRemoveControlPoint(this);
+		actionBezierEdgeSelectControlPoint = new ActionBezierEdgeSelectControlPoint(this);
+		actionBezierEdgeUnlockTangents = new ActionBezierEdgeUnlockTangents(this);
+
+		bezierEditingToolBox = new BezierModificationToolsPanel(mainWindow, this);
+		BezierConnectionHelperBar = new BezierConnectionHelperBar(mainWindow, this);
+
+		edgeBreakagesIterator = new JmtEdgeBreakagesIterator();
+
 	}
+	
+	
 
 	/**
 	 * Creates a toolbar to be displayed in main window.
@@ -315,10 +276,11 @@ public class Mediator implements GuiInterface {
 		// Builds an array with all actions to be put in the toolbar
 		AbstractJmodelAction[] actions = new AbstractJmodelAction[] { newModel, openModel, saveModel, null,
 				actionCut, actionCopy, actionPaste, actionDelete, null, editUserClasses, editMeasures, editSimParams, editPAParams, null,
-				switchToExactSolver, null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp, null, useTemplate };
+				switchToExactSolver, null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp, null, useTemplate};
 		toolbar.populateToolbar(actions);
 		return toolbar;
 	}
+
 
 	/**
 	 * Creates a menu to be displayed in main window.
@@ -332,7 +294,7 @@ public class Mediator implements GuiInterface {
 		menu.addMenu(action);
 
 		// Edit menu
-		action = new MenuAction("Edit", new AbstractJmodelAction[] { actionCut, actionCopy, actionPaste, actionDelete, null, takeScreenShot });
+		action = new MenuAction("Edit", new AbstractJmodelAction[] { actionCut, actionCopy, actionPaste, actionDelete, actionCancelEdgeDrawing, null, takeScreenShot});
 		menu.addMenu(action);
 
 		// Define menu
@@ -356,6 +318,10 @@ public class Mediator implements GuiInterface {
 
 	public void setMouseListener(GraphMouseListener mouseListener) {
 		this.mouseListener = mouseListener;
+	}
+
+	public GraphMouseListener getMouseListener() {
+		return mouseListener;
 	}
 
 	private File openedArchive;
@@ -392,6 +358,14 @@ public class Mediator implements GuiInterface {
 		actionRotate.setEnabled(state);
 	}
 
+    public void enableRotateLeftAction(boolean state) {
+        actionRotateLeft.setEnabled(state);
+    }
+
+    public void enableRotateRightAction(boolean state) {
+        actionRotateRight.setEnabled(state);
+    }
+
 	public void enableSetRight(boolean state) {
 		actionSetRight.setEnabled(state);
 	}
@@ -403,6 +377,14 @@ public class Mediator implements GuiInterface {
 	public AbstractJmodelAction getRotate() {
 		return actionRotate;
 	}
+
+    public AbstractJmodelAction getRotateLeft() {
+        return actionRotateLeft;
+    }
+
+    public AbstractJmodelAction getRotateRight() {
+        return actionRotateRight;
+    }
 
 	public AbstractJmodelAction getSetRight() {
 		return actionSetRight;
@@ -435,6 +417,36 @@ public class Mediator implements GuiInterface {
 	public AbstractJmodelAction getAbout() {
 		return about;
 	}
+
+	public AbstractJmodelAction getBezierEdgeAddControlPoint() {
+		return actionBezierEdgeAddControlPoint;
+	}
+
+	public AbstractJmodelAction getBezierEdgeAddTangents() {
+		return actionBezierEdgeAddTangents;
+	}
+
+	public AbstractJmodelAction getBezierEdgeBreakEdge() {
+		return actionBezierEdgeBreakEdge;
+	}
+
+	public AbstractJmodelAction getBezierEdgeRemoveControlPoint() {
+		return actionBezierEdgeRemoveControlPoint;
+	}
+
+	public AbstractJmodelAction getBezierEdgeSelectControlPoint() {
+		return actionBezierEdgeSelectControlPoint;
+	}
+
+	public AbstractJmodelAction getBezierEdgeUnlockTangents() {
+		return actionBezierEdgeUnlockTangents;
+	}
+
+	public AbstractJmodelAction getCancelEdgeDrawing() {
+		return actionCancelEdgeDrawing;
+	}
+
+
 
 	private GraphUndoManager undoManager;
 	private UndoManagerProxy undoProxy;
@@ -476,8 +488,19 @@ public class Mediator implements GuiInterface {
 		oldCursor = cursor;
 		cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 		setGraphCursor(cursor);
+		System.out.println("Mediator -> setConnectState");
 		mouseListener.setConnectState();
 	}
+
+	public void setBezierConnectState() {
+		setSelect.setEnabled(true);
+		oldCursor = cursor;
+		cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+		setGraphCursor(cursor);
+		System.out.println("Mediator -> setBezierConnectState");
+		mouseListener.setBezierConnectState();
+	}
+
 
 	public void setInsertState(String className) {
 		setSelect.setEnabled(true);
@@ -510,6 +533,9 @@ public class Mediator implements GuiInterface {
 		actionDelete.setEnabled(state);
 	}
 
+	public void enableSnapToGridAction(boolean state) {
+		actionSnapToGrid.setEnabled(state);
+	}
 	public AbstractJmodelAction getTakeScreenShot() {
 		return takeScreenShot;
 	}
@@ -542,8 +568,12 @@ public class Mediator implements GuiInterface {
 		return closeModel;
 	}
 
-	public AbstractJmodelAction getSetConnect() {
-		return setConnect;
+	public AbstractJmodelAction getSetConnect() { return setConnect; }
+
+	public AbstractJmodelAction getSetBezierConnect() { return setBezierConnect; }
+
+	public AbstractJmodelAction getSnapToGrid() {
+		return actionSnapToGrid;
 	}
 
 	public AbstractJmodelAction getCutAction() {
@@ -636,6 +666,7 @@ public class Mediator implements GuiInterface {
 		componentBar.clearButtonGroupSelection(0);
 		componentBar.enableButtonGroup(0, true);
 
+
 		// Disables show results button and measure definition, until simulation
 		showResults.setSelected(false);
 		showResults.setEnabled(false);
@@ -649,9 +680,13 @@ public class Mediator implements GuiInterface {
 		enableCopyAction(false);
 		enableDeleteAction(false);
 
+		// Enable snap to grid
+		enableSnapToGridAction(true);
+
 		// Disables creation of blocking region
 		enableAddBlockingRegion(false);
 		setConnect.setEnabled(false);
+		setBezierConnect.setEnabled(false);
 		setSelect.setEnabled(false);
 		actionRotate.setEnabled(false);
 		actionSetRight.setEnabled(false);
@@ -668,6 +703,8 @@ public class Mediator implements GuiInterface {
 		mainWindow.updateTitle(null);
 		// Free same resources by forcing a garbage collection
 		System.gc();
+
+
 	}
 
 	/**
@@ -741,12 +778,14 @@ public class Mediator implements GuiInterface {
 		componentBar.clearButtonGroupSelection(0);
 		componentBar.enableButtonGroup(0, false);
 		setConnect.setEnabled(false);
+		setBezierConnect.setEnabled(false);
 		actionCut.setEnabled(false);
 		actionCopy.setEnabled(false);
 		actionPaste.setEnabled(false);
 		actionDelete.setEnabled(false);
 		actionRotate.setEnabled(false);
 		actionSetRight.setEnabled(false);
+		actionSnapToGrid.setEnabled(false);
 
 		setSelect.setEnabled(false);
 		simulate.setEnabled(false);
@@ -786,10 +825,17 @@ public class Mediator implements GuiInterface {
 		pt = graph.snap(pt);
 		Object[] arg = new Object[] { newCell };
 		graph.getModel().insert(arg, newCell.setAttributes(pt, graph), null, null, null);
+
+		//snap the cell to the grid (will work only if the grid is enabled)
+		this.snapCellByPort(newCell);
+
 		// Puts new cell on back to go under blocking regions
 		graph.getModel().toBack(new Object[] { newCell });
 		newCell.resetParent();
 		setConnect.setEnabled(true);
+		setBezierConnect.setEnabled(true);
+		actionSetRight.setEnabled(!(model.hasConnectionShape()));
+
 	}
 
 	/** Set the state of mouse listener to select & passes the event to the
@@ -980,12 +1026,110 @@ public class Mediator implements GuiInterface {
 			ConnectionSet cs = new ConnectionSet();
 			cs.connect(connection, outPort.getCell(), true);
 			cs.connect(connection, inPort.getCell(), false);
+
+			// if previous JmtEdge exists and erase it
+			Set edges= ((OutputPort) (outPort.getCell())).getEdges();
+			Iterator<JmtEdge> itr = edges.iterator();
+			JmtEdge e = null;
+			for (int i=0; itr.hasNext(); i++){
+				e = itr.next();
+				if (e.getTargetKey()==targetKey) {
+					this.deleteJmtEdge(e);
+				}
+			}
+
 			// Visualizes connection only if it can be created into data structure
-			if (model.setConnected(sourceKey, targetKey, true)) {
+			if(model.areConnectable(sourceKey,targetKey)){
+				model.setConnected(sourceKey, targetKey, true);
 				graph.getModel().insert(insert, viewMap, cs, null, null);
+
+				//A Non-Bezier connection has been created so the attribute free of the cells is set to false
+				JmtCell source = (JmtCell) ((DefaultPort) connection.getSource()).getParent();
+				JmtCell target = (JmtCell) ((DefaultPort) connection.getTarget()).getParent();
+
+				//if the source or target station were previously rotated by any angle, creating a non-bezier edge will
+				// snap their rotation at zero, so we also need to rotate the edges accordingly
+				// If they were not rotate, we rotate the edge by an angle zero so we do nothing
+				rotateEndEdges(source,  Math.toRadians(-source.getRotationAngle()));
+				rotateEndEdges(target,  Math.toRadians(-target.getRotationAngle()));
+
+				source.setFreeRotationAllowed(false);
+				target.setFreeRotationAllowed(false);
+				this.loadImage(source);
+				this.loadImage(target);
+				this.toggleFreeRotationButtons();
+				System.out.println("Mediator - > connect (model.hasConnectionShape())"+(model.hasConnectionShape()));
+				actionSetRight.setEnabled(!(model.hasConnectionShape()));
 			}
 		}
 	}
+
+	public void connectBezier( Point2D start, Point2D current, JMTPath path, PortView inPort, PortView outPort) {
+		Point2D p = fromScreen(start);
+		Point2D p2 = fromScreen(current);
+		if (inPort != null && outPort != null) {
+			// Adds connection into underlying data structure
+            Object sourceKey = ((CellComponent) ((JmtCell) ((OutputPort) (outPort.getCell())).getUserObject()).getUserObject()).getKey();
+            Object targetKey = ((CellComponent) ((JmtCell) ((InputPort) (inPort.getCell())).getUserObject()).getUserObject()).getKey();
+
+			ArrayList<Point2D> list = new ArrayList<Point2D>();
+			list.add(p);
+			list.add(p2);
+			Map map = new Hashtable();
+			GraphConstants.setPoints(map, list);
+			GraphConstants.setRouting(map, JmtGraphConstants.ROUTING_BEZIER_JMT);
+			GraphConstants.setLineEnd(map, GraphConstants.ARROW_CLASSIC);
+			GraphConstants.setEndFill(map, true);
+			GraphConstants.setConnectable(map, false);
+			GraphConstants.setDisconnectable(map, false);
+
+			Map<Object, Map> viewMap = new Hashtable<Object, Map>();
+			// Adds connection into underlying data structure
+			JmtEdge connection = new JmtEdge(sourceKey, targetKey, true, this);
+
+			viewMap.put(connection, map);
+			Object[] insert = new Object[] { connection };
+			ConnectionSet cs = new ConnectionSet();
+			cs.connect(connection, outPort.getCell(), true);
+			cs.connect(connection, inPort.getCell(), false);
+
+
+            // if previous JmtEdge exists and erase it
+			Set edges= ((OutputPort) (outPort.getCell())).getEdges();
+			Iterator<JmtEdge> itr = edges.iterator();
+			JmtEdge e = null;
+			for (int i=0; itr.hasNext(); i++){
+				e = itr.next();
+				if (e.getTargetKey()==targetKey) {
+					this.deleteJmtEdge(e);
+
+				}
+			}
+			if (model.areConnectable(sourceKey,targetKey)){
+				model.setConnected(sourceKey, targetKey, true);
+				model.setConnectionShape(sourceKey,targetKey,path);
+				graph.getModel().insert(insert, viewMap, cs, null, null);
+				editConnectionLabels(sourceKey,targetKey, start, current,connection);
+
+				//test if the cell is only linked to Bezier edges to set the value of the attribute AuthorisedFreeRotation
+				JmtCell source = (JmtCell) ((DefaultPort) connection.getSource()).getParent();
+				JmtCell target = (JmtCell) ((DefaultPort) connection.getTarget()).getParent();
+				source.setFreeRotationAllowed(this.isLinkedOnlyToBezierEdges(source));
+				target.setFreeRotationAllowed(this.isLinkedOnlyToBezierEdges(target));
+				this.loadImage(source);
+				this.loadImage(target);
+				this.toggleFreeRotationButtons();
+				actionSetRight.setEnabled(false);
+
+				Object[] edges2 = ((OutputPort) (outPort.getCell())).getEdges().toArray();
+				Object[] edges3 = ((InputPort) (inPort.getCell())).getEdges().toArray();
+				toFront(edges2);
+				toFront(edges3);
+			}
+
+		}
+	}
+
 
 	/**
 	 * Creates a connection between given source and target JmtCells
@@ -1007,6 +1151,8 @@ public class Mediator implements GuiInterface {
 	 * @return created component or null if connection between source and target cannot be created
 	 *
 	 * Author: Bertoli Marco
+     *
+     * Modified by Emma Bortone to add the BEZIER ROUTING
 	 */
 	public JmtEdge connect(JmtCell source, JmtCell target, boolean forced) {
 		// If one of parameter is null, returns null
@@ -1018,13 +1164,22 @@ public class Mediator implements GuiInterface {
 		Object targetKey = ((CellComponent) target.getUserObject()).getKey();
 		// Initializes correct layout for routing edges
 		Map map = new Hashtable();
-		GraphConstants.setRouting(map, JmtGraphConstants.ROUTING_JMT);
+		JmtEdge connection;
+        if (this.getModel().hasConnectionShape(sourceKey,targetKey)){
+            GraphConstants.setRouting(map, JmtGraphConstants.ROUTING_BEZIER_JMT);
+            connection = new JmtEdge(sourceKey, targetKey, true,this);
+            setConnectionLabels(map, sourceKey,targetKey, getPortOutPosition(source), getPortInPosition(target));
+        }
+		else {
+            GraphConstants.setRouting(map, JmtGraphConstants.ROUTING_JMT);
+			connection = new JmtEdge(sourceKey, targetKey, this);
+        }
 		GraphConstants.setLineEnd(map, GraphConstants.ARROW_CLASSIC);
 		GraphConstants.setEndFill(map, true);
 		GraphConstants.setConnectable(map, false);
 		GraphConstants.setDisconnectable(map, false);
+
 		Map<Object, Map> viewMap = new Hashtable<Object, Map>();
-		JmtEdge connection = new JmtEdge(sourceKey, targetKey, this);
 		viewMap.put(connection, map);
 		Object[] insert = new Object[] { connection };
 		ConnectionSet cs = new ConnectionSet();
@@ -1054,7 +1209,15 @@ public class Mediator implements GuiInterface {
 			// Adds connection to the graph only if it can be created into data structure
 			if (model.setConnected(sourceKey, targetKey, true) || forced) {
 				graph.getModel().insert(insert, viewMap, cs, null, null);
+
+                //test if the cell is only linked to Bezier edges to set the value of the attribute AuthorisedFreeRotation
+				source.setFreeRotationAllowed(this.isLinkedOnlyToBezierEdges(source));
+				target.setFreeRotationAllowed(this.isLinkedOnlyToBezierEdges(target));
+                this.loadImage(source);
+                this.loadImage(target);
+				actionSetRight.setEnabled(!(model.hasConnectionShape()));
 				return connection;
+
 			}
 		}
 		return null;
@@ -1134,6 +1297,7 @@ public class Mediator implements GuiInterface {
 	 * editing for the specified item.
 	 */
 	public void startEditingAtCell(Object cell) {
+
 		graph.startEditingAtCell(cell);
 		if ((cell != null) && (cell instanceof JmtCell)) {
 			JmtCell jcell = (JmtCell) cell;
@@ -1183,6 +1347,19 @@ public class Mediator implements GuiInterface {
 		dialogFactory.getDialog(regionPanel, "Editing " + model.getRegionName(regionKey) + " Properties...");
 	}
 
+	public void showBezierEditingPanel() {
+		System.out.println("Mediator -> showBezierEditingPanel !");
+		bezierEditingToolBox.getDialog().setVisible(true);
+		bezierEditingToolBox.getToolBar().clickButton(actionBezierEdgeSelectControlPoint);
+	}
+
+	public void hideBezierEditingPanel() {
+		if (mouseListener.getCurrentState() == mouseListener.bezierSelect){
+			System.out.println("Mediator -> hideBezierEditingPanel !");
+			bezierEditingToolBox.getDialog().setVisible(false);
+		}
+	}
+
 	/**
 	 * Cuts all the selected stations, connections and blocking regions.
 	 */
@@ -1205,6 +1382,7 @@ public class Mediator implements GuiInterface {
 		// If more than one stations are present enables link button
 		if (graph.getModel().getRootCount() > 1) {
 			setConnect.setEnabled(true);
+			setBezierConnect.setEnabled(true);
 		}
 		// If one station is present show select button
 		if (graph.getModel().getRootCount() >= 1) {
@@ -1232,6 +1410,8 @@ public class Mediator implements GuiInterface {
 		Set<Object> children = new HashSet<Object>();
 		// Set of the blocking regions with deleted stations
 		Set<Object> regions = new HashSet<Object>();
+		// List of the cells connected to the deleted edges
+		HashSet<JmtCell> connectedCells = new HashSet<>();
 		for (Object cell : cells) {
 			if (cell instanceof JmtCell) {
 				for (Object c : ((JmtCell) cell).getChildren()) {
@@ -1250,7 +1430,18 @@ public class Mediator implements GuiInterface {
 						children.add(c);
 					}
 				}
+			} else if (cell instanceof JmtEdge) { // Add to the list connectedCells the cells connected to the deleted edges
+				JmtCell source = (JmtCell) ((DefaultPort) ((JmtEdge) cell).getSource()).getParent();
+				JmtCell target = (JmtCell) ((DefaultPort) ((JmtEdge) cell).getTarget()).getParent();
+				connectedCells.add(source);
+				connectedCells.add(target);
 			}
+		}
+		for (Object edge : edges) { // Add to the list connectedCells the cells connected to the additional deleted edges
+			JmtCell source = (JmtCell) ((DefaultPort) ((JmtEdge) edge).getSource()).getParent();
+			JmtCell target = (JmtCell) ((DefaultPort) ((JmtEdge) edge).getTarget()).getParent();
+			connectedCells.add(source);
+			connectedCells.add(target);
 		}
 
 		// Removes edges from graph
@@ -1263,16 +1454,30 @@ public class Mediator implements GuiInterface {
 		for (Object c : children) {
 			((JmtCell) c).resetParent();
 		}
+
 		// Removes elements from data structure
 		for (Object cell : cells) {
 			if (cell instanceof JmtCell) {
+				if(connectedCells.contains(cell)){ // removes from the list connectedCells the cells taht will be deleted
+					connectedCells.remove(cell);
+				}
 				model.deleteStation(((CellComponent) ((JmtCell) cell).getUserObject()).getKey());
 			} else if (cell instanceof JmtEdge) {
 				model.setConnected(((JmtEdge) cell).getSourceKey(), ((JmtEdge) cell).getTargetKey(), false);
+				if (model.hasConnectionShape(((JmtEdge) cell).getSourceKey(), ((JmtEdge) cell).getTargetKey())) {
+                    model.deleteConnectionShape(((JmtEdge) cell).getSourceKey(), ((JmtEdge) cell).getTargetKey());
+					edgeBreakagesIterator.removeAll(((JmtEdge) cell).getSourceKey(), ((JmtEdge) cell).getTargetKey());
+                }
 			} else if (cell instanceof BlockingRegion) {
 				model.deleteBlockingRegion(((BlockingRegion) cell).getKey());
 			}
 		}
+
+		//update the attribute authorisedFreeRotation of the cells that were connected to a deleted edge
+		for (JmtCell connectedCell : connectedCells) {
+			connectedCell.setFreeRotationAllowed(this.isLinkedOnlyToBezierEdges(connectedCell));
+		}
+
 
 		// Checks for empty blocking regions
 		Iterator<Object> it = regions.iterator();
@@ -1291,8 +1496,37 @@ public class Mediator implements GuiInterface {
 		if (graphModel.getRootCount() == 0) {
 			componentBar.clearButtonGroupSelection(0);
 			setConnect.setEnabled(false);
+			setBezierConnect.setEnabled(false);
 			setSelect.setEnabled(false);
 			actionSetRight.setEnabled(false);
+			actionRotateLeft.setEnabled(false);
+            actionRotateRight.setEnabled(false);
+		}
+
+		// Change graphMouseListener state to select state if current state is bezierEdgeModification
+		this.mouseListener.cellDeleted();
+	}
+
+	/**
+	 * This function deletes a jmtEdge without disconnecting the stations
+	 * this is used before replacing that edge with another.
+	 */
+	public void deleteJmtEdge(JmtEdge edge){
+		GraphModel graphModel = graph.getModel();
+		HashSet<JmtCell> connectedCells = new HashSet<>();
+		JmtCell source = (JmtCell) ((DefaultPort) edge.getSource()).getParent();
+		JmtCell target = (JmtCell) ((DefaultPort) edge.getTarget()).getParent();
+		connectedCells.add(source);
+		connectedCells.add(target);
+
+		Object[] objectToDelete = new Object[] { edge };
+		// Removes elements from graph
+		graphModel.remove(objectToDelete);
+		// Removes elements from data structure
+
+		if (model.hasConnectionShape(edge.getSourceKey(), edge.getTargetKey())) {
+			model.deleteConnectionShape(edge.getSourceKey(), edge.getTargetKey());
+			edgeBreakagesIterator.removeAll(edge.getSourceKey(), edge.getTargetKey());
 		}
 	}
 
@@ -1383,7 +1617,7 @@ public class Mediator implements GuiInterface {
 				JmtCell jcell = (JmtCell) cell;
 				key = ((CellComponent) jcell.getUserObject()).getKey();
 				// Sets cell coordinate into data structure
-				model.setStationPosition(key, new JMTPoint(getCellCoordinates(jcell), !jcell.isLeftInputCell()));
+				model.setStationPosition(key, new JMTPoint(getCellCoordinates(jcell), !jcell.isLeftInputCell(), ((JmtCell) cell).getRotationAngle()));
 			}
 		}
 	}
@@ -1414,27 +1648,33 @@ public class Mediator implements GuiInterface {
 			// If position is not present, auto-position this station
 			while (position == null) {
 				containPosition = false;
-				JMTPoint tmp = new JMTPoint(X0 + X * (count / colCount), Y0 + Y * (count % colCount), false);
+				JMTPoint tmp = new JMTPoint(X0 + X * (count / colCount), Y0 + Y * (count % colCount), false, 0);
 				if (!overlapCells(tmp, cell)) {
 					position = tmp;
 				}
 				count++;
 			}
 			InsertCell(position, cell);
-			if (position.isRotate()) {
-				rotateComponent(new Object[] { cell });
-			}
+
+			//Set attributes of the cell that modify the icon (mirrored, rotation angle)
+			//Here the attribute isFreeRotationAllowed will be set to True, it will be actualized if a connection with
+			// a non-Bezier arc is found.
+			cell.setIconModifiers(position.isRotate(),true, position.getAngle());
+			loadImage(cell);
+
 			cells.put(station, cell);
 		}
 		Vector<Object> forwardConnections;
 		// Shows connections
 		for (Object station : stations) {
 			forwardConnections = model.getForwardConnections(station);
+
 			for (int j = 0; j < forwardConnections.size(); j++) {
 				// Forces connection as it is already present into data structure
 				connect(cells.get(station), cells.get(forwardConnections.get(j)), true);
 			}
 		}
+
 		// Now adds blocking regions
 		Vector<Object> regions = model.getRegionKeys();
 		for (int i = 0; i < regions.size(); i++) {
@@ -1518,7 +1758,7 @@ public class Mediator implements GuiInterface {
 	 */
 
 	int resetOverLapping = 0;
-	int sp = 0;
+	int  sp = 0;
 
 	public void putCellInGoodPlace(JmtCell cell, int x, int y, boolean flag) {
 		if (sp > 9) {
@@ -1555,6 +1795,7 @@ public class Mediator implements GuiInterface {
 			while (overlapping.length > 0) {
 				// Moves bounds until it does not overlap with anything
 				Point2D last = (Point2D) zero.clone();
+
 				for (int j = 0; j < overlapping.length; j++) {
 					resetOverLapping++;
 					// resetOverLapping is inserted for an abnormal behavior, 
@@ -1590,12 +1831,16 @@ public class Mediator implements GuiInterface {
 							last.setLocation(new Point(oldPointX, oldPointY));
 						}
 					}
-
+					/**Part to modified by Emma Bortone to excluse bezier curves**/
 					if (overlapping[j] instanceof JmtEdge
 							&& overlapping[j] != cell
 							&& !isInGroup(overlapping[j])
 							&& ((JmtEdge) overlapping[j]).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(overlapping[j], false),
-									GraphConstants.getBounds(cell.getAttributes())) && ((JmtEdge) overlapping[j]).getSource() != cell.getChildAt(0)) {
+									GraphConstants.getBounds(cell.getAttributes()))
+							&& ((JmtEdge) overlapping[j]).getSource() != cell.getChildAt(0)
+							&& (!((JmtEdge) overlapping[j]).getIsBezier())
+					       ){
+						/** **/
 						boolean access = false;
 						boolean access2 = false;
 						if (cell instanceof SourceCell
@@ -1794,7 +2039,6 @@ public class Mediator implements GuiInterface {
 						}
 					}
 				}
-
 				if (last.equals(zero)) {
 					break;
 				}
@@ -1803,7 +2047,8 @@ public class Mediator implements GuiInterface {
 			}
 
 			GraphConstants.setBounds(cell.getAttributes(), bounds);
-		} else {
+		}
+		else {
 			Rectangle bounds = GraphConstants.getBounds(cell.getAttributes()).getBounds();
 			if (isInGroup(cell)) {
 				inGroup = true;
@@ -1908,9 +2153,11 @@ public class Mediator implements GuiInterface {
 		Rectangle r = new Rectangle2D.Double(p.getX(), p.getY(), d.getWidth(), d.getHeight()).getBounds();
 		Object[] cells = graph.getRoots(r);
 		for (Object cell : cells) {
-			if (cell instanceof JmtEdge) {
-				if (((JmtEdge) cell).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(cell, false), r)) {
-					return true;
+			if (cell instanceof JmtEdge ) {
+				if (!((JmtEdge) cell).getIsBezier()) {
+					if (((JmtEdge) cell).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(cell, false), r)) {
+						return true;
+					}
 				}
 			}
 			if (cell instanceof JmtCell || cell instanceof BlockingRegion) {
@@ -2697,27 +2944,21 @@ public class Mediator implements GuiInterface {
 		if (cells == null) {
 			cells = graph.getSelectionCells();
 		}
-
 		for (Object cell : cells) {
 			if ((cell instanceof BlockingRegion) || cell instanceof JmtEdge) {
 				continue;
 			}
-
 			JmtCell current = (JmtCell) cell;
-			Map<Object, Map> nested = new Hashtable<Object, Map>();
-			Map attributeMap = new Hashtable();
-			ImageIcon icon;
-			if (current.isLeftInputCell()) {
-				icon = JMTImageLoader.loadImage(current.getIcon(), ImageLoader.MODIFIER_MIRROR);
-			} else {
-				icon = JMTImageLoader.loadImage(current.getIcon());
-			}
-			GraphConstants.setIcon(attributeMap, icon);
-
-			nested.put(cell, attributeMap);
 			current.setLeftInputCell(!current.isLeftInputCell());
-			current.updatePortPositions(nested, icon, current.getSize(graph));
-			graph.getGraphLayoutCache().edit(nested);
+
+			rotateEndEdges(current,Math.toRadians(180));
+			loadImage(current);
+
+			Object key =((CellComponent) (current).getUserObject()).getKey();
+			if (model.hasConnectionShape(key,key)){
+				RotateSelfLoopEdge(model.getConnectionShape(key,key), current);
+				loadImage(current);
+			}
 		}
 		avoidOverlappingCell(cells);
 	}
@@ -2750,6 +2991,10 @@ public class Mediator implements GuiInterface {
 	}
 
 	public void tryAdjustGraph(boolean needConfirm) {
+		if(mouseListener.getCurrentState() == mouseListener.bezierconnect){
+			((BezierConnectState) mouseListener.getCurrentState()).initializeState();
+		}
+
 		Object[] cells = graph.getDescendants(graph.getRoots());
 		Rectangle[] cellsBounds = new Rectangle[cells.length];
 		boolean[] cellsRotate = new boolean[cells.length];
@@ -3090,6 +3335,713 @@ public class Mediator implements GuiInterface {
 			return openedArchive.getName();
 		} else {
 			return null;
+		}
+	}
+
+
+	/**
+	 * Toggle enableGrid in the JGraph object
+	 *
+	 * if the grid was previously enabled, the grid is now disabled.
+	 * if the grid was previously disabled, the grid is now enabled.
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	public void toggleGrid() {
+		if (this.getGraph().isGridEnabled()) {
+			System.out.println("disable grid");
+			this.getGraph().setGridEnabled(false); // disables the grid
+			this.getGraph().setGridMode(0); // displays dots in the background
+			this.getGraph().setGridColor(Color.BLACK);
+		}
+		else {
+			System.out.println("enable grid");
+			this.getGraph().setGridEnabled(true); // enables the grid
+			this.getGraph().setGridMode(2); // displays a grid in the background
+			this.getGraph().setGridColor(Color.LIGHT_GRAY);
+
+		}
+	}
+
+	/**
+	 * If the Grid is enabled, return the offset separating a given point from the grid
+	 * Otherwise return (0, 0)
+	 *
+	 * @param  originalPoint Point2D
+	 * @return offset Point2D
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	private Point2D offsetForGridSnap(Point2D originalPoint){
+		Point2D snappedPoint = this.snap(new Point2D.Double(originalPoint.getX(),originalPoint.getY()));
+		Point2D offset= new Point2D.Double(snappedPoint.getX()-originalPoint.getX(),snappedPoint.getY()-originalPoint.getY());
+		return offset;
+	}
+
+	/**
+	 * Moves a JmtCell by a given offset
+	 * @param  offset Point2D
+	 * @param  cell JmtCell
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	private void moveCellByOffset(JmtCell cell, Point2D offset){
+		Rectangle2D bounds = GraphConstants.getBounds(cell.getAttributes()); // bounds of the cell
+		Point2D topLeftPoint = new Point2D.Double(bounds.getMinX(), bounds.getMinY()); // Top left point of the cell
+		// newTopLeftPoint = topLeftPoint+ offset
+		Point2D newTopLeftPoint = new Point2D.Double(topLeftPoint.getX()+offset.getX(), topLeftPoint.getY()+offset.getY());
+		Rectangle newBounds = new Rectangle((int) newTopLeftPoint.getX(), (int) newTopLeftPoint.getY() , (int) bounds.getWidth(), (int) bounds.getHeight());
+		GraphConstants.setBounds(cell.getAttributes(), newBounds);
+	}
+
+
+	/**
+	 * Return the position of the input port of a JmtCell if it exists,
+	 * otherwise returns null
+	 * @param  cell JmtCell
+	 * @return position of input port Point2D
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	private Point2D getPortInPosition(JmtCell cell){
+		Rectangle2D rett = GraphConstants.getBounds( cell.getAttributes());
+		PortView port = this.getInPortViewAt((int) rett.getCenterX(), (int) rett.getCenterY());
+		if (port!= null){
+			return  port.getLocation();
+		}
+		return null;
+	}
+
+	/**
+	 * Return the position of the output port of a JmtCell if it exists,
+	 * otherwise returns null
+	 * @param  cell JmtCell
+	 * @return position of output port Point2D
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	private Point2D getPortOutPosition(JmtCell cell){
+		Rectangle2D rett = GraphConstants.getBounds( cell.getAttributes());
+		PortView port = this.getOutPortViewAt((int) rett.getCenterX(), (int) rett.getCenterY());
+		if (port!= null){
+			return port.getLocation();
+		}
+		return null;
+	}
+
+	/**
+	 * If the grid is enabled, moves a JmtCell so that it one of its ports is snapped to the grid.
+	 * Returns true if the cell was moved, false otherwise
+	 *
+	 * First we try to snap the input port, if it doesn't exists (ex :source)  we snap the output port
+	 *
+	 * @param  cell JmtCell
+	 * @return true if the cell was moved,
+	 * 	       otherwise returns false
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	public boolean snapCellByPort(JmtCell cell){
+		Point2D offset;
+		Point2D inPortPoint = this.getPortInPosition( cell);
+		Point2D outPortPoint = this.getPortOutPosition( cell);
+
+		if (inPortPoint != null) {
+			// offset = distance separating the inPort from the grid
+			offset = this.offsetForGridSnap(inPortPoint);
+		}
+		// If there no input port (ex :source) the cell is snapped by its output port
+		else {
+			//offset = distance separating the outPort from the grid
+			offset = this.offsetForGridSnap(outPortPoint);
+		}
+		//If the offset between the snapped Port point and the original Port point is superior to 1, the cell is moved
+		//If the grid is not enabled, the offset will be zero and the cell won't be moved
+		if ((Math.abs(offset.getX()) >=1) || (Math.abs(offset.getY()) >=1)){ //
+			this.moveCellByOffset(cell, offset);
+			return true ;
+		}
+		else {
+			return false;
+		}
+	};
+
+    /**
+     * Returns true if the cell is connected only with Bezier edges,
+     * otherwise returns false
+     *
+     *
+     * @param  cell JmtCell
+     * @return true if the cell if the cell is connected only with Bezier edges,
+     * 	       otherwise returns false
+     *
+     * @author Emma Bortone
+     * Date: April 2020
+     */
+	private boolean isLinkedOnlyToBezierEdges(JmtCell cell){
+        Integer childIndex;
+        List children= cell.getChildren();
+        Set edges = new HashSet();
+        boolean isOnlyLinkedByBezierEdges = true;
+
+        // all the edges connected to this cell are put in the HashSet edges
+        for (childIndex=0; childIndex<cell.getChildCount(); childIndex++ ){
+            if (children.get(childIndex) instanceof  DefaultPort){
+                   edges.addAll(((DefaultPort)children.get(childIndex)).getEdges());
+            }
+        }
+
+        // For each edge connected to the cell, we check if it a bezier edge
+        //If we find one NON Bezier edge, the loop break and the function returns false
+        Iterator<JmtEdge> itr = edges.iterator();
+        JmtEdge e = null;
+        for (int i=0; itr.hasNext(); i++){
+            e = itr.next();
+            if (!e.getIsBezier()){
+                isOnlyLinkedByBezierEdges=false;
+                break;
+            }
+        }
+        return isOnlyLinkedByBezierEdges;
+    }
+
+
+    /**
+     * Enables or Disable the RotateLeft and RotateRight buttons
+     *
+     * If the selected cells contain only connection of Bezier type, then the rotation buttons are enabled
+     * If the selected cells contain at least one connection of NON Bezier type, then the rotation buttons are disabled
+     *
+     *
+     * @author Emma Bortone
+     * Date: April 2020
+     */
+	private void toggleFreeRotationButtons(){
+        //find all the selected cells
+        boolean SelectionLinkedOnlyToBezierEdges =true;
+        Object[] cells = graph.getSelectionCells();
+        for (Object cell : cells) {
+            if (cell instanceof JmtCell) {
+
+            	 if (!(((JmtCell) cell).isFreeRotationAllowed())){
+                    SelectionLinkedOnlyToBezierEdges = false;
+                    break;
+                }
+            }
+        }
+        if (SelectionLinkedOnlyToBezierEdges){
+            //If all the selected cells are linked only by Bezier edges, the buttons are enabled
+            this.enableRotateLeftAction(true);
+            this.enableRotateRightAction(true);
+        }
+        else{
+            // If the selected cells contain at least one connection of NON Bezier type, the rotation buttons are disabled
+            this.enableRotateLeftAction(false);
+            this.enableRotateRightAction(false);
+        }
+    }
+
+
+	/**
+	 * Set the angle of rotation in the attributes of the rotated cells
+	 * Load the rotated image
+	 *
+	 * @param cells list of cells to rotate left
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+    public void rotateLeft(Object[] cells) {
+		if (cells == null) {
+			cells = graph.getSelectionCells();
+		}
+		for (Object cell : cells) {
+			if ((cell instanceof BlockingRegion) || cell instanceof JmtEdge) {
+				continue;
+			}
+			JmtCell current = (JmtCell) cell;
+
+			Double previousAngle= current.getRotationAngle();
+			Double angleModification = 45.0;
+			Double newAngle= (previousAngle - angleModification) % (360);
+			current.setRotationAngle(newAngle);
+			rotateEndEdges(current,Math.toRadians(-angleModification));
+			loadImage(current);
+
+
+			Object key =((CellComponent) (current).getUserObject()).getKey();
+			if (model.hasConnectionShape(key,key)){
+				RotateSelfLoopEdge(model.getConnectionShape(key,key), current);
+				loadImage(current);
+			}
+		}
+	}
+
+	/**
+	 * Set the angle of rotation in the attributes of the rotated cells
+	 * Load the rotated image
+	 *
+	 * @param cells list of cells to rotate left
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	public void rotateRight(Object[] cells) {
+		if (cells == null) {
+			cells = graph.getSelectionCells();
+		}
+		for (Object cell : cells) {
+			if ((cell instanceof BlockingRegion) || cell instanceof JmtEdge) {
+				continue;
+			}
+			JmtCell current = (JmtCell) cell;
+
+			Double previousAngle= current.getRotationAngle();
+			Double angleModification = 45.0;
+			Double newAngle= (previousAngle + angleModification) % (360);
+			current.setRotationAngle(newAngle);
+			rotateEndEdges(current,Math.toRadians(angleModification));
+			loadImage(current);
+
+			Object key =((CellComponent) (current).getUserObject()).getKey();
+			if (model.hasConnectionShape(key,key)){
+				RotateSelfLoopEdge(model.getConnectionShape(key,key), current);
+				loadImage(current);
+			}
+
+		}
+	}
+
+	/**
+	 * Modify the points of the path (self loop path) of a cell that is rotated
+	 * @param path path of the cell loop
+	 * @param cell station that presents a self loop that needs to be rotated
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	private void RotateSelfLoopEdge(JMTPath path, JmtCell cell){
+		ArrayList pointsList = new ArrayList<JMTPoint>();
+		ArrayList<JMTArc> arcs = new ArrayList<JMTArc>();
+		pointsList.add( new Point2D.Double(0, 0));
+		pointsList.add( new Point2D.Double(0, 0));
+		double xOffset, yOffset, rotationAngle;
+		Point2D.Double point1,  point2, point3, point4, inputPort_location, outputPort_location;
+		inputPort_location = (Point2D.Double) getPortInPosition(cell);
+		outputPort_location = (Point2D.Double)  getPortOutPosition(cell);
+
+		double height =inputPort_location.getY()-outputPort_location.getY();
+		double width = inputPort_location.getX()-outputPort_location.getX();
+		rotationAngle = ((!(cell.isLeftInputCell())) ? (cell.getRotationAngle()+180.0) : cell.getRotationAngle());
+		xOffset = ((width >= 0) ? -20 : 20);
+		yOffset = ((height >= 0) ? 20 : -20);
+		if (Math.abs(height) <= 1.0){
+			yOffset = 40.0;
+		}
+		if (Math.abs(width) <= 1.0){
+			xOffset = 40.0;
+		}
+		//If station is in vertical position
+		if (rotationAngle==-90.0 || rotationAngle==90.0 ||rotationAngle==270.0 || rotationAngle==-270.0){
+			point1 = new Point2D.Double(0.0, -yOffset);
+			point2= new Point2D.Double(xOffset, point1.getY());
+			point3= new Point2D.Double(point2.getX(),height+yOffset);
+			point4= new Point2D.Double(0.0,point3.getY());
+		}
+		else {
+			point1 = new Point2D.Double(xOffset, 0.0);
+			point2= new Point2D.Double(point1.getX(), height+yOffset);
+			point3= new Point2D.Double(width-xOffset, point2.getY());
+			point4= new Point2D.Double(point3.getX(), height);
+		}
+		arcs.add(new JMTArc(new Point2D.Double(0, 0), pointsList, point1));
+		arcs.add(new JMTArc(point1, pointsList, point2));
+		arcs.add(new JMTArc(point2, pointsList, point3));
+		arcs.add(new JMTArc(point3, pointsList, point4));
+		arcs.add(new JMTArc(point4, pointsList,  new Point2D.Double(0, 0)));
+		path.setArcs(arcs);
+	}
+
+	/**
+	 * When a station is rotated, the positions of the end of its edges (if different from the position
+	 * of the port) need to be rotated by the same rotation
+	 * @param angle angle by which the cell was rotated (in radians)
+	 * @param cell station that has been rotated
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	private void rotateEndEdges(JmtCell cell, double angle){
+		Set<Object> edges = new HashSet<Object>();
+		for (Object c : (cell).getChildren()) {
+			if (c instanceof DefaultPort) {
+				edges.addAll(((DefaultPort) c).getEdges());
+			}
+		}
+		for (Object e : edges){
+			if (model.hasConnectionShape(((JmtEdge) e).getSourceKey() ,((JmtEdge) e).getTargetKey())){
+				JMTPath path = (model.getConnectionShape(((JmtEdge) e).getSourceKey() ,((JmtEdge) e).getTargetKey()));
+				// The target points must be moved
+				if (((JmtEdge) e).getTargetKey() ==  ((CellComponent) cell.getUserObject()).getKey()){
+					Point2D initialTargetPosition = path.getArc(path.getArcsNb()-1).getTarget();
+					Point2D newTargetPosition = newEndPosition( initialTargetPosition, angle);
+					path.getArc(path.getArcsNb()-1).setTarget(newTargetPosition);
+				}
+				// The input point must be moved
+				else {
+					Point2D initialSourcePosition = path.getArc(0).getSource();
+					Point2D newSourcePosition= newEndPosition( initialSourcePosition,  angle);
+					path.getArc(0).setSource(newSourcePosition);
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * This function calculates the new position of the end of the edge after a rotation by the angle in argument
+	 * @param initialPosition initial position of the end of the edge
+	 * @param angle angle by which the cell is rotated (in radians)
+	 * @return The new position of the end edge
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	private Point2D newEndPosition(Point2D initialPosition, double angle){
+		Point2D newPosition = new Point2D.Double(0.0,0.0);
+		double norm =Math.sqrt( Math.pow(initialPosition.getX(),2)+Math.pow(initialPosition.getY(),2));
+		if (norm > 10e-6){
+			double yPos = 1;
+			if(initialPosition.getY() <0.0){
+				yPos = -1;
+			}
+			double angle1 = Math.acos(  (initialPosition.getX())/norm) * yPos;
+			double angle2 = angle1+angle;
+			 newPosition = new Point2D.Double(norm*Math.cos(angle2),norm*Math.sin(angle2));
+		}
+		return newPosition;
+	}
+
+
+	/**
+	 * This function interrupt the drawing of an Edge
+	 * For example if the user realised that he made a mistake
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	public void cancelEdgeDrawing(){
+		if(mouseListener.getCurrentState()==mouseListener.bezierconnect){
+			((BezierConnectState) mouseListener.getCurrentState()).initializeState();
+		}
+	}
+
+
+
+	/**
+	 * This function load the image of a station applying the right modifications (rotation or mirror)
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	public void loadImage (JmtCell cell) {
+		String iconName = cell.getIcon();
+		Map<Object, Map> nested = new Hashtable<Object, Map>();
+		Map attributeMap = new Hashtable();
+		ImageIcon icon;
+		boolean mirrored = !(cell.isLeftInputCell());
+		boolean rotated = (cell.isFreeRotationAllowed());
+
+		if(mirrored & rotated){
+			icon = JMTImageLoader.loadImage(iconName, ImageLoader.MODIFIER_MIRROR_AND_ROTATE,  cell.getRotationAngle());
+		}
+		else if(mirrored){
+			icon = JMTImageLoader.loadImage(iconName, ImageLoader.MODIFIER_MIRROR);
+		}
+		else if(rotated){
+			icon = JMTImageLoader.loadImage(iconName, ImageLoader.MODIFIER_ROTATE, cell.getRotationAngle());
+		}
+		else{
+			icon = JMTImageLoader.loadImage(iconName);
+		}
+		GraphConstants.setIcon(attributeMap, icon);
+		nested.put(cell, attributeMap);
+		cell.updateCellSize(icon, graph);
+		cell.updatePortPositions(nested, icon, cell.getSize(graph));
+		graph.getGraphLayoutCache().edit(nested);
+	}
+
+	/**
+	 * This function shows the helper bar for drawing Bezier Edges
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	public void BezierConnectshowHelperBar(){
+		BezierConnectionHelperBar.setVisible(true);
+	}
+
+	/**
+	 * This function hides the helper bar for drawing Bezier Edges
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	public void BezierConnecthideHelperBar(){
+		BezierConnectionHelperBar.setVisible(false);
+	}
+
+	/**
+	 * @return the helper bar for the creation of Bezier Edges
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	public BezierConnectionHelperBar getBezierConnectionHelperBar() {
+		return (BezierConnectionHelperBar);
+	}
+
+	/**
+	 * Update the shape of a connection when the source station is moved
+	 * The goal is to update the shape in order to maintain constant the absolute position of all the control points
+	 * of the connection shape except for the first arc.
+	 * @param offsetByCell
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	void updateBezierPath(HashMap<Object, Point2D> offsetByCell){
+		for (Object sourceKey : offsetByCell.keySet()) {
+			HashMap<Object, JMTPath> pathByTarget = model.getConnectionShapesFromSource(sourceKey);
+			if (pathByTarget !=null){
+				for (Object targetKey : pathByTarget.keySet()) {
+					if ( !(offsetByCell.keySet().contains(targetKey))){ //if the target wasn't moved
+
+						JMTPath path = model.getConnectionShape(sourceKey,targetKey);
+						Point2D offset = offsetByCell.get(sourceKey);
+						Integer n = path.getArcsNb();
+
+						Point2D newSourceArc;
+						Point2D newTargetArc;
+
+						if (n>1){
+							//for first arc
+							newTargetArc = UtilPoint.subtractPoints(path.getArc(0).getTarget(),offset);
+							path.getArc(0).setTarget(newTargetArc);
+
+							//arcs in the middle
+							for (int i = 1; i < n-1; i++) {
+								newSourceArc = UtilPoint.subtractPoints(path.getArc(i).getSource(),offset);
+								newTargetArc = UtilPoint.subtractPoints(path.getArc(i).getTarget(),offset);
+								path.getArc(i).setSource(newSourceArc);
+								path.getArc(i).setTarget(newTargetArc);
+							}
+
+							//for last arc
+							newSourceArc = UtilPoint.subtractPoints(path.getArc(n-1).getSource(),offset);
+							path.getArc(n-1).setSource(newSourceArc);
+						}
+
+					}
+				}
+			}
+
+		}
+	}
+
+	/**
+	 * This function updates the labels of all Bezier edges connected to a cell after the cell was moved
+	 * The labels identify the broken arcs
+	 * @param cells : the cells that were moved
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+    public void updateLabelAfterMovingCell(Object[] cells){
+        ArrayList<JmtEdge> edges = new ArrayList<>();
+        if (cells != null) {
+            System.out.println("mediator -> updateLabelAfterMovingCell"+cells);
+            for (Object cell : cells) {
+                if (cell instanceof JmtCell) {
+                    for (Object c : ((JmtCell) cell).getChildren()) {
+                        if (c instanceof DefaultPort) {
+                            edges.addAll(((DefaultPort) c).getEdges());
+                        }
+                    }
+                } else if (cell instanceof BlockingRegion) {
+                    for (Object c : ((BlockingRegion) cell).getChildren()) {
+                        if (c instanceof JmtCell) {
+                            for (Object c1 : ((JmtCell) cell).getChildren()) {
+                                if (c1 instanceof DefaultPort) {
+                                    edges.addAll(((DefaultPort) c).getEdges());
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            for (Object edge : edges) {
+                Object sourcekey = ((JmtEdge) edge).getSourceKey();
+                Object targetkey = ((JmtEdge) edge).getTargetKey();
+                if (model.hasConnectionShape(sourcekey, targetkey)) {
+                    Point2D source =(Point2D) ((PortView) ((EdgeView) getViewOfCell(edge, false)).getSource()).getLocation();
+                    Point2D target = (Point2D) ((PortView) ((EdgeView) getViewOfCell(edge, false)).getTarget()).getLocation();
+                    editConnectionLabels( sourcekey,targetkey,  source,  target, (JmtEdge) edge);
+                }
+            }
+        }
+    };
+
+	/**
+	 * Sets the labels for Bezier connections
+	 * A connection needs a labels if it contains one or several broken arcs. The labels are positioned on each side
+	 * of the breakage to identify how they are connected
+	 * @param map : attribute map
+	 * @param sourceKey key of the station at the source of the edge
+	 * @param targetKey key of the station at the target of the edge
+	 * @param source position of the output port of the source station
+	 * @param target position of the input port of the target station
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	private void setConnectionLabels(Map map, Object sourceKey, Object targetKey, Point2D source, Point2D target){
+        //ADDING LABEL TO BROKEN ARCS
+        // for all the arcs
+		if (model.hasConnectionShape(sourceKey,targetKey)) {
+			JMTPath path = model.getConnectionShape(sourceKey,targetKey);
+			int n = path.getArcsNb();
+			ArrayList<Object> labels = new ArrayList<>();
+			ArrayList<Point2D> labelPositions = new ArrayList<Point2D>();
+			Point2D sourceArc,targetArc;
+			Point2D[] listPoints = getAbsolutePoints( source,  target, sourceKey, targetKey);
+			double lengthPath = lengthPathToPoint(Arrays.asList(listPoints),4 * (n-1) + 3);
+			int indexBreak = 0;
+			for (int i = 1; i < n; i++) {
+				sourceArc =  listPoints[4 * i];
+				targetArc =  listPoints[4 * (i-1) + 3];
+
+				if (!UtilPoint.equalsWithTolerance(sourceArc,targetArc)){ //if edge is broken
+					double lengthPathToSource =lengthPathToPoint(Arrays.asList(listPoints),4 * i);
+					double lengthPathToTarget =lengthPathToPoint(Arrays.asList(listPoints),4 * (i-1) + 3);
+
+					String letter = edgeBreakagesIterator.getLetter(sourceKey,targetKey,indexBreak);
+					labels.add(letter);
+					labels.add(letter);
+					labelPositions.add(new Point2D.Double(GraphConstants.PERMILLE*(lengthPathToSource/lengthPath),10.0));
+					labelPositions.add(new Point2D.Double(GraphConstants.PERMILLE*(lengthPathToTarget/lengthPath),10.0));
+					indexBreak ++;
+				}
+
+			}
+			while(indexBreak < edgeBreakagesIterator.getNumberAttributedTo(sourceKey,targetKey)) {
+				// RemoveLast
+				edgeBreakagesIterator.removeLast(sourceKey,targetKey);
+			}
+			Point2D[] simpleArray = new Point2D[ labelPositions.size() ];
+			labelPositions.toArray( simpleArray );
+			GraphConstants.setExtraLabelPositions(map, simpleArray);
+			GraphConstants.setExtraLabels(map, labels.toArray());
+		}
+
+
+	}
+
+
+	/**
+	 *  Edit the labels the given connection
+	 * 	A connection needs a labels if it contains one or several broken arcs. The labels are positioned on each side
+	 *  of the breakage to identify how they are connected
+	 * @param sourceKey key of the station at the source of the edge
+	 * @param targetKey key of the station at the target of the edge
+	 * @param source position of the output port of the source station
+	 * @param target position of the input port of the target station
+	 * @param edge edge whose labels needs to be edited
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+	public void editConnectionLabels(Object sourceKey, Object targetKey, Point2D source, Point2D target, JmtEdge edge){
+        Map nested = new Hashtable();
+		Map map = new Hashtable();
+
+		setConnectionLabels(map,  sourceKey, targetKey,  source,  target);
+        nested.put(edge, map);
+        graph.getGraphLayoutCache().edit(nested, null, null, null);
+    }
+
+	/**
+	 * Returns a list of the points constituting a path in absolute
+	 * @param sourceKey key of the station at the source of the edge
+	 * @param targetKey key of the station at the target of the edge
+	 * @param source position of the output port of the source station
+	 * @param target position of the input port of the target station
+	 * @return the list of point in absolute
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+    private Point2D[] getAbsolutePoints(Point2D source, Point2D target, Object sourceKey, Object targetKey){
+        ArrayList<Point2D> points = new ArrayList<>();
+		JMTPath path = model.getConnectionShape(sourceKey,targetKey);
+		Point2D sourceArc, controlPoint0, controlPoint1, targetArc;
+
+		for (int i=0; i<path.getArcsNb()-1;i++){
+            sourceArc = UtilPoint.addPoints(source,path.getArc(i).getSource());
+            controlPoint0 = UtilPoint.addPoints(sourceArc,path.getArc(i).getArcPoints().get(0));
+            targetArc = UtilPoint.addPoints(source,path.getArc(i).getTarget());
+            controlPoint1 = UtilPoint.addPoints(targetArc,path.getArc(i).getArcPoints().get(1));
+            points.add(sourceArc);
+            points.add(controlPoint0);
+            points.add(controlPoint1);
+            points.add(targetArc);
+        }
+        sourceArc = UtilPoint.addPoints(source,path.getArc(path.getArcsNb()-1).getSource());
+        controlPoint0 = UtilPoint.addPoints(sourceArc,path.getArc(path.getArcsNb()-1).getArcPoints().get(0));
+        targetArc = UtilPoint.addPoints(target,path.getArc(path.getArcsNb()-1).getTarget());
+        controlPoint1 = UtilPoint.addPoints(targetArc,path.getArc(path.getArcsNb()-1).getArcPoints().get(1));
+        points.add(sourceArc);
+        points.add(controlPoint0);
+        points.add(controlPoint1);
+        points.add(targetArc);
+
+        Point2D[] listPoints = new Point2D[ points.size() ];
+        points.toArray( listPoints );
+        return listPoints;
+
+    }
+
+	/**
+	 * Returns the length of a path constituted by the list of points from the start to the specific index
+	 * @param points list of points
+	 * @param pointIndex index of the end point
+	 * @return length of a path from the start to the specific index
+	 *
+	 * @author Emma Bortone
+	 * Date 2020
+	 */
+    private double lengthPathToPoint(List points, int pointIndex){
+        double length=0.0;
+        for (int i=0; i<pointIndex; i++ ){
+            length=length+Math.sqrt(Math.pow(((Point2D)points.get(i+1)).getX()-((Point2D) points.get(i)).getX(),2)+
+                    Math.pow(((Point2D) points.get(i+1)).getY()-((Point2D) points.get(i)).getY(),2));
+        }
+        return length;
+    }
+
+
+
+	// Brings the Specified Cells to Front
+	public void toFront(Object[] c) {
+		if (c != null && c.length > 0) {
+			graph.getGraphLayoutCache().toFront(c);
 		}
 	}
 

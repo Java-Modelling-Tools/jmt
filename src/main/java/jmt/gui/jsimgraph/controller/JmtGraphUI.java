@@ -111,10 +111,17 @@ public class JmtGraphUI extends BasicGraphUI {
 			boolean foundBlockingRegion = false;
 			boolean foundConnection = false;
 			boolean cannotAddBlockingRegion = false;
+			boolean foundRotableStations = true;
 			Object[] cells = sm.getSelectionCells();
 			for (Object cell : cells) {
 				if (cell instanceof JmtCell) {
 					foundStations = true;
+
+					if(!(((JmtCell) cell).isFreeRotationAllowed())){
+						// the free rotation is enabled only if the station is connected by bezier edges only
+						foundRotableStations=false;
+					};
+
 					// If selected station is member of a BlockingRegion, signals it
 					if (((JmtCell) cell).getParent() instanceof BlockingRegion) {
 						cannotAddBlockingRegion = true;
@@ -136,24 +143,37 @@ public class JmtGraphUI extends BasicGraphUI {
 			}
 
 			if (foundStations) {
+
 				mediator.enableCutAction(true);
 				mediator.enableCopyAction(true);
 				mediator.enableDeleteAction(true);
 				mediator.enableAddBlockingRegion(!cannotAddBlockingRegion);
 				mediator.enableRotateAction(true);
-				mediator.enableSetRight(true);
+
+				//By default the free rotation is disabled for all stations
+				mediator.enableRotateLeftAction(false);
+				mediator.enableRotateRightAction(false);
+				if (foundRotableStations){
+					// the free rotation is enabled only if the station is connected by bezier edges only
+					mediator.enableRotateLeftAction(true);
+					mediator.enableRotateRightAction(true);
+				}
 			} else if (foundBlockingRegion) {
 				mediator.enableCutAction(true);
 				mediator.enableCopyAction(true);
 				mediator.enableDeleteAction(true);
 				mediator.enableAddBlockingRegion(false);
 				mediator.enableRotateAction(false);
+				mediator.enableRotateLeftAction(false);
+				mediator.enableRotateRightAction(false);
 			} else {
 				mediator.enableCutAction(false);
 				mediator.enableCopyAction(false);
 				mediator.enableDeleteAction(false);
 				mediator.enableAddBlockingRegion(false);
 				mediator.enableRotateAction(false);
+				mediator.enableRotateLeftAction(false);
+				mediator.enableRotateRightAction(false);
 			}
 			if (foundConnection) {
 				mediator.enableDeleteAction(true);

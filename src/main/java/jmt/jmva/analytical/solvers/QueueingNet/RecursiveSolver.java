@@ -85,10 +85,17 @@ public class RecursiveSolver extends QNSolver {
 	protected BigRational initialConditionFor(PopulationVector n) {
 		// Consider think time
 		BigRational toAssign = BigRational.ONE;
+        boolean nnzDelay = false;
+        for (int r = 0; r < qnm.R; r++) {
+        	if (qnm.getDelay(r)>0) {
+        		nnzDelay = true;
+        	}
+        }
+        if (nnzDelay == false) {
+            return BigRational.ZERO;        	
+        }
+		
 		for (int r = 0; r < qnm.R; r++) {
-			if (qnm.getDelay(r) == 0) {
-				return BigRational.ZERO;
-			}
 			int nr = n.get(r);
 			if (nr > 0) {
 				BigRational curVal = qnm.getDelayAsBigRational(r).pow(nr);

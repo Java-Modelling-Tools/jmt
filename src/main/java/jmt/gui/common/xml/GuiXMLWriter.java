@@ -20,10 +20,7 @@ package jmt.gui.common.xml;
 
 import java.io.File;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
@@ -144,6 +141,7 @@ public class GuiXMLWriter implements GuiXMLConstants {
 		if (model instanceof JSimGraphModel) {
 			writeClasses(guiDoc, elem, (JSimGraphModel) model);
 			writeStations(guiDoc, elem, (JSimGraphModel) model);
+			writeConnectionShapes(guiDoc, elem, (JSimGraphModel) model);
 		}
 		writeParametricAnalysisInfos(guiDoc, elem, model);
 	}
@@ -182,8 +180,61 @@ public class GuiXMLWriter implements GuiXMLConstants {
 			position.setAttribute(XML_A_POSITION_X, String.valueOf(model.getStationPosition(stationKey).getX()));
 			position.setAttribute(XML_A_POSITION_Y, String.valueOf(model.getStationPosition(stationKey).getY()));
 			position.setAttribute(XML_A_POSITION_ROTATE, String.valueOf(model.getStationPosition(stationKey).isRotate()));
+			position.setAttribute(XML_A_POSITION_ANGLE, String.valueOf(model.getStationPosition(stationKey).getAngle()));
 			station.appendChild(position);
 			guiNode.appendChild(station);
+		}
+	}
+
+	/**
+	 * Write informations for connection shapes
+	 * @param doc document root
+	 * @param guiNode parent node where station informations should be added
+	 * @param model data structure
+	 */
+	static protected void writeConnectionShapes(Document doc, Node guiNode, JSimGraphModel model) {
+		Vector<Object> stations = model.getStationKeys();
+		Element connectionshape, arc, sourceArc, targetArc , controlPointSource, controlPointTarget;
+		Integer arcsNb;
+
+		// For each pair of station, we test if a connection shape has been defined
+		for (int i = 0; i < stations.size(); i++) {
+			for (int j = 0; j < stations.size(); j++) {
+				if (model.hasConnectionShape(stations.get(i),stations.get(j))){
+					//if a connection shape has been defined for the pair of stations, we insert the connection shape
+					//in the document
+					connectionshape = doc.createElement(XML_E_CONNECTION_SHAPE);
+					connectionshape.setAttribute(XML_A_CONNECTION_SOURCE, model.getStationName(stations.get(i)));
+					connectionshape.setAttribute(XML_A_CONNECTION_TARGET, model.getStationName(stations.get(j)));
+
+					//Then we get the number of arcs
+					arcsNb=model.getConnectionShape(stations.get(i),stations.get(j)).getArcsNb();
+					for (int k = 0; k < arcsNb; k++) {
+						arc = doc.createElement(XML_E_ARC);
+						sourceArc=doc.createElement(XML_E_SOURCE);
+						controlPointSource=doc.createElement(XML_E_POINT);
+						controlPointTarget=doc.createElement(XML_E_POINT);
+						targetArc=doc.createElement(XML_E_TARGET);
+
+						sourceArc.setAttribute(XML_A_SOURCE_X, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getSource().getX()));
+						sourceArc.setAttribute(XML_A_SOURCE_Y, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getSource().getY()));
+						controlPointSource.setAttribute(XML_A_POINT_X, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getArcPoints().get(0).getX()));
+						controlPointSource.setAttribute(XML_A_POINT_Y, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getArcPoints().get(0).getY()));
+						controlPointTarget.setAttribute(XML_A_POINT_X,String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getArcPoints().get(1).getX()));
+						controlPointTarget.setAttribute(XML_A_POINT_Y,String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getArcPoints().get(1).getY()));
+						targetArc.setAttribute(XML_A_TARGET_X, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getTarget().getX()));
+						targetArc.setAttribute(XML_A_TARGET_Y, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getTarget().getY()));
+
+						connectionshape.appendChild(arc);
+						arc.appendChild(sourceArc);
+						arc.appendChild(controlPointSource);
+						arc.appendChild(controlPointTarget);
+						arc.appendChild(targetArc);
+					}
+					guiNode.appendChild(connectionshape);
+					
+				}
+			}
 		}
 	}
 

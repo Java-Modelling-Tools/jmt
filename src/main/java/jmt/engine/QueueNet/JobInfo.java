@@ -52,6 +52,7 @@ public class JobInfo {
 	public double getEnteringTime() {
 		return enteringTime;
 	}
+	
 	public NetSystem getNetSystem(){
 		return job.getNetSystem();
 	}

@@ -37,7 +37,7 @@ public class ActionRotate extends AbstractJmodelAction {
 	 * description string and default icon.
 	 */
 	public ActionRotate(Mediator mediator) {
-		super("Rotate", "Rotate", mediator);
+		super("Rotate", "Rotate2", mediator);
 		putValue(SHORT_DESCRIPTION, "Rotate selected stations");
 		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_R));
 		setEnabled(false);

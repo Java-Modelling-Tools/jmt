@@ -27,9 +27,11 @@ import org.jgraph.graph.GraphConstants;
  * Date: 28-nov-2003
  * Time: 12.03.52
 
+ * Modified by Emma Bortone
+ * Date 24 march 2020
  */
 public class JmtGraphConstants extends GraphConstants {
 
 	public static final Edge.Routing ROUTING_JMT = new JmtRouting();
-
+	public static final Edge.Routing ROUTING_BEZIER_JMT = new JmtRoutingBezier();
 }

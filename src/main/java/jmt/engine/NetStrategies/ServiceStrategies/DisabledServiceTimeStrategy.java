@@ -49,9 +49,9 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 	public double wait(final NodeSection nodeSection, final JobClass jobClass) throws NetException {
 		if (!isDisabledWarningShown) {
 			if (nodeSection.getOwnerNode().getQueueNet().isTerminalSimulation()) {
-				System.out.println("JSIMengine - Warning: A job of "
-						+ jobClass.getName() + " requires service from "
-						+ nodeSection.getOwnerNode().getName() + ", which however is disabled.");
+				System.out.println("JSIMengine - Warning: A job of class \""
+						+ jobClass.getName() + "\" requires service at station \""
+						+ nodeSection.getOwnerNode().getName() + "\", which however is disabled.");
 			} else {
 				new Thread(new Runnable() {
 					@Override
@@ -60,9 +60,9 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 							Thread.sleep(800);
 						} catch (InterruptedException e) {
 						}
-						JOptionPane.showMessageDialog(null, "A job of "
-								+ jobClass.getName() + " requires service from "
-								+ nodeSection.getOwnerNode().getName() + ", which however is disabled.",
+						JOptionPane.showMessageDialog(null, "A job of class \""
+								+ jobClass.getName() + "\" requires service at station \""
+								+ nodeSection.getOwnerNode().getName() + "\", which however is disabled.",
 								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}
 				}).start();
