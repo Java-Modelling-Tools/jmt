@@ -191,8 +191,7 @@ public class Firing extends OutputSection {
 					int releasedJobNumber = firingOutcomes[modeIndex].getEntry(nodeName, i);
 					for (int j = 0; j < releasedJobNumber; j++) {
 						Job job = newJobIterators[i].next();
-                        job.initialize(netSystem); 
-						jobPermutation[index] = job;
+                        jobPermutation[index] = job;
 						index++;
 					}
 				}
