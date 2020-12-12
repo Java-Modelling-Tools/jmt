@@ -408,8 +408,9 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 						|| measure.type.equals(SimulationDefinition.MEASURE_RP)
 						|| measure.type.equals(SimulationDefinition.MEASURE_DR)) {
 					Vector<Object> vector = new Vector<Object>();
-					vector.add("");
+					vector.add("");					
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());					
 					return stationsCombos.getEditor(vector);
 				} else if (measure.type.equals(SimulationDefinition.MEASURE_QT)
 						|| measure.type.equals(SimulationDefinition.MEASURE_RD)

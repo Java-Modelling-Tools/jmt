@@ -488,7 +488,7 @@ public class Mediator implements GuiInterface {
 		oldCursor = cursor;
 		cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 		setGraphCursor(cursor);
-		System.out.println("Mediator -> setConnectState");
+//		System.out.println("Mediator -> setConnectState");
 		mouseListener.setConnectState();
 	}
 
@@ -497,7 +497,7 @@ public class Mediator implements GuiInterface {
 		oldCursor = cursor;
 		cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 		setGraphCursor(cursor);
-		System.out.println("Mediator -> setBezierConnectState");
+//		System.out.println("Mediator -> setBezierConnectState");
 		mouseListener.setBezierConnectState();
 	}
 
@@ -1058,7 +1058,7 @@ public class Mediator implements GuiInterface {
 				this.loadImage(source);
 				this.loadImage(target);
 				this.toggleFreeRotationButtons();
-				System.out.println("Mediator - > connect (model.hasConnectionShape())"+(model.hasConnectionShape()));
+//				System.out.println("Mediator - > connect (model.hasConnectionShape())"+(model.hasConnectionShape()));
 				actionSetRight.setEnabled(!(model.hasConnectionShape()));
 			}
 		}
@@ -1348,14 +1348,14 @@ public class Mediator implements GuiInterface {
 	}
 
 	public void showBezierEditingPanel() {
-		System.out.println("Mediator -> showBezierEditingPanel !");
+//		System.out.println("Mediator -> showBezierEditingPanel !");
 		bezierEditingToolBox.getDialog().setVisible(true);
 		bezierEditingToolBox.getToolBar().clickButton(actionBezierEdgeSelectControlPoint);
 	}
 
 	public void hideBezierEditingPanel() {
 		if (mouseListener.getCurrentState() == mouseListener.bezierSelect){
-			System.out.println("Mediator -> hideBezierEditingPanel !");
+//			System.out.println("Mediator -> hideBezierEditingPanel !");
 			bezierEditingToolBox.getDialog().setVisible(false);
 		}
 	}
@@ -3350,13 +3350,13 @@ public class Mediator implements GuiInterface {
 	 */
 	public void toggleGrid() {
 		if (this.getGraph().isGridEnabled()) {
-			System.out.println("disable grid");
+//			System.out.println("disable grid");
 			this.getGraph().setGridEnabled(false); // disables the grid
 			this.getGraph().setGridMode(0); // displays dots in the background
 			this.getGraph().setGridColor(Color.BLACK);
 		}
 		else {
-			System.out.println("enable grid");
+//			System.out.println("enable grid");
 			this.getGraph().setGridEnabled(true); // enables the grid
 			this.getGraph().setGridMode(2); // displays a grid in the background
 			this.getGraph().setGridColor(Color.LIGHT_GRAY);
@@ -3866,7 +3866,7 @@ public class Mediator implements GuiInterface {
     public void updateLabelAfterMovingCell(Object[] cells){
         ArrayList<JmtEdge> edges = new ArrayList<>();
         if (cells != null) {
-            System.out.println("mediator -> updateLabelAfterMovingCell"+cells);
+//            System.out.println("mediator -> updateLabelAfterMovingCell"+cells);
             for (Object cell : cells) {
                 if (cell instanceof JmtCell) {
                     for (Object c : ((JmtCell) cell).getChildren()) {

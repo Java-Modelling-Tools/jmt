@@ -20,7 +20,7 @@ public class ActionCancelEdgeDrawing extends AbstractJmodelAction {
      * Invoked when an action occurs.
      */
     public void actionPerformed(ActionEvent e) {
-        System.out.println("ActionCancelEdgeDrawing -> actionPerformed");
+//        System.out.println("ActionCancelEdgeDrawing -> actionPerformed");
         mediator.cancelEdgeDrawing();
     }
 

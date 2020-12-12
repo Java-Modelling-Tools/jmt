@@ -102,9 +102,9 @@ public class JmtOverlapping {
 				Rectangle2D cellBound = GraphConstants.getBounds(((JmtCell) element).getAttributes());
 				EdgeView viewtmp = (EdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(listEdge, false);
 				if (((JmtEdge) listEdge).intersects(viewtmp, cellBound)) {
-					System.out.println("JmtOverlapping -> fct avoidOverlappingCell -> IS BEZIER :"+(((JmtEdge) listEdge).getIsBezier()));
+//					System.out.println("JmtOverlapping -> fct avoidOverlappingCell -> IS BEZIER :"+(((JmtEdge) listEdge).getIsBezier()));
 					if  (!(((JmtEdge) listEdge).getIsBezier())) {
-						System.out.println("JmtOverlapping -> fct avoidOverlappingCell -> if intersects");
+//						System.out.println("JmtOverlapping -> fct avoidOverlappingCell -> if intersects");
 						double vertexMinX = (int) cellBound.getMinX();
 						double vertexMinY = (int) cellBound.getMinY();
 						double vertexMaxX = (int) cellBound.getMaxX();

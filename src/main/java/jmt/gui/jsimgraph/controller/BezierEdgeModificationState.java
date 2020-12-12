@@ -82,7 +82,7 @@ public class BezierEdgeModificationState extends UIStateDefault {
 	 */
 	@Override
 	public void handlePress(MouseEvent e) {
-		System.out.println("BezierEdgeModificationState -> handlePress click on x="+e.getX()+"  y="+e.getY());
+//		System.out.println("BezierEdgeModificationState -> handlePress click on x="+e.getX()+"  y="+e.getY());
 		if (state.equals("SELECT") || state.equals("DEL_POINT") || state.equals("UNLOCK") || state.equals("BREAK") || state.equals("ADD_TGTS")) {
 			if (selectedPoint == null && (!e.isConsumed()) ){
 				boolean pressedOnControlPoint = false;
@@ -943,7 +943,7 @@ public class BezierEdgeModificationState extends UIStateDefault {
 	 */
 	private void breakArc(){
 		Point2D offset = new Point2D.Double(20.0,0.0);
-		System.out.println("breakArc");
+//		System.out.println("breakArc");
 		if (typeControlPoint==0 && Integer.parseInt(indexCurrentArc)>0){
 			Point2D newSource = UtilPoint.addPoints(path.getArc(Integer.parseInt(indexCurrentArc)).getSource(),offset);
 			Point2D newTarget = UtilPoint.subtractPoints(path.getArc(Integer.parseInt(indexCurrentArc)-1).getTarget(),offset);
@@ -963,7 +963,7 @@ public class BezierEdgeModificationState extends UIStateDefault {
 	 */
 	private void addTangents(){
 		Point2D offset = new Point2D.Double(50.0,0.0);
-		System.out.println("addTangents");
+//		System.out.println("addTangents");
 		if (typeControlPoint==0) {
 			if (UtilPoint.equalsWithTolerance(path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(0),new Point2D.Double(0.0,0.0))){
 				path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setFirstControlPoint(offset);

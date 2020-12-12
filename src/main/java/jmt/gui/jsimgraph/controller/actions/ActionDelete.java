@@ -49,7 +49,7 @@ public class ActionDelete extends AbstractJmodelAction {
 	 * Invoked when an action occurs.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		System.out.println("ActionDelete -> actionPerformed");
+//		System.out.println("ActionDelete -> actionPerformed");
 		mediator.hideBezierEditingPanel();
 		int resultValue = JOptionPane.showConfirmDialog(mediator.getMainWindow(),
 				"Delete all the selected stations, connections and finite capacity regions?",

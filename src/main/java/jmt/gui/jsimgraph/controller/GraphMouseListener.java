@@ -161,7 +161,7 @@ public class GraphMouseListener implements MouseInputListener {
 		currentState = bezierconnect;
 		mediator.BezierConnectshowHelperBar();
 		((BezierConnectState) currentState).initializeState();
-		System.out.println("GraphMouseListener -> Going in Bezier Connect State");
+//		System.out.println("GraphMouseListener -> Going in Bezier Connect State");
 	}
 
 	public void setDeleteState() {

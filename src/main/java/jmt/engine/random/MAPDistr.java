@@ -19,6 +19,7 @@
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.engine.RandomEngine;									 
 
 /**
  * 
@@ -46,6 +47,11 @@ public class MAPDistr extends AbstractDistribution implements Distribution {
 		expPar = new ExponentialPar();
 	}
 
+	@Override
+	public void setRandomEngine(RandomEngine engine){
+		this.engine = engine;
+		this.expDistr.setRandomEngine(engine);
+	}
 	/**
 	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.

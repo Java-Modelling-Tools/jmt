@@ -71,15 +71,15 @@ public class GuiXMLReader implements GuiXMLConstants {
 	 * @param model data model to be elaborated
 	 */
 	public static void parseXML(Element root, CommonModel model) {
-		System.out.println("GuiXMLReader -> parseXML -> root"+ root);
-		System.out.println("GuiXMLReader -> parseXML -> model"+ model);
+		//System.out.println("GuiXMLReader -> parseXML -> root"+ root);
+		//System.out.println("GuiXMLReader -> parseXML -> model"+ model);
 		if (model instanceof JSimGraphModel) {
 			setUserClasses(root, (JSimGraphModel) model);
 			setStations(root, (JSimGraphModel) model);
 
 			/* Modification by Emma */
 			if(root.getElementsByTagName(XML_E_CONNECTION_SHAPE).getLength() > 0){
-				System.out.println("GuiXMLReader -> parseXML -> CONNECTION SHAPE DETECTED");
+				//System.out.println("GuiXMLReader -> parseXML -> CONNECTION SHAPE DETECTED");
 				setConnectionShapes(root, (JSimGraphModel) model);
 			}
 		}
