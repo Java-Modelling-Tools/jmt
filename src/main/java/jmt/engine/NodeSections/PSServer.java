@@ -67,12 +67,17 @@ public class PSServer extends ServiceSection {
 	private PSJobInfo messageJobInfo;
 	private double messageSendTime;
 
+	
+	public PSServer(Integer numberOfServers, ServiceStrategy[] serviceStrategies) {
+	 this(numberOfServers, false, serviceStrategies);
+	}
+	
 	/**
 	 * Creates a new instance of PSServer.
 	 * @param numberOfServers Number of jobs which can be served simultaneously.
 	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
-	public PSServer(Integer numberOfServers, Boolean serverPreemtive, ServiceStrategy[] serviceStrategies) {
+	public PSServer(Integer numberOfServers, Boolean serverPreemptive, ServiceStrategy[] serviceStrategies) {
 		super(false);
 		this.numberOfServers = numberOfServers.intValue();
 		this.serviceStrategies = serviceStrategies;
@@ -86,6 +91,9 @@ public class PSServer extends ServiceSection {
 		}
 	}
 
+	public PSServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
+		this(numberOfServers, false, serviceStrategies);
+	}
 	/**
 	 * Creates a new instance of PSServer.
 	 * @param numberOfServers Number of jobs which can be served simultaneously.
@@ -93,8 +101,13 @@ public class PSServer extends ServiceSection {
 	 * the server will be single visit.
 	 * @param serviceStrategies Array of service strategies, one per class.
 	 */
-	public PSServer(Integer numberOfServers, Boolean serverPreemtive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
+	public PSServer(Integer numberOfServers, Boolean serverPreemptive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
 		this(numberOfServers, false, serviceStrategies);
+	}
+	
+	public PSServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies,
+			PSStrategy[] psStrategies, Double[] serviceWeights) {
+		this(numberOfServers, false, numberOfVisitsPerClass, serviceStrategies, psStrategies, serviceWeights);
 	}
 
 	/**
@@ -106,7 +119,7 @@ public class PSServer extends ServiceSection {
 	 * @param psStrategies Array of PS strategies, one per class.
 	 * @param serviceWeights Array of service weights, one per class.
 	 */
-	public PSServer(Integer numberOfServers, Boolean serverPreemtive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies,
+	public PSServer(Integer numberOfServers, Boolean serverPreemptive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies,
 			PSStrategy[] psStrategies, Double[] serviceWeights) {
 		this(numberOfServers, false, numberOfVisitsPerClass, serviceStrategies);
 		this.psStrategies = psStrategies;

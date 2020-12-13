@@ -133,7 +133,7 @@ public class SimLoader {
 			parser.setFeature("http://apache.org/xml/features/validation/schema-full-checking", true);
 
 			//NEW
-			//TODO: setto lo schema xsd con cui fare il parsing
+			//TODO: set the schema to do parsing
 			String externalSchemaLocation = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION);
 			parser.setProperty("http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation", externalSchemaLocation);
 			//end NEW
@@ -560,10 +560,17 @@ public class SimLoader {
 				Class<?>[] parameterTypes = new Class[parameterList.getLength()];
 				for (int i = 0; i < parameterList.getLength(); i++) {
 					//creates the parameter
+					//if (DEBUG) {
+					//	System.out.println("parameterList.item(i): " + parameterList.item(i).toString());
+					//}
 					initargs[i] = createParameter((Element) parameterList.item(i));
 					if (initargs[i] != null) {
 						//gets the class of the parameter
 						parameterTypes[i] = initargs[i].getClass();
+						if (DEBUG) {
+							//System.out.println("parameterTypes[i]: " + parameterTypes[i].toString());
+							System.out.println("        parameter of class = " + parameterTypes[i].getName());
+						}
 					} else {
 						if (!((Element) parameterList.item(i)).getAttribute("array").equals("true")) {
 							//the parameter is not an array
@@ -579,6 +586,7 @@ public class SimLoader {
 					}
 				}
 				//gets the right constructor
+				//System.out.println("    looking for constructor");
 				Constructor<?> constr = getConstructor(c, parameterTypes);
 				if (DEBUG) {
 					System.out.println("    constructor found");
@@ -593,7 +601,7 @@ public class SimLoader {
 			throw new LoadException("Class of Section cannot be istantiated", e);
 		} catch (IllegalAccessException e) {
 			throw new LoadException("Class of Section illegal access", e);
-		} catch (NoSuchMethodException e) {
+		} catch (NoSuchMethodException e) {			
 			throw new LoadException("Constructor of Section not found", e);
 		} catch (InvocationTargetException e) {
 			throw new LoadException("problems with Section constructor", e);
@@ -898,7 +906,7 @@ public class SimLoader {
 					((EmpiricalStrategy)o).setRandomEngine(sim.getEngine());	
 				}
 				if(o instanceof LoadDependentRoutingParameter){
-					((LoadDependentRoutingParameter)o).setRandomEngine(sim.getEngine());				
+					((LoadDependentRoutingParameter)o).setRandomEngine(sim.getEngine());
 				}
 				if(o instanceof LDParameter){
 					((LDParameter)o).setRandomEngine(sim.getEngine());

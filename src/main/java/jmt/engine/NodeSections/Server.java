@@ -42,6 +42,10 @@ public class Server extends ServiceSection {
 
 	private int busyCounter;
 
+	public Server(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
+		this(numberOfServers, false, numberOfVisitsPerClass, serviceStrategies);	
+	}
+
 	/**
 	 * Creates a new instance of Server.
 	 * @param numberOfServers Number of jobs which can be served simultaneously.

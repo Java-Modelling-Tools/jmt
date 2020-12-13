@@ -242,6 +242,10 @@ public class Queue extends InputSection {
 			}
 		}
 	}
+	
+	public Queue(Integer size, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+		this(size.intValue(), -1, false, false, getStrategy, putStrategies);
+	}
 
 	/**
 	 * Turns on the "redirecting queue" behaviour.
