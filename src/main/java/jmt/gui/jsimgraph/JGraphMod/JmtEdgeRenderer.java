@@ -55,6 +55,8 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 
 	@Override
 	protected Shape createShape() {
+		GeneralPath ret = new GeneralPath();
+		try {
 		ArrayList tmp1 = new ArrayList();
 		boolean passed = false;
 		int n = view.getPointCount();
@@ -353,8 +355,12 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 					view.sharedPath.append(view.beginShape, true);
 				}
 			}
+		  ret = view.sharedPath;
 		}
-		return view.sharedPath;
+		} catch (Exception e) {
+			System.out.println("Warning: exception in jmt.gui.jsimgraph.JGraphMod.JmtEdgeRenderer.createShape");
+		}
+		return ret;
 	}
 
 	protected Shape createShape2() {
@@ -522,6 +528,7 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 	*/
 	@Override
 	public void paint(Graphics var1) {
+		try {
 		super.paint(var1);
 		if (this.selected && mediator.getModel().hasConnectionShape(((JmtEdge) view.getCell()).getSourceKey(),
 				((JmtEdge) view.getCell()).getTargetKey())) {
@@ -530,6 +537,8 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 			var3.setColor(this.highlightColor);
 			drawTangents(var3);
 			drawControlPoints(var3);
+		}} catch (Exception e) {
+			System.out.println("Warning: exception in jmt.gui.jsimgraph.JGraphMod.JmtEdgeRenderer.paint");
 		}
 	}
 

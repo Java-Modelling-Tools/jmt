@@ -2990,6 +2990,40 @@ public class Mediator implements GuiInterface {
 		graph.getGraphLayoutCache().reload();
 	}
 
+
+	public void forceAdjustGraph() {
+		if(mouseListener.getCurrentState() == mouseListener.bezierconnect){
+			((BezierConnectState) mouseListener.getCurrentState()).initializeState();
+		}
+
+		Object[] cells = graph.getDescendants(graph.getRoots());
+		Rectangle[] cellsBounds = new Rectangle[cells.length];
+		boolean[] cellsRotate = new boolean[cells.length];
+		for (int i = 0; i < cells.length; i++) {
+			if (cells[i] instanceof JmtCell) {
+				JmtCell cell = (JmtCell) cells[i];
+				cellsBounds[i] = GraphConstants.getBounds(cell.getAttributes()).getBounds();
+				cellsRotate[i] = !cell.isLeftInputCell();
+			}
+		}
+
+		adjustGraph();
+
+		for (int i = 0; i < cells.length; i++) {
+			if (cells[i] instanceof JmtCell) {
+				JmtCell cell = (JmtCell) cells[i];
+				GraphConstants.setBounds(cell.getAttributes(), cellsBounds[i]);
+				if (cellsRotate[i]) {
+					rotateComponent(new Object[] { cell });
+				}
+			}
+		}
+		graphRepaint();
+		graph.getGraphLayoutCache().reload();
+		avoidOverlappingCell(cells);
+	}
+
+
 	public void tryAdjustGraph(boolean needConfirm) {
 		if(mouseListener.getCurrentState() == mouseListener.bezierconnect){
 			((BezierConnectState) mouseListener.getCurrentState()).initializeState();

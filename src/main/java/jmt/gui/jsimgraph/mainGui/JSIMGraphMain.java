@@ -164,7 +164,9 @@ public class JSIMGraphMain extends JMTFrame {
 				System.exit(1);
 			}
 			mw.mediator.openModel(file);
-			mw.mediator.tryAdjustGraph(false);
+			mw.mediator.graphRepaint();
+			mw.getContentPane().repaint();
+			mw.mediator.forceAdjustGraph();
 		}
 	}
 
