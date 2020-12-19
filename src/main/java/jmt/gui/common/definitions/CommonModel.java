@@ -959,29 +959,29 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Returns queue capacity of the station, given the search key.
 	 */
 	@Override
-	public Integer getStationInServiceCapacity(Object key) {
+	public Integer getStationMaxRunning(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return null;
 		}
-		return sd.inServiceCapacity;
+		return sd.maxRunning;
 	}
 
 	/**
 	 * Sets in service capacity of the station, given the search key.
 	 */
 	@Override
-	public void setStationInServiceCapacity(Object key, Integer inServiceCapacity) {
+	public void setStationMaxRunning(Object key, Integer maxRunning) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return;
 		}
-		if (sd.inServiceCapacity == null || !sd.inServiceCapacity.equals(inServiceCapacity)) {
-			sd.inServiceCapacity = inServiceCapacity;
+		if (sd.maxRunning == null || !sd.maxRunning.equals(maxRunning)) {
+			sd.maxRunning = maxRunning;
 			save = true;
 		}
 	}
@@ -1263,24 +1263,24 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			sd.serverPreemptive = false;
 		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			sd.numberOfServers = Integer.valueOf(-1);
 			sd.serverPreemptive = false;
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
-			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			sd.numberOfServers = Defaults.getAsInteger("stationServers");
 			sd.serverPreemptive = false;
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
-			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
 				sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
@@ -1293,12 +1293,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.maxRunning = Integer.valueOf(-1);
 			sd.serverPreemptive = false;
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.maxRunning = Integer.valueOf(-1);
 			sd.serverPreemptive = false;
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
@@ -1311,7 +1311,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else if (sd.type.equals(STATION_TYPE_PLACE)) {
 			sd.queueCapacity = Defaults.getAsInteger("placeCapacity");
 			sd.serverPreemptive = false;
-			sd.inServiceCapacity = Integer.valueOf(-1);
+			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
@@ -3718,7 +3718,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String name;
 		public String type;
 		public Integer queueCapacity;
-		public Integer inServiceCapacity;
+		public Integer maxRunning;
 		public Boolean serverPreemptive;
 		public String queueStrategy;
 		public Integer numberOfServers;
@@ -3739,7 +3739,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			StationData sd = new StationData(name, type);
 			sd.queueCapacity = queueCapacity;
 			sd.queueStrategy = queueStrategy;
-			sd.inServiceCapacity = inServiceCapacity;
+			sd.maxRunning = maxRunning;
 			sd.serverPreemptive = serverPreemptive;
 			sd.numberOfServers = numberOfServers;
 			sd.forkBlock = forkBlock;

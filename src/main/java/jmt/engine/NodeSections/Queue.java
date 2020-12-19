@@ -86,7 +86,7 @@ public class Queue extends InputSection {
 	public static final String FINITE_WAITING = "waiting queue";
 
 	private int size;
-	private int inServiceCapacity;
+	private int maxRunning;
 
 	//coolStart is true if there are no waiting jobs when the queue is started
 	private boolean coolStart;
@@ -130,7 +130,7 @@ public class Queue extends InputSection {
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 */
-	public Queue(int size, int inServiceCapacity, boolean serverPreemptive, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+	public Queue(int size, int maxRunning, boolean serverPreemptive, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
 		//auto = false, otherwise when a JOB message is received,
 		//the corresponding Job object is automatically added to
 		//JobInfoList
@@ -143,11 +143,11 @@ public class Queue extends InputSection {
 			this.size = size;
 			infinite = false;
 		}
-		if (inServiceCapacity == -1) {
-			this.inServiceCapacity = -1;
+		if (maxRunning == -1) {
+			this.maxRunning = -1;
 			serviceCapacityInfinite = true;
 		} else {
-			this.inServiceCapacity = inServiceCapacity;
+			this.maxRunning = maxRunning;
 			serviceCapacityInfinite = false;
 		}
 		this.preemption = serverPreemptive;
@@ -179,8 +179,8 @@ public class Queue extends InputSection {
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 */
-	public Queue(Integer size, Integer inServiceCapacity, Boolean serverPreemptive, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
-		this(size.intValue(), inServiceCapacity.intValue(), serverPreemptive.booleanValue(), drop.booleanValue(), getStrategy, putStrategies);
+	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+		this(size.intValue(), maxRunning.intValue(), serverPreemptive.booleanValue(), drop.booleanValue(), getStrategy, putStrategies);
 	}
 
 	/**
@@ -193,9 +193,9 @@ public class Queue extends InputSection {
 	 * @param myReg the blocking region to which the owner node of this queue
 	 * belongs.
 	 */
-	public Queue(int size, int inServiceCapacity, boolean serverPreemptive, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, BlockingRegion myReg) {
+	public Queue(int size, int maxRunning, boolean serverPreemptive, boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, BlockingRegion myReg) {
 		//uses constructor for generic queue
-		this(size, inServiceCapacity, serverPreemptive, drop, getStrategy, putStrategies);
+		this(size, maxRunning, serverPreemptive, drop, getStrategy, putStrategies);
 
 		//sets blocking region properties
 		redirectionON = true;
@@ -213,8 +213,8 @@ public class Queue extends InputSection {
 	 * @param myReg the blocking region to which the owner node of this queue
 	 * belongs.
 	 */
-	public Queue(Integer size, Integer inServiceCapacity, Boolean serverPreemptive, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, BlockingRegion myReg) {
-		this(size.intValue(), inServiceCapacity.intValue(), serverPreemptive.booleanValue(), drop.booleanValue(), getStrategy, putStrategies, myReg);
+	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, Boolean drop, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, BlockingRegion myReg) {
+		this(size.intValue(), maxRunning.intValue(), serverPreemptive.booleanValue(), drop.booleanValue(), getStrategy, putStrategies, myReg);
 	}
 
 	/**
@@ -226,8 +226,8 @@ public class Queue extends InputSection {
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 */
-	public Queue(Integer size, Integer inServiceCapacity, Boolean serverPreemptive, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
-		this(size.intValue(), inServiceCapacity.intValue(), serverPreemptive.booleanValue(), false, getStrategy, putStrategies);
+	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+		this(size.intValue(), maxRunning.intValue(), serverPreemptive.booleanValue(), false, getStrategy, putStrategies);
 		// Decodes drop strategies
 		for (int i = 0; i < dropStrategies.length; i++) {
 			if (dropStrategies[i].equals(FINITE_DROP)) {
@@ -442,7 +442,7 @@ public class Queue extends InputSection {
 						sendForward(job, 0.0);
 				} else {
 					int jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
-					if (coolStart && (jobsInService < inServiceCapacity || serviceCapacityInfinite)) {
+					if (coolStart && (jobsInService < maxRunning || serviceCapacityInfinite)) {
 						// No jobs in queue: Refresh jobsList and sends job (do not use put strategy, because queue is empty)
 						if (jobsList.size() <= 0) {
 							jobsList.add(new JobInfo(job));
@@ -536,7 +536,7 @@ public class Queue extends InputSection {
 
 			// if there is at least one job, sends it
 			int jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
-			if (jobsList.size() > 0  && (jobsInService < inServiceCapacity || serviceCapacityInfinite)) {
+			if (jobsList.size() > 0  && (jobsInService < maxRunning || serviceCapacityInfinite)) {
 				// Gets job using a specific strategy and sends job
 				Job jobSent = getStrategy.get(jobsList);
 				sendForward(jobSent, 0.0);
@@ -548,7 +548,7 @@ public class Queue extends InputSection {
 
 		case NetEvent.EVENT_JOB_COMPLETED:
 			jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
-			if (jobsList.size() > 0 && (jobsInService < inServiceCapacity || serviceCapacityInfinite)) {
+			if (jobsList.size() > 0 && (jobsInService < maxRunning || serviceCapacityInfinite)) {
 				// Gets job using a specific strategy and sends job
 				Job jobSent = getStrategy.get(jobsList);
 				sendForward(jobSent, 0.0);

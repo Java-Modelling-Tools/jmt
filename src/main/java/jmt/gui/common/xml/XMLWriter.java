@@ -552,19 +552,19 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		// ...and add it to queue element's children
 		size.appendParameterElement(doc, queue);
 
-		String serviceCapacity = model.getStationInServiceCapacity(stationKey) == null ? "-1"
-				: model.getStationInServiceCapacity(stationKey).toString();
-		XMLParameter inServiceCapacity = new XMLParameter("inServiceCapacity", "java.lang.Integer", null,
+		String serviceCapacity = model.getStationMaxRunning(stationKey) == null ? "-1"
+				: model.getStationMaxRunning(stationKey).toString();
+		XMLParameter maxRunning = new XMLParameter("maxRunning", "java.lang.Integer", null,
 				serviceCapacity, false);
 		// ...and add it to queue element's children
-		inServiceCapacity.appendParameterElement(doc, queue);
+		//maxRunning.appendParameterElement(doc, queue); // uncomment this to save maxRunning
 
 		String servicePre = model.getStationServerPreemptive(stationKey) == null ? "false"
 				: model.getStationServerPreemptive(stationKey).toString();
 		XMLParameter serverPreemptive = new XMLParameter("serverPreemptive", "java.lang.Boolean", null,
 				servicePre, false);
 		// ...and add it to queue element's children
-		serverPreemptive.appendParameterElement(doc, queue);
+		//serverPreemptive.appendParameterElement(doc, queue); // uncomment this for serverPreemptive for LCFS-PR
 
 		// Drop policies. They are different for each customer class
 		Vector<Object> classes = model.getClassKeys();
@@ -668,7 +668,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		XMLParameter serverPreemptive = new XMLParameter("serverPreemptive", "java.lang.Boolean", null,
 				servicePre, false);
 		// ...and add it to queue element's children
-		serverPreemptive.appendParameterElement(doc, elem);
+		//serverPreemptive.appendParameterElement(doc, elem); //remove to re-enable serverPreemptive for LCFS-PR
+		
 		// creating numbers of visits node element
 		XMLParameter[] numberOfVisits = new XMLParameter[classes.size()];
 		for (int i = 0; i < numberOfVisits.length; i++) {

@@ -184,12 +184,12 @@ public interface StationDefinition {
 	/**
 	 * Returns in service capacity of the station, given the search key.
 	 */
-	public Integer getStationInServiceCapacity(Object key);
+	public Integer getStationMaxRunning(Object key);
 
 	/**
 	 * Sets in service capacity of the station, given the search key.
 	 */
-	public void setStationInServiceCapacity(Object key, Integer inServiceCapacity);
+	public void setStationMaxRunning(Object key, Integer maxRunning);
 
 	/**
 	 * Gets whether server will use preemption
