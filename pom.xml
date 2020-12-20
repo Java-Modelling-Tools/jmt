@@ -166,6 +166,7 @@
 							<izpackBasedir>${izpack.staging}</izpackBasedir>
 							<customPanelDirectory>${izpack.staging}</customPanelDirectory>
 							<finalName>JMT-installer-${jmt.version}</finalName>
+							<classifier>jar</classifier>
 						</configuration>
 						<executions>
 							<execution>
