@@ -19,7 +19,7 @@ public class ActionBezierEdgeAddControlPoint extends AbstractJmodelAction {
         putValue(SHORT_DESCRIPTION, "Add a new control point");
         setGroup(1);
         setSelectable(true);
-        System.out.println(SELECTABLE);
+        //System.out.println(SELECTABLE);
         setEnabled(true);
     }
 
