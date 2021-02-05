@@ -244,7 +244,7 @@ public class Queue extends InputSection {
 	}
 	
 	public Queue(Integer size, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
-		this(size.intValue(), -1, false, false, getStrategy, putStrategies);
+		this(size.intValue(), -1, false, dropStrategies, getStrategy, putStrategies);
 	}
 
 	/**

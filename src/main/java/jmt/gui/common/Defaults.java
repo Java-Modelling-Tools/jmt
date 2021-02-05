@@ -112,7 +112,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("blockingMaxMemory", "-1");
 		def.setProperty("blockingMaxJobsPerClass", "-1");
 		def.setProperty("blockingMaxMemoryPerClass", "-1");
-		def.setProperty("blockingDropPerClass", "true");
+		def.setProperty("blockingDropPerClass", "false");
 		def.setProperty("blockingWeightPerClass", "1");
 		def.setProperty("blockingSizePerClass", "1");
 		def.setProperty("blockingGroupName", "Group");
