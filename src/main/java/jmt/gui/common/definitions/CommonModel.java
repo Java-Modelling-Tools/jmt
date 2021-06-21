@@ -53,6 +53,7 @@ import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.ServiceStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
 import jmt.gui.common.transitionUtilities.TransitionMatrix;
 
 /**
@@ -222,6 +223,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * on X coordinate must be put class search keys, on Y station search keys.
 	 */
 	protected BDMap stationDetailsBDM = new BDMapImpl();
+
 
 	/**
 	 * BDMap containing a set of blocking region details for each blocking region and each class.
@@ -1072,6 +1074,146 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
+	 * Sets the polling type of the station, given the search key.
+	 */
+
+	@Override
+	public void setStationPollingServerType(Object key, String pollingType) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+
+		if (sd.pollingServerType == null || !sd.pollingServerType.equals(pollingType)) {
+			sd.pollingServerType = pollingType;
+			save = true;
+		}
+	}
+
+	@Override
+	public String getStationPollingServerType(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.pollingServerType;
+	}
+
+	@Override
+	public void setStationPollingServerBoolean(Object key, Boolean serverPolling) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+
+		if (sd.serverPolling == null || !sd.serverPolling.equals(serverPolling)) {
+			sd.serverPolling = serverPolling;
+			save = true;
+		}
+	}
+
+
+	@Override
+	public Boolean getStationPollingServerBoolean(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.serverPolling;
+	}
+
+	@Override
+	public void setStationPollingServerKValue(Object key, Integer k) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+
+		if (sd.pollingKValue == null || !sd.pollingKValue.equals(k)) {
+			sd.pollingKValue = k;
+			save = true;
+		}
+
+	}
+
+	@Override
+	public Integer getStationPollingServerKValue(Object key) {
+
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.pollingKValue;
+	}
+
+	@Override
+	public void setStationPollingSwitchoverDistribution(Object stationKey, Object classKey, Object distribution) {
+		StationData sd;
+		if (stationDataHM.containsKey(stationKey)) {
+			sd = (StationData) stationDataHM.get(stationKey);
+			if (sd.switchoverPeriods == null) {
+				sd.switchoverPeriods = new HashMap<>();
+			}
+		} else {
+			return;
+		}
+
+		if ( !sd.switchoverPeriods.containsKey(classKey)
+				|| !sd.switchoverPeriods.get(classKey).equals(distribution)) {
+
+			sd.switchoverPeriods.put(classKey, distribution);
+			save = true;
+		}
+	}
+
+	@Override
+	public Object getStationPollingSwitchoverDistribution(Object stationKey, Object classKey) {
+		StationData sd;
+		if (stationDataHM.containsKey(stationKey)) {
+			sd = (StationData) stationDataHM.get(stationKey);
+			if (sd.switchoverPeriods == null)
+				sd.switchoverPeriods = new HashMap<>();
+
+			updatePollingServerSwitchoverDistribution(stationKey);
+		} else {
+			return null;
+		}
+
+		return sd.switchoverPeriods.get(classKey);
+	}
+
+	protected void updatePollingServerSwitchoverDistribution(Object stationKey) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		Set<Object> switchoverKeys = new HashSet<>(sd.switchoverPeriods.keySet());
+		for (Object classKey : classesKeyset) {
+			if (switchoverKeys.contains(classKey)) {
+				switchoverKeys.remove(classKey);
+			} else {
+				sd.switchoverPeriods.put(classKey, new ZeroStrategy());
+			}
+		}
+
+		for (Object key: switchoverKeys) {
+			sd.switchoverPeriods.remove(key);
+		}
+
+	}
+
+
+
+	/**
 	 * Tells if a fork is blocking
 	 * <br>Author: Bertoli Marco
 	 * @param key: search's key for fork
@@ -1278,11 +1420,17 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			sd.numberOfServers = Defaults.getAsInteger("stationServers");
 			sd.serverPreemptive = false;
+			sd.serverPolling = false;
+			sd.pollingKValue = 1;
+			sd.pollingServerType = STATION_QUEUE_STRATEGY_POLLING_LIMITED;
+			sd.switchoverPeriods = new HashMap<>();
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
 			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
-			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)
+					|| sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
+					|| sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
 				sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			}
 			sd.serverPreemptive = false;
@@ -1942,6 +2090,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/**
 	 * Deletes station details for a class, given the search key.
 	 */
+
 	protected void deleteStationDetailsForClass(Object key) {
 		for (Object stationKey : stationsKeyset) {
 			stationDetailsBDM.remove(key, stationKey);
@@ -2002,7 +2151,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			scd.queueStrategy = Defaults.get("stationQueueStrategy");
-			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
 				if (scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_RAND)
@@ -2012,8 +2161,23 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)) {
 					scd.queueStrategy = QUEUE_STRATEGY_PS;
 				}
+			} else if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+				if (scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_RAND)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SJF)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LJF)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SEPT)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_PS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)) {
+					scd.queueStrategy = QUEUE_STRATEGY_LCFS_PR;
+				}
+
 			} else {
 				if (scd.queueStrategy.equals(QUEUE_STRATEGY_PS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS_PR)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)) {
 					scd.queueStrategy = QUEUE_STRATEGY_FCFS;
@@ -3722,6 +3886,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Boolean serverPreemptive;
 		public String queueStrategy;
 		public Integer numberOfServers;
+		public String pollingServerType;
+		public Integer pollingKValue;
+		public Boolean serverPolling;
+		public HashMap<Object, Object> switchoverPeriods;
 		public Integer forkBlock;
 		public Boolean isSimplifiedFork;
 		public LoggerParameters loggerParameters;
@@ -3742,6 +3910,21 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.maxRunning = maxRunning;
 			sd.serverPreemptive = serverPreemptive;
 			sd.numberOfServers = numberOfServers;
+			sd.pollingServerType = pollingServerType;
+			sd.serverPolling = serverPolling;
+			if (switchoverPeriods != null) {
+				sd.switchoverPeriods = new HashMap<>();
+				for (Object key : switchoverPeriods.keySet()) {
+					Object item;
+					item = switchoverPeriods.get(key);
+					if (item instanceof ServiceStrategy) {
+						item = ((ServiceStrategy) item).clone();
+					} else {
+						item = new ZeroStrategy();
+					}
+					sd.switchoverPeriods.put(key, item);
+				}
+			}
 			sd.forkBlock = forkBlock;
 			sd.isSimplifiedFork = isSimplifiedFork;
 			if (loggerParameters != null) {

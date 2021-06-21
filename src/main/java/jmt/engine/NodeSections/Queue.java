@@ -18,31 +18,19 @@
 
 package jmt.engine.NodeSections;
 
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy;
+import jmt.engine.NetStrategies.QueueGetStrategies.PollingGetStrategy;
+import jmt.engine.NetStrategies.QueueGetStrategy;
+import jmt.engine.NetStrategies.QueuePutStrategies.PreemptiveStrategy;
+import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
+import jmt.engine.NetStrategies.QueuePutStrategy;
+import jmt.engine.QueueNet.*;
+import jmt.engine.dataAnalysis.Measure;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
-import jmt.common.exception.NetException;
-import jmt.engine.NetStrategies.QueueGetStrategy;
-import jmt.engine.NetStrategies.QueuePutStrategy;
-import jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy;
-import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
-import jmt.engine.QueueNet.BlockingRegion;
-import jmt.engine.QueueNet.ForkJob;
-import jmt.engine.QueueNet.GlobalJobInfoList;
-import jmt.engine.QueueNet.Job;
-import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobClassList;
-import jmt.engine.QueueNet.JobInfo;
-import jmt.engine.QueueNet.JobInfoList;
-import jmt.engine.QueueNet.LinkedJobInfoList;
-import jmt.engine.QueueNet.NetEvent;
-import jmt.engine.QueueNet.NetMessage;
-import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NodeSection;
-import jmt.engine.QueueNet.SimConstants;
-import jmt.engine.QueueNet.WaitingRequest;
-import jmt.engine.dataAnalysis.Measure;
 
 /**
  * This class implements a generic finite/infinite queue. In finite queue, if
@@ -88,6 +76,7 @@ public class Queue extends InputSection {
 	private int size;
 	private int maxRunning;
 
+	/* Temp solution for Limited Polling */
 	//coolStart is true if there are no waiting jobs when the queue is started
 	private boolean coolStart;
 	private boolean infinite;
@@ -110,6 +99,8 @@ public class Queue extends InputSection {
 	private List<WaitingRequest> waitingRequests;
 
 	private QueueGetStrategy getStrategy;
+
+	private Boolean switchOverRequest;
 
 	private QueuePutStrategy[] putStrategies;
 
@@ -169,6 +160,8 @@ public class Queue extends InputSection {
 		redirectionON = false;
 		myRegion = null;
 		regionInputStation = null;
+
+		switchOverRequest = false;
 	}
 
 	/**
@@ -289,6 +282,11 @@ public class Queue extends InputSection {
 				putStrategies[i] = new TailStrategy();
 			}
 		}
+
+		if (getStrategy instanceof PollingGetStrategy) {
+			((PollingGetStrategy) getStrategy).setPollingQueues(jobClasses);
+		}
+
 		//retrieves the job info list of the owner node
 		nodeJobsList = node.getJobInfoList();
 		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
@@ -365,13 +363,18 @@ public class Queue extends InputSection {
 			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 			if (jobsList.size() > 0) {
 				//the first job is forwarded to service section
-				sendForward(getStrategy.get(jobsList), 0.0);
+				job = getStrategy.get(jobsList);
+				switchOverRequest = job == null;
+				if (job == null && (getStrategy instanceof PollingGetStrategy)) {
+					send(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0, NodeSection.SERVICE);
+				} else {
+					sendForward(job, 0.0);
+				}
 				coolStart = false;
 			}
 			break;
 
 		case NetEvent.EVENT_JOB:
-
 			//EVENT_JOB
 			//If the queue is a redirecting queue, jobs arriving from the outside of
 			//the blocking region must be redirected to the region input station
@@ -438,20 +441,33 @@ public class Queue extends InputSection {
 				// If coolStart is true, this is the first job received or the
 				// queue was empty: this job is sent immediately to the next
 				// section and coolStart set to false.
-				if (preemption) {
-						sendForward(job, 0.0);
+				if (putStrategies[job.getJobClass().getId()] instanceof PreemptiveStrategy) {
+					sendForward(job, 0.0);
 				} else {
 					int jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
 					if (coolStart && (jobsInService < maxRunning || serviceCapacityInfinite)) {
 						// No jobs in queue: Refresh jobsList and sends job (do not use put strategy, because queue is empty)
-						if (jobsList.size() <= 0) {
+						if (jobsList.size() <= 0 && !(getStrategy instanceof PollingGetStrategy)) {
 							jobsList.add(new JobInfo(job));
 							// forward without any delay
 							sendForward(jobsList.removeFirst().getJob(), 0.0);
 						} else {
 							putStrategies[job.getJobClass().getId()].put(job, jobsList, this);
-							Job jobSent = getStrategy.get(jobsList);
-							sendForward(jobSent, 0.0);
+							if (getStrategy instanceof PollingGetStrategy){
+								if (!switchOverRequest) {
+									Job jobSent = getStrategy.get(jobsList);
+									if (jobSent == null) {
+										switchOverRequest = true;
+										send(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0, NodeSection.SERVICE);
+									} else {
+										sendForward(jobSent, 0.0);
+									}
+								}
+							} else {
+								Job jobSent = getStrategy.get(jobsList);
+								sendForward(jobSent, 0.0);
+							}
+
 						}
 						coolStart = false;
 					} else {
@@ -506,8 +522,15 @@ public class Queue extends InputSection {
 			}
 			break;
 
-		case NetEvent.EVENT_ACK:
+		case NetEvent.EVENT_POLLING_SERVER_READY:
+		    switchOverRequest = false;
+		    coolStart = true;
+		    break;
 
+		case NetEvent.EVENT_POLLING_SERVER_NEXT:
+		    switchOverRequest = false;
+
+		case NetEvent.EVENT_ACK:
 			//EVENT_ACK
 			//If there are waiting requests, the first is taken (if the source node of this request
 			//is the owner node of this section, an ack message is sent).
@@ -536,10 +559,21 @@ public class Queue extends InputSection {
 
 			// if there is at least one job, sends it
 			int jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
-			if (jobsList.size() > 0  && (jobsInService < maxRunning || serviceCapacityInfinite)) {
+			if (getStrategy instanceof PollingGetStrategy) {
+				if (!switchOverRequest) {
+					Job jobSent = getStrategy.get(jobsList);
+					if (jobSent == null) {
+						switchOverRequest = true;
+						send(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0, NodeSection.SERVICE);
+					} else {
+						sendForward(jobSent, 0.0);
+					}
+				}
+			} else if (jobsList.size() > 0  && (jobsInService < maxRunning || serviceCapacityInfinite)) {
 				// Gets job using a specific strategy and sends job
-				Job jobSent = getStrategy.get(jobsList);
-				sendForward(jobSent, 0.0);
+					Job jobSent = getStrategy.get(jobsList);
+					sendForward(jobSent, 0.0);
+
 			} else {
 			// else set coolStart to true
 				coolStart = true;
@@ -548,8 +582,17 @@ public class Queue extends InputSection {
 
 		case NetEvent.EVENT_JOB_COMPLETED:
 			jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
-			if (jobsList.size() > 0 && (jobsInService < maxRunning || serviceCapacityInfinite)) {
-				// Gets job using a specific strategy and sends job
+			if (getStrategy instanceof PollingGetStrategy) {
+				if (!switchOverRequest) {
+					Job jobSent = getStrategy.get(jobsList);
+					if (jobSent == null) {
+						switchOverRequest = true;
+						send(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0, NodeSection.SERVICE);
+					} else {
+						sendForward(jobSent, 0.0);
+					}
+				}
+			} else if (jobsList.size() > 0 && (jobsInService < maxRunning || serviceCapacityInfinite)) {
 				Job jobSent = getStrategy.get(jobsList);
 				sendForward(jobSent, 0.0);
 			} else {
@@ -557,6 +600,8 @@ public class Queue extends InputSection {
 				coolStart = true;
 			}
 			break;
+
+
 		case NetEvent.EVENT_PREEMPTED_JOB:
 			job = message.getJob();
 			putStrategies[job.getJobClass().getId()].put(job, jobsList, this);

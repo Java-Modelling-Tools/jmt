@@ -18,36 +18,6 @@
 
 package jmt.gui.common.xml;
 
-import java.io.File;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
-import jmt.gui.common.forkStrategies.ForkStrategy;
-import jmt.gui.common.forkStrategies.OutPath;
-import jmt.gui.common.forkStrategies.ProbabilitiesFork;
-import jmt.gui.common.forkStrategies.CombFork;
-import jmt.gui.common.joinStrategies.JoinStrategy;
-import jmt.gui.common.joinStrategies.NormalJoin;
-import jmt.gui.common.joinStrategies.PartialJoin;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import jmt.engine.log.LoggerParameters;
 import jmt.engine.random.EmpiricalEntry;
 import jmt.framework.data.MacroReplacer;
@@ -56,22 +26,29 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.distributions.Distribution.Parameter;
-import jmt.gui.common.forkStrategies.ClassSwitchFork;
-import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
+import jmt.gui.common.forkStrategies.*;
 import jmt.gui.common.joinStrategies.GuardJoin;
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.PowerOfKRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
-import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.joinStrategies.NormalJoin;
+import jmt.gui.common.joinStrategies.PartialJoin;
+import jmt.gui.common.routingStrategies.*;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.OutputStream;
+import java.util.*;
 
 /**
  * <p>Title: XML Writer</p>
@@ -92,6 +69,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	protected static final Map<String, String> QUEUE_PUT_MAPPING;
 	protected static final Map<String, String> PRIORITY_QUEUE_PUT_MAPPING;
 	protected static final Map<String, String> DROP_RULES_MAPPING;
+	protected static final Map<String, String> POLLING_TYPE_MAPPING;
 
 	static {
 		HashMap<String, String> temp = null;
@@ -105,6 +83,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		temp = new HashMap<String, String>();
 		temp.put(QUEUE_STRATEGY_FCFS, "TailStrategy");
 		temp.put(QUEUE_STRATEGY_LCFS, "HeadStrategy");
+		temp.put(QUEUE_STRATEGY_LCFS_PR, "LCFSPRStrategy");
 		temp.put(QUEUE_STRATEGY_RAND, "RandStrategy");
 		temp.put(QUEUE_STRATEGY_SJF, "SJFStrategy");
 		temp.put(QUEUE_STRATEGY_LJF, "LJFStrategy");
@@ -127,6 +106,12 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		temp.put(FINITE_BLOCK, "BAS blocking");
 		temp.put(FINITE_WAITING, "waiting queue");
 		DROP_RULES_MAPPING = Collections.unmodifiableMap(temp);
+
+		temp = new HashMap<String, String>();
+		temp.put(STATION_QUEUE_STRATEGY_POLLING_LIMITED, CLASSNAME_LKPSERVER);
+		temp.put(STATION_QUEUE_STRATEGY_POLLING_GATED, CLASSNAME_GATEDPSERVER);
+		temp.put(STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE, CLASSNAME_EXHAUSTIVEPSERVER);
+		POLLING_TYPE_MAPPING = Collections.unmodifiableMap(temp);
 	}
 
 	public static final String strategiesClasspathBase = "jmt.engine.NetStrategies.";
@@ -563,8 +548,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				: model.getStationServerPreemptive(stationKey).toString();
 		XMLParameter serverPreemptive = new XMLParameter("serverPreemptive", "java.lang.Boolean", null,
 				servicePre, false);
-		// ...and add it to queue element's children
-		//serverPreemptive.appendParameterElement(doc, queue); // uncomment this for serverPreemptive for LCFS-PR
+
+
 
 		// Drop policies. They are different for each customer class
 		Vector<Object> classes = model.getClassKeys();
@@ -583,10 +568,44 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 * queue get strategy, which is fixed to FCFS, as difference between
 		 * strategies can be resolved by queue put strategies
 		 */
+
+		String getStrategy = "FCFSstrategy";
+		Boolean isServerPollingBool = model.getStationPollingServerBoolean(stationKey);
+		boolean isServerPolling = isServerPollingBool != null && isServerPollingBool;
+		XMLParameter switchoverParam = null;
+		if (isServerPolling) {
+			if (model.getStationPollingServerType(stationKey).equals(STATION_QUEUE_STRATEGY_POLLING_LIMITED)) {
+				getStrategy = "LimitedPollingGetStrategy";
+			} else if (model.getStationPollingServerType(stationKey).equals(STATION_QUEUE_STRATEGY_POLLING_GATED)) {
+				getStrategy = "GatedPollingGetStrategy";
+			} else if (model.getStationPollingServerType(stationKey).equals(STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE)) {
+				getStrategy = "ExhaustivePollingGetStrategy";
+			}
+			switchoverParam = SwitchoverStrategyWriter.getServiceSection(model, stationKey);
+			switchoverParam.parameterName = "switchoverStrategy";
+			switchoverParam.isSubParameter = true;
+		}
+
 		XMLParameter queueGetStrategy = new XMLParameter("FCFSstrategy",
 				strategiesClasspathBase + queueGetStrategiesSuffix
-				+ "FCFSstrategy", null, (String) null, false);
+				+ getStrategy, null, (String) null, false);
+
+		if (isServerPolling) {
+		    XMLParameter pollingParams[] =  {switchoverParam};;
+				if (model.getStationPollingServerType(stationKey).equals(STATION_QUEUE_STRATEGY_POLLING_LIMITED)) {
+					Integer kValueInt = model.getStationPollingServerKValue(stationKey);
+					pollingParams = new XMLParameter[]{
+							new XMLParameter("pollingKValue", "java.lang.Integer", null, kValueInt.toString(), true),
+							switchoverParam};
+				}
+			queueGetStrategy = new XMLParameter("FCFSstrategy",
+					strategiesClasspathBase + queueGetStrategiesSuffix + getStrategy, null, pollingParams, false);
+			queueGetStrategy.parameterArray = "false";
+
+		}
+
 		queueGetStrategy.appendParameterElement(doc, queue);
+
 
 		/*
 		 * At last, queue put parameter, which can be defined differently for
@@ -598,9 +617,12 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				queuePutStrategy, false);
 		String queueStrategy = model.getStationQueueStrategy(stationKey);
 		for (int i = 0; i < queuePutStrategy.length; i++) {
-			String strategy = queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
+
+			boolean ps_strategy =  PS_STRATEGIES_MAPPING.containsKey(model.getQueueStrategy(stationKey, classes.get(i)));
+			String strategy = (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)
+					&& ps_strategy)
 					? QUEUE_STRATEGY_FCFS : model.getQueueStrategy(stationKey,
-							classes.get(i));
+					classes.get(i));
 			Map<String, String> strategyMapping = queueStrategy
 					.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
 					? PRIORITY_QUEUE_PUT_MAPPING : QUEUE_PUT_MAPPING;
@@ -648,8 +670,16 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			CommonModel model, Object stationKey) {
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
 		String queueStrategy = model.getStationQueueStrategy(stationKey);
-		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
-			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER);
+		boolean hasKValue = false;
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
+				elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER);
+		} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
+		    String pollingServer = POLLING_TYPE_MAPPING.get(model.getStationPollingServerType(stationKey));
+			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, pollingServer);
+			hasKValue = pollingServer.equals(CLASSNAME_LKPSERVER);
+
+		} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)){
+			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PREEMPTIVESERVER);
 		} else {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_SERVER);
 		}
@@ -669,7 +699,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				servicePre, false);
 		// ...and add it to queue element's children
 		//serverPreemptive.appendParameterElement(doc, elem); //remove to re-enable serverPreemptive for LCFS-PR
-		
+
+
 		// creating numbers of visits node element
 		XMLParameter[] numberOfVisits = new XMLParameter[classes.size()];
 		for (int i = 0; i < numberOfVisits.length; i++) {
@@ -680,9 +711,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		XMLParameter numbersOfVisits = new XMLParameter("numberOfVisits",
 				"java.lang.Integer", null, numberOfVisits, false);
 		numbersOfVisits.appendParameterElement(doc, elem);
-		getServiceSection(model, stationKey).appendParameterElement(doc, elem);
+		ServiceStrategyWriter.getServiceSection(model, stationKey).appendParameterElement(doc, elem);
 
-		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
 			// creating PS strategies node element
 			XMLParameter[] psStrategy = new XMLParameter[classes.size()];
 			for (int i = 0; i < psStrategy.length; i++) {
@@ -711,6 +742,53 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					"java.lang.Double", null, serviceWeight, false);
 			serviceWeights.appendParameterElement(doc, elem);
 		}
+
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
+
+			XMLParameter distParameter = SwitchoverStrategyWriter.getServiceSection(model, stationKey);
+			distParameter.parameterName = "switchoverStrategy";
+			distParameter.appendParameterElement(doc, elem);
+
+			if (hasKValue) {
+				Integer kValueInt = model.getStationPollingServerKValue(stationKey);
+				XMLParameter kValue = new XMLParameter("pollingKValue",
+						"java.lang.Integer", null, kValueInt.toString(), false );
+				kValue.appendParameterElement(doc, elem);
+			}
+
+		}
+
+	}
+
+	protected interface DistributionStrategyGetter {
+		public Object get(CommonModel model, Object stationKey, Object classKey);
+	}
+
+	protected static class ServiceStrategyWriter implements DistributionStrategyGetter {
+		private static ServiceStrategyWriter INSTANCE = new ServiceStrategyWriter();
+		private ServiceStrategyWriter(){};
+
+		public static XMLParameter getServiceSection(CommonModel model, Object stationKey) {
+			return XMLWriter.getServiceSection(model, stationKey, INSTANCE);
+		}
+
+		public Object get(CommonModel model, Object stationKey, Object classKey) {
+			return model.getServiceTimeDistribution(stationKey, classKey);
+		}
+		public String getName() {return "ServerStrategy";}
+	}
+
+	protected static class SwitchoverStrategyWriter implements DistributionStrategyGetter {
+		private static SwitchoverStrategyWriter INSTANCE = new SwitchoverStrategyWriter();
+		private SwitchoverStrategyWriter(){};
+		public static XMLParameter getServiceSection(CommonModel model, Object stationKey) {
+			return XMLWriter.getServiceSection(model, stationKey, INSTANCE);
+
+		}
+		public Object get(CommonModel model, Object stationKey, Object classKey) {
+			return model.getStationPollingSwitchoverDistribution(stationKey, classKey);
+		}
+
 	}
 
 	/**
@@ -724,15 +802,14 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	 *         Bertoli Marco
 	 */
 	protected static XMLParameter getServiceSection(CommonModel model,
-			Object stationKey) {
+			Object stationKey, DistributionStrategyGetter distributionGetter) {
 		Vector<Object> classes = model.getClassKeys();
 		// creating set of service time distributions
 		XMLParameter[] distrParams = new XMLParameter[classes.size()];
 		Object currentClass;
 		for (int i = 0; i < distrParams.length; i++) {
 			currentClass = classes.get(i);
-			Object serviceDistribution = model.getServiceTimeDistribution(
-					stationKey, currentClass);
+			Object serviceDistribution = distributionGetter.get(model, stationKey, currentClass);
 			if (serviceDistribution instanceof Distribution) {
 				// Service time is a Distribution and not a LDService
 				distrParams[i] = DistributionWriter
@@ -793,7 +870,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				distrParams[i].parameterArray = "false";
 			}
 		}
-		XMLParameter globalDistr = new XMLParameter("ServiceStrategy",
+		XMLParameter globalDistr = new XMLParameter("ServerStrategy",
 				strategiesClasspathBase + "ServiceStrategy", null, distrParams,
 				false);
 		return globalDistr;
@@ -883,7 +960,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
 		elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_DELAY);
 		node.appendChild(elem);
-		getServiceSection(model, stationKey).appendParameterElement(doc, elem);
+		ServiceStrategyWriter.getServiceSection(model, stationKey).appendParameterElement(doc, elem);
 	}
 
 	static protected void writeRouterSection(Document doc, Node node,

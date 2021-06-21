@@ -27,17 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -57,6 +47,7 @@ import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.jsimgraph.DialogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -73,14 +64,52 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	/**
 	 * Used to define station queue policies
 	 */
-	protected static final Object[] serverStationQueuePolicies = { STATION_QUEUE_STRATEGY_PREEMPTIVE, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY };
-	protected static final Object[] otherStationQueuePolicies = { STATION_QUEUE_STRATEGY_NON_PREEMPTIVE, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY };
+	protected static final Object[] serverStationQueuePolicies =
+			{
+					STATION_QUEUE_STRATEGY_NON_PREEMPTIVE,
+					STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY,
+                    STATION_QUEUE_STRATEGY_POLLING,
+					STATION_QUEUE_STRATEGY_PREEMPTIVE,
+					STATION_QUEUE_STRATEGY_PSSERVER
+			};
+
+	protected static final Object[] otherStationQueuePolicies =
+			{
+					STATION_QUEUE_STRATEGY_NON_PREEMPTIVE,
+					STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY
+			};
 	/**
 	 * Used to define queue policies
 	 */
-	protected static final Object[] serverPreemptiveQueuePolicies = { QUEUE_STRATEGY_PS, QUEUE_STRATEGY_GPS, QUEUE_STRATEGY_DPS };
-	protected static final Object[] serverNonPreemptiveQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND, QUEUE_STRATEGY_SJF, QUEUE_STRATEGY_LJF, QUEUE_STRATEGY_SEPT, QUEUE_STRATEGY_LEPT };
-	protected static final Object[] otherNonPreemptiveQueuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND };
+	protected static final Object[] serverPSQueuePolicies =
+			{
+					QUEUE_STRATEGY_PS,
+					QUEUE_STRATEGY_GPS,
+					QUEUE_STRATEGY_DPS
+			};
+
+	protected  static final Object[] serverPreemptiveQueuePolicies = {
+			QUEUE_STRATEGY_LCFS_PR
+
+	};
+
+	protected static final Object[] serverNonPreemptiveQueuePolicies =
+			{
+					QUEUE_STRATEGY_FCFS,
+					QUEUE_STRATEGY_LCFS,
+					QUEUE_STRATEGY_RAND,
+					QUEUE_STRATEGY_SJF,
+					QUEUE_STRATEGY_LJF,
+					QUEUE_STRATEGY_SEPT,
+					QUEUE_STRATEGY_LEPT
+			};
+
+	protected static final Object[] otherNonPreemptiveQueuePolicies =
+			{
+					QUEUE_STRATEGY_FCFS,
+					QUEUE_STRATEGY_LCFS,
+					QUEUE_STRATEGY_RAND
+			};
 	/**
 	 * Used to define drop rules
 	 */
@@ -101,6 +130,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected Object stationKey;
 
 	protected JComboBox queuePolicyCombo;
+	protected JButton queuePolicyEditButton;
 
 	public InputSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
 		isInitComplete = false;
@@ -109,6 +139,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		initComponents();
 		addDataManagers();
 		updateQueueLength();
+		updatePolicyEditButton();
 		isInitComplete = true;
 	}
 
@@ -135,7 +166,9 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		JPanel queueStrategy = new JPanel(new BorderLayout());
 		queueStrategy.add(new JLabel("Station queue policy: "), BorderLayout.WEST);
 		queuePolicyCombo = new JComboBox();
+		queuePolicyEditButton = new JButton("Edit");
 		queueStrategy.add(queuePolicyCombo, BorderLayout.CENTER);
+		queueStrategy.add(queuePolicyEditButton, BorderLayout.EAST);
 		queuePolicyPanel.add(queueStrategy, BorderLayout.NORTH);
 		queueStrategy.setBorder(BorderFactory.createEmptyBorder(2, 5, 10, 5));
 
@@ -211,8 +244,12 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				}
 				String queuePolicy = (String) queuePolicyCombo.getSelectedItem();
 				data.setStationQueueStrategy(stationKey, queuePolicy);
-				if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
-					List<Object> policyList = Arrays.asList(serverPreemptiveQueuePolicies);
+
+				boolean isPolling = queuePolicy.equals(STATION_QUEUE_STRATEGY_POLLING);
+				data.setStationPollingServerBoolean(stationKey, isPolling);
+
+				if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
+					List<Object> policyList = Arrays.asList(serverPSQueuePolicies);
 					Vector<Object> classKeys = classData.getClassKeys();
 					if (classKeys.size() > 0 && !policyList.contains(data.getQueueStrategy(stationKey, classKeys.get(0)))) {
 						String policy = Defaults.get("stationQueueStrategy");
@@ -223,6 +260,20 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 							data.setQueueStrategy(stationKey, classKey, policy);
 						}
 					}
+				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+				    List<Object> policyList = Arrays.asList(serverPreemptiveQueuePolicies);
+					Vector<Object> classKeys = classData.getClassKeys();
+					if (classKeys.size() > 0 && !policyList.contains(data.getQueueStrategy(stationKey, classKeys.get(0)))) {
+						String policy = Defaults.get("stationQueueStrategy");
+						if (!policyList.contains(policy)) {
+							policy = QUEUE_STRATEGY_LCFS_PR;
+						}
+						for (Object classKey : classKeys) {
+							data.setQueueStrategy(stationKey, classKey, policy);
+							data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));
+						}
+					}
+
 				} else {
 					List<Object> policyList = Arrays.asList(serverNonPreemptiveQueuePolicies);
 					Vector<Object> classKeys = classData.getClassKeys();
@@ -237,7 +288,17 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 						}
 					}
 				}
+				updatePolicyEditButton();
 				queueTable.repaint();
+			}
+		});
+
+		queuePolicyEditButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PollingServerPanel serverPanel = new PollingServerPanel(null, data, stationKey, classData);
+				DialogFactory factory = new DialogFactory(null);
+				factory.getDialog(serverPanel, "Editing Polling Server Preferences");
 			}
 		});
 	}
@@ -255,6 +316,10 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		}
 	}
 
+	private void updatePolicyEditButton() {
+		queuePolicyEditButton.setEnabled(data.getStationPollingServerBoolean(stationKey));
+
+	}
 	/**
 	 * @return the panel's name
 	 */
@@ -315,9 +380,13 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == 1) {
 				if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
-					if (data.getStationQueueStrategy(stationKey).equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+				    String queueStrategy = data.getStationQueueStrategy(stationKey);
+					if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
+						return ComboBoxCellEditor.getEditorInstance(serverPSQueuePolicies);
+					} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
 						return ComboBoxCellEditor.getEditorInstance(serverPreemptiveQueuePolicies);
-					} else {
+					}
+					else {
 						return ComboBoxCellEditor.getEditorInstance(serverNonPreemptiveQueuePolicies);
 					}
 				} else {

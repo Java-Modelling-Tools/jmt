@@ -23,6 +23,8 @@ import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.*;
 import jmt.engine.simEngine.RemoveToken;
 
+import javax.swing.*;
+
 /**
  * This class implements a multi-class, single/multi server service.
  * Every class has a specific distribution and a own set of statistical

@@ -18,32 +18,18 @@
 
 package jmt.gui.common;
 
-import java.awt.Dimension;
-
 import jmt.framework.data.ConstMap;
-import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
-import jmt.gui.common.forkStrategies.ClassSwitchFork;
-import jmt.gui.common.forkStrategies.CombFork;
-import jmt.gui.common.forkStrategies.ForkStrategy;
-import jmt.gui.common.forkStrategies.ProbabilitiesFork;
+import jmt.gui.common.forkStrategies.*;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.NormalJoin;
 import jmt.gui.common.joinStrategies.PartialJoin;
-import jmt.gui.common.routingStrategies.DisabledRouting;
-import jmt.gui.common.routingStrategies.FastestServiceRouting;
-import jmt.gui.common.routingStrategies.LeastUtilizationRouting;
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.PowerOfKRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
-import jmt.gui.common.routingStrategies.RandomRouting;
-import jmt.gui.common.routingStrategies.RoundRobinRouting;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
-import jmt.gui.common.routingStrategies.ShortestQueueLengthRouting;
-import jmt.gui.common.routingStrategies.ShortestResponseTimeRouting;
-import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
+import jmt.gui.common.routingStrategies.*;
 import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import org.jaxen.function.StringFunction;
+
+import java.awt.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -171,9 +157,17 @@ public interface CommonConstants {
 	public static final Dimension LARGE_ICON_SIZE_TOOL_BAR = new Dimension(35, 35);
 
 	/**Constants for selection of station queueing strategy*/
+	public static final String STATION_QUEUE_STRATEGY_PSSERVER = "Processor Sharing Scheduling";
 	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE = "Preemptive Scheduling";
 	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE = "Non-preemptive Scheduling";
 	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY = "Non-preemptive Scheduling (Priority)";
+	public static final String STATION_QUEUE_STRATEGY_POLLING = "Polling Scheduling";
+
+	/**Constants for selection of server type */
+	public static final String STATION_QUEUE_STRATEGY_PS = "PS Station Queue Type";
+	public static final String STATION_QUEUE_STRATEGY_POLLING_LIMITED = "K-Limited";
+	public static final String STATION_QUEUE_STRATEGY_POLLING_GATED = "Gated";
+	public static final String STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE = "Exhaustive";
 
 	/**Constants for selection of queueing strategy*/
 	public static final String QUEUE_STRATEGY_PS = "PS";
@@ -181,6 +175,7 @@ public interface CommonConstants {
 	public static final String QUEUE_STRATEGY_DPS = "DPS";
 	public static final String QUEUE_STRATEGY_FCFS = "FCFS";
 	public static final String QUEUE_STRATEGY_LCFS = "LCFS";
+	public static final String QUEUE_STRATEGY_LCFS_PR = "LCFS-PR";
 	public static final String QUEUE_STRATEGY_RAND = "RAND";
 	public static final String QUEUE_STRATEGY_SJF = "SJF";
 	public static final String QUEUE_STRATEGY_LJF = "LJF";
@@ -191,6 +186,7 @@ public interface CommonConstants {
 	public static final String SERVICE_LOAD_INDEPENDENT = "Load Independent";
 	public static final String SERVICE_LOAD_DEPENDENT = "Load Dependent";
 	public static final String SERVICE_ZERO = "Zero Service Time";
+	public static final String SWITCHOVER_ZERO = "Zero Switchover Time";
 	public static final String SERVICE_DISABLED = "Disabled";
 
 	/**Constants for selection of distributions*/

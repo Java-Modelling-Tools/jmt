@@ -18,53 +18,23 @@
 
 package jmt.gui.common.editors;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.text.ParseException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Vector;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SpringLayout;
-import javax.swing.WindowConstants;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
+
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.text.ParseException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * <p>Title: Defaults Editor</p>
@@ -668,9 +638,11 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Creates a Map with station Queue strategy names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> stationQueueStrategies = new LinkedHashMap<String, String>();
-		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER, CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER);
 		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
+		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
 		addInputCombo(text, property, cont, stationQueueStrategies);
 	}
 
@@ -689,6 +661,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_DPS, CommonConstants.QUEUE_STRATEGY_DPS);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.QUEUE_STRATEGY_FCFS);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.QUEUE_STRATEGY_LCFS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, CommonConstants.QUEUE_STRATEGY_LCFS_PR);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.QUEUE_STRATEGY_RAND);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SJF, CommonConstants.QUEUE_STRATEGY_SJF);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LJF, CommonConstants.QUEUE_STRATEGY_LJF);

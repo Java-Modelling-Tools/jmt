@@ -18,18 +18,14 @@
 
 package jmt.gui.common.panels;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -48,12 +44,14 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.common.editors.LDStrategyEditor;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.jsimgraph.DialogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -131,10 +129,13 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		//layout of main panel
 		JPanel serverNumPanel = new JPanel();
-		serverNumPanel.setBorder(new TitledBorder(new EtchedBorder(), "Number of Servers"));
-		serverNumPanel.add(new JLabel("Number:"));
-		serverNumPanel.add(serverNumSpinner);
+		serverNumPanel.setLayout(new BorderLayout(3, 3));
+		JPanel serverNum = new JPanel();
+		serverNum.add(new JLabel("Number:"));
+		serverNum.add(serverNumSpinner);
+		serverNumPanel.add(serverNum, BorderLayout.CENTER);
 		this.add(serverNumPanel, BorderLayout.NORTH);
+
 		WarningScrollTable ServiceSectionTable = new WarningScrollTable(serviceTable, WARNING_CLASS);
 		ServiceSectionTable.setBorder(new TitledBorder(new EtchedBorder(), "Service Time Distributions"));
 		this.add(ServiceSectionTable, BorderLayout.CENTER);
@@ -148,13 +149,14 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		serviceTable = new ServiceTable();
 		serverNumSpinner = new JSpinner();
 		serverNumSpinner.setPreferredSize(DIM_BUTTON_XS);
+
 		classEditor.setData(cd);
 		initComponents();
-		updateServerNum();
+		updateServerPreferences();
 		addDataManagers();
 	}
 
-	private void updateServerNum() {
+	private void updateServerPreferences() {
 		serverNumSpinner.setValue(data.getStationNumberOfServers(stationKey));
 		if (STATION_TYPE_DELAY.equals(data.getStationType(stationKey))) {
 			serverNumSpinner.setValue(Double.POSITIVE_INFINITY);

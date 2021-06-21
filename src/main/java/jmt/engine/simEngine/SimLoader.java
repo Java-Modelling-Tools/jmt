@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.swing.*;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import jmt.common.exception.IncorrectDistributionParameterException;

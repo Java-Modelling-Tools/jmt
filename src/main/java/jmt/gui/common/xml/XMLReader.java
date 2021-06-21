@@ -127,6 +127,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
 	protected static final String psStrategy = "jmt.engine.NetStrategies.PSStrategy";
 	protected static final String queuePut = "jmt.engine.NetStrategies.QueuePutStrategy";
+	protected static final String queueGet = "jmt.engine.NetStrategies.QueueGetStrategy";
 	protected static final String serviceStrategy = "jmt.engine.NetStrategies.ServiceStrategy";
 	protected static final String distributionContainer = "jmt.engine.random.DistributionContainer";
 
@@ -549,12 +550,23 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String name, classpath;
 		Map<String, Node> putStrategy = null;
 		Map<String, Node> dropRules = null;
+		String pollingType = null;
 		for (int i = 0; i < parameters.getLength(); i++) {
 			curr = (Element) parameters.item(i);
 			name = curr.getAttribute(XML_A_PARAMETER_NAME);
 			classpath = curr.getAttribute(XML_A_PARAMETER_CLASSPATH);
 			if (classpath.equals(queuePut)) {
 				putStrategy = parseParameterRefclassArray(curr);
+			} else if (name.equals("FCFSstrategy")) {
+				pollingType = name;
+				NodeList subparams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
+				for (int y = 0; y < subparams.getLength(); y++) {
+					if (((Element) subparams.item(y)).getAttribute(XML_A_PARAMETER_NAME).equals("pollingKValue")) {
+						Integer pollingKValue = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+						model.setStationPollingServerKValue(key, pollingKValue);
+					}
+				}
+
 			} else if (name.equals("size")) {
 				Integer capacity = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationQueueCapacity(key, capacity);
@@ -564,10 +576,14 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (name.equals("serverPreemptive")) {
 				Boolean serverPreemptive = Boolean.valueOf(findText((curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
 				model.setStationServerPreemptive(key, serverPreemptive);
+			} else if (name.equals("pollingKValue")) {
+				Integer pollingKValue = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+				model.setStationPollingServerKValue(key, pollingKValue);
 			} else if (name.equals("dropStrategies")) {
 				dropRules = parseParameterRefclassArray(curr);
 			}
 		}
+
 		if (putStrategy != null) {
 			Object[] classNames = putStrategy.keySet().toArray();
 			for (Object className : classNames) {
@@ -587,6 +603,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				} else if (strategy.equals("HeadStrategyPriority")) {
 					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
+				} else if (strategy.equals("LCFSPRStrategy")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_LCFS_PR);
 				} else if (strategy.equals("RandStrategy")) {
 					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_RAND);
@@ -620,6 +639,24 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				}
 			}
 		}
+
+		if (pollingType != null) {
+		    String getStrategy = pollingType.substring(pollingType.lastIndexOf(".") + 1);
+			if (getStrategy.equals("LimitedPollingGetStrategy")) {
+				model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
+				model.setStationPollingServerBoolean(key, true);
+				model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_LIMITED);
+			} else if (getStrategy.equals("GatedPollingGetStrategy")) {
+				model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
+				model.setStationPollingServerBoolean(key, true);
+				model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_GATED);
+			} else if (getStrategy.equals("ExhaustivePollingGetStrategy")) {
+				model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
+				model.setStationPollingServerBoolean(key, true);
+				model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
+			}
+	}
+
 		// Decodes drop rules
 		if (dropRules != null) {
 			Object[] classNames = dropRules.keySet().toArray();
@@ -656,11 +693,28 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static void parseServerSection(Element section, CommonModel model, Object key) {
 		String sectionName = section.getAttribute(XML_A_STATION_SECTION_CLASSNAME);
 		if (CLASSNAME_PSSERVER.equals(sectionName)) {
-			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_PREEMPTIVE);
+			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_PSSERVER);
 			for (Object classKey : classes.values()) {
 				model.setQueueStrategy(key, classKey, QUEUE_STRATEGY_PS);
 			}
+		} else if (CLASSNAME_LKPSERVER.equals(sectionName)) {
+			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
+			model.setStationPollingServerBoolean(key, true);
+			model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_LIMITED);
+		} else if (CLASSNAME_GATEDPSERVER.equals(sectionName)) {
+			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
+			model.setStationPollingServerBoolean(key, true);
+			model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_GATED);
+		} else if (CLASSNAME_EXHAUSTIVEPSERVER.equals(sectionName)) {
+			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
+			model.setStationPollingServerBoolean(key, true);
+			model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
+		} else if (CLASSNAME_PREEMPTIVESERVER.equals(sectionName)) {
+			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_PREEMPTIVE);
+		} else if (CLASSNAME_SERVER.equals(sectionName)) {
+			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 		}
+
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
 		Element curr;
 		String name, classpath;
@@ -675,6 +729,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (name.equals("serverPreemptive")) {
 				Boolean serverPreemptive = Boolean.valueOf(findText((curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
 				model.setStationServerPreemptive(key, serverPreemptive);
+			} else if (name.equals("switchoverStrategy")) {
+				Map<String, Node> distributions = parseParameterRefclassArray((Element) parameters.item(i));
+				Object[] classNames = distributions.keySet().toArray();
+				for (Object className : classNames) {
+					model.setStationPollingSwitchoverDistribution(key, classes.get(className), parseServiceStrategy((Element) distributions.get(className)));
+				}
 			} else if (classpath.equals(serviceStrategy)) {
 				// Retrieves all distributions subParameters
 				Map<String, Node> distributions = parseParameterRefclassArray((Element) parameters.item(i));
@@ -1849,7 +1909,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			return STATION_TYPE_DELAY;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
 				&& (sectionNames[1].equals(CLASSNAME_SERVER)
+						|| sectionNames[1].equals(CLASSNAME_PREEMPTIVESERVER)
 						|| sectionNames[1].equals(CLASSNAME_PSSERVER))
+						|| sectionNames[1].equals(CLASSNAME_EXHAUSTIVEPSERVER)
+						|| sectionNames[1].equals(CLASSNAME_LKPSERVER)
+						|| sectionNames[1].equals(CLASSNAME_GATEDPSERVER)
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
 			return STATION_TYPE_SERVER;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)

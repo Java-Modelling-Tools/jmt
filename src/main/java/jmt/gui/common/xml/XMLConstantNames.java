@@ -141,6 +141,10 @@ public interface XMLConstantNames {
 	public static final String CLASSNAME_QUEUE = "Queue";
 	public static final String CLASSNAME_SINK = "JobSink";
 	public static final String CLASSNAME_SERVER = "Server";
+	public static final String CLASSNAME_PREEMPTIVESERVER = "PreemptiveServer";
+	public static final String CLASSNAME_LKPSERVER = "LimitedPollingServer";
+	public static final String CLASSNAME_GATEDPSERVER = "GatedPollingServer";
+	public static final String CLASSNAME_EXHAUSTIVEPSERVER = "ExhaustivePollingServer";
 	public static final String CLASSNAME_PSSERVER = "PSServer";
 	public static final String CLASSNAME_DELAY = "Delay";
 	public static final String CLASSNAME_TUNNEL = "ServiceTunnel";

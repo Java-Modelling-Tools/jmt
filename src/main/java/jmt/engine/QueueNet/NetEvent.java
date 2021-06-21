@@ -68,5 +68,8 @@ public class NetEvent {
 	public static final int EVENT_JOB_RELEASE = 0x2000;
 	/** Event ID: Job finish event.*/
 	public static final int EVENT_JOB_FINISH = 0x4000;
+	/** Event ID: PollNext */
+	public static final int EVENT_POLLING_SERVER_NEXT = 0x5000;
+	public static final int EVENT_POLLING_SERVER_READY = 0x5001;
 
 }

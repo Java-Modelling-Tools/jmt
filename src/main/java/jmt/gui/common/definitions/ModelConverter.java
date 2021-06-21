@@ -71,7 +71,7 @@ public class ModelConverter {
 		String defaultStationQueue = Defaults.get("stationStationQueueStrategy");
 		String defaultQueue = Defaults.get("stationQueueStrategy");
 		Defaults.set("stationRoutingStrategy", RandomRouting.class.getName());
-		Defaults.set("stationStationQueueStrategy", CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+		Defaults.set("stationStationQueueStrategy", CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER);
 		Defaults.set("stationQueueStrategy", CommonConstants.QUEUE_STRATEGY_PS);
 
 		ArrayList<String> res = new ArrayList<String>();

@@ -83,6 +83,12 @@ public class LoadDependentStrategy extends ServiceStrategy {
 				if (index < 0) {
 					index = -index - 2;
 				}
+
+				// Polling server switchover time could happen with 0 jobs in the lists
+				if (index < 0) {
+					index = 0;
+				}
+
 				LDParameter parameter = parameters[index];
 				item = new MeanCache(parameter, jobs);
 				cache.set(jobs, item);

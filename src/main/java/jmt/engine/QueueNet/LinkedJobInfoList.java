@@ -117,6 +117,11 @@ public class LinkedJobInfoList implements JobInfoList {
 	/**
 	 * Creates a new JobInfoList instance.
 	 * @param numberOfJobClasses number of job classes.
+	if (preemption) {
+	jobInService = job;
+	jobInService.setServingMessage(jobInServiceMessage);
+	jobInService.setIsJobInService(true);
+	}
 	 */
 	@SuppressWarnings("unchecked")
 	public LinkedJobInfoList(int numberOfJobClasses) {
@@ -803,6 +808,10 @@ public class LinkedJobInfoList implements JobInfoList {
 		list.remove(jobInfo);
 		listPerClass[c].remove(jobInfo);
 	}
+
+	/*
+	 *
+	 */
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#setNumberOfServers(int)

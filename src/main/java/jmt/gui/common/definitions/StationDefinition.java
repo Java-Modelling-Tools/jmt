@@ -222,6 +222,51 @@ public interface StationDefinition {
 	public void setStationNumberOfServers(Object key, Integer numberOfServers);
 
 	/**
+	 * Sets polling type, given the search key
+	 */
+	public void setStationPollingServerType(Object key, String PollingType);
+
+	/**
+	 * Returns type of polling server
+	 */
+	public String getStationPollingServerType(Object key);
+
+	/**
+	 * Sets k value for K polling servers
+	 */
+
+	public void setStationPollingServerKValue(Object key, Integer k);
+
+	/**
+	 * Returns k value for K polling servers
+	 */
+
+	public Integer getStationPollingServerKValue(Object key);
+
+	/**
+	 * Sets value of whether a server is polling
+	 */
+	public void setStationPollingServerBoolean(Object key, Boolean serverPolling);
+
+	/**
+	 * Returns value of whether a server is polling
+	 */
+
+	public Boolean getStationPollingServerBoolean(Object key);
+
+	/**
+	 * Set switchover period distribution
+	 */
+
+	public void setStationPollingSwitchoverDistribution(Object stationKey, Object classKey, Object distribution);
+
+	/**
+	 * Get switchover period distribution
+	 */
+
+	public Object getStationPollingSwitchoverDistribution(Object stationKey, Object classKey);
+
+	/**
 	 * Tells if a fork is blocking
 	 * <br>Author: Bertoli Marco
 	 * @param key: search's key for fork
