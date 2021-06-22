@@ -25,7 +25,7 @@ import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceMeasurement.Boole
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceMeasurement.DoubleValueImpatienceMeasurement;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
 import jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy;
-cd import jmt.engine.NetStrategies.QueueGetStrategies.PollingGetStrategy;
+import jmt.engine.NetStrategies.QueueGetStrategies.PollingGetStrategy;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.PreemptiveStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
@@ -418,7 +418,7 @@ public class Queue extends InputSection {
 			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 			if (jobsList.size() > 0) {
 				//the first job is forwarded to service section
-				job = getStrategy.get(jobsList);
+				//job = getStrategy.get(jobsList);
 				switchOverRequest = job == null;
 				if (switchOverRequest && (getStrategy instanceof PollingGetStrategy)) {
 					send(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0, NodeSection.SERVICE);

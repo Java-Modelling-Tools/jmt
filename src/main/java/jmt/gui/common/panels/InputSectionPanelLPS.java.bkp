@@ -75,7 +75,7 @@ public class InputSectionPanelLPS extends WizardPanel implements CommonConstants
 	/**
 	 * Used to define drop rules
 	 */
-	protected static final Object[] dropRules = { FINITE_DROP, FINITE_BLOCK, FINITE_WAITING };
+	protected static final Object[] dropRules = { FINITE_DROP, FINITE_BLOCK, FINITE_WAITING, FINITE_RETRIAL };
 
 	private boolean isInitComplete;
 
