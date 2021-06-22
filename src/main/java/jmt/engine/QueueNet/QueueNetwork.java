@@ -21,6 +21,14 @@ package jmt.engine.QueueNet;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import jmt.common.exception.NetException;
+import jmt.engine.NodeSections.BlockingQueue;
+import jmt.engine.NodeSections.ClassSwitch;
+import jmt.engine.NodeSections.Enabling;
+import jmt.engine.NodeSections.Firing;
+import jmt.engine.NodeSections.Fork;
+import jmt.engine.NodeSections.Queue;
+import jmt.engine.NodeSections.Storage;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
 

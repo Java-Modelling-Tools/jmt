@@ -18,6 +18,48 @@
 
 package jmt.gui.common.editors;
 
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.text.ParseException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SpringLayout;
+import javax.swing.WindowConstants;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
@@ -683,6 +725,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		dropRules.put(CommonConstants.FINITE_DROP, CommonConstants.FINITE_DROP);
 		dropRules.put(CommonConstants.FINITE_BLOCK, CommonConstants.FINITE_BLOCK);
 		dropRules.put(CommonConstants.FINITE_WAITING, CommonConstants.FINITE_WAITING);
+		dropRules.put(CommonConstants.FINITE_RETRIAL, CommonConstants.FINITE_RETRIAL);
 		addInputCombo(text, property, cont, dropRules);
 	}
 

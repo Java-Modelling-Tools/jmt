@@ -64,7 +64,7 @@ public class StorageSectionPanel extends WizardPanel implements CommonConstants 
 	private static final long serialVersionUID = 1L;
 
 	private static final Object[] queuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND };
-	private static final Object[] dropRules = { FINITE_DROP, FINITE_BLOCK, FINITE_WAITING };
+	private static final Object[] dropRules = { FINITE_DROP, FINITE_BLOCK, FINITE_WAITING, FINITE_RETRIAL};
 
 	private boolean isInitComplete;
 

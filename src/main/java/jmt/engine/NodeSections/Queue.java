@@ -1,16 +1,16 @@
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
-
+ * <p>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
-
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
-
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -19,18 +19,22 @@
 package jmt.engine.NodeSections;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.ImpatienceStrategies.Balking;
+import jmt.engine.NetStrategies.ImpatienceStrategies.Impatience;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceMeasurement.BooleanValueImpatienceMeasurement;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceMeasurement.DoubleValueImpatienceMeasurement;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
 import jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy;
-import jmt.engine.NetStrategies.QueueGetStrategies.PollingGetStrategy;
+cd import jmt.engine.NetStrategies.QueueGetStrategies.PollingGetStrategy;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.PreemptiveStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategy;
+import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.*;
 import jmt.engine.dataAnalysis.Measure;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class implements a generic finite/infinite queue. In finite queue, if
@@ -46,7 +50,7 @@ import java.util.List;
  * processed but redirected to the fictitious station (called "region input station")
  * which controls the access to the blocking region.
  * <br><br>
- *
+ * <p>
  * The class has different constructors to create a generic queue or a redirecting queue.
  * <br>
  * However it is also possible to create a generic queue and then to turn on/off the
@@ -54,16 +58,18 @@ import java.util.List;
  * <tt>redirectionTurnOFF()</tt> methods.
  *
  * @author Francesco Radaelli, Stefano Omini, Bertoli Marco
- * 
+ * <p>
  * Modified by Ashanka (Oct 2009) for FCR Bug fix: Events are created with job instead of null for EVENT_JOB_OUT_OF_REGION
  */
+
 /**
- * <p><b>Name:</b> Queue</p> 
- * <p><b>Description:</b> 
- * 
+ * <p><b>Name:</b> Queue</p>
+ * <p><b>Description:</b>
+ *
  * </p>
  * <p><b>Date:</b> 15/nov/2009
  * <b>Time:</b> 23.08.16</p>
+ *
  * @author Bertoli Marco [marco.bertoli@neptuny.com]
  * @version 3.0
  */
@@ -72,8 +78,13 @@ public class Queue extends InputSection {
 	public static final String FINITE_DROP = "drop";
 	public static final String FINITE_BLOCK = "BAS blocking";
 	public static final String FINITE_WAITING = "waiting queue";
+	public static final String FINITE_RETRIAL = "retrial";
 
-	private int size;
+	private String[] dropStrategies;
+
+	private ServiceStrategy[] retrialDistributionStrategies;
+
+	private int size; // queue + servers
 	private int maxRunning;
 
 	/* Temp solution for Limited Polling */
@@ -91,13 +102,25 @@ public class Queue extends InputSection {
 
 	//the JobInfoList of the owner NetNode
 	private JobInfoList nodeJobsList;
-	//the JobInfoList of the global Network
+	//the JobInfoList of the global Network -- model level
 	private GlobalJobInfoList netJobsList;
 	//the JobInfoList used for Fork nodes
 	private JobInfoList FJList;
+	// Backup buffer when the main jobsList is full
+	private JobInfoList waitingRequests;
 
-	private List<WaitingRequest> waitingRequests;
+	private boolean isRetrialDR = false;
 
+	// TODO rose: Suggest to change to pair
+	// Used only if the job is forwarded to a PSServer
+	private Map<Job, Double> renegingDelayPerJob = new HashMap<>();
+
+
+	// Mapping such that each Queue and each JobClass has its own Reneging object
+	private Impatience[] impatienceStrategyPerStationClass;
+	private boolean linkedToPSServer = false;
+
+	// Get and put strategies for the Queue
 	private QueueGetStrategy getStrategy;
 
 	private Boolean switchOverRequest;
@@ -113,6 +136,12 @@ public class Queue extends InputSection {
 	private NetNode regionInputStation;
 	//------------------------------------------------------------------//
 
+	private enum BufferType {
+		FJ_LIST,
+		JOBS_LIST,
+		WAITING_REQUESTS
+	}
+
 	/**
 	 * Creates a new instance of finite Queue.
 	 * @param size Queue size (-1 = infinite queue).
@@ -126,27 +155,12 @@ public class Queue extends InputSection {
 		//the corresponding Job object is automatically added to
 		//JobInfoList
 		super(false);
-
-		if (size == -1) {
-			this.size = -1;
-			infinite = true;
-		} else {
-			this.size = size;
-			infinite = false;
-		}
-		if (maxRunning == -1) {
-			this.maxRunning = -1;
-			serviceCapacityInfinite = true;
-		} else {
-			this.maxRunning = maxRunning;
-			serviceCapacityInfinite = false;
-		}
+		this.size = size;
+		infinite = size == -1;
+		this.maxRunning = maxRunning;
+		serviceCapacityInfinite = maxRunning == -1;
 		this.preemption = serverPreemptive;
-		if (getStrategy == null) {
-			this.getStrategy = new FCFSstrategy();
-		} else {
-			this.getStrategy = getStrategy;
-		}
+		this.getStrategy = getStrategy == null ? new FCFSstrategy() : getStrategy;
 		this.putStrategies = putStrategies;
 		// Uses putstrategies.length to estimate number of classes. It is a bit
 		// unclean but we are forced for compatibility.
@@ -215,33 +229,61 @@ public class Queue extends InputSection {
 	 * different drop strategies. Other constructors are left for compatibility.
 	 * @param size Queue size (-1 = infinite queue).
 	 * @param dropStrategies Drop strategy per class: FINITE_DROP || FINITE_BLOCK
-	 * || FINITE_WAITING.
+	 * || FINITE_WAITING || FINITE_RETRIAL.
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 */
-	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies, ServiceStrategy[] retrials, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
 		this(size.intValue(), maxRunning.intValue(), serverPreemptive.booleanValue(), false, getStrategy, putStrategies);
 		// Decodes drop strategies
+		this.dropStrategies = dropStrategies;
 		for (int i = 0; i < dropStrategies.length; i++) {
-			if (dropStrategies[i].equals(FINITE_DROP)) {
-				drop[i] = true;
-				block[i] = false;
-			} else if (dropStrategies[i].equals(FINITE_BLOCK)) {
-				drop[i] = false;
-				block[i] = true;
-			} else if (dropStrategies[i].equals(FINITE_WAITING)) {
-				drop[i] = false;
-				block[i] = false;
+			switch (dropStrategies[i]) {
+				case FINITE_DROP:
+					drop[i] = true;
+					block[i] = false;
+					break;
+				case FINITE_BLOCK:
+					drop[i] = false;
+					block[i] = true;
+					break;
+				case FINITE_RETRIAL:
+					isRetrialDR = true;
+					retrialDistributionStrategies = retrials;
+				case FINITE_WAITING:
+				default:
+					drop[i] = false;
+					block[i] = false;
 			}
 		}
 	}
-	
-	public Queue(Integer size, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
-		this(size.intValue(), -1, false, dropStrategies, getStrategy, putStrategies);
+
+	public Queue(Integer size, String[] dropStrategies, ServiceStrategy[] retrials, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+		this(size.intValue(), -1, false, dropStrategies, retrials, getStrategy, putStrategies);
+	}
+
+	/**
+	 * Creates a new instance of finite Queue with reneging. Calling constructor that supports
+	 * different drop strategies and reneging strategies. Other constructors are left for compatibility.
+	 *
+	 * @param impatienceStrategies Impatience strategies unique to each station and class.
+	 */
+	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies, ServiceStrategy[] retrials
+					, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, Impatience[] impatienceStrategies) {
+		// Called method with decoded drop Strategies
+		this(size, maxRunning, serverPreemptive, dropStrategies, retrials, getStrategy, putStrategies);
+		// Add impatience strategies for each class
+		impatienceStrategyPerStationClass = impatienceStrategies;
+	}
+
+	public Queue(Integer size, String[] dropStrategies, ServiceStrategy[] retrials, QueueGetStrategy getStrategy,
+							 QueuePutStrategy[] putStrategies, Impatience[] impatienceStrategies) {
+		this(size, -1, false, dropStrategies, retrials, getStrategy, putStrategies, impatienceStrategies);
 	}
 
 	/**
 	 * Turns on the "redirecting queue" behaviour.
+	 *
 	 * @param region the blocking region to which the owner node of this queue
 	 * belongs.
 	 */
@@ -272,26 +314,30 @@ public class Queue extends InputSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
-		// Sets netnode dependent properties
+		// for easier reference
 		jobClasses = getJobClasses();
-		waitingRequests = new LinkedList<WaitingRequest>();
-        //waitingRequests.setNetSystem(node.getNetSystem());
+		nodeJobsList = node.getJobInfoList();
+
+		waitingRequests = new LinkedJobInfoList(jobClasses.size());
+		waitingRequests.setNetSystem(node.getNetSystem());
+
 		if (putStrategies == null) {
 			putStrategies = new QueuePutStrategy[jobClasses.size()];
-			for (int i = 0; i < putStrategies.length; i++) {
-				putStrategies[i] = new TailStrategy();
-			}
+			Arrays.fill(putStrategies, new TailStrategy());
 		}
 
 		if (getStrategy instanceof PollingGetStrategy) {
 			((PollingGetStrategy) getStrategy).setPollingQueues(jobClasses);
 		}
-
-		//retrieves the job info list of the owner node
-		nodeJobsList = node.getJobInfoList();
+				
 		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
 			FJList = new LinkedJobInfoList(jobClasses.size());
-            FJList.setNetSystem(node.getNetSystem()); 
+			FJList.setNetSystem(node.getNetSystem());
+		}
+
+		// Check if the Queue is connected directly to a PSServer
+		if (node.getSection(NodeSection.SERVICE) instanceof PSServer) {
+			linkedToPSServer = true;
 		}
 	}
 
@@ -311,7 +357,7 @@ public class Queue extends InputSection {
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			for (int j = 0; j < jobsPerClass[i]; j++) {
 				Job job = new Job(jobClasses.get(i), netJobsList);
-                job.initialize(this.getOwnerNode().getNetSystem());
+				job.initialize(this.getOwnerNode().getNetSystem());
 				updateVisitPath(job);
 				jobPermutation[index] = job;
 				index++;
@@ -341,16 +387,25 @@ public class Queue extends InputSection {
 				myRegion.increaseOccupation(job.getJobClass());
 			}
 		}
+
 	}
 
 	/**
 	 * This method implements a generic finite/infinite queue.
+	 *
 	 * @param message message to be processed.
 	 * @throws NetException
 	 */
 	@Override
 	protected int process(NetMessage message) throws NetException {
-		Job job;
+		Job job = message.getJob();
+		JobInfo jobInfo = null;
+		int jobClass = -1;
+		if (job != null) {
+			jobInfo = nodeJobsList.lookFor(job);
+			jobClass = job.getJobClass().getId();
+		}
+		boolean isRetrialJob = false;
 
 		switch (message.getEvent()) {
 
@@ -365,14 +420,29 @@ public class Queue extends InputSection {
 				//the first job is forwarded to service section
 				job = getStrategy.get(jobsList);
 				switchOverRequest = job == null;
-				if (job == null && (getStrategy instanceof PollingGetStrategy)) {
+				if (switchOverRequest && (getStrategy instanceof PollingGetStrategy)) {
 					send(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0, NodeSection.SERVICE);
 				} else {
-					sendForward(job, 0.0);
+					sendForward(getStrategy.get(jobsList), 0.0);
 				}
 				coolStart = false;
 			}
 			break;
+
+			case NetEvent.EVENT_RETRIAL:
+				/*
+				EVENT_RETRIAL
+				For this case, the job is resent to the queue (same source and same owner node) with a random delay.
+				 */
+				double randomDelay = retrialDistributionStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
+				nodeJobsList.addToRetrialOrbit(job);
+				sendMe(NetEvent.EVENT_RETRIAL_JOB, job, randomDelay);
+				break;
+
+			case NetEvent.EVENT_RETRIAL_JOB:
+				nodeJobsList.retryJob(jobInfo);
+				netJobsList.retryJob(job);
+				isRetrialJob = true;
 
 		case NetEvent.EVENT_JOB:
 			//EVENT_JOB
@@ -395,7 +465,7 @@ public class Queue extends InputSection {
 			//
 			//If the queue is infinite, the job is put into the queue and an ack is sent
 
-			job = message.getJob();
+
 
 			//----REDIRECTION BEHAVIOUR----------//
 			if (redirectionON) {
@@ -417,43 +487,57 @@ public class Queue extends InputSection {
 			}
 			//----END REDIRECTION BEHAVIOUR-------//
 
-			//
-			//two possible cases:
-			//1 - the queue is a generic queue (!redirectionOn)
-			//2 - the queue is a redirecting queue, but the message has arrived
-			//from the inside of the region or from the inputStation:
-			//in this case the redirecting queue acts as a normal queue
-			//
-			//therefore in both cases the behaviour is the same
-			//
-
-			// Check if there is still capacity.
-			// <= size because the arriving job has not been inserted in Queue
-			// job list but has been inserted in NetNode job list !!
-			if (infinite || nodeJobsList.size() <= size) {
-				// Queue is not full. Okay.
-
-				// If parent node is a fork node adds job to FJ info list
-				if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-					FJList.add(new JobInfo(job));
+				//
+				//two possible cases:
+				//1 - the queue is a generic queue (!redirectionOn)
+				//2 - the queue is a redirecting queue, but the message has arrived
+				//from the inside of the region or from the inputStation:
+				//in this case the redirecting queue acts as a normal queue
+				//therefore in both cases the behaviour is the same
+				// Before even entering the queue, we first check if the job will balk.
+				// If it balks, do not proceed further with the rest of the code.
+				if (jobWillBalk(job)) {
+					performBalkingOperations(job);
+					sendAckToMessageSource(message, job);
+					break;
 				}
+				// Check if there is still capacity.
+				// <= size because the arriving job has not been inserted in Queue
+				// job list but has been inserted in NetNode job list !!
+				// If true, then retrial will be considered as successful
+				if (infinite || nodeJobsList.size() <= size) {
+					// Queue is not full. Okay.
+					double waitingTime = getNetSytem().getTime() - job.getSystemEnteringTime();
+					if (nodeJobsList.getRetrialOrbit().containsKey(job.getId())) {
+						waitingTime = getNetSytem().getTime() - nodeJobsList.getRetrialOrbit().get(job.getId()).get(0);
+						nodeJobsList.removeFromRetrialOrbit(job);
+					}
+					nodeJobsList.updateWaitingTime(job, waitingTime);
+					// If parent node is a fork node adds job to FJ info list
+					if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+						addJobToBuffer(job, message, BufferType.FJ_LIST);
+					}
+					// If coolStart is true, this is the first job received or the queue was empty: this job is sent immediately
+					// to the next section and coolStart set to false.
+						if (putStrategies[job.getJobClass().getId()] instanceof PreemptiveStrategy) {
+						sendForward(job, 0.0);
+						setRenegingEvent(job); //rose: if event is processed immediately, should not need to renege
+					} else {
+						int jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
+						if (coolStart && (jobsInService < maxRunning || serviceCapacityInfinite)) {
 
-				// If coolStart is true, this is the first job received or the
-				// queue was empty: this job is sent immediately to the next
-				// section and coolStart set to false.
-				if (putStrategies[job.getJobClass().getId()] instanceof PreemptiveStrategy) {
-					sendForward(job, 0.0);
-				} else {
-					int jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
-					if (coolStart && (jobsInService < maxRunning || serviceCapacityInfinite)) {
-						// No jobs in queue: Refresh jobsList and sends job (do not use put strategy, because queue is empty)
+							// No jobs in queue: Refresh jobsList and sends job (do not use put strategy, because queue is empty)
 						if (jobsList.size() <= 0 && !(getStrategy instanceof PollingGetStrategy)) {
-							jobsList.add(new JobInfo(job));
-							// forward without any delay
-							sendForward(jobsList.removeFirst().getJob(), 0.0);
-						} else {
-							putStrategies[job.getJobClass().getId()].put(job, jobsList, this);
-							if (getStrategy instanceof PollingGetStrategy){
+								jobsList.add(new JobInfo(job));
+								setRenegingEvent(job); //rose: if event is processed immediately, will not renege
+
+								// forward without any delay
+								sendForward(jobsList.removeFirst().getJob(), 0.0);
+
+							} else { //queue is not empty (need to queue before service)
+								putStrategies[job.getJobClass().getId()].put(job, jobsList, this);
+								setRenegingEvent(job);
+	if (getStrategy instanceof PollingGetStrategy){
 								if (!switchOverRequest) {
 									Job jobSent = getStrategy.get(jobsList);
 									if (jobSent == null) {
@@ -466,31 +550,40 @@ public class Queue extends InputSection {
 							} else {
 								Job jobSent = getStrategy.get(jobsList);
 								sendForward(jobSent, 0.0);
+
 							}
 
 						}
+							forwardRenegingData(job, this.getNetSytem().getTime());
 						coolStart = false;
 					} else {
 						putStrategies[job.getJobClass().getId()].put(job, jobsList, this);
+							setRenegingEvent(job);
 					}
 				}
 				// sends an ACK backward
+					if (!isRetrialJob) {
 				send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+					}
 			} else {
 				// Queue is full. Now we use an additional queue or drop.
 
 				// if the job has been sent by the owner node of this queue section
-				if (isMyOwnerNode(message.getSource())) {
+					if (isMyOwnerNode(message.getSource()) && !dropStrategies[jobClass].equals(FINITE_RETRIAL)) { // job sent by the node itself (corner case) -- should always be successful
 					send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 
-					waitingRequests.add(new WaitingRequest(job, message.getSourceSection(), message.getSource()));
-				}
+						addJobToBuffer(job, message, BufferType.WAITING_REQUESTS);
+						setRenegingEvent(job);
+					} else if (!drop[jobClass]) { // user did not select drop
 				// otherwise if job has been sent by another node
-				else if (!drop[job.getJobClass().getId()]) {
-					// if drop is true reject the job, else add the job to waitingRequests
-					waitingRequests.add(new WaitingRequest(job, message.getSourceSection(), message.getSource()));
+						if (dropStrategies != null && dropStrategies[jobClass].equals(FINITE_RETRIAL)) {
+							sendMe(NetEvent.EVENT_RETRIAL, job, 0);
+						} else {
+							addJobToBuffer(job, message, BufferType.WAITING_REQUESTS);
+							setRenegingEvent(job);
+						}
 					// if blocking is disabled, sends ack otherwise router of the previous node remains busy
-					if (!block[job.getJobClass().getId()]) {
+						if (!block[job.getJobClass().getId()] && !isRetrialJob) {
 						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 					}
 				} else {
@@ -530,20 +623,16 @@ public class Queue extends InputSection {
 		case NetEvent.EVENT_POLLING_SERVER_NEXT:
 		    switchOverRequest = false;
 
-		case NetEvent.EVENT_ACK:
-			//EVENT_ACK
-			//If there are waiting requests, the first is taken (if the source node of this request
-			//is the owner node of this section, an ack message is sent).
-			//The job contained is put into the queue using the specified put strategy.
-			//
-			//At this point, if there are jobs in queue, the first is taken (using the
-			//specified get strategy) and forwarded. Otherwise, if there are no jobs, coolStart
-			//is set true.
-
-			// if there is a waiting request send ack to the first node
-			//(note that with infinite queue there are no waiting requests)
-			if (waitingRequests.size() > 0) {
-				WaitingRequest wr = waitingRequests.remove(0);
+			case NetEvent.EVENT_ACK:
+				//EVENT_ACK
+				//If there are waiting requests, the first is taken (if the source node of this request
+				//is the owner node of this section, an ack message is sent).
+				//The job contained is put into the queue using the specified put strategy.
+				//At this point, if there are jobs in queue, the first is taken (using the
+				//specified get strategy) and forwarded. Otherwise, if there are no jobs, coolStart is set true.
+				// if there is a waiting request send ack to the first node
+				if (waitingRequests.size() > 0) {
+					WaitingRequest wr = (WaitingRequest) waitingRequests.removeFirst();
 
 				// If the source is not the owner node sends ack if blocking is enabled. Otherwise 
 				// ack was already sent.
@@ -552,9 +641,7 @@ public class Queue extends InputSection {
 				}
 
 				//the class ID of this job
-				int c = wr.getJob().getJobClass().getId();
-				//the job is put into the queue according to its own class put strategy
-				putStrategies[c].put(wr.getJob(), jobsList, this);
+					addJobToBuffer(wr.getJob(), message, BufferType.JOBS_LIST);
 			}
 
 			// if there is at least one job, sends it
@@ -571,8 +658,10 @@ public class Queue extends InputSection {
 				}
 			} else if (jobsList.size() > 0  && (jobsInService < maxRunning || serviceCapacityInfinite)) {
 				// Gets job using a specific strategy and sends job
+                    double jobEntryTimeToQueue = getStrategy.peek(jobsList).getEnteringTime();
 					Job jobSent = getStrategy.get(jobsList);
 					sendForward(jobSent, 0.0);
+                    forwardRenegingData(jobSent, jobEntryTimeToQueue);
 
 			} else {
 			// else set coolStart to true
@@ -580,9 +669,9 @@ public class Queue extends InputSection {
 			}
 			break;
 
-		case NetEvent.EVENT_JOB_COMPLETED:
-			jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
-			if (getStrategy instanceof PollingGetStrategy) {
+			case NetEvent.EVENT_JOB_COMPLETED:
+				jobsInService = getOwnerNode().getSection(NodeSection.SERVICE).getIntSectionProperty(NodeSection.PROPERTY_ID_RESIDENT_JOBS);
+				if (getStrategy instanceof PollingGetStrategy) {
 				if (!switchOverRequest) {
 					Job jobSent = getStrategy.get(jobsList);
 					if (jobSent == null) {
@@ -593,30 +682,43 @@ public class Queue extends InputSection {
 					}
 				}
 			} else if (jobsList.size() > 0 && (jobsInService < maxRunning || serviceCapacityInfinite)) {
-				Job jobSent = getStrategy.get(jobsList);
-				sendForward(jobSent, 0.0);
-			} else {
-				// else set coolStart to true
-				coolStart = true;
-			}
-			break;
+					// Gets job using a specific strategy and sends job
+					Job jobSent = getStrategy.get(jobsList);
+					setRenegingEvent(jobSent);
+					sendForward(jobSent, 0.0);
+					forwardRenegingData(jobSent, this.getNetSytem().getTime());
+				} else {
+					coolStart = true;
+				}
+				break;
+			case NetEvent.EVENT_PREEMPTED_JOB:
+				job = message.getJob();
+				addJobToBuffer(job, message, BufferType.JOBS_LIST);
+				setRenegingEvent(job);
+				break;
 
+			case NetEvent.EVENT_JOIN:
+				if (!(getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork)) {
+					return MSG_NOT_PROCESSED;
+				}
+				job = (Job) message.getData();
+				jobInfo = getJobInfoFromBuffer(job, FJList);
+				if (jobInfo != null) {
+					FJList.remove(jobInfo);
+				}
+				break;
 
-		case NetEvent.EVENT_PREEMPTED_JOB:
-			job = message.getJob();
-			putStrategies[job.getJobClass().getId()].put(job, jobsList, this);
-			break;
-
-		case NetEvent.EVENT_JOIN:
-			if (!(getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork)) {
-				return MSG_NOT_PROCESSED;
-			}
-			job = (Job) message.getData();
-			JobInfo jobInfo = FJList.lookFor(job);
-			if (jobInfo != null) {
-				FJList.remove(jobInfo);
-			}
-			break;
+			case NetEvent.EVENT_RENEGE:
+				// Find the job in the jobsList, and if it is present, drop the job from the system
+				job = (Job) message.getData();
+				// Look for the job in either jobsList or in waitingRequests and perform the reneging (if the job can be found).
+				// It cannot exist in both places at the same time.
+				if (getJobInfoFromBuffer(job, jobsList) != null) {
+					performRenegingOperations(job, jobsList);
+				} else if (getJobInfoFromBuffer(job, waitingRequests) != null) {
+					performRenegingOperations(job, waitingRequests);
+				}
+				renegingDelayPerJob.remove(job);
 
 		case NetEvent.EVENT_JOB_RELEASE:
 			break;
@@ -628,24 +730,151 @@ public class Queue extends InputSection {
 			break;
 
 
-		default:
-			return MSG_NOT_PROCESSED;
+			default:
+				return MSG_NOT_PROCESSED;
 		}
 
 		return MSG_PROCESSED;
 	}
 
+	/**
+	 * This method should be used only in process(), and whenever a job is to be added to a buffer in this class.
+	 */
+	private void addJobToBuffer(Job job, NetMessage message, BufferType bufferType) throws NetException {
+		switch (bufferType) {
+			case FJ_LIST:
+				FJList.add(new JobInfo(job));
+				break;
+			case JOBS_LIST:
+				putStrategies[getJobClassId(job)].put(job, jobsList, this);
+				break;
+			case WAITING_REQUESTS:
+				JobInfo waitingRequestInfo = new WaitingRequest(job, message.getSourceSection(), message.getSource());
+				waitingRequests.add(waitingRequestInfo);
+				break;
+		}
+	}
+
+	/**
+	 * Forwards, to the ServiceStation, data on the time left before the job reneges.
+	 * Only a PSServer is designed to process this particular event.
+	 */
+	private void forwardRenegingData(Job job, double jobEntryTimeToQueue) {
+		if (jobClassHasRequiredImpatience(getJobClassId(job), ImpatienceType.RENEGING)
+						&& linkedToPSServer) {
+			double renegingDelay = renegingDelayPerJob.get(job);
+			Double remainingTimeBeforeReneging = jobEntryTimeToQueue + renegingDelay - this.getNetSytem().getTime();
+			Map<Job, Double> jobToRemainingTimeMap = new HashMap<>();
+			jobToRemainingTimeMap.put(job, remainingTimeBeforeReneging);
+			sendForward(NetEvent.EVENT_RENEGE, jobToRemainingTimeMap, 0.0);
+		}
+	}
+
+	private void sendAckToMessageSource(NetMessage message, Job job) {
+		send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+	}
+
+	/**
+	 * Checks if the job is will balk before even entering the queue.
+	 * If it balks, call another method to handle the balking operation.
+	 *
+	 * @param job the job being processed.
+	 */
+	private boolean jobWillBalk(Job job) {
+		int jobClassId = getJobClassId(job);
+
+		// Allows the job to balk only if the impatience strategy for the station-class is Balking
+		if (jobClassHasRequiredImpatience(jobClassId, ImpatienceType.BALKING)) {
+			boolean priorityActivated = ((Balking) impatienceStrategyPerStationClass[jobClassId]).isPriorityActivated();
+			int jobClassPriority = job.getJobClass().getPriority();
+			BooleanValueImpatienceMeasurement balkingStatus =
+							new BooleanValueImpatienceMeasurement(jobsList, waitingRequests, jobClassPriority, priorityActivated);
+			// If queueLength = 0, it not possible at all for the job to balk
+			if (balkingStatus.getQueueLength() <= 0) {
+				return false;
+			}
+			// Modify by reference the boolean value held in balkingStatus
+			impatienceStrategyPerStationClass[jobClassId].generateImpatience(balkingStatus);
+			return balkingStatus.getBooleanValue();
+		}
+		return false;
+	}
+
+	/**
+	 * Gets the reneging time of the job, adds it to the Map and sends a reneging event to itself.
+	 *
+	 * @param job the job being processed.
+	 */
+	private void setRenegingEvent(Job job) {
+		int jobClassId = getJobClassId(job);
+		// Allows the job to renege only if the impatience strategy for the station-class is Reneging
+		if (jobClassHasRequiredImpatience(jobClassId, ImpatienceType.RENEGING)) {
+			DoubleValueImpatienceMeasurement renegingDelay = new DoubleValueImpatienceMeasurement();
+			// Modify by reference the MutableDouble value held in renegingDelay
+			impatienceStrategyPerStationClass[jobClassId].generateImpatience(renegingDelay);
+			renegingDelayPerJob.put(job, renegingDelay.doubleValue());
+			// Set the delay after which the job reneges, and send this event to itself
+			sendMe(NetEvent.EVENT_RENEGE, job, renegingDelay.doubleValue());
+		}
+	}
+
+	/**
+	 * Checks if the particular job class has an Impatience object attached to it
+	 *
+	 * @param jobClassId
+	 * @param requiredImpatience
+	 * @return
+	 */
+	private boolean jobClassHasRequiredImpatience(int jobClassId, ImpatienceType requiredImpatience) {
+		return impatienceStrategyPerStationClass != null && impatienceStrategyPerStationClass[jobClassId] != null
+						&& impatienceStrategyPerStationClass[jobClassId].isImpatienceType(requiredImpatience);
+	}
+
+
+	/**
+	 * Reneges the job from the Queue, NetNode, and System. Thereafter, updates the counters for reneging.
+	 *
+	 * @param job         the job being reneged.
+	 * @param jobsInQueue the JobInfoList belonging to the Queue, from which the job will renege
+	 */
+	private void performRenegingOperations(Job job, JobInfoList jobsInQueue) {
+		JobInfo jobInfoInQueueClass = getJobInfoFromBuffer(job, jobsInQueue);
+		JobInfo jobInfoInNetNode = getJobInfoFromBuffer(job, nodeJobsList);
+		// Renege jobs from jobsInQueue (Queue item), nodeJobsList (NetNode item) and netJobsList (Global item)
+		jobsInQueue.renegeJob(jobInfoInQueueClass);
+		nodeJobsList.renegeJob(jobInfoInNetNode);
+		netJobsList.renegeJob(job);
+	}
+
+	/**
+	 * Balks the job from the Queue, NetNode, and System. Thereafter, updates the counters for balking.
+	 * @param job the job being balked.
+	 */
+	private void performBalkingOperations(Job job) {
+		JobInfo jobInfoInNetNode = getJobInfoFromBuffer(job, nodeJobsList);
+		nodeJobsList.balkJob(jobInfoInNetNode);
+		netJobsList.balkJob(job);
+	}
+
+	private int getJobClassId(Job job) {
+		return job.getJobClass().getId();
+	}
+
+	private JobInfo getJobInfoFromBuffer(Job job, JobInfoList buffer) {
+		return buffer.lookFor(job);
+	}
+
 	@Override
 	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
 		switch (name) {
-		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-			FJList.analyzeQueueLength(jobClass, measurement);
-			break;
-		case SimConstants.FORK_JOIN_RESPONSE_TIME:
-			FJList.analyzeResponseTime(jobClass, measurement);
-			break;
-		default:
-			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+			case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+				FJList.analyzeQueueLength(jobClass, measurement);
+				break;
+			case SimConstants.FORK_JOIN_RESPONSE_TIME:
+				FJList.analyzeResponseTime(jobClass, measurement);
+				break;
+			default:
+				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
 	}
 

@@ -18,19 +18,6 @@
 
 package jmt.framework.xml;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import jmt.common.xml.XSDSchemaLoader;
 
 import org.apache.xerces.parsers.DOMParser;
@@ -39,6 +26,13 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * @author alyf (Andrea Conti) (Date: 18-set-2003)

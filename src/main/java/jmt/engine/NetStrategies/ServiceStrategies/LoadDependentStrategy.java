@@ -122,6 +122,14 @@ public class LoadDependentStrategy extends ServiceStrategy {
 	}
 
 	/**
+	 * Used mainly for the Balking class.
+	 * @return parameters variable
+	 */
+	public LDParameter[] getParameters() {
+		return parameters;
+	}
+
+	/**
 	 * Inner class used to cache mean values and distributions to avoid parsing a function
 	 * at each call of this strategy
 	 */

@@ -51,11 +51,22 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector<Integer> utilization = new Vector<Integer>();
 	private Vector<Integer> throughput = new Vector<Integer>();
 	private Vector<Integer> dropRate = new Vector<Integer>();
+	private Vector<Integer> renegingRate = new Vector<Integer>();
+	private Vector<Integer> balkingRate = new Vector<Integer>();
+	private Vector<Integer> retrialAttemptsRate = new Vector<Integer>();
+	private Vector<Integer> waitingTime = new Vector<Integer>();
+	private Vector<Integer> retrialOrbitSize = new Vector<Integer>();
+	private Vector<Integer> busyServerVar = new Vector<Integer>();
+
 	private Vector<Integer> systemCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> systemResponseTime = new Vector<Integer>();
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
+	private Vector<Integer> systemRenegingRate = new Vector<Integer>();
+	private Vector<Integer> systemBalkingRate = new Vector<Integer>();
 	private Vector<Integer> systemPower = new Vector<Integer>();
+	private Vector<Integer> systemRetrialAttemptsRate = new Vector<Integer>();
+
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputPerSink = new Vector<Integer>();
 	private Vector<Integer> FCRTotalWeight = new Vector<Integer>();
@@ -115,6 +126,22 @@ public class ResultsModel implements MeasureDefinition {
 				throughput.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
 				dropRate.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_RR)) {
+				renegingRate.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_BR)) {
+				balkingRate.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_R)) {
+				retrialAttemptsRate.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_BR)) { // added BR and RR for PA
+				balkingRate.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_RR)) {
+				renegingRate.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_WT)) {
+				waitingTime.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
+				retrialOrbitSize.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
+				busyServerVar.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
 				systemCustomerNumber.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {
@@ -123,8 +150,14 @@ public class ResultsModel implements MeasureDefinition {
 				systemThroughput.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_S_DR)) {
 				systemDropRate.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_S_RR)) {
+				systemRenegingRate.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_S_BR)) {
+				systemBalkingRate.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 				systemPower.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_S_R)) {
+				systemRetrialAttemptsRate.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {
 				responseTimePerSink.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
@@ -424,6 +457,69 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
+	 * Returns an array with the measureIndex of every reneging rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getRenegingRateMeasures() {
+		int[] tmp = new int[renegingRate.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = renegingRate.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
+	 * Returns an array with the measureIndex of every balking rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getBalkingRateMeasures() {
+		int[] tmp = new int[balkingRate.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = balkingRate.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
+	 * Returns an array with the measureIndex of every retrial attempts rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getRetrialAttemptsRateMeasures() {
+		int[] tmp = new int[retrialAttemptsRate.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = retrialAttemptsRate.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	@Override
+	public int[] getRetrialOrbitSizeMeasures() {
+		int[] tmp = new int[retrialOrbitSize.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = retrialOrbitSize.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	@Override
+	public int[] getWaitingTimeMeasures() {
+		int[] tmp = new int[waitingTime.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = waitingTime.get(i).intValue();
+		}
+		return tmp;	}
+
+	@Override
+	public int[] getNumberOfBusyServersMeasures() {
+		int[] tmp = new int[busyServerVar.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = busyServerVar.get(i).intValue();
+		}
+		return tmp;
+	}
+
+
+	/**
 	 * Returns an array with the measureIndex of every system customer number measure
 	 * @return an array with measures' index
 	 */
@@ -472,6 +568,30 @@ public class ResultsModel implements MeasureDefinition {
 	}
 
 	/**
+	 * Returns an array with the measureIndex of every system reneging rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemRenegingRateMeasures() {
+		int[] tmp = new int[systemRenegingRate.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemRenegingRate.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
+	 * Returns an array with the measureIndex of every system reneging rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemBalkingRateMeasures() {
+		int[] tmp = new int[systemBalkingRate.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemBalkingRate.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	/**
 	 * Returns an array with the measureIndex of every system power measure
 	 * @return an array with measures' index
 	 */
@@ -482,6 +602,19 @@ public class ResultsModel implements MeasureDefinition {
 		}
 		return tmp;
 	}
+
+	/**
+	 * Returns an array with the measureIndex of every system retrial attempts rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemRetrialAttemptsRateMeasures() {
+		int[] tmp = new int[systemRetrialAttemptsRate.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemRetrialAttemptsRate.get(i).intValue();
+		}
+		return tmp;
+	}
+
 
 	/**
 	 * Returns an array with the measureIndex of every response time per sink measure

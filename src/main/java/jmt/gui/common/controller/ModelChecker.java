@@ -16,10 +16,13 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+//Flag
+
 package jmt.gui.common.controller;
 
 import java.util.*;
 
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.BlockingRegionDefinition;
 import jmt.gui.common.definitions.ClassDefinition;
@@ -29,8 +32,14 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
+
+//TODO: investigate delete or not
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
 
 /**
  * <p>
@@ -63,6 +72,10 @@ public class ModelChecker implements CommonConstants {
 	private Vector<Object> classesWithoutReferenceStation;
 	//Vector containing the keys of stations without an essential link
 	private Vector<Object> stationsWithoutEssentialLink;
+	//HashMap containing the vector of keys of stations that may route a closed
+	//class to sinks. The key of the HashMap is the key of the closed class
+	//considered.
+	private HashMap<Object, Vector<Object>> closedClassesWithRoutingError;
 	//Vector containing the keys of measures defined more than once
 	private Vector<Object> redundantMeasures;
 	//Vector containing the keys of stations using different queue strategies
@@ -82,6 +95,9 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of class switches with a matrix in which some
 	//rows sum to less than one
 	private Vector<Object> classSwitchesWithInvalidMatrix;
+	//Vector containing the keys of class switches followed by a queue with the
+	//BAS strategy
+	private Vector<Object> classSwitchesFollowedByBasStrategy;
 	//HashMap containing the vector of keys of classes for which this station
 	//uses a Guard strategy with zero tasks. The key of the HashMap is the key
 	//of the station considered.
@@ -141,6 +157,13 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of transitions without firing outcome for a
 	//mode
 	private Vector<Object> transitionsWithoutFiringOutcome;
+
+	//TODO rose: check whether needed or not
+	//Vector containing the keys of transitions with invalid firing outcome for
+	//a mode
+	private Vector<Object> transitionsWithInvalidOutcome;
+	// Vector containing the keys of stations with impatience selected and which are connected to a fork
+	private Vector<Object> stationsWithImpatienceAndConnectedToFork;
 
 	//constant used to define an error
 	public static final int ERROR_PROBLEM = 0;
@@ -205,6 +228,9 @@ public class ModelChecker implements CommonConstants {
 	//it occurs when a transition has an infinite enabling degree for a mode.
 	public static final int TRANSITION_INFINITE_ENABLING_DEGREE_ERROR = 23;
 
+	//TODO rose: added test
+	//it occurs when there is an impatience strategy selected at a station connected to a fork.
+	public static final int IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR = 24;
 	//it occurs when a server has different queue strategies.
 	// (only when trying to convert to JMVA)
 	public static final int BCMP_DIFFERENT_QUEUE_STRATEGIES_WARNING = 0;
@@ -267,7 +293,7 @@ public class ModelChecker implements CommonConstants {
 	//it occurs when a transition has no firing outcome for a mode.
 	public static final int TRANSITION_NO_FIRING_OUTCOME_WARNING = 20;
 
-	private static final int NUMBER_OF_ERROR_TYPES = 24;
+	private static final int NUMBER_OF_ERROR_TYPES = 25;
 	private static final int NUMBER_OF_WARNING_TYPES = 21;
 
 	/**
@@ -316,6 +342,7 @@ public class ModelChecker implements CommonConstants {
 		transitionsWithConstantEnablingDegree = new Vector<Object>(0, 1);
 		transitionsWithInvalidInputCondition = new Vector<Object>(0, 1);
 		transitionsWithoutFiringOutcome = new Vector<Object>(0, 1);
+		stationsWithImpatienceAndConnectedToFork = new Vector<>(0, 1);
 		isToJMVAChecker = isToJMVA;
 		checkModel();
 	}
@@ -351,6 +378,7 @@ public class ModelChecker implements CommonConstants {
 		transitionsWithConstantEnablingDegree.clear();
 		transitionsWithInvalidInputCondition.clear();
 		transitionsWithoutFiringOutcome.clear();
+		stationsWithImpatienceAndConnectedToFork.clear();
 		for (int i = 0; i < NUMBER_OF_ERROR_TYPES; i++) {
 			errors[i] = false;
 		}
@@ -414,6 +442,8 @@ public class ModelChecker implements CommonConstants {
 			checkForTransitionConstantEnablingDegreeWarning();
 			checkForTransitionInvalidInputConditionWarning();
 			checkForTransitionNoFiringOutcomeWarning();
+			checkForImpatienceEnabledInStationBetweenForkJoinError();
+
 		}
 	}
 
@@ -723,6 +753,16 @@ public class ModelChecker implements CommonConstants {
 	public boolean isThereTransitionInfiniteEnablingDegreeError() {
 		return errors[TRANSITION_INFINITE_ENABLING_DEGREE_ERROR];
 	}
+
+
+	//TODO emergent: add error
+	/**
+	 * @return true if a station connected to a fork has an impatience strategy enabled.
+	 */
+	public boolean isThereImpatienceInStationBetweenForkJoinError() {
+		return errors[IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR];
+	}
+
 
 	/**
 	 * Returns true if a server has different queue strategies.
@@ -1227,6 +1267,11 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public Vector<Object> getTransitionsWithoutFiringOutcome() {
 		return transitionsWithoutFiringOutcome;
+	}
+
+	//TODO rose: do we need this
+	public Vector<Object> getStationsWithImpatienceAndConnectedToFork() {
+		return stationsWithImpatienceAndConnectedToFork;
 	}
 
 	/**
@@ -1788,6 +1833,52 @@ public class ModelChecker implements CommonConstants {
 						errors[TRANSITION_INFINITE_ENABLING_DEGREE_ERROR] = true;
 						break;
 					}
+				}
+			}
+		}
+	}
+
+
+	/** Checks if there is an impatience strategy selected at a station connected to a fork. */
+	private void checkForImpatienceEnabledInStationBetweenForkJoinError() {
+		Vector<Object> stations = station_def.getStationKeys();
+		Vector<Object> classes = class_def.getClassKeys();
+		Vector<Object> forks = station_def.getStationKeysFork();
+		Vector<Object> stationsWithImpatience = new Vector<>();
+
+		// Get all the stations that have impatience
+		for (Object currentStation : stations) {
+			if (!station_def.getStationType(currentStation).equals(STATION_TYPE_SERVER)) {
+				continue;
+			}
+
+			for (Object currentClass : classes) {
+				if (station_def.getImpatienceType(currentStation, currentClass) != ImpatienceType.NONE) {
+					stationsWithImpatience.add(currentStation);
+					break;
+				}
+			}
+		}
+
+		// Return if no stations have impatience set
+		if (stationsWithImpatience.isEmpty()) {
+			return;
+		}
+
+		// Check if stations with impatience are connected to a fork
+		for (Object fork : forks) {
+			Vector<Object> stationsBetweenForkJoin = searchForStationBetweenForkJoin(STATION_TYPE_SERVER,
+							fork);
+
+			if (stationsBetweenForkJoin == null) {
+				continue;
+			}
+
+			for (Object currentStation : stationsBetweenForkJoin) {
+				if (stationsWithImpatience.contains(currentStation)) {
+					stationsWithImpatienceAndConnectedToFork.add(currentStation);
+					errors[IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR] = true;
+					return;
 				}
 			}
 		}

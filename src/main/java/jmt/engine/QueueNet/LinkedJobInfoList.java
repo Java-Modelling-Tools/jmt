@@ -18,9 +18,7 @@
 
 package jmt.engine.QueueNet;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ListIterator;
+import java.util.*;
 
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
@@ -46,6 +44,8 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected LinkedList<JobInfo> listPerClass[];
 
 	//arrivals and completions
+	protected Map<Integer, List<Double>> retrialOrbit = new HashMap<>();
+	protected Map<Integer, List<Double>> retrialOrbitPerClass[];
 	protected int jobsIn;
 
 	protected int jobsInPerClass[];
@@ -54,6 +54,8 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected int jobsOutPerClass[];
 
+	protected double lastJobInServiceTime;
+	protected double lastJobInServiceTimePerClass[];
 	protected double lastJobOutTime;
 
 	protected double lastJobOutTimePerClass[];
@@ -66,6 +68,19 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected double lastJobDropTimePerClass[];
 
+	protected double lastJobRenegingTime;
+
+	protected double lastJobRenegingTimePerClass[];
+
+	protected double lastJobBalkingTime;
+
+	protected double lastJobBalkingTimePerClass[];
+
+	protected double lastJobRetrialAttemptTime;
+	protected double lastJobRetrialAttemptTimePerClass[];
+
+	protected double lastRetrialOrbitModifyTime;
+	protected double lastRetrialOrbitModifyTimePerClass[];
 	protected double totalSojournTime;
 
 	protected double totalSojournTimePerClass[];
@@ -102,6 +117,27 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected InverseMeasure dropRatePerClass[];
 
+	protected InverseMeasure renegingRate;
+
+	protected InverseMeasure renegingRatePerClass[];
+
+	protected InverseMeasure balkingRate;
+
+	protected InverseMeasure balkingRatePerClass[];
+
+	// add rates for retrial
+	protected InverseMeasure retrialAttemptsRate;
+
+	protected InverseMeasure retrialAttemptsRatePerClass[];
+
+	protected Measure waitingTime;
+	protected Measure waitingTimePerClass[];
+
+	protected Measure retrialOrbitSize;
+	protected Measure retrialOrbitSizePerClass[];
+
+	protected Measure busyServerNum;
+	protected Measure busyServerNumPerClass[];
 	protected Measure responseTimePerSink;
 
 	protected Measure responseTimePerSinkPerClass[];
@@ -128,16 +164,23 @@ public class LinkedJobInfoList implements JobInfoList {
 		this.numberOfJobClasses = numberOfJobClasses;
 		list = new LinkedList<JobInfo>();
 		listPerClass = new LinkedList[numberOfJobClasses];
+		retrialOrbitPerClass = new HashMap[numberOfJobClasses];
 		for (int i = 0; i < numberOfJobClasses; i++) {
 			listPerClass[i] = new LinkedList<JobInfo>();
+			retrialOrbitPerClass[i] = new HashMap<Integer, List<Double>>();
 		}
 		jobsInPerClass = new int[numberOfJobClasses];
 		jobsOutPerClass = new int[numberOfJobClasses];
+		lastJobInServiceTimePerClass = new double[numberOfJobClasses];
 		lastJobInTimePerClass = new double[numberOfJobClasses];
 		lastJobOutTimePerClass = new double[numberOfJobClasses];
 		lastJobDropTimePerClass = new double[numberOfJobClasses];
+		lastJobRenegingTimePerClass = new double[numberOfJobClasses];
+		lastJobBalkingTimePerClass = new double[numberOfJobClasses];
+		lastJobRetrialAttemptTimePerClass = new double[numberOfJobClasses];
 		totalSojournTimePerClass = new double[numberOfJobClasses];
 		lastJobSojournTimePerClass = new double[numberOfJobClasses];
+		lastRetrialOrbitModifyTimePerClass = new double[numberOfJobClasses];
 	}
 
 	/**---------------------------------------------------------------------
@@ -158,6 +201,32 @@ public class LinkedJobInfoList implements JobInfoList {
 		return listPerClass[jobClass.getId()].size();
 	}
 
+	public Map<Integer, List<Double>> getRetrialOrbit() {
+		return retrialOrbit;
+	}
+
+	public Map<Integer, List<Double>> addToRetrialOrbit(Job job) {
+		int id = job.getId();
+		int classID = job.getJobClass().getId();
+		updateRetrialOrbitSize(job);
+		List<Double> currList = (retrialOrbit.get(id) == null ? new ArrayList<Double>() : retrialOrbit.get(id));
+		currList.add(this.getTime());
+		retrialOrbit.put(job.getId(), currList);
+		retrialOrbitPerClass[classID].put(job.getId(), currList);
+		lastRetrialOrbitModifyTime = getTime();
+		lastRetrialOrbitModifyTimePerClass[classID] = getTime();
+		return retrialOrbit;
+	}
+
+	public void removeFromRetrialOrbit(Job job) {
+		int id = job.getId();
+		int classID = job.getJobClass().getId();
+		updateRetrialOrbitSize(job);
+		retrialOrbit.remove(id);
+		retrialOrbitPerClass[classID].remove(id);
+		lastRetrialOrbitModifyTime = getTime();
+		lastRetrialOrbitModifyTimePerClass[job.getJobClass().getId()] = getTime();
+	}
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getJobsIn()
 	 */
@@ -231,6 +300,44 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getLastModifyTime()
 	 */
+	public double getLastJobRenegingTime() {
+		return lastJobRenegingTime;
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobDropTimePerClass(jmt.engine.QueueNet.JobClass)
+	 */
+	public double getLastJobRenegingTimePerClass(JobClass jobClass) {
+		return lastJobRenegingTimePerClass[jobClass.getId()];
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobDropTime()
+	 */
+	public double getLastJobBalkingTime() {
+		return lastJobBalkingTime;
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobDropTimePerClass(jmt.engine.QueueNet.JobClass)
+	 */
+	public double getLastJobBalkingTimePerClass(JobClass jobClass) {
+		return lastJobBalkingTimePerClass[jobClass.getId()];
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobDropTime()
+	 */
+	public double getLastJobRetrialAttemptTime() {
+		return lastJobRetrialAttemptTime;
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#getLastJobDropTimePerClass(jmt.engine.QueueNet.JobClass)
+	 */
+	public double getLastJobRetrialTimePerClass(JobClass jobClass) {
+		return lastJobRetrialAttemptTimePerClass[jobClass.getId()];
+	}
 	public double getLastModifyTime() {
 		if (lastJobOutTime >= lastJobInTime && lastJobOutTime >= lastJobDropTime) {
 			return lastJobOutTime;
@@ -299,6 +406,18 @@ public class LinkedJobInfoList implements JobInfoList {
 		return null;
 	}
 
+	@Override
+	public JobInfo findJob(Job job) {
+		ListIterator<JobInfo> it = list.listIterator();
+		JobInfo jobInfo = null;
+		while (it.hasNext()) {
+			jobInfo = it.next();
+			if (jobInfo.getJob().getId() == job.getId()) {
+				return jobInfo;
+			}
+		}
+		return null;
+	}
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getInternalJobInfoList()
 	 */
@@ -313,6 +432,15 @@ public class LinkedJobInfoList implements JobInfoList {
 		return listPerClass[jobClass.getId()];
 	}
 
+	@Override
+	public JobInfo getFirstJob() {
+		return list.getFirst();
+	}
+
+	@Override
+	public JobInfo getLastJob() {
+		return list.getLast();
+	}
 	/**---------------------------------------------------------------------
 	 *--------------------- "ADD" AND "REMOVE" METHODS ---------------------
 	 *---------------------------------------------------------------------*/
@@ -396,6 +524,24 @@ public class LinkedJobInfoList implements JobInfoList {
 		doRemove(jobInfo, 0, 0);
 	}
 
+	@Override
+	public void removeOnly(JobInfo jobInfo) {
+		int c = jobInfo.getJob().getJobClass().getId();
+		updateQueueLength(jobInfo);
+		updateUtilization(jobInfo);
+		updateUtilizationJoin(jobInfo);
+		updateThroughput(jobInfo);
+		finalRemove(jobInfo, list, 0);
+		finalRemove(jobInfo, listPerClass[c], 0);
+		jobsOut++;
+		jobsOutPerClass[c]++;
+		lastJobOutTime = getTime();
+		lastJobOutTimePerClass[c] = getTime();
+		totalSojournTime += getTime() - jobInfo.getEnteringTime();
+		totalSojournTimePerClass[c] += getTime() - jobInfo.getEnteringTime();
+		lastJobSojournTime = getTime() - jobInfo.getEnteringTime();
+		lastJobSojournTimePerClass[c] = getTime() - jobInfo.getEnteringTime();
+	}
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#removeFirst()
 	 */
@@ -589,6 +735,78 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeResponseTimePerSink(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
+	public void analyzeRenegingRate(JobClass jobClass, InverseMeasure measurement) {
+		if (jobClass != null) {
+			if (renegingRatePerClass == null) {
+				renegingRatePerClass = new InverseMeasure[numberOfJobClasses];
+			}
+			renegingRatePerClass[jobClass.getId()] = measurement;
+		} else {
+			renegingRate = measurement;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#analyzeDropRate(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
+	 */
+	public void analyzeBalkingRate(JobClass jobClass, InverseMeasure measurement) {
+		if (jobClass != null) {
+			if (balkingRatePerClass == null) {
+				balkingRatePerClass = new InverseMeasure[numberOfJobClasses];
+			}
+			balkingRatePerClass[jobClass.getId()] = measurement;
+		} else {
+			balkingRate = measurement;
+		}
+	}
+
+	@Override
+	public void analyzeRetrialAttemptsRate(JobClass jobClass, InverseMeasure measurement) {
+		if (jobClass != null) {
+			if (retrialAttemptsRatePerClass == null) {
+				retrialAttemptsRatePerClass = new InverseMeasure[numberOfJobClasses];
+			}
+			retrialAttemptsRatePerClass[jobClass.getId()] = measurement;
+		} else {
+			retrialAttemptsRate = measurement;
+		}
+	}
+
+	@Override
+	public void analyzeRetrialOrbitSize(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
+			if (retrialOrbitSizePerClass == null) {
+				retrialOrbitSizePerClass = new Measure[numberOfJobClasses];
+			}
+			retrialOrbitSizePerClass[jobClass.getId()] = measurement;
+		} else {
+			retrialOrbitSize = measurement;
+		}
+	}
+
+	@Override
+	public void analyzeWaitingTime(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
+			if (waitingTimePerClass == null) {
+				waitingTimePerClass = new Measure[numberOfJobClasses];
+			}
+			waitingTimePerClass[jobClass.getId()] = measurement;
+		} else {
+			waitingTime = measurement;
+		}
+	}
+
+	@Override
+	public void analyzeBusyServersVar(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
+			if (busyServerNumPerClass == null) {
+				busyServerNumPerClass = new Measure[numberOfJobClasses];
+			}
+			busyServerNumPerClass[jobClass.getId()] = measurement;
+		} else {
+			busyServerNum = measurement;
+		}
+	}
 	public void analyzeResponseTimePerSink(JobClass jobClass, Measure measurement) {
 		if (jobClass != null) {
 			if (responseTimePerSinkPerClass == null) {
@@ -722,6 +940,94 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
+	protected void updateRenegingRate(JobInfo jobInfo) {
+		if (renegingRatePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+			Measure m = renegingRatePerClass[c];
+			if (m != null) {
+				m.update(getTime() - getLastJobRenegingTimePerClass(jobClass), 1.0);
+			}
+		}
+		if (renegingRate != null) {
+			renegingRate.update(getTime() - getLastJobRenegingTime(), 1.0);
+		}
+	}
+
+	protected void updateBalkingRate(JobInfo jobInfo) {
+		if (balkingRatePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+			Measure m = balkingRatePerClass[c];
+			if (m != null) {
+				m.update(getTime() - getLastJobBalkingTimePerClass(jobClass), 1.0);
+			}
+		}
+		if (balkingRate != null) {
+			balkingRate.update(getTime() - getLastJobBalkingTime(), 1.0);
+		}
+	}
+
+	protected void updateRetrialAttemptsRate(JobInfo jobInfo) {
+		if (retrialAttemptsRatePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+			Measure m = retrialAttemptsRatePerClass[c];
+			if (m != null) {
+				m.update(getTime() - getLastJobRetrialTimePerClass(jobClass), 1.0);
+			}
+		}
+		if (retrialAttemptsRate != null) {
+			retrialAttemptsRate.update(getTime() - getLastJobRetrialAttemptTime(), 1.0);
+		}
+	}
+
+	protected void updateRetrialOrbitSize(Job job) {
+		if (retrialOrbitSizePerClass != null) {
+			JobClass jobClass = job.getJobClass();
+			int c = jobClass.getId();
+			Measure m = retrialOrbitSizePerClass[c];
+			if (m != null) {
+				m.update(retrialOrbit.size(), getTime() - lastRetrialOrbitModifyTimePerClass[c]);
+			}
+		}
+		if (retrialOrbitSize != null) {
+			retrialOrbitSize.update(retrialOrbit.size(), getTime() - lastRetrialOrbitModifyTime);
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#updateWaitingTime(jmt.engine.QueueNet.JobInfo)
+	 */
+	public void updateWaitingTime(Job job, double wt) {
+		if (waitingTimePerClass != null) {
+			JobClass jobClass = job.getJobClass();
+			int c = jobClass.getId();
+			Measure m = waitingTimePerClass[c];
+			if (m != null) {
+				m.update(wt, 1.0);
+			}
+		}
+		if (waitingTime != null) {
+			waitingTime.update(wt, 1.0);
+		}
+	}
+
+	@Override
+	public void updateNumberOfBusyServersVar(Job job, int num) {
+		int mean = 0;
+		if (busyServerNumPerClass != null) {
+			JobClass jobClass = job.getJobClass();
+			int c = jobClass.getId();
+			Measure m = busyServerNumPerClass[c];
+			if (m != null) {
+				m.update(num, getTime() - Math.max(lastJobInServiceTime, lastJobOutTime));
+			}
+		}
+		if (busyServerNum != null) {
+			busyServerNum.update(num, getTime() - Math.max(lastJobInServiceTime, lastJobOutTime));
+		}
+	}
 	protected void updateResponseTimePerSink(JobInfo jobInfo) {
 		if (responseTimePerSinkPerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
@@ -794,6 +1100,40 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#produceJob(jmt.engine.QueueNet.JobInfo)
 	 */
+	public void renegeJob(JobInfo jobInfo) {
+		int c = jobInfo.getJob().getJobClass().getId();
+		updateQueueLength(jobInfo);
+		updateRenegingRate(jobInfo);
+		list.remove(jobInfo);
+		listPerClass[c].remove(jobInfo);
+		lastJobRenegingTime = getTime();
+		lastJobRenegingTimePerClass[c] = getTime();
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#dropJob(jmt.engine.QueueNet.JobInfo)
+	 */
+	public void balkJob(JobInfo jobInfo) {
+		int c = jobInfo.getJob().getJobClass().getId();
+		updateBalkingRate(jobInfo);
+		list.remove(jobInfo);
+		listPerClass[c].remove(jobInfo);
+		lastJobBalkingTime = getTime();
+		lastJobBalkingTimePerClass[c] = getTime();
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#dropJob(jmt.engine.QueueNet.JobInfo)
+	 */
+	public void retryJob(JobInfo jobInfo) {
+		int c = jobInfo.getJob().getJobClass().getId();
+		updateRetrialAttemptsRate(jobInfo);
+		if (findJob(jobInfo.getJob()) == null) {
+			list.add(jobInfo);
+		}
+		lastJobRetrialAttemptTime = getTime();
+		lastJobRetrialAttemptTimePerClass[c] = getTime();
+	}
 	public void produceJob(JobInfo jobInfo) {
 		int c = jobInfo.getJob().getJobClass().getId();
 		list.add(jobInfo);
@@ -812,6 +1152,11 @@ public class LinkedJobInfoList implements JobInfoList {
 	/*
 	 *
 	 */
+	@Override
+	public void serveJob(Job job) {
+		lastJobInServiceTime = getTime();
+		lastJobInServiceTimePerClass[job.getJobClass().getId()] = getTime();
+	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#setNumberOfServers(int)

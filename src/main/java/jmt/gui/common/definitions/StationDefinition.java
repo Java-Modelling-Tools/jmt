@@ -22,7 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
+import jmt.engine.NetStrategies.ImpatienceStrategies.Retrial;
 import jmt.engine.log.LoggerParameters;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.serviceStrategies.LDStrategy;
 
 /**
  * Created by IntelliJ IDEA.
@@ -361,7 +366,7 @@ public interface StationDefinition {
 	 * Returns drop rule associated with given station queue section if capacity is finite.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @return FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
+	 * @return FINITE_DROP || FINITE_BLOCK || FINITE_WAITING || FINITE_RETRIAL
 	 */
 	public String getDropRule(Object stationKey, Object classKey);
 
@@ -369,9 +374,61 @@ public interface StationDefinition {
 	 * Sets drop rule associated with given station queue section if capacity is finite.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param dropRule: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
+	 * @param dropRule: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING || FINITE_RETRIAL
 	 */
 	public void setDropRule(Object stationKey, Object classKey, String dropRule);
+
+	/**
+	 * Sets the retrial rate with given station queue section if capacity is finite.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param retrialRate: a double that dictates the time distribution of each retrial job
+	 */
+
+	/**
+	 * Sets retrial rate distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
+	public void setRetrialDistribution(Object stationKey, Object classKey, Object distribution);
+
+	/**
+	 * Returns retrial rate distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return distribution for specified class and station.
+	 */
+	public Object getRetrialDistribution(Object stationKey, Object classKey);
+
+	/**
+	 * Returns impatience strategy associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return BALKING || RENEGING || RETRIAL
+	 */
+	ImpatienceType getImpatienceType(Object stationKey, Object classKey);
+
+	/**
+	 * Sets drop rule associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return BALKING || RENEGING || RETRIAL
+	 */
+	void setImpatienceType(Object stationKey, Object classKey, ImpatienceType impatienceType);
+
+	void resetImpatience(Object stationKey, Object classKey);
+
+	ImpatienceParameter getImpatienceParameter(Object stationKey, Object classKey);
+
+	void setImpatienceParameter(Object stationKey, Object classKey, ImpatienceParameter impatienceParameter);
+
+	/**
+	 * Update the BalkingParameter whenever the queue policy changes from non-priority to priority and vice versa.
+	 */
+	void updateBalkingParameter(Object stationKey, Object classKey, String serverStationQueuePolicy);
 
 	/**
 	 * Returns service weight for class and station, given their search keys.

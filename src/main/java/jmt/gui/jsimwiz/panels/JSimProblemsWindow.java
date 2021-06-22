@@ -482,6 +482,19 @@ public class JSimProblemsWindow extends JFrame {
 							+ " has an infinite enabling degree for a mode.</div></html>", stationKey, null));
 				}
 			}
+			if (mc.isThereImpatienceInStationBetweenForkJoinError()) {
+				Vector<Object> stationsWithError = mc.getStationsWithImpatienceAndConnectedToFork();
+				for (int i = 0; i < stationsWithError.size(); i++) {
+					Object stationKey = stationsWithError.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM,
+									ModelChecker.IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR,
+									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH
+													+ "px;\">Impatience cannot be selected for stations connected to a fork. "
+													+ stationName + " must have its impatience selected as None.</div></html>",
+									stationKey, null));
+				}
+			}
 			if (mc.isThereNoOptionalLinkWarning()) {
 				Vector<Object> temp = mc.getStationsWithoutOptionalLink();
 				for (int i = 0; i < temp.size(); i++) {

@@ -54,6 +54,7 @@ public class Storage extends InputSection {
 	public static final String FINITE_DROP = "drop";
 	public static final String FINITE_BLOCK = "BAS blocking";
 	public static final String FINITE_WAITING = "waiting queue";
+	public static final String FINITE_RETRIAL = "retrial";
 
 	private int totalCapacity;
 	private int[] capacities;
@@ -100,7 +101,7 @@ public class Storage extends InputSection {
 			} else if (dropRules[i].equals(FINITE_BLOCK)) {
 				drop[i] = false;
 				block[i] = true;
-			} else if (dropRules[i].equals(FINITE_WAITING)) {
+			} else if (dropRules[i].equals(FINITE_WAITING) || dropRules[i].equals(FINITE_RETRIAL)) { //TODO rose: confirm
 				drop[i] = false;
 				block[i] = false;
 			} else {

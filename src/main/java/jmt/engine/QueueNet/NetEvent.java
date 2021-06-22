@@ -71,5 +71,10 @@ public class NetEvent {
 	/** Event ID: PollNext */
 	public static final int EVENT_POLLING_SERVER_NEXT = 0x5000;
 	public static final int EVENT_POLLING_SERVER_READY = 0x5001;
-
+/** Event ID: Job reneges while in queue. */
+	public static final int EVENT_RENEGE = 0x8000;
+	/** Event ID: Job signals retrial. */
+	public static final int EVENT_RETRIAL = 0x0003;
+	/** Event ID: Job signals retrial. */
+	public static final int EVENT_RETRIAL_JOB = 0x0005;
 }

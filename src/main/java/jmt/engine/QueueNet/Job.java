@@ -21,6 +21,7 @@ package jmt.engine.QueueNet;
 import jmt.engine.simEngine.RemoveToken;
 import org.apache.commons.math3.util.Pair;
 
+import java.util.Objects;
 /**
  *	This class implements a generic job of a queue network.
  * 	@author Francesco Radaelli, Marco Bertoli
@@ -234,4 +235,17 @@ public class Job implements Cloneable {
 		//resetClass();
 	}
 
+	@Override
+	public boolean equals(Object that) {
+		if (!(that instanceof Job)) {
+			return false;
+		}
+		Job a = (Job) that;
+		return a.getId() == this.Id;
+	}
+
+	@Override
+	public int hashCode() {
+		return getId();
+	}
 }

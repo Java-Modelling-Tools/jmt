@@ -26,10 +26,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import jmt.engine.NetStrategies.ImpatienceStrategies.BalkingParameter;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
+import jmt.engine.NetStrategies.ImpatienceStrategies.Retrial;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.data.BDMap;
@@ -465,6 +470,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			save = true;
 		}
 	}
+
 
 	/**
 	 * Returns reference station of the class, given the search key.
@@ -1549,7 +1555,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Returns drop rule associated with given station queue section if capacity is finite.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @return FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
+	 * @return FINITE_DROP || FINITE_BLOCK || FINITE_WAITING || FINITE_RETRIAL
 	 */
 	@Override
 	public String getDropRule(Object stationKey, Object classKey) {
@@ -1564,7 +1570,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Sets drop rule associated with given station queue section if capacity is finite.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param dropRule: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING
+	 * @param dropRule: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING || FINITE_RETRIAL
 	 */
 	@Override
 	public void setDropRule(Object stationKey, Object classKey, String dropRule) {
@@ -1576,6 +1582,29 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.dropRule = dropRule;
 			save = true;
 		}
+	}
+
+
+	@Override
+	public void setRetrialDistribution(Object stationKey, Object classKey, Object distribution) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.retrialDistribution == null || !scd.retrialDistribution.equals(distribution)) {
+			scd.retrialDistribution = distribution;
+			save = true;
+		}
+	}
+
+	@Override
+	public Object getRetrialDistribution(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+
+		return scd.retrialDistribution;
 	}
 
 	/**
@@ -1611,6 +1640,92 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		if (scd.serviceWeight == null || !scd.serviceWeight.equals(weight)) {
 			scd.serviceWeight = weight;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns impatience strategy associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return BALKING || RENEGING || RETRIAL
+	 */
+	@Override
+	public ImpatienceType getImpatienceType(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.impatienceType;
+	}
+
+	/**
+	 * Sets drop rule associated with given station queue section if capacity is finite.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param impatienceType: BALKING || RENEGING || RETRIAL
+	 */
+	@Override
+	public void setImpatienceType(Object stationKey, Object classKey, ImpatienceType impatienceType) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.impatienceType == null || !scd.impatienceType.equals(impatienceType)) {
+			scd.impatienceType = impatienceType;
+			save = true;
+		}
+	}
+
+	@Override
+  public void resetImpatience(Object stationKey, Object classKey) {
+	  clearImpatienceType(stationKey, classKey);
+	  clearImpatienceParameter(stationKey, classKey);
+  }
+
+	private void clearImpatienceType(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		scd.impatienceType = null;
+	}
+
+	private void clearImpatienceParameter(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		scd.impatienceParameter = null;
+	}
+
+	@Override
+	public ImpatienceParameter getImpatienceParameter(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.impatienceParameter;
+	}
+
+	@Override
+	public void setImpatienceParameter(Object stationKey, Object classKey, ImpatienceParameter impatienceParameter) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		scd.impatienceParameter = impatienceParameter;
+		save = true;
+	}
+
+	@Override
+	public void updateBalkingParameter(Object stationKey, Object classKey,	String serverStationQueuePolicy) {
+		ImpatienceParameter impatienceParameter = getImpatienceParameter(stationKey, classKey);
+
+		// We need to verify if the impatienceParameter is of type BalkingParameter
+		if (impatienceParameter instanceof BalkingParameter) {
+			String classQueueStrategy = getQueueStrategy(stationKey, classKey);
+			((BalkingParameter) impatienceParameter).updatePriority(serverStationQueuePolicy, classQueueStrategy);
 			save = true;
 		}
 	}
@@ -2185,6 +2300,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			}
 			scd.dropRule = Defaults.get("dropRule");
 			scd.serviceWeight = Defaults.getAsDouble("serviceWeight");
+			scd.impatienceType = ImpatienceType.NONE;
 			scd.serviceDistribution = Defaults.getAsNewInstance("stationServiceStrategy");
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
@@ -2199,6 +2315,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				scd.queueStrategy = QUEUE_STRATEGY_FCFS;
 			}
 			scd.dropRule = Defaults.get("dropRule");
+			scd.impatienceType = ImpatienceType.NONE;
 			scd.forkStrategy = Defaults.getAsNewInstance("stationForkStrategy");
 		} else if (sd.type.equals(STATION_TYPE_JOIN)) {
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
@@ -2225,6 +2342,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
 			// Do nothing
 		}
+		scd.retrialDistribution = Defaults.getAsNewInstance("classDistribution");
 		return scd;
 	}
 
@@ -2665,7 +2783,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	@Override
 	public boolean isGlobalMeasure(String type) {
 		return type.equals(MEASURE_S_X) || type.equals(MEASURE_S_RP) || type.equals(MEASURE_S_CN)
-				|| type.equals(MEASURE_S_DR) || type.equals(MEASURE_S_P);
+				|| type.equals(MEASURE_S_DR) || type.equals(MEASURE_S_P) || type.equals(MEASURE_S_R)
+				|| type.equals(MEASURE_S_RR) || type.equals(MEASURE_S_BR);
 	}
 
 	/**
@@ -3956,6 +4075,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Object joinStrategy;
 		public Object semaphoreStrategy;
 		public ClassSwitchRow classSwitchProb;
+		private ImpatienceType impatienceType;
+		private ImpatienceParameter impatienceParameter;
+		public Object retrialDistribution;
+
 
 		public StationClassData() {
 			this.preload = new Integer(0);

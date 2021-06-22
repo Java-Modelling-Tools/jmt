@@ -89,24 +89,68 @@ public interface SimConstants {
 	/** Measure identifier: firing throughput of the transition. */
 	public static final int FIRING_THROUGHPUT = 18;
 
+
+	/** Measure identifier: reneging rate of the system */
+	public static final int SYSTEM_RENEGING_RATE = 19;
+
+	/** Measure identifier: reneging rate of the node */
+	public static final int RENEGING_RATE = 20;
+
+	/** Measure identifier: reneging rate of the system */
+	public static final int SYSTEM_BALKING_RATE = 21;
+
+	/** Measure identifier: reneging rate of the node */
+	public static final int BALKING_RATE = 22;
+
+	/** Measure identifier: retrial attempts rate of the node */
+	public static final int RETRIAL_ATTEMPTS_RATE = 30;
+
+	/** Measure identifier: retrial attempts rate of the system */
+	public static final int SYSTEM_RETRIAL_ATTEMPTS_RATE = 31;
+
+	/** Measure identifier: number of jobs in the retrial orbit of the node */
+	public static final int RETRIAL_ORBIT_SIZE = 33;
+
+	/** Measure identifier: (total) waiting time of a job of a node (system entering time - time when job is pass to serving section) */
+	public static final int WAITING_TIME = 36;
+
+	public static final int NUM_BUSY_SERVERS = 39;
+
 	//-------------------- end SIMULATION MEASURE IDENTIFIERS -------------------------//
 
 	//-------------------- JOB LIST MEASURE IDENTIFIERS ----------------------------//
 
 	/** Measure identifier: number of jobs in the list */
-	public static final int LIST_NUMBER_OF_JOBS = 21;
+	public static final int LIST_NUMBER_OF_JOBS = 23;
 
 	/** Measure identifier: response time of the list */
-	public static final int LIST_RESPONSE_TIME = 22;
+	public static final int LIST_RESPONSE_TIME = 24;
 
 	/** Measure identifier: residence time of the list */
-	public static final int LIST_RESIDENCE_TIME = 23;
+	public static final int LIST_RESIDENCE_TIME = 25;
 
 	/** Measure identifier: throughput of the list */
-	public static final int LIST_THROUGHPUT = 24;
+	public static final int LIST_THROUGHPUT = 26;
 
 	/** Measure identifier: drop rate of the list */
-	public static final int LIST_DROP_RATE = 25;
+	public static final int LIST_DROP_RATE = 27;
+
+	/** Measure identifier: reneging rate of the list */
+	public static final int LIST_RENEGING_RATE = 28;
+
+	/** Measure identifier: reneging rate of the list */
+	public static final int LIST_BALKING_RATE = 29;
+
+	/** Measure identifier: drop rate of the list */
+	public static final int LIST_RETRIAL_RATE = 32;
+
+	/** Measure identifier: number of jobs in the retrial orbit in the list */
+	public static final int LIST_RETRIAL_ORBIT_SIZE = 35;
+
+	/** Measure identifier: (total) waiting time of a job of the list (system entering time - time when job is pass to serving section) */
+	public static final int LIST_WAITING_TIME = 38;
+
+	public static final int LIST_BUSY_SERVERS = 40;
 
 	//-------------------- end JOB LIST MEASURE IDENTIFIERS -------------------------//
 

@@ -49,6 +49,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import jmt.engine.simEngine.Simulation;
 import jmt.framework.data.LabelValue;
 import jmt.framework.data.MacroReplacer;
 import jmt.framework.gui.layouts.SpringUtilities;
@@ -128,7 +129,12 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			SimulationDefinition.MEASURE_U,
 			SimulationDefinition.MEASURE_X,
 			SimulationDefinition.MEASURE_DR,
+			SimulationDefinition.MEASURE_RR,
+			SimulationDefinition.MEASURE_BR,
 			SimulationDefinition.MEASURE_P,
+			SimulationDefinition.MEASURE_R,
+			SimulationDefinition.MEASURE_WT,
+			SimulationDefinition.MEASURE_RS,
 			SimulationDefinition.MEASURE_RP_PER_SINK,
 			SimulationDefinition.MEASURE_X_PER_SINK,
 			SimulationDefinition.MEASURE_FCR_TW,
@@ -353,6 +359,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			measureSelection.setSelectedIndex(0);
 			return;
 		}
+		Measure measure = getImplicitMeasure(null, (String) measureSelection.getSelectedItem(), null, null);
 		simData.addMeasure((String) measureSelection.getSelectedItem(), null, null);
 		measureTable.tableChanged(new TableModelEvent(measureTable.getModel()));
 		measureSelection.setSelectedIndex(0);
@@ -406,7 +413,10 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			} else if (column == 2) {
 				if (measure.type.equals(SimulationDefinition.MEASURE_QL)
 						|| measure.type.equals(SimulationDefinition.MEASURE_RP)
-						|| measure.type.equals(SimulationDefinition.MEASURE_DR)) {
+						|| measure.type.equals(SimulationDefinition.MEASURE_DR)
+						|| measure.type.equals(SimulationDefinition.MEASURE_RR)
+						|| measure.type.equals(SimulationDefinition.MEASURE_BR)
+						|| measure.type.equals(SimulationDefinition.MEASURE_R)) {
 					Vector<Object> vector = new Vector<Object>();
 					vector.add("");					
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
@@ -414,7 +424,11 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					return stationsCombos.getEditor(vector);
 				} else if (measure.type.equals(SimulationDefinition.MEASURE_QT)
 						|| measure.type.equals(SimulationDefinition.MEASURE_RD)
-						|| measure.type.equals(SimulationDefinition.MEASURE_U)) {
+						|| measure.type.equals(SimulationDefinition.MEASURE_U)
+						|| measure.type.equals(SimulationDefinition.MEASURE_WT)
+					  || measure.type.equals(SimulationDefinition.MEASURE_RS)
+//					  || measure.type.equals(SimulationDefinition.MEASURE_V_BS)
+				) {
 					return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
 				} else if (measure.type.equals(SimulationDefinition.MEASURE_X)) {
 					Vector<Object> vector = new Vector<Object>();
@@ -593,7 +607,11 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				|| type.equals(SimulationDefinition.MEASURE_S_RP)
 				|| type.equals(SimulationDefinition.MEASURE_S_X)
 				|| type.equals(SimulationDefinition.MEASURE_S_DR)
-				|| type.equals(SimulationDefinition.MEASURE_S_P)) {
+				|| type.equals(SimulationDefinition.MEASURE_S_RR)
+				|| type.equals(SimulationDefinition.MEASURE_S_BR)
+				|| type.equals(SimulationDefinition.MEASURE_S_P)
+				|| type.equals(SimulationDefinition.MEASURE_S_R)
+		) {
 			return new Measure(getStationMeasureType(type), "", classKey);
 		} else {
 			return new Measure(type, stationKey, classKey);
@@ -605,7 +623,13 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				|| type.equals(SimulationDefinition.MEASURE_RP)
 				|| type.equals(SimulationDefinition.MEASURE_X)
 				|| type.equals(SimulationDefinition.MEASURE_DR)
-				|| type.equals(SimulationDefinition.MEASURE_P)) {
+				|| type.equals(SimulationDefinition.MEASURE_RR)
+				|| type.equals(SimulationDefinition.MEASURE_BR)
+				|| type.equals(SimulationDefinition.MEASURE_P)
+				|| type.equals(SimulationDefinition.MEASURE_R)
+				|| type.equals(SimulationDefinition.MEASURE_WT)
+				|| type.equals(SimulationDefinition.MEASURE_RS)
+		) {
 			if (stationKey != null && stationKey.equals("")) {
 				return new Measure(getSystemMeasureType(type), null, classKey);
 			} else {
@@ -631,8 +655,14 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			return SimulationDefinition.MEASURE_X;
 		} else if (type.equals(SimulationDefinition.MEASURE_S_DR)) {
 			return SimulationDefinition.MEASURE_DR;
+		}	else if (type.equals(SimulationDefinition.MEASURE_S_RR)) {
+			return SimulationDefinition.MEASURE_RR;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_BR)) {
+			return SimulationDefinition.MEASURE_BR;
 		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 			return SimulationDefinition.MEASURE_P;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_R)) {
+			return SimulationDefinition.MEASURE_R;
 		} else {
 			return null;
 		}
@@ -647,8 +677,14 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			return SimulationDefinition.MEASURE_S_X;
 		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
 			return SimulationDefinition.MEASURE_S_DR;
+		} else if (type.equals(SimulationDefinition.MEASURE_RR)) {
+			return SimulationDefinition.MEASURE_S_RR;
+		} else if (type.equals(SimulationDefinition.MEASURE_BR)) {
+			return SimulationDefinition.MEASURE_S_BR;
 		} else if (type.equals(SimulationDefinition.MEASURE_P)) {
 			return SimulationDefinition.MEASURE_S_P;
+		} else if (type.equals(SimulationDefinition.MEASURE_R)) {
+			return SimulationDefinition.MEASURE_S_R;
 		} else {
 			return null;
 		}

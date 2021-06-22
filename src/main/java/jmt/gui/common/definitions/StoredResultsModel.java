@@ -1,6 +1,6 @@
-/** 
+/**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
-
+ * <p>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -10,7 +10,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
-
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -27,11 +27,11 @@ import jmt.framework.gui.graph.MeasureValue;
  * <p>Title: Result's Model data structure</p>
  * <p>Description: This class will store all values of measured loaded from a file.
  * it is used by <code>XMLResultsReader</code>.</p>
- * 
+ *
  * @author Bertoli Marco
  *         Date: 3-ott-2005
  *         Time: 14.10.50
- *         
+ *
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
  * Description: Added new Performance index for capturing 
@@ -52,11 +52,21 @@ public class StoredResultsModel implements MeasureDefinition {
 	private Vector<Integer> utilization = new Vector<Integer>();
 	private Vector<Integer> throughput = new Vector<Integer>();
 	private Vector<Integer> dropRate = new Vector<Integer>();
+	private Vector<Integer> renegingRate = new Vector<Integer>();
+	private Vector<Integer> balkingRate = new Vector<Integer>();
+	private Vector<Integer> retrialAttemptsRate = new Vector<Integer>();
+	private Vector<Integer> waitingTime = new Vector<Integer>();
+	private Vector<Integer> retrialOrbitSize = new Vector<Integer>();
+	private Vector<Integer> busyServersNum = new Vector<Integer>();
+
 	private Vector<Integer> systemCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> systemResponseTime = new Vector<Integer>();
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
+	private Vector<Integer> systemRenegingRate = new Vector<Integer>();
+	private Vector<Integer> systemBalkingRate = new Vector<Integer>();
 	private Vector<Integer> systemPower = new Vector<Integer>();
+	private Vector<Integer> systemRetrialAttemptsRate = new Vector<Integer>();
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputPerSink = new Vector<Integer>();
 	private Vector<Integer> FCRTotalWeight = new Vector<Integer>();
@@ -189,233 +199,138 @@ public class StoredResultsModel implements MeasureDefinition {
 		return measures.get(measureIndex).values;
 	}
 
+
+	//
 	/**
-	 * Returns an array with the measureIndex of every queue length measure
+	 * Helper method called by all getMeasure functions
+	 * Returns an array with the measureIndex of every vector measure
 	 * @return an array with measures' index
 	 */
+	private int[] getTmpArray(Vector<Integer> vector) {
+		int[] tmp = new int[vector.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = vector.get(i).intValue();
+		}
+		return tmp;
+	}
+
 	public int[] getQueueLengthMeasures() {
-		int[] tmp = new int[queueLength.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = queueLength.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(queueLength);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every queue time measure
-	 * @return an array with measures' index
-	 */
 	public int[] getQueueTimeMeasures() {
-		int[] tmp = new int[queueTime.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = queueTime.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(queueTime);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every response time measure
-	 * @return an array with measures' index
-	 */
 	public int[] getResponseTimeMeasures() {
-		int[] tmp = new int[responseTime.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = responseTime.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(responseTime);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every residence time measure
-	 * @return an array with measures' index
-	 */
 	public int[] getResidenceTimeMeasures() {
-		int[] tmp = new int[residenceTime.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = residenceTime.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(residenceTime);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every utilization measure
-	 * @return an array with measures' index
-	 */
 	public int[] getUtilizationMeasures() {
-		int[] tmp = new int[utilization.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = utilization.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(utilization);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every throughput measure
-	 * @return an array with measures' index
-	 */
 	public int[] getThroughputMeasures() {
-		int[] tmp = new int[throughput.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = throughput.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(throughput);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every drop rate measure
-	 * @return an array with measures' index
-	 */
 	public int[] getDropRateMeasures() {
-		int[] tmp = new int[dropRate.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = dropRate.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(dropRate);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every system customer number measure
-	 * @return an array with measures' index
-	 */
+	public int[] getRenegingRateMeasures() {
+		return getTmpArray(renegingRate);
+	}
+
+	public int[] getBalkingRateMeasures() {
+		return getTmpArray(balkingRate);
+	}
+
+	@Override
+	public int[] getRetrialAttemptsRateMeasures() {
+		return getTmpArray(retrialAttemptsRate);
+	}
+
+	@Override
+	public int[] getRetrialOrbitSizeMeasures() {
+		return getTmpArray(retrialOrbitSize);
+	}
+
+	@Override
+	public int[] getWaitingTimeMeasures() {
+		return getTmpArray(waitingTime);
+	}
+
+	@Override
+	public int[] getNumberOfBusyServersMeasures() {
+		return getTmpArray(busyServersNum);
+	}
+
 	public int[] getSystemCustomerNumberMeasures() {
-		int[] tmp = new int[systemCustomerNumber.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = systemCustomerNumber.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(systemCustomerNumber);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every system response time measure
-	 * @return an array with measures' index
-	 */
 	public int[] getSystemResponseTimeMeasures() {
-		int[] tmp = new int[systemResponseTime.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = systemResponseTime.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(systemResponseTime);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every system throughput measure
-	 * @return an array with measures' index
-	 */
 	public int[] getSystemThroughputMeasures() {
-		int[] tmp = new int[systemThroughput.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = systemThroughput.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(systemThroughput);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every system drop rate measure
-	 * @return an array with measures' index
-	 */
 	public int[] getSystemDropRateMeasures() {
-		int[] tmp = new int[systemDropRate.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = systemDropRate.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(systemDropRate);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every system power measure
-	 * @return an array with measures' index
-	 */
+	public int[] getSystemRenegingRateMeasures() {
+		return getTmpArray(systemRenegingRate);
+	}
+
+	public int[] getSystemBalkingRateMeasures() {
+		return getTmpArray(systemBalkingRate);
+	}
+
 	public int[] getSystemPowerMeasures() {
-		int[] tmp = new int[systemPower.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = systemPower.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(systemPower);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every response time per sink measure
-	 * @return an array with measures' index
-	 */
+	@Override
+	public int[] getSystemRetrialAttemptsRateMeasures() {
+		return getTmpArray(systemRetrialAttemptsRate);
+	}
+
 	public int[] getResponsetimePerSinkMeasures() {
-		int[] tmp = new int[responseTimePerSink.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = responseTimePerSink.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(responseTimePerSink);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every throughput per sink measure
-	 * @return an array with measures' index
-	 */
 	public int[] getThroughputPerSinkMeasures() {
-		int[] tmp = new int[throughputPerSink.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = throughputPerSink.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(throughputPerSink);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every FCR total weight measure
-	 * @return an array with measures' index
-	 */
 	public int[] getFCRTotalWeightMeasures() {
-		int[] tmp = new int[FCRTotalWeight.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = FCRTotalWeight.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(FCRTotalWeight);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every FCR memory occupation measure
-	 * @return an array with measures' index
-	 */
 	public int[] getFCRMemoryOccupationMeasures() {
-		int[] tmp = new int[FCRMemoryOccupation.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = FCRMemoryOccupation.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(FCRMemoryOccupation);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every FJ customer number measure
-	 * @return an array with measures' index
-	 */
 	public int[] getFJCustomerNumberMeasures() {
-		int[] tmp = new int[FJCustomerNumber.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = FJCustomerNumber.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(FJCustomerNumber);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every FJ response time measure
-	 * @return an array with measures' index
-	 */
 	public int[] getFJResponseTimeMeasures() {
-		int[] tmp = new int[FJResponseTime.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = FJResponseTime.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(FJResponseTime);
 	}
 
-	/**
-	 * Returns an array with the measureIndex of every firing throughput measure
-	 * @return an array with measures' index
-	 */
 	public int[] getFiringThroughputMeasures() {
-		int[] tmp = new int[firingThroughput.size()];
-		for (int i = 0; i < tmp.length; i++) {
-			tmp[i] = firingThroughput.get(i).intValue();
-		}
-		return tmp;
+		return getTmpArray(firingThroughput);
 	}
+
 
 	/**
 	 * Returns if simulation has finished, so results are fixed
@@ -466,6 +381,7 @@ public class StoredResultsModel implements MeasureDefinition {
 	}
 
 	// --- Methods to populate data structure ----------------------------------------------------------------
+
 	/**
 	 * Adds a new measure into this data structure.
 	 * @param name measure name
@@ -499,6 +415,18 @@ public class StoredResultsModel implements MeasureDefinition {
 			throughput.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
 			dropRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_RR)) {
+			renegingRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_BR)) {
+			balkingRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_R)) {
+			retrialAttemptsRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
+			retrialOrbitSize.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_WT)) {
+			waitingTime.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
+			busyServersNum.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
 			systemCustomerNumber.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {
@@ -507,8 +435,14 @@ public class StoredResultsModel implements MeasureDefinition {
 			systemThroughput.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_DR)) {
 			systemDropRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_RR)) {
+			systemRenegingRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_BR)) {
+			systemBalkingRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 			systemPower.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_R)) {
+			systemRetrialAttemptsRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {
 			responseTimePerSink.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
@@ -543,6 +477,7 @@ public class StoredResultsModel implements MeasureDefinition {
 	// -------------------------------------------------------------------------------------------------------
 
 	// --- Inner Classes--------------------------------------------------------------------------------------
+
 	/**
 	 * Inner class to store parameters of each measure
 	 */

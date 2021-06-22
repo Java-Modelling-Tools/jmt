@@ -18,6 +18,8 @@
 
 package jmt.gui.common;
 
+import java.awt.Dimension;
+
 import jmt.framework.data.ConstMap;
 import jmt.gui.common.forkStrategies.*;
 import jmt.gui.common.joinStrategies.GuardJoin;
@@ -245,6 +247,7 @@ public interface CommonConstants {
 	public static final String FINITE_DROP = "Drop";
 	public static final String FINITE_BLOCK = "BAS Blocking";
 	public static final String FINITE_WAITING = "Waiting Queue";
+	public static final String FINITE_RETRIAL = "Retrial";
 
 	public static final String CLASSES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Classes Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define type (Open or Closed), name and parameters for each customer class."
@@ -278,6 +281,10 @@ public interface CommonConstants {
 			+ HTML_FONT_NORM + "Define the distribution and the values of service times for a range of number of jobs inside "
 			+ "the station. Mean value of the distribution can be specified with an arithmetic "
 			+ "expression, as a function of the current value of 'n' (see Help for operators)." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String BALKINGSTRATEGY_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Balking Probability" + HTML_FONT_TIT_END
+			+ HTML_FONT_NORM + "Define the probability that a job will balk based on the length of the queue when the job arrives. "
+			+ "Assign the probability value (between 0.0 and 1.0) that a job will balk to each range." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String PARAMETRIC_ANALYSIS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "What-if Analysis" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Define the type of What-If analysis to be performed and modify parameter options." + HTML_FONT_NOR_END + HTML_END;

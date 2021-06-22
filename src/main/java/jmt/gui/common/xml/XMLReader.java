@@ -42,6 +42,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import jmt.common.xml.XSDSchemaLoader;
+import jmt.engine.NetStrategies.ImpatienceStrategies.*;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.data.MacroReplacer;
@@ -50,6 +51,7 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.CombFork;
 import jmt.gui.common.forkStrategies.ForkStrategy;
@@ -59,17 +61,14 @@ import jmt.gui.common.forkStrategies.ProbabilitiesFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.PartialJoin;
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.PowerOfKRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
-import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
+import jmt.gui.common.routingStrategies.*;
 import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
 
+import org.apache.xerces.dom.CharacterDataImpl;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -114,6 +113,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		temp.put("drop", FINITE_DROP);
 		temp.put("BAS blocking", FINITE_BLOCK);
 		temp.put("waiting queue", FINITE_WAITING);
+		temp.put("retrial", FINITE_RETRIAL);
 		DROP_RULES_MAPPING = Collections.unmodifiableMap(temp);
 	}
 
@@ -538,6 +538,70 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		}
 	}
 
+	private static void parseAndSetImpatienceParameters(CommonModel model, Object stationKey,
+																											Map<String, Node> classNameToNodeMap) {
+		String[] classNames = getClassNamesFromMap(classNameToNodeMap);
+
+		// Sets the impatience strategy in the CommonModel. Implementation borrowed from parseServerSection().
+		for (String className : classNames) {
+			Object classKey = classes.get(className);
+			Element impatienceElement = (Element) classNameToNodeMap.get(className);
+			String impatienceString = impatienceElement.getAttribute(XML_A_SUBPARAMETER_NAME);
+			ImpatienceType impatienceType = ImpatienceType.getType(impatienceString);
+
+			switch(impatienceType) {
+				case RENEGING:
+					// Set the reneging strategy in the model
+					Distribution renegingDistribution = (Distribution) parseServiceStrategy(impatienceElement);
+					RenegingParameter renegingParameter = new RenegingParameter(renegingDistribution);
+					setImpatienceParameterAndType(model, stationKey, classKey, renegingParameter, impatienceType);
+					break;
+
+				case BALKING:
+					// Set the balking strategy in the model
+					NodeList nodeList = impatienceElement.getChildNodes();
+					if (nodeList instanceof Element) {
+						int indexOfLDStrategyNode = 1;
+						int indexOfPriorityNode = 3;
+
+						// Extract the values from the XML
+						Element ldStrategyElement = (Element) nodeList.item(indexOfLDStrategyNode);
+						LDStrategy ldStrategy = (LDStrategy) parseServiceStrategy(ldStrategyElement);
+						Element booleanElement = (Element) nodeList.item(indexOfPriorityNode);
+						boolean priorityActivated = parseBooleanElement(booleanElement);
+
+						// Set the values in the model
+						BalkingParameter balkingParameter = new BalkingParameter(ldStrategy);
+						balkingParameter.setPriorityActivated(priorityActivated);
+						setImpatienceParameterAndType(model, stationKey, classKey, balkingParameter, impatienceType);
+					}
+					break;
+
+				case NONE:
+					// This case occurs when a particular class has no impatience selected.
+					setImpatienceParameterAndType(model, stationKey, classKey, null, impatienceType);
+					break;
+			}
+		}
+	}
+
+	private static boolean parseBooleanElement(Element booleanElement) {
+		NodeList nodeList = booleanElement.getChildNodes();
+		int indexOfValueNode = 1;
+		Node booleanNode = nodeList.item(indexOfValueNode);
+		CharacterDataImpl dataNode = (CharacterDataImpl) booleanNode.getFirstChild();
+		return Boolean.valueOf(dataNode.getData());
+	}
+
+	private static String[] getClassNamesFromMap(Map<String, Node> classNameToNodeMap) {
+		return classNameToNodeMap.keySet().toArray(new String[classNameToNodeMap.size()]);
+	}
+
+	private static void setImpatienceParameterAndType(CommonModel model, Object stationKey,
+																										Object classKey, ImpatienceParameter impatienceParameter, ImpatienceType impatienceType) {
+		model.setImpatienceParameter(stationKey, classKey, impatienceParameter);
+		model.setImpatienceType(stationKey, classKey, impatienceType);
+	}
 	/**
 	 * Parses all informations regarding Queue section.
 	 * @param section input section of queue or delay station
@@ -550,7 +614,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String name, classpath;
 		Map<String, Node> putStrategy = null;
 		Map<String, Node> dropRules = null;
-		String pollingType = null;
+		Map<String, Node> retrialDistributions = null;
+        String pollingType = null;
 		for (int i = 0; i < parameters.getLength(); i++) {
 			curr = (Element) parameters.item(i);
 			name = curr.getAttribute(XML_A_PARAMETER_NAME);
@@ -566,7 +631,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						model.setStationPollingServerKValue(key, pollingKValue);
 					}
 				}
-
 			} else if (name.equals("size")) {
 				Integer capacity = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationQueueCapacity(key, capacity);
@@ -581,6 +645,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				model.setStationPollingServerKValue(key, pollingKValue);
 			} else if (name.equals("dropStrategies")) {
 				dropRules = parseParameterRefclassArray(curr);
+			} else if (name.equals("retrialDistributions")) {
+				retrialDistributions = parseParameterRefclassArray(curr);
+			}
+			else if (name.equals(ImpatienceType.IMPATIENCE.getDisplayName())) {
+				// Retrieves all impatience subParameters and sets them in the model
+				Map<String, Node> classNameToNodeMap = parseParameterRefclassArray(curr);
+				parseAndSetImpatienceParameters(model, key, classNameToNodeMap);
 			}
 		}
 
@@ -663,6 +734,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			for (Object className : classNames) {
 				String rule = findText(((Element) dropRules.get(className)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 				model.setDropRule(key, classes.get(className), DROP_RULES_MAPPING.get(rule));
+				if (rule.equals("retrial") && retrialDistributions != null) {
+					Distribution distribution = (Distribution) parseServiceStrategy((Element) retrialDistributions.get(className));
+					model.setRetrialDistribution(key, classes.get(className), distribution);
+				}
 			}
 		}
 	}

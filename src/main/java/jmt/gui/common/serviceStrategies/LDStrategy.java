@@ -22,6 +22,7 @@ import java.text.DecimalFormat;
 import java.util.NoSuchElementException;
 import java.util.TreeMap;
 
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
 import jmt.engine.math.parser.Parser;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.distributions.Distribution;

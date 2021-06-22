@@ -29,7 +29,7 @@ package jmt.gui.common.definitions;
  *
  * Modified by Ashanka (Nov 09):
  * Desc: Added the description of the Drop Rate
- * 
+ *
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
  * Description: Added new Performance index for capturing 
@@ -86,6 +86,24 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_DROP_RATE = HTML_START + HTML_FONT_TITLE + "Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average drop rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
+	public static final String DESCRIPTION_RENEGING_RATE = HTML_START + HTML_FONT_TITLE + "Reneging Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average reneging rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_BALKING_RATE = HTML_START + HTML_FONT_TITLE + "Balking Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average balking rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_RETRIAL_ATTEMPTS_RATE = HTML_START + HTML_FONT_TITLE + "Retrial Attempts Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average retrial attempts rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_WAITING_TIME = HTML_START + HTML_FONT_TITLE + "Waiting Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
+					+ "Average waiting time for each selected class until served at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_RETRIAL_ORBIT_SIZE = HTML_START + HTML_FONT_TITLE + "Retrial Orbit Size" + HTML_FONT_TIT_END + HTML_FONT_NORM
+					+ "Average number of customers at the retrial orbit of a selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_BUSY_SERVER_NUMBER = HTML_START + HTML_FONT_TITLE + "Number of busy servers" + HTML_FONT_TIT_END + HTML_FONT_NORM
+					+ "Average number of number of busy servers at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_SYSTEM_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average number of customers in the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
@@ -98,8 +116,17 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_SYSTEM_DROP_RATE = HTML_START + HTML_FONT_TITLE + "System Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average drop rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
+	public static final String DESCRIPTION_SYSTEM_RENEGING_RATE = HTML_START + HTML_FONT_TITLE + "System Reneging Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average reneging rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_SYSTEM_BALKING_RATE = HTML_START + HTML_FONT_TITLE + "System Balking Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average balking rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_SYSTEM_POWER = HTML_START + HTML_FONT_TITLE + "System Power" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average power of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_SYSTEM_RETRIAL_ATTEMPTS_RATE = HTML_START + HTML_FONT_TITLE + "System Retrial Attempts Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average retrial attempts rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RESPONSE_TIME_PER_SINK = HTML_START + HTML_FONT_TITLE + "Response Time per Sink" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average response time for each selected class at each selected Sink station." + HTML_FONT_NOR_END + HTML_END;
@@ -107,19 +134,19 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_THROUGHPUT_PER_SINK = HTML_START + HTML_FONT_TITLE + "Throughput per Sink" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average throughput for each selected class at each selected Sink station." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_FCR_TOTAL_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR Total Weight" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+	public static final String DESCRIPTION_FCR_TOTAL_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR Total Weight" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average total weight for each selected finite capacity region." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_FCR_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+	public static final String DESCRIPTION_FCR_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average memory occupation for each selected finite capacity region." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_FJ_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "Fork Join Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+	public static final String DESCRIPTION_FJ_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "Fork Join Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average number of customers for each selected class in each selected Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_FJ_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Fork Join Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+	public static final String DESCRIPTION_FJ_RESPONSE_TIME = HTML_START + HTML_FONT_TITLE + "Fork Join Response Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average response time of a customer for each selected class in each selected Fork/Join section." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_FIRING_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Firing Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM 
+	public static final String DESCRIPTION_FIRING_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Firing Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average firing throughput for each selected mode at each selected transition station." + HTML_FONT_NOR_END + HTML_END;
 
 	// Temp measure mean label

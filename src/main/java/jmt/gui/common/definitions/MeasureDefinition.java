@@ -194,6 +194,43 @@ public interface MeasureDefinition {
 	public int[] getDropRateMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every reneging rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getRenegingRateMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every balking rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getBalkingRateMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every retrial attempts rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getRetrialAttemptsRateMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every retrial orbit size measure
+	 * @return an array with measures' index
+	 */
+	public int[] getRetrialOrbitSizeMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every waiting time measure
+	 * @return an array with measures' index
+	 */
+	public int[] getWaitingTimeMeasures();
+
+
+	/**
+	 * Returns an array with the measureIndex of every waiting time measure
+	 * @return an array with measures' index
+	 */
+	public int[] getNumberOfBusyServersMeasures();
+
+	/**
 	 * Returns an array with the measureIndex of every system customer number measure
 	 * @return an array with measures' index
 	 */
@@ -218,10 +255,28 @@ public interface MeasureDefinition {
 	public int[] getSystemDropRateMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every system reneging rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemRenegingRateMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every system balking rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemBalkingRateMeasures();
+
+	/**
 	 * Returns an array with the measureIndex of every system power measure
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemPowerMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every system retrial attempts rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemRetrialAttemptsRateMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every response time per sink measure

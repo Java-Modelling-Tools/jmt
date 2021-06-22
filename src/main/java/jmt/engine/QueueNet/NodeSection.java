@@ -419,6 +419,9 @@ public abstract class NodeSection {
 				}
 			}
 		}
+		if (event == NetEvent.EVENT_RETRIAL ) {
+			updateJobsListAfterSend((Job) data, event);
+		}
 		return ownerNode.send(event, data, delay, sectionID, destinationSection, destination);
 	}
 
@@ -548,12 +551,19 @@ public abstract class NodeSection {
 		}
 	}
 
+	private void updateJobsListAfterSend(Job job, int event) {
+		JobInfo jobInfo = jobsList.lookFor(job);
+		if (jobInfo != null & event == NetEvent.EVENT_RETRIAL) {
+			jobsList.removeOnly(jobInfo);
+		}
+	}
 	/**
 	 * Updates the JobInfoList after receiving this job.
 	 * @param job job to be received.
 	 */
 	private void updateJobsListAfterReceive(Job job) {
-		jobsList.add(new JobInfo(job));
+		JobInfo jobInfo = new JobInfo(job);
+		jobsList.add(jobInfo);
 	}
 
 	void setOwnerNode(NetNode ownerNode) throws NetException {

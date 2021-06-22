@@ -136,7 +136,7 @@ public class DispatcherJSIMschema {
 	public boolean solveModel() throws Exception {
 		/*********************SIM DEFINITION MODEL*********************/
 		// does model file exist??
-		if (!simModelDefinition.exists()) {
+ 		if (!simModelDefinition.exists()) {
 			//the passed file does not exist
 			logger.error("The sim model file " + simModelDefinitionPath + " does not exist...");
 			return false;

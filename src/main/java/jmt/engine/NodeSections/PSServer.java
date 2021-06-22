@@ -1,16 +1,16 @@
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
-
+ * <p>
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
-
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
-
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -18,17 +18,24 @@
 
 package jmt.engine.NodeSections;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import java.util.List;
+import java.util.Map;
+
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
 import jmt.engine.NetStrategies.PSStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.NetStrategies.PSStrategies.EPSStrategy;
+import jmt.engine.QueueNet.GlobalJobInfoList;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
@@ -67,11 +74,20 @@ public class PSServer extends ServiceSection {
 	private PSJobInfo messageJobInfo;
 	private double messageSendTime;
 
-	
+	// The owner NetNode
+	private NetNode ownerNode;
+	// The JobInfoList of the owner NetNode
+	private JobInfoList nodeJobsList;
+	// The JobInfoList of the global Network
+	private GlobalJobInfoList netJobsList;
+
+	// Used to record jobs that will be reneged in each round of process()
+	List<Job> jobsToBeReneged = new ArrayList<>();
+
 	public PSServer(Integer numberOfServers, ServiceStrategy[] serviceStrategies) {
-	 this(numberOfServers, false, serviceStrategies);
+		this(numberOfServers, false, serviceStrategies);
 	}
-	
+
 	/**
 	 * Creates a new instance of PSServer.
 	 * @param numberOfServers Number of jobs which can be served simultaneously.
@@ -94,6 +110,7 @@ public class PSServer extends ServiceSection {
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
 		this(numberOfServers, false, serviceStrategies);
 	}
+
 	/**
 	 * Creates a new instance of PSServer.
 	 * @param numberOfServers Number of jobs which can be served simultaneously.
@@ -104,9 +121,9 @@ public class PSServer extends ServiceSection {
 	public PSServer(Integer numberOfServers, Boolean serverPreemptive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies) {
 		this(numberOfServers, false, serviceStrategies);
 	}
-	
+
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies,
-			PSStrategy[] psStrategies, Double[] serviceWeights) {
+									PSStrategy[] psStrategies, Double[] serviceWeights) {
 		this(numberOfServers, false, numberOfVisitsPerClass, serviceStrategies, psStrategies, serviceWeights);
 	}
 
@@ -120,7 +137,7 @@ public class PSServer extends ServiceSection {
 	 * @param serviceWeights Array of service weights, one per class.
 	 */
 	public PSServer(Integer numberOfServers, Boolean serverPreemptive, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies,
-			PSStrategy[] psStrategies, Double[] serviceWeights) {
+									PSStrategy[] psStrategies, Double[] serviceWeights) {
 		this(numberOfServers, false, numberOfVisitsPerClass, serviceStrategies);
 		this.psStrategies = psStrategies;
 		this.serviceWeights = new double[serviceWeights.length];
@@ -132,31 +149,31 @@ public class PSServer extends ServiceSection {
 	@Override
 	public double getDoubleSectionProperty(int id) throws NetException {
 		switch (id) {
-		case PROPERTY_ID_UTILIZATION:
-			double sum = 0.0;
-			for (int i = 0; i < jobClasses.size(); i++) {
-				JobClass jobClass = jobClasses.get(i);
-				sum += psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
-			}
-			return sum;
-		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (getTime() <= 0.0) ? 0.0
-					: psJobsList.getTotalSojournTime() / getTime() / numberOfServers;
-		default:
-			return super.getDoubleSectionProperty(id);
+			case PROPERTY_ID_UTILIZATION:
+				double sum = 0.0;
+				for (int i = 0; i < jobClasses.size(); i++) {
+					JobClass jobClass = jobClasses.get(i);
+					sum += psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
+				}
+				return sum;
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+				return (getTime() <= 0.0) ? 0.0
+								: psJobsList.getTotalSojournTime() / getTime() / numberOfServers;
+			default:
+				return super.getDoubleSectionProperty(id);
 		}
 	}
 
 	@Override
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-		case PROPERTY_ID_UTILIZATION:
-			return psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
-		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (getTime() <= 0.0) ? 0.0
-					: psJobsList.getTotalSojournTimePerClass(jobClass) / getTime() / numberOfServers;
-		default:
-			return super.getDoubleSectionProperty(id, jobClass);
+			case PROPERTY_ID_UTILIZATION:
+				return psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+				return (getTime() <= 0.0) ? 0.0
+								: psJobsList.getTotalSojournTimePerClass(jobClass) / getTime() / numberOfServers;
+			default:
+				return super.getDoubleSectionProperty(id, jobClass);
 		}
 	}
 
@@ -169,62 +186,134 @@ public class PSServer extends ServiceSection {
 		psJobsList.setNumberOfServers(numberOfServers);
 		serviceFractions = new double[jobClasses.size()];
 		Arrays.fill(serviceFractions, 0.0);
+
+		// Retrieve the nodeJobsList from the owner NetNode
+		ownerNode = node;
+		nodeJobsList = ownerNode.getJobInfoList();
 	}
 
 	@Override
 	protected int process(NetMessage message) throws NetException {
+		// Clear jobsToBeReneged at the start of every process()
+		jobsToBeReneged.clear();
+
 		switch (message.getEvent()) {
 
-		case NetEvent.EVENT_START:
-			break;
+			case NetEvent.EVENT_START:
+				// Retrieve the netJobsList from the QueueNetwork (this is only possible at EVENT_START onwards)
+				netJobsList = ownerNode.getGlobalJobInfoList();
+				break;
 
-		case NetEvent.EVENT_JOB:
-			Job job = message.getJob();
-			if (isMine(message)) {
-				performServiceTimes(messageSendTime);
-				handleJobInfoList(messageJobInfo, PSEvent.JOB_OUT);
-				messageToken = null;
-				sendForward(job, 0.0);
-				sendBackward(NetEvent.EVENT_JOB_COMPLETED, job, 0.0);
-			} else {
-				if (messageToken != null) {
-					removeMessage(messageToken);
+			case NetEvent.EVENT_JOB:
+				Job job = message.getJob();
+				if (isMine(message)) {
 					performServiceTimes(messageSendTime);
+					performRenegingOperations(jobsToBeReneged);
+					handleJobInfoList(messageJobInfo, PSEvent.JOB_OUT);
 					messageToken = null;
+					if (!jobDidRenege(job)) {
+						sendForward(job, 0.0);
+						sendBackward(NetEvent.EVENT_JOB_COMPLETED, job, 0.0);
+					}
+				} else {
+					if (messageToken != null) {
+						removeMessage(messageToken);
+						performServiceTimes(messageSendTime);
+						performRenegingOperations(jobsToBeReneged);
+						messageToken = null;
+					}
+					// To support LD strategy, update jobInfoList before obtaining serviceTime
+					PSJobInfo jobInfo = new PSJobInfo(job);
+					handleJobInfoList(jobInfo, PSEvent.JOB_IN);
+					double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
+					jobInfo.setServiceTime(serviceTime);
+					jobInfo.setResidualServiceTime(serviceTime);
+					sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 				}
-				// To support LD strategy, update jobInfoList before obtaining serviceTime
-				PSJobInfo jobInfo = new PSJobInfo(job);
-				handleJobInfoList(jobInfo, PSEvent.JOB_IN);
-				double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
-				jobInfo.setServiceTime(serviceTime);
-				jobInfo.setResidualServiceTime(serviceTime);
-				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
-			}
-			updateServiceFractions();
-			serviceJobs();
-			break;
+				updateServiceFractions();
+				serviceJobs();
+				break;
 
-		case NetEvent.EVENT_ACK:
-			break;
+			case NetEvent.EVENT_RENEGE:
+				Map<Job, Double> jobToRemainingTimeMap = (Map<Job, Double>) message.getData();
+				Job jobReceived = null;
+				Double timeLeftToRenege = null;
+				for (Map.Entry<Job, Double> entry : jobToRemainingTimeMap.entrySet()) {
+					jobReceived = entry.getKey();
+					timeLeftToRenege = entry.getValue();
+				}
+				// Rose: so this is essentially getting the last item in the map? or is there ever only one job?
+				// in that case we could just use a Pair(?)
 
-		case NetEvent.EVENT_STOP:
-			break;
+				// Add the extra information (impatienceType and timeLeftToRenege) to the PSJobInfo of jobReceived
+				PSJobInfo psJobInfo = (PSJobInfo) psJobsList.lookFor(jobReceived);
+				psJobInfo.setImpatienceType(ImpatienceType.RENEGING);
+				psJobInfo.setRenegingDelay(timeLeftToRenege);
+				break;
 
-		default:
-			return MSG_NOT_PROCESSED;
+			case NetEvent.EVENT_ACK:
+				break;
+
+			case NetEvent.EVENT_STOP:
+				break;
+
+			default:
+				return MSG_NOT_PROCESSED;
 		}
 
 		return MSG_PROCESSED;
 	}
 
+	private boolean jobDidRenege(Job job) {
+		return jobsToBeReneged.contains(job);
+	}
+
 	private void performServiceTimes(double startTime) {
 		Iterator<JobInfo> it = psJobsList.getInternalJobInfoList().iterator();
+		double waitingTime = 0.0;
+
 		while (it.hasNext()) {
 			PSJobInfo jobInfo = (PSJobInfo) it.next();
 			int jobClassID = jobInfo.getJob().getJobClass().getId();
+
+			// If the job can renege, subtract the waitingTime from its renegingDelay
+			if (jobInfo.hasImpatienceType(ImpatienceType.RENEGING)) {
+				jobInfo.subtractFromRenegingDelay(waitingTime);
+
+				// If renegingDelay <= 0.0, add the job to jobsToBeReneged so that it can later be reneged
+				if (jobInfo.getRenegingDelay() <= 0.0) {
+					jobsToBeReneged.add(jobInfo.getJob());
+					continue;
+				}
+			}
+
+			// Perform service for the job
 			double serviceTime = (getTime() - startTime) * numberOfServers * serviceFractions[jobClassID];
 			jobInfo.performServiceTime(serviceTime);
+
+			waitingTime += serviceTime;
 		}
+	}
+
+	/**
+	 * Reneges the job from the PSServer, NetNode, and System.
+	 *
+	 * @param jobsToBeReneged the list of jobs being reneged.
+	 */
+	private void performRenegingOperations(List<Job> jobsToBeReneged) {
+		for (Job job : jobsToBeReneged) {
+			JobInfo jobInfoInPSJobsList = getJobInfoFromBuffer(job, psJobsList);
+			JobInfo jobInfoInNetNode = getJobInfoFromBuffer(job, nodeJobsList);
+
+			// Renege jobs from jobsInQueue (Queue item), nodeJobsList (NetNode item) and netJobsList (Global item)
+			psJobsList.renegeJob(jobInfoInPSJobsList);
+			nodeJobsList.renegeJob(jobInfoInNetNode);
+			netJobsList.renegeJob(job);
+		}
+	}
+
+	private JobInfo getJobInfoFromBuffer(Job job, JobInfoList buffer) {
+		return buffer.lookFor(job);
 	}
 
 	private void handleJobInfoList(PSJobInfo jobInfo, PSEvent event) {
@@ -264,7 +353,7 @@ public class PSServer extends ServiceSection {
 					if (!serviceSaturated[i]) {
 						JobClass jobClass = jobClasses.get(i);
 						serviceFractions[i] = psStrategies[i].slice(psJobsList, jobClasses, serviceWeights, serviceSaturated, jobClass)
-								* (residualCapacity / numberOfServers);
+										* (residualCapacity / numberOfServers);
 					}
 				}
 				allocationComplete = true;
@@ -298,8 +387,8 @@ public class PSServer extends ServiceSection {
 			messageSendTime = getTime();
 		}
 	}
-	
-	private double getTime(){
+
+	private double getTime() {
 		return this.getOwnerNode().getNetSystem().getTime();
 	}
 

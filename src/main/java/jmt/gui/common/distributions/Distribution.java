@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import javax.swing.ImageIcon;
 
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
 import jmt.gui.common.serviceStrategies.ServiceStrategy;
 
 /**

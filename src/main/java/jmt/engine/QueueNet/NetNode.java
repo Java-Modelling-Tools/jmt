@@ -27,11 +27,9 @@ import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.SimParameters;
 import jmt.engine.log.JSimLogger;
-import jmt.engine.simEngine.RemoveToken;
-import jmt.engine.simEngine.SimEntity;
-import jmt.engine.simEngine.SimEvent;
-import jmt.engine.simEngine.SimSystem;
-import jmt.engine.simEngine.SimTypeP;
+import jmt.engine.simEngine.*;
+
+import java.util.ListIterator;
 
 /**
  * This class implements a generic QueueNetwork node.
@@ -320,6 +318,10 @@ public class NetNode extends SimEntity {
 		return network;
 	}
 
+	public GlobalJobInfoList getGlobalJobInfoList() {
+		return network.getJobInfoList();
+	}
+
 	/**
 	 * Analyzes a measure in the node.
 	 * @param measureName name of the measure to be activated.
@@ -341,6 +343,24 @@ public class NetNode extends SimEntity {
 		case SimConstants.LIST_DROP_RATE:
 			jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
 			break;
+			case SimConstants.LIST_RENEGING_RATE:
+				jobsList.analyzeRenegingRate(jobClass, (InverseMeasure) measurement);
+				break;
+			case SimConstants.LIST_BALKING_RATE:
+				jobsList.analyzeBalkingRate(jobClass, (InverseMeasure) measurement);
+				break;
+			case SimConstants.LIST_RETRIAL_RATE:
+				jobsList.analyzeRetrialAttemptsRate(jobClass, (InverseMeasure) measurement);
+				break;
+			case SimConstants.LIST_RETRIAL_ORBIT_SIZE:
+				jobsList.analyzeRetrialOrbitSize(jobClass, measurement);
+				break;
+			case SimConstants.LIST_WAITING_TIME:
+				jobsList.analyzeWaitingTime(jobClass, measurement);
+				break;
+			case SimConstants.LIST_BUSY_SERVERS:
+				jobsList.analyzeBusyServersVar(jobClass, measurement);
+				break;
 		case SimConstants.RESPONSE_TIME_PER_SINK:
 			jobsList.analyzeResponseTimePerSink(jobClass, measurement);
 			break;
@@ -420,15 +440,25 @@ public class NetNode extends SimEntity {
 
 		//Look if message is a job message and if job is arriving at this node (from the node
 		//itself or from another node)
-		if (message.getEvent() == NetEvent.EVENT_JOB) {
+				int event = message.getEvent();
+		Job job = message.getJob();
+		switch(event) {
+			case NetEvent.EVENT_JOB:
 			if ((message.getSource() != this) || ((message.getSource() == this)
 					&& (message.getSourceSection() == NodeSection.OUTPUT && message.getDestinationSection() == NodeSection.INPUT))) {
-				Job job = message.getJob();
 				inputSection.updateVisitPath(job);
 				if (inputSection.automaticUpdateNodeJobinfolist()) {
 					jobsList.add(new JobInfo(job));
 				}
 			}
+			break;
+			case NetEvent.EVENT_RETRIAL:
+				inputSection.updateVisitPath(job);
+				break;
+			case NetEvent.EVENT_RETRIAL_JOB:
+				jobsList.add(new JobInfo(job));
+				break;
+
 		}
 	}
 
@@ -610,13 +640,12 @@ public class NetNode extends SimEntity {
 			if ((destination != this) || ((destination == this)
 					&& (sourceSection == NodeSection.OUTPUT && destinationSection == NodeSection.INPUT))) {
 				if (outputSection.automaticUpdateNodeJobinfolist()) {
-					Job job = (Job) data;
-					JobInfo jobInfo = jobsList.lookFor(job);
-					if (jobInfo != null) {
-						jobsList.remove(jobInfo);
-					}
+					removeJobFromNodeJobsList((Job) data);
 				}
 			}
+		}
+		 if (event == NetEvent.EVENT_RETRIAL) {
+			 removeJobFromNodeJobsListOnly((Job) data, event);
 		}
 
 		//
@@ -634,6 +663,34 @@ public class NetNode extends SimEntity {
 		tag += sourceSection << NodeSection.SOURCE_SHIFT;
 		tag += destinationSection << NodeSection.DESTINATION_SHIFT;
 		return simSchedule(destination.getId(), delay, tag, data);
+	}
+
+	/**
+	 * Helper function to remove job from the NodeJobsList
+	 * @param data the jobInfo data looking to be removed.
+	 */
+	private boolean removeJobFromNodeJobsList(Job data) {
+		Job job = data;
+		JobInfo jobInfo = jobsList.lookFor(job);
+		if (jobInfo != null) {
+			jobsList.remove(jobInfo);
+			return true;
+		}
+		return false;
+	}
+
+		/**
+	 * Helper function to remove job from the NodeJobsList
+	 * @param data the jobInfo data looking to be removed.
+	 */
+	public boolean removeJobFromNodeJobsListOnly(Job data, int event) {
+		Job job = data;
+		JobInfo jobInfo = jobsList.lookFor(job);
+		if (jobInfo != null && event == NetEvent.EVENT_RETRIAL) {
+			jobsList.removeOnly(jobInfo);
+			return true;
+		}
+		return false;
 	}
 
 	/**

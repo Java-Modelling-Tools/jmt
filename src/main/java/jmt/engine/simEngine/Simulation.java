@@ -510,6 +510,24 @@ public class Simulation {
 					case SimConstants.DROP_RATE:
 						netNodes[nodePosition].analyze(SimConstants.LIST_DROP_RATE, jClass, ms.getMeasure());
 						break;
+						case SimConstants.RENEGING_RATE:
+							netNodes[nodePosition].analyze(SimConstants.LIST_RENEGING_RATE, jClass, ms.getMeasure());
+							break;
+						case SimConstants.BALKING_RATE:
+							netNodes[nodePosition].analyze(SimConstants.LIST_BALKING_RATE, jClass, ms.getMeasure());
+							break;
+						case SimConstants.RETRIAL_ATTEMPTS_RATE:
+							netNodes[nodePosition].analyze(SimConstants.LIST_RETRIAL_RATE, jClass, ms.getMeasure());
+							break;
+						case SimConstants.RETRIAL_ORBIT_SIZE:
+							netNodes[nodePosition].analyze(SimConstants.LIST_RETRIAL_ORBIT_SIZE, jClass, ms.getMeasure());
+							break;
+						case SimConstants.WAITING_TIME:
+							netNodes[nodePosition].analyze(SimConstants.LIST_WAITING_TIME, jClass, ms.getMeasure());
+							break;
+						case SimConstants.NUM_BUSY_SERVERS:
+							netNodes[nodePosition].analyze(SimConstants.LIST_BUSY_SERVERS, jClass, ms.getMeasure());
+							break;
 					case SimConstants.RESPONSE_TIME_PER_SINK:
 						netNodes[nodePosition].analyze(SimConstants.RESPONSE_TIME_PER_SINK, jClass, ms.getMeasure());
 						break;
@@ -548,9 +566,18 @@ public class Simulation {
 					case SimConstants.SYSTEM_DROP_RATE:
 						network.getJobInfoList().analyzeDropRate(jClass, ms.getMeasure());
 						break;
+						case SimConstants.SYSTEM_RENEGING_RATE:
+							network.getJobInfoList().analyzeRenegingRate(jClass, ms.getMeasure());
+							break;
+						case SimConstants.SYSTEM_BALKING_RATE:
+							network.getJobInfoList().analyzeBalkingRate(jClass, ms.getMeasure());
+							break;
 					case SimConstants.SYSTEM_POWER:
 						network.getJobInfoList().analyzeSystemPower(jClass, ms.getMeasure());
 						break;
+						case SimConstants.SYSTEM_RETRIAL_ATTEMPTS_RATE:
+							network.getJobInfoList().analyzeRetrialAttemptsRate(jClass, ms.getMeasure());
+							break;
 					}
 				}
 			}

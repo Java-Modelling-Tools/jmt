@@ -2695,6 +2695,9 @@ public class Mediator implements GuiInterface {
 			JOptionPane.showMessageDialog(null, stationName + " is not located between fork/join. This topology is not allowed.\n",
 					"Error", JOptionPane.ERROR_MESSAGE);
 		}
+        else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR)) {
+			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INFINITE_ENABLING_DEGREE_ERROR)) {
 			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
@@ -2707,6 +2710,9 @@ public class Mediator implements GuiInterface {
 			if (k == JOptionPane.OK_OPTION) {
 				showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 			}
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_INFINITE_ENABLING_DEGREE_ERROR)) {
+			showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
 		}
 		// used only in JMVA conversion
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_STRATEGIES_WARNING)) {

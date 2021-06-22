@@ -63,6 +63,26 @@ public interface SimulationDefinition {
 	public static final String MEASURE_X = "Throughput";
 	/**Code for drop rate measure*/
 	public static final String MEASURE_DR = "Drop Rate";
+	/**Code for reneging rate measure*/
+	public static final String MEASURE_RR = "Reneging Rate";
+	/**Code for balking rate measure*/
+	public static final String MEASURE_BR = "Balking Rate";
+	/**Code for retrial attempt rate number measure*/
+	public static final String MEASURE_R = "Retrial Attempts Rate";
+	/**Code for waiting time measure*/
+	public static final String MEASURE_WT = "Waiting Time";
+	/**Code for retrial orbit size measure*/
+	public static final String MEASURE_RS = "Retrial Orbit Size";
+	/**Code for number of busy servers measure -- not displayed in JSIMgraph UI */
+	public static final String MEASURE_BS = "Number of busy servers";
+
+
+	/**Code for number of system retrial number measure*/
+	public static final String MEASURE_S_R = "System Retrial Attempts Rate";
+	/**Code for system reneging rate measure*/
+	public static final String MEASURE_S_RR = "System Reneging Rate";
+	/**Code for system reneging rate measure*/
+	public static final String MEASURE_S_BR = "System Balking Rate";
 	/**Code for power measure*/
 	public static final String MEASURE_P = "Power";
 	/**Code for system customer number measure*/

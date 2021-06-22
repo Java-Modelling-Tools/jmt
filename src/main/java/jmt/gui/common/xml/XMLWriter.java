@@ -18,6 +18,36 @@
 
 package jmt.gui.common.xml;
 
+import java.io.File;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
+import jmt.engine.NetStrategies.ImpatienceStrategies.*;
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.forkStrategies.OutPath;
+import jmt.gui.common.forkStrategies.ProbabilitiesFork;
+import jmt.gui.common.forkStrategies.CombFork;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.joinStrategies.NormalJoin;
+import jmt.gui.common.joinStrategies.PartialJoin;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import jmt.engine.log.LoggerParameters;
 import jmt.engine.random.EmpiricalEntry;
 import jmt.framework.data.MacroReplacer;
@@ -26,26 +56,21 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.distributions.Distribution.Parameter;
-import jmt.gui.common.forkStrategies.*;
+import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.NormalJoin;
 import jmt.gui.common.joinStrategies.PartialJoin;
 import jmt.gui.common.routingStrategies.*;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
-import jmt.gui.common.serviceStrategies.DisabledStrategy;
-import jmt.gui.common.serviceStrategies.LDStrategy;
-import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.common.serviceStrategies.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.*;
 import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.*;
@@ -105,6 +130,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		temp.put(FINITE_DROP, "drop");
 		temp.put(FINITE_BLOCK, "BAS blocking");
 		temp.put(FINITE_WAITING, "waiting queue");
+		temp.put(FINITE_RETRIAL, "retrial");
 		DROP_RULES_MAPPING = Collections.unmodifiableMap(temp);
 
 		temp = new HashMap<String, String>();
@@ -123,6 +149,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	public static final String transitionUtilitiesSuffix = "TransitionUtilities.";
 	public static final String distributionContainerClasspath = "jmt.engine.random.DistributionContainer";
 
+	private static final String SERVICE_TIME_STRATEGY_PATH = strategiesClasspathBase + serviceStrategiesSuffix + "ServiceTimeStrategy";
 	public static void writeXML(String fileName, CommonModel model) {
 		writeToResult(new StreamResult(new File(fileName)), model, fileName);
 	}
@@ -497,7 +524,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				distrParams[i] = DistributionWriter
 						.getDistributionParameter((Distribution) model
 								.getClassDistribution(currentClass), model,
-								currentClass);
+								currentClass, "ServiceTimeStrategy", SERVICE_TIME_STRATEGY_PATH);
 			} else {
 				// otherwise write a null parameter
 				String name = "ServiceTimeStrategy";
@@ -556,13 +583,21 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		XMLParameter[] dropStrategy = new XMLParameter[classes.size()];
 		XMLParameter dropStrategies = new XMLParameter("dropStrategies",
 				String.class.getName(), null, dropStrategy, false);
+		XMLParameter[] rd = new XMLParameter[classes.size()];
+		XMLParameter retrialDistributions = new XMLParameter("retrialDistributions",
+																												 strategiesClasspathBase + "ServiceStrategy",
+																												 null, rd, false);
 		for (int i = 0; i < dropStrategy.length; i++) {
 			String strategy = model.getDropRule(stationKey, classes.get(i));
 			dropStrategy[i] = new XMLParameter("dropStrategy",
 					String.class.getName(), model.getClassName(classes.get(i)),
 					DROP_RULES_MAPPING.get(strategy), true);
+			rd[i] = DistributionWriter
+							.getDistributionParameter((Distribution) model.getRetrialDistribution(stationKey, classes.get(i)),
+																				model, classes.get(i), "ServiceTimeStrategy", SERVICE_TIME_STRATEGY_PATH);
 		}
 		dropStrategies.appendParameterElement(doc, queue);
+		retrialDistributions.appendParameterElement(doc, queue);
 
 		/*
 		 * queue get strategy, which is fixed to FCFS, as difference between
@@ -633,6 +668,139 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					(String) null, true);
 		}
 		queuePutStrategies.appendParameterElement(doc, queue);
+		writeImpatienceParameters(doc, model, stationKey, queue, classes);
+	}
+
+	/*
+	 * Use the model to write the reneging strategies for each station and each class as XML parameters.
+	 * Modelled after the "ServiceStrategy" parameter for RandomSource.
+	 */
+	private static void writeImpatienceParameters(Document doc, CommonModel model, Object stationKey,
+			Element queue, Vector<Object> classes) {
+		String impatienceClassName = Impatience.class.getSimpleName();
+		String impatiencePath = Impatience.class.getCanonicalName();
+		XMLParameter[] impatienceParams = new XMLParameter[classes.size()];
+		XMLParameter impatienceParam = new XMLParameter(impatienceClassName,
+				impatiencePath, null, impatienceParams, false);
+
+		for (int i = 0; i < impatienceParams.length; i++) {
+			// Get the current class and use it to retrieve its impatience type
+			Object classKey = classes.get(i);
+			ImpatienceType impatienceType = model.getImpatienceType(stationKey, classKey);
+			if (impatienceType != null) { // handling null pointer
+				// Based on the ImpatienceStrategy, retrieve the object from the model and write it to XML
+				switch (impatienceType) {
+					case RENEGING:
+						impatienceParams[i] = createRenegingParameter(model, stationKey, classKey);
+						break;
+
+					case BALKING:
+						impatienceParams[i] = createBalkingParameter(model, stationKey, classKey, classes.size(), i);
+						break;
+
+					default:
+						// Write a null parameter when no impatience strategy was selected
+						impatienceParams[i] = new XMLParameter(impatienceClassName, impatiencePath,
+																									 model.getClassName(classKey), "null", true);
+						break;
+				}
+			} else {
+				// Write a null parameter when no impatience strategy was selected
+				impatienceParams[i] = new XMLParameter(impatienceClassName, impatiencePath,
+																							 model.getClassName(classKey), "null", true);
+			}
+		}
+		// finally, create node from parameters and append it to the section element
+		impatienceParam.appendParameterElement(doc, queue);
+	}
+
+	private static XMLParameter createRenegingParameter(CommonModel model, Object stationKey,	Object classKey) {
+		String renegingClassName = Reneging.class.getSimpleName();
+		String renegingPath = Reneging.class.getCanonicalName();
+		RenegingParameter renegingParameter = (RenegingParameter) model.getImpatienceParameter(stationKey, classKey);
+		Distribution renegingDistribution = renegingParameter.getDistribution();
+
+		return DistributionWriter
+				.getDistributionParameter(renegingDistribution, model, classKey, renegingClassName, renegingPath);
+	}
+
+	private static XMLParameter createBalkingParameter(CommonModel model, Object stationKey,
+			Object classKey, int numOfClasses, int classIndex) {
+		String balkingClassName = Balking.class.getSimpleName();
+		String balkingPath = Balking.class.getCanonicalName();
+
+		BalkingParameter balkingParameter = (BalkingParameter) model.getImpatienceParameter(stationKey, classKey);
+		LDStrategy strategy = balkingParameter.getLdStrategy();
+		boolean priorityActivated = balkingParameter.getPriorityActivated();
+
+		// --- Load Dependent Service Strategy (borrowed from getServiceSection()) --- //
+		XMLParameter[] ranges = createRangeParameterArray(strategy);
+
+		// Creates LDParameter array
+		XMLParameter LDParameter = createLDParameterArray(ranges);
+
+		// Creates service strategy (Parameter #1 of Balking class)
+		XMLParameter loadDependentStrategyParameter = createLoadDependentStrategyParameter(LDParameter);
+
+		// Creates the boolean parameter for the priorityActivated field (Parameter #2 of Balking class)
+		XMLParameter booleanParameter = new XMLParameter("priorityActivated",
+				Boolean.class.getName(),	null, String.valueOf(priorityActivated), true);
+
+		// Finally, create the balkingParameter and set the array to be false
+		XMLParameter xmlBalkingParameter = new XMLParameter(balkingClassName,
+				balkingPath, model.getClassName(classKey),
+				new XMLParameter[] {loadDependentStrategyParameter, booleanParameter}, true);
+		xmlBalkingParameter.parameterArray = "false";
+		// --- End --- //
+
+		return xmlBalkingParameter;
+  }
+
+	private static XMLParameter[] createRangeParameterArray(LDStrategy strategy) {
+		XMLParameter[] ranges = new XMLParameter[strategy.getRangeNumber()];
+		Object[] rangeKeys = strategy.getAllRanges();
+
+		for (int j = 0; j < ranges.length; j++) {
+			// Creates "from" parameter
+			XMLParameter from = new XMLParameter("from",
+					Integer.class.getName(), null,
+					Integer.toString(strategy
+							.getRangeFrom(rangeKeys[j])), true);
+			// Creates "distribution" parameter
+			XMLParameter[] distr = DistributionWriter
+					.getDistributionParameter(strategy
+							.getRangeDistribution(rangeKeys[j]));
+			// Creates "function" parameter (mean value of the distribution)
+			XMLParameter function = new XMLParameter("function",
+					String.class.getName(), null,
+					strategy.getRangeDistributionMean(rangeKeys[j]),
+					true);
+			ranges[j] = new XMLParameter("LDParameter",
+					strategiesClasspathBase + serviceStrategiesSuffix
+							+ "LDParameter", null, new XMLParameter[]{
+					from, distr[0], distr[1],
+					function}, true);
+			// Sets array = false as it is not an array of equal elements
+			ranges[j].parameterArray = "false";
+		}
+		return ranges;
+	}
+
+	private static XMLParameter createLDParameterArray(XMLParameter[] ranges) {
+		return new XMLParameter("LDParameter",
+				strategiesClasspathBase + serviceStrategiesSuffix
+						+ "LDParameter", null, ranges, true);
+	}
+
+	private static XMLParameter createLoadDependentStrategyParameter(XMLParameter LDParameter) {
+		XMLParameter loadDependentStrategyParam = new XMLParameter("LoadDependentStrategy",
+				strategiesClasspathBase + serviceStrategiesSuffix
+						+ "LoadDependentStrategy",
+				null,
+				new XMLParameter[] { LDParameter }, true);
+		loadDependentStrategyParam.parameterArray = "false";
+
+		return loadDependentStrategyParam;
 	}
 
 	static protected void writeTerminalSection(Document doc, Node node,
@@ -815,7 +983,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				distrParams[i] = DistributionWriter
 						.getDistributionParameter(
 								(Distribution) serviceDistribution, model,
-								currentClass);
+								currentClass,  "ServiceTimeStrategy", SERVICE_TIME_STRATEGY_PATH);
 			} else if (serviceDistribution instanceof ZeroStrategy) {
 				// Zero Service Time Strategy
 				distrParams[i] = new XMLParameter("ZeroServiceTimeStrategy",
@@ -829,50 +997,18 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			} else {
 				// Load Dependent Service Strategy
 				LDStrategy strategy = (LDStrategy) serviceDistribution;
-				XMLParameter[] ranges = new XMLParameter[strategy
-				                                         .getRangeNumber()];
-				Object[] rangeKeys = strategy.getAllRanges();
-
-				for (int j = 0; j < ranges.length; j++) {
-					// Creates "from" parameter
-					XMLParameter from = new XMLParameter("from",
-							Integer.class.getName(), null,
-							Integer.toString(strategy
-									.getRangeFrom(rangeKeys[j])), true);
-					// Creates "distribution" parameter
-					XMLParameter[] distribution = DistributionWriter
-							.getDistributionParameter(strategy
-									.getRangeDistribution(rangeKeys[j]));
+				XMLParameter[] ranges;
 					// Creates "function" parameter (mean value of the
 					// distribution)
-					XMLParameter function = new XMLParameter("function",
-							String.class.getName(), null,
-							strategy.getRangeDistributionMean(rangeKeys[j]),
-							true);
-					ranges[j] = new XMLParameter("LDParameter",
-							strategiesClasspathBase + serviceStrategiesSuffix
-							+ "LDParameter", null, new XMLParameter[] {
-									from, distribution[0], distribution[1],
-									function }, true);
-					// Sets array = false as it is not an array of equal elements
-					ranges[j].parameterArray = "false";
-				}
+				ranges = createRangeParameterArray(strategy);										
+				
 				// Creates LDParameter array
-				XMLParameter LDParameter = new XMLParameter("LDParameter",
-						strategiesClasspathBase + serviceStrategiesSuffix
-						+ "LDParameter", null, ranges, true);
+				XMLParameter LDParameter = createLDParameterArray(ranges);
 				// Creates service strategy
-				distrParams[i] = new XMLParameter("LoadDependentStrategy",
-						strategiesClasspathBase + serviceStrategiesSuffix
-						+ "LoadDependentStrategy",
-						model.getClassName(currentClass),
-						new XMLParameter[] { LDParameter }, true);
-				distrParams[i].parameterArray = "false";
+				distrParams[i] = createLoadDependentStrategyParameter(LDParameter);
 			}
 		}
-		XMLParameter globalDistr = new XMLParameter("ServerStrategy",
-				strategiesClasspathBase + "ServiceStrategy", null, distrParams,
-				false);
+       XMLParameter globalDistr = new XMLParameter("ServerStrategy",			strategiesClasspathBase + "ServiceStrategy", null, distrParams, false);
 		return globalDistr;
 	}
 
@@ -1203,7 +1339,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			Object strategy = model.getFiringTimeDistribution(stationKey, i);
 			if (strategy instanceof Distribution) {
 				timingStrategy[i] = DistributionWriter.getDistributionParameter(
-						(Distribution) strategy, model, null);
+						(Distribution) strategy, model, null, "ServiceTimeStrategy",
+						strategiesClasspathBase + serviceStrategiesSuffix + "ServiceTimeStrategy");
 				timingStrategy[i].parameterName = "timingStrategy";
 			} else {
 				timingStrategy[i] = new XMLParameter("timingStrategy",
@@ -1675,11 +1812,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 * other parameters.
 		 */
 		static XMLParameter getDistributionParameter(Distribution distr,
-				CommonModel model, Object classKey) {
+				CommonModel model, Object classKey, String className, String classPath) {
 			XMLParameter[] distribution = getDistributionParameter(distr);
-			XMLParameter returnValue = new XMLParameter("ServiceTimeStrategy",
-					strategiesClasspathBase + serviceStrategiesSuffix
-					+ "ServiceTimeStrategy",
+			XMLParameter returnValue = new XMLParameter(className,
+					classPath,
 					model.getClassName(classKey), new XMLParameter[] {
 							distribution[0], distribution[1] }, true);
 			/*

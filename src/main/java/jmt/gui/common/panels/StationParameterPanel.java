@@ -128,7 +128,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 
 		if (hasInputSection(type)) {
 			if (isPane == null) {
-				isPane = new InputSectionPanel(stationData, classData, stationKey);
+				isPane = new InputSectionPanel(stationData, classData, stationKey, type);
 			} else {
 				isPane.setData(stationData, classData, stationKey);
 			}

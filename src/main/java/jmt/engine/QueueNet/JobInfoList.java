@@ -18,6 +18,7 @@
 package jmt.engine.QueueNet;
 
 import java.util.List;
+import java.util.Map;
 
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
@@ -54,6 +55,11 @@ public interface JobInfoList {
 	 */
 	public abstract int size(JobClass jobClass);
 
+	public Map<Integer, List<Double>> getRetrialOrbit();
+
+	public Map<Integer, List<Double>> addToRetrialOrbit(Job job);
+
+	public void removeFromRetrialOrbit(Job job);
 	/**
 	 * Gets the number of added jobs.
 	 * @return Number of added jobs.
@@ -169,6 +175,7 @@ public interface JobInfoList {
 	 * Gets the internal job info list.
 	 * @return Internal job info list.
 	 */
+	public abstract JobInfo findJob(Job job);
 	public abstract List<JobInfo> getInternalJobInfoList();
 
 	/**
@@ -178,6 +185,9 @@ public interface JobInfoList {
 	 */
 	public abstract List<JobInfo> getInternalJobInfoList(JobClass jobClass);
 
+	JobInfo getFirstJob();
+
+	JobInfo getLastJob();
 	/**
 	 * Adds a new job info to the list.
 	 * @param jobInfo Reference to the job info to be added.
@@ -218,6 +228,7 @@ public interface JobInfoList {
 	 */
 	public abstract void remove(JobInfo jobInfo);
 
+	public abstract void removeOnly(JobInfo jobInfo);
 	/**
 	 * Removes a job info at the start of the list.
 	 * @return Job info at the start of the list.
@@ -294,6 +305,47 @@ public interface JobInfoList {
 	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure measurement);
 
 	/**
+	 * Analyzes the reneging rate for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeRenegingRate(JobClass jobClass, InverseMeasure measurement);
+
+	/**
+	 * Analyzes the reneging rate for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeBalkingRate(JobClass jobClass, InverseMeasure measurement);
+
+	/**
+	 * Analyzes the retrial attempts rate for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeRetrialAttemptsRate(JobClass jobClass, InverseMeasure measurement);
+
+	/**
+	 * Analyzes the retrial orbit size for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeRetrialOrbitSize(JobClass jobClass, Measure measurement);
+
+	/**
+	 * Analyzes the waiting time for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeWaitingTime(JobClass jobClass, Measure measurement);
+
+	/**
+	 * Analyzes the waiting time for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeBusyServersVar(JobClass jobClass, Measure measurement);
+	/**
 	 * Analyzes the response time of a sink for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated inverse measure.
@@ -329,6 +381,19 @@ public interface JobInfoList {
 	 * Adds a new job info to the list when a job is produced.
 	 * @param jobInfo Reference to the job info to be added.
 	 */
+	public abstract void renegeJob(JobInfo jobInfo);
+
+	/**
+	 * Removes a job info from the list when a job is balked.
+	 * @param jobInfo Reference to the job info to be removed.
+	 */
+	public abstract void balkJob(JobInfo jobInfo);
+
+	/**
+	 * add a job info from the list when a job is retried.
+	 * @param jobInfo Reference to the job info to be added.
+	 */
+	public abstract void retryJob(JobInfo jobInfo);
 	public abstract void produceJob(JobInfo jobInfo);
 
 	/**
@@ -337,6 +402,16 @@ public interface JobInfoList {
 	 */
 	public abstract void consumeJob(JobInfo jobInfo);
 
+	public abstract void serveJob(Job job);
+
+
+	/**
+	 * Updates the waiting time of a job -- called when a job is being served.
+	 * @param job Reference to the job that is being sent to service section (of a queue).
+	 */
+	public void updateWaitingTime(Job job, double wt);
+
+	public void updateNumberOfBusyServersVar(Job job, int num);
 	/**
 	 * Sets the number of servers. This parameter is used to scale utilization.
 	 * @param numberOfServers Number of servers.
