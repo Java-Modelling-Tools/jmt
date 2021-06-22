@@ -233,7 +233,7 @@ public class Queue extends InputSection {
 	 * @param getStrategy Queue get strategy: if null FCFS strategy is used.
 	 * @param putStrategies Queue put strategy per class: if null Tail strategy is used.
 	 */
-	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies, ServiceStrategy[] retrials, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
 		this(size.intValue(), maxRunning.intValue(), serverPreemptive.booleanValue(), false, getStrategy, putStrategies);
 		// Decodes drop strategies
 		this.dropStrategies = dropStrategies;
@@ -249,7 +249,6 @@ public class Queue extends InputSection {
 					break;
 				case FINITE_RETRIAL:
 					isRetrialDR = true;
-					retrialDistributionStrategies = retrials;
 				case FINITE_WAITING:
 				default:
 					drop[i] = false;
@@ -258,10 +257,50 @@ public class Queue extends InputSection {
 		}
 	}
 
+	/**
+	 * Creates a new instance of finite Queue. This is the newest constructor that supports retrial queues.
+	 *
+	 * @param dropStrategies Drop strategy per class: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING || FINITE_RETRIAL.
+	 */
+	public Queue(Integer size, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+		this(size.intValue(), -1, false, dropStrategies, getStrategy, putStrategies);
+	}
+
+	/**
+	 * Creates a new instance of finite Queue. This is the newest constructor that supports retrial queues.
+	 *
+	 * @param dropStrategies Drop strategy per class: FINITE_DROP || FINITE_BLOCK || FINITE_WAITING || FINITE_RETRIAL.
+	 */
+	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies, ServiceStrategy[] retrials, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+		this(size.intValue(), maxRunning.intValue(), serverPreemptive.booleanValue(), dropStrategies, getStrategy, putStrategies);
+		// Decodes drop strategies
+		retrialDistributionStrategies = retrials;
+
+	}
+
 	public Queue(Integer size, String[] dropStrategies, ServiceStrategy[] retrials, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
 		this(size.intValue(), -1, false, dropStrategies, retrials, getStrategy, putStrategies);
 	}
 
+		/**
+	 * Creates a new instance of finite Queue with reneging. Calling constructor that supports
+	 * different drop strategies and reneging strategies. Other constructors are left for compatibility.
+	 *
+	 * @param impatienceStrategies Impatience strategies unique to each station and class.
+	 */
+	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies
+					, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, Impatience[] impatienceStrategies) {
+		// Called method with decoded drop Strategies
+		this(size, maxRunning, serverPreemptive, dropStrategies, getStrategy, putStrategies);
+		// Add impatience strategies for each class
+		impatienceStrategyPerStationClass = impatienceStrategies;
+	}
+
+	public Queue(Integer size, String[] dropStrategies, QueueGetStrategy getStrategy,
+							 QueuePutStrategy[] putStrategies, Impatience[] impatienceStrategies) {
+		this(size, -1, false, dropStrategies, getStrategy, putStrategies, impatienceStrategies);
+	}
+	
 	/**
 	 * Creates a new instance of finite Queue with reneging. Calling constructor that supports
 	 * different drop strategies and reneging strategies. Other constructors are left for compatibility.
@@ -271,9 +310,9 @@ public class Queue extends InputSection {
 	public Queue(Integer size, Integer maxRunning, Boolean serverPreemptive, String[] dropStrategies, ServiceStrategy[] retrials
 					, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies, Impatience[] impatienceStrategies) {
 		// Called method with decoded drop Strategies
-		this(size, maxRunning, serverPreemptive, dropStrategies, retrials, getStrategy, putStrategies);
+			this(size, maxRunning, serverPreemptive, dropStrategies, getStrategy, putStrategies, impatienceStrategies);
 		// Add impatience strategies for each class
-		impatienceStrategyPerStationClass = impatienceStrategies;
+		retrialDistributionStrategies = retrials;
 	}
 
 	public Queue(Integer size, String[] dropStrategies, ServiceStrategy[] retrials, QueueGetStrategy getStrategy,

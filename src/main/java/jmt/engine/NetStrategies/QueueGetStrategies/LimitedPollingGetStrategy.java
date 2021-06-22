@@ -3,6 +3,8 @@ package jmt.engine.NetStrategies.QueueGetStrategies;
 import jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.QueueNet.*;
+import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.JobInfoList;
 
 import javax.swing.*;
 
@@ -64,4 +66,10 @@ public class LimitedPollingGetStrategy extends PollingGetStrategy {
 	public Job get(JobInfoList queue, JobClass jobClass) {
 		return queue.removeFirst(jobClass).getJob();
 	}
+	
+	@Override
+	public JobInfo peek(JobInfoList queue) {
+		return queue.getFirstJob();
+	}
+
 }

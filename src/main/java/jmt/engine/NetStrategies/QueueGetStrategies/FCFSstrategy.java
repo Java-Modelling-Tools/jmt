@@ -53,6 +53,4 @@ public class FCFSstrategy extends QueueGetStrategy {
 	public JobInfo peek(JobInfoList queue) {
 		return queue.getFirstJob();
 	}
-
-
 }

@@ -15,7 +15,7 @@ import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
 import jmt.jmva.analytical.solvers.SolverSingleClosedMVA;
 
 public class Moment {
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	
 	private ExactModel model;
 	

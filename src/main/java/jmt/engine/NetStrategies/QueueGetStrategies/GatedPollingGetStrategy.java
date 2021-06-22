@@ -74,5 +74,10 @@ public class GatedPollingGetStrategy extends PollingGetStrategy {
 	public Job get(JobInfoList queue, JobClass jobClass) {
 		return queue.removeFirst(jobClass).getJob();
 	}
+	
+	@Override
+	public JobInfo peek(JobInfoList queue) {
+		return queue.getFirstJob();
+	}
 
 }
