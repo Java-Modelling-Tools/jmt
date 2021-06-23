@@ -68,7 +68,7 @@ public interface SimulationDefinition {
 	/**Code for balking rate measure*/
 	public static final String MEASURE_BR = "Balking Rate";
 	/**Code for retrial attempt rate number measure*/
-	public static final String MEASURE_R = "Retrial Attempts Rate";
+	public static final String MEASURE_R = "Retrial Rate";
 	/**Code for waiting time measure*/
 	public static final String MEASURE_WT = "Waiting Time";
 	/**Code for retrial orbit size measure*/
@@ -78,7 +78,7 @@ public interface SimulationDefinition {
 
 
 	/**Code for number of system retrial number measure*/
-	public static final String MEASURE_S_R = "System Retrial Attempts Rate";
+	public static final String MEASURE_S_R = "System Retrial Rate";
 	/**Code for system reneging rate measure*/
 	public static final String MEASURE_S_RR = "System Reneging Rate";
 	/**Code for system reneging rate measure*/

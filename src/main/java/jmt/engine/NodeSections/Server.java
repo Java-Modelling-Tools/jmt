@@ -145,7 +145,8 @@ public class Server extends ServiceSection {
 						jobInService.setIsJobInService(false);
 						sendBackward(NetEvent.EVENT_PREEMPTED_JOB, jobInService, 0.0);
 						busyCounter--;
-							this.getOwnerNode().getJobInfoList().updateNumberOfBusyServersVar(message.getJob(), busyCounter);
+						// this is for retrial debugging
+						//this.getOwnerNode().getJobInfoList().updateNumberOfBusyServersVar(message.getJob(), busyCounter);
 					}
 				}
 				if (busyCounter < numberOfServers) {
@@ -175,8 +176,9 @@ public class Server extends ServiceSection {
 					}
 
 					busyCounter++;
-						this.getOwnerNode().getJobInfoList().updateNumberOfBusyServersVar(job, busyCounter);
-						this.getOwnerNode().getJobInfoList().serveJob(job);
+					// this is for retrial debugging
+					//this.getOwnerNode().getJobInfoList().updateNumberOfBusyServersVar(job, busyCounter);
+					this.getOwnerNode().getJobInfoList().serveJob(job);
 					if (busyCounter < numberOfServers) {
 						// Sends an ACK to the input section (remember not to propagate
 						// this ack again when computation is finished)
@@ -207,7 +209,8 @@ public class Server extends ServiceSection {
 				// Avoid ACK as we already sent ack
 				busyCounter--;
 			}
-				this.getOwnerNode().getJobInfoList().updateNumberOfBusyServersVar(message.getJob(), busyCounter);
+			// this is for retrial debugging
+			//	this.getOwnerNode().getJobInfoList().updateNumberOfBusyServersVar(message.getJob(), busyCounter);
 			break;
 
 		case NetEvent.EVENT_STOP:
