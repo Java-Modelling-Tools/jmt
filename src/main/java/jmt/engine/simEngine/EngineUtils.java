@@ -53,12 +53,14 @@ public abstract class EngineUtils {
 				return SimulationDefinition.MEASURE_RR;
 			case SimConstants.BALKING_RATE:
 				return SimulationDefinition.MEASURE_BR;
+			case SimConstants.NUM_BUSY_SERVERS:
+				return SimulationDefinition.MEASURE_BS;
 			case SimConstants.RETRIAL_ATTEMPTS_RATE:
 				return SimulationDefinition.MEASURE_R;
 			case SimConstants.RETRIAL_ORBIT_SIZE:
 				return SimulationDefinition.MEASURE_RS;
 			case SimConstants.WAITING_TIME:
-				return SimulationDefinition.MEASURE_WT;
+				return SimulationDefinition.MEASURE_OT;
 			case SimConstants.SYSTEM_NUMBER_OF_JOBS:
 				return SimulationDefinition.MEASURE_S_CN;
 			case SimConstants.SYSTEM_RESPONSE_TIME:
@@ -123,7 +125,7 @@ public abstract class EngineUtils {
 			return SimConstants.RETRIAL_ATTEMPTS_RATE;
 		} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
 			return SimConstants.RETRIAL_ORBIT_SIZE;
-		} else if (type.equals(SimulationDefinition.MEASURE_WT)) {
+		} else if (type.equals(SimulationDefinition.MEASURE_OT)) {
 			return SimConstants.WAITING_TIME;
 		} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
 			return SimConstants.NUM_BUSY_SERVERS;

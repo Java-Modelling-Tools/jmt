@@ -219,7 +219,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		if (stationType.equals(STATION_TYPE_SERVER)) {
 			impatienceStrategies.add(ImpatienceType.BALKING.getDisplayName());
 			impatienceStrategies.add(ImpatienceType.RENEGING.getDisplayName());
-			impatienceStrategies.add(ImpatienceType.RETRIAL.getDisplayName());
+			//impatienceStrategies.add(ImpatienceType.RETRIAL.getDisplayName());
 		}
 	}
 

@@ -92,17 +92,17 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_BALKING_RATE = HTML_START + HTML_FONT_TITLE + "Balking Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average balking rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_RETRIAL_ATTEMPTS_RATE = HTML_START + HTML_FONT_TITLE + "Retrial Attempts Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String DESCRIPTION_RETRIAL_ATTEMPTS_RATE = HTML_START + HTML_FONT_TITLE + "Retrial Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average retrial attempts rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_WAITING_TIME = HTML_START + HTML_FONT_TITLE + "Waiting Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-					+ "Average waiting time for each selected class until served at each selected station." + HTML_FONT_NOR_END + HTML_END;
+	public static final String DESCRIPTION_RETRIAL_ORBIT_TIME = HTML_START + HTML_FONT_TITLE + "Retrial Orbit Residence Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
+					+ "Total average orbit time for each selected class until admitted at the selected station. (Orbit Residence Time = Number of Orbits * Orbit Time). " + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RETRIAL_ORBIT_SIZE = HTML_START + HTML_FONT_TITLE + "Retrial Orbit Size" + HTML_FONT_TIT_END + HTML_FONT_NORM
 					+ "Average number of customers at the retrial orbit of a selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_BUSY_SERVER_NUMBER = HTML_START + HTML_FONT_TITLE + "Number of busy servers" + HTML_FONT_TIT_END + HTML_FONT_NORM
-					+ "Average number of number of busy servers at each selected station." + HTML_FONT_NOR_END + HTML_END;
+	//public static final String DESCRIPTION_BUSY_SERVER_NUMBER = HTML_START + HTML_FONT_TITLE + "Number of Busy Servers" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	//				+ "Average number of number of busy servers at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average number of customers in the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;

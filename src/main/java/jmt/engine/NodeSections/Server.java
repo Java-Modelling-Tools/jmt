@@ -210,7 +210,7 @@ public class Server extends ServiceSection {
 				busyCounter--;
 			}
 			// this is for retrial debugging
-			//	this.getOwnerNode().getJobInfoList().updateNumberOfBusyServersVar(message.getJob(), busyCounter);
+			//this.getOwnerNode().getJobInfoList().updateNumberOfBusyServersVar(message.getJob(), busyCounter);
 			break;
 
 		case NetEvent.EVENT_STOP:

@@ -154,7 +154,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RR, DESCRIPTION_RENEGING_RATE, results.getRenegingRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_BR, DESCRIPTION_BALKING_RATE, results.getBalkingRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_R, DESCRIPTION_RETRIAL_ATTEMPTS_RATE, results.getRetrialAttemptsRateMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_WT, DESCRIPTION_WAITING_TIME, results.getWaitingTimeMeasures());
+		//addTabPane(mainPanel, SimulationDefinition.MEASURE_BS, DESCRIPTION_BUSY_SERVER_NUMBER, results.getNumberOfBusyServersMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_OT, DESCRIPTION_RETRIAL_ORBIT_TIME, results.getWaitingTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RS, DESCRIPTION_RETRIAL_ORBIT_SIZE, results.getRetrialOrbitSizeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RP, DESCRIPTION_SYSTEM_RESPONSE_TIME, results.getSystemResponseTimeMeasures());

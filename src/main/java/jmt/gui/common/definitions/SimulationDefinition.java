@@ -69,12 +69,12 @@ public interface SimulationDefinition {
 	public static final String MEASURE_BR = "Balking Rate";
 	/**Code for retrial attempt rate number measure*/
 	public static final String MEASURE_R = "Retrial Rate";
-	/**Code for waiting time measure*/
-	public static final String MEASURE_WT = "Waiting Time";
+	/**Code for orbit waiting time measure*/
+	public static final String MEASURE_OT = "Retrial Orbit Residence Time";
 	/**Code for retrial orbit size measure*/
 	public static final String MEASURE_RS = "Retrial Orbit Size";
-	/**Code for number of busy servers measure -- not displayed in JSIMgraph UI */
-	public static final String MEASURE_BS = "Number of busy servers";
+	/**Code for number of busy servers measure */
+	//public static final String MEASURE_BS = "Number of Busy Servers";
 
 
 	/**Code for number of system retrial number measure*/

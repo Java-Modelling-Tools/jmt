@@ -142,7 +142,7 @@ public class PAResultsModel implements MeasureDefinition {
 				balkingRate.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_RR)) {
 				renegingRate.add(new Integer(i));
-			} else if (measureType.equals(SimulationDefinition.MEASURE_WT)) {
+			} else if (measureType.equals(SimulationDefinition.MEASURE_OT)) {
 				waitingTime.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_RS)) {
 				retrialOrbitSize.add(new Integer(i));
@@ -227,7 +227,7 @@ public class PAResultsModel implements MeasureDefinition {
 			balkingRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_R)) {
 			retrialAttemptsRate.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_WT)) {
+		} else if (type.equals(SimulationDefinition.MEASURE_OT)) {
 			waitingTime.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
 			retrialOrbitSize.add(new Integer(measures.size() - 1));

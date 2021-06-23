@@ -123,12 +123,12 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	protected static final String[] measureTypes = new String[] {
 			"---Select an index---",
 			SimulationDefinition.MEASURE_QL,
-			SimulationDefinition.MEASURE_U,
-			SimulationDefinition.MEASURE_X,
+			//SimulationDefinition.MEASURE_BS,			
+			SimulationDefinition.MEASURE_QT,
 			SimulationDefinition.MEASURE_RP,
 			SimulationDefinition.MEASURE_RD,
-			SimulationDefinition.MEASURE_QT,
-			//SimulationDefinition.MEASURE_WT,
+			SimulationDefinition.MEASURE_X,
+			SimulationDefinition.MEASURE_U,
 			"---Advanced indexes---",
 			SimulationDefinition.MEASURE_BR,
 			SimulationDefinition.MEASURE_DR,
@@ -142,6 +142,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			SimulationDefinition.MEASURE_RP_PER_SINK,
 			SimulationDefinition.MEASURE_R,
 			SimulationDefinition.MEASURE_RS,
+			SimulationDefinition.MEASURE_OT,
 			SimulationDefinition.MEASURE_X_PER_SINK
 	};
 
@@ -429,7 +430,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				} else if (measure.type.equals(SimulationDefinition.MEASURE_QT)
 						|| measure.type.equals(SimulationDefinition.MEASURE_RD)
 						|| measure.type.equals(SimulationDefinition.MEASURE_U)
-						//|| measure.type.equals(SimulationDefinition.MEASURE_WT)
+						//|| measure.type.equals(SimulationDefinition.MEASURE_BS)						
+						|| measure.type.equals(SimulationDefinition.MEASURE_OT)
 					  || measure.type.equals(SimulationDefinition.MEASURE_RS)
 				) {
 					return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
@@ -630,7 +632,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				|| type.equals(SimulationDefinition.MEASURE_BR)
 				|| type.equals(SimulationDefinition.MEASURE_P)
 				|| type.equals(SimulationDefinition.MEASURE_R)
-				//|| type.equals(SimulationDefinition.MEASURE_WT)
+				|| type.equals(SimulationDefinition.MEASURE_OT)
 				|| type.equals(SimulationDefinition.MEASURE_RS)
 		) {
 			if (stationKey != null && stationKey.equals("")) {
@@ -664,8 +666,6 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			return SimulationDefinition.MEASURE_BR;
 		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 			return SimulationDefinition.MEASURE_P;
-		} else if (type.equals(SimulationDefinition.MEASURE_S_R)) {
-			return SimulationDefinition.MEASURE_R;
 		} else {
 			return null;
 		}

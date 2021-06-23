@@ -136,7 +136,7 @@ public class ResultsModel implements MeasureDefinition {
 				balkingRate.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_RR)) {
 				renegingRate.add(new Integer(i));
-			} else if (type.equals(SimulationDefinition.MEASURE_WT)) {
+			} else if (type.equals(SimulationDefinition.MEASURE_OT)) {
 				waitingTime.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
 				retrialOrbitSize.add(new Integer(i));

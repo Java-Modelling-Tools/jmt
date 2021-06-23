@@ -423,7 +423,7 @@ public class StoredResultsModel implements MeasureDefinition {
 			retrialAttemptsRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
 			retrialOrbitSize.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_WT)) {
+		} else if (type.equals(SimulationDefinition.MEASURE_OT)) {
 			waitingTime.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
 			busyServersNum.add(new Integer(measures.size() - 1));
