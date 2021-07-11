@@ -1,3 +1,4 @@
+
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
@@ -85,7 +86,7 @@ public class AboutDialogFactory {
 
 	/** JMVA main contributors */
 	private static final Contributors[] JMVA = {
-			new Contributors(Company.POLIMI, "Bertoli Marco", "Cerotti Davide", "Conti Andrea", "Dall'Orso Federico", "Omini Stefano", "Granata Federico", "Gribaudo Marco", "Sheikhvand Kourosh"),
+			new Contributors(Company.POLIMI, "Bertoli Marco", "Cerotti Davide", "Conti Andrea", "Dall'Orso Federico", "Granata Federico", "Gribaudo Marco", "Omini Stefano", "Sheikhvand Kourosh"),
 			new Contributors(Company.ICL, "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Tokaj Piotr", "Su Haixiao", "Wai Hong Ong", "Zakon Alexander")
 	};
 
@@ -97,7 +98,7 @@ public class AboutDialogFactory {
 	/** JSIMgraph main contributors */
 	private static final Contributors[] JMODEL = {
 			new Contributors(Company.POLIMI, "Bertoli Marco", "Bortone Emma", "Cazzoli Mattia", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
-			new Contributors(Company.ICL, "Salem Ahmed", "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phumin Phuangjaisri", "Murali Srikrishna", "Vaibhav Krishnakumar", "Ng Lok Sen Rosemary")
+			new Contributors(Company.ICL, "Salem Ahmed", "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phuangjaisri Phumin", "Murali Srikrishna", "Vaibhav Krishnakumar", "Ng Lok Sen Rosemary")
 	};
 
 	/** JABA main contributors */
