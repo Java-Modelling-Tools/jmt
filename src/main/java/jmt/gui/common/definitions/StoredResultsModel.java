@@ -425,8 +425,8 @@ public class StoredResultsModel implements MeasureDefinition {
 			retrialOrbitSize.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_OT)) {
 			waitingTime.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
-			busyServersNum.add(new Integer(measures.size() - 1));
+		//} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
+		//	busyServersNum.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
 			systemCustomerNumber.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {

@@ -74,6 +74,7 @@ public class PAProgressWindow extends JMTDialog {
 
 	private int numberOfSimulations;
 	private int stepNumber;
+	private int parallelism;
 	private JPanel globalPanel;
 	private JPanel pivotPanel;
 	private boolean stopped;
@@ -100,6 +101,7 @@ public class PAProgressWindow extends JMTDialog {
 		super(owner, false);
 		numberOfSimulations = pad.getNumberOfSteps();
 		stepNumber = 1;
+		this.parallelism = pad.getParallelism();
 		this.getContentPane().setLayout(new BorderLayout());
 		this.setTitle("What-if analysis progress");
 
@@ -202,6 +204,7 @@ public class PAProgressWindow extends JMTDialog {
 		timeLabelPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
 		JPanel stepLabelPanel = new JPanel();
 		stepLabel = new JLabel(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + ENUMERATION_MESSAGE + " " + stepNumber + " of "
+				//+ this.numberOfSimulations + " on " + this.parallelism + " worker threads ..." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 				+ this.numberOfSimulations + "..." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 		stepLabelPanel.add(stepLabel);
 		JPanel lowerLabelPanel = new JPanel(new BorderLayout());
@@ -251,6 +254,7 @@ public class PAProgressWindow extends JMTDialog {
 	public void incrementStepNumber() {
 		stepNumber++;
 		stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + ENUMERATION_MESSAGE + " " + stepNumber + " of "
+				//+ this.numberOfSimulations + " on " + this.parallelism + " worker threads ..." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 				+ this.numberOfSimulations + "..." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 		progressBar.setValue(stepNumber - 1);
 		//updateStatistics(stepNumber - 1);
@@ -405,6 +409,7 @@ public class PAProgressWindow extends JMTDialog {
 		mainLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_TITLE + RUNNING_MESSAGE + CommonConstants.HTML_FONT_TIT_END
 				+ CommonConstants.HTML_END);
 		stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + ENUMERATION_MESSAGE + " " + stepNumber + " of "
+				//+ this.numberOfSimulations + " on " + this.parallelism + " worker threads ..." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 				+ this.numberOfSimulations + "..." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 		progressBar.setValue(stepNumber - 1);
 
@@ -491,19 +496,24 @@ public class PAProgressWindow extends JMTDialog {
 		paused = false;
 		mainLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_TITLE + "Simulation complete" + CommonConstants.HTML_FONT_TIT_END
 				+ CommonConstants.HTML_END);
+		int nworkers = this.numberOfSimulations;
+		if (nworkers > this.parallelism) { 
+			nworkers = this.parallelism;	
+		}
+				
 		if (stepNumber - 1 == this.numberOfSimulations) {
 		stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "All of the " + this.numberOfSimulations
-				+ " simulations were completed" + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+				+ " simulations were completed using " + nworkers + " worker threads." + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 		} else {
 			if (stepNumber == 1) {
 				stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "No simulation out of "
-						+ numberOfSimulations + " was completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+						+ numberOfSimulations + " was completed using 1 worker thread " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 			} else if (stepNumber -1 == 1) {
 				stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "Only " + (stepNumber - 1) + " simulation out of "
-						+ numberOfSimulations + " were completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+						+ numberOfSimulations + " was completed using " + nworkers + " worker threads." +  CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 	    	} else {
 			stepLabel.setText(CommonConstants.HTML_START + CommonConstants.HTML_FONT_NORM + "Only " + (stepNumber - 1) + " simulations out of "
-					+ numberOfSimulations + " were completed " + CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
+					+ numberOfSimulations + " were completed using " + nworkers + " worker threads." +  CommonConstants.HTML_FONT_NOR_END + CommonConstants.HTML_END);
 			} 
 		}
 		

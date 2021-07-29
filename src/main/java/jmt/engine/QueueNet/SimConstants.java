@@ -114,7 +114,7 @@ public interface SimConstants {
 	/** Measure identifier: (total) waiting time of a job of a node (system entering time - time when job is pass to serving section) */
 	public static final int WAITING_TIME = 36;
 
-	public static final int NUM_BUSY_SERVERS = 39;
+	//public static final int NUM_BUSY_SERVERS = 39;
 
 	//-------------------- end SIMULATION MEASURE IDENTIFIERS -------------------------//
 

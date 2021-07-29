@@ -525,9 +525,9 @@ public class Simulation {
 						case SimConstants.WAITING_TIME:
 							netNodes[nodePosition].analyze(SimConstants.LIST_WAITING_TIME, jClass, ms.getMeasure());
 							break;
-						case SimConstants.NUM_BUSY_SERVERS:
+						/* case SimConstants.NUM_BUSY_SERVERS:
 							netNodes[nodePosition].analyze(SimConstants.LIST_BUSY_SERVERS, jClass, ms.getMeasure());
-							break;
+							break;*/
 					case SimConstants.RESPONSE_TIME_PER_SINK:
 						netNodes[nodePosition].analyze(SimConstants.RESPONSE_TIME_PER_SINK, jClass, ms.getMeasure());
 						break;

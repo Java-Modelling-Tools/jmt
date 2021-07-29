@@ -322,13 +322,13 @@ public interface CommonConstants {
 	public static final String INFINITE_CAPACITY = "Infinite Capacity";
 
 	// Warnings for missing resources
-	public static final String WARNING_CLASS_STATION = "User classes and stations have to be defined first";
-	public static final String WARNING_CLASS = "User classes have to be defined first";
+	public static final String WARNING_CLASS_STATION = "Customer classes and stations have to be defined first";
+	public static final String WARNING_CLASS = "Customer classes have to be defined first";
 	public static final String WARNING_STATION = "Stations have to be defined first";
 	public static final String WARNING_INCOMING_ROUTING = "Station incoming connections undefined";
 	public static final String WARNING_OUTGOING_ROUTING = "Station outgoing connections undefined";
-	public static final String WARNING_CLASS_INCOMING_ROUTING = "User classes and station incoming connections have to be defined first";
-	public static final String WARNING_CLASS_OUTGOING_ROUTING = "User classes and station outgoing connections have to be defined first";
+	public static final String WARNING_CLASS_INCOMING_ROUTING = "Customer classes and station incoming connections have to be defined first";
+	public static final String WARNING_CLASS_OUTGOING_ROUTING = "Customer classes and station outgoing connections have to be defined first";
 
 	// Application names (used for input file format conversion messages)
 	public static final String JMVA = "JMVA";

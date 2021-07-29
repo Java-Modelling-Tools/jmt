@@ -187,11 +187,11 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		toolbar.add(stop);
 		stop.setVisible(false);
 		bottomPanel.add(toolbar, BorderLayout.WEST);
+		UIManager.put("ProgressBar.selectionForeground", Color.WHITE);
 		progressBar = new JProgressBar();
 		progressBar.setStringPainted(true);
 		progressBar.setForeground(Color.BLUE);
-		UIManager.put("ProgressBar.selectionForeground", Color.WHITE);
-		setProgressBar(results.getProgress(), results.getElapsedTime());
+		setProgressBar(results.getProgress(), results.getElapsedTime());		
 		bottomPanel.add(progressBar, BorderLayout.CENTER);
 		// Adds bottom panel
 		this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);

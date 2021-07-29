@@ -146,8 +146,8 @@ public class PAResultsModel implements MeasureDefinition {
 				waitingTime.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_RS)) {
 				retrialOrbitSize.add(new Integer(i));
-			} else if (measureType.equals(SimulationDefinition.MEASURE_BS)) {
-				busyServersNum.add(new Integer(i));
+			//} else if (measureType.equals(SimulationDefinition.MEASURE_BS)) {
+			//	busyServersNum.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_S_CN)) {
 				systemCustomerNumber.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_S_RP)) {
@@ -231,8 +231,8 @@ public class PAResultsModel implements MeasureDefinition {
 			waitingTime.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
 			retrialOrbitSize.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
-			busyServersNum.add(new Integer(measures.size() - 1));
+		//} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
+		//	busyServersNum.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
 			systemCustomerNumber.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {
@@ -276,6 +276,13 @@ public class PAResultsModel implements MeasureDefinition {
 	public void addSample(String measureName, double lowerBound, double meanValue, double upperBound, boolean validity) {
 		Measure requested = names.get(measureName);
 		requested.addSample(meanValue, upperBound, lowerBound, validity);
+	}
+	
+	public MeasureValue getEmptyMeasureValue() {
+		double avgupper = 0.0;
+		double avgvalue = 0.0;
+		double avglower = 0.0;		
+		return new MeasureValueImpl(avgvalue, avgupper, avglower, false);
 	}
 
 	public Vector<Number> getParameterValues() {
@@ -649,7 +656,6 @@ public class PAResultsModel implements MeasureDefinition {
 			values.add(val);
 			samples++;
 		}
-
 	}
 
 	/**
@@ -686,6 +692,22 @@ public class PAResultsModel implements MeasureDefinition {
 
 		public double getLowerBound() {
 			return lower;
+		}
+
+		public void setMeanValue(double x) {
+			this.mean = x;
+		}
+
+		public void setUpperBound(double x) {
+			this.upper = x;
+		}
+
+		public void setLowerBound(double x) {
+			this.lower = x;
+		}
+		
+		public void setValid(boolean x) {
+			this.valid = x;
 		}
 
 		public boolean isValid() {

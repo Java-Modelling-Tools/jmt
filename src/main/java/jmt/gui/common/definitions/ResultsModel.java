@@ -140,8 +140,8 @@ public class ResultsModel implements MeasureDefinition {
 				waitingTime.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
 				retrialOrbitSize.add(new Integer(i));
-			} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
-				busyServerVar.add(new Integer(i));
+			//} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
+			//	busyServerVar.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
 				systemCustomerNumber.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {

@@ -161,7 +161,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_BR, DESCRIPTION_BALKING_RATE, results.getBalkingRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RR, DESCRIPTION_RENEGING_RATE, results.getRenegingRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_R, DESCRIPTION_RETRIAL_ATTEMPTS_RATE, results.getRetrialAttemptsRateMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_BS, DESCRIPTION_BUSY_SERVER_NUMBER, results.getNumberOfBusyServersMeasures());
+		//addTabPane(mainPanel, SimulationDefinition.MEASURE_BS, DESCRIPTION_BUSY_SERVER_NUMBER, results.getNumberOfBusyServersMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_OT, DESCRIPTION_RETRIAL_ORBIT_TIME, results.getWaitingTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RS, DESCRIPTION_RETRIAL_ORBIT_SIZE, results.getRetrialOrbitSizeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
@@ -1258,14 +1258,13 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			dtcr.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
 			//Component c = null;
 			Component c;
-			if (column < values.size()) {
+			if (column < values.size() && !(pad.getType().equals(PA_TYPE_SEED) && column <= values.size())) {
 				c = dtcr.getTableCellRendererComponent(this, values.get(column), false, false, row, column);
-				if (!((PAResultsModel.MeasureValueImpl) values.get(column)).isValid()) {
-					c.setForeground(Color.RED);
-				} else {
-					c.setForeground(Color.BLACK);
-				}
-
+					if (!((PAResultsModel.MeasureValueImpl) values.get(column)).isValid()) {
+						c.setForeground(Color.RED);
+					} else {
+						c.setForeground(Color.BLACK);
+					}
 			} else {
 				c = dtcr.getTableCellRendererComponent(this, "-", false, false, row, column);
 				c.setForeground(Color.BLACK);
@@ -1303,7 +1302,35 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		String measureType;
 
 		public ValuesTableModel(Vector values, String measureType) {
-			this.values = values;
+			if (pad.getType().equals(PA_TYPE_SEED)) {
+				Vector newvalues = new Vector(values.size()+1);
+				MeasureValue amv = results.getEmptyMeasureValue();
+				
+				double avgupper = 0.0;
+				double avgvalue = 0.0;
+				double avglower = 0.0;
+				
+				int samples = values.size();
+		
+				for (int columnIndex = 0; columnIndex < samples; columnIndex++) {				
+						avgupper += ((MeasureValue) values.get(columnIndex)).getUpperBound() / samples;
+						avgvalue += ((MeasureValue) values.get(columnIndex)).getMeanValue() / samples;
+						avglower += ((MeasureValue) values.get(columnIndex)).getLowerBound() / samples;
+				}
+				
+				((PAResultsModel.MeasureValueImpl)amv).setUpperBound(avgupper);
+				((PAResultsModel.MeasureValueImpl)amv).setMeanValue(avgvalue);
+				((PAResultsModel.MeasureValueImpl)amv).setLowerBound(avglower);
+				
+				newvalues.add(0, (MeasureValue) amv);
+				for (int columnIndex = 0; columnIndex < values.size(); columnIndex++) {
+					MeasureValue mv = (MeasureValue) values.get(columnIndex);
+					newvalues.add(columnIndex+1, mv);
+				}
+				this.values = newvalues;
+			} else {
+				this.values = values;
+			}
 			this.measureType = measureType;
 			prototype = "XXXX.XXX XXX";
 			rowHeaderPrototype = "Upper bound";
@@ -1366,7 +1393,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		}
 
 		public int getColumnCount() {
-			return pad.getNumberOfSteps();
+			if (pad.getType().equals(PA_TYPE_SEED)) {
+				return 1+pad.getNumberOfSteps();
+			} else {
+				return pad.getNumberOfSteps();
+			}
 		}
 
 		/**
@@ -1408,6 +1439,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 */
 		public String getColumnName(int index) {
 			String columnName = "NA";
+			
 			//if single class return the value, else return the percentage
 			if (pad.getType().equals(PA_TYPE_ARRIVAL_RATE)) {
 				ArrivalRateParametricAnalysis arpa = (ArrivalRateParametricAnalysis) pad;
@@ -1451,7 +1483,12 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			}
 			//if it is a seed parametric analysis just enumerate columns
 			else if (pad.getType().equals(PA_TYPE_SEED)) {
-				columnName = Integer.toString(index);
+				if (index == 0) {
+					columnName = new String("Average");
+				} else {				
+					columnName = Integer.toString(index-1);				
+				}
+				
 				return columnName;
 			}
 			return columnName;
