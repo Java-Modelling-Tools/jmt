@@ -62,13 +62,10 @@ parametrization. The tool includes also an interface to the similarity clusterin
 
 Compiling instructions
 ----------------------
-- To compile Java Modelling Tools you need Java J2SE SDK 1.5 (or later revision) that can be found at 
-   http://java.com/ and Apache ANT that can be found at http://ant.apache.org/ .
-
-- To create an installer you need IzPack that can be downloaded at  http://www.izforge.com/izpack/ and
-   configure the appropriate path in "build.properties" file.
-
-- Simply open "build.xml" with ANT and select desired target to build JMT from sources
+- To compile Java Modelling Tools you need maven 3.6.3 or later and Java 14 or later.
+- To create the JAR file, it is sufficient to run on the command line "mvn package" from the JMT folder root.
+- To create the JMT installer, it is sufficient to run on the command line "mvn deploy" from the JMT folder root.
+- If the compilation is successful, the results will appear under the target\ folder.
 
 
 License
