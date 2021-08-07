@@ -645,8 +645,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				model.setStationPollingServerKValue(key, pollingKValue);
 			} else if (name.equals("dropStrategies")) {
 				dropRules = parseParameterRefclassArray(curr);
-			} else if (name.equals("retrialDistributions")) {
-				retrialDistributions = parseParameterRefclassArray(curr);
+				NodeList subparams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
+				for (int y = 0; y < subparams.getLength(); y++) {
+					if (((Element) subparams.item(y)).getAttribute(XML_A_PARAMETER_NAME).equals("retrialDistributions")) {
+						retrialDistributions = parseParameterRefclassArray(((Element) subparams.item(y)));
+					}
+				}
 			}
 			else if (name.equals(ImpatienceType.IMPATIENCE.getDisplayName())) {
 				// Retrieves all impatience subParameters and sets them in the model
