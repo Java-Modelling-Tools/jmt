@@ -208,6 +208,7 @@ public interface CommonConstants {
 	public static final String DISTRIBUTION_REPLAYER = "Replayer";
 	//public static final String DISTRIBUTION_STUDENTT = "StudentT";
 	public static final String DISTRIBUTION_UNIFORM = "Uniform";
+	public static final String DISTRIBUTION_WEIBULL = "Weibull";
 
 	/**Constants for selection of timing strategy*/
 	public static final String TIMING_STRATEGY_TIMED = "Timed";
