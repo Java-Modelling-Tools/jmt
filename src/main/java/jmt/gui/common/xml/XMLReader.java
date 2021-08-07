@@ -615,7 +615,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		Map<String, Node> putStrategy = null;
 		Map<String, Node> dropRules = null;
 		Map<String, Node> retrialDistributions = null;
-        String pollingType = null;
+	        String pollingType = null;
 		for (int i = 0; i < parameters.getLength(); i++) {
 			curr = (Element) parameters.item(i);
 			name = curr.getAttribute(XML_A_PARAMETER_NAME);

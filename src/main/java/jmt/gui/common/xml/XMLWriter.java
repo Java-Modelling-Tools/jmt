@@ -584,20 +584,15 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		XMLParameter dropStrategies = new XMLParameter("dropStrategies",
 				String.class.getName(), null, dropStrategy, false);
 		XMLParameter[] rd = new XMLParameter[classes.size()];
-		XMLParameter retrialDistributions = new XMLParameter("retrialDistributions",
-																												 strategiesClasspathBase + "ServiceStrategy",
-																												 null, rd, false);
+		XMLParameter retrialDistributions = new XMLParameter("retrialDistributions", strategiesClasspathBase + "ServiceStrategy", null, rd, false);
 		for (int i = 0; i < dropStrategy.length; i++) {
 			String strategy = model.getDropRule(stationKey, classes.get(i));
 			dropStrategy[i] = new XMLParameter("dropStrategy",
 					String.class.getName(), model.getClassName(classes.get(i)),
 					DROP_RULES_MAPPING.get(strategy), true);
-			rd[i] = DistributionWriter
-							.getDistributionParameter((Distribution) model.getRetrialDistribution(stationKey, classes.get(i)),
-																				model, classes.get(i), "ServiceTimeStrategy", SERVICE_TIME_STRATEGY_PATH);
+			rd[i] = DistributionWriter.getDistributionParameter((Distribution) model.getRetrialDistribution(stationKey, classes.get(i)), model, classes.get(i), "ServiceTimeStrategy", SERVICE_TIME_STRATEGY_PATH);
 		}
 		dropStrategies.appendParameterElement(doc, queue);
-		retrialDistributions.appendParameterElement(doc, queue);
 
 		/*
 		 * queue get strategy, which is fixed to FCFS, as difference between
@@ -668,6 +663,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					(String) null, true);
 		}
 		queuePutStrategies.appendParameterElement(doc, queue);
+		retrialDistributions.appendParameterElement(doc, queue);
 		writeImpatienceParameters(doc, model, stationKey, queue, classes);
 	}
 
