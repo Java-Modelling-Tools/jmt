@@ -201,6 +201,7 @@ public interface CommonConstants {
 	public static final String DISTRIBUTION_EXPONENTIAL = "Exponential";
 	public static final String DISTRIBUTION_GAMMA = "Gamma";
 	public static final String DISTRIBUTION_HYPEREXPONENTIAL = "Hyperexponential";
+	public static final String DISTRIBUTION_LOGNORMAL = "Lognormal";
 	public static final String DISTRIBUTION_NORMAL = "Normal";
 	public static final String DISTRIBUTION_PARETO = "Pareto";
 	public static final String DISTRIBUTION_PHASETYPE = "PhaseType";

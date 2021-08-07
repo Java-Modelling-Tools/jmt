@@ -135,22 +135,11 @@ public class Normal extends AbstractDistribution implements Distribution {
 			double mean = ((NormalPar) p).getMean();
 			double standardDeviation = ((NormalPar) p).getStandardDeviation();
 			// Uses polar Box-Muller transformation.
-			if (cacheFilled) {
-				cacheFilled = false;
-				// If generated number is in the past, reruns this method
-				return (cache > 0.0) ? cache : nextRand(p);
-			};
-			double x, y, r, z;
-			do {
-				x = 2.0 * engine.raw() - 1.0;
-				y = 2.0 * engine.raw() - 1.0;
-				r = x * x + y * y;
-			} while (r >= 1.0);
-			z = Math.sqrt(-2.0 * Math.log(r) / r);
-			cache = mean + standardDeviation * x * z;
-			cacheFilled = true;
+			double U1=engine.raw();
+			double U2=engine.raw();
+			double z = Math.sqrt(-2.0 * Math.log(U1)) * Math.cos(2*Math.PI*U2);
+			double ret = mean + standardDeviation*z ;
 			// If generated number is in the past, reruns this method
-			double ret = mean + standardDeviation * y * z;
 			return (ret > 0.0) ? ret : nextRand(p);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: standardDeviation must be gtz");

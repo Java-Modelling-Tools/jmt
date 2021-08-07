@@ -53,7 +53,7 @@ public class Weibull extends Distribution {
 
 		// Sets parameter lambda
 		//ARIF: Left parameters name as alpha and r in order to have back-compatibility of the XML files.
-		parameters[0] = new Parameter("alpha", "\u03BB", Double.class, new Double(0.8));
+		parameters[0] = new Parameter("alpha", "\u03BB", Double.class, new Double(0.445106618845));
 		// Checks value of lambda must greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
@@ -67,7 +67,7 @@ public class Weibull extends Distribution {
 		});
 
 		// Sets parameter k
-		parameters[1] = new Parameter("r", "k", Double.class, new Double(4));
+		parameters[1] = new Parameter("r", "k", Double.class, new Double(0.471065636952));
 		// Checks value of k must be greater than 0
 		parameters[1].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
