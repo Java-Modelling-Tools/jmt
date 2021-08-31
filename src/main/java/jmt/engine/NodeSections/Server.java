@@ -136,7 +136,7 @@ public class Server extends ServiceSection {
 			} else {
 				//message received from another node section: if the server is not completely busy,
 				//it sends itself a message with this job
-				if (preemption) {
+				if (preemption && busyCounter == numberOfServers) {					
 					if (jobInService.getIsJobInService()) {
 						double timeElapsed = this.getTime() - jobInService.getServiceArrivalTime();
 						jobInService.setServiceTime(jobInService.getServiceTime() - timeElapsed);

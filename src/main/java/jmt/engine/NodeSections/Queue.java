@@ -730,6 +730,7 @@ public class Queue extends InputSection {
 					coolStart = true;
 				}
 				break;
+				
 			case NetEvent.EVENT_PREEMPTED_JOB:
 				job = message.getJob();
 				addJobToBuffer(job, message, BufferType.JOBS_LIST);
