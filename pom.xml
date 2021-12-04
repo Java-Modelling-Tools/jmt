@@ -279,9 +279,26 @@
 			<id>local-repo</id>
 			<url>file:${project.basedir}/repo</url>
 		</repository>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>			
 	</repositories>
 	<dependencies>
 		<dependency>
+			<groupId>org.example</groupId>
+			<artifactId>kpc-toolbox-java</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+	<dependency>
+<!--		<groupId>com.github.imperial-qore</groupId>
+			<artifactId>kpc-toolbox-java</artifactId>
+			<version>1.0</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+-->
 			<groupId>org.freehep</groupId>
 			<artifactId>freehep-graphics2d</artifactId>
 			<version>2.4</version>
@@ -492,5 +509,10 @@
 			<artifactId>jbig2-imageio</artifactId>
 			<version>3.0.3</version>
 		</dependency>
+		<dependency>
+			<groupId>org.graalvm.compiler</groupId>
+			<artifactId>compiler</artifactId>
+			<version>21.2.0</version>
+		</dependency>		
 	</dependencies>
 </project>

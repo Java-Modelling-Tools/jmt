@@ -36,40 +36,20 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.Spring;
-import javax.swing.SpringLayout;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import KPC.FittingOptions;
+import KPC.Trace;
+import KPC.TraceFitter;
 import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.image.ImagePanel;
 import jmt.framework.gui.layouts.SpringUtilities;
@@ -87,6 +67,8 @@ import jmt.gui.common.distributions.Replayer;
 import jmt.gui.exact.table.ExactCellRenderer;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
+import org.ejml.data.DMatrixRMaj;
+import org.graalvm.compiler.lir.LIRInstruction;
 
 /**
  * <p>
@@ -142,6 +124,7 @@ public class DistributionsEditor extends JMTDialog {
 	protected static final String INTERVAL_A_LABEL = "Interval type A";
 	protected static final String INTERVAL_B_LABEL = "Interval type B";
 	protected static final String ROUND_ROBIN = "Round-Robin";
+	protected static final String TRACEFILE = "Trace File";
 
 	protected JPanel[] intervalPanels;
 
@@ -644,8 +627,208 @@ public class DistributionsEditor extends JMTDialog {
 				rend.addDistribution(INTERVAL_LENGTH_DISTRIBUTION, 3,
 						intervalPanels[2]);
 				rend.addDistribution(VALUE_DISTRIBUTION, 4, intervalPanels[2]);
+
+
 			} else if (current instanceof PhaseType || current instanceof MAP) {
+
 				((GridLayout) scrollPanel.getLayout()).setRows(1);
+				JPanel compositePanel = new JPanel();
+				compositePanel.setLayout(new BorderLayout());
+				/**
+				 * My code here
+				 */
+				if (current instanceof MAP) {
+					final JPanel autoFitPanel = new JPanel();
+					autoFitPanel.setBorder(new TitledBorder(new EtchedBorder(),
+							"Fitting from Empirical Trace"));
+					JButton traceButton = new JButton("Choose File");
+					final JFileChooser traceChooser = new JFileChooser(Defaults.getWorkingPath());
+					final JTextField traceTextField = new JTextField();
+					final JTextField traceFileView = new JTextField("no file selected");
+					final JLabel progressLabel = new JLabel("");
+					traceFileView.setFont(new Font("", Font.ITALIC, 12));
+					traceFileView.setEditable(false);
+
+					traceTextField.setName(TRACEFILE);
+					traceButton.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							int status = traceChooser.showOpenDialog(DistributionsEditor.this);
+							if (status == JFileChooser.CANCEL_OPTION) {
+								return;
+							} else if (status == JFileChooser.ERROR_OPTION) {
+								return;
+							}
+							traceTextField.setText(traceChooser.getSelectedFile().getAbsolutePath());
+							traceFileView.setText(traceChooser.getSelectedFile().getName());
+							refreshValues();
+						}
+					});
+					param_panel.add(traceTextField);
+					param_panel.add(traceButton);
+					// KPC Parameters
+					Defaults.set("autoOrder", "No");
+					Defaults.set("numStates", "4");
+					Defaults.set("fitSyle", "fast");
+
+					final FittingOptions options = new FittingOptions();
+					options.setVerbose(false);
+					JButton preferencesButton = new JButton("Options");
+					preferencesButton.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							JPanel panel = new JPanel(new GridLayout(4, 2));
+
+							panel.add(new JLabel("Fit Bicorrelations:\t"));
+							JCheckBox bcBox = new JCheckBox();
+							bcBox.setSelected(true);
+							panel.add(bcBox);
+
+							panel.add(new JLabel("Automatically Determine Order:\t"));
+							JCheckBox autoOrderBox = new JCheckBox();
+							if (Defaults.get("autoOrder").equals("Yes")) {
+								autoOrderBox.setSelected(true);
+							} else {
+								autoOrderBox.setSelected(false);
+							}
+							panel.add(autoOrderBox);
+
+							panel.add(new JLabel("Maximum number of States (if manual):\t"));
+							JSpinner orderSpinner = new JSpinner();
+							int nStates = Integer.parseInt(Defaults.get("numStates"));
+							orderSpinner.setModel(new SpinnerNumberModel(nStates, 2, 128, 1) {
+								@Override
+								public Object getNextValue() {
+									Object nextValue = super.getValue();
+									int x = Integer.parseInt(nextValue.toString())*2;
+									//Object o = x;
+									return x;
+								}
+								@Override
+								public Object getPreviousValue() {
+									Object nextValue = super.getValue();
+									int x = Integer.parseInt(nextValue.toString());
+									if (x > 2) {
+										return x /2;
+									}
+									//Object o = x;
+									return x;
+								}
+							});
+							panel.add(orderSpinner);
+
+							panel.add(new JLabel("Optimization Options:\t"));
+							JComboBox optimCB = new JComboBox(new String[] {"Fast Fit", "Accurate Fit"});
+							int selectedStyle = 0;
+							if (Defaults.get("fitSyle").equals("accurate")) {
+								selectedStyle = 1;
+							}
+							optimCB.setSelectedIndex(selectedStyle);
+							panel.add(optimCB);
+
+							/*
+							panel.add(new JLabel("Allow SMP:\t"));
+							JCheckBox smpBox = new JCheckBox();
+							smpBox.setSelected(false);
+							panel.add(smpBox);
+							*/
+
+							int option = JOptionPane.showConfirmDialog(null, panel, "Fitting Options", JOptionPane.OK_CANCEL_OPTION);
+							if (option == JOptionPane.OK_OPTION) {
+								if (autoOrderBox.isSelected()) {
+									Defaults.set("autoOrder", "Yes");
+									options.setNumMAPs(0);
+									options.setPossibleOrders(6);
+								} else {
+									int nMaps = (int) (Math.log((Integer) orderSpinner.getValue()) / Math.log(2));
+									Defaults.set("autoOrder", "No");
+									Defaults.set("numStates", orderSpinner.getValue().toString());
+									options.setNumMAPs(nMaps);
+								}
+								options.setAllowSM(false); // smpBox.isSelected()
+								options.setOnlyAc(!bcBox.isSelected());
+								if (optimCB.getSelectedIndex() == 0) {
+									Defaults.set("fitSyle","fast");
+									options.setMaxRunsAC(25);
+									options.setMaxEvalsAC(2000);
+									options.setMaxIterAC(250);
+									options.setMaxResAC(5);
+									options.setMaxIterBC(30);
+									options.setMaxRunsBC(5);
+								} else {
+									Defaults.set("fitSyle", "accurate");
+									options.setMaxRunsAC(50);
+									options.setMaxEvalsAC(3000);
+									options.setMaxIterAC(250);
+									options.setMaxResAC(10);
+									options.setMaxIterBC(30);
+									options.setMaxRunsBC(10);
+								}
+							}
+						}
+					});
+					autoFitPanel.add(traceButton);
+					autoFitPanel.add(traceFileView);
+					autoFitPanel.add(preferencesButton);
+					JButton fitButton = new JButton("Fit");
+					autoFitPanel.add(fitButton);
+					autoFitPanel.add(progressLabel);
+
+					fitButton.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							final SwingWorker<KPC.MAP, String> sw = new SwingWorker<KPC.MAP, String>() {
+								KPC.MAP map;
+								TraceFitter fitter;
+
+								@Override
+								protected KPC.MAP doInBackground() throws Exception {
+									try {
+										publish("Reading Trace file...");
+										Trace trace = new Trace(traceTextField.getText());
+										publish("Fitting MAP...");
+										fitter = new TraceFitter(trace, options);
+										List<KPC.MAP> maps = fitter.fit();
+										map = maps.get(0);
+									} catch (IOException ioException) {
+										JOptionPane.showMessageDialog(null, "Error: Trace File Invalid");
+										ioException.printStackTrace();
+									}
+									return map;
+								}
+
+								@Override
+								protected void process(List<String> chunks) {
+									for (String s : chunks) {
+										progressLabel.setText(s);
+									}
+								}
+
+								@Override
+								protected void done() {
+									int order = map.numStates;
+									for (int i = 0; i < current.getNumberOfParameters(); i++) {
+										Object[][] newMatrix = new Object[order][order];
+										for (int j = 0; j < newMatrix.length; j++) {
+											for (int k = 0; k < newMatrix[j].length; k++) {
+												DMatrixRMaj mat = i == 0 ? map.D0 : map.D1;
+												newMatrix[j][k] = mat.get(j, k);
+											}
+										}
+										current.getParameter(i).setValue(newMatrix);
+										parameterTables[i].updateStructure();
+									}
+									progressLabel.setText("Finished!");
+								}
+							};
+							sw.execute();
+
+						}
+					});
+
+
+					compositePanel.add(autoFitPanel, BorderLayout.NORTH);
+				}
+
 
 				int phaseNum = ((Object[][]) current.getParameter(0).getValue())[0].length;
 				phaseNumSpinner = new JSpinner();
@@ -677,11 +860,13 @@ public class DistributionsEditor extends JMTDialog {
 						}
 					}
 				});
+
 				JPanel phaseNumPanel = new JPanel();
 				phaseNumPanel.setBorder(new TitledBorder(new EtchedBorder(),
 						(current instanceof PhaseType) ? "Number of Phases" : "Number of States"));
 				phaseNumPanel.add(new JLabel("Number: "));
 				phaseNumPanel.add(phaseNumSpinner);
+
 
 				int parameterNum = current.getNumberOfParameters();
 				parameterTables = new ParameterTable[parameterNum];
@@ -694,11 +879,12 @@ public class DistributionsEditor extends JMTDialog {
 					parametersPanel.add(parameterPane);
 				}
 
-				JPanel compositePanel = new JPanel();
-				compositePanel.setLayout(new BorderLayout());
-				compositePanel.add(phaseNumPanel, BorderLayout.NORTH);
+
+				compositePanel.add(phaseNumPanel, BorderLayout.SOUTH);
 				compositePanel.add(parametersPanel, BorderLayout.CENTER);
 				scrollPanel.add(compositePanel);
+
+
 			} else {
 				((GridLayout) scrollPanel.getLayout()).setRows(1);
 
@@ -898,7 +1084,7 @@ public class DistributionsEditor extends JMTDialog {
 					value = new Double(1 - prob.doubleValue());
 				} else if (comp.getName().equals(PROBABILITY_INTERVAL_A)) {
 					value = current.getParameter(0).getValue();
-				} else {
+				} else if (!comp.getName().equals(TRACEFILE)){
 					int num = Integer.parseInt(comp.getName());
 					value = current.getParameter(num).getValue();
 				}
@@ -1247,5 +1433,4 @@ public class DistributionsEditor extends JMTDialog {
 		}
 
 	}
-
 }
