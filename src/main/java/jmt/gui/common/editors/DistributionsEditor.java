@@ -47,9 +47,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import KPC.FittingOptions;
-import KPC.Trace;
-import KPC.TraceFitter;
+import org.qore.KPC.*;
 import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.image.ImagePanel;
 import jmt.framework.gui.layouts.SpringUtilities;
@@ -680,7 +678,7 @@ public class DistributionsEditor extends JMTDialog {
 
 							panel.add(new JLabel("Fit Bicorrelations:\t"));
 							JCheckBox bcBox = new JCheckBox();
-							bcBox.setSelected(true);
+							bcBox.setSelected(false);
 							panel.add(bcBox);
 
 							panel.add(new JLabel("Automatically Determine Order:\t"));
@@ -719,7 +717,7 @@ public class DistributionsEditor extends JMTDialog {
 							panel.add(new JLabel("Optimization Options:\t"));
 							JComboBox optimCB = new JComboBox(new String[] {"Fast Fit", "Accurate Fit"});
 							int selectedStyle = 0;
-							if (Defaults.get("fitSyle").equals("accurate")) {
+							if (Defaults.get("fitStyle").equals("accurate")) {
 								selectedStyle = 1;
 							}
 							optimCB.setSelectedIndex(selectedStyle);
@@ -747,7 +745,7 @@ public class DistributionsEditor extends JMTDialog {
 								options.setAllowSM(false); // smpBox.isSelected()
 								options.setOnlyAc(!bcBox.isSelected());
 								if (optimCB.getSelectedIndex() == 0) {
-									Defaults.set("fitSyle","fast");
+									Defaults.set("fitStyle","fast");
 									options.setMaxRunsAC(25);
 									options.setMaxEvalsAC(2000);
 									options.setMaxIterAC(250);
@@ -755,7 +753,7 @@ public class DistributionsEditor extends JMTDialog {
 									options.setMaxIterBC(30);
 									options.setMaxRunsBC(5);
 								} else {
-									Defaults.set("fitSyle", "accurate");
+									Defaults.set("fitStyle", "accurate");
 									options.setMaxRunsAC(50);
 									options.setMaxEvalsAC(3000);
 									options.setMaxIterAC(250);
@@ -776,18 +774,19 @@ public class DistributionsEditor extends JMTDialog {
 					fitButton.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							final SwingWorker<KPC.MAP, String> sw = new SwingWorker<KPC.MAP, String>() {
-								KPC.MAP map;
-								TraceFitter fitter;
+							final SwingWorker<org.qore.KPC.MAP, String> sw = new SwingWorker<org.qore.KPC.MAP, String>() {
+								org.qore.KPC.MAP map;
+								org.qore.KPC.TraceFitter fitter;
 
 								@Override
-								protected KPC.MAP doInBackground() throws Exception {
+								protected org.qore.KPC.MAP doInBackground() throws Exception {
 									try {
 										publish("Reading Trace file...");
-										Trace trace = new Trace(traceTextField.getText());
+										String str = traceTextField.getText();
+										Trace trace = new Trace(str);
 										publish("Fitting MAP...");
 										fitter = new TraceFitter(trace, options);
-										List<KPC.MAP> maps = fitter.fit();
+										List<org.qore.KPC.MAP> maps = fitter.fit();
 										map = maps.get(0);
 									} catch (IOException ioException) {
 										JOptionPane.showMessageDialog(null, "Error: Trace File Invalid");

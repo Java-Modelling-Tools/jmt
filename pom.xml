@@ -277,32 +277,28 @@
 	<repositories>
 		<repository>
 			<id>local-repo</id>
-			<url>file:${project.basedir}/repo</url>
+			<url>file:${project.basedir}\lib</url>
 		</repository>
 		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>			
+        <id>kpc-toolbox-java-mvn-repo</id>
+        <url>https://raw.githubusercontent.com/imperial-qore/kpc-toolbox-java/main/mvn-artifact/</url>
+        <snapshots>
+            <enabled>true</enabled>
+            <updatePolicy>always</updatePolicy>
+        </snapshots>
+    </repository>		
 	</repositories>
-	<dependencies>
-		<dependency>
-			<groupId>org.example</groupId>
-			<artifactId>kpc-toolbox-java</artifactId>
-			<version>1.0-SNAPSHOT</version>
-			<scope>compile</scope>
-		</dependency>
+	<dependencies>	
 	<dependency>
-<!--		<groupId>com.github.imperial-qore</groupId>
-			<artifactId>kpc-toolbox-java</artifactId>
-			<version>1.0</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
--->
-			<groupId>org.freehep</groupId>
-			<artifactId>freehep-graphics2d</artifactId>
-			<version>2.4</version>
-		</dependency>
+		<groupId>org.qore</groupId>
+		<artifactId>kpc-toolbox-java</artifactId>
+		<version>1.0.0</version>
+	</dependency>
+	<dependency>
+		<groupId>org.freehep</groupId>
+		<artifactId>freehep-graphics2d</artifactId>
+		<version>2.4</version>
+	</dependency>
 		<dependency>
 			<groupId>org.freehep</groupId>
 			<artifactId>freehep-graphicsbase</artifactId>
@@ -420,11 +416,6 @@
 			<version>2.6</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-math3</artifactId>
-			<version>3.0</version>
-		</dependency>
-		<dependency>
 			<groupId>org.swinglabs</groupId>
 			<artifactId>swingx</artifactId>
 			<version>1.6.1</version>
@@ -514,5 +505,33 @@
 			<artifactId>compiler</artifactId>
 			<version>21.2.0</version>
 		</dependency>		
+ <!-- https://mvnrepository.com/artifact/org.ejml/ejml-all -->
+        <dependency>
+            <groupId>org.ejml</groupId>
+            <artifactId>ejml-all</artifactId>
+            <version>0.41</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-math3</artifactId>
+            <version>3.6.1</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/de.xypron.jcobyla/jcobyla -->
+        <dependency>
+            <groupId>de.xypron.jcobyla</groupId>
+            <artifactId>jcobyla</artifactId>
+            <version>1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>net.objecthunter</groupId>
+            <artifactId>exp4j</artifactId>
+            <version>0.4.8</version>
+        </dependency>
+        <dependency>
+            <groupId>net.jqwik</groupId>
+            <artifactId>jqwik</artifactId>
+            <version>1.5.4</version>
+            <scope>test</scope>
+        </dependency>		
 	</dependencies>
 </project>

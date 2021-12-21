@@ -165,6 +165,11 @@ public class Defaults implements CommonConstants {
 		// Templates dialogs default parameters
 		def.setProperty("showDefaultTemplates", "true");
 		def.setProperty("showTemplateDialog", "true");
+		
+		// KPC fit default parameters
+		def.setProperty("autoOrder", "false");
+		def.setProperty("fitStyle", "fast");
+		def.setProperty("numStates", "4");
 
 		return def;
 	}
