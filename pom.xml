@@ -277,7 +277,7 @@
 	<repositories>
 		<repository>
 			<id>local-repo</id>
-			<url>file:${project.basedir}\lib</url>
+			<url>file:${project.basedir}/repo</url>
 		</repository>
 		<repository>
         <id>kpc-toolbox-java-mvn-repo</id>
