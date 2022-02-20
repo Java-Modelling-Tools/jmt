@@ -19,11 +19,8 @@
 package jmt.engine.NetStrategies;
 
 import jmt.common.AutoCheck;
-import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.NodeList;
-import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.NodeSections.Router;
+import jmt.engine.QueueNet.*;
 
 /**
  * Use this class to implement a specific routing strategy. A routing
@@ -33,7 +30,16 @@ import jmt.engine.QueueNet.NodeSection;
  * @author Das Ashanka 11-2011 (Added getOutNode with NodeSection).
  */
 public abstract class RoutingStrategy implements AutoCheck {
-
+	/**
+	 * This method should be overridden to implement a specific strategy.
+	 * @param router List of the output nodes.
+	 * @param job Current job to be routed.
+	 * @return Selected node.
+	 */
+	public NetNode getOutClassSwitchNode(Router router, Job job) {
+		return null;
+	}
+	 
 	/**
 	 * This method should be overridden to implement a specific strategy.
 	 * @param nodeList List of the output nodes.

@@ -226,6 +226,7 @@ public interface CommonConstants {
 	public static final RoutingStrategy ROUTING_POWER_OF_K = new PowerOfKRouting();
 	public static final RoutingStrategy ROUTING_WEIGHTED_ROUNDROBIN = new WeightedRoundRobinRouting();
 	public static final RoutingStrategy ROUTING_DISABLED = new DisabledRouting();
+	public static final RoutingStrategy ROUTING_CLASS_SWITCH = new ClassSwitchRouting();
 
 	public static final ForkStrategy FORK_PROBABILITIES = new ProbabilitiesFork();
 	public static final ForkStrategy FORK_COMBINATION = new CombFork();

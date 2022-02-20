@@ -1039,6 +1039,61 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				values = ((Element) child).getElementsByTagName(XML_E_PARAMETER_VALUE);
 				Boolean withMemory = Boolean.valueOf(findText(values.item(0)));
 				strategy.setWithMemory(withMemory);
+			} else if (rs instanceof ClassSwitchRouting) {
+				ClassSwitchRouting strategy = (ClassSwitchRouting) rs;
+				Vector<Node> empiricalArrays = new Vector<>();
+				Map<Object, Map<Object, Double>> outPaths = new HashMap<>();
+
+				// Find EntryArray node
+				Node entryArray = routing.get(className2).getFirstChild();
+				while (entryArray != null && (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER))) {
+					entryArray = entryArray.getNextSibling();
+				}
+
+				// Now find every empirical entry
+				while (entryArray != null) {
+					// Find first subParameter element
+					while (entryArray != null && (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER))) {
+						entryArray = entryArray.getNextSibling();
+					}
+					if (entryArray != null) {
+						empiricalArrays.add(entryArray);
+						entryArray = entryArray.getNextSibling();
+					}
+				}
+
+				// For each empirical array: get station name and get class associated probability
+				for (Node empiricalArray: empiricalArrays) {
+					if (empiricalArray.hasChildNodes()) {
+						Map<Object, Double> entries = new HashMap<>();
+						Node empiricalPointer = empiricalArray.getFirstChild().getNextSibling();
+						if (empiricalPointer == null) {
+							continue;
+						}
+						String stationName = findText(((Element) empiricalPointer).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+						Object stationObject = model.getStationByName(stationName);
+						if (stationObject == null) {
+							continue;
+						}
+
+						empiricalPointer = empiricalPointer.getNextSibling();
+						while (empiricalPointer != null) {
+							if (empiricalPointer.getNodeType() != Node.ELEMENT_NODE || !empiricalPointer.getNodeName().equals(XML_E_SUBPARAMETER)) {
+								empiricalPointer = empiricalPointer.getNextSibling();
+								continue;
+							}
+
+							String toClassName = findText(((Element) empiricalPointer).getElementsByTagName(XML_E_PARAMETER_REFCLASS).item(0));
+							Double probability = Double.valueOf(findText(((Element) empiricalPointer).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+							Object toClass = model.getClassByName(toClassName);
+							empiricalPointer = empiricalPointer.getNextSibling();
+							entries.put(toClass, probability);
+						}
+						outPaths.put(stationObject, entries);
+					}
+
+				}
+				strategy.setOutPaths(outPaths);
 			} else if (rs instanceof WeightedRoundRobinRouting) {
 				Vector<Node> entries = new Vector<>();
 				Node entryArray = routing.get(className2).getFirstChild();

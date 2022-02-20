@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="open_3class_4stat.jsimg" timestamp="Sat Aug 07 08:07:27 BST 2021" xsi:noNamespaceSchemaLocation="Archive.xsd">
-    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="/home/gcasale/JMT/" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="open_3class_4stat.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="open_3class_4stat.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
         <userClass name="Class0" priority="0" referenceSource="Source of Customers" type="open"/>
         <userClass name="Class1" priority="0" referenceSource="Source of Customers" type="open"/>
         <userClass name="Class2" priority="0" referenceSource="Source of Customers" type="open"/>

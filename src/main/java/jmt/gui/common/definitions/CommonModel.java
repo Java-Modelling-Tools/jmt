@@ -53,6 +53,7 @@ import jmt.gui.common.forkStrategies.OutPath;
 import jmt.gui.common.forkStrategies.ProbabilitiesFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.routingStrategies.ClassSwitchRouting;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
@@ -2047,6 +2048,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				if (getRoutingStrategy(stationKey, classKey) instanceof LoadDependentRouting) {
 					LoadDependentRouting ldr = (LoadDependentRouting) getRoutingStrategy(stationKey, classKey);
 					for (Map<Object, Double> values : ldr.getAllEmpiricalEntries().values()) {
+						normalizeRoutingProbabilities(stationKey, classKey, values);
+					}
+				}
+				if (getRoutingStrategy(stationKey, classKey) instanceof ClassSwitchRouting) {
+					ClassSwitchRouting cs = (ClassSwitchRouting) getRoutingStrategy(stationKey, classKey);
+					Map<Object, Double> values = cs.getValues();
+					if(values != null){
 						normalizeRoutingProbabilities(stationKey, classKey, values);
 					}
 				}

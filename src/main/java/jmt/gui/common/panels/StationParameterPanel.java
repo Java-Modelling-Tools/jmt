@@ -360,7 +360,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 		if (checkNullValues()) {
 			return false;
 		} else {
-			return STATION_TYPE_CLASSSWITCH.equals(type);
+			return STATION_TYPE_CLASSSWITCH.equals(type) || STATION_TYPE_SERVER.equals(type);
 		}
 	}
 

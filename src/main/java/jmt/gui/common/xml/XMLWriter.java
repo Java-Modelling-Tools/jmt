@@ -1998,6 +1998,43 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				XMLParameter param1 = new XMLParameter("k", Integer.class.getName(), null, k.toString(), true);
 				XMLParameter param2 = new XMLParameter("withMemory", Boolean.class.getName(), null, withMemory.toString(), true);
 				innerRoutingPar = new XMLParameter[] { param1, param2 };
+			} else if (routingStrat instanceof ClassSwitchRouting) {
+				Vector<Object> outputs = model.getForwardConnections(stationKey);
+				ClassSwitchRouting rs = ((ClassSwitchRouting) routingStrat);
+				Map<Object, Map<Object, Double>> paths = rs.getOutPaths();
+				XMLParameter[] stationEntries = new XMLParameter[outputs.size()];
+				Object[] stations = paths.keySet().toArray();
+
+				// for each station connected to:
+				for (int i = 0; i < paths.size(); i++) {
+					Object station = stations[i];
+					Map<Object, Double> stationClassMap = paths.get(station);
+					Object[] stationClasses = stationClassMap.keySet().toArray();
+
+					XMLParameter[] stationClassNodes = new XMLParameter[stationClassMap.size() + 1];
+					stationClassNodes[0] = new XMLParameter("stationName",
+							String.class.getName(), null,
+							model.getStationName(station), true);
+					// for each class:
+					for (int j = 0; j < stationClassMap.size(); j++) {
+						Object outClass = stationClasses[j];
+						String className = model.getClassName(outClass);
+						Double prob = stationClassMap.get(outClass);
+
+						XMLParameter routProb = new XMLParameter("probability",
+							Double.class.getName(), className, prob.toString(), true);
+						stationClassNodes[j + 1] = new XMLParameter("EmpiricalEntry",
+							EmpiricalEntry.class.getName(), null,
+							new XMLParameter[] { routProb }, true);
+					}
+
+
+					XMLParameter stationEmpiricalNode = new XMLParameter("EmpiricalEntryArray",
+							EmpiricalEntry.class.getName(), null, stationClassNodes,
+							true);
+					stationEntries[i] = stationEmpiricalNode;
+				}
+				innerRoutingPar = stationEntries;
 			} else if (routingStrat instanceof WeightedRoundRobinRouting) {
 				Vector<Object> outputs = model.getForwardConnections(stationKey);
 				Map<Object, Integer> values = ((WeightedRoundRobinRouting) routingStrat).getWeights();

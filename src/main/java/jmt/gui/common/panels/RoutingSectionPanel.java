@@ -43,10 +43,7 @@ import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.common.editors.LoadDependentRoutingEditor;
 import jmt.gui.common.editors.RoutingProbabilitiesEditor;
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.PowerOfKRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -285,7 +282,11 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 				Object value = aValue;
 				if (aValue instanceof ProbabilityRouting) {
 					value = ((ProbabilityRouting) aValue).clone();
-				} else if (aValue instanceof LoadDependentRouting) {
+				}
+				else if (aValue instanceof ClassSwitchRouting) {
+					value = ((ClassSwitchRouting) aValue).clone();
+				}
+				else if (aValue instanceof LoadDependentRouting) {
 					value = ((LoadDependentRouting) aValue).clone();
 				} else if (aValue instanceof PowerOfKRouting) {
 					value = ((PowerOfKRouting) aValue).clone();

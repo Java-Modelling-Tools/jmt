@@ -39,6 +39,7 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.common.exception.LoadException;
 import jmt.common.xml.XSDSchemaLoader;
 import jmt.engine.NetStrategies.ForkStrategy;
+import jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchStrategy;
 import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy;
 import jmt.engine.NetStrategies.RoutingStrategies.LoadDependentRoutingParameter;

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import javax.swing.JOptionPane;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchStrategy;
 import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.ForkJob;
@@ -166,8 +167,13 @@ public class Router extends OutputSection {
 
 			JobClass jobClass = job.getJobClass();
 
+				NetNode outNode;
 			//choose the outNode using the corresponding routing strategy
-			NetNode outNode = routingStrategies[jobClass.getId()].getOutNode(this, jobClass);
+				if (routingStrategies[jobClass.getId()] instanceof ClassSwitchStrategy) {
+					outNode = ((ClassSwitchStrategy)routingStrategies[jobClass.getId()]).getOutClassSwitchNode(this, job);
+				} else {
+					outNode = routingStrategies[jobClass.getId()].getOutNode(this, jobClass);
+				}
 			// Bertoli Marco: sanity checks with closed classes and sinks were moved inside
 			// routing strategies
 
