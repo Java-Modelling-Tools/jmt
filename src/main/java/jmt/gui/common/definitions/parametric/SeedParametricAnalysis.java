@@ -63,9 +63,14 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 	 */
 	@Override
 	public void changeModel(int step) {
-		Long nextSeed = (Long) values.get(step);
-		simDef.setUseRandomSeed(false);
-		simDef.setSimulationSeed(nextSeed);
+		if (step >= numberOfSteps) {
+			return;
+		}
+		if (values != null) {
+			Long nextSeed = (Long) values.get(step);
+			simDef.setUseRandomSeed(false);
+			simDef.setSimulationSeed(nextSeed);
+		}
 	}
 
 	/**
@@ -103,8 +108,10 @@ public class SeedParametricAnalysis extends ParametricAnalysisDefinition {
 	 */
 	@Override
 	public void restoreOriginalValues() {
-		simDef.setUseRandomSeed((Boolean) ((Vector<Object>) originalValues).get(0));
-		simDef.setSimulationSeed((Long) ((Vector<Object>) originalValues).get(1));
+		if (originalValues != null) {
+			simDef.setUseRandomSeed((Boolean) ((Vector<Object>) originalValues).get(0));
+			simDef.setSimulationSeed((Long) ((Vector<Object>) originalValues).get(1));
+		}
 	}
 
 	/**

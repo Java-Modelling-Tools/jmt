@@ -42,12 +42,6 @@ public class LoadDependentRouting extends RoutingStrategy {
 	}
 
 	@Override
-	@Deprecated
-	public Map<Object, Double> getValues() {
-		return null;
-	}
-
-	@Override
 	public RoutingStrategy clone() {
 		LoadDependentRouting ldr = new LoadDependentRouting();
 		for (Integer from : values.keySet()) {
@@ -85,11 +79,6 @@ public class LoadDependentRouting extends RoutingStrategy {
 		entries.put(stationKey, probability);
 	}
 
-	/**
-	 * Validates the Routing to see if all the probabilities sum to 1.
-	 * If there is no error then it returns List with size 0.
-	 * @return
-	 */
 	public List<String> validate() {
 		List<String> errors = new ArrayList<String>();
 		if (values.size() == 0) {
@@ -140,14 +129,6 @@ public class LoadDependentRouting extends RoutingStrategy {
 		}
 	}
 
-	/**
-	 * Returns true if the routing strategy is dependent on the state of
-	 * the model
-	 * @return true if the routing strategy is dependent on the state of
-	 * the model
-	 *
-	 * Author: Francesco D'Aquino
-	 */
 	@Override
 	public boolean isModelStateDependent() {
 		return false;

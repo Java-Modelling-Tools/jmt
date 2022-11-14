@@ -36,7 +36,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	/**
 	 * This is the constructor. It creates a new exponential distribution
 	 * which is defined from pdf:
-	 * <pre>                  (-lambda*x)
+	 * <pre>                   (-lambda*x)
 	 * pdf(x)= lambda * e</pre>
 	 * with lambda gtz, if x is gtz.
 	 * 0 if x<0.
@@ -55,10 +55,10 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 */
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double lambda = ((ExponentialPar) p).getLambda();
 			if (x < 0.0) {
 				return 0.0;
 			}
+			double lambda = ((ExponentialPar) p).getLambda();
 			return lambda * Math.exp(-x * lambda);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
@@ -133,7 +133,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 */
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-				return -Math.log(engine.raw()) / ((ExponentialPar) p).getLambda();
+			return -Math.log(engine.raw()) / ((ExponentialPar) p).getLambda();
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}

@@ -23,7 +23,6 @@ import java.util.Arrays;
 import javax.swing.JOptionPane;
 
 import jmt.common.exception.NetException;
-import jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchStrategy;
 import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.ForkJob;
@@ -91,36 +90,19 @@ public class Router extends OutputSection {
 	 */
 	public Router(RoutingStrategy[] routingStrategies) {
 		this.routingStrategies = routingStrategies;
-
-		borderRouterON = false;
-		myRegion = null;
-		regionInputStation = null;
+		borderRouterTurnOFF();
 	}
 
 	/**
-	 * Creates a new instance of blocking region border Router.
-	 * @param routingStrategies Routing strategies, one for each class.
-	 * @param myReg the blocking region to which the owner node of this router
-	 * belongs.
-	 */
-	public Router(RoutingStrategy[] routingStrategies, BlockingRegion myReg) {
-		this.routingStrategies = routingStrategies;
-
-		borderRouterON = true;
-		myRegion = myReg;
-		regionInputStation = myRegion.getInputStation();
-	}
-
-	/**
-	 * Tells whether this router is a border router of a blocking region.
-	 * @return true if this router is a border router of a blocking region.
+	 * Tells whether the "border router" behaviour has been turned on.
+	 * @return true, if the "border router" behaviour is on; false otherwise.
 	 */
 	public boolean isBorderRouterON() {
 		return borderRouterON;
 	}
 
 	/**
-	 * Turns on the "borderRouter" behaviour.
+	 * Turns on the "border router" behaviour.
 	 * @param region the blocking region to which the owner node of this router
 	 * belongs.
 	 */
@@ -144,7 +126,7 @@ public class Router extends OutputSection {
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
 		outNodeList = node.getOutputNodes();
-		randomEngine = RandomEngine.makeDefault();
+		randomEngine = node.getNetSystem().getEngine();
 		JobClassList jobClasses = getJobClasses();
 		isClosedJobRoutingWarningShown = new boolean[jobClasses.size()];
 		Arrays.fill(isClosedJobRoutingWarningShown, false);
@@ -167,13 +149,8 @@ public class Router extends OutputSection {
 
 			JobClass jobClass = job.getJobClass();
 
-				NetNode outNode;
 			//choose the outNode using the corresponding routing strategy
-				if (routingStrategies[jobClass.getId()] instanceof ClassSwitchStrategy) {
-					outNode = ((ClassSwitchStrategy)routingStrategies[jobClass.getId()]).getOutClassSwitchNode(this, job);
-				} else {
-					outNode = routingStrategies[jobClass.getId()].getOutNode(this, jobClass);
-				}
+			NetNode outNode = routingStrategies[jobClass.getId()].getOutNode(this, job);
 			// Bertoli Marco: sanity checks with closed classes and sinks were moved inside
 			// routing strategies
 
@@ -224,18 +201,14 @@ public class Router extends OutputSection {
 	/**
 	 * Shows the closed job routing error.
 	 */
-	private void showClosedJobRoutingWarning(JobClass jobClass) {
+	private void showClosedJobRoutingWarning(final JobClass jobClass) {
 		if (!isClosedJobRoutingWarningShown[jobClass.getId()]) {
 			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
 				System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
 						+ " could not route one or more " + jobClass.getName()
 						+ " jobs forward as its output stations are all sinks or routing is disabled.");
 			} else {
-				class OneShotTask implements Runnable {
-					JobClass jobClass;
-					public OneShotTask(JobClass jobClass) {
-						this.jobClass = jobClass;
-					}
+				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						try {
@@ -247,8 +220,7 @@ public class Router extends OutputSection {
 								+ " jobs forward as its output stations are all sinks or routing is disabled.",
 								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}
-				}
-				(new Thread(new OneShotTask(jobClass))).start();
+				}).start();
 			}
 			isClosedJobRoutingWarningShown[jobClass.getId()] = true;
 		}

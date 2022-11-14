@@ -42,7 +42,7 @@ public class RoundRobinStrategy extends RoutingStrategy {
 	/**
 	 * Gets the output node, into which the job must be routed, using a round
 	 * robin strategy.
-	 * @param nodeList List of the output nodes.
+	 * @param ownerNode Owner node of the output section.
 	 * @param jobClass Class of current job to be routed.
 	 * @return The selected node.
 	 */

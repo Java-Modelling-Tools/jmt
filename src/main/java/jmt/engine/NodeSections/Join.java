@@ -218,10 +218,7 @@ public class Join extends InputSection {
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			if (!(getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork)) {
-				return MSG_NOT_PROCESSED;
-			}
-			job = (Job) message.getData();
+			job = message.getJob();
 			JobInfo jobInfo = FJList.lookFor(job);
 			if (jobInfo != null) {
 				FJList.remove(jobInfo);

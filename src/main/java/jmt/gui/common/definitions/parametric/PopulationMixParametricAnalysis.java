@@ -190,12 +190,14 @@ public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinitio
 	 */
 	@Override
 	public void restoreOriginalValues() {
-		Vector vals = (Vector) originalValues;
-		int thisClassPop = ((Integer) vals.get(0)).intValue();
-		int otherClassPop = ((Integer) vals.get(1)).intValue();
-		classDef.setClassPopulation(classKey, new Integer(thisClassPop));
-		classDef.setClassPopulation(otherClassKey, new Integer(otherClassPop));
-		simDef.manageJobs();
+		if (originalValues != null) {
+			Vector vals = (Vector) originalValues;
+			int thisClassPop = ((Integer) vals.get(0)).intValue();
+			int otherClassPop = ((Integer) vals.get(1)).intValue();
+			classDef.setClassPopulation(classKey, new Integer(thisClassPop));
+			classDef.setClassPopulation(otherClassKey, new Integer(otherClassPop));
+			simDef.manageJobs();
+		}
 	}
 
 	/**

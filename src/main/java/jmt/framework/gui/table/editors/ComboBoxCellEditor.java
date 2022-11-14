@@ -32,7 +32,7 @@ import javax.swing.table.TableCellRenderer;
 
 /**
  * <p>Title: ComboBox Table CellViewer/CellEditor</p>
- * <p>Description: A component to display a Combobox as both a viewer and an editor in a table.
+ * <p>Description: A component to display a ComboBox as both a viewer and an editor in a table.
  * Internally caches already allocated editors to avoid creation of too many ComboBoxes.
  * Renderer instance is a single element cached too.</p>
  *
@@ -95,13 +95,15 @@ public class ComboBoxCellEditor extends AbstractCellEditor implements TableCellE
 		comboBox = new JComboBox(items);
 	}
 
+	/**
+	 * Creates a new ComboBox editor/renderer
+	 */
 	protected ComboBoxCellEditor() {
 		comboBox = new JComboBox();
 	}
 
 	/**
-	 * Returns the value contained in the editor.
-	 *
+	 * Returns the value contained in the editor
 	 * @return the value contained in the editor
 	 */
 	public Object getCellEditorValue() {

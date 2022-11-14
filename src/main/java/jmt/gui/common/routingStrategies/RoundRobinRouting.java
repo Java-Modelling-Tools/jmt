@@ -18,8 +18,6 @@
 
 package jmt.gui.common.routingStrategies;
 
-import java.util.Map;
-
 /**
  * Created by IntelliJ IDEA.
  * User: orsotronIII
@@ -39,11 +37,6 @@ public class RoundRobinRouting extends RoutingStrategy {
 	}
 
 	@Override
-	public Map<Object, Double> getValues() {
-		return null;
-	}
-
-	@Override
 	public RoundRobinRouting clone() {
 		return new RoundRobinRouting();
 	}
@@ -53,14 +46,6 @@ public class RoundRobinRouting extends RoutingStrategy {
 		return "jmt.engine.NetStrategies.RoutingStrategies.RoundRobinStrategy";
 	}
 
-	/**
-	 * Returns true if the routing strategy is dependent on the state of
-	 * the model
-	 * @return true if the routing strategy is dependent on the state of
-	 * the model
-	 *
-	 * Author: Francesco D'Aquino
-	 */
 	@Override
 	public boolean isModelStateDependent() {
 		return false;

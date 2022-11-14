@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 import jmt.common.exception.NetException;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.NetEvent;
@@ -71,6 +73,7 @@ public class LogTunnel extends ServiceTunnel {
 	private String strTimestampValue;
 	private LoggerParameters lp;
 
+	private File file;
 	private CSVLogger logger;
 	private Map<String, String> defaultValues;
 
@@ -89,7 +92,11 @@ public class LogTunnel extends ServiceTunnel {
 	private void initLoggerParameters() {
 		// Get global values (from the XML file) for the path, auto-replace, and delimiter 
 		lp.path = getOwnerNode().getSimParameters().getLogPath();
-		intReplacePolicy = new Integer(getOwnerNode().getSimParameters().getLogReplaceMode()).intValue();
+		int parametricStep = getOwnerNode().getQueueNet().getParametricStep();
+		if (parametricStep >= 0) {
+			lp.name = lp.name.substring(0, lp.name.length() - 4) + "_" + (parametricStep + 1) + ".csv";
+		}
+		intReplacePolicy = Integer.parseInt(getOwnerNode().getSimParameters().getLogReplaceMode());
 		chDelimiter = getOwnerNode().getSimParameters().getLogDelimiter();
 		decimalSeparator = getOwnerNode().getSimParameters().getLogDecimalSeparator();
 		strTimestampValue = getOwnerNode().getSimParameters().getTimestampValue();
@@ -97,38 +104,41 @@ public class LogTunnel extends ServiceTunnel {
 
 	@Override
 	protected int process(NetMessage message) throws NetException {
-		try {
-			switch (message.getEvent()) {
+		switch (message.getEvent()) {
 
-			case NetEvent.EVENT_START:
-				break;
+		case NetEvent.EVENT_START:
+			// Build logger and default values
+			initLoggerParameters();
+			file = new File(lp.path, lp.name);
+			logger = JSimLoggerFactory.getCSVLogger(
+					file,
+					COLUMNS,
+					intReplacePolicy == LoggerParameters.LOGGER_AR_APPEND,
+					chDelimiter,
+					decimalSeparator);
+			defaultValues = new HashMap<String, String>();
+			if (lp.boolExecTimestamp.booleanValue()) {
+				defaultValues.put(COLUMN_START_TIME, strTimestampValue);
+			}
+			if (lp.boolLoggername.booleanValue()) {
+				defaultValues.put(COLUMN_LOGGERNAME, message.getSource().getName());
+			}
+			break;
 
-			case NetEvent.EVENT_STOP:
-				if (logger != null) {
-					logger.close();
+		case NetEvent.EVENT_STOP:
+			if (logger != null) {
+				try {
+					JSimLoggerFactory.remove(logger);
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-				break;
+				logger = null;
+			}
+			break;
 
-			case NetEvent.EVENT_JOB:
+		case NetEvent.EVENT_JOB:
+			if (logger != null) {
 				Job job = message.getJob();
-				// Build logger and default values if needed
-				if (logger == null) {
-					initLoggerParameters();
-					logger = JSimLoggerFactory.getCSVLogger(
-							new File(lp.path, lp.name), 
-							COLUMNS, 
-							intReplacePolicy == LoggerParameters.LOGGER_AR_APPEND, 
-							chDelimiter, 
-							decimalSeparator
-							);
-					defaultValues = new HashMap<String, String>();
-					if (lp.boolExecTimestamp.booleanValue()) {
-						defaultValues.put(COLUMN_START_TIME, strTimestampValue);
-					}
-					if (lp.boolLoggername.booleanValue()) {
-						defaultValues.put(COLUMN_LOGGERNAME, message.getSource().getName());
-					}
-				}
 				// Fills the values for the log column
 				Map<String, Object> values = new HashMap<String, Object>();
 				if (lp.boolTimeStamp.booleanValue()) {
@@ -152,32 +162,48 @@ public class LogTunnel extends ServiceTunnel {
 					double interarrivalAny = message.getTime() - jobsList.getLastJobOutTime();
 					values.put(COLUMN_INTERARRIVAL_ANYCLASS, interarrivalAny);
 				}
-				// Finally logs the line
-				logger.log(values, defaultValues);
-				// Do not break here
-
-			default:
-				if (message.getSourceSection() == NodeSection.INPUT) {
-					sendForward(message.getEvent(), message.getData(), 0.0);
+				try {
+					// Finally logs the line
+					logger.log(values, defaultValues);
+				} catch (IOException e1) {
+					if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
+						System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
+								+ " failed to write the CSV file: " + file.getAbsolutePath());
+					} else {
+						new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									Thread.sleep(800);
+								} catch (InterruptedException e) {
+								}
+								JOptionPane.showMessageDialog(null, getOwnerNode().getName()
+										+ " failed to write the CSV file: " + file.getAbsolutePath(),
+										"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
+							}
+						}).start();
+					}
+					try {
+						JSimLoggerFactory.remove(logger);
+					} catch (IOException e2) {
+						e2.printStackTrace();
+					}
+					logger = null;
 				}
-				if (message.getSourceSection() == NodeSection.OUTPUT) {
-					sendBackward(message.getEvent(), message.getData(), 0.0);
-				}
-				break;
 			}
+			// Do not break here
 
-			return MSG_PROCESSED;
-		} catch (IOException ex) {
-			throw new NetException("Error while writing to the log file: " + ex.getMessage());
+		default:
+			if (message.getSourceSection() == NodeSection.INPUT) {
+				sendForward(message.getEvent(), message.getData(), 0.0);
+			}
+			if (message.getSourceSection() == NodeSection.OUTPUT) {
+				sendBackward(message.getEvent(), message.getData(), 0.0);
+			}
+			break;
 		}
-	}
 
-	@Override
-	protected void finalize() throws Throwable {
-		if (logger != null) {
-			logger.close();
-			logger = null;
-		}
+		return MSG_PROCESSED;
 	}
 
 }

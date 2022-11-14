@@ -87,7 +87,7 @@ public abstract class ParametricAnalysisDefinition implements ParametricAnalysis
 	public int getNumberOfSteps() {
 		return numberOfSteps;
 	}
-	
+
 	/**
 	 * Gets the number of worker threads used in the parametric analysis
 	 *
@@ -95,7 +95,7 @@ public abstract class ParametricAnalysisDefinition implements ParametricAnalysis
 	 */
 	public int getParallelism() {
 		return simDef.getWhatIfParallelism();
-	}	
+	}
 
 	/**
 	 * Sets the initial value of the parameter to be varied

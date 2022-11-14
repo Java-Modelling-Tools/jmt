@@ -25,29 +25,23 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * This is the parameter that should be passed to the Poisson
  * distribution.
  * 
- * <br><br>Copyright (c) 2003
- * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
- * @author Fabrizio Frontera - ffrontera@yahoo.it
+ * @author Leran Chen - 01/09/2021
  * 
  */
 public class PoissonPar extends AbstractParameter implements Parameter {
 
-	private double mean;
+	private double lambda;
 
 	/**
-	 * It creates a new poisson parameter with the mean provided by the user.
+	 * It creates a new Poisson parameter with the mean provided by the user.
 	 *
-	 * @param mean double containing the mean of the poisson distribution.
-	 * @throws IncorrectDistributionParameterException if the mean is not
+	 * @param lambda double containing the parameter lambda.
+	 * @throws IncorrectDistributionParameterException if the value provided is not
 	 * greater than zero.
 	 *
 	 */
-	public PoissonPar(double mean) throws IncorrectDistributionParameterException {
-		if (mean <= 0) {
-			throw new IncorrectDistributionParameterException("mean must be gtz");
-		} else {
-			this.mean = mean;
-		}
+	public PoissonPar(double lambda) throws IncorrectDistributionParameterException {
+		setLambda(lambda);
 	}
 
 	public PoissonPar(Double wmean) throws IncorrectDistributionParameterException {
@@ -55,15 +49,15 @@ public class PoissonPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It verifies that the parameter is correct. For the poisson distribution,
-	 * the parameter is correct if the mean is greater than zero.
+	 * It controls if the parameter is correct or not. For the Poisson distribution,
+	 * the parameter is correct if the lambda is greater than zero.
 	 *
 	 * @return boolean indicating if the parameter is correct or not.
 	 *
 	 */
 	@Override
 	public boolean check() {
-		if (mean <= 0) {
+		if (lambda <= 0) {
 			return false;
 		} else {
 			return true;
@@ -71,30 +65,45 @@ public class PoissonPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
-	 * It return the value of the mean of the poisson distribution.
+	 * It returns the value of the parameter lambda of the Poisson distribution.
 	 *
-	 * @return double with the value of the mean of the poisson distribution.
+	 * @return double with lambda.
 	 *
 	 */
-	public double getMean() {
-		return mean;
+	public double getLambda() {
+		return lambda;
 	}
 
 	/**
-	 * It allows the user to change the value of the mean of the poisson
-	 * distribution and verifies if it is greater than zero.
+	 * It allows the user to modify the value of the parameter lambda of the
+	 * Poisson distribution and verify if the value is correct that is if it is
+	 * greater than zero.
 	 *
-	 * @param mean double indicating the mean of the poisson distribution.
-	 * @throws IncorrectDistributionParameterException if the mean is not
+	 * @param lambda double indicating the new value of the parameter lambda.
+	 * @throws IncorrectDistributionParameterException if the provided value is not
 	 * greater than zero.
 	 *
 	 */
-	public void setMean(double mean) throws IncorrectDistributionParameterException {
-		if (mean <= 0) {
-			throw new IncorrectDistributionParameterException("mean must be gtz");
-		} else {
-			this.mean = mean;
+	public void setLambda(double lambda) throws IncorrectDistributionParameterException {
+		if (lambda <= 0) {
+			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}
+		this.lambda = lambda;
+	}
+
+	/**
+	 * Sets mean for a given distribution parameter. This method is required to adjust the mean value
+	 * of a distribution into Load Dependent Service Time Strategy.
+	 * <br>Author: Bertoli Marco
+	 * @param value New mean value for this distribution.
+	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution.
+	 */
+	@Override
+	public void setMean(double value) throws IncorrectDistributionParameterException {
+		if (value <= 0) {
+			throw new IncorrectDistributionParameterException("Mean value must be greater than zero");
+		}
+		lambda = value;
 	}
 
 } // end PoissonPar

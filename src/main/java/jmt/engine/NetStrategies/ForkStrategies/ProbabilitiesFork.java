@@ -26,10 +26,7 @@ import jmt.common.exception.LoadException;
 import jmt.engine.NetStrategies.ForkStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeListWithJobNum;
-import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.random.Empirical;
 import jmt.engine.random.EmpiricalEntry;
 import jmt.engine.random.EmpiricalPar;
@@ -63,13 +60,12 @@ public class ProbabilitiesFork extends ForkStrategy {
 	}
 
 	@Override
-	public void setRandomEngine(RandomEngine randomEngine){
+	public void setRandomEngine(RandomEngine randomEngine) {
 		distribution.setRandomEngine(randomEngine); 
 	}
 
 	@Override	
-    public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
-	//NodeList nodeList = ownerNode.getOutputNodes();
+	public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
 		if (nodes == null) {
 			//it is the first execution of this method: find the NetNode objects
 			nodes = new NetNode[nodeNames.length];

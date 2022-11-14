@@ -29,12 +29,12 @@ public class JobInfo {
 	private double enteringTime;
 
 	/**
-	 * Creates a new instance of JobInfo object.
+	 * Creates a new instance of JobInfo class.
 	 * @param job Job referenced by this JobInfo.
 	 */
 	public JobInfo(Job job) {
 		this.job = job;
-		this.enteringTime = job.getNetSystem().getTime();
+		resetEnteringTime();
 	}
 
 	/**
@@ -52,8 +52,16 @@ public class JobInfo {
 	public double getEnteringTime() {
 		return enteringTime;
 	}
-	
-	public NetSystem getNetSystem(){
+
+	/**
+	 * Resets the time that the job entered the JobInfoList.
+	 * @return Time that the job entered the JobInfoList.
+	 */
+	public void resetEnteringTime() {
+		enteringTime = job.getNetSystem().getTime();
+	}
+
+	public NetSystem getNetSystem() {
 		return job.getNetSystem();
 	}
 

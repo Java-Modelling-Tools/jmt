@@ -23,20 +23,16 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import jmt.gui.jsimgraph.UtilPoint;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.definitions.JMTArc;
 import jmt.gui.jsimgraph.definitions.JMTPath;
-import org.apache.xpath.operations.Bool;
-import org.jgraph.JGraph;
 import org.jgraph.graph.*;
-
-import javax.swing.*;
 
 /**
  * <p>Title: JmtEdgeRenderer </p>
@@ -49,314 +45,323 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 	private static final long serialVersionUID = 1L;
 	private Mediator mediator;
 
-	public JmtEdgeRenderer(Mediator factory) {
+	public JmtEdgeRenderer(EdgeView view, Mediator factory) {
+		this.view = view;
 		this.mediator = factory;
+	}
+
+	@Override
+	protected void installAttributes(CellView view) {
+		Map map = ((DefaultEdge) view.getCell()).getAttributes();
+		int end = GraphConstants.getLineEnd(map);
+		GraphConstants.setLineEnd(view.getAllAttributes(), end);
+		super.installAttributes(view);
 	}
 
 	@Override
 	protected Shape createShape() {
 		GeneralPath ret = new GeneralPath();
 		try {
-		ArrayList tmp1 = new ArrayList();
-		boolean passed = false;
-		int n = view.getPointCount();
-		if (n > 1) {
-			JmtEdgeView tmp = (JmtEdgeView) view;
-			JmtEdge cell = (JmtEdge) tmp.getCell();
-			if (cell != null) {
-				Point2D[] p = new Point2D[n];
-				for (int i = 0; i < n; i++) {
-					Point2D pt = tmp.getPoint(i);
-					if (pt == null) {
-						return null; // exit
+			ArrayList tmp1 = new ArrayList();
+			boolean passed = false;
+			int n = view.getPointCount();
+			if (n > 1) {
+				JmtEdgeView tmp = (JmtEdgeView) view;
+				JmtEdge cell = (JmtEdge) tmp.getCell();
+				if (cell != null) {
+					Point2D[] p = new Point2D[n];
+					for (int i = 0; i < n; i++) {
+						Point2D pt = tmp.getPoint(i);
+						if (pt == null) {
+							return null; // exit
+						}
+						int x = (int) pt.getX();
+						int y = (int) pt.getY();
+						p[i] = new Point2D.Double(x, y);
 					}
-					int x = (int) pt.getX();
-					int y = (int) pt.getY();
-					p[i] = new Point2D.Double(x, y);
-				}
 
-				if (view.sharedPath == null) {
-					view.sharedPath = new GeneralPath(GeneralPath.WIND_NON_ZERO, n);
-				} else {
-					view.sharedPath.reset();
-				}
-				view.beginShape = view.lineShape = view.endShape = null;
+					if (view.sharedPath == null) {
+						view.sharedPath = new GeneralPath(GeneralPath.WIND_NON_ZERO, n);
+					} else {
+						view.sharedPath.reset();
+					}
+					view.beginShape = view.lineShape = view.endShape = null;
 
-				if (endDeco != GraphConstants.ARROW_NONE) {
-					if ((DefaultPort) cell.getTarget() != null) {
-						JmtCell targetOfEdge1 = (JmtCell) ((DefaultPort) cell.getTarget()).getParent();
-						if (!targetOfEdge1.isLeftInputCell()) {
-							view.endShape = createLineEnd(endSize, endDeco, new Point2D.Double(p[n - 1].getX() + 10, p[n - 1].getY()), p[n - 1]);
-						} else {
-							view.endShape = createLineEnd(endSize, endDeco, new Point2D.Double(p[n - 1].getX() - 10, p[n - 1].getY()), p[n - 1]);
+					if (endDeco != GraphConstants.ARROW_NONE) {
+						if ((DefaultPort) cell.getTarget() != null) {
+							JmtCell targetOfEdge1 = (JmtCell) ((DefaultPort) cell.getTarget()).getParent();
+							if (!targetOfEdge1.isLeftInputCell()) {
+								view.endShape = createLineEnd(endSize, endDeco, new Point2D.Double(p[n - 1].getX() + 10, p[n - 1].getY()), p[n - 1]);
+							} else {
+								view.endShape = createLineEnd(endSize, endDeco, new Point2D.Double(p[n - 1].getX() - 10, p[n - 1].getY()), p[n - 1]);
+							}
 						}
 					}
-				}
-				view.sharedPath.moveTo((float) p[0].getX(), (float) p[0].getY());
+					view.sharedPath.moveTo((float) p[0].getX(), (float) p[0].getY());
 
-				cell.intersectionEdgePoint = null;
-				if (cell.intersectsEdge()) {
-					for (int i = 0; i < cell.intersectionEdgePoint.size(); i++) {
-						for (int j = i; j < cell.intersectionEdgePoint.size(); j++) {
-							if (i < j) {
-								if ((int) cell.intersectionEdgePoint.get(j).getX() < (int) cell.intersectionEdgePoint.get(i).getX()) {
-									Point2D tmp2 = cell.intersectionEdgePoint.get(j);
-									cell.intersectionEdgePoint.set(j, cell.intersectionEdgePoint.get(i));
-									cell.intersectionEdgePoint.set(i, tmp2);
+					cell.intersectionEdgePoint = null;
+					if (cell.intersectsEdge()) {
+						for (int i = 0; i < cell.intersectionEdgePoint.size(); i++) {
+							for (int j = i; j < cell.intersectionEdgePoint.size(); j++) {
+								if (i < j) {
+									if ((int) cell.intersectionEdgePoint.get(j).getX() < (int) cell.intersectionEdgePoint.get(i).getX()) {
+										Point2D tmp2 = cell.intersectionEdgePoint.get(j);
+										cell.intersectionEdgePoint.set(j, cell.intersectionEdgePoint.get(i));
+										cell.intersectionEdgePoint.set(i, tmp2);
+									}
 								}
 							}
 						}
 					}
-				}
 
-				for (int i = 0; i < n - 1; i++) {
-					if (i % 2 == 0 && i != 0) {
-						view.sharedPath.lineTo((float) p[i].getX(), (float) p[i].getY());
-						if (cell.intersectionEdgePoint.size() > 0) {
-							for (int j = 0; j < cell.intersectionEdgePoint.size(); j++) {
-								if (cell.isRing && i == 4) {
-									if ((int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
-											&& (int) p[i].getX() < (int) cell.intersectionEdgePoint.get(j).getX()) {
-										int intersectionPoint = (int) cell.intersectionEdgePoint.get(j).getX();
-										if (intersectionPoint < (int) p[5].getX() && p[5].getX() > p[4].getX()) {
-											view.sharedPath.curveTo((float) p[4].getX(), (float) p[4].getY(), (float) ((p[4].getX() + p[5]
-													.getX()) / 2), (float) (p[4].getY() - 10), (float) p[5].getX(), (float) p[5].getY());
-											view.sharedPath.moveTo((float) p[5].getX(), (float) p[5].getY());
-										}
-									} else if ((int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
-											&& (int) p[i].getX() > (int) cell.intersectionEdgePoint.get(j).getX()) {
-										int intersectionPoint = (int) cell.intersectionEdgePoint.get(j).getX();
-										if (p[5].getX() < p[4].getX() && intersectionPoint > (int) p[5].getX()) {
-											view.sharedPath.curveTo((float) p[4].getX(), (float) p[4].getY(), (float) ((p[4].getX() + p[5]
-													.getX()) / 2), (float) (p[4].getY() - 10), (float) p[5].getX(), (float) p[5].getY());
-											view.sharedPath.moveTo((float) p[5].getX(), (float) p[5].getY());
-										}
-									}
-								} else {
-									if ((int) p[i + 1].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
-											&& (int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
-											&& (int) p[i].getX() < (int) cell.intersectionEdgePoint.get(j).getX()
-											&& (int) p[i + 1].getX() > (int) cell.intersectionEdgePoint.get(j).getX()) {
-										if ((j + 1) < cell.intersectionEdgePoint.size()
-												&& cell.intersectionEdgePoint.get(j + 1).getX() > cell.intersectionEdgePoint.get(j).getX()
-												&& cell.intersectionEdgePoint.get(j + 1).getX() - cell.intersectionEdgePoint.get(j).getX() < 10
-												&& cell.intersectionEdgePoint.get(j).getY() == cell.intersectionEdgePoint.get(j + 1).getY()) {
-											double middleX = (cell.intersectionEdgePoint.get(j + 1).getX() + cell.intersectionEdgePoint.get(j).getX()) / 2;
-											view.sharedPath.lineTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
-													(float) cell.intersectionEdgePoint.get(j).getY());
-											view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
-													(float) cell.intersectionEdgePoint.get(j).getY());
-											view.sharedPath.curveTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
-													(float) cell.intersectionEdgePoint.get(j).getY(), (float) middleX,
-													(float) (cell.intersectionEdgePoint.get(j).getY() - 10),
-													(float) (cell.intersectionEdgePoint.get(j + 1).getX() + 5),
-													(float) cell.intersectionEdgePoint.get(j + 1).getY());
-											view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j + 1).getX() + 5),
-													(float) cell.intersectionEdgePoint.get(j).getY());
-											j++;
-										} else {
-											view.sharedPath.lineTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
-													(float) cell.intersectionEdgePoint.get(j).getY());
-											view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
-													(float) cell.intersectionEdgePoint.get(j).getY());
-											view.sharedPath.curveTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
-													(float) cell.intersectionEdgePoint.get(j).getY(),
-													(float) cell.intersectionEdgePoint.get(j).getX(),
-													(float) (cell.intersectionEdgePoint.get(j).getY() - 10),
-													(float) (cell.intersectionEdgePoint.get(j).getX() + 5),
-													(float) cell.intersectionEdgePoint.get(j).getY());
-											view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j).getX() + 5),
-													(float) cell.intersectionEdgePoint.get(j).getY());
-										}
-									} else if ((!passed || (passed && tmp1.size() > 0 && !tmp1.contains(cell.intersectionEdgePoint.get(j))))
-											&& (int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
-											&& (int) p[i].getX() > (int) p[i + 1].getX()
-											&& (int) p[i + 1].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
-											&& (int) p[i + 1].getX() < (int) cell.intersectionEdgePoint.get(j).getX()) {
-										passed = true;
-										for (int q = 0; q < cell.intersectionEdgePoint.size(); q++) {
-											if (cell.intersectionEdgePoint.get(q).getY() == cell.intersectionEdgePoint.get(j).getY()) {
-												tmp1.add(cell.intersectionEdgePoint.get(q).clone());
+					for (int i = 0; i < n - 1; i++) {
+						if (i % 2 == 0 && i != 0) {
+							view.sharedPath.lineTo((float) p[i].getX(), (float) p[i].getY());
+							if (cell.intersectionEdgePoint.size() > 0) {
+								for (int j = 0; j < cell.intersectionEdgePoint.size(); j++) {
+									if (cell.isRing && i == 4) {
+										if ((int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
+												&& (int) p[i].getX() < (int) cell.intersectionEdgePoint.get(j).getX()) {
+											int intersectionPoint = (int) cell.intersectionEdgePoint.get(j).getX();
+											if (intersectionPoint < (int) p[5].getX() && p[5].getX() > p[4].getX()) {
+												view.sharedPath.curveTo((float) p[4].getX(), (float) p[4].getY(), (float) ((p[4].getX() + p[5]
+														.getX()) / 2), (float) (p[4].getY() - 10), (float) p[5].getX(), (float) p[5].getY());
+												view.sharedPath.moveTo((float) p[5].getX(), (float) p[5].getY());
+											}
+										} else if ((int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
+												&& (int) p[i].getX() > (int) cell.intersectionEdgePoint.get(j).getX()) {
+											int intersectionPoint = (int) cell.intersectionEdgePoint.get(j).getX();
+											if (p[5].getX() < p[4].getX() && intersectionPoint > (int) p[5].getX()) {
+												view.sharedPath.curveTo((float) p[4].getX(), (float) p[4].getY(), (float) ((p[4].getX() + p[5]
+														.getX()) / 2), (float) (p[4].getY() - 10), (float) p[5].getX(), (float) p[5].getY());
+												view.sharedPath.moveTo((float) p[5].getX(), (float) p[5].getY());
 											}
 										}
-
-										for (int q = 0; q < tmp1.size(); q++) {
-											for (int k = q; k < tmp1.size(); k++) {
-												int valore2X = (int) ((Point2D) tmp1.get(k)).getX();
-												int valore1X = (int) ((Point2D) (tmp1).get(q)).getX();
-												if (valore1X < valore2X) {
-													Point2D tmp2 = (Point2D) tmp1.get(k);
-													tmp1.set(k, tmp1.get(q));
-													tmp1.set(q, tmp2);
+									} else {
+										if ((int) p[i + 1].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
+												&& (int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
+												&& (int) p[i].getX() < (int) cell.intersectionEdgePoint.get(j).getX()
+												&& (int) p[i + 1].getX() > (int) cell.intersectionEdgePoint.get(j).getX()) {
+											if ((j + 1) < cell.intersectionEdgePoint.size()
+													&& cell.intersectionEdgePoint.get(j + 1).getX() > cell.intersectionEdgePoint.get(j).getX()
+													&& cell.intersectionEdgePoint.get(j + 1).getX() - cell.intersectionEdgePoint.get(j).getX() < 10
+													&& cell.intersectionEdgePoint.get(j).getY() == cell.intersectionEdgePoint.get(j + 1).getY()) {
+												double middleX = (cell.intersectionEdgePoint.get(j + 1).getX() + cell.intersectionEdgePoint.get(j).getX()) / 2;
+												view.sharedPath.lineTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
+														(float) cell.intersectionEdgePoint.get(j).getY());
+												view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
+														(float) cell.intersectionEdgePoint.get(j).getY());
+												view.sharedPath.curveTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
+														(float) cell.intersectionEdgePoint.get(j).getY(), (float) middleX,
+														(float) (cell.intersectionEdgePoint.get(j).getY() - 10),
+														(float) (cell.intersectionEdgePoint.get(j + 1).getX() + 5),
+														(float) cell.intersectionEdgePoint.get(j + 1).getY());
+												view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j + 1).getX() + 5),
+														(float) cell.intersectionEdgePoint.get(j).getY());
+												j++;
+											} else {
+												view.sharedPath.lineTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
+														(float) cell.intersectionEdgePoint.get(j).getY());
+												view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
+														(float) cell.intersectionEdgePoint.get(j).getY());
+												view.sharedPath.curveTo((float) (cell.intersectionEdgePoint.get(j).getX() - 5),
+														(float) cell.intersectionEdgePoint.get(j).getY(),
+														(float) cell.intersectionEdgePoint.get(j).getX(),
+														(float) (cell.intersectionEdgePoint.get(j).getY() - 10),
+														(float) (cell.intersectionEdgePoint.get(j).getX() + 5),
+														(float) cell.intersectionEdgePoint.get(j).getY());
+												view.sharedPath.moveTo((float) (cell.intersectionEdgePoint.get(j).getX() + 5),
+														(float) cell.intersectionEdgePoint.get(j).getY());
+											}
+										} else if ((!passed || (passed && tmp1.size() > 0 && !tmp1.contains(cell.intersectionEdgePoint.get(j))))
+												&& (int) p[i].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
+												&& (int) p[i].getX() > (int) p[i + 1].getX()
+												&& (int) p[i + 1].getY() == (int) cell.intersectionEdgePoint.get(j).getY()
+												&& (int) p[i + 1].getX() < (int) cell.intersectionEdgePoint.get(j).getX()) {
+											passed = true;
+											for (int q = 0; q < cell.intersectionEdgePoint.size(); q++) {
+												if (cell.intersectionEdgePoint.get(q).getY() == cell.intersectionEdgePoint.get(j).getY()) {
+													tmp1.add(cell.intersectionEdgePoint.get(q).clone());
 												}
 											}
-										}
 
-										for (int x = 0; x < tmp1.size(); x++) {
-											if ((x + 1) < tmp1.size() && ((Point2D) tmp1.get(x)).getX() - ((Point2D) tmp1.get(x + 1)).getX() < 10) {
-												double middleX = (((Point2D) tmp1.get(x + 1)).getX() + ((Point2D) tmp1.get(x)).getX()) / 2;
-												view.sharedPath.lineTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
-														(float) ((Point2D) tmp1.get(x)).getY());
-												view.sharedPath.moveTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
-														(float) ((Point2D) tmp1.get(x)).getY());
-												view.sharedPath.curveTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
-														(float) ((Point2D) tmp1.get(x)).getY(), (float) middleX,
-														(float) (((Point2D) tmp1.get(x)).getY() - 10),
-														(float) (((Point2D) tmp1.get(x + 1)).getX() - 5),
-														(float) ((Point2D) tmp1.get(x + 1)).getY());
-												view.sharedPath.moveTo((float) (((Point2D) tmp1.get(x + 1)).getX() - 5),
-														(float) ((Point2D) tmp1.get(x)).getY());
-												x++;
-											} else {
-												if ((int) p[i].getY() == (int) ((Point2D) tmp1.get(x)).getY()) {
+											for (int q = 0; q < tmp1.size(); q++) {
+												for (int k = q; k < tmp1.size(); k++) {
+													int valore2X = (int) ((Point2D) tmp1.get(k)).getX();
+													int valore1X = (int) ((Point2D) (tmp1).get(q)).getX();
+													if (valore1X < valore2X) {
+														Point2D tmp2 = (Point2D) tmp1.get(k);
+														tmp1.set(k, tmp1.get(q));
+														tmp1.set(q, tmp2);
+													}
+												}
+											}
+
+											for (int x = 0; x < tmp1.size(); x++) {
+												if ((x + 1) < tmp1.size() && ((Point2D) tmp1.get(x)).getX() - ((Point2D) tmp1.get(x + 1)).getX() < 10) {
+													double middleX = (((Point2D) tmp1.get(x + 1)).getX() + ((Point2D) tmp1.get(x)).getX()) / 2;
 													view.sharedPath.lineTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
 															(float) ((Point2D) tmp1.get(x)).getY());
 													view.sharedPath.moveTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
 															(float) ((Point2D) tmp1.get(x)).getY());
 													view.sharedPath.curveTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
-															(float) ((Point2D) tmp1.get(x)).getY(),
-															(float) ((Point2D) tmp1.get(x)).getX(),
+															(float) ((Point2D) tmp1.get(x)).getY(), (float) middleX,
 															(float) (((Point2D) tmp1.get(x)).getY() - 10),
-															(float) (((Point2D) tmp1.get(x)).getX() - 5),
+															(float) (((Point2D) tmp1.get(x + 1)).getX() - 5),
+															(float) ((Point2D) tmp1.get(x + 1)).getY());
+													view.sharedPath.moveTo((float) (((Point2D) tmp1.get(x + 1)).getX() - 5),
 															(float) ((Point2D) tmp1.get(x)).getY());
-													view.sharedPath.moveTo(((float) ((Point2D) tmp1.get(x)).getX() - 5),
-															(float) ((Point2D) tmp1.get(x)).getY());
+													x++;
+												} else {
+													if ((int) p[i].getY() == (int) ((Point2D) tmp1.get(x)).getY()) {
+														view.sharedPath.lineTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
+																(float) ((Point2D) tmp1.get(x)).getY());
+														view.sharedPath.moveTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
+																(float) ((Point2D) tmp1.get(x)).getY());
+														view.sharedPath.curveTo((float) (((Point2D) tmp1.get(x)).getX() + 5),
+																(float) ((Point2D) tmp1.get(x)).getY(),
+																(float) ((Point2D) tmp1.get(x)).getX(),
+																(float) (((Point2D) tmp1.get(x)).getY() - 10),
+																(float) (((Point2D) tmp1.get(x)).getX() - 5),
+																(float) ((Point2D) tmp1.get(x)).getY());
+														view.sharedPath.moveTo(((float) ((Point2D) tmp1.get(x)).getX() - 5),
+																(float) ((Point2D) tmp1.get(x)).getY());
+													}
 												}
 											}
 										}
 									}
 								}
 							}
-						}
-					} else {
-						boolean done = false;
-						if (i == 0) {
-							Vector<Point2D> pointOnFirstPoints = new Vector<Point2D>();
-							for (int q = 0; q < cell.intersectionEdgePoint.size(); q++) {
-								if ((int) p[0].getY() == (int) cell.intersectionEdgePoint.get(q).getY()) {
-									pointOnFirstPoints.add(cell.intersectionEdgePoint.get(q));
+						} else {
+							boolean done = false;
+							if (i == 0) {
+								Vector<Point2D> pointOnFirstPoints = new Vector<Point2D>();
+								for (int q = 0; q < cell.intersectionEdgePoint.size(); q++) {
+									if ((int) p[0].getY() == (int) cell.intersectionEdgePoint.get(q).getY()) {
+										pointOnFirstPoints.add(cell.intersectionEdgePoint.get(q));
+									}
 								}
-							}
 
-							for (int j = 0; j < pointOnFirstPoints.size(); j++) {
-								if (p[1].getX() - p[0].getX() > 0) {
-									if ((int) p[0].getY() == (int) (pointOnFirstPoints.get(j)).getY()) {
-										if (p[0].getY() == (pointOnFirstPoints.get(j)).getY()
-												&& (int) p[0].getX() < (int) (pointOnFirstPoints.get(j)).getX()
-												&& (int) (pointOnFirstPoints.get(j)).getX() < (int) p[1].getX()) {
+								for (int j = 0; j < pointOnFirstPoints.size(); j++) {
+									if (p[1].getX() - p[0].getX() > 0) {
+										if ((int) p[0].getY() == (int) (pointOnFirstPoints.get(j)).getY()) {
+											if (p[0].getY() == (pointOnFirstPoints.get(j)).getY()
+													&& (int) p[0].getX() < (int) (pointOnFirstPoints.get(j)).getX()
+													&& (int) (pointOnFirstPoints.get(j)).getX() < (int) p[1].getX()) {
+												if ((j + 1) < pointOnFirstPoints.size()
+														&& (pointOnFirstPoints.get(j + 1)).getX() > (pointOnFirstPoints.get(j)).getX()
+														&& (pointOnFirstPoints.get(j + 1)).getX() - (pointOnFirstPoints.get(j)).getX() < 10
+														&& (pointOnFirstPoints.get(j)).getY() == (pointOnFirstPoints.get(j + 1)).getY()) {
+													double middleX = ((pointOnFirstPoints.get(j + 1)).getX() + (pointOnFirstPoints.get(j)).getX()) / 2;
+													view.sharedPath.lineTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													view.sharedPath.curveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
+															(float) (pointOnFirstPoints.get(j)).getY(), (float) middleX,
+															(float) ((pointOnFirstPoints.get(j)).getY() - 10),
+															(float) ((pointOnFirstPoints.get(j + 1)).getX() + 5),
+															(float) (pointOnFirstPoints.get(j + 1)).getY());
+													view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j + 1)).getX() + 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													j++;
+													done = true;
+												} else {
+													view.sharedPath.lineTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													view.sharedPath.curveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
+															(float) (pointOnFirstPoints.get(j)).getY(),
+															(float) (pointOnFirstPoints.get(j)).getX(),
+															(float) ((pointOnFirstPoints.get(j)).getY() - 10),
+															(float) ((pointOnFirstPoints.get(j)).getX() + 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													done = true;
+												}
+											}
+										}
+									} else {
+										Vector<Point2D> temp = new Vector<>();
+										for (int z = 0; z < pointOnFirstPoints.size(); z++) {
+											temp.add(pointOnFirstPoints.get(pointOnFirstPoints.size() - z - 1));
+										}
+										pointOnFirstPoints = temp;
+
+										boolean largeArc = false;
+										if ((int) p[0].getY() == (int) (pointOnFirstPoints.get(j)).getY()
+												&& (int) p[0].getX() > (int) (pointOnFirstPoints.get(j)).getX()
+												&& (int) (pointOnFirstPoints.get(j)).getX() > (int) p[1].getX()) {
 											if ((j + 1) < pointOnFirstPoints.size()
-													&& (pointOnFirstPoints.get(j + 1)).getX() > (pointOnFirstPoints.get(j)).getX()
-													&& (pointOnFirstPoints.get(j + 1)).getX() - (pointOnFirstPoints.get(j)).getX() < 10
-													&& (pointOnFirstPoints.get(j)).getY() == (pointOnFirstPoints.get(j + 1)).getY()) {
-												double middleX = ((pointOnFirstPoints.get(j + 1)).getX() + (pointOnFirstPoints.get(j)).getX()) / 2;
-												view.sharedPath.lineTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												view.sharedPath.curveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
-														(float) (pointOnFirstPoints.get(j)).getY(), (float) middleX,
-														(float) ((pointOnFirstPoints.get(j)).getY() - 10),
-														(float) ((pointOnFirstPoints.get(j + 1)).getX() + 5),
-														(float) (pointOnFirstPoints.get(j + 1)).getY());
-												view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j + 1)).getX() + 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												j++;
+													&& (pointOnFirstPoints.get(j + 1)).getX() < (pointOnFirstPoints.get(j)).getX()
+													&& (pointOnFirstPoints.get(j)).getX() - (pointOnFirstPoints.get(j + 1)).getX() < 10) {
+												double middleX = ((int) (pointOnFirstPoints.get(j + 1)).getX() + (int) (pointOnFirstPoints.get(j)).getX()) / 2;
+												view.sharedPath.lineTo((float) ((pointOnFirstPoints.get(j)).getX() + 5), (float) p[0].getY());
+												view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5), (float) p[0].getY());
+												view.sharedPath.curveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
+														(float) p[0].getY(), (float) middleX, (float) (p[0].getY() - 10),
+														(float) ((pointOnFirstPoints.get(j + 1)).getX() - 5), (float) p[0].getY());
+												view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j + 1)).getX() - 5), (float) p[0].getY());
+												j = j + 1;
+												largeArc = true;
 												done = true;
 											} else {
-												view.sharedPath.lineTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												view.sharedPath.curveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
-														(float) (pointOnFirstPoints.get(j)).getY(),
-														(float) (pointOnFirstPoints.get(j)).getX(),
-														(float) ((pointOnFirstPoints.get(j)).getY() - 10),
-														(float) ((pointOnFirstPoints.get(j)).getX() + 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												done = true;
+												if (!largeArc) {
+													view.sharedPath.lineTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													view.sharedPath.curveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
+															(float) (pointOnFirstPoints.get(j)).getY(),
+															(float) (pointOnFirstPoints.get(j)).getX(),
+															(float) ((pointOnFirstPoints.get(j)).getY() - 10),
+															(float) ((pointOnFirstPoints.get(j)).getX() - 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
+															(float) (pointOnFirstPoints.get(j)).getY());
+													done = true;
+												}
 											}
 										}
-									}
-								} else {
-									Vector<Point2D> temp = new Vector<>();
-									for (int z = 0; z < pointOnFirstPoints.size(); z++) {
-										temp.add(pointOnFirstPoints.get(pointOnFirstPoints.size() - z - 1));
-									}
-									pointOnFirstPoints = temp;
 
-									boolean largeArc = false;
-									if ((int) p[0].getY() == (int) (pointOnFirstPoints.get(j)).getY()
-											&& (int) p[0].getX() > (int) (pointOnFirstPoints.get(j)).getX()
-											&& (int) (pointOnFirstPoints.get(j)).getX() > (int) p[1].getX()) {
-										if ((j + 1) < pointOnFirstPoints.size()
-												&& (pointOnFirstPoints.get(j + 1)).getX() < (pointOnFirstPoints.get(j)).getX()
-												&& (pointOnFirstPoints.get(j)).getX() - (pointOnFirstPoints.get(j + 1)).getX() < 10) {
-											double middleX = ((int) (pointOnFirstPoints.get(j + 1)).getX() + (int) (pointOnFirstPoints.get(j)).getX()) / 2;
-											view.sharedPath.lineTo((float) ((pointOnFirstPoints.get(j)).getX() + 5), (float) p[0].getY());
-											view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5), (float) p[0].getY());
-											view.sharedPath.curveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
-													(float) p[0].getY(), (float) middleX, (float) (p[0].getY() - 10),
-													(float) ((pointOnFirstPoints.get(j + 1)).getX() - 5), (float) p[0].getY());
-											view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j + 1)).getX() - 5), (float) p[0].getY());
-											j = j + 1;
-											largeArc = true;
-											done = true;
-										} else {
-											if (!largeArc) {
-												view.sharedPath.lineTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												view.sharedPath.curveTo((float) ((pointOnFirstPoints.get(j)).getX() + 5),
-														(float) (pointOnFirstPoints.get(j)).getY(),
-														(float) (pointOnFirstPoints.get(j)).getX(),
-														(float) ((pointOnFirstPoints.get(j)).getY() - 10),
-														(float) ((pointOnFirstPoints.get(j)).getX() - 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												view.sharedPath.moveTo((float) ((pointOnFirstPoints.get(j)).getX() - 5),
-														(float) (pointOnFirstPoints.get(j)).getY());
-												done = true;
-											}
+										Vector<Point2D> temp2 = new Vector<Point2D>();
+										for (int z = 0; z < pointOnFirstPoints.size(); z++) {
+											temp2.add(pointOnFirstPoints.get(pointOnFirstPoints.size() - z - 1));
 										}
+										pointOnFirstPoints = temp2;
 									}
-
-									Vector<Point2D> temp2 = new Vector<Point2D>();
-									for (int z = 0; z < pointOnFirstPoints.size(); z++) {
-										temp2.add(pointOnFirstPoints.get(pointOnFirstPoints.size() - z - 1));
-									}
-									pointOnFirstPoints = temp2;
 								}
+								view.sharedPath.lineTo((float) p[1].getX(), (float) p[1].getY());
+								view.sharedPath.moveTo((float) p[1].getX(), (float) p[1].getY());
+								done = true;
+							} else if (i == 1 && done) {
+								done = false;
+							} else if (i == 1 && !done) {
+								view.sharedPath.lineTo((float) p[i].getX(), (float) p[i].getY());
+								view.sharedPath.moveTo((float) p[i].getX(), (float) p[i].getY());
+							} else {
+								view.sharedPath.lineTo((float) p[i].getX(), (float) p[i].getY());
+								view.sharedPath.moveTo((float) p[i].getX(), (float) p[i].getY());
 							}
-							view.sharedPath.lineTo((float) p[1].getX(), (float) p[1].getY());
-							view.sharedPath.moveTo((float) p[1].getX(), (float) p[1].getY());
-							done = true;
-						} else if (i == 1 && done) {
-							done = false;
-						} else if (i == 1 && !done) {
-							view.sharedPath.lineTo((float) p[i].getX(), (float) p[i].getY());
-							view.sharedPath.moveTo((float) p[i].getX(), (float) p[i].getY());
-						} else {
-							view.sharedPath.lineTo((float) p[i].getX(), (float) p[i].getY());
-							view.sharedPath.moveTo((float) p[i].getX(), (float) p[i].getY());
 						}
 					}
-				}
 
-				view.sharedPath.lineTo((float) p[n - 1].getX(), (float) p[n - 1].getY());
-				view.sharedPath.moveTo((float) p[n - 1].getX(), (float) p[n - 1].getY());
+					view.sharedPath.lineTo((float) p[n - 1].getX(), (float) p[n - 1].getY());
+					view.sharedPath.moveTo((float) p[n - 1].getX(), (float) p[n - 1].getY());
 
-				view.lineShape = (GeneralPath) view.sharedPath.clone();
-				if (view.endShape != null) {
-					view.sharedPath.append(view.endShape, true);
+					view.lineShape = (GeneralPath) view.sharedPath.clone();
+					if (view.endShape != null) {
+						view.sharedPath.append(view.endShape, true);
+					}
+					if (view.beginShape != null) {
+						view.sharedPath.append(view.beginShape, true);
+					}
 				}
-				if (view.beginShape != null) {
-					view.sharedPath.append(view.beginShape, true);
-				}
+				ret = view.sharedPath;
 			}
-		  ret = view.sharedPath;
-		}
 		} catch (Exception e) {
 			System.out.println("Warning: exception in jmt.gui.jsimgraph.JGraphMod.JmtEdgeRenderer.createShape");
 		}
@@ -412,6 +417,7 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 				view.sharedPath.append(view.beginShape, true);
 			}
 		}
+
 		return view.sharedPath;
 	}
 
@@ -429,16 +435,14 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 		}
 		view.beginShape = view.lineShape = view.endShape = null;
 		Point2D source = (Point2D) edgeView.getPoint(0).clone();
-
 		Point2D target = (Point2D) edgeView.getPoint(edgeView.getPointCount() - 1).clone();
 
 		if (points.get(0) instanceof PortView) {
 			points.set(0, UtilPoint.addPoints(path.getArc(0).getSource(),source));
 		}
-		if (points.get(points.size()-1) instanceof PortView) {
-			points.set(points.size()-1, UtilPoint.addPoints(path.getArc(n-1).getTarget(),target));
+		if (points.get(points.size() - 1) instanceof PortView) {
+			points.set(points.size() - 1, UtilPoint.addPoints(path.getArc(n - 1).getTarget(),target));
 		}
-
 
 		Point2D controlPointSource, targetArc, controlPointTarget, sourceArc;
 		Shape EndShape;
@@ -449,10 +453,9 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 			if (cell.getTarget() != null) {
 				double theta = rotationAngle(lastArc, source, target);
 				EndShape = createLineEnd(endSize, endDeco,
-						new Point2D.Double(((Point2D)points.get(points.size()-1)).getX() - 10 * Math.cos(theta), ((Point2D)points.get(points.size()-1)).getY() - 10 * Math.sin(theta))
-						, (Point2D) ((Point2D)points.get(points.size()-1)).clone());
+						new Point2D.Double(((Point2D) points.get(points.size() - 1)).getX() - 10 * Math.cos(theta), ((Point2D) points.get(points.size()-1)).getY() - 10 * Math.sin(theta)),
+						(Point2D) ((Point2D) points.get(points.size() - 1)).clone());
 				view.endShape = EndShape;
-
 			}
 		}
 
@@ -463,9 +466,9 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 			controlPointTarget = (Point2D) points.get(4 * i + 2);
 			targetArc = (Point2D) points.get(4 * i + 3);
 			view.sharedPath.moveTo((float) sourceArc.getX(), (float) sourceArc.getY());
-			view.sharedPath.curveTo((float) controlPointSource.getX(), (float) controlPointSource.getY()
-					, (float) controlPointTarget.getX(), (float) controlPointTarget.getY()
-					, (float) targetArc.getX(), (float) targetArc.getY());
+			view.sharedPath.curveTo((float) controlPointSource.getX(), (float) controlPointSource.getY(),
+					(float) controlPointTarget.getX(), (float) controlPointTarget.getY(),
+					(float) targetArc.getX(), (float) targetArc.getY());
 			view.sharedPath.moveTo((float) targetArc.getX(), (float) targetArc.getY());
 		}
 
@@ -478,9 +481,7 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 		}
 
 		return view.sharedPath;
-
 	}
-
 
 	/**
 	 * Calculates the rotation angle for the lineEnd
@@ -525,19 +526,33 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 	/**
 	 * This function extends the function "paint" in order to make the tangents and control points
 	 * visible when the connection is selected
-	*/
+	 */
 	@Override
 	public void paint(Graphics var1) {
 		try {
-		super.paint(var1);
-		if (this.selected && mediator.getModel().hasConnectionShape(((JmtEdge) view.getCell()).getSourceKey(),
-				((JmtEdge) view.getCell()).getTargetKey())) {
-			Graphics2D var3 = (Graphics2D) var1;
-			var3.setStroke(GraphConstants.SELECTION_STROKE);
-			var3.setColor(this.highlightColor);
-			drawTangents(var3);
-			drawControlPoints(var3);
-		}} catch (Exception e) {
+			super.paint(var1);
+			if (view.isLeaf() && view.getShape() != null && lineWidth > 0) {
+				Graphics2D var3 = (Graphics2D) var1;
+				if (view.endShape != null) {
+					if (endDeco == GraphConstants.ARROW_CIRCLE || endDeco == GraphConstants.ARROW_TECHNICAL) {
+						if (endFill) {
+							var3.setColor(new Color(255, 255, 255));
+							var3.fill(view.endShape);
+						}
+						var3.setColor(getForeground());
+						var3.draw(view.endShape);
+					}
+				}
+			}
+			if (selected && mediator.getModel().hasConnectionShape(((JmtEdge) view.getCell()).getSourceKey(),
+					((JmtEdge) view.getCell()).getTargetKey())) {
+				Graphics2D var3 = (Graphics2D) var1;
+				var3.setStroke(GraphConstants.SELECTION_STROKE);
+				var3.setColor(highlightColor);
+				drawTangents(var3);
+				drawControlPoints(var3);
+			}
+		} catch (Exception e) {
 			System.out.println("Warning: exception in jmt.gui.jsimgraph.JGraphMod.JmtEdgeRenderer.paint");
 		}
 	}
@@ -569,7 +584,7 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 	 * This function draws the the control points of a Bezier connection
 	 */
 	private void drawControlPoints(Graphics2D var3) {
-		var3.setStroke(new BasicStroke(this.lineWidth));
+		var3.setStroke(new BasicStroke(lineWidth));
 		var3.setColor(Color.black);
 		JmtEdgeView edgeView = (JmtEdgeView) view;
 		List points = edgeView.getPoints();
@@ -587,7 +602,7 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 				topLeftPoint.getX() - side / 2.0, topLeftPoint.getY() - side / 2.0,
 				side, side);
 		var3.draw(rect);
-		var3.setColor(this.highlightColor);
+		var3.setColor(highlightColor);
 		var3.fill(rect);
 		var3.setColor(Color.black);
 	}
@@ -604,7 +619,7 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 		JmtEdge cell = (JmtEdge) edgeView.getCell();
 
 		boolean isSourceMoving = !(points.get(0).equals(pointsActual.get(0)));
-		boolean isTargetMoving = !(points.get(points.size()-1).equals(pointsActual.get(pointsActual.size()-1)));
+		boolean isTargetMoving = !(points.get(points.size() - 1).equals(pointsActual.get(pointsActual.size() - 1)));
 		boolean isSourceMovingAlone = isSourceMoving & !isTargetMoving;
 		if(isSourceMovingAlone) {
 			//Select points to update
@@ -620,16 +635,14 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 		}
 		view.beginShape = view.lineShape = view.endShape = null;
 		Point2D source = (Point2D) edgeView.getPoint(0).clone();
-
 		Point2D target = (Point2D) edgeView.getPoint(edgeView.getPointCount() - 1).clone();
 
 		if (points.get(0) instanceof PortView) {
 			points.set(0, UtilPoint.addPoints(path.getArc(0).getSource(),source));
 		}
-		if (points.get(points.size()-1) instanceof PortView) {
-			points.set(points.size()-1, UtilPoint.addPoints(path.getArc(n-1).getTarget(),target));
+		if (points.get(points.size() - 1) instanceof PortView) {
+			points.set(points.size() - 1, UtilPoint.addPoints(path.getArc(n - 1).getTarget(),target));
 		}
-
 
 		Point2D controlPointSource, targetArc, controlPointTarget, sourceArc;
 		Shape EndShape;
@@ -641,10 +654,9 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 				if (cell.getTarget() != null) {
 					double theta = rotationAngle(lastArc, source, target);
 					EndShape = createLineEnd(endSize, endDeco,
-							new Point2D.Double(((Point2D) points.get(points.size() - 1)).getX() - 10 * Math.cos(theta), ((Point2D) points.get(points.size() - 1)).getY() - 10 * Math.sin(theta))
-							, (Point2D) ((Point2D) points.get(points.size() - 1)).clone());
+							new Point2D.Double(((Point2D) points.get(points.size() - 1)).getX() - 10 * Math.cos(theta), ((Point2D) points.get(points.size() - 1)).getY() - 10 * Math.sin(theta)),
+							(Point2D) ((Point2D) points.get(points.size() - 1)).clone());
 					view.endShape = EndShape;
-
 				}
 			}
 		}
@@ -656,9 +668,9 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 			controlPointTarget = (Point2D) points.get(4 * i + 2);
 			targetArc = (Point2D) points.get(4 * i + 3);
 			view.sharedPath.moveTo((float) sourceArc.getX(), (float) sourceArc.getY());
-			view.sharedPath.curveTo((float) controlPointSource.getX(), (float) controlPointSource.getY()
-					, (float) controlPointTarget.getX(), (float) controlPointTarget.getY()
-					, (float) targetArc.getX(), (float) targetArc.getY());
+			view.sharedPath.curveTo((float) controlPointSource.getX(), (float) controlPointSource.getY(),
+					(float) controlPointTarget.getX(), (float) controlPointTarget.getY(),
+					(float) targetArc.getX(), (float) targetArc.getY());
 			view.sharedPath.moveTo((float) targetArc.getX(), (float) targetArc.getY());
 		}
 
@@ -670,9 +682,7 @@ public class JmtEdgeRenderer extends EdgeRenderer implements CellViewRenderer {
 			view.sharedPath.append(view.beginShape, true);
 		}
 
-
 		return view.sharedPath;
 	}
-
 
 }

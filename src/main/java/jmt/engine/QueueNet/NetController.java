@@ -28,7 +28,6 @@ import jmt.engine.simEngine.SimSystem;
  *
  * @author Federico Granata, Stefano Omini
  */
-
 class NetController {
 
 	private boolean running;
@@ -57,7 +56,7 @@ class NetController {
 
 	//the maximum processed events a simulation is allowed to reach before it is stopped, negative value means infinite
 	private int maxProcessedEvents = -1;
-	
+
 	private NetSystem netSystem;
 	NetController() {
 		running = false;
@@ -158,7 +157,9 @@ class NetController {
 	public void setMaxProcessedEvents(int maxProcessedEvents) {
 		this.maxProcessedEvents = maxProcessedEvents;
 	}
-	public void setNetSystem(NetSystem netSystem){
+
+	public void setNetSystem(NetSystem netSystem) {
 		this.netSystem = netSystem;
 	}
+
 }

@@ -47,15 +47,12 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 	private static final String DESCRIPTION = HTML_START
 			+ "The value (i, j) is the probability that a job of class i switches to "
 			+ "class j. The values may be either probabilities or number of visits. "
-			+ "If the sum of a row is greater than one, the values will be normalized "
-			+ "in order to sum to one. A sum less than one will raise an error."
-			+ HTML_END;
-	private static final String NORMALIZATION_ERROR = HTML_START
-			+ "<font color=\"red\"> Error: some rows sum to less than one.</font>"
+			+ "If the sum of a row is not equal to one, the values will be normalized "
+			+ "in order to sum to one."
 			+ HTML_END;
 	private static final String NORMALIZATION_WARNING = HTML_START
-			+ "<font color=\"blue\"> Warning: some rows sum to greater than one. "
-			+ "The values will be normalized.</font>"
+			+ "<font color=\"blue\"> Warning: some rows do not sum to one. The values "
+			+ "will be normalized.</font>"
 			+ HTML_END;
 
 	/** Used to display classes with icon */
@@ -64,9 +61,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 	private ClassDefinition classData;
 	private Object stationKey;
 	private JLabel descriptionLabel;
-	private JLabel normalizationErrorLabel;
 	private JLabel normalizationWarningLabel;
-	private boolean errorRows[];
 	private boolean warningRows[];
 
 	public ClassSwitchSectionPanel(StationDefinition sd, ClassDefinition cd,
@@ -84,7 +79,6 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 		}
 		if (classData.getClassKeys().size() > 0) {
 			csTable = new ClassSwitchTable();
-			this.errorRows = new boolean[classData.getClassKeys().size()];
 			this.warningRows = new boolean[classData.getClassKeys().size()];
 		} else {
 			csTable = new JTable();
@@ -100,13 +94,11 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 		setBorder(new TitledBorder(new EtchedBorder(), "CS Strategies"));
 		setMinimumSize(new Dimension(180, 100));
 		descriptionLabel = new JLabel(DESCRIPTION);
-		normalizationErrorLabel = new JLabel(NORMALIZATION_ERROR);
 		normalizationWarningLabel = new JLabel(NORMALIZATION_WARNING);
-		checkRowLessThanOne();
+		checkRowNotEqualToOne();
 		add(wST, BorderLayout.CENTER);
 		add(descriptionLabel, BorderLayout.SOUTH);
 		JPanel msgPanel = new JPanel(new BorderLayout());
-		msgPanel.add(normalizationErrorLabel, BorderLayout.NORTH);
 		msgPanel.add(normalizationWarningLabel, BorderLayout.SOUTH);
 		add(msgPanel, BorderLayout.NORTH);
 		if (descriptionLabel != null) {
@@ -143,8 +135,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 		return "Class Switch Matrix";
 	}
 
-	private void checkRowLessThanOne() {
-		boolean allIsOk = true;
+	private void checkRowNotEqualToOne() {
 		boolean noWarning = true;
 		Vector<Object> classes = classData.getClassKeys();
 		for (int i = 0; i < classes.size(); i++) {
@@ -154,23 +145,13 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 				Object classOutKey = classes.get(j);
 				row += stationData.getClassSwitchMatrix(stationKey, classInKey, classOutKey);
 			}
-			if (row < 1) {
-				allIsOk = false;
-				errorRows[i] = true;
-				warningRows[i] = false;
-				normalizationErrorLabel.setVisible(true);				
-			} else if (row > 1) {
+			if (row != 1) {
 				noWarning  = false;
 				warningRows[i] = true;
-				errorRows[i] = false;
 				normalizationWarningLabel.setVisible(true);				
 			} else {
 				warningRows[i] = false;
-				errorRows[i] = false;
 			}
-		}
-		if (allIsOk) {
-			normalizationErrorLabel.setVisible(false);				
 		}
 		if (noWarning) {
 			normalizationWarningLabel.setVisible(false);				
@@ -222,9 +203,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 				return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 			} else {
 				JLabel label = new JLabel((String) value, SwingConstants.CENTER);
-				if (errorRows[row]) {
-					label.setForeground(Color.RED);
-				} else if (warningRows[row]) {
+				if (warningRows[row]) {
 					label.setForeground(Color.BLUE);
 				}
 				return label;
@@ -317,7 +296,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 			}
 			stationData.setClassSwitchMatrix(stationKey,
 					classes.get(rowIndex), classes.get(columnIndex), value);
-			checkRowLessThanOne();
+			checkRowNotEqualToOne();
 		}
 
 	}

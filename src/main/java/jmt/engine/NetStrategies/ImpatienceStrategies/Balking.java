@@ -1,6 +1,5 @@
 package jmt.engine.NetStrategies.ImpatienceStrategies;
 
-// import com.google.common.base.Preconditions;
 import java.util.Random;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceMeasurement.BooleanValueImpatienceMeasurement;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceMeasurement.ImpatienceMeasurement;
@@ -15,7 +14,7 @@ public class Balking implements Impatience {
   private boolean priorityActivated;
   private final Random randomGenerator;
 
-  public Balking(LoadDependentStrategy loadDependentStrategy, Boolean priorityActivated){
+  public Balking(LoadDependentStrategy loadDependentStrategy, Boolean priorityActivated) {
     this(loadDependentStrategy, priorityActivated, System.nanoTime());
   }
 
@@ -34,9 +33,6 @@ public class Balking implements Impatience {
     return priorityActivated;
   }
 
-  /**
-   * Returns the type of impatience
-   */
   @Override
   public ImpatienceType impatienceType() {
     return impatienceType;

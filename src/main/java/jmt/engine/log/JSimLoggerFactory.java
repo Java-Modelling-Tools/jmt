@@ -19,7 +19,6 @@ package jmt.engine.log;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +34,7 @@ import java.util.Map;
  */
 public class JSimLoggerFactory {
 	private static Map<File, CSVLogger> csvLoggerCache = new HashMap<File, CSVLogger>();
-	
+
 	/**
 	 * Returns an instance of CSVLogger on a given file 
 	 * @param file the file we should write to
@@ -45,45 +44,34 @@ public class JSimLoggerFactory {
 	 * @param digitSep the decimal digit separator
 	 * @return the logger instance
 	 */
-	public static CSVLogger getCSVLogger(File file, String[] columns, boolean append, String colSep, String digitSep) {
+	public static synchronized CSVLogger getCSVLogger(File file, String[] columns, boolean append, String colSep, String digitSep) {
 		CSVLogger ret = csvLoggerCache.get(file);
 		if (ret == null) {
-			synchronized (JSimLoggerFactory.class) {
-				ret = csvLoggerCache.get(file);
-				if (ret == null) {
-					ret = new CSVLogger(file, columns, append, colSep, digitSep);
-					csvLoggerCache.put(file, ret);
-				}
-			}
+			ret = new CSVLogger(file, columns, append, colSep, digitSep);
+			csvLoggerCache.put(file, ret);
 		}
 		return ret;
 	}
-	
+
 	/**
 	 * Removes a logger from the list of all loggers and disposes it.
 	 * @param logger the logger that should be removed
 	 */
-	static void remove(CSVLogger logger) throws IOException {
+	public static synchronized void remove(CSVLogger logger) throws IOException {
 		File file = logger.getFile();
 		if (csvLoggerCache.containsKey(file)) {
-			synchronized (JSimLoggerFactory.class) {
-				if (csvLoggerCache.containsKey(file)) {
-					csvLoggerCache.remove(file);
-				}
-			}
+			csvLoggerCache.remove(file);
 		}
 		logger.dispose();
 	}
-	
+
 	/**
-	 * Closes all the loggers built by this factory.
+	 * Removes all the loggers built by this factory.
 	 * @throws IOException if an IO problem occurs
 	 */
-	public static synchronized void closeAllLoggers() throws IOException {
-		ArrayList<CSVLogger> loggers = new ArrayList<CSVLogger>();
-		loggers.addAll(csvLoggerCache.values());
-		for (CSVLogger logger : loggers) {
-			logger.close();
+	public static synchronized void removeAllLoggers() throws IOException {
+		for (CSVLogger logger : csvLoggerCache.values()) {
+			remove(logger);
 		}
 	}
 }

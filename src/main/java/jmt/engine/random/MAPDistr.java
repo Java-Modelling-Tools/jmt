@@ -48,10 +48,11 @@ public class MAPDistr extends AbstractDistribution implements Distribution {
 	}
 
 	@Override
-	public void setRandomEngine(RandomEngine engine){
+	public void setRandomEngine(RandomEngine engine) {
 		this.engine = engine;
 		this.expDistr.setRandomEngine(engine);
 	}
+
 	/**
 	 * This method is used to obtain from the distribution its probability distribution
 	 * function evaluated where required by the user.

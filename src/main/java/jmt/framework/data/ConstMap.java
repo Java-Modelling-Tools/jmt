@@ -18,7 +18,10 @@
 
 package jmt.framework.data;
 
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * <p><b>Name:</b> ConstMap</p> 
@@ -30,12 +33,13 @@ import java.util.HashMap;
  * @author Bertoli Marco
  * @version 1.0
  */
-public abstract class ConstMap<E, F> {
-	private HashMap<E, F> map = new HashMap<E, F>();
+public abstract class ConstMap<K, V> {
+
+	private Map<K, V> map = new LinkedHashMap<K, V>();
 
 	/**
-	 * Fills this constant map with values. Call putConst method to fill.
-	 * @see #putConst(Object, Object)
+	 * Fills this constant map with values. Call put method to fill.
+	 * @see #put(Object, Object)
 	 */
 	protected abstract void fill();
 
@@ -44,20 +48,29 @@ public abstract class ConstMap<E, F> {
 	}
 
 	/**
-	 * Put an element in this constmap. May be called only from the fill method.
-	 * @param key the key for the constant
-	 * @param value constant value
+	 * Puts a value in this map. May be called only from the fill method.
+	 * @param key the key for the value
+	 * @param value the value
 	 */
-	protected void putConst(E key, F value) {
+	protected void put(K key, V value) {
 		map.put(key, value);
 	}
 
 	/**
-	 * Returns an object in this map.
-	 * @param key the key for the object
-	 * @return the object or null if not found
+	 * Returns a value in this map.
+	 * @param key the key for the value
+	 * @return the value
 	 */
-	public F get(Object key) {
+	public V get(Object key) {
 		return map.get(key);
 	}
+
+	/**
+	 * Returns the key set of this map.
+	 * @return the key set
+	 */
+	public Set<K> keySet() {
+		return Collections.unmodifiableSet(map.keySet());
+	}
+
 }

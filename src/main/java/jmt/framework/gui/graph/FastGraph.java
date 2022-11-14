@@ -37,7 +37,6 @@ import javax.swing.JPopupMenu;
 
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
-
 /**
  * <p>Title: FastGraph</p>
  * <p>Description: Displays a graph with autoresizing property. This is designed to be a
@@ -52,8 +51,9 @@ import org.freehep.graphicsbase.util.export.ExportDialog;
  *         Time: 12.34.37
  */
 public class FastGraph extends JPanel {
+
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final Color COLOR_DRAW = Color.BLUE;
 	private static final Color COLOR_AXIS = Color.BLACK;
 	private static final Color COLOR_BG = Color.WHITE;
@@ -62,13 +62,13 @@ public class FastGraph extends JPanel {
 	private static final Color COLOR_POPUP = Color.decode("#C218FF");
 	private static final Color COLOR_POPUP_BG = Color.decode("#FFFBF2");
 	private static final int MARGIN = 8;
-	
+
 	private static final String POPUP_X_PREFIX = "t";
 	private static final String POPUP_MIDDLE = " : ";
 	private static final String POPUP_FULL_X_PREFIX = POPUP_X_PREFIX + POPUP_MIDDLE;
 	private static final int POPUP_VSPACING = 1;
 	private static final int POPUP_MARGIN = 5;
-	
+
 	private List<MeasureValue> values;
 	private double xunit;
 	private int x0; // Position of origin of cartesian axes
@@ -90,7 +90,7 @@ public class FastGraph extends JPanel {
 
 	private DecimalFormat formatXsimple  = new DecimalFormat("#0");
 	private DecimalFormat formatXdecimal  = new DecimalFormat("#0.#");
-	
+
 	private DecimalFormat simulationTimeFormat = new DecimalFormat("#,##0");
 
 	/**
@@ -131,7 +131,7 @@ public class FastGraph extends JPanel {
 		// Find maximum value for x
 		MeasureValue lastValue = values.get(values.size() - 1);
 		double lastXValue = getXValue(lastValue, values.size() - 1);
-		
+
 		// Detect X measure unit. It should be a multiple of 10^3
 		String xLabel;
 		double xMeasureUnit;
@@ -141,7 +141,7 @@ public class FastGraph extends JPanel {
 			long xScale = (long)Math.log10(lastXValue);
 			xScale = xScale - (xScale % 3);
 			xMeasureUnit = Math.pow(10, xScale);
-			
+
 			// Allow one decimal digit if scaled value is less than 10
 			maxXLabel = Math.ceil(lastXValue / xMeasureUnit);
 			if (maxXLabel < 10) {
@@ -154,7 +154,7 @@ public class FastGraph extends JPanel {
 				xLabel = "";
 			}
 		}
-		
+
 		// Find maximum value for y
 		double maxy = 0;
 		for (int i = 0; i < values.size(); i++) {
@@ -192,7 +192,7 @@ public class FastGraph extends JPanel {
 		// Rounds the x axis step and adjust maxx accordingly.
 		double maxAvailableXWidth = width - x0 - MARGIN - xtextBound.getWidth() / 2;
 		int xTicNum = (int) Math.floor(maxAvailableXWidth / (xtextBound.getWidth() + 4));
-		
+
 		double xTicSize;
 		if (!xDecimalDigit) {
 			xTicSize = Math.ceil(maxXLabel / xTicNum);
@@ -200,7 +200,7 @@ public class FastGraph extends JPanel {
 			xTicSize = Math.ceil(maxXLabel / xTicNum * 10) / 10;
 		}
 		double maxx = xTicSize * xTicNum * xMeasureUnit;
-		
+
 		xstep = (width - x0 - MARGIN - xtextBound.getWidth() / 2) / maxx;
 		ystep = (y0 - MARGIN) / maxy;
 
@@ -219,8 +219,7 @@ public class FastGraph extends JPanel {
 
 		// X axis
 		g.drawLine(x0, y0, getX(maxx), y0);
-		
-		
+
 		num = (int) Math.floor((getX(maxx) - x0) / (xtextBound.getWidth() + 4));
 		// Draws caption for x axis
 		for (int i = 0; i <= xTicNum; i++) {
@@ -267,7 +266,7 @@ public class FastGraph extends JPanel {
 				g.drawLine(getX(xValue), getY(0), getX((xValue)), getY(currValue.getLastIntervalAvgValue()));
 			}
 		}
-		
+
 		// Draw last points as dot if no lines were drawn during the previous cycle.
 		if (values.size() == 1) {
 			g.setColor(COLOR_BOUNDS);
@@ -280,18 +279,18 @@ public class FastGraph extends JPanel {
 			g.setColor(COLOR_DRAW);
 			g.fillOval(getX(lastXValue),getY(lastValue.getMeanValue()), 2, 1);
 		}
-		
+
 		if (!hideLastInterval) {
 			g.setColor(COLOR_LAST_INTERVAL);
 			g.drawLine(getX(lastXValue), getY(0), getX((lastXValue)), getY(lastValue.getLastIntervalAvgValue()));
 		}
-		
+
 		// Draws the selected value
 		if (selectedValue != null) {
 			paintSelectedValue(selectedValue, g, width, height, maxx, maxy);
 		}
 	}
-	
+
 	/**
 	 * Draws the selected value
 	 * @param selectedValue the selected value to draw
@@ -306,7 +305,7 @@ public class FastGraph extends JPanel {
 		String x_str = simulationTimeFormat.format(selectedValue.getSimTime());
 		String m_str = formatNumber(selectedValue.getMeanValue());
 		String i_str = formatNumber(selectedValue.getLastIntervalAvgValue());
-		
+
 		Dimension bounds = composeVerticalBounds(g, metric, POPUP_FULL_X_PREFIX + x_str, POPUP_FULL_X_PREFIX + m_str, POPUP_FULL_X_PREFIX + i_str);
 		int selectedValueX = getX(selectedValue.getSimTime());
 		int textX = (int)(selectedValueX - bounds.getWidth() / 2);
@@ -317,28 +316,28 @@ public class FastGraph extends JPanel {
 			textX = width - (int)bounds.getWidth() - POPUP_MARGIN;
 		}
 		int textY = getY(maxy / 2) + (int)bounds.getHeight() / 2;
-		
+
 		g.setColor(COLOR_POPUP);
 		g.drawLine(selectedValueX, getY(0), selectedValueX, getY(selectedValue.getLastIntervalAvgValue()));
 		g.setColor(COLOR_POPUP_BG);
 		g.fillRoundRect(textX - POPUP_MARGIN, textY - (int)bounds.getHeight(), (int)bounds.getWidth() + POPUP_MARGIN * 2, (int)bounds.getHeight() + POPUP_MARGIN, 4, 4);	
 		g.setColor(COLOR_POPUP);
 		g.drawRoundRect(textX - POPUP_MARGIN, textY - (int)bounds.getHeight(), (int)bounds.getWidth() + POPUP_MARGIN * 2, (int)bounds.getHeight() + POPUP_MARGIN, 4, 4);
-		
+
 		// Draw squares
 		Rectangle2D prefixBounds = metric.getStringBounds(POPUP_X_PREFIX, g);
 		g.setColor(COLOR_DRAW);
 		g.fillRect(textX, textY - (int)prefixBounds.getHeight() - bounds.height / 3, (int)prefixBounds.getWidth(), (int)prefixBounds.getHeight());
 		g.setColor(COLOR_LAST_INTERVAL);
 		g.fillRect(textX, textY - (int)prefixBounds.getHeight(), (int)prefixBounds.getWidth(), (int)prefixBounds.getHeight());
-		
+
 		// Draws texts
 		g.setColor(COLOR_AXIS);
 		g.drawString(POPUP_FULL_X_PREFIX + x_str, textX, textY - bounds.height * 2 / 3);
 		g.drawString(POPUP_MIDDLE + m_str, textX + (int)prefixBounds.getWidth(), textY - bounds.height / 3);
 		g.drawString(POPUP_MIDDLE + i_str, textX + (int)prefixBounds.getWidth(), textY);
 	}
-	
+
 	private Dimension composeVerticalBounds(Graphics g, FontMetrics metric, String...strings) {
 		double xBounds = 0.0, yBounds = 0.0;
 		for (int i=0; i<strings.length; i++) {
@@ -389,7 +388,7 @@ public class FastGraph extends JPanel {
 			repaint();
 			return;
 		}
-		
+
 		// Selects the best matching value.
 		int clickedX = ev.getX();
 		double simulationTime = (clickedX - x0) / xstep;
@@ -411,7 +410,7 @@ public class FastGraph extends JPanel {
 		}
 		repaint();
 	}
-	
+
 	/**
 	 * Returns the nearest value between left and right values
 	 * @param leftValue one of the values
@@ -484,21 +483,24 @@ public class FastGraph extends JPanel {
 	}
 
 	protected class PlotPopupMenu extends JPopupMenu {
+
 		private static final long serialVersionUID = 1L;
 		public JMenuItem saveAs;
+
 		public PlotPopupMenu() {
 			saveAs = new JMenuItem("Save as...");
 			this.add(saveAs);
 			addListeners();
 		}
+
 		public void addListeners() {
 			saveAs.addActionListener(new AbstractAction() {
 				private static final long serialVersionUID = 1L;
 				public void actionPerformed(ActionEvent e) {
 					ExportDialog export = new ExportDialog();
 					export.showExportDialog(FastGraph.this,"Export view as ...", FastGraph.this,"Export");
-				}});
-
+				}
+			});
 		}
 
 	}
@@ -519,6 +521,7 @@ public class FastGraph extends JPanel {
 
 	/** Compares simulation time, either in a MeasureValue data structure or in a Double */
 	private static class SimTimeComparator implements Comparator<Object> {
+
 		@Override
 		public int compare(Object arg0, Object arg1) {
 			double val0 = getSimulationTime(arg0);
@@ -531,7 +534,7 @@ public class FastGraph extends JPanel {
 				return 0;
 			}
 		}
-		
+
 		/**
 		 * Return the simulation time from the given object
 		 * @param obj the object
@@ -546,7 +549,7 @@ public class FastGraph extends JPanel {
 				return 0;
 			}
 		}
-		
+
 	}
 
 }

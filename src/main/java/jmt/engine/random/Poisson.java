@@ -19,80 +19,20 @@
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
-import jmt.engine.math.Arithmetic;
-import jmt.engine.math.Probability;
 
 /**
  * 
- * This is the Poisson distribution (see the constructor description
- * for its pdf definition).
+ * This is the Poisson distribution.
  * 
- * <br><br>Copyright (c) 2003 (thanks to CERN - European Organization
- * for Nuclear Research for the Patchwork Rejection/Inversion method).
- * <br>Politecnico di Milano - dipartimento di Elettronica e Informazione
- * @author Fabrizio Frontera - ffrontera@yahoo.it
- * @author Modified by Stefano Omini, 7/5/2004
+ * @author Leran Chen - 01/09/2021
  * 
  */
 public class Poisson extends AbstractDistribution implements Distribution {
 
-	// precomputed and cached values (for performance only)
-	// cache for < SWITCH_MEAN
-	protected double my_old = -1.0;
-	protected double par;
-	protected double q;
-	protected double p0;
-	protected double ppp;
-	protected double[] pp = new double[36];
-	protected int llll;
-
-	// cache for >= SWITCH_MEAN
-	protected double my_last = -1.0;
-	protected double ll;
-	protected int k2;
-	protected int k4;
-	protected int k1;
-	protected int k5;
-	protected double dl;
-	protected double dr;
-	protected double r1;
-	protected double r2;
-	protected double r4;
-	protected double r5;
-	protected double lr;
-	protected double l_my;
-	protected double c_pm;
-	protected double f1;
-	protected double f2;
-	protected double f4;
-	protected double f5;
-	protected double p1;
-	protected double p2;
-	protected double p3;
-	protected double p4;
-	protected double p5;
-	protected double p6;
-
-	// cache for both;
-	protected int m;
-
-	protected static final double MEAN_MAX = Integer.MAX_VALUE; // for all means larger than that, we do not try to compute a poisson deviation, but return the mean.
-	protected static final double SWITCH_MEAN = 10.0; // switch from method A to method B
-
 	/**
-	 * This is the constructor. It creates a new poisson distribution which
-	 * is defined from pdf:
-	 * <pre>         (lambda^x)     (-lambda)
-	 * pdf(x) = ----------- * e
-	 *              x!</pre>
-	 * where lambda is the variance of the distribution and it is also the mean
-	 * and x is an integer.
+	 * This is the constructor. It creates a new Poisson distribution.
 	 */
 	public Poisson() {
-	}
-
-	private static double f(int k, double l_nu, double c_pm) {
-		return Math.exp(k * l_nu - Arithmetic.logFactorial(k) - c_pm);
 	}
 
 	/**
@@ -100,19 +40,20 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the pdf.
-	 * @param p parameter of the poisson distribution.
+	 * @param p parameter of the Poisson distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the probability distribution function evaluated in x.
 	 */
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double mean = ((PoissonPar) p).getMean();
-			if (Math.floor(x) != x) {
-				throw new IncorrectDistributionParameterException("Error: x must be integer.");
+			if (x < 0.0) {
+				return 0.0;
 			}
-			return Math.exp(x * Math.log(mean) - Arithmetic.logFactorial((int) x) - mean);
+			double lambda = ((PoissonPar) p).getLambda();
+			int k = (int) Math.floor(x);
+			return getPoissonProbability(k, lambda);
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: parameter mean must be gtz");
+			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}
 	}
 
@@ -121,16 +62,23 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * function evaluated where required by the user.
 	 *
 	 * @param x double indicating where to evaluate the cdf.
-	 * @param p parameter of the poisson distribution.
+	 * @param p parameter of the Poisson distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the cumulative distribution function evaluated in x.
 	 */
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			double mean = ((PoissonPar) p).getMean();
-			return Probability.poisson((int) x, mean);
+			if (x < 0.0) {
+				return 0.0;
+			}
+			double lambda = ((PoissonPar) p).getLambda();
+			double sum = 0;
+			for (int k = 0; k <= (int) Math.floor(x); k++) {
+				sum += getPoissonProbability(k, lambda);
+			}
+			return sum;
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: parameter mean must be gtz");
+			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}
 	}
 
@@ -138,15 +86,15 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic mean.
 	 *
-	 * @param p parameter of the poisson distribution.
+	 * @param p parameter of the Poisson distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic mean of the distribution.
 	 */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			return ((PoissonPar) p).getMean();
+			return ((PoissonPar) p).getLambda();
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: parameter mean must be gtz");
+			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}
 	}
 
@@ -154,15 +102,15 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * This method is used to obtain from the distribution the value of its own
 	 * theoretic variance.
 	 *
-	 * @param p parameter of the poisson distribution.
+	 * @param p parameter of the Poisson distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the theoretic variance of the distribution.
 	 */
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			return ((PoissonPar) p).getMean();
+			return ((PoissonPar) p).getLambda();
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: parameter mean must be gtz");
+			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}
 	}
 
@@ -170,215 +118,40 @@ public class Poisson extends AbstractDistribution implements Distribution {
 	 * This method is used to obtain from the distribution the next number distributed
 	 * according to the distribution parameter.
 	 *
-	 * @param p parameter of the poisson distribution.
+	 * @param p parameter of the Poisson distribution.
 	 * @throws IncorrectDistributionParameterException
 	 * @return double with the next random number of this distribution.
 	 */
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
-			/******************************************************************
-			 *                                                                *
-			 * Poisson Distribution - Patchwork Rejection/Inversion           *
-			 * with many thanks to CERN - European                            *
-			 * Organization for Nuclear Research.                             *
-			 *                                                                *
-			 ******************************************************************
-			 *                                                                *
-			 * For parameter  my < 10  Tabulated Inversion is applied.        *
-			 * For my >= 10  Patchwork Rejection is employed:                 *
-			 * The area below the histogram function f(x) is rearranged in    *
-			 * its body by certain point reflections. Within a large center   *
-			 * interval variates are sampled efficiently by rejection from    *
-			 * uniform hats. Rectangular immediate acceptance regions speed   *
-			 * up the generation. The remaining tails are covered by          *
-			 * exponential functions.                                         *
-			 *                                                                *
-			 *****************************************************************/
-			double my = ((PoissonPar) p).getMean();
-
-			double u;
-			int k, i;
-
-			if (my < SWITCH_MEAN) { // CASE B: Inversion- start new table and calculate p0
-				if (my != my_old) {
-					my_old = my;
-					llll = 0;
-					ppp = Math.exp(-my);
-					q = ppp;
-					p0 = ppp;
-				}
-				m = (my > 1.0) ? (int) my : 1;
-				for (;;) {
-					u = engine.raw(); // Step U. Uniform sample
-					k = 0;
-					if (u <= p0) {
-						return (k);
-					}
-					if (llll != 0) { // Step T. Table comparison
-						i = (u > 0.458) ? Math.min(llll, m) : 1;
-						for (k = i; k <= llll; k++) {
-							if (u <= pp[k]) {
-								return (k);
-							}
-						}
-						if (llll == 35) {
-							continue;
-						}
-					}
-					for (k = llll + 1; k <= 35; k++) { // Step C. Creation of new prob.
-						ppp *= my / k;
-						q += ppp;
-						pp[k] = q;
-						if (u <= q) {
-							llll = k;
-							return (k);
-						}
-					}
-					llll = 35;
-				}
-			} // end my < SWITCH_MEAN
-			else if (my < MEAN_MAX) { // CASE A: acceptance complement
-				int Dk, X, Y;
-				double Ds, U, V, W;
-
-				m = (int) my;
-				if (my != my_last) { //  set-up
-					my_last = my;
-
-					// approximate deviation of reflection points k2, k4 from my - 1/2
-					Ds = Math.sqrt(my + 0.25);
-
-					// mode m, reflection points k2 and k4, and points k1 and k5, which
-					// delimit the centre region of h(x)
-					k2 = (int) Math.ceil(my - 0.5 - Ds);
-					k4 = (int) (my - 0.5 + Ds);
-					k1 = k2 + k2 - m + 1;
-					k5 = k4 + k4 - m;
-
-					// range width of the critical left and right centre region
-					dl = (k2 - k1);
-					dr = (k5 - k4);
-
-					// recurrence constants r(k) = ppp(k)/ppp(k-1) at k = k1, k2, k4+1, k5+1
-					r1 = my / k1;
-					r2 = my / k2;
-					r4 = my / (k4 + 1);
-					r5 = my / (k5 + 1);
-
-					// reciprocal values of the scale parameters of expon. tail envelopes
-					ll = Math.log(r1); // expon. tail left
-					lr = -Math.log(r5); // expon. tail right
-
-					// Poisson constants, necessary for computing function values f(k)
-					l_my = Math.log(my);
-					c_pm = m * l_my - Arithmetic.logFactorial(m);
-
-					// function values f(k) = ppp(k)/ppp(m) at k = k2, k4, k1, k5
-					f2 = f(k2, l_my, c_pm);
-					f4 = f(k4, l_my, c_pm);
-					f1 = f(k1, l_my, c_pm);
-					f5 = f(k5, l_my, c_pm);
-
-					// area of the two centre and the two exponential tail regions
-					// area of the two immediate acceptance regions between k2, k4
-					p1 = f2 * (dl + 1.0); // immed. left
-					p2 = f2 * dl + p1; // centre left
-					p3 = f4 * (dr + 1.0) + p2; // immed. right
-					p4 = f4 * dr + p3; // centre right
-					p5 = f1 / ll + p4; // expon. tail left
-					p6 = f5 / lr + p5; // expon. tail right
-				} // end set-up
-
-				for (;;) {
-					// generate uniform number U -- U(0, p6)
-					// case distinction corresponding to U
-					if ((U = engine.raw() * p6) < p2) { // centre left
-
-						// immediate acceptance region R2 = [k2, m) *[0, f2),  X = k2, ... m -1
-						if ((V = U - p1) < 0.0) {
-							return (k2 + (int) (U / f2));
-						}
-						// immediate acceptance region R1 = [k1, k2)*[0, f1),  X = k1, ... k2-1
-						if ((W = V / dl) < f1) {
-							return (k1 + (int) (V / f1));
-						}
-
-						// computation of candidate X < k2, and its counterpart Y > k2
-						// either squeeze-acceptance of X or acceptance-rejection of Y
-						Dk = (int) (dl * engine.raw()) + 1;
-						if (W <= f2 - Dk * (f2 - f2 / r2)) { // quick accept of
-							return (k2 - Dk); // X = k2 - Dk
-						}
-						if ((V = f2 + f2 - W) < 1.0) { // quick reject of Y
-							Y = k2 + Dk;
-							if (V <= f2 + Dk * (1.0 - f2) / (dl + 1.0)) {// quick accept of
-								return (Y); // Y = k2 + Dk
-							}
-							if (V <= f(Y, l_my, c_pm)) {
-								return (Y); // final accept of Y
-							}
-						}
-						X = k2 - Dk;
-					} else if (U < p4) { // centre right
-						// immediate acceptance region R3 = [m, k4+1)*[0, f4), X = m, ... k4
-						if ((V = U - p3) < 0.0) {
-							return (k4 - (int) ((U - p2) / f4));
-						}
-						// immediate acceptance region R4 = [k4+1, k5+1)*[0, f5)
-						if ((W = V / dr) < f5) {
-							return (k5 - (int) (V / f5));
-						}
-
-						// computation of candidate X > k4, and its counterpart Y < k4
-						// either squeeze-acceptance of X or acceptance-rejection of Y
-						Dk = (int) (dr * engine.raw()) + 1;
-						if (W <= f4 - Dk * (f4 - f4 * r4)) { // quick accept of
-							return (k4 + Dk); // X = k4 + Dk
-						}
-						if ((V = f4 + f4 - W) < 1.0) { // quick reject of Y
-							Y = k4 - Dk;
-							if (V <= f4 + Dk * (1.0 - f4) / dr) { // quick accept of
-								return (Y); // Y = k4 - Dk
-							}
-							if (V <= f(Y, l_my, c_pm)) {
-								return (Y); // final accept of Y
-							}
-						}
-						X = k4 + Dk;
-					} else {
-						W = engine.raw();
-						if (U < p5) { // expon. tail left
-							Dk = (int) (1.0 - Math.log(W) / ll);
-							if ((X = k1 - Dk) < 0) {
-								continue; // 0 <= X <= k1 - 1
-							}
-							W *= (U - p4) * ll; // W -- U(0, h(x))
-							if (W <= f1 - Dk * (f1 - f1 / r1)) {
-								return (X); // quick accept of X
-							}
-						} else { // expon. tail right
-							Dk = (int) (1.0 - Math.log(W) / lr);
-							X = k5 + Dk; // X >= k5 + 1
-							W *= (U - p5) * lr; // W -- U(0, h(x))
-							if (W <= f5 - Dk * (f5 - f5 * r5)) {
-								return (X); // quick accept of X
-							}
-						}
-					}
-
-					// acceptance-rejection test of candidate X from the original area
-					// test, whether  W <= f(k),    with  W = U*h(x)  and  U -- U(0, 1)
-					// getLog f(X) = (X - m)*getLog(my) - getLog X! + getLog m!
-					if (Math.log(W) <= X * l_my - Arithmetic.logFactorial(X) - c_pm) {
-						return (X);
-					}
-				}
-			} else { // mean is too large
-				return (int) my;
+			double lambda = ((PoissonPar) p).getLambda();
+			int k = -1;
+			double sum = 0.0;
+			double rand = engine.raw();
+			while (sum < rand) {
+				k++;
+				sum += getPoissonProbability(k, lambda);
 			}
+			return (double) k;
 		} else {
-			throw new IncorrectDistributionParameterException("Remember: parameter mean must be gtz");
+			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}
+	}
+
+	/**
+	 * This method is used to compute the probability of the Poisson distribution for
+	 * an input k given the parameter lambda.
+	 *
+	 * @param k input of the Poisson distribution.
+	 * @param lambda parameter of the Poisson distribution.
+	 * @return double with the probability for an input k given the parameter lambda.
+	 */
+	private double getPoissonProbability(int k, double lambda) {
+		double prob = Math.exp(-lambda);
+		for (int i = 1; i <= k; i++) {
+			prob *= lambda / i;
+		}
+		return prob;
 	}
 
 } // end Poisson

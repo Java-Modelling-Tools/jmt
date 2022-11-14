@@ -333,7 +333,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 				Object classKey = indexToKey(rowIndex);
 				if (!value.equals(sd.getForkStrategy(stationKey, classKey))) {
 					sd.setForkStrategy(stationKey, classKey, ((ForkStrategy) value).clone());
-				}			
+				}
 				forkProbEditor.setData(sd, cd, stationKey, classKey);
 				descrTextPane.setText(((ForkStrategy) sd.getForkStrategy(stationKey, classKey)).getDescription());
 				InGateWaySectionPanel.this.doLayout();

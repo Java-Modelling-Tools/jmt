@@ -46,8 +46,8 @@ public class XSDSchemaLoader {
 
 	//******************XSLT TRANSLATORS**************************//
 
-	public static final String JMVA_TO_JSIM = "MVAtoSIM_parallel.xslt";
-	public static final String JSIM_TO_JMVA = "translatorSIMtoMVA.xslt";
+	public static final String JMVA_TO_JSIM = "MVAtoSIM.xslt";
+	public static final String JSIM_TO_JMVA = "SIMtoMVA.xslt";
 	public static final String OUT_TO_JMVA = "OUTtoMVA.xslt";
 	public static final String OUT_TO_JMVA_SCALING = "OUTtoMVAscaling.xslt";
 

@@ -66,7 +66,6 @@ import jmt.gui.exact.table.ExactCellRenderer;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 import org.ejml.data.DMatrixRMaj;
-import org.graalvm.compiler.lir.LIRInstruction;
 
 /**
  * <p>
@@ -625,16 +624,11 @@ public class DistributionsEditor extends JMTDialog {
 				rend.addDistribution(INTERVAL_LENGTH_DISTRIBUTION, 3,
 						intervalPanels[2]);
 				rend.addDistribution(VALUE_DISTRIBUTION, 4, intervalPanels[2]);
-
-
 			} else if (current instanceof PhaseType || current instanceof MAP) {
-
 				((GridLayout) scrollPanel.getLayout()).setRows(1);
 				JPanel compositePanel = new JPanel();
 				compositePanel.setLayout(new BorderLayout());
-				/**
-				 * My code here
-				 */
+
 				if (current instanceof MAP) {
 					final JPanel autoFitPanel = new JPanel();
 					autoFitPanel.setBorder(new TitledBorder(new EtchedBorder(),
@@ -728,7 +722,7 @@ public class DistributionsEditor extends JMTDialog {
 							JCheckBox smpBox = new JCheckBox();
 							smpBox.setSelected(false);
 							panel.add(smpBox);
-							*/
+							 */
 
 							int option = JOptionPane.showConfirmDialog(null, panel, "Fitting Options", JOptionPane.OK_CANCEL_OPTION);
 							if (option == JOptionPane.OK_OPTION) {
@@ -819,15 +813,13 @@ public class DistributionsEditor extends JMTDialog {
 									progressLabel.setText("Finished!");
 								}
 							};
-							sw.execute();
 
+							sw.execute();
 						}
 					});
 
-
 					compositePanel.add(autoFitPanel, BorderLayout.NORTH);
 				}
-
 
 				int phaseNum = ((Object[][]) current.getParameter(0).getValue())[0].length;
 				phaseNumSpinner = new JSpinner();
@@ -866,7 +858,6 @@ public class DistributionsEditor extends JMTDialog {
 				phaseNumPanel.add(new JLabel("Number: "));
 				phaseNumPanel.add(phaseNumSpinner);
 
-
 				int parameterNum = current.getNumberOfParameters();
 				parameterTables = new ParameterTable[parameterNum];
 				JPanel parametersPanel = new JPanel(new GridLayout(parameterNum, 1));
@@ -878,12 +869,9 @@ public class DistributionsEditor extends JMTDialog {
 					parametersPanel.add(parameterPane);
 				}
 
-
 				compositePanel.add(phaseNumPanel, BorderLayout.SOUTH);
 				compositePanel.add(parametersPanel, BorderLayout.CENTER);
 				scrollPanel.add(compositePanel);
-
-
 			} else {
 				((GridLayout) scrollPanel.getLayout()).setRows(1);
 
@@ -892,21 +880,19 @@ public class DistributionsEditor extends JMTDialog {
 						.getMinimumSize().width;
 
 				// Shows this distribution's parameters on param_panel
-				JLabel label;
-				JTextField textfield;
 				scrollPanel.add(new JScrollPane(param_panel));
 				for (int i = 0; i < current.getNumberOfParameters(); i++) {
 					// Creates the label
-					label = new JLabel(current.getParameter(i).getDescription()
+					JLabel label = new JLabel(current.getParameter(i).getDescription()
 							+ ":", SwingConstants.TRAILING);
 					// Corrects maxwidth if needed
 					if (maxwidth < label.getMinimumSize().width) {
 						maxwidth = label.getMinimumSize().width;
 					}
 					// Creates the textfield used to input values
-					textfield = new JTextField(5);
-					textfield.setMaximumSize(new Dimension(textfield
-							.getMaximumSize().width,
+					JTextField textfield = new JTextField(5);
+					textfield.setMaximumSize(new Dimension(
+							textfield.getMaximumSize().width,
 							textfield.getMinimumSize().height));
 					label.setLabelFor(textfield);
 					textfield.setName(Integer.toString(i));
@@ -938,13 +924,10 @@ public class DistributionsEditor extends JMTDialog {
 						param_panel.add(replayerTextField);
 						param_panel.add(chooseReplayerFileButton);
 					} else {
-						param_panel
-						.add(label,
-								new SpringLayout.Constraints(Spring
-										.constant(0), Spring.constant(0),
-										Spring.constant(maxwidth),
-										Spring.constant(label
-												.getMinimumSize().height)));
+						param_panel.add(label, new SpringLayout.Constraints(
+								Spring.constant(0), Spring.constant(0),
+								Spring.constant(maxwidth),
+								Spring.constant(label.getMinimumSize().height)));
 						param_panel.add(textfield);
 					}
 				}
@@ -964,20 +947,16 @@ public class DistributionsEditor extends JMTDialog {
 					if (current.hasMean()) {
 						rows++;
 						// Creates the label
-						label = new JLabel("mean:", SwingConstants.TRAILING);
-						mean_c_panel
-						.add(label,
-								new SpringLayout.Constraints(
-										Spring.constant(0),
-										Spring.constant(0),
-										Spring.constant(maxwidth),
-										Spring.constant(label
-												.getMinimumSize().height)));
+						JLabel label = new JLabel("mean:", SwingConstants.TRAILING);
+						mean_c_panel.add(label, new SpringLayout.Constraints(
+								Spring.constant(0), Spring.constant(0),
+								Spring.constant(maxwidth),
+								Spring.constant(label.getMinimumSize().height)));
 						// Creates the textfield used to input mean values
-						textfield = new JTextField(5);
-						textfield.setMaximumSize(new Dimension(textfield
-								.getMaximumSize().width, textfield
-								.getMinimumSize().height));
+						JTextField textfield = new JTextField(5);
+						textfield.setMaximumSize(new Dimension(
+								textfield.getMaximumSize().width,
+								textfield.getMinimumSize().height));
 						label.setLabelFor(textfield);
 						textfield.setName("mean");
 						textfield.addFocusListener(cmListener);
@@ -989,20 +968,16 @@ public class DistributionsEditor extends JMTDialog {
 					if (current.hasC()) {
 						rows++;
 						// Creates the label
-						label = new JLabel("c:", SwingConstants.TRAILING);
-						mean_c_panel
-						.add(label,
-								new SpringLayout.Constraints(
-										Spring.constant(0),
-										Spring.constant(0),
-										Spring.constant(maxwidth),
-										Spring.constant(label
-												.getMinimumSize().height)));
+						JLabel label = new JLabel("c:", SwingConstants.TRAILING);
+						mean_c_panel.add(label, new SpringLayout.Constraints(
+								Spring.constant(0), Spring.constant(0),
+								Spring.constant(maxwidth),
+								Spring.constant(label.getMinimumSize().height)));
 						// Creates the textfield used to input mean values
-						textfield = new JTextField(5);
-						textfield.setMaximumSize(new Dimension(textfield
-								.getMaximumSize().width, textfield
-								.getMinimumSize().height));
+						JTextField textfield = new JTextField(5);
+						textfield.setMaximumSize(new Dimension(
+								textfield.getMaximumSize().width,
+								textfield.getMinimumSize().height));
 						label.setLabelFor(textfield);
 						textfield.setName("c");
 						textfield.addFocusListener(cmListener);
@@ -1083,7 +1058,7 @@ public class DistributionsEditor extends JMTDialog {
 					value = new Double(1 - prob.doubleValue());
 				} else if (comp.getName().equals(PROBABILITY_INTERVAL_A)) {
 					value = current.getParameter(0).getValue();
-				} else if (!comp.getName().equals(TRACEFILE)){
+				} else if (!comp.getName().equals(TRACEFILE)) {
 					int num = Integer.parseInt(comp.getName());
 					value = current.getParameter(num).getValue();
 				}

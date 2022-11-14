@@ -24,10 +24,7 @@ import jmt.engine.NetStrategies.ForkStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeListWithJobNum;
-import jmt.engine.QueueNet.NodeSection;
 
 /**
  *
@@ -49,8 +46,7 @@ public class ClassSwitchFork extends ForkStrategy {
 	}
 
 	@Override
-		public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
-		//NodeList nodes = ownerNode.getOutputNodes();
+	public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
 		if (nodes == null) {
 			//it is the first execution of this method: find the NetNode objects
 			nodes = new NetNode[nodeNames.length];

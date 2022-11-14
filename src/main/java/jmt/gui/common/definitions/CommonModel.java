@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -34,7 +33,6 @@ import java.util.Vector;
 import jmt.engine.NetStrategies.ImpatienceStrategies.BalkingParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
-import jmt.engine.NetStrategies.ImpatienceStrategies.Retrial;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.data.BDMap;
@@ -45,6 +43,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.classSwitchUtilities.ClassSwitchRow;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
+import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.CombFork;
 import jmt.gui.common.forkStrategies.ForkStrategy;
@@ -267,6 +266,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		disableStatistic = Defaults.getAsBoolean("isStatisticDisabled");
 		maxEvents = Defaults.getAsInteger("maxSimulationEvents");
 		pollingInterval = Defaults.getAsDouble("simulationPolling");
+		loggerGlbParams = new LoggerGlobalParameters();
 		//TODO: eventually load the parametricAnalysisEnabled state from default
 		parametricAnalysisEnabled = false;
 	}
@@ -719,6 +719,18 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (!classSwitchesKeyset.isEmpty()) {
 			keyset.add(STATION_TYPE_CLASSSWITCH);
 		}
+		for (Object stationKey : stationsKeyset) {
+			if (keyset.contains(STATION_TYPE_CLASSSWITCH)) {
+				break;
+			}
+			for (Object classKey : classesKeyset) {
+				StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+				if (scd.routingStrategy instanceof ClassSwitchRouting) {
+					keyset.add(STATION_TYPE_CLASSSWITCH);
+					break;
+				}
+			}
+		}
 		if (!scalersKeyset.isEmpty()) {
 			keyset.add(STATION_TYPE_SCALER);
 		}
@@ -965,60 +977,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Returns queue capacity of the station, given the search key.
-	 */
-	@Override
-	public Integer getStationMaxRunning(Object key) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return null;
-		}
-		return sd.maxRunning;
-	}
-
-	/**
-	 * Sets in service capacity of the station, given the search key.
-	 */
-	@Override
-	public void setStationMaxRunning(Object key, Integer maxRunning) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return;
-		}
-		if (sd.maxRunning == null || !sd.maxRunning.equals(maxRunning)) {
-			sd.maxRunning = maxRunning;
-			save = true;
-		}
-	}
-
-	@Override
-	public void setStationServerPreemptive(Object key, Boolean serverPreemptive) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return;
-		}
-		if (!sd.serverPreemptive == serverPreemptive) {
-			sd.serverPreemptive = serverPreemptive;
-			save = true;
-		}
-	}
-	@Override
-	public Boolean getStationServerPreemptive(Object key) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return false;
-		}
-		return sd.serverPreemptive;
-	}
-	/**
 	 * Returns queue strategy of the station, given the search key.
 	 */
 	@Override
@@ -1081,24 +1039,39 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Sets the polling type of the station, given the search key.
+	 * Returns max running jobs of the station, given the search key.
 	 */
-
 	@Override
-	public void setStationPollingServerType(Object key, String pollingType) {
+	public Integer getStationMaxRunningJobs(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.maxRunningJobs;
+	}
+
+	/**
+	 * Sets max running jobs of the station, given the search key.
+	 */
+	@Override
+	public void setStationMaxRunningJobs(Object key, Integer maxRunningJobs) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return;
 		}
-
-		if (sd.pollingServerType == null || !sd.pollingServerType.equals(pollingType)) {
-			sd.pollingServerType = pollingType;
+		if (sd.maxRunningJobs == null || !sd.maxRunningJobs.equals(maxRunningJobs)) {
+			sd.maxRunningJobs = maxRunningJobs;
 			save = true;
 		}
 	}
 
+	/**
+	 * Returns type of polling server, given the search key.
+	 */
 	@Override
 	public String getStationPollingServerType(Object key) {
 		StationData sd;
@@ -1110,52 +1083,28 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return sd.pollingServerType;
 	}
 
+	/**
+	 * Sets type of polling server, given the search key.
+	 */
 	@Override
-	public void setStationPollingServerBoolean(Object key, Boolean serverPolling) {
+	public void setStationPollingServerType(Object key, String pollingType) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return;
 		}
-
-		if (sd.serverPolling == null || !sd.serverPolling.equals(serverPolling)) {
-			sd.serverPolling = serverPolling;
+		if (sd.pollingServerType == null || !sd.pollingServerType.equals(pollingType)) {
+			sd.pollingServerType = pollingType;
 			save = true;
 		}
 	}
 
-
-	@Override
-	public Boolean getStationPollingServerBoolean(Object key) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return null;
-		}
-		return sd.serverPolling;
-	}
-
-	@Override
-	public void setStationPollingServerKValue(Object key, Integer k) {
-		StationData sd;
-		if (stationDataHM.containsKey(key)) {
-			sd = (StationData) stationDataHM.get(key);
-		} else {
-			return;
-		}
-
-		if (sd.pollingKValue == null || !sd.pollingKValue.equals(k)) {
-			sd.pollingKValue = k;
-			save = true;
-		}
-
-	}
-
+	/**
+	 * Returns k value for K polling servers, given the search key.
+	 */
 	@Override
 	public Integer getStationPollingServerKValue(Object key) {
-
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
@@ -1165,60 +1114,53 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		return sd.pollingKValue;
 	}
 
+	/**
+	 * Sets k value for K polling servers, given the search key.
+	 */
 	@Override
-	public void setStationPollingSwitchoverDistribution(Object stationKey, Object classKey, Object distribution) {
+	public void setStationPollingServerKValue(Object key, Integer k) {
 		StationData sd;
-		if (stationDataHM.containsKey(stationKey)) {
-			sd = (StationData) stationDataHM.get(stationKey);
-			if (sd.switchoverPeriods == null) {
-				sd.switchoverPeriods = new HashMap<>();
-			}
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return;
 		}
-
-		if ( !sd.switchoverPeriods.containsKey(classKey)
-				|| !sd.switchoverPeriods.get(classKey).equals(distribution)) {
-
-			sd.switchoverPeriods.put(classKey, distribution);
+		if (sd.pollingKValue == null || !sd.pollingKValue.equals(k)) {
+			sd.pollingKValue = k;
 			save = true;
 		}
 	}
 
+	/**
+	 * Gets whether setup times are enabled, given the search key.
+	 */
 	@Override
-	public Object getStationPollingSwitchoverDistribution(Object stationKey, Object classKey) {
+	public Boolean getSetupTimesEnabled(Object key) {
 		StationData sd;
-		if (stationDataHM.containsKey(stationKey)) {
-			sd = (StationData) stationDataHM.get(stationKey);
-			if (sd.switchoverPeriods == null)
-				sd.switchoverPeriods = new HashMap<>();
-
-			updatePollingServerSwitchoverDistribution(stationKey);
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return null;
 		}
-
-		return sd.switchoverPeriods.get(classKey);
+		return sd.setupTimesEnabled;
 	}
 
-	protected void updatePollingServerSwitchoverDistribution(Object stationKey) {
-		StationData sd = (StationData) stationDataHM.get(stationKey);
-		Set<Object> switchoverKeys = new HashSet<>(sd.switchoverPeriods.keySet());
-		for (Object classKey : classesKeyset) {
-			if (switchoverKeys.contains(classKey)) {
-				switchoverKeys.remove(classKey);
-			} else {
-				sd.switchoverPeriods.put(classKey, new ZeroStrategy());
-			}
+	/**
+	 * Sets whether setup times are enabled, given the search key.
+	 */
+	@Override
+	public void setSetupTimesEnabled(Object key, Boolean enabled) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
 		}
-
-		for (Object key: switchoverKeys) {
-			sd.switchoverPeriods.remove(key);
+		if (sd.setupTimesEnabled == null || !sd.setupTimesEnabled.equals(enabled)) {
+			sd.setupTimesEnabled = enabled;
+			save = true;
 		}
-
 	}
-
-
 
 	/**
 	 * Tells if a fork is blocking
@@ -1412,35 +1354,29 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
-			sd.serverPreemptive = false;
 		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			sd.numberOfServers = Integer.valueOf(-1);
-			sd.serverPreemptive = false;
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
-			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			sd.numberOfServers = Defaults.getAsInteger("stationServers");
-			sd.serverPreemptive = false;
-			sd.serverPolling = false;
-			sd.pollingKValue = 1;
+			sd.maxRunningJobs = Defaults.getAsInteger("stationRunningJobs");
+			sd.pollingKValue = Integer.valueOf(1);
 			sd.pollingServerType = STATION_QUEUE_STRATEGY_POLLING_LIMITED;
-			sd.switchoverPeriods = new HashMap<>();
+			sd.serverPolling = Boolean.valueOf(false);
+			sd.setupTimesEnabled = Boolean.valueOf(false);
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
-			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)
 					|| sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
+					|| sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)
 					|| sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
 				sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			}
-			sd.serverPreemptive = false;
 			sd.forkBlock = Defaults.getAsInteger("forkBlock");
 			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
 			sd.numberOfServers = Defaults.getAsInteger("forkJobsPerLink");
@@ -1448,25 +1384,19 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.maxRunning = Integer.valueOf(-1);
-			sd.serverPreemptive = false;
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
+			sd.loggerParameters = new LoggerParameters();
 		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
 			sd.queueCapacity = Integer.valueOf(-1);
-			sd.maxRunning = Integer.valueOf(-1);
-			sd.serverPreemptive = false;
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
 			// Do nothing
 		} else if (sd.type.equals(STATION_TYPE_SCALER)) {
 			sd.forkBlock = Integer.valueOf(-1);
-			sd.serverPreemptive = false;
 			sd.isSimplifiedFork = Boolean.parseBoolean(Defaults.get("isSimplifiedFork"));
 			sd.numberOfServers = Defaults.getAsInteger("forkJobsPerLink");
 		} else if (sd.type.equals(STATION_TYPE_PLACE)) {
 			sd.queueCapacity = Defaults.getAsInteger("placeCapacity");
-			sd.serverPreemptive = false;
-			sd.maxRunning = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
@@ -1480,8 +1410,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Returns queue capacity for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return integer for queue capacity.
@@ -1497,8 +1426,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets queue capacity for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return queueCapacity: integer for queue capacity.
@@ -1517,8 +1445,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Returns queue strategy for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return string name for queue strategy.
@@ -1534,8 +1461,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets queue strategy for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param queueStrategy: string name for queue strategy.
@@ -1585,7 +1511,125 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	/**
+	 * Returns impatience type associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return NONE || BALKING || RENEGING
+	 */
+	@Override
+	public ImpatienceType getImpatienceType(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.impatienceType;
+	}
 
+	/**
+	 * Sets impatience type associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return NONE || BALKING || RENEGING
+	 */
+	@Override
+	public void setImpatienceType(Object stationKey, Object classKey, ImpatienceType impatienceType) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.impatienceType == null || !scd.impatienceType.equals(impatienceType)) {
+			scd.impatienceType = impatienceType;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns impatience parameter associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return impatience parameter for station and class.
+	 */
+	@Override
+	public ImpatienceParameter getImpatienceParameter(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.impatienceParameter;
+	}
+
+	/**
+	 * Sets impatience parameter associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param impatience parameter for station and class.
+	 */
+	@Override
+	public void setImpatienceParameter(Object stationKey, Object classKey, ImpatienceParameter impatienceParameter) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		scd.impatienceParameter = impatienceParameter;
+		save = true;
+	}
+
+	/**
+	 * Resets impatience strategy associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 */
+	@Override
+	public void resetImpatience(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		scd.impatienceType = null;
+		scd.impatienceParameter = null;
+		save = true;
+	}
+
+	/**
+	 * Updates balking parameter associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param serverStationQueuePolicy: queue policy for station.
+	 */
+	@Override
+	public void updateBalkingParameter(Object stationKey, Object classKey,	String serverStationQueuePolicy) {
+		ImpatienceParameter impatienceParameter = getImpatienceParameter(stationKey, classKey);
+		// We need to verify if the impatienceParameter is of type BalkingParameter
+		if (impatienceParameter instanceof BalkingParameter) {
+			((BalkingParameter) impatienceParameter).updatePriority(serverStationQueuePolicy);
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns retrial rate distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return distribution for specified class and station.
+	 */
+	@Override
+	public Object getRetrialDistribution(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.retrialDistribution;
+	}
+
+	/**
+	 * Sets retrial rate distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
 	@Override
 	public void setRetrialDistribution(Object stationKey, Object classKey, Object distribution) {
 		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
@@ -1598,20 +1642,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
-	@Override
-	public Object getRetrialDistribution(Object stationKey, Object classKey) {
-		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (scd == null) {
-			return null;
-		}
-
-		return scd.retrialDistribution;
-	}
-
 	/**
 	 * Returns service weight for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return weight for specified class and station.
@@ -1627,8 +1660,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets service weight for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param weight: weight to be set for specified class and station.
@@ -1646,95 +1678,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Returns impatience strategy associated with given station queue section.
-	 * @param stationKey: search key for station.
-	 * @param classKey: search key for class.
-	 * @return BALKING || RENEGING || RETRIAL
-	 */
-	@Override
-	public ImpatienceType getImpatienceType(Object stationKey, Object classKey) {
-		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (scd == null) {
-			return null;
-		}
-		return scd.impatienceType;
-	}
-
-	/**
-	 * Sets drop rule associated with given station queue section if capacity is finite.
-	 * @param stationKey: search key for station.
-	 * @param classKey: search key for class.
-	 * @param impatienceType: BALKING || RENEGING || RETRIAL
-	 */
-	@Override
-	public void setImpatienceType(Object stationKey, Object classKey, ImpatienceType impatienceType) {
-		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (scd == null) {
-			return;
-		}
-		if (scd.impatienceType == null || !scd.impatienceType.equals(impatienceType)) {
-			scd.impatienceType = impatienceType;
-			save = true;
-		}
-	}
-
-	@Override
-  public void resetImpatience(Object stationKey, Object classKey) {
-	  clearImpatienceType(stationKey, classKey);
-	  clearImpatienceParameter(stationKey, classKey);
-  }
-
-	private void clearImpatienceType(Object stationKey, Object classKey) {
-		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (scd == null) {
-			return;
-		}
-		scd.impatienceType = null;
-	}
-
-	private void clearImpatienceParameter(Object stationKey, Object classKey) {
-		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (scd == null) {
-			return;
-		}
-		scd.impatienceParameter = null;
-	}
-
-	@Override
-	public ImpatienceParameter getImpatienceParameter(Object stationKey, Object classKey) {
-		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (scd == null) {
-			return null;
-		}
-		return scd.impatienceParameter;
-	}
-
-	@Override
-	public void setImpatienceParameter(Object stationKey, Object classKey, ImpatienceParameter impatienceParameter) {
-		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
-		if (scd == null) {
-			return;
-		}
-		scd.impatienceParameter = impatienceParameter;
-		save = true;
-	}
-
-	@Override
-	public void updateBalkingParameter(Object stationKey, Object classKey,	String serverStationQueuePolicy) {
-		ImpatienceParameter impatienceParameter = getImpatienceParameter(stationKey, classKey);
-
-		// We need to verify if the impatienceParameter is of type BalkingParameter
-		if (impatienceParameter instanceof BalkingParameter) {
-			String classQueueStrategy = getQueueStrategy(stationKey, classKey);
-			((BalkingParameter) impatienceParameter).updatePriority(serverStationQueuePolicy, classQueueStrategy);
-			save = true;
-		}
-	}
-
-	/**
 	 * Returns service time distribution for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return distribution for specified class and station.
@@ -1750,8 +1695,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets service time distribution for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param distribution: distribution to be set for specified class and station.
@@ -1767,11 +1711,85 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			save = true;
 		}
 	}
-	
+
+	/**
+	 * Returns switchover period distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return distribution for specified class and station.
+	 */
+	@Override
+	public Object getPollingSwitchoverDistribution(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.switchoverPeriod;
+	}
+
+	/**
+	 * Sets switchover period distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
+	@Override
+	public void setPollingSwitchoverDistribution(Object stationKey, Object classKey, Object distribution) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.switchoverPeriod == null || !scd.switchoverPeriod.equals(distribution)) {
+			scd.switchoverPeriod = distribution;
+			save = true;
+		}
+	}
+
+	/**
+	 * Returns setup time distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
+	 * @param stationKey: search key for station.
+	 * @param fromClassKey: search key for current class.
+	 * @param toClassKey: search key for next class.
+	 * @return distribution for the specified class and station.
+	 */
+	@Override
+	public Object getSetupTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(fromClassKey, stationKey);
+		if (scd == null || scd.setupTimeDistributions == null) {
+			return null;
+		}
+		if (scd.setupTimeDistributions.get(toClassKey) == null) {
+			scd.setupTimeDistributions.put(toClassKey, new ZeroStrategy());
+		}
+		return scd.setupTimeDistributions.get(toClassKey);
+	}
+
+	/**
+	 * Sets setup time distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * @param stationKey: search key for station.
+	 * @param fromClassKey: search key for current class.
+	 * @param toClassKey: search key for next class.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
+	@Override
+	public void setSetupTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey, Object distribution) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(fromClassKey, stationKey);
+		if (scd == null || scd.setupTimeDistributions == null) {
+			return;
+		}
+		if (scd.setupTimeDistributions.get(toClassKey) == null || !scd.setupTimeDistributions.get(toClassKey).equals(distribution)) {
+			scd.setupTimeDistributions.put(toClassKey, distribution);
+			save = true;
+		}
+	}
+
 	/**
 	 * Returns routing strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return routing strategy for specified class and station.
@@ -1787,8 +1805,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets routing strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param routingStrategy: routing strategy to be set for specified class and station.
@@ -1807,8 +1824,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Returns fork strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return fork strategy for specified class and station.
@@ -1824,8 +1840,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets fork strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param forkStrategy: fork strategy to be set for specified class and station.
@@ -1844,8 +1859,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Returns join strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return join strategy for specified class and station.
@@ -1861,8 +1875,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets join strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param joinStrategy: join strategy to be set for specified class and station.
@@ -1881,8 +1894,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Returns semaphore strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return semaphore strategy for specified class and station.
@@ -1898,8 +1910,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets semaphore strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param semaphoreStrategy: semaphore strategy to be set for specified class and station.
@@ -1928,7 +1939,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else {
 			return null;
 		}
-		return (sd.loggerParameters != null) ? sd.loggerParameters : new LoggerParameters();
+		return sd.loggerParameters;
 	}
 
 	/**
@@ -1956,11 +1967,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	@Override
 	public String getLoggingGlbParameter(String selector) {
-		// The global parameters must be instantiated for a new file
-		if (loggerGlbParams == null) {
-			loggerGlbParams = new LoggerGlobalParameters();
-		}
-
 		if (selector.equalsIgnoreCase("path")) {
 			return loggerGlbParams.path;
 		} else if (selector.equalsIgnoreCase("delim")) {
@@ -1982,13 +1988,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	@Override
 	public void setLoggingGlbParameter(String selector, String value) {
-		// The global parameters must be instantiated for a new file
-		if (loggerGlbParams == null) {
-			loggerGlbParams = new LoggerGlobalParameters();
-		}
-
 		debugLog.debug("glbParameter <" + selector + "=" + value + ">");
-
 		if (selector.equalsIgnoreCase("path")) {
 			loggerGlbParams.path = value;
 		} else if (selector.equalsIgnoreCase("decimalSeparator")) {
@@ -2005,36 +2005,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Used by the Mediator to get the <i>files that could be overwritten</i>,
-	 * in order to warn the user with a dialog box. 
-	 * @author MF08 0.7.4 - Michael Fercu for Logger (Marco Bertoli)
-	 * @return String[] of the filename of all log files that will be written to.
-	 */
-	public String[] getLoggerNameList() {
-		String[] lknames = new String[loggersKeyset.size()];
-		int size = 0;
-		boolean globalWasProcessed = false;
-
-		// get the list of all filenames from their keys
-		for (Object loggerKey : loggersKeyset) {
-			LoggerParameters lp = getLoggingParameters(loggerKey);
-			if (!lp.name.equalsIgnoreCase("global")) {
-				lknames[size++] = lp.name;
-			} else if (lp.name.equalsIgnoreCase("global") && !globalWasProcessed) {
-				globalWasProcessed = true;
-				lknames[size++] = lp.name;
-			}
-		}
-
-		String[] lknames2 = new String[size];
-		for (int i = 0; i < size; i++) {
-			lknames2[i] = lknames[i];
-		}
-		return lknames2;
-	}
-
-	/**
-	 * Manages the routing and fork probabilities.
+	 * Manages the routing, fork and class switch probabilities.
 	 */
 	@Override
 	public void manageProbabilities() {
@@ -2052,10 +2023,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 					}
 				}
 				if (getRoutingStrategy(stationKey, classKey) instanceof ClassSwitchRouting) {
-					ClassSwitchRouting cs = (ClassSwitchRouting) getRoutingStrategy(stationKey, classKey);
-					Map<Object, Double> values = cs.getValues();
-					if(values != null){
-						normalizeRoutingProbabilities(stationKey, classKey, values);
+					ClassSwitchRouting csr = (ClassSwitchRouting) getRoutingStrategy(stationKey, classKey);
+					Map<Object, Double> values = csr.getValues();
+					normalizeRoutingProbabilities(stationKey, classKey, values);
+					Map<Object, Map<Object, Double>> outPaths = csr.getOutPaths();
+					for (Map.Entry<Object, Map<Object, Double>> entry : outPaths.entrySet()) {
+						Map<Object, Double> values2 = entry.getValue();
+						normalizeClassSwitchProbabilities(classKey, values2, new Double(0.0));
 					}
 				}
 				if (getForkStrategy(stationKey, classKey) instanceof ProbabilitiesFork) {
@@ -2070,6 +2044,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 					CombFork cf = (CombFork) getForkStrategy(stationKey, classKey);
 					Map<Object, Double> values = (Map<Object, Double>) cf.getOutDetails();
 					normalizeForkProbabilities(values);
+				}
+				StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+				if (scd.classSwitchProb != null) {
+					Map<Object, Float> values = scd.classSwitchProb.getRowValues();
+					normalizeClassSwitchProbabilities(classKey, values, new Float(0.0));
 				}
 			}
 		}
@@ -2091,12 +2070,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			}
 		}
 
-		Double[] probabilities = new Double[outputs.size()];
+		double[] probabilities = new double[outputs.size()];
 		Object[] keys = outputs.toArray();
 		for (int i = 0; i < probabilities.length; i++) {
-			probabilities[i] = (Double) values.get(keys[i]);
-			if (probabilities[i] == null) {
-				probabilities[i] = new Double(0.0);
+			if (values.get(keys[i]) == null) {
+				probabilities[i] = 0.0;
+			} else {
+				probabilities[i] = values.get(keys[i]).doubleValue();
 			}
 		}
 		values.clear();
@@ -2104,20 +2084,20 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		double totalSum = 0.0;
 		for (int i = 0; i < probabilities.length; i++) {
 			if (normalOutputs.contains(keys[i])) {
-				totalSum += probabilities[i].doubleValue();
+				totalSum += probabilities[i];
 			}
 		}
 		for (int i = 0; i < probabilities.length; i++) {
 			if (normalOutputs.contains(keys[i])) {
-				if (totalSum == 0.0) {
-					probabilities[i] = new Double(1.0 / normalOutputs.size());
+				if (totalSum <= 0.0) {
+					probabilities[i] = 1.0 / normalOutputs.size();
 				} else {
-					probabilities[i] = new Double(probabilities[i].doubleValue() / totalSum);
+					probabilities[i] = probabilities[i] / totalSum;
 				}
 			} else {
-				probabilities[i] = new Double(0.0);
+				probabilities[i] = 0.0;
 			}
-			values.put(keys[i], probabilities[i]);
+			values.put(keys[i], new Double(probabilities[i]));
 		}
 	}
 
@@ -2126,27 +2106,80 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 */
 	@Override
 	public void normalizeForkProbabilities(Map<Object, Double> values) {
-		Double[] probabilities = new Double[values.size()];
+		double[] probabilities = new double[values.size()];
 		Object[] keys = values.keySet().toArray();
 		for (int i = 0; i < probabilities.length; i++) {
-			probabilities[i] = (Double) values.get(keys[i]);
-			if (probabilities[i] == null) {
+			if (values.get(keys[i]) == null) {
 				probabilities[i] = new Double(0.0);
+			} else {
+				probabilities[i] = values.get(keys[i]).doubleValue();
 			}
 		}
 		values.clear();
 
 		double totalSum = 0.0;
 		for (int i = 0; i < probabilities.length; i++) {
-			totalSum += probabilities[i].doubleValue();
+			totalSum += probabilities[i];
 		}
 		for (int i = 0; i < probabilities.length; i++) {
-			if (totalSum == 0.0) {
-				probabilities[i] = new Double(1.0 / probabilities.length);
+			if (totalSum <= 0.0) {
+				probabilities[i] = 1.0 / probabilities.length;
 			} else {
-				probabilities[i] = new Double(probabilities[i].doubleValue() / totalSum);
+				probabilities[i] = probabilities[i] / totalSum;
 			}
-			values.put(keys[i], probabilities[i]);
+			values.put(keys[i], new Double(probabilities[i]));
+		}
+	}
+
+	/**
+	 * Normalizes the class switch probabilities.
+	 */
+	@Override
+	public void normalizeClassSwitchProbabilities(Object classKey, Map values, Number example) {
+		Vector<Object> normalClasses = new Vector<Object>();
+		normalClasses.addAll(classesKeyset);
+		for (int i = 0; i < classesKeyset.size(); i++) {
+			if (getClassType(classesKeyset.get(i)) != getClassType(classKey)) {
+				normalClasses.remove(classesKeyset.get(i));
+			}
+		}
+
+		double[] probabilities = new double[classesKeyset.size()];
+		Object[] keys = classesKeyset.toArray();
+		for (int i = 0; i < probabilities.length; i++) {
+			if (values.get(keys[i]) == null) {
+				probabilities[i] = 0.0;
+			} else {
+				probabilities[i] = ((Number) values.get(keys[i])).doubleValue();
+			}
+		}
+		values.clear();
+
+		double totalSum = 0.0;
+		for (int i = 0; i < probabilities.length; i++) {
+			if (normalClasses.contains(keys[i])) {
+				totalSum += probabilities[i];
+			}
+		}
+		for (int i = 0; i < probabilities.length; i++) {
+			if (normalClasses.contains(keys[i])) {
+				if (totalSum <= 0.0) {
+					if (keys[i] == classKey) {
+						probabilities[i] = 1.0;
+					} else {
+						probabilities[i] = 0.0;
+					}
+				} else {
+					probabilities[i] = probabilities[i] / totalSum;
+				}
+			} else {
+				probabilities[i] = 0.0;
+			}
+			if (example instanceof Float) {
+				values.put(keys[i], new Float(probabilities[i]));
+			} else {
+				values.put(keys[i], new Double(probabilities[i]));
+			}
 		}
 	}
 
@@ -2191,7 +2224,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 					if (scd.forkStrategy != null) {
 						Vector<Object> outputs = getForwardConnections(stationKey);
 						for (Object out : outputs) {
-							((ForkStrategy) scd.forkStrategy).addStation(out, classKey, classesKeyset);
+							((ForkStrategy) scd.forkStrategy).addStation(out, key, classesKeyset);
 						}
 					}
 				} else {
@@ -2204,6 +2237,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 					}
 					if (scd.joinStrategy instanceof GuardJoin) {
 						((GuardJoin) scd.joinStrategy).getGuard().put(key, 0);
+					}
+					if (scd.routingStrategy instanceof ClassSwitchRouting) {
+						((ClassSwitchRouting) scd.routingStrategy).addClass(key);
 					}
 				}
 			}
@@ -2247,6 +2283,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				if (scd.classSwitchProb != null) {
 					scd.classSwitchProb.setValue(classKey, key, 0.0f);
 				}
+				if (scd.routingStrategy instanceof ClassSwitchRouting) {
+					((ClassSwitchRouting) scd.routingStrategy).deleteClass(key);
+				}
+				if (scd.setupTimeDistributions != null) {
+					scd.setupTimeDistributions.remove(key);
+				}
 			}
 		}
 	}
@@ -2265,11 +2307,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_ROUTER)) {
 			scd.queueStrategy = QUEUE_STRATEGY_FCFS;
-			scd.dropRule = Defaults.get("dropRule");
+			scd.dropRule = FINITE_DROP;
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_DELAY)) {
 			scd.queueStrategy = QUEUE_STRATEGY_FCFS;
-			scd.dropRule = Defaults.get("dropRule");
+			scd.dropRule = FINITE_DROP;
 			scd.serviceDistribution = Defaults.getAsNewInstance("stationDelayServiceStrategy");
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
@@ -2281,35 +2323,43 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SJF)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LJF)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SEPT)
-						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)) {
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS_PR)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS_PR)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SRPT)) {
 					scd.queueStrategy = QUEUE_STRATEGY_PS;
 				}
-			} else if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
-				if (scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS)
+			} else if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
+					|| sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
+				if (scd.queueStrategy.equals(QUEUE_STRATEGY_PS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_RAND)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SJF)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LJF)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SEPT)
-						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)
-						|| scd.queueStrategy.equals(QUEUE_STRATEGY_PS)
-						|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)
-						|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)) {
-					scd.queueStrategy = QUEUE_STRATEGY_LCFS_PR;
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)) {
+					scd.queueStrategy = QUEUE_STRATEGY_FCFS_PR;
 				}
-
 			} else {
 				if (scd.queueStrategy.equals(QUEUE_STRATEGY_PS)
-						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS_PR)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_GPS)
-						|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)) {
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_DPS)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS_PR)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS_PR)
+						|| scd.queueStrategy.equals(QUEUE_STRATEGY_SRPT)) {
 					scd.queueStrategy = QUEUE_STRATEGY_FCFS;
 				}
 			}
 			scd.dropRule = Defaults.get("dropRule");
-			scd.serviceWeight = Defaults.getAsDouble("serviceWeight");
 			scd.impatienceType = ImpatienceType.NONE;
+			scd.retrialDistribution = new Exponential();
+			scd.serviceWeight = Defaults.getAsDouble("serviceWeight");
 			scd.serviceDistribution = Defaults.getAsNewInstance("stationServiceStrategy");
+			scd.switchoverPeriod = new ZeroStrategy();
+			scd.setupTimeDistributions = new HashMap<>();
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			scd.queueStrategy = Defaults.get("stationQueueStrategy");
@@ -2319,22 +2369,26 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 					|| scd.queueStrategy.equals(QUEUE_STRATEGY_SJF)
 					|| scd.queueStrategy.equals(QUEUE_STRATEGY_LJF)
 					|| scd.queueStrategy.equals(QUEUE_STRATEGY_SEPT)
-					|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)) {
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_LEPT)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS_PR)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS_PR)
+					|| scd.queueStrategy.equals(QUEUE_STRATEGY_SRPT)) {
 				scd.queueStrategy = QUEUE_STRATEGY_FCFS;
 			}
 			scd.dropRule = Defaults.get("dropRule");
 			scd.impatienceType = ImpatienceType.NONE;
+			scd.retrialDistribution = new Exponential();
 			scd.forkStrategy = Defaults.getAsNewInstance("stationForkStrategy");
 		} else if (sd.type.equals(STATION_TYPE_JOIN)) {
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 			scd.joinStrategy = Defaults.getAsNewInstance("stationJoinStrategy");
 		} else if (sd.type.equals(STATION_TYPE_LOGGER)) {
 			scd.queueStrategy = QUEUE_STRATEGY_FCFS;
-			scd.dropRule = Defaults.get("dropRule");
+			scd.dropRule = FINITE_DROP;
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_CLASSSWITCH)) {
 			scd.queueStrategy = QUEUE_STRATEGY_FCFS;
-			scd.dropRule = Defaults.get("dropRule");
+			scd.dropRule = FINITE_DROP;
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 			scd.classSwitchProb = new ClassSwitchRow();
 		} else if (sd.type.equals(STATION_TYPE_SEMAPHORE)) {
@@ -2350,7 +2404,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		} else if (sd.type.equals(STATION_TYPE_TRANSITION)) {
 			// Do nothing
 		}
-		scd.retrialDistribution = Defaults.getAsNewInstance("classDistribution");
 		return scd;
 	}
 
@@ -2546,7 +2599,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (sourceKey == targetKey
 				&& (source.type.equals(STATION_TYPE_ROUTER) || source.type.equals(STATION_TYPE_FORK) || source.type.equals(STATION_TYPE_JOIN)
 						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_CLASSSWITCH) || source.type.equals(STATION_TYPE_SEMAPHORE)
-						|| source.type.equals(STATION_TYPE_SCALER) || source.type.equals(STATION_TYPE_PLACE) || source.type.equals(STATION_TYPE_TRANSITION))) {
+						|| source.type.equals(STATION_TYPE_SCALER))) {
 			return false;
 		}
 		//no connection among sources, sinks or terminals
@@ -2599,7 +2652,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		connectionsBDM.remove(stationKey, BDMap.Y);
 	}
 
-	/*------------------------------------------------------------------------------
+	/*-------------------------------------------------------------------------------
 	 *---------------  methods for simulation parameters definition  ----------------
 	 *-------------------------------------------------------------------------------*/
 	/* (non-Javadoc)
@@ -2791,8 +2844,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	@Override
 	public boolean isGlobalMeasure(String type) {
 		return type.equals(MEASURE_S_X) || type.equals(MEASURE_S_RP) || type.equals(MEASURE_S_CN)
-				|| type.equals(MEASURE_S_DR) || type.equals(MEASURE_S_P) || type.equals(MEASURE_S_R)
-				|| type.equals(MEASURE_S_RR) || type.equals(MEASURE_S_BR);
+				|| type.equals(MEASURE_S_DR) || type.equals(MEASURE_S_BR) || type.equals(MEASURE_S_RN)
+				|| type.equals(MEASURE_S_RT) || type.equals(MEASURE_S_P);
 	}
 
 	/**
@@ -4009,14 +4062,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String name;
 		public String type;
 		public Integer queueCapacity;
-		public Integer maxRunning;
-		public Boolean serverPreemptive;
 		public String queueStrategy;
 		public Integer numberOfServers;
+		public Integer maxRunningJobs;
 		public String pollingServerType;
 		public Integer pollingKValue;
 		public Boolean serverPolling;
-		public HashMap<Object, Object> switchoverPeriods;
+		public Boolean setupTimesEnabled;
 		public Integer forkBlock;
 		public Boolean isSimplifiedFork;
 		public LoggerParameters loggerParameters;
@@ -4034,24 +4086,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			StationData sd = new StationData(name, type);
 			sd.queueCapacity = queueCapacity;
 			sd.queueStrategy = queueStrategy;
-			sd.maxRunning = maxRunning;
-			sd.serverPreemptive = serverPreemptive;
 			sd.numberOfServers = numberOfServers;
+			sd.maxRunningJobs = maxRunningJobs;
 			sd.pollingServerType = pollingServerType;
 			sd.serverPolling = serverPolling;
-			if (switchoverPeriods != null) {
-				sd.switchoverPeriods = new HashMap<>();
-				for (Object key : switchoverPeriods.keySet()) {
-					Object item;
-					item = switchoverPeriods.get(key);
-					if (item instanceof ServiceStrategy) {
-						item = ((ServiceStrategy) item).clone();
-					} else {
-						item = new ZeroStrategy();
-					}
-					sd.switchoverPeriods.put(key, item);
-				}
-			}
+			sd.setupTimesEnabled = setupTimesEnabled;
 			sd.forkBlock = forkBlock;
 			sd.isSimplifiedFork = isSimplifiedFork;
 			if (loggerParameters != null) {
@@ -4076,17 +4115,18 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Integer queueCapacity;
 		public String queueStrategy;
 		public String dropRule;
+		public ImpatienceType impatienceType;
+		public ImpatienceParameter impatienceParameter;
+		public Object retrialDistribution;
 		public Double serviceWeight;
 		public Object serviceDistribution;
+		public Object switchoverPeriod;
+		public Map<Object, Object> setupTimeDistributions;
 		public Object routingStrategy;
 		public Object forkStrategy;
 		public Object joinStrategy;
 		public Object semaphoreStrategy;
 		public ClassSwitchRow classSwitchProb;
-		private ImpatienceType impatienceType;
-		private ImpatienceParameter impatienceParameter;
-		public Object retrialDistribution;
-
 
 		public StationClassData() {
 			this.preload = new Integer(0);
@@ -4102,6 +4142,16 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.serviceWeight = serviceWeight;
 			if (serviceDistribution != null) {
 				scd.serviceDistribution = ((ServiceStrategy) serviceDistribution).clone();
+			}
+			if (switchoverPeriod != null) {
+				scd.switchoverPeriod = ((ServiceStrategy) switchoverPeriod).clone();
+			}
+			if (setupTimeDistributions != null) {
+				scd.setupTimeDistributions = new HashMap<>();
+				for (Object classKey : setupTimeDistributions.keySet()) {
+					Object distribution = setupTimeDistributions.get(classKey);
+					scd.setupTimeDistributions.put(classKey, ((ServiceStrategy) distribution).clone());
+				}
 			}
 			if (routingStrategy != null) {
 				scd.routingStrategy = ((RoutingStrategy) routingStrategy).clone();
@@ -4268,10 +4318,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			this.name = name;
 			this.enablingCondition = new TransitionMatrix();
 			this.inhibitingCondition = new TransitionMatrix();
-			this.numberOfServers = Defaults.getAsInteger("transitionNumberOfServers");
-			this.firingTimeDistribution = Defaults.getAsNewInstance("transitionFiringTimeDistribution");
-			this.firingPriority = Integer.valueOf(-1);
-			this.firingWeight = Double.valueOf(1.0);
+			this.numberOfServers = Defaults.getAsInteger("transitionModeNumberOfServers");
+			this.firingTimeDistribution = Defaults.getAsNewInstance("transitionTimedModeFiringTimeDistribution");
+			this.firingPriority = Defaults.getAsInteger("transitionTimedModeFiringPriority");
+			this.firingWeight = Defaults.getAsDouble("transitionTimedModeFiringWeight");
 			this.firingOutcome = new TransitionMatrix();
 		}
 

@@ -138,22 +138,6 @@ public class CellFactory {
 	public String getComponentType(String className) {
 		// For convention Component type is simply its className without "Cell"
 		return className.substring(0, className.lastIndexOf("Cell"));
-		/*
-		// Try to get correct values from JMODELConstants through reflection to make simpler
-		// deploying of new components. Otherwise a switch was needed here.
-		String baseName = className.substring(0, className.lastIndexOf("Cell"));
-		String baseType = "STATION_TYPE_" + baseName.toUpperCase();
-
-		try {
-		    return (String) JMODELConstants.class.getField(baseType).get(null);
-		} catch (IllegalAccessException e) {
-		    System.out.println("A security manager has blocked reflection");
-		    e.printStackTrace();
-		} catch (NoSuchFieldException e) {
-		    System.out.println("Reflection failed to find " + baseType + " constant.");
-		    e.printStackTrace();
-		}
-		return null; */
 	}
 
 	/**
@@ -175,26 +159,16 @@ public class CellFactory {
 		JmodelStationDefinition sd = mediator.getStationDefinition();
 		String path = "jmt.gui.jsimgraph.JGraphMod.";
 		ImageIcon icon = null;
-		// Using reflection to access to public ICON field on given class
+		// Uses reflection to access to public ICON field on given class
 		try {
 			String iconName = (String) (Class.forName(path + className)).getField("ICON").get(null);
 			icon = JMTImageLoader.loadImage(iconName);
-		} catch (IllegalAccessException e) {
-			System.out.println("Error: A security manager has blocked reflection...");
-			e.printStackTrace();
-			return null;
-		} catch (NoSuchFieldException e) {
-			System.out.println("Error: Field 'ICON' was not found in '" + className + "'. This is needed for reflection.");
-			e.printStackTrace();
-			return null;
-		} catch (ClassNotFoundException e) {
-			System.out.println("Error: Trying to get size fron a Cell class that does not exist");
+		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
 		}
 
 		String name = sd.previewStationName(getComponentType(className));
-
 		Dimension cellDimension = new Dimension(icon.getIconWidth(), icon.getIconHeight());
 		// Gets the graph font
 		Font font = mediator.getGraph().getFont();
@@ -208,4 +182,5 @@ public class CellFactory {
 		cellDimension.width = Math.max(cellDimension.width, r.width + 10);
 		return cellDimension;
 	}
+
 }

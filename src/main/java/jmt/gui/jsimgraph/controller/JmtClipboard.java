@@ -29,6 +29,7 @@ import jmt.gui.jsimgraph.JGraphMod.CellComponent;
 import jmt.gui.jsimgraph.JGraphMod.JmtCell;
 import jmt.gui.jsimgraph.JGraphMod.JmtEdge;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.definitions.JmodelBlockingRegionDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;
@@ -143,6 +144,7 @@ public class JmtClipboard {
 			return null;
 		}
 
+		JSimGraphModel model = (JSimGraphModel) mediator.getModel();
 		JmodelStationDefinition sd = mediator.getStationDefinition();
 		JmodelBlockingRegionDefinition brd = mediator.getBlockingRegionDefinition();
 		HashMap<Object, Object> stationKeyMap = new HashMap<Object, Object>();
@@ -182,7 +184,11 @@ public class JmtClipboard {
 
 		// Loads parameters of every station from its serialized form
 		for (Object oldStationKey : stations.keySet()) {
-			sd.LoadStation(stations.get(oldStationKey), stationKeyMap.get(oldStationKey), classes, reverseStationKeyMap);
+			Object newStationKey = stationKeyMap.get(oldStationKey);
+			JmtCell newStationCell = stationCellMap.get(newStationKey);
+			sd.LoadStation(stations.get(oldStationKey), newStationKey, classes, reverseStationKeyMap);
+			newStationCell.setIcon(model.getStationIcon(newStationKey));
+			mediator.loadImage(newStationCell);
 		}
 
 		// Inserts every blocking region according to its serialized form

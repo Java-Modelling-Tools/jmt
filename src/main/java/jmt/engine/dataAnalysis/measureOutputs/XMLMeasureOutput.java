@@ -25,8 +25,6 @@ import java.io.Writer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -34,6 +32,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.MeasureOutput;
 
 import org.apache.xerces.parsers.DOMParser;
@@ -76,7 +75,7 @@ public class XMLMeasureOutput extends MeasureOutput {
 	//protected static final String SCHEMA_FULL_CHECKING_FEATURE_ID = "http://apache.org/xml/features/validation/schema-full-checking";
 	public static final String EXTERNAL_SCHEMA_LOCATION_PROPERTY_ID = "http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation";
 
-	public XMLMeasureOutput(jmt.engine.dataAnalysis.Measure measure, boolean append, String fileName) throws IOException {
+	public XMLMeasureOutput(Measure measure, boolean append, String fileName) throws IOException {
 		super(measure);
 
 		this.measure = measure;
@@ -119,9 +118,7 @@ public class XMLMeasureOutput extends MeasureOutput {
 			root.appendChild(report);
 
 			samples = document.createElement("samples");
-		} catch (FactoryConfigurationError factoryConfigurationError) {
-			factoryConfigurationError.printStackTrace();
-		} catch (ParserConfigurationException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -204,7 +201,6 @@ public class XMLMeasureOutput extends MeasureOutput {
 			temp.renameTo(file);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("error in closing file..");
 		}
 	}
 

@@ -23,6 +23,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.text.ParseException;
+import java.util.Iterator;
+import java.util.Set;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -78,8 +80,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 	protected ImagedComboBoxCellEditorFactory comboEditor;
 
 	//Enabled types of stations for station editing
-	Object[] stationTypes = new Object[] { STATION_TYPE_DELAY, STATION_TYPE_SERVER, STATION_TYPE_FORK, STATION_TYPE_JOIN, STATION_TYPE_ROUTER,
-			STATION_TYPE_LOGGER, STATION_TYPE_CLASSSWITCH, STATION_TYPE_SEMAPHORE, STATION_TYPE_SCALER, STATION_TYPE_PLACE, STATION_TYPE_TRANSITION };
+	private Object[] stationTypes;
 
 	//Component responsible of setting global number of classes at once
 	private JSpinner stationNumSpinner = new JSpinner() {
@@ -164,6 +165,18 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	/**Creates a new instance of <code>StationsPanel</code> given a model definition.*/
 	public StationsPanel(StationDefinition sd, ClassDefinition cd) {
+		Set<String> stationTypeSet = STATION_NAMES.keySet();
+		stationTypes = new Object[stationTypeSet.size() - 2];
+		Iterator<String> it = stationTypeSet.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			String stationType = it.next();
+			if (!stationType.equals(STATION_TYPE_SOURCE)
+					&& !stationType.equals(STATION_TYPE_SINK)) {
+				stationTypes[i] = stationType;
+				i++;
+			}
+		}
 		stationTable = new StationTable();
 		comboEditor = new ImagedComboBoxCellEditorFactory(null,
 				ImagedComboBoxCellEditorFactory.OPTION_STATION_TYPES);

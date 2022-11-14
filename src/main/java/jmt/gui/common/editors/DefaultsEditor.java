@@ -38,6 +38,7 @@ import java.awt.event.WindowEvent;
 import java.text.ParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -65,18 +66,6 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
-
-import javax.swing.*;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.*;
-import java.awt.event.*;
-import java.text.ParseException;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Vector;
 
 /**
  * <p>Title: Defaults Editor</p>
@@ -359,17 +348,12 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Station type (JSIM only)
 		if (target == JSIM) {
 			tmpMap = new LinkedHashMap<String, String>();
-			tmpMap.put(STATION_TYPE_ROUTER, STATION_NAMES.get(STATION_TYPE_ROUTER));
-			tmpMap.put(STATION_TYPE_DELAY, STATION_NAMES.get(STATION_TYPE_DELAY));
-			tmpMap.put(STATION_TYPE_SERVER, STATION_NAMES.get(STATION_TYPE_SERVER));
-			tmpMap.put(STATION_TYPE_FORK, STATION_NAMES.get(STATION_TYPE_FORK));
-			tmpMap.put(STATION_TYPE_JOIN, STATION_NAMES.get(STATION_TYPE_JOIN));
-			tmpMap.put(STATION_TYPE_LOGGER, STATION_NAMES.get(STATION_TYPE_LOGGER));
-			tmpMap.put(STATION_TYPE_CLASSSWITCH, STATION_NAMES.get(STATION_TYPE_CLASSSWITCH));
-			tmpMap.put(STATION_TYPE_SEMAPHORE, STATION_NAMES.get(STATION_TYPE_SEMAPHORE));
-			tmpMap.put(STATION_TYPE_SCALER, STATION_NAMES.get(STATION_TYPE_SCALER));
-			tmpMap.put(STATION_TYPE_PLACE, STATION_NAMES.get(STATION_TYPE_PLACE));
-			tmpMap.put(STATION_TYPE_TRANSITION, STATION_NAMES.get(STATION_TYPE_TRANSITION));
+			Set<String> tmpSet = STATION_NAMES.keySet();
+			for (String tmp : tmpSet) {
+				if (!tmp.equals(STATION_TYPE_SOURCE) && !tmp.equals(STATION_TYPE_SINK)) {
+					tmpMap.put(tmp, STATION_NAMES.get(tmp));
+				}
+			}
 			addInputCombo("Type", "stationType", station_panel, tmpMap);
 			stationpanelnum++;
 		}
@@ -456,12 +440,10 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		simpanelnum++;
 		addInputSpinner("Animation update interval (sec)", "simulationPolling", sim_panel, 1);
 
-		// Francesco D'Aquino
 		// Animation enabled/disabled
 		simpanelnum++;
 		addInputAnimationSpinner("Number of classes in queue animation", "isWithAnimation", "representableClasses", sim_panel, 1, 10);
-		// end Francesco D'Aquino
-		
+
 		//What if parallelism
 		simpanelnum++;		
 		addInputSpinner("What-if Analysis parallel threads", "whatIfParallelism", sim_panel, 1);
@@ -680,10 +662,11 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Creates a Map with station Queue strategy names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> stationQueueStrategies = new LinkedHashMap<String, String>();
-		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER, CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER);
 		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
+		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER, CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER);
 		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
 		addInputCombo(text, property, cont, stationQueueStrategies);
 	}
@@ -698,17 +681,19 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Creates a Map with Queue strategy names, then delegates addInputCombo to create
 		// graphical components
 		Map<String, String> queueStrategies = new LinkedHashMap<String, String>();
-		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_PS, CommonConstants.QUEUE_STRATEGY_PS);
-		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_GPS, CommonConstants.QUEUE_STRATEGY_GPS);
-		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_DPS, CommonConstants.QUEUE_STRATEGY_DPS);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.QUEUE_STRATEGY_FCFS);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.QUEUE_STRATEGY_LCFS);
-		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, CommonConstants.QUEUE_STRATEGY_LCFS_PR);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.QUEUE_STRATEGY_RAND);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SJF, CommonConstants.QUEUE_STRATEGY_SJF);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LJF, CommonConstants.QUEUE_STRATEGY_LJF);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SEPT, CommonConstants.QUEUE_STRATEGY_SEPT);
 		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LEPT, CommonConstants.QUEUE_STRATEGY_LEPT);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, CommonConstants.QUEUE_STRATEGY_LCFS_PR);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, CommonConstants.QUEUE_STRATEGY_LCFS_PR);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SRPT, CommonConstants.QUEUE_STRATEGY_SRPT);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_PS, CommonConstants.QUEUE_STRATEGY_PS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_GPS, CommonConstants.QUEUE_STRATEGY_GPS);
+		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_DPS, CommonConstants.QUEUE_STRATEGY_DPS);
 		addInputCombo(text, property, cont, queueStrategies);
 	}
 

@@ -37,12 +37,12 @@ import jmt.engine.NodeSections.PSServer;
 import jmt.engine.NodeSections.Queue;
 import jmt.engine.NodeSections.RandomSource;
 import jmt.engine.NodeSections.Router;
+import jmt.engine.NodeSections.Server;
 import jmt.engine.NodeSections.ServiceSection;
 import jmt.engine.NodeSections.ServiceTunnel;
 import jmt.engine.NodeSections.Storage;
 import jmt.engine.NodeSections.Terminal;
 import jmt.engine.QueueNet.BlockingRegion;
-import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NetSystem;
@@ -137,10 +137,11 @@ public class Simulation {
 
 	//---------------------- end PRELOAD -------------------------------//
 
-	private boolean isTerminalSimulation;
+	private boolean isTerminalSimulation = false;
+	private int parametricStep = -1;
 
 	//-------------------------CONSTRUCTORS-------------------------------//
-	
+
 	private NetSystem netSystem;
 
 	/**
@@ -269,8 +270,7 @@ public class Simulation {
 	 * Creates a blocking region.
 	 */
 	public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] maxMemoryPerClass, boolean[] drop, double[] classWeights, double[] classSizes,
-			String[] groupNames, double[] maxCapacityPerGroup, double[] maxMemoryPerGroup, List<List<Integer>> groupClassIndexLists, String[] stations)
-			throws LoadException {
+			String[] groupNames, double[] maxCapacityPerGroup, double[] maxMemoryPerGroup, List<List<Integer>> groupClassIndexLists, String[] stations) throws LoadException {
 		regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, maxMemoryPerClass, drop, classWeights, classSizes,
 				groupNames, maxCapacityPerGroup, maxMemoryPerGroup, groupClassIndexLists, this, stations));
 	}
@@ -291,13 +291,11 @@ public class Simulation {
 		// Sets the max processed events for the system, when reached the simulation is stopped
 		netSystem.setMaxProcessedEvents(simParameters.getMaxProcessedEvents());
 
-		// Resets the job counter
-		//Job.resetCounter();
-
 		// creates network
 		network = new QueueNetwork("JSIM simulation: " + name);
-        network.setNetSystem(netSystem);
+		network.setNetSystem(netSystem);
 		network.setTerminalSimulation(isTerminalSimulation);
+		network.setParametricStep(parametricStep);
 		// adds network to NetSystem
 		netSystem.addNetwork(network);
 
@@ -451,7 +449,7 @@ public class Simulation {
 					//if true, for each Measure sets the corresponding MeasureOutput
 					//a measure output can be a file (xml, txt, ...) which contains
 					//samples and final report of that measure
-					new VerboseCSVMeasureOutput(ms.getMeasure(), simParameters);
+					new VerboseCSVMeasureOutput(ms.getMeasure(), simParameters, isTerminalSimulation, parametricStep);
 				}
 				network.addMeasure(ms.getMeasure());
 			}
@@ -493,12 +491,8 @@ public class Simulation {
 					case SimConstants.RESIDENCE_TIME:
 						netNodes[nodePosition].analyze(SimConstants.LIST_RESIDENCE_TIME, jClass, ms.getMeasure());
 						break;
-					case SimConstants.UTILIZATION:
-						if (netNodes[nodePosition].getSection(NodeSection.INPUT) instanceof Join) {
-							netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeJoin(SimConstants.UTILIZATION, jClass, ms.getMeasure());
-						} else {
-							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
-						}
+					case SimConstants.ARRIVAL_RATE:
+						netNodes[nodePosition].analyze(SimConstants.LIST_ARRIVAL_RATE, jClass, ms.getMeasure());
 						break;
 					case SimConstants.THROUGHPUT:
 						if (netNodes[nodePosition].getSection(NodeSection.OUTPUT) instanceof Fork) {
@@ -507,27 +501,38 @@ public class Simulation {
 							netNodes[nodePosition].getSection(NodeSection.OUTPUT).analyze(SimConstants.LIST_THROUGHPUT, jClass, ms.getMeasure());
 						}
 						break;
+					case SimConstants.UTILIZATION:
+						if (netNodes[nodePosition].getSection(NodeSection.INPUT) instanceof Join) {
+							netNodes[nodePosition].getSection(NodeSection.INPUT).analyzeJoin(SimConstants.UTILIZATION, jClass, ms.getMeasure());
+						} else {
+							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
+						}
+						break;
+					case SimConstants.EFFECTIVE_UTILIZATION:
+						if (netNodes[nodePosition].getSection(NodeSection.SERVICE) instanceof Server) {
+							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS_IN_SERVICE, jClass, ms.getMeasure());
+						} else {
+							netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
+						}
+						break;
 					case SimConstants.DROP_RATE:
 						netNodes[nodePosition].analyze(SimConstants.LIST_DROP_RATE, jClass, ms.getMeasure());
 						break;
-						case SimConstants.RENEGING_RATE:
-							netNodes[nodePosition].analyze(SimConstants.LIST_RENEGING_RATE, jClass, ms.getMeasure());
-							break;
-						case SimConstants.BALKING_RATE:
-							netNodes[nodePosition].analyze(SimConstants.LIST_BALKING_RATE, jClass, ms.getMeasure());
-							break;
-						case SimConstants.RETRIAL_ATTEMPTS_RATE:
-							netNodes[nodePosition].analyze(SimConstants.LIST_RETRIAL_RATE, jClass, ms.getMeasure());
-							break;
-						case SimConstants.RETRIAL_ORBIT_SIZE:
-							netNodes[nodePosition].analyze(SimConstants.LIST_RETRIAL_ORBIT_SIZE, jClass, ms.getMeasure());
-							break;
-						case SimConstants.WAITING_TIME:
-							netNodes[nodePosition].analyze(SimConstants.LIST_WAITING_TIME, jClass, ms.getMeasure());
-							break;
-						/* case SimConstants.NUM_BUSY_SERVERS:
-							netNodes[nodePosition].analyze(SimConstants.LIST_BUSY_SERVERS, jClass, ms.getMeasure());
-							break;*/
+					case SimConstants.BALKING_RATE:
+						netNodes[nodePosition].analyze(SimConstants.LIST_BALKING_RATE, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RENEGING_RATE:
+						netNodes[nodePosition].analyze(SimConstants.LIST_RENEGING_RATE, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RETRIAL_ATTEMPTS_RATE:
+						netNodes[nodePosition].analyze(SimConstants.LIST_RETRIAL_RATE, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RETRIAL_ORBIT_SIZE:
+						netNodes[nodePosition].analyze(SimConstants.LIST_RETRIAL_ORBIT_SIZE, jClass, ms.getMeasure());
+						break;
+					case SimConstants.RETRIAL_ORBIT_TIME:
+						netNodes[nodePosition].analyze(SimConstants.LIST_RETRIAL_ORBIT_TIME, jClass, ms.getMeasure());
+						break;
 					case SimConstants.RESPONSE_TIME_PER_SINK:
 						netNodes[nodePosition].analyze(SimConstants.RESPONSE_TIME_PER_SINK, jClass, ms.getMeasure());
 						break;
@@ -566,18 +571,18 @@ public class Simulation {
 					case SimConstants.SYSTEM_DROP_RATE:
 						network.getJobInfoList().analyzeDropRate(jClass, ms.getMeasure());
 						break;
-						case SimConstants.SYSTEM_RENEGING_RATE:
-							network.getJobInfoList().analyzeRenegingRate(jClass, ms.getMeasure());
-							break;
-						case SimConstants.SYSTEM_BALKING_RATE:
-							network.getJobInfoList().analyzeBalkingRate(jClass, ms.getMeasure());
-							break;
+					case SimConstants.SYSTEM_BALKING_RATE:
+						network.getJobInfoList().analyzeBalkingRate(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_RENEGING_RATE:
+						network.getJobInfoList().analyzeRenegingRate(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_RETRIAL_ATTEMPTS_RATE:
+						network.getJobInfoList().analyzeRetrialAttemptsRate(jClass, ms.getMeasure());
+						break;
 					case SimConstants.SYSTEM_POWER:
 						network.getJobInfoList().analyzeSystemPower(jClass, ms.getMeasure());
 						break;
-						case SimConstants.SYSTEM_RETRIAL_ATTEMPTS_RATE:
-							network.getJobInfoList().analyzeRetrialAttemptsRate(jClass, ms.getMeasure());
-							break;
 					}
 				}
 			}
@@ -802,12 +807,20 @@ public class Simulation {
 	public void setTerminalSimulation(boolean isTerminalSimulation) {
 		this.isTerminalSimulation = isTerminalSimulation;
 	}
-	
-	public SimSystem getSimSystem(){
+
+	public int getParametricStep() {
+		return parametricStep;
+	}
+
+	public void setParametricStep(int parametricStep) {
+		this.parametricStep = parametricStep;
+	}
+
+	public SimSystem getSimSystem() {
 		return netSystem.getSimSystem();
 	}
-	
-	public NetSystem getNetSystem(){
+
+	public NetSystem getNetSystem() {
 		return netSystem;
 	}
 
@@ -920,11 +933,10 @@ public class Simulation {
 		 */
 		public SimNode(String name, InputSection inSec, ServiceSection serSec, OutputSection outSec) {
 			this.node = new NetNode(name);
-			//////
 			SimSystem simSystem = netSystem.getSimSystem();
 			simSystem.add(this.node);
 			node.setSimSystem(simSystem);
-			
+
 			this.input = inSec;
 			this.service = serSec;
 			this.output = outSec;

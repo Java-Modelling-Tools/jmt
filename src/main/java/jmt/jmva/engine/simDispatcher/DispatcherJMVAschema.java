@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import jmt.common.exception.NetException;
-import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
@@ -182,7 +181,7 @@ public class DispatcherJMVAschema {
 			simModelDefinitionPath = modelDefinitionParent + SEPARATOR + "sim_" + modelDefinition.getName();
 		}
 
-		transfSuccess = md.MVAtoSIM_parallel(modelDefinitionPath, simModelDefinitionPath);
+		transfSuccess = md.MVAtoSIM(modelDefinitionPath, simModelDefinitionPath);
 
 		if (!transfSuccess) {
 			logger.error("MVA to SIM transformation failed for model file " + modelDefinitionPath);
@@ -286,7 +285,7 @@ public class DispatcherJMVAschema {
 			return false;
 		}
 
-		transfSuccess = md.OUTtoMVAScaling(simResultsPath, tempPath);
+		transfSuccess = md.OUTtoMVAscaling(simResultsPath, tempPath);
 
 		if (!transfSuccess) {
 			logger.error("OUT to MVA transformation failed model " + modelDefinitionPath);
@@ -467,7 +466,7 @@ public class DispatcherJMVAschema {
 		try {
 			SimLoader simLoader = new SimLoader(simModelDefinitionPath);
 			Simulation sim = simLoader.getSim();
-         
+
 			//sets in the Simulation object the path of the original (i.e. MVA)
 			//xml model definition
 			sim.setXmlModelDefPath(modelDefinitionPath);

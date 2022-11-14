@@ -45,7 +45,6 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.distributions.Distribution.Parameter;
-import jmt.gui.common.serviceStrategies.ZeroStrategy;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 
@@ -433,29 +432,27 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 		Element timingStrategy = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_TIMING_STRATEGY);
 		if (timingStrategy != null) {
 			if (PNML_JSIM_V_TRANSITION_TIMING_STRATEGY_TIMED.equals(timingStrategy.getTextContent())) {
+				model.setFiringTimeDistribution(transition, 0, Defaults.getAsNewInstance("transitionTimedModeFiringTimeDistribution"));
+				model.setFiringPriority(transition, 0, Defaults.getAsInteger("transitionTimedModeFiringPriority"));
+				model.setFiringWeight(transition, 0, Defaults.getAsDouble("transitionTimedModeFiringWeight"));
+
 				Element firingTimeDistribution = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_TIME_DISTRIBUTION);
 				if (firingTimeDistribution != null) {
 					Element distribution = getFirstChildElementByTagName(firingTimeDistribution, PNML_JSIM_E_DISTRIBUTION);
 					model.setFiringTimeDistribution(transition, 0, parseDistribution(distribution));
 				}
-
-				model.setFiringPriority(transition, 0, Integer.valueOf(-1));
-				model.setFiringWeight(transition, 0, Double.valueOf(1.0));
 			} else {
-				model.setFiringTimeDistribution(transition, 0, new ZeroStrategy());
+				model.setFiringTimeDistribution(transition, 0, Defaults.getAsNewInstance("transitionImmediateModeFiringTimeDistribution"));
+				model.setFiringPriority(transition, 0, Defaults.getAsInteger("transitionImmediateModeFiringPriority"));
+				model.setFiringWeight(transition, 0, Defaults.getAsDouble("transitionImmediateModeFiringWeight"));
 
 				Element firingPriority = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_PRIORITY);
 				if (firingPriority != null) {
 					model.setFiringPriority(transition, 0, Integer.valueOf(firingPriority.getTextContent()));
-				} else {
-					model.setFiringPriority(transition, 0, Defaults.getAsInteger("transitionFiringPriority"));
 				}
-
 				Element firingWeight = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_WEIGHT);
 				if (firingWeight != null) {
 					model.setFiringWeight(transition, 0, Double.valueOf(firingWeight.getTextContent()));
-				} else {
-					model.setFiringWeight(transition, 0, Defaults.getAsDouble("transitionFiringWeight"));
 				}
 			}
 		}

@@ -32,7 +32,7 @@ import jmt.engine.QueueNet.NodeSection;
 public class DisabledServiceTimeStrategy extends ServiceStrategy {
 
 	boolean isDisabledWarningShown;
-	
+
 	/** Creates a new instance of ServiceTime.*/
 	public DisabledServiceTimeStrategy() {
 		isDisabledWarningShown = false;
@@ -49,9 +49,9 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 	public double wait(final NodeSection nodeSection, final JobClass jobClass) throws NetException {
 		if (!isDisabledWarningShown) {
 			if (nodeSection.getOwnerNode().getQueueNet().isTerminalSimulation()) {
-				System.out.println("JSIMengine - Warning: A job of class \""
-						+ jobClass.getName() + "\" requires service at station \""
-						+ nodeSection.getOwnerNode().getName() + "\", which however is disabled.");
+				System.out.println("JSIMengine - Warning: A " + jobClass.getName()
+						+ " job requires service at " + nodeSection.getOwnerNode().getName()
+						+ ", which however is disabled.");
 			} else {
 				new Thread(new Runnable() {
 					@Override
@@ -60,10 +60,9 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 							Thread.sleep(800);
 						} catch (InterruptedException e) {
 						}
-						JOptionPane.showMessageDialog(null, "A job of class \""
-								+ jobClass.getName() + "\" requires service at station \""
-								+ nodeSection.getOwnerNode().getName() + "\", which however is disabled.",
-								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showMessageDialog(null, "A " + jobClass.getName()
+								+ " job requires service at " + nodeSection.getOwnerNode().getName()
+								+ ", which however is disabled.", "JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}
 				}).start();
 			}

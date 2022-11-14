@@ -24,10 +24,7 @@ import java.util.Vector;
 
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
-import jmt.engine.NetStrategies.ImpatienceStrategies.Retrial;
 import jmt.engine.log.LoggerParameters;
-import jmt.gui.common.distributions.Distribution;
-import jmt.gui.common.serviceStrategies.LDStrategy;
 
 /**
  * Created by IntelliJ IDEA.
@@ -187,26 +184,6 @@ public interface StationDefinition {
 	public void setStationQueueCapacity(Object key, Integer queueCapacity);
 
 	/**
-	 * Returns in service capacity of the station, given the search key.
-	 */
-	public Integer getStationMaxRunning(Object key);
-
-	/**
-	 * Sets in service capacity of the station, given the search key.
-	 */
-	public void setStationMaxRunning(Object key, Integer maxRunning);
-
-	/**
-	 * Gets whether server will use preemption
-	 */
-	public Boolean getStationServerPreemptive(Object key);
-
-	/**
-	 * Sets whether server will use preemption.
-	 */
-	public void setStationServerPreemptive(Object key, Boolean serverPreemption);
-
-	/**
 	 * Returns queue strategy of the station, given the search key.
 	 */
 	public String getStationQueueStrategy(Object key);
@@ -227,49 +204,44 @@ public interface StationDefinition {
 	public void setStationNumberOfServers(Object key, Integer numberOfServers);
 
 	/**
-	 * Sets polling type, given the search key
+	 * Returns max running jobs of the station, given the search key.
 	 */
-	public void setStationPollingServerType(Object key, String PollingType);
+	public Integer getStationMaxRunningJobs(Object key);
 
 	/**
-	 * Returns type of polling server
+	 * Sets max running jobs of the station, given the search key.
+	 */
+	public void setStationMaxRunningJobs(Object key, Integer maxRunningJobs);
+
+	/**
+	 * Returns type of polling server, given the search key.
 	 */
 	public String getStationPollingServerType(Object key);
 
 	/**
-	 * Sets k value for K polling servers
+	 * Sets type of polling server, given the search key.
 	 */
-
-	public void setStationPollingServerKValue(Object key, Integer k);
+	public void setStationPollingServerType(Object key, String PollingType);
 
 	/**
-	 * Returns k value for K polling servers
+	 * Returns k value for K polling servers, given the search key.
 	 */
-
 	public Integer getStationPollingServerKValue(Object key);
 
 	/**
-	 * Sets value of whether a server is polling
+	 * Sets k value for K polling servers, given the search key.
 	 */
-	public void setStationPollingServerBoolean(Object key, Boolean serverPolling);
+	public void setStationPollingServerKValue(Object key, Integer k);
 
 	/**
-	 * Returns value of whether a server is polling
+	 * Gets whether setup times are enabled, given the search key.
 	 */
-
-	public Boolean getStationPollingServerBoolean(Object key);
+	public Boolean getSetupTimesEnabled(Object key);
 
 	/**
-	 * Set switchover period distribution
+	 * Sets whether setup times are enabled, given the search key.
 	 */
-
-	public void setStationPollingSwitchoverDistribution(Object stationKey, Object classKey, Object distribution);
-
-	/**
-	 * Get switchover period distribution
-	 */
-
-	public Object getStationPollingSwitchoverDistribution(Object stationKey, Object classKey);
+	public void setSetupTimesEnabled(Object key, Boolean enabled);
 
 	/**
 	 * Tells if a fork is blocking
@@ -321,11 +293,9 @@ public interface StationDefinition {
 	/*------------------------------------------------------------------------------
 	 *---------------- Methods for setup of class-station parameters ---------------
 	 *------------------------------------------------------------------------------*/
-
 	/**
 	 * Returns queue capacity for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return integer for queue capacity.
@@ -334,8 +304,7 @@ public interface StationDefinition {
 
 	/**
 	 * Sets queue capacity for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return queueCapacity: integer for queue capacity.
@@ -344,8 +313,7 @@ public interface StationDefinition {
 
 	/**
 	 * Returns queue strategy for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return string name for queue strategy.
@@ -354,8 +322,7 @@ public interface StationDefinition {
 
 	/**
 	 * Sets queue strategy for a station and a class, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param queueStrategy: string name for queue strategy.
@@ -379,20 +346,51 @@ public interface StationDefinition {
 	public void setDropRule(Object stationKey, Object classKey, String dropRule);
 
 	/**
-	 * Sets the retrial rate with given station queue section if capacity is finite.
+	 * Returns impatience type associated with given station queue section.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param retrialRate: a double that dictates the time distribution of each retrial job
+	 * @return NONE || BALKING || RENEGING
 	 */
+	ImpatienceType getImpatienceType(Object stationKey, Object classKey);
 
 	/**
-	 * Sets retrial rate distribution for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * Sets impatience type associated with given station queue section.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param distribution: distribution to be set for specified class and station.
+	 * @return NONE || BALKING || RENEGING
 	 */
-	public void setRetrialDistribution(Object stationKey, Object classKey, Object distribution);
+	void setImpatienceType(Object stationKey, Object classKey, ImpatienceType impatienceType);
+
+	/**
+	 * Returns impatience parameter associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return impatience parameter for station and class.
+	 */
+	ImpatienceParameter getImpatienceParameter(Object stationKey, Object classKey);
+
+	/**
+	 * Sets impatience parameter associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param impatience parameter for station and class.
+	 */
+	void setImpatienceParameter(Object stationKey, Object classKey, ImpatienceParameter impatienceParameter);
+
+	/**
+	 * Resets impatience strategy associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 */
+	void resetImpatience(Object stationKey, Object classKey);
+
+	/**
+	 * Updates balking parameter associated with given station queue section.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param serverStationQueuePolicy: queue policy for station.
+	 */
+	void updateBalkingParameter(Object stationKey, Object classKey, String serverStationQueuePolicy);
 
 	/**
 	 * Returns retrial rate distribution for class and station, given their search keys.
@@ -404,36 +402,17 @@ public interface StationDefinition {
 	public Object getRetrialDistribution(Object stationKey, Object classKey);
 
 	/**
-	 * Returns impatience strategy associated with given station queue section.
+	 * Sets retrial rate distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @return BALKING || RENEGING || RETRIAL
+	 * @param distribution: distribution to be set for specified class and station.
 	 */
-	ImpatienceType getImpatienceType(Object stationKey, Object classKey);
-
-	/**
-	 * Sets drop rule associated with given station queue section.
-	 * @param stationKey: search key for station.
-	 * @param classKey: search key for class.
-	 * @return BALKING || RENEGING || RETRIAL
-	 */
-	void setImpatienceType(Object stationKey, Object classKey, ImpatienceType impatienceType);
-
-	void resetImpatience(Object stationKey, Object classKey);
-
-	ImpatienceParameter getImpatienceParameter(Object stationKey, Object classKey);
-
-	void setImpatienceParameter(Object stationKey, Object classKey, ImpatienceParameter impatienceParameter);
-
-	/**
-	 * Update the BalkingParameter whenever the queue policy changes from non-priority to priority and vice versa.
-	 */
-	void updateBalkingParameter(Object stationKey, Object classKey, String serverStationQueuePolicy);
+	public void setRetrialDistribution(Object stationKey, Object classKey, Object distribution);
 
 	/**
 	 * Returns service weight for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return weight for specified class and station.
@@ -442,8 +421,7 @@ public interface StationDefinition {
 
 	/**
 	 * Sets service weight for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param weight: weight to be set for specified class and station.
@@ -452,8 +430,7 @@ public interface StationDefinition {
 
 	/**
 	 * Returns service time distribution for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return distribution for specified class and station.
@@ -462,8 +439,7 @@ public interface StationDefinition {
 
 	/**
 	 * Sets service time distribution for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param distribution: distribution to be set for specified class and station.
@@ -471,9 +447,46 @@ public interface StationDefinition {
 	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object distribution);
 
 	/**
+	 * Returns switchover period distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return distribution for specified class and station.
+	 */
+	public Object getPollingSwitchoverDistribution(Object stationKey, Object classKey);
+
+	/**
+	 * Sets switchover period distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
+	public void setPollingSwitchoverDistribution(Object stationKey, Object classKey, Object distribution);
+
+	/**
+	 * Returns setup time distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
+	 * @param stationKey: search key for station.
+	 * @param fromClassKey: search key for current class.
+	 * @param toClassKey: search key for next class.
+	 * @return distribution for the specified class and station.
+	 */
+	public Object getSetupTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey);
+
+	/**
+	 * Sets setup time distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * @param stationKey: search key for station.
+	 * @param fromClassKey: search key for current class from.
+	 * @param toClassKey: search key for next class.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
+	public void setSetupTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey, Object distribution);
+
+	/**
 	 * Returns routing strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return routing strategy for specified class and station.
@@ -482,8 +495,7 @@ public interface StationDefinition {
 
 	/**
 	 * Sets routing strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param routingStrategy: routing strategy to be set for specified class and station.
@@ -492,8 +504,7 @@ public interface StationDefinition {
 
 	/**
 	 * Returns fork strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return fork strategy for specified class and station.
@@ -502,8 +513,7 @@ public interface StationDefinition {
 
 	/**
 	 * Sets fork strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param forkStrategy: fork strategy to be set for specified class and station.
@@ -512,8 +522,7 @@ public interface StationDefinition {
 
 	/**
 	 * Returns join strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return join strategy for specified class and station.
@@ -522,8 +531,7 @@ public interface StationDefinition {
 
 	/**
 	 * Sets join strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param joinStrategy: join strategy to be set for specified class and station.
@@ -532,8 +540,7 @@ public interface StationDefinition {
 
 	/**
 	 * Returns semaphore strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, null value is
-	 * returned.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @return semaphore strategy for specified class and station.
@@ -542,8 +549,7 @@ public interface StationDefinition {
 
 	/**
 	 * Sets semaphore strategy for class and station, given their search keys.
-	 * If specified station cannot accept this kind of parameter, no value will
-	 * be set.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
 	 * @param semaphoreStrategy: semaphore strategy to be set for specified class and station.
@@ -587,11 +593,16 @@ public interface StationDefinition {
 	public void normalizeRoutingProbabilities(Object stationKey, Object classKey, Map<Object, Double> values);
 
 	/**
+	 * Normalizes the class switch probabilities.
+	 */
+	public void normalizeClassSwitchProbabilities(Object classKey, Map values, Number example);
+
+	/**
 	 * Normalizes the fork probabilities.
 	 */
 	public void normalizeForkProbabilities(Map<Object, Double> values);
 
-	/*------------------------------------------------------------------------------
+	/*-------------------------------------------------------------------------------
 	 *-------------  methods for inter-station connections definition  --------------
 	 *-------------------------------------------------------------------------------*/
 	/**Adds a connection between two stations in this model, given search keys of

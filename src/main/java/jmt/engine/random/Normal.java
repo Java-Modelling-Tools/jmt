@@ -35,9 +35,6 @@ import jmt.engine.math.Probability;
  */
 public class Normal extends AbstractDistribution implements Distribution {
 
-	private double cache; // cache for Box-Mueller algorithm
-	private boolean cacheFilled; // Box-Mueller
-
 	/**
 	 * This is the constructor. It creates a new normal distribution which is
 	 * defined from pdf:
@@ -135,10 +132,10 @@ public class Normal extends AbstractDistribution implements Distribution {
 			double mean = ((NormalPar) p).getMean();
 			double standardDeviation = ((NormalPar) p).getStandardDeviation();
 			// Uses polar Box-Muller transformation.
-			double U1=engine.raw();
-			double U2=engine.raw();
-			double z = Math.sqrt(-2.0 * Math.log(U1)) * Math.cos(2*Math.PI*U2);
-			double ret = mean + standardDeviation*z ;
+			double U1 = engine.raw();
+			double U2 = engine.raw();
+			double z = Math.sqrt(-2.0 * Math.log(U1)) * Math.cos(2 * Math.PI * U2);
+			double ret = mean + standardDeviation * z;
 			// If generated number is in the past, reruns this method
 			return (ret > 0.0) ? ret : nextRand(p);
 		} else {

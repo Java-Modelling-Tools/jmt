@@ -214,9 +214,9 @@ public class TimingEventQueue implements EventQueue {
 		}
 
 	}
-	public void setEngine(RandomEngine engine){
+
+	public void setEngine(RandomEngine engine) {
 		this.randomEngine = engine;
 	}
-
 
 }

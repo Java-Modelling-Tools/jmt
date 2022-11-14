@@ -22,9 +22,6 @@ public class Reneging implements Impatience {
     }
   }
 
-  /**
-   * Returns the type of impatience
-   */
   @Override
   public ImpatienceType impatienceType() {
     return impatienceType;

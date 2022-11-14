@@ -23,8 +23,6 @@ import jmt.common.exception.LoadException;
 import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.NodeList;
 import jmt.engine.random.Empirical;
 import jmt.engine.random.EmpiricalEntry;
 import jmt.engine.random.EmpiricalPar;
@@ -112,13 +110,12 @@ public class EmpiricalStrategy extends RoutingStrategy {
 	/**
 	 * Gets the output node, into which the job must be routed, using an
 	 * empirical strategy.
-	 * @param nodeList List of the output nodes.
+	 * @param ownerNode Owner node of the output section.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
-		public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
-		NodeList nodeList = ownerNode.getOutputNodes();
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
 		if (nodes == null) {
 			//it is the first execution of this method: find the NetNode objects
 			nodes = new NetNode[nodeNames.length];

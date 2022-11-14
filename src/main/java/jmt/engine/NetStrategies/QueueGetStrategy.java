@@ -21,7 +21,6 @@ package jmt.engine.NetStrategies;
 import jmt.common.AutoCheck;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobInfo; 
 import jmt.engine.QueueNet.JobInfoList;
 
 /**
@@ -45,8 +44,6 @@ public abstract class QueueGetStrategy implements AutoCheck {
 	 * @return Job selected and removed from the queue.
 	 */
 	public abstract Job get(JobInfoList queue, JobClass jobClass);
-
-	public abstract JobInfo peek(JobInfoList queue);
 
 	public boolean check() {
 		return true;

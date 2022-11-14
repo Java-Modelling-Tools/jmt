@@ -282,7 +282,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 					gNumber.setEnabled(false);
 					mainPanel.setSelectedIndex(0);
 					mainPanel.setEnabledAt(1, false);
-				}	
+				}
 			}
 		});
 

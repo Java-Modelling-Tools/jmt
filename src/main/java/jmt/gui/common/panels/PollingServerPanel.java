@@ -1,8 +1,27 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.gui.common.panels;
 
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.table.editors.ComboBoxCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
@@ -28,346 +47,339 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import static jmt.gui.common.CommonConstants.*;
-
-/*
- * Menu for editing polling server properties (Heavily inspired by ServiceSectionPanel)
+/**
+ * Menu for editing polling server properties
  * @author Ahmed Salem
  */
-public class PollingServerPanel extends WizardPanel {
+public class PollingServerPanel extends WizardPanel implements CommonConstants {
 
+	private static final long serialVersionUID = 1L;
 
-    protected static final int BORDERSIZE = 20;
+	protected StationDefinition data;
+	protected Object stationKey;
+	protected ClassDefinition classData;
 
-    protected StationDefinition data;
-    protected Object stationKey;
-    protected ClassDefinition classData;
+	protected ImagedComboBoxCellEditorFactory classEditor;
+	protected SwitchoverTable switchoverTable;
 
-    protected ImagedComboBoxCellEditorFactory classEditor;
-    private SwitchoverTable switchoverTable;
+	protected JComboBox pollingTypeCombo;
+	protected JSpinner pollingKValue;
 
-    private JComboBox pollingTypeCombo;
-    private JSpinner pollingKValue;
+	protected static final String[] pollingTypes = {
+			STATION_QUEUE_STRATEGY_POLLING_LIMITED,
+			STATION_QUEUE_STRATEGY_POLLING_GATED,
+			STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE
+	};
 
-    protected static final String[] pollingTypes =
-            {
-                    STATION_QUEUE_STRATEGY_POLLING_LIMITED,
-                    STATION_QUEUE_STRATEGY_POLLING_GATED,
-                    STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE
-            };
+	protected AbstractAction editDistribution = new AbstractAction("Edit") {
 
-    protected AbstractAction editDistribution = new AbstractAction("Edit") {
+		private static final long serialVersionUID = 1L;
 
-        private static final long serialVersionUID = 1L;
+		{
+			putValue(Action.SHORT_DESCRIPTION, "Edits Service Time Distribution");
+		}
 
-        {
-            putValue(Action.SHORT_DESCRIPTION, "Edits Service Time Distribution");
-        }
+		public void actionPerformed(ActionEvent e) {
+			int index = switchoverTable.getSelectedRow();
+			if (index >= 0 && index < switchoverTable.getRowCount()) {
+				Object key = classData.getClassKeys().elementAt(index);
+				Object service = data.getPollingSwitchoverDistribution(stationKey, key);
+				if (service instanceof Distribution) {
+					DistributionsEditor editor = DistributionsEditor.getInstance(PollingServerPanel.this.getParent(), (Distribution) service);
+					editor.setTitle("Editing " + classData.getClassName(key) + " Switchover Time Distribution...");
+					editor.setVisible(true);
+					data.setPollingSwitchoverDistribution(stationKey, key, editor.getResult());
+					switchoverTable.repaint();
+				} else {
+					LDStrategyEditor editor = LDStrategyEditor.getInstance(PollingServerPanel.this.getParent(), (LDStrategy) service);
+					editor.setTitle("Editing " + classData.getClassName(key) + " Load Dependent Switchover Strategy...");
+					editor.setVisible(true);
+					switchoverTable.repaint();
+				}
+			}
+		}
 
-        public void actionPerformed(ActionEvent e) {
-            int index = switchoverTable.getSelectedRow();
-            if (index >= 0 && index < switchoverTable.getRowCount()) {
-                Object key = classData.getClassKeys().elementAt(index);
-                Object service = data.getStationPollingSwitchoverDistribution(stationKey, key);
-                if (service instanceof Distribution) {
-                    DistributionsEditor editor = DistributionsEditor.getInstance(PollingServerPanel.this.getParent(), (Distribution) service);
-                    editor.setTitle("Editing " + classData.getClassName(key) + " Switchover Time Distribution...");
-                    editor.setVisible(true);
-                    data.setStationPollingSwitchoverDistribution(stationKey, key, editor.getResult());
-                    switchoverTable.repaint();
-                }
-                else {
-                    LDStrategyEditor editor = LDStrategyEditor.getInstance(PollingServerPanel.this.getParent(), (LDStrategy) service);
-                    editor.setTitle("Editing " + classData.getClassName(key) + " Load Dependent Switchover Strategy...");
-                    editor.setVisible(true);
-                    switchoverTable.repaint();
-                }
-            }
-        }
-    };
+	};
 
-    public PollingServerPanel(Dialog owner, StationDefinition data, Object stationKey, ClassDefinition cd) {
-        setData(data, stationKey, cd);
-    }
+	public PollingServerPanel(Dialog owner, StationDefinition data, Object stationKey, ClassDefinition cd) {
+		setData(data, stationKey, cd);
+	}
 
-    private void setData(StationDefinition sd, Object sk, ClassDefinition cd) {
-        data = sd;
-        stationKey = sk;
-        classData = cd;
-        classEditor = new ImagedComboBoxCellEditorFactory(cd);
-        classEditor.setData(cd);
+	private void setData(StationDefinition sd, Object sk, ClassDefinition cd) {
+		data = sd;
+		stationKey = sk;
+		classData = cd;
+		classEditor = new ImagedComboBoxCellEditorFactory(cd);
+		classEditor.setData(cd);
 
-        switchoverTable = new SwitchoverTable();
+		switchoverTable = new SwitchoverTable();
 
-        pollingTypeCombo = new JComboBox();
-        pollingTypeCombo.setModel(new DefaultComboBoxModel(pollingTypes));
+		pollingTypeCombo = new JComboBox();
+		pollingTypeCombo.setModel(new DefaultComboBoxModel(pollingTypes));
 
-        pollingKValue = new JSpinner();
-        pollingKValue.setPreferredSize(DIM_BUTTON_XS);
-        updateServerPreferences();
-        addDataManagers();
-        initComponents();
-    }
+		pollingKValue = new JSpinner();
+		pollingKValue.setPreferredSize(DIM_BUTTON_XS);
+		updateServerPreferences();
+		addDataManagers();
+		initComponents();
+	}
 
+	private void initComponents() {
+		this.setLayout(new BorderLayout(5, 5));
+		this.setBorder(new EmptyBorder(5, 5, 5, 5));
+		JPanel topPanel = new JPanel();
+		topPanel.setLayout(new BorderLayout(3, 3));
+		topPanel.setBorder(new TitledBorder(new EtchedBorder(), "Polling Server Preferences"));
+		JPanel pollingSettings = new JPanel();
+		pollingSettings.add(Box.createRigidArea(new Dimension(5, 0)));
+		pollingSettings.add(new JLabel("Polling Type:"));
+		pollingSettings.add(pollingTypeCombo);
+		pollingSettings.add(Box.createRigidArea(new Dimension(5, 0)));
+		pollingSettings.add(new JLabel("Limit Value K"));
+		pollingSettings.add(pollingKValue);
+		topPanel.add(pollingSettings, BorderLayout.NORTH);
+		this.add(topPanel, BorderLayout.NORTH);
 
-    protected void initComponents() {
-        this.setLayout(new BorderLayout(5, 5));
-        this.setBorder(new EmptyBorder(5, 5, 5, 5));
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BorderLayout(3, 3));
-        topPanel.setBorder(new TitledBorder(new EtchedBorder(), "Polling Server Preferences"));
-        JPanel pollingSettings = new JPanel();
-        pollingSettings.add(Box.createRigidArea(new Dimension(5, 0)));
-        pollingSettings.add(new JLabel("Polling Type:"));
-        pollingSettings.add(pollingTypeCombo);
-        pollingSettings.add(Box.createRigidArea(new Dimension(5, 0)));
-        pollingSettings.add(new JLabel("Limit Value K"));
-        pollingSettings.add(pollingKValue);
-        topPanel.add(pollingSettings, BorderLayout.NORTH);
+		WarningScrollTable ServiceSectionTable = new WarningScrollTable(switchoverTable, WARNING_CLASS);
+		ServiceSectionTable.setBorder(new TitledBorder(new EtchedBorder(), "Switchover Time Distributions"));
+		this.add(ServiceSectionTable, BorderLayout.CENTER);
+	}
 
-        this.add(topPanel, BorderLayout.NORTH);
+	private void updateServerPreferences() {
+		pollingKValue.setValue(data.getStationPollingServerKValue(stationKey));
+		String pollingType = data.getStationPollingServerType(stationKey);
+		int index = 0;
+		for (int i = 0; i < pollingTypes.length; i++) {
+			if (pollingTypes[i].equals(pollingType)) {
+				index = i;
+				break;
 
-        WarningScrollTable ServiceSectionTable = new WarningScrollTable(switchoverTable, WARNING_CLASS);
-        ServiceSectionTable.setBorder(new TitledBorder(new EtchedBorder(), "Switchover Time Distributions"));
-        this.add(ServiceSectionTable, BorderLayout.CENTER);
+			}
+		}
+		pollingTypeCombo.setSelectedIndex(index);
+		pollingKValue.setEnabled(pollingType.equals(STATION_QUEUE_STRATEGY_POLLING_LIMITED));
+	}
 
-    }
+	private void addDataManagers() {
+		pollingTypeCombo.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String pollingType = (String) pollingTypeCombo.getSelectedItem();
+				data.setStationPollingServerType(stationKey, pollingType);
+				pollingKValue.setEnabled(pollingType.equals(STATION_QUEUE_STRATEGY_POLLING_LIMITED));
+			}
+		});
 
-    private void updateServerPreferences() {
-        pollingKValue.setValue(data.getStationPollingServerKValue(stationKey));
-        String pollingType = data.getStationPollingServerType(stationKey);
-        int index = 0;
-        for (int i = 0; i < pollingTypes.length; i++) {
-            if (pollingTypes[i].equals(pollingType)) {
-                index = i;
-                break;
+		pollingKValue.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (pollingKValue.getValue() instanceof Integer) {
+					Integer kValue = (Integer) pollingKValue.getValue();
+					if (kValue.intValue() < 1) {
+						kValue = new Integer(1);
+						pollingKValue.setValue(kValue);
+					}
 
-            }
-        }
-        pollingTypeCombo.setSelectedIndex(index);
-        pollingKValue.setEnabled(pollingType.equals(STATION_QUEUE_STRATEGY_POLLING_LIMITED));
+					data.setStationPollingServerKValue(stationKey, kValue);
+				}
+			}
+		});
 
-    }
-    private void addDataManagers() {
-        pollingTypeCombo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String pollingType = (String) pollingTypeCombo.getSelectedItem();
-                data.setStationPollingServerType(stationKey, pollingType);
-                pollingKValue.setEnabled(pollingType.equals(STATION_QUEUE_STRATEGY_POLLING_LIMITED));
-            }
-        });
+	}
 
-        pollingKValue.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                if (pollingKValue.getValue() instanceof Integer) {
-                    Integer kValue = (Integer) pollingKValue.getValue();
-                    if (kValue.intValue() < 1) {
-                        kValue = new Integer(1);
-                        pollingKValue.setValue(kValue);
-                    }
+	protected class SwitchoverTable extends JTable {
 
-                    data.setStationPollingServerKValue(stationKey, kValue);
-                }
-            }
-        });
+		private static final long serialVersionUID = 1L;
+		protected Object[] serviceType = new Object[] { SWITCHOVER_ZERO, SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT};
+		JButton editButton = new JButton() {
+			private static final long serialVersionUID = 1L;
+			{
+				setText("Edit");
+			}
+		};
 
-    }
+		int[] columnSizes = new int[] { 90, 90, 150, 30 };
 
-    /* Similar to Service Table in ServiceSectionPanel */
-    protected class SwitchoverTable extends JTable {
-        protected Object[] serviceType = new Object[] { SWITCHOVER_ZERO, SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT};
-        JButton editButton = new JButton() {
+		public SwitchoverTable() {
+			setModel(new SwitchoverTableModel());
+			sizeColumns();
+			setRowHeight(ROW_HEIGHT);
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			getTableHeader().setReorderingAllowed(false);
+		}
 
-            private static final long serialVersionUID = 1L;
-            {
-                setText("Edit");
-            }
-        };
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+			if (column == 0) {
+				return classEditor.getRenderer();
+			} else if (column == 1) {
+				return ComboBoxCellEditor.getRendererInstance();
+			} else if (column == 3) {
+				return new PollingServerPanel.DisabledButtonCellRenderer(editButton);
+			} else {
+				return super.getCellRenderer(row, column);
+			}
+		}
 
-        int[] columnSizes = new int[] { 90, 60, 150, 30 };
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+			if (column == 1) {
+				return ComboBoxCellEditor.getEditorInstance(serviceType);
+			} else if (column == 3) {
+				return new ButtonCellEditor(new JButton(editDistribution));
+			} else {
+				return super.getCellEditor(row, column);
+			}
+		}
 
-        public SwitchoverTable() {
-            setModel(new SwitchoverTableModel());
-            sizeColumns();
-            setRowHeight(ROW_HEIGHT);
-            setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            getTableHeader().setReorderingAllowed(false);
-        }
+		private void sizeColumns() {
+			for (int i = 0; i < columnSizes.length && i < getColumnCount(); i++) {
+				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
+			}
+		}
+	}
 
-        @Override
-        public TableCellRenderer getCellRenderer(int row, int column) {
-            if (column == 0) {
-                return classEditor.getRenderer();
-            } else if (column == 1) {
-                return ComboBoxCellEditor.getRendererInstance();
-            } else if (column == 3) {
-                return new PollingServerPanel.DisabledButtonCellRenderer(editButton);
-            } else {
-                return super.getCellRenderer(row, column);
-            }
-        }
+	protected class SwitchoverTableModel extends AbstractTableModel {
 
-        @Override
-        public TableCellEditor getCellEditor(int row, int column) {
-            if (column == 1) {
-                return ComboBoxCellEditor.getEditorInstance(serviceType);
-            } else if (column == 3) {
-                return new ButtonCellEditor(new JButton(editDistribution));
-            } else {
-                return super.getCellEditor(row, column);
-            }
-        }
+		private static final long serialVersionUID = 1L;
+		private String[] columnNames = new String[] { "Class", "Strategy", "Switchover Time Distribution", "" };
+		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Object.class };
 
-        private void sizeColumns() {
-            for (int i = 0; i < columnSizes.length && i < getColumnCount(); i++) {
-                this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
-            }
-        }
-    }
+		public int getRowCount() {
+			return classData.getClassKeys().size();
+		}
 
-    protected class SwitchoverTableModel extends AbstractTableModel {
+		public int getColumnCount() {
+			return columnNames.length;
+		}
 
-        private static final long serialVersionUID = 1L;
-        private String[] columnNames = new String[] { "Class", "Strategy", "Switchover Time Distribution", "" };
-        private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Object.class };
+		@Override
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
+		}
 
-        public int getRowCount() {
-            return classData.getClassKeys().size();
-        }
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return columnClasses[columnIndex];
+		}
 
-        public int getColumnCount() {
-            return columnNames.length;
-        }
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			Object classKey = classData.getClassKeys().get(rowIndex);
+			if (columnIndex == 0) {
+				return false;
+			} else if (columnIndex == 2) {
+				return false;
+			} else if (columnIndex == 3 && data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 
-        @Override
-        public String getColumnName(int columnIndex) {
-            return columnNames[columnIndex];
-        }
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			Object classKey = classData.getClassKeys().get(rowIndex);
+			switch (columnIndex) {
+			case (0):
+				return classKey;
+			case (1):
+				// Checks if current service section is load dependent or independent
+				if (data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof LDStrategy) {
+					return SERVICE_LOAD_DEPENDENT;
+				} else if (data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy) {
+					return SWITCHOVER_ZERO;
+				} else if (data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof DisabledStrategy) {
+					return SERVICE_DISABLED;
+				} else {
+					return SERVICE_LOAD_INDEPENDENT;
+				}
+			case (2):
+				return data.getPollingSwitchoverDistribution(stationKey, classKey);
+			}
+			return null;
+		}
 
-        @Override
-        public Class<?> getColumnClass(int columnIndex) {
-            return columnClasses[columnIndex];
-        }
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			Object classKey = classData.getClassKeys().get(rowIndex);
+			switch (columnIndex) {
+			// Load dependency
+			case (1):
+				switch (((String) aValue)) {
+				case SERVICE_LOAD_DEPENDENT:
+					// Puts a Load Dependent Service Strategy only if previously it was different
+					if (!(data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof LDStrategy)) {
+						data.setPollingSwitchoverDistribution(stationKey, classKey, new LDStrategy());
+					}
+					break;
+				case SWITCHOVER_ZERO:
+					// Puts a Zero Service Time Strategy only if previously it was different
+					if (!(data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy)) {
+						data.setPollingSwitchoverDistribution(stationKey, classKey, new ZeroStrategy());
+					}
+					break;
+				default:
+					// Puts the default service strategy only if previously it was different
+					if (!(data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof Distribution)) {
+						Object distribution = Defaults.getAsNewInstance("stationServiceStrategy");
+						data.setPollingSwitchoverDistribution(stationKey, classKey, distribution);
+					}
+					break;
+				}
+			repaint();
+			}
+		}
+	}
 
-        @Override
-        public boolean isCellEditable(int rowIndex, int columnIndex) {
-            Object classKey = classData.getClassKeys().get(rowIndex);
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
 
-            if (columnIndex == 0) {
-                return false;
-            } else if (columnIndex == 2) {
-                return false;
-            } else if (columnIndex == 3 && data.getStationPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy) {
-                return false;
-            } else {
-                return true;
-            }
-        }
+		private static final long serialVersionUID = 1L;
 
-        public Object getValueAt(int rowIndex, int columnIndex) {
-            Object classKey = classData.getClassKeys().get(rowIndex);
-            switch (columnIndex) {
-                case (0):
-                    return classKey;
-                case (1):
-                    // Checks if current service section is load dependent or independent
-                    if (data.getStationPollingSwitchoverDistribution(stationKey, classKey) instanceof LDStrategy) {
-                        return SERVICE_LOAD_DEPENDENT;
-                    } else if (data.getStationPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy) {
-                        return SWITCHOVER_ZERO;
-                    } else if (data.getStationPollingSwitchoverDistribution(stationKey, classKey) instanceof DisabledStrategy) {
-                        return SERVICE_DISABLED;
-                    } else {
-                        return SERVICE_LOAD_INDEPENDENT;
-                    }
-                case (2):
-                    return data.getStationPollingSwitchoverDistribution(stationKey, classKey);
-            }
-            return null;
-        }
+		private JButton button;
 
-        /**Puts edited values to the underlying data structure for model implementation*/
-        @Override
-        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-            Object classKey = classData.getClassKeys().get(rowIndex);
-            switch (columnIndex) {
-                // Load dependency
-                case (1):
-                    switch (((String) aValue)) {
-                        case SERVICE_LOAD_DEPENDENT:
-                            // Puts a Load Dependent Service Strategy only if previously it was different
-                            if (!(data.getStationPollingSwitchoverDistribution(stationKey, classKey) instanceof LDStrategy)) {
-                                data.setStationPollingSwitchoverDistribution(stationKey, classKey, new LDStrategy());
-                            }
-                            break;
-                        case SWITCHOVER_ZERO:
-                            // Puts a Zero Service Time Strategy only if previously it was different
-                            if (!(data.getStationPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy)) {
-                                data.setStationPollingSwitchoverDistribution(stationKey, classKey, new ZeroStrategy());
-                            }
-                            break;
-                        default:
-                            // Puts the default service strategy only if previously it was different
-                            if (!(data.getStationPollingSwitchoverDistribution(stationKey, classKey) instanceof Distribution)) {
-                                Object distribution = Defaults.getAsNewInstance("stationServiceStrategy");
-                                data.setStationPollingSwitchoverDistribution(stationKey, classKey, distribution);
-                            }
-                            break;
-                    }
-                    repaint();
-            }
-        }
-    }
+		public DisabledButtonCellRenderer(JButton jbutt) {
+			super(jbutt);
+			button = jbutt;
+		}
 
-    private class DisabledButtonCellRenderer extends ButtonCellEditor {
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			if (table.isCellEditable(row, column)) {
+				button.setEnabled(true);
+			} else {
+				button.setEnabled(false);
+			}
+			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+		}
 
-        private static final long serialVersionUID = 1L;
+	}
 
-        private JButton button;
+	@Override
+	public String getName() {
+		return "Polling Server Properties Editor";
+	}
 
-        public DisabledButtonCellRenderer(JButton jbutt) {
-            super(jbutt);
-            button = jbutt;
-        }
+	@Override
+	public void repaint() {
+		if (switchoverTable != null) {
+			switchoverTable.tableChanged(new TableModelEvent(switchoverTable.getModel()));
+		}
+		super.repaint();
+	}
 
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            if (table.isCellEditable(row, column)) {
-                button.setEnabled(true);
-            } else {
-                button.setEnabled(false);
-            }
-            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        }
+	@Override
+	public void gotFocus() {
+		classEditor.clearCache();
+	}
 
-    }
+	@Override
+	public void lostFocus() {
+		// Aborts editing of table
+		TableCellEditor editor = switchoverTable.getCellEditor();
+		if (editor != null) {
+			editor.stopCellEditing();
+		}
+	}
 
-    @Override
-    public String getName() {
-        return "Polling Server Properties Editor";
-    }
-
-    @Override
-    public void repaint() {
-        if (switchoverTable != null) {
-            switchoverTable.tableChanged(new TableModelEvent(switchoverTable.getModel()));
-        }
-        super.repaint();
-    }
-
-    @Override
-    public void gotFocus() {
-        classEditor.clearCache();
-    }
-
-    @Override
-    public void lostFocus() {
-        // Aborts editing of table
-        TableCellEditor editor = switchoverTable.getCellEditor();
-        if (editor != null) {
-            editor.stopCellEditing();
-        }
-    }
 }

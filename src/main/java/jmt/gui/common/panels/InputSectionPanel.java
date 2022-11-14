@@ -52,7 +52,6 @@ import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.jsimgraph.DialogFactory;
-import jmt.gui.jsimwiz.panels.ClassesPanel;
 
 /**
  * Created by IntelliJ IDEA.
@@ -69,62 +68,61 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	/**
 	 * Used to define station queue policies
 	 */
-	protected static final Object[] serverStationQueuePolicies =
-			{
-					STATION_QUEUE_STRATEGY_NON_PREEMPTIVE,
-					STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY,
-                    STATION_QUEUE_STRATEGY_POLLING,
-					STATION_QUEUE_STRATEGY_PREEMPTIVE,
-					STATION_QUEUE_STRATEGY_PSSERVER
-			};
+	protected static final Object[] serverStationQueuePolicies = {
+			STATION_QUEUE_STRATEGY_NON_PREEMPTIVE,
+			STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY,
+			STATION_QUEUE_STRATEGY_PREEMPTIVE,
+			STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY,
+			STATION_QUEUE_STRATEGY_PSSERVER,
+			STATION_QUEUE_STRATEGY_POLLING
+	};
 
-	protected static final Object[] otherStationQueuePolicies =
-			{
-					STATION_QUEUE_STRATEGY_NON_PREEMPTIVE,
-					STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY
-			};
+	protected static final Object[] otherStationQueuePolicies = {
+			STATION_QUEUE_STRATEGY_NON_PREEMPTIVE,
+			STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY
+	};
+
 	/**
 	 * Used to define queue policies
 	 */
-	protected static final Object[] serverPSQueuePolicies =
-			{
-					QUEUE_STRATEGY_PS,
-					QUEUE_STRATEGY_DPS,
-					QUEUE_STRATEGY_GPS
-			};
-
-	protected  static final Object[] serverPreemptiveQueuePolicies = {
-					QUEUE_STRATEGY_LCFS_PR
+	protected static final Object[] serverPSQueuePolicies = {
+			QUEUE_STRATEGY_PS,
+			QUEUE_STRATEGY_DPS,
+			QUEUE_STRATEGY_GPS
 	};
 
-	protected static final Object[] serverNonPreemptiveQueuePolicies =
-			{
-					QUEUE_STRATEGY_FCFS,
-					QUEUE_STRATEGY_LCFS,
-					QUEUE_STRATEGY_RAND,
-					QUEUE_STRATEGY_SJF,
-					QUEUE_STRATEGY_LJF,
-					QUEUE_STRATEGY_SEPT,
-					QUEUE_STRATEGY_LEPT
-			};
+	protected  static final Object[] serverPreemptiveQueuePolicies = {
+			QUEUE_STRATEGY_FCFS_PR,
+			QUEUE_STRATEGY_LCFS_PR,
+			QUEUE_STRATEGY_SRPT
+	};
 
-	protected static final Object[] otherNonPreemptiveQueuePolicies =
-			{
-					QUEUE_STRATEGY_FCFS,
-					QUEUE_STRATEGY_LCFS,
-					QUEUE_STRATEGY_RAND
-			};
+	protected static final Object[] serverNonPreemptiveQueuePolicies = {
+			QUEUE_STRATEGY_FCFS,
+			QUEUE_STRATEGY_LCFS,
+			QUEUE_STRATEGY_RAND,
+			QUEUE_STRATEGY_SJF,
+			QUEUE_STRATEGY_LJF,
+			QUEUE_STRATEGY_SEPT,
+			QUEUE_STRATEGY_LEPT
+	};
+
+	protected static final Object[] otherNonPreemptiveQueuePolicies = {
+			QUEUE_STRATEGY_FCFS,
+			QUEUE_STRATEGY_LCFS,
+			QUEUE_STRATEGY_RAND
+	};
+
 	/**
 	 * Used to define drop rules
 	 */
 	protected static final Object[] dropRules = { FINITE_DROP, FINITE_BLOCK, FINITE_WAITING, FINITE_RETRIAL};
-  /**
-   * Used to define impatience strategies
-   */
+	/**
+	 * Used to define impatience strategies
+	 */
 	protected static List<String> impatienceStrategies;
 
 	private boolean isInitComplete;
-	private String stationType;	// Used to determine which impatience strategies are available.
 
 	private ButtonGroup queueLengthGroup;
 	private JRadioButton infiniteQueueSelector;
@@ -138,7 +136,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected StationDefinition data;
 	protected ClassDefinition classData;
 	protected Object stationKey;
-	
+
 	/** References to columns **/
 	protected final int COLUMN_CLASS = 0;
 	protected final int COLUMN_QUEUE_POLICY = 1;
@@ -148,19 +146,16 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected final int COLUMN_EDIT = 5;
 	protected JButton queuePolicyEditButton;
 
-	public InputSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey, String stationType) {
+	public InputSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
 		isInitComplete = false;
-		this.stationType = stationType;
 		classEditor = new ImagedComboBoxCellEditorFactory(cd);
 		setData(sd, cd, stationKey);
 		initComponents();
 		addDataManagers();
 		updateQueueLength();
-        switch (stationType) {
-        case STATION_TYPE_SERVER:
-		     updatePolicyEditButton();
-             break;
-        }
+		if (sd.getStationType(stationKey) == STATION_TYPE_SERVER) {
+			updatePolicyEditButton();
+		}
 		isInitComplete = true;
 	}
 
@@ -185,7 +180,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 
 		// Queue strategy selector
 		JPanel queueStrategy = new JPanel(new BorderLayout());
-		queueStrategy.add(new JLabel("Station queue policy: "), BorderLayout.WEST);
+		queueStrategy.add(new JLabel("Station Queue Policy: "), BorderLayout.WEST);
 		queuePolicyCombo = new JComboBox();
 		queuePolicyEditButton = new JButton("Edit");
 		queueStrategy.add(queuePolicyCombo, BorderLayout.CENTER);
@@ -216,10 +211,9 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	private void getRelevantImpatienceStrategies() {
 		impatienceStrategies = new ArrayList<>();
 		impatienceStrategies.add(ImpatienceType.NONE.getDisplayName());
-		if (stationType.equals(STATION_TYPE_SERVER)) {
+		if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
 			impatienceStrategies.add(ImpatienceType.BALKING.getDisplayName());
 			impatienceStrategies.add(ImpatienceType.RENEGING.getDisplayName());
-			//impatienceStrategies.add(ImpatienceType.RETRIAL.getDisplayName());
 		}
 	}
 
@@ -230,6 +224,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		classEditor.setData(cd);
 		if (isInitComplete) {
 			updateQueueLength();
+			getRelevantImpatienceStrategies();
 		}
 	}
 
@@ -280,11 +275,9 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				if (editor != null) {
 					editor.stopCellEditing();
 				}
+
 				String queuePolicy = (String) queuePolicyCombo.getSelectedItem();
 				data.setStationQueueStrategy(stationKey, queuePolicy);
-
-				boolean isPolling = queuePolicy.equals(STATION_QUEUE_STRATEGY_POLLING);
-				data.setStationPollingServerBoolean(stationKey, isPolling);
 
 				if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
 					List<Object> policyList = Arrays.asList(serverPSQueuePolicies);
@@ -298,20 +291,45 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 							data.setQueueStrategy(stationKey, classKey, policy);
 						}
 					}
-				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
-				    List<Object> policyList = Arrays.asList(serverPreemptiveQueuePolicies);
+					Boolean setupTimesEnabled = data.getSetupTimesEnabled(stationKey);
+					if (setupTimesEnabled != null) {
+						data.setSetupTimesEnabled(stationKey, Boolean.valueOf(false));
+					}
+				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
+						|| queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
+					List<Object> policyList = Arrays.asList(serverPreemptiveQueuePolicies);
 					Vector<Object> classKeys = classData.getClassKeys();
 					if (classKeys.size() > 0 && !policyList.contains(data.getQueueStrategy(stationKey, classKeys.get(0)))) {
 						String policy = Defaults.get("stationQueueStrategy");
 						if (!policyList.contains(policy)) {
-							policy = QUEUE_STRATEGY_LCFS_PR;
+							policy = QUEUE_STRATEGY_FCFS_PR;
 						}
 						for (Object classKey : classKeys) {
 							data.setQueueStrategy(stationKey, classKey, policy);
 							data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));
 						}
 					}
-
+					Boolean setupTimesEnabled = data.getSetupTimesEnabled(stationKey);
+					if (setupTimesEnabled != null) {
+						data.setSetupTimesEnabled(stationKey, Boolean.valueOf(false));
+					}
+				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
+					List<Object> policyList = Arrays.asList(serverNonPreemptiveQueuePolicies);
+					Vector<Object> classKeys = classData.getClassKeys();
+					if (classKeys.size() > 0 && !policyList.contains(data.getQueueStrategy(stationKey, classKeys.get(0)))) {
+						String policy = Defaults.get("stationQueueStrategy");
+						if (!policyList.contains(policy)) {
+							policy = QUEUE_STRATEGY_FCFS;
+						}
+						for (Object classKey : classKeys) {
+							data.setQueueStrategy(stationKey, classKey, policy);
+							data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));
+						}
+					}
+					Boolean setupTimesEnabled = data.getSetupTimesEnabled(stationKey);
+					if (setupTimesEnabled != null) {
+						data.setSetupTimesEnabled(stationKey, Boolean.valueOf(false));
+					}
 				} else {
 					List<Object> policyList = Arrays.asList(serverNonPreemptiveQueuePolicies);
 					Vector<Object> classKeys = classData.getClassKeys();
@@ -332,7 +350,6 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				for (Object classKey : classKeys) {
 					data.updateBalkingParameter(stationKey, classKey, queuePolicy);
 				}
-
 				queueTable.repaint();
 			}
 		});
@@ -340,9 +357,18 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		queuePolicyEditButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				PollingServerPanel serverPanel = new PollingServerPanel(null, data, stationKey, classData);
-				DialogFactory factory = new DialogFactory(null);
-				factory.getDialog(serverPanel, "Editing Polling Server Preferences");
+				String queuePolicy = data.getStationQueueStrategy(stationKey);
+				if (queuePolicy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
+					PollingServerPanel serverPanel = new PollingServerPanel(null, data, stationKey, classData);
+					DialogFactory factory = new DialogFactory(null);
+					factory.getDialog(serverPanel, "Editing Polling Server Preferences",
+							MAX_GUI_WIDTH_POLLING, MAX_GUI_HEIGHT_POLLING, false, "", "");
+				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
+					ProcessorSharingServerPanel serverPanel = new ProcessorSharingServerPanel(data, stationKey);
+					DialogFactory factory = new DialogFactory(null);
+					factory.getDialog(serverPanel, "Editing Processor Sharing Server Preferences",
+							MAX_GUI_WIDTH_PSSERVER, MAX_GUI_HEIGHT_PSSERVER, false, "", "");
+				}
 			}
 		});
 	}
@@ -361,9 +387,11 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	}
 
 	private void updatePolicyEditButton() {
-		queuePolicyEditButton.setEnabled(data.getStationPollingServerBoolean(stationKey));
-
+		String queuePolicy = data.getStationQueueStrategy(stationKey);
+		queuePolicyEditButton.setEnabled(queuePolicy.equals(STATION_QUEUE_STRATEGY_POLLING)
+				|| queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER));
 	}
+
 	/**
 	 * @return the panel's name
 	 */
@@ -399,13 +427,14 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	}
 
 	private Object getClassKeyFromRow(int row) {
-    return classData.getClassKeys().elementAt(row);
-  }
+		return classData.getClassKeys().elementAt(row);
+	}
 
-  private boolean isOpenClassAtRow(int row) {
-	  Object classKey = getClassKeyFromRow(row);
-	  return ((CommonModel) data).getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN;
-  }
+	private boolean isOpenClassAtRow(int row) {
+		Object classKey = getClassKeyFromRow(row);
+		return ((CommonModel) data).getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN;
+	}
+
 	protected class QueueTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
@@ -432,10 +461,11 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		public TableCellEditor getCellEditor(int row, int column) {
 			if (column == COLUMN_QUEUE_POLICY) {
 				if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
-				    String queueStrategy = data.getStationQueueStrategy(stationKey);
+					String queueStrategy = data.getStationQueueStrategy(stationKey);
 					if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
 						return ComboBoxCellEditor.getEditorInstance(serverPSQueuePolicies);
-					} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)) {
+					} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
+							|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
 						return ComboBoxCellEditor.getEditorInstance(serverPreemptiveQueuePolicies);
 					} else {
 						return ComboBoxCellEditor.getEditorInstance(serverNonPreemptiveQueuePolicies);
@@ -447,9 +477,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				return ComboBoxCellEditor.getEditorInstance(dropRules);
 			} else if (column == COLUMN_IMPATIENCE) {
 				return getCellEditorForImpatienceFromClassType(row);
-      } else if (column == COLUMN_EDIT) {
-        Object classKey = getClassKeyFromRow(row);
-
+			} else if (column == COLUMN_EDIT) {
+				Object classKey = getClassKeyFromRow(row);
 				// This will ensure that the correct Editing window is returned when the Edit button is clicked
 				return getCellEditorForImpatienceType(stationKey, classKey);
 			} else {
@@ -468,26 +497,26 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			} else if (column == COLUMN_SERVICE_WEIGHT) {
 				return serviceWeightRenderer;
 			} else if (column == COLUMN_IMPATIENCE) {
-        return ComboBoxCellEditor.getRendererInstance();
-      } else if (column == COLUMN_EDIT) {
+				return ComboBoxCellEditor.getRendererInstance();
+			} else if (column == COLUMN_EDIT) {
 				return createAndRenderEditButton(row);
 			} else {
 				return super.getCellRenderer(row, column);
 			}
 		}
-	/** This method was created for the getCellEditor() method. Depending on the type of class (open/closed)
+
+		/** This method was created for the getCellEditor() method. Depending on the type of class (open/closed)
 		 * for that row, the appropriate list of impatience strategies in the UI is returned.
 		 * @param row The row of the table.
 		 * @return The ComboBox containing the appropriate list of impatience strategies available */
 		private ComboBoxCellEditor getCellEditorForImpatienceFromClassType(int row) {
-      boolean isOpenClass = isOpenClassAtRow(row);
-
+			boolean isOpenClass = isOpenClassAtRow(row);
 			// Closed classes should never have any impatience strategies attached to it; only open classes should
 			if (isOpenClass) {
-        return ComboBoxCellEditor.getEditorInstance(impatienceStrategies.toArray());
+				return ComboBoxCellEditor.getEditorInstance(impatienceStrategies.toArray());
 			} else {
-        String[] selectableImpatienceStrategies = {ImpatienceType.NONE.getDisplayName()};
-        return ComboBoxCellEditor.getEditorInstance(selectableImpatienceStrategies);
+				String[] selectableImpatienceStrategies = {ImpatienceType.NONE.getDisplayName()};
+				return ComboBoxCellEditor.getEditorInstance(selectableImpatienceStrategies);
 			}
 		}
 
@@ -499,8 +528,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		 * @return The appropriate editing window depending on the type of impatience strategy. */
 		private ButtonCellEditor getCellEditorForImpatienceType(Object stationKey, Object classKey) {
 			ImpatienceType impatienceType = data.getImpatienceType(stationKey, classKey);
-
-      return new ButtonCellEditor(new JButton(editImpatienceParameter(impatienceType)));
+			return new ButtonCellEditor(new JButton(editImpatienceParameter(impatienceType)));
 		}
 
 		// An action to bring up a new window to edit the distribution based on the selected impatience type
@@ -512,14 +540,11 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				public void actionPerformed(ActionEvent e) {
 					int selectedRow = queueTable.getSelectedRow();
 					Object classKey = getClassKeyFromRow(selectedRow);
-
 					if (isValidRow(selectedRow)) {
 						ImpatienceParameter impatienceParameter = data.getImpatienceParameter(stationKey, classKey);
 						String className = classData.getClassName(classKey);
-						impatienceParameter = ImpatienceEditorFactory.
-								displayEditorAndReturnParameter(impatienceType, impatienceParameter,
-										InputSectionPanel.this.getParent(), className);
-
+						impatienceParameter = ImpatienceEditorFactory.displayEditorAndReturnParameter(
+								impatienceType, impatienceParameter, InputSectionPanel.this.getParent(), className);
 						data.setImpatienceParameter(stationKey, classKey, impatienceParameter);
 						queueTable.repaint();
 					}
@@ -534,21 +559,18 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		 * @param row The row for the edit button
 		 * @return The edit button with the enabled/disabled status set appropriately. */
 		private ButtonCellEditor createAndRenderEditButton(int row) {
-			DisabledButtonCellRenderer editButton = 	createEditButton();
+			DisabledButtonCellRenderer editButton = createEditButton();
 			renderEditButton(row, editButton);
-
 			return editButton;
 		}
 
 		private DisabledButtonCellRenderer createEditButton() {
-			DisabledButtonCellRenderer editButton = new DisabledButtonCellRenderer(
-					new JButton() {
-						private static final long serialVersionUID = 1L;
-						{
-							setText("Edit");
-						}
-					}
-			);
+			DisabledButtonCellRenderer editButton = new DisabledButtonCellRenderer(new JButton() {
+				private static final long serialVersionUID = 1L;
+				{
+					setText("Edit");
+				}
+			});
 			return editButton;
 		}
 
@@ -562,7 +584,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		}
 
 		private boolean isImpatienceTypeAtRow(ImpatienceType type, int row) {
-      Object classKey = getClassKeyFromRow(row);
+			Object classKey = getClassKeyFromRow(row);
 			return data.getImpatienceType(stationKey, classKey) == type;
 		}
 
@@ -608,8 +630,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 					&& !data.getQueueStrategy(stationKey, classKey).equals(QUEUE_STRATEGY_DPS))) {
 				return false;
 			} else if (columnIndex == COLUMN_IMPATIENCE) {
-			  return isOpenClassAtRow(rowIndex);
-      } else if (columnIndex == COLUMN_EDIT) {
+				return isOpenClassAtRow(rowIndex);
+			} else if (columnIndex == COLUMN_EDIT) {
 				return !queueTable.isImpatienceTypeAtRow(ImpatienceType.NONE, rowIndex);
 			} else {
 				return true;
@@ -654,15 +676,16 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 				}
 				repaint();
 			} else if (columnIndex == COLUMN_DROP_RULE) {
-				data.setDropRule(stationKey, classKey, (String) aValue);
-				if (aValue.toString().equals(FINITE_RETRIAL)) {
+				String oldRule = data.getDropRule(stationKey, classKey);
+				String newRule = (String) aValue;
+				data.setDropRule(stationKey, classKey, newRule);
+				if (newRule.equals(FINITE_RETRIAL) && !newRule.equals(oldRule)) {
 					Distribution retrialDistribution = (Distribution) data.getRetrialDistribution(stationKey, classKey);
 					DistributionsEditor editor = DistributionsEditor.getInstance(InputSectionPanel.this.getParent(), retrialDistribution);
 					String className = classData.getClassName(classKey);
 					editor.setTitle("Editing " + className + " Retrial Time Distribution...");
 					editor.show();
 					data.setRetrialDistribution(stationKey, classKey, editor.getResult());
-					queueTable.repaint();
 				}
 			} else if (columnIndex == COLUMN_SERVICE_WEIGHT) {
 				try {
@@ -677,13 +700,12 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			} else if (columnIndex == COLUMN_IMPATIENCE) {
 				String impatienceString = aValue.toString();
 				ImpatienceType impatienceType = ImpatienceType.getType(impatienceString);
-
-        if (selectedImpatienceWasDifferentOrNone(classKey, impatienceType)) {
-        	data.resetImpatience(stationKey, classKey);
+				if (selectedImpatienceWasDifferentOrNone(classKey, impatienceType)) {
+					data.resetImpatience(stationKey, classKey);
 					setDefaultImpatienceParameter(classKey, impatienceType);
 					data.setImpatienceType(stationKey, classKey, impatienceType);
+					repaint();
 				}
-				queueTable.repaint();
 			}
 		}
 
@@ -691,36 +713,30 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			return classData.getClassKeys().get(index);
 		}
 
-	private void setDefaultRetrialDistributionParam(Object classKey) {
-			Distribution distribution = (Distribution) Defaults.getAsNewInstance("classDistribution");
-			data.setRetrialDistribution(stationKey, classKey, new RetrialDistribution(distribution));
+		/** Returns a boolean variable indicating whether the selected impatience strategy is different
+		 * from the previous impatience strategy, or whether the selected impatience strategy is "NONE" */
+		private boolean selectedImpatienceWasDifferentOrNone(Object classKey, ImpatienceType selectedImpatience) {
+			return data.getImpatienceType(stationKey, classKey) != selectedImpatience
+					|| selectedImpatience == ImpatienceType.NONE;
 		}
 
-		/** Returns a boolean variable indicating whether the selected impatience strategy is different
-     * from the preivous impatience strategy, or whether the selected impatience strategy is "NONE" */
-		private boolean selectedImpatienceWasDifferentOrNone(Object classKey, ImpatienceType selectedImpatience) {
-      return
-          data.getImpatienceType(stationKey, classKey) != selectedImpatience
-              || selectedImpatience == ImpatienceType.NONE;
-    }
-
- /** Sets the default ImpatienceParameter for the StationClass depending on the ImpatienceType */
-    private void setDefaultImpatienceParameter(Object classKey, ImpatienceType impatienceType) {
-      switch (impatienceType) {
-        case NONE:
-          break;
-        case RENEGING:
-          Distribution distribution = (Distribution) Defaults.getAsNewInstance("classDistribution");
-          data.setImpatienceParameter(stationKey, classKey, new RenegingParameter(distribution));
-          break;
-        case BALKING:
-        	String serverStationQueuePolicy = (String) serverStationQueuePolicies[queuePolicyCombo.getSelectedIndex()];
-        	String classQueueStrategy = data.getQueueStrategy(stationKey, classKey);
-          data.setImpatienceParameter(stationKey, classKey, new BalkingParameter(serverStationQueuePolicy, classQueueStrategy));
-          break;
-      }
-    }
-  }
+		/** Sets the default ImpatienceParameter for the StationClass depending on the ImpatienceType */
+		private void setDefaultImpatienceParameter(Object classKey, ImpatienceType impatienceType) {
+			switch (impatienceType) {
+			case RENEGING:
+				Distribution distribution = (Distribution) Defaults.getAsNewInstance("classDistribution");
+				data.setImpatienceParameter(stationKey, classKey, new RenegingParameter(distribution));
+				break;
+			case BALKING:
+				String serverStationQueuePolicy = (String) serverStationQueuePolicies[queuePolicyCombo.getSelectedIndex()];
+				data.setImpatienceParameter(stationKey, classKey, new BalkingParameter(serverStationQueuePolicy));
+				break;
+			default:
+				data.setImpatienceParameter(stationKey, classKey, null);
+				break;
+			}
+		}
+	}
 
 	/**
 	 * <p><b>Name:</b> DisabledColumnRenderer</p> 
@@ -780,5 +796,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			enabled = value;
 			button.setEnabled(value);
 		}
+
 	}
+
 }

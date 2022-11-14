@@ -168,11 +168,11 @@ public class ModelTransformer {
 
 	/**
 	 * Transform an xml file describing the model, converting it from the
-	 *  JMTmodel.xsd schema to the SIMmodeldefinition.xsd schema
+	 * JMTmodel.xsd schema to the SIMmodeldefinition.xsd schema.
 	 * @param srcPath the path of the original xml file
 	 * @param dstPath the path of the destination xml file
 	 */
-	public boolean MVAtoSIM_parallel(String srcPath, String dstPath) {
+	public boolean MVAtoSIM(String srcPath, String dstPath) {
 
 		//source xsd
 		String srcXsdPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMVA_MODEL_DEFINITION);
@@ -184,27 +184,27 @@ public class ModelTransformer {
 		String transPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMVA_TO_JSIM);
 
 		configureTransformer(srcPath, dstPath, transPath, srcXsdPath, dstXsdPath);
+
 		return transform();
 
 	}
 
 	/**
-	 * Transform an xml file containing the simulation results (SIMmodeloutput),
-	 * converting it in a file with the model definition and the results following
-	 * the JMTmodel.xsd schema. This must be used together with XSLT transformer that changes Residence times
+	 * Transform an xml file describing the model, converting it from the
+	 * SIMmodeldefinition.xsd schema to the JMTmodel.xsd schema.
 	 * @param srcPath the path of the original xml file
 	 * @param dstPath the path of the destination xml file
 	 */
-	public boolean OUTtoMVAScaling(String srcPath, String dstPath) {
+	public boolean SIMtoMVA(String srcPath, String dstPath) {
 
 		//source xsd
-		String srcXsdPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_RESULTS);
+		String srcXsdPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION);
 
 		//destination xsd
 		String dstXsdPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMVA_MODEL_DEFINITION);
 
 		//xslt transformation
-		String transPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.OUT_TO_JMVA_SCALING);
+		String transPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_TO_JMVA);
 
 		configureTransformer(srcPath, dstPath, transPath, srcXsdPath, dstXsdPath);
 
@@ -235,4 +235,30 @@ public class ModelTransformer {
 		return transform();
 
 	}
+
+	/**
+	 * Transform an xml file containing the simulation results (SIMmodeloutput),
+	 * converting it in a file with the model definition and the results following
+	 * the JMTmodel.xsd schema. This must be used together with XSLT transformer
+	 * that changes Residence times.
+	 * @param srcPath the path of the original xml file
+	 * @param dstPath the path of the destination xml file
+	 */
+	public boolean OUTtoMVAscaling(String srcPath, String dstPath) {
+
+		//source xsd
+		String srcXsdPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_RESULTS);
+
+		//destination xsd
+		String dstXsdPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMVA_MODEL_DEFINITION);
+
+		//xslt transformation
+		String transPath = XSDSchemaLoader.loadSchema(XSDSchemaLoader.OUT_TO_JMVA_SCALING);
+
+		configureTransformer(srcPath, dstPath, transPath, srcXsdPath, dstXsdPath);
+
+		return transform();
+
+	}
+
 }

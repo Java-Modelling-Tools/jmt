@@ -57,32 +57,26 @@ public interface SimulationDefinition {
 	public static final String MEASURE_RP = "Response Time";
 	/**Code for residence time measure*/
 	public static final String MEASURE_RD = "Residence Time";
-	/**Code for utilization measure*/
-	public static final String MEASURE_U = "Utilization";
+	/**Code for arrival rate measure*/
+	public static final String MEASURE_AR = "Arrival Rate";
 	/**Code for throughput measure*/
 	public static final String MEASURE_X = "Throughput";
+	/**Code for utilization measure*/
+	public static final String MEASURE_U = "Utilization";
+	/**Code for effective utilization measure*/
+	public static final String MEASURE_EU = "Effective Utilization";
 	/**Code for drop rate measure*/
 	public static final String MEASURE_DR = "Drop Rate";
-	/**Code for reneging rate measure*/
-	public static final String MEASURE_RR = "Reneging Rate";
 	/**Code for balking rate measure*/
 	public static final String MEASURE_BR = "Balking Rate";
-	/**Code for retrial attempt rate number measure*/
-	public static final String MEASURE_R = "Retrial Rate";
-	/**Code for orbit waiting time measure*/
-	public static final String MEASURE_OT = "Retrial Orbit Residence Time";
+	/**Code for reneging rate measure*/
+	public static final String MEASURE_RN = "Reneging Rate";
+	/**Code for retrial attempts rate measure*/
+	public static final String MEASURE_RT = "Retrial Rate";
 	/**Code for retrial orbit size measure*/
-	public static final String MEASURE_RS = "Retrial Orbit Size";
-	/**Code for number of busy servers measure */
-	//public static final String MEASURE_BS = "Number of Busy Servers";
-
-
-	/**Code for number of system retrial number measure*/
-	public static final String MEASURE_S_R = "System Retrial Rate";
-	/**Code for system reneging rate measure*/
-	public static final String MEASURE_S_RR = "System Reneging Rate";
-	/**Code for system reneging rate measure*/
-	public static final String MEASURE_S_BR = "System Balking Rate";
+	public static final String MEASURE_OS = "Retrial Orbit Size";
+	/**Code for retrial orbit time measure*/
+	public static final String MEASURE_OT = "Retrial Orbit Residence Time";
 	/**Code for power measure*/
 	public static final String MEASURE_P = "Power";
 	/**Code for system customer number measure*/
@@ -93,6 +87,12 @@ public interface SimulationDefinition {
 	public static final String MEASURE_S_X = "System Throughput";
 	/**Code for system drop rate measure*/
 	public static final String MEASURE_S_DR = "System Drop Rate";
+	/**Code for system balking rate measure*/
+	public static final String MEASURE_S_BR = "System Balking Rate";
+	/**Code for system reneging rate measure*/
+	public static final String MEASURE_S_RN = "System Reneging Rate";
+	/**Code for system retrial attempts rate measure*/
+	public static final String MEASURE_S_RT = "System Retrial Rate";
 	/**Code for system power measure*/
 	public static final String MEASURE_S_P = "System Power";
 	/**Code for response time per sink measure*/

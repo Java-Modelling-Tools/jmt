@@ -155,23 +155,24 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_QT, DESCRIPTION_QUEUE_TIME, results.getQueueTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP, DESCRIPTION_RESPONSE_TIME, results.getResponseTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RD, DESCRIPTION_RESIDENCE_TIME, results.getResidenceTimeMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_U, DESCRIPTION_UTILIZATION, results.getUtilizationMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_AR, DESCRIPTION_ARRIVAL_RATE, results.getArrivalRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X, DESCRIPTION_THROUGHPUT, results.getThroughputMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_U, DESCRIPTION_UTILIZATION, results.getUtilizationMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_EU, DESCRIPTION_EFFECTIVE_UTILIZATION, results.getEffectiveUtilizationMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_DR, DESCRIPTION_DROP_RATE, results.getDropRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_BR, DESCRIPTION_BALKING_RATE, results.getBalkingRateMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_RR, DESCRIPTION_RENEGING_RATE, results.getRenegingRateMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_R, DESCRIPTION_RETRIAL_ATTEMPTS_RATE, results.getRetrialAttemptsRateMeasures());
-		//addTabPane(mainPanel, SimulationDefinition.MEASURE_BS, DESCRIPTION_BUSY_SERVER_NUMBER, results.getNumberOfBusyServersMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_OT, DESCRIPTION_RETRIAL_ORBIT_TIME, results.getWaitingTimeMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_RS, DESCRIPTION_RETRIAL_ORBIT_SIZE, results.getRetrialOrbitSizeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_RN, DESCRIPTION_RENEGING_RATE, results.getRenegingRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_RT, DESCRIPTION_RETRIAL_ATTEMPTS_RATE, results.getRetrialAttemptsRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_OS, DESCRIPTION_RETRIAL_ORBIT_SIZE, results.getRetrialOrbitSizeMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_OT, DESCRIPTION_RETRIAL_ORBIT_TIME, results.getRetrialOrbitTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RP, DESCRIPTION_SYSTEM_RESPONSE_TIME, results.getSystemResponseTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_X, DESCRIPTION_SYSTEM_THROUGHPUT, results.getSystemThroughputMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_DR, DESCRIPTION_SYSTEM_DROP_RATE, results.getSystemDropRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_BR, DESCRIPTION_SYSTEM_BALKING_RATE, results.getSystemBalkingRateMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RR, DESCRIPTION_SYSTEM_RENEGING_RATE, results.getSystemRenegingRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RN, DESCRIPTION_SYSTEM_RENEGING_RATE, results.getSystemRenegingRateMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RT, DESCRIPTION_SYSTEM_RETRIAL_ATTEMPTS_RATE, results.getSystemRetrialAttemptsRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_P, DESCRIPTION_SYSTEM_POWER, results.getSystemPowerMeasures());
-		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_R, DESCRIPTION_SYSTEM_RETRIAL_ATTEMPTS_RATE, results.getSystemRetrialAttemptsRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP_PER_SINK, DESCRIPTION_RESPONSE_TIME_PER_SINK, results.getResponsetimePerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_PER_SINK, results.getThroughputPerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_TW, DESCRIPTION_FCR_TOTAL_WEIGHT, results.getFCRTotalWeightMeasures());
@@ -210,19 +211,20 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 	public String getYLabel(int measureIndex) {
 		String measureType = results.getMeasureType(measureIndex);
 		String suffix = null;
-		if (measureType.equals(SimulationDefinition.MEASURE_QL) || measureType.equals(SimulationDefinition.MEASURE_S_CN)
-				|| measureType.equals(SimulationDefinition.MEASURE_FJ_CN)) {
+		if (measureType.equals(SimulationDefinition.MEASURE_QL) || measureType.equals(SimulationDefinition.MEASURE_OS)
+				|| measureType.equals(SimulationDefinition.MEASURE_S_CN) || measureType.equals(SimulationDefinition.MEASURE_FJ_CN)) {
 			suffix = " (j)";
 		} else if (measureType.equals(SimulationDefinition.MEASURE_QT) || measureType.equals(SimulationDefinition.MEASURE_RP)
-				|| measureType.equals(SimulationDefinition.MEASURE_RD) || measureType.equals(SimulationDefinition.MEASURE_S_RP)
-				|| measureType.equals(SimulationDefinition.MEASURE_RP_PER_SINK) || measureType.equals(SimulationDefinition.MEASURE_FJ_RP)) {
+				|| measureType.equals(SimulationDefinition.MEASURE_RD) || measureType.equals(SimulationDefinition.MEASURE_OT)
+				|| measureType.equals(SimulationDefinition.MEASURE_S_RP) || measureType.equals(SimulationDefinition.MEASURE_RP_PER_SINK)
+				|| measureType.equals(SimulationDefinition.MEASURE_FJ_RP)) {
 			suffix = " (s)";
-		} else if (measureType.equals(SimulationDefinition.MEASURE_X) || measureType.equals(SimulationDefinition.MEASURE_DR)
+		} else if (measureType.equals(SimulationDefinition.MEASURE_AR) || measureType.equals(SimulationDefinition.MEASURE_X)
+				|| measureType.equals(SimulationDefinition.MEASURE_DR) || measureType.equals(SimulationDefinition.MEASURE_BR)
+				|| measureType.equals(SimulationDefinition.MEASURE_RN) || measureType.equals(SimulationDefinition.MEASURE_RT)
 				|| measureType.equals(SimulationDefinition.MEASURE_S_X) || measureType.equals(SimulationDefinition.MEASURE_S_DR)
-				|| measureType.equals(SimulationDefinition.MEASURE_X_PER_SINK) || measureType.equals(SimulationDefinition.MEASURE_S_R)
-				|| measureType.equals(SimulationDefinition.MEASURE_R) || measureType.equals(SimulationDefinition.MEASURE_RR)
-				|| measureType.equals(SimulationDefinition.MEASURE_BR) || measureType.equals(SimulationDefinition.MEASURE_S_RR)
-				|| measureType.equals(SimulationDefinition.MEASURE_S_BR)) {
+				|| measureType.equals(SimulationDefinition.MEASURE_S_BR) || measureType.equals(SimulationDefinition.MEASURE_S_RN)
+				|| measureType.equals(SimulationDefinition.MEASURE_S_RT) || measureType.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
 			suffix = " (j/s)";
 		} else if (measureType.equals(SimulationDefinition.MEASURE_S_P)) {
 			suffix = " (j/s^2)";
@@ -1405,16 +1407,20 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 		 */
 		protected Object getRowName(int rowIndex) {
 			String suffix = null;
-			if (measureType.equals(SimulationDefinition.MEASURE_QL) || measureType.equals(SimulationDefinition.MEASURE_S_CN)
-					|| measureType.equals(SimulationDefinition.MEASURE_FJ_CN)) {
+			if (measureType.equals(SimulationDefinition.MEASURE_QL) || measureType.equals(SimulationDefinition.MEASURE_OS)
+					|| measureType.equals(SimulationDefinition.MEASURE_S_CN) || measureType.equals(SimulationDefinition.MEASURE_FJ_CN)) {
 				suffix = " (j)";
 			} else if (measureType.equals(SimulationDefinition.MEASURE_QT) || measureType.equals(SimulationDefinition.MEASURE_RP)
-					|| measureType.equals(SimulationDefinition.MEASURE_RD) || measureType.equals(SimulationDefinition.MEASURE_S_RP)
-					|| measureType.equals(SimulationDefinition.MEASURE_RP_PER_SINK) || measureType.equals(SimulationDefinition.MEASURE_FJ_RP)) {
+					|| measureType.equals(SimulationDefinition.MEASURE_RD) || measureType.equals(SimulationDefinition.MEASURE_OT)
+					|| measureType.equals(SimulationDefinition.MEASURE_S_RP) || measureType.equals(SimulationDefinition.MEASURE_RP_PER_SINK)
+					|| measureType.equals(SimulationDefinition.MEASURE_FJ_RP)) {
 				suffix = " (s)";
-			} else if (measureType.equals(SimulationDefinition.MEASURE_X) || measureType.equals(SimulationDefinition.MEASURE_DR)
+			} else if (measureType.equals(SimulationDefinition.MEASURE_AR) || measureType.equals(SimulationDefinition.MEASURE_X)
+					|| measureType.equals(SimulationDefinition.MEASURE_DR) || measureType.equals(SimulationDefinition.MEASURE_BR)
+					|| measureType.equals(SimulationDefinition.MEASURE_RN) || measureType.equals(SimulationDefinition.MEASURE_RT)
 					|| measureType.equals(SimulationDefinition.MEASURE_S_X) || measureType.equals(SimulationDefinition.MEASURE_S_DR)
-					|| measureType.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
+					|| measureType.equals(SimulationDefinition.MEASURE_S_BR) || measureType.equals(SimulationDefinition.MEASURE_S_RN)
+					|| measureType.equals(SimulationDefinition.MEASURE_S_RT) || measureType.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
 				suffix = " (j/s)";
 			} else if (measureType.equals(SimulationDefinition.MEASURE_S_P)) {
 				suffix = " (j/s^2)";

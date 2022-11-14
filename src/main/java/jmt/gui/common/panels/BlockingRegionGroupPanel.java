@@ -518,6 +518,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 				}
 				repaint();
 			}
+
 		}
 
 		protected class GrayBooleanCellRenderer extends JCheckBox implements TableCellRenderer {
@@ -551,6 +552,7 @@ public class BlockingRegionGroupPanel extends WizardPanel implements CommonConst
 			}
 
 		}
-	}	
+
+	}
 
 }

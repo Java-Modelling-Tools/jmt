@@ -43,7 +43,7 @@ public class Lognormal extends Distribution {
 	}
 
 	/**
-	 * Used to set parameters of this distribution.
+	 * Used to set parameters of this distribution
 	 * @return distribution parameters
 	 */
 	@Override
@@ -56,8 +56,7 @@ public class Lognormal extends Distribution {
 		// Checks value of mu must be greater than or equal to 0
 		parameters[0].setValueChecker(new Distribution.ValueChecker() {
 			public boolean checkValue(Object value) {
-				Double d = (Double) value;
-					return true;				
+				return true;
 			}
 		});
 
@@ -126,8 +125,8 @@ public class Lognormal extends Distribution {
 		Object oldm = getParameter("mu").getValue();
 		Object olds = getParameter("sigma").getValue();		
 				
-		double mu = Math.log(mean  / Math.sqrt(c*c + 1));
-		double sigma = Math.sqrt(Math.log(c*c + 1));
+		double mu = Math.log(mean / Math.sqrt(c * c + 1));
+		double sigma = Math.sqrt(Math.log(c * c + 1));
 		
 		if (getParameter("mu").setValue(mu)	&& getParameter("sigma").setValue(sigma)) {
 			this.mean = mean;
@@ -146,8 +145,8 @@ public class Lognormal extends Distribution {
 	public void updateCM() {
 		double mu = ((Double) getParameter("mu").getValue()).doubleValue();
 		double sigma = ((Double) getParameter("sigma").getValue()).doubleValue();
-		mean = Math.exp(mu+sigma*sigma/2);
-		c =  Math.sqrt( (Math.exp(sigma*sigma)-1)*Math.exp(2*mu+sigma*sigma) )/ mean;
+		mean = Math.exp(mu + sigma * sigma / 2);
+		c =  Math.sqrt((Math.exp(sigma * sigma) - 1) * Math.exp(2 * mu+sigma * sigma)) / mean;
 	}
 
 }

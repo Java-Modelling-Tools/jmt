@@ -45,7 +45,7 @@ import org.w3c.dom.NodeList;
  * <p>Title: Gui XML Reader</p>
  * <p>Description: Reads JModel GUI specific information from an XML file. This
  * class provides methods for model load.</p>
- *
+ * 
  * @author Bertoli Marco
  *         Date: 27-lug-2005
  *         Time: 11.04.13
@@ -78,7 +78,7 @@ public class GuiXMLReader implements GuiXMLConstants {
 			setStations(root, (JSimGraphModel) model);
 
 			/* Modification by Emma */
-			if(root.getElementsByTagName(XML_E_CONNECTION_SHAPE).getLength() > 0){
+			if(root.getElementsByTagName(XML_E_CONNECTION_SHAPE).getLength() > 0) {
 				//System.out.println("GuiXMLReader -> parseXML -> CONNECTION SHAPE DETECTED");
 				setConnectionShapes(root, (JSimGraphModel) model);
 			}
@@ -86,7 +86,11 @@ public class GuiXMLReader implements GuiXMLConstants {
 		setParametricAnalysis(root, model);
 	}
 
-
+	/**
+	 * Sets gui specific connection shape parameters
+	 * @param root GuiXML document root
+	 * @param model data structure where properties have to be set
+	 */
 	protected static void setConnectionShapes(Element root, JSimGraphModel model) {
 		NodeList connectionShapes = root.getElementsByTagName(XML_E_CONNECTION_SHAPE);
 		// Build a map of station name -> station key
@@ -96,9 +100,9 @@ public class GuiXMLReader implements GuiXMLConstants {
 			names.put(model.getStationName(keys.get(i)), keys.get(i));
 		}
 
-		Element connectionShape, arc , SourcePoint,point0 , point1, targetPoint;
+		Element connectionShape, arc, sourcePoint, point0 , point1, targetPoint;
 		String target, source;
-		NodeList arcs ,SourceNode, points , targetNode ;
+		NodeList arcs, sourceNode, points, targetNode;
 		double source_x, source_y, x0, y0, x1, y1, target_x, target_y;
 		ArrayList pointsList;
 		ArrayList<JMTArc> arcsList;
@@ -107,20 +111,20 @@ public class GuiXMLReader implements GuiXMLConstants {
 			connectionShape = (Element) connectionShapes.item(i);
 			target = connectionShape.getAttribute(XML_A_CONNECTION_TARGET);
 			source = connectionShape.getAttribute(XML_A_CONNECTION_SOURCE);
-			if (names.containsKey(source) && names.containsKey(target) && model.areConnected(names.get(source),names.get(target))) {
+			if (names.containsKey(source) && names.containsKey(target) && model.areConnected(names.get(source), names.get(target))) {
 				// For each arc of the path
 				arcsList = new ArrayList<JMTArc>();
 				arcs = connectionShape.getElementsByTagName(XML_E_ARC);
-				for(int j = 0; j < arcs.getLength();j++){
+				for(int j = 0; j < arcs.getLength();j++) {
 					pointsList = new ArrayList<JMTPoint>();
 					arc = (Element) arcs.item(j);
 
 					// Extract the source point from the arc *************************
-					SourceNode = arc.getElementsByTagName(XML_E_SOURCE);
-					SourcePoint = (Element) SourceNode.item(0);
+					sourceNode = arc.getElementsByTagName(XML_E_SOURCE);
+					sourcePoint = (Element) sourceNode.item(0);
 
-					source_x = Double.parseDouble(SourcePoint.getAttribute(XML_A_SOURCE_X));
-					source_y = Double.parseDouble(SourcePoint.getAttribute(XML_A_SOURCE_Y));
+					source_x = Double.parseDouble(sourcePoint.getAttribute(XML_A_SOURCE_X));
+					source_y = Double.parseDouble(sourcePoint.getAttribute(XML_A_SOURCE_Y));
 
 					// Extract control points from the arc ***************************
 					points = arc.getElementsByTagName(XML_E_POINT);
@@ -132,7 +136,7 @@ public class GuiXMLReader implements GuiXMLConstants {
 					y0 = Double.parseDouble(point0.getAttribute(XML_A_POINT_Y));
 					y1 = Double.parseDouble(point1.getAttribute(XML_A_POINT_Y));
 					pointsList.add(new Point2D.Double(x0, y0));
-					pointsList.add(new Point2D.Double(x1,y1));
+					pointsList.add(new Point2D.Double(x1, y1));
 
 					// Extract the target point from the arc ****************************
 					targetNode = arc.getElementsByTagName(XML_E_TARGET);
@@ -142,19 +146,15 @@ public class GuiXMLReader implements GuiXMLConstants {
 					target_y = Double.parseDouble(targetPoint.getAttribute(XML_A_TARGET_Y));
 
 					// Add the arc to the arcs list **************************************
-					arcsList.add(new JMTArc(new Point2D.Double(source_x,source_y), pointsList,new Point2D.Double(target_x,target_y)));
+					arcsList.add(new JMTArc(new Point2D.Double(source_x, source_y), pointsList, new Point2D.Double(target_x, target_y)));
 				}
-				model.setConnectionShape(names.get(source),names.get(target),new JMTPath(arcsList));
+				model.setConnectionShape(names.get(source), names.get(target), new JMTPath(arcsList));
 			} else {
-				System.out.println("Error - Found connection shape info for the connection '" + source + "' to '"+target+"' " +
-						"which is not present in the model.");
+				System.out.println("Error - Found connection shape info for the connection '" + source + "' to '" + target + "' "
+						+ "which is not present in the model.");
 			}
 		}
 	}
-
-
-
-
 
 	/**
 	 * Sets gui specific user class parameters

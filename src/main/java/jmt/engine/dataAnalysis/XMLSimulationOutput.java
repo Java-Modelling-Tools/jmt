@@ -82,11 +82,13 @@ public class XMLSimulationOutput extends SimulationOutput {
 	private String logDecimalSeparator;
 	private String logDelimiter;
 	private boolean isTerminalSimulation;
+	private int parametricStep;
 
 	public XMLSimulationOutput(Simulation simulation) {
 		super(simulation);
 
-		this.isTerminalSimulation = simulation.isTerminalSimulation();
+		isTerminalSimulation = simulation.isTerminalSimulation();
+		parametricStep = simulation.getParametricStep();
 
 		try {
 			/////////////////////////////

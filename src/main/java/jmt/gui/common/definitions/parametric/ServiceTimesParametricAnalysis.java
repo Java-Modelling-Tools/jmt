@@ -263,7 +263,6 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 				Distribution distr = (Distribution) stationDef.getServiceTimeDistribution(stationKey, classKey);
 				distr.setMean(refST.doubleValue());
 			} else {
-				//Vector classSet = classDef.getClassKeys();
 				for (int i = 0; i < availableClasses.size(); i++) {
 					Object thisClass = availableClasses.get(i);
 					double refST = ((ValuesTable) values).getValue(thisClass, step);
@@ -357,7 +356,6 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 				}
 			}
 		}
-		//modified = false;
 	}
 
 	/**
@@ -452,5 +450,4 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 		}
 		return assumedValues;
 	}
-
 }

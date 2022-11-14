@@ -55,11 +55,24 @@ public interface JobInfoList {
 	 */
 	public abstract int size(JobClass jobClass);
 
-	public Map<Integer, List<Double>> getRetrialOrbit();
+	/**
+	 * Gets the retrial orbit.
+	 * @return Reference to the retrial orbit.
+	 */
+	public abstract Map<Integer, List<Double>> getRetrialOrbit();
 
-	public Map<Integer, List<Double>> addToRetrialOrbit(Job job);
+	/**
+	 * Adds a job to the retrial orbit.
+	 * @param job Reference to the job.
+	 */
+	public abstract void addToRetrialOrbit(Job job);
 
-	public void removeFromRetrialOrbit(Job job);
+	/**
+	 * Removes a job from the retrial orbit.
+	 * @param job Reference to the job.
+	 */
+	public abstract void removeFromRetrialOrbit(Job job);
+
 	/**
 	 * Gets the number of added jobs.
 	 * @return Number of added jobs.
@@ -85,6 +98,19 @@ public interface JobInfoList {
 	 * @return Number of removed jobs of the specified job class.
 	 */
 	public abstract int getJobsOutPerClass(JobClass jobClass);
+
+	/**
+	 * Gets the number of jobs in service.
+	 * @return Number of jobs in service.
+	 */
+	public abstract int getJobsInService();
+
+	/**
+	 * Gets the number of jobs in service of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Number of jobs in service of the specified job class.
+	 */
+	public abstract int getJobsInServicePerClass(JobClass jobClass);
 
 	/**
 	 * Gets the time of the last added job.
@@ -113,6 +139,32 @@ public interface JobInfoList {
 	public abstract double getLastJobOutTimePerClass(JobClass jobClass);
 
 	/**
+	 * Gets the time of the last started job.
+	 * @return Time of the last started job.
+	 */
+	public abstract double getLastJobStartTime();
+
+	/**
+	 * Gets the time of the last started job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last started job of the specified job class.
+	 */
+	public abstract double getLastJobStartTimePerClass(JobClass jobClass);
+
+	/**
+	 * Gets the time of the last ended job.
+	 * @return Time of the last ended job.
+	 */
+	public abstract double getLastJobEndTime();
+
+	/**
+	 * Gets the time of the last ended job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last ended job of the specified job class.
+	 */
+	public abstract double getLastJobEndTimePerClass(JobClass jobClass);
+
+	/**
 	 * Gets the time of the last dropped job.
 	 * @return Time of the last dropped job.
 	 */
@@ -126,6 +178,58 @@ public interface JobInfoList {
 	public abstract double getLastJobDropTimePerClass(JobClass jobClass);
 
 	/**
+	 * Gets the time of the last switched job.
+	 * @return Time of the last switched job.
+	 */
+	public abstract double getLastJobSwitchTime();
+
+	/**
+	 * Gets the time of the last switched job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last switched job of the specified job class.
+	 */
+	public abstract double getLastJobSwitchTimePerClass(JobClass jobClass);
+
+	/**
+	 * Gets the time of the last balked job.
+	 * @return Time of the last balked job.
+	 */
+	public abstract double getLastJobBalkingTime();
+
+	/**
+	 * Gets the time of the last balked job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last balked job of the specified job class.
+	 */
+	public abstract double getLastJobBalkingTimePerClass(JobClass jobClass);
+
+	/**
+	 * Gets the time of the last reneged job.
+	 * @return Time of the last reneged job.
+	 */
+	public abstract double getLastJobRenegingTime();
+
+	/**
+	 * Gets the time of the last reneged job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last reneged job of the specified job class.
+	 */
+	public abstract double getLastJobRenegingTimePerClass(JobClass jobClass);
+
+	/**
+	 * Gets the time of the last retried job.
+	 * @return Time of the last retried job.
+	 */
+	public abstract double getLastJobRetrialAttemptTime();
+
+	/**
+	 * Gets the time of the last retried job of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last retried job of the specified job class.
+	 */
+	public abstract double getLastJobRetrialTimePerClass(JobClass jobClass);
+
+	/**
 	 * Gets the time of the last modify.
 	 * @return Time of the last modify.
 	 */
@@ -137,6 +241,32 @@ public interface JobInfoList {
 	 * @return Time of the last modify of the specified job class.
 	 */
 	public abstract double getLastModifyTimePerClass(JobClass jobClass);
+
+	/**
+	 * Gets the time of the last service modify.
+	 * @return Time of the last modify.
+	 */
+	public abstract double getLastServiceModifyTime();
+
+	/**
+	 * Gets the time of the last service modify of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last service modify of the specified job class.
+	 */
+	public abstract double getLastServiceModifyTimePerClass(JobClass jobClass);
+
+	/**
+	 * Gets the time of the last retrial orbit modify.
+	 * @return Time of the last retrial orbit modify.
+	 */
+	public abstract double getLastRetrialOrbitModifyTime();
+
+	/**
+	 * Gets the time of the last retrial orbit modify of the specified job class.
+	 * @param jobClass Specified job class.
+	 * @return Time of the last retrial orbit modify of the specified job class.
+	 */
+	public abstract double getLastRetrialOrbitModifyTimePerClass(JobClass jobClass);
 
 	/**
 	 * Gets the total sojourn time.
@@ -175,7 +305,6 @@ public interface JobInfoList {
 	 * Gets the internal job info list.
 	 * @return Internal job info list.
 	 */
-	public abstract JobInfo findJob(Job job);
 	public abstract List<JobInfo> getInternalJobInfoList();
 
 	/**
@@ -185,9 +314,6 @@ public interface JobInfoList {
 	 */
 	public abstract List<JobInfo> getInternalJobInfoList(JobClass jobClass);
 
-	JobInfo getFirstJob();
-
-	JobInfo getLastJob();
 	/**
 	 * Adds a new job info to the list.
 	 * @param jobInfo Reference to the job info to be added.
@@ -228,7 +354,12 @@ public interface JobInfoList {
 	 */
 	public abstract void remove(JobInfo jobInfo);
 
+	/**
+	 * Removes a job info from the list.
+	 * @param jobInfo Reference to the job info to be removed.
+	 */
 	public abstract void removeOnly(JobInfo jobInfo);
+
 	/**
 	 * Removes a job info at the start of the list.
 	 * @return Job info at the start of the list.
@@ -277,6 +408,20 @@ public interface JobInfoList {
 	public abstract void analyzeResidenceTime(JobClass jobClass, Measure measurement);
 
 	/**
+	 * Analyzes the arrival rate for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeArrivalRate(JobClass jobClass, InverseMeasure measurement);
+
+	/**
+	 * Analyzes the throughput for the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated inverse measure.
+	 */
+	public abstract void analyzeThroughput(JobClass jobClass, InverseMeasure measurement);
+
+	/**
 	 * Analyzes the utilization for the specified job class.
 	 * jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated measure.
@@ -288,14 +433,14 @@ public interface JobInfoList {
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated measure.
 	 */
-	public void analyzeUtilizationJoin(JobClass jobClass, Measure measurement);
+	public abstract void analyzeUtilizationJoin(JobClass jobClass, Measure measurement);
 
 	/**
-	 * Analyzes the throughput for the specified job class.
-	 * @param jobClass Specified job class. If null, analysis will be job class independent.
-	 * @param measurement Reference to the associated inverse measure.
+	 * Analyzes the effective utilization for the specified job class.
+	 * jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
 	 */
-	public abstract void analyzeThroughput(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeEffectiveUtilization(JobClass jobClass, Measure measurement);
 
 	/**
 	 * Analyzes the drop rate for the specified job class.
@@ -305,18 +450,18 @@ public interface JobInfoList {
 	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure measurement);
 
 	/**
-	 * Analyzes the reneging rate for the specified job class.
+	 * Analyzes the balking rate for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated inverse measure.
 	 */
-	public abstract void analyzeRenegingRate(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeBalkingRate(JobClass jobClass, InverseMeasure measurement);
 
 	/**
 	 * Analyzes the reneging rate for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated inverse measure.
 	 */
-	public abstract void analyzeBalkingRate(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeRenegingRate(JobClass jobClass, InverseMeasure measurement);
 
 	/**
 	 * Analyzes the retrial attempts rate for the specified job class.
@@ -328,23 +473,17 @@ public interface JobInfoList {
 	/**
 	 * Analyzes the retrial orbit size for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
-	 * @param measurement Reference to the associated inverse measure.
+	 * @param measurement Reference to the associated measure.
 	 */
 	public abstract void analyzeRetrialOrbitSize(JobClass jobClass, Measure measurement);
 
 	/**
-	 * Analyzes the waiting time for the specified job class.
+	 * Analyzes the retrial orbit time for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
-	 * @param measurement Reference to the associated inverse measure.
+	 * @param measurement Reference to the associated measure.
 	 */
-	public abstract void analyzeWaitingTime(JobClass jobClass, Measure measurement);
+	public abstract void analyzeRetrialOrbitTime(JobClass jobClass, Measure measurement);
 
-	/**
-	 * Analyzes the waiting time for the specified job class.
-	 * @param jobClass Specified job class. If null, analysis will be job class independent.
-	 * @param measurement Reference to the associated inverse measure.
-	 */
-	public abstract void analyzeBusyServersVar(JobClass jobClass, Measure measurement);
 	/**
 	 * Analyzes the response time of a sink for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
@@ -366,10 +505,22 @@ public interface JobInfoList {
 	public abstract void removeJob(JobInfo jobInfo);
 
 	/**
-	 * Redirected a job info from the list when a job is redirected.
+	 * Removes a job info from the list when a job is redirected.
 	 * @param jobInfo Reference to the job info to be removed.
 	 */
 	public abstract void redirectJob(JobInfo jobInfo);
+
+	/**
+	 * Changes a job info in the list when a job is started.
+	 * @param jobInfo Reference to the job info to be changed.
+	 */
+	public abstract void startJob(JobInfo jobInfo);
+
+	/**
+	 * Changes a job info from the list when a job is ended.
+	 * @param jobInfo Reference to the job info to be changed.
+	 */
+	public abstract void endJob(JobInfo jobInfo);
 
 	/**
 	 * Removes a job info from the list when a job is dropped.
@@ -378,10 +529,10 @@ public interface JobInfoList {
 	public abstract void dropJob(JobInfo jobInfo);
 
 	/**
-	 * Adds a new job info to the list when a job is produced.
-	 * @param jobInfo Reference to the job info to be added.
+	 * Changes a job info in the list when a job is switched.
+	 * @param jobInfo Reference to the job info to be changed.
 	 */
-	public abstract void renegeJob(JobInfo jobInfo);
+	public abstract void switchJob(JobInfo jobInfo);
 
 	/**
 	 * Removes a job info from the list when a job is balked.
@@ -390,10 +541,21 @@ public interface JobInfoList {
 	public abstract void balkJob(JobInfo jobInfo);
 
 	/**
-	 * add a job info from the list when a job is retried.
+	 * Removes a job info from the list when a job is reneged.
+	 * @param jobInfo Reference to the job info to be removed.
+	 */
+	public abstract void renegeJob(JobInfo jobInfo);
+
+	/**
+	 * Adds a job info to the list when a job is retried.
 	 * @param jobInfo Reference to the job info to be added.
 	 */
 	public abstract void retryJob(JobInfo jobInfo);
+
+	/**
+	 * Adds a job info to the list when a job is consumed.
+	 * @param jobInfo Reference to the job info to be added.
+	 */
 	public abstract void produceJob(JobInfo jobInfo);
 
 	/**
@@ -402,22 +564,16 @@ public interface JobInfoList {
 	 */
 	public abstract void consumeJob(JobInfo jobInfo);
 
-	public abstract void serveJob(Job job);
-
-
-	/**
-	 * Updates the waiting time of a job -- called when a job is being served.
-	 * @param job Reference to the job that is being sent to service section (of a queue).
-	 */
-	public void updateWaitingTime(Job job, double wt);
-
-	public void updateNumberOfBusyServersVar(Job job, int num);
 	/**
 	 * Sets the number of servers. This parameter is used to scale utilization.
 	 * @param numberOfServers Number of servers.
 	 */
-	public void setNumberOfServers(int numberOfServers);
+	public abstract void setNumberOfServers(int numberOfServers);
 
+	/**
+	 * Sets the network system. This parameter is used to get simulation time.
+	 * @param netSystem Network system.
+	 */
 	public abstract void setNetSystem(NetSystem netSystem); 
 
 }

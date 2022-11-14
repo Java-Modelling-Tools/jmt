@@ -55,6 +55,7 @@ import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 
 /**
  * <p>Title: Firing Section Panel</p>
@@ -80,6 +81,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 	private StationDefinition stationData;
 	private ClassDefinition classData;
 	private Object stationKey;
+	private Vector<Object> stationInKeys;
 	private Vector<Object> stationOutKeys;
 	private Vector<Object> classKeys;
 	private int currentModeIndex;
@@ -104,6 +106,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		stationData = sd;
 		classData = cd;
 		stationKey = sk;
+		stationInKeys = stationData.getBackwardConnections(stationKey);
 		stationOutKeys = stationData.getForwardConnections(stationKey);
 		classKeys = classData.getClassKeys();
 		currentModeIndex = 0;
@@ -172,6 +175,12 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 				int index = stationData.getTransitionModeListSize(stationKey);
 				stationData.addTransitionMode(stationKey, Defaults.get("transitionModeName") + (index + 1));
 				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+				if (stationData instanceof JSimGraphModel) {
+					JSimGraphModel model = (JSimGraphModel) stationData;
+					String icon = model.getStationIcon(stationKey);
+					model.setStationIcon(stationKey, icon);
+					model.refreshGraph();
+				}
 			}
 		});
 
@@ -249,12 +258,14 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 			noticeText.setForeground(Color.BLUE);
 		} else {
 			boolean hasSpecifiedValues = false;
+			OUTER_LOOP:
 			for (Object stationInKey : stationOutKeys) {
 				for (Object classKey : classKeys) {
 					int firingValue = stationData.getFiringOutcome(stationKey, currentModeIndex,
 							stationInKey, classKey).intValue();
 					if (firingValue > 0) {
 						hasSpecifiedValues = true;
+						break OUTER_LOOP;
 					}
 				}
 			}
@@ -359,9 +370,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 
 		@Override
 		public void clear(int row, int col) {
-			stationData.setFiringOutcome(stationKey, currentModeIndex,
-					stationOutKeys.get(row), classKeys.get(col), Integer.valueOf(0));
-			updateNotice();
+			setValueAt("0", row, col);
 		}
 
 	}
@@ -387,6 +396,16 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 				int index = modeTable.getSelectedRow();
 				stationData.deleteTransitionMode(stationKey, index);
 				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+				if (stationData instanceof JSimGraphModel) {
+					JSimGraphModel model = (JSimGraphModel) stationData;
+					String icon = model.getStationIcon(stationKey);
+					model.setStationIcon(stationKey, icon);
+					for (Object stationInKey : stationInKeys) {
+						int end = model.getConnectionEnd(stationInKey, stationKey);
+						model.setConnectionEnd(stationInKey, stationKey, end);
+					}
+					model.refreshGraph();
+				}
 			}
 
 		};

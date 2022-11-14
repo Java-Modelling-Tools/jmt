@@ -47,7 +47,6 @@ import jmt.engine.dataAnalysis.Measure;
 public class GlobalJobInfoList {
 
 	private int classNum;
-	private boolean hasClassSwitch;
 
 	private double lastJobOutTime;
 	private double[] lastJobOutTimePerClass;
@@ -78,14 +77,15 @@ public class GlobalJobInfoList {
 	private InverseMeasure dropRate;
 	private InverseMeasure[] dropRatePerClass;
 
-	private InverseMeasure renegingRate;
-	private InverseMeasure[] renegingRatePerClass;
-
 	private InverseMeasure balkingRate;
 	private InverseMeasure[] balkingRatePerClass;
 
+	private InverseMeasure renegingRate;
+	private InverseMeasure[] renegingRatePerClass;
+
 	private InverseMeasure retrialAttemptsRate;
 	private InverseMeasure[] retrialAttemptsRatePerClass;
+
 	private InverseMeasure throughput;
 	private InverseMeasure[] throughputPerClass;
 
@@ -99,14 +99,14 @@ public class GlobalJobInfoList {
 	double sampling_SystemResponseSum;
 	double sampling_SystemThroughputSum;
 	double samplingClass_SystemThroughputSum[];
-	
+
 	private Set<Pair<NetNode, JobClass>> pairSet;
 	private Set<Pair<Pair<NetNode, JobClass>, Pair<NetNode, JobClass>>> linkSet;
 	private Set<Set<Pair<NetNode, JobClass>>> chainSet; 
 	private Map<Pair<NetNode, JobClass>, Set<Pair<NetNode, JobClass>>> pairChainMap;
 	private Map<Set<Pair<NetNode, JobClass>>, Integer> visitCountPerChain;
 	private Integer totalVisitCount;
-	
+
 	private NetSystem netSystem;
 
 	/**
@@ -127,10 +127,10 @@ public class GlobalJobInfoList {
 		lastJobOutTimePerClass = new double[classNum];
 		lastJobDropTime = 0.0;
 		lastJobDropTimePerClass = new double[classNum];
-		lastJobRenegeTime = 0.0;
-		lastJobRenegeTimePerClass = new double[classNum];
 		lastJobBalkTime = 0.0;
 		lastJobBalkTimePerClass = new double[classNum];
+		lastJobRenegeTime = 0.0;
+		lastJobRenegeTimePerClass = new double[classNum];
 		lastJobRetrialTime = 0.0;
 		lastJobRetrialTimePerClass = new double[classNum];
 		lastModifyNumber = 0.0;
@@ -144,6 +144,8 @@ public class GlobalJobInfoList {
 		responseTimePerClass = null;
 		dropRate = null;
 		dropRatePerClass = null;
+		balkingRate = null;
+		balkingRatePerClass = null;
 		renegingRate = null;
 		renegingRatePerClass = null;
 		retrialAttemptsRate = null;
@@ -174,10 +176,10 @@ public class GlobalJobInfoList {
 	 * @param job identifier of added job.
 	 */
 	public void addJob(Job job) {
-		job.reset();
+		job.resetSystemEnteringTime();
 		updateJobNumber(job);
 		// Updates job number data structures
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = netSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
 		jobs++;
 		jobsPerClass[job.getJobClass().getId()]++;
 	}
@@ -196,8 +198,8 @@ public class GlobalJobInfoList {
 		// Updates jobs number and throughput data structures
 		jobs--;
 		jobsPerClass[job.getJobClass().getId()]--;
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = netSystem.getTime();
-		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = netSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
+		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = getTime();
 	}
 
 	/**
@@ -212,10 +214,10 @@ public class GlobalJobInfoList {
 		updateVisitCountPerChain(job);
 
 		// Updates jobs number and throughput data structures
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = netSystem.getTime();
-		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = netSystem.getTime();
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
+		lastJobOutTimePerClass[job.getJobClass().getId()] = lastJobOutTime = getTime();
 
-		job.reset();
+		job.resetSystemEnteringTime();
 	}
 
 	/**
@@ -235,8 +237,23 @@ public class GlobalJobInfoList {
 	}
 
 	/**
-	 * This method MUST be called each time a job is produced by a transition.
-	 * @param job identifier of produced job.
+	 * This method must be called each time a job is balked by a queue
+	 * @param job identifier of balked job
+	 */
+	public void balkJob(Job job) {
+		updateJobNumber(job);
+		updateBalkingRate(job);
+
+		// Updates jobs number and balking rate data structures
+		jobs--;
+		jobsPerClass[job.getJobClass().getId()]--;
+		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
+		lastJobBalkTimePerClass[job.getJobClass().getId()] = lastJobBalkTime = getTime();
+	}
+
+	/**
+	 * This method MUST be called each time a job is reneged by a queue.
+	 * @param job identifier of reneged job.
 	 */
 	public void renegeJob(Job job) {
 		updateJobNumber(job);
@@ -250,29 +267,19 @@ public class GlobalJobInfoList {
 	}
 
 	/**
-	 * This method must be called each time a job balks from a queue
-	 * @param job identifier of reneged job
-	 */
-	public void balkJob(Job job) {
-		updateJobNumber(job);
-		updateBalkingRate(job);
-		// Updates jobs number and balking rate data structures
-		jobs--;
-		jobsPerClass[job.getJobClass().getId()]--;
-		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
-
-		lastJobBalkTimePerClass[job.getJobClass().getId()] = lastJobBalkTime = getTime();
-	}
-
-	/**
-	 * This method must be called each time a job retries joining a queue
-	 * @param job identifier of reneged job
+	 * This method must be called each time a job is retried by a queue
+	 * @param job identifier of retried job
 	 */
 	public void retryJob(Job job) {
 		updateRetrialAttemptsRate(job);
 		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
 		lastJobRetrialTimePerClass[job.getJobClass().getId()] = lastJobRetrialTime = getTime();
 	}
+
+	/**
+	 * This method MUST be called each time a job is produced by a transition.
+	 * @param job identifier of produced job.
+	 */
 	public void produceJob(Job job) {
 		updateJobNumber(job);
 		// Updates job number data structure only
@@ -346,7 +353,7 @@ public class GlobalJobInfoList {
 	}
 
 	/**
-	 * Analyzes Drop Rate for a specific job class or for every class.
+	 * Analyzes System Drop Rate for a specific job class or for every class.
 	 * @param jobClass specified job class. If null measure will be job independent.
 	 * @param Measure reference to a Measure object.
 	 */
@@ -358,6 +365,54 @@ public class GlobalJobInfoList {
 			dropRatePerClass[jobClass.getId()] = (InverseMeasure) Measure;
 		} else {
 			dropRate = (InverseMeasure) Measure;
+		}
+	}
+
+	/**
+	 * Analyzes System Balking Rate for a specific job class or for every class
+	 * @param jobClass specified job class. If null measure will be job independent
+	 * @param Measure reference to a Measure object
+	 */
+	public void analyzeBalkingRate(JobClass jobClass, Measure Measure) {
+		if (jobClass != null) {
+			if (balkingRatePerClass == null) {
+				balkingRatePerClass = new InverseMeasure[classNum];
+			}
+			balkingRatePerClass[jobClass.getId()] = (InverseMeasure) Measure;
+		} else {
+			balkingRate = (InverseMeasure) Measure;
+		}
+	}
+
+	/**
+	 * Analyzes System Reneging Rate for a specific job class or for every class
+	 * @param jobClass specified job class. If null measure will be job independent
+	 * @param Measure reference to a Measure object
+	 */
+	public void analyzeRenegingRate(JobClass jobClass, Measure Measure) {
+		if (jobClass != null) {
+			if (renegingRatePerClass == null) {
+				renegingRatePerClass = new InverseMeasure[classNum];
+			}
+			renegingRatePerClass[jobClass.getId()] = (InverseMeasure) Measure;
+		} else {
+			renegingRate = (InverseMeasure) Measure;
+		}
+	}
+
+	/**
+	 * Analyzes System Retrial Attempts Rate for a specific job class or for every class.
+	 * @param jobClass specified job class. If null measure will be job independent.
+	 * @param Measure reference to a Measure object.
+	 */
+	public void analyzeRetrialAttemptsRate(JobClass jobClass, Measure Measure) {
+		if (jobClass != null) {
+			if (retrialAttemptsRatePerClass == null) {
+				retrialAttemptsRatePerClass = new InverseMeasure[classNum];
+			}
+			retrialAttemptsRatePerClass[jobClass.getId()] = (InverseMeasure) Measure;
+		} else {
+			retrialAttemptsRate = (InverseMeasure) Measure;
 		}
 	}
 
@@ -382,61 +437,6 @@ public class GlobalJobInfoList {
 	// --- Methods to update measures -----------------------------------------------------
 
 	/**
-	public void analyzeRenegingRate(JobClass jobClass, Measure Measure) {
-		if (jobClass != null) {
-			if (renegingRatePerClass == null) {
-				renegingRatePerClass = new InverseMeasure[classNum];
-			}
-			renegingRatePerClass[jobClass.getId()] = (InverseMeasure) Measure;
-		} else {
-			renegingRate = (InverseMeasure) Measure;
-		}
-	}
-    **/
-
-	public void analyzeRenegingRate(JobClass jobClass, Measure Measure) {
-		if (jobClass != null) {
-			if (renegingRatePerClass == null) {
-				renegingRatePerClass = new InverseMeasure[classNum];
-			}
-			renegingRatePerClass[jobClass.getId()] = (InverseMeasure) Measure;
-		} else {
-			renegingRate = (InverseMeasure) Measure;
-		}
-	}
-
-	/**
-	 * Analyzes Balking Rate for a specific job class or for every class
-	 * @param jobClass specified job class. If null measure will be job independent
-	 * @param Measure reference to a Measure object
-	 */
-	public void analyzeBalkingRate(JobClass jobClass, Measure Measure) {
-		if (jobClass != null) {
-			if (balkingRatePerClass == null) {
-				balkingRatePerClass = new InverseMeasure[classNum];
-			}
-			balkingRatePerClass[jobClass.getId()] = (InverseMeasure) Measure;
-		} else {
-			balkingRate = (InverseMeasure) Measure;
-		}
-	}
-
-	/**
-	 * Analyzes System Number of retrials for a specific job class or for every class.
-	 * @param jobClass specified job class. If null measure will be job independent.
-	 * @param Measure reference to a Measure object.
-	 */
-	public void analyzeRetrialAttemptsRate(JobClass jobClass, Measure Measure) {
-		if (jobClass != null) {
-			if (retrialAttemptsRatePerClass == null) {
-				retrialAttemptsRatePerClass = new InverseMeasure[classNum];
-			}
-			retrialAttemptsRatePerClass[jobClass.getId()] = (InverseMeasure) Measure;
-		} else {
-			retrialAttemptsRate = (InverseMeasure) Measure;
-		}
-	}
-    /*
 	 * Updates System Job Number measures.
 	 * @param job current job.
 	 */
@@ -462,7 +462,7 @@ public class GlobalJobInfoList {
 			int index = job.getJobClass().getId();
 			Measure m = responseTimePerClass[index];
 			if (m != null) {
-				m.update(netSystem.getTime() - job.getSystemEnteringTime(), 1.0);
+				m.update(getTime() - job.getSystemEnteringTime(), 1.0);
 			}
 		}
 		if (responseTime != null) {
@@ -505,23 +505,6 @@ public class GlobalJobInfoList {
 	}
 
 	/**
-	 * Updates System Power measures.
-	 * @param job current job.
-	 */
-	private void updateRenegingRate(Job job) {
-		if (renegingRatePerClass != null) {
-			int index = job.getJobClass().getId();
-			Measure m = renegingRatePerClass[index];
-			if (m != null) {
-				m.update(getTime() - lastJobRenegeTimePerClass[index], 1.0);
-			}
-		}
-		if (renegingRate != null) {
-			renegingRate.update(getTime() - lastJobRenegeTime, 1.0);
-		}
-	}
-
-	/**
 	 * Updates System Balking Rate measures.
 	 * @param job current job
 	 */
@@ -535,6 +518,23 @@ public class GlobalJobInfoList {
 		}
 		if (balkingRate != null) {
 			balkingRate.update(getTime() - lastJobBalkTime, 1.0);
+		}
+	}
+
+	/**
+	 * Updates System Reneging Rate measures.
+	 * @param job current job.
+	 */
+	private void updateRenegingRate(Job job) {
+		if (renegingRatePerClass != null) {
+			int index = job.getJobClass().getId();
+			Measure m = renegingRatePerClass[index];
+			if (m != null) {
+				m.update(getTime() - lastJobRenegeTimePerClass[index], 1.0);
+			}
+		}
+		if (renegingRate != null) {
+			renegingRate.update(getTime() - lastJobRenegeTime, 1.0);
 		}
 	}
 
@@ -554,6 +554,11 @@ public class GlobalJobInfoList {
 			retrialAttemptsRate.update(getTime() - lastJobRetrialTime, 1.0);
 		}
 	}
+
+	/**
+	 * Updates System Power measures.
+	 * @param job current job.
+	 */
 	private void updateSystemPower(Job job) {
 		sampling_SystemThroughputSum = sampling_SystemThroughputSum + (getTime() - lastJobOutTime);
 		sampling_SystemResponseSum   = sampling_SystemResponseSum + (getTime() - job.getSystemEnteringTime());
@@ -670,12 +675,11 @@ public class GlobalJobInfoList {
 		jobsPerClass[newClassId]++;
 	}
 
-	
-	private double getTime(){
+	private double getTime() {
 		return netSystem.getTime();
 	}
-	
-	public void setNetSystem(NetSystem netSystem){
+
+	public void setNetSystem(NetSystem netSystem) {
 		this.netSystem = netSystem;
 	}
 

@@ -22,6 +22,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -52,6 +53,7 @@ import jmt.gui.common.serviceStrategies.ZeroStrategy;
 import jmt.gui.exact.table.BooleanCellRenderer;
 import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.exact.table.ExactCellRenderer;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 
 /**
  * <p>Title: Timing Section Panel</p>
@@ -69,6 +71,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 
 	private StationDefinition stationData;
 	//private ClassDefinition classData;
+	private Vector<Object> stationInKeys;
 	private Object stationKey;
 
 	private JButton addModeButton;
@@ -84,6 +87,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 		stationData = sd;
 		//classData = cd;
 		stationKey = sk;
+		stationInKeys = sd.getBackwardConnections(stationKey);
 	}
 
 	private void initComponents() {
@@ -109,6 +113,12 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 				int index = stationData.getTransitionModeListSize(stationKey);
 				stationData.addTransitionMode(stationKey, Defaults.get("transitionModeName") + (index + 1));
 				optionTable.tableChanged(new TableModelEvent(optionTable.getModel()));
+				if (stationData instanceof JSimGraphModel) {
+					JSimGraphModel model = (JSimGraphModel) stationData;
+					String icon = model.getStationIcon(stationKey);
+					model.setStationIcon(stationKey, icon);
+					model.refreshGraph();
+				}
 			}
 		});
 	}
@@ -191,6 +201,16 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 				int index = optionTable.getSelectedRow();
 				stationData.deleteTransitionMode(stationKey, index);
 				optionTable.tableChanged(new TableModelEvent(optionTable.getModel()));
+				if (stationData instanceof JSimGraphModel) {
+					JSimGraphModel model = (JSimGraphModel) stationData;
+					String icon = model.getStationIcon(stationKey);
+					model.setStationIcon(stationKey, icon);
+					for (Object stationInKey : stationInKeys) {
+						int end = model.getConnectionEnd(stationInKey, stationKey);
+						model.setConnectionEnd(stationInKey, stationKey, end);
+					}
+					model.refreshGraph();
+				}
 			}
 
 		};
@@ -361,7 +381,7 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 				if (((Boolean) aValue).booleanValue()) {
 					stationData.setNumberOfServers(stationKey, rowIndex, Integer.valueOf(-1));
 				} else {
-					Integer number = Defaults.getAsInteger("transitionNumberOfServers");
+					Integer number = Defaults.getAsInteger("transitionModeNumberOfServers");
 					if (number.intValue() < 1) {
 						number = Integer.valueOf(1);
 					}
@@ -371,18 +391,33 @@ public class TimingSectionPanel extends WizardPanel implements CommonConstants {
 			} else if (columnIndex == 3) {
 				if (((String) aValue).equals(TIMING_STRATEGY_TIMED)) {
 					if (!(stationData.getFiringTimeDistribution(stationKey, rowIndex) instanceof Distribution)) {
-						Object distribution = Defaults.getAsNewInstance("transitionFiringTimeDistribution");
-						stationData.setFiringTimeDistribution(stationKey, rowIndex, distribution);
-						stationData.setFiringPriority(stationKey, rowIndex, Integer.valueOf(-1));
-						stationData.setFiringWeight(stationKey, rowIndex, Double.valueOf(1.0));
+						Object strategy = Defaults.getAsNewInstance("transitionTimedModeFiringTimeDistribution");
+						Integer prioirty = Defaults.getAsInteger("transitionTimedModeFiringPriority");
+						Double weight = Defaults.getAsDouble("transitionTimedModeFiringWeight");
+						stationData.setFiringTimeDistribution(stationKey, rowIndex, strategy);
+						stationData.setFiringPriority(stationKey, rowIndex, prioirty);
+						stationData.setFiringWeight(stationKey, rowIndex, weight);
+						if (stationData instanceof JSimGraphModel) {
+							JSimGraphModel model = (JSimGraphModel) stationData;
+							String icon = model.getStationIcon(stationKey);
+							model.setStationIcon(stationKey, icon);
+							model.refreshGraph();
+						}
 					}
 				} else {
 					if (!(stationData.getFiringTimeDistribution(stationKey, rowIndex) instanceof ZeroStrategy)) {
-						Integer prioirty = Defaults.getAsInteger("transitionFiringPriority");
-						Double weight = Defaults.getAsDouble("transitionFiringWeight");
-						stationData.setFiringTimeDistribution(stationKey, rowIndex, new ZeroStrategy());
+						Object strategy = Defaults.getAsNewInstance("transitionImmediateModeFiringTimeDistribution");
+						Integer prioirty = Defaults.getAsInteger("transitionImmediateModeFiringPriority");
+						Double weight = Defaults.getAsDouble("transitionImmediateModeFiringWeight");
+						stationData.setFiringTimeDistribution(stationKey, rowIndex, strategy);
 						stationData.setFiringPriority(stationKey, rowIndex, prioirty);
 						stationData.setFiringWeight(stationKey, rowIndex, weight);
+						if (stationData instanceof JSimGraphModel) {
+							JSimGraphModel model = (JSimGraphModel) stationData;
+							String icon = model.getStationIcon(stationKey);
+							model.setStationIcon(stationKey, icon);
+							model.refreshGraph();
+						}
 					}
 				}
 				repaint();

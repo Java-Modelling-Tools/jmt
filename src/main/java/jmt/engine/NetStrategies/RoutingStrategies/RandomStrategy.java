@@ -41,12 +41,12 @@ public class RandomStrategy extends RoutingStrategy {
 	/**
 	 * Gets the output node, into which the job must be routed, using a random
 	 * strategy.
-	 * @param nodeList List of the output nodes.
+	 * @param ownerNode Owner node of the output section.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
-		public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
 		RandomEngine randomEngine = ownerNode.getNetSystem().getEngine();
 		NodeList nodeList = ownerNode.getOutputNodes();
 		if (nodeList.size() == 0) {

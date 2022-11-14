@@ -27,13 +27,17 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.List;
+import java.util.Vector;
 
 import javax.swing.Action;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import jmt.engine.log.LoggerParameters;
+import jmt.framework.data.MacroReplacer;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.listeners.AbstractJMTAction;
@@ -515,11 +519,11 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 	}
 
 	private void startSimulation() {
-		//if simulation is not in pause state
+		// If simulation is not in pause state
 		if (!SIM_STOP.isEnabled()) {
 			// Asks for confirmation before overwriting previous simulation data
 			if (model.containsSimulationResults()) {
-				// Find frame to show confirm dialog
+				// Finds frame to show confirm dialog
 				Component parent = this;
 				if (resultsWindow != null && resultsWindow.isFocused()) {
 					parent = resultsWindow;
@@ -531,14 +535,43 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 					return;
 				}
 			}
+			// Asks for confirmation before overwriting previous log files
+			if (Integer.parseInt(model.getLoggingGlbParameter("autoAppend")) == LoggerParameters.LOGGER_AR_ASK) {
+				// Checks if the model has any loggers or verbose measures
+				boolean hasVerboseMeasures = false;
+				Vector<Object> measureKeys = model.getMeasureKeys();
+				for (Object measureKey : measureKeys) {
+					if (model.getMeasureLog(measureKey)) {
+						hasVerboseMeasures = true;
+						break;
+					}
+				}
+				if (!model.getStationKeysLogger().isEmpty() || hasVerboseMeasures) {
+					// Checks if any log files already exist
+					File logDirectory = new File(MacroReplacer.replace(model.getLoggingGlbParameter("path")));
+					File[] logFiles = logDirectory.listFiles(new FilenameFilter() {
+						@Override
+						public boolean accept(File dir, String name) {
+							return name.endsWith(".csv");
+						}
+					});
+					if (logFiles.length > 0) {
+						// Finds frame to show confirm dialog
+						Component parent = this;
+						if (resultsWindow != null && resultsWindow.isFocused()) {
+							parent = resultsWindow;
+						}
 
-			// Correct eventual problems on preloading for closed classes
-			model.manageJobs();
-			// Removes previous ResultsWindow
-			if (resultsWindow != null) {
-				resultsWindow.dispose();
-				SHOW_RESULTS.setEnabled(false);
+						int resultValue = JOptionPane.showConfirmDialog(parent, "This operation may modify CSV file(s) in the following path: "
+								+ logDirectory.getAbsolutePath() + ". Continue anyway?", "JMT - Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+						if (resultValue == JOptionPane.NO_OPTION) {
+							return;
+						}
+					}
+				}
 			}
+			// Corrects eventual problems on preloading for closed classes
+			model.manageJobs();
 			mc = new ModelChecker(model, model, model, model, false);
 			pw.setModelChecker(mc);
 			pw.updateProblemsShown(false);
@@ -558,6 +591,11 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 	}
 
 	public void launchSimulation() {
+		// Removes previous ResultsWindow
+		if (resultsWindow != null) {
+			resultsWindow.dispose();
+			SHOW_RESULTS.setEnabled(false);
+		}
 		if (!model.isParametricAnalysisEnabled()) {
 			try {
 				File temp = File.createTempFile("~JModelSimulation", ".xml");
@@ -574,7 +612,6 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 				handleException(e);
 			}
 		} else {
-			SHOW_RESULTS.setEnabled(false);
 			if (progressWindow == null) {
 				progressWindow = new PAProgressWindow(this, SIM_START, SIM_PAUSE, SIM_STOP, model.getParametricAnalysisModel());
 			}
@@ -805,11 +842,6 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.BLOCKING_REGION_MEMORY_OVERLOAD_ERROR)) {
 			tabbedPane.setSelectedIndex(7);
 		}
-		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_INVALID_MATRIX_ERROR)) {
-			tabbedPane.setSelectedIndex(3);
-			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
-			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
-		}
 		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_REFERENCE_STATION_ERROR)) {
 			tabbedPane.setSelectedIndex(5);
 		}
@@ -834,6 +866,26 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 			tabbedPane.setSelectedIndex(3);
 			StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
 			parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.DROP_ENABLED_BETWEEN_FORK_JOIN_ERROR)) {
+			String stationName = model.getStationName(relatedStation);
+			int k = JOptionPane.showConfirmDialog(null, stationName + " uses a drop strategy for a class but is located between fork/join. The dropped\n"
+					+ "tasks may prevent the others from merging at the join.\n", "Warning", JOptionPane.WARNING_MESSAGE);
+			if (k == JOptionPane.OK_OPTION) {
+				tabbedPane.setSelectedIndex(3);
+				StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
+				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+			}
+		}
+		else if ((problemType == ModelChecker.ERROR_PROBLEM) && (problemSubType == ModelChecker.IMPATIENCE_ENABLED_BETWEEN_FORK_JOIN_ERROR)) {
+			String stationName = model.getStationName(relatedStation);
+			int k = JOptionPane.showConfirmDialog(null, stationName + " uses an impatience strategy for a class but is located between fork/join. The\n"
+					+ "balked or reneged tasks may prevent the others from merging at the join.\n", "Warning", JOptionPane.WARNING_MESSAGE);
+			if (k == JOptionPane.OK_OPTION) {
+				tabbedPane.setSelectedIndex(3);
+				StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
+				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.INPUT_SECTION, null);
+			}
 		}
 		//used only in JMVA conversion
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_DIFFERENT_QUEUE_STRATEGIES_WARNING)) {
@@ -922,9 +974,19 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_BETWEEN_FORK_JOIN_WARNING)) {
 			String stationName = model.getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, stationName + " seems to be located between fork/join. The switched tasks may fail to merge\n"
-					+ "at the join with a Guard strategy.\n", "Warning", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(null, stationName + " is located between fork/join. The switched tasks may fail to merge at the join\n"
+					+ "with a Guard strategy.\n", "Warning", JOptionPane.WARNING_MESSAGE);
 			tabbedPane.setSelectedIndex(2);
+		}
+		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.CLASS_SWITCH_ROUTING_BETWEEN_FORK_JOIN_WARNING)) {
+			String stationName = model.getStationName(relatedStation);
+			int k = JOptionPane.showConfirmDialog(null, stationName + " uses a class switch routing strategy but is located between fork/join. The\n"
+					+ "switched tasks may fail to merge at the join with a Guard strategy.\n", "Warning", JOptionPane.WARNING_MESSAGE);
+			if (k == JOptionPane.OK_OPTION) {
+				tabbedPane.setSelectedIndex(3);
+				StationParametersPanel parameterPanel = (StationParametersPanel) tabbedPane.getComponentAt(3);
+				parameterPanel.showStationParameterPanel(relatedStation, StationParameterPanel.OUTPUT_SECTION, null);
+			}
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.SCHEDULING_SAME_PRIORITY_WARNING)) {
 			tabbedPane.setSelectedIndex(3);
@@ -933,8 +995,8 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN_WARNING)) {
 			String stationName = model.getStationName(relatedStation);
-			JOptionPane.showMessageDialog(null, stationName + " seems to be located between fork/join. On any firing of a transition between\n"
-					+ "fork/join, the number of output tasks for each class should be equal to the number of input\ntasks for that class.\n",
+			JOptionPane.showMessageDialog(null, stationName + " is located between fork/join. On any firing of a transition between fork/join,\n"
+					+ "the number of output tasks for each class should be equal to the number of input tasks for\nthat class.\n",
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			tabbedPane.setSelectedIndex(2);
 		}

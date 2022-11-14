@@ -57,6 +57,7 @@ import jmt.gui.exact.table.ExactCellEditor;
 import jmt.gui.exact.table.ExactCellRenderer;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 
 /**
  * <p>Title: Enabling Section Panel</p>
@@ -197,6 +198,12 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 				int index = stationData.getTransitionModeListSize(stationKey);
 				stationData.addTransitionMode(stationKey, Defaults.get("transitionModeName") + (index + 1));
 				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+				if (stationData instanceof JSimGraphModel) {
+					JSimGraphModel model = (JSimGraphModel) stationData;
+					String icon = model.getStationIcon(stationKey);
+					model.setStationIcon(stationKey, icon);
+					model.refreshGraph();
+				}
 			}
 		});
 
@@ -287,6 +294,7 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 		} else {
 			boolean hasSpecifiedValues = false;
 			boolean hasInvalidValues = false;
+			OUTER_LOOP:
 			for (Object stationInKey : stationInKeys) {
 				for (Object classKey : classKeys) {
 					int enablingValue = stationData.getEnablingCondition(stationKey, currentModeIndex,
@@ -298,6 +306,9 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 					}
 					if (inhibitingValue > 0 && enablingValue >= inhibitingValue) {
 						hasInvalidValues = true;
+					}
+					if (hasSpecifiedValues && hasInvalidValues) {
+						break OUTER_LOOP;
 					}
 				}
 			}
@@ -432,6 +443,14 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 					stationData.setInhibitingCondition(stationKey, currentModeIndex,
 							stationInKeys.get(rowIndex), classKeys.get(columnIndex), ivalue);
 				}
+				if (stationData instanceof JSimGraphModel) {
+					JSimGraphModel model = (JSimGraphModel) stationData;
+					for (Object stationInKey : stationInKeys) {
+						int end = model.getConnectionEnd(stationInKey, stationKey);
+						model.setConnectionEnd(stationInKey, stationKey, end);
+					}
+					model.refreshGraph();
+				}
 				updateNotice();
 			} catch (NumberFormatException e) {
 				// Aborts modification if String is invalid
@@ -440,14 +459,7 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 
 		@Override
 		public void clear(int row, int col) {
-			if (isEnablingModel) {
-				stationData.setEnablingCondition(stationKey, currentModeIndex,
-						stationInKeys.get(row), classKeys.get(col), Integer.valueOf(0));
-			} else {
-				stationData.setInhibitingCondition(stationKey, currentModeIndex,
-						stationInKeys.get(row), classKeys.get(col), Integer.valueOf(0));
-			}
-			updateNotice();
+			setValueAt("0", row, col);
 		}
 
 	}
@@ -487,6 +499,16 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 				int index = modeTable.getSelectedRow();
 				stationData.deleteTransitionMode(stationKey, index);
 				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));
+				if (stationData instanceof JSimGraphModel) {
+					JSimGraphModel model = (JSimGraphModel) stationData;
+					String icon = model.getStationIcon(stationKey);
+					model.setStationIcon(stationKey, icon);
+					for (Object stationInKey : stationInKeys) {
+						int end = model.getConnectionEnd(stationInKey, stationKey);
+						model.setConnectionEnd(stationInKey, stationKey, end);
+					}
+					model.refreshGraph();
+				}
 			}
 
 		};

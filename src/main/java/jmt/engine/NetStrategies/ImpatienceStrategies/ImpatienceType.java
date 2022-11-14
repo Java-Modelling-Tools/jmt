@@ -2,10 +2,8 @@ package jmt.engine.NetStrategies.ImpatienceStrategies;
 
 public enum ImpatienceType {
   NONE("None"),
-  IMPATIENCE("Impatience"),
-  RENEGING("Reneging"),
-  RETRIAL("Retrial"),
-  BALKING("Balking");
+  BALKING("Balking"),
+  RENEGING("Reneging");
 
   // The display name of that enum type in the UI
   private String displayName;
@@ -20,6 +18,10 @@ public enum ImpatienceType {
 
   public static ImpatienceType getType(String impatienceString) {
     impatienceString = impatienceString.toUpperCase();
-    return ImpatienceType.valueOf(impatienceString);
+    try {
+    	return ImpatienceType.valueOf(impatienceString);
+    } catch (IllegalArgumentException e) {
+    	return ImpatienceType.NONE;
+    }
   }
 }

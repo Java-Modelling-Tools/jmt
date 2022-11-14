@@ -23,10 +23,6 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.net.URISyntaxException;
 
-import jmt.common.exception.NetException;
-import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.QueueNetwork;
-import jmt.jmva.BatchTest;
 import jmt.jmva.engine.simDispatcher.DispatcherJMVAschema;
 
 import org.junit.Test;
@@ -38,26 +34,18 @@ public class PauseThreadTest {
 
 	private static final int MAX_WAIT_TIME = 15000;
 
-	private static void test1() {
-		int n = 5;
-		Thread1 t1 = new Thread1(n);
-		Thread2 t2 = new Thread2(n);
-		t1.start();
-		t2.start();
-	}
-
 	@Test
 	public void testPausing1SecondSleepAndCheckSimProgress() throws InterruptedException, URISyntaxException {
 
 		DispatcherJMVAschema disp = new DispatcherJMVAschema(new File(getClass().getResource("randomModel_open_1.xml").toURI()));
 
-		Thread3 t3 = new Thread3(disp);
-		Thread4 t4 = new Thread4(disp);
-		t3.start();
-		t4.start();
-		t4.join(MAX_WAIT_TIME);
-		if (t4.isAlive()) {
-			t4.finished = true;
+		Thread1 t1 = new Thread1(disp);
+		Thread2 t2 = new Thread2(disp);
+		t1.start();
+		t2.start();
+		t2.join(MAX_WAIT_TIME);
+		if (t2.isAlive()) {
+			t2.finished = true;
 			fail("Thread did not finish");
 		}
 	}
@@ -67,99 +55,24 @@ public class PauseThreadTest {
 
 		DispatcherJMVAschema disp = new DispatcherJMVAschema(new File(getClass().getResource("randomModel_open_1.xml").toURI()));
 
+		Thread1 t1 = new Thread1(disp);
 		Thread3 t3 = new Thread3(disp);
-		Thread5 t5 = new Thread5(disp);
+		t1.start();
 		t3.start();
-		t5.start();
-		t5.join(MAX_WAIT_TIME);
-		if (t5.isAlive()) {
-			t5.finished = true;
+		t3.join(MAX_WAIT_TIME);
+		if (t3.isAlive()) {
+			t3.finished = true;
 			fail("Thread did not finish");
 		}
-	}
-
-	public static void main(String[] args) throws InterruptedException {
-		//test1();
 	}
 
 }
 
 class Thread1 extends Thread {
 
-	int models;
-
-	public Thread1(int n) {
-		models = n;
-
-	}
-
-	@Override
-	public void run() {
-
-		BatchTest.comboTest(1, 1, models, 1, 1);
-
-	}
-
-}
-
-class Thread2 extends Thread {
-
-	int models;
-
-	public Thread2(int n) {
-		models = n;
-
-	}
-
-	@Override
-	public void run() {
-
-		//boolean finished = false;
-		double progress = 0.0;
-
-		do {
-			try {
-				sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-
-			/*if (NetSystem.pause()) {
-				if (NetSystem.getNetworkList().size() != 0) {
-					QueueNetwork net = NetSystem.getNetworkList().get(0);
-					try {
-						progr = NetSystem.checkProgress(net);
-						System.out.println("PROGRESS: " + Double.toString(progr));
-						if (progr == 1) {
-							//finished = true;
-							models--;
-
-						}
-					} catch (NetException e) {
-						e.printStackTrace();
-					}
-
-				}
-
-				NetSystem.restartFromPause();
-			} else {
-				if (progr > 0) {
-					System.out.println("PROGRESS: finished");
-					break;
-				}
-			} */
-
-		} while (models > 0);
-
-	}
-
-}
-
-class Thread3 extends Thread {
-
 	private DispatcherJMVAschema disp;
 
-	public Thread3(DispatcherJMVAschema disp) {
+	public Thread1(DispatcherJMVAschema disp) {
 		this.disp = disp;
 	}
 
@@ -172,12 +85,12 @@ class Thread3 extends Thread {
 
 }
 
-class Thread4 extends Thread {
+class Thread2 extends Thread {
 
 	private DispatcherJMVAschema disp;
 	boolean finished = false;
 
-	public Thread4(DispatcherJMVAschema disp) {
+	public Thread2(DispatcherJMVAschema disp) {
 		this.disp = disp;
 	}
 
@@ -212,12 +125,12 @@ class Thread4 extends Thread {
 
 }
 
-class Thread5 extends Thread {
+class Thread3 extends Thread {
 
 	private DispatcherJMVAschema disp;
 	boolean finished = false;
 
-	public Thread5(DispatcherJMVAschema disp) {
+	public Thread3(DispatcherJMVAschema disp) {
 		this.disp = disp;
 	}
 

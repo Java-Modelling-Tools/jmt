@@ -716,7 +716,7 @@ public class AMVATest {
 			System.out.println("Wrong input!!");
 		}
 
-	}	
+	}
 
 	private double maxDiff(int[] pop, double[][] queueLen1, double[][] queueLen2) {
 		double maxDiff = 0;

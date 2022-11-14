@@ -54,12 +54,12 @@ public class Storage extends InputSection {
 	public static final String FINITE_DROP = "drop";
 	public static final String FINITE_BLOCK = "BAS blocking";
 	public static final String FINITE_WAITING = "waiting queue";
-	public static final String FINITE_RETRIAL = "retrial";
 
 	private int totalCapacity;
 	private int[] capacities;
 	private boolean[] drop;
 	private boolean[] block;
+	private boolean[] waiting;
 	private QueueGetStrategy getStrategy;
 	private QueuePutStrategy[] putStrategies;
 
@@ -94,19 +94,20 @@ public class Storage extends InputSection {
 		}
 		drop = new boolean[dropRules.length];
 		block = new boolean[dropRules.length];
+		waiting = new boolean[dropRules.length];
 		for (int i = 0; i < dropRules.length; i++) {
-			if (dropRules[i].equals(FINITE_DROP)) {
+			switch (dropRules[i]) {
+			case FINITE_DROP:
 				drop[i] = true;
-				block[i] = false;
-			} else if (dropRules[i].equals(FINITE_BLOCK)) {
-				drop[i] = false;
+				break;
+			case FINITE_BLOCK:
 				block[i] = true;
-			} else if (dropRules[i].equals(FINITE_WAITING) || dropRules[i].equals(FINITE_RETRIAL)) { //TODO rose: confirm
-				drop[i] = false;
-				block[i] = false;
-			} else {
-				drop[i] = true;
-				block[i] = false;
+				break;
+			case FINITE_WAITING:
+				waiting[i] = true;
+				break;
+			default:
+				break;
 			}
 		}
 		this.getStrategy = getStrategy;
@@ -157,6 +158,7 @@ public class Storage extends InputSection {
 	 */
 	public void preloadJobs(int[] jobsPerClass) throws NetException {
 		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
+		NetSystem netSystem = getOwnerNode().getNetSystem();
 		int totalJobs = 0;
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			totalJobs += jobsPerClass[i];
@@ -166,7 +168,7 @@ public class Storage extends InputSection {
 		for (int i = 0; i < jobsPerClass.length; i++) {
 			for (int j = 0; j < jobsPerClass[i]; j++) {
 				Job job = new Job(jobClasses.get(i), netJobsList);
-                job.initialize(getNetSystem()); 
+				job.initialize(netSystem);
 				updateVisitPath(job);
 				jobPermutation[index] = job;
 				index++;
@@ -175,7 +177,7 @@ public class Storage extends InputSection {
 
 		/* Commented to ensure a deterministic initialization
 		// Durstenfeld Shuffle
-		RandomEngine randomEngine = RandomEngine.makeDefault();
+		RandomEngine randomEngine = netSystem.getEngine();
 		for (int i = jobPermutation.length - 1; i > 0; i--) {
 			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
 			Job job = jobPermutation[i];
@@ -249,9 +251,11 @@ public class Storage extends InputSection {
 				}
 			} else if (block[jobClass.getId()]) {
 				waitingRequests.add(new WaitingRequest(job, sourceSection, source));
-			} else {
+			} else if (waiting[jobClass.getId()]) {
 				waitingRequests.add(new WaitingRequest(job, sourceSection, source));
 				send(NetEvent.EVENT_ACK, job, 0.0, sourceSection, source);
+			} else {
+				return MSG_NOT_PROCESSED;
 			}
 			break;
 		}
@@ -339,10 +343,5 @@ public class Storage extends InputSection {
 
 		return MSG_PROCESSED;
 	}
-	
-	private NetSystem getNetSystem() {
-		return this.getOwnerNode().getNetSystem();
-	}
-
 
 }

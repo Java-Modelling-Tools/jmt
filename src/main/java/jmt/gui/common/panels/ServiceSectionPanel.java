@@ -53,6 +53,7 @@ import jmt.gui.common.editors.LDStrategyEditor;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.jsimgraph.DialogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -72,6 +73,8 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 
 	private ServiceTable serviceTable;
 	private JSpinner serverNumSpinner;
+	private JButton serverFeatureButton;
+	private ServerFeaturePanel serverFeaturePanel;
 
 	/** Used to display classes with icon */
 	protected ImagedComboBoxCellEditorFactory classEditor;
@@ -117,6 +120,23 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			}
 			// ---- end ----
 		}
+
+	};
+
+	protected AbstractAction editFeatures = new AbstractAction("Edit") {
+
+		private static final long serialVersionUID = 1L;
+
+		{
+			putValue(Action.SHORT_DESCRIPTION, "Edits Advanced Server Features");
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			DialogFactory factory = new DialogFactory(null);
+			factory.getDialog(serverFeaturePanel, "Editing Advanced Server Features",
+					MAX_GUI_WIDTH_SERVER_FEATURES, MAX_GUI_HEIGHT_SERVER_FEATURES, false, "", "");
+		}
+
 	};
 
 	public ServiceSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
@@ -128,13 +148,16 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		//building mainPanel
 		this.setLayout(new BorderLayout(5, 5));
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
-		//layout of main panel
-		JPanel serverNumPanel = new JPanel();
-		serverNumPanel.setBorder(new TitledBorder(new EtchedBorder(), "Number of Servers"));
-		serverNumPanel.add(new JLabel("Number:"));
-		serverNumPanel.add(serverNumSpinner);
-		this.add(serverNumPanel, BorderLayout.NORTH);
 
+		// server configuration panel
+		JPanel serverConfigPanel = new JPanel();
+		serverConfigPanel.setBorder(new TitledBorder(new EtchedBorder(), "Server Configuration"));
+		serverConfigPanel.add(new JLabel("Number of Servers:"));
+		serverConfigPanel.add(serverNumSpinner);
+		serverConfigPanel.add(serverFeatureButton);
+		this.add(serverConfigPanel, BorderLayout.NORTH);
+
+		// service time distributions panel
 		WarningScrollTable ServiceSectionTable = new WarningScrollTable(serviceTable, WARNING_CLASS);
 		ServiceSectionTable.setBorder(new TitledBorder(new EtchedBorder(), "Service Time Distributions"));
 		this.add(ServiceSectionTable, BorderLayout.CENTER);
@@ -148,6 +171,12 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		serviceTable = new ServiceTable();
 		serverNumSpinner = new JSpinner();
 		serverNumSpinner.setPreferredSize(DIM_BUTTON_XS);
+		serverFeatureButton = new JButton(editFeatures);
+		serverFeatureButton.setPreferredSize(DIM_BUTTON_XS);
+		if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
+			serverFeaturePanel = new ServerFeaturePanel();
+			serverFeaturePanel.setData(data, classData, stationKey);
+		}
 
 		classEditor.setData(cd);
 		initComponents();
@@ -156,12 +185,21 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 	}
 
 	private void updateServerPreferences() {
-		serverNumSpinner.setValue(data.getStationNumberOfServers(stationKey));
-		if (STATION_TYPE_DELAY.equals(data.getStationType(stationKey))) {
+		String stationType = data.getStationType(stationKey);
+		if (stationType.equals(STATION_TYPE_DELAY)) {
 			serverNumSpinner.setValue(Double.POSITIVE_INFINITY);
 			serverNumSpinner.setEnabled(false);
+			serverFeatureButton.setEnabled(false);
 		} else {
+			serverNumSpinner.setValue(data.getStationNumberOfServers(stationKey));
 			serverNumSpinner.setEnabled(true);
+			String queuePolicy = data.getStationQueueStrategy(stationKey);
+			if (queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE)
+					|| queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
+				serverFeatureButton.setEnabled(true);
+			} else {
+				serverFeatureButton.setEnabled(false);
+			}
 		}
 	}
 
@@ -214,6 +252,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 	@Override
 	public void gotFocus() {
 		classEditor.clearCache();
+		updateServerPreferences();
 	}
 
 	protected class ServiceTable extends JTable {
@@ -273,6 +312,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);
 			}
 		}
+
 	}
 
 	protected class ServiceTableModel extends AbstractTableModel {

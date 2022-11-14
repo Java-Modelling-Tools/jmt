@@ -203,8 +203,8 @@ public class FunctionNode implements ExpressionNode {
 			}
 		}
 	}
-	
-	public void setParser(Parser parser){
+
+	public void setParser(Parser parser) {
 		this.parser = parser;
 	}
 

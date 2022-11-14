@@ -18,8 +18,6 @@
 
 package jmt.gui.common.routingStrategies;
 
-import java.util.Map;
-
 /**
  * Created by IntelliJ IDEA.
  * User: giuliano casale
@@ -30,17 +28,13 @@ import java.util.Map;
 public class DisabledRouting extends RoutingStrategy {
 
 	public DisabledRouting() {
-		description = "If the user knows that jobs in this class cannot be routed here, this strategy can be used to indicate that routing is left unspecified.";
+		description = "If the user knows that jobs in this class cannot be routed here, "
+				+ "this strategy can be used to indicate that routing is left unspecified.";
 	}
 
 	@Override
 	public String getName() {
 		return "Disabled";
-	}
-
-	@Override
-	public Map<Object, Double> getValues() {
-		return null;
 	}
 
 	@Override
@@ -53,14 +47,6 @@ public class DisabledRouting extends RoutingStrategy {
 		return "jmt.engine.NetStrategies.RoutingStrategies.DisabledRoutingStrategy";
 	}
 
-	/**
-	 * Returns true if the routing strategy is dependent on the state of
-	 * the model
-	 * @return true if the routing strategy is dependent on the state of
-	 * the model
-	 *
-	 * Author: Giuliano Casale
-	 */
 	@Override
 	public boolean isModelStateDependent() {
 		return false;

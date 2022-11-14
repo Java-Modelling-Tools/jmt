@@ -19,7 +19,6 @@
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
-import jmt.engine.math.Arithmetic;
 import jmt.engine.math.Gamma;
 
 /**

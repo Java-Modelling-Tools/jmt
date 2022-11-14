@@ -18,8 +18,6 @@
 
 package jmt.gui.common.routingStrategies;
 
-import java.util.Map;
-
 /**
  * Created by IntelliJ IDEA.
  * User: orsotronIII
@@ -39,11 +37,6 @@ public class LeastUtilizationRouting extends RoutingStrategy {
 	}
 
 	@Override
-	public Map<Object, Double> getValues() {
-		return null;
-	}
-
-	@Override
 	public LeastUtilizationRouting clone() {
 		return new LeastUtilizationRouting();
 	}
@@ -53,14 +46,6 @@ public class LeastUtilizationRouting extends RoutingStrategy {
 		return "jmt.engine.NetStrategies.RoutingStrategies.LeastUtilizationRoutingStrategy";
 	}
 
-	/**
-	 * Returns true if the routing strategy is dependent on the state of
-	 * the model
-	 * @return true if the routing strategy is dependent on the state of
-	 * the model
-	 *
-	 * Author: Francesco D'Aquino
-	 */
 	@Override
 	public boolean isModelStateDependent() {
 		return true;

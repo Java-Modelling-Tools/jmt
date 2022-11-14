@@ -26,7 +26,6 @@ import java.util.Locale;
 
 import javax.swing.ImageIcon;
 
-import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
 import jmt.gui.common.serviceStrategies.ServiceStrategy;
 
 /**
@@ -465,14 +464,14 @@ public abstract class Distribution implements ServiceStrategy {
 	// ----- Abastract Methods that must be implemented by all distributions ------------------------------
 
 	/**
-	 * Used to set parameters of this distribution.
+	 * Used to set parameters of this distribution
 	 * @return distribution parameters
 	 */
 	protected abstract Parameter[] setParameters();
 
 	/**
 	 * Sets explicative image of this distribution used, together with description, to help the
-	 * user to understand meaning of parameters.
+	 * user to understand meaning of parameters
 	 * @return explicative image
 	 */
 	protected abstract ImageIcon setImage();

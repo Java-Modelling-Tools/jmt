@@ -111,7 +111,7 @@ public abstract class ImageLoader {
 	 * @return icon if found, null otherwise
 	 */
 	public ImageIcon loadIcon(String iconName, String modifier) {
-		return this.loadIcon(iconName,modifier,0.0);
+		return this.loadIcon(iconName, modifier, 0.0);
 	}
 
 	/**
@@ -144,7 +144,6 @@ public abstract class ImageLoader {
 		}
 	}
 
-
 	/**
 	 * Loads an icon with specified name, modifier and size, caches it and then resizes it.
 	 *
@@ -162,8 +161,8 @@ public abstract class ImageLoader {
 		if (modifier != null) {
 			derivedName = deriveIconName(iconName, modifier);
 		}
-		if(angle != 0.0){
-			derivedName = derivedName + "_" + ((int)  Math.floor(angle));
+		if (angle != 0.0) {
+			derivedName = derivedName + "_" + ((int) Math.floor(angle));
 		}
 
 		if (iconCache.containsKey(derivedName)) {
@@ -196,7 +195,6 @@ public abstract class ImageLoader {
 		iconCache.put(derivedName, icon);
 		return icon;
 	}
-
 
 	/**
 	 * Derives an icon name to apply suffixes before extension
@@ -238,11 +236,11 @@ public abstract class ImageLoader {
 	protected ImageIcon applyModifier(ImageIcon base, String modifier, Double angle) {
 		if (modifier.equals(MODIFIER_MIRROR)) {
 			return mirrorImage(base);
-		} else if (modifier.equals(MODIFIER_ROTATE)){
+		} else if (modifier.equals(MODIFIER_ROTATE)) {
 			return rotate(base, angle);
-		} else if (modifier.equals(MODIFIER_MIRROR_AND_ROTATE)){
-			ImageIcon iconMirrored= mirrorImage( base);
-			return rotate( iconMirrored, angle);
+		} else if (modifier.equals(MODIFIER_MIRROR_AND_ROTATE)) {
+			ImageIcon iconMirrored = mirrorImage(base);
+			return rotate(iconMirrored, angle);
 		} else if (modifier.equals(MODIFIER_ROLLOVER) || modifier.equals(MODIFIER_SELECTED)) {
 			ImageIcon background = loadIcon(deriveIconName(TEMPLATE_IMAGE_NAME, modifier));
 			if (background != null) {
@@ -292,7 +290,6 @@ public abstract class ImageLoader {
 		return new ImageIcon(out);
 	}
 
-
 	/**
 	 * Rotates image on y axis
 	 *
@@ -304,17 +301,17 @@ public abstract class ImageLoader {
 	 * Date: April 2020
 	 */
 	protected ImageIcon rotate(ImageIcon base, Double angle) {
-		double radianAngle= Math.toRadians(angle);
+		double radianAngle = Math.toRadians(angle);
 
 		//width and height of the original image
-		int widthBase= base.getIconWidth();
-		int heightBase= base.getIconHeight();
+		int widthBase = base.getIconWidth();
+		int heightBase = base.getIconHeight();
 
 		//width and height of the new image
-		int widthNew= (int) Math.ceil(widthBase * Math.abs(Math.cos(radianAngle)) + heightBase * Math.abs(Math.sin(radianAngle)) );
-		int heightNew= (int) Math.ceil(widthBase * Math.abs(Math.sin(radianAngle))+ heightBase * Math.abs(Math.cos(radianAngle)) );
+		int widthNew = (int) Math.ceil(widthBase * Math.abs(Math.cos(radianAngle)) + heightBase * Math.abs(Math.sin(radianAngle)));
+		int heightNew = (int) Math.ceil(widthBase * Math.abs(Math.sin(radianAngle)) + heightBase * Math.abs(Math.cos(radianAngle)));
 
-		BufferedImage out = new BufferedImage(widthNew,heightNew, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage out = new BufferedImage(widthNew, heightNew, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = out.createGraphics();
 
 		AffineTransform identity = new AffineTransform();
@@ -323,14 +320,12 @@ public abstract class ImageLoader {
 		trans.setTransform(identity);
 
 		// translation of the image to the center of the new rectangle
-		trans.translate((widthNew-widthBase)/2.0,(heightNew-heightBase)/2.0);
+		trans.translate((widthNew - widthBase) / 2.0 , (heightNew - heightBase) / 2.0);
 		// rotation of the image
-		trans.rotate(radianAngle,widthBase/2.0, heightBase/2.0 );
+		trans.rotate(radianAngle, widthBase / 2.0, heightBase / 2.0);
 		g.drawImage(base.getImage(), trans, null);
 
 		return new ImageIcon(out);
 	}
-
-
 
 }

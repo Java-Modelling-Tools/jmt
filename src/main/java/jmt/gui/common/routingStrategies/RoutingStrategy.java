@@ -20,7 +20,6 @@ package jmt.gui.common.routingStrategies;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -43,8 +42,6 @@ public abstract class RoutingStrategy {
 	public String getDescription() {
 		return description;
 	}
-
-	public abstract Map<Object, Double> getValues();
 
 	@Override
 	public String toString() {

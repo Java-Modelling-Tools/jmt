@@ -34,7 +34,7 @@ public class ProbabilityRouting extends RoutingStrategy {
 
 	public ProbabilityRouting() {
 		description = "Jobs are routed to stations connected to the current one according to the specified probabilities. "
-				+ "If the sum of the probabilities is different from 1, all the values will be scaled to sum 1.";
+				+ "If the sum of the routing probabilities is different from 1, the values will be scaled to sum to 1.";
 	}
 
 	@Override
@@ -42,7 +42,6 @@ public class ProbabilityRouting extends RoutingStrategy {
 		return "Probabilities";
 	}
 
-	@Override
 	public Map<Object, Double> getValues() {
 		return values;
 	}
@@ -61,14 +60,6 @@ public class ProbabilityRouting extends RoutingStrategy {
 		return "jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy";
 	}
 
-	/**
-	 * Returns true if the routing strategy is dependent on the state of
-	 * the model
-	 * @return true if the routing strategy is dependent on the state of
-	 * the model
-	 *
-	 * Author: Francesco D'Aquino
-	 */
 	@Override
 	public boolean isModelStateDependent() {
 		return false;

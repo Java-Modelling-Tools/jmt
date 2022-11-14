@@ -75,34 +75,39 @@ public interface ResultsConstants {
 			+ "Average residence time for each selected class at each selected station. (Residence Time = Number of Visits * Response Time).  In a Fork/Join section this index refers to tasks and not to customers."
 			+ HTML_FONT_NOR_END + HTML_END;
 
+	public static final String DESCRIPTION_ARRIVAL_RATE = HTML_START + HTML_FONT_TITLE + "Arrival Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average arrival rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average throughput for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_UTILIZATION = HTML_START + HTML_FONT_TITLE + "Utilization" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average utilization for each selected class at each selected station. For multi-server queueing stations this is the "
 			+ "average utilization of each server. The utilization of a delay station is the average number of customers in the station (may be greater than 1)."
 			+ HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average throughput for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+	public static final String DESCRIPTION_EFFECTIVE_UTILIZATION = HTML_START + HTML_FONT_TITLE + "Effective Utilization" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average effective utilization for each selected class at each selected station. For multi-server queueing stations this is the "
+			+ "average effective utilization of each server. The time taken by additional processes (e.g. setup, blocking, waiting and retrial) is ignored."
+			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_DROP_RATE = HTML_START + HTML_FONT_TITLE + "Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average drop rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_RENEGING_RATE = HTML_START + HTML_FONT_TITLE + "Reneging Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average reneging rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
-
 	public static final String DESCRIPTION_BALKING_RATE = HTML_START + HTML_FONT_TITLE + "Balking Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average balking rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_RENEGING_RATE = HTML_START + HTML_FONT_TITLE + "Reneging Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average reneging rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RETRIAL_ATTEMPTS_RATE = HTML_START + HTML_FONT_TITLE + "Retrial Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average retrial attempts rate for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_RETRIAL_ORBIT_TIME = HTML_START + HTML_FONT_TITLE + "Retrial Orbit Residence Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
-					+ "Total average orbit time for each selected class until admitted at the selected station. (Orbit Residence Time = Number of Orbits * Orbit Time). " + HTML_FONT_NOR_END + HTML_END;
-
 	public static final String DESCRIPTION_RETRIAL_ORBIT_SIZE = HTML_START + HTML_FONT_TITLE + "Retrial Orbit Size" + HTML_FONT_TIT_END + HTML_FONT_NORM
-					+ "Average number of customers at the retrial orbit of a selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+			+ "Average number of customers at the retrial orbit of a selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
 
-	//public static final String DESCRIPTION_BUSY_SERVER_NUMBER = HTML_START + HTML_FONT_TITLE + "Number of Busy Servers" + HTML_FONT_TIT_END + HTML_FONT_NORM
-	//				+ "Average number of number of busy servers at each selected station." + HTML_FONT_NOR_END + HTML_END;
+	public static final String DESCRIPTION_RETRIAL_ORBIT_TIME = HTML_START + HTML_FONT_TITLE + "Retrial Orbit Residence Time" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Total average orbit time for each selected class until admitted at the selected station. (Orbit Residence Time = Number of Orbits * Orbit Time). " + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "System Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average number of customers in the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
@@ -116,17 +121,17 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_SYSTEM_DROP_RATE = HTML_START + HTML_FONT_TITLE + "System Drop Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average drop rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_SYSTEM_RENEGING_RATE = HTML_START + HTML_FONT_TITLE + "System Reneging Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average reneging rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
-
 	public static final String DESCRIPTION_SYSTEM_BALKING_RATE = HTML_START + HTML_FONT_TITLE + "System Balking Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average balking rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_SYSTEM_POWER = HTML_START + HTML_FONT_TITLE + "System Power" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average power of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
+	public static final String DESCRIPTION_SYSTEM_RENEGING_RATE = HTML_START + HTML_FONT_TITLE + "System Reneging Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average reneging rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_SYSTEM_RETRIAL_ATTEMPTS_RATE = HTML_START + HTML_FONT_TITLE + "System Retrial Attempts Rate" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average retrial attempts rate of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_SYSTEM_POWER = HTML_START + HTML_FONT_TITLE + "System Power" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average power of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RESPONSE_TIME_PER_SINK = HTML_START + HTML_FONT_TITLE + "Response Time per Sink" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average response time for each selected class at each selected Sink station." + HTML_FONT_NOR_END + HTML_END;

@@ -31,11 +31,9 @@ public class TransitionCell extends JmtCell {
 
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * Tells if this component can be placed on JGraph or has been disabled. This is
-	 * useful to load old models with disabled components (like terminals)
-	 */
-	public static final boolean canBePlaced = true;
+	public static final String TIMED_TRANSITION_ICON = "TimedTransition";
+	public static final String IMMEDIATE_TRANSITION_ICON = "ImmediateTransition";
+	public static final String HYBRID_TRANSITION_ICON = "HybridTransition";
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
 	public static final String ICON = "Transition";
@@ -73,16 +71,6 @@ public class TransitionCell extends JmtCell {
 	@Override
 	public boolean generateOrDestroyJobs() {
 		return true;
-	}
-
-	/**
-	 * Returns the name of the icon of this cell
-	 *
-	 * @return the name of the icon of this cell
-	 */
-	@Override
-	public String getIcon() {
-		return ICON;
 	}
 
 }

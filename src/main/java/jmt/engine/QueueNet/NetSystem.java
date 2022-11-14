@@ -50,16 +50,16 @@ public class NetSystem {
 	private NetworkList networkList;
 
 	private SimSystem simSystem;
-	
+
 	private int jobCounter;
-	
+
 	private RandomEngine engine;
 
 	public NetSystem() {
 		simSystem = new SimSystem();
 		engine = new MersenneTwister(); 
 		jobCounter = 0;
-	};
+	}
 
 	/**
 	 * Initializes the simulation system
@@ -381,12 +381,13 @@ public class NetSystem {
 	public SimSystem getSimSystem() {
 		return simSystem;
 	}
-	
-	public int nextjobNumber(){
+
+	public int nextjobNumber() {
 		return jobCounter++;
 	}
 
 	public RandomEngine getEngine() {
 		return engine;
 	}
+
 }

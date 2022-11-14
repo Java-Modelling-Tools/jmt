@@ -77,6 +77,7 @@ public class RandomSource extends InputSection {
 		Job job;
 		int c;
 		double delay;
+		NetSystem netSystem;
 
 		switch (message.getEvent()) {
 
@@ -88,6 +89,7 @@ public class RandomSource extends InputSection {
 			//departure of the job, calculated using the strategy of the corresponding class
 
 			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
+			netSystem = getOwnerNode().getNetSystem();
 			ListIterator<JobClass> it = jobClasses.listIterator();
 			while (it.hasNext()) {
 				JobClass jobClass = it.next();
@@ -100,7 +102,7 @@ public class RandomSource extends InputSection {
 				// Calculates the delay of departure (1/lambda)
 				if (strategies[c] != null) {
 					job = new Job(jobClass, netJobsList);
-                    			job.initialize(this.getNetSystem());
+					job.initialize(netSystem);
 					updateVisitPath(job);
 					delay = strategies[c].wait(this, jobClass);
 					sendMe(job, delay);
@@ -144,7 +146,8 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(job.getJobClass(), netJobsList);
-                job.initialize(this.getNetSystem());
+				netSystem = getOwnerNode().getNetSystem();
+				job.initialize(netSystem);
 				updateVisitPath(job);
 				delay = strategies[c].wait(this, job.getJobClass());
 				sendMe(job, delay);
@@ -188,7 +191,8 @@ public class RandomSource extends InputSection {
 
 				// Create a new job and send it to me delayed
 				job = new Job(jobClasses.get(c), netJobsList);
-                job.initialize(this.getNetSystem()); 
+				netSystem = getOwnerNode().getNetSystem();
+				job.initialize(netSystem);
 				updateVisitPath(job);
 				delay = strategies[c].wait(this, jobClasses.get(c));
 				sendMe(job, delay);
@@ -205,10 +209,6 @@ public class RandomSource extends InputSection {
 		}
 
 		return MSG_PROCESSED;
-	}
-	
-	private NetSystem getNetSystem(){
-		return this.getOwnerNode().getNetSystem();
 	}
 
 }

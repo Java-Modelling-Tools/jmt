@@ -42,7 +42,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import jmt.common.xml.XSDSchemaLoader;
-import jmt.engine.NetStrategies.ImpatienceStrategies.*;
+import jmt.engine.NetStrategies.ImpatienceStrategies.BalkingParameter;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
+import jmt.engine.NetStrategies.ImpatienceStrategies.RenegingParameter;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.data.MacroReplacer;
@@ -51,7 +54,6 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
-import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.CombFork;
 import jmt.gui.common.forkStrategies.ForkStrategy;
@@ -61,7 +63,12 @@ import jmt.gui.common.forkStrategies.ProbabilitiesFork;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.PartialJoin;
-import jmt.gui.common.routingStrategies.*;
+import jmt.gui.common.routingStrategies.ClassSwitchRouting;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.PowerOfKRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
 import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
@@ -96,6 +103,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static HashMap<Object[], Map<String, Double>> empiricalRouting;
 	protected static HashMap<Object[], Map<String, Double>> empiricalLDRouting;
 	protected static HashMap<Object[], Map<String, Integer>> wrrRouting;
+	protected static HashMap<Object[], Map<String, Double>> csBranchRouting;
+	protected static HashMap<Object[], Map<String, Map<String, Double>>> csClassRouting;
 	protected static HashMap<Object[], Map<String, OutPath>> empiricalFork;
 	protected static HashMap<Object[], Map<String, Double>> combFork;
 	protected static HashMap<Object[], Integer> enablingConditionMap;
@@ -260,6 +269,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		empiricalRouting = new HashMap<Object[], Map<String, Double>>();
 		empiricalLDRouting = new HashMap<Object[], Map<String, Double>>();
 		wrrRouting = new HashMap<Object[], Map<String, Integer>>();
+		csBranchRouting = new HashMap<Object[], Map<String, Double>>();
+		csClassRouting = new HashMap<Object[], Map<String, Map<String, Double>>>();
 		empiricalFork = new HashMap<Object[], Map<String, OutPath>>();
 		combFork = new HashMap<Object[], Map<String, Double>>();
 		enablingConditionMap = new HashMap<Object[], Integer>();
@@ -288,7 +299,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		keys = empiricalRouting.keySet().toArray();
 		for (Object key : keys) {
 			Object[] dualkey = (Object[]) key;
-			RoutingStrategy rs = (RoutingStrategy) model.getRoutingStrategy(dualkey[0], dualkey[1]);
+			ProbabilityRouting rs = (ProbabilityRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
 			Map<Object, Double> routing = rs.getValues();
 			Map<String, Double> values = empiricalRouting.get(key);
 			Object[] names = values.keySet().toArray();
@@ -315,6 +326,34 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Object[] names = values.keySet().toArray();
 			for (Object name : names) {
 				routing.put(stations.get(name), values.get(name));
+			}
+		}
+		keys = csBranchRouting.keySet().toArray();
+		for (Object key : keys) {
+			Object[] dualkey = (Object[]) key;
+			ClassSwitchRouting rs = (ClassSwitchRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
+			Map<Object, Double> routing = rs.getValues();
+			Map<String, Double> values = csBranchRouting.get(key);
+			Object[] names = values.keySet().toArray();
+			for (Object name : names) {
+				routing.put(stations.get(name), values.get(name));
+			}
+		}
+		keys = csClassRouting.keySet().toArray();
+		for (Object key : keys) {
+			Object[] dualkey = (Object[]) key;
+			ClassSwitchRouting rs = (ClassSwitchRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
+			Map<Object, Map<Object, Double>> outPaths = rs.getOutPaths();
+			Map<String, Map<String, Double>> values = csClassRouting.get(key);
+			Object[] names = values.keySet().toArray();
+			for (Object name : names) {
+				Map<Object, Double> outPath = new HashMap<Object, Double>();
+				Map<String, Double> values2 = values.get(name);
+				Object[] names2 = values2.keySet().toArray();
+				for (Object name2 : names2) {
+					outPath.put(classes.get(name2), values2.get(name2));
+				}
+				outPaths.put(stations.get(name), outPath);
 			}
 		}
 		keys = empiricalFork.keySet().toArray();
@@ -539,48 +578,48 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	private static void parseAndSetImpatienceParameters(CommonModel model, Object stationKey,
-																											Map<String, Node> classNameToNodeMap) {
+			Map<String, Node> classNameToNodeMap) {
 		String[] classNames = getClassNamesFromMap(classNameToNodeMap);
 
 		// Sets the impatience strategy in the CommonModel. Implementation borrowed from parseServerSection().
 		for (String className : classNames) {
 			Object classKey = classes.get(className);
 			Element impatienceElement = (Element) classNameToNodeMap.get(className);
-			String impatienceString = impatienceElement.getAttribute(XML_A_SUBPARAMETER_NAME);
+			String impatienceString = impatienceElement.getAttribute(XML_A_PARAMETER_NAME);
 			ImpatienceType impatienceType = ImpatienceType.getType(impatienceString);
 
 			switch(impatienceType) {
-				case RENEGING:
-					// Set the reneging strategy in the model
-					Distribution renegingDistribution = (Distribution) parseServiceStrategy(impatienceElement);
-					RenegingParameter renegingParameter = new RenegingParameter(renegingDistribution);
-					setImpatienceParameterAndType(model, stationKey, classKey, renegingParameter, impatienceType);
-					break;
+			case RENEGING:
+				// Set the reneging strategy in the model
+				Distribution renegingDistribution = (Distribution) parseServiceStrategy(impatienceElement);
+				RenegingParameter renegingParameter = new RenegingParameter(renegingDistribution);
+				setImpatienceParameterAndType(model, stationKey, classKey, renegingParameter, impatienceType);
+				break;
 
-				case BALKING:
-					// Set the balking strategy in the model
-					NodeList nodeList = impatienceElement.getChildNodes();
-					if (nodeList instanceof Element) {
-						int indexOfLDStrategyNode = 1;
-						int indexOfPriorityNode = 3;
+			case BALKING:
+				// Set the balking strategy in the model
+				NodeList nodeList = impatienceElement.getChildNodes();
+				if (nodeList instanceof Element) {
+					int indexOfLDStrategyNode = 1;
+					int indexOfPriorityNode = 3;
 
-						// Extract the values from the XML
-						Element ldStrategyElement = (Element) nodeList.item(indexOfLDStrategyNode);
-						LDStrategy ldStrategy = (LDStrategy) parseServiceStrategy(ldStrategyElement);
-						Element booleanElement = (Element) nodeList.item(indexOfPriorityNode);
-						boolean priorityActivated = parseBooleanElement(booleanElement);
+					// Extract the values from the XML
+					Element ldStrategyElement = (Element) nodeList.item(indexOfLDStrategyNode);
+					LDStrategy ldStrategy = (LDStrategy) parseServiceStrategy(ldStrategyElement);
+					Element booleanElement = (Element) nodeList.item(indexOfPriorityNode);
+					boolean priorityActivated = parseBooleanElement(booleanElement);
 
-						// Set the values in the model
-						BalkingParameter balkingParameter = new BalkingParameter(ldStrategy);
-						balkingParameter.setPriorityActivated(priorityActivated);
-						setImpatienceParameterAndType(model, stationKey, classKey, balkingParameter, impatienceType);
-					}
-					break;
+					// Set the values in the model
+					BalkingParameter balkingParameter = new BalkingParameter(ldStrategy);
+					balkingParameter.setPriorityActivated(priorityActivated);
+					setImpatienceParameterAndType(model, stationKey, classKey, balkingParameter, impatienceType);
+				}
+				break;
 
-				case NONE:
-					// This case occurs when a particular class has no impatience selected.
-					setImpatienceParameterAndType(model, stationKey, classKey, null, impatienceType);
-					break;
+			default:
+				// This case occurs when a particular class has no impatience selected.
+				setImpatienceParameterAndType(model, stationKey, classKey, null, ImpatienceType.NONE);
+				break;
 			}
 		}
 	}
@@ -598,10 +637,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	}
 
 	private static void setImpatienceParameterAndType(CommonModel model, Object stationKey,
-																										Object classKey, ImpatienceParameter impatienceParameter, ImpatienceType impatienceType) {
+			Object classKey, ImpatienceParameter impatienceParameter, ImpatienceType impatienceType) {
 		model.setImpatienceParameter(stationKey, classKey, impatienceParameter);
 		model.setImpatienceType(stationKey, classKey, impatienceType);
 	}
+
 	/**
 	 * Parses all informations regarding Queue section.
 	 * @param section input section of queue or delay station
@@ -613,9 +653,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		Element curr;
 		String name, classpath;
 		Map<String, Node> putStrategy = null;
+		String pollingType = null;
 		Map<String, Node> dropRules = null;
 		Map<String, Node> retrialDistributions = null;
-        String pollingType = null;
 		for (int i = 0; i < parameters.getLength(); i++) {
 			curr = (Element) parameters.item(i);
 			name = curr.getAttribute(XML_A_PARAMETER_NAME);
@@ -625,8 +665,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (name.equals("FCFSstrategy")) {
 				pollingType = name;
 				NodeList subparams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
-				for (int y = 0; y < subparams.getLength(); y++) {
-					if (((Element) subparams.item(y)).getAttribute(XML_A_PARAMETER_NAME).equals("pollingKValue")) {
+				for (int j = 0; j < subparams.getLength(); j++) {
+					if (((Element) subparams.item(j)).getAttribute(XML_A_PARAMETER_NAME).equals("pollingKValue")) {
 						Integer pollingKValue = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 						model.setStationPollingServerKValue(key, pollingKValue);
 					}
@@ -634,25 +674,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (name.equals("size")) {
 				Integer capacity = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationQueueCapacity(key, capacity);
-			} else if (name.equals("maxRunning")) {
-				Integer maxRunning = Integer.valueOf(findText((curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
-				model.setStationMaxRunning(key, maxRunning);
-			} else if (name.equals("serverPreemptive")) {
-				Boolean serverPreemptive = Boolean.valueOf(findText((curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
-				model.setStationServerPreemptive(key, serverPreemptive);
-			} else if (name.equals("pollingKValue")) {
-				Integer pollingKValue = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
-				model.setStationPollingServerKValue(key, pollingKValue);
 			} else if (name.equals("dropStrategies")) {
 				dropRules = parseParameterRefclassArray(curr);
-				NodeList subparams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
-				for (int y = 0; y < subparams.getLength(); y++) {
-					if (((Element) subparams.item(y)).getAttribute(XML_A_PARAMETER_NAME).equals("retrialDistributions")) {
-						retrialDistributions = parseParameterRefclassArray(((Element) subparams.item(y)));
-					}
-				}
-			}
-			else if (name.equals(ImpatienceType.IMPATIENCE.getDisplayName())) {
+			} else if (name.equals("retrialDistributions")) {
+				retrialDistributions = parseParameterRefclassArray(curr);
+			} else if (name.equals("Impatience")) {
 				// Retrieves all impatience subParameters and sets them in the model
 				Map<String, Node> classNameToNodeMap = parseParameterRefclassArray(curr);
 				parseAndSetImpatienceParameters(model, key, classNameToNodeMap);
@@ -662,10 +688,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		if (putStrategy != null) {
 			Object[] classNames = putStrategy.keySet().toArray();
 			for (Object className : classNames) {
-				String strategy = ((Element) putStrategy.get(className)).getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+				String strategy = ((Element) putStrategy.get(className)).getAttribute(XML_A_PARAMETER_CLASSPATH);
 				// Takes away classpath from put strategy name
 				strategy = strategy.substring(strategy.lastIndexOf(".") + 1, strategy.length());
-				// Now sets correct queue strategy, given queueput policies
+				// Now sets correct queue strategy, given queue put policies
 				if (strategy.equals("TailStrategy")) {
 					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_FCFS);
@@ -678,9 +704,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				} else if (strategy.equals("HeadStrategyPriority")) {
 					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_LCFS);
-				} else if (strategy.equals("LCFSPRStrategy")) {
-					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
-					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_LCFS_PR);
 				} else if (strategy.equals("RandStrategy")) {
 					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_RAND);
@@ -711,26 +734,41 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				} else if (strategy.equals("LEPTStrategyPriority")) {
 					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key,classes.get(className), QUEUE_STRATEGY_LEPT);
+				} else if (strategy.equals("FCFSPRStrategy")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_FCFS_PR);
+				} else if (strategy.equals("FCFSPRStrategyPriority")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_FCFS_PR);
+				} else if (strategy.equals("LCFSPRStrategy")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_LCFS_PR);
+				} else if (strategy.equals("LCFSPRStrategyPriority")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_LCFS_PR);
+				} else if (strategy.equals("SRPTStrategy")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_SRPT);
+				} else if (strategy.equals("SRPTStrategyPriority")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_SRPT);
 				}
 			}
 		}
 
 		if (pollingType != null) {
-		    String getStrategy = pollingType.substring(pollingType.lastIndexOf(".") + 1);
+			String getStrategy = pollingType.substring(pollingType.lastIndexOf(".") + 1);
 			if (getStrategy.equals("LimitedPollingGetStrategy")) {
 				model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
-				model.setStationPollingServerBoolean(key, true);
 				model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_LIMITED);
 			} else if (getStrategy.equals("GatedPollingGetStrategy")) {
 				model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
-				model.setStationPollingServerBoolean(key, true);
 				model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_GATED);
 			} else if (getStrategy.equals("ExhaustivePollingGetStrategy")) {
 				model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
-				model.setStationPollingServerBoolean(key, true);
 				model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
 			}
-	}
+		}
 
 		// Decodes drop rules
 		if (dropRules != null) {
@@ -739,7 +777,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				String rule = findText(((Element) dropRules.get(className)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 				model.setDropRule(key, classes.get(className), DROP_RULES_MAPPING.get(rule));
 				if (rule.equals("retrial") && retrialDistributions != null) {
-					Distribution distribution = (Distribution) parseServiceStrategy((Element) retrialDistributions.get(className));
+					Object distribution = parseServiceStrategy((Element) retrialDistributions.get(className));
 					model.setRetrialDistribution(key, classes.get(className), distribution);
 				}
 			}
@@ -778,45 +816,51 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			}
 		} else if (CLASSNAME_LKPSERVER.equals(sectionName)) {
 			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
-			model.setStationPollingServerBoolean(key, true);
 			model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_LIMITED);
 		} else if (CLASSNAME_GATEDPSERVER.equals(sectionName)) {
 			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
-			model.setStationPollingServerBoolean(key, true);
 			model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_GATED);
 		} else if (CLASSNAME_EXHAUSTIVEPSERVER.equals(sectionName)) {
 			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
-			model.setStationPollingServerBoolean(key, true);
 			model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
-		} else if (CLASSNAME_PREEMPTIVESERVER.equals(sectionName)) {
-			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_PREEMPTIVE);
-		} else if (CLASSNAME_SERVER.equals(sectionName)) {
-			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 		}
 
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
-		Element curr;
-		String name, classpath;
 		for (int i = 0; i < parameters.getLength(); i++) {
-			curr = (Element) parameters.item(i);
-			name = curr.getAttribute(XML_A_PARAMETER_NAME);
-			classpath = curr.getAttribute(XML_A_PARAMETER_CLASSPATH);
+			Element curr = (Element) parameters.item(i);
+			String name = curr.getAttribute(XML_A_PARAMETER_NAME);
+			String classpath = curr.getAttribute(XML_A_PARAMETER_CLASSPATH);
 			if (name.equals("maxJobs")) {
 				// Sets number of servers
 				Integer number = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationNumberOfServers(key, number);
-			} else if (name.equals("serverPreemptive")) {
-				Boolean serverPreemptive = Boolean.valueOf(findText((curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0))));
-				model.setStationServerPreemptive(key, serverPreemptive);
-			} else if (name.equals("switchoverStrategy")) {
-				Map<String, Node> distributions = parseParameterRefclassArray((Element) parameters.item(i));
+			} else if (name.equals("maxRunning")) {
+				// Sets max running jobs
+				Integer running = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+				model.setStationMaxRunningJobs(key, running);
+			} else if (name.equals("SwitchoverStrategy")) {
+				// Retrieves all switchover strategy subParameters
+				Map<String, Node> distributions = parseParameterRefclassArray(curr);
 				Object[] classNames = distributions.keySet().toArray();
 				for (Object className : classNames) {
-					model.setStationPollingSwitchoverDistribution(key, classes.get(className), parseServiceStrategy((Element) distributions.get(className)));
+					model.setPollingSwitchoverDistribution(key, classes.get(className), parseServiceStrategy((Element) distributions.get(className)));
+				}
+			} else if (name.equals("SetupStrategy")) {
+				// Retrieves all setup strategy subParameters
+				model.setSetupTimesEnabled(key, Boolean.valueOf(true));
+				Map<String, Node> setupStrategies = parseParameterRefclassArray(curr);
+				Object[] fromClassNames = setupStrategies.keySet().toArray();
+				for (Object fromClassName : fromClassNames) {
+					Element subCurr = (Element) setupStrategies.get(fromClassName);
+					Map<String, Node> setupStrategy = parseParameterRefclassArray(subCurr);
+					Object[] toClassNames = setupStrategy.keySet().toArray();
+					for (Object toClassName : toClassNames) {
+						model.setSetupTimeDistribution(key, classes.get(fromClassName), classes.get(toClassName), parseServiceStrategy((Element) setupStrategy.get(toClassName)));
+					}
 				}
 			} else if (classpath.equals(serviceStrategy)) {
 				// Retrieves all distributions subParameters
-				Map<String, Node> distributions = parseParameterRefclassArray((Element) parameters.item(i));
+				Map<String, Node> distributions = parseParameterRefclassArray(curr);
 				Object[] classNames = distributions.keySet().toArray();
 				// Sets service time distributions
 				for (Object className : classNames) {
@@ -824,11 +868,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				}
 			} else if (classpath.equals(psStrategy)) {
 				// Retrieves all PS strategies subParameters
-				Map<String, Node> psStrategies = parseParameterRefclassArray((Element) parameters.item(i));
+				Map<String, Node> psStrategies = parseParameterRefclassArray(curr);
 				Object[] classNames = psStrategies.keySet().toArray();
 				// Sets all PS strategies
 				for (Object className : classNames) {
-					String strategy = ((Element) psStrategies.get(className)).getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+					String strategy = ((Element) psStrategies.get(className)).getAttribute(XML_A_PARAMETER_CLASSPATH);
 					strategy = strategy.substring(strategy.lastIndexOf(".") + 1, strategy.length());
 					if (strategy.equals("EPSStrategy")) {
 						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_PS);
@@ -840,7 +884,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				}
 			} else if (name.equals("serviceWeights")) {
 				// Retrieves all service weights subParameters
-				Map<String, Node> serviceWeights = parseParameterRefclassArray((Element) parameters.item(i));
+				Map<String, Node> serviceWeights = parseParameterRefclassArray(curr);
 				Object[] classNames = serviceWeights.keySet().toArray();
 				// Sets all service weights
 				for (Object className : classNames) {
@@ -926,7 +970,6 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		Element parameter = (Element) section.getElementsByTagName(XML_E_PARAMETER).item(0);
 		Map<String, Node> routing = parseParameterRefclassArray(parameter);
 		Object[] classNames = routing.keySet().toArray();
-		String className;
 
 		// Creates a Map of Name --> Routing Strategy if needed
 		if (engineToGuiRouting == null) {
@@ -938,23 +981,23 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		}
 
 		Object[] routStratKeys = engineToGuiRouting.keySet().toArray();
-		for (Object className2 : classNames) {
-			className = ((Element) routing.get(className2)).getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+		for (Object name : classNames) {
+			String classPath = ((Element) routing.get(name)).getAttribute(XML_A_PARAMETER_CLASSPATH);
 			// Searches all available routing strategy to find the one saved
 			for (Object routStratKey : routStratKeys) {
-				if (className.equals(engineToGuiRouting.get(routStratKey).getClassPath())) {
-					model.setRoutingStrategy(key, classes.get(className2), engineToGuiRouting.get(routStratKey).clone());
+				if (classPath.equals(engineToGuiRouting.get(routStratKey).getClassPath())) {
+					model.setRoutingStrategy(key, classes.get(name), engineToGuiRouting.get(routStratKey).clone());
 				}
 			}
 
 			// Treat particular case of Empirical (Probabilities) Routing
-			RoutingStrategy rs = (RoutingStrategy) model.getRoutingStrategy(key, classes.get(className2));
+			RoutingStrategy rs = (RoutingStrategy) model.getRoutingStrategy(key, classes.get(name));
 			if (rs instanceof ProbabilityRouting) {
 				// Creates a Vector of all empirical entris. Could not be done automaticly
 				// for the above problem with array (see parseParameterRefclassArray)
 				Vector<Node> entries = new Vector<Node>();
 				// Finds EntryArray node
-				Node entryArray = routing.get(className2).getFirstChild();
+				Node entryArray = routing.get(name).getFirstChild();
 				while (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER)) {
 					entryArray = entryArray.getNextSibling();
 				}
@@ -983,9 +1026,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				}
 				// Put into empiricalRouting a pair of station key and class key and map with
 				// station names instead of station key
-				empiricalRouting.put(new Object[] { key, classes.get(className2) }, tmp);
+				empiricalRouting.put(new Object[] { key, classes.get(name) }, tmp);
 			} else if (rs instanceof LoadDependentRouting) {
-				Node entryArray = routing.get(className2).getFirstChild();
+				Node entryArray = routing.get(name).getFirstChild();
 				while (entryArray != null && (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER))) {
 					entryArray = entryArray.getNextSibling();//This is a SubParameter..So next time it wont enter.
 				}
@@ -1009,23 +1052,23 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					String fromValue = findText(((Element) values.item(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 					values = ((Element) values.item(1)).getElementsByTagName(XML_E_SUBPARAMETER);
 					Map<String, Double> tmp = new TreeMap<String, Double>();
-					for (int n = 0; n < values.getLength(); n++) {
+					for (int k = 0; k < values.getLength(); k++) {
 						//Empirical Entry..Station Name..probability Keeps repeating..
-						String atrName = ((Element) values.item(n)).getAttribute("name");//Empirical Entry..Station Name..probability..for a from.
+						String atrName = ((Element) values.item(k)).getAttribute("name");//Empirical Entry..Station Name..probability..for a from.
 						if ("EmpiricalEntry".equalsIgnoreCase(atrName)) {
-							Node empiricalEntry = values.item(n);
+							Node empiricalEntry = values.item(k);
 							Node station = empiricalEntry.getFirstChild().getNextSibling();
 							String stationName = findText(((Element) station).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 							Node probability = empiricalEntry.getFirstChild().getNextSibling().getNextSibling().getNextSibling();
 							String probabilityValue = findText(((Element) probability).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 							tmp.put(stationName, Double.valueOf(probabilityValue));
 						}
-						empiricalLDRouting.put(new Object[] { key, classes.get(className2), Integer.valueOf(fromValue) }, tmp);
+						empiricalLDRouting.put(new Object[] { key, classes.get(name), Integer.valueOf(fromValue) }, tmp);
 					}
 				}
 			} else if (rs instanceof PowerOfKRouting) {
-			    PowerOfKRouting strategy = (PowerOfKRouting) rs;
-				Node child = routing.get(className2).getFirstChild();
+				PowerOfKRouting strategy = (PowerOfKRouting) rs;
+				Node child = routing.get(name).getFirstChild();
 				while (child.getNodeType() != Node.ELEMENT_NODE || !child.getNodeName().equals(XML_E_SUBPARAMETER)) {
 					child = child.getNextSibling();
 				}
@@ -1039,64 +1082,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				values = ((Element) child).getElementsByTagName(XML_E_PARAMETER_VALUE);
 				Boolean withMemory = Boolean.valueOf(findText(values.item(0)));
 				strategy.setWithMemory(withMemory);
-			} else if (rs instanceof ClassSwitchRouting) {
-				ClassSwitchRouting strategy = (ClassSwitchRouting) rs;
-				Vector<Node> empiricalArrays = new Vector<>();
-				Map<Object, Map<Object, Double>> outPaths = new HashMap<>();
-
-				// Find EntryArray node
-				Node entryArray = routing.get(className2).getFirstChild();
-				while (entryArray != null && (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER))) {
-					entryArray = entryArray.getNextSibling();
-				}
-
-				// Now find every empirical entry
-				while (entryArray != null) {
-					// Find first subParameter element
-					while (entryArray != null && (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER))) {
-						entryArray = entryArray.getNextSibling();
-					}
-					if (entryArray != null) {
-						empiricalArrays.add(entryArray);
-						entryArray = entryArray.getNextSibling();
-					}
-				}
-
-				// For each empirical array: get station name and get class associated probability
-				for (Node empiricalArray: empiricalArrays) {
-					if (empiricalArray.hasChildNodes()) {
-						Map<Object, Double> entries = new HashMap<>();
-						Node empiricalPointer = empiricalArray.getFirstChild().getNextSibling();
-						if (empiricalPointer == null) {
-							continue;
-						}
-						String stationName = findText(((Element) empiricalPointer).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
-						Object stationObject = model.getStationByName(stationName);
-						if (stationObject == null) {
-							continue;
-						}
-
-						empiricalPointer = empiricalPointer.getNextSibling();
-						while (empiricalPointer != null) {
-							if (empiricalPointer.getNodeType() != Node.ELEMENT_NODE || !empiricalPointer.getNodeName().equals(XML_E_SUBPARAMETER)) {
-								empiricalPointer = empiricalPointer.getNextSibling();
-								continue;
-							}
-
-							String toClassName = findText(((Element) empiricalPointer).getElementsByTagName(XML_E_PARAMETER_REFCLASS).item(0));
-							Double probability = Double.valueOf(findText(((Element) empiricalPointer).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
-							Object toClass = model.getClassByName(toClassName);
-							empiricalPointer = empiricalPointer.getNextSibling();
-							entries.put(toClass, probability);
-						}
-						outPaths.put(stationObject, entries);
-					}
-
-				}
-				strategy.setOutPaths(outPaths);
 			} else if (rs instanceof WeightedRoundRobinRouting) {
 				Vector<Node> entries = new Vector<>();
-				Node entryArray = routing.get(className2).getFirstChild();
+				Node entryArray = routing.get(name).getFirstChild();
 				while (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER)) {
 					entryArray = entryArray.getNextSibling();
 				}
@@ -1117,7 +1105,65 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					Integer weight = Integer.valueOf(findText(((Element) values.item(1)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 					tmp.put(stationName, weight);
 				}
-				wrrRouting.put(new Object[] { key, classes.get(className2) }, tmp);
+				wrrRouting.put(new Object[] { key, classes.get(name) }, tmp);
+			} else if (rs instanceof ClassSwitchRouting) {
+				Vector<Node> parameters = new Vector<Node>();
+				Node parameterArray = routing.get(name).getFirstChild();
+				// Find ParameterArray node
+				while (parameterArray != null && (parameterArray.getNodeType() != Node.ELEMENT_NODE || !parameterArray.getNodeName().equals(XML_E_SUBPARAMETER))) {
+					parameterArray = parameterArray.getNextSibling();
+				}
+				// Now find every cs parameter
+				Node child = parameterArray.getFirstChild();
+				while (child != null) {
+					// Find first subParameter element
+					while (child != null && (child.getNodeType() != Node.ELEMENT_NODE || !child.getNodeName().equals(XML_E_SUBPARAMETER))) {
+						child = child.getNextSibling();
+					}
+					if (child != null) {
+						parameters.add(child);
+						child = child.getNextSibling();
+					}
+				}
+				// For each cs parameter get station name, probability and empirical array
+				Map<String, Double> tmp = new TreeMap<String, Double>();
+				Map<String, Map<String, Double>> tmp2 = new TreeMap<String, Map<String, Double>>();
+				for (int j = 0; j < parameters.size(); j++) {
+					NodeList values = ((Element) parameters.get(j)).getElementsByTagName(XML_E_SUBPARAMETER);
+					String stationName = findText(((Element) values.item(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+					Double stationProb = Double.valueOf(findText(((Element) values.item(1)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+					tmp.put(stationName, stationProb);
+
+					Vector<Node> entries = new Vector<Node>();
+					Node entryArray = values.item(2);
+					// Find EntryArray node
+					while (entryArray != null && (entryArray.getNodeType() != Node.ELEMENT_NODE || !entryArray.getNodeName().equals(XML_E_SUBPARAMETER))) {
+						entryArray = entryArray.getNextSibling();
+					}
+					// Now find every empirical entry
+					Node child2 = entryArray.getFirstChild();
+					while (child2 != null) {
+						// Find first subParameter element
+						while (child2 != null && (child2.getNodeType() != Node.ELEMENT_NODE || !child2.getNodeName().equals(XML_E_SUBPARAMETER))) {
+							child2 = child2.getNextSibling();
+						}
+						if (child2 != null) {
+							entries.add(child2);
+							child2 = child2.getNextSibling();
+						}
+					}
+					// For each empirical entry get class name and probability
+					Map<String, Double> map = new TreeMap<String, Double>();
+					for (int k = 0; k < entries.size(); k++) {
+						NodeList values2 = ((Element) entries.get(k)).getElementsByTagName(XML_E_SUBPARAMETER);
+						String className = findText(((Element) values2.item(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+						Double classProb = Double.valueOf(findText(((Element) values2.item(1)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
+						map.put(className, classProb);
+					}
+					tmp2.put(stationName, map);
+				}
+				csBranchRouting.put(new Object[] { key, classes.get(name) }, tmp);
+				csClassRouting.put(new Object[] { key, classes.get(name) }, tmp2);
 			}
 		}
 	}
@@ -1139,7 +1185,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Element row = (Element) rows.get(classIn);
 			NodeList rowChild = row.getChildNodes(); 
 			for (int j = 0; j < rowChild.getLength();j++) {
-				if (rowChild.item(j).getNodeType() == Node.TEXT_NODE ) {
+				if (rowChild.item(j).getNodeType() == Node.TEXT_NODE) {
 					continue;
 				}
 				Node refClass = rowChild.item(j);
@@ -1259,7 +1305,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				for (Object className2 : classNames) {
 					Map<String, OutPath> map = new HashMap<String, OutPath>();
 					className = ((Element) fork.get(className2))
-							.getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+							.getAttribute(XML_A_PARAMETER_CLASSPATH);
 					for (Object forkStratKey : forkStratKeys) {
 						if (className.equals(engineToGuiFork.get(
 								forkStratKey).getClassPath())) {
@@ -1538,7 +1584,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Object[] joinStratKeys = engineToGuiJoin.keySet().toArray();
 			for (Object className2 : classNames) {
 				className = ((Element) join.get(className2))
-						.getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+						.getAttribute(XML_A_PARAMETER_CLASSPATH);
 
 				for (Object joinStratKey : joinStratKeys) {
 					if (className.equals(engineToGuiJoin.get(joinStratKey)
@@ -1626,7 +1672,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Object[] semaphoreStratKeys = engineToGuiSemaphore.keySet().toArray();
 			for (Object className2 : classNames) {
 				className = ((Element) semaphore.get(className2))
-						.getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+						.getAttribute(XML_A_PARAMETER_CLASSPATH);
 
 				for (Object semaphoreStratKey : semaphoreStratKeys) {
 					if (className.equals(engineToGuiSemaphore.get(semaphoreStratKey)
@@ -1702,7 +1748,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
 		if (putStrategies != null) {
 			for (Entry<String, Node> strategy : putStrategies.entrySet()) {
-				String putStrategy = ((Element) strategy.getValue()).getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+				String putStrategy = ((Element) strategy.getValue()).getAttribute(XML_A_PARAMETER_CLASSPATH);
 				putStrategy = putStrategy.substring(putStrategy.lastIndexOf(".") + 1);
 				if (putStrategy.equals("TailStrategy")) {
 					model.setQueueStrategy(key, classes.get(strategy.getKey()), QUEUE_STRATEGY_FCFS);
@@ -1892,7 +1938,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * @return created Distribution or LDStrategy or null if this field is set to null
 	 */
 	protected static Object parseServiceStrategy(Element serviceTimeStrategy) {
-		String serviceClassPath = serviceTimeStrategy.getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+		if (serviceTimeStrategy == null) {
+			return null;
+		}
+		String serviceClassPath = serviceTimeStrategy.getAttribute(XML_A_PARAMETER_CLASSPATH);
 		if (serviceClassPath.equals(ZeroStrategy.getEngineClassPath())) {
 			// Zero Service Time Strategy
 			return new ZeroStrategy();
@@ -1907,9 +1956,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Vector<Node> ranges = parseParameterArray(LDParameterArray);
 			for (int i = 0; i < ranges.size(); i++) {
 				Vector<Node> parameters = parseParameterArray((Element) ranges.get(i));
-				int from = Integer.parseInt(findText(((Element) parameters.get(0)).getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0)));
+				int from = Integer.parseInt(findText(((Element) parameters.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				Distribution distr = parseDistribution((Element) parameters.get(1), (Element) parameters.get(2));
-				String mean = findText(((Element) parameters.get(3)).getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0));
+				String mean = findText(((Element) parameters.get(3)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 				Object key;
 				if (from == 1) {
 					// If this is first range
@@ -1942,7 +1991,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * @return parsed distribution
 	 */
 	protected static Distribution parseDistribution(Element distr, Element distrPar) {
-		String classname = distr.getAttribute(XML_A_SUBPARAMETER_CLASSPATH);
+		String classname = distr.getAttribute(XML_A_PARAMETER_CLASSPATH);
 
 		//get the subparameter which are directly passed to the distribution
 		Vector<Node> distributionParameters = parseParameterArray(distr);
@@ -1964,9 +2013,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String param_name;
 		for (int i = 0; i < distributionParameters.size(); i++) {
 			currpar = (Element) distributionParameters.get(i);
-			param_name = currpar.getAttribute(XML_A_SUBPARAMETER_NAME);
+			param_name = currpar.getAttribute(XML_A_PARAMETER_NAME);
 			//if current parameter is a nested Distribution
-			if (currpar.getAttribute(XML_A_SUBPARAMETER_CLASSPATH).equals(distributionContainer)) {
+			if (currpar.getAttribute(XML_A_PARAMETER_CLASSPATH).equals(distributionContainer)) {
 				//parse the currentparameter to get DIRECT subparameters
 				Vector<Node> nestedDistr = parseParameterArray(currpar);
 				// If distribution is not set, continue
@@ -1976,7 +2025,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				//parse the nested distribution
 				Object param_value = parseDistribution((Element) nestedDistr.get(0), (Element) nestedDistr.get(1));
 				dist.getParameter(param_name).setValue(param_value);
-			} else if (Boolean.parseBoolean(currpar.getAttribute(XML_A_SUBPARAMETER_ARRAY))) {
+			} else if (Boolean.parseBoolean(currpar.getAttribute(XML_A_PARAMETER_ARRAY))) {
 				Object[][] param_value = null;
 				Vector<Node> vectors = parseParameterArray(currpar);
 				for (int j = 0; j < vectors.size(); j++) {
@@ -1990,7 +2039,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 							param_value[j] = new Object[entries.size()];
 						}
 						Element entry = (Element) entries.get(k);
-						String value = findText(entry.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0));
+						String value = findText(entry.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 						param_value[j][k] = dist.getParameter(param_name).parseValue(value);
 						if (param_value[j][k] == null) {
 							param_value[j][k] = dist.getParameter(param_name).parseValue("0");
@@ -1999,7 +2048,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				}
 				dist.getParameter(param_name).setValue(param_value);
 			} else {
-				String param_value = findText(currpar.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0));
+				String param_value = findText(currpar.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 				dist.getParameter(param_name).setValue(param_value);
 			}
 		}
@@ -2044,10 +2093,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)
 				&& (sectionNames[1].equals(CLASSNAME_SERVER)
 						|| sectionNames[1].equals(CLASSNAME_PREEMPTIVESERVER)
-						|| sectionNames[1].equals(CLASSNAME_PSSERVER))
+						|| sectionNames[1].equals(CLASSNAME_PSSERVER)
 						|| sectionNames[1].equals(CLASSNAME_EXHAUSTIVEPSERVER)
 						|| sectionNames[1].equals(CLASSNAME_LKPSERVER)
-						|| sectionNames[1].equals(CLASSNAME_GATEDPSERVER)
+						|| sectionNames[1].equals(CLASSNAME_GATEDPSERVER))
 				&& sectionNames[2].equals(CLASSNAME_ROUTER)) {
 			return STATION_TYPE_SERVER;
 		} else if (sectionNames[0].equals(CLASSNAME_QUEUE)

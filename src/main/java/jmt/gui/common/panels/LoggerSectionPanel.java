@@ -59,7 +59,6 @@ import jmt.gui.common.definitions.StationDefinition;
  *         Time: 20.02.08
  *
  */
-
 public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;
@@ -100,7 +99,6 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 	JComboBox loggerChooser;
 	JLabel labelFileStatus;
-	JCheckBox checkExecutionTimestamp;
 
 	HoverHelp help;
 
@@ -154,7 +152,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 		GridBagConstraints gbc = new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, 10, 0, new Insets(0, 4, 6, 0), 0, 0);
 
-		//layout of top panel
+		// layout of top panel
 		loggerPanelTop.setLayout(new GridBagLayout());
 		loggerPanelTop.setBorder(new TitledBorder(new EtchedBorder(), "Logging Options"));
 		// layout of north: dropdown-box for filename, and status
@@ -167,61 +165,57 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		gbc.gridx = 0;
 		gbc.gridy = 0;
 		loggerPanelTop.add(loggerPanelTopLogfile, gbc);
-		checkExecutionTimestamp = new JCheckBox();
-		checkExecutionTimestamp.setText("Simul. Start Timestamp  ");
-		help.addHelp(checkExecutionTimestamp, "Simulation Timestamp is useful to identify the run number when appending.  (e.g. "
-				+ "31102008T125959GMT" + ")");
+		final JCheckBox checkExecutionTimestamp = new JCheckBox();
+		checkExecutionTimestamp.setText("Simul. Start Timestamp");
+		help.addHelp(checkExecutionTimestamp, "Simulation Timestamp is useful to identify the run number when appending. "
+				+ "(e.g. 31102008T125959GMT)");
 		gbc.gridx = 2;
 		gbc.gridy = 0;
 		loggerPanelTop.add(checkExecutionTimestamp, gbc);
-		/*
-		labelFileStatus = new JLabel();
-		gbc.fill = GridBagConstraints.REMAINDER; gbc.gridx = 1; gbc.gridy = 0; gbc.gridwidth=3;
-		loggerPanelTop.add(labelFileStatus,gbc);
-		 */
+
 		// layout of north: checkbox fields
 		final JCheckBox checkLoggername = new JCheckBox();
-		checkLoggername.setText("Logger Name  ");
-		help.addHelp(checkLoggername, "Name of the logger class.  (e.g. " + "Logger 1" + ")");
+		checkLoggername.setText("Logger Name");
+		help.addHelp(checkLoggername, "Name of the logger class. (e.g. Logger 1)");
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		gbc.gridx = 0;
 		gbc.gridy = 1;
 		loggerPanelTop.add(checkLoggername, gbc);
 		final JCheckBox checkTimeStamp = new JCheckBox();
-		checkTimeStamp.setText("Timestamp  ");
-		help.addHelp(checkTimeStamp, "Timestamp of arrival of the job (ref. to sim time).  (e.g. 0.7532)");
+		checkTimeStamp.setText("Timestamp");
+		help.addHelp(checkTimeStamp, "Timestamp of arrival of the job (ref. to simulation time). (e.g. 0.7532)");
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		loggerPanelTop.add(checkTimeStamp, gbc);
 		final JCheckBox checkJobID = new JCheckBox();
-		checkJobID.setText("Job ID  ");
+		checkJobID.setText("Job ID");
 		help.addHelp(checkJobID, "Unique identification number of the job. (e.g. 153)");
 		gbc.gridx = 2;
 		gbc.gridy = 1;
 		loggerPanelTop.add(checkJobID, gbc);
 		final JCheckBox checkJobClass = new JCheckBox();
-		checkJobClass.setText("Class ID  ");
-		help.addHelp(checkJobClass, "Identifiation number of job class.  (e.g. Class1)");
+		checkJobClass.setText("Class ID");
+		help.addHelp(checkJobClass, "Identifiation number of job class. (e.g. Class1)");
 		gbc.gridx = 0;
 		gbc.gridy = 2;
 		loggerPanelTop.add(checkJobClass, gbc);
 		final JCheckBox checkTimeSameClass = new JCheckBox();
-		checkTimeSameClass.setText("Interarrival time (same class)      ");
+		checkTimeSameClass.setText("Interarrival time (same class)");
 		help.addHelp(checkTimeSameClass, "Time elapsed since the last arrival of the same class. (e.g. 0.7532)");
 		gbc.gridx = 1;
 		gbc.gridy = 2;
 		loggerPanelTop.add(checkTimeSameClass, gbc);
 		final JCheckBox checkTimeAnyClass = new JCheckBox();
-		checkTimeAnyClass.setText("Interarrival time (any class)  ");
+		checkTimeAnyClass.setText("Interarrival time (any class)");
 		help.addHelp(checkTimeAnyClass, "Time elapsed since the last arrival of any class. (e.g. 0.7532)");
 		gbc.gridx = 2;
 		gbc.gridy = 2;
 		loggerPanelTop.add(checkTimeAnyClass, gbc);
 
-		//layout of top-right panel
+		// layout of top-right panel
 		loggerPanelTR.setLayout(new GridLayout(4, 2, 0, 6));
 		loggerPanelTR.setBorder(new TitledBorder(new EtchedBorder(), "Logfile Options"));
-		//layout of top-right: choosers
+		// layout of top-right: choosers
 		JLabel cpLabel = new JLabel("Change Path: ");
 		loggerPanelTR.add(cpLabel);
 		help.addHelp(cpLabel, "Choose path of the log file");
@@ -284,7 +278,6 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		/* Event Listeners */
 		loggerChooser.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				if (loggerChooser.getSelectedIndex() == 0) {
 					loggerParameters.name = LoggerParameters.GLOBALLOGNAME;
 				} else if (loggerChooser.getSelectedIndex() == 1) {
@@ -292,26 +285,6 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 				} else if (loggerChooser.getSelectedIndex() == 2) {
 					loggerParameters.name = loggerParameters.name;
 				}
-
-				/*
-				else if (loggerChooser.getSelectedIndex() == 2)
-				{
-					String tmpFileName = "";
-					JFileChooser fc = new JFileChooser();
-				    fc.setFileSelectionMode(JFileChooser.FILES_ONLY );
-				    fc.setDialogTitle("Choose File Name of Log...");
-				    fc.setCurrentDirectory(new File(loggerUniversalLogPath));
-				    int ret = fc.showSaveDialog(LoggerSectionPanel.this);
-
-				    if (ret == JFileChooser.APPROVE_OPTION) {
-				        File thefile = fc.getSelectedFile();
-				        tmpFileName = thefile.getName();
-				        //stationData.setLoggingGlbParameter("path", loggerUniversalLogPath);
-				    }
-
-					loggerParameters.name = tmpFileName;
-				}
-				 */
 				loggerChooserLoadValues();
 			}
 		});
@@ -367,7 +340,6 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		});
 		filepathButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				JFileChooser fc = new JFileChooser();
 				fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				fc.setDialogTitle("Choose Save Path for all logfiles...");
@@ -419,7 +391,6 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 	 */
 	private int loggerChooserGetIndex() {
 		try {
-
 			if (loggerParameters.name.equalsIgnoreCase(LoggerParameters.GLOBALLOGNAME)) {
 				return 0;
 			} else if (loggerParameters.name.startsWith(loggerStationName)) {
@@ -432,7 +403,6 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 				debugLog.debug("[LoggerSectionPanel].loggerChooserGetIndex parsed \"" + loggerParameters.name + "\" and defaulted to global.");
 				return 0;
 			}
-
 		} catch (Exception e) {
 			debugLog.error("[LoggerSectionPanel].loggerChooserGetIndex parsed \"" + loggerParameters.name + "\" and faulted: " + e.toString());
 			return 0;
@@ -441,15 +411,9 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 	private void loggerChooserLoadValues() {
 		preventSaveReplacement = true; // keeps the other combo boxes (delim/append) from changing
-		//if (loggerParameters.isGlobal()) {
 		delimiterChooser.setSelectedIndex(getDelimiterIndex(stationData.getLoggingGlbParameter("delim")));
 		decimalSeparatorChooser.setSelectedIndex(getDecimalSeparatorIndex(stationData.getLoggingGlbParameter("decimalSeparator")));
 		autoAppendChooser.setSelectedIndex(Integer.parseInt(stationData.getLoggingGlbParameter("autoAppend")));
-		/*// this code is now redundant; since all delimiters and appenders are global-only
-		} else {
-			delimiterChooser.setSelectedIndex(getDelimiterIndex(loggerParameters.delimiter.toString()));
-		    autoAppendChooser.setSelectedIndex(loggerParameters.intAutoAppend.intValue());
-		} */
 		updateFileLabelStatus();
 		preventSaveReplacement = false;
 	}
@@ -507,7 +471,7 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 			delim = new Character(loggerOutputDelimiterDropdown[delimiterChooser.getSelectedIndex()].charAt(0));
 		}
 
-		// Set the append/replace parameter for local log
+		// Sets the append/replace parameter for local log
 		String tmp = loggerAutoAppendDropdown[autoAppendChooser.getSelectedIndex()];
 		if (tmp.equalsIgnoreCase(NAME_loggerAutoAppendDropdownReplace)) {
 			autoAppendPolicy = new Integer(LoggerParameters.LOGGER_AR_REPLACE);
@@ -520,30 +484,16 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		}
 		tmp = null;
 
-		//Checks if decimal separator and delimiter are same. If yes, changes decimal to default
+		// Checks if decimal separator and delimiter are same. If yes, changes decimal to default
 		String temp = new String(loggerOutputDecimalSeparatorDropdown[decimalSeparatorChooser.getSelectedIndex()]);
-		if (temp.equals(delim.toString()))
-		{
-
+		if (temp.equals(delim.toString())) {
 			JOptionPane.showMessageDialog(this,
 					"Delimiter and Decimal separator cannot be the same. Please make sure that they are different.",
 					"Error", JOptionPane.ERROR_MESSAGE);
 			decimalSeparatorChooser.setSelectedIndex(0);
-
 		}
 
-		/* MF (Bertoli suggests): global append should be the only mode for 0.7.4 
-		if (!isGlobal)
-		{
-
-			// If not logging to global.csv, set the delimiter and append policy per logger
-			loggerParameters.delimiter = delim;
-			loggerParameters.intAutoAppend = autoAppendPolicy;
-
-		}
-		 */
-
-		// Finally, set the globally effective 'delimiter' and 'append' mode for logs
+		// Finally, sets the globally effective 'delimiter' and 'append' mode for logs
 		stationData.setLoggingGlbParameter("delim", delim.toString());
 		stationData.setLoggingGlbParameter("decimalSeparator", loggerOutputDecimalSeparatorDropdown[decimalSeparatorChooser.getSelectedIndex()]);
 		stationData.setLoggingGlbParameter("autoAppend", autoAppendPolicy.toString());
@@ -554,18 +504,16 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 		try {
 			logFile = new File(loggerUniversalLogPath, loggerParameters.name);
-
 			if (logFile.exists()) {
 				if (logFile.length() == 0) {
-					tmpStatus = "  (empty file)";
+					tmpStatus = " (empty file)";
 				} else {
-					tmpStatus = "  (" + logFile.length() / 1024 + "KB file)";
+					tmpStatus = " (" + logFile.length() / 1024 + " KB file)";
 				}
 			} else {
-				tmpStatus = "  (does not exist).";
+				tmpStatus = " (does not exist).";
 			}
-
-			labelFileStatus.setText("File:  " + logFile.getAbsolutePath() + " " + tmpStatus);
+			labelFileStatus.setText("File: " + logFile.getAbsolutePath() + " " + tmpStatus);
 		} catch (Exception e) {
 			labelFileStatus.setText("Caught exception: " + e.getCause() + " trying to access " + loggerParameters.name + " File.");
 		}

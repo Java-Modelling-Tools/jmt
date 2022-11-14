@@ -178,6 +178,7 @@ public class BatchTest {
 		ResultsCheck check = new ResultsCheck(model.getAbsolutePath(), true, simSeed);
 		//fixed seed -> only one run
 		check.checkRes();
+
 	}
 
 	/**

@@ -42,9 +42,9 @@ public class CoxianDistr extends AbstractDistribution implements Distribution {
 	public CoxianDistr() {
 		expDistr = new Exponential();
 	}
-	
+
 	@Override
-	public void setRandomEngine(RandomEngine engine){
+	public void setRandomEngine(RandomEngine engine) {
 		this.engine = engine;
 		this.expDistr.setRandomEngine(engine);
 	}
@@ -106,7 +106,7 @@ public class CoxianDistr extends AbstractDistribution implements Distribution {
 		} else {
 			throw new IncorrectDistributionParameterException(
 					"Remember: parameter lambda0 and lambda1 must be gtz; phi0 must be a number between 0 and 1");
-		}	
+		}
 	}
 
 	/**

@@ -43,7 +43,7 @@ public class Poisson extends Distribution {
 	}
 
 	/**
-	 * Used to set parameters of this distribution.
+	 * Used to set parameters of this distribution
 	 * @return distribution parameters
 	 */
 	@Override
@@ -52,7 +52,7 @@ public class Poisson extends Distribution {
 		Parameter[] parameters = new Parameter[1];
 
 		// Sets parameter lambda
-		parameters[0] = new Parameter("mean", "\u03BB", Double.class, new Double(0.5));
+		parameters[0] = new Parameter("mean", "\u03BB", Double.class, new Double(1.0));
 		// Checks value of lambda must be greater than 0
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {

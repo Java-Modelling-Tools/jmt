@@ -5,7 +5,6 @@ import java.util.List;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
-import jmt.engine.QueueNet.WaitingRequest;
 
 public class BooleanValueImpatienceMeasurement implements ImpatienceMeasurement {
   private int queueLength;

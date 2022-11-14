@@ -16,9 +16,6 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-/* SimEntity.java
-*/
-
 package jmt.engine.simEngine;
 
 import jmt.common.exception.NetException;
@@ -58,8 +55,8 @@ public abstract class SimEntity {
 		// Adding this to SimSystem automatically
 		//simSystem.add(this);
 	}
-	
-	public void setSimSystem(SimSystem simSystem){
+
+	public void setSimSystem(SimSystem simSystem) {
 		this.simSystem = simSystem;
 	}
 
@@ -110,7 +107,6 @@ public abstract class SimEntity {
 	 * @param ev Returns the event if hold interrupted
 	 * @return The amount of time left on the hold (0.0 if no interruptions)
 	 */
-	//
 	public final double simHoldFor(double delay) {
 		double start_t = simSystem.getClock();
 		simSchedule(me, delay, 9999); // Send self 'hold done' msg
@@ -338,5 +334,4 @@ public abstract class SimEntity {
 		body();
 		exit();
 	}
-
 }

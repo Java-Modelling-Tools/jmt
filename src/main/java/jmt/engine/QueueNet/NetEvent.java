@@ -37,44 +37,44 @@ public class NetEvent {
 	/** Event ID: Starts the simulation.*/
 	public static final int EVENT_START = 0x0002;
 	/** Event ID: The event contains a job.*/
-	public static final int EVENT_JOB = 0x0004;
+	public static final int EVENT_JOB = 0x0003;
 	/** Event ID: Job ack event.*/
-	public static final int EVENT_ACK = 0x0008;
-	/** Event ID: Job finished in service event.*/
-	public static final int EVENT_JOB_COMPLETED = 0x0009;
+	public static final int EVENT_ACK = 0x0004;
 	/** Event ID: Job was preempted in service event.*/
-	public static final int EVENT_PREEMPTED_JOB = 0x0011;
+	public static final int EVENT_PREEMPTED_JOB = 0x0005;
 	/** Event ID: Keeps node awake.*/
-	public static final int EVENT_KEEP_AWAKE = 0x0010;
-	//todo: eventualmente chiamarlo fork-join?? Oppure dividere in due eventi distinti
+	public static final int EVENT_KEEP_AWAKE = 0x0006;
 	/** Event ID: Join ack event.*/
-	public static final int EVENT_JOIN = 0x0020;
-	//todo: evento per job che lasciano regione critica
+	public static final int EVENT_JOIN = 0x0007;
 	/** Event ID: Job out of region event.*/
-	public static final int EVENT_JOB_OUT_OF_REGION = 0x0040;
+	public static final int EVENT_JOB_OUT_OF_REGION = 0x0008;
 	/** Event ID: Distribution change event.*/
-	public static final int EVENT_DISTRIBUTION_CHANGE = 0x0080;
+	public static final int EVENT_DISTRIBUTION_CHANGE = 0x0009;
 	/** Event ID: Job change event.*/
-	public static final int EVENT_JOB_CHANGE = 0x0100;
+	public static final int EVENT_JOB_CHANGE = 0x000A;
 	/** Event ID: Enabling event.*/
-	public static final int EVENT_ENABLING = 0x0200;
+	public static final int EVENT_ENABLING = 0x000B;
 	/** Event ID: Timing event.*/
-	public static final int EVENT_TIMING = 0x0400;
+	public static final int EVENT_TIMING = 0x000C;
 	/** Event ID: Firing event.*/
-	public static final int EVENT_FIRING = 0x0800;
+	public static final int EVENT_FIRING = 0x000D;
 	/** Event ID: Job request event.*/
-	public static final int EVENT_JOB_REQUEST = 0x1000;
+	public static final int EVENT_JOB_REQUEST = 0x000E;
 	/** Event ID: Job release event.*/
-	public static final int EVENT_JOB_RELEASE = 0x2000;
+	public static final int EVENT_JOB_RELEASE = 0x000F;
 	/** Event ID: Job finish event.*/
-	public static final int EVENT_JOB_FINISH = 0x4000;
-	/** Event ID: PollNext */
-	public static final int EVENT_POLLING_SERVER_NEXT = 0x5000;
-	public static final int EVENT_POLLING_SERVER_READY = 0x5001;
-/** Event ID: Job reneges while in queue. */
-	public static final int EVENT_RENEGE = 0x8000;
-	/** Event ID: Job signals retrial. */
-	public static final int EVENT_RETRIAL = 0x0003;
-	/** Event ID: Job signals retrial. */
-	public static final int EVENT_RETRIAL_JOB = 0x0005;
+	public static final int EVENT_JOB_FINISH = 0x0010;
+	/** Event ID: Polling next event. */
+	public static final int EVENT_POLLING_SERVER_NEXT = 0x0011;
+	/** Event ID: Polling next ready. */
+	public static final int EVENT_POLLING_SERVER_READY = 0x0012;
+	/** Event ID: Job renege event. */
+	public static final int EVENT_RENEGE = 0x0013;
+	/** Event ID: Job retrial event. */
+	public static final int EVENT_RETRIAL = 0x0014;
+	/** Event ID: Job retrial event. */
+	public static final int EVENT_RETRIAL_JOB = 0x0015;
+	/** Event ID: Job setup event. */
+	public static final int EVENT_SETUP_JOB = 0x0016;
+
 }

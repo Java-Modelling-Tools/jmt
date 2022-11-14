@@ -21,7 +21,7 @@ package jmt.gui.jsimgraph.JGraphMod;
 import org.jgraph.graph.Port;
 
 /**
- * Generates new jobs in open systems, it generates jobs of 1 JobClass only
+ * Preloads new jobs in closed systems, it preloads jobs of 1 JobClass only
  *
  * @author Federico Granata, Bertoli Marco
  * Date: 5-giu-2003
@@ -32,9 +32,6 @@ import org.jgraph.graph.Port;
 public class TerminalCell extends JmtCell {
 
 	private static final long serialVersionUID = 1L;
-
-	// Disables this component
-	public static final boolean canBePlaced = false;
 
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
 	public static final String ICON = "Terminal";
@@ -63,33 +60,6 @@ public class TerminalCell extends JmtCell {
 		return ports;
 	}
 
-	//protected Point getInPortOffset(Map attr, Icon icon, Dimension cellDimension) {
-	//	int iconHeight = icon.getIconHeight();
-	//	int iconWidth = icon.getIconWidth();
-	//	//exactly the opposite of a normal JmtCell
-	//	//(opposite means inport at the place of outport)
-	//	int xOff = (cellDimension.width - iconWidth)
-	//			/ 2 * 1000 / cellDimension.width
-	//			+ iconWidth * 1000 / cellDimension.width;
-	//	int yOff = iconHeight / 2 * 1000 / cellDimension.height;
-	//	return new Point(xOff, yOff);
-	//}
-	//
-	//protected Point getOutPortoffset(Map attr, Icon icon, Dimension cellDimension) {
-	//	int iconHeight = icon.getIconHeight();
-	//	int iconWidth = icon.getIconWidth();
-	//	//exactly the opposite of a normal JmtCell
-	//	//(opposite means inport at the place of outport)
-	//	int xOff = (cellDimension.width - iconWidth)
-	//			/ 2 * 1000 / cellDimension.width;
-	//	int yOff = iconHeight / 2 * 1000 / cellDimension.height;
-	//	return new Point(xOff, yOff);
-	//}
-	//
-	//public boolean isLeftInputCell() {
-	//	return false;
-	//}
-
 	/**
 	 * Tells if this station generates or destroys jobs (useful for blocking region
 	 * management)
@@ -98,17 +68,7 @@ public class TerminalCell extends JmtCell {
 	 */
 	@Override
 	public boolean generateOrDestroyJobs() {
-		return true;
-	}
-
-	/**
-	 * Returns the name of the icon of this cell
-	 *
-	 * @return the name of the icon of this cell
-	 */
-	@Override
-	public String getIcon() {
-		return ICON;
+		return false;
 	}
 
 }

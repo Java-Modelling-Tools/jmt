@@ -58,6 +58,22 @@ public class ExponentialPar extends AbstractParameter implements Parameter {
 	}
 
 	/**
+	 * It controls if the parameter is correct or not. For the exponential distribution,
+	 * the parameter is right if lambda is greater than zero.
+	 *
+	 * @return boolean indicating if the parameter is correct or not.
+	 *
+	 */
+	@Override
+	public boolean check() {
+		if (lambda <= 0) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
 	 * It returns the value of the parameter lambda of the exponential distribution.
 	 *
 	 * @return double with lambda.
@@ -78,27 +94,10 @@ public class ExponentialPar extends AbstractParameter implements Parameter {
 	 *
 	 */
 	public void setLambda(double lambda) throws IncorrectDistributionParameterException {
-		if (lambda > 0) {
-			this.lambda = lambda;
-		} else {
+		if (lambda <= 0) {
 			throw new IncorrectDistributionParameterException("Remember: parameter lambda must be gtz");
 		}
-	}
-
-	/**
-	 * It controls if the parameter is correct or not. For the exponential distribution,
-	 * the parameter is right if lambda is greater than zero.
-	 *
-	 * @return boolean indicating if the parameter is correct or not.
-	 *
-	 */
-	@Override
-	public boolean check() {
-		if (lambda > 0) {
-			return true;
-		} else {
-			return false;
-		}
+		this.lambda = lambda;
 	}
 
 	/**

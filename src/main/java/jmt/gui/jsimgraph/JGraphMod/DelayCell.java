@@ -31,12 +31,6 @@ public class DelayCell extends JmtCell {
 
 	private static final long serialVersionUID = 1L;
 
-	/**
-	 * Tells if this component can be placed on JGraph or has been disabled. This is
-	 * useful to load old models with disabled components (like terminals)
-	 */
-	public static final boolean canBePlaced = true;
-
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
 	public static final String ICON = "Delay";
 
@@ -72,16 +66,6 @@ public class DelayCell extends JmtCell {
 	@Override
 	public boolean generateOrDestroyJobs() {
 		return false;
-	}
-
-	/**
-	 * Returns the name of the icon of this cell
-	 *
-	 * @return the name of the icon of this cell
-	 */
-	@Override
-	public String getIcon() {
-		return ICON;
 	}
 
 }

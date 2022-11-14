@@ -44,9 +44,9 @@ public class MMPP2Distr extends AbstractDistribution implements Distribution {
 		curState = 0;
 		expDistr = new Exponential();
 	}
-	
+
 	@Override
-	public void setRandomEngine(RandomEngine engine){
+	public void setRandomEngine(RandomEngine engine) {
 		this.engine = engine;
 		this.expDistr.setRandomEngine(engine);
 	}

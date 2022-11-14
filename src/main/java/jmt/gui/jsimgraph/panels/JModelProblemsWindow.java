@@ -143,7 +143,7 @@ public class JModelProblemsWindow extends JDialog {
 					}
 					if (pType == ModelChecker.ERROR_PROBLEM
 							&& (pSubType == ModelChecker.NO_STATION_ERROR
-									|| pSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR)) {
+							|| pSubType == ModelChecker.OPEN_CLASS_BUT_NO_SOURCE_ERROR)) {
 						setVisible(false);
 					} else {
 						if (!mc.isEverythingOkToJMVA()) {
@@ -395,8 +395,8 @@ public class JModelProblemsWindow extends JDialog {
 						description = "<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
 								+ " is not backward linked.</div></html>";
 					} else if (staitonType.equals(CommonConstants.STATION_TYPE_TRANSITION)) {
-							description = "<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-									+ " is not forward or backward linked.</div></html>";
+						description = "<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+								+ " is not forward or backward linked.</div></html>";
 					} else {
 						description = "<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
 								+ " is not forward linked.</div></html>";
@@ -458,16 +458,6 @@ public class JModelProblemsWindow extends JDialog {
 							+ " exceeds the global, class or group memory constraints (sizes have been considered).</div></html>", null, null));
 				}
 			}
-			if (mc.isThereClassSwitchInvalidMatrixError()) {
-				Vector<Object> temp = mc.getClassSwitchesWithInvalidMatrix();
-				for (int i = 0; i < temp.size(); i++) {
-					Object stationKey = temp.get(i);
-					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLASS_SWITCH_INVALID_MATRIX_ERROR,
-							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " has a matrix in which some rows sum to less than one.</div></html>", stationKey, null));
-				}
-			}
 			if (mc.isThereClassSwitchReferenceStationError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.CLASS_SWITCH_REFERENCE_STATION_ERROR,
 						"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Since a class switch is in the model, "
@@ -521,18 +511,24 @@ public class JModelProblemsWindow extends JDialog {
 							+ " has an infinite enabling degree for a mode.</div></html>", stationKey, null));
 				}
 			}
-			//TODO rose: Check whether still works
-			if (mc.isThereImpatienceInStationBetweenForkJoinError()) {
-				Vector<Object> stationsWithError = mc.getStationsWithImpatienceAndConnectedToFork();
-				for (int i = 0; i < stationsWithError.size(); i++) {
-					Object stationKey = stationsWithError.get(i);
+			if (mc.isThereDropEnabledBetweenForkJoinError()) {
+				Vector<Object> temp = mc.getStationsWithDropStrategyBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
 					String stationName = mc.getStationModel().getStationName(stationKey);
-					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM,
-									ModelChecker.IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR,
-									"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH
-													+ "px;\">Impatience cannot be selected for stations connected to a fork. "
-													+ stationName + " must have its impatience selected as None.</div></html>",
-									stationKey, null));
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.DROP_ENABLED_BETWEEN_FORK_JOIN_ERROR,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " uses a drop strategy for a class but is located between fork/join.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereImpatienceEnabledBetweenForkJoinError()) {
+				Vector<Object> temp = mc.getStationsWithImpatienceStrategyBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.IMPATIENCE_ENABLED_BETWEEN_FORK_JOIN_ERROR,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " uses an impatience strategy for a class but is located between fork/join.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereNoOptionalLinkWarning()) {
@@ -576,7 +572,17 @@ public class JModelProblemsWindow extends JDialog {
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CLASS_SWITCH_BETWEEN_FORK_JOIN_WARNING,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " seems to be located between fork/join.</div></html>", stationKey, null));
+							+ " is located between fork/join.</div></html>", stationKey, null));
+				}
+			}
+			if (mc.isThereClassSwitchRoutingBetweenForkJoinWarning()) {
+				Vector<Object> temp = mc.getStationsWithClassSwitchRoutingBetweenForkJoin();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.CLASS_SWITCH_ROUTING_BETWEEN_FORK_JOIN_WARNING,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
+							+ " uses a class switch strategy but is located between fork/join.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereSchedulingSamePriorityWarning()) {
@@ -596,7 +602,7 @@ public class JModelProblemsWindow extends JDialog {
 					String stationName = mc.getStationModel().getStationName(stationKey);
 					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.TRANSITION_BETWEEN_FORK_JOIN_WARNING,
 							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">" + stationName
-							+ " seems to be located between fork/join.</div></html>", stationKey, null));
+							+ " is located between fork/join.</div></html>", stationKey, null));
 				}
 			}
 			if (mc.isThereTransitionConstantEnablingDegreeWarning()) {

@@ -29,9 +29,6 @@ import jmt.gui.common.joinStrategies.PartialJoin;
 import jmt.gui.common.routingStrategies.*;
 import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
-import org.jaxen.function.StringFunction;
-
-import java.awt.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -66,29 +63,32 @@ public interface CommonConstants {
 	//public static final String STATION_TYPE_INGATEWAY = "InGateWay";
 	//public static final String STATION_TYPE_OUTGATEWAY = "OutGateWay";
 
-	/** A map that decodes from station type to station name for the GUI */
-
+	/**
+	 * A map that decodes from station type to station name for the GUI. It also
+	 * determines the display order of station icons/names. To disable a type of
+	 * station, simply comment out the corresponding line.
+	 */
 	public static final ConstMap<String, String> STATION_NAMES = new ConstMap<String, String>() {
 		@Override
 		protected void fill() {
-			putConst(STATION_TYPE_SOURCE, STATION_TYPE_SOURCE);
-			putConst(STATION_TYPE_SINK, STATION_TYPE_SINK);
-			putConst(STATION_TYPE_TERMINAL, STATION_TYPE_TERMINAL);
-			putConst(STATION_TYPE_ROUTER, STATION_TYPE_ROUTER);
-			putConst(STATION_TYPE_DELAY, STATION_TYPE_DELAY);
-			putConst(STATION_TYPE_SERVER, "Queue");
-			putConst(STATION_TYPE_FORK, STATION_TYPE_FORK);
-			putConst(STATION_TYPE_JOIN, STATION_TYPE_JOIN);
-			putConst(STATION_TYPE_LOGGER, STATION_TYPE_LOGGER);
-			putConst(STATION_TYPE_CLASSSWITCH, STATION_TYPE_CLASSSWITCH);
-			putConst(STATION_TYPE_SEMAPHORE, STATION_TYPE_SEMAPHORE);
-			putConst(STATION_TYPE_SCALER, STATION_TYPE_SCALER);
-			putConst(STATION_TYPE_PLACE, STATION_TYPE_PLACE);
-			putConst(STATION_TYPE_TRANSITION, STATION_TYPE_TRANSITION);
+			put(STATION_TYPE_SOURCE, STATION_TYPE_SOURCE);
+			put(STATION_TYPE_SINK, STATION_TYPE_SINK);
+			//put(STATION_TYPE_TERMINAL, STATION_TYPE_TERMINAL);
+			put(STATION_TYPE_ROUTER, STATION_TYPE_ROUTER);
+			put(STATION_TYPE_DELAY, STATION_TYPE_DELAY);
+			put(STATION_TYPE_SERVER, "Queue");
+			put(STATION_TYPE_FORK, STATION_TYPE_FORK);
+			put(STATION_TYPE_JOIN, STATION_TYPE_JOIN);
+			put(STATION_TYPE_SCALER, STATION_TYPE_SCALER);
+			put(STATION_TYPE_SEMAPHORE, STATION_TYPE_SEMAPHORE);
+			put(STATION_TYPE_LOGGER, STATION_TYPE_LOGGER);
+			put(STATION_TYPE_CLASSSWITCH, STATION_TYPE_CLASSSWITCH);
+			put(STATION_TYPE_PLACE, STATION_TYPE_PLACE);
+			put(STATION_TYPE_TRANSITION, STATION_TYPE_TRANSITION);
 
 			//For BPMN
-			//putConst(STATION_TYPE_INGATEWAY, STATION_TYPE_INGATEWAY);
-			//putConst(STATION_TYPE_OUTGATEWAY, STATION_TYPE_OUTGATEWAY);
+			//put(STATION_TYPE_INGATEWAY, STATION_TYPE_INGATEWAY);
+			//put(STATION_TYPE_OUTGATEWAY, STATION_TYPE_OUTGATEWAY);
 		}
 	};
 
@@ -139,6 +139,13 @@ public interface CommonConstants {
 	public static final int MAX_GUI_WIDTH_LDEDITING = 400;
 	public static final int MAX_GUI_HEIGHT_LDEDITING = 400;
 
+	public static final int MAX_GUI_WIDTH_POLLING = 640;
+	public static final int MAX_GUI_HEIGHT_POLLING = 480;
+	public static final int MAX_GUI_WIDTH_PSSERVER = 640;
+	public static final int MAX_GUI_HEIGHT_PSSERVER = 180;
+	public static final int MAX_GUI_WIDTH_SERVER_FEATURES = 780;
+	public static final int MAX_GUI_HEIGHT_SERVER_FEATURES = 520;
+
 	public static final int MAX_GUI_WIDTH_WHATIF_PROGRESS = 640;
 	public static final int MAX_GUI_HEIGHT_WHATIF_PROGRESS = 480;
 	public static final int MAX_GUI_WIDTH_WHATIF_RESULTS = 1024;
@@ -160,9 +167,10 @@ public interface CommonConstants {
 
 	/**Constants for selection of station queueing strategy*/
 	public static final String STATION_QUEUE_STRATEGY_PSSERVER = "Processor Sharing Scheduling";
-	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE = "Preemptive Scheduling";
 	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE = "Non-preemptive Scheduling";
 	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY = "Non-preemptive Scheduling (Priority)";
+	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE = "Preemptive Scheduling";
+	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY = "Preemptive Scheduling (Priority)";
 	public static final String STATION_QUEUE_STRATEGY_POLLING = "Polling Scheduling";
 
 	/**Constants for selection of server type */
@@ -177,12 +185,14 @@ public interface CommonConstants {
 	public static final String QUEUE_STRATEGY_DPS = "DPS";
 	public static final String QUEUE_STRATEGY_FCFS = "FCFS";
 	public static final String QUEUE_STRATEGY_LCFS = "LCFS";
-	public static final String QUEUE_STRATEGY_LCFS_PR = "LCFS-PR";
 	public static final String QUEUE_STRATEGY_RAND = "RAND";
 	public static final String QUEUE_STRATEGY_SJF = "SJF";
 	public static final String QUEUE_STRATEGY_LJF = "LJF";
 	public static final String QUEUE_STRATEGY_SEPT = "SEPT";
 	public static final String QUEUE_STRATEGY_LEPT = "LEPT";
+	public static final String QUEUE_STRATEGY_FCFS_PR = "FCFS-PR";
+	public static final String QUEUE_STRATEGY_LCFS_PR = "LCFS-PR";
+	public static final String QUEUE_STRATEGY_SRPT = "SRPT";
 
 	/**Constants for service time distributions*/
 	public static final String SERVICE_LOAD_INDEPENDENT = "Load Independent";
@@ -225,8 +235,8 @@ public interface CommonConstants {
 	public static final RoutingStrategy ROUTING_LOADDEPENDENT = new LoadDependentRouting();
 	public static final RoutingStrategy ROUTING_POWER_OF_K = new PowerOfKRouting();
 	public static final RoutingStrategy ROUTING_WEIGHTED_ROUNDROBIN = new WeightedRoundRobinRouting();
-	public static final RoutingStrategy ROUTING_DISABLED = new DisabledRouting();
 	public static final RoutingStrategy ROUTING_CLASS_SWITCH = new ClassSwitchRouting();
+	public static final RoutingStrategy ROUTING_DISABLED = new DisabledRouting();
 
 	public static final ForkStrategy FORK_PROBABILITIES = new ProbabilitiesFork();
 	public static final ForkStrategy FORK_COMBINATION = new CombFork();
@@ -253,10 +263,10 @@ public interface CommonConstants {
 	public static final String FINITE_RETRIAL = "Retrial";
 
 	public static final String CLASSES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Classes Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Define type (Open or Closed), name and parameters for each customer class."
-			+ "<br/>" + "<b>Closed Classes:</b> If a <b>ClassSwitch</b> is in the model, then <b>all</b> the closed classes must have the <b>same</b> reference station."
-			+ "<br/>" + "<b>Open Classes:</b> An open class that has <b>Fork</b>, <b>ClassSwitch</b>, <b>Scaler</b> or <b>Transition</b> as the reference station is <b>not</b> generated by <b>any</b> Source."
-			+ "<br/>" + "<b>Priorities:</b> A larger value implies a higher priority." + HTML_FONT_NOR_END + HTML_END;
+			+ "Define type (Open or Closed), name and parameters for each customer class.<br/>"
+			+ "<b>Closed Classes:</b> If a <b>ClassSwitch</b> is in the model, then <b>all</b> the closed classes must have the <b>same</b> reference station.<br/>"
+			+ "<b>Open Classes:</b> An open class that has <b>Fork</b>, <b>ClassSwitch</b>, <b>Scaler</b> or <b>Transition</b> as the reference station is <b>not</b> generated by <b>any</b> Source.<br/>"
+			+ "<b>Priorities:</b> A larger value implies a higher priority." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String STATIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Station Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define type and name for each station" + HTML_FONT_NOR_END + HTML_END;
@@ -268,7 +278,7 @@ public interface CommonConstants {
 			+ "For each station in the list, define the requested parameters" + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String MEASURES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Performance Indices" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Define performance indices to be collected and " + "plotted by the simulation engine." + HTML_FONT_NOR_END + HTML_END;
+			+ "Define performance indices to be collected and plotted by the simulation engine." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Simulation Parameters" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define simulation parameters and initial customer locations." + HTML_FONT_NOR_END + HTML_END;
@@ -277,13 +287,13 @@ public interface CommonConstants {
 			+ "Enable parametric analysis and customize it." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String REFSOURCE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Reference Station" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Define reference station for each closed class. This is used " + "to calculate system throughput for that class." + HTML_FONT_NOR_END
-			+ HTML_END;
+			+ "Define reference station for each closed class. This is used to calculate system throughput for that class."
+			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String LDSERVICE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Load Dependent Service Time Distribution" + HTML_FONT_TIT_END
-			+ HTML_FONT_NORM + "Define the distribution and the values of service times for a range of number of jobs inside "
-			+ "the station. Mean value of the distribution can be specified with an arithmetic "
-			+ "expression, as a function of the current value of 'n' (see Help for operators)." + HTML_FONT_NOR_END + HTML_END;
+			+ HTML_FONT_NORM + "Define the distribution and the values of service times for a range of number of jobs inside the station. "
+			+ "Mean value of the distribution can be specified with an arithmetic expression, as a function of the current value of 'n' (see Help for operators)."
+			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String BALKINGSTRATEGY_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Balking Probability" + HTML_FONT_TIT_END
 			+ HTML_FONT_NORM + "Define the probability that a job will balk based on the length of the queue when the job arrives. "
@@ -301,12 +311,12 @@ public interface CommonConstants {
 			+ "The conversion was completed with the warnings shown below" + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String LDROUTING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Description" + HTML_FONT_TIT_END +
-			HTML_FONT_NORM + "Customers of each class are routed depending on their number on the current station. " +
-			"The outgoing paths must have associated probabilities that should sum to 1 for each range."
+			HTML_FONT_NORM + "Customers of each class are routed depending on their number on the current station. "
+			+ "The outgoing paths must have associated probabilities that should sum to 1 for each range."
 			+ HTML_FONT_NOR_END + HTML_END;
 
 	public static final String MEASURE_LOG_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Statistical Results CSV file" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Check the 'Stat.Res.' button to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size."
+			+ "Check the \"Stat.Res.\" box to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size."
 			+ HTML_FONT_NOR_END + HTML_END;
 
 	// String tokens
@@ -328,6 +338,7 @@ public interface CommonConstants {
 	public static final String WARNING_CLASS_STATION = "Customer classes and stations have to be defined first";
 	public static final String WARNING_CLASS = "Customer classes have to be defined first";
 	public static final String WARNING_STATION = "Stations have to be defined first";
+	public static final String WARNING_MULTI_CLASS = "At least two customer classes have to be defined first";
 	public static final String WARNING_INCOMING_ROUTING = "Station incoming connections undefined";
 	public static final String WARNING_OUTGOING_ROUTING = "Station outgoing connections undefined";
 	public static final String WARNING_CLASS_INCOMING_ROUTING = "Customer classes and station incoming connections have to be defined first";

@@ -128,7 +128,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 
 		if (hasInputSection(type)) {
 			if (isPane == null) {
-				isPane = new InputSectionPanel(stationData, classData, stationKey, type);
+				isPane = new InputSectionPanel(stationData, classData, stationKey);
 			} else {
 				isPane.setData(stationData, classData, stationKey);
 			}
@@ -213,11 +213,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 				mainPanel.setSelectedComponent(oldComponent);
 			}
 		} else if (hasLoggerSection(type)) {
-			//if (lsPane == null) {
 			lsPane = new LoggerSectionPanel(stationData, classData, stationKey);
-			//} else {
-			//lsPane.setData(stationData, classData, stationKey);
-			//}
 			mainPanel.add(lsPane, lsPane.getName());
 
 			// If this was previously selected, selects this

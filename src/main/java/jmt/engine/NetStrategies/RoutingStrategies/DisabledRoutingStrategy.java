@@ -21,15 +21,9 @@ package jmt.engine.NetStrategies.RoutingStrategies;
 import jmt.engine.NetStrategies.RoutingStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NodeList;
-import jmt.engine.random.engine.RandomEngine;
 
 /**
- * This class implements a random strategy: the output node
- * is chosen with a random number
- * @author  Stefano Omini, Bertoli Marco
- * @version 13/11/2005
- * Reimplemented by Bertoli Marco to correct behaviour with closed classes and sinks
+ * This class implements a disabled routing strategy.
  */
 public class DisabledRoutingStrategy extends RoutingStrategy {
 
@@ -37,15 +31,14 @@ public class DisabledRoutingStrategy extends RoutingStrategy {
 	}
 
 	/**
-	 * Gets the output node, into which the job must be routed, using a random
-	 * strategy.
-	 * @param nodes List of the output nodes.
+	 * This method should be overridden to implement a specific strategy.
+	 * @param ownerNode Owner node of the output section.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
 	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
-			return null;
-		}
+		return null;
+	}
 
 }

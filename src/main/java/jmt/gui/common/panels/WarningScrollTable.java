@@ -50,7 +50,7 @@ public class WarningScrollTable extends JRootPane {
 
 	private static final long serialVersionUID = 1L;
 
-	protected static final int BORDERSIZE = 5;
+	protected static final int BORDERSIZE = 3;
 	protected static final Dimension warningBoxSize = new Dimension(210, 95);
 	protected JTable table;
 	protected Vector<Vector<Object>> vectors;

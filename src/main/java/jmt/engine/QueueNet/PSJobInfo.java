@@ -18,7 +18,6 @@
 
 package jmt.engine.QueueNet;
 
-import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
 /**
  * This class is a generic job information storage class used by processor-
  * sharing.
@@ -29,8 +28,6 @@ public class PSJobInfo extends JobInfo {
 
 	private double serviceTime;
 	private double residualServiceTime;
-	private double renegingDelay;
-	private ImpatienceType impatienceType;
 
 	/**
 	 * Creates a new instance of JobInfo object.
@@ -80,23 +77,4 @@ public class PSJobInfo extends JobInfo {
 		residualServiceTime -= serviceTime;
 	}
 
-	public void setImpatienceType(ImpatienceType impatienceType) {
-		this.impatienceType = impatienceType;
-	}
-
-	public boolean hasImpatienceType(ImpatienceType impatienceType) {
-		return this.impatienceType == impatienceType;
-	}
-
-	public double getRenegingDelay() {
-		return renegingDelay;
-	}
-
-	public void setRenegingDelay(double renegingDelay) {
-		this.renegingDelay = renegingDelay;
-	}
-
-	public void subtractFromRenegingDelay(double waitingTime) {
-		renegingDelay -= waitingTime;
-	}
 }

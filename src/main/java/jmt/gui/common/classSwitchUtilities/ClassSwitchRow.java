@@ -64,4 +64,12 @@ public class ClassSwitchRow {
 		this.rowValues.put(classOutKey, new Float(value));
 	}
 
+	public Map<Object, Float> getRowValues() {
+		return this.rowValues;
+	}
+
+	public void setRowValues(Map<Object, Float> rowValues) {
+		this.rowValues = rowValues;
+	}
+
 }

@@ -18,7 +18,11 @@
 
 package jmt.gui.common.panels;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Frame;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -283,13 +287,13 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 				if (aValue instanceof ProbabilityRouting) {
 					value = ((ProbabilityRouting) aValue).clone();
 				}
-				else if (aValue instanceof ClassSwitchRouting) {
-					value = ((ClassSwitchRouting) aValue).clone();
-				}
 				else if (aValue instanceof LoadDependentRouting) {
 					value = ((LoadDependentRouting) aValue).clone();
 				} else if (aValue instanceof PowerOfKRouting) {
 					value = ((PowerOfKRouting) aValue).clone();
+				}
+				else if (aValue instanceof ClassSwitchRouting) {
+					value = ((ClassSwitchRouting) aValue).clone();
 				}
 				if (!value.equals(stationData.getRoutingStrategy(stationKey, classKey))) {
 					stationData.setRoutingStrategy(stationKey, classKey, value);

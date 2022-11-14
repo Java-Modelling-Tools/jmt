@@ -28,9 +28,6 @@ public class LoggerCell extends JmtCell {
 
 	private static final long serialVersionUID = 1L;
 
-	// Disables this component
-	public static final boolean canBePlaced = true;
-
 	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
 	public static final String ICON = "Logger";
 
@@ -41,7 +38,7 @@ public class LoggerCell extends JmtCell {
 	 *                   the cell's data
 	 */
 	public LoggerCell(Object userObject) {
-		super(LoggerCell.ICON, userObject);
+		super(ICON, userObject);
 		type = LOGGER;
 	}
 
@@ -66,16 +63,6 @@ public class LoggerCell extends JmtCell {
 	@Override
 	public boolean generateOrDestroyJobs() {
 		return false;
-	}
-
-	/**
-	 * Returns the name of the icon of this cell
-	 *
-	 * @return the name of the icon of this cell
-	 */
-	@Override
-	public String getIcon() {
-		return ICON;
 	}
 
 }

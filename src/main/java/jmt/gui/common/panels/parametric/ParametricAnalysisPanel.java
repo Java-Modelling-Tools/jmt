@@ -54,11 +54,8 @@ import jmt.gui.common.definitions.parametric.ServiceTimesParametricAnalysis;
  *         Date: 7-mar-2006
  *         Time: 13.12.42
  */
-
 public class ParametricAnalysisPanel extends WizardPanel implements CommonConstants {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 	Color DEFAULT_TITLE_COLOR = new TitledBorder("").getTitleColor();
 	private String[] parameters = { "                   " };
@@ -162,10 +159,6 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 			parameterOptionPanel.setEnabled(true);
 			tb.setTitleColor(DEFAULT_TITLE_COLOR);
 			parameterOptionPanel.repaint();
-			// Deactivate all log measures
-			for (Object measureKey : simd.getMeasureKeys()) {
-				simd.setMeasureLog(false, measureKey);
-			}
 		}
 	}
 

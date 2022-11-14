@@ -176,6 +176,12 @@ public interface MeasureDefinition {
 	public int[] getResidenceTimeMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every arrival rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getArrivalRateMeasures();
+
+	/**
 	 * Returns an array with the measureIndex of every throughput measure
 	 * @return an array with measures' index
 	 */
@@ -188,22 +194,28 @@ public interface MeasureDefinition {
 	public int[] getUtilizationMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every effective utilization measure
+	 * @return an array with measures' index
+	 */
+	public int[] getEffectiveUtilizationMeasures();
+
+	/**
 	 * Returns an array with the measureIndex of every drop rate measure
 	 * @return an array with measures' index
 	 */
 	public int[] getDropRateMeasures();
 
 	/**
-	 * Returns an array with the measureIndex of every reneging rate measure
-	 * @return an array with measures' index
-	 */
-	public int[] getRenegingRateMeasures();
-
-	/**
 	 * Returns an array with the measureIndex of every balking rate measure
 	 * @return an array with measures' index
 	 */
 	public int[] getBalkingRateMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every reneging rate measure
+	 * @return an array with measures' index
+	 */
+	public int[] getRenegingRateMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every retrial attempts rate measure
@@ -218,17 +230,10 @@ public interface MeasureDefinition {
 	public int[] getRetrialOrbitSizeMeasures();
 
 	/**
-	 * Returns an array with the measureIndex of every waiting time measure
+	 * Returns an array with the measureIndex of every retrial orbit time measure
 	 * @return an array with measures' index
 	 */
-	public int[] getWaitingTimeMeasures();
-
-
-	/**
-	 * Returns an array with the measureIndex of every waiting time measure
-	 * @return an array with measures' index
-	 */
-	public int[] getNumberOfBusyServersMeasures();
+	public int[] getRetrialOrbitTimeMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every system customer number measure
@@ -255,28 +260,28 @@ public interface MeasureDefinition {
 	public int[] getSystemDropRateMeasures();
 
 	/**
-	 * Returns an array with the measureIndex of every system reneging rate measure
-	 * @return an array with measures' index
-	 */
-	public int[] getSystemRenegingRateMeasures();
-
-	/**
 	 * Returns an array with the measureIndex of every system balking rate measure
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemBalkingRateMeasures();
 
 	/**
-	 * Returns an array with the measureIndex of every system power measure
+	 * Returns an array with the measureIndex of every system reneging rate measure
 	 * @return an array with measures' index
 	 */
-	public int[] getSystemPowerMeasures();
+	public int[] getSystemRenegingRateMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every system retrial attempts rate measure
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemRetrialAttemptsRateMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every system power measure
+	 * @return an array with measures' index
+	 */
+	public int[] getSystemPowerMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every response time per sink measure
@@ -389,6 +394,6 @@ public interface MeasureDefinition {
 	 */
 	public interface MalformedReplayerFileListener {
 		public void detectedError(String msg);
-	}	
+	}
 
 }

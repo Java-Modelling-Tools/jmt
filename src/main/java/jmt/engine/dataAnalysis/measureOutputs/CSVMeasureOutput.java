@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 
+import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.MeasureOutput;
 
 /**
@@ -56,7 +57,7 @@ public class CSVMeasureOutput extends MeasureOutput {
 	 * on the standard output
 	 * @throws java.io.IOException
 	 */
-	public CSVMeasureOutput(jmt.engine.dataAnalysis.Measure measure, boolean append, String fileName) throws IOException {
+	public CSVMeasureOutput(Measure measure, boolean append, String fileName) throws IOException {
 		super(measure);
 		if (fileName == null) {
 			outputWriter = new OutputStreamWriter(System.out);
@@ -75,7 +76,7 @@ public class CSVMeasureOutput extends MeasureOutput {
 	 * it is useful only if a file is used)
 	 * @throws java.io.IOException
 	 */
-	public CSVMeasureOutput(jmt.engine.dataAnalysis.Measure Measure, boolean Append) throws IOException {
+	public CSVMeasureOutput(Measure Measure, boolean Append) throws IOException {
 		super(Measure);
 		outputWriter = new BufferedWriter(new FileWriter(Measure.getName() + ".csv", Append));
 		StdOutput = false;
@@ -85,7 +86,8 @@ public class CSVMeasureOutput extends MeasureOutput {
 	public void write(double Sample, double Weight) {
 		try {
 			outputWriter.write(Sample + "; " + Weight + ";\n");
-		} catch (IOException exc) {
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -106,7 +108,8 @@ public class CSVMeasureOutput extends MeasureOutput {
 			if (!StdOutput) {
 				outputWriter.close();
 			}
-		} catch (IOException exc) {
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

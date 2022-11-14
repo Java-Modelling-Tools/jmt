@@ -64,7 +64,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		this.sd = sd;
 		this.results = (ResultsModel) sd.getSimulationResults();
 		poller = new PollerThread(sd.getPollingInterval().doubleValue(), this);
-		// Avoid hanging the system during execution
+		// Avoids hanging the system during execution
 		this.setPriority(Thread.MIN_PRIORITY);
 	}
 
@@ -138,7 +138,6 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 	public void stopSimulation() {
 		if (simulator != null) {
 			timer.kill();
-			//gui.changeSimActionsState(true, false, false);
 			simulator.abortAllMeasures();
 		}
 	}
@@ -184,7 +183,7 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 			}
 			// While simulation is not finished, polls at given intervals
 			while (!dispatcher.simulator.isFinished()) {
-				// Wait to collect results until simulation is really started
+				// Waits to collect results until simulation is really started
 				while (!dispatcher.simulator.isStarted() && !dispatcher.simulator.isFinished()) {
 					try {
 						sleep(500);
@@ -238,13 +237,13 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 						try {
 							simStateChecker.forceDraw();
 						} catch (Exception e) {
-							//Ignore
+							// Ignores
 						}
 					}
 					// -------------end Francesco D'Aquino ---------------
 				}
 
-				// Wait for polling interval
+				// Waits for polling interval
 				try {
 					sleep(interval);
 				} catch (InterruptedException ex) {

@@ -269,7 +269,6 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 				((Vector<Integer>) originalValues).add(thisValue);
 			}
 		}
-
 	}
 
 	/**
@@ -277,19 +276,20 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 	 */
 	@Override
 	public void restoreOriginalValues() {
-		if (singleClass) {
-			classDef.setClassPopulation(classKey, (Integer) originalValues);
-		} else {
-			Vector values = (Vector) originalValues;
-			Vector<Object> closeClasses = classDef.getClosedClassKeys();
-			for (int i = 0; i < closeClasses.size(); i++) {
-				Object thisClass = closeClasses.get(i);
-				Integer thisValue = (Integer) values.get(i);
-				classDef.setClassPopulation(thisClass, thisValue);
+		if (originalValues != null) {
+			if (singleClass) {
+				classDef.setClassPopulation(classKey, (Integer) originalValues);
+			} else {
+				Vector values = (Vector) originalValues;
+				Vector<Object> closeClasses = classDef.getClosedClassKeys();
+				for (int i = 0; i < closeClasses.size(); i++) {
+					Object thisClass = closeClasses.get(i);
+					Integer thisValue = (Integer) values.get(i);
+					classDef.setClassPopulation(thisClass, thisValue);
+				}
 			}
+			simDef.manageJobs();
 		}
-		simDef.manageJobs();
-		//modified = false;
 	}
 
 	/**
@@ -393,12 +393,8 @@ public class NumberOfCustomerParametricAnalysis extends ParametricAnalysisDefini
 					}
 				}
 			}
-
 		}
-		//modified = false;
-		//lastCode = code;
 		return code;
-		//}
 	}
 
 	/**

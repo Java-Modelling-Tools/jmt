@@ -3,9 +3,9 @@
 	<xsl:output method="xml" version="1.0" encoding="ISO-8859-1" indent="yes"/>
 	
 	<xsl:template match="/">
-	<xsl:processing-instruction name="xml-stylesheet">"type="text/xsl" href="translatorMVAtoSIM.xslt"</xsl:processing-instruction>
+	<xsl:processing-instruction name="xml-stylesheet">"type="text/xsl" href="SIMtoMVA.xslt"</xsl:processing-instruction>
 		<model>
-		<xsl:attribute name="xsi:noNamespaceSchemaLocation" namespace="http://www.w3.org/2001/XMLSchema-instance">exactmodel.xsd</xsl:attribute>
+		<xsl:attribute name="xsi:noNamespaceSchemaLocation" namespace="http://www.w3.org/2001/XMLSchema-instance">JMTmodel.xsd</xsl:attribute>
 			<parameters>
 				<xsl:apply-templates select="sim"/>
 			</parameters>

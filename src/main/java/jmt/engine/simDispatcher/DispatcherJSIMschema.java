@@ -25,12 +25,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import jmt.common.exception.NetException;
-import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.QueueNetwork;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
 import jmt.engine.log.JSimLogger;
-import jmt.engine.random.engine.RandomEngine;
 import jmt.engine.simEngine.SimLoader;
 import jmt.engine.simEngine.Simulation;
 
@@ -81,7 +79,8 @@ public class DispatcherJSIMschema {
 	private long maxDuration = -1;
 
 	private Simulation sim;
-	boolean isTerminalSimulation;
+	boolean isTerminalSimulation = false;
+	int parametricStep = -1;
 
 	/**
 	 * This constructor receives the absolute path of the xml file containing
@@ -135,8 +134,8 @@ public class DispatcherJSIMschema {
 
 	public boolean solveModel() throws Exception {
 		/*********************SIM DEFINITION MODEL*********************/
-		// does model file exist??
- 		if (!simModelDefinition.exists()) {
+		//does model file exist??
+		if (!simModelDefinition.exists()) {
 			//the passed file does not exist
 			logger.error("The sim model file " + simModelDefinitionPath + " does not exist...");
 			return false;
@@ -146,17 +145,16 @@ public class DispatcherJSIMschema {
 
 		/*********************SIMULATION LOADING AND RUNNING*********************/
 		//now prepare simulation
-		//try {
 		SimLoader simLoader = new SimLoader(simModelDefinitionPath);
 		sim = simLoader.getSim();
 		sim.setTerminalSimulation(isTerminalSimulation);
+		sim.setParametricStep(parametricStep);
 
-		//sets in the Simulation object the path of the
-		//xml model definition
+		//set path of the xml model definition
 		sim.setXmlSimModelDefPath(simModelDefinitionPath);
 
 		if (automaticSeed) {
-			// Generate only positive integers (to facilitate replay in the gui)
+			//generate only positive integers (to facilitate replay in the gui)
 			simulationSeed = sim.getEngine().nextInt();
 			if (simulationSeed < 0) {
 				simulationSeed = -simulationSeed;
@@ -172,7 +170,7 @@ public class DispatcherJSIMschema {
 
 		long start, stop, elapsed;
 
-		// Sets simulation max duration (if specified)
+		//set simulation max duration (if specified)
 		ExecutorService es = Executors.newSingleThreadExecutor();
 		if (maxDuration > 0) {
 			es.submit(new Runnable() {
@@ -181,27 +179,27 @@ public class DispatcherJSIMschema {
 						Thread.sleep(maxDuration);
 						abortAllMeasures();	
 					} catch (InterruptedException ex) {
-						// Nothing to do.
+						//do nothing
 					}
 				}
 			});
 		}
 
 		simStarted = true;
-		//Start time
+		//start time
 		start = System.currentTimeMillis();
 
 		//run simulation
 		sim.run();
 
-		//Stop time
+		//stop time
 		stop = System.currentTimeMillis();
 		elapsed = (stop - start) / 1000;
 
 		simPaused = false;
 		simFinished = true;
 
-		// Shutdown the simulation timer, if any.
+		//shut down simulation timer (if any)
 		es.shutdownNow();
 
 		logger.info("Model " + simModelDefinitionPath + " solved by JSIM in " + Double.toString(elapsed) + " seconds");
@@ -487,6 +485,10 @@ public class DispatcherJSIMschema {
 
 	public void setTerminalSimulation(boolean isTerminalSimulation) {
 		this.isTerminalSimulation = isTerminalSimulation;
+	}
+
+	public void setParametricStep(int parametricStep) {
+		this.parametricStep = parametricStep;
 	}
 
 }

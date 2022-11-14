@@ -1,7 +1,7 @@
 package jmt.engine.NetStrategies.ImpatienceStrategies;
 
-import static jmt.gui.common.CommonConstants.QUEUE_STRATEGY_FCFS;
 import static jmt.gui.common.CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY;
+import static jmt.gui.common.CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY;
 
 import jmt.gui.common.serviceStrategies.LDStrategy;
 
@@ -9,9 +9,9 @@ public class BalkingParameter implements ImpatienceParameter {
   private LDStrategy ldStrategy;
   private boolean priorityActivated;
 
-  public BalkingParameter(String serverStationQueuePolicy, String classQueueStrategy) {
+  public BalkingParameter(String serverStationQueuePolicy) {
     ldStrategy = new LDStrategy();
-    updatePriority(serverStationQueuePolicy, classQueueStrategy);
+    updatePriority(serverStationQueuePolicy);
   }
 
   public BalkingParameter(LDStrategy ldStrategy) {
@@ -26,9 +26,9 @@ public class BalkingParameter implements ImpatienceParameter {
     this.ldStrategy = ldStrategy;
   }
 
-  public void updatePriority(String serverStationQueuePolicy, String queueStrategy) {
+  public void updatePriority(String serverStationQueuePolicy) {
     priorityActivated = (serverStationQueuePolicy == STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY
-        && queueStrategy == QUEUE_STRATEGY_FCFS);
+        || serverStationQueuePolicy == STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
   }
 
   public boolean getPriorityActivated() {

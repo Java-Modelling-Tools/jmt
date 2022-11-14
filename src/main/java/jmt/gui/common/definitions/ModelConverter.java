@@ -223,10 +223,10 @@ public class ModelConverter {
 				output.addMeasure(SimulationDefinition.MEASURE_QL, stationKey, classKey);
 				// Residence Time
 				output.addMeasure(SimulationDefinition.MEASURE_RD, stationKey, classKey);
-				// Utilization
-				output.addMeasure(SimulationDefinition.MEASURE_U, stationKey, classKey);
 				// Throughput
 				output.addMeasure(SimulationDefinition.MEASURE_X, stationKey, classKey);
+				// Utilization
+				output.addMeasure(SimulationDefinition.MEASURE_U, stationKey, classKey);
 			}
 		}
 		// Restores default values
@@ -497,7 +497,7 @@ public class ModelConverter {
 					+ ", which is considered as Router in JMVA.");
 		}
 		if (strategy instanceof ProbabilityRouting) {
-			Map<Object, Double> routingMap = strategy.getValues();
+			Map<Object, Double> routingMap = ((ProbabilityRouting) strategy).getValues();
 			Iterator<Object> it = routingMap.keySet().iterator();
 			while (it.hasNext()) {
 				Object dest = it.next();

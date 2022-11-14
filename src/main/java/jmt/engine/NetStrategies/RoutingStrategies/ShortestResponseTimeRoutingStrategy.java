@@ -42,17 +42,17 @@ public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 	private int propertyQ = NodeSection.PROPERTY_ID_RESIDENT_JOBS;
 	private int propertyR = NetNode.PROPERTY_ID_RESIDENCE_TIME;
 	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)
-	private RandomEngine random = RandomEngine.makeDefault();
 
 	/**
 	 * This strategy selects the resource with the shortest response time for this jobClass
 	 * among the output nodes.
-	 * @param nodeList List of the output nodes.
+	 * @param ownerNode Owner node of the output section.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
 	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+		RandomEngine randomEngine = ownerNode.getNetSystem().getEngine();
 		NodeList nodeList = ownerNode.getOutputNodes();
 		if (nodeList.size() == 0) {
 			return null;
@@ -114,7 +114,7 @@ public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {
 		} else if (length == 1) {
 			return output[0];
 		} else {
-			return output[(int) Math.floor(random.raw() * length)];
+			return output[(int) Math.floor(randomEngine.raw() * length)];
 		}
 	}
 

@@ -59,7 +59,7 @@ public class PhaseType extends Distribution {
 	}
 
 	/**
-	 * Used to set parameters of this distribution.
+	 * Used to set parameters of this distribution
 	 * @return distribution parameters
 	 */
 	@Override

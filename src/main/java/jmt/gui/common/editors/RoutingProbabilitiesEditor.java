@@ -18,7 +18,8 @@
 
 package jmt.gui.common.editors;
 
-import java.awt.*;
+import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collections;
@@ -26,7 +27,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -40,12 +51,15 @@ import javax.swing.table.AbstractTableModel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
-import jmt.gui.common.forkStrategies.OutPath;
 import jmt.gui.common.panels.RoutingSectionPanel;
 import jmt.gui.common.panels.WarningScrollTable;
-import jmt.gui.common.routingStrategies.*;
+import jmt.gui.common.routingStrategies.ClassSwitchRouting;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.PowerOfKRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
 import jmt.gui.exact.table.ExactCellEditor;
-import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 
 /**
  * Created by IntelliJ IDEA.
@@ -59,44 +73,43 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 	private static final long serialVersionUID = 1L;
 
 	private Map<Object, Double> routingProbs;
-	private Map<Object, Double> classSwitchProbs;
-	private Map<Object, Map<Object, Double>> outPaths;
 	private Map<Object, Integer> wrrWeights;
+	private Map<Object, Map<Object, Double>> outPaths;
+	private Map<Object, Double> classSwitchProbs;
 	private Vector<Object> validOutputs;
+	private Vector<Object> validClasses;
 	private StationDefinition stations;
 	private ClassDefinition classes;
 	private Object stationKey;
 	private Object classKey;
 
 	private WarningScrollTable rtPane;
-	private WarningScrollTable classProbPane;
 	private WarningScrollTable weightsTablePane;
 	private WarningScrollTable powerOfKWarningPanel;
-	private WarningScrollTable csPane;
+	private WarningScrollTable branchProbPane;
+	private WarningScrollTable classProbPane;
 	private JTextArea descrTextPane = new JTextArea("");
 	private JScrollPane descrPane = new JScrollPane();
 	private RoutingTable routingTable = new RoutingTable();
-	private ClassSwtichTable classSwitchTable = new ClassSwtichTable();
 	private WeightsTable weightsTable = new WeightsTable();
+	private BranchSwitchTable branchSwitchTable = new BranchSwitchTable();
+	private ClassSwitchTable classSwitchTable = new ClassSwitchTable();
 	private JTextArea noOptLabel = new JTextArea("No options available for this routing strategy");
 	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);
 	private JComponent powerOfKPanel = new JPanel();
 	private JSpinner jNumField = new JSpinner();
 	private JCheckBox memoryCheckbox = new JCheckBox();
-	private ForkSwitchTable switchTable = new ForkSwitchTable();
 
 	public RoutingProbabilitiesEditor(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		setOrientation(JSplitPane.VERTICAL_SPLIT);
 		setDividerSize(3);
 		setBorder(new EmptyBorder(0, 0, 0, 0));
-		setResizeWeight(0.5);
 		initComponents();
 		setData(sd, cd, stationKey, classKey);
 	}
 
 	private void initComponents() {
 		rtPane = new WarningScrollTable(routingTable, WARNING_OUTGOING_ROUTING);
-		classProbPane = new WarningScrollTable(classSwitchTable, WARNING_OUTGOING_ROUTING);
 		weightsTablePane = new WarningScrollTable(weightsTable, WARNING_OUTGOING_ROUTING);
 		powerOfKWarningPanel = new WarningScrollTable(powerOfKPanel, WARNING_OUTGOING_ROUTING);
 		Border routingOptionsBorder = new TitledBorder(new EtchedBorder(), "Routing Options");
@@ -106,7 +119,6 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		noOptLabel.setLineWrap(true);
 		noOptLabel.setWrapStyleWord(true);
 		rtPane.setBorder(routingOptionsBorder);
-		classProbPane.setBorder(routingOptionsBorder);
 		weightsTablePane.setBorder(routingOptionsBorder);
 		powerOfKWarningPanel.setBorder(routingOptionsBorder);
 		descrTextPane.setOpaque(false);
@@ -118,8 +130,6 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		powerOfKPanel.setBorder(routingOptionsBorder);
 		powerOfKPanel.setLayout(new FlowLayout());
 
-		csPane = new WarningScrollTable(switchTable, WARNING_OUTGOING_ROUTING);
-		csPane.setBorder(new TitledBorder(new EtchedBorder(), "Branches"));
 		JPanel valueOfKPanel = new JPanel();
 		valueOfKPanel.add(new JLabel("Number of choices, k:"));
 		jNumField.setPreferredSize(DIM_BUTTON_XS);
@@ -133,15 +143,18 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		memoryCheckbox.addChangeListener(new EnableMemoryListener());
 		powerOfKPanel.add(memoryPanel);
 		setLeftComponent(descrPane);
-		setResizeWeight(0.2);
 
-		switchTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+		branchProbPane = new WarningScrollTable(branchSwitchTable, WARNING_OUTGOING_ROUTING);
+		branchProbPane.setBorder(new TitledBorder(new EtchedBorder(), "Branches"));
+		classProbPane = new WarningScrollTable(classSwitchTable, WARNING_OUTGOING_ROUTING);
+		classProbPane.setBorder(new TitledBorder(new EtchedBorder(), "Classes"));
+
+		// Update class probability table when branch table is selected for class switch routing
+		branchSwitchTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting() && switchTable.getSelectedRow() > -1) {
-					classSwitchProbs = outPaths.get(indexToKey(switchTable.getSelectedRow()));
-					normalizeClassSwitchProbabilities(classes.getClassKeys(), classSwitchProbs);
-
+				if (!e.getValueIsAdjusting() && branchSwitchTable.getSelectedRow() > -1) {
+					classSwitchProbs = outPaths.get(indexToKey(branchSwitchTable.getSelectedRow()));
 					classSwitchTable.updateUI();
 					classProbPane.updateUI();
 				}
@@ -151,7 +164,17 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 				if (stationKey == null) {
 					return null;
 				}
-				return stations.getForwardConnections(stationKey).get(index);
+				return validOutputs.get(index);
+			}
+		});
+
+		// Update red text labels for incorrect class probability sums
+		classSwitchTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (!e.getValueIsAdjusting() && classSwitchTable.getSelectedRow() > -1) {
+					branchSwitchTable.repaint();
+				}
 			}
 		});
 	}
@@ -165,8 +188,9 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
 		RoutingStrategy rs = (RoutingStrategy) sd.getRoutingStrategy(stationKey, classKey);
-		switchTable.clearSelection();
+		branchSwitchTable.clearSelection();
 		classSwitchTable.clearSelection();
+		setResizeWeight(0.5);
 		if (rs == null) {
 			descrTextPane.setText("");
 			emptyPane();
@@ -212,7 +236,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	private void createDetails(RoutingStrategy rs) {
 		if (rs instanceof ProbabilityRouting) {
-			routingProbs = rs.getValues();
+			routingProbs = ((ProbabilityRouting) rs).getValues();
 			validOutputs = new Vector<>(0);
 			setupRouting();
 			setRightComponent(rtPane);
@@ -230,19 +254,54 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			validOutputs = new Vector<>(0);
 			setupWeights();
 			setRightComponent(weightsTablePane);
-		}
-		else if (rs instanceof ClassSwitchRouting) {
-			validOutputs = new Vector<>(0);
-			outPaths = ((ClassSwitchRouting) rs).getOutDetails();
+		} else if (rs instanceof ClassSwitchRouting) {
+			routingProbs = ((ClassSwitchRouting) rs).getValues();
+			outPaths = ((ClassSwitchRouting) rs).getOutPaths();
 			classSwitchProbs = null;
+			validOutputs = new Vector<>(0);
+			validClasses = new Vector<>(0);
 
+			setupRouting();
 			setupClassSwitchRouting();
 
 			JSplitPane csRightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+			csRightPanel.setDividerSize(3);
 			csRightPanel.setResizeWeight(0.5);
-			csRightPanel.setTopComponent(csPane);
+			csRightPanel.setTopComponent(branchProbPane);
 			csRightPanel.setBottomComponent(classProbPane);
 			setRightComponent(csRightPanel);
+			setResizeWeight(0.18);
+
+			//preselect first branch for cs routing
+			if (branchSwitchTable.getRowCount() > 0) {
+				branchSwitchTable.setRowSelectionInterval(0, 0);
+			}
+		}
+	}
+
+	private void setupRouting() {
+		if (stationKey == null || classKey == null || stations == null || routingProbs == null) {
+			return;
+		}
+		//fetching output-connected stations list
+		Vector<Object> outputs = stations.getForwardConnections(stationKey);
+		//saving all entries of routing strategy in a temporary data structure
+		HashMap<Object, Double> temp = new HashMap<Object, Double>(routingProbs);
+		routingProbs.clear();
+		for (int i = 0; i < outputs.size(); i++) {
+			//add old entries to map only if they are still in the current connection set
+			Object currentKey = outputs.get(i);
+			if (temp.containsKey(currentKey)) {
+				routingProbs.put(currentKey, temp.get(currentKey));
+			} else {
+				routingProbs.put(currentKey, new Double(0.0));
+			}
+			if (classes.getClassType(classKey) != CLASS_TYPE_CLOSED
+					|| !stations.getStationType(currentKey).equals(STATION_TYPE_SINK)) {
+				validOutputs.add(currentKey);
+			} else {
+				routingProbs.put(currentKey, new Double(0.0));
+			}
 		}
 	}
 
@@ -268,52 +327,20 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		}
 	}
 
-	/**sets up all of the entries in routing table from output connections for specified
-	 * station*/
-	protected void setupRouting() {
-		if (stationKey == null || classKey == null || stations == null || routingProbs == null) {
+	private void setupClassSwitchRouting() {
+		if (stationKey == null || classKey == null || stations == null || outPaths == null) {
 			return;
 		}
 		//fetching output-connected stations list
 		Vector<Object> outputs = stations.getForwardConnections(stationKey);
 		//saving all entries of routing strategy in a temporary data structure
-		HashMap<Object, Double> temp = new HashMap<Object, Double>(routingProbs);
-		routingProbs.clear();
+		HashMap<Object, Map<Object, Double>> temp = new HashMap<Object, Map<Object, Double>>(outPaths);
+		outPaths.clear();
 		for (int i = 0; i < outputs.size(); i++) {
 			//add old entries to map only if they are still in the current connection set
 			Object currentKey = outputs.get(i);
 			if (temp.containsKey(currentKey)) {
-				routingProbs.put(currentKey, temp.get(currentKey));
-			} else {
-				//if connection set contains new entries, set them to 0 by default
-				routingProbs.put(currentKey, new Double(0.0));
-			}
-			if (classes.getClassType(classKey) != CLASS_TYPE_CLOSED
-					|| !stations.getStationType(currentKey).equals(STATION_TYPE_SINK)) {
-				validOutputs.add(currentKey);
-			} else {
-				routingProbs.put(currentKey, new Double(0.0));
-			}
-		}
-	}
-
-	protected void setupClassSwitchRouting() {
-		if (stationKey == null || classKey == null || stations == null || outPaths == null) {
-			return;
-		}
-		// fetching output-connected stations list
-		Vector<Object> outputs = stations.getForwardConnections(stationKey);
-		// saving all entries of routing strategy in a temporary data structure
-		HashMap<Object, Map<Object, Double>> temp2 = new HashMap<Object, Map<Object, Double>>(outPaths);
-
-		outPaths.clear();
-		for (int i = 0; i < outputs.size(); i++) {
-			// add old entries to map only if they are still in the current
-			// connection set
-			Object currentKey = outputs.get(i);
-
-			if (temp2.containsKey(currentKey)) {
-				outPaths.put(currentKey, temp2.get(currentKey));
+				outPaths.put(currentKey, temp.get(currentKey));
 			} else {
 				Map<Object, Double> tempPath = new HashMap<Object, Double>();
 				for (Object o : classes.getClassKeys()) {
@@ -325,8 +352,16 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 				}
 				outPaths.put(currentKey, tempPath);
 			}
+			for (Object o : classes.getClassKeys()) {
+				if (classes.getClassType(o) == classes.getClassType(classKey)) {
+					validClasses.add(o);
+				} else {
+					outPaths.get(currentKey).put(o, new Double(0.0));
+				}
+			}
 		}
 	}
+
 	public void stopEditing() {
 		if (routingTable.getCellEditor() != null) {
 			routingTable.getCellEditor().stopCellEditing();
@@ -334,139 +369,25 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		if (weightsTable.getCellEditor() != null) {
 			weightsTable.getCellEditor().stopCellEditing();
 		}
+		if (branchSwitchTable.getCellEditor() != null) {
+			branchSwitchTable.getCellEditor().stopCellEditing();
+		}
+		if (classSwitchTable.getCellEditor() != null) {
+			classSwitchTable.getCellEditor().stopCellEditing();
+		}
 		if (stations != null) {
 			RoutingStrategy rs = (RoutingStrategy) stations.getRoutingStrategy(stationKey, classKey);
 			if (rs instanceof ProbabilityRouting && routingProbs != null) {
 				stations.normalizeRoutingProbabilities(stationKey, classKey, routingProbs);
-			} else if (rs instanceof ClassSwitchRouting && classSwitchProbs != null) {
-				normalizeClassSwitchProbabilities(classes.getClassKeys(), classSwitchProbs);
+			}
+			if (rs instanceof ClassSwitchRouting && routingProbs != null && classSwitchProbs != null) {
+				stations.normalizeRoutingProbabilities(stationKey, classKey, routingProbs);
+				stations.normalizeClassSwitchProbabilities(classKey, classSwitchProbs, new Double(0.0));
 			}
 		}
 	}
 
-	/**
-	 * Normalizes the class switch probabilities.
-	 */
-	public void normalizeClassSwitchProbabilities(Vector<Object> outputs, Map<Object, Double> values) {
-		Vector<Object> normalOutputs = new Vector<Object>();
-		normalOutputs.addAll(outputs);
-
-		Double[] probabilities = new Double[outputs.size()];
-		Object[] keys = outputs.toArray();
-		for (int i = 0; i < probabilities.length; i++) {
-			probabilities[i] = (Double) values.get(keys[i]);
-			if (probabilities[i] == null) {
-				probabilities[i] = new Double(0.0);
-			}
-		}
-		values.clear();
-
-		double totalSum = 0.0;
-		for (int i = 0; i < probabilities.length; i++) {
-			if (normalOutputs.contains(keys[i])) {
-				totalSum += probabilities[i].doubleValue();
-			}
-		}
-		for (int i = 0; i < probabilities.length; i++) {
-			if (normalOutputs.contains(keys[i])) {
-				if (totalSum == 0.0) {
-					probabilities[i] = new Double(1.0 / normalOutputs.size());
-				} else {
-					probabilities[i] = new Double(probabilities[i].doubleValue() / totalSum);
-				}
-			} else {
-				probabilities[i] = new Double(0.0);
-			}
-			values.put(keys[i], probabilities[i]);
-		}
-	}
-
-	protected class ClassSwtichTable extends JTable {
-
-		private static final long serialVersionUID = 1L;
-
-		public ClassSwtichTable() {
-			setModel(new ClassSwtichTableModel());
-			setDefaultEditor(Object.class, new ExactCellEditor());
-			sizeColumns();
-			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			getTableHeader().setReorderingAllowed(false);
-		}
-
-		private void sizeColumns() {
-			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(((ClassSwtichTableModel) getModel()).columnSizes[i]);
-			}
-		}
-
-	}
-
-	protected class ClassSwtichTableModel extends AbstractTableModel {
-
-		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Class", "Probability" };
-		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
-		public int[] columnSizes = new int[] { 80, 80 };
-
-		public int getRowCount() {
-			if (classes.getClassKeys() != null) {
-				return classes.getClassKeys().size();
-			} else {
-				return 0;
-			}
-		}
-
-		public int getColumnCount() {
-			return columnNames.length;
-		}
-
-		@Override
-		public String getColumnName(int columnIndex) {
-			return columnNames[columnIndex];
-		}
-
-		@Override
-		public Class<?> getColumnClass(int columnIndex) {
-			return columnClasses[columnIndex];
-		}
-
-		@Override
-		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return columnIndex == 1;
-		}
-
-		public Object getValueAt(int rowIndex, int columnIndex) {
-			if (classSwitchProbs == null) {
-				return null;
-			}
-			if (columnIndex == 0) {
-				return classes.getClassName(indexToKey(rowIndex));
-			} else if (columnIndex == 1) {
-				return classSwitchProbs.get(indexToKey(rowIndex));
-			} else {
-				return null;
-			}
-		}
-
-		@Override
-		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			if  (columnIndex == 1) {
-				try {
-					Double value = Double.valueOf((String) aValue);
-					if (value.doubleValue() >= 0) {
-						classSwitchProbs.put(indexToKey(rowIndex), value);
-					}
-				} catch (NumberFormatException e) {
-			}
-		}
-	}
-
-		private Object indexToKey(int index) {
-			return classes.getClassKeys().get(index);
-		}
-
-	}
-	protected class RoutingTable extends JTable {
+	private class RoutingTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
 
@@ -486,7 +407,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	}
 
-	protected class RoutingTableModel extends AbstractTableModel {
+	private class RoutingTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 		private String[] columnNames = new String[] { "Destination", "Probability" };
@@ -546,7 +467,6 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 			}
 		}
 
-		//retrieves station search key from index in table
 		private Object indexToKey(int index) {
 			if (stationKey == null) {
 				return null;
@@ -560,7 +480,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 		private static final long serialVersionUID = 1L;
 
-		WeightsTable() {
+		public WeightsTable() {
 			setModel(new WeightsTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
@@ -575,7 +495,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 		}
 	}
 
-	protected class WeightsTableModel extends AbstractTableModel {
+	private class WeightsTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
 		private String[] columnNames = new String[] { "Destination", "Weights" };
@@ -638,7 +558,7 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 		private void checkMaxNotZero() {
 			if (Collections.max(wrrWeights.values()) == 0) {
-				for (Object station : wrrWeights.keySet()){
+				for (Object station : wrrWeights.keySet()) {
 					wrrWeights.put(station, 1);
 				}
 			}
@@ -653,12 +573,12 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 	}
 
-	protected class ForkSwitchTable extends JTable {
+	private class BranchSwitchTable extends JTable {
 
 		private static final long serialVersionUID = 1L;
 
-		public ForkSwitchTable() {
-			setModel(new ForkSwitchTableModel());
+		public BranchSwitchTable() {
+			setModel(new BranchSwitchTableModel());
 			setDefaultEditor(Object.class, new ExactCellEditor());
 			sizeColumns();
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -667,22 +587,22 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 		private void sizeColumns() {
 			for (int i = 0; i < getColumnCount(); i++) {
-				getColumnModel().getColumn(i).setMinWidth(((ForkSwitchTableModel) getModel()).columnSizes[i]);
+				getColumnModel().getColumn(i).setMinWidth(((BranchSwitchTableModel) getModel()).columnSizes[i]);
 			}
 		}
 
 	}
 
-	protected class ForkSwitchTableModel extends AbstractTableModel {
+	private class BranchSwitchTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Destination" };
-		private Class<?>[] columnClasses = new Class[] { String.class };
-		public int[] columnSizes = new int[] { 80 };
+		private String[] columnNames = new String[] { "Destination", "Probability" };
+		private Class<?>[] columnClasses = new Class[] { String.class , Object.class};
+		public int[] columnSizes = new int[] { 80 ,80 };
 
 		public int getRowCount() {
 			if (stationKey != null) {
-				return stations.getForwardConnections(stationKey).size();
+				return validOutputs.size();
 			} else {
 				return 0;
 			}
@@ -704,12 +624,17 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
-			return false;
+			return columnIndex == 1;
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
+			if (routingProbs == null) {
+				return null;
+			}
 			if (columnIndex == 0) {
 				return stations.getStationName(indexToKey(rowIndex));
+			} else if (columnIndex == 1) {
+				return routingProbs.get(indexToKey(rowIndex));
 			} else {
 				return null;
 			}
@@ -717,18 +642,115 @@ public class RoutingProbabilitiesEditor extends JSplitPane implements CommonCons
 
 		@Override
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-			return;
+			if (columnIndex == 1) {
+				try {
+					double value = Double.parseDouble((String) aValue);
+					if (value >= 0) {
+						routingProbs.put(indexToKey(rowIndex), value);
+					}
+				} catch (NumberFormatException e) {
+				}
+			}
 		}
 
-		// retrieves station search key from index in table
 		private Object indexToKey(int index) {
 			if (stationKey == null) {
 				return null;
 			}
-			return stations.getForwardConnections(stationKey).get(index);
+			return validOutputs.get(index);
 		}
 
 	}
+
+	private class ClassSwitchTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+		public ClassSwitchTable() {
+			setModel(new ClassSwitchTableModel());
+			setDefaultEditor(Object.class, new ExactCellEditor());
+			sizeColumns();
+			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			getTableHeader().setReorderingAllowed(false);
+		}
+
+		private void sizeColumns() {
+			for (int i = 0; i < getColumnCount(); i++) {
+				getColumnModel().getColumn(i).setMinWidth(((ClassSwitchTableModel) getModel()).columnSizes[i]);
+			}
+		}
+
+	}
+
+	private class ClassSwitchTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+		private String[] columnNames = new String[] { "Class", "Probability" };
+		private Class<?>[] columnClasses = new Class[] { String.class, Object.class };
+		public int[] columnSizes = new int[] { 80, 80 };
+
+		public int getRowCount() {
+			if (classKey != null) {
+				return validClasses.size();
+			} else {
+				return 0;
+			}
+		}
+
+		public int getColumnCount() {
+			return columnNames.length;
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			return columnNames[columnIndex];
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return columnClasses[columnIndex];
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			return (columnIndex == 1 && classSwitchProbs != null);
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			if (classSwitchProbs == null) {
+				return null;
+			}
+			if (columnIndex == 0) {
+				return classes.getClassName(indexToKey(rowIndex));
+			} else if (columnIndex == 1) {
+				return classSwitchProbs.get(indexToKey(rowIndex));
+			} else {
+				return null;
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if (columnIndex == 1) {
+				try {
+					Double value = Double.valueOf((String) aValue);
+					if (value.doubleValue() >= 0) {
+						classSwitchProbs.put(indexToKey(rowIndex), value);
+					}
+				} catch (NumberFormatException e) {
+				}
+			}
+		}
+
+		private Object indexToKey(int index) {
+			if (classKey == null) {
+				return null;
+			}
+			return validClasses.get(index);
+		}
+
+	}
+
 	private class EditLoadDependentRoutingListener implements ActionListener {
 
 		HashMap<String, Object> properties = null;

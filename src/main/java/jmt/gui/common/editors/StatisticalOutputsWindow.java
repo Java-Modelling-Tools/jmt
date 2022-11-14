@@ -64,6 +64,7 @@ import javax.swing.filechooser.FileFilter;
 
 import jmt.engine.log.CSVLogger;
 import jmt.engine.log.JSimLogger;
+import jmt.engine.log.JSimLoggerFactory;
 import jmt.engine.math.SampleStatistics;
 import jmt.engine.math.SampleStatistics.DistributionType;
 import jmt.engine.simEngine.EngineUtils;
@@ -163,8 +164,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		try {
 			this.sop = new StatisticalOutputsLoader(measureDefinition, measureIndex);
 			initGUI();
-		} catch (FileNotFoundException ex) {
-			logger.error("Verbose CSV file not found for measure.", ex);
+		} catch (FileNotFoundException e) {
+			logger.error("Verbose CSV file not found for measure.", e);
 		}
 	}
 
@@ -535,7 +536,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		JPanel leftPanel = new JPanel(new BorderLayout());
 		leftPanel.add(pivotPanel, BorderLayout.CENTER);
 		if (inverseMeasure) {
-			JLabel warningLabel = new JLabel("<html>Please note that statistics for Throughput, Drop Rate and System Power indices are based on inter-departure times.</html>");
+			JLabel warningLabel = new JLabel("<html>Please note that statistics for Arrival Rate are computed from inter-arrival times while those for Throughput, Drop Rate and System Power indices are based on inter-departure times.</html>");
 			warningLabel.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
 			warningLabel.setIcon(JMTImageLoader.loadImage("lightbulb"));
 			warningLabel.setIconTextGap(5);
@@ -768,8 +769,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 			setFieldsEnabled(false);
 			sop.reloadData();
-		} catch (NumberFormatException ex) {
-			JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+		} catch (NumberFormatException e) {
+			JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
@@ -788,7 +789,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		Enumeration<AbstractButton> filterButtonsE = filterTypeButtons.getElements();
 		while (filterButtonsE.hasMoreElements()) {
 			filterButtonsE.nextElement().setEnabled(enabled);
-		}		
+		}
 	}
 
 	private Double parseNumber(JTextField field) throws NumberFormatException {
@@ -797,7 +798,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		} else {
 			try {
 				return Double.valueOf(field.getText());
-			} catch (Exception ex) {
+			} catch (Exception e) {
 				throw new NumberFormatException("Value '" + field.getText() + "' for field '" + field.getName() + "' is not a valid number.");
 			}
 		}
@@ -856,8 +857,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 
 			// Check for overwrite.
 			if (selectedFile.exists()) {
-				int response = JOptionPane.showConfirmDialog(null, "Overwrite file '" + selectedFile.getName() + "'?", "Confirm overwrite", JOptionPane.YES_NO_OPTION,
-						JOptionPane.QUESTION_MESSAGE);
+				int response = JOptionPane.showConfirmDialog(null, "Overwrite the CSV file: " + selectedFile.getAbsolutePath() + "?", "Confirm overwrite",
+						JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 				save = response == JOptionPane.YES_OPTION;
 			} else {
 				save = true;
@@ -871,11 +872,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 			} else {
 				distrType = DistributionType.FREQUENCY;
 			}
-			try {
-				saveChartData(selectedFile, distrType);
-			} catch (IOException ex) {
-				JOptionPane.showMessageDialog(this, "Error while writing CSV file: " + ex.getMessage());
-			}
+			saveChartData(selectedFile, distrType);
 		}
 	}
 
@@ -883,27 +880,33 @@ public class StatisticalOutputsWindow extends JMTFrame {
 	 * Save chart data in target file
 	 * @param targetFile the target file for save operation
 	 * @param type the distribution type to save
-	 * @throws IOException when save operation failed
 	 */
-	private void saveChartData(File targetFile, DistributionType type) throws IOException {
-		CSVLogger logger = new CSVLogger(targetFile, new String[] {CSV_COLUMN_INDEX, CSV_COLUMN_START, CSV_COLUMN_END, CSV_COLUMN_VALUE}, false, 
+	private void saveChartData(File targetFile, DistributionType type) {
+		CSVLogger logger = JSimLoggerFactory.getCSVLogger(targetFile, new String[] {CSV_COLUMN_INDEX, CSV_COLUMN_START, CSV_COLUMN_END, CSV_COLUMN_VALUE}, false, 
 				Defaults.get("loggerDelimiter"), Defaults.get("loggerDecimalSeparator"));
-		try {
-			HashMap<String, Number> value = new HashMap<>();
-			Map<String,Number> defaults = Collections.emptyMap();
-			double[] values = statGraph.getDistribution(type);
-			double[] start = statGraph.getDistributionIntervalsStart();
-			double[] end = statGraph.getDistriburionIntervalsEnd();
 
-			for (int i=0; i<values.length; i++) {
-				value.put(CSV_COLUMN_INDEX, i + 1);
-				value.put(CSV_COLUMN_START, start[i]);
-				value.put(CSV_COLUMN_END, end[i]);
-				value.put(CSV_COLUMN_VALUE, values[i]);
+		HashMap<String, Number> value = new HashMap<>();
+		Map<String,Number> defaults = Collections.emptyMap();
+		double[] values = statGraph.getDistribution(type);
+		double[] start = statGraph.getDistributionIntervalsStart();
+		double[] end = statGraph.getDistriburionIntervalsEnd();
+
+		for (int i = 0; i < values.length; i++) {
+			value.put(CSV_COLUMN_INDEX, i + 1);
+			value.put(CSV_COLUMN_START, start[i]);
+			value.put(CSV_COLUMN_END, end[i]);
+			value.put(CSV_COLUMN_VALUE, values[i]);
+			try {
 				logger.log(value, defaults);
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(this, "Failed to write the CSV file: " + targetFile.getAbsolutePath());
+				break;
 			}
-		} finally {
-			logger.close();
+		}
+		try {
+			JSimLoggerFactory.remove(logger);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

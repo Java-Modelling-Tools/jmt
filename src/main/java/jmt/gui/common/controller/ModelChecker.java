@@ -32,14 +32,9 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.joinStrategies.GuardJoin;
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.ClassSwitchRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
-
-//TODO: investigate delete or not
-import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.common.routingStrategies.ProbabilityRouting;
 
 /**
  * <p>
@@ -72,10 +67,6 @@ public class ModelChecker implements CommonConstants {
 	private Vector<Object> classesWithoutReferenceStation;
 	//Vector containing the keys of stations without an essential link
 	private Vector<Object> stationsWithoutEssentialLink;
-	//HashMap containing the vector of keys of stations that may route a closed
-	//class to sinks. The key of the HashMap is the key of the closed class
-	//considered.
-	private HashMap<Object, Vector<Object>> closedClassesWithRoutingError;
 	//Vector containing the keys of measures defined more than once
 	private Vector<Object> redundantMeasures;
 	//Vector containing the keys of stations using different queue strategies
@@ -92,12 +83,6 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of blocking regions in which the total preload
 	//exceeds the memory constraints
 	private Vector<Object> blockingRegionsWithMemoryOverload;
-	//Vector containing the keys of class switches with a matrix in which some
-	//rows sum to less than one
-	private Vector<Object> classSwitchesWithInvalidMatrix;
-	//Vector containing the keys of class switches followed by a queue with the
-	//BAS strategy
-	private Vector<Object> classSwitchesFollowedByBasStrategy;
 	//HashMap containing the vector of keys of classes for which this station
 	//uses a Guard strategy with zero tasks. The key of the HashMap is the key
 	//of the station considered.
@@ -109,6 +94,12 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of transitions with an infinite enabling
 	//degree for a mode
 	private Vector<Object> transitionsWithInfiniteEnablingDegree;
+	//Vector containing the keys of stations using a drop strategy for a class
+	//but located between fork/join
+	private Vector<Object> stationsWithDropStrategyBetweenForkJoin;
+	//Vector containing the keys of stations using an impatience strategy for a
+	//class but located between fork/join
+	private Vector<Object> stationsWithImpatienceStrategyBetweenForkJoin;
 
 	//Vector containing the keys of servers with different queue strategies
 	private Vector<Object> bcmpServersWithDifferentQueueStrategies;
@@ -143,6 +134,9 @@ public class ModelChecker implements CommonConstants {
 	private Vector<Object> closedClassesWithZeroPopulation;
 	//Vector containing the keys of class switches located between fork/join
 	private Vector<Object> classSwitchesBetweenForkJoin;
+	//Vector containing the keys of stations using a class switch routing
+	//strategy but located between fork/join
+	private Vector<Object> stationsWithClassSwitchRoutingBetweenForkJoin;
 	//Vector containing the keys of stations using priority scheduling when all
 	//the classes have the same priority
 	private Vector<Object> stationsWithPriorityScheduling;
@@ -157,13 +151,6 @@ public class ModelChecker implements CommonConstants {
 	//Vector containing the keys of transitions without firing outcome for a
 	//mode
 	private Vector<Object> transitionsWithoutFiringOutcome;
-
-	//TODO rose: check whether needed or not
-	//Vector containing the keys of transitions with invalid firing outcome for
-	//a mode
-	private Vector<Object> transitionsWithInvalidOutcome;
-	// Vector containing the keys of stations with impatience selected and which are connected to a fork
-	private Vector<Object> stationsWithImpatienceAndConnectedToFork;
 
 	//constant used to define an error
 	public static final int ERROR_PROBLEM = 0;
@@ -212,25 +199,25 @@ public class ModelChecker implements CommonConstants {
 	//it occurs when the total preload in a blocking region exceeds the memory
 	//constraints.
 	public static final int BLOCKING_REGION_MEMORY_OVERLOAD_ERROR = 17;
-	//it occurs when a class switch has a matrix in which some rows sum to less
-	//than one.
-	public static final int CLASS_SWITCH_INVALID_MATRIX_ERROR = 18;
 	//it occurs when a class switch is in the model and closed classes have
 	//different reference stations.
-	public static final int CLASS_SWITCH_REFERENCE_STATION_ERROR = 19;
+	public static final int CLASS_SWITCH_REFERENCE_STATION_ERROR = 18;
 	//it occurs when a station uses a Guard strategy with zero tasks for a
 	//class.
-	public static final int ZERO_GUARD_STRATEGY_ERROR = 20;
+	public static final int ZERO_GUARD_STRATEGY_ERROR = 19;
 	//it occurs when a semaphore is not located between fork/join.
-	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN_ERROR = 21;
+	public static final int SEMAPHORE_NOT_BETWEEN_FORK_JOIN_ERROR = 20;
 	//it occurs when a scaler is not located between fork/join.
-	public static final int SCALER_NOT_BETWEEN_FORK_JOIN_ERROR = 22;
+	public static final int SCALER_NOT_BETWEEN_FORK_JOIN_ERROR = 21;
 	//it occurs when a transition has an infinite enabling degree for a mode.
-	public static final int TRANSITION_INFINITE_ENABLING_DEGREE_ERROR = 23;
+	public static final int TRANSITION_INFINITE_ENABLING_DEGREE_ERROR = 22;
+	//it occurs when a station with a drop strategy for a class is located
+	//between fork/join.
+	public static final int DROP_ENABLED_BETWEEN_FORK_JOIN_ERROR = 23;
+	//it occurs when a station with an impatience strategy for a class is
+	//located between fork/join.
+	public static final int IMPATIENCE_ENABLED_BETWEEN_FORK_JOIN_ERROR = 24;
 
-	//TODO rose: added test
-	//it occurs when there is an impatience strategy selected at a station connected to a fork.
-	public static final int IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR = 24;
 	//it occurs when a server has different queue strategies.
 	// (only when trying to convert to JMVA)
 	public static final int BCMP_DIFFERENT_QUEUE_STRATEGIES_WARNING = 0;
@@ -281,20 +268,23 @@ public class ModelChecker implements CommonConstants {
 	public static final int ZERO_TOTAL_POPULATION_WARNING = 14;
 	//it occurs when a class switch is located between fork/join.
 	public static final int CLASS_SWITCH_BETWEEN_FORK_JOIN_WARNING = 15;
+	//it occurs when a station with a class switch routing strategy is located
+	//between fork/join.
+	public static final int CLASS_SWITCH_ROUTING_BETWEEN_FORK_JOIN_WARNING = 16;
 	//it occurs when a station uses priority scheduling but all the classes
 	//have the same priority.
-	public static final int SCHEDULING_SAME_PRIORITY_WARNING = 16;
+	public static final int SCHEDULING_SAME_PRIORITY_WARNING = 17;
 	//it occurs when a transition is located between fork/join.
-	public static final int TRANSITION_BETWEEN_FORK_JOIN_WARNING = 17;
+	public static final int TRANSITION_BETWEEN_FORK_JOIN_WARNING = 18;
 	//it occurs when a transition has a constant enabling degree for a mode.
-	public static final int TRANSITION_CONSTANT_ENABLING_DEGREE_WARNING = 18;
+	public static final int TRANSITION_CONSTANT_ENABLING_DEGREE_WARNING = 19;
 	//it occurs when a transition has invalid input condition for a mode.
-	public static final int TRANSITION_INVALID_INPUT_CONDITION_WARNING = 19;
+	public static final int TRANSITION_INVALID_INPUT_CONDITION_WARNING = 20;
 	//it occurs when a transition has no firing outcome for a mode.
-	public static final int TRANSITION_NO_FIRING_OUTCOME_WARNING = 20;
+	public static final int TRANSITION_NO_FIRING_OUTCOME_WARNING = 21;
 
 	private static final int NUMBER_OF_ERROR_TYPES = 25;
-	private static final int NUMBER_OF_WARNING_TYPES = 21;
+	private static final int NUMBER_OF_WARNING_TYPES = 22;
 
 	/**
 	 * Creates a new modelchecker
@@ -322,11 +312,12 @@ public class ModelChecker implements CommonConstants {
 		emptyBlockingRegions = new Vector<Object>(0, 1);
 		blockingRegionsWithCapacityOverload = new Vector<Object>(0, 1);
 		blockingRegionsWithMemoryOverload = new Vector<Object>(0, 1);
-		classSwitchesWithInvalidMatrix = new Vector<Object>(0, 1);
 		stationsWithZeroGuardStrategy = new HashMap<Object, Vector<Object>>(0, 1);
 		semaphoresNotBetweenForkJoin = new Vector<Object>(0, 1);
 		scalersNotBetweenForkJoin = new Vector<Object>(0, 1);
 		transitionsWithInfiniteEnablingDegree = new Vector<Object>(0, 1);
+		stationsWithDropStrategyBetweenForkJoin = new Vector<>(0, 1);
+		stationsWithImpatienceStrategyBetweenForkJoin = new Vector<>(0, 1);
 		bcmpServersWithDifferentQueueStrategies = new Vector<Object>(0, 1);
 		bcmpFcfsServersWithDifferentServiceStrategies = new Vector<Object>(0, 1);
 		bcmpFcfsServersWithNonExponentialDistribution = new Vector<Object>(0, 1);
@@ -337,12 +328,12 @@ public class ModelChecker implements CommonConstants {
 		stationsWithoutOptionalLink = new Vector<Object>(0, 1);
 		closedClassesWithZeroPopulation = new Vector<Object>(0, 1);
 		classSwitchesBetweenForkJoin = new Vector<Object>(0, 1);
+		stationsWithClassSwitchRoutingBetweenForkJoin = new Vector<Object>(0, 1);
 		stationsWithPriorityScheduling = new Vector<Object>(0, 1);
 		transitionsBetweenForkJoin = new Vector<Object>(0, 1);
 		transitionsWithConstantEnablingDegree = new Vector<Object>(0, 1);
 		transitionsWithInvalidInputCondition = new Vector<Object>(0, 1);
 		transitionsWithoutFiringOutcome = new Vector<Object>(0, 1);
-		stationsWithImpatienceAndConnectedToFork = new Vector<>(0, 1);
 		isToJMVAChecker = isToJMVA;
 		checkModel();
 	}
@@ -358,11 +349,12 @@ public class ModelChecker implements CommonConstants {
 		emptyBlockingRegions.clear();
 		blockingRegionsWithCapacityOverload.clear();
 		blockingRegionsWithMemoryOverload.clear();
-		classSwitchesWithInvalidMatrix.clear();
 		stationsWithZeroGuardStrategy.clear();
 		semaphoresNotBetweenForkJoin.clear();
 		scalersNotBetweenForkJoin.clear();
 		transitionsWithInfiniteEnablingDegree.clear();
+		stationsWithDropStrategyBetweenForkJoin.clear();
+		stationsWithImpatienceStrategyBetweenForkJoin.clear();
 		bcmpServersWithDifferentQueueStrategies.clear();
 		bcmpFcfsServersWithDifferentServiceStrategies.clear();
 		bcmpFcfsServersWithNonExponentialDistribution.clear();
@@ -373,12 +365,12 @@ public class ModelChecker implements CommonConstants {
 		stationsWithoutOptionalLink.clear();
 		closedClassesWithZeroPopulation.clear();
 		classSwitchesBetweenForkJoin.clear();
+		stationsWithClassSwitchRoutingBetweenForkJoin.clear();
 		stationsWithPriorityScheduling.clear();
 		transitionsBetweenForkJoin.clear();
 		transitionsWithConstantEnablingDegree.clear();
 		transitionsWithInvalidInputCondition.clear();
 		transitionsWithoutFiringOutcome.clear();
-		stationsWithImpatienceAndConnectedToFork.clear();
 		for (int i = 0; i < NUMBER_OF_ERROR_TYPES; i++) {
 			errors[i] = false;
 		}
@@ -424,12 +416,13 @@ public class ModelChecker implements CommonConstants {
 			checkForEmptyBlockingRegionError();
 			checkForBlockingRegionCapacityOverloadError();
 			checkForBlockingRegionMemoryOverloadError();
-			checkForClassSwitchInvalidMatrixError();
 			checkForClassSwitchReferenceStationError();
 			checkForZeroGuardStrategyError();
 			checkForSemaphoreNotBetweenForkJoinError();
 			checkForScalerNotBetweenForkJoinError();
 			checkForTransitionInfiniteEnablingDegreeError();
+			checkForDropEnabledBetweenForkJoinError();
+			checkForImpatienceEnabledBetweenForkJoinError();
 			checkForNoOptionalLinkWarning();
 			checkForForkWithoutJoinWarning();
 			checkForParametricAnalysisModelModifiedWarning();
@@ -437,13 +430,12 @@ public class ModelChecker implements CommonConstants {
 			checkForZeroPopulationWarning();
 			checkForZeroTotalPopulationWarning();
 			checkForClassSwitchBetweenForkJoinWarning();
+			checkForClassSwitchRoutingBetweenForkJoinWarning();
 			checkForSchedulingSamePriorityWarning();
 			checkForTransitionBetweenForkJoinWarning();
 			checkForTransitionConstantEnablingDegreeWarning();
 			checkForTransitionInvalidInputConditionWarning();
 			checkForTransitionNoFiringOutcomeWarning();
-			checkForImpatienceEnabledInStationBetweenForkJoinError();
-
 		}
 	}
 
@@ -695,17 +687,6 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns true if a class switch has a matrix in which some rows sum to
-	 * less than one.
-	 *
-	 * @return true if a class switch has a matrix in which some rows sum to
-	 * less than one.
-	 */
-	public boolean isThereClassSwitchInvalidMatrixError() {
-		return errors[CLASS_SWITCH_INVALID_MATRIX_ERROR];
-	}
-
-	/**
 	 * Returns true if a class switch is in the model and closed classes have
 	 * different reference stations.
 	 *
@@ -754,15 +735,27 @@ public class ModelChecker implements CommonConstants {
 		return errors[TRANSITION_INFINITE_ENABLING_DEGREE_ERROR];
 	}
 
-
-	//TODO emergent: add error
 	/**
-	 * @return true if a station connected to a fork has an impatience strategy enabled.
+	 * Returns true if a station with a drop strategy for a class is located
+	 * between fork/join.
+	 *
+	 * @return true if a station with a drop strategy for a class is located
+	 * between fork/join.
 	 */
-	public boolean isThereImpatienceInStationBetweenForkJoinError() {
-		return errors[IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR];
+	public boolean isThereDropEnabledBetweenForkJoinError() {
+		return errors[DROP_ENABLED_BETWEEN_FORK_JOIN_ERROR];
 	}
 
+	/**
+	 * Returns true if a station with an impatience strategy is located between
+	 * fork/join.
+	 *
+	 * @return true if a station with an impatience strategy is located between
+	 * fork/join.
+	 */
+	public boolean isThereImpatienceEnabledBetweenForkJoinError() {
+		return errors[IMPATIENCE_ENABLED_BETWEEN_FORK_JOIN_ERROR];
+	}
 
 	/**
 	 * Returns true if a server has different queue strategies.
@@ -925,6 +918,17 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
+	 * Returns true if a station with a class switch routing strategy is
+	 * located between fork/join.
+	 *
+	 * @return true if a station uses a class switch routing strategy is
+	 * located between fork/join.
+	 */
+	public boolean isThereClassSwitchRoutingBetweenForkJoinWarning() {
+		return warnings[CLASS_SWITCH_ROUTING_BETWEEN_FORK_JOIN_WARNING];
+	}
+
+	/**
 	 * Returns true if a station uses priority scheduling but all the classes
 	 * have the same priority.
 	 *
@@ -1049,17 +1053,6 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of class switches with a
-	 * matrix in which some rows sum to less than one.
-	 *
-	 * @return a Vector<Object> containing the keys of class switches with a
-	 * matrix in which some rows sum to less than one.
-	 */
-	public Vector<Object> getClassSwitchesWithInvalidMatrix() {
-		return classSwitchesWithInvalidMatrix;
-	}
-
-	/**
 	 * Returns a HashMap where the key is the key of a station. For each
 	 * station that uses a Guard strategy with zero tasks for a class, it
 	 * contains a Vector<Object> with the keys of classes for which the problem
@@ -1102,6 +1095,28 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public Vector<Object> getTransitionsWithInfiniteEnablingDegree() {
 		return transitionsWithInfiniteEnablingDegree;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of stations using a drop
+	 * strategy for a class but located between fork/join.
+	 *
+	 * Returns a Vector<Object> containing the keys of stations using a drop
+	 * strategy for a class but located between fork/join.
+	 */
+	public Vector<Object> getStationsWithDropStrategyBetweenForkJoin() {
+		return stationsWithDropStrategyBetweenForkJoin;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of stations using an
+	 * impatience strategy for a class but located between fork/join.
+	 *
+	 * Returns a Vector<Object> containing the keys of stations using an
+	 * impatience strategy for a class but located between fork/join.
+	 */
+	public Vector<Object> getStationsWithImpatienceStrategyBetweenForkJoin() {
+		return stationsWithImpatienceStrategyBetweenForkJoin;
 	}
 
 	/**
@@ -1204,14 +1219,25 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of class switches between
-	 * fork/join.
+	 * Returns a Vector<Object> containing the keys of class switches located
+	 * between fork/join.
 	 *
-	 * @return a Vector<Object> containing the keys of class switches between
-	 * fork/join.
+	 * @return a Vector<Object> containing the keys of class switches located
+	 * between fork/join.
 	 */
 	public Vector<Object> getClassSwitchesBetweenForkJoin() {
 		return classSwitchesBetweenForkJoin;
+	}
+
+	/**
+	 * Returns a Vector<Object> containing the keys of stations using a class
+	 * switch routing strategy but located between fork/join.
+	 *
+	 * @return a Vector<Object> containing the keys of stations using a class
+	 * switch routing strategy but located between fork/join.
+	 */
+	public Vector<Object> getStationsWithClassSwitchRoutingBetweenForkJoin() {
+		return stationsWithClassSwitchRoutingBetweenForkJoin;
 	}
 
 	/**
@@ -1226,11 +1252,11 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of transitions between
-	 * fork/join.
+	 * Returns a Vector<Object> containing the keys of transitions located
+	 * between fork/join.
 	 *
-	 * @return a Vector<Object> containing the keys of transitions between
-	 * fork/join.
+	 * @return a Vector<Object> containing the keys of transitions located
+	 * between fork/join.
 	 */
 	public Vector<Object> getTransitionsBetweenForkJoin() {
 		return transitionsBetweenForkJoin;
@@ -1267,11 +1293,6 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public Vector<Object> getTransitionsWithoutFiringOutcome() {
 		return transitionsWithoutFiringOutcome;
-	}
-
-	//TODO rose: do we need this
-	public Vector<Object> getStationsWithImpatienceAndConnectedToFork() {
-		return stationsWithImpatienceAndConnectedToFork;
 	}
 
 	/**
@@ -1494,7 +1515,8 @@ public class ModelChecker implements CommonConstants {
 			}
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
-				Integer priority = stationStrategy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
+				Integer priority = (stationStrategy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
+						|| stationStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY))
 						? class_def.getClassPriority(thisClass) : Integer.valueOf(0);
 				String strategy = station_def.getQueueStrategy(thisServer, thisClass);
 				if (!strategies.containsKey(priority)) {
@@ -1523,8 +1545,8 @@ public class ModelChecker implements CommonConstants {
 				String queueStrategy = station_def.getQueueStrategy(thisServer, thisClass);
 				Object serviceStrategy = station_def.getServiceTimeDistribution(thisServer, thisClass);
 				if ((queueStrategy.equals(QUEUE_STRATEGY_SJF) || queueStrategy.equals(QUEUE_STRATEGY_LJF)
-						|| queueStrategy.equals(QUEUE_STRATEGY_SEPT) || queueStrategy.equals(QUEUE_STRATEGY_LEPT))
-						&& serviceStrategy instanceof LDStrategy) {
+						|| queueStrategy.equals(QUEUE_STRATEGY_SEPT) || queueStrategy.equals(QUEUE_STRATEGY_LEPT)
+						|| queueStrategy.equals(QUEUE_STRATEGY_SRPT)) && serviceStrategy instanceof LDStrategy) {
 					serversWithUnpredictableService.add(thisServer);
 					errors[UNPREDICTABLE_SERVICE_ERROR] = true;
 					break;
@@ -1682,31 +1704,6 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Checks if a class switch has a matrix in which some rows sum to less
-	 * than one.
-	 */
-	private void checkForClassSwitchInvalidMatrixError() {
-		Vector<Object> classSwitches = station_def.getStationKeysClassSwitch();
-		Vector<Object> classes = class_def.getClassKeys();
-		for (int i = 0; i < classSwitches.size(); i++) {
-			Object thisClassSwitch = classSwitches.get(i);
-			for (int j = 0; j < classes.size(); j++) {
-				Object classInKey = classes.get(j);
-				float row = 0;
-				for (int k = 0; k < classes.size(); k++) {
-					Object classOutKey = classes.get(k);
-					row += station_def.getClassSwitchMatrix(thisClassSwitch, classInKey, classOutKey);
-				}
-				if (row < 1) {
-					classSwitchesWithInvalidMatrix.add(thisClassSwitch);
-					errors[CLASS_SWITCH_INVALID_MATRIX_ERROR] = true;
-					break;
-				}
-			}
-		}
-	}
-
-	/**
 	 * Checks if a class switch is in the model and closed classes have
 	 * different reference stations.
 	 */
@@ -1816,6 +1813,7 @@ public class ModelChecker implements CommonConstants {
 			} else {
 				for (int j = 0; j < size; j++) {
 					boolean hasSpecifiedValues = false;
+					OUTER_LOOP:
 					for (Object stationInKey : stationInKeys) {
 						for (Object classKey : classKeys) {
 							int enablingValue = station_def.getEnablingCondition(thisTransition, j,
@@ -1824,6 +1822,7 @@ public class ModelChecker implements CommonConstants {
 									stationInKey, classKey).intValue();
 							if (enablingValue > 0 || inhibitingValue > 0) {
 								hasSpecifiedValues = true;
+								break OUTER_LOOP;
 							}
 						}
 					}
@@ -1838,49 +1837,75 @@ public class ModelChecker implements CommonConstants {
 		}
 	}
 
-
-	/** Checks if there is an impatience strategy selected at a station connected to a fork. */
-	private void checkForImpatienceEnabledInStationBetweenForkJoinError() {
-		Vector<Object> stations = station_def.getStationKeys();
+	/**
+	 * Checks if a station with a drop strategy for a class is located between
+	 * fork/join.
+	 */
+	private void checkForDropEnabledBetweenForkJoinError() {
 		Vector<Object> classes = class_def.getClassKeys();
-		Vector<Object> forks = station_def.getStationKeysFork();
-		Vector<Object> stationsWithImpatience = new Vector<>();
-
-		// Get all the stations that have impatience
-		for (Object currentStation : stations) {
-			if (!station_def.getStationType(currentStation).equals(STATION_TYPE_SERVER)) {
-				continue;
-			}
-
-			for (Object currentClass : classes) {
-				if (station_def.getImpatienceType(currentStation, currentClass) != ImpatienceType.NONE) {
-					stationsWithImpatience.add(currentStation);
+		Vector<Object> stations = station_def.getStationKeys();
+		Vector<Object> stationsWithDropStrategy = new Vector<Object>();
+		for (int i = 0; i < stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			for (int j = 0; j < classes.size(); j++) {
+				Object thisClass = classes.get(j);
+				Integer stationQueueCapacity = station_def.getStationQueueCapacity(thisStation);
+				Integer queueCapacity = station_def.getQueueCapacity(thisStation, thisClass);
+				String dropRule = station_def.getDropRule(thisStation, thisClass);
+				if (((stationQueueCapacity != null && stationQueueCapacity.intValue() >= 1)
+						|| (queueCapacity != null && queueCapacity.intValue() >= 1))
+						&& (dropRule != null && dropRule.equals(FINITE_DROP))) {
+					stationsWithDropStrategy.add(thisStation);
 					break;
 				}
 			}
 		}
-
-		// Return if no stations have impatience set
-		if (stationsWithImpatience.isEmpty()) {
-			return;
+		Vector<Object> forks = station_def.getStationKeysFork();
+		Vector<Object> stationsBetweenForkJoin = new Vector<Object>();
+		for (int i = 0; i < forks.size(); i++) {
+			Object thisFork = forks.get(i);
+			Vector<Object> result = searchForStationBetweenForkJoin(null, thisFork);
+			stationsBetweenForkJoin.removeAll(result);
+			stationsBetweenForkJoin.addAll(result);
 		}
+		stationsWithDropStrategyBetweenForkJoin.addAll(stationsWithDropStrategy);
+		stationsWithDropStrategyBetweenForkJoin.retainAll(stationsBetweenForkJoin);
+		if (!stationsWithDropStrategyBetweenForkJoin.isEmpty()) {
+			errors[DROP_ENABLED_BETWEEN_FORK_JOIN_ERROR] = true;
+		}
+	}
 
-		// Check if stations with impatience are connected to a fork
-		for (Object fork : forks) {
-			Vector<Object> stationsBetweenForkJoin = searchForStationBetweenForkJoin(STATION_TYPE_SERVER,
-							fork);
-
-			if (stationsBetweenForkJoin == null) {
-				continue;
-			}
-
-			for (Object currentStation : stationsBetweenForkJoin) {
-				if (stationsWithImpatience.contains(currentStation)) {
-					stationsWithImpatienceAndConnectedToFork.add(currentStation);
-					errors[IMPATIENCE_ENABLED_IN_STATION_BETWEEN_FORK_JOIN_ERROR] = true;
-					return;
+	/**
+	 * Checks if a station with an impatience strategy for a class is located
+	 * between fork/join.
+	 */
+	private void checkForImpatienceEnabledBetweenForkJoinError() {
+		Vector<Object> classes = class_def.getClassKeys();
+		Vector<Object> stations = station_def.getStationKeys();
+		Vector<Object> stationsWithImpatienceStrategy = new Vector<Object>();
+		for (int i = 0; i < stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			for (int j = 0; j < classes.size(); j++) {
+				Object thisClass = classes.get(j);
+				ImpatienceType impatienceType = station_def.getImpatienceType(thisStation, thisClass);
+				if (impatienceType != null && impatienceType != ImpatienceType.NONE) {
+					stationsWithImpatienceStrategy.add(thisStation);
+					break;
 				}
 			}
+		}
+		Vector<Object> forks = station_def.getStationKeysFork();
+		Vector<Object> stationsBetweenForkJoin = new Vector<Object>();
+		for (int i = 0; i < forks.size(); i++) {
+			Object thisFork = forks.get(i);
+			Vector<Object> result = searchForStationBetweenForkJoin(null, thisFork);
+			stationsBetweenForkJoin.removeAll(result);
+			stationsBetweenForkJoin.addAll(result);
+		}
+		stationsWithImpatienceStrategyBetweenForkJoin.addAll(stationsWithImpatienceStrategy);
+		stationsWithImpatienceStrategyBetweenForkJoin.retainAll(stationsBetweenForkJoin);
+		if (!stationsWithImpatienceStrategyBetweenForkJoin.isEmpty()) {
+			errors[IMPATIENCE_ENABLED_BETWEEN_FORK_JOIN_ERROR] = true;
 		}
 	}
 
@@ -2232,6 +2257,40 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
+	 * Checks if a station with a class switch routing strategy is located
+	 * between fork/join.
+	 */
+	private void checkForClassSwitchRoutingBetweenForkJoinWarning() {
+		Vector<Object> stations = station_def.getStationKeys();
+		Vector<Object> classes = class_def.getClassKeys();
+		Vector<Object> stationsWithClassSwitchRouting = new Vector<Object>();
+		for (int i = 0; i < stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			for (int j = 0; j < classes.size(); j++) {
+				Object thisClass = classes.get(j);
+				Object strategy = station_def.getRoutingStrategy(thisStation, thisClass);
+				if (strategy instanceof ClassSwitchRouting) {
+					stationsWithClassSwitchRouting.add(thisStation);
+					break;
+				}
+			}
+		}
+		Vector<Object> forks = station_def.getStationKeysFork();
+		Vector<Object> stationsBetweenForkJoin = new Vector<Object>();
+		for (int i = 0; i < forks.size(); i++) {
+			Object thisFork = forks.get(i);
+			Vector<Object> result = searchForStationBetweenForkJoin(null, thisFork);
+			stationsBetweenForkJoin.removeAll(result);
+			stationsBetweenForkJoin.addAll(result);
+		}
+		stationsWithClassSwitchRoutingBetweenForkJoin.addAll(stationsWithClassSwitchRouting);
+		stationsWithClassSwitchRoutingBetweenForkJoin.retainAll(stationsBetweenForkJoin);
+		if (!stationsWithClassSwitchRoutingBetweenForkJoin.isEmpty()) {
+			warnings[CLASS_SWITCH_ROUTING_BETWEEN_FORK_JOIN_WARNING] = true;
+		}
+	}
+
+	/**
 	 * Checks if a station uses priority scheduling but all the classes have
 	 * the same priority.
 	 */
@@ -2254,7 +2313,8 @@ public class ModelChecker implements CommonConstants {
 		for (int i = 0; i < stations.size(); i++) {
 			Object thisStation = stations.get(i);
 			String stationStrategy = station_def.getStationQueueStrategy(thisStation);
-			if (stationStrategy != null && stationStrategy.equals(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
+			if (stationStrategy != null && (stationStrategy.equals(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
+					|| stationStrategy.equals(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY))) {
 				stationsWithPriorityScheduling.add(thisStation);
 				warnings[SCHEDULING_SAME_PRIORITY_WARNING] = true;
 			}
@@ -2302,6 +2362,7 @@ public class ModelChecker implements CommonConstants {
 			} else {
 				for (int j = 0; j < size; j++) {
 					boolean hasSpecifiedValues = false;
+					OUTER_LOOP:
 					for (Object stationInKey : stationInKeys) {
 						for (Object classKey : classKeys) {
 							int enablingValue = station_def.getEnablingCondition(thisTransition, j,
@@ -2310,6 +2371,7 @@ public class ModelChecker implements CommonConstants {
 									stationInKey, classKey).intValue();
 							if (enablingValue > 0 || inhibitingValue > 0) {
 								hasSpecifiedValues = true;
+								break OUTER_LOOP;
 							}
 						}
 					}
@@ -2342,6 +2404,7 @@ public class ModelChecker implements CommonConstants {
 			int size = station_def.getTransitionModeListSize(thisTransition);
 			for (int j = 0; j < size; j++) {
 				boolean hasInvalidValues = false;
+				OUTER_LOOP:
 				for (Object stationInKey : stationInKeys) {
 					for (Object classKey : classKeys) {
 						int enablingValue = station_def.getEnablingCondition(thisTransition, j,
@@ -2350,6 +2413,7 @@ public class ModelChecker implements CommonConstants {
 								stationInKey, classKey).intValue();
 						if (inhibitingValue > 0 && enablingValue >= inhibitingValue) {
 							hasInvalidValues = true;
+							break OUTER_LOOP;
 						}
 					}
 				}
@@ -2381,12 +2445,14 @@ public class ModelChecker implements CommonConstants {
 				int size = station_def.getTransitionModeListSize(thisTransition);
 				for (int j = 0; j < size; j++) {
 					boolean hasSpecifiedValues = false;
+					OUTER_LOOP:
 					for (Object stationOutKey : stationOutKeys) {
 						for (Object classKey : classKeys) {
 							int firingValue = station_def.getFiringOutcome(thisTransition, j,
 									stationOutKey, classKey).intValue();
 							if (firingValue > 0) {
 								hasSpecifiedValues = true;
+								break OUTER_LOOP;
 							}
 						}
 					}
@@ -2414,6 +2480,7 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> found = new Vector<Object>(0, 1);
 		Map<Object, Boolean> reachable = new HashMap<Object, Boolean>(0, 1);
 		searchForStationBetweenForkJoinAux(type, start, start, 0, reachable, found);
+		found.remove(start);
 		return found;
 	}
 
@@ -2445,7 +2512,8 @@ public class ModelChecker implements CommonConstants {
 				reachable.put(source, true);
 			}
 		}
-		if (station_def.getStationType(source).equals(type) && reachable.get(source)) {
+		// If type is null, any type of station is considered
+		if ((type == null || station_def.getStationType(source).equals(type)) && reachable.get(source)) {
 			found.add(source);
 		}
 		return;

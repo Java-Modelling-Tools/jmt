@@ -90,7 +90,8 @@ public class Firing extends OutputSection {
 	@Override
 	protected int process(NetMessage message) throws NetException {
 		Object data = message.getData();
-        NetSystem netSystem = message.getDestination().getNetSystem();
+		NetSystem netSystem = getOwnerNode().getNetSystem();
+		RandomEngine randomEngine = netSystem.getEngine();
 
 		switch (message.getEvent()) {
 
@@ -120,7 +121,6 @@ public class Firing extends OutputSection {
 					for (int j = 0; j < releasedJobNumberForClass; j++) {
 						pickedForkJobInfos[j] = forkJobInfoLists[i].get(j);
 					}
-					RandomEngine randomEngine = this.getNetSytem().getEngine();
 					for (int j = releasedJobNumberForClass; j < forkJobInfoLists[i].size(); j++) {
 						int k = (int) Math.floor(randomEngine.raw() * (j + 1));
 						if (k < releasedJobNumberForClass) {
@@ -130,20 +130,20 @@ public class Firing extends OutputSection {
 
 					for (int j = 0; j < releasedJobNumberForClass; j++) {
 						ForkJob newForkJob = new ForkJob(jobClasses.get(i), pickedForkJobInfos[j]);
-                        newForkJob.initialize(netSystem); 
+						newForkJob.initialize(netSystem);
 						newJobLists[i].add(newForkJob);
 					}
 					showForkJobNumWarning(modeIndex, modeName);
 				} else if (releasedJobNumberForClass == forkJobInfoLists[i].size()) {
 					for (int j = 0; j < releasedJobNumberForClass; j++) {
 						ForkJob newForkJob = new ForkJob(jobClasses.get(i), forkJobInfoLists[i].get(j));
-                        newForkJob.initialize(netSystem); 
+						newForkJob.initialize(netSystem);
 						newJobLists[i].add(newForkJob);
 					}
 				} else {
 					for (int j = 0; j < forkJobInfoLists[i].size(); j++) {
 						ForkJob newForkJob = new ForkJob(jobClasses.get(i), forkJobInfoLists[i].get(j));
-                        newForkJob.initialize(netSystem); 
+						newForkJob.initialize(netSystem);
 						newJobLists[i].add(newForkJob);
 					}
 
@@ -151,7 +151,7 @@ public class Firing extends OutputSection {
 							- (totalLifetimes[i] / (releasedJobNumberForClass - forkJobInfoLists[i].size()));
 					for (int j = forkJobInfoLists[i].size(); j < releasedJobNumberForClass; j++) {
 						Job newJob = new Job(jobClasses.get(i), netJobsList);
-                        newJob.initialize(netSystem); 
+						newJob.initialize(netSystem);
 						updateVisitPath(newJob);
 						newJob.setSystemEnteringTime(averageEnteringTime);
 						newJobLists[i].add(newJob);
@@ -159,7 +159,6 @@ public class Firing extends OutputSection {
 				}
 
 				if (forkJobInfoLists[i].size() > 0) {
-					RandomEngine randomEngine = this.getNetSytem().getEngine();
 					// Durstenfeld Shuffle
 					for (int j = newJobLists[i].size() - 1; j > 0; j--) {
 						int k = (int) Math.floor(randomEngine.raw() * (j + 1));
@@ -171,7 +170,6 @@ public class Firing extends OutputSection {
 				newJobIterators[i] = newJobLists[i].iterator();
 			}
 
-			RandomEngine randomEngine = this.getNetSytem().getEngine();
 			// Durstenfeld Shuffle
 			for (int i = nodeNamePermutation.length - 1; i > 0; i--) {
 				int j = (int) Math.floor(randomEngine.raw() * (i + 1));
@@ -191,11 +189,11 @@ public class Firing extends OutputSection {
 					int releasedJobNumber = firingOutcomes[modeIndex].getEntry(nodeName, i);
 					for (int j = 0; j < releasedJobNumber; j++) {
 						Job job = newJobIterators[i].next();
-                        jobPermutation[index] = job;
+						jobPermutation[index] = job;
 						index++;
 					}
 				}
-                
+
 				// Durstenfeld Shuffle
 				for (int i = jobPermutation.length - 1; i > 0; i--) {
 					int j = (int) Math.floor(randomEngine.raw() * (i + 1));
@@ -242,18 +240,14 @@ public class Firing extends OutputSection {
 	/**
 	 * Shows the fork job number warning.
 	 */
-	private void showForkJobNumWarning(int modeIndex, String modeName) {
+	private void showForkJobNumWarning(int modeIndex, final String modeName) {
 		if (!isForkJobNumWarningShown[modeIndex]) {
 			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {
 				System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
 						+ " failed to maintain the equilibrium between input and output tasks in "
 						+ modeName + ".");
 			} else {
-				class OneShotTask implements Runnable {
-					String modeName;
-					public OneShotTask(String modeName) {
-						this.modeName = modeName;
-					}
+				new Thread(new Runnable() {
 					@Override
 					public void run() {
 						try {
@@ -264,8 +258,7 @@ public class Firing extends OutputSection {
 								+ " failed to maintain the equilibrium between input and output tasks in "
 								+ modeName + ".", "JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
 					}
-				}
-				(new Thread(new OneShotTask(modeName))).start();
+				}).start();
 			}
 			isForkJobNumWarningShown[modeIndex] = true;
 		}

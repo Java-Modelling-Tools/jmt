@@ -57,7 +57,6 @@ public interface XMLConstantNames {
 	public static final String XML_A_PARAMETER_NAME = "name";
 	public static final String XML_A_PARAMETER_CLASSPATH = "classPath";
 	public static final String XML_A_PARAMETER_ARRAY = "array";
-	public static final String XML_A_PARAMETER_DIRECT = "isDirect";
 	public static final String XML_E_PARAMETER_VALUE = "value";
 	public static final String XML_E_PARAMETER_REFCLASS = "refClass";
 
@@ -66,6 +65,7 @@ public interface XMLConstantNames {
 	public static final String XML_A_SUBPARAMETER_CLASSPATH = "classPath";
 	public static final String XML_A_SUBPARAMETER_ARRAY = "array";
 	public static final String XML_E_SUBPARAMETER_VALUE = "value";
+	public static final String XML_E_SUBPARAMETER_REFCLASS = "refClass";
 
 	public static final String XML_E_MEASURE = "measure";
 	public static final String XML_A_MEASURE_NAME = "name";

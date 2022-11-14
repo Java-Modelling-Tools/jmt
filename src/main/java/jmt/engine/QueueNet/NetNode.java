@@ -29,8 +29,6 @@ import jmt.engine.dataAnalysis.SimParameters;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.simEngine.*;
 
-import java.util.ListIterator;
-
 /**
  * This class implements a generic QueueNetwork node.
  * @author Francesco Radaelli, Stefano Omini, Marco Bertoli
@@ -340,27 +338,30 @@ public class NetNode extends SimEntity {
 		case SimConstants.LIST_RESIDENCE_TIME:
 			jobsList.analyzeResidenceTime(jobClass, measurement);
 			break;
+		case SimConstants.LIST_ARRIVAL_RATE:
+			jobsList.analyzeArrivalRate(jobClass, (InverseMeasure) measurement);
+			break;
+		case SimConstants.THROUGHPUT:
+			jobsList.analyzeThroughput(jobClass, (InverseMeasure) measurement);
+			break;
 		case SimConstants.LIST_DROP_RATE:
 			jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
 			break;
-			case SimConstants.LIST_RENEGING_RATE:
-				jobsList.analyzeRenegingRate(jobClass, (InverseMeasure) measurement);
-				break;
-			case SimConstants.LIST_BALKING_RATE:
-				jobsList.analyzeBalkingRate(jobClass, (InverseMeasure) measurement);
-				break;
-			case SimConstants.LIST_RETRIAL_RATE:
-				jobsList.analyzeRetrialAttemptsRate(jobClass, (InverseMeasure) measurement);
-				break;
-			case SimConstants.LIST_RETRIAL_ORBIT_SIZE:
-				jobsList.analyzeRetrialOrbitSize(jobClass, measurement);
-				break;
-			case SimConstants.LIST_WAITING_TIME:
-				jobsList.analyzeWaitingTime(jobClass, measurement);
-				break;
-			case SimConstants.LIST_BUSY_SERVERS:
-				jobsList.analyzeBusyServersVar(jobClass, measurement);
-				break;
+		case SimConstants.LIST_BALKING_RATE:
+			jobsList.analyzeBalkingRate(jobClass, (InverseMeasure) measurement);
+			break;
+		case SimConstants.LIST_RENEGING_RATE:
+			jobsList.analyzeRenegingRate(jobClass, (InverseMeasure) measurement);
+			break;
+		case SimConstants.LIST_RETRIAL_RATE:
+			jobsList.analyzeRetrialAttemptsRate(jobClass, (InverseMeasure) measurement);
+			break;
+		case SimConstants.LIST_RETRIAL_ORBIT_SIZE:
+			jobsList.analyzeRetrialOrbitSize(jobClass, measurement);
+			break;
+		case SimConstants.LIST_RETRIAL_ORBIT_TIME:
+			jobsList.analyzeRetrialOrbitTime(jobClass, measurement);
+			break;
 		case SimConstants.RESPONSE_TIME_PER_SINK:
 			jobsList.analyzeResponseTimePerSink(jobClass, measurement);
 			break;
@@ -440,10 +441,10 @@ public class NetNode extends SimEntity {
 
 		//Look if message is a job message and if job is arriving at this node (from the node
 		//itself or from another node)
-				int event = message.getEvent();
+		int event = message.getEvent();
 		Job job = message.getJob();
 		switch(event) {
-			case NetEvent.EVENT_JOB:
+		case NetEvent.EVENT_JOB:
 			if ((message.getSource() != this) || ((message.getSource() == this)
 					&& (message.getSourceSection() == NodeSection.OUTPUT && message.getDestinationSection() == NodeSection.INPUT))) {
 				inputSection.updateVisitPath(job);
@@ -452,13 +453,12 @@ public class NetNode extends SimEntity {
 				}
 			}
 			break;
-			case NetEvent.EVENT_RETRIAL:
-				inputSection.updateVisitPath(job);
-				break;
-			case NetEvent.EVENT_RETRIAL_JOB:
-				jobsList.add(new JobInfo(job));
-				break;
-
+		case NetEvent.EVENT_RETRIAL:
+			inputSection.updateVisitPath(job);
+			break;
+		case NetEvent.EVENT_RETRIAL_JOB:
+			jobsList.add(new JobInfo(job));
+			break;
 		}
 	}
 
@@ -644,8 +644,8 @@ public class NetNode extends SimEntity {
 				}
 			}
 		}
-		 if (event == NetEvent.EVENT_RETRIAL) {
-			 removeJobFromNodeJobsListOnly((Job) data, event);
+		if (event == NetEvent.EVENT_RETRIAL) {
+			removeJobFromNodeJobsListOnly((Job) data);
 		}
 
 		//
@@ -679,14 +679,14 @@ public class NetNode extends SimEntity {
 		return false;
 	}
 
-		/**
+	/**
 	 * Helper function to remove job from the NodeJobsList
 	 * @param data the jobInfo data looking to be removed.
 	 */
-	public boolean removeJobFromNodeJobsListOnly(Job data, int event) {
+	public boolean removeJobFromNodeJobsListOnly(Job data) {
 		Job job = data;
 		JobInfo jobInfo = jobsList.lookFor(job);
-		if (jobInfo != null && event == NetEvent.EVENT_RETRIAL) {
+		if (jobInfo != null) {
 			jobsList.removeOnly(jobInfo);
 			return true;
 		}
@@ -746,7 +746,7 @@ public class NetNode extends SimEntity {
 		// When a node is linked to a network, connections between nodes must
 		// have been already done!!!
 		jobsList = new LinkedJobInfoList(getJobClasses().size());
-        jobsList.setNetSystem(network.getNetSystem()); 
+		jobsList.setNetSystem(network.getNetSystem()); 
 	}
 
 	@Override
@@ -891,7 +891,8 @@ public class NetNode extends SimEntity {
 		}
 	}
 
-	public NetSystem getNetSystem(){
+	public NetSystem getNetSystem() {
 		return network.getNetSystem();
 	}
+
 }

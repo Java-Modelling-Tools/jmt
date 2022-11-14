@@ -194,13 +194,12 @@ public class GuiXMLWriter implements GuiXMLConstants {
 	 */
 	static protected void writeConnectionShapes(Document doc, Node guiNode, JSimGraphModel model) {
 		Vector<Object> stations = model.getStationKeys();
-		Element connectionshape, arc, sourceArc, targetArc , controlPointSource, controlPointTarget;
+		Element connectionshape, arc, sourceArc, targetArc, controlPointSource, controlPointTarget;
 		Integer arcsNb;
-
 		// For each pair of station, we test if a connection shape has been defined
 		for (int i = 0; i < stations.size(); i++) {
 			for (int j = 0; j < stations.size(); j++) {
-				if (model.hasConnectionShape(stations.get(i),stations.get(j))){
+				if (model.hasConnectionShape(stations.get(i), stations.get(j))) {
 					//if a connection shape has been defined for the pair of stations, we insert the connection shape
 					//in the document
 					connectionshape = doc.createElement(XML_E_CONNECTION_SHAPE);
@@ -208,22 +207,22 @@ public class GuiXMLWriter implements GuiXMLConstants {
 					connectionshape.setAttribute(XML_A_CONNECTION_TARGET, model.getStationName(stations.get(j)));
 
 					//Then we get the number of arcs
-					arcsNb=model.getConnectionShape(stations.get(i),stations.get(j)).getArcsNb();
+					arcsNb = model.getConnectionShape(stations.get(i), stations.get(j)).getArcsNb();
 					for (int k = 0; k < arcsNb; k++) {
 						arc = doc.createElement(XML_E_ARC);
-						sourceArc=doc.createElement(XML_E_SOURCE);
-						controlPointSource=doc.createElement(XML_E_POINT);
-						controlPointTarget=doc.createElement(XML_E_POINT);
-						targetArc=doc.createElement(XML_E_TARGET);
+						sourceArc = doc.createElement(XML_E_SOURCE);
+						controlPointSource = doc.createElement(XML_E_POINT);
+						controlPointTarget = doc.createElement(XML_E_POINT);
+						targetArc = doc.createElement(XML_E_TARGET);
 
-						sourceArc.setAttribute(XML_A_SOURCE_X, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getSource().getX()));
-						sourceArc.setAttribute(XML_A_SOURCE_Y, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getSource().getY()));
-						controlPointSource.setAttribute(XML_A_POINT_X, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getArcPoints().get(0).getX()));
-						controlPointSource.setAttribute(XML_A_POINT_Y, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getArcPoints().get(0).getY()));
-						controlPointTarget.setAttribute(XML_A_POINT_X,String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getArcPoints().get(1).getX()));
-						controlPointTarget.setAttribute(XML_A_POINT_Y,String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getArcPoints().get(1).getY()));
-						targetArc.setAttribute(XML_A_TARGET_X, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getTarget().getX()));
-						targetArc.setAttribute(XML_A_TARGET_Y, String.valueOf(model.getConnectionShape(stations.get(i),stations.get(j)).getArc(k).getTarget().getY()));
+						sourceArc.setAttribute(XML_A_SOURCE_X, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getSource().getX()));
+						sourceArc.setAttribute(XML_A_SOURCE_Y, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getSource().getY()));
+						controlPointSource.setAttribute(XML_A_POINT_X, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getArcPoints().get(0).getX()));
+						controlPointSource.setAttribute(XML_A_POINT_Y, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getArcPoints().get(0).getY()));
+						controlPointTarget.setAttribute(XML_A_POINT_X, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getArcPoints().get(1).getX()));
+						controlPointTarget.setAttribute(XML_A_POINT_Y, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getArcPoints().get(1).getY()));
+						targetArc.setAttribute(XML_A_TARGET_X, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getTarget().getX()));
+						targetArc.setAttribute(XML_A_TARGET_Y, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getTarget().getY()));
 
 						connectionshape.appendChild(arc);
 						arc.appendChild(sourceArc);
@@ -232,7 +231,6 @@ public class GuiXMLWriter implements GuiXMLConstants {
 						arc.appendChild(targetArc);
 					}
 					guiNode.appendChild(connectionshape);
-					
 				}
 			}
 		}

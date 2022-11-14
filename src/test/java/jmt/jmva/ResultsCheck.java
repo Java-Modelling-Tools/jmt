@@ -265,15 +265,12 @@ public class ResultsCheck {
 	 */
 	private boolean solve_jmva(File model) {
 		CommandLineSolver solver = new CommandLineSolver();
-
 		long start, stop, elapsed;
 		start = System.currentTimeMillis();
 		boolean success = solver.solve(model);
 		stop = System.currentTimeMillis();
 		elapsed = stop - start;
-
 		logger.debug("Model " + model.getAbsolutePath() + " solved in " + elapsed + " milliseconds.");
-
 		return success;
 	}
 
@@ -283,7 +280,6 @@ public class ResultsCheck {
 	 * @return true if the model has been correctly solved
 	 */
 	private boolean solve_jsim(File model) {
-
 		DispatcherJMVAschema solver = new DispatcherJMVAschema(model);
 		solver.setDeleteIntermediateFiles(deleteIntermediateSimFiles);
 		if (!automaticSeed) {

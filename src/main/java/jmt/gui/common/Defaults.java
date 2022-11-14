@@ -76,6 +76,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("stationStationQueueStrategy", STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
 		def.setProperty("stationQueueStrategy", QUEUE_STRATEGY_FCFS);
 		def.setProperty("stationServers", "1");
+		def.setProperty("stationRunningJobs", "-1");
 		def.setProperty("stationServiceStrategy", "jmt.gui.common.distributions.Exponential");
 		def.setProperty("stationDelayServiceStrategy", "jmt.gui.common.distributions.Exponential");
 		def.setProperty("stationRoutingStrategy", "jmt.gui.common.routingStrategies.RandomRouting");
@@ -94,10 +95,13 @@ public class Defaults implements CommonConstants {
 		def.setProperty("placeQueueStrategy", QUEUE_STRATEGY_FCFS);
 		def.setProperty("placeDropRule", FINITE_DROP);
 		def.setProperty("transitionModeName", "Mode");
-		def.setProperty("transitionNumberOfServers", "-1");
-		def.setProperty("transitionFiringTimeDistribution", "jmt.gui.common.distributions.Exponential");
-		def.setProperty("transitionFiringPriority", "0");
-		def.setProperty("transitionFiringWeight", "1.0");
+		def.setProperty("transitionModeNumberOfServers", "-1");
+		def.setProperty("transitionTimedModeFiringTimeDistribution", "jmt.gui.common.distributions.Exponential");
+		def.setProperty("transitionTimedModeFiringPriority", "-1");
+		def.setProperty("transitionTimedModeFiringWeight", "1.0");
+		def.setProperty("transitionImmediateModeFiringTimeDistribution", "jmt.gui.common.serviceStrategies.ZeroStrategy");
+		def.setProperty("transitionImmediateModeFiringPriority", "0");
+		def.setProperty("transitionImmediateModeFiringWeight", "1.0");
 
 		// Classes parameters defaults
 		def.setProperty("className", "Class");
@@ -146,7 +150,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("simulationPolling", "1");
 		def.setProperty("isWithAnimation", "true");
 		def.setProperty("representableClasses", "10");
-		
+
 		int logicalCores = Runtime.getRuntime().availableProcessors(); // hyper-threading doubles this
 		def.setProperty("whatIfParallelism", String.valueOf(logicalCores));
 		// GUI default parameters.
@@ -165,7 +169,7 @@ public class Defaults implements CommonConstants {
 		// Templates dialogs default parameters
 		def.setProperty("showDefaultTemplates", "true");
 		def.setProperty("showTemplateDialog", "true");
-		
+
 		// KPC fit default parameters
 		def.setProperty("autoOrder", "false");
 		def.setProperty("fitStyle", "fast");

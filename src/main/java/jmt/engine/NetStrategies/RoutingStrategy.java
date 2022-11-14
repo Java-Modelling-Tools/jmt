@@ -19,7 +19,6 @@
 package jmt.engine.NetStrategies;
 
 import jmt.common.AutoCheck;
-import jmt.engine.NodeSections.Router;
 import jmt.engine.QueueNet.*;
 
 /**
@@ -30,19 +29,10 @@ import jmt.engine.QueueNet.*;
  * @author Das Ashanka 11-2011 (Added getOutNode with NodeSection).
  */
 public abstract class RoutingStrategy implements AutoCheck {
-	/**
-	 * This method should be overridden to implement a specific strategy.
-	 * @param router List of the output nodes.
-	 * @param job Current job to be routed.
-	 * @return Selected node.
-	 */
-	public NetNode getOutClassSwitchNode(Router router, Job job) {
-		return null;
-	}
 	 
 	/**
 	 * This method should be overridden to implement a specific strategy.
-	 * @param nodeList List of the output nodes.
+	 * @param ownerNode Owner node of the output section.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
@@ -56,6 +46,16 @@ public abstract class RoutingStrategy implements AutoCheck {
 	 */
 	public NetNode getOutNode(NodeSection section, JobClass jobClass) {
 		return getOutNode(section.getOwnerNode(), jobClass);
+	}
+
+	/**
+	 * @author Ashanka
+	 * Made it normal function instead of abstract as I do not
+	 * want other Strategies to forcefully override this method.
+	 * Currently only LoadDependentRoutingStrategy overrides it.
+	 */
+	public NetNode getOutNode(NodeSection section, Job job) {
+		return getOutNode(section.getOwnerNode(), job.getJobClass());
 	}
 
 	public boolean check() {

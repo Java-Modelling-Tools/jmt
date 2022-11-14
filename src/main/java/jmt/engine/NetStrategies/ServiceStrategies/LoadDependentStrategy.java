@@ -93,11 +93,8 @@ public class LoadDependentStrategy extends ServiceStrategy {
 				item = new MeanCache(parameter, jobs);
 				cache.set(jobs, item);
 			}
-			// At this point item is retrieved from cache or parsed.
-			if (item.valid) {
-				// Note: this is needed as parameter is shared among all items of the same LDParameter
-				item.parameter.setMean(item.mean);
-			}
+			// Note: this is needed as parameter is shared among all items of the same LDParameter
+			item.parameter.setMean(item.mean);
 
 			return item.distribution.nextRand(item.parameter);
 		} catch (NetException e) {
@@ -140,8 +137,6 @@ public class LoadDependentStrategy extends ServiceStrategy {
 		public Parameter parameter;
 		/** mean value */
 		public double mean;
-		/** tells if mean field is valid */
-		public boolean valid;
 
 		/**
 		 * Creates a new MeanCache object by parsing mean value in given LDParameter
@@ -157,7 +152,6 @@ public class LoadDependentStrategy extends ServiceStrategy {
 					Parser p = ldp.getParser();
 					p.setVariable(VAR, n);
 					mean = p.getValue();
-					valid = true;
 				} catch (RuntimeException e) {
 					throw new ExpressionParseException(e.getMessage());
 				}

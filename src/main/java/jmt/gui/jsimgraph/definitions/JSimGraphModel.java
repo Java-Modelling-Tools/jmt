@@ -22,6 +22,8 @@ import java.awt.Color;
 import java.awt.geom.Point2D;
 import java.util.*;
 
+import org.jgraph.graph.GraphConstants;
+
 import jmt.engine.log.LoggerParameters;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
@@ -40,6 +42,10 @@ import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.ServiceStrategy;
 import jmt.gui.jsimgraph.JSimGraphConstants;
+import jmt.gui.jsimgraph.JGraphMod.JmtCell;
+import jmt.gui.jsimgraph.JGraphMod.JmtEdge;
+import jmt.gui.jsimgraph.JGraphMod.TransitionCell;
+import jmt.gui.jsimgraph.controller.Mediator;
 
 /**
  * <p>Title: JMODEL-Model </p>
@@ -57,6 +63,8 @@ import jmt.gui.jsimgraph.JSimGraphConstants;
 //todo MMM JMVA bridge, undo/redo
 public class JSimGraphModel extends CommonModel implements JmodelClassDefinition, JmodelStationDefinition, JmodelBlockingRegionDefinition, JSimGraphConstants {
 
+	protected Mediator mediator;
+
 	// ----- Variables -------------------------------------------------------------
 	protected HashMap<String, Integer> objectNumber = new HashMap<String, Integer>(); // Used to generate progressive unique default names
 	protected HashMap<Object, Color> classColor = new HashMap<Object, Color>(); // Used to store classes color
@@ -69,10 +77,11 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 
 	// ----- Methods----------------------------------------------------------------
 	/**
-	 * Default constructor, creates a new instance of <code>JMODELModel</code>
+	 * Default constructor, creates a new instance of <code>JMODELModel</code>.
+	 * @param mediator reference to mediator.
 	 */
-	public JSimGraphModel() {
-		super();
+	public JSimGraphModel(Mediator mediator) {
+		this.mediator = mediator;
 	}
 
 	// ----- Class Definition Methods ---------------------------------------------------------------------
@@ -285,48 +294,47 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	}
 
 	/**
-	 * Sets shape of a connection, given the search key.
+	 * Sets shape of a connection, given the source and target keys.
 	 */
-	public void setConnectionShape(Object sourceKey,Object targetKey, JMTPath path) {
-		if(connectionShapes.containsKey(sourceKey)){
+	public void setConnectionShape(Object sourceKey, Object targetKey, JMTPath path) {
+		if(connectionShapes.containsKey(sourceKey)) {
 			connectionShapes.get(sourceKey).put(targetKey, path);
-		}
-		else {
+		} else {
 			connectionShapes.put(sourceKey, new HashMap<Object, JMTPath>());
 			connectionShapes.get(sourceKey).put(targetKey, path);
 		}
 	}
 
 	/**
-	 * Delete shape of a connection, given the search key.
+	 * Delete shape of a connection, given the source and target keys.
 	 */
-	public void deleteConnectionShape(Object sourceKey,Object targetKey) {
-		if(connectionShapes.containsKey(sourceKey)){
+	public void deleteConnectionShape(Object sourceKey, Object targetKey) {
+		if(connectionShapes.containsKey(sourceKey)) {
 			connectionShapes.get(sourceKey).remove(targetKey);
 		}
 	}
 
 	/**
-	 * Returns shape of a connection, given the search key.
+	 * Returns shape of a connection, given the source and target keys.
 	 */
-	public JMTPath getConnectionShape(Object sourceKey,Object targetKey) {
+	public JMTPath getConnectionShape(Object sourceKey, Object targetKey) {
 		return connectionShapes.get(sourceKey).get(targetKey);
 	}
 
 	/**
-	 * Returns shape of a connection, given the search key.
+	 * Returns shapes of connections, given the source key.
 	 */
 	public HashMap<Object, JMTPath> getConnectionShapesFromSource(Object sourceKey) {
 		return connectionShapes.get(sourceKey);
 	}
 
 	/**
-	 * Returns shape of a connection, given the search key.
+	 * Returns shapes of connections, given the target key.
 	 */
 	public HashMap<Object, JMTPath> getConnectionShapesFromTarget(Object targetKey) {
 		HashMap<Object, JMTPath> res = new HashMap<>();
 		for (Object key : connectionShapes.keySet()) {
-			if(connectionShapes.get(key).containsKey(targetKey)){
+			if(connectionShapes.get(key).containsKey(targetKey)) {
 				res.put(targetKey, connectionShapes.get(key).get(targetKey));
 			}
 		}
@@ -334,27 +342,132 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	}
 
 	/**
-	 * Returns true if a connection shape exists, given the search key.
+	 * Returns true if a connection shape exists, given the source and target keys.
 	 */
-	public boolean hasConnectionShape(Object sourceKey,Object targetKey) {
-		if(connectionShapes.containsKey(sourceKey)){
+	public boolean hasConnectionShape(Object sourceKey, Object targetKey) {
+		if(connectionShapes.containsKey(sourceKey)) {
 			return connectionShapes.get(sourceKey).containsKey(targetKey);
-		}
-		else{
+		} else {
 			return false;
 		}
 	}
 
 	/**
-	 * Returns true if a connection shape is defined in the model
+	 * Returns true if a connection shape is defined in the model.
 	 */
 	public boolean hasConnectionShape() {
-		boolean res =false;
+		boolean res = false;
 		for (Object key : connectionShapes.keySet()) {
-			res=!(connectionShapes.get(key).isEmpty());
+			res = !(connectionShapes.get(key).isEmpty());
 		}
 		return res;
 	}
+
+	/**
+	 * Gets the icon of a station, given the search key.
+	 */
+	public String getStationIcon(Object key) {
+		StationData sd = (StationData) stationDataHM.get(key);
+		if (sd.type.equals(STATION_TYPE_TRANSITION)) {
+			boolean hasTimedModes = false;
+			boolean hasImmediateModes = false;
+			for (TransitionModeData tmd : sd.transitionModeList) {
+				if (tmd.firingTimeDistribution instanceof Distribution) { 
+					hasTimedModes = true;
+				} else {
+					hasImmediateModes = true;
+				}
+				if (hasTimedModes && hasImmediateModes) {
+					break;
+				}
+			}
+			if (hasTimedModes && hasImmediateModes) {
+				return TransitionCell.HYBRID_TRANSITION_ICON;
+			} else if (hasTimedModes && !hasImmediateModes) {
+				return TransitionCell.TIMED_TRANSITION_ICON;
+			} else if (!hasTimedModes && hasImmediateModes) {
+				return TransitionCell.IMMEDIATE_TRANSITION_ICON;
+			} else {
+				return TransitionCell.ICON;
+			}
+		} else {
+			String path = "jmt.gui.jsimgraph.JGraphMod.";
+			String className = sd.type + "Cell";
+			// Uses reflection to access to public ICON field on given class
+			try {
+				return (String) (Class.forName(path + className)).getField("ICON").get(null);
+			} catch (Exception e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+	}
+
+	/**
+	 * Sets the icon of a transition, given the search key.
+	 */
+	public void setStationIcon(Object key, String icon) {
+		JmtCell jcell = mediator.getStationCell(key);
+		jcell.setIcon(icon);
+		mediator.loadImage(jcell);
+	}
+
+	/**
+	 * Gets the end of a connection, given the source and target keys.
+	 */
+	public int getConnectionEnd(Object sourceKey, Object targetKey) {
+		StationData sd = (StationData) stationDataHM.get(targetKey);
+		if (sd.type.equals(STATION_TYPE_TRANSITION)) {
+			boolean hasEnablingValues = false;
+			boolean hasInhibitingValues = false;
+			OUTER_LOOP:
+			for (TransitionModeData tmd : sd.transitionModeList) {
+				for (Object classKey : classesKeyset) {
+					int enablingValue = tmd.enablingCondition.getEntry(sourceKey, classKey).intValue();
+					if (enablingValue > 0) {
+						hasEnablingValues = true;
+					}
+					int inhibitingValue = tmd.inhibitingCondition.getEntry(sourceKey, classKey).intValue();
+					if (inhibitingValue > 0) {
+						hasInhibitingValues = true;
+					}
+					if (hasEnablingValues && hasInhibitingValues) {
+						break OUTER_LOOP;
+					}
+				}
+			}
+			if (hasEnablingValues && hasInhibitingValues) {
+				return GraphConstants.ARROW_TECHNICAL;
+			} else if (hasEnablingValues && !hasInhibitingValues) {
+				return GraphConstants.ARROW_CLASSIC;
+			} else if (!hasEnablingValues && hasInhibitingValues) {
+				return GraphConstants.ARROW_CIRCLE;
+			} else {
+				return GraphConstants.ARROW_SIMPLE;
+			}
+		} else {
+			return GraphConstants.ARROW_CLASSIC;
+		}
+	}
+
+	/**
+	 * Sets the end of a connection, given the source and target keys.
+	 */
+	public void setConnectionEnd(Object sourceKey, Object targetKey, int end) {
+		JmtEdge jedge = mediator.getConnectionEdge(sourceKey, targetKey);
+		if (jedge.getIsBezier()) {
+			GraphConstants.setLineEnd(jedge.getAttributes(), end);
+		}
+	}
+
+	/**
+	 * Refreshes the graph component.
+	 */
+	public void refreshGraph() {
+		mediator.graphRepaint();
+		mediator.getGraph().getGraphLayoutCache().reload();
+	}
+
 	/**
 	 * Returns serialized form of a station.
 	 * @param key search key for the station.
@@ -389,6 +502,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		setStationQueueCapacity(key, ss.data.queueCapacity);
 		setStationQueueStrategy(key, ss.data.queueStrategy);
 		setStationNumberOfServers(key, ss.data.numberOfServers);
+		setStationMaxRunningJobs(key, ss.data.maxRunningJobs);
 		setForkBlock(key, ss.data.forkBlock);
 		setIsSimplifiedFork(key, ss.data.isSimplifiedFork);
 		if (ss.data.loggerParameters != null) {

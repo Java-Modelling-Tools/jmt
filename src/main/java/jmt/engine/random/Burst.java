@@ -24,7 +24,6 @@ import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.random.engine.RandomEngine;
-import jmt.engine.simEngine.SimSystem;
 
 /**
  * 
@@ -111,18 +110,16 @@ public class Burst extends NetNode implements Distribution {
 
 		// sets the starting distribution and the starting interval end
 		// move these two lines to servicestrategy
-		
 	}
-	
-	public void setRandomEngine(RandomEngine engine){
+
+	public void setRandomEngine(RandomEngine engine) {
 		this.engine = engine;
 	}
-	
-	public void initialize() throws IncorrectDistributionParameterException{
+
+	public void initialize() throws IncorrectDistributionParameterException {
 		intervalEnd = changeInterval();
 		sendMe(intervalEnd, NetEvent.EVENT_DISTRIBUTION_CHANGE);
 	}
-	
 
 	/**
 	 * Creates a new non-Round-Robin Burst distribution with the specified probability
@@ -215,13 +212,13 @@ public class Burst extends NetNode implements Distribution {
 	}
 
 	/**
-	  * This method is used to obtain from the distribution the value of its own
-	  * theoretic mean.
-	  *
-	  * @param p parameter of the constant distribution.
-	  * @throws IncorrectDistributionParameterException
-	  * @return double with the theoretic mean of the distribution.
-	  */
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic mean.
+	 *
+	 * @param p parameter of the constant distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic mean of the distribution.
+	 */
 	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
 		double probA = 0.0;
 		double probB = 0.0;

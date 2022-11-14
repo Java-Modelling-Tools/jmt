@@ -174,8 +174,14 @@ public abstract class NodeSection {
 		case SimConstants.LIST_NUMBER_OF_JOBS:
 			jobsList.analyzeUtilization(jobClass, measurement);
 			break;
+		case SimConstants.LIST_NUMBER_OF_JOBS_IN_SERVICE:
+			jobsList.analyzeEffectiveUtilization(jobClass, measurement);
+			break;
 		case SimConstants.LIST_RESIDENCE_TIME:
 			jobsList.analyzeResidenceTime(jobClass, measurement);
+			break;
+		case SimConstants.LIST_ARRIVAL_RATE:
+			jobsList.analyzeArrivalRate(jobClass, (InverseMeasure) measurement);
 			break;
 		case SimConstants.LIST_THROUGHPUT:
 			jobsList.analyzeThroughput(jobClass, (InverseMeasure) measurement);
@@ -186,6 +192,25 @@ public abstract class NodeSection {
 		default:
 			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
+	}
+
+	/**
+	 * Sets the owner node of this section.
+	 * @param ownerNode owner node.
+	 */
+	void setOwnerNode(NetNode ownerNode) throws NetException {
+		this.ownerNode = ownerNode;
+		jobsList = new LinkedJobInfoList(getJobClasses().size());
+		jobsList.setNetSystem(ownerNode.getNetSystem()); 
+		nodeLinked(ownerNode);
+	}
+
+	/**
+	 * Gets the owner node of this section.
+	 * @return Owner node.
+	 */
+	public NetNode getOwnerNode() {
+		return ownerNode;
 	}
 
 	/**
@@ -200,19 +225,19 @@ public abstract class NodeSection {
 	}
 
 	/**
-	 * Gets owner node of this section.
-	 * @return Owner node.
-	 */
-	public NetNode getOwnerNode() {
-		return ownerNode;
-	}
-
-	/**
 	 * Gets the list of the job classes of the owner queue network.
 	 * @return Queue network job classes.
 	 */
 	public JobClassList getJobClasses() {
 		return ownerNode.getJobClasses();
+	}
+
+	/**
+	 * Gets the job info list of this section.
+	 * @return Job info list.
+	 */
+	public JobInfoList getJobInfoList() {
+		return jobsList;
 	}
 
 	/**
@@ -265,14 +290,15 @@ public abstract class NodeSection {
 	 * @throws NetException if the requested property is not available.
 	 */
 	public double getDoubleSectionProperty(int id) throws NetException {
+		NetSystem netSystem = ownerNode.getNetSystem();
 		switch (id) {
 		case PROPERTY_ID_RESIDENCE_TIME:
 			return jobsList.getLastJobSojournTime();
 		case PROPERTY_ID_UTILIZATION:
 			return jobsList.size();
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (getNetSytem().getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTime() / ownerNode.getNetSystem().getTime();
+			return (netSystem.getTime() <= 0.0) ? 0.0
+					: jobsList.getTotalSojournTime() / netSystem.getTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
@@ -288,14 +314,15 @@ public abstract class NodeSection {
 	 * @throws NetException if the requested property is not available.
 	 */
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
+		NetSystem netSystem = ownerNode.getNetSystem();
 		switch (id) {
 		case PROPERTY_ID_RESIDENCE_TIME:
 			return jobsList.getLastJobSojournTimePerClass(jobClass);
 		case PROPERTY_ID_UTILIZATION:
 			return jobsList.size(jobClass);
 		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (getNetSytem().getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTimePerClass(jobClass) / ownerNode.getNetSystem().getTime();
+			return (netSystem.getTime() <= 0.0) ? 0.0
+					: jobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime();
 		default:
 			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
@@ -419,8 +446,8 @@ public abstract class NodeSection {
 				}
 			}
 		}
-		if (event == NetEvent.EVENT_RETRIAL ) {
-			updateJobsListAfterSend((Job) data, event);
+		if (event == NetEvent.EVENT_RETRIAL) {
+			updateJobsListAfterSendOnly((Job) data);
 		}
 		return ownerNode.send(event, data, delay, sectionID, destinationSection, destination);
 	}
@@ -551,28 +578,22 @@ public abstract class NodeSection {
 		}
 	}
 
-	private void updateJobsListAfterSend(Job job, int event) {
+	/**
+	 * Updates the JobInfoList after sending this job.
+	 * @param job job to be sent.
+	 */
+	private void updateJobsListAfterSendOnly(Job job) {
 		JobInfo jobInfo = jobsList.lookFor(job);
-		if (jobInfo != null & event == NetEvent.EVENT_RETRIAL) {
+		if (jobInfo != null) {
 			jobsList.removeOnly(jobInfo);
 		}
 	}
+
 	/**
-	 * Updates the JobInfoList after receiving this job.
-	 * @param job job to be received.
+	 * Receives a message to a section of a node.
+	 * @param message message to be received.
+	 * @throws NetException
 	 */
-	private void updateJobsListAfterReceive(Job job) {
-		JobInfo jobInfo = new JobInfo(job);
-		jobsList.add(jobInfo);
-	}
-
-	void setOwnerNode(NetNode ownerNode) throws NetException {
-		this.ownerNode = ownerNode;
-		jobsList = new LinkedJobInfoList(getJobClasses().size());
-        jobsList.setNetSystem(ownerNode.getNetSystem()); 
-		nodeLinked(ownerNode);
-	}
-
 	int receive(NetMessage message) throws NetException {
 		if (message.getEvent() == NetEvent.EVENT_JOB) {
 			if ((message.getSource() != ownerNode) || (message.getSource() == ownerNode && message.getSourceSection() != sectionID)) {
@@ -582,6 +603,15 @@ public abstract class NodeSection {
 			}
 		}
 		return process(message);
+	}
+
+	/**
+	 * Updates the JobInfoList after receiving this job.
+	 * @param job job to be received.
+	 */
+	private void updateJobsListAfterReceive(Job job) {
+		JobInfo jobInfo = new JobInfo(job);
+		jobsList.add(jobInfo);
 	}
 
 	/**
@@ -677,10 +707,6 @@ public abstract class NodeSection {
 
 	public void analyzeTransition(int name, String modeName, Measure measurement) throws NetException {
 		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
-	}
-
-	public NetSystem getNetSytem() {
-		return ownerNode.getNetSystem();
 	}
 
 }

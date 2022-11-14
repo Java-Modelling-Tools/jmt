@@ -33,6 +33,7 @@ import jmt.engine.QueueNet.JobInfoList;
 import jmt.engine.QueueNet.NetEvent;
 import jmt.engine.QueueNet.NetMessage;
 import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.NodeList;
 import jmt.engine.QueueNet.NodeListWithJobNum;
 import jmt.engine.QueueNet.NodeSection;
@@ -165,7 +166,9 @@ public class Fork extends OutputSection {
 			}
 
 			ForkJobInfo newJobInfo = new ForkJobInfo(job, totalOutNum, getOwnerNode());
-			RandomEngine randomEngine = this.getNetSytem().getEngine();
+
+			NetSystem netSystem = getOwnerNode().getNetSystem();
+			RandomEngine randomEngine = netSystem.getEngine();
 			// Durstenfeld Shuffle
 			NetNode[] outNodePermutation = outNodeList.toArray();
 			for (int i = outNodePermutation.length - 1; i > 0; i--) {
@@ -179,7 +182,7 @@ public class Fork extends OutputSection {
 				if (isSimplifiedFork) {
 					for (int n = 0; n < jobsPerLink; n++) {
 						ForkJob newJob = new ForkJob(jobClass, newJobInfo);
-							newJob.initialize(outNode.getNetSystem()); 
+						newJob.initialize(netSystem);
 						// Sends new job to the following station
 						send(newJob, 0.0, outNode);
 					}
@@ -192,7 +195,7 @@ public class Fork extends OutputSection {
 						int newJobNum = entry.getValue().intValue();
 						for (int n = 0; n < newJobNum; n++) {
 							ForkJob newJob =  new ForkJob(newJobClass, newJobInfo);
-                            newJob.initialize(outNode.getNetSystem()); 
+							newJob.initialize(netSystem);
 							newJobPermutation[index] = newJob;
 							index++;
 						}
@@ -224,7 +227,7 @@ public class Fork extends OutputSection {
 			break;
 
 		case NetEvent.EVENT_JOIN:
-			job = (Job) message.getData();
+			job = message.getJob();
 			if (jobs.contains(job)) {
 				// If this fork blocks, finally sends ack back and unlocks it
 				if (block >= 0 && jobs.size() >= block) {

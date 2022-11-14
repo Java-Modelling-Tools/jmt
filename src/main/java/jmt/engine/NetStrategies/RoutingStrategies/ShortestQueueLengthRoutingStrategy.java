@@ -43,13 +43,13 @@ public class ShortestQueueLengthRoutingStrategy extends RoutingStrategy {
 	/**
 	 * This strategy selects the resource with the shortest queue length
 	 * among the output nodes.
-	 * @param nodeList List of the output nodes.
+	 * @param ownerNode Owner node of the output section.
 	 * @param jobClass Class of current job to be routed.
 	 * @return Selected node.
 	 */
 	@Override
 	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
-		RandomEngine random = ownerNode.getNetSystem().getEngine();
+		RandomEngine randomEngine = ownerNode.getNetSystem().getEngine();
 		NodeList nodeList = ownerNode.getOutputNodes();
 		if (nodeList.size() == 0) {
 			return null;
@@ -98,7 +98,7 @@ public class ShortestQueueLengthRoutingStrategy extends RoutingStrategy {
 		} else if (length == 1) {
 			return output[0];
 		} else {
-			return output[(int) Math.floor(random.raw() * length)];
+			return output[(int) Math.floor(randomEngine.raw() * length)];
 		}
 	}
 

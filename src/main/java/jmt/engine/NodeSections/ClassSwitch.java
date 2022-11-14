@@ -68,17 +68,18 @@ public class ClassSwitch extends ServiceSection {
 			JobClass inClass = job.getJobClass();
 			int jobClassIn = inClass.getId();
 			int jobClassOut = chooseOutClass(matrix[jobClassIn]);
-			JobClass outClass = getJobClasses().get(jobClassOut);
-			job.setJobClass(outClass);
-			JobInfo jobInfo = jobsList.lookFor(job);
-			jobsList.getInternalJobInfoList(inClass).remove(jobInfo);
-			jobsList.getInternalJobInfoList(outClass).add(jobInfo);
-			JobInfo nodeJobInfo = nodeJobsList.lookFor(job);
-			nodeJobsList.getInternalJobInfoList(inClass).remove(nodeJobInfo);
-			nodeJobsList.getInternalJobInfoList(outClass).add(nodeJobInfo);
-			if (!(job instanceof ForkJob)) {
-				GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();
-				global.performJobClassSwitch(inClass, outClass);
+			if (jobClassIn != jobClassOut) {
+				JobClass outClass = getJobClasses().get(jobClassOut);
+				job.setNextJobClass(outClass);
+				JobInfo jobInfo = jobsList.lookFor(job);
+				jobsList.switchJob(jobInfo);
+				JobInfo nodeJobInfo = nodeJobsList.lookFor(job);
+				nodeJobsList.switchJob(nodeJobInfo);
+				if (!(job instanceof ForkJob)) {
+					GlobalJobInfoList netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
+					netJobsList.performJobClassSwitch(inClass, outClass);
+				}
+				job.setJobClass(outClass);
 			}
 			sendForward(NetEvent.EVENT_JOB, job, 0.0);
 			sendBackward(NetEvent.EVENT_ACK, job, 0.0);
@@ -106,23 +107,19 @@ public class ClassSwitch extends ServiceSection {
 	 * @return
 	 */
 	private int chooseOutClass(Float[] row) {
-		float sum;
-		float random;
-		int i;
-
-		sum = 0;
-		for (i = 0; i < row.length; i++) {
+		float sum = 0;
+		for (int i = 0; i < row.length; i++) {
 			sum += row[i];
 		}
 
-        RandomEngine engine = this.getNetSytem().getEngine();
-		random = (float) (engine.raw() * sum);
-		for (i = 0; i < row.length; i++) {
+		RandomEngine engine = getOwnerNode().getNetSystem().getEngine();
+		float random = (float) (engine.raw() * sum);
+		for (int i = 0; i < row.length; i++) {
 			random -= row[i];
 			if (random <= 0)
 				return i;
 		}
-		return i-1;
+		return row.length - 1;
 	}
 
 }

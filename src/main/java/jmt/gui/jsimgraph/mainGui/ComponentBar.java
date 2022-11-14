@@ -18,11 +18,11 @@
 
 package jmt.gui.jsimgraph.mainGui;
 
-import java.lang.reflect.Field;
-
-import javax.swing.JToolBar;
+import java.util.Iterator;
+import java.util.Set;
 
 import jmt.framework.gui.components.JMTToolBar;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.controller.actions.SetInsertState;
@@ -30,9 +30,7 @@ import jmt.gui.jsimgraph.controller.actions.SetInsertState;
 /**
  * <p>Title: Component Toolbar</p>
  * <p>Description: A toolbar used to insert new stations in the graph, or to go
- * into "select mode" or "link mode". This class uses reflection on
- * <code>JMODELConstants</code>, in such way a future placement of new station
- * types will be easy.</p>
+ * into "select mode" or "link mode".
  * 
  * @author Bertoli Marco
  *         Date: 4-giu-2005
@@ -51,7 +49,7 @@ public class ComponentBar extends JMTToolBar {
 		// Adds Select button
 		addGenericButton(m.getSetSelect());
 		addSeparator();
-		// Adds insert mode buttons.
+		// Adds insert mode buttons
 		String[] stations = getStationList();
 		for (String station : stations) {
 			addGenericButton(new SetInsertState(m, station));
@@ -61,66 +59,38 @@ public class ComponentBar extends JMTToolBar {
 		addGenericButton(m.getSetConnect());
 		// Adds Bezier link button
 		addGenericButton(m.getSetBezierConnect());
-		// Blocking region button
+		// Adds Blocking region button
 		addGenericButton(m.getAddBlockingRegion());
 
 		addSeparator();
-		// Rotate button 
+		// Adds Rotate button 
 		addGenericButton(m.getRotate());
-		// RotateLeft button
+		// Adds RotateLeft button
 		addGenericButton(m.getRotateLeft());
-		// RotateRight button
+		// Adds RotateRight button
 		addGenericButton(m.getRotateRight());
-		// Set right button
+		// Adds SetRight button
 		addGenericButton(m.getSetRight());
 
 		addSeparator();
-		//add Grid Button
+		//Adds Grid Button
 		addGenericButton(m.getSnapToGrid());
 
 		// Disables all components button
 		enableButtons(false);
 	}
 
-	/**
-	 * Finds all possible station types using reflection on <code>JSimGraphConstants</code>
-	 * In such way a future placement of new station types will be easy.
-	 * @return All station types element found
-	 */
 	private String[] getStationList() {
-		String path = "jmt.gui.jsimgraph.JGraphMod.";
-		Field[] fields = jmt.gui.jsimgraph.JSimGraphConstants.class.getFields();
-		String[] stationNames = new String[fields.length];
-		int index = 0;
-		try {
-			for (Field field : fields) {
-				if (field.getName().startsWith("STATION_TYPE_")) {
-					// Checks for existence of graphic component
-					String name = ((String) field.get(null)).replaceAll(" ", "") + "Cell";
-					try {
-						boolean enabled = Class.forName(path + name).getDeclaredField("canBePlaced").getBoolean(null);
-						if (enabled) {
-							stationNames[index++] = name;
-						}
-					} catch (ClassNotFoundException e) {
-						// Never Thrown
-						e.printStackTrace();
-					} catch (NoSuchFieldException ex) {
-						// Never Thrown
-						ex.printStackTrace();
-					}
-				}
-			}
-		} catch (IllegalAccessException ex) {
-			System.out.println("A security manager has blocked reflection");
-			ex.printStackTrace();
-		}
 		// Build *Cell array to be given as output
-		String[] tmp = new String[index];
-		for (int i = 0; i < index; i++) {
-			tmp[i] = stationNames[i];
+		Set<String> typeSet = CommonConstants.STATION_NAMES.keySet();
+		String[] classNames = new String[typeSet.size()];
+		Iterator<String> it = typeSet.iterator();
+		int i = 0;
+		while (it.hasNext()) {
+			classNames[i] = it.next() + "Cell";
+			i++;
 		}
-		return tmp;
+		return classNames;
 	}
 
 }

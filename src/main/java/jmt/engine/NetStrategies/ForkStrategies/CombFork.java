@@ -26,9 +26,7 @@ import jmt.common.exception.LoadException;
 import jmt.engine.NetStrategies.ForkStrategy;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.QueueNet.NodeListWithJobNum;
-import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.random.Empirical;
 import jmt.engine.random.EmpiricalEntry;
 import jmt.engine.random.EmpiricalPar;
@@ -56,14 +54,15 @@ public class CombFork extends ForkStrategy {
 		distribution = new Empirical();
 		param = new EmpiricalPar(probabilities);
 	}
+
 	@Override
-	public void setRandomEngine(RandomEngine randomEngine){
+	public void setRandomEngine(RandomEngine randomEngine) {
 		distribution.setRandomEngine(randomEngine); 
 	}
+
 	@Override
 	public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
-		NetSystem netSystem = ownerNode.getNetSystem();
-		RandomEngine engine = netSystem.getEngine();
+		RandomEngine engine = ownerNode.getNetSystem().getEngine();
 		NodeListWithJobNum nl = new NodeListWithJobNum();
 
 		if (nodes == null) {
@@ -86,7 +85,7 @@ public class CombFork extends ForkStrategy {
 					indices[j] = i;
 				}
 			}
-			
+
 			for (int i = 0; i < indices.length; i++) {
 				Map<JobClass, Integer> map = new HashMap<JobClass, Integer>();
 				map.put(jobClass, Integer.valueOf(1));

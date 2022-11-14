@@ -21,14 +21,6 @@ package jmt.engine.QueueNet;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
-import jmt.common.exception.NetException;
-import jmt.engine.NodeSections.BlockingQueue;
-import jmt.engine.NodeSections.ClassSwitch;
-import jmt.engine.NodeSections.Enabling;
-import jmt.engine.NodeSections.Firing;
-import jmt.engine.NodeSections.Fork;
-import jmt.engine.NodeSections.Queue;
-import jmt.engine.NodeSections.Storage;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
 
@@ -94,7 +86,9 @@ public class QueueNetwork {
 	private GlobalJobInfoList jobInfoList;
 
 	private boolean isTerminalSimulation;
-	
+
+	private int parametricStep;
+
 	private NetSystem netSystem;
 
 	/** Creates a new instance of QueueNetwork. */
@@ -106,6 +100,8 @@ public class QueueNetwork {
 		measures = new LinkedList<Measure>();
 		behaviour = BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP;
 		state = STATE_READY;
+		isTerminalSimulation = false;
+		parametricStep = -1;
 	}
 
 	/** Adds a generic node to the network. If the node has no inputs the node
@@ -196,7 +192,7 @@ public class QueueNetwork {
 		// (at this point all classes should be declared)
 		if (jobInfoList == null) {
 			jobInfoList = new GlobalJobInfoList(jobClasses.size());
-            jobInfoList.setNetSystem(netSystem);
+			jobInfoList.setNetSystem(netSystem);
 		}
 
 		//sets the reference to network
@@ -287,14 +283,20 @@ public class QueueNetwork {
 		this.isTerminalSimulation = isTerminalSimulation;
 	}
 
-	public NetSystem getNetSystem(){
+	public int getParametricStep() {
+		return parametricStep;
+	}
+
+	public void setParametricStep(int parametricStep) {
+		this.parametricStep = parametricStep;
+	}
+
+	public NetSystem getNetSystem() {
 		return netSystem;
 	}
 
 	public void setNetSystem(NetSystem netSystem) {
-		// TODO Auto-generated method stub
 		this.netSystem = netSystem;
-		
 	}
 
 }

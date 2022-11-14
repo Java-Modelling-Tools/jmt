@@ -15,7 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.framework.gui.graph;
+
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -42,6 +44,7 @@ import org.freehep.graphicsbase.util.export.ExportDialog;
  *
  */
 public class DistributionDensityGraph extends JPanel {
+
 	private static final long serialVersionUID = 1L;
 
 	private double[] values;
@@ -66,12 +69,10 @@ public class DistributionDensityGraph extends JPanel {
 	protected PlotPopupMenu popup = new PlotPopupMenu();
 
 	// Used to format numbers. Formatters are not thread safe, so they should never be static.
+	private DecimalFormat decimalFormat1 = new DecimalFormat("#0.000");
 	private DecimalFormat decimalFormat2 = new DecimalFormat("#0.00");
 	private DecimalFormat decimalFormat3 = new DecimalFormat("#0.0");
 	private DecimalFormat decimalFormat4 = new DecimalFormat("#00 ");
-
-
-
 
 	public DistributionDensityGraph(int type, SampleStatistics stat) {
 		DistributionType distrType;
@@ -107,11 +108,8 @@ public class DistributionDensityGraph extends JPanel {
 		}
 
 		// Find the range for x
-
-		double xRange = maxx-minx;
-
-		String xLabel="";
-
+		double xRange = maxx - minx;
+		String xLabel = "";
 
 		// Find maximum value for y
 		double maxy = 0;
@@ -130,7 +128,7 @@ public class DistributionDensityGraph extends JPanel {
 		//Get text bounds
 		FontMetrics metric = g.getFontMetrics();
 		Rectangle2D xtextBound = metric.getStringBounds("XXXX", g);
-		Rectangle2D ytextBound = metric.getStringBounds(formatNumber(maxy), g);
+		Rectangle2D ytextBound = metric.getStringBounds(decimalFormat1.format(maxy), g);
 		Rectangle2D xLabelBound = metric.getStringBounds(xLabel, g);
 
 		// Find initial position
@@ -149,7 +147,7 @@ public class DistributionDensityGraph extends JPanel {
 		// Draws caption for y axis
 		for (int i = 0; i <= yNum; i++) {
 			g.drawLine(x0, getY(maxy / yNum * i), x0 - 2, getY(maxy / yNum * i));
-			g.drawString(decimalFormat2.format(maxy / yNum * i), MARGIN, getY(maxy / yNum * i) + halfHeight);
+			g.drawString(decimalFormat1.format(maxy / yNum * i), MARGIN, getY(maxy / yNum * i) + halfHeight);
 		}
 		g.setColor(COLOR_AXIS);
 
@@ -169,7 +167,6 @@ public class DistributionDensityGraph extends JPanel {
 		g.drawString(xLabel, width - (int)xLabelBound.getWidth() - MARGIN/2 - 1, height - MARGIN/2 - 1);
 
 		// Draw chart series
-
 		switch (type) {
 		case StatisticalOutputsWindow.TYPE_DENSITY_LINE:
 			for (int i = 0; i < values.length -1; i++) {
@@ -194,6 +191,7 @@ public class DistributionDensityGraph extends JPanel {
 				g.drawLine(getX(xValue+ intwidth),getY(yValue),getX(xValue+ intwidth),y0);
 			}
 			break;
+
 		case StatisticalOutputsWindow.TYPE_DISTRIBUTION:
 			for (int i = 0; i < values.length -1; i++) {
 				double yValue = values[i];
@@ -206,7 +204,6 @@ public class DistributionDensityGraph extends JPanel {
 			}
 			break;	
 		}
-
 	}
 
 	/**
@@ -246,7 +243,6 @@ public class DistributionDensityGraph extends JPanel {
 		}
 	}
 
-
 	/**
 	 * Formats a number to string to be shown as label of the graph
 	 * @param value number to be converted
@@ -269,21 +265,24 @@ public class DistributionDensityGraph extends JPanel {
 	}
 
 	protected class PlotPopupMenu extends JPopupMenu {
+
 		private static final long serialVersionUID = 1L;
 		public JMenuItem saveAs;
+
 		public PlotPopupMenu() {
 			saveAs = new JMenuItem("Save as...");
 			this.add(saveAs);
 			addListeners();
 		}
+
 		public void addListeners() {
 			saveAs.addActionListener(new AbstractAction() {
 				private static final long serialVersionUID = 1L;
 				public void actionPerformed(ActionEvent e) {
 					ExportDialog export = new ExportDialog();
 					export.showExportDialog(DistributionDensityGraph.this,"Export view as ...", DistributionDensityGraph.this,"Export");
-				}});
-
+				}
+			});
 		}
 
 	} 
@@ -296,6 +295,4 @@ public class DistributionDensityGraph extends JPanel {
 		}
 	}
 
-
 }
-

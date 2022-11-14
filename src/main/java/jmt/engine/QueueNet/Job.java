@@ -21,7 +21,6 @@ package jmt.engine.QueueNet;
 import jmt.engine.simEngine.RemoveToken;
 import org.apache.commons.math3.util.Pair;
 
-import java.util.Objects;
 /**
  *	This class implements a generic job of a queue network.
  * 	@author Francesco Radaelli, Marco Bertoli
@@ -33,13 +32,12 @@ public class Job implements Cloneable {
 	//job ID
 	private int Id;
 
-	private double serviceArrivalTime;
-	private boolean jobIsInService;
-	private boolean isPreemptedJob;
-	private RemoveToken servingMessage;
-
 	//class of this job
 	private JobClass jobClass;
+	//next class of this job
+	private JobClass nextJobClass;
+	//network system
+	protected NetSystem netSystem;
 	//used to compute system response time
 	protected double systemEnteringTime;
 
@@ -56,8 +54,9 @@ public class Job implements Cloneable {
 	private NetNode originalDestinationNode = null;
 
 	private double serviceTime = -1.0;
-	
-    private NetSystem netSystem;
+	private double serviceStartTime = -1.0;
+	private RemoveToken servingMessage = null;
+	private RemoveToken renegingMessage = null;
 
 	protected GlobalJobInfoList globalJobInfoList = null;
 	protected Pair<NetNode, JobClass> lastVisitedPair = null;
@@ -68,21 +67,21 @@ public class Job implements Cloneable {
 	 * @param netJobsList Reference to the global jobInfoList.
 	 */
 	public Job(JobClass jobClass, GlobalJobInfoList globalJobInfoList) {
-		//this.Id = counter++;
 		this.jobClass = jobClass;
+		this.nextJobClass = jobClass;
 		this.globalJobInfoList = globalJobInfoList;
-		//reset();
-        serviceArrivalTime = 0;
-		isPreemptedJob = false;
-		jobIsInService = false;
 	}
 
 	/**
-	 * Resets the counter of Job.
+	 * Initializes this job.
+	 * @param the network system.
 	 */
-	//public static void resetCounter() {
-	//	counter = 0;
-	//}
+	public void initialize(NetSystem netSystem) {
+		this.netSystem = netSystem;
+		// Job Id is used only for logging
+		this.Id = netSystem.nextjobNumber();
+		resetSystemEnteringTime();
+	}
 
 	/**
 	 * Gets the ID of this job.
@@ -109,10 +108,19 @@ public class Job implements Cloneable {
 	}
 
 	/**
-	 * Resets this job.
+	 * Gets the next class of this job.
+	 * @return the next class of this job.
 	 */
-	public void reset() {
-		systemEnteringTime = netSystem.getTime();
+	public JobClass getNextJobClass() {
+		return nextJobClass;
+	}
+
+	/**
+	 * Sets the next class of this job.
+	 * @param jobClass the next class of this job.
+	 */
+	public void setNextJobClass(JobClass jobClass) {
+		this.nextJobClass = jobClass;
 	}
 
 	/**
@@ -132,6 +140,14 @@ public class Job implements Cloneable {
 	}
 
 	/**
+	 * Resets the system entering time of this job.
+	 * @param time the system entering time of this job.
+	 */
+	public void resetSystemEnteringTime() {
+		systemEnteringTime = netSystem.getTime();
+	}
+
+	/**
 	 * Gets the destination node of this redirected job.
 	 * @return the destination node of this redirected job.
 	 */
@@ -141,10 +157,10 @@ public class Job implements Cloneable {
 
 	/**
 	 * Sets the destination node of this redirected job.
-	 * @param originalDestinationNode the destination node of this redirected job.
+	 * @param node the destination node of this redirected job.
 	 */
-	public void setOriginalDestinationNode(NetNode originalDestinationNode) {
-		this.originalDestinationNode = originalDestinationNode;
+	public void setOriginalDestinationNode(NetNode node) {
+		this.originalDestinationNode = node;
 	}
 
 	/**
@@ -164,6 +180,66 @@ public class Job implements Cloneable {
 	}
 
 	/**
+	 * Gets the service start time of this job.
+	 * @return the service start time of this job.
+	 */
+	public double getServiceStartTime() {
+		return serviceStartTime;
+	}
+
+	/**
+	 * Sets the service start time of this job.
+	 * @param time the service start time of this job.
+	 */
+	public void setServiceStartTime(double time) {
+		this.serviceStartTime = time;
+	}
+
+	/**
+	 * Gets the serving message of this job.
+	 * @return the serving message of this job.
+	 */
+	public RemoveToken getServingMessage() {
+		return servingMessage;
+	}
+
+	/**
+	 * Sets the serving message of this job.
+	 * @param message the serving message of this job.
+	 */
+	public void setServingMessage(RemoveToken message) {
+		this.servingMessage = message;
+	}
+
+	/**
+	 * Gets the remaining service time of this job.
+	 * @return the remaining service time of this job.
+	 */
+	public double getRemainingServiceTime() {
+		if (serviceStartTime < 0.0) {
+			return serviceTime;
+		} else {
+			return serviceTime - (netSystem.getElapsedTime() - serviceStartTime);
+		}
+	}
+
+	/**
+	 * Gets the reneging message of this job.
+	 * @return the reneging message of this job.
+	 */
+	public RemoveToken getRenegingMessage() {
+		return renegingMessage;
+	}
+
+	/**
+	 * Sets the reneging message of this job.
+	 * @param message the reneging message of this job.
+	 */
+	public void setRenegingMessage(RemoveToken message) {
+		this.renegingMessage = message;
+	}
+
+	/**
 	 * Gets the last pair visited by this job.
 	 * @return the last pair visited by this job.
 	 */
@@ -179,10 +255,6 @@ public class Job implements Cloneable {
 		this.lastVisitedPair = pair;
 	}
 
-	public NetSystem getNetSystem(){
-		return netSystem;
-	}	
-	
 	/**
 	 * Adds a pair to the visit path of this job.
 	 * @param pair the pair to be added to the visit path.
@@ -192,60 +264,22 @@ public class Job implements Cloneable {
 		lastVisitedPair = pair;
 	}
 
-	public double getServiceArrivalTime() {
-		return serviceArrivalTime;
-	}
-
-	public void setServiceArrivalTime(double serviceArrivalTime) {
-		this.serviceArrivalTime = serviceArrivalTime;
-	}
-
-	public boolean getIsPreemptedJob() {
-		return isPreemptedJob;
-	}
-
-	public void setIsPreemptedJob(boolean isPreemptedJob) {
-		this.isPreemptedJob = isPreemptedJob;
-	}
-
-	public boolean getIsJobInService() {
-		return jobIsInService;
-	}
-
-	public void setIsJobInService(boolean jobIsInService) {
-		this.jobIsInService = jobIsInService;
-	}
-	public RemoveToken getServingMessage() {
-		return servingMessage;
-	}
-
-	public void setServingMessage(RemoveToken servingMessage) {
-		this.servingMessage = servingMessage;
-	}
-	
-	public void initialize(NetSystem netSystem){
-		this.netSystem = netSystem;
-		// Job Id is used only for logging
-		this.Id = netSystem.nextjobNumber();
-		resetSystemEnteringTime();
-	}
-	
-	public void resetSystemEnteringTime() {
-		this.systemEnteringTime = netSystem.getTime();
-		//resetClass();
+	public NetSystem getNetSystem() {
+		return netSystem;
 	}
 
 	@Override
-	public boolean equals(Object that) {
-		if (!(that instanceof Job)) {
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Job)) {
 			return false;
 		}
-		Job a = (Job) that;
-		return a.getId() == this.Id;
+		Job that = (Job) obj;
+		return this == that || this.Id == that.getId();
 	}
 
 	@Override
 	public int hashCode() {
 		return getId();
 	}
+
 }

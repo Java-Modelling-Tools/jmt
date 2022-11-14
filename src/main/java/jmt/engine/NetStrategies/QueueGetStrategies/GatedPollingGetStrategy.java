@@ -1,83 +1,71 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.engine.NetStrategies.QueueGetStrategies;
 
-import jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy;
-import jmt.engine.QueueNet.*;
-import jmt.engine.NetStrategies.ServiceStrategy;
-import jmt.gui.common.serviceStrategies.ZeroStrategy;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
+import jmt.engine.QueueNet.JobInfoList;
 
 /**
  * Implements Gated Polling Get Strategy
  * @author Ahmed Salem
  */
-
 public class GatedPollingGetStrategy extends PollingGetStrategy {
 
-
 	private int currentQueue;
-	private List<JobInfo> queueJobInfoList;
+	private int k;
+	private int count;
 	private JobClassList jobClassList;
 	private JobClass jobClass;
-	private ServiceStrategy[] switchoverStrategies;
 
-	public GatedPollingGetStrategy(ServiceStrategy[] switchoverStrategies) {
+	public GatedPollingGetStrategy() {
 		currentQueue = 0;
-		queueJobInfoList = null;
-		jobClassList = null;
-		jobClass = null;
-		this.switchoverStrategies = switchoverStrategies;
-
-	}
-
-	public Job nextJob(JobInfoList jobsList) {
-
-		if (queueJobInfoList == null) {
-			jobClass = jobClassList.get(currentQueue);
-			queueJobInfoList = new ArrayList<>(jobsList.getInternalJobInfoList(jobClass));
-		}
-
-		if (queueJobInfoList.size() > 0) {
-			JobInfo jobInfo = queueJobInfoList.get(0);
-			jobsList.remove(jobInfo);
-			queueJobInfoList.remove(0);
-			return jobInfo.getJob();
-		}
-
-		currentQueue = (currentQueue + 1) % jobClassList.size();
-		jobClass = jobClassList.get(currentQueue);
-
-		queueJobInfoList = null;
-
-		return null;
-
+		k = -1;
+		count = 0;
 	}
 
 	public void setPollingQueues(JobClassList jobClassList) {
 		this.jobClassList = jobClassList;
+		jobClass = jobClassList.get(0);
 	}
 
 	public Job get(JobInfoList queue) {
-		Job job = nextJob(queue);
-		for (int i = 0;
-			 i < jobClassList.size() && job == null && switchoverStrategies[currentQueue] instanceof ZeroServiceTimeStrategy;
-			 i++) {
-			job = nextJob(queue);
+		if (k < 0) {
+			k = queue.size(jobClass);
 		}
-		return job;
+
+		if (count < k && queue.size(jobClass) > 0) {
+			Job job = queue.removeFirst(jobClass).getJob();
+			count++;
+			return job;
+		}
+
+		currentQueue = (currentQueue + 1) % jobClassList.size();
+		jobClass = jobClassList.get(currentQueue);
+		k = -1;
+		count = 0;
+		return null;
 	}
 
 	public Job get(JobInfoList queue, JobClass jobClass) {
 		return queue.removeFirst(jobClass).getJob();
-	}
-	
-	@Override
-	public JobInfo peek(JobInfoList queue) {
-		return queue.getFirstJob();
 	}
 
 }

@@ -29,7 +29,7 @@ public class CSVLogger {
 	private String colSep;
 	private NumberFormat numberFormat;
 	private BufferedWriter writer;
-	
+
 	/**
 	 * Creates a new CSVLogger that writes to the given file
 	 * @param file the file we should write to
@@ -44,14 +44,14 @@ public class CSVLogger {
 		this.append = append;
 		this.columns = columns;
 		this.colSep = colSep;
-		
+
 		DecimalFormatSymbols dfs = new DecimalFormatSymbols(Locale.US);
 		dfs.setDecimalSeparator(digitSep.charAt(0));
 		numberFormat = new DecimalFormat("#.#", dfs);
 		numberFormat.setMaximumFractionDigits(340);
 		numberFormat.setMaximumIntegerDigits(340);
 	}
-		
+
 	/**
 	 * Logs the given values. Only the actual writing to the stream is synchronized. This method is designed
 	 * so that each log line will never be mixed with another one.
@@ -60,12 +60,12 @@ public class CSVLogger {
 	 * in values map, it is looked in defaultValues map.
 	 * @throws IOException if a problem is risen opening or writing to the log file
 	 */
-	public void log(Map<String, ?> values, Map<String, ?> defaultValues) throws IOException {
-		if (!isInitialized()) {
+	public synchronized void log(Map<String, ?> values, Map<String, ?> defaultValues) throws IOException {
+		if (!initialized) {
 			init();
 		}
 		StringBuilder logLine = new StringBuilder(100);
-		for (int i=0; i<columns.length; i++) {
+		for (int i = 0; i < columns.length; i++) {
 			if (i > 0) {
 				logLine.append(colSep);
 			}
@@ -77,59 +77,47 @@ public class CSVLogger {
 				logLine.append(toString(value));
 			}
 		}
-		
+
 		// Finally writes to the stream
-		synchronized(this) {
-			writer.newLine();
-			writer.append(logLine);
-		}
+		writer.newLine();
+		writer.append(logLine);
 	}
-	
+
 	/**
 	 * Initialize this logger. This method has no effect if the logger is already initialized.
 	 * @throws IOException if an IO problem is risen opening the log file.
 	 */
-	private synchronized void init() throws IOException {
-		if (!isInitialized()) {
-			boolean needHeader = true;
-			if (append && file.exists() && file.length() > 0) {
-				needHeader = false;
-			}
-			initialized = true;
-			writer = new BufferedWriter(new FileWriter(file, append));
-			
-			// Write header if needed
-			if (needHeader) {
-				for (int i=0; i<columns.length; i++) {
-					if (i > 0) {
-						writer.write(colSep);
-					}
-					writer.write(columns[i]);
+	private void init() throws IOException {
+		boolean needHeader = true;
+		if (append && file.exists() && file.length() > 0) {
+			needHeader = false;
+		}
+		writer = new BufferedWriter(new FileWriter(file, append));
+
+		// Write header if needed
+		if (needHeader) {
+			for (int i = 0; i < columns.length; i++) {
+				if (i > 0) {
+					writer.write(colSep);
 				}
+				writer.write(columns[i]);
 			}
 		}
+		initialized = true;
 	}
 
-	/**
-	 * Closes this logger, flushing and closing every file stream opened by it.
-	 * @throws IOException if an IO problem is risen closing the log file.
-	 */
-	public synchronized void close() throws IOException {
-		JSimLoggerFactory.remove(this);
-	}
-	
 	/**
 	 * Disposes this logger object, closing the writer.
 	 * @throws IOException if an IO problem is risen closing the log file.
 	 */
-	synchronized void dispose() throws IOException {
-		if (isInitialized()) {
+	protected synchronized void dispose() throws IOException {
+		if (initialized) {
 			writer.flush();
 			writer.close();
 			initialized = false;
 		}
 	}
-	
+
 	/**
 	 * @return the file this logger is writing on.
 	 */
@@ -142,16 +130,9 @@ public class CSVLogger {
 	 */
 	@Override
 	protected void finalize() throws Throwable {
-		close();
+		dispose();
 	}
-	
-	/**
-	 * @return true if this logger was initialized and running. False otherwise.
-	 */
-	public boolean isInitialized() {
-		return initialized;
-	}
-	
+
 	/**
 	 * Tells if the given object is a null or empty string
 	 * @param obj the object
@@ -166,7 +147,7 @@ public class CSVLogger {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Converts the given object to a string with the correct digit separator.
 	 * @param obj the object, may not be null

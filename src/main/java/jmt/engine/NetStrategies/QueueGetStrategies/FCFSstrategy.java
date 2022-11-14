@@ -21,7 +21,6 @@ package jmt.engine.NetStrategies.QueueGetStrategies;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
 
 /**
@@ -49,8 +48,4 @@ public class FCFSstrategy extends QueueGetStrategy {
 		return queue.removeFirst(jobClass).getJob();
 	}
 
-	@Override
-	public JobInfo peek(JobInfoList queue) {
-		return queue.getFirstJob();
-	}
 }

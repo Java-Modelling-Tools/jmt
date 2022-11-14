@@ -26,6 +26,7 @@ import jmt.engine.QueueNet.NodeSection;
 import jmt.engine.random.engine.RandomEngine;
 
 public abstract class ForkStrategy implements AutoCheck {
+
 	private RandomEngine randomEngine;
 
 	public abstract NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass);
@@ -37,12 +38,12 @@ public abstract class ForkStrategy implements AutoCheck {
 	public boolean check() {
 		return true;
 	}
-	
-	public void setRandomEngine(RandomEngine randomEngine){
+
+	public void setRandomEngine(RandomEngine randomEngine) {
 		this.randomEngine = randomEngine;
 	}
-	
-	public RandomEngine getRandomEngine(){
+
+	public RandomEngine getRandomEngine() {
 		return randomEngine;
 	}
 

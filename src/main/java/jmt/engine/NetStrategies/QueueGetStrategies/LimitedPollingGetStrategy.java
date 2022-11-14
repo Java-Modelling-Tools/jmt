@@ -1,35 +1,44 @@
+/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
 package jmt.engine.NetStrategies.QueueGetStrategies;
 
-import jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy;
-import jmt.engine.NetStrategies.ServiceStrategy;
-import jmt.engine.QueueNet.*;
-import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
 import jmt.engine.QueueNet.JobInfoList;
-
-import javax.swing.*;
 
 /**
  * Implements Limited Polling Get Strategy
  * @author Ahmed Salem
  */
-
 public class LimitedPollingGetStrategy extends PollingGetStrategy {
 
-
 	private int currentQueue;
-	private final int k;
+	private int k;
 	private int count;
 	private JobClassList jobClassList;
 	private JobClass jobClass;
-	ServiceStrategy[] switchoverStrategies;
 
-	public LimitedPollingGetStrategy(Integer pollingK, ServiceStrategy[] switchoverStrategies) {
+	public LimitedPollingGetStrategy(Integer pollingK) {
 		currentQueue = 0;
 		k = pollingK;
 		count = 0;
-		jobClassList = null;
-		jobClass = null;
-		this.switchoverStrategies = switchoverStrategies;
 	}
 
 	public void setPollingQueues(JobClassList jobClassList) {
@@ -37,13 +46,11 @@ public class LimitedPollingGetStrategy extends PollingGetStrategy {
 		jobClass = jobClassList.get(0);
 	}
 
-	public Job nextJob(JobInfoList jobsList){
-		if (count < k) {
-			if (jobsList.getInternalJobInfoList(jobClass).size() > 0) {
-				Job nextJob = jobsList.removeFirst(jobClass).getJob();
-				count++;
-				return nextJob;
-			}
+	public Job get(JobInfoList queue) {
+		if (count < k && queue.size(jobClass) > 0) {
+			Job job = queue.removeFirst(jobClass).getJob();
+			count++;
+			return job;
 		}
 
 		currentQueue = (currentQueue + 1) % jobClassList.size();
@@ -52,24 +59,8 @@ public class LimitedPollingGetStrategy extends PollingGetStrategy {
 		return null;
 	}
 
-	public Job get(JobInfoList queue) {
-		Job job = nextJob(queue);
-		for (int i = 0;
-			 i < jobClassList.size() && job == null && switchoverStrategies[currentQueue] instanceof ZeroServiceTimeStrategy;
-			 i++) {
-			job = nextJob(queue);
-		}
-
-		return job;
-	}
-
 	public Job get(JobInfoList queue, JobClass jobClass) {
 		return queue.removeFirst(jobClass).getJob();
-	}
-	
-	@Override
-	public JobInfo peek(JobInfoList queue) {
-		return queue.getFirstJob();
 	}
 
 }

@@ -20,11 +20,11 @@ package jmt.engine.NetStrategies.RoutingStrategies;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NetSystem;
 import jmt.engine.random.Empirical;
 import jmt.engine.random.EmpiricalEntry;
 import jmt.engine.random.EmpiricalPar;
 import jmt.engine.random.engine.RandomEngine;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Ashanka
@@ -53,7 +53,7 @@ public class LoadDependentRoutingParameter implements Comparable<Object> {
 		param = new EmpiricalPar(probabilities);
 	}
 
-		public NetNode getOutNode(NetNode ownerNode) {
+	public NetNode getOutNode(NetNode ownerNode) {
 		if (nodes == null) {
 			//it is the first execution of this method: find the NetNode objects
 			nodes = new NetNode[nodeNames.length];
@@ -120,6 +120,7 @@ public class LoadDependentRoutingParameter implements Comparable<Object> {
 			throw new ClassCastException("Incorrect Class to compare");
 		}
 	}
+
 	public void setRandomEngine(RandomEngine engine) {
 		distribution.setRandomEngine(engine); 		
 	}

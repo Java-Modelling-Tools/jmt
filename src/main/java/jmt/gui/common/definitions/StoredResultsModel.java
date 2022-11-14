@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
- * <p>
+
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -10,7 +10,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * <p>
+
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
@@ -41,32 +41,35 @@ import jmt.framework.gui.graph.MeasureValue;
  */
 public class StoredResultsModel implements MeasureDefinition {
 
-	protected Vector<Measure> measures = new Vector<Measure>();
-	protected HashMap<String, Measure> names = new HashMap<String, Measure>();
-	protected double pollingInterval = 1.0;
-	protected long elapsedTime = 0;
+	private Vector<Measure> measures = new Vector<Measure>();
+	private HashMap<String, Measure> names = new HashMap<String, Measure>();
+	private double pollingInterval = 1.0;
+	private long elapsedTime = 0;
+
 	private Vector<Integer> queueLength = new Vector<Integer>();
 	private Vector<Integer> queueTime = new Vector<Integer>();
 	private Vector<Integer> responseTime = new Vector<Integer>();
 	private Vector<Integer> residenceTime = new Vector<Integer>();
-	private Vector<Integer> utilization = new Vector<Integer>();
+	private Vector<Integer> arrivalRate = new Vector<Integer>();
 	private Vector<Integer> throughput = new Vector<Integer>();
+	private Vector<Integer> utilization = new Vector<Integer>();
+	private Vector<Integer> effectiveUtilization = new Vector<Integer>();
 	private Vector<Integer> dropRate = new Vector<Integer>();
-	private Vector<Integer> renegingRate = new Vector<Integer>();
 	private Vector<Integer> balkingRate = new Vector<Integer>();
+	private Vector<Integer> renegingRate = new Vector<Integer>();
 	private Vector<Integer> retrialAttemptsRate = new Vector<Integer>();
-	private Vector<Integer> waitingTime = new Vector<Integer>();
 	private Vector<Integer> retrialOrbitSize = new Vector<Integer>();
-	private Vector<Integer> busyServersNum = new Vector<Integer>();
+	private Vector<Integer> retrialOrbitTime = new Vector<Integer>();
 
 	private Vector<Integer> systemCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> systemResponseTime = new Vector<Integer>();
 	private Vector<Integer> systemThroughput = new Vector<Integer>();
 	private Vector<Integer> systemDropRate = new Vector<Integer>();
-	private Vector<Integer> systemRenegingRate = new Vector<Integer>();
 	private Vector<Integer> systemBalkingRate = new Vector<Integer>();
-	private Vector<Integer> systemPower = new Vector<Integer>();
+	private Vector<Integer> systemRenegingRate = new Vector<Integer>();
 	private Vector<Integer> systemRetrialAttemptsRate = new Vector<Integer>();
+	private Vector<Integer> systemPower = new Vector<Integer>();
+
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputPerSink = new Vector<Integer>();
 	private Vector<Integer> FCRTotalWeight = new Vector<Integer>();
@@ -230,12 +233,20 @@ public class StoredResultsModel implements MeasureDefinition {
 		return getTmpArray(residenceTime);
 	}
 
-	public int[] getUtilizationMeasures() {
-		return getTmpArray(utilization);
+	public int[] getArrivalRateMeasures() {
+		return getTmpArray(arrivalRate);
 	}
 
 	public int[] getThroughputMeasures() {
 		return getTmpArray(throughput);
+	}
+
+	public int[] getUtilizationMeasures() {
+		return getTmpArray(utilization);
+	}
+
+	public int[] getEffectiveUtilizationMeasures() {
+		return getTmpArray(effectiveUtilization);
 	}
 
 	public int[] getDropRateMeasures() {
@@ -250,24 +261,16 @@ public class StoredResultsModel implements MeasureDefinition {
 		return getTmpArray(balkingRate);
 	}
 
-	@Override
 	public int[] getRetrialAttemptsRateMeasures() {
 		return getTmpArray(retrialAttemptsRate);
 	}
 
-	@Override
 	public int[] getRetrialOrbitSizeMeasures() {
 		return getTmpArray(retrialOrbitSize);
 	}
 
-	@Override
-	public int[] getWaitingTimeMeasures() {
-		return getTmpArray(waitingTime);
-	}
-
-	@Override
-	public int[] getNumberOfBusyServersMeasures() {
-		return getTmpArray(busyServersNum);
+	public int[] getRetrialOrbitTimeMeasures() {
+		return getTmpArray(retrialOrbitTime);
 	}
 
 	public int[] getSystemCustomerNumberMeasures() {
@@ -409,24 +412,26 @@ public class StoredResultsModel implements MeasureDefinition {
 			responseTime.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_RD)) {
 			residenceTime.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_U)) {
-			utilization.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_AR)) {
+			arrivalRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_X)) {
 			throughput.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_U)) {
+			utilization.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_EU)) {
+			effectiveUtilization.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
 			dropRate.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_RR)) {
-			renegingRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_BR)) {
 			balkingRate.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_R)) {
+		} else if (type.equals(SimulationDefinition.MEASURE_RN)) {
+			renegingRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_RT)) {
 			retrialAttemptsRate.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_RS)) {
+		} else if (type.equals(SimulationDefinition.MEASURE_OS)) {
 			retrialOrbitSize.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_OT)) {
-			waitingTime.add(new Integer(measures.size() - 1));
-		//} else if (type.equals(SimulationDefinition.MEASURE_BS)) {
-		//	busyServersNum.add(new Integer(measures.size() - 1));
+			retrialOrbitTime.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {
 			systemCustomerNumber.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {
@@ -435,14 +440,14 @@ public class StoredResultsModel implements MeasureDefinition {
 			systemThroughput.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_DR)) {
 			systemDropRate.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_S_RR)) {
-			systemRenegingRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_BR)) {
 			systemBalkingRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_RN)) {
+			systemRenegingRate.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_RT)) {
+			systemRetrialAttemptsRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 			systemPower.add(new Integer(measures.size() - 1));
-		} else if (type.equals(SimulationDefinition.MEASURE_S_R)) {
-			systemRetrialAttemptsRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {
 			responseTimePerSink.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {

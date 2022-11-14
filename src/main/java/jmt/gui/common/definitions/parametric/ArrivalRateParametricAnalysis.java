@@ -77,7 +77,6 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 				finalValue = TO_ALL;
 			}
 		}
-
 	}
 
 	/**
