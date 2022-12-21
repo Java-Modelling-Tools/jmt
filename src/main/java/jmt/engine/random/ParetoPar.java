@@ -48,8 +48,8 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	public ParetoPar(double alpha, double k) throws IncorrectDistributionParameterException {
 		this.alpha = alpha;
 		this.k = k;
-		if (alpha <= 2) {
-			throw new IncorrectDistributionParameterException("alpha must be > 2");
+		if (alpha <= 0) {
+			throw new IncorrectDistributionParameterException("alpha must be > 0");
 		}
 		if (k <= 0) {
 			throw new IncorrectDistributionParameterException("k must be > 0");
@@ -70,7 +70,7 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	 */
 	@Override
 	public boolean check() {
-		if ((alpha <= 2) || (k <= 0)) {
+		if ((alpha <= 0) || (k <= 0)) {
 			return false;
 		} else {
 			return true;
@@ -107,8 +107,8 @@ public class ParetoPar extends AbstractParameter implements Parameter {
 	 *
 	 */
 	public void setAlpha(double alpha) throws IncorrectDistributionParameterException {
-		if (alpha <= 2) {
-			throw new IncorrectDistributionParameterException("alpha must be > 2");
+		if (alpha <= 0) {
+			throw new IncorrectDistributionParameterException("alpha must be > 0");
 		} else {
 			this.alpha = alpha;
 		}

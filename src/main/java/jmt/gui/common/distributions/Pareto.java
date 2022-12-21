@@ -57,7 +57,7 @@ public class Pareto extends Distribution {
 		parameters[0].setValueChecker(new ValueChecker() {
 			public boolean checkValue(Object value) {
 				Double d = (Double) value;
-				if (d.doubleValue() > 2.0) {
+				if (d.doubleValue() > 0.0) {
 					return true;
 				} else {
 					return false;

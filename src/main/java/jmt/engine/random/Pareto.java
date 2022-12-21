@@ -127,7 +127,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 			return (alfa * k * k / ((alfa - 1.0) * (alfa - 1.0) * (alfa - 2.0)));
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter alpha must be > 2; parameter k must be > 0");
+					"Remember: parameter alpha must be > 0; parameter k must be > 0");
 		}
 	}
 
@@ -146,7 +146,7 @@ public class Pareto extends AbstractDistribution implements Distribution {
 			return Math.pow((1.0 - engine.raw()), (-1.0 / alpha)) * k;
 		} else {
 			throw new IncorrectDistributionParameterException(
-					"Remember: parameter alpha must be > 2; parameter k must be > 0");
+					"Remember: parameter alpha must be > 0; parameter k must be > 0");
 		}
 	}
 
