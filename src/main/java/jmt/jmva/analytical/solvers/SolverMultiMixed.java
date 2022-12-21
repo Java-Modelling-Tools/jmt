@@ -122,7 +122,9 @@ public class SolverMultiMixed extends SolverMulti {
 
 			//moves in the last position the class with maximum population
 			//TODO: why? (to optimize the memory consumption moving intelligently on the state space)
+			// disabled as it did not work correctly with 2 closed classes followed by an open class
 			int lastClass = classes - 1;
+			/*
 			double temp = popPar[lastClass];
 			this.popPar[lastClass] = popPar[maxIndex];
 			this.popPar[maxIndex] = temp;
@@ -146,7 +148,7 @@ public class SolverMultiMixed extends SolverMulti {
 					System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 0, s[i][lastClass].length);
 				}
 			}
-
+			*/
 			computeNumClosed();
 			computeLambdaN();
 			computeClosedPops();
@@ -312,7 +314,7 @@ public class SolverMultiMixed extends SolverMulti {
 		copyClosedPerfIndices();
 		computeOpenPerfIndices();
 		computeFinalThroughput();
-		restoreClassOrder();
+		//restoreClassOrder();
 		computeStationParams();
 		computeSystemParams();
 
@@ -1031,7 +1033,7 @@ public class SolverMultiMixed extends SolverMulti {
 				sysNumJobs += clsNumJobs[j];
 			}
 
-			restoreClassOrder();
+			//restoreClassOrder();
 
 			sysResponseTime = 0;
 
