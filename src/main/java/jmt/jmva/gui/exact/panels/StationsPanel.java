@@ -192,8 +192,8 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	 */
 	private boolean isLdEnabled() {
 		ExactModel data = ew.getData();
-		//return data.isClosed() && data.isSingleClass() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
-		return data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
+		return data.isClosed() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
+		//return data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms(); // uncomment to enable for mixed
 	}
 
 	@Override
@@ -428,7 +428,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			JOptionPane
 			.showMessageDialog(
 					this,
-					"<html><center>A system with zero customers cannot have load dependent stations.<br>Increase the number of customers or remove all load dependent stations.</center></html>",
+					"<html><center>In JMVA, a system with zero customers in closed classes cannot have load dependent stations.<br>Increase the number of customers or remove all load dependent stations.</center></html>",
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}

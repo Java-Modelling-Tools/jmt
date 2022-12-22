@@ -77,7 +77,7 @@ public final class ResTimePanel extends SolutionPanel {
 			if (resTimes == null) {
 				return 0;
 			}
-			return stations;
+			return stations + 1;
 		}
 
 		@Override
@@ -90,25 +90,32 @@ public final class ResTimePanel extends SolutionPanel {
 
 		@Override
 		protected Object getRowName(int rowIndex) {
-			return stationNames[rowIndex];
+			if (rowIndex == 0) {
+				return "<html><i>Aggregate</i></html>";
+			}
+			return stationNames[rowIndex - 1];
 		}
 
 		@Override
-		public String getColumnName(int index) {
-			if (index == 0) {
+		public String getColumnName(int columnIndex) {
+			if (columnIndex == 0) {
 				return "<html><i>Aggregate</i></html>";
 			}
-			return classNames[index - 1];
+			return classNames[columnIndex - 1];
 		}
 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			double d = -1.0;
 
-			if (columnIndex == 0 && !data.isMixed()) {
-				d = stationAggs[rowIndex][iteration];
-			} else if (columnIndex > 0) {
-				d = resTimes[rowIndex][columnIndex - 1][iteration];
+			if (rowIndex == 0 && columnIndex == 0  && !data.isMixed()) {
+				//d = globalAgg[iteration];
+			} else if (rowIndex == 0 && columnIndex > 0  && !data.isMixed()) {
+				//d = classAggs[columnIndex - 1][iteration];
+			} else if (rowIndex > 0 && columnIndex == 0  && !data.isMixed()) {
+				d = stationAggs[rowIndex - 1][iteration];
+			} else if (rowIndex > 0 && columnIndex > 0) {
+				d = resTimes[rowIndex - 1][columnIndex - 1][iteration];
 			}
 
 			if (d < 0.0) {
