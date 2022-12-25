@@ -1812,22 +1812,20 @@ public class ModelChecker implements CommonConstants {
 				}
 			} else {
 				for (int j = 0; j < size; j++) {
-					boolean hasSpecifiedValues = false;
+					boolean hasEnablingValues = false;
 					OUTER_LOOP:
 					for (Object stationInKey : stationInKeys) {
 						for (Object classKey : classKeys) {
 							int enablingValue = station_def.getEnablingCondition(thisTransition, j,
 									stationInKey, classKey).intValue();
-							int inhibitingValue = station_def.getInhibitingCondition(thisTransition, j,
-									stationInKey, classKey).intValue();
-							if (enablingValue > 0 || inhibitingValue > 0) {
-								hasSpecifiedValues = true;
+							if (enablingValue > 0) {
+								hasEnablingValues = true;
 								break OUTER_LOOP;
 							}
 						}
 					}
 					int numberOfServers = station_def.getNumberOfServers(thisTransition, j).intValue();
-					if (!hasSpecifiedValues && numberOfServers < 1) {
+					if (!hasEnablingValues && numberOfServers < 1) {
 						transitionsWithInfiniteEnablingDegree.add(thisTransition);
 						errors[TRANSITION_INFINITE_ENABLING_DEGREE_ERROR] = true;
 						break;
@@ -2361,22 +2359,20 @@ public class ModelChecker implements CommonConstants {
 				}
 			} else {
 				for (int j = 0; j < size; j++) {
-					boolean hasSpecifiedValues = false;
+					boolean hasEnablingValues = false;
 					OUTER_LOOP:
 					for (Object stationInKey : stationInKeys) {
 						for (Object classKey : classKeys) {
 							int enablingValue = station_def.getEnablingCondition(thisTransition, j,
 									stationInKey, classKey).intValue();
-							int inhibitingValue = station_def.getInhibitingCondition(thisTransition, j,
-									stationInKey, classKey).intValue();
-							if (enablingValue > 0 || inhibitingValue > 0) {
-								hasSpecifiedValues = true;
+							if (enablingValue > 0) {
+								hasEnablingValues = true;
 								break OUTER_LOOP;
 							}
 						}
 					}
 					int numberOfServers = station_def.getNumberOfServers(thisTransition, j).intValue();
-					if (!hasSpecifiedValues && numberOfServers >= 1) {
+					if (!hasEnablingValues && numberOfServers >= 1) {
 						transitionsWithConstantEnablingDegree.add(thisTransition);
 						warnings[TRANSITION_CONSTANT_ENABLING_DEGREE_WARNING] = true;
 						break;

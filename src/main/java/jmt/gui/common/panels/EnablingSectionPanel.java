@@ -77,11 +77,11 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 	private static final String NO_INPUT_PLACES_WARNING =
 			"Warning: No input places are defined, and the number of servers is finite. "
 			+ "The transition will have a constant enabling degree for this mode.";
-	private static final String NO_INPUT_CONDITION_ERROR =
-			"Error: No enabling or inhibiting condition is specified, but the number of servers is infinite. "
+	private static final String NO_ENABLING_CONDITION_ERROR =
+			"Error: No enabling condition is specified, but the number of servers is infinite. "
 			+ "The transition will have an infinite enabling degree for this mode.";
-	private static final String NO_INPUT_CONDITION_WARNING =
-			"Warning: No enabling or inhibiting condition is specified, and the number of servers is finite. "
+	private static final String NO_ENABLING_CONDITION_WARNING =
+			"Warning: No enabling condition is specified, and the number of servers is finite. "
 			+ "The transition will have a constant enabling degree for this mode.";
 	private static final String INVALID_INPUT_CONDITION_WARNING =
 			"Warning: The enabling condition is invalidated by the inhibiting condition. "
@@ -292,7 +292,7 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 				noticeText.setForeground(Color.BLUE);
 			}
 		} else {
-			boolean hasSpecifiedValues = false;
+			boolean hasEnablingValues = false;
 			boolean hasInvalidValues = false;
 			OUTER_LOOP:
 			for (Object stationInKey : stationInKeys) {
@@ -301,25 +301,25 @@ public class EnablingSectionPanel extends WizardPanel implements CommonConstants
 							stationInKey, classKey).intValue();
 					int inhibitingValue = stationData.getInhibitingCondition(stationKey, currentModeIndex,
 							stationInKey, classKey).intValue();
-					if (enablingValue > 0 || inhibitingValue > 0) {
-						hasSpecifiedValues = true;
+					if (enablingValue > 0) {
+						hasEnablingValues = true;
 					}
 					if (inhibitingValue > 0 && enablingValue >= inhibitingValue) {
 						hasInvalidValues = true;
 					}
-					if (hasSpecifiedValues && hasInvalidValues) {
+					if (hasEnablingValues && hasInvalidValues) {
 						break OUTER_LOOP;
 					}
 				}
 			}
 
-			if (!hasSpecifiedValues) {
+			if (!hasEnablingValues) {
 				int numberOfServers = stationData.getNumberOfServers(stationKey, currentModeIndex).intValue();
 				if (numberOfServers < 1) {
-					noticeText.setText(NO_INPUT_CONDITION_ERROR);
+					noticeText.setText(NO_ENABLING_CONDITION_ERROR);
 					noticeText.setForeground(Color.RED);
 				} else {
-					noticeText.setText(NO_INPUT_CONDITION_WARNING);
+					noticeText.setText(NO_ENABLING_CONDITION_WARNING);
 					noticeText.setForeground(Color.BLUE);
 				}
 			} else {
