@@ -17,9 +17,9 @@
  */
 package jmt.jmva.commandline;
 
-import java.io.File;
+import jmt.jmva.analytical.solvers.dispatchers.SolverDispatcher;
 
-import jmt.jmva.analytical.SolverDispatcher;
+import java.io.File;
 
 /**
  * <p><b>Name:</b> JMVASolver</p> 

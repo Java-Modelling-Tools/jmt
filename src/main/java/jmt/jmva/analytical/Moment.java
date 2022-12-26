@@ -1,20 +1,22 @@
 package jmt.jmva.analytical;
 
-import java.io.File;
-
-import org.xml.sax.SAXException;
-
 import jmt.common.exception.SolverException;
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.xml.XMLUtils;
 import jmt.jmva.analytical.solvers.Solver;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.analytical.solvers.SolverMulti;
-import jmt.jmva.analytical.solvers.SolverMultiClosedLinearizer;
-import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
-import jmt.jmva.analytical.solvers.SolverSingleClosedMVA;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedLinearizer;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMVA;
+import jmt.jmva.analytical.solvers.singleSolverAlgorithms.SolverSingleClosedMVA;
+import org.xml.sax.SAXException;
+
+import java.io.File;
 
 public class Moment {
+
+	// TODO: Update this class to include priorities
+
 	private static final boolean DEBUG = false;
 	
 	private ExactModel model;

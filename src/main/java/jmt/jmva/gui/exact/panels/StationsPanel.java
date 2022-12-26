@@ -18,38 +18,6 @@
 
 package jmt.jmva.gui.exact.panels;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.Box;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.KeyStroke;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.table.editors.ButtonCellEditor;
@@ -64,6 +32,21 @@ import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.ExactWizard;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
 
@@ -82,6 +65,12 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	// Column numbers
+	private final static int COL_NAME = 0;
+	private final static int COL_TYPE = 1;
+	private final static int COL_DELETE_BUTTON = 2;
+
 	private ExactWizard ew;
 	private HoverHelp help;
 	private static final String helpText = "<html>In this panel you can define the number of stations in the system and their properties.<br><br>"
@@ -192,8 +181,8 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	 */
 	private boolean isLdEnabled() {
 		ExactModel data = ew.getData();
-		return data.isClosed() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
-		//return data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms(); // uncomment to enable for mixed
+		//return data.isClosed() && data.isSingleClass() && data.getAlgorithmType().supportLoadDependent() && !data.isWhatifAlgorithms();
+		return data.getAlgorithmType().supportsLoadDependent() && !data.isWhatifAlgorithms();
 	}
 
 	@Override
@@ -410,6 +399,18 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 	}
 
 	/**
+	 * @return true if the system contains Priority stations
+	 */
+	private boolean isPriority() {
+		for (int i = 0; i < stations; i++) {
+			if (stationTypes[i] == STATION_PRS || stationTypes[i] == STATION_HOL) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * @return true if the system contains LD stations
 	 */
 	private boolean isLD() {
@@ -428,7 +429,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			JOptionPane
 			.showMessageDialog(
 					this,
-					"<html><center>In JMVA, a system with zero customers in closed classes cannot have load dependent stations.<br>Increase the number of customers or remove all load dependent stations.</center></html>",
+					"<html><center>A system with zero customers cannot have load dependent stations.<br>Increase the number of customers or remove all load dependent stations.</center></html>",
 					"Warning", JOptionPane.WARNING_MESSAGE);
 			return false;
 		}
@@ -504,8 +505,9 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			//BEGIN Federico Dall'Orso 8/3/2005
 			//station type cell renderers
 			//NEW
-			LD_disabled_StationTypeCell = new ComboBoxCell(STATION_TYPENAMES);
-			LD_enabled_StationTypeCell = new ComboBoxCell(STATION_TYPENAMES_LD_ENABLED);
+			String[] ldDisabledStationTypeNames = grayOutStationType(STATION_TYPENAMES, STATION_LD);
+			LD_disabled_StationTypeCell = new ComboBoxCell(ldDisabledStationTypeNames);
+			LD_enabled_StationTypeCell = new ComboBoxCell(STATION_TYPENAMES);
 			//14/3/2005
 			deleteButton = new JButton(deleteOneStation);
 			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);
@@ -515,12 +517,12 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			//END Federico Dall'Orso
 
 			/* a station type cell editor for open/mixed systems */
-			JComboBox<String> stationTypeBox = new JComboBox<String>(STATION_TYPENAMES);
+			JComboBox<String> stationTypeBox = new JComboBox<String>(ldDisabledStationTypeNames);
 			stationTypeBox.setEditable(false);
 			LD_disabled_StationTypeEditor = new DefaultCellEditor(stationTypeBox);
 
 			/* a station type cell editor for closed systems */
-			JComboBox<String> LD_enabled_StationTypeBox = new JComboBox<String>(STATION_TYPENAMES_LD_ENABLED);
+			JComboBox<String> LD_enabled_StationTypeBox = new JComboBox<String>(STATION_TYPENAMES);
 			LD_enabled_StationTypeBox.setEditable(false);
 			LD_enabled_StationTypeEditor = new DefaultCellEditor(LD_enabled_StationTypeBox);
 
@@ -540,6 +542,18 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 			tableHeader.setToolTipText(null);
 			rowHeader.setToolTipText(null);
 			help.addHelp(rowHeader, "Click, SHIFT-click or drag to select stations");
+		}
+
+		/**
+		 * Adds GRAY_S, GRAY_E around a specified station type name
+		 * @param stationTypes array of types of stations
+		 * @param station index of station to be grayed out
+		 * @return copy of stationTypes with new grayed out value
+		 */
+		private String[] grayOutStationType(String[] stationTypes, int station) {
+			String[] newTypes = ArrayUtils.copy(stationTypes);
+			newTypes[station] = GRAY_S + newTypes[station] + GRAY_E;
+			return newTypes;
 		}
 
 		//BEGIN Federico Dall'Orso 14/3/2005
@@ -582,7 +596,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		 */
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
-			if (column == 1) { //station type
+			if (column == COL_TYPE) {
 				/* select the right editor */
 				if (isLdEnabled()) {
 					return LD_enabled_StationTypeEditor;
@@ -601,7 +615,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		@Override
 		public TableCellRenderer getCellRenderer(int row, int column) {
 			//if this is type column, I must render it as a combo box instead of a jtextfield
-			if (column == 1) {
+			if (column == COL_TYPE) {
 				if (isLdEnabled()) {
 					return LD_enabled_StationTypeCell;
 				} else {
@@ -662,9 +676,9 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		@Override
 		public String getColumnName(int index) {
 			switch (index) {
-			case 0:
+			case COL_NAME:
 				return "Name";
-			case 1:
+			case COL_TYPE:
 				return "Type";
 			default:
 				return null;
@@ -679,10 +693,10 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-			case 0://name
+			case COL_NAME:
 				return stationNames[rowIndex];
-			case 1://type
-				return STATION_TYPENAMES_LD_ENABLED[stationTypes[rowIndex]];
+			case COL_TYPE:
+				return STATION_TYPENAMES[stationTypes[rowIndex]];
 			default:
 				return null;
 			}
@@ -691,20 +705,19 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		@Override
 		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-			case 0: //name
+			case COL_NAME:
 				stationNames[rowIndex] = (String) value;
 				break;
-			case 1: //type
-				for (int i = 0; i < STATION_TYPENAMES_LD_ENABLED.length; i++) {
-					if (value == STATION_TYPENAMES_LD_ENABLED[i]) { //literal strings are canonical objects, hence == is ok
+			case COL_TYPE:
+				for (int i = 0; i < STATION_TYPENAMES.length; i++) {
+					if (value == STATION_TYPENAMES[i]) { //literal strings are canonical objects, hence == is ok
 						stationTypes[rowIndex] = i;
 						break;
 					}
 				}
-				boolean isLd = isLD();
-				ew.updateAlgoPanel(null, null, null, isLd);
+				ew.updateAlgoPanel(null, null, null, isLD(), isPriority());
 				//if (isLd) {
-				ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
+				//ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
 				//}
 				break;
 			default:
@@ -714,8 +727,8 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		@Override
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-			case 0:
-			case 1:
+			case COL_NAME:
+			case COL_TYPE:
 				return true;
 			default:
 				return false;

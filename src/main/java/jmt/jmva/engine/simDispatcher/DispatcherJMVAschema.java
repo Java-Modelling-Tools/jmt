@@ -36,7 +36,7 @@ import jmt.engine.simEngine.SimLoader;
 import jmt.engine.simEngine.Simulation;
 import jmt.framework.xml.XMLUtils;
 import jmt.gui.common.definitions.CommonModel;
-import jmt.gui.common.definitions.ModelConverter;
+import jmt.gui.common.definitions.convertors.JMVAtoJSIMConvertor;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.XMLWriter;
@@ -285,7 +285,7 @@ public class DispatcherJMVAschema {
 			return false;
 		}
 
-		transfSuccess = md.OUTtoMVAscaling(simResultsPath, tempPath);
+		transfSuccess = md.OUTtoMVAScaling(simResultsPath, tempPath);
 
 		if (!transfSuccess) {
 			logger.error("OUT to MVA transformation failed model " + modelDefinitionPath);
@@ -382,7 +382,7 @@ public class DispatcherJMVAschema {
 		}
 		logger.debug("Input model opened correctly...");
 		CommonModel simModel = new CommonModel();
-		List<String> warnings = ModelConverter.convertJMVAtoJSIM(exact, simModel);
+		List<String> warnings = JMVAtoJSIMConvertor.convert(exact, simModel);
 		// Last element of warning is transform matrix
 		for (int i = 0; i < warnings.size(); i++) {
 			logger.warn("Warning during conversion: " + warnings.get(i));
@@ -466,7 +466,7 @@ public class DispatcherJMVAschema {
 		try {
 			SimLoader simLoader = new SimLoader(simModelDefinitionPath);
 			Simulation sim = simLoader.getSim();
-
+         
 			//sets in the Simulation object the path of the original (i.e. MVA)
 			//xml model definition
 			sim.setXmlModelDefPath(modelDefinitionPath);

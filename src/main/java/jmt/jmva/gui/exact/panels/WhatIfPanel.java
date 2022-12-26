@@ -17,54 +17,27 @@
  */
 package jmt.jmva.gui.exact.panels;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.border.EtchedBorder;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
-
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
-import jmt.jmva.analytical.solvers.SolverMultiClosedMonteCarloLogistic;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMonteCarloLogistic;
 import jmt.jmva.gui.exact.ExactWizard;
+import jmt.jmva.gui.exact.utilities.SolverAlgorithmCounter;
+
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
+import java.awt.event.*;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * <p>Title: What-If Analysis Panel</p>
@@ -288,7 +261,9 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		setAlgorithms();
 		/** End **/
 
-		enableOrDisableCompareAlgs(data.isClosed() && !data.isLd());
+		// enableOrDisableCompareAlgs(data.isClosed() && !data.isLd());
+		// TODO: Mixed algorithms exist, allow WhatIf to be run on mixed algos
+		enableOrDisableCompareAlgs(!data.isLd());
 	}
 
 	private void setAlgorithms() {
@@ -303,7 +278,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			if ((selected && !checkbox.isSelected()) || (!selected && checkbox.isSelected())) {
 				checkbox.doClick();
 			}
-			if (!algo.isExact()) {
+			if (algo.isIterative()) {
 				//boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO);
 				boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC);
 				if (isMonteCarloAlgo) {
@@ -480,7 +455,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 					data.clearWhatifAlgorithms();
 				}
 				algPanel.setVisible(selected);
-				wizard.updateAlgoPanel(null, null, selected, null);
+				wizard.updateAlgoPanel(null, null, selected, null, null);
 				repaint();
 			}
 		});
@@ -491,7 +466,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		algCheckBoxes = new EnumMap<SolverAlgorithm, JCheckBox>(SolverAlgorithm.class);
 		algParams = new EnumMap<SolverAlgorithm, JTextField>(SolverAlgorithm.class);
 		algParamLabels = new EnumMap<SolverAlgorithm, JLabel>(SolverAlgorithm.class);
-		int noOfExactAlgs = SolverAlgorithm.noOfExactAlgs();
+		int numClosedExactAlgorithms = SolverAlgorithmCounter.numClosedExactAlgorithms();
 		for (int i = 0; i < SolverAlgorithm.closedValues().length; i++) {
 			SolverAlgorithm algo = SolverAlgorithm.closedValues()[i];
 			if (i == 0) {
@@ -503,7 +478,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				JPanel placeHolder = new JPanel();
 				placeHolder.setFocusable(false);
 				algPanel.add(placeHolder);
-			} else if (i == noOfExactAlgs) {
+			} else if (i == numClosedExactAlgorithms) {
 				JLabel label = new JLabel("----- Approximate -----");
 				label.setMinimumSize(new Dimension(250, 0));
 				algPanel.add(label, BorderLayout.CENTER);
@@ -529,7 +504,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			algPanel.add(checkBox);
 			algCheckBoxes.put(algo,checkBox);
 
-			if (!algo.isExact()) {
+			if (algo.isIterative()) {
 				//boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO);
 				boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC);
 				Dimension d = new Dimension(90, 30);
@@ -630,7 +605,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 
 		algPanel.setVisible(false);
 		algPanel.setBorder(BorderFactory.createEtchedBorder());
-		algPanel.setPreferredSize(new Dimension(275, 22*(2+SolverAlgorithm.closedNames().length)));
+		algPanel.setPreferredSize(new Dimension(275, 22*(2+SolverAlgorithm.closedValues().length)));
 		JPanel panel = new JPanel();
 		//panel.setPreferredSize(new Dimension(200, 20));
 		panel.setLayout(new BorderLayout());

@@ -274,9 +274,10 @@ public class Beta3D {
 				int[] pxy1 = (((Segment3D) latixy.get(j)).getS1()).getCoords();
 				int[] pxy2 = (((Segment3D) latixy.get(j)).getS2()).getCoords();
 
-				// 2 segmenti possono essere unibili se hanno gli stessi estremi.
-				// Questo può accadere in 2 modi: se A1-A2 e B1-B2 sono gli estremi
-				// dei segmenti A e B, si può avere A1=B1 e A2=B2
+				// 2 segments can be joined if they have the same endpoints.
+// This can happen in 2 ways: if A1-A2 and B1-B2 ar	e the endpoints
+// of segments A and B, we can have A1=B1 and A2=B2
+				
 				if ((p1[0] == pxy1[0] && p1[1] == pxy1[1] && p2[0] == pxy2[0] && p2[1] == pxy2[1])) {
 					Vector<BetaVertex> betav = new Vector<BetaVertex>();
 					betav.addElement((((Segment3D) latixy.get(j)).getBeta(0)));
@@ -328,9 +329,9 @@ public class Beta3D {
 				int[] pxz1 = (((Segment3D) latixz.get(j)).getS1()).getCoords();
 				int[] pxz2 = (((Segment3D) latixz.get(j)).getS2()).getCoords();
 
-				// 2 segmenti possono essere unibili se hanno gli stessi estremi.
-				// Questo può accadere in 2 modi: se A1-A2 e B1-B2 sono gli estremi
-				// dei segmenti A e B, si può avere A1=B1 e A2=B2
+// 2 segments can be joined if they have the same endpoints.
+// This can happen in 2 ways: if A1-A2 and B1-B2 are the endpoints
+// of segments A and B, we can have A1=B1 and A2=B2
 				if ((p1[0] == pxz1[0] && pxz1[1] == -1 && p1[2] == pxz1[2] && p2[0] == pxz2[0] && pxz2[1] == -1 && p2[2] == pxz2[2])) {
 					Vector<BetaVertex> betav = new Vector<BetaVertex>();
 					betav.addElement((((Segment3D) latixz.get(j)).getBeta(0)));
@@ -384,11 +385,11 @@ public class Beta3D {
 				int[] p2 = (((Segment3D) lati.get(i)).getS2()).getCoords();
 				int[] pyz1 = (((Segment3D) latiyz.get(j)).getS1()).getCoords();
 				int[] pyz2 = (((Segment3D) latiyz.get(j)).getS2()).getCoords();
-				// 2 segmenti possono essere unibili se hanno gli stessi estremi.
-				// Questo può accadere in 2 modi: se A1-A2 e B1-B2 sono gli estremi
-				// dei segmenti A e B,
+// 2 segments can be joined if they have the same endpoints.
+// This can happen in 2 ways: if A1-A2 and B1-B2 are the endpoints
+// of segments A and B,
 
-				// si può avere A1=B1 e A2=B2
+// you can have A1=B1 and A2=B2
 				if ((p1[2] == pyz1[2] && p1[1] == pyz1[1] && p2[2] == pyz2[2] && p2[1] == pyz2[1])) {
 					Vector<BetaVertex> betav = new Vector<BetaVertex>();
 					betav.addElement((((Segment3D) latiyz.get(j)).getBeta(0)));
@@ -396,25 +397,25 @@ public class Beta3D {
 					betav.addElement((((Segment3D) lati.get(i)).getBeta(0)));
 					betav.addElement((((Segment3D) lati.get(i)).getBeta(1)));
 
-					// Aggiungo il segmento A1-B1
+// Add segment A1-B1
 					lati.addElement(new Segment3D((((Segment3D) latiyz.get(j)).getBeta(0)), (((Segment3D) lati.get(i)).getBeta(0)),
 							(((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1())));
 
-					// Aggiungo il segmento A2-B2
+// Add segment A2-B2
 					lati.addElement(new Segment3D((((Segment3D) latiyz.get(j)).getBeta(1)), (((Segment3D) lati.get(i)).getBeta(1)),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 
-					// Aggiungo il settore creato unendo i 4 segmenti
+// Add the sector created by joining the 4 segments
 					sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 
-					// Rimuovo i segmenti utilizzati
+// Remove used segments
 					lati.removeElementAt(i);
 					latiyz.removeElementAt(j);
 					//i--;
 					//j--;
 				}
-				// oppure si può avere A1=B2 e A2=B1
+// or you can have A1=B2 and A2=B1
 				else if ((p1[2] == pyz2[2] && p1[1] == pyz2[1] && p2[2] == pyz1[2] && p2[1] == pyz1[1])) {
 					Vector<BetaVertex> betav = new Vector<BetaVertex>();
 					betav.addElement((((Segment3D) latiyz.get(j)).getBeta(0)));
@@ -443,17 +444,17 @@ public class Beta3D {
 	public Vector<Object> Join1Staz(Vector<Object> latixy, Vector<Object> latixz, Vector<Object> latiyz, Vector<Object> lati, Vector<Object> sett1staz) {
 		//Vector out = new Vector();
 		for (int i = 0; i < lati.size(); i++) {
-			//Vector stemp = new Vector();    // Conterrà i segmenti selezionati
-			Vector<BetaVertex> ptemp = new Vector<BetaVertex>(); // Conterrà i punti dei segmenti
-			Vector<Vertex> statp = new Vector<Vertex>(); // Conterrà le stazioni a cui sono associati i punti dei segmenti
+			//Vector stemp = new Vector();    // Will contain the selected segments
+			Vector<BetaVertex> ptemp = new Vector<BetaVertex>();// Will contain the points of the segments
+			Vector<Vertex> statp = new Vector<Vertex>(); // Will contain the stations to which the points of the segments are associated
 
-			// Creo un array con le coordinate dei primi punti dei lati
+// I create an array with the coordinates of the first points of the sides
 			int[] clato = ((((Segment3D) lati.get(i)).getS1()).getCoords());
 
-			// Controllo necessario per i casi particolari in cui vengono collegati come sett2staz
-			// due lati del triangolo
+// Check needed for special cases where they are linked as sett2staz
+// two sides of the triangle
 			if (((((Segment3D) lati.get(i)).getS1())) == ((((Segment3D) lati.get(i)).getS2()))) {
-				// Cerco tra i segmenti sul lato con beta3=0
+// Search through the segments on the side with beta3=0
 				for (int j = 0; j < latixy.size(); j++) {
 					int[] cxy = ((((Segment3D) latixy.get(j)).getS1()).getCoords());
 					if (clato[0] == cxy[0] && clato[1] == cxy[1]) {
@@ -467,7 +468,7 @@ public class Beta3D {
 					}
 				}
 
-				// Cerco tra i segmenti sul lato con beta2=0
+// Search through the segments on the side with beta2=0
 				for (int k = 0; k < latixz.size(); k++) {
 					int[] cxz = ((((Segment3D) latixz.get(k)).getS1()).getCoords());
 					if (clato[0] == cxz[0] && clato[2] == cxz[2]) {
@@ -481,7 +482,7 @@ public class Beta3D {
 					}
 				}
 
-				// Cerco tra i segmenti sul lato con beta1=0
+// Search through the segments on the side with beta1=0
 				for (int h = 0; h < latiyz.size(); h++) {
 					int[] cyz = ((((Segment3D) latiyz.get(h)).getS1()).getCoords());
 					if (clato[1] == cyz[1] && clato[2] == cyz[2]) {
@@ -495,7 +496,7 @@ public class Beta3D {
 					}
 				}
 
-				// Cerco tra i segmenti del gruppo lati
+// I search among the segments of the side group
 				for (int l = 0; l < lati.size(); l++) {
 					int[] clat = ((((Segment3D) lati.get(l)).getS1()).getCoords());
 					if (clato[0] == clat[0] && clato[1] == clat[1] && clato[2] == clat[2]) {
@@ -510,7 +511,7 @@ public class Beta3D {
 					}
 				}
 
-				// Elimino i punti doppi
+// I remove the double points
 				for (int k = 0; k < ptemp.size(); k++) {
 					for (int j = k + 1; j < ptemp.size(); j++) {
 						{
@@ -531,8 +532,8 @@ public class Beta3D {
 	}
 
 	/**
-	 * Presi i vettori con i segmenti sul lato del triangolo li unisce.
-	 * Utile soprattutto se non ci sono settori con 3 stazioni saturanti contemporaneamente.
+* Take the vectors with the segments on the side of the triangle joining them.
+* Especially useful if there are no sectors with 3 saturation stations at the same time.
 	 * @param latixy
 	 * @param latixz
 	 * @param latiyz
@@ -550,16 +551,16 @@ public class Beta3D {
 			for (int i = 0; i < latixy.size(); i++) {
 				int[] p1xy = new int[3];
 
-				// confronto xy-xz
+// xy-xz comparison
 				for (int j = 0; j < latixz.size(); j++) {
 					p1xy = (((Segment3D) latixy.get(i)).getS1()).getCoords();
 					int[] p2xy = (((Segment3D) latixy.get(i)).getS2()).getCoords();
 					int[] pxz1 = (((Segment3D) latixz.get(j)).getS1()).getCoords();
 					int[] pxz2 = (((Segment3D) latixz.get(j)).getS2()).getCoords();
 
-					// 2 segmenti possono essere uniti se hanno gli stessi estremi.
-					if ((p1xy[0] == pxz1[0] && p2xy[0] == pxz2[0] && p1xy[0] != p2xy[0] && //assicura che non sia la stessa stazione
-							p2xy[0] != -1 //assicura che non è un estremo
+// 2 segments can be joined if they have the same endpoints.
+					if ((p1xy[0] == pxz1[0] && p2xy[0] == pxz2[0] && p1xy[0] != p2xy[0] && //make sure it's not the same station
+							p2xy[0] != -1 //make sure it's not an extreme
 							)
 							|| (p2xy[0] == pxz1[0] && p1xy[0] == pxz2[0] && p1xy[0] != p2xy[0] && p2xy[0] != -1))
 
@@ -587,7 +588,7 @@ public class Beta3D {
 			for (int i = 0; i < latixy.size(); i++) {
 				int[] p1xy = new int[3];
 
-				// confronto xy-yz
+				// compare xy-yz
 				if (latiyz.size() > 0) {
 					for (int j = 0; j < latiyz.size(); j++) {
 						p1xy = (((Segment3D) latixy.get(i)).getS1()).getCoords();
@@ -617,7 +618,7 @@ public class Beta3D {
 			}
 		}
 
-		// confronto yz-xz
+		// compare yz-xz
 		if (latiyz.size() > 1 && latixz.size() > 1) {
 			for (int i = 0; i < latiyz.size(); i++) {
 				int[] p1yz = (((Segment3D) latiyz.get(i)).getS1()).getCoords();
@@ -658,10 +659,10 @@ public class Beta3D {
 	}
 
 	/**
-	 * Il metodo è usato per unire i settori complanari, quelli cioè dove saturano più di 3 stazioni contemp.
-	 *
-	 * @param triangles è un vettore contenente i settori a triangolo dove saturano 3 stazioni contemporaneamente
-	 * @return un vettore con i settori uniti
+* The method is used to join coplanar sectors, i.e. those where more than 3 contemp stations saturate.
+*
+* @param triangles is a vector containing the triangle sectors where 3 stations saturate simultaneously
+* @return an array with joined sectors
 	 */
 	public Vector<Object> JoinComplanars(Vector<Object> triangles) {
 		Vector<Object> out = new Vector<Object>();
@@ -692,12 +693,12 @@ public class Beta3D {
 						}
 					}
 
-					//ATTIVARE SOLO PER CONTROLLI
+//ONLY ENABLE FOR CHECKS
 					//System.out.println(c);
 					//System.out.println(k);
 
 					if (c > 1) {
-						// toglie un triangolo e crea un settore con 4 stazioni
+// remove a triangle and create a sector with 4 stations
 						((Sector3D) triangles.get(i)).setType(((Sector3D) triangles.get(i)).getType() + 1);
 						int z = 0;
 						if (d[0] != 0 && d[1] != 0) {
@@ -716,14 +717,14 @@ public class Beta3D {
 			}
 		}
 
-		//todo creare un controllo ciclico che crei settori con N stazioni
+//todo create a cyclic check that creates sectors with N stations
 		out = triangles;
 		return out;
 	}
 
 	/**
-	 * Cancella il settore dove saturano 2 stazioni che unirebbe due settori complanari in cui saturano
-	 * 3 stazioni
+* Erase the sector where 2 stations saturate which would join two coplanar sectors where they saturate
+* 3 stations
 	 *
 	 * @param s3d
 	 * @return
@@ -744,7 +745,7 @@ public class Beta3D {
 	}
 
 	/**
-	 * Creates the global saturation sector in the case where a single station
+	* Creates the global saturation sector in the case where a single station
 	 * saturates
 	 * 
 	 * @param v station

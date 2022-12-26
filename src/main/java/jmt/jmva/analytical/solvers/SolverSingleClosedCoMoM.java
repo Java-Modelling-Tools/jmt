@@ -1,7 +1,7 @@
 package jmt.jmva.analytical.solvers;
 
 import jmt.framework.data.ArrayUtils;
-import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 
 /**
  * Solves a single class closed model, using Monte Carlo Logistic algorithm.

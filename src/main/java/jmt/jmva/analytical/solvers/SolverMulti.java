@@ -18,9 +18,10 @@
 
 package jmt.jmva.analytical.solvers;
 
-import java.io.PrintWriter;
-
 import jmt.engine.math.Printer;
+import jmt.jmva.analytical.ExactConstants;
+
+import java.io.PrintWriter;
 
 /**
  * SolverMulti is an abstract class, which contains the methods
@@ -43,6 +44,12 @@ public abstract class SolverMulti {
 
 	/** constant for delay center*/
 	public static final int DELAY = 2;
+
+	/** constant for Preemptive Resume center*/
+	public static final int PRS = 3;
+
+	/** constant for Non-preemptive Head-of-Line center*/
+	public static final int HOL = 4;
 	//end NEW
 
 	/** constant for Open Class */
@@ -75,6 +82,11 @@ public abstract class SolverMulti {
 	/** visits for each service station, class<br>
 	 * [station] [class] */
 	protected double[][] visits;
+
+	/** priority of each class<br>
+	 * Higher number = Higher Priority
+	 * [class] */
+	protected int[] priorities;
 
 	/**---------------MODEL SOLUTION------------------------*/
 
@@ -146,6 +158,7 @@ public abstract class SolverMulti {
 		type = new int[stations];
 		servTime = new double[stations][classes][];
 		visits = new double[stations][classes];
+		priorities = new int[classes];
 
 		throughput = new double[stations][classes];
 		queueLen = new double[stations][classes];
@@ -164,33 +177,41 @@ public abstract class SolverMulti {
 
 	/** Initializes the Multiclass solver with the model parameters.
 	 *  @param  n   array of names of service centers.
-	 *  @param  t   array of the types (LD or LI) of service centers.
+	 *  @param  t   array of the types (LD, LI, DELAY, PRS, HOL) of service centers.
+	 *              Types found in ExactConstants, the STATION_'s
 	 *  @param  s   matrix of service time of the service centers.
 	 *  @param  v   matrix of visits to the service centers.
+	 *  @param  p   array of priorities of the classes.
 	 *  @return true if the operation is completed with success
 	 */
-	public boolean input(String[] n, int[] t, double[][][] s, double[][] v) {
-		if ((n.length != stations) || (t.length != stations) || (s.length != stations) || (v.length != stations)) {
+	public boolean input(String[] n, int[] t, double[][][] s, double[][] v, int[] p) {
+		if ((n.length != stations) || (t.length != stations) || (s.length != stations) || (v.length != stations) || (p.length != classes)) {
 			return false; // wrong input.
 		}
 
 		System.arraycopy(n, 0, name, 0, stations);
 		System.arraycopy(t, 0, type, 0, stations);
+		System.arraycopy(p, 0, priorities, 0, classes);
 
 		for (int i = 0; i < stations; i++) {
 
 			System.arraycopy(v[i], 0, visits[i], 0, classes);
 
 			for (int j = 0; j < classes; j++) {
-				if (t[i] == LI) {
-					servTime[i][j] = new double[1];
-				} else {
-					servTime[i][j] = new double[s[i][j].length];
-				}
+                servTime[i][j] = new double[s[i][j].length];
 				System.arraycopy(s[i][j], 0, servTime[i][j], 0, s[i][j].length);
 			}
 		}
 		return true;
+	}
+
+
+	public boolean input(String[] n, int[] t, double[][][] s, double[][] v) {
+		int[] p = new int[classes];
+		for(int i = 0; i < p.length; i++) {
+			p[i] = ExactConstants.DEFAULT_CLASS_PRIORITY;
+		}
+		return input(n, t, s, v, p);
 	}
 
 	/**
@@ -393,6 +414,15 @@ public abstract class SolverMulti {
 		return sysThroughput;
 	}
 
+	// Used by MultiMixedRWA
+	public void setServTime(double[][][] servTime) {
+		this.servTime = servTime;
+	}
+
+	public double[][] getVisits() {
+		return visits;
+	}
+
 	/** Prints all the calculated indices in the system.out.
 	 *  It is used to debug or test the class.
 	 */
@@ -524,4 +554,31 @@ public abstract class SolverMulti {
 	}
 	//end NEW
 
+
+	// MVA Exact algorithms use versions of these functions but I don't know if they should.
+	// If they do, they should be extracted into a common function like this instead of the repeated
+	// implementations that exist
+	/*
+	protected void calculateStationAndClassParameters() {
+		for (int station = 0; station < stations; station++) {
+			for(int clas = 0; clas < classes; clas++) {
+				calculateClasParameters(station, clas);
+				calculateStationParameters(station, clas);
+			}
+		}
+	}
+
+	protected void calculateClasParameters(int station, int clas) {
+		clsThroughput[clas] += throughput[station][clas];
+		clsRespTime[clas] += residenceTime[station][clas];
+		clsNumJobs[clas] += queueLen[station][clas];
+	}
+
+	protected void calculateStationParameters(int station, int clas) {
+		scThroughput[station] += throughput[station][clas];
+		scUtilization[station] += utilization[station][clas];
+		scQueueLen[station] += queueLen[station][clas];
+		scResidTime[station] += residenceTime[station][clas];
+	}
+	*/
 }

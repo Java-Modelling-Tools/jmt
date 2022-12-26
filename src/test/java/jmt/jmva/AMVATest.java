@@ -13,11 +13,11 @@ import java.util.Random;
 import jmt.engine.math.Printer;
 import jmt.jmva.analytical.solvers.Solver;
 import jmt.jmva.analytical.solvers.SolverMulti;
-import jmt.jmva.analytical.solvers.SolverMultiClosedAQL;
-import jmt.jmva.analytical.solvers.SolverMultiClosedBardSchweitzer;
-import jmt.jmva.analytical.solvers.SolverMultiClosedChow;
-import jmt.jmva.analytical.solvers.SolverMultiClosedLinearizer;
-import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedAQL;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedBardSchweitzer;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedChow;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedLinearizer;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMVA;
 import jmt.util.TempTextFile;
 
 import org.apache.commons.io.FileUtils;
@@ -716,7 +716,7 @@ public class AMVATest {
 			System.out.println("Wrong input!!");
 		}
 
-	}
+	}	
 
 	private double maxDiff(int[] pop, double[][] queueLen1, double[][] queueLen2) {
 		double maxDiff = 0;

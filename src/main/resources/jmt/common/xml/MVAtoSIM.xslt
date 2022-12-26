@@ -26,7 +26,7 @@
 <xsl:for-each select="classes/*">
 			Total visit class <xsl:value-of select="@name"/>: <xsl:copy-of select="sum(key('sumOfVisits',@name))"/>;
 </xsl:for-each>
-</xsl:comment>
+</xsl:comment>		
 		<xsl:apply-templates select="classes/closedclass"/>
 		<xsl:apply-templates select="classes/openclass"/>
 		<!--the following templates check for presence of open/closed classes and eventually 

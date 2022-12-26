@@ -6,13 +6,9 @@ package jmt.jmva.analytical.solvers;
  * @author Abhimanyu Chugh
  *
  */
-public abstract class SolverMultiClosedAMVA extends SolverMulti {
+public abstract class SolverMultiClosedAMVA extends SolverMultiIterative {
 
-	public static final double DEFAULT_TOLERANCE = Math.pow(10, -7);
-	protected double tolerance = DEFAULT_TOLERANCE;
-	protected int MAX_ITERATIONS = Integer.MAX_VALUE;
 	protected int[] clsPopulation;
-	protected int iterations = 0; // algorithm iterations
 
 	public SolverMultiClosedAMVA(int classes, int stations, int[] classPopulation) {
 		super(classes, stations);
@@ -32,18 +28,6 @@ public abstract class SolverMultiClosedAMVA extends SolverMulti {
 		} catch (Exception ex) {
 			return null;
 		}
-	}
-
-	public void setTolerance(double tolerance) {
-		this.tolerance = tolerance;
-	}
-
-	public void setMaxIterations(int maxIterations) {
-		MAX_ITERATIONS = maxIterations;
-	}
-
-	public int getIterations() {
-		return iterations;
 	}
 
 	/** Returns the number of jobs in the system

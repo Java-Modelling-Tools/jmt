@@ -17,13 +17,13 @@
 
 package jmt.jmva.analytical.solvers;
 
-import jmt.jmva.analytical.solvers.DataStructures.QNModel;
-import jmt.jmva.analytical.solvers.DataStructures.QNModel.QueueType;
-import jmt.jmva.analytical.solvers.Exceptions.BTFMatrixErrorException;
-import jmt.jmva.analytical.solvers.Exceptions.InconsistentLinearSystemException;
-import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.QueueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.QueueingNet.RECALSolver;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel.QueueType;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingNet.RECALSolver;
 
 /**
  * This class implements the API to allow use by other applications. One can

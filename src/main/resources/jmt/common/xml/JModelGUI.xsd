@@ -3,7 +3,7 @@
 	<xs:include schemaLocation="Archive.xsd"/>
 	<xs:element name="jmodel">
 		<xs:annotation>
-			<xs:documentation>Root element containing all JMODEL's GUI specific elements</xs:documentation>
+			<xs:documentation>Root element containing all JSIMgraph's GUI specific elements</xs:documentation>
 			<xs:documentation>Author: Bertoli Marco</xs:documentation>
 		</xs:annotation>
 		<xs:complexType>

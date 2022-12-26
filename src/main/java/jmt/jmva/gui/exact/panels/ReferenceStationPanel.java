@@ -60,7 +60,7 @@ import jmt.jmva.gui.exact.ExactWizard;
  * This panel has requested to be added in order to make the possibility for each user to choose a reference station for a class in closed model. when the
  * class is open the no "Reference station" is chosen. the data of the the stations are saved in the XML file. here the variable which shows the data
  * for the reference station is ReferenceStation has n rows which refers to the the all the classes. 
- * 
+ *
  */
 public final class ReferenceStationPanel extends WizardPanel implements ForceUpdatablePanel, ExactConstants {
 
@@ -117,7 +117,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		}
 		for (int i=0;i<classes;i++) //if the class is open there is no RefStation
 		{
-			if (classTypes[i] == 1) 
+			if (classTypes[i] == 1)
 				ReferenceStation[i] = stationNames.length-1;
 			else if (classTypes[i] == 0 && ReferenceStation[i] == stationNames.length-1)
 				ReferenceStation[i] = 0;
@@ -166,7 +166,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		stTable.update();
 		stTable.updateStructure();
 		StationCombo = new ComboBoxCell(stationNames);
-		JComboBox<String> stationBox = new JComboBox<String>(stationNames);	
+		JComboBox<String> stationBox = new JComboBox<String>(stationNames);
 		stationBox.setEditable(false);
 		ComboBoxRenderer renderer = new ComboBoxRenderer(stationBox);
 		renderer.setColors(colors);
@@ -422,7 +422,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 			}
 		}
 		@Override
-		public void setValueAt(Object value, int rowIndex, int columnIndex) {			
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {
 			for (int i=0; i < stationNames.length; i++)
 			{
 				if (classTypes[rowIndex] == 0 && value.toString().equals("Arrival Process"))
@@ -470,12 +470,20 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			switch (columnIndex) {
-			case 0://name
-				return classNames[rowIndex];
-			case 1://type
-				return stationNames[(int) ReferenceStation[rowIndex]];
-			default:
-				return null;
+				case 0://name
+					return classNames[rowIndex];
+				case 1://type
+					try {
+						return stationNames[(int) ReferenceStation[rowIndex]];
+					} catch (ArrayIndexOutOfBoundsException e) {
+						// TODO: try/catch is a temporary fix
+						// Out of bounds caused when reference station is near the end and then
+						// stations are deleted. A better fix should keep track of the reference station
+                        // instead of it's index so stations being added/deleted is irrelevant
+						return null;
+					}
+				default:
+					return null;
 			}
 		}
 

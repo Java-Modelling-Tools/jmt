@@ -379,13 +379,15 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		@Override
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			switch (stationTypes[rowIndex]) {
-				case STATION_DELAY:
-				case STATION_LI:
-					return new Double(serviceTimes[rowIndex][columnIndex][0]);
-				case STATION_LD:
-					return "LD";
-				default:
-					return null;
+			case STATION_DELAY:
+			case STATION_LI:
+			case STATION_PRS:
+			case STATION_HOL:
+				return new Double(serviceTimes[rowIndex][columnIndex][0]);
+			case STATION_LD:
+				return "LD";
+			default:
+				return null;
 			}
 		}
 

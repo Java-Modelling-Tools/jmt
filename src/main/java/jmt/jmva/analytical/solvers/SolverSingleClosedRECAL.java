@@ -1,7 +1,9 @@
 package jmt.jmva.analytical.solvers;
 
 import jmt.framework.data.ArrayUtils;
-import jmt.jmva.analytical.solvers.Exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.Solver;
+import jmt.jmva.analytical.solvers.SolverMultiClosedRECAL;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 
 /**
  * Solves a single class closed model, using Monte Carlo Logistic algorithm.
@@ -69,6 +71,9 @@ public class SolverSingleClosedRECAL extends Solver {
 	public void solve() {
 		solver.solve();
 
+		// TODO: Move into singleSolverAlgorithms package
+		// sys.ResponseTime & co are protected fields in SolverMulti so need to be in the same package
+		// Ideally a wrapper would be used
 		totUser = customers;
 		totRespTime = solver.sysResponseTime;
 		totThroughput = solver.sysThroughput;

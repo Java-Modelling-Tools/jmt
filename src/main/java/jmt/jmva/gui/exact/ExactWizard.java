@@ -18,33 +18,6 @@
 
 package jmt.jmva.gui.exact;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-
-import javax.swing.AbstractButton;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
-import javax.swing.WindowConstants;
-
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.common.exception.UnsupportedModelException;
@@ -57,7 +30,7 @@ import jmt.framework.gui.wizard.Wizard;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
-import jmt.gui.common.definitions.ModelConverter;
+import jmt.gui.common.definitions.convertors.JMVAtoJSIMConvertor;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.WarningWindow;
 import jmt.gui.common.xml.ModelLoader;
@@ -66,28 +39,18 @@ import jmt.gui.jsimwiz.definitions.JSIMModel;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.gui.exact.link.SolverClient;
-import jmt.jmva.gui.exact.panels.AMVAPanel;
-import jmt.jmva.gui.exact.panels.AlgorithmPanel;
-import jmt.jmva.gui.exact.panels.ClassesPanel;
-import jmt.jmva.gui.exact.panels.DescriptionPanel;
-import jmt.jmva.gui.exact.panels.ForceUpdatablePanel;
-import jmt.jmva.gui.exact.panels.GraphPanel;
-import jmt.jmva.gui.exact.panels.IterationSelector;
-import jmt.jmva.gui.exact.panels.QueueLenPanel;
-import jmt.jmva.gui.exact.panels.ReferenceStationPanel;
-import jmt.jmva.gui.exact.panels.ResTimePanel;
-import jmt.jmva.gui.exact.panels.ServiceDemandsPanel;
-import jmt.jmva.gui.exact.panels.ServiceTimesPanel;
-import jmt.jmva.gui.exact.panels.StationsPanel;
-import jmt.jmva.gui.exact.panels.SynopsisPanel;
-import jmt.jmva.gui.exact.panels.SystemPowerPanel;
-import jmt.jmva.gui.exact.panels.SystemRespTimePanel;
-import jmt.jmva.gui.exact.panels.ThroughputPanel;
-import jmt.jmva.gui.exact.panels.UtilizationPanel;
-import jmt.jmva.gui.exact.panels.VisitsPanel;
-import jmt.jmva.gui.exact.panels.WhatIfPanel;
+import jmt.jmva.gui.exact.panels.*;
 import jmt.manual.ChapterIdentifier;
 import jmt.manual.PDFViewer;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * This is the object you use to define your system structure and parameters
@@ -538,7 +501,7 @@ public class ExactWizard extends Wizard {
 	protected void switchToSimulator() {
 		JSIMModel output = new JSIMModel();
 		// New Converter by Bertoli Marco
-		List<String> res = ModelConverter.convertJMVAtoJSIM(data, output);
+		List<String> res = JMVAtoJSIMConvertor.convert(data, output);
 		JSIMWizMain jsim = new JSIMWizMain(output);
 		jsim.setVisible(true);
 		// If problems are found, shows warnings
@@ -620,6 +583,7 @@ public class ExactWizard extends Wizard {
 		newdata.resetResults();
 		/* END */
 
+
 		try {
 			tempFile = solver.solve(newdata);
 		} catch (UnsupportedModelException e) {
@@ -672,7 +636,7 @@ public class ExactWizard extends Wizard {
 			selector = new IterationSelector(data);
 		}
 		/* EDITED by Abhimanyu Chugh */
-		if (selector != null && data.isClosed() && data.isWhatifAlgorithms()) {
+		if (selector != null && data.getWhatifAlgorithms().size() != 1 && data.isWhatifAlgorithms()) {
 			for (SolverAlgorithm algorithm : data.getWhatifAlgorithms()) {
 				AlgorithmPanel algPanel = new AlgorithmPanel(this, algorithm);
 				algPanel.addSolutionPanel(new ThroughputPanel(this, algorithm));
@@ -764,7 +728,7 @@ public class ExactWizard extends Wizard {
 				panels.get(i).gotFocus();
 			}
 		}
-		amvaPanel.update(null, null, null, null);
+		amvaPanel.update(null, null, null, null, null);
 	}
 
 	@Override
@@ -816,9 +780,11 @@ public class ExactWizard extends Wizard {
 	 * @param isOpen true if model is open, false if not, null to read from data structure
 	 * @param isAlgowhatif true if whatif on algorithm was selected, false if not, null to read from data structure
 	 * @param isLoadDependent if model is load dependent or not. null to read from data structure
+     * @param isPriority if model is priority or not. null to read from data structure
 	 */
-	public void updateAlgoPanel(Boolean isClosed, Boolean isOpen, Boolean isAlgowhatif, Boolean isLoadDependent) {
-		this.amvaPanel.update(isClosed, isOpen, isAlgowhatif, isLoadDependent);
+	public void updateAlgoPanel(Boolean isClosed, Boolean isOpen, Boolean isAlgowhatif, Boolean isLoadDependent, Boolean isPriority) {
+		this.amvaPanel.update(isClosed, isOpen, isAlgowhatif, isLoadDependent, isPriority);
+		data.resetChanged();
 	}
 
 }

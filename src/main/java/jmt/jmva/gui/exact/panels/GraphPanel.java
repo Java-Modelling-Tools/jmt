@@ -17,36 +17,6 @@
  */
 package jmt.jmva.gui.exact.panels;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultCellEditor;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JTable;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.TableColumnModelEvent;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-
 import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.graph.WhatIfPlot;
 import jmt.framework.gui.table.editors.ColorCellEditor;
@@ -56,6 +26,20 @@ import jmt.gui.common.CommonConstants;
 import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.List;
+import java.util.*;
 
 /**
  * <p>Title: Graph Panel</p>
@@ -213,9 +197,6 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		left.add(tableScrollPane, BorderLayout.CENTER);
 		graph.setLegendPanel(mainPanel);
 
-		if (!model.isClosed()) {
-			table.hideColumn(LinesTableColumn.ALGORITHM);
-		}
 
 		updateSpinners();
 		addActions();

@@ -18,19 +18,18 @@
 
 package jmt.jmva.gui.exact.link;
 
-import java.awt.Frame;
-import java.io.File;
-
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.common.exception.UnsupportedModelException;
 import jmt.engine.log.JSimLogger;
 import jmt.framework.xml.XMLUtils;
 import jmt.jmva.analytical.ExactModel;
-import jmt.jmva.analytical.SolverDispatcher;
+import jmt.jmva.analytical.solvers.dispatchers.SolverDispatcher;
 import jmt.jmva.gui.exact.panels.ProgressWindow;
-
 import org.xml.sax.SAXException;
+
+import java.awt.*;
+import java.io.File;
 
 /**
 

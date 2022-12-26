@@ -192,6 +192,8 @@ public interface CommonConstants {
 	public static final String QUEUE_STRATEGY_LEPT = "LEPT";
 	public static final String QUEUE_STRATEGY_FCFS_PR = "FCFS-PR";
 	public static final String QUEUE_STRATEGY_LCFS_PR = "LCFS-PR";
+	public static final String QUEUE_STRATEGY_FCFS_PR_PRIORITY = "FCFS-PR-PRIORITY";
+	public static final String QUEUE_STRATEGY_LCFS_PR_PRIORITY = "LCFS-PR-PRIORITY";
 	public static final String QUEUE_STRATEGY_SRPT = "SRPT";
 
 	/**Constants for service time distributions*/

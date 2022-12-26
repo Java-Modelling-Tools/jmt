@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
 
 import jmt.jmva.analytical.CommandLineSolver;
 import jmt.jmva.analytical.solvers.SolverMulti;
-import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMVA;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
@@ -254,7 +254,7 @@ public class CommandLineTest {
 				|| (Math.abs(0.201 - solver.getUtilization(2, 2)) >= 0.001) || (Math.abs(0.458 - solver.getUtilization(3, 0)) >= 0.001)
 				|| (Math.abs(0.454 - solver.getUtilization(3, 1)) >= 0.001) || (Math.abs(0.082 - solver.getUtilization(3, 2)) >= 0.001)) {
 			fail("Test failed");
-		}
+		}		
 	}
 
 }

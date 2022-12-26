@@ -39,7 +39,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import jmt.jmva.analytical.SolverDispatcher;
+import jmt.jmva.analytical.solvers.dispatchers.SolverDispatcher;
 import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.engine.simDispatcher.DispatcherJSIMschema;

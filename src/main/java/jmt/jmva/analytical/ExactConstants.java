@@ -34,29 +34,34 @@ import java.util.Set;
 
 public interface ExactConstants {
 
+	public static final boolean DEBUG = true;
+
 	public static final int STATION_DELAY = 0;
-	public static final int STATION_LI = 1; //load independent
-	public static final int STATION_LD = 2; //load dependent
+	public static final int STATION_LI = 1; // Load Independent
+	public static final int STATION_LD = 2; // Load Dependent
+	public static final int STATION_PRS = 3; // FCFS Preemptive Resume
+	public static final int STATION_HOL = 4; // FCFS Non-preemptive Head-of-Line
 	/** HTML gray text START*/
 	public static final String GRAY_S = "<html><font color=\"aaaaaa\">";
 	/** HTML gray text END*/
 	public static final String GRAY_E = "</font></html>";
 
-	public static final String[] STATION_TYPENAMES_LD_ENABLED = { "Delay (Infinite Server)", "Load Independent", "Load Dependent" };
-	//BEGIN Federico Dall'Orso 7/3/2005
-	/*OLD
-	public static final String[] STATION_TYPENAMES = {"Delay (Infinite Server)", "Load Independent"};
-	 */
-	//NEW
-	public static final String[] STATION_TYPENAMES = { "Delay (Infinite Server)", "Load Independent", GRAY_S + "Load Dependent" + GRAY_E };
-	//END Federico Dall'Orso 7/3/2005
+	public static final String[] STATION_TYPENAMES = {
+			"Delay (Infinite Server)",
+			"Load Independent",
+			"Load Dependent",
+			"Preemptive Resume",
+			"Non-preemptive Head-of-Line"
+	};
 
 	public static final int CLASS_CLOSED = 0;
 	public static final int CLASS_OPEN = 1;
 	public static final String[] CLASS_TYPENAMES = { "closed", "open" };
 
-	public static final int MAX_CLASSES = 30;
-	public static final int MAX_STATIONS = 50;
+	public static final int DEFAULT_CLASS_PRIORITY = 0;
+
+	public static final int MAX_CLASSES = 100;
+	public static final int MAX_STATIONS = 100;
 
 	// Performance indices
 	public static final String[] INDICES_TYPES = { "Throughput", "Number of Customers", "Residence Times", "Utilization", "System Power" };
@@ -65,7 +70,7 @@ public interface ExactConstants {
 	public static final Set<String> AGGREGATE_TYPES_SET = new HashSet<String>(Arrays.asList(AGGREGATE_TYPES));
 
 	public static final String DESCRIPTION_CLASSES = "<html><body align=\"left\"><font size=\"4\"><b>Classes characteristics</b></font>"
-			+ "<font size=\"3\"><br>Number, customized name, type of classes and number of customers (closed class) or arrival rate (open class). Add classes one by one or define total number at once.</font></body></html>";
+			+ "<font size=\"3\"><br>Number, customized name, type of classes and number of customers (closed class) or arrival rate (open class). Add classes one by one or define total number at once. Higher number means higher priority</font></body></html>";
 	public static final String DESCRIPTION_STATIONS = "<html><body align=\"left\"><font size=\"4\"><b>Stations characteristics</b></font>"
 			+ "<font size=\"3\"><br>Number, customized name and type of stations. Add stations one by one or define the total number at once. Load Dependent stations necessarily require the use of MVA.</font></body></html>";
 	public static final String DESCRIPTION_SERVICETIMES = "<html><body align=\"left\"><font size=\"4\"><b>Service Times</b></font>"
@@ -91,8 +96,8 @@ public interface ExactConstants {
 			+ "<font size=\"3\"><br>Throughput of each class for each station. System Throughput is the completion rate of the <b>Reference Station</b>.</font></body></html>";
 	public static final String DESCRIPTION_RESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>System Response Time</b></font>"
 			+ "<font size=\"3\"><br>The global aggregate is the \"System Response Time\" and is obtained weighting the aggregated values by the relative per-class throughput.<br>"
-			+ "<b>A:</b> This value of System Response Time <b>includes</b> the Residence Time of the Reference Station.<br>"
-			+ "<b>B:</b> This value of System Response Time <b>does NOT include</b> the Residence Time of the Reference Station.<br>"
+			+ "<b>A:</b> This value of System Response Time <b>includes</b> the Residence Time at the Reference Station.<br>"
+			+ "<b>B:</b> This value of System Response Time <b>does NOT include</b> the Residence Time at the Reference Station.<br>"
 			+ "Notice: For <b>open classes</b> the Reference Station always coincides with the arrival process. Thus the <b>B</b> values are not computed.</font></body></html>";
 	public static final String DESCRIPTION_RESIDENCETIMES = "<html><body align=\"left\"><font size=\"4\"><b>Residence Times</b></font>"
 			+ "<font size=\"3\"><br>Total time spent by each customer class summed across all visits to a station.</font></body></html>";
@@ -118,17 +123,17 @@ public interface ExactConstants {
 			+ "Since only integer Ni values are allowed, the number of models executed can be very small.</font></body></html>";
 	public static final String DESCRIPTION_GRAPH = "<html><body align=\"left\"><font size=\"4\"><b>Graphical Results</b></font>"
 			+ "<font size=\"3\"><br>Select performance indices to be plotted. Right-click and drag on the graph to zoom it, right-click to save it in EPS or PNG format.<br>"
-			+ "Notice: System Response Time of closed classes includes the Residence Time of the Reference Station.</font></body></html>";
+			+ "Notice: System Response Time of closed classes includes the Residence Time at the Reference Station.</font></body></html>";
 	public static final String DESCRIPTION_SYSTEMPOWERS = "<html><body align=\"left\"><font size=\"4\"><b>System Power</b></font>"
 			+ "<font size=\"3\"><br><b>Aggregate System Power:</b> Aggregate System Throughput (sum of the per-class throughputs) divided by the Aggregate System Response Time (sum of the Response Times per class weighted by the relative throughputs).<br>"
 			+ "<b>Per-class System Power:</b> Throughput divided by the Response Time of each class.<br>"
-			+ "<b>A:</b> This value of System Power is computed using the value of System Response Time that <b>includes</b> the Residence Time of the Reference Station.<br>"
-			+ "<b>B:</b> This value of System Power is computed using the value of System Response Time that <b>does NOT include</b> the Residence Time of the Reference Station.<br>"
+			+ "<b>A:</b> This value of System Power is computed using the value of System Response Time that <b>includes</b> the Residence Time at the Reference Station.<br>"
+			+ "<b>B:</b> This value of System Power is computed using the value of System Response Time that <b>does NOT include</b> the Residence Time at the Reference Station.<br>"
 			+ "Notice: For <b>open classes</b> the Reference Station always coincides with the arrival process. Thus the <b>B</b> values are not computed.</font></body></html>";
 
 	/** What-if Analysis type constants */
 	public static final String WHAT_IF_ARRIVAL = "Arrival Rates";
-	public static final String WHAT_IF_CUSTOMERS = "Customer Numbers";
+	public static final String WHAT_IF_CUSTOMERS = "Number of Customers";
 	public static final String WHAT_IF_MIX = "Population Mix";
 	public static final String WHAT_IF_DEMANDS = "Service Demands";
 }

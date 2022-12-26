@@ -27,10 +27,10 @@ import java.util.Random;
 
 import jmt.jmva.analytical.solvers.Solver;
 import jmt.jmva.analytical.solvers.SolverMulti;
-import jmt.jmva.analytical.solvers.SolverMultiClosedMVA;
-import jmt.jmva.analytical.solvers.SolverMultiMixed;
-import jmt.jmva.analytical.solvers.SolverMultiOpen;
-import jmt.jmva.analytical.solvers.SolverSingleClosedMVA;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMVA;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiMixed;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiOpen;
+import jmt.jmva.analytical.solvers.singleSolverAlgorithms.SolverSingleClosedMVA;
 import jmt.util.TempTextFile;
 
 import org.apache.commons.io.FileUtils;

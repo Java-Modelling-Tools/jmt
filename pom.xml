@@ -46,6 +46,7 @@
 								<exclude>**/RandomMVAModelGenerator.class</exclude>
 								<exclude>**/ResultsCheck.class</exclude>
 							</excludes>
+						<skipTests>true</skipTests>
 						</configuration>
 					</plugin>
 					<!-- Reading properties -->

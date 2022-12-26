@@ -39,6 +39,11 @@ public abstract class Solver {
 	/** constant for delay center*/
 	public static final int DELAY = 2;
 
+	/** constant for Preemptive Resume center*/
+	public static final int PRS = 3;
+
+	/** constant for Non-preemptive Head-of-Line center*/
+	public static final int HOL = 4;
 	/**---------------MODEL DEFINITION------------------------*/
 
 	/**number of resources*/
