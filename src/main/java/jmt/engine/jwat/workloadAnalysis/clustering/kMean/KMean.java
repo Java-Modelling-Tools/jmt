@@ -10,7 +10,7 @@ public class KMean implements Clustering, JWATConstants {
 
 	private ClusteringInfosKMean[] results;
 	private short[][] clustAssign = null;
-	//private Vector clusterAssignemnt=null; //Vector di Vector
+	//private Vector clusterAssignemnt=null; //Vector of Vector
 	private int[] varSel;
 
 	public KMean(int numClust, int[] varSel) {
@@ -50,14 +50,14 @@ public class KMean implements Clustering, JWATConstants {
 
 	public void setRatio(int endClust) {
 		if (endClust > 2) {
-			//Mostra riassunto sui cluster
-			/* Calcola un indice che mostri la validità di un clustering */
+//Show cluster summary
+/* Calculate an index showing the validity of a clustering */
 			for (int i = 1; i < (endClust - 1); i++) {
 				if (results[i + 1].omsr != 0) {
 					results[i].ratio = results[i].omsr / results[i + 1].omsr;
 				}
 			}
-			//Calcola se esistono cluster validi
+//Calculate if there are valid clusters
 			for (int i = 1; i < (endClust - 1); i++) {
 				if (results[i].ratio >= 1.5) {
 					if (results[i].omsr > 10) {
@@ -85,9 +85,9 @@ public class KMean implements Clustering, JWATConstants {
 		return KMEANS;
 	}
 
-	//UPDATE 02/11/2006: + matrice degli assegnamenti
-	//					 + getter della matrice degli assegnamenti
-	//					 + getter delle variabili clusterizzate
+//UPDATE 02/11/2006: + array of assignments
+// + assignment array getter
+// + clustered variable getter
 	public short[][] getAsseg() {
 		return clustAssign;
 	}

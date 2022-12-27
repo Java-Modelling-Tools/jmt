@@ -217,7 +217,7 @@ public class JabaModel implements JabaConstants {
 		// NEW minimum classes = 2
 		classes = 2;
 
-		// TODO: perchè è 1 se non ci sono customers?? Lasciare così
+// TODO: why is it 1 if there are no customers?? Leave it like this
 		totalPop = 1;
 		changed = true;
 
@@ -225,7 +225,7 @@ public class JabaModel implements JabaConstants {
 		// NEW
 		// @author Stefano Omini
 		// @author Andrea Zanzottera (added second class)
-		// todo mettere String
+		// todo add String
 		classData[0] = 0;
 		classData[1] = 0;
 		// end NEW
@@ -958,7 +958,7 @@ public class JabaModel implements JabaConstants {
 
 		// NEW
 		// @author Stefano Omini
-		// todo eliminato il salvataggio dei risultati
+		// todo removed saving of results
 		// if (hasResults && resultsOK)
 		// modelElement.appendChild(makeSolutionElement(root));
 		// end NEW
@@ -1028,8 +1028,8 @@ public class JabaModel implements JabaConstants {
 
 			break;
 
-		case STATION_DELAY: // TODO: è uguale al caso Li ad eccezione del nome
-							// (forse si può semplificare)
+case STATION_DELAY: // TODO: Same as Li case except name
+// (maybe it can be simplified)
 
 			station_element = root.createElement("delaystation");
 			station_element.setAttribute("name", this.stationNames[stationNum]);
@@ -1089,8 +1089,8 @@ public class JabaModel implements JabaConstants {
 				Element st_element = root.createElement("servicetimes");
 				st_element.setAttribute("customerclass", class_name);
 				;
-				// TODO: questa parte va cambiata, devo avere una stringa csv
-				// con tutti i serv times (tranne l'elem 0 che è nullo)
+// TODO: this part needs to be changed, I need to have a csv string
+// with all serv times (except elem 0 which is null)
 
 				String serv_t = ArrayUtils.toCSV(serviceTimes[stationNum][j]);
 
@@ -1354,7 +1354,7 @@ public class JabaModel implements JabaConstants {
 
 				// Element sTimesElem = (Element)
 				// current.getElementsByTagName("servicetimes").item(0);
-				// TODO: non funziona
+				// TODO: does not work
 				Element sTimesElem = (Element) current.getElementsByTagName(
 						"servicetimes").item(0);
 				sTimes = sTimesElem.getElementsByTagName("servicetimes");
@@ -1446,7 +1446,7 @@ public class JabaModel implements JabaConstants {
 
 	// NEW
 	// @author Stefano Omini
-	// TODO: nuovo schema JMTmodel.xsd
+	// TODO: new schema JMTmodel.xsd
 	public double[][] loadResultsMatrix(Element base, int len1, int len2,
 			String res) {
 
@@ -1789,8 +1789,8 @@ public class JabaModel implements JabaConstants {
 		prop = JabaConstants.SERVICE_DEMANDS_PROP;
 
 		for (int i = 0; i < stations; i++) {
-			// Crea il vettore da passare a Calc3D
-			// il giusto sarebbe moltiplicare per 1000000, ma dà problemi
+// Create the vector to pass to Calc3D
+// the correct would be to multiply by 1000000, but it gives problems
 			int a = (int) Math
 					.round((serviceTimes[i][0][0] * prop * visits[i][0]));
 			int b = (int) Math
@@ -1809,8 +1809,8 @@ public class JabaModel implements JabaConstants {
 		prop = JabaConstants.SERVICE_DEMANDS_PROP;
 
 		for (int i = 0; i < stations; i++) {
-			// Crea il vettore da passare a Calc3D
-			// il giusto sarebbe moltiplicare per 1000000, ma dà problemi
+// Create the vector to pass to Calc3D
+// the correct would be to multiply by 1000000, but it gives problems
 			int a = (int) Math
 					.round((serviceTimes[i][0][0] * prop * visits[i][0]));
 			int b = (int) Math

@@ -138,15 +138,15 @@ public class WorkloadAnalysisSession extends JwatSession {
 				for (k = 0; k < model.getMatrix().getNumVariables(); k++) {
 					dos.writeDouble(curClustInfo[j].percVar[k]);
 					dos.writeInt(curClustInfo[j].statClust[k].iNotZr);
-					dos.writeDouble(curClustInfo[j].statClust[k].dMedia);
+					dos.writeDouble(curClustInfo[j].statClust[k].dMean);
 					dos.writeDouble(curClustInfo[j].statClust[k].dStdEr);
 					dos.writeDouble(curClustInfo[j].statClust[k].dStdDv);
-					dos.writeDouble(curClustInfo[j].statClust[k].dVarnz);
+					dos.writeDouble(curClustInfo[j].statClust[k].dVarnc);
 					dos.writeDouble(curClustInfo[j].statClust[k].dKurto);
 					dos.writeDouble(curClustInfo[j].statClust[k].dSkewn);
 					dos.writeDouble(curClustInfo[j].statClust[k].dRange);
-					dos.writeDouble(curClustInfo[j].statClust[k].dMinOs);
-					dos.writeDouble(curClustInfo[j].statClust[k].dMaxOs);
+					dos.writeDouble(curClustInfo[j].statClust[k].dMinObs);
+					dos.writeDouble(curClustInfo[j].statClust[k].dMaxObs);
 				}
 			}
 
@@ -177,15 +177,15 @@ public class WorkloadAnalysisSession extends JwatSession {
 					for (k = 0; k < model.getMatrix().getNumVariables(); k++) {
 						dos.writeDouble(curClustInfo[j].percVar[k]);
 						dos.writeInt(curClustInfo[j].statClust[k].iNotZr);
-						dos.writeDouble(curClustInfo[j].statClust[k].dMedia);
+						dos.writeDouble(curClustInfo[j].statClust[k].dMean);
 						dos.writeDouble(curClustInfo[j].statClust[k].dStdEr);
 						dos.writeDouble(curClustInfo[j].statClust[k].dStdDv);
-						dos.writeDouble(curClustInfo[j].statClust[k].dVarnz);
+						dos.writeDouble(curClustInfo[j].statClust[k].dVarnc);
 						dos.writeDouble(curClustInfo[j].statClust[k].dKurto);
 						dos.writeDouble(curClustInfo[j].statClust[k].dSkewn);
 						dos.writeDouble(curClustInfo[j].statClust[k].dRange);
-						dos.writeDouble(curClustInfo[j].statClust[k].dMinOs);
-						dos.writeDouble(curClustInfo[j].statClust[k].dMaxOs);
+						dos.writeDouble(curClustInfo[j].statClust[k].dMinObs);
+						dos.writeDouble(curClustInfo[j].statClust[k].dMaxObs);
 					}
 				}
 			}

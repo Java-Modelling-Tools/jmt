@@ -9,9 +9,9 @@ import jmt.engine.jwat.input.EventFinishAbort;
 import jmt.engine.jwat.input.ProgressShow;
 import jmt.engine.jwat.workloadAnalysis.clustering.EventClusteringDone;
 
-//UPDATE 29/10/2006: + aggiunto passaggio parametro costruttore del tipo di trasformazione da applicare a variabili selezionate
-//+ aggiunta trasformazione e anti a variabili selezionate per clustering			
-//UPDATE 31/10/2006: + aggiunto calcolo delle statistiche clustering su variabili non trasformate
+//UPDATE 10/29/2006: + added passage of constructor parameter of the type of transformation to be applied to selected variables
+//+ add transform and anti to selected variables for clustering
+//UPDATE 10/31/2006: + added calculation of clustering statistics on untransformed variables
 
 public class MainKMean extends TimeConsumingWorker {
 
@@ -46,7 +46,7 @@ public class MainKMean extends TimeConsumingWorker {
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		}
-		//Applicazione trasformazione alle variabili coinvolte nel clustering
+//Applying the transformation to the variables involved in the clustering
 		if (trasf != VariableNumber.NONE) {
 			for (int element : varSel) {
 				m.getVariables()[element].doClusteringTrasformation(trasf);
@@ -62,7 +62,7 @@ public class MainKMean extends TimeConsumingWorker {
 			return null;
 		}
 		try {
-			// Variabili | numero variabili totale | numero di variaibli coinvolte | trasformazione | num Max Cluster | num Max Iterazioni | Elenco indici delle variabili coinvolte
+// Variables | total number of variables | number of variables involved | transformation | num Max Clusters | num Max Iterations | Index list of the variables involved
 			Cluster.PrepClustering(m, numClust, iteration, varSel);
 			if (isCanceled()) {
 				msg = "CLUSTERING ABORTED BY USER";
@@ -82,7 +82,7 @@ public class MainKMean extends TimeConsumingWorker {
 				}
 				return null;
 			}
-			//Antitrasformazione delle variabili coinvolte
+//Anti-transformation of the variables involved
 
 			if (trasf != VariableNumber.NONE) {
 				anti = true;
@@ -91,7 +91,7 @@ public class MainKMean extends TimeConsumingWorker {
 				}
 			}
 			updateInfos((iteration * numClust) + 2, "Saving Results", true);
-			//Calcolo delle statistiche clustering eseguito
+//Clustering statistics calculation done
 			for (int i = 0; i < clustering.getNumCluster(); i++) {
 				((ClusteringInfosKMean) clustering.getClusteringInfos(i)).DOStat(varSel, clustering.getAsseg()[i], m);
 			}

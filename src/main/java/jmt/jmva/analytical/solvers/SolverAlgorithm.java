@@ -30,7 +30,7 @@ public enum SolverAlgorithm {
 	// algorithmName, closed, open, exact, iterative, loadDependent, priority
     
     // EXACT
-    EXACT("MVA", true, false, true, false, true, false),
+    EXACT("MVA", true, true, true, false, true, false),
     // TODO: Update below algorithms to use new constructor instead of the old constructor as a wrapper
     RECAL("RECAL", true, false, true, false, false, false),
     //MOM("MoM", true, true, false),
@@ -38,8 +38,8 @@ public enum SolverAlgorithm {
     //RGF("RGF", true, true, false), /* Looks buggy */
     TREE_MVA("Tree MVA", true, false, true, false, false, false),
     //TREE_CONV("Tree Convolution", true, true, false), /* Looks buggy */
-    MIXED("Mixed MVA", true, true, true, false, false, false),
-    OPEN("Open MVA", false, true, true, false, false, false),
+    //MIXED("Mixed MVA", true, true, true, false, false, false),
+    //OPEN("Open MVA", false, true, true, false, false, false),
 
     // APPROXIMATE
     CHOW("Chow", true, false, false, true, false, false),

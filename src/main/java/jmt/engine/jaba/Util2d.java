@@ -32,11 +32,11 @@ public class Util2d {
 	private double EPSYLON = 0.000001; // Error costante used for modulo    
 
 	/**
-	 * Il metodo controlla se p è collineare ai punti a e b
-	 * @param a
-	 * @param b
-	 * @param p
-	 * @return              true se sono collineari
+* The method checks if p is collinear at points a and b
+* @param a
+* @param b
+* @param p
+* @return true if they are collinear
 	 */
 	public boolean Collinear(newPoint a, newPoint b, newPoint p) {
 		boolean out = false;
@@ -96,7 +96,7 @@ public class Util2d {
 			}
 			if (t) {
 				vertices.removeElementAt(i);
-				// necessario x non saltare il punto successivo dato il ridimens. del vettore
+// necessary x not skip the next point given the resize. of the vector
 				i--;
 			}
 		}
@@ -104,9 +104,9 @@ public class Util2d {
 	}
 
 	/**
-	 * Il metodo aggiunge le proiezioni sugli assi ad un vettore di vertici
-	 * @param vertices      è il vettore di NewPoint passato
-	 * @return              un vettore di NewPoint contenente i vertici iniziali + le proiezioni
+* The method adds the axis projections to a vertex vector
+* @param vertices is the vector of NewPoint passed
+* @return a vector of NewPoint containing initial vertices + projections
 	 */
 	public Vector<newPoint> LExplode2D(Vector<newPoint> vertices) {
 		Vector<newPoint> lout = new Vector<newPoint>();
@@ -120,10 +120,10 @@ public class Util2d {
 	}
 
 	/**
-	 * Il metodo controlla se un vertice 2D è presente in un vettore di vertici
-	 * @param a             il newPoint passato
-	 * @param vertices      il vettore di newPoint da controllare
-	 * @return              true se è presente
+* The method checks if a 2D vertex is present in a vertex vector
+* @param a the passed newPoint
+* @param vertices the array of newPoints to check
+* @return true if it is present
 	 */
 	public boolean VPresent(newPoint a, Vector<newPoint> vertices) {
 		boolean out = false;
@@ -140,7 +140,7 @@ public class Util2d {
 		Vector<newPoint> out = new Vector<newPoint>(vertices);
 		int ilast = vertices.size() - 1;
 		newPoint first = out.get(0);
-		// Attenzione qui sotto out.get(0) -> out.get(1) ??
+		// Attention here below out.get(0) -> out.get(1) ??
 		newPoint second = out.get(1);
 		newPoint last = out.lastElement();
 		newPoint prelast = out.get(ilast - 1);

@@ -236,7 +236,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 					return Boolean.FALSE;
 				}
 				if (columnIndex == 2) {
-					return defaultFormat.format(data[rowIndex].dMedia);
+					return defaultFormat.format(data[rowIndex].dMean);
 				}
 				if (columnIndex == 3) {
 					return defaultFormat.format(data[rowIndex].dStdDv);

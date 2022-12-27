@@ -232,7 +232,7 @@ public class JMVAtoJSIMConvertor {
             Exponential exp = new Exponential();
             exp.setMean(serviceTimes[j][0]);
             output.setServiceTimeDistribution(key, classKeys[j], exp);
-            output.setQueueStrategy(key, classKeys[j], CommonConstants.QUEUE_STRATEGY_FCFS_PR_PRIORITY);
+            output.setQueueStrategy(key, classKeys[j], CommonConstants.QUEUE_STRATEGY_FCFS_PR);
         }
         return key;
     }

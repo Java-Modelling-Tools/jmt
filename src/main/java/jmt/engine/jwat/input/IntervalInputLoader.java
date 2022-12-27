@@ -88,9 +88,9 @@ public class IntervalInputLoader extends InputLoader implements JWATConstants {
 				if (totalRaw % getStep() == 0) {
 					updateInfos(totalRaw, "<HTML># observations read: " + totalRaw + "<p># errors: " + (totalRaw - countObs) + "</HTML>", false);
 				}
-				//Legge le stringhe e ne controlla il formato
-				for (i = 0; i < param.getNumVar(); i++) {
-					//Leggo il token con i separatori (se definiti) qualunque cosa ci sia dentro
+//Read strings and check their format
+for (i = 0; i < param.getNumVar(); i++) {
+//Read the token with the separators (if defined) whatever is inside
 					if (separator[i] != null) {
 						parseToken = separator[i];
 					} else {
@@ -99,16 +99,16 @@ public class IntervalInputLoader extends InputLoader implements JWATConstants {
 
 					if (myMatch.contains(input, myComp.compile(parseToken))) {
 						if (sel[i]) {
-							//Prendo il token
+//Take the token
 							lineToken[i] = myMatch.getMatch().toString();
 							if (separator[i] != null) {
-								//	Se il token aveva dei separatori li tolgo
+// If the token had separators, remove them
 								lineToken[i] = lineToken[i].substring(1, lineToken[i].length() - 1);
-								//E prendo quello che mi interessa di cio che rimane
+//And I take what interests me of what remains
 								if (myMatch.contains(lineToken[i], myComp.compile(regExp[i]))) {
 									lineToken[i] = myMatch.getMatch().toString();
 								} else {
-									//Riga sbagliata, decremento il num di oss
+//Wrong line, decrease the number of obs
 									countObs--;
 
 									try {
@@ -121,7 +121,7 @@ public class IntervalInputLoader extends InputLoader implements JWATConstants {
 							}
 						}
 					} else {
-						//Riga sbagliata, decremento il num di oss
+//Wrong line, decrease the number of obs
 						countObs--;
 						try {
 							w.write("Error in row " + (totalRaw + minInd) + " : Line does not match format (element " + i + " not found)\n");

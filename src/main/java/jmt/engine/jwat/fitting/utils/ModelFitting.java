@@ -42,7 +42,7 @@ public class ModelFitting implements JWatModel {
 		this.matrix = matrix;
 
 		//fill the list of double
-		obs = matrix.getListOss();
+		obs = matrix.getListObs();
 		obslist = new double[obs.length];
 
 		i = 0;

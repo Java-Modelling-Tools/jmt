@@ -30,7 +30,7 @@ import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
-//TODO: Aggiungere listener a model per cambiamento della matrice delle osservazioni
+//TODO: Add listener to model to change observation array
 public class DispMatrix extends JScrollPane {
 
 	/**
@@ -114,12 +114,12 @@ public class DispMatrix extends JScrollPane {
 		}
 
 		private void initComponent() {
-			/* Creazione del buffer per l'immagine */
+			/* Create buffer for image */
 			chart = new BufferedImage(WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1,
 					BufferedImage.TYPE_USHORT_555_RGB);
 			Redraw = true;
-			/* Aggiunta del listener del mouse per visualizzazione dello scatter plot corrispondente in caso di pressione del tasto sinistro sul pannello
-			 oppure visualizzare la possibilita' di salvare l'immagine in formato .png con tasto destro */
+			/* Addition of the mouse listener for displaying the corresponding scatter plot in case of pressing the left button on the panel
+or display the possibility of saving the image in .png format with the right button */
 			if (this.getMouseListeners().length > 0) {
 				this.removeMouseListener(this.getMouseListeners()[0]);
 			}
@@ -154,7 +154,7 @@ public class DispMatrix extends JScrollPane {
 							f.setVisible(true);
 						}
 					}
-					/* Opzione di salvataggio immagine */
+					/* Image saving option */
 					if (e.getButton() == MouseEvent.BUTTON3) {
 						showScreenShotDialog();
 						/* inserimento del nome per il salvataggio nel file */
@@ -196,19 +196,19 @@ public class DispMatrix extends JScrollPane {
 						Graphics g = chart.getGraphics();
 						VariableNumber Elenco[] = model.getMatrix().getVariables();
 						try {
-							// Pulizia dell'immagine
+							// Image cleaning
 							g.setColor(Color.WHITE);
 							g.fillRect(0, 0, WIDTH_TOT * Elenco.length + 1, HEIGHT_TOT * Elenco.length + 1);
 
 							initShow(10000 * (Elenco.length * Elenco.length));
 
-							// Disegno dei grafici
+							// Graph drawing
 							for (int row = 0; row < Elenco.length; row++) {
 								for (int col = 0; col < Elenco.length; col++) {
 									g.setColor(Color.BLACK);
 									g.drawRect(col * WIDTH_TOT, row * HEIGHT_TOT, WIDTH_TOT, HEIGHT_TOT);
 									if (col == row) {
-										// Scrittura della variabile
+										// Write variable
 										Graphics2D gr = (Graphics2D) g;
 										gr.setFont(new Font("Arial", Font.BOLD, 13));
 										FontRenderContext context = gr.getFontRenderContext();
@@ -220,10 +220,10 @@ public class DispMatrix extends JScrollPane {
 												* HEIGHT_TOT - (int) bounds.getY() + (HEIGHT_TOT - (int) bounds.getHeight()) / 2);
 										g.setFont(new Font("Arial", Font.PLAIN, 12));
 									} else {
-										/*// Calcolo del passo del grafico
+										/*// Graph step calculation
 										double yFoot = HEIGHT_GRAPH / Elenco[row].getUniStats().getRangeValue();
 										double xFoot = WIDTH_GRAPH / Elenco[col].getUniStats().getRangeValue();
-										// Plottaggio del grafico
+										// Graph plotting
 										g.setColor(Color.RED);
 										for (int i = 1; i <= WIDTH_GRAPH; i++) {
 											boolean[] done = new boolean[101];
@@ -273,11 +273,11 @@ public class DispMatrix extends JScrollPane {
 			export.showExportDialog(this, "Export as image...", this, "graph");
 		}
 
-		/* Lista delle variabili da visualizzare */
+		/* List of variables to visualize */
 		private ModelWorkloadAnalysis model;
-		/* Bufferr d'immagine */
+		/* Image buffer */
 		private BufferedImage chart;
-		/* Indica se l'immagine deve essere o meno ridisegnato */
+		/* Indicates whether or not the image should be redrawn */
 		private boolean Redraw;
 		/* COSTANTI */
 		private static final int HEIGHT_GRAPH = 100;

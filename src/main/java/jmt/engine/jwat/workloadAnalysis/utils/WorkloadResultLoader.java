@@ -109,19 +109,19 @@ public class WorkloadResultLoader implements ResultLoader {
 			curInfo[i].ratio = dis.readDouble();
 			for (k = 0; k < curNumCluster; k++) {
 				curInfo[i].infoCluster[k] = new ClusterInfoKMean(numvars);
-				curInfo[i].infoCluster[k].numOss = dis.readInt();
+				curInfo[i].infoCluster[k].numObs = dis.readInt();
 				for (j = 0; j < numvars; j++) {
 					curInfo[i].infoCluster[k].percVar[j] = dis.readDouble();
 					curInfo[i].infoCluster[k].statClust[j].iNotZr = dis.readInt();
-					curInfo[i].infoCluster[k].statClust[j].dMedia = dis.readDouble();
+					curInfo[i].infoCluster[k].statClust[j].dMean = dis.readDouble();
 					curInfo[i].infoCluster[k].statClust[j].dStdEr = dis.readDouble();
 					curInfo[i].infoCluster[k].statClust[j].dStdDv = dis.readDouble();
-					curInfo[i].infoCluster[k].statClust[j].dVarnz = dis.readDouble();
+					curInfo[i].infoCluster[k].statClust[j].dVarnc = dis.readDouble();
 					curInfo[i].infoCluster[k].statClust[j].dKurto = dis.readDouble();
 					curInfo[i].infoCluster[k].statClust[j].dSkewn = dis.readDouble();
 					curInfo[i].infoCluster[k].statClust[j].dRange = dis.readDouble();
-					curInfo[i].infoCluster[k].statClust[j].dMaxOs = dis.readDouble();
-					curInfo[i].infoCluster[k].statClust[j].dMinOs = dis.readDouble();
+					curInfo[i].infoCluster[k].statClust[j].dMaxObs = dis.readDouble();
+					curInfo[i].infoCluster[k].statClust[j].dMinObs = dis.readDouble();
 				}
 			}
 			for (k = 0; k < numoss; k++) {
@@ -158,19 +158,19 @@ public class WorkloadResultLoader implements ResultLoader {
 			if (error != -1) {
 				for (k = 0; k < curNumCluster; k++) {
 					infoCluster[k] = new ClusterInfoFuzzy(numvars);
-					infoCluster[k].numOss = dis.readInt();
+					infoCluster[k].numObs = dis.readInt();
 					for (j = 0; j < numvars; j++) {
 						infoCluster[k].percVar[j] = dis.readDouble();
 						infoCluster[k].statClust[j].iNotZr = dis.readInt();
-						infoCluster[k].statClust[j].dMedia = dis.readDouble();
+						infoCluster[k].statClust[j].dMean = dis.readDouble();
 						infoCluster[k].statClust[j].dStdEr = dis.readDouble();
 						infoCluster[k].statClust[j].dStdDv = dis.readDouble();
-						infoCluster[k].statClust[j].dVarnz = dis.readDouble();
+						infoCluster[k].statClust[j].dVarnc = dis.readDouble();
 						infoCluster[k].statClust[j].dKurto = dis.readDouble();
 						infoCluster[k].statClust[j].dSkewn = dis.readDouble();
 						infoCluster[k].statClust[j].dRange = dis.readDouble();
-						infoCluster[k].statClust[j].dMaxOs = dis.readDouble();
-						infoCluster[k].statClust[j].dMinOs = dis.readDouble();
+						infoCluster[k].statClust[j].dMaxObs = dis.readDouble();
+						infoCluster[k].statClust[j].dMinObs = dis.readDouble();
 					}
 				}
 			}

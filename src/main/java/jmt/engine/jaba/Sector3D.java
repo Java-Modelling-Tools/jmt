@@ -30,7 +30,7 @@ import jmt.engine.jaba.Hull.Vertex;
  */
 public class Sector3D {
 
-	private int type; // 3=triangolo
+	private int type; // 3=triangle
 
 	private Vector<BetaVertex> points = new Vector<BetaVertex>();
 	private Vector<Vertex> stations = new Vector<Vertex>();
@@ -47,7 +47,7 @@ public class Sector3D {
 		this.classNames = classNames;
 	}
 
-	// COSTRUTTORI DI TRIANGOLI (3 STAZIONI SATURANO CONTEMPORANEAMENTE)
+// CONSTRUCTORS OF TRIANGLES (3 STATIONS SATURATE AT THE SAME TIME)
 	public Sector3D(double b11, double b12, double b13, double b21, double b22, double b23, double b31, double b32, double b33, int thistype,
 			Vertex vv1, Vertex vv2, Vertex vv3) {
 		BetaVertex b1 = new BetaVertex(b11, b12, b13);
@@ -79,7 +79,7 @@ public class Sector3D {
 
 	}
 
-	// COSTRUTTORI DI SETTORI IN CUI SATURANO 2 STAZIONI CONTEMPORANEAMENTE
+// CONSTRUCTORS OF SECTORS IN WHICH THEY SATURATE 2 STATIONS AT THE SAME TIME
 	public Sector3D(BetaVertex v1, BetaVertex v2, BetaVertex v3, BetaVertex v4, int thistype, Vertex vv1, Vertex vv2) {
 		points.addElement(v1);
 		points.addElement(v2);
@@ -106,19 +106,19 @@ public class Sector3D {
 		stations.addElement(vv4);
 	}
 
-	// COSTRUTTORE GENERICO CON VETTORI
+// GENERIC CONSTRUCTOR WITH VECTORS
 	public Sector3D(Vector<BetaVertex> points, int thistype, Vector<Vertex> stations) {
 		this.points = points;
 		type = thistype;
 		this.stations = stations;
 	}
 
-	/**                                                                 !!NON USATO!!
-	 * Restituisce la coordinata "x","y" o "z" del vertice vertex nello spazio Beta
-	 * @param vertex
-	 * @param coord
-	 * @return la coordinata "x","y" o "z" del vertice vertex nello spazio Beta
-	 */
+/**                                                                 !!NOT USED!!
+* Returns the "x","y" or "z" coordinate of the vertex vertex in Beta space
+* @param vertex
+* @param coord
+* @return the "x","y" or "z" coordinate of the vertex vertex in Beta space
+*/
 	public double getBeta(int vertex, String coord) {
 		double beta = -1;
 		if (coord == "x" || coord == "X") {
@@ -146,12 +146,12 @@ public class Sector3D {
 		return beta;
 	}
 
-	/**
-	 * Restituisce un array di double che contengono le coordinate nello spazio zeta
-	 * del vertice vertex
-	 * @param vertex
-	 * @return un array di double che contengono le coordinate nello spazio zeta
-	 */
+/**
+* Returns an array of doubles containing coordinates in zeta space
+* of vertex vertex
+* @param vertex
+* @return an array of doubles containing coordinates in zeta space
+*/
 	public double[] getBetas(int vertex) {
 		double[] beta = new double[3];
 		beta[0] = points.get(vertex).getX();
@@ -202,17 +202,17 @@ public class Sector3D {
 	}
 
 	/**
-	 * @return un int che corrisponde al numero di stazioni associati a un settore
+* @return an int that corresponds to the number of stations associated with a sector
 	 */
 	public int CountStations() {
 		return stations.size();
 	}
 
 	/**
-	 * Aggiunge un punto nello spazio Beta e la relativa stazione
-	 * @param betas
-	 * @param station
-	 * @return il settore aggiornato
+* Adds a point in Beta space and its station
+* @param betas
+* @param station
+* @return the updated sector
 	 */
 	public Sector3D AddVertex(BetaVertex betas, Vertex station) {
 		points.addElement(betas);
@@ -221,13 +221,13 @@ public class Sector3D {
 	}
 
 	/**
-	 * Il metodo serve per settare il tipo di settore.
-	 * 1=Satura una singola stazione
-	 * 2=Saturano 2 stazioni
-	 * 3=Saturano 3 stazioni
-	 * eccetera
-	 * @param type
-	 * @return il settore aggiornato
+* The method is to set the sector type.
+* 1=Saturates a single station
+* 2=Saturate 2 stations
+* 3=Saturate 3 stations
+* etc
+* @param type
+* @return the updated sector
 	 */
 	public Sector3D setType(int type) {
 		this.type = type;
@@ -235,15 +235,15 @@ public class Sector3D {
 	}
 
 	/**
-	 * @return il tipo di Settore
+* @return the type of Sector
 	 */
 	public int getType() {
 		return type;
 	}
 
 	/**
-	 * Verifica se un Sector3D è un triangolo dove saturano 3 stazioni contemp.
-	 * @return TRUE se è un triangolo
+* Check if a Sector3D is a triangle where 3 contemp stations saturate.
+* @return TRUE if it's a triangle
 	 */
 	public boolean IsTriangle() {
 		if (type == 3) {
@@ -254,10 +254,10 @@ public class Sector3D {
 	}
 
 	/**
-	 * Dato un vettore di Vertex e un Vertex associa quest'ultimo alle stazioni iniziali
-	 * @param points
-	 * @param p
-	 * @return il numero della stazione iniziale
+* Given a vector of Vertex and a Vertex associate this last one to the initial stations
+* @param points
+* @param p
+* @return the starting station number
 	 */
 	public int AssoStation3D(Vector points, Vertex p) {
 		int stat = -1;
@@ -278,7 +278,7 @@ public class Sector3D {
 		return stat;
 	}
 
-	////////////////////// GESTIONE DELLE COORDINATE PROIETTATE SUL PIANO XY ////////////////////
+////////////////////// MANAGEMENT OF COORDINATES PROJECTED ON THE XY PLANE ////////////////////
 
 	public double[] getxycoord(int point) {
 		return xycoord.get(point);
@@ -298,7 +298,7 @@ public class Sector3D {
 		xycoord.addElement(coord);
 	}
 
-	//Metodo che calcola il punto a cui collegare l'etichetta di un settore
+//Method that calculates the point to attach the label of a sector
 
 	/**
 	 * Calculates central point of the polygon
@@ -319,12 +319,11 @@ public class Sector3D {
 		return out;
 	}
 
-	/////////////////////// GESTIONE DEI NOMI DELLE STAZIONI ////////////////////////////////////
-
+/////////////////////// STATION NAMES MANAGEMENT ////////////////////// //////////////
 	public void givename(Vector<Station3D> oristations) {
 		for (int i = 0; i < stations.size(); i++) {
 			for (int j = 0; j < oristations.size(); j++) {
-				//Controllo se due vertici sono uguali
+//Check if two vertices are equal
 				int[] v1 = stations.get(i).getCoords();
 				int[] v2 = oristations.get(j).getV3D().getCoords();
 				if ((Math.abs(v1[0] - v2[0]) < 0.001 && Math.abs(v1[1] - v2[1]) < 0.001 && Math.abs(v1[2] - v2[2]) < 0.001)
@@ -342,23 +341,23 @@ public class Sector3D {
 		String name = "";
 		String[] arname = new String[statname.size()];
 		for (int i = 0; i < statname.size(); i++) {
-			//rende dinamico il nome
+//make the name dynamic
 
-			if (statname.size() != stations.size()) {
-				String temp = "Station";
-				name = name.concat(temp + " ");
-			} else
+if (statname.size() != stations.size()) {
+String temp = "Station";
+name = name.concat(temp + " ");
+} else
 
-			{
-				//controllo sulla ripetizione del nome
-				arname[i] = statname.get(i);
-				int k = 0;
-				for (String element : arname) {
-					if (arname[i] != element) {
-						k++;
-					}
-				}
-				//se il nome non è già stato usato lo si aggiunge
+{
+//control over name repetition
+arname[i] = statname.get(i);
+int k = 0;
+for (String element : arname) {
+if (arname[i] != element) {
+k++;
+}
+}
+// if the name hasn't already been used, add it
 				if (k == arname.length - 1) {
 					name = name.concat(statname.get(i) + " ");
 				}
@@ -394,15 +393,14 @@ public class Sector3D {
 			String name = "";
 			String[] arname = new String[statname.size()];
 			for (int i = 0; i < statname.size(); i++) {
-				//rende dinamico il nome
-
+//make the name dynamic
 				if (statname.size() != stations.size()) {
 					String temp = "Station";
 					name = name.concat(temp + " ");
 				} else
 
 				{
-					//controllo sulla ripetizione del nome
+//control over name repetition
 					arname[i] = statname.get(i);
 					int k = 0;
 					for (String element : arname) {
@@ -410,7 +408,7 @@ public class Sector3D {
 							k++;
 						}
 					}
-					//se il nome non è già stato usato lo si aggiunge
+// if the name hasn't already been used, add it
 					if (k == arname.length - 1) {
 						name = name.concat(statname.get(i) + " ");
 					}

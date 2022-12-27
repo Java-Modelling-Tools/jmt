@@ -208,7 +208,7 @@ public class SimLoader {
 
 			//-------------- SIM PARAMETERS -------------------//
 
-			//TODO: codice per fissare i sim parameters
+			//TODO: code to set sim parameters
 
 			// Create a class SimParameter, whose parameters will be shared by all
 			// dynamic data analyzer in order to compute confidence intervals.
@@ -217,14 +217,14 @@ public class SimLoader {
 			//this constructor will use default values
 			SimParameters simParam = new SimParameters();
 
-			//TODO: qui dovrei mettere blocchi tipo if (has attribute("batch")) then set(..) ecc
-			//una volta aggiunti nello schema dell'xml, vanno letti e
-			//inseriti coi rispettivi metodi set
+		//TODO: here I should put blocks like if (has attribute("batch")) then set(..) etc
+//once added in the xml schema, they must be read and
+//inserted with the respective set methods
 
-			// {......}
+// {......}
 
-			//TODO: finita la parte con parsing e set degli attributi, si mette questo metodo
-			//(che per il momento si limita a settare i valori di default)
+//TODO: finished the part with parsing and set of attributes, put this method
+//(which for the moment is limited to setting the default values)
 
 			//sets the reference in sim object
 			sim.setSimParameters(simParam);

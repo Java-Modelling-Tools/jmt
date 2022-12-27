@@ -32,7 +32,7 @@ import jmt.gui.jwat.JWATConstants;
  */
 public class MatrixObservations {
 	/* Array of observations */
-	private Observation[] VectOss;
+	private Observation[] VectObs;
 	/* Array of variables */
 	private VariableNumber[] VectVar;
 
@@ -47,29 +47,29 @@ public class MatrixObservations {
 	public MatrixObservations(Observation[] Matrix, String[] Vname, int[] TipoVar, VariableMapping[] map) throws OutOfMemoryError {
 		/* Number of variables and observationss*/
 		int VarDim = Vname.length;
-		int OssDim = Matrix.length;
-		VectOss = Matrix;
+		int ObsDim = Matrix.length;
+		VectObs = Matrix;
 		/* Temporary array used for sorting by single variable */
-		Observation[] VectOssTemp = new Observation[OssDim];
-		for (int i = 0; i < OssDim; i++) {
-			VectOssTemp[i] = VectOss[i];
+		Observation[] VectObsTemp = new Observation[ObsDim];
+		for (int i = 0; i < ObsDim; i++) {
+			VectObsTemp[i] = VectObs[i];
 		}
 		/* Array of variables */
 		VectVar = new VariableNumber[VarDim];
 		/* Creation of each variable */
 		for (int i = 0; i < VarDim; i++) {
 			/* Sets up current varaible sorting information */
-			VectOssTemp[0].setSorter(i);
-			Arrays.sort(VectOssTemp);
+			VectObsTemp[0].setSorter(i);
+			Arrays.sort(VectObsTemp);
 			switch (TipoVar[i]) {
 				case 0:
-					VectVar[i] = new VariableNumber(VectOssTemp, Vname[i], i, JWATConstants.NUMERIC, null);
+					VectVar[i] = new VariableNumber(VectObsTemp, Vname[i], i, JWATConstants.NUMERIC, null);
 					break;
 				case 1:
-					VectVar[i] = new VariableString(VectOssTemp, Vname[i], i, JWATConstants.STRING, map[i]);
+					VectVar[i] = new VariableString(VectObsTemp, Vname[i], i, JWATConstants.STRING, map[i]);
 					break;
 				case 2:
-					VectVar[i] = new VariableDate(VectOssTemp, Vname[i], i, JWATConstants.DATE, map[i]);
+					VectVar[i] = new VariableDate(VectObsTemp, Vname[i], i, JWATConstants.DATE, map[i]);
 					break;
 				default:
 			}
@@ -106,8 +106,8 @@ public class MatrixObservations {
 	 * Returns the array of original observations.
 	 * @return array of original observations.
 	 */
-	public Observation[] getListOss() {
-		return VectOss;
+	public Observation[] getListObs() {
+		return VectObs;
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class MatrixObservations {
 	 */
 	public int getNumOfOriginalObs() {
 		if (VectVar != null && VectVar.length > 0) {
-			return VectOss.length;
+			return VectObs.length;
 		} else {
 			return -1;
 		}
@@ -156,8 +156,8 @@ public class MatrixObservations {
 		}
 	}
 
-	//UPDATE 28/10/2006 + Spostamento operazioni di trasformazione da modelWorkloadAnalysis a MatrixOsservazioni
-	//					+ Inserimento array delle statistiche bivariate per non effettuare il ricalcolo in caso di undo
+//UPDATE 28/10/2006 + Moving transformation operations from modelWorkloadAnalysis to MatrixObservations
+// + Array insertion of bivariate statistics to avoid recalculation in case of undo
 
 	private ArrayList<StatBivariate> listOfStatsBiv = new ArrayList<StatBivariate>(); //<StatBivariate>
 
@@ -168,16 +168,16 @@ public class MatrixObservations {
 
 	public boolean undoTransformation(int varSel) {
 		if (VectVar[varSel].undoLastTrasf()) {
-			//E' stato necessario annullare il sampling
+// Sampling had to be canceled
 			for (int i = 0; i < VectVar.length; i++) {
 				if (i != varSel) {
 					VectVar[i].resetSampling();
 				}
 			}
-			//Reset validity e ID osservazioni
-			for (int i = 0; i < VectOss.length; i++) {
-				VectOss[i].setValid(true);
-				VectOss[i].setID(i + 1);
+		//Reset validity and ID observations
+			for (int i = 0; i < VectObs.length; i++) {
+				VectObs[i].setValid(true);
+				VectObs[i].setID(i + 1);
 			}
 			return true;
 		}
@@ -203,10 +203,10 @@ public class MatrixObservations {
 			}
 		}
 		undoBivStats(listOfStatsBiv.size() - VectVar[varSel].getNumOfTransf() - 1);
-		//Reset validity e ID osservazioni
-		for (int i = 0; i < VectOss.length; i++) {
-			VectOss[i].setValid(true);
-			VectOss[i].setID(i + 1);
+		//Reset validity and ID observations
+		for (int i = 0; i < VectObs.length; i++) {
+			VectObs[i].setValid(true);
+			VectObs[i].setID(i + 1);
 		}
 
 	}

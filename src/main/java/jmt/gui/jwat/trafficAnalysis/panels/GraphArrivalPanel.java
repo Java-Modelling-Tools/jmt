@@ -606,9 +606,9 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 		long year = 1;
 		long month = 1;
 
-		//Se le prima e ultima data hanno mese o anno differente calcolo il numero di mesi e anni di differenza
+		//If the first and last date have a different month or year, I calculate the number of months and years of difference
 		if (cal.get(Calendar.MONTH) != cal2.get(Calendar.MONTH) || cal.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
-			// ?  Non funziona --> conta + anni di quelli esistenti e la funzione roll non incrementa l'anno !!!
+			// ?  It doesn't work --> it counts + years of the existing ones and the roll function doesn't increase the year !!!
 			while (cal.get(Calendar.MONTH) != cal2.get(Calendar.MONTH) || cal.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {
 				if (cal.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {
 					month++;

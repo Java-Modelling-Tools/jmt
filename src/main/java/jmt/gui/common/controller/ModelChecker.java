@@ -127,6 +127,9 @@ public class ModelChecker implements CommonConstants {
 	//PS, FCFS or RAND
 	//Used only in JMVA conversion
 	private Vector<Object> bcmpServersWithAsymmetricSchedulingPolicy;
+	//Vector containing the keys of servers with a priority scheduling policy
+	//Used only in JMVA conversion
+	private Vector<Object> bcmpServersWithPrioritySchedulingPolicy;
 
 	//Vector containing the keys of stations without an optional link
 	private Vector<Object> stationsWithoutOptionalLink;
@@ -251,6 +254,9 @@ public class ModelChecker implements CommonConstants {
 	//RAND.
 	// (only when trying to convert to JMVA)
 	public static final int BCMP_ASYMMETRIC_SCHEDULING_POLICY_WARNING = 8;
+	// occurs when a server has a priority scheduling policy
+	// (only when trying to convert to JMVA)
+	public static final int BCMP_PRIORITY_SCHEDULING_POLICY_WARNING = 9;
 
 	//it occurs when a station has no optional links.
 	public static final int NO_OPTIONAL_LINK_WARNING = 9;
@@ -325,6 +331,7 @@ public class ModelChecker implements CommonConstants {
 		bcmpDelaysWithNonRationalDistribution = new Vector<Object>(0, 1);
 		bcmpStationsWithStateDependentRoutingStrategy = new Vector<Object>(0, 1);
 		bcmpServersWithAsymmetricSchedulingPolicy = new Vector<Object>(0, 1);
+		bcmpServersWithPrioritySchedulingPolicy = new Vector<Object>(0, 1);
 		stationsWithoutOptionalLink = new Vector<Object>(0, 1);
 		closedClassesWithZeroPopulation = new Vector<Object>(0, 1);
 		classSwitchesBetweenForkJoin = new Vector<Object>(0, 1);
@@ -362,6 +369,7 @@ public class ModelChecker implements CommonConstants {
 		bcmpDelaysWithNonRationalDistribution.clear();
 		bcmpStationsWithStateDependentRoutingStrategy.clear();
 		bcmpServersWithAsymmetricSchedulingPolicy.clear();
+		bcmpServersWithPrioritySchedulingPolicy.clear();
 		stationsWithoutOptionalLink.clear();
 		closedClassesWithZeroPopulation.clear();
 		classSwitchesBetweenForkJoin.clear();
@@ -396,6 +404,7 @@ public class ModelChecker implements CommonConstants {
 			checkForBcmpDelayNonRationalDistributionWarning();
 			checkForBcmpStateDependentRoutingStrategyWarning();
 			checkForBcmpAsymmetricSchedulingPolicyWarning();
+			checkForBcmpPrioritySchedulingPolicyWarning();
 		} else {
 			station_def.manageProbabilities();
 			checkForNoClassError();
@@ -851,6 +860,14 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
+	 *
+	 * @return true if a server has a priority scheduling policy
+	 */
+	public boolean isThereBcmpPrioritySchedulingPolicyWarning() {
+		return warnings[BCMP_PRIORITY_SCHEDULING_POLICY_WARNING];
+	}
+
+	/**
 	 * Returns true if a station has no optional links.
 	 *
 	 * @return true if a station has no optional links.
@@ -1194,6 +1211,14 @@ public class ModelChecker implements CommonConstants {
 	 */
 	public Vector<Object> getBcmpServersWithAsymmetricSchedulingPolicy() {
 		return bcmpServersWithAsymmetricSchedulingPolicy;
+	}
+
+	/**
+	 * @return a Vector<Object> containing the keys of servers with a
+	 * priority scheduling policy
+	 */
+	public Vector<Object> getBcmpServersWithPrioritySchedulingPolicy() {
+		return bcmpServersWithPrioritySchedulingPolicy;
 	}
 
 	/**
@@ -2112,6 +2137,27 @@ public class ModelChecker implements CommonConstants {
 				}
 				bcmpServersWithAsymmetricSchedulingPolicy.add(thisServer);
 				warnings[BCMP_ASYMMETRIC_SCHEDULING_POLICY_WARNING] = true;
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Checks if a server has a priority scheduling policy
+	 */
+	private void checkForBcmpPrioritySchedulingPolicyWarning() {
+		Vector<Object> servers = station_def.getStationKeysServer();
+		Vector<Object> classes = class_def.getClassKeys();
+		for (int i = 0; i < servers.size(); i++) {
+			Object thisServer = servers.get(i);
+			for (int j = 0; j < classes.size(); j++) {
+				String strategy = station_def.getStationQueueStrategy(thisServer);
+				if (!strategy.equals(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
+						&& !strategy.equals(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
+					continue;
+				}
+				bcmpServersWithPrioritySchedulingPolicy.add(thisServer);
+				warnings[BCMP_PRIORITY_SCHEDULING_POLICY_WARNING] = true;
 				break;
 			}
 		}

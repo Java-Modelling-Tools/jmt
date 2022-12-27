@@ -88,10 +88,10 @@ public class Convex2DGraph extends JabaGraph implements MouseListener,
 	private CartesianPositivePlane plane;
 
 	private int mouseButtonPress;
-	private Point dragPoint;// Il punto correntemente puntato dal mouse
-	private boolean dragging;
-	private DPoint selectedPoint;// Il punto del convex hull correntemente
-									// selezionato o puntato dal mouse
+private Point dragPoint;// The point currently pointed at by the mouse
+private boolean dragging;
+private DPoint selectedPoint;// The point of the convex hull currently
+// selected or pointed to by mouse
 	private JabaWizard mainWin;
 	private ConvexSegment selectedConvexSegment;
 

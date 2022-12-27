@@ -67,7 +67,7 @@ public abstract class JwatSession {
 			root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 			root.setAttribute("xsi:noNamespaceSchemaLocation", "jwatsave.xsd");
 
-			Observation[] obs = matrix.getListOss();
+			Observation[] obs = matrix.getListObs();
 			VariableNumber[] var = matrix.getVariables();
 
 			saveVariablesInfo(var, doc, root, zos);

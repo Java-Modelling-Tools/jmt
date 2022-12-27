@@ -12,28 +12,28 @@ public class ClusterInfoFuzzy {
 
 	public class SFCluStat {
 
-		public int iNotZr; //Non-zero observations
-		public double dMedia; //Media
-		public double dStdEr; //Standard Error
-		public double dStdDv; //Standard Deviation
-		public double dVarnz; //Variance
-		public double dKurto; //Kurtosis
-		public double dSkewn; //Skewness
-		public double dRange; //Range   (Max-Min)
-		public double dMinOs; //Minimum value
-		public double dMaxOs; //Maximum value
+public int iNotZr; //Non-zero observations
+public double dMean; //Average
+public double dStdEr; //StandardError
+public double dStdDv; // Standard Deviation
+public double dVarnc; // Variance
+public double dKurto; // Kurtosis
+public double dSkewn; //Skewness
+public double dRange; //Range (Max-Min)
+public double dMinObs; //Minimum value
+public double dMaxObs; //Maximum value
 
-		public double dSomma; //Somma dei valori per ogni variabile	v[1]
-		public double dSQuad; //Somma dei quadrati					v[2]
-		public double dSTerz; //Somma delle terze potenze				v[3]
-		public double dSQuar; //Somma delle quarte potenze			v[4]
-		public double dPerc5; //Usato per i percentili				v[5]
-		public double dPerc6; //Usato per i percentili				v[6]
-		public double dPerc7; //Usato per i percentili				v[7]
+public double dSum; //Sum of the values for each variable v[1]
+public double dSQuad; //Sum of squares v[2]
+public double dSThird; //Sum of third powers v[3]
+public double dSFourth; //Sum of the fourth powers v[4]
+public double dPerc5; //Used for percentiles v[5]
+public double dPerc6; //Used for percentiles v[6]
+public double dPerc7; //Used for percentiles v[7]
 	}
 
-	public String clus_log; // log dei valori del Cluster
-	public double[] percVar;// percentuale di ogni variabile sul totale della variabile
+public String clus_log; // log of Cluster values
+public double[] percVar;// percentage of each variable out of the total variable
 	public SFCluStat[] statClust;
-	public int numOss;
+	public int numObs;
 }

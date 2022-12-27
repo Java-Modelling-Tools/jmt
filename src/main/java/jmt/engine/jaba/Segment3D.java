@@ -67,8 +67,8 @@ public class Segment3D {
 	}
 
 	/**
-	 * Crea un vettore di segmenti. Viene usato per controllare di non utilizzare lo stesso
-	 * segmento due volte nella costruzione dello spazio 3D
+* Create a vector of segments. It is used to check not to use the same
+* segment twice in 3D space construction
 	 * @param tri
 	 * @return
 	 */
@@ -83,11 +83,11 @@ public class Segment3D {
 			Vertex s1 = ((Sector3D) tri.get(i)).getS1();
 			Vertex s2 = ((Sector3D) tri.get(i)).getS2();
 
-			// Segmento S0-S1
+			// Segment S0-S1
 			out.addElement(new Segment3D(abetas[0], abetas[1], abetas[2], bbetas[0], bbetas[1], bbetas[2], s0, s1));
-			// Segmento S0-S2
+			// Segment S0-S2
 			out.addElement(new Segment3D(abetas[0], abetas[1], abetas[2], cbetas[0], cbetas[1], cbetas[2], s0, s2));
-			// Segmento S1-S2
+			// Segment S1-S2
 			out.addElement(new Segment3D(bbetas[0], bbetas[1], bbetas[2], cbetas[0], cbetas[1], cbetas[2], s1, s2));
 
 		}
@@ -143,41 +143,41 @@ public class Segment3D {
 	}
 
 	/**
-	 * Partendo dai lati dei settori dove saturano 2 stazioni ottenute unendo quelle
-	 * dove saturano 3 stazioni aggiunge i segmenti creati e toglie quelli già usati
-	 * @param sett2staz
-	 * @param lt
+* Starting from the sides of the sectors where they saturate 2 stations obtained by joining them
+* where saturate 3 stations adds the segments created and removes those already used
+* @param sett2stat
+* @param lt
 	 * @return
 	 */
-	public Vector<Object> FixLtFromJoin(Vector<Object> sett2staz, Vector<Object> lt) {
+	public Vector<Object> FixLtFromJoin(Vector<Object> sect2station, Vector<Object> lt) {
 		//Vector ltout = new Vector();
-		for (int i = 0; i < sett2staz.size(); i++) {
+		for (int i = 0; i < sect2station.size(); i++) {
 			for (int j = 0; j < lt.size(); j++) {
-				// Sfrutto il fatto che dal join di 2 triangoli viene creato un settore con qsta sequenza:
-				// TrA S0 - TrB S0 - TrA S1 - TrB S1
+// I take advantage of the fact that a sector with this sequence is created from the join of 2 triangles:
+// TrA S0 - TrB S0 - TrA S1 - TrB S1
 
-				// Attenzione!! Nessun controllo sulle beta, sto supponendo (ad es) che le stazioni
-				// 0 e 1 siano presenti sempre solo su al massimo 2 triangoli, e che quindi siano uniti
+// Caution!! No control over betas, I'm assuming (eg) stations
+// 0 and 1 are always present only on at most 2 triangles, and therefore are united
 
-				if (((Sector3D) sett2staz.get(i)).getS0() == ((Segment3D) lt.get(j)).getS1()
-						&& ((Sector3D) sett2staz.get(i)).getS2() == ((Segment3D) lt.get(j)).getS2()) {
-					lt.removeElementAt(j);
-					j--;
-				}
-			}
+if (((Sector3D) sect2station.get(i)).getS0() == ((Segment3D) lt.get(j)).getS1()
+&& ((Sector3D) sect2station.get(i)).getS2() == ((Segment3D) lt.get(j)).getS2()) {
+lt.removeElementAt(j);
+j--;
+}
+}
 
-			// Per ogni settore3D a 2 stazioni devo poi aggiungere i nuovi lati creati congiungendo
-			// i settori.
+// For each 2-station 3D sector I must then add the new sides created by joining
+// the sectors.
 
-			// Aggiungo il segmento fatto dalla prima stazione che satura
-			lt.addElement(new Segment3D(((Sector3D) sett2staz.get(i)).getBeta(0, 1), ((Sector3D) sett2staz.get(i)).getBeta(0, 2),
-					((Sector3D) sett2staz.get(i)).getBeta(0, 3), ((Sector3D) sett2staz.get(i)).getBeta(1, 1), ((Sector3D) sett2staz.get(i)).getBeta(
-							1, 2), ((Sector3D) sett2staz.get(i)).getBeta(1, 3), ((Sector3D) sett2staz.get(i)).getS0(), ((Sector3D) sett2staz.get(i))
-							.getS1()));
-			// Aggiungo il segmento fatto dalla seconda stazione che satura
-			lt.addElement(new Segment3D(((Sector3D) sett2staz.get(i)).getBeta(2, 1), ((Sector3D) sett2staz.get(i)).getBeta(2, 2),
-					((Sector3D) sett2staz.get(i)).getBeta(2, 3), ((Sector3D) sett2staz.get(i)).getBeta(3, 1), ((Sector3D) sett2staz.get(i)).getBeta(
-							3, 2), ((Sector3D) sett2staz.get(i)).getBeta(3, 3), ((Sector3D) sett2staz.get(i)).getS2(), ((Sector3D) sett2staz.get(i))
+// Add the segment made by the first station that saturates
+lt.addElement(new Segment3D(((Sector3D) sect2station.get(i)).getBeta(0, 1), ((Sector3D) sect2station.get(i)).getBeta(0, 2),
+((Sector3D) sect2station.get(i)).getBeta(0, 3), ((Sector3D) sect2station.get(i)).getBeta(1, 1), ((Sector3D) sect2station.get(i)). getBeta(
+1, 2), ((Sector3D) sect2station.get(i)).getBeta(1, 3), ((Sector3D) sect2station.get(i)).getS0(), ((Sector3D) sect2station.get(i) )
+.getS1()));
+// Add the segment made by the second station that saturates
+			lt.addElement(new Segment3D(((Sector3D) sect2station.get(i)).getBeta(2, 1), ((Sector3D) sect2station.get(i)).getBeta(2, 2),
+					((Sector3D) sect2station.get(i)).getBeta(2, 3), ((Sector3D) sect2station.get(i)).getBeta(3, 1), ((Sector3D) sect2station.get(i)).getBeta(
+							3, 2), ((Sector3D) sect2station.get(i)).getBeta(3, 3), ((Sector3D) sect2station.get(i)).getS2(), ((Sector3D) sect2station.get(i))
 							.getS(3)));
 		}
 		return lt;
@@ -187,39 +187,39 @@ public class Segment3D {
 		Vector<Object> out = new Vector<Object>();
 		for (int i = 0; i < resxy.size(); i++) {
 			Vertex st1 = new Vertex((resxy.get(i).getP1()).x, (resxy.get(i).getP1()).y,
-			// metto -1 per indicare che la coordinata originale si è persa
-					-1);
-			Vertex st2 = new Vertex((resxy.get(i).getP2()).x, (resxy.get(i).getP2()).y, -1);
-			out.addElement(new Segment3D(resxy.get(i).getBeta1(), resxy.get(i).getBeta11(),
-			// i punti che arrivano da xy hanno per definizione beta3=0
-					0, resxy.get(i).getBeta2(), resxy.get(i).getBeta22(), 0, st1, st2));
-		}
-		return out;
-	}
+// put -1 to indicate that the original coordinate is lost
+-1);
+Vertex st2 = new Vertex((resxy.get(i).getP2()).x, (resxy.get(i).getP2()).y, -1);
+out.addElement(new Segment3D(resxy.get(i).getBeta1(), resxy.get(i).getBeta11(),
+// the points coming from xy have by definition beta3=0
+0, resxy.get(i).getBeta2(), resxy.get(i).getBeta22(), 0, st1, st2));
+}
+return out;
+}
 
-	public Vector<Object> FixLtFrom2Dxz(Vector<Sector2D> resxz) {
-		Vector<Object> out = new Vector<Object>();
-		for (int i = 0; i < resxz.size(); i++) {
-			Vertex st1 = new Vertex((resxz.get(i).getP1()).x,
-			// metto -1 per indicare che la coordinata originale si è persa
-					-1, (resxz.get(i).getP1()).y);
-			Vertex st2 = new Vertex((resxz.get(i).getP2()).x, -1, (resxz.get(i).getP2()).y);
-			out.addElement(new Segment3D(resxz.get(i).getBeta1(),
-			// i punti che arrivano da xz hanno per definizione beta2=0
-					0.0, resxz.get(i).getBeta11(), resxz.get(i).getBeta2(), 0.0, resxz.get(i).getBeta22(), st1, st2));
-		}
-		return out;
-	}
+public Vector<Object> FixLtFrom2Dxz(Vector<Sector2D> resxz) {
+Vector<Object> out = new Vector<Object>();
+for (int i = 0; i < resxz.size(); i++) {
+Vertex st1 = new Vertex((resxz.get(i).getP1()).x,
+// put -1 to indicate that the original coordinate is lost
+-1, (resxz.get(i).getP1()).y);
+Vertex st2 = new Vertex((resxz.get(i).getP2()).x, -1, (resxz.get(i).getP2()).y);
+out.addElement(new Segment3D(resxz.get(i).getBeta1(),
+// the points coming from xz have by definition beta2=0
+0.0, resxz.get(i).getBeta11(), resxz.get(i).getBeta2(), 0.0, resxz.get(i).getBeta22(), st1, st2));
+}
+return out;
+}
 
-	public Vector<Object> FixLtFrom2Dyz(Vector<Sector2D> resyz) {
-		Vector<Object> out = new Vector<Object>();
-		for (int i = 0; i < resyz.size(); i++) {
-			Vertex st1 = new Vertex(
-			// metto -1 per indicare che la coordinata originale si è persa
-					-1, (resyz.get(i).getP1()).x, (resyz.get(i).getP1()).y);
-			Vertex st2 = new Vertex(-1, (resyz.get(i).getP2()).x, (resyz.get(i).getP2()).y);
-			out.addElement(new Segment3D(
-			// i punti che arrivano da yz hanno per definizione beta2=0
+public Vector<Object> FixLtFrom2Dyz(Vector<Sector2D> resyz) {
+Vector<Object> out = new Vector<Object>();
+for (int i = 0; i < resyz.size(); i++) {
+Vertex st1 = new Vertex(
+// put -1 to indicate that the original coordinate is lost
+-1, (resyz.get(i).getP1()).x, (resyz.get(i).getP1()).y);
+Vertex st2 = new Vertex(-1, (resyz.get(i).getP2()).x, (resyz.get(i).getP2()).y);
+out.addElement(new Segment3D(
+// the points coming from yz have by definition beta2=0
 					0.0, resyz.get(i).getBeta1(), resyz.get(i).getBeta11(), 0, resyz.get(i).getBeta2(), resyz.get(i).getBeta22(), st1, st2));
 		}
 		return out;

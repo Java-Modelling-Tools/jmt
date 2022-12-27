@@ -196,11 +196,11 @@ public class SolverDispatcher {
 		JabaResults jres = new JabaResults();
 		Vector<Object> out = new Vector<Object>();
 
-		for (int i = 0; i < calc.getsett1staz().size(); i++) {
-			out.addElement(calc.getsett1staz().get(i));
+		for (int i = 0; i < calc.getsect1station().size(); i++) {
+			out.addElement(calc.getsect1station().get(i));
 		}
-		for (int i = 0; i < calc.getsett2staz().size(); i++) {
-			out.addElement(calc.getsett2staz().get(i));
+		for (int i = 0; i < calc.getsect2station().size(); i++) {
+			out.addElement(calc.getsect2station().get(i));
 		}
 		for (int i = 0; i < calc.gettriangles().size(); i++) {
 			out.addElement(calc.gettriangles().get(i));

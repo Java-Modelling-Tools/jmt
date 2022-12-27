@@ -143,7 +143,7 @@ public class DispFuzzyMatrix extends JScrollPane {
 			repaint();
 		}
 
-		//Da togliere ma verificare
+		//To remove but verify
 		public void setCluster(int clust) {
 			curClust = clust;
 			Redraw = true;
@@ -157,12 +157,12 @@ public class DispFuzzyMatrix extends JScrollPane {
 		}
 
 		private void initComponent() {
-			/* Creazione del buffer per l'immagine */
+			/* Create buffer for image */
 			chart = new BufferedImage(WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1,
 					BufferedImage.TYPE_USHORT_555_RGB);
 			Redraw = true;
-			/* Aggiunta del listener del mouse per visualizzazione dello scatter plot corrispondente in caso di pressione del tasto sinistro sul pannello
-			 oppure visualizzare la possibilita' di salvare l'immagine in formato .png con tasto destro */
+			/* Addition of the mouse listener for displaying the corresponding scatter plot in case of pressing the left button on the panel
+or display the possibility of saving the image in .png format with the right button */
 			if (this.getMouseListeners().length > 0) {
 				this.removeMouseListener(this.getMouseListeners()[0]);
 			}
@@ -197,7 +197,7 @@ public class DispFuzzyMatrix extends JScrollPane {
 							f.setVisible(true);
 						}
 					}
-					/* Opzione di salvataggio immagine */
+					/* Image saving option */
 					if (e.getButton() == MouseEvent.BUTTON3) {
 						showScreenShotDialog();
 					}
@@ -221,7 +221,7 @@ public class DispFuzzyMatrix extends JScrollPane {
 						VariableNumber Elenco[] = model.getMatrix().getVariables();
 						try {
 							if (fuzzyN != -1) {
-								// Pulizia dell'immagine
+								// Image cleaning
 								g.setColor(Color.WHITE);
 								g.fillRect(0, 0, WIDTH_TOT * Elenco.length + 1, HEIGHT_TOT * Elenco.length + 1);
 
@@ -231,13 +231,13 @@ public class DispFuzzyMatrix extends JScrollPane {
 										.getClusteringInfos(curClust)).getAssignment();
 								int[] v = ((FuzzyKMean) (session.getListOfClustering().get(clustering))).getVarClust();
 								int l = 0;
-								// Disegno dei grafici
+								// Graph drawing
 								for (int row = 0; row < Elenco.length; row++) {
 									for (int col = 0; col < Elenco.length; col++) {
 										g.setColor(Color.BLACK);
 										g.drawRect(col * WIDTH_TOT, row * HEIGHT_TOT, WIDTH_TOT, HEIGHT_TOT);
 										if (col == row) {
-											// Scrittura della variabile
+											// Write variable
 											Graphics2D gr = (Graphics2D) g;
 											gr.setFont(new Font("Arial", Font.BOLD, 13));
 											FontRenderContext context = gr.getFontRenderContext();
@@ -247,7 +247,7 @@ public class DispFuzzyMatrix extends JScrollPane {
 											g.setFont(new Font("Arial", Font.BOLD, 12));
 											g.drawString(Elenco[row].getName(), col * WIDTH_TOT + (WIDTH_TOT - (int) bounds.getWidth()) / 2, row
 													* HEIGHT_TOT - (int) bounds.getY() + (HEIGHT_TOT - (int) bounds.getHeight()) / 2);
-											//UPDATE 02/11/2006:	+visualizzazione variabile clusterizzata
+											//UPDATE 02/11/2006:	+clustered variable display
 											if (l < v.length && v[l] == col) {
 												g.drawString("(Clusterized)", col * WIDTH_TOT + 10, row * HEIGHT_TOT - (int) bounds.getY()
 														+ (HEIGHT_TOT - (int) bounds.getHeight()) / 2 + 15);
@@ -255,10 +255,10 @@ public class DispFuzzyMatrix extends JScrollPane {
 											}
 											g.setFont(new Font("Arial", Font.PLAIN, 12));
 										} else {
-											// Calcolo del passo del grafico
+											// Graph step calculation
 											double yFoot = HEIGHT_GRAPH / Elenco[row].getUniStats().getRangeValue();
 											double xFoot = WIDTH_GRAPH / Elenco[col].getUniStats().getRangeValue();
-											// Plottaggio del grafico
+											// Graph plotting
 											for (int i = 1; i <= WIDTH_GRAPH; i++) {
 												boolean[] done = new boolean[101];
 												int k = 1;
@@ -305,11 +305,11 @@ public class DispFuzzyMatrix extends JScrollPane {
 			}
 		}
 
-		/* Lista delle variabili da visualizzare */
+		/* List of variables to visualize */
 		private ModelWorkloadAnalysis model;
-		/* Bufferr d'immagine */
+		/* Image buffer */
 		private BufferedImage chart;
-		/* Indica se l'immagine deve essere o meno ridisegnato */
+		/* Indicates whether or not the image should be redrawn */
 		private boolean Redraw;
 		/* COSTANTI */
 		private static final int HEIGHT_GRAPH = 100;

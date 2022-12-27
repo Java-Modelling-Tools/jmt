@@ -9,12 +9,12 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 
 	public ClusterInfoKMean[] infoCluster;
 
-	public int isGoodCluster; // -1 non presente; 0 non ottimo; 1 ottimo
-	public double omsr; // overall
-	public double ratio; // ratio
+public int isGoodCluster; // -1 not present; 0 not great; 1 excellent
+public double omsr; // overall
+public double ratio; // ratio
 
-	public int[] numElem; // numero di elementi di ogni singolo cluster
-	public double[] percent; // percentuale sul totale
+public int[] numElem; // number of elements of each single cluster
+public double[] percent; // percentage of the total
 
 	public int numCluster;
 
@@ -37,10 +37,10 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 
 		passw = oldPassw;
 
-		double ssb; // varianza fra le classi sulla variabile j
-		double ssw; // varianza interna sulla variabile j
-		double dfw = 0; // grado di libertà interna fra le classi
-		double assw = 0;// errore totale nella partizione
+double ssb; // variance between classes on variable j
+double ssw; // internal variance on variable j
+double dfw = 0; // degree of internal freedom between classes
+double assw = 0;// total error in partition
 
 		double sd, sc, r[];
 		r = new double[varSel.length];
@@ -82,8 +82,8 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 				ssw = th;
 			}
 
-			ratio = 0; // variance ratio for variable j
-			if (ssw != 0) { // per me non serve...
+ratio = 0; // variance ratio for variable j
+if (ssw != 0) { // I don't think it is needed..
 				ratio = (r[j] / ssw - 1) * (1 + dfw) + 1;
 				r[j] = ssw;
 
@@ -98,7 +98,7 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 
 		passw = assw;
 
-		/* Determina per ogni cluster il numero dei punti che cadono in ciascun cluster */
+/* Determine for each cluster the number of points that fall into each cluster */
 		for (int xx = 0; xx < m.getNumOfObs(); xx++) {
 			numElem[clusAssign[xx]]++;
 		}
@@ -131,55 +131,56 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 		double absoluteVal[][] = new double[arrNClus.length][m.getNumVariables()];
 
 		int nclus;
-		//Observation[] currOss=m.getListOss();		//Valore corrente di ogni variabile
-		Observation[] currOss = m.getVariables()[0].getCurObs();
+//Observation[] currObs=m.getListObs(); //Current value of each variable
+		Observation[] currObs = m.getVariables()[0].getCurObs();
 		for (int count = 0; count < m.getNumOfObs(); count++) {
 
-			//nclus = Integer.parseInt(arrNClus.get(count).toString());
-			nclus = arrNClus[currOss[count].getID() - 1];
-			infoCluster[nclus].numOss++;
+//nclus = Integer.parseInt(arrNClus.get(count).toString());
+nclus = arrNClus[currObs[count].getID() - 1];
+infoCluster[nclus].numObs++;
 
-			//Porting di stat1cl
-			//Calcola somma, somma quadr. etc.
+//Port of stat1cl
+//Calculate sum, squared sum. etc.
 
 			for (int i = 0; i < m.getNumVariables(); i++) {
-				if (currOss[count].getIndex(i) != 0) {
+				if (currObs[count].getIndex(i) != 0) {
 					infoCluster[nclus].statClust[i].iNotZr++;
 				}
-				if (infoCluster[nclus].numOss == 1) {
-					infoCluster[nclus].statClust[i].dMaxOs = currOss[count].getIndex(i);
-					infoCluster[nclus].statClust[i].dMinOs = currOss[count].getIndex(i);
+				if (infoCluster[nclus].numObs == 1) {
+					infoCluster[nclus].statClust[i].dMaxObs = currObs[count].getIndex(i);
+					infoCluster[nclus].statClust[i].dMinObs = currObs[count].getIndex(i);
 				} else {
-					if (infoCluster[nclus].statClust[i].dMaxOs < currOss[count].getIndex(i)) {
-						infoCluster[nclus].statClust[i].dMaxOs = currOss[count].getIndex(i);
+					if (infoCluster[nclus].statClust[i].dMaxObs < currObs[count].getIndex(i)) {
+						infoCluster[nclus].statClust[i].dMaxObs = currObs[count].getIndex(i);
 					}
-					if (infoCluster[nclus].statClust[i].dMinOs > currOss[count].getIndex(i)) {
-						infoCluster[nclus].statClust[i].dMinOs = currOss[count].getIndex(i);
+					if (infoCluster[nclus].statClust[i].dMinObs > currObs[count].getIndex(i)) {
+						infoCluster[nclus].statClust[i].dMinObs = currObs[count].getIndex(i);
 					}
 				}
-				infoCluster[nclus].statClust[i].dSomma += currOss[count].getIndex(i);
-				absoluteVal[nclus][i] += Math.abs(currOss[count].getIndex(i));
-				infoCluster[nclus].statClust[i].dSQuad += Math.pow(currOss[count].getIndex(i), 2);
-				infoCluster[nclus].statClust[i].dSTerz += Math.pow(currOss[count].getIndex(i), 3);
-				infoCluster[nclus].statClust[i].dSQuar += Math.pow(currOss[count].getIndex(i), 4);
+				infoCluster[nclus].statClust[i].dSum += currObs[count].getIndex(i);
+				absoluteVal[nclus][i] += Math.abs(currObs[count].getIndex(i));
+				infoCluster[nclus].statClust[i].dSQuad += Math.pow(currObs[count].getIndex(i), 2);
+				infoCluster[nclus].statClust[i].dSThird += Math.pow(currObs[count].getIndex(i), 3);
+				infoCluster[nclus].statClust[i].dSFourth += Math.pow(currObs[count].getIndex(i), 4);
 
 			}
 		}
 
-		double somma_per_var;
-		double abs_somma_per_var;
+		double sum_per_var;
+		double abs_sum_per_var;
 		//Calcola percentuale della variabile usata nel cluster
+
 		for (int i = 0; i < m.getNumVariables(); i++) {
-			somma_per_var = 0;
-			abs_somma_per_var = 0;
+			sum_per_var = 0;
+			abs_sum_per_var = 0;
 			for (int l = 0; l <= numCluster; l++) {
-				somma_per_var += infoCluster[l].statClust[i].dSomma;
-				abs_somma_per_var += absoluteVal[l][i];
+				sum_per_var += infoCluster[l].statClust[i].dSum;
+				abs_sum_per_var += absoluteVal[l][i];
 			}
 
 			for (int l = 0; l <= numCluster; l++) {
-				infoCluster[l].percVar[i] = absoluteVal[l][i] / abs_somma_per_var;
-				//infoCluster[l].percVar[i] = infoCluster[l].statClust[i].dSomma / somma_per_var;
+				infoCluster[l].percVar[i] = absoluteVal[l][i] / abs_sum_per_var;
+				//infoCluster[l].percVar[i] = infoCluster[l].statClust[i].dSum / sum_per_var;
 			}
 		}
 
@@ -190,33 +191,33 @@ public class ClusteringInfosKMean implements ClusteringInfos {
 		for (int l = 0; l <= numCluster; l++) {
 
 			for (int i = 0; i < m.getNumVariables(); i++) {
-				infoCluster[l].statClust[i].dRange = infoCluster[l].statClust[i].dMaxOs - infoCluster[l].statClust[i].dMinOs;
-				infoCluster[l].statClust[i].dMedia = infoCluster[l].statClust[i].dSomma / infoCluster[l].numOss;
+				infoCluster[l].statClust[i].dRange = infoCluster[l].statClust[i].dMaxObs - infoCluster[l].statClust[i].dMinObs;
+				infoCluster[l].statClust[i].dMean = infoCluster[l].statClust[i].dSum / infoCluster[l].numObs;
 
-				if (infoCluster[l].numOss != 1) {
-					dPerc5 = Math.pow(infoCluster[l].statClust[i].dMedia, 2);
-					dPerc6 = Math.pow(infoCluster[l].statClust[i].dMedia, 3);
-					dPerc7 = Math.pow(infoCluster[l].statClust[i].dMedia, 4);
+				if (infoCluster[l].numObs != 1) {
+					dPerc5 = Math.pow(infoCluster[l].statClust[i].dMean, 2);
+					dPerc6 = Math.pow(infoCluster[l].statClust[i].dMean, 3);
+					dPerc7 = Math.pow(infoCluster[l].statClust[i].dMean, 4);
 
-					infoCluster[l].statClust[i].dVarnz = (infoCluster[l].statClust[i].dSQuad - infoCluster[l].numOss * dPerc5)
-							/ (infoCluster[l].numOss - 1);
+					infoCluster[l].statClust[i].dVarnc = (infoCluster[l].statClust[i].dSQuad - infoCluster[l].numObs * dPerc5)
+							/ (infoCluster[l].numObs - 1);
 
-					if (infoCluster[l].statClust[i].dVarnz != 0) {
-						infoCluster[l].statClust[i].dStdDv = Math.sqrt(infoCluster[l].statClust[i].dVarnz);
-						infoCluster[l].statClust[i].dStdEr = infoCluster[l].statClust[i].dStdDv / Math.sqrt(infoCluster[l].numOss);
+					if (infoCluster[l].statClust[i].dVarnc != 0) {
+						infoCluster[l].statClust[i].dStdDv = Math.sqrt(infoCluster[l].statClust[i].dVarnc);
+						infoCluster[l].statClust[i].dStdEr = infoCluster[l].statClust[i].dStdDv / Math.sqrt(infoCluster[l].numObs);
 
-						infoCluster[l].statClust[i].dSkewn = infoCluster[l].statClust[i].dSTerz - 3 * infoCluster[l].statClust[i].dMedia
-								* infoCluster[l].statClust[i].dSQuad + 3 * dPerc5 * infoCluster[l].statClust[i].dSomma;
-						infoCluster[l].statClust[i].dSkewn /= infoCluster[l].numOss;
+						infoCluster[l].statClust[i].dSkewn = infoCluster[l].statClust[i].dSThird - 3 * infoCluster[l].statClust[i].dMean
+								* infoCluster[l].statClust[i].dSQuad + 3 * dPerc5 * infoCluster[l].statClust[i].dSum;
+						infoCluster[l].statClust[i].dSkewn /= infoCluster[l].numObs;
 						infoCluster[l].statClust[i].dSkewn -= dPerc6;
-						infoCluster[l].statClust[i].dSkewn /= Math.pow(infoCluster[l].statClust[i].dVarnz, 1.5);
+						infoCluster[l].statClust[i].dSkewn /= Math.pow(infoCluster[l].statClust[i].dVarnc, 1.5);
 
-						infoCluster[l].statClust[i].dKurto = infoCluster[l].statClust[i].dSQuar - 4 * infoCluster[l].statClust[i].dMedia
-								* infoCluster[l].statClust[i].dSTerz + 6 * dPerc5 * infoCluster[l].statClust[i].dSQuad - 4 * dPerc6
-								* infoCluster[l].statClust[i].dSomma;
-						infoCluster[l].statClust[i].dKurto /= infoCluster[l].numOss;
+						infoCluster[l].statClust[i].dKurto = infoCluster[l].statClust[i].dSFourth - 4 * infoCluster[l].statClust[i].dMean
+								* infoCluster[l].statClust[i].dSThird + 6 * dPerc5 * infoCluster[l].statClust[i].dSQuad - 4 * dPerc6
+								* infoCluster[l].statClust[i].dSum;
+						infoCluster[l].statClust[i].dKurto /= infoCluster[l].numObs;
 						infoCluster[l].statClust[i].dKurto += dPerc7;
-						infoCluster[l].statClust[i].dKurto /= Math.pow(infoCluster[l].statClust[i].dVarnz, 2);
+						infoCluster[l].statClust[i].dKurto /= Math.pow(infoCluster[l].statClust[i].dVarnc, 2);
 						infoCluster[l].statClust[i].dKurto -= 3;
 					}
 				}

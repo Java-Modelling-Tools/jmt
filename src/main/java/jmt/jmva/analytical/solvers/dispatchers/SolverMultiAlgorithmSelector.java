@@ -159,7 +159,7 @@ public class SolverMultiAlgorithmSelector {
     }
 
     public SolverMulti selectOpenSolver(SolverAlgorithm algorithmType) throws SolverException {
-        if (SolverAlgorithm.OPEN.equals(algorithmType)) {
+        if (SolverAlgorithm.EXACT.equals(algorithmType)) {
             SolverMulti solver = new SolverMultiOpen(classes, stations, classData, stationServers);
             if (!solver.input(stationNames, stationTypes, serviceTimes, visits)) {
                 DispatcherUtil.fail("Error initializing SolverMultiOpen", null);
@@ -171,7 +171,7 @@ public class SolverMultiAlgorithmSelector {
     }
 
     public SolverMulti selectMixedSolver(SolverAlgorithm algorithmType) throws SolverException {
-        if (SolverAlgorithm.MIXED.equals(algorithmType)) {
+        if (SolverAlgorithm.EXACT.equals(algorithmType)) {
             SolverMultiMixed mixedSolver = new SolverMultiMixed(classes, stations);
             if (!mixedSolver.input(stationNames, stationTypes, serviceTimes, visits, classData, classTypes)) {
                 DispatcherUtil.fail("Error initializing SolverMultiMixed", null);

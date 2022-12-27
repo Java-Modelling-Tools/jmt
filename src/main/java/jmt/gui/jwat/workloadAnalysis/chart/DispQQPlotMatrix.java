@@ -108,7 +108,7 @@ public class DispQQPlotMatrix extends JScrollPane {
 
 		private void initComponent() {
 			if (model.getMatrix() != null) {
-				/* Creazione del buffer per l'immagine */
+				/* Create buffer for image */
 				chart = new BufferedImage(WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1,
 						BufferedImage.TYPE_USHORT_555_RGB);
 				Redraw = true;
@@ -147,7 +147,7 @@ public class DispQQPlotMatrix extends JScrollPane {
 								f.setVisible(true);
 							}
 						}
-						/* Opzione di salvataggio immagine */
+						/* Image saving option */
 						if (e.getButton() == MouseEvent.BUTTON3) {
 							showScreenShotDialog();
 						}
@@ -172,19 +172,19 @@ public class DispQQPlotMatrix extends JScrollPane {
 							Graphics g = chart.getGraphics();
 							VariableNumber Elenco[] = model.getMatrix().getVariables();
 							try {
-								// Pulizia dell'immagine
+								// Image cleaning
 								g.setColor(Color.WHITE);
 								g.fillRect(0, 0, WIDTH_TOT * Elenco.length + 1, HEIGHT_TOT * Elenco.length + 1);
 
 								initShow((Elenco.length * Elenco.length));
 
-								// Disegno dei grafici
+								// Graph drawing
 								for (int row = 0; row < Elenco.length; row++) {
 									for (int col = 0; col < Elenco.length; col++) {
 										g.setColor(Color.BLACK);
 										g.drawRect(col * WIDTH_TOT, row * HEIGHT_TOT, WIDTH_TOT, HEIGHT_TOT);
 										if (col == row) {
-											// Scrittura della variabile
+											// Write variable
 											Graphics2D gr = (Graphics2D) g;
 											gr.setFont(new Font("Arial", Font.BOLD, 13));
 											FontRenderContext context = gr.getFontRenderContext();
@@ -251,11 +251,11 @@ public class DispQQPlotMatrix extends JScrollPane {
 			}
 		}
 
-		/* Lista delle variabili da visualizzare */
+		/* List of variables to visualize */
 		private ModelWorkloadAnalysis model;
-		/* Bufferr d'immagine */
+		/* Image buffer */
 		private BufferedImage chart;
-		/* Indica se l'immagine deve essere o meno ridisegnato */
+		/* Indicates whether or not the image should be redrawn */
 		private boolean Redraw;
 		/* COSTANTI */
 		private static final int HEIGHT_GRAPH = 100;

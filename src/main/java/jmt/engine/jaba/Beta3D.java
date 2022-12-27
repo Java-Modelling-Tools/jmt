@@ -252,19 +252,19 @@ public class Beta3D {
 	 * @return
 	 */
 	public Vector<Object> JoinTriangles(Vector<Object> triangles) {
-		Vector<Object> sett2staz = new Vector<Object>();
+		Vector<Object> sect2station = new Vector<Object>();
 		for (int i = 0; i < triangles.size(); i++) {
 			//if (i+1>=triangles.size())
 			for (int j = i + 1; j < triangles.size(); j++) {
 				if (Joinable((Sector3D) triangles.get(i), (Sector3D) triangles.get(j))) {
-					sett2staz.addElement(JoinTriangle((Sector3D) triangles.get(i), (Sector3D) triangles.get(j)));
+					sect2station.addElement(JoinTriangle((Sector3D) triangles.get(i), (Sector3D) triangles.get(j)));
 				}
 			}
 		}
-		return sett2staz;
+		return sect2station;
 	}
 
-	public Vector<Vector<Object>> Join2Statxy(Vector<Object> latixy, Vector<Object> lati, Vector<Object> sett2staz) {
+	public Vector<Vector<Object>> Join2Statxy(Vector<Object> latixy, Vector<Object> lati, Vector<Object> sect2station) {
 		Vector<Vector<Object>> out = new Vector<Vector<Object>>();
 		int[] p1 = new int[3];
 		for (int i = 0; i < lati.size(); i++) {
@@ -288,7 +288,7 @@ public class Beta3D {
 							(((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1())));
 					lati.addElement(new Segment3D((((Segment3D) latixy.get(j)).getBeta(1)), (((Segment3D) lati.get(i)).getBeta(1)),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
-					sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
+					sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 					lati.removeElementAt(i);
 					latixy.removeElementAt(j);
@@ -304,7 +304,7 @@ public class Beta3D {
 							(((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1())));
 					lati.addElement(new Segment3D((((Segment3D) latixy.get(j)).getBeta(0)), (((Segment3D) lati.get(i)).getBeta(1)),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
-					sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
+					sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 					lati.removeElementAt(i);
 					latixy.removeElementAt(j);
@@ -313,13 +313,13 @@ public class Beta3D {
 				}
 			}
 		}
-		out.addElement(sett2staz);
+		out.addElement(sect2station);
 		out.addElement(lati);
 		out.addElement(latixy);
 		return out;
 	}
 
-	public Vector<Vector<Object>> Join2Statxz(Vector<Object> latixz, Vector<Object> lati, Vector<Object> sett2staz) {
+	public Vector<Vector<Object>> Join2Statxz(Vector<Object> latixz, Vector<Object> lati, Vector<Object> sect2station) {
 		Vector<Vector<Object>> out = new Vector<Vector<Object>>();
 		int[] p1 = new int[3];
 		for (int i = 0; i < lati.size(); i++) {
@@ -345,7 +345,7 @@ public class Beta3D {
 					lati.addElement(new Segment3D((((Segment3D) latixz.get(j)).getBeta(1)), (((Segment3D) lati.get(i)).getBeta(1)),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 
-					sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
+					sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 					lati.removeElementAt(i);
 					latixz.removeElementAt(j);
@@ -361,7 +361,7 @@ public class Beta3D {
 							(((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1())));
 					lati.addElement(new Segment3D((((Segment3D) latixz.get(j)).getBeta(0)), (((Segment3D) lati.get(i)).getBeta(1)),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
-					sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
+					sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 					lati.removeElementAt(i);
 					latixz.removeElementAt(j);
@@ -370,13 +370,13 @@ public class Beta3D {
 				}
 			}
 		}
-		out.addElement(sett2staz);
+		out.addElement(sect2station);
 		out.addElement(lati);
 		out.addElement(latixz);
 		return out;
 	}
 
-	public Vector<Vector<Object>> Join2Statyz(Vector<Object> latiyz, Vector<Object> lati, Vector<Object> sett2staz) {
+	public Vector<Vector<Object>> Join2Statyz(Vector<Object> latiyz, Vector<Object> lati, Vector<Object> sect2station) {
 		Vector<Vector<Object>> out = new Vector<Vector<Object>>();
 		int[] p1 = new int[3];
 		for (int i = 0; i < lati.size(); i++) {
@@ -406,7 +406,7 @@ public class Beta3D {
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 
 // Add the sector created by joining the 4 segments
-					sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
+					sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 
 // Remove used segments
@@ -426,7 +426,7 @@ public class Beta3D {
 							(((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1())));
 					lati.addElement(new Segment3D((((Segment3D) latiyz.get(j)).getBeta(0)), (((Segment3D) lati.get(i)).getBeta(1)),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
-					sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
+					sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) lati.get(i)).getS1()), (((Segment3D) lati.get(i)).getS1()),
 							(((Segment3D) lati.get(i)).getS2()), (((Segment3D) lati.get(i)).getS2())));
 					lati.removeElementAt(i);
 					latiyz.removeElementAt(j);
@@ -435,13 +435,13 @@ public class Beta3D {
 				}
 			}
 		}
-		out.addElement(sett2staz);
+		out.addElement(sect2station);
 		out.addElement(lati);
 		out.addElement(latiyz);
 		return out;
 	}
 
-	public Vector<Object> Join1Staz(Vector<Object> latixy, Vector<Object> latixz, Vector<Object> latiyz, Vector<Object> lati, Vector<Object> sett1staz) {
+	public Vector<Object> Join1Staz(Vector<Object> latixy, Vector<Object> latixz, Vector<Object> latiyz, Vector<Object> lati, Vector<Object> sect1station) {
 		//Vector out = new Vector();
 		for (int i = 0; i < lati.size(); i++) {
 			//Vector stemp = new Vector();    // Will contain the selected segments
@@ -451,7 +451,7 @@ public class Beta3D {
 // I create an array with the coordinates of the first points of the sides
 			int[] clato = ((((Segment3D) lati.get(i)).getS1()).getCoords());
 
-// Check needed for special cases where they are linked as sett2staz
+// Check needed for special cases where they are linked as sect2station
 // two sides of the triangle
 			if (((((Segment3D) lati.get(i)).getS1())) == ((((Segment3D) lati.get(i)).getS2()))) {
 // Search through the segments on the side with beta3=0
@@ -525,10 +525,10 @@ public class Beta3D {
 						}
 					}
 				}
-				sett1staz.addElement(new Sector3D(ptemp, 1, statp));
+				sect1station.addElement(new Sector3D(ptemp, 1, statp));
 			}
 		}
-		return sett1staz;
+		return sect1station;
 	}
 
 	/**
@@ -537,12 +537,12 @@ public class Beta3D {
 	 * @param latixy
 	 * @param latixz
 	 * @param latiyz
-	 * @param sett1staz
-	 * @param sett2staz
-	 * @return sett2staz
+	 * @param sect1station
+	 * @param sect2station
+	 * @return sect2station
 	 */
-	public Vector<Vector<Object>> Join2StazN3(Vector<Object> latixy, Vector<Object> latixz, Vector<Object> latiyz, Vector<Object> sett1staz,
-			Vector<Object> sett2staz) {
+	public Vector<Vector<Object>> Join2StazN3(Vector<Object> latixy, Vector<Object> latixz, Vector<Object> latiyz, Vector<Object> sect1station,
+			Vector<Object> sect2station) {
 		Vector<Vector<Object>> out = new Vector<Vector<Object>>();
 
 		Vector<Object> lati = new Vector<Object>();
@@ -575,7 +575,7 @@ public class Beta3D {
 								(((Segment3D) latixy.get(i)).getS1()), (((Segment3D) latixy.get(i)).getS1())));
 						lati.addElement(new Segment3D((((Segment3D) latixz.get(j)).getBeta(1)), (((Segment3D) latixy.get(i)).getBeta(1)),
 								(((Segment3D) latixy.get(i)).getS2()), (((Segment3D) latixy.get(i)).getS2())));
-						sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) latixy.get(i)).getS1()), (((Segment3D) latixy.get(i)).getS1()),
+						sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) latixy.get(i)).getS1()), (((Segment3D) latixy.get(i)).getS1()),
 								(((Segment3D) latixy.get(i)).getS2()), (((Segment3D) latixy.get(i)).getS2())));
 						latixy.removeElementAt(i);
 						latixz.removeElementAt(j);
@@ -608,7 +608,7 @@ public class Beta3D {
 									(((Segment3D) latixy.get(i)).getS1()), (((Segment3D) latixy.get(i)).getS1())));
 							lati.addElement(new Segment3D((((Segment3D) latiyz.get(j)).getBeta(1)), (((Segment3D) latixy.get(i)).getBeta(1)),
 									(((Segment3D) latixy.get(i)).getS2()), (((Segment3D) latixy.get(i)).getS2())));
-							sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) latixy.get(i)).getS1()), (((Segment3D) latixy.get(i)).getS1()),
+							sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) latixy.get(i)).getS1()), (((Segment3D) latixy.get(i)).getS1()),
 									(((Segment3D) latixy.get(i)).getS2()), (((Segment3D) latixy.get(i)).getS2())));
 							latixy.removeElementAt(i);
 							latiyz.removeElementAt(j);
@@ -641,7 +641,7 @@ public class Beta3D {
 								(((Segment3D) latiyz.get(i)).getS1()), (((Segment3D) latiyz.get(i)).getS1())));
 						lati.addElement(new Segment3D((((Segment3D) latixz.get(j)).getBeta(1)), (((Segment3D) latiyz.get(i)).getBeta(1)),
 								(((Segment3D) latiyz.get(i)).getS2()), (((Segment3D) latiyz.get(i)).getS2())));
-						sett2staz.addElement(new Sector3D(betav, 2, (((Segment3D) latiyz.get(i)).getS1()), (((Segment3D) latiyz.get(i)).getS1()),
+						sect2station.addElement(new Sector3D(betav, 2, (((Segment3D) latiyz.get(i)).getS1()), (((Segment3D) latiyz.get(i)).getS1()),
 								(((Segment3D) latiyz.get(i)).getS2()), (((Segment3D) latiyz.get(i)).getS2())));
 						latiyz.removeElementAt(i);
 						latixz.removeElementAt(j);
@@ -653,8 +653,8 @@ public class Beta3D {
 		out.addElement(latixy);
 		out.addElement(latixz);
 		out.addElement(latiyz);
-		out.addElement(sett1staz);
-		out.addElement(sett2staz);
+		out.addElement(sect1station);
+		out.addElement(sect2station);
 		return out;
 	}
 

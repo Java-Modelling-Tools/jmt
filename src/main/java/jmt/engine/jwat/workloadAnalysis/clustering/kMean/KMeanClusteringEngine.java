@@ -31,71 +31,71 @@ public class KMeanClusteringEngine {
 	private KMean clustering;
 	private MatrixObservations m;
 	private Observation[] obsVal;
-	private VariableNumber[] listAllVar; //Puntatori a tutte le variabili
-	private VariableNumber[] listSelVar; //Puntatori a tutte le variabili
+	private VariableNumber[] listAllVar; //Pointers to all variables
+	private VariableNumber[] listSelVar; //Pointers to all variables
 	private int indexSelVar[];
 
-	private int numMaxClust; //Num.massimo di cluster da considerare
-	private int numMaxIter; //Num.massimo di iterazioni
-	private int numTotVar; //Numero totale delle variabili
-	private int numVarSel; //Numero totale delle variabili
+private int numMaxClust; //Maximum number of clusters to consider
+private int numMaxIter; //Maximum number of iterations
+private int numTotVar; //Total number of variables
+private int numVarSel; //Total number of variables
 
-	private boolean[] isSelectedVar; //Marca le variabili coinvolte nel Clustering all'interno del totale delle variabili
+private boolean[] isSelectedVar; //Mark the variables involved in clustering within the total of variables
 
-	public TempClusterStatistics[][] sum; //Contiene le statistiche dei vari cluster
-	private double[] omsr; //Rapporto totale di varianza per partizione
+public TempClusterStatistics[][] sum; //Contains the statistics of the various clusters
+private double[] omsr; //Total variance report per partition
 
-	private int[] nn; //Usata per contenere il numero di oss.per
+private int[] nn; //Used to contain the number of obs.per
 
-	public String m_strKMLog; //Log da aggiungere al session log
-	//public Vector nclusArray;					//Vector contenente un vector per ogni cluster	//Array contenente il cluster attuale della variabile
-	public short[][] nclust; //Matrice contenente cluster attuale osservazione, per ogni n-clustering
+public String m_strKMLog; //Log to add to session log
+//public Vector nclusArray; //Vector containing a vector for each cluster //Array containing the current cluster of the variable
+public short[][] nclust; //Matrix containing current observation cluster, for each n-clustering
 
-	NumberFormat Floatformatter = new DecimalFormat("###.###E0");
+NumberFormat Floatformatter = new DecimalFormat("###.###E0");
 
-	public class TempClusterStatistics {
-		public double Coord; //	1 coordinata
-		public int numOs; //	2 # di osservazioni
-		public double Media; //	3 media
-		public double stdDv; //	4 std.deviation
-		public double minOs; //	5 minimum value
-		public double maxOs; //	6 maximum value
-		public double Skewn; //	7 skewness
-		public double Kurto; //	8 kurtosis
-		public double Varnz; //	9 varianza
-		public double SSDev; // 10 somma delle square deviations from centre of cluster
+public class TempClusterStatistics {
+public double Coord; // 1 coordinate
+public int numOs; // 2 # of observations
+public double Media; // 3 medium
+public double stdDv; // 4 std. deviation
+public double minOs; // 5 minimum values
+public double maxOs; // 6 maximum values
+public double Skewn; // 7 skewness
+public double Kurto; // 8 Kurtosis
+public double Varnz; // 9 variance
+public double SSDev; // 10 sum of square deviations from center of cluster
 
-		public double Somma; //	1 somma dei valori
-		public double SumQd; //	2 somma dei quadrati
-		public double SumTz; //	3 somma delle terze potenze
-		public double SumQt; //	4 somma delle quarte potenze
+public double Somma; // 1 sum of values
+public double SumQd; // 2 sum of squares
+public double SumTz; // 3 sum of the third powers
+public double SumQt; // 4 sum of the fourth powers
 
-		public double VVdi5; //	5
-		public double VVdi6; //	6
-		public double VVdi7; //	7
-	}
+public double VVdi5; // 5
+public double VVdi6; // 6
+public double VVdi7; // 7	
+}
 
 	public KMeanClusteringEngine(KMean clustering, TimeConsumingWorker worker) {
 		this.worker = worker;
 		this.clustering = clustering;
 	}
 
-	public boolean PrepClustering(MatrixObservations m, int numeroMassimoCluster, int numeroMassimoIterazioni, int variabiliSelezionate[]) {
+	public boolean PrepClustering(MatrixObservations m, int numberMaximumCluster, int numberMaximumIterations, int chosenVariables[]) {
 		int j = 0, i = 0;
 		this.m = m;
-		/* Inserite per TEST */
-		numMaxClust = numeroMassimoCluster; // Num.massimo di clusters da considerare
-		numMaxIter = numeroMassimoIterazioni; // Num. max di iterazioni
-		/* Salvataggio del numero di variaibli totali */
-		numTotVar = m.getNumVariables(); //Numero totale delle variabili
-		numVarSel = variabiliSelezionate.length; //Numero totale delle variabili
+/* Enter for TEST */
+numMaxClust = numberMaximumCluster; // Maximum number of clusters to consider
+numMaxIter = numberMaximumIterations; // Max number of iterations
+/* Save total number of variables */
+numTotVar = m.getNumVariables(); //Total number of variables
+numVarSel = chosenVariables.length; //Total number of variables
 
-		obsVal = m.getVariables()[0].getCurObs();
-		/* Inizializzazione degli array variabili normalizzate e dei puntatori alle variabili */
-		listAllVar = m.getVariables();
-		listSelVar = new VariableNumber[numVarSel];
-		indexSelVar = variabiliSelezionate;
-		/* Settaggio delle variaibli che sono coinvolte nel clustering */
+obsVal = m.getVariables()[0].getCurObs();
+/* Initialize array normalized variables and pointers to variables */
+listAllVar = m.getVariables();
+listSelVar = new VariableNumber[numVarSel];
+indexSelVar = chosenVariables;
+/* Setting the variables that are involved in clustering */
 
 		isSelectedVar = new boolean[numTotVar];
 		sum = new TempClusterStatistics[numTotVar][numMaxClust];
@@ -107,7 +107,7 @@ public class KMeanClusteringEngine {
 		}
 
 		for (i = 0; i < numTotVar; i++) {
-			if (variabiliSelezionate[j] == i) {
+			if (chosenVariables[j] == i) {
 				isSelectedVar[i] = true;
 				listSelVar[j] = listAllVar[i];
 				j++;
@@ -123,7 +123,7 @@ public class KMeanClusteringEngine {
 
 	private void InitData() {
 		int i = 0;
-		/* Inizializzazione del vettore delle statistiche delle variaibli */
+/* Initialize the variable statistics vector */
 		for (i = 0; i < numMaxClust; i++) {
 			for (int j = 0; j < numVarSel; j++) {
 				sum[j][i] = new TempClusterStatistics();
@@ -146,20 +146,20 @@ public class KMeanClusteringEngine {
 				sum[j][i].VVdi6 = 0;
 				sum[j][i].VVdi7 = 0;
 			}
-			/* Inizializzazione del vettore che contiene il numero di punti per cluster */
-			nn[i] = 0;
-			/* Azzeramento dell'array del rapporto totale di varianza per partizione */
+/* Initialize the array containing the number of points per cluster */
+nn[i] = 0;
+/* Clear array of total variance ratio per partition */
 			omsr[i] = 0;
 		}
 	}
 
 	public boolean DoClustering() {
 
-		/* Indica il cluster di partenza */
+/* Indicate the starting cluster */
 		int endclust, startClust = 0;
 		//nclusArray= new Vector();
 		nclust = new short[numMaxClust][obsVal.length];
-		/* Richiama la funzione che effettua l clustering */
+/* Call the function that does clustering */
 		endclust = Build(startClust);
 		if (endclust != -1) {
 			clustering.setRatio(endclust + 1);
@@ -170,17 +170,17 @@ public class KMeanClusteringEngine {
 	}
 
 	private int Build(int startClust) {
-		//Costruisce effettivamente i vari cluster
-		//aggiorna lo stato dei calcoli sulla Status Bar
+//Actually builds the various clusters
+//update the state of the calculations on the Status Bar
 		int km = 0;
-		/* creazione variaibili di utilità ignota */
+/* create variables of unknown utility */
 		int nclus = 0;
 		double dclus = 0;
 		int retVal = 0;
 		int i = 0;
-		/* Eseguo il ciclo di operazioni per il numero di cluster da considerare scelto nel form del clustering*/
+/* Execute the cycle of operations for the number of clusters to be considered chosen in the clustering form*/
 		for (int kk = startClust; kk < numMaxClust; kk++) {
-			/* Eseguo il ciclo di operazioni per il numero massimo di iterazioni scelte nel form del clustering */
+/* Execute the cycle of operations for the maximum number of iterations chosen in the clustering form */
 			for (int nc = 0; nc < numMaxIter; nc++) {
 				if (worker.isCanceled()) {
 					return -1;
@@ -190,21 +190,21 @@ public class KMeanClusteringEngine {
 				for (int kkk = 0; kkk <= kk; kkk++) {
 					for (int j = 0; j < numVarSel; j++) {
 						if ((nc == 0) || (sum[j][kkk].Coord != sum[j][kkk].Media)) {
-							/* Controllo che la Coordinata ??? sia diversa dalla media del cluster j */
+/* Check that the Coordinate ??? is different from the mean of cluster j */
 							err = true;
 						}
 					}
 				}
-				/* Il primo ciclo entra sempre nell'if poichè nc = 0 e err è settato a TRUE */
+/* The first loop always enters the if since nc = 0 and err is set to TRUE */
 				if (err) {
 					for (int kkk = 0; kkk <= kk; kkk++) {
-						/* Azzero il numero di osservazioni per il cluster kkk */
+/* Reset the number of observations for cluster kkk */
 						nn[kkk] = 0;
-						/* Re Inizializzo la variabile sum che contiene le statistiche di ogni cluster */
+/* Re Initialize the sum variable which contains the statistics of each cluster */
 						for (int j = 0; j < numVarSel; j++) {
-							/* PERCHE' ???? */
+							/* WHY' ???? */
 							sum[j][kkk].Coord = sum[j][kkk].Media;
-							/* Azzera i campi */
+							/* Zero the fields */
 							sum[j][kkk].Somma = 0;
 							sum[j][kkk].SumQd = 0;
 							sum[j][kkk].SumTz = 0;
@@ -215,19 +215,19 @@ public class KMeanClusteringEngine {
 						}
 					}
 					/**************************************** kmeans ********************************************/
-					/* Recupero il numero di osservazioni totali */
-					int numOsserv = listSelVar[0].Size();
-					/* Preparo la variaible per contenere il cluster attuale */
+/* Retrieve the number of total observations */
+					int numObserv = listSelVar[0].Size();
+/* Prepare the variable to hold the current cluster */
 					//nclusArray.add(new Vector());
-					//((Vector)nclusArray.get(kk)).setSize(numOsserv);
-					for (int xx = 0; xx < numOsserv; xx++) {
+					//((Vector)nclusArray.get(kk)).setSize(numObserv);
+					for (int xx = 0; xx < numObserv; xx++) {
 
-						/* Operazioni per indicare nella barra la percentuale e il passo attuali dell'algoritmo di kmean */
+/* Operations to indicate the current percentage and pace of the kmean algorithm in the bar */
 
-						nclus = 0; /* Presumo siano il numero di cluster ??????????? */
-						dclus = Double.POSITIVE_INFINITY; /* Indica la differenza iniziale da considerare tra i cluster ???????????????? */
+nclus = 0; /* I assume they are the number of clusters ??????????? */
+dclus = Double.POSITIVE_INFINITY; /* Indicate the initial difference to consider between clusters ???????????????? */
 						/*************************************************/
-						/* kk è il numero corrente di cluster utilizzati
+/* kk is the current number of clusters used
 						  /*************************************************/
 						for (int j = 0; j <= kk; j++) {
 							/*
@@ -237,7 +237,7 @@ public class KMeanClusteringEngine {
 							double xp = Math.pow(10, -10);
 							double dd = 0;
 							/*
-							 m_NumNorm Numero delle variaibli normalizzate
+m_Num Norm Number of normalized variables
 							 */
 							for (int r = 0; r < numVarSel; r++) {
 								dd += Math.pow(obsVal[xx].getIndex(indexSelVar[r]) - sum[r][j].Coord, 2);
@@ -359,13 +359,13 @@ public class KMeanClusteringEngine {
 						}//j
 					}// nclust
 				} else {
-					break; //esce dal for nc
+					break; //quit for nc
 				}// endif (err!=0)
 			}// nc
 
 			clustering.calcClusteringInfo(kk, sum,/*(Vector)nclusArray.get(kk),*/nclust[kk], m);
 
-			if (kk != (numMaxClust - 1)) { //era venti
+			if (kk != (numMaxClust - 1)) { //was 20
 				double sm = 0;
 				for (int j = 0; j < numVarSel; j++) {
 					for (int kkk = 0; kkk <= kk; kkk++) {

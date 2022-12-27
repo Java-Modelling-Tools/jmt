@@ -229,7 +229,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 	 * resize internal data structures according to new values. intended to be called from a listener.
 	 */
 	private void updateSizes()
-	//todo aggiunto controllo sul numero delle classi
+	//todo add control on number of classes 
 	{
 		if (((Integer) classSpinner.getValue()).intValue() <= MAXCLASSES) {
 			setNumberOfClasses(((Integer) classSpinner.getValue()).intValue());
@@ -557,7 +557,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 			//BEGIN Federico Dall'Orso 8/3/2005
 			//NEW
 			classTypeComboBoxCell = new ComboBoxCell(CLASS_TYPENAMES);
-			//todo sostituire quando saranno inserite le classi aperte
+			//todo replace after adding open classes
 			classTypeComboBoxCell.getComboBox().setEnabled(false);
 
 			deleteButton = new JButton(deleteOneClass);
@@ -568,7 +568,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 			//END Federico Dall'Orso 8/3/2005
 
 			JComboBox<String> classTypeBox = new JComboBox<String>(CLASS_TYPENAMES);
-			//todo sostituire quando saranno inserite le classi aperte
+			//todo replace after adding open classes
 			classTypeBox.setEnabled(false);
 
 			classTypeCellEditor = new DefaultCellEditor(classTypeBox);
@@ -600,8 +600,8 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 		/*enables deleting operations with last column's button*/
 		private void enableDeletes() {
 			//deleteOneClass.setEnabled(classes>1);
-			//todo zanzottera inserito controllo inizialmente non si possono cancellare le 2 classi
-			deleteOneClass.setEnabled(classes > MINCLASSES);
+			//todo zanzottera added control initially it is not possible to cancel the 2 classes
+						deleteOneClass.setEnabled(classes > MINCLASSES);
 			/*It seems the only way to implement row deletion...*/
 			this.addMouseListener(new MouseAdapter() {
 				@Override
@@ -827,7 +827,7 @@ public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpd
 				case 1:
 					return false;
 				case 2:
-					//todo ripristinare quando saranno accettate le classi aperte
+					//todo restore when open classes will be accepted
 					//return (classTypes[rowIndex] == CLASS_CLOSED);
 				case 3:
 					return (classTypes[rowIndex] == CLASS_OPEN);

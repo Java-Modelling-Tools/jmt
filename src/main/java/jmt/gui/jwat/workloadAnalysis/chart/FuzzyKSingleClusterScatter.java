@@ -62,22 +62,21 @@ public class FuzzyKSingleClusterScatter extends JPanel {
 	private Point YText = new Point(WIDTH_TEXT_Y / 2, (TOP_SPACE + HEIGHT + HEIGHT_TEXT_X + HEIGHT_VALUES_X) / 2);
 	private Point XText = new Point((WIDTH_TEXT_Y + WIDTH_VALUES_Y + WIDTH + RIGHT_SPACE) / 2, TOP_SPACE + HEIGHT + HEIGHT_VALUES_X + HEIGHT_TEXT_X
 			/ 2);
-
-	private BufferedImage graph; //Immagine grafico
-	private boolean first = true; //Indica che devono essere ridisegnati i punti nella buffered image
-	private boolean zoomming = false; //Indica che si sta operando una selezione di zoom In
-	private int xStart; //Posizione di inizio e fine della selezione di zoom
+	private BufferedImage graph; //Graph Image
+	private boolean first = true; //Indicate that points in the buffered image should be redrawed
+	private boolean zoomming = false; //Indicates that a zoom In selection is being made
+	private int xStart; //Start and end position of the zoom selection
 	private int yStart;
 	private int xEnd;
 	private int yEnd;
-	private ModelWorkloadAnalysis model; //Modello contenente i valori da plottare
-	private WorkloadAnalysisSession session; //Modello contenente i valori da plottare
+	private ModelWorkloadAnalysis model; //Template containing the values to plot
+	private WorkloadAnalysisSession session; //Template containing the values to plot
 
 	private int curClust = 1;
 
-	private int xVar; //Variabile da plottare in x
-	private int yVar; //Variabile da plottare in y
-	private double xMin; //Valori limite correnti del grafico
+	private int xVar; //Variable to plot in x
+	private int yVar; //Variable to plot in y
+	private double xMin; //Current limit values of the graph
 	private double xMax;
 	private double yMin;
 	private double yMax;

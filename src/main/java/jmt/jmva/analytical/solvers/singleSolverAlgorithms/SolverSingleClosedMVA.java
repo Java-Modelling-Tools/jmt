@@ -1690,8 +1690,7 @@ public class SolverSingleClosedMVA extends Solver {
 				//calculation of marginal probabilities p(k,n) except k = 0, n
 				for (k = 1; k < n; k++) {
 					pCorr[k] = servTime[m][k] * X[n] * pPrec[k - 1];
-					//TODO: exp ?? Forse serve per probabilità troppo basse??
-					//R: hai aganciato il concetto
+					//this is for probabilities that are very low or very high
 					expMultCorr[k] = expMultPrec[k - 1];
 					if (pCorr[k] < MIN) {
 						pCorr[k] *= MAX;
@@ -1699,14 +1698,11 @@ public class SolverSingleClosedMVA extends Solver {
 						if (expMultCorr[k] > min) {
 							min = expMultCorr[k];
 						}
-						//TODO: idem per prob alte??
-						//R: esatto pero' cosidera che alte vuole dire tenendo conto del moltiplicatore...
 					} else if (pCorr[k] > MAX) {
 						pCorr[k] *= MIN;
 						expMultCorr[k]--;
 					}
-					//TODO: punto non chiaro: cosa succede??
-					//R: quando il moltiplicatore per la prob k-esima e' 0 aumento il numero
+					//when the mutiplier for the prob k-esima is 0 I increase the value
 					if (expMultCorr[k] == 0) {
 						puntProb[0]++;
 						puntProb[puntProb[0]] = k;

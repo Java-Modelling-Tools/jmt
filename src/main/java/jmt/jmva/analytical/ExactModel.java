@@ -863,6 +863,7 @@ public class ExactModel implements ExactConstants  {
 	 * @return true if data was changed, false otherwise
 	 */
 	public boolean setClassPriorities(int[] classPriorities) {
+		//System.out.println("" + classPriorities.length + " "+classes);
 		if (classPriorities.length != classes) {
 			throw new IllegalArgumentException("classPriorities.length!=classes");
 		}

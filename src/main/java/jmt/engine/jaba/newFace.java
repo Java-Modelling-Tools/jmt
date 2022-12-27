@@ -53,7 +53,7 @@ public class newFace {
 		return controllo;
 	}
 
-	// I 3 metodi seguenti ritornano i vertici di un newFace
+// The following 3 methods return the vertices of a newFace
 	public Vertex getV0() {
 		return vert1;
 	}
@@ -66,8 +66,8 @@ public class newFace {
 		return vert3;
 	}
 
-	// I 4 metodi seguenti ritornano il valore dei 4 parametri dell'equazione
-	// di un piano passante per 3 punti: Ax+By+Cz+D=0
+// The following 4 methods return the value of the 4 parameters of the equation
+// of a plane passing through 3 points: Ax+By+Cz+D=0
 	public double getPianoA() {
 		int v0[] = vert1.getCoords();
 		int v1[] = vert2.getCoords();
@@ -101,13 +101,13 @@ public class newFace {
 	}
 
 	/**
-	 * Controlla se due newFace sono confinanti
-	 * @param s1
-	 * @param s2
-	 * @return      true se sono confinanti
+* Check if two newFace are bordering
+* @param s1
+* @param s2
+* @return true if they are bordering
 	 */
 	public boolean confSect(newFace s1, newFace s2) {
-		// Considero due settori confinanti se hanno due vertici su 3 in comune
+// I consider two neighboring sectors if they have two vertices out of 3 in common
 		int t = 0;
 		if (s1.vert1 == s2.vert1) {
 			t++;
@@ -144,16 +144,15 @@ public class newFace {
 	}
 
 	/**
-	 * Controlla se due newFace sono complanari
+* Check if two newFace are coplanar
 	 * @param s1
 	 * @param s2
 	 * @return
 	 */
 	public boolean Complanar(newFace s1, newFace s2) {
 		if (
-		// Per il controllo utilizzo la condizione che due piani sono complanari se
-		// hanno i coefficienti dell'equazione proporzionali tra loro.
-
+// For the check I use the condition that two planes are coplanar if
+// have the coefficients of the equation proportional to each other.
 		(((Math.abs(s2.getPianoA()) < EPSYLON) && Math.abs(s1.getPianoA()) < EPSYLON) || Math.abs((s1.getPianoA() / s2.getPianoA()) - s1.getPianoB()
 				/ s2.getPianoB()) < EPSYLON)
 				&& (((Math.abs(s2.getPianoA()) < EPSYLON) && Math.abs(s1.getPianoC()) < EPSYLON) || Math.abs((s1.getPianoA() / s2.getPianoA())

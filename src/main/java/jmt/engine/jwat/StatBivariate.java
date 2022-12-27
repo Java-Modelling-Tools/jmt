@@ -18,47 +18,47 @@
 package jmt.engine.jwat;
 
 /**
- * Classe che rappresenta le statistiche bivariate
+ * Class representing bivariate statistics
  * @author Brambilla Davide, Fumagalli Claudio
  * @version 1.0
  */
 public class StatBivariate {
 	/**
-	 * Costruttore della classe
-	 * @param allVar array delle variabili
+* Class builder
+* @param allVar array of variables
 	 */
 	public StatBivariate(VariableNumber[] allVar) {
 		var = allVar;
-		covarianza = new double[allVar.length][];
+		covariance = new double[allVar.length][];
 		covDone = new boolean[allVar.length][allVar.length + 1];
 	}
 
 	/**
-	 * Restituisce il valore della covarianza(v1,v2)
-	 * @param ind1 indice della prima variabile
-	 * @param ind2 indice della seconda variabile
+* Returns the value of covariance(v1,v2)
+* @param ind1 index of the first variable
+* @param ind2 index of the second variable
 	 */
 	public double getCovariance(int ind1, int ind2) {
-		//Controllo se esiste il vettore delle covarianza per ind1
+//Check if the covariance vector exists for ind1
 		if (!covDone[ind1][0]) {
-			covarianza[ind1] = new double[var.length];
+			covariance[ind1] = new double[var.length];
 			covDone[ind1][0] = true;
 		}
-		//Controllo se la covarianza cercata e' gia calcolata
+//Check if the searched covariance is already calculated
 		if (!covDone[ind1][ind2 + 1]) {
 			calcCovariance(ind1, ind2);
 		}
-		return covarianza[ind1][ind2];
+		return covariance[ind1][ind2];
 	}
 
-	//Calcola il valore della convarianza delle due variabili richieste
+//Calculate the value of the convariance of the two requested variables
 	private void calcCovariance(int ind1, int ind2) {
 		double cov = 0;
 		for (int i = 0; i < var[0].Size(); i++) {
 			cov += (var[ind1].getValue(i) - var[ind1].getUniStats().getMean()) * (var[ind2].getValue(i) - var[ind2].getUniStats().getMean());
 		}
 		cov /= var[0].Size();
-		covarianza[ind1][ind2] = cov / (var[ind1].getUniStats().getVariance() * var[ind2].getUniStats().getVariance());
+		covariance[ind1][ind2] = cov / (var[ind1].getUniStats().getVariance() * var[ind2].getUniStats().getVariance());
 		covDone[ind1][ind2 + 1] = true;
 	}
 
@@ -71,10 +71,10 @@ public class StatBivariate {
 		}
 	}
 
-	/* Array delle variabili */
+/* Array of variables */
 	private VariableNumber[] var;
-	/*Covarainza*/
-	private double[][] covarianza;
+	/*Covariance*/
+	private double[][] covariance;
 	//Il primo elemento di ogni riga contiene se esiste il vettore delle cov per la variabile
 	private boolean[][] covDone;
 

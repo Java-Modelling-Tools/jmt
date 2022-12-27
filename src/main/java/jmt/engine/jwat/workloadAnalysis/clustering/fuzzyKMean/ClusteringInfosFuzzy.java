@@ -15,7 +15,7 @@ public class ClusteringInfosFuzzy implements ClusteringInfos {
 	public int[] numElem;
 	public double[] percent; // percentuale sul totale
 
-	public String centri; // contiene i centri dei cluster
+	public String centers; // contiene i centers dei cluster
 	public String log; // informazioni generali
 
 	public ClusteringInfosFuzzy(double[][] ass, int nCluster) {
@@ -50,7 +50,7 @@ public class ClusteringInfosFuzzy implements ClusteringInfos {
 		int i, j;
 		boolean assigned;
 		numElem = new int[numCluster + 1];
-		//Creazione InfoCluster
+		//Create InfoCluster
 		for (i = 0; i < assignment[0].length; i++) {
 			assigned = false;
 			for (j = 0; j < assignment.length; j++) {
@@ -89,7 +89,7 @@ public class ClusteringInfosFuzzy implements ClusteringInfos {
 	private void DoStat(MatrixObservations m) {
 		int nclus;
 
-		Observation[] currOss = m.getListOss(); //Valore corrente di ogni variabile
+		Observation[] currObs = m.getListObs(); //Current value of each variable
 		for (int count = 0; count < m.getNumOfObs(); count++) {
 
 			nclus = assignedToClust[count];
@@ -97,81 +97,79 @@ public class ClusteringInfosFuzzy implements ClusteringInfos {
 				continue;
 			}
 			nclus -= 2;
-			infoCluster[nclus].numOss++;
+			infoCluster[nclus].numObs++;
 
-			//Calcola somma, somma quadr. etc.
-
+//Calculate sum, squared sum. etc.
 			for (int i = 0; i < m.getNumVariables(); i++) {
-				if (currOss[count].getIndex(i) != 0) {
+				if (currObs[count].getIndex(i) != 0) {
 					infoCluster[nclus].statClust[i].iNotZr++;
 				}
-				if (infoCluster[nclus].numOss == 1) {
-					infoCluster[nclus].statClust[i].dMaxOs = currOss[count].getIndex(i);
-					infoCluster[nclus].statClust[i].dMinOs = currOss[count].getIndex(i);
+				if (infoCluster[nclus].numObs == 1) {
+					infoCluster[nclus].statClust[i].dMaxObs = currObs[count].getIndex(i);
+					infoCluster[nclus].statClust[i].dMinObs = currObs[count].getIndex(i);
 				} else {
-					if (infoCluster[nclus].statClust[i].dMaxOs < currOss[count].getIndex(i)) {
-						infoCluster[nclus].statClust[i].dMaxOs = currOss[count].getIndex(i);
+					if (infoCluster[nclus].statClust[i].dMaxObs < currObs[count].getIndex(i)) {
+						infoCluster[nclus].statClust[i].dMaxObs = currObs[count].getIndex(i);
 					}
-					if (infoCluster[nclus].statClust[i].dMinOs > currOss[count].getIndex(i)) {
-						infoCluster[nclus].statClust[i].dMinOs = currOss[count].getIndex(i);
+					if (infoCluster[nclus].statClust[i].dMinObs > currObs[count].getIndex(i)) {
+						infoCluster[nclus].statClust[i].dMinObs = currObs[count].getIndex(i);
 					}
 				}
-				infoCluster[nclus].statClust[i].dSomma += currOss[count].getIndex(i);
-				infoCluster[nclus].statClust[i].dSQuad += Math.pow(currOss[count].getIndex(i), 2);
-				infoCluster[nclus].statClust[i].dSTerz += Math.pow(currOss[count].getIndex(i), 3);
-				infoCluster[nclus].statClust[i].dSQuar += Math.pow(currOss[count].getIndex(i), 4);
+				infoCluster[nclus].statClust[i].dSum += currObs[count].getIndex(i);
+				infoCluster[nclus].statClust[i].dSQuad += Math.pow(currObs[count].getIndex(i), 2);
+				infoCluster[nclus].statClust[i].dSThird += Math.pow(currObs[count].getIndex(i), 3);
+				infoCluster[nclus].statClust[i].dSFourth += Math.pow(currObs[count].getIndex(i), 4);
 
 			}
 		}
 
-		double somma_per_var;
-		//Calcola percentuale della variabile usata nel cluster
+		double sum_per_var;
+//Calculate percentage of variable used in the cluster
 		for (int i = 0; i < m.getNumVariables(); i++) {
-			somma_per_var = 0;
+			sum_per_var = 0;
 			for (int l = 0; l < numCluster; l++) {
-				somma_per_var += infoCluster[l].statClust[i].dSomma;
+				sum_per_var += infoCluster[l].statClust[i].dSum;
 			}
 
 			for (int l = 0; l < numCluster; l++) {
 
-				infoCluster[l].percVar[i] = infoCluster[l].statClust[i].dSomma / somma_per_var;
+				infoCluster[l].percVar[i] = infoCluster[l].statClust[i].dSum / sum_per_var;
 			}
 		}
-
-		//Porting di stat2cl
-		//Calcola media, varianza, etc,etc
+//Port of stat2cl
+//Calculate mean, variance, etc,etc
 
 		for (int l = 0; l < numCluster; l++) {
 
 			for (int i = 0; i < m.getNumVariables(); i++) {
-				infoCluster[l].statClust[i].dRange = infoCluster[l].statClust[i].dMaxOs - infoCluster[l].statClust[i].dMinOs;
-				infoCluster[l].statClust[i].dMedia = infoCluster[l].statClust[i].dSomma / infoCluster[l].numOss;
+				infoCluster[l].statClust[i].dRange = infoCluster[l].statClust[i].dMaxObs - infoCluster[l].statClust[i].dMinObs;
+				infoCluster[l].statClust[i].dMean = infoCluster[l].statClust[i].dSum / infoCluster[l].numObs;
 
-				if (infoCluster[l].numOss != 1) {
-					infoCluster[l].statClust[i].dPerc5 = Math.pow(infoCluster[l].statClust[i].dMedia, 2);
-					infoCluster[l].statClust[i].dPerc6 = Math.pow(infoCluster[l].statClust[i].dMedia, 3);
-					infoCluster[l].statClust[i].dPerc7 = Math.pow(infoCluster[l].statClust[i].dMedia, 4);
+				if (infoCluster[l].numObs != 1) {
+					infoCluster[l].statClust[i].dPerc5 = Math.pow(infoCluster[l].statClust[i].dMean, 2);
+					infoCluster[l].statClust[i].dPerc6 = Math.pow(infoCluster[l].statClust[i].dMean, 3);
+					infoCluster[l].statClust[i].dPerc7 = Math.pow(infoCluster[l].statClust[i].dMean, 4);
 
-					infoCluster[l].statClust[i].dVarnz = (infoCluster[l].statClust[i].dSQuad - infoCluster[l].numOss
+					infoCluster[l].statClust[i].dVarnc = (infoCluster[l].statClust[i].dSQuad - infoCluster[l].numObs
 							* infoCluster[l].statClust[i].dPerc5)
-							/ (infoCluster[l].numOss - 1);
+							/ (infoCluster[l].numObs - 1);
 
-					if (infoCluster[l].statClust[i].dVarnz != 0) {
-						infoCluster[l].statClust[i].dStdDv = Math.sqrt(infoCluster[l].statClust[i].dVarnz);
-						infoCluster[l].statClust[i].dStdEr = infoCluster[l].statClust[i].dStdDv / Math.sqrt(infoCluster[l].numOss);
+					if (infoCluster[l].statClust[i].dVarnc != 0) {
+						infoCluster[l].statClust[i].dStdDv = Math.sqrt(infoCluster[l].statClust[i].dVarnc);
+						infoCluster[l].statClust[i].dStdEr = infoCluster[l].statClust[i].dStdDv / Math.sqrt(infoCluster[l].numObs);
 
-						infoCluster[l].statClust[i].dSkewn = infoCluster[l].statClust[i].dSTerz - 3 * infoCluster[l].statClust[i].dMedia
-								* infoCluster[l].statClust[i].dSQuad + 3 * infoCluster[l].statClust[i].dPerc5 * infoCluster[l].statClust[i].dSomma;
-						infoCluster[l].statClust[i].dSkewn /= infoCluster[l].numOss;
+						infoCluster[l].statClust[i].dSkewn = infoCluster[l].statClust[i].dSThird - 3 * infoCluster[l].statClust[i].dMean
+								* infoCluster[l].statClust[i].dSQuad + 3 * infoCluster[l].statClust[i].dPerc5 * infoCluster[l].statClust[i].dSum;
+						infoCluster[l].statClust[i].dSkewn /= infoCluster[l].numObs;
 						infoCluster[l].statClust[i].dSkewn -= infoCluster[l].statClust[i].dPerc6;
-						infoCluster[l].statClust[i].dSkewn /= Math.pow(infoCluster[l].statClust[i].dVarnz, 1.5);
+						infoCluster[l].statClust[i].dSkewn /= Math.pow(infoCluster[l].statClust[i].dVarnc, 1.5);
 
-						infoCluster[l].statClust[i].dKurto = infoCluster[l].statClust[i].dSQuar - 4 * infoCluster[l].statClust[i].dMedia
-								* infoCluster[l].statClust[i].dSTerz + 6 * infoCluster[l].statClust[i].dPerc5 * infoCluster[l].statClust[i].dSQuad
-								- 4 * infoCluster[l].statClust[i].dPerc6 * infoCluster[l].statClust[i].dSomma;
-						infoCluster[l].statClust[i].dKurto /= infoCluster[l].numOss;
+						infoCluster[l].statClust[i].dKurto = infoCluster[l].statClust[i].dSFourth - 4 * infoCluster[l].statClust[i].dMean
+								* infoCluster[l].statClust[i].dSThird + 6 * infoCluster[l].statClust[i].dPerc5 * infoCluster[l].statClust[i].dSQuad
+								- 4 * infoCluster[l].statClust[i].dPerc6 * infoCluster[l].statClust[i].dSum;
+						infoCluster[l].statClust[i].dKurto /= infoCluster[l].numObs;
 						infoCluster[l].statClust[i].dKurto += infoCluster[l].statClust[i].dPerc7;
-						infoCluster[l].statClust[i].dKurto /= Math.pow(infoCluster[l].statClust[i].dVarnz, 2);
+						infoCluster[l].statClust[i].dKurto /= Math.pow(infoCluster[l].statClust[i].dVarnc, 2);
 						infoCluster[l].statClust[i].dKurto -= 3;
 					}
 				}

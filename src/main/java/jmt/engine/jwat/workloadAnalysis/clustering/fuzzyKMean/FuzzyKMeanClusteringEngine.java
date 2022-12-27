@@ -26,10 +26,10 @@ import jmt.engine.jwat.VariableNumber;
 public class FuzzyKMeanClusteringEngine {
 
 	class SFKMClust {
-		String centri; // contiene i centri dei cluster
-		String log; // informazioni generali
-		/** DA SISTEMARE **/
-		String[] clus_log; /*= new String[37];	// log dei valori del Cluster = new String[MAXCLU]*/
+String centers; // contains cluster centers
+String log; // general informations
+/** TO BE FIXED **/
+String[] clus_log; /*= new String[37]; // log of Cluster values = new String[MAXCLU]*/
 	}
 
 	public String m_strFKMLog;
@@ -62,9 +62,9 @@ public class FuzzyKMeanClusteringEngine {
 
 	public void PrepFClustering(MatrixObservations m, int indVarSel[], int nMaxClust, int nFLev, int nIter) {
 		m_nNumNorm = indVarSel.length;
-		m_nMaxClust = nMaxClust; // Num.massimo di clusters da considerare
-		m_nFLev = nFLev; // Livello di fuzzyness
-		m_nIter = nIter; // Valore di tollerabilità dell'errore
+m_nMaxClust = nMaxClust; // Maximum number of clusters to consider
+m_nFLev = nFLev; // Level of fuzzyness
+m_nIter = nIter; // Fault tolerance value
 		clus_entropy = new double[m_nMaxClust - 1];
 
 		obsSel = m.getVariables()[indVarSel[0]].getCurObs();
@@ -82,7 +82,7 @@ public class FuzzyKMeanClusteringEngine {
 		int currClust = 0;
 		int nObs = listOfVars[0].getCurObs().length;
 
-		//inizializzazione vettore entropia
+//initialize entropy vector
 		for (int temp = 0; temp < m_nMaxClust - 1; temp++) {
 			entropy[temp] = 0.0;
 		}
@@ -101,7 +101,7 @@ public class FuzzyKMeanClusteringEngine {
 			initMatrix(0, cltemp, nObs);
 			initMatrix(1, cltemp, nObs);
 
-			//RIPETI PER IL NUMERO DI ITERAZIONI
+//REPEAT FOR THE NUMBER OF ITERATIONS
 			for (int kh = 0; kh < m_nIter; kh++) {
 				if (worker.isCanceled()) {
 					return;
@@ -114,7 +114,7 @@ public class FuzzyKMeanClusteringEngine {
 				initMatrix(5, cltemp, nObs);
 
 				/*** OK ***/
-				for (int i = 0; i < cltemp; i++) { //inizializza/calcola mrow
+				for (int i = 0; i < cltemp; i++) { //inizialiaze/calculate mrow
 					mrow[i][1] = 0;
 					for (int k = 0; k < nObs; k++) {
 						mrow[i][1] = mrow[i][1] + Math.pow(U[i][k], m_nFLev);
@@ -123,7 +123,7 @@ public class FuzzyKMeanClusteringEngine {
 				}
 
 				/*** OK ***/
-				for (int i = 0; i < cltemp; i++) { //calcola i centri
+				for (int i = 0; i < cltemp; i++) { //calculate centers
 					for (int j = 0; j < m_nNumNorm; j++) {
 						centers[i][j] = 0;
 						for (int k = 0; k < nObs; k++) {
@@ -138,7 +138,7 @@ public class FuzzyKMeanClusteringEngine {
 					singularity[k][0] = -1;//era [1]
 				}
 
-				for (int i = 0; i < cltemp; i++) { //calcola distanza datapoint-centri
+				for (int i = 0; i < cltemp; i++) { //distance datapoint-centers
 					for (int k = 0; k < nObs; k++) {
 						distance[i][obsSel[k].getID() - 1] = 0;
 						for (int j = 0; j < m_nNumNorm; j++) {
@@ -180,7 +180,7 @@ public class FuzzyKMeanClusteringEngine {
 
 			fuzzy.setAssign(currClust++, newU);
 
-			//calcolo delle entropie
+//calculate the entropies
 			for (int i = 0; i < cltemp; i++) {
 				for (int k = 0; k < nObs; k++) {
 					if (U[i][k] != 0) {
@@ -200,7 +200,7 @@ public class FuzzyKMeanClusteringEngine {
 			case 0:
 				U = new double[row][col];
 				//m = U;
-				//inizializzazione come suggerito da E.N.Magenis
+//initialization as suggested by E.N.Magenis
 				for (int i = 0; i < row; i++) {
 					for (int j = 0; j < col; j++) {
 						if ((i == j) || ((i == row - 1) && (j > row - 1))) {

@@ -266,7 +266,7 @@ public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 				short[] c1 = ((KMean) session.getListOfClustering().get(clustering)).getAsseg()[cluster - 1];
 				g2.setColor(Color.WHITE);
 				g2.fillRect(1, 1, WIDTH - 1, HEIGHT - 1);
-				//Calcolo del passo del grafico
+				//Graph step calculation
 				/*double yFoot = (HEIGHT - 1) / y.getUniStats().getRangeValue();
 				for (int i = 1; i <= WIDTH - 1; i++) {
 					boolean[] done = new boolean[101];

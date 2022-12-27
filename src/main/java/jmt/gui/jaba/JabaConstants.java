@@ -55,12 +55,12 @@ public interface JabaConstants {
 	public static final int CLASS_CLOSED = 0;
 	public static final int CLASS_OPEN = 1;
 
-	// todo aggiungere classi chiuse quando possibile
+	// todo add closed classes when possible
 	// public static final String[] CLASS_TYPENAMES = {"closed", "open"};
 	public static final String[] CLASS_TYPENAMES = { "closed" };
 
-	// todo limitazione delle classi a 3
-	public static final int MAX_CLASSES = 3; // prima era limitato a 100
+	// todo limit classes to 3 
+	public static final int MAX_CLASSES = 3; // before it was 100
 	public static final int MAX_STATIONS = 500;
 
 	public static final String DESCRIPTION_CLASSES = "<html><body align=\"left\"><font size=\"4\"><b>Classes characteristics</b>"

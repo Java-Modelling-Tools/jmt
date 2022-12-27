@@ -103,15 +103,14 @@ public class EpochPanel extends WizardPanel implements JWATConstants {
 
 	};
 
-	//	 TODO controllare validita dei dati forniti nel pannello e creazione e passaggio informazioni al modello per il prossimo panello
-	// Chiamata prima di passare al prossimo pannello
-	@Override
+// TODO check the validity of the data provided in the panel and create and pass information to the model for the next panel
+// Called before moving to the next panel	@Override
 	public boolean canGoForward() {
 		return canGoOn;
 	}
 
-	// TODO controllare con Fuma cosa fare
-	// Chiamata quando dal pannello si torna indietro
+// TODO check with Fuma what to do
+// Called when navigating back from the panel
 	@Override
 	public boolean canGoBack() {
 		return true;

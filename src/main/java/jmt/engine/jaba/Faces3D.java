@@ -44,10 +44,9 @@ public class Faces3D {
 	public Vector<newFace> Hull3D(Vector<Vertex> vertices) throws ConvexHullException {
 		Vector<newFace> newfaces = new Vector<newFace>();
 
-		// Lancio del metodo ConvexHull
-		ConvexHull hull = new ConvexHull(vertices);
-
-		// Recupero delle informazioni
+// Run Convex Hull method 
+		ConvexHull hull = new ConvexHull(vertices); 
+// Retrieve information
 		Vector<Polygon> faces = new Vector<Polygon>(hull.getFaces());
 		Vector vertoffaces = new Vector();
 		Vector<Vertex> vertof0 = new Vector<Vertex>(vertoffaces);
@@ -60,9 +59,9 @@ public class Faces3D {
 
 		int NSettori = newfaces.size();
 
-		// Controllo della complanarità ed assegnazione dei colori
+// Control of coplanarity and assignment of colors
 		for (int i = 0; i < NSettori; i++) {
-			//TODO Meglio mettere j=i o j=0???
+//TODO Better to put j=i or j=0???
 			for (int j = i; j < NSettori; j++) {
 				if (newfaces.get(i).Complanar(newfaces.get(i), newfaces.get(j)) && i != j
 						&& newfaces.get(i).confSect(newfaces.get(i), newfaces.get(j))) {
@@ -71,24 +70,24 @@ public class Faces3D {
 			}
 		}
 
-		// A questo punto si ha a disposizione il vettore newfaces (che è un vettore di newFace),
-		// con al suo interno i vertici delle facce e in ultimo il "colore" associato.
+// At this point we have the vector newfaces available (which is a vector of newFace),
+// containing the vertices of the faces and finally the associated "color".
 
 		return newfaces;
 	}
 
 	/**
-	 * Il metodo "esplode" un vettore di vertici 3D (vertex) aggiungendo le proiezioni sugli
-	 * assi di tutti i punti.
-	 *
-	 * @param lin       Il vettore di vertici passato
-	 * @return          Un vettore di vertici contenente anche le proiezioni sugli assi
+* The method "explodes" a vector of 3D vertices (vertex) by adding the projections on
+* axes of all points.
+*
+* @param lin The passed vertex vector
+* @return A vertex vector containing also the projections on the axes
 	 */
 	public Vector<Vertex> LExplode3D(Vector<Vertex> lin) {
-		// Creo un vettore L contenente le coordinate e le loro proiezioni sugli assi
+// I create a vector L containing the coordinates and their projections on the axes
 		Vector<Vertex> lout = new Vector<Vertex>();
 
-		// Cerco le coordinate di ogni vertice passato e creo le proiezioni
+// I look up the coordinates of each passed vertex and create the projections
 		int[] coord = {};
 
 		for (int i = 0; i < lin.size(); i++) {
@@ -109,8 +108,8 @@ public class Faces3D {
 	}
 
 	/**
-	 * Il metodo toglie da un vettore di vertici 3D (vertex) le proiezioni confrontandolo
-	 * con il vettore dei vertici originali
+* The method removes the projections from a 3D vertex vector (vertex) by comparing it
+* with the vector of the original vertices
 	 * @param lin
 	 * @param ori
 	 * @return
@@ -128,11 +127,11 @@ public class Faces3D {
 	}
 
 	/**
-	 * Controlla se i due vertici v1 e v2 sono uguali
-	 *
-	 * @param v1
-	 * @param v2
-	 * @return      true se sono uguali
+* Check if the two vertices v1 and v2 are equal
+*
+* @param v1
+* @param v2
+* @return true if they are equal
 	 */
 	public boolean SameVertex(Vertex v1, Vertex v2) {
 		boolean out = false;
@@ -145,11 +144,11 @@ public class Faces3D {
 	}
 
 	/**
-	 * Controlla se il vertice v è presente nel vettore di vertici vertices
-	 *
-	 * @param v
-	 * @param vertices
-	 * @return      true se v è presente in vertices
+* Check if the vertex v is present in the vertex vector vertices
+*
+* @param v
+* @param vertices
+* @return true if v occurs in vertices
 	 */
 	public boolean HasVertex(Vertex v, Vector<Vertex> vertices) {
 		boolean out = false;
@@ -163,14 +162,14 @@ public class Faces3D {
 	}
 
 	/**
-	 * Rimuove dal vettore di newFace faces le facce che non sono composte solo da
-	 * punti contenuti nel vettore di vertici ori.
-	 *
-	 * Usato per rimuovere le facce contenenti proiezioni.
-	 *
-	 * @param faces
-	 * @param ori
-	 * @return      un vettore con le facce rimaste
+* Removes from the array of newFace faces faces that are not composed only of
+* points contained in the ori vertex vector.
+*
+* Used to remove faces containing projections.
+*
+* @param faces
+* @param ori
+* @return a vector with faces left
 	 */
 	public Vector<newFace> RemoveP(Vector<newFace> faces, Vector<Vertex> ori) {
 		Vector<newFace> out2 = new Vector<newFace>();
@@ -184,9 +183,9 @@ public class Faces3D {
 	}
 
 	/**
-	 * Trasforma un vettore di vertici 2D in un vettore di punti 2D scartando la coord z
-	 * @param vertices
-	 * @return
+* Transform a 2D vertex vector into a 2D point vector by discarding the z-coord
+* @param vertices
+* @return
 	 */
 	public Vector<newPoint> VertexRemoveZ(Vector<Vertex> vertices) {
 		Vector<newPoint> out = new Vector<newPoint>();
@@ -222,9 +221,9 @@ public class Faces3D {
 	}
 
 	/**
-	 * Controlla se ci sono delle facce che giacciono sullo stesso piano.
-	 * @param s
-	 * @return
+* Check if there are any faces lying in the same plane.
+* @param s
+* @return
 	 */
 	public boolean ExistsComplanar(Vector<newFace> s) {
 		boolean out = false;

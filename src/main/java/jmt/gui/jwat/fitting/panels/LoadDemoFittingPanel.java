@@ -191,8 +191,8 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 	}
 
 	/********** WIZARD MANAGEMENT FUNCTIONS **********/
-	// TODO controllare validita dei dati forniti nel pannello e creazione e passaggio informazioni al modello per il prossimo panello
-	// Chiamata prima di passare al prossimo pannello
+// TODO check the validity of the data provided in the panel and create and pass information to the model for the next panel
+// Called before moving to the next panel
 	@Override
 	public boolean canGoForward() {
 		return canGoOn;
@@ -202,15 +202,15 @@ public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants
 		canGoOn = canGo;
 	}
 
-	// TODO controllare con Fuma cosa fare
-	// Chiamata quando dal pannello si torna indietro
+// TODO check with Fuma what to do
+// Called when navigating back from the panel
 	@Override
 	public boolean canGoBack() {
 		if (JOptionPane.showConfirmDialog(this, "Are you sure you want to go back to start screen?", "Back operation", JOptionPane.YES_NO_OPTION,
 				JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
 			return false;
 		}
-		//Reset della finestra principale
+//Reset the main window
 		parent.resetScreen();
 		return true;
 	}

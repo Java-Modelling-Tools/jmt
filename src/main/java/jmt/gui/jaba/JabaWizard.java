@@ -124,11 +124,11 @@ public class JabaWizard extends Wizard {
 		addPanel(new DescriptionPanel(this));
 
 		// NEW Andrea Zanzottera 25/11/2005
-		// Pannello con i risultati grafici
+// Panel with graphical results
 		SectorsGraphicPanel drawPanel = new SectorsGraphicPanel();
 		drawPanel.setData(this.data);
 		addPanel(drawPanel);
-		// Pannello con i risultati in numeri
+// Panel with results in numbers
 		// END Andrea Zanzottera 25/11/2005
 
 		// New Carlo Gimondi
@@ -581,7 +581,7 @@ public class JabaWizard extends Wizard {
 												 // indices
 
 		try {
-			// controllo che ci siano 2 o 3 classi
+// check that there are 2 or 3 classes
 			// NEW Zanzottera
 			newdata.setResults(jsolver.solve(newdata));
 			// end NEW
@@ -599,8 +599,8 @@ public class JabaWizard extends Wizard {
 		}
 		this.data = newdata;
 
-		// Zanzottera: i risultati vengono visualizzati all'interno della
-		// schermata principale
+// Zanzottera: the results are displayed inside the
+// main screen
 		// Dall'Orso createSolutionWindow(newdata.getResults()); //END
 
 		updatePanels();

@@ -62,7 +62,7 @@ public class VariableNumber implements JWATConstants {
 	private final int intervalGraphSize = 1000;
 	private int[] intervalGraph = new int[intervalGraphSize + 1];
 	/* Number of observations */
-	private int numOss = 0;
+	private int numObs = 0;
 	/* Indeicates if it is sampled */
 	private boolean sampled = false;
 	/*Mapping della varaibile*/
@@ -82,11 +82,11 @@ public class VariableNumber implements JWATConstants {
 	public VariableNumber(Observation[] valObs, String vName, int pos, short type, VariableMapping varMapping) {
 		name = vName;
 		nVar = pos;
-		numOss = valObs.length;
+		numObs = valObs.length;
 		varType = type;
 		originalValue = new Observation[valObs.length];
 		// Saving observations
-		for (int i = 0; i < numOss; i++) {
+		for (int i = 0; i < numObs; i++) {
 			originalValue[i] = valObs[i];
 		}
 		mapping = varMapping;
@@ -201,7 +201,7 @@ public class VariableNumber implements JWATConstants {
 		double min = varUniStatsTransf.get(statsUniCurrentIndexTransf).getMinValue();
 		int nInsG = 0;
 
-		for (int i = 0; i < numOss; i++) {
+		for (int i = 0; i < numObs; i++) {
 			// Graph interval ( 1000 intervals )
 			if (obsValue[i].getIndex(nVar) <= range * (0.001 * posIntG) + min || obsValue[i].getIndex(nVar) > range + min) {
 				nInsG++;
@@ -261,7 +261,7 @@ public class VariableNumber implements JWATConstants {
 	 */
 	private void setLogTransformation() throws TrasformException {
 		if (isLogTrasformable()) {
-			for (int i = 0; i < numOss; i++) {
+			for (int i = 0; i < numObs; i++) {
 				obsValue[i].setIndex(nVar, Math.log(obsValue[i].getIndex(nVar)) / Math.log(10));
 			}
 			addTrasf(LOGARITHMIC);
@@ -274,7 +274,7 @@ public class VariableNumber implements JWATConstants {
 	 * Performs min/max transformation (value - minimum) / (maximum - minimum)
 	 */
 	private void setMaxMinTransformation() {
-		for (int i = 0; i < numOss; i++) {
+		for (int i = 0; i < numObs; i++) {
 			obsValue[i].setIndex(nVar, (obsValue[i].getIndex(nVar) - varUniStatsTransf.get(statsUniCurrentIndexTransf).getMinValue())
 					/ (varUniStatsTransf.get(statsUniCurrentIndexTransf).getRangeValue()));
 		}
@@ -285,7 +285,7 @@ public class VariableNumber implements JWATConstants {
 	 * Performs the following transformation (value - mean) / (standard deviation)
 	 */
 	private void setStandardTransformation() {
-		for (int i = 0; i < numOss; i++) {
+		for (int i = 0; i < numObs; i++) {
 			obsValue[i].setIndex(nVar, (obsValue[i].getIndex(nVar) - varUniStatsTransf.get(statsUniCurrentIndexTransf).getMean())
 					/ varUniStatsTransf.get(statsUniCurrentIndexTransf).getDevStd());
 		}
@@ -337,7 +337,7 @@ public class VariableNumber implements JWATConstants {
 	 */
 	private void undoLogTrasformation() {
 		// Removes last Log transformation
-		for (int i = 0; i < numOss; i++) {
+		for (int i = 0; i < numObs; i++) {
 			obsValue[i].setIndex(nVar, Math.pow(10, obsValue[i].getIndex(nVar)));
 		}
 		listOfTransfs.remove(listOfTransfs.size() - 1);
@@ -353,7 +353,7 @@ public class VariableNumber implements JWATConstants {
 		double oldMin = varUniStatsTransf.get(varUniStatsTransf.size() - 2).getMinValue();
 		double oldMax = varUniStatsTransf.get(varUniStatsTransf.size() - 2).getMaxValue();
 
-		for (int i = 0; i < numOss; i++) {
+		for (int i = 0; i < numObs; i++) {
 			obsValue[i].setIndex(nVar, obsValue[i].getIndex(nVar) * (oldMax - oldMin) + oldMin);
 		}
 		listOfTransfs.remove(listOfTransfs.size() - 1);
@@ -369,7 +369,7 @@ public class VariableNumber implements JWATConstants {
 		double oldDevStd = varUniStatsTransf.get(varUniStatsTransf.size() - 2).getDevStd();
 		double oldMean = varUniStatsTransf.get(varUniStatsTransf.size() - 2).getMean();
 
-		for (int i = 0; i < numOss; i++) {
+		for (int i = 0; i < numObs; i++) {
 			obsValue[i].setIndex(nVar, (obsValue[i].getIndex(nVar) * oldDevStd) + oldMean);
 		}
 		listOfTransfs.remove(listOfTransfs.size() - 1);
@@ -419,12 +419,12 @@ public class VariableNumber implements JWATConstants {
 	}
 
 	/** ******** METHODS FOR PLOT ********** */
-	// Indica la variabile compagna nel plot del grafico
+// Indicate the companion variable in the graph plot
 	private int val;
-	// Valore di start e end intervallo di visualizzazione variabile
+// Start and end value variable display range
 	private int PosS;
 	private int PosE;
-	// Valori min e max della variabile gemella nel grafico
+// Min and max values of the twin variable in the graph
 	private double minV;
 	private double maxV;
 
@@ -432,7 +432,7 @@ public class VariableNumber implements JWATConstants {
 		return varUniStatsTransf.get(statsUniCurrentIndexTransf).getRangeValue() / 1000;
 	}
 
-	public int getNumeroOssPerInt() {
+	public int getNumeroObsPerInt() {
 		return PosE - PosS;
 	}
 
@@ -445,43 +445,41 @@ public class VariableNumber implements JWATConstants {
 	}
 
 	/**
-	 * Restituisce il valore relativo all'indice pos dell'array degli intervalli
-	 * @param Index
-	 *            Indice dell'array degli intervalli
-	 * @return Restituzione del valore realtivo ad uno limite dell'intervallo
-	 */
+* Returns the value relative to the pos index of the range array
+* @param Index
+* Range array index
+* @return Return of the real value at a limit of the range	 */
 	public double getIntValue(int Index) {
 
-		return (obsValue[numOss - 1].getIndex(nVar) - obsValue[0].getIndex(nVar)) * 0.01 * Index + obsValue[0].getIndex(nVar);
+		return (obsValue[numObs - 1].getIndex(nVar) - obsValue[0].getIndex(nVar)) * 0.01 * Index + obsValue[0].getIndex(nVar);
 	}
 
-	/**
-	 * Restituisce il valore relativo all'indice pos dell'array degli intervalli
-	 * @param Index
-	 *            Indice dell'array degli intervalli
-	 * @return Restituzione del valore realtivo ad uno limite dell'intervallo
-	 */
+/**
+* Returns the value relative to the pos index of the range array
+* @param Index
+* Range array index
+* @return Return of the real value at a limit of the range
+*/
 	public double getIntValueG(int Index) {
-		return (obsValue[numOss - 1].getIndex(nVar) - obsValue[0].getIndex(nVar)) * 0.001 * Index + obsValue[0].getIndex(nVar);
+		return (obsValue[numObs - 1].getIndex(nVar) - obsValue[0].getIndex(nVar)) * 0.001 * Index + obsValue[0].getIndex(nVar);
 
 	}
 
-	/**
-	 * Impostazione per la ricerca dei punti all'interno di un intervallo per il plot
-	 * @param min
-	 *            Limite inferiore dell'intervallo come indice dell'array degli intervalli
-	 * @param max
-	 *            Limite superiore dell'intervallo come indice dell'array degli intervalli
-	 * @param minv
-	 *            Limite inferiore come valore della variabile compagna dello scatter plot
-	 * @param maxv
-	 *            Limite superiore come valore della variabile compagna dello scatter plot
-	 * @param n
-	 *            Posizone della variabile compagna nello scatter plot nelle osservazioni
-	 */
+/**
+* Setting to search for points within a range for the plot
+* @param min
+* Range lower bound as range array index
+* @param max
+* Range upper bound as range array index
+* @param minv
+* Lower bound as the value of the companion variable of the scatter plot
+* @param maxv
+* Upper limit as the value of the companion variable of the scatter plot
+* @param n
+* Position of the companion variable in the scatter plot in the observations
+*/
 	public void setRangeIntervallo(int min, int max, double minv, double maxv, int n) {
-		// Settaggio delle informazioni per restituizione osservazioni da plottare
-		minV = minv;
+// Setting of information for returning observations to be plotted		minV = minv;
 		maxV = maxv;
 		val = n;
 		PosS = intervalGraph[min];
@@ -489,10 +487,10 @@ public class VariableNumber implements JWATConstants {
 	}
 
 	/**
-	 * Restituisce il prossimo indice se esiste dell'osservazione da plottare che corrisponde alle restrizioni 
-	 * impostate con setRangeQuantili
-	 * 
-	 * @return indice che soddisfa le condizioni
+* Returns the next index if there is an observation to plot that matches the restrictions
+* set with setRangeQuantili
+*
+* @return index that satisfies the conditions
 	 */
 	public int getNextInt() throws Exception {
 		while (obsValue[PosS].getIndex(val) < minV || obsValue[PosS].getIndex(val) > maxV) {
@@ -509,33 +507,33 @@ public class VariableNumber implements JWATConstants {
 	}
 
 	/**
-	 * Restituisce il range tra posizioni di intervalli
-	 * @param min
-	 *            posizone minima dell'intervallo
-	 * @param max
-	 *            posizone massima dell'intervallo
-	 * @return range tra i due intervalli
+* Returns the range between interval positions
+* @param min
+* minimum position of the range
+* @param max
+* maximum position of the interval
+* @return range between the two intervals
 	 */
 	public double getIntRange(int min, int max) {
-		return (obsValue[numOss - 1].getIndex(nVar) - obsValue[0].getIndex(nVar)) * 0.01 * (max - min);
+		return (obsValue[numObs - 1].getIndex(nVar) - obsValue[0].getIndex(nVar)) * 0.01 * (max - min);
 	}
 
 	/**
-	 * Restituisce il range tra posizioni di intervalli
-	 * @param min
-	 *            posizone minima dell'intervallo
-	 * @param max
-	 *            posizone massima dell'intervallo
-	 * @return range tra i due intervalli
+* Returns the range between interval positions
+* @param min
+* minimum position of the range
+* @param max
+* maximum position of the interval
+* @return range between the two intervals
 	 */
 	public double getIntRangeG(int min, int max) {
-		return (obsValue[numOss - 1].getIndex(nVar) - obsValue[0].getIndex(nVar)) * 0.001 * (max - min);
+		return (obsValue[numObs - 1].getIndex(nVar) - obsValue[0].getIndex(nVar)) * 0.001 * (max - min);
 	}
 
 	/**
-	 * NON UTILIZZATO ERRATO 
-	 * Restituisce l'array degli intervalli
-	 * @return vettore contenente le posizioni delle variabili che delimitano gli intervalli
+* NOT USED INCORRECT
+* Returns the range array
+* @return vector containing the positions of the variables that delimit the intervals
 	 */
 	/*public int[] getInterval() {
 		return interval;
@@ -601,11 +599,11 @@ public class VariableNumber implements JWATConstants {
 		temp.clear();
 		temp = null;
 
-		numOss = obsValue.length;
+		numObs = obsValue.length;
 		varUniStatsTransf.add(new UnivariateStatistics(obsValue, nVar));
 		statsUniCurrentIndexTransf += 1;
 		calculateIntervals();
-		return numOss;
+		return numObs;
 	}
 
 	/**
@@ -626,7 +624,7 @@ public class VariableNumber implements JWATConstants {
 		obsValue = temp;
 		temp = null;
 
-		numOss = obsValue.length;
+		numObs = obsValue.length;
 		varUniStatsTransf.add(new UnivariateStatistics(obsValue, nVar));
 		statsUniCurrentIndexTransf += 1;
 		calculateIntervals();
@@ -650,7 +648,7 @@ public class VariableNumber implements JWATConstants {
 			undoLastTrasf();
 		}
 		obsValue = originalValue;
-		numOss = obsValue.length;
+		numObs = obsValue.length;
 		listOfTransfs.remove(listOfTransfs.size() - 1);
 		varUniStatsTransf.remove(statsUniCurrentIndexTransf);
 		statsUniCurrentIndexTransf -= 1;
@@ -682,10 +680,10 @@ public class VariableNumber implements JWATConstants {
 		}
 	}
 
-	//Update 28/10/2006: + aggiunta funzione per recupero numero trasformazioni esistenti per la variabile
-	//					 + spostamento reset della validity a ID in matrixOsservazioni
-	//					 + aggiunte funzioni separate per operazione trasformazione variabili per clustering
-	//					 ? controllare con Fuma se le statistiche sono necessarie dopo la trasf altrimenti non si ricalcolano
+//Update 28/10/2006: + function added to recover the number of existing transformations for the variable
+// + move reset of validity to ID in matrixObservations
+// + added separate functions for variable transformation operation for clustering
+// ? check with Smoke if the stats are needed after the transfer otherwise they don't recalculate
 	public int getNumOfTransf() {
 		return listOfTransfs.size();
 	}

@@ -11,7 +11,7 @@ public class JWatUnivariateStatsTableModel extends AbstractTableModel implements
 	 */
 	private static final long serialVersionUID = 1L;
 
-	// TODO: Deve essergli passata una istanza di matrixOsservazioni o array di variabili
+	// TODO: Deve essergli passata una istanza di matrixObservazioni o array di variabili
 	// Nomi delle colonne della tabella
 	protected String[] columnNames = new String[] { "Variable", "Mean", "Variance", "Std. Dev.", "Coeff. of var.", "Minimum", "Maximum", "Range",
 			"Median", "Kurtosis", "Skewness", "Num. Obs." };

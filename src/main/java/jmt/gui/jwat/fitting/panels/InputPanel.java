@@ -350,9 +350,9 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 
 		// Removes all rows from inputTable and update varchooser comboBox and option panel
 		public void actionPerformed(ActionEvent arg0) {
-			// Se esistono dei valori li salvo
+// If there are any values I save them
 			if (((JWatVariableInputTableModel) inputTable.getModel()).getSize() > 0) {
-				//Il formato è selezionato
+//The format is selected
 				if (formatchooser.getSelectedIndex() >= 0) {
 					int response = JOptionPane.showConfirmDialog(null, "Overwrite existing file?", "Confirm overwrite", JOptionPane.YES_NO_OPTION,
 							JOptionPane.QUESTION_MESSAGE);
@@ -392,9 +392,9 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					}
 					new FormatFileWriter(mod.getNames(), mod.getComments(), mod.getDelimiters(), mod.getRegExpr(), mod.getTypes(), fFile
 							.getAbsolutePath(), mod.getDefaults(), mod.getReplaces());
-					//controllo se il file è attualmente caricato o no
+//check if the file is currently loaded or not
 					boolean exist = false;
-					//controllo se esiste gia' la voce selezionata
+//check if the selected item already exists
 					for (int i = 1; i < formatchooser.getModel().getSize(); i++) {
 						if (((String) formatchooser.getModel().getElementAt(i)).equals(fFile.getAbsolutePath())) {
 							exist = true;
@@ -603,7 +603,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 							e.printStackTrace();
 						}
 						boolean exist = false;
-						//controllo se esiste gia' la voce selezionata
+						//check if the selected item already exists
 						for (int i = 1; i < filechooser.getModel().getSize(); i++) {
 							if (((String) filechooser.getModel().getElementAt(i)).equals(file.getSelectedFile().getAbsolutePath())) {
 								exist = true;

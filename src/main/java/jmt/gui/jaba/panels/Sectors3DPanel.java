@@ -180,10 +180,10 @@ public class Sectors3DPanel extends JPanel {
 		aT.setToTranslation(.1 * height + 15, getHeight() - height * 0.1 - 10);
 		g2.transform(aT);
 
-		// Cambia lo Stroke e il colore per evidenziare la linea
+// Change the Stroke and color to highlight the line
 		g2.setStroke(SECTORS);
 
-		// Disegna lo sfondo del triangolo
+// Draw the background of the triangle
 		int[] xt = { 0, (int) Math.floor(rad3d2 * height), (int) Math.floor(rad3 * height) };
 		int[] yt = { 0, -1 * height, 0 };
 		g2.setColor(SINGLE);
@@ -193,17 +193,17 @@ public class Sectors3DPanel extends JPanel {
 			// Used to sort label ascendingly by position
 			TreeSet<Caption> labels = new TreeSet<Caption>();
 
-			// per ogni settore
+			// foreach sector
 			for (int i = 0; i < s3d.size(); i++) {
 				Sector3D sector = (Sector3D) s3d.get(i);
 				//System.out.println("Totale: "+s3d.size()+", Parziale: "+i);
-				// Sono le coordinate dei punti che saranno passati al metodo fillPolygon
+// These are the coordinates of the points that will be passed to the fillPolygon method
 				int[] xxp = new int[sector.CountPoint()];
 				int[] yyp = new int[sector.CountPoint()];
 
 				Vector<newPoint> points = new Vector<newPoint>();
 
-				// per ogni punto di un settore
+// for each point of a sector
 				for (int j = 0; j < sector.CountPoint(); j++) {
 
 					double pb11 = sector.getx(j);
@@ -212,12 +212,12 @@ public class Sectors3DPanel extends JPanel {
 					int pb1 = (int) Math.floor(pb11 * height);
 					int pb2 = (int) Math.floor(pb12 * height);
 
-					//Aggiungo il punto al vettore da passare al Grahamscan
+//Add the dot to the vector to pass to the Grahamscan
 					newPoint temp = new newPoint(pb1, pb2);
 					points.addElement(temp);
 				}
 
-				//Coloro il settore in base al numero di stazioni che vi saturano
+				//Color the sector based on the number of stations that saturate
 				int numstat = sector.getType();
 				if (numstat > 2) {
 					sectorcolor = MORE;
@@ -247,7 +247,7 @@ public class Sectors3DPanel extends JPanel {
 				double[] centre = sector.getCentre();
 				labels.add(new Caption(sector.getName(), centre[0], centre[1], sector.getType()));
 
-			}//per ogni settore
+			}//for each sector
 
 			// Now draws captions and link them to the corresponding sector
 			Iterator<Caption> i = labels.iterator();
@@ -313,7 +313,7 @@ public class Sectors3DPanel extends JPanel {
 				previousy = yvalue + (float) g2.getFontMetrics().getStringBounds(c.getLabel(), g2).getHeight();
 			}
 
-			// Disegna gli assi
+			// Draw axes
 			g2.setStroke(LINES);
 			sectorcolor = BLACK;
 			g2.setColor(sectorcolor);
@@ -354,7 +354,7 @@ public class Sectors3DPanel extends JPanel {
 			// Graph is shown
 			isShown = true;
 
-			// Disegna il perimetro del triangolo
+			// Draw triangle perimeter
 			g2.setColor(Color.BLACK);
 			g2.draw(new Polygon(xt, yt, 3));
 		}

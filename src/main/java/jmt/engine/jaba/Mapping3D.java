@@ -41,16 +41,16 @@ public class Mapping3D {
 	 */
 	public double[] Beta2xy(double beta1, double beta2, double beta3) {
 		double[] xy = new double[2];
-		//Soluzione esatta ma che rende il disegno specchiato.
+//Exact solution but which makes the drawing mirrored.
 		//xy[0]=beta3*0.866026+beta2*0.866026*2;//+beta1*0.866026;
-		//Soluzione che rende il disegno corretto
+//Solution that makes the drawing correct
 		xy[0] = beta3 * rad3d2 + beta2 * rad3;//+beta1*0.866026;
 		xy[1] = beta3;
 		return xy;
 	}
 
 	/**
-	 * Questo metodo rimappa in 2D tutti i punti di un settore di saturazione
+* This method remaps all points in a saturation sector to 2D
 	 * @param s3d
 	 */
 	public Sector3D RemapSector(Sector3D s3d) {
@@ -64,7 +64,7 @@ public class Mapping3D {
 	}
 
 	/**
-	 * Questo metodo viene usato per mappare in 2D tutti i settori di un Vector di Sector3D
+* This method is used to map all sectors of a Sector3D Vector to 2D
 	 * @param sect
 	 * @return sect
 	 */
