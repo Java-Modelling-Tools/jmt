@@ -83,7 +83,7 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 			if (resTimes == null) {
 				return 0;
 			}
-			return 2;
+			return 3;
 		}
 
 		@Override
@@ -97,8 +97,10 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 		@Override
 		protected Object getRowName(int rowIndex) {
 			if (rowIndex == 0) {
-				return "<html><body><p><b>A</b></p></body></html>";
+				return "<html><i>Aggregate</i></html>";
 			} else if (rowIndex == 1) {
+				return "<html><body><p><b>A</b></p></body></html>";
+			} else if (rowIndex == 2) {
 				return "<html><body><p><b>B</b></p></body></html>";
 			} else {
 				return null;
@@ -117,13 +119,13 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			double d = -1.0;
 
-			if (rowIndex == 0 && columnIndex == 0 && !data.isMixed()) {
+			if (rowIndex == 1 && columnIndex == 0 && !data.isMixed()) {
 				d = globalAgg[iteration];
-			} else if (rowIndex == 0 && columnIndex > 0) {
+			} else if (rowIndex == 1 && columnIndex > 0) {
 				d = classAggs[columnIndex - 1][iteration];
-			} else if (rowIndex == 1 && columnIndex == 0 && data.isClosed()) {
+			} else if (rowIndex == 2 && columnIndex == 0 && data.isClosed()) {
 				d = globalAggWO[iteration];
-			} else if (rowIndex == 1 && columnIndex > 0 && data.getClassTypes()[columnIndex - 1] == CLASS_CLOSED) {
+			} else if (rowIndex == 2 && columnIndex > 0){ // && data.getClassTypes()[columnIndex - 1] == CLASS_CLOSED) {
 				d = classAggsWO[columnIndex - 1][iteration];
 			}
 

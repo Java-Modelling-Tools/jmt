@@ -76,7 +76,7 @@ public final class UtilizationPanel extends SolutionPanel {
 			if (util == null) {
 				return 0;
 			}
-			return stations;
+			return stations+1;
 		}
 
 		public int getColumnCount() {
@@ -88,7 +88,10 @@ public final class UtilizationPanel extends SolutionPanel {
 
 		@Override
 		protected Object getRowName(int rowIndex) {
-			return stationNames[rowIndex];
+			if (rowIndex == 0) {
+				return "<html><i>Aggregate</i></html>";
+			}
+			return stationNames[rowIndex - 1];
 		}
 
 		@Override
@@ -103,10 +106,10 @@ public final class UtilizationPanel extends SolutionPanel {
 		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
 			double d = -1.0;
 
-			if (columnIndex == 0) {
-				d = stationAggs[rowIndex][iteration];
-			} else if (columnIndex > 0) {
-				d = util[rowIndex][columnIndex - 1][iteration];
+			if (columnIndex == 0 && rowIndex >0) {
+				d = stationAggs[rowIndex - 1][iteration];
+			} else if (columnIndex > 0 && rowIndex >0) {
+				d = util[rowIndex - 1][columnIndex - 1][iteration];
 			}
 
 			if (d < 0.0) {
