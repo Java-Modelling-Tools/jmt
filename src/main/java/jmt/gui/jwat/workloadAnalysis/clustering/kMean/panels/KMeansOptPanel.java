@@ -1,5 +1,6 @@
 package jmt.gui.jwat.workloadAnalysis.clustering.kMean.panels;
 
+import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -49,6 +50,7 @@ public class KMeansOptPanel extends JPanel implements CommonConstants {
 	private JRadioButton stdDevT;
 	private JSpinner numOfClust;
 	private JSpinner numOfIter;
+	private static final int BUTTONSIZE = 25;
 
 	public KMeansOptPanel(WizardPanel parent, ProgressStatusListener lst, ModelWorkloadAnalysis model) {
 		this.model = model;
@@ -138,7 +140,7 @@ public class KMeansOptPanel extends JPanel implements CommonConstants {
 
 			{
 				putValue(Action.SHORT_DESCRIPTION, "Clusterize");
-				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Sim"));
+				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Sim", new Dimension(BUTTONSIZE + 10,BUTTONSIZE + 10)));
 				putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
 				putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_L));
 			}

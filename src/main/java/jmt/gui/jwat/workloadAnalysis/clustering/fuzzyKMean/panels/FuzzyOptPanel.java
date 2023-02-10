@@ -1,5 +1,6 @@
 package jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels;
 
+import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -46,6 +47,8 @@ public class FuzzyOptPanel extends JPanel implements CommonConstants {
 	private final String FKMEANS_FLEVEL_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Fuzziness Level" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Fuzziness level is the fuzzy exponent and<p>" + "range from (2 to 100).It determines the<p>"
 			+ "degree of fuzziness of the final solution" + HTML_FONT_NOR_END + HTML_END;
+
+	private static final int BUTTONSIZE = 25;
 
 	private ProgressStatusListener lst;
 	private ModelWorkloadAnalysis model;
@@ -166,7 +169,7 @@ public class FuzzyOptPanel extends JPanel implements CommonConstants {
 
 			{
 				putValue(Action.SHORT_DESCRIPTION, "Clusterize");
-				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Sim"));
+				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage("Sim", new Dimension(BUTTONSIZE + 10,BUTTONSIZE + 10)));
 				putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));
 				putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_L));
 			}
