@@ -145,7 +145,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		globalPanel.add(label);
 		globalPanel.add(name);
 		// Enter global number of customers
-		label = new JLabel("Region Capacity: ");
+		label = new JLabel("Region Max Capacity: ");
 		JPanel tmpPanel = new JPanel(new BorderLayout(6, 6));
 		JPanel tmp = new JPanel(new BorderLayout(6, 6));
 		JPanel tmpG = new JPanel(new BorderLayout(6, 6));
@@ -157,7 +157,7 @@ public class BlockingRegionParameterPanel extends WizardPanel implements CommonC
 		mInf = new JCheckBox("Infinite");
 		gEnable = new JCheckBox("Enable");
 		gEnable.setEnabled(true);
-		JLabel mLabel = new JLabel("Region Memory Size: ");
+		JLabel mLabel = new JLabel("Region Max Memory: ");
 		JLabel gLabel = new JLabel("Region Groups: ");
 		tmpPanel.add(number, BorderLayout.CENTER);
 		tmpPanel.add(inf, BorderLayout.EAST);

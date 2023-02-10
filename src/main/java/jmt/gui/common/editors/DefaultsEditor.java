@@ -468,7 +468,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		blockpanelnum++;
 
 		// Region Memory
-		addInputInfSpinner("Global Region Memory Size", "blockingMaxMemory", block_panel, 1, -1);
+		addInputInfSpinner("Global Region Memory", "blockingMaxMemory", block_panel, 1, -1);
 		blockpanelnum++;
 
 		// Region Capacity per Class
@@ -476,7 +476,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		blockpanelnum++;
 
 		// Region Memory per Class
-		addInputInfSpinner("Region Memory Size per Class", "blockingMaxMemoryPerClass", block_panel, 1, -1);
+		addInputInfSpinner("Region Memory per Class", "blockingMaxMemoryPerClass", block_panel, 1, -1);
 		blockpanelnum++;
 
 		// Drop rule

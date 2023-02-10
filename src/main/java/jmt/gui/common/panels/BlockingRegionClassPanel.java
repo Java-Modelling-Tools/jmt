@@ -151,8 +151,8 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 
 		private Class<?>[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class, Boolean.class,
 				String.class, String.class, String.class };
-		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Memory Size", "\u221e",
-				"Drop", "Job Weight", "Job Size" };
+		private String[] columnNames = new String[] { "Class", "Max Capacity", "\u221e", "Max Memory", "\u221e",
+				"Drop", "Job Capacity", "Job Memory" };
 
 		public int getRowCount() {
 			return cd.getClassKeys().size();
@@ -176,7 +176,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			return  (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue()) || columnIndex == 2
 					|| (columnIndex == 3 && !((Boolean) getValueAt(rowIndex, 4)).booleanValue()) || columnIndex == 4
-					|| columnIndex == 5 || columnIndex == 7;
+					|| columnIndex == 5 || columnIndex == 6 || columnIndex == 7;
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {

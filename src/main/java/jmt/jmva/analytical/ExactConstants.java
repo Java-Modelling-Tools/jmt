@@ -93,7 +93,7 @@ public interface ExactConstants {
 	public static final String DESCRIPTION_QUEUELENGTHS = "<html><body align=\"left\"><font size=\"4\"><b>Number of Customers</b></font>"
 			+ "<font size=\"3\"><br>Average number of customers for each class at each station.</font></body></html>";
 	public static final String DESCRIPTION_THROUGHPUTS = "<html><body align=\"left\"><font size=\"4\"><b>Throughput</b></font>"
-			+ "<font size=\"3\"><br>Throughput of each class for each station. System Throughput is the completion rate of the <b>Reference Station</b>.</font></body></html>";
+			+ "<font size=\"3\"><br>Throughput of each class for each station. System Throughput is the completion rate at the <b>Reference Station</b>.</font></body></html>";
 	public static final String DESCRIPTION_RESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>System Response Time</b></font>"
 			+ "<font size=\"3\"><br>The global aggregate is the \"System Response Time\" and is obtained weighting the aggregated values by the relative per-class throughput.<br>"
 			+ "<b>A:</b> This value of System Response Time <b>includes</b> the Residence Time at the Reference Station.<br>"

@@ -26,8 +26,13 @@ public class SolverMultiDispatcher {
                 if (model.isClosed()) {
                     solver = selector.selectClosedSolver(algorithmType);
                 } else {
-                    // model is multiclass mixed
-                    solver = selector.selectMixedSolver(algorithmType);
+		    if (model.isLd()) {
+			   throw new InputDataException("Load-dependent mixed models are presently not supported.");
+	                   // solver = selector.selectMixedSolver(algorithmType);
+		    } else {
+        	            // model is multiclass mixed
+	                    solver = selector.selectMixedSolver(algorithmType);
+		    }
                 }
             }
         } catch (Exception e) {

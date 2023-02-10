@@ -464,8 +464,11 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					vector.removeAll(stationData.getStationKeysClassSwitch());
 					vector.removeAll(stationData.getStationKeysRouter());
 					return stationsCombos.getEditor(vector);
-				} else if (measure.type.equals(SimulationDefinition.MEASURE_AR)) {
-					return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_AR)) {  
+					Vector<Object> vector = new Vector<Object>();
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getFCRegionKeys());
+					return stationsCombos.getEditor(vector);
 				} else if (measure.type.equals(SimulationDefinition.MEASURE_U)) {  
 					Vector<Object> vector = new Vector<Object>();
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());

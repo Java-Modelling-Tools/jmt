@@ -421,7 +421,10 @@ public class SolverMultiMixed extends SolverMulti {
 		}
 		tempQ[0] = 1 - pSum;
 		if (Arrays.equals(Nc, pop)) {
-			lastClassPc[m] = Q.get(popHashCode(pop, maxPop))[m];
+			try {
+				lastClassPc[m] = Q.get(popHashCode(pop, maxPop))[m];
+			} catch (Exception e) {
+			}
 		}
 		Q.get(popHashCode(pop, maxPop))[m] = tempQ;
 	}

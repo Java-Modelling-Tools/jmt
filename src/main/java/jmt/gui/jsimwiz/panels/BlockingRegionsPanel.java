@@ -492,7 +492,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 				case 2:
 					return "\u221e";
 				case 3:
-					return "Memory Size";
+					return "Memory";
 				case 4:
 					return "\u221e";
 				case 5:
