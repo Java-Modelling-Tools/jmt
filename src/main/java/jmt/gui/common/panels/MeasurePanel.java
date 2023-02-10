@@ -434,33 +434,96 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			if (column == 6) {
 				return new ButtonCellEditor(deleteButton);
 			} else if (column == 2) {
-				if (measure.type.equals(SimulationDefinition.MEASURE_QL)
-						|| measure.type.equals(SimulationDefinition.MEASURE_RP)
-						|| measure.type.equals(SimulationDefinition.MEASURE_DR)
+				if (measure.type.equals(SimulationDefinition.MEASURE_RT)
 						|| measure.type.equals(SimulationDefinition.MEASURE_BR)
-						|| measure.type.equals(SimulationDefinition.MEASURE_RN)
-						|| measure.type.equals(SimulationDefinition.MEASURE_RT)) {
+						|| measure.type.equals(SimulationDefinition.MEASURE_RN)) {
 					Vector<Object> vector = new Vector<Object>();
-					vector.add("");
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());
+					vector.removeAll(stationData.getStationKeysPlace());
+					vector.removeAll(stationData.getStationKeysClassSwitch());
+					vector.removeAll(stationData.getFCRegionKeys());
+					vector.removeAll(stationData.getStationKeysDelay());
+					vector.removeAll(stationData.getFJKeys());
+					vector.removeAll(stationData.getStationKeysJoin());
+					vector.removeAll(stationData.getStationKeysRouter());
 					return stationsCombos.getEditor(vector);
-				} else if (measure.type.equals(SimulationDefinition.MEASURE_QT)
-						|| measure.type.equals(SimulationDefinition.MEASURE_RD)
-						|| measure.type.equals(SimulationDefinition.MEASURE_AR)
-						|| measure.type.equals(SimulationDefinition.MEASURE_U)
-						|| measure.type.equals(SimulationDefinition.MEASURE_EU)
-						|| measure.type.equals(SimulationDefinition.MEASURE_OS)
-						|| measure.type.equals(SimulationDefinition.MEASURE_OT)) {
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_DR)) {
+					Vector<Object> vector = new Vector<Object>();
+					vector.add(""); //System
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());
+					vector.removeAll(stationData.getStationKeysClassSwitch());
+					return stationsCombos.getEditor(vector);
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_RP)
+						|| measure.type.equals(SimulationDefinition.MEASURE_QL)) {
+					Vector<Object> vector = new Vector<Object>();
+					vector.add(""); //System
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());
+					vector.removeAll(stationData.getStationKeysClassSwitch());
+					vector.removeAll(stationData.getStationKeysRouter());
+					return stationsCombos.getEditor(vector);
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_AR)) {
 					return stationsCombos.getEditor(stationData.getStationRegionKeysNoSourceSink());
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_U)) {  
+					Vector<Object> vector = new Vector<Object>();
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());
+					vector.removeAll(stationData.getStationKeysPlace());
+					vector.removeAll(stationData.getStationKeysClassSwitch());
+					vector.removeAll(stationData.getStationKeysJoin());
+					vector.removeAll(stationData.getFCRegionKeys());
+					vector.removeAll(stationData.getFJKeys());
+					vector.removeAll(stationData.getStationKeysRouter());
+					return stationsCombos.getEditor(vector);
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_EU)) {  
+					Vector<Object> vector = new Vector<Object>();
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());
+					vector.removeAll(stationData.getStationKeysPlace());
+					vector.removeAll(stationData.getStationKeysClassSwitch());
+					vector.removeAll(stationData.getStationKeysDelay());
+					vector.removeAll(stationData.getStationKeysJoin());
+					vector.removeAll(stationData.getFCRegionKeys());
+					vector.removeAll(stationData.getFJKeys());
+					vector.removeAll(stationData.getStationKeysRouter());
+					return stationsCombos.getEditor(vector);
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_OT) 
+						|| measure.type.equals(SimulationDefinition.MEASURE_OS)) {
+					Vector<Object> vector = new Vector<Object>();
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());
+					vector.removeAll(stationData.getStationKeysClassSwitch());
+					vector.removeAll(stationData.getStationKeysDelay());
+					vector.removeAll(stationData.getStationKeysJoin());
+					vector.removeAll(stationData.getFCRegionKeys());
+					vector.removeAll(stationData.getFJKeys());
+					vector.removeAll(stationData.getStationKeysRouter());
+					return stationsCombos.getEditor(vector);
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_QT)) {
+					Vector<Object> vector = new Vector<Object>();
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());
+					vector.removeAll(stationData.getStationKeysClassSwitch());
+					vector.removeAll(stationData.getStationKeysRouter());
+					return stationsCombos.getEditor(vector);
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_RD)) {
+					Vector<Object> vector = new Vector<Object>();
+					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
+					vector.removeAll(stationData.getStationKeysTransition());
+					vector.removeAll(stationData.getStationKeysClassSwitch());
+					vector.removeAll(stationData.getStationKeysRouter());
+					return stationsCombos.getEditor(vector);
 				} else if (measure.type.equals(SimulationDefinition.MEASURE_X)) {
 					Vector<Object> vector = new Vector<Object>();
-					vector.add("");
+					vector.add(""); //System
 					vector.addAll(stationData.getStationKeysSource());
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
 					return stationsCombos.getEditor(vector);
 				} else if (measure.type.equals(SimulationDefinition.MEASURE_P)) {
 					Vector<Object> vector = new Vector<Object>();
-					vector.add("");
+					vector.add(""); //System
 					return stationsCombos.getEditor(vector);
 				} else if (simData.isSinkMeasure(measure.type)) {
 					return stationsCombos.getEditor(stationData.getStationKeysSink());

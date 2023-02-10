@@ -658,13 +658,14 @@ public class DistributionsEditor extends JMTDialog {
 					param_panel.add(traceTextField);
 					param_panel.add(traceButton);
 					// KPC Parameters
-					Defaults.set("autoOrder", "No");
-					Defaults.set("numStates", "4");
+					Defaults.set("autoOrder", "Yes");
+					Defaults.set("numStates", "2");
 					Defaults.set("fitSyle", "fast");
 
 					final FittingOptions options = new FittingOptions();
 					options.setVerbose(false);
 					JButton preferencesButton = new JButton("Options");
+					final JSpinner orderSpinner = new JSpinner();
 					preferencesButton.addActionListener(new ActionListener() {
 						@Override
 						public void actionPerformed(ActionEvent e) {
@@ -684,8 +685,7 @@ public class DistributionsEditor extends JMTDialog {
 							}
 							panel.add(autoOrderBox);
 
-							panel.add(new JLabel("Maximum number of States (if manual):\t"));
-							JSpinner orderSpinner = new JSpinner();
+							panel.add(new JLabel("Maximum Number of States (if manual):\t"));
 							int nStates = Integer.parseInt(Defaults.get("numStates"));
 							orderSpinner.setModel(new SpinnerNumberModel(nStates, 2, 128, 1) {
 								@Override
@@ -799,6 +799,7 @@ public class DistributionsEditor extends JMTDialog {
 								@Override
 								protected void done() {
 									int order = map.numStates;
+									orderSpinner.setValue(Integer.valueOf(order));
 									for (int i = 0; i < current.getNumberOfParameters(); i++) {
 										Object[][] newMatrix = new Object[order][order];
 										for (int j = 0; j < newMatrix.length; j++) {

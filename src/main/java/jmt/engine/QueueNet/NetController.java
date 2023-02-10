@@ -91,7 +91,8 @@ class NetController {
 					netSystem.checkMeasures();
 				}
 				//check if a positive max simulated time is set and has been reached for the first time
-				if (maxSimulatedTime > 0 && simSystem.getClock() > maxSimulatedTime && !aborting) {
+				//if (maxSimulatedTime > 0 && simSystem.getClock() > maxSimulatedTime && !aborting) {
+				if (((maxSimulatedTime > 0 && simSystem.getClock() > maxSimulatedTime) || (maxProcessedEvents > 0 && n > maxProcessedEvents)) && !aborting) {
 					ListIterator<QueueNetwork> nets = netSystem.getNetworkList().listIterator();
 					QueueNetwork network;
 					while (nets.hasNext()) {
