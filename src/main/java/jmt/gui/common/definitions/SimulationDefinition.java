@@ -100,9 +100,9 @@ public interface SimulationDefinition {
 	/**Code for throughput per sink measure*/
 	public static final String MEASURE_X_PER_SINK = "Throughput per Sink";
 	/**Code for FCR total weight measure*/
-	public static final String MEASURE_FCR_TW = "FCR Total Weight";
+	public static final String MEASURE_FCR_TW = "FCR Capacity"; // Total weight
 	/**Code for FCR memory occupation measure*/
-	public static final String MEASURE_FCR_MO = "FCR Memory Occupation";
+	public static final String MEASURE_FCR_MO = "FCR Memory"; // Memory occupation
 	/**Code for FJ customer number measure*/
 	public static final String MEASURE_FJ_CN = "Fork Join Number of Customers";
 	/**Code for FJ response time measure*/

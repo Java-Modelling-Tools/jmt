@@ -194,9 +194,9 @@ public class SolverMultiAlgorithmSelector {
         if (SolverAlgorithm.PRIO_MVA_BKT.equals(algorithmType)) {
             return PrioMVASolverFactory.getBKTPrioMVA(model);
         }
-        if (SolverAlgorithm.PRIO_MVA_T.equals(algorithmType)) {
-            return PrioMVASolverFactory.getTPrioMVA(model);
-        }
+        //if (SolverAlgorithm.PRIO_MVA_T.equals(algorithmType)) {
+        //    return PrioMVASolverFactory.getTPrioMVA(model);
+        //}
 		/*
         if (SolverAlgorithm.PRIO_MVA_CL_Z.equals(algorithmType)) {
             return PrioMVASolverFactory.getCL_ZPrioMVA(model);

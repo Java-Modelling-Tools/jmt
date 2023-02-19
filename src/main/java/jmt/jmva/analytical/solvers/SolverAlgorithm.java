@@ -52,9 +52,9 @@ public enum SolverAlgorithm {
 
     // Priority
     // PrioMVA's - can be LD in same way that MixedMVA can be, not implemented though
-    PRIO_MVA_CL("Chandy-Lakshmi", true, true, false, false, false, true),
     PRIO_MVA_BKT("Bryant-Krzesinski-Teunissen", true, true, false, false, false, true),
-    PRIO_MVA_T("Teunissen", true, true, false, false, false, true),
+    PRIO_MVA_CL("Chandy-Lakshmi", true, true, false, false, false, true),
+    //PRIO_MVA_T("Teunissen", true, true, false, false, false, true),
     // If mixed MVA implements LD then SCA can be LD, shouldn't really be used with open
     SCA("Shadow Server", true, true, false, true, false, true);
     //PRIO_MVA_CL_Z("PRIOMVA - CL:Z", true, true, false, false, false, true),

@@ -139,10 +139,10 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_THROUGHPUT_PER_SINK = HTML_START + HTML_FONT_TITLE + "Throughput per Sink" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average throughput for each selected class at each selected Sink station." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_FCR_TOTAL_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR Total Weight" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Average total weight for each selected finite capacity region." + HTML_FONT_NOR_END + HTML_END;
+	public static final String DESCRIPTION_FCR_TOTAL_WEIGHT = HTML_START + HTML_FONT_TITLE + "FCR Total Capacity" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average total capacity usage for each selected finite capacity region." + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String DESCRIPTION_FCR_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR Memory Occupation" + HTML_FONT_TIT_END + HTML_FONT_NORM
+	public static final String DESCRIPTION_FCR_MEMORY_OCCUPATION = HTML_START + HTML_FONT_TITLE + "FCR Total Memory" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average memory occupation for each selected finite capacity region." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_FJ_CUSTOMER_NUMBER = HTML_START + HTML_FONT_TITLE + "Fork Join Number of Customers" + HTML_FONT_TIT_END + HTML_FONT_NORM
