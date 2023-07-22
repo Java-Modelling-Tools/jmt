@@ -446,6 +446,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		Element currclass;
 		int type;
 		Integer priority;
+		Double softDeadline;
 		Integer customers;
 		String name;
 		Object key;
@@ -454,6 +455,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			name = currclass.getAttribute(XML_A_CLASS_NAME);
 			type = currclass.getAttribute(XML_A_CLASS_TYPE).equals("open") ? CLASS_TYPE_OPEN : CLASS_TYPE_CLOSED;
 			priority = Defaults.getAsInteger("classPriority");
+			softDeadline = Defaults.getAsDouble("classSoftDeadline");
 			customers = Defaults.getAsInteger("classPopulation");
 
 			// As these elements are not mandatory, sets them by default, then tries to parses them
@@ -467,8 +469,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				priority = Integer.valueOf(tmp);
 			}
 
+			tmp = currclass.getAttribute(XML_A_CLASS_DUE_DATE);
+			if (tmp != null && tmp != "") {
+				softDeadline = Double.valueOf(tmp);
+			}
+
 			// Now adds user class. Note that distribution will be set lately.
-			key = model.addClass(name, type, priority, customers, Defaults.getAsNewInstance("classDistribution"));
+			key = model.addClass(name, type, priority, softDeadline, customers, Defaults.getAsNewInstance("classDistribution"));
 			// Stores reference station as will be set lately (when we will have stations key)
 			refStations.put(key, currclass.getAttribute(XML_A_CLASS_REFSOURCE));
 			// Creates mapping class-name -> key into stations data structure
@@ -493,10 +500,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		Element station;
 		String type, name;
 		NodeList sections;
+		NodeList classSoftDeadlines;
 		// For every station, identifies its type and parses its parameters
 		for (int i = 0; i < nodestations.getLength(); i++) {
 			station = (Element) nodestations.item(i);
 			sections = station.getElementsByTagName(XML_E_STATION_SECTION);
+			classSoftDeadlines = station.getElementsByTagName(XML_E_STATION_DUE_DATES);
 			type = getStationType(station);
 			name = station.getAttribute(XML_A_STATION_NAME);
 			// Puts station into data structure
@@ -514,10 +523,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (type.equals(STATION_TYPE_DELAY)) {
 				parseDelaySection((Element) sections.item(1), model, key);
 				parseRouterSection((Element) sections.item(2), model, key);
+				parseClassStationSoftDeadlines(classSoftDeadlines, model, key);
 			} else if (type.equals(STATION_TYPE_SERVER)) {
 				parseQueueSection((Element) sections.item(0), model, key);
 				parseServerSection((Element) sections.item(1), model, key);
 				parseRouterSection((Element) sections.item(2), model, key);
+				parseClassStationSoftDeadlines(classSoftDeadlines, model, key);
 			} else if (type.equals(STATION_TYPE_FORK)) {
 				parseQueueSection((Element) sections.item(0), model, key);
 				parseForkSection((Element) sections.item(2), model, key);
@@ -544,6 +555,31 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				parseTimingSection((Element) sections.item(1), model, key);
 				parseFiringSection((Element) sections.item(2), model, key);
 			}
+		}
+	}
+
+	protected static void parseClassStationSoftDeadlines(NodeList classSoftDeadlines, CommonModel model, Object key) {
+		if (classSoftDeadlines.getLength() == 0) {
+			return;
+		}
+
+		// Process soft deadlines.
+		List<Double> softDeadlines;
+		Vector<Object> classKeys = model.getClassKeys();
+		NodeList classSoftDeadlinesChildren = classSoftDeadlines.item(0).getChildNodes();
+		softDeadlines = new ArrayList<>();
+
+		for (int j = 0; j < classSoftDeadlinesChildren.getLength(); j++) {
+			Node item = classSoftDeadlinesChildren.item(j);
+			if (item.getNodeType() == Node.ELEMENT_NODE) {
+				// This is a soft deadline element.
+				softDeadlines.add(Double.parseDouble(item.getTextContent()));
+			}
+		}
+
+		for (int i = 0; i < softDeadlines.size(); i++) {
+			Object classKey = classKeys.get(i);
+			model.setClassStationSoftDeadline(key, classKey, softDeadlines.get(i));
 		}
 	}
 
@@ -752,6 +788,21 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				} else if (strategy.equals("SRPTStrategyPriority")) {
 					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
 					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_SRPT);
+				} else if (strategy.equals("EDDStrategy")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_EDD);
+				} else if (strategy.equals("EDDStrategyPriority")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_EDD);
+				} else if (strategy.equals("EDFStrategy")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_EDF);
+				} else if (strategy.equals("EDFStrategyPriority")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_EDF);
+				} else if (strategy.equals("TBSStrategyPriority")) {
+					model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
+					model.setQueueStrategy(key, classes.get(className), CommonConstants.QUEUE_STRATEGY_TBS);
 				}
 			}
 		}
@@ -2303,6 +2354,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				Element classSize = (Element) classSizes.item(j);
 				model.setRegionClassSize(key, classes.get(classSize.getAttribute(XML_A_CLASSSIZE_CLASS)),
 						Integer.valueOf(classSize.getAttribute(XML_A_CLASSSIZE_SIZE)));
+			}
+
+			NodeList classSoftDeadlines = region.getElementsByTagName(XML_E_CLASSDUEDATE);
+			for (int j = 0; j < classSizes.getLength(); j++) {
+				Element classSoftDeadline = (Element) classSoftDeadlines.item(j);
+				model.setRegionClassSoftDeadline(key, classes.get(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_CLASS)),
+						Double.valueOf(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_DUEDATE)));
 			}
 
 			// Now parses group constraints

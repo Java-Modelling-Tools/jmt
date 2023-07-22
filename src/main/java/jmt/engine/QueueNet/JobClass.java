@@ -41,6 +41,8 @@ public class JobClass {
 
 	private String referenceNodeName;
 
+	private double softDeadline;
+
 	//----------------------CONSTRUCTORS---------------------------///
 
 	/** Creates a new instance of JobClass
@@ -116,4 +118,11 @@ public class JobClass {
 		this.referenceNodeName = referenceNodeName;
 	}
 
+	public void setSoftDeadline(double softDeadline) {
+		this.softDeadline = softDeadline;
+	}
+
+	public double getSoftDeadline() {
+		return this.softDeadline;
+	}
 }

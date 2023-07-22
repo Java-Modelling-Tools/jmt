@@ -194,6 +194,24 @@ public interface MeasureDefinition {
 	public int[] getUtilizationMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every tardiness measure
+	 * @return an array with measures' index
+	 */
+	public int[] getTardinessMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every earliness measure
+	 * @return an array with measures' index
+	 */
+	public int[] getEarlinessMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every lateness measure
+	 * @return an array with measures' index
+	 */
+	public int[] getLatenessMeasures();
+
+	/**
 	 * Returns an array with the measureIndex of every effective utilization measure
 	 * @return an array with measures' index
 	 */
@@ -282,6 +300,24 @@ public interface MeasureDefinition {
 	 * @return an array with measures' index
 	 */
 	public int[] getSystemPowerMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every system tardiness measure
+	 * @return an array with measures' index
+	 */
+	int[] getSystemTardinessMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every system earliness measure
+	 * @return an array with measures' index
+	 */
+	int[] getSystemEarlinessMeasures();
+
+	/**
+	 * Returns an array with the measureIndex of every system lateness measure
+	 * @return an array with measures' index
+	 */
+	int[] getSystemLatenessMeasures();
 
 	/**
 	 * Returns an array with the measureIndex of every response time per sink measure

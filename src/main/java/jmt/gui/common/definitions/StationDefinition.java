@@ -293,6 +293,11 @@ public interface StationDefinition {
 	/*------------------------------------------------------------------------------
 	 *---------------- Methods for setup of class-station parameters ---------------
 	 *------------------------------------------------------------------------------*/
+
+	public Double getClassStationSoftDeadline(Object stationKey, Object classKey);
+
+	public void setClassStationSoftDeadline(Object stationKey, Object classKey, Double softDeadline);
+
 	/**
 	 * Returns queue capacity for a station and a class, given their search keys.
 	 * If specified station cannot accept this kind of parameter, null value is returned.

@@ -98,7 +98,7 @@ public class AboutDialogFactory {
 	/** JSIMgraph main contributors */
 	private static final Contributors[] JMODEL = {
 			new Contributors(Company.POLIMI, "Bertoli Marco", "Bortone Emma", "Cazzoli Mattia", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif"),
-			new Contributors(Company.ICL, "Salem Ahmed", "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phuangjaisri Phumin", "Murali Srikrishna", "Vaibhav Krishnakumar", "Ng Lok Sen Rosemary", "Kodiak Conrad", "Li Zelun", "Wang Nathan", "Roman Andrei", "Pahnke Ben")
+			new Contributors(Company.ICL, "Salem Ahmed", "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phuangjaisri Phumin", "Murali Srikrishna", "Vaibhav Krishnakumar", "Ng Lok Sen Rosemary", "Kodiak Conrad", "Li Zelun", "Wang Nathan", "Roman Andrei", "Pahnke Ben", "Choy Ashton")
 	};
 
 	/** JABA main contributors */

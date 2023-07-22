@@ -53,6 +53,9 @@ public class PAResultsModel implements MeasureDefinition {
 	private Vector<Integer> arrivalRate = new Vector<Integer>();
 	private Vector<Integer> throughput = new Vector<Integer>();
 	private Vector<Integer> utilization = new Vector<Integer>();
+	private Vector<Integer> tardiness = new Vector<>();
+	private Vector<Integer> earliness = new Vector<>();
+	private Vector<Integer> lateness = new Vector<>();
 	private Vector<Integer> effectiveUtilization = new Vector<Integer>();
 	private Vector<Integer> dropRate = new Vector<Integer>();
 	private Vector<Integer> balkingRate = new Vector<Integer>();
@@ -69,6 +72,9 @@ public class PAResultsModel implements MeasureDefinition {
 	private Vector<Integer> systemRenegingRate = new Vector<Integer>();
 	private Vector<Integer> systemRetrialAttemptsRate = new Vector<Integer>();
 	private Vector<Integer> systemPower = new Vector<Integer>();
+	private Vector<Integer> systemTardiness = new Vector<Integer>();
+	private Vector<Integer> systemEarliness = new Vector<>();
+	private Vector<Integer> systemLateness = new Vector<>();
 
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputPerSink = new Vector<Integer>();
@@ -139,6 +145,12 @@ public class PAResultsModel implements MeasureDefinition {
 				throughput.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_U)) {
 				utilization.add(new Integer(i));
+			} else if (measureType.equals(SimulationDefinition.MEASURE_T)) {
+				tardiness.add(new Integer(i));
+			} else if (measureType.equals(SimulationDefinition.MEASURE_E)) {
+				earliness.add(new Integer(i));
+			} else if (measureType.equals(SimulationDefinition.MEASURE_L)) {
+				lateness.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_EU)) {
 				effectiveUtilization.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_DR)) {
@@ -169,6 +181,12 @@ public class PAResultsModel implements MeasureDefinition {
 				systemRetrialAttemptsRate.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_S_P)) {
 				systemPower.add(new Integer(i));
+			} else if (measureType.equals(SimulationDefinition.MEASURE_S_T)) {
+				systemTardiness.add(new Integer(i));
+			} else if (measureType.equals(SimulationDefinition.MEASURE_S_E)) {
+				systemEarliness.add(new Integer(i));
+			} else if (measureType.equals(SimulationDefinition.MEASURE_S_L)) {
+				systemLateness.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {
 				responseTimePerSink.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
@@ -226,6 +244,12 @@ public class PAResultsModel implements MeasureDefinition {
 			throughput.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_U)) {
 			utilization.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_T)) {
+			tardiness.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_E)) {
+			earliness.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_L)) {
+			lateness.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_EU)) {
 			effectiveUtilization.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
@@ -256,6 +280,12 @@ public class PAResultsModel implements MeasureDefinition {
 			systemRetrialAttemptsRate.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 			systemPower.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_T)) {
+			systemTardiness.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_E)) {
+			systemEarliness.add(new Integer(measures.size() - 1));
+		} else if (type.equals(SimulationDefinition.MEASURE_S_L)) {
+			systemLateness.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {
 			responseTimePerSink.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
@@ -441,6 +471,18 @@ public class PAResultsModel implements MeasureDefinition {
 		return getTmpArray(utilization);
 	}
 
+	public int[] getTardinessMeasures() {
+		return getTmpArray(tardiness);
+	}
+
+	public int[] getEarlinessMeasures() {
+		return getTmpArray(earliness);
+	}
+
+	public int[] getLatenessMeasures() {
+		return getTmpArray(lateness);
+	}
+
 	public int[] getEffectiveUtilizationMeasures() {
 		return getTmpArray(effectiveUtilization);
 	}
@@ -499,6 +541,18 @@ public class PAResultsModel implements MeasureDefinition {
 
 	public int[] getSystemPowerMeasures() {
 		return getTmpArray(systemPower);
+	}
+
+	public int[] getSystemTardinessMeasures() {
+		return getTmpArray(systemTardiness);
+	}
+
+	public int[] getSystemEarlinessMeasures() {
+		return getTmpArray(systemEarliness);
+	}
+
+	public int[] getSystemLatenessMeasures() {
+		return getTmpArray(systemLateness);
 	}
 
 	public int[] getResponsetimePerSinkMeasures() {

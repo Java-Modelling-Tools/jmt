@@ -128,12 +128,12 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		private static final long serialVersionUID = 1L;
 
 		{
-			putValue(Action.SHORT_DESCRIPTION, "Edits Advanced Server Features");
+			putValue(Action.SHORT_DESCRIPTION, "Edits Server Configuration");
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			DialogFactory factory = new DialogFactory(null);
-			factory.getDialog(serverFeaturePanel, "Editing Advanced Server Features",
+			factory.getDialog(serverFeaturePanel, "Editing Server Configuration",
 					MAX_GUI_WIDTH_SERVER_FEATURES, MAX_GUI_HEIGHT_SERVER_FEATURES, false, "", "");
 		}
 
@@ -154,6 +154,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		serverConfigPanel.setBorder(new TitledBorder(new EtchedBorder(), "Server Configuration"));
 		serverConfigPanel.add(new JLabel("Number of Servers:"));
 		serverConfigPanel.add(serverNumSpinner);
+		serverConfigPanel.add(new JLabel("         Advanced Features:"));
 		serverConfigPanel.add(serverFeatureButton);
 		this.add(serverConfigPanel, BorderLayout.NORTH);
 
@@ -173,10 +174,10 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		serverNumSpinner.setPreferredSize(DIM_BUTTON_XS);
 		serverFeatureButton = new JButton(editFeatures);
 		serverFeatureButton.setPreferredSize(DIM_BUTTON_XS);
-		if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
-			serverFeaturePanel = new ServerFeaturePanel();
-			serverFeaturePanel.setData(data, classData, stationKey);
-		}
+		//if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
+		serverFeaturePanel = new ServerFeaturePanel();
+		serverFeaturePanel.setData(data, classData, stationKey);
+		//}
 
 		classEditor.setData(cd);
 		initComponents();
@@ -189,17 +190,17 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		if (stationType.equals(STATION_TYPE_DELAY)) {
 			serverNumSpinner.setValue(Double.POSITIVE_INFINITY);
 			serverNumSpinner.setEnabled(false);
-			serverFeatureButton.setEnabled(false);
+			//serverFeatureButton.setEnabled(false);
 		} else {
 			serverNumSpinner.setValue(data.getStationNumberOfServers(stationKey));
 			serverNumSpinner.setEnabled(true);
 			String queuePolicy = data.getStationQueueStrategy(stationKey);
-			if (queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE)
-					|| queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
+			//if (queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE)
+			//		|| queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
 				serverFeatureButton.setEnabled(true);
-			} else {
-				serverFeatureButton.setEnabled(false);
-			}
+			//} else {
+			//	serverFeatureButton.setEnabled(false);
+			//}
 		}
 	}
 

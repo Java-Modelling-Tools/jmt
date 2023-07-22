@@ -122,6 +122,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		temp.put(QUEUE_STRATEGY_FCFS_PR, "FCFSPRStrategy");
 		temp.put(QUEUE_STRATEGY_LCFS_PR, "LCFSPRStrategy");
 		temp.put(QUEUE_STRATEGY_SRPT, "SRPTStrategy");
+		temp.put(QUEUE_STRATEGY_EDD, "EDDStrategy");
+		temp.put(QUEUE_STRATEGY_EDF, "EDFStrategy");
 		QUEUE_PUT_MAPPING = Collections.unmodifiableMap(temp);
 
 		temp = new HashMap<String, String>();
@@ -135,6 +137,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		temp.put(QUEUE_STRATEGY_FCFS_PR, "FCFSPRStrategyPriority");
 		temp.put(QUEUE_STRATEGY_LCFS_PR, "LCFSPRStrategyPriority");
 		temp.put(QUEUE_STRATEGY_SRPT, "SRPTStrategyPriority");
+		temp.put(QUEUE_STRATEGY_EDD, "EDDStrategyPriority");
+		temp.put(QUEUE_STRATEGY_EDF, "EDFStrategyPriority");
+		temp.put(QUEUE_STRATEGY_TBS, "TBSStrategyPriority");
 		PRIORITY_QUEUE_PUT_MAPPING = Collections.unmodifiableMap(temp);
 
 		temp = new HashMap<String, String>();
@@ -295,11 +300,12 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					"open" : "closed";
 			Element userClass = doc.createElement(XML_E_CLASS);
 			String[] attrsNames = new String[] { XML_A_CLASS_NAME,
-					XML_A_CLASS_TYPE, XML_A_CLASS_PRIORITY,
+					XML_A_CLASS_TYPE, XML_A_CLASS_PRIORITY, XML_A_CLASS_DUE_DATE,
 					XML_A_CLASS_CUSTOMERS, XML_A_CLASS_REFSOURCE };
 			String[] attrsValues = new String[] { model.getClassName(classKey),
 					classType,
 					String.valueOf(model.getClassPriority(classKey)),
+					String.valueOf(model.getClassSoftDeadline(classKey)),
 					String.valueOf(model.getClassPopulation(classKey)),
 					getSourceNameForClass(classKey, doc, model) };
 			for (int j = 0; j < attrsNames.length; j++) {
@@ -342,6 +348,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					model.getStationName(stations.get(i)));
 			Object stationKey = stations.get(i);
 			String stationType = model.getStationType(stationKey);
+
+			if (STATION_TYPE_DELAY.equals(stationType) || STATION_TYPE_SERVER.equals(stationType)) {
+				writeStationSoftDeadlines(doc, elem, model, stationKey);
+			}
+
 			if (STATION_TYPE_SOURCE.equals(stationType)) {
 				writeSourceSection(doc, elem, model, stationKey);
 				writeTunnelSection(doc, elem, model, stationKey);
@@ -399,6 +410,16 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			}
 			simNode.appendChild(elem);
 		}
+	}
+
+	private static void writeStationSoftDeadlines(Document doc, Node node, CommonModel model, Object stationKey) {
+		Element softDeadlines = doc.createElement(XML_E_STATION_DUE_DATES);
+		for (Object classKey : model.getClassKeys()) {
+			Element softDeadline = doc.createElement("softDeadline");
+			softDeadline.setTextContent(model.getClassStationSoftDeadline(stationKey, classKey).toString());
+			softDeadlines.appendChild(softDeadline);
+		}
+		node.appendChild(softDeadlines);
 	}
 
 	/**
@@ -1697,6 +1718,17 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				classSize.setAttribute(XML_A_CLASSSIZE_SIZE,
 						model.getRegionClassSize(key, classKey).toString());
 				region.appendChild(classSize);
+			}
+
+			classes = model.getClassKeys().iterator();
+			while (classes.hasNext()) {
+				Object classKey = classes.next();
+				Element classSoftDeadline = doc.createElement(XML_E_CLASSDUEDATE);
+				classSoftDeadline.setAttribute(XML_A_CLASSDUEDATE_CLASS,
+						model.getClassName(classKey));
+				classSoftDeadline.setAttribute(XML_A_CLASSDUEDATE_DUEDATE,
+						model.getRegionClassSoftDeadline(key, classKey).toString());
+				region.appendChild(classSoftDeadline);
 			}
 
 			// Adds group constraints

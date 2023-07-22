@@ -31,6 +31,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.SetupTimesEditor;
+import jmt.gui.common.editors.DeadlineEditor;
 
 /**
  * Tabbed panel for editing advanced server features
@@ -43,6 +44,7 @@ public class ServerFeaturePanel extends WizardPanel implements CommonConstants {
 	private JTabbedPane mainPanel;
 	private WizardPanel current;
 	private SetupTimesEditor setupTimesEditor;
+	private DeadlineEditor deadlineEditor;
 
 	public ServerFeaturePanel() {
 		this.setLayout(new BorderLayout(5, 5));
@@ -72,15 +74,19 @@ public class ServerFeaturePanel extends WizardPanel implements CommonConstants {
 	}
 
 	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey) {
-		setupTimesEditor = new SetupTimesEditor(sd, cd, stationKey);
-		mainPanel.add(setupTimesEditor, setupTimesEditor.getName());
-		mainPanel.setSelectedComponent(setupTimesEditor);
-		current = setupTimesEditor;
+		deadlineEditor = new DeadlineEditor(sd, cd, stationKey);
+		mainPanel.add(deadlineEditor, deadlineEditor.getName());
+		if (sd.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
+			setupTimesEditor = new SetupTimesEditor(sd, cd, stationKey);
+			mainPanel.add(setupTimesEditor, setupTimesEditor.getName());
+		}
+		mainPanel.setSelectedComponent(deadlineEditor);
+		current = deadlineEditor;
 	}
 
 	@Override
 	public String getName() {
-		return "Advanced Server Features";
+		return "Server Configuration";
 	}
 
 	@Override

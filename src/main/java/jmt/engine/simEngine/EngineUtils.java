@@ -93,6 +93,18 @@ public abstract class EngineUtils {
 				return SimulationDefinition.MEASURE_FJ_RP;
 			case SimConstants.FIRING_THROUGHPUT:
 				return SimulationDefinition.MEASURE_FX;
+			case SimConstants.SYSTEM_TARDINESS:
+				return SimulationDefinition.MEASURE_S_T;
+			case SimConstants.TARDINESS:
+				return SimulationDefinition.MEASURE_T;
+			case SimConstants.SYSTEM_EARLINESS:
+				return SimulationDefinition.MEASURE_S_E;
+			case SimConstants.EARLINESS:
+				return SimulationDefinition.MEASURE_E;
+			case SimConstants.SYSTEM_LATENESS:
+				return SimulationDefinition.MEASURE_S_L;
+			case SimConstants.LATENESS:
+				return SimulationDefinition.MEASURE_L;
 			default:
 				return SimulationDefinition.MEASURE_QL;
 		}
@@ -163,6 +175,18 @@ public abstract class EngineUtils {
 			return SimConstants.FORK_JOIN_RESPONSE_TIME;
 		} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
 			return SimConstants.FIRING_THROUGHPUT;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_T)) {
+			return SimConstants.SYSTEM_TARDINESS;
+		} else if (type.equals(SimulationDefinition.MEASURE_T)) {
+			return SimConstants.TARDINESS;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_E)) {
+			return SimConstants.SYSTEM_EARLINESS;
+		} else if (type.equals(SimulationDefinition.MEASURE_E)) {
+			return SimConstants.EARLINESS;
+		} else if (type.equals(SimulationDefinition.MEASURE_S_L)) {
+			return SimConstants.SYSTEM_LATENESS;
+		} else if (type.equals(SimulationDefinition.MEASURE_L)) {
+			return SimConstants.LATENESS;
 		} else {
 			return SimConstants.QUEUE_LENGTH;
 		}

@@ -96,7 +96,7 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 		private static final long serialVersionUID = 1L;
 
 		public JModelClassTable() {
-			columnSizes = new int[] { 8, 100, 100, 28, 38, 140, 39, 200, 18 };
+			columnSizes = new int[] { 8, 100, 100, 28, 56, 160, 39, 2*39, 180, 18 };
 		}
 
 		@Override
@@ -111,9 +111,9 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				} else {
 					return new DisabledCellRenderer();
 				}
-			} else if (column == 7) {
-				return combos.getRenderer();
 			} else if (column == 8) {
+				return combos.getRenderer();
+			} else if (column == 9) {
 				return new ButtonCellEditor(deleteButton);
 			} else {
 				return getDefaultRenderer(getModel().getColumnClass(column));
@@ -128,13 +128,13 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				return super.getCellEditor(row, 1);
 			} else if (column == 6) {
 				return new ButtonCellEditor(new JButton(editDistribution));
-			} else if (column == 7) {
+			} else if (column == 8) {
 				if (getValueAt(row, 2).equals("Open")) {
 					return combos.getEditor(sd.getStationKeysRefStation());
 				} else {
 					return combos.getEditor(sd.getStationKeysNoSourceSink());
 				}
-			} else if (column == 8) {
+			} else if (column == 9) {
 				return new ButtonCellEditor(new JButton(deleteClass));
 			} else {
 				return getDefaultEditor(getModel().getColumnClass(column));
@@ -150,9 +150,9 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 		private static final long serialVersionUID = 1L;
 
 		public JModelClassTableModel() {
-			columnNames = new String[] { "Color", "Name", "Type", "Priority", "Population", "Interarrival Time Distribution", "",
+			columnNames = new String[] { "Color", "Name", "Type", "Priority", "Population", "Interarrival Time Distribution", "", "Soft Deadline",
 					"Reference Station", "" };
-			colClasses = new Class[] { Color.class, String.class, JComboBox.class, String.class, String.class, String.class, Object.class,
+			colClasses = new Class[] { Color.class, String.class, JComboBox.class, String.class, String.class, String.class, Object.class, String.class,
 					JComboBox.class, JButton.class };
 		}
 
@@ -164,10 +164,10 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 				return false;
 			} else if (columnIndex == 6 && getValueAt(rowIndex, 2).equals("Closed")) {
 				return false;
-			} else if (columnIndex == 6 && (STATION_TYPE_FORK.equals(getValueAt(rowIndex, 7))
-					|| STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 7))
-					|| STATION_TYPE_SCALER.equals(getValueAt(rowIndex, 7))
-					|| STATION_TYPE_TRANSITION.equals(getValueAt(rowIndex, 7)))) {
+			} else if (columnIndex == 6 && (STATION_TYPE_FORK.equals(getValueAt(rowIndex, 8))
+					|| STATION_TYPE_CLASSSWITCH.equals(getValueAt(rowIndex, 8))
+					|| STATION_TYPE_SCALER.equals(getValueAt(rowIndex, 8))
+					|| STATION_TYPE_TRANSITION.equals(getValueAt(rowIndex, 8)))) {
 				return false;
 			} else {
 				return true;
@@ -179,6 +179,9 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 			if (columnIndex == 0) {
 				return cd.getClassColor(cd.getClassKeys().get(rowIndex));
 			} else if (columnIndex == 7) {
+				return cd.getClassSoftDeadline(cd.getClassKeys().get(rowIndex));
+			}
+			else if (columnIndex == 8) {
 				return cd.getClassRefStation(cd.getClassKeys().get(rowIndex));
 			} else {
 				return super.getValueAt(rowIndex, columnIndex - 1);
@@ -190,6 +193,11 @@ public class JModelClassesPanel extends ClassesPanel implements JSimGraphConstan
 			if (columnIndex == 0) {
 				cd.setClassColor(cd.getClassKeys().get(rowIndex), (Color) aValue);
 			} else if (columnIndex == 7) {
+				try {
+					cd.setClassSoftDeadline(cd.getClassKeys().get(rowIndex), Math.max(0,
+							Double.parseDouble((String) aValue)));
+				} catch (NumberFormatException ignored) {}
+			} else if (columnIndex == 8) {
 				cd.setClassRefStation(cd.getClassKeys().get(rowIndex), aValue);
 				refreshComponents();
 			} else {

@@ -52,6 +52,9 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector<Integer> arrivalRate = new Vector<Integer>();
 	private Vector<Integer> throughput = new Vector<Integer>();
 	private Vector<Integer> utilization = new Vector<Integer>();
+	private Vector<Integer> tardiness = new Vector<>();
+	private Vector<Integer> earliness = new Vector<>();
+	private Vector<Integer> lateness = new Vector<>();
 	private Vector<Integer> effectiveUtilization = new Vector<Integer>();
 	private Vector<Integer> dropRate = new Vector<Integer>();
 	private Vector<Integer> balkingRate = new Vector<Integer>();
@@ -68,6 +71,9 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector<Integer> systemRenegingRate = new Vector<Integer>();
 	private Vector<Integer> systemRetrialAttemptsRate = new Vector<Integer>();
 	private Vector<Integer> systemPower = new Vector<Integer>();
+	private Vector<Integer> systemTardiness = new Vector<Integer>();
+	private Vector<Integer> systemEarliness = new Vector<>();
+	private Vector<Integer> systemLateness = new Vector<>();
 
 	private Vector<Integer> responseTimePerSink = new Vector<Integer>();
 	private Vector<Integer> throughputPerSink = new Vector<Integer>();
@@ -128,6 +134,12 @@ public class ResultsModel implements MeasureDefinition {
 				throughput.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_U)) {
 				utilization.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_T)) {
+				tardiness.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_E)) {
+				earliness.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_L)) {
+				lateness.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_EU)) {
 				effectiveUtilization.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_DR)) {
@@ -158,6 +170,12 @@ public class ResultsModel implements MeasureDefinition {
 				systemRetrialAttemptsRate.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {
 				systemPower.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_S_T)) {
+				systemTardiness.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_S_E)) {
+				systemEarliness.add(new Integer(i));
+			} else if (type.equals(SimulationDefinition.MEASURE_S_L)) {
+				systemLateness.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {
 				responseTimePerSink.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {
@@ -456,6 +474,30 @@ public class ResultsModel implements MeasureDefinition {
 		return tmp;
 	}
 
+	public int[] getTardinessMeasures() {
+		int[] tmp = new int[tardiness.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = tardiness.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	public int[] getEarlinessMeasures() {
+		int[] tmp = new int[earliness.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = earliness.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	public int[] getLatenessMeasures() {
+		int[] tmp = new int[lateness.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = lateness.get(i).intValue();
+		}
+		return tmp;
+	}
+
 	/**
 	 * Returns an array with the measureIndex of every utilization measure
 	 * @return an array with measures' index
@@ -635,6 +677,30 @@ public class ResultsModel implements MeasureDefinition {
 		int[] tmp = new int[systemPower.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = systemPower.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	public int[] getSystemTardinessMeasures() {
+		int[] tmp = new int[systemTardiness.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemTardiness.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	public int[] getSystemEarlinessMeasures() {
+		int[] tmp = new int[systemEarliness.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemEarliness.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	public int[] getSystemLatenessMeasures() {
+		int[] tmp = new int[systemLateness.size()];
+		for (int i = 0; i < tmp.length; i++) {
+			tmp[i] = systemLateness.get(i).intValue();
 		}
 		return tmp;
 	}

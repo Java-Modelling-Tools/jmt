@@ -109,6 +109,18 @@ public interface SimulationDefinition {
 	public static final String MEASURE_FJ_RP = "Fork Join Response Time";
 	/**Code for firing throughput measure*/
 	public static final String MEASURE_FX = "Firing Throughput";
+	/**Code for system tardiness measure*/
+	public static final String MEASURE_S_T = "System Tardiness";
+	/**Code for tardiness measure*/
+	public static final String MEASURE_T = "Tardiness";
+	/**Code for system earliness measure*/
+	public static final String MEASURE_S_E = "System Earliness";
+	/**Code for earliness measure*/
+	public static final String MEASURE_E = "Earliness";
+	/**Code for system lateness measure*/
+	public static final String MEASURE_S_L = "System Lateness";
+	/**Code for lateness measure*/
+	public static final String MEASURE_L = "Lateness";
 
 	/*------------------------------------------------------------------------------------------
 	------------------------------Parameters for measures definition----------------------------
@@ -429,7 +441,7 @@ public interface SimulationDefinition {
 
 	/**
 	 * Enable / disable queue animation
-	 * @param enabled - set it to true to enable queue animation
+	 * @param isEnabled - set it to true to enable queue animation
 	 */
 	public void setAnimationEnabled(boolean isEnabled);
 

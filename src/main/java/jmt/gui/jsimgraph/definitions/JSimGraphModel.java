@@ -100,6 +100,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 		objectNumber.put(Defaults.get("className"), new Integer(++num));
 		return addClass(Defaults.get("className") + num,
 				Defaults.getAsInteger("classType").intValue(), Defaults.getAsInteger("classPriority"),
+				Defaults.getAsDouble("classSoftDeadline"),
 				Defaults.getAsInteger("classPopulation"), Defaults.getAsNewInstance("classDistribution"));
 	}
 
@@ -107,14 +108,15 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	 * Adds a new class to the model and sets all the parameters at once.
 	 * @param name name of the new class.
 	 * @param type type of the new class.
+	 * @param softDeadline soft deadline of the new class.
 	 * @param priority priority of the new class.
 	 * @param population population of the new class.
 	 * @param distribution inter-arrival time distribution of the new class.
 	 * @return search key for the new class.
 	 */
 	@Override
-	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution) {
-		Object key = super.addClass(name, type, priority, population, distribution);
+	public Object addClass(String name, int type, Integer priority, Double softDeadline, Integer population, Object distribution) {
+		Object key = super.addClass(name, type, priority, softDeadline, population, distribution);
 		setClassColor(key, getNewColor());
 		if (type == CLASS_TYPE_OPEN && !sourcesKeyset.isEmpty()) {
 			setClassRefStation(key, sourcesKeyset.get(0));
@@ -197,7 +199,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	@Override
 	public Object deserializeClass(Object Class) {
 		SerializedClass sc = (SerializedClass) Class;
-		Object key = addClass(sc.data.name, sc.data.type, sc.data.priority, sc.data.population, null);
+		Object key = addClass(sc.data.name, sc.data.type, sc.data.priority, sc.data.softDeadline, sc.data.population, null);
 		if (sc.data.distribution != null) {
 			setClassDistribution(key, ((Distribution) sc.data.distribution).clone());
 		}

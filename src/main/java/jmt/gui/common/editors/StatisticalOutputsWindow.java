@@ -289,7 +289,7 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		//Skewness, and Kurtosis
 
 		JPanel measuresPanel= new JPanel(new SpringLayout());
-		measuresPanel.setBorder(new TitledBorder(new EtchedBorder(), "Measures"));
+		measuresPanel.setBorder(new TitledBorder(new EtchedBorder(), "Statistics"));
 		// MEAN
 		label = new JLabel("Mean:");
 		fieldMean = new JTextField();

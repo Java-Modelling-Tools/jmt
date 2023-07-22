@@ -46,12 +46,14 @@ public interface XMLConstantNames {
 	public static final String XML_A_CLASS_NAME = "name";
 	public static final String XML_A_CLASS_TYPE = "type";
 	public static final String XML_A_CLASS_PRIORITY = "priority";
+	public static final String XML_A_CLASS_DUE_DATE = "softDeadline";
 	public static final String XML_A_CLASS_REFSOURCE = "referenceSource";
 	public static final String XML_A_CLASS_CUSTOMERS = "customers";
 
 	public static final String XML_E_STATION = "node";
 	public static final String XML_A_STATION_NAME = "name";
 	public static final String XML_E_STATION_SECTION = "section";
+	public static final String XML_E_STATION_DUE_DATES = "classSoftDeadlines";
 	public static final String XML_A_STATION_SECTION_CLASSNAME = "className";
 	public static final String XML_E_PARAMETER = "parameter";
 	public static final String XML_A_PARAMETER_NAME = "name";
@@ -124,6 +126,9 @@ public interface XMLConstantNames {
 	public static final String XML_E_CLASSSIZE = "classSize";
 	public static final String XML_A_CLASSSIZE_CLASS = "jobClass";
 	public static final String XML_A_CLASSSIZE_SIZE = "size";
+	public static final String XML_E_CLASSDUEDATE = "classSoftDeadline";
+	public static final String XML_A_CLASSDUEDATE_CLASS = "jobClass";
+	public static final String XML_A_CLASSDUEDATE_DUEDATE = "softDeadline";
 
 	public static final String XML_E_GROUPCONSTRAINT = "groupConstraint";
 	public static final String XML_A_GROUPCONSTRAINT_GROUP = "jobGroup";

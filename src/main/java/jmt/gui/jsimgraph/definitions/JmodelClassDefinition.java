@@ -44,11 +44,12 @@ public interface JmodelClassDefinition extends ClassDefinition {
 	 * @param name name of the new class.
 	 * @param type type of the new class.
 	 * @param priority priority of the new class.
+	 * @param softDeadline soft deadline of the new class.
 	 * @param population population of the new class.
 	 * @param distribution inter-arrival time distribution of the new class.
 	 * @return search key for the new class.
 	 */
-	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution);
+	public Object addClass(String name, int type, Integer priority, Double softDeadline, Integer population, Object distribution);
 
 	/**
 	 * Deletes a class from the model, given the search key.

@@ -99,12 +99,14 @@ public class ModelConverter {
 
 			if (type == ExactConstants.CLASS_CLOSED) {
 				// Closed class
-				key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, Defaults.getAsInteger("classPriority"), new Integer((int) data), null);
+				key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, Defaults.getAsInteger("classPriority"),
+						Defaults.getAsDouble("classSoftDeadline"), new Integer((int) data), null);
 			} else {
 				// Open class
 				Exponential exp = new Exponential();
 				exp.setMean(1 / data);
-				key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, Defaults.getAsInteger("classPriority"), null, exp);
+				key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, Defaults.getAsInteger("classPriority"),
+						Defaults.getAsDouble("classSoftDeadline"), null, exp);
 			}
 			classKeys[i] = key;
 		}

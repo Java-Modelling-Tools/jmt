@@ -410,6 +410,31 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
+	public Double getClassSoftDeadline(Object key) {
+		ClassData cd;
+		if (classDataHM.containsKey(key)) {
+			cd = (ClassData) classDataHM.get(key);
+		} else {
+			return null;
+		}
+		return cd.softDeadline;
+	}
+
+	@Override
+	public void setClassSoftDeadline(Object key, Double softDeadline) {
+		ClassData cd;
+		if (classDataHM.containsKey(key)) {
+			cd = (ClassData) classDataHM.get(key);
+		} else {
+			return;
+		}
+		if (cd.softDeadline == null || !cd.softDeadline.equals(softDeadline)) {
+			cd.softDeadline = softDeadline;
+			save = true;
+		}
+	}
+
 	/**
 	 * Returns population of the class, given the search key.
 	 */
@@ -521,21 +546,22 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param name name of the new class.
 	 * @param type type of the new class.
 	 * @param priority priority of the new class.
+	 * @param softDeadline soft deadline of the new class.
 	 * @param population population of the new class.
 	 * @param distribution inter-arrival time distribution of the new class.
 	 * @return search key for the new class.
 	 */
 	@Override
-	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution) {
+	public Object addClass(String name, int type, Integer priority, Double softDeadline, Integer population, Object distribution) {
 		name = getUniqueClassName(name);
 		Object key = new Long(++incrementalKey);
 		classesKeyset.add(key);
 		ClassData cd;
 		if (type == CLASS_TYPE_OPEN) {
-			cd = new ClassData(name, type, priority, null, distribution);
+			cd = new ClassData(name, type, priority, softDeadline, null, distribution);
 			openClassesKeyset.add(key);
 		} else {
-			cd = new ClassData(name, type, priority, population, null);
+			cd = new ClassData(name, type, priority, softDeadline, population, null);
 			closedClassesKeyset.add(key);
 		}
 		classDataHM.put(key, cd);
@@ -1407,6 +1433,27 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	/*------------------------------------------------------------------------------
 	 *---------------- Methods for setup of class-station parameters ---------------
 	 *------------------------------------------------------------------------------*/
+
+	@Override
+	public Double getClassStationSoftDeadline(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.softDeadline;
+	}
+
+	@Override
+	public void setClassStationSoftDeadline(Object stationKey, Object classKey, Double softDeadline) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (scd.softDeadline == null || !scd.softDeadline.equals(softDeadline)) {
+			scd.softDeadline = softDeadline;
+			save = true;
+		}
+	}
 
 	/**
 	 * Returns queue capacity for a station and a class, given their search keys.
@@ -2314,8 +2361,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.dropRule = FINITE_DROP;
 			scd.serviceDistribution = Defaults.getAsNewInstance("stationDelayServiceStrategy");
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
+			scd.softDeadline = Defaults.getAsDouble("classSoftDeadline");
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			scd.queueStrategy = Defaults.get("stationQueueStrategy");
+			scd.softDeadline = Defaults.getAsDouble("classSoftDeadline");
 			if (sd.queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
 				if (scd.queueStrategy.equals(QUEUE_STRATEGY_FCFS)
 						|| scd.queueStrategy.equals(QUEUE_STRATEGY_LCFS)
@@ -2845,7 +2894,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	public boolean isGlobalMeasure(String type) {
 		return type.equals(MEASURE_S_X) || type.equals(MEASURE_S_RP) || type.equals(MEASURE_S_CN)
 				|| type.equals(MEASURE_S_DR) || type.equals(MEASURE_S_BR) || type.equals(MEASURE_S_RN)
-				|| type.equals(MEASURE_S_RT) || type.equals(MEASURE_S_P);
+				|| type.equals(MEASURE_S_RT) || type.equals(MEASURE_S_P) || type.equals(MEASURE_S_T)
+				|| type.equals(MEASURE_S_E) || type.equals(MEASURE_S_L);
 	}
 
 	/**
@@ -3624,6 +3674,26 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		save = true;
 	}
 
+	@Override
+	public Double getRegionClassSoftDeadline(Object regionKey, Object classKey) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return null;
+		}
+		return ((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).softDeadline;
+	}
+
+	@Override
+	public void setRegionClassSoftDeadline(Object regionKey, Object classKey, Double softDeadline) {
+		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
+			return;
+		}
+		if (((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).softDeadline.equals(softDeadline)) {
+			return;
+		}
+		((BlockingClassData) blockingDetailsBDM.get(classKey, regionKey)).softDeadline = softDeadline;
+		save = true;
+	}
+
 	/**
 	 * Tells if a station can be added to a blocking region
 	 * (all the stations that create or destroy jobs cannot be added)
@@ -3734,7 +3804,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		for (Object classKey : classesKeyset) {
 			blockingDetailsBDM.put(classKey, regionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
 					Defaults.getAsInteger("blockingMaxMemoryPerClass"), Defaults.getAsBoolean("blockingDropPerClass"),
-					Defaults.getAsInteger("blockingWeightPerClass"), Defaults.getAsInteger("blockingSizePerClass")));
+					Defaults.getAsInteger("blockingWeightPerClass"), Defaults.getAsInteger("blockingSizePerClass"), Defaults.getAsDouble("classSoftDeadline")));
 		}
 	}
 
@@ -3754,7 +3824,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		for (Object regionKey : blockingRegionsKeyset) {
 			blockingDetailsBDM.put(classKey, regionKey, new BlockingClassData(Defaults.getAsInteger("blockingMaxJobsPerClass"),
 					Defaults.getAsInteger("blockingMaxMemoryPerClass"), Defaults.getAsBoolean("blockingDropPerClass"),
-					Defaults.getAsInteger("blockingWeightPerClass"), Defaults.getAsInteger("blockingSizePerClass")));
+					Defaults.getAsInteger("blockingWeightPerClass"), Defaults.getAsInteger("blockingSizePerClass"), Defaults.getAsDouble("classSoftDeadline")));
 		}
 	}
 
@@ -4032,21 +4102,23 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String name;
 		public int type;
 		public Integer priority;
+		public Double softDeadline;
 		public Integer population;
 		public Object distribution;
 		public Object refStation;
 
-		public ClassData(String name, int type, Integer priority, Integer population, Object distribution) {
+		public ClassData(String name, int type, Integer priority, Double softDeadline, Integer population, Object distribution) {
 			this.name = name;
 			this.type = type;
 			this.priority = priority;
+			this.softDeadline = softDeadline;
 			this.population = population;
 			this.distribution = distribution;
 		}
 
 		@Override
 		public Object clone() {
-			ClassData cd = new ClassData(name, type, priority, population, distribution);
+			ClassData cd = new ClassData(name, type, priority, softDeadline, population, distribution);
 			cd.refStation = refStation;
 			return cd;
 		}
@@ -4127,6 +4199,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Object joinStrategy;
 		public Object semaphoreStrategy;
 		public ClassSwitchRow classSwitchProb;
+		public Double softDeadline;
 
 		public StationClassData() {
 			this.preload = new Integer(0);
@@ -4140,6 +4213,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.queueStrategy = queueStrategy;
 			scd.dropRule = dropRule;
 			scd.serviceWeight = serviceWeight;
+			scd.softDeadline = softDeadline;
 			if (serviceDistribution != null) {
 				scd.serviceDistribution = ((ServiceStrategy) serviceDistribution).clone();
 			}
@@ -4215,18 +4289,20 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Boolean drop;
 		public Integer weight;
 		public Integer size;
+		public Double softDeadline;
 
-		public BlockingClassData(Integer maxJobs, Integer maxMemory, Boolean drop, Integer weight, Integer size) {
+		public BlockingClassData(Integer maxJobs, Integer maxMemory, Boolean drop, Integer weight, Integer size, Double softDeadline) {
 			this.maxJobs = maxJobs;
 			this.maxMemory = maxMemory;
 			this.drop = drop;
 			this.weight = weight;
 			this.size = size;
+			this.softDeadline = softDeadline;
 		}
 
 		@Override
 		public Object clone() {
-			return new BlockingClassData(maxJobs, maxMemory, drop, weight, size);
+			return new BlockingClassData(maxJobs, maxMemory, drop, weight, size, softDeadline);
 		}
 	}
 

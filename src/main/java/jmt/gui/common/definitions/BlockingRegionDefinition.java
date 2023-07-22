@@ -192,6 +192,22 @@ public interface BlockingRegionDefinition {
 	public void setRegionClassSize(Object regionKey, Object classKey, Integer size);
 
 	/**
+	 * Gets the soft deadline of each job for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @return soft deadline of each job for specified class
+	 */
+	Double getRegionClassSoftDeadline(Object regionKey, Object classKey);
+
+	/**
+	 * Sets the soft deadline of each job for a blocking region and a class
+	 * @param regionKey search's key for region
+	 * @param classKey search's key for class
+	 * @param softDeadline soft deadline of each job for specified class
+	 */
+	void setRegionClassSoftDeadline(Object regionKey, Object classKey, Double softDeadline);
+
+	/**
 	 * Tells if a station can be added to a blocking region
 	 * (all the stations that create or destroy jobs cannot be added)
 	 * @param regionKey search's key for region

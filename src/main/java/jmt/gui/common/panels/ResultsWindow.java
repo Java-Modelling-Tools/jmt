@@ -151,6 +151,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_AR, DESCRIPTION_ARRIVAL_RATE, results.getArrivalRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X, DESCRIPTION_THROUGHPUT, results.getThroughputMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_U, DESCRIPTION_UTILIZATION, results.getUtilizationMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_T, DESCRIPTION_TARDINESS, results.getTardinessMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_E, DESCRIPTION_EARLINESS, results.getEarlinessMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_L, DESCRIPTION_LATENESS, results.getLatenessMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_EU, DESCRIPTION_EFFECTIVE_UTILIZATION, results.getEffectiveUtilizationMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_DR, DESCRIPTION_DROP_RATE, results.getDropRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_BR, DESCRIPTION_BALKING_RATE, results.getBalkingRateMeasures());
@@ -166,6 +169,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RN, DESCRIPTION_SYSTEM_RENEGING_RATE, results.getSystemRenegingRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RT, DESCRIPTION_SYSTEM_RETRIAL_ATTEMPTS_RATE, results.getSystemRetrialAttemptsRateMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_P, DESCRIPTION_SYSTEM_POWER, results.getSystemPowerMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_T, DESCRIPTION_SYSTEM_TARDINESS, results.getSystemTardinessMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_E, DESCRIPTION_SYSTEM_EARLINESS, results.getSystemEarlinessMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_L, DESCRIPTION_SYSTEM_LATENESS, results.getSystemLatenessMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP_PER_SINK, DESCRIPTION_RESPONSE_TIME_PER_SINK, results.getResponsetimePerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_PER_SINK, results.getThroughputPerSinkMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_TW, DESCRIPTION_FCR_TOTAL_WEIGHT, results.getFCRTotalWeightMeasures());
@@ -528,8 +534,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			});
 
 			//Creates button to display Statistical Results Window.
-			statisticalOutputsButton = new JButton("Statistical Results");
-			statisticalOutputsButton.setToolTipText("Displays requested Statistical Outputs");
+			statisticalOutputsButton = new JButton("Statistics");
+			statisticalOutputsButton.setToolTipText("Displays requested distribution");
 			statisticalOutputsButton.setEnabled(false);
 
 			if (md.getLogFileName(measureIndex) == null) {

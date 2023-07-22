@@ -10,6 +10,7 @@
 						<xs:attribute name="name" type="xs:string" use="required"/>
 						<xs:attribute name="type" type="xs:string" use="required"/>
 						<xs:attribute name="priority" type="xs:string" use="required"/>
+						<xs:attribute name="softDeadline" type="xs:string"/>
 						<xs:attribute name="referenceSource" type="xs:string" use="optional"/>
 						<xs:attribute name="customers" type="xs:string" use="optional"/>
 					</xs:complexType>
@@ -123,6 +124,12 @@
 									<xs:attribute name="size" type="jdouble" use="required"/>
 								</xs:complexType>
 							</xs:element>
+							<xs:element name="classSoftDeadline" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:attribute name="jobClass" type="xs:string" use="required"/>
+									<xs:attribute name="softDeadline" type="jdouble" use="required"/>
+								</xs:complexType>
+							</xs:element>
 							<xs:element name="groupConstraint" minOccurs="0" maxOccurs="unbounded">
 								<xs:complexType>
 									<xs:attribute name="jobGroup" type="xs:string" use="required"/>
@@ -213,6 +220,7 @@
 	<xs:element name="node">
 		<xs:complexType>
 			<xs:sequence>
+				<xs:element ref="classSoftDeadlines" minOccurs="0"/>
 				<xs:element ref="section" minOccurs="0" maxOccurs="3"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
@@ -234,4 +242,11 @@
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="refClass" type="xs:string"/>
+	<xs:element name="classSoftDeadlines">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="softDeadline" type="xs:double" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 </xs:schema>

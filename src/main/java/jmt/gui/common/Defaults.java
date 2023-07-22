@@ -108,6 +108,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("classType", "" + CLASS_TYPE_OPEN);
 		def.setProperty("classPriority", "0");
 		def.setProperty("classPopulation", "0");
+		def.setProperty("classSoftDeadline", "0");
 		def.setProperty("classDistribution", "jmt.gui.common.distributions.Exponential");
 
 		// Blocking Region Parameters

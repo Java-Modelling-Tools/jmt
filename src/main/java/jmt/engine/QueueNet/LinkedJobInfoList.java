@@ -139,6 +139,15 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected InverseMeasure throughputPerSink;
 	protected InverseMeasure throughputPerSinkPerClass[];
 
+	protected Measure tardiness;
+	protected Measure[] tardinessPerClass;
+	protected Measure earliness;
+	protected Measure[] earlinessPerClass;
+	protected Measure lateness;
+	protected Measure[] latenessPerClass;
+	/* Only set if this joblist is for a blocking region input station */
+	protected double[] regionSoftDeadlinesByClass;
+
 	/** The number of servers to estimate Utilization measure on multiserver environments */
 	protected int numberOfServers = 1;
 
@@ -680,6 +689,9 @@ public class LinkedJobInfoList implements JobInfoList {
 		updateThroughput(jobInfo);
 		updateUtilization(jobInfo);
 		updateUtilizationJoin(jobInfo);
+		updateTardiness(jobInfo);
+		updateEarliness(jobInfo);
+		updateLateness(jobInfo);
 		finalRemove(jobInfo, list, position);
 		finalRemove(jobInfo, listPerClass[c], perClassPosition);
 		jobsOut++;
@@ -934,6 +946,95 @@ public class LinkedJobInfoList implements JobInfoList {
 			throughputPerSinkPerClass[jobClass.getId()] = measurement;
 		} else {
 			throughputPerSink = measurement;
+		}
+	}
+
+	@Override
+	public void analyzeTardiness(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
+			if (tardinessPerClass == null) {
+				tardinessPerClass = new Measure[numberOfJobClasses];
+			}
+			tardinessPerClass[jobClass.getId()] = measurement;
+		} else {
+			tardiness = measurement;
+		}
+	}
+
+	@Override
+	public void analyzeEarliness(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
+			if (earlinessPerClass == null) {
+				earlinessPerClass = new Measure[numberOfJobClasses];
+			}
+			earlinessPerClass[jobClass.getId()] = measurement;
+		} else {
+			earliness = measurement;
+		}
+	}
+
+	@Override
+	public void analyzeLateness(JobClass jobClass, Measure measurement) {
+		if (jobClass != null) {
+			if (latenessPerClass == null) {
+				latenessPerClass = new Measure[numberOfJobClasses];
+			}
+			latenessPerClass[jobClass.getId()] = measurement;
+		} else {
+			lateness = measurement;
+		}
+	}
+
+	protected void updateTardiness(JobInfo jobInfo) {
+		JobClass jobClass = jobInfo.getJob().getJobClass();
+		int c = jobClass.getId();
+		double softDeadline = regionSoftDeadlinesByClass == null ?
+				jobInfo.getJob().getCurrentStationSoftDeadline() :
+				(regionSoftDeadlinesByClass[c] + jobInfo.getEnteringTime());
+		if (tardinessPerClass != null) {
+			Measure m = tardinessPerClass[c];
+			if (m != null) {
+				// The soft deadline retrieved by getCurrentStationSoftDeadline is absolute, so we do not need to
+				// offset it as is done in GlobalJobInfoList.
+				m.update(Math.max(0, getTime() - softDeadline), 1.0);
+			}
+		}
+		if (tardiness != null) {
+			tardiness.update(Math.max(0, getTime() - softDeadline), 1.0);
+		}
+	}
+
+	protected void updateEarliness(JobInfo jobInfo) {
+		JobClass jobClass = jobInfo.getJob().getJobClass();
+		int c = jobClass.getId();
+		double softDeadline = regionSoftDeadlinesByClass == null ?
+				jobInfo.getJob().getCurrentStationSoftDeadline() :
+				(regionSoftDeadlinesByClass[c] + jobInfo.getEnteringTime());
+		if (earlinessPerClass != null) {
+			Measure m = earlinessPerClass[c];
+			if (m != null) {
+				m.update(Math.max(0, softDeadline - getTime()), 1.0);
+			}
+		}
+		if (earliness != null) {
+			earliness.update(Math.max(0, softDeadline - getTime()), 1.0);
+		}
+	}
+
+	protected void updateLateness(JobInfo jobInfo) {
+		JobClass jobClass = jobInfo.getJob().getJobClass();
+		int c = jobClass.getId();
+		double softDeadline = regionSoftDeadlinesByClass == null ?
+				jobInfo.getJob().getCurrentStationSoftDeadline() :
+				(regionSoftDeadlinesByClass[c] + jobInfo.getEnteringTime());
+		if (latenessPerClass != null) {
+			Measure m = latenessPerClass[c];
+			if (m != null) {
+				m.update(getTime() - softDeadline, 1.0);
+			}
+		}
+		if (lateness != null) {
+			lateness.update(getTime() - softDeadline, 1.0);
 		}
 	}
 
@@ -1247,6 +1348,9 @@ public class LinkedJobInfoList implements JobInfoList {
 		updateResidenceTime(jobInfo);
 		updateUtilization(jobInfo);
 		updateUtilizationJoin(jobInfo);
+		updateTardiness(jobInfo);
+		updateEarliness(jobInfo);
+		updateLateness(jobInfo);
 		listPerClass[oc].remove(jobInfo);
 		listPerClass[nc].add(jobInfo);
 		lastJobSwitchTime = getTime();
@@ -1326,6 +1430,10 @@ public class LinkedJobInfoList implements JobInfoList {
 	 */
 	public void setNetSystem(NetSystem netSystem) {
 		this.netSystem = netSystem;
+	}
+
+	public void setRegionSoftDeadlinesByClass(double[] regionSoftDeadlinesByClass) {
+		this.regionSoftDeadlinesByClass = regionSoftDeadlinesByClass;
 	}
 
 	protected double getTime() {

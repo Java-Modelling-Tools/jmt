@@ -368,6 +368,15 @@ public class NetNode extends SimEntity {
 		case SimConstants.THROUGHPUT_PER_SINK:
 			jobsList.analyzeThroughputPerSink(jobClass, (InverseMeasure) measurement);
 			break;
+		case SimConstants.TARDINESS:
+			jobsList.analyzeTardiness(jobClass, measurement);
+			break;
+		case SimConstants.EARLINESS:
+			jobsList.analyzeEarliness(jobClass, measurement);
+			break;
+		case SimConstants.LATENESS:
+			jobsList.analyzeLateness(jobClass, measurement);
+			break;
 		default:
 			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
@@ -746,7 +755,10 @@ public class NetNode extends SimEntity {
 		// When a node is linked to a network, connections between nodes must
 		// have been already done!!!
 		jobsList = new LinkedJobInfoList(getJobClasses().size());
-		jobsList.setNetSystem(network.getNetSystem()); 
+		if (isBlockingRegionInputStation()) {
+			jobsList.setRegionSoftDeadlinesByClass(getBlockingRegionInputStation().getClassSoftDeadlines());
+		}
+		jobsList.setNetSystem(network.getNetSystem());
 	}
 
 	@Override

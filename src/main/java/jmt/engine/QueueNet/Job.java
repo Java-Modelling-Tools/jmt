@@ -61,6 +61,10 @@ public class Job implements Cloneable {
 	protected GlobalJobInfoList globalJobInfoList = null;
 	protected Pair<NetNode, JobClass> lastVisitedPair = null;
 
+	/* Note that this is stored as an absolute time, rather than
+	the relative time specified by the user. */
+	private double currentStationSoftDeadline = -1.0;
+
 	/**
 	 * Creates a new instance of Job.
 	 * @param jobClass Reference to the class of the job.
@@ -266,6 +270,14 @@ public class Job implements Cloneable {
 
 	public NetSystem getNetSystem() {
 		return netSystem;
+	}
+
+	public double getCurrentStationSoftDeadline() {
+		return currentStationSoftDeadline;
+	}
+
+	public void setCurrentStationSoftDeadline(double currentStationSoftDeadline) {
+		this.currentStationSoftDeadline = currentStationSoftDeadline;
 	}
 
 	@Override

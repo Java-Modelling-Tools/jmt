@@ -80,6 +80,16 @@ public interface ClassDefinition {
 	public void setClassPriority(Object key, Integer priority);
 
 	/**
+	 * Returns soft deadline of the class, given the search key.
+	 */
+	public Double getClassSoftDeadline(Object key);
+
+	/**
+	 * Sets soft deadline of the class, given the search key.
+	 */
+	public void setClassSoftDeadline(Object key, Double softDeadline);
+
+	/**
 	 * Returns population of the class, given the search key.
 	 */
 	public Integer getClassPopulation(Object key);
@@ -114,11 +124,12 @@ public interface ClassDefinition {
 	 * @param name name of the new class.
 	 * @param type type of the new class.
 	 * @param priority priority of the new class.
+	 * @param softDeadline soft deadline of the new class.
 	 * @param population population of the new class.
 	 * @param distribution inter-arrival time distribution of the new class.
 	 * @return search key for the new class.
 	 */
-	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution);
+	public Object addClass(String name, int type, Integer priority, Double softDeadline, Integer population, Object distribution);
 
 	/**
 	 * Deletes a class from the model, given the search key.

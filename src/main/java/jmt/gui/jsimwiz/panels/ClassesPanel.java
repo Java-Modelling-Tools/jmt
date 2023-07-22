@@ -296,6 +296,7 @@ public class ClassesPanel extends WizardPanel implements CommonConstants {
 	protected void addClass() {
 		data.addClass(Defaults.get("className") + (++classNameIndex),
 				Defaults.getAsInteger("classType").intValue(), Defaults.getAsInteger("classPriority"),
+				Defaults.getAsDouble("classSoftDeadline"),
 				Defaults.getAsInteger("classPopulation"), Defaults.getAsNewInstance("classDistribution"));
 		refreshComponents();
 	}

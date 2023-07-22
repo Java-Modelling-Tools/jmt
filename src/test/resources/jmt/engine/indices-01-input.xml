@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="indices-01-input.xml" timestamp="Sat Aug 12 17:17:17 BST 2017" xsi:noNamespaceSchemaLocation="Archive.xsd">
 <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="" logReplaceMode="0" maxSamples="1000000" name="indices-01-input.xml" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
-<userClass name="Class1" priority="0" referenceSource="Source 1" type="open"/>
+<userClass name="Class1" softDeadline="0" priority="0" referenceSource="Source 1" type="open"/>
 <node name="Source 1">
 <section className="RandomSource">
 <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">

@@ -86,6 +86,15 @@ public interface ResultsConstants {
 			+ "average utilization of each server. The utilization of a delay station is the average number of customers in the station (may be greater than 1)."
 			+ HTML_FONT_NOR_END + HTML_END;
 
+	public static final String DESCRIPTION_TARDINESS = HTML_START + HTML_FONT_TITLE + "Tardiness" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average tardiness for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_EARLINESS = HTML_START + HTML_FONT_TITLE + "Earliness" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average earliness for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_LATENESS = HTML_START + HTML_FONT_TITLE + "Lateness" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average lateness for each selected class at each selected station." + HTML_FONT_NOR_END + HTML_END;
+
 	public static final String DESCRIPTION_EFFECTIVE_UTILIZATION = HTML_START + HTML_FONT_TITLE + "Effective Utilization" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average effective utilization for each selected class at each selected station. For multi-server queueing stations this is the "
 			+ "average effective utilization of each server. The time taken by additional processes (e.g. setup, blocking, waiting and retrial) is ignored."
@@ -132,6 +141,15 @@ public interface ResultsConstants {
 
 	public static final String DESCRIPTION_SYSTEM_POWER = HTML_START + HTML_FONT_TITLE + "System Power" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average power of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_SYSTEM_TARDINESS = HTML_START + HTML_FONT_TITLE + "System Tardiness" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average tardiness of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_SYSTEM_EARLINESS =  HTML_START + HTML_FONT_TITLE + "System Earliness" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average earliness of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String DESCRIPTION_SYSTEM_LATENESS =  HTML_START + HTML_FONT_TITLE + "System Lateness" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Average lateness of the entire system for each selected class." + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String DESCRIPTION_RESPONSE_TIME_PER_SINK = HTML_START + HTML_FONT_TITLE + "Response Time per Sink" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average response time for each selected class at each selected Sink station." + HTML_FONT_NOR_END + HTML_END;

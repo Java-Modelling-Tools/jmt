@@ -104,6 +104,7 @@ public class BlockingRegion {
 
 	protected double[] classWeights;
 	protected double[] classSizes;
+	protected double[] classSoftDeadlines;
 
 	private Measure weightMeasure, sizeMeasure;
 	private double lastTimeModified;
@@ -115,7 +116,7 @@ public class BlockingRegion {
 	 * Creates a blocking region with global, class and group constraints
 	 */
 	public BlockingRegion(String regionName, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] maxMemoryPerClass, boolean[] drop, double[] classWeights, double[] classSizes,
-			String[] groupNames, double[] maxCapacityPerGroup, double[] maxMemoryPerGroup, List<List<Integer>> groupClassIndexLists, Simulation sim, String[] regionNodeNames) {
+			double[] classSoftDeadlines, String[] groupNames, double[] maxCapacityPerGroup, double[] maxMemoryPerGroup, List<List<Integer>> groupClassIndexLists, Simulation sim, String[] regionNodeNames) {
 		//No control on input dimensions.
 
 		//-----------------REGION PROPERTIES----------------------//
@@ -203,6 +204,9 @@ public class BlockingRegion {
 
 		//------------------CLASS SIZE---------------------//
 		this.classSizes = classSizes;
+
+		//-----------------CLASS DUE DATE------------------//
+		this.classSoftDeadlines = classSoftDeadlines;
 
 		//------------------GROUP CONSTRAINT----------------------//
 		groupInfo = new ArrayList<GroupInfo>();
@@ -464,6 +468,13 @@ public class BlockingRegion {
 	 */
 	public double[] getClassWeights() {
 		return classWeights;
+	}
+
+	/**
+	 * @return Returns classSoftDeadlines.
+	 */
+	public double[] getClassSoftDeadlines() {
+		return classSoftDeadlines;
 	}
 
 	/**

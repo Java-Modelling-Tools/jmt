@@ -92,6 +92,15 @@ public class GlobalJobInfoList {
 	private InverseMeasure systemPower;
 	private InverseMeasure[] systemPowerPerClass;
 
+	private Measure tardiness;
+	private Measure[] tardinessPerClass;
+
+	private Measure earliness;
+	private Measure[] earlinessPerClass;
+
+	private Measure lateness;
+	private Measure[] latenessPerClass;
+
 	//Variables for the System Power calculation: New Modified version.
 	double systemPowerSamples;
 	double systemPowerSamplesClass[];
@@ -154,6 +163,12 @@ public class GlobalJobInfoList {
 		throughputPerClass = null;
 		systemPower = null;
 		systemPowerPerClass = null;
+		tardiness = null;
+		tardinessPerClass = null;
+		earliness = null;
+		earlinessPerClass = null;
+		lateness = null;
+		latenessPerClass = null;
 
 		systemPowerSamples = 0.0;
 		systemPowerSamplesClass = new double[classNum];
@@ -194,6 +209,9 @@ public class GlobalJobInfoList {
 		updateThroughput(job);
 		updateSystemPower(job);
 		updateVisitCountPerChain(job);
+		updateSystemTardiness(job);
+		updateSystemEarliness(job);
+		updateSystemLateness(job);
 
 		// Updates jobs number and throughput data structures
 		jobs--;
@@ -212,6 +230,9 @@ public class GlobalJobInfoList {
 		updateThroughput(job);
 		updateSystemPower(job);
 		updateVisitCountPerChain(job);
+		updateSystemTardiness(job);
+		updateSystemEarliness(job);
+		updateSystemLateness(job);
 
 		// Updates jobs number and throughput data structures
 		lastModifyNumberPerClass[job.getJobClass().getId()] = lastModifyNumber = getTime();
@@ -432,6 +453,54 @@ public class GlobalJobInfoList {
 		}
 	}
 
+	/**
+	 * Analyzes System Tardiness for a specific job class or for every class.
+	 * @param jobClass specified job class. If null measure will be job independent.
+	 * @param measure reference to a Measure object.
+	 */
+	public void analyzeTardiness(JobClass jobClass, Measure measure) {
+		if (jobClass != null) {
+			if (tardinessPerClass == null) {
+				tardinessPerClass = new Measure[classNum];
+			}
+			tardinessPerClass[jobClass.getId()] = measure;
+		} else {
+			tardiness = measure;
+		}
+	}
+
+	/**
+	 * Analyzes System Earliness for a specific job class or for every class.
+	 * @param jobClass specified job class. If null measure will be job independent.
+	 * @param measure reference to a Measure object.
+	 */
+	public void analyzeEarliness(JobClass jobClass, Measure measure) {
+		if (jobClass != null) {
+			if (earlinessPerClass == null) {
+				earlinessPerClass = new Measure[classNum];
+			}
+			earlinessPerClass[jobClass.getId()] = measure;
+		} else {
+			earliness = measure;
+		}
+	}
+
+	/**
+	 * Analyzes System Lateness for a specific job class or for every class.
+	 * @param jobClass specified job class. If null measure will be job independent.
+	 * @param measure reference to a Measure object.
+	 */
+	public void analyzeLateness(JobClass jobClass, Measure measure) {
+		if (jobClass != null) {
+			if (latenessPerClass == null) {
+				latenessPerClass = new Measure[classNum];
+			}
+			latenessPerClass[jobClass.getId()] = measure;
+		} else {
+			lateness = measure;
+		}
+	}
+
 	// ------------------------------------------------------------------------------------
 
 	// --- Methods to update measures -----------------------------------------------------
@@ -552,6 +621,59 @@ public class GlobalJobInfoList {
 		}
 		if (retrialAttemptsRate != null) {
 			retrialAttemptsRate.update(getTime() - lastJobRetrialTime, 1.0);
+		}
+	}
+
+	/**
+	 * Updates System Tardiness measures.
+	 * @param job current job.
+	 */
+	private void updateSystemTardiness(Job job) {
+		if (tardinessPerClass != null) {
+			int index = job.getJobClass().getId();
+			Measure m = tardinessPerClass[index];
+			if (m != null) {
+				m.update(Math.max(0, getTime() - job.getSystemEnteringTime() - job.getJobClass().getSoftDeadline()), 1.0);
+//				m.update(5, 1.0);
+			}
+		}
+		if (tardiness != null) {
+			tardiness.update(Math.max(0, getTime() - job.getSystemEnteringTime() - job.getJobClass().getSoftDeadline()), 1.0);
+//			tardiness.update(3, 1.0);
+		}
+	}
+
+	/**
+	 * Updates System Earliness measures.
+	 * @param job current job.
+	 */
+	private void updateSystemEarliness(Job job) {
+		if (earlinessPerClass != null) {
+			int index = job.getJobClass().getId();
+			Measure m = earlinessPerClass[index];
+			if (m != null) {
+				m.update(Math.max(0, job.getJobClass().getSoftDeadline() - (getTime() - job.getSystemEnteringTime())), 1.0);
+			}
+		}
+		if (earliness != null) {
+			earliness.update(Math.max(0, job.getJobClass().getSoftDeadline() - (getTime() - job.getSystemEnteringTime())), 1.0);
+		}
+	}
+
+	/**
+	 * Updates System Lateness measures.
+	 * @param job current job.
+	 */
+	private void updateSystemLateness(Job job) {
+		if (latenessPerClass != null) {
+			int index = job.getJobClass().getId();
+			Measure m = latenessPerClass[index];
+			if (m != null) {
+				m.update(getTime() - job.getSystemEnteringTime() - job.getJobClass().getSoftDeadline(), 1.0);
+			}
+		}
+		if (lateness != null) {
+			lateness.update(getTime() - job.getSystemEnteringTime() - job.getJobClass().getSoftDeadline(), 1.0);
 		}
 	}
 

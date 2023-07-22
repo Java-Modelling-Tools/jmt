@@ -193,6 +193,9 @@ public interface CommonConstants {
 	public static final String QUEUE_STRATEGY_FCFS_PR = "FCFS-PR";
 	public static final String QUEUE_STRATEGY_LCFS_PR = "LCFS-PR";
 	public static final String QUEUE_STRATEGY_SRPT = "SRPT";
+	public static final String QUEUE_STRATEGY_EDD = "EDD";
+	public static final String QUEUE_STRATEGY_EDF = "EDF";
+	public static final String QUEUE_STRATEGY_TBS = "TBS";
 
 	/**Constants for service time distributions*/
 	public static final String SERVICE_LOAD_INDEPENDENT = "Load Independent";
@@ -315,8 +318,8 @@ public interface CommonConstants {
 			+ "The outgoing paths must have associated probabilities that should sum to 1 for each range."
 			+ HTML_FONT_NOR_END + HTML_END;
 
-	public static final String MEASURE_LOG_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Statistical Results CSV file" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Check the \"Stat.Res.\" box to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size."
+	public static final String MEASURE_LOG_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Statistics CSV file" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Check the \"Save Stats\" box to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size."
 			+ HTML_FONT_NOR_END + HTML_END;
 
 	// String tokens

@@ -39,8 +39,8 @@ public class JSIMModel extends CommonModel {
 
 	//intercept each call for addition of a new class
 	@Override
-	public Object addClass(String name, int type, Integer priority, Integer population, Object distribution) {
-		Object key = super.addClass(name, type, priority, population, distribution);
+	public Object addClass(String name, int type, Integer priority, Double softDeadline, Integer population, Object distribution) {
+		Object key = super.addClass(name, type, priority, softDeadline, population, distribution);
 		if (type == CLASS_TYPE_OPEN) {
 			if (getOpenClassKeys().size() == 1) {
 				addSourceAndSink();

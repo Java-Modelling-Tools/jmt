@@ -196,7 +196,8 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 		List<fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI> arcs = page.getObjects_ArcHLAPI();
 
 		Object classKey = model.addClass("Token", Defaults.getAsInteger("classType").intValue(),
-				Defaults.getAsInteger("classPriority"), Defaults.getAsInteger("classPopulation"),
+				Defaults.getAsInteger("classPriority"), Defaults.getAsDouble("classSoftDeadline"),
+				Defaults.getAsInteger("classPopulation"),
 				Defaults.getAsNewInstance("classDistribution"));
 		referenceNodeName = null;
 		List<fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI> specifics = net.getToolspecificsHLAPI();

@@ -96,7 +96,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 
 		protected String[] dropRules = new String[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() };
 		protected TableCellRenderer grayRenderer = new GrayCellRenderer();
-		int[] columnSizes = new int[] { 130, 60, 30, 60, 30, 50, 50, 50 };		
+		int[] columnSizes = new int[] { 130, 60, 30, 60, 30, 50, 50, 50, 50 };
 
 		public BlockingClassTable() {
 			setModel(new BlockingClassTableModel());
@@ -150,9 +150,9 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 		private static final long serialVersionUID = 1L;
 
 		private Class<?>[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class, Boolean.class,
-				String.class, String.class, String.class };
-		private String[] columnNames = new String[] { "Class", "Max Capacity", "\u221e", "Max Memory", "\u221e",
-				"Drop", "Job Capacity", "Job Memory" };
+				String.class, String.class, String.class, Double.class };
+		private String[] columnNames = new String[] { "Class", "Capacity", "\u221e", "Memory Size", "\u221e",
+				"Drop", "Job Weight", "Job Size", "Soft Deadline" };
 
 		public int getRowCount() {
 			return cd.getClassKeys().size();
@@ -176,7 +176,7 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 		public boolean isCellEditable(int rowIndex, int columnIndex) {
 			return  (columnIndex == 1 && !((Boolean) getValueAt(rowIndex, 2)).booleanValue()) || columnIndex == 2
 					|| (columnIndex == 3 && !((Boolean) getValueAt(rowIndex, 4)).booleanValue()) || columnIndex == 4
-					|| columnIndex == 5 || columnIndex == 6 || columnIndex == 7;
+					|| columnIndex == 5 || columnIndex == 7 || columnIndex == 8;
 		}
 
 		public Object getValueAt(int rowIndex, int columnIndex) {
@@ -203,6 +203,8 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 				return brd.getRegionClassWeight(key, classKey);
 			case 7:
 				return brd.getRegionClassSize(key, classKey);
+			case 8:
+				return brd.getRegionClassSoftDeadline(key, classKey);
 			}
 			return null;
 		}
@@ -277,6 +279,8 @@ public class BlockingRegionClassPanel extends WizardPanel implements CommonConst
 					// Do nothing
 				}
 				break;
+			case 8:
+				brd.setRegionClassSoftDeadline(key, classKey, Math.max(0, (double) aValue));
 			}
 			repaint();
 		}

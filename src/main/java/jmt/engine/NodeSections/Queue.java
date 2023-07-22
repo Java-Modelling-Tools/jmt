@@ -126,6 +126,8 @@ public class Queue extends InputSection {
 	// Get and put strategies for the Queue
 	private QueueGetStrategy getStrategy;
 	private QueuePutStrategy[] putStrategies;
+	// Class soft deadlines for the overall station
+	private double[] softDeadlines;
 
 	//--------------------BLOCKING REGION PROPERTIES--------------------//
 	//true if the redirection behaviour is turned on
@@ -446,6 +448,11 @@ public class Queue extends InputSection {
 					addJobToBuffer(job, message, BufferType.FJ_LIST);
 				}
 
+				if (softDeadlines != null) {
+					job.setCurrentStationSoftDeadline(softDeadlines[job.getJobClass().getId()]
+							+ getOwnerNode().getNetSystem().getTime());
+				}
+
 				putStrategies[jobClass].put(job, jobsList, this);
 				// If coolStart is true, at least one server is available
 				if (coolStart) {
@@ -576,7 +583,7 @@ public class Queue extends InputSection {
 			break;
 
 		case NetEvent.EVENT_PREEMPTED_JOB:
-			addJobToBuffer(job, message, BufferType.JOBS_LIST_FIRST);
+			addJobToBuffer(job, message, BufferType.JOBS_LIST);
 			createRenegingEvent(job);
 			break;
 
@@ -766,4 +773,7 @@ public class Queue extends InputSection {
 		}
 	}
 
+	public void setSoftDeadlines(double[] softDeadlines) {
+		this.softDeadlines = softDeadlines;
+	}
 }

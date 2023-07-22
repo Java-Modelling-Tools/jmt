@@ -94,7 +94,16 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected  static final Object[] serverPreemptiveQueuePolicies = {
 			QUEUE_STRATEGY_FCFS_PR,
 			QUEUE_STRATEGY_LCFS_PR,
-			QUEUE_STRATEGY_SRPT
+			QUEUE_STRATEGY_SRPT,
+			QUEUE_STRATEGY_EDF,
+	};
+
+	protected static final Object[] serverPreemptiveQueuePriorityPolicies = {
+			QUEUE_STRATEGY_FCFS_PR,
+			QUEUE_STRATEGY_LCFS_PR,
+			QUEUE_STRATEGY_SRPT,
+			QUEUE_STRATEGY_EDF,
+			QUEUE_STRATEGY_TBS
 	};
 
 	protected static final Object[] serverNonPreemptiveQueuePolicies = {
@@ -104,7 +113,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			QUEUE_STRATEGY_SJF,
 			QUEUE_STRATEGY_LJF,
 			QUEUE_STRATEGY_SEPT,
-			QUEUE_STRATEGY_LEPT
+			QUEUE_STRATEGY_LEPT,
+			QUEUE_STRATEGY_EDD
 	};
 
 	protected static final Object[] otherNonPreemptiveQueuePolicies = {
@@ -297,7 +307,9 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 					}
 				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 						|| queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
-					List<Object> policyList = Arrays.asList(serverPreemptiveQueuePolicies);
+					List<Object> policyList = queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE) ?
+							Arrays.asList(serverPreemptiveQueuePolicies) :
+							Arrays.asList(serverPreemptiveQueuePriorityPolicies);
 					Vector<Object> classKeys = classData.getClassKeys();
 					if (classKeys.size() > 0 && !policyList.contains(data.getQueueStrategy(stationKey, classKeys.get(0)))) {
 						String policy = Defaults.get("stationQueueStrategy");
@@ -462,13 +474,15 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			if (column == COLUMN_QUEUE_POLICY) {
 				if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
 					String queueStrategy = data.getStationQueueStrategy(stationKey);
-					if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
-						return ComboBoxCellEditor.getEditorInstance(serverPSQueuePolicies);
-					} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
-							|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
-						return ComboBoxCellEditor.getEditorInstance(serverPreemptiveQueuePolicies);
-					} else {
-						return ComboBoxCellEditor.getEditorInstance(serverNonPreemptiveQueuePolicies);
+					switch (queueStrategy) {
+						case STATION_QUEUE_STRATEGY_PSSERVER:
+							return ComboBoxCellEditor.getEditorInstance(serverPSQueuePolicies);
+						case STATION_QUEUE_STRATEGY_PREEMPTIVE:
+							return ComboBoxCellEditor.getEditorInstance(serverPreemptiveQueuePolicies);
+						case STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY:
+							return ComboBoxCellEditor.getEditorInstance(serverPreemptiveQueuePriorityPolicies);
+						default:
+							return ComboBoxCellEditor.getEditorInstance(serverNonPreemptiveQueuePolicies);
 					}
 				} else {
 					return ComboBoxCellEditor.getEditorInstance(otherNonPreemptiveQueuePolicies);

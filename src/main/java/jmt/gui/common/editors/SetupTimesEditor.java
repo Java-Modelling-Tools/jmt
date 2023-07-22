@@ -43,6 +43,7 @@ import javax.swing.JRootPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
+import javax.swing.JOptionPane;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
@@ -85,6 +86,8 @@ public class SetupTimesEditor extends WizardPanel implements CommonConstants {
 	private void initGUI(StationDefinition sd, ClassDefinition cd, final Object stationKey) {
 		this.setLayout(new BorderLayout());
 
+		final WizardPanel parent = this;
+
 		useSetupTimesCheckbox = new JCheckBox("Enable Setup Times");
 		boolean setupTimesEnabled = data.getSetupTimesEnabled(stationKey).booleanValue();
 		useSetupTimesCheckbox.setSelected(setupTimesEnabled);
@@ -92,8 +95,14 @@ public class SetupTimesEditor extends WizardPanel implements CommonConstants {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				boolean setupTimesEnabled = useSetupTimesCheckbox.isSelected();
-				data.setSetupTimesEnabled(stationKey, Boolean.valueOf(setupTimesEnabled));
-				tablePane.getGlassPane().setVisible(!setupTimesEnabled);
+				final String queuePolicy = data.getStationQueueStrategy(stationKey);
+				if (queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE) || queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
+					data.setSetupTimesEnabled(stationKey, Boolean.valueOf(setupTimesEnabled));
+					tablePane.getGlassPane().setVisible(!setupTimesEnabled); 
+				} else {
+					JOptionPane.showMessageDialog(parent, "Setup times require non-preemptive scheduling", "Error", JOptionPane.ERROR_MESSAGE);
+					useSetupTimesCheckbox.setSelected(false);
+				}	
 			}
 		});
 

@@ -270,9 +270,9 @@ public class Simulation {
 	 * Creates a blocking region.
 	 */
 	public void addRegion(String name, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] maxMemoryPerClass, boolean[] drop, double[] classWeights, double[] classSizes,
-			String[] groupNames, double[] maxCapacityPerGroup, double[] maxMemoryPerGroup, List<List<Integer>> groupClassIndexLists, String[] stations) throws LoadException {
+			double[] classSoftDeadlines, String[] groupNames, double[] maxCapacityPerGroup, double[] maxMemoryPerGroup, List<List<Integer>> groupClassIndexLists, String[] stations) throws LoadException {
 		regions.add(new BlockingRegion(name, maxCapacity, maxMemory, maxCapacityPerClass, maxMemoryPerClass, drop, classWeights, classSizes,
-				groupNames, maxCapacityPerGroup, maxMemoryPerGroup, groupClassIndexLists, this, stations));
+				classSoftDeadlines, groupNames, maxCapacityPerGroup, maxMemoryPerGroup, groupClassIndexLists, this, stations));
 	}
 
 	//--------------end METHODS TO ADD SIMULATION COMPONENTS---------------//
@@ -475,6 +475,15 @@ public class Simulation {
 					int nodePosition = findNodePosition(ms.getNodeName());
 
 					switch (ms.getMeasureType()) {
+					case SimConstants.TARDINESS:
+						netNodes[nodePosition].analyze(SimConstants.TARDINESS, jClass, ms.getMeasure());
+						break;
+					case SimConstants.EARLINESS:
+						netNodes[nodePosition].analyze(SimConstants.EARLINESS, jClass, ms.getMeasure());
+						break;
+					case SimConstants.LATENESS:
+						netNodes[nodePosition].analyze(SimConstants.LATENESS, jClass, ms.getMeasure());
+						break;
 					case SimConstants.QUEUE_LENGTH:
 						netNodes[nodePosition].analyze(SimConstants.LIST_NUMBER_OF_JOBS, jClass, ms.getMeasure());
 						break;
@@ -582,6 +591,15 @@ public class Simulation {
 						break;
 					case SimConstants.SYSTEM_POWER:
 						network.getJobInfoList().analyzeSystemPower(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_TARDINESS:
+						network.getJobInfoList().analyzeTardiness(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_EARLINESS:
+						network.getJobInfoList().analyzeEarliness(jClass, ms.getMeasure());
+						break;
+					case SimConstants.SYSTEM_LATENESS:
+						network.getJobInfoList().analyzeLateness(jClass, ms.getMeasure());
 						break;
 					}
 				}

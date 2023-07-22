@@ -64,7 +64,7 @@ public class LogTunnel extends ServiceTunnel {
 	public static final String COLUMN_INTERARRIVAL_ANYCLASS = "INTERARRIVAL_ANYCLASS";
 	public static final String COLUMN_START_TIME = "SIMUL_START_TIME";
 
-	public static final String[] COLUMNS = {COLUMN_LOGGERNAME, COLUMN_TIMESTAMP, COLUMN_JOBID, COLUMN_CLASSID, 
+	public static final String[] COLUMNS = {COLUMN_LOGGERNAME, COLUMN_TIMESTAMP, COLUMN_JOBID, COLUMN_CLASSID,
 			COLUMN_INTERARRIVAL_SAMECLASS, COLUMN_INTERARRIVAL_ANYCLASS, COLUMN_START_TIME};
 
 	private String chDelimiter;
@@ -162,6 +162,7 @@ public class LogTunnel extends ServiceTunnel {
 					double interarrivalAny = message.getTime() - jobsList.getLastJobOutTime();
 					values.put(COLUMN_INTERARRIVAL_ANYCLASS, interarrivalAny);
 				}
+
 				try {
 					// Finally logs the line
 					logger.log(values, defaultValues);

@@ -119,6 +119,24 @@ public interface SimConstants {
 	/** Measure identifier: firing throughput of the transition. */
 	public static final int FIRING_THROUGHPUT = 28;
 
+	/** Measure identifier: tardiness of the system. */
+	public static final int SYSTEM_TARDINESS = 29;
+
+	/** Measure identifier: tardiness of the node. */
+	public static final int TARDINESS = 30;
+
+	/** Measure identifier: earliness of the system. */
+	public static final int SYSTEM_EARLINESS = 31;
+
+	/** Measure identifier: earliness of the node. */
+	public static final int EARLINESS = 32;
+
+	/** Measure identifier: lateness of the system. */
+	public static final int SYSTEM_LATENESS = 33;
+
+	/** Measure identifier: lateness of the node. */
+	public static final int LATENESS = 34;
+
 	//-------------------- end SIMULATION MEASURE IDENTIFIERS -------------------------//
 
 	//-------------------- JOB LIST MEASURE IDENTIFIERS ----------------------------//

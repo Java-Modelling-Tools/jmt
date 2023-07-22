@@ -44,6 +44,7 @@ import jmt.engine.NetStrategies.RoutingStrategies.LoadDependentRoutingParameter;
 import jmt.engine.NetStrategies.ServiceStrategies.LDParameter;
 import jmt.engine.NodeSections.InputSection;
 import jmt.engine.NodeSections.OutputSection;
+import jmt.engine.NodeSections.Queue;
 import jmt.engine.NodeSections.ServiceSection;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
@@ -321,8 +322,10 @@ public class SimLoader {
 				String currentClassType = currentJobClass.getAttribute("type");
 				String currentClassPriority = currentJobClass.getAttribute("priority");
 				String referenceNode = currentJobClass.getAttribute("referenceSource");
+				String currentClassSoftDeadline = currentJobClass.getAttribute("softDeadline");
 
 				int type, priority;
+				double softDeadline;
 
 				if (currentClassType.equalsIgnoreCase("closed")) {
 					type = JobClass.CLOSED_CLASS;
@@ -336,9 +339,13 @@ public class SimLoader {
 					priority = 0;
 				}
 
+				softDeadline = currentClassSoftDeadline.isEmpty() ? 0 : Double.parseDouble(currentClassSoftDeadline);
+
 				//add job class
 				jobClasses[i] = new JobClass(currentClassName, priority, type, referenceNode);
 				//end NEW
+
+				jobClasses[i].setSoftDeadline(softDeadline);
 
 				if (DEBUG) {
 					System.out.println("Class " + jobClasses[i].getName() + " created");
@@ -356,6 +363,25 @@ public class SimLoader {
 				if (DEBUG) {
 					System.out.println("start creation of node = " + node.getAttribute("name"));
 				}
+				// Process soft deadlines.
+				double[] softDeadlinesArr = null;
+				if (node.getElementsByTagName("classSoftDeadlines").getLength() != 0) {
+					List<Double> softDeadlines = new ArrayList<>();
+					NodeList classSoftDeadlinesChildren = node.getElementsByTagName("classSoftDeadlines").item(0).getChildNodes();
+					for (int j = 0; j < classSoftDeadlinesChildren.getLength(); j++) {
+						Node item = classSoftDeadlinesChildren.item(j);
+						if (item.getNodeType() == Node.ELEMENT_NODE) {
+							// This is a soft deadline element.
+							softDeadlines.add(Double.parseDouble(item.getTextContent()));
+						}
+					}
+					if (softDeadlines.size() > 0) {
+						softDeadlinesArr = new double[softDeadlines.size()];
+						for (int j = 0; j < softDeadlines.size(); j++) {
+							softDeadlinesArr[j] = softDeadlines.get(j);
+						}
+					}
+				}
 				//gets list of sections
 				NodeList sectionList = node.getElementsByTagName("section");
 				NodeSection[] sections = new NodeSection[3];
@@ -369,6 +395,9 @@ public class SimLoader {
 						System.out.println("    finished creation of " + ((Element) sectionList.item(j)).getAttribute("className") + "\n");
 					}
 					if (ns instanceof InputSection) {
+						if (ns instanceof Queue) {
+							((Queue) ns).setSoftDeadlines(softDeadlinesArr);
+						}
 						sections[0] = ns;
 					} else if (ns instanceof ServiceSection) {
 						sections[1] = ns;
@@ -378,6 +407,7 @@ public class SimLoader {
 						throw new LoadException("trying to cast the wrong Class type");
 					}
 				}
+
 				//adds node.
 				sim.addNode(node.getAttribute("name"), (InputSection) sections[0], (ServiceSection) sections[1], (OutputSection) sections[2]);
 				if (DEBUG) {
@@ -1216,6 +1246,31 @@ public class SimLoader {
 				}
 			}
 
+			//----------------CLASS DUE DATES----------------//
+			NodeList classSoftDeadlines = root.getElementsByTagName("classSoftDeadline");
+
+			double[] regionClassSoftDeadlines = new double[classNumber];
+			//init
+			Arrays.fill(regionClassSoftDeadlines, 1.0);
+
+			if (classSoftDeadlines.getLength() > 0) {
+				Element clsSoftDeadline = null;
+				String className;
+				int classPosition;
+
+				for (int cdd = 0; cdd < classSoftDeadlines.getLength(); cdd++) {
+					clsSoftDeadline = (Element) classSoftDeadlines.item(cdd);
+					className = clsSoftDeadline.getAttribute("jobClass");
+					//entries may be in a wrong order: find the right position
+					classPosition = findClassPosition(className);
+					regionClassSoftDeadlines[classPosition] = Double.parseDouble(clsSoftDeadline.getAttribute("softDeadline"));
+
+					if (DEBUG) {
+						System.out.println("   soft deadline for class " + className + " = " + Double.toString(regionClassSoftDeadlines[classPosition]));
+					}
+				}
+			}
+
 			//----------------GROUP CONSTRAINTS----------------//
 			NodeList groupConstraints = region.getElementsByTagName("groupConstraint");
 			int groupNumber = groupConstraints.getLength();
@@ -1251,7 +1306,7 @@ public class SimLoader {
 
 			//------------------ADD BLOCKING REGION TO SIM------------------//
 			sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, maxMemoryPerClass, dropThisClass, regionClassWeights, regionClassSizes,
-					groupNames, maxCapacityPerGroup, maxMemoryPerGroup, groupClassIndexLists, stationNames);
+					regionClassSoftDeadlines, groupNames, maxCapacityPerGroup, maxMemoryPerGroup, groupClassIndexLists, stationNames);
 			if (DEBUG) {
 				System.out.println("added region " + regionName);
 			}

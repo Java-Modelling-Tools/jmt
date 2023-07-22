@@ -499,6 +499,27 @@ public interface JobInfoList {
 	public abstract void analyzeThroughputPerSink(JobClass jobClass, InverseMeasure measurement);
 
 	/**
+	 * Analyzes the tardiness of the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
+	 */
+	public abstract void analyzeTardiness(JobClass jobClass, Measure measurement);
+
+	/**
+	 * Analyzes the earliness of the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
+	 */
+	public abstract void analyzeEarliness(JobClass jobClass, Measure measurement);
+
+	/**
+	 * Analyzes the lateness of the specified job class.
+	 * @param jobClass Specified job class. If null, analysis will be job class independent.
+	 * @param measurement Reference to the associated measure.
+	 */
+	public abstract void analyzeLateness(JobClass jobClass, Measure measurement);
+
+	/**
 	 * Removes a job info from the list when a job is removed.
 	 * @param jobInfo Reference to the job info to be removed.
 	 */
@@ -574,6 +595,13 @@ public interface JobInfoList {
 	 * Sets the network system. This parameter is used to get simulation time.
 	 * @param netSystem Network system.
 	 */
-	public abstract void setNetSystem(NetSystem netSystem); 
+	public abstract void setNetSystem(NetSystem netSystem);
+
+	/**
+	 * Sets the region soft deadlines for each class to be used by tardiness measures.
+	 * This method should only be called when the relevant station is a blocking region input station.
+	 * @param regionSoftDeadlinesByClass Soft deadlines for each class.
+	 */
+	public abstract void setRegionSoftDeadlinesByClass(double[] regionSoftDeadlinesByClass);
 
 }
