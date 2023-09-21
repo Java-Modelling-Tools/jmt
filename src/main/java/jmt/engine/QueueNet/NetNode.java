@@ -122,6 +122,10 @@ public class NetNode extends SimEntity {
 		stopped = false;
 	}
 
+
+	/***************************************************
+	 *		 Methods about initialize the NetNode	   *
+	 ***************************************************/
 	/**
 	 * Adds a section to the node.
 	 * @param section Reference to the section to be added.
@@ -189,6 +193,9 @@ public class NetNode extends SimEntity {
 		return OutputNodes;
 	}
 
+	/***************************************************
+	 *		 Methods about get jobsList property	   *
+	 ***************************************************/
 	/**
 	 * Gets an integer type property related to this node.
 	 * @param Id Property identifier.
@@ -386,6 +393,10 @@ public class NetNode extends SimEntity {
 		return (state != SimEntity.FINISHED);
 	}
 
+/***************************************************
+	 *	   Methods about msg and jobinfo processing	   *
+	 ***************************************************/
+	
 	/**
 	 * Gets the list of the job classes of the owner queue network.
 	 * @return Queue network job classes.

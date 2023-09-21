@@ -46,6 +46,7 @@ public class JobSink extends InputSection {
 	/**
 	 * Default Constructor creates the JobSink that can be used only as Input Section.
 	 */
+	// JobSink section do not need extra parameter [in Jsim file]
 	public JobSink() {
 	}
 
@@ -78,6 +79,8 @@ public class JobSink extends InputSection {
 
 			Job job = message.getJob();
 
+			// Send the `NetEvent.EVENT_ACK`:  section.send() -> netNode.send() ->
+			// simEntity.simSchedule() -> simSystem.send() -> add to the timing/future event queue.
 			send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 
 			JobInfo jobInfo = jobsList.lookFor(job);

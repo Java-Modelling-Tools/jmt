@@ -34,7 +34,7 @@ public class JobClass {
 	/* Open class type */
 	public static final int OPEN_CLASS = 1;
 
-	//class type
+	//class type (open or closed)
 	private int type;
 	//class priority
 	private int priority;
@@ -42,6 +42,12 @@ public class JobClass {
 	private String referenceNodeName;
 
 	private double softDeadline;
+
+	private boolean hasCachePair;
+	private boolean isCacheHit;
+
+	private JobClass cachePairClass;
+	private String cachePairClassName;
 
 	//----------------------CONSTRUCTORS---------------------------///
 
@@ -116,6 +122,32 @@ public class JobClass {
 
 	public void setReferenceNodeName(String referenceNodeName) {
 		this.referenceNodeName = referenceNodeName;
+	}
+
+
+	public void setCacheReferece(String cachePairClassName, boolean isCacheHit){
+		this.hasCachePair = true;
+		this.isCacheHit = isCacheHit;
+		this.cachePairClassName = cachePairClassName;
+	}
+
+	public boolean isHasCachePair() {
+		return hasCachePair;
+	}
+
+	public boolean isCacheHit() {
+		return isCacheHit;
+	}
+
+	public String getCachePairClassName() {
+		return cachePairClassName;
+	}
+	public JobClass getCachePairClass() {
+		return cachePairClass;
+	}
+
+	public void setCachePairClass(JobClass jobClass) {
+		this.cachePairClass = jobClass;
 	}
 
 	public void setSoftDeadline(double softDeadline) {

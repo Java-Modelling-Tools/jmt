@@ -37,6 +37,9 @@ public interface ParametricAnalysis {
 	public final String PA_TYPE_POPULATION_MIX = "Population mix";
 	public final String PA_TYPE_SERVICE_TIMES = "Service times";
 	public final String PA_TYPE_ARRIVAL_RATE = "Arrival rates";
+	public final String PA_TYPE_NUMBER_OF_SERVERS = "Number of servers";
+	public final String PA_TYPE_TOTAL_CAPACITY = "Total capacity";
+	public final String PA_TYPE_ROUTING_PROBABILITY = "Routing probability";
 	public final String PA_TYPE_SEED = "Seed";
 	public final int MAX_STEP_NUMBER = 1000;
 
@@ -116,5 +119,7 @@ public interface ParametricAnalysis {
 		public Set<Object> getClassKeySet() {
 			return table.keySet();
 		}
+
+		public HashMap<Object, Vector> getTable() { return table; }
 	}
 }

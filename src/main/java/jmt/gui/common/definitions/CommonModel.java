@@ -1096,6 +1096,37 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
+	 * Returns total capacity of the station, given the search key.
+	 */
+	@Override
+	public Integer getStationTotalCapacity(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.totalStationCapacity;
+	}
+
+	/**
+	 * Sets total capacity of the station, given the search key.
+	 */
+	@Override
+	public void setStationTotalCapacity(Object key, Integer totalStationCapacity) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.totalStationCapacity == null || !sd.totalStationCapacity.equals(totalStationCapacity)) {
+			sd.totalStationCapacity = totalStationCapacity;
+			save = true;
+		}
+	}
+
+	/**
 	 * Returns type of polling server, given the search key.
 	 */
 	@Override
@@ -1394,6 +1425,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.pollingServerType = STATION_QUEUE_STRATEGY_POLLING_LIMITED;
 			sd.serverPolling = Boolean.valueOf(false);
 			sd.setupTimesEnabled = Boolean.valueOf(false);
+			sd.totalStationCapacity = sd.queueCapacity + sd.maxRunningJobs;
+
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
@@ -1428,6 +1461,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
 			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
 		}
+
 	}
 
 	/*------------------------------------------------------------------------------
@@ -4147,6 +4181,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public List<TransitionModeData> transitionModeList;
 		/** Reference to owner blocking region */
 		public Object blockingRegion;
+		public Integer totalStationCapacity;
 
 		public StationData(String name, String type) {
 			this.name = name;
@@ -4175,9 +4210,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				}
 			}
 			sd.blockingRegion = blockingRegion;
+			sd.totalStationCapacity = totalStationCapacity; // newly added
 			return sd;
 		}
 	}
+
 
 	/**This class contains all of the data which can be defined for a combination of
 	 * class and station. These data include queue policy, service time distribution

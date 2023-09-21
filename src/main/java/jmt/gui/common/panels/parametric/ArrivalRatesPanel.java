@@ -58,16 +58,18 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
  * @author Francesco D'Aquino
  *         Date: 9-mar-2006
  *         Time: 16.08.09
+ *
+ * Modified by: Xinyu Gao
  */
 public class ArrivalRatesPanel extends ParameterOptionPanel {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private JRadioButton allClass;
 	private JRadioButton singleClass;
 	private JLabel fromLabel;
-	private JTextField from;
+	private JSpinner from;
 	private JLabel toLabel;
 	private JSpinner to;
 	private JLabel stepsLabel;
@@ -122,9 +124,9 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 		classChooser.setToolTipText("Choose the class whose arrival rate will change");
 		if (ARPA.isSingleClass()) {
 			fromLabel = new JLabel("From:");
-			from = new JTextField();
-			from.setEnabled(false);
-			from.setText(Double.toString(ARPA.getInitialValue()));
+			from = new JSpinner(new SpinnerNumberModel(ARPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+			from.setEnabled(true);
+			from.setToolTipText("Sets the initial arrival rate in job/sec");
 			toLabel = new JLabel("To: ");
 			to = new JSpinner(new SpinnerNumberModel(ARPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
 			to.setToolTipText("Sets the final arrival rate in job/sec");
@@ -152,9 +154,9 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 			allClass.setSelected(false);
 		} else {
 			fromLabel = new JLabel("From (%):");
-			from = new JTextField();
-			from.setEnabled(false);
-			from.setText(Double.toString(ARPA.getInitialValue()));
+			from = new JSpinner(new SpinnerNumberModel(ARPA.getInitialValue(), 0.1, Double.MAX_VALUE, 0.1));
+			from.setEnabled(true);
+			from.setToolTipText("Sets the initial arrival rate");
 			toLabel = new JLabel("To (%): ");
 			to = new JSpinner(new SpinnerNumberModel(ARPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
 			to.setToolTipText("Sets the final proportion of arrival rate with respect to the initial");
@@ -229,7 +231,7 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 		}
 		singleClass.setEnabled(enabled);
 		fromLabel.setEnabled(enabled);
-		from.setEnabled(false);
+		from.setEnabled(enabled);  // changed to be "enabled"
 		toLabel.setEnabled(enabled);
 		to.setEnabled(enabled);
 		stepsLabel.setEnabled(enabled);
@@ -258,6 +260,18 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 	}
 
 	private void setListeners() {
+		// Add the "From" listener
+		from.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Object fValue = from.getValue();
+				if (fValue instanceof Double) {
+					ARPA.setInitialValue(((Double) fValue).doubleValue());
+				} else if (fValue instanceof Integer) {
+					ARPA.setInitialValue(((Integer) fValue).doubleValue());
+				}
+				from.setValue(new Double(ARPA.getInitialValue()));
+			}
+		});
 		to.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				Object tValue = to.getValue();
@@ -288,7 +302,9 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 				toLabel.setText("To (%): ");
 				ARPA.setDefaultInitialValue();
 				ARPA.setDefaultFinalValue();
-				from.setText(Double.toString(ARPA.getInitialValue()));
+				from.setModel(new SpinnerNumberModel(ARPA.getInitialValue(), 0.1, Double.MAX_VALUE, 0.1));
+				from.setValue(new Double(ARPA.getInitialValue()));
+				from.setToolTipText("Sets the initial value of arrival rate");
 				to.setModel(new SpinnerNumberModel(ARPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
 				to.setValue(new Double(ARPA.getFinalValue()));
 				to.setToolTipText("Sets the final proportion of arrival rate with respect to the initial");
@@ -329,10 +345,12 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 				toLabel.setText("To (j/s): ");
 				ARPA.setDefaultInitialValue();
 				ARPA.setDefaultFinalValue();
-				from.setText(Double.toString(ARPA.getInitialValue()));
+				from.setModel(new SpinnerNumberModel(ARPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+				from.setValue(new Double(ARPA.getInitialValue()));
+				from.setToolTipText("Sets the initial value of arrival rate");
 				to.setModel(new SpinnerNumberModel(ARPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
 				to.setValue(new Double(ARPA.getFinalValue()));
-				to.setToolTipText("Sets the final arrival rate in job/sec");
+				to.setToolTipText("Sets the final number of servers");
 				description.setText(DESCRIPTION_SINGLE);
 			}
 		});
@@ -355,7 +373,7 @@ public class ArrivalRatesPanel extends ParameterOptionPanel {
 				ARPA.setReferenceClass(classKey);
 				ARPA.setDefaultInitialValue();
 				ARPA.setDefaultFinalValue();
-				from.setText(Double.toString(ARPA.getInitialValue()));
+				from.setValue(new Double(ARPA.getInitialValue()));
 				to.setValue(new Double(ARPA.getFinalValue()));
 			}
 		});

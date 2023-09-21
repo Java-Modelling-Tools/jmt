@@ -150,8 +150,8 @@ public class Jmt {
 		File temp = File.createTempFile("tempfileSim", ".jsim");
 		temp.deleteOnExit();
 
-		Document doc = db.parse(model);
-		Element sim = XMLArchiver.getSimFromArchiveDocument(doc);
+		Document doc = db.parse(model);									// Convert the XML doc into structured elements.
+		Element sim = XMLArchiver.getSimFromArchiveDocument(doc);		// Extract the element and its sub-elements enclosed with tag <sim></sim>
 
 		Document doc2 = db.newDocument();
 		Node dup = doc2.importNode(sim, true);

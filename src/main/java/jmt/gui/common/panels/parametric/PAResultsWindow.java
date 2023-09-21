@@ -79,6 +79,9 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.definitions.parametric.PopulationMixParametricAnalysis;
 import jmt.gui.common.definitions.parametric.SeedParametricAnalysis;
 import jmt.gui.common.definitions.parametric.ServiceTimesParametricAnalysis;
+import jmt.gui.common.definitions.parametric.NumberOfServersParametricAnalysis;
+import jmt.gui.common.definitions.parametric.TotalStationCapacityParametricAnalysis;
+import jmt.gui.common.definitions.parametric.RoutingProbabilitiesParametricAnalysis;
 import jmt.gui.exact.table.ExactTable;
 import jmt.gui.exact.table.ExactTableModel;
 
@@ -208,6 +211,19 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				return stpa.getReferenceClassName() + " service time at " + stpa.getReferenceStationName() + " [s]";
 			} else {
 				return "Ratio between assumed service time at " + stpa.getReferenceStationName() + " and the initial one [%]";
+			}
+		} else if (pad instanceof NumberOfServersParametricAnalysis) {
+			NumberOfServersParametricAnalysis nspa = (NumberOfServersParametricAnalysis) pad;
+			return "Number of servers of " + nspa.getReferenceStationName();
+		} else if (pad instanceof TotalStationCapacityParametricAnalysis) {
+			TotalStationCapacityParametricAnalysis tscpa = (TotalStationCapacityParametricAnalysis) pad;
+			return "Total capacity at " + tscpa.getReferenceStationName();
+		} else if (pad instanceof RoutingProbabilitiesParametricAnalysis) {
+			RoutingProbabilitiesParametricAnalysis rppa = (RoutingProbabilitiesParametricAnalysis) pad;
+			if (rppa.isSingleClass()) {
+				return rppa.getReferenceClassName() + " routing probability at " + rppa.getReferenceStationName() + " towards " + rppa.getDestinationStationName();
+			} else {
+				return "Routing Probability at " + rppa.getReferenceStationName() + " towards " + rppa.getDestinationStationName();
 			}
 		} else {
 			return "Not defined";
@@ -1271,11 +1287,11 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			Component c;
 			if (column < values.size() && !(pad.getType().equals(PA_TYPE_SEED) && column <= values.size())) {
 				c = dtcr.getTableCellRendererComponent(this, values.get(column), false, false, row, column);
-					if (!((PAResultsModel.MeasureValueImpl) values.get(column)).isValid()) {
-						c.setForeground(Color.RED);
-					} else {
-						c.setForeground(Color.BLACK);
-					}
+				if (!((PAResultsModel.MeasureValueImpl) values.get(column)).isValid()) {
+					c.setForeground(Color.RED);
+				} else {
+					c.setForeground(Color.BLACK);
+				}
 			} else {
 				c = dtcr.getTableCellRendererComponent(this, "-", false, false, row, column);
 				c.setForeground(Color.BLACK);
@@ -1486,6 +1502,40 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 					columnName = twoDecFormat.format(val) + " %";
 				}
 			}
+
+			//if single class return the value, else return the percentage
+			else if (pad.getType().equals(PA_TYPE_NUMBER_OF_SERVERS)) {
+				NumberOfServersParametricAnalysis nspa = (NumberOfServersParametricAnalysis) pad;
+				Vector<Number> assumedValues = nspa.getParameterValues();
+				Object temp = assumedValues.get(index);
+				double val = ((Double) temp).doubleValue();
+				columnName = threeDecFormat.format(val);
+			}
+
+			//if single class return the value, else return the percentage
+			else if (pad.getType().equals(PA_TYPE_TOTAL_CAPACITY)) {
+				TotalStationCapacityParametricAnalysis tscpa = (TotalStationCapacityParametricAnalysis) pad;
+				Vector<Number> assumedValues = tscpa.getParameterValues();
+				Object temp = assumedValues.get(index);
+				double val = ((Double) temp).doubleValue();
+				columnName = threeDecFormat.format(val);
+			}
+
+			//if single class return the value, else return the percentage
+			else if (pad.getType().equals(PA_TYPE_ROUTING_PROBABILITY)) {
+				RoutingProbabilitiesParametricAnalysis rppa = (RoutingProbabilitiesParametricAnalysis) pad;
+				Vector<Number> assumedValues = rppa.getParameterValues();
+				if (rppa.isSingleClass()) {
+					Object temp = assumedValues.get(index);
+					double val = ((Double) temp).doubleValue();
+					columnName = threeDecFormat.format(val);
+				} else {
+					Object temp = assumedValues.get(index);
+					double val = ((Double) temp).doubleValue();
+					columnName = twoDecFormat.format(val);
+				}
+			}
+
 			//for "number of customers" return the number of customers
 			else if (pad.getType().equals(PA_TYPE_NUMBER_OF_CUSTOMERS)) {
 				Vector<Number> assumedValues = pad.getParameterValues();

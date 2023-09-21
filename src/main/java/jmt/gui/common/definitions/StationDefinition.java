@@ -214,6 +214,16 @@ public interface StationDefinition {
 	public void setStationMaxRunningJobs(Object key, Integer maxRunningJobs);
 
 	/**
+	 * Returns total capacity of the station, given the search key.
+	 */
+	public Integer getStationTotalCapacity(Object key);
+
+	/**
+	 * Sets total capacity of the station, given the search key.
+	 */
+	public void setStationTotalCapacity(Object key, Integer totalStationCapacity);
+
+	/**
 	 * Returns type of polling server, given the search key.
 	 */
 	public String getStationPollingServerType(Object key);

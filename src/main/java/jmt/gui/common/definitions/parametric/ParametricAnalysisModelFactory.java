@@ -51,6 +51,12 @@ public class ParametricAnalysisModelFactory implements ParametricAnalysis {
 			return new ServiceTimesParametricAnalysis(cd, sd, simd);
 		} else if (param.equals(ParametricAnalysis.PA_TYPE_ARRIVAL_RATE)) {
 			return new ArrivalRateParametricAnalysis(cd, sd, simd);
+		} else if (param.equals(ParametricAnalysis.PA_TYPE_NUMBER_OF_SERVERS)) {
+			return new NumberOfServersParametricAnalysis(cd, sd, simd);
+		} else if (param.equals(ParametricAnalysis.PA_TYPE_TOTAL_CAPACITY)) {
+			return new TotalStationCapacityParametricAnalysis(cd, sd, simd);
+		} else if (param.equals(ParametricAnalysis.PA_TYPE_ROUTING_PROBABILITY)) {
+			return new RoutingProbabilitiesParametricAnalysis(cd, sd, simd);
 		} else if (param.equals(ParametricAnalysis.PA_TYPE_SEED)) {
 			return new SeedParametricAnalysis(cd, sd, simd);
 		} else {

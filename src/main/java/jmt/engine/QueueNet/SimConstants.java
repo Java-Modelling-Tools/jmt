@@ -137,6 +137,9 @@ public interface SimConstants {
 	/** Measure identifier: lateness of the node. */
 	public static final int LATENESS = 34;
 
+        public static final int CACHE_HIT_RATE = 35;
+	
+
 	//-------------------- end SIMULATION MEASURE IDENTIFIERS -------------------------//
 
 	//-------------------- JOB LIST MEASURE IDENTIFIERS ----------------------------//
@@ -176,6 +179,9 @@ public interface SimConstants {
 
 	/** Measure identifier: time of a job in the retrial orbit of the list */
 	public static final int LIST_RETRIAL_ORBIT_TIME = 111;
+
+        public static final int LIST_CACHE_HIT_RATE = 112;
+
 
 	//-------------------- end JOB LIST MEASURE IDENTIFIERS -------------------------//
 

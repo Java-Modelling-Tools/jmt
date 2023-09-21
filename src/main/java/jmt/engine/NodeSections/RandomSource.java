@@ -65,10 +65,16 @@ public class RandomSource extends InputSection {
 		coolStart = true;
 	}
 
+	//`nodeLinked(ownerNode)` is invoked by `NodeSection.setOwnerNode(ownerNode);` ===>  NetNode.inputSection.setOwnerNode(this);
+	// just like the `initialize()` for this section.
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
 		// Sets netnode dependent properties
+
+		//  ownerNode.getJobClasses() -> network.getJobClasses();
 		jobClasses = getJobClasses();
+
+		// get the ownerNode's jobsList
 		nodeJobsList = node.getJobInfoList();
 	}
 
@@ -81,7 +87,7 @@ public class RandomSource extends InputSection {
 
 		switch (message.getEvent()) {
 
-		case NetEvent.EVENT_START:
+		case NetEvent.EVENT_START: // msg is sent by NetSystem.start()
 
 			//case EVENT_START:
 			//the random source creates all the jobs requested by each class.
@@ -90,6 +96,15 @@ public class RandomSource extends InputSection {
 
 			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();
 			netSystem = getOwnerNode().getNetSystem();
+
+			// traverse all the jobClass, and determine the jobClass type.
+			// if close_class:
+			// 		do not process, since close class has the fix number of jobs.
+			// if open_class:
+			//		if find the strategies corresponding to the class type:
+			//			create a new job
+			//			send the job to itself as `NetEvent.EVENT_JOB` with a certain time of `strategy.wait()`
+			
 			ListIterator<JobClass> it = jobClasses.listIterator();
 			while (it.hasNext()) {
 				JobClass jobClass = it.next();
@@ -100,8 +115,11 @@ public class RandomSource extends InputSection {
 
 				c = jobClass.getId();
 				// Calculates the delay of departure (1/lambda)
+
 				if (strategies[c] != null) {
 					job = new Job(jobClass, netJobsList);
+					// assign this netSystem to the job and call `nextjobNumber()` to add job counter.
+					// set the systemEnteringTime to compute system response time
 					job.initialize(netSystem);
 					updateVisitPath(job);
 					delay = strategies[c].wait(this, jobClass);
@@ -123,7 +141,7 @@ public class RandomSource extends InputSection {
 			job = message.getJob();
 			if (coolStart) {
 				// Gets the class of the job
-				c = job.getJobClass().getId();
+				c = job.getJobClass().getId(); // jobClass Id
 
 				//no control is made on the number of jobs created
 				//it is an open class
@@ -142,6 +160,7 @@ public class RandomSource extends InputSection {
 				// Signals to global jobInfoList new added job
 				netJobsList.addJob(job);
 
+				// send `NetEvent.EVENT_JOB` signal to `NodeSection.SERVICE` without and delay.
 				sendForward(job, 0.0);
 
 				// Create a new job and send it to me delayed
@@ -149,6 +168,7 @@ public class RandomSource extends InputSection {
 				netSystem = getOwnerNode().getNetSystem();
 				job.initialize(netSystem);
 				updateVisitPath(job);
+
 				delay = strategies[c].wait(this, job.getJobClass());
 				sendMe(job, delay);
 

@@ -36,12 +36,17 @@ import jmt.engine.dataAnalysis.Measure;
  */
 public class LinkedJobInfoList implements JobInfoList {
 
+	protected static final int REMOVE_FIRST = 1;
+	protected static final int REMOVE_LAST = 2;
+	protected static final int REMOVE_SPECIFIC = 0;
+
 	protected int numberOfJobClasses;
 
 	//contain JobInfo objects
 	protected LinkedList<JobInfo> list;
 	protected LinkedList<JobInfo> listPerClass[];
 
+	//arrivals and completions
 	protected Map<Integer, List<Double>> retrialOrbit = new HashMap<>();
 	protected Map<Integer, List<Double>> retrialOrbitPerClass[];
 
@@ -52,12 +57,21 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected int jobsOut;
 	protected int jobsOutPerClass[];
 
+	// due to calculate the cache request count for all the class is meaningless
+	// we only need to calculate the cache request count for each class.
+	protected int jobsTotalCacheHitCount;
+	protected int jobsTotalCacheMissCount;
+	protected int jobsCacheCountPerClass[];
+
+
 	protected int jobsInService;
 	protected int jobsInServicePerClass[];
 
 	protected double lastJobInTime;
 	protected double lastJobInTimePerClass[];
 
+	// once a job is removed from this list -> call remove related method to update job Out Time.
+	// to calculate the 'throughput' and 'throughput per sink'
 	protected double lastJobOutTime;
 	protected double lastJobOutTimePerClass[];
 
@@ -85,6 +99,11 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected double lastRetrialOrbitModifyTime;
 	protected double lastRetrialOrbitModifyTimePerClass[];
 
+	// The difference between sojourn time and waiting time:
+	// Sojourn time is 'current time at job removal - jobInfo.enteringTime'
+	// Waiting time is 'current time at job entering queue - job.systemEnteringTime'
+	// jobInfo.enteringTime is assigned at each strategies or section creating a jobInfo that containing a job and a time.
+	// job.systemEnteringTime is only assigned in job Creation or GlobalJobInfoList adding jobs.
 	protected double totalSojournTime;
 	protected double totalSojournTimePerClass[];
 
@@ -114,6 +133,9 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected Measure effectiveUtilization;
 	protected Measure effectiveUtilizationPerClass[];
+
+	protected Measure hitRate;
+	protected Measure hitRatePerClass[];
 
 	protected InverseMeasure dropRate;
 	protected InverseMeasure dropRatePerClass[];
@@ -425,6 +447,7 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getLastModifyTimePerClass(jmt.engine.QueueNet.JobClass)
+	 * get the most recent time of a job events (JobOut, JobIn, JobDrop)
 	 */
 	public double getLastModifyTimePerClass(JobClass jobClass) {
 		double max = 0.0;
@@ -603,11 +626,13 @@ public class LinkedJobInfoList implements JobInfoList {
 	 * @see jmt.engine.QueueNet.JobInfoList#remove(jmt.engine.QueueNet.JobInfo)
 	 */
 	public void remove(JobInfo jobInfo) {
-		doRemove(jobInfo, 0, 0);
+		doRemove(jobInfo, REMOVE_SPECIFIC, REMOVE_SPECIFIC);
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#removeOnly(jmt.engine.QueueNet.JobInfo)
+	 * if event type is 'NetEvent.EVENT_RETRIAL' call removeOnly, which will not 'updateResponseTime(jobInfo)' and
+	 * 'updateResidenceTime(jobInfo)'
 	 */
 	public void removeOnly(JobInfo jobInfo) {
 		int c = jobInfo.getJob().getJobClass().getId();
@@ -615,8 +640,8 @@ public class LinkedJobInfoList implements JobInfoList {
 		updateThroughput(jobInfo);
 		updateUtilization(jobInfo);
 		updateUtilizationJoin(jobInfo);
-		finalRemove(jobInfo, list, 0);
-		finalRemove(jobInfo, listPerClass[c], 0);
+		finalRemove(jobInfo, list, REMOVE_SPECIFIC);
+		finalRemove(jobInfo, listPerClass[c], REMOVE_SPECIFIC);
 		jobsOut++;
 		jobsOutPerClass[c]++;
 		lastJobOutTime = getTime();
@@ -629,11 +654,12 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#removeFirst()
+	 * Since the jobInfo appear the first item in 'list' so it's also the first item in perClass list.
 	 */
 	public JobInfo removeFirst() {
 		JobInfo jobInfo = list.getFirst();
 		if (jobInfo != null) {
-			doRemove(jobInfo, 1, 1);
+			doRemove(jobInfo, REMOVE_FIRST, REMOVE_FIRST);
 			return jobInfo;
 		} else {
 			return null;
@@ -642,12 +668,14 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#removeFirst(jmt.engine.QueueNet.JobClass)
+	 * Since we remove the first jobInfo belong to 'jobClass',
+	 * we remove exactly itself from 'list' and the first position in perClass list.
 	 */
 	public JobInfo removeFirst(JobClass jobClass) {
 		int c = jobClass.getId();
 		JobInfo jobInfo = listPerClass[c].getFirst();
 		if (jobInfo != null) {
-			doRemove(jobInfo, 0, 1);
+			doRemove(jobInfo, REMOVE_SPECIFIC, REMOVE_FIRST);
 			return jobInfo;
 		} else {
 			return null;
@@ -656,11 +684,12 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#removeLast()
+	 * Since the jobInfo appear the last item in 'list' so it's also the last item in perClass list.
 	 */
 	public JobInfo removeLast() {
 		JobInfo jobInfo = list.getLast();
 		if (jobInfo != null) {
-			doRemove(jobInfo, 2, 2);
+			doRemove(jobInfo, REMOVE_LAST, REMOVE_LAST);
 			return jobInfo;
 		} else {
 			return null;
@@ -669,12 +698,14 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#removeLast(jmt.engine.QueueNet.JobClass)
+	 * Since we remove the last jobInfo belong to 'jobClass',
+	 * we remove exactly itself from 'list' and the first position in perClass list.
 	 */
 	public JobInfo removeLast(JobClass jobClass) {
 		int c = jobClass.getId();
 		JobInfo jobInfo = listPerClass[c].getLast();
 		if (jobInfo != null) {
-			doRemove(jobInfo, 0, 2);
+			doRemove(jobInfo, REMOVE_SPECIFIC, REMOVE_LAST);
 			return jobInfo;
 		} else {
 			return null;
@@ -706,15 +737,15 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected void finalRemove(JobInfo what, LinkedList<JobInfo> list, int position) {
 		switch (position) {
-		case 1:
-			list.removeFirst();
-			break;
-		case 2:
-			list.removeLast();
-			break;
-		default:
-			list.remove(what);
-			break;
+			case REMOVE_FIRST:
+				list.removeFirst();
+				break;
+			case REMOVE_LAST:
+				list.removeLast();
+				break;
+			default:
+				list.remove(what);
+				break;
 		}
 	}
 
@@ -1440,4 +1471,77 @@ public class LinkedJobInfoList implements JobInfoList {
 		return netSystem.getTime();
 	}
 
+	/***************************************
+	 *  Method to calculate cache hit rate
+	 ****************************************/
+	@Override
+	public void analyzeCacheHitRate(JobClass jobClass, Measure measurement){
+		if (jobClass != null) {
+			if (hitRatePerClass == null) {
+				hitRatePerClass = new Measure[numberOfJobClasses];
+			}
+			hitRatePerClass[jobClass.getId()] = measurement;
+		} else {
+			hitRate = measurement;
+		}
+	}
+	@Override
+	public int getJobsTotalCacheMissCount() { return jobsTotalCacheMissCount; }
+
+	@Override
+	public int getJobsTotalCacheHitCount() { return jobsTotalCacheHitCount; }
+
+	@Override
+	public int getJobsCacheCountPerClass(JobClass jclass) { return jobsCacheCountPerClass[jclass.getId()]; }
+
+
+	protected void updateCacheHitRate(JobClass jclass){
+		// To Make sure the input value always be a positive value, to avoid NaN measure reuslt.
+		if(jobsCacheCountPerClass[jclass.getId()]==0 || jobsCacheCountPerClass[jclass.getCachePairClass().getId()]==0)
+			return;
+		if(jobsTotalCacheHitCount==0 || jobsTotalCacheMissCount==0)
+			return;
+
+		if (hitRatePerClass != null) {
+
+			// we make the cache class as a pair of hit and miss,
+			// if a class 'isCacheHit = true', the opposite class connected to this class is cache Miss class.
+			// but usually, cacheHit class is used as the input jClass in Measure.
+			int targetClassId = jclass.getId();
+			int pairClassId = jclass.getCachePairClass().getId();
+			double hitRate = 0.0;
+
+			if(jclass.isCacheHit()){
+				hitRate = (double)jobsCacheCountPerClass[targetClassId] /
+						(jobsCacheCountPerClass[targetClassId] + jobsCacheCountPerClass[pairClassId]);
+			}
+			else {
+				hitRate = (double)jobsCacheCountPerClass[pairClassId] /
+						(double)(jobsCacheCountPerClass[targetClassId] + jobsCacheCountPerClass[pairClassId]);
+			}
+
+			Measure m = hitRatePerClass[targetClassId];
+			if (m != null) {
+				m.update(hitRate, 1.0);
+			}
+		}
+		if (hitRate != null) {
+			double tempHitRate = (double)getJobsTotalCacheHitCount()/
+					(double) (getJobsTotalCacheHitCount()+getJobsTotalCacheMissCount());
+			hitRate.update(tempHitRate, 1.0);
+		}
+	}
+
+	@Override
+	public void CacheJob(JobClass jclass, boolean isHit){
+		updateCacheHitRate(jclass);
+		if(isHit){
+			jobsTotalCacheHitCount++;
+		}
+		else {
+			jobsTotalCacheMissCount++;
+		}
+		// we divide the hit and miss into two class, so only add to the classID corresponding class.
+		jobsCacheCountPerClass[jclass.getId()]++;
+	}
 }

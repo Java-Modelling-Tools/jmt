@@ -189,6 +189,9 @@ public abstract class NodeSection {
 		case SimConstants.LIST_DROP_RATE:
 			jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
 			break;
+		case SimConstants.CACHE_HIT_RATE:
+			jobsList.analyzeCacheHitRate(jobClass, measurement);
+			break;
 		default:
 			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}

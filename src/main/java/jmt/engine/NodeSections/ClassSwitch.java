@@ -66,6 +66,7 @@ public class ClassSwitch extends ServiceSection {
 		case NetEvent.EVENT_JOB:
 			Job job = message.getJob();
 			JobClass inClass = job.getJobClass();
+
 			int jobClassIn = inClass.getId();
 			int jobClassOut = chooseOutClass(matrix[jobClassIn]);
 			if (jobClassIn != jobClassOut) {

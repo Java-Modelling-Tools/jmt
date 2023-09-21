@@ -105,6 +105,9 @@ public abstract class EngineUtils {
 				return SimulationDefinition.MEASURE_S_L;
 			case SimConstants.LATENESS:
 				return SimulationDefinition.MEASURE_L;
+			case SimConstants.CACHE_HIT_RATE:
+				return SimulationDefinition.MEASURE_CHR;
+
 			default:
 				return SimulationDefinition.MEASURE_QL;
 		}
@@ -187,6 +190,8 @@ public abstract class EngineUtils {
 			return SimConstants.SYSTEM_LATENESS;
 		} else if (type.equals(SimulationDefinition.MEASURE_L)) {
 			return SimConstants.LATENESS;
+		} else if (type.equals((SimulationDefinition.MEASURE_CHR))){
+			return SimConstants.CACHE_HIT_RATE;
 		} else {
 			return SimConstants.QUEUE_LENGTH;
 		}

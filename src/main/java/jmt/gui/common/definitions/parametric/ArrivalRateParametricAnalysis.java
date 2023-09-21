@@ -39,7 +39,10 @@ import jmt.gui.common.distributions.Distribution;
  * @author Francesco D'Aquino
  *         Date: 14-dic-2005
  *         Time: 12.22.28
+ *
+ * Modified by: Xinyu Gao
  */
+
 public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition {
 	private final double FROM_ALL = 100;
 	private final double TO_ALL = 150;
@@ -218,7 +221,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 			originalValues = new Double(initialValue);
 		} else {
 			double sum = 1;
-			double increment = (finalValue - initialValue) / (100 * (double) (numberOfSteps - 1));
+			double increment = (finalValue - initialValue) / (getInitialValue() * (double) (numberOfSteps - 1));
 			//find the set of available classes
 			Vector<Object> openClasses = classDef.getOpenClassKeys();
 			availableClasses = new Vector<Object>(0, 1);
@@ -346,7 +349,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 			double originalValue = ((Double) ((Vector) originalValues).get(0)).doubleValue();
 			for (int i = 0; i < numberOfSteps; i++) {
 				double thisValue = temp.getValue(availableClasses.get(0), i);
-				double ratio = thisValue / originalValue * 100;
+				double ratio = thisValue / originalValue * getInitialValue();
 				assumedValues.add(new Double(ratio));
 			}
 		}
@@ -371,6 +374,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	@Override
 	public Map<String, String> getProperties() {
 		TreeMap<String, String> properties = new TreeMap<String, String>();
+		properties.put(FROM_PROPERTY, Double.toString(initialValue));
 		properties.put(TYPE_PROPERTY, getType());
 		properties.put(TO_PROPERTY, Double.toString(finalValue));
 		properties.put(STEPS_PROPERTY, Integer.toString(numberOfSteps));
@@ -384,6 +388,7 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	/**
 	 * Sets the value for the specified property. The supported properties are: <br>
 	 * - TO_PROPERTY  <br>
+	 * - FROM_PROPERTY  <br>
 	 * - STEPS_PROPERTY <br>
 	 * - IS_SINGLE_CLASS_PROPERTY <br>
 	 * - REFERENCE_CLASS_PROPERTY
@@ -394,6 +399,8 @@ public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition 
 	public void setProperty(String propertyName, String value) {
 		if (propertyName.equals(TO_PROPERTY)) {
 			finalValue = Double.parseDouble(value);
+		} else if (propertyName.equals(FROM_PROPERTY)) {
+			initialValue = Double.parseDouble(value);
 		} else if (propertyName.equals(STEPS_PROPERTY)) {
 			numberOfSteps = Integer.parseInt(value);
 			if (numberOfSteps > MAX_STEP_NUMBER) {

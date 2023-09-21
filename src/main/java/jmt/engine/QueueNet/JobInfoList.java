@@ -604,4 +604,15 @@ public interface JobInfoList {
 	 */
 	public abstract void setRegionSoftDeadlinesByClass(double[] regionSoftDeadlinesByClass);
 
+
+	/**
+	 *  Methods to calculate cache performance measures
+         */
+	public void analyzeCacheHitRate(JobClass jobClass, Measure measurement);
+	public int getJobsTotalCacheMissCount();
+	public int getJobsTotalCacheHitCount();
+	public int getJobsCacheCountPerClass(JobClass jclass);
+	public void CacheJob(JobClass jclass, boolean isHit);
+
+
 }

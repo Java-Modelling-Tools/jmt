@@ -13,6 +13,8 @@
 						<xs:attribute name="softDeadline" type="xs:string"/>
 						<xs:attribute name="referenceSource" type="xs:string" use="optional"/>
 						<xs:attribute name="customers" type="xs:string" use="optional"/>
+						<xs:attribute name="cacheMissClass" type="xs:string" use="optional"/>
+						<xs:attribute name="cacheHitClass" type="xs:string" use="optional"/>
 					</xs:complexType>
 				</xs:element>
 				<xs:element ref="node" maxOccurs="unbounded"/>

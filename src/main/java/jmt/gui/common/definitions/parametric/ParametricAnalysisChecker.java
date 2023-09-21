@@ -19,11 +19,13 @@
 package jmt.gui.common.definitions.parametric;
 
 import java.util.Vector;
+import java.util.Map;
 
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
 
 /**
  * <p>Title: ParametricAnalysisChecker </p>
@@ -87,6 +89,21 @@ public class ParametricAnalysisChecker {
 		if (!temp.isEmpty()) {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_ARRIVAL_RATE);
 		}
+		//check if "Number of server" parametric analysis is runnable
+		temp = checkForNumberOfServersParametricAnalysisAvailableStations();
+		if (!temp.isEmpty()) {
+			runnableVector.add(ParametricAnalysis.PA_TYPE_NUMBER_OF_SERVERS);
+		}
+		//check if "Total station capacity" parametric analysis is runnable
+		temp = checkForTotalStationCapacityParametricAnalysisAvailableStations();
+		if (!temp.isEmpty()) {
+			runnableVector.add(ParametricAnalysis.PA_TYPE_TOTAL_CAPACITY);
+		}
+		//check if "Routing probabilities" parametric analysis is runnable
+		temp = checkForRoutingProbabilitiesParametricAnalysisAvailableSourceStations();
+		if (!temp.isEmpty()) {
+			runnableVector.add(ParametricAnalysis.PA_TYPE_ROUTING_PROBABILITY);
+		}
 		//check if "Seed" parametric analysis is available
 		if (!cd.getClassKeys().isEmpty() && !sd.getStationKeys().isEmpty()) {
 			runnableVector.add(ParametricAnalysis.PA_TYPE_SEED);
@@ -107,10 +124,14 @@ public class ParametricAnalysisChecker {
 	 */
 	public Vector<Object> checkForServiceTimesParametricAnalysisAvailableStations() {
 		Vector<Object> availableStations = new Vector<Object>(0, 1);
+		// get all stations
 		Vector<Object> stations = sd.getStationKeys();
+		// get all classes
 		Vector<Object> classes = cd.getClassKeys();
+
 		for (int i = 0; i < stations.size(); i++) {
 			Object thisStation = stations.get(i);
+			// used to see whether current station is suitable for PA
 			boolean stationOK = false;
 			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
@@ -154,6 +175,65 @@ public class ParametricAnalysisChecker {
 	}
 
 	/**
+	 * This method has a meaning only if used inside a routing probabilities parametric analysis.
+	 * It can be used to get the keys of stations available to perform that kind of parametric
+	 * analysis.
+	 * @param stationKey the key of the station whose routing probabilities will be varied.
+	 * @return a Vector containing the keys of available stations
+	 */
+	public Vector<Object> checkForRoutingProbabilitiesParametricAnalysisAvailableSourceStations() {
+		// get all stations
+		Vector<Object> stations = sd.getStationKeys();
+		// get all classes
+		Vector<Object> classes = cd.getClassKeys();
+		Vector<Object> availableStations = new Vector<Object>(0, 1);
+
+		for(int i=0; i<stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			// used to see whether current station is suitable for PA
+			boolean stationOK = false;
+			for (int j = 0; j < classes.size(); j++) {
+				Object thisClass = classes.get(j);
+				if (sd.getRoutingStrategy(thisStation, thisClass) instanceof ProbabilityRouting) {
+					ProbabilityRouting pr = (ProbabilityRouting) sd.getRoutingStrategy(thisStation, thisClass);
+					Map<Object, Double> values = pr.getValues();
+					if (!values.isEmpty()) {
+						stationOK = true;
+						break;
+					}
+				}
+			}
+			if (stationOK) {
+				availableStations.add(thisStation);
+			}
+		}
+		return availableStations;
+	}
+
+	/**
+	 * This method has a meaning only if used inside a routing probabilities parametric analysis.
+	 * It can be used to get the keys of classes available to perform that kind of parametric
+	 * analysis.
+	 * @param stationKey the key of the station whose routing probabilities will be varied.
+	 * @return a Vector containing the keys of available classes
+	 */
+	public Vector<Object> checkForRoutingProbabilitiesParametricSimulationAvailableClasses(Object stationKey) {
+		Vector<Object> valid = new Vector<Object>(0, 1);
+		Vector<Object> classes = cd.getClassKeys();
+		for (int j = 0; j < classes.size(); j++) {
+			Object thisClass = classes.get(j);
+			if (sd.getRoutingStrategy(stationKey, thisClass) instanceof ProbabilityRouting) {
+				ProbabilityRouting pr = (ProbabilityRouting) sd.getRoutingStrategy(stationKey, thisClass);
+				Map<Object, Double> values = pr.getValues();
+				if (!values.isEmpty()) {
+					valid.add(thisClass);
+				}
+			}
+		}
+		return valid;
+	}
+
+	/**
 	 * This method has a meaning only if used inside an arrival rate parametric analysis.
 	 * It can be used to get the keys of classes available to perform that kind of parametric
 	 * analysis.
@@ -175,4 +255,47 @@ public class ParametricAnalysisChecker {
 		return valid;
 	}
 
+	public Vector<Object> checkForNumberOfServersParametricAnalysisAvailableStations() {
+		Vector<Object> availableStations = new Vector<Object>(0, 1);
+		Vector<Object> stations = sd.getStationKeys();
+		Vector<Object> classes = cd.getClassKeys();
+		for (int i = 0; i < stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			boolean stationOK = false;
+			for (int j = 0; j < classes.size(); j++) {
+				Object thisClass = classes.get(j);
+				Integer temp = sd.getStationNumberOfServers(thisStation);
+				if (temp != null && temp.intValue() > 0) {
+					stationOK = true;
+					break;
+				}
+			}
+			if (stationOK) {
+				availableStations.add(thisStation);
+			}
+		}
+		return availableStations;
+	}
+
+	public Vector<Object> checkForTotalStationCapacityParametricAnalysisAvailableStations() {
+		Vector<Object> availableStations = new Vector<Object>(0, 1);
+		Vector<Object> stations = sd.getStationKeys();
+		Vector<Object> classes = cd.getClassKeys();
+		for (int i = 0; i < stations.size(); i++) {
+			Object thisStation = stations.get(i);
+			boolean stationOK = false;
+			for (int j = 0; j < classes.size(); j++) {
+				Object thisClass = classes.get(j);
+				Integer temp = sd.getStationQueueCapacity(thisStation);
+				if (temp != null) {
+					stationOK = true;
+					break;
+				}
+			}
+			if (stationOK) {
+				availableStations.add(thisStation);
+			}
+		}
+		return availableStations;
+	}
 }

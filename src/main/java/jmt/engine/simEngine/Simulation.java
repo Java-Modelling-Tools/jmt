@@ -245,10 +245,15 @@ public class Simulation {
 	/**
 	 * Adds to the system a new measure to be computed.
 	 * @param measureType type of measure (see the constants specified in this class).
-	 * @param nodeName name of the node to be measured.
+	 * @param nodeName name of the node to be measured. [Attribute assign in `referenceNode`]<br>
+	 *                 "" (empty string) means Global Measure, no need specify referNode.
 	 * @param measure
-	 * @param jClass
-	 * @param nodeType type of the node to be measured.
+	 * @param jClass name of the job class to be measured. [Attribute assign in `referenceUserClass`]<br>
+	 *               null means measuring all the class, not to the specific class
+	 * @param nodeType type of the node to be measured. [Attribute assign in `nodeType`] <br>
+	 *                 - null -> Global Measure, no specific referNode. <br>
+	 *                 - station -> Node Measure, bind to a specific referNode <br>
+	 *                 - region -> Capacity Region Measure.
 	 * @throws LoadException
 	 */
 	public void addMeasure(int measureType, String nodeName, Measure measure, String jClass, String nodeType) throws LoadException {
@@ -466,11 +471,13 @@ public class Simulation {
 					jClass = classes[position[0]];
 				} else {
 					//aggregated measure
+					// job class is null means it measure all the class.
 					jClass = null;
 				}
 
 				// If measure is not global
 				if (ms.getNodeName() != null && !ms.getNodeName().equals("")) {
+					// If referenceNode specified, this measure is targeted to the specific node.
 					//measures are computed by sampling specific
 					int nodePosition = findNodePosition(ms.getNodeName());
 
@@ -563,10 +570,14 @@ public class Simulation {
 					case SimConstants.FIRING_THROUGHPUT:
 						netNodes[nodePosition].getSection(NodeSection.SERVICE).analyzeTransition(SimConstants.FIRING_THROUGHPUT, ms.getjClass(), ms.getMeasure());
 						break;
+					case SimConstants.CACHE_HIT_RATE:
+						netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.CACHE_HIT_RATE, jClass, ms.getMeasure());
+						break;
 					}
 				}
 				// Global measures (new by Bertoli Marco)
 				else {
+					// If referenceNode not specified, this measure is targeted to the global metric in 'GlobalJobInfoList'.
 					switch (ms.getMeasureType()) {
 					case SimConstants.SYSTEM_NUMBER_OF_JOBS:
 						network.getJobInfoList().analyzeJobNumber(jClass, ms.getMeasure());

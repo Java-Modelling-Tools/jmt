@@ -149,7 +149,7 @@ public class SimLoader {
 			if (DEBUG) {
 				System.out.println(" created document");
 			}
-			//gets root
+			//gets root - node name = 'sim'
 			Element root = document.getDocumentElement();
 			if (DEBUG) {
 				System.out.println("root = " + root.getAttribute("name"));
@@ -323,6 +323,8 @@ public class SimLoader {
 				String currentClassPriority = currentJobClass.getAttribute("priority");
 				String referenceNode = currentJobClass.getAttribute("referenceSource");
 				String currentClassSoftDeadline = currentJobClass.getAttribute("softDeadline");
+				String cacheMissClass = currentJobClass.getAttribute("cacheMissClass");
+				String cacheHitClass = currentJobClass.getAttribute("cacheHitClass");
 
 				int type, priority;
 				double softDeadline;
@@ -346,6 +348,16 @@ public class SimLoader {
 				//end NEW
 
 				jobClasses[i].setSoftDeadline(softDeadline);
+
+				// if the jobClass connect to the cacheMiss class, set it as the cacheHit class
+				if(!cacheMissClass.equals("") & cacheHitClass.equals("")){
+					jobClasses[i].setCacheReferece(cacheMissClass, true);
+				}
+
+				// if the jobClass connect ot the cacheHit class, set it as the cacheMiss class
+				if(cacheMissClass.equals("") & !cacheHitClass.equals("")){
+					jobClasses[i].setCacheReferece(cacheHitClass, false);
+				}
 
 				if (DEBUG) {
 					System.out.println("Class " + jobClasses[i].getName() + " created");
@@ -566,6 +578,8 @@ public class SimLoader {
 	 * @param section  dom description of the nodeName section.
 	 * @return NodeSection created.
 	 */
+	// section Element represents the content enclosed by the <Section> tag
+	// traverse each parameter node in section，creating the object as the input of the section constructor
 	private NodeSection createSection(Element section) throws LoadException {
 		//gets all the parameters
 		NodeList parameterList = section.getElementsByTagName("parameter");

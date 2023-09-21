@@ -77,6 +77,10 @@ public interface SimulationDefinition {
 	public static final String MEASURE_OS = "Retrial Orbit Size";
 	/**Code for retrial orbit time measure*/
 	public static final String MEASURE_OT = "Retrial Orbit Residence Time";
+
+	/**Code for cache hit rate */
+	public static final String MEASURE_CHR = "Cache Hit Rate";
+
 	/**Code for power measure*/
 	public static final String MEASURE_P = "Power";
 	/**Code for system customer number measure*/

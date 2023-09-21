@@ -524,6 +524,10 @@ public class GlobalJobInfoList {
 
 	/**
 	 * Updates System Response Time measures.
+	 * ResponseTime is 'time spent by all jobs in the system / number of jobs complete'
+	 * call update once a job is being remove (job completion) / or recycle (in the reference station itself).
+	 * each time call this function corresponds to a single job completion, and each item has same weight for
+	 * the computation of the mean value.
 	 * @param job current job.
 	 */
 	private void updateResponseTime(Job job) {
@@ -541,6 +545,10 @@ public class GlobalJobInfoList {
 
 	/**
 	 * Updates System Throughput measures.
+	 * Throughput is 'num of completed job / total simulation time'.
+	 * InverseMeasure will get the inverse of the statistic value - that is the average time for one job completion.
+	 * call update once a job is being remove (job completion) / or recycle (in the reference station itself).
+	 * so collect `lastJobOutTimePerClass` to calculate how long it will take for one job completion.
 	 * @param job current job.
 	 */
 	private void updateThroughput(Job job) {
@@ -558,6 +566,8 @@ public class GlobalJobInfoList {
 
 	/**
 	 * Updates System Drop Rate measures.
+	 * Drop rate is an inverse measure
+	 * 'the average time between two job drop' and then inverse -> how many job dropped per second
 	 * @param job current job.
 	 */
 	private void updateDropRate(Job job) {

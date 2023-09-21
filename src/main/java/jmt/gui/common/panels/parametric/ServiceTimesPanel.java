@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
+
 package jmt.gui.common.panels.parametric;
 
 import java.awt.BorderLayout;
@@ -58,16 +59,17 @@ import jmt.gui.common.definitions.parametric.ServiceTimesParametricAnalysis;
  * @author Francesco D'Aquino
  *         Date: 9-mar-2006
  *         Time: 16.19.35
+ * Modified by: Xinyu Gao
  */
 public class ServiceTimesPanel extends ParameterOptionPanel {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private JRadioButton allClass;
 	private JRadioButton singleClass;
 	private JLabel fromLabel;
-	private JTextField from;
+	private JSpinner from;
 	private JLabel toLabel;
 	private JSpinner to;
 	private JLabel stepsLabel;
@@ -152,9 +154,8 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		}
 		if (STPA.isSingleClass()) {
 			fromLabel = new JLabel("From (s):");
-			from = new JTextField();
-			from.setEnabled(false);
-			from.setText(Double.toString(STPA.getInitialValue()));
+			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+			from.setEnabled(true);   // changed to "true
 			toLabel = new JLabel("To (s):");
 			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
 			to.setToolTipText("Sets the final service time mean value expressed in seconds");
@@ -181,10 +182,10 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			description.setText(DESCRIPTION_SINGLE);
 		} else {
 			fromLabel = new JLabel("From (%):");
-			from = new JTextField();
-			from.setEnabled(false);
-			from.setText(Double.toString(STPA.getInitialValue()));
-        		from.setPreferredSize(new Dimension(130, 30));
+			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+			from.setEnabled(true);  // changed to "true"
+			//from.setPreferredSize(new Dimension(130, 30));
+			from.setToolTipText("Sets the initial service time");
 			toLabel = new JLabel("To (%):");
 			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
 			to.setToolTipText("Sets the final proportion of service time with respect to the initial");
@@ -200,7 +201,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		from.setBackground(Color.WHITE);
 		stationChooserLabel = new JLabel("Station:");
 		edit.add(fromLabel);
-                edit.add(from);
+		edit.add(from);
 		edit.add(toLabel);
 		edit.add(to);
 		edit.add(stepsLabel);
@@ -250,7 +251,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		}
 		singleClass.setEnabled(enabled);
 		fromLabel.setEnabled(enabled);
-		from.setEnabled(false);
+		from.setEnabled(enabled);  // set to "enabled"
 		toLabel.setEnabled(enabled);
 		to.setEnabled(enabled);
 		stepsLabel.setEnabled(enabled);
@@ -281,6 +282,18 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 	}
 
 	private void setListeners() {
+		// Add the "from" listener
+		from.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Object fValue = from.getValue();
+				if (fValue instanceof Double) {
+					STPA.setInitialValue(((Double) fValue).doubleValue());
+				} else if (fValue instanceof Integer) {
+					STPA.setInitialValue(((Integer) fValue).doubleValue());
+				}
+				from.setValue(new Double(STPA.getInitialValue()));
+			}
+		});
 		to.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				Object tValue = to.getValue();
@@ -311,7 +324,9 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 				toLabel.setText("To (%): ");
 				STPA.setDefaultInitialValue();
 				STPA.setDefaultFinalValue();
-				from.setText(Double.toString(STPA.getInitialValue()));
+				from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+				from.setValue(new Double(STPA.getInitialValue()));
+				from.setToolTipText("Sets the initial value of service time");
 				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
 				to.setValue(new Double(STPA.getFinalValue()));
 				to.setToolTipText("Sets the final proportion of service time with respect to the initial");
@@ -352,10 +367,12 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 				toLabel.setText("To (s):");
 				STPA.setDefaultInitialValue();
 				STPA.setDefaultFinalValue();
-				from.setText(Double.toString(STPA.getInitialValue()));
+				from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+				from.setValue(new Double(STPA.getInitialValue()));
+				from.setToolTipText("Sets the initial service time in job/sec");
 				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
 				to.setValue(new Double(STPA.getFinalValue()));
-				to.setToolTipText("Sets the final arrival rate in job/sec");
+				to.setToolTipText("Sets the final service time in job/sec");
 				description.setText(DESCRIPTION_SINGLE);
 			}
 		});
@@ -377,7 +394,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 				STPA.setReferenceClass(classKey);
 				STPA.setDefaultInitialValue();
 				STPA.setDefaultFinalValue();
-				from.setText(Double.toString(STPA.getInitialValue()));
+				from.setValue(new Double(STPA.getInitialValue()));
 				to.setValue(new Double(STPA.getFinalValue()));
 			}
 		});
@@ -402,7 +419,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 					}
 					STPA.setDefaultInitialValue();
 					STPA.setDefaultFinalValue();
-					from.setText(Double.toString(STPA.getInitialValue()));
+					from.setValue(new Double(STPA.getInitialValue()));
 					to.setValue(new Double(STPA.getFinalValue()));
 					ItemListener listener = classChooser.getItemListeners()[0];
 					classChooser.removeItemListener(listener);
@@ -435,7 +452,8 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 						STPA.setReferenceClass(validC.get(0));
 						STPA.setDefaultInitialValue();
 						STPA.setDefaultFinalValue();
-						from.setText(Double.toString(STPA.getInitialValue()));
+						from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+						from.setValue(new Double(STPA.getInitialValue()));
 						to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
 						to.setValue(new Double(STPA.getFinalValue()));
 						//... and set the STPA to be single class

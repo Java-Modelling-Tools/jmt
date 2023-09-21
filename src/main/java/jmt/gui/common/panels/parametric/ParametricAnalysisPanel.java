@@ -19,15 +19,42 @@ package jmt.gui.common.panels.parametric;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.FlowLayout;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JList;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.SwingUtilities;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JButton;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.basic.BasicMenuItemUI;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
@@ -43,6 +70,12 @@ import jmt.gui.common.definitions.parametric.ParametricAnalysisModelFactory;
 import jmt.gui.common.definitions.parametric.PopulationMixParametricAnalysis;
 import jmt.gui.common.definitions.parametric.SeedParametricAnalysis;
 import jmt.gui.common.definitions.parametric.ServiceTimesParametricAnalysis;
+import jmt.gui.common.definitions.parametric.NumberOfServersParametricAnalysis;
+import jmt.gui.common.definitions.parametric.TotalStationCapacityParametricAnalysis;
+import jmt.gui.common.definitions.parametric.RoutingProbabilitiesParametricAnalysis;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * <p>Title: ParametricAnalysisPanel</p>
@@ -53,6 +86,8 @@ import jmt.gui.common.definitions.parametric.ServiceTimesParametricAnalysis;
  * @author Francesco D'Aquino
  *         Date: 7-mar-2006
  *         Time: 13.12.42
+ *
+ *  Modified by: Xinyu Gao
  */
 public class ParametricAnalysisPanel extends WizardPanel implements CommonConstants {
 
@@ -64,8 +99,14 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 	private JPanel upperPanel;
 	private JPanel chooserPanel;
 	private JPanel enablerPanel;
-	private JComboBox chooser;
+	private JComboBox<String> chooser;
 	private TitledBorder tb;
+	private JPopupMenu popupMenu;
+	private JButton btnChoose;
+	private JButton arrowButton;
+	private JPanel combinedButtonPanel;
+	private String selectedItem = "";
+
 	ClassDefinition cd;
 	StationDefinition sd;
 	SimulationDefinition simd;
@@ -81,6 +122,21 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 	}
 
 	public void initGui() {
+		combinedButtonPanel = new JPanel(new GridBagLayout());
+
+		GridBagConstraints gbc2 = new GridBagConstraints();
+		gbc2.weightx = 0.0;
+		gbc2.weighty = 0;
+		gbc2.gridx = 0;
+		gbc2.gridy = 0;
+		gbc2.anchor = GridBagConstraints.WEST;
+
+
+		popupMenu = new JPopupMenu() {};
+		btnChoose = new JButton("Choose analysis");
+		btnChoose.setPreferredSize(new Dimension(173, 22));
+		arrowButton = new JButton("▼");
+
 		enabler = new JCheckBox("Enable What-If analysis");
 		enabler.setToolTipText("Enable or disable What-If analysis");
 		enablerPanel = new JPanel(new BorderLayout());
@@ -89,10 +145,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 		chooserPanel = new JPanel();
 		tb = new TitledBorder("Parameter selection for the control of repeated executions");
 		chooserPanel.setBorder(tb);
-		chooser = new JComboBox(parameters);
-		chooser.setPreferredSize(DIM_BUTTON_XL);
-		chooser.setToolTipText("Choose the what-if analysis to be performed");
-		chooserPanel.add(chooser, BorderLayout.NORTH);
+
 		JLabel description = new JLabel(PARAMETRIC_ANALYSIS_DESCRIPTION);
 		JLabel Warning = new JLabel (HTML_START + HTML_FONT_TITLE + "WARNING: "+ HTML_FONT_TIT_END + HTML_FONT_NORM
 				+ "Enabling What-If analysis will disable all statistical outputs." + HTML_FONT_NOR_END + HTML_END);
@@ -105,7 +158,6 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 		upperPanel.add(chooserPanel, BorderLayout.SOUTH);
 		this.setLayout(new BorderLayout());
 		this.setBorder(new EmptyBorder(20, 20, 20, 20));
-		chooser.removeAllItems();
 		ParametricAnalysisChecker pac = new ParametricAnalysisChecker(cd, sd, simd);
 		if (!pac.canBeEnabled()) {
 			enabler.setEnabled(false);
@@ -117,18 +169,83 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 			enabler.setSelected(simd.isParametricAnalysisEnabled());
 			ParametricAnalysisDefinition pad = simd.getParametricAnalysisModel();
 			parameters = pac.getRunnableParametricAnalysis();
+
 			for (String parameter : parameters) {
-				chooser.addItem(parameter);
+				final String currentParameter = parameter;
+				JMenuItem menuItem = new JMenuItem(currentParameter);
+
+				btnChoose.setHorizontalAlignment(SwingConstants.LEFT);
+				btnChoose.setMargin(new Insets(0, 24, 0, 0));
+				if ("Routing probability".equals(currentParameter)) {
+					menuItem.setEnabled(true);
+				}
+				menuItem.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						selectedItem = ((JMenuItem) e.getSource()).getText();
+						btnChoose.setText(selectedItem);
+						String param = ((JMenuItem) e.getSource()).getText();
+
+						if (parameterOptionPanel != null) {
+							remove(parameterOptionPanel);
+							ParametricAnalysisDefinition temp = ParametricAnalysisModelFactory.createParametricAnalysisModel(param, cd, sd, simd);
+							simd.setParametricAnalysisModel(temp);
+							simd.setSaveChanged();
+							parameterOptionPanel = createPanel(temp);
+							add(parameterOptionPanel, BorderLayout.CENTER);
+							doLayout();
+							parameterOptionPanel.validate();
+						}
+					}
+				});
+				popupMenu.add(menuItem);
 			}
+
+			int lastItemIndex = popupMenu.getComponentCount() - 1;
+			if (!Arrays.asList(parameters).contains("Routing probability")) {
+				JMenuItem menuItemRoutingProbability = new JMenuItem("Routing probability");
+				menuItemRoutingProbability.setEnabled(false);
+				popupMenu.insert(menuItemRoutingProbability, lastItemIndex);
+			}
+
+			btnChoose.setToolTipText("Choose the what-if analysis to be performed");
+			btnChoose.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					popupMenu.show(combinedButtonPanel, 0, btnChoose.getHeight());
+				}
+			});
+
+			arrowButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					popupMenu.show(btnChoose, 0, btnChoose.getHeight());
+				}
+			});
+
+			btnChoose.addPropertyChangeListener("enabled", new PropertyChangeListener() {
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					boolean isEnabled = (Boolean) evt.getNewValue();
+					arrowButton.setEnabled(isEnabled);
+				}
+			});
+
+			combinedButtonPanel.add(btnChoose, gbc2);
+			combinedButtonPanel.add(arrowButton);
+
+			chooserPanel.add(combinedButtonPanel, BorderLayout.NORTH);
+
 			String temp = parameters[0];
 			if (pad == null) {
 				pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(temp, cd, sd, simd);
 				simd.setParametricAnalysisModel(pad);
 			} else {
-				int code = pad.checkCorrectness(true); //check correctness of the PAD and if it is possible corrects it
+				int code = pad.checkCorrectness(true);
 				if (code != 2) {
-					chooser.setSelectedItem(pad.getType());
-				} else { //the old type of parametric analysis is no more available
+					String initialType = pad.getType();
+					btnChoose.setText(initialType);
+				} else {
 					pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(temp, cd, sd, simd);
 					simd.setParametricAnalysisModel(pad);
 				}
@@ -144,7 +261,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 	@Override
 	public void setEnabled(boolean enabled) {
 		if (!enabled) {
-			chooser.setEnabled(false);
+			btnChoose.setEnabled(false);
 			enablerPanel.setEnabled(false);
 			chooserPanel.setEnabled(false);
 			upperPanel.setEnabled(false);
@@ -152,7 +269,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 			tb.setTitleColor(Color.LIGHT_GRAY);
 			parameterOptionPanel.repaint();
 		} else {
-			chooser.setEnabled(true);
+			btnChoose.setEnabled(true);
 			enablerPanel.setEnabled(true);
 			chooserPanel.setEnabled(true);
 			upperPanel.setEnabled(true);
@@ -177,24 +294,6 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 				}
 			}
 		});
-		chooser.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.DESELECTED) {
-					return;
-				}
-				String param = (String) chooser.getSelectedItem();
-				if (parameterOptionPanel != null) {
-					remove(parameterOptionPanel);
-					ParametricAnalysisDefinition temp = ParametricAnalysisModelFactory.createParametricAnalysisModel(param, cd, sd, simd);
-					simd.setParametricAnalysisModel(temp);
-					simd.setSaveChanged();
-					parameterOptionPanel = createPanel(temp);
-					add(parameterOptionPanel, BorderLayout.CENTER);
-					doLayout();
-					parameterOptionPanel.validate();
-				}
-			}
-		});
 	}
 
 	/**
@@ -216,6 +315,12 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 				pop = new ServiceTimesPanel((ServiceTimesParametricAnalysis) pad, cd, sd, simd);
 			} else if (pad instanceof ArrivalRateParametricAnalysis) {
 				pop = new ArrivalRatesPanel((ArrivalRateParametricAnalysis) pad, cd, sd, simd);
+			} else if (pad instanceof NumberOfServersParametricAnalysis) {
+				pop = new NumberOfServersPanel((NumberOfServersParametricAnalysis) pad, cd, sd, simd);
+			} else if (pad instanceof TotalStationCapacityParametricAnalysis) {
+				pop = new TotalStationCapacityPanel((TotalStationCapacityParametricAnalysis) pad, cd, sd, simd);
+			} else if (pad instanceof RoutingProbabilitiesParametricAnalysis) {
+				pop = new RoutingProbabilitiesPanel((RoutingProbabilitiesParametricAnalysis) pad, cd, sd, simd);
 			} else if (pad instanceof SeedParametricAnalysis) {
 				pop = new SeedPanel((SeedParametricAnalysis) pad, cd, sd, simd);
 			} else {

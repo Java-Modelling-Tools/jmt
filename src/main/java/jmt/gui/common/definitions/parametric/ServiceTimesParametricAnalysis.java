@@ -21,6 +21,7 @@ package jmt.gui.common.definitions.parametric;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.HashMap;
 
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
@@ -39,6 +40,8 @@ import jmt.gui.common.distributions.Distribution;
  * @author Francesco D'Aquino
  *         Date: 14-dic-2005
  *         Time: 12.03.48
+ *
+ * Modified by: Xinyu Gao
  */
 public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition {
 	private final double FROM_ALL = 100;
@@ -61,9 +64,11 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 		simDef = simd;
 		numberOfSteps = STEPS;
 		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);
+
 		stationKey = checker.checkForServiceTimesParametricAnalysisAvailableStations().get(0);
 		Vector<Object> available = checker.checkForServiceTimesParametricSimulationAvailableClasses(stationKey);
 		if (cd.getClassKeys().size() == 1 || available.size() < cd.getClassKeys().size()) {
+			simDef.setSaveChanged();
 			singleClass = true;
 			classKey = available.get(0);
 			double mean = ((Distribution) (stationDef.getServiceTimeDistribution(stationKey, classKey))).getMean();
@@ -161,6 +166,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 	public Map<String, String> getProperties() {
 		TreeMap<String, String> properties = new TreeMap<String, String>();
 		properties.put(TYPE_PROPERTY, getType());
+		properties.put(FROM_PROPERTY, Double.toString(initialValue));
 		properties.put(TO_PROPERTY, Double.toString(finalValue));
 		properties.put(STEPS_PROPERTY, Integer.toString(numberOfSteps));
 		properties.put(IS_SINGLE_CLASS_PROPERTY, Boolean.toString(singleClass));
@@ -185,6 +191,8 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 	public void setProperty(String propertyName, String value) {
 		if (propertyName.equals(TO_PROPERTY)) {
 			finalValue = Double.parseDouble(value);
+		} else if (propertyName.equals(FROM_PROPERTY)) {
+			initialValue = Double.parseDouble(value);
 		} else if (propertyName.equals(STEPS_PROPERTY)) {
 			numberOfSteps = Integer.parseInt(value);
 			if (numberOfSteps > MAX_STEP_NUMBER) {
@@ -302,7 +310,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 			originalValues = new Double(initialValue);
 		} else {
 			double sum = 1;
-			double increment = (finalValue - initialValue) / (100 * (double) (numberOfSteps - 1));
+			double increment = (finalValue - initialValue) / (getInitialValue() * (double) (numberOfSteps - 1));
 			//find the set of available classes
 			Vector<Object> allClasses = classDef.getClassKeys();
 			availableClasses = new Vector<Object>(0, 1);
@@ -316,6 +324,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 					}
 				}
 			}
+
 			values = new ValuesTable(classDef, availableClasses, numberOfSteps);
 			for (int i = 0; i < numberOfSteps; i++) {
 				for (int k = 0; k < availableClasses.size(); k++) {
@@ -399,16 +408,16 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 						classKey = availableClasses.get(0); //change the reference class
 						setDefaultInitialValue();
 						setDefaultFinalValue();
-					}
-				} else {
-					double mean = ((Distribution) stationDef.getServiceTimeDistribution(stationKey, classKey)).getMean();
-					//If the service time of reference class was changed...
-					if (initialValue != mean) {
-						code = 1;
-						if (autocorrect) {
-							initialValue = mean;
-							finalValue = mean * INCREMENT_SINGLE;
-						}
+				//	}
+				//} else {
+				//	double mean = ((Distribution) stationDef.getServiceTimeDistribution(stationKey, classKey)).getMean();
+				//	//If the service time of reference class was changed...
+				//	if (initialValue != mean) {
+				//		code = 1;
+				//		if (autocorrect) {
+				//			initialValue = mean;
+				//			finalValue = mean * INCREMENT_SINGLE;
+				//		}
 					}
 				}
 			}
@@ -444,7 +453,7 @@ public class ServiceTimesParametricAnalysis extends ParametricAnalysisDefinition
 			double originalValue = ((Double) ((Vector) originalValues).get(0)).doubleValue();
 			for (int i = 0; i < numberOfSteps; i++) {
 				double thisValue = temp.getValue(availableClasses.get(0), i);
-				double ratio = thisValue / originalValue * 100;
+				double ratio = thisValue / originalValue * getInitialValue();
 				assumedValues.add(new Double(ratio));
 			}
 		}
