@@ -520,6 +520,13 @@ public interface JobInfoList {
 	public abstract void analyzeLateness(JobClass jobClass, Measure measurement);
 
 	/**
+	 * Analyzes the number of active servers in a Server section
+	 * @param measurement Reference to the associated measure
+	 */
+	public abstract void analyzeNumberOfServers(Measure measurement);
+
+
+	/**
 	 * Removes a job info from the list when a job is removed.
 	 * @param jobInfo Reference to the job info to be removed.
 	 */
@@ -584,6 +591,11 @@ public interface JobInfoList {
 	 * @param jobInfo Reference to the job info to be removed.
 	 */
 	public abstract void consumeJob(JobInfo jobInfo);
+
+	/**
+	 * Changes the number of active servers when the enabling degree changes
+	 */
+	public abstract void changeNumberOfActiveServers(int numberOfServers);
 
 	/**
 	 * Sets the number of servers. This parameter is used to scale utilization.

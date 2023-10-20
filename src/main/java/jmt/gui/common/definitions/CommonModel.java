@@ -241,6 +241,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	private boolean parametricAnalysisEnabled;
 	// -------------- end Francesco D'Aquino ----------------------
 
+	private int useEnablingDegree = 0;
+
 	/**
 	 * Tells if current model is to be saved
 	 * @return true if model is to be saved
@@ -1416,6 +1418,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.queueCapacity = Integer.valueOf(-1);
 			sd.queueStrategy = STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
 			sd.numberOfServers = Integer.valueOf(-1);
+			sd.transitionModeList = new ArrayList<TransitionModeData>();
+			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
@@ -1426,6 +1430,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.serverPolling = Boolean.valueOf(false);
 			sd.setupTimesEnabled = Boolean.valueOf(false);
 			sd.totalStationCapacity = sd.queueCapacity + sd.maxRunningJobs;
+			sd.transitionModeList = new ArrayList<TransitionModeData>();
+			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
 
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
@@ -2644,7 +2650,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		Vector<Object> retval = new Vector<Object>(0);
 		//check returned map not to be null
 		if (conns != null) {
-			//scan all of the station entries to find out which selected one is connected to
+			//scan all the station entries to find out which selected one is connected to
 			for (int i = 0; i < stationsKeyset.size(); i++) {
 				Connection c = (Connection) conns.get(stationsKeyset.get(i));
 				//assure connection is not null, preventing NullPointerException
@@ -2657,6 +2663,26 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			}
 		}
 		return retval;
+	}
+
+	/**
+	 * @param stationKey: source station which connected places must be returned
+	 * @return Vector containing backward connected places
+	 */
+	@Override
+	public Vector<Object> getBackwardConnectedPlaces(Object stationKey){
+		Vector<Object> retVal = new Vector<Object>(0);
+		Map conns = connectionsBDM.get(stationKey, BDMap.X);
+
+		Vector<Object> connectedStationKeys = scanForConnections(conns);
+
+		for(Object st : connectedStationKeys){
+			if(((StationData) stationDataHM.get(st)).type.equals(STATION_TYPE_PLACE)){
+				retVal.add(st);
+			}
+		}
+
+		return retVal;
 	}
 
 	/**Tells whether two stations can be connected. Subclasses can override this method to
@@ -2690,9 +2716,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				&& (target.type.equals(STATION_TYPE_SOURCE) || target.type.equals(STATION_TYPE_SINK) || target.type.equals(STATION_TYPE_TERMINAL))) {
 			return false;
 		}
-		//a place can only be connected to a transition
+		//a place can only be connected to a transition, to a queue and to a delay station
 		//a transition can only be connected from a place
-		if ((source.type.equals(STATION_TYPE_PLACE) && !target.type.equals(STATION_TYPE_TRANSITION))
+		if ((source.type.equals(STATION_TYPE_PLACE) && !(target.type.equals(STATION_TYPE_TRANSITION) || target.type.equals(STATION_TYPE_SERVER) || target.type.equals(STATION_TYPE_DELAY)))
 				|| (target.type.equals(STATION_TYPE_TRANSITION) && !source.type.equals(STATION_TYPE_PLACE))) {
 			return false;
 		}
@@ -4421,6 +4447,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String name;
 		public TransitionMatrix enablingCondition;
 		public TransitionMatrix inhibitingCondition;
+		public TransitionMatrix resourceCondition;
 		public Integer numberOfServers;
 		public Object firingTimeDistribution;
 		public Integer firingPriority;
@@ -4431,6 +4458,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			this.name = name;
 			this.enablingCondition = new TransitionMatrix();
 			this.inhibitingCondition = new TransitionMatrix();
+			this.resourceCondition = new TransitionMatrix();
 			this.numberOfServers = Defaults.getAsInteger("transitionModeNumberOfServers");
 			this.firingTimeDistribution = Defaults.getAsNewInstance("transitionTimedModeFiringTimeDistribution");
 			this.firingPriority = Defaults.getAsInteger("transitionTimedModeFiringPriority");
@@ -4443,6 +4471,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			TransitionModeData tmd = new TransitionModeData(name);
 			tmd.enablingCondition = (TransitionMatrix) enablingCondition.clone();
 			tmd.inhibitingCondition = (TransitionMatrix) inhibitingCondition.clone();
+			tmd.resourceCondition = (TransitionMatrix) resourceCondition.clone();
 			tmd.numberOfServers = numberOfServers;
 			tmd.firingTimeDistribution = ((ServiceStrategy) firingTimeDistribution).clone();
 			tmd.firingPriority = firingPriority;
@@ -4629,6 +4658,23 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		TransitionModeData tmd = sd.transitionModeList.get(modeIndex);
 		if (!tmd.inhibitingCondition.getEntry(stationInKey, classKey).equals(value)) {
 			tmd.inhibitingCondition.setEntry(stationInKey, classKey, value);
+			save = true;
+		}
+	}
+
+	@Override
+	public Integer getResourceCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = sd.transitionModeList.get(modeIndex);
+		return tmd.resourceCondition.getEntry(stationInKey, classKey);
+	}
+
+	@Override
+	public void setResourceCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey, Integer value){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		TransitionModeData tmd = sd.transitionModeList.get(modeIndex);
+		if(!tmd.resourceCondition.getEntry(stationInKey, classKey).equals(value)){
+			tmd.resourceCondition.setEntry(stationInKey, classKey, value);
 			save = true;
 		}
 	}

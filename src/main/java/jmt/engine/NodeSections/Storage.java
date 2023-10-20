@@ -25,21 +25,10 @@ import java.util.List;
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategy;
+import jmt.engine.NetStrategies.TransitionUtilities.EventFinishPacket;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionVector;
-import jmt.engine.QueueNet.BlockingRegion;
-import jmt.engine.QueueNet.ForkJob;
-import jmt.engine.QueueNet.GlobalJobInfoList;
-import jmt.engine.QueueNet.Job;
-import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobClassList;
-import jmt.engine.QueueNet.JobInfo;
-import jmt.engine.QueueNet.JobInfoList;
-import jmt.engine.QueueNet.NetEvent;
-import jmt.engine.QueueNet.NetMessage;
-import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.NodeSection;
-import jmt.engine.QueueNet.WaitingRequest;
+import jmt.engine.NetStrategies.TransitionUtilities.VectorsForServerRequest;
+import jmt.engine.QueueNet.*;
 
 /**
  * <p>Title: Storage</p>
@@ -64,6 +53,7 @@ public class Storage extends InputSection {
 	private QueuePutStrategy[] putStrategies;
 
 	private JobClassList jobClasses;
+	private int BackupJobsIdCount = 0;
 	private JobInfoList nodeJobsList;
 	private GlobalJobInfoList netJobsList;
 	private TransitionVector storageVector;
@@ -112,6 +102,7 @@ public class Storage extends InputSection {
 		}
 		this.getStrategy = getStrategy;
 		this.putStrategies = putStrategies;
+
 		redirectionTurnOFF();
 	}
 
@@ -217,7 +208,7 @@ public class Storage extends InputSection {
 			break;
 		}
 
-		case NetEvent.EVENT_JOB:
+		case NetEvent.EVENT_JOB: //a new job has arrived
 		{
 			Job job = (Job) data;
 			JobClass jobClass = job.getJobClass();
@@ -281,8 +272,67 @@ public class Storage extends InputSection {
 			for (int i = 0; i < jobClasses.size(); i++) {
 				storageVector.setEntry(i, jobsList.size(jobClasses.get(i)));
 			}
-			sendForward(NetEvent.EVENT_JOB_CHANGE, storageVector, 0.0);
 			sendForward(NetEvent.EVENT_JOB_FINISH, null, 0.0);
+			sendForward(NetEvent.EVENT_JOB_CHANGE, storageVector, 0.0);
+
+			if (waitingRequests.size() > 0) {
+				boolean nextJobChange = false;
+				Iterator<WaitingRequest> it = waitingRequests.iterator();
+				while (it.hasNext()) {
+					WaitingRequest request = it.next();
+					Job job = request.getJob();
+					JobClass jobClass = job.getJobClass();
+					if (capacities[jobClass.getId()] >= 0 && jobsList.size(jobClass) >= capacities[jobClass.getId()]) {
+						continue;
+					}
+					it.remove();
+					putStrategies[jobClass.getId()].put(job, jobsList, this);
+					if (block[jobClass.getId()]) {
+						send(NetEvent.EVENT_ACK, job, 0.0, request.getSourceSection(), request.getSource());
+					}
+					nextJobChange = true;
+					if (totalCapacity >= 0 && jobsList.size() >= totalCapacity) {
+						break;
+					}
+				}
+
+				if (nextJobChange) {
+					for (int i = 0; i < jobClasses.size(); i++) {
+						nextStorageVector.setEntry(i, jobsList.size(jobClasses.get(i)));
+					}
+					sendForward(NetEvent.EVENT_JOB_CHANGE, nextStorageVector, 0.0);
+				}
+			}
+			break;
+		}
+
+		case NetEvent.EVENT_JOB_REQUEST_FROM_SERVER:{
+			TransitionVector enablingVector = ((RequestToPlace) data).enablingVector;
+			TransitionVector resourceVector = ((RequestToPlace) data).resourceVector;
+
+			for(int i = 0; i < jobClasses.size(); i++){
+				int enablingJobNumber = enablingVector.getEntry(i);
+				int resourceJobNumber = resourceVector.getEntry(i);
+				if(enablingJobNumber > jobsList.size(jobClasses.get(i))
+					|| resourceJobNumber > enablingJobNumber){
+					return MSG_NOT_PROCESSED;
+				}
+			}
+
+			for(int i = 0; i < jobClasses.size(); i++){
+				int enablingJobNumber = enablingVector.getEntry(i);
+				int resourceJobNumber = resourceVector.getEntry(i);
+				for(int j = 0; j < enablingJobNumber - resourceJobNumber; j++){
+					sendForward(getStrategy.get(jobsList, jobClasses.get(i)), 0.0);
+				}
+			}
+
+			for(int i = 0; i < jobClasses.size(); i++){
+				storageVector.setEntry(i, jobsList.size(jobClasses.get(i)));
+			}
+
+			sendForward(NetEvent.EVENT_JOB_FINISH, null, 0.0);
+			sendForward(NetEvent.EVENT_JOB_CHANGE, storageVector, 0.0);
 
 			if (waitingRequests.size() > 0) {
 				boolean nextJobChange = false;

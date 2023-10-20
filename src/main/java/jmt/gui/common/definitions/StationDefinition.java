@@ -659,6 +659,12 @@ public interface StationDefinition {
 	public Vector<Object> getBackwardConnections(Object stationKey);
 
 	/**
+	 * @param stationKey: source station for which connected places must be returned
+	 * @return Vector containing input connected places
+	 */
+	public Vector<Object> getBackwardConnectedPlaces(Object stationKey);
+
+	/**
 	 * Returns the search key for the station, given the station name.
 	 */
 	public Object getStationByName(String stationName);
@@ -738,6 +744,18 @@ public interface StationDefinition {
 	 * condition for transition <code>stationKey</code> and mode <code>modeIndex</code>.
 	 */
 	public void setInhibitingCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey, Integer value);
+
+	/**
+	 * Returns the entry (<code>stationInKey</code>, <code>classKey</code>) of the resource
+	 * condition for server <code>stationKey</code> and mode<code>modeIndex</code>
+	 */
+	public Integer getResourceCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey);
+
+	/**
+	 * Sets the entry (<code>stationInKey</code>, <code>classKey</code>) of the resource
+	 * condition for server <code>stationKey</code> and mode <code>modeIndex</code>.
+	 */
+	public void setResourceCondition(Object stationKey, int modeIndex, Object stationInKey, Object classKey, Integer value);
 
 	/**
 	 * Returns the number of servers for transition <code>stationKey</code> and mode

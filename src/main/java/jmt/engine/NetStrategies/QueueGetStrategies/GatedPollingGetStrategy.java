@@ -18,10 +18,9 @@
 
 package jmt.engine.NetStrategies.QueueGetStrategies;
 
-import jmt.engine.QueueNet.Job;
-import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobClassList;
-import jmt.engine.QueueNet.JobInfoList;
+import jmt.engine.QueueNet.*;
+
+import java.util.List;
 
 /**
  * Implements Gated Polling Get Strategy
@@ -66,6 +65,10 @@ public class GatedPollingGetStrategy extends PollingGetStrategy {
 
 	public Job get(JobInfoList queue, JobClass jobClass) {
 		return queue.removeFirst(jobClass).getJob();
+	}
+
+	public int GetJobClassIdOfNextJob(JobInfoList queue) {
+		return jobClass.getId();
 	}
 
 }

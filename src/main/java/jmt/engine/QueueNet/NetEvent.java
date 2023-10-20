@@ -76,5 +76,8 @@ public class NetEvent {
 	public static final int EVENT_RETRIAL_JOB = 0x0015;
 	/** Event ID: Job setup event. */
 	public static final int EVENT_SETUP_JOB = 0x0016;
-
+	/** Event ID: Job request from server event */
+	public static final int EVENT_JOB_REQUEST_FROM_SERVER = 0x0017;
+	/** Event ID: CoolStart variable reset event */
+	public static final int EVENT_RESET_COOLSTART = 0x0018;
 }

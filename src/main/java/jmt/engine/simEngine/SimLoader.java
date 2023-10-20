@@ -396,7 +396,7 @@ public class SimLoader {
 				}
 				//gets list of sections
 				NodeList sectionList = node.getElementsByTagName("section");
-				NodeSection[] sections = new NodeSection[3];
+				NodeSection[] sections = new NodeSection[4];
 				//creates all sections (max is 3)
 				for (int j = 0; j < sectionList.getLength(); j++) {
 					if (DEBUG) {

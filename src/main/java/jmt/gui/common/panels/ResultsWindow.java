@@ -179,6 +179,7 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CUSTOMER_NUMBER, results.getFJCustomerNumberMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RP, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());
 		addTabPane(mainPanel, SimulationDefinition.MEASURE_FX, DESCRIPTION_FIRING_THROUGHPUT, results.getFiringThroughputMeasures());
+		addTabPane(mainPanel, SimulationDefinition.MEASURE_NS, DESCRIPTION_NUMBER_OF_ACTIVE_SERVERS, results.getNumberOfActiveServersMeasures());
 		// Creates bottom panel
 		JPanel bottomPanel = new JPanel(new BorderLayout());
 		JToolBar toolbar = new JToolBar();

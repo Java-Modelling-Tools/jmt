@@ -362,6 +362,12 @@ public interface MeasureDefinition {
 	public int[] getFiringThroughputMeasures();
 
 	/**
+	 * Returns an array with the measureIndex of every firing throughput measure
+	 * @return an array with measures' index
+	 */
+	public int[] getNumberOfActiveServersMeasures();
+
+	/**
 	 * Sets a ProgressListener to listen to progress change events. This is unique.
 	 * @param listener listener to be set or null to reset previous one
 	 */

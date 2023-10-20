@@ -83,6 +83,7 @@ public class StoredResultsModel implements MeasureDefinition {
 	private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> FJResponseTime = new Vector<Integer>();
 	private Vector<Integer> firingThroughput = new Vector<Integer>();
+	private Vector<Integer> numberOfActiveServers = new Vector<Integer>();
 
 	public Vector<Measure> getMeasures() {
 		return measures;
@@ -364,6 +365,9 @@ public class StoredResultsModel implements MeasureDefinition {
 		return getTmpArray(firingThroughput);
 	}
 
+	public int[] getNumberOfActiveServersMeasures(){
+		return getTmpArray(numberOfActiveServers);
+	}
 
 	/**
 	 * Returns if simulation has finished, so results are fixed
@@ -504,6 +508,8 @@ public class StoredResultsModel implements MeasureDefinition {
 			FJResponseTime.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
 			firingThroughput.add(new Integer(measures.size() - 1));
+		}else if(type.equals(SimulationDefinition.MEASURE_NS)){
+			numberOfActiveServers.add(new Integer(measures.size() - 1));
 		} else {
 			queueLength.add(new Integer(measures.size() - 1));
 		}

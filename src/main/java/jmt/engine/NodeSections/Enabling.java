@@ -133,6 +133,11 @@ public class Enabling extends InputSection {
 
 			for (int i = 0; i < enablingConditions.length; i++) {
 				if (i == currentModeIndex) {
+				/**
+				* This 'if' statement prevents the modification of the enabling degree of the mode that others are currently working on.
+				* It is necessary in the case where two job-change events occur in a row. If one event has already reached the firing section
+				* when the other one arrives, it could disrupt the count. This 'if' statement solves the problem.
+				*/
 					continue;
 				}
 

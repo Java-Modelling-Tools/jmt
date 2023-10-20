@@ -107,7 +107,8 @@ public abstract class EngineUtils {
 				return SimulationDefinition.MEASURE_L;
 			case SimConstants.CACHE_HIT_RATE:
 				return SimulationDefinition.MEASURE_CHR;
-
+			case SimConstants.NUMBER_OF_ACTIVE_SERVERS:
+				return SimulationDefinition.MEASURE_NS;
 			default:
 				return SimulationDefinition.MEASURE_QL;
 		}
@@ -192,6 +193,9 @@ public abstract class EngineUtils {
 			return SimConstants.LATENESS;
 		} else if (type.equals((SimulationDefinition.MEASURE_CHR))){
 			return SimConstants.CACHE_HIT_RATE;
+		}else if(type.equals(SimulationDefinition.MEASURE_NS)){
+			return SimConstants.NUMBER_OF_ACTIVE_SERVERS;
+
 		} else {
 			return SimConstants.QUEUE_LENGTH;
 		}

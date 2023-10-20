@@ -18,10 +18,15 @@
 
 package jmt.engine.QueueNet;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NodeSections.Linkage;
 import jmt.engine.NodeSections.Queue;
+import jmt.engine.NodeSections.ServiceTunnel;
 import jmt.engine.NodeSections.Storage;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
@@ -54,6 +59,8 @@ public class NetNode extends SimEntity {
 	public static final int EXCEPTION_SERVICE_SECTION_ALREADY_DEFINED = 0x0004;
 	/** Output section has been already defined. */
 	public static final int EXCEPTION_OUTPUT_SECTION_ALREADY_DEFINED = 0x0005;
+	/** Enabling section has been already defined*/
+	public static final int EXCEPTION_ENABLING_SECTION_ALREADY_DEFINED = 0x0007;
 	/** Required property is not available */
 	public static final int EXCEPTION_PROPERTY_NOT_AVAILABLE = 0x0006;
 
@@ -459,14 +466,18 @@ public class NetNode extends SimEntity {
 		message.setSource(getNetSystem().getNode(receiveBuffer.getSrc()));
 		message.setDestination(getNetSystem().getNode(receiveBuffer.getDest()));
 
+        boolean isJobFromPlaceToServerOrDelay = isJobFromPlaceToServerOrDelay(message);
+
 		//Look if message is a job message and if job is arriving at this node (from the node
 		//itself or from another node)
 		int event = message.getEvent();
 		Job job = message.getJob();
 		switch(event) {
 		case NetEvent.EVENT_JOB:
-			if ((message.getSource() != this) || ((message.getSource() == this)
-					&& (message.getSourceSection() == NodeSection.OUTPUT && message.getDestinationSection() == NodeSection.INPUT))) {
+			if (((message.getSource() != this) || ((message.getSource() == this)
+					&& (message.getSourceSection() == NodeSection.OUTPUT && message.getDestinationSection() == NodeSection.INPUT)))
+					&& !isJobFromPlaceToServerOrDelay
+			) {
 				inputSection.updateVisitPath(job);
 				if (inputSection.automaticUpdateNodeJobinfolist()) {
 					jobsList.add(new JobInfo(job));
@@ -559,6 +570,11 @@ public class NetNode extends SimEntity {
 		NetNode source = message.getSource();
 		byte sourceSection = message.getSourceSection();
 		byte destinationSection = message.getDestinationSection();
+		int temp = 0;
+
+		if(message.getEvent() == NetEvent.EVENT_JOB_FINISH && message.getSourceSection() == 3){
+			temp = 1;
+		}
 
 		//message goes through this switch depending on the destination section
 		//if the message is correctly processed by the appropriate node section
@@ -689,7 +705,7 @@ public class NetNode extends SimEntity {
 	 * Helper function to remove job from the NodeJobsList
 	 * @param data the jobInfo data looking to be removed.
 	 */
-	private boolean removeJobFromNodeJobsList(Job data) {
+	public boolean removeJobFromNodeJobsList(Job data) {
 		Job job = data;
 		JobInfo jobInfo = jobsList.lookFor(job);
 		if (jobInfo != null) {
@@ -918,4 +934,26 @@ public class NetNode extends SimEntity {
 		return network.getNetSystem();
 	}
 
+	private boolean isJobFromPlaceToServerOrDelay(NetMessage message){
+		NetNode sourceNode = message.getSource();
+		NetNode destinationNode = message.getDestination();
+		int sourceSection = message.getSourceSection();
+		int destinationSection = message.getDestinationSection();
+		boolean result = false;
+		try
+		{
+			result = sourceNode != null && destinationNode != null
+					&& message.getEvent() == NetEvent.EVENT_JOB
+					&& sourceSection > 0
+					&& sourceNode.getSection(sourceSection) instanceof Linkage
+					&& destinationSection == 1
+					&& destinationNode.getSection(destinationSection) instanceof Queue
+			;
+		}
+		catch(NetException e)
+		{
+		}
+
+		return result;
+	}
 }

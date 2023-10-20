@@ -58,6 +58,8 @@ public class Job implements Cloneable {
 	private RemoveToken servingMessage = null;
 	private RemoveToken renegingMessage = null;
 
+	private boolean isToken;
+
 	protected GlobalJobInfoList globalJobInfoList = null;
 	protected Pair<NetNode, JobClass> lastVisitedPair = null;
 
@@ -74,6 +76,7 @@ public class Job implements Cloneable {
 		this.jobClass = jobClass;
 		this.nextJobClass = jobClass;
 		this.globalJobInfoList = globalJobInfoList;
+		this.isToken = false;
 	}
 
 	/**
@@ -223,7 +226,7 @@ public class Job implements Cloneable {
 		if (serviceStartTime < 0.0) {
 			return serviceTime;
 		} else {
-			return serviceTime - (netSystem.getElapsedTime() - serviceStartTime);
+			return serviceTime - (netSystem.getTime() - serviceStartTime);
 		}
 	}
 

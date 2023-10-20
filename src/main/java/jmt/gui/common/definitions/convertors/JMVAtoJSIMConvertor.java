@@ -65,14 +65,15 @@ public class JMVAtoJSIMConvertor {
                 visitSum[i] += visits[j][i];
             }
 
+	    Double softDeadline = -1.0;
             if (type == ExactConstants.CLASS_CLOSED) {
                 // Closed class
-                key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, priority, 0.0, new Integer((int) data), null);
+                key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, priority, softDeadline, new Integer((int) data), null);
             } else {
                 // Open class
                 Exponential exp = new Exponential();
                 exp.setMean(1 / data);
-                key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, priority, 0.0, null, exp);
+                key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, priority, softDeadline, null, exp);
             }
             classKeys[i] = key;
         }

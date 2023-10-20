@@ -67,6 +67,8 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected int jobsInService;
 	protected int jobsInServicePerClass[];
 
+	protected int activeServers;
+
 	protected double lastJobInTime;
 	protected double lastJobInTimePerClass[];
 
@@ -109,6 +111,8 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected double lastJobSojournTime;
 	protected double lastJobSojournTimePerClass[];
+
+	protected double lastActiveServersTime;
 
 	protected Measure queueLength;
 	protected Measure queueLengthPerClass[];
@@ -169,6 +173,9 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected Measure[] latenessPerClass;
 	/* Only set if this joblist is for a blocking region input station */
 	protected double[] regionSoftDeadlinesByClass;
+
+
+	protected Measure numberOfActiveServers;
 
 	/** The number of servers to estimate Utilization measure on multiserver environments */
 	protected int numberOfServers = 1;
@@ -520,6 +527,8 @@ public class LinkedJobInfoList implements JobInfoList {
 		return lastJobSojournTimePerClass[jobClass.getId()];
 	}
 
+	public double getLastActiveServersTime() { return lastActiveServersTime; }
+
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#lookFor(jmt.engine.QueueNet.Job)
 	 */
@@ -622,6 +631,16 @@ public class LinkedJobInfoList implements JobInfoList {
 		lastJobInTimePerClass[c] = getTime();
 	}
 
+	protected void updateAfterRemoval(JobInfo jobInfo){
+		int c = jobInfo.getJob().getJobClass().getId();
+		updateQueueLength(jobInfo);
+		updateResponseTime(jobInfo);
+		updateResidenceTime(jobInfo);
+		updateThroughput(jobInfo);
+		updateUtilization(jobInfo);
+		updateUtilizationJoin(jobInfo);
+	}
+
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#remove(jmt.engine.QueueNet.JobInfo)
 	 */
@@ -650,6 +669,24 @@ public class LinkedJobInfoList implements JobInfoList {
 		totalSojournTimePerClass[c] += getTime() - jobInfo.getEnteringTime();
 		lastJobSojournTime = getTime() - jobInfo.getEnteringTime();
 		lastJobSojournTimePerClass[c] = getTime() - jobInfo.getEnteringTime();
+	}
+
+	public void removeWithoutUpdating(JobInfo jobInfo){
+		int c = jobInfo.getJob().getJobClass().getId();
+		finalRemove(jobInfo, list, 0);
+		finalRemove(jobInfo, listPerClass[c], 0);
+		jobsOut++;
+		jobsOutPerClass[c]++;
+		lastJobOutTime = getTime();
+		lastJobOutTimePerClass[c] = getTime();
+		totalSojournTime += getTime() - jobInfo.getEnteringTime();
+		totalSojournTimePerClass[c] += getTime() - jobInfo.getEnteringTime();
+		lastJobSojournTime = getTime() - jobInfo.getEnteringTime();
+		lastJobSojournTimePerClass[c] = getTime() - jobInfo.getEnteringTime();
+	}
+
+	public void updateWithoutRemoving(JobInfo jobInfo){
+		updateAfterRemoval(jobInfo);
 	}
 
 	/* (non-Javadoc)
@@ -980,6 +1017,14 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#analyzeNumberOfServers(jmt.engine.dataAnalysis.Measure)
+	 */
+	public void analyzeNumberOfServers(Measure measurement){
+		numberOfActiveServers = measurement;
+	}
+
+
 	@Override
 	public void analyzeTardiness(JobClass jobClass, Measure measurement) {
 		if (jobClass != null) {
@@ -1303,6 +1348,12 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 	}
 
+	protected void updateNumberOfServers(){
+		if(numberOfActiveServers != null) {
+			numberOfActiveServers.update(activeServers, getTime() - getLastActiveServersTime());
+		}
+	}
+
 	/**---------------------------------------------------------------------
 	 *-------------------------- "OTHER" METHODS ---------------------------
 	 *---------------------------------------------------------------------*/
@@ -1447,6 +1498,12 @@ public class LinkedJobInfoList implements JobInfoList {
 		int c = jobInfo.getJob().getJobClass().getId();
 		list.remove(jobInfo);
 		listPerClass[c].remove(jobInfo);
+	}
+
+	public void changeNumberOfActiveServers(int numberOfServers){
+		updateNumberOfServers();
+		activeServers = numberOfServers;
+		lastActiveServersTime = getTime();
 	}
 
 	/* (non-Javadoc)

@@ -172,6 +172,9 @@ public interface ResultsConstants {
 	public static final String DESCRIPTION_FIRING_THROUGHPUT = HTML_START + HTML_FONT_TITLE + "Firing Throughput" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Average firing throughput for each selected mode at each selected transition station." + HTML_FONT_NOR_END + HTML_END;
 
+	public static final String DESCRIPTION_NUMBER_OF_ACTIVE_SERVERS = HTML_START + HTML_FONT_TITLE + "Number of Active Servers" + HTML_FONT_TIT_END +HTML_FONT_NORM
+			+ "Average number of active servers of a selected station" + HTML_FONT_NOR_END + HTML_END;
+
 	// Temp measure mean label
 	public static final String TEMP_MEAN = HTML_START + HTML_FONT_NORM + "<b>Average value: </b>" + HTML_FONT_NOR_END + HTML_END;
 

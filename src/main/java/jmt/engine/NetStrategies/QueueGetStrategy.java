@@ -49,4 +49,5 @@ public abstract class QueueGetStrategy implements AutoCheck {
 		return true;
 	}
 
+	public abstract int GetJobClassIdOfNextJob(JobInfoList queue);
 }

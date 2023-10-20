@@ -20,6 +20,7 @@ package jmt.gui.common.panels;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.util.Vector;
 
 import javax.swing.JTabbedPane;
 import javax.swing.border.EtchedBorder;
@@ -58,7 +59,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	protected SemaphoreSectionPanel smPane;
 	protected StorageSectionPanel stPane;
 	protected EnablingSectionPanel enPane;
-
+	protected EnablingSectionPanelForServer enPaneServer;
 	protected ServiceSectionPanel ssPane;
 	protected ForkSectionPanel fsPane;
 	protected LoggerSectionPanel lsPane;
@@ -162,7 +163,20 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == smPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-		} else if (hasStorageSection(type)) {
+		} else if (hasEnablingSection(type)) {
+			if (enPane == null) {
+				enPane = new EnablingSectionPanel(stationData, classData, stationKey);
+			} else {
+				enPane.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(enPane, enPane.getName());
+
+			// If this was previously selected, selects this
+			if (oldComponent == enPane) {
+				mainPanel.setSelectedComponent(oldComponent);
+			}
+		}
+		else if (hasStorageSection(type)) {
 			if (stPane == null) {
 				stPane = new StorageSectionPanel(stationData, classData, stationKey);
 			} else {
@@ -174,16 +188,17 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			if (oldComponent == stPane) {
 				mainPanel.setSelectedComponent(oldComponent);
 			}
-		} else if (hasEnablingSection(type)) {
-			if (enPane == null) {
-				enPane = new EnablingSectionPanel(stationData, classData, stationKey);
-			} else {
-				enPane.setData(stationData, classData, stationKey);
-			}
-			mainPanel.add(enPane, enPane.getName());
+		}
 
-			// If this was previously selected, selects this
-			if (oldComponent == enPane) {
+		if(hasEnablingSectionServerDelay(type)){
+			if(enPaneServer == null){
+				enPaneServer = new EnablingSectionPanelForServer(stationData, classData, stationKey);
+			}else{
+				enPaneServer.setData(stationData, classData, stationKey);
+			}
+			mainPanel.add(enPaneServer, enPaneServer.getName());
+
+			if(oldComponent == enPaneServer){
 				mainPanel.setSelectedComponent(oldComponent);
 			}
 		}
@@ -325,6 +340,21 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			return false;
 		} else {
 			return STATION_TYPE_TRANSITION.equals(type);
+		}
+	}
+
+	private boolean hasEnablingSectionServerDelay(String type){
+		if(checkNullValues()){
+			return false;
+		}else{
+			boolean res = false;
+			Vector<Object> connectedPlaces = stationData.getBackwardConnectedPlaces(stationKey);
+
+			if(!connectedPlaces.isEmpty()){
+				return STATION_TYPE_SERVER.equals(type) || STATION_TYPE_DELAY.equals(type);
+			}else{
+				return false;
+			}
 		}
 	}
 

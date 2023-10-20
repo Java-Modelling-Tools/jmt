@@ -125,6 +125,8 @@ public interface SimulationDefinition {
 	public static final String MEASURE_S_L = "System Lateness";
 	/**Code for lateness measure*/
 	public static final String MEASURE_L = "Lateness";
+	/** Code for number of active servers*/
+	public static final String MEASURE_NS = "Number of Active Servers";
 
 	/*------------------------------------------------------------------------------------------
 	------------------------------Parameters for measures definition----------------------------

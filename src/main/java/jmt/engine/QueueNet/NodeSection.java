@@ -18,6 +18,8 @@
 
 package jmt.engine.QueueNet;
 
+import jmt.engine.NodeSections.Linkage;
+import jmt.engine.NodeSections.Queue;
 import org.apache.commons.math3.util.Pair;
 
 import jmt.common.exception.NetException;
@@ -191,6 +193,9 @@ public abstract class NodeSection {
 			break;
 		case SimConstants.CACHE_HIT_RATE:
 			jobsList.analyzeCacheHitRate(jobClass, measurement);
+			break;
+		case SimConstants.NUMBER_OF_ACTIVE_SERVERS:
+			jobsList.analyzeNumberOfServers(measurement);
 			break;
 		default:
 			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
@@ -712,4 +717,25 @@ public abstract class NodeSection {
 		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 	}
 
+	private boolean isJobFromPlaceToServerOrDelay(NetMessage message){
+		NetNode sourceNode = message.getSource();
+		NetNode destinationNode = message.getDestination();
+		int sourceSection = message.getSourceSection();
+		int destinationSection = message.getDestinationSection();
+		boolean result = false;
+		try
+		{
+			result = sourceNode != null && destinationNode != null
+					&& sourceSection == 3
+					&& sourceNode.getSection(sourceSection) instanceof Linkage
+					&& destinationSection == 1
+					&& destinationNode.getSection(destinationSection) instanceof Queue
+			;
+		}
+		catch(NetException e)
+		{
+		}
+
+		return result;
+	}
 }

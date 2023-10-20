@@ -83,6 +83,7 @@ public class PAResultsModel implements MeasureDefinition {
 	private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> FJResponseTime = new Vector<Integer>();
 	private Vector<Integer> firingThroughput = new Vector<Integer>();
+	private Vector<Integer> numberOfActiveServers = new Vector<Integer>();
 
 	private HashMap<String, Measure> names = new HashMap<String, Measure>();
 
@@ -201,6 +202,8 @@ public class PAResultsModel implements MeasureDefinition {
 				FJResponseTime.add(new Integer(i));
 			} else if (measureType.equals(SimulationDefinition.MEASURE_FX)) {
 				firingThroughput.add(new Integer(i));
+			}else if(measureType.equals(SimulationDefinition.MEASURE_NS)){
+				numberOfActiveServers.add(new Integer(i));
 			} else {
 				queueLength.add(new Integer(i));
 			}
@@ -300,6 +303,8 @@ public class PAResultsModel implements MeasureDefinition {
 			FJResponseTime.add(new Integer(measures.size() - 1));
 		} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
 			firingThroughput.add(new Integer(measures.size() - 1));
+		}else if(type.equals(SimulationDefinition.MEASURE_NS)){
+			numberOfActiveServers.add(new Integer(measures.size() - 1));
 		} else {
 			queueLength.add(new Integer(measures.size() - 1));
 		}
@@ -581,6 +586,10 @@ public class PAResultsModel implements MeasureDefinition {
 
 	public int[] getFiringThroughputMeasures() {
 		return getTmpArray(firingThroughput);
+	}
+
+	public int[] getNumberOfActiveServersMeasures(){
+		return getTmpArray(numberOfActiveServers);
 	}
 
 	// ------------------------- USELESS METHODS --------------------------------

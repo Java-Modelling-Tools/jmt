@@ -139,6 +139,8 @@ public interface SimConstants {
 
         public static final int CACHE_HIT_RATE = 35;
 	
+	/** Measure identifier: number of active servers of the station*/
+	public static final int NUMBER_OF_ACTIVE_SERVERS = 36;
 
 	//-------------------- end SIMULATION MEASURE IDENTIFIERS -------------------------//
 

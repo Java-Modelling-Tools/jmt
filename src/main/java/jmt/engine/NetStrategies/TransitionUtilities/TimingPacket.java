@@ -44,6 +44,14 @@ public class TimingPacket {
 		this.timingToken = null;
 	}
 
+	public TimingPacket(double delay){
+		this.modeIndex = 0;
+		this.firingDelay = delay;
+		this.firingPriority = 1;
+		this.firingWeight = 1;
+		this.timingToken = null;
+	}
+
 	public int getModeIndex() {
 		return modeIndex;
 	}

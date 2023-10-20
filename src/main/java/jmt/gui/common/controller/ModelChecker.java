@@ -1368,7 +1368,15 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> openClasses = class_def.getOpenClassKeys();
 		Vector<Object> sinks = station_def.getStationKeysSink();
 		Vector<Object> transitions = station_def.getStationKeysTransition();
-		if (!openClasses.isEmpty() && (sinks.isEmpty() && transitions.isEmpty())) {
+		Vector<Object> servers = station_def.getStationKeysServer();
+		boolean serverWorkingAsTransition = false;
+		for(Object server : servers){
+			if(station_def.getBackwardConnectedPlaces(server).size() > 0);{
+				serverWorkingAsTransition = true;
+				break;
+			}
+		}
+		if (!openClasses.isEmpty() && (sinks.isEmpty() && transitions.isEmpty() && !serverWorkingAsTransition)) {
 			errors[OPEN_CLASS_BUT_NO_SINK_ERROR] = true;
 		}
 	}

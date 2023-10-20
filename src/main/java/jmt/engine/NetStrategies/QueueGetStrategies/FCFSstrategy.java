@@ -21,7 +21,10 @@ package jmt.engine.NetStrategies.QueueGetStrategies;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobInfo;
 import jmt.engine.QueueNet.JobInfoList;
+
+import java.util.List;
 
 /**
  * This class implements a FCFS strategy (First Come First Served).
@@ -46,6 +49,18 @@ public class FCFSstrategy extends QueueGetStrategy {
 	 */
 	public Job get(JobInfoList queue, JobClass jobClass) {
 		return queue.removeFirst(jobClass).getJob();
+	}
+
+	public int GetJobClassIdOfNextJob(JobInfoList queue) {
+		List<JobInfo> list = queue.getInternalJobInfoList();
+		if(list != null && !list.isEmpty()){
+			JobInfo jobInfo = list.get(0);
+			if(jobInfo != null){
+				return jobInfo.getJob().getJobClass().getId();
+			}
+		}
+
+		return -1;
 	}
 
 }

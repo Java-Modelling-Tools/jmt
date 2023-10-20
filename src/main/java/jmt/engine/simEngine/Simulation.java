@@ -26,22 +26,7 @@ import java.util.List;
 
 import jmt.common.exception.LoadException;
 import jmt.common.exception.NetException;
-import jmt.engine.NodeSections.BlockingQueue;
-import jmt.engine.NodeSections.BlockingRouter;
-import jmt.engine.NodeSections.Fork;
-import jmt.engine.NodeSections.InputSection;
-import jmt.engine.NodeSections.Join;
-import jmt.engine.NodeSections.Linkage;
-import jmt.engine.NodeSections.OutputSection;
-import jmt.engine.NodeSections.PSServer;
-import jmt.engine.NodeSections.Queue;
-import jmt.engine.NodeSections.RandomSource;
-import jmt.engine.NodeSections.Router;
-import jmt.engine.NodeSections.Server;
-import jmt.engine.NodeSections.ServiceSection;
-import jmt.engine.NodeSections.ServiceTunnel;
-import jmt.engine.NodeSections.Storage;
-import jmt.engine.NodeSections.Terminal;
+import jmt.engine.NodeSections.*;
 import jmt.engine.QueueNet.BlockingRegion;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
@@ -572,6 +557,9 @@ public class Simulation {
 						break;
 					case SimConstants.CACHE_HIT_RATE:
 						netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.CACHE_HIT_RATE, jClass, ms.getMeasure());
+						break;
+					case SimConstants.NUMBER_OF_ACTIVE_SERVERS:
+						netNodes[nodePosition].getSection(NodeSection.SERVICE).analyze(SimConstants.NUMBER_OF_ACTIVE_SERVERS, jClass, ms.getMeasure());
 						break;
 					}
 				}

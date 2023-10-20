@@ -152,7 +152,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			SimulationDefinition.MEASURE_FCR_MO,
 			SimulationDefinition.MEASURE_FJ_CN,
 			SimulationDefinition.MEASURE_FJ_RP,
-			SimulationDefinition.MEASURE_FX
+			SimulationDefinition.MEASURE_FX,
+			SimulationDefinition.MEASURE_NS
 	};
 
 	// Measure selection ComboBox
@@ -548,6 +549,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					return FJstationsCombos.getEditor(stationData.getFJKeys());
 				} else if (measure.type.equals(SimulationDefinition.MEASURE_FX)) {
 					return stationsCombos.getEditor(stationData.getStationKeysTransition());
+				}else if(measure.type.equals(SimulationDefinition.MEASURE_NS)){
+					return stationsCombos.getEditor(stationData.getStationKeysServer());
 				} else {
 					return stationsCombos.getEditor(new Vector<Object>());
 				}
@@ -562,6 +565,8 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					} else {
 						return modesCombos.getEditor(stationData.getAllTransitionModeNames(measure.stationKey));
 					}
+				}else if(measure.type.equals(SimulationDefinition.MEASURE_NS)){
+					return classesCombos.getEditor(new Vector<Object>());
 				} else {
 					return classesCombos.getEditor(classData.getClassKeys());
 				}
@@ -630,6 +635,12 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			if (columnIndex == 0) {
 				return false;
 			}
+
+			Object key = simData.getMeasureKeys().get(rowIndex);
+			if(columnIndex == 1 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_NS)){
+				return false;
+			}
+
 			return true;
 		}
 

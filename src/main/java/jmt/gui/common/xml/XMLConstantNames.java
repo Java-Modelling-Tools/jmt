@@ -162,6 +162,7 @@ public interface XMLConstantNames {
 	public static final String CLASSNAME_STORAGE = "Storage";
 	public static final String CLASSNAME_LINKAGE = "Linkage";
 	public static final String CLASSNAME_ENABLING = "Enabling";
+	public static final String CLASSNAME_ENABLING_SERVER = "EnablingServer";
 	public static final String CLASSNAME_TIMING = "Timing";
 	public static final String CLASSNAME_FIRING = "Firing";
 

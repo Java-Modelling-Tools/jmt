@@ -526,6 +526,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 					for (Object oldClassKey : oldClassKeys) {
 						setEnablingCondition(key, i, newStationInKey, oldClassKey, oldTmd.enablingCondition.getEntry(oldStationInKey, oldClassKey));
 						setInhibitingCondition(key, i, newStationInKey, oldClassKey, oldTmd.inhibitingCondition.getEntry(oldStationInKey, oldClassKey));
+						setResourceCondition(key, i, newStationInKey, oldClassKey, oldTmd.resourceCondition.getEntry(oldStationInKey, oldClassKey));
 					}
 				}
 				setNumberOfServers(key, i, oldTmd.numberOfServers);

@@ -82,6 +82,7 @@ public class ResultsModel implements MeasureDefinition {
 	private Vector<Integer> FJCustomerNumber = new Vector<Integer>();
 	private Vector<Integer> FJResponseTime = new Vector<Integer>();
 	private Vector<Integer> firingThroughput = new Vector<Integer>();
+	private Vector<Integer> numberOfActiveServers = new Vector<Integer>();
 
 	private Vector[] measuresVector; // For each TempMeasure holds a Vector with its value at every poll
 	private boolean[] finished;
@@ -190,6 +191,8 @@ public class ResultsModel implements MeasureDefinition {
 				FJResponseTime.add(new Integer(i));
 			} else if (type.equals(SimulationDefinition.MEASURE_FX)) {
 				firingThroughput.add(new Integer(i));
+			} else if(type.equals(SimulationDefinition.MEASURE_NS)){
+				numberOfActiveServers.add(new Integer(i));
 			} else {
 				queueLength.add(new Integer(i));
 			}
@@ -785,6 +788,14 @@ public class ResultsModel implements MeasureDefinition {
 		int[] tmp = new int[firingThroughput.size()];
 		for (int i = 0; i < tmp.length; i++) {
 			tmp[i] = firingThroughput.get(i).intValue();
+		}
+		return tmp;
+	}
+
+	public int[] getNumberOfActiveServersMeasures(){
+		int[] tmp = new int[numberOfActiveServers.size()];
+		for(int i = 0; i < tmp.length; i++){
+			tmp[i] = numberOfActiveServers.get(i).intValue();
 		}
 		return tmp;
 	}

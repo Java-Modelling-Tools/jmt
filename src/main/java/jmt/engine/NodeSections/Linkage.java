@@ -19,13 +19,8 @@
 package jmt.engine.NodeSections;
 
 import jmt.common.exception.NetException;
-import jmt.engine.QueueNet.BlockingRegion;
-import jmt.engine.QueueNet.Job;
-import jmt.engine.QueueNet.NetEvent;
-import jmt.engine.QueueNet.NetMessage;
-import jmt.engine.QueueNet.NetNode;
-import jmt.engine.QueueNet.NodeList;
-import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.NetStrategies.TransitionUtilities.EventFinishPacket;
+import jmt.engine.QueueNet.*;
 
 /**
  * <p>Title: Linkage</p>
@@ -126,6 +121,15 @@ public class Linkage extends OutputSection {
 			}
 			requestSource = source;
 			sendBackward(NetEvent.EVENT_JOB_REQUEST, data, 0.0);
+			break;
+		}
+
+		case NetEvent.EVENT_JOB_REQUEST_FROM_SERVER:{
+			if(requestSource != null){
+				return MSG_NOT_PROCESSED;
+			}
+			requestSource = source;
+			sendBackward(NetEvent.EVENT_JOB_REQUEST_FROM_SERVER, data, 0.0);
 			break;
 		}
 

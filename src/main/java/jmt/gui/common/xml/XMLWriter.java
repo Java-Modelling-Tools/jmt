@@ -364,19 +364,19 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_ROUTER.equals(stationType)) {
-				writeQueueSection(doc, elem, model, stationKey);
+				writeQueueSection(doc, elem, model, stationKey, stationType);
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_DELAY.equals(stationType)) {
-				writeQueueSection(doc, elem, model, stationKey);
+				writeQueueSection(doc, elem, model, stationKey, stationType);
 				writeDelaySection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_SERVER.equals(stationType)) {
-				writeQueueSection(doc, elem, model, stationKey);
+				writeQueueSection(doc, elem, model, stationKey, stationType);
 				writeServerSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_FORK.equals(stationType)) {
-				writeQueueSection(doc, elem, model, stationKey);
+				writeQueueSection(doc, elem, model, stationKey, stationType);
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeForkSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_JOIN.equals(stationType)) {
@@ -384,11 +384,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				writeTunnelSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_LOGGER.equals(stationType)) {
-				writeQueueSection(doc, elem, model, stationKey);
+				writeQueueSection(doc, elem, model, stationKey, stationType);
 				writeLoggerSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_CLASSSWITCH.equals(stationType)) {
-				writeQueueSection(doc, elem, model, stationKey);
+				writeQueueSection(doc, elem, model, stationKey, stationType);
 				writeClassSwitchSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_SEMAPHORE.equals(stationType)) {
@@ -583,7 +583,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	}
 
 	static protected void writeQueueSection(Document doc, Node node,
-			CommonModel model, Object stationKey) {
+			CommonModel model, Object stationKey, String stationType) {
 		// creating element representing queue section
 		Element queue = doc.createElement(XML_E_STATION_SECTION);
 		queue.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_QUEUE);
@@ -683,6 +683,13 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		}
 		queuePutStrategies.appendParameterElement(doc, queue);
 		writeImpatienceParameters(doc, model, stationKey, queue, classes);
+
+		if(STATION_TYPE_SERVER.equals(stationType) || STATION_TYPE_DELAY.equals(stationType)) {
+			/*
+			 * Servers enabling, inhibiting and resource conditions
+			 */
+			createTransitionLikeConditionsForServerDelay(doc, model, queue, stationKey);
+		}
 	}
 
 	private static void writeImpatienceParameters(Document doc, CommonModel model, Object stationKey,
@@ -810,6 +817,136 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				new XMLParameter[] { LDParameter }, true);
 		loadDependentStrategyParam.parameterArray = "false";
 		return loadDependentStrategyParam;
+	}
+
+	private static void createTransitionLikeConditionsForServerDelay(Document doc, CommonModel model, Element queue, Object stationKey){
+		Vector<Object> stationInKeys = model.getBackwardConnectedPlaces(stationKey);
+		Boolean workingAsTransition = stationInKeys.size() > 0;
+
+		if(workingAsTransition) {
+			Vector<Object> classes = model.getClassKeys();
+			int modeIndex = 0;
+
+			//Enabling conditions
+			//Servers use only one mode so the array has been set to be of one element
+			XMLParameter[] enablingCondition = new XMLParameter[1];
+			for (int i = 0; i < enablingCondition.length; i++) {
+				XMLParameter[] enablingVector = new XMLParameter[stationInKeys.size()];
+				for (int j = 0; j < enablingVector.length; j++) {
+					XMLParameter[] enablingEntry = new XMLParameter[classes.size()];
+					for (int k = 0; k < enablingEntry.length; k++) {
+						Integer ivalue = model.getEnablingCondition(stationKey, modeIndex,
+								stationInKeys.get(j), classes.get(k));
+						enablingEntry[k] = new XMLParameter("enablingEntry",
+								Integer.class.getName(), model.getClassName(classes.get(k)),
+								ivalue.toString(), true);
+					}
+
+					XMLParameter stationName = new XMLParameter("stationName",
+							String.class.getName(), null, model.getStationName(stationInKeys.get(j)), true);
+					XMLParameter enablingEntries = new XMLParameter("enablingEntries",
+							Integer.class.getName(), null, enablingEntry, true);
+
+					enablingVector[j] = new XMLParameter("enablingVector",
+							strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+							null, new XMLParameter[]{stationName, enablingEntries}, true);
+					enablingVector[j].parameterArray = "false";
+				}
+
+				XMLParameter enablingVectors = new XMLParameter("enablingVectors",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+						null, enablingVector, true);
+				enablingCondition[i] = new XMLParameter("enablingCondition",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+						null, new XMLParameter[]{enablingVectors}, true);
+				enablingCondition[i].parameterArray = "false";
+			}
+
+			XMLParameter enablingConditions = new XMLParameter("enablingConditions",
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+					null, enablingCondition, false);
+			enablingConditions.appendParameterElement(doc, queue);
+
+
+			//Inhibiting conditions
+			//Servers use only one mode so the array has been set to be of one element
+			XMLParameter[] inhibitingCondition = new XMLParameter[1];
+			for (int i = 0; i < inhibitingCondition.length; i++) {
+				XMLParameter[] inhibitingVector = new XMLParameter[stationInKeys.size()];
+				for (int j = 0; j < inhibitingVector.length; j++) {
+					XMLParameter[] inhibitingEntry = new XMLParameter[classes.size()];
+					for (int k = 0; k < inhibitingEntry.length; k++) {
+						Integer ivalue = model.getInhibitingCondition(stationKey, modeIndex,
+								stationInKeys.get(j), classes.get(k));
+						inhibitingEntry[k] = new XMLParameter("inhibitingEntry",
+								Integer.class.getName(), model.getClassName(classes.get(k)),
+								ivalue.toString(), true);
+					}
+
+					XMLParameter stationName = new XMLParameter("stationName",
+							String.class.getName(), null, model.getStationName(stationInKeys.get(j)), true);
+					XMLParameter inhibitingEntries = new XMLParameter("inhibitingEntries",
+							Integer.class.getName(), null, inhibitingEntry, true);
+					inhibitingVector[j] = new XMLParameter("inhibitingVector",
+							strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+							null, new XMLParameter[]{stationName, inhibitingEntries}, true);
+					inhibitingVector[j].parameterArray = "false";
+				}
+
+				XMLParameter inhibitingVectors = new XMLParameter("inhibitingVectors",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+						null, inhibitingVector, true);
+				inhibitingCondition[i] = new XMLParameter("inhibitingCondition",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+						null, new XMLParameter[]{inhibitingVectors}, true);
+				inhibitingCondition[i].parameterArray = "false";
+			}
+
+			XMLParameter inhibitingConditions = new XMLParameter("inhibitingConditions",
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+					null, inhibitingCondition, false);
+			inhibitingConditions.appendParameterElement(doc, queue);
+
+			//Resource conditions
+			//Servers use only one mode so the array has been set to be of one element
+			XMLParameter[] resourceCondition = new XMLParameter[1];
+			for (int i = 0; i < resourceCondition.length; i++) {
+				XMLParameter[] resourceVector = new XMLParameter[stationInKeys.size()];
+				for (int j = 0; j < resourceVector.length; j++) {
+					XMLParameter[] resourceEntry = new XMLParameter[classes.size()];
+					for (int k = 0; k < resourceEntry.length; k++) {
+						Integer ivalue = model.getResourceCondition(stationKey, modeIndex,
+								stationInKeys.get(j), classes.get(k));
+						resourceEntry[k] = new XMLParameter("resourceEntry",
+								Integer.class.getName(), model.getClassName(classes.get(k)),
+								ivalue.toString(), true);
+					}
+
+					XMLParameter stationName = new XMLParameter("stationName",
+							String.class.getName(), null, model.getStationName(stationInKeys.get(j)), true);
+					XMLParameter resourceEntries = new XMLParameter("resourceEntries",
+							Integer.class.getName(), null, resourceEntry, true);
+
+					resourceVector[j] = new XMLParameter("resourceVector",
+							strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+							null, new XMLParameter[]{stationName, resourceEntries}, true);
+					resourceVector[j].parameterArray = "false";
+				}
+
+				XMLParameter resourceVectors = new XMLParameter("resourceVectors",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionVector",
+						null, resourceVector, true);
+				resourceCondition[i] = new XMLParameter("resourceCondition",
+						strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+						null, new XMLParameter[]{resourceVectors}, true);
+				resourceCondition[i].parameterArray = "false";
+			}
+
+			XMLParameter resourceConditions = new XMLParameter("resourceConditions",
+					strategiesClasspathBase + transitionUtilitiesSuffix + "TransitionMatrix",
+					null, resourceCondition, false);
+			resourceConditions.appendParameterElement(doc, queue);
+		}
 	}
 
 	static protected void writeTerminalSection(Document doc, Node node,

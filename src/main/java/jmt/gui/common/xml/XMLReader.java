@@ -109,6 +109,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	protected static HashMap<Object[], Map<String, Double>> combFork;
 	protected static HashMap<Object[], Integer> enablingConditionMap;
 	protected static HashMap<Object[], Integer> inhibitingConditionMap;
+	protected static HashMap<Object[], Integer> resourceConditionMap;
 	protected static HashMap<Object[], Integer> firingOutcomeMap;
 
 	/**defines the default logger (used to report errors and information for debugging purposes).*/
@@ -275,6 +276,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		combFork = new HashMap<Object[], Map<String, Double>>();
 		enablingConditionMap = new HashMap<Object[], Integer>();
 		inhibitingConditionMap = new HashMap<Object[], Integer>();
+		resourceConditionMap = new HashMap<Object[], Integer>();
 		firingOutcomeMap = new HashMap<Object[], Integer>();
 		parseStations(root, model);
 		parseConnections(root, model);
@@ -390,6 +392,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Object[] quadkey = (Object[]) key;
 			Integer value = inhibitingConditionMap.get(key);
 			model.setInhibitingCondition(quadkey[0], ((Integer) quadkey[1]).intValue(),
+					stations.get((String) quadkey[2]), quadkey[3], value);
+		}
+		keys = resourceConditionMap.keySet().toArray();
+		for(Object key : keys){
+			Object[] quadkey = (Object[]) key;
+			Integer value = resourceConditionMap.get(key);
+			model.setResourceCondition(quadkey[0], ((Integer) quadkey[1]).intValue(),
 					stations.get((String) quadkey[2]), quadkey[3], value);
 		}
 		keys = firingOutcomeMap.keySet().toArray();
@@ -692,6 +701,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String pollingType = null;
 		Map<String, Node> dropRules = null;
 		Map<String, Node> retrialDistributions = null;
+		Vector<Node> enablingConditions = null;
+		Vector<Node> inhibitingConditions = null;
+		Vector<Node> resourceConditions = null;
+
 		for (int i = 0; i < parameters.getLength(); i++) {
 			curr = (Element) parameters.item(i);
 			name = curr.getAttribute(XML_A_PARAMETER_NAME);
@@ -718,6 +731,12 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				// Retrieves all impatience subParameters and sets them in the model
 				Map<String, Node> classNameToNodeMap = parseParameterRefclassArray(curr);
 				parseAndSetImpatienceParameters(model, key, classNameToNodeMap);
+			}else if (name.equals("enablingConditions")) {
+				enablingConditions = parseParameterArray(curr);
+			} else if (name.equals("inhibitingConditions")) {
+				inhibitingConditions = parseParameterArray(curr);
+			}else if(name.equals("resourceConditions")){
+				resourceConditions = parseParameterArray(curr);
 			}
 		}
 
@@ -830,6 +849,60 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				if (rule.equals("retrial") && retrialDistributions != null) {
 					Object distribution = parseServiceStrategy((Element) retrialDistributions.get(className));
 					model.setRetrialDistribution(key, classes.get(className), distribution);
+				}
+			}
+		}
+
+		if (enablingConditions != null) {
+			for (int i = 0; i < enablingConditions.size(); i++) {
+				Node enablingCondition = enablingConditions.get(i);
+				Vector<Node> conditionElements = parseParameterArray((Element) enablingCondition);
+				Vector<Node> enablingVectors = parseParameterArray((Element) conditionElements.get(0));
+				for (Node enablingVector : enablingVectors) {
+					Vector<Node> vectorElements = parseParameterArray((Element) enablingVector);
+					String stationName = findText(((Element) vectorElements.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+					Map<String, Node> enablingEntries = parseParameterRefclassArray((Element) vectorElements.get(1));
+					for (Entry<String, Node> enablingEntry : enablingEntries.entrySet()) {
+						Object[] quadkey = new Object[] { key, Integer.valueOf(i), stationName, classes.get(enablingEntry.getKey()) };
+						String value = findText(((Element) enablingEntry.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+						enablingConditionMap.put(quadkey, Integer.valueOf(value));
+					}
+				}
+			}
+		}
+
+		if (inhibitingConditions != null) {
+			for (int i = 0; i < inhibitingConditions.size(); i++) {
+				Node inhibitingCondition = inhibitingConditions.get(i);
+				Vector<Node> conditionElements = parseParameterArray((Element) inhibitingCondition);
+				Vector<Node> inhibitingVectors = parseParameterArray((Element) conditionElements.get(0));
+				for (Node inhibitingVector : inhibitingVectors) {
+					Vector<Node> vectorElements = parseParameterArray((Element) inhibitingVector);
+					String stationName = findText(((Element) vectorElements.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+					Map<String, Node> inhibitingEntries = parseParameterRefclassArray((Element) vectorElements.get(1));
+					for (Entry<String, Node> inhibitingEntry : inhibitingEntries.entrySet()) {
+						Object[] quadkey = new Object[] { key, Integer.valueOf(i), stationName, classes.get(inhibitingEntry.getKey()) };
+						String value = findText(((Element) inhibitingEntry.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+						inhibitingConditionMap.put(quadkey, Integer.valueOf(value));
+					}
+				}
+			}
+		}
+
+		if(resourceConditions != null){
+			for(int i = 0; i < resourceConditions.size(); i++){
+				Node resourceCondition = resourceConditions.get(i);
+				Vector<Node> conditionElements = parseParameterArray((Element) resourceCondition);
+				Vector<Node> resourceVectors = parseParameterArray((Element)  conditionElements.get(0));
+				for(Node resourceVector : resourceVectors){
+					Vector<Node> vectorElements = parseParameterArray((Element) resourceVector);
+					String stationName = findText(((Element) vectorElements.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+					Map<String, Node> resourceEntries = parseParameterRefclassArray((Element) vectorElements.get(1));
+					for(Entry<String, Node> resourceEntry : resourceEntries.entrySet()){
+						Object[] quadkey = new Object[] {key, Integer.valueOf(i), stationName, classes.get(resourceEntry.getKey())};
+						String value = findText(((Element) resourceEntry.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
+						resourceConditionMap.put(quadkey, Integer.valueOf(value));
+					}
 				}
 			}
 		}

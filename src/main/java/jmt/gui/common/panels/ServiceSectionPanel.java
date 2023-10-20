@@ -193,7 +193,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			//serverFeatureButton.setEnabled(false);
 		} else {
 			serverNumSpinner.setValue(data.getStationNumberOfServers(stationKey));
-			serverNumSpinner.setEnabled(true);
+			//serverNumSpinner.setEnabled(true);
 			String queuePolicy = data.getStationQueueStrategy(stationKey);
 			//if (queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE)
 			//		|| queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
