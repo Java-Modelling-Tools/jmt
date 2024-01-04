@@ -1211,7 +1211,7 @@ public class SimLoader {
 			}
 
 			//----------------CLASS WEIGHTS----------------//
-			NodeList classWeights = root.getElementsByTagName("classWeight");
+			NodeList classWeights = region.getElementsByTagName("classWeight");
 
 			double[] regionClassWeights = new double[classNumber];
 			//init
@@ -1236,7 +1236,7 @@ public class SimLoader {
 			}
 
 			//----------------CLASS SIZES----------------//
-			NodeList classSizes = root.getElementsByTagName("classSize");
+			NodeList classSizes = region.getElementsByTagName("classSize");
 
 			double[] regionClassSizes = new double[classNumber];
 			//init
@@ -1261,7 +1261,7 @@ public class SimLoader {
 			}
 
 			//----------------CLASS DUE DATES----------------//
-			NodeList classSoftDeadlines = root.getElementsByTagName("classSoftDeadline");
+			NodeList classSoftDeadlines = region.getElementsByTagName("classSoftDeadline");
 
 			double[] regionClassSoftDeadlines = new double[classNumber];
 			//init

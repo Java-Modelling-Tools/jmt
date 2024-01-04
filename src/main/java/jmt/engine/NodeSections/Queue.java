@@ -593,8 +593,8 @@ public class Queue extends InputSection {
 				//is the owner node of this section, an ack message is sent).
 				//The job contained is put into the queue using the specified put strategy.
 				//At this point, if there are jobs in queue, the first is taken (using the
-				//specified get strategy) and forwarded. Otherwise, if there are no jobs, coolStart is set true.
-
+				//specified get strategy) and forwarded. Otherwise, if there are no jobs,
+				//coolStart is set true.
 				if (waitingRequests.size() > 0) {
 					WaitingRequest wr = (WaitingRequest) waitingRequests.removeFirst();
 					if (!isMyOwnerNode(wr.getSource()) && block[wr.getJob().getJobClass().getId()]) {
@@ -621,6 +621,13 @@ public class Queue extends InputSection {
 					}
 					coolStart = false;
 				} else {
+					// GC: new section, if it is not execute then it will be "wait-and-see" polling
+					if (getStrategy instanceof PollingGetStrategy) {
+						if (!switchOverRequest) {
+								sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0.0);
+								switchOverRequest = true;
+						}
+					}
 					coolStart = true;
 				}
 

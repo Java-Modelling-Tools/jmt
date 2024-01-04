@@ -962,24 +962,26 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				// Sets max running jobs
 				Integer running = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationMaxRunningJobs(key, running);
-			} else if (name.equals("SwitchoverStrategy")) {
-				// Retrieves all switchover strategy subParameters
-				Map<String, Node> distributions = parseParameterRefclassArray(curr);
-				Object[] classNames = distributions.keySet().toArray();
-				for (Object className : classNames) {
-					model.setPollingSwitchoverDistribution(key, classes.get(className), parseServiceStrategy((Element) distributions.get(className)));
-				}
-			} else if (name.equals("SetupStrategy")) {
-				// Retrieves all setup strategy subParameters
-				model.setSetupTimesEnabled(key, Boolean.valueOf(true));
-				Map<String, Node> setupStrategies = parseParameterRefclassArray(curr);
-				Object[] fromClassNames = setupStrategies.keySet().toArray();
-				for (Object fromClassName : fromClassNames) {
-					Element subCurr = (Element) setupStrategies.get(fromClassName);
-					Map<String, Node> setupStrategy = parseParameterRefclassArray(subCurr);
-					Object[] toClassNames = setupStrategy.keySet().toArray();
-					for (Object toClassName : toClassNames) {
-						model.setSetupTimeDistribution(key, classes.get(fromClassName), classes.get(toClassName), parseServiceStrategy((Element) setupStrategy.get(toClassName)));
+			} else if (name.equals("SwitchoverStrategy") || name.equals("SetupStrategy")) {
+				if (model.getStationQueueStrategy(key) == STATION_QUEUE_STRATEGY_POLLING) {
+					// Retrieves all switchover strategy subParameters
+					Map<String, Node> distributions = parseParameterRefclassArray(curr);
+					Object[] classNames = distributions.keySet().toArray();
+					for (Object className : classNames) {
+						model.setPollingSwitchoverDistribution(key, classes.get(className), parseServiceStrategy((Element) distributions.get(className)));
+					}
+				} else {
+					// Retrieves all setup strategy subParameters
+					model.setSwitchoverTimesEnabled(key, Boolean.valueOf(true));
+					Map<String, Node> setupStrategies = parseParameterRefclassArray(curr);
+					Object[] fromClassNames = setupStrategies.keySet().toArray();
+					for (Object fromClassName : fromClassNames) {
+						Element subCurr = (Element) setupStrategies.get(fromClassName);
+						Map<String, Node> setupStrategy = parseParameterRefclassArray(subCurr);
+						Object[] toClassNames = setupStrategy.keySet().toArray();
+						for (Object toClassName : toClassNames) {
+							model.setSwitchoverTimeDistribution(key, classes.get(fromClassName), classes.get(toClassName), parseServiceStrategy((Element) setupStrategy.get(toClassName)));
+						}
 					}
 				}
 			} else if (classpath.equals(serviceStrategy)) {
@@ -2429,11 +2431,15 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						Integer.valueOf(classSize.getAttribute(XML_A_CLASSSIZE_SIZE)));
 			}
 
-			NodeList classSoftDeadlines = region.getElementsByTagName(XML_E_CLASSDUEDATE);
-			for (int j = 0; j < classSizes.getLength(); j++) {
-				Element classSoftDeadline = (Element) classSoftDeadlines.item(j);
-				model.setRegionClassSoftDeadline(key, classes.get(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_CLASS)),
-						Double.valueOf(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_DUEDATE)));
+			try {
+				NodeList classSoftDeadlines = region.getElementsByTagName(XML_E_CLASSDUEDATE);
+				for (int j = 0; j < classSizes.getLength(); j++) {
+					Element classSoftDeadline = (Element) classSoftDeadlines.item(j);
+					model.setRegionClassSoftDeadline(key, classes.get(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_CLASS)),
+							Double.valueOf(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_DUEDATE)));
+				}
+			} catch (Exception e) {
+				// no-op
 			}
 
 			// Now parses group constraints

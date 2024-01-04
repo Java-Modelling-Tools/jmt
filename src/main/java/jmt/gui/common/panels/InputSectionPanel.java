@@ -301,9 +301,9 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 							data.setQueueStrategy(stationKey, classKey, policy);
 						}
 					}
-					Boolean setupTimesEnabled = data.getSetupTimesEnabled(stationKey);
+					Boolean setupTimesEnabled = data.getSwitchoverTimesEnabled(stationKey);
 					if (setupTimesEnabled != null) {
-						data.setSetupTimesEnabled(stationKey, Boolean.valueOf(false));
+						data.setSwitchoverTimesEnabled(stationKey, Boolean.valueOf(false));
 					}
 				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 						|| queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
@@ -321,9 +321,9 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 							data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));
 						}
 					}
-					Boolean setupTimesEnabled = data.getSetupTimesEnabled(stationKey);
+					Boolean setupTimesEnabled = data.getSwitchoverTimesEnabled(stationKey);
 					if (setupTimesEnabled != null) {
-						data.setSetupTimesEnabled(stationKey, Boolean.valueOf(false));
+						data.setSwitchoverTimesEnabled(stationKey, Boolean.valueOf(false));
 					}
 				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
 					List<Object> policyList = Arrays.asList(serverNonPreemptiveQueuePolicies);
@@ -338,9 +338,9 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 							data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));
 						}
 					}
-					Boolean setupTimesEnabled = data.getSetupTimesEnabled(stationKey);
+					Boolean setupTimesEnabled = data.getSwitchoverTimesEnabled(stationKey);
 					if (setupTimesEnabled != null) {
-						data.setSetupTimesEnabled(stationKey, Boolean.valueOf(false));
+						data.setSwitchoverTimesEnabled(stationKey, Boolean.valueOf(false));
 					}
 				} else {
 					List<Object> policyList = Arrays.asList(serverNonPreemptiveQueuePolicies);

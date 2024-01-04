@@ -1194,29 +1194,29 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Gets whether setup times are enabled, given the search key.
 	 */
 	@Override
-	public Boolean getSetupTimesEnabled(Object key) {
+	public Boolean getSwitchoverTimesEnabled(Object key) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return null;
 		}
-		return sd.setupTimesEnabled;
+		return sd.switchoverTimesEnabled;
 	}
 
 	/**
 	 * Sets whether setup times are enabled, given the search key.
 	 */
 	@Override
-	public void setSetupTimesEnabled(Object key, Boolean enabled) {
+	public void setSwitchoverTimesEnabled(Object key, Boolean enabled) {
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
 		} else {
 			return;
 		}
-		if (sd.setupTimesEnabled == null || !sd.setupTimesEnabled.equals(enabled)) {
-			sd.setupTimesEnabled = enabled;
+		if (sd.switchoverTimesEnabled == null || !sd.switchoverTimesEnabled.equals(enabled)) {
+			sd.switchoverTimesEnabled = enabled;
 			save = true;
 		}
 	}
@@ -1428,7 +1428,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.pollingKValue = Integer.valueOf(1);
 			sd.pollingServerType = STATION_QUEUE_STRATEGY_POLLING_LIMITED;
 			sd.serverPolling = Boolean.valueOf(false);
-			sd.setupTimesEnabled = Boolean.valueOf(false);
+			sd.switchoverTimesEnabled = Boolean.valueOf(false);
 			sd.totalStationCapacity = sd.queueCapacity + sd.maxRunningJobs;
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
 			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
@@ -1843,15 +1843,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @return distribution for the specified class and station.
 	 */
 	@Override
-	public Object getSetupTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey) {
+	public Object getSwitchoverTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey) {
 		StationClassData scd = (StationClassData) stationDetailsBDM.get(fromClassKey, stationKey);
-		if (scd == null || scd.setupTimeDistributions == null) {
+		if (scd == null || scd.switchoverTimeDistributions == null) {
 			return null;
 		}
-		if (scd.setupTimeDistributions.get(toClassKey) == null) {
-			scd.setupTimeDistributions.put(toClassKey, new ZeroStrategy());
+		if (scd.switchoverTimeDistributions.get(toClassKey) == null) {
+			scd.switchoverTimeDistributions.put(toClassKey, new ZeroStrategy());
 		}
-		return scd.setupTimeDistributions.get(toClassKey);
+		return scd.switchoverTimeDistributions.get(toClassKey);
 	}
 
 	/**
@@ -1863,13 +1863,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param distribution: distribution to be set for specified class and station.
 	 */
 	@Override
-	public void setSetupTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey, Object distribution) {
+	public void setSwitchoverTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey, Object distribution) {
 		StationClassData scd = (StationClassData) stationDetailsBDM.get(fromClassKey, stationKey);
-		if (scd == null || scd.setupTimeDistributions == null) {
+		if (scd == null || scd.switchoverTimeDistributions == null) {
 			return;
 		}
-		if (scd.setupTimeDistributions.get(toClassKey) == null || !scd.setupTimeDistributions.get(toClassKey).equals(distribution)) {
-			scd.setupTimeDistributions.put(toClassKey, distribution);
+		if (scd.switchoverTimeDistributions.get(toClassKey) == null || !scd.switchoverTimeDistributions.get(toClassKey).equals(distribution)) {
+			scd.switchoverTimeDistributions.put(toClassKey, distribution);
 			save = true;
 		}
 	}
@@ -2373,8 +2373,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				if (scd.routingStrategy instanceof ClassSwitchRouting) {
 					((ClassSwitchRouting) scd.routingStrategy).deleteClass(key);
 				}
-				if (scd.setupTimeDistributions != null) {
-					scd.setupTimeDistributions.remove(key);
+				if (scd.switchoverTimeDistributions != null) {
+					scd.switchoverTimeDistributions.remove(key);
 				}
 			}
 		}
@@ -2448,7 +2448,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.serviceWeight = Defaults.getAsDouble("serviceWeight");
 			scd.serviceDistribution = Defaults.getAsNewInstance("stationServiceStrategy");
 			scd.switchoverPeriod = new ZeroStrategy();
-			scd.setupTimeDistributions = new HashMap<>();
+			scd.switchoverTimeDistributions = new HashMap<>();
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			scd.queueStrategy = Defaults.get("stationQueueStrategy");
@@ -4200,7 +4200,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String pollingServerType;
 		public Integer pollingKValue;
 		public Boolean serverPolling;
-		public Boolean setupTimesEnabled;
+		public Boolean switchoverTimesEnabled;
 		public Integer forkBlock;
 		public Boolean isSimplifiedFork;
 		public LoggerParameters loggerParameters;
@@ -4223,7 +4223,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.maxRunningJobs = maxRunningJobs;
 			sd.pollingServerType = pollingServerType;
 			sd.serverPolling = serverPolling;
-			sd.setupTimesEnabled = setupTimesEnabled;
+			sd.switchoverTimesEnabled = switchoverTimesEnabled;
 			sd.forkBlock = forkBlock;
 			sd.isSimplifiedFork = isSimplifiedFork;
 			if (loggerParameters != null) {
@@ -4256,7 +4256,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Double serviceWeight;
 		public Object serviceDistribution;
 		public Object switchoverPeriod;
-		public Map<Object, Object> setupTimeDistributions;
+		public Map<Object, Object> switchoverTimeDistributions;
 		public Object routingStrategy;
 		public Object forkStrategy;
 		public Object joinStrategy;
@@ -4283,11 +4283,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			if (switchoverPeriod != null) {
 				scd.switchoverPeriod = ((ServiceStrategy) switchoverPeriod).clone();
 			}
-			if (setupTimeDistributions != null) {
-				scd.setupTimeDistributions = new HashMap<>();
-				for (Object classKey : setupTimeDistributions.keySet()) {
-					Object distribution = setupTimeDistributions.get(classKey);
-					scd.setupTimeDistributions.put(classKey, ((ServiceStrategy) distribution).clone());
+			if (switchoverTimeDistributions != null) {
+				scd.switchoverTimeDistributions = new HashMap<>();
+				for (Object classKey : switchoverTimeDistributions.keySet()) {
+					Object distribution = switchoverTimeDistributions.get(classKey);
+					scd.switchoverTimeDistributions.put(classKey, ((ServiceStrategy) distribution).clone());
 				}
 			}
 			if (routingStrategy != null) {

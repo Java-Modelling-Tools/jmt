@@ -120,7 +120,9 @@ public class PollingServer extends ServiceSection {
 		case NetEvent.EVENT_POLLING_SERVER_NEXT:
 			if (busyCounter <= 0) {
 				waitSwitchover();
+				needSwitchover = false; // GC added
 			} else {
+				// GC: this could be a problem for an extension with multiple polling servers
 				needSwitchover = true;
 			}
 			break;
@@ -152,8 +154,10 @@ public class PollingServer extends ServiceSection {
 
 	private void waitSwitchover() throws NetException {
 		int walkClassID = (classInService.getId() + 1) % switchOverStrategies.length;
+		// the switchover time follows the distribution of the job class that is in service
+		// but it is accumulated by the next job
+		double waitTime = switchOverStrategies[classInService.getId()].wait(this, getJobClasses().get(walkClassID));
 		classInService = getJobClasses().get(walkClassID);
-		double waitTime = switchOverStrategies[walkClassID].wait(this, classInService);
 		sendBackward(NetEvent.EVENT_POLLING_SERVER_READY, null, waitTime);
 	}
 

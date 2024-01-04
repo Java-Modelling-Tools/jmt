@@ -246,12 +246,12 @@ public interface StationDefinition {
 	/**
 	 * Gets whether setup times are enabled, given the search key.
 	 */
-	public Boolean getSetupTimesEnabled(Object key);
+	public Boolean getSwitchoverTimesEnabled(Object key);
 
 	/**
 	 * Sets whether setup times are enabled, given the search key.
 	 */
-	public void setSetupTimesEnabled(Object key, Boolean enabled);
+	public void setSwitchoverTimesEnabled(Object key, Boolean enabled);
 
 	/**
 	 * Tells if a fork is blocking
@@ -487,7 +487,7 @@ public interface StationDefinition {
 	 * @param toClassKey: search key for next class.
 	 * @return distribution for the specified class and station.
 	 */
-	public Object getSetupTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey);
+	public Object getSwitchoverTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey);
 
 	/**
 	 * Sets setup time distribution for class and station, given their search keys.
@@ -497,7 +497,7 @@ public interface StationDefinition {
 	 * @param toClassKey: search key for next class.
 	 * @param distribution: distribution to be set for specified class and station.
 	 */
-	public void setSetupTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey, Object distribution);
+	public void setSwitchoverTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey, Object distribution);
 
 	/**
 	 * Returns routing strategy for class and station, given their search keys.

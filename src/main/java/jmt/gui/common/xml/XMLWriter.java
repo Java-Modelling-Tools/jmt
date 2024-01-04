@@ -1084,14 +1084,14 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE)
 				|| queueStrategy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
-			Boolean setupTimesEnabled = model.getSetupTimesEnabled(stationKey);
+			Boolean setupTimesEnabled = model.getSwitchoverTimesEnabled(stationKey);
 			if (setupTimesEnabled.booleanValue()) {
 				XMLParameter[] setupStrategy = new XMLParameter[classes.size()];
 				for (int i = 0; i < classes.size(); i++) {
 					Object classKey = classes.get(i);
-					setupStrategy[i] = SetupStrategyWriter.getServiceSection(model, stationKey, classKey);
+					setupStrategy[i] = QueueSwitchOverStrategyWriter.getServiceSection(model, stationKey, classKey);
 				}
-				XMLParameter setupStrategies = new XMLParameter("SetupStrategy",
+				XMLParameter setupStrategies = new XMLParameter("SwitchoverStrategy",
 						Object.class.getName(), null, setupStrategy, false);
 				setupStrategies.appendParameterElement(doc, elem);
 			}
@@ -1141,22 +1141,22 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		}
 	}
 
-	protected static class SetupStrategyWriter implements DistributionStrategyGetter {
+	protected static class QueueSwitchOverStrategyWriter implements DistributionStrategyGetter {
 		private Object fromClassKey;
 
-		private SetupStrategyWriter(Object fromClassKey) { this.fromClassKey = fromClassKey; }
+		private QueueSwitchOverStrategyWriter(Object fromClassKey) { this.fromClassKey = fromClassKey; }
 
 		public static XMLParameter getServiceSection(CommonModel model, Object stationKey, Object fromClassKey) {
-			SetupStrategyWriter instance = new SetupStrategyWriter(fromClassKey);
+			QueueSwitchOverStrategyWriter instance = new QueueSwitchOverStrategyWriter(fromClassKey);
 			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, instance);
-			distrArrayParameter.parameterName = "SetupStrategy";
+			distrArrayParameter.parameterName = "SwitchoverStrategy";
 			distrArrayParameter.parameterRefClass = model.getClassName(fromClassKey);
 			distrArrayParameter.isSubParameter = true;
 			return distrArrayParameter;
 		}
 
 		public Object get(CommonModel model, Object stationKey, Object classKey) {
-			return model.getSetupTimeDistribution(stationKey, fromClassKey, classKey);
+			return model.getSwitchoverTimeDistribution(stationKey, fromClassKey, classKey);
 		}
 	}
 
